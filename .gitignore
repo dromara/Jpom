@@ -1,6 +1,4 @@
 # Created by .ignore support plugin (hsz.mobi)
-.gitignore
 .idea/inspectionProfiles/
 .idea/workspace.xml
 boot-online.iml
-src/
