@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration debug="false">
+    <property name="logpath" value="/etc/nginx/boot/log/"/>
+    <property name="logType" value="nginx,domain"/>
+
+    <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>INFO</level>
+            <onMatch>ACCEPT</onMatch>
+            <onMismatch>DENY</onMismatch>
+        </filter>
+        <layout class="ch.qos.logback.classic.PatternLayout">
+            <pattern><![CDATA[%date %level [%thread] %logger{10} [%file:%line]- x:\(%X\) %msg%n]]></pattern>
+        </layout>
+    </appender>
+
+    <appender name="errorFileAppender" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <File>/etc/nginx/boot/log/error/systemError.log</File>
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>ERROR</level>
+            <onMatch>ACCEPT</onMatch>
+            <onMismatch>DENY</onMismatch>
+        </filter>
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} %-5level [%thread] %logger - %msg%n</pattern>
+        </encoder>
+        <!-- 每天一归档 -->
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>/etc/nginx/boot/log/error/systemError-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <!-- 单个日志文件最多 100MB, 30天的日志周期，最大不能超过10GB -->
+            <maxFileSize>100MB</maxFileSize>
+            <maxHistory>30</maxHistory>
+            <totalSizeCap>10GB</totalSizeCap>
+        </rollingPolicy>
+    </appender>
+
+    <root level="ERROR" name="systemError" additivity="true">
+        <appender-ref ref="errorFileAppender"/>
+        <appender-ref ref="console"/>
+    </root>
+
+    <root level="DEBUG" name="systemInfo" additivity="true">
+        <appender-ref ref="console"/>
+        <!--<appender-ref ref="infoFileAppender"/>-->
+    </root>
+</configuration>

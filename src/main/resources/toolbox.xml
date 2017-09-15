@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<toolbox>
+    <!--<tool>-->
+    <!--<key>Date</key>-->
+    <!--<scope>application</scope>-->
+    <!--<class>com.hong610.utils.DateUtils</class>  -->
+    <!--</tool>-->
+    <tool>
+        <key>StringUtils</key>
+        <scope>application</scope>
+        <class>com.yoke.util.StringUtil</class>  
+    </tool>
+    <!--<tool>-->
+    <!--<key>ResourcesHelper</key>-->
+    <!--<scope>application</scope>-->
+    <!--<class>com.hong610.common.helper.ResourcesHelper</class>  -->
+    <!--</tool>-->
+    <!--<tool>-->
+    <!--<key>RoleHelper</key>-->
+    <!--<scope>application</scope>-->
+    <!--<class>com.hong610.common.helper.RoleHelper</class>  -->
+    <!--</tool>-->
+</toolbox>
