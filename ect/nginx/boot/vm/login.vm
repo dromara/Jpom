@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta content="width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1,user-scalable=no" name="viewport">
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black">
+		<title>项目管理系统</title>
+		<link rel="stylesheet" href="/static/js/plugins/layui/css/layui.css" media="all">
+	</head>
+
+	<body>
+		<div class="layui-carousel" id="div-carousel" style="width: 100%; height: 100%; position: fixed; z-index: 0;">
+			<div carousel-item>
+				<div><img src="http://web-test.ztoutiao.cn/logo0509/assets/img/backgrounds/1.jpg" style="width: 100%;"></div>
+				<div><img src="http://web-test.ztoutiao.cn/logo0509/assets/img/backgrounds/2.jpg" style="width: 100%;"></div>
+				<div><img src="http://web-test.ztoutiao.cn/logo0509/assets/img/backgrounds/3.jpg" style="width: 100%;"></div>
+			</div>
+		</div>
+		<div class="layui-container" style="margin-top: 150px;">
+			<div class="layui-row">
+				<div class="layui-col-md4 layui-col-md-offset4">
+					<form class="layui-form" method="post">
+						<div class="layui-form-item" style="color: #FFF; font-size: 24px;text-align: center;">
+							<span>项目管理系统</span>
+						</div>
+						<div class="layui-form-item">
+							<div class="layui-input-block" style="margin-left: 0px;">
+								<input type="text" required lay-verify="required" class="layui-input" placeholder="请输入用户名" name="userName">
+							</div>
+						</div>
+						<div class="layui-form-item">
+							<div class="layui-input-block" style="margin-left: 0px;">
+								<input type="password" required lay-verify="required" class="layui-input" placeholder="请输入密码" name="userPwd">
+							</div>
+						</div>
+						<div class="layui-form-item">
+							<div class="layui-input-block" style="margin-left: 0px;">
+								<button class="layui-btn layui-btn-danger" lay-submit lay-filter="from_login" style="width: 100%">登录</button>
+							</div>
+						</div>
+					</form>
+				</div>
+			</div>
+		</div>
+	</body>
+	<script type="text/javascript" src="/static/js/plugins/layui/layui.js"></script>
+	<script>
+		layui.use(['form', 'carousel', 'layer'], function() {
+			var $ = layui.$;
+			var form = layui.form;
+			var carousel = layui.carousel;
+			var layer = layui.layer;
+
+			//判断是否在iframe中, 如果是，刷新父页面
+			if(self!=top){
+			    parent.window.location.replace(window.location.href);
+			}
+
+			carousel.render({
+				elem: '#div-carousel',
+				width: '100%',
+				height: '100%',
+				anim: 'fade',
+				arrow: 'none',
+				indicator: 'none'
+			});
+
+			form.on('submit(from_login)', function(data) {
+				$.ajax({
+					url: '/userLogin',
+					type: 'POST',
+					dataType: 'json',
+					data: data.field,
+					success: function(data) {
+						if (200 == data.code) {
+							window.location.href = '/index';
+						} else {
+							layer.alert(data.msg);
+						}
+					},
+					error: function(err) {
+						layer.alert(err.msg);
+					}
+				});
+				return false;
+			});
+		});
+	</script>
+
+</html>

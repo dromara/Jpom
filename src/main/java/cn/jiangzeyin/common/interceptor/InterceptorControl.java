@@ -1,5 +1,6 @@
 package cn.jiangzeyin.common.interceptor;
 
+import cn.jiangzeyin.system.SystemBean;
 import cn.jiangzeyin.system.log.SystemLog;
 import cn.jiangzeyin.util.PackageUtil;
 import org.springframework.context.annotation.Bean;
@@ -7,10 +8,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.web.servlet.HandlerInterceptor;
-import org.springframework.web.servlet.config.annotation.ContentNegotiationConfigurer;
-import org.springframework.web.servlet.config.annotation.EnableWebMvc;
-import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
+import org.springframework.web.servlet.config.annotation.*;
 
 import java.io.IOException;
 import java.lang.reflect.Modifier;
@@ -28,6 +26,7 @@ import java.util.List;
 public class InterceptorControl extends WebMvcConfigurerAdapter {
 
 
+    // 解决返回中文乱码
     @Bean
     public HttpMessageConverter<String> responseBodyConverter() {
         StringHttpMessageConverter converter = new StringHttpMessageConverter(Charset.forName("UTF-8"));
@@ -51,6 +50,13 @@ public class InterceptorControl extends WebMvcConfigurerAdapter {
     public void addInterceptors(InterceptorRegistry registry) {
         //registry.addInterceptor(new LoginInterceptor()).addPathPatterns("/**");
         init(registry);
+    }
+
+    // 配置静态资源的目录
+    @Override
+    public void addResourceHandlers(ResourceHandlerRegistry registry) {
+        registry.addResourceHandler("/static/**").
+                addResourceLocations(SystemBean.getInstance().getEnvironment().getProperty("static.conf"));
     }
 
     /**

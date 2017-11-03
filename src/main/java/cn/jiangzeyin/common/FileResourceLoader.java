@@ -1,5 +1,6 @@
 package cn.jiangzeyin.common;
 
+import cn.jiangzeyin.system.SystemBean;
 import cn.jiangzeyin.system.log.SystemLog;
 import org.apache.commons.collections.ExtendedProperties;
 import org.apache.velocity.exception.ResourceNotFoundException;
@@ -53,7 +54,8 @@ public class FileResourceLoader extends ResourceLoader {
     }
 
     private File getResourceFile(String name) {
-        //SystemBean.getInstance().VelocityPath
-        return new File(String.format("%s/%s", "ss", name));
+//        SystemBean.getInstance().VelocityPath
+
+        return new File(String.format("%s/%s", SystemBean.getInstance().VelocityPath, name));
     }
 }

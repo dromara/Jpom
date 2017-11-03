@@ -8,7 +8,7 @@
     <tool>
         <key>StringUtils</key>
         <scope>application</scope>
-        <class>com.yoke.util.StringUtil</class>  
+        <class>cn.jiangzeyin.util.StringUtil</class>  
     </tool>
     <!--<tool>-->
     <!--<key>ResourcesHelper</key>-->

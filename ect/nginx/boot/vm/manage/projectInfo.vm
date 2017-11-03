@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta content="width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1,user-scalable=no" name="viewport">
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black">
+		<title>项目</title>
+		<link rel="stylesheet" href="/static/js/plugins/layui/css/layui.css" media="all">
+		<style type="text/css">
+			.layui-bg-white {
+				background-color: #FFF;
+			}
+		</style>
+	</head>
+
+	<body>
+		<div class="layui-row" style="margin-top: 10px;">
+			<a href="javascript:;" class="layui-btn layui-btn-mini">新增项目</a>
+			<a href="javascript:;" class="layui-btn layui-btn-mini">修改配置</a>
+			<a href="javascript:;" class="layui-btn layui-btn-mini">删除项目</a>
+		</div>
+		<table class="layui-table" id="tab_project" lay-filter="tab_project" style="margin: 0;"></table>
+	</body>
+	<script type="text/javascript" src="/static/js/plugins/layui/layui.js"></script>
+	<script>
+		layui.use(['layer', 'element', 'table'], function() {
+			var $ = layui.$;
+			var table = layui.table;
+
+			table.render({
+				elem: '#tab_project',
+				even: true,
+				cols: [[
+					{checkbox: true},
+					{field: 'id', title: '主键', width: '100'},
+					{field: 'name', title: '名称', width: '100'},
+					{field: 'status', title: '状态', width: '100'},
+					{field: 'op', title: '操作', width: 'auto', toolbar: '#bar_projects'}
+
+				]],
+				data: [{id: 1, name: 'test', status: 'online'}, {id: 2, name: '测试', status: 'online'}]
+			});
+
+			table.on('tool(bar_projects)', function(obj) {
+				
+			});
+
+		});
+	</script>
+	<script type="text/html" id="bar_projects">
+		<a href="javascript:;" class="layui-btn layui-btn-mini" lay-event="add">添加</a>
+		<a href="javascript:;" class="layui-btn layui-btn-mini" lay-event="add">修改</a>
+		<a href="javascript:;" class="layui-btn layui-btn-mini" lay-event="add">删除</a>
+	</script>
+
+</html>
