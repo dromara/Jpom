@@ -1,0 +1,26 @@
+Manifest-Version: 1.0
+Class-Path: hibernate-validator-5.2.4.Final.jar struts-taglib-1.3.8.ja
+ r jul-to-slf4j-1.7.21.jar spring-web-4.3.4.RELEASE.jar spring-context
+ -support-4.3.4.RELEASE.jar fastjson-1.2.29.jar snakeyaml-1.17.jar spr
+ ing-boot-autoconfigure-1.4.2.RELEASE.jar tomcat-embed-el-8.5.6.jar ja
+ ckson-annotations-2.8.4.jar spring-beans-4.3.4.RELEASE.jar jcl-over-s
+ lf4j-1.7.21.jar struts-tiles-1.3.8.jar commons-chain-1.1.jar spring-b
+ oot-1.4.2.RELEASE.jar spring-boot-starter-websocket-1.4.2.RELEASE.jar
+  spring-aop-4.3.4.RELEASE.jar spring-boot-starter-tomcat-1.4.2.RELEAS
+ E.jar dom4j-1.6.1.jar logback-core-1.1.7.jar sslext-1.2-0.jar tomcat-
+ embed-websocket-8.5.6.jar antlr-2.7.7.jar jackson-core-2.8.4.jar xml-
+ apis-1.4.01.jar spring-boot-starter-web-1.4.2.RELEASE.jar classmate-1
+ .3.3.jar commons-validator-1.3.1.jar spring-webmvc-4.3.4.RELEASE.jar 
+ spring-core-4.3.4.RELEASE.jar spring-boot-starter-logging-1.4.2.RELEA
+ SE.jar jboss-logging-3.3.0.Final.jar commons-beanutils-1.9.3.jar comm
+ ons-lang-2.4.jar velocity-1.7.jar jackson-databind-2.8.4.jar spring-m
+ essaging-4.3.4.RELEASE.jar commons-digester-2.1.jar validation-api-1.
+ 1.0.Final.jar slf4j-api-1.7.21.jar aspectjweaver-1.8.9.jar spring-boo
+ t-starter-aop-1.4.2.RELEASE.jar spring-websocket-4.3.4.RELEASE.jar ve
+ locity-tools-2.0.jar spring-context-4.3.4.RELEASE.jar spring-boot-sta
+ rter-velocity-1.4.2.RELEASE.jar log4j-over-slf4j-1.7.21.jar logback-c
+ lassic-1.1.7.jar spring-boot-starter-1.4.2.RELEASE.jar oro-2.0.8.jar 
+ commons-collections-3.2.2.jar struts-core-1.3.8.jar spring-expression
+ -4.3.4.RELEASE.jar tomcat-embed-core-8.5.6.jar
+Main-Class: cn.jiangzeyin.BootOnLineApplication
+

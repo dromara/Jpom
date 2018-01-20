@@ -17,6 +17,7 @@ import javax.servlet.http.HttpServletResponse;
 public class LoginInterceptor extends BaseInterceptor implements GetUserName {
 
     public static final String SESSION_NAME = "user";
+    public static final String SESSION_PWD = "pwd";
 
     public LoginInterceptor() {
         put(this);

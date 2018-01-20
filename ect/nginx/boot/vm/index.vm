@@ -48,7 +48,7 @@
 					<ul class="layui-tab-title">
 						<li class="layui-this" lay-id="tab_welcome">首页</li>
 					</ul>
-					<ul class="layui-nav custom-nav" lay-filter="tab_operation">
+					<!-- <ul class="layui-nav custom-nav" lay-filter="tab_operation">
 						<li class="layui-nav-item">
 							<a href="javascript:;">页面操作</a>
 							<dl class="layui-nav-child">
@@ -57,7 +57,7 @@
 								<dd op="closeall"><a href="javascript:;">关闭全部</a></dd>
 							</dl>
 						</li>
-					</ul>
+					</ul> -->
 					<div class="layui-tab-content">
 						<div class="layui-tab-item layui-show">
 							<iframe src="/welcome" frameborder="0" class="custom-iframe"></iframe>

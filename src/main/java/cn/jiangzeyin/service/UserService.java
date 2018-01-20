@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class UserService extends BaseService {
 
-    private static String FILENAME = "user.json";
+    private static final String FILENAME = "user.json";
     /**
      * 用户登录
      * @param name 用户名
@@ -16,7 +16,7 @@ public class UserService extends BaseService {
      * @return
      */
     public boolean login(String name, String pwd) throws Exception {
-        JSONObject userInfo = (JSONObject)getJsonObject(FILENAME, name);
+        JSONObject userInfo = getJsonObject(FILENAME, name);
 
         if (JsonUtil.jsonIsEmpty(userInfo)) {
             return  false;
@@ -37,7 +37,7 @@ public class UserService extends BaseService {
      * @return
      */
     public String updatePwd(String name, String oldPwd, String newPwd) throws Exception {
-        JSONObject userInfo = (JSONObject)getJsonObject(FILENAME, name);
+        JSONObject userInfo = getJsonObject(FILENAME, name);
 
         // 判断用户是否存在
         if (null == userInfo ) {

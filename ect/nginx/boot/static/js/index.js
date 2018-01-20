@@ -29,21 +29,21 @@ layui.use(['layer', 'element', 'form'], function() {
 	});
 
 	// 操作
-	element.on('nav(tab_operation)', function(elem) {
-		var op = this.getAttribute('op');
+	// element.on('nav(tab_operation)', function(elem) {
+	// 	var op = this.getAttribute('op');
 
-		if ('refresh' == op) {
-			// 刷新当前页
+	// 	if ('refresh' == op) {
+	// 		// 刷新当前页
+	// 		refreshPage();
+	// 	} else if ('closeother' == op) {
+	// 		// 关闭其他页面
+	// 		closeotherPage();
+	// 	} else if ('closeall' == op) {
+	// 		// 关闭全部页面
+	// 		closeallPage();
+	// 	}
 
-		} else if ('closeother' == op) {
-			// 关闭其他页面
-
-		} else if ('closeall' == op) {
-			// 关闭全部页面
-
-		}
-
-	});
+	// });
 
 	// 用户操作
 	element.on('nav(userOperation)', function(elem) {
@@ -60,7 +60,6 @@ layui.use(['layer', 'element', 'form'], function() {
 				area: '300px',
 				yes: function(index, layero) {
 					$('#pwd_submit').click();
-					layer.close(index);
 				},
 				cancel: function() {
 					console.log('cancel');
@@ -88,7 +87,8 @@ layui.use(['layer', 'element', 'form'], function() {
 			data: data.field,
 			success: function(data) {
 				if(200 == data.code) {
-					layer.confirm('修改成功，请重新登录！', {'title': '系统提示'}, function(index_confirm) {
+					layer.closeAll('page');
+					layer.alert('修改成功，请重新登录！', function(index_confirm) {
 						
 						window.location.href = '/'
 						layer.close(index_confirm);
@@ -111,4 +111,19 @@ layui.use(['layer', 'element', 'form'], function() {
 			layer.close(index);
 		})
 	});
+
+	// // 刷新当前页
+	// function refreshPage() {
+		
+	// }
+
+	// // 关闭其他页面
+	// function closeotherPage() {
+
+	// }
+
+	// // 关闭全部页面
+	// function closeallPage() {
+
+	// }
 });

@@ -1,0 +1,43 @@
+body {
+	padding: 10px 10px 0px 10px;
+}
+
+.div-project {
+	display: none;
+	width: 100%;
+	margin: 10px 0;
+}
+
+.div-project .layui-inline {
+	width: calc(50% - 5px);
+	margin-right: 0px;
+}
+
+.div-runboot {
+	display: none;
+	position: absolute;
+	top: 0px;
+	right: 0px;
+	bottom: 0px;
+	left: 0px;
+	padding: 20px;
+}
+
+#ta_runboot {
+	/*position: absolute;
+	top: 0px;
+	right: 0px;
+	bottom: 0px;
+	left: 0px;*/
+	resize: none;
+	border-radius: 3px;
+	width: 100%;
+	height: 100%;
+	padding: 10px;
+}
+
+#form_runboot {
+	width: 100%;
+	height: 100%;
+	margin: -10px;
+}

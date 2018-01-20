@@ -10,14 +10,13 @@
 		<meta name="apple-mobile-web-app-status-bar-style" content="black">
 		<title>项目管理系统</title>
 		<link rel="stylesheet" href="/static/js/plugins/layui/css/layui.css" media="all">
-		<link rel="stylesheet" href="/static/css/manage/projectInfo.css" media="all">
+		<link rel="stylesheet" href="/static/css/manage/filemanage.css" media="all">
 	</head>
 
 	<body>
 		<div class="layui-row">
-			<button id="addProject" class="layui-btn layui-btn-mini">新增项目</button>
-			<button id="refresh" class="layui-btn layui-btn-mini">刷新表格</button>
-			<button id="updateRunBoot" class="layui-btn layui-btn-mini">修改启动文件</button>
+			<button id="addProject" class="layui-btn layui-btn-mini">上传文件</button>
+			<button id="refresh" class="layui-btn layui-btn-mini">刷新</button>
 		</div>
 		<table class="layui-table" id="tab_project" lay-filter="tab_project" style="margin: 0;"></table>
 		<div class="layui-container div-project" id="div-project">
@@ -75,16 +74,9 @@
 				<input type="hidden" lay-submit lay-filter="submitProject" id="project_submit" >
 			</form>
 		</div>
-
-		<div class="div-runboot" id="div-runboot">
-			<form action="" class="layui-form" id="form_runboot">
-				<textarea id="ta_runboot" name="content"></textarea>
-				<input type="hidden" lay-submit lay-filter="submitRunBoot" id="runboot_submit" >
-			</form>
-		</div>
 	</body>
 	<script type="text/javascript" src="/static/js/plugins/layui/layui.js"></script>
-	<script type="text/javascript" src="/static/js/manage/projectInfo.js"></script>
+	<script type="text/javascript" src="/static/js/manage/filemanage.js"></script>
 	<script type="text/html" id="bar_projects">
 		<a href="javascript:;" class="layui-btn layui-btn-mini layui-btn-normal" lay-event="manage">管理</a>
 		<a href="javascript:;" class="layui-btn layui-btn-mini layui-btn-warm" lay-event="update">配置</a>

@@ -5,7 +5,10 @@ import org.springframework.util.Assert;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
+import java.security.MessageDigest;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.StringTokenizer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -690,5 +693,49 @@ public final class StringUtil {
             stringBuffer.append(strings[i]);
         }
         return stringBuffer.toString();
+    }
+
+    /**
+     * 获取当前时间,默认格式："yyyy-MM-dd HH:mm:ss"
+     * @return
+     */
+    public static String currTime() {
+        return currTime("yyyy-MM-dd HH:mm:ss");
+    }
+    public static String currTime(String format) {
+
+        SimpleDateFormat sdf = new SimpleDateFormat(format);
+        return sdf.format(new Date());
+    }
+
+    /**
+     * 获取字符串Md5值
+     * @param str
+     * @return
+     */
+    public static String getMd5(String str) {
+
+        byte[] md5Byte = new byte[0];
+        try {
+            MessageDigest md = MessageDigest.getInstance("MD5");
+            md5Byte = md.digest(str.getBytes("UTF-8"));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        StringBuffer hexStr = new StringBuffer();
+        int num;
+        for (int i = 0; i < md5Byte.length; i++) {
+            num = md5Byte[i];
+            if (num < 0) {
+                num += 256;
+            }
+            if (num < 16) {
+                hexStr.append("0");
+            }
+            hexStr.append(Integer.toHexString(num));
+        }
+
+        return hexStr.toString().toUpperCase();
     }
 }

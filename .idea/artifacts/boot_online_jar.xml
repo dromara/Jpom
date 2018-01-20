@@ -1,0 +1,67 @@
+<component name="ArtifactManager">
+  <artifact name="boot-online:jar">
+    <output-path>F:/etc/nginx/boot-line_jar</output-path>
+    <root id="root">
+      <element id="archive" name="boot-online.jar">
+        <element id="directory" name="META-INF">
+          <element id="file-copy" path="$PROJECT_DIR$/src/META-INF/MANIFEST.MF" />
+        </element>
+        <element id="module-output" name="boot-online" />
+      </element>
+      <element id="library" level="project" name="Maven: org.hibernate:hibernate-validator:5.2.4.Final" />
+      <element id="library" level="project" name="Maven: org.apache.struts:struts-taglib:1.3.8" />
+      <element id="library" level="project" name="Maven: org.slf4j:jul-to-slf4j:1.7.21" />
+      <element id="library" level="project" name="Maven: org.springframework:spring-web:4.3.4.RELEASE" />
+      <element id="library" level="project" name="Maven: org.springframework:spring-context-support:4.3.4.RELEASE" />
+      <element id="library" level="project" name="Maven: com.alibaba:fastjson:1.2.29" />
+      <element id="library" level="project" name="Maven: org.yaml:snakeyaml:1.17" />
+      <element id="library" level="project" name="Maven: org.springframework.boot:spring-boot-autoconfigure:1.4.2.RELEASE" />
+      <element id="library" level="project" name="Maven: org.apache.tomcat.embed:tomcat-embed-el:8.5.6" />
+      <element id="library" level="project" name="Maven: com.fasterxml.jackson.core:jackson-annotations:2.8.4" />
+      <element id="library" level="project" name="Maven: org.springframework:spring-beans:4.3.4.RELEASE" />
+      <element id="library" level="project" name="Maven: org.slf4j:jcl-over-slf4j:1.7.21" />
+      <element id="library" level="project" name="Maven: org.apache.struts:struts-tiles:1.3.8" />
+      <element id="library" level="project" name="Maven: commons-chain:commons-chain:1.1" />
+      <element id="library" level="project" name="Maven: org.springframework.boot:spring-boot:1.4.2.RELEASE" />
+      <element id="library" level="project" name="Maven: org.springframework.boot:spring-boot-starter-websocket:1.4.2.RELEASE" />
+      <element id="library" level="project" name="Maven: org.springframework:spring-aop:4.3.4.RELEASE" />
+      <element id="library" level="project" name="Maven: org.springframework.boot:spring-boot-starter-tomcat:1.4.2.RELEASE" />
+      <element id="library" level="project" name="Maven: dom4j:dom4j:1.6.1" />
+      <element id="library" level="project" name="Maven: ch.qos.logback:logback-core:1.1.7" />
+      <element id="library" level="project" name="Maven: sslext:sslext:1.2-0" />
+      <element id="library" level="project" name="Maven: org.apache.tomcat.embed:tomcat-embed-websocket:8.5.6" />
+      <element id="library" level="project" name="Maven: antlr:antlr:2.7.7" />
+      <element id="library" level="project" name="Maven: com.fasterxml.jackson.core:jackson-core:2.8.4" />
+      <element id="library" level="project" name="Maven: xml-apis:xml-apis:1.4.01" />
+      <element id="library" level="project" name="Maven: org.springframework.boot:spring-boot-starter-web:1.4.2.RELEASE" />
+      <element id="library" level="project" name="Maven: com.fasterxml:classmate:1.3.3" />
+      <element id="library" level="project" name="Maven: commons-validator:commons-validator:1.3.1" />
+      <element id="library" level="project" name="Maven: org.springframework:spring-webmvc:4.3.4.RELEASE" />
+      <element id="library" level="project" name="Maven: org.springframework:spring-core:4.3.4.RELEASE" />
+      <element id="library" level="project" name="Maven: org.springframework.boot:spring-boot-starter-logging:1.4.2.RELEASE" />
+      <element id="library" level="project" name="Maven: org.jboss.logging:jboss-logging:3.3.0.Final" />
+      <element id="library" level="project" name="Maven: commons-beanutils:commons-beanutils:1.9.3" />
+      <element id="library" level="project" name="Maven: commons-lang:commons-lang:2.4" />
+      <element id="library" level="project" name="Maven: org.apache.velocity:velocity:1.7" />
+      <element id="library" level="project" name="Maven: com.fasterxml.jackson.core:jackson-databind:2.8.4" />
+      <element id="library" level="project" name="Maven: org.springframework:spring-messaging:4.3.4.RELEASE" />
+      <element id="library" level="project" name="Maven: commons-digester:commons-digester:2.1" />
+      <element id="library" level="project" name="Maven: javax.validation:validation-api:1.1.0.Final" />
+      <element id="library" level="project" name="Maven: org.slf4j:slf4j-api:1.7.21" />
+      <element id="library" level="project" name="Maven: org.aspectj:aspectjweaver:1.8.9" />
+      <element id="library" level="project" name="Maven: org.springframework.boot:spring-boot-starter-aop:1.4.2.RELEASE" />
+      <element id="library" level="project" name="Maven: org.springframework:spring-websocket:4.3.4.RELEASE" />
+      <element id="library" level="project" name="Maven: org.apache.velocity:velocity-tools:2.0" />
+      <element id="library" level="project" name="Maven: org.springframework:spring-context:4.3.4.RELEASE" />
+      <element id="library" level="project" name="Maven: org.springframework.boot:spring-boot-starter-velocity:1.4.2.RELEASE" />
+      <element id="library" level="project" name="Maven: org.slf4j:log4j-over-slf4j:1.7.21" />
+      <element id="library" level="project" name="Maven: ch.qos.logback:logback-classic:1.1.7" />
+      <element id="library" level="project" name="Maven: org.springframework.boot:spring-boot-starter:1.4.2.RELEASE" />
+      <element id="library" level="project" name="Maven: oro:oro:2.0.8" />
+      <element id="library" level="project" name="Maven: commons-collections:commons-collections:3.2.2" />
+      <element id="library" level="project" name="Maven: org.apache.struts:struts-core:1.3.8" />
+      <element id="library" level="project" name="Maven: org.springframework:spring-expression:4.3.4.RELEASE" />
+      <element id="library" level="project" name="Maven: org.apache.tomcat.embed:tomcat-embed-core:8.5.6" />
+    </root>
+  </artifact>
+</component>

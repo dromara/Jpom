@@ -8,6 +8,7 @@ import com.alibaba.fastjson.JSONObject;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 
 public class BaseService {
@@ -35,7 +36,7 @@ public class BaseService {
         File file = new File(getDataPath(), filename);
 
         if(!file.exists()) {
-            file.createNewFile();
+            throw new FileNotFoundException(file.getPath() + " 文件不存在！");
         }
 
         return file.getPath();
@@ -55,7 +56,7 @@ public class BaseService {
 
         // 判断是否存在数据
         if (null != data && 0 < data.keySet().size()) {
-            throw new Exception("对象已存在！");
+            throw new Exception("项目名称已存在！");
         } else {
             allData.put(key, json);
             JsonUtil.saveJson(getDataFilePath(filename), allData);
@@ -69,15 +70,35 @@ public class BaseService {
      */
     public void updateJson(String filename, JSONObject json) throws Exception{
         String key = json.getString("id");
-        // 读取文件，如果存在记录，则抛出异常
+        // 读取文件，如果不存在记录，则抛出异常
         JSONObject allData = getJsonObject(filename);
         JSONObject data = allData.getJSONObject(key);
 
         // 判断是否存在数据
         if (null == data || 0 == data.keySet().size()) {
-            throw new Exception("对象不存在！");
+            throw new Exception("项目名称不存在！");
         } else {
             allData.put(key, json);
+            JsonUtil.saveJson(getDataFilePath(filename), allData);
+        }
+    }
+
+    /**
+     * 删除json对象
+     * @param filename
+     * @param key
+     * @throws Exception
+     */
+    public void deleteJson(String filename, String key) throws Exception {
+        // 读取文件，如果存在记录，则抛出异常
+        JSONObject allData = getJsonObject(filename);
+        JSONObject data = allData.getJSONObject(key);
+
+        // 判断是否存在数据
+        if (JsonUtil.jsonIsEmpty(data)) {
+            throw new Exception("项目名称存不在！");
+        } else {
+            allData.remove(key);
             JsonUtil.saveJson(getDataFilePath(filename), allData);
         }
     }
@@ -89,10 +110,10 @@ public class BaseService {
      * @return
      * @throws IOException
      */
-    public Object getJsonObject(String filename, String key) throws IOException {
+    public JSONObject getJsonObject(String filename, String key) throws IOException {
         JSONObject json_data = getJsonObject(filename);
 
-        return json_data.get(key);
+        return json_data.getJSONObject(key);
     }
 
     /**
