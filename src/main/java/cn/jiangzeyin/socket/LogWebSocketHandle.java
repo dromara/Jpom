@@ -1,10 +1,11 @@
 package cn.jiangzeyin.socket;
 
+import cn.jiangzeyin.Md5Util;
+import cn.jiangzeyin.StringUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.spring.SpringUtil;
 import cn.jiangzeyin.service.BaseService;
-import cn.jiangzeyin.util.StringUtil;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Component;
 
@@ -36,7 +37,7 @@ public class LogWebSocketHandle implements TailLogThread.Evn {
         // 通过用户名和密码的Md5值判断是否是登录的
         try {
             boolean flag = false;
-            if (!StringUtil.IsEmpty(userInfo)) {
+            if (!StringUtil.isEmpty(userInfo)) {
                 BaseService service = new BaseService();
                 JSONObject obj = service.getJsonObject("user.json");
 
@@ -46,7 +47,7 @@ public class LogWebSocketHandle implements TailLogThread.Evn {
                 while (iter_key.hasNext()) {
                     String str_key = iter_key.next();
                     JSONObject json_user = obj.getJSONObject(str_key);
-                    String str_userMd5 = StringUtil.getMd5(String.format("%s:%s", json_user.getString("id"), json_user.getString("password")));
+                    String str_userMd5 = Md5Util.getString(String.format("%s:%s", json_user.getString("id"), json_user.getString("password")));
                     if (str_userMd5.equals(userInfo)) {
                         flag = true;
                         break;

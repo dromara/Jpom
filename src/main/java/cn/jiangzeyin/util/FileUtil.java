@@ -1,11 +1,10 @@
 package cn.jiangzeyin.util;
 
 
-import org.springframework.util.Assert;
-
 import java.io.*;
 import java.math.BigDecimal;
 import java.util.LinkedList;
+import java.util.Objects;
 import java.util.Properties;
 
 /**
@@ -309,8 +308,8 @@ public final class FileUtil {
      * @throws IOException
      */
     public static boolean writeInputStream(InputStream inputStream, File file) throws IOException {
-        Assert.notNull(inputStream);
-        Assert.notNull(file);
+        Objects.requireNonNull(inputStream);
+        Objects.requireNonNull(file);
         mkdirs(file);
         DataOutputStream outputStream = null;
         try {

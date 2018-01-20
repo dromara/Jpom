@@ -1,5 +1,7 @@
 package cn.jiangzeyin.controller.manage;
 
+import cn.jiangzeyin.DateUtil;
+import cn.jiangzeyin.Md5Util;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.PageUtil;
@@ -7,7 +9,6 @@ import cn.jiangzeyin.common.interceptor.LoginInterceptor;
 import cn.jiangzeyin.controller.base.AbstractBaseControl;
 import cn.jiangzeyin.model.ProjectInfoModel;
 import cn.jiangzeyin.service.manage.ManageService;
-import cn.jiangzeyin.util.StringUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Controller;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.annotation.Resource;
 import java.io.IOException;
+import java.security.NoSuchAlgorithmException;
 import java.util.Iterator;
 import java.util.Set;
 
@@ -45,7 +47,7 @@ public class ManageControl extends AbstractBaseControl {
      * @return
      */
     @RequestMapping(value = "console")
-    public String console(String id) {
+    public String console(String id) throws NoSuchAlgorithmException {
         ProjectInfoModel pim = null;
         try {
             pim = manageService.getProjectInfo(id);
@@ -54,7 +56,7 @@ public class ManageControl extends AbstractBaseControl {
             DefaultSystemLog.LOG().error(e.getMessage(), e);
         }
         setAttribute("projectInfo", JSONObject.toJSONString(pim));
-        setAttribute("userInfo", StringUtil.getMd5(String.format("%s:%s", getSession().getAttribute(LoginInterceptor.SESSION_NAME), getSession().getAttribute(LoginInterceptor.SESSION_PWD))));
+        setAttribute("userInfo", Md5Util.getString(String.format("%s:%s", getSession().getAttribute(LoginInterceptor.SESSION_NAME), getSession().getAttribute(LoginInterceptor.SESSION_PWD))));
         return "manage/console";
     }
 
@@ -99,7 +101,7 @@ public class ManageControl extends AbstractBaseControl {
     @ResponseBody
     public String addProject(ProjectInfoModel projectInfo) {
 
-        projectInfo.setCreateTime(StringUtil.currTime());
+        projectInfo.setCreateTime(DateUtil.getCurrentFormatTime(null));
 
         try {
             manageService.saveProject(projectInfo);
@@ -144,7 +146,7 @@ public class ManageControl extends AbstractBaseControl {
     @ResponseBody
     public String updateProject(ProjectInfoModel projectInfo) {
 
-        projectInfo.setCreateTime(StringUtil.currTime());
+        projectInfo.setCreateTime(DateUtil.getCurrentFormatTime(null));
 
         try {
             manageService.updateProject(projectInfo);
