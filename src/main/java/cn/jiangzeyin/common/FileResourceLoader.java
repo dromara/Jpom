@@ -1,7 +1,6 @@
 package cn.jiangzeyin.common;
 
-import cn.jiangzeyin.system.SystemBean;
-import cn.jiangzeyin.system.log.SystemLog;
+import cn.jiangzeyin.common.spring.SpringUtil;
 import org.apache.commons.collections.ExtendedProperties;
 import org.apache.velocity.exception.ResourceNotFoundException;
 import org.apache.velocity.runtime.resource.Resource;
@@ -19,7 +18,7 @@ import java.util.Map;
  * Created by jiangzeyin on 2017/1/5.
  */
 public class FileResourceLoader extends ResourceLoader {
-    Map<String, Long> fileLastModified = new HashMap<>();
+    private Map<String, Long> fileLastModified = new HashMap<>();
 
     @Override
     public void init(ExtendedProperties configuration) {
@@ -33,7 +32,7 @@ public class FileResourceLoader extends ResourceLoader {
             file = getResourceFile(source);
             return new FileInputStream(file);
         } catch (FileNotFoundException e) {
-            SystemLog.LOG().info("FileNotFoundException:" + source + "  " + file.getPath());
+            DefaultSystemLog.LOG().info("FileNotFoundException:" + source + "  " + file.getPath());
             return this.getClass().getResourceAsStream(source);
         } finally {
             if (file != null)
@@ -56,6 +55,6 @@ public class FileResourceLoader extends ResourceLoader {
     private File getResourceFile(String name) {
 //        SystemBean.getInstance().VelocityPath
 
-        return new File(String.format("%s/%s", SystemBean.getInstance().VelocityPath, name));
+        return new File(String.format("%s/%s", SpringUtil.getEnvironment().getProperty("spring.velocity.resource-loader-path"), name));
     }
 }

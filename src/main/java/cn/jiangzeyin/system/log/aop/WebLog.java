@@ -1,8 +1,7 @@
 package cn.jiangzeyin.system.log.aop;
 
 
-import cn.jiangzeyin.system.log.LogType;
-import cn.jiangzeyin.system.log.SystemLog;
+import cn.jiangzeyin.common.DefaultSystemLog;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.Signature;
 import org.aspectj.lang.annotation.AfterReturning;
@@ -51,6 +50,6 @@ public class WebLog {
         if (ret == null)
             return;
         //BaseInterceptor.getNowUserName() +
-        SystemLog.LOG(LogType.REQUEST).info(" :" + ret.toString());
+        DefaultSystemLog.LOG().info(" :" + ret.toString());
     }
 }

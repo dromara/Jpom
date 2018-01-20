@@ -1,7 +1,5 @@
 package cn.jiangzeyin.common.interceptor;
 
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.method.HandlerMethod;
 
 import javax.servlet.http.HttpServletRequest;
@@ -13,15 +11,12 @@ import javax.servlet.http.HttpServletResponse;
  * @author jiangzeyin
  * Created by jiangzeyin on 2017/2/4.
  */
-@InterceptorUrl({"/**"})
-public class LoginInterceptor extends BaseInterceptor implements GetUserName {
+@InterceptorPattens()
+public class LoginInterceptor extends BaseInterceptor {
 
     public static final String SESSION_NAME = "user";
     public static final String SESSION_PWD = "pwd";
 
-    public LoginInterceptor() {
-        put(this);
-    }
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
@@ -38,24 +33,6 @@ public class LoginInterceptor extends BaseInterceptor implements GetUserName {
                 }
             }
         }
-        // 系统管理限制
-        if (url.startsWith("/sysadmin")) {
-            if (!"admin".equals(user)) {
-                response.sendRedirect(request.getContextPath() + "/login.html");
-                return false;
-            }
-        }
         return true;
-    }
-
-    @Override
-    public String getUserName() {
-        ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
-        HttpServletRequest request = attributes.getRequest();
-        return (String) request.getSession().getAttribute(LoginInterceptor.SESSION_NAME);
-    }
-
-    public String getAllUserName() {
-        return getUserName();
     }
 }

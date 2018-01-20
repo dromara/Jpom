@@ -1,6 +1,6 @@
 package cn.jiangzeyin;
 
-import org.springframework.boot.SpringApplication;
+import cn.jiangzeyin.common.BaseApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.web.servlet.ServletComponentScan;
 import org.springframework.context.annotation.ComponentScan;
@@ -11,17 +11,7 @@ import org.springframework.context.annotation.ComponentScan;
 @SpringBootApplication
 @ServletComponentScan
 @ComponentScan({"cn.jiangzeyin"})
-public class BootOnLineApplication extends SpringApplication {
-
-    /**
-     * @param sources sources
-     */
-    public BootOnLineApplication(Object... sources) {
-        super(sources);
-        setBanner((environment, sourceClass, out) -> {
-            out.println("yokead Spring Boot online manager starting");
-        });
-    }
+public class BootOnLineApplication extends BaseApplication {
 
     /**
      * 启动执行
@@ -29,7 +19,7 @@ public class BootOnLineApplication extends SpringApplication {
      * @param args 参数
      */
     public static void main(String[] args) {
-        BootOnLineApplication application = new BootOnLineApplication(BootOnLineApplication.class);
+        BaseApplication application = new BaseApplication(BootOnLineApplication.class);
         application.run(args);
     }
 }

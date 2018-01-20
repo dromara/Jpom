@@ -1,11 +1,12 @@
 package cn.jiangzeyin.controller.manage;
 
+import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
-import cn.jiangzeyin.common.base.AbstractBaseControl;
+import cn.jiangzeyin.common.PageUtil;
 import cn.jiangzeyin.common.interceptor.LoginInterceptor;
+import cn.jiangzeyin.controller.base.AbstractBaseControl;
 import cn.jiangzeyin.model.ProjectInfoModel;
 import cn.jiangzeyin.service.manage.ManageService;
-import cn.jiangzeyin.system.log.SystemLog;
 import cn.jiangzeyin.util.StringUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -15,11 +16,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.annotation.Resource;
-import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Set;
 
 @Controller
@@ -27,11 +25,12 @@ import java.util.Set;
 public class ManageControl extends AbstractBaseControl {
 
     @Resource
-    ManageService manageService;
+    private ManageService manageService;
 
 
     /**
      * 展示项目页面
+     *
      * @return
      */
     @RequestMapping(value = "projectInfo")
@@ -42,6 +41,7 @@ public class ManageControl extends AbstractBaseControl {
 
     /**
      * 管理项目
+     *
      * @return
      */
     @RequestMapping(value = "console")
@@ -51,17 +51,17 @@ public class ManageControl extends AbstractBaseControl {
             pim = manageService.getProjectInfo(id);
         } catch (IOException e) {
             e.printStackTrace();
-            SystemLog.LOG().error(e.getMessage(), e);
+            DefaultSystemLog.LOG().error(e.getMessage(), e);
         }
-        request.setAttribute("projectInfo", JSONObject.toJSONString(pim));
-        request.setAttribute("userInfo", StringUtil.getMd5(String.format("%s:%s", session.getAttribute(LoginInterceptor.SESSION_NAME), session.getAttribute(LoginInterceptor.SESSION_PWD))));
+        setAttribute("projectInfo", JSONObject.toJSONString(pim));
+        setAttribute("userInfo", StringUtil.getMd5(String.format("%s:%s", getSession().getAttribute(LoginInterceptor.SESSION_NAME), getSession().getAttribute(LoginInterceptor.SESSION_PWD))));
         return "manage/console";
     }
 
 
-
     /**
      * 查询所有项目
+     *
      * @return
      */
     @RequestMapping(value = "getProjectInfo")
@@ -81,10 +81,10 @@ public class ManageControl extends AbstractBaseControl {
                 array.add(json.get(iterator.next()));
             }
 
-            return JsonMessage.getPaginate(200, "查询成功！", array);
+            return PageUtil.getPaginate(200, "查询成功！", array);
         } catch (IOException e) {
             e.printStackTrace();
-            SystemLog.LOG().error(e.getMessage(), e);
+            DefaultSystemLog.LOG().error(e.getMessage(), e);
             return JsonMessage.getString(500, e.getMessage());
         }
     }
@@ -92,6 +92,7 @@ public class ManageControl extends AbstractBaseControl {
 
     /**
      * 添加项目
+     *
      * @return
      */
     @RequestMapping(value = "addProject", method = RequestMethod.POST)
@@ -106,13 +107,14 @@ public class ManageControl extends AbstractBaseControl {
             return JsonMessage.getString(200, "新增成功！");
         } catch (Exception e) {
             e.printStackTrace();
-            SystemLog.LOG().error(e.getMessage(), e);
+            DefaultSystemLog.LOG().error(e.getMessage(), e);
             return JsonMessage.getString(500, e.getMessage());
         }
     }
 
     /**
      * 删除项目
+     *
      * @param id
      * @return
      */
@@ -126,7 +128,7 @@ public class ManageControl extends AbstractBaseControl {
             return JsonMessage.getString(200, "删除成功！");
         } catch (Exception e) {
             e.printStackTrace();
-            SystemLog.LOG().error(e.getMessage(), e);
+            DefaultSystemLog.LOG().error(e.getMessage(), e);
             return JsonMessage.getString(500, e.getMessage());
         }
     }
@@ -134,6 +136,7 @@ public class ManageControl extends AbstractBaseControl {
 
     /**
      * 配置项目信息
+     *
      * @param projectInfo
      * @return
      */
@@ -149,7 +152,7 @@ public class ManageControl extends AbstractBaseControl {
             return JsonMessage.getString(200, "配置成功！");
         } catch (Exception e) {
             e.printStackTrace();
-            SystemLog.LOG().error(e.getMessage(), e);
+            DefaultSystemLog.LOG().error(e.getMessage(), e);
             return JsonMessage.getString(500, e.getMessage());
         }
     }

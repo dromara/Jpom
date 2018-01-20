@@ -1,16 +1,13 @@
 package cn.jiangzeyin.socket;
 
+import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
+import cn.jiangzeyin.common.spring.SpringUtil;
 import cn.jiangzeyin.service.BaseService;
-import cn.jiangzeyin.service.UserService;
-import cn.jiangzeyin.system.SystemBean;
-import cn.jiangzeyin.system.log.SystemLog;
-import cn.jiangzeyin.util.JsonUtil;
 import cn.jiangzeyin.util.StringUtil;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.Resource;
 import javax.websocket.*;
 import javax.websocket.server.PathParam;
 import javax.websocket.server.ServerEndpoint;
@@ -64,14 +61,14 @@ public class LogWebSocketHandle implements TailLogThread.Evn {
                 session.close();
             }
         } catch (Exception e) {
-            SystemLog.LOG().error(e.getMessage());
+            DefaultSystemLog.ERROR().error(e.getMessage());
             try {
                 if (null != session) {
                     sendMsg(session, JsonMessage.getString(500, "系统错误!"));
                     session.close();
                 }
             } catch (IOException e1) {
-                SystemLog.LOG().error(e1.getMessage());
+                DefaultSystemLog.ERROR().error(e1.getMessage());
             }
         }
     }
@@ -79,7 +76,7 @@ public class LogWebSocketHandle implements TailLogThread.Evn {
     @OnMessage
     public void onMessage(String message, Session session) {
 
-        SystemLog.LOG().info("客户端消息：" + message);
+        DefaultSystemLog.LOG().info("客户端消息：" + message);
         JSONObject json = JSONObject.parseObject(message);
         JSONObject projectInfo = json.getJSONObject("projectInfo");
 
@@ -152,7 +149,7 @@ public class LogWebSocketHandle implements TailLogThread.Evn {
                     }
 
                 } catch (IOException e) {
-                    SystemLog.ERROR().error("打开日志异常", e);
+                    DefaultSystemLog.ERROR().error("打开日志异常", e);
                 }
                 break;
             default:
@@ -162,8 +159,9 @@ public class LogWebSocketHandle implements TailLogThread.Evn {
 
     /**
      * 执行shell命令
-     * @param session 用于输出的websocket会话
-     * @param op 执行的操作
+     *
+     * @param session   用于输出的websocket会话
+     * @param op        执行的操作
      * @param tag
      * @param mainClass
      * @param lib
@@ -176,7 +174,7 @@ public class LogWebSocketHandle implements TailLogThread.Evn {
         StringBuffer sb_temp = new StringBuffer();
         try {
             // 执行命令
-            String command = String.format("%s %s %s %s %s %s %s %s", SystemBean.getInstance().getEnvironment().getProperty("command.conf"), op, tag, mainClass, lib, log, port, token);
+            String command = String.format("%s %s %s %s %s %s %s %s", SpringUtil.getEnvironment().getProperty("command.conf"), op, tag, mainClass, lib, log, port, token);
             System.out.println(command);
             Process process = Runtime.getRuntime().exec(command);
             is = process.getInputStream();
@@ -189,8 +187,8 @@ public class LogWebSocketHandle implements TailLogThread.Evn {
             }
             is.close();
         } catch (IOException e) {
-            SystemLog.ERROR().error("执行命令异常", e);
-            sendMsg(session,"执行命令异常");
+            DefaultSystemLog.ERROR().error("执行命令异常", e);
+            sendMsg(session, "执行命令异常");
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -207,17 +205,18 @@ public class LogWebSocketHandle implements TailLogThread.Evn {
             if (inputStream != null)
                 inputStream.close();
         } catch (Exception e) {
-            SystemLog.ERROR().error("关闭异常", e);
+            DefaultSystemLog.ERROR().error("关闭异常", e);
         }
         if (process != null)
             process.destroy();
         if (thread != null)
             thread.stop();
-        SystemLog.LOG().info(" socket 关闭");
+        DefaultSystemLog.LOG().info(" socket 关闭");
     }
 
     /**
      * 发送消息
+     *
      * @param session
      * @param msg
      */
@@ -226,14 +225,14 @@ public class LogWebSocketHandle implements TailLogThread.Evn {
         try {
             session.getBasicRemote().sendText(msg);
         } catch (IOException e) {
-            SystemLog.ERROR().error("websocket发送信息异常", e);
+            DefaultSystemLog.ERROR().error("websocket发送信息异常", e);
         }
     }
 
     @OnError
     public void onError(Session session, Throwable thr) {
 
-        SystemLog.ERROR().error("socket 异常", thr);
+        DefaultSystemLog.ERROR().error("socket 异常", thr);
     }
 
     @Override

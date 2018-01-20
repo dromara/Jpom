@@ -1,10 +1,9 @@
 package cn.jiangzeyin.socket;
 
-import cn.jiangzeyin.system.log.SystemLog;
+import cn.jiangzeyin.common.DefaultSystemLog;
 
 import javax.websocket.Session;
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
@@ -45,10 +44,10 @@ public class TailLogThread implements Runnable {
                     session.getAsyncRemote().sendText(line);
                 }
             } catch (Exception e) {
-                SystemLog.ERROR().error("发送消息失败", e);
+                DefaultSystemLog.ERROR().error("发送消息失败", e);
                 errorCount++;
                 if (errorCount == 10) {
-                    SystemLog.LOG().info("失败次数超过10次，结束本次事件");
+                    DefaultSystemLog.LOG().info("失败次数超过10次，结束本次事件");
                     stop();
                     if (evn != null)
                         evn.onError();
@@ -56,7 +55,7 @@ public class TailLogThread implements Runnable {
                 }
             }
         }
-        SystemLog.LOG().info("结束本次读取地址事件");
+        DefaultSystemLog.LOG().info("结束本次读取地址事件");
     }
 
     public interface Evn {

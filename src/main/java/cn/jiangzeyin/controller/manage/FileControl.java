@@ -2,13 +2,11 @@ package cn.jiangzeyin.controller.manage;
 
 
 import cn.jiangzeyin.common.JsonMessage;
-import cn.jiangzeyin.service.manage.ManageService;
-import cn.jiangzeyin.system.SystemBean;
+import cn.jiangzeyin.common.spring.SpringUtil;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import javax.annotation.Resource;
 import java.io.*;
 import java.util.HashMap;
 import java.util.Map;
@@ -19,6 +17,7 @@ public class FileControl {
 
     /**
      * 文件管理页面
+     *
      * @param id
      * @return
      */
@@ -33,13 +32,14 @@ public class FileControl {
 
     /**
      * 读取启动文件
+     *
      * @return
      */
     @RequestMapping(value = "getRunBoot")
     @ResponseBody
     public String getRunBoot() {
 
-        File file = new File(SystemBean.getInstance().getEnvironment().getProperty("command.conf"));
+        File file = new File(SpringUtil.getEnvironment().getProperty("command.conf"));
 
         if (!file.exists()) {
             return JsonMessage.getString(500, "启动文件不存在");
@@ -69,13 +69,14 @@ public class FileControl {
 
     /**
      * 修改启动文件
+     *
      * @param content
      * @return
      */
     @RequestMapping(value = "saveRunBoot")
     @ResponseBody
     public String saveRunBoot(String content) {
-        File file = new File(SystemBean.getInstance().getEnvironment().getProperty("command.conf"));
+        File file = new File(SpringUtil.getEnvironment().getProperty("command.conf"));
 
         if (!file.exists()) {
             return JsonMessage.getString(500, "启动文件不存在");

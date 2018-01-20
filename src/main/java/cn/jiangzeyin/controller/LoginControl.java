@@ -1,11 +1,12 @@
 package cn.jiangzeyin.controller;
 
+import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
-import cn.jiangzeyin.common.base.AbstractBaseControl;
 import cn.jiangzeyin.common.interceptor.LoginInterceptor;
 import cn.jiangzeyin.common.interceptor.NotLogin;
+import cn.jiangzeyin.controller.base.AbstractBaseControl;
 import cn.jiangzeyin.service.UserService;
-import cn.jiangzeyin.system.log.SystemLog;
+import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -17,7 +18,7 @@ import javax.annotation.Resource;
 public class LoginControl extends AbstractBaseControl {
 
     @Resource
-    UserService userService;
+    private UserService userService;
 
     @RequestMapping(value = {"login.html", "", "/"})
     @NotLogin
@@ -31,13 +32,13 @@ public class LoginControl extends AbstractBaseControl {
     public String userLogin(String userName, String userPwd) {
         StringBuilder stringBuffer = new StringBuilder();
         stringBuffer.append("用户登录：").append(userName).append(",IP：").append(ip);
-        stringBuffer.append(",浏览器：").append(getUserAgent());
+        stringBuffer.append(",浏览器：").append(getHeader(HttpHeaders.USER_AGENT));
         try {
             boolean flag = userService.login(userName, userPwd);
             if (flag) {
                 stringBuffer.append("，结果：").append("OK");
-                session.setAttribute(LoginInterceptor.SESSION_NAME, userName);
-                session.setAttribute(LoginInterceptor.SESSION_PWD, userPwd);
+                getSession().setAttribute(LoginInterceptor.SESSION_NAME, userName);
+                getSession().setAttribute(LoginInterceptor.SESSION_PWD, userPwd);
                 return JsonMessage.getString(200, "登录成功");
             } else {
                 stringBuffer.append("，结果：").append("faild");
@@ -47,7 +48,7 @@ public class LoginControl extends AbstractBaseControl {
             stringBuffer.append("，结果：").append("error");
             return JsonMessage.getString(500, e.getLocalizedMessage());
         } finally {
-            SystemLog.LOG().info(stringBuffer.toString());
+            DefaultSystemLog.LOG().info(stringBuffer.toString());
         }
     }
 }
