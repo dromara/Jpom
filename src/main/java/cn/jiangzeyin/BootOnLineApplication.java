@@ -11,7 +11,7 @@ import org.springframework.context.annotation.ComponentScan;
 @SpringBootApplication
 @ServletComponentScan
 @ComponentScan({"cn.jiangzeyin"})
-public class BootOnLineApplication extends BaseApplication {
+public class BootOnLineApplication {
 
     /**
      * 启动执行
