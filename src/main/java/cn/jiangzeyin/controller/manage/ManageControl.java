@@ -68,7 +68,7 @@ public class ManageControl extends AbstractBaseControl {
      */
     @RequestMapping(value = "getProjectInfo")
     @ResponseBody
-    public String getProjectInfor() {
+    public String getProjectInfo() {
         try {
             // 查询数据
             JSONObject json = manageService.getAllProjectInfo();
