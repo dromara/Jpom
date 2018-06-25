@@ -53,4 +53,17 @@
             </plugin>
         </plugins>
     </build>
+
+    <developers>
+        <developer>
+            <name>F7575</name>
+            <email>1757518819@qq.com</email>
+            <organization>F7575</organization>
+        </developer>
+        <developer>
+            <name>jiangzeyin</name>
+            <email>bwcx_jzy@163.com</email>
+            <organization>bwcx_jzy</organization>
+        </developer>
+    </developers>
 </project>
