@@ -1,6 +1,5 @@
 package cn.jiangzeyin.system.log.aop;
 
-
 import cn.jiangzeyin.common.DefaultSystemLog;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.Signature;

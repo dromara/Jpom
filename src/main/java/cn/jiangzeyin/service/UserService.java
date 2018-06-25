@@ -1,6 +1,5 @@
 package cn.jiangzeyin.service;
 
-import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.util.JsonUtil;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;

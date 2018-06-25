@@ -172,7 +172,7 @@ public class LogWebSocketHandle implements TailLogThread.Evn {
      */
     public String execCommand(Session session, String op, String tag, String mainClass, String lib, String log, int port, String token) {
         InputStream is;
-        StringBuffer sb_temp = new StringBuffer();
+        StringBuilder sb_temp = new StringBuilder();
         try {
             // 执行命令
             String command = String.format("%s %s %s %s %s %s %s %s", SpringUtil.getEnvironment().getProperty("command.conf"), op, tag, mainClass, lib, log, port, token);

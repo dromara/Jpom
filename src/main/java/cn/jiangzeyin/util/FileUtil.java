@@ -1,6 +1,5 @@
 package cn.jiangzeyin.util;
 
-
 import java.io.*;
 import java.math.BigDecimal;
 import java.util.LinkedList;
@@ -11,7 +10,7 @@ import java.util.Properties;
  * 文件操作工具类
  *
  * @author jiangzeyin
- * @date 2016-8-11
+ * date 2016-8-11
  */
 public final class FileUtil {
 

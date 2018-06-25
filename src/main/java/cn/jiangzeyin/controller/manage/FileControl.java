@@ -33,6 +33,7 @@ public class FileControl extends AbstractBaseControl {
 
     /**
      * 文件管理页面
+     *
      * @param id
      * @return
      */
@@ -45,6 +46,7 @@ public class FileControl extends AbstractBaseControl {
 
     /**
      * 读取启动文件
+     *
      * @return
      */
     @RequestMapping(value = "getRunBoot")
@@ -57,7 +59,7 @@ public class FileControl extends AbstractBaseControl {
             return JsonMessage.getString(500, "启动文件不存在");
         }
 
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         // 读取文件
         try {
             BufferedReader br = new BufferedReader(new FileReader(file));
@@ -65,11 +67,9 @@ public class FileControl extends AbstractBaseControl {
 
             while ((str_temp = br.readLine()) != null) {
 
-                sb.append(str_temp + "\r\n");
+                sb.append(str_temp).append("\r\n");
             }
             br.close();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -81,6 +81,7 @@ public class FileControl extends AbstractBaseControl {
 
     /**
      * 修改启动文件
+     *
      * @param content
      * @return
      */
@@ -109,6 +110,7 @@ public class FileControl extends AbstractBaseControl {
 
     /**
      * 列出目录下的文件
+     *
      * @param id
      * @return
      */
@@ -149,6 +151,7 @@ public class FileControl extends AbstractBaseControl {
 
     /**
      * 上传文件
+     *
      * @param request
      * @return
      */
@@ -156,7 +159,7 @@ public class FileControl extends AbstractBaseControl {
     @ResponseBody
     public String upload(HttpServletRequest request) {
         String id = getRequest().getParameter("id");
-        List<MultipartFile> files = ((MultipartHttpServletRequest)request).getFiles("file");
+        List<MultipartFile> files = ((MultipartHttpServletRequest) request).getFiles("file");
         try {
             ProjectInfoModel pim = manageService.getProjectInfo(id);
 
@@ -177,12 +180,13 @@ public class FileControl extends AbstractBaseControl {
 
     /**
      * 删除文件
+     *
      * @param filename
      * @return
      */
     @RequestMapping(value = "deleteFile")
     @ResponseBody
-    public String deleteFile(String id, String filename){
+    public String deleteFile(String id, String filename) {
 
         try {
             ProjectInfoModel pim = manageService.getProjectInfo(id);
