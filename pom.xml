@@ -4,9 +4,9 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>cn.jiangzeyin</groupId>
         <artifactId>common-parent</artifactId>
-        <version>1.1.7</version>
+        <groupId>cn.jiangzeyin.fast-boot</groupId>
+        <version>1.1.15</version>
     </parent>
     <artifactId>boot-online</artifactId>
     <version>1.0</version>
@@ -16,7 +16,7 @@
     </properties>
     <dependencies>
         <dependency>
-            <groupId>cn.jiangzeyin</groupId>
+            <groupId>cn.jiangzeyin.fast-boot</groupId>
             <artifactId>common-boot</artifactId>
         </dependency>
         <dependency>
