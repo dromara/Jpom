@@ -217,14 +217,18 @@ public class LogWebSocketHandle implements TailLogThread.Evn {
      * @param session
      * @param msg
      */
-    public void sendMsg(Session session, String msg) {
-
-        session.getAsyncRemote().sendText(msg);
+    private synchronized void sendMsg(Session session, String msg) {
+        try {
+            session.getBasicRemote().sendText(msg);
+        } catch (IOException e) {
+            DefaultSystemLog.ERROR().error("websocket发送信息异常", e);
+        }
     }
+
+
 
     @OnError
     public void onError(Session session, Throwable thr) {
-
         DefaultSystemLog.ERROR().error("socket 异常", thr);
     }
 

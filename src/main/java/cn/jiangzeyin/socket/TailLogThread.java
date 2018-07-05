@@ -13,7 +13,7 @@ import java.io.InputStreamReader;
 public class TailLogThread implements Runnable {
 
     private BufferedReader reader;
-    private Session session;
+    private final Session session;
     private boolean run = false;
     private Evn evn;
 
@@ -37,21 +37,23 @@ public class TailLogThread implements Runnable {
         int errorCount = 0;
         run = true;
         while (run) {
-            // 将实时日志通过WebSocket发送给客户端，给每一行添加一个HTML换行
-            try {
-                line = reader.readLine();
-                if (line != null) {
-                    session.getAsyncRemote().sendText(line);
-                }
-            } catch (Exception e) {
-                DefaultSystemLog.ERROR().error("发送消息失败", e);
-                errorCount++;
-                if (errorCount == 10) {
-                    DefaultSystemLog.LOG().info("失败次数超过10次，结束本次事件");
-                    stop();
-                    if (evn != null)
-                        evn.onError();
-                    break;
+            synchronized (session) {
+                // 将实时日志通过WebSocket发送给客户端，给每一行添加一个HTML换行
+                try {
+                    line = reader.readLine();
+                    if (line != null) {
+                        session.getBasicRemote().sendText(line);
+                    }
+                } catch (Exception e) {
+                    DefaultSystemLog.ERROR().error("发送消息失败", e);
+                    errorCount++;
+                    if (errorCount == 10) {
+                        DefaultSystemLog.LOG().info("失败次数超过10次，结束本次事件");
+                        stop();
+                        if (evn != null)
+                            evn.onError();
+                        break;
+                    }
                 }
             }
         }
