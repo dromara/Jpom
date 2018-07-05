@@ -10,8 +10,10 @@ import cn.jiangzeyin.controller.base.AbstractBaseControl;
 import cn.jiangzeyin.model.ProjectInfoModel;
 import cn.jiangzeyin.service.manage.ManageService;
 import com.alibaba.fastjson.JSONArray;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
@@ -37,7 +39,7 @@ public class FileControl extends AbstractBaseControl {
      * @param id
      * @return
      */
-    @RequestMapping(value = "filemanage")
+    @RequestMapping(value = "filemanage", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
     public String fileManage(String id) {
         setAttribute("id", id);
         return "manage/filemanage";
@@ -113,10 +115,9 @@ public class FileControl extends AbstractBaseControl {
      * @param id
      * @return
      */
-    @RequestMapping(value = "getFileList")
+    @RequestMapping(value = "getFileList", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     public String getFileList(String id) {
-
         try {
             // 查询项目路径
             ProjectInfoModel pim = manageService.getProjectInfo(id);

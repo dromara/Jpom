@@ -1,5 +1,5 @@
 {
-  "test":{
+  "BusinessApplication":{
     "lib":"/tashimall/boot-application/business-web/lib",
     "mainClass":"com.yokead.Application",
     "createTime":"2017-11-30 16:04:35",

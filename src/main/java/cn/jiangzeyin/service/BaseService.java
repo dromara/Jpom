@@ -115,7 +115,6 @@ public class BaseService {
      */
     public JSONObject getJsonObject(String filename, String key) throws IOException {
         JSONObject json_data = getJsonObject(filename);
-
         return json_data.getJSONObject(key);
     }
 
@@ -127,8 +126,6 @@ public class BaseService {
      * @throws IOException
      */
     public JSONObject getJsonObject(String filename) throws IOException {
-        JSONObject json_data = (JSONObject) JsonUtil.readJson(getDataFilePath(filename));
-
-        return json_data;
+        return (JSONObject) JsonUtil.readJson(getDataFilePath(filename));
     }
 }

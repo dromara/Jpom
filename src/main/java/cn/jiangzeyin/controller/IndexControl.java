@@ -4,10 +4,11 @@ import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.interceptor.LoginInterceptor;
 import cn.jiangzeyin.controller.base.AbstractBaseControl;
-import cn.jiangzeyin.service.IndexService;
 import cn.jiangzeyin.service.UserService;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.annotation.Resource;
@@ -17,24 +18,26 @@ import javax.annotation.Resource;
 public class IndexControl extends AbstractBaseControl {
 
     @Resource
-    IndexService indexService;
-    @Resource
     private UserService userService;
+
+    @RequestMapping(value = "error", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
+    public String error() {
+        return "error";
+    }
+
 
     /**
      * 加载首页
      *
      * @return
      */
-    @RequestMapping(value = "index")
+    @RequestMapping(value = "index", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
     public String index() {
-
         return "index";
     }
 
     @RequestMapping(value = "welcome")
     public String welcome() {
-
         return "welcome";
     }
 

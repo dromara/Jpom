@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 # description: Auto-starts boot
 Tag="$2"
 MainClass="$3"

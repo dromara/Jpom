@@ -14,10 +14,10 @@ import javax.websocket.server.PathParam;
 import javax.websocket.server.ServerEndpoint;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Iterator;
 import java.util.Set;
 
 /**
+ * socket
  * Created by jiangzeyin on 2017/9/8.
  */
 @ServerEndpoint(value = "/console/{userInfo}")
@@ -42,10 +42,8 @@ public class LogWebSocketHandle implements TailLogThread.Evn {
                 JSONObject obj = service.getJsonObject("user.json");
 
                 Set<String> set_key = obj.keySet();
-                Iterator<String> iter_key = set_key.iterator();
 
-                while (iter_key.hasNext()) {
-                    String str_key = iter_key.next();
+                for (String str_key : set_key) {
                     JSONObject json_user = obj.getJSONObject(str_key);
                     String str_userMd5 = Md5Util.getString(String.format("%s:%s", json_user.getString("id"), json_user.getString("password")));
                     if (str_userMd5.equals(userInfo)) {
