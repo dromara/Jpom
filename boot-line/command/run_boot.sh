@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+﻿#!/usr/bin/env bash
 # description: Auto-starts boot
 Tag="$2"
 MainClass="$3"
@@ -9,7 +9,7 @@ Port="$6"
 
 RETVAL="0"
 # See how we were called.
-start() 
+start()
 {
     if [ ! -f $Log ]; then
         touch $Log
@@ -17,12 +17,12 @@ start()
     nohup java -Dappliction=$Tag -Djava.ext.dirs=$Lib":${JAVA_HOME}/jre/lib/ext" $MainClass > $Log 2>&1 & sleep 1s & status
 }
 
-stop() 
+stop()
 {
     pid=$(ps -ef | grep "Dappliction=$Tag" | grep -v 'grep' | awk '{printf $2 " "}')
     if [ "$pid" != "" ]; then
 
-        #wget http://127.0.0.1:$Port/sys/shutdown?token=$Token
+       # wget http://127.0.0.1:$Port/sys/shutdown?token=$Token
 
         pid=$(ps -ef | grep "Dappliction=$Tag" | grep -v 'grep' | awk '{printf $2 " "}')
         if [ "$pid" != "" ]; then

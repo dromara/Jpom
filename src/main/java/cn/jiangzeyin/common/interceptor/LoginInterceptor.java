@@ -11,7 +11,7 @@ import javax.servlet.http.HttpServletResponse;
  * @author jiangzeyin
  * Created by jiangzeyin on 2017/2/4.
  */
-//@InterceptorPattens
+@InterceptorPattens
 public class LoginInterceptor extends BaseInterceptor {
 
     public static final String SESSION_NAME = "user";

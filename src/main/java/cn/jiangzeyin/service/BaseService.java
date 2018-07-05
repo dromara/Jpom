@@ -7,6 +7,7 @@ import com.alibaba.fastjson.JSONObject;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.Objects;
 
 public class BaseService {
 
@@ -115,7 +116,9 @@ public class BaseService {
      */
     public JSONObject getJsonObject(String filename, String key) throws IOException {
         JSONObject json_data = getJsonObject(filename);
-        return json_data.getJSONObject(key);
+        JSONObject jsonObject = json_data.getJSONObject(key);
+        Objects.requireNonNull(jsonObject, key + "没有找到");
+        return jsonObject;
     }
 
     /**

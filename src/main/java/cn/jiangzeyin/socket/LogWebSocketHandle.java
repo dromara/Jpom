@@ -174,7 +174,8 @@ public class LogWebSocketHandle implements TailLogThread.Evn {
         try {
             // 执行命令
             String command = String.format("%s %s %s %s %s %s %s", SpringUtil.getEnvironment().getProperty("command.conf"), op, tag, mainClass, lib, log, port);
-            System.out.println(command);
+//            System.out.println(command);
+            DefaultSystemLog.LOG().info(command);
             Process process = Runtime.getRuntime().exec(command);
             is = process.getInputStream();
             process.waitFor();
@@ -185,13 +186,10 @@ public class LogWebSocketHandle implements TailLogThread.Evn {
                 sb_temp.append(new String(arr_bytes, 0, len, "UTF-8"));
             }
             is.close();
-        } catch (IOException e) {
+        } catch (IOException | InterruptedException e) {
             DefaultSystemLog.ERROR().error("执行命令异常", e);
-            sendMsg(session, "执行命令异常");
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+            sendMsg(session, "执行命令异常：" + StringUtil.fromException(e));
         }
-        System.out.println(sb_temp.toString());
         return sb_temp.toString();
     }
 
@@ -221,11 +219,7 @@ public class LogWebSocketHandle implements TailLogThread.Evn {
      */
     public void sendMsg(Session session, String msg) {
 
-        try {
-            session.getBasicRemote().sendText(msg);
-        } catch (IOException e) {
-            DefaultSystemLog.ERROR().error("websocket发送信息异常", e);
-        }
+        session.getAsyncRemote().sendText(msg);
     }
 
     @OnError
