@@ -31,7 +31,7 @@ public class LoginControl extends AbstractBaseControl {
     @NotLogin
     public String userLogin(String userName, String userPwd) {
         StringBuilder stringBuffer = new StringBuilder();
-        stringBuffer.append("用户登录：").append(userName).append(",IP：").append(ip);
+        stringBuffer.append("用户登录：").append(userName).append(",IP：").append(getIp());
         stringBuffer.append(",浏览器：").append(getHeader(HttpHeaders.USER_AGENT));
         try {
             boolean flag = userService.login(userName, userPwd);

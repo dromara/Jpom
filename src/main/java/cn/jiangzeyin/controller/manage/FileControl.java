@@ -39,7 +39,6 @@ public class FileControl extends AbstractBaseControl {
      */
     @RequestMapping(value = "filemanage")
     public String fileManage(String id) {
-
         setAttribute("id", id);
         return "manage/filemanage";
     }

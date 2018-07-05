@@ -11,7 +11,7 @@ import javax.servlet.http.HttpServletResponse;
  * @author jiangzeyin
  * Created by jiangzeyin on 2017/2/4.
  */
-@InterceptorPattens
+//@InterceptorPattens
 public class LoginInterceptor extends BaseInterceptor {
 
     public static final String SESSION_NAME = "user";
@@ -21,7 +21,7 @@ public class LoginInterceptor extends BaseInterceptor {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         super.preHandle(request, response, handler);
-        String url = request.getRequestURI();
+        //String url = request.getRequestURI();
         String user = (String) session.getAttribute(SESSION_NAME);
         if (handler instanceof HandlerMethod) {
             HandlerMethod handlerMethod = (HandlerMethod) handler;
@@ -33,6 +33,7 @@ public class LoginInterceptor extends BaseInterceptor {
                 }
             }
         }
+        reload();
         return true;
     }
 }

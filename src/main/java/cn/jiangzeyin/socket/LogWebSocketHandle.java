@@ -175,7 +175,7 @@ public class LogWebSocketHandle implements TailLogThread.Evn {
         StringBuilder sb_temp = new StringBuilder();
         try {
             // 执行命令
-            String command = String.format("%s %s %s %s %s %s %s %s", SpringUtil.getEnvironment().getProperty("command.conf"), op, tag, mainClass, lib, log, port, token);
+            String command = String.format("%s %s %s %s %s %s %s", SpringUtil.getEnvironment().getProperty("command.conf"), op, tag, mainClass, lib, log, port);
             System.out.println(command);
             Process process = Runtime.getRuntime().exec(command);
             is = process.getInputStream();

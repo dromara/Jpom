@@ -4,7 +4,7 @@ MainClass="$3"
 Lib="$4"
 Log="$5"
 Port="$6"
-Token="$7"
+#Token="$7"
 
 RETVAL="0"
 # See how we were called.
@@ -21,7 +21,7 @@ stop()
     pid=$(ps -ef | grep "Dappliction=$Tag" | grep -v 'grep' | awk '{printf $2 " "}')
     if [ "$pid" != "" ]; then
 
-        wget http://127.0.0.1:$Port/sys/shutdown?token=$Token
+        #wget http://127.0.0.1:$Port/sys/shutdown?token=$Token
 
         pid=$(ps -ef | grep "Dappliction=$Tag" | grep -v 'grep' | awk '{printf $2 " "}')
         if [ "$pid" != "" ]; then

@@ -1,12 +1,12 @@
 {
   "test":{
-    "lib":"/root/桌面/TestJar/lib",
-    "mainClass":"com.demo.demo1.Demo1Application",
+    "lib":"/tashimall/boot-application/business-web/lib",
+    "mainClass":"com.yokead.Application",
     "createTime":"2017-11-30 16:04:35",
-    "log":"/root/桌面/TestJar/run.log",
-    "port":8081,
-    "id":"test",
-    "tag":"Demo1Application",
+    "log":"/tashimall/boot-application/business-web/run.log",
+    "port":4100,
+    "id":"BusinessApplication",
+    "tag":"BusinessApplication",
     "token":""
   }
 }

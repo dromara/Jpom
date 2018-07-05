@@ -1,12 +1,6 @@
 {
-  "test":{
-    "password":"testtest",
-    "role":"tester",
-    "name":"test",
-    "id":"test"
-  },
   "admin":{
-    "password":"aaaaaa",
+    "password":"admin123",
     "role":"manager",
     "name":"admin",
     "id":"admin"
