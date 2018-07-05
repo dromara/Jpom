@@ -8,6 +8,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 
 /**
+ * 线程处理
  * Created by jiangzeyin on 2017/9/8.
  */
 public class TailLogThread implements Runnable {

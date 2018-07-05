@@ -5,6 +5,7 @@ import cn.jiangzeyin.StringUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.spring.SpringUtil;
+import cn.jiangzeyin.pool.ThreadPoolService;
 import cn.jiangzeyin.service.BaseService;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Component;
@@ -15,6 +16,7 @@ import javax.websocket.server.ServerEndpoint;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
 
 /**
  * socket
@@ -23,6 +25,8 @@ import java.util.Set;
 @ServerEndpoint(value = "/console/{userInfo}")
 @Component
 public class LogWebSocketHandle implements TailLogThread.Evn {
+
+    private static ExecutorService EXECUTOR_SERVICE = null;
 
     private Process process;
     private InputStream inputStream;
@@ -33,7 +37,8 @@ public class LogWebSocketHandle implements TailLogThread.Evn {
      */
     @OnOpen
     public void onOpen(@PathParam("userInfo") String userInfo, Session session) {
-
+        if (EXECUTOR_SERVICE == null)
+            EXECUTOR_SERVICE = ThreadPoolService.newCachedThreadPool(LogWebSocketHandle.class);
         // 通过用户名和密码的Md5值判断是否是登录的
         try {
             boolean flag = false;
@@ -136,17 +141,16 @@ public class LogWebSocketHandle implements TailLogThread.Evn {
                     // 执行tail -f命令
                     process = Runtime.getRuntime().exec(String.format("tail -f %s", log));
                     inputStream = process.getInputStream();
-
                     // 一定要启动新的线程，防止InputStream阻塞处理WebSocket的线程
                     if (thread == null) {
                         thread = new TailLogThread(inputStream, session, this);
-                        // 如果线程没有正在运行，则启动新线程
-                        if (!thread.isRun()) {
-                            Thread thread_ = new Thread(thread);
-                            thread_.start();
-                        }
                     }
-
+                    // 如果线程没有正在运行，则启动新线程
+                    if (!thread.isRun()) {
+                        EXECUTOR_SERVICE.execute(thread);
+                        //Thread thread_ = new Thread(thread);
+                        //thread_.start();
+                    }
                 } catch (IOException e) {
                     DefaultSystemLog.ERROR().error("打开日志异常", e);
                 }
@@ -224,7 +228,6 @@ public class LogWebSocketHandle implements TailLogThread.Evn {
             DefaultSystemLog.ERROR().error("websocket发送信息异常", e);
         }
     }
-
 
 
     @OnError
