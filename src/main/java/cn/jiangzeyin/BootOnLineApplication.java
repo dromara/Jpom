@@ -1,19 +1,21 @@
 package cn.jiangzeyin;
 
-import cn.jiangzeyin.common.SpringApplicationBuilder;
+import cn.jiangzeyin.common.ApplicationBuilder;
+import cn.jiangzeyin.common.EnableCommonBoot;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.web.servlet.ServletComponentScan;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.http.converter.StringHttpMessageConverter;
 
 import java.nio.charset.Charset;
 
 /**
  * Created by jiangzeyin on 2017/9/14.
+ *
+ * @author jiangzeyin
  */
 @SpringBootApplication
 @ServletComponentScan
-@ComponentScan({"cn.jiangzeyin"})
+@EnableCommonBoot
 public class BootOnLineApplication {
 
     /**
@@ -22,7 +24,7 @@ public class BootOnLineApplication {
      * @param args 参数
      */
     public static void main(String[] args) throws Exception {
-        SpringApplicationBuilder.createBuilder(BootOnLineApplication.class)
+        ApplicationBuilder.createBuilder(BootOnLineApplication.class)
                 .addHttpMessageConverter(new StringHttpMessageConverter(Charset.forName("UTF-8")))
                 .run(args);
     }

@@ -4,10 +4,9 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
-import java.io.IOException;
-
 /**
- * Created by jiangzeyin on 2017/5/15.
+ * @author jiangzeyin
+ * date 2017/5/15
  */
 public class JsonUtil {
 
@@ -42,13 +41,13 @@ public class JsonUtil {
         return flag;
     }
 
-    public static Object readJson(String path) throws IOException {
-        String json = FileUtil.readToString(path);
+    public static Object readJson(String path) {
+        String json = cn.hutool.core.io.FileUtil.readString(path, "UTF-8");
         return JSON.parse(json);
     }
 
-    public static void saveJson(String path, JSON json) throws IOException {
+    public static void saveJson(String path, JSON json) {
         String newsJson = JSON.toJSONString(json, true);
-        FileUtil.writeFile(path, newsJson);
+        cn.hutool.core.io.FileUtil.writeString(newsJson, path, "UTF-8");
     }
 }

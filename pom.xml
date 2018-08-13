@@ -6,13 +6,15 @@
     <parent>
         <artifactId>common-parent</artifactId>
         <groupId>cn.jiangzeyin.fast-boot</groupId>
-        <version>1.1.17</version>
+        <version>1.1.22</version>
     </parent>
     <artifactId>boot-online</artifactId>
     <version>1.0</version>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <java.version>1.8</java.version>
+
+        <hutool-all.version>4.1.7</hutool-all.version>
     </properties>
     <dependencies>
         <dependency>
@@ -35,6 +37,20 @@
             <groupId>com.alibaba</groupId>
             <artifactId>fastjson</artifactId>
         </dependency>
+
+        <dependency>
+            <groupId>cn.hutool</groupId>
+            <artifactId>hutool-all</artifactId>
+            <version>${hutool-all.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>cn.antcore</groupId>
+            <artifactId>spring-boot-starter-ant-resources</artifactId>
+            <version>1.0-RELEASE</version>
+            <scope>test</scope>
+        </dependency>
+
     </dependencies>
     <build>
         <plugins>

@@ -1,6 +1,7 @@
 package cn.jiangzeyin.controller.manage;
 
 
+import cn.hutool.core.io.FileUtil;
 import cn.jiangzeyin.DateUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
@@ -122,28 +123,26 @@ public class FileControl extends AbstractBaseControl {
             // 查询项目路径
             ProjectInfoModel pim = manageService.getProjectInfo(id);
 
-            File file_dir = new File(pim.getLib());
-
-            if (!file_dir.exists()) {
+            File fileDir = new File(pim.getLib());
+            if (!fileDir.exists()) {
                 return JsonMessage.getString(500, "目录不存在");
             }
+            File[] filesAll = fileDir.listFiles();
+            List<Map<String, String>> listFile = new ArrayList<>();
+            if (filesAll != null) {
+                for (File file : filesAll) {
+                    Map<String, String> mapFile = new HashMap<>();
+                    mapFile.put("filename", file.getName());
+                    mapFile.put("projectid", id);
+                    mapFile.put("modifytime", DateUtil.formatTime("yyyy-MM-dd HH:mm:ss", file.lastModified()));
+                    mapFile.put("filesize", FileUtil.readableFileSize(file.length()));
+                    listFile.add(mapFile);
 
-            File[] files_all = file_dir.listFiles();
-            List<Map<String, String>> list_file = new ArrayList<>();
-            for (File file : files_all) {
-                Map<String, String> map_file = new HashMap<>();
-                map_file.put("filename", file.getName());
-                map_file.put("projectid", id);
-                map_file.put("modifytime", DateUtil.formatTime("yyyy-MM-dd HH:mm:ss", file.lastModified()));
-                map_file.put("filesize", file.length() + "");
-                list_file.add(map_file);
+                }
             }
-
-            JSONArray array_file = JSONArray.parseArray(JSONArray.toJSONString(list_file));
-
-            return PageUtil.getPaginate(200, "查询成功", array_file);
+            JSONArray arrayFile = (JSONArray) JSONArray.toJSON(listFile);
+            return PageUtil.getPaginate(200, "查询成功", arrayFile);
         } catch (IOException e) {
-            e.printStackTrace();
             DefaultSystemLog.LOG().error(e.getMessage(), e);
             return JsonMessage.getString(500, "查询失败");
         }
@@ -171,10 +170,9 @@ public class FileControl extends AbstractBaseControl {
                 }
             }
             return JsonMessage.getString(200, "上传成功");
-        } catch (IOException e) {
-            e.printStackTrace();
-            DefaultSystemLog.LOG().error(e.getMessage(), e);
-            return JsonMessage.getString(500, "上传失败");
+        } catch (Exception e) {
+            DefaultSystemLog.ERROR().error(e.getMessage(), e);
+            return JsonMessage.getString(500, "上传失败:" + e.getMessage());
         }
     }
 
@@ -193,15 +191,16 @@ public class FileControl extends AbstractBaseControl {
 
             File file = new File(pim.getLib() + "/" + filename);
             if (file.exists()) {
-                file.delete();
-                return JsonMessage.getString(200, "删除成功");
+                if (file.delete()) {
+                    return JsonMessage.getString(200, "删除成功");
+                }
             } else {
                 return JsonMessage.getString(404, "文件不存在");
             }
         } catch (IOException e) {
-            e.printStackTrace();
-            return JsonMessage.getString(500, "删除失败");
+            DefaultSystemLog.ERROR().error("删除文件异常", e);
         }
+        return JsonMessage.getString(500, "删除失败");
     }
 
 }
