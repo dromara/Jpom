@@ -1,7 +1,7 @@
 package cn.jiangzeyin.controller.manage;
 
-import cn.jiangzeyin.DateUtil;
-import cn.jiangzeyin.Md5Util;
+import cn.hutool.core.date.DateUtil;
+import cn.hutool.crypto.SecureUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.PageUtil;
@@ -56,7 +56,8 @@ public class ManageControl extends AbstractBaseControl {
             DefaultSystemLog.LOG().error(e.getMessage(), e);
         }
         setAttribute("projectInfo", JSONObject.toJSONString(pim));
-        setAttribute("userInfo", Md5Util.getString(String.format("%s:%s", getSession().getAttribute(LoginInterceptor.SESSION_NAME), getSession().getAttribute(LoginInterceptor.SESSION_PWD))));
+
+        setAttribute("userInfo", SecureUtil.md5(String.format("%s:%s", getSession().getAttribute(LoginInterceptor.SESSION_NAME), getSession().getAttribute(LoginInterceptor.SESSION_PWD))));
         return "manage/console";
     }
 
@@ -101,7 +102,7 @@ public class ManageControl extends AbstractBaseControl {
     @ResponseBody
     public String addProject(ProjectInfoModel projectInfo) {
 
-        projectInfo.setCreateTime(DateUtil.getCurrentFormatTime(null));
+        projectInfo.setCreateTime(DateUtil.now());
 
         try {
             manageService.saveProject(projectInfo);
@@ -146,7 +147,7 @@ public class ManageControl extends AbstractBaseControl {
     @ResponseBody
     public String updateProject(ProjectInfoModel projectInfo) {
 
-        projectInfo.setCreateTime(DateUtil.getCurrentFormatTime(null));
+        projectInfo.setCreateTime(DateUtil.now());
 
         try {
             manageService.updateProject(projectInfo);

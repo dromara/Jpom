@@ -34,8 +34,9 @@ public class WebLog {
             ResponseBody responseBody = methodSignature.getMethod().getAnnotation(ResponseBody.class);
             if (responseBody == null) {
                 RestController restController = joinPoint.getTarget().getClass().getAnnotation(RestController.class);
-                if (restController == null)
+                if (restController == null) {
                     isLog.set(false);
+                }
             }
         }
     }

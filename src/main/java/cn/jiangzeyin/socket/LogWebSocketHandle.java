@@ -1,7 +1,8 @@
 package cn.jiangzeyin.socket;
 
-import cn.jiangzeyin.Md5Util;
-import cn.jiangzeyin.StringUtil;
+import cn.hutool.core.exceptions.ExceptionUtil;
+import cn.hutool.core.util.StrUtil;
+import cn.hutool.crypto.SecureUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.spring.SpringUtil;
@@ -37,12 +38,13 @@ public class LogWebSocketHandle implements TailLogThread.Evn {
      */
     @OnOpen
     public void onOpen(@PathParam("userInfo") String userInfo, Session session) {
-        if (EXECUTOR_SERVICE == null)
+        if (EXECUTOR_SERVICE == null) {
             EXECUTOR_SERVICE = ThreadPoolService.newCachedThreadPool(LogWebSocketHandle.class);
+        }
         // 通过用户名和密码的Md5值判断是否是登录的
         try {
             boolean flag = false;
-            if (!StringUtil.isEmpty(userInfo)) {
+            if (!StrUtil.isEmpty(userInfo)) {
                 BaseService service = new BaseService();
                 JSONObject obj = service.getJsonObject("user.json");
 
@@ -50,7 +52,7 @@ public class LogWebSocketHandle implements TailLogThread.Evn {
 
                 for (String str_key : set_key) {
                     JSONObject json_user = obj.getJSONObject(str_key);
-                    String str_userMd5 = Md5Util.getString(String.format("%s:%s", json_user.getString("id"), json_user.getString("password")));
+                    String str_userMd5 = SecureUtil.md5(String.format("%s:%s", json_user.getString("id"), json_user.getString("password")));
                     if (str_userMd5.equals(userInfo)) {
                         flag = true;
                         break;
@@ -192,7 +194,7 @@ public class LogWebSocketHandle implements TailLogThread.Evn {
             is.close();
         } catch (IOException | InterruptedException e) {
             DefaultSystemLog.ERROR().error("执行命令异常", e);
-            sendMsg(session, "执行命令异常：" + StringUtil.fromException(e));
+            sendMsg(session, "执行命令异常：" + ExceptionUtil.stacktraceToString(e));
         }
         return sb_temp.toString();
     }
@@ -203,15 +205,18 @@ public class LogWebSocketHandle implements TailLogThread.Evn {
     @OnClose
     public void onClose() {
         try {
-            if (inputStream != null)
+            if (inputStream != null) {
                 inputStream.close();
+            }
         } catch (Exception e) {
             DefaultSystemLog.ERROR().error("关闭异常", e);
         }
-        if (process != null)
+        if (process != null) {
             process.destroy();
-        if (thread != null)
+        }
+        if (thread != null) {
             thread.stop();
+        }
         DefaultSystemLog.LOG().info(" socket 关闭");
     }
 

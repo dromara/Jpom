@@ -1,8 +1,8 @@
 package cn.jiangzeyin.controller.manage;
 
 
+import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.FileUtil;
-import cn.jiangzeyin.DateUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.PageUtil;
@@ -17,15 +17,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 import javax.annotation.Resource;
-import javax.servlet.http.HttpServletRequest;
 import java.io.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Controller
 @RequestMapping(value = "/file/")
@@ -134,7 +129,9 @@ public class FileControl extends AbstractBaseControl {
                     Map<String, String> mapFile = new HashMap<>();
                     mapFile.put("filename", file.getName());
                     mapFile.put("projectid", id);
-                    mapFile.put("modifytime", DateUtil.formatTime("yyyy-MM-dd HH:mm:ss", file.lastModified()));
+                    Date date = new Date();
+                    date.setTime(file.lastModified());
+                    mapFile.put("modifytime", DateUtil.format(date, "yyyy-MM-dd HH:mm:ss"));
                     mapFile.put("filesize", FileUtil.readableFileSize(file.length()));
                     listFile.add(mapFile);
 
@@ -151,22 +148,21 @@ public class FileControl extends AbstractBaseControl {
     /**
      * 上传文件
      *
-     * @param request
      * @return
      */
     @RequestMapping(value = "upload")
     @ResponseBody
-    public String upload(HttpServletRequest request) {
-        String id = getRequest().getParameter("id");
-        List<MultipartFile> files = ((MultipartHttpServletRequest) request).getFiles("file");
+    public String upload() {
+        String id = getParameter("id");
+
+        List<MultipartFile> files = getFiles("file");
         try {
             ProjectInfoModel pim = manageService.getProjectInfo(id);
 
             for (MultipartFile file : files) {
                 if (null != file) {
                     File saveFile = new File(pim.getLib() + "/" + file.getOriginalFilename());
-
-                    file.transferTo(saveFile);
+                    FileUtil.writeFromStream(file.getInputStream(), saveFile);
                 }
             }
             return JsonMessage.getString(200, "上传成功");

@@ -4,9 +4,9 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <artifactId>common-parent</artifactId>
-        <groupId>cn.jiangzeyin.fast-boot</groupId>
-        <version>1.1.22</version>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>1.4.7.RELEASE</version>
     </parent>
     <artifactId>boot-online</artifactId>
     <version>1.0</version>
@@ -14,12 +14,12 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <java.version>1.8</java.version>
 
-        <hutool-all.version>4.1.7</hutool-all.version>
     </properties>
     <dependencies>
         <dependency>
             <groupId>cn.jiangzeyin.fast-boot</groupId>
             <artifactId>common-boot</artifactId>
+            <version>1.2.3</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -33,24 +33,6 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-aop</artifactId>
         </dependency>
-        <dependency>
-            <groupId>com.alibaba</groupId>
-            <artifactId>fastjson</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>cn.hutool</groupId>
-            <artifactId>hutool-all</artifactId>
-            <version>${hutool-all.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>cn.antcore</groupId>
-            <artifactId>spring-boot-starter-ant-resources</artifactId>
-            <version>1.0-RELEASE</version>
-            <scope>test</scope>
-        </dependency>
-
     </dependencies>
     <build>
         <plugins>
