@@ -17,8 +17,9 @@
 		<div class="layui-row">
 			<button id="uploadFile" class="layui-btn layui-btn-mini"><i class="layui-icon">&#xe67c;</i>上传文件</button>
 			<button id="refresh" class="layui-btn layui-btn-mini">刷新</button>
+            <button id="clear" class="layui-btn layui-btn-mini">清空文件</button>
 		</div>
-		<table class="layui-table" id="tab_file" lay-filter="tab_file" style="margin: 0;"></ta
+		<table class="layui-table" id="tab_file" lay-filter="tab_file" style="margin: 0;"></table>
 	</body>
 	<script type="text/javascript" src="/static/js/plugins/layui/layui.js"></script>
 	<script type="text/javascript" src="/static/js/manage/filemanage.js"></script>

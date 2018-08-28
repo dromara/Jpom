@@ -50,6 +50,33 @@ layui.use(['layer', 'element', 'table', 'form', 'upload'], function () {
         table.reload('table_file', {height: 'full-52'});
     });
 
+    // 点击'上传文件'事件
+    $('#clear').on('click', function () {
+        layer.confirm('确定清空此项目文件吗？',
+            {title: '系统提示'},
+            function (index) {
+                layer.close(index);
+                $.ajax({
+                    url: '/file/clear',
+                    type: 'POST',
+                    dataType: 'json',
+                    data: {id: id},
+                    success: function (data) {
+                        if (200 === data.code) {
+                            layer.msg(data.msg);
+                            // 刷新项目列表
+                            table.reload('table_file', {height: 'full-52'});
+                        } else {
+                            layer.msg(data.msg);
+                        }
+                    },
+                    error: function (err) {
+                        layer.msg('删除失败！');
+                    }
+                });
+            });
+    });
+
 
     // 表格工具条事件
     table.on('tool(tab_file)', function (obj) {
@@ -63,16 +90,18 @@ layui.use(['layer', 'element', 'table', 'form', 'upload'], function () {
 
     // 删除文件
     function deleteFile(data) {
-
         layer.confirm('确定删除文件 ' + data.filename + '？', {title: '系统提示'}, function (index) {
             layer.close(index);
             $.ajax({
                 url: '/file/deleteFile',
                 type: 'POST',
                 dataType: 'json',
-                data: {id: data.projectid, filename: data.filename},
+                data: {
+                    id: data.projectid,
+                    filename: data.filename
+                },
                 success: function (data) {
-                    if (200 == data.code) {
+                    if (200 === data.code) {
                         layer.msg('删除成功！');
                         // 刷新项目列表
                         table.reload('table_file', {height: 'full-52'});

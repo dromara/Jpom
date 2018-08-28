@@ -3,6 +3,7 @@ package cn.jiangzeyin.controller.manage;
 
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.util.CharsetUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.PageUtil;
@@ -19,7 +20,9 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
-import java.io.*;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.*;
 
 @Controller
@@ -49,30 +52,13 @@ public class FileControl extends AbstractBaseControl {
     @RequestMapping(value = "getRunBoot")
     @ResponseBody
     public String getRunBoot() {
-
         File file = new File(SpringUtil.getEnvironment().getProperty("command.conf"));
-
         if (!file.exists()) {
             return JsonMessage.getString(500, "启动文件不存在");
         }
-
-        StringBuilder sb = new StringBuilder();
-        // 读取文件
-        try {
-            BufferedReader br = new BufferedReader(new FileReader(file));
-            String str_temp;
-
-            while ((str_temp = br.readLine()) != null) {
-
-                sb.append(str_temp).append("\r\n");
-            }
-            br.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
+        String content = FileUtil.readString(file, CharsetUtil.CHARSET_UTF_8);
         Map<String, String> map = new HashMap<>();
-        map.put("content", sb.toString());
+        map.put("content", content);
         return JsonMessage.getString(200, "success", map);
     }
 
@@ -172,6 +158,22 @@ public class FileControl extends AbstractBaseControl {
         }
     }
 
+    @RequestMapping(value = "clear")
+    @ResponseBody
+    public String clear(String id) {
+        try {
+            ProjectInfoModel pim = manageService.getProjectInfo(id);
+            File file = new File(pim.getLib());
+            if (FileUtil.clean(file)) {
+                return JsonMessage.getString(200, "清除成功");
+            }
+        } catch (IOException e) {
+            DefaultSystemLog.ERROR().error("删除文件异常", e);
+        }
+        return JsonMessage.getString(500, "删除失败");
+    }
+
+
     /**
      * 删除文件
      *
@@ -181,10 +183,8 @@ public class FileControl extends AbstractBaseControl {
     @RequestMapping(value = "deleteFile")
     @ResponseBody
     public String deleteFile(String id, String filename) {
-
         try {
             ProjectInfoModel pim = manageService.getProjectInfo(id);
-
             File file = new File(pim.getLib() + "/" + filename);
             if (file.exists()) {
                 if (file.delete()) {

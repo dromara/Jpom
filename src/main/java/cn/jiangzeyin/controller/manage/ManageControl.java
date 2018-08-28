@@ -18,8 +18,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.annotation.Resource;
 import java.io.IOException;
-import java.security.NoSuchAlgorithmException;
-import java.util.Iterator;
 import java.util.Set;
 
 @Controller
@@ -37,7 +35,6 @@ public class ManageControl extends AbstractBaseControl {
      */
     @RequestMapping(value = "projectInfo")
     public String projectInfo() {
-
         return "manage/projectInfo";
     }
 
@@ -47,7 +44,7 @@ public class ManageControl extends AbstractBaseControl {
      * @return
      */
     @RequestMapping(value = "console")
-    public String console(String id) throws NoSuchAlgorithmException {
+    public String console(String id) {
         ProjectInfoModel pim = null;
         try {
             pim = manageService.getProjectInfo(id);
@@ -56,7 +53,6 @@ public class ManageControl extends AbstractBaseControl {
             DefaultSystemLog.LOG().error(e.getMessage(), e);
         }
         setAttribute("projectInfo", JSONObject.toJSONString(pim));
-
         setAttribute("userInfo", SecureUtil.md5(String.format("%s:%s", getSession().getAttribute(LoginInterceptor.SESSION_NAME), getSession().getAttribute(LoginInterceptor.SESSION_PWD))));
         return "manage/console";
     }
@@ -76,17 +72,13 @@ public class ManageControl extends AbstractBaseControl {
 
             // 转换为数据
             JSONArray array = new JSONArray();
-
-            Set<String> set_key = json.keySet();
-            Iterator<String> iterator = set_key.iterator();
-
-            while (iterator.hasNext()) {
-                array.add(json.get(iterator.next()));
+            Set<String> setKey = json.keySet();
+            for (String asetKey : setKey) {
+                array.add(json.get(asetKey));
             }
 
             return PageUtil.getPaginate(200, "查询成功！", array);
         } catch (IOException e) {
-            e.printStackTrace();
             DefaultSystemLog.LOG().error(e.getMessage(), e);
             return JsonMessage.getString(500, e.getMessage());
         }
@@ -101,15 +93,11 @@ public class ManageControl extends AbstractBaseControl {
     @RequestMapping(value = "addProject", method = RequestMethod.POST)
     @ResponseBody
     public String addProject(ProjectInfoModel projectInfo) {
-
         projectInfo.setCreateTime(DateUtil.now());
-
         try {
             manageService.saveProject(projectInfo);
-
             return JsonMessage.getString(200, "新增成功！");
         } catch (Exception e) {
-            e.printStackTrace();
             DefaultSystemLog.LOG().error(e.getMessage(), e);
             return JsonMessage.getString(500, e.getMessage());
         }
@@ -124,13 +112,10 @@ public class ManageControl extends AbstractBaseControl {
     @RequestMapping(value = "deleteProject", method = RequestMethod.POST)
     @ResponseBody
     public String deleteProject(String id) {
-
         try {
             manageService.deleteProject(id);
-
             return JsonMessage.getString(200, "删除成功！");
         } catch (Exception e) {
-            e.printStackTrace();
             DefaultSystemLog.LOG().error(e.getMessage(), e);
             return JsonMessage.getString(500, e.getMessage());
         }
@@ -146,15 +131,11 @@ public class ManageControl extends AbstractBaseControl {
     @RequestMapping(value = "updateProject", method = RequestMethod.POST)
     @ResponseBody
     public String updateProject(ProjectInfoModel projectInfo) {
-
         projectInfo.setCreateTime(DateUtil.now());
-
         try {
             manageService.updateProject(projectInfo);
-
             return JsonMessage.getString(200, "配置成功！");
         } catch (Exception e) {
-            e.printStackTrace();
             DefaultSystemLog.LOG().error(e.getMessage(), e);
             return JsonMessage.getString(500, e.getMessage());
         }
