@@ -21,7 +21,6 @@ public class LoginInterceptor extends BaseInterceptor {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         super.preHandle(request, response, handler);
-        //String url = request.getRequestURI();
         String user = (String) session.getAttribute(SESSION_NAME);
         if (handler instanceof HandlerMethod) {
             HandlerMethod handlerMethod = (HandlerMethod) handler;

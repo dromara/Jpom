@@ -4,7 +4,8 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 /**
- * Created by jiangzeyin on 2018/1/20.
+ * @author jiangzeyin
+ * date 2018/1/20
  */
 public class PageUtil {
     /**

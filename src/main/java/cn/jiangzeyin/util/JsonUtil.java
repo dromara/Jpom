@@ -1,5 +1,6 @@
 package cn.jiangzeyin.util;
 
+import cn.hutool.core.io.FileUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -42,12 +43,12 @@ public class JsonUtil {
     }
 
     public static Object readJson(String path) {
-        String json = cn.hutool.core.io.FileUtil.readString(path, "UTF-8");
+        String json = FileUtil.readString(path, "UTF-8");
         return JSON.parse(json);
     }
 
     public static void saveJson(String path, JSON json) {
         String newsJson = JSON.toJSONString(json, true);
-        cn.hutool.core.io.FileUtil.writeString(newsJson, path, "UTF-8");
+        FileUtil.writeString(newsJson, path, "UTF-8");
     }
 }
