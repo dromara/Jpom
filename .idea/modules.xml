@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/boot-online.iml" filepath="$PROJECT_DIR$/boot-online.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/boot-online.iml" filepath="$PROJECT_DIR$/.idea/boot-online.iml" />
     </modules>
   </component>
 </project>
