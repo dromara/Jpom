@@ -1,94 +1,100 @@
 <!DOCTYPE html>
 <html>
 
-	<head>
-		<meta charset="utf-8">
-		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-		<meta http-equiv="X-UA-Compatible" content="IE=edge">
-		<meta content="width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1,user-scalable=no" name="viewport">
-		<meta name="apple-mobile-web-app-capable" content="yes">
-		<meta name="apple-mobile-web-app-status-bar-style" content="black">
-		<title>项目管理系统</title>
-		<link rel="stylesheet" href="/static/js/plugins/layui/css/layui.css" media="all">
-		<link rel="stylesheet" href="/static/css/manage/projectInfo.css" media="all">
-	</head>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta content="width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1,user-scalable=no" name="viewport">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <title>项目管理系统</title>
+    <link rel="stylesheet" href="//cdn.90so.net/layui/2.4.3/css/layui.css" media="all">
+    <link rel="stylesheet" href="/static/css/manage/projectInfo.css" media="all">
+</head>
 
-	<body>
-		<div class="layui-row">
-			<button id="addProject" class="layui-btn layui-btn-mini">新增项目</button>
-			<button id="refresh" class="layui-btn layui-btn-mini">刷新表格</button>
-			<button id="updateRunBoot" class="layui-btn layui-btn-mini">修改启动文件</button>
-		</div>
-		<table class="layui-table" id="tab_project" lay-filter="tab_project" style="margin: 0;"></table>
-		<div class="layui-container div-project" id="div-project">
-			<form action="" class="layui-form" id="form_project">
-				<div class="layui-form-item">
-					<div class="layui-inline">
-						<label class="layui-form-label">项目名称</label>
-						<div class="layui-input-block">
-							<input type="text" name="id" placeholder="项目名称（设置后将不能修改）" required lay-verify="required" class="layui-input">
-						</div>
-					</div>
-					<div class="layui-inline">
-						<label class="layui-form-label">Tag</label>
-						<div class="layui-input-block">
-							<input type="text" name="tag" placeholder="程序运行标志" required lay-verify="required" class="layui-input">
-						</div>
-					</div>
-				</div>
-				<div class="layui-form-item">
-					<div class="layui-inline">
-						<label class="layui-form-label">MainClass</label>
-						<div class="layui-input-block">
-							<input type="text" name="mainClass" placeholder="程序运行的SpringBoot main 类" required lay-verify="required" class="layui-input">
-						</div>
-					</div>
-					<div class="layui-inline">
-						<label class="layui-form-label">Lib</label>
-						<div class="layui-input-block">
-							<input type="text" name="lib" placeholder="程序在生产服务器环境中需要的jar路径" required lay-verify="required" class="layui-input">
-						</div>
-					</div>
-				</div>
-				<div class="layui-form-item">
-					<div class="layui-inline">
-						<label class="layui-form-label">Log</label>
-						<div class="layui-input-block">
-							<input type="text" name="log" placeholder="记录程序运行所有日志保存路径" required lay-verify="required" class="layui-input">
-						</div>
-					</div>
-					<div class="layui-inline">
-						<label class="layui-form-label">Port</label>
-						<div class="layui-input-block">
-							<input type="text" name="port" placeholder="运行程序对应端口" required lay-verify="required|port" class="layui-input">
-						</div>
-					</div>
-				</div>
-				<div class="layui-form-item">
-					<div class="layui-inline">
-						<label class="layui-form-label">Token</label>
-						<div class="layui-input-block">
-							<input type="text" name="token" placeholder="对应接口的token，可不填" class="layui-input">
-						</div>
-					</div>
-				</div>
-				<input type="hidden" lay-submit lay-filter="submitProject" id="project_submit" >
-			</form>
-		</div>
+<body>
+<div class="layui-row">
+    <button id="addProject" class="layui-btn layui-btn-sm">新增项目</button>
+    <button id="refresh" class="layui-btn layui-btn-sm">刷新表格</button>
+    <button id="updateRunBoot" class="layui-btn layui-btn-sm">修改启动文件</button>
+</div>
+<table class="layui-table" id="tab_project" lay-filter="tab_project" style="margin: 0;"></table>
+<div class="layui-container div-project" id="div-project">
+    <form action="" class="layui-form" id="form_project">
+        <div class="layui-form-item">
+            <div class="layui-inline">
+                <label class="layui-form-label">项目名称</label>
+                <div class="layui-input-block">
+                    <input type="text" name="id" placeholder="项目名称（设置后将不能修改）" required lay-verify="required"
+                           class="layui-input">
+                </div>
+            </div>
+            <div class="layui-inline">
+                <label class="layui-form-label">Tag</label>
+                <div class="layui-input-block">
+                    <input type="text" name="tag" placeholder="程序运行标志" required lay-verify="required"
+                           class="layui-input">
+                </div>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-inline">
+                <label class="layui-form-label">MainClass</label>
+                <div class="layui-input-block">
+                    <input type="text" name="mainClass" placeholder="程序运行的SpringBoot main 类" required
+                           lay-verify="required" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-inline">
+                <label class="layui-form-label">Lib</label>
+                <div class="layui-input-block">
+                    <input type="text" name="lib" placeholder="程序在生产服务器环境中需要的jar路径" required lay-verify="required"
+                           class="layui-input">
+                </div>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-inline">
+                <label class="layui-form-label">Log</label>
+                <div class="layui-input-block">
+                    <input type="text" name="log" placeholder="记录程序运行所有日志保存路径" required lay-verify="required"
+                           class="layui-input">
+                </div>
+            </div>
+            <div class="layui-inline">
+                <label class="layui-form-label">Port</label>
+                <div class="layui-input-block">
+                    <input type="text" name="port" placeholder="运行程序对应端口" required lay-verify="required|port"
+                           class="layui-input">
+                </div>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-inline">
+                <label class="layui-form-label">Token</label>
+                <div class="layui-input-block">
+                    <input type="text" name="token" placeholder="对应接口的token，可不填" class="layui-input">
+                </div>
+            </div>
+        </div>
+        <input type="hidden" lay-submit lay-filter="submitProject" id="project_submit">
+    </form>
+</div>
 
-		<div class="div-runboot" id="div-runboot">
-			<form action="" class="layui-form" id="form_runboot">
-				<textarea id="ta_runboot" name="content"></textarea>
-				<input type="hidden" lay-submit lay-filter="submitRunBoot" id="runboot_submit" >
-			</form>
-		</div>
-	</body>
-	<script type="text/javascript" src="/static/js/plugins/layui/layui.js"></script>
-	<script type="text/javascript" src="/static/js/manage/projectInfo.js"></script>
-	<script type="text/html" id="bar_projects">
-		<a href="javascript:;" class="layui-btn layui-btn-mini layui-btn-normal" lay-event="manage">管理</a>
-		<a href="javascript:;" class="layui-btn layui-btn-mini layui-btn-warm" lay-event="update">配置</a>
-		<a href="javascript:;" class="layui-btn layui-btn-mini layui-btn" lay-event="file">文件</a>
-		<a href="javascript:;" class="layui-btn layui-btn-mini layui-btn-danger" lay-event="delete">删除</a>
-	</script>
+<div class="div-runboot" id="div-runboot">
+    <form action="" class="layui-form" id="form_runboot">
+        <textarea id="ta_runboot" name="content"></textarea>
+        <input type="hidden" lay-submit lay-filter="submitRunBoot" id="runboot_submit">
+    </form>
+</div>
+</body>
+<script type="text/javascript" src="//cdn.90so.net/layui/2.4.3/layui.js"></script>
+<script type="text/javascript" src="/static/js/manage/projectInfo.js"></script>
+<script type="text/html" id="bar_projects">
+    <a href="javascript:;" class="layui-btn  layui-btn-sm layui-btn-normal" lay-event="manage">管理</a>
+    <a href="javascript:;" class="layui-btn  layui-btn-sm layui-btn-warm" lay-event="update">配置</a>
+    <a href="javascript:;" class="layui-btn  layui-btn-sm layui-btn" lay-event="file">文件</a>
+    <a href="javascript:;" class="layui-btn  layui-btn-sm layui-btn-danger" lay-event="delete">删除</a>
+</script>
 </html>

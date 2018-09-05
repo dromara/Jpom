@@ -5,7 +5,6 @@ layui.use(['layer', 'element', 'table', 'form', 'upload'], function () {
     var layer = layui.layer;
     var upload = layui.upload;
 
-
     table.render({
         id: 'table_file',
         elem: '#tab_file',
@@ -17,10 +16,11 @@ layui.use(['layer', 'element', 'table', 'form', 'upload'], function () {
             id: id
         },
         cols: [[
-            {field: 'filename', title: '文件名称', width: '500'},
-            {field: 'modifytime', title: '修改时间', width: '200'},
-            {field: 'filesize', title: '文件大小', width: '150'},
-            {field: 'op', title: '操作', width: '80', align: 'center', toolbar: '#bar_projects', fixed: 'right'}
+            {field: 'index', title: '编号', width: '10%'},
+            {field: 'filename', title: '文件名称', width: '30%'},
+            {field: 'modifytime', title: '修改时间', width: '15%'},
+            {field: 'filesize', title: '文件大小', width: '15%'},
+            {field: 'op', title: '操作', toolbar: '#bar_projects'}
         ]],
         loading: true,
         response: {
@@ -36,9 +36,20 @@ layui.use(['layer', 'element', 'table', 'form', 'upload'], function () {
         },
         multiple: true,
         url: '/file/upload',
-        done: function () {
-            table.reload('table_file', {height: 'full-52'});
-            layer.msg('success');
+        before: function () {
+            layer.load(1, {
+                shade: [0.5, '#fff'] //0.1透明度的白色背景
+            });
+        },
+        allDone: function (obj) {
+            layer.msg(JSON.stringify(obj));
+            setTimeout(function () {
+                table.reload('table_file', {height: 'full-52'});
+                layer.closeAll();
+            }, 2000);
+        },
+        done: function (res, index, upload) {
+            //layer.msg('success');
         },
         error: function () {
             layer.msg('fail');

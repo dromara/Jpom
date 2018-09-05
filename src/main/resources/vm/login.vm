@@ -9,7 +9,7 @@
 		<meta name="apple-mobile-web-app-capable" content="yes">
 		<meta name="apple-mobile-web-app-status-bar-style" content="black">
 		<title>项目管理系统</title>
-		<link rel="stylesheet" href="/static/js/plugins/layui/css/layui.css" media="all">
+		<link rel="stylesheet" href="//cdn.90so.net/layui/2.4.3/css/layui.css" media="all">
 	</head>
 
 	<body>
@@ -47,7 +47,7 @@
 			</div>
 		</div>
 	</body>
-	<script type="text/javascript" src="/static/js/plugins/layui/layui.js"></script>
+	<script type="text/javascript" src="//cdn.90so.net/layui/2.4.3/layui.js"></script>
 	<script>
 		layui.use(['form', 'carousel', 'layer'], function() {
 			var $ = layui.$;

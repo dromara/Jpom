@@ -1,95 +1,98 @@
 <!DOCTYPE html>
 <html>
 
-	<head>
-		<meta charset="utf-8">
-		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-		<meta http-equiv="X-UA-Compatible" content="IE=edge">
-		<meta content="width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1,user-scalable=no" name="viewport">
-		<meta name="apple-mobile-web-app-capable" content="yes">
-		<meta name="apple-mobile-web-app-status-bar-style" content="black">
-		<title>项目管理系统</title>
-		<link rel="stylesheet" href="/static/js/plugins/layui/css/layui.css" media="all">
-		<link rel="stylesheet" href="/static/css/index.css">
-	</head>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta content="width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1,user-scalable=no" name="viewport">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <title>项目管理系统</title>
+    <link rel="stylesheet" href="//cdn.90so.net/layui/2.4.3/css/layui.css" media="all">
+    <link rel="stylesheet" href="/static/css/index.css">
+</head>
 
-	<body class="layui-layout-body">
-		<div class="layui-layout layui-layout-admin">
-			<div class="layui-header">
-				<div class="layui-logo">项目管理系统</div>
-				<ul class="layui-nav layui-layout-right" lay-filter="userOperation">
-					<li class="layui-nav-item">
-						<a href="javascript:;">
-							$user
-						</a>
-						<dl class="layui-nav-child">
-							<dd op="updatePwd"><a href="javascript:;">修改密码</a></dd>
-						</dl>
-					</li>
-					<li class="layui-nav-item" id="li-exit">
-						<a href="javascript:;">退出</a>
-					</li>
-				</ul>
-			</div>
-			<div class="layui-side layui-bg-black">
-				<div class="layui-side-scroll">
-					<ul class="layui-nav layui-nav-tree" lay-filter="menu">
-						<li class="layui-nav-item layui-this" data-options="{'id':'welcome', 'title':'首页', 'url':'/welcome'}">
-							<a href="javascript:;">首页</a>
-						</li>
-						<li class="layui-nav-item" data-options="{'id':'manage', 'title':'项目管理', 'url':'/manage/projectInfo'}">
-							<a href="javascript:;">项目管理</a>
-						</li>
-					</ul>
-				</div>
-			</div>
-			<div class="layui-body" style="overflow: hidden;">
-				<div class="layui-tab layui-tab-card" lay-allowClose="true" lay-filter="mainTabs">
-					<ul class="layui-tab-title">
-						<li class="layui-this" lay-id="tab_welcome">首页</li>
-					</ul>
-					<!-- <ul class="layui-nav custom-nav" lay-filter="tab_operation">
-						<li class="layui-nav-item">
-							<a href="javascript:;">页面操作</a>
-							<dl class="layui-nav-child">
-								<dd op="refresh"><a href="javascript:;">刷新当前</a></dd>
-								<dd op="closeother"><a href="javascript:;">关闭其他</a></dd>
-								<dd op="closeall"><a href="javascript:;">关闭全部</a></dd>
-							</dl>
-						</li>
-					</ul> -->
-					<div class="layui-tab-content">
-						<div class="layui-tab-item layui-show">
-							<iframe src="/welcome" frameborder="0" class="custom-iframe"></iframe>
-						</div>
-					</div>
-				</div>
-			</div>
-			<div class="layui-footer">
-				<div style="text-align: center;">© 2017 项目管理系统</div>
-			</div>
-		</div>
-		<div id="div-updatePwd">
-			<form method="POST" class="layui-form" id="form_updatePwd">
-				<div class="layui-form-item">
-					<div class="layui-form-block">
-						<input type="password" name="oldPwd" id="oldPwd" required lay-verify="required|pass" placeholder="请输入旧密码" class="layui-input" autocomplete="off">
-					</div>
-				</div>
-				<div class="layui-form-item">
-					<div class="layui-form-block">
-						<input type="password" name="newPwd" id="newPwd" required lay-verify="required|pass" placeholder="请输入新密码" class="layui-input">
-					</div>
-				</div>
-				<div class="layui-form-item">
-					<div class="layui-form-block">
-						<input type="password" name="confirmPwd" id="confirmPwd" required lay-verify="required|pass|confirmPwd" placeholder="请确认新密码" class="layui-input">
-					</div>
-				</div>
-				<input type="hidden" lay-submit lay-filter="updatePwd" id="pwd_submit" >
-			</form>
-		</div>
-	</body>
-	<script type="text/javascript" src="/static/js/plugins/layui/layui.js"></script>
-	<script type="text/javascript" src="/static/js/index.js"></script>
+<body class="layui-layout-body">
+<div class="layui-layout layui-layout-admin">
+    <div class="layui-header">
+        <div class="layui-logo">项目管理系统</div>
+        <ul class="layui-nav layui-layout-right" lay-filter="userOperation">
+            <li class="layui-nav-item">
+                <a href="javascript:;">
+                    $user
+                </a>
+                <dl class="layui-nav-child">
+                    <dd op="updatePwd"><a href="javascript:;">修改密码</a></dd>
+                </dl>
+            </li>
+            <li class="layui-nav-item" id="li-exit">
+                <a href="javascript:;">退出</a>
+            </li>
+        </ul>
+    </div>
+    <div class="layui-side layui-bg-black">
+        <div class="layui-side-scroll">
+            <ul class="layui-nav layui-nav-tree" lay-filter="menu">
+                <li class="layui-nav-item layui-this">
+                    <a href="javascript:;" data-options="{'id':'welcome', 'title':'首页', 'url':'/welcome'}">首页</a>
+                </li>
+                <li class="layui-nav-item">
+                    <a href="javascript:;" data-options="{'id':'manage', 'title':'项目管理', 'url':'/manage/projectInfo'}">项目管理</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+    <div class="layui-body" style="overflow: hidden;">
+        <div class="layui-tab layui-tab-card" lay-allowClose="true" lay-filter="mainTabs">
+            <ul class="layui-tab-title">
+                <li class="layui-this" lay-id="tab_welcome">首页</li>
+            </ul>
+            <!-- <ul class="layui-nav custom-nav" lay-filter="tab_operation">
+                <li class="layui-nav-item">
+                    <a href="javascript:;">页面操作</a>
+                    <dl class="layui-nav-child">
+                        <dd op="refresh"><a href="javascript:;">刷新当前</a></dd>
+                        <dd op="closeother"><a href="javascript:;">关闭其他</a></dd>
+                        <dd op="closeall"><a href="javascript:;">关闭全部</a></dd>
+                    </dl>
+                </li>
+            </ul> -->
+            <div class="layui-tab-content">
+                <div class="layui-tab-item layui-show">
+                    <iframe src="/welcome" frameborder="0" class="custom-iframe"></iframe>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="layui-footer">
+        <div style="text-align: center;">© 2017 项目管理系统</div>
+    </div>
+</div>
+<div id="div-updatePwd">
+    <form method="POST" class="layui-form" id="form_updatePwd">
+        <div class="layui-form-item">
+            <div class="layui-form-block">
+                <input type="password" name="oldPwd" id="oldPwd" required lay-verify="required|pass"
+                       placeholder="请输入旧密码" class="layui-input" autocomplete="off">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-form-block">
+                <input type="password" name="newPwd" id="newPwd" required lay-verify="required|pass"
+                       placeholder="请输入新密码" class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-form-block">
+                <input type="password" name="confirmPwd" id="confirmPwd" required lay-verify="required|pass|confirmPwd"
+                       placeholder="请确认新密码" class="layui-input">
+            </div>
+        </div>
+        <input type="hidden" lay-submit lay-filter="updatePwd" id="pwd_submit">
+    </form>
+</div>
+</body>
+<script type="text/javascript" src="//cdn.90so.net/layui/2.4.3/layui.js"></script>
+<script type="text/javascript" src="/static/js/index.js"></script>
 </html>

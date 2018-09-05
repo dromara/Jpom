@@ -9,22 +9,23 @@
 		<meta name="apple-mobile-web-app-capable" content="yes">
 		<meta name="apple-mobile-web-app-status-bar-style" content="black">
 		<title>项目管理系统</title>
-		<link rel="stylesheet" href="/static/js/plugins/layui/css/layui.css" media="all">
+		<link rel="stylesheet" href="//cdn.90so.net/layui/2.4.3/css/layui.css" media="all">
 		<link rel="stylesheet" href="/static/css/manage/filemanage.css" media="all">
 	</head>
 
 	<body>
 		<div class="layui-row">
-			<button id="uploadFile" class="layui-btn layui-btn-mini"><i class="layui-icon">&#xe67c;</i>上传文件</button>
-			<button id="refresh" class="layui-btn layui-btn-mini">刷新</button>
-            <button id="clear" class="layui-btn layui-btn-mini">清空文件</button>
+			<button id="uploadFile" class="layui-btn layui-btn-sm"><i class="layui-icon">&#xe67c;</i>上传文件</button>
+			<button id="refresh" class="layui-btn layui-btn-sm">刷新</button>
+            <button id="clear" class="layui-btn layui-btn-sm">清空文件</button>
 		</div>
 		<table class="layui-table" id="tab_file" lay-filter="tab_file" style="margin: 0;"></table>
 	</body>
-	<script type="text/javascript" src="/static/js/plugins/layui/layui.js"></script>
+	<script type="text/javascript" src="//cdn.90so.net/layui/2.4.3/layui.js"></script>
 	<script type="text/javascript" src="/static/js/manage/filemanage.js"></script>
+##	删除按钮
 	<script type="text/html" id="bar_projects">
-		<a href="javascript:;" class="layui-btn layui-btn-mini layui-btn-danger" lay-event="delete">删除</a>
+		<a href="javascript:;" class="layui-btn layui-btn-sm layui-btn-danger" lay-event="delete">删除</a>
 	</script>
 	<script type="text/javascript">
 		var id = '$id';

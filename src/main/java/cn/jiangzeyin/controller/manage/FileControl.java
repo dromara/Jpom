@@ -23,7 +23,10 @@ import javax.annotation.Resource;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Controller
 @RequestMapping(value = "/file/")
@@ -111,16 +114,15 @@ public class FileControl extends AbstractBaseControl {
             File[] filesAll = fileDir.listFiles();
             List<Map<String, String>> listFile = new ArrayList<>();
             if (filesAll != null) {
-                for (File file : filesAll) {
-                    Map<String, String> mapFile = new HashMap<>();
+                for (int i = 0, size = filesAll.length; i < size; i++) {
+                    File file = filesAll[i];
+                    Map<String, String> mapFile = new HashMap<>(size);
+                    mapFile.put("index", String.valueOf(i + 1));
                     mapFile.put("filename", file.getName());
                     mapFile.put("projectid", id);
-                    Date date = new Date();
-                    date.setTime(file.lastModified());
-                    mapFile.put("modifytime", DateUtil.format(date, "yyyy-MM-dd HH:mm:ss"));
+                    mapFile.put("modifytime", DateUtil.date(file.lastModified()).toString());
                     mapFile.put("filesize", FileUtil.readableFileSize(file.length()));
                     listFile.add(mapFile);
-
                 }
             }
             JSONArray arrayFile = (JSONArray) JSONArray.toJSON(listFile);
@@ -140,11 +142,9 @@ public class FileControl extends AbstractBaseControl {
     @ResponseBody
     public String upload() {
         String id = getParameter("id");
-
         List<MultipartFile> files = getFiles("file");
         try {
             ProjectInfoModel pim = manageService.getProjectInfo(id);
-
             for (MultipartFile file : files) {
                 if (null != file) {
                     File saveFile = new File(pim.getLib() + "/" + file.getOriginalFilename());
