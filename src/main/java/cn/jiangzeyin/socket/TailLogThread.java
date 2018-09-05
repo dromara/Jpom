@@ -51,8 +51,9 @@ public class TailLogThread implements Runnable {
                     if (errorCount == 10) {
                         DefaultSystemLog.LOG().info("失败次数超过10次，结束本次事件");
                         stop();
-                        if (evn != null)
+                        if (evn != null) {
                             evn.onError();
+                        }
                         break;
                     }
                 }

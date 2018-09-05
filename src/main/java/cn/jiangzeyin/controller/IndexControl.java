@@ -62,20 +62,16 @@ public class IndexControl extends AbstractBaseControl {
     @RequestMapping(value = "updatePwd")
     @ResponseBody
     public String updatePwd(String oldPwd, String newPwd) {
-
         try {
             String result = userService.updatePwd(getSession().getAttribute(LoginInterceptor.SESSION_NAME).toString(), oldPwd, newPwd);
-
             // 用户不存在
             if ("notexist".equals(result)) {
                 return JsonMessage.getString(500, "用户不存在！");
             }
-
             // 旧密码不正确
             if ("olderror".equals(result)) {
                 return JsonMessage.getString(500, "旧密码不正确！");
             }
-
             // 如果修改成功，则销毁会话
             getSession().invalidate();
             return JsonMessage.getString(200, "修改密码成功！");

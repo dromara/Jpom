@@ -1,6 +1,8 @@
 package cn.jiangzeyin.socket;
 
 import cn.hutool.core.exceptions.ExceptionUtil;
+import cn.hutool.core.io.IoUtil;
+import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SecureUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
@@ -137,9 +139,7 @@ public class LogWebSocketHandle implements TailLogThread.Evn {
                 break;
             case "showlog":
                 // 进入管理页面后需要实时加载日志
-
                 try {
-
                     // 执行tail -f命令
                     process = Runtime.getRuntime().exec(String.format("tail -f %s", log));
                     inputStream = process.getInputStream();
@@ -150,8 +150,6 @@ public class LogWebSocketHandle implements TailLogThread.Evn {
                     // 如果线程没有正在运行，则启动新线程
                     if (!thread.isRun()) {
                         EXECUTOR_SERVICE.execute(thread);
-                        //Thread thread_ = new Thread(thread);
-                        //thread_.start();
                     }
                 } catch (IOException e) {
                     DefaultSystemLog.ERROR().error("打开日志异常", e);
@@ -174,29 +172,23 @@ public class LogWebSocketHandle implements TailLogThread.Evn {
      * @param port
      * @param token
      */
-    public String execCommand(Session session, String op, String tag, String mainClass, String lib, String log, int port, String token) {
+    private String execCommand(Session session, String op, String tag, String mainClass, String lib, String log, int port, String token) {
         InputStream is;
-        StringBuilder sb_temp = new StringBuilder();
+        String result = "error";
         try {
             // 执行命令
             String command = String.format("%s %s %s %s %s %s %s", SpringUtil.getEnvironment().getProperty("command.conf"), op, tag, mainClass, lib, log, port);
-//            System.out.println(command);
             DefaultSystemLog.LOG().info(command);
             Process process = Runtime.getRuntime().exec(command);
             is = process.getInputStream();
             process.waitFor();
-            byte[] arr_bytes = new byte[51200];
-            int len;
-
-            while (-1 < (len = is.read(arr_bytes))) {
-                sb_temp.append(new String(arr_bytes, 0, len, "UTF-8"));
-            }
+            result = IoUtil.read(is, CharsetUtil.CHARSET_UTF_8);
             is.close();
         } catch (IOException | InterruptedException e) {
             DefaultSystemLog.ERROR().error("执行命令异常", e);
             sendMsg(session, "执行命令异常：" + ExceptionUtil.stacktraceToString(e));
         }
-        return sb_temp.toString();
+        return result;
     }
 
     /**

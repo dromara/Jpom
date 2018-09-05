@@ -12,6 +12,7 @@ import cn.jiangzeyin.controller.base.AbstractBaseControl;
 import cn.jiangzeyin.model.ProjectInfoModel;
 import cn.jiangzeyin.service.manage.ManageService;
 import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -23,7 +24,6 @@ import javax.annotation.Resource;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -79,7 +79,6 @@ public class FileControl extends AbstractBaseControl {
         if (!file.exists()) {
             return JsonMessage.getString(500, "启动文件不存在");
         }
-
         // 写入文件
         try {
             FileOutputStream fos = new FileOutputStream(file);
@@ -90,7 +89,6 @@ public class FileControl extends AbstractBaseControl {
             e.printStackTrace();
             DefaultSystemLog.LOG().error(e.getMessage(), e);
         }
-
         return JsonMessage.getString(200, "success");
     }
 
@@ -106,26 +104,31 @@ public class FileControl extends AbstractBaseControl {
         try {
             // 查询项目路径
             ProjectInfoModel pim = manageService.getProjectInfo(id);
-
             File fileDir = new File(pim.getLib());
             if (!fileDir.exists()) {
                 return JsonMessage.getString(500, "目录不存在");
             }
             File[] filesAll = fileDir.listFiles();
-            List<Map<String, String>> listFile = new ArrayList<>();
-            if (filesAll != null) {
-                for (int i = 0, size = filesAll.length; i < size; i++) {
-                    File file = filesAll[i];
-                    Map<String, String> mapFile = new HashMap<>(size);
-                    mapFile.put("index", String.valueOf(i + 1));
-                    mapFile.put("filename", file.getName());
-                    mapFile.put("projectid", id);
-                    mapFile.put("modifytime", DateUtil.date(file.lastModified()).toString());
-                    mapFile.put("filesize", FileUtil.readableFileSize(file.length()));
-                    listFile.add(mapFile);
-                }
+            if (filesAll == null) {
+                return JsonMessage.getString(500, "目录是空");
             }
-            JSONArray arrayFile = (JSONArray) JSONArray.toJSON(listFile);
+            int size = filesAll.length;
+            JSONArray arrayFile = new JSONArray(size);
+            for (int i = 0; i < size; i++) {
+                JSONObject jsonObject = new JSONObject(6);
+                File file = filesAll[i];
+                jsonObject.put("index", String.valueOf(i + 1));
+                jsonObject.put("filename", file.getName());
+                jsonObject.put("projectid", id);
+                jsonObject.put("modifytime", DateUtil.date(file.lastModified()).toString());
+                jsonObject.put("filesize", FileUtil.readableFileSize(file.length()));
+                arrayFile.add(jsonObject);
+            }
+            arrayFile.sort((o1, o2) -> {
+                JSONObject jsonObject1 = (JSONObject) o1;
+                JSONObject jsonObject2 = (JSONObject) o2;
+                return jsonObject1.getString("filename").compareTo(jsonObject2.getString("filename"));
+            });
             return PageUtil.getPaginate(200, "查询成功", arrayFile);
         } catch (IOException e) {
             DefaultSystemLog.LOG().error(e.getMessage(), e);

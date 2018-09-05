@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Aspect
 @Component
 public class WebLog {
-    private static final ThreadLocal<Boolean> isLog = new ThreadLocal<>();
+    private static final ThreadLocal<Boolean> IS_LOG = new ThreadLocal<>();
 
     @Pointcut("execution(public * cn.jiangzeyin.controller..*.*(..))")
     public void webLog() {
@@ -27,7 +27,7 @@ public class WebLog {
     @Before("webLog()")
     public void doBefore(JoinPoint joinPoint) throws Throwable {
         // 接收到请求，记录请求内容
-        isLog.set(true);
+        IS_LOG.set(true);
         Signature signature = joinPoint.getSignature();
         if (signature instanceof MethodSignature) {
             MethodSignature methodSignature = (MethodSignature) signature;
@@ -35,7 +35,7 @@ public class WebLog {
             if (responseBody == null) {
                 RestController restController = joinPoint.getTarget().getClass().getAnnotation(RestController.class);
                 if (restController == null) {
-                    isLog.set(false);
+                    IS_LOG.set(false);
                 }
             }
         }
@@ -44,12 +44,14 @@ public class WebLog {
     @AfterReturning(returning = "ret", pointcut = "webLog()")
     public void doAfterReturning(Object ret) throws Throwable {
         // 处理完请求，返回内容
-        Boolean isLog_ = isLog.get();
-        if (isLog_ != null && !isLog_)
+        Boolean isLog_ = IS_LOG.get();
+        if (isLog_ != null && !isLog_) {
             return;
-        if (ret == null)
+        }
+        if (ret == null) {
             return;
-        //BaseInterceptor.getNowUserName() +
+        }
         DefaultSystemLog.LOG().info(" :" + ret.toString());
+        IS_LOG.remove();
     }
 }
