@@ -31,7 +31,7 @@ public class IndexControl extends AbstractBaseControl {
      *
      * @return
      */
-    @RequestMapping(value = "index", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
+    @RequestMapping(value = {"index", "", "index.html", "/"}, method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
     public String index() {
         return "index";
     }
