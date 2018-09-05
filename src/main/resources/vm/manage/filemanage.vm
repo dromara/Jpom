@@ -1,33 +1,181 @@
 <!DOCTYPE html>
 <html>
 
-	<head>
-		<meta charset="utf-8">
-		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-		<meta http-equiv="X-UA-Compatible" content="IE=edge">
-		<meta content="width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1,user-scalable=no" name="viewport">
-		<meta name="apple-mobile-web-app-capable" content="yes">
-		<meta name="apple-mobile-web-app-status-bar-style" content="black">
-		<title>项目管理系统</title>
-		<link rel="stylesheet" href="//cdn.90so.net/layui/2.4.3/css/layui.css" media="all">
-		<link rel="stylesheet" href="/static/css/manage/filemanage.css" media="all">
-	</head>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta content="width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1,user-scalable=no" name="viewport">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <title>项目管理系统</title>
+    <link rel="stylesheet" href="//cdn.90so.net/layui/2.4.3/css/layui.css" media="all">
+    <style>
+        body {
+            padding: 10px 10px 0px 10px;
+        }
 
-	<body>
-		<div class="layui-row">
-			<button id="uploadFile" class="layui-btn layui-btn-sm"><i class="layui-icon">&#xe67c;</i>上传文件</button>
-			<button id="refresh" class="layui-btn layui-btn-sm">刷新</button>
-            <button id="clear" class="layui-btn layui-btn-sm">清空文件</button>
-		</div>
-		<table class="layui-table" id="tab_file" lay-filter="tab_file" style="margin: 0;"></table>
-	</body>
-	<script type="text/javascript" src="//cdn.90so.net/layui/2.4.3/layui.js"></script>
-	<script type="text/javascript" src="/static/js/manage/filemanage.js"></script>
+        .div-uploadfiles {
+            display: none;
+            width: 100%;
+            margin: 10px 0;
+        }
+
+        .div-uploadfiles .layui-inline {
+            width: calc(50% - 5px);
+            margin-right: 0px;
+        }
+    </style>
+</head>
+
+<body>
+<div class="layui-row">
+    <button id="uploadFile" class="layui-btn layui-btn-sm"><i class="layui-icon">&#xe67c;</i>上传文件</button>
+    <button id="refresh" class="layui-btn layui-btn-sm">刷新</button>
+    <button id="clear" class="layui-btn layui-btn-sm">清空文件</button>
+    <button id="export" class="layui-btn layui-btn-sm">导出日志</button>
+</div>
+<table class="layui-table" id="tab_file" lay-filter="tab_file" style="margin: 0;"></table>
+</body>
+<script type="text/javascript" src="//cdn.90so.net/layui/2.4.3/layui.js"></script>
 ##	删除按钮
-	<script type="text/html" id="bar_projects">
-		<a href="javascript:;" class="layui-btn layui-btn-sm layui-btn-danger" lay-event="delete">删除</a>
-	</script>
-	<script type="text/javascript">
-		var id = '$id';
-	</script>
+<script type="text/html" id="bar_projects">
+    <a href="javascript:;" class="layui-btn layui-btn-sm layui-btn-danger" lay-event="delete">删除</a>
+</script>
+<script type="text/javascript">
+    var id = '$id';
+    layui.use(['layer', 'element', 'table', 'form', 'upload'], function () {
+        var $ = layui.$;
+        var table = layui.table;
+        var form = layui.form;
+        var layer = layui.layer;
+        var upload = layui.upload;
+
+        table.render({
+            id: 'table_file',
+            elem: '#tab_file',
+            url: '/file/getFileList',
+            method: 'post',
+            height: 'full-52',
+            even: true,
+            where: {
+                id: id
+            },
+            cols: [[
+                {field: 'index', title: '编号', width: '10%'},
+                {field: 'filename', title: '文件名称', width: '30%'},
+                {field: 'modifytime', title: '修改时间', width: '15%'},
+                {field: 'filesize', title: '文件大小', width: '15%'},
+                {field: 'op', title: '操作', toolbar: '#bar_projects'}
+            ]],
+            loading: true,
+            response: {
+                statusCode: 200
+            }
+        });
+
+        var uploadInst = upload.render({
+            elem: '#uploadFile',
+            accept: 'file',
+            data: {
+                id: id
+            },
+            multiple: true,
+            url: '/file/upload',
+            before: function () {
+                layer.load(1, {
+                    shade: [0.5, '#fff'] //0.1透明度的白色背景
+                });
+            },
+            allDone: function (obj) {
+                layer.msg(JSON.stringify(obj));
+                setTimeout(function () {
+                    table.reload('table_file', {height: 'full-52'});
+                    layer.closeAll();
+                }, 2000);
+            },
+            done: function (res, index, upload) {
+                //layer.msg('success');
+            },
+            error: function () {
+                layer.msg('fail');
+            }
+        });
+
+        // 点击'上传文件'事件
+        $('#refresh').on('click', function () {
+            table.reload('table_file', {height: 'full-52'});
+        });
+
+        $('#export').on('click', function () {
+            location.href = "export.html?id=" + id;
+        });
+
+        // 点击'上传文件'事件
+        $('#clear').on('click', function () {
+            layer.confirm('确定清空此项目文件吗？',
+                    {title: '系统提示'},
+                    function (index) {
+                        layer.close(index);
+                        $.ajax({
+                            url: '/file/clear',
+                            type: 'POST',
+                            dataType: 'json',
+                            data: {id: id},
+                            success: function (data) {
+                                if (200 === data.code) {
+                                    layer.msg(data.msg);
+                                    // 刷新项目列表
+                                    table.reload('table_file', {height: 'full-52'});
+                                } else {
+                                    layer.msg(data.msg);
+                                }
+                            },
+                            error: function (err) {
+                                layer.msg('删除失败！');
+                            }
+                        });
+                    });
+        });
+
+
+        // 表格工具条事件
+        table.on('tool(tab_file)', function (obj) {
+            var data = obj.data;
+            var event = obj.event;
+            if ('delete' === event) {
+                // 删除文件
+                deleteFile(data);
+            }
+        });
+
+        // 删除文件
+        function deleteFile(data) {
+            layer.confirm('确定删除文件 ' + data.filename + '？', {title: '系统提示'}, function (index) {
+                layer.close(index);
+                $.ajax({
+                    url: '/file/deleteFile',
+                    type: 'POST',
+                    dataType: 'json',
+                    data: {
+                        id: data.projectid,
+                        filename: data.filename
+                    },
+                    success: function (data) {
+                        if (200 === data.code) {
+                            layer.msg('删除成功！');
+                            // 刷新项目列表
+                            table.reload('table_file', {height: 'full-52'});
+                        } else {
+                            layer.msg(data.msg);
+                        }
+                    },
+                    error: function (err) {
+                        layer.msg('删除失败！');
+                    }
+                });
+            });
+        }
+    });
+</script>
 </html>

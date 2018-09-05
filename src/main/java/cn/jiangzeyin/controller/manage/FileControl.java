@@ -3,6 +3,7 @@ package cn.jiangzeyin.controller.manage;
 
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.util.CharsetUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
@@ -21,9 +22,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import javax.servlet.http.HttpServletResponse;
+import java.io.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -75,7 +75,6 @@ public class FileControl extends AbstractBaseControl {
     @ResponseBody
     public String saveRunBoot(String content) {
         File file = new File(SpringUtil.getEnvironment().getProperty("command.conf"));
-
         if (!file.exists()) {
             return JsonMessage.getString(500, "启动文件不存在");
         }
@@ -114,20 +113,23 @@ public class FileControl extends AbstractBaseControl {
             }
             int size = filesAll.length;
             JSONArray arrayFile = new JSONArray(size);
-            for (int i = 0; i < size; i++) {
+            for (File aFilesAll : filesAll) {
                 JSONObject jsonObject = new JSONObject(6);
-                File file = filesAll[i];
-                jsonObject.put("index", String.valueOf(i + 1));
-                jsonObject.put("filename", file.getName());
+                jsonObject.put("filename", aFilesAll.getName());
                 jsonObject.put("projectid", id);
-                jsonObject.put("modifytime", DateUtil.date(file.lastModified()).toString());
-                jsonObject.put("filesize", FileUtil.readableFileSize(file.length()));
+                jsonObject.put("modifytime", DateUtil.date(aFilesAll.lastModified()).toString());
+                jsonObject.put("filesize", FileUtil.readableFileSize(aFilesAll.length()));
                 arrayFile.add(jsonObject);
             }
             arrayFile.sort((o1, o2) -> {
                 JSONObject jsonObject1 = (JSONObject) o1;
                 JSONObject jsonObject2 = (JSONObject) o2;
                 return jsonObject1.getString("filename").compareTo(jsonObject2.getString("filename"));
+            });
+            final int[] i = {0};
+            arrayFile.forEach(o -> {
+                JSONObject jsonObject = (JSONObject) o;
+                jsonObject.put("index", ++i[0]);
             });
             return PageUtil.getPaginate(200, "查询成功", arrayFile);
         } catch (IOException e) {
@@ -139,7 +141,7 @@ public class FileControl extends AbstractBaseControl {
     /**
      * 上传文件
      *
-     * @return
+     * @return json
      */
     @RequestMapping(value = "upload")
     @ResponseBody
@@ -150,7 +152,7 @@ public class FileControl extends AbstractBaseControl {
             ProjectInfoModel pim = manageService.getProjectInfo(id);
             for (MultipartFile file : files) {
                 if (null != file) {
-                    File saveFile = new File(pim.getLib() + "/" + file.getOriginalFilename());
+                    File saveFile = new File(pim.getLib(), file.getOriginalFilename());
                     FileUtil.writeFromStream(file.getInputStream(), saveFile);
                 }
             }
@@ -159,6 +161,32 @@ public class FileControl extends AbstractBaseControl {
             DefaultSystemLog.ERROR().error(e.getMessage(), e);
             return JsonMessage.getString(500, "上传失败:" + e.getMessage());
         }
+    }
+
+    @RequestMapping(value = "export.html", method = RequestMethod.GET)
+    @ResponseBody
+    public String export(String id) {
+        try {
+            ProjectInfoModel pim = manageService.getProjectInfo(id);
+            File file = new File(pim.getLog());
+            if (!file.exists()) {
+                return JsonMessage.getString(400, "没有日志文件:" + file.getPath());
+            }
+            HttpServletResponse response = getResponse();
+            // 设置强制下载不打开
+            response.setContentType("application/force-download");
+            // 设置文件名
+            response.addHeader("Content-Disposition", "attachment;fileName=" + file.getName());
+            OutputStream os = response.getOutputStream();
+            byte[] bytes = IoUtil.readBytes(new FileInputStream(file));
+            IoUtil.write(os, false, bytes);
+            os.flush();
+            os.close();
+            return "ok";
+        } catch (IOException e) {
+            DefaultSystemLog.ERROR().error("删除文件异常", e);
+        }
+        return JsonMessage.getString(500, "导出失败");
     }
 
     @RequestMapping(value = "clear")
@@ -188,11 +216,9 @@ public class FileControl extends AbstractBaseControl {
     public String deleteFile(String id, String filename) {
         try {
             ProjectInfoModel pim = manageService.getProjectInfo(id);
-            File file = new File(pim.getLib() + "/" + filename);
-            if (file.exists()) {
-                if (file.delete()) {
-                    return JsonMessage.getString(200, "删除成功");
-                }
+            File file = new File(pim.getLib(), filename);
+            if (file.exists() && file.delete()) {
+                return JsonMessage.getString(200, "删除成功");
             } else {
                 return JsonMessage.getString(404, "文件不存在");
             }
@@ -201,5 +227,4 @@ public class FileControl extends AbstractBaseControl {
         }
         return JsonMessage.getString(500, "删除失败");
     }
-
 }

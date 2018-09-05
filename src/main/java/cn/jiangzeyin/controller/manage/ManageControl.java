@@ -69,14 +69,12 @@ public class ManageControl extends AbstractBaseControl {
         try {
             // 查询数据
             JSONObject json = manageService.getAllProjectInfo();
-
             // 转换为数据
             JSONArray array = new JSONArray();
             Set<String> setKey = json.keySet();
             for (String asetKey : setKey) {
                 array.add(json.get(asetKey));
             }
-
             return PageUtil.getPaginate(200, "查询成功！", array);
         } catch (IOException e) {
             DefaultSystemLog.LOG().error(e.getMessage(), e);
