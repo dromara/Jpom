@@ -27,6 +27,5 @@ public class BootOnLineApplication {
         ApplicationBuilder.createBuilder(BootOnLineApplication.class)
                 .addHttpMessageConverter(new StringHttpMessageConverter(Charset.forName("UTF-8")))
                 .run(args);
-
     }
 }

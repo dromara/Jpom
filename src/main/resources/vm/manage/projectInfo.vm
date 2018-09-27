@@ -77,6 +77,12 @@
                     <input type="text" name="token" placeholder="对应接口的token，可不填" class="layui-input">
                 </div>
             </div>
+            <div class="layui-inline">
+                <label class="layui-form-label">Jvm参数</label>
+                <div class="layui-input-block">
+                    <input type="text" name="jvm" placeholder="jvm参数" class="layui-input">
+                </div>
+            </div>
         </div>
         <input type="hidden" lay-submit lay-filter="submitProject" id="project_submit">
     </form>

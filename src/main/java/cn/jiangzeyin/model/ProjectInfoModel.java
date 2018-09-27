@@ -6,9 +6,18 @@ public class ProjectInfoModel {
     private String mainClass;
     private String lib;
     private String log;
+    private String jvm;
     private int port;
     private String token;
     private String createTime;
+
+    public String getJvm() {
+        return jvm;
+    }
+
+    public void setJvm(String jvm) {
+        this.jvm = jvm;
+    }
 
     public String getId() {
         return id;
@@ -72,5 +81,20 @@ public class ProjectInfoModel {
 
     public void setCreateTime(String createTime) {
         this.createTime = createTime;
+    }
+
+    @Override
+    public String toString() {
+        return "ProjectInfoModel{" +
+                "id='" + id + '\'' +
+                ", tag='" + tag + '\'' +
+                ", mainClass='" + mainClass + '\'' +
+                ", lib='" + lib + '\'' +
+                ", log='" + log + '\'' +
+                ", jvm='" + jvm + '\'' +
+                ", port=" + port +
+                ", token='" + token + '\'' +
+                ", createTime='" + createTime + '\'' +
+                '}';
     }
 }
