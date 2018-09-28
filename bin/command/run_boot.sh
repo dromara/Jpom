@@ -71,7 +71,7 @@ status()
 #  备份日志
 backupLog()
 {
-   Log = $1
+   Log=$0
    LogBack=$Log"_back/"
    echo $Log
    if [ -f $Log ]; then
