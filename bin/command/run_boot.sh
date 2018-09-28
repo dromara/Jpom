@@ -28,30 +28,36 @@ ARGS=${array[1]}
 JVM=${JVM:1}
 ARGS=${ARGS:1}
 
+
+
 # See how we were called.
 start()
 {
-    backupLog $Log;
+   
+   pid=`getPid`
+   if [ "$pid" != "" ]; then
+       echo "Please do not repeat the call"
+       status
+    else
+       backupLog $Log;
 
-    echo "JVM:$JVM"
-    echo "args:$ARGS"
-    nohup java $JVM -Dappliction=$Tag -Djava.ext.dirs=$Lib":${JAVA_HOME}/jre/lib/ext" $MainClass $ARGS > $Log 2>&1 & sleep 1s & status
+       echo "JVM:$JVM"
+       echo "args:$ARGS"
+       nohup java $JVM -Dappliction=$Tag -Djava.ext.dirs=$Lib":${JAVA_HOME}/jre/lib/ext" $MainClass $ARGS > $Log 2>&1 & sleep 1s & status
+    fi
 }
 
+# 关闭程序
 stop()
 {
-    pid=$(getPid)
-    if [ "$pid" != "" ]; then
+    pid=`getPid`
+    if [ "$pid" != ""  ]; then
 
        if [ "$WebClose" != "no" ]; then
          echo $WebClose
          wget "$WebClose"
        fi
-
-       pid=$(getPid)
-       if [ "$pid" != "" ]; then
-          kill -9 "$pid"
-       fi
+       kill -9 "$pid"
     fi
     status
 }
@@ -59,8 +65,7 @@ stop()
 # 运行状态
 status()
 {
-    pid=$(getPid)
-    
+    pid=`getPid`
     if [ "$pid" != "" ]; then
         echo "running:$pid"
     else
@@ -85,10 +90,11 @@ backupLog()
    fi
 }
 
+#获取进程
 getPid()
 {
-  pid=$(ps -ef | grep "Dappliction=$Tag" | grep -v 'grep' | awk '{printf $2 " "}')
-  return pid
+  pid=$(ps -ef | grep "Dappliction=$Tag" | grep -v 'grep' | awk '{printf $2}')
+  echo $pid;
 }
 
 usage()
@@ -123,3 +129,4 @@ case "$1" in
 esac
 
 exit $RETVAL
+
