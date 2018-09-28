@@ -2,14 +2,8 @@
 <html>
 
 <head>
-    <meta charset="utf-8">
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta content="width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1,user-scalable=no" name="viewport">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    #parse("./common/head.vm")
     <title>项目管理系统</title>
-    <link rel="stylesheet" href="//cdn.90so.net/layui/2.4.3/css/layui.css" media="all">
     <link rel="stylesheet" href="/static/css/manage/console.css" media="all">
 </head>
 
@@ -27,7 +21,6 @@
     <div class="terminal"></div>
 </div>
 </body>
-<script type="text/javascript" src="//cdn.90so.net/layui/2.4.3/layui.js"></script>
 <script type="text/javascript">
     var projectInfo = $projectInfo;
     var userInfo = '$userInfo';
