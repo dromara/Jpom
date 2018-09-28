@@ -42,8 +42,15 @@ public class FileControl extends AbstractBaseControl {
      * @return
      */
     @RequestMapping(value = "filemanage", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
-    public String fileManage(String id) {
+    public String fileManage(String id) throws IOException {
         setAttribute("id", id);
+        String logSize = null;
+        ProjectInfoModel pim = manageService.getProjectInfo(id);
+        File file = new File(pim.getLog());
+        if (file.exists()) {
+            logSize = FileUtil.readableFileSize(file);
+        }
+        setAttribute("logSize", logSize);
         return "manage/filemanage";
     }
 
