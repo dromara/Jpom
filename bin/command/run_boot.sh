@@ -21,28 +21,25 @@ OLD_IFS="$IFS"
 IFS="]"
 array=($ARGS)
 IFS="$OLD_IFS"
-
+#
 JVM=${array[0]}
 ARGS=${array[1]}
 # 截取
 JVM=${JVM:1}
 ARGS=${ARGS:1}
 
-
-
-# See how we were called.
+# 启动程序
 start()
 {
-   
    pid=`getPid`
    if [ "$pid" != "" ]; then
        echo "Please do not repeat the call"
        status
     else
        backupLog $Log;
-
        echo "JVM:$JVM"
        echo "args:$ARGS"
+       # java run
        nohup java $JVM -Dappliction=$Tag -Djava.ext.dirs=$Lib":${JAVA_HOME}/jre/lib/ext" $MainClass $ARGS > $Log 2>&1 & sleep 1s & status
     fi
 }
@@ -97,6 +94,7 @@ getPid()
   echo $pid;
 }
 
+#提示用法
 usage()
 {
    echo "Usage: $0 {start|stop|restart|status} tag mainclass lib log WebClose JVM args"
