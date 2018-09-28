@@ -74,6 +74,10 @@ status()
 backupLog()
 {
    Log=$1
+   if [ "$Log" = "" ]; then
+     echo "logPath empty"
+     return 3;
+   fi
    LogBack=$Log"_back/"
    echo $Log
    if [ -f $Log ]; then
