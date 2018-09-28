@@ -4,17 +4,34 @@ Tag="$2"
 MainClass="$3"
 Lib="$4"
 Log="$5"
-Port="$6"
-#Token="$7"
+JVM="$7"
+
+ARGS=""
+
+for ((i=8; i<=$#; i++))
+do
+    ARGS=${ARGS}" "${!i}
+done
+
+
+LogBack=$Log"../log/"
 
 RETVAL="0"
 # See how we were called.
 start()
 {
+    echo $Log
+
     if [ ! -f $Log ]; then
+        if [ ! -d $LogBack ];then
+            mkdir $LogBack
+        fi
+        cur_dateTime="`date +%Y-%m-%d_%H:%M:%S`.log"
+        mv $Log  $LogBack$cur_dateTime
+        echo "mv to $LogBack$cur_dateTime"
         touch $Log
     fi
-    nohup java -Dappliction=$Tag -Djava.ext.dirs=$Lib":${JAVA_HOME}/jre/lib/ext" $MainClass > $Log 2>&1 & sleep 1s & status
+    nohup java $JVM -Dappliction=$Tag -Djava.ext.dirs=$Lib":${JAVA_HOME}/jre/lib/ext" $MainClass $ARGS > $Log 2>&1 & sleep 1s & status
 }
 
 stop()
@@ -22,13 +39,14 @@ stop()
     pid=$(ps -ef | grep "Dappliction=$Tag" | grep -v 'grep' | awk '{printf $2 " "}')
     if [ "$pid" != "" ]; then
 
-       # wget http://127.0.0.1:$Port/sys/shutdown?token=$Token
+       if ["$6"!="no"]; then
+         wget "$6"
+       fi
 
-        pid=$(ps -ef | grep "Dappliction=$Tag" | grep -v 'grep' | awk '{printf $2 " "}')
-        if [ "$pid" != "" ]; then
-
-            kill -9 "$pid"
-        fi
+       pid=$(ps -ef | grep "Dappliction=$Tag" | grep -v 'grep' | awk '{printf $2 " "}')
+       if [ "$pid" != "" ]; then
+          kill -9 "$pid"
+       fi
     fi
     status
 }
@@ -48,7 +66,7 @@ status()
 
 usage()
 {
-   echo "Usage: $0 {start|stop|restart|status} tag mainclass lib log port token"
+   echo "Usage: $0 {start|stop|restart|status} tag mainclass lib log token JVM args"
    RETVAL="2"
 }
 

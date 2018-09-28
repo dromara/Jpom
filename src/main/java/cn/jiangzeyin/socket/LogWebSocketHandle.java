@@ -88,21 +88,13 @@ public class LogWebSocketHandle implements TailLogThread.Evn {
         JSONObject json = JSONObject.parseObject(message);
         JSONObject projectInfo = json.getJSONObject("projectInfo");
 
-        String str_result = "";
-
-        // 项目启动信息
-        String tag = projectInfo.getString("tag");
-        String mainClass = projectInfo.getString("mainClass");
-        String lib = projectInfo.getString("lib");
-        String log = projectInfo.getString("log");
-        int port = projectInfo.getInteger("port");
-        String token = projectInfo.getString("token");
+        String str_result;
 
         // 执行相应命令
         switch (json.getString("op")) {
             case "start":
                 // 启动项目
-                str_result = execCommand(session, "start", tag, mainClass, lib, log, port, token);
+                str_result = execCommand(session, "start", projectInfo);
                 if (str_result.startsWith("running")) {
                     sendMsg(session, JsonMessage.getString(200, "启动成功", json));
                 } else {
@@ -112,12 +104,12 @@ public class LogWebSocketHandle implements TailLogThread.Evn {
 
             case "restart":
                 // 重启项目
-                execCommand(session, "restart", tag, mainClass, lib, log, port, token);
+                execCommand(session, "restart", projectInfo);
                 break;
 
             case "stop":
                 // 停止项目
-                str_result = execCommand(session, "stop", tag, mainClass, lib, log, port, token);
+                str_result = execCommand(session, "stop", projectInfo);
                 if (str_result.startsWith("stopped")) {
                     sendMsg(session, JsonMessage.getString(200, "已停止", json));
                     thread.stop();
@@ -128,7 +120,7 @@ public class LogWebSocketHandle implements TailLogThread.Evn {
 
             case "status":
                 // 获取项目状态
-                str_result = execCommand(session, "status", tag, mainClass, lib, log, port, token);
+                str_result = execCommand(session, "status", projectInfo);
                 json.put("result", str_result);
                 if (str_result.startsWith("running")) {
                     sendMsg(session, JsonMessage.getString(200, "运行中", json));
@@ -139,6 +131,7 @@ public class LogWebSocketHandle implements TailLogThread.Evn {
                 break;
             case "showlog":
                 // 进入管理页面后需要实时加载日志
+                String log = projectInfo.getString("log");
                 try {
                     // 执行tail -f命令
                     process = Runtime.getRuntime().exec(String.format("tail -f %s", log));
@@ -163,21 +156,28 @@ public class LogWebSocketHandle implements TailLogThread.Evn {
     /**
      * 执行shell命令
      *
-     * @param session   用于输出的websocket会话
-     * @param op        执行的操作
-     * @param tag
-     * @param mainClass
-     * @param lib
-     * @param log
-     * @param port
-     * @param token
+     * @param session     用于输出的websocket会话
+     * @param op          执行的操作
+     * @param projectInfo 项目信息
      */
-    private String execCommand(Session session, String op, String tag, String mainClass, String lib, String log, int port, String token) {
+    private String execCommand(Session session, String op, JSONObject projectInfo) {
         InputStream is;
         String result = "error";
+        String commandPath = SpringUtil.getEnvironment().getProperty("command.conf");
+
+
+        // 项目启动信息
+        String tag = projectInfo.getString("tag");
+        String mainClass = projectInfo.getString("mainClass");
+        String lib = projectInfo.getString("lib");
+        String log = projectInfo.getString("log");
+
+        String token = projectInfo.getString("token");
+        String jvm = projectInfo.getString("jvm");
+        String args = projectInfo.getString("args");
         try {
             // 执行命令
-            String command = String.format("%s %s %s %s %s %s %s", SpringUtil.getEnvironment().getProperty("command.conf"), op, tag, mainClass, lib, log, port);
+            String command = String.format("%s %s %s %s %s %s %s %s %s", commandPath, op, tag, mainClass, lib, log, token, jvm, args);
             DefaultSystemLog.LOG().info(command);
             Process process = Runtime.getRuntime().exec(command);
             is = process.getInputStream();
