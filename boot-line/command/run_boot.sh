@@ -1,4 +1,5 @@
-﻿#!/bin/bash
+#!/bin/bash
+
 
 # description: Auto-starts boot
 Tag="$2"
@@ -11,8 +12,12 @@ ARGS=""
 
 for ((i=8; i<=$#; i++))
 do
-    ARGS=${ARGS}" "${!i}
+    if [ "$ARGS" != "" ]; then
+       ARGS=${ARGS}" "   
+    fi
+    ARGS=${ARGS}${!i}
 done
+
 
 
 LogBack=$Log"/../log/"
@@ -32,6 +37,8 @@ start()
         echo "mv to $LogBack$cur_dateTime"
         touch $Log
     fi
+    echo "$JVM"
+    echo "$ARGS"
     nohup java $JVM -Dappliction=$Tag -Djava.ext.dirs=$Lib":${JAVA_HOME}/jre/lib/ext" $MainClass $ARGS > $Log 2>&1 & sleep 1s & status
 }
 
