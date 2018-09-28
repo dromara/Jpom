@@ -248,8 +248,8 @@ public class LogWebSocketHandle implements TailLogThread.Evn {
     /**
      * 发送消息
      *
-     * @param session
-     * @param msg
+     * @param session 回话
+     * @param msg     消息
      */
     private synchronized void sendMsg(Session session, String msg) {
         try {
@@ -259,7 +259,6 @@ public class LogWebSocketHandle implements TailLogThread.Evn {
             DefaultSystemLog.ERROR().error("websocket发送信息异常", e);
         }
     }
-
 
     @OnError
     public void onError(Session session, Throwable thr) {
