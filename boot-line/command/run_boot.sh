@@ -1,4 +1,5 @@
-﻿#!/usr/bin/env bash
+﻿#!/bin/bash
+
 # description: Auto-starts boot
 Tag="$2"
 MainClass="$3"
@@ -14,7 +15,7 @@ do
 done
 
 
-LogBack=$Log"../log/"
+LogBack=$Log"/../log/"
 
 RETVAL="0"
 # See how we were called.

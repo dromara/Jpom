@@ -2,6 +2,7 @@ package cn.jiangzeyin;
 
 import cn.jiangzeyin.common.ApplicationBuilder;
 import cn.jiangzeyin.common.EnableCommonBoot;
+import cn.jiangzeyin.common.spring.SpringUtil;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.web.servlet.ServletComponentScan;
 import org.springframework.http.converter.StringHttpMessageConverter;
@@ -29,5 +30,6 @@ public class BootOnLineApplication {
         ApplicationBuilder.createBuilder(BootOnLineApplication.class)
                 .addHttpMessageConverter(new StringHttpMessageConverter(Charset.forName("UTF-8")))
                 .run(args);
+        System.out.println(SpringUtil.getEnvironment().getProperty("spring.application.name"));
     }
 }

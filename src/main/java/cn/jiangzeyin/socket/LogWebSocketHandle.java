@@ -111,7 +111,7 @@ public class LogWebSocketHandle implements TailLogThread.Evn {
             case "start":
                 // 启动项目
                 str_result = execCommand(session, "start", projectInfoModel);
-                if (str_result.startsWith("running")) {
+                if (str_result.contains("running")) {
                     sendMsg(session, JsonMessage.getString(200, "启动成功", json));
                 } else {
                     sendMsg(session, JsonMessage.getString(200, str_result, json));
@@ -194,10 +194,15 @@ public class LogWebSocketHandle implements TailLogThread.Evn {
             String command = String.format("%s %s %s %s %s %s %s %s %s", commandPath, op, tag, mainClass, lib, log, token, jvm, args);
             DefaultSystemLog.LOG().info(command);
             Process process = Runtime.getRuntime().exec(command);
-            is = process.getInputStream();
-            process.waitFor();
+            int wait = process.waitFor();
+            if (wait == 0) {
+                is = process.getInputStream();
+            } else {
+                is = process.getErrorStream();
+            }
             result = IoUtil.read(is, CharsetUtil.CHARSET_UTF_8);
             is.close();
+            process.destroy();
         } catch (IOException | InterruptedException e) {
             DefaultSystemLog.ERROR().error("执行命令异常", e);
             sendMsg(session, "执行命令异常：" + ExceptionUtil.stacktraceToString(e));
@@ -250,25 +255,24 @@ public class LogWebSocketHandle implements TailLogThread.Evn {
     public void onError() {
         onClose();
     }
-//
-//    public static void main(String[] args) {
-//        try{
-//            String command = "/etc/nginx/boot/command/run_boot.sh status Demo1Application com.demo.demo1.Demo1Application /root/桌面/TestJar/lib /root/桌面/TestJar/run.log 8081";
-////            String command = "ps -ef";
-//            Process process = Runtime.getRuntime().exec(command);
-//            InputStream is = process.getInputStream();
-//            process.waitFor();
-//            byte[] arr_bytes = new byte[51200];
-//            int len;
-//            StringBuffer sb_temp = new StringBuffer();
-//            while (-1 < (len = is.read(arr_bytes))) {
-//                sb_temp.append(new String(arr_bytes, 0, len, "UTF-8"));
-//            }
-//            is.close();
-//            System.out.println(sb_temp);
-//        } catch(Exception e) {
-//            e.printStackTrace();
-//        }
-//
-//    }
+
+    public static void main(String[] args) {
+        try {
+            String command = "/boot-line/command/run_boot.sh status Testteststesttst cn.jiangzeyin.BootOnLineApplication /boot-line/boot/online/lib /boot-line/boot/online/run.log no";
+//            String command = "ps -ef";
+            Process process = Runtime.getRuntime().exec(new String[]{"/bin/sh", "-c", command});
+            InputStream is;
+            int wait = process.waitFor();
+            if (wait == 0) {
+                is = process.getInputStream();
+            } else {
+                is = process.getErrorStream();
+            }
+            System.out.println(IoUtil.read(is, CharsetUtil.CHARSET_UTF_8));
+            is.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
 }
