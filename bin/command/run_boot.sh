@@ -29,21 +29,11 @@ ARGS=${array[1]}
 JVM=${JVM:1}
 ARGS=${ARGS:1}
 
-RETVAL="0"
 # See how we were called.
 start()
 {
-    echo $Log
+    backupLog $Log
 
-    if [ -f $Log ]; then
-        if [ ! -d $LogBack ]; then
-            mkdir $LogBack
-        fi
-        cur_dateTime="`date +%Y-%m-%d_%H:%M:%S`.log"
-        mv $Log  $LogBack$cur_dateTime
-        echo "mv to $LogBack$cur_dateTime"
-        touch $Log
-    fi
     echo "JVM:$JVM"
     echo "args:$ARGS"
     nohup java $JVM -Dappliction=$Tag -Djava.ext.dirs=$Lib":${JAVA_HOME}/jre/lib/ext" $MainClass $ARGS > $Log 2>&1 & sleep 1s & status
@@ -51,7 +41,7 @@ start()
 
 stop()
 {
-    pid=$(ps -ef | grep "Dappliction=$Tag" | grep -v 'grep' | awk '{printf $2 " "}')
+    pid=$(getPid)
     if [ "$pid" != "" ]; then
 
        if [ "$WebClose" != "no" ]; then
@@ -59,7 +49,7 @@ stop()
          wget "$WebClose"
        fi
 
-       pid=$(ps -ef | grep "Dappliction=$Tag" | grep -v 'grep' | awk '{printf $2 " "}')
+       pid=$(getPid)
        if [ "$pid" != "" ]; then
           kill -9 "$pid"
        fi
@@ -67,9 +57,10 @@ stop()
     status
 }
 
+# 运行状态
 status()
 {
-    pid=$(ps -ef | grep "Dappliction=$Tag" | grep -v 'grep' | awk '{printf $2 " "}')
+    pid=$(getPid)
     
     if [ "$pid" != "" ]; then
         echo "running:$pid"
@@ -78,11 +69,31 @@ status()
     fi
 }
 
+#  备份日志
+backupLog()
+{
+   Log = $1
+   echo $Log
+   if [ -f $Log ]; then
+        if [ ! -d $LogBack ]; then
+            mkdir $LogBack
+        fi
+        cur_dateTime="`date +%Y-%m-%d_%H:%M:%S`.log"
+        mv $Log  $LogBack$cur_dateTime
+        echo "mv to $LogBack$cur_dateTime"
+        touch $Log
+   fi
+}
 
+getPid()
+{
+  pid=$(ps -ef | grep "Dappliction=$Tag" | grep -v 'grep' | awk '{printf $2 " "}')
+  return pid
+}
 
 usage()
 {
-   echo "Usage: $0 {start|stop|restart|status} tag mainclass lib log WebClose JVM args"
+   echo "Usage: $0 {start|stop|restart|status|backupLog} tag mainclass lib log WebClose JVM args"
    RETVAL="2"
 }
 
@@ -99,11 +110,11 @@ case "$1" in
         stop
         start
         ;;
-    reload)
-        RETVAL="3"
-        ;;
     status)
         status
+        ;;
+    backupLog)
+        backupLog $2
         ;;
     *)
       usage
