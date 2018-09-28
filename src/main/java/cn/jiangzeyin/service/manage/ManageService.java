@@ -11,8 +11,10 @@ import java.io.IOException;
 public class ManageService extends BaseService {
 
     private static final String FILENAME = "project.json";
+
     /**
      * 查询所有项目信息
+     *
      * @return
      * @throws IOException
      */
@@ -22,6 +24,7 @@ public class ManageService extends BaseService {
 
     /**
      * 保存项目信息
+     *
      * @param projectInfo
      * @return
      */
@@ -33,6 +36,7 @@ public class ManageService extends BaseService {
 
     /**
      * 删除项目
+     *
      * @param id
      */
     public void deleteProject(String id) throws Exception {
@@ -41,6 +45,7 @@ public class ManageService extends BaseService {
 
     /**
      * 修改项目信息
+     *
      * @param projectInfo
      */
     public void updateProject(ProjectInfoModel projectInfo) throws Exception {
@@ -51,6 +56,7 @@ public class ManageService extends BaseService {
 
     /**
      * 根据id查询项目
+     *
      * @param id
      * @return
      */

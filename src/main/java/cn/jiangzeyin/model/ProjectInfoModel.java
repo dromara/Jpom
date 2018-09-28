@@ -1,5 +1,7 @@
 package cn.jiangzeyin.model;
 
+import com.alibaba.fastjson.JSONObject;
+
 public class ProjectInfoModel {
     private String id;
     private String tag;
@@ -86,16 +88,6 @@ public class ProjectInfoModel {
 
     @Override
     public String toString() {
-        return "ProjectInfoModel{" +
-                "id='" + id + '\'' +
-                ", tag='" + tag + '\'' +
-                ", mainClass='" + mainClass + '\'' +
-                ", lib='" + lib + '\'' +
-                ", log='" + log + '\'' +
-                ", jvm='" + jvm + '\'' +
-                ", token='" + token + '\'' +
-                ", createTime='" + createTime + '\'' +
-                ", args='" + args + '\'' +
-                '}';
+        return JSONObject.toJSONString(this);
     }
 }

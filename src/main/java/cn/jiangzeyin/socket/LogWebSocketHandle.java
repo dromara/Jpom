@@ -8,8 +8,10 @@ import cn.hutool.crypto.SecureUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.spring.SpringUtil;
+import cn.jiangzeyin.model.ProjectInfoModel;
 import cn.jiangzeyin.pool.ThreadPoolService;
 import cn.jiangzeyin.service.BaseService;
+import cn.jiangzeyin.service.manage.ManageService;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Component;
 
@@ -89,12 +91,26 @@ public class LogWebSocketHandle implements TailLogThread.Evn {
         JSONObject projectInfo = json.getJSONObject("projectInfo");
 
         String str_result;
+        String id = projectInfo.getString("id");
+
+        ManageService manageService = SpringUtil.getBean(ManageService.class);
+        ProjectInfoModel projectInfoModel = null;
+        try {
+            projectInfoModel = manageService.getProjectInfo(id);
+        } catch (IOException e) {
+            DefaultSystemLog.ERROR().error("获取异常", e);
+        }
+        if (projectInfoModel == null) {
+            sendMsg(session, "没有对应项目");
+            return;
+        }
+
 
         // 执行相应命令
         switch (json.getString("op")) {
             case "start":
                 // 启动项目
-                str_result = execCommand(session, "start", projectInfo);
+                str_result = execCommand(session, "start", projectInfoModel);
                 if (str_result.startsWith("running")) {
                     sendMsg(session, JsonMessage.getString(200, "启动成功", json));
                 } else {
@@ -104,12 +120,12 @@ public class LogWebSocketHandle implements TailLogThread.Evn {
 
             case "restart":
                 // 重启项目
-                execCommand(session, "restart", projectInfo);
+                execCommand(session, "restart", projectInfoModel);
                 break;
 
             case "stop":
                 // 停止项目
-                str_result = execCommand(session, "stop", projectInfo);
+                str_result = execCommand(session, "stop", projectInfoModel);
                 if (str_result.startsWith("stopped")) {
                     sendMsg(session, JsonMessage.getString(200, "已停止", json));
                     thread.stop();
@@ -120,7 +136,7 @@ public class LogWebSocketHandle implements TailLogThread.Evn {
 
             case "status":
                 // 获取项目状态
-                str_result = execCommand(session, "status", projectInfo);
+                str_result = execCommand(session, "status", projectInfoModel);
                 json.put("result", str_result);
                 if (str_result.startsWith("running")) {
                     sendMsg(session, JsonMessage.getString(200, "运行中", json));
@@ -131,7 +147,7 @@ public class LogWebSocketHandle implements TailLogThread.Evn {
                 break;
             case "showlog":
                 // 进入管理页面后需要实时加载日志
-                String log = projectInfo.getString("log");
+                String log = projectInfoModel.getLog();
                 try {
                     // 执行tail -f命令
                     process = Runtime.getRuntime().exec(String.format("tail -f %s", log));
@@ -156,25 +172,23 @@ public class LogWebSocketHandle implements TailLogThread.Evn {
     /**
      * 执行shell命令
      *
-     * @param session     用于输出的websocket会话
-     * @param op          执行的操作
-     * @param projectInfo 项目信息
+     * @param session          用于输出的websocket会话
+     * @param op               执行的操作
+     * @param projectInfoModel 项目信息
      */
-    private String execCommand(Session session, String op, JSONObject projectInfo) {
+    private String execCommand(Session session, String op, ProjectInfoModel projectInfoModel) {
         InputStream is;
         String result = "error";
         String commandPath = SpringUtil.getEnvironment().getProperty("command.conf");
 
-
         // 项目启动信息
-        String tag = projectInfo.getString("tag");
-        String mainClass = projectInfo.getString("mainClass");
-        String lib = projectInfo.getString("lib");
-        String log = projectInfo.getString("log");
-
-        String token = projectInfo.getString("token");
-        String jvm = projectInfo.getString("jvm");
-        String args = projectInfo.getString("args");
+        String tag = projectInfoModel.getTag();
+        String mainClass = projectInfoModel.getMainClass();
+        String lib = projectInfoModel.getLib();
+        String log = projectInfoModel.getLog();
+        String token = projectInfoModel.getToken();
+        String jvm = projectInfoModel.getJvm();
+        String args = projectInfoModel.getArgs();
         try {
             // 执行命令
             String command = String.format("%s %s %s %s %s %s %s %s %s", commandPath, op, tag, mainClass, lib, log, token, jvm, args);
