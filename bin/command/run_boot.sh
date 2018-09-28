@@ -31,7 +31,7 @@ ARGS=${ARGS:1}
 # See how we were called.
 start()
 {
-    backupLog $Log
+    backupLog $Log;
 
     echo "JVM:$JVM"
     echo "args:$ARGS"
@@ -71,7 +71,7 @@ status()
 #  备份日志
 backupLog()
 {
-   Log=$0
+   Log=$1
    LogBack=$Log"_back/"
    echo $Log
    if [ -f $Log ]; then
@@ -93,7 +93,8 @@ getPid()
 
 usage()
 {
-   echo "Usage: $0 {start|stop|restart|status|backupLog} tag mainclass lib log WebClose JVM args"
+   echo "Usage: $0 {start|stop|restart|status} tag mainclass lib log WebClose JVM args"
+   echo "Usage: $0 {backupLog} log"
    RETVAL="2"
 }
 
