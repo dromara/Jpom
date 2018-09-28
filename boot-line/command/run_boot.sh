@@ -1,13 +1,13 @@
 #!/bin/bash
 
-
 # description: Auto-starts boot
 Tag="$2"
 MainClass="$3"
 Lib="$4"
 Log="$5"
+LogBack=$Log"/../log/"
+WebClose="$6"
 JVM="$7"
-
 ARGS=""
 
 for ((i=8; i<=$#; i++))
@@ -17,10 +17,6 @@ do
     fi
     ARGS=${ARGS}${!i}
 done
-
-
-
-LogBack=$Log"/../log/"
 
 RETVAL="0"
 # See how we were called.
@@ -47,8 +43,9 @@ stop()
     pid=$(ps -ef | grep "Dappliction=$Tag" | grep -v 'grep' | awk '{printf $2 " "}')
     if [ "$pid" != "" ]; then
 
-       if ["$6"!="no"]; then
-         wget "$6"
+       if [ "$WebClose" != "no" ]; then
+         echo $WebClose
+         wget "$WebClose"
        fi
 
        pid=$(ps -ef | grep "Dappliction=$Tag" | grep -v 'grep' | awk '{printf $2 " "}')
@@ -74,7 +71,7 @@ status()
 
 usage()
 {
-   echo "Usage: $0 {start|stop|restart|status} tag mainclass lib log token JVM args"
+   echo "Usage: $0 {start|stop|restart|status} tag mainclass lib log WebClose JVM args"
    RETVAL="2"
 }
 
