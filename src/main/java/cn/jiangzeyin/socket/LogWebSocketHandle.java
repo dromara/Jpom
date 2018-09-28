@@ -104,33 +104,38 @@ public class LogWebSocketHandle implements TailLogThread.Evn {
             sendMsg(session, "没有对应项目");
             return;
         }
-
-
+        String op = json.getString("op");
+        JSONObject resultData = null;
         // 执行相应命令
-        switch (json.getString("op")) {
+        switch (op) {
             case "start":
                 // 启动项目
                 str_result = execCommand(session, "start", projectInfoModel);
                 if (str_result.contains("running")) {
-                    sendMsg(session, JsonMessage.getString(200, "启动成功", json));
+                    resultData = JsonMessage.toJson(200, "启动成功", json);
                 } else {
-                    sendMsg(session, JsonMessage.getString(200, str_result, json));
+                    resultData = JsonMessage.toJson(400, str_result, json);
                 }
                 break;
 
             case "restart":
                 // 重启项目
-                execCommand(session, "restart", projectInfoModel);
+                str_result = execCommand(session, "restart", projectInfoModel);
+                if (str_result.contains("running")) {
+                    resultData = JsonMessage.toJson(200, "重启成功", json);
+                } else {
+                    resultData = JsonMessage.toJson(400, str_result, json);
+                }
                 break;
 
             case "stop":
                 // 停止项目
                 str_result = execCommand(session, "stop", projectInfoModel);
                 if (str_result.contains("stopped")) {
-                    sendMsg(session, JsonMessage.getString(200, "已停止", json));
+                    resultData = JsonMessage.toJson(200, "已停止", json);
                     thread.stop();
                 } else {
-                    sendMsg(session, JsonMessage.getString(200, str_result, json));
+                    resultData = JsonMessage.toJson(500, str_result, json);
                 }
                 break;
 
@@ -139,32 +144,40 @@ public class LogWebSocketHandle implements TailLogThread.Evn {
                 str_result = execCommand(session, "status", projectInfoModel);
                 json.put("result", str_result);
                 if (str_result.contains("running")) {
-                    sendMsg(session, JsonMessage.getString(200, "运行中", json));
+                    resultData = JsonMessage.toJson(200, "运行中", json);
                 } else {
-                    sendMsg(session, JsonMessage.getString(200, "未运行", json));
+                    resultData = JsonMessage.toJson(404, "未运行", json);
                 }
                 break;
             case "showlog":
                 // 进入管理页面后需要实时加载日志
                 String log = projectInfoModel.getLog();
                 try {
+                    if (process != null) {
+                        process.destroy();
+                    }
                     // 执行tail -f命令
                     process = Runtime.getRuntime().exec(String.format("tail -f %s", log));
+                    if (inputStream != null) {
+                        inputStream.close();
+                    }
                     inputStream = process.getInputStream();
                     // 一定要启动新的线程，防止InputStream阻塞处理WebSocket的线程
-                    if (thread == null) {
-                        thread = new TailLogThread(inputStream, session, this);
+                    if (thread != null) {
+                        thread.stop();
                     }
-                    // 如果线程没有正在运行，则启动新线程
-                    if (!thread.isRun()) {
-                        EXECUTOR_SERVICE.execute(thread);
-                    }
+                    thread = new TailLogThread(inputStream, session, this);
+                    EXECUTOR_SERVICE.execute(thread);
                 } catch (IOException e) {
                     DefaultSystemLog.ERROR().error("打开日志异常", e);
                 }
                 break;
             default:
                 break;
+        }
+        if (resultData != null) {
+            resultData.put("op", op);
+            sendMsg(session, resultData.toString());
         }
     }
 
@@ -238,6 +251,7 @@ public class LogWebSocketHandle implements TailLogThread.Evn {
      */
     private synchronized void sendMsg(Session session, String msg) {
         try {
+            DefaultSystemLog.LOG().info(msg);
             session.getBasicRemote().sendText(msg);
         } catch (IOException e) {
             DefaultSystemLog.ERROR().error("websocket发送信息异常", e);
