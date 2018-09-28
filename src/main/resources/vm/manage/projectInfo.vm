@@ -84,6 +84,14 @@
                 </div>
             </div>
         </div>
+        <div class="layui-form-item">
+            <div class="layui-inline">
+                <label class="layui-form-label">arg</label>
+                <div class="layui-input-block">
+                    <input type="text" name="arg" placeholder="arg参数" class="layui-input">
+                </div>
+            </div>
+        </div>
         <input type="hidden" lay-submit lay-filter="submitProject" id="project_submit">
     </form>
 </div>

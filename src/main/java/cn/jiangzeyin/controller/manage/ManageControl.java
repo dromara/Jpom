@@ -131,6 +131,7 @@ public class ManageControl extends AbstractBaseControl {
     public String updateProject(ProjectInfoModel projectInfo) {
         projectInfo.setCreateTime(DateUtil.now());
         try {
+            System.out.println(projectInfo);
             manageService.updateProject(projectInfo);
             return JsonMessage.getString(200, "配置成功！");
         } catch (Exception e) {
