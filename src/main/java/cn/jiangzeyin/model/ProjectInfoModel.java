@@ -10,6 +10,7 @@ public class ProjectInfoModel {
     private int port;
     private String token;
     private String createTime;
+    private String arg;
 
     public String getJvm() {
         return jvm;
@@ -83,6 +84,14 @@ public class ProjectInfoModel {
         this.createTime = createTime;
     }
 
+    public String getArg() {
+        return arg;
+    }
+
+    public void setArg(String arg) {
+        this.arg = arg;
+    }
+
     @Override
     public String toString() {
         return "ProjectInfoModel{" +
@@ -95,6 +104,7 @@ public class ProjectInfoModel {
                 ", port=" + port +
                 ", token='" + token + '\'' +
                 ", createTime='" + createTime + '\'' +
+                ", arg='" + arg + '\'' +
                 '}';
     }
 }
