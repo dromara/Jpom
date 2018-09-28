@@ -191,7 +191,7 @@ public class LogWebSocketHandle implements TailLogThread.Evn {
         String args = projectInfoModel.getArgs();
         try {
             // 执行命令
-            String command = String.format("%s %s %s %s %s %s %s %s %s", commandPath, op, tag, mainClass, lib, log, token, jvm, args);
+            String command = String.format("%s %s %s %s %s %s %s [%s][%s]", commandPath, op, tag, mainClass, lib, log, token, jvm, args);
             DefaultSystemLog.LOG().info(command);
             Process process = Runtime.getRuntime().exec(command);
             int wait = process.waitFor();

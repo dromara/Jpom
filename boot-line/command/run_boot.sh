@@ -5,18 +5,29 @@ Tag="$2"
 MainClass="$3"
 Lib="$4"
 Log="$5"
-LogBack=$Log"/../log/"
+LogBack="$5_back/"
 WebClose="$6"
-JVM="$7"
-ARGS=""
 
-for ((i=8; i<=$#; i++))
+#组合
+ARGS=""
+for ((i=7; i<=$#; i++))
 do
     if [ "$ARGS" != "" ]; then
        ARGS=${ARGS}" "   
     fi
     ARGS=${ARGS}${!i}
 done
+#拆分
+OLD_IFS="$IFS"
+IFS="]"
+array=($ARGS)
+IFS="$OLD_IFS"
+
+JVM=${array[0]}
+ARGS=${array[1]}
+# 截取
+JVM=${JVM:1}
+ARGS=${ARGS:1}
 
 RETVAL="0"
 # See how we were called.
@@ -24,8 +35,8 @@ start()
 {
     echo $Log
 
-    if [ ! -f $Log ]; then
-        if [ ! -d $LogBack ];then
+    if [ -f $Log ]; then
+        if [ ! -d $LogBack ]; then
             mkdir $LogBack
         fi
         cur_dateTime="`date +%Y-%m-%d_%H:%M:%S`.log"
@@ -33,8 +44,8 @@ start()
         echo "mv to $LogBack$cur_dateTime"
         touch $Log
     fi
-    echo "$JVM"
-    echo "$ARGS"
+    echo "JVM:$JVM"
+    echo "args:$ARGS"
     nohup java $JVM -Dappliction=$Tag -Djava.ext.dirs=$Lib":${JAVA_HOME}/jre/lib/ext" $MainClass $ARGS > $Log 2>&1 & sleep 1s & status
 }
 
