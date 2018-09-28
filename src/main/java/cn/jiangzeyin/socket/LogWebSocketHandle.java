@@ -126,7 +126,7 @@ public class LogWebSocketHandle implements TailLogThread.Evn {
             case "stop":
                 // 停止项目
                 str_result = execCommand(session, "stop", projectInfoModel);
-                if (str_result.startsWith("stopped")) {
+                if (str_result.contains("stopped")) {
                     sendMsg(session, JsonMessage.getString(200, "已停止", json));
                     thread.stop();
                 } else {
@@ -138,12 +138,11 @@ public class LogWebSocketHandle implements TailLogThread.Evn {
                 // 获取项目状态
                 str_result = execCommand(session, "status", projectInfoModel);
                 json.put("result", str_result);
-                if (str_result.startsWith("running")) {
+                if (str_result.contains("running")) {
                     sendMsg(session, JsonMessage.getString(200, "运行中", json));
                 } else {
                     sendMsg(session, JsonMessage.getString(200, "未运行", json));
                 }
-
                 break;
             case "showlog":
                 // 进入管理页面后需要实时加载日志
