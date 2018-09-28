@@ -7,10 +7,9 @@ public class ProjectInfoModel {
     private String lib;
     private String log;
     private String jvm;
-    private int port;
     private String token;
     private String createTime;
-    private String arg;
+    private String args;
 
     public String getJvm() {
         return jvm;
@@ -60,13 +59,6 @@ public class ProjectInfoModel {
         this.log = log;
     }
 
-    public int getPort() {
-        return port;
-    }
-
-    public void setPort(int port) {
-        this.port = port;
-    }
 
     public String getToken() {
         return token;
@@ -84,12 +76,12 @@ public class ProjectInfoModel {
         this.createTime = createTime;
     }
 
-    public String getArg() {
-        return arg;
+    public String getArgs() {
+        return args;
     }
 
-    public void setArg(String arg) {
-        this.arg = arg;
+    public void setArgs(String args) {
+        this.args = args;
     }
 
     @Override
@@ -101,10 +93,9 @@ public class ProjectInfoModel {
                 ", lib='" + lib + '\'' +
                 ", log='" + log + '\'' +
                 ", jvm='" + jvm + '\'' +
-                ", port=" + port +
                 ", token='" + token + '\'' +
                 ", createTime='" + createTime + '\'' +
-                ", arg='" + arg + '\'' +
+                ", args='" + args + '\'' +
                 '}';
     }
 }

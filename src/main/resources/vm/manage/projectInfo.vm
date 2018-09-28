@@ -63,10 +63,9 @@
                 </div>
             </div>
             <div class="layui-inline">
-                <label class="layui-form-label">Port</label>
+                <label class="layui-form-label">args</label>
                 <div class="layui-input-block">
-                    <input type="text" name="port" placeholder="运行程序对应端口" required lay-verify="required|port"
-                           class="layui-input">
+                    <input type="text" name="args" placeholder="arg参数" class="layui-input">
                 </div>
             </div>
         </div>
@@ -81,14 +80,6 @@
                 <label class="layui-form-label">Jvm参数</label>
                 <div class="layui-input-block">
                     <input type="text" name="jvm" placeholder="jvm参数" class="layui-input">
-                </div>
-            </div>
-        </div>
-        <div class="layui-form-item">
-            <div class="layui-inline">
-                <label class="layui-form-label">arg</label>
-                <div class="layui-input-block">
-                    <input type="text" name="arg" placeholder="arg参数" class="layui-input">
                 </div>
             </div>
         </div>
