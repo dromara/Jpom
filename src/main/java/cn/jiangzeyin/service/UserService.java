@@ -1,9 +1,15 @@
 package cn.jiangzeyin.service;
 
+import cn.hutool.crypto.SecureUtil;
 import cn.jiangzeyin.util.JsonUtil;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
+
+/**
+ * @author Administrator
+ */
 @Service
 public class UserService extends BaseService {
 
@@ -23,6 +29,25 @@ public class UserService extends BaseService {
         }
         return pwd.equals(userInfo.getString("password"));
     }
+
+
+    public boolean checkUser(String userMd5) throws IOException {
+        JSONObject jsonData = getJsonObject(FILENAME);
+        if (jsonData == null) {
+            return false;
+        }
+        for (String strKey : jsonData.keySet()) {
+            JSONObject jsonUser = jsonData.getJSONObject(strKey);
+            String id = jsonUser.getString("id");
+            String pwd = jsonUser.getString("password");
+            String strUsermd5 = SecureUtil.md5(String.format("%s:%s", id, pwd));
+            if (strUsermd5.equals(userMd5)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
 
     /**
      * 修改密码

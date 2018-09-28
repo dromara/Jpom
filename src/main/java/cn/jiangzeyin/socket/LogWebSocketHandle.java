@@ -3,14 +3,12 @@ package cn.jiangzeyin.socket;
 import cn.hutool.core.exceptions.ExceptionUtil;
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.util.CharsetUtil;
-import cn.hutool.core.util.StrUtil;
-import cn.hutool.crypto.SecureUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.spring.SpringUtil;
 import cn.jiangzeyin.model.ProjectInfoModel;
 import cn.jiangzeyin.pool.ThreadPoolService;
-import cn.jiangzeyin.service.BaseService;
+import cn.jiangzeyin.service.UserService;
 import cn.jiangzeyin.service.manage.CommandService;
 import cn.jiangzeyin.service.manage.ManageService;
 import com.alibaba.fastjson.JSONObject;
@@ -21,19 +19,22 @@ import javax.websocket.server.PathParam;
 import javax.websocket.server.ServerEndpoint;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Set;
 import java.util.concurrent.ExecutorService;
 
 /**
  * socket
- * Created by jiangzeyin on 2017/9/8.
+ *
+ * @author jiangzeyin
+ * @date 2017/9/8
  */
 @ServerEndpoint(value = "/console/{userInfo}")
 @Component
 public class LogWebSocketHandle implements TailLogThread.Evn {
 
-    private static ExecutorService EXECUTOR_SERVICE = null;
+    private static final String RUNING_TAG = "running";
+    private static final String STOP_TAG = "stopped";
 
+    private static ExecutorService EXECUTOR_SERVICE = null;
     private Process process;
     private InputStream inputStream;
     private TailLogThread thread;
@@ -48,26 +49,8 @@ public class LogWebSocketHandle implements TailLogThread.Evn {
         }
         // 通过用户名和密码的Md5值判断是否是登录的
         try {
-            boolean flag = false;
-            if (!StrUtil.isEmpty(userInfo)) {
-                BaseService service = new BaseService();
-                JSONObject obj = service.getJsonObject("user.json");
-
-                Set<String> set_key = obj.keySet();
-
-                for (String str_key : set_key) {
-                    JSONObject json_user = obj.getJSONObject(str_key);
-                    String str_userMd5 = SecureUtil.md5(String.format("%s:%s", json_user.getString("id"), json_user.getString("password")));
-                    if (str_userMd5.equals(userInfo)) {
-                        flag = true;
-                        break;
-                    }
-                }
-            } else {
-                sendMsg(session, JsonMessage.getString(500, "用户名或密码错误!"));
-                session.close();
-            }
-            if (!flag) {
+            UserService userService = SpringUtil.getBean(UserService.class);
+            if (!userService.checkUser(userInfo)) {
                 sendMsg(session, JsonMessage.getString(500, "用户名或密码错误!"));
                 session.close();
             }
@@ -86,14 +69,10 @@ public class LogWebSocketHandle implements TailLogThread.Evn {
 
     @OnMessage
     public void onMessage(String message, Session session) {
-
         DefaultSystemLog.LOG().info("客户端消息：" + message);
         JSONObject json = JSONObject.parseObject(message);
         JSONObject projectInfo = json.getJSONObject("projectInfo");
-
-        String str_result;
         String id = projectInfo.getString("id");
-
         ManageService manageService = SpringUtil.getBean(ManageService.class);
         ProjectInfoModel projectInfoModel = null;
         try {
@@ -107,73 +86,54 @@ public class LogWebSocketHandle implements TailLogThread.Evn {
         }
         String op = json.getString("op");
         JSONObject resultData = null;
+        String strResult;
         // 执行相应命令
         switch (op) {
             case "start":
                 // 启动项目
-                str_result = execCommand(session, "start", projectInfoModel);
-                if (str_result.contains("running")) {
+                strResult = execCommand(session, "start", projectInfoModel);
+                if (strResult.contains(RUNING_TAG)) {
                     resultData = JsonMessage.toJson(200, "启动成功", json);
                 } else {
-                    resultData = JsonMessage.toJson(400, str_result, json);
+                    resultData = JsonMessage.toJson(400, strResult, json);
                 }
                 break;
-
             case "restart":
                 // 重启项目
-                str_result = execCommand(session, "restart", projectInfoModel);
-                if (str_result.contains("running")) {
+                strResult = execCommand(session, "restart", projectInfoModel);
+                if (strResult.contains(RUNING_TAG)) {
                     resultData = JsonMessage.toJson(200, "重启成功", json);
                 } else {
-                    resultData = JsonMessage.toJson(400, str_result, json);
+                    resultData = JsonMessage.toJson(400, strResult, json);
                 }
                 break;
-
             case "stop":
                 // 停止项目
-                str_result = execCommand(session, "stop", projectInfoModel);
-                if (str_result.contains("stopped")) {
+                strResult = execCommand(session, "stop", projectInfoModel);
+                if (strResult.contains(STOP_TAG)) {
                     resultData = JsonMessage.toJson(200, "已停止", json);
-                    thread.stop();
+                    if (thread != null) {
+                        thread.stop();
+                    }
                 } else {
-                    resultData = JsonMessage.toJson(500, str_result, json);
+                    resultData = JsonMessage.toJson(500, strResult, json);
                 }
                 break;
-
             case "status":
                 // 获取项目状态
-                str_result = execCommand(session, "status", projectInfoModel);
-                json.put("result", str_result);
-                if (str_result.contains("running")) {
+                strResult = execCommand(session, "status", projectInfoModel);
+                json.put("result", strResult);
+                if (strResult.contains(RUNING_TAG)) {
                     resultData = JsonMessage.toJson(200, "运行中", json);
                 } else {
                     resultData = JsonMessage.toJson(404, "未运行", json);
                 }
                 break;
             case "showlog":
-                // 进入管理页面后需要实时加载日志
-                String log = projectInfoModel.getLog();
-                try {
-                    if (process != null) {
-                        process.destroy();
-                    }
-                    // 执行tail -f命令
-                    process = Runtime.getRuntime().exec(String.format("tail -f %s", log));
-                    if (inputStream != null) {
-                        inputStream.close();
-                    }
-                    inputStream = process.getInputStream();
-                    // 一定要启动新的线程，防止InputStream阻塞处理WebSocket的线程
-                    if (thread != null) {
-                        thread.stop();
-                    }
-                    thread = new TailLogThread(inputStream, session, this);
-                    EXECUTOR_SERVICE.execute(thread);
-                } catch (IOException e) {
-                    DefaultSystemLog.ERROR().error("打开日志异常", e);
-                }
+                showLog(session, projectInfoModel);
                 break;
             default:
+                resultData = JsonMessage.toJson(404, "不支持的方式：" + op);
                 break;
         }
         if (resultData != null) {
@@ -181,6 +141,31 @@ public class LogWebSocketHandle implements TailLogThread.Evn {
             sendMsg(session, resultData.toString());
         }
     }
+
+    private void showLog(Session session, ProjectInfoModel projectInfoModel) {
+        // 进入管理页面后需要实时加载日志
+        String log = projectInfoModel.getLog();
+        try {
+            if (process != null) {
+                process.destroy();
+            }
+            // 执行tail -f命令
+            process = Runtime.getRuntime().exec(String.format("tail -f %s", log));
+            if (inputStream != null) {
+                inputStream.close();
+            }
+            inputStream = process.getInputStream();
+            // 一定要启动新的线程，防止InputStream阻塞处理WebSocket的线程
+            if (thread != null) {
+                thread.stop();
+            }
+            thread = new TailLogThread(inputStream, session, this);
+            EXECUTOR_SERVICE.execute(thread);
+        } catch (IOException e) {
+            DefaultSystemLog.ERROR().error("打开日志异常", e);
+        }
+    }
+
 
     /**
      * 执行shell命令
@@ -252,6 +237,9 @@ public class LogWebSocketHandle implements TailLogThread.Evn {
      * @param msg     消息
      */
     private synchronized void sendMsg(Session session, String msg) {
+        if (session == null) {
+            return;
+        }
         try {
             DefaultSystemLog.LOG().info(msg);
             session.getBasicRemote().sendText(msg);

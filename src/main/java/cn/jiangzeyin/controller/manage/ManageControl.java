@@ -40,26 +40,6 @@ public class ManageControl extends AbstractBaseControl {
     }
 
     /**
-     * 管理项目
-     *
-     * @return
-     */
-    @RequestMapping(value = "console")
-    public String console(String id) {
-        ProjectInfoModel pim = null;
-        try {
-            pim = manageService.getProjectInfo(id);
-        } catch (IOException e) {
-            e.printStackTrace();
-            DefaultSystemLog.LOG().error(e.getMessage(), e);
-        }
-        setAttribute("projectInfo", JSONObject.toJSONString(pim));
-        setAttribute("userInfo", SecureUtil.md5(String.format("%s:%s", getSession().getAttribute(LoginInterceptor.SESSION_NAME), getSession().getAttribute(LoginInterceptor.SESSION_PWD))));
-        return "manage/console";
-    }
-
-
-    /**
      * 查询所有项目
      *
      * @return

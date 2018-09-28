@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * Created by Administrator on 2017/5/11.
+ * Created by jiangzeyin on 2017/5/11.
  */
 @Aspect
 @Component
@@ -25,7 +25,7 @@ public class WebAopLog {
     }
 
     @Before("webLog()")
-    public void doBefore(JoinPoint joinPoint) throws Throwable {
+    public void doBefore(JoinPoint joinPoint) {
         // 接收到请求，记录请求内容
         IS_LOG.set(true);
         Signature signature = joinPoint.getSignature();
@@ -42,13 +42,13 @@ public class WebAopLog {
     }
 
     @AfterReturning(returning = "ret", pointcut = "webLog()")
-    public void doAfterReturning(Object ret) throws Throwable {
-        // 处理完请求，返回内容
-        Boolean isLog_ = IS_LOG.get();
-        if (isLog_ != null && !isLog_) {
+    public void doAfterReturning(Object ret) {
+        if (ret == null) {
             return;
         }
-        if (ret == null) {
+        // 处理完请求，返回内容
+        Boolean isLog = IS_LOG.get();
+        if (isLog != null && !isLog) {
             return;
         }
         DefaultSystemLog.LOG().info(" :" + ret.toString());

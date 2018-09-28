@@ -23,15 +23,11 @@ public class JsonUtil {
         if (null == obj) {
             flag = true;
         } else if (obj instanceof JSONObject) {
-            JSONObject jsonobj = (JSONObject) obj;
-            if (0 == jsonobj.keySet().size()) {
-                flag = true;
-            }
+            JSONObject jsonObject = (JSONObject) obj;
+            flag = jsonObject.isEmpty();
         } else if (obj instanceof JSONArray) {
-            JSONArray jsonarr = (JSONArray) obj;
-            if (0 == jsonarr.size()) {
-                flag = true;
-            }
+            JSONArray jsonArray = (JSONArray) obj;
+            flag = jsonArray.isEmpty();
         }
         return flag;
     }

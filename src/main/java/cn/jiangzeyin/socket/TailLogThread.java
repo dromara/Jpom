@@ -9,7 +9,9 @@ import java.io.InputStreamReader;
 
 /**
  * 线程处理
- * Created by jiangzeyin on 2017/9/8.
+ *
+ * @author jiangzeyin
+ * @date 2017/9/8
  */
 public class TailLogThread implements Runnable {
 
@@ -26,10 +28,6 @@ public class TailLogThread implements Runnable {
 
     public void stop() {
         run = false;
-    }
-
-    public boolean isRun() {
-        return run;
     }
 
     @Override
@@ -63,6 +61,9 @@ public class TailLogThread implements Runnable {
     }
 
     public interface Evn {
+        /**
+         * 尝试次数过多
+         */
         void onError();
     }
 }

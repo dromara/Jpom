@@ -37,8 +37,8 @@ public class LoginControl extends AbstractBaseControl {
             boolean flag = userService.login(userName, userPwd);
             if (flag) {
                 stringBuffer.append("，结果：").append("OK");
-                getSession().setAttribute(LoginInterceptor.SESSION_NAME, userName);
-                getSession().setAttribute(LoginInterceptor.SESSION_PWD, userPwd);
+                setSessionAttribute(LoginInterceptor.SESSION_NAME, userName);
+                setSessionAttribute(LoginInterceptor.SESSION_PWD, userPwd);
                 return JsonMessage.getString(200, "登录成功");
             } else {
                 stringBuffer.append("，结果：").append("faild");
