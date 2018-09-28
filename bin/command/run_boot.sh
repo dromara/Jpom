@@ -5,7 +5,6 @@ Tag="$2"
 MainClass="$3"
 Lib="$4"
 Log="$5"
-LogBack="$5_back/"
 WebClose="$6"
 
 #组合
@@ -73,6 +72,7 @@ status()
 backupLog()
 {
    Log = $1
+   LogBack=$Log"_back/"
    echo $Log
    if [ -f $Log ]; then
         if [ ! -d $LogBack ]; then
