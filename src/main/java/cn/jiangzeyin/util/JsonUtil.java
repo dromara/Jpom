@@ -1,6 +1,7 @@
 package cn.jiangzeyin.util;
 
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -37,6 +38,9 @@ public class JsonUtil {
 
     public static Object readJson(String path) {
         String json = FileUtil.readString(path, "UTF-8");
+        if (StrUtil.isEmpty(json)) {
+            return JSONObject.parseObject("{}");
+        }
         return JSON.parse(json);
     }
 

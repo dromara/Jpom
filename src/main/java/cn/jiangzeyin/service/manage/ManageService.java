@@ -1,12 +1,17 @@
 package cn.jiangzeyin.service.manage;
 
+import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.model.ProjectInfoModel;
 import cn.jiangzeyin.service.BaseService;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.util.Set;
 
+/**
+ * @author jiangzeyin
+ */
 @Service
 public class ManageService extends BaseService {
 
@@ -45,11 +50,24 @@ public class ManageService extends BaseService {
     /**
      * 修改项目信息
      *
-     * @param projectInfo
+     * @param projectInfo 项目信息
      */
     public void updateProject(ProjectInfoModel projectInfo) throws Exception {
         // 修改
-        updateJson(FILENAME, (JSONObject) JSONObject.toJSON(projectInfo));
+        JSONObject jsonObject = getJsonObject(FILENAME, projectInfo.getId());
+        if (jsonObject == null) {
+            return;
+        }
+        JSONObject newJson = (JSONObject) JSONObject.toJSON(projectInfo);
+        Set<String> keys = newJson.keySet();
+        for (String key : keys) {
+            String val = newJson.getString(key);
+            if (StrUtil.isEmptyOrUndefined(val)) {
+                continue;
+            }
+            jsonObject.put(key, newJson.get(key));
+        }
+        updateJson(FILENAME, jsonObject);
     }
 
 

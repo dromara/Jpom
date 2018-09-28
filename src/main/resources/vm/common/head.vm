@@ -3,7 +3,7 @@
 <meta content="width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1,user-scalable=no" name="viewport">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
-<link rel="stylesheet" href="//jiangzeyin.gitee.io/boot-online/src/main/resources/static/layui/css/layui.css"
-      media="all">
-<script type="text/javascript"
-        src="//jiangzeyin.gitee.io/boot-online/src/main/resources/static/layui/layui.js"></script>
+<link rel="icon" href="/static/favicon.ico" type="image/x-icon"/>
+<link rel="shortcut icon" href="/static/favicon.ico" type="image/x-icon"/>
+<link rel="stylesheet" href="/static/layui/css/layui.css" media="all">
+<script type="text/javascript" src="/static/layui/layui.js"></script>

@@ -8,18 +8,21 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
+/**
+ * @author jiangzeyin
+ */
 public class BaseService {
 
     /**
      * 获取数据的路径，如果没有这个路径，则创建一个
      *
-     * @return
+     * @return file
      */
-    private File getDataPath() {
+    private File getDataPath() throws IOException {
         String path = SpringUtil.getEnvironment().getProperty("boot-online.data");
         File file = new File(path);
-        if (!file.exists()) {
-            file.mkdirs();
+        if (!file.exists() && !file.mkdirs()) {
+            throw new IOException(path);
         }
         return file;
     }
@@ -31,13 +34,12 @@ public class BaseService {
      * @return
      * @throws IOException
      */
-    public String getDataFilePath(String filename) throws IOException {
+    private String getDataFilePath(String filename) throws IOException {
         File file = new File(getDataPath(), filename);
 
         if (!file.exists()) {
             throw new FileNotFoundException(file.getPath() + " 文件不存在！");
         }
-
         return file.getPath();
     }
 
@@ -48,7 +50,7 @@ public class BaseService {
      * @param json     json数据
      * @throws IOException
      */
-    public void saveJson(String filename, JSONObject json) throws Exception {
+    protected void saveJson(String filename, JSONObject json) throws Exception {
         String key = json.getString("id");
         // 读取文件，如果存在记录，则抛出异常
         JSONObject allData = getJsonObject(filename);
@@ -69,7 +71,7 @@ public class BaseService {
      * @param filename 文件名
      * @param json     json数据
      */
-    public void updateJson(String filename, JSONObject json) throws Exception {
+    protected void updateJson(String filename, JSONObject json) throws Exception {
         String key = json.getString("id");
         // 读取文件，如果不存在记录，则抛出异常
         JSONObject allData = getJsonObject(filename);
@@ -77,7 +79,7 @@ public class BaseService {
 
         // 判断是否存在数据
         if (null == data || 0 == data.keySet().size()) {
-            throw new Exception("项目名称不存在！");
+            throw new Exception("数据不存在");
         } else {
             allData.put(key, json);
             JsonUtil.saveJson(getDataFilePath(filename), allData);

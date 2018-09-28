@@ -109,14 +109,10 @@
             height: 'full-52',
             even: true,
             cols: [[
-                {field: 'id', title: '项目名称', width: '10%'},
-                {field: 'tag', title: 'Tag', width: '10%'},
-                {field: 'mainClass', title: 'MainClass', width: '10%'},
-                {field: 'lib', title: 'Lib', width: '10%'},
-                {field: 'log', title: 'Log', width: '10%'},
-                {field: 'port', title: 'Port', width: '5%'},
-                {field: 'token', title: 'Token', width: '10%'},
-                {field: 'createTime', title: '创建时间', width: '10%'},
+                {field: 'id', title: '项目名称'},
+                {field: 'lib', title: 'Lib'},
+                {field: 'createTime', title: '创建时间'},
+                {field: 'modifyTime', title: '修改时间'},
                 {field: 'op', title: '操作', align: 'center', toolbar: '#bar_projects', fixed: 'right'}
             ]],
             loading: true,

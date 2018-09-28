@@ -1,13 +1,13 @@
-#!/bin/bash
-
 # description: Auto-starts boot
+#!/bin/bash
+# 变量
 Tag="$2"
 MainClass="$3"
 Lib="$4"
 Log="$5"
 WebClose="$6"
 
-#组合
+#获取jvm 和 args
 ARGS=""
 for ((i=7; i<=$#; i++))
 do
@@ -49,7 +49,7 @@ stop()
 {
     pid=`getPid`
     if [ "$pid" != ""  ]; then
-
+        # 接口关闭
        if [ "$WebClose" != "no" ]; then
          echo $WebClose
          wget "$WebClose"
@@ -88,6 +88,8 @@ backupLog()
         mv $Log  $LogBack$cur_dateTime
         echo "mv to $LogBack$cur_dateTime"
         touch $Log
+   else
+     echo "log file notExits"
    fi
 }
 
