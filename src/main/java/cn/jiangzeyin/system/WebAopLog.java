@@ -1,4 +1,4 @@
-package cn.jiangzeyin.system.log.aop;
+package cn.jiangzeyin.system;
 
 import cn.jiangzeyin.common.DefaultSystemLog;
 import org.aspectj.lang.JoinPoint;
@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @Aspect
 @Component
-public class WebLog {
+public class WebAopLog {
     private static final ThreadLocal<Boolean> IS_LOG = new ThreadLocal<>();
 
     @Pointcut("execution(public * cn.jiangzeyin.controller..*.*(..))")

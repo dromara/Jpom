@@ -7,6 +7,7 @@ import org.springframework.boot.web.servlet.ServletComponentScan;
 import org.springframework.http.converter.StringHttpMessageConverter;
 
 import java.nio.charset.Charset;
+import java.util.Arrays;
 
 /**
  * Created by jiangzeyin on 2017/9/14.
@@ -24,6 +25,7 @@ public class BootOnLineApplication {
      * @param args 参数
      */
     public static void main(String[] args) throws Exception {
+        System.out.println("main 参数" + Arrays.toString(args));
         ApplicationBuilder.createBuilder(BootOnLineApplication.class)
                 .addHttpMessageConverter(new StringHttpMessageConverter(Charset.forName("UTF-8")))
                 .run(args);
