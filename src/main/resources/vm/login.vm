@@ -9,9 +9,9 @@
 <body>
 <div class="layui-carousel" id="div-carousel" style="width: 100%; height: 100%; position: fixed; z-index: 0;">
     <div carousel-item>
-        <div><img src="http://web-test.ztoutiao.cn/logo0509/assets/img/backgrounds/1.jpg" style="width: 100%;"></div>
-        <div><img src="http://web-test.ztoutiao.cn/logo0509/assets/img/backgrounds/2.jpg" style="width: 100%;"></div>
-        <div><img src="http://web-test.ztoutiao.cn/logo0509/assets/img/backgrounds/3.jpg" style="width: 100%;"></div>
+        <div><img src="//jiangzeyin.gitee.io/boot-online/src/main/resources/static/backgrounds/1.jpg" style="width: 100%;"></div>
+        <div><img src="//jiangzeyin.gitee.io/boot-online/src/main/resources/static/backgrounds/2.jpg" style="width: 100%;"></div>
+        <div><img src="//jiangzeyin.gitee.io/boot-online/src/main/resources/static/backgrounds/3.jpg" style="width: 100%;"></div>
     </div>
 </div>
 <div class="layui-container" style="margin-top: 150px;">

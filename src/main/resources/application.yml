@@ -31,9 +31,8 @@ banner:
 
 #boot online \u914D\u7F6E
 boot-online:
-  conf: /boot-line/
-  data: ${boot.conf}data/
-  command: ${boot.conf}command/run_boot.sh
+  data: /boot-line/data/
+  command: /boot-line/command/run_boot.sh
 # \u9759\u6001\u8D44\u6E90
 interceptor:
   resourceHandler: /static/**
