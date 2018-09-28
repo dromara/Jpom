@@ -1,6 +1,7 @@
 package cn.jiangzeyin.controller.manage;
 
 import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SecureUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
@@ -91,12 +92,20 @@ public class ManageControl extends AbstractBaseControl {
     @RequestMapping(value = "addProject", method = RequestMethod.POST)
     @ResponseBody
     public String addProject(ProjectInfoModel projectInfo) {
-        projectInfo.setCreateTime(DateUtil.now());
+        String id = projectInfo.getId();
+        if (StrUtil.isEmpty(id)) {
+            return JsonMessage.getString(400, "项目id不能为空");
+        }
         try {
+            ProjectInfoModel exitsModel = manageService.getProjectInfo(id);
+            if (exitsModel != null) {
+                return JsonMessage.getString(400, "id已经存在");
+            }
+            projectInfo.setCreateTime(DateUtil.now());
             manageService.saveProject(projectInfo);
             return JsonMessage.getString(200, "新增成功！");
         } catch (Exception e) {
-            DefaultSystemLog.LOG().error(e.getMessage(), e);
+            DefaultSystemLog.ERROR().error(e.getMessage(), e);
             return JsonMessage.getString(500, e.getMessage());
         }
     }
@@ -129,13 +138,12 @@ public class ManageControl extends AbstractBaseControl {
     @RequestMapping(value = "updateProject", method = RequestMethod.POST)
     @ResponseBody
     public String updateProject(ProjectInfoModel projectInfo) {
-        projectInfo.setCreateTime(DateUtil.now());
+        projectInfo.setModifyTime(DateUtil.now());
         try {
-            System.out.println(projectInfo);
             manageService.updateProject(projectInfo);
             return JsonMessage.getString(200, "配置成功！");
         } catch (Exception e) {
-            DefaultSystemLog.LOG().error(e.getMessage(), e);
+            DefaultSystemLog.ERROR().error(e.getMessage(), e);
             return JsonMessage.getString(500, e.getMessage());
         }
     }

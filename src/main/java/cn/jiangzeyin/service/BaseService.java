@@ -7,7 +7,6 @@ import com.alibaba.fastjson.JSONObject;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.Objects;
 
 public class BaseService {
 
@@ -16,8 +15,8 @@ public class BaseService {
      *
      * @return
      */
-    public File getDataPath() {
-        String path = SpringUtil.getEnvironment().getProperty("data.conf");
+    private File getDataPath() {
+        String path = SpringUtil.getEnvironment().getProperty("boot-online.data");
         File file = new File(path);
         if (!file.exists()) {
             file.mkdirs();
@@ -92,11 +91,10 @@ public class BaseService {
      * @param key
      * @throws Exception
      */
-    public void deleteJson(String filename, String key) throws Exception {
+    protected void deleteJson(String filename, String key) throws Exception {
         // 读取文件，如果存在记录，则抛出异常
         JSONObject allData = getJsonObject(filename);
         JSONObject data = allData.getJSONObject(key);
-
         // 判断是否存在数据
         if (JsonUtil.jsonIsEmpty(data)) {
             throw new Exception("项目名称存不在！");
@@ -114,11 +112,9 @@ public class BaseService {
      * @return
      * @throws IOException
      */
-    public JSONObject getJsonObject(String filename, String key) throws IOException {
-        JSONObject json_data = getJsonObject(filename);
-        JSONObject jsonObject = json_data.getJSONObject(key);
-        Objects.requireNonNull(jsonObject, key + "没有找到");
-        return jsonObject;
+    protected JSONObject getJsonObject(String filename, String key) throws IOException {
+        JSONObject jsonData = getJsonObject(filename);
+        return jsonData.getJSONObject(key);
     }
 
     /**

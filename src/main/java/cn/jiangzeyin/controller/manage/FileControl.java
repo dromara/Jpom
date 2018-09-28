@@ -8,9 +8,9 @@ import cn.hutool.core.util.CharsetUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.PageUtil;
-import cn.jiangzeyin.common.spring.SpringUtil;
 import cn.jiangzeyin.controller.base.AbstractBaseControl;
 import cn.jiangzeyin.model.ProjectInfoModel;
+import cn.jiangzeyin.service.manage.CommandService;
 import cn.jiangzeyin.service.manage.ManageService;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -34,6 +34,8 @@ public class FileControl extends AbstractBaseControl {
 
     @Resource
     private ManageService manageService;
+    @Resource
+    private CommandService commandService;
 
     /**
      * 文件管理页面
@@ -57,15 +59,12 @@ public class FileControl extends AbstractBaseControl {
     /**
      * 读取启动文件
      *
-     * @return
+     * @return json
      */
     @RequestMapping(value = "getRunBoot")
     @ResponseBody
     public String getRunBoot() {
-        File file = new File(SpringUtil.getEnvironment().getProperty("command.conf"));
-        if (!file.exists()) {
-            return JsonMessage.getString(500, "启动文件不存在");
-        }
+        File file = commandService.getCommandFile();
         String content = FileUtil.readString(file, CharsetUtil.CHARSET_UTF_8);
         Map<String, String> map = new HashMap<>();
         map.put("content", content);
@@ -81,10 +80,7 @@ public class FileControl extends AbstractBaseControl {
     @RequestMapping(value = "saveRunBoot")
     @ResponseBody
     public String saveRunBoot(String content) {
-        File file = new File(SpringUtil.getEnvironment().getProperty("command.conf"));
-        if (!file.exists()) {
-            return JsonMessage.getString(500, "启动文件不存在");
-        }
+        File file = commandService.getCommandFile();
         // 写入文件
         try {
             FileOutputStream fos = new FileOutputStream(file);

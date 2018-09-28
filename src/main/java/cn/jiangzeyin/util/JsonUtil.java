@@ -18,27 +18,20 @@ public class JsonUtil {
      * @return
      */
     public static boolean jsonIsEmpty(Object obj) {
-
         boolean flag = false;
-
         if (null == obj) {
             flag = true;
-        }
-
-        if (obj instanceof JSONObject) {
+        } else if (obj instanceof JSONObject) {
             JSONObject jsonobj = (JSONObject) obj;
             if (0 == jsonobj.keySet().size()) {
                 flag = true;
             }
-        }
-
-        if (obj instanceof JSONArray) {
+        } else if (obj instanceof JSONArray) {
             JSONArray jsonarr = (JSONArray) obj;
             if (0 == jsonarr.size()) {
                 flag = true;
             }
         }
-
         return flag;
     }
 

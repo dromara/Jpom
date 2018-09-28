@@ -2,6 +2,11 @@ package cn.jiangzeyin.model;
 
 import com.alibaba.fastjson.JSONObject;
 
+/**
+ * 项目配置信息实体
+ *
+ * @author jiangzeyin
+ */
 public class ProjectInfoModel {
     private String id;
     private String tag;
@@ -11,7 +16,16 @@ public class ProjectInfoModel {
     private String jvm;
     private String token;
     private String createTime;
+    private String modifyTime;
     private String args;
+
+    public String getModifyTime() {
+        return modifyTime;
+    }
+
+    public void setModifyTime(String modifyTime) {
+        this.modifyTime = modifyTime;
+    }
 
     public String getJvm() {
         return jvm;

@@ -29,7 +29,6 @@ public class ManageService extends BaseService {
      * @return
      */
     public void saveProject(ProjectInfoModel projectInfo) throws Exception {
-
         // 保存
         saveJson(FILENAME, (JSONObject) JSONObject.toJSON(projectInfo));
     }
@@ -61,7 +60,10 @@ public class ManageService extends BaseService {
      * @return
      */
     public ProjectInfoModel getProjectInfo(String id) throws IOException {
-
-        return getJsonObject(FILENAME, id).toJavaObject(ProjectInfoModel.class);
+        JSONObject jsonObject = getJsonObject(FILENAME, id);
+        if (jsonObject == null) {
+            return null;
+        }
+        return jsonObject.toJavaObject(ProjectInfoModel.class);
     }
 }

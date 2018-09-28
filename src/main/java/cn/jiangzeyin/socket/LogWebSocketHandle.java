@@ -11,6 +11,7 @@ import cn.jiangzeyin.common.spring.SpringUtil;
 import cn.jiangzeyin.model.ProjectInfoModel;
 import cn.jiangzeyin.pool.ThreadPoolService;
 import cn.jiangzeyin.service.BaseService;
+import cn.jiangzeyin.service.manage.CommandService;
 import cn.jiangzeyin.service.manage.ManageService;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Component;
@@ -191,7 +192,8 @@ public class LogWebSocketHandle implements TailLogThread.Evn {
     private String execCommand(Session session, String op, ProjectInfoModel projectInfoModel) {
         InputStream is;
         String result = "error";
-        String commandPath = SpringUtil.getEnvironment().getProperty("command.conf");
+        CommandService commandService = SpringUtil.getBean(CommandService.class);
+        String commandPath = commandService.getCommandPath();
 
         // 项目启动信息
         String tag = projectInfoModel.getTag();

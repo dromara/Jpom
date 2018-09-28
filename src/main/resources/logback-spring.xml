@@ -40,6 +40,5 @@
 
     <root level="DEBUG" name="systemInfo" additivity="true">
         <appender-ref ref="console"/>
-        <!--<appender-ref ref="infoFileAppender"/>-->
     </root>
 </configuration>

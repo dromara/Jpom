@@ -1,0 +1,41 @@
+#\u7A0B\u5E8F\u7AEF\u53E3\u53F7
+server:
+  port: 2122
+  #\u7CFB\u7EDF\u6807\u8BC6
+  #nginx.conf=/etc/nginx/conf.d/ad/
+spring:
+  application:
+    name: boot-line
+  profiles:
+    active: dev
+  #spring: http: multipart: enabled=false
+  #velocity \u6A21\u677F\u6587\u4EF6\u914D\u7F6E
+  velocity:
+    charset:  UTF-8
+    content-type: text/html
+    properties:
+      input:
+        encoding: UTF-8
+      output:
+        encoding: UTF-8
+    expose-request-attributes: true
+    expose-session-attributes: true
+    enabled: true
+    resource-loader-path: classpath:/vm/
+    suffix: .vm
+  #order: conf=/yokead_boot/order/
+  #shield: conf=${order: conf}shield
+  #server: session-timeout=1800
+banner:
+  msg: boot-line
+
+#boot online \u914D\u7F6E
+boot-online:
+  conf: /boot-line/
+  data: ${boot.conf}data/
+  command: ${boot.conf}command/run_boot.sh
+# \u9759\u6001\u8D44\u6E90
+interceptor:
+  resourceHandler: /static/**
+  resourceLocation: classpath:/static/
+  initPackageName: cn.jiangzeyin.common.interceptor
