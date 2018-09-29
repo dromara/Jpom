@@ -1,14 +1,11 @@
 package cn.jiangzeyin.controller.manage;
 
-import cn.hutool.core.date.DateUtil;
-import cn.hutool.core.util.StrUtil;
-import cn.hutool.crypto.SecureUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.PageUtil;
-import cn.jiangzeyin.common.interceptor.LoginInterceptor;
 import cn.jiangzeyin.controller.base.AbstractBaseControl;
 import cn.jiangzeyin.model.ProjectInfoModel;
+import cn.jiangzeyin.service.manage.CommandService;
 import cn.jiangzeyin.service.manage.ManageService;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -27,6 +24,8 @@ public class ManageControl extends AbstractBaseControl {
 
     @Resource
     private ManageService manageService;
+    @Resource
+    private CommandService commandService;
 
 
     /**
@@ -54,7 +53,12 @@ public class ManageControl extends AbstractBaseControl {
             JSONArray array = new JSONArray();
             Set<String> setKey = json.keySet();
             for (String asetKey : setKey) {
-                array.add(json.get(asetKey));
+                ProjectInfoModel projectInfoModel = manageService.getProjectInfo(asetKey);
+                String result = commandService.execCommand(CommandService.CommandOp.status, projectInfoModel, null);
+                JSONObject jsonObject = json.getJSONObject(asetKey);
+                boolean status = result.contains(CommandService.RUNING_TAG);
+                jsonObject.put("status", status);
+                array.add(jsonObject);
             }
             return PageUtil.getPaginate(200, "查询成功！", array);
         } catch (IOException e) {
@@ -81,7 +85,4 @@ public class ManageControl extends AbstractBaseControl {
             return JsonMessage.getString(500, e.getMessage());
         }
     }
-
-
-
 }

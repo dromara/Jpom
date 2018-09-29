@@ -1,10 +1,12 @@
 package cn.jiangzeyin.oss;
 
+import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.resource.ResourceUtil;
 import cn.hutool.core.util.CharsetUtil;
 import cn.jiangzeyin.common.spring.SpringUtil;
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.aliyun.oss.OSSClient;
 import com.aliyun.oss.model.ListObjectsRequest;
@@ -22,7 +24,7 @@ import java.util.List;
 @Service
 public class OssManagerService {
 
-    public List<OSSObjectSummary> list(String name) {
+    public JSONArray list(String name) {
         OSSClient ossClient;
         String prefix = String.format("%s%s", getKeyPrefix(), name);
         ListObjectsRequest request;
@@ -37,17 +39,24 @@ public class OssManagerService {
             request.setMarker(nextMarker);
             ObjectListing objectListing = ossClient.listObjects(request);
             List<OSSObjectSummary> sums = objectListing.getObjectSummaries();
-            sums.forEach(ossObjectSummary -> {
-                String newKey = ossObjectSummary.getKey().substring(prefix.length());
-                ossObjectSummary.setKey(newKey);
-            });
+//
             summaryList.addAll(sums);
             nextMarker = objectListing.getNextMarker();
             // 关闭OSSClient。
             ossClient.shutdown();
         } while (nextMarker != null);
         summaryList.sort((o1, o2) -> o2.getLastModified().compareTo(o1.getLastModified()));
-        return summaryList;
+        JSONArray jsonArray = new JSONArray();
+        summaryList.forEach(ossObjectSummary -> {
+            JSONObject jsonObject = new JSONObject();
+            String newKey = ossObjectSummary.getKey().substring(prefix.length());
+            jsonObject.put("shortKey", newKey);
+            jsonObject.put("key", ossObjectSummary.getKey());
+            jsonObject.put("time", DateUtil.date(ossObjectSummary.getLastModified()).toString());
+            jsonObject.put("size", FileUtil.readableFileSize(ossObjectSummary.getSize()));
+            jsonArray.add(jsonObject);
+        });
+        return jsonArray;
     }
 
     private OSSClient getOSSClient() {

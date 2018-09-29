@@ -29,15 +29,15 @@ import java.util.concurrent.ExecutorService;
  */
 @ServerEndpoint(value = "/console/{userInfo}")
 @Component
-public class LogWebSocketHandle implements TailLogThread.Evn {
+public class LogWebSocketHandle implements TailLogThread.Evn, CommandService.Evt {
 
-    private static final String RUNING_TAG = "running";
-    private static final String STOP_TAG = "stopped";
 
     private static ExecutorService EXECUTOR_SERVICE = null;
     private Process process;
     private InputStream inputStream;
     private TailLogThread thread;
+    private CommandService commandService;
+    private Session session;
 
     /**
      * 新的WebSocket请求开启
@@ -47,6 +47,7 @@ public class LogWebSocketHandle implements TailLogThread.Evn {
         if (EXECUTOR_SERVICE == null) {
             EXECUTOR_SERVICE = ThreadPoolService.newCachedThreadPool(LogWebSocketHandle.class);
         }
+        commandService = SpringUtil.getBean(CommandService.class);
         // 通过用户名和密码的Md5值判断是否是登录的
         try {
             UserService userService = SpringUtil.getBean(UserService.class);
@@ -54,6 +55,7 @@ public class LogWebSocketHandle implements TailLogThread.Evn {
                 sendMsg(session, JsonMessage.getString(500, "用户名或密码错误!"));
                 session.close();
             }
+            this.session = session;
         } catch (Exception e) {
             DefaultSystemLog.ERROR().error(e.getMessage());
             try {
@@ -85,33 +87,25 @@ public class LogWebSocketHandle implements TailLogThread.Evn {
             return;
         }
         String op = json.getString("op");
+        CommandService.CommandOp commandOp = CommandService.CommandOp.valueOf(op);
         JSONObject resultData = null;
         String strResult;
         // 执行相应命令
-        switch (op) {
-            case "start":
-                // 启动项目
-                strResult = execCommand(session, "start", projectInfoModel);
-                if (strResult.contains(RUNING_TAG)) {
-                    resultData = JsonMessage.toJson(200, "启动成功", json);
+        switch (commandOp) {
+            case start:
+            case restart:
+                strResult = commandService.execCommand(commandOp, projectInfoModel, this);
+                if (strResult.contains(CommandService.RUNING_TAG)) {
+                    resultData = JsonMessage.toJson(200, "操作成功", json);
                 } else {
                     resultData = JsonMessage.toJson(400, strResult, json);
                 }
                 break;
-            case "restart":
-                // 重启项目
-                strResult = execCommand(session, "restart", projectInfoModel);
-                if (strResult.contains(RUNING_TAG)) {
-                    resultData = JsonMessage.toJson(200, "重启成功", json);
-                } else {
-                    resultData = JsonMessage.toJson(400, strResult, json);
-                }
-                break;
-            case "stop":
+            case stop:
                 // 停止项目
-                strResult = execCommand(session, "stop", projectInfoModel);
-                if (strResult.contains(STOP_TAG)) {
-                    resultData = JsonMessage.toJson(200, "已停止", json);
+                strResult = commandService.execCommand(commandOp, projectInfoModel, this);
+                if (strResult.contains(CommandService.STOP_TAG)) {
+                    resultData = JsonMessage.toJson(200, "操作成功", json);
                     if (thread != null) {
                         thread.stop();
                     }
@@ -119,17 +113,17 @@ public class LogWebSocketHandle implements TailLogThread.Evn {
                     resultData = JsonMessage.toJson(500, strResult, json);
                 }
                 break;
-            case "status":
+            case status:
                 // 获取项目状态
-                strResult = execCommand(session, "status", projectInfoModel);
+                strResult = commandService.execCommand(commandOp, projectInfoModel, this);
                 json.put("result", strResult);
-                if (strResult.contains(RUNING_TAG)) {
+                if (strResult.contains(CommandService.RUNING_TAG)) {
                     resultData = JsonMessage.toJson(200, "运行中", json);
                 } else {
                     resultData = JsonMessage.toJson(404, "未运行", json);
                 }
                 break;
-            case "showlog":
+            case showlog:
                 showLog(session, projectInfoModel);
                 break;
             default:
@@ -166,48 +160,6 @@ public class LogWebSocketHandle implements TailLogThread.Evn {
         }
     }
 
-
-    /**
-     * 执行shell命令
-     *
-     * @param session          用于输出的websocket会话
-     * @param op               执行的操作
-     * @param projectInfoModel 项目信息
-     */
-    private String execCommand(Session session, String op, ProjectInfoModel projectInfoModel) {
-        InputStream is;
-        String result = "error";
-        CommandService commandService = SpringUtil.getBean(CommandService.class);
-        String commandPath = commandService.getCommandPath();
-
-        // 项目启动信息
-        String tag = projectInfoModel.getTag();
-        String mainClass = projectInfoModel.getMainClass();
-        String lib = projectInfoModel.getLib();
-        String log = projectInfoModel.getLog();
-        String token = projectInfoModel.getToken();
-        String jvm = projectInfoModel.getJvm();
-        String args = projectInfoModel.getArgs();
-        try {
-            // 执行命令
-            String command = String.format("%s %s %s %s %s %s %s [%s][%s]", commandPath, op, tag, mainClass, lib, log, token, jvm, args);
-            DefaultSystemLog.LOG().info(command);
-            Process process = Runtime.getRuntime().exec(command);
-            int wait = process.waitFor();
-            if (wait == 0) {
-                is = process.getInputStream();
-            } else {
-                is = process.getErrorStream();
-            }
-            result = IoUtil.read(is, CharsetUtil.CHARSET_UTF_8);
-            is.close();
-            process.destroy();
-        } catch (IOException | InterruptedException e) {
-            DefaultSystemLog.ERROR().error("执行命令异常", e);
-            sendMsg(session, "执行命令异常：" + ExceptionUtil.stacktraceToString(e));
-        }
-        return result;
-    }
 
     /**
      * WebSocket请求关闭
@@ -258,6 +210,14 @@ public class LogWebSocketHandle implements TailLogThread.Evn {
         onClose();
     }
 
+    @Override
+    public void error(Exception e) {
+        if (session == null) {
+            return;
+        }
+        sendMsg(session, "执行命令异常：" + ExceptionUtil.stacktraceToString(e));
+    }
+
     public static void main(String[] args) {
         try {
             String command = "/boot-line/command/run_boot.sh status Testteststesttst cn.jiangzeyin.BootOnLineApplication /boot-line/boot/online/lib /boot-line/boot/online/run.log no";
@@ -277,4 +237,6 @@ public class LogWebSocketHandle implements TailLogThread.Evn {
         }
 
     }
+
+
 }

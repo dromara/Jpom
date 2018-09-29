@@ -4,6 +4,11 @@
 <head>
     #parse("./common/head.vm")
     <title>项目管理系统</title>
+    <style>
+        body {
+            padding: 20px;
+        }
+    </style>
 </head>
 
 <body>
@@ -18,36 +23,16 @@
         </tr>
         </thead>
         <tbody>
-        <tr>
-            <td>贤心</td>
-            <td>汉族</td>
-            <td>1989-10-14</td>
-            <td>人生似修行</td>
-        </tr>
-        <tr>
-            <td>张爱玲</td>
-            <td>汉族</td>
-            <td>1920-09-30</td>
-            <td>于千万人之中遇见你所遇见的人，于千万年之中，时间的无涯的荒野里…</td>
-        </tr>
-        <tr>
-            <td>Helen Keller</td>
-            <td>拉丁美裔</td>
-            <td>1880-06-27</td>
-            <td> Life is either a daring adventure or nothing.</td>
-        </tr>
-        <tr>
-            <td>岳飞</td>
-            <td>汉族</td>
-            <td>1103-北宋崇宁二年</td>
-            <td>教科书再滥改，也抹不去“民族英雄”的事实</td>
-        </tr>
-        <tr>
-            <td>孟子</td>
-            <td>华夏族（汉族）</td>
-            <td>公元前-372年</td>
-            <td>猿强，则国强。国强，则猿更强！</td>
-        </tr>
+            #foreach($item in $array)
+            <tr>
+                <td>$item.shortKey</td>
+                <td>$item.time</td>
+                <td>$item.size</td>
+                <td>
+                    <button class="layui-btn layui-btn-normal layui-btn-sm">安装</button>
+                </td>
+            </tr>
+            #end
         </tbody>
     </table>
 </div>
