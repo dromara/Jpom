@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    #parse("./common/head.vm")
+    <title>项目管理系统</title>
+    <link rel="stylesheet" href="/static/css/manage/list.css" media="all">
+</head>
+
+<body>
+<div class="layui-row">
+    <button id="addProject" class="layui-btn layui-btn-sm">新增用户</button>
+    <button id="refresh" class="layui-btn layui-btn-sm">刷新表格</button>
+</div>
+<table class="layui-table" id="tab_project" lay-filter="tab_project" style="margin: 0;"></table>
+<div class="layui-container div-project" id="div-project">
+    <form action="" class="layui-form" id="form_project">
+        <div class="layui-form-item">
+            <div class="layui-inline">
+                <label class="layui-form-label">登录名</label>
+                <div class="layui-input-block">
+                    <input type="text" name="id" placeholder="登录名（设置后将不能修改）" required lay-verify="required"
+                           class="layui-input">
+                </div>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-inline">
+                <label class="layui-form-label">密码</label>
+                <div class="layui-input-block">
+                    <input type="text" name="password" placeholder=""
+                           class="layui-input">
+                </div>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-form-item">
+                <div class="layui-inline">
+                    <label class="layui-form-label">昵称</label>
+                    <div class="layui-input-block">
+                        <input type="text" name="name" placeholder="昵称" required
+                               lay-verify="required" class="layui-input">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-inline">
+                <label class="layui-form-label">是否是管理员</label>
+                <div class="layui-input-block">
+                    <input type="checkbox" value="true" name="role" lay-skin="switch" lay-text="是|否">
+                </div>
+            </div>
+        </div>
+
+        <input type="hidden" lay-submit lay-filter="submitProject" id="project_submit">
+    </form>
+</div>
+
+</body>
+
+<script type="text/html" id="bar_projects">
+    <a href="javascript:;" class="layui-btn  layui-btn-sm layui-btn-warm" lay-event="update">编辑</a>
+    <a href="javascript:;" class="layui-btn  layui-btn-sm layui-btn-danger" lay-event="delete">删除</a>
+</script>
+<script type="text/javascript">
+    layui.use(['layer', 'element', 'table', 'form'], function () {
+        var $ = layui.$;
+        var table = layui.table;
+        var form = layui.form;
+        var layer = layui.layer;
+
+        table.render({
+            id: 'table_project',
+            elem: '#tab_project',
+            url: '/user/getUserList',
+            height: 'full-52',
+            even: true,
+            cols: [[
+                {field: 'id', title: 'id'},
+                {field: 'name', title: '昵称'},
+                {field: 'role', title: '是否是管理员'},
+                {field: 'op', title: '操作', align: 'center', toolbar: '#bar_projects', fixed: 'right'}
+            ]],
+            loading: true,
+            response: {
+                statusCode: 200
+            }
+        });
+
+        // '添加用户'点击事件
+        $('#addProject').on('click', function () {
+            // 重置表单
+            document.getElementById('form_project').reset();
+            $('#form_project [name="id"]').attr('readonly', false).removeClass('layui-disabled');
+            $('#form_project [name="role"]').attr('checked', false);
+            // 弹出
+            layer.open({
+                type: 1,
+                title: '新增项目',
+                content: $('#div-project'),
+                area: ['60%', '60%'],
+                btnAlign: 'c',
+                btn: ['提交'],
+                yes: function (index, layero) {
+                    $('#form_project').attr('action', '/user/addUser');
+                    $('#project_submit').click();
+                }
+            });
+        });
+
+        // '刷新表格'点击事件
+        $('#refresh').on('click', function () {
+            table.reload('table_project', {height: 'full-52'});
+        });
+
+        // 提交项目表单
+        form.on('submit(submitProject)', function (data) {
+            $.ajax({
+                url: data.form.action,
+                type: 'POST',
+                dataType: 'json',
+                data: data.field,
+                success: function (data) {
+                    if (200 == data.code) {
+                        layer.closeAll('page');
+
+                        // 刷新项目列表
+                        table.reload('table_project', {height: 'full-52'});
+                    } else {
+                        layer.msg(data.msg);
+                    }
+                },
+                error: function (err) {
+                    layer.msg('操作失败！');
+                }
+            });
+            return false;
+        });
+
+
+        // 表格工具条事件
+        table.on('tool(tab_project)', function (obj) {
+            var data = obj.data;
+            var event = obj.event;
+
+            if ('update' === event) {
+                // 修改
+                updateApplication(data);
+            } else if ('delete' === event) {
+                // 删除
+                deleteApplication(data);
+            }
+        });
+
+        // 编辑用户信息
+        function updateApplication(data) {
+            // 重置表单
+            document.getElementById('form_project').reset();
+            $('#form_project [name="id"]').attr('readonly', true).addClass('layui-disabled');
+
+            // 设置表单值
+            for (var key in data) {
+                if ("role" == key) {
+                    if (data[key])
+                        $('#form_project [name="role"]').attr('checked', true);
+                } else {
+                    $('#form_project [name="' + key + '"]').val(data[key]);
+                }
+            }
+
+            // 弹出
+            layer.open({
+                type: 1,
+                title: '编辑',
+                content: $('#div-project'),
+                area: ['60%', '60%'],
+                btnAlign: 'c',
+                btn: ['提交'],
+                yes: function (index, layero) {
+                    $('#form_project').attr('action', '/user/updateUser');
+                    $('#project_submit').click();
+                }
+            });
+        }
+
+        // 删除用户
+        function deleteApplication(data) {
+            layer.confirm('确定删除用户 ' + data.id + '？', {title: '系统提示'}, function (index) {
+                layer.close(index);
+                $.ajax({
+                    url: '/user/deleteUser',
+                    type: 'POST',
+                    dataType: 'json',
+                    data: {id: data.id},
+                    success: function (data) {
+                        if (200 == data.code) {
+                            layer.msg('删除成功！');
+                            // 刷新项目列表
+                            table.reload('table_project', {height: 'full-52'});
+                        } else {
+                            layer.msg(data.msg);
+                        }
+                    },
+                    error: function (err) {
+                        layer.msg('删除失败！');
+                    }
+                });
+            });
+        }
+    });
+</script>
+</html>
