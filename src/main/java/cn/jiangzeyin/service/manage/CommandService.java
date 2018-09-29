@@ -95,8 +95,9 @@ public class CommandService {
             if (evt != null) {
                 evt.commandError(e);
             }
+            result += e.getMessage();
         }
-        //
+        //  通知日志刷新
         if (commandOp == CommandOp.start || commandOp == CommandOp.restart) {
             TailLogThread.logChange(log);
         }
