@@ -88,7 +88,7 @@ public class CommandService {
         } catch (IOException | InterruptedException e) {
             DefaultSystemLog.ERROR().error("执行命令异常", e);
             if (evt != null) {
-                evt.error(e);
+                evt.commandError(e);
             }
         }
         return result;
@@ -100,6 +100,6 @@ public class CommandService {
          *
          * @param e e
          */
-        void error(Exception e);
+        void commandError(Exception e);
     }
 }

@@ -1,60 +1,98 @@
 package cn.jiangzeyin.socket;
 
+import cn.hutool.core.io.IoUtil;
+import cn.hutool.core.io.LineHandler;
+import cn.hutool.core.util.CharsetUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 
 import javax.websocket.Session;
-import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * 线程处理
  *
  * @author jiangzeyin
- * @date 2017/9/8
+ * date 2017/9/8
  */
 public class TailLogThread implements Runnable {
 
-    private BufferedReader reader;
-    private final Session session;
-    private boolean run = false;
-    private Evn evn;
+    private static ConcurrentHashMap<String, InputStream> MAP = new ConcurrentHashMap<>();
+    private static ConcurrentHashMap<String, Boolean> CHANGE = new ConcurrentHashMap<>();
 
-    public TailLogThread(InputStream in, Session session, Evn evn) {
-        this.reader = new BufferedReader(new InputStreamReader(in));
+    private final Session session;
+    private boolean run = true;
+    private Evn evn;
+    private String log;
+    private int errorCount;
+
+    TailLogThread(InputStream in, String log, Session session, Evn evn) {
         this.session = session;
         this.evn = evn;
+        this.log = log;
+        MAP.put(log, in);
+        CHANGE.put(log, true);
     }
 
-    public void stop() {
+    void stop() {
         run = false;
     }
 
+    public void send(String msg) {
+        if (msg == null) {
+            return;
+        }
+        if (!session.isOpen()) {
+            return;
+        }
+        try {
+            synchronized (session) {
+                session.getBasicRemote().sendText(msg);
+            }
+        } catch (IOException e) {
+            DefaultSystemLog.ERROR().error("发送消息失败", e);
+            errorCount++;
+            if (errorCount >= 10) {
+                DefaultSystemLog.LOG().info("失败次数超过大于10次，结束本次事件");
+                throw new RuntimeException(e);
+            }
+        }
+    }
+
+
     @Override
     public void run() {
-        String line;
-        int errorCount = 0;
-        run = true;
+        InputStream inputStream = MAP.get(this.log);
         while (run) {
-            synchronized (session) {
+            Boolean change = CHANGE.get(this.log);
+            if (change != null && change) {
+                inputStream = MAP.get(this.log);
+                CHANGE.remove(this.log);
+                send("自动切换到新的流");
+                System.out.println("切换：" + session.getId());
+            }
+            if (inputStream == null) {
+                send("没有对应日志信息");
+                break;
+            }
+            try {
+                errorCount = 0;
                 // 将实时日志通过WebSocket发送给客户端，给每一行添加一个HTML换行
-                try {
-                    line = reader.readLine();
-                    if (line != null) {
-                        session.getBasicRemote().sendText(line);
-                    }
-                } catch (Exception e) {
-                    DefaultSystemLog.ERROR().error("发送消息失败", e);
-                    errorCount++;
-                    if (errorCount == 10) {
-                        DefaultSystemLog.LOG().info("失败次数超过10次，结束本次事件");
-                        stop();
-                        if (evn != null) {
-                            evn.onError();
-                        }
-                        break;
-                    }
+                IoUtil.readLines(inputStream, CharsetUtil.CHARSET_UTF_8, (LineHandler) this::send);
+            } catch (Exception e) {
+                String msg = e.getMessage();
+                if (msg.contains("Stream closed") && errorCount++ <= 10) {
+                    send("流已关闭,将等等自动重连");
+                    continue;
                 }
+                e.printStackTrace();
+                stop();
+                if (evn != null) {
+                    evn.onError();
+                }
+                break;
             }
         }
         DefaultSystemLog.LOG().info("结束本次读取地址事件");

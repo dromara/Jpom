@@ -25,7 +25,7 @@ import java.util.concurrent.ExecutorService;
  * socket
  *
  * @author jiangzeyin
- * @date 2017/9/8
+ * date 2017/9/8
  */
 @ServerEndpoint(value = "/console/{userInfo}")
 @Component
@@ -64,7 +64,7 @@ public class LogWebSocketHandle implements TailLogThread.Evn, CommandService.Evt
                     session.close();
                 }
             } catch (IOException e1) {
-                DefaultSystemLog.ERROR().error(e1.getMessage());
+                DefaultSystemLog.ERROR().error(e1.getMessage(), e1);
             }
         }
     }
@@ -152,11 +152,13 @@ public class LogWebSocketHandle implements TailLogThread.Evn, CommandService.Evt
             // 一定要启动新的线程，防止InputStream阻塞处理WebSocket的线程
             if (thread != null) {
                 thread.stop();
+                thread.send("停止");
             }
-            thread = new TailLogThread(inputStream, session, this);
+            thread = new TailLogThread(inputStream, log, session, this);
             EXECUTOR_SERVICE.execute(thread);
         } catch (IOException e) {
             DefaultSystemLog.ERROR().error("打开日志异常", e);
+            sendMsg(session, "打开日志异常");
         }
     }
 
@@ -170,14 +172,17 @@ public class LogWebSocketHandle implements TailLogThread.Evn, CommandService.Evt
             if (inputStream != null) {
                 inputStream.close();
             }
+            if (process != null) {
+                process.destroy();
+            }
+            if (thread != null) {
+                thread.stop();
+            }
+            if (session != null) {
+                session.close();
+            }
         } catch (Exception e) {
             DefaultSystemLog.ERROR().error("关闭异常", e);
-        }
-        if (process != null) {
-            process.destroy();
-        }
-        if (thread != null) {
-            thread.stop();
         }
         DefaultSystemLog.LOG().info(" socket 关闭");
     }
@@ -188,7 +193,7 @@ public class LogWebSocketHandle implements TailLogThread.Evn, CommandService.Evt
      * @param session 回话
      * @param msg     消息
      */
-    private synchronized void sendMsg(Session session, String msg) {
+    private void sendMsg(Session session, String msg) {
         if (session == null) {
             return;
         }
@@ -211,7 +216,7 @@ public class LogWebSocketHandle implements TailLogThread.Evn, CommandService.Evt
     }
 
     @Override
-    public void error(Exception e) {
+    public void commandError(Exception e) {
         if (session == null) {
             return;
         }
