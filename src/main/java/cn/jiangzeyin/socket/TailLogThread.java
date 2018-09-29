@@ -134,6 +134,7 @@ public class TailLogThread implements Runnable {
                 }
             }
         } while (reload);
+        send("结束本次读取地址事件");
         DefaultSystemLog.LOG().info("结束本次读取地址事件");
     }
 
