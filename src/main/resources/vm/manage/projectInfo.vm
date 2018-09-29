@@ -173,7 +173,6 @@
             } else if ('file' === event) {
                 fileManage(data);
             } else if ('build' === event) {
-                console.log(data)
                 layer.open({
                     type: 2,
                     title: '自动构建',

@@ -29,7 +29,9 @@
                 <td>$item.time</td>
                 <td>$item.size</td>
                 <td>
-                    <button class="layui-btn layui-btn-normal layui-btn-sm">安装</button>
+                    <button name="install" data-name="$item.shortKey" data-key="$item.key" data-id="$id"
+                            class="layui-btn layui-btn-normal layui-btn-sm">安装
+                    </button>
                 </td>
             </tr>
             #end
@@ -40,9 +42,43 @@
 <script type="text/javascript">
     layui.use(['layer', 'element', 'table', 'form'], function () {
         var $ = layui.$;
-        var table = layui.table;
-        var form = layui.form;
         var layer = layui.layer;
+
+        $("button[name='install']").click(function () {
+            var that = $(this);
+            var name = that.attr("data-name");
+            layer.confirm('您确定要安装【' + name + '】？', {
+                btn: ['确定', '不确定'] //按钮
+            }, function (index) {
+                layer.close(index);
+                index = layer.load(1, {
+                    shade: [0.5, '#fff'] //0.1透明度的白色背景
+                });
+                var key = that.attr("data-key");
+                var id = that.attr("data-id");
+                $.ajax({
+                    url: './build_install',
+                    type: 'POST',
+                    dataType: 'json',
+                    data: {id: id, key: key},
+                    success: function (data) {
+                        layer.msg(data.msg);
+                        if (200 == data.code) {
+
+                        }
+                    },
+                    error: function (err) {
+                        layer.msg('安装失败');
+                    },
+                    complete: function () {
+                        layer.close(index);
+                    }
+                });
+            }, function () {
+
+            });
+
+        });
     });
 </script>
 </html>

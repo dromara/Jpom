@@ -1,6 +1,9 @@
 package cn.jiangzeyin.service;
 
+import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.spring.SpringUtil;
+import cn.jiangzeyin.controller.BaseController;
 import cn.jiangzeyin.util.JsonUtil;
 import com.alibaba.fastjson.JSONObject;
 
@@ -24,6 +27,17 @@ public class BaseService {
         if (!file.exists() && !file.mkdirs()) {
             throw new IOException(path);
         }
+        return file;
+    }
+
+    protected File getTempPath() throws IOException {
+        File file = getDataPath();
+        String userName = BaseController.getUserName();
+        if (StrUtil.isEmpty(userName)) {
+            throw new RuntimeException("没有登录");
+        }
+        file = new File(file.getPath() + "/temp/", userName);
+        FileUtil.mkdir(file);
         return file;
     }
 

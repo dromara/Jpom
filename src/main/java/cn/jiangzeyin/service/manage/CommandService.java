@@ -59,7 +59,6 @@ public class CommandService {
         if (commandOp == CommandOp.showlog) {
             return result;
         }
-        InputStream is;
         CommandService commandService = SpringUtil.getBean(CommandService.class);
         String commandPath = commandService.getCommandPath();
 
@@ -72,6 +71,7 @@ public class CommandService {
         String jvm = projectInfoModel.getJvm();
         String args = projectInfoModel.getArgs();
         try {
+            InputStream is;
             // 执行命令
             String command = String.format("%s %s %s %s %s %s %s [%s][%s]", commandPath, commandOp.toString(), tag, mainClass, lib, log, token, jvm, args);
             DefaultSystemLog.LOG().info(command);

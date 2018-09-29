@@ -1,19 +1,23 @@
-package cn.jiangzeyin.oss;
+package cn.jiangzeyin.service.oss;
 
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.resource.ResourceUtil;
 import cn.hutool.core.util.CharsetUtil;
 import cn.jiangzeyin.common.spring.SpringUtil;
+import cn.jiangzeyin.service.BaseService;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.aliyun.oss.OSSClient;
+import com.aliyun.oss.model.GetObjectRequest;
 import com.aliyun.oss.model.ListObjectsRequest;
 import com.aliyun.oss.model.OSSObjectSummary;
 import com.aliyun.oss.model.ObjectListing;
 import org.springframework.stereotype.Service;
 
+import java.io.File;
+import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -22,7 +26,18 @@ import java.util.List;
  * Created by jiangzeyin on 2018/9/28.
  */
 @Service
-public class OssManagerService {
+public class OssManagerService extends BaseService {
+
+    public File download(String key) throws IOException {
+        File file = getTempPath();
+        file = new File(file, key);
+        OSSClient ossClient = getOSSClient();
+        // 下载OSS文件到本地文件。如果指定的本地文件存在会覆盖，不存在则新建。
+        ossClient.getObject(new GetObjectRequest(getBucketName(), key), file);
+        // 关闭OSSClient。
+        ossClient.shutdown();
+        return file;
+    }
 
     public JSONArray list(String name) {
         OSSClient ossClient;

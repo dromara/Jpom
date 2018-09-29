@@ -110,7 +110,6 @@
 
         // 提交项目表单
         form.on('submit(submitProject)', function (data) {
-            console.log(data.field)
             $.ajax({
                 url: data.form.action,
                 type: 'POST',
