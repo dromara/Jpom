@@ -46,13 +46,6 @@ public class FileControl extends AbstractBaseControl {
     @RequestMapping(value = "filemanage", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
     public String fileManage(String id) throws IOException {
         setAttribute("id", id);
-        String logSize = null;
-        ProjectInfoModel pim = manageService.getProjectInfo(id);
-        File file = new File(pim.getLog());
-        if (file.exists()) {
-            logSize = FileUtil.readableFileSize(file);
-        }
-        setAttribute("logSize", logSize);
         return "manage/filemanage";
     }
 
@@ -166,31 +159,6 @@ public class FileControl extends AbstractBaseControl {
         }
     }
 
-    @RequestMapping(value = "export.html", method = RequestMethod.GET)
-    @ResponseBody
-    public String export(String id) {
-        try {
-            ProjectInfoModel pim = manageService.getProjectInfo(id);
-            File file = new File(pim.getLog());
-            if (!file.exists()) {
-                return JsonMessage.getString(400, "没有日志文件:" + file.getPath());
-            }
-            HttpServletResponse response = getResponse();
-            // 设置强制下载不打开
-            response.setContentType("application/force-download");
-            // 设置文件名
-            response.addHeader("Content-Disposition", "attachment;fileName=" + file.getName());
-            OutputStream os = response.getOutputStream();
-            byte[] bytes = IoUtil.readBytes(new FileInputStream(file));
-            IoUtil.write(os, false, bytes);
-            os.flush();
-            os.close();
-            return "ok";
-        } catch (IOException e) {
-            DefaultSystemLog.ERROR().error("删除文件异常", e);
-        }
-        return JsonMessage.getString(500, "导出失败");
-    }
 
     @RequestMapping(value = "clear")
     @ResponseBody

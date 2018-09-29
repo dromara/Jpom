@@ -9,7 +9,12 @@
 
 <body>
 <div class="console">
-    <div class="layui-row"><!-- layui-elem-quote -->
+
+    <div class="layui-row">
+        <!-- layui-elem-quote -->
+        #if($logSize)
+            <button id="export" class="layui-btn layui-btn-sm">导出日志($logSize)</button>
+        #end
         <a href="javascript:;" class="btn-op layui-btn  layui-btn-sm" op="start">启动</a>
         <a href="javascript:;" class="btn-op layui-btn  layui-btn-sm layui-btn-warm" op="restart">重启</a>
         <a href="javascript:;" class="btn-op layui-btn  layui-btn-sm layui-btn-danger" op="stop">停止</a>
@@ -22,7 +27,7 @@
 </div>
 </body>
 <script type="text/javascript">
-    var projectInfo = $projectInfo;
+    var projectInfo =  $projectInfo;
     var userInfo = '$userInfo';
 
     layui.use(['layer', 'element', 'table', 'form'], function () {
@@ -123,6 +128,10 @@
             var h = showLogDom[0].scrollHeight;
             showLogDom.scrollTop(h);
         }
+
+        $('#export').on('click', function () {
+            location.href = "export.html?id=" + projectInfo.id;
+        });
 
     });
 </script>
