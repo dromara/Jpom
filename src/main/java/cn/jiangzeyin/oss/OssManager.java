@@ -22,10 +22,9 @@ public class OssManager {
         OSSClient ossClient = getOSSClient();
         String prefix = String.format("%s%s", getKeyPrefix(), name);
         ObjectListing objectListing = ossClient.listObjects(getBucketName(), prefix);
-
         List<OSSObjectSummary> sums = objectListing.getObjectSummaries();
         for (OSSObjectSummary s : sums) {
-            System.out.println(JSONObject.toJSON(s));
+            // System.out.println(DateUtil.date(s.getLastModified()));
             System.out.println("\t" + s.getKey());
         }
         // 关闭OSSClient。
