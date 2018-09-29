@@ -4,7 +4,23 @@
 <head>
     #parse("./common/head.vm")
     <title>项目管理系统</title>
-    <link rel="stylesheet" href="/static/css/manage/list.css" media="all">
+    <style>
+        .layui-form-label {
+            width: 100px;
+        }
+
+        body {
+            padding: 10px 10px 0px 10px;
+        }
+
+        .layui-container {
+            width: 80% !important;
+        }
+
+        .layui-input-block {
+            margin-left: 135px;
+        }
+    </style>
 </head>
 
 <body>

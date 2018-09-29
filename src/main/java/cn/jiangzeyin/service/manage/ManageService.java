@@ -86,4 +86,5 @@ public class ManageService extends BaseService {
         }
         return jsonObject.toJavaObject(ProjectInfoModel.class);
     }
+
 }

@@ -1,8 +1,8 @@
 package cn.jiangzeyin.controller.user;
 
+import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.controller.BaseController;
-import cn.jiangzeyin.model.UserInfoMode;
 import cn.jiangzeyin.service.UserService;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -37,23 +37,48 @@ public class UserInfoController extends BaseController {
     /**
      * 新增用户
      *
-     * @param user 用户
      * @return String
      */
     @RequestMapping(value = "addUser", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public String addUser(UserInfoMode user) {
-        return userService.addUser(user);
+    public String addUser(String id, String name, String role, String password) {
+        if (StrUtil.isEmpty(id)) {
+            return JsonMessage.getString(400, "登录名不能为空");
+        }
+        if (StrUtil.isEmpty(password)) {
+            return JsonMessage.getString(400, "密码不能为空");
+        }
+        int length = password.length();
+        if (length < 6) {
+            return JsonMessage.getString(400, "密码长度为6-12位");
+        }
+        boolean b = userService.addUser(id, name, password, role);
+        if (b) {
+            return JsonMessage.getString(200, "添加成功");
+        }
+        return JsonMessage.getString(400, "添加失败");
     }
 
     /**
      * 修改用户
      *
-     * @param user 用户
      * @return String
      */
     @RequestMapping(value = "updateUser", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public String updateUser(UserInfoMode user) {
-        return userService.updateUser(user);
+    public String updateUser(String id, String name, String role, String password) {
+        if (StrUtil.isEmpty(id)) {
+            return JsonMessage.getString(400, "登录名不能为空");
+        }
+        if (!StrUtil.isEmpty(password)) {
+            int length = password.length();
+            if (length < 6) {
+                return JsonMessage.getString(400, "密码长度为6-12位");
+            }
+        }
+        boolean b = userService.updateUser(id, name, password, role);
+        if (b) {
+            return JsonMessage.getString(200, "修改成功");
+        }
+        return JsonMessage.getString(400, "修改失败");
     }
 
 }

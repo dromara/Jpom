@@ -17,7 +17,7 @@
                     $user
                 </a>
                 <dl class="layui-nav-child">
-                    <dd op="updatePwd"><a href="javascript:;">修改密码</a></dd>
+                    <dd id="updatePwd" op="updatePwd"><a href="javascript:;">修改密码</a></dd>
                 </dl>
             </li>
             <li class="layui-nav-item" id="li-exit">
@@ -125,10 +125,12 @@
 
         // 用户操作
         element.on('nav(userOperation)', function (elem) {
-            var op = this.getAttribute('op');
-
+            var op =   document.getElementById('updatePwd').getAttribute('op');
+            console.log(op);
+            console.log(this);
             // 修改密码
             if ('updatePwd' == op) {
+                console.log('updatePwd');
                 document.getElementById('form_updatePwd').reset();
                 layer.open({
                     type: 1,
