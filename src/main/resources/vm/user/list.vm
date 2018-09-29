@@ -28,7 +28,7 @@
             <div class="layui-inline">
                 <label class="layui-form-label">密码</label>
                 <div class="layui-input-block">
-                    <input type="text" name="password" placeholder=""
+                    <input type="password" name="password" placeholder=""
                            class="layui-input">
                 </div>
             </div>
@@ -162,7 +162,7 @@
             // 设置表单值
             for (var key in data) {
                 if ("role" == key) {
-                    if (data[key])
+                    if ("是" === data[key])
                         $('#form_project [name="role"]').attr('checked', true);
                 } else {
                     $('#form_project [name="' + key + '"]').val(data[key]);
