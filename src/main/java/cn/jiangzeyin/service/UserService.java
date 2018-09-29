@@ -77,6 +77,11 @@ public class UserService extends BaseService {
             String key = (String) entry.getKey();
             JSONObject value = (JSONObject) entry.getValue();
             value.remove("password");
+            if(value.containsKey("role")){
+                value.put("role","是");
+            }else {
+                value.put("role","否");
+            }
             array.add(value);
         }
         return array;
@@ -161,7 +166,6 @@ public class UserService extends BaseService {
         if (user == null) {
             return JsonMessage.getString(400, "用户信息为空");
         }
-        System.out.println(user.toString());
         String id = user.getId();
         if (StrUtil.isEmpty(id)) {
             return JsonMessage.getString(400, "修改失败,获取id失败");
