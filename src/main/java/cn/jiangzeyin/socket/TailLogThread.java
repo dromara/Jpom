@@ -9,7 +9,6 @@ import javax.websocket.Session;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * 线程处理
@@ -90,7 +89,7 @@ public class TailLogThread implements Runnable {
                 e.printStackTrace();
                 stop();
                 if (evn != null) {
-                    evn.onError();
+                    evn.onError(session);
                 }
                 break;
             }
@@ -101,7 +100,9 @@ public class TailLogThread implements Runnable {
     public interface Evn {
         /**
          * 尝试次数过多
+         *
+         * @param session 会话
          */
-        void onError();
+        void onError(Session session);
     }
 }

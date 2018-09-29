@@ -1,13 +1,17 @@
 package cn.jiangzeyin.service.manage;
 
+import cn.hutool.core.exceptions.ExceptionUtil;
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.spring.SpringUtil;
 import cn.jiangzeyin.model.ProjectInfoModel;
+import cn.jiangzeyin.socket.LogWebSocketHandle;
+import cn.jiangzeyin.socket.SocketSession;
 import org.springframework.stereotype.Service;
 
+import javax.websocket.Session;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -101,5 +105,22 @@ public class CommandService {
          * @param e e
          */
         void commandError(Exception e);
+    }
+
+    public static class EvtIml implements Evt {
+
+        private Session session;
+
+        public EvtIml(Session session) {
+            this.session = session;
+        }
+
+        @Override
+        public void commandError(Exception e) {
+            SocketSession socketSession = LogWebSocketHandle.SESSION_CONCURRENT_HASH_MAP.get(session.getId());
+            if (socketSession != null) {
+                socketSession.sendMsg("执行命令异常：" + ExceptionUtil.stacktraceToString(e));
+            }
+        }
     }
 }

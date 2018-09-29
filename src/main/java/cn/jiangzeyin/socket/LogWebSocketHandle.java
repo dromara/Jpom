@@ -1,6 +1,5 @@
 package cn.jiangzeyin.socket;
 
-import cn.hutool.core.exceptions.ExceptionUtil;
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.util.CharsetUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
@@ -19,6 +18,7 @@ import javax.websocket.server.PathParam;
 import javax.websocket.server.ServerEndpoint;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 
 /**
@@ -29,15 +29,11 @@ import java.util.concurrent.ExecutorService;
  */
 @ServerEndpoint(value = "/console/{userInfo}")
 @Component
-public class LogWebSocketHandle implements TailLogThread.Evn, CommandService.Evt {
-
+public class LogWebSocketHandle implements TailLogThread.Evn {
 
     private static ExecutorService EXECUTOR_SERVICE = null;
-    private Process process;
-    private InputStream inputStream;
-    private TailLogThread thread;
     private CommandService commandService;
-    private Session session;
+    public static final ConcurrentHashMap<String, SocketSession> SESSION_CONCURRENT_HASH_MAP = new ConcurrentHashMap<>();
 
     /**
      * 新的WebSocket请求开启
@@ -48,25 +44,32 @@ public class LogWebSocketHandle implements TailLogThread.Evn, CommandService.Evt
             EXECUTOR_SERVICE = ThreadPoolService.newCachedThreadPool(LogWebSocketHandle.class);
         }
         commandService = SpringUtil.getBean(CommandService.class);
+        SocketSession socketSession = new SocketSession(session);
         // 通过用户名和密码的Md5值判断是否是登录的
         try {
             UserService userService = SpringUtil.getBean(UserService.class);
             if (!userService.checkUser(userInfo)) {
-                sendMsg(session, JsonMessage.getString(500, "用户名或密码错误!"));
+                socketSession.sendMsg(JsonMessage.getString(500, "用户名或密码错误!"));
                 session.close();
+            } else {
+
+                SESSION_CONCURRENT_HASH_MAP.put(session.getId(), socketSession);
             }
-            this.session = session;
         } catch (Exception e) {
-            DefaultSystemLog.ERROR().error(e.getMessage());
+            DefaultSystemLog.ERROR().error(e.getMessage(), e);
             try {
                 if (null != session) {
-                    sendMsg(session, JsonMessage.getString(500, "系统错误!"));
+                    socketSession.sendMsg(JsonMessage.getString(500, "系统错误!"));
                     session.close();
                 }
             } catch (IOException e1) {
                 DefaultSystemLog.ERROR().error(e1.getMessage(), e1);
             }
         }
+    }
+
+    private SocketSession getItem(Session session) {
+        return SESSION_CONCURRENT_HASH_MAP.get(session.getId());
     }
 
     @OnMessage
@@ -76,6 +79,7 @@ public class LogWebSocketHandle implements TailLogThread.Evn, CommandService.Evt
         JSONObject projectInfo = json.getJSONObject("projectInfo");
         String id = projectInfo.getString("id");
         ManageService manageService = SpringUtil.getBean(ManageService.class);
+        SocketSession socketSession = getItem(session);
         ProjectInfoModel projectInfoModel = null;
         try {
             projectInfoModel = manageService.getProjectInfo(id);
@@ -83,18 +87,19 @@ public class LogWebSocketHandle implements TailLogThread.Evn, CommandService.Evt
             DefaultSystemLog.ERROR().error("获取异常", e);
         }
         if (projectInfoModel == null) {
-            sendMsg(session, "没有对应项目");
+            socketSession.sendMsg("没有对应项目");
             return;
         }
         String op = json.getString("op");
         CommandService.CommandOp commandOp = CommandService.CommandOp.valueOf(op);
         JSONObject resultData = null;
         String strResult;
+        CommandService.EvtIml evtIml = new CommandService.EvtIml(session);
         // 执行相应命令
         switch (commandOp) {
             case start:
             case restart:
-                strResult = commandService.execCommand(commandOp, projectInfoModel, this);
+                strResult = commandService.execCommand(commandOp, projectInfoModel, evtIml);
                 if (strResult.contains(CommandService.RUNING_TAG)) {
                     resultData = JsonMessage.toJson(200, "操作成功", json);
                 } else {
@@ -103,19 +108,16 @@ public class LogWebSocketHandle implements TailLogThread.Evn, CommandService.Evt
                 break;
             case stop:
                 // 停止项目
-                strResult = commandService.execCommand(commandOp, projectInfoModel, this);
+                strResult = commandService.execCommand(commandOp, projectInfoModel, evtIml);
                 if (strResult.contains(CommandService.STOP_TAG)) {
                     resultData = JsonMessage.toJson(200, "操作成功", json);
-                    if (thread != null) {
-                        thread.stop();
-                    }
                 } else {
                     resultData = JsonMessage.toJson(500, strResult, json);
                 }
                 break;
             case status:
                 // 获取项目状态
-                strResult = commandService.execCommand(commandOp, projectInfoModel, this);
+                strResult = commandService.execCommand(commandOp, projectInfoModel, evtIml);
                 json.put("result", strResult);
                 if (strResult.contains(CommandService.RUNING_TAG)) {
                     resultData = JsonMessage.toJson(200, "运行中", json);
@@ -132,33 +134,28 @@ public class LogWebSocketHandle implements TailLogThread.Evn, CommandService.Evt
         }
         if (resultData != null) {
             resultData.put("op", op);
-            sendMsg(session, resultData.toString());
+            socketSession.sendMsg(resultData.toString());
         }
     }
 
     private void showLog(Session session, ProjectInfoModel projectInfoModel) {
+        SocketSession socketSession = getItem(session);
         // 进入管理页面后需要实时加载日志
         String log = projectInfoModel.getLog();
         try {
-            if (process != null) {
-                process.destroy();
-            }
+            onClose(session, "重新打开新的对话");
             // 执行tail -f命令
-            process = Runtime.getRuntime().exec(String.format("tail -f %s", log));
-            if (inputStream != null) {
-                inputStream.close();
-            }
-            inputStream = process.getInputStream();
+            Process process = Runtime.getRuntime().exec(String.format("tail -f %s", log));
+            InputStream inputStream = process.getInputStream();
             // 一定要启动新的线程，防止InputStream阻塞处理WebSocket的线程
-            if (thread != null) {
-                thread.stop();
-                thread.send("停止");
-            }
-            thread = new TailLogThread(inputStream, log, session, this);
+            TailLogThread thread = new TailLogThread(inputStream, log, session, this);
+            socketSession.setInputStream(inputStream);
+            socketSession.setProcess(process);
+            socketSession.setThread(thread);
             EXECUTOR_SERVICE.execute(thread);
         } catch (IOException e) {
             DefaultSystemLog.ERROR().error("打开日志异常", e);
-            sendMsg(session, "打开日志异常");
+            socketSession.sendMsg("打开日志异常");
         }
     }
 
@@ -167,43 +164,28 @@ public class LogWebSocketHandle implements TailLogThread.Evn, CommandService.Evt
      * WebSocket请求关闭
      */
     @OnClose
-    public void onClose() {
+    public void onClose(Session session, String callback) {
         try {
-            if (inputStream != null) {
-                inputStream.close();
+            SocketSession socketSession = getItem(session);
+            if (socketSession.getProcess() != null) {
+                socketSession.getProcess().destroy();
             }
-            if (process != null) {
-                process.destroy();
+            if (socketSession.getInputStream() != null) {
+                socketSession.getInputStream().close();
             }
-            if (thread != null) {
-                thread.stop();
+            if (socketSession.getThread() != null) {
+                if (callback != null) {
+                    socketSession.getThread().send(callback);
+                }
+                socketSession.getThread().stop();
             }
-            if (session != null) {
-                session.close();
-            }
+            SESSION_CONCURRENT_HASH_MAP.remove(session.getId());
         } catch (Exception e) {
             DefaultSystemLog.ERROR().error("关闭异常", e);
         }
         DefaultSystemLog.LOG().info(" socket 关闭");
     }
 
-    /**
-     * 发送消息
-     *
-     * @param session 回话
-     * @param msg     消息
-     */
-    private void sendMsg(Session session, String msg) {
-        if (session == null) {
-            return;
-        }
-        try {
-            DefaultSystemLog.LOG().info(msg);
-            session.getBasicRemote().sendText(msg);
-        } catch (IOException e) {
-            DefaultSystemLog.ERROR().error("websocket发送信息异常", e);
-        }
-    }
 
     @OnError
     public void onError(Session session, Throwable thr) {
@@ -211,17 +193,10 @@ public class LogWebSocketHandle implements TailLogThread.Evn, CommandService.Evt
     }
 
     @Override
-    public void onError() {
-        onClose();
+    public void onError(Session session) {
+        onClose(session, null);
     }
 
-    @Override
-    public void commandError(Exception e) {
-        if (session == null) {
-            return;
-        }
-        sendMsg(session, "执行命令异常：" + ExceptionUtil.stacktraceToString(e));
-    }
 
     public static void main(String[] args) {
         try {
