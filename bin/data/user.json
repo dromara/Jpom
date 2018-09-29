@@ -1,8 +1,8 @@
 {
-  "admin":{
-    "password":"admin123",
-    "role":"manager",
-    "name":"admin",
-    "id":"admin"
+  "admin": {
+    "password": "test",
+    "role": true,
+    "name": "admin",
+    "id": "admin"
   }
 }
