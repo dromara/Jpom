@@ -26,13 +26,18 @@ import static com.sun.org.apache.xml.internal.security.keys.keyresolver.KeyResol
  * date 2017/9/8
  */
 public class TailLogThread implements Runnable {
-
-
+    /**
+     * 记录日志被哪些打开过
+     */
     private static final ConcurrentHashMap<String, List<TailLogThread>> TAIL_LOG_THREAD_CONCURRENT_HASH_MAP = new ConcurrentHashMap<>();
+    /**
+     * 记录日志被修改过,需要重新打开
+     */
+    private static final ConcurrentHashMap<String, Boolean> LOG_CHANGE = new ConcurrentHashMap<>();
+
 
     private final Session session;
     private Evn evn;
-    private int errorCount;
     private String log;
     private InputStream inputStream;
     private Process process;
@@ -45,17 +50,33 @@ public class TailLogThread implements Runnable {
         this.log = log;
     }
 
-    public static TailLogThread createThread(Session session, String log, Evn evn) throws IOException {
+    /**
+     * 创建新的
+     *
+     * @param session
+     * @param log
+     * @param evn
+     * @return
+     */
+    static TailLogThread createThread(Session session, String log, Evn evn) {
         List<TailLogThread> logThreads = TAIL_LOG_THREAD_CONCURRENT_HASH_MAP.computeIfAbsent(log, s -> new ArrayList<>());
-        for (TailLogThread logThread : logThreads) {
-            //  停止上一次的读取
-            logThread.process.destroy();
-            // 标记需要重新执行
-            logThread.reload = true;
+        Boolean change = LOG_CHANGE.get(log);
+        if (change != null) {
+            for (TailLogThread logThread : logThreads) {
+                //  停止上一次的读取
+                logThread.process.destroy();
+                // 标记需要重新执行
+                logThread.reload = true;
+            }
+            LOG_CHANGE.remove(log);
         }
         TailLogThread tailLogThread = new TailLogThread(log, session, evn);
         logThreads.add(tailLogThread);
         return tailLogThread;
+    }
+
+    public static void logChange(String log) {
+        LOG_CHANGE.put(log, true);
     }
 
     private void loadInputStream() throws IOException {
@@ -81,23 +102,13 @@ public class TailLogThread implements Runnable {
         logThreads.remove(this);
     }
 
-    public void send(String msg) {
-        if (msg == null) {
-            return;
-        }
-        if (!session.isOpen()) {
-            return;
-        }
+    private void send(String msg) {
         try {
-            synchronized (session) {
-                session.getBasicRemote().sendText(msg);
-            }
+            SocketSession.send(session, msg);
         } catch (IOException e) {
-            DefaultSystemLog.ERROR().error("发送消息失败", e);
-            errorCount++;
-            if (errorCount >= 10) {
-                DefaultSystemLog.LOG().info("失败次数超过大于10次，结束本次事件");
-                throw new RuntimeException(e);
+            stop();
+            if (evn != null) {
+                evn.onError(session);
             }
         }
     }
@@ -134,27 +145,5 @@ public class TailLogThread implements Runnable {
          */
         void onError(Session session);
 
-    }
-
-    public static void main(String[] args) throws IOException {
-        Process process = Runtime.getRuntime().exec(String.format("tail -f %s", "/boot-line/boot/online/run.log"));
-        InputStream inputStream = process.getInputStream();
-        BufferedReader bufferedReader = IoUtil.getReader(inputStream, CharsetUtil.CHARSET_UTF_8);
-        String line;
-        new Thread() {
-            @Override
-            public void run() {
-                try {
-                    Thread.sleep(5000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                System.out.println("关闭");
-                process.destroy();
-            }
-        }.start();
-        while ((line = bufferedReader.readLine()) != null) {
-            System.out.println(line);
-        }
     }
 }

@@ -9,6 +9,7 @@ import cn.jiangzeyin.common.spring.SpringUtil;
 import cn.jiangzeyin.model.ProjectInfoModel;
 import cn.jiangzeyin.socket.LogWebSocketHandle;
 import cn.jiangzeyin.socket.SocketSession;
+import cn.jiangzeyin.socket.TailLogThread;
 import org.springframework.stereotype.Service;
 
 import javax.websocket.Session;
@@ -95,6 +96,10 @@ public class CommandService {
                 evt.commandError(e);
             }
         }
+        //
+        if (commandOp == CommandOp.start || commandOp == CommandOp.restart) {
+            TailLogThread.logChange(log);
+        }
         return result;
     }
 
@@ -119,7 +124,11 @@ public class CommandService {
         public void commandError(Exception e) {
             SocketSession socketSession = LogWebSocketHandle.SESSION_CONCURRENT_HASH_MAP.get(session.getId());
             if (socketSession != null) {
-                socketSession.sendMsg("执行命令异常：" + ExceptionUtil.stacktraceToString(e));
+                try {
+                    socketSession.sendMsg("执行命令异常：" + ExceptionUtil.stacktraceToString(e));
+                } catch (IOException e1) {
+                    e1.printStackTrace();
+                }
             }
         }
     }

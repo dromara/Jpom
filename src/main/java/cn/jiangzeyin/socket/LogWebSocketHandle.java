@@ -73,7 +73,7 @@ public class LogWebSocketHandle implements TailLogThread.Evn {
     }
 
     @OnMessage
-    public void onMessage(String message, Session session) {
+    public void onMessage(String message, Session session) throws IOException {
         DefaultSystemLog.LOG().info("客户端消息：" + message);
         JSONObject json = JSONObject.parseObject(message);
         JSONObject projectInfo = json.getJSONObject("projectInfo");
@@ -142,16 +142,11 @@ public class LogWebSocketHandle implements TailLogThread.Evn {
         SocketSession socketSession = getItem(session);
         // 进入管理页面后需要实时加载日志
         String log = projectInfoModel.getLog();
-        try {
-            destroy(session, "重新打开新的对话");
-            // 一定要启动新的线程，防止InputStream阻塞处理WebSocket的线程
-            TailLogThread thread = TailLogThread.createThread(session, log, this);
-            socketSession.setThread(thread);
-            EXECUTOR_SERVICE.execute(thread);
-        } catch (IOException e) {
-            DefaultSystemLog.ERROR().error("打开日志异常", e);
-            socketSession.sendMsg("打开日志异常");
-        }
+        destroy(session, "重新打开新的对话");
+        // 一定要启动新的线程，防止InputStream阻塞处理WebSocket的线程
+        TailLogThread thread = TailLogThread.createThread(session, log, this);
+        socketSession.setThread(thread);
+        EXECUTOR_SERVICE.execute(thread);
     }
 
 
@@ -160,7 +155,7 @@ public class LogWebSocketHandle implements TailLogThread.Evn {
             SocketSession socketSession = getItem(session);
             if (socketSession.getThread() != null) {
                 if (callback != null) {
-                    socketSession.getThread().send(callback);
+                    SocketSession.send(session, callback);
                 }
                 socketSession.getThread().stop();
             }

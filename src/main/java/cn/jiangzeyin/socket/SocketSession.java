@@ -2,6 +2,7 @@ package cn.jiangzeyin.socket;
 
 
 import cn.jiangzeyin.common.DefaultSystemLog;
+import cn.jiangzeyin.util.KeyLock;
 
 import javax.websocket.Session;
 import java.io.IOException;
@@ -12,13 +13,15 @@ import java.io.InputStream;
  */
 public class SocketSession {
 
+    private static final KeyLock<String> LOCK = new KeyLock<>();
+
     private TailLogThread thread;
     private Session session;
+
 
     public SocketSession(Session session) {
         this.session = session;
     }
-
 
     public TailLogThread getThread() {
         return thread;
@@ -28,28 +31,38 @@ public class SocketSession {
         this.thread = thread;
     }
 
-    public Session getSession() {
-        return session;
-    }
-
-    public void setSession(Session session) {
-        this.session = session;
-    }
-
     /**
      * 发送消息
      *
      * @param msg 消息
      */
-    public void sendMsg(String msg) {
+    public void sendMsg(String msg) throws IOException {
         if (session == null) {
             return;
         }
-        try {
-            DefaultSystemLog.LOG().info(msg);
-            session.getBasicRemote().sendText(msg);
-        } catch (IOException e) {
-            DefaultSystemLog.ERROR().error("websocket发送信息异常", e);
+        DefaultSystemLog.LOG().info(msg);
+        send(session, msg);
+    }
+
+    public static void send(final Session session, String msg) throws IOException {
+        if (msg == null) {
+            return;
+        }
+        if (!session.isOpen()) {
+            return;
+        }
+        for (int i = 1; i <= 10; i++) {
+            try {
+                LOCK.lock(session.getId());
+                session.getBasicRemote().sendText(msg);
+                LOCK.unlock(session.getId());
+                break;
+            } catch (IOException e) {
+                DefaultSystemLog.ERROR().error("发送消息失败:" + i, e);
+                if (i == 10) {
+                    throw e;
+                }
+            }
         }
     }
 }
