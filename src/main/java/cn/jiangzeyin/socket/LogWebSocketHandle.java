@@ -1,7 +1,5 @@
 package cn.jiangzeyin.socket;
 
-import cn.hutool.core.io.IoUtil;
-import cn.hutool.core.util.CharsetUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.spring.SpringUtil;
@@ -17,7 +15,6 @@ import javax.websocket.*;
 import javax.websocket.server.PathParam;
 import javax.websocket.server.ServerEndpoint;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 
@@ -148,7 +145,6 @@ public class LogWebSocketHandle implements TailLogThread.Evn {
         socketSession.setThread(thread);
         EXECUTOR_SERVICE.execute(thread);
     }
-
 
     private void destroy(Session session, String callback) {
         try {

@@ -1,8 +1,6 @@
 package cn.jiangzeyin.socket;
 
-import cn.hutool.core.io.IORuntimeException;
 import cn.hutool.core.io.IoUtil;
-import cn.hutool.core.io.LineHandler;
 import cn.hutool.core.util.CharsetUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 
@@ -11,13 +9,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.BiFunction;
-import java.util.function.Function;
-
-import static com.sun.org.apache.xml.internal.security.keys.keyresolver.KeyResolver.iterator;
 
 /**
  * 线程处理
@@ -75,6 +68,11 @@ public class TailLogThread implements Runnable {
         return tailLogThread;
     }
 
+    /**
+     * 通知日志需要重新加载
+     *
+     * @param log log
+     */
     public static void logChange(String log) {
         LOG_CHANGE.put(log, true);
     }
@@ -113,7 +111,6 @@ public class TailLogThread implements Runnable {
         }
     }
 
-
     @Override
     public void run() {
         do {
@@ -134,6 +131,14 @@ public class TailLogThread implements Runnable {
                 }
             }
         } while (reload);
+
+        try {
+            inputStream.close();
+            bufferedReader.close();
+        } catch (IOException e) {
+            DefaultSystemLog.ERROR().error("关闭流异常", e);
+            send("关闭流异常:" + e.getMessage());
+        }
         send("结束本次读取地址事件");
         DefaultSystemLog.LOG().info("结束本次读取地址事件");
     }
