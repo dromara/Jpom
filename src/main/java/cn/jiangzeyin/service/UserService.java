@@ -1,11 +1,19 @@
 package cn.jiangzeyin.service;
 
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SecureUtil;
+import cn.jiangzeyin.common.DefaultSystemLog;
+import cn.jiangzeyin.common.JsonMessage;
+import cn.jiangzeyin.model.UserInfoMode;
 import cn.jiangzeyin.util.JsonUtil;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * @author Administrator
@@ -20,7 +28,7 @@ public class UserService extends BaseService {
      *
      * @param name 用户名
      * @param pwd  密码
-     * @return
+     * @return 登录
      */
     public boolean login(String name, String pwd) throws Exception {
         JSONObject userInfo = getJsonObject(FILENAME, name);
@@ -48,6 +56,31 @@ public class UserService extends BaseService {
         return false;
     }
 
+    /**
+     * 获取用户列表
+     *
+     * @return 用户列表
+     */
+    public JSONArray getUserList() {
+        JSONObject jsonObject = null;
+        try {
+            jsonObject = getJsonObject(FILENAME);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        if (jsonObject == null) {
+            return null;
+        }
+        Set<Map.Entry<String, Object>> set = jsonObject.entrySet();
+        JSONArray array = new JSONArray();
+        for (Map.Entry entry : set) {
+            String key = (String) entry.getKey();
+            JSONObject value = (JSONObject) entry.getValue();
+            value.remove("password");
+            array.add(value);
+        }
+        return array;
+    }
 
     /**
      * 修改密码
@@ -72,5 +105,83 @@ public class UserService extends BaseService {
         } else {
             return "olderror";
         }
+    }
+
+    /**
+     * 删除用户
+     *
+     * @param id 用户id
+     * @return String
+     */
+    public boolean deleteUser(String id) {
+        try {
+            deleteJson(FILENAME, id);
+            return true;
+        } catch (Exception e) {
+            DefaultSystemLog.LOG().error(e.getMessage(), e);
+        }
+        return false;
+    }
+
+    /**
+     * 新增用户
+     *
+     * @param user 用户
+     */
+    public String addUser(UserInfoMode user) {
+        if (user == null) {
+            return JsonMessage.getString(400, "用户信息为空");
+        }
+        String password = user.getPassword();
+        if (StrUtil.isEmpty(password)) {
+            return JsonMessage.getString(400, "密码不能为空");
+        }
+        try {
+            JSONObject jsonData = getJsonObject(FILENAME);
+            String id = user.getId();
+            if (jsonData.containsKey(id)) {
+                return JsonMessage.getString(400, "该用户已存在");
+            }
+            JSONObject object = (JSONObject) JSON.toJSON(user);
+            saveJson(FILENAME, object);
+            return JsonMessage.getString(200, "添加成功");
+        } catch (Exception e) {
+            DefaultSystemLog.LOG().error(e.getMessage(), e);
+        }
+        return JsonMessage.getString(400, "添加失败");
+    }
+
+    /**
+     * 修改用户
+     *
+     * @param user 用户
+     * @return String
+     */
+    public String updateUser(UserInfoMode user) {
+        if (user == null) {
+            return JsonMessage.getString(400, "用户信息为空");
+        }
+        System.out.println(user.toString());
+        String id = user.getId();
+        if (StrUtil.isEmpty(id)) {
+            return JsonMessage.getString(400, "修改失败,获取id失败");
+        }
+        String name = StrUtil.nullToEmpty(user.getName());
+        String password = StrUtil.nullToEmpty(user.getPassword());
+        Boolean role = user.getRole();
+        try {
+            JSONObject jsonData = getJsonObject(FILENAME);
+            JSONObject jsonObject = jsonData.getJSONObject(id);
+            jsonObject.put("name", name);
+            if (!StrUtil.isEmpty(password)) {
+                jsonObject.put("password", password);
+            }
+            jsonObject.put("role", role);
+            updateJson(FILENAME, jsonObject);
+            return JsonMessage.getString(200, "修改成功");
+        } catch (Exception e) {
+            DefaultSystemLog.LOG().error(e.getMessage(), e);
+        }
+        return JsonMessage.getString(400, "修改失败");
     }
 }

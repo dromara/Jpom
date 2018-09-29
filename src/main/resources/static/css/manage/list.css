@@ -1,0 +1,20 @@
+body {
+    padding: 10px 10px 0px 10px;
+}
+
+.div-project {
+    display: none;
+    width: 100%;
+    margin: 10px 0;
+}
+
+.div-project .layui-inline {
+    width: calc(50% - 5px);
+    margin-right: 0px;
+}
+.layui-form-label{
+    width: 100px;
+}
+.layui-input-block{
+    margin-left: 135px;
+}
