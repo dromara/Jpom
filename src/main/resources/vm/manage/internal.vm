@@ -12,73 +12,28 @@
 </head>
 
 <body>
-<div class="layui-form">
-    <table class="layui-table">
-        <thead>
-        <tr>
-            <th>文件名</th>
-            <th>修改时间</th>
-            <th>文件大小</th>
-            <th>操作</th>
-        </tr>
-        </thead>
-        <tbody>
-            #foreach($item in $array)
-            <tr>
-                <td>$item.shortKey</td>
-                <td>$item.time</td>
-                <td>$item.size</td>
-                <td>
-                    <button name="install" data-name="$item.shortKey" data-key="$item.key" data-id="$id"
-                            class="layui-btn layui-btn-normal layui-btn-sm">安装
-                    </button>
-                </td>
-            </tr>
-            #end
-        </tbody>
-    </table>
+<div class="layui-form-item">
+    <label class="layui-form-label">已使用：</label>
+    <label class="layui-form-label">$internal.use</label>
+</div>
+<div class="layui-form-item">
+    <label class="layui-form-label">分配剩余：</label>
+    <label class="layui-form-label">$internal.free</label>
+</div>
+<div class="layui-form-item">
+    <label class="layui-form-label">最大可用：</label>
+    <label class="layui-form-label">$internal.useAble</label>
+</div>
+<div class="layui-form-item">
+    <label class="layui-form-label">已分配：</label>
+    <label class="layui-form-label">$internal.allot</label>
+</div>
+<div class="layui-form-item">
+    <label class="layui-form-label">总内存：</label>
+    <label class="layui-form-label">$internal.total</label>
 </div>
 </body>
 <script type="text/javascript">
-    layui.use(['layer', 'element', 'table', 'form'], function () {
-        var $ = layui.$;
-        var layer = layui.layer;
 
-        $("button[name='install']").click(function () {
-            var that = $(this);
-            var name = that.attr("data-name");
-            layer.confirm('您确定要安装【' + name + '】？', {
-                btn: ['确定', '不确定'] //按钮
-            }, function (index) {
-                layer.close(index);
-                index = layer.load(1, {
-                    shade: [0.5, '#fff'] //0.1透明度的白色背景
-                });
-                var key = that.attr("data-key");
-                var id = that.attr("data-id");
-                $.ajax({
-                    url: './build_install',
-                    type: 'POST',
-                    dataType: 'json',
-                    data: {id: id, key: key},
-                    success: function (data) {
-                        layer.msg(data.msg);
-                        if (200 == data.code) {
-
-                        }
-                    },
-                    error: function (err) {
-                        layer.msg('安装失败');
-                    },
-                    complete: function () {
-                        layer.close(index);
-                    }
-                });
-            }, function () {
-
-            });
-
-        });
-    });
 </script>
 </html>

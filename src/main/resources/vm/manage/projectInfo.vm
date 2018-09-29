@@ -180,6 +180,14 @@
                     area: ['80%', '90%'],
                     content: 'build?id=' + data.id
                 });
+            }else if ('ram' === event) {
+                layer.open({
+                    type: 2,
+                    title: '内存',
+                    shade: 0.8,
+                    area: ['60%', '50%'],
+                    content: 'internal?id=' + data.id
+                });
             }
         });
 

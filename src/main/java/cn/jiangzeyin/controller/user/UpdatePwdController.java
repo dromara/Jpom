@@ -3,7 +3,6 @@ package cn.jiangzeyin.controller.user;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.controller.BaseController;
-import cn.jiangzeyin.model.UserInfoMode;
 import cn.jiangzeyin.service.UserService;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.RequestMapping;

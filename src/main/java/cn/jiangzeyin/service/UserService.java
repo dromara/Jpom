@@ -4,9 +4,7 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SecureUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
-import cn.jiangzeyin.model.UserInfoMode;
 import cn.jiangzeyin.util.JsonUtil;
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;
@@ -77,10 +75,10 @@ public class UserService extends BaseService {
             String key = (String) entry.getKey();
             JSONObject value = (JSONObject) entry.getValue();
             value.remove("password");
-            if(value.containsKey("role")){
-                value.put("role","是");
-            }else {
-                value.put("role","否");
+            if (value.containsKey("role")) {
+                value.put("role", "是");
+            } else {
+                value.put("role", "否");
             }
             array.add(value);
         }
@@ -130,62 +128,45 @@ public class UserService extends BaseService {
 
     /**
      * 新增用户
-     *
-     * @param user 用户
      */
-    public String addUser(UserInfoMode user) {
-        if (user == null) {
-            return JsonMessage.getString(400, "用户信息为空");
-        }
-        String password = user.getPassword();
-        if (StrUtil.isEmpty(password)) {
-            return JsonMessage.getString(400, "密码不能为空");
-        }
+    public boolean addUser(String id, String name, String password, String role) {
         try {
-            JSONObject jsonData = getJsonObject(FILENAME);
-            String id = user.getId();
-            if (jsonData.containsKey(id)) {
-                return JsonMessage.getString(400, "该用户已存在");
-            }
-            JSONObject object = (JSONObject) JSON.toJSON(user);
+            JSONObject object = new JSONObject();
+            object.put("id", id);
+            object.put("name", name);
+            object.put("password", password);
+            object.put("role", role);
             saveJson(FILENAME, object);
-            return JsonMessage.getString(200, "添加成功");
+            return true;
         } catch (Exception e) {
             DefaultSystemLog.LOG().error(e.getMessage(), e);
         }
-        return JsonMessage.getString(400, "添加失败");
+        return false;
     }
 
     /**
      * 修改用户
      *
-     * @param user 用户
      * @return String
      */
-    public String updateUser(UserInfoMode user) {
-        if (user == null) {
-            return JsonMessage.getString(400, "用户信息为空");
-        }
-        String id = user.getId();
-        if (StrUtil.isEmpty(id)) {
-            return JsonMessage.getString(400, "修改失败,获取id失败");
-        }
-        String name = StrUtil.nullToEmpty(user.getName());
-        String password = StrUtil.nullToEmpty(user.getPassword());
-        Boolean role = user.getRole();
+    public boolean updateUser(String id, String name, String password, String role) {
         try {
-            JSONObject jsonData = getJsonObject(FILENAME);
-            JSONObject jsonObject = jsonData.getJSONObject(id);
-            jsonObject.put("name", name);
+            JSONObject object = new JSONObject();
+            object.put("id", id);
+            object.put("name", name);
+            object.put("role", role);
+            JSONObject jsonObject = getJsonObject(FILENAME);
+            JSONObject user = jsonObject.getJSONObject(id);
+            String pass = user.getString("password");
+            object.put("password", pass);
             if (!StrUtil.isEmpty(password)) {
-                jsonObject.put("password", password);
+                object.put("password", password);
             }
-            jsonObject.put("role", role);
-            updateJson(FILENAME, jsonObject);
-            return JsonMessage.getString(200, "修改成功");
+            updateJson(FILENAME, object);
+            return true;
         } catch (Exception e) {
             DefaultSystemLog.LOG().error(e.getMessage(), e);
         }
-        return JsonMessage.getString(400, "修改失败");
+        return false;
     }
 }
