@@ -1,14 +1,23 @@
 package cn.jiangzeyin.socket;
 
+import cn.hutool.core.io.IORuntimeException;
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.io.LineHandler;
 import cn.hutool.core.util.CharsetUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 
 import javax.websocket.Session;
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.BiFunction;
+import java.util.function.Function;
+
+import static com.sun.org.apache.xml.internal.security.keys.keyresolver.KeyResolver.iterator;
 
 /**
  * 线程处理
@@ -18,25 +27,58 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class TailLogThread implements Runnable {
 
-    private static ConcurrentHashMap<String, InputStream> MAP = new ConcurrentHashMap<>();
-    private static ConcurrentHashMap<String, Boolean> CHANGE = new ConcurrentHashMap<>();
+
+    private static final ConcurrentHashMap<String, List<TailLogThread>> TAIL_LOG_THREAD_CONCURRENT_HASH_MAP = new ConcurrentHashMap<>();
 
     private final Session session;
-    private boolean run = true;
     private Evn evn;
-    private String log;
     private int errorCount;
+    private String log;
+    private InputStream inputStream;
+    private Process process;
+    private volatile boolean reload = false;
+    private BufferedReader bufferedReader;
 
-    TailLogThread(InputStream in, String log, Session session, Evn evn) {
+    private TailLogThread(String log, Session session, Evn evn) {
         this.session = session;
         this.evn = evn;
         this.log = log;
-        MAP.put(log, in);
-        CHANGE.put(log, true);
+    }
+
+    public static TailLogThread createThread(Session session, String log, Evn evn) throws IOException {
+        List<TailLogThread> logThreads = TAIL_LOG_THREAD_CONCURRENT_HASH_MAP.computeIfAbsent(log, s -> new ArrayList<>());
+        for (TailLogThread logThread : logThreads) {
+            //  停止上一次的读取
+            logThread.process.destroy();
+            // 标记需要重新执行
+            logThread.reload = true;
+        }
+        TailLogThread tailLogThread = new TailLogThread(log, session, evn);
+        logThreads.add(tailLogThread);
+        return tailLogThread;
+    }
+
+    private void loadInputStream() throws IOException {
+        if (inputStream != null) {
+            inputStream.close();
+        }
+        if (bufferedReader != null) {
+            bufferedReader.close();
+        }
+        // 执行tail -f命令
+        process = Runtime.getRuntime().exec(String.format("tail -f %s", this.log));
+        inputStream = process.getInputStream();
+        bufferedReader = IoUtil.getReader(inputStream, CharsetUtil.CHARSET_UTF_8);
+        // 已经重新加载
+        reload = false;
     }
 
     void stop() {
-        run = false;
+        if (process != null) {
+            process.destroy();
+        }
+        List<TailLogThread> logThreads = TAIL_LOG_THREAD_CONCURRENT_HASH_MAP.computeIfAbsent(log, s -> new ArrayList<>());
+        logThreads.remove(this);
     }
 
     public void send(String msg) {
@@ -63,37 +105,24 @@ public class TailLogThread implements Runnable {
 
     @Override
     public void run() {
-        InputStream inputStream = MAP.get(this.log);
-        while (run) {
-            Boolean change = CHANGE.get(this.log);
-            if (change != null && change) {
-                inputStream = MAP.get(this.log);
-                CHANGE.remove(this.log);
-                send("自动切换到新的流");
-                System.out.println("切换：" + session.getId());
-            }
-            if (inputStream == null) {
-                send("没有对应日志信息");
-                break;
+        do {
+            if (reload) {
+                send("需要重新开始读取流");
             }
             try {
-                errorCount = 0;
-                // 将实时日志通过WebSocket发送给客户端，给每一行添加一个HTML换行
-                IoUtil.readLines(inputStream, CharsetUtil.CHARSET_UTF_8, (LineHandler) this::send);
-            } catch (Exception e) {
-                String msg = e.getMessage();
-                if (msg.contains("Stream closed") && errorCount++ <= 10) {
-                    send("流已关闭,将等等自动重连");
-                    continue;
+                loadInputStream();
+                String line;
+                // 会阻塞读取
+                while ((line = bufferedReader.readLine()) != null) {
+                    send(line);
                 }
-                e.printStackTrace();
+            } catch (Exception e) {
                 stop();
                 if (evn != null) {
                     evn.onError(session);
                 }
-                break;
             }
-        }
+        } while (reload);
         DefaultSystemLog.LOG().info("结束本次读取地址事件");
     }
 
@@ -104,5 +133,28 @@ public class TailLogThread implements Runnable {
          * @param session 会话
          */
         void onError(Session session);
+
+    }
+
+    public static void main(String[] args) throws IOException {
+        Process process = Runtime.getRuntime().exec(String.format("tail -f %s", "/boot-line/boot/online/run.log"));
+        InputStream inputStream = process.getInputStream();
+        BufferedReader bufferedReader = IoUtil.getReader(inputStream, CharsetUtil.CHARSET_UTF_8);
+        String line;
+        new Thread() {
+            @Override
+            public void run() {
+                try {
+                    Thread.sleep(5000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                System.out.println("关闭");
+                process.destroy();
+            }
+        }.start();
+        while ((line = bufferedReader.readLine()) != null) {
+            System.out.println(line);
+        }
     }
 }

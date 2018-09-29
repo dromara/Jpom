@@ -12,8 +12,6 @@ import java.io.InputStream;
  */
 public class SocketSession {
 
-    private Process process;
-    private InputStream inputStream;
     private TailLogThread thread;
     private Session session;
 
@@ -21,21 +19,6 @@ public class SocketSession {
         this.session = session;
     }
 
-    public Process getProcess() {
-        return process;
-    }
-
-    public void setProcess(Process process) {
-        this.process = process;
-    }
-
-    public InputStream getInputStream() {
-        return inputStream;
-    }
-
-    public void setInputStream(InputStream inputStream) {
-        this.inputStream = inputStream;
-    }
 
     public TailLogThread getThread() {
         return thread;
