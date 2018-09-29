@@ -7,28 +7,47 @@ import cn.jiangzeyin.common.spring.SpringUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.aliyun.oss.OSSClient;
+import com.aliyun.oss.model.ListObjectsRequest;
 import com.aliyun.oss.model.OSSObjectSummary;
 import com.aliyun.oss.model.ObjectListing;
+import org.springframework.stereotype.Service;
 
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Created by jiangzeyin on 2018/9/28.
  */
-public class OssManager {
+@Service
+public class OssManagerService {
 
-    public void list(String name) {
-        OSSClient ossClient = getOSSClient();
+    public List<OSSObjectSummary> list(String name) {
+        OSSClient ossClient;
         String prefix = String.format("%s%s", getKeyPrefix(), name);
-        ObjectListing objectListing = ossClient.listObjects(getBucketName(), prefix);
-        List<OSSObjectSummary> sums = objectListing.getObjectSummaries();
-        for (OSSObjectSummary s : sums) {
-            // System.out.println(DateUtil.date(s.getLastModified()));
-            System.out.println("\t" + s.getKey());
-        }
-        // 关闭OSSClient。
-        ossClient.shutdown();
+        ListObjectsRequest request;
+        List<OSSObjectSummary> summaryList = new ArrayList<>();
+        String nextMarker = null;
+        do {
+            ossClient = getOSSClient();
+            request = new ListObjectsRequest();
+            request.setBucketName(getBucketName());
+            request.setPrefix(prefix);
+            request.setMaxKeys(1);
+            request.setMarker(nextMarker);
+            ObjectListing objectListing = ossClient.listObjects(request);
+            List<OSSObjectSummary> sums = objectListing.getObjectSummaries();
+            sums.forEach(ossObjectSummary -> {
+                String newKey = ossObjectSummary.getKey().substring(prefix.length());
+                ossObjectSummary.setKey(newKey);
+            });
+            summaryList.addAll(sums);
+            nextMarker = objectListing.getNextMarker();
+            // 关闭OSSClient。
+            ossClient.shutdown();
+        } while (nextMarker != null);
+        summaryList.sort((o1, o2) -> o2.getLastModified().compareTo(o1.getLastModified()));
+        return summaryList;
     }
 
     private OSSClient getOSSClient() {

@@ -1,5 +1,6 @@
 package cn.jiangzeyin.service.manage;
 
+import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.model.ProjectInfoModel;
 import cn.jiangzeyin.service.BaseService;
@@ -58,7 +59,8 @@ public class ManageService extends BaseService {
         if (jsonObject == null) {
             return;
         }
-        JSONObject newJson = (JSONObject) JSONObject.toJSON(projectInfo);
+        projectInfo.setModifyTime(DateUtil.now());
+        JSONObject newJson = projectInfo.toJson();
         Set<String> keys = newJson.keySet();
         for (String key : keys) {
             String val = newJson.getString(key);

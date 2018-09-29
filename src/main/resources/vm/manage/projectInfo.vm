@@ -14,72 +14,6 @@
     <button id="updateRunBoot" class="layui-btn layui-btn-sm">修改启动文件</button>
 </div>
 <table class="layui-table" id="tab_project" lay-filter="tab_project" style="margin: 0;"></table>
-<div class="layui-container div-project" id="div-project">
-    <form action="" class="layui-form" id="form_project">
-        <div class="layui-form-item">
-            <div class="layui-inline">
-                <label class="layui-form-label">项目名称</label>
-                <div class="layui-input-block">
-                    <input type="text" name="id" placeholder="项目名称（设置后将不能修改）" required lay-verify="required"
-                           class="layui-input">
-                </div>
-            </div>
-            <div class="layui-inline">
-                <label class="layui-form-label">Tag</label>
-                <div class="layui-input-block">
-                    <input type="text" name="tag" placeholder="程序运行标志" required lay-verify="required"
-                           class="layui-input">
-                </div>
-            </div>
-        </div>
-        <div class="layui-form-item">
-            <div class="layui-inline">
-                <label class="layui-form-label">MainClass</label>
-                <div class="layui-input-block">
-                    <input type="text" name="mainClass" placeholder="程序运行的SpringBoot main 类" required
-                           lay-verify="required" class="layui-input">
-                </div>
-            </div>
-            <div class="layui-inline">
-                <label class="layui-form-label">Lib</label>
-                <div class="layui-input-block">
-                    <input type="text" name="lib" placeholder="程序在生产服务器环境中需要的jar路径" required lay-verify="required"
-                           class="layui-input">
-                </div>
-            </div>
-        </div>
-        <div class="layui-form-item">
-            <div class="layui-inline">
-                <label class="layui-form-label">Log</label>
-                <div class="layui-input-block">
-                    <input type="text" name="log" placeholder="记录程序运行所有日志保存路径" required lay-verify="required"
-                           class="layui-input">
-                </div>
-            </div>
-            <div class="layui-inline">
-                <label class="layui-form-label">args</label>
-                <div class="layui-input-block">
-                    <input type="text" name="args" placeholder="arg参数" class="layui-input">
-                </div>
-            </div>
-        </div>
-        <div class="layui-form-item">
-            <div class="layui-inline">
-                <label class="layui-form-label">Token</label>
-                <div class="layui-input-block">
-                    <input type="text" name="token" placeholder="对应接口的token，可不填" class="layui-input">
-                </div>
-            </div>
-            <div class="layui-inline">
-                <label class="layui-form-label">Jvm参数</label>
-                <div class="layui-input-block">
-                    <input type="text" name="jvm" placeholder="jvm参数" class="layui-input">
-                </div>
-            </div>
-        </div>
-        <input type="hidden" lay-submit lay-filter="submitProject" id="project_submit">
-    </form>
-</div>
 
 <div class="div-runboot" id="div-runboot">
     <form action="" class="layui-form" id="form_runboot">
@@ -93,12 +27,14 @@
     <a href="javascript:;" class="layui-btn  layui-btn-sm layui-btn-normal" lay-event="manage">管理</a>
     <a href="javascript:;" class="layui-btn  layui-btn-sm layui-btn-warm" lay-event="update">配置</a>
     <a href="javascript:;" class="layui-btn  layui-btn-sm layui-btn" lay-event="file">文件</a>
+    <a href="javascript:;" class="layui-btn  layui-btn-sm layui-btn" lay-event="build">构建</a>
     <a href="javascript:;" class="layui-btn  layui-btn-sm layui-btn-danger" lay-event="delete">删除</a>
 </script>
 <script type="text/javascript">
+    var table;
     layui.use(['layer', 'element', 'table', 'form'], function () {
         var $ = layui.$;
-        var table = layui.table;
+        table = layui.table;
         var form = layui.form;
         var layer = layui.layer;
 
@@ -110,10 +46,10 @@
             even: true,
             cols: [[
                 {field: 'id', title: '项目名称'},
-                {field: 'lib', title: 'Lib'},
-                {field: 'createTime', title: '创建时间'},
-                {field: 'modifyTime', title: '修改时间'},
-                {field: 'op', title: '操作', align: 'center', toolbar: '#bar_projects', fixed: 'right'}
+                {field: 'modifyTime', title: '运行状态', width: '10%'},
+                {field: 'createTime', title: '创建时间', width: '15%'},
+                {field: 'modifyTime', title: '修改时间', width: '15%'},
+                {field: 'op', title: '操作', toolbar: '#bar_projects'}
             ]],
             loading: true,
             response: {
@@ -121,29 +57,10 @@
             }
         });
 
-        // '添加项目'点击事件
-        $('#addProject').on('click', function () {
-            // 重置表单
-            document.getElementById('form_project').reset();
-            $('#form_project [name="id"]').attr('readonly', false).removeClass('layui-disabled');
-            // 弹出
-            layer.open({
-                type: 1,
-                title: '新增项目',
-                content: $('#div-project'),
-                area: ['80%', '80%'],
-                btnAlign: 'c',
-                btn: ['提交'],
-                yes: function (index, layero) {
-                    $('#form_project').attr('action', '/manage/addProject');
-                    $('#project_submit').click();
-                }
-            });
-        });
 
         // '刷新表格'点击事件
         $('#refresh').on('click', function () {
-            table.reload('table_project', {height: 'full-52'});
+            reloadTable();
         });
 
         // '修改启动文件'点击事件
@@ -222,26 +139,27 @@
                 }
             });
             return false;
+        }); // '添加项目'点击事件
+        $('#addProject').on('click', function () {
+            editProject("");
         });
 
-        // 表单验证
-        form.verify({
-            port: function (value, item) {
-                if (!/^[0-9]{2,5}$/.test(value) || 80 > value || value > 65530) {
-                    return 'Port请填写80-65530之间，避免占用系统进程端口！';
-                }
-            }
-        });
-
+        function editProject(id) {
+            layer.open({
+                type: 2,
+                title: '管理项目配置信息',
+                shade: 0.8,
+                area: ['80%', '90%'],
+                content: 'editProject?id=' + id
+            });
+        }
 
         // 表格工具条事件
         table.on('tool(tab_project)', function (obj) {
             var data = obj.data;
             var event = obj.event;
-
             if ('update' === event) {
-                // 配置
-                updateApplication(data);
+                editProject(data.id);
             } else if ('delete' === event) {
                 // 删除
                 deleteApplication(data);
@@ -250,6 +168,15 @@
                 manageApplication(data);
             } else if ('file' === event) {
                 fileManage(data);
+            } else if ('build' === event) {
+                console.log(data)
+                layer.open({
+                    type: 2,
+                    title: '自动构建',
+                    shade: 0.8,
+                    area: ['80%', '90%'],
+                    content: 'build?id=' + data.id
+                });
             }
         });
 
@@ -302,32 +229,6 @@
             }
         }
 
-        // 配置项目
-        function updateApplication(data) {
-            // 重置表单
-            document.getElementById('form_project').reset();
-            $('#form_project [name="id"]').attr('readonly', true).addClass('layui-disabled');
-
-            // 设置表单值
-            for (var key in data) {
-                $('#form_project [name="' + key + '"]').val(data[key]);
-            }
-
-            // 弹出
-            layer.open({
-                type: 1,
-                title: '配置项目',
-                content: $('#div-project'),
-                area: ['80%', '80%'],
-                btnAlign: 'c',
-                btn: ['提交'],
-                yes: function (index, layero) {
-                    $('#form_project').attr('action', '/manage/updateProject');
-                    $('#project_submit').click();
-                }
-            });
-        }
-
         // 删除项目
         function deleteApplication(data) {
             layer.confirm('确定删除项目 ' + data.id + '？', {title: '系统提示'}, function (index) {
@@ -353,5 +254,9 @@
             });
         }
     });
+
+    function reloadTable() {
+        table.reload('table_project', {height: 'full-52'});
+    }
 </script>
 </html>

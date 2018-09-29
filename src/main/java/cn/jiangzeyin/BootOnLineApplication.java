@@ -2,7 +2,6 @@ package cn.jiangzeyin;
 
 import cn.jiangzeyin.common.ApplicationBuilder;
 import cn.jiangzeyin.common.EnableCommonBoot;
-import cn.jiangzeyin.oss.OssManager;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.web.servlet.ServletComponentScan;
 import org.springframework.http.converter.StringHttpMessageConverter;
@@ -28,7 +27,7 @@ public class BootOnLineApplication {
         ApplicationBuilder.createBuilder(BootOnLineApplication.class)
                 .addHttpMessageConverter(new StringHttpMessageConverter(Charset.forName("UTF-8")))
                 .run(args);
-        OssManager ossManager = new OssManager();
-        ossManager.list("tashimall-manage_");
+//        OssManager ossManager = new OssManager();
+//        System.out.println(JSONArray.toJSON(ossManager.list("")));
     }
 }

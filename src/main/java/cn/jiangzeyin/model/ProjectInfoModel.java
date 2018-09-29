@@ -18,6 +18,15 @@ public class ProjectInfoModel {
     private String createTime;
     private String modifyTime;
     private String args;
+    private String buildTag;
+
+    public String getBuildTag() {
+        return buildTag;
+    }
+
+    public void setBuildTag(String buildTag) {
+        this.buildTag = buildTag;
+    }
 
     public String getModifyTime() {
         return modifyTime;
@@ -103,5 +112,9 @@ public class ProjectInfoModel {
     @Override
     public String toString() {
         return JSONObject.toJSONString(this);
+    }
+
+    public JSONObject toJson() {
+        return (JSONObject) JSONObject.toJSON(this);
     }
 }

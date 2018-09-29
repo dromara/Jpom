@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    #parse("./common/head.vm")
+    <title>项目管理系统</title>
+    <style>
+        .div-project {
+            width: 100%;
+            margin: 10px 0;
+        }
+
+        .div-project .layui-inline {
+            width: calc(50% - 5px);
+            margin-right: 0px;
+        }
+    </style>
+</head>
+
+<body>
+<div class="layui-container div-project" id="div-project">
+    <form action="saveProject" class="layui-form" id="form_project">
+        <div class="layui-form-item">
+            <div class="layui-inline">
+                <label class="layui-form-label">项目名Id</label>
+                <div class="layui-input-block">
+                    <input type="text" name="id" placeholder="项目名称（设置后将不能修改）" required lay-verify="required"
+                           class="layui-input" value="#if($item)$!item.id#end">
+                </div>
+            </div>
+            <div class="layui-inline">
+                <label class="layui-form-label">Tag</label>
+                <div class="layui-input-block">
+                    <input type="text" name="tag" placeholder="程序运行标志" required lay-verify="required"
+                           class="layui-input" value="#if($item)$!item.tag#end">
+                </div>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-inline">
+                <label class="layui-form-label">MainClass</label>
+                <div class="layui-input-block">
+                    <input type="text" name="mainClass" placeholder="程序运行的SpringBoot main 类" required
+                           lay-verify="required" class="layui-input" value="#if($item)$!item.mainClass#end">
+                </div>
+            </div>
+            <div class="layui-inline">
+                <label class="layui-form-label">Lib</label>
+                <div class="layui-input-block">
+                    <input type="text" name="lib" placeholder="程序在生产服务器环境中需要的jar路径" required lay-verify="required"
+                           class="layui-input" value="#if($item)$!item.lib#end">
+                </div>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-inline">
+                <label class="layui-form-label">Log</label>
+                <div class="layui-input-block">
+                    <input type="text" name="log" placeholder="记录程序运行所有日志保存路径" required lay-verify="required"
+                           class="layui-input" value="#if($item)$!item.log#end">
+                </div>
+            </div>
+            <div class="layui-inline">
+                <label class="layui-form-label">Token</label>
+                <div class="layui-input-block">
+                    <input type="text" name="token" placeholder="对应接口的token，可不填" class="layui-input"
+                           value="#if($item)$!item.token#end">
+                </div>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-inline">
+                <label class="layui-form-label">Jvm参数</label>
+                <div class="layui-input-block">
+                    <input type="text" name="jvm" placeholder="jvm参数" class="layui-input"
+                           value="#if($item)$!item.jvm#end">
+                </div>
+            </div>
+            <div class="layui-inline">
+                <label class="layui-form-label">args</label>
+                <div class="layui-input-block">
+                    <input type="text" name="args" placeholder="arg参数" class="layui-input"
+                           value="#if($item)$!item.args#end">
+                </div>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-inline">
+                <label class="layui-form-label">Build标识</label>
+                <div class="layui-input-block">
+                    <input type="text" name="buildTag" placeholder="Build标识" class="layui-input"
+                           value="#if($item)$!item.buildTag#end">
+                </div>
+            </div>
+        </div>
+        <div class="layui-form-item" style="padding-left: 20%">
+            <button class="layui-btn layui-btn-normal" lay-submit lay-filter="submitProject" id="project_submit">提交
+            </button>
+        </div>
+    </form>
+</div>
+</body>
+<script type="text/javascript">
+    layui.use(['layer', 'element', 'table', 'form'], function () {
+        var $ = layui.$;
+        var table = layui.table;
+        var form = layui.form;
+        var layer = layui.layer;
+
+
+        // 提交项目表单
+        form.on('submit(submitProject)', function (data) {
+            console.log(data.field)
+            $.ajax({
+                url: data.form.action,
+                type: 'POST',
+                dataType: 'json',
+                data: data.field,
+                success: function (data) {
+                    layer.msg(data.msg);
+                    if (200 == data.code) {
+                        var index = parent.layer.getFrameIndex(window.name);
+                        parent.layer.close(index);
+                        // 刷新项目列表
+                        parent.reloadTable();
+                    }
+                },
+                error: function (err) {
+                    layer.msg('操作失败！');
+                }
+            });
+            return false;
+        });
+
+        // 表单验证
+        form.verify({
+            port: function (value, item) {
+                if (!/^[0-9]{2,5}$/.test(value) || 80 > value || value > 65530) {
+                    return 'Port请填写80-65530之间，避免占用系统进程端口！';
+                }
+            }
+        });
+    });
+</script>
+</html>
