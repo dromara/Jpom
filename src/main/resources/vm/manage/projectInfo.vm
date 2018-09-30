@@ -62,7 +62,6 @@
             }
         });
 
-
         // '刷新表格'点击事件
         $('#refresh').on('click', function () {
             reloadTable();
@@ -180,7 +179,7 @@
                     area: ['80%', '90%'],
                     content: 'build?id=' + data.id
                 });
-            }else if ('ram' === event) {
+            } else if ('ram' === event) {
                 layer.open({
                     type: 2,
                     title: '内存',
@@ -195,7 +194,6 @@
         function fileManage(data) {
             var lay_id = 'tab_file_' + data.id;
             var url = '/file/filemanage?id=' + data.id;
-
             tabChange({
                 id: data.id,
                 url: url,

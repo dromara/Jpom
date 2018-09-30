@@ -47,7 +47,7 @@ public class BuildController extends BaseController {
     }
 
     @RequestMapping(value = "build_download", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public String build_download(String id, String key) {
+    public String buildDownload(String id, String key) {
         try {
             ProjectInfoModel projectInfoModel = manageService.getProjectInfo(id);
             if (projectInfoModel == null) {
