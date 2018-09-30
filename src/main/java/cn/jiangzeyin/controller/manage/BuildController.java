@@ -85,7 +85,7 @@ public class BuildController extends BaseController {
         modify.setId(projectInfoModel.getId());
         modify.setUseLibDesc("build");
         manageService.updateProject(modify);
-        String result = commandService.execCommand(CommandService.CommandOp.restart, projectInfoModel, null);
+        String result = commandService.execCommand(CommandService.CommandOp.restart, projectInfoModel);
         if (result.contains(CommandService.RUNING_TAG)) {
             return JsonMessage.getString(200, "安装成功，已自动重启");
         }

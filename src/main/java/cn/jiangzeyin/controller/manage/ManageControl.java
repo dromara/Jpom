@@ -54,7 +54,7 @@ public class ManageControl extends AbstractBaseControl {
             Set<String> setKey = json.keySet();
             for (String asetKey : setKey) {
                 ProjectInfoModel projectInfoModel = manageService.getProjectInfo(asetKey);
-                String result = commandService.execCommand(CommandService.CommandOp.status, projectInfoModel, null);
+                String result = commandService.execCommand(CommandService.CommandOp.status, projectInfoModel);
                 JSONObject jsonObject = json.getJSONObject(asetKey);
                 boolean status = result.contains(CommandService.RUNING_TAG);
                 jsonObject.put("status", status);

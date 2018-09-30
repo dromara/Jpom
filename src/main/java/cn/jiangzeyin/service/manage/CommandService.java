@@ -21,6 +21,8 @@ import java.io.InputStream;
 
 /**
  * Created by jiangzeyin on 2018/9/28.
+ *
+ * @author jiangzeyin
  */
 @Service
 public class CommandService {
@@ -39,7 +41,16 @@ public class CommandService {
         stop,
         restart,
         status,
-        showlog
+
+        showlog,
+        /**
+         * 获取进程id
+         */
+        getPid,
+        /**
+         * 备份日志
+         */
+        backupLog
     }
 
 
@@ -57,6 +68,10 @@ public class CommandService {
             throw new RuntimeException("请配置命令文件");
         }
         return command;
+    }
+
+    public String execCommand(CommandOp commandOp, ProjectInfoModel projectInfoModel) {
+        return execCommand(commandOp, projectInfoModel, null);
     }
 
     /**
@@ -81,12 +96,46 @@ public class CommandService {
         String token = projectInfoModel.getToken();
         String jvm = projectInfoModel.getJvm();
         String args = projectInfoModel.getArgs();
+        // 执行命令
+        String command;
+        switch (commandOp) {
+            case restart:
+            case start:
+            case status:
+            case stop:
+                command = String.format("%s %s %s %s %s %s %s [%s][%s]", commandPath, commandOp.toString(), tag, mainClass, lib, log, token, jvm, args);
+                break;
+            case getPid:
+                command = String.format("%s %s %s", commandPath, commandOp.toString(), tag);
+                break;
+            case backupLog:
+                command = String.format("%s %s %s", commandPath, commandOp.toString(), log);
+                break;
+            default:
+                throw new IllegalArgumentException(commandOp + " error");
+        }
+        result = execCommand(command, evt);
+        //  通知日志刷新
+        if (commandOp == CommandOp.start || commandOp == CommandOp.restart) {
+            TailLogThread.logChange(log);
+            // 修改 run lib 使用情况
+            ProjectInfoModel modify = new ProjectInfoModel();
+            modify.setId(projectInfoModel.getId());
+            modify.setRunLibDesc(projectInfoModel.getUseLibDesc());
+            try {
+                manageService.updateProject(modify);
+            } catch (Exception ignored) {
+            }
+        }
+        return result;
+    }
+
+    private String execCommand(String command, Evt evt) {
+        String result = "error";
         try {
-            InputStream is;
-            // 执行命令
-            String command = String.format("%s %s %s %s %s %s %s [%s][%s]", commandPath, commandOp.toString(), tag, mainClass, lib, log, token, jvm, args);
             DefaultSystemLog.LOG().info(command);
             Process process = Runtime.getRuntime().exec(command);
+            InputStream is;
             int wait = process.waitFor();
             if (wait == 0) {
                 is = process.getInputStream();
@@ -102,18 +151,6 @@ public class CommandService {
                 evt.commandError(e);
             }
             result += e.getMessage();
-        }
-        //  通知日志刷新
-        if (commandOp == CommandOp.start || commandOp == CommandOp.restart) {
-            TailLogThread.logChange(log);
-            // 修改 run lib 使用情况
-            ProjectInfoModel modify = new ProjectInfoModel();
-            modify.setId(projectInfoModel.getId());
-            modify.setRunLibDesc(projectInfoModel.getUseLibDesc());
-            try {
-                manageService.updateProject(modify);
-            } catch (Exception ignored) {
-            }
         }
         return result;
     }
@@ -164,7 +201,7 @@ public class CommandService {
 
     private String getTopRam(String pid) {
         String command = "top -p " + pid;
-        return exe(command);
+        return execCommand(command, null);
     }
 
     /**
@@ -174,35 +211,9 @@ public class CommandService {
      * @return pid
      */
     private String getPid(String tag) {
-        CommandService commandService = SpringUtil.getBean(CommandService.class);
-        String commandPath = commandService.getCommandPath();
+        String commandPath = getCommandPath();
         String command = String.format("%s %s %s", commandPath, "pid", tag);
-        return exe(command);
+        return execCommand(command, null);
     }
 
-    /**
-     * 执行命令
-     *
-     * @param command 命令
-     * @return 命令
-     */
-    private String exe(String command) {
-        String read = "";
-        try {
-            InputStream is;
-            Process process = Runtime.getRuntime().exec(command);
-            int wait = process.waitFor();
-            if (wait == 0) {
-                is = process.getInputStream();
-            } else {
-                is = process.getErrorStream();
-            }
-            read = IoUtil.read(is, CharsetUtil.CHARSET_UTF_8);
-            is.close();
-            process.destroy();
-        } catch (Exception e) {
-            DefaultSystemLog.ERROR().error("执行命令异常", e);
-        }
-        return read;
-    }
 }
