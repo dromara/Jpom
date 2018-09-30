@@ -17,6 +17,10 @@
             width: 80% !important;
         }
 
+        .div-user {
+            display: none;
+        }
+
         .layui-input-block {
             margin-left: 135px;
         }
@@ -28,9 +32,9 @@
     <button id="addProject" class="layui-btn layui-btn-sm">新增用户</button>
     <button id="refresh" class="layui-btn layui-btn-sm">刷新表格</button>
 </div>
-<table class="layui-table" id="tab_project" lay-filter="tab_project" style="margin: 0;"></table>
-<div class="layui-container div-project" id="div-project">
-    <form action="" class="layui-form" id="form_project">
+<table class="layui-table" id="tab_user" lay-filter="tab_user" style="margin: 0;"></table>
+<div class="layui-container div-user" id="div-user">
+    <form action="" class="layui-form" id="form_user">
         <div class="layui-form-item">
             <div class="layui-inline">
                 <label class="layui-form-label">登录名</label>
@@ -69,7 +73,7 @@
             </div>
         </div>
 
-        <input type="hidden" lay-submit lay-filter="submitProject" id="project_submit">
+        <input type="hidden" lay-submit lay-filter="submitUser" id="user_submit">
     </form>
 </div>
 
@@ -87,8 +91,8 @@
         var layer = layui.layer;
 
         table.render({
-            id: 'table_project',
-            elem: '#tab_project',
+            id: 'tab_user',
+            elem: '#tab_user',
             url: '/user/getUserList',
             height: 'full-52',
             even: true,
@@ -107,31 +111,31 @@
         // '添加用户'点击事件
         $('#addProject').on('click', function () {
             // 重置表单
-            document.getElementById('form_project').reset();
+            document.getElementById('form_user').reset();
             $('#form_project [name="id"]').attr('readonly', false).removeClass('layui-disabled');
             $('#form_project [name="role"]').attr('checked', false);
             // 弹出
             layer.open({
                 type: 1,
-                title: '新增项目',
-                content: $('#div-project'),
+                title: '新增用户',
+                content: $('#div-user'),
                 area: ['60%', '60%'],
                 btnAlign: 'c',
                 btn: ['提交'],
                 yes: function (index, layero) {
                     $('#form_project').attr('action', '/user/addUser');
-                    $('#project_submit').click();
+                    $('#user_submit').click();
                 }
             });
         });
 
         // '刷新表格'点击事件
         $('#refresh').on('click', function () {
-            table.reload('table_project', {height: 'full-52'});
+            table.reload('tab_user', {height: 'full-52'});
         });
 
-        // 提交项目表单
-        form.on('submit(submitProject)', function (data) {
+        // 提交用户信息
+        form.on('submit(submitUser)', function (data) {
             $.ajax({
                 url: data.form.action,
                 type: 'POST',
@@ -141,8 +145,8 @@
                     if (200 == data.code) {
                         layer.closeAll('page');
 
-                        // 刷新项目列表
-                        table.reload('table_project', {height: 'full-52'});
+                        // 刷新表
+                        table.reload('tab_user', {height: 'full-52'});
                     } else {
                         layer.msg(data.msg);
                     }
@@ -156,7 +160,7 @@
 
 
         // 表格工具条事件
-        table.on('tool(tab_project)', function (obj) {
+        table.on('tool(tab_user)', function (obj) {
             var data = obj.data;
             var event = obj.event;
 
@@ -172,16 +176,16 @@
         // 编辑用户信息
         function updateApplication(data) {
             // 重置表单
-            document.getElementById('form_project').reset();
-            $('#form_project [name="id"]').attr('readonly', true).addClass('layui-disabled');
+            document.getElementById('form_user').reset();
+            $('#form_user [name="id"]').attr('readonly', true).addClass('layui-disabled');
 
             // 设置表单值
             for (var key in data) {
                 if ("role" == key) {
                     if ("是" === data[key])
-                        $('#form_project [name="role"]').attr('checked', true);
+                        $('#form_user [name="role"]').attr('checked', true);
                 } else {
-                    $('#form_project [name="' + key + '"]').val(data[key]);
+                    $('#form_user [name="' + key + '"]').val(data[key]);
                 }
             }
 
@@ -189,13 +193,13 @@
             layer.open({
                 type: 1,
                 title: '编辑',
-                content: $('#div-project'),
+                content: $('#div-user'),
                 area: ['60%', '60%'],
                 btnAlign: 'c',
                 btn: ['提交'],
                 yes: function (index, layero) {
-                    $('#form_project').attr('action', '/user/updateUser');
-                    $('#project_submit').click();
+                    $('#form_user').attr('action', '/user/updateUser');
+                    $('#user_submit').click();
                 }
             });
         }
@@ -213,7 +217,7 @@
                         if (200 == data.code) {
                             layer.msg('删除成功！');
                             // 刷新项目列表
-                            table.reload('table_project', {height: 'full-52'});
+                            table.reload('tab_user', {height: 'full-52'});
                         } else {
                             layer.msg(data.msg);
                         }
