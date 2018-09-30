@@ -130,8 +130,13 @@ public class TailLogThread implements Runnable {
                     evn.onError(session);
                 }
             }
+            // 延迟判断是否有新的流需要读取
+            try {
+                Thread.sleep(3000);
+            } catch (InterruptedException ignored) {
+            }
         } while (reload);
-
+        // 关闭流
         try {
             inputStream.close();
             bufferedReader.close();
