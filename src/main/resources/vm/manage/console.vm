@@ -13,7 +13,7 @@
     <div class="layui-row">
         <!-- layui-elem-quote -->
         #if($logSize)
-            <button id="export" class="layui-btn layui-btn-sm">导出日志($logSize)</button>
+            <button id="export" class="layui-btn layui-btn-sm">导出日志(<span id="logSize">$logSize</span>)</button>
         #end
         <a href="javascript:;" class="btn-op layui-btn  layui-btn-sm" op="start">启动</a>
         <a href="javascript:;" class="btn-op layui-btn  layui-btn-sm layui-btn-warm" op="restart">重启</a>
@@ -29,6 +29,8 @@
 <script type="text/javascript">
     var projectInfo =  $projectInfo;
     var userInfo = '$userInfo';
+    var loopLog = false;
+    var loopLogTime;
 
     layui.use(['layer', 'element', 'table', 'form'], function () {
         var $ = layui.$;
@@ -80,21 +82,22 @@
                             }
                             break;
                         case  'showlog':
-                            if (200 === json_data.code) {
-                                openLog = true;
-                            }
                             break;
                         default:
                             break;
                     }
                 } else {
                     showLogDom.append(data.data + '<br/>');
+                    if (!loopLog) {
+                        loopLogAjax();
+                    }
                 }
                 scrollToBotomm();
             };
 
             ws.onclose = function () {
                 showLogDom.append('WebSocket连接已关闭！<br/>');
+                clearInterval(loopLogTime)
             };
 
             $('.btn-op').on('click', function () {
@@ -127,6 +130,25 @@
         function scrollToBotomm() {
             var h = showLogDom[0].scrollHeight;
             showLogDom.scrollTop(h);
+        }
+
+        function loopLogAjax() {
+            loopLog = true;
+            loopLogTime = setInterval(function () {
+                $.ajax({
+                    url: './logSize',
+                    type: 'POST',
+                    dataType: 'json',
+                    data: {
+                        id: projectInfo.id
+                    },
+                    success: function (data) {
+                        if (200 == data.code) {
+                            $("#logSize").html(data.data);
+                        }
+                    }
+                });
+            }, 30000)
         }
 
         $('#export').on('click', function () {

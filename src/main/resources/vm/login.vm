@@ -38,6 +38,7 @@
                         <button class="layui-btn layui-btn-danger" lay-submit lay-filter="from_login"
                                 style="width: 100%">登录
                         </button>
+                        <input name="hidden" type="hidden"/>
                     </div>
                 </div>
             </form>
@@ -76,6 +77,8 @@
                     if (200 == data.code) {
                         window.location.href = '/index';
                     } else {
+                        $("input[name='hidden']").focus();
+                        console.log("focus")
                         layer.alert(data.msg);
                     }
                 },

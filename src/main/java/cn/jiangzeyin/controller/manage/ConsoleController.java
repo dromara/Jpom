@@ -9,6 +9,7 @@ import cn.jiangzeyin.controller.BaseController;
 import cn.jiangzeyin.model.ProjectInfoModel;
 import cn.jiangzeyin.service.manage.ManageService;
 import com.alibaba.fastjson.JSONObject;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -42,22 +43,42 @@ public class ConsoleController extends BaseController {
         try {
             pim = manageService.getProjectInfo(id);
         } catch (IOException e) {
-            DefaultSystemLog.LOG().error(e.getMessage(), e);
+            DefaultSystemLog.ERROR().error(e.getMessage(), e);
         }
         if (pim != null) {
             setAttribute("projectInfo", JSONObject.toJSONString(pim));
             String md5 = SecureUtil.md5(String.format("%s:%s", userName, userPwd));
             setAttribute("userInfo", md5);
+            String logSize = getLogSize(id);
+            setAttribute("logSize", logSize);
+        }
+        return "manage/console";
+    }
 
-            String logSize = null;
+    @RequestMapping(value = "logSize", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @ResponseBody
+    public String logSize(String id) {
+        return JsonMessage.getString(200, "ok", getLogSize(id));
+    }
+
+    private String getLogSize(String id) {
+        ProjectInfoModel pim;
+        try {
+            pim = manageService.getProjectInfo(id);
+        } catch (IOException e) {
+            DefaultSystemLog.ERROR().error(e.getMessage(), e);
+            return "error";
+        }
+        if (pim != null) {
+            String logSize = "no";
 
             File file = new File(pim.getLog());
             if (file.exists()) {
                 logSize = FileUtil.readableFileSize(file);
             }
-            setAttribute("logSize", logSize);
+            return logSize;
         }
-        return "manage/console";
+        return "noproject";
     }
 
     @RequestMapping(value = "export.html", method = RequestMethod.GET)
