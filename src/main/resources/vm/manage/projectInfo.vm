@@ -164,7 +164,7 @@
                     title: '内存',
                     shade: 0.8,
                     area: ['60%', '50%'],
-                    content: 'internal?id=' + data.id
+                    content: 'internal?tag=' + data.tag
                 });
             }
         });

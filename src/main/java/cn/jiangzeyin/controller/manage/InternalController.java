@@ -2,9 +2,8 @@ package cn.jiangzeyin.controller.manage;
 
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.system.RuntimeInfo;
-import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.controller.BaseController;
-import cn.jiangzeyin.service.manage.ManageService;
+import cn.jiangzeyin.service.manage.CommandService;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -20,10 +19,13 @@ import javax.annotation.Resource;
 public class InternalController extends BaseController {
 
     @Resource
-    private ManageService manageService;
+    private CommandService commandService;
 
     @RequestMapping(value = "internal", method = RequestMethod.GET)
-    public String getInternal(String id) {
+    public String getInternal(String tag) {
+        JSONObject internal = commandService.getInternal(tag);
+
+
         RuntimeInfo runtimeInfo = new RuntimeInfo();
         JSONObject object = new JSONObject();
         object.put("total", FileUtil.readableFileSize(runtimeInfo.getMaxMemory()));

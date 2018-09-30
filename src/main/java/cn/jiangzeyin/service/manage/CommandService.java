@@ -10,6 +10,7 @@ import cn.jiangzeyin.model.ProjectInfoModel;
 import cn.jiangzeyin.socket.LogWebSocketHandle;
 import cn.jiangzeyin.socket.SocketSession;
 import cn.jiangzeyin.socket.TailLogThread;
+import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -28,6 +29,7 @@ public class CommandService {
 
     @Resource
     private ManageService manageService;
+
 
     public enum CommandOp {
         /**
@@ -144,5 +146,63 @@ public class CommandService {
                 }
             }
         }
+    }
+
+    /**
+     * 获取内存信息
+     *
+     * @param tag tag
+     * @return 内存信息
+     */
+    public JSONObject getInternal(String tag) {
+        String pid = getPid(tag);
+        String topRam = getTopRam(pid);
+        System.out.println(pid);
+        System.out.println(topRam);
+        return null;
+    }
+
+    private String getTopRam(String pid) {
+        String command = "top -p " + pid;
+        return exe(command);
+    }
+
+    /**
+     * 获取进程pid
+     *
+     * @param tag tag
+     * @return pid
+     */
+    private String getPid(String tag) {
+        CommandService commandService = SpringUtil.getBean(CommandService.class);
+        String commandPath = commandService.getCommandPath();
+        String command = String.format("%s %s %s", commandPath, "pid", tag);
+        return exe(command);
+    }
+
+    /**
+     * 执行命令
+     *
+     * @param command 命令
+     * @return 命令
+     */
+    private String exe(String command) {
+        String read = "";
+        try {
+            InputStream is;
+            Process process = Runtime.getRuntime().exec(command);
+            int wait = process.waitFor();
+            if (wait == 0) {
+                is = process.getInputStream();
+            } else {
+                is = process.getErrorStream();
+            }
+            read = IoUtil.read(is, CharsetUtil.CHARSET_UTF_8);
+            is.close();
+            process.destroy();
+        } catch (Exception e) {
+            DefaultSystemLog.ERROR().error("执行命令异常", e);
+        }
+        return read;
     }
 }
