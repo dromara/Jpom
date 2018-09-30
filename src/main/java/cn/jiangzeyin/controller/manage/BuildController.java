@@ -62,7 +62,7 @@ public class BuildController extends BaseController {
 
     @RequestMapping(value = "build_install", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
-    public String buildInstall(String id, String key) throws IOException {
+    public String buildInstall(String id, String key) throws Exception {
         ProjectInfoModel projectInfoModel = manageService.getProjectInfo(id);
         if (projectInfoModel == null) {
             return JsonMessage.getString(400, "没有对应项目");
@@ -80,9 +80,14 @@ public class BuildController extends BaseController {
             return JsonMessage.getString(500, "清楚旧lib失败");
         }
         ZipUtil.unzip(file, lib);
+        // 修改使用状态
+        ProjectInfoModel modify = new ProjectInfoModel();
+        modify.setId(projectInfoModel.getId());
+        modify.setUseLibDesc("build lib");
+        manageService.updateProject(modify);
         String result = commandService.execCommand(CommandService.CommandOp.restart, projectInfoModel, null);
         if (result.contains(CommandService.RUNING_TAG)) {
-            return JsonMessage.getString(200, "ok");
+            return JsonMessage.getString(200, "安装成功，已自动重启");
         }
         return JsonMessage.getString(505, "安装失败：" + result);
     }
