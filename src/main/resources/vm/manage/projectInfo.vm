@@ -103,29 +103,6 @@
             });
         });
 
-        // 提交项目表单
-        form.on('submit(submitProject)', function (data) {
-            $.ajax({
-                url: data.form.action,
-                type: 'POST',
-                dataType: 'json',
-                data: data.field,
-                success: function (data) {
-                    if (200 == data.code) {
-                        layer.closeAll('page');
-                        // 刷新项目列表
-                        table.reload('table_project', {height: 'full-52'});
-                    } else {
-                        layer.msg(data.msg);
-                    }
-                },
-                error: function (err) {
-                    layer.msg('操作失败！');
-                }
-            });
-            return false;
-        });
-
         // 提交启动文件表单
         form.on('submit(submitRunBoot)', function (data) {
             $.ajax({
