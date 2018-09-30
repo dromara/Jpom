@@ -83,7 +83,7 @@ public class BuildController extends BaseController {
         // 修改使用状态
         ProjectInfoModel modify = new ProjectInfoModel();
         modify.setId(projectInfoModel.getId());
-        modify.setUseLibDesc("build lib");
+        modify.setUseLibDesc("build");
         manageService.updateProject(modify);
         String result = commandService.execCommand(CommandService.CommandOp.restart, projectInfoModel, null);
         if (result.contains(CommandService.RUNING_TAG)) {

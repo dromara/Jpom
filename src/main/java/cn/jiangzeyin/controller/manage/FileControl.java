@@ -155,7 +155,7 @@ public class FileControl extends AbstractBaseControl {
             // 修改使用状态
             ProjectInfoModel modify = new ProjectInfoModel();
             modify.setId(pim.getId());
-            modify.setUseLibDesc("upload lib");
+            modify.setUseLibDesc("upload");
             manageService.updateProject(modify);
             return JsonMessage.getString(200, "上传成功");
         } catch (Exception e) {

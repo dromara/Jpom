@@ -29,12 +29,12 @@
     <a href="javascript:;" class="layui-btn  layui-btn-sm layui-btn" lay-event="file">文件</a>
     <a href="javascript:;" class="layui-btn  layui-btn-sm layui-btn" lay-event="build">构建</a>
     <a href="javascript:;" class="layui-btn  layui-btn-sm layui-btn" lay-event="ram">内存</a>
-    <a href="javascript:;" class="layui-btn  layui-btn-sm layui-btn-danger" lay-event="delete">删除</a>
 </script>
 <script type="text/html" id="status_templ">
     <input type="checkbox" disabled name="status" {{# if(d.status){ }} checked {{# } }} lay-skin="switch"
            lay-text="运行中|未运行">
 </script>
+
 <script type="text/javascript">
     var table;
     layui.use(['layer', 'element', 'table', 'form'], function () {
@@ -51,9 +51,11 @@
             even: true,
             cols: [[
                 {field: 'id', title: '项目名称', width: '15%'},
-                {field: 'runLibDesc', title: '运行lib', width: '10%'},
-                {field: 'useLibDesc', title: '文件lib', width: '10%'},
-
+                {
+                    title: 'lib状态', width: '10%', templet: function (d) {
+                        return (d.runLibDesc || "") + " / " + (d.useLibDesc || "");
+                    }
+                },
                 {field: 'createTime', title: '创建时间', width: '13%'},
                 {field: 'modifyTime', title: '修改时间', width: '13%'},
                 {title: '运行状态', templet: "#status_templ", width: '10%'},
@@ -166,9 +168,6 @@
             var event = obj.event;
             if ('update' === event) {
                 editProject(data.id);
-            } else if ('delete' === event) {
-                // 删除
-                deleteApplication(data);
             } else if ('manage' === event) {
                 // 管理
                 manageApplication(data);
@@ -211,31 +210,6 @@
                 id: data.id,
                 url: url,
                 title: data.id + ' - 管理',
-            });
-        }
-
-        // 删除项目
-        function deleteApplication(data) {
-            layer.confirm('确定删除项目 ' + data.id + '？', {title: '系统提示'}, function (index) {
-                layer.close(index);
-                $.ajax({
-                    url: '/manage/deleteProject',
-                    type: 'POST',
-                    dataType: 'json',
-                    data: {id: data.id},
-                    success: function (data) {
-                        if (200 == data.code) {
-                            layer.msg('删除成功！');
-                            // 刷新项目列表
-                            table.reload('table_project', {height: 'full-52'});
-                        } else {
-                            layer.msg(data.msg);
-                        }
-                    },
-                    error: function (err) {
-                        layer.msg('删除失败！');
-                    }
-                });
             });
         }
     });
