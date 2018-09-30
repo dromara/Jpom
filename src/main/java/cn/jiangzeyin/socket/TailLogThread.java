@@ -46,10 +46,10 @@ public class TailLogThread implements Runnable {
     /**
      * 创建新的
      *
-     * @param session
-     * @param log
-     * @param evn
-     * @return
+     * @param session 回话
+     * @param log     需要监听的log
+     * @param evn     错误事件
+     * @return 线程
      */
     static TailLogThread createThread(Session session, String log, Evn evn) {
         List<TailLogThread> logThreads = TAIL_LOG_THREAD_CONCURRENT_HASH_MAP.computeIfAbsent(log, s -> new ArrayList<>());

@@ -20,7 +20,9 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by jiangzeyin on 2018/9/28.
@@ -72,6 +74,15 @@ public class OssManagerService extends BaseService {
             jsonArray.add(jsonObject);
         });
         return jsonArray;
+    }
+
+    public URL getUrl(String key) {
+        // 创建OSSClient实例。
+        OSSClient ossClient = getOSSClient();
+        // 设置URL过期时间。
+        Date expiration = new Date(System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(10));
+        // 生成以GET方法访问的签名URL，访客可以直接通过浏览器访问相关内容。
+        return ossClient.generatePresignedUrl(getBucketName(), key, expiration);
     }
 
     private OSSClient getOSSClient() {

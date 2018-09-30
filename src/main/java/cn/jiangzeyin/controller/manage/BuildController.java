@@ -3,6 +3,7 @@ package cn.jiangzeyin.controller.manage;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.core.util.ZipUtil;
+import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.controller.BaseController;
 import cn.jiangzeyin.model.ProjectInfoModel;
@@ -43,6 +44,20 @@ public class BuildController extends BaseController {
             setAttribute("id", id);
         }
         return "manage/build";
+    }
+
+    @RequestMapping(value = "build_download", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    public String build_download(String id, String key) {
+        try {
+            ProjectInfoModel projectInfoModel = manageService.getProjectInfo(id);
+            if (projectInfoModel == null) {
+                return "error";
+            }
+            return "redirect:" + ossManagerService.getUrl(key);
+        } catch (Exception e) {
+            DefaultSystemLog.ERROR().error("获取下载地址失败", e);
+            return "error";
+        }
     }
 
     @RequestMapping(value = "build_install", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
