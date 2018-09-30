@@ -44,7 +44,7 @@ public class FileControl extends AbstractBaseControl {
      * @return
      */
     @RequestMapping(value = "filemanage", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
-    public String fileManage(String id) throws IOException {
+    public String fileManage(String id) {
         setAttribute("id", id);
         return "manage/filemanage";
     }
@@ -82,7 +82,7 @@ public class FileControl extends AbstractBaseControl {
             fos.close();
         } catch (IOException e) {
             e.printStackTrace();
-            DefaultSystemLog.LOG().error(e.getMessage(), e);
+            DefaultSystemLog.ERROR().error(e.getMessage(), e);
         }
         return JsonMessage.getString(200, "success");
     }
@@ -129,7 +129,7 @@ public class FileControl extends AbstractBaseControl {
             });
             return PageUtil.getPaginate(200, "查询成功", arrayFile);
         } catch (IOException e) {
-            DefaultSystemLog.LOG().error(e.getMessage(), e);
+            DefaultSystemLog.ERROR().error(e.getMessage(), e);
             return JsonMessage.getString(500, "查询失败");
         }
     }

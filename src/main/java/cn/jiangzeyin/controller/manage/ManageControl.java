@@ -62,7 +62,7 @@ public class ManageControl extends AbstractBaseControl {
             }
             return PageUtil.getPaginate(200, "查询成功！", array);
         } catch (IOException e) {
-            DefaultSystemLog.LOG().error(e.getMessage(), e);
+            DefaultSystemLog.ERROR().error(e.getMessage(), e);
             return JsonMessage.getString(500, e.getMessage());
         }
     }
@@ -81,7 +81,7 @@ public class ManageControl extends AbstractBaseControl {
             manageService.deleteProject(id);
             return JsonMessage.getString(200, "删除成功！");
         } catch (Exception e) {
-            DefaultSystemLog.LOG().error(e.getMessage(), e);
+            DefaultSystemLog.ERROR().error(e.getMessage(), e);
             return JsonMessage.getString(500, e.getMessage());
         }
     }
