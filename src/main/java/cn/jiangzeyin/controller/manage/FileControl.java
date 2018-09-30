@@ -3,7 +3,6 @@ package cn.jiangzeyin.controller.manage;
 
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.util.CharsetUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
@@ -22,8 +21,9 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
-import javax.servlet.http.HttpServletResponse;
-import java.io.*;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -152,6 +152,11 @@ public class FileControl extends AbstractBaseControl {
                     FileUtil.writeFromStream(file.getInputStream(), saveFile);
                 }
             }
+            // 修改使用状态
+            ProjectInfoModel modify = new ProjectInfoModel();
+            modify.setId(pim.getId());
+            modify.setUseLibDesc("upload");
+            manageService.updateProject(modify);
             return JsonMessage.getString(200, "上传成功");
         } catch (Exception e) {
             DefaultSystemLog.ERROR().error(e.getMessage(), e);

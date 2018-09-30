@@ -12,6 +12,7 @@ import cn.jiangzeyin.socket.SocketSession;
 import cn.jiangzeyin.socket.TailLogThread;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import javax.websocket.Session;
 import java.io.File;
 import java.io.IOException;
@@ -24,6 +25,9 @@ import java.io.InputStream;
 public class CommandService {
     public static final String RUNING_TAG = "running";
     public static final String STOP_TAG = "stopped";
+
+    @Resource
+    private ManageService manageService;
 
     public enum CommandOp {
         /**
@@ -100,6 +104,14 @@ public class CommandService {
         //  通知日志刷新
         if (commandOp == CommandOp.start || commandOp == CommandOp.restart) {
             TailLogThread.logChange(log);
+            // 修改 run lib 使用情况
+            ProjectInfoModel modify = new ProjectInfoModel();
+            modify.setId(projectInfoModel.getId());
+            modify.setRunLibDesc(projectInfoModel.getUseLibDesc());
+            try {
+                manageService.updateProject(modify);
+            } catch (Exception ignored) {
+            }
         }
         return result;
     }

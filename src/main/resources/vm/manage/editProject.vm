@@ -96,6 +96,10 @@
         <div class="layui-form-item" style="padding-left: 20%">
             <button class="layui-btn layui-btn-normal" lay-submit lay-filter="submitProject" id="project_submit">提交
             </button>
+            #if($item)
+                <a class="layui-btn layui-btn-warm" data-id="$item.id" id="delete_project">删除
+                </a>
+            #end
         </div>
     </form>
 </div>
@@ -138,6 +142,36 @@
                     return 'Port请填写80-65530之间，避免占用系统进程端口！';
                 }
             }
+        });
+
+
+        $("#delete_project").click(function () {
+            var id = $(this).attr("data-id");
+            layer.confirm('确定删除项目 ' + id + '？', {
+                title: '系统提示'
+            }, function (index) {
+                layer.close(index);
+                $.ajax({
+                    url: './deleteProject',
+                    type: 'POST',
+                    dataType: 'json',
+                    data: {
+                        id: id
+                    },
+                    success: function (data) {
+                        layer.msg(data.msg);
+                        if (200 == data.code) {
+                            var index = parent.layer.getFrameIndex(window.name);
+                            parent.layer.close(index);
+                            // 刷新项目列表
+                            parent.reloadTable();
+                        }
+                    },
+                    error: function (err) {
+                        layer.msg('删除失败！');
+                    }
+                });
+            });
         });
     });
 </script>

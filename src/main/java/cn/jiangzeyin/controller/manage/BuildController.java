@@ -3,6 +3,7 @@ package cn.jiangzeyin.controller.manage;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.core.util.ZipUtil;
+import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.controller.BaseController;
 import cn.jiangzeyin.model.ProjectInfoModel;
@@ -45,9 +46,23 @@ public class BuildController extends BaseController {
         return "manage/build";
     }
 
+    @RequestMapping(value = "build_download", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    public String buildDownload(String id, String key) {
+        try {
+            ProjectInfoModel projectInfoModel = manageService.getProjectInfo(id);
+            if (projectInfoModel == null) {
+                return "error";
+            }
+            return "redirect:" + ossManagerService.getUrl(key);
+        } catch (Exception e) {
+            DefaultSystemLog.ERROR().error("获取下载地址失败", e);
+            return "error";
+        }
+    }
+
     @RequestMapping(value = "build_install", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
-    public String buildInstall(String id, String key) throws IOException {
+    public String buildInstall(String id, String key) throws Exception {
         ProjectInfoModel projectInfoModel = manageService.getProjectInfo(id);
         if (projectInfoModel == null) {
             return JsonMessage.getString(400, "没有对应项目");
@@ -65,9 +80,14 @@ public class BuildController extends BaseController {
             return JsonMessage.getString(500, "清楚旧lib失败");
         }
         ZipUtil.unzip(file, lib);
+        // 修改使用状态
+        ProjectInfoModel modify = new ProjectInfoModel();
+        modify.setId(projectInfoModel.getId());
+        modify.setUseLibDesc("build");
+        manageService.updateProject(modify);
         String result = commandService.execCommand(CommandService.CommandOp.restart, projectInfoModel, null);
         if (result.contains(CommandService.RUNING_TAG)) {
-            return JsonMessage.getString(200, "ok");
+            return JsonMessage.getString(200, "安装成功，已自动重启");
         }
         return JsonMessage.getString(505, "安装失败：" + result);
     }

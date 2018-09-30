@@ -4,6 +4,10 @@
     height: 100%;
 }
 
+.layui-body {
+    bottom: 10px !important;
+}
+
 .layui-tab-title {
     /*width: calc(100% - 100px)*/
     right: 70px;

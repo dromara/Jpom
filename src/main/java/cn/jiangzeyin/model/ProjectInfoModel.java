@@ -19,6 +19,30 @@ public class ProjectInfoModel {
     private String modifyTime;
     private String args;
     private String buildTag;
+    /**
+     * lib 目录当前文件状态
+     */
+    private String useLibDesc;
+    /**
+     * 当前运行lib 状态
+     */
+    private String runLibDesc;
+
+    public String getRunLibDesc() {
+        return runLibDesc;
+    }
+
+    public void setRunLibDesc(String runLibDesc) {
+        this.runLibDesc = runLibDesc;
+    }
+
+    public String getUseLibDesc() {
+        return useLibDesc;
+    }
+
+    public void setUseLibDesc(String useLibDesc) {
+        this.useLibDesc = useLibDesc;
+    }
 
     public String getBuildTag() {
         return buildTag;
