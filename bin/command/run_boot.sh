@@ -105,6 +105,7 @@ usage()
 {
    echo "Usage: $0 {start|stop|restart|status} tag mainclass lib log WebClose JVM args"
    echo "Usage: $0 {backupLog} log"
+   echo "Usage: $0 {pid} tag"
    RETVAL="2"
 }
 
@@ -126,6 +127,9 @@ case "$1" in
         ;;
     backupLog)
         backupLog $2
+        ;;
+     pid)
+        getPid
         ;;
     *)
       usage
