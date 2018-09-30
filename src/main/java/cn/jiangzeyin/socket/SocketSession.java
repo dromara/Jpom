@@ -6,7 +6,6 @@ import cn.jiangzeyin.util.KeyLock;
 
 import javax.websocket.Session;
 import java.io.IOException;
-import java.io.InputStream;
 
 /**
  * Created by jiangzeyin on 2018/9/29.
@@ -55,14 +54,17 @@ public class SocketSession {
             try {
                 LOCK.lock(session.getId());
                 session.getBasicRemote().sendText(msg);
-                LOCK.unlock(session.getId());
-                break;
             } catch (IOException e) {
                 DefaultSystemLog.ERROR().error("发送消息失败:" + i, e);
                 if (i == 10) {
                     throw e;
+                } else {
+                    continue;
                 }
+            } finally {
+                LOCK.unlock(session.getId());
             }
+            break;
         }
     }
 }
