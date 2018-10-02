@@ -2,10 +2,10 @@
 #!/bin/bash
 # 变量
 Tag="$2"
-MainClass="$3"
-Lib="$4"
-Log="$5"
-WebClose="$6"
+WebClose="$3"
+MainClass="$4"
+Lib="$5"
+Log="$6"
 
 #获取jvm 和 args
 ARGS=""
@@ -103,7 +103,8 @@ getPid()
 #提示用法
 usage()
 {
-   echo "Usage: $0 {start|stop|restart|status} tag mainclass lib log WebClose JVM args"
+   echo "Usage: $0 {start|restart|status} tag WebClose mainclass lib log JVM args"
+   echo "Usage: $0 {stop} tag WebClose"
    echo "Usage: $0 {backupLog} log"
    echo "Usage: $0 {pid} tag"
    RETVAL="2"

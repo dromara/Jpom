@@ -14,7 +14,7 @@ import java.io.IOException;
 /**
  * @author jiangzeyin
  */
-public class BaseService {
+public abstract class BaseService {
 
     /**
      * 获取数据的路径，如果没有这个路径，则创建一个
@@ -30,7 +30,7 @@ public class BaseService {
         return file;
     }
 
-    protected File getTempPath() throws IOException {
+    public File getTempPath() throws IOException {
         File file = getDataPath();
         String userName = BaseController.getUserName();
         if (StrUtil.isEmpty(userName)) {

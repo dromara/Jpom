@@ -8,6 +8,7 @@ import cn.jiangzeyin.pool.ThreadPoolService;
 import cn.jiangzeyin.service.UserService;
 import cn.jiangzeyin.service.manage.CommandService;
 import cn.jiangzeyin.service.manage.ManageService;
+import cn.jiangzeyin.socket.top.TopManager;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Component;
 
@@ -125,6 +126,9 @@ public class LogWebSocketHandle implements TailLogThread.Evn {
             case showlog:
                 showLog(session, projectInfoModel);
                 break;
+            case top:
+                TopManager.addMonitor(session);
+                break;
             default:
                 resultData = JsonMessage.toJson(404, "不支持的方式：" + op);
                 break;
@@ -171,12 +175,19 @@ public class LogWebSocketHandle implements TailLogThread.Evn {
         } catch (Exception e) {
             DefaultSystemLog.ERROR().error("关闭异常", e);
         }
+        TopManager.removeMonitor(session);
         DefaultSystemLog.LOG().info(session.getId() + " socket 关闭");
     }
 
 
     @OnError
     public void onError(Session session, Throwable thr) {
+        // java.io.IOException: Broken pipe
+        SocketSession socketSession = getItem(session);
+        try {
+            socketSession.sendMsg("服务端发生异常" + thr.getMessage());
+        } catch (IOException ignored) {
+        }
         DefaultSystemLog.ERROR().error(session.getId() + "socket 异常", thr);
     }
 

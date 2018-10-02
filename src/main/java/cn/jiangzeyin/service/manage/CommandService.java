@@ -7,9 +7,11 @@ import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.spring.SpringUtil;
 import cn.jiangzeyin.model.ProjectInfoModel;
+import cn.jiangzeyin.service.BaseService;
 import cn.jiangzeyin.socket.LogWebSocketHandle;
 import cn.jiangzeyin.socket.SocketSession;
 import cn.jiangzeyin.socket.TailLogThread;
+import cn.jiangzeyin.socket.top.TopManager;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;
 
@@ -25,7 +27,7 @@ import java.io.InputStream;
  * @author jiangzeyin
  */
 @Service
-public class CommandService {
+public class CommandService extends BaseService {
     public static final String RUNING_TAG = "running";
     public static final String STOP_TAG = "stopped";
 
@@ -50,7 +52,8 @@ public class CommandService {
         /**
          * 备份日志
          */
-        backupLog
+        backupLog,
+        top
     }
 
 
@@ -87,23 +90,27 @@ public class CommandService {
         }
         CommandService commandService = SpringUtil.getBean(CommandService.class);
         String commandPath = commandService.getCommandPath();
-
+        String tag = null, mainClass = null, lib = null, log = null, token = null, jvm = null, args = null;
         // 项目启动信息
-        String tag = projectInfoModel.getTag();
-        String mainClass = projectInfoModel.getMainClass();
-        String lib = projectInfoModel.getLib();
-        String log = projectInfoModel.getLog();
-        String token = projectInfoModel.getToken();
-        String jvm = projectInfoModel.getJvm();
-        String args = projectInfoModel.getArgs();
+        if (projectInfoModel != null) {
+            tag = projectInfoModel.getTag();
+            mainClass = projectInfoModel.getMainClass();
+            lib = projectInfoModel.getLib();
+            log = projectInfoModel.getLog();
+            token = projectInfoModel.getToken();
+            jvm = projectInfoModel.getJvm();
+            args = projectInfoModel.getArgs();
+        }
         // 执行命令
         String command;
         switch (commandOp) {
             case restart:
             case start:
             case status:
-            case stop:
                 command = String.format("%s %s %s %s %s %s %s [%s][%s]", commandPath, commandOp.toString(), tag, mainClass, lib, log, token, jvm, args);
+                break;
+            case stop:
+                command = String.format("%s %s %s %s", commandPath, commandOp.toString(), tag, token);
                 break;
             case getPid:
                 command = String.format("%s %s %s", commandPath, commandOp.toString(), tag);
@@ -111,20 +118,26 @@ public class CommandService {
             case backupLog:
                 command = String.format("%s %s %s", commandPath, commandOp.toString(), log);
                 break;
+            case top:
+                String savePath = TopManager.getTopFile();
+                command = String.format("top -b -d 1 -n 1 > %s", savePath);
+                break;
             default:
                 throw new IllegalArgumentException(commandOp + " error");
         }
         result = execCommand(command, evt);
         //  通知日志刷新
         if (commandOp == CommandOp.start || commandOp == CommandOp.restart) {
-            TailLogThread.logChange(log);
-            // 修改 run lib 使用情况
-            ProjectInfoModel modify = new ProjectInfoModel();
-            modify.setId(projectInfoModel.getId());
-            modify.setRunLibDesc(projectInfoModel.getUseLibDesc());
-            try {
-                manageService.updateProject(modify);
-            } catch (Exception ignored) {
+            if (projectInfoModel != null) {
+                TailLogThread.logChange(log);
+                // 修改 run lib 使用情况
+                ProjectInfoModel modify = new ProjectInfoModel();
+                modify.setId(projectInfoModel.getId());
+                modify.setRunLibDesc(projectInfoModel.getUseLibDesc());
+                try {
+                    manageService.updateProject(modify);
+                } catch (Exception ignored) {
+                }
             }
         }
         return result;
