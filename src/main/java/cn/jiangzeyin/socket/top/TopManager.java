@@ -130,5 +130,6 @@ public class TopManager {
             watchMonitor.close();
         }
         CronUtil.remove(CRON_ID);
+        watch = false;
     }
 }
