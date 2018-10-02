@@ -11,7 +11,6 @@ import cn.jiangzeyin.service.BaseService;
 import cn.jiangzeyin.socket.LogWebSocketHandle;
 import cn.jiangzeyin.socket.SocketSession;
 import cn.jiangzeyin.socket.TailLogThread;
-import cn.jiangzeyin.socket.top.TopManager;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;
 
@@ -84,10 +83,7 @@ public class CommandService extends BaseService {
      * @param projectInfoModel 项目信息
      */
     public String execCommand(CommandOp commandOp, ProjectInfoModel projectInfoModel, Evt evt) {
-        String result = "error";
-        if (commandOp == CommandOp.showlog) {
-            return result;
-        }
+        String result;
         CommandService commandService = SpringUtil.getBean(CommandService.class);
         String commandPath = commandService.getCommandPath();
         String tag = null, mainClass = null, lib = null, log = null, token = null, jvm = null, args = null;
@@ -106,12 +102,12 @@ public class CommandService extends BaseService {
         switch (commandOp) {
             case restart:
             case start:
-            case status:
                 command = String.format("%s %s %s %s %s %s %s [%s][%s]", commandPath, commandOp.toString(), tag, mainClass, lib, log, token, jvm, args);
                 break;
             case stop:
                 command = String.format("%s %s %s %s", commandPath, commandOp.toString(), tag, token);
                 break;
+            case status:
             case getPid:
                 command = String.format("%s %s %s", commandPath, commandOp.toString(), tag);
                 break;
@@ -121,6 +117,7 @@ public class CommandService extends BaseService {
             case top:
                 command = "top -b -n 1";
                 break;
+            case showlog:
             default:
                 throw new IllegalArgumentException(commandOp + " error");
         }

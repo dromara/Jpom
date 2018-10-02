@@ -103,10 +103,10 @@ getPid()
 #提示用法
 usage()
 {
-   echo "Usage: $0 {start|restart|status} tag WebClose mainclass lib log JVM args"
+   echo "Usage: $0 {start|restart} tag WebClose mainclass lib log JVM args"
    echo "Usage: $0 {stop} tag WebClose"
    echo "Usage: $0 {backupLog} log"
-   echo "Usage: $0 {pid} tag"
+   echo "Usage: $0 {pid|status} tag"
    RETVAL="2"
 }
 
