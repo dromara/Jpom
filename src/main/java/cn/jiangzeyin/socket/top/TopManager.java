@@ -29,7 +29,7 @@ public class TopManager {
 
     public static void removeMonitor(Session session) {
         SESSIONS.remove(session);
-        close(null);
+        close();
     }
 
     private static void addCron() {
@@ -67,30 +67,29 @@ public class TopManager {
                     }
                 }
             }
-            close(null);
+            close();
         }
     }
 
-    private static void close(String msg) {
+    private static void close() {
         // 如果没有队列就停止监听
         int size = SESSIONS.size();
         if (size > 0) {
             return;
         }
-        if (msg != null) {
-            Iterator<Session> iterator = SESSIONS.iterator();
-            while (iterator.hasNext()) {
-                Session session = iterator.next();
-                try {
-                    SocketSession.send(session, msg);
-                } catch (IOException e) {
-                    DefaultSystemLog.ERROR().error("消息失败", e);
-                }
-                try {
-                    session.close();
-                    iterator.remove();
-                } catch (IOException ignored) {
-                }
+        //
+        Iterator<Session> iterator = SESSIONS.iterator();
+        while (iterator.hasNext()) {
+            Session session = iterator.next();
+            try {
+                SocketSession.send(session, null);
+            } catch (IOException e) {
+                DefaultSystemLog.ERROR().error("消息失败", e);
+            }
+            try {
+                session.close();
+                iterator.remove();
+            } catch (IOException ignored) {
             }
         }
         CronUtil.remove(CRON_ID);
