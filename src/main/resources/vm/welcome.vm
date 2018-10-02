@@ -28,6 +28,8 @@
             overflow: auto;
             word-break: keep-all;
             white-space: nowrap;
+            font-weight: bold;
+            font-size: 23px;
         }
     </style>
 </head>
@@ -55,6 +57,7 @@
             };
 
             ws.onmessage = function (data) {
+                console.log(data)
                 showLogDom.html(data.data + '<br/>');
             }
 

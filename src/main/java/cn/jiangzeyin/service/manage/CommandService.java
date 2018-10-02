@@ -119,8 +119,7 @@ public class CommandService extends BaseService {
                 command = String.format("%s %s %s", commandPath, commandOp.toString(), log);
                 break;
             case top:
-                String savePath = TopManager.getTopFile();
-                command = String.format("top -b -d 1 -n 1 >> %s", savePath);
+                command = "top -b -n 1";
                 break;
             default:
                 throw new IllegalArgumentException(commandOp + " error");
