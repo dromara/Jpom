@@ -25,11 +25,6 @@ public class IndexControl extends AbstractBaseControl {
         return "index";
     }
 
-    @RequestMapping(value = "welcome")
-    public String welcome() {
-        return "welcome";
-    }
-
     /**
      * 退出登录
      *

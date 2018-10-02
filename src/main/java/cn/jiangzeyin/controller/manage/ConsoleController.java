@@ -47,8 +47,7 @@ public class ConsoleController extends BaseController {
         }
         if (pim != null) {
             setAttribute("projectInfo", JSONObject.toJSONString(pim));
-            String md5 = SecureUtil.md5(String.format("%s:%s", userName, userPwd));
-            setAttribute("userInfo", md5);
+            setAttribute("userInfo", getSocketPwd());
             String logSize = getLogSize(id);
             setAttribute("logSize", logSize);
         }

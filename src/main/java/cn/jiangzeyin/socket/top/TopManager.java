@@ -1,9 +1,12 @@
 package cn.jiangzeyin.socket.top;
 
+import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.watch.WatchMonitor;
 import cn.hutool.core.io.watch.WatchUtil;
 import cn.hutool.core.io.watch.Watcher;
+import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.cron.CronUtil;
+import cn.hutool.cron.task.Task;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.spring.SpringUtil;
 import cn.jiangzeyin.service.manage.CommandService;
@@ -42,7 +45,7 @@ public class TopManager {
     public static String getTopFile() {
         String savePath = "~/top.txt";
         try {
-            savePath = new File(commandService.getTempPath(), "top.txt").getPath();
+            savePath = new File(commandService.getDataPath(), "top.txt").getPath();
         } catch (IOException ignored) {
 
         }
@@ -58,7 +61,11 @@ public class TopManager {
         }
         CronUtil.remove(CRON_ID);
         CronUtil.setMatchSecond(true);
-        CronUtil.schedule(CRON_ID, "0/10 * * * * ?", () -> commandService.execCommand(CommandService.CommandOp.top, null, null));
+        CronUtil.schedule(CRON_ID, "0/10 * * * * ?", () -> {
+            String result = commandService.execCommand(CommandService.CommandOp.top, null, null);
+            System.out.println(result);
+        });
+        CronUtil.restart();
         watchMonitor = WatchUtil.create(getTopFile());
         watchMonitor.watch(new Watcher() {
             @Override
@@ -86,11 +93,14 @@ public class TopManager {
 
     private static void send() {
         synchronized (TopManager.class) {
+            System.out.println("发送");
             Iterator<Session> iterator = SESSIONS.iterator();
             while (iterator.hasNext()) {
                 Session session = iterator.next();
+                String content = FileUtil.readString(getTopFile(), CharsetUtil.GBK);
+                content = content.replaceAll("\r\n", "<br/>").replaceAll("\n", "<br/>");
                 try {
-                    SocketSession.send(session, "");
+                    SocketSession.send(session, content);
                 } catch (IOException e) {
                     DefaultSystemLog.ERROR().error("消息失败", e);
                     try {

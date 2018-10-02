@@ -21,7 +21,7 @@ public abstract class BaseService {
      *
      * @return file
      */
-    private File getDataPath() throws IOException {
+    public File getDataPath() throws IOException {
         String path = SpringUtil.getEnvironment().getProperty("boot-online.data");
         File file = new File(path);
         if (!file.exists() && !file.mkdirs()) {
@@ -30,7 +30,7 @@ public abstract class BaseService {
         return file;
     }
 
-    public File getTempPath() throws IOException {
+    protected File getTempPath() throws IOException {
         File file = getDataPath();
         String userName = BaseController.getUserName();
         if (StrUtil.isEmpty(userName)) {

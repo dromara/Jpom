@@ -84,12 +84,13 @@ public class LogWebSocketHandle implements TailLogThread.Evn {
         } catch (IOException e) {
             DefaultSystemLog.ERROR().error("获取异常", e);
         }
-        if (projectInfoModel == null) {
+        String op = json.getString("op");
+        CommandService.CommandOp commandOp = CommandService.CommandOp.valueOf(op);
+        if (projectInfoModel == null && commandOp != CommandService.CommandOp.top) {
             socketSession.sendMsg("没有对应项目");
             return;
         }
-        String op = json.getString("op");
-        CommandService.CommandOp commandOp = CommandService.CommandOp.valueOf(op);
+
         JSONObject resultData = null;
         String strResult;
         CommandService.EvtIml evtIml = new CommandService.EvtIml(session);

@@ -4,17 +4,65 @@
 <head>
     #parse("./common/head.vm")
     <title>Welcome</title>
+    <style>
+        body {
+            position: absolute;
+            top: 0px;
+            right: 0px;
+            bottom: 0px;
+            left: 0px;
+            padding: 10px;
+        }
+
+        .terminal {
+            height: 100%;
+            position: relative;
+            top: 40px;
+            right: 0px;
+            bottom: 0px;
+            left: 0px;
+            border: 1px solid #c1c1c1;
+            border-radius: 5px;
+            font-family: Consolas;
+            padding: 5px;
+            overflow: auto;
+            word-break: keep-all;
+            white-space: nowrap;
+        }
+    </style>
 </head>
 
-<body class="layui-layout-body">
+<body>
 <div class="layui-container">
-    欢迎页
+    <div class="terminal"></div>
 </div>
 </body>
 <script>
     layui.use(['layer', 'element'], function () {
         var element = layui.element;
         var layer = layui.layer;
+        var $ = layui.$;
+
+        var showLogDom = $('.terminal');
+
+
+        if ('WebSocket' in window) {
+            var ws = new WebSocket("ws://" + window.location.host + "/console/$userInfo");
+
+            ws.onopen = function () {
+                showLogDom.append('WebSocket连接成功！<br/>');
+                ws.send('{"op": "top", "projectInfo":{}}');
+            };
+
+            ws.onmessage = function (data) {
+                showLogDom.html(data.data + '<br/>');
+            }
+
+            ws.onerror = function (ev) {
+                showLogDom.append('WebSocket连接已关闭！<br/>');
+            }
+
+        }
     });
 </script>
 
