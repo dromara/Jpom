@@ -102,7 +102,7 @@ public class CommandService extends BaseService {
         switch (commandOp) {
             case restart:
             case start:
-                command = String.format("%s %s %s %s %s %s %s [%s][%s]", commandPath, commandOp.toString(), tag, mainClass, lib, log, token, jvm, args);
+                command = String.format("%s %s %s %s %s %s %s [%s][%s]", commandPath, commandOp.toString(), tag, token, mainClass, lib, log, jvm, args);
                 break;
             case stop:
                 command = String.format("%s %s %s %s", commandPath, commandOp.toString(), tag, token);
