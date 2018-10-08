@@ -42,7 +42,9 @@ public class CommandService extends BaseService {
         stop,
         restart,
         status,
-
+        /**
+         * 运行日志
+         */
         showlog,
         /**
          * 获取进程id
@@ -52,6 +54,9 @@ public class CommandService extends BaseService {
          * 备份日志
          */
         backupLog,
+        /**
+         * 查看内存信息
+         */
         top
     }
 
