@@ -39,7 +39,7 @@
             <div class="layui-inline">
                 <label class="layui-form-label">登录名</label>
                 <div class="layui-input-block">
-                    <input type="text" name="id" placeholder="登录名（设置后将不能修改）" required lay-verify="required"
+                    <input type="text" name="id" placeholder="登录名" required lay-verify="required"
                            class="layui-input">
                 </div>
             </div>
@@ -108,6 +108,35 @@
             }
         });
 
+        // 编辑用户信息
+        function updateApplication(data) {
+            // 重置表单
+            document.getElementById('form_user').reset();
+            $('#form_user [name="id"]').attr('readonly', true).addClass('layui-disabled');
+
+            // 设置表单值
+            for (var key in data) {
+                if ("role" == key) {
+                    if ("是" === data[key])
+                        $('#form_user [name="role"]').attr('checked', true);
+                } else {
+                    $('#form_user [name="' + key + '"]').val(data[key]);
+                }
+            }
+            // 弹出
+            layer.open({
+                type: 1,
+                title: '编辑',
+                content: $('#div-user'),
+                area: ['60%', '60%'],
+                btnAlign: 'c',
+                btn: ['提交'],
+                yes: function (index, layero) {
+                    $('#form_user').attr('action', '/user/updateUser');
+                    $('#user_submit').click();
+                }
+            });
+        }
         // '添加用户'点击事件
         $('#addProject').on('click', function () {
             // 重置表单
@@ -123,7 +152,7 @@
                 btnAlign: 'c',
                 btn: ['提交'],
                 yes: function (index, layero) {
-                    $('#form_project').attr('action', '/user/addUser');
+                    $('#form_user').attr('action', '/user/addUser');
                     $('#user_submit').click();
                 }
             });
@@ -173,36 +202,6 @@
             }
         });
 
-        // 编辑用户信息
-        function updateApplication(data) {
-            // 重置表单
-            document.getElementById('form_user').reset();
-            $('#form_user [name="id"]').attr('readonly', true).addClass('layui-disabled');
-
-            // 设置表单值
-            for (var key in data) {
-                if ("role" == key) {
-                    if ("是" === data[key])
-                        $('#form_user [name="role"]').attr('checked', true);
-                } else {
-                    $('#form_user [name="' + key + '"]').val(data[key]);
-                }
-            }
-
-            // 弹出
-            layer.open({
-                type: 1,
-                title: '编辑',
-                content: $('#div-user'),
-                area: ['60%', '60%'],
-                btnAlign: 'c',
-                btn: ['提交'],
-                yes: function (index, layero) {
-                    $('#form_user').attr('action', '/user/updateUser');
-                    $('#user_submit').click();
-                }
-            });
-        }
 
         // 删除用户
         function deleteApplication(data) {
