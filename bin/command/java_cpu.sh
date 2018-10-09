@@ -5,7 +5,7 @@ T=`ps -mp $1 -o THREAD,tid,time|sort -k 2 -nr|awk '{print $2","$8","$9}'|head -n
 Count=$2
 Name=$3
 if [ "$Name" = ""  ]; then
-   Name="java_Analy.txt";
+   Name="java_cpu.txt";
 fi
 
 touch $Name
