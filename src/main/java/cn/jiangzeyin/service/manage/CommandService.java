@@ -49,7 +49,7 @@ public class CommandService extends BaseService {
         /**
          * 获取进程id
          */
-        getPid,
+        pid,
         /**
          * 备份日志
          */
@@ -113,7 +113,7 @@ public class CommandService extends BaseService {
                 command = String.format("%s %s %s %s", commandPath, commandOp.toString(), tag, token);
                 break;
             case status:
-            case getPid:
+            case pid:
                 command = String.format("%s %s %s", commandPath, commandOp.toString(), tag);
                 break;
             case backupLog:
