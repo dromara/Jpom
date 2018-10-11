@@ -205,16 +205,19 @@ public class CommandService extends BaseService {
      * @param tag tag
      * @return 内存信息
      */
-    public JSONObject getInternal(String tag) {
+    public String getInternal(String tag) {
         String pid = getPid(tag);
-        String topRam = getTopRam(pid);
-        System.out.println(pid);
-        System.out.println(topRam);
-        return null;
+        return getTopRam(pid);
     }
 
+    /**
+     * 获取单个进程信息
+     *
+     * @param pid
+     * @return
+     */
     private String getTopRam(String pid) {
-        String command = "top -p " + pid;
+        String command = "top -b -n 1 -p " + pid;
         return execCommand(command, null);
     }
 
@@ -226,7 +229,7 @@ public class CommandService extends BaseService {
      */
     private String getPid(String tag) {
         String commandPath = getCommandPath();
-        String command = String.format("%s %s %s", commandPath, "pid", tag);
+        String command = String.format("%s %s %s", commandPath, CommandOp.pid, tag);
         return execCommand(command, null);
     }
 

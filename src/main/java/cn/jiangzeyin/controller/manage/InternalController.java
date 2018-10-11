@@ -23,16 +23,11 @@ public class InternalController extends BaseController {
 
     @RequestMapping(value = "internal", method = RequestMethod.GET)
     public String getInternal(String tag) {
-        JSONObject internal = commandService.getInternal(tag);
-
-
-        RuntimeInfo runtimeInfo = new RuntimeInfo();
+        String internal = commandService.getInternal(tag);
+        internal = internal.replaceAll("\n", "<br/>");
+        internal = internal.replaceAll(" ", "&nbsp;&nbsp;");
         JSONObject object = new JSONObject();
-        object.put("total", FileUtil.readableFileSize(runtimeInfo.getMaxMemory()));
-        object.put("use", FileUtil.readableFileSize(runtimeInfo.getTotalMemory() - runtimeInfo.getFreeMemory()));
-        object.put("allot", FileUtil.readableFileSize(runtimeInfo.getTotalMemory()));
-        object.put("free", FileUtil.readableFileSize(runtimeInfo.getFreeMemory()));
-        object.put("useAble", FileUtil.readableFileSize(runtimeInfo.getUsableMemory()));
+        object.put("ram", internal);
         setAttribute("internal", object);
         return "/manage/internal";
     }

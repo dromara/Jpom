@@ -12,26 +12,10 @@
 </head>
 
 <body>
-<div class="layui-form-item">
-    <label class="layui-form-label">已使用：</label>
-    <label class="layui-form-label">$internal.use</label>
+<div>
+    $internal.ram
 </div>
-<div class="layui-form-item">
-    <label class="layui-form-label">分配剩余：</label>
-    <label class="layui-form-label">$internal.free</label>
-</div>
-<div class="layui-form-item">
-    <label class="layui-form-label">最大可用：</label>
-    <label class="layui-form-label">$internal.useAble</label>
-</div>
-<div class="layui-form-item">
-    <label class="layui-form-label">已分配：</label>
-    <label class="layui-form-label">$internal.allot</label>
-</div>
-<div class="layui-form-item">
-    <label class="layui-form-label">总内存：</label>
-    <label class="layui-form-label">$internal.total</label>
-</div>
+
 </body>
 <script type="text/javascript">
 
