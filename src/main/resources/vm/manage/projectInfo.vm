@@ -28,7 +28,7 @@
     <a href="javascript:;" class="layui-btn  layui-btn-sm layui-btn-warm" lay-event="update">配置</a>
     <a href="javascript:;" class="layui-btn  layui-btn-sm layui-btn" lay-event="file">文件</a>
     <a href="javascript:;" class="layui-btn  layui-btn-sm layui-btn" lay-event="build">构建</a>
-    <a href="javascript:;" class="layui-btn  layui-btn-sm layui-btn" lay-event="ram">内存</a>
+    <a href="javascript:;" class="layui-btn  layui-btn-sm layui-btn" lay-event="ram">监控</a>
 </script>
 <script type="text/html" id="status_templ">
     <input type="checkbox" disabled name="status" {{# if(d.status){ }} checked {{# } }} lay-skin="switch"

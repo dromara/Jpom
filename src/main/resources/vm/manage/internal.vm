@@ -8,16 +8,41 @@
         body {
             padding: 20px;
         }
+
+        .info {
+            margin-top: 30px;
+        }
+        .but{
+            width: 50px;
+            padding: 10px;
+            background: #cccccc;
+        }
     </style>
 </head>
 
 <body>
 <div>
-    $internal.ram
+##    <button class="btn" value="$!internal.tag" id="stack">导出堆栈信息</button>
+##    <button class="btn" value="$!internal.tag" id="ram">导出内存信息</button>
+    <a class="but" href="/manage/stack?tag=$!internal.tag">导出堆栈信息</a>
+    <a class="but" href="/manage/ram?tag=$!internal.tag">导出内存信息</a>
+    <div class="info">
+        $internal.ram
+    </div>
+
 </div>
 
 </body>
 <script type="text/javascript">
+    layui.use(['layer', 'element', 'form'], function () {
+        var element = layui.element;
+        var layer = layui.layer;
+        var form = layui.form;
+        var $ = layui.$;
+
+
+
+    })
 
 </script>
 </html>

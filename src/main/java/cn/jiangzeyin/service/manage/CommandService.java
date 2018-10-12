@@ -199,38 +199,10 @@ public class CommandService extends BaseService {
         }
     }
 
-    /**
-     * 获取内存信息
-     *
-     * @param tag tag
-     * @return 内存信息
-     */
-    public String getInternal(String tag) {
-        String pid = getPid(tag);
-        return getTopRam(pid);
-    }
 
-    /**
-     * 获取单个进程信息
-     *
-     * @param pid
-     * @return
-     */
-    private String getTopRam(String pid) {
-        String command = "top -b -n 1 -p " + pid;
+    public String execCommand(String command) {
         return execCommand(command, null);
     }
 
-    /**
-     * 获取进程pid
-     *
-     * @param tag tag
-     * @return pid
-     */
-    private String getPid(String tag) {
-        String commandPath = getCommandPath();
-        String command = String.format("%s %s %s", commandPath, CommandOp.pid, tag);
-        return execCommand(command, null);
-    }
 
 }

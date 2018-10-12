@@ -31,41 +31,64 @@
             font-weight: bold;
             font-size: 23px;
         }
+
+        .titl {
+            width: 100px;
+        }
+
+        .layui-inline {
+            width: 200px;
+        }
     </style>
 </head>
 
 <body>
+<form action="" class="layui-form" id="form">
+    <div class="layui-inline">
+        <label class="layui-form-label titl">是否开启监听</label>
+        <div class="layui-input-block">
+            <input type="checkbox" lay-filter="filter" id="monitor" lay-skin="switch" lay-text="开启|关闭">
+        </div>
+    </div>
+</form>
 <div class="layui-container">
     <div class="terminal"></div>
 </div>
 </body>
 <script>
-    layui.use(['layer', 'element'], function () {
+    layui.use(['layer', 'element', 'form'], function () {
         var element = layui.element;
         var layer = layui.layer;
+        var form = layui.form;
         var $ = layui.$;
+        var ws;
 
         var showLogDom = $('.terminal');
 
-
-        if ('WebSocket' in window) {
-            var ws = new WebSocket("ws://" + window.location.host + "/console/$userInfo");
-
-            ws.onopen = function () {
-                showLogDom.append('WebSocket连接成功！<br/>');
-                ws.send('{"op": "top", "projectInfo":{}}');
-            };
-
-            ws.onmessage = function (data) {
-                console.log(data)
-                showLogDom.html(data.data + '<br/>');
+        form.on('switch(filter)', function (data) {
+            var check = data.elem.checked;
+            if ('WebSocket' in window) {
+                if (!ws) {
+                    ws = new WebSocket("ws://" + window.location.host + "/console/$userInfo");
+                }
+                if (check) {
+                    ws.onopen = function () {
+                        showLogDom.append('WebSocket连接成功！<br/>');
+                        ws.send('{"op": "top", "projectInfo":{}}');
+                    };
+                    ws.onmessage = function (data) {
+                        showLogDom.html(data.data + '<br/>');
+                    }
+                    ws.onerror = function (ev) {
+                        showLogDom.append('WebSocket连接已关闭！<br/>');
+                    }
+                } else {
+                    ws.close();
+                }
             }
+        })
 
-            ws.onerror = function (ev) {
-                showLogDom.append('WebSocket连接已关闭！<br/>');
-            }
 
-        }
     });
 </script>
 
