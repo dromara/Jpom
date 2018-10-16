@@ -6,8 +6,10 @@ import cn.jiangzeyin.controller.BaseController;
 import cn.jiangzeyin.model.ProjectInfoModel;
 import cn.jiangzeyin.service.manage.CommandService;
 import com.alibaba.fastjson.JSONObject;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.annotation.Resource;
@@ -27,7 +29,7 @@ public class InternalController extends BaseController {
     /**
      * 获取内存信息
      */
-    @RequestMapping(value = "internal")
+    @RequestMapping(value = "internal", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
     public String getInternal(String tag) {
         ProjectInfoModel projectInfoModel = new ProjectInfoModel();
         projectInfoModel.setTag(tag);
@@ -40,7 +42,7 @@ public class InternalController extends BaseController {
         object.put("ram", internal);
         object.put("tag", tag);
         setAttribute("internal", object);
-        return "/manage/internal";
+        return "manage/internal";
     }
 
     /**
