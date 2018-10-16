@@ -8,7 +8,7 @@ import java.io.InputStream;
 
 public class TopTest {
     public static void main(String[] args) {
-        String result = execCommand("top -b -n 1 ");
+        String result = execCommand("/boot-line/command/java_cpu.sh 4257 1 java_cpu22340.txt");
         System.out.println(result);
     }
 

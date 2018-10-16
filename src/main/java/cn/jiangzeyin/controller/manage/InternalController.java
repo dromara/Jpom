@@ -56,7 +56,7 @@ public class InternalController extends BaseController {
         String pid = commandService.execCommand(CommandService.CommandOp.pid, projectInfoModel, null).trim();
         pid = pid.replace("\n", "");
         String fileName = "java_cpu" + RandomUtil.randomNumbers(5) + ".txt";
-        String command = String.format("%s %s %s %s", "/boot-line/command/java_cpu.sh", pid, 0, fileName);
+        String command = String.format("%s %s %s %s", "/boot-line/command/java_cpu.sh", pid, 300, fileName);
         commandService.execCommand(command);
         downLoad(getResponse(), fileName, "java_cpu.txt");
         return JsonMessage.getString(200, "");
