@@ -3,7 +3,7 @@ package cn.jiangzeyin.controller.manage;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.PageUtil;
-import cn.jiangzeyin.controller.base.AbstractBaseControl;
+import cn.jiangzeyin.controller.BaseController;
 import cn.jiangzeyin.model.ProjectInfoModel;
 import cn.jiangzeyin.service.manage.CommandService;
 import cn.jiangzeyin.service.manage.ManageService;
@@ -20,7 +20,7 @@ import java.util.Set;
 
 @Controller
 @RequestMapping(value = "/manage/")
-public class ManageControl extends AbstractBaseControl {
+public class ManageControl extends BaseController {
 
     @Resource
     private ManageService manageService;

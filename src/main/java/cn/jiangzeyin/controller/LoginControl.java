@@ -4,7 +4,6 @@ import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.interceptor.LoginInterceptor;
 import cn.jiangzeyin.common.interceptor.NotLogin;
-import cn.jiangzeyin.controller.base.AbstractBaseControl;
 import cn.jiangzeyin.service.UserService;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Controller;
@@ -15,7 +14,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import javax.annotation.Resource;
 
 @Controller
-public class LoginControl extends AbstractBaseControl {
+public class LoginControl extends BaseController {
 
     @Resource
     private UserService userService;

@@ -2,14 +2,14 @@ package cn.jiangzeyin.controller;
 
 import cn.hutool.crypto.SecureUtil;
 import cn.jiangzeyin.common.interceptor.LoginInterceptor;
-import cn.jiangzeyin.controller.base.AbstractBaseControl;
+import cn.jiangzeyin.controller.base.AbstractController;
 import org.springframework.web.context.request.RequestAttributes;
 
 /**
  * @author jiangzeyin
  * @date 2018/9/28
  */
-public abstract class BaseController extends AbstractBaseControl {
+public abstract class BaseController extends AbstractController {
     protected String userName;
     protected String userPwd;
 

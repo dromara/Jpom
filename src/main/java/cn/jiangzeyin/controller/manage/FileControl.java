@@ -7,7 +7,7 @@ import cn.hutool.core.util.CharsetUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.PageUtil;
-import cn.jiangzeyin.controller.base.AbstractBaseControl;
+import cn.jiangzeyin.controller.BaseController;
 import cn.jiangzeyin.model.ProjectInfoModel;
 import cn.jiangzeyin.service.manage.CommandService;
 import cn.jiangzeyin.service.manage.ManageService;
@@ -30,7 +30,7 @@ import java.util.Map;
 
 @Controller
 @RequestMapping(value = "/file/")
-public class FileControl extends AbstractBaseControl {
+public class FileControl extends BaseController {
 
     @Resource
     private ManageService manageService;
@@ -143,7 +143,7 @@ public class FileControl extends AbstractBaseControl {
     @ResponseBody
     public String upload() {
         String id = getParameter("id");
-        List<MultipartFile> files = getFiles("file");
+        List<MultipartFile> files = getMultiRequest().getFiles("file");
         try {
             ProjectInfoModel pim = manageService.getProjectInfo(id);
             for (MultipartFile file : files) {

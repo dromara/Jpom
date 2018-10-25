@@ -1,6 +1,5 @@
 package cn.jiangzeyin.controller;
 
-import cn.jiangzeyin.controller.base.AbstractBaseControl;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -8,7 +7,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 
 @Controller
 @RequestMapping(value = "/")
-public class IndexControl extends AbstractBaseControl {
+public class IndexControl extends BaseController {
 
     @RequestMapping(value = "error", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
     public String error() {
