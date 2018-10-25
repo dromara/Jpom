@@ -8,6 +8,7 @@ import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.PageUtil;
 import cn.jiangzeyin.controller.BaseController;
+import cn.jiangzeyin.controller.multipart.MultipartFileBuilder;
 import cn.jiangzeyin.model.ProjectInfoModel;
 import cn.jiangzeyin.service.manage.CommandService;
 import cn.jiangzeyin.service.manage.ManageService;
@@ -18,16 +19,17 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
+/**
+ * @author Administrator
+ */
 @Controller
 @RequestMapping(value = "/file/")
 public class FileControl extends BaseController {
@@ -139,29 +141,23 @@ public class FileControl extends BaseController {
      *
      * @return json
      */
-    @RequestMapping(value = "upload")
+    @RequestMapping(value = "upload", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
-    public String upload() {
+    public String upload() throws Exception {
         String id = getParameter("id");
-        List<MultipartFile> files = getMultiRequest().getFiles("file");
-        try {
-            ProjectInfoModel pim = manageService.getProjectInfo(id);
-            for (MultipartFile file : files) {
-                if (null != file) {
-                    File saveFile = new File(pim.getLib(), file.getOriginalFilename());
-                    FileUtil.writeFromStream(file.getInputStream(), saveFile);
-                }
-            }
-            // 修改使用状态
-            ProjectInfoModel modify = new ProjectInfoModel();
-            modify.setId(pim.getId());
-            modify.setUseLibDesc("upload");
-            manageService.updateProject(modify);
-            return JsonMessage.getString(200, "上传成功");
-        } catch (Exception e) {
-            DefaultSystemLog.ERROR().error(e.getMessage(), e);
-            return JsonMessage.getString(500, "上传失败:" + e.getMessage());
-        }
+        ProjectInfoModel pim = manageService.getProjectInfo(id);
+        MultipartFileBuilder multipartFileBuilder = createMultipart()
+                .addFieldName("file")
+                .setSavePath(pim.getLib())
+                .setUseOriginalFilename(true);
+        // 保存
+        multipartFileBuilder.save();
+        // 修改使用状态
+        ProjectInfoModel modify = new ProjectInfoModel();
+        modify.setId(pim.getId());
+        modify.setUseLibDesc("upload");
+        manageService.updateProject(modify);
+        return JsonMessage.getString(200, "上传成功");
     }
 
 

@@ -33,15 +33,19 @@ public class JsonUtil {
     }
 
     public static Object readJson(String path) {
-        String json = FileUtil.readString(path, "UTF-8");
-        if (StrUtil.isEmpty(json)) {
-            return JSONObject.parseObject("{}");
+        synchronized (JsonUtil.class) {
+            String json = FileUtil.readString(path, "UTF-8");
+            if (StrUtil.isEmpty(json)) {
+                return JSONObject.parseObject("{}");
+            }
+            return JSON.parse(json);
         }
-        return JSON.parse(json);
     }
 
     public static void saveJson(String path, JSON json) {
-        String newsJson = JSON.toJSONString(json, true);
-        FileUtil.writeString(newsJson, path, "UTF-8");
+        synchronized (JsonUtil.class) {
+            String newsJson = JSON.toJSONString(json, true);
+            FileUtil.writeString(newsJson, path, "UTF-8");
+        }
     }
 }

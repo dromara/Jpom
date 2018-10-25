@@ -140,7 +140,7 @@ public abstract class BaseService {
      * @return
      * @throws IOException
      */
-    public JSONObject getJsonObject(String filename) throws IOException {
+    protected JSONObject getJsonObject(String filename) throws IOException {
         return (JSONObject) JsonUtil.readJson(getDataFilePath(filename));
     }
 }
