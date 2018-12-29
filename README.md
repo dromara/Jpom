@@ -9,7 +9,7 @@
 
 ###  在这里boot-online 项目将如上问题统一解决
 
-> 这里就采用SpringBoot开发web项目来统一管理，只要电脑能使用浏览器就ok
+> 这里就采用SpringBoot开发web项目(前台采用layui)+websocket来统一管理，只要电脑能使用浏览器就ok
 
 #### 项目主要功能
 1. 创建、修改、删除项目
@@ -20,6 +20,7 @@
 6. 阿里云 CodePipeline + Oss在线管理
 7. 多用户管理
 8. 此项目完全不依赖数据库，随装随用
+9. 整个服务器top监听
 
 
 #### 项目截图
@@ -43,7 +44,10 @@
 ![控制台日志实时查看](/doc/images/console.png)
 
 7. 用户管理
-![控制台日志实时查看](/doc/images/user_list.png)
+![用户管理](/doc/images/user_list.png)
+
+8. top监听
+![top监听](/doc/images/top.png)
 
 贡献人员：
     
