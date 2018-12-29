@@ -61,7 +61,7 @@ public class FileControl extends BaseController {
     public String getRunBoot() {
         File file = commandService.getCommandFile();
         String content = FileUtil.readString(file, CharsetUtil.CHARSET_UTF_8);
-        Map<String, String> map = new HashMap<>();
+        Map<String, String> map = new HashMap<>(1);
         map.put("content", content);
         return JsonMessage.getString(200, "success", map);
     }
@@ -69,8 +69,8 @@ public class FileControl extends BaseController {
     /**
      * 修改启动文件
      *
-     * @param content
-     * @return
+     * @param content 内容
+     * @return json
      */
     @RequestMapping(value = "saveRunBoot")
     @ResponseBody

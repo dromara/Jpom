@@ -47,7 +47,7 @@
                 <artifactId>maven-assembly-plugin</artifactId>
                 <configuration>
                     <descriptors>
-                        <descriptor>src/main/resources/release.xml</descriptor>
+                        <descriptor>script/release.xml</descriptor>
                     </descriptors>
                     <outputDirectory>target/</outputDirectory>
                 </configuration>

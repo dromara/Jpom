@@ -1,7 +1,6 @@
 #\u7A0B\u5E8F\u7AEF\u53E3\u53F7
 server:
   port: 2122
-
 spring:
   application:
     name: boot-line

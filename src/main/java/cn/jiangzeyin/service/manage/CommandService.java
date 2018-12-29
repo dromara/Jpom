@@ -11,7 +11,6 @@ import cn.jiangzeyin.service.BaseService;
 import cn.jiangzeyin.socket.LogWebSocketHandle;
 import cn.jiangzeyin.socket.SocketSession;
 import cn.jiangzeyin.socket.TailLogThread;
-import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -62,12 +61,19 @@ public class CommandService extends BaseService {
 
 
     public File getCommandFile() {
-        File file = new File(getCommandPath());
+        File file = new File(getRunCommandPath());
         if (!file.exists()) {
             throw new RuntimeException("启动文件不存在");
         }
         return file;
     }
+
+    private String getRunCommandPath() {
+        String command = getCommandPath();
+        return command + "/run_boot.sh";
+//        return command;
+    }
+
 
     private String getCommandPath() {
         String command = SpringUtil.getEnvironment().getProperty("boot-online.command");
@@ -76,6 +82,21 @@ public class CommandService extends BaseService {
         }
         return command;
     }
+
+
+    public String getCpuCommandPath() {
+        String command = getCommandPath();
+        return command + "/java_cpu.sh";
+//        return command;
+    }
+
+
+    public String getRamCommandPath() {
+        String command = getCommandPath();
+        return command + "/java_ram.sh";
+//        return command;
+    }
+
 
     public String execCommand(CommandOp commandOp, ProjectInfoModel projectInfoModel) {
         return execCommand(commandOp, projectInfoModel, null);
@@ -90,7 +111,7 @@ public class CommandService extends BaseService {
     public String execCommand(CommandOp commandOp, ProjectInfoModel projectInfoModel, Evt evt) {
         String result;
         CommandService commandService = SpringUtil.getBean(CommandService.class);
-        String commandPath = commandService.getCommandPath();
+        String commandPath = commandService.getRunCommandPath();
         String tag = null, mainClass = null, lib = null, log = null, token = null, jvm = null, args = null;
         // 项目启动信息
         if (projectInfoModel != null) {

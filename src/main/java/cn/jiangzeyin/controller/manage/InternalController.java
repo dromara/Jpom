@@ -56,7 +56,8 @@ public class InternalController extends BaseController {
         String pid = commandService.execCommand(CommandService.CommandOp.pid, projectInfoModel, null).trim();
         pid = pid.replace("\n", "");
         String fileName = "java_cpu" + RandomUtil.randomNumbers(5) + ".txt";
-        String command = String.format("%s %s %s %s", "/boot-line/command/java_cpu.sh", pid, 300, fileName);
+        String commandPath = commandService.getCpuCommandPath();
+        String command = String.format("%s %s %s %s", commandPath, pid, 300, fileName);
         commandService.execCommand(command);
         downLoad(getResponse(), fileName, "java_cpu.txt");
         return JsonMessage.getString(200, "");
@@ -72,7 +73,8 @@ public class InternalController extends BaseController {
         projectInfoModel.setTag(tag);
         String pid = commandService.execCommand(CommandService.CommandOp.pid, projectInfoModel, null).trim();
         String fileName = "java_ram" + RandomUtil.randomNumbers(5) + ".txt";
-        String command = String.format("%s %s %s", "/boot-line/command/java_ram.sh", pid, fileName);
+        String commandPath = commandService.getRamCommandPath();
+        String command = String.format("%s %s %s", commandPath, pid, fileName);
         commandService.execCommand(command);
         downLoad(getResponse(), fileName, "java_ram.txt");
         return JsonMessage.getString(200, "");
@@ -91,7 +93,7 @@ public class InternalController extends BaseController {
         String path = realPath + "/" + fileName;
         File file = new File(path);
         try {
-            String filename = file.getName();
+//            String filename = file.getName();
             // 以流的形式下载文件。
             InputStream fis = new BufferedInputStream(new FileInputStream(path));
             byte[] buffer = new byte[fis.available()];
