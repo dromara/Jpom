@@ -49,16 +49,40 @@
 8. top监听
 ![top监听](/doc/images/top.png)
 
-### 贡献人员：
+
+### 编译安装
+
+访问[Boot-online](https://gitee.com/jiangzeyin/boot-online)的码云主页,拉取最新完整代码：
+
+1. 端口修改确认（默认：2122）
+2. 项目运行数据目录修改确认（默认：/boot-online/data/）数据路径存储用户信息和项目配置信息，基础格查看项目目录[/bin/data]
+3. 项目运行命令目录修改确认（默认：/boot-online/command/）完整命令查看项目目录[/bin/command] 在部署是需要完整copy此目录到配置的命令目录中 
+4. 项目运行日志目录确认（默认：/boot-online/log/）
+
+然后进入项目目录执行：
+
+    mvn package
+
+然后在目录中查看 target/boot-online-1.0-lib 
+
+### 贡献人员
     
 1.  [F7575](https://gitee.com/F7575)
 2.  [bwcx_jzy](https://gitee.com/jiangzeyin)
 3.  [arno](https://gitee.com/arnohand)
 
-### 感谢：
+### 感谢
  boot-online使用以下开源项目
   - [Spring Boot](https://github.com/spring-projects/spring-boot)：核心框架
   - [Fast-Boot](https://gitee.com/jiangzeyin/common-parent)：针对SpringBoot 封装的一系列的快捷包 提供公共的Controller、自动化拦截器、启动加载资源接口、线程池管理
   - [alibaba/fastjson](https://github.com/alibaba/fastjson)：用于Java的快速JSON解析器/生成器
   - [Hutool](https://gitee.com/looly/hutool)：一个Java工具包，也只是一个工具包，它帮助我们简化每一行代码，减少每一个方法，让Java语言也可以“甜甜的”
   - [Layui](https://gitee.com/sentsin/layui)：前端UI框架
+  
+
+### 提供bug反馈或建议
+
+- [码云](https://gitee.com/jiangzeyin/boot-online/issues)
+
+### 贡献代码
+  欢迎任何人为Boot-online添砖加瓦，贡献代码

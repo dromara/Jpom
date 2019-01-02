@@ -14,7 +14,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <java.version>1.8</java.version>
 
-        <common-boot.version>1.2.9</common-boot.version>
+        <common-boot.version>1.2.23</common-boot.version>
     </properties>
     <dependencies>
         <dependency>
