@@ -122,7 +122,7 @@
                             }
                             rgb = hslToRgb.apply(this, HSL[size - 1]);
                         }
-                        return "<div  title='" + d.group + "(" + d.id + ")" + "' style='background: rgb(" + rgb + ");color: #fff;margin: 0 -15px;padding: 0 15px;'>" + (d.runLibDesc || "") + " / " + (d.useLibDesc || "") + "</div>";
+                        return "<div  title='" + d.group + "(" + d.id + ")' style='background: rgb(" + rgb + ");color: #fff;margin: 0 -15px;padding: 0 15px;'>" + (d.runLibDesc || "") + " / " + (d.useLibDesc || "") + "</div>";
                     }
                 },
                 {field: 'createTime', title: '创建时间', width: '13%'},
