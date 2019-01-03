@@ -2,7 +2,6 @@ package cn.jiangzeyin.service.oss;
 
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.io.resource.ResourceUtil;
 import cn.hutool.core.util.CharsetUtil;
 import cn.jiangzeyin.common.spring.SpringUtil;
 import cn.jiangzeyin.service.BaseService;
@@ -42,7 +41,7 @@ public class OssManagerService extends BaseService {
         return file;
     }
 
-    public JSONArray list(String name) {
+    public JSONArray list(String name) throws IOException {
         OSSClient ossClient;
         String prefix = String.format("%s%s", getKeyPrefix(), name);
         ListObjectsRequest request;
@@ -77,7 +76,7 @@ public class OssManagerService extends BaseService {
         return jsonArray;
     }
 
-    public URL getUrl(String key) {
+    public URL getUrl(String key) throws IOException {
         // 创建OSSClient实例。
         OSSClient ossClient = getOSSClient();
         // 设置URL过期时间。
@@ -86,7 +85,7 @@ public class OssManagerService extends BaseService {
         return ossClient.generatePresignedUrl(getBucketName(), key, expiration);
     }
 
-    private OSSClient getOSSClient() {
+    private OSSClient getOSSClient() throws IOException {
         JSONObject config = getConfig();
         String endpoint = String.format("http://%s", config.getString("endpoint"));
         // 阿里云主账号AccessKey拥有所有API的访问权限，风险很高。强烈建议您创建并使用RAM账号进行API访问或日常运维，请登录 https://ram.console.aliyun.com 创建RAM账号。
@@ -96,22 +95,23 @@ public class OssManagerService extends BaseService {
         return new OSSClient(endpoint, accessKeyId, accessKeySecret);
     }
 
-    private JSONObject getConfig() {
+    private JSONObject getConfig() throws IOException {
         String active = SpringUtil.getEnvironment().getProperty("spring.profiles.active");
-        URL url = ResourceUtil.getResource("oss/" + active + ".json");
-        if (url == null) {
+        File file = getDataPath();
+        file = new File(file, "oss_" + active + ".json");
+        if (!file.exists()) {
             throw new IllegalArgumentException("请配置阿里云oss");
         }
-        String json = FileUtil.readString(url, CharsetUtil.UTF_8);
+        String json = FileUtil.readString(file, CharsetUtil.UTF_8);
         return JSON.parseObject(json);
     }
 
-    private String getBucketName() {
+    private String getBucketName() throws IOException {
         JSONObject config = getConfig();
         return config.getString("bucketName");
     }
 
-    private String getKeyPrefix() {
+    private String getKeyPrefix() throws IOException {
         JSONObject config = getConfig();
         return config.getString("keyPrefix");
     }

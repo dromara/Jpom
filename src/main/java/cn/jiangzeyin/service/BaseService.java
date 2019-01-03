@@ -21,7 +21,7 @@ public abstract class BaseService {
      *
      * @return file
      */
-    private File getDataPath() throws IOException {
+    protected File getDataPath() throws IOException {
         String path = SpringUtil.getEnvironment().getProperty("boot-online.data");
         File file = new File(path);
         if (!file.exists() && !file.mkdirs()) {
