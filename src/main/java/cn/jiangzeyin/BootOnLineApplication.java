@@ -2,6 +2,7 @@ package cn.jiangzeyin;
 
 import cn.jiangzeyin.common.ApplicationBuilder;
 import cn.jiangzeyin.common.EnableCommonBoot;
+import cn.jiangzeyin.common.interceptor.LoginInterceptor;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.web.servlet.ServletComponentScan;
 import org.springframework.http.converter.StringHttpMessageConverter;
@@ -26,6 +27,7 @@ public class BootOnLineApplication {
     public static void main(String[] args) throws Exception {
         ApplicationBuilder.createBuilder(BootOnLineApplication.class)
                 .addHttpMessageConverter(new StringHttpMessageConverter(Charset.forName("UTF-8")))
+                .addInterceptor(LoginInterceptor.class)
                 .run(args);
     }
 }

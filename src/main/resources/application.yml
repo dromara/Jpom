@@ -3,7 +3,7 @@ server:
   port: 2122
 spring:
   application:
-    name: boot-line
+    name: boot-online
   profiles:
     active: dev
   #velocity \u6A21\u677F\u6587\u4EF6\u914D\u7F6E
@@ -21,7 +21,7 @@ spring:
     resource-loader-path: classpath:/vm/
     suffix: .vm
 banner:
-  msg: boot-line
+  msg: boot-online 管理系统启动中
 #boot online \u914D\u7F6E
 boot-online:
   data: /boot-online/data/
@@ -30,6 +30,5 @@ boot-online:
 interceptor:
   resourceHandler: /static/**
   resourceLocation: classpath:/static/
-  initPackageName: cn.jiangzeyin.common.interceptor
 tomcat:
   sessionTimeOut: 18000
