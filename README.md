@@ -71,12 +71,18 @@
 2. 项目运行数据目录修改确认,如需修改请查看[/src/main/resources/application.yml](/src/main/resources/application.yml)（默认：/boot-online/data/）数据路径存储用户信息和项目配置信息，基础格查看项目目录[/bin/data](/bin/data)
 3. 项目运行命令目录修改确认,如需修改请查看[/src/main/resources/application.yml](/src/main/resources/application.yml)（默认：/boot-online/command/）完整命令查看项目目录[/bin/command](/bin/command) 在部署是需要完整copy此目录到配置的命令目录中 
 4. 项目运行日志目录确认,如需修改请查看[/src/main/resources/logback-spring.xml](/src/main/resources/logback-spring.xml)（默认：/boot-online/log/）
-5. 进入项目目录执行
+5. 进入项目目录执行，然后在目录中查看 target/boot-online-1.0-lib
 ```
 mvn package
 ```
-然后在目录中查看 target/boot-online-1.0-lib
-5. 打包上传服务器运行  （推荐命令执行文件[/bin/run.sh](/bin/run.sh)） 
+6. 打包上传服务器运行 （推荐命令执行文件[/bin/run.sh](/bin/run.sh)） 
+
+### 编译运行
+
+1. 将【编译安装】中的1-4部都确认执行
+2. copy项目运行数据文件到对应目录
+3. 运行*cn.jiangzeyin.BootOnLineApplication*
+4. 浏览器访问
 
 ### 贡献人员
     
