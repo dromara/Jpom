@@ -56,11 +56,9 @@
 3. 修改运行参数配置信息 [run.sh](/bin/run.sh)
 4. 修改默认账号信息 [data/user.json](/bin/data/user.json)
 5. 执行如下命令（记得给命令文件添加权限奥）
-
 ```
 /boot-online/run.sh start
 ```
-
 6. 配置端口访问域名或者指定端口访问
  
 
