@@ -100,7 +100,7 @@ public class OssManagerService extends BaseService {
         File file = getDataPath();
         file = new File(file, "oss_" + active + ".json");
         if (!file.exists()) {
-            throw new IllegalArgumentException("请配置阿里云oss");
+            throw new IllegalArgumentException("请配置阿里云oss:" + file.getPath());
         }
         String json = FileUtil.readString(file, CharsetUtil.UTF_8);
         return JSON.parseObject(json);

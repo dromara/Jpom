@@ -60,6 +60,7 @@
 /boot-online/run.sh start
 ```
 6. 配置端口访问域名或者指定端口访问
+7. 配置阿里云oss信息
  
 
 ### 编译安装
@@ -70,16 +71,12 @@
 2. 项目运行数据目录修改确认（默认：/boot-online/data/）数据路径存储用户信息和项目配置信息，基础格查看项目目录[/bin/data]
 3. 项目运行命令目录修改确认（默认：/boot-online/command/）完整命令查看项目目录[/bin/command] 在部署是需要完整copy此目录到配置的命令目录中 
 4. 项目运行日志目录确认（默认：/boot-online/log/）
-
-然后进入项目目录执行：
-
-
+    然后进入项目目录执行：
 ```
 mvn package
 ```
-
-
-然后在目录中查看 target/boot-online-1.0-lib 
+然后在目录中查看 target/boot-online-1.0-lib
+5. 打包上传服务器运行  （推荐命令执行文件[/bin/run.sh](/bin/run.sh)） 
 
 ### 贡献人员
     
