@@ -8,11 +8,13 @@ import javax.websocket.Session;
 import java.io.IOException;
 
 /**
- * Created by jiangzeyin on 2018/9/29.
+ * @author jiangzeyin
+ * @date 2018/9/29
  */
 public class SocketSession {
 
     private static final KeyLock<String> LOCK = new KeyLock<>();
+    private static final int ERROR_TRY_COUNT = 10;
 
     private TailLogThread thread;
     private Session session;
@@ -50,13 +52,13 @@ public class SocketSession {
         if (!session.isOpen()) {
             return;
         }
-        for (int i = 1; i <= 10; i++) {
+        for (int i = 1; i <= ERROR_TRY_COUNT; i++) {
             try {
                 LOCK.lock(session.getId());
                 session.getBasicRemote().sendText(msg);
             } catch (IOException e) {
                 DefaultSystemLog.ERROR().error("发送消息失败:" + i, e);
-                if (i == 10) {
+                if (i == ERROR_TRY_COUNT) {
                     throw e;
                 } else {
                     continue;

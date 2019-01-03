@@ -13,7 +13,8 @@ import java.util.Iterator;
 import java.util.Set;
 
 /**
- * Created by jiangzeyin on 2018/10/2.
+ * @author jiangzeyin
+ * @date 2018/10/2
  */
 public class TopManager {
 

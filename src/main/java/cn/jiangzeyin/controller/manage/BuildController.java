@@ -22,7 +22,8 @@ import java.io.File;
 import java.io.IOException;
 
 /**
- * Created by jiangzeyin on 2018/9/29.
+ * @author jiangzeyin
+ * @date 2018/9/29
  */
 @Controller
 @RequestMapping(value = "/manage/")
