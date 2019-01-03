@@ -36,7 +36,7 @@ public class ManageControl extends BaseController {
     /**
      * 展示项目页面
      *
-     * @return
+     * @return page
      */
     @RequestMapping(value = "projectInfo")
     public String projectInfo() {
@@ -83,8 +83,8 @@ public class ManageControl extends BaseController {
     /**
      * 删除项目
      *
-     * @param id
-     * @return
+     * @param id id
+     * @return json
      */
     @RequestMapping(value = "deleteProject", method = RequestMethod.POST)
     @ResponseBody

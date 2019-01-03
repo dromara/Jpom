@@ -5,6 +5,9 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
+/**
+ * @author Administrator
+ */
 @Controller
 @RequestMapping(value = "/")
 public class IndexControl extends BaseController {
@@ -17,7 +20,7 @@ public class IndexControl extends BaseController {
     /**
      * 加载首页
      *
-     * @return
+     * @return page
      */
     @RequestMapping(value = {"index", "", "index.html", "/"}, method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
     public String index() {
@@ -27,7 +30,7 @@ public class IndexControl extends BaseController {
     /**
      * 退出登录
      *
-     * @return
+     * @return page
      */
     @RequestMapping(value = "logout")
     public String logout() {

@@ -13,6 +13,9 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.annotation.Resource;
 
+/**
+ * @author Administrator
+ */
 @Controller
 public class LoginControl extends BaseController {
 
