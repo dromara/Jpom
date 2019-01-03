@@ -9,7 +9,7 @@
 
 ###  在这里boot-online 项目将如上问题统一解决
 
-> 这里就采用SpringBoot开发web项目(前台采用layui)+websocket来统一管理，只要电脑能使用浏览器就ok
+> boot-online采用SpringBoot开发web项目(前台采用layui)+websocket来统一管理，只要电脑能使用浏览器就ok
 
 #### 项目主要功能
 1. 创建、修改、删除项目
@@ -26,28 +26,28 @@
 #### 项目截图
 
 1. 创建项目
-![创建项目](/doc/images/create.png)
+![创建项目](https://gitee.com/jiangzeyin/boot-online/raw/master/doc/images/create.png)
 
 2. 修改、删除项目
-![修改、删除项目](/doc/images/edit_del.png)
+![修改、删除项目](https://gitee.com/jiangzeyin/boot-online/raw/master/doc/images/edit_del.png)
 
 3. 文件管理
-![文件管理](/doc/images/file.png)
+![文件管理](https://gitee.com/jiangzeyin/boot-online/raw/master/doc/images/file.png)
 
 4. 项目列表
-![项目列表](/doc/images/list.png)
+![项目列表](https://gitee.com/jiangzeyin/boot-online/raw/master/doc/images/list.png)
 
 5. 监控cpu 内存
-![ 监控cpu 内存](/doc/images/cup_ram.png)
+![ 监控cpu 内存](https://gitee.com/jiangzeyin/boot-online/raw/master/doc/images/cup_ram.png)
 
 6. 控制台日志实时查看
-![控制台日志实时查看](/doc/images/console.png)
+![控制台日志实时查看](https://gitee.com/jiangzeyin/boot-online/raw/master/doc/images/console.png)
 
 7. 用户管理
-![用户管理](/doc/images/user_list.png)
+![用户管理](https://gitee.com/jiangzeyin/boot-online/raw/master/doc/images/user_list.png)
 
 8. top监听
-![top监听](/doc/images/top.png)
+![top监听](https://gitee.com/jiangzeyin/boot-online/raw/master/doc/images/top.png)
 
 
 ### 编译安装
