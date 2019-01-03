@@ -46,7 +46,7 @@ public class ManageControl extends BaseController {
     /**
      * 查询所有项目
      *
-     * @return
+     * @return json
      */
     @RequestMapping(value = "getProjectInfo")
     @ResponseBody
@@ -60,17 +60,15 @@ public class ManageControl extends BaseController {
             for (String asetKey : setKey) {
                 ProjectInfoModel projectInfoModel = manageService.getProjectInfo(asetKey);
                 String result = commandService.execCommand(CommandService.CommandOp.status, projectInfoModel);
-                JSONObject jsonObject = json.getJSONObject(asetKey);
                 boolean status = result.contains(CommandService.RUNING_TAG);
                 projectInfoModel.setStatus(status);
-//                jsonObject.put("status", status);
                 array.add(projectInfoModel);
             }
             array.sort((o1, o2) -> {
                 String group1 = o1.getGroup();
                 String group2 = o2.getGroup();
                 if (group1 == null || group2 == null) {
-                    return 0;
+                    return -1;
                 }
                 return group1.compareTo(group2);
             });

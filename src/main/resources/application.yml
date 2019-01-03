@@ -22,7 +22,6 @@ spring:
     suffix: .vm
 banner:
   msg: boot-line
-
 #boot online \u914D\u7F6E
 boot-online:
   data: /boot-online/data/
@@ -32,3 +31,5 @@ interceptor:
   resourceHandler: /static/**
   resourceLocation: classpath:/static/
   initPackageName: cn.jiangzeyin.common.interceptor
+tomcat:
+  sessionTimeOut: 18000
