@@ -7,7 +7,7 @@
 > 如果休息日在朋友家玩，公司领导联系说需要控制一下某个项目，此时你身边有电脑，但是没有专业的管理服务器的软件。
 
 
-###  在这里boot-online 项目将如上问题统一解决
+###  在这里[boot-online](https://gitee.com/jiangzeyin/boot-online) 项目将如上问题统一解决
 
 > boot-online采用SpringBoot开发web项目(前台采用layui)+websocket来统一管理，只要电脑能使用浏览器就ok
 
