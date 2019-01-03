@@ -112,34 +112,45 @@ public class CommandService extends BaseService {
         String result;
         CommandService commandService = SpringUtil.getBean(CommandService.class);
         String commandPath = commandService.getRunCommandPath();
-        String tag = null, mainClass = null, lib = null, log = null, token = null, jvm = null, args = null;
+        String tag = null, log = null;
         // 项目启动信息
         if (projectInfoModel != null) {
-            tag = projectInfoModel.getTag();
-            mainClass = projectInfoModel.getMainClass();
-            lib = projectInfoModel.getLib();
+            tag = projectInfoModel.getId();
             log = projectInfoModel.getLog();
-            token = projectInfoModel.getToken();
-            jvm = projectInfoModel.getJvm();
-            args = projectInfoModel.getArgs();
+
         }
         // 执行命令
         String command;
         switch (commandOp) {
             case restart:
-            case start:
+            case start: {
+                String mainClass = null, lib = null, token = null, jvm = null, args = null;
+                if (projectInfoModel != null) {
+                    mainClass = projectInfoModel.getMainClass();
+                    lib = projectInfoModel.getLib();
+                    token = projectInfoModel.getToken();
+                    jvm = projectInfoModel.getJvm();
+                    args = projectInfoModel.getArgs();
+                }
                 command = String.format("%s %s %s %s %s %s %s [%s][%s]", commandPath, commandOp.toString(), tag, token, mainClass, lib, log, jvm, args);
                 break;
-            case stop:
+            }
+            case stop: {
+                String token = null;
+                if (projectInfoModel != null) {
+                    token = projectInfoModel.getToken();
+                }
                 command = String.format("%s %s %s %s", commandPath, commandOp.toString(), tag, token);
                 break;
+            }
             case status:
             case pid:
                 command = String.format("%s %s %s", commandPath, commandOp.toString(), tag);
                 break;
-            case backupLog:
+            case backupLog: {
                 command = String.format("%s %s %s", commandPath, commandOp.toString(), log);
                 break;
+            }
             case top:
                 command = "top -b -n 1";
                 break;

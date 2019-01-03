@@ -18,6 +18,9 @@ import javax.annotation.Resource;
 import java.io.IOException;
 import java.util.Set;
 
+/**
+ * @author Administrator
+ */
 @Controller
 @RequestMapping(value = "/manage/")
 public class ManageControl extends BaseController {

@@ -25,7 +25,8 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Created by jiangzeyin on 2018/9/28.
+ * @author jiangzeyin
+ * @date 2018/9/28
  */
 @Service
 public class OssManagerService extends BaseService {

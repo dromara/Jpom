@@ -22,17 +22,17 @@
     <form action="saveProject" class="layui-form" id="form_project">
         <div class="layui-form-item">
             <div class="layui-inline">
-                <label class="layui-form-label">项目名Id</label>
+                <label class="layui-form-label">项目名名称</label>
                 <div class="layui-input-block">
-                    <input type="text" name="id" placeholder="项目名称（设置后将不能修改）" required lay-verify="required"
-                           class="layui-input" value="#if($item)$!item.id#end">
+                    <input type="text" name="name" placeholder="项目名称" required lay-verify="required"
+                           class="layui-input" value="#if($item) #if($item.name)$item.name#else$!item.id#end #end">
                 </div>
             </div>
             <div class="layui-inline">
                 <label class="layui-form-label">Tag</label>
                 <div class="layui-input-block">
-                    <input type="text" name="tag" placeholder="程序运行标志" required lay-verify="required"
-                           class="layui-input" value="#if($item)$!item.tag#end">
+                    <input type="text" name="id" placeholder="程序运行标志（设置后将不能修改）" required lay-verify="required"
+                           class="layui-input" value="#if($item)$!item.id#end"  #if($item)readonly#end>
                 </div>
             </div>
         </div>

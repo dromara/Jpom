@@ -76,8 +76,8 @@ public class ManageService extends BaseService {
     /**
      * 根据id查询项目
      *
-     * @param id
-     * @return
+     * @param id 项目Id
+     * @return model
      */
     public ProjectInfoModel getProjectInfo(String id) throws IOException {
         JSONObject jsonObject = getJsonObject(FILENAME, id);

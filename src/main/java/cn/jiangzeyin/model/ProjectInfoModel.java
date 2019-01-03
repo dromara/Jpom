@@ -9,7 +9,7 @@ import com.alibaba.fastjson.JSONObject;
  */
 public class ProjectInfoModel {
     private String id;
-    private String tag;
+    private String name;
     private String mainClass;
     private String lib;
     private String log;
@@ -76,12 +76,12 @@ public class ProjectInfoModel {
         this.id = id;
     }
 
-    public String getTag() {
-        return tag;
+    public String getName() {
+        return name;
     }
 
-    public void setTag(String tag) {
-        this.tag = tag;
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getMainClass() {

@@ -1,6 +1,7 @@
 package cn.jiangzeyin.controller.manage;
 
 import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.lang.Validator;
 import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
@@ -16,7 +17,8 @@ import javax.annotation.Resource;
 import java.io.IOException;
 
 /**
- * Created by jiangzeyin on 2018/9/29.
+ * @author jiangzeyin
+ * @date 2018/9/29
  */
 @Controller
 @RequestMapping(value = "/manage/")
@@ -35,35 +37,20 @@ public class EditProjectController extends BaseController {
     @ResponseBody
     public String saveProject(ProjectInfoModel projectInfo) throws IOException {
         String id = projectInfo.getId();
-        ProjectInfoModel exits = manageService.getProjectInfo(id);
-        if (exits == null) {
-            return addProject(projectInfo);
-        }
-        return updateProject(projectInfo);
-    }
-
-    private String addProject(ProjectInfoModel projectInfo) {
-        String id = projectInfo.getId();
-        if (StrUtil.isEmpty(id)) {
+        if (StrUtil.isEmptyOrUndefined(id)) {
             return JsonMessage.getString(400, "项目id不能为空");
         }
-        try {
-            ProjectInfoModel exitsModel = manageService.getProjectInfo(id);
-            if (exitsModel != null) {
-                return JsonMessage.getString(400, "id已经存在");
-            }
-            projectInfo.setCreateTime(DateUtil.now());
-            manageService.saveProject(projectInfo);
-            return JsonMessage.getString(200, "新增成功！");
-        } catch (Exception e) {
-            DefaultSystemLog.ERROR().error(e.getMessage(), e);
-            return JsonMessage.getString(500, e.getMessage());
+        if (Validator.isChinese(id)) {
+            return JsonMessage.getString(401, "项目id不能包含中文");
         }
-    }
-
-
-    private String updateProject(ProjectInfoModel projectInfo) {
+        ProjectInfoModel exits = manageService.getProjectInfo(id);
         try {
+            if (exits == null) {
+                //  return addProject(projectInfo);
+                projectInfo.setCreateTime(DateUtil.now());
+                manageService.saveProject(projectInfo);
+                return JsonMessage.getString(200, "新增成功！");
+            }
             manageService.updateProject(projectInfo);
             return JsonMessage.getString(200, "修改成功");
         } catch (Exception e) {

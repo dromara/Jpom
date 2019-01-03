@@ -21,13 +21,18 @@ public abstract class BaseService {
      *
      * @return file
      */
-    public File getDataPath() throws IOException {
+    private File getDataPath() throws IOException {
         String path = SpringUtil.getEnvironment().getProperty("boot-online.data");
         File file = new File(path);
         if (!file.exists() && !file.mkdirs()) {
             throw new IOException(path);
         }
         return file;
+    }
+
+    public String getTempPathName() throws IOException {
+        File file = getTempPath();
+        return FileUtil.normalize(file.getPath());
     }
 
     protected File getTempPath() throws IOException {
@@ -125,8 +130,8 @@ public abstract class BaseService {
      *
      * @param filename 文件名
      * @param key      主键
-     * @return
-     * @throws IOException
+     * @return json
+     * @throws IOException io
      */
     protected JSONObject getJsonObject(String filename, String key) throws IOException {
         JSONObject jsonData = getJsonObject(filename);
@@ -137,8 +142,8 @@ public abstract class BaseService {
      * 读取整个json文件
      *
      * @param filename 文件名
-     * @return
-     * @throws IOException
+     * @return json
+     * @throws IOException io
      */
     protected JSONObject getJsonObject(String filename) throws IOException {
         return (JSONObject) JsonUtil.readJson(getDataFilePath(filename));

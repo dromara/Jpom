@@ -2,7 +2,6 @@ package cn.jiangzeyin.controller.manage;
 
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
-import cn.hutool.crypto.SecureUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.controller.BaseController;
@@ -23,7 +22,8 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 /**
- * Created by jiangzeyin on 2018/9/28.
+ * @author jiangzeyin
+ * @date 2018/9/28
  */
 @Controller
 @RequestMapping(value = "/manage/")

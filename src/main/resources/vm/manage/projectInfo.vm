@@ -50,7 +50,7 @@
             height: 'full-52',
             even: true,
             cols: [[
-                {field: 'id', title: '项目名称', width: '15%'},
+                {field: 'name', title: '项目名称', width: '15%'},
                 {
                     title: 'lib状态', width: '10%', templet: function (d) {
                         return (d.runLibDesc || "") + " / " + (d.useLibDesc || "");
@@ -64,6 +64,9 @@
             loading: true,
             response: {
                 statusCode: 200
+            },
+            done: function (data) {
+                console.log(data);
             }
         });
 

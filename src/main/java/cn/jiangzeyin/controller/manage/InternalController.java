@@ -1,6 +1,7 @@
 package cn.jiangzeyin.controller.manage;
 
-import cn.hutool.core.util.RandomUtil;
+import cn.hutool.core.io.FileUtil;
+import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.controller.BaseController;
 import cn.jiangzeyin.model.ProjectInfoModel;
@@ -14,10 +15,15 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
-import java.io.*;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.OutputStream;
 
 /**
  * 内存查看
+ *
+ * @author Administrator
  */
 @Controller
 @RequestMapping(value = "/manage/")
@@ -32,7 +38,7 @@ public class InternalController extends BaseController {
     @RequestMapping(value = "internal", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
     public String getInternal(String tag) {
         ProjectInfoModel projectInfoModel = new ProjectInfoModel();
-        projectInfoModel.setTag(tag);
+        projectInfoModel.setId(tag);
         String pid = commandService.execCommand(CommandService.CommandOp.pid, projectInfoModel, null);
         String command = "top -b -n 1 -p " + pid;
         String internal = commandService.execCommand(command);
@@ -50,16 +56,18 @@ public class InternalController extends BaseController {
      */
     @RequestMapping(value = "stack")
     @ResponseBody
-    public String stack(String tag) {
+    public String stack(String tag) throws IOException {
         ProjectInfoModel projectInfoModel = new ProjectInfoModel();
-        projectInfoModel.setTag(tag);
+        projectInfoModel.setId(tag);
         String pid = commandService.execCommand(CommandService.CommandOp.pid, projectInfoModel, null).trim();
         pid = pid.replace("\n", "");
-        String fileName = "java_cpu" + RandomUtil.randomNumbers(5) + ".txt";
+//        String fileName = "java_cpu" + RandomUtil.randomNumbers(5) + ".txt";
+        String fileName = commandService.getTempPathName() + "/" + tag + "_java_cpu.txt";
+        fileName = FileUtil.normalize(fileName);
         String commandPath = commandService.getCpuCommandPath();
         String command = String.format("%s %s %s %s", commandPath, pid, 300, fileName);
         commandService.execCommand(command);
-        downLoad(getResponse(), fileName, "java_cpu.txt");
+        downLoad(getResponse(), fileName);
         return JsonMessage.getString(200, "");
     }
 
@@ -68,15 +76,16 @@ public class InternalController extends BaseController {
      */
     @RequestMapping(value = "ram")
     @ResponseBody
-    public String ram(String tag) {
+    public String ram(String tag) throws IOException {
         ProjectInfoModel projectInfoModel = new ProjectInfoModel();
-        projectInfoModel.setTag(tag);
+        projectInfoModel.setId(tag);
         String pid = commandService.execCommand(CommandService.CommandOp.pid, projectInfoModel, null).trim();
-        String fileName = "java_ram" + RandomUtil.randomNumbers(5) + ".txt";
+        String fileName = commandService.getTempPathName() + "/" + tag + "_java_ram.txt";
+        fileName = FileUtil.normalize(fileName);
         String commandPath = commandService.getRamCommandPath();
         String command = String.format("%s %s %s", commandPath, pid, fileName);
         commandService.execCommand(command);
-        downLoad(getResponse(), fileName, "java_ram.txt");
+        downLoad(getResponse(), fileName);
         return JsonMessage.getString(200, "");
     }
 
@@ -85,20 +94,16 @@ public class InternalController extends BaseController {
      *
      * @param response response
      * @param fileName 文件名字
-     * @param name     文件下载名字
      */
-    private void downLoad(HttpServletResponse response, String fileName, String name) {
+    private void downLoad(HttpServletResponse response, String fileName) {
         //获取项目根路径
-        String realPath = System.getProperty("user.dir");
-        String path = realPath + "/" + fileName;
-        File file = new File(path);
+//        String realPath = System.getProperty("user.dir");
+//        String path = realPath + "/" + fileName;
+        File file = new File(fileName);
+        String name = file.getName();
         try {
-//            String filename = file.getName();
             // 以流的形式下载文件。
-            InputStream fis = new BufferedInputStream(new FileInputStream(path));
-            byte[] buffer = new byte[fis.available()];
-            fis.read(buffer);
-            fis.close();
+            byte[] buffer = FileUtil.readBytes(file);
             // 清空response
             response.reset();
             // 设置response的Header
@@ -112,9 +117,9 @@ public class InternalController extends BaseController {
             toClient.flush();
             toClient.close();
         } catch (IOException ioe) {
-            ioe.printStackTrace();
+            DefaultSystemLog.ERROR().error("下载异常", ioe);
         } finally {
-            file.delete();
+            FileUtil.del(file);
         }
     }
 

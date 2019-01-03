@@ -79,7 +79,7 @@
                     } else {
                         $("input[name='hidden']").focus();
                         console.log("focus")
-                        layer.alert(data.msg);
+                        layer.msg(data.msg);
                     }
                 },
                 error: function (err) {
