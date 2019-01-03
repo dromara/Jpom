@@ -10,11 +10,13 @@ import com.alibaba.fastjson.JSONObject;
 public class ProjectInfoModel {
     private String id;
     private String name;
+    private String group;
     private String mainClass;
     private String lib;
     private String log;
     private String jvm;
     private String token;
+    private boolean status;
     private String createTime;
     private String modifyTime;
     private String args;
@@ -27,6 +29,14 @@ public class ProjectInfoModel {
      * 当前运行lib 状态
      */
     private String runLibDesc;
+
+    public boolean isStatus() {
+        return status;
+    }
+
+    public void setStatus(boolean status) {
+        this.status = status;
+    }
 
     public String getRunLibDesc() {
         return runLibDesc;
@@ -82,6 +92,14 @@ public class ProjectInfoModel {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getGroup() {
+        return group;
+    }
+
+    public void setGroup(String group) {
+        this.group = group;
     }
 
     public String getMainClass() {

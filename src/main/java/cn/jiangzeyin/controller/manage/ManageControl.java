@@ -16,6 +16,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.annotation.Resource;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -53,17 +55,26 @@ public class ManageControl extends BaseController {
             // 查询数据
             JSONObject json = manageService.getAllProjectInfo();
             // 转换为数据
-            JSONArray array = new JSONArray();
+            List<ProjectInfoModel> array = new ArrayList<>();
             Set<String> setKey = json.keySet();
             for (String asetKey : setKey) {
                 ProjectInfoModel projectInfoModel = manageService.getProjectInfo(asetKey);
                 String result = commandService.execCommand(CommandService.CommandOp.status, projectInfoModel);
                 JSONObject jsonObject = json.getJSONObject(asetKey);
                 boolean status = result.contains(CommandService.RUNING_TAG);
-                jsonObject.put("status", status);
-                array.add(jsonObject);
+                projectInfoModel.setStatus(status);
+//                jsonObject.put("status", status);
+                array.add(projectInfoModel);
             }
-            return PageUtil.getPaginate(200, "查询成功！", array);
+            array.sort((o1, o2) -> {
+                String group1 = o1.getGroup();
+                String group2 = o2.getGroup();
+                if (group1 == null || group2 == null) {
+                    return 0;
+                }
+                return group1.compareTo(group2);
+            });
+            return PageUtil.getPaginate(200, "查询成功！", (JSONArray) JSONArray.toJSON(array));
         } catch (IOException e) {
             DefaultSystemLog.ERROR().error(e.getMessage(), e);
             return JsonMessage.getString(500, e.getMessage());

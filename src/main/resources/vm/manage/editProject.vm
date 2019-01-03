@@ -25,18 +25,26 @@
                 <label class="layui-form-label">项目名名称</label>
                 <div class="layui-input-block">
                     <input type="text" name="name" placeholder="项目名称" required lay-verify="required"
-                           class="layui-input" value="#if($item) #if($item.name)$item.name#else$!item.id#end #end">
+                           class="layui-input" value="#if($item)#if($item.name)$!item.name#else$!item.id#end#end">
                 </div>
             </div>
             <div class="layui-inline">
-                <label class="layui-form-label">Tag</label>
+                <label class="layui-form-label">分组名称</label>
                 <div class="layui-input-block">
-                    <input type="text" name="id" placeholder="程序运行标志（设置后将不能修改）" required lay-verify="required"
-                           class="layui-input" value="#if($item)$!item.id#end"  #if($item)readonly#end>
+                    <input type="text" name="group" placeholder="项目分组名称" required lay-verify="required"
+                           class="layui-input" value="#if($item)$!item.group#end">
                 </div>
             </div>
         </div>
         <div class="layui-form-item">
+            <div class="layui-inline">
+                <label class="layui-form-label">Tag</label>
+                <div class="layui-input-block">
+                    <input type="text" name="id" placeholder="程序运行标志（设置后将不能修改）" required lay-verify="required"
+                           class="layui-input  #if($item)layui-disabled#end" value="#if($item)$!item.id#end"
+                           #if($item)readonly#end>
+                </div>
+            </div>
             <div class="layui-inline">
                 <label class="layui-form-label">MainClass</label>
                 <div class="layui-input-block">
@@ -44,6 +52,9 @@
                            lay-verify="required" class="layui-input" value="#if($item)$!item.mainClass#end">
                 </div>
             </div>
+
+        </div>
+        <div class="layui-form-item">
             <div class="layui-inline">
                 <label class="layui-form-label">Lib</label>
                 <div class="layui-input-block">
@@ -51,8 +62,6 @@
                            class="layui-input" value="#if($item)$!item.lib#end">
                 </div>
             </div>
-        </div>
-        <div class="layui-form-item">
             <div class="layui-inline">
                 <label class="layui-form-label">Log</label>
                 <div class="layui-input-block">
@@ -60,13 +69,7 @@
                            class="layui-input" value="#if($item)$!item.log#end">
                 </div>
             </div>
-            <div class="layui-inline">
-                <label class="layui-form-label">Token</label>
-                <div class="layui-input-block">
-                    <input type="text" name="token" placeholder="对应接口的token，可不填" class="layui-input"
-                           value="#if($item)$!item.token#end">
-                </div>
-            </div>
+
         </div>
         <div class="layui-form-item">
             <div class="layui-inline">
@@ -85,6 +88,13 @@
             </div>
         </div>
         <div class="layui-form-item">
+            <div class="layui-inline">
+                <label class="layui-form-label">Token</label>
+                <div class="layui-input-block">
+                    <input type="text" name="token" placeholder="对应接口的token，可不填" class="layui-input"
+                           value="#if($item)$!item.token#end">
+                </div>
+            </div>
             <div class="layui-inline">
                 <label class="layui-form-label">Build标识</label>
                 <div class="layui-input-block">
