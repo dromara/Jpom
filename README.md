@@ -60,8 +60,6 @@
 /boot-online/run.sh start
 ```
 6. 配置端口访问域名或者指定端口访问
-7. 配置阿里云oss信息
- 
 
 ### 编译安装
 
@@ -83,6 +81,10 @@ mvn package
 2. copy项目运行数据文件到对应目录
 3. 运行*cn.jiangzeyin.BootOnLineApplication*
 4. 浏览器访问
+
+### 阿里云CodePipeline 配置
+
+[查看文档](/CodePipeline-Oss.md)
 
 ### 贡献人员
     
