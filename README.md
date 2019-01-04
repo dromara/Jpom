@@ -63,7 +63,7 @@
 
 ### 编译安装
 
-访问[Boot-online](https://gitee.com/jiangzeyin/boot-online)的码云主页,拉取最新完整代码：
+访问[Jpom](https://gitee.com/jiangzeyin/boot-online)的码云主页,拉取最新完整代码：
 
 1. 端口修改确认（默认：2122）
 2. 项目运行数据目录修改确认,如需修改请查看[/src/main/resources/application.yml](/src/main/resources/application.yml)（默认：/boot-online/data/）数据路径存储用户信息和项目配置信息，基础格查看项目目录[/bin/data](/bin/data)
@@ -106,4 +106,4 @@ mvn package
 - [码云](https://gitee.com/jiangzeyin/boot-online/issues)
 
 ### 贡献代码
-  欢迎任何人为Boot-online添砖加瓦，贡献代码
+  欢迎任何人为Jpom添砖加瓦，贡献代码
