@@ -8,8 +8,8 @@
         <artifactId>spring-boot-starter-parent</artifactId>
         <version>1.4.7.RELEASE</version>
     </parent>
-    <artifactId>boot-online</artifactId>
-    <name>在线管理系统</name>
+    <artifactId>jpom</artifactId>
+    <name>jpom</name>
     <inceptionYear>2017</inceptionYear>
     <version>1.0</version>
     <properties>
