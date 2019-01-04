@@ -1,6 +1,6 @@
 # Jpom(Java Project Online Management)Java项目在线管理
 
-> 在linux 中管理jar包运行，如SpringBoot、Jboot、jfinal、Tio项目如果是打包为Jar那么我们一般是使用shell 命令来管理, 
+> 在linux 中管理jar包运行，如SpringBoot、Jboot、jfinal、t-io项目如果是打包为Jar那么我们一般是使用shell 命令来管理, 
 > 如果有多个项目管理起来显得比较麻烦。
 > 如果新增、更新、删除项目都不是很方便。
 > 再或者想不使用电脑控制重启、关闭、开启项目。直接使用shell 登录服务器管理显然不是最简单的方法
