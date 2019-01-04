@@ -22,7 +22,7 @@ public abstract class BaseService {
      * @return file
      */
     protected File getDataPath() throws IOException {
-        String path = SpringUtil.getEnvironment().getProperty("boot-online.data");
+        String path = SpringUtil.getEnvironment().getProperty("jpom.data");
         File file = new File(path);
         if (!file.exists() && !file.mkdirs()) {
             throw new IOException(path);

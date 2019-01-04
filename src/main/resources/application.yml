@@ -3,7 +3,7 @@ server:
   port: 2122
 spring:
   application:
-    name: boot-online
+    name: jpom
   profiles:
     active: dev
   #velocity \u6A21\u677F\u6587\u4EF6\u914D\u7F6E
@@ -21,11 +21,11 @@ spring:
     resource-loader-path: classpath:/vm/
     suffix: .vm
 banner:
-  msg: boot-online 管理系统启动中
+  msg: jpom 管理系统启动中
 #boot online \u914D\u7F6E
-boot-online:
-  data: /boot-online/data/
-  command: /boot-online/command/
+jpom:
+  data: /jpom/data/
+  command: /jpom/command/
 # \u9759\u6001\u8D44\u6E90
 interceptor:
   resourceHandler: /static/**

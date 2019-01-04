@@ -1,15 +1,15 @@
 {
   "properties": [
     {
-      "name": "boot-online.data",
+      "name": "jpom.data",
       "type": "java.lang.String",
-      "description": "boot-online 项目运行数据存储文件路径",
+      "description": "jpom 项目运行数据存储文件路径",
       "defaultValue": ""
     },
     {
-      "name": "boot-online.command",
+      "name": "jpom.command",
       "type": "java.lang.String",
-      "description": "boot-online 项目运行控制xshell 命令文件存储路径",
+      "description": "jpom 项目运行控制shell 命令文件存储路径",
       "defaultValue": ""
     }
   ]

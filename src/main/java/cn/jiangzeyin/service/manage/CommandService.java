@@ -76,7 +76,7 @@ public class CommandService extends BaseService {
 
 
     private String getCommandPath() {
-        String command = SpringUtil.getEnvironment().getProperty("boot-online.command");
+        String command = SpringUtil.getEnvironment().getProperty("jpom.command");
         if (StrUtil.isEmpty(command)) {
             throw new RuntimeException("请配置命令文件");
         }

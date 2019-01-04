@@ -17,7 +17,7 @@ import java.nio.charset.Charset;
 @SpringBootApplication
 @ServletComponentScan
 @EnableCommonBoot
-public class BootOnLineApplication {
+public class JpomApplication {
 
     /**
      * 启动执行
@@ -25,7 +25,7 @@ public class BootOnLineApplication {
      * @param args 参数
      */
     public static void main(String[] args) throws Exception {
-        ApplicationBuilder.createBuilder(BootOnLineApplication.class)
+        ApplicationBuilder.createBuilder(JpomApplication.class)
                 .addHttpMessageConverter(new StringHttpMessageConverter(Charset.forName("UTF-8")))
                 .addInterceptor(LoginInterceptor.class)
                 .run(args);
