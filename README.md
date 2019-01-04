@@ -107,3 +107,7 @@ mvn package
 
 ### 贡献代码
   欢迎任何人为Jpom添砖加瓦，贡献代码
+  
+### 交流讨论
+
+  QQ群：[136715345](https://shang.qq.com/wpa/qunwpa?idkey=93ff8d8a37a436b752fe38d32075bb1b32a8e0b3d3ff19d0b541ca840433f561)
