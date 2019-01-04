@@ -1,14 +1,14 @@
 #!/bin/bash
 
-Tag="BootOnLineApplication"
-MainClass="cn.jiangzeyin.BootOnLineApplication"
-Path="/boot-online/"
+Tag="JpomApplication"
+MainClass="cn.jiangzeyin.JpomApplication"
+Path="/jpom/"
 Lib=${Path}"lib/"
 Log=${Path}"run.log"
 LogBack=${Path}"log/"
 JVM="-server "
 # 修改项目端口号 和 数据运行目录
-ARGS="--server.port=2122 --boot-online.data=/boot-online/data/ --boot-online.command=/boot-online/command/"
+ARGS="--server.port=2122 --jpom.data=/jpom/data/ --jpom.command=/jpom/command/"
 
 echo ${Tag}
 RETVAL="0"

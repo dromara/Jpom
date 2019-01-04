@@ -66,9 +66,9 @@
 访问[Jpom](https://gitee.com/jiangzeyin/jpom)的码云主页,拉取最新完整代码：
 
 1. 端口修改确认（默认：2122）
-2. 项目运行数据目录修改确认,如需修改请查看[/src/main/resources/application.yml](/src/main/resources/application.yml)（默认：/boot-online/data/）数据路径存储用户信息和项目配置信息，基础格查看项目目录[/bin/data](/bin/data)
-3. 项目运行命令目录修改确认,如需修改请查看[/src/main/resources/application.yml](/src/main/resources/application.yml)（默认：/boot-online/command/）完整命令查看项目目录[/bin/command](/bin/command) 在部署是需要完整copy此目录到配置的命令目录中 
-4. 项目运行日志目录确认,如需修改请查看[/src/main/resources/logback-spring.xml](/src/main/resources/logback-spring.xml)（默认：/boot-online/log/）
+2. 项目运行数据目录修改确认,如需修改请查看[/src/main/resources/application.yml](/src/main/resources/application.yml)（默认：/jpom/data/）数据路径存储用户信息和项目配置信息，基础格查看项目目录[/bin/data](/bin/data)
+3. 项目运行命令目录修改确认,如需修改请查看[/src/main/resources/application.yml](/src/main/resources/application.yml)（默认：/jpom/command/）完整命令查看项目目录[/bin/command](/bin/command) 在部署是需要完整copy此目录到配置的命令目录中 
+4. 项目运行日志目录确认,如需修改请查看[/src/main/resources/logback-spring.xml](/src/main/resources/logback-spring.xml)（默认：/jpom/log/）
 5. 进入项目目录执行，然后在目录中查看 target/jpom-1.0-lib
 ```
 mvn package
