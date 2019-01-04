@@ -1,4 +1,4 @@
-# Jpom(Java Project Online Management)一个Java jar包线上项目管理系统
+# Jpom(Java Project Online Management)Java项目在线管理
 
 > 在linux 中管理jar包运行，如SpringBoot 项目如果是打包为Jar那么我们一般是使用shell 命令来管理, 
 > 如果有多个项目管理起来显得比较麻烦。
@@ -51,7 +51,7 @@
 
 ### 下载安装
 
-1. 下载安装包 [https://gitee.com/jiangzeyin/boot-online/attach_files](https://gitee.com/jiangzeyin/jpom/attach_files)
+1. 下载安装包 [https://gitee.com/jiangzeyin/jpom/attach_files](https://gitee.com/jiangzeyin/jpom/attach_files)
 2. 上传到服务解压到根目录
 3. 修改运行参数配置信息 [run.sh](/bin/run.sh)
 4. 修改默认账号信息 [data/user.json](/bin/data/user.json)
