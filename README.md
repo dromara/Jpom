@@ -97,7 +97,7 @@ mvn package
   - [Spring Boot](https://github.com/spring-projects/spring-boot)：核心框架
   - [Fast-Boot](https://gitee.com/jiangzeyin/common-parent)：针对SpringBoot 封装的一系列的快捷包 提供公共的Controller、自动化拦截器、启动加载资源接口、线程池管理
   - [Fastjson](https://github.com/alibaba/fastjson)：用于Java的快速JSON解析器/生成器
-  - [Hutool](https://gitee.com/looly/hutool)：一个Java工具包，也只是一个工具包，它帮助我们简化每一行代码，减少每一个方法，让Java语言也可以“甜甜的”
+  - [Hutool](https://gitee.com/loolly/hutool)：一个Java工具包，也只是一个工具包，它帮助我们简化每一行代码，减少每一个方法，让Java语言也可以“甜甜的”
   - [Layui](https://gitee.com/sentsin/layui)：前端UI框架
   
 
