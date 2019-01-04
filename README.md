@@ -57,7 +57,7 @@
 4. 修改默认账号信息 [data/user.json](/bin/data/user.json)
 5. 执行如下命令（记得给命令文件添加权限奥）
 ```
-/boot-online/run.sh start
+/jpom/run.sh start
 ```
 6. 配置端口访问域名或者指定端口访问
 
@@ -79,7 +79,7 @@ mvn package
 
 1. 将【编译安装】中的1-4部都确认执行
 2. copy项目运行数据文件到对应目录
-3. 运行*cn.jiangzeyin.BootOnLineApplication*
+3. 运行*cn.jiangzeyin.JpomApplication*
 4. 浏览器访问
 
 ### 阿里云CodePipeline 配置
@@ -96,7 +96,7 @@ mvn package
  Jpom使用以下开源项目
   - [Spring Boot](https://github.com/spring-projects/spring-boot)：核心框架
   - [Fast-Boot](https://gitee.com/jiangzeyin/common-parent)：针对SpringBoot 封装的一系列的快捷包 提供公共的Controller、自动化拦截器、启动加载资源接口、线程池管理
-  - [alibaba/fastjson](https://github.com/alibaba/fastjson)：用于Java的快速JSON解析器/生成器
+  - [Fastjson](https://github.com/alibaba/fastjson)：用于Java的快速JSON解析器/生成器
   - [Hutool](https://gitee.com/looly/hutool)：一个Java工具包，也只是一个工具包，它帮助我们简化每一行代码，减少每一个方法，让Java语言也可以“甜甜的”
   - [Layui](https://gitee.com/sentsin/layui)：前端UI框架
   
