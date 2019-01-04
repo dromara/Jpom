@@ -7,7 +7,7 @@
 > 如果休息日在朋友家玩，公司领导联系说需要控制一下某个项目，此时你身边有电脑，但是没有专业的管理服务器的软件。
 
 
-###  在这里[Jpom](https://gitee.com/jiangzeyin/boot-online) 项目将如上问题统一解决
+###  在这里[Jpom](https://gitee.com/jiangzeyin/jpom) 项目将如上问题统一解决
 
 > Jpom采用SpringBoot开发web项目(前台采用layui)+websocket来统一管理，只要电脑能使用浏览器就ok
 
@@ -26,32 +26,32 @@
 #### 项目截图
 
 1. 创建项目
-![创建项目](https://gitee.com/jiangzeyin/boot-online/raw/master/doc/images/create.png)
+![创建项目](/doc/images/create.png)
 
 2. 修改、删除项目
-![修改、删除项目](https://gitee.com/jiangzeyin/boot-online/raw/master/doc/images/edit_del.png)
+![修改、删除项目](/doc/images/edit_del.png)
 
 3. 文件管理
-![文件管理](https://gitee.com/jiangzeyin/boot-online/raw/master/doc/images/file.png)
+![文件管理](/doc/images/file.png)
 
 4. 项目列表
-![项目列表](https://gitee.com/jiangzeyin/boot-online/raw/master/doc/images/list.png)
+![项目列表](/doc/images/list.png)
 
 5. 监控cpu 内存
-![ 监控cpu 内存](https://gitee.com/jiangzeyin/boot-online/raw/master/doc/images/cup_ram.png)
+![ 监控cpu 内存](/doc/images/cup_ram.png)
 
 6. 控制台日志实时查看
-![控制台日志实时查看](https://gitee.com/jiangzeyin/boot-online/raw/master/doc/images/console.png)
+![控制台日志实时查看](/doc/images/console.png)
 
 7. 用户管理
-![用户管理](https://gitee.com/jiangzeyin/boot-online/raw/master/doc/images/user_list.png)
+![用户管理](/doc/images/user_list.png)
 
 8. top监听
-![top监听](https://gitee.com/jiangzeyin/boot-online/raw/master/doc/images/top.png)
+![top监听](/doc/images/top.png)
 
 ### 下载安装
 
-1. 下载安装包 [https://gitee.com/jiangzeyin/boot-online/attach_files](https://gitee.com/jiangzeyin/boot-online/attach_files)
+1. 下载安装包 [https://gitee.com/jiangzeyin/boot-online/attach_files](https://gitee.com/jiangzeyin/jpom/attach_files)
 2. 上传到服务解压到根目录
 3. 修改运行参数配置信息 [run.sh](/bin/run.sh)
 4. 修改默认账号信息 [data/user.json](/bin/data/user.json)
@@ -63,7 +63,7 @@
 
 ### 编译安装
 
-访问[Jpom](https://gitee.com/jiangzeyin/boot-online)的码云主页,拉取最新完整代码：
+访问[Jpom](https://gitee.com/jiangzeyin/jpom)的码云主页,拉取最新完整代码：
 
 1. 端口修改确认（默认：2122）
 2. 项目运行数据目录修改确认,如需修改请查看[/src/main/resources/application.yml](/src/main/resources/application.yml)（默认：/boot-online/data/）数据路径存储用户信息和项目配置信息，基础格查看项目目录[/bin/data](/bin/data)
@@ -103,7 +103,7 @@ mvn package
 
 ### 提供bug反馈或建议
 
-- [码云](https://gitee.com/jiangzeyin/boot-online/issues)
+- [码云](https://gitee.com/jiangzeyin/jpom/issues)
 
 ### 贡献代码
   欢迎任何人为Jpom添砖加瓦，贡献代码
