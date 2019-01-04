@@ -11,7 +11,7 @@ Log="$6"
 ARGS=""
 for ((i=7; i<=$#; i++))
 do
-    if [ "$ARGS" != "" ]; then
+    if [[ "$ARGS" != "" ]]; then
        ARGS=${ARGS}" "   
     fi
     ARGS=${ARGS}${!i}
@@ -19,7 +19,7 @@ done
 #拆分
 OLD_IFS="$IFS"
 IFS="]"
-array=($ARGS)
+array=(${ARGS})
 IFS="$OLD_IFS"
 #
 JVM=${array[0]}
@@ -32,15 +32,15 @@ ARGS=${ARGS:1}
 start()
 {
    pid=`getPid`
-   if [ "$pid" != "" ]; then
+   if [[ "$pid" != "" ]]; then
        echo "Please do not repeat the call"
        status
     else
-       backupLog $Log;
+       backupLog ${Log};
        echo "JVM:$JVM"
        echo "args:$ARGS"
        # java run
-       nohup java $JVM -Dappliction=$Tag -Djava.ext.dirs=$Lib":${JAVA_HOME}/jre/lib/ext" $MainClass $ARGS > $Log 2>&1 & sleep 1s & status
+       nohup java ${JVM} -Dappliction=${Tag} -Djava.ext.dirs=${Lib}":${JAVA_HOME}/jre/lib/ext" ${MainClass} ${ARGS} > ${Log} 2>&1 & sleep 1s & status
     fi
 }
 
@@ -48,10 +48,10 @@ start()
 stop()
 {
     pid=`getPid`
-    if [ "$pid" != ""  ]; then
+    if [[ "$pid" != ""  ]]; then
         # 接口关闭
-       if [ "$WebClose" != "no" ]; then
-         echo $WebClose
+       if [[ "$WebClose" != "no" ]]; then
+         echo ${WebClose}
          wget "$WebClose"
        fi
        kill -9 "$pid"
@@ -63,7 +63,7 @@ stop()
 status()
 {
     pid=`getPid`
-    if [ "$pid" != "" ]; then
+    if [[ "$pid" != "" ]]; then
         echo "running:$pid"
     else
         echo "stopped"
@@ -74,20 +74,20 @@ status()
 backupLog()
 {
    Log=$1
-   if [ "$Log" = "" ]; then
+   if [[ "$Log" = "" ]]; then
      echo "logPath empty"
      return 3;
    fi
-   LogBack=$Log"_back/"
-   echo $Log
-   if [ -f $Log ]; then
-        if [ ! -d $LogBack ]; then
-            mkdir $LogBack
+   LogBack=${Log}"_back/"
+   echo ${Log}
+   if [[ -f ${Log} ]]; then
+        if [[ ! -d ${LogBack} ]]; then
+            mkdir ${LogBack}
         fi
         cur_dateTime="`date +%Y-%m-%d_%H:%M:%S`.log"
-        mv $Log  $LogBack$cur_dateTime
+        mv ${Log}  ${LogBack}${cur_dateTime}
         echo "mv to $LogBack$cur_dateTime"
-        touch $Log
+        touch ${Log}
    else
      echo "log file notExits"
    fi
@@ -97,7 +97,7 @@ backupLog()
 getPid()
 {
   pid=$(ps -ef | grep "Dappliction=$Tag" | grep -v 'grep' | awk '{printf $2}')
-  echo $pid;
+  echo ${pid};
 }
 
 #提示用法
@@ -137,5 +137,5 @@ case "$1" in
       ;;
 esac
 
-exit $RETVAL
+exit ${RETVAL}
 

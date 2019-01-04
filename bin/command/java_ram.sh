@@ -1,21 +1,21 @@
 #!/bin/bash
 
 Name=$2
-if [ "$Name" = ""  ]; then
+if [[ "$Name" = ""  ]]; then
    Name="java_ram.txt";
 fi
 
-echo $Name
+echo ${Name}
 
-touch $Name
+touch ${Name}
 
-: > $Name
+: > ${Name}
 
-jmap -heap $1 >> $Name
+jmap -heap $1 >> ${Name}
 
-echo "===============================================================" >> $Name
+echo "===============================================================" >> ${Name}
 
-jmap -histo $1 >> $Name
+jmap -histo $1 >> ${Name}
 
 # jmap -dump:format=b,file=$Name -F $1
 
