@@ -54,12 +54,12 @@
 1. 下载安装包 [https://gitee.com/jiangzeyin/jpom/attach_files](https://gitee.com/jiangzeyin/jpom/attach_files)
 2. 上传到服务解压到根目录
 3. 修改运行参数配置信息 [run.sh](/bin/run.sh)
-4. 执行如下命令（记得给命令文件添加权限奥[*chmod /jpom/run.sh 777*]）
+4. 执行如下命令（记得给命令文件添加权限奥[*chmod  777 /jpom/run.sh*]）
 ```
 /jpom/run.sh start
 ```
 5. 修改默认账号信息 在项目运行路径中找到【data/user.json】文件修改[data/user.json](/src/main/resources/bin/data/user.json)
-6. 配置端口访问域名或者指定端口访问（如果是nginx推荐配置：[/doc/jpom.conf](/doc/jpom.conf)）
+6. 配置端口访问域名或者指定端口访问（如果是nginx推荐配置：[/doc/jpom-nginx.conf](/doc/jpom-nginx.conf)）
 
 ### 编译安装
 
