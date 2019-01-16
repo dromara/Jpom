@@ -67,7 +67,7 @@ public abstract class BaseService {
      *
      * @param filename 文件名
      * @param json     json数据
-     * @throws IOException
+     * @throws Exception
      */
     protected void saveJson(String filename, JSONObject json) throws Exception {
         String key = json.getString("id");
