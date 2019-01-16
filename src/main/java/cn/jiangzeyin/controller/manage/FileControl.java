@@ -9,8 +9,9 @@ import cn.jiangzeyin.common.PageUtil;
 import cn.jiangzeyin.controller.BaseController;
 import cn.jiangzeyin.controller.multipart.MultipartFileBuilder;
 import cn.jiangzeyin.model.ProjectInfoModel;
-import cn.jiangzeyin.service.manage.CommandService;
 import cn.jiangzeyin.service.manage.ManageService;
+import cn.jiangzeyin.system.ConfigBean;
+import cn.jiangzeyin.system.ConfigException;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.http.MediaType;
@@ -21,7 +22,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.annotation.Resource;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -35,8 +35,6 @@ public class FileControl extends BaseController {
 
     @Resource
     private ManageService manageService;
-    @Resource
-    private CommandService commandService;
 
     /**
      * 文件管理页面
@@ -57,36 +55,36 @@ public class FileControl extends BaseController {
      */
     @RequestMapping(value = "getRunBoot")
     @ResponseBody
-    public String getRunBoot() {
-        File file = commandService.getCommandFile();
+    public String getRunBoot() throws ConfigException {
+        String file = ConfigBean.getInstance().getRunCommandPath();
         String content = FileUtil.readString(file, CharsetUtil.CHARSET_UTF_8);
         Map<String, String> map = new HashMap<>(1);
         map.put("content", content);
         return JsonMessage.getString(200, "success", map);
     }
 
-    /**
-     * 修改启动文件
-     *
-     * @param content 内容
-     * @return json
-     */
-    @RequestMapping(value = "saveRunBoot")
-    @ResponseBody
-    public String saveRunBoot(String content) {
-        File file = commandService.getCommandFile();
-        // 写入文件
-        try {
-            FileOutputStream fos = new FileOutputStream(file);
-            fos.write(content.getBytes());
-            fos.flush();
-            fos.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-            DefaultSystemLog.ERROR().error(e.getMessage(), e);
-        }
-        return JsonMessage.getString(200, "success");
-    }
+//    /**
+//     * 修改启动文件
+//     *
+//     * @param content 内容
+//     * @return json
+//     */
+//    @RequestMapping(value = "saveRunBoot")
+//    @ResponseBody
+//    public String saveRunBoot(String content) {
+//        File file = commandService.getCommandFile();
+//        // 写入文件
+//        try {
+//            FileOutputStream fos = new FileOutputStream(file);
+//            fos.write(content.getBytes());
+//            fos.flush();
+//            fos.close();
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//            DefaultSystemLog.ERROR().error(e.getMessage(), e);
+//        }
+//        return JsonMessage.getString(200, "success");
+//    }
 
     /**
      * 列出目录下的文件

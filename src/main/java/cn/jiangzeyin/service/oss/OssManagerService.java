@@ -2,10 +2,9 @@ package cn.jiangzeyin.service.oss;
 
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.util.CharsetUtil;
 import cn.jiangzeyin.common.spring.SpringUtil;
-import cn.jiangzeyin.service.BaseService;
-import com.alibaba.fastjson.JSON;
+import cn.jiangzeyin.service.BaseDataService;
+import cn.jiangzeyin.system.ConfigBean;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.aliyun.oss.OSSClient;
@@ -28,10 +27,11 @@ import java.util.concurrent.TimeUnit;
  * @date 2018/9/28
  */
 @Service
-public class OssManagerService extends BaseService {
+public class OssManagerService extends BaseDataService {
 
     public File download(String key) throws IOException {
-        File file = getTempPath();
+        File file = ConfigBean.getInstance().getTempPath();
+        //getTempPath();
         file = new File(file, key);
         OSSClient ossClient = getOSSClient();
         // 下载OSS文件到本地文件。如果指定的本地文件存在会覆盖，不存在则新建。
@@ -97,13 +97,9 @@ public class OssManagerService extends BaseService {
 
     private JSONObject getConfig() throws IOException {
         String active = SpringUtil.getEnvironment().getProperty("spring.profiles.active");
-        File file = getDataPath();
-        file = new File(file, "oss_" + active + ".json");
-        if (!file.exists()) {
-            throw new IllegalArgumentException("请配置阿里云oss:" + file.getPath());
-        }
-        String json = FileUtil.readString(file, CharsetUtil.UTF_8);
-        return JSON.parseObject(json);
+        return getJsonObject("oss_" + active + ".json");
+//        String json = FileUtil.readString(file, CharsetUtil.UTF_8);
+//        return JSON.parseObject(json);
     }
 
     private String getBucketName() throws IOException {

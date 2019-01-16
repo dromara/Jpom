@@ -8,7 +8,7 @@ Log=${Path}"run.log"
 LogBack=${Path}"log/"
 JVM="-server "
 # 修改项目端口号 和 数据运行目录
-ARGS="--server.port=2122 --jpom.data=/jpom/data/ --jpom.command=/jpom/command/"
+ARGS="--server.port=2122 --jpom.path=/jpom/"
 
 echo ${Tag}
 RETVAL="0"

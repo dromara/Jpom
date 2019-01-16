@@ -24,11 +24,12 @@ banner:
   msg: jpom 管理系统启动中
 #boot online \u914D\u7F6E
 jpom:
-  data: /jpom/data/
-  command: /jpom/command/
+  path: /jpom/
 # \u9759\u6001\u8D44\u6E90
 interceptor:
   resourceHandler: /static/**
   resourceLocation: classpath:/static/
 tomcat:
   sessionTimeOut: 18000
+preload:
+  packageName: cn.jiangzeyin.system.init

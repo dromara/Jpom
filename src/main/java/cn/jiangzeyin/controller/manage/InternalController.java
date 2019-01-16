@@ -6,6 +6,8 @@ import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.controller.BaseController;
 import cn.jiangzeyin.model.ProjectInfoModel;
 import cn.jiangzeyin.service.manage.CommandService;
+import cn.jiangzeyin.system.ConfigBean;
+import cn.jiangzeyin.system.ConfigException;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
@@ -36,7 +38,7 @@ public class InternalController extends BaseController {
      * 获取内存信息
      */
     @RequestMapping(value = "internal", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
-    public String getInternal(String tag) {
+    public String getInternal(String tag) throws ConfigException {
         ProjectInfoModel projectInfoModel = new ProjectInfoModel();
         projectInfoModel.setId(tag);
         String pid = commandService.execCommand(CommandService.CommandOp.pid, projectInfoModel, null);
@@ -62,9 +64,9 @@ public class InternalController extends BaseController {
         String pid = commandService.execCommand(CommandService.CommandOp.pid, projectInfoModel, null).trim();
         pid = pid.replace("\n", "");
 //        String fileName = "java_cpu" + RandomUtil.randomNumbers(5) + ".txt";
-        String fileName = commandService.getTempPathName() + "/" + tag + "_java_cpu.txt";
+        String fileName = ConfigBean.getInstance().getTempPathName() + "/" + tag + "_java_cpu.txt";
         fileName = FileUtil.normalize(fileName);
-        String commandPath = commandService.getCpuCommandPath();
+        String commandPath = ConfigBean.getInstance().getCpuCommandPath();
         String command = String.format("%s %s %s %s", commandPath, pid, 300, fileName);
         commandService.execCommand(command);
         downLoad(getResponse(), fileName);
@@ -80,9 +82,9 @@ public class InternalController extends BaseController {
         ProjectInfoModel projectInfoModel = new ProjectInfoModel();
         projectInfoModel.setId(tag);
         String pid = commandService.execCommand(CommandService.CommandOp.pid, projectInfoModel, null).trim();
-        String fileName = commandService.getTempPathName() + "/" + tag + "_java_ram.txt";
+        String fileName = ConfigBean.getInstance().getTempPathName() + "/" + tag + "_java_ram.txt";
         fileName = FileUtil.normalize(fileName);
-        String commandPath = commandService.getRamCommandPath();
+        String commandPath = ConfigBean.getInstance().getRamCommandPath();
         String command = String.format("%s %s %s", commandPath, pid, fileName);
         commandService.execCommand(command);
         downLoad(getResponse(), fileName);

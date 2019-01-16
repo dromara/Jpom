@@ -3,7 +3,8 @@ package cn.jiangzeyin.service.manage;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.model.ProjectInfoModel;
-import cn.jiangzeyin.service.BaseService;
+import cn.jiangzeyin.service.BaseDataService;
+import cn.jiangzeyin.system.ConfigBean;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;
 
@@ -14,9 +15,9 @@ import java.util.Set;
  * @author jiangzeyin
  */
 @Service
-public class ManageService extends BaseService {
+public class ManageService extends BaseDataService {
 
-    private static final String FILENAME = "project.json";
+    private static final String FILENAME = ConfigBean.PROJECT;
 
     /**
      * 查询所有项目信息

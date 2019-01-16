@@ -1,9 +1,9 @@
 package cn.jiangzeyin.service;
 
 import cn.hutool.core.util.StrUtil;
-import cn.hutool.crypto.SecureUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
-import cn.jiangzeyin.common.JsonMessage;
+import cn.jiangzeyin.model.UserModel;
+import cn.jiangzeyin.system.ConfigBean;
 import cn.jiangzeyin.util.JsonUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -17,9 +17,9 @@ import java.util.Set;
  * @author Administrator
  */
 @Service
-public class UserService extends BaseService {
+public class UserService extends BaseDataService {
 
-    private static final String FILENAME = "user.json";
+    private static final String FILENAME = ConfigBean.USER;
 
     /**
      * 用户登录
@@ -33,7 +33,8 @@ public class UserService extends BaseService {
         if (JsonUtil.jsonIsEmpty(userInfo)) {
             return false;
         }
-        return pwd.equals(userInfo.getString("password"));
+        UserModel userModel = userInfo.toJavaObject(UserModel.class);
+        return pwd.equals(userModel.getPassword());
     }
 
 
@@ -44,9 +45,8 @@ public class UserService extends BaseService {
         }
         for (String strKey : jsonData.keySet()) {
             JSONObject jsonUser = jsonData.getJSONObject(strKey);
-            String id = jsonUser.getString("id");
-            String pwd = jsonUser.getString("password");
-            String strUsermd5 = SecureUtil.md5(String.format("%s:%s", id, pwd));
+            UserModel userModel = jsonUser.toJavaObject(UserModel.class);
+            String strUsermd5 = userModel.getUserMd5Key();
             if (strUsermd5.equals(userMd5)) {
                 return true;
             }
@@ -121,7 +121,7 @@ public class UserService extends BaseService {
             deleteJson(FILENAME, id);
             return true;
         } catch (Exception e) {
-            DefaultSystemLog.LOG().error(e.getMessage(), e);
+            DefaultSystemLog.ERROR().error(e.getMessage(), e);
         }
         return false;
     }
@@ -131,12 +131,11 @@ public class UserService extends BaseService {
      */
     public boolean addUser(String id, String name, String password, String role) {
         try {
-            JSONObject object = new JSONObject();
-            object.put("id", id);
-            object.put("name", name);
-            object.put("password", password);
-            object.put("role", role);
-            saveJson(FILENAME, object);
+            UserModel userModel = new UserModel();
+            userModel.setName(name);
+            userModel.setId(id);
+            userModel.setPassword(password);
+            saveJson(FILENAME, userModel.toJson());
             return true;
         } catch (Exception e) {
             DefaultSystemLog.LOG().error(e.getMessage(), e);
@@ -165,7 +164,7 @@ public class UserService extends BaseService {
             updateJson(FILENAME, object);
             return true;
         } catch (Exception e) {
-            DefaultSystemLog.LOG().error(e.getMessage(), e);
+            DefaultSystemLog.ERROR().error(e.getMessage(), e);
         }
         return false;
     }

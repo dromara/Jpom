@@ -1,10 +1,13 @@
 package cn.jiangzeyin.util;
 
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+
+import java.io.File;
 
 /**
  * @author jiangzeyin
@@ -33,8 +36,12 @@ public class JsonUtil {
     }
 
     public static Object readJson(String path) {
+        File file = new File(path);
+        if (!file.exists()) {
+            throw new RuntimeException("没有找到对应配置文件：" + path);
+        }
         synchronized (JsonUtil.class) {
-            String json = FileUtil.readString(path, "UTF-8");
+            String json = FileUtil.readString(file, CharsetUtil.UTF_8);
             if (StrUtil.isEmpty(json)) {
                 return JSONObject.parseObject("{}");
             }

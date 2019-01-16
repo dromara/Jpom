@@ -5,6 +5,7 @@ import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.spring.SpringUtil;
 import cn.jiangzeyin.service.manage.CommandService;
 import cn.jiangzeyin.socket.SocketSession;
+import cn.jiangzeyin.system.ConfigException;
 
 import javax.websocket.Session;
 import java.io.IOException;
@@ -43,7 +44,12 @@ public class TopManager {
         CronUtil.remove(CRON_ID);
         CronUtil.setMatchSecond(true);
         CronUtil.schedule(CRON_ID, "0/5 * * * * ?", () -> {
-            String result = commandService.execCommand(CommandService.CommandOp.top, null, null);
+            String result = null;
+            try {
+                result = commandService.execCommand(CommandService.CommandOp.top, null, null);
+            } catch (ConfigException e) {
+                e.printStackTrace();
+            }
             send(result);
         });
         CronUtil.restart();

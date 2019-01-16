@@ -1,6 +1,6 @@
 {
   "admin": {
-    "password": "test",
+    "password": "adminadmin",
     "role": true,
     "name": "admin",
     "id": "admin"

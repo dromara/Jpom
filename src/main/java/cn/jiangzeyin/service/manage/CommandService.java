@@ -3,19 +3,18 @@ package cn.jiangzeyin.service.manage;
 import cn.hutool.core.exceptions.ExceptionUtil;
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.util.CharsetUtil;
-import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
-import cn.jiangzeyin.common.spring.SpringUtil;
 import cn.jiangzeyin.model.ProjectInfoModel;
 import cn.jiangzeyin.service.BaseService;
 import cn.jiangzeyin.socket.LogWebSocketHandle;
 import cn.jiangzeyin.socket.SocketSession;
 import cn.jiangzeyin.socket.TailLogThread;
+import cn.jiangzeyin.system.ConfigBean;
+import cn.jiangzeyin.system.ConfigException;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import javax.websocket.Session;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -59,46 +58,17 @@ public class CommandService extends BaseService {
         top
     }
 
-
-    public File getCommandFile() {
-        File file = new File(getRunCommandPath());
-        if (!file.exists()) {
-            throw new RuntimeException("启动文件不存在");
-        }
-        return file;
-    }
-
-    private String getRunCommandPath() {
-        String command = getCommandPath();
-        return command + "/run_boot.sh";
-//        return command;
-    }
+//
+//    public File getCommandFile() {
+//        File file = new File(getRunCommandPath());
+//        if (!file.exists()) {
+//            throw new RuntimeException("启动文件不存在");
+//        }
+//        return file;
+//    }
 
 
-    private String getCommandPath() {
-        String command = SpringUtil.getEnvironment().getProperty("jpom.command");
-        if (StrUtil.isEmpty(command)) {
-            throw new RuntimeException("请配置命令文件");
-        }
-        return command;
-    }
-
-
-    public String getCpuCommandPath() {
-        String command = getCommandPath();
-        return command + "/java_cpu.sh";
-//        return command;
-    }
-
-
-    public String getRamCommandPath() {
-        String command = getCommandPath();
-        return command + "/java_ram.sh";
-//        return command;
-    }
-
-
-    public String execCommand(CommandOp commandOp, ProjectInfoModel projectInfoModel) {
+    public String execCommand(CommandOp commandOp, ProjectInfoModel projectInfoModel) throws ConfigException {
         return execCommand(commandOp, projectInfoModel, null);
     }
 
@@ -108,10 +78,10 @@ public class CommandService extends BaseService {
      * @param commandOp        执行的操作
      * @param projectInfoModel 项目信息
      */
-    public String execCommand(CommandOp commandOp, ProjectInfoModel projectInfoModel, Evt evt) {
+    public String execCommand(CommandOp commandOp, ProjectInfoModel projectInfoModel, Evt evt) throws ConfigException {
         String result;
-        CommandService commandService = SpringUtil.getBean(CommandService.class);
-        String commandPath = commandService.getRunCommandPath();
+
+        String commandPath = ConfigBean.getInstance().getRunCommandPath();
         String tag = null, log = null;
         // 项目启动信息
         if (projectInfoModel != null) {

@@ -1,16 +1,10 @@
 {
   "properties": [
     {
-      "name": "jpom.data",
+      "name": "jpom.path",
       "type": "java.lang.String",
-      "description": "jpom 项目运行数据存储文件路径",
-      "defaultValue": ""
-    },
-    {
-      "name": "jpom.command",
-      "type": "java.lang.String",
-      "description": "jpom 项目运行控制shell 命令文件存储路径",
-      "defaultValue": ""
+      "description": "jpom 项目运行路径",
+      "defaultValue": "/jpom/"
     }
   ]
 }

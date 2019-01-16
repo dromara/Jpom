@@ -54,11 +54,11 @@
 1. 下载安装包 [https://gitee.com/jiangzeyin/jpom/attach_files](https://gitee.com/jiangzeyin/jpom/attach_files)
 2. 上传到服务解压到根目录
 3. 修改运行参数配置信息 [run.sh](/bin/run.sh)
-4. 修改默认账号信息 [data/user.json](/bin/data/user.json)
-5. 执行如下命令（记得给命令文件添加权限奥[*chmod /jpom/run.sh 777*]）
+4. 执行如下命令（记得给命令文件添加权限奥[*chmod /jpom/run.sh 777*]）
 ```
 /jpom/run.sh start
 ```
+5. 修改默认账号信息 在项目运行路径中找到【data/user.json】文件修改[data/user.json](/src/main/resources/bin/data/user.json)
 6. 配置端口访问域名或者指定端口访问（如果是nginx推荐配置：[/doc/jpom.conf](/doc/jpom.conf)）
 
 ### 编译安装
@@ -66,8 +66,7 @@
 访问[Jpom](https://gitee.com/jiangzeyin/jpom)的码云主页,拉取最新完整代码：
 
 1. 端口修改确认（默认：2122）
-2. 项目运行数据目录修改确认,如需修改请查看[/src/main/resources/application.yml](/src/main/resources/application.yml)（默认：/jpom/data/）数据路径存储用户信息和项目配置信息，基础格查看项目目录[/bin/data](/bin/data)
-3. 项目运行命令目录修改确认,如需修改请查看[/src/main/resources/application.yml](/src/main/resources/application.yml)（默认：/jpom/command/）完整命令查看项目目录[/bin/command](/bin/command) 在部署是需要完整copy此目录到配置的命令目录中 
+2. 项目运行目录修改确认,如需修改请查看[/src/main/resources/application.yml](/src/main/resources/application.yml)（默认：/jpom/）数据路径存储用户信息、项目配置信息、运行命令，基础格查看项目目录[/src/main/resources/bin](/src/main/resources/bin) 
 4. 项目运行日志目录确认,如需修改请查看[/src/main/resources/logback-spring.xml](/src/main/resources/logback-spring.xml)（默认：/jpom/log/）
 5. 进入项目目录执行，然后在目录中查看 target/jpom-1.0-lib
 ```
