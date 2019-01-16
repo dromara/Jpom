@@ -12,12 +12,12 @@
 1. 在CodePipeline 后台创建项目并获取项目名称
 
 2. 在Jpom 配置对应项目的 CodePipeline 项目名称(记得结尾添加一个`_`奥)
-    ![CodePipeline](/doc/images/build_edit.png)
+    ![CodePipeline](./images/build_edit.png)
     
 3. 配置阿里云oss 信息，在项目运行数据目录添加如[/bin/data/oss_dev.json](/bin/data/oss_dev.json),dev 是根据boot项目当前运行模式，默认为dev,如项目运行模式为prod 则文件名应为【oss_prod.json】
 
 4. 在项目列表中操作点击构建按钮
-    ![CodePipeline](/doc/images/build_list.png)
+    ![CodePipeline](./images/build_list.png)
     
 5. 点击安装按钮间自动从阿里云oss 中下载并解压到项目的lib 路径
 
