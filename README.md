@@ -84,7 +84,7 @@ mvn package
 
 ### 阿里云CodePipeline 配置
 
-[查看文档](/CodePipeline-Oss.md)
+[查看文档](/doc/CodePipeline-Oss.md)
 
 ### 贡献人员
     
