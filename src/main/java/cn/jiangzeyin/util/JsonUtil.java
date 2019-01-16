@@ -8,6 +8,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 
 /**
  * @author jiangzeyin
@@ -18,8 +19,8 @@ public class JsonUtil {
     /**
      * 判断json对象是否为空
      *
-     * @param obj
-     * @return
+     * @param obj obj
+     * @return true
      */
     public static boolean jsonIsEmpty(Object obj) {
         boolean flag = false;
@@ -35,10 +36,10 @@ public class JsonUtil {
         return flag;
     }
 
-    public static Object readJson(String path) {
+    public static Object readJson(String path) throws FileNotFoundException {
         File file = new File(path);
         if (!file.exists()) {
-            throw new RuntimeException("没有找到对应配置文件：" + path);
+            throw new FileNotFoundException("没有找到对应配置文件：" + path);
         }
         synchronized (JsonUtil.class) {
             String json = FileUtil.readString(file, CharsetUtil.UTF_8);

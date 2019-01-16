@@ -1,11 +1,10 @@
 package cn.jiangzeyin.service;
 
+import cn.hutool.core.io.FileUtil;
 import cn.jiangzeyin.system.ConfigBean;
 import cn.jiangzeyin.util.JsonUtil;
 import com.alibaba.fastjson.JSONObject;
 
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 
 /**
@@ -18,15 +17,10 @@ public class BaseDataService extends BaseService {
      * 获取数据文件的路径，如果文件不存在，则创建一个
      *
      * @param filename 文件名
-     * @return
-     * @throws IOException
+     * @return path
      */
-    private String getDataFilePath(String filename) throws IOException {
-        File file = new File(ConfigBean.getInstance().getDataPath(), filename);
-        if (!file.exists()) {
-            throw new FileNotFoundException(file.getPath() + " 文件不存在！");
-        }
-        return file.getPath();
+    private String getDataFilePath(String filename) {
+        return FileUtil.normalize(ConfigBean.getInstance().getDataPath() + "/" + filename);
     }
 
     /**

@@ -12,6 +12,9 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.annotation.Resource;
 
 
+/**
+ * @author Administrator
+ */
 @RestController
 @RequestMapping(value = "/user")
 public class UserInfoController extends BaseController {

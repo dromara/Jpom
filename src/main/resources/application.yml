@@ -22,7 +22,7 @@ spring:
     suffix: .vm
 banner:
   msg: jpom 管理系统启动中
-#boot online \u914D\u7F6E
+#jpom 项目运行路径
 jpom:
   path: /jpom/
 # \u9759\u6001\u8D44\u6E90

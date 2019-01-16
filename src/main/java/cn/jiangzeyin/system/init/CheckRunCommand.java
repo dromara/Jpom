@@ -48,6 +48,9 @@ public class CheckRunCommand {
         }
     }
 
+    /**
+     * 检查运行数据
+     */
     @PreLoadMethod
     private static void checkData() {
         File file = new File(ConfigBean.getInstance().getDataPath(), ConfigBean.USER);

@@ -28,13 +28,16 @@ public class UserService extends BaseDataService {
      * @param pwd  密码
      * @return 登录
      */
-    public boolean login(String name, String pwd) throws Exception {
+    public UserModel login(String name, String pwd) throws Exception {
         JSONObject userInfo = getJsonObject(FILENAME, name);
         if (JsonUtil.jsonIsEmpty(userInfo)) {
-            return false;
+            return null;
         }
         UserModel userModel = userInfo.toJavaObject(UserModel.class);
-        return pwd.equals(userModel.getPassword());
+        if (pwd.equals(userModel.getPassword())) {
+            return userModel;
+        }
+        return null;
     }
 
 
@@ -95,15 +98,16 @@ public class UserService extends BaseDataService {
      */
     public String updatePwd(String name, String oldPwd, String newPwd) throws Exception {
         JSONObject userInfo = getJsonObject(FILENAME, name);
-
         // 判断用户是否存在
         if (null == userInfo) {
             return "notexist";
         }
-        if (oldPwd.equals(userInfo.getString("password"))) {
+        UserModel userModel = userInfo.toJavaObject(UserModel.class);
+        if (oldPwd.equals(userModel.getPassword())) {
             // 修改密码
-            userInfo.put("password", newPwd);
-            updateJson(FILENAME, userInfo);
+            userModel.setPassword(newPwd);
+//            userInfo.put("password", newPwd);
+            updateJson(FILENAME, userModel.toJson());
             return "success";
         } else {
             return "olderror";

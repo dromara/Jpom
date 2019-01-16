@@ -31,7 +31,7 @@ public class UpdatePwdController extends BaseController {
     @RequestMapping(value = "updatePwd", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public String updatePwd(String oldPwd, String newPwd) {
         try {
-            String result = userService.updatePwd(userName, oldPwd, newPwd);
+            String result = userService.updatePwd(userName.getId(), oldPwd, newPwd);
             // 用户不存在
             if ("notexist".equals(result)) {
                 return JsonMessage.getString(500, "用户不存在！");
@@ -48,9 +48,4 @@ public class UpdatePwdController extends BaseController {
             return JsonMessage.getString(500, e.getMessage());
         }
     }
-
-
-
-
-
 }

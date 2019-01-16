@@ -4,6 +4,7 @@ import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.interceptor.LoginInterceptor;
 import cn.jiangzeyin.common.interceptor.NotLogin;
+import cn.jiangzeyin.model.UserModel;
 import cn.jiangzeyin.service.UserService;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Controller;
@@ -36,11 +37,11 @@ public class LoginControl extends BaseController {
         stringBuffer.append("用户登录：").append(userName).append(",IP：").append(getIp());
         stringBuffer.append(",浏览器：").append(getHeader(HttpHeaders.USER_AGENT));
         try {
-            boolean flag = userService.login(userName, userPwd);
-            if (flag) {
+            UserModel userModel = userService.login(userName, userPwd);
+            if (userModel != null) {
                 stringBuffer.append("，结果：").append("OK");
-                setSessionAttribute(LoginInterceptor.SESSION_NAME, userName);
-                setSessionAttribute(LoginInterceptor.SESSION_PWD, userPwd);
+                setSessionAttribute(LoginInterceptor.SESSION_NAME, userModel);
+//                setSessionAttribute(LoginInterceptor.SESSION_PWD, userPwd);
                 return JsonMessage.getString(200, "登录成功");
             } else {
                 stringBuffer.append("，结果：").append("faild");

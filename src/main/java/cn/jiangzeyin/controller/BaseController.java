@@ -1,8 +1,8 @@
 package cn.jiangzeyin.controller;
 
-import cn.hutool.crypto.SecureUtil;
 import cn.jiangzeyin.common.interceptor.LoginInterceptor;
 import cn.jiangzeyin.controller.base.AbstractController;
+import cn.jiangzeyin.model.UserModel;
 import org.springframework.web.context.request.RequestAttributes;
 
 /**
@@ -10,13 +10,11 @@ import org.springframework.web.context.request.RequestAttributes;
  * @date 2018/9/28
  */
 public abstract class BaseController extends AbstractController {
-    protected String userName;
-    private String userPwd;
+    protected UserModel userName;
 
     @Override
     public void resetInfo() {
-        userName = getSessionAttribute(LoginInterceptor.SESSION_NAME);
-        userPwd = getSessionAttribute(LoginInterceptor.SESSION_PWD);
+        userName = (UserModel) getSessionAttributeObj(LoginInterceptor.SESSION_NAME);
     }
 
     /**
@@ -25,10 +23,14 @@ public abstract class BaseController extends AbstractController {
      * @return 用户名
      */
     public static String getUserName() {
-        return (String) getRequestAttributes().getAttribute(LoginInterceptor.SESSION_NAME, RequestAttributes.SCOPE_SESSION);
+        UserModel userModel = (UserModel) getRequestAttributes().getAttribute(LoginInterceptor.SESSION_NAME, RequestAttributes.SCOPE_SESSION);
+        if (userModel == null) {
+            return null;
+        }
+        return userModel.getId();
     }
 
     protected String getSocketPwd() {
-        return SecureUtil.md5(String.format("%s:%s", userName, userPwd));
+        return userName.getUserMd5Key();
     }
 }

@@ -98,8 +98,6 @@ public class OssManagerService extends BaseDataService {
     private JSONObject getConfig() throws IOException {
         String active = SpringUtil.getEnvironment().getProperty("spring.profiles.active");
         return getJsonObject("oss_" + active + ".json");
-//        String json = FileUtil.readString(file, CharsetUtil.UTF_8);
-//        return JSON.parseObject(json);
     }
 
     private String getBucketName() throws IOException {

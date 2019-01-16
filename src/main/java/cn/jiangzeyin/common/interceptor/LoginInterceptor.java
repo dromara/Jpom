@@ -1,5 +1,6 @@
 package cn.jiangzeyin.common.interceptor;
 
+import cn.jiangzeyin.model.UserModel;
 import org.springframework.web.method.HandlerMethod;
 
 import javax.servlet.http.HttpServletRequest;
@@ -16,14 +17,13 @@ import javax.servlet.http.HttpSession;
 public class LoginInterceptor extends BaseInterceptor {
 
     public static final String SESSION_NAME = "user";
-    public static final String SESSION_PWD = "pwd";
 
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         super.preHandle(request, response, handler);
         HttpSession session = getSession();
-        String user = (String) session.getAttribute(SESSION_NAME);
+        UserModel user = (UserModel) session.getAttribute(SESSION_NAME);
         if (handler instanceof HandlerMethod) {
             HandlerMethod handlerMethod = (HandlerMethod) handler;
             NotLogin notLogin = handlerMethod.getMethodAnnotation(NotLogin.class);

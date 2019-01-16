@@ -10,6 +10,9 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.annotation.Resource;
 
+/**
+ * @author Administrator
+ */
 @Controller
 @RequestMapping(value = "/user")
 public class UserListController extends BaseController {
@@ -27,13 +30,12 @@ public class UserListController extends BaseController {
 
     /**
      * 查询所有用户
-     *
      */
     @RequestMapping(value = "getUserList")
     @ResponseBody
     public String getUserList() {
         JSONArray userList = userService.getUserList();
-        return JsonMessage.getString(200, "",userList);
+        return JsonMessage.getString(200, "", userList);
     }
 
 
