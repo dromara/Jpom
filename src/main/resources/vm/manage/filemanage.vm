@@ -33,6 +33,7 @@
 ##	删除按钮
 <script type="text/html" id="bar_projects">
     <a href="javascript:;" class="layui-btn layui-btn-sm layui-btn-danger" lay-event="delete">删除</a>
+    <a href="javascript:;" class="layui-btn layui-btn-sm layui-btn-normal" lay-event="download">下载</a>
 </script>
 <script type="text/javascript">
     var id = '$id';
@@ -135,7 +136,20 @@
                 // 删除文件
                 deleteFile(data);
             }
+            if ('download' === event) {
+                // 下载文件
+                downloadFile(data);
+            }
         });
+
+        /**
+         * 下载文件
+         * @param data
+         */
+        function downloadFile(data) {
+            var url = "/file/download?id=" + data.projectid + "&filename=" + data.filename
+            self.location.href = url;
+        }
 
         // 删除文件
         function deleteFile(data) {
