@@ -3,6 +3,7 @@ package cn.jiangzeyin.controller.manage;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.CharsetUtil;
+import cn.hutool.extra.servlet.ServletUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.PageUtil;
@@ -155,6 +156,27 @@ public class FileControl extends BaseController {
         modify.setUseLibDesc("upload");
         manageService.updateProject(modify);
         return JsonMessage.getString(200, "上传成功");
+    }
+
+    /**
+     * 下载文件
+     *
+     * @return File
+     */
+    @RequestMapping(value = "download")
+    @ResponseBody
+    public String download() {
+        String id = getParameter("id");
+        String filename = getParameter("filename");
+        try {
+            ProjectInfoModel pim = manageService.getProjectInfo(id);
+            String path = pim.getLib() + filename;
+            File file = new File(path);
+            ServletUtil.write(getResponse(), file);
+        } catch (Exception e) {
+            DefaultSystemLog.ERROR().error("下载文件异常", e);
+        }
+        return "下载失败。请刷新页面后重试";
     }
 
 
