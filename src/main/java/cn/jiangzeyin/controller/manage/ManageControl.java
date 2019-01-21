@@ -1,5 +1,6 @@
 package cn.jiangzeyin.controller.manage;
 
+import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.PageUtil;
@@ -9,6 +10,7 @@ import cn.jiangzeyin.service.manage.CommandService;
 import cn.jiangzeyin.service.manage.ManageService;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -77,6 +79,24 @@ public class ManageControl extends BaseController {
             DefaultSystemLog.ERROR().error(e.getMessage(), e);
             return JsonMessage.getString(500, e.getMessage());
         }
+    }
+
+    @RequestMapping(value = "port", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
+    public String getPort(String tag) {
+        // 查询数据
+        try {
+            ProjectInfoModel projectInfoModel = new ProjectInfoModel();
+            projectInfoModel.setId(tag);
+            String pId = commandService.execCommand(CommandService.CommandOp.pid, projectInfoModel, null).trim();
+            if (StrUtil.isNotEmpty(pId)) {
+                String result = commandService.execSystemCommand("netstat -antup | grep " + pId);
+                setAttribute("port", result);
+                return "manage/port";
+            }
+        } catch (Exception e) {
+            DefaultSystemLog.ERROR().error(e.getMessage(), e);
+        }
+        return "manage/port";
     }
 
 

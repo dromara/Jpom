@@ -171,6 +171,31 @@ public class CommandService extends BaseService {
         return result;
     }
 
+
+    public String execSystemCommand(String command) {
+        String result = "error";
+        try {
+            DefaultSystemLog.LOG().info(command);
+            //执行linux系统命令
+            String[] cmd = {"/bin/sh", "-c", command};
+            Process process = Runtime.getRuntime().exec(cmd);
+            InputStream is;
+            int wait = process.waitFor();
+            if (wait == 0) {
+                is = process.getInputStream();
+            } else {
+                is = process.getErrorStream();
+            }
+            result = IoUtil.read(is, CharsetUtil.CHARSET_UTF_8);
+            is.close();
+            process.destroy();
+        } catch (IOException | InterruptedException e) {
+            DefaultSystemLog.ERROR().error("执行命令异常", e);
+            result += e.getMessage();
+        }
+        return result;
+    }
+
     public interface Evt {
         /**
          * 执行异常

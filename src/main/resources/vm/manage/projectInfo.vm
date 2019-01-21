@@ -29,9 +29,10 @@
     <a href="javascript:;" class="layui-btn  layui-btn-sm layui-btn" lay-event="file">文件</a>
     <a href="javascript:;" class="layui-btn  layui-btn-sm layui-btn" lay-event="build">构建</a>
     <a href="javascript:;" class="layui-btn  layui-btn-sm layui-btn" lay-event="ram">监控</a>
+    <a href="javascript:;" class="layui-btn  layui-btn-sm layui-btn" lay-event="port">端口</a>
 </script>
 <script type="text/html" id="status_templ">
-    <input type="checkbox" disabled name="status" {{# if(d.status){ }} checked {{# } }} lay-skin="switch"
+    <input type="checkbox" id="" disabled name="status" {{# if(d.status){ }} checked {{# } }} lay-skin="switch"
            lay-text="运行中|未运行">
 </script>
 
@@ -236,6 +237,18 @@
                     shade: 0.8,
                     area: ['60%', '50%'],
                     content: 'internal?tag=' + data.id
+                });
+            } else if ('port' === event) {
+                if (!data.status) {
+                    layer.msg('请先运行程序！');
+                    return;
+                }
+                layer.open({
+                    type: 2,
+                    title: '端口',
+                    shade: 0.8,
+                    area: ['60%', '50%'],
+                    content: 'port?tag=' + data.id
                 });
             }
         });
