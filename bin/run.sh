@@ -1,7 +1,7 @@
 #!/bin/bash
 
 Tag="JpomApplication"
-MainClass="cn.jiangzeyin.JpomApplication"
+MainClass="cn.keepbx.jpom.JpomApplication"
 Path="/jpom/"
 Lib=${Path}"lib/"
 Log=${Path}"run.log"
