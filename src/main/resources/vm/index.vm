@@ -14,7 +14,7 @@
         <ul class="layui-nav layui-layout-right" lay-filter="userOperation">
             <li class="layui-nav-item">
                 <a href="javascript:;">
-                    $user
+                    $user.name
                 </a>
                 <dl class="layui-nav-child">
                     <dd id="updatePwd"><a href="javascript:;"  op="updatePwd">修改密码</a></dd>
