@@ -8,9 +8,9 @@
         <artifactId>spring-boot-starter-parent</artifactId>
         <version>1.4.7.RELEASE</version>
     </parent>
-    <groupId>cn.jiangzeyin</groupId>
+    <groupId>cn.keepbx</groupId>
     <artifactId>jpom</artifactId>
-    <name>jpom</name>
+    <name>jpom Java项目在线管理</name>
     <inceptionYear>2017</inceptionYear>
     <version>1.0</version>
     <properties>
