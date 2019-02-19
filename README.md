@@ -12,6 +12,7 @@
 ![GitHub](https://img.shields.io/github/license/jiangzeyin/jpom.svg?style=flat)
 ![jdk](https://img.shields.io/badge/JDK-1.8+-green.svg)
 [![travis](https://travis-ci.org/jiangzeyin/jpom.svg?branch=master)](https://travis-ci.org/jiangzeyin/jpom)
+[![codecov](https://codecov.io/gh/jiangzeyin/jpom/branch/master/graph/badge.svg)](https://codecov.io/gh/jiangzeyin/jpom)
 
 
 > Jpom采用SpringBoot开发web项目(前台采用layui)+websocket来统一管理，只要电脑能使用浏览器就ok
