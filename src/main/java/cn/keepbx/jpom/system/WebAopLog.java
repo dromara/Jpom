@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
+ * 自动记录日志
+ *
  * @author jiangzeyin
  * @date 2017/5/11
  */
@@ -21,7 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class WebAopLog {
     private static final ThreadLocal<Boolean> IS_LOG = new ThreadLocal<>();
 
-    @Pointcut("execution(public * cn.jiangzeyin.controller..*.*(..))")
+    @Pointcut("execution(public * cn.keepbx.jpom.controller..*.*(..))")
     public void webLog() {
     }
 

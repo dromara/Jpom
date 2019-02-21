@@ -3,12 +3,12 @@ package cn.keepbx.jpom.socket;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.spring.SpringUtil;
-import cn.keepbx.jpom.model.ProjectInfoModel;
-import cn.keepbx.jpom.socket.top.TopManager;
 import cn.jiangzeyin.pool.ThreadPoolService;
+import cn.keepbx.jpom.model.ProjectInfoModel;
 import cn.keepbx.jpom.service.UserService;
 import cn.keepbx.jpom.service.manage.CommandService;
 import cn.keepbx.jpom.service.manage.ManageService;
+import cn.keepbx.jpom.socket.top.TopManager;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Component;
 
@@ -20,7 +20,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 
 /**
- * socket
+ * socket 消息控制器
  *
  * @author jiangzeyin
  * date 2017/9/8
@@ -61,6 +61,12 @@ public class LogWebSocketHandle implements TailLogThread.Evn {
         }
     }
 
+    /**
+     * 工具回话对象获取 socket回话消息对象
+     *
+     * @param session session
+     * @return socket回话消息对象
+     */
     private SocketSession getItem(Session session) {
         SocketSession socketSession = SESSION_CONCURRENT_HASH_MAP.get(session.getId());
         if (socketSession == null) {

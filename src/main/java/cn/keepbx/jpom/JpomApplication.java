@@ -10,6 +10,7 @@ import org.springframework.http.converter.StringHttpMessageConverter;
 import java.nio.charset.Charset;
 
 /**
+ * jpom 启动类
  * Created by jiangzeyin on 2017/9/14.
  *
  * @author jiangzeyin

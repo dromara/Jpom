@@ -7,12 +7,19 @@ import javax.websocket.Session;
 import java.io.IOException;
 
 /**
+ * socket 回话对象
+ *
  * @author jiangzeyin
  * @date 2018/9/29
  */
 public class SocketSession {
-
+    /**
+     * 锁
+     */
     private static final KeyLock<String> LOCK = new KeyLock<>();
+    /**
+     * 错误尝试次数
+     */
     private static final int ERROR_TRY_COUNT = 10;
 
     private TailLogThread thread;
@@ -44,6 +51,13 @@ public class SocketSession {
         send(session, msg);
     }
 
+    /**
+     * 发送消息
+     *
+     * @param session 回话对象
+     * @param msg     消息
+     * @throws IOException 异常
+     */
     public static void send(final Session session, String msg) throws IOException {
         if (msg == null) {
             return;

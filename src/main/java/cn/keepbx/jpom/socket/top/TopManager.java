@@ -3,8 +3,8 @@ package cn.keepbx.jpom.socket.top;
 import cn.hutool.cron.CronUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.spring.SpringUtil;
-import cn.keepbx.jpom.socket.SocketSession;
 import cn.keepbx.jpom.service.manage.CommandService;
+import cn.keepbx.jpom.socket.SocketSession;
 import cn.keepbx.jpom.system.ConfigException;
 
 import javax.websocket.Session;
@@ -14,6 +14,8 @@ import java.util.Iterator;
 import java.util.Set;
 
 /**
+ * top命令管理，保证整个服务器只获取一个top命令
+ *
  * @author jiangzeyin
  * @date 2018/10/2
  */
@@ -24,16 +26,29 @@ public class TopManager {
     private static CommandService commandService;
     private static boolean watch = false;
 
+    /**
+     * 添加top 命令监听
+     *
+     * @param session 回话
+     */
     public static void addMonitor(Session session) {
         SESSIONS.add(session);
         addCron();
     }
 
+    /**
+     * 移除top 命令监控
+     *
+     * @param session 回话
+     */
     public static void removeMonitor(Session session) {
         SESSIONS.remove(session);
         close();
     }
 
+    /**
+     * 创建定时执行top
+     */
     private static void addCron() {
         if (watch) {
             return;
@@ -48,7 +63,7 @@ public class TopManager {
             try {
                 result = commandService.execCommand(CommandService.CommandOp.top, null, null);
             } catch (ConfigException e) {
-                e.printStackTrace();
+                DefaultSystemLog.ERROR().error(e.getMessage(), e);
             }
             send(result);
         });
@@ -56,6 +71,11 @@ public class TopManager {
         watch = true;
     }
 
+    /**
+     * 同步发送消息
+     *
+     * @param content 内容
+     */
     private static void send(String content) {
         synchronized (TopManager.class) {
             Iterator<Session> iterator = SESSIONS.iterator();
@@ -78,6 +98,9 @@ public class TopManager {
         }
     }
 
+    /**
+     * 关闭top监听
+     */
     private static void close() {
         // 如果没有队列就停止监听
         int size = SESSIONS.size();
