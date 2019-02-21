@@ -1,23 +1,30 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <assembly>
-    <id>lib</id>
+
+    <id>release</id>
     <includeBaseDirectory>false</includeBaseDirectory>
     <formats>
         <format>dir</format>
         <format>zip</format>
     </formats>
+
     <fileSets>
         <fileSet>
+            <directory>${basedir}/bin/</directory>
+            <outputDirectory>/</outputDirectory>
+            <!-- 脚本文件在 linux 下的权限设为 755，无需 chmod 可直接运行 -->
+            <fileMode>755</fileMode>
             <includes>
-                <include>resources/*</include>
+                <include>*.sh</include>
+                <include>*.bat</include>
             </includes>
         </fileSet>
     </fileSets>
 
+    <!-- 依赖的 jar 包 copy 到 lib 目录下 -->
     <dependencySets>
         <dependencySet>
-            <scope>runtime</scope>
-            <outputDirectory>/</outputDirectory>
+            <outputDirectory>lib</outputDirectory>
         </dependencySet>
     </dependencySets>
 

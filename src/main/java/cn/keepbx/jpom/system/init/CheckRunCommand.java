@@ -7,8 +7,8 @@ import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.PreLoadClass;
 import cn.jiangzeyin.common.PreLoadMethod;
 import cn.jiangzeyin.common.spring.SpringUtil;
-import cn.keepbx.jpom.system.ConfigBean;
 import cn.keepbx.jpom.service.manage.CommandService;
+import cn.keepbx.jpom.system.ConfigBean;
 import cn.keepbx.jpom.system.ConfigException;
 
 import java.io.File;
@@ -78,7 +78,7 @@ public class CheckRunCommand {
         FileUtil.writeString(content, file, CharsetUtil.UTF_8);
         // 添加文件权限
         CommandService commandService = SpringUtil.getBean(CommandService.class);
-        String runCommand = "chmod 777 " + file;
+        String runCommand = "chmod 755 " + file;
         commandService.execCommand(runCommand);
     }
 }

@@ -84,7 +84,7 @@ mvn package
 
 1. 将【编译安装】中的1-4部都确认执行
 2. copy项目运行数据文件到对应目录
-3. 运行*cn.jiangzeyin.JpomApplication*
+3. 运行*cn.keepbx.jpom.JpomApplication*
 4. 浏览器访问
 
 ### 阿里云CodePipeline 配置
