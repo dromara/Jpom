@@ -1,4 +1,4 @@
-#\u7A0B\u5E8F\u7AEF\u53E3\u53F7
+#运行端口号
 server:
   port: 2122
 spring:
@@ -25,11 +25,13 @@ banner:
 #jpom 项目运行路径
 jpom:
   path: /jpom/
-# \u9759\u6001\u8D44\u6E90
+# 静态资源配置
 interceptor:
   resourceHandler: /static/**
   resourceLocation: classpath:/static/
+# session 超时时间
 tomcat:
   sessionTimeOut: 18000
+# 启动完成自动初始化指定包
 preload:
-  packageName: cn.jiangzeyin.system.init
+  packageName: cn.keepbx.jpom.system.init
