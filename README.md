@@ -57,6 +57,10 @@
 8. top监听
 ![top监听](/doc/images/top.png)
 
+9. 查看项目占用的端口情况
+
+![查看项目占用的端口情况](/doc/images/port.png)
+
 ### 下载安装
 
 1. 下载安装包 [https://gitee.com/jiangzeyin/jpom/attach_files](https://gitee.com/jiangzeyin/jpom/attach_files)
