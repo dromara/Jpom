@@ -54,7 +54,14 @@ stop()
          echo ${WebClose}
          wget "$WebClose"
        fi
-       kill -9 "$pid"
+       #
+       kill $(pgrep -f ${MainClass}) 2>/dev/null
+       sleep 3
+       pid=`getPid`
+       if [[ "$pid" != "" ]]; then
+			echo "kill boot process"
+			kill -9 "$pid"
+	    fi
     fi
     status
 }

@@ -18,6 +18,7 @@
 > Jpom采用SpringBoot开发web项目(前台采用layui)+websocket来统一管理，只要电脑能使用浏览器就ok
 
 #### 项目主要功能
+
 1. 创建、修改、删除项目
 2. 实时查看控制台
 3. jar包文件夹管理
@@ -27,6 +28,7 @@
 7. 多用户管理
 8. 此项目完全不依赖数据库，随装随用
 9. 整个服务器top监听
+10. 查看项目运行进程占用的端口
 
 
 #### 项目截图
@@ -115,5 +117,6 @@ mvn package
   
   
 ### 常见问题
+
    1. 如何修改程序运行端口：修改启动程序命令文件中 --server.port=2122
    2. 如何修改程序日志路径：建议自行编译安装修改 [/src/main/resources/logback-spring.xml](/src/main/resources/logback-spring.xml) 文件
