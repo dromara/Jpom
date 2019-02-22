@@ -17,6 +17,8 @@
 
 > Jpom采用SpringBoot开发web项目(前台采用layui)+websocket来统一管理，只要电脑能使用浏览器就ok
 
+![logo](/doc/logo.png)
+
 #### 项目主要功能
 
 1. 创建、修改、删除项目
