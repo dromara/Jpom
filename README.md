@@ -65,9 +65,9 @@
 
 ### 下载安装
 
-1. 下载安装包 [https://gitee.com/jiangzeyin/jpom/attach_files](https://gitee.com/jiangzeyin/jpom/attach_files)
+1. 下载安装包 [https://gitee.com/keepbx/jpom/attach_files](https://gitee.com/keepbx/jpom/attach_files)
 2. 上传到服务解压到根目录
-3. 执行目录下[run.sh](/bin/run.sh)文件（记得给命令文件添加权限奥[*chmod  777 /jpom/run.sh*]）
+3. 执行目录下[run.sh](/bin/run.sh)文件（记得给命令文件添加权限奥[*chmod  755 /jpom/run.sh*]）
 如
 ```
 /jpom/run.sh start
@@ -87,7 +87,7 @@ mvn package
 
 ### 编译运行
 
-访问[Jpom](https://gitee.com/jiangzeyin/jpom)的码云主页,拉取最新完整代码：
+访问[Jpom](https://gitee.com/keepbx/jpom)的码云主页,拉取最新完整代码：
 
 1. 运行*cn.keepbx.jpom.JpomApplication*
 2. 浏览器访问
@@ -105,7 +105,7 @@ mvn package
 ### 感谢
  Jpom使用以下开源项目
   - [Spring Boot](https://github.com/spring-projects/spring-boot)：核心框架
-  - [Fast-Boot](https://gitee.com/jiangzeyin/common-parent)：针对SpringBoot 封装的一系列的快捷包 提供公共的Controller、自动化拦截器、启动加载资源接口、线程池管理
+  - [Fast-Boot](https://gitee.com/keepbx/common-parent)：针对SpringBoot 封装的一系列的快捷包 提供公共的Controller、自动化拦截器、启动加载资源接口、线程池管理
   - [Fastjson](https://github.com/alibaba/fastjson)：用于Java的快速JSON解析器/生成器
   - [Hutool](https://gitee.com/loolly/hutool)：一个Java工具包，也只是一个工具包，它帮助我们简化每一行代码，减少每一个方法，让Java语言也可以“甜甜的”
   - [Layui](https://gitee.com/sentsin/layui)：前端UI框架
@@ -113,7 +113,7 @@ mvn package
 
 ### 提供bug反馈或建议
 
-- [码云](https://gitee.com/jiangzeyin/jpom/issues)
+- [码云](https://gitee.com/keepbx/jpom/issues)
 
 ### 贡献代码
   欢迎任何人为Jpom添砖加瓦，贡献代码
