@@ -2,20 +2,22 @@
 
 Tag="JpomApplication"
 MainClass="cn.keepbx.jpom.JpomApplication"
-Path="/jpom/"
+# 自动获取当前路径
+Path=$(cd `dirname $0`; pwd)"/"
 Lib=${Path}"lib/"
 Log=${Path}"run.log"
 LogBack=${Path}"log/"
 JVM="-server "
-# 修改项目端口号 和 数据运行目录
-ARGS="--server.port=2122 --jpom.path=/jpom/"
+# 修改项目端口号
+ARGS="--server.port=2122 --jpom.path="${Path}
 
 echo ${Tag}
 RETVAL="0"
 
-# See how we were called.
+# 启动程序
 function start() {
     echo  ${Log}
+    # 备份日志
     if [[ -f ${Log} ]]; then
 		if [[ ! -d ${LogBack} ]];then
 			mkdir ${LogBack}
@@ -29,7 +31,7 @@ function start() {
     tailf ${Log}
 }
 
-
+# 停止程序
 function stop() {
 	pid=$(ps -ef | grep -v 'grep' | egrep $Tag| awk '{printf $2 " "}')
 	if [[ "$pid" != "" ]]; then
@@ -48,6 +50,7 @@ function stop() {
 	status
 }
 
+# 获取程序状态
 function status()
 {
 	pid=$(ps -ef | grep -v 'grep' | egrep ${Tag}| awk '{printf $2 " "}')
@@ -59,8 +62,7 @@ function status()
 	fi
 }
 
-
-
+# 提示使用语法
 function usage()
 {
    echo "Usage: $0 {start|stop|restart|status}"
