@@ -75,7 +75,7 @@
 4. 如有需要修改项目端口请查看 run.sh
 ### 编译安装
 
-访问[Jpom](https://gitee.com/jiangzeyin/jpom)的码云主页,拉取最新完整代码：
+访问[Jpom](https://gitee.com/keepbx/jpom)的码云主页,拉取最新完整代码：
  
 1. 项目运行日志目录确认,如需修改请查看[/src/main/resources/logback-spring.xml](/src/main/resources/logback-spring.xml)（默认：/jpom/log/）
 2. 进入项目目录执行，然后在目录中查看 target/jpom-x.x-release
