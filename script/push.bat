@@ -24,4 +24,11 @@ call git push github dev
 
 call git push github master
 
+echo 推送tags
+
+call git push gitee --tags
+
+call git push github --tags
+
+echo 切回分支
 call git checkout dev
