@@ -3,8 +3,8 @@ package cn.keepbx.jpom.service.manage;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.keepbx.jpom.model.ProjectInfoModel;
-import cn.keepbx.jpom.system.ConfigBean;
 import cn.keepbx.jpom.service.BaseDataService;
+import cn.keepbx.jpom.system.ConfigBean;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;
 
@@ -12,6 +12,8 @@ import java.io.IOException;
 import java.util.Set;
 
 /**
+ * 项目管理
+ *
  * @author jiangzeyin
  */
 @Service
@@ -56,7 +58,7 @@ public class ManageService extends BaseDataService {
      */
     public void updateProject(ProjectInfoModel projectInfo) throws Exception {
         // 修改
-        JSONObject jsonObject = getJsonObject(FILENAME, projectInfo.getId());
+        JSONObject jsonObject = getJsonObjectByKey(FILENAME, projectInfo.getId());
         if (jsonObject == null) {
             return;
         }
@@ -81,7 +83,7 @@ public class ManageService extends BaseDataService {
      * @return model
      */
     public ProjectInfoModel getProjectInfo(String id) throws IOException {
-        JSONObject jsonObject = getJsonObject(FILENAME, id);
+        JSONObject jsonObject = getJsonObjectByKey(FILENAME, id);
         if (jsonObject == null) {
             return null;
         }

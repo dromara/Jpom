@@ -7,14 +7,18 @@ import cn.keepbx.jpom.common.interceptor.NotLogin;
 import cn.keepbx.jpom.model.UserModel;
 import cn.keepbx.jpom.service.UserService;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.annotation.Resource;
+import java.io.IOException;
 
 /**
+ * 登录控制
+ *
  * @author Administrator
  */
 @Controller
@@ -23,9 +27,19 @@ public class LoginControl extends BaseController {
     @Resource
     private UserService userService;
 
-    @RequestMapping(value = {"login.html", "", "/"})
+    /**
+     * 登录页面
+     *
+     * @return login
+     * @throws IOException 异常
+     */
+    @RequestMapping(value = "login.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
     @NotLogin
-    public String login() {
+    public String login() throws IOException {
+        if (userService.userListEmpty()) {
+            // 调整到初始化也
+            return "redirect:install.html";
+        }
         return "login";
     }
 
@@ -41,7 +55,6 @@ public class LoginControl extends BaseController {
             if (userModel != null) {
                 stringBuffer.append("，结果：").append("OK");
                 setSessionAttribute(LoginInterceptor.SESSION_NAME, userModel);
-//                setSessionAttribute(LoginInterceptor.SESSION_PWD, userPwd);
                 return JsonMessage.getString(200, "登录成功");
             } else {
                 stringBuffer.append("，结果：").append("faild");

@@ -22,6 +22,17 @@ public class UserService extends BaseDataService {
     private static final String FILENAME = ConfigBean.USER;
 
     /**
+     * 用户列表是否为空
+     *
+     * @return true 为空需要初始化
+     * @throws IOException 异常
+     */
+    public boolean userListEmpty() throws IOException {
+        JSONObject userInfo = getJsonObject(FILENAME);
+        return userInfo.isEmpty();
+    }
+
+    /**
      * 用户登录
      *
      * @param name 用户名
@@ -29,7 +40,7 @@ public class UserService extends BaseDataService {
      * @return 登录
      */
     public UserModel login(String name, String pwd) throws Exception {
-        JSONObject userInfo = getJsonObject(FILENAME, name);
+        JSONObject userInfo = getJsonObjectByKey(FILENAME, name);
         if (JsonUtil.jsonIsEmpty(userInfo)) {
             return null;
         }
@@ -40,7 +51,13 @@ public class UserService extends BaseDataService {
         return null;
     }
 
-
+    /**
+     * 验证用户md5
+     *
+     * @param userMd5 用户md5
+     * @return true 合法
+     * @throws IOException 异常
+     */
     public boolean checkUser(String userMd5) throws IOException {
         JSONObject jsonData = getJsonObject(FILENAME);
         if (jsonData == null) {
@@ -49,8 +66,8 @@ public class UserService extends BaseDataService {
         for (String strKey : jsonData.keySet()) {
             JSONObject jsonUser = jsonData.getJSONObject(strKey);
             UserModel userModel = jsonUser.toJavaObject(UserModel.class);
-            String strUsermd5 = userModel.getUserMd5Key();
-            if (strUsermd5.equals(userMd5)) {
+            String strUserMd5 = userModel.getUserMd5Key();
+            if (strUserMd5.equals(userMd5)) {
                 return true;
             }
         }
@@ -75,14 +92,14 @@ public class UserService extends BaseDataService {
         Set<Map.Entry<String, Object>> set = jsonObject.entrySet();
         JSONArray array = new JSONArray();
         for (Map.Entry entry : set) {
-            String key = (String) entry.getKey();
+//            String key = (String) entry.getKey();
             JSONObject value = (JSONObject) entry.getValue();
             value.remove("password");
-            if (value.containsKey("role")) {
-                value.put("role", "是");
-            } else {
-                value.put("role", "否");
-            }
+//            if (value.containsKey("role")) {
+//                value.put("role", "是");
+//            } else {
+//                value.put("role", "否");
+//            }
             array.add(value);
         }
         return array;
@@ -94,10 +111,10 @@ public class UserService extends BaseDataService {
      * @param name   用户名
      * @param oldPwd 旧密码
      * @param newPwd 新密码
-     * @return
+     * @return 修改结果
      */
     public String updatePwd(String name, String oldPwd, String newPwd) throws Exception {
-        JSONObject userInfo = getJsonObject(FILENAME, name);
+        JSONObject userInfo = getJsonObjectByKey(FILENAME, name);
         // 判断用户是否存在
         if (null == userInfo) {
             return "notexist";
@@ -131,14 +148,34 @@ public class UserService extends BaseDataService {
     }
 
     /**
-     * 新增用户
+     * 添加用户
+     *
+     * @param id       用户登录名
+     * @param name     昵称
+     * @param password 密码
+     * @return true
      */
-    public boolean addUser(String id, String name, String password, String role) {
+    public boolean addUser(String id, String name, String password) {
         try {
             UserModel userModel = new UserModel();
             userModel.setName(name);
             userModel.setId(id);
             userModel.setPassword(password);
+            return addUser(userModel);
+        } catch (Exception e) {
+            DefaultSystemLog.LOG().error(e.getMessage(), e);
+        }
+        return false;
+    }
+
+    /**
+     * 添加用户
+     *
+     * @param userModel 实体
+     * @return true
+     */
+    public boolean addUser(UserModel userModel) {
+        try {
             saveJson(FILENAME, userModel.toJson());
             return true;
         } catch (Exception e) {

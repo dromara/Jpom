@@ -54,7 +54,7 @@ public class UserInfoController extends BaseController {
         if (length < 6) {
             return JsonMessage.getString(400, "密码长度为6-12位");
         }
-        boolean b = userService.addUser(id, name, password, role);
+        boolean b = userService.addUser(id, name, password);
         if (b) {
             return JsonMessage.getString(200, "添加成功");
         }

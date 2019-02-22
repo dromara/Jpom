@@ -93,7 +93,7 @@ public class BaseDataService extends BaseService {
      * @return json
      * @throws IOException io
      */
-    protected JSONObject getJsonObject(String filename, String key) throws IOException {
+    protected JSONObject getJsonObjectByKey(String filename, String key) throws IOException {
         JSONObject jsonData = getJsonObject(filename);
         return jsonData.getJSONObject(key);
     }

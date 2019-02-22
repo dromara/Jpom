@@ -7,6 +7,8 @@ import org.springframework.context.annotation.Configuration;
 import javax.servlet.MultipartConfigElement;
 
 /**
+ * 上传文件配置
+ *
  * @author ChenRan
  * create by 2017-10-24 20:07
  **/

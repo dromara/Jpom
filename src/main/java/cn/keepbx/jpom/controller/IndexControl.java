@@ -1,11 +1,14 @@
 package cn.keepbx.jpom.controller;
 
+import cn.keepbx.jpom.common.interceptor.NotLogin;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
 /**
+ * 首页
+ *
  * @author Administrator
  */
 @Controller
@@ -13,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 public class IndexControl extends BaseController {
 
     @RequestMapping(value = "error", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
+    @NotLogin
     public String error() {
         return "error";
     }
