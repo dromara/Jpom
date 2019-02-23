@@ -68,10 +68,11 @@
             <div class="layui-inline">
                 <label class="layui-form-label">是否是管理员</label>
                 <div class="layui-input-block">
-                    <input type="checkbox" value="true" name="role" lay-skin="switch" lay-text="是|否">
+                    <input type="checkbox" value="true" name="manage" lay-skin="switch" lay-text="是|否">
                 </div>
             </div>
         </div>
+        <div id="tag"></div>
 
         <input type="hidden" lay-submit lay-filter="submitUser" id="user_submit">
     </form>
@@ -82,6 +83,10 @@
 <script type="text/html" id="bar_projects">
     <a href="javascript:;" class="layui-btn  layui-btn-sm layui-btn-warm" lay-event="update">编辑</a>
     <a href="javascript:;" class="layui-btn  layui-btn-sm layui-btn-danger" lay-event="delete">删除</a>
+</script>
+<script type="text/html" id="manager_status">
+    <input type="checkbox" id="" disabled name="status" {{# if(d.manage){ }} checked {{# } }} lay-skin="switch"
+           lay-text="是|否">
 </script>
 <script type="text/javascript">
     layui.use(['layer', 'element', 'table', 'form'], function () {
@@ -99,7 +104,7 @@
             cols: [[
                 {field: 'id', title: 'id'},
                 {field: 'name', title: '昵称'},
-                {field: 'role', title: '是否是管理员'},
+                {field: 'manage', templet: "#manager_status", title: '是否是管理员'},
                 {field: 'op', title: '操作', align: 'center', toolbar: '#bar_projects', fixed: 'right'}
             ]],
             loading: true,
@@ -115,14 +120,19 @@
             $('#form_user [name="id"]').attr('readonly', true).addClass('layui-disabled');
 
             // 设置表单值
+            var projects = [];
             for (var key in data) {
-                if ("role" == key) {
-                    if ("是" === data[key])
-                        $('#form_user [name="role"]').attr('checked', true);
+                if ("manage" === key) {
+                    if (true === data[key])
+                        $('#form_user [name="manage"]').attr('checked', true);
+                } else if ("projects" === key) {
+                    var str = data[key];
+                    projects = str.split(',');
                 } else {
                     $('#form_user [name="' + key + '"]').val(data[key]);
                 }
             }
+            getProject(projects);
             // 弹出
             layer.open({
                 type: 1,
@@ -137,12 +147,55 @@
                 }
             });
         }
+
+
+        function getProject(projects) {
+            $("#tag").html("");
+            var length = projects.length;
+            $.ajax({
+                url: "/manage/getProjectInfo",
+                type: 'POST',
+                dataType: 'json',
+                success: function (data) {
+                    if (200 == data.code) {
+                        var projectArray = data.data;
+                        var len = projectArray.length;
+                        var start = "<div class=\"layui-form-item\"><div class=\"layui-inline\"><label class=\"layui-form-label\">管理项目</label>";
+                        var end = "</div></div>";
+                        var p, id, project, str;
+                        for (var i = 0; i < len; i++) {
+                            project = projectArray[i];
+                            id = project.id;
+                            str = "<input type=\"checkbox\" name=\"project\" value=" + id + " title=" + project.name + ">";
+                            for (var j = 0; j < length; j++) {
+                                p = projects[j].trim();
+                                if (p === id) {
+                                    str = "<input type=\"checkbox\" name=\"project\" value=" + id + " title=" + project.name + " checked>";
+                                }
+                            }
+                            start += str;
+                        }
+                        if (len > 0) {
+                            $("#tag").prepend(start + end);
+                        }
+                        form.render('checkbox');
+                    } else {
+                        layer.msg(data.msg);
+                    }
+                },
+                error: function (err) {
+                    layer.msg('操作失败！');
+                }
+            });
+        }
+
+
         // '添加用户'点击事件
         $('#addProject').on('click', function () {
             // 重置表单
             document.getElementById('form_user').reset();
             $('#form_project [name="id"]').attr('readonly', false).removeClass('layui-disabled');
-            $('#form_project [name="role"]').attr('checked', false);
+            $('#form_project [name="manage"]').attr('checked', false);
             // 弹出
             layer.open({
                 type: 1,
@@ -163,13 +216,27 @@
             table.reload('tab_user', {height: 'full-52'});
         });
 
+        function getCheckedBox() {
+            var projects = $('input[name="project"]');
+            var check_val = [];
+            for (k in projects) {
+                if (projects[k].checked) {
+                    check_val.push(projects[k].value);
+                }
+            }
+            return check_val;
+        }
+
         // 提交用户信息
         form.on('submit(submitUser)', function (data) {
+            var check_val = getCheckedBox();
+            var field = data.field;
+            field.project = check_val.join(",");
             $.ajax({
                 url: data.form.action,
                 type: 'POST',
                 dataType: 'json',
-                data: data.field,
+                data: field,
                 success: function (data) {
                     if (200 == data.code) {
                         layer.closeAll('page');

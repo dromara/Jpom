@@ -7,6 +7,7 @@ import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.keepbx.jpom.controller.BaseController;
 import cn.keepbx.jpom.model.ProjectInfoModel;
+import cn.keepbx.jpom.service.UserService;
 import cn.keepbx.jpom.service.manage.ManageService;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -25,6 +26,8 @@ import java.io.IOException;
 public class EditProjectController extends BaseController {
     @Resource
     private ManageService manageService;
+    @Resource
+    private UserService userService;
 
     @RequestMapping(value = "editProject", method = RequestMethod.GET)
     public String editProject(String id) throws IOException {
@@ -37,6 +40,10 @@ public class EditProjectController extends BaseController {
     @ResponseBody
     public String saveProject(ProjectInfoModel projectInfo) throws IOException {
         String id = projectInfo.getId();
+        boolean manager = userService.isManager(id, getUserName());
+        if (!manager) {
+            return JsonMessage.getString(400, "你没有对应操作权限操作!");
+        }
         if (StrUtil.isEmptyOrUndefined(id)) {
             return JsonMessage.getString(400, "项目id不能为空");
         }

@@ -10,8 +10,7 @@ import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * @author Administrator
@@ -92,14 +91,8 @@ public class UserService extends BaseDataService {
         Set<Map.Entry<String, Object>> set = jsonObject.entrySet();
         JSONArray array = new JSONArray();
         for (Map.Entry entry : set) {
-//            String key = (String) entry.getKey();
             JSONObject value = (JSONObject) entry.getValue();
             value.remove("password");
-//            if (value.containsKey("role")) {
-//                value.put("role", "是");
-//            } else {
-//                value.put("role", "否");
-//            }
             array.add(value);
         }
         return array;
@@ -129,6 +122,31 @@ public class UserService extends BaseDataService {
         } else {
             return "olderror";
         }
+    }
+
+    /**
+     * 判断用户是否该项目的管理员
+     *
+     * @param projectId 项目id
+     * @param userId    用户id
+     * @return boolean
+     */
+    public boolean isManager(String projectId, String userId) {
+        try {
+            JSONObject jsonObject = getJsonObject(FILENAME);
+            JSONObject user = jsonObject.getJSONObject(userId);
+            boolean manage = user.getBooleanValue("manage");
+            if (!manage) {
+                return false;
+            }
+            String projects = user.getString("projects");
+            String[] split = projects.split(",");
+            List<String> list = Arrays.asList(split);
+            return list.contains(projectId);
+        } catch (IOException e) {
+            DefaultSystemLog.ERROR().error(e.getMessage(), e);
+        }
+        return false;
     }
 
     /**
@@ -189,12 +207,13 @@ public class UserService extends BaseDataService {
      *
      * @return String
      */
-    public boolean updateUser(String id, String name, String password, String role) {
+    public boolean updateUser(String id, String name, String password, String role, String project) {
         try {
             JSONObject object = new JSONObject();
             object.put("id", id);
             object.put("name", name);
-            object.put("role", role);
+            object.put("manage", "true".equals(role));
+            object.put("projects", project);
             JSONObject jsonObject = getJsonObject(FILENAME);
             JSONObject user = jsonObject.getJSONObject(id);
             String pass = user.getString("password");

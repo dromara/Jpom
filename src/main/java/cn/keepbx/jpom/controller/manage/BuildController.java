@@ -7,6 +7,7 @@ import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.keepbx.jpom.controller.BaseController;
 import cn.keepbx.jpom.model.ProjectInfoModel;
+import cn.keepbx.jpom.service.UserService;
 import cn.keepbx.jpom.service.manage.CommandService;
 import cn.keepbx.jpom.service.manage.ManageService;
 import cn.keepbx.jpom.service.oss.OssManagerService;
@@ -35,6 +36,8 @@ public class BuildController extends BaseController {
     private ManageService manageService;
     @Resource
     private CommandService commandService;
+    @Resource
+    private UserService userService;
 
     @RequestMapping(value = "build", method = RequestMethod.GET)
     public String build(String id) throws IOException {
@@ -64,6 +67,10 @@ public class BuildController extends BaseController {
     @RequestMapping(value = "build_install", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     public String buildInstall(String id, String key) throws Exception {
+        boolean manager = userService.isManager(id, getUserName());
+        if (!manager) {
+            return JsonMessage.getString(400, "你没有对应操作权限操作!");
+        }
         ProjectInfoModel projectInfoModel = manageService.getProjectInfo(id);
         if (projectInfoModel == null) {
             return JsonMessage.getString(400, "没有对应项目");

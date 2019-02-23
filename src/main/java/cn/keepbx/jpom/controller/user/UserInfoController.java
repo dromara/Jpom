@@ -67,7 +67,7 @@ public class UserInfoController extends BaseController {
      * @return String
      */
     @RequestMapping(value = "updateUser", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public String updateUser(String id, String name, String role, String password) {
+    public String updateUser(String id, String name, String manage, String password, String project) {
         if (StrUtil.isEmpty(id)) {
             return JsonMessage.getString(400, "登录名不能为空");
         }
@@ -77,7 +77,7 @@ public class UserInfoController extends BaseController {
                 return JsonMessage.getString(400, "密码长度为6-12位");
             }
         }
-        boolean b = userService.updateUser(id, name, password, role);
+        boolean b = userService.updateUser(id, name, password, manage, project);
         if (b) {
             return JsonMessage.getString(200, "修改成功");
         }
