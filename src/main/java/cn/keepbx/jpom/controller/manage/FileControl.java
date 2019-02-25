@@ -10,6 +10,7 @@ import cn.keepbx.jpom.common.PageUtil;
 import cn.keepbx.jpom.controller.BaseController;
 import cn.jiangzeyin.controller.multipart.MultipartFileBuilder;
 import cn.keepbx.jpom.model.ProjectInfoModel;
+import cn.keepbx.jpom.service.UserService;
 import cn.keepbx.jpom.service.manage.ManageService;
 import cn.keepbx.jpom.system.ConfigBean;
 import cn.keepbx.jpom.system.ConfigException;
@@ -36,6 +37,9 @@ public class FileControl extends BaseController {
 
     @Resource
     private ManageService manageService;
+
+    @Resource
+    private UserService userService;
 
     /**
      * 文件管理页面
@@ -143,6 +147,10 @@ public class FileControl extends BaseController {
     @ResponseBody
     public String upload() throws Exception {
         String id = getParameter("id");
+        boolean manager = userService.isManager(id, getUserName());
+        if (!manager) {
+            return JsonMessage.getString(400, "你没有对应操作权限操作!");
+        }
         ProjectInfoModel pim = manageService.getProjectInfo(id);
         MultipartFileBuilder multipartFileBuilder = createMultipart()
                 .addFieldName("file")
@@ -183,6 +191,10 @@ public class FileControl extends BaseController {
     @RequestMapping(value = "clear")
     @ResponseBody
     public String clear(String id) {
+        boolean manager = userService.isManager(id, getUserName());
+        if (!manager) {
+            return JsonMessage.getString(400, "你没有对应操作权限操作!");
+        }
         try {
             ProjectInfoModel pim = manageService.getProjectInfo(id);
             File file = new File(pim.getLib());

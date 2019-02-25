@@ -1,6 +1,7 @@
 package cn.keepbx.jpom.model;
 
 import cn.hutool.crypto.SecureUtil;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 /**
@@ -14,6 +15,15 @@ public class UserModel {
     private String name;
     private String password;
     private boolean manage;
+    private String projects;
+
+    public String getProjects() {
+        return projects;
+    }
+
+    public void setProjects(String projects) {
+        this.projects = projects;
+    }
 
     public String getId() {
         return id;
