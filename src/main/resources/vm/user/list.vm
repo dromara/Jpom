@@ -118,7 +118,6 @@
             // 重置表单
             document.getElementById('form_user').reset();
             $('#form_user [name="id"]').attr('readonly', true).addClass('layui-disabled');
-
             // 设置表单值
             var projects = [];
             for (var key in data) {
@@ -126,8 +125,7 @@
                     if (true === data[key])
                         $('#form_user [name="manage"]').attr('checked', true);
                 } else if ("projects" === key) {
-                    var str = data[key];
-                    projects = str.split(',');
+                    projects = data[key];
                 } else {
                     $('#form_user [name="' + key + '"]').val(data[key]);
                 }

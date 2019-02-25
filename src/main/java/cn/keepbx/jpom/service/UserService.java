@@ -10,7 +10,8 @@ import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * @author Administrator
@@ -136,13 +137,14 @@ public class UserService extends BaseDataService {
             JSONObject jsonObject = getJsonObject(FILENAME);
             JSONObject user = jsonObject.getJSONObject(userId);
             boolean manage = user.getBooleanValue("manage");
-            if (!manage) {
+            if (manage) {
+                return true;
+            }
+            JSONArray projects = user.getJSONArray("projects");
+            if (projects == null || projects.isEmpty()) {
                 return false;
             }
-            String projects = user.getString("projects");
-            String[] split = projects.split(",");
-            List<String> list = Arrays.asList(split);
-            return list.contains(projectId);
+            return projects.contains(projectId);
         } catch (IOException e) {
             DefaultSystemLog.ERROR().error(e.getMessage(), e);
         }
@@ -207,13 +209,13 @@ public class UserService extends BaseDataService {
      *
      * @return String
      */
-    public boolean updateUser(String id, String name, String password, String role, String project) {
+    public boolean updateUser(String id, String name, String password, String role, JSONArray projects) {
         try {
             JSONObject object = new JSONObject();
             object.put("id", id);
             object.put("name", name);
             object.put("manage", "true".equals(role));
-            object.put("projects", project);
+            object.put("projects", projects);
             JSONObject jsonObject = getJsonObject(FILENAME);
             JSONObject user = jsonObject.getJSONObject(id);
             String pass = user.getString("password");

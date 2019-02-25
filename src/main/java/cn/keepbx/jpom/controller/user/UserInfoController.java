@@ -4,6 +4,7 @@ import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.keepbx.jpom.controller.BaseController;
 import cn.keepbx.jpom.service.UserService;
+import com.alibaba.fastjson.JSONArray;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -77,7 +78,11 @@ public class UserInfoController extends BaseController {
                 return JsonMessage.getString(400, "密码长度为6-12位");
             }
         }
-        boolean b = userService.updateUser(id, name, password, manage, project);
+        JSONArray projects = null;
+        if (StrUtil.isNotEmpty(project)) {
+            projects = (JSONArray) JSONArray.toJSON(StrUtil.splitToArray(project, ','));
+        }
+        boolean b = userService.updateUser(id, name, password, manage, projects);
         if (b) {
             return JsonMessage.getString(200, "修改成功");
         }
