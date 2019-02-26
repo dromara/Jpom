@@ -113,11 +113,11 @@ public class InternalController extends BaseController {
             response.addHeader("Content-Disposition", "attachment;filename=" + name);
             //设置文件打下
             response.addHeader("Content-Length", "" + file.length());
-            OutputStream toClient = new BufferedOutputStream(response.getOutputStream());
-            response.setContentType("application/octet-stream");
-            toClient.write(buffer);
-            toClient.flush();
-            toClient.close();
+            try (OutputStream toClient = new BufferedOutputStream(response.getOutputStream());) {
+                response.setContentType("application/octet-stream");
+                toClient.write(buffer);
+                toClient.flush();
+            }
         } catch (IOException ioe) {
             DefaultSystemLog.ERROR().error("下载异常", ioe);
         } finally {
