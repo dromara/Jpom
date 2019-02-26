@@ -7,7 +7,7 @@
 > 如果休息日在朋友家玩，公司领导联系说需要控制一下某个项目，此时你身边有电脑，但是没有专业的管理服务器的软件。
 
 
-###  在这里[Jpom](https://gitee.com/jiangzeyin/jpom) 项目将如上问题统一解决
+###  在这里[Jpom](https://gitee.com/keepbx/jpom) 项目将如上问题统一解决
 
 ![GitHub](https://img.shields.io/github/license/jiangzeyin/jpom.svg?style=flat)
 ![jdk](https://img.shields.io/badge/JDK-1.8+-green.svg)
