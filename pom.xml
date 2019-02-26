@@ -10,7 +10,7 @@
     </parent>
     <groupId>cn.keepbx</groupId>
     <artifactId>jpom</artifactId>
-    <name>jpom Java项目在线管理</name>
+    <name>Jpom Java项目在线管理</name>
     <inceptionYear>2017</inceptionYear>
     <version>1.1</version>
     <properties>
