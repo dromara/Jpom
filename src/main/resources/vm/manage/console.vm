@@ -29,6 +29,7 @@
 <script type="text/javascript">
     var projectInfo =  $projectInfo;
     var userInfo = '$userInfo';
+    var manager = '$manager';
     var loopLog = false;
     var loopLogTime;
 
@@ -102,7 +103,11 @@
 
             $('.btn-op').on('click', function () {
                 var op = $(this).attr('op');
-                setMsg(op);
+                if ("true" === manager) {
+                    setMsg(op);
+                } else {
+                    layer.msg('你没有对应权限！');
+                }
             });
 
             function setMsg(opt) {
