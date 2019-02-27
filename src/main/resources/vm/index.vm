@@ -35,7 +35,8 @@
                     <a href="javascript:;" data-options="{'id':'manage', 'title':'项目管理', 'url':'/manage/projectInfo'}">项目管理</a>
                 </li>
                 <li class="layui-nav-item">
-                    <a href="javascript:;" data-options="{'id':'user', 'title':'用户管理', 'url':'/user/list'}">用户管理</a>
+                    <a href="javascript:;"
+                       #if($manager)data-options="{'id':'user', 'title':'用户管理', 'url':'/user/list'}" #end>用户管理</a>
                 </li>
             </ul>
         </div>
@@ -102,6 +103,9 @@
                 options = JSON.parse(dataJSON);
             } catch (e) {
                 options = eval('(' + dataJSON + ')');
+            }
+            if (!options) {
+                return;
             }
             tabChange(options);
         });

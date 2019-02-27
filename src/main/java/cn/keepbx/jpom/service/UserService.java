@@ -84,7 +84,7 @@ public class UserService extends BaseDataService {
         try {
             jsonObject = getJsonObject(FILENAME);
         } catch (IOException e) {
-            e.printStackTrace();
+            DefaultSystemLog.ERROR().error(e.getMessage(), e);
         }
         if (jsonObject == null) {
             return null;
@@ -133,22 +133,37 @@ public class UserService extends BaseDataService {
      * @return boolean
      */
     public boolean isManager(String projectId, String userId) {
+        JSONObject user = getUserModel(userId);
+        if (user == null) {
+            return false;
+        }
+        boolean manage = user.getBooleanValue("manage");
+        if (manage) {
+            return true;
+        }
+        JSONArray projects = user.getJSONArray("projects");
+        if (projects == null || projects.isEmpty()) {
+            return false;
+        }
+        return projects.contains(projectId);
+    }
+
+    /**
+     * 获取用户信息
+     *
+     * @param userId 用户id
+     * @return 用户信息
+     */
+    public JSONObject getUserModel(String userId) {
         try {
             JSONObject jsonObject = getJsonObject(FILENAME);
             JSONObject user = jsonObject.getJSONObject(userId);
-            boolean manage = user.getBooleanValue("manage");
-            if (manage) {
-                return true;
-            }
-            JSONArray projects = user.getJSONArray("projects");
-            if (projects == null || projects.isEmpty()) {
-                return false;
-            }
-            return projects.contains(projectId);
+            user.remove("password");
+            return user;
         } catch (IOException e) {
             DefaultSystemLog.ERROR().error(e.getMessage(), e);
         }
-        return false;
+        return null;
     }
 
     /**

@@ -123,6 +123,9 @@
                             }
                             rgb = hslToRgb.apply(this, HSL[size - 1]);
                         }
+                        if (!d.manager) {
+                            rgb = [211, 211, 211];
+                        }
                         return "<div  title='" + d.group + "(" + d.id + ")' style='background: rgb(" + rgb + ");color: #fff;margin: 0 -15px;padding: 0 15px;'>" + (d.runLibDesc || "") + " / " + (d.useLibDesc || "") + "</div>";
                     }
                 },
@@ -255,13 +258,18 @@
 
         // 文件管理
         function fileManage(data) {
-            var lay_id = 'tab_file_' + data.id;
-            var url = '/file/filemanage?id=' + data.id;
-            tabChange({
-                id: data.id,
-                url: url,
-                title: data.id + ' - 文件',
-            });
+            var manager = data.manager;
+            if (manager) {
+                var lay_id = 'tab_file_' + data.id;
+                var url = '/file/filemanage?id=' + data.id;
+                tabChange({
+                    id: data.id,
+                    url: url,
+                    title: data.id + ' - 文件',
+                });
+            } else {
+                layer.msg('你还没有对应权限！');
+            }
         }
 
         // 管理
