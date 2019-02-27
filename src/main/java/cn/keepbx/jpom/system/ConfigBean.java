@@ -2,6 +2,7 @@ package cn.keepbx.jpom.system;
 
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.jiangzeyin.common.spring.SpringUtil;
 import cn.keepbx.jpom.controller.BaseController;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
@@ -27,12 +28,12 @@ public class ConfigBean {
     public static final String USER = "user.json";
     public static final String PROJECT = "project.json";
 
-    private static class HelperSingleton {
-        private static final ConfigBean CONFIG_BEAN = new ConfigBean();
-    }
 
     public static ConfigBean getInstance() {
-        return HelperSingleton.CONFIG_BEAN;
+        if (configBean == null) {
+            configBean = SpringUtil.getBean(ConfigBean.class);
+        }
+        return configBean;
     }
 
     /**
