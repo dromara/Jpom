@@ -6,6 +6,7 @@ import cn.jiangzeyin.common.JsonMessage;
 import cn.keepbx.jpom.common.PageUtil;
 import cn.keepbx.jpom.controller.BaseController;
 import cn.keepbx.jpom.model.ProjectInfoModel;
+import cn.keepbx.jpom.service.UserService;
 import cn.keepbx.jpom.service.manage.CommandService;
 import cn.keepbx.jpom.service.manage.ManageService;
 import com.alibaba.fastjson.JSONArray;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import javax.annotation.Resource;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 
@@ -33,7 +35,8 @@ public class ManageControl extends BaseController {
     private ManageService manageService;
     @Resource
     private CommandService commandService;
-
+    @Resource
+    private UserService userService;
 
     /**
      * 展示项目页面
@@ -57,18 +60,21 @@ public class ManageControl extends BaseController {
             // 查询数据
             JSONObject json = manageService.getAllProjectInfo();
             // 转换为数据
-            List<ProjectInfoModel> array = new ArrayList<>();
+            List<JSONObject> array = new ArrayList<>();
             Set<String> setKey = json.keySet();
             for (String asetKey : setKey) {
                 ProjectInfoModel projectInfoModel = manageService.getProjectInfo(asetKey);
                 String result = commandService.execCommand(CommandService.CommandOp.status, projectInfoModel);
                 boolean status = result.contains(CommandService.RUNING_TAG);
                 projectInfoModel.setStatus(status);
-                array.add(projectInfoModel);
+                String id = projectInfoModel.getId();
+                JSONObject object = (JSONObject) JSONObject.toJSON(projectInfoModel);
+                object.put("manager", userService.isManager(id, getUserName()));
+                array.add(object);
             }
             array.sort((o1, o2) -> {
-                String group1 = o1.getGroup();
-                String group2 = o2.getGroup();
+                String group1 = o1.getString("group");
+                String group2 = o2.getString("group");
                 if (group1 == null || group2 == null) {
                     return -1;
                 }
@@ -109,6 +115,10 @@ public class ManageControl extends BaseController {
     @RequestMapping(value = "deleteProject", method = RequestMethod.POST)
     @ResponseBody
     public String deleteProject(String id) {
+        boolean manager = userService.isManager(id, getUserName());
+        if (!manager) {
+            return JsonMessage.getString(500, "你没有对应权限");
+        }
         try {
             manageService.deleteProject(id);
             return JsonMessage.getString(200, "删除成功！");

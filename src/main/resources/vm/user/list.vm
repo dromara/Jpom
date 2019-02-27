@@ -72,7 +72,7 @@
                 </div>
             </div>
         </div>
-        <div id="tag"></div>
+        <div id="view"></div>
 
         <input type="hidden" lay-submit lay-filter="submitUser" id="user_submit">
     </form>
@@ -88,12 +88,24 @@
     <input type="checkbox" id="" disabled name="status" {{# if(d.manage){ }} checked {{# } }} lay-skin="switch"
            lay-text="是|否">
 </script>
+<script id="manageProject" type="text/html">
+    <div class="layui-form-item">
+        <div class="layui-inline">
+            <label class="layui-form-label">管理项目</label>
+            {{# layui.each(d.data, function(index, item){ }}
+            <input type="checkbox" name="project" value={{ item.id }} title={{ item.name }} {{# if(item.manager){ }}
+                   checked {{# } }}>
+            {{# }); }}
+        </div>
+    </div>
+</script>
 <script type="text/javascript">
-    layui.use(['layer', 'element', 'table', 'form'], function () {
+    layui.use(['layer', 'element', 'table', 'form', 'laytpl'], function () {
         var $ = layui.$;
         var table = layui.table;
         var form = layui.form;
         var layer = layui.layer;
+        var laytpl = layui.laytpl;
 
         table.render({
             id: 'tab_user',
@@ -148,7 +160,6 @@
 
 
         function getProject(projects) {
-            $("#tag").html("");
             var length = projects.length;
             $.ajax({
                 url: "/manage/getProjectInfo",
@@ -156,27 +167,12 @@
                 dataType: 'json',
                 success: function (data) {
                     if (200 == data.code) {
-                        var projectArray = data.data;
-                        var len = projectArray.length;
-                        var start = "<div class=\"layui-form-item\"><div class=\"layui-inline\"><label class=\"layui-form-label\">管理项目</label>";
-                        var end = "</div></div>";
-                        var p, id, project, str;
-                        for (var i = 0; i < len; i++) {
-                            project = projectArray[i];
-                            id = project.id;
-                            str = "<input type=\"checkbox\" name=\"project\" value=" + id + " title=" + project.name + ">";
-                            for (var j = 0; j < length; j++) {
-                                p = projects[j].trim();
-                                if (p === id) {
-                                    str = "<input type=\"checkbox\" name=\"project\" value=" + id + " title=" + project.name + " checked>";
-                                }
-                            }
-                            start += str;
-                        }
-                        if (len > 0) {
-                            $("#tag").prepend(start + end);
-                        }
-                        form.render('checkbox');
+                        var manager = manageProject.innerHTML;
+                        var view = document.getElementById('view');
+                        laytpl(manager).render(data, function (html) {
+                            view.innerHTML = html;
+                        });
+                        form.render();
                     } else {
                         layer.msg(data.msg);
                     }

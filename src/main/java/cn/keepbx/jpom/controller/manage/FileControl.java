@@ -44,8 +44,7 @@ public class FileControl extends BaseController {
     /**
      * 文件管理页面
      *
-     * @param id
-     * @return
+     * @param id 项目id
      */
     @RequestMapping(value = "filemanage", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
     public String fileManage(String id) {
@@ -68,34 +67,10 @@ public class FileControl extends BaseController {
         return JsonMessage.getString(200, "success", map);
     }
 
-//    /**
-//     * 修改启动文件
-//     *
-//     * @param content 内容
-//     * @return json
-//     */
-//    @RequestMapping(value = "saveRunBoot")
-//    @ResponseBody
-//    public String saveRunBoot(String content) {
-//        File file = commandService.getCommandFile();
-//        // 写入文件
-//        try {
-//            FileOutputStream fos = new FileOutputStream(file);
-//            fos.write(content.getBytes());
-//            fos.flush();
-//            fos.close();
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//            DefaultSystemLog.ERROR().error(e.getMessage(), e);
-//        }
-//        return JsonMessage.getString(200, "success");
-//    }
-
     /**
      * 列出目录下的文件
      *
-     * @param id
-     * @return
+     * @param id 项目id
      */
     @RequestMapping(value = "getFileList", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
@@ -149,7 +124,7 @@ public class FileControl extends BaseController {
         String id = getParameter("id");
         boolean manager = userService.isManager(id, getUserName());
         if (!manager) {
-            return JsonMessage.getString(400, "你没有对应操作权限操作!");
+            return JsonMessage.getString(400, "你没有该操作权限操作!");
         }
         ProjectInfoModel pim = manageService.getProjectInfo(id);
         MultipartFileBuilder multipartFileBuilder = createMultipart()
@@ -211,8 +186,7 @@ public class FileControl extends BaseController {
     /**
      * 删除文件
      *
-     * @param filename
-     * @return
+     * @param filename 文件名称
      */
     @RequestMapping(value = "deleteFile")
     @ResponseBody
@@ -230,4 +204,29 @@ public class FileControl extends BaseController {
         }
         return JsonMessage.getString(500, "删除失败");
     }
+
+
+//    /**
+//     * 修改启动文件
+//     *
+//     * @param content 内容
+//     * @return json
+//     */
+//    @RequestMapping(value = "saveRunBoot")
+//    @ResponseBody
+//    public String saveRunBoot(String content) {
+//        File file = commandService.getCommandFile();
+//        // 写入文件
+//        try {
+//            FileOutputStream fos = new FileOutputStream(file);
+//            fos.write(content.getBytes());
+//            fos.flush();
+//            fos.close();
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//            DefaultSystemLog.ERROR().error(e.getMessage(), e);
+//        }
+//        return JsonMessage.getString(200, "success");
+//    }
+
 }
