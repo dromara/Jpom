@@ -18,6 +18,16 @@
     
    执行如下命令：(https://blog.csdn.net/perter_liao/article/details/76757605)
    
-   ![jpom](/doc/error/ff-unix-edit.png)
+    1.编辑文件
+      #vim filename（文件名）
+      
+    2.进入末行模式（按esc键）
     
-   
+    3.设置文件格式
+     ：set fileformat=unix
+     
+    4.保存退出
+     ：wq
+     
+    5.#sh filename
+      OK!
