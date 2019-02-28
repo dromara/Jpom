@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.annotation.Resource;
-import java.io.IOException;
 
 /**
  * 登录控制
@@ -31,11 +30,10 @@ public class LoginControl extends BaseController {
      * 登录页面
      *
      * @return login
-     * @throws IOException 异常
      */
     @RequestMapping(value = "login.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
     @NotLogin
-    public String login() throws IOException {
+    public String login() {
         if (userService.userListEmpty()) {
             // 调整到初始化也
             return "redirect:install.html";

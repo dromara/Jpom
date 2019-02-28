@@ -23,7 +23,7 @@ import java.util.concurrent.ExecutorService;
  * socket 消息控制器
  *
  * @author jiangzeyin
- * date 2017/9/8
+ * @date 2017/9/8
  */
 @ServerEndpoint(value = "/console/{userInfo}")
 @Component

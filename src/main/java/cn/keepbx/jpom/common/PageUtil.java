@@ -7,7 +7,7 @@ import com.alibaba.fastjson.JSONObject;
  * 分页工具
  *
  * @author jiangzeyin
- * date 2018/1/20
+ * @date 2018/1/20
  */
 public class PageUtil {
     /**

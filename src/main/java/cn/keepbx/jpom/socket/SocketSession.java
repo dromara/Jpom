@@ -74,6 +74,11 @@ public class SocketSession {
                 if (i == ERROR_TRY_COUNT) {
                     throw e;
                 } else {
+                    // 休眠一秒
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException ignored) {
+                    }
                     continue;
                 }
             } finally {

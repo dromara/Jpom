@@ -16,7 +16,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * 线程处理
  *
  * @author jiangzeyin
- * date 2017/9/8
+ * @date 2017/9/8
  */
 public class TailLogThread implements Runnable {
     /**

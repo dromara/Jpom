@@ -70,9 +70,9 @@ public abstract class BaseDataService {
     /**
      * 删除json对象
      *
-     * @param filename
-     * @param key
-     * @throws Exception
+     * @param filename 文件
+     * @param key      key
+     * @throws Exception 异常
      */
     protected void deleteJson(String filename, String key) throws Exception {
         // 读取文件，如果存在记录，则抛出异常

@@ -5,7 +5,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.socket.server.standard.ServerEndpointExporter;
 
 /**
- * socke 配置
+ * socket 配置
  *
  * @author jiangzeyin
  */
