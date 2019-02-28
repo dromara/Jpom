@@ -4,12 +4,12 @@ Tag="JpomApplication"
 MainClass="cn.keepbx.jpom.JpomApplication"
 # 自动获取当前路径
 Path=$(cd `dirname $0`; pwd)"/"
-Lib=${Path}"lib/"
-Log=${Path}"run.log"
-LogBack=${Path}"log/"
+Lib="${Path}lib/"
+Log="${Path}run.log"
+LogBack="${Path}log/"
 JVM="-server "
 # 修改项目端口号 日志路径
-ARGS="--server.port=2122 --jpom.path=$Path --jpom.log=${Path}log "
+ARGS="--server.port=2122 --jpom.path=${Path} --jpom.log=${Path}log --jpom.showDemo=false"
 
 echo ${Tag}
 RETVAL="0"

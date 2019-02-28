@@ -98,6 +98,13 @@ mvn package
 1. 运行*cn.keepbx.jpom.JpomApplication*
 2. 浏览器访问（如：http://127.0.0.1:2122）
 
+### 演示项目
+
+   [http://jpom-demo.jiangzeyin.cn](http://jpom-demo.jiangzeyin.cn)
+   
+    账号：admin
+    密码：admin123
+
 ### 常见问题
 
 [常见问题>>](/FQA.md)
