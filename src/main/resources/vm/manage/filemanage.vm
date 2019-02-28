@@ -110,7 +110,9 @@
                             url: '/file/clear',
                             type: 'POST',
                             dataType: 'json',
-                            data: {id: id},
+                            data: {
+                                id: id
+                            },
                             success: function (data) {
                                 if (200 === data.code) {
                                     layer.msg(data.msg);

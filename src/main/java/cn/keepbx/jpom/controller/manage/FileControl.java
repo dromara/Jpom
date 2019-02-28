@@ -11,6 +11,7 @@ import cn.keepbx.jpom.controller.BaseController;
 import cn.keepbx.jpom.model.ProjectInfoModel;
 import cn.keepbx.jpom.service.UserService;
 import cn.keepbx.jpom.service.manage.ManageService;
+import cn.keepbx.jpom.system.ConfigBean;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.http.MediaType;
@@ -150,7 +151,7 @@ public class FileControl extends BaseController {
         String filename = getParameter("filename");
         try {
             ProjectInfoModel pim = manageService.getProjectInfo(id);
-            String path = pim.getLib() + filename;
+            String path = pim.getLib() + "/" + filename;
             File file = new File(path);
             ServletUtil.write(getResponse(), file);
         } catch (Exception e) {
@@ -160,9 +161,12 @@ public class FileControl extends BaseController {
     }
 
 
-    @RequestMapping(value = "clear")
+    @RequestMapping(value = "clear", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     public String clear(String id) {
+        if (ConfigBean.getInstance().showDemo) {
+            return JsonMessage.getString(400, "演示项目不能清除文件");
+        }
         boolean manager = userService.isManager(id, getUserName());
         if (!manager) {
             return JsonMessage.getString(400, "你没有对应操作权限操作!");
@@ -185,9 +189,12 @@ public class FileControl extends BaseController {
      *
      * @param filename 文件名称
      */
-    @RequestMapping(value = "deleteFile")
+    @RequestMapping(value = "deleteFile", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     public String deleteFile(String id, String filename) {
+        if (ConfigBean.getInstance().showDemo) {
+            return JsonMessage.getString(400, "演示项目不能清除文件");
+        }
         try {
             ProjectInfoModel pim = manageService.getProjectInfo(id);
             File file = new File(pim.getLib(), filename);

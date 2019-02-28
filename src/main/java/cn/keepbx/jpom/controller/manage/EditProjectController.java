@@ -50,10 +50,6 @@ public class EditProjectController extends BaseController {
     @ResponseBody
     public String saveProject(ProjectInfoModel projectInfo) throws IOException {
         String id = projectInfo.getId();
-        boolean manager = userService.isManager(id, getUserName());
-        if (!manager) {
-            return JsonMessage.getString(400, "你没有对应操作权限操作!");
-        }
         if (StrUtil.isEmptyOrUndefined(id)) {
             return JsonMessage.getString(400, "项目id不能为空");
         }
@@ -71,14 +67,20 @@ public class EditProjectController extends BaseController {
         if (lib.contains("../") || log.contains("../")) {
             return JsonMessage.getString(401, "项目lib/log存在提升目录问题");
         }
-
         ProjectInfoModel exits = manageService.getProjectInfo(id);
         try {
             if (exits == null) {
+                if (!userName.isManage()) {
+                    return JsonMessage.getString(400, "管理员才能创建项目!");
+                }
                 //  return addProject(projectInfo);
                 projectInfo.setCreateTime(DateUtil.now());
                 manageService.saveProject(projectInfo);
                 return JsonMessage.getString(200, "新增成功！");
+            }
+            boolean manager = userService.isManager(id, getUserName());
+            if (!manager) {
+                return JsonMessage.getString(400, "你没有对应操作权限操作!");
             }
             manageService.updateProject(projectInfo);
             return JsonMessage.getString(200, "修改成功");

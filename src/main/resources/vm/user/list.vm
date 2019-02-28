@@ -34,7 +34,7 @@
 </div>
 <table class="layui-table" id="tab_user" lay-filter="tab_user" style="margin: 0;"></table>
 <div class="layui-container div-user" id="div-user">
-    <form action="" class="layui-form" id="form_user">
+    <form action="" class="layui-form" id="form_user" style="margin-top: 20px">
         <div class="layui-form-item">
             <div class="layui-inline">
                 <label class="layui-form-label">登录名</label>
@@ -186,7 +186,7 @@
             // 重置表单
             document.getElementById('form_user').reset();
             $('#form_user [name="id"]').attr('readonly', false).removeClass('layui-disabled');
-            // $('#form_project [name="manage"]').attr('checked', false);
+            $('#form_user [name="manage"]').attr('checked', false);
             getProject('-1');
             // 弹出
             layer.open({
