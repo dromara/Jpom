@@ -1,13 +1,10 @@
 package cn.keepbx.jpom.controller;
 
 import cn.keepbx.jpom.common.interceptor.NotLogin;
-import cn.keepbx.jpom.service.UserService;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-
-import javax.annotation.Resource;
 
 /**
  * 首页

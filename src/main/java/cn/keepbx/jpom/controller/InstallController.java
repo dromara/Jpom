@@ -6,7 +6,7 @@ import cn.jiangzeyin.common.JsonMessage;
 import cn.keepbx.jpom.common.interceptor.LoginInterceptor;
 import cn.keepbx.jpom.common.interceptor.NotLogin;
 import cn.keepbx.jpom.model.UserModel;
-import cn.keepbx.jpom.service.UserService;
+import cn.keepbx.jpom.service.user.UserService;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;

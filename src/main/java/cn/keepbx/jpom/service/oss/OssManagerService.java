@@ -4,7 +4,7 @@ import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.jiangzeyin.common.spring.SpringUtil;
 import cn.keepbx.jpom.system.ConfigBean;
-import cn.keepbx.jpom.service.BaseDataService;
+import cn.keepbx.jpom.common.BaseDataService;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.aliyun.oss.OSSClient;

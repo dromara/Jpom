@@ -1,7 +1,8 @@
-package cn.keepbx.jpom.service;
+package cn.keepbx.jpom.service.user;
 
 import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
+import cn.keepbx.jpom.common.BaseDataService;
 import cn.keepbx.jpom.model.UserModel;
 import cn.keepbx.jpom.system.ConfigBean;
 import cn.keepbx.jpom.system.init.CheckRunCommand;

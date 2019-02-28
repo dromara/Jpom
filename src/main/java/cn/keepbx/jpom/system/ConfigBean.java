@@ -27,6 +27,7 @@ public class ConfigBean {
 
     public static final String USER = "user.json";
     public static final String PROJECT = "project.json";
+    public static final String WHITELIST_DIRECTORY = "whitelistDirectory.json";
 
 
     public static ConfigBean getInstance() {
@@ -37,10 +38,10 @@ public class ConfigBean {
     }
 
     /**
-     * 标记是否为演示模式
+     * 标记是否为安全模式
      */
-    @Value("${jpom.showDemo:false}")
-    public boolean showDemo;
+    @Value("${jpom.safeMode:false}")
+    public boolean safeMode;
 
     /**
      * 项目运行存储路径

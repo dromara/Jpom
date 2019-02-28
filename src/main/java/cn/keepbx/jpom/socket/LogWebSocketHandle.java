@@ -5,7 +5,7 @@ import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.spring.SpringUtil;
 import cn.jiangzeyin.pool.ThreadPoolService;
 import cn.keepbx.jpom.model.ProjectInfoModel;
-import cn.keepbx.jpom.service.UserService;
+import cn.keepbx.jpom.service.user.UserService;
 import cn.keepbx.jpom.service.manage.CommandService;
 import cn.keepbx.jpom.service.manage.ManageService;
 import cn.keepbx.jpom.socket.top.TopManager;

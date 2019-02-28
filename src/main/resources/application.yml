@@ -27,7 +27,7 @@ jpom:
   path: /jpom/
   log: /jpom/log/
   # 演示模式
-  showDemo: false
+  safeMode: false
 # 静态资源配置
 interceptor:
   resourceHandler: /static/**

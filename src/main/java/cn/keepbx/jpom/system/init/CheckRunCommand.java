@@ -65,6 +65,12 @@ public class CheckRunCommand {
             DefaultSystemLog.LOG().info("创建默认文件：" + file.getPath());
             addDataFile(ConfigBean.PROJECT, file.getPath());
         }
+
+        file = new File(ConfigBean.getInstance().getDataPath(), ConfigBean.WHITELIST_DIRECTORY);
+        if (!file.exists()) {
+            DefaultSystemLog.LOG().info("创建默认文件：" + file.getPath());
+            addDataFile(ConfigBean.WHITELIST_DIRECTORY, file.getPath());
+        }
         WebAopLog webAopLog = SpringUtil.getBean(WebAopLog.class);
         String logPath = SpringUtil.getEnvironment().getProperty("jpom.log");
         DefaultSystemLog.LOG().info("日志存储路径：" + webAopLog.getPropertyValue() + "   -》  " + logPath);

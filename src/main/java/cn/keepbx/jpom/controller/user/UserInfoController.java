@@ -4,7 +4,7 @@ import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.keepbx.jpom.controller.BaseController;
-import cn.keepbx.jpom.service.UserService;
+import cn.keepbx.jpom.service.user.UserService;
 import cn.keepbx.jpom.system.ConfigBean;
 import com.alibaba.fastjson.JSONArray;
 import org.springframework.http.MediaType;
@@ -35,8 +35,8 @@ public class UserInfoController extends BaseController {
      */
     @RequestMapping(value = "updatePwd", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public String updatePwd(String oldPwd, String newPwd) {
-        if (ConfigBean.getInstance().showDemo) {
-            return JsonMessage.getString(401, "演示模式不允许修改自己的密码");
+        if (ConfigBean.getInstance().safeMode) {
+            return JsonMessage.getString(401, "安全模式不允许修改自己的密码");
         }
         try {
             String result = userService.updatePwd(userName.getId(), oldPwd, newPwd);
@@ -98,6 +98,9 @@ public class UserInfoController extends BaseController {
         int length = password.length();
         if (length < 6) {
             return JsonMessage.getString(400, "密码长度为6-12位");
+        }
+        if ("true".equals(manage) && ConfigBean.getInstance().safeMode) {
+            return JsonMessage.getString(401, "安全模式不能创建管理员");
         }
         boolean b = userService.addUser(id, name, password, "true".equals(manage));
         if (b) {

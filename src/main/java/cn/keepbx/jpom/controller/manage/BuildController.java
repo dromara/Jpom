@@ -7,7 +7,7 @@ import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.keepbx.jpom.controller.BaseController;
 import cn.keepbx.jpom.model.ProjectInfoModel;
-import cn.keepbx.jpom.service.UserService;
+import cn.keepbx.jpom.service.user.UserService;
 import cn.keepbx.jpom.service.manage.CommandService;
 import cn.keepbx.jpom.service.manage.ManageService;
 import cn.keepbx.jpom.service.oss.OssManagerService;

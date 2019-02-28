@@ -7,8 +7,10 @@ import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.keepbx.jpom.controller.BaseController;
 import cn.keepbx.jpom.model.ProjectInfoModel;
-import cn.keepbx.jpom.service.UserService;
 import cn.keepbx.jpom.service.manage.ManageService;
+import cn.keepbx.jpom.service.system.SystemService;
+import cn.keepbx.jpom.service.user.UserService;
+import com.alibaba.fastjson.JSONArray;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -31,6 +33,8 @@ public class EditProjectController extends BaseController {
     private ManageService manageService;
     @Resource
     private UserService userService;
+    @Resource
+    private SystemService systemService;
 
     @RequestMapping(value = "editProject", method = RequestMethod.GET)
     public String editProject(String id) throws IOException {
@@ -66,6 +70,20 @@ public class EditProjectController extends BaseController {
         }
         if (lib.contains("../") || log.contains("../")) {
             return JsonMessage.getString(401, "项目lib/log存在提升目录问题");
+        }
+        JSONArray jsonArray = systemService.getWhitelistDirectory();
+        if (jsonArray == null) {
+            return JsonMessage.getString(401, "还没有配置白名单");
+        }
+        int errorCount = 0;
+        for (Object obj : jsonArray) {
+            String wPath = obj.toString();
+            if (!lib.startsWith(wPath) && !log.startsWith(wPath)) {
+                errorCount++;
+            }
+        }
+        if (errorCount == jsonArray.size()) {
+            return JsonMessage.getString(401, "项目lib/log 必须在白名单目录下");
         }
         ProjectInfoModel exits = manageService.getProjectInfo(id);
         try {

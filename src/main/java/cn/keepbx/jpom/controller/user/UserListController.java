@@ -2,7 +2,7 @@ package cn.keepbx.jpom.controller.user;
 
 import cn.jiangzeyin.common.JsonMessage;
 import cn.keepbx.jpom.controller.BaseController;
-import cn.keepbx.jpom.service.UserService;
+import cn.keepbx.jpom.service.user.UserService;
 import com.alibaba.fastjson.JSONArray;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;

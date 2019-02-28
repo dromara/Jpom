@@ -3,7 +3,7 @@ package cn.keepbx.jpom.service.manage;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.keepbx.jpom.model.ProjectInfoModel;
-import cn.keepbx.jpom.service.BaseDataService;
+import cn.keepbx.jpom.common.BaseDataService;
 import cn.keepbx.jpom.system.ConfigBean;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;

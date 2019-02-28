@@ -37,6 +37,10 @@
                 <li class="layui-nav-item">
                     <a href="javascript:;" data-options="{'id':'user', 'title':'用户管理', 'url':'/user/list'}">用户管理</a>
                 </li>
+                <li class="layui-nav-item">
+                    <a href="javascript:;"
+                       data-options="{'id':'whitelistDirectory', 'title':'白名单目录', 'url':'/system/whitelistDirectory'}">白名单目录</a>
+                </li>
             </ul>
         </div>
     </div>

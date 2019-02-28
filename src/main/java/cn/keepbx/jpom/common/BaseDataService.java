@@ -1,8 +1,9 @@
-package cn.keepbx.jpom.service;
+package cn.keepbx.jpom.common;
 
 import cn.hutool.core.io.FileUtil;
 import cn.keepbx.jpom.system.ConfigBean;
 import cn.keepbx.jpom.util.JsonUtil;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import java.io.IOException;
@@ -21,7 +22,7 @@ public abstract class BaseDataService {
      * @param filename 文件名
      * @return path
      */
-    private String getDataFilePath(String filename) {
+    protected String getDataFilePath(String filename) {
         return FileUtil.normalize(ConfigBean.getInstance().getDataPath() + "/" + filename);
     }
 
@@ -109,5 +110,9 @@ public abstract class BaseDataService {
      */
     protected JSONObject getJsonObject(String filename) throws IOException {
         return (JSONObject) JsonUtil.readJson(getDataFilePath(filename));
+    }
+
+    protected JSONArray getJSONArray(String filename) throws IOException {
+        return (JSONArray) JsonUtil.readJson(getDataFilePath(filename));
     }
 }
