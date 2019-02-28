@@ -5,6 +5,12 @@
       "type": "java.lang.String",
       "description": "jpom 项目运行路径",
       "defaultValue": "/jpom/"
+    },
+    {
+      "name": "jpom.log",
+      "type": "java.lang.String",
+      "description": "jpom 项目日常存储路径",
+      "defaultValue": "/jpom/"
     }
   ]
 }

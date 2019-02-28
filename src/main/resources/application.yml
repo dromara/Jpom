@@ -25,6 +25,7 @@ banner:
 #jpom 项目运行路径
 jpom:
   path: /jpom/
+  log: /jpom/log/
 # 静态资源配置
 interceptor:
   resourceHandler: /static/**

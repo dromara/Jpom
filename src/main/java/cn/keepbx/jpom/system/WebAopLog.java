@@ -1,6 +1,9 @@
 package cn.keepbx.jpom.system;
 
+import ch.qos.logback.core.PropertyDefinerBase;
+import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
+import cn.keepbx.jpom.JpomApplication;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.Signature;
 import org.aspectj.lang.annotation.AfterReturning;
@@ -20,7 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @Aspect
 @Component
-public class WebAopLog {
+public class WebAopLog extends PropertyDefinerBase {
     private static final ThreadLocal<Boolean> IS_LOG = new ThreadLocal<>();
 
     @Pointcut("execution(public * cn.keepbx.jpom.controller..*.*(..))")
@@ -56,5 +59,16 @@ public class WebAopLog {
         }
         DefaultSystemLog.LOG().info(" :" + ret.toString());
         IS_LOG.remove();
+    }
+
+    @Override
+    public String getPropertyValue() {
+        String path = JpomApplication.getArgs("jpom.log");
+        if (StrUtil.isEmpty(path)) {
+            path = "/jpom/log/";
+        }
+        // 配置默认日志路径
+        DefaultSystemLog.configPath(path, false);
+        return path;
     }
 }

@@ -8,8 +8,8 @@ Lib=${Path}"lib/"
 Log=${Path}"run.log"
 LogBack=${Path}"log/"
 JVM="-server "
-# 修改项目端口号
-ARGS="--server.port=2122 --jpom.path="${Path}
+# 修改项目端口号 日志路径
+ARGS="--server.port=2122 --jpom.path=$Path --jpom.log=${Path}log "
 
 echo ${Tag}
 RETVAL="0"
