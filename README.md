@@ -98,6 +98,14 @@ mvn package
 1. 运行*cn.keepbx.jpom.JpomApplication*
 2. 浏览器访问
 
+### 常见问题
+
+[常见问题>>](/FQA.md)
+
+### 开发计划
+
+[开发计划>>](/PLANS.md)
+
 ### 阿里云CodePipeline 配置
 
 [查看文档](/doc/CodePipeline-Oss.md)
@@ -129,12 +137,4 @@ mvn package
   QQ群：[136715345](https://shang.qq.com/wpa/qunwpa?idkey=93ff8d8a37a436b752fe38d32075bb1b32a8e0b3d3ff19d0b541ca840433f561)
   
   
-### 常见问题
 
-   1. 如何修改程序运行端口：修改管理程序命令文件中 --server.port=2122
-   2. 如何修改程序日志路径：建议自行编译安装修改 [/src/main/resources/logback-spring.xml](/src/main/resources/logback-spring.xml) 文件
-   3. 如何修改回话超时时长：在管理程序命令文件中 ARGS 变量添加 --tomcat.sessionTimeOut=1800
-   
-### 开发计划
-   1. 兼容windows 服务器
-   2. 主要管理页面兼容移动端
