@@ -78,12 +78,15 @@ public class EditProjectController extends BaseController {
         int errorCount = 0;
         for (Object obj : jsonArray) {
             String wPath = obj.toString();
-            if (!lib.startsWith(wPath) && !log.startsWith(wPath)) {
+            if (!lib.startsWith(wPath) || !log.startsWith(wPath)) {
                 errorCount++;
             }
         }
         if (errorCount == jsonArray.size()) {
             return JsonMessage.getString(401, "项目lib/log 必须在白名单目录下");
+        }
+        if (!log.endsWith(".log")) {
+            return JsonMessage.getString(401, "log必须是个文件,并且以.log 结尾");
         }
         ProjectInfoModel exits = manageService.getProjectInfo(id);
         try {

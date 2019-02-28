@@ -38,13 +38,19 @@ public class WhitelistDirectoryController extends BaseController {
         return "system/whitelistDirectory";
     }
 
+    /**
+     * 保存接口
+     *
+     * @param value 值
+     * @return json
+     */
     @RequestMapping(value = "whitelistDirectory_submit", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     public String whitelistDirectorySubmit(String value) {
         if (StrUtil.isEmpty(value)) {
             return JsonMessage.getString(401, "白名单不能为空");
         }
-        List<String> list = StrSpliter.splitTrim(value, "\n", false);
+        List<String> list = StrSpliter.splitTrim(value, "\n", true);
         if (list == null || list.size() <= 0) {
             return JsonMessage.getString(401, "白名单不能为空");
         }
