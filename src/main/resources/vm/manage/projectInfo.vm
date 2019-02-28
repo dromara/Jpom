@@ -126,7 +126,7 @@
                         if (!d.manager) {
                             rgb = [211, 211, 211];
                         }
-                        return "<div  title='" + d.group + "(" + d.id + ")' style='background: rgb(" + rgb + ");color: #fff;margin: 0 -15px;padding: 0 15px;'>" + (d.runLibDesc || "") + " / " + (d.useLibDesc || "") + "</div>";
+                        return "<div  name='" + d.id + "' title='" + d.group + "(" + d.id + ")' style='background: rgb(" + rgb + ");color: #fff;margin: 0 -15px;padding: 0 15px;'>" + (d.runLibDesc || "") + " / " + (d.useLibDesc || "") + "</div>";
                     }
                 },
                 {field: 'createTime', title: '创建时间', width: '13%'},
@@ -139,6 +139,13 @@
                 statusCode: 200
             },
             done: function (data) {
+                var projects = data.data;
+                for (var i = 0; i < projects.length; i++) {
+                    var project = projects[i];
+                    if (!project.manager) {
+                        $('tr[data-index="' + i + '"').css('background-color', 'rgb(211,211,211)');
+                    }
+                }
             }
         });
 

@@ -93,8 +93,8 @@
         <div class="layui-inline">
             <label class="layui-form-label">管理项目</label>
             {{# layui.each(d.data, function(index, item){ }}
-            <input type="checkbox" name="project" value={{ item.id }} title={{ item.name }} {{# if(item.manager){ }}
-                   checked {{# } }}>
+            <input type="checkbox" name="project" value="{{= item.id }}"
+                   title="{{= item.name }}" {{# if(item.manager){ }} checked {{# } }}>
             {{# }); }}
         </div>
     </div>
@@ -131,18 +131,15 @@
             document.getElementById('form_user').reset();
             $('#form_user [name="id"]').attr('readonly', true).addClass('layui-disabled');
             // 设置表单值
-            var projects = [];
             for (var key in data) {
                 if ("manage" === key) {
                     if (true === data[key])
                         $('#form_user [name="manage"]').attr('checked', true);
-                } else if ("projects" === key) {
-                    projects = data[key];
                 } else {
                     $('#form_user [name="' + key + '"]').val(data[key]);
                 }
             }
-            getProject(projects);
+            getProject(data.id);
             // 弹出
             layer.open({
                 type: 1,
@@ -159,12 +156,12 @@
         }
 
 
-        function getProject(projects) {
-            var length = projects.length;
+        function getProject(userId) {
             $.ajax({
                 url: "/manage/getProjectInfo",
                 type: 'POST',
                 dataType: 'json',
+                data: {userId: userId},
                 success: function (data) {
                     if (200 == data.code) {
                         var manager = manageProject.innerHTML;
