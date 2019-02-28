@@ -11,6 +11,12 @@
       "type": "java.lang.String",
       "description": "jpom 项目日常存储路径",
       "defaultValue": "/jpom/"
+    },
+    {
+      "name": "jpom.showDemo",
+      "type": "java.lang.Boolean",
+      "description": "是否以演示模式运行，演示模式不允许修改自己的秘密",
+      "defaultValue": false
     }
   ]
 }

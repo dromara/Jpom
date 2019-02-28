@@ -13,7 +13,7 @@
 </head>
 
 <body>
-<div class="layui-carousel" id="div-carousel" style="width: 100%; height: 100%; position: fixed; z-index: 0;">
+<div class="layui-carousel auto" id="div-carousel" style=" position: fixed; z-index: 0;">
     <div carousel-item>
         <div><img src="/static/backgrounds/1.jpg" class="auto"></div>
         <div><img src="/static/backgrounds/2.jpg" class="auto"></div>
@@ -44,7 +44,6 @@
                         <button class="layui-btn layui-btn-danger" lay-submit lay-filter="from_login"
                                 style="width: 100%">登录
                         </button>
-                        <input name="hidden" type="hidden"/>
                     </div>
                 </div>
             </form>
@@ -83,8 +82,6 @@
                     if (200 == data.code) {
                         window.location.href = '/index';
                     } else {
-                        $("input[name='hidden']").focus();
-                        console.log("focus")
                         layer.msg(data.msg);
                     }
                 },

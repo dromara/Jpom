@@ -1,5 +1,6 @@
 package cn.keepbx.jpom.model;
 
+import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSONObject;
 
 /**
@@ -126,8 +127,15 @@ public class ProjectInfoModel {
         this.log = log;
     }
 
-
+    /**
+     * 默认 是no
+     *
+     * @return url token
+     */
     public String getToken() {
+        if (StrUtil.isEmpty(token)) {
+            token = "no";
+        }
         return token;
     }
 

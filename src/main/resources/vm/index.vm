@@ -10,7 +10,7 @@
 <body class="layui-layout-body">
 <div class="layui-layout layui-layout-admin">
     <div class="layui-header">
-        <div class="layui-logo">项目管理系统</div>
+        <div class="layui-logo">Jpom项目管理系统</div>
         <ul class="layui-nav layui-layout-right" lay-filter="userOperation">
             <li class="layui-nav-item">
                 <a href="javascript:;">
@@ -158,7 +158,7 @@
         // 提交修改密码表单
         form.on('submit(updatePwd)', function (data) {
             $.ajax({
-                url: '/updatePwd',
+                url: '/user/updatePwd',
                 type: 'POST',
                 dataType: 'json',
                 data: data.field,
@@ -166,7 +166,6 @@
                     if (200 == data.code) {
                         layer.closeAll('page');
                         layer.alert('修改成功，请重新登录！', function (index_confirm) {
-
                             window.location.href = '/'
                             layer.close(index_confirm);
                         });

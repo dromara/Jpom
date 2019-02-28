@@ -37,6 +37,12 @@ public class ConfigBean {
     }
 
     /**
+     * 标记是否为演示模式
+     */
+    @Value("${jpom.showDemo:false}")
+    public boolean showDemo;
+
+    /**
      * 项目运行存储路径
      */
     @Value("${jpom.path}")

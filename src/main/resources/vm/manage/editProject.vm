@@ -48,7 +48,7 @@
             <div class="layui-inline">
                 <label class="layui-form-label">MainClass</label>
                 <div class="layui-input-block">
-                    <input type="text" name="mainClass" placeholder="程序运行的SpringBoot main 类" required
+                    <input type="text" name="mainClass" placeholder="程序运行的 main 类" required
                            lay-verify="required" class="layui-input" value="#if($item)$!item.mainClass#end">
                 </div>
             </div>
@@ -91,7 +91,7 @@
             <div class="layui-inline">
                 <label class="layui-form-label">Token</label>
                 <div class="layui-input-block">
-                    <input type="text" name="token" placeholder="对应接口的token，可不填" class="layui-input"
+                    <input type="text" name="token" placeholder="对应接口的token，没有请填写no" class="layui-input"
                            value="#if($item)$!item.token#end">
                 </div>
             </div>

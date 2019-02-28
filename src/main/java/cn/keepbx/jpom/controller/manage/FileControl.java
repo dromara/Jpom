@@ -2,7 +2,6 @@ package cn.keepbx.jpom.controller.manage;
 
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.extra.servlet.ServletUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
@@ -12,8 +11,6 @@ import cn.keepbx.jpom.controller.BaseController;
 import cn.keepbx.jpom.model.ProjectInfoModel;
 import cn.keepbx.jpom.service.UserService;
 import cn.keepbx.jpom.service.manage.ManageService;
-import cn.keepbx.jpom.system.ConfigBean;
-import cn.keepbx.jpom.system.ConfigException;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.http.MediaType;
@@ -25,8 +22,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import javax.annotation.Resource;
 import java.io.File;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * 文件管理
@@ -54,20 +49,20 @@ public class FileControl extends BaseController {
         return "manage/filemanage";
     }
 
-    /**
-     * 读取启动文件
-     *
-     * @return json
-     */
-    @RequestMapping(value = "getRunBoot")
-    @ResponseBody
-    public String getRunBoot() throws ConfigException {
-        String file = ConfigBean.getInstance().getRunCommandPath();
-        String content = FileUtil.readString(file, CharsetUtil.CHARSET_UTF_8);
-        Map<String, String> map = new HashMap<>(1);
-        map.put("content", content);
-        return JsonMessage.getString(200, "success", map);
-    }
+//    /**
+//     * 读取启动文件
+//     *
+//     * @return json
+//     */
+//    @RequestMapping(value = "getRunBoot")
+//    @ResponseBody
+//    public String getRunBoot() throws ConfigException {
+//        String file = ConfigBean.getInstance().getRunCommandPath();
+//        String content = FileUtil.readString(file, CharsetUtil.CHARSET_UTF_8);
+//        Map<String, String> map = new HashMap<>(1);
+//        map.put("content", content);
+//        return JsonMessage.getString(200, "success", map);
+//    }
 
     /**
      * 列出目录下的文件
