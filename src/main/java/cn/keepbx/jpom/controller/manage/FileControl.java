@@ -118,10 +118,10 @@ public class FileControl extends BaseController {
      */
     @RequestMapping(value = "upload", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
-    public String upload() throws Exception {
-        String id = getParameter("id");
-        boolean manager = userService.isManager(id, getUserName());
-        if (!manager) {
+    public String upload(String id) throws Exception {
+//        String id = getParameter("id");
+//        boolean manager = userService.isManager(id, getUserName());
+        if (!userName.isProject(id)) {
             return JsonMessage.getString(400, "你没有该操作权限操作!");
         }
         ProjectInfoModel pim = manageService.getProjectInfo(id);
@@ -167,8 +167,8 @@ public class FileControl extends BaseController {
         if (ConfigBean.getInstance().safeMode) {
             return JsonMessage.getString(400, "安全模式不能清除文件");
         }
-        boolean manager = userService.isManager(id, getUserName());
-        if (!manager) {
+//        boolean manager = userService.isManager(id, getUserName());
+        if (!userName.isProject(id)) {
             return JsonMessage.getString(400, "你没有对应操作权限操作!");
         }
         try {

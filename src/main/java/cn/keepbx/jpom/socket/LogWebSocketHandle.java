@@ -5,9 +5,10 @@ import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.spring.SpringUtil;
 import cn.jiangzeyin.pool.ThreadPoolService;
 import cn.keepbx.jpom.model.ProjectInfoModel;
-import cn.keepbx.jpom.service.user.UserService;
+import cn.keepbx.jpom.model.UserModel;
 import cn.keepbx.jpom.service.manage.CommandService;
 import cn.keepbx.jpom.service.manage.ManageService;
+import cn.keepbx.jpom.service.user.UserService;
 import cn.keepbx.jpom.socket.top.TopManager;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Component;
@@ -25,7 +26,7 @@ import java.util.concurrent.ExecutorService;
  * @author jiangzeyin
  * @date 2017/9/8
  */
-@ServerEndpoint(value = "/console/{userInfo}")
+@ServerEndpoint(value = "/console/{userInfo}/{projectId}")
 @Component
 public class LogWebSocketHandle implements TailLogThread.Evn {
 
@@ -37,7 +38,7 @@ public class LogWebSocketHandle implements TailLogThread.Evn {
      * 新的WebSocket请求开启
      */
     @OnOpen
-    public void onOpen(@PathParam("userInfo") String userInfo, Session session) {
+    public void onOpen(@PathParam("userInfo") String userInfo, @PathParam("projectId") String projectId, Session session) {
         if (EXECUTOR_SERVICE == null) {
             EXECUTOR_SERVICE = ThreadPoolService.newCachedThreadPool(LogWebSocketHandle.class);
         }
@@ -45,11 +46,26 @@ public class LogWebSocketHandle implements TailLogThread.Evn {
         SocketSession socketSession = getItem(session);
         // 通过用户名和密码的Md5值判断是否是登录的
         try {
-            UserService userService = SpringUtil.getBean(UserService.class);
-            if (!userService.checkUser(userInfo)) {
-                socketSession.sendMsg(JsonMessage.getString(500, "用户名或密码错误!"));
+            ManageService manageService = SpringUtil.getBean(ManageService.class);
+            ProjectInfoModel projectInfoModel = manageService.getProjectInfo(projectId);
+            if (projectInfoModel == null) {
+                socketSession.sendMsg("获取项目信息错误");
                 session.close();
+                return;
             }
+            UserService userService = SpringUtil.getBean(UserService.class);
+            UserModel userModel = userService.checkUser(userInfo);
+            if (userModel == null) {
+                socketSession.sendMsg("用户名或密码错误!");
+                session.close();
+                return;
+            }
+            if (!userService.isManagerProject(projectInfoModel.getId(), userModel.getId())) {
+                socketSession.sendMsg("没有项目权限");
+                session.close();
+                return;
+            }
+            socketSession.sendMsg("欢迎加入：" + userModel.getName());
         } catch (Exception e) {
             DefaultSystemLog.ERROR().error(e.getMessage(), e);
             try {

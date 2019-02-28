@@ -36,8 +36,8 @@ public class UserListController extends BaseController {
     @RequestMapping(value = "getUserList", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     public String getUserList() {
-        boolean manager = userService.isManager("", getUserName());
-        if (!manager) {
+//        boolean manager = userService.isManager("", getUserName());
+        if (!userName.isManage()) {
             return JsonMessage.getString(400, "你没有对应权限！");
         }
         JSONArray userList = userService.getUserList();

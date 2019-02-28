@@ -63,6 +63,7 @@ public class InstallController extends BaseController {
         userModel.setName("超级管理员");
         userModel.setId(userName);
         userModel.setPassword(userPwd);
+        userModel.setParent(UserModel.SYSTEM_ADMIN);
         userModel.setManage(true);
         boolean b = userService.addUser(userModel);
         if (b) {

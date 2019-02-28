@@ -42,7 +42,7 @@
         var showLogDom = $('.console .terminal');
 
         if ('WebSocket' in window) {
-            var ws = new WebSocket("ws://" + window.location.host + "/console/" + userInfo);
+            var ws = new WebSocket("ws://" + window.location.host + "/console/" + userInfo + "/" + projectInfo.id);
 
             ws.onopen = function () {
                 showLogDom.append('WebSocket连接成功！<br/>');

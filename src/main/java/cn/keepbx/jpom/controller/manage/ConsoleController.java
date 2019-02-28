@@ -6,8 +6,8 @@ import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.keepbx.jpom.controller.BaseController;
 import cn.keepbx.jpom.model.ProjectInfoModel;
-import cn.keepbx.jpom.service.user.UserService;
 import cn.keepbx.jpom.service.manage.ManageService;
+import cn.keepbx.jpom.service.user.UserService;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
@@ -55,7 +55,7 @@ public class ConsoleController extends BaseController {
             setAttribute("userInfo", getSocketPwd());
             String logSize = getLogSize(id);
             setAttribute("logSize", logSize);
-            setAttribute("manager", userService.isManager(id, getUserName()));
+            setAttribute("manager", userName.isProject(id));
         }
         return "manage/console";
     }

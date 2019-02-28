@@ -4,6 +4,7 @@ import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.keepbx.jpom.controller.BaseController;
+import cn.keepbx.jpom.model.UserModel;
 import cn.keepbx.jpom.service.user.UserService;
 import cn.keepbx.jpom.system.ConfigBean;
 import com.alibaba.fastjson.JSONArray;
@@ -36,7 +37,10 @@ public class UserInfoController extends BaseController {
     @RequestMapping(value = "updatePwd", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public String updatePwd(String oldPwd, String newPwd) {
         if (ConfigBean.getInstance().safeMode) {
-            return JsonMessage.getString(401, "安全模式不允许修改自己的密码");
+            String parent = userName.getParent();
+            if (UserModel.SYSTEM_ADMIN.equals(parent)) {
+                return JsonMessage.getString(401, "安全模式下系统创建的管理员不能修改密码");
+            }
         }
         try {
             String result = userService.updatePwd(userName.getId(), oldPwd, newPwd);
@@ -85,8 +89,8 @@ public class UserInfoController extends BaseController {
      */
     @RequestMapping(value = "addUser", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public String addUser(String id, String name, String manage, String password) {
-        boolean manager = userService.isManager("", getUserName());
-        if (!manager) {
+//        boolean manager = userService.isManager("", getUserName());
+        if (!userName.isManage()) {
             return JsonMessage.getString(400, "你还没有权限");
         }
         if (StrUtil.isEmpty(id)) {
@@ -99,10 +103,18 @@ public class UserInfoController extends BaseController {
         if (length < 6) {
             return JsonMessage.getString(400, "密码长度为6-12位");
         }
-        if ("true".equals(manage) && ConfigBean.getInstance().safeMode) {
+        boolean manageB = "true".equals(manage);
+        if (manageB && ConfigBean.getInstance().safeMode) {
             return JsonMessage.getString(401, "安全模式不能创建管理员");
         }
-        boolean b = userService.addUser(id, name, password, "true".equals(manage));
+        UserModel userModel = new UserModel();
+        userModel.setName(name);
+        userModel.setId(id);
+        userModel.setPassword(password);
+        userModel.setManage(manageB);
+        userModel.setParent(userName.getId());
+
+        boolean b = userService.addUser(userModel);
         if (b) {
             return JsonMessage.getString(200, "添加成功");
         }
@@ -129,7 +141,16 @@ public class UserInfoController extends BaseController {
         if (StrUtil.isNotEmpty(project)) {
             projects = (JSONArray) JSONArray.toJSON(StrUtil.splitToArray(project, ','));
         }
-        boolean b = userService.updateUser(id, name, password, manage, projects);
+        UserModel userModel = userService.getUserModel(id);
+//        UserModel userModel = new UserModel();
+//        userModel.setId(id);
+        userModel.setName(name);
+        if (StrUtil.isNotEmpty(password) && password.length() >= 6) {
+            userModel.setPassword(password);
+        }
+        userModel.setManage("true".equals(manage));
+        userModel.setProjects(projects);
+        boolean b = userService.updateUser(userModel);
         if (b) {
             return JsonMessage.getString(200, "修改成功");
         }

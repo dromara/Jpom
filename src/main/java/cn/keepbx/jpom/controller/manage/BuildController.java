@@ -7,10 +7,10 @@ import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.keepbx.jpom.controller.BaseController;
 import cn.keepbx.jpom.model.ProjectInfoModel;
-import cn.keepbx.jpom.service.user.UserService;
 import cn.keepbx.jpom.service.manage.CommandService;
 import cn.keepbx.jpom.service.manage.ManageService;
 import cn.keepbx.jpom.service.oss.OssManagerService;
+import cn.keepbx.jpom.service.user.UserService;
 import com.alibaba.fastjson.JSONArray;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
@@ -69,8 +69,8 @@ public class BuildController extends BaseController {
     @RequestMapping(value = "build_install", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     public String buildInstall(String id, String key) throws Exception {
-        boolean manager = userService.isManager(id, getUserName());
-        if (!manager) {
+//        boolean manager = userService.isManager(id, getUserName());
+        if (!userName.isProject(id)) {
             return JsonMessage.getString(400, "你没有对应操作权限操作!");
         }
         ProjectInfoModel projectInfoModel = manageService.getProjectInfo(id);

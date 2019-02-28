@@ -6,9 +6,9 @@ import cn.jiangzeyin.common.JsonMessage;
 import cn.keepbx.jpom.common.PageUtil;
 import cn.keepbx.jpom.controller.BaseController;
 import cn.keepbx.jpom.model.ProjectInfoModel;
-import cn.keepbx.jpom.service.user.UserService;
 import cn.keepbx.jpom.service.manage.CommandService;
 import cn.keepbx.jpom.service.manage.ManageService;
+import cn.keepbx.jpom.service.user.UserService;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.http.MediaType;
@@ -73,7 +73,7 @@ public class ManageControl extends BaseController {
                 projectInfoModel.setStatus(status);
                 String id = projectInfoModel.getId();
                 JSONObject object = (JSONObject) JSONObject.toJSON(projectInfoModel);
-                object.put("manager", userService.isManager(id, userId));
+                object.put("manager", userService.isManagerProject(id, userId));
                 array.add(object);
             }
             array.sort((o1, o2) -> {
@@ -119,8 +119,8 @@ public class ManageControl extends BaseController {
     @RequestMapping(value = "deleteProject", method = RequestMethod.POST)
     @ResponseBody
     public String deleteProject(String id) {
-        boolean manager = userService.isManager(id, getUserName());
-        if (!manager) {
+//        boolean manager = userService.isManager(id, getUserName());
+        if (!userName.isProject(id)) {
             return JsonMessage.getString(500, "你没有对应权限");
         }
         try {

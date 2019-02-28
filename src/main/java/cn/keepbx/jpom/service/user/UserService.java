@@ -1,6 +1,5 @@
 package cn.keepbx.jpom.service.user;
 
-import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.keepbx.jpom.common.BaseDataService;
 import cn.keepbx.jpom.model.UserModel;
@@ -63,23 +62,23 @@ public class UserService extends BaseDataService {
      * 验证用户md5
      *
      * @param userMd5 用户md5
-     * @return true 合法
+     * @return userModel 用户对象
      * @throws IOException 异常
      */
-    public boolean checkUser(String userMd5) throws IOException {
+    public UserModel checkUser(String userMd5) throws IOException {
         JSONObject jsonData = getJsonObject(FILENAME);
         if (jsonData == null) {
-            return false;
+            return null;
         }
         for (String strKey : jsonData.keySet()) {
             JSONObject jsonUser = jsonData.getJSONObject(strKey);
             UserModel userModel = jsonUser.toJavaObject(UserModel.class);
             String strUserMd5 = userModel.getUserMd5Key();
             if (strUserMd5.equals(userMd5)) {
-                return true;
+                return userModel;
             }
         }
-        return false;
+        return null;
     }
 
     /**
@@ -140,16 +139,16 @@ public class UserService extends BaseDataService {
      * @param userId    用户id
      * @return boolean
      */
-    public boolean isManager(String projectId, String userId) {
-        JSONObject user = getUserModel(userId);
+    public boolean isManagerProject(String projectId, String userId) {
+        UserModel user = getUserModel(userId);
         if (user == null) {
             return false;
         }
-        boolean manage = user.getBooleanValue("manage");
+        boolean manage = user.isManage();
         if (manage) {
             return true;
         }
-        JSONArray projects = user.getJSONArray("projects");
+        JSONArray projects = user.getProjects();
         if (projects == null || projects.isEmpty()) {
             return false;
         }
@@ -162,15 +161,15 @@ public class UserService extends BaseDataService {
      * @param userId 用户id
      * @return 用户信息
      */
-    public JSONObject getUserModel(String userId) {
+    public UserModel getUserModel(String userId) {
         try {
             JSONObject jsonObject = getJsonObject(FILENAME);
             JSONObject user = jsonObject.getJSONObject(userId);
             if (user == null) {
                 return null;
             }
-            user.remove("password");
-            return user;
+            return user.toJavaObject(UserModel.class);
+//            user.remove("password");
         } catch (IOException e) {
             DefaultSystemLog.ERROR().error(e.getMessage(), e);
         }
@@ -189,29 +188,6 @@ public class UserService extends BaseDataService {
             return true;
         } catch (Exception e) {
             DefaultSystemLog.ERROR().error(e.getMessage(), e);
-        }
-        return false;
-    }
-
-    /**
-     * 添加用户
-     *
-     * @param id       用户登录名
-     * @param name     昵称
-     * @param password 密码
-     * @param manage   是否是管理员
-     * @return true
-     */
-    public boolean addUser(String id, String name, String password, boolean manage) {
-        try {
-            UserModel userModel = new UserModel();
-            userModel.setName(name);
-            userModel.setId(id);
-            userModel.setPassword(password);
-            userModel.setManage(manage);
-            return addUser(userModel);
-        } catch (Exception e) {
-            DefaultSystemLog.LOG().error(e.getMessage(), e);
         }
         return false;
     }
@@ -240,21 +216,9 @@ public class UserService extends BaseDataService {
      *
      * @return String
      */
-    public boolean updateUser(String id, String name, String password, String role, JSONArray projects) {
+    public boolean updateUser(UserModel userModel) {
         try {
-            JSONObject object = new JSONObject();
-            object.put("id", id);
-            object.put("name", name);
-            object.put("manage", "true".equals(role));
-            object.put("projects", projects);
-            JSONObject jsonObject = getJsonObject(FILENAME);
-            JSONObject user = jsonObject.getJSONObject(id);
-            String pass = user.getString("password");
-            object.put("password", pass);
-            if (!StrUtil.isEmpty(password)) {
-                object.put("password", password);
-            }
-            updateJson(FILENAME, object);
+            updateJson(FILENAME, userModel.toJson());
             return true;
         } catch (Exception e) {
             DefaultSystemLog.ERROR().error(e.getMessage(), e);

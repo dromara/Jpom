@@ -14,14 +14,35 @@ public class UserModel {
     private String id;
     private String name;
     private String password;
+    /**
+     * 是否为管理员
+     */
     private boolean manage;
-    private String projects;
+    /**
+     * 授权的项目集
+     */
+    private JSONArray projects;
+    /**
+     * 创建此用户的人
+     */
+    private String parent;
 
-    public String getProjects() {
+
+    public static String SYSTEM_ADMIN = "sys";
+
+    public String getParent() {
+        return parent;
+    }
+
+    public void setParent(String parent) {
+        this.parent = parent;
+    }
+
+    public JSONArray getProjects() {
         return projects;
     }
 
-    public void setProjects(String projects) {
+    public void setProjects(JSONArray projects) {
         this.projects = projects;
     }
 
@@ -55,6 +76,16 @@ public class UserModel {
 
     public boolean isManage() {
         return manage;
+    }
+
+    public boolean isProject(String id) {
+        if (isManage()) {
+            return true;
+        }
+        if (projects == null) {
+            return false;
+        }
+        return projects.contains(id);
     }
 
     public void setManage(boolean manage) {

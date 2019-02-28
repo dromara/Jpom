@@ -99,8 +99,8 @@ public class EditProjectController extends BaseController {
                 manageService.saveProject(projectInfo);
                 return JsonMessage.getString(200, "新增成功！");
             }
-            boolean manager = userService.isManager(id, getUserName());
-            if (!manager) {
+//            boolean manager = userService.isManager(id, getUserName());
+            if (!userName.isProject(id)) {
                 return JsonMessage.getString(400, "你没有对应操作权限操作!");
             }
             manageService.updateProject(projectInfo);
