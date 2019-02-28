@@ -24,8 +24,8 @@ public class ManageService extends BaseDataService {
     /**
      * 查询所有项目信息
      *
-     * @return
-     * @throws IOException
+     * @return json
+     * @throws IOException 异常
      */
     public JSONObject getAllProjectInfo() throws IOException {
         return getJsonObject(FILENAME);
@@ -34,8 +34,7 @@ public class ManageService extends BaseDataService {
     /**
      * 保存项目信息
      *
-     * @param projectInfo
-     * @return
+     * @param projectInfo 项目
      */
     public void saveProject(ProjectInfoModel projectInfo) throws Exception {
         // 保存
@@ -45,7 +44,7 @@ public class ManageService extends BaseDataService {
     /**
      * 删除项目
      *
-     * @param id
+     * @param id 项目Id
      */
     public void deleteProject(String id) throws Exception {
         deleteJson(FILENAME, id);

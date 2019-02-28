@@ -8,10 +8,12 @@ import com.alibaba.fastjson.JSONObject;
 import java.io.IOException;
 
 /**
+ * 公共文件操作Service
+ *
  * @author jiangzeyin
  * @date 2019/1/16
  */
-public class BaseDataService extends BaseService {
+public abstract class BaseDataService {
 
     /**
      * 获取数据文件的路径，如果文件不存在，则创建一个
@@ -28,7 +30,7 @@ public class BaseDataService extends BaseService {
      *
      * @param filename 文件名
      * @param json     json数据
-     * @throws Exception
+     * @throws Exception 异常
      */
     protected void saveJson(String filename, JSONObject json) throws Exception {
         String key = json.getString("id");

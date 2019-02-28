@@ -21,7 +21,7 @@ spring:
     resource-loader-path: classpath:/vm/
     suffix: .vm
 banner:
-  msg: jpom 管理系统启动中
+  msg: Jpom 管理系统启动中
 #jpom 项目运行路径
 jpom:
   path: /jpom/

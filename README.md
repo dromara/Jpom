@@ -1,6 +1,6 @@
 # Jpom(Java Project Online Management)Java项目在线管理
 
-> 在linux 中管理jar包运行，如SpringBoot、Jboot、jfinal、t-io项目如果是打包为Jar那么我们一般是使用shell 命令来管理, 
+> 在linux 中管理jar包运行，如SpringBoot、Jboot、jfinal、t-io等项目如果是打包为Jar那么我们一般是使用shell 命令来管理, 
 > 如果有多个项目管理起来显得比较麻烦。
 > 如果新增、更新、删除项目都不是很方便。
 > 再或者想不使用电脑控制重启、关闭、开启项目。直接使用shell 登录服务器管理显然不是最简单的方法
@@ -33,7 +33,7 @@
 4. cpu、ram 监控
 5. 导出堆栈信息
 6. 阿里云 CodePipeline + Oss在线管理
-7. 多用户管理
+7. 多用户管理，用户项目权限独立
 8. 此项目完全不依赖数据库，随装随用
 9. 整个服务器top监听
 10. 查看项目运行进程占用的端口
@@ -96,7 +96,7 @@ mvn package
 访问[Jpom](https://gitee.com/keepbx/jpom)的码云主页,拉取最新完整代码：
 
 1. 运行*cn.keepbx.jpom.JpomApplication*
-2. 浏览器访问
+2. 浏览器访问（如：http://127.0.0.1:2122）
 
 ### 常见问题
 

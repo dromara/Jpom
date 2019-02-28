@@ -5,7 +5,6 @@ import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.util.CharsetUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.keepbx.jpom.model.ProjectInfoModel;
-import cn.keepbx.jpom.service.BaseService;
 import cn.keepbx.jpom.socket.LogWebSocketHandle;
 import cn.keepbx.jpom.socket.SocketSession;
 import cn.keepbx.jpom.socket.TailLogThread;
@@ -24,7 +23,7 @@ import java.io.InputStream;
  * @author jiangzeyin
  */
 @Service
-public class CommandService extends BaseService {
+public class CommandService {
     public static final String RUNING_TAG = "running";
     public static final String STOP_TAG = "stopped";
 

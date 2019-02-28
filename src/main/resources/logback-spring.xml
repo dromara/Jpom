@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration debug="false">
+    <!--如果有需要修改日志存储路径，请修改value值-->
     <property name="logPath" value="/jpom/log/"/>
 
     <appender name="console" class="ch.qos.logback.core.ConsoleAppender">

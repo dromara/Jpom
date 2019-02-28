@@ -4,16 +4,20 @@ import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.keepbx.jpom.model.UserModel;
 import cn.keepbx.jpom.system.ConfigBean;
+import cn.keepbx.jpom.system.init.CheckRunCommand;
 import cn.keepbx.jpom.util.JsonUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Map;
 import java.util.Set;
 
 /**
+ * 用户管理
+ *
  * @author Administrator
  */
 @Service
@@ -25,11 +29,14 @@ public class UserService extends BaseDataService {
      * 用户列表是否为空
      *
      * @return true 为空需要初始化
-     * @throws IOException 异常
      */
-    public boolean userListEmpty() throws IOException {
-        JSONObject userInfo = getJsonObject(FILENAME);
-        return userInfo.isEmpty();
+    public boolean userListEmpty() {
+        try {
+            JSONObject userInfo = getJsonObject(FILENAME);
+            return userInfo.isEmpty();
+        } catch (Exception ignored) {
+        }
+        return true;
     }
 
     /**
@@ -215,8 +222,11 @@ public class UserService extends BaseDataService {
         try {
             saveJson(FILENAME, userModel.toJson());
             return true;
+        } catch (FileNotFoundException fileNotFoundException) {
+            CheckRunCommand.repairData();
+            return addUser(userModel);
         } catch (Exception e) {
-            DefaultSystemLog.LOG().error(e.getMessage(), e);
+            DefaultSystemLog.ERROR().error(e.getMessage(), e);
         }
         return false;
     }

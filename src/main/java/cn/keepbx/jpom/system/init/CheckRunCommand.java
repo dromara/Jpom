@@ -66,6 +66,13 @@ public class CheckRunCommand {
         }
     }
 
+    /**
+     * 修护检查
+     */
+    public static void repairData() {
+        checkData();
+    }
+
     private static void addDataFile(String name, String file) {
         URL url = ResourceUtil.getResource("bin/data/" + name);
         String content = FileUtil.readString(url, CharsetUtil.UTF_8);
