@@ -55,13 +55,16 @@ public class ManageControl extends BaseController {
      */
     @RequestMapping(value = "getProjectInfo")
     @ResponseBody
-    public String getProjectInfo() {
+    public String getProjectInfo(String userId) {
         try {
             // 查询数据
             JSONObject json = manageService.getAllProjectInfo();
             // 转换为数据
             List<JSONObject> array = new ArrayList<>();
             Set<String> setKey = json.keySet();
+            if (StrUtil.isEmpty(userId)) {
+                userId = getUserName();
+            }
             for (String asetKey : setKey) {
                 ProjectInfoModel projectInfoModel = manageService.getProjectInfo(asetKey);
                 String result = commandService.execCommand(CommandService.CommandOp.status, projectInfoModel);
@@ -69,7 +72,7 @@ public class ManageControl extends BaseController {
                 projectInfoModel.setStatus(status);
                 String id = projectInfoModel.getId();
                 JSONObject object = (JSONObject) JSONObject.toJSON(projectInfoModel);
-                object.put("manager", userService.isManager(id, getUserName()));
+                object.put("manager", userService.isManager(id, userId));
                 array.add(object);
             }
             array.sort((o1, o2) -> {

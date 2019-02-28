@@ -188,14 +188,16 @@ public class UserService extends BaseDataService {
      * @param id       用户登录名
      * @param name     昵称
      * @param password 密码
+     * @param manage   是否是管理员
      * @return true
      */
-    public boolean addUser(String id, String name, String password) {
+    public boolean addUser(String id, String name, String password, boolean manage) {
         try {
             UserModel userModel = new UserModel();
             userModel.setName(name);
             userModel.setId(id);
             userModel.setPassword(password);
+            userModel.setManage(manage);
             return addUser(userModel);
         } catch (Exception e) {
             DefaultSystemLog.LOG().error(e.getMessage(), e);

@@ -18,9 +18,6 @@ import javax.annotation.Resource;
 @RequestMapping(value = "/")
 public class IndexControl extends BaseController {
 
-    @Resource
-    private UserService userService;
-
     @RequestMapping(value = "error", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
     @NotLogin
     public String error() {
@@ -34,7 +31,6 @@ public class IndexControl extends BaseController {
      */
     @RequestMapping(value = {"index", "", "index.html", "/"}, method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
     public String index() {
-        setAttribute("manager", userService.isManager("", getUserName()));
         return "index";
     }
 
