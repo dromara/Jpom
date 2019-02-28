@@ -9,6 +9,7 @@ import cn.keepbx.jpom.controller.BaseController;
 import cn.keepbx.jpom.model.ProjectInfoModel;
 import cn.keepbx.jpom.service.UserService;
 import cn.keepbx.jpom.service.manage.ManageService;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -38,7 +39,14 @@ public class EditProjectController extends BaseController {
         return "manage/editProject";
     }
 
-    @RequestMapping(value = "saveProject", method = RequestMethod.POST)
+    /**
+     * 保存项目
+     *
+     * @param projectInfo 项目实体
+     * @return json
+     * @throws IOException IO
+     */
+    @RequestMapping(value = "saveProject", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     public String saveProject(ProjectInfoModel projectInfo) throws IOException {
         String id = projectInfo.getId();
@@ -52,6 +60,18 @@ public class EditProjectController extends BaseController {
         if (Validator.isChinese(id)) {
             return JsonMessage.getString(401, "项目id不能包含中文");
         }
+        String lib = projectInfo.getLib();
+        String log = projectInfo.getLog();
+        if (StrUtil.isEmpty(lib) || StrUtil.isEmpty(log)) {
+            return JsonMessage.getString(401, "项目lib/log不能为空");
+        }
+        if (StrUtil.SLASH.equals(lib) || StrUtil.SLASH.equals(log)) {
+            return JsonMessage.getString(401, "项目lib/log不能为顶级目录");
+        }
+        if (lib.contains("../") || log.contains("../")) {
+            return JsonMessage.getString(401, "项目lib/log存在提升目录问题");
+        }
+
         ProjectInfoModel exits = manageService.getProjectInfo(id);
         try {
             if (exits == null) {

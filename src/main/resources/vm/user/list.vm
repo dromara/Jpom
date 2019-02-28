@@ -185,8 +185,9 @@
         $('#addProject').on('click', function () {
             // 重置表单
             document.getElementById('form_user').reset();
-            $('#form_project [name="id"]').attr('readonly', false).removeClass('layui-disabled');
-            $('#form_project [name="manage"]').attr('checked', false);
+            $('#form_user [name="id"]').attr('readonly', false).removeClass('layui-disabled');
+            // $('#form_project [name="manage"]').attr('checked', false);
+            getProject('-1');
             // 弹出
             layer.open({
                 type: 1,

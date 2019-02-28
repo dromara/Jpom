@@ -165,6 +165,9 @@ public class UserService extends BaseDataService {
         try {
             JSONObject jsonObject = getJsonObject(FILENAME);
             JSONObject user = jsonObject.getJSONObject(userId);
+            if (user == null) {
+                return null;
+            }
             user.remove("password");
             return user;
         } catch (IOException e) {
