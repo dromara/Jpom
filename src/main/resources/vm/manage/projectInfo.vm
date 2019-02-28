@@ -11,16 +11,10 @@
 <div class="layui-row">
     <button id="addProject" class="layui-btn layui-btn-sm">新增项目</button>
     <button id="refresh" class="layui-btn layui-btn-sm">刷新表格</button>
-    <button id="updateRunBoot" class="layui-btn layui-btn-sm">修改启动文件</button>
+
 </div>
 <table class="layui-table" id="tab_project" lay-filter="tab_project" style="margin: 0;"></table>
 
-<div class="div-runboot" id="div-runboot">
-    <form action="" class="layui-form" id="form_runboot">
-        <textarea id="ta_runboot" name="content"></textarea>
-        <input type="hidden" lay-submit lay-filter="submitRunBoot" id="runboot_submit">
-    </form>
-</div>
 </body>
 
 <script type="text/html" id="bar_projects">
@@ -154,59 +148,8 @@
             reloadTable();
         });
 
-        // '修改启动文件'点击事件
-        $('#updateRunBoot').on('click', function () {
-            $.ajax({
-                url: '/file/getRunBoot',
-                type: 'get',
-                dataType: 'json',
-                success: function (data) {
-                    if (200 == data.code) {
-                        $('#ta_runboot').val(data.data.content);
-                        layer.open({
-                            type: 1,
-                            title: '修改启动文件',
-                            content: $('#div-runboot'),
-                            area: ['80%', '80%'],
-                            btnAlign: 'c',
-                            btn: ['提交'],
-                            yes: function (index, layero) {
-                                $('#form_runboot').attr('action', '/file/saveRunBoot');
-                                $('#runboot_submit').click();
-                            }
-                        });
-                    } else {
-                        layer.msg('启动文件不存在');
-                    }
-                },
-                error: function (error) {
-                    console.error(error);
-                }
-            });
-        });
 
-        // 提交启动文件表单
-        form.on('submit(submitRunBoot)', function (data) {
-            $.ajax({
-                url: data.form.action,
-                type: 'POST',
-                dataType: 'json',
-                data: data.field,
-                success: function (data) {
-                    if (200 == data.code) {
-                        layer.closeAll('page');
-
-                        layer.msg('修改成功！');
-                    } else {
-                        layer.msg('修改失败！');
-                    }
-                },
-                error: function (err) {
-                    layer.msg('操作失败！');
-                }
-            });
-            return false;
-        }); // '添加项目'点击事件
+        // '添加项目'点击事件
         $('#addProject').on('click', function () {
             editProject("");
         });

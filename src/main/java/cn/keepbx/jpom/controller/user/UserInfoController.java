@@ -14,6 +14,8 @@ import javax.annotation.Resource;
 
 
 /**
+ * 用户管理
+ *
  * @author Administrator
  */
 @RestController
@@ -31,6 +33,12 @@ public class UserInfoController extends BaseController {
      */
     @RequestMapping(value = "deleteUser", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public String deleteUser(String id) {
+        if (userName == null) {
+            return JsonMessage.getString(401, "系统异常：不能删除");
+        }
+        if (userName.getId().equals(id)) {
+            return JsonMessage.getString(400, "不能删除自己");
+        }
         boolean b = userService.deleteUser(id);
         if (b) {
             return JsonMessage.getString(200, "删除成功");
