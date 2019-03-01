@@ -121,6 +121,10 @@ public class EditProjectController extends BaseController {
             }
         }
 
+        // 判断空格
+        if (id.contains(StrUtil.SPACE) || lib.contains(StrUtil.SPACE) || log.contains(StrUtil.SPACE) || token.contains(StrUtil.SPACE)) {
+            return JsonMessage.getString(401, "项目Id、项目Lib、WebHooks不能包含空格");
+        }
         ProjectInfoModel exits = manageService.getProjectInfo(id);
         try {
             UserModel userName = getUser();

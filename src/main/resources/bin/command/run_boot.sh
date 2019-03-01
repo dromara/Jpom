@@ -57,6 +57,7 @@ stop()
          wget "$WebClose"
        fi
        #
+       echo -n $"Shutting down boot: wait"
        kill $(pgrep -f ${Tag}) 2>/dev/null
        sleep 3
        pid=`getPid`
