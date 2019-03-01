@@ -30,6 +30,8 @@ import java.util.concurrent.ExecutorService;
 @Component
 public class LogWebSocketHandle implements TailLogThread.Evn {
 
+    public static final String SYSTEM_ID = "system";
+
     private static ExecutorService EXECUTOR_SERVICE = null;
     private CommandService commandService;
     public static final ConcurrentHashMap<String, SocketSession> SESSION_CONCURRENT_HASH_MAP = new ConcurrentHashMap<>();
@@ -47,12 +49,6 @@ public class LogWebSocketHandle implements TailLogThread.Evn {
         // 通过用户名和密码的Md5值判断是否是登录的
         try {
             ManageService manageService = SpringUtil.getBean(ManageService.class);
-            ProjectInfoModel projectInfoModel = manageService.getProjectInfo(projectId);
-            if (projectInfoModel == null) {
-                socketSession.sendMsg("获取项目信息错误");
-                session.close();
-                return;
-            }
             UserService userService = SpringUtil.getBean(UserService.class);
             UserModel userModel = userService.checkUser(userInfo);
             if (userModel == null) {
@@ -60,10 +56,19 @@ public class LogWebSocketHandle implements TailLogThread.Evn {
                 session.close();
                 return;
             }
-            if (!userModel.isProject(projectInfoModel.getId())) {
-                socketSession.sendMsg("没有项目权限");
-                session.close();
-                return;
+            // 判断项目
+            if (!SYSTEM_ID.equals(projectId)) {
+                ProjectInfoModel projectInfoModel = manageService.getProjectInfo(projectId);
+                if (projectInfoModel == null) {
+                    socketSession.sendMsg("获取项目信息错误");
+                    session.close();
+                    return;
+                }
+                if (!userModel.isProject(projectInfoModel.getId())) {
+                    socketSession.sendMsg("没有项目权限");
+                    session.close();
+                    return;
+                }
             }
             socketSession.sendMsg("欢迎加入：" + userModel.getName());
         } catch (Exception e) {

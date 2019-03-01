@@ -58,12 +58,10 @@
             <div class="layui-inline">
                 <label class="layui-form-label">项目路径</label>
                 <div class="layui-input-block">
-                ##                    <input type="text" name="lib" placeholder="" required lay-verify="required"
-                ##                           class="layui-input" value="#if($item)$!item.lib#end">
 
                     <select name="whitelistDirectory" lay-filter="aihao">
                         #foreach($itemPath in $whitelistDirectory)
-                            #if($item && $item.lib.startsWith($itemPath))
+                            #if($item && $itemWhitelistDirectory.startsWith($itemPath))
                                 <option value="$itemPath" selected>$itemPath</option>
                             #else
                                 <option value="$itemPath">$itemPath</option>

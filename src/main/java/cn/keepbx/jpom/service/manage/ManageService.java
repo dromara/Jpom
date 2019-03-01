@@ -10,6 +10,7 @@ import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -32,14 +33,14 @@ public class ManageService extends BaseDataService {
         return getJsonObject(FILENAME);
     }
 
-    public JSONArray getAllProjectArrayInfo() throws IOException {
+    public List<ProjectInfoModel> getAllProjectArrayInfo() throws IOException {
         JSONObject jsonObject = getJsonObject(FILENAME);
         Set<String> setKey = jsonObject.keySet();
         JSONArray jsonArray = new JSONArray();
         for (String key : setKey) {
             jsonArray.add(jsonObject.getJSONObject(key));
         }
-        return jsonArray;
+        return jsonArray.toJavaList(ProjectInfoModel.class);
     }
 
     /**

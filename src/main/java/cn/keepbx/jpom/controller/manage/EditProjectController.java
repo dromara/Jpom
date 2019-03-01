@@ -10,7 +10,7 @@ import cn.keepbx.jpom.controller.BaseController;
 import cn.keepbx.jpom.model.ProjectInfoModel;
 import cn.keepbx.jpom.service.manage.ManageService;
 import cn.keepbx.jpom.service.system.SystemService;
-import cn.keepbx.jpom.service.user.UserService;
+import cn.keepbx.jpom.socket.LogWebSocketHandle;
 import com.alibaba.fastjson.JSONArray;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import javax.annotation.Resource;
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 
 /**
  * 项目管理
@@ -34,14 +35,11 @@ public class EditProjectController extends BaseController {
     @Resource
     private ManageService manageService;
     @Resource
-    private UserService userService;
-    @Resource
     private SystemService systemService;
 
     @RequestMapping(value = "editProject", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
     public String editProject(String id) throws IOException {
         ProjectInfoModel projectInfo = manageService.getProjectInfo(id);
-
 
         // 白名单
         JSONArray jsonArray = systemService.getWhitelistDirectory();
@@ -52,7 +50,9 @@ public class EditProjectController extends BaseController {
                 String path = obj.toString();
                 String lib = projectInfo.getLib();
                 if (lib.startsWith(path)) {
+                    String itemWhitelistDirectory = lib.substring(0, path.length());
                     lib = lib.substring(path.length());
+                    setAttribute("itemWhitelistDirectory", itemWhitelistDirectory);
                     projectInfo.setLib(lib);
                     break;
                 }
@@ -79,6 +79,9 @@ public class EditProjectController extends BaseController {
         if (Validator.isChinese(id)) {
             return JsonMessage.getString(401, "项目id不能包含中文");
         }
+        if (LogWebSocketHandle.SYSTEM_ID.equals(id)) {
+            return JsonMessage.getString(401, "项目id " + LogWebSocketHandle.SYSTEM_ID + " 关键词被系统占用");
+        }
         if (StrUtil.isEmpty(whitelistDirectory)) {
             return JsonMessage.getString(401, "项目路径不能为空");
         }
@@ -104,11 +107,15 @@ public class EditProjectController extends BaseController {
         projectInfo.setLib(FileUtil.normalize(lib));
 
         String log = new File(lib).getParent();
-        log = String.format("%s/run.log", log);
+        log = String.format("%s/%s.log", log, id);
         projectInfo.setLog(FileUtil.normalize(log));
 
         ProjectInfoModel exits = manageService.getProjectInfo(id);
         try {
+            JsonMessage jsonMessage = checkPath(projectInfo);
+            if (jsonMessage != null) {
+                return jsonMessage.toString();
+            }
             if (exits == null) {
                 if (!userName.isManage()) {
                     return JsonMessage.getString(400, "管理员才能创建项目!");
@@ -128,5 +135,21 @@ public class EditProjectController extends BaseController {
             DefaultSystemLog.ERROR().error(e.getMessage(), e);
             return JsonMessage.getString(500, e.getMessage());
         }
+    }
+
+    private JsonMessage checkPath(ProjectInfoModel projectInfoModel) throws IOException {
+        List<ProjectInfoModel> projectInfoModelList = manageService.getAllProjectArrayInfo();
+        for (ProjectInfoModel model : projectInfoModelList) {
+            if (!model.getId().equals(projectInfoModel.getId())) {
+                if (model.getLib().startsWith(projectInfoModel.getLib()) || projectInfoModel.getLib().startsWith(model.getLib())) {
+                    return new JsonMessage(401, "项目lib和【" + model.getName() + "】项目冲突");
+                }
+                //  log 自动生成
+                //      if (model.getLog().equals(projectInfoModel.getLog())) {
+                //          return new JsonMessage(401, "项目log和【" + model.getName() + "】项目冲突");
+                //      }
+            }
+        }
+        return null;
     }
 }

@@ -104,7 +104,9 @@
             height: 'full-52',
             even: true,
             cols: [[
-                {field: 'name', title: '项目名称', width: '15%'},
+                {
+                    field: 'name', title: '项目名称', width: '15%'
+                },
                 {
                     title: 'lib状态', width: '10%', templet: function (d) {
                         var rgb;

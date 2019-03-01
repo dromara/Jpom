@@ -2,6 +2,7 @@ package cn.keepbx.jpom.controller.user;
 
 import cn.jiangzeyin.common.JsonMessage;
 import cn.keepbx.jpom.controller.BaseController;
+import cn.keepbx.jpom.model.ProjectInfoModel;
 import cn.keepbx.jpom.service.manage.ManageService;
 import cn.keepbx.jpom.service.user.UserService;
 import com.alibaba.fastjson.JSONArray;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.annotation.Resource;
 import java.io.IOException;
+import java.util.List;
 
 /**
  * @author Administrator
@@ -32,7 +34,7 @@ public class UserListController extends BaseController {
      */
     @RequestMapping(value = "list", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
     public String projectInfo() throws IOException {
-        JSONArray jsonArray = manageService.getAllProjectArrayInfo();
+        List<ProjectInfoModel> jsonArray = manageService.getAllProjectArrayInfo();
         setAttribute("projects", jsonArray);
         return "user/list";
     }
