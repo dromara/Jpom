@@ -36,6 +36,7 @@ public class WhitelistDirectoryController extends BaseController {
     @RequestMapping(value = "whitelistDirectory", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
     public String whitelistDirectory() {
         setAttribute("value", systemService.getWhitelistDirectoryLine());
+//        certificate
         return "system/whitelistDirectory";
     }
 
