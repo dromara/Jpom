@@ -166,9 +166,13 @@ public class UserInfoController extends BaseController {
             userModel.setPassword(password);
         }
 
+
         boolean manageB = "true".equals(manage);
         if (manageB && ConfigBean.getInstance().safeMode) {
-            return JsonMessage.getString(401, "安全模式不能创建管理员");
+            return JsonMessage.getString(401, "安全模式不能设置管理员");
+        }
+        if (!manageB && UserModel.SYSTEM_ADMIN.equals(userModel.getParent())) {
+            return JsonMessage.getString(401, "不能取消系统管理员的管理权限");
         }
         userModel.setManage(manageB);
 
