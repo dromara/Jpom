@@ -112,7 +112,7 @@ public class ManageControl extends BaseController {
      * @param id id
      * @return json
      */
-    @RequestMapping(value = "deleteProject", method = RequestMethod.POST)
+    @RequestMapping(value = "deleteProject", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     public String deleteProject(String id) {
 //        boolean manager = userService.isManager(id, getUserName());

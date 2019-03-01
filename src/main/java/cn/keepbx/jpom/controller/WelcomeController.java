@@ -1,5 +1,6 @@
 package cn.keepbx.jpom.controller;
 
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -13,9 +14,9 @@ import org.springframework.web.bind.annotation.RequestMethod;
 @RequestMapping(value = "/")
 public class WelcomeController extends BaseController {
 
-    @RequestMapping(value = "welcome", method = RequestMethod.GET)
+    @RequestMapping(value = "welcome", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
     public String welcome() {
-        setAttribute("userInfo", getSocketPwd());
+        setAttribute("userInfo", userName.getUserMd5Key());
         return "welcome";
     }
 }

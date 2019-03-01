@@ -25,11 +25,11 @@ public class LoginInterceptor extends BaseInterceptor {
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         super.preHandle(request, response, handler);
         HttpSession session = getSession();
-        UserModel user = (UserModel) session.getAttribute(SESSION_NAME);
         if (handler instanceof HandlerMethod) {
             HandlerMethod handlerMethod = (HandlerMethod) handler;
             NotLogin notLogin = handlerMethod.getMethodAnnotation(NotLogin.class);
             if (notLogin == null) {
+                UserModel user = (UserModel) session.getAttribute(SESSION_NAME);
                 if (user == null) {
                     response.sendRedirect(request.getContextPath() + "/login.html");
                     return false;

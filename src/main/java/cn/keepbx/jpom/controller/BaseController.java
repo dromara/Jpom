@@ -32,7 +32,7 @@ public abstract class BaseController extends AbstractController {
         return userModel.getId();
     }
 
-    protected String getSocketPwd() {
-        return userName.getUserMd5Key();
-    }
+//    protected String getSocketPwd() {
+//        return userName.getUserMd5Key();
+//    }
 }

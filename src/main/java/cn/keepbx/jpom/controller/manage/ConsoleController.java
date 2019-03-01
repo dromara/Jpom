@@ -49,7 +49,7 @@ public class ConsoleController extends BaseController {
         }
         if (pim != null) {
             setAttribute("projectInfo", JSONObject.toJSONString(pim));
-            setAttribute("userInfo", getSocketPwd());
+            setAttribute("userInfo", userName.getUserMd5Key());
             String logSize = getLogSize(id);
             setAttribute("logSize", logSize);
             setAttribute("manager", userName.isProject(id));

@@ -56,7 +56,7 @@ public class InternalController extends BaseController {
     /**
      * 导出堆栈信息
      */
-    @RequestMapping(value = "stack")
+    @RequestMapping(value = "stack", method = RequestMethod.GET)
     @ResponseBody
     public String stack(String tag) throws IOException {
         ProjectInfoModel projectInfoModel = new ProjectInfoModel();
@@ -76,7 +76,7 @@ public class InternalController extends BaseController {
     /**
      * 导出内存信息
      */
-    @RequestMapping(value = "ram")
+    @RequestMapping(value = "ram", method = RequestMethod.GET)
     @ResponseBody
     public String ram(String tag) throws IOException {
         ProjectInfoModel projectInfoModel = new ProjectInfoModel();

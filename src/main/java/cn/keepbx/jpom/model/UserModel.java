@@ -27,9 +27,13 @@ public class UserModel {
      */
     private String parent;
 
-
+    /**
+     * 系统管理员
+     */
     public static String SYSTEM_ADMIN = "sys";
-
+    /**
+     * 用户密码长度
+     */
     public static int USER_PWD_LEN = 6;
 
     public String getParent() {
