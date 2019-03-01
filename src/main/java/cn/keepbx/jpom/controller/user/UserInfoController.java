@@ -42,6 +42,12 @@ public class UserInfoController extends BaseController {
                 return JsonMessage.getString(401, "安全模式下管理员的密码不能通过WEB端修改");
             }
         }
+        if (StrUtil.isEmpty(oldPwd) || StrUtil.isEmpty(newPwd) || oldPwd.length() < UserModel.USER_PWD_LEN || newPwd.length() < UserModel.USER_PWD_LEN) {
+            return JsonMessage.getString(400, "密码长度为6-12位");
+        }
+        if (oldPwd.equals(newPwd)) {
+            return JsonMessage.getString(400, "新旧密码一致");
+        }
         try {
             String result = userService.updatePwd(userName.getId(), oldPwd, newPwd);
             // 用户不存在
