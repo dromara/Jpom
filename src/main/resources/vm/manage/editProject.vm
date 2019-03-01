@@ -56,17 +56,27 @@
         </div>
         <div class="layui-form-item">
             <div class="layui-inline">
-                <label class="layui-form-label">Lib</label>
+                <label class="layui-form-label">项目路径</label>
                 <div class="layui-input-block">
-                    <input type="text" name="lib" placeholder="程序在生产服务器环境中需要的jar路径" required lay-verify="required"
-                           class="layui-input" value="#if($item)$!item.lib#end">
+                ##                    <input type="text" name="lib" placeholder="" required lay-verify="required"
+                ##                           class="layui-input" value="#if($item)$!item.lib#end">
+
+                    <select name="whitelistDirectory" lay-filter="aihao">
+                        #foreach($itemPath in $whitelistDirectory)
+                            #if($item && $item.lib.startsWith($itemPath))
+                                <option value="$itemPath" selected>$itemPath</option>
+                            #else
+                                <option value="$itemPath">$itemPath</option>
+                            #end
+                        #end
+                    </select>
                 </div>
             </div>
             <div class="layui-inline">
-                <label class="layui-form-label">Log</label>
+                <label class="layui-form-label" title="$!item.log">项目Lib</label>
                 <div class="layui-input-block">
-                    <input type="text" name="log" placeholder="记录程序运行所有日志保存路径" required lay-verify="required"
-                           class="layui-input" value="#if($item)$!item.log#end">
+                    <input type="text" name="lib" placeholder="程序在生产服务器环境中需要的jar路径" required lay-verify="required"
+                           class="layui-input" value="#if($item)$!item.lib#end">
                 </div>
             </div>
 

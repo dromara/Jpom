@@ -144,15 +144,7 @@ public class UserService extends BaseDataService {
         if (user == null) {
             return false;
         }
-        boolean manage = user.isManage();
-        if (manage) {
-            return true;
-        }
-        JSONArray projects = user.getProjects();
-        if (projects == null || projects.isEmpty()) {
-            return false;
-        }
-        return projects.contains(projectId);
+        return user.isProject(projectId);
     }
 
     /**

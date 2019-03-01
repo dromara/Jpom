@@ -66,7 +66,29 @@ public class WhitelistDirectoryController extends BaseController {
             val = FileUtil.normalize(val);
             jsonArray.add(val);
         }
+        String error = findStartsWith(jsonArray, 0);
+        if (error != null) {
+            return JsonMessage.getString(401, "白名单目录中不能存在包含关系：" + error);
+        }
         systemService.saveWhitelistDirectory(jsonArray);
         return JsonMessage.getString(200, "保存成功");
+    }
+
+    private String findStartsWith(JSONArray jsonArray, int start) {
+        String str = jsonArray.getString(start);
+        int len = jsonArray.size();
+        for (int i = 0; i < len; i++) {
+            if (i == start) {
+                continue;
+            }
+            String findStr = jsonArray.getString(i);
+            if (findStr.startsWith(str)) {
+                return str;
+            }
+        }
+        if (start < len - 1) {
+            return findStartsWith(jsonArray, start + 1);
+        }
+        return null;
     }
 }

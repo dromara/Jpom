@@ -1,6 +1,7 @@
 package cn.keepbx.jpom.controller.manage;
 
 import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.lang.Validator;
 import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.annotation.Resource;
+import java.io.File;
 import java.io.IOException;
 
 /**
@@ -36,9 +38,23 @@ public class EditProjectController extends BaseController {
     @Resource
     private SystemService systemService;
 
-    @RequestMapping(value = "editProject", method = RequestMethod.GET)
+    @RequestMapping(value = "editProject", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
     public String editProject(String id) throws IOException {
         ProjectInfoModel projectInfo = manageService.getProjectInfo(id);
+
+
+        // 白名单
+        JSONArray jsonArray = systemService.getWhitelistDirectory();
+        setAttribute("whitelistDirectory", jsonArray);
+        for (Object obj : jsonArray) {
+            String path = obj.toString();
+            String lib = projectInfo.getLib();
+            if (lib.startsWith(path)) {
+                lib = lib.substring(path.length());
+                projectInfo.setLib(lib);
+                break;
+            }
+        }
         setAttribute("item", projectInfo);
         return "manage/editProject";
     }
@@ -52,7 +68,7 @@ public class EditProjectController extends BaseController {
      */
     @RequestMapping(value = "saveProject", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
-    public String saveProject(ProjectInfoModel projectInfo) throws IOException {
+    public String saveProject(ProjectInfoModel projectInfo, String whitelistDirectory) throws IOException {
         String id = projectInfo.getId();
         if (StrUtil.isEmptyOrUndefined(id)) {
             return JsonMessage.getString(400, "项目id不能为空");
@@ -60,34 +76,34 @@ public class EditProjectController extends BaseController {
         if (Validator.isChinese(id)) {
             return JsonMessage.getString(401, "项目id不能包含中文");
         }
-        String lib = projectInfo.getLib();
-        String log = projectInfo.getLog();
-        if (StrUtil.isEmpty(lib) || StrUtil.isEmpty(log)) {
-            return JsonMessage.getString(401, "项目lib/log不能为空");
-        }
-        if (StrUtil.SLASH.equals(lib) || StrUtil.SLASH.equals(log)) {
-            return JsonMessage.getString(401, "项目lib/log不能为顶级目录");
-        }
-        if (lib.contains("../") || log.contains("../")) {
-            return JsonMessage.getString(401, "项目lib/log存在提升目录问题");
+        if (StrUtil.isEmpty(whitelistDirectory)) {
+            return JsonMessage.getString(401, "项目路径不能为空");
         }
         JSONArray jsonArray = systemService.getWhitelistDirectory();
         if (jsonArray == null) {
             return JsonMessage.getString(401, "还没有配置白名单");
         }
-        int errorCount = 0;
-        for (Object obj : jsonArray) {
-            String wPath = obj.toString();
-            if (!lib.startsWith(wPath) || !log.startsWith(wPath)) {
-                errorCount++;
-            }
+        if (!jsonArray.contains(whitelistDirectory)) {
+            return JsonMessage.getString(401, "请选择正确的项目路径");
         }
-        if (errorCount == jsonArray.size()) {
-            return JsonMessage.getString(401, "项目lib/log 必须在白名单目录下");
+        String lib = projectInfo.getLib();
+//        String log = projectInfo.getLog();
+        if (StrUtil.isEmpty(lib)) {
+            return JsonMessage.getString(401, "项目lib不能为空");
         }
-        if (!log.endsWith(".log")) {
-            return JsonMessage.getString(401, "log必须是个文件,并且以.log 结尾");
+        if (StrUtil.SLASH.equals(lib)) {
+            return JsonMessage.getString(401, "项目lib不能为顶级目录");
         }
+        if (lib.contains("../")) {
+            return JsonMessage.getString(401, "项目lib存在提升目录问题");
+        }
+        lib = String.format("%s/%s", whitelistDirectory, lib);
+        projectInfo.setLib(FileUtil.normalize(lib));
+
+        String log = new File(lib).getParent();
+        log = String.format("%s/run.log", log);
+        projectInfo.setLog(FileUtil.normalize(log));
+
         ProjectInfoModel exits = manageService.getProjectInfo(id);
         try {
             if (exits == null) {

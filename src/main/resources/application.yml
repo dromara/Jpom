@@ -25,7 +25,7 @@ banner:
 #jpom 项目运行路径
 jpom:
   path: /jpom/
-  log: /jpom/log/
+  log: ${jpom.path}log/
   # 演示模式
   safeMode: false
 # 静态资源配置
