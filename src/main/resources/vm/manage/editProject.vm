@@ -38,7 +38,7 @@
         </div>
         <div class="layui-form-item">
             <div class="layui-inline">
-                <label class="layui-form-label">Tag</label>
+                <label class="layui-form-label">项目ID</label>
                 <div class="layui-input-block">
                     <input type="text" name="id" placeholder="程序运行标志（设置后将不能修改）" required lay-verify="required"
                            class="layui-input  #if($item)layui-disabled#end" value="#if($item)$!item.id#end"

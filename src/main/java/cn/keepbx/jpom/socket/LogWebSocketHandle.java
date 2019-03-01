@@ -38,6 +38,10 @@ public class LogWebSocketHandle implements TailLogThread.Evn {
 
     /**
      * 新的WebSocket请求开启
+     *
+     * @param userInfo  用户授权信息
+     * @param projectId 项目id
+     * @param session   回话
      */
     @OnOpen
     public void onOpen(@PathParam("userInfo") String userInfo, @PathParam("projectId") String projectId, Session session) {

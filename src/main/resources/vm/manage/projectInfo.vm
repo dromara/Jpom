@@ -103,28 +103,41 @@
             url: '/manage/getProjectInfo',
             height: 'full-52',
             even: true,
-            cols: [[
-                {
-                    field: 'name', title: '项目名称', width: '15%'
-                },
-                {
-                    title: 'lib状态', width: '10%', templet: function (d) {
-                        var rgb;
-                        if (d.group) {
-                            var size = groupMap.size;
-                            if (!groupMap.get(d.group)) {
-                                groupMap.set(d.group, "1");
-                                size += 1;
-                                getHslArray(size);
-                            }
-                            rgb = hslToRgb.apply(this, HSL[size - 1]);
+            cols: [[{
+                field: 'name', title: '项目名称', width: '15%', templet: function (d) {
+                    var rgb;
+                    if (d.group) {
+                        var size = groupMap.size;
+                        if (!groupMap.get(d.group)) {
+                            groupMap.set(d.group, "1");
+                            size += 1;
+                            getHslArray(size);
                         }
-                        if (!d.manager) {
-                            rgb = [211, 211, 211];
-                        }
-                        return "<div  name='" + d.id + "' title='" + d.group + "(" + d.id + ")' style='background: rgb(" + rgb + ");color: #fff;margin: 0 -15px;padding: 0 15px;'>" + (d.runLibDesc || "") + " / " + (d.useLibDesc || "") + "</div>";
+                        rgb = hslToRgb.apply(this, HSL[size - 1]);
                     }
-                },
+                    if (!d.manager) {
+                        rgb = [211, 211, 211];
+                    }
+                    return "<span   name='" + d.id + "' title='分组：" + d.group + "(项目Id:" + d.id + ")' style='background: rgb(" + rgb + ");padding: 10px;'></span >" + d.name;
+                }
+            }, {
+                title: 'lib状态', width: '10%', templet: function (d) {
+                    var rgb;
+                    if (d.group) {
+                        var size = groupMap.size;
+                        if (!groupMap.get(d.group)) {
+                            groupMap.set(d.group, "1");
+                            size += 1;
+                            getHslArray(size);
+                        }
+                        rgb = hslToRgb.apply(this, HSL[size - 1]);
+                    }
+                    if (!d.manager) {
+                        rgb = [211, 211, 211];
+                    }
+                    return (d.runLibDesc || "") + " / " + (d.useLibDesc || "");
+                }
+            },
                 {field: 'createTime', title: '创建时间', width: '13%'},
                 {field: 'modifyTime', title: '修改时间', width: '13%'},
                 {title: '运行状态', templet: "#status_templ", width: '10%'},
@@ -133,8 +146,7 @@
             loading: true,
             response: {
                 statusCode: 200
-            },
-            done: function (data) {
+            }, done: function (data) {
                 var projects = data.data;
                 for (var i = 0; i < projects.length; i++) {
                     var project = projects[i];
@@ -233,7 +245,8 @@
                 title: data.id + ' - 管理',
             });
         }
-    });
+    })
+    ;
 
     function reloadTable() {
         table.reload('table_project', {
