@@ -39,7 +39,7 @@
             <div class="layui-inline">
                 <label class="layui-form-label">登录名</label>
                 <div class="layui-input-block">
-                    <input type="text" name="id" placeholder="登录名" required lay-verify="required"
+                    <input type="text" name="id" placeholder="登录名,创建后不能修改" required lay-verify="required"
                            class="layui-input">
                 </div>
             </div>
@@ -99,12 +99,7 @@
 </script>
 
 <script type="text/javascript">
-    layui.use(['layer', 'element', 'table', 'form', 'laytpl'], function () {
-        var $ = layui.$;
-        var table = layui.table;
-        var form = layui.form;
-        var layer = layui.layer;
-        var laytpl = layui.laytpl;
+    function loadSuccess() {
 
         table.render({
             id: 'tab_user',
@@ -261,6 +256,6 @@
                 });
             });
         }
-    });
+    }
 </script>
 </html>

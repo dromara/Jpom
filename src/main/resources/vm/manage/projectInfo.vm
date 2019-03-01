@@ -89,14 +89,9 @@
 </script>
 
 <script type="text/javascript">
-    var table;
-    var groupMap = new Map();
-    layui.use(['layer', 'element', 'table', 'form'], function () {
-        var $ = layui.$;
-        table = layui.table;
-        var form = layui.form;
-        var layer = layui.layer;
+    const groupMap = new Map();
 
+    function loadSuccess() {
         table.render({
             id: 'table_project',
             elem: '#tab_project',
@@ -198,6 +193,10 @@
                     content: 'build?id=' + data.id
                 });
             } else if ('ram' === event) {
+                if (!data.status) {
+                    layer.msg('请先运行程序！');
+                    return;
+                }
                 layer.open({
                     type: 2,
                     title: '内存',
@@ -245,8 +244,7 @@
                 title: data.id + ' - 管理',
             });
         }
-    })
-    ;
+    }
 
     function reloadTable() {
         table.reload('table_project', {

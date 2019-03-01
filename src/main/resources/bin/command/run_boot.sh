@@ -1,5 +1,7 @@
-# description: Auto-starts boot
 #!/bin/bash
+
+# description: Auto-starts boot
+
 # 变量
 Tag="$2"
 WebClose="$3"

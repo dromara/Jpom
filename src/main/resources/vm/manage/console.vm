@@ -9,20 +9,22 @@
 
 <body>
 <div class="console">
+    #if($manager)
+        <div class="layui-row">
+            <!-- layui-elem-quote -->
+            #if($logSize)
+                <button id="export" class="layui-btn layui-btn-sm">导出日志(<span id="logSize">$logSize</span>)</button>
+            #end
 
-    <div class="layui-row">
-        <!-- layui-elem-quote -->
-        #if($logSize)
-            <button id="export" class="layui-btn layui-btn-sm">导出日志(<span id="logSize">$logSize</span>)</button>
-        #end
-        <a href="javascript:;" class="btn-op layui-btn  layui-btn-sm" op="start">启动</a>
-        <a href="javascript:;" class="btn-op layui-btn  layui-btn-sm layui-btn-warm" op="restart">重启</a>
-        <a href="javascript:;" class="btn-op layui-btn  layui-btn-sm layui-btn-danger" op="stop">停止</a>
-        <div class="status">
-            <div class="status-div"></div>
-            <span></span>
+            <a href="javascript:;" class="btn-op layui-btn  layui-btn-sm" op="start">启动</a>
+            <a href="javascript:;" class="btn-op layui-btn  layui-btn-sm layui-btn-warm" op="restart">重启</a>
+            <a href="javascript:;" class="btn-op layui-btn  layui-btn-sm layui-btn-danger" op="stop">停止</a>
+            <div class="status">
+                <div class="status-div"></div>
+                <span></span>
+            </div>
         </div>
-    </div>
+    #end
     <div class="terminal"></div>
 </div>
 </body>
@@ -33,11 +35,7 @@
     var loopLog = false;
     var loopLogTime;
 
-    layui.use(['layer', 'element', 'table', 'form'], function () {
-        var $ = layui.$;
-        var table = layui.table;
-        var form = layui.form;
-        var layer = layui.layer;
+    function loadSuccess() {
 
         var showLogDom = $('.console .terminal');
 
@@ -53,10 +51,10 @@
                 // 如果是
                 if (data.data.indexOf('{') === 0) {
                     var json_data = JSON.parse(data.data);
-                    var op = json_data.op;
                     if (json_data.code !== 200) {
                         layer.msg(json_data.msg);
                     }
+                    var op = json_data.op;
                     switch (op) {
                         case 'status':
                         case 'start':
@@ -159,7 +157,6 @@
         $('#export').on('click', function () {
             location.href = "export.html?id=" + projectInfo.id;
         });
-
-    });
+    }
 </script>
 </html>

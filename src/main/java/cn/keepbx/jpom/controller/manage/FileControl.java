@@ -69,6 +69,9 @@ public class FileControl extends BaseController {
     @RequestMapping(value = "getFileList", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     public String getFileList(String id) {
+        if (!userName.isProject(id)) {
+            return JsonMessage.getString(400, "你没有该操作权限操作!");
+        }
         try {
             // 查询项目路径
             ProjectInfoModel pim = manageService.getProjectInfo(id);
@@ -140,7 +143,7 @@ public class FileControl extends BaseController {
      *
      * @return File
      */
-    @RequestMapping(value = "download")
+    @RequestMapping(value = "download", method = RequestMethod.GET)
     @ResponseBody
     public String download() {
         String id = getParameter("id");

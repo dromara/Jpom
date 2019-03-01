@@ -99,12 +99,7 @@
 </div>
 </body>
 <script type="text/javascript">
-    layui.use(['layer', 'element', 'form'], function () {
-        var $ = layui.$;
-        var element = layui.element;
-        var layer = layui.layer;
-        var form = layui.form;
-
+    function loadSuccess() {
         // 左侧导航条事件
         element.on('nav(menu)', function (data) {
             var dataJSON = $(data.context).attr("data-options");
@@ -193,7 +188,9 @@
 
         // 退出系统
         $('#li-exit').click(function () {
-            layer.confirm('确定退出系统？', {'title': '系统提示'}, function (index) {
+            layer.confirm('确定退出系统？', {
+                'title': '系统提示'
+            }, function (index) {
                 window.location.href = "/logout";
                 layer.close(index);
             })
@@ -213,6 +210,6 @@
         // function closeallPage() {
 
         // }
-    });
+    }
 </script>
 </html>

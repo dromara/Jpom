@@ -10,7 +10,6 @@ import cn.keepbx.jpom.model.ProjectInfoModel;
 import cn.keepbx.jpom.service.manage.CommandService;
 import cn.keepbx.jpom.service.manage.ManageService;
 import cn.keepbx.jpom.service.oss.OssManagerService;
-import cn.keepbx.jpom.service.user.UserService;
 import com.alibaba.fastjson.JSONArray;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
@@ -38,10 +37,8 @@ public class BuildController extends BaseController {
     private ManageService manageService;
     @Resource
     private CommandService commandService;
-    @Resource
-    private UserService userService;
 
-    @RequestMapping(value = "build", method = RequestMethod.GET)
+    @RequestMapping(value = "build", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
     public String build(String id) throws IOException {
         ProjectInfoModel projectInfoModel = manageService.getProjectInfo(id);
         if (projectInfoModel != null && StrUtil.isNotEmpty(projectInfoModel.getBuildTag())) {
@@ -52,24 +49,26 @@ public class BuildController extends BaseController {
         return "manage/build";
     }
 
-    @RequestMapping(value = "build_download", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "build_download", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
     public String buildDownload(String id, String key) {
+        if (!userName.isProject(id)) {
+            return "redirect:error";
+        }
         try {
             ProjectInfoModel projectInfoModel = manageService.getProjectInfo(id);
             if (projectInfoModel == null) {
-                return "error";
+                return "redirect:error";
             }
             return "redirect:" + ossManagerService.getUrl(key);
         } catch (Exception e) {
             DefaultSystemLog.ERROR().error("获取下载地址失败", e);
-            return "error";
+            return "redirect:error";
         }
     }
 
     @RequestMapping(value = "build_install", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     public String buildInstall(String id, String key) throws Exception {
-//        boolean manager = userService.isManager(id, getUserName());
         if (!userName.isProject(id)) {
             return JsonMessage.getString(400, "你没有对应操作权限操作!");
         }

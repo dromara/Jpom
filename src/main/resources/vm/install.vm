@@ -44,42 +44,39 @@
 </div>
 </body>
 <script type="text/javascript">
-    layui.use(['form', 'carousel', 'layer'], function () {
-        var $ = layui.$;
-        var form = layui.form;
-        var carousel = layui.carousel;
-        var layer = layui.layer;
-
-
-        carousel.render({
-            elem: '#div-carousel',
-            width: '100%',
-            height: '100%',
-            anim: 'fade',
-            arrow: 'none',
-            indicator: 'none'
-        });
-
-        form.on('submit(from_login)', function (data) {
-            $.ajax({
-                url: '/install_submit.json',
-                type: 'POST',
-                dataType: 'json',
-                data: data.field,
-                success: function (data) {
-                    if (200 == data.code) {
-                        window.location.href = '/index';
-                    } else {
-                        layer.msg(data.msg);
-                    }
-                },
-                error: function (err) {
-                    layer.alert(err.msg);
-                }
+    function loadSuccess() {
+        layui.use(['carousel'], function () {
+            var carousel = layui.carousel;
+            carousel.render({
+                elem: '#div-carousel',
+                width: '100%',
+                height: '100%',
+                anim: 'fade',
+                arrow: 'none',
+                indicator: 'none'
             });
-            return false;
+
+            form.on('submit(from_login)', function (data) {
+                $.ajax({
+                    url: '/install_submit.json',
+                    type: 'POST',
+                    dataType: 'json',
+                    data: data.field,
+                    success: function (data) {
+                        if (200 == data.code) {
+                            window.location.href = '/index';
+                        } else {
+                            layer.msg(data.msg);
+                        }
+                    },
+                    error: function (err) {
+                        layer.alert(err.msg);
+                    }
+                });
+                return false;
+            });
         });
-    });
+    }
 </script>
 
 </html>

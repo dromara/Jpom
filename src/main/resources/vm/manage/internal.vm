@@ -12,7 +12,8 @@
         .info {
             margin-top: 30px;
         }
-        .but{
+
+        .but {
             width: 50px;
             padding: 10px;
             background: #cccccc;
@@ -34,15 +35,8 @@
 
 </body>
 <script type="text/javascript">
-    layui.use(['layer', 'element', 'form'], function () {
-        var element = layui.element;
-        var layer = layui.layer;
-        var form = layui.form;
-        var $ = layui.$;
+    function loadSuccess() {
 
-
-
-    })
-
+    }
 </script>
 </html>

@@ -43,10 +43,7 @@
 </div>
 </body>
 <script type="text/javascript">
-    layui.use(['layer', 'element', 'table', 'form'], function () {
-        var $ = layui.$;
-        var layer = layui.layer;
-
+    function loadSuccess() {
         $("button[name='install']").click(function () {
             var that = $(this);
             var name = that.attr("data-name");
@@ -82,6 +79,6 @@
             });
 
         });
-    });
+    }
 </script>
 </html>

@@ -123,13 +123,7 @@
 </div>
 </body>
 <script type="text/javascript">
-    layui.use(['layer', 'element', 'table', 'form'], function () {
-        var $ = layui.$;
-        var table = layui.table;
-        var form = layui.form;
-        var layer = layui.layer;
-
-
+    function loadSuccess() {
         // 提交项目表单
         form.on('submit(submitProject)', function (data) {
             $.ajax({
@@ -191,6 +185,6 @@
                 });
             });
         });
-    });
+    }
 </script>
 </html>

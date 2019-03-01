@@ -8,10 +8,18 @@
 <link rel="stylesheet" href="/static/layui/css/layui.css" media="all">
 <script type="text/javascript" src="/static/layui/layui.js"></script>
 <script type="text/javascript">
-    var $;
-    layui.use(['layer', 'element', 'form'], function () {
+    var $, layer, form, element, table;
+    layui.use(['layer', 'element', 'form', 'table'], function () {
         $ = layui.$;
         element = layui.element;
+        layer = layui.layer;
+        form = layui.form;
+        table = layui.table;
+        //
+        try {
+            loadSuccess && loadSuccess();
+        } catch (e) {
+        }
     });
 
     function tabChange(options) {
