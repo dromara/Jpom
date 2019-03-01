@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.annotation.Resource;
-import java.io.IOException;
 
 /**
  * 初始化程序
@@ -29,7 +28,7 @@ public class InstallController extends BaseController {
 
     @RequestMapping(value = "install.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
     @NotLogin
-    public String install() throws IOException {
+    public String install() {
         if (userService.userListEmpty()) {
             return "install";
         }
@@ -52,11 +51,7 @@ public class InstallController extends BaseController {
         if (Validator.isChinese(userName)) {
             return JsonMessage.getString(400, "登录名不能包含汉字");
         }
-        if (StrUtil.isEmpty(userPwd)) {
-            return JsonMessage.getString(400, "密码不能为空");
-        }
-        int length = userPwd.length();
-        if (length < 6) {
+        if (StrUtil.isEmpty(userPwd) || userPwd.length() < UserModel.USER_PWD_LEN) {
             return JsonMessage.getString(400, "密码长度为6-12位");
         }
         UserModel userModel = new UserModel();

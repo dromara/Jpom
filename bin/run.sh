@@ -1,6 +1,6 @@
 #!/bin/bash
 
-Tag="JpomApplication"
+Tag="KeepBx-System-JpomApplication"
 MainClass="cn.keepbx.jpom.JpomApplication"
 # 自动获取当前路径
 Path=$(cd `dirname $0`; pwd)"/"

@@ -41,7 +41,7 @@ public class LoginControl extends BaseController {
         return "login";
     }
 
-    @RequestMapping(value = "userLogin", method = RequestMethod.POST)
+    @RequestMapping(value = "userLogin", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     @NotLogin
     public String userLogin(String userName, String userPwd) {
