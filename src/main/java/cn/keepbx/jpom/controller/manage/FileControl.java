@@ -10,7 +10,6 @@ import cn.keepbx.jpom.common.PageUtil;
 import cn.keepbx.jpom.controller.BaseController;
 import cn.keepbx.jpom.model.ProjectInfoModel;
 import cn.keepbx.jpom.service.manage.ManageService;
-import cn.keepbx.jpom.service.user.UserService;
 import cn.keepbx.jpom.system.ConfigBean;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -35,9 +34,6 @@ public class FileControl extends BaseController {
 
     @Resource
     private ManageService manageService;
-
-    @Resource
-    private UserService userService;
 
     /**
      * 文件管理页面
@@ -167,7 +163,6 @@ public class FileControl extends BaseController {
         if (ConfigBean.getInstance().safeMode) {
             return JsonMessage.getString(400, "安全模式不能清除文件");
         }
-//        boolean manager = userService.isManager(id, getUserName());
         if (!userName.isProject(id)) {
             return JsonMessage.getString(400, "你没有对应操作权限操作!");
         }
@@ -192,8 +187,8 @@ public class FileControl extends BaseController {
     @RequestMapping(value = "deleteFile", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     public String deleteFile(String id, String filename) {
-        if (ConfigBean.getInstance().safeMode) {
-            return JsonMessage.getString(400, "安全模式不能清除文件");
+        if (!userName.isProject(id)) {
+            return JsonMessage.getString(400, "你没有对应操作权限操作!");
         }
         try {
             ProjectInfoModel pim = manageService.getProjectInfo(id);

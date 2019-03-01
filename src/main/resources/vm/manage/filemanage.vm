@@ -81,9 +81,11 @@
                 });
             },
             allDone: function (obj) {
-                layer.msg(JSON.stringify(obj));
+                layer.msg("文件总数：" + obj.total + " 成功上传：" + obj.successful + " 上传失败：" + obj.aborted);
                 setTimeout(function () {
-                    table.reload('table_file', {height: 'full-52'});
+                    table.reload('table_file', {
+                        height: 'full-52'
+                    });
                     layer.closeAll();
                 }, 2000);
             },
@@ -117,7 +119,9 @@
                                 if (200 === data.code) {
                                     layer.msg(data.msg);
                                     // 刷新项目列表
-                                    table.reload('table_file', {height: 'full-52'});
+                                    table.reload('table_file', {
+                                        height: 'full-52'
+                                    });
                                 } else {
                                     layer.msg(data.msg);
                                 }

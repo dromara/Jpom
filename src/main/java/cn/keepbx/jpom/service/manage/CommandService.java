@@ -16,6 +16,7 @@ import javax.annotation.Resource;
 import javax.websocket.Session;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
 
 /**
  * Created by jiangzeyin on 2018/9/28.
@@ -148,18 +149,7 @@ public class CommandService {
     private String execCommand(String command, Evt evt) {
         String result = "error";
         try {
-            DefaultSystemLog.LOG().info(command);
-            Process process = Runtime.getRuntime().exec(command);
-            InputStream is;
-            int wait = process.waitFor();
-            if (wait == 0) {
-                is = process.getInputStream();
-            } else {
-                is = process.getErrorStream();
-            }
-            result = IoUtil.read(is, CharsetUtil.CHARSET_UTF_8);
-            is.close();
-            process.destroy();
+            result = exec(new String[]{command});
         } catch (IOException | InterruptedException e) {
             DefaultSystemLog.ERROR().error("执行命令异常", e);
             if (evt != null) {
@@ -170,28 +160,38 @@ public class CommandService {
         return result;
     }
 
-
     public String execSystemCommand(String command) {
         String result = "error";
         try {
-            DefaultSystemLog.LOG().info(command);
             //执行linux系统命令
             String[] cmd = {"/bin/sh", "-c", command};
-            Process process = Runtime.getRuntime().exec(cmd);
-            InputStream is;
-            int wait = process.waitFor();
-            if (wait == 0) {
-                is = process.getInputStream();
-            } else {
-                is = process.getErrorStream();
-            }
-            result = IoUtil.read(is, CharsetUtil.CHARSET_UTF_8);
-            is.close();
-            process.destroy();
+            result = exec(cmd);
         } catch (IOException | InterruptedException e) {
             DefaultSystemLog.ERROR().error("执行命令异常", e);
             result += e.getMessage();
         }
+        return result;
+    }
+
+    private String exec(String[] cmd) throws IOException, InterruptedException {
+        DefaultSystemLog.LOG().info(Arrays.toString(cmd));
+        String result;
+        Process process;
+        if (cmd.length == 1) {
+            process = Runtime.getRuntime().exec(cmd[0]);
+        } else {
+            process = Runtime.getRuntime().exec(cmd);
+        }
+        InputStream is;
+        int wait = process.waitFor();
+        if (wait == 0) {
+            is = process.getInputStream();
+        } else {
+            is = process.getErrorStream();
+        }
+        result = IoUtil.read(is, CharsetUtil.CHARSET_UTF_8);
+        is.close();
+        process.destroy();
         return result;
     }
 

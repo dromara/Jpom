@@ -1,6 +1,7 @@
 package cn.keepbx.jpom.controller;
 
 import cn.keepbx.jpom.common.interceptor.NotLogin;
+import cn.keepbx.jpom.system.ConfigBean;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -28,6 +29,7 @@ public class IndexControl extends BaseController {
      */
     @RequestMapping(value = {"index", "", "index.html", "/"}, method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
     public String index() {
+        setAttribute("safeMode", ConfigBean.getInstance().safeMode);
         return "index";
     }
 

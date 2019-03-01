@@ -7,7 +7,6 @@ import cn.jiangzeyin.common.JsonMessage;
 import cn.keepbx.jpom.controller.BaseController;
 import cn.keepbx.jpom.model.ProjectInfoModel;
 import cn.keepbx.jpom.service.manage.ManageService;
-import cn.keepbx.jpom.service.user.UserService;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
@@ -34,15 +33,13 @@ public class ConsoleController extends BaseController {
 
     @Resource
     private ManageService manageService;
-    @Resource
-    private UserService userService;
 
     /**
      * 管理项目
      *
      * @return page
      */
-    @RequestMapping(value = "console", method = RequestMethod.GET)
+    @RequestMapping(value = "console", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
     public String console(String id) {
         ProjectInfoModel pim = null;
         try {
@@ -72,18 +69,17 @@ public class ConsoleController extends BaseController {
             pim = manageService.getProjectInfo(id);
         } catch (IOException e) {
             DefaultSystemLog.ERROR().error(e.getMessage(), e);
-            return "error";
+            return null;
         }
         if (pim != null) {
-            String logSize = "no";
-
+            String logSize = null;
             File file = new File(pim.getLog());
             if (file.exists()) {
                 logSize = FileUtil.readableFileSize(file);
             }
             return logSize;
         }
-        return "noproject";
+        return null;
     }
 
     @RequestMapping(value = "export.html", method = RequestMethod.GET)
