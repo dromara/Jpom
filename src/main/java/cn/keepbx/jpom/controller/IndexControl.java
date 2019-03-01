@@ -1,5 +1,6 @@
 package cn.keepbx.jpom.controller;
 
+import cn.keepbx.jpom.common.BaseController;
 import cn.keepbx.jpom.common.interceptor.NotLogin;
 import cn.keepbx.jpom.system.ConfigBean;
 import org.springframework.http.MediaType;

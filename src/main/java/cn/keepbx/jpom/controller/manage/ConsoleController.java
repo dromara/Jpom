@@ -4,8 +4,9 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
-import cn.keepbx.jpom.controller.BaseController;
+import cn.keepbx.jpom.common.BaseController;
 import cn.keepbx.jpom.model.ProjectInfoModel;
+import cn.keepbx.jpom.model.UserModel;
 import cn.keepbx.jpom.service.manage.ManageService;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.http.MediaType;
@@ -47,6 +48,7 @@ public class ConsoleController extends BaseController {
         } catch (IOException e) {
             DefaultSystemLog.ERROR().error(e.getMessage(), e);
         }
+        UserModel userName = getUser();
         if (pim != null) {
             setAttribute("projectInfo", JSONObject.toJSONString(pim));
             setAttribute("userInfo", userName.getUserMd5Key());

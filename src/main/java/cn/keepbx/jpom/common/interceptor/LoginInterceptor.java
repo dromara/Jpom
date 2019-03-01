@@ -2,6 +2,7 @@ package cn.keepbx.jpom.common.interceptor;
 
 import cn.jiangzeyin.common.interceptor.BaseInterceptor;
 import cn.jiangzeyin.common.interceptor.InterceptorPattens;
+import cn.keepbx.jpom.common.BaseController;
 import cn.keepbx.jpom.model.UserModel;
 import org.springframework.web.method.HandlerMethod;
 
@@ -17,9 +18,10 @@ import javax.servlet.http.HttpSession;
  */
 @InterceptorPattens
 public class LoginInterceptor extends BaseInterceptor {
-
+    /**
+     * session
+     */
     public static final String SESSION_NAME = "user";
-
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
@@ -38,5 +40,11 @@ public class LoginInterceptor extends BaseInterceptor {
         }
         reload();
         return true;
+    }
+
+    @Override
+    public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
+        super.afterCompletion(request, response, handler, ex);
+        BaseController.remove();
     }
 }

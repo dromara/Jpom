@@ -83,30 +83,30 @@
             <div class="layui-inline">
                 <label class="layui-form-label">Jvm参数</label>
                 <div class="layui-input-block">
-                    <input type="text" name="jvm" placeholder="jvm参数" class="layui-input"
+                    <input type="text" name="jvm" placeholder="jvm参数,非必填" class="layui-input"
                            value="#if($item)$!item.jvm#end">
                 </div>
             </div>
             <div class="layui-inline">
                 <label class="layui-form-label">args</label>
                 <div class="layui-input-block">
-                    <input type="text" name="args" placeholder="arg参数" class="layui-input"
+                    <input type="text" name="args" placeholder="Main函数 args参数,非必填" class="layui-input"
                            value="#if($item)$!item.args#end">
                 </div>
             </div>
         </div>
         <div class="layui-form-item">
             <div class="layui-inline">
-                <label class="layui-form-label">Token</label>
+                <label class="layui-form-label">WebHooks</label>
                 <div class="layui-input-block">
-                    <input type="text" name="token" placeholder="对应接口的token，没有请填写no" class="layui-input"
+                    <input type="text" name="token" placeholder="关闭程序时自动请求，没有请填写no" class="layui-input"
                            value="#if($item)$!item.token#end">
                 </div>
             </div>
             <div class="layui-inline">
                 <label class="layui-form-label">Build标识</label>
                 <div class="layui-input-block">
-                    <input type="text" name="buildTag" placeholder="Build标识" class="layui-input"
+                    <input type="text" name="buildTag" placeholder="CodePipeline发布后oss中的文件标识,非必填" class="layui-input"
                            value="#if($item)$!item.buildTag#end">
                 </div>
             </div>

@@ -6,9 +6,10 @@ import cn.hutool.extra.servlet.ServletUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.controller.multipart.MultipartFileBuilder;
+import cn.keepbx.jpom.common.BaseController;
 import cn.keepbx.jpom.common.PageUtil;
-import cn.keepbx.jpom.controller.BaseController;
 import cn.keepbx.jpom.model.ProjectInfoModel;
+import cn.keepbx.jpom.model.UserModel;
 import cn.keepbx.jpom.service.manage.ManageService;
 import cn.keepbx.jpom.system.ConfigBean;
 import com.alibaba.fastjson.JSONArray;
@@ -69,6 +70,7 @@ public class FileControl extends BaseController {
     @RequestMapping(value = "getFileList", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     public String getFileList(String id) {
+        UserModel userName = getUser();
         if (!userName.isProject(id)) {
             return JsonMessage.getString(400, "你没有该操作权限操作!");
         }
@@ -120,6 +122,7 @@ public class FileControl extends BaseController {
     public String upload(String id) throws Exception {
 //        String id = getParameter("id");
 //        boolean manager = userService.isManager(id, getUserName());
+        UserModel userName = getUser();
         if (!userName.isProject(id)) {
             return JsonMessage.getString(400, "你没有该操作权限操作!");
         }
@@ -166,6 +169,7 @@ public class FileControl extends BaseController {
         if (ConfigBean.getInstance().safeMode) {
             return JsonMessage.getString(400, "安全模式不能清除文件");
         }
+        UserModel userName = getUser();
         if (!userName.isProject(id)) {
             return JsonMessage.getString(400, "你没有对应操作权限操作!");
         }
@@ -190,6 +194,7 @@ public class FileControl extends BaseController {
     @RequestMapping(value = "deleteFile", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     public String deleteFile(String id, String filename) {
+        UserModel userName = getUser();
         if (!userName.isProject(id)) {
             return JsonMessage.getString(400, "你没有对应操作权限操作!");
         }

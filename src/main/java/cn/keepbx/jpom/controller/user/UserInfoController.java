@@ -3,7 +3,7 @@ package cn.keepbx.jpom.controller.user;
 import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
-import cn.keepbx.jpom.controller.BaseController;
+import cn.keepbx.jpom.common.BaseController;
 import cn.keepbx.jpom.model.UserModel;
 import cn.keepbx.jpom.service.user.UserService;
 import cn.keepbx.jpom.system.ConfigBean;
@@ -36,6 +36,7 @@ public class UserInfoController extends BaseController {
      */
     @RequestMapping(value = "updatePwd", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public String updatePwd(String oldPwd, String newPwd) {
+        UserModel userName = getUser();
         if (ConfigBean.getInstance().safeMode) {
             String parent = userName.getParent();
             if (UserModel.SYSTEM_ADMIN.equals(parent)) {
@@ -75,6 +76,7 @@ public class UserInfoController extends BaseController {
      */
     @RequestMapping(value = "deleteUser", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public String deleteUser(String id) {
+        UserModel userName = getUser();
         if (userName == null) {
             return JsonMessage.getString(401, "系统异常：不能删除");
         }
@@ -99,6 +101,7 @@ public class UserInfoController extends BaseController {
      */
     @RequestMapping(value = "addUser", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public String addUser(String id, String name, String manage, String password) {
+        UserModel userName = getUser();
         if (!userName.isManage()) {
             return JsonMessage.getString(400, "你还没有权限");
         }
@@ -150,6 +153,7 @@ public class UserInfoController extends BaseController {
      */
     @RequestMapping(value = "updateUser", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public String updateUser(String id, String name, String manage, String password) {
+        UserModel userName = getUser();
         if (!userName.isManage()) {
             return JsonMessage.getString(400, "你还没有权限");
         }

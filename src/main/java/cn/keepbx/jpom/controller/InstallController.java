@@ -3,8 +3,11 @@ package cn.keepbx.jpom.controller;
 import cn.hutool.core.lang.Validator;
 import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.JsonMessage;
+import cn.jiangzeyin.common.spring.SpringUtil;
+import cn.keepbx.jpom.common.BaseController;
 import cn.keepbx.jpom.common.interceptor.LoginInterceptor;
 import cn.keepbx.jpom.common.interceptor.NotLogin;
+import cn.keepbx.jpom.controller.system.WhitelistDirectoryController;
 import cn.keepbx.jpom.model.UserModel;
 import cn.keepbx.jpom.service.user.UserService;
 import org.springframework.http.MediaType;
@@ -44,7 +47,7 @@ public class InstallController extends BaseController {
     @RequestMapping(value = "install_submit.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @NotLogin
     @ResponseBody
-    public String installSubmit(String userName, String userPwd) {
+    public String installSubmit(String userName, String userPwd, String whitelistDirectory) {
         if (StrUtil.isEmpty(userName)) {
             return JsonMessage.getString(400, "登录名不能为空");
         }
@@ -62,6 +65,12 @@ public class InstallController extends BaseController {
         userModel.setManage(true);
         boolean b = userService.addUser(userModel);
         if (b) {
+            // 白名单
+            WhitelistDirectoryController whitelistDirectoryController = SpringUtil.getBean(WhitelistDirectoryController.class);
+            JsonMessage jsonMessage = whitelistDirectoryController.save(whitelistDirectory);
+            if (jsonMessage.getCode() != 200) {
+                return jsonMessage.toString();
+            }
             // 自动登录
             setSessionAttribute(LoginInterceptor.SESSION_NAME, userModel);
             return JsonMessage.getString(200, "初始化成功");

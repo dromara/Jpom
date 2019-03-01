@@ -3,9 +3,10 @@ package cn.keepbx.jpom.controller.manage;
 import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
+import cn.keepbx.jpom.common.BaseController;
 import cn.keepbx.jpom.common.PageUtil;
-import cn.keepbx.jpom.controller.BaseController;
 import cn.keepbx.jpom.model.ProjectInfoModel;
+import cn.keepbx.jpom.model.UserModel;
 import cn.keepbx.jpom.service.manage.CommandService;
 import cn.keepbx.jpom.service.manage.ManageService;
 import com.alibaba.fastjson.JSONArray;
@@ -55,6 +56,7 @@ public class ManageControl extends BaseController {
     @ResponseBody
     public String getProjectInfo() {
         try {
+            UserModel userName = getUser();
             // 查询数据
             JSONObject json = manageService.getAllProjectInfo();
             // 转换为数据
@@ -115,7 +117,7 @@ public class ManageControl extends BaseController {
     @RequestMapping(value = "deleteProject", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     public String deleteProject(String id) {
-//        boolean manager = userService.isManager(id, getUserName());
+        UserModel userName = getUser();
         if (!userName.isProject(id)) {
             return JsonMessage.getString(500, "你没有对应权限");
         }

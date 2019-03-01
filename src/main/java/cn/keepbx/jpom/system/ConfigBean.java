@@ -3,7 +3,7 @@ package cn.keepbx.jpom.system;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.spring.SpringUtil;
-import cn.keepbx.jpom.controller.BaseController;
+import cn.keepbx.jpom.common.BaseController;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 

@@ -4,7 +4,8 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.text.StrSpliter;
 import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.JsonMessage;
-import cn.keepbx.jpom.controller.BaseController;
+import cn.keepbx.jpom.common.BaseController;
+import cn.keepbx.jpom.model.UserModel;
 import cn.keepbx.jpom.service.system.SystemService;
 import cn.keepbx.jpom.system.ConfigBean;
 import com.alibaba.fastjson.JSONArray;
@@ -47,32 +48,41 @@ public class WhitelistDirectoryController extends BaseController {
     @RequestMapping(value = "whitelistDirectory_submit", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     public String whitelistDirectorySubmit(String value) {
-        if (StrUtil.isEmpty(value)) {
-            return JsonMessage.getString(401, "白名单不能为空");
-        }
-        List<String> list = StrSpliter.splitTrim(value, "\n", true);
-        if (list == null || list.size() <= 0) {
-            return JsonMessage.getString(401, "白名单不能为空");
-        }
         if (ConfigBean.getInstance().safeMode) {
             return JsonMessage.getString(401, "安全模式下不能修改白名单目录");
         }
+        UserModel userName = getUser();
         if (!userName.isManage()) {
             return JsonMessage.getString(401, "你没有权限修改白名单目录");
         }
+        JsonMessage jsonMessage = save(value);
+        return jsonMessage.toString();
+    }
+
+    public JsonMessage save(String value) {
+        if (StrUtil.isEmpty(value)) {
+            return new JsonMessage(401, "白名单不能为空");
+        }
+        List<String> list = StrSpliter.splitTrim(value, "\n", true);
+        if (list == null || list.size() <= 0) {
+            return new JsonMessage(401, "白名单不能为空");
+        }
+
         JSONArray jsonArray = new JSONArray();
         for (String s : list) {
             String val = String.format("/%s/", s);
+            val = val.replace("../", "");
             val = FileUtil.normalize(val);
             jsonArray.add(val);
         }
         String error = findStartsWith(jsonArray, 0);
         if (error != null) {
-            return JsonMessage.getString(401, "白名单目录中不能存在包含关系：" + error);
+            return new JsonMessage(401, "白名单目录中不能存在包含关系：" + error);
         }
         systemService.saveWhitelistDirectory(jsonArray);
-        return JsonMessage.getString(200, "保存成功");
+        return new JsonMessage(200, "保存成功");
     }
+
 
     private String findStartsWith(JSONArray jsonArray, int start) {
         String str = jsonArray.getString(start);

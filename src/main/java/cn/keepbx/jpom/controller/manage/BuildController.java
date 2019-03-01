@@ -5,7 +5,7 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.core.util.ZipUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
-import cn.keepbx.jpom.controller.BaseController;
+import cn.keepbx.jpom.common.BaseController;
 import cn.keepbx.jpom.model.ProjectInfoModel;
 import cn.keepbx.jpom.service.manage.CommandService;
 import cn.keepbx.jpom.service.manage.ManageService;
@@ -51,7 +51,7 @@ public class BuildController extends BaseController {
 
     @RequestMapping(value = "build_download", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
     public String buildDownload(String id, String key) {
-        if (!userName.isProject(id)) {
+        if (!getUser().isProject(id)) {
             return "redirect:error";
         }
         try {
@@ -69,7 +69,7 @@ public class BuildController extends BaseController {
     @RequestMapping(value = "build_install", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     public String buildInstall(String id, String key) throws Exception {
-        if (!userName.isProject(id)) {
+        if (!getUser().isProject(id)) {
             return JsonMessage.getString(400, "你没有对应操作权限操作!");
         }
         ProjectInfoModel projectInfoModel = manageService.getProjectInfo(id);

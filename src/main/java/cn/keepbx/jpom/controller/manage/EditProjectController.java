@@ -2,12 +2,15 @@ package cn.keepbx.jpom.controller.manage;
 
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.lang.PatternPool;
 import cn.hutool.core.lang.Validator;
+import cn.hutool.core.util.ReUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
-import cn.keepbx.jpom.controller.BaseController;
+import cn.keepbx.jpom.common.BaseController;
 import cn.keepbx.jpom.model.ProjectInfoModel;
+import cn.keepbx.jpom.model.UserModel;
 import cn.keepbx.jpom.service.manage.ManageService;
 import cn.keepbx.jpom.service.system.SystemService;
 import cn.keepbx.jpom.socket.LogWebSocketHandle;
@@ -110,8 +113,17 @@ public class EditProjectController extends BaseController {
         log = String.format("%s/%s.log", log, id);
         projectInfo.setLog(FileUtil.normalize(log));
 
+        //
+        String token = projectInfo.getToken();
+        if (!ProjectInfoModel.NO_TOKEN.equals(token)) {
+            if (!ReUtil.isMatch(PatternPool.URL_HTTP, token)) {
+                return JsonMessage.getString(401, "WebHooks 地址不合法");
+            }
+        }
+
         ProjectInfoModel exits = manageService.getProjectInfo(id);
         try {
+            UserModel userName = getUser();
             JsonMessage jsonMessage = checkPath(projectInfo);
             if (jsonMessage != null) {
                 return jsonMessage.toString();

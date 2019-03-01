@@ -9,6 +9,8 @@ import com.alibaba.fastjson.JSONObject;
  * @author jiangzeyin
  */
 public class ProjectInfoModel {
+    public static final String NO_TOKEN = "no";
+
     private String id;
     private String name;
     private String group;
@@ -134,7 +136,7 @@ public class ProjectInfoModel {
      */
     public String getToken() {
         if (StrUtil.isEmpty(token)) {
-            token = "no";
+            token = NO_TOKEN;
         }
         return token;
     }

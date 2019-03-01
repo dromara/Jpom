@@ -1,4 +1,4 @@
-package cn.keepbx.jpom.controller;
+package cn.keepbx.jpom.common;
 
 import cn.jiangzeyin.controller.base.AbstractController;
 import cn.keepbx.jpom.common.interceptor.LoginInterceptor;
@@ -12,11 +12,23 @@ import org.springframework.web.context.request.RequestAttributes;
  * @date 2018/9/28
  */
 public abstract class BaseController extends AbstractController {
-    protected UserModel userName;
+    private static final ThreadLocal<UserModel> USER_MODEL_THREAD_LOCAL = new ThreadLocal<>();
 
     @Override
     public void resetInfo() {
-        userName = (UserModel) getSessionAttributeObj(LoginInterceptor.SESSION_NAME);
+        USER_MODEL_THREAD_LOCAL.set(getUserModel());
+    }
+
+    protected UserModel getUser() {
+        return USER_MODEL_THREAD_LOCAL.get();
+    }
+
+    public static void remove() {
+        USER_MODEL_THREAD_LOCAL.remove();
+    }
+
+    private static UserModel getUserModel() {
+        return (UserModel) getRequestAttributes().getAttribute(LoginInterceptor.SESSION_NAME, RequestAttributes.SCOPE_SESSION);
     }
 
     /**
@@ -25,14 +37,10 @@ public abstract class BaseController extends AbstractController {
      * @return 用户名
      */
     public static String getUserName() {
-        UserModel userModel = (UserModel) getRequestAttributes().getAttribute(LoginInterceptor.SESSION_NAME, RequestAttributes.SCOPE_SESSION);
+        UserModel userModel = getUserModel();
         if (userModel == null) {
             return null;
         }
         return userModel.getId();
     }
-
-//    protected String getSocketPwd() {
-//        return userName.getUserMd5Key();
-//    }
 }

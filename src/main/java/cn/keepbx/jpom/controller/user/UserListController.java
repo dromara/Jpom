@@ -1,8 +1,9 @@
 package cn.keepbx.jpom.controller.user;
 
 import cn.jiangzeyin.common.JsonMessage;
-import cn.keepbx.jpom.controller.BaseController;
+import cn.keepbx.jpom.common.BaseController;
 import cn.keepbx.jpom.model.ProjectInfoModel;
+import cn.keepbx.jpom.model.UserModel;
 import cn.keepbx.jpom.service.manage.ManageService;
 import cn.keepbx.jpom.service.user.UserService;
 import com.alibaba.fastjson.JSONArray;
@@ -45,7 +46,7 @@ public class UserListController extends BaseController {
     @RequestMapping(value = "getUserList", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     public String getUserList() {
-//        boolean manager = userService.isManager("", getUserName());
+        UserModel userName = getUser();
         if (!userName.isManage()) {
             return JsonMessage.getString(400, "你没有对应权限！");
         }

@@ -23,7 +23,7 @@
             <div class="layui-inline" style="width: 80%;height:30vh;">
                 <label class="layui-form-label">白名单列表</label>
                 <div class="layui-input-block auto">
-                    <textarea name="value" placeholder="请输入内容"
+                    <textarea name="value" placeholder="请输入项目存放路径白名单，回车支持输入多个路径，系统会自动过滤 ../ 路径"
                               class="layui-textarea auto">$!value</textarea>
                 </div>
             </div>
