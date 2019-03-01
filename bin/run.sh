@@ -38,7 +38,7 @@ function stop() {
         echo -n "boot ( pid $pid) is running" 
         echo 
         echo -n $"Shutting down boot: "
-        kill $(pgrep -f ${MainClass}) 2>/dev/null
+        kill $(pgrep -f ${Tag}) 2>/dev/null
         sleep 3
 		pid=$(ps -ef | grep -v 'grep' | egrep $Tag| awk '{printf $2 " "}')
 		if [[ "$pid" != "" ]]; then

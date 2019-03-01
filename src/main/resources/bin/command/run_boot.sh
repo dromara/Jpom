@@ -55,7 +55,7 @@ stop()
          wget "$WebClose"
        fi
        #
-       kill $(pgrep -f ${MainClass}) 2>/dev/null
+       kill $(pgrep -f ${Tag}) 2>/dev/null
        sleep 3
        pid=`getPid`
        if [[ "$pid" != "" ]]; then
