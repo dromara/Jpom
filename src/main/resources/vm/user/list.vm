@@ -75,10 +75,12 @@
         <div class="layui-form-item">
             <div class="layui-inline">
                 <label class="layui-form-label">管理项目</label>
-                #foreach($pItem in $projects)
-                    <input type="checkbox" name="project" project="$pItem.id" value="$pItem.id"
-                           title="$pItem.name">
-                #end
+                <div class="layui-input-block">
+                    #foreach($pItem in $projects)
+                        <input type="checkbox" name="project" project="$pItem.id" value="$pItem.id"
+                               title="$pItem.name">
+                    #end
+                </div>
             </div>
         </div>
         <input type="hidden" lay-submit lay-filter="submitUser" id="user_submit">

@@ -8,6 +8,11 @@
         .div {
             margin-top: 20px;
         }
+
+        .auto {
+            width: 100%;
+            height: 100%;
+        }
     </style>
 </head>
 
@@ -15,10 +20,11 @@
 <div class="layui-container div">
     <form action="" class="layui-form" id="form_user">
         <div class="layui-form-item">
-            <div class="layui-inline">
+            <div class="layui-inline" style="width: 80%;height:30vh;">
                 <label class="layui-form-label">白名单列表</label>
-                <div class="layui-input-block">
-                    <textarea name="value" placeholder="请输入内容" class="layui-textarea">$!value</textarea>
+                <div class="layui-input-block auto">
+                    <textarea name="value" placeholder="请输入内容"
+                              class="layui-textarea auto">$!value</textarea>
                 </div>
             </div>
         </div>
