@@ -133,21 +133,6 @@ public class UserService extends BaseDataService {
     }
 
     /**
-     * 判断用户是否该项目的管理员
-     *
-     * @param projectId 项目id
-     * @param userId    用户id
-     * @return boolean
-     */
-    public boolean isManagerProject(String projectId, String userId) {
-        UserModel user = getUserModel(userId);
-        if (user == null) {
-            return false;
-        }
-        return user.isProject(projectId);
-    }
-
-    /**
      * 获取用户信息
      *
      * @param userId 用户id

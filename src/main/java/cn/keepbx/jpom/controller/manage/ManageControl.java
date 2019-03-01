@@ -8,7 +8,6 @@ import cn.keepbx.jpom.controller.BaseController;
 import cn.keepbx.jpom.model.ProjectInfoModel;
 import cn.keepbx.jpom.service.manage.CommandService;
 import cn.keepbx.jpom.service.manage.ManageService;
-import cn.keepbx.jpom.service.user.UserService;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.http.MediaType;
@@ -36,15 +35,13 @@ public class ManageControl extends BaseController {
     private ManageService manageService;
     @Resource
     private CommandService commandService;
-    @Resource
-    private UserService userService;
 
     /**
      * 展示项目页面
      *
      * @return page
      */
-    @RequestMapping(value = "projectInfo")
+    @RequestMapping(value = "projectInfo", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
     public String projectInfo() {
         return "manage/projectInfo";
     }
@@ -54,26 +51,25 @@ public class ManageControl extends BaseController {
      *
      * @return json
      */
-    @RequestMapping(value = "getProjectInfo")
+    @RequestMapping(value = "getProjectInfo", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
-    public String getProjectInfo(String userId) {
+    public String getProjectInfo() {
         try {
             // 查询数据
             JSONObject json = manageService.getAllProjectInfo();
             // 转换为数据
             List<JSONObject> array = new ArrayList<>();
             Set<String> setKey = json.keySet();
-            if (StrUtil.isEmpty(userId)) {
-                userId = getUserName();
-            }
-            for (String asetKey : setKey) {
-                ProjectInfoModel projectInfoModel = manageService.getProjectInfo(asetKey);
+            for (String key : setKey) {
+                JSONObject jsonObject = json.getJSONObject(key);
+                ProjectInfoModel projectInfoModel = jsonObject.toJavaObject(ProjectInfoModel.class);
+//                manageService.getProjectInfo(key);
                 String result = commandService.execCommand(CommandService.CommandOp.status, projectInfoModel);
                 boolean status = result.contains(CommandService.RUNING_TAG);
                 projectInfoModel.setStatus(status);
                 String id = projectInfoModel.getId();
                 JSONObject object = (JSONObject) JSONObject.toJSON(projectInfoModel);
-                object.put("manager", userService.isManagerProject(id, userId));
+                object.put("manager", userName.isProject(id));
                 array.add(object);
             }
             array.sort((o1, o2) -> {

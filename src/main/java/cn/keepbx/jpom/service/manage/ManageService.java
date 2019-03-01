@@ -2,9 +2,10 @@ package cn.keepbx.jpom.service.manage;
 
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.StrUtil;
-import cn.keepbx.jpom.model.ProjectInfoModel;
 import cn.keepbx.jpom.common.BaseDataService;
+import cn.keepbx.jpom.model.ProjectInfoModel;
 import cn.keepbx.jpom.system.ConfigBean;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;
 
@@ -29,6 +30,16 @@ public class ManageService extends BaseDataService {
      */
     public JSONObject getAllProjectInfo() throws IOException {
         return getJsonObject(FILENAME);
+    }
+
+    public JSONArray getAllProjectArrayInfo() throws IOException {
+        JSONObject jsonObject = getJsonObject(FILENAME);
+        Set<String> setKey = jsonObject.keySet();
+        JSONArray jsonArray = new JSONArray();
+        for (String key : setKey) {
+            jsonArray.add(jsonObject.getJSONObject(key));
+        }
+        return jsonArray;
     }
 
     /**

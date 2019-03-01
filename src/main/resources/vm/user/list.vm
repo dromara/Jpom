@@ -72,8 +72,15 @@
                 </div>
             </div>
         </div>
-        <div id="view"></div>
-
+        <div class="layui-form-item">
+            <div class="layui-inline">
+                <label class="layui-form-label">管理项目</label>
+                #foreach($pItem in $projects)
+                    <input type="checkbox" name="project" project="$pItem.id" value="$pItem.id"
+                           title="$pItem.name">
+                #end
+            </div>
+        </div>
         <input type="hidden" lay-submit lay-filter="submitUser" id="user_submit">
     </form>
 </div>
@@ -88,17 +95,7 @@
     <input type="checkbox" id="" disabled name="status" {{# if(d.manage){ }} checked {{# } }} lay-skin="switch"
            lay-text="是|否">
 </script>
-<script id="manageProject" type="text/html">
-    <div class="layui-form-item">
-        <div class="layui-inline">
-            <label class="layui-form-label">管理项目</label>
-            {{# layui.each(d.data, function(index, item){ }}
-            <input type="checkbox" name="project" value="{{= item.id }}"
-                   title="{{= item.name }}" {{# if(item.manager){ }} checked {{# } }}>
-            {{# }); }}
-        </div>
-    </div>
-</script>
+
 <script type="text/javascript">
     layui.use(['layer', 'element', 'table', 'form', 'laytpl'], function () {
         var $ = layui.$;
@@ -131,16 +128,22 @@
             // 重置表单
             document.getElementById('form_user').reset();
             $('#form_user [name="id"]').attr('readonly', true).addClass('layui-disabled');
+            $('#form_user [name="project"]').prop('checked', false);
             // 设置表单值
             for (var key in data) {
                 if ("manage" === key) {
-                    if (true === data[key])
-                        $('#form_user [name="manage"]').attr('checked', true);
+                    $('#form_user [name="manage"]').prop('checked', data[key]);
+                } else if ('projects' === key) {
+                    const projects = data[key];
+                    if (projects) {
+                        for (var i = 0; i < projects.length; i++) {
+                            $('input[project="' + projects[i] + '"]').prop('checked', true);
+                        }
+                    }
                 } else {
                     $('#form_user [name="' + key + '"]').val(data[key]);
                 }
             }
-            getProject(data.id);
             // 弹出
             layer.open({
                 type: 1,
@@ -156,39 +159,14 @@
             });
         }
 
-
-        function getProject(userId) {
-            $.ajax({
-                url: "/manage/getProjectInfo",
-                type: 'POST',
-                dataType: 'json',
-                data: {userId: userId},
-                success: function (data) {
-                    if (200 == data.code) {
-                        var manager = manageProject.innerHTML;
-                        var view = document.getElementById('view');
-                        laytpl(manager).render(data, function (html) {
-                            view.innerHTML = html;
-                        });
-                        form.render();
-                    } else {
-                        layer.msg(data.msg);
-                    }
-                },
-                error: function (err) {
-                    layer.msg('操作失败！');
-                }
-            });
-        }
-
-
         // '添加用户'点击事件
         $('#addProject').on('click', function () {
             // 重置表单
             document.getElementById('form_user').reset();
             $('#form_user [name="id"]').attr('readonly', false).removeClass('layui-disabled');
-            $('#form_user [name="manage"]').attr('checked', false);
-            getProject('-1');
+            $('#form_user [name="manage"]').prop('checked', false);
+            $('#form_user [name="project"]').prop('checked', false);
+            // form.render();
             // 弹出
             layer.open({
                 type: 1,
@@ -206,25 +184,17 @@
 
         // '刷新表格'点击事件
         $('#refresh').on('click', function () {
-            table.reload('tab_user', {height: 'full-52'});
+            table.reload('tab_user', {
+                height: 'full-52'
+            });
         });
 
-        function getCheckedBox() {
-            var projects = $('input[name="project"]');
-            var check_val = [];
-            for (k in projects) {
-                if (projects[k].checked) {
-                    check_val.push(projects[k].value);
-                }
-            }
-            return check_val;
-        }
 
         // 提交用户信息
         form.on('submit(submitUser)', function (data) {
-            var check_val = getCheckedBox();
+            // var check_val = getCheckedBox();
             var field = data.field;
-            field.project = check_val.join(",");
+            // field.project = check_val.join(",");
             $.ajax({
                 url: data.form.action,
                 type: 'POST',
@@ -265,7 +235,9 @@
 
         // 删除用户
         function deleteApplication(data) {
-            layer.confirm('确定删除用户 ' + data.id + '？', {title: '系统提示'}, function (index) {
+            layer.confirm('确定删除用户 ' + data.id + '？', {
+                title: '系统提示'
+            }, function (index) {
                 layer.close(index);
                 $.ajax({
                     url: '/user/deleteUser',

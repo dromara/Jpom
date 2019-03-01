@@ -60,7 +60,7 @@ public class LogWebSocketHandle implements TailLogThread.Evn {
                 session.close();
                 return;
             }
-            if (!userService.isManagerProject(projectInfoModel.getId(), userModel.getId())) {
+            if (!userModel.isProject(projectInfoModel.getId())) {
                 socketSession.sendMsg("没有项目权限");
                 session.close();
                 return;

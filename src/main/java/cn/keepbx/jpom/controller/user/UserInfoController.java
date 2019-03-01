@@ -89,7 +89,6 @@ public class UserInfoController extends BaseController {
      */
     @RequestMapping(value = "addUser", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public String addUser(String id, String name, String manage, String password) {
-//        boolean manager = userService.isManager("", getUserName());
         if (!userName.isManage()) {
             return JsonMessage.getString(400, "你还没有权限");
         }
@@ -114,6 +113,14 @@ public class UserInfoController extends BaseController {
         userModel.setManage(manageB);
         userModel.setParent(userName.getId());
 
+        String[] projects = getParameters("project");
+        JSONArray jsonProjects = null;
+        if (projects != null) {
+            jsonProjects = (JSONArray) JSONArray.toJSON(projects);
+        }
+
+        userModel.setProjects(jsonProjects);
+
         boolean b = userService.addUser(userModel);
         if (b) {
             return JsonMessage.getString(200, "添加成功");
@@ -127,9 +134,9 @@ public class UserInfoController extends BaseController {
      * @return String
      */
     @RequestMapping(value = "updateUser", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public String updateUser(String id, String name, String manage, String password, String project) {
-        if (StrUtil.isEmpty(id)) {
-            return JsonMessage.getString(400, "登录名不能为空");
+    public String updateUser(String id, String name, String manage, String password) {
+        if (!userName.isManage()) {
+            return JsonMessage.getString(400, "你还没有权限");
         }
         if (!StrUtil.isEmpty(password)) {
             int length = password.length();
@@ -137,19 +144,21 @@ public class UserInfoController extends BaseController {
                 return JsonMessage.getString(400, "密码长度为6-12位");
             }
         }
-        JSONArray projects = null;
-        if (StrUtil.isNotEmpty(project)) {
-            projects = (JSONArray) JSONArray.toJSON(StrUtil.splitToArray(project, ','));
+        String[] projects = getParameters("project");
+        JSONArray jsonProjects = null;
+        if (projects != null) {
+            jsonProjects = (JSONArray) JSONArray.toJSON(projects);
         }
         UserModel userModel = userService.getUserModel(id);
-//        UserModel userModel = new UserModel();
-//        userModel.setId(id);
+        if (userModel == null) {
+            return JsonMessage.getString(400, "修改失败:-1");
+        }
         userModel.setName(name);
         if (StrUtil.isNotEmpty(password) && password.length() >= 6) {
             userModel.setPassword(password);
         }
         userModel.setManage("true".equals(manage));
-        userModel.setProjects(projects);
+        userModel.setProjects(jsonProjects);
         boolean b = userService.updateUser(userModel);
         if (b) {
             return JsonMessage.getString(200, "修改成功");

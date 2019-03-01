@@ -46,13 +46,16 @@ public class EditProjectController extends BaseController {
         // 白名单
         JSONArray jsonArray = systemService.getWhitelistDirectory();
         setAttribute("whitelistDirectory", jsonArray);
-        for (Object obj : jsonArray) {
-            String path = obj.toString();
-            String lib = projectInfo.getLib();
-            if (lib.startsWith(path)) {
-                lib = lib.substring(path.length());
-                projectInfo.setLib(lib);
-                break;
+
+        if (projectInfo != null) {
+            for (Object obj : jsonArray) {
+                String path = obj.toString();
+                String lib = projectInfo.getLib();
+                if (lib.startsWith(path)) {
+                    lib = lib.substring(path.length());
+                    projectInfo.setLib(lib);
+                    break;
+                }
             }
         }
         setAttribute("item", projectInfo);

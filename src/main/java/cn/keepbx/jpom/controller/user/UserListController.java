@@ -2,6 +2,7 @@ package cn.keepbx.jpom.controller.user;
 
 import cn.jiangzeyin.common.JsonMessage;
 import cn.keepbx.jpom.controller.BaseController;
+import cn.keepbx.jpom.service.manage.ManageService;
 import cn.keepbx.jpom.service.user.UserService;
 import com.alibaba.fastjson.JSONArray;
 import org.springframework.http.MediaType;
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.annotation.Resource;
+import java.io.IOException;
 
 /**
  * @author Administrator
@@ -22,11 +24,16 @@ public class UserListController extends BaseController {
     @Resource
     private UserService userService;
 
+    @Resource
+    private ManageService manageService;
+
     /**
      * 展示用户列表
      */
     @RequestMapping(value = "list", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
-    public String projectInfo() {
+    public String projectInfo() throws IOException {
+        JSONArray jsonArray = manageService.getAllProjectArrayInfo();
+        setAttribute("projects", jsonArray);
         return "user/list";
     }
 
