@@ -39,9 +39,20 @@
         .layui-inline {
             width: 200px;
         }
-    </style>
-</head>
 
+        .top {
+            margin-top: 20px;
+            width: 100%;
+        }
+
+        .echarts {
+            margin: 0 auto;
+            width: 90%;
+            height: 500px;
+        }
+    </style>
+    <script src="http://echarts.baidu.com/dist/echarts.js"></script>
+</head>
 <body>
 <form action="" class="layui-form" id="form">
     <div class="layui-inline">
@@ -51,9 +62,13 @@
         </div>
     </div>
 </form>
-<div class="layui-container">
-    <div class="terminal"></div>
+##<div class="layui-container">
+##    <div class="terminal"></div>
+##</div>
+<div class="top">
+    <div class="echarts" id="echarts"></div>
 </div>
+
 </body>
 <script>
     layui.use(['layer', 'element', 'form'], function () {
@@ -63,30 +78,102 @@
         var $ = layui.$;
         var ws;
 
-        var showLogDom = $('.terminal');
+        $(function () {
+            loadFirstEcharts();
+        });
+
+        function loadFirstEcharts() {
+            $.ajax({
+                url: '/manage/getTop',
+                type: 'POST',
+                dataType: 'json',
+                success: function (data) {
+                    if (200 == data.code) {
+                        var top = JSON.parse(data.data);
+                        loadEcharts(top);
+                    } else {
+                        layer.alert(data.msg);
+                    }
+                },
+                error: function (err) {
+                    layer.alert("top信息错误！");
+                }
+            });
+        }
+
+        function linkSocket(status) {
+            if (!ws) {
+                ws = new WebSocket("ws://" + window.location.host + "/console/$userInfo/system");
+            }
+            if (status) {
+                ws.onopen = function () {
+                    ws.send('{"op": "top", "projectInfo":{}}');
+                };
+                ws.onmessage = function (data) {
+                    try {
+                        if (data.data) {
+                            var top = JSON.parse(data.data);
+                            if (top.top) {
+                                loadEcharts(top);
+                            }
+                        }
+                    } catch (e) {
+                        return;
+                    }
+                };
+                ws.onerror = function (ev) {
+                };
+            } else {
+                ws.close();
+            }
+        }
 
         form.on('switch(filter)', function (data) {
             var check = data.elem.checked;
             if ('WebSocket' in window) {
-                if (!ws) {
-                    ws = new WebSocket("ws://" + window.location.host + "/console/$userInfo");
-                }
-                if (check) {
-                    ws.onopen = function () {
-                        showLogDom.append('WebSocket连接成功！<br/>');
-                        ws.send('{"op": "top", "projectInfo":{}}');
-                    };
-                    ws.onmessage = function (data) {
-                        showLogDom.html(data.data + '<br/>');
-                    }
-                    ws.onerror = function (ev) {
-                        showLogDom.append('WebSocket连接已关闭！<br/>');
-                    }
-                } else {
-                    ws.close();
-                }
+                linkSocket(check);
             }
         })
+
+        //加载病状图
+        function loadEcharts(top) {
+            console.log(top);
+            if (!top) {
+                return;
+            }
+            var cpu = top.cpu;
+            var value = [];
+            if (cpu) {
+                info = {
+                    name: 'cpu',
+                    type: 'pie',
+                    center: ['30%', '40%'],
+                    radius: ['20%', '40%'],
+                    data: cpu
+                }
+                value.push(info);
+            }
+            var memory = top.memory;
+            if (memory) {
+                info = {
+                    name: '内存',
+                    type: 'pie',
+                    center: ['70%', '40%'],
+                    radius: ['20%', '40%'],
+                    data: memory
+                }
+                value.push(info);
+            }
+            var option = {
+                tooltip: {
+                    trigger: 'item',
+                    formatter: "{a} <br/>{b} : {c} ({d}%)"
+                },
+                series: value
+            };
+            var myEcharts = echarts.init(document.getElementById('echarts'));
+            myEcharts.setOption(option);
+        }
 
 
     });
