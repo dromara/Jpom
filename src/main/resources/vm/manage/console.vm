@@ -30,7 +30,6 @@
 </body>
 <script type="text/javascript">
     var projectInfo =  $projectInfo;
-    var userInfo = '$userInfo';
     var loopLog = false;
     var loopLogTime;
 
@@ -39,7 +38,7 @@
         var showLogDom = $('.console .terminal');
 
         if ('WebSocket' in window) {
-            var ws = new WebSocket("ws://" + window.location.host + "/console/" + userInfo + "/" + projectInfo.id);
+            var ws = new WebSocket("ws://" + window.location.host + "/console/$userInfo/" + projectInfo.id);
 
             ws.onopen = function () {
                 showLogDom.append('WebSocket连接成功！<br/>');
@@ -49,6 +48,7 @@
             ws.onmessage = function (data) {
                 // 如果是
                 if (data.data.indexOf('{') === 0) {
+                    layer.closeAll('loading');
                     var json_data = null;
                     try {
                         json_data = JSON.parse(data.data);
@@ -120,6 +120,9 @@
                     op: opt,
                     projectInfo: projectInfo
                 };
+                layer.load(1, {
+                    shade: [0.3, '#fff'] //0.1透明度的白色背景
+                });
                 ws.send(JSON.stringify(data));
             }
         } else {
