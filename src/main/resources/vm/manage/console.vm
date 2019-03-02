@@ -106,22 +106,27 @@
                     }, 1000);
                 #end
             };
+
+            $('.btn-op').on('click', function () {
+                var op = $(this).attr('op');
+                setMsg(op);
+            });
+
+            function setMsg(opt) {
+                const data = {
+                    op: opt,
+                    projectInfo: projectInfo
+                };
+                layer.load(1, {
+                    shade: [0.3, '#fff'] //0.1透明度的白色背景
+                });
+                ws.send(JSON.stringify(data));
+                setTimeout(function () {
+                    layer.closeAll();
+                }, 2000);
+            }
         } else {
             showLogDom.html('你的浏览器不支持WebSocket！');
-        }
-
-        function setMsg(opt) {
-            const data = {
-                op: opt,
-                projectInfo: projectInfo
-            };
-            layer.load(1, {
-                shade: [0.3, '#fff'] //0.1透明度的白色背景
-            });
-            ws.send(JSON.stringify(data));
-            setTimeout(function () {
-                layer.closeAll();
-            }, 2000);
         }
 
         function setOpBtn(flag) {
@@ -162,10 +167,7 @@
             location.href = "export.html?id=" + projectInfo.id;
         });
 
-        $('.btn-op').on('click', function () {
-            var op = $(this).attr('op');
-            setMsg(op);
-        });
+
     }
 </script>
 </html>
