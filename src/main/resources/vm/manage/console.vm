@@ -101,7 +101,13 @@
 
             ws.onclose = function () {
                 showLogDom.append('WebSocket连接已关闭！<br/>');
-                clearInterval(loopLogTime)
+                clearInterval(loopLogTime);
+                // 如果有权限，自动重连
+                #if($manager)
+                    setTimeout(function () {
+                        window.location.reload();
+                    }, 1000);
+                #end
             };
 
             $('.btn-op').on('click', function () {

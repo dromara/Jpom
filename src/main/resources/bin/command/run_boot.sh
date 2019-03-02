@@ -58,8 +58,9 @@ stop()
        fi
        #
        echo -n $"Shutting down boot: wait"
-       kill $(pgrep -f ${Tag}) 2>/dev/null
-       sleep 3
+       kill "$pid"
+       # kill $(pgrep -f ${Tag}) 2>/dev/null
+       sleep 3s
        pid=`getPid`
        if [[ "$pid" != "" ]]; then
 			echo "kill boot process"
