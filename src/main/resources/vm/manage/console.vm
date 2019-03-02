@@ -34,12 +34,9 @@
     var loopLogTime;
 
     function loadSuccess() {
-
-        var showLogDom = $('.console .terminal');
-
+        const showLogDom = $('.console .terminal');
         if ('WebSocket' in window) {
-            var ws = new WebSocket("ws://" + window.location.host + "/console/$userInfo/" + projectInfo.id);
-
+            const ws = new WebSocket("ws://" + window.location.host + "/console/$userInfo/" + projectInfo.id);
             ws.onopen = function () {
                 showLogDom.append('WebSocket连接成功！<br/>');
                 setMsg('status');
@@ -102,20 +99,13 @@
             ws.onclose = function () {
                 showLogDom.append('WebSocket连接已关闭！<br/>');
                 clearInterval(loopLogTime);
-                // 如果有权限，自动重连
                 #if($manager)
+                    // 如果有权限，自动重连
                     setTimeout(function () {
                         window.location.reload();
                     }, 1000);
                 #end
             };
-
-            $('.btn-op').on('click', function () {
-                var op = $(this).attr('op');
-                setMsg(op);
-            });
-
-
         } else {
             showLogDom.html('你的浏览器不支持WebSocket！');
         }
@@ -170,6 +160,11 @@
 
         $('#export').on('click', function () {
             location.href = "export.html?id=" + projectInfo.id;
+        });
+
+        $('.btn-op').on('click', function () {
+            var op = $(this).attr('op');
+            setMsg(op);
         });
     }
 </script>
