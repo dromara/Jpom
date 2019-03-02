@@ -3,6 +3,7 @@ package cn.keepbx.jpom.service.manage;
 import cn.hutool.core.exceptions.ExceptionUtil;
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.util.CharsetUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.keepbx.jpom.model.ProjectInfoModel;
 import cn.keepbx.jpom.socket.LogWebSocketHandle;
@@ -192,6 +193,9 @@ public class CommandService {
         result = IoUtil.read(is, CharsetUtil.CHARSET_UTF_8);
         is.close();
         process.destroy();
+        if (StrUtil.isEmpty(result)) {
+            result = "没有返回任何执行信息";
+        }
         return result;
     }
 

@@ -51,7 +51,7 @@
             height: 500px;
         }
     </style>
-    <script src="http://echarts.baidu.com/dist/echarts.js"></script>
+    <script src="//echarts.baidu.com/dist/echarts.js"></script>
 </head>
 <body>
 <form action="" class="layui-form" id="form">
@@ -71,7 +71,7 @@
 
 </body>
 <script>
-    layui.use(['layer', 'element', 'form'], function () {
+    function loadSuccess() {
         var element = layui.element;
         var layer = layui.layer;
         var form = layui.form;
@@ -84,7 +84,7 @@
 
         function loadFirstEcharts() {
             $.ajax({
-                url: '/manage/getTop',
+                url: './getTop',
                 type: 'POST',
                 dataType: 'json',
                 success: function (data) {
@@ -174,9 +174,7 @@
             var myEcharts = echarts.init(document.getElementById('echarts'));
             myEcharts.setOption(option);
         }
-
-
-    });
+    }
 </script>
 
 </html>

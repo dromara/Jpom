@@ -31,7 +31,6 @@
 <script type="text/javascript">
     var projectInfo =  $projectInfo;
     var userInfo = '$userInfo';
-    var manager = '$manager';
     var loopLog = false;
     var loopLogTime;
 
@@ -50,7 +49,13 @@
             ws.onmessage = function (data) {
                 // 如果是
                 if (data.data.indexOf('{') === 0) {
-                    var json_data = JSON.parse(data.data);
+                    var json_data = null;
+                    try {
+                        json_data = JSON.parse(data.data);
+                    } catch (e) {
+                        showLogDom.append(data.data + '<br/>');
+                        return;
+                    }
                     if (json_data.code !== 200) {
                         layer.msg(json_data.msg);
                     }
@@ -101,15 +106,11 @@
 
             $('.btn-op').on('click', function () {
                 var op = $(this).attr('op');
-                if ("true" === manager) {
-                    setMsg(op);
-                } else {
-                    layer.msg('你没有对应权限！');
-                }
+                setMsg(op);
             });
 
             function setMsg(opt) {
-                var data = {
+                const data = {
                     op: opt,
                     projectInfo: projectInfo
                 };

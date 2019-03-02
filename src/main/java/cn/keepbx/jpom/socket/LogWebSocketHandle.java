@@ -167,6 +167,7 @@ public class LogWebSocketHandle implements TailLogThread.Evn {
         }
         if (resultData != null) {
             resultData.put("op", op);
+            DefaultSystemLog.LOG().info(resultData.toString());
             socketSession.sendMsg(resultData.toString());
         }
     }
