@@ -2,7 +2,6 @@ package cn.keepbx.jpom.controller;
 
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
-import cn.jiangzeyin.common.spring.SpringUtil;
 import cn.keepbx.jpom.common.BaseController;
 import cn.keepbx.jpom.model.UserModel;
 import cn.keepbx.jpom.service.manage.CommandService;
@@ -37,9 +36,6 @@ public class WelcomeController extends BaseController {
     @RequestMapping(value = "getTop", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     public String getTop() {
-        if (commandService == null) {
-            commandService = SpringUtil.getBean(CommandService.class);
-        }
         String topInfo = "";
         try {
             String s = commandService.execCommand(CommandService.CommandOp.top, null, null);

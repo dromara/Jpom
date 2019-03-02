@@ -72,15 +72,8 @@
 </body>
 <script>
     function loadSuccess() {
-        var element = layui.element;
-        var layer = layui.layer;
-        var form = layui.form;
-        var $ = layui.$;
-        var ws;
-
-        $(function () {
-            loadFirstEcharts();
-        });
+        var ws
+        loadFirstEcharts();
 
         function loadFirstEcharts() {
             $.ajax({

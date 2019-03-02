@@ -47,7 +47,7 @@ public class JpomApplication {
         for (String item : args) {
             item = StrUtil.trim(item);
             if (item.startsWith("--" + name + "=")) {
-                return item.substring(name.length() + 1);
+                return item.substring(name.length() + 3);
             }
         }
         return null;

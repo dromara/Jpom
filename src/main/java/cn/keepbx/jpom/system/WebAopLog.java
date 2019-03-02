@@ -15,6 +15,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.io.File;
+
 /**
  * 自动记录日志
  *
@@ -65,7 +67,9 @@ public class WebAopLog extends PropertyDefinerBase {
     public String getPropertyValue() {
         String path = JpomApplication.getArgs("jpom.log");
         if (StrUtil.isEmpty(path)) {
-            path = "/jpom/log/";
+            File directory = new File("");
+            directory = new File(directory.getAbsolutePath(), "log");
+            path = directory.getPath();
         }
         // 配置默认日志路径
         DefaultSystemLog.configPath(path, false);

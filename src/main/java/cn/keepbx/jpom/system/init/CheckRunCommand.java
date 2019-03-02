@@ -72,8 +72,7 @@ public class CheckRunCommand {
             addDataFile(ConfigBean.WHITELIST_DIRECTORY, file.getPath());
         }
         WebAopLog webAopLog = SpringUtil.getBean(WebAopLog.class);
-        String logPath = SpringUtil.getEnvironment().getProperty("jpom.log");
-        DefaultSystemLog.LOG().info("日志存储路径：" + webAopLog.getPropertyValue() + "   -》  " + logPath);
+        DefaultSystemLog.LOG().info("日志存储路径：" + webAopLog.getPropertyValue());
     }
 
     /**
