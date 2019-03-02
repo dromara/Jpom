@@ -42,13 +42,13 @@
 
             ws.onopen = function () {
                 showLogDom.append('WebSocket连接成功！<br/>');
-                ws.send('{"op": "status", "projectInfo": ' + JSON.stringify(projectInfo) + '}');
+                setMsg('status');
             };
 
             ws.onmessage = function (data) {
                 // 如果是
                 if (data.data.indexOf('{') === 0) {
-                    layer.closeAll('loading');
+                    layer.closeAll();
                     var json_data = null;
                     try {
                         json_data = JSON.parse(data.data);
@@ -115,20 +115,24 @@
                 setMsg(op);
             });
 
-            function setMsg(opt) {
-                const data = {
-                    op: opt,
-                    projectInfo: projectInfo
-                };
-                layer.load(1, {
-                    shade: [0.3, '#fff'] //0.1透明度的白色背景
-                });
-                ws.send(JSON.stringify(data));
-            }
+
         } else {
             showLogDom.html('你的浏览器不支持WebSocket！');
         }
 
+        function setMsg(opt) {
+            const data = {
+                op: opt,
+                projectInfo: projectInfo
+            };
+            layer.load(1, {
+                shade: [0.3, '#fff'] //0.1透明度的白色背景
+            });
+            ws.send(JSON.stringify(data));
+            setTimeout(function () {
+                layer.closeAll();
+            }, 2000);
+        }
 
         function setOpBtn(flag) {
             if (flag) {
