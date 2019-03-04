@@ -23,8 +23,8 @@
             <div class="layui-inline" style="width: 80%;height:30vh;">
                 <label class="layui-form-label">项目路径</label>
                 <div class="layui-input-block auto">
-                    <textarea name="value" placeholder="请输入项目存放路径白名单，回车支持输入多个路径，系统会自动过滤 ../ 路径"
-                              class="layui-textarea auto">$!value</textarea>
+                    <textarea name="project" placeholder="请输入项目存放路径白名单，回车支持输入多个路径，系统会自动过滤 ../ 路径、不允许输入根路径"
+                              class="layui-textarea auto">$!project</textarea>
                 </div>
             </div>
         </div>
@@ -32,7 +32,7 @@
             <div class="layui-inline" style="width: 80%;height:30vh;">
                 <label class="layui-form-label">证书路径</label>
                 <div class="layui-input-block auto">
-                    <textarea name="certificate" placeholder="请输入项目存放路径白名单，回车支持输入多个路径，系统会自动过滤 ../ 路径"
+                    <textarea name="certificate" placeholder="请输入证书存放路径白名单，回车支持输入多个路径，系统会自动过滤 ../ 路径、不允许输入根路径"
                               class="layui-textarea auto">$!certificate</textarea>
                 </div>
             </div>

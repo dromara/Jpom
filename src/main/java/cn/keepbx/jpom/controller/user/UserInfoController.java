@@ -36,28 +36,24 @@ public class UserInfoController extends BaseController {
      */
     @RequestMapping(value = "updatePwd", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public String updatePwd(String oldPwd, String newPwd) {
-        UserModel userName = getUser();
-        if (ConfigBean.getInstance().safeMode) {
-            String parent = userName.getParent();
-            if (UserModel.SYSTEM_ADMIN.equals(parent)) {
-                return JsonMessage.getString(401, "安全模式下管理员的密码不能通过WEB端修改");
-            }
-        }
         if (StrUtil.isEmpty(oldPwd) || StrUtil.isEmpty(newPwd) || oldPwd.length() < UserModel.USER_PWD_LEN || newPwd.length() < UserModel.USER_PWD_LEN) {
             return JsonMessage.getString(400, "密码长度为6-12位");
         }
         if (oldPwd.equals(newPwd)) {
             return JsonMessage.getString(400, "新旧密码一致");
         }
+        UserModel userName = getUser();
+        if (ConfigBean.getInstance().safeMode && UserModel.SYSTEM_ADMIN.equals(userName.getParent())) {
+            return JsonMessage.getString(401, "安全模式下管理员的密码不能通过WEB端修改");
+        }
         try {
-            String result = userService.updatePwd(userName.getId(), oldPwd, newPwd);
-            // 用户不存在
-            if ("notexist".equals(result)) {
-                return JsonMessage.getString(500, "用户不存在！");
-            }
-            // 旧密码不正确
-            if ("olderror".equals(result)) {
+            UserModel userModel = userService.login(userName.getId(), oldPwd);
+            if (userModel == null) {
                 return JsonMessage.getString(500, "旧密码不正确！");
+            }
+            userModel.setPassword(newPwd);
+            if (!userService.updateUser(userModel)) {
+                return JsonMessage.getString(500, "修改失败！");
             }
             // 如果修改成功，则销毁会话
             getSession().invalidate();
@@ -97,6 +93,10 @@ public class UserInfoController extends BaseController {
     /**
      * 新增用户
      *
+     * @param id       登录名
+     * @param manage   是否为管理员
+     * @param name     用户名
+     * @param password 用户密码
      * @return String
      */
     @RequestMapping(value = "addUser", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
@@ -116,10 +116,9 @@ public class UserInfoController extends BaseController {
             return JsonMessage.getString(400, "密码长度为6-12位");
         }
         boolean manageB = "true".equals(manage);
-        if (manageB && ConfigBean.getInstance().safeMode) {
-            return JsonMessage.getString(401, "安全模式不能创建管理员");
-        }
-
+//        if (manageB && ConfigBean.getInstance().safeMode) {
+//            return JsonMessage.getString(401, "安全模式不能创建管理员");
+//        }
         UserModel userModel = userService.getUserModel(id);
         if (userModel != null) {
             return JsonMessage.getString(401, "登录名已经存在");
@@ -149,6 +148,10 @@ public class UserInfoController extends BaseController {
     /**
      * 修改用户
      *
+     * @param id       登录名
+     * @param manage   是否为管理员
+     * @param name     用户名
+     * @param password 用户密码
      * @return String
      */
     @RequestMapping(value = "updateUser", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
@@ -173,14 +176,14 @@ public class UserInfoController extends BaseController {
             if (length < UserModel.USER_PWD_LEN) {
                 return JsonMessage.getString(400, "密码长度为6-12位");
             }
+            if (ConfigBean.getInstance().safeMode && UserModel.SYSTEM_ADMIN.equals(userModel.getParent())) {
+                return JsonMessage.getString(401, "安全模式不能修改系统管理员的密码");
+            }
             userModel.setPassword(password);
         }
 
-
         boolean manageB = "true".equals(manage);
-        if (manageB && ConfigBean.getInstance().safeMode) {
-            return JsonMessage.getString(401, "安全模式不能设置管理员");
-        }
+
         if (!manageB && UserModel.SYSTEM_ADMIN.equals(userModel.getParent())) {
             return JsonMessage.getString(401, "不能取消系统管理员的管理权限");
         }

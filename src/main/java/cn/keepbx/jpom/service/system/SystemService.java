@@ -7,6 +7,7 @@ import cn.keepbx.jpom.system.ConfigBean;
 import cn.keepbx.jpom.system.init.CheckRunCommand;
 import cn.keepbx.jpom.util.JsonUtil;
 import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;
 
 import java.io.FileNotFoundException;
@@ -18,21 +19,55 @@ import java.io.FileNotFoundException;
 @Service
 public class SystemService extends BaseDataService {
 
-    public JSONArray getWhitelistDirectory() {
+    public JSONObject getWhitelist() {
         try {
-            return getJSONArray(ConfigBean.WHITELIST_DIRECTORY);
+            JSONObject jsonObject = getJsonObject(ConfigBean.WHITELIST_DIRECTORY);
+            if (jsonObject == null) {
+                return null;
+            }
+            return jsonObject;
         } catch (FileNotFoundException fileNotFoundException) {
             CheckRunCommand.repairData();
-            return getWhitelistDirectory();
+            return getWhitelist();
         } catch (Exception e) {
             DefaultSystemLog.ERROR().error(e.getMessage(), e);
         }
         return null;
     }
 
-    public String getWhitelistDirectoryLine() {
+    /**
+     * 获取项目路径白名单
+     *
+     * @return project
+     */
+    public JSONArray getWhitelistDirectory() {
         try {
-            JSONArray jsonArray = getWhitelistDirectory();
+            JSONObject jsonObject = getWhitelist();
+            if (jsonObject == null) {
+                return null;
+            }
+            return jsonObject.getJSONArray("project");
+        } catch (Exception e) {
+            DefaultSystemLog.ERROR().error(e.getMessage(), e);
+        }
+        return null;
+    }
+
+    public JSONArray getCertificateDirectory() {
+        try {
+            JSONObject jsonObject = getWhitelist();
+            if (jsonObject == null) {
+                return null;
+            }
+            return jsonObject.getJSONArray("certificate");
+        } catch (Exception e) {
+            DefaultSystemLog.ERROR().error(e.getMessage(), e);
+        }
+        return null;
+    }
+
+    public String convertToLine(JSONArray jsonArray) {
+        try {
             return CollUtil.join(jsonArray, "\r\n");
         } catch (Exception e) {
             DefaultSystemLog.ERROR().error(e.getMessage(), e);
@@ -40,8 +75,8 @@ public class SystemService extends BaseDataService {
         return "";
     }
 
-    public void saveWhitelistDirectory(JSONArray jsonArray) {
+    public void saveWhitelistDirectory(JSONObject jsonObject) {
         String path = getDataFilePath(ConfigBean.WHITELIST_DIRECTORY);
-        JsonUtil.saveJson(path, jsonArray);
+        JsonUtil.saveJson(path, jsonObject);
     }
 }

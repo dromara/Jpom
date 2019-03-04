@@ -67,7 +67,7 @@ public class InstallController extends BaseController {
         if (b) {
             // 白名单
             WhitelistDirectoryController whitelistDirectoryController = SpringUtil.getBean(WhitelistDirectoryController.class);
-            JsonMessage jsonMessage = whitelistDirectoryController.save(whitelistDirectory);
+            JsonMessage jsonMessage = whitelistDirectoryController.save(whitelistDirectory, null);
             if (jsonMessage.getCode() != 200) {
                 return jsonMessage.toString();
             }
