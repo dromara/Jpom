@@ -2,6 +2,7 @@ package cn.keepbx.jpom.socket.top;
 
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.cron.CronUtil;
+import cn.hutool.cron.Scheduler;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.spring.SpringUtil;
 import cn.keepbx.jpom.service.manage.CommandService;
@@ -62,16 +63,18 @@ public class TopManager {
         CronUtil.remove(CRON_ID);
         CronUtil.setMatchSecond(true);
         CronUtil.schedule(CRON_ID, "0/5 * * * * ?", () -> {
-            String result = null;
             try {
-                result = commandService.execCommand(CommandService.CommandOp.top, null, null);
+                String result = commandService.execCommand(CommandService.CommandOp.top, null, null);
+                String topInfo = getTopInfo(result);
+                send(topInfo);
             } catch (ConfigException e) {
                 DefaultSystemLog.ERROR().error(e.getMessage(), e);
             }
-            String topInfo = getTopInfo(result);
-            send(topInfo);
         });
-        CronUtil.restart();
+        Scheduler scheduler = CronUtil.getScheduler();
+        if (!scheduler.isStarted()) {
+            CronUtil.start();
+        }
         watch = true;
     }
 
@@ -80,13 +83,18 @@ public class TopManager {
             return "top查询失败";
         }
         String[] split = content.split("\n");
-        String cpus = split[2];
-        String mem = split[3];
-        JSONArray cpu = getCpu(cpus);
-        JSONArray memory = getMemory(mem);
+        int length = split.length;
         JSONObject jsonObject = new JSONObject();
-        jsonObject.put("cpu", cpu);
-        jsonObject.put("memory", memory);
+        if (length >= 2) {
+            String cpus = split[2];
+            JSONArray cpu = getCpu(cpus);
+            jsonObject.put("cpu", cpu);
+        }
+        if (length >= 3) {
+            String mem = split[3];
+            JSONArray memory = getMemory(mem);
+            jsonObject.put("memory", memory);
+        }
         jsonObject.put("top", true);
         return jsonObject.toJSONString();
     }
@@ -111,13 +119,13 @@ public class TopManager {
 //            13284k free — 空闲内存总量（13M）
 //            25364k buffers — 缓存的内存量 （25M）
             if (str.endsWith("free")) {
-                memory.add(putObject("用户空间占用", str.replace("free", "").trim()));
+                memory.add(putObject("空闲内存", str.replace("free", "").trim()));
             }
             if (str.endsWith("used")) {
-                memory.add(putObject("用户空间占用", str.replace("used", "").trim()));
+                memory.add(putObject("使用中的内存", str.replace("used", "").trim()));
             }
             if (str.endsWith("buff/cache")) {
-                memory.add(putObject("用户空间占用", str.replace("buff/cache", "").trim()));
+                memory.add(putObject("缓存的内存", str.replace("buff/cache", "").trim()));
             }
         }
         return memory;
@@ -149,25 +157,25 @@ public class TopManager {
             String tag = str.substring(str.length() - 2);
             switch (tag) {
                 case "us":
-                    cpu.add(putObject("用户空间占用", value));
+                    cpu.add(putObject("用户空间", value));
                     break;
                 case "sy":
-                    cpu.add(putObject("内核空间占用", value));
+                    cpu.add(putObject("内核空间", value));
                     break;
                 case "ni":
-                    cpu.add(putObject("改变过优先级的进程占用", value));
+                    cpu.add(putObject("改变过优先级的进程", value));
                     break;
                 case "id":
-                    cpu.add(putObject("空闲CPU占用", value));
+                    cpu.add(putObject("空闲CPU", value));
                     break;
                 case "wa":
-                    cpu.add(putObject("IO等待占用", value));
+                    cpu.add(putObject("IO等待", value));
                     break;
                 case "hi":
-                    cpu.add(putObject("硬中断占用", value));
+                    cpu.add(putObject("硬中断", value));
                     break;
                 case "si":
-                    cpu.add(putObject("软中断占用占用", value));
+                    cpu.add(putObject("软中断", value));
                     break;
                 default:
                     break;
