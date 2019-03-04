@@ -8,7 +8,7 @@ import cn.keepbx.jpom.common.PageUtil;
 import cn.keepbx.jpom.model.ProjectInfoModel;
 import cn.keepbx.jpom.model.UserModel;
 import cn.keepbx.jpom.service.manage.CommandService;
-import cn.keepbx.jpom.service.manage.ManageService;
+import cn.keepbx.jpom.service.manage.ProjectInfoService;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.http.MediaType;
@@ -33,7 +33,7 @@ import java.util.Set;
 public class ManageControl extends BaseController {
 
     @Resource
-    private ManageService manageService;
+    private ProjectInfoService projectInfoService;
     @Resource
     private CommandService commandService;
 
@@ -58,7 +58,7 @@ public class ManageControl extends BaseController {
         try {
             UserModel userName = getUser();
             // 查询数据
-            JSONObject json = manageService.getAllProjectInfo();
+            JSONObject json = projectInfoService.getAllProjectInfo();
             // 转换为数据
             List<JSONObject> array = new ArrayList<>();
             Set<String> setKey = json.keySet();
@@ -122,7 +122,7 @@ public class ManageControl extends BaseController {
             return JsonMessage.getString(500, "你没有对应权限");
         }
         try {
-            manageService.deleteProject(id);
+            projectInfoService.deleteProject(id);
             return JsonMessage.getString(200, "删除成功！");
         } catch (Exception e) {
             DefaultSystemLog.ERROR().error(e.getMessage(), e);

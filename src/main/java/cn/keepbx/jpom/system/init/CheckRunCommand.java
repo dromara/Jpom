@@ -4,16 +4,26 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.resource.ResourceUtil;
 import cn.hutool.core.util.CharsetUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
+import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.PreLoadClass;
 import cn.jiangzeyin.common.PreLoadMethod;
 import cn.jiangzeyin.common.spring.SpringUtil;
+import cn.keepbx.jpom.controller.system.WhitelistDirectoryController;
+import cn.keepbx.jpom.model.ProjectInfoModel;
 import cn.keepbx.jpom.service.manage.CommandService;
+import cn.keepbx.jpom.service.manage.ProjectInfoService;
+import cn.keepbx.jpom.service.system.SystemService;
 import cn.keepbx.jpom.system.ConfigBean;
 import cn.keepbx.jpom.system.ConfigException;
 import cn.keepbx.jpom.system.WebAopLog;
+import cn.keepbx.jpom.util.JsonUtil;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 
 import java.io.File;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * 检查运行命令
@@ -71,8 +81,48 @@ public class CheckRunCommand {
             DefaultSystemLog.LOG().info("创建默认文件：" + file.getPath());
             addDataFile(ConfigBean.WHITELIST_DIRECTORY, file.getPath());
         }
+        repairUpdateWhiteList(file);
+
         WebAopLog webAopLog = SpringUtil.getBean(WebAopLog.class);
         DefaultSystemLog.LOG().info("日志存储路径：" + webAopLog.getPropertyValue());
+    }
+
+    /**
+     * 自动升级同步白名单数据
+     *
+     * @param file 文件
+     */
+    private static void repairUpdateWhiteList(File file) {
+        // 自动同步项目路径
+        try {
+            Object object = JsonUtil.readJson(file.getPath());
+            SystemService systemService = SpringUtil.getBean(SystemService.class);
+            WhitelistDirectoryController whitelistDirectoryController = SpringUtil.getBean(WhitelistDirectoryController.class);
+            if (object instanceof JSONArray) {
+                DefaultSystemLog.LOG().info("升级白名单目录数据");
+                String all = systemService.convertToLine((JSONArray) object);
+                whitelistDirectoryController.save(all, null);
+            } else if (object instanceof JSONObject) {
+                JSONArray jsonArray = systemService.getWhitelistDirectory();
+                if (jsonArray == null || jsonArray.isEmpty()) {
+                    DefaultSystemLog.LOG().info("升级、自动转换白名单目录数据");
+                    ProjectInfoService projectInfoService = SpringUtil.getBean(ProjectInfoService.class);
+                    List<ProjectInfoModel> projectInfoModels = projectInfoService.getAllProjectArrayInfo();
+                    List<String> paths = new ArrayList<>();
+                    for (ProjectInfoModel projectInfoModel : projectInfoModels) {
+                        File file1 = new File(projectInfoModel.getLib());
+                        file1 = file1.getParentFile().getParentFile();
+                        paths.add(file1.getPath());
+                    }
+                    JSONArray certificateDirectory = systemService.getCertificateDirectory();
+                    List<String> certificateDirectoryStr = certificateDirectory.toJavaList(String.class);
+                    JsonMessage message = whitelistDirectoryController.save(paths, certificateDirectoryStr);
+                    DefaultSystemLog.LOG().info(message.toString());
+
+                }
+            }
+        } catch (Exception ignored) {
+        }
     }
 
     /**

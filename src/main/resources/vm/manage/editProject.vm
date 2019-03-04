@@ -59,13 +59,17 @@
                 <label class="layui-form-label">项目路径</label>
                 <div class="layui-input-block">
 
-                    <select name="whitelistDirectory" lay-filter="aihao">
+                    <select name="whitelistDirectory" lay-filter="projectLib">
                         #foreach($itemPath in $whitelistDirectory)
                             #if($item && $itemWhitelistDirectory.startsWith($itemPath))
                                 <option value="$itemPath" selected>$itemPath</option>
+                                #set($hasetPath=$itemPath)
                             #else
                                 <option value="$itemPath">$itemPath</option>
                             #end
+                        #end
+                        #if(!$hasetPath)
+                            <option value="/" selected>没有匹配项</option>
                         #end
                     </select>
                 </div>
@@ -77,7 +81,13 @@
                            class="layui-input" value="#if($item)$!item.lib#end">
                 </div>
             </div>
-
+            <div class="layui-form-mid layui-word-aux">
+                <div class="layui-input-block" style="color: red;">
+                    结果：
+                    <span id="projectStart">#if($hasetPath)$hasetPath#else 请选择#end</span>
+                    <span id="projectEnd" style="margin-left: -4px">#if(!$item)请填写#else$!item.lib#end</span>
+                </div>
+            </div>
         </div>
         <div class="layui-form-item">
             <div class="layui-inline">
@@ -156,7 +166,21 @@
             }
         });
 
+        form.on('select(projectLib)', function (data) {
+            let val = data.value;
+            if (val === "") {
+                val = "请选择";
+            }
+            $("#projectStart").text(val);
+        });
 
+        $("input[name='lib']").change(function (e) {
+            let val = $(this).val();
+            if (val === "") {
+                val = "请填写";
+            }
+            $("#projectEnd").text(val);
+        });
         $("#delete_project").click(function () {
             var id = $(this).attr("data-id");
             layer.confirm('确定删除项目 ' + id + '？', {

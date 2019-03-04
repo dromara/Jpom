@@ -66,6 +66,12 @@ public class SystemService extends BaseDataService {
         return null;
     }
 
+    /**
+     * 转换为字符串
+     *
+     * @param jsonArray jsonArray
+     * @return str
+     */
     public String convertToLine(JSONArray jsonArray) {
         try {
             return CollUtil.join(jsonArray, "\r\n");

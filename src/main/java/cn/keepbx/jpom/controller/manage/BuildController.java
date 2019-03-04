@@ -8,7 +8,7 @@ import cn.jiangzeyin.common.JsonMessage;
 import cn.keepbx.jpom.common.BaseController;
 import cn.keepbx.jpom.model.ProjectInfoModel;
 import cn.keepbx.jpom.service.manage.CommandService;
-import cn.keepbx.jpom.service.manage.ManageService;
+import cn.keepbx.jpom.service.manage.ProjectInfoService;
 import cn.keepbx.jpom.service.oss.OssManagerService;
 import com.alibaba.fastjson.JSONArray;
 import org.springframework.http.MediaType;
@@ -34,13 +34,13 @@ public class BuildController extends BaseController {
     @Resource
     private OssManagerService ossManagerService;
     @Resource
-    private ManageService manageService;
+    private ProjectInfoService projectInfoService;
     @Resource
     private CommandService commandService;
 
     @RequestMapping(value = "build", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
     public String build(String id) throws IOException {
-        ProjectInfoModel projectInfoModel = manageService.getProjectInfo(id);
+        ProjectInfoModel projectInfoModel = projectInfoService.getProjectInfo(id);
         if (projectInfoModel != null && StrUtil.isNotEmpty(projectInfoModel.getBuildTag())) {
             JSONArray jsonArray = ossManagerService.list(projectInfoModel.getBuildTag());
             setAttribute("array", jsonArray);
@@ -55,7 +55,7 @@ public class BuildController extends BaseController {
             return "redirect:error";
         }
         try {
-            ProjectInfoModel projectInfoModel = manageService.getProjectInfo(id);
+            ProjectInfoModel projectInfoModel = projectInfoService.getProjectInfo(id);
             if (projectInfoModel == null) {
                 return "redirect:error";
             }
@@ -72,7 +72,7 @@ public class BuildController extends BaseController {
         if (!getUser().isProject(id)) {
             return JsonMessage.getString(400, "你没有对应操作权限操作!");
         }
-        ProjectInfoModel projectInfoModel = manageService.getProjectInfo(id);
+        ProjectInfoModel projectInfoModel = projectInfoService.getProjectInfo(id);
         if (projectInfoModel == null) {
             return JsonMessage.getString(400, "没有对应项目");
         }
@@ -93,7 +93,7 @@ public class BuildController extends BaseController {
         ProjectInfoModel modify = new ProjectInfoModel();
         modify.setId(projectInfoModel.getId());
         modify.setUseLibDesc("build");
-        manageService.updateProject(modify);
+        projectInfoService.updateProject(modify);
         String result = commandService.execCommand(CommandService.CommandOp.restart, projectInfoModel);
         if (result.contains(CommandService.RUNING_TAG)) {
             return JsonMessage.getString(200, "安装成功，已自动重启");

@@ -10,7 +10,7 @@ import cn.keepbx.jpom.common.BaseController;
 import cn.keepbx.jpom.common.PageUtil;
 import cn.keepbx.jpom.model.ProjectInfoModel;
 import cn.keepbx.jpom.model.UserModel;
-import cn.keepbx.jpom.service.manage.ManageService;
+import cn.keepbx.jpom.service.manage.ProjectInfoService;
 import cn.keepbx.jpom.system.ConfigBean;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -34,7 +34,7 @@ import java.io.IOException;
 public class FileControl extends BaseController {
 
     @Resource
-    private ManageService manageService;
+    private ProjectInfoService projectInfoService;
 
     /**
      * 文件管理页面
@@ -76,7 +76,7 @@ public class FileControl extends BaseController {
         }
         try {
             // 查询项目路径
-            ProjectInfoModel pim = manageService.getProjectInfo(id);
+            ProjectInfoModel pim = projectInfoService.getProjectInfo(id);
             File fileDir = new File(pim.getLib());
             if (!fileDir.exists()) {
                 return JsonMessage.getString(500, "目录不存在");
@@ -126,7 +126,7 @@ public class FileControl extends BaseController {
         if (!userName.isProject(id)) {
             return JsonMessage.getString(400, "你没有该操作权限操作!");
         }
-        ProjectInfoModel pim = manageService.getProjectInfo(id);
+        ProjectInfoModel pim = projectInfoService.getProjectInfo(id);
         MultipartFileBuilder multipartFileBuilder = createMultipart()
                 .addFieldName("file")
                 .setSavePath(pim.getLib())
@@ -137,7 +137,7 @@ public class FileControl extends BaseController {
         ProjectInfoModel modify = new ProjectInfoModel();
         modify.setId(pim.getId());
         modify.setUseLibDesc("upload");
-        manageService.updateProject(modify);
+        projectInfoService.updateProject(modify);
         return JsonMessage.getString(200, "上传成功");
     }
 
@@ -152,7 +152,7 @@ public class FileControl extends BaseController {
         String id = getParameter("id");
         String filename = getParameter("filename");
         try {
-            ProjectInfoModel pim = manageService.getProjectInfo(id);
+            ProjectInfoModel pim = projectInfoService.getProjectInfo(id);
             String path = pim.getLib() + "/" + filename;
             File file = new File(path);
             ServletUtil.write(getResponse(), file);
@@ -174,7 +174,7 @@ public class FileControl extends BaseController {
             return JsonMessage.getString(400, "你没有对应操作权限操作!");
         }
         try {
-            ProjectInfoModel pim = manageService.getProjectInfo(id);
+            ProjectInfoModel pim = projectInfoService.getProjectInfo(id);
             File file = new File(pim.getLib());
             if (FileUtil.clean(file)) {
                 return JsonMessage.getString(200, "清除成功");
@@ -199,7 +199,7 @@ public class FileControl extends BaseController {
             return JsonMessage.getString(400, "你没有对应操作权限操作!");
         }
         try {
-            ProjectInfoModel pim = manageService.getProjectInfo(id);
+            ProjectInfoModel pim = projectInfoService.getProjectInfo(id);
             File file = new File(pim.getLib(), filename);
             if (file.exists() && file.delete()) {
                 return JsonMessage.getString(200, "删除成功");

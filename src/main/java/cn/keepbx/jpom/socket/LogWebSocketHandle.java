@@ -7,7 +7,7 @@ import cn.jiangzeyin.pool.ThreadPoolService;
 import cn.keepbx.jpom.model.ProjectInfoModel;
 import cn.keepbx.jpom.model.UserModel;
 import cn.keepbx.jpom.service.manage.CommandService;
-import cn.keepbx.jpom.service.manage.ManageService;
+import cn.keepbx.jpom.service.manage.ProjectInfoService;
 import cn.keepbx.jpom.service.user.UserService;
 import cn.keepbx.jpom.socket.top.TopManager;
 import com.alibaba.fastjson.JSONObject;
@@ -52,7 +52,7 @@ public class LogWebSocketHandle implements TailLogThread.Evn {
         SocketSession socketSession = getItem(session);
         // 通过用户名和密码的Md5值判断是否是登录的
         try {
-            ManageService manageService = SpringUtil.getBean(ManageService.class);
+            ProjectInfoService projectInfoService = SpringUtil.getBean(ProjectInfoService.class);
             UserService userService = SpringUtil.getBean(UserService.class);
             UserModel userModel = userService.checkUser(userInfo);
             if (userModel == null) {
@@ -62,7 +62,7 @@ public class LogWebSocketHandle implements TailLogThread.Evn {
             }
             // 判断项目
             if (!SYSTEM_ID.equals(projectId)) {
-                ProjectInfoModel projectInfoModel = manageService.getProjectInfo(projectId);
+                ProjectInfoModel projectInfoModel = projectInfoService.getProjectInfo(projectId);
                 if (projectInfoModel == null) {
                     socketSession.sendMsg("获取项目信息错误");
                     session.close();
@@ -107,11 +107,11 @@ public class LogWebSocketHandle implements TailLogThread.Evn {
         JSONObject json = JSONObject.parseObject(message);
         JSONObject projectInfo = json.getJSONObject("projectInfo");
         String id = projectInfo.getString("id");
-        ManageService manageService = SpringUtil.getBean(ManageService.class);
+        ProjectInfoService projectInfoService = SpringUtil.getBean(ProjectInfoService.class);
         SocketSession socketSession = getItem(session);
         ProjectInfoModel projectInfoModel = null;
         try {
-            projectInfoModel = manageService.getProjectInfo(id);
+            projectInfoModel = projectInfoService.getProjectInfo(id);
         } catch (IOException e) {
             DefaultSystemLog.ERROR().error("获取异常", e);
         }

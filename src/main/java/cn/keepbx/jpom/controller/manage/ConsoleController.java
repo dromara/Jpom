@@ -7,7 +7,7 @@ import cn.jiangzeyin.common.JsonMessage;
 import cn.keepbx.jpom.common.BaseController;
 import cn.keepbx.jpom.model.ProjectInfoModel;
 import cn.keepbx.jpom.model.UserModel;
-import cn.keepbx.jpom.service.manage.ManageService;
+import cn.keepbx.jpom.service.manage.ProjectInfoService;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
@@ -33,7 +33,7 @@ import java.io.OutputStream;
 public class ConsoleController extends BaseController {
 
     @Resource
-    private ManageService manageService;
+    private ProjectInfoService projectInfoService;
 
     /**
      * 管理项目
@@ -44,7 +44,7 @@ public class ConsoleController extends BaseController {
     public String console(String id) {
         ProjectInfoModel pim = null;
         try {
-            pim = manageService.getProjectInfo(id);
+            pim = projectInfoService.getProjectInfo(id);
         } catch (IOException e) {
             DefaultSystemLog.ERROR().error(e.getMessage(), e);
         }
@@ -68,7 +68,7 @@ public class ConsoleController extends BaseController {
     private String getLogSize(String id) {
         ProjectInfoModel pim;
         try {
-            pim = manageService.getProjectInfo(id);
+            pim = projectInfoService.getProjectInfo(id);
         } catch (IOException e) {
             DefaultSystemLog.ERROR().error(e.getMessage(), e);
             return null;
@@ -88,7 +88,7 @@ public class ConsoleController extends BaseController {
     @ResponseBody
     public String export(String id) {
         try {
-            ProjectInfoModel pim = manageService.getProjectInfo(id);
+            ProjectInfoModel pim = projectInfoService.getProjectInfo(id);
             File file = new File(pim.getLog());
             if (!file.exists()) {
                 return JsonMessage.getString(400, "没有日志文件:" + file.getPath());

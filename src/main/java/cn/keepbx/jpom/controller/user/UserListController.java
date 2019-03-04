@@ -4,7 +4,7 @@ import cn.jiangzeyin.common.JsonMessage;
 import cn.keepbx.jpom.common.BaseController;
 import cn.keepbx.jpom.model.ProjectInfoModel;
 import cn.keepbx.jpom.model.UserModel;
-import cn.keepbx.jpom.service.manage.ManageService;
+import cn.keepbx.jpom.service.manage.ProjectInfoService;
 import cn.keepbx.jpom.service.user.UserService;
 import com.alibaba.fastjson.JSONArray;
 import org.springframework.http.MediaType;
@@ -28,14 +28,14 @@ public class UserListController extends BaseController {
     private UserService userService;
 
     @Resource
-    private ManageService manageService;
+    private ProjectInfoService projectInfoService;
 
     /**
      * 展示用户列表
      */
     @RequestMapping(value = "list", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
     public String projectInfo() throws IOException {
-        List<ProjectInfoModel> jsonArray = manageService.getAllProjectArrayInfo();
+        List<ProjectInfoModel> jsonArray = projectInfoService.getAllProjectArrayInfo();
         setAttribute("projects", jsonArray);
         return "user/list";
     }

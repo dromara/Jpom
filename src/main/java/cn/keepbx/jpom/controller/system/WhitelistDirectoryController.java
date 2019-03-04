@@ -76,17 +76,20 @@ public class WhitelistDirectoryController extends BaseController {
     }
 
     public JsonMessage save(String project, List<String> certificate) {
+        if (StrUtil.isEmpty(project)) {
+            return new JsonMessage(401, "项目路径白名单不能为空");
+        }
+        List<String> list = StrSpliter.splitTrim(project, "\n", true);
+        if (list == null || list.size() <= 0) {
+            return new JsonMessage(401, "项目路径白名单不能为空");
+        }
+        return save(list, certificate);
+    }
+
+    public JsonMessage save(List<String> projects, List<String> certificate) {
         JSONArray projectArray;
         {
-            if (StrUtil.isEmpty(project)) {
-                return new JsonMessage(401, "项目路径白名单不能为空");
-            }
-            List<String> list = StrSpliter.splitTrim(project, "\n", true);
-            if (list == null || list.size() <= 0) {
-                return new JsonMessage(401, "项目路径白名单不能为空");
-            }
-
-            projectArray = covertToArray(list);
+            projectArray = covertToArray(projects);
             if (projectArray.isEmpty()) {
                 return new JsonMessage(401, "项目路径白名单不能为空");
             }
@@ -96,7 +99,7 @@ public class WhitelistDirectoryController extends BaseController {
             }
         }
         JSONArray certificateArray = null;
-        if (certificate != null) {
+        if (certificate != null && !certificate.isEmpty()) {
             certificateArray = covertToArray(certificate);
             if (certificateArray.isEmpty()) {
                 return new JsonMessage(401, "证书路径白名单不能为空");
@@ -117,7 +120,7 @@ public class WhitelistDirectoryController extends BaseController {
     }
 
     private JSONArray covertToArray(List<String> list) {
-        JSONArray certificateArray = new JSONArray();
+        JSONArray array = new JSONArray();
         for (String s : list) {
             String val = String.format("/%s/", s);
             val = val.replace("../", "");
@@ -125,9 +128,12 @@ public class WhitelistDirectoryController extends BaseController {
             if (StrUtil.SLASH.equals(val)) {
                 continue;
             }
-            certificateArray.add(val);
+            if (array.contains(val)) {
+                continue;
+            }
+            array.add(val);
         }
-        return certificateArray;
+        return array;
     }
 
 

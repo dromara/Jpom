@@ -11,7 +11,7 @@ import cn.jiangzeyin.common.JsonMessage;
 import cn.keepbx.jpom.common.BaseController;
 import cn.keepbx.jpom.model.ProjectInfoModel;
 import cn.keepbx.jpom.model.UserModel;
-import cn.keepbx.jpom.service.manage.ManageService;
+import cn.keepbx.jpom.service.manage.ProjectInfoService;
 import cn.keepbx.jpom.service.system.SystemService;
 import cn.keepbx.jpom.socket.LogWebSocketHandle;
 import com.alibaba.fastjson.JSONArray;
@@ -36,13 +36,13 @@ import java.util.List;
 @RequestMapping(value = "/manage/")
 public class EditProjectController extends BaseController {
     @Resource
-    private ManageService manageService;
+    private ProjectInfoService projectInfoService;
     @Resource
     private SystemService systemService;
 
     @RequestMapping(value = "editProject", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
     public String editProject(String id) throws IOException {
-        ProjectInfoModel projectInfo = manageService.getProjectInfo(id);
+        ProjectInfoModel projectInfo = projectInfoService.getProjectInfo(id);
 
         // 白名单
         JSONArray jsonArray = systemService.getWhitelistDirectory();
@@ -125,7 +125,7 @@ public class EditProjectController extends BaseController {
         if (id.contains(StrUtil.SPACE) || lib.contains(StrUtil.SPACE) || log.contains(StrUtil.SPACE) || token.contains(StrUtil.SPACE)) {
             return JsonMessage.getString(401, "项目Id、项目Lib、WebHooks不能包含空格");
         }
-        ProjectInfoModel exits = manageService.getProjectInfo(id);
+        ProjectInfoModel exits = projectInfoService.getProjectInfo(id);
         try {
             UserModel userName = getUser();
             JsonMessage jsonMessage = checkPath(projectInfo);
@@ -138,14 +138,14 @@ public class EditProjectController extends BaseController {
                 }
                 //  return addProject(projectInfo);
                 projectInfo.setCreateTime(DateUtil.now());
-                manageService.saveProject(projectInfo);
+                projectInfoService.saveProject(projectInfo);
                 return JsonMessage.getString(200, "新增成功！");
             }
 //            boolean manager = userService.isManager(id, getUserName());
             if (!userName.isProject(id)) {
                 return JsonMessage.getString(400, "你没有对应操作权限操作!");
             }
-            manageService.updateProject(projectInfo);
+            projectInfoService.updateProject(projectInfo);
             return JsonMessage.getString(200, "修改成功");
         } catch (Exception e) {
             DefaultSystemLog.ERROR().error(e.getMessage(), e);
@@ -154,7 +154,7 @@ public class EditProjectController extends BaseController {
     }
 
     private JsonMessage checkPath(ProjectInfoModel projectInfoModel) throws IOException {
-        List<ProjectInfoModel> projectInfoModelList = manageService.getAllProjectArrayInfo();
+        List<ProjectInfoModel> projectInfoModelList = projectInfoService.getAllProjectArrayInfo();
         for (ProjectInfoModel model : projectInfoModelList) {
             if (!model.getId().equals(projectInfoModel.getId())) {
                 if (model.getLib().startsWith(projectInfoModel.getLib()) || projectInfoModel.getLib().startsWith(model.getLib())) {

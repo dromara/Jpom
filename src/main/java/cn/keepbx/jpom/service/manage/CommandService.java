@@ -30,7 +30,7 @@ public class CommandService {
     public static final String STOP_TAG = "stopped";
 
     @Resource
-    private ManageService manageService;
+    private ProjectInfoService projectInfoService;
 
 
     public enum CommandOp {
@@ -139,7 +139,7 @@ public class CommandService {
                 modify.setId(projectInfoModel.getId());
                 modify.setRunLibDesc(projectInfoModel.getUseLibDesc());
                 try {
-                    manageService.updateProject(modify);
+                    projectInfoService.updateProject(modify);
                 } catch (Exception ignored) {
                 }
             }

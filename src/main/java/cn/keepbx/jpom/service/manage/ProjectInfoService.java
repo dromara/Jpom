@@ -19,7 +19,7 @@ import java.util.Set;
  * @author jiangzeyin
  */
 @Service
-public class ManageService extends BaseDataService {
+public class ProjectInfoService extends BaseDataService {
 
     private static final String FILENAME = ConfigBean.PROJECT;
 
