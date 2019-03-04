@@ -99,6 +99,9 @@
                 ws = new WebSocket("ws://" + window.location.host + "/console/$userInfo/system");
             }
             if (status) {
+                if (ws.readyState != 1 && ws.readyState != 0) {
+                    ws = new WebSocket("ws://" + window.location.host + "/console/$userInfo/system");
+                }
                 ws.onopen = function () {
                     ws.send('{"op": "top", "projectInfo":{}}');
                 };
@@ -130,7 +133,6 @@
 
         //加载病状图
         function loadEcharts(top) {
-            console.log(top);
             if (!top) {
                 return;
             }
