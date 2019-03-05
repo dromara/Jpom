@@ -2,9 +2,9 @@ package cn.keepbx.jpom.service.oss;
 
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.FileUtil;
-import cn.jiangzeyin.common.spring.SpringUtil;
-import cn.keepbx.jpom.system.ConfigBean;
 import cn.keepbx.jpom.common.BaseDataService;
+import cn.keepbx.jpom.system.ConfigBean;
+import cn.keepbx.jpom.util.JsonUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.aliyun.oss.OSSClient;
@@ -95,9 +95,8 @@ public class OssManagerService extends BaseDataService {
         return new OSSClient(endpoint, accessKeyId, accessKeySecret);
     }
 
-    private JSONObject getConfig() throws IOException {
-        String active = SpringUtil.getEnvironment().getProperty("spring.profiles.active");
-        return getJsonObject("oss_" + active + ".json");
+    public JSONObject getConfig() throws IOException {
+        return getJsonObject(ConfigBean.ALI_OSS);
     }
 
     private String getBucketName() throws IOException {
@@ -108,5 +107,10 @@ public class OssManagerService extends BaseDataService {
     private String getKeyPrefix() throws IOException {
         JSONObject config = getConfig();
         return config.getString("keyPrefix");
+    }
+
+    public void save(JSONObject jsonObject) {
+        String path = getDataFilePath(ConfigBean.ALI_OSS);
+        JsonUtil.saveJson(path, jsonObject);
     }
 }

@@ -69,10 +69,8 @@ public class ProjectManageControl extends BaseController {
             // 转换为数据
             List<JSONObject> array = new ArrayList<>();
             for (ProjectInfoModel projectInfoModel : projectInfoModels) {
-                if (StrUtil.isNotEmpty(group)) {
-                    if (group.equals(projectInfoModel.getGroup())) {
-                        continue;
-                    }
+                if (StrUtil.isNotEmpty(group) && !group.equals(projectInfoModel.getGroup())) {
+                    continue;
                 }
                 String result = commandService.execCommand(CommandService.CommandOp.status, projectInfoModel);
                 boolean status = result.contains(CommandService.RUNING_TAG);
