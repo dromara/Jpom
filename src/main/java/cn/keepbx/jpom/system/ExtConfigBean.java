@@ -33,7 +33,7 @@ public class ExtConfigBean {
         String path = (home.getSource() == null ? "" : home.getSource().getAbsolutePath());
         File file = new File(path);
         if (file.isFile()) {
-            file = file.getParentFile();
+            file = file.getParentFile().getParentFile();
         } else {
             file = new File(file, "bin");
         }

@@ -18,8 +18,11 @@ import java.io.IOException;
  */
 public class ExtConfigEnvironmentPostProcessor implements EnvironmentPostProcessor {
 
+    private static ConfigurableEnvironment configurableEnvironment;
+
     @Override
     public void postProcessEnvironment(ConfigurableEnvironment environment, SpringApplication application) {
+        configurableEnvironment = environment;
         File directory = ExtConfigBean.getFile();
         if (!directory.exists()) {
             return;

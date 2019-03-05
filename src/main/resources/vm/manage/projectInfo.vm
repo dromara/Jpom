@@ -96,7 +96,7 @@
             id: 'table_project',
             elem: '#tab_project',
             url: '/manage/getProjectInfo',
-            height: 'full-52',
+            // height: 'full-52',
             even: true,
             cols: [[{
                 field: 'name', title: '项目名称', width: '15%', templet: function (d) {
@@ -248,7 +248,7 @@
 
     function reloadTable() {
         table.reload('table_project', {
-            height: 'full-52'
+            // height: 'full-52'
         });
     }
 </script>
