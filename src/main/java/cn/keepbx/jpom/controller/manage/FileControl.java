@@ -87,12 +87,16 @@ public class FileControl extends BaseController {
             }
             int size = filesAll.length;
             JSONArray arrayFile = new JSONArray(size);
-            for (File aFilesAll : filesAll) {
+            for (File file : filesAll) {
                 JSONObject jsonObject = new JSONObject(6);
-                jsonObject.put("filename", aFilesAll.getName());
+                if (file.isDirectory()) {
+                    jsonObject.put("filename", file.getName() + "[文件夹]");
+                } else {
+                    jsonObject.put("filename", file.getName());
+                }
                 jsonObject.put("projectid", id);
-                jsonObject.put("modifytime", DateUtil.date(aFilesAll.lastModified()).toString());
-                jsonObject.put("filesize", FileUtil.readableFileSize(aFilesAll.length()));
+                jsonObject.put("modifytime", DateUtil.date(file.lastModified()).toString());
+                jsonObject.put("filesize", FileUtil.readableFileSize(file.length()));
                 arrayFile.add(jsonObject);
             }
             arrayFile.sort((o1, o2) -> {

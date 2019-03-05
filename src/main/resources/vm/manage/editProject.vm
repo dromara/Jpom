@@ -81,11 +81,17 @@
                            class="layui-input" value="#if($item)$!item.lib#end">
                 </div>
             </div>
-            <div class="layui-form-mid layui-word-aux">
-                <div class="layui-input-block" style="color: red;">
+            <div class="layui-form-mid layui-word-aux" style="padding: 0 !important;">
+                <div class="layui-input-block" style="color: red;min-height: 0px;">
                     结果：
                     <span id="projectStart">#if($hasetPath)$hasetPath#else 请选择#end</span>
                     <span id="projectEnd" style="margin-left: -4px">#if(!$item)请填写#else$!item.lib#end</span>
+                    #if($item)
+                        <span>&nbsp;&nbsp;日志路径：$!item.log</span>
+                    #end
+                </div>
+                <div class="layui-input-block" id="tipMsgDiv" style="color: red;min-height: 0px;display: none">
+                    提示：<span id="tipMsg"></span>
                 </div>
             </div>
         </div>
@@ -170,17 +176,44 @@
             let val = data.value;
             if (val === "") {
                 val = "请选择";
+                $("#tipMsgDiv").hide();
             }
             $("#projectStart").text(val);
+            checngeLib();
         });
 
         $("input[name='lib']").change(function (e) {
             let val = $(this).val();
             if (val === "") {
                 val = "请填写";
+                $("#tipMsgDiv").hide();
             }
             $("#projectEnd").text(val);
+            checngeLib();
         });
+
+        function checngeLib() {
+            var lib = $("#projectStart").text() + $("#projectEnd").text();
+            $.ajax({
+                url: './judge_lib.json',
+                type: 'POST',
+                dataType: 'json',
+                data: {
+                    id: "#if($item)$!item.id#else#end",
+                    newLib: lib
+                },
+                success: function (data) {
+                    if (200 == data.code) {
+                        $("#tipMsgDiv").hide();
+                    } else {
+                        $("#tipMsg").text(data.msg).parent().show();
+                    }
+                },
+                error: function (err) {
+                }
+            });
+        }
+
         $("#delete_project").click(function () {
             var id = $(this).attr("data-id");
             layer.confirm('确定删除项目 ' + id + '？', {

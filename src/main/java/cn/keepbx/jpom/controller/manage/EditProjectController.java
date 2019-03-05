@@ -40,6 +40,13 @@ public class EditProjectController extends BaseController {
     @Resource
     private SystemService systemService;
 
+    /**
+     * 修改项目页面
+     *
+     * @param id 项目Id
+     * @return json
+     * @throws IOException IO
+     */
     @RequestMapping(value = "editProject", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
     public String editProject(String id) throws IOException {
         ProjectInfoModel projectInfo = projectInfoService.getProjectInfo(id);
@@ -107,12 +114,20 @@ public class EditProjectController extends BaseController {
             return JsonMessage.getString(401, "项目lib存在提升目录问题");
         }
         lib = String.format("%s/%s", whitelistDirectory, lib);
+
         projectInfo.setLib(FileUtil.normalize(lib));
+        File checkFile = new File(projectInfo.getLib());
+        if (checkFile.exists() && checkFile.isFile()) {
+            return JsonMessage.getString(401, "项目lib是一个已经存在的文件");
+        }
 
         String log = new File(lib).getParent();
         log = String.format("%s/%s.log", log, id);
         projectInfo.setLog(FileUtil.normalize(log));
-
+        checkFile = new File(projectInfo.getLog());
+        if (checkFile.exists() && checkFile.isDirectory()) {
+            return JsonMessage.getString(401, "项目log是一个已经存在的文件夹");
+        }
         //
         String token = projectInfo.getToken();
         if (!ProjectInfoModel.NO_TOKEN.equals(token)) {
@@ -125,7 +140,12 @@ public class EditProjectController extends BaseController {
         if (id.contains(StrUtil.SPACE) || lib.contains(StrUtil.SPACE) || log.contains(StrUtil.SPACE) || token.contains(StrUtil.SPACE)) {
             return JsonMessage.getString(401, "项目Id、项目Lib、WebHooks不能包含空格");
         }
-        ProjectInfoModel exits = projectInfoService.getProjectInfo(id);
+
+        return save(projectInfo);
+    }
+
+    private String save(ProjectInfoModel projectInfo) throws IOException {
+        ProjectInfoModel exits = projectInfoService.getProjectInfo(projectInfo.getId());
         try {
             UserModel userName = getUser();
             JsonMessage jsonMessage = checkPath(projectInfo);
@@ -142,14 +162,71 @@ public class EditProjectController extends BaseController {
                 return JsonMessage.getString(200, "新增成功！");
             }
 //            boolean manager = userService.isManager(id, getUserName());
-            if (!userName.isProject(id)) {
+            if (!userName.isProject(projectInfo.getId())) {
                 return JsonMessage.getString(400, "你没有对应操作权限操作!");
             }
+            moveTo(exits, projectInfo);
             projectInfoService.updateProject(projectInfo);
             return JsonMessage.getString(200, "修改成功");
         } catch (Exception e) {
             DefaultSystemLog.ERROR().error(e.getMessage(), e);
             return JsonMessage.getString(500, e.getMessage());
+        }
+    }
+
+    /**
+     * 验证lib 暂时用情况
+     *
+     * @param id     项目Id
+     * @param newLib 新lib
+     * @return json
+     * @throws IOException IO
+     */
+    @RequestMapping(value = "judge_lib.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @ResponseBody
+    public String saveProject(String id, String newLib) throws IOException {
+        ProjectInfoModel exits = projectInfoService.getProjectInfo(id);
+        File file = new File(newLib);
+        String msg = null;
+        if (exits == null) {
+            if (file.exists() && file.isFile()) {
+                msg = "lib目录当前是一个已经存在的文件,请修改";
+            }
+        } else {
+            File oldLib = new File(exits.getLib());
+            if (file.exists() && oldLib.exists()) {
+                if (file.isFile()) {
+                    msg = "lib目录当前是一个已经存在的文件,请修改";
+                } else {
+                    msg = "lib目录已经存在,保存将覆盖原文件夹并会自动同步原lib目录";
+                }
+            }
+        }
+        if (msg == null && Validator.isChinese(newLib)) {
+            msg = "不建议使用中文目录";
+        }
+        if (msg == null) {
+            return JsonMessage.getString(200, "");
+        }
+        return JsonMessage.getString(400, msg);
+    }
+
+    private void moveTo(ProjectInfoModel old, ProjectInfoModel news) {
+        // 移动目录
+        if (!old.getLib().equals(news.getLib())) {
+            File oldLib = new File(old.getLib());
+            if (oldLib.exists()) {
+                File newsLib = new File(news.getLib());
+                FileUtil.move(oldLib, newsLib, true);
+            }
+        }
+        // log
+        if (!old.getLog().equals(news.getLog())) {
+            File oldLog = new File(old.getLog());
+            if (oldLog.exists()) {
+                File newsLog = new File(news.getLog());
+                FileUtil.move(oldLog, newsLog, true);
+            }
         }
     }
 
