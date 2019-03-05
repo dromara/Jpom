@@ -90,13 +90,17 @@ public class FileControl extends BaseController {
             for (File file : filesAll) {
                 JSONObject jsonObject = new JSONObject(6);
                 if (file.isDirectory()) {
-                    jsonObject.put("filename", file.getName() + "[文件夹]");
+                    jsonObject.put("isDirectory", true);
+                    long sizeFile = FileUtil.size(file);
+                    jsonObject.put("filesize", FileUtil.readableFileSize(sizeFile));
                 } else {
-                    jsonObject.put("filename", file.getName());
+
+                    jsonObject.put("filesize", FileUtil.readableFileSize(file.length()));
                 }
+                jsonObject.put("filename", file.getName());
                 jsonObject.put("projectid", id);
                 jsonObject.put("modifytime", DateUtil.date(file.lastModified()).toString());
-                jsonObject.put("filesize", FileUtil.readableFileSize(file.length()));
+
                 arrayFile.add(jsonObject);
             }
             arrayFile.sort((o1, o2) -> {
@@ -152,13 +156,15 @@ public class FileControl extends BaseController {
      */
     @RequestMapping(value = "download", method = RequestMethod.GET)
     @ResponseBody
-    public String download() {
-        String id = getParameter("id");
+    public String download(String id) {
         String filename = getParameter("filename");
         try {
             ProjectInfoModel pim = projectInfoService.getProjectInfo(id);
             String path = pim.getLib() + "/" + filename;
             File file = new File(path);
+            if (file.isDirectory()) {
+                return "暂不支持下载文件夹";
+            }
             ServletUtil.write(getResponse(), file);
         } catch (Exception e) {
             DefaultSystemLog.ERROR().error("下载文件异常", e);

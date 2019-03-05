@@ -59,15 +59,6 @@ public class CommandService {
         top
     }
 
-//
-//    public File getCommandFile() {
-//        File file = new File(getRunCommandPath());
-//        if (!file.exists()) {
-//            throw new RuntimeException("启动文件不存在");
-//        }
-//        return file;
-//    }
-
 
     public String execCommand(CommandOp commandOp, ProjectInfoModel projectInfoModel) throws ConfigException {
         return execCommand(commandOp, projectInfoModel, null);
@@ -161,6 +152,10 @@ public class CommandService {
         return result;
     }
 
+    public String execCommand(String command) {
+        return execCommand(command, null);
+    }
+
     public String execSystemCommand(String command) {
         String result = "error";
         try {
@@ -227,11 +222,6 @@ public class CommandService {
                 }
             }
         }
-    }
-
-
-    public String execCommand(String command) {
-        return execCommand(command, null);
     }
 
 

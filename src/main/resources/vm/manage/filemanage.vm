@@ -46,14 +46,21 @@
                 elem: '#tab_file',
                 url: '/file/getFileList',
                 method: 'post',
-                height: 'full-52',
+                // height: 'full',
                 even: true,
                 where: {
                     id: id
                 },
                 cols: [[
                     {field: 'index', title: '编号', width: '10%'},
-                    {field: 'filename', title: '文件名称', width: '30%'},
+                    {
+                        field: 'filename', title: '文件名称', width: '30%', templet: function (d) {
+                            if (d.isDirectory) {
+                                return d.filename + '【文件夹】';
+                            }
+                            return d.filename;
+                        }
+                    },
                     {field: 'modifytime', title: '修改时间', width: '15%'},
                     {field: 'filesize', title: '文件大小', width: '15%'},
                     {field: 'op', title: '操作', toolbar: '#bar_projects'}
@@ -81,7 +88,7 @@
                     layer.msg("文件总数：" + obj.total + " 成功上传：" + obj.successful + " 上传失败：" + obj.aborted);
                     setTimeout(function () {
                         table.reload('table_file', {
-                            height: 'full-52'
+                            // height: 'full-52'
                         });
                         layer.closeAll();
                     }, 2000);
@@ -90,44 +97,46 @@
                     //layer.msg('success');
                 },
                 error: function () {
-                    layer.msg('fail');
+                    layer.msg('上传失败');
                 }
             });
 
             // 点击'上传文件'事件
             $('#refresh').on('click', function () {
-                table.reload('table_file', {height: 'full-52'});
+                table.reload('table_file', {
+                    // height: 'full-52'
+                });
             });
 
             // 点击'上传文件'事件
             $('#clear').on('click', function () {
-                layer.confirm('确定清空此项目文件吗？',
-                        {title: '系统提示'},
-                        function (index) {
-                            layer.close(index);
-                            $.ajax({
-                                url: '/file/clear',
-                                type: 'POST',
-                                dataType: 'json',
-                                data: {
-                                    id: id
-                                },
-                                success: function (data) {
-                                    if (200 === data.code) {
-                                        layer.msg(data.msg);
-                                        // 刷新项目列表
-                                        table.reload('table_file', {
-                                            height: 'full-52'
-                                        });
-                                    } else {
-                                        layer.msg(data.msg);
-                                    }
-                                },
-                                error: function (err) {
-                                    layer.msg('删除失败！');
-                                }
-                            });
-                        });
+                layer.confirm('确定清空此项目文件吗？', {
+                    title: '系统提示'
+                }, function (index) {
+                    layer.close(index);
+                    $.ajax({
+                        url: '/file/clear',
+                        type: 'POST',
+                        dataType: 'json',
+                        data: {
+                            id: id
+                        },
+                        success: function (data) {
+                            if (200 === data.code) {
+                                layer.msg(data.msg);
+                                // 刷新项目列表
+                                table.reload('table_file', {
+                                    height: 'full-52'
+                                });
+                            } else {
+                                layer.msg(data.msg);
+                            }
+                        },
+                        error: function (err) {
+                            layer.msg('删除失败！');
+                        }
+                    });
+                });
             });
 
 
@@ -145,18 +154,17 @@
                 }
             });
 
-            /**
-             * 下载文件
-             * @param data
-             */
+            //下载文件
             function downloadFile(data) {
-                var url = "/file/download?id=" + data.projectid + "&filename=" + data.filename
+                var url = "/file/download?id=" + data.projectid + "&filename=" + encodeURI(data.filename);
                 self.location.href = url;
             }
 
             // 删除文件
             function deleteFile(data) {
-                layer.confirm('确定删除文件 ' + data.filename + '？', {title: '系统提示'}, function (index) {
+                layer.confirm('确定删除文件 ' + data.filename + '？', {
+                    title: '系统提示'
+                }, function (index) {
                     layer.close(index);
                     $.ajax({
                         url: '/file/deleteFile',
@@ -170,7 +178,9 @@
                             if (200 === data.code) {
                                 layer.msg('删除成功！');
                                 // 刷新项目列表
-                                table.reload('table_file', {height: 'full-52'});
+                                table.reload('table_file', {
+                                    // height: 'full-52'
+                                });
                             } else {
                                 layer.msg(data.msg);
                             }
