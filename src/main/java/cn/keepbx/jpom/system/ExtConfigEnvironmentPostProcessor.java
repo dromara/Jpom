@@ -20,7 +20,7 @@ public class ExtConfigEnvironmentPostProcessor implements EnvironmentPostProcess
 
     @Override
     public void postProcessEnvironment(ConfigurableEnvironment environment, SpringApplication application) {
-        File directory = ExtConfigBean.FILE;
+        File directory = ExtConfigBean.getFile();
         if (!directory.exists()) {
             return;
         }

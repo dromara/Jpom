@@ -87,7 +87,7 @@ public class CheckRunCommand {
         WebAopLog webAopLog = SpringUtil.getBean(WebAopLog.class);
         DefaultSystemLog.LOG().info("日志存储路径：" + webAopLog.getPropertyValue());
         DefaultSystemLog.LOG().info("项目数据存储路径：" + ConfigBean.getInstance().getPath());
-        DefaultSystemLog.LOG().info("外部配置文件路径：" + ExtConfigBean.FILE.getAbsolutePath());
+        DefaultSystemLog.LOG().info("外部配置文件路径：" + ExtConfigBean.getFile().getAbsolutePath());
     }
 
     /**

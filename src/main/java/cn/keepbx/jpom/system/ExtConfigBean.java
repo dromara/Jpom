@@ -2,6 +2,7 @@ package cn.keepbx.jpom.system;
 
 import cn.jiangzeyin.common.spring.SpringUtil;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.ApplicationHome;
 import org.springframework.context.annotation.Configuration;
 
 import java.io.File;
@@ -17,11 +18,27 @@ public class ExtConfigBean {
 
     public static final String FILE_NAME = "extConfig.yml";
 
-    public static final File FILE;
+    private static File file;
 
-    static {
-        File directory = new File("");
-        FILE = new File(directory.getAbsolutePath(), ExtConfigBean.FILE_NAME);
+    /**
+     * 动态获取外部配置文件的 file
+     *
+     * @return File
+     */
+    public static File getFile() {
+        if (file != null) {
+            return file;
+        }
+        ApplicationHome home = new ApplicationHome(ExtConfigBean.class);
+        String path = (home.getSource() == null ? "" : home.getSource().getAbsolutePath());
+        File file = new File(path);
+        if (file.isFile()) {
+            file = file.getParentFile();
+        } else {
+            file = new File(file, "bin");
+        }
+        ExtConfigBean.file = new File(file, FILE_NAME);
+        return ExtConfigBean.file;
     }
 
     /**

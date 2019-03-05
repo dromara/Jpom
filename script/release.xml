@@ -17,7 +17,14 @@
             <includes>
                 <include>*.sh</include>
                 <include>*.bat</include>
-                <include>*.yml</include>
+            </includes>
+        </fileSet>
+        <!--复制外部配置文件-->
+        <fileSet>
+            <directory>${basedir}/src/main/resources/bin/</directory>
+            <outputDirectory>/lib/</outputDirectory>
+            <includes>
+                <include>extConfig.yml</include>
             </includes>
         </fileSet>
     </fileSets>
