@@ -15,6 +15,7 @@ import cn.keepbx.jpom.service.manage.ProjectInfoService;
 import cn.keepbx.jpom.service.system.SystemService;
 import cn.keepbx.jpom.system.ConfigBean;
 import cn.keepbx.jpom.system.ConfigException;
+import cn.keepbx.jpom.system.ExtConfigBean;
 import cn.keepbx.jpom.system.WebAopLog;
 import cn.keepbx.jpom.util.JsonUtil;
 import com.alibaba.fastjson.JSONArray;
@@ -85,6 +86,8 @@ public class CheckRunCommand {
 
         WebAopLog webAopLog = SpringUtil.getBean(WebAopLog.class);
         DefaultSystemLog.LOG().info("日志存储路径：" + webAopLog.getPropertyValue());
+        DefaultSystemLog.LOG().info("项目数据存储路径：" + ConfigBean.getInstance().getPath());
+        DefaultSystemLog.LOG().info("外部配置文件路径：" + ExtConfigBean.FILE.getAbsolutePath());
     }
 
     /**
