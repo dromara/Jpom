@@ -23,16 +23,17 @@ public class ProjectInfoService extends BaseDataService {
 
     private static final String FILENAME = ConfigBean.PROJECT;
 
+
+//    public JSONObject getAllProjectInfo() throws IOException {
+//        return getJsonObject(FILENAME);
+//    }
+
     /**
      * 查询所有项目信息
      *
-     * @return json
+     * @return list
      * @throws IOException 异常
      */
-    public JSONObject getAllProjectInfo() throws IOException {
-        return getJsonObject(FILENAME);
-    }
-
     public List<ProjectInfoModel> getAllProjectArrayInfo() throws IOException {
         JSONObject jsonObject = getJsonObject(FILENAME);
         Set<String> setKey = jsonObject.keySet();

@@ -117,19 +117,6 @@
                 }
             }, {
                 title: 'lib状态', width: '10%', templet: function (d) {
-                    var rgb;
-                    if (d.group) {
-                        var size = groupMap.size;
-                        if (!groupMap.get(d.group)) {
-                            groupMap.set(d.group, "1");
-                            size += 1;
-                            getHslArray(size);
-                        }
-                        rgb = hslToRgb.apply(this, HSL[size - 1]);
-                    }
-                    if (!d.manager) {
-                        rgb = [211, 211, 211];
-                    }
                     return (d.runLibDesc || "") + " / " + (d.useLibDesc || "");
                 }
             },

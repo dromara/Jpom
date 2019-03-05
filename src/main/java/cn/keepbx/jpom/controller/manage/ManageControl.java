@@ -21,7 +21,6 @@ import javax.annotation.Resource;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 /**
  * 项目管理
@@ -58,14 +57,10 @@ public class ManageControl extends BaseController {
         try {
             UserModel userName = getUser();
             // 查询数据
-            JSONObject json = projectInfoService.getAllProjectInfo();
+            List<ProjectInfoModel> projectInfoModels = projectInfoService.getAllProjectArrayInfo();
             // 转换为数据
             List<JSONObject> array = new ArrayList<>();
-            Set<String> setKey = json.keySet();
-            for (String key : setKey) {
-                JSONObject jsonObject = json.getJSONObject(key);
-                ProjectInfoModel projectInfoModel = jsonObject.toJavaObject(ProjectInfoModel.class);
-//                manageService.getProjectInfo(key);
+            for (ProjectInfoModel projectInfoModel : projectInfoModels) {
                 String result = commandService.execCommand(CommandService.CommandOp.status, projectInfoModel);
                 boolean status = result.contains(CommandService.RUNING_TAG);
                 projectInfoModel.setStatus(status);

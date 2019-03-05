@@ -62,7 +62,11 @@ public class ConsoleController extends BaseController {
     @RequestMapping(value = "logSize", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     public String logSize(String id) {
-        return JsonMessage.getString(200, "ok", getLogSize(id));
+        String info = getLogSize(id);
+        if (info != null) {
+            return JsonMessage.getString(200, "ok", info);
+        }
+        return JsonMessage.getString(500, "获取日志大小失败");
     }
 
     private String getLogSize(String id) {

@@ -145,29 +145,39 @@
         }
 
         function loopLogAjax() {
-            loopLog = true;
-            loopLogTime = setInterval(function () {
-                $.ajax({
-                    url: './logSize',
-                    type: 'POST',
-                    dataType: 'json',
-                    data: {
-                        id: projectInfo.id
-                    },
-                    success: function (data) {
-                        if (200 == data.code) {
-                            $("#logSize").html(data.data);
+            if (loopLog) {
+                return;
+            }
+            #if($logSize)
+                loopLog = true;
+                loopLogTime = setInterval(function () {
+                    $.ajax({
+                        url: './logSize',
+                        type: 'POST',
+                        dataType: 'json',
+                        data: {
+                            id: projectInfo.id
+                        },
+                        success: function (data) {
+                            if (200 == data.code) {
+                                $("#logSize").html(data.data);
+                            } else {
+                                layer.msg(data.msg);
+                            }
+                        },
+                        error: function () {
+                            loopLog = false;
+                            clearInterval(loopLogTime);
+                            layer.alert("日志监听失败");
                         }
-                    }
-                });
-            }, 30000)
+                    });
+                }, 30000)
+            #end
         }
 
         $('#export').on('click', function () {
             location.href = "export.html?id=" + projectInfo.id;
         });
-
-
     }
 </script>
 </html>
