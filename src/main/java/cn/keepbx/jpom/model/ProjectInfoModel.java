@@ -98,6 +98,9 @@ public class ProjectInfoModel {
     }
 
     public String getGroup() {
+        if (StrUtil.isEmpty(group)) {
+            return "默认";
+        }
         return group;
     }
 

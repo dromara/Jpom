@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import javax.annotation.Resource;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 /**
@@ -29,7 +30,7 @@ import java.util.List;
  */
 @Controller
 @RequestMapping(value = "/manage/")
-public class ManageControl extends BaseController {
+public class ProjectManageControl extends BaseController {
 
     @Resource
     private ProjectInfoService projectInfoService;
@@ -42,7 +43,14 @@ public class ManageControl extends BaseController {
      * @return page
      */
     @RequestMapping(value = "projectInfo", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
-    public String projectInfo() {
+    public String projectInfo() throws IOException {
+        //获取所有分组
+        List<ProjectInfoModel> projectInfoModels = projectInfoService.getAllProjectArrayInfo();
+        HashSet<String> hashSet = new HashSet<>();
+        for (ProjectInfoModel projectInfoModel : projectInfoModels) {
+            hashSet.add(projectInfoModel.getGroup());
+        }
+        setAttribute("groups", hashSet);
         return "manage/projectInfo";
     }
 
@@ -51,9 +59,9 @@ public class ManageControl extends BaseController {
      *
      * @return json
      */
-    @RequestMapping(value = "getProjectInfo", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "getProjectInfo", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
-    public String getProjectInfo() {
+    public String getProjectInfo(String group) {
         try {
             UserModel userName = getUser();
             // 查询数据
@@ -61,6 +69,11 @@ public class ManageControl extends BaseController {
             // 转换为数据
             List<JSONObject> array = new ArrayList<>();
             for (ProjectInfoModel projectInfoModel : projectInfoModels) {
+                if (StrUtil.isNotEmpty(group)) {
+                    if (group.equals(projectInfoModel.getGroup())) {
+                        continue;
+                    }
+                }
                 String result = commandService.execCommand(CommandService.CommandOp.status, projectInfoModel);
                 boolean status = result.contains(CommandService.RUNING_TAG);
                 projectInfoModel.setStatus(status);

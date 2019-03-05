@@ -36,8 +36,7 @@
     <a href="javascript:;" class="layui-btn layui-btn-sm layui-btn-normal" lay-event="download">下载</a>
 </script>
 <script type="text/javascript">
-    var id = '$id';
-
+    // var id = '';
     function loadSuccess() {
         layui.use(['upload'], function () {
             var upload = layui.upload;
@@ -49,20 +48,20 @@
                 // height: 'full',
                 even: true,
                 where: {
-                    id: id
+                    id: '$id'
                 },
                 cols: [[
                     {field: 'index', title: '编号', width: '10%'},
                     {
-                        field: 'filename', title: '文件名称', width: '30%', templet: function (d) {
+                        field: 'filename', title: '文件名称', sort: true, width: '30%', templet: function (d) {
                             if (d.isDirectory) {
                                 return d.filename + '【文件夹】';
                             }
                             return d.filename;
                         }
                     },
-                    {field: 'modifytime', title: '修改时间', width: '15%'},
-                    {field: 'filesize', title: '文件大小', width: '15%'},
+                    {field: 'modifytime', title: '修改时间', sort: true, width: '15%'},
+                    {field: 'filesize', title: '文件大小', sort: true, width: '15%'},
                     {field: 'op', title: '操作', toolbar: '#bar_projects'}
                 ]],
                 loading: true,
@@ -75,7 +74,7 @@
                 elem: '#uploadFile',
                 accept: 'file',
                 data: {
-                    id: id
+                    id: '$id'
                 },
                 multiple: true,
                 url: '/file/upload',
@@ -119,7 +118,7 @@
                         type: 'POST',
                         dataType: 'json',
                         data: {
-                            id: id
+                            id: '$id'
                         },
                         success: function (data) {
                             if (200 === data.code) {
