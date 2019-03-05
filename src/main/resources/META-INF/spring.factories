@@ -1,0 +1,1 @@
+org.springframework.boot.env.EnvironmentPostProcessor=cn.keepbx.jpom.system.ExtConfigEnvironmentPostProcessor

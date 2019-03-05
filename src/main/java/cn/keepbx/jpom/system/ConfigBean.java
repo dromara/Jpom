@@ -30,6 +30,9 @@ public class ConfigBean {
     public static final String WHITELIST_DIRECTORY = "whitelistDirectory.json";
 
 
+    public static final String JPOM_PATH = "jpom.path";
+
+
     public static ConfigBean getInstance() {
         if (configBean == null) {
             configBean = SpringUtil.getBean(ConfigBean.class);
@@ -46,10 +49,10 @@ public class ConfigBean {
     /**
      * 项目运行存储路径
      */
-    @Value("${jpom.path}")
+    @Value("${" + JPOM_PATH + "}")
     private String path;
 
-    private String getPath() {
+    public String getPath() {
         if (StrUtil.isEmpty(path)) {
             throw new RuntimeException("请配运行路径属性【jpom.path】");
         }

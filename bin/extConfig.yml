@@ -1,0 +1,3 @@
+whitelistDirectory:
+  # 白名单目录是否验证包含关系
+  checkStartsWith: false

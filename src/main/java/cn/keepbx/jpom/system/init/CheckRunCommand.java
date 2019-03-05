@@ -101,23 +101,26 @@ public class CheckRunCommand {
             if (object instanceof JSONArray) {
                 DefaultSystemLog.LOG().info("升级白名单目录数据");
                 String all = systemService.convertToLine((JSONArray) object);
-                whitelistDirectoryController.save(all, null);
+                JsonMessage message = whitelistDirectoryController.save(all, null);
+                DefaultSystemLog.LOG().info(message.toString());
             } else if (object instanceof JSONObject) {
                 JSONArray jsonArray = systemService.getWhitelistDirectory();
                 if (jsonArray == null || jsonArray.isEmpty()) {
                     DefaultSystemLog.LOG().info("升级、自动转换白名单目录数据");
                     ProjectInfoService projectInfoService = SpringUtil.getBean(ProjectInfoService.class);
                     List<ProjectInfoModel> projectInfoModels = projectInfoService.getAllProjectArrayInfo();
-                    List<String> paths = new ArrayList<>();
-                    for (ProjectInfoModel projectInfoModel : projectInfoModels) {
-                        File file1 = new File(projectInfoModel.getLib());
-                        file1 = file1.getParentFile().getParentFile();
-                        paths.add(file1.getPath());
+                    if (projectInfoModels != null && !projectInfoModels.isEmpty()) {
+                        List<String> paths = new ArrayList<>();
+                        for (ProjectInfoModel projectInfoModel : projectInfoModels) {
+                            File file1 = new File(projectInfoModel.getLib());
+                            file1 = file1.getParentFile().getParentFile();
+                            paths.add(file1.getPath());
+                        }
+                        JSONArray certificateDirectory = systemService.getCertificateDirectory();
+                        List<String> certificateDirectoryStr = certificateDirectory.toJavaList(String.class);
+                        JsonMessage message = whitelistDirectoryController.save(paths, certificateDirectoryStr);
+                        DefaultSystemLog.LOG().info(message.toString());
                     }
-                    JSONArray certificateDirectory = systemService.getCertificateDirectory();
-                    List<String> certificateDirectoryStr = certificateDirectory.toJavaList(String.class);
-                    JsonMessage message = whitelistDirectoryController.save(paths, certificateDirectoryStr);
-                    DefaultSystemLog.LOG().info(message.toString());
 
                 }
             }
