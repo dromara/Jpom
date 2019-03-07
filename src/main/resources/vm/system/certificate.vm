@@ -22,11 +22,21 @@
         }
 
         #certPath {
-            padding-bottom: 5px;
+            padding: 5px !important;
+            color: red;
         }
 
         #keyPath {
-            padding-bottom: 5px;
+            padding: 5px !important;
+            color: red;
+        }
+
+        .layui-input {
+            margin-top: 5px;
+        }
+
+        .layui-form-label {
+            margin-top: 10px;
         }
     </style>
 </head>
@@ -90,8 +100,32 @@
     <a href="javascript:;" class="layui-btn  layui-btn-sm layui-btn-warm" lay-event="update">编辑</a>
     <a href="javascript:;" class="layui-btn  layui-btn-sm layui-btn-danger" lay-event="delete">删除</a>
 </script>
+
+<script type="text/html" id="tem_expirationTime">
+    {{ formateTime(d.expirationTime)  }}
+</script>
+
 <script type="text/javascript">
+
+    function formateTime(time) {
+        var date = new Date();
+        date.setTime(time);
+        var y = date.getFullYear();
+        var m = date.getMonth() + 1;
+        m = m < 10 ? ('0' + m) : m;
+        var d = date.getDate();
+        d = d < 10 ? ('0' + d) : d;
+        var h = date.getHours();
+        h = h < 10 ? ('0' + h) : h;
+        var minute = date.getMinutes();
+        var second = date.getSeconds();
+        minute = minute < 10 ? ('0' + minute) : minute;
+        second = second < 10 ? ('0' + second) : second;
+        return y + '-' + m + '-' + d + ' ' + h + ':' + minute + ':' + second;
+    }
+
     function loadSuccess() {
+
 
         table.render({
             id: 'tab_certificate',
@@ -102,7 +136,7 @@
             cols: [[
                 {field: 'id', title: 'id'},
                 {field: 'domain', title: '域名'},
-                {field: 'expirationTime', title: '到期时间'},
+                {field: 'expirationTime', templet: "#tem_expirationTime", title: '到期时间'},
                 {field: 'op', title: '操作', align: 'center', toolbar: '#bar_cert', fixed: 'right'}
             ]],
             loading: true,
