@@ -1,6 +1,5 @@
 package cn.keepbx.jpom.controller.manage;
 
-import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
@@ -111,10 +110,9 @@ public class ConsoleController extends BaseController {
         String logSize = null;
         File file = new File(pim.getLog());
         if (file.exists()) {
-            FileInputStream fileInputStream = new FileInputStream(file);
-            long size = fileInputStream.available();
-            long fileSize = file.length();
-            logSize = String.format("%s|%s", FileUtil.readableFileSize(fileSize), FileUtil.readableFileSize(size));
+//            long fileSize = file.length();
+//            logSize = FileUtil.readableFileSize(fileSize);
+            logSize = commandService.execSystemCommand("du -h  " + file.getAbsolutePath() + "  | awk '{print $1}'");
         }
         return logSize;
     }

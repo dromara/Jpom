@@ -1,5 +1,6 @@
 package cn.keepbx.jpom.socket;
 
+import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.keepbx.jpom.util.KeyLock;
 
@@ -59,7 +60,7 @@ public class SocketSession {
      * @throws IOException 异常
      */
     public static void send(final Session session, String msg) throws IOException {
-        if (msg == null) {
+        if (StrUtil.isEmpty(msg)) {
             return;
         }
         if (!session.isOpen()) {
