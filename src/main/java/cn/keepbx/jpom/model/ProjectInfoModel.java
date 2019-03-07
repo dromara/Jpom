@@ -3,6 +3,8 @@ package cn.keepbx.jpom.model;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSONObject;
 
+import java.io.File;
+
 /**
  * 项目配置信息实体
  *
@@ -126,6 +128,11 @@ public class ProjectInfoModel {
 
     public String getLog() {
         return log;
+    }
+
+    public File getLogBack() {
+        File logBack = new File(getLog() + "_back");
+        return logBack;
     }
 
     public void setLog(String log) {

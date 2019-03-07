@@ -26,7 +26,7 @@
 <div class="layui-row">
     <button id="uploadFile" class="layui-btn layui-btn-sm"><i class="layui-icon">&#xe67c;</i>上传文件</button>
     <button id="refresh" class="layui-btn layui-btn-sm">刷新</button>
-    <button id="clear" class="layui-btn layui-btn-sm">清空文件</button>
+    <button id="clear" class="layui-btn layui-btn-sm layui-btn-danger">清空文件</button>
 </div>
 <table class="layui-table" id="tab_file" lay-filter="tab_file" style="margin: 0;"></table>
 </body>
@@ -155,7 +155,7 @@
 
             //下载文件
             function downloadFile(data) {
-                var url = "/file/download?id=" + data.projectid + "&filename=" + encodeURI(data.filename);
+                var url = "/file/download?id=$id&filename=" + encodeURI(data.filename);
                 self.location.href = url;
             }
 
@@ -170,7 +170,7 @@
                         type: 'POST',
                         dataType: 'json',
                         data: {
-                            id: data.projectid,
+                            id: '$id',
                             filename: data.filename
                         },
                         success: function (data) {

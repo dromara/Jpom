@@ -19,7 +19,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.annotation.Resource;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 
@@ -67,7 +66,7 @@ public class ProjectManageControl extends BaseController {
             // 查询数据
             List<ProjectInfoModel> projectInfoModels = projectInfoService.getAllProjectArrayInfo();
             // 转换为数据
-            List<JSONObject> array = new ArrayList<>();
+            JSONArray array = new JSONArray();
             for (ProjectInfoModel projectInfoModel : projectInfoModels) {
                 if (StrUtil.isNotEmpty(group) && !group.equals(projectInfoModel.getGroup())) {
                     continue;
@@ -80,7 +79,9 @@ public class ProjectManageControl extends BaseController {
                 object.put("manager", userName.isProject(id));
                 array.add(object);
             }
-            array.sort((o1, o2) -> {
+            array.sort((oo1, oo2) -> {
+                JSONObject o1 = (JSONObject) oo1;
+                JSONObject o2 = (JSONObject) oo2;
                 String group1 = o1.getString("group");
                 String group2 = o2.getString("group");
                 if (group1 == null || group2 == null) {
@@ -88,7 +89,7 @@ public class ProjectManageControl extends BaseController {
                 }
                 return group1.compareTo(group2);
             });
-            return PageUtil.getPaginate(200, "查询成功！", (JSONArray) JSONArray.toJSON(array));
+            return PageUtil.getPaginate(200, "查询成功！", array);
         } catch (IOException e) {
             DefaultSystemLog.ERROR().error(e.getMessage(), e);
             return JsonMessage.getString(500, e.getMessage());

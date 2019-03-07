@@ -15,5 +15,7 @@ public class RunFile {
 
         System.out.println(FileUtil.readableFileSize(FileUtil.size(new File("D:\\SystemDocument\\Documents\\Tencent Files\\1593503371\\Image"))));
 //        System.out.println(list);
+//        String msg = exec("/test.sh");
+//        System.out.println(msg);
     }
 }

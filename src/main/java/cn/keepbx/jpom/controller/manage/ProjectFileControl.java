@@ -31,7 +31,7 @@ import java.io.IOException;
  */
 @Controller
 @RequestMapping(value = "/file/")
-public class FileControl extends BaseController {
+public class ProjectFileControl extends BaseController {
 
     @Resource
     private ProjectInfoService projectInfoService;
@@ -46,21 +46,6 @@ public class FileControl extends BaseController {
         setAttribute("id", id);
         return "manage/filemanage";
     }
-
-//    /**
-//     * 读取启动文件
-//     *
-//     * @return json
-//     */
-//    @RequestMapping(value = "getRunBoot")
-//    @ResponseBody
-//    public String getRunBoot() throws ConfigException {
-//        String file = ConfigBean.getInstance().getRunCommandPath();
-//        String content = FileUtil.readString(file, CharsetUtil.CHARSET_UTF_8);
-//        Map<String, String> map = new HashMap<>(1);
-//        map.put("content", content);
-//        return JsonMessage.getString(200, "success", map);
-//    }
 
     /**
      * 列出目录下的文件
@@ -85,39 +70,47 @@ public class FileControl extends BaseController {
             if (filesAll == null) {
                 return JsonMessage.getString(500, "目录是空");
             }
-            int size = filesAll.length;
-            JSONArray arrayFile = new JSONArray(size);
-            for (File file : filesAll) {
-                JSONObject jsonObject = new JSONObject(6);
-                if (file.isDirectory()) {
-                    jsonObject.put("isDirectory", true);
-                    long sizeFile = FileUtil.size(file);
-                    jsonObject.put("filesize", FileUtil.readableFileSize(sizeFile));
-                } else {
-
-                    jsonObject.put("filesize", FileUtil.readableFileSize(file.length()));
-                }
-                jsonObject.put("filename", file.getName());
-                jsonObject.put("projectid", id);
-                jsonObject.put("modifytime", DateUtil.date(file.lastModified()).toString());
-
-                arrayFile.add(jsonObject);
-            }
-            arrayFile.sort((o1, o2) -> {
-                JSONObject jsonObject1 = (JSONObject) o1;
-                JSONObject jsonObject2 = (JSONObject) o2;
-                return jsonObject1.getString("filename").compareTo(jsonObject2.getString("filename"));
-            });
-            final int[] i = {0};
-            arrayFile.forEach(o -> {
-                JSONObject jsonObject = (JSONObject) o;
-                jsonObject.put("index", ++i[0]);
-            });
+            JSONArray arrayFile = parseInfo(filesAll, false);
             return PageUtil.getPaginate(200, "查询成功", arrayFile);
         } catch (IOException e) {
             DefaultSystemLog.ERROR().error(e.getMessage(), e);
             return JsonMessage.getString(500, "查询失败");
         }
+    }
+
+    public static JSONArray parseInfo(File[] files, boolean time) {
+        int size = files.length;
+        JSONArray arrayFile = new JSONArray(size);
+        for (File file : files) {
+            JSONObject jsonObject = new JSONObject(6);
+            if (file.isDirectory()) {
+                jsonObject.put("isDirectory", true);
+                long sizeFile = FileUtil.size(file);
+                jsonObject.put("filesize", FileUtil.readableFileSize(sizeFile));
+            } else {
+                jsonObject.put("filesize", FileUtil.readableFileSize(file.length()));
+            }
+            jsonObject.put("filename", file.getName());
+//            jsonObject.put("projectid", id);
+            long mTime = file.lastModified();
+            jsonObject.put("modifytimelong", mTime);
+            jsonObject.put("modifytime", DateUtil.date(mTime).toString());
+            arrayFile.add(jsonObject);
+        }
+        arrayFile.sort((o1, o2) -> {
+            JSONObject jsonObject1 = (JSONObject) o1;
+            JSONObject jsonObject2 = (JSONObject) o2;
+            if (time) {
+                return jsonObject2.getLong("modifytimelong").compareTo(jsonObject1.getLong("modifytimelong"));
+            }
+            return jsonObject1.getString("filename").compareTo(jsonObject2.getString("filename"));
+        });
+        final int[] i = {0};
+        arrayFile.forEach(o -> {
+            JSONObject jsonObject = (JSONObject) o;
+            jsonObject.put("index", ++i[0]);
+        });
+        return arrayFile;
     }
 
     /**
@@ -128,8 +121,6 @@ public class FileControl extends BaseController {
     @RequestMapping(value = "upload", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     public String upload(String id) throws Exception {
-//        String id = getParameter("id");
-//        boolean manager = userService.isManager(id, getUserName());
         UserModel userName = getUser();
         if (!userName.isProject(id)) {
             return JsonMessage.getString(400, "你没有该操作权限操作!");
@@ -221,29 +212,4 @@ public class FileControl extends BaseController {
         }
         return JsonMessage.getString(500, "删除失败");
     }
-
-
-//    /**
-//     * 修改启动文件
-//     *
-//     * @param content 内容
-//     * @return json
-//     */
-//    @RequestMapping(value = "saveRunBoot")
-//    @ResponseBody
-//    public String saveRunBoot(String content) {
-//        File file = commandService.getCommandFile();
-//        // 写入文件
-//        try {
-//            FileOutputStream fos = new FileOutputStream(file);
-//            fos.write(content.getBytes());
-//            fos.flush();
-//            fos.close();
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//            DefaultSystemLog.ERROR().error(e.getMessage(), e);
-//        }
-//        return JsonMessage.getString(200, "success");
-//    }
-
 }

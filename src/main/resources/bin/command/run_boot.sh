@@ -96,11 +96,12 @@ backupLog()
             mkdir ${LogBack}
         fi
         cur_dateTime="`date +%Y-%m-%d_%H:%M:%S`.log"
-        mv ${Log}  ${LogBack}${cur_dateTime}
-        echo "mv to $LogBack$cur_dateTime"
-        touch ${Log}
+        cp ${Log}  ${LogBack}${cur_dateTime}
+        echo "cp to $LogBack$cur_dateTime"
+        cat /dev/null > ${Log}
    else
-     echo "log file notExits"
+     touch ${Log}
+     echo "touch log file:${Log}"
    fi
 }
 

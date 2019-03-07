@@ -3,7 +3,7 @@
 
 <head>
     #parse("./common/head.vm")
-    <title>项目管理系统</title>
+    <title>logBack</title>
     <style>
         body {
             padding: 20px;
@@ -26,15 +26,15 @@
         <tbody>
             #foreach($item in $array)
             <tr>
-                <td>$velocityCount</td>
-                <td>$item.shortKey</td>
-                <td>$item.time</td>
-                <td>$item.size</td>
+                <td>$item.index</td>
+                <td>$item.filename</td>
+                <td>$item.modifytime</td>
+                <td>$item.filesize</td>
                 <td>
-                    <button name="install" data-name="$item.shortKey" data-key="$item.key" data-id="$id"
-                            class="layui-btn layui-btn-danger layui-btn-sm">安装
+                    <button name="delete" data-name="$item.filename" data-id="$id"
+                            class="layui-btn layui-btn-danger layui-btn-sm">删除
                     </button>
-                    <a name="download" href="build_download?key=$item.key&id=$id"
+                    <a name="download" href="logBack_download?key=$item.filename&id=$id"
                        class="layui-btn layui-btn-warm layui-btn-sm">下载
                     </a>
                 </td>
@@ -51,31 +51,36 @@
 </body>
 <script type="text/javascript">
     function loadSuccess() {
-        $("button[name='install']").click(function () {
+        $("button[name='delete']").click(function () {
             var that = $(this);
             var name = that.attr("data-name");
-            layer.confirm('您确定要安装【' + name + '】？', {
+            layer.confirm('您确定要删除【' + name + '】？', {
                 btn: ['确定', '不确定'] //按钮
             }, function (index) {
                 layer.close(index);
                 index = layer.load(1, {
                     shade: [0.5, '#fff'] //0.1透明度的白色背景
                 });
-                var key = that.attr("data-key");
+                // var key = that.attr("data-key");
                 var id = that.attr("data-id");
                 $.ajax({
-                    url: './build_install',
+                    url: './logBack_delete',
                     type: 'POST',
                     dataType: 'json',
-                    data: {id: id, key: key},
+                    data: {
+                        id: id,
+                        name: name
+                    },
                     success: function (data) {
                         layer.msg(data.msg);
                         if (200 == data.code) {
-
+                            setTimeout(function () {
+                                window.location.reload();
+                            }, 2000);
                         }
                     },
                     error: function (err) {
-                        layer.msg('安装失败');
+                        layer.msg('删除失败');
                     },
                     complete: function () {
                         layer.close(index);

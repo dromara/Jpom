@@ -42,19 +42,25 @@ public class ConsoleController extends BaseController {
      */
     @RequestMapping(value = "console", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
     public String console(String id) {
-        ProjectInfoModel pim = null;
+        ProjectInfoModel projectInfoModel = null;
         try {
-            pim = projectInfoService.getProjectInfo(id);
+            projectInfoModel = projectInfoService.getProjectInfo(id);
         } catch (IOException e) {
             DefaultSystemLog.ERROR().error(e.getMessage(), e);
         }
-        UserModel userName = getUser();
-        if (pim != null) {
-            setAttribute("projectInfo", JSONObject.toJSONString(pim));
+        if (projectInfoModel != null) {
+            UserModel userName = getUser();
+            setAttribute("projectInfo", JSONObject.toJSONString(projectInfoModel));
             setAttribute("userInfo", userName.getUserMd5Key());
             String logSize = getLogSize(id);
             setAttribute("logSize", logSize);
             setAttribute("manager", userName.isProject(id));
+
+            //获取日志备份路径
+            File logBack = projectInfoModel.getLogBack();
+            if (logBack.exists() && logBack.isDirectory()) {
+                setAttribute("logBack", true);
+            }
         }
         return "manage/console";
     }
