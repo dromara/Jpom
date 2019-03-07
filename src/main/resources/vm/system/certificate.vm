@@ -20,6 +20,14 @@
         .btn_upload {
             margin-top: 10px;
         }
+
+        #certPath {
+            padding-bottom: 5px;
+        }
+
+        #keyPath {
+            padding-bottom: 5px;
+        }
     </style>
 </head>
 
@@ -57,6 +65,7 @@
             <div class="layui-inline">
                 <label class="layui-form-label">证书文件</label>
                 <div class="layui-input-block">
+                    <label id="certPath"></label>
                     <input type="file" id="cert" name="cert" placeholder="" class="layui-input" required
                            lay-verify="required">
                 </div>
@@ -66,6 +75,7 @@
             <div class="layui-inline">
                 <label class="layui-form-label">私钥文件</label>
                 <div class="layui-input-block">
+                    <label id="keyPath"></label>
                     <input type="file" id="key" name="key" placeholder="" class="layui-input" required
                            lay-verify="required">
                 </div>
@@ -120,7 +130,11 @@
             document.getElementById('form_certificate').reset();
             $('#form_certificate [name="id"]').attr('readonly', true).addClass('layui-disabled');
             for (var key in data) {
-                if ("id" === key || "path" === key) {
+                if ("cert" === key) {
+                    $("#certPath").html(data[key]);
+                } else if ("key" === key) {
+                    $("#keyPath").html(data[key]);
+                } else {
                     $('#form_certificate [name="' + key + '"]').val(data[key]);
                 }
             }
