@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.annotation.Resource;
+import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
@@ -122,13 +123,16 @@ public class CertificateController extends BaseController {
     }
 
     /**
-     * 解析证书失败
+     * 解析证书
      *
      * @param file 证书文件
      */
     private JSONObject decodeCert(File file) {
+        if (file == null) {
+            return null;
+        }
         try {
-            InputStream inStream = new FileInputStream(file);
+            BufferedInputStream inStream = FileUtil.getInputStream(file);
             // 创建X509工厂类
             CertificateFactory cf = CertificateFactory.getInstance("X.509");
             // 创建证书对象
