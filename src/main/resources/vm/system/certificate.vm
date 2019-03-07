@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    #parse("./common/head.vm")
+    <title>证书管理</title>
+    <style>
+        body {
+            padding: 10px 10px 0px 10px;
+        }
+
+        .layui-container {
+            width: 80% !important;
+        }
+
+        .div-certificate {
+            display: none;
+        }
+
+        .btn_upload {
+            margin-top: 10px;
+        }
+
+        #certPath {
+            padding: 5px !important;
+            color: red;
+        }
+
+        #keyPath {
+            padding: 5px !important;
+            color: red;
+        }
+
+        .layui-input {
+            margin-top: 5px;
+        }
+
+        .layui-form-label {
+            margin-top: 10px;
+        }
+    </style>
+</head>
+
+<body>
+<div class="layui-row">
+    <button id="addCertificate" class="layui-btn layui-btn-sm">新增证书</button>
+    <button id="refresh" class="layui-btn layui-btn-sm">刷新表格</button>
+</div>
+<table class="layui-table" id="tab_certificate" lay-filter="tab_certificate" style="margin: 0;"></table>
+
+<div class="layui-container div-certificate" id="div-certificate">
+    <form action="" enctype="multipart/form-data" class="layui-form" id="form_certificate" style="margin-top: 20px">
+        <div class="layui-form-item">
+            <div class="layui-inline">
+                <label class="layui-form-label">证书id</label>
+                <div class="layui-input-block">
+                    <input type="text" id="id" name="id" placeholder="创建后不能修改" class="layui-input" required
+                           lay-verify="required">
+                </div>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-inline">
+                <label class="layui-form-label">证书路径</label>
+                <div class="layui-input-block">
+                    <select name="path" id="path" lay-filter="aihao">
+                        #foreach($item in $certificate)
+                            <option value="$item">$item</option>
+                        #end
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-inline">
+                <label class="layui-form-label">证书文件</label>
+                <div class="layui-input-block">
+                    <label id="certPath"></label>
+                    <input type="file" id="cert" name="cert" placeholder="" class="layui-input" required
+                           lay-verify="required">
+                </div>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-inline">
+                <label class="layui-form-label">私钥文件</label>
+                <div class="layui-input-block">
+                    <label id="keyPath"></label>
+                    <input type="file" id="key" name="key" placeholder="" class="layui-input" required
+                           lay-verify="required">
+                </div>
+            </div>
+        </div>
+        <input type="hidden" lay-submit lay-filter="submitCert" id="cert_submit">
+    </form>
+</div>
+
+</body>
+<script type="text/html" id="bar_cert">
+    <a href="javascript:;" class="layui-btn  layui-btn-sm layui-btn-warm" lay-event="update">编辑</a>
+    <a href="javascript:;" class="layui-btn  layui-btn-sm layui-btn-danger" lay-event="delete">删除</a>
+</script>
+
+<script type="text/html" id="tem_effectiveTime">
+    {{ formateTime(d.effectiveTime)  }}
+</script>
+<script type="text/html" id="tem_expirationTime">
+    {{ formateTime(d.expirationTime)  }}
+</script>
+
+<script type="text/javascript">
+
+    function formateTime(time) {
+        if (!time) {
+            return 0;
+        }
+        var date = new Date();
+        date.setTime(time);
+        var y = date.getFullYear();
+        var m = date.getMonth() + 1;
+        m = m < 10 ? ('0' + m) : m;
+        var d = date.getDate();
+        d = d < 10 ? ('0' + d) : d;
+        var h = date.getHours();
+        h = h < 10 ? ('0' + h) : h;
+        var minute = date.getMinutes();
+        var second = date.getSeconds();
+        minute = minute < 10 ? ('0' + minute) : minute;
+        second = second < 10 ? ('0' + second) : second;
+        return y + '-' + m + '-' + d + ' ' + h + ':' + minute + ':' + second;
+    }
+
+    function loadSuccess() {
+
+
+        table.render({
+            id: 'tab_certificate',
+            elem: '#tab_certificate',
+            url: '/system/certificate/getCertList',
+            height: 'full-52',
+            even: true,
+            cols: [[
+                {field: 'id', title: 'id'},
+                {field: 'domain', title: '域名'},
+                {field: 'effectiveTime', templet: "#tem_effectiveTime", title: '生效时间'},
+                {field: 'expirationTime', templet: "#tem_expirationTime", title: '到期时间'},
+                {field: 'op', title: '操作', align: 'center', toolbar: '#bar_cert', fixed: 'right'}
+            ]],
+            loading: true,
+            response: {
+                statusCode: 200
+            }
+        });
+
+        // 表格工具条事件
+        table.on('tool(tab_certificate)', function (obj) {
+            var data = obj.data;
+            var event = obj.event;
+
+            if ('update' === event) {
+                // 修改
+                updateCert(data);
+            } else if ('delete' === event) {
+                // 删除
+                deleteCert(data);
+            }
+        });
+
+        // 修改证书
+        function updateCert(data) {
+            document.getElementById('form_certificate').reset();
+            $('#form_certificate [name="id"]').attr('readonly', true).addClass('layui-disabled');
+            for (var key in data) {
+                if ("cert" === key) {
+                    $("#certPath").html(data[key]);
+                } else if ("key" === key) {
+                    $("#keyPath").html(data[key]);
+                } else {
+                    $('#form_certificate [name="' + key + '"]').val(data[key]);
+                }
+            }
+            // 弹出
+            layer.open({
+                type: 1,
+                title: '编辑',
+                content: $('#div-certificate'),
+                area: ['60%', '60%'],
+                btnAlign: 'c',
+                btn: ['提交'],
+                yes: function (index, layero) {
+                    $('#form_certificate').attr('action', '/system/certificate/updateCertificate');
+                    $('#cert_submit').click();
+                }
+            });
+        }
+
+        // 删除证书
+        function deleteCert(data) {
+            layer.confirm('确定删除证书 ' + data.id + '？', {
+                title: '系统提示'
+            }, function (index) {
+                layer.close(index);
+                $.ajax({
+                    url: '/system/certificate/delete',
+                    type: 'POST',
+                    dataType: 'json',
+                    data: {id: data.id},
+                    success: function (data) {
+                        if (200 == data.code) {
+                            layer.msg('删除成功！');
+                            // 刷新项目列表
+                            table.reload('tab_certificate', {height: 'full-52'});
+                        } else {
+                            layer.msg(data.msg);
+                        }
+                    },
+                    error: function (err) {
+                        layer.msg('删除失败！');
+                    }
+                });
+            });
+        }
+
+        // 新增证书
+        $('#addCertificate').on('click', function () {
+            // 重置表单
+            document.getElementById('form_certificate').reset();
+            $('#form_certificate [name="id"]').attr('readonly', false).removeClass('layui-disabled');
+            $("#certPath").html("");
+            $("#keyPath").html("");
+            layer.open({
+                type: 1,
+                title: '新增证书',
+                content: $('#div-certificate'),
+                area: ['60%', '60%'],
+                btnAlign: 'c',
+                btn: ['提交'],
+                yes: function (index, layero) {
+                    $('#form_certificate').attr('action', '/system/certificate/addCertificate');
+                    $('#cert_submit').click();
+                }
+            });
+        });
+
+        // 新增证书
+        $('#refresh').on('click', function () {
+            table.reload('tab_certificate');
+        });
+
+        form.on('submit(submitCert)', function (data) {
+            //获取文件
+            var cert = $("#cert")[0].files[0];
+            var key = $("#key")[0].files[0];
+            var id = $("#id").val();
+            var path = $("#path").val();
+
+            var formData = new FormData();
+            formData.append("path", path);
+            formData.append("cert", cert);
+            formData.append("key", key);
+            formData.append("id", id);
+            $.ajax({
+                url: data.form.action,
+                type: 'POST',
+                dataType: 'json',
+                contentType: false,
+                processData: false,
+                data: formData,
+                success: function (data) {
+                    layer.msg(data.msg);
+                    if (200 == data.code) {
+                        layer.closeAll('page');
+                        // 刷新表
+                        table.reload('tab_certificate');
+                    }
+                },
+                error: function (err) {
+                    layer.alert(err.msg);
+                }
+            });
+            return false;
+        });
+
+    }
+</script>
+
+</html>
