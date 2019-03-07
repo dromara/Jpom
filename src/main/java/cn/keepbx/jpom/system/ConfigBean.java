@@ -29,6 +29,7 @@ public class ConfigBean {
     public static final String PROJECT = "project.json";
     public static final String WHITELIST_DIRECTORY = "whitelistDirectory.json";
     public static final String ALI_OSS = "aliOss.json";
+    public static final String CERT = "cert.json";
 
 
     public static final String JPOM_PATH = "jpom.path";
