@@ -6,8 +6,8 @@ import cn.jiangzeyin.common.JsonMessage;
 import cn.keepbx.jpom.common.BaseController;
 import cn.keepbx.jpom.model.ProjectInfoModel;
 import cn.keepbx.jpom.service.manage.CommandService;
+import cn.keepbx.jpom.service.manage.ProjectInfoService;
 import cn.keepbx.jpom.system.ConfigBean;
-import cn.keepbx.jpom.system.ConfigException;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
@@ -34,13 +34,15 @@ public class InternalController extends BaseController {
     @Resource
     private CommandService commandService;
 
+    @Resource
+    private ProjectInfoService projectInfoService;
+
     /**
      * 获取内存信息
      */
     @RequestMapping(value = "internal", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
-    public String getInternal(String tag) throws ConfigException {
-        ProjectInfoModel projectInfoModel = new ProjectInfoModel();
-        projectInfoModel.setId(tag);
+    public String getInternal(String tag) throws IOException {
+        ProjectInfoModel projectInfoModel = projectInfoService.getProjectInfo(tag);
         String pid = commandService.execCommand(CommandService.CommandOp.pid, projectInfoModel, null);
         String command = "top -b -n 1 -p " + pid;
         String internal = commandService.execCommand(command);
@@ -59,8 +61,7 @@ public class InternalController extends BaseController {
     @RequestMapping(value = "stack", method = RequestMethod.GET)
     @ResponseBody
     public String stack(String tag) throws IOException {
-        ProjectInfoModel projectInfoModel = new ProjectInfoModel();
-        projectInfoModel.setId(tag);
+        ProjectInfoModel projectInfoModel = projectInfoService.getProjectInfo(tag);
         String pid = commandService.execCommand(CommandService.CommandOp.pid, projectInfoModel, null).trim();
         pid = pid.replace("\n", "");
 //        String fileName = "java_cpu" + RandomUtil.randomNumbers(5) + ".txt";
@@ -79,8 +80,8 @@ public class InternalController extends BaseController {
     @RequestMapping(value = "ram", method = RequestMethod.GET)
     @ResponseBody
     public String ram(String tag) throws IOException {
-        ProjectInfoModel projectInfoModel = new ProjectInfoModel();
-        projectInfoModel.setId(tag);
+        ProjectInfoModel projectInfoModel = projectInfoService.getProjectInfo(tag);
+//        projectInfoModel.setId(tag);
         String pid = commandService.execCommand(CommandService.CommandOp.pid, projectInfoModel, null).trim();
         String fileName = ConfigBean.getInstance().getTempPathName() + "/" + tag + "_java_ram.txt";
         fileName = FileUtil.normalize(fileName);

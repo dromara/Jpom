@@ -98,7 +98,8 @@ backupLog()
         cur_dateTime="`date +%Y-%m-%d_%H:%M:%S`.log"
         cp ${Log}  ${LogBack}${cur_dateTime}
         echo "cp to $LogBack$cur_dateTime"
-        cat /dev/null > ${Log}
+        echo "" > ${Log} & cp /dev/null  ${Log}
+        echo "end ok"
    else
      touch ${Log}
      echo "touch log file:${Log}"

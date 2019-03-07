@@ -133,10 +133,8 @@ public class ProjectFileControl extends BaseController {
         // 保存
         multipartFileBuilder.save();
         // 修改使用状态
-        ProjectInfoModel modify = new ProjectInfoModel();
-        modify.setId(pim.getId());
-        modify.setUseLibDesc("upload");
-        projectInfoService.updateProject(modify);
+        pim.setUseLibDesc("upload");
+        projectInfoService.updateProject(pim);
         return JsonMessage.getString(200, "上传成功");
     }
 

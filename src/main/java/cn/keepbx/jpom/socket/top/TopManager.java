@@ -7,7 +7,6 @@ import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.spring.SpringUtil;
 import cn.keepbx.jpom.service.manage.CommandService;
 import cn.keepbx.jpom.socket.SocketSession;
-import cn.keepbx.jpom.system.ConfigException;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
@@ -67,7 +66,7 @@ public class TopManager {
                 String result = commandService.execCommand(CommandService.CommandOp.top, null, null);
                 String topInfo = getTopInfo(result);
                 send(topInfo);
-            } catch (ConfigException e) {
+            } catch (IOException e) {
                 DefaultSystemLog.ERROR().error(e.getMessage(), e);
             }
         });

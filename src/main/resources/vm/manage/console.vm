@@ -4,7 +4,57 @@
 <head>
     #parse("./common/head.vm")
     <title>项目管理系统</title>
-    <link rel="stylesheet" href="/static/css/manage/console.css" media="all">
+    <style>
+        body {
+            position: absolute;
+            top: 0px;
+            right: 0px;
+            bottom: 0px;
+            left: 0px;
+            padding: 10px;
+        }
+
+        .console {
+            height: 100%;
+            position: relative;
+        }
+
+        .console .terminal {
+            position: absolute;
+            top: 40px;
+            right: 0px;
+            bottom: 0px;
+            left: 0px;
+            border: 1px solid #c1c1c1;
+            border-radius: 5px;
+            font-family: Consolas;
+            padding: 5px;
+            overflow: auto;
+            word-break: keep-all;
+            white-space: nowrap;
+        }
+
+        .console .status {
+            display: inline-block;
+            float: right;
+        }
+
+        .console .status .status-div {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            border: 1px solid #c1c1c1;
+        }
+
+        .console .status .status-run {
+            background-color: #05ff2d;
+        }
+
+        .console .status .status-stop {
+            background-color: #ff0000;
+        }
+    </style>
 </head>
 
 <body>
@@ -13,7 +63,8 @@
         <div class="layui-row">
             <!-- layui-elem-quote -->
             #if($logSize)
-                <button id="export" class="layui-btn layui-btn-sm">导出日志(<span id="logSize">$logSize</span>)</button>
+                <button id="export" class="layui-btn layui-btn-sm">导出日志</button>
+                <button id="resetLog" class="layui-btn layui-btn-sm">重置(<span id="logSize">$logSize</span>)</button>
             #end
             #if($logBack)
                 <button id="logBack" class="layui-btn layui-btn-sm">日志备份</button>
@@ -154,32 +205,56 @@
             #if($logSize)
                 loopLog = true;
                 loopLogTime = setInterval(function () {
-                    $.ajax({
-                        url: './logSize',
-                        type: 'POST',
-                        dataType: 'json',
-                        data: {
-                            id: projectInfo.id
-                        },
-                        success: function (data) {
-                            if (200 == data.code) {
-                                $("#logSize").html(data.data);
-                            } else {
-                                layer.msg(data.msg);
-                            }
-                        },
-                        error: function () {
-                            loopLog = false;
-                            clearInterval(loopLogTime);
-                            layer.alert("日志监听失败");
-                        }
-                    });
+                    reqLogSize();
                 }, 30000)
             #end
         }
 
+        function reqLogSize() {
+            $.ajax({
+                url: './logSize',
+                type: 'POST',
+                dataType: 'json',
+                data: {
+                    id: projectInfo.id
+                },
+                success: function (data) {
+                    if (200 == data.code) {
+                        $("#logSize").html(data.data);
+                    } else {
+                        layer.msg(data.msg);
+                    }
+                },
+                error: function () {
+                    loopLog = false;
+                    clearInterval(loopLogTime);
+                    layer.alert("日志监听失败");
+                }
+            });
+        }
+
         $('#export').on('click', function () {
             location.href = "export.html?id=" + projectInfo.id;
+        });
+
+        $("#resetLog").on('click', function () {
+            $.ajax({
+                url: './resetLog',
+                type: 'POST',
+                dataType: 'json',
+                data: {
+                    id: projectInfo.id
+                },
+                success: function (data) {
+                    layer.msg(data.msg);
+                    if (200 == data.code) {
+                        reqLogSize();
+                    }
+                },
+                error: function () {
+                    layer.alert("重置日志失败");
+                }
+            });
         });
 
         $("#logBack").on('click', function () {

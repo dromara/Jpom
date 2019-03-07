@@ -10,7 +10,6 @@ import cn.keepbx.jpom.socket.LogWebSocketHandle;
 import cn.keepbx.jpom.socket.SocketSession;
 import cn.keepbx.jpom.socket.TailLogThread;
 import cn.keepbx.jpom.system.ConfigBean;
-import cn.keepbx.jpom.system.ConfigException;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -60,7 +59,7 @@ public class CommandService {
     }
 
 
-    public String execCommand(CommandOp commandOp, ProjectInfoModel projectInfoModel) throws ConfigException {
+    public String execCommand(CommandOp commandOp, ProjectInfoModel projectInfoModel) throws IOException {
         return execCommand(commandOp, projectInfoModel, null);
     }
 
@@ -70,7 +69,7 @@ public class CommandService {
      * @param commandOp        执行的操作
      * @param projectInfoModel 项目信息
      */
-    public String execCommand(CommandOp commandOp, ProjectInfoModel projectInfoModel, Evt evt) throws ConfigException {
+    public String execCommand(CommandOp commandOp, ProjectInfoModel projectInfoModel, Evt evt) throws IOException {
         String result;
 
         String commandPath = ConfigBean.getInstance().getRunCommandPath();
@@ -126,8 +125,7 @@ public class CommandService {
             if (projectInfoModel != null) {
                 TailLogThread.logChange(log);
                 // 修改 run lib 使用情况
-                ProjectInfoModel modify = new ProjectInfoModel();
-                modify.setId(projectInfoModel.getId());
+                ProjectInfoModel modify = projectInfoService.getProjectInfo(projectInfoModel.getId());
                 modify.setRunLibDesc(projectInfoModel.getUseLibDesc());
                 try {
                     projectInfoService.updateProject(modify);

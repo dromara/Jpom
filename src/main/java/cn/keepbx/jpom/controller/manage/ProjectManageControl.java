@@ -100,8 +100,7 @@ public class ProjectManageControl extends BaseController {
     public String getPort(String tag) {
         // 查询数据
         try {
-            ProjectInfoModel projectInfoModel = new ProjectInfoModel();
-            projectInfoModel.setId(tag);
+            ProjectInfoModel projectInfoModel = projectInfoService.getProjectInfo(tag);
             String pId = commandService.execCommand(CommandService.CommandOp.pid, projectInfoModel, null).trim();
             if (StrUtil.isNotEmpty(pId)) {
                 String result = commandService.execSystemCommand("netstat -antup | grep " + pId);

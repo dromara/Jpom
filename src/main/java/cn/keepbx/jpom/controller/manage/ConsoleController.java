@@ -7,6 +7,7 @@ import cn.jiangzeyin.common.JsonMessage;
 import cn.keepbx.jpom.common.BaseController;
 import cn.keepbx.jpom.model.ProjectInfoModel;
 import cn.keepbx.jpom.model.UserModel;
+import cn.keepbx.jpom.service.manage.CommandService;
 import cn.keepbx.jpom.service.manage.ProjectInfoService;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.http.MediaType;
@@ -35,13 +36,16 @@ public class ConsoleController extends BaseController {
     @Resource
     private ProjectInfoService projectInfoService;
 
+    @Resource
+    private CommandService commandService;
+
     /**
      * 管理项目
      *
      * @return page
      */
     @RequestMapping(value = "console", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
-    public String console(String id) {
+    public String console(String id) throws IOException {
         ProjectInfoModel projectInfoModel = null;
         try {
             projectInfoModel = projectInfoService.getProjectInfo(id);
@@ -67,7 +71,7 @@ public class ConsoleController extends BaseController {
 
     @RequestMapping(value = "logSize", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
-    public String logSize(String id) {
+    public String logSize(String id) throws IOException {
         String info = getLogSize(id);
         if (info != null) {
             return JsonMessage.getString(200, "ok", info);
@@ -75,23 +79,44 @@ public class ConsoleController extends BaseController {
         return JsonMessage.getString(500, "获取日志大小失败");
     }
 
-    private String getLogSize(String id) {
+
+    @RequestMapping(value = "resetLog", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @ResponseBody
+    public String resetLog(String id) {
         ProjectInfoModel pim;
         try {
             pim = projectInfoService.getProjectInfo(id);
+            String msg = commandService.execCommand(CommandService.CommandOp.backupLog, pim);
+            if (msg.contains("ok")) {
+                return JsonMessage.getString(200, "重置成功");
+            }
+            return JsonMessage.getString(201, "重置失败：" + msg);
+        } catch (Exception e) {
+            DefaultSystemLog.ERROR().error(e.getMessage(), e);
+            return JsonMessage.getString(500, "重置日志失败");
+        }
+    }
+
+    private String getLogSize(String id) throws IOException {
+        ProjectInfoModel pim;
+        try {
+            pim = projectInfoService.getProjectInfo(id);
+            if (pim == null) {
+                return null;
+            }
         } catch (IOException e) {
             DefaultSystemLog.ERROR().error(e.getMessage(), e);
             return null;
         }
-        if (pim != null) {
-            String logSize = null;
-            File file = new File(pim.getLog());
-            if (file.exists()) {
-                logSize = FileUtil.readableFileSize(file);
-            }
-            return logSize;
+        String logSize = null;
+        File file = new File(pim.getLog());
+        if (file.exists()) {
+            FileInputStream fileInputStream = new FileInputStream(file);
+            long size = fileInputStream.available();
+            long fileSize = file.length();
+            logSize = String.format("%s|%s", FileUtil.readableFileSize(fileSize), FileUtil.readableFileSize(size));
         }
-        return null;
+        return logSize;
     }
 
     @RequestMapping(value = "export.html", method = RequestMethod.GET)
