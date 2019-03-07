@@ -21,6 +21,10 @@ public class CertModel {
      */
     private long expirationTime;
     /**
+     * 证书生效日期
+     */
+    private long effectiveTime;
+    /**
      * 绑定域名
      */
     private String domain;
@@ -63,6 +67,14 @@ public class CertModel {
 
     public void setDomain(String domain) {
         this.domain = domain;
+    }
+
+    public long getEffectiveTime() {
+        return effectiveTime;
+    }
+
+    public void setEffectiveTime(long effectiveTime) {
+        this.effectiveTime = effectiveTime;
     }
 
     public JSONObject toJson() {

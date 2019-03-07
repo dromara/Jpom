@@ -101,6 +101,9 @@
     <a href="javascript:;" class="layui-btn  layui-btn-sm layui-btn-danger" lay-event="delete">删除</a>
 </script>
 
+<script type="text/html" id="tem_effectiveTime">
+    {{ formateTime(d.effectiveTime)  }}
+</script>
 <script type="text/html" id="tem_expirationTime">
     {{ formateTime(d.expirationTime)  }}
 </script>
@@ -108,6 +111,9 @@
 <script type="text/javascript">
 
     function formateTime(time) {
+        if (!time) {
+            return 0;
+        }
         var date = new Date();
         date.setTime(time);
         var y = date.getFullYear();
@@ -136,6 +142,7 @@
             cols: [[
                 {field: 'id', title: 'id'},
                 {field: 'domain', title: '域名'},
+                {field: 'effectiveTime', templet: "#tem_effectiveTime", title: '生效时间'},
                 {field: 'expirationTime', templet: "#tem_expirationTime", title: '到期时间'},
                 {field: 'op', title: '操作', align: 'center', toolbar: '#bar_cert', fixed: 'right'}
             ]],
@@ -219,6 +226,8 @@
             // 重置表单
             document.getElementById('form_certificate').reset();
             $('#form_certificate [name="id"]').attr('readonly', false).removeClass('layui-disabled');
+            $("#certPath").html("");
+            $("#keyPath").html("");
             layer.open({
                 type: 1,
                 title: '新增证书',

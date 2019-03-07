@@ -118,6 +118,7 @@ public class CertificateController extends BaseController {
         certModel.setDomain(jsonObject.getString("domain"));
         certModel.setExpirationTime(jsonObject.getLongValue("expirationTime"));
         certModel.setCert(certPath);
+        certModel.setEffectiveTime(jsonObject.getLongValue("effectiveTime"));
         certModel.setKey(keyPath);
         return certModel;
     }
@@ -140,12 +141,15 @@ public class CertificateController extends BaseController {
             inStream.close();
             //到期时间
             Date expirationTime = oCert.getNotAfter();
+            //生效日期
+            Date effectiveTime = oCert.getNotBefore();
             //域名
             String name = oCert.getSubjectDN().getName();
             int i = name.indexOf("=");
             String domain = name.substring(i + 1);
             JSONObject jsonObject = new JSONObject();
             jsonObject.put("expirationTime", expirationTime.getTime());
+            jsonObject.put("effectiveTime", effectiveTime.getTime());
             jsonObject.put("domain", domain);
             return jsonObject;
         } catch (Exception e) {

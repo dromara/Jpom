@@ -2,6 +2,7 @@ package cn.keepbx.jpom.service.system;
 
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.CharsetUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.keepbx.jpom.common.BaseDataService;
 import cn.keepbx.jpom.model.CertModel;
@@ -76,7 +77,23 @@ public class CertService extends BaseDataService {
      */
     public boolean delete(String id) {
         try {
+            JSONObject jsonObject = getJsonObject(FILENAME);
+            if (jsonObject == null) {
+                return false;
+            }
+            JSONObject cert = jsonObject.getJSONObject(id);
+            if (cert == null) {
+                return true;
+            }
+            String keyPath = cert.getString("key");
             deleteJson(FILENAME, id);
+            if (StrUtil.isNotEmpty(keyPath)) {
+                File parentFile = FileUtil.file(keyPath).getParentFile();
+                boolean del = FileUtil.del(parentFile);
+                if (!del) {
+                    return false;
+                }
+            }
         } catch (Exception e) {
             DefaultSystemLog.ERROR().error(e.getMessage(), e);
             return false;
