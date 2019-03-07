@@ -91,6 +91,9 @@ public class WhitelistDirectoryController extends BaseController {
         JSONArray projectArray;
         {
             projectArray = covertToArray(projects);
+            if (projectArray == null) {
+                return new JsonMessage(401, "项目路径白名单不能位于Jpom目录下");
+            }
             if (projectArray.isEmpty()) {
                 return new JsonMessage(401, "项目路径白名单不能为空");
             }
@@ -102,6 +105,9 @@ public class WhitelistDirectoryController extends BaseController {
         JSONArray certificateArray = null;
         if (certificate != null && !certificate.isEmpty()) {
             certificateArray = covertToArray(certificate);
+            if (certificateArray == null) {
+                return new JsonMessage(401, "证书路径白名单不能位于Jpom目录下");
+            }
             if (certificateArray.isEmpty()) {
                 return new JsonMessage(401, "证书路径白名单不能为空");
             }
@@ -131,6 +137,10 @@ public class WhitelistDirectoryController extends BaseController {
             }
             if (array.contains(val)) {
                 continue;
+            }
+            // 判断是否保护jpom 路径
+            if (val.startsWith(ConfigBean.getInstance().getPath())) {
+                return null;
             }
             array.add(val);
         }

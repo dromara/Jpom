@@ -52,6 +52,10 @@
                     <a href="javascript:;"
                        data-options="{'id':'alioss', 'title':'阿里云OSS', 'url':'/system/alioss'}">阿里云OSS</a>
                 </li>
+                <li class="layui-nav-item">
+                    <a href="javascript:;"
+                       data-options="{'id':'certificate', 'title':'证书管理', 'url':'/system/certificate'}">证书管理</a>
+                </li>
             </ul>
         </div>
     </div>

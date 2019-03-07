@@ -43,6 +43,9 @@ public class AliOssController extends BaseController {
     @RequestMapping(value = "alioss_submit", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     public String aliOssSubmit(String endpoint, String accessKeyId, String accessKeySecret, String bucketName, String keyPrefix) {
+        if (!UserModel.SYSTEM_ADMIN.equals(getUser().getParent())) {
+            return JsonMessage.getString(401, "你没有权限管理alioss");
+        }
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("endpoint", endpoint);
         jsonObject.put("accessKeyId", accessKeyId);
