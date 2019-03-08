@@ -1,14 +1,12 @@
 package cn.keepbx.jpom.service.system;
 
 import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.keepbx.jpom.common.BaseDataService;
 import cn.keepbx.jpom.model.CertModel;
 import cn.keepbx.jpom.system.ConfigBean;
-import cn.keepbx.jpom.system.init.CheckRunCommand;
-import com.alibaba.fastjson.JSON;
+import cn.keepbx.jpom.util.JsonUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;
@@ -36,10 +34,6 @@ public class CertService extends BaseDataService {
         try {
             saveJson(FILENAME, certModel.toJson());
             return true;
-        } catch (FileNotFoundException fileNotFoundException) {
-            File file = new File(ConfigBean.getInstance().getDataPath(), ConfigBean.CERT);
-            FileUtil.writeString("", file, CharsetUtil.UTF_8);
-            return addCert(certModel);
         } catch (Exception e) {
             DefaultSystemLog.ERROR().error(e.getMessage(), e);
         }
@@ -64,6 +58,10 @@ public class CertService extends BaseDataService {
                 array.add(value);
             }
             return array;
+        } catch (FileNotFoundException e) {
+            File file = new File(ConfigBean.getInstance().getDataPath(), ConfigBean.CERT);
+            JsonUtil.saveJson(file.getPath(), new JSONObject());
+            return null;
         } catch (IOException e) {
             DefaultSystemLog.ERROR().error(e.getMessage(), e);
         }

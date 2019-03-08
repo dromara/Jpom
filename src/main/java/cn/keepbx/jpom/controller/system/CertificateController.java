@@ -20,8 +20,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import javax.annotation.Resource;
 import java.io.BufferedInputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.Date;
@@ -44,7 +42,7 @@ public class CertificateController extends BaseController {
     public String certificate() {
         JSONArray jsonArray = systemService.getCertificateDirectory();
         setAttribute("certificate", jsonArray);
-        return "/system/certificate";
+        return "system/certificate";
     }
 
 
