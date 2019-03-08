@@ -42,7 +42,7 @@ start()
        echo "JVM:$JVM"
        echo "args:$ARGS"
        # java run
-       nohup java ${JVM} -Dappliction=${Tag} -Djava.ext.dirs=${Lib}":${JAVA_HOME}/jre/lib/ext" ${MainClass} ${ARGS} > ${Log} 2>&1 & sleep 1s & status
+       nohup java ${JVM} -Dappliction=${Tag} -Djava.ext.dirs=${Lib}":${JAVA_HOME}/jre/lib/ext" ${MainClass} ${ARGS} >> ${Log} 2>&1 & sleep 1s & status
     fi
 }
 
@@ -98,7 +98,7 @@ backupLog()
         cur_dateTime="`date +%Y-%m-%d_%H:%M:%S`.log"
         cp ${Log}  ${LogBack}${cur_dateTime}
         echo "cp to $LogBack$cur_dateTime"
-        echo "" > ${Log} & cp /dev/null  ${Log}
+        cp /dev/null  ${Log}
         echo "end ok"
    else
      touch ${Log}

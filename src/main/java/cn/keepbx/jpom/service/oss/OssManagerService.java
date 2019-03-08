@@ -23,6 +23,8 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
+ * 阿里云oss
+ *
  * @author jiangzeyin
  * @date 2018/9/28
  */
