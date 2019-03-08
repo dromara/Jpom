@@ -4,16 +4,19 @@
 <head>
     #parse("./common/head.vm")
     <title>项目管理系统</title>
-    <link rel="stylesheet" href="/static/css/manage/projectInfo.css" media="all">
+    <style>
+        body {
+            padding: 10px 10px 0px 10px;
+        }
+    </style>
 </head>
 <body>
 <div class="layui-row">
-    <button id="addProject" class="layui-btn layui-btn-sm">新增项目</button>
-    <button id="refresh" class="layui-btn layui-btn-sm">刷新表格</button>
+    <button id="addProject" onclick="editProject('');" class="layui-btn layui-btn-sm">新增项目</button>
+    <button id="refresh" onclick="reloadTable();" class="layui-btn layui-btn-sm">刷新表格</button>
 
 </div>
 <table class="layui-table" id="tab_project" lay-filter="tab_project" style="margin: 0;"></table>
-
 
 <script type="text/html" id="bar_projects">
     <a href="javascript:;" class="layui-btn  layui-btn-sm layui-btn-normal" lay-event="manage">控制台</a>
@@ -111,6 +114,11 @@
     const apiWhere = {};
 
     function loadSuccess() {
+        // 获取缓存中的值
+        const project = layui.data('project');
+        if (project && project.group) {
+            apiWhere.group = project.group;
+        }
         table.render({
             id: 'table_project',
             elem: '#tab_project',
@@ -152,7 +160,8 @@
             method: 'POST',
             response: {
                 statusCode: 200
-            }, done: function (data) {
+            },
+            done: function (data) {
                 var projects = data.data;
                 for (var i = 0; i < projects.length; i++) {
                     var project = projects[i];
@@ -166,29 +175,13 @@
             }
         });
 
-        // '刷新表格'点击事件
-        $('#refresh').on('click', function () {
-            reloadTable();
-        });
-
-
-        // '添加项目'点击事件
-        $('#addProject').on('click', function () {
-            editProject("");
-        });
-
-        function editProject(id) {
-            layer.open({
-                type: 2,
-                title: '管理项目配置信息',
-                shade: 0.8,
-                area: ['80%', '90%'],
-                content: 'editProject?id=' + id
-            });
-        }
 
         form.on('select(groupName)', function (data) {
             apiWhere.group = data.value;
+            layui.data('project', {
+                key: 'group'
+                , value: data.value
+            });
             reloadTable();
             return true;
         });
@@ -264,6 +257,16 @@
                 title: data.id + ' - 管理',
             });
         }
+    }
+
+    function editProject(id) {
+        layer.open({
+            type: 2,
+            title: '管理项目配置信息',
+            shade: 0.8,
+            area: ['80%', '90%'],
+            content: 'editProject?id=' + id
+        });
     }
 
     function reloadTable() {

@@ -67,7 +67,7 @@
                 <button id="resetLog" class="layui-btn layui-btn-sm">重置(<span id="logSize">$logSize</span>)</button>
             #end
             #if($logBack)
-                <button id="logBack" class="layui-btn layui-btn-sm">日志备份</button>
+                <button id="logBack" class="layui-btn layui-btn-sm">备份列表</button>
             #end
 
             <a href="javascript:;" class="btn-op layui-btn  layui-btn-sm" op="start">启动</a>
@@ -260,7 +260,7 @@
         $("#logBack").on('click', function () {
             layer.open({
                 type: 2,
-                title: '日志备份',
+                title: '备份列表',
                 shade: 0.8,
                 area: ['80%', '90%'],
                 content: 'logBack?id=' + projectInfo.id

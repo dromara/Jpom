@@ -27,7 +27,7 @@ function start() {
 			echo "mv to $LogBack$cur_dateTime"
 		touch ${Log}
 	fi
-    nohup java  ${JVM} -Dappliction=$Tag -Djava.ext.dirs=${Lib}":${JAVA_HOME}/jre/lib/ext" ${MainClass} ${ARGS}  > ${Log} 2>&1 &
+    nohup java  ${JVM} -Dappliction=$Tag -Djava.ext.dirs=${Lib}":${JAVA_HOME}/jre/lib/ext" ${MainClass} ${ARGS}  >> ${Log} 2>&1 &
     tailf ${Log}
 }
 
