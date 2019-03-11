@@ -3,6 +3,8 @@ package cn.keepbx.jpom.model;
 import com.alibaba.fastjson.JSONObject;
 
 /**
+ * 证书实体
+ *
  * @author Arno
  */
 public class CertModel {
