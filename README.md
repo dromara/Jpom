@@ -127,11 +127,6 @@ mvn package
 
 [查看文档](/doc/CodePipeline-Oss.md)
 
-### 贡献人员
-    
-1.  [F7575](https://gitee.com/F7575)
-2.  [bwcx_jzy](https://gitee.com/jiangzeyin)
-3.  [arno](https://gitee.com/arnohand)
 
 ### 感谢
  Jpom使用以下开源项目
