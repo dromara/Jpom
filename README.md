@@ -36,12 +36,12 @@
 3. jar包文件夹管理
 4. cpu、ram 监控
 5. 导出堆栈信息
-6. 阿里云 CodePipeline + Oss在线管理
+6. [阿里云 CodePipeline + Oss在线管理](/doc/CodePipeline-Oss.md)
 7. 多用户管理，用户项目权限独立
 8. 此项目完全不依赖数据库，随装随用
 9. 整个服务器top监听
 10. 查看项目运行进程占用的端口
-11. 安全模式运行，更好的保证服务器稳定、避免误操作
+11. [安全模式](/doc/safeMode.md)运行，更好的保证服务器稳定、避免误操作
 12. 项目路径白名单模式，杜绝用户误操作系统文件
 
 
@@ -123,7 +123,7 @@ mvn package
 
 [安全模式>>](/doc/safeMode.md)
 
-### 阿里云CodePipeline 配置
+### 阿里云Oss文件读取
 
 [查看文档](/doc/CodePipeline-Oss.md)
 

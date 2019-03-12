@@ -14,7 +14,7 @@
 2. 在Jpom 配置对应项目的 CodePipeline 项目名称(记得结尾添加一个`_`奥)
     ![CodePipeline](./images/build_edit.png)
     
-3. 配置阿里云oss 信息，在项目运行数据目录添加配置信息如[/bin/data/oss_dev.json](/bin/data/oss_dev.json),dev 是根据boot项目当前运行模式，默认为dev,如项目运行模式为prod 则文件名应为【oss_prod.json】，具体路径如【/jpom/data/oss_dev.json】
+3. 配置阿里云oss 信息，在管理面板中左侧点击阿里云OSS，然后填入对应信息（此项仅有系统管理员才能查看和修改）
 
 4. 在项目列表中操作点击构建按钮
     ![CodePipeline](./images/build_list.png)
