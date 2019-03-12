@@ -119,6 +119,10 @@ mvn package
 
 [开发计划>>](/PLANS.md)
 
+### 安全模式说明
+
+[安全模式>>](/doc/safeMode.md)
+
 ### 阿里云CodePipeline 配置
 
 [查看文档](/doc/CodePipeline-Oss.md)
