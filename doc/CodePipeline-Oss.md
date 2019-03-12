@@ -4,7 +4,7 @@
 
 > Jpom 为了方便用户快速安装项目包和快速回滚添加支持 CodePipeline，推荐和码云搭配使用
 
-码云配置说明文档：[https://gitee.com/jiangzeyin/jpom/paas/code_pipeline](https://gitee.com/jiangzeyin/jpom/paas/code_pipeline)
+码云配置说明文档：[https://gitee.com/keepbx/jpom/paas/code_pipeline](https://gitee.com/keepbx/jpom/paas/code_pipeline)
 
 阿里云CodePipeline说明文档：[https://help.aliyun.com/document_detail/56512.html?spm=5176.145865.755375.doc1.230f163fuW7gQs](https://help.aliyun.com/document_detail/56512.html?spm=5176.145865.755375.doc1.230f163fuW7gQs)
 
