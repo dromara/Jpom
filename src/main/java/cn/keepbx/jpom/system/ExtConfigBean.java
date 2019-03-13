@@ -4,6 +4,9 @@ import cn.jiangzeyin.common.spring.SpringUtil;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationHome;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.Resource;
 
 import java.io.File;
 
@@ -18,27 +21,30 @@ public class ExtConfigBean {
 
     public static final String FILE_NAME = "extConfig.yml";
 
-    private static File file;
+    private static Resource resource;
 
     /**
-     * 动态获取外部配置文件的 file
+     * 动态获取外部配置文件的 resource
      *
      * @return File
      */
-    public static File getFile() {
-        if (file != null) {
-            return file;
+    public static Resource getResource() {
+        if (resource != null) {
+            return resource;
         }
         ApplicationHome home = new ApplicationHome(ExtConfigBean.class);
         String path = (home.getSource() == null ? "" : home.getSource().getAbsolutePath());
         File file = new File(path);
         if (file.isFile()) {
             file = file.getParentFile().getParentFile();
-        } else {
-            file = new File(file, "bin");
+            file = new File(file, FILE_NAME);
+            if (file.exists() && file.isFile()) {
+                resource = new FileSystemResource(file);
+                return ExtConfigBean.resource;
+            }
         }
-        ExtConfigBean.file = new File(file, FILE_NAME);
-        return ExtConfigBean.file;
+        resource = new ClassPathResource("/bin/" + FILE_NAME);
+        return ExtConfigBean.resource;
     }
 
     /**
