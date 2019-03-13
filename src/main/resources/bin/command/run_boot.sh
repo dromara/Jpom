@@ -41,9 +41,23 @@ start()
        backupLog ${Log};
        echo "JVM:$JVM"
        echo "args:$ARGS"
-       # java run
-       nohup java ${JVM} -Dappliction=${Tag} -Djava.ext.dirs=${Lib}":${JAVA_HOME}/jre/lib/ext" ${MainClass} ${ARGS} >> ${Log} 2>&1 & sleep 1s & status
+       # classPath
+       CLASSPATH=`listDir ${Lib}`
+        # run
+       nohup java ${JVM} -classpath ${CLASSPATH} -Dappliction=${Tag} -Dbasedir=${Lib} ${MainClass} ${ARGS} >> ${Log} 2>&1 & sleep 1s & status
     fi
+}
+
+# 拼接所有文件
+function listDir()
+{
+    ALL=""
+	for file in `ls $1`
+	do
+		#得到文件的完整的目录
+        ALL="${ALL}${1}/${file}:"
+	done
+	echo ${ALL}
 }
 
 # 关闭程序
