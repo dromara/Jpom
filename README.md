@@ -12,7 +12,6 @@
 ![GitHub](https://img.shields.io/github/license/jiangzeyin/jpom.svg?style=flat)
 ![jdk](https://img.shields.io/badge/JDK-1.8+-green.svg)
 [![travis](https://travis-ci.org/jiangzeyin/jpom.svg?branch=master)](https://travis-ci.org/jiangzeyin/jpom)
-[![codecov](https://codecov.io/gh/jiangzeyin/jpom/branch/master/graph/badge.svg)](https://codecov.io/gh/jiangzeyin/jpom)
 
 
 > Jpom采用SpringBoot开发web项目(前台采用layui)+websocket来统一管理，只要电脑能使用浏览器就ok
@@ -36,12 +35,12 @@
 3. jar包文件夹管理
 4. cpu、ram 监控
 5. 导出堆栈信息
-6. 阿里云 CodePipeline + Oss在线管理
+6. [阿里云 CodePipeline + Oss在线管理](/doc/CodePipeline-Oss.md)
 7. 多用户管理，用户项目权限独立
 8. 此项目完全不依赖数据库，随装随用
 9. 整个服务器top监听
 10. 查看项目运行进程占用的端口
-11. 安全模式运行，更好的保证服务器稳定、避免误操作
+11. [安全模式](/doc/safeMode.md)运行，更好的保证服务器稳定、避免误操作
 12. 项目路径白名单模式，杜绝用户误操作系统文件
 
 
@@ -110,6 +109,9 @@ mvn package
    
     账号：admin
     密码：admin123
+    
+   1. [Jboot案例代码](https://gitee.com/keepbx/Jpom-demo-case/tree/master/jboot-test)
+   2. [SpringBoot案例代码](https://gitee.com/keepbx/Jpom-demo-case/tree/master/springboot-test)
 
 ### 常见问题
 
@@ -119,15 +121,14 @@ mvn package
 
 [开发计划>>](/PLANS.md)
 
-### 阿里云CodePipeline 配置
+### 安全模式说明
+
+[安全模式>>](/doc/safeMode.md)
+
+### 阿里云Oss配置
 
 [查看文档](/doc/CodePipeline-Oss.md)
 
-### 贡献人员
-    
-1.  [F7575](https://gitee.com/F7575)
-2.  [bwcx_jzy](https://gitee.com/jiangzeyin)
-3.  [arno](https://gitee.com/arnohand)
 
 ### 感谢
  Jpom使用以下开源项目
