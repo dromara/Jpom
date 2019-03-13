@@ -59,7 +59,9 @@
             if (self != top) {
                 parent.window.location.replace(window.location.href);
             }
-
+            //
+            const user = layui.data('user');
+            $("input[name='userName']").val(user.userName);
             carousel.render({
                 elem: '#div-carousel',
                 width: '100%',
@@ -69,14 +71,19 @@
                 indicator: 'none'
             });
 
-            form.on('submit(from_login)', function (data) {
+            form.on('submit(from_login)', function (dataForm) {
                 $.ajax({
                     url: '/userLogin',
                     type: 'POST',
                     dataType: 'json',
-                    data: data.field,
+                    data: dataForm.field,
                     success: function (data) {
                         if (200 == data.code) {
+                            // 记住用户名
+                            layui.data('user', {
+                                key: "userName",
+                                value: dataForm.field.userName
+                            });
                             window.location.href = '/index';
                         } else {
                             layer.msg(data.msg);

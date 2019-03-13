@@ -51,13 +51,18 @@ public class ExtConfigBean {
      * 白名单路径是否判断包含关系
      */
     @Value("${whitelistDirectory.checkStartsWith:true}")
-    public boolean whitelistDirectoryCheckStartsWith = true;
+    public boolean whitelistDirectoryCheckStartsWith;
 
     /**
      * 系统最多能创建多少用户
      */
     @Value("${user.maxCount:10}")
-    public int userMaxCount = 10;
+    public int userMaxCount;
+    /**
+     * 用户连续登录失败次数，超过此数将自动不再被允许登录，零是不限制
+     */
+    @Value("${user.alwaysLoginError:5}")
+    public int userAlwaysLoginError;
 
 
     public static ExtConfigBean getInstance() {
