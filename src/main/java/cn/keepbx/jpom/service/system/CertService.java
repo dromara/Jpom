@@ -87,10 +87,7 @@ public class CertService extends BaseDataService {
             deleteJson(FILENAME, id);
             if (StrUtil.isNotEmpty(keyPath)) {
                 File parentFile = FileUtil.file(keyPath).getParentFile();
-                boolean del = FileUtil.del(parentFile);
-                if (!del) {
-                    return false;
-                }
+                return FileUtil.del(parentFile);
             }
         } catch (Exception e) {
             DefaultSystemLog.ERROR().error(e.getMessage(), e);

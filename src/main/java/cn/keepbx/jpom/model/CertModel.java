@@ -30,6 +30,18 @@ public class CertModel {
      * 绑定域名
      */
     private String domain;
+    /**
+     * 白名单路径
+     */
+    private String whitePath;
+
+    public String getWhitePath() {
+        return whitePath;
+    }
+
+    public void setWhitePath(String whitePath) {
+        this.whitePath = whitePath;
+    }
 
     public String getId() {
         return id;

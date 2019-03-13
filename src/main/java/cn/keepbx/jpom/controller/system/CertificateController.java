@@ -113,6 +113,7 @@ public class CertificateController extends BaseController {
         String keyPath = key.save();
         CertModel certModel = new CertModel();
         certModel.setId(id);
+        certModel.setWhitePath(path);
         certModel.setDomain(jsonObject.getString("domain"));
         certModel.setExpirationTime(jsonObject.getLongValue("expirationTime"));
         certModel.setCert(certPath);

@@ -42,6 +42,8 @@ public class WhitelistDirectoryController extends BaseController {
         //
         jsonArray = systemService.getCertificateDirectory();
         setAttribute("certificate", systemService.convertToLine(jsonArray));
+        jsonArray = systemService.getNgxDirectory();
+        setAttribute("nginx", systemService.convertToLine(jsonArray));
         return "system/whitelistDirectory";
     }
 
@@ -54,7 +56,7 @@ public class WhitelistDirectoryController extends BaseController {
      */
     @RequestMapping(value = "whitelistDirectory_submit", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
-    public String whitelistDirectorySubmit(String project, String certificate) {
+    public String whitelistDirectorySubmit(String project, String certificate, String nginx) {
         if (ConfigBean.getInstance().safeMode) {
             return JsonMessage.getString(401, "安全模式下不能修改白名单目录");
         }
@@ -71,12 +73,18 @@ public class WhitelistDirectoryController extends BaseController {
                 return JsonMessage.getString(401, "证书路径白名单不能为空");
             }
         }
-
-        JsonMessage jsonMessage = save(project, certificateList);
+        List<String> nList = null;
+        if (StrUtil.isNotEmpty(nginx)) {
+            nList = StrSpliter.splitTrim(nginx, "\n", true);
+            if (nList == null || nList.size() <= 0) {
+                return JsonMessage.getString(401, "nginx路径白名单不能为空");
+            }
+        }
+        JsonMessage jsonMessage = save(project, certificateList, nList);
         return jsonMessage.toString();
     }
 
-    public JsonMessage save(String project, List<String> certificate) {
+    public JsonMessage save(String project, List<String> certificate, List<String> nginx) {
         if (StrUtil.isEmpty(project)) {
             return new JsonMessage(401, "项目路径白名单不能为空");
         }
@@ -84,10 +92,10 @@ public class WhitelistDirectoryController extends BaseController {
         if (list == null || list.size() <= 0) {
             return new JsonMessage(401, "项目路径白名单不能为空");
         }
-        return save(list, certificate);
+        return save(list, certificate, nginx);
     }
 
-    public JsonMessage save(List<String> projects, List<String> certificate) {
+    public JsonMessage save(List<String> projects, List<String> certificate, List<String> nginx) {
         JSONArray projectArray;
         {
             projectArray = covertToArray(projects);
@@ -116,12 +124,27 @@ public class WhitelistDirectoryController extends BaseController {
                 return new JsonMessage(401, "证书目录中不能存在包含关系：" + error);
             }
         }
+        JSONArray nginxArray = null;
+        if (nginx != null && !nginx.isEmpty()) {
+            nginxArray = covertToArray(nginx);
+            if (nginxArray == null) {
+                return new JsonMessage(401, "nginx路径白名单不能位于Jpom目录下");
+            }
+            if (nginxArray.isEmpty()) {
+                return new JsonMessage(401, "nginx路径白名单不能为空");
+            }
+            String error = findStartsWith(nginxArray, 0);
+            if (error != null) {
+                return new JsonMessage(401, "nginx目录中不能存在包含关系：" + error);
+            }
+        }
         JSONObject jsonObject = systemService.getWhitelist();
         if (jsonObject == null) {
             jsonObject = new JSONObject();
         }
         jsonObject.put("project", projectArray);
         jsonObject.put("certificate", certificateArray);
+        jsonObject.put("nginx", nginxArray);
         systemService.saveWhitelistDirectory(jsonObject);
         return new JsonMessage(200, "保存成功");
     }
