@@ -61,7 +61,7 @@ public class WhitelistDirectoryController extends BaseController {
             return JsonMessage.getString(401, "安全模式下不能修改白名单目录");
         }
         UserModel userName = getUser();
-        if (!userName.isManage()) {
+        if (!UserModel.SYSTEM_ADMIN.equals(userName.getParent())) {
             return JsonMessage.getString(401, "你没有权限修改白名单目录");
         }
 

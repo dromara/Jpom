@@ -40,6 +40,23 @@ public class UserService extends BaseDataService {
     }
 
     /**
+     * 获取系统用户个数
+     *
+     * @return int
+     */
+    public int userSize() {
+        try {
+            JSONObject userInfo = getJsonObject(FILENAME);
+            if (userInfo == null) {
+                return 0;
+            }
+            return userInfo.keySet().size();
+        } catch (Exception ignored) {
+        }
+        return 0;
+    }
+
+    /**
      * 用户登录
      *
      * @param name 用户名

@@ -47,6 +47,12 @@ public class ExtConfigBean {
     @Value("${whitelistDirectory.checkStartsWith:true}")
     public boolean whitelistDirectoryCheckStartsWith = true;
 
+    /**
+     * 系统最多能创建多少用户
+     */
+    @Value("${user.maxCount:10}")
+    public int userMaxCount = 10;
+
 
     public static ExtConfigBean getInstance() {
         return SpringUtil.getBean(ExtConfigBean.class);

@@ -1,3 +1,6 @@
 whitelistDirectory:
   # 白名单目录是否验证包含关系
   checkStartsWith: true
+user:
+  # 最多能创建多少个用户
+  maxCount: 10

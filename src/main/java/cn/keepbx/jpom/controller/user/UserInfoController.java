@@ -7,6 +7,7 @@ import cn.keepbx.jpom.common.BaseController;
 import cn.keepbx.jpom.model.UserModel;
 import cn.keepbx.jpom.service.user.UserService;
 import cn.keepbx.jpom.system.ConfigBean;
+import cn.keepbx.jpom.system.ExtConfigBean;
 import com.alibaba.fastjson.JSONArray;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -105,6 +106,11 @@ public class UserInfoController extends BaseController {
         if (!userName.isManage()) {
             return JsonMessage.getString(400, "你还没有权限");
         }
+        //
+        int size = userService.userSize();
+        if (size >= ExtConfigBean.getInstance().userMaxCount) {
+            return JsonMessage.getString(500, "当前用户个数超过系统上限");
+        }
         if (StrUtil.isEmpty(id)) {
             return JsonMessage.getString(400, "登录名不能为空");
         }
@@ -176,8 +182,13 @@ public class UserInfoController extends BaseController {
             if (length < UserModel.USER_PWD_LEN) {
                 return JsonMessage.getString(400, "密码长度为6-12位");
             }
+            //
             if (ConfigBean.getInstance().safeMode && UserModel.SYSTEM_ADMIN.equals(userModel.getParent())) {
                 return JsonMessage.getString(401, "安全模式不能修改系统管理员的密码");
+            }
+            //
+            if (UserModel.SYSTEM_ADMIN.equals(userName.getParent())) {
+                return JsonMessage.getString(401, "只有系统管理员才能重置用户密码");
             }
             userModel.setPassword(password);
         }
