@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    #parse("./common/head.vm")
+    <title>nginx管理</title>
+    <style>
+        body {
+            padding: 10px 10px 0px 10px;
+        }
+
+        .layui-container {
+            width: 80% !important;
+        }
+
+        .div-ngx {
+            display: none;
+        }
+
+        .div-uploadNgx {
+            display: none;
+        }
+
+        .auto {
+            width: 100%;
+            height: 100%;
+        }
+
+    </style>
+</head>
+
+<body>
+<div class="layui-row">
+    <button id="addNgx" class="layui-btn layui-btn-sm">新增nginx配置</button>
+    <button id="uploadNgx" class="layui-btn layui-btn-sm">上传nginx配置</button>
+    <button id="refresh" class="layui-btn layui-btn-sm">刷新表格</button>
+</div>
+<table class="layui-table" id="tab_ngx" lay-filter="tab_ngx" style="margin: 0;"></table>
+
+<div class="layui-container div-ngx" id="div-ngx">
+    <form action="" class="layui-form" id="form_ngx" style="margin-top: 20px">
+        <div class="layui-form-item">
+            <div class="layui-inline">
+                <label class="layui-form-label">文件名称</label>
+                <div class="layui-input-block">
+                    <input type="text" id="name" name="name" placeholder='文件后缀必须为".conf"' class="layui-input" required
+                           lay-verify="required">
+                </div>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-inline">
+                <label class="layui-form-label">文件路径</label>
+                <div class="layui-input-block">
+                    <select name="whitePath" id="whitePath" lay-filter="aihao">
+                        #foreach($item in $nginx)
+                            <option value="$item">$item</option>
+                        #end
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-inline" style="width: 80%;height:40vh;">
+                <label class="layui-form-label">配置内容</label>
+                <div class="layui-input-block auto">
+                    <textarea id="context" name="context" required lay-verify="required" placeholder=""
+                              class="layui-textarea auto"></textarea>
+                </div>
+            </div>
+        </div>
+        <input type="hidden" lay-submit lay-filter="submitNgx" id="ngx_submit">
+    </form>
+</div>
+
+<div class="layui-container div-uploadNgx" id="div-uploadNgx">
+    <form action="" enctype="multipart/form-data" class="layui-form" id="form_uploadNgx" style="margin-top: 20px">
+        <div class="layui-form-item">
+            <div class="layui-inline">
+                <label class="layui-form-label">文件路径</label>
+                <div class="layui-input-block">
+                    <select name="whitePath" id="whitePath" lay-filter="aihao">
+                        #foreach($item in $nginx)
+                            <option value="$item">$item</option>
+                        #end
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-inline">
+                <label class="layui-form-label">配置文件</label>
+                <div class="layui-input-block">
+                    <input type="file" id="file" name="file" placeholder="" class="layui-input" required
+                           lay-verify="required">
+                </div>
+            </div>
+        </div>
+        <input type="hidden" lay-submit lay-filter="submitUploadNgx" id="uploadNgx_submit">
+    </form>
+</div>
+
+</body>
+<script type="text/html" id="bar_ngx">
+    <a href="javascript:;" class="layui-btn  layui-btn-sm layui-btn-warm" lay-event="update">编辑</a>
+    <a href="javascript:;" class="layui-btn  layui-btn-sm layui-btn-danger" lay-event="delete">删除</a>
+</script>
+
+
+<script type="text/javascript">
+
+    function loadSuccess() {
+
+        table.render({
+            id: 'tab_ngx',
+            elem: '#tab_ngx',
+            url: '/system/nginx/list',
+            height: 'full-52',
+            even: true,
+            cols: [[
+                {field: 'name', title: '文件名'},
+                {field: 'domain', title: '域名'},
+                {field: 'op', title: '操作', align: 'center', toolbar: '#bar_ngx', fixed: 'right'}
+            ]],
+            loading: true,
+            response: {
+                statusCode: 200
+            }
+        });
+
+        // 表格工具条事件
+        table.on('tool(tab_ngx)', function (obj) {
+            var data = obj.data;
+            var event = obj.event;
+
+            if ('update' === event) {
+                // 修改
+                updateNgx(data);
+            } else if ('delete' === event) {
+                // 删除
+                deleteNgx(data);
+            }
+        });
+
+        // 修改
+        function updateNgx(data) {
+            document.getElementById('form_ngx').reset();
+            $('#form_ngx [name="whitePath"]').attr('disabled', true).addClass('layui-disabled');
+            $('#form_ngx [name="name"]').attr('readonly', true).addClass('layui-disabled');
+            getNginxContest(data);
+            for (var key in data) {
+                $('#form_ngx [name="' + key + '"]').val(data[key]);
+            }
+            // 弹出
+            layer.open({
+                type: 1,
+                title: '编辑',
+                content: $('#div-ngx'),
+                area: ['60%', '60%'],
+                btnAlign: 'c',
+                btn: ['提交'],
+                yes: function (index, layero) {
+                    $('#form_ngx').attr('action', '/system/nginx/updateNgx');
+                    $('#ngx_submit').click();
+                }
+            });
+        }
+
+        function getNginxContest(data) {
+            var path = data.path;
+            $.ajax({
+                url: "/system/nginx/getConf",
+                type: 'POST',
+                dataType: 'json',
+                data: {path: path},
+                success: function (ret) {
+                    if (200 == ret.code) {
+                        $('#form_ngx [name="context"]').val(ret.data.context);
+                    }
+                },
+                error: function (err) {
+                    layer.alert(err.msg);
+                }
+            });
+        }
+
+        // 删除
+        function deleteNgx(data) {
+            layer.confirm('确定删除配置 ' + data.name + '？', {
+                title: '系统提示'
+            }, function (index) {
+                layer.close(index);
+                $.ajax({
+                    url: '/system/nginx/delete',
+                    type: 'POST',
+                    dataType: 'json',
+                    data: {path: data.path},
+                    success: function (data) {
+                        if (200 == data.code) {
+                            layer.msg('删除成功！');
+                            // 刷新项目列表
+                            table.reload('tab_ngx', {height: 'full-52'});
+                        } else {
+                            layer.msg(data.msg);
+                        }
+                    },
+                    error: function (err) {
+                        layer.msg('删除失败！');
+                    }
+                });
+            });
+        }
+
+        // 新增配置
+        $('#addNgx').on('click', function () {
+            // 重置表单
+            document.getElementById('form_ngx').reset();
+            $('#form_ngx [name="whitePath"]').attr('disabled', false).removeClass('layui-disabled');
+            $('#form_ngx [name="name"]').attr('readonly', false).removeClass('layui-disabled');
+            layer.open({
+                type: 1,
+                title: '新增配置',
+                content: $('#div-ngx'),
+                area: ['60%', '60%'],
+                btnAlign: 'c',
+                btn: ['提交'],
+                yes: function (index, layero) {
+                    $('#form_ngx').attr('action', '/system/nginx/addNgx');
+                    $('#ngx_submit').click();
+                }
+            });
+        });
+
+        //上传配置
+        $('#uploadNgx').on('click', function () {
+            document.getElementById('form_uploadNgx').reset();
+            layer.open({
+                type: 1,
+                title: '上传配置',
+                content: $('#div-uploadNgx'),
+                area: ['60%', '60%'],
+                btnAlign: 'c',
+                btn: ['提交'],
+                yes: function (index, layero) {
+                    $('#form_uploadNgx').attr('action', '/system/nginx/uploadNgx');
+                    $('#uploadNgx_submit').click();
+                }
+            });
+        });
+
+        //上传配置
+        form.on('submit(submitUploadNgx)', function (data) {
+            var file = $("#file")[0].files[0];
+            var whitePath = $("#whitePath").val();
+            var formData = new FormData();
+            formData.append("whitePath", whitePath);
+            formData.append("file", file);
+            $.ajax({
+                url: data.form.action,
+                type: 'POST',
+                dataType: 'json',
+                contentType: false,
+                processData: false,
+                data: formData,
+                success: function (data) {
+                    layer.msg(data.msg);
+                    if (200 == data.code) {
+                        layer.closeAll('page');
+                        // 刷新表
+                        table.reload('tab_ngx');
+                    }
+                },
+                error: function (err) {
+                    layer.alert(err.msg);
+                }
+            });
+            return false;
+        });
+
+        // 刷新
+        $('#refresh').on('click', function () {
+            table.reload('tab_ngx');
+        });
+
+        form.on('submit(submitNgx)', function (data) {
+            $.ajax({
+                url: data.form.action,
+                type: 'POST',
+                dataType: 'json',
+                data: data.field,
+                success: function (data) {
+                    layer.msg(data.msg);
+                    if (200 == data.code) {
+                        layer.closeAll('page');
+                        // 刷新表
+                        table.reload('tab_ngx');
+                    }
+                },
+                error: function (err) {
+                    layer.alert(err.msg);
+                }
+            });
+            return false;
+        });
+
+    }
+</script>
+
+</html>

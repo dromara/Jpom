@@ -106,7 +106,7 @@ public class CheckRunCommand {
             if (object instanceof JSONArray) {
                 DefaultSystemLog.LOG().info("升级白名单目录数据");
                 String all = systemService.convertToLine((JSONArray) object);
-                JsonMessage message = whitelistDirectoryController.save(all, null);
+                JsonMessage message = whitelistDirectoryController.save(all, null, null);
                 DefaultSystemLog.LOG().info(message.toString());
             } else if (object instanceof JSONObject) {
                 JSONArray jsonArray = systemService.getWhitelistDirectory();
@@ -123,7 +123,9 @@ public class CheckRunCommand {
                         }
                         JSONArray certificateDirectory = systemService.getCertificateDirectory();
                         List<String> certificateDirectoryStr = certificateDirectory.toJavaList(String.class);
-                        JsonMessage message = whitelistDirectoryController.save(paths, certificateDirectoryStr);
+                        JSONArray ngxDirectory = systemService.getNgxDirectory();
+                        List<String> ngxDirectoryStr = ngxDirectory.toJavaList(String.class);
+                        JsonMessage message = whitelistDirectoryController.save(paths, certificateDirectoryStr, ngxDirectoryStr);
                         DefaultSystemLog.LOG().info(message.toString());
                     }
 

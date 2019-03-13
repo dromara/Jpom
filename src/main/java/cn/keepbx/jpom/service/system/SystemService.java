@@ -53,6 +53,19 @@ public class SystemService extends BaseDataService {
         return null;
     }
 
+    public JSONArray getNgxDirectory() {
+        try {
+            JSONObject jsonObject = getWhitelist();
+            if (jsonObject == null) {
+                return null;
+            }
+            return jsonObject.getJSONArray("nginx");
+        } catch (Exception e) {
+            DefaultSystemLog.ERROR().error(e.getMessage(), e);
+        }
+        return null;
+    }
+
     public JSONArray getCertificateDirectory() {
         try {
             JSONObject jsonObject = getWhitelist();
