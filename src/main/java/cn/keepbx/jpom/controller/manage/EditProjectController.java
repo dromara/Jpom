@@ -103,19 +103,31 @@ public class EditProjectController extends BaseController {
             return JsonMessage.getString(401, "请选择正确的项目路径");
         }
         String lib = projectInfo.getLib();
-//        String log = projectInfo.getLog();
         if (StrUtil.isEmpty(lib)) {
             return JsonMessage.getString(401, "项目lib不能为空");
         }
         if (StrUtil.SLASH.equals(lib)) {
             return JsonMessage.getString(401, "项目lib不能为顶级目录");
         }
-        if (lib.contains("../")) {
+        if (Validator.isChinese(lib)) {
+            return JsonMessage.getString(401, "项目lib中不能包含中文");
+        }
+        if (!checkPathSafe(lib)) {
             return JsonMessage.getString(401, "项目lib存在提升目录问题");
         }
-        lib = String.format("%s/%s", whitelistDirectory, lib);
 
-        projectInfo.setLib(FileUtil.normalize(lib));
+        lib = String.format("%s/%s", whitelistDirectory, lib);
+        lib = FileUtil.normalize(lib);
+        // 重复lib
+        List<ProjectInfoModel> list = projectInfoService.getAllProjectArrayInfo();
+        if (list != null) {
+            for (ProjectInfoModel projectInfoModel : list) {
+                if (!projectInfoModel.getId().equals(id) && projectInfoModel.getLib().equals(lib)) {
+                    return JsonMessage.getString(401, "当前项目lib已经被【" + projectInfoModel.getName() + "】占用,请检查");
+                }
+            }
+        }
+        projectInfo.setLib(lib);
         File checkFile = new File(projectInfo.getLib());
         if (checkFile.exists() && checkFile.isFile()) {
             return JsonMessage.getString(401, "项目lib是一个已经存在的文件");

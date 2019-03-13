@@ -2,6 +2,7 @@ package cn.keepbx.jpom.controller.manage;
 
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.core.util.ZipUtil;
 import cn.hutool.extra.servlet.ServletUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
@@ -165,12 +166,15 @@ public class ProjectFileControl extends BaseController {
      */
     @RequestMapping(value = "download", method = RequestMethod.GET)
     @ResponseBody
-    public String download(String id) {
-        String filename = getParameter("filename");
+    public String download(String id, String filename) {
+        filename = pathSafe(filename);
+        if (StrUtil.isEmpty(filename)) {
+            return JsonMessage.getString(405, "非法操作");
+        }
         try {
             ProjectInfoModel pim = projectInfoService.getProjectInfo(id);
-            String path = pim.getLib() + "/" + filename;
-            File file = new File(path);
+//            String path = + "/" + filename;
+            File file = new File(pim.getLib(), filename);
             if (file.isDirectory()) {
                 return "暂不支持下载文件夹";
             }
@@ -217,11 +221,22 @@ public class ProjectFileControl extends BaseController {
         if (!userName.isProject(id)) {
             return JsonMessage.getString(400, "你没有对应操作权限操作!");
         }
+        filename = pathSafe(filename);
+        if (StrUtil.isEmpty(filename)) {
+            return JsonMessage.getString(405, "非法操作");
+        }
         try {
             ProjectInfoModel pim = projectInfoService.getProjectInfo(id);
             File file = new File(pim.getLib(), filename);
-            if (file.exists() && file.delete()) {
-                return JsonMessage.getString(200, "删除成功");
+            if (file.exists()) {
+                if (file.isFile()) {
+                    if (file.delete()) {
+                        return JsonMessage.getString(200, "删除成功");
+                    }
+                } else if (FileUtil.clean(file) && file.delete()) {
+
+                    return JsonMessage.getString(200, "删除成功");
+                }
             } else {
                 return JsonMessage.getString(404, "文件不存在");
             }

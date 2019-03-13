@@ -6,12 +6,13 @@ import cn.keepbx.jpom.model.UserModel;
 import cn.keepbx.jpom.system.ConfigBean;
 import cn.keepbx.jpom.system.init.CheckRunCommand;
 import cn.keepbx.jpom.util.JsonUtil;
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -103,7 +104,7 @@ public class UserService extends BaseDataService {
      *
      * @return 用户列表
      */
-    public JSONArray getUserList() {
+    public List<UserModel> getUserList() {
         JSONObject jsonObject = null;
         try {
             jsonObject = getJsonObject(FILENAME);
@@ -114,39 +115,18 @@ public class UserService extends BaseDataService {
             return null;
         }
         Set<Map.Entry<String, Object>> set = jsonObject.entrySet();
-        JSONArray array = new JSONArray();
+        List<UserModel> array = new ArrayList<>();
         for (Map.Entry entry : set) {
             JSONObject value = (JSONObject) entry.getValue();
-            value.remove("password");
-            array.add(value);
+            UserModel userModel = value.toJavaObject(UserModel.class);
+            // 不显示系统管理员信息
+            if (UserModel.SYSTEM_ADMIN.equals(userModel.getParent())) {
+                continue;
+            }
+            userModel.setPassword("");
+            array.add(userModel);
         }
         return array;
-    }
-
-    /**
-     * 修改密码
-     *
-     * @param name   用户名
-     * @param oldPwd 旧密码
-     * @param newPwd 新密码
-     * @return 修改结果
-     */
-    public String updatePwd(String name, String oldPwd, String newPwd) throws Exception {
-        JSONObject userInfo = getJsonObjectByKey(FILENAME, name);
-        // 判断用户是否存在
-        if (null == userInfo) {
-            return "notexist";
-        }
-        UserModel userModel = userInfo.toJavaObject(UserModel.class);
-        if (oldPwd.equals(userModel.getPassword())) {
-            // 修改密码
-            userModel.setPassword(newPwd);
-//            userInfo.put("password", newPwd);
-            updateJson(FILENAME, userModel.toJson());
-            return "success";
-        } else {
-            return "olderror";
-        }
     }
 
     /**
