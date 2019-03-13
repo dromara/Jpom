@@ -7,6 +7,7 @@ import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.controller.multipart.MultipartFileBuilder;
 import cn.keepbx.jpom.common.BaseController;
+import cn.keepbx.jpom.service.system.CertService;
 import cn.keepbx.jpom.service.system.NgxService;
 import cn.keepbx.jpom.service.system.SystemService;
 import com.alibaba.fastjson.JSONArray;
@@ -32,6 +33,8 @@ public class NgxController extends BaseController {
 
     @Resource
     private SystemService systemService;
+    @Resource
+    private CertService certService;
 
     @Resource
     private NgxService ngxService;
@@ -40,9 +43,14 @@ public class NgxController extends BaseController {
     public String ngx() {
         JSONArray ngxDirectory = systemService.getNgxDirectory();
         setAttribute("nginx", ngxDirectory);
+        JSONArray certList = certService.getCertList();
+        setAttribute("cert", certList);
         return "system/nginx";
     }
 
+    /**
+     * 配置列表
+     */
     @RequestMapping(value = "nginx/list", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
     @ResponseBody
     public String list() {

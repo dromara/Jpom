@@ -27,6 +27,9 @@ public class NgxService extends BaseDataService {
 
     public JSONArray list() {
         JSONArray ngxDirectory = systemService.getNgxDirectory();
+        if (ngxDirectory == null) {
+            return null;
+        }
         JSONArray array = new JSONArray();
         for (Object o : ngxDirectory) {
             String parentPath = o.toString();
