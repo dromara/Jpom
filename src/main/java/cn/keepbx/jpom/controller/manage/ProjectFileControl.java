@@ -2,6 +2,7 @@ package cn.keepbx.jpom.controller.manage;
 
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.util.ZipUtil;
 import cn.hutool.extra.servlet.ServletUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
@@ -116,6 +117,7 @@ public class ProjectFileControl extends BaseController {
     /**
      * 上传文件
      *
+     * @param id 项目id
      * @return json
      */
     @RequestMapping(value = "upload", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
@@ -126,12 +128,29 @@ public class ProjectFileControl extends BaseController {
             return JsonMessage.getString(400, "你没有该操作权限操作!");
         }
         ProjectInfoModel pim = projectInfoService.getProjectInfo(id);
+
         MultipartFileBuilder multipartFileBuilder = createMultipart()
-                .addFieldName("file")
-                .setSavePath(pim.getLib())
-                .setUseOriginalFilename(true);
-        // 保存
-        multipartFileBuilder.save();
+                .addFieldName("file");
+        String type = getParameter("type");
+        if ("unzip".equals(type)) {
+            multipartFileBuilder.setSavePath(ConfigBean.getInstance().getTempPathName());
+            String path = multipartFileBuilder.save();
+            //
+            File lib = new File(pim.getLib());
+            if (!FileUtil.clean(lib)) {
+                return JsonMessage.getString(500, "清除旧lib失败");
+            }
+            File file = new File(path);
+            ZipUtil.unzip(file, lib);
+            if (!file.delete()) {
+                DefaultSystemLog.LOG().info("删除失败：" + file.getPath());
+            }
+        } else {
+            multipartFileBuilder.setSavePath(pim.getLib())
+                    .setUseOriginalFilename(true);
+            // 保存
+            multipartFileBuilder.save();
+        }
         // 修改使用状态
         pim.setUseLibDesc("upload");
         projectInfoService.updateProject(pim);
@@ -141,6 +160,7 @@ public class ProjectFileControl extends BaseController {
     /**
      * 下载文件
      *
+     * @param id 项目id
      * @return File
      */
     @RequestMapping(value = "download", method = RequestMethod.GET)
