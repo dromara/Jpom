@@ -119,7 +119,9 @@ mvn package
 
 ### 安全模式说明
 
-[安全模式>>](/doc/safeMode.md)
+[安全模式>>](/doc/safeMode.md)  
+
+[用户角色说明>>](/doc/safeMode.md#用户权限说明)
 
 ### 阿里云Oss配置
 
