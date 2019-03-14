@@ -49,7 +49,7 @@ public class UserInfoController extends BaseController {
             return JsonMessage.getString(401, "安全模式下管理员的密码不能通过WEB端修改");
         }
         try {
-            UserModel userModel = userService.login(userName.getId(), oldPwd);
+            UserModel userModel = userService.simpleLogin(userName.getId(), oldPwd);
             if (userModel == null || userModel.getPwdErrorCount() > 0) {
                 return JsonMessage.getString(500, "旧密码不正确！");
             }
