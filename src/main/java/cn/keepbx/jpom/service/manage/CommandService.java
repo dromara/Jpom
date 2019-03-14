@@ -125,7 +125,7 @@ public class CommandService {
             if (projectInfoModel != null) {
                 TailLogThread.logChange(log);
                 // 修改 run lib 使用情况
-                ProjectInfoModel modify = projectInfoService.getProjectInfo(projectInfoModel.getId());
+                ProjectInfoModel modify = projectInfoService.getItem(projectInfoModel.getId());
                 modify.setRunLibDesc(projectInfoModel.getUseLibDesc());
                 try {
                     projectInfoService.updateProject(modify);

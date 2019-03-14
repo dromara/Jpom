@@ -4,6 +4,7 @@ import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.keepbx.jpom.common.BaseController;
+import cn.keepbx.jpom.common.interceptor.LoginInterceptor;
 import cn.keepbx.jpom.model.UserModel;
 import cn.keepbx.jpom.service.user.UserService;
 import cn.keepbx.jpom.system.ConfigBean;
@@ -65,6 +66,25 @@ public class UserInfoController extends BaseController {
         }
     }
 
+    @RequestMapping(value = "updateName", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    public String updateName(String name) {
+        if (StrUtil.isEmpty(name)) {
+            return JsonMessage.getString(405, "请输入新的昵称");
+        }
+        int len = name.length();
+        if (len > 10 || len < 2) {
+            return JsonMessage.getString(405, "昵称长度只能是2-10");
+        }
+        UserModel userModel = getUser();
+        userModel = userService.getItem(userModel.getId());
+        userModel.setName(name);
+        if (userService.updateUser(userModel)) {
+            setSessionAttribute(LoginInterceptor.SESSION_NAME, userModel);
+            return JsonMessage.getString(200, "修改成功");
+        }
+        return JsonMessage.getString(500, "修改失败");
+    }
+
     /**
      * 删除用户
      *
@@ -80,7 +100,7 @@ public class UserInfoController extends BaseController {
         if (userName.getId().equals(id)) {
             return JsonMessage.getString(400, "不能删除自己");
         }
-        UserModel userModel = userService.getUserModel(id);
+        UserModel userModel = userService.getItem(id);
         if (UserModel.SYSTEM_ADMIN.equals(userModel.getParent())) {
             return JsonMessage.getString(400, "不能删除系统管理员");
         }
@@ -123,7 +143,7 @@ public class UserInfoController extends BaseController {
         }
         boolean manageB = "true".equals(manage);
 
-        UserModel userModel = userService.getUserModel(id);
+        UserModel userModel = userService.getItem(id);
         if (userModel != null) {
             return JsonMessage.getString(401, "登录名已经存在");
         }
@@ -170,7 +190,7 @@ public class UserInfoController extends BaseController {
         if (projects != null) {
             jsonProjects = (JSONArray) JSONArray.toJSON(projects);
         }
-        UserModel userModel = userService.getUserModel(id);
+        UserModel userModel = userService.getItem(id);
         if (userModel == null) {
             return JsonMessage.getString(400, "修改失败:-1");
         }

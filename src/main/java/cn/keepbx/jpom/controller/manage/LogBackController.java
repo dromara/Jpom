@@ -36,7 +36,7 @@ public class LogBackController extends BaseController {
     public String console(String id) {
         try {
             // 查询项目路径
-            ProjectInfoModel pim = projectInfoService.getProjectInfo(id);
+            ProjectInfoModel pim = projectInfoService.getItem(id);
             File logBack = pim.getLogBack();
             if (logBack.exists() && logBack.isDirectory()) {
                 File[] filesAll = logBack.listFiles();
@@ -60,7 +60,7 @@ public class LogBackController extends BaseController {
             return JsonMessage.getString(405, "非法操作");
         }
         try {
-            ProjectInfoModel pim = projectInfoService.getProjectInfo(id);
+            ProjectInfoModel pim = projectInfoService.getItem(id);
             File logBack = pim.getLogBack();
             if (logBack.exists() && logBack.isDirectory()) {
                 logBack = new File(logBack, key);
@@ -87,7 +87,7 @@ public class LogBackController extends BaseController {
             return JsonMessage.getString(405, "非法操作:" + name);
         }
         try {
-            ProjectInfoModel pim = projectInfoService.getProjectInfo(id);
+            ProjectInfoModel pim = projectInfoService.getItem(id);
             File logBack = pim.getLogBack();
             if (logBack.exists() && logBack.isDirectory()) {
                 logBack = new File(logBack, name);

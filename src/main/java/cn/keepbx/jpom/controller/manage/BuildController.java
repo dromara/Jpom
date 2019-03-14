@@ -40,7 +40,7 @@ public class BuildController extends BaseController {
 
     @RequestMapping(value = "build", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
     public String build(String id) throws IOException {
-        ProjectInfoModel projectInfoModel = projectInfoService.getProjectInfo(id);
+        ProjectInfoModel projectInfoModel = projectInfoService.getItem(id);
         if (projectInfoModel != null && StrUtil.isNotEmpty(projectInfoModel.getBuildTag())) {
             JSONArray jsonArray = ossManagerService.list(projectInfoModel.getBuildTag());
             setAttribute("array", jsonArray);
@@ -55,7 +55,7 @@ public class BuildController extends BaseController {
             return "redirect:error";
         }
         try {
-            ProjectInfoModel projectInfoModel = projectInfoService.getProjectInfo(id);
+            ProjectInfoModel projectInfoModel = projectInfoService.getItem(id);
             if (projectInfoModel == null) {
                 return "redirect:error";
             }
@@ -72,7 +72,7 @@ public class BuildController extends BaseController {
         if (!getUser().isProject(id)) {
             return JsonMessage.getString(400, "你没有对应操作权限操作!");
         }
-        ProjectInfoModel projectInfoModel = projectInfoService.getProjectInfo(id);
+        ProjectInfoModel projectInfoModel = projectInfoService.getItem(id);
         if (projectInfoModel == null) {
             return JsonMessage.getString(400, "没有对应项目");
         }

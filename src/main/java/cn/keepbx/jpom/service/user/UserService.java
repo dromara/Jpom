@@ -59,7 +59,7 @@ public class UserService extends BaseOperService<UserModel> {
      */
     public UserModel login(String name, String pwd) {
         synchronized (UserService.class) {
-            UserModel userModel = getUserModel(name);
+            UserModel userModel = getItem(name);
             if (userModel == null) {
                 return null;
             }
@@ -139,7 +139,8 @@ public class UserService extends BaseOperService<UserModel> {
      * @param userId 用户id
      * @return 用户信息
      */
-    public UserModel getUserModel(String userId) {
+    @Override
+    public UserModel getItem(String userId) {
         try {
             JSONObject jsonObject = getJsonObject(ConfigBean.USER);
             JSONObject user = jsonObject.getJSONObject(userId);

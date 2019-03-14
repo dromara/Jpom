@@ -62,7 +62,7 @@ public class LogWebSocketHandle implements TailLogThread.Evn {
             }
             // 判断项目
             if (!SYSTEM_ID.equals(projectId)) {
-                ProjectInfoModel projectInfoModel = projectInfoService.getProjectInfo(projectId);
+                ProjectInfoModel projectInfoModel = projectInfoService.getItem(projectId);
                 if (projectInfoModel == null) {
                     socketSession.sendMsg("获取项目信息错误");
                     session.close();
@@ -111,7 +111,7 @@ public class LogWebSocketHandle implements TailLogThread.Evn {
         SocketSession socketSession = getItem(session);
         ProjectInfoModel projectInfoModel = null;
         try {
-            projectInfoModel = projectInfoService.getProjectInfo(id);
+            projectInfoModel = projectInfoService.getItem(id);
         } catch (IOException e) {
             DefaultSystemLog.ERROR().error("获取异常", e);
         }
