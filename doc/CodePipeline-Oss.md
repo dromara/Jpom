@@ -11,8 +11,8 @@
 ## Jpom 配置CodePipeline构建
 1. 在CodePipeline 后台创建项目并获取项目名称
 
-2. 在Jpom 配置对应项目的 CodePipeline 项目名称(记得结尾添加一个`_`奥)
-    ![CodePipeline](./images/build_edit.png)
+2. 在Jpom 配置对应项目的 【Build标识】(记得结尾添加一个`_`奥)
+    ![CodePipeline](./images/edit_del.png)
     
 3. 配置阿里云oss 信息，在管理面板中左侧点击阿里云OSS，然后填入对应信息（此项仅有系统管理员才能查看和修改）
 

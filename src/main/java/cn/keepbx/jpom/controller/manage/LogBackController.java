@@ -1,6 +1,7 @@
 package cn.keepbx.jpom.controller.manage;
 
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.servlet.ServletUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
@@ -54,6 +55,10 @@ public class LogBackController extends BaseController {
     @RequestMapping(value = "logBack_download", method = RequestMethod.GET)
     @ResponseBody
     public String download(String id, String key) {
+        key = pathSafe(key);
+        if (StrUtil.isEmpty(key)) {
+            return JsonMessage.getString(405, "非法操作");
+        }
         try {
             ProjectInfoModel pim = projectInfoService.getProjectInfo(id);
             File logBack = pim.getLogBack();
@@ -76,6 +81,10 @@ public class LogBackController extends BaseController {
         UserModel userName = getUser();
         if (!userName.isProject(id)) {
             return JsonMessage.getString(400, "你没有对应操作权限操作!");
+        }
+        name = pathSafe(name);
+        if (StrUtil.isEmpty(name)) {
+            return JsonMessage.getString(405, "非法操作:" + name);
         }
         try {
             ProjectInfoModel pim = projectInfoService.getProjectInfo(id);

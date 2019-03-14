@@ -1,6 +1,5 @@
 package cn.keepbx.jpom.controller.system;
 
-import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.text.StrSpliter;
 import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.JsonMessage;
@@ -61,21 +60,21 @@ public class WhitelistDirectoryController extends BaseController {
             return JsonMessage.getString(401, "安全模式下不能修改白名单目录");
         }
         UserModel userName = getUser();
-        if (!userName.isManage()) {
+        if (!UserModel.SYSTEM_ADMIN.equals(userName.getParent())) {
             return JsonMessage.getString(401, "你没有权限修改白名单目录");
         }
 
         //
         List<String> certificateList = null;
         if (StrUtil.isNotEmpty(certificate)) {
-            certificateList = StrSpliter.splitTrim(certificate, "\n", true);
+            certificateList = StrSpliter.splitTrim(certificate, StrUtil.LF, true);
             if (certificateList == null || certificateList.size() <= 0) {
                 return JsonMessage.getString(401, "证书路径白名单不能为空");
             }
         }
         List<String> nList = null;
         if (StrUtil.isNotEmpty(nginx)) {
-            nList = StrSpliter.splitTrim(nginx, "\n", true);
+            nList = StrSpliter.splitTrim(nginx, StrUtil.LF, true);
             if (nList == null || nList.size() <= 0) {
                 return JsonMessage.getString(401, "nginx路径白名单不能为空");
             }
@@ -88,7 +87,7 @@ public class WhitelistDirectoryController extends BaseController {
         if (StrUtil.isEmpty(project)) {
             return new JsonMessage(401, "项目路径白名单不能为空");
         }
-        List<String> list = StrSpliter.splitTrim(project, "\n", true);
+        List<String> list = StrSpliter.splitTrim(project, StrUtil.LF, true);
         if (list == null || list.size() <= 0) {
             return new JsonMessage(401, "项目路径白名单不能为空");
         }
@@ -153,8 +152,7 @@ public class WhitelistDirectoryController extends BaseController {
         JSONArray array = new JSONArray();
         for (String s : list) {
             String val = String.format("/%s/", s);
-            val = val.replace("../", "");
-            val = FileUtil.normalize(val);
+            val = pathSafe(val);
             if (StrUtil.SLASH.equals(val)) {
                 continue;
             }

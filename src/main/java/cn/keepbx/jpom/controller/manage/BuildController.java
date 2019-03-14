@@ -84,9 +84,8 @@ public class BuildController extends BaseController {
             return JsonMessage.getString(500, "下载远程文件失败");
         }
         File lib = new File(projectInfoModel.getLib());
-        FileUtil.mkdir(lib);
         if (!FileUtil.clean(lib)) {
-            return JsonMessage.getString(500, "清楚旧lib失败");
+            return JsonMessage.getString(500, "覆盖清除旧lib失败");
         }
         ZipUtil.unzip(file, lib);
         // 修改使用状态

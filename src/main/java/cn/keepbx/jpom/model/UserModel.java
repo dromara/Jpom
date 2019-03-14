@@ -10,9 +10,23 @@ import com.alibaba.fastjson.JSONObject;
  * @author jiangzeyin
  * @date 2019/1/16
  */
-public class UserModel {
-    private String id;
+public class UserModel extends BaseModel {
+    /**
+     * 系统管理员
+     */
+    public static String SYSTEM_ADMIN = "sys";
+    /**
+     * 用户密码长度
+     */
+    public static int USER_PWD_LEN = 6;
+
+    /**
+     * 昵称
+     */
     private String name;
+    /**
+     * 密码
+     */
     private String password;
     /**
      * 是否为管理员
@@ -26,15 +40,18 @@ public class UserModel {
      * 创建此用户的人
      */
     private String parent;
+    /**
+     * 连续登录失败次数
+     */
+    private int pwdErrorCount;
 
-    /**
-     * 系统管理员
-     */
-    public static String SYSTEM_ADMIN = "sys";
-    /**
-     * 用户密码长度
-     */
-    public static int USER_PWD_LEN = 6;
+    public int getPwdErrorCount() {
+        return pwdErrorCount;
+    }
+
+    public void setPwdErrorCount(int pwdErrorCount) {
+        this.pwdErrorCount = pwdErrorCount;
+    }
 
     public String getParent() {
         return parent;
@@ -50,14 +67,6 @@ public class UserModel {
 
     public void setProjects(JSONArray projects) {
         this.projects = projects;
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
     }
 
     public String getName() {
@@ -77,7 +86,7 @@ public class UserModel {
     }
 
     public String getUserMd5Key() {
-        return SecureUtil.md5(String.format("%s:%s", id, password));
+        return SecureUtil.md5(String.format("%s:%s", getId(), password));
     }
 
     public boolean isManage() {

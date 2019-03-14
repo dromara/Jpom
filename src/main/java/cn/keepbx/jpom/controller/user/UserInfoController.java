@@ -7,6 +7,7 @@ import cn.keepbx.jpom.common.BaseController;
 import cn.keepbx.jpom.model.UserModel;
 import cn.keepbx.jpom.service.user.UserService;
 import cn.keepbx.jpom.system.ConfigBean;
+import cn.keepbx.jpom.system.ExtConfigBean;
 import com.alibaba.fastjson.JSONArray;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -48,7 +49,7 @@ public class UserInfoController extends BaseController {
         }
         try {
             UserModel userModel = userService.login(userName.getId(), oldPwd);
-            if (userModel == null) {
+            if (userModel == null || userModel.getPwdErrorCount() > 0) {
                 return JsonMessage.getString(500, "旧密码不正确！");
             }
             userModel.setPassword(newPwd);
@@ -73,8 +74,8 @@ public class UserInfoController extends BaseController {
     @RequestMapping(value = "deleteUser", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public String deleteUser(String id) {
         UserModel userName = getUser();
-        if (userName == null) {
-            return JsonMessage.getString(401, "系统异常：不能删除");
+        if (!userName.isManage()) {
+            return JsonMessage.getString(400, "你没有删除用户的权限");
         }
         if (userName.getId().equals(id)) {
             return JsonMessage.getString(400, "不能删除自己");
@@ -105,6 +106,11 @@ public class UserInfoController extends BaseController {
         if (!userName.isManage()) {
             return JsonMessage.getString(400, "你还没有权限");
         }
+        //
+        int size = userService.userSize();
+        if (size >= ExtConfigBean.getInstance().userMaxCount) {
+            return JsonMessage.getString(500, "当前用户个数超过系统上限");
+        }
         if (StrUtil.isEmpty(id)) {
             return JsonMessage.getString(400, "登录名不能为空");
         }
@@ -116,9 +122,7 @@ public class UserInfoController extends BaseController {
             return JsonMessage.getString(400, "密码长度为6-12位");
         }
         boolean manageB = "true".equals(manage);
-//        if (manageB && ConfigBean.getInstance().safeMode) {
-//            return JsonMessage.getString(401, "安全模式不能创建管理员");
-//        }
+
         UserModel userModel = userService.getUserModel(id);
         if (userModel != null) {
             return JsonMessage.getString(401, "登录名已经存在");
@@ -170,14 +174,19 @@ public class UserInfoController extends BaseController {
         if (userModel == null) {
             return JsonMessage.getString(400, "修改失败:-1");
         }
+        // 禁止修改系统管理员信息
+        if (UserModel.SYSTEM_ADMIN.equals(userModel.getParent())) {
+            return JsonMessage.getString(401, "WEB端不能修改系统管理员信息");
+        }
         userModel.setName(name);
         if (!StrUtil.isEmpty(password)) {
             int length = password.length();
             if (length < UserModel.USER_PWD_LEN) {
                 return JsonMessage.getString(400, "密码长度为6-12位");
             }
-            if (ConfigBean.getInstance().safeMode && UserModel.SYSTEM_ADMIN.equals(userModel.getParent())) {
-                return JsonMessage.getString(401, "安全模式不能修改系统管理员的密码");
+            //
+            if (UserModel.SYSTEM_ADMIN.equals(userName.getParent())) {
+                return JsonMessage.getString(401, "只有系统管理员才能重置用户密码");
             }
             userModel.setPassword(password);
         }

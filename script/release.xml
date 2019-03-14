@@ -9,14 +9,12 @@
     </formats>
 
     <fileSets>
+        <!-- 打包Jpom 管理命令文件-->
         <fileSet>
-            <directory>${basedir}/bin/</directory>
+            <directory>${basedir}/script/</directory>
             <outputDirectory>/</outputDirectory>
-            <!-- 脚本文件在 linux 下的权限设为 755，无需 chmod 可直接运行 -->
-            <fileMode>755</fileMode>
             <includes>
-                <include>*.sh</include>
-                <include>*.bat</include>
+                <include>Jpom.sh</include>
             </includes>
         </fileSet>
         <!--复制外部配置文件-->

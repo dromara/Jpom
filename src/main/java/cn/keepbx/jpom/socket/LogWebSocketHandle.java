@@ -74,7 +74,7 @@ public class LogWebSocketHandle implements TailLogThread.Evn {
                     return;
                 }
             }
-            socketSession.sendMsg("欢迎加入：" + userModel.getName());
+            socketSession.sendMsg("欢迎加入：" + userModel.getName() + "  回话id:" + session.getId());
         } catch (Exception e) {
             DefaultSystemLog.ERROR().error(e.getMessage(), e);
             try {

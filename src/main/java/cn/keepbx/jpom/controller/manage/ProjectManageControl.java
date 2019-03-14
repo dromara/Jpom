@@ -44,7 +44,7 @@ public class ProjectManageControl extends BaseController {
     @RequestMapping(value = "projectInfo", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
     public String projectInfo() throws IOException {
         //获取所有分组
-        List<ProjectInfoModel> projectInfoModels = projectInfoService.getAllProjectArrayInfo();
+        List<ProjectInfoModel> projectInfoModels = projectInfoService.list();
         HashSet<String> hashSet = new HashSet<>();
         for (ProjectInfoModel projectInfoModel : projectInfoModels) {
             hashSet.add(projectInfoModel.getGroup());
@@ -64,7 +64,7 @@ public class ProjectManageControl extends BaseController {
         try {
             UserModel userName = getUser();
             // 查询数据
-            List<ProjectInfoModel> projectInfoModels = projectInfoService.getAllProjectArrayInfo();
+            List<ProjectInfoModel> projectInfoModels = projectInfoService.list();
             // 转换为数据
             JSONArray array = new JSONArray();
             for (ProjectInfoModel projectInfoModel : projectInfoModels) {

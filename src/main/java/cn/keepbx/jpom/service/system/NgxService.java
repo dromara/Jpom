@@ -3,7 +3,7 @@ package cn.keepbx.jpom.service.system;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
-import cn.keepbx.jpom.common.BaseDataService;
+import cn.keepbx.jpom.common.BaseOperService;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.github.odiszapc.nginxparser.NgxBlock;
@@ -20,11 +20,12 @@ import java.util.List;
  * @author Arno
  */
 @Service
-public class NgxService extends BaseDataService {
+public class NgxService extends BaseOperService {
 
     @Resource
     private SystemService systemService;
 
+    @Override
     public JSONArray list() {
         JSONArray ngxDirectory = systemService.getNgxDirectory();
         if (ngxDirectory == null) {

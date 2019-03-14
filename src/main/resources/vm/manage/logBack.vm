@@ -31,12 +31,12 @@
                 <td>$item.modifytime</td>
                 <td>$item.filesize</td>
                 <td>
-                    <button name="delete" data-name="$item.filename" data-id="$id"
-                            class="layui-btn layui-btn-danger layui-btn-sm">删除
-                    </button>
                     <a name="download" href="logBack_download?key=$item.filename&id=$id"
                        class="layui-btn layui-btn-warm layui-btn-sm">下载
                     </a>
+                    <button name="delete" data-name="$item.filename" data-id="$id"
+                            class="layui-btn layui-btn-danger layui-btn-sm">删除
+                    </button>
                 </td>
             </tr>
             #end

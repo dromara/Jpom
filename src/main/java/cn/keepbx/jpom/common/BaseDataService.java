@@ -3,7 +3,6 @@ package cn.keepbx.jpom.common;
 import cn.hutool.core.io.FileUtil;
 import cn.keepbx.jpom.system.ConfigBean;
 import cn.keepbx.jpom.util.JsonUtil;
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import java.io.IOException;
@@ -31,16 +30,16 @@ public abstract class BaseDataService {
      *
      * @param filename 文件名
      * @param json     json数据
-     * @throws Exception 异常
+     * @throws IOException 异常
      */
-    protected void saveJson(String filename, JSONObject json) throws Exception {
+    protected void saveJson(String filename, JSONObject json) throws IOException {
         String key = json.getString("id");
         // 读取文件，如果存在记录，则抛出异常
         JSONObject allData = getJsonObject(filename);
         JSONObject data = allData.getJSONObject(key);
         // 判断是否存在数据
         if (null != data && 0 < data.keySet().size()) {
-            throw new Exception("项目名称已存在！");
+            throw new RuntimeException("项目名称已存在！");
         } else {
             allData.put(key, json);
             JsonUtil.saveJson(getDataFilePath(filename), allData);
@@ -89,19 +88,6 @@ public abstract class BaseDataService {
     }
 
     /**
-     * 根据主键读取json对象
-     *
-     * @param filename 文件名
-     * @param key      主键
-     * @return json
-     * @throws IOException io
-     */
-    protected JSONObject getJsonObjectByKey(String filename, String key) throws IOException {
-        JSONObject jsonData = getJsonObject(filename);
-        return jsonData.getJSONObject(key);
-    }
-
-    /**
      * 读取整个json文件
      *
      * @param filename 文件名
@@ -112,7 +98,5 @@ public abstract class BaseDataService {
         return (JSONObject) JsonUtil.readJson(getDataFilePath(filename));
     }
 
-    protected JSONArray getJSONArray(String filename) throws IOException {
-        return (JSONArray) JsonUtil.readJson(getDataFilePath(filename));
-    }
+
 }
