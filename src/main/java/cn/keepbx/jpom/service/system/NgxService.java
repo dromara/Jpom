@@ -25,6 +25,7 @@ public class NgxService extends BaseDataService {
     @Resource
     private SystemService systemService;
 
+    @Override
     public JSONArray list() {
         JSONArray ngxDirectory = systemService.getNgxDirectory();
         if (ngxDirectory == null) {

@@ -119,7 +119,7 @@ public class EditProjectController extends BaseController {
         lib = String.format("%s/%s", whitelistDirectory, lib);
         lib = FileUtil.normalize(lib);
         // 重复lib
-        List<ProjectInfoModel> list = projectInfoService.getAllProjectArrayInfo();
+        List<ProjectInfoModel> list = projectInfoService.list();
         if (list != null) {
             for (ProjectInfoModel projectInfoModel : list) {
                 if (!projectInfoModel.getId().equals(id) && projectInfoModel.getLib().equals(lib)) {
@@ -243,7 +243,7 @@ public class EditProjectController extends BaseController {
     }
 
     private JsonMessage checkPath(ProjectInfoModel projectInfoModel) throws IOException {
-        List<ProjectInfoModel> projectInfoModelList = projectInfoService.getAllProjectArrayInfo();
+        List<ProjectInfoModel> projectInfoModelList = projectInfoService.list();
         for (ProjectInfoModel model : projectInfoModelList) {
             if (!model.getId().equals(projectInfoModel.getId())) {
                 if (model.getLib().startsWith(projectInfoModel.getLib()) || projectInfoModel.getLib().startsWith(model.getLib())) {

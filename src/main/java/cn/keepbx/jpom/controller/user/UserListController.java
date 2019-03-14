@@ -34,7 +34,7 @@ public class UserListController extends BaseController {
      */
     @RequestMapping(value = "list", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
     public String projectInfo() throws IOException {
-        List<ProjectInfoModel> jsonArray = projectInfoService.getAllProjectArrayInfo();
+        List<ProjectInfoModel> jsonArray = projectInfoService.list();
         setAttribute("projects", jsonArray);
         return "user/list";
     }
@@ -49,7 +49,7 @@ public class UserListController extends BaseController {
         if (!userName.isManage()) {
             return JsonMessage.getString(400, "你没有对应权限！");
         }
-        List<UserModel> userList = userService.getUserList();
+        List<UserModel> userList = userService.list();
         return JsonMessage.getString(200, "", userList);
     }
 

@@ -1,5 +1,6 @@
 package cn.keepbx.jpom.controller;
 
+import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.keepbx.jpom.common.BaseController;
@@ -43,10 +44,20 @@ public class LoginControl extends BaseController {
         return "login";
     }
 
+    /**
+     * 登录接口
+     *
+     * @param userName 登录名
+     * @param userPwd  登录密码
+     * @return json
+     */
     @RequestMapping(value = "userLogin", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     @NotLogin
     public String userLogin(String userName, String userPwd) {
+        if (StrUtil.isEmpty(userName) || StrUtil.isEmpty(userPwd)) {
+            return JsonMessage.getString(405, "请输入登录信息");
+        }
         StringBuilder stringBuffer = new StringBuilder();
         stringBuffer.append("用户登录：").append(userName).append(",IP：").append(getIp());
         stringBuffer.append(",浏览器：").append(getHeader(HttpHeaders.USER_AGENT));

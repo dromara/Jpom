@@ -3,10 +3,10 @@ package cn.keepbx.jpom.common;
 import cn.hutool.core.io.FileUtil;
 import cn.keepbx.jpom.system.ConfigBean;
 import cn.keepbx.jpom.util.JsonUtil;
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import java.io.IOException;
+import java.util.List;
 
 /**
  * 公共文件操作Service
@@ -14,7 +14,7 @@ import java.io.IOException;
  * @author jiangzeyin
  * @date 2019/1/16
  */
-public abstract class BaseDataService {
+public abstract class BaseDataService<T> {
 
     /**
      * 获取数据文件的路径，如果文件不存在，则创建一个
@@ -89,19 +89,6 @@ public abstract class BaseDataService {
     }
 
     /**
-     * 根据主键读取json对象
-     *
-     * @param filename 文件名
-     * @param key      主键
-     * @return json
-     * @throws IOException io
-     */
-    protected JSONObject getJsonObjectByKey(String filename, String key) throws IOException {
-        JSONObject jsonData = getJsonObject(filename);
-        return jsonData.getJSONObject(key);
-    }
-
-    /**
      * 读取整个json文件
      *
      * @param filename 文件名
@@ -112,7 +99,11 @@ public abstract class BaseDataService {
         return (JSONObject) JsonUtil.readJson(getDataFilePath(filename));
     }
 
-    protected JSONArray getJSONArray(String filename) throws IOException {
-        return (JSONArray) JsonUtil.readJson(getDataFilePath(filename));
-    }
+    /**
+     * 获取所有数据
+     *
+     * @return list
+     * @throws IOException IO
+     */
+    public abstract List<T> list() throws IOException;
 }

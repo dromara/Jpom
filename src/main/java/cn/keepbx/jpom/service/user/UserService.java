@@ -22,7 +22,7 @@ import java.util.Set;
  * @author Administrator
  */
 @Service
-public class UserService extends BaseDataService {
+public class UserService extends BaseDataService<UserModel> {
 
     /**
      * 用户列表是否为空
@@ -107,7 +107,8 @@ public class UserService extends BaseDataService {
      *
      * @return 用户列表
      */
-    public List<UserModel> getUserList() {
+    @Override
+    public List<UserModel> list() {
         JSONObject jsonObject = null;
         try {
             jsonObject = getJsonObject(ConfigBean.USER);

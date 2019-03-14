@@ -10,7 +10,7 @@ import com.alibaba.fastjson.JSONObject;
  * @author jiangzeyin
  * @date 2019/1/16
  */
-public class UserModel {
+public class UserModel extends BaseModel {
     /**
      * 系统管理员
      */
@@ -20,11 +20,6 @@ public class UserModel {
      */
     public static int USER_PWD_LEN = 6;
 
-
-    /**
-     * id 登录名
-     */
-    private String id;
     /**
      * 昵称
      */
@@ -74,14 +69,6 @@ public class UserModel {
         this.projects = projects;
     }
 
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
     public String getName() {
         return name;
     }
@@ -99,7 +86,7 @@ public class UserModel {
     }
 
     public String getUserMd5Key() {
-        return SecureUtil.md5(String.format("%s:%s", id, password));
+        return SecureUtil.md5(String.format("%s:%s", getId(), password));
     }
 
     public boolean isManage() {
