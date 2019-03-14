@@ -6,7 +6,6 @@ import cn.keepbx.jpom.util.JsonUtil;
 import com.alibaba.fastjson.JSONObject;
 
 import java.io.IOException;
-import java.util.List;
 
 /**
  * 公共文件操作Service
@@ -14,7 +13,7 @@ import java.util.List;
  * @author jiangzeyin
  * @date 2019/1/16
  */
-public abstract class BaseDataService<T> {
+public abstract class BaseDataService {
 
     /**
      * 获取数据文件的路径，如果文件不存在，则创建一个
@@ -31,16 +30,16 @@ public abstract class BaseDataService<T> {
      *
      * @param filename 文件名
      * @param json     json数据
-     * @throws Exception 异常
+     * @throws IOException 异常
      */
-    protected void saveJson(String filename, JSONObject json) throws Exception {
+    protected void saveJson(String filename, JSONObject json) throws IOException {
         String key = json.getString("id");
         // 读取文件，如果存在记录，则抛出异常
         JSONObject allData = getJsonObject(filename);
         JSONObject data = allData.getJSONObject(key);
         // 判断是否存在数据
         if (null != data && 0 < data.keySet().size()) {
-            throw new Exception("项目名称已存在！");
+            throw new RuntimeException("项目名称已存在！");
         } else {
             allData.put(key, json);
             JsonUtil.saveJson(getDataFilePath(filename), allData);
@@ -99,11 +98,5 @@ public abstract class BaseDataService<T> {
         return (JSONObject) JsonUtil.readJson(getDataFilePath(filename));
     }
 
-    /**
-     * 获取所有数据
-     *
-     * @return list
-     * @throws IOException IO
-     */
-    public abstract List<T> list() throws IOException;
+
 }

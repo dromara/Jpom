@@ -116,9 +116,4 @@ public class OssManagerService extends BaseDataService {
         String path = getDataFilePath(ConfigBean.ALI_OSS);
         JsonUtil.saveJson(path, jsonObject);
     }
-
-    @Override
-    public List list() throws IOException {
-        return null;
-    }
 }

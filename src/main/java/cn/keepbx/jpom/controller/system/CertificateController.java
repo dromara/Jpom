@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import javax.annotation.Resource;
 import java.io.BufferedInputStream;
 import java.io.File;
+import java.io.IOException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.Date;
@@ -164,7 +165,7 @@ public class CertificateController extends BaseController {
      */
     @RequestMapping(value = "/certificate/getCertList", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
-    public String getCertList() {
+    public String getCertList() throws IOException {
         List<CertModel> array = certService.list();
         return JsonMessage.getString(200, "", array);
     }

@@ -1,6 +1,6 @@
 package cn.keepbx.jpom.service.manage;
 
-import cn.keepbx.jpom.common.BaseDataService;
+import cn.keepbx.jpom.common.BaseOperService;
 import cn.keepbx.jpom.model.ProjectInfoModel;
 import cn.keepbx.jpom.system.ConfigBean;
 import com.alibaba.fastjson.JSONArray;
@@ -17,7 +17,7 @@ import java.util.Set;
  * @author jiangzeyin
  */
 @Service
-public class ProjectInfoService extends BaseDataService<ProjectInfoModel> {
+public class ProjectInfoService extends BaseOperService<ProjectInfoModel> {
 
     /**
      * 查询所有项目信息

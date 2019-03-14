@@ -11,8 +11,6 @@ import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;
 
 import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.util.List;
 
 /**
  * @author jiangzeyin
@@ -99,10 +97,5 @@ public class SystemService extends BaseDataService {
     public void saveWhitelistDirectory(JSONObject jsonObject) {
         String path = getDataFilePath(ConfigBean.WHITELIST_DIRECTORY);
         JsonUtil.saveJson(path, jsonObject);
-    }
-
-    @Override
-    public List list() throws IOException {
-        return null;
     }
 }

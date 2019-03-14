@@ -1,7 +1,7 @@
 package cn.keepbx.jpom.service.user;
 
 import cn.jiangzeyin.common.DefaultSystemLog;
-import cn.keepbx.jpom.common.BaseDataService;
+import cn.keepbx.jpom.common.BaseOperService;
 import cn.keepbx.jpom.model.UserModel;
 import cn.keepbx.jpom.system.ConfigBean;
 import cn.keepbx.jpom.system.ExtConfigBean;
@@ -22,7 +22,7 @@ import java.util.Set;
  * @author Administrator
  */
 @Service
-public class UserService extends BaseDataService<UserModel> {
+public class UserService extends BaseOperService<UserModel> {
 
     /**
      * 用户列表是否为空

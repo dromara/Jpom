@@ -3,10 +3,9 @@ package cn.keepbx.jpom.service.system;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
-import cn.keepbx.jpom.common.BaseDataService;
+import cn.keepbx.jpom.common.BaseOperService;
 import cn.keepbx.jpom.model.CertModel;
 import cn.keepbx.jpom.system.ConfigBean;
-import cn.keepbx.jpom.util.JsonUtil;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;
 
@@ -22,7 +21,7 @@ import java.util.Set;
  * @author Arno
  */
 @Service
-public class CertService extends BaseDataService<CertModel> {
+public class CertService extends BaseOperService<CertModel> {
 
     private static final String FILENAME = ConfigBean.CERT;
 
@@ -47,7 +46,7 @@ public class CertService extends BaseDataService<CertModel> {
      * @return 证书列表
      */
     @Override
-    public List<CertModel> list() {
+    public List<CertModel> list() throws IOException {
         try {
             JSONObject jsonObject = getJsonObject(FILENAME);
             if (jsonObject == null) {
@@ -62,7 +61,7 @@ public class CertService extends BaseDataService<CertModel> {
             return list;
         } catch (FileNotFoundException e) {
             File file = new File(ConfigBean.getInstance().getDataPath(), ConfigBean.CERT);
-            JsonUtil.saveJson(file.getPath(), new JSONObject());
+            saveJson(file.getPath(), new JSONObject());
             return null;
         } catch (IOException e) {
             DefaultSystemLog.ERROR().error(e.getMessage(), e);
