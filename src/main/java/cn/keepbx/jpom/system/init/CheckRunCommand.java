@@ -117,7 +117,7 @@ public class CheckRunCommand {
                 if (jsonArray == null || jsonArray.isEmpty()) {
                     DefaultSystemLog.LOG().info("升级、自动转换白名单目录数据");
                     ProjectInfoService projectInfoService = SpringUtil.getBean(ProjectInfoService.class);
-                    List<ProjectInfoModel> projectInfoModels = projectInfoService.getAllProjectArrayInfo();
+                    List<ProjectInfoModel> projectInfoModels = projectInfoService.list();
                     if (projectInfoModels != null && !projectInfoModels.isEmpty()) {
                         List<String> paths = new ArrayList<>();
                         for (ProjectInfoModel projectInfoModel : projectInfoModels) {

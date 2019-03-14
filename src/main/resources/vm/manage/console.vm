@@ -83,14 +83,13 @@
 </div>
 </body>
 <script type="text/javascript">
-    var projectInfo =  $projectInfo;
     var loopLog = false;
     var loopLogTime;
 
     function loadSuccess() {
         const showLogDom = $('.console .terminal');
         if ('WebSocket' in window) {
-            const ws = new WebSocket("ws://" + window.location.host + "/console/$userInfo/" + projectInfo.id);
+            const ws = new WebSocket("ws://" + window.location.host + "/console/$userInfo/$!projectInfo.id");
             ws.onopen = function () {
                 showLogDom.append('WebSocket连接成功！<br/>');
                 setMsg('status');
@@ -169,7 +168,7 @@
             function setMsg(opt) {
                 const data = {
                     op: opt,
-                    projectInfo: projectInfo
+                    projectId: "$!projectInfo.id"
                 };
                 layer.load(1, {
                     shade: [0.3, '#fff'] //0.1透明度的白色背景
@@ -216,7 +215,7 @@
                 type: 'POST',
                 dataType: 'json',
                 data: {
-                    id: projectInfo.id
+                    id: "$!projectInfo.id"
                 },
                 success: function (data) {
                     if (200 == data.code) {
@@ -234,7 +233,7 @@
         }
 
         $('#export').on('click', function () {
-            location.href = "export.html?id=" + projectInfo.id;
+            location.href = "export.html?id=$!projectInfo.id";
         });
 
         $("#resetLog").on('click', function () {
@@ -243,7 +242,7 @@
                 type: 'POST',
                 dataType: 'json',
                 data: {
-                    id: projectInfo.id
+                    id: "$!projectInfo.id"
                 },
                 success: function (data) {
                     layer.msg(data.msg);
@@ -263,7 +262,7 @@
                 title: '备份列表',
                 shade: 0.8,
                 area: ['80%', '90%'],
-                content: 'logBack?id=' + projectInfo.id
+                content: 'logBack?id=$!projectInfo.id'
             });
         })
     }

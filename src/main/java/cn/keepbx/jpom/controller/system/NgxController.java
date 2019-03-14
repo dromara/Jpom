@@ -7,6 +7,7 @@ import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.controller.multipart.MultipartFileBuilder;
 import cn.keepbx.jpom.common.BaseController;
+import cn.keepbx.jpom.model.CertModel;
 import cn.keepbx.jpom.service.system.CertService;
 import cn.keepbx.jpom.service.system.NgxService;
 import cn.keepbx.jpom.service.system.SystemService;
@@ -21,6 +22,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import javax.annotation.Resource;
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 
 /**
  * nginx 管理
@@ -40,10 +42,10 @@ public class NgxController extends BaseController {
     private NgxService ngxService;
 
     @RequestMapping(value = "nginx", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
-    public String ngx() {
+    public String ngx() throws IOException {
         JSONArray ngxDirectory = systemService.getNgxDirectory();
         setAttribute("nginx", ngxDirectory);
-        JSONArray certList = certService.getCertList();
+        List<CertModel> certList = certService.list();
         setAttribute("cert", certList);
         return "system/nginx";
     }

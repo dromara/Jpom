@@ -1,11 +1,10 @@
 package cn.keepbx.jpom.service.user;
 
 import cn.jiangzeyin.common.DefaultSystemLog;
-import cn.keepbx.jpom.common.BaseDataService;
+import cn.keepbx.jpom.common.BaseOperService;
 import cn.keepbx.jpom.model.UserModel;
 import cn.keepbx.jpom.system.ConfigBean;
 import cn.keepbx.jpom.system.init.CheckRunCommand;
-import cn.keepbx.jpom.util.JsonUtil;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;
 
@@ -22,9 +21,7 @@ import java.util.Set;
  * @author Administrator
  */
 @Service
-public class UserService extends BaseDataService {
-
-    private static final String FILENAME = ConfigBean.USER;
+public class UserService extends BaseOperService<UserModel> {
 
     /**
      * 用户列表是否为空
@@ -32,12 +29,7 @@ public class UserService extends BaseDataService {
      * @return true 为空需要初始化
      */
     public boolean userListEmpty() {
-        try {
-            JSONObject userInfo = getJsonObject(FILENAME);
-            return userInfo.isEmpty();
-        } catch (Exception ignored) {
-        }
-        return true;
+        return userSize() <= 0;
     }
 
     /**
@@ -47,7 +39,7 @@ public class UserService extends BaseDataService {
      */
     public int userSize() {
         try {
-            JSONObject userInfo = getJsonObject(FILENAME);
+            JSONObject userInfo = getJsonObject(ConfigBean.USER);
             if (userInfo == null) {
                 return 0;
             }
@@ -64,12 +56,11 @@ public class UserService extends BaseDataService {
      * @param pwd  密码
      * @return 登录
      */
-    public UserModel login(String name, String pwd) throws Exception {
-        JSONObject userInfo = getJsonObjectByKey(FILENAME, name);
-        if (JsonUtil.jsonIsEmpty(userInfo)) {
+    public UserModel simpleLogin(String name, String pwd) {
+        UserModel userModel = getItem(name);
+        if (userModel == null) {
             return null;
         }
-        UserModel userModel = userInfo.toJavaObject(UserModel.class);
         if (pwd.equals(userModel.getPassword())) {
             return userModel;
         }
@@ -84,7 +75,7 @@ public class UserService extends BaseDataService {
      * @throws IOException 异常
      */
     public UserModel checkUser(String userMd5) throws IOException {
-        JSONObject jsonData = getJsonObject(FILENAME);
+        JSONObject jsonData = getJsonObject(ConfigBean.USER);
         if (jsonData == null) {
             return null;
         }
@@ -104,10 +95,11 @@ public class UserService extends BaseDataService {
      *
      * @return 用户列表
      */
-    public List<UserModel> getUserList() {
+    @Override
+    public List<UserModel> list() {
         JSONObject jsonObject = null;
         try {
-            jsonObject = getJsonObject(FILENAME);
+            jsonObject = getJsonObject(ConfigBean.USER);
         } catch (IOException e) {
             DefaultSystemLog.ERROR().error(e.getMessage(), e);
         }
@@ -135,15 +127,15 @@ public class UserService extends BaseDataService {
      * @param userId 用户id
      * @return 用户信息
      */
-    public UserModel getUserModel(String userId) {
+    @Override
+    public UserModel getItem(String userId) {
         try {
-            JSONObject jsonObject = getJsonObject(FILENAME);
+            JSONObject jsonObject = getJsonObject(ConfigBean.USER);
             JSONObject user = jsonObject.getJSONObject(userId);
             if (user == null) {
                 return null;
             }
             return user.toJavaObject(UserModel.class);
-//            user.remove("password");
         } catch (IOException e) {
             DefaultSystemLog.ERROR().error(e.getMessage(), e);
         }
@@ -158,7 +150,7 @@ public class UserService extends BaseDataService {
      */
     public boolean deleteUser(String id) {
         try {
-            deleteJson(FILENAME, id);
+            deleteJson(ConfigBean.USER, id);
             return true;
         } catch (Exception e) {
             DefaultSystemLog.ERROR().error(e.getMessage(), e);
@@ -174,7 +166,7 @@ public class UserService extends BaseDataService {
      */
     public boolean addUser(UserModel userModel) {
         try {
-            saveJson(FILENAME, userModel.toJson());
+            saveJson(ConfigBean.USER, userModel.toJson());
             return true;
         } catch (FileNotFoundException fileNotFoundException) {
             CheckRunCommand.repairData();
@@ -192,7 +184,7 @@ public class UserService extends BaseDataService {
      */
     public boolean updateUser(UserModel userModel) {
         try {
-            updateJson(FILENAME, userModel.toJson());
+            updateJson(ConfigBean.USER, userModel.toJson());
             return true;
         } catch (Exception e) {
             DefaultSystemLog.ERROR().error(e.getMessage(), e);

@@ -49,7 +49,7 @@ public class EditProjectController extends BaseController {
      */
     @RequestMapping(value = "editProject", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
     public String editProject(String id) throws IOException {
-        ProjectInfoModel projectInfo = projectInfoService.getProjectInfo(id);
+        ProjectInfoModel projectInfo = projectInfoService.getItem(id);
 
         // 白名单
         JSONArray jsonArray = systemService.getWhitelistDirectory();
@@ -119,7 +119,7 @@ public class EditProjectController extends BaseController {
         lib = String.format("%s/%s", whitelistDirectory, lib);
         lib = FileUtil.normalize(lib);
         // 重复lib
-        List<ProjectInfoModel> list = projectInfoService.getAllProjectArrayInfo();
+        List<ProjectInfoModel> list = projectInfoService.list();
         if (list != null) {
             for (ProjectInfoModel projectInfoModel : list) {
                 if (!projectInfoModel.getId().equals(id) && projectInfoModel.getLib().equals(lib)) {
@@ -157,7 +157,7 @@ public class EditProjectController extends BaseController {
     }
 
     private String save(ProjectInfoModel projectInfo) throws IOException {
-        ProjectInfoModel exits = projectInfoService.getProjectInfo(projectInfo.getId());
+        ProjectInfoModel exits = projectInfoService.getItem(projectInfo.getId());
         try {
             UserModel userName = getUser();
             JsonMessage jsonMessage = checkPath(projectInfo);
@@ -197,7 +197,7 @@ public class EditProjectController extends BaseController {
     @RequestMapping(value = "judge_lib.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     public String saveProject(String id, String newLib) throws IOException {
-        ProjectInfoModel exits = projectInfoService.getProjectInfo(id);
+        ProjectInfoModel exits = projectInfoService.getItem(id);
         File file = new File(newLib);
         String msg = null;
         if (exits == null) {
@@ -243,7 +243,7 @@ public class EditProjectController extends BaseController {
     }
 
     private JsonMessage checkPath(ProjectInfoModel projectInfoModel) throws IOException {
-        List<ProjectInfoModel> projectInfoModelList = projectInfoService.getAllProjectArrayInfo();
+        List<ProjectInfoModel> projectInfoModelList = projectInfoService.list();
         for (ProjectInfoModel model : projectInfoModelList) {
             if (!model.getId().equals(projectInfoModel.getId())) {
                 if (model.getLib().startsWith(projectInfoModel.getLib()) || projectInfoModel.getLib().startsWith(model.getLib())) {

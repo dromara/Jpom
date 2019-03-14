@@ -40,7 +40,7 @@ public class InternalController extends BaseController {
      */
     @RequestMapping(value = "internal", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
     public String getInternal(String tag) throws IOException {
-        ProjectInfoModel projectInfoModel = projectInfoService.getProjectInfo(tag);
+        ProjectInfoModel projectInfoModel = projectInfoService.getItem(tag);
         String pid = commandService.execCommand(CommandService.CommandOp.pid, projectInfoModel, null);
         String command = "top -b -n 1 -p " + pid;
         String internal = commandService.execCommand(command);
@@ -59,7 +59,7 @@ public class InternalController extends BaseController {
     @RequestMapping(value = "stack", method = RequestMethod.GET)
     @ResponseBody
     public String stack(String tag) throws IOException {
-        ProjectInfoModel projectInfoModel = projectInfoService.getProjectInfo(tag);
+        ProjectInfoModel projectInfoModel = projectInfoService.getItem(tag);
         String pid = commandService.execCommand(CommandService.CommandOp.pid, projectInfoModel, null).trim();
         pid = pid.replace("\n", "");
         String fileName = ConfigBean.getInstance().getTempPathName() + "/" + tag + "_java_cpu.txt";
@@ -77,7 +77,7 @@ public class InternalController extends BaseController {
     @RequestMapping(value = "ram", method = RequestMethod.GET)
     @ResponseBody
     public String ram(String tag) throws IOException {
-        ProjectInfoModel projectInfoModel = projectInfoService.getProjectInfo(tag);
+        ProjectInfoModel projectInfoModel = projectInfoService.getItem(tag);
         String pid = commandService.execCommand(CommandService.CommandOp.pid, projectInfoModel, null).trim();
         String fileName = ConfigBean.getInstance().getTempPathName() + "/" + tag + "_java_ram.txt";
         fileName = FileUtil.normalize(fileName);

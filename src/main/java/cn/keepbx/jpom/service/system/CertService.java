@@ -3,17 +3,17 @@ package cn.keepbx.jpom.service.system;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
-import cn.keepbx.jpom.common.BaseDataService;
+import cn.keepbx.jpom.common.BaseOperService;
 import cn.keepbx.jpom.model.CertModel;
 import cn.keepbx.jpom.system.ConfigBean;
-import cn.keepbx.jpom.util.JsonUtil;
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -21,9 +21,8 @@ import java.util.Set;
  * @author Arno
  */
 @Service
-public class CertService extends BaseDataService {
+public class CertService extends BaseOperService<CertModel> {
 
-    private static final String FILENAME = ConfigBean.CERT;
 
     /**
      * 新增证书
@@ -32,7 +31,7 @@ public class CertService extends BaseDataService {
      */
     public boolean addCert(CertModel certModel) {
         try {
-            saveJson(FILENAME, certModel.toJson());
+            saveJson(ConfigBean.CERT, certModel.toJson());
             return true;
         } catch (Exception e) {
             DefaultSystemLog.ERROR().error(e.getMessage(), e);
@@ -45,27 +44,41 @@ public class CertService extends BaseDataService {
      *
      * @return 证书列表
      */
-    public JSONArray getCertList() {
+    @Override
+    public List<CertModel> list() throws IOException {
         try {
-            JSONObject jsonObject = getJsonObject(FILENAME);
+            JSONObject jsonObject = getJsonObject(ConfigBean.CERT);
             if (jsonObject == null) {
                 return null;
             }
             Set<Map.Entry<String, Object>> entries = jsonObject.entrySet();
-            JSONArray array = new JSONArray();
+            List<CertModel> list = new ArrayList<>();
             for (Map.Entry<String, Object> entry : entries) {
-                Object value = entry.getValue();
-                array.add(value);
+                JSONObject jsonObject1 = (JSONObject) entry.getValue();
+                list.add(jsonObject1.toJavaObject(CertModel.class));
             }
-            return array;
+            return list;
         } catch (FileNotFoundException e) {
             File file = new File(ConfigBean.getInstance().getDataPath(), ConfigBean.CERT);
-            JsonUtil.saveJson(file.getPath(), new JSONObject());
+            saveJson(file.getPath(), new JSONObject());
             return null;
         } catch (IOException e) {
             DefaultSystemLog.ERROR().error(e.getMessage(), e);
         }
         return null;
+    }
+
+    @Override
+    public CertModel getItem(String id) throws IOException {
+        JSONObject jsonObject = getJsonObject(ConfigBean.CERT);
+        if (jsonObject == null) {
+            return null;
+        }
+        jsonObject = jsonObject.getJSONObject(id);
+        if (jsonObject == null) {
+            return null;
+        }
+        return jsonObject.toJavaObject(CertModel.class);
     }
 
     /**
@@ -75,7 +88,7 @@ public class CertService extends BaseDataService {
      */
     public boolean delete(String id) {
         try {
-            JSONObject jsonObject = getJsonObject(FILENAME);
+            JSONObject jsonObject = getJsonObject(ConfigBean.CERT);
             if (jsonObject == null) {
                 return false;
             }
@@ -84,7 +97,7 @@ public class CertService extends BaseDataService {
                 return true;
             }
             String keyPath = cert.getString("key");
-            deleteJson(FILENAME, id);
+            deleteJson(ConfigBean.CERT, id);
             if (StrUtil.isNotEmpty(keyPath)) {
                 File parentFile = FileUtil.file(keyPath).getParentFile();
                 return FileUtil.del(parentFile);
@@ -103,7 +116,7 @@ public class CertService extends BaseDataService {
      */
     public boolean updateCert(CertModel certModel) {
         try {
-            updateJson(FILENAME, certModel.toJson());
+            updateJson(ConfigBean.CERT, certModel.toJson());
         } catch (Exception e) {
             DefaultSystemLog.ERROR().error(e.getMessage(), e);
             return false;

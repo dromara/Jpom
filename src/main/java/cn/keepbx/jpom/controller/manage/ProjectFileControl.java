@@ -63,7 +63,7 @@ public class ProjectFileControl extends BaseController {
         }
         try {
             // 查询项目路径
-            ProjectInfoModel pim = projectInfoService.getProjectInfo(id);
+            ProjectInfoModel pim = projectInfoService.getItem(id);
             File fileDir = new File(pim.getLib());
             if (!fileDir.exists()) {
                 return JsonMessage.getString(500, "目录不存在");
@@ -128,7 +128,7 @@ public class ProjectFileControl extends BaseController {
         if (!userName.isProject(id)) {
             return JsonMessage.getString(400, "你没有该操作权限操作!");
         }
-        ProjectInfoModel pim = projectInfoService.getProjectInfo(id);
+        ProjectInfoModel pim = projectInfoService.getItem(id);
 
         MultipartFileBuilder multipartFileBuilder = createMultipart()
                 .addFieldName("file");
@@ -172,7 +172,7 @@ public class ProjectFileControl extends BaseController {
             return JsonMessage.getString(405, "非法操作");
         }
         try {
-            ProjectInfoModel pim = projectInfoService.getProjectInfo(id);
+            ProjectInfoModel pim = projectInfoService.getItem(id);
 //            String path = + "/" + filename;
             File file = new File(pim.getLib(), filename);
             if (file.isDirectory()) {
@@ -197,7 +197,7 @@ public class ProjectFileControl extends BaseController {
             return JsonMessage.getString(400, "你没有对应操作权限操作!");
         }
         try {
-            ProjectInfoModel pim = projectInfoService.getProjectInfo(id);
+            ProjectInfoModel pim = projectInfoService.getItem(id);
             File file = new File(pim.getLib());
             if (FileUtil.clean(file)) {
                 return JsonMessage.getString(200, "清除成功");
@@ -212,7 +212,9 @@ public class ProjectFileControl extends BaseController {
     /**
      * 删除文件
      *
+     * @param id       项目id
      * @param filename 文件名称
+     * @return json
      */
     @RequestMapping(value = "deleteFile", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
@@ -226,15 +228,10 @@ public class ProjectFileControl extends BaseController {
             return JsonMessage.getString(405, "非法操作");
         }
         try {
-            ProjectInfoModel pim = projectInfoService.getProjectInfo(id);
+            ProjectInfoModel pim = projectInfoService.getItem(id);
             File file = new File(pim.getLib(), filename);
             if (file.exists()) {
-                if (file.isFile()) {
-                    if (file.delete()) {
-                        return JsonMessage.getString(200, "删除成功");
-                    }
-                } else if (FileUtil.clean(file) && file.delete()) {
-
+                if (FileUtil.del(file)) {
                     return JsonMessage.getString(200, "删除成功");
                 }
             } else {

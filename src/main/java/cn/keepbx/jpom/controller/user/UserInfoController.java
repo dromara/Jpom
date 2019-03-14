@@ -4,6 +4,7 @@ import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.keepbx.jpom.common.BaseController;
+import cn.keepbx.jpom.common.interceptor.LoginInterceptor;
 import cn.keepbx.jpom.model.UserModel;
 import cn.keepbx.jpom.service.user.UserService;
 import cn.keepbx.jpom.system.ConfigBean;
@@ -48,8 +49,8 @@ public class UserInfoController extends BaseController {
             return JsonMessage.getString(401, "安全模式下管理员的密码不能通过WEB端修改");
         }
         try {
-            UserModel userModel = userService.login(userName.getId(), oldPwd);
-            if (userModel == null) {
+            UserModel userModel = userService.simpleLogin(userName.getId(), oldPwd);
+            if (userModel == null || userModel.getPwdErrorCount() > 0) {
                 return JsonMessage.getString(500, "旧密码不正确！");
             }
             userModel.setPassword(newPwd);
@@ -66,6 +67,31 @@ public class UserInfoController extends BaseController {
     }
 
     /**
+     * 修改用户昵称
+     *
+     * @param name 新昵称
+     * @return json
+     */
+    @RequestMapping(value = "updateName", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    public String updateName(String name) {
+        if (StrUtil.isEmpty(name)) {
+            return JsonMessage.getString(405, "请输入新的昵称");
+        }
+        int len = name.length();
+        if (len > 10 || len < 2) {
+            return JsonMessage.getString(405, "昵称长度只能是2-10");
+        }
+        UserModel userModel = getUser();
+        userModel = userService.getItem(userModel.getId());
+        userModel.setName(name);
+        if (userService.updateUser(userModel)) {
+            setSessionAttribute(LoginInterceptor.SESSION_NAME, userModel);
+            return JsonMessage.getString(200, "修改成功");
+        }
+        return JsonMessage.getString(500, "修改失败");
+    }
+
+    /**
      * 删除用户
      *
      * @param id 用户id
@@ -74,13 +100,16 @@ public class UserInfoController extends BaseController {
     @RequestMapping(value = "deleteUser", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public String deleteUser(String id) {
         UserModel userName = getUser();
-        if (userName == null) {
-            return JsonMessage.getString(401, "系统异常：不能删除");
+        if (!userName.isManage()) {
+            return JsonMessage.getString(400, "你没有删除用户的权限");
         }
         if (userName.getId().equals(id)) {
             return JsonMessage.getString(400, "不能删除自己");
         }
-        UserModel userModel = userService.getUserModel(id);
+        UserModel userModel = userService.getItem(id);
+        if (userModel == null) {
+            return JsonMessage.getString(501, "非法访问");
+        }
         if (UserModel.SYSTEM_ADMIN.equals(userModel.getParent())) {
             return JsonMessage.getString(400, "不能删除系统管理员");
         }
@@ -121,11 +150,17 @@ public class UserInfoController extends BaseController {
         if (length < UserModel.USER_PWD_LEN) {
             return JsonMessage.getString(400, "密码长度为6-12位");
         }
+        if (StrUtil.isEmpty(name)) {
+            return JsonMessage.getString(405, "请输入账户昵称");
+        }
+        int len = name.length();
+        if (len > 10 || len < 2) {
+            return JsonMessage.getString(405, "昵称长度只能是2-10");
+        }
+
         boolean manageB = "true".equals(manage);
-//        if (manageB && ConfigBean.getInstance().safeMode) {
-//            return JsonMessage.getString(401, "安全模式不能创建管理员");
-//        }
-        UserModel userModel = userService.getUserModel(id);
+
+        UserModel userModel = userService.getItem(id);
         if (userModel != null) {
             return JsonMessage.getString(401, "登录名已经存在");
         }
@@ -172,19 +207,26 @@ public class UserInfoController extends BaseController {
         if (projects != null) {
             jsonProjects = (JSONArray) JSONArray.toJSON(projects);
         }
-        UserModel userModel = userService.getUserModel(id);
+        UserModel userModel = userService.getItem(id);
         if (userModel == null) {
             return JsonMessage.getString(400, "修改失败:-1");
+        }
+        // 禁止修改系统管理员信息
+        if (UserModel.SYSTEM_ADMIN.equals(userModel.getParent())) {
+            return JsonMessage.getString(401, "WEB端不能修改系统管理员信息");
+        }
+        if (StrUtil.isEmpty(name)) {
+            return JsonMessage.getString(405, "请输入新的账户昵称");
+        }
+        int len = name.length();
+        if (len > 10 || len < 2) {
+            return JsonMessage.getString(405, "昵称长度只能是2-10");
         }
         userModel.setName(name);
         if (!StrUtil.isEmpty(password)) {
             int length = password.length();
             if (length < UserModel.USER_PWD_LEN) {
                 return JsonMessage.getString(400, "密码长度为6-12位");
-            }
-            //
-            if (ConfigBean.getInstance().safeMode && UserModel.SYSTEM_ADMIN.equals(userModel.getParent())) {
-                return JsonMessage.getString(401, "安全模式不能修改系统管理员的密码");
             }
             //
             if (UserModel.SYSTEM_ADMIN.equals(userName.getParent())) {
