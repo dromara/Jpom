@@ -95,7 +95,7 @@ public class LoginControl extends BaseController {
             if (showCode() || userModel.getPwdErrorCount() >= 3) {
                 // 获取验证码
                 String sCode = getSessionAttribute(LOGIN_CODE);
-                if (StrUtil.isEmpty(code) || !sCode.equals(code)) {
+                if (StrUtil.isEmpty(code) || !sCode.equalsIgnoreCase(code)) {
                     return JsonMessage.getString(600, "请输入正确的验证码");
                 }
                 removeSessionAttribute(LOGIN_CODE);

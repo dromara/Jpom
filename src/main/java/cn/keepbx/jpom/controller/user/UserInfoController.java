@@ -66,6 +66,12 @@ public class UserInfoController extends BaseController {
         }
     }
 
+    /**
+     * 修改用户昵称
+     *
+     * @param name 新昵称
+     * @return json
+     */
     @RequestMapping(value = "updateName", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public String updateName(String name) {
         if (StrUtil.isEmpty(name)) {
@@ -101,6 +107,9 @@ public class UserInfoController extends BaseController {
             return JsonMessage.getString(400, "不能删除自己");
         }
         UserModel userModel = userService.getItem(id);
+        if (userModel == null) {
+            return JsonMessage.getString(501, "非法访问");
+        }
         if (UserModel.SYSTEM_ADMIN.equals(userModel.getParent())) {
             return JsonMessage.getString(400, "不能删除系统管理员");
         }
@@ -141,6 +150,14 @@ public class UserInfoController extends BaseController {
         if (length < UserModel.USER_PWD_LEN) {
             return JsonMessage.getString(400, "密码长度为6-12位");
         }
+        if (StrUtil.isEmpty(name)) {
+            return JsonMessage.getString(405, "请输入账户昵称");
+        }
+        int len = name.length();
+        if (len > 10 || len < 2) {
+            return JsonMessage.getString(405, "昵称长度只能是2-10");
+        }
+
         boolean manageB = "true".equals(manage);
 
         UserModel userModel = userService.getItem(id);
@@ -197,6 +214,13 @@ public class UserInfoController extends BaseController {
         // 禁止修改系统管理员信息
         if (UserModel.SYSTEM_ADMIN.equals(userModel.getParent())) {
             return JsonMessage.getString(401, "WEB端不能修改系统管理员信息");
+        }
+        if (StrUtil.isEmpty(name)) {
+            return JsonMessage.getString(405, "请输入新的账户昵称");
+        }
+        int len = name.length();
+        if (len > 10 || len < 2) {
+            return JsonMessage.getString(405, "昵称长度只能是2-10");
         }
         userModel.setName(name);
         if (!StrUtil.isEmpty(password)) {
