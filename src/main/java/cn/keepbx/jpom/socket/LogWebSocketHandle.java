@@ -105,13 +105,12 @@ public class LogWebSocketHandle implements TailLogThread.Evn {
     public void onMessage(String message, Session session) throws IOException {
         DefaultSystemLog.LOG().info("客户端消息：" + message);
         JSONObject json = JSONObject.parseObject(message);
-        JSONObject projectInfo = json.getJSONObject("projectInfo");
-        String id = projectInfo.getString("id");
+        String projectId = json.getString("projectId");
         ProjectInfoService projectInfoService = SpringUtil.getBean(ProjectInfoService.class);
         SocketSession socketSession = getItem(session);
         ProjectInfoModel projectInfoModel = null;
         try {
-            projectInfoModel = projectInfoService.getItem(id);
+            projectInfoModel = projectInfoService.getItem(projectId);
         } catch (IOException e) {
             DefaultSystemLog.ERROR().error("获取异常", e);
         }
