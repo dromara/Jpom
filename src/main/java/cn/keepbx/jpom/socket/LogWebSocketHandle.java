@@ -127,12 +127,11 @@ public class LogWebSocketHandle implements TailLogThread.Evn {
 
         JSONObject resultData = null;
         String strResult;
-        CommandService.EvtIml evtIml = new CommandService.EvtIml(session);
         // 执行相应命令
         switch (commandOp) {
             case start:
             case restart:
-                strResult = commandService.execCommand(commandOp, projectInfoModel, evtIml);
+                strResult = commandService.execCommand(commandOp, projectInfoModel);
                 if (strResult.contains(CommandService.RUNING_TAG)) {
                     resultData = JsonMessage.toJson(200, "操作成功:" + strResult);
                 } else {
@@ -141,7 +140,7 @@ public class LogWebSocketHandle implements TailLogThread.Evn {
                 break;
             case stop:
                 // 停止项目
-                strResult = commandService.execCommand(commandOp, projectInfoModel, evtIml);
+                strResult = commandService.execCommand(commandOp, projectInfoModel);
                 if (strResult.contains(CommandService.STOP_TAG)) {
                     resultData = JsonMessage.toJson(200, "操作成功");
                 } else {
@@ -150,7 +149,7 @@ public class LogWebSocketHandle implements TailLogThread.Evn {
                 break;
             case status:
                 // 获取项目状态
-                strResult = commandService.execCommand(commandOp, projectInfoModel, evtIml);
+                strResult = commandService.execCommand(commandOp, projectInfoModel);
                 if (strResult.contains(CommandService.RUNING_TAG)) {
                     resultData = JsonMessage.toJson(200, "运行中", strResult);
                 } else {

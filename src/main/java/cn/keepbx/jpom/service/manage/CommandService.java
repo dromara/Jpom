@@ -53,17 +53,13 @@ public class CommandService {
     }
 
 
-    public String execCommand(CommandOp commandOp, ProjectInfoModel projectInfoModel) throws Exception {
-        return execCommand(commandOp, projectInfoModel, null);
-    }
-
     /**
      * 执行shell命令
      *
      * @param commandOp        执行的操作
      * @param projectInfoModel 项目信息
      */
-    public String execCommand(CommandOp commandOp, ProjectInfoModel projectInfoModel, Evt evt) throws Exception {
+    public String execCommand(CommandOp commandOp, ProjectInfoModel projectInfoModel) throws Exception {
         String result = "";
         AbstractCommander abstractCommander = AbstractCommander.getInstance();
         // 执行命令
@@ -90,12 +86,8 @@ public class CommandService {
             case backupLog:
                 result = abstractCommander.backLog(projectInfoModel);
                 break;
-            case top: {
-                String command = "top -b -n 1";
-                return AbstractCommander.getInstance().execCommand(command);
-            }
+            case top:
             case showlog:
-
             default:
                 throw new IllegalArgumentException(commandOp + " error");
         }

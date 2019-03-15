@@ -23,7 +23,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
-import java.io.IOException;
 import java.util.List;
 
 /**
@@ -45,17 +44,7 @@ public class InternalController extends BaseController {
      * 获取内存信息
      */
     @RequestMapping(value = "internal", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
-    public String getInternal(String tag) throws Exception {
-        ProjectInfoModel projectInfoModel = projectInfoService.getItem(tag);
-        String pid = commandService.execCommand(CommandService.CommandOp.pid, projectInfoModel, null);
-        String command = "top -b -n 1 -p " + pid;
-        String internal = AbstractCommander.getInstance().execCommand(command);
-        internal = internal.replaceAll("\n", "<br/>");
-        internal = internal.replaceAll(" ", "&nbsp;&nbsp;");
-        JSONObject object = new JSONObject();
-        object.put("ram", internal);
-        object.put("tag", tag);
-        setAttribute("internal", object);
+    public String getInternal() {
         return "manage/internal";
     }
 
@@ -66,7 +55,10 @@ public class InternalController extends BaseController {
             return JsonMessage.getString(200, "");
         }
         ProjectInfoModel projectInfoModel = projectInfoService.getItem(tag);
-        String pid = commandService.execCommand(CommandService.CommandOp.pid, projectInfoModel, null);
+        if (projectInfoModel == null) {
+            return JsonMessage.getString(400, "id错误");
+        }
+        String pid = commandService.execCommand(CommandService.CommandOp.pid, projectInfoModel);
         String command = "top -b -n 1 -p " + pid;
         String internal = AbstractCommander.getInstance().execCommand(command);
         JSONArray array = formatTop(internal);
@@ -126,7 +118,7 @@ public class InternalController extends BaseController {
     @ResponseBody
     public String stack(String tag) throws Exception {
         ProjectInfoModel projectInfoModel = projectInfoService.getItem(tag);
-        String pid = commandService.execCommand(CommandService.CommandOp.pid, projectInfoModel, null).trim();
+        String pid = commandService.execCommand(CommandService.CommandOp.pid, projectInfoModel).trim();
         pid = pid.replace("\n", "");
         String fileName = ConfigBean.getInstance().getTempPathName() + "/" + tag + "_java_cpu.txt";
         fileName = FileUtil.normalize(fileName);
@@ -144,7 +136,7 @@ public class InternalController extends BaseController {
     @ResponseBody
     public String ram(String tag) throws Exception {
         ProjectInfoModel projectInfoModel = projectInfoService.getItem(tag);
-        String pid = commandService.execCommand(CommandService.CommandOp.pid, projectInfoModel, null).trim();
+        String pid = commandService.execCommand(CommandService.CommandOp.pid, projectInfoModel).trim();
         String fileName = ConfigBean.getInstance().getTempPathName() + "/" + tag + "_java_ram.txt";
         fileName = FileUtil.normalize(fileName);
         String commandPath = ConfigBean.getInstance().getRamCommandPath();

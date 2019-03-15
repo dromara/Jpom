@@ -5,6 +5,7 @@ import cn.hutool.cron.CronUtil;
 import cn.hutool.cron.Scheduler;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.spring.SpringUtil;
+import cn.keepbx.jpom.common.commander.AbstractCommander;
 import cn.keepbx.jpom.service.manage.CommandService;
 import cn.keepbx.jpom.socket.SocketSession;
 import com.alibaba.fastjson.JSONArray;
@@ -63,7 +64,7 @@ public class TopManager {
         CronUtil.setMatchSecond(true);
         CronUtil.schedule(CRON_ID, "0/5 * * * * ?", () -> {
             try {
-                String result = commandService.execCommand(CommandService.CommandOp.top, null, null);
+                String result = AbstractCommander.getInstance().execCommand("top -b -n 1");
                 String topInfo = getTopInfo(result);
                 send(topInfo);
             } catch (Exception e) {
