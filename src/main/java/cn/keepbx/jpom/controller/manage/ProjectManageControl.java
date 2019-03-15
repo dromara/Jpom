@@ -104,7 +104,13 @@ public class ProjectManageControl extends BaseController {
             ProjectInfoModel projectInfoModel = projectInfoService.getItem(tag);
             String pId = commandService.execCommand(CommandService.CommandOp.pid, projectInfoModel, null).trim();
             if (StrUtil.isNotEmpty(pId)) {
-                String result = AbstractCommander.getInstance().execSystemCommand("netstat -antup | grep " + pId);
+                String cmd;
+                if (AbstractCommander.OS_INFO.isLinux()) {
+                    cmd = "netstat -antup | grep " + pId;
+                } else {
+                    cmd = "netstat -nao | findstr " + pId;
+                }
+                String result = AbstractCommander.getInstance().execSystemCommand(cmd);
                 setAttribute("port", result);
                 return "manage/port";
             }
