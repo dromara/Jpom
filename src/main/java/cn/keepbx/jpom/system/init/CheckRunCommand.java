@@ -20,8 +20,10 @@ import cn.keepbx.jpom.system.WebAopLog;
 import cn.keepbx.jpom.util.JsonUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import org.springframework.core.io.Resource;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -87,9 +89,11 @@ public class CheckRunCommand {
         WebAopLog webAopLog = SpringUtil.getBean(WebAopLog.class);
         DefaultSystemLog.LOG().info("日志存储路径：" + webAopLog.getPropertyValue());
         DefaultSystemLog.LOG().info("项目数据存储路径：" + ConfigBean.getInstance().getPath());
-        File file1 = ExtConfigBean.getFile();
-        String e = file1.exists() ? "【存在】" : "【不存在】";
-        DefaultSystemLog.LOG().info("外部配置文件路径：" + file1.getAbsolutePath() + "  " + e);
+        Resource resource = ExtConfigBean.getResource();
+        try {
+            DefaultSystemLog.LOG().info("外部配置文件路径：" + resource.getURL());
+        } catch (IOException ignored) {
+        }
     }
 
     /**
@@ -106,14 +110,14 @@ public class CheckRunCommand {
             if (object instanceof JSONArray) {
                 DefaultSystemLog.LOG().info("升级白名单目录数据");
                 String all = systemService.convertToLine((JSONArray) object);
-                JsonMessage message = whitelistDirectoryController.save(all, null);
+                JsonMessage message = whitelistDirectoryController.save(all, null, null);
                 DefaultSystemLog.LOG().info(message.toString());
             } else if (object instanceof JSONObject) {
                 JSONArray jsonArray = systemService.getWhitelistDirectory();
                 if (jsonArray == null || jsonArray.isEmpty()) {
                     DefaultSystemLog.LOG().info("升级、自动转换白名单目录数据");
                     ProjectInfoService projectInfoService = SpringUtil.getBean(ProjectInfoService.class);
-                    List<ProjectInfoModel> projectInfoModels = projectInfoService.getAllProjectArrayInfo();
+                    List<ProjectInfoModel> projectInfoModels = projectInfoService.list();
                     if (projectInfoModels != null && !projectInfoModels.isEmpty()) {
                         List<String> paths = new ArrayList<>();
                         for (ProjectInfoModel projectInfoModel : projectInfoModels) {
@@ -123,7 +127,9 @@ public class CheckRunCommand {
                         }
                         JSONArray certificateDirectory = systemService.getCertificateDirectory();
                         List<String> certificateDirectoryStr = certificateDirectory.toJavaList(String.class);
-                        JsonMessage message = whitelistDirectoryController.save(paths, certificateDirectoryStr);
+                        JSONArray ngxDirectory = systemService.getNgxDirectory();
+                        List<String> ngxDirectoryStr = ngxDirectory.toJavaList(String.class);
+                        JsonMessage message = whitelistDirectoryController.save(paths, certificateDirectoryStr, ngxDirectoryStr);
                         DefaultSystemLog.LOG().info(message.toString());
                     }
 

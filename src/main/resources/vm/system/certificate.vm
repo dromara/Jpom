@@ -65,7 +65,7 @@
                 <div class="layui-input-block">
                     <select name="path" id="path" lay-filter="aihao">
                         #foreach($item in $certificate)
-                            <option value="$item">$item</option>
+                            <option id="path_$item" value="$item">$item</option>
                         #end
                     </select>
                 </div>
@@ -175,6 +175,8 @@
                     $("#certPath").html(data[key]);
                 } else if ("key" === key) {
                     $("#keyPath").html(data[key]);
+                } else if ("whitePath" === key) {
+                    document.getElementById('path_' + data[key]).setAttribute('selected', true);
                 } else {
                     $('#form_certificate [name="' + key + '"]').val(data[key]);
                 }

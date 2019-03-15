@@ -179,8 +179,8 @@
         form.on('select(groupName)', function (data) {
             apiWhere.group = data.value;
             layui.data('project', {
-                key: 'group'
-                , value: data.value
+                key: 'group',
+                value: data.value
             });
             reloadTable();
             return true;

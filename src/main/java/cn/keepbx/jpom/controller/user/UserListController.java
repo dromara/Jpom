@@ -6,7 +6,6 @@ import cn.keepbx.jpom.model.ProjectInfoModel;
 import cn.keepbx.jpom.model.UserModel;
 import cn.keepbx.jpom.service.manage.ProjectInfoService;
 import cn.keepbx.jpom.service.user.UserService;
-import com.alibaba.fastjson.JSONArray;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -35,7 +34,7 @@ public class UserListController extends BaseController {
      */
     @RequestMapping(value = "list", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
     public String projectInfo() throws IOException {
-        List<ProjectInfoModel> jsonArray = projectInfoService.getAllProjectArrayInfo();
+        List<ProjectInfoModel> jsonArray = projectInfoService.list();
         setAttribute("projects", jsonArray);
         return "user/list";
     }
@@ -50,7 +49,7 @@ public class UserListController extends BaseController {
         if (!userName.isManage()) {
             return JsonMessage.getString(400, "你没有对应权限！");
         }
-        JSONArray userList = userService.getUserList();
+        List<UserModel> userList = userService.list();
         return JsonMessage.getString(200, "", userList);
     }
 

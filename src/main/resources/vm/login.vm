@@ -9,6 +9,12 @@
             width: 100%;
             height: 100%;
         }
+
+        .randCode {
+            padding: 0;
+            min-height: 36px;
+            height: 38px;
+        }
     </style>
 </head>
 
@@ -39,6 +45,16 @@
                                name="userPwd">
                     </div>
                 </div>
+                <div class="layui-form-item" id="randCodeDiv" style="display: none;">
+                    <div class="layui-input-inline" style="margin-left: 0px;">
+                        <input type="text" name="code" placeholder="请输入验证码" autocomplete="off"
+                               class="layui-input">
+                    </div>
+                    <div class="layui-form-mid layui-word-aux" onclick="showCode();"
+                         style="padding: 0 !important; margin: 0;">
+                        <img src="" id="codeImg" class="randCode">
+                    </div>
+                </div>
                 <div class="layui-form-item">
                     <div class="layui-input-block" style="margin-left: 0px;">
                         <button class="layui-btn layui-btn-danger" lay-submit lay-filter="from_login"
@@ -59,7 +75,9 @@
             if (self != top) {
                 parent.window.location.replace(window.location.href);
             }
-
+            //
+            const user = layui.data('user');
+            $("input[name='userName']").val(user.userName);
             carousel.render({
                 elem: '#div-carousel',
                 width: '100%',
@@ -69,16 +87,25 @@
                 indicator: 'none'
             });
 
-            form.on('submit(from_login)', function (data) {
+            form.on('submit(from_login)', function (dataForm) {
                 $.ajax({
                     url: '/userLogin',
                     type: 'POST',
                     dataType: 'json',
-                    data: data.field,
+                    data: dataForm.field,
                     success: function (data) {
                         if (200 == data.code) {
+                            // 记住用户名
+                            layui.data('user', {
+                                key: "userName",
+                                value: dataForm.field.userName
+                            });
                             window.location.href = '/index';
                         } else {
+                            // 显示验证码
+                            if (600 == data.code) {
+                                showCode();
+                            }
                             layer.msg(data.msg);
                         }
                     },
@@ -88,7 +115,16 @@
                 });
                 return false;
             });
+
+            #if($showCode)
+                showCode();
+            #end
         });
+    }
+
+    function showCode() {
+        $("#codeImg").attr("src", "/randCode.png?time=" + new Date().getTime());
+        $("#randCodeDiv").show();
     }
 </script>
 

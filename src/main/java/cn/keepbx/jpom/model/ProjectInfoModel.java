@@ -10,10 +10,9 @@ import java.io.File;
  *
  * @author jiangzeyin
  */
-public class ProjectInfoModel {
+public class ProjectInfoModel extends BaseModel {
     public static final String NO_TOKEN = "no";
 
-    private String id;
     private String name;
     private String group;
     private String mainClass;
@@ -81,14 +80,6 @@ public class ProjectInfoModel {
 
     public void setJvm(String jvm) {
         this.jvm = jvm;
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
     }
 
     public String getName() {

@@ -1,6 +1,7 @@
 package cn.keepbx.jpom.controller.manage;
 
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.servlet.ServletUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
@@ -35,7 +36,7 @@ public class LogBackController extends BaseController {
     public String console(String id) {
         try {
             // 查询项目路径
-            ProjectInfoModel pim = projectInfoService.getProjectInfo(id);
+            ProjectInfoModel pim = projectInfoService.getItem(id);
             File logBack = pim.getLogBack();
             if (logBack.exists() && logBack.isDirectory()) {
                 File[] filesAll = logBack.listFiles();
@@ -54,8 +55,12 @@ public class LogBackController extends BaseController {
     @RequestMapping(value = "logBack_download", method = RequestMethod.GET)
     @ResponseBody
     public String download(String id, String key) {
+        key = pathSafe(key);
+        if (StrUtil.isEmpty(key)) {
+            return JsonMessage.getString(405, "非法操作");
+        }
         try {
-            ProjectInfoModel pim = projectInfoService.getProjectInfo(id);
+            ProjectInfoModel pim = projectInfoService.getItem(id);
             File logBack = pim.getLogBack();
             if (logBack.exists() && logBack.isDirectory()) {
                 logBack = new File(logBack, key);
@@ -77,8 +82,12 @@ public class LogBackController extends BaseController {
         if (!userName.isProject(id)) {
             return JsonMessage.getString(400, "你没有对应操作权限操作!");
         }
+        name = pathSafe(name);
+        if (StrUtil.isEmpty(name)) {
+            return JsonMessage.getString(405, "非法操作:" + name);
+        }
         try {
-            ProjectInfoModel pim = projectInfoService.getProjectInfo(id);
+            ProjectInfoModel pim = projectInfoService.getItem(id);
             File logBack = pim.getLogBack();
             if (logBack.exists() && logBack.isDirectory()) {
                 logBack = new File(logBack, name);

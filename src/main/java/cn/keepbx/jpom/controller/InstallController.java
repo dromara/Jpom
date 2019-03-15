@@ -42,6 +42,9 @@ public class InstallController extends BaseController {
     /**
      * 初始化提交
      *
+     * @param userName           系统管理员登录名
+     * @param userPwd            系统管理员的登录密码
+     * @param whitelistDirectory 默认白名单目录
      * @return json
      */
     @RequestMapping(value = "install_submit.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
@@ -67,7 +70,7 @@ public class InstallController extends BaseController {
         if (b) {
             // 白名单
             WhitelistDirectoryController whitelistDirectoryController = SpringUtil.getBean(WhitelistDirectoryController.class);
-            JsonMessage jsonMessage = whitelistDirectoryController.save(whitelistDirectory, null);
+            JsonMessage jsonMessage = whitelistDirectoryController.save(whitelistDirectory, null, null);
             if (jsonMessage.getCode() != 200) {
                 return jsonMessage.toString();
             }

@@ -2,6 +2,8 @@ package cn.keepbx.jpom.controller.manage;
 
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.util.StrUtil;
+import cn.hutool.core.util.ZipUtil;
 import cn.hutool.extra.servlet.ServletUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
@@ -61,7 +63,7 @@ public class ProjectFileControl extends BaseController {
         }
         try {
             // 查询项目路径
-            ProjectInfoModel pim = projectInfoService.getProjectInfo(id);
+            ProjectInfoModel pim = projectInfoService.getItem(id);
             File fileDir = new File(pim.getLib());
             if (!fileDir.exists()) {
                 return JsonMessage.getString(500, "目录不存在");
@@ -116,6 +118,7 @@ public class ProjectFileControl extends BaseController {
     /**
      * 上传文件
      *
+     * @param id 项目id
      * @return json
      */
     @RequestMapping(value = "upload", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
@@ -125,13 +128,30 @@ public class ProjectFileControl extends BaseController {
         if (!userName.isProject(id)) {
             return JsonMessage.getString(400, "你没有该操作权限操作!");
         }
-        ProjectInfoModel pim = projectInfoService.getProjectInfo(id);
+        ProjectInfoModel pim = projectInfoService.getItem(id);
+
         MultipartFileBuilder multipartFileBuilder = createMultipart()
-                .addFieldName("file")
-                .setSavePath(pim.getLib())
-                .setUseOriginalFilename(true);
-        // 保存
-        multipartFileBuilder.save();
+                .addFieldName("file");
+        String type = getParameter("type");
+        if ("unzip".equals(type)) {
+            multipartFileBuilder.setSavePath(ConfigBean.getInstance().getTempPathName());
+            String path = multipartFileBuilder.save();
+            //
+            File lib = new File(pim.getLib());
+            if (!FileUtil.clean(lib)) {
+                return JsonMessage.getString(500, "清除旧lib失败");
+            }
+            File file = new File(path);
+            ZipUtil.unzip(file, lib);
+            if (!file.delete()) {
+                DefaultSystemLog.LOG().info("删除失败：" + file.getPath());
+            }
+        } else {
+            multipartFileBuilder.setSavePath(pim.getLib())
+                    .setUseOriginalFilename(true);
+            // 保存
+            multipartFileBuilder.save();
+        }
         // 修改使用状态
         pim.setUseLibDesc("upload");
         projectInfoService.updateProject(pim);
@@ -141,16 +161,20 @@ public class ProjectFileControl extends BaseController {
     /**
      * 下载文件
      *
+     * @param id 项目id
      * @return File
      */
     @RequestMapping(value = "download", method = RequestMethod.GET)
     @ResponseBody
-    public String download(String id) {
-        String filename = getParameter("filename");
+    public String download(String id, String filename) {
+        filename = pathSafe(filename);
+        if (StrUtil.isEmpty(filename)) {
+            return JsonMessage.getString(405, "非法操作");
+        }
         try {
-            ProjectInfoModel pim = projectInfoService.getProjectInfo(id);
-            String path = pim.getLib() + "/" + filename;
-            File file = new File(path);
+            ProjectInfoModel pim = projectInfoService.getItem(id);
+//            String path = + "/" + filename;
+            File file = new File(pim.getLib(), filename);
             if (file.isDirectory()) {
                 return "暂不支持下载文件夹";
             }
@@ -173,7 +197,7 @@ public class ProjectFileControl extends BaseController {
             return JsonMessage.getString(400, "你没有对应操作权限操作!");
         }
         try {
-            ProjectInfoModel pim = projectInfoService.getProjectInfo(id);
+            ProjectInfoModel pim = projectInfoService.getItem(id);
             File file = new File(pim.getLib());
             if (FileUtil.clean(file)) {
                 return JsonMessage.getString(200, "清除成功");
@@ -188,7 +212,9 @@ public class ProjectFileControl extends BaseController {
     /**
      * 删除文件
      *
+     * @param id       项目id
      * @param filename 文件名称
+     * @return json
      */
     @RequestMapping(value = "deleteFile", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
@@ -197,11 +223,17 @@ public class ProjectFileControl extends BaseController {
         if (!userName.isProject(id)) {
             return JsonMessage.getString(400, "你没有对应操作权限操作!");
         }
+        filename = pathSafe(filename);
+        if (StrUtil.isEmpty(filename)) {
+            return JsonMessage.getString(405, "非法操作");
+        }
         try {
-            ProjectInfoModel pim = projectInfoService.getProjectInfo(id);
+            ProjectInfoModel pim = projectInfoService.getItem(id);
             File file = new File(pim.getLib(), filename);
-            if (file.exists() && file.delete()) {
-                return JsonMessage.getString(200, "删除成功");
+            if (file.exists()) {
+                if (FileUtil.del(file)) {
+                    return JsonMessage.getString(200, "删除成功");
+                }
             } else {
                 return JsonMessage.getString(404, "文件不存在");
             }

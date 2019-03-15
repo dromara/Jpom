@@ -20,11 +20,10 @@
         </ul>
         <ul class="layui-nav layui-layout-right" lay-filter="userOperation">
             <li class="layui-nav-item">
-                <a href="javascript:;">
-                    $user.name
-                </a>
+                <a href="javascript:;">$user.name</a>
                 <dl class="layui-nav-child">
-                    <dd id="updatePwd"><a href="javascript:;" op="updatePwd">修改密码</a></dd>
+                    <dd><a href="javascript:;" op="updatePwd">修改密码</a></dd>
+                    <dd><a href="javascript:;" op="updateName">修改昵称</a></dd>
                 </dl>
             </li>
             <li class="layui-nav-item" id="li-exit">
@@ -55,6 +54,10 @@
                 <li class="layui-nav-item">
                     <a href="javascript:;"
                        data-options="{'id':'certificate', 'title':'证书管理', 'url':'/system/certificate'}">证书管理</a>
+                </li>
+                <li class="layui-nav-item">
+                    <a href="javascript:;"
+                       data-options="{'id':'nginx', 'title':'nginx管理', 'url':'/system/nginx'}">nginx管理</a>
                 </li>
             </ul>
         </div>
@@ -153,8 +156,36 @@
                         $('#pwd_submit').click();
                     },
                     cancel: function () {
-                        console.log('cancel');
                     }
+                });
+            } else if ('updateName' == op) {
+                layer.prompt({
+                    title: '输入新的昵称',
+                    formType: 0,
+                    value: "$user.name"
+                }, function (val, index) {
+                    $.ajax({
+                        url: '/user/updateName',
+                        type: 'POST',
+                        dataType: 'json',
+                        data: {
+                            name: val
+                        },
+                        success: function (data) {
+                            if (200 == data.code) {
+                                layer.close(index);
+                                layer.msg("修改成功");
+                                setTimeout(function () {
+                                    window.location.reload();
+                                }, 2000);
+                            } else {
+                                layer.msg(data.msg);
+                            }
+                        },
+                        error: function (err) {
+                            layer.alert('修改失败！');
+                        }
+                    });
                 });
             }
         });

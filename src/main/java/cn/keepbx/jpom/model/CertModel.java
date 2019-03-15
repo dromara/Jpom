@@ -7,9 +7,7 @@ import com.alibaba.fastjson.JSONObject;
  *
  * @author Arno
  */
-public class CertModel {
-
-    private String id;
+public class CertModel extends BaseModel {
     /**
      * 证书文件
      */
@@ -30,13 +28,17 @@ public class CertModel {
      * 绑定域名
      */
     private String domain;
+    /**
+     * 白名单路径
+     */
+    private String whitePath;
 
-    public String getId() {
-        return id;
+    public String getWhitePath() {
+        return whitePath;
     }
 
-    public void setId(String id) {
-        this.id = id;
+    public void setWhitePath(String whitePath) {
+        this.whitePath = whitePath;
     }
 
     public String getCert() {

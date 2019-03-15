@@ -131,8 +131,8 @@
             <button class="layui-btn layui-btn-normal" lay-submit lay-filter="submitProject" id="project_submit">提交
             </button>
             #if($item)
-                <a class="layui-btn layui-btn-warm" data-id="$item.id" id="delete_project">删除
-                </a>
+                <a class="layui-btn layui-btn-warm" data-id="$item.id" id="delete_project">删除</a>
+            ##                <a class="layui-btn layui-btn-primary" type="all" data-id="$item.id" id="delete_project_all">彻底删除</a>
             #end
         </div>
     </form>
@@ -161,15 +161,6 @@
                 }
             });
             return false;
-        });
-
-        // 表单验证
-        form.verify({
-            port: function (value, item) {
-                if (!/^[0-9]{2,5}$/.test(value) || 80 > value || value > 65530) {
-                    return 'Port请填写80-65530之间，避免占用系统进程端口！';
-                }
-            }
         });
 
         form.on('select(projectLib)', function (data) {
@@ -214,20 +205,28 @@
             });
         }
 
-        $("#delete_project").click(function () {
+        $("#delete_project,#delete_project_all").click(function () {
             var id = $(this).attr("data-id");
-            layer.confirm('确定删除项目 ' + id + '？', {
+            var type = $(this).attr("type");
+            var msg;
+            if ("all" == type) {
+                msg = '确定彻底该删除项目 ' + id + ',删除将项目日志、lib都彻底删除？';
+            } else {
+                msg = '确定删除项目 ' + id + '？';
+            }
+            layer.confirm(msg, {
                 title: '系统提示'
             }, function (index) {
-                layer.close(index);
                 $.ajax({
                     url: './deleteProject',
                     type: 'POST',
                     dataType: 'json',
                     data: {
-                        id: id
+                        id: id,
+                        type: type
                     },
                     success: function (data) {
+                        layer.close(index);
                         layer.msg(data.msg);
                         if (200 == data.code) {
                             var index = parent.layer.getFrameIndex(window.name);

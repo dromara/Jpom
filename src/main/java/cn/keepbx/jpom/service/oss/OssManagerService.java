@@ -36,6 +36,7 @@ public class OssManagerService extends BaseDataService {
         //getTempPath();
         file = new File(file, key);
         OSSClient ossClient = getOSSClient();
+        //   SimplifiedObjectMeta objectMeta = ossClient.getSimplifiedObjectMeta(getBucketName(), key);
         // 下载OSS文件到本地文件。如果指定的本地文件存在会覆盖，不存在则新建。
         ossClient.getObject(new GetObjectRequest(getBucketName(), key), file);
         // 关闭OSSClient。

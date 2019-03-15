@@ -44,7 +44,7 @@ public class ProjectManageControl extends BaseController {
     @RequestMapping(value = "projectInfo", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
     public String projectInfo() throws IOException {
         //获取所有分组
-        List<ProjectInfoModel> projectInfoModels = projectInfoService.getAllProjectArrayInfo();
+        List<ProjectInfoModel> projectInfoModels = projectInfoService.list();
         HashSet<String> hashSet = new HashSet<>();
         for (ProjectInfoModel projectInfoModel : projectInfoModels) {
             hashSet.add(projectInfoModel.getGroup());
@@ -64,7 +64,7 @@ public class ProjectManageControl extends BaseController {
         try {
             UserModel userName = getUser();
             // 查询数据
-            List<ProjectInfoModel> projectInfoModels = projectInfoService.getAllProjectArrayInfo();
+            List<ProjectInfoModel> projectInfoModels = projectInfoService.list();
             // 转换为数据
             JSONArray array = new JSONArray();
             for (ProjectInfoModel projectInfoModel : projectInfoModels) {
@@ -90,7 +90,7 @@ public class ProjectManageControl extends BaseController {
                 return group1.compareTo(group2);
             });
             return PageUtil.getPaginate(200, "查询成功！", array);
-        } catch (IOException e) {
+        } catch (Exception e) {
             DefaultSystemLog.ERROR().error(e.getMessage(), e);
             return JsonMessage.getString(500, e.getMessage());
         }
@@ -100,7 +100,7 @@ public class ProjectManageControl extends BaseController {
     public String getPort(String tag) {
         // 查询数据
         try {
-            ProjectInfoModel projectInfoModel = projectInfoService.getProjectInfo(tag);
+            ProjectInfoModel projectInfoModel = projectInfoService.getItem(tag);
             String pId = commandService.execCommand(CommandService.CommandOp.pid, projectInfoModel, null).trim();
             if (StrUtil.isNotEmpty(pId)) {
                 String result = commandService.execSystemCommand("netstat -antup | grep " + pId);
@@ -122,11 +122,37 @@ public class ProjectManageControl extends BaseController {
      */
     @RequestMapping(value = "deleteProject", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
-    public String deleteProject(String id) {
+    public String deleteProject(String id, String type) throws IOException {
         UserModel userName = getUser();
         if (!userName.isProject(id)) {
             return JsonMessage.getString(500, "你没有对应权限");
         }
+        ProjectInfoModel projectInfoModel = projectInfoService.getItem(id);
+        if (projectInfoModel == null) {
+            return JsonMessage.getString(405, "未找到对应项目");
+        }
+        //
+        //        if ("all".equals(type)) {
+        //            if (ConfigBean.getInstance().safeMode) {
+        //                return JsonMessage.getString(405, "安全模式下，不允许彻底删除项目");
+        //            }
+        //            if (!UserModel.SYSTEM_ADMIN.equals(userName.getParent())) {
+        //                return JsonMessage.getString(405, "只有系统管理员才能彻底删除项目");
+        //            }
+        //            //
+        //            commandService.execCommand(CommandService.CommandOp.stop, projectInfoModel);
+        //            //
+        //            if (!FileUtil.del(projectInfoModel.getLib())) {
+        //                return JsonMessage.getString(500, "清除项目lib失败");
+        //            }
+        //            if (!FileUtil.del(projectInfoModel.getLogBack())) {
+        //                return JsonMessage.getString(500, "清除项目日志备份失败");
+        //            }
+        //            //
+        //            if (!FileUtil.del(projectInfoModel.getLog())) {
+        //                return JsonMessage.getString(500, "清除项目控制台日志文件失败");
+        //            }
+        //        }
         try {
             projectInfoService.deleteProject(id);
             return JsonMessage.getString(200, "删除成功！");

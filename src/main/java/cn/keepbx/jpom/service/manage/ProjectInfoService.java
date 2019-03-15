@@ -1,8 +1,6 @@
 package cn.keepbx.jpom.service.manage;
 
-import cn.hutool.core.date.DateUtil;
-import cn.hutool.core.util.StrUtil;
-import cn.keepbx.jpom.common.BaseDataService;
+import cn.keepbx.jpom.common.BaseOperService;
 import cn.keepbx.jpom.model.ProjectInfoModel;
 import cn.keepbx.jpom.system.ConfigBean;
 import com.alibaba.fastjson.JSONArray;
@@ -19,14 +17,7 @@ import java.util.Set;
  * @author jiangzeyin
  */
 @Service
-public class ProjectInfoService extends BaseDataService {
-
-    private static final String FILENAME = ConfigBean.PROJECT;
-
-
-//    public JSONObject getAllProjectInfo() throws IOException {
-//        return getJsonObject(FILENAME);
-//    }
+public class ProjectInfoService extends BaseOperService<ProjectInfoModel> {
 
     /**
      * 查询所有项目信息
@@ -34,8 +25,9 @@ public class ProjectInfoService extends BaseDataService {
      * @return list
      * @throws IOException 异常
      */
-    public List<ProjectInfoModel> getAllProjectArrayInfo() throws IOException {
-        JSONObject jsonObject = getJsonObject(FILENAME);
+    @Override
+    public List<ProjectInfoModel> list() throws IOException {
+        JSONObject jsonObject = getJsonObject(ConfigBean.PROJECT);
         Set<String> setKey = jsonObject.keySet();
         JSONArray jsonArray = new JSONArray();
         for (String key : setKey) {
@@ -51,7 +43,7 @@ public class ProjectInfoService extends BaseDataService {
      */
     public void saveProject(ProjectInfoModel projectInfo) throws Exception {
         // 保存
-        saveJson(FILENAME, (JSONObject) JSONObject.toJSON(projectInfo));
+        saveJson(ConfigBean.PROJECT, projectInfo.toJson());
     }
 
     /**
@@ -60,7 +52,7 @@ public class ProjectInfoService extends BaseDataService {
      * @param id 项目Id
      */
     public void deleteProject(String id) throws Exception {
-        deleteJson(FILENAME, id);
+        deleteJson(ConfigBean.PROJECT, id);
     }
 
     /**
@@ -69,22 +61,7 @@ public class ProjectInfoService extends BaseDataService {
      * @param projectInfo 项目信息
      */
     public void updateProject(ProjectInfoModel projectInfo) throws Exception {
-        // 修改
-        JSONObject jsonObject = getJsonObjectByKey(FILENAME, projectInfo.getId());
-        if (jsonObject == null) {
-            return;
-        }
-        projectInfo.setModifyTime(DateUtil.now());
-        JSONObject newJson = projectInfo.toJson();
-        Set<String> keys = newJson.keySet();
-        for (String key : keys) {
-            String val = newJson.getString(key);
-            if (StrUtil.isEmptyOrUndefined(val)) {
-                continue;
-            }
-            jsonObject.put(key, newJson.get(key));
-        }
-        updateJson(FILENAME, jsonObject);
+        updateJson(ConfigBean.PROJECT, projectInfo.toJson());
     }
 
 
@@ -94,8 +71,13 @@ public class ProjectInfoService extends BaseDataService {
      * @param id 项目Id
      * @return model
      */
-    public ProjectInfoModel getProjectInfo(String id) throws IOException {
-        JSONObject jsonObject = getJsonObjectByKey(FILENAME, id);
+    @Override
+    public ProjectInfoModel getItem(String id) throws IOException {
+        JSONObject jsonObject = getJsonObject(ConfigBean.PROJECT);
+        if (jsonObject == null) {
+            return null;
+        }
+        jsonObject = jsonObject.getJSONObject(id);
         if (jsonObject == null) {
             return null;
         }
