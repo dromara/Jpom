@@ -232,7 +232,7 @@ public abstract class AbstractCommander {
         result = IoUtil.read(is, charset);
         is.close();
         process.destroy();
-        if (StrUtil.isEmpty(result)) {
+        if (StrUtil.isEmpty(result) && wait != 0) {
             result = "没有返回任何执行信息";
         }
         return result;

@@ -1,5 +1,6 @@
 package cn.keepbx.jpom.common.commander.impl;
 
+import cn.hutool.core.thread.GlobalThreadPool;
 import cn.keepbx.jpom.common.commander.AbstractCommander;
 import cn.keepbx.jpom.model.ProjectInfoModel;
 import cn.keepbx.jpom.service.manage.CommandService;
@@ -32,7 +33,7 @@ public class LinuxCommander extends AbstractCommander {
                 projectInfoModel.getMainClass(),
                 projectInfoModel.getArgs(),
                 projectInfoModel.getAbsoluteLog());
-        execSystemCommand(command);
+        GlobalThreadPool.execute(() -> execSystemCommand(command));
         Thread.sleep(3000);
         return status(projectInfoModel.getId());
     }

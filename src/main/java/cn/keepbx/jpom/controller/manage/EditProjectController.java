@@ -55,7 +55,7 @@ public class EditProjectController extends BaseController {
         JSONArray jsonArray = systemService.getWhitelistDirectory();
         setAttribute("whitelistDirectory", jsonArray);
 
-        if (projectInfo != null) {
+        if (projectInfo != null && jsonArray != null) {
             for (Object obj : jsonArray) {
                 String path = obj.toString();
                 String lib = projectInfo.getLib();
