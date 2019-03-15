@@ -23,7 +23,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
-import java.io.IOException;
 import java.util.List;
 
 /**
@@ -50,10 +49,14 @@ public class InternalController extends BaseController {
         String pid = commandService.execCommand(CommandService.CommandOp.pid, projectInfoModel, null);
         String command = "top -b -n 1 -p " + pid;
         String internal = AbstractCommander.getInstance().execCommand(command);
-        internal = internal.replaceAll("\n", "<br/>");
-        internal = internal.replaceAll(" ", "&nbsp;&nbsp;");
+        String[] split = internal.split("\n");
+        StringBuilder result = new StringBuilder();
+        for (int i = 0; i < 5; i++) {
+            String s = split[i].replaceAll(" ", "&nbsp;&nbsp;");
+            result.append(s).append("<br/>");
+        }
         JSONObject object = new JSONObject();
-        object.put("ram", internal);
+        object.put("ram", result.toString());
         object.put("tag", tag);
         setAttribute("internal", object);
         return "manage/internal";
@@ -90,7 +93,7 @@ public class InternalController extends BaseController {
                 item.put("pid", value);
                 continue;
             }
-            if ("virt".equals(name) || "res".equals(name) || "shr".equals(name)) {
+            if ("VIRT".equalsIgnoreCase(name) || "RES".equalsIgnoreCase(name) || "SHR".equalsIgnoreCase(name)) {
                 value = Convert.toLong(value) / 1024 + "mb";
             }
             if ("�".equals(name)) {
@@ -109,7 +112,7 @@ public class InternalController extends BaseController {
                     value = "不可中断的睡眠状态 ";
                 }
             }
-            if ("%cpu".equals(name) || "%mem".equals(name)) {
+            if ("%CPU".equalsIgnoreCase(name) || "%MEM".equalsIgnoreCase(name)) {
                 value += "%";
             }
             item.put(name, value);
