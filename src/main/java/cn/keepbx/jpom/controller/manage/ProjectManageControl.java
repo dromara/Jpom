@@ -90,7 +90,7 @@ public class ProjectManageControl extends BaseController {
                 return group1.compareTo(group2);
             });
             return PageUtil.getPaginate(200, "查询成功！", array);
-        } catch (IOException e) {
+        } catch (Exception e) {
             DefaultSystemLog.ERROR().error(e.getMessage(), e);
             return JsonMessage.getString(500, e.getMessage());
         }

@@ -39,7 +39,7 @@ public class InternalController extends BaseController {
      * 获取内存信息
      */
     @RequestMapping(value = "internal", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
-    public String getInternal(String tag) throws IOException {
+    public String getInternal(String tag) throws Exception {
         ProjectInfoModel projectInfoModel = projectInfoService.getItem(tag);
         String pid = commandService.execCommand(CommandService.CommandOp.pid, projectInfoModel, null);
         String command = "top -b -n 1 -p " + pid;
@@ -58,7 +58,7 @@ public class InternalController extends BaseController {
      */
     @RequestMapping(value = "stack", method = RequestMethod.GET)
     @ResponseBody
-    public String stack(String tag) throws IOException {
+    public String stack(String tag) throws Exception {
         ProjectInfoModel projectInfoModel = projectInfoService.getItem(tag);
         String pid = commandService.execCommand(CommandService.CommandOp.pid, projectInfoModel, null).trim();
         pid = pid.replace("\n", "");
@@ -76,7 +76,7 @@ public class InternalController extends BaseController {
      */
     @RequestMapping(value = "ram", method = RequestMethod.GET)
     @ResponseBody
-    public String ram(String tag) throws IOException {
+    public String ram(String tag) throws Exception {
         ProjectInfoModel projectInfoModel = projectInfoService.getItem(tag);
         String pid = commandService.execCommand(CommandService.CommandOp.pid, projectInfoModel, null).trim();
         String fileName = ConfigBean.getInstance().getTempPathName() + "/" + tag + "_java_ram.txt";
