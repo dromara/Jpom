@@ -23,7 +23,6 @@ import java.util.Set;
 @Service
 public class CertService extends BaseOperService<CertModel> {
 
-    private static final String FILENAME = ConfigBean.CERT;
 
     /**
      * 新增证书
@@ -32,7 +31,7 @@ public class CertService extends BaseOperService<CertModel> {
      */
     public boolean addCert(CertModel certModel) {
         try {
-            saveJson(FILENAME, certModel.toJson());
+            saveJson(ConfigBean.CERT, certModel.toJson());
             return true;
         } catch (Exception e) {
             DefaultSystemLog.ERROR().error(e.getMessage(), e);
@@ -48,7 +47,7 @@ public class CertService extends BaseOperService<CertModel> {
     @Override
     public List<CertModel> list() throws IOException {
         try {
-            JSONObject jsonObject = getJsonObject(FILENAME);
+            JSONObject jsonObject = getJsonObject(ConfigBean.CERT);
             if (jsonObject == null) {
                 return null;
             }
@@ -69,6 +68,19 @@ public class CertService extends BaseOperService<CertModel> {
         return null;
     }
 
+    @Override
+    public CertModel getItem(String id) throws IOException {
+        JSONObject jsonObject = getJsonObject(ConfigBean.CERT);
+        if (jsonObject == null) {
+            return null;
+        }
+        jsonObject = jsonObject.getJSONObject(id);
+        if (jsonObject == null) {
+            return null;
+        }
+        return jsonObject.toJavaObject(CertModel.class);
+    }
+
     /**
      * 删除证书
      *
@@ -76,7 +88,7 @@ public class CertService extends BaseOperService<CertModel> {
      */
     public boolean delete(String id) {
         try {
-            JSONObject jsonObject = getJsonObject(FILENAME);
+            JSONObject jsonObject = getJsonObject(ConfigBean.CERT);
             if (jsonObject == null) {
                 return false;
             }
@@ -85,7 +97,7 @@ public class CertService extends BaseOperService<CertModel> {
                 return true;
             }
             String keyPath = cert.getString("key");
-            deleteJson(FILENAME, id);
+            deleteJson(ConfigBean.CERT, id);
             if (StrUtil.isNotEmpty(keyPath)) {
                 File parentFile = FileUtil.file(keyPath).getParentFile();
                 return FileUtil.del(parentFile);
@@ -104,7 +116,7 @@ public class CertService extends BaseOperService<CertModel> {
      */
     public boolean updateCert(CertModel certModel) {
         try {
-            updateJson(FILENAME, certModel.toJson());
+            updateJson(ConfigBean.CERT, certModel.toJson());
         } catch (Exception e) {
             DefaultSystemLog.ERROR().error(e.getMessage(), e);
             return false;

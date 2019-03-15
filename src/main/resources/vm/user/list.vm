@@ -108,7 +108,7 @@
             id: 'tab_user',
             elem: '#tab_user',
             url: '/user/getUserList',
-            height: 'full-52',
+            // height: 'full-52',
             even: true,
             cols: [[
                 {field: 'id', title: 'id'},
@@ -185,7 +185,7 @@
         // '刷新表格'点击事件
         $('#refresh').on('click', function () {
             table.reload('tab_user', {
-                height: 'full-52'
+                // height: 'full-52'
             });
         });
 
@@ -248,7 +248,9 @@
                         if (200 == data.code) {
                             layer.msg('删除成功！');
                             // 刷新项目列表
-                            table.reload('tab_user', {height: 'full-52'});
+                            table.reload('tab_user', {
+                                // height: 'full-52'
+                            });
                         } else {
                             layer.msg(data.msg);
                         }

@@ -1,4 +1,6 @@
 import cn.hutool.core.io.FileUtil;
+
+import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.lang.Validator;
 import cn.hutool.core.util.StrUtil;
 
@@ -21,5 +23,7 @@ public class TestString {
             liveCheck = liveCheck.substring(0, liveCheck.length() - 1);
         }
         System.out.println(liveCheck);
+//        System.out.println("/jpom-project/rrr/s/s".startsWith("/jpom-project/rrr/s/"));
+        System.out.println(FileUtil.normalize("..\\../"));
     }
 }

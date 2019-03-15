@@ -71,7 +71,8 @@ public class ProjectInfoService extends BaseOperService<ProjectInfoModel> {
      * @param id 项目Id
      * @return model
      */
-    public ProjectInfoModel getProjectInfo(String id) throws IOException {
+    @Override
+    public ProjectInfoModel getItem(String id) throws IOException {
         JSONObject jsonObject = getJsonObject(ConfigBean.PROJECT);
         if (jsonObject == null) {
             return null;

@@ -9,7 +9,6 @@ import cn.keepbx.jpom.model.ProjectInfoModel;
 import cn.keepbx.jpom.model.UserModel;
 import cn.keepbx.jpom.service.manage.CommandService;
 import cn.keepbx.jpom.service.manage.ProjectInfoService;
-import com.alibaba.fastjson.JSONObject;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -48,13 +47,13 @@ public class ConsoleController extends BaseController {
     public String console(String id) throws IOException {
         ProjectInfoModel projectInfoModel = null;
         try {
-            projectInfoModel = projectInfoService.getProjectInfo(id);
+            projectInfoModel = projectInfoService.getItem(id);
         } catch (IOException e) {
             DefaultSystemLog.ERROR().error(e.getMessage(), e);
         }
         if (projectInfoModel != null) {
             UserModel userName = getUser();
-            setAttribute("projectInfo", JSONObject.toJSONString(projectInfoModel));
+            setAttribute("projectInfo", projectInfoModel);
             setAttribute("userInfo", userName.getUserMd5Key());
             String logSize = getLogSize(id);
             setAttribute("logSize", logSize);
@@ -85,7 +84,7 @@ public class ConsoleController extends BaseController {
     public String resetLog(String id) {
         ProjectInfoModel pim;
         try {
-            pim = projectInfoService.getProjectInfo(id);
+            pim = projectInfoService.getItem(id);
             String msg = commandService.execCommand(CommandService.CommandOp.backupLog, pim);
             if (msg.contains("ok")) {
                 return JsonMessage.getString(200, "重置成功");
@@ -100,7 +99,7 @@ public class ConsoleController extends BaseController {
     private String getLogSize(String id) throws IOException {
         ProjectInfoModel pim;
         try {
-            pim = projectInfoService.getProjectInfo(id);
+            pim = projectInfoService.getItem(id);
             if (pim == null) {
                 return null;
             }
@@ -121,7 +120,7 @@ public class ConsoleController extends BaseController {
     @ResponseBody
     public String export(String id) {
         try {
-            ProjectInfoModel pim = projectInfoService.getProjectInfo(id);
+            ProjectInfoModel pim = projectInfoService.getItem(id);
             File file = new File(pim.getLog());
             if (!file.exists()) {
                 return JsonMessage.getString(400, "没有日志文件:" + file.getPath());

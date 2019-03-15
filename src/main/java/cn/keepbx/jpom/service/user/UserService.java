@@ -4,7 +4,6 @@ import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.keepbx.jpom.common.BaseOperService;
 import cn.keepbx.jpom.model.UserModel;
 import cn.keepbx.jpom.system.ConfigBean;
-import cn.keepbx.jpom.system.ExtConfigBean;
 import cn.keepbx.jpom.system.init.CheckRunCommand;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;
@@ -57,26 +56,15 @@ public class UserService extends BaseOperService<UserModel> {
      * @param pwd  密码
      * @return 登录
      */
-    public UserModel login(String name, String pwd) {
-        synchronized (UserService.class) {
-            UserModel userModel = getUserModel(name);
-            if (userModel == null) {
-                return null;
-            }
-            if (pwd.equals(userModel.getPassword())) {
-                userModel.setPwdErrorCount(0);
-            } else {
-                // 零是不限制
-                if (ExtConfigBean.getInstance().userAlwaysLoginError <= 0) {
-                    return null;
-                }
-                userModel.setPwdErrorCount(userModel.getPwdErrorCount() + 1);
-            }
-            if (ExtConfigBean.getInstance().userAlwaysLoginError > 0) {
-                updateUser(userModel);
-            }
+    public UserModel simpleLogin(String name, String pwd) {
+        UserModel userModel = getItem(name);
+        if (userModel == null) {
+            return null;
+        }
+        if (pwd.equals(userModel.getPassword())) {
             return userModel;
         }
+        return null;
     }
 
     /**
@@ -139,7 +127,8 @@ public class UserService extends BaseOperService<UserModel> {
      * @param userId 用户id
      * @return 用户信息
      */
-    public UserModel getUserModel(String userId) {
+    @Override
+    public UserModel getItem(String userId) {
         try {
             JSONObject jsonObject = getJsonObject(ConfigBean.USER);
             JSONObject user = jsonObject.getJSONObject(userId);

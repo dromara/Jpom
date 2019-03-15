@@ -62,7 +62,7 @@ public class LogWebSocketHandle implements TailLogThread.Evn {
             }
             // 判断项目
             if (!SYSTEM_ID.equals(projectId)) {
-                ProjectInfoModel projectInfoModel = projectInfoService.getProjectInfo(projectId);
+                ProjectInfoModel projectInfoModel = projectInfoService.getItem(projectId);
                 if (projectInfoModel == null) {
                     socketSession.sendMsg("获取项目信息错误");
                     session.close();
@@ -74,7 +74,7 @@ public class LogWebSocketHandle implements TailLogThread.Evn {
                     return;
                 }
             }
-            socketSession.sendMsg("欢迎加入：" + userModel.getName() + "  回话id:" + session.getId());
+            socketSession.sendMsg(StrUtil.format("欢迎加入:{} 回话id:{} 当前会话总数:{}", userModel.getName(), session.getId(), SESSION_CONCURRENT_HASH_MAP.size()));
         } catch (Exception e) {
             DefaultSystemLog.ERROR().error(e.getMessage(), e);
             try {
@@ -102,20 +102,22 @@ public class LogWebSocketHandle implements TailLogThread.Evn {
     }
 
     @OnMessage
-    public void onMessage(String message, Session session) throws IOException {
+    public void onMessage(String message, Session session) throws Exception {
         DefaultSystemLog.LOG().info("客户端消息：" + message);
         JSONObject json = JSONObject.parseObject(message);
-        JSONObject projectInfo = json.getJSONObject("projectInfo");
-        String id = projectInfo.getString("id");
+        String op = json.getString("op");
+        if ("heart".equals(op)) {
+            return;
+        }
+        String projectId = json.getString("projectId");
         ProjectInfoService projectInfoService = SpringUtil.getBean(ProjectInfoService.class);
         SocketSession socketSession = getItem(session);
         ProjectInfoModel projectInfoModel = null;
         try {
-            projectInfoModel = projectInfoService.getProjectInfo(id);
+            projectInfoModel = projectInfoService.getItem(projectId);
         } catch (IOException e) {
             DefaultSystemLog.ERROR().error("获取异常", e);
         }
-        String op = json.getString("op");
         CommandService.CommandOp commandOp = CommandService.CommandOp.valueOf(op);
         if (projectInfoModel == null && commandOp != CommandService.CommandOp.top) {
             socketSession.sendMsg("没有对应项目");
