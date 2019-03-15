@@ -1,7 +1,5 @@
 package cn.keepbx.jpom.socket;
 
-import cn.hutool.core.exceptions.ExceptionUtil;
-import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.spring.SpringUtil;
@@ -76,7 +74,7 @@ public class LogWebSocketHandle implements TailLogThread.Evn {
                     return;
                 }
             }
-            socketSession.sendMsg(StrUtil.format("欢迎加入:{} 回话id:{} 当前会话总数:{}", userModel.getName(), session.getId(), SESSION_CONCURRENT_HASH_MAP.size()));
+            socketSession.sendMsg("欢迎加入：" + userModel.getName() + "  会话id:" + session.getId());
         } catch (Exception e) {
             DefaultSystemLog.ERROR().error(e.getMessage(), e);
             try {
@@ -104,13 +102,9 @@ public class LogWebSocketHandle implements TailLogThread.Evn {
     }
 
     @OnMessage
-    public void onMessage(String message, Session session) throws IOException {
+    public void onMessage(String message, Session session) throws Exception {
         DefaultSystemLog.LOG().info("客户端消息：" + message);
         JSONObject json = JSONObject.parseObject(message);
-        String op = json.getString("op");
-        if ("heart".equals(op)) {
-            return;
-        }
         String projectId = json.getString("projectId");
         ProjectInfoService projectInfoService = SpringUtil.getBean(ProjectInfoService.class);
         SocketSession socketSession = getItem(session);
@@ -120,7 +114,7 @@ public class LogWebSocketHandle implements TailLogThread.Evn {
         } catch (IOException e) {
             DefaultSystemLog.ERROR().error("获取异常", e);
         }
-
+        String op = json.getString("op");
         CommandService.CommandOp commandOp = CommandService.CommandOp.valueOf(op);
         if (projectInfoModel == null && commandOp != CommandService.CommandOp.top) {
             socketSession.sendMsg("没有对应项目");
@@ -223,7 +217,7 @@ public class LogWebSocketHandle implements TailLogThread.Evn {
         // java.io.IOException: Broken pipe
         SocketSession socketSession = getItem(session);
         try {
-            socketSession.sendMsg("服务端发生异常" + ExceptionUtil.stacktraceToString(thr));
+            socketSession.sendMsg("服务端发生异常" + thr.getMessage());
         } catch (IOException ignored) {
         }
         DefaultSystemLog.ERROR().error(session.getId() + "socket 异常", thr);
