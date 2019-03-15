@@ -10,7 +10,6 @@ import cn.keepbx.jpom.model.ProjectInfoModel;
 import cn.keepbx.jpom.socket.LogWebSocketHandle;
 import cn.keepbx.jpom.socket.SocketSession;
 import cn.keepbx.jpom.socket.TailLogThread;
-import cn.keepbx.jpom.system.ConfigBean;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -72,62 +71,43 @@ public class CommandService {
      */
     public String execCommand(CommandOp commandOp, ProjectInfoModel projectInfoModel, Evt evt) throws Exception {
         String result = "";
-
         Commander commander = Commander.getInstance();
-        String commandPath = ConfigBean.getInstance().getRunCommandPath();
-        String tag = null, log = null;
-        // 项目启动信息
-        if (projectInfoModel != null) {
-            tag = projectInfoModel.getId();
-            log = projectInfoModel.getLog();
-
-        }
         // 执行命令
-        String command;
         switch (commandOp) {
             case restart:
                 result = commander.restart(projectInfoModel);
                 break;
-            case start: {
-//                String mainClass = null, lib = null, token = null, jvm = null, args = null;
-//                if (projectInfoModel != null) {
-//                    mainClass = projectInfoModel.getMainClass();
-//                    lib = projectInfoModel.getLib();
-//                    token = projectInfoModel.getToken();
-//                    jvm = projectInfoModel.getJvm();
-//                    args = projectInfoModel.getArgs();
-//                }
-//                command = String.format("%s %s %s %s %s %s %s [%s][%s]", commandPath, commandOp.toString(), tag, token, mainClass, lib, log, jvm, args);
+            case start:
                 result = commander.start(projectInfoModel);
                 break;
-            }
-            case stop: {
-//                String token = null;
-//                if (projectInfoModel != null) {
-//                    token = projectInfoModel.getToken();
-//                }
-//                command = String.format("%s %s %s %s", commandPath, commandOp.toString(), tag, token);
-                result = commander.stop(projectInfoModel.getId());
+            case stop:
+                result = commander.stop(projectInfoModel);
                 break;
-            }
-            case status:
-            case pid:
+            case status: {
+                String tag = projectInfoModel.getId();
                 result = commander.status(tag);
                 break;
-            case backupLog: {
-                command = String.format("%s %s %s", commandPath, commandOp.toString(), log);
+            }
+            case pid: {
+                String tag = projectInfoModel.getId();
+                result = commander.getPid(tag);
                 break;
             }
+            case backupLog:
+                result = commander.backLog(projectInfoModel);
+                break;
             case top:
-                command = "top -b -n 1";
+//                command = "top -b -n 1";
                 break;
             case showlog:
+
             default:
                 throw new IllegalArgumentException(commandOp + " error");
         }
         //  通知日志刷新
         if (commandOp == CommandOp.start || commandOp == CommandOp.restart) {
             if (projectInfoModel != null) {
+                String log = projectInfoModel.getLog();
                 TailLogThread.logChange(log);
                 // 修改 run lib 使用情况
                 ProjectInfoModel modify = projectInfoService.getItem(projectInfoModel.getId());

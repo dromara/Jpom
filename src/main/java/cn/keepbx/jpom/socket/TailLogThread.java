@@ -136,6 +136,9 @@ public class TailLogThread implements Runnable {
             } catch (InterruptedException ignored) {
             }
         } while (reload);
+        if (inputStream == null) {
+            return;
+        }
         // 关闭流
         try {
             inputStream.close();

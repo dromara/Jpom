@@ -110,6 +110,7 @@
                     if (json_data.code !== 200) {
                         layer.msg(json_data.msg);
                     }
+                    showLogDom.append(json_data.msg + (json_data.data || "") + '<br/>');
                     var op = json_data.op;
                     switch (op) {
                         case 'status':
