@@ -13,6 +13,10 @@ import cn.keepbx.jpom.service.system.NgxService;
 import cn.keepbx.jpom.service.system.SystemService;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.github.odiszapc.nginxparser.NgxBlock;
+import com.github.odiszapc.nginxparser.NgxConfig;
+import com.github.odiszapc.nginxparser.NgxDumper;
+import com.github.odiszapc.nginxparser.NgxParam;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -33,6 +37,7 @@ import java.util.List;
 @RequestMapping("/system")
 public class NgxController extends BaseController {
 
+
     @Resource
     private SystemService systemService;
     @Resource
@@ -50,6 +55,26 @@ public class NgxController extends BaseController {
         return "system/nginx";
     }
 
+    @RequestMapping(value = "nginx_setting", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
+    public String setting(String path, String type) throws IOException {
+        JSONArray ngxDirectory = systemService.getNgxDirectory();
+        setAttribute("nginx", ngxDirectory);
+        List<CertModel> certList = certService.list();
+        setAttribute("cert", certList);
+        setAttribute("type", type);
+        if (StrUtil.isNotEmpty(path)) {
+            JSONObject jsonObject = ngxService.resolveNgx(path);
+            File file = FileUtil.file(path);
+            String string = FileUtil.readUtf8String(file);
+            jsonObject.put("context", string);
+            String name = file.getName();
+            jsonObject.put("name", name);
+            jsonObject.put("whitePath", path.replace(name, ""));
+            setAttribute("data", jsonObject);
+        }
+        return "system/nginxSetting";
+    }
+
     /**
      * 配置列表
      */
@@ -60,31 +85,131 @@ public class NgxController extends BaseController {
         return JsonMessage.getString(200, "", array);
     }
 
+    /**
+     * 新增或修改配置
+     *
+     * @param name      文件名
+     * @param whitePath 白名单路径
+     */
     @RequestMapping(value = "nginx/updateNgx", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
-    public String updateNgx(String name, String whitePath, String context) {
+    public String updateNgx(String name, String whitePath, String context, String type, String genre) {
         if (StrUtil.isEmpty(name)) {
             return JsonMessage.getString(400, "请填写文件名");
-        }
-        if (StrUtil.isEmpty(whitePath)) {
-            return JsonMessage.getString(400, "请选择文件路径");
         }
         if (!name.endsWith(".conf")) {
             return JsonMessage.getString(400, "文件后缀必须为\".conf\"");
         }
-        if (StrUtil.isEmpty(context)) {
-            return JsonMessage.getString(400, "请填写配置信息");
+        if (StrUtil.isEmpty(whitePath)) {
+            return JsonMessage.getString(400, "请选择文件路径");
+        }
+        File file = FileUtil.file(whitePath + "/" + name);
+        boolean add = "add".equals(genre);
+        if (add) {
+            if (file.exists()) {
+                return JsonMessage.getString(400, "该文件已存在");
+            }
+        }
+        if ("quick".equals(type)) {
+            String port = getParameter("port");
+            if (StrUtil.isEmpty(port)) {
+                return JsonMessage.getString(400, "请填写监听端口");
+            }
+            String domain = getParameter("domain");
+            if (StrUtil.isEmpty(domain)) {
+                return JsonMessage.getString(400, "请填写监听地址");
+            }
+            if (!whitePath.endsWith("/")) {
+                whitePath += "/";
+            }
+            String cachePath = whitePath + name.substring(0, name.indexOf(".")) + "/";
+            //添加配置信息
+            context = getQuickNgx(cachePath, port, domain);
+        } else {
+            if (StrUtil.isEmpty(context)) {
+                return JsonMessage.getString(400, "请填写配置信息");
+            }
         }
         try {
-            FileUtil.writeString(context, whitePath + "/" + name, CharsetUtil.UTF_8);
+            FileUtil.writeString(context, file, CharsetUtil.UTF_8);
         } catch (Exception e) {
             DefaultSystemLog.ERROR().error(e.getMessage(), e);
-            return JsonMessage.getString(400, "修改失败");
+            if (!add) {
+                return JsonMessage.getString(400, "修改失败");
+            } else {
+                return JsonMessage.getString(400, "新增失败");
+            }
         }
-        return JsonMessage.getString(200, "修改成功");
+        if (add) {
+            return JsonMessage.getString(200, "新增成功");
+        } else {
+            return JsonMessage.getString(200, "修改成功");
+        }
     }
 
+    /**
+     * 添加配置信息
+     *
+     * @param cachePath 缓存地址
+     * @param port      端口
+     * @param domain    监听地址
+     */
+    private String getQuickNgx(String cachePath, String port, String domain) {
+        String location = getParameter("location");
+        String convert = getParameter("convert");
+        String cert = getParameter("cert");
+        String key = getParameter("key");
+        String cacheStatus = getParameter("cacheStatus");
+        NgxConfig config = new NgxConfig();
+        NgxBlock http = new NgxBlock();
+        http.addValue("http");
+        if ("true".equals(cacheStatus)) {
+            int cacheSize = getParameterInt("cacheSize", 1024);
+            int inactive = getParameterInt("inactive", 30);
+            String value = " proxy_cache_path " + cachePath + " levels=1:2 keys_zone=mycache:10m max_size=" + cacheSize +
+                    "m inactive=" + inactive + "m use_temp_path=off";
+            addNgxParam(http, value);
+        }
+        NgxBlock sever = new NgxBlock();
+        sever.addValue("server");
+        addNgxParam(sever, "listen " + port);
+        addNgxParam(sever, "server_name " + domain);
+        if (StrUtil.isNotEmpty(cert)) {
+            addNgxParam(sever, "ssl_certificate " + cert);
+            addNgxParam(sever, "ssl_certificate_key " + key);
+            addNgxParam(sever, "ssl_prefer_server_ciphers  on");
+            if ("true".equals(convert)) {
+                NgxBlock httpSever = new NgxBlock();
+                httpSever.addValue("server");
+                addNgxParam(httpSever, "listen 80");
+                addNgxParam(httpSever, "server_name " + domain);
+                addNgxParam(httpSever, "rewrite ^(.*)$  https://$host$1 permanent");
+                http.addEntry(httpSever);
+            }
+        }
+        NgxBlock locationBlock = new NgxBlock();
+        locationBlock.addValue("location /");
+        addNgxParam(locationBlock, "proxy_pass " + location);
+        addNgxParam(locationBlock, "proxy_set_header  Host            $http_host");
+        addNgxParam(locationBlock, "proxy_set_header  X-Real-IP       $remote_addr");
+        addNgxParam(locationBlock, "proxy_set_header  X-Forwarded-For $proxy_add_x_forwarded_for");
+        sever.addEntry(locationBlock);
+        http.addEntry(sever);
+        config.addEntry(http);
+        return new NgxDumper(config).dump();
+    }
 
+    private void addNgxParam(NgxBlock block, String value) {
+        NgxParam ngxParam = new NgxParam();
+        ngxParam.addValue(value);
+        block.addEntry(ngxParam);
+    }
+
+    /**
+     * 上传配置文件
+     *
+     * @param whitePath 白名单路径
+     */
     @RequestMapping(value = "nginx/uploadNgx", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     public String uploadNgx(String whitePath) {
@@ -101,30 +226,11 @@ public class NgxController extends BaseController {
         return JsonMessage.getString(200, "上传成功");
     }
 
-    @RequestMapping(value = "nginx/addNgx", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    @ResponseBody
-    public String addNgx(String name, String whitePath, String context) {
-        if (StrUtil.isEmpty(name)) {
-            return JsonMessage.getString(400, "请填写文件名");
-        }
-        if (!name.endsWith(".conf")) {
-            return JsonMessage.getString(400, "文件后缀必须为\".conf\"");
-        }
-        if (StrUtil.isEmpty(whitePath)) {
-            return JsonMessage.getString(400, "请选择文件路径");
-        }
-        if (StrUtil.isEmpty(context)) {
-            return JsonMessage.getString(400, "请填写配置信息");
-        }
-        try {
-            FileUtil.writeString(context, whitePath + "/" + name, CharsetUtil.UTF_8);
-        } catch (Exception e) {
-            DefaultSystemLog.ERROR().error(e.getMessage(), e);
-            return JsonMessage.getString(400, "创建失败");
-        }
-        return JsonMessage.getString(200, "创建成功");
-    }
-
+    /**
+     * 删除配置
+     *
+     * @param path 文件路径
+     */
     @RequestMapping(value = "nginx/delete", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     public String delete(String path) {
@@ -136,16 +242,10 @@ public class NgxController extends BaseController {
         if (!delete) {
             return JsonMessage.getString(400, "删除失败");
         }
+        //删除缓存文件
+        String cachePath = path.substring(0, path.indexOf("."));
+        FileUtil.del(cachePath);
         return JsonMessage.getString(200, "删除成功");
-    }
-
-    @RequestMapping(value = "nginx/getConf", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    @ResponseBody
-    public String getConf(String path) {
-        String string = FileUtil.readString(path, CharsetUtil.UTF_8);
-        JSONObject jsonObject = new JSONObject();
-        jsonObject.put("context", string);
-        return JsonMessage.getString(200, "", jsonObject);
     }
 
 }

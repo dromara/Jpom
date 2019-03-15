@@ -59,8 +59,8 @@ public class CertService extends BaseOperService<CertModel> {
             }
             return list;
         } catch (FileNotFoundException e) {
-            File file = new File(ConfigBean.getInstance().getDataPath(), ConfigBean.CERT);
-            saveJson(file.getPath(), new JSONObject());
+            File file = FileUtil.touch(ConfigBean.getInstance().getDataPath(), ConfigBean.CERT);
+            saveJson(file.getName(), new JSONObject());
             return null;
         } catch (IOException e) {
             DefaultSystemLog.ERROR().error(e.getMessage(), e);
