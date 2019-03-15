@@ -195,15 +195,6 @@ public abstract class AbstractCommander {
         return exec(new String[]{command});
     }
 
-    /**
-     * 异步执行命令
-     *
-     * @param command 命令
-     */
-    protected void asyncExec(String command) {
-        GlobalThreadPool.execute(() -> execSystemCommand(command));
-    }
-
     public String execSystemCommand(String command) {
         String result = "error";
         try {
