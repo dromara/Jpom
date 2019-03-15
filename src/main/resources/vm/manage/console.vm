@@ -85,6 +85,7 @@
 <script type="text/javascript">
     var loopLog = false;
     var loopLogTime;
+    var heart;
 
     function loadSuccess() {
         const showLogDom = $('.console .terminal');
@@ -109,6 +110,7 @@
                     if (json_data.code !== 200) {
                         layer.msg(json_data.msg);
                     }
+                    showLogDom.append(json_data.msg + (json_data.data || "") + '<br/>');
                     var op = json_data.op;
                     switch (op) {
                         case 'status':
@@ -145,6 +147,15 @@
                     if (!loopLog) {
                         loopLogAjax();
                     }
+                    clearInterval(heart);
+                    // 创建心跳，防止掉线
+                    heart = setInterval(function () {
+                        const data = {
+                            op: "heart",
+                            projectId: "$!projectInfo.id"
+                        };
+                        ws.send(JSON.stringify(data));
+                    }, 5000);
                 }
                 scrollToBotomm();
             };

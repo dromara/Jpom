@@ -1,8 +1,8 @@
 package cn.keepbx.jpom.socket;
 
 import cn.hutool.core.io.IoUtil;
-import cn.hutool.core.util.CharsetUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
+import cn.keepbx.jpom.common.commander.AbstractCommander;
 
 import javax.websocket.Session;
 import java.io.BufferedReader;
@@ -87,7 +87,7 @@ public class TailLogThread implements Runnable {
         // 执行tail -f命令
         process = Runtime.getRuntime().exec(String.format("tail -f %s", this.log));
         inputStream = process.getInputStream();
-        bufferedReader = IoUtil.getReader(inputStream, CharsetUtil.CHARSET_UTF_8);
+        bufferedReader = IoUtil.getReader(inputStream, AbstractCommander.getInstance().getCharset());
         // 已经重新加载
         reload = false;
     }
@@ -137,13 +137,8 @@ public class TailLogThread implements Runnable {
             }
         } while (reload);
         // 关闭流
-        try {
-            inputStream.close();
-            bufferedReader.close();
-        } catch (IOException e) {
-            DefaultSystemLog.ERROR().error("关闭流异常", e);
-            send("关闭流异常:" + e.getMessage());
-        }
+        IoUtil.close(inputStream);
+        IoUtil.close(bufferedReader);
         send("结束本次读取地址事件");
         DefaultSystemLog.LOG().info("结束本次读取地址事件");
     }

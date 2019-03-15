@@ -1,74 +1,59 @@
 package cn.keepbx.jpom.common.commander.impl;
 
-import cn.hutool.core.util.CharsetUtil;
-import cn.keepbx.jpom.common.commander.Commander;
+import cn.hutool.core.thread.GlobalThreadPool;
+import cn.keepbx.jpom.common.commander.AbstractCommander;
 import cn.keepbx.jpom.model.ProjectInfoModel;
+import cn.keepbx.jpom.service.manage.CommandService;
 
-import java.io.File;
+import java.nio.charset.Charset;
 
-public class WindowsCommander extends Commander {
+/**
+ * windows 版
+ *
+ * @author Administrator
+ */
+public class WindowsCommander extends AbstractCommander {
 
-    public WindowsCommander() {
-        charset = CharsetUtil.CHARSET_GBK;
+    public WindowsCommander(Charset charset) {
+        super(charset);
     }
 
-    // 启动
     @Override
     public String start(ProjectInfoModel projectInfoModel) throws Exception {
-        String result;
-
+        String msg = checkStart(projectInfoModel);
+        if (msg != null) {
+            return msg;
+        }
         // 拼接命令
         String jvm = projectInfoModel.getJvm();
         String tag = projectInfoModel.getId();
-        String lib = projectInfoModel.getLib();
         String mainClass = projectInfoModel.getMainClass();
         String args = projectInfoModel.getArgs();
-        String log = projectInfoModel.getLog();
-        String classPath = "";
-        File fileLib = new File(lib);
-        File[] files = fileLib.listFiles();
+        String classPath = ProjectInfoModel.getClassPathLib(projectInfoModel);
 
-        // 获取lib下面的所有jar包
-        for (File file : files) {
-            classPath += file.getPath() + ";";
-        }
-
-        String command = String.format("javaw %s -classpath %s -Dapplication=%s -Dbasedir=%s %s %s >> %s", jvm, classPath, tag, lib, mainClass, args, log);
-        System.out.println("===>>" + command);
-        // 执行命令
-        Runtime.getRuntime().exec(command);
-        Thread.sleep(3000);
-        result = status(projectInfoModel.getId());
-
-        return result;
+        String command = String.format("javaw %s -classpath %s -Dapplication=%s -Dbasedir=%s %s %s >> %s",
+                jvm, classPath, tag,
+                projectInfoModel.getAbsoluteLib(), mainClass, args, projectInfoModel.getAbsoluteLog());
+        // 执行命令;
+        GlobalThreadPool.execute(() -> execSystemCommand(command));
+        //
+        loopCheckRun(projectInfoModel.getId(), true);
+        return status(projectInfoModel.getId());
     }
 
-    // 停止
     @Override
-    public String stop(String tag) throws Exception {
+    public String stop(ProjectInfoModel projectInfoModel) throws Exception {
+        super.stop(projectInfoModel);
+        String tag = projectInfoModel.getId();
         // 查询状态，如果正在运行，则执行杀进程命令
         String result = status(tag);
-        if (result.startsWith("running")) {
+        if (result.startsWith(CommandService.RUNING_TAG)) {
             String pid = result.split(":")[1];
-            String cmd = String.format("taskkill /F /PID %s", pid);
-            Runtime.getRuntime().exec(cmd);
-            Thread.sleep(3000);
+            String cmd = String.format("taskkill  /PID %s", pid);
+            execCommand(cmd);
+            loopCheckRun(projectInfoModel.getId(), false);
             result = status(tag);
         }
-
-        return result;
-    }
-
-    // 重启
-    @Override
-    public String restart(ProjectInfoModel projectInfoModel) throws Exception {
-        String result = status(projectInfoModel.getId());
-
-        // 如果正在运行，需要先停止
-        if (result.startsWith("running")) {
-            stop(projectInfoModel.getId());
-        }
-        result = start(projectInfoModel);
         return result;
     }
 }

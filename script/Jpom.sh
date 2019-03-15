@@ -27,8 +27,22 @@ function start() {
 			echo "mv to $LogBack$cur_dateTime"
 		touch ${Log}
 	fi
-    nohup java  ${JVM} -Dappliction=$Tag -Djava.ext.dirs=${Lib}":${JAVA_HOME}/jre/lib/ext" ${MainClass} ${ARGS}  >> ${Log} 2>&1 &
+	# classPath
+    CLASSPATH=`listDir ${Lib}`
+    nohup java  ${JVM} -classpath ${CLASSPATH}${JAVA_HOME}/lib/tools.jar -Dappliction=$Tag ${MainClass} ${ARGS}  >> ${Log} 2>&1 &
     tailf ${Log}
+}
+
+# 拼接所有文件
+function listDir()
+{
+    ALL=""
+	for file in `ls $1`
+	do
+		#得到文件的完整的目录
+        ALL="${ALL}${1}/${file}:"
+	done
+	echo ${ALL}
 }
 
 # 停止程序

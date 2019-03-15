@@ -1,6 +1,7 @@
 package cn.keepbx.jpom.model;
 
 import cn.hutool.core.util.StrUtil;
+import cn.keepbx.jpom.common.commander.AbstractCommander;
 import com.alibaba.fastjson.JSONObject;
 
 import java.io.File;
@@ -113,6 +114,26 @@ public class ProjectInfoModel extends BaseModel {
         return lib;
     }
 
+    public String getAbsoluteLib() {
+        File file = new File(getLib());
+        return file.getAbsolutePath();
+    }
+
+    public static String getClassPathLib(ProjectInfoModel projectInfoModel) {
+        File fileLib = new File(projectInfoModel.getLib());
+        File[] files = fileLib.listFiles();
+        if (files == null) {
+            return "";
+        }
+        // 获取lib下面的所有jar包
+        StringBuilder classPath = new StringBuilder();
+
+        for (File file : files) {
+            classPath.append(file.getAbsolutePath()).append(AbstractCommander.OS_INFO.isWindows() ? ";" : ":");
+        }
+        return classPath.toString();
+    }
+
     public void setLib(String lib) {
         this.lib = lib;
     }
@@ -121,9 +142,13 @@ public class ProjectInfoModel extends BaseModel {
         return log;
     }
 
+    public String getAbsoluteLog() {
+        File file = new File(getLog());
+        return file.getAbsolutePath();
+    }
+
     public File getLogBack() {
-        File logBack = new File(getLog() + "_back");
-        return logBack;
+        return new File(getLog() + "_back");
     }
 
     public void setLog(String log) {

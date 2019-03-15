@@ -1,5 +1,7 @@
 package cn.keepbx.jpom.socket;
 
+import cn.hutool.core.exceptions.ExceptionUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.spring.SpringUtil;
@@ -103,7 +105,6 @@ public class LogWebSocketHandle implements TailLogThread.Evn {
 
     @OnMessage
     public void onMessage(String message, Session session) throws Exception {
-        DefaultSystemLog.LOG().info("客户端消息：" + message);
         JSONObject json = JSONObject.parseObject(message);
         String op = json.getString("op");
         if ("heart".equals(op)) {
@@ -133,28 +134,27 @@ public class LogWebSocketHandle implements TailLogThread.Evn {
             case restart:
                 strResult = commandService.execCommand(commandOp, projectInfoModel, evtIml);
                 if (strResult.contains(CommandService.RUNING_TAG)) {
-                    resultData = JsonMessage.toJson(200, "操作成功", json);
+                    resultData = JsonMessage.toJson(200, "操作成功:" + strResult);
                 } else {
-                    resultData = JsonMessage.toJson(400, strResult, json);
+                    resultData = JsonMessage.toJson(400, strResult);
                 }
                 break;
             case stop:
                 // 停止项目
                 strResult = commandService.execCommand(commandOp, projectInfoModel, evtIml);
                 if (strResult.contains(CommandService.STOP_TAG)) {
-                    resultData = JsonMessage.toJson(200, "操作成功", json);
+                    resultData = JsonMessage.toJson(200, "操作成功");
                 } else {
-                    resultData = JsonMessage.toJson(500, strResult, json);
+                    resultData = JsonMessage.toJson(500, strResult);
                 }
                 break;
             case status:
                 // 获取项目状态
                 strResult = commandService.execCommand(commandOp, projectInfoModel, evtIml);
-                json.put("result", strResult);
                 if (strResult.contains(CommandService.RUNING_TAG)) {
-                    resultData = JsonMessage.toJson(200, "运行中", json);
+                    resultData = JsonMessage.toJson(200, "运行中", strResult);
                 } else {
-                    resultData = JsonMessage.toJson(404, "未运行", json);
+                    resultData = JsonMessage.toJson(404, "未运行", strResult);
                 }
                 break;
             case showlog:
@@ -220,7 +220,7 @@ public class LogWebSocketHandle implements TailLogThread.Evn {
         // java.io.IOException: Broken pipe
         SocketSession socketSession = getItem(session);
         try {
-            socketSession.sendMsg("服务端发生异常" + thr.getMessage());
+            socketSession.sendMsg("服务端发生异常" + ExceptionUtil.stacktraceToString(thr));
         } catch (IOException ignored) {
         }
         DefaultSystemLog.ERROR().error(session.getId() + "socket 异常", thr);
