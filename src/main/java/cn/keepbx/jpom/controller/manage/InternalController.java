@@ -1,6 +1,9 @@
 package cn.keepbx.jpom.controller.manage;
 
+import cn.hutool.core.convert.Convert;
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.text.StrSpliter;
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.servlet.ServletUtil;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.keepbx.jpom.common.BaseController;
@@ -9,6 +12,7 @@ import cn.keepbx.jpom.model.ProjectInfoModel;
 import cn.keepbx.jpom.service.manage.CommandService;
 import cn.keepbx.jpom.service.manage.ProjectInfoService;
 import cn.keepbx.jpom.system.ConfigBean;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
@@ -19,6 +23,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
+import java.io.IOException;
+import java.util.List;
 
 /**
  * 内存查看
@@ -51,6 +57,66 @@ public class InternalController extends BaseController {
         object.put("tag", tag);
         setAttribute("internal", object);
         return "manage/internal";
+    }
+
+    @RequestMapping(value = "internal/list", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @ResponseBody
+    public String list(String tag) throws Exception {
+        if (StrUtil.isEmpty(tag)) {
+            return JsonMessage.getString(200, "");
+        }
+        ProjectInfoModel projectInfoModel = projectInfoService.getItem(tag);
+        String pid = commandService.execCommand(CommandService.CommandOp.pid, projectInfoModel, null);
+        String command = "top -b -n 1 -p " + pid;
+        String internal = AbstractCommander.getInstance().execCommand(command);
+        JSONArray array = formatTop(internal);
+        return JsonMessage.getString(200, "", array);
+    }
+
+    private JSONArray formatTop(String top) {
+        List<String> list = StrSpliter.splitTrim(top, "\n", true);
+        if (list.size() < 5) {
+            return null;
+        }
+        String topName = list.get(list.size() - 2);
+        List<String> nameList = StrSpliter.splitTrim(topName, " ", true);
+        String ram = list.get(list.size() - 1);
+        List<String> ramList = StrSpliter.splitTrim(ram, " ", true);
+        JSONObject item = new JSONObject();
+        for (int i = 0; i < nameList.size(); i++) {
+            String name = nameList.get(i);
+            String value = ramList.get(i);
+            if (i == 0) {
+                item.put("pid", value);
+                continue;
+            }
+            if ("virt".equals(name) || "res".equals(name) || "shr".equals(name)) {
+                value = Convert.toLong(value) / 1024 + "mb";
+            }
+            if ("�".equals(name)) {
+                name = "S";
+            }
+            if ("S".equals(name)) {
+                if ("S".equals(value)) {
+                    value = "睡眠";
+                } else if ("R".equals(value)) {
+                    value = "运行";
+                } else if ("T".equals(value)) {
+                    value = "跟踪/停止";
+                } else if ("Z".equals(value)) {
+                    value = "僵尸进程 ";
+                } else if ("D".equals(value)) {
+                    value = "不可中断的睡眠状态 ";
+                }
+            }
+            if ("%cpu".equals(name) || "%mem".equals(name)) {
+                value += "%";
+            }
+            item.put(name, value);
+        }
+        JSONArray array = new JSONArray();
+        array.add(item);
+        return array;
     }
 
     /**

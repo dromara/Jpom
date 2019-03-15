@@ -23,20 +23,44 @@
 
 <body>
 <div>
-##    <button class="btn" value="$!internal.tag" id="stack">导出堆栈信息</button>
-##    <button class="btn" value="$!internal.tag" id="ram">导出内存信息</button>
     <a class="but" href="/manage/stack?tag=$!internal.tag">导出堆栈信息</a>
     <a class="but" href="/manage/ram?tag=$!internal.tag">导出内存信息</a>
-    <div class="info">
-        $internal.ram
-    </div>
+##    <div class="info">
+##        $internal.ram
+##    </div>
 
 </div>
+
+<table class="layui-table" id="tab_ram" lay-filter="tab_ram"></table>
 
 </body>
 <script type="text/javascript">
     function loadSuccess() {
-
+        table.render({
+            id: 'tab_ram',
+            elem: '#tab_ram',
+            url: '/manage/internal/list?tag=$!internal.tag',
+            height: 'full-52',
+            even: true,
+            cols: [[
+                {field: 'pid', title: '进程id '},
+                {field: 'USER', title: '所有者'},
+                {field: 'PR', title: '优先级'},
+                {field: 'NI', title: 'nice值'},
+                {field: 'VIRT', title: '使用虚拟内存'},
+                {field: 'RES', title: '使用物理内存'},
+                {field: 'SHR', title: '共享内存'},
+                {field: 'S', title: '进程状态'},
+                {field: '%CPU', title: '占用CPU'},
+                {field: '%MEM', title: '占用物理内存'},
+                {field: 'TIME+', title: '时间总计'},
+                {field: 'COMMAND', title: '进程名称'}
+            ]],
+            loading: true,
+            response: {
+                statusCode: 200
+            }
+        });
     }
 </script>
 </html>

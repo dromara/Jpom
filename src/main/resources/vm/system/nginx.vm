@@ -13,9 +13,6 @@
             width: 80% !important;
         }
 
-        .div-ngx {
-            display: none;
-        }
 
         .div-uploadNgx {
             display: none;
@@ -25,26 +22,10 @@
             width: 80%;
         }
 
-        .auto {
-            width: 100%;
-            height: 100%;
-        }
-
         .div_hidden {
             display: none;
         }
 
-        .btn_inline {
-            display: inline-flex;
-        }
-
-        .btn_title {
-            margin-left: 50px;
-        }
-
-        .layui-card-body {
-            border: #b9b7b7 1px solid;
-        }
 
     </style>
 </head>
@@ -56,71 +37,6 @@
     <button id="refresh" class="layui-btn layui-btn-sm">刷新表格</button>
 </div>
 <table class="layui-table" id="tab_ngx" lay-filter="tab_ngx" style="margin: 0;"></table>
-
-<div class="layui-container div-ngx" id="div-ngx">
-    <form action="" class="layui-form" id="form_ngx" style="margin-top: 20px">
-        <div class="layui-form-item">
-            <div class="layui-inline">
-                <label class="layui-form-label">文件名称</label>
-                <div class="layui-input-block">
-                    <input type="text" id="name" name="name" placeholder='文件后缀必须为".conf"' class="layui-input" required
-                           lay-verify="required">
-                </div>
-            </div>
-        </div>
-        <div class="layui-form-item">
-            <div class="layui-inline">
-                <label class="layui-form-label">文件路径</label>
-                <div class="layui-input-block">
-                    <select name="whitePath" id="whitePath">
-                        #foreach($item in $nginx)
-                            <option value="$item">$item</option>
-                        #end
-                    </select>
-                </div>
-            </div>
-        </div>
-        <div class="layui-form-item">
-            <div class="layui-inline">
-                <label class="layui-form-label">配置方式</label>
-                <div class="layui-input-block">
-                    <input type="radio" name="conf" lay-filter="ngx_conf" value="quick" title="快速配置" checked>
-                    <input type="radio" name="conf" lay-filter="ngx_conf" value="manua" title="手动配置">
-                </div>
-            </div>
-        </div>
-        <div class="layui-form-item div_hidden" id="conf_manua">
-            <div class="layui-inline" style="width: 80%;height:40vh;">
-                <label class="layui-form-label">配置内容</label>
-                <div class="layui-input-block auto">
-                    <textarea id="context" name="context" required lay-verify="required" placeholder=""
-                              class="layui-textarea auto"></textarea>
-                </div>
-            </div>
-        </div>
-        <div class="layui-form-item" id="conf_quick">
-            <div class="layui-inline">
-                <label class="layui-form-label">快速配置</label>
-                <div class="layui-input-block auto">
-                    <div class="layui-card">
-                        <div class="layui-card-header btn_inline" id="conf">
-                            <div class="title">文件配置</div>
-                            <div class="btn_title">
-                                <button id="addConfParame" type="button" class="layui-btn layui-btn-sm">添加属性</button>
-                                <button id="addConfHttp" type="button" class="layui-btn layui-btn-sm">添加http模块</button>
-                                <button id="addConfSever" type="button" class="layui-btn layui-btn-sm">添加sever模块
-                                </button>
-                            </div>
-                        </div>
-                        <div class="layui-card-body" id="tem_ngx_conf">
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <input type="hidden" lay-submit lay-filter="submitNgx" id="ngx_submit">
-    </form>
-</div>
 
 <div class="layui-container div-uploadNgx" id="div-uploadNgx">
     <form action="" enctype="multipart/form-data" class="layui-form" id="form_uploadNgx" style="margin-top: 20px">
@@ -155,75 +71,47 @@
     <a href="javascript:;" class="layui-btn  layui-btn-sm layui-btn-danger" lay-event="delete">删除</a>
 </script>
 
-<script type="text/html" id="tem_conf_http">
-    <div class="layui-card">
-        <div class="layui-card-header btn_inline">
-            <input type="text" hidden name="{{= d.index }}_http" value="http">
-            <div class="title">http</div>
-            <div class="btn_title">
-                <button onclick="addHttpParame(this)" type="button" class="layui-btn layui-btn-sm">添加属性</button>
-                <button onclick="addHttpSever(this)" type="button" class="layui-btn layui-btn-sm">添加sever模块</button>
-            </div>
-        </div>
-        <div class="layui-card-body" id="tem_ngx_http_context"></div>
-    </div>
-</script>
-
-<script type="text/html" id="tem_conf_sever">
-    <div class="layui-card layui-form-item" style="margin-top: 5px">
-        <div class="layui-card-header btn_inline">
-            <input type="text" hidden name="{{= d.index }}_sever" value="sever">
-            <div class="title">sever</div>
-            <div class="btn_title">
-                <button onclick="addSeverParame(this)" type="button" class="layui-btn layui-btn-sm">添加属性</button>
-                <button onclick="addSeverLocation(this)" type="button" class="layui-btn layui-btn-sm">添加location模块
-                </button>
-            </div>
-        </div>
-        <div class="layui-card-body" id="tem_ngx_sever_context">
-            <div class="layui-form-item">
-                <div class="layui-inline">
-                    <label class="layui-form-label">选择证书:</label>
-                    <div class="layui-input-block">
-                        <select id="cert" style="display: block;margin-top: 10px;" lay-filter="ngx_select">
-                            <option value=""></option>
-                            #foreach($item in $cert)
-                                <option value=$item id=$item>$item.id</option>
-                            #end
-                        </select>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</script>
-
-<script type="text/html" id="tem_conf_location">
-    <div class="layui-card layui-form-item" style="margin-top: 10px">
-        <div class="layui-card-header btn_inline">
-            <div class="title">
-                <input type="text" placeholder="" name="{{= d.index }}_location" class="layui-input" required
-                       value="location  " lay-verify="required">
-            </div>
-            <div class="btn_title">
-                <button onclick="addLocationParame(this)" type="button" class="layui-btn layui-btn-sm">添加属性</button>
-            </div>
-        </div>
-        <div class="layui-card-body" id="tem_ngx_location_context"></div>
-    </div>
-</script>
-
-<script type="text/html" id="tem_ngx_param">
-    <div class="btn_inline" style="margin-top: 5px" name="{{ d.name||'' }}">
-        <input type="text" name="{{= d.index }}_paramName" value="{{ d.name||'' }}" placeholder='属性名'
-               class="layui-input" required lay-verify="required">&nbsp;&nbsp;:&nbsp;&nbsp;
-        <input type="text" name="{{= d.index }}_paramValue" value="{{ d.value||'' }}" placeholder='属性值' required
-               lay-verify="required">
-    </div>
-</script>
 
 <script type="text/javascript">
+    var laytpl;
+    var index = 0;
+
     function loadSuccess() {
+
+        // 表格工具条事件
+        table.on('tool(tab_ngx)', function (obj) {
+            var data = obj.data;
+            var event = obj.event;
+
+            if ('update' === event) {
+                // 修改
+                updateNgx(data);
+            } else if ('delete' === event) {
+                // 删除
+                deleteNgx(data);
+            }
+        });
+
+        // 新增配置
+        $('#addNgx').on('click', function () {
+            var url = '/system/nginx_setting?type=add';
+            tabChange({
+                id: 0,
+                url: url,
+                title: '新增配置',
+            });
+        });
+
+        // 修改
+        function updateNgx(data) {
+            var url = '/system/nginx_setting?type=update&path=' + data.path;
+            tabChange({
+                id: 1,
+                url: url,
+                title: 'nginx设置',
+            });
+        }
+
         table.render({
             id: 'tab_ngx',
             elem: '#tab_ngx',
@@ -240,60 +128,6 @@
                 statusCode: 200
             }
         });
-
-        // 表格工具条事件
-        table.on('tool(tab_ngx)', function (obj) {
-            var data = obj.data;
-            var event = obj.event;
-
-            if ('update' === event) {
-                // 修改
-                updateNgx(data);
-            } else if ('delete' === event) {
-                // 删除
-                deleteNgx(data);
-            }
-        });
-
-        // 修改
-        function updateNgx(data) {
-            initForm();
-            getNginxContest(data);
-            for (var key in data) {
-                $('#form_ngx [name="' + key + '"]').val(data[key]);
-            }
-            // 弹出
-            layer.open({
-                type: 1,
-                title: '编辑',
-                content: $('#div-ngx'),
-                area: ['60%', '60%'],
-                btnAlign: 'c',
-                btn: ['提交'],
-                yes: function (index, layero) {
-                    $('#form_ngx').attr('action', '/system/nginx/updateNgx');
-                    $('#ngx_submit').click();
-                }
-            });
-        }
-
-        function getNginxContest(data) {
-            var path = data.path;
-            $.ajax({
-                url: "/system/nginx/getConf",
-                type: 'POST',
-                dataType: 'json',
-                data: {path: path},
-                success: function (ret) {
-                    if (200 == ret.code) {
-                        $('#form_ngx [name="context"]').val(ret.data.context);
-                    }
-                },
-                error: function (err) {
-                    layer.alert(err.msg);
-                }
-            });
-        }
 
         // 删除
         function deleteNgx(data) {
@@ -322,23 +156,6 @@
             });
         }
 
-        // 新增配置
-        $('#addNgx').on('click', function () {
-            // 重置表单
-            initForm();
-            layer.open({
-                type: 1,
-                title: '新增配置',
-                content: $('#div-ngx'),
-                area: ['60%', '60%'],
-                btnAlign: 'c',
-                btn: ['提交'],
-                yes: function (index, layero) {
-                    $('#form_ngx').attr('action', '/system/nginx/addNgx');
-                    $('#ngx_submit').click();
-                }
-            });
-        });
 
         //上传配置
         $('#uploadNgx').on('click', function () {
@@ -391,190 +208,9 @@
             table.reload('tab_ngx');
         });
 
-        //提交配置信息
-        form.on('submit(submitNgx)', function (data) {
-            console.log(data);
-            console.log(data.field);
-            // $.ajax({
-            //     url: data.form.action,
-            //     type: 'POST',
-            //     dataType: 'json',
-            //     data: data.field,
-            //     success: function (data) {
-            //         layer.msg(data.msg);
-            //         if (200 == data.code) {
-            //             layer.closeAll('page');
-            //             // 刷新表
-            //             table.reload('tab_ngx');
-            //         }
-            //     },
-            //     error: function (err) {
-            //         layer.alert(err.msg);
-            //     }
-            // });
-            return false;
-        });
 
-        //配置方式选择
-        form.on('radio(ngx_conf)', function (data) {
-            console.log(data.elem); //得到radio原始DOM对象
-            console.log(data.value); //被点击的radio的value值
-            if ("manua" === data.value) {
-                $('#conf_manua').removeClass("div_hidden");
-                $('#conf_quick').addClass("div_hidden");
-            } else if ("quick" === data.value) {
-                $('#conf_manua').addClass("div_hidden");
-                $('#conf_quick').removeClass("div_hidden");
-            }
-        });
-
-        function initForm() {
-            document.getElementById('form_ngx').reset();
-            $('#conf_manua').addClass("div_hidden");
-            $('#conf_quick').removeClass("div_hidden");
-            $('#form_ngx [name="whitePath"]').attr('disabled', false).removeClass('layui-disabled');
-            $('#form_ngx [name="name"]').attr('readonly', false).removeClass('layui-disabled');
-            document.getElementById('tem_ngx_conf').innerHTML = "";
-        }
-
-        layui.use('laytpl', function () {
-            laytpl = layui.laytpl;
-
-            $('#addConfParame').on('click', function () {
-                var view = $("#tem_ngx_conf");
-                var tem = tem_ngx_param.innerHTML;
-                paramIndex++;
-                laytpl(tem).render({index: paramIndex}, function (html) {
-                    view.append(html);
-                });
-            });
-
-            $('#addConfHttp').on('click', function (data) {
-                $('#addConfSever').attr("disabled", true);
-                var tem = tem_conf_http.innerHTML;
-                var view = $("#tem_ngx_conf");
-                httpIndex++;
-                laytpl(tem).render({index: httpIndex}, function (html) {
-                    view.append(html);
-                });
-            });
-
-            $('#addConfSever').on('click', function (data) {
-                $('#addConfHttp').attr("disabled", true);
-                var tem = tem_conf_sever.innerHTML;
-                var view = $("#tem_ngx_conf");
-                severIndex++;
-                laytpl(tem).render({index: severIndex}, function (html) {
-                    view.append(html);
-                });
-            });
-
-            //选择证书事件
-            $(document).on("change", 'select#cert', function () {
-                var data = $(this).val();
-                var view = $(this)[0].parentNode.parentNode;
-                var jsView = $(view);
-                cleanCert(jsView);
-                if (!data) {
-                    return;
-                }
-                if (typeof data == "string") {
-                    data = JSON.parse(data);
-                }
-                var tem = tem_ngx_param.innerHTML;
-                paramIndex++;
-                var tem_data = {name: "listen", value: "443 ssl", index: paramIndex};
-                laytpl(tem).render(tem_data, function (html) {
-                    jsView.append(html);
-                });
-                paramIndex++;
-                tem_data = {name: "ssl", value: "on", index: paramIndex};
-                laytpl(tem).render(tem_data, function (html) {
-                    jsView.append(html);
-                });
-                var domain = data.domain;
-                paramIndex++;
-                tem_data = {name: "server_name", value: domain, index: paramIndex};
-                laytpl(tem).render(tem_data, function (html) {
-                    jsView.append(html);
-                });
-                var cert = data.cert;
-                paramIndex++;
-                tem_data = {name: "ssl_certificate", value: cert, index: paramIndex};
-                laytpl(tem).render(tem_data, function (html) {
-                    jsView.append(html);
-                });
-                var key = data.key;
-                paramIndex++;
-                tem_data = {name: "ssl_certificate_key", value: key, index: paramIndex};
-                laytpl(tem).render(tem_data, function (html) {
-                    jsView.append(html);
-                });
-            });
-
-            function cleanCert(dom) {
-                dom.find('[name="ssl"]').remove();
-                dom.find('[name="ssl_certificate"]').remove();
-                dom.find('[name="ssl_certificate_key"]').remove();
-            }
-        });
     }
 
-    var laytpl;
-    var httpIndex = 0;
-    var severIndex = 0;
-    var locationIndex = 0;
-    var paramIndex = 0;
-
-    function addHttpParame(dom) {
-        var node = dom.parentNode.parentNode.parentNode;
-        var view = $(node).find('[id="tem_ngx_http_context"]');
-        var tem = tem_ngx_param.innerHTML;
-        paramIndex++;
-        laytpl(tem).render({index: paramIndex}, function (html) {
-            view.append(html);
-        });
-    }
-
-    function addHttpSever(dom) {
-        var node = dom.parentNode.parentNode.parentNode;
-        var view = $(node).find('[id="tem_ngx_http_context"]');
-        var tem = tem_conf_sever.innerHTML;
-        severIndex++;
-        laytpl(tem).render({index: severIndex}, function (html) {
-            view.append(html);
-        });
-    }
-
-    function addSeverParame(dom) {
-        var node = dom.parentNode.parentNode.parentNode;
-        var view = $(node).find('[id="tem_ngx_sever_context"]');
-        var tem = tem_ngx_param.innerHTML;
-        paramIndex++;
-        laytpl(tem).render({index: paramIndex}, function (html) {
-            view.append(html);
-        });
-    }
-
-    function addSeverLocation(dom) {
-        var node = dom.parentNode.parentNode.parentNode;
-        var view = $(node).find('[id="tem_ngx_sever_context"]');
-        var tem = tem_conf_location.innerHTML;
-        locationIndex++;
-        laytpl(tem).render({index: locationIndex}, function (html) {
-            view.append(html);
-        });
-    }
-
-    function addLocationParame(dom) {
-        var node = dom.parentNode.parentNode.parentNode;
-        var view = $(node).find('[id="tem_ngx_location_context"]');
-        var tem = tem_ngx_param.innerHTML;
-        paramIndex++;
-        laytpl(tem).render({index: paramIndex}, function (html) {
-            view.append(html);
-        });
-    }
 </script>
 
 </html>
