@@ -74,7 +74,7 @@ public class LogWebSocketHandle implements TailLogThread.Evn {
                     return;
                 }
             }
-            socketSession.sendMsg("欢迎加入：" + userModel.getName() + "  会话id:" + session.getId());
+            socketSession.sendMsg(StrUtil.format("欢迎加入:{} 回话id:{} 当前会话总数:{}", userModel.getName(), session.getId(), SESSION_CONCURRENT_HASH_MAP.size()));
         } catch (Exception e) {
             DefaultSystemLog.ERROR().error(e.getMessage(), e);
             try {
@@ -105,6 +105,10 @@ public class LogWebSocketHandle implements TailLogThread.Evn {
     public void onMessage(String message, Session session) throws Exception {
         DefaultSystemLog.LOG().info("客户端消息：" + message);
         JSONObject json = JSONObject.parseObject(message);
+        String op = json.getString("op");
+        if ("heart".equals(op)) {
+            return;
+        }
         String projectId = json.getString("projectId");
         ProjectInfoService projectInfoService = SpringUtil.getBean(ProjectInfoService.class);
         SocketSession socketSession = getItem(session);
@@ -114,7 +118,6 @@ public class LogWebSocketHandle implements TailLogThread.Evn {
         } catch (IOException e) {
             DefaultSystemLog.ERROR().error("获取异常", e);
         }
-        String op = json.getString("op");
         CommandService.CommandOp commandOp = CommandService.CommandOp.valueOf(op);
         if (projectInfoModel == null && commandOp != CommandService.CommandOp.top) {
             socketSession.sendMsg("没有对应项目");
