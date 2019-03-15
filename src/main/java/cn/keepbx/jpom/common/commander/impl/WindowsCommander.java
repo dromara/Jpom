@@ -37,7 +37,7 @@ public class WindowsCommander extends AbstractCommander {
         // 执行命令;
         GlobalThreadPool.execute(() -> execSystemCommand(command));
         //
-        Thread.sleep(3000);
+        loopCheckRun(projectInfoModel.getId(), true);
         return status(projectInfoModel.getId());
     }
 
@@ -49,9 +49,9 @@ public class WindowsCommander extends AbstractCommander {
         String result = status(tag);
         if (result.startsWith(CommandService.RUNING_TAG)) {
             String pid = result.split(":")[1];
-            String cmd = String.format("taskkill /F /PID %s", pid);
+            String cmd = String.format("taskkill  /PID %s", pid);
             execCommand(cmd);
-            Thread.sleep(3000);
+            loopCheckRun(projectInfoModel.getId(), false);
             result = status(tag);
         }
         return result;

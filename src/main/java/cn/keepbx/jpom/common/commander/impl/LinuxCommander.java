@@ -25,7 +25,7 @@ public class LinuxCommander extends AbstractCommander {
             return msg;
         }
         // 拼接命令
-        String command = String.format("nohup java %s -classpath %s -Dapplication=%s -Dbasedir=%s %s %s >> %s 2>&1",
+        String command = String.format("nohup java %s -classpath %s -Dapplication=%s -Dbasedir=%s %s %s >> %s 2>&1 &",
                 projectInfoModel.getJvm(),
                 ProjectInfoModel.getClassPathLib(projectInfoModel),
                 projectInfoModel.getId(),
@@ -34,7 +34,8 @@ public class LinuxCommander extends AbstractCommander {
                 projectInfoModel.getArgs(),
                 projectInfoModel.getAbsoluteLog());
         GlobalThreadPool.execute(() -> execSystemCommand(command));
-        Thread.sleep(3000);
+        //
+        loopCheckRun(projectInfoModel.getId(), true);
         return status(projectInfoModel.getId());
     }
 
@@ -48,7 +49,7 @@ public class LinuxCommander extends AbstractCommander {
             String pid = result.split(":")[1];
             String cmd = String.format("kill  %s", pid);
             execCommand(cmd);
-            Thread.sleep(3000);
+            loopCheckRun(projectInfoModel.getId(), false);
             result = status(tag);
         }
         return result;

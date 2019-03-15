@@ -191,6 +191,20 @@ public abstract class AbstractCommander {
         return result.contains(CommandService.RUNING_TAG);
     }
 
+    protected void loopCheckRun(String tag, boolean status) throws Exception {
+        int count = 0;
+        do {
+            if (isRun(tag) == status) {
+                return;
+            }
+            try {
+
+                Thread.sleep(500);
+            } catch (InterruptedException ignored) {
+            }
+        } while (count++ < 10);
+    }
+
     public String execCommand(String command) throws Exception {
         return exec(new String[]{command});
     }

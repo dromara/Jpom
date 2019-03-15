@@ -105,7 +105,6 @@ public class LogWebSocketHandle implements TailLogThread.Evn {
 
     @OnMessage
     public void onMessage(String message, Session session) throws Exception {
-        DefaultSystemLog.LOG().info("客户端消息：" + message);
         JSONObject json = JSONObject.parseObject(message);
         String op = json.getString("op");
         if ("heart".equals(op)) {
