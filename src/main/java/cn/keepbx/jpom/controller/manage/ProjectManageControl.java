@@ -5,6 +5,7 @@ import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.keepbx.jpom.common.BaseController;
 import cn.keepbx.jpom.common.PageUtil;
+import cn.keepbx.jpom.common.commander.AbstractCommander;
 import cn.keepbx.jpom.model.ProjectInfoModel;
 import cn.keepbx.jpom.model.UserModel;
 import cn.keepbx.jpom.service.manage.CommandService;
@@ -103,7 +104,7 @@ public class ProjectManageControl extends BaseController {
             ProjectInfoModel projectInfoModel = projectInfoService.getItem(tag);
             String pId = commandService.execCommand(CommandService.CommandOp.pid, projectInfoModel, null).trim();
             if (StrUtil.isNotEmpty(pId)) {
-                String result = commandService.execSystemCommand("netstat -antup | grep " + pId);
+                String result = AbstractCommander.getInstance().execSystemCommand("netstat -antup | grep " + pId);
                 setAttribute("port", result);
                 return "manage/port";
             }

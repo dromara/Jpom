@@ -31,14 +31,18 @@ import java.util.Properties;
  *
  * @author Administrator
  */
-public abstract class Commander {
+public abstract class AbstractCommander {
 
-    private static Commander commander = null;
+    private static AbstractCommander abstractCommander = null;
     protected Charset charset;
     public static final OsInfo OS_INFO = SystemUtil.getOsInfo();
 
-    protected Commander(Charset charset) {
+    protected AbstractCommander(Charset charset) {
         this.charset = charset;
+    }
+
+    public Charset getCharset() {
+        return charset;
     }
 
     /**
@@ -46,21 +50,21 @@ public abstract class Commander {
      *
      * @return 命令执行对象
      */
-    public static Commander getInstance() {
-        if (commander != null) {
-            return commander;
+    public static AbstractCommander getInstance() {
+        if (abstractCommander != null) {
+            return abstractCommander;
         }
 
         if (OS_INFO.isLinux()) {
             // Linux系统
-            commander = new LinuxCommander(CharsetUtil.CHARSET_UTF_8);
+            abstractCommander = new LinuxCommander(CharsetUtil.CHARSET_UTF_8);
         } else if (OS_INFO.isWindows()) {
             // Windows系统
-            commander = new WindowsCommander(CharsetUtil.CHARSET_GBK);
+            abstractCommander = new WindowsCommander(CharsetUtil.CHARSET_GBK);
         } else {
             throw new RuntimeException("不支持的：" + OS_INFO.getName());
         }
-        return commander;
+        return abstractCommander;
     }
 
     /**
@@ -120,6 +124,13 @@ public abstract class Commander {
         return null;
     }
 
+    /**
+     * 清空日志信息
+     *
+     * @param projectInfoModel 项目
+     * @return 结果
+     * @throws Exception 异常
+     */
     public String backLog(ProjectInfoModel projectInfoModel) throws Exception {
         File file = new File(projectInfoModel.getLog());
         if (!file.exists()) {
@@ -152,10 +163,8 @@ public abstract class Commander {
             // 根据进程id查询启动属性，如果属性-Dapplication匹配，说明项目已经启动，并返回进程id
             Properties properties = VirtualMachine.attach(vmd.id()).getAgentProperties();
             String args = StrUtil.emptyToDefault(properties.getProperty("sun.jvm.args"), "");
-            System.out.println(args + "   =>  " + tag);
             if (StrUtil.containsIgnoreCase(args, tag)) {
                 result = StrUtil.format("{}:{}", CommandService.RUNING_TAG, vmd.id());
-                System.out.println(result);
                 break;
             }
         }
@@ -177,7 +186,7 @@ public abstract class Commander {
         return "0";
     }
 
-    protected boolean isRun(String tag) throws Exception {
+    private boolean isRun(String tag) throws Exception {
         String result = status(tag);
         return result.contains(CommandService.RUNING_TAG);
     }

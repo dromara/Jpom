@@ -1,7 +1,7 @@
 package cn.keepbx.jpom.model;
 
 import cn.hutool.core.util.StrUtil;
-import cn.keepbx.jpom.common.commander.Commander;
+import cn.keepbx.jpom.common.commander.AbstractCommander;
 import com.alibaba.fastjson.JSONObject;
 
 import java.io.File;
@@ -129,7 +129,7 @@ public class ProjectInfoModel extends BaseModel {
         StringBuilder classPath = new StringBuilder();
 
         for (File file : files) {
-            classPath.append(file.getAbsolutePath()).append(Commander.OS_INFO.isWindows() ? ";" : ":");
+            classPath.append(file.getAbsolutePath()).append(AbstractCommander.OS_INFO.isWindows() ? ";" : ":");
         }
         return classPath.toString();
     }

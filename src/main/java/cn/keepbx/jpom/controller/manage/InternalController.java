@@ -4,6 +4,7 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.extra.servlet.ServletUtil;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.keepbx.jpom.common.BaseController;
+import cn.keepbx.jpom.common.commander.AbstractCommander;
 import cn.keepbx.jpom.model.ProjectInfoModel;
 import cn.keepbx.jpom.service.manage.CommandService;
 import cn.keepbx.jpom.service.manage.ProjectInfoService;
@@ -18,7 +19,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
-import java.io.IOException;
 
 /**
  * 内存查看
@@ -43,7 +43,7 @@ public class InternalController extends BaseController {
         ProjectInfoModel projectInfoModel = projectInfoService.getItem(tag);
         String pid = commandService.execCommand(CommandService.CommandOp.pid, projectInfoModel, null);
         String command = "top -b -n 1 -p " + pid;
-        String internal = commandService.execCommand(command);
+        String internal = AbstractCommander.getInstance().execCommand(command);
         internal = internal.replaceAll("\n", "<br/>");
         internal = internal.replaceAll(" ", "&nbsp;&nbsp;");
         JSONObject object = new JSONObject();
@@ -66,7 +66,7 @@ public class InternalController extends BaseController {
         fileName = FileUtil.normalize(fileName);
         String commandPath = ConfigBean.getInstance().getCpuCommandPath();
         String command = String.format("%s %s %s %s", commandPath, pid, 300, fileName);
-        commandService.execCommand(command);
+        AbstractCommander.getInstance().execCommand(command);
         downLoad(getResponse(), fileName);
         return JsonMessage.getString(200, "");
     }
@@ -83,7 +83,7 @@ public class InternalController extends BaseController {
         fileName = FileUtil.normalize(fileName);
         String commandPath = ConfigBean.getInstance().getRamCommandPath();
         String command = String.format("%s %s %s", commandPath, pid, fileName);
-        commandService.execCommand(command);
+        AbstractCommander.getInstance().execCommand(command);
         downLoad(getResponse(), fileName);
         return JsonMessage.getString(200, "");
     }

@@ -1,11 +1,7 @@
 package cn.keepbx.jpom.service.manage;
 
 import cn.hutool.core.exceptions.ExceptionUtil;
-import cn.hutool.core.io.IoUtil;
-import cn.hutool.core.util.CharsetUtil;
-import cn.hutool.core.util.StrUtil;
-import cn.jiangzeyin.common.DefaultSystemLog;
-import cn.keepbx.jpom.common.commander.Commander;
+import cn.keepbx.jpom.common.commander.AbstractCommander;
 import cn.keepbx.jpom.model.ProjectInfoModel;
 import cn.keepbx.jpom.socket.LogWebSocketHandle;
 import cn.keepbx.jpom.socket.SocketSession;
@@ -15,8 +11,6 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
 import javax.websocket.Session;
 import java.io.IOException;
-import java.io.InputStream;
-import java.util.Arrays;
 
 /**
  * Created by jiangzeyin on 2018/9/28.
@@ -71,34 +65,35 @@ public class CommandService {
      */
     public String execCommand(CommandOp commandOp, ProjectInfoModel projectInfoModel, Evt evt) throws Exception {
         String result = "";
-        Commander commander = Commander.getInstance();
+        AbstractCommander abstractCommander = AbstractCommander.getInstance();
         // 执行命令
         switch (commandOp) {
             case restart:
-                result = commander.restart(projectInfoModel);
+                result = abstractCommander.restart(projectInfoModel);
                 break;
             case start:
-                result = commander.start(projectInfoModel);
+                result = abstractCommander.start(projectInfoModel);
                 break;
             case stop:
-                result = commander.stop(projectInfoModel);
+                result = abstractCommander.stop(projectInfoModel);
                 break;
             case status: {
                 String tag = projectInfoModel.getId();
-                result = commander.status(tag);
+                result = abstractCommander.status(tag);
                 break;
             }
             case pid: {
                 String tag = projectInfoModel.getId();
-                result = commander.getPid(tag);
+                result = abstractCommander.getPid(tag);
                 break;
             }
             case backupLog:
-                result = commander.backLog(projectInfoModel);
+                result = abstractCommander.backLog(projectInfoModel);
                 break;
-            case top:
-//                command = "top -b -n 1";
-                break;
+            case top: {
+                String command = "top -b -n 1";
+                return AbstractCommander.getInstance().execCommand(command);
+            }
             case showlog:
 
             default:
@@ -117,62 +112,6 @@ public class CommandService {
                 } catch (Exception ignored) {
                 }
             }
-        }
-        return result;
-    }
-
-    private String execCommand(String command, Evt evt) {
-        String result = "error";
-        try {
-            result = exec(new String[]{command});
-        } catch (IOException | InterruptedException e) {
-            DefaultSystemLog.ERROR().error("执行命令异常", e);
-            if (evt != null) {
-                evt.commandError(e);
-            }
-            result += e.getMessage();
-        }
-        return result;
-    }
-
-    public String execCommand(String command) {
-        return execCommand(command, null);
-    }
-
-    public String execSystemCommand(String command) {
-        String result = "error";
-        try {
-            //执行linux系统命令
-            String[] cmd = {"/bin/sh", "-c", command};
-            result = exec(cmd);
-        } catch (IOException | InterruptedException e) {
-            DefaultSystemLog.ERROR().error("执行命令异常", e);
-            result += e.getMessage();
-        }
-        return result;
-    }
-
-    private String exec(String[] cmd) throws IOException, InterruptedException {
-        DefaultSystemLog.LOG().info(Arrays.toString(cmd));
-        String result;
-        Process process;
-        if (cmd.length == 1) {
-            process = Runtime.getRuntime().exec(cmd[0]);
-        } else {
-            process = Runtime.getRuntime().exec(cmd);
-        }
-        InputStream is;
-        int wait = process.waitFor();
-        if (wait == 0) {
-            is = process.getInputStream();
-        } else {
-            is = process.getErrorStream();
-        }
-        result = IoUtil.read(is, CharsetUtil.CHARSET_UTF_8);
-        is.close();
-        process.destroy();
-        if (StrUtil.isEmpty(result)) {
-            result = "没有返回任何执行信息";
         }
         return result;
     }

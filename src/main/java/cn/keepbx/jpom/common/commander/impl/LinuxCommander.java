@@ -1,6 +1,6 @@
 package cn.keepbx.jpom.common.commander.impl;
 
-import cn.keepbx.jpom.common.commander.Commander;
+import cn.keepbx.jpom.common.commander.AbstractCommander;
 import cn.keepbx.jpom.model.ProjectInfoModel;
 import cn.keepbx.jpom.service.manage.CommandService;
 
@@ -11,7 +11,7 @@ import java.nio.charset.Charset;
  *
  * @author Administrator
  */
-public class LinuxCommander extends Commander {
+public class LinuxCommander extends AbstractCommander {
 
     public LinuxCommander(Charset charset) {
         super(charset);
