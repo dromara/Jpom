@@ -31,7 +31,7 @@ public class WindowsCommander extends AbstractCommander {
         String args = projectInfoModel.getArgs();
         String classPath = ProjectInfoModel.getClassPathLib(projectInfoModel);
 
-        String command = String.format("javaw %s -classpath %s -Dapplication=%s -Dbasedir=%s %s %s >> %s",
+        String command = String.format("javaw %s -classpath %s -Dapplication=%s -Dbasedir=%s %s %s >> %s &",
                 jvm, classPath, tag,
                 projectInfoModel.getAbsoluteLib(), mainClass, args, projectInfoModel.getAbsoluteLog());
         // 执行命令;
@@ -49,7 +49,7 @@ public class WindowsCommander extends AbstractCommander {
         String result = status(tag);
         if (result.startsWith(CommandService.RUNING_TAG)) {
             String pid = result.split(":")[1];
-            String cmd = String.format("taskkill  /PID %s", pid);
+            String cmd = String.format("taskkill /F /PID %s", pid);
             execCommand(cmd);
             loopCheckRun(projectInfoModel.getId(), false);
             result = status(tag);

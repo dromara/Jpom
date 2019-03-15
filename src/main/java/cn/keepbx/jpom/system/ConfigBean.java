@@ -21,7 +21,6 @@ public class ConfigBean {
     private static final String DATA = "data";
     private static ConfigBean configBean;
 
-    public static final String RUN_SH = "/run_boot.sh";
     public static final String CPU_SH = "/java_cpu.sh";
     public static final String RAM_SH = "/java_ram.sh";
 
@@ -123,16 +122,6 @@ public class ConfigBean {
             throw new ConfigException(item + " 文件不存在:" + runSh, runSh);
         }
         return runSh;
-    }
-
-    /**
-     * 运行控制
-     *
-     * @return 完整路径
-     * @throws ConfigException 配置异常
-     */
-    public String getRunCommandPath() throws ConfigException {
-        return getCommandPath(RUN_SH);
     }
 
     /**

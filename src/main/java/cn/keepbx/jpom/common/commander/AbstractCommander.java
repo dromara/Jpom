@@ -4,7 +4,6 @@ import cn.hutool.core.date.DatePattern;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
-import cn.hutool.core.thread.GlobalThreadPool;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.http.HttpUtil;
@@ -143,8 +142,8 @@ public abstract class AbstractCommander {
             execCommand("cp /dev/null " + projectInfoModel.getLog());
         } else if (OS_INFO.isWindows()) {
             // 清空日志
-            String log = projectInfoModel.getLog();
-            FileUtil.del(log);
+            //            String r = execSystemCommand("echo  \"\" > " + file.getAbsolutePath());
+            //            System.out.println(r);
         }
         return "ok";
     }

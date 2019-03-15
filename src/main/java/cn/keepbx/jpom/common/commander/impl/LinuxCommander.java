@@ -33,8 +33,9 @@ public class LinuxCommander extends AbstractCommander {
                 projectInfoModel.getMainClass(),
                 projectInfoModel.getArgs(),
                 projectInfoModel.getAbsoluteLog());
-        GlobalThreadPool.execute(() -> execSystemCommand(command));
         //
+        GlobalThreadPool.execute(() -> execSystemCommand(command));
+        // 检查是否执行完毕
         loopCheckRun(projectInfoModel.getId(), true);
         return status(projectInfoModel.getId());
     }
