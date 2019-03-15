@@ -5,6 +5,7 @@ import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
+import cn.keepbx.jpom.common.commander.Commander;
 import cn.keepbx.jpom.model.ProjectInfoModel;
 import cn.keepbx.jpom.socket.LogWebSocketHandle;
 import cn.keepbx.jpom.socket.SocketSession;
@@ -59,7 +60,7 @@ public class CommandService {
     }
 
 
-    public String execCommand(CommandOp commandOp, ProjectInfoModel projectInfoModel) throws IOException {
+    public String execCommand(CommandOp commandOp, ProjectInfoModel projectInfoModel) throws Exception {
         return execCommand(commandOp, projectInfoModel, null);
     }
 
@@ -69,9 +70,10 @@ public class CommandService {
      * @param commandOp        执行的操作
      * @param projectInfoModel 项目信息
      */
-    public String execCommand(CommandOp commandOp, ProjectInfoModel projectInfoModel, Evt evt) throws IOException {
-        String result;
+    public String execCommand(CommandOp commandOp, ProjectInfoModel projectInfoModel, Evt evt) throws Exception {
+        String result = "";
 
+        Commander commander = Commander.getInstance();
         String commandPath = ConfigBean.getInstance().getRunCommandPath();
         String tag = null, log = null;
         // 项目启动信息
@@ -84,29 +86,33 @@ public class CommandService {
         String command;
         switch (commandOp) {
             case restart:
+                result = commander.restart(projectInfoModel);
+                break;
             case start: {
-                String mainClass = null, lib = null, token = null, jvm = null, args = null;
-                if (projectInfoModel != null) {
-                    mainClass = projectInfoModel.getMainClass();
-                    lib = projectInfoModel.getLib();
-                    token = projectInfoModel.getToken();
-                    jvm = projectInfoModel.getJvm();
-                    args = projectInfoModel.getArgs();
-                }
-                command = String.format("%s %s %s %s %s %s %s [%s][%s]", commandPath, commandOp.toString(), tag, token, mainClass, lib, log, jvm, args);
+//                String mainClass = null, lib = null, token = null, jvm = null, args = null;
+//                if (projectInfoModel != null) {
+//                    mainClass = projectInfoModel.getMainClass();
+//                    lib = projectInfoModel.getLib();
+//                    token = projectInfoModel.getToken();
+//                    jvm = projectInfoModel.getJvm();
+//                    args = projectInfoModel.getArgs();
+//                }
+//                command = String.format("%s %s %s %s %s %s %s [%s][%s]", commandPath, commandOp.toString(), tag, token, mainClass, lib, log, jvm, args);
+                result = commander.start(projectInfoModel);
                 break;
             }
             case stop: {
-                String token = null;
-                if (projectInfoModel != null) {
-                    token = projectInfoModel.getToken();
-                }
-                command = String.format("%s %s %s %s", commandPath, commandOp.toString(), tag, token);
+//                String token = null;
+//                if (projectInfoModel != null) {
+//                    token = projectInfoModel.getToken();
+//                }
+//                command = String.format("%s %s %s %s", commandPath, commandOp.toString(), tag, token);
+                result = commander.stop(projectInfoModel.getId());
                 break;
             }
             case status:
             case pid:
-                command = String.format("%s %s %s", commandPath, commandOp.toString(), tag);
+                result = commander.status(tag);
                 break;
             case backupLog: {
                 command = String.format("%s %s %s", commandPath, commandOp.toString(), log);
@@ -119,7 +125,6 @@ public class CommandService {
             default:
                 throw new IllegalArgumentException(commandOp + " error");
         }
-        result = execCommand(command, evt);
         //  通知日志刷新
         if (commandOp == CommandOp.start || commandOp == CommandOp.restart) {
             if (projectInfoModel != null) {

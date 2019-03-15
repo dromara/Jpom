@@ -66,7 +66,7 @@ public class TopManager {
                 String result = commandService.execCommand(CommandService.CommandOp.top, null, null);
                 String topInfo = getTopInfo(result);
                 send(topInfo);
-            } catch (IOException e) {
+            } catch (Exception e) {
                 DefaultSystemLog.ERROR().error(e.getMessage(), e);
             }
         });

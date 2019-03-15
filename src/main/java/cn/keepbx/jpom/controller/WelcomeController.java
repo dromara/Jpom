@@ -40,7 +40,7 @@ public class WelcomeController extends BaseController {
         try {
             String s = commandService.execCommand(CommandService.CommandOp.top, null, null);
             topInfo = TopManager.getTopInfo(s);
-        } catch (IOException e) {
+        } catch (Exception e) {
             DefaultSystemLog.ERROR().error(e.getMessage(), e);
         }
         return JsonMessage.getString(200, "", topInfo);

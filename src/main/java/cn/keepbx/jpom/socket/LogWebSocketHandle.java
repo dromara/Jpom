@@ -74,7 +74,7 @@ public class LogWebSocketHandle implements TailLogThread.Evn {
                     return;
                 }
             }
-            socketSession.sendMsg("欢迎加入：" + userModel.getName() + "  回话id:" + session.getId());
+            socketSession.sendMsg("欢迎加入：" + userModel.getName() + "  会话id:" + session.getId());
         } catch (Exception e) {
             DefaultSystemLog.ERROR().error(e.getMessage(), e);
             try {
@@ -102,7 +102,7 @@ public class LogWebSocketHandle implements TailLogThread.Evn {
     }
 
     @OnMessage
-    public void onMessage(String message, Session session) throws IOException {
+    public void onMessage(String message, Session session) throws Exception {
         DefaultSystemLog.LOG().info("客户端消息：" + message);
         JSONObject json = JSONObject.parseObject(message);
         String projectId = json.getString("projectId");
