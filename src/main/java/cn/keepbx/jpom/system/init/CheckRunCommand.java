@@ -11,7 +11,6 @@ import cn.jiangzeyin.common.spring.SpringUtil;
 import cn.keepbx.jpom.common.commander.AbstractCommander;
 import cn.keepbx.jpom.controller.system.WhitelistDirectoryController;
 import cn.keepbx.jpom.model.ProjectInfoModel;
-import cn.keepbx.jpom.service.manage.CommandService;
 import cn.keepbx.jpom.service.manage.ProjectInfoService;
 import cn.keepbx.jpom.service.system.SystemService;
 import cn.keepbx.jpom.system.ConfigBean;
@@ -43,12 +42,6 @@ public class CheckRunCommand {
      */
     @PreLoadMethod
     private static void checkSh() throws Exception {
-        try {
-            ConfigBean.getInstance().getRunCommandPath();
-        } catch (ConfigException e) {
-            DefaultSystemLog.LOG().info("创建默认文件：" + e.getPath());
-            addCommandFile(ConfigBean.RUN_SH, e.getPath());
-        }
         try {
             ConfigBean.getInstance().getRamCommandPath();
         } catch (ConfigException e) {
@@ -158,7 +151,6 @@ public class CheckRunCommand {
         String content = FileUtil.readString(url, CharsetUtil.UTF_8);
         FileUtil.writeString(content, file, CharsetUtil.UTF_8);
         // 添加文件权限
-        CommandService commandService = SpringUtil.getBean(CommandService.class);
         String runCommand = "chmod 755 " + file;
         AbstractCommander.getInstance().execCommand(runCommand);
     }
