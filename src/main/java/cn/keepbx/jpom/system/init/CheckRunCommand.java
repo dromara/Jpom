@@ -3,6 +3,9 @@ package cn.keepbx.jpom.system.init;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.resource.ResourceUtil;
 import cn.hutool.core.util.CharsetUtil;
+import cn.hutool.core.util.StrUtil;
+import cn.hutool.system.JavaRuntimeInfo;
+import cn.hutool.system.SystemUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.PreLoadClass;
@@ -42,6 +45,7 @@ public class CheckRunCommand {
      */
     @PreLoadMethod
     private static void checkSh() throws Exception {
+        tipTail();
         try {
             ConfigBean.getInstance().getRamCommandPath();
         } catch (ConfigException e) {
@@ -53,6 +57,36 @@ public class CheckRunCommand {
         } catch (ConfigException e) {
             DefaultSystemLog.LOG().info("创建默认文件：" + e.getPath());
             addCommandFile(ConfigBean.CPU_SH, e.getPath());
+        }
+    }
+
+    private static void tipTail() {
+        if (!AbstractCommander.OS_INFO.isWindows()) {
+            return;
+        }
+        JavaRuntimeInfo javaRuntimeInfo = SystemUtil.getJavaRuntimeInfo();
+        String path = javaRuntimeInfo.getLibraryPath();
+        String[] paths = StrUtil.splitToArray(path, ';');
+        for (String itemPath : paths) {
+            String item = FileUtil.normalize(itemPath);
+            int index = item.indexOf(StrUtil.COLON);
+            if (index < 0) {
+                continue;
+            }
+            item = item.substring(index + 1);
+            if (item.startsWith(StrUtil.SLASH)) {
+                item = item.substring(1);
+            }
+            if (item.endsWith(StrUtil.SLASH)) {
+                item = item.substring(0, item.length() - 1);
+            }
+            if (StrUtil.equalsIgnoreCase("WINDOWS/system32", item)) {
+                File file = new File(itemPath, "tail.exe");
+                if (!file.exists()) {
+                    DefaultSystemLog.LOG().info("还未配置tail：详情查看>> https://gitee.com/keepbx/jpom/blob/master/doc/windows-tail.md");
+                }
+                break;
+            }
         }
     }
 

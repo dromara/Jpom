@@ -123,6 +123,10 @@ mvn package
 
 [用户角色说明>>](/doc/safeMode.md#用户权限说明)
 
+### windows 开启实时查看控制台日志
+
+[飞机>>](/doc/windows-tail.md)
+
 ### 阿里云Oss配置
 
 [查看文档](/doc/CodePipeline-Oss.md)
