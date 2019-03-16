@@ -1,5 +1,6 @@
 package cn.keepbx.jpom.common.commander;
 
+import cn.hutool.core.convert.Convert;
 import cn.hutool.core.date.DatePattern;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.io.FileUtil;
@@ -16,10 +17,17 @@ import cn.keepbx.jpom.model.ProjectInfoModel;
 import cn.keepbx.jpom.service.manage.CommandService;
 import com.sun.tools.attach.VirtualMachine;
 import com.sun.tools.attach.VirtualMachineDescriptor;
+import sun.management.ConnectorAddressLink;
 
+import javax.management.MBeanServerConnection;
+import javax.management.remote.JMXConnector;
+import javax.management.remote.JMXConnectorFactory;
+import javax.management.remote.JMXServiceURL;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.management.ManagementFactory;
+import java.lang.management.MemoryMXBean;
 import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.List;
@@ -159,18 +167,43 @@ public abstract class AbstractCommander {
         tag = String.format("-Dapplication=%s", tag);
         String result = CommandService.STOP_TAG;
         // 通过VirtualMachine.list()列出所有的java进程
-        List<VirtualMachineDescriptor> listvm = VirtualMachine.list();
-        for (VirtualMachineDescriptor vmd : listvm) {
+        List<VirtualMachineDescriptor> descriptorList = VirtualMachine.list();
+        for (VirtualMachineDescriptor virtualMachineDescriptor : descriptorList) {
+            VirtualMachine virtualMachine = VirtualMachine.attach(virtualMachineDescriptor);
+            int pid = Convert.toInt(virtualMachineDescriptor.id(), 0);
             // 根据进程id查询启动属性，如果属性-Dapplication匹配，说明项目已经启动，并返回进程id
-            Properties properties = VirtualMachine.attach(vmd.id()).getAgentProperties();
+            Properties properties = virtualMachine.getAgentProperties();
             String args = StrUtil.emptyToDefault(properties.getProperty("sun.jvm.args"), "");
             if (StrUtil.containsIgnoreCase(args, tag)) {
-                result = StrUtil.format("{}:{}", CommandService.RUNING_TAG, vmd.id());
+                result = StrUtil.format("{}:{}", CommandService.RUNING_TAG, pid);
                 break;
             }
         }
         return result;
     }
+
+    private static void getM(int pid) throws IOException {
+        JMXServiceURL jmxServiceURL = getLocalStubServiceURLFromPID(pid);
+        if (jmxServiceURL != null) {
+            JMXConnector jmxc = JMXConnectorFactory.connect(jmxServiceURL, null);
+            MBeanServerConnection mBeanServerConnection = jmxc.getMBeanServerConnection();
+            
+            MemoryMXBean memBean = ManagementFactory.newPlatformMXBeanProxy
+                    (mBeanServerConnection, ManagementFactory.MEMORY_MXBEAN_NAME, MemoryMXBean.class);
+
+//                mBeanServerConnection.getAttribute("java.lang:type=Memory", "HeapMemoryUsage");
+        }
+    }
+
+    private static JMXServiceURL getLocalStubServiceURLFromPID(int pid)
+            throws IOException {
+        String address = ConnectorAddressLink.importFrom(pid);
+        if (address != null) {
+            return new JMXServiceURL(address);
+        }
+        return null;
+    }
+
 
     /**
      * 获取进程id

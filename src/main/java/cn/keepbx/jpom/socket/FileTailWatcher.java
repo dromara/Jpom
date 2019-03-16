@@ -1,6 +1,5 @@
 package cn.keepbx.jpom.socket;
 
-import cn.hutool.core.io.IORuntimeException;
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.CharsetUtil;
@@ -51,9 +50,6 @@ public class FileTailWatcher implements Runnable {
         if (!file.exists()) {
             throw new IOException("文件不存在:" + file.getPath());
         }
-        if (file.length() <= 0) {
-            throw new IOException("文件内容为空");
-        }
         FileTailWatcher fileTailWatcher = CONCURRENT_HASH_MAP.computeIfAbsent(log, s -> {
             try {
                 return new FileTailWatcher(file, s);
@@ -85,13 +81,9 @@ public class FileTailWatcher implements Runnable {
     private FileTailWatcher(File file, String log) throws IOException {
         this.log = log;
         this.randomFile = new RandomAccessFile(file, "r");
-        // 开始读取
-        this.read(false);
-        // 将指针置于末尾
-        try {
-            this.randomFile.seek(randomFile.length());
-        } catch (IOException e) {
-            throw new IORuntimeException(e);
+        if (file.length() > 0) {
+            // 开始读取
+            this.read(false);
         }
     }
 
@@ -100,6 +92,10 @@ public class FileTailWatcher implements Runnable {
             try {
                 SocketSessionUtil.send(session, StrUtil.format("监听日志成功,目前共有{}人正在查看", this.socketSessions.size()));
             } catch (IOException ignored) {
+            }
+            if (this.limitQueue.size() <= 0) {
+                send("日志文件为空");
+                return;
             }
             // 开发发送头信息
             for (String s : this.limitQueue) {
@@ -127,7 +123,7 @@ public class FileTailWatcher implements Runnable {
         }
         String tmp;
         while ((tmp = randomFile.readLine()) != null) {
-            tmp = CharsetUtil.convert(tmp, CharsetUtil.CHARSET_ISO_8859_1, CharsetUtil.CHARSET_UTF_8);
+            tmp = CharsetUtil.convert(tmp, CharsetUtil.CHARSET_ISO_8859_1, CharsetUtil.systemCharset());
             limitQueue.offer(tmp);
             if (send) {
                 send(tmp);
