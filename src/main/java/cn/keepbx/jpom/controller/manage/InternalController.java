@@ -3,7 +3,6 @@ package cn.keepbx.jpom.controller.manage;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.text.StrSpliter;
-import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.servlet.ServletUtil;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.keepbx.jpom.common.BaseController;
@@ -12,7 +11,6 @@ import cn.keepbx.jpom.model.ProjectInfoModel;
 import cn.keepbx.jpom.service.manage.CommandService;
 import cn.keepbx.jpom.service.manage.ProjectInfoService;
 import cn.keepbx.jpom.system.ConfigBean;
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
@@ -23,7 +21,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
-import java.io.IOException;
 import java.util.List;
 
 /**
@@ -46,34 +43,29 @@ public class InternalController extends BaseController {
      */
     @RequestMapping(value = "internal", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
     public String getInternal(String tag) throws Exception {
-        ProjectInfoModel projectInfoModel = projectInfoService.getItem(tag);
-        String pid = commandService.execCommand(CommandService.CommandOp.pid, projectInfoModel, null);
-        String command = "top -b -n 1 -p " + pid;
-        String internal = AbstractCommander.getInstance().execCommand(command);
-        internal = internal.replaceAll("\n", "<br/>");
-        internal = internal.replaceAll(" ", "&nbsp;&nbsp;");
         JSONObject object = new JSONObject();
-        object.put("ram", internal);
+        if (AbstractCommander.OS_INFO.isLinux()) {
+            ProjectInfoModel projectInfoModel = projectInfoService.getItem(tag);
+            String pid = commandService.execCommand(CommandService.CommandOp.pid, projectInfoModel, null);
+            String command = "top -b -n 1 -p " + pid;
+            String internal = AbstractCommander.getInstance().execCommand(command);
+            String[] split = internal.split("\n");
+            StringBuilder result = new StringBuilder();
+            for (int i = 0; i < 5; i++) {
+                String s = split[i].replaceAll(" ", "&nbsp;&nbsp;");
+                result.append(s).append("<br/>");
+            }
+            JSONObject jsonObject = formatTop(internal);
+            setAttribute("item", jsonObject);
+            object.put("ram", result.toString());
+        }
         object.put("tag", tag);
         setAttribute("internal", object);
         return "manage/internal";
     }
 
-    @RequestMapping(value = "internal/list", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    @ResponseBody
-    public String list(String tag) throws Exception {
-        if (StrUtil.isEmpty(tag)) {
-            return JsonMessage.getString(200, "");
-        }
-        ProjectInfoModel projectInfoModel = projectInfoService.getItem(tag);
-        String pid = commandService.execCommand(CommandService.CommandOp.pid, projectInfoModel, null);
-        String command = "top -b -n 1 -p " + pid;
-        String internal = AbstractCommander.getInstance().execCommand(command);
-        JSONArray array = formatTop(internal);
-        return JsonMessage.getString(200, "", array);
-    }
 
-    private JSONArray formatTop(String top) {
+    private JSONObject formatTop(String top) {
         List<String> list = StrSpliter.splitTrim(top, "\n", true);
         if (list.size() < 5) {
             return null;
@@ -90,7 +82,8 @@ public class InternalController extends BaseController {
                 item.put("pid", value);
                 continue;
             }
-            if ("virt".equals(name) || "res".equals(name) || "shr".equals(name)) {
+            name = name.replaceAll("%", "").replace("+", "");
+            if ("VIRT".equalsIgnoreCase(name) || "RES".equalsIgnoreCase(name) || "SHR".equalsIgnoreCase(name)) {
                 value = Convert.toLong(value) / 1024 + "mb";
             }
             if ("�".equals(name)) {
@@ -109,14 +102,12 @@ public class InternalController extends BaseController {
                     value = "不可中断的睡眠状态 ";
                 }
             }
-            if ("%cpu".equals(name) || "%mem".equals(name)) {
+            if ("CPU".equalsIgnoreCase(name) || "MEM".equalsIgnoreCase(name)) {
                 value += "%";
             }
             item.put(name, value);
         }
-        JSONArray array = new JSONArray();
-        array.add(item);
-        return array;
+        return item;
     }
 
     /**
@@ -125,15 +116,19 @@ public class InternalController extends BaseController {
     @RequestMapping(value = "stack", method = RequestMethod.GET)
     @ResponseBody
     public String stack(String tag) throws Exception {
-        ProjectInfoModel projectInfoModel = projectInfoService.getItem(tag);
-        String pid = commandService.execCommand(CommandService.CommandOp.pid, projectInfoModel, null).trim();
-        pid = pid.replace("\n", "");
-        String fileName = ConfigBean.getInstance().getTempPathName() + "/" + tag + "_java_cpu.txt";
-        fileName = FileUtil.normalize(fileName);
-        String commandPath = ConfigBean.getInstance().getCpuCommandPath();
-        String command = String.format("%s %s %s %s", commandPath, pid, 300, fileName);
-        AbstractCommander.getInstance().execCommand(command);
-        downLoad(getResponse(), fileName);
+        if (AbstractCommander.OS_INFO.isLinux()) {
+            ProjectInfoModel projectInfoModel = projectInfoService.getItem(tag);
+            String pid = commandService.execCommand(CommandService.CommandOp.pid, projectInfoModel, null).trim();
+            pid = pid.replace("\n", "");
+            String fileName = ConfigBean.getInstance().getTempPathName() + "/" + tag + "_java_cpu.txt";
+            fileName = FileUtil.normalize(fileName);
+            String commandPath = ConfigBean.getInstance().getCpuCommandPath();
+            String command = String.format("%s %s %s %s", commandPath, pid, 300, fileName);
+            AbstractCommander.getInstance().execCommand(command);
+            downLoad(getResponse(), fileName);
+        } else {
+            getResponse().sendRedirect("internal?tag=" + tag);
+        }
         return JsonMessage.getString(200, "");
     }
 
@@ -143,14 +138,18 @@ public class InternalController extends BaseController {
     @RequestMapping(value = "ram", method = RequestMethod.GET)
     @ResponseBody
     public String ram(String tag) throws Exception {
-        ProjectInfoModel projectInfoModel = projectInfoService.getItem(tag);
-        String pid = commandService.execCommand(CommandService.CommandOp.pid, projectInfoModel, null).trim();
-        String fileName = ConfigBean.getInstance().getTempPathName() + "/" + tag + "_java_ram.txt";
-        fileName = FileUtil.normalize(fileName);
-        String commandPath = ConfigBean.getInstance().getRamCommandPath();
-        String command = String.format("%s %s %s", commandPath, pid, fileName);
-        AbstractCommander.getInstance().execCommand(command);
-        downLoad(getResponse(), fileName);
+        if (AbstractCommander.OS_INFO.isLinux()) {
+            ProjectInfoModel projectInfoModel = projectInfoService.getItem(tag);
+            String pid = commandService.execCommand(CommandService.CommandOp.pid, projectInfoModel, null).trim();
+            String fileName = ConfigBean.getInstance().getTempPathName() + "/" + tag + "_java_ram.txt";
+            fileName = FileUtil.normalize(fileName);
+            String commandPath = ConfigBean.getInstance().getRamCommandPath();
+            String command = String.format("%s %s %s", commandPath, pid, fileName);
+            AbstractCommander.getInstance().execCommand(command);
+            downLoad(getResponse(), fileName);
+        } else {
+            getResponse().sendRedirect("internal?tag=" + tag);
+        }
         return JsonMessage.getString(200, "");
     }
 
