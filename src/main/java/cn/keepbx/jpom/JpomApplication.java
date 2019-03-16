@@ -5,6 +5,7 @@ import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.ApplicationBuilder;
 import cn.jiangzeyin.common.EnableCommonBoot;
 import cn.keepbx.jpom.common.interceptor.LoginInterceptor;
+import cn.keepbx.jpom.common.interceptor.PermissionInterceptor;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.web.servlet.ServletComponentScan;
 import org.springframework.http.converter.StringHttpMessageConverter;
@@ -30,7 +31,8 @@ public class JpomApplication {
         JpomApplication.args = args;
         ApplicationBuilder.createBuilder(JpomApplication.class)
                 .addHttpMessageConverter(new StringHttpMessageConverter(CharsetUtil.CHARSET_UTF_8))
-                .addInterceptor(LoginInterceptor.class)
+                // 拦截器
+                .addInterceptor(LoginInterceptor.class).addInterceptor(PermissionInterceptor.class)
                 .run(args);
     }
 

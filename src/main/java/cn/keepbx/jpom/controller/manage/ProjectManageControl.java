@@ -7,6 +7,7 @@ import cn.jiangzeyin.common.JsonMessage;
 import cn.keepbx.jpom.common.BaseController;
 import cn.keepbx.jpom.common.PageUtil;
 import cn.keepbx.jpom.common.commander.AbstractCommander;
+import cn.keepbx.jpom.common.interceptor.ProjectPermission;
 import cn.keepbx.jpom.model.ProjectInfoModel;
 import cn.keepbx.jpom.model.UserModel;
 import cn.keepbx.jpom.service.manage.CommandService;
@@ -164,12 +165,9 @@ public class ProjectManageControl extends BaseController {
      */
     @RequestMapping(value = "deleteProject", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
-    public String deleteProject(String id, String type) throws IOException {
-        UserModel userName = getUser();
-        if (!userName.isProject(id)) {
-            return JsonMessage.getString(500, "你没有对应权限");
-        }
-        ProjectInfoModel projectInfoModel = projectInfoService.getItem(id);
+    @ProjectPermission
+    public String deleteProject(String id, String type) {
+        ProjectInfoModel projectInfoModel = getProjectInfoModel();
         if (projectInfoModel == null) {
             return JsonMessage.getString(405, "未找到对应项目");
         }

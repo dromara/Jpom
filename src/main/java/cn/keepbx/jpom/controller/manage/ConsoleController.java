@@ -96,7 +96,7 @@ public class ConsoleController extends BaseController {
         }
     }
 
-    private String getLogSize(String id) throws IOException {
+    private String getLogSize(String id) {
         ProjectInfoModel pim;
         try {
             pim = projectInfoService.getItem(id);

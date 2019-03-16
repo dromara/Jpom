@@ -6,8 +6,8 @@ import cn.hutool.extra.servlet.ServletUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.keepbx.jpom.common.BaseController;
+import cn.keepbx.jpom.common.interceptor.ProjectPermission;
 import cn.keepbx.jpom.model.ProjectInfoModel;
-import cn.keepbx.jpom.model.UserModel;
 import cn.keepbx.jpom.service.manage.ProjectInfoService;
 import com.alibaba.fastjson.JSONArray;
 import org.springframework.http.MediaType;
@@ -77,31 +77,23 @@ public class LogBackController extends BaseController {
 
     @RequestMapping(value = "logBack_delete", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
+    @ProjectPermission(checkDelete = true)
     public String clear(String id, String name) {
-        UserModel userName = getUser();
-        if (!userName.isProject(id)) {
-            return JsonMessage.getString(400, "你没有对应操作权限操作!");
-        }
         name = pathSafe(name);
         if (StrUtil.isEmpty(name)) {
             return JsonMessage.getString(405, "非法操作:" + name);
         }
-        try {
-            ProjectInfoModel pim = projectInfoService.getItem(id);
-            File logBack = pim.getLogBack();
-            if (logBack.exists() && logBack.isDirectory()) {
-                logBack = new File(logBack, name);
-                if (logBack.exists()) {
-                    FileUtil.del(logBack);
-                    return JsonMessage.getString(200, "删除成功");
-                }
-                return JsonMessage.getString(500, "没有对应文件");
-            } else {
-                return JsonMessage.getString(500, "没有对应文件夹");
+        ProjectInfoModel pim = getProjectInfoModel();
+        File logBack = pim.getLogBack();
+        if (logBack.exists() && logBack.isDirectory()) {
+            logBack = new File(logBack, name);
+            if (logBack.exists()) {
+                FileUtil.del(logBack);
+                return JsonMessage.getString(200, "删除成功");
             }
-        } catch (IOException e) {
-            DefaultSystemLog.ERROR().error("删除文件异常", e);
+            return JsonMessage.getString(500, "没有对应文件");
+        } else {
+            return JsonMessage.getString(500, "没有对应文件夹");
         }
-        return JsonMessage.getString(500, "删除失败");
     }
 }
