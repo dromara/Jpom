@@ -211,9 +211,7 @@
 
         // 提交用户信息
         form.on('submit(submitUser)', function (data) {
-            // var check_val = getCheckedBox();
             var field = data.field;
-            // field.project = check_val.join(",");
             $.ajax({
                 url: data.form.action,
                 type: 'POST',
@@ -222,9 +220,8 @@
                 success: function (data) {
                     if (200 == data.code) {
                         layer.closeAll('page');
-
                         // 刷新表
-                        table.reload('tab_user', {height: 'full-52'});
+                        table.reload('tab_user', {});
                     } else {
                         layer.msg(data.msg);
                     }
