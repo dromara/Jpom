@@ -43,21 +43,23 @@ public class InternalController extends BaseController {
      */
     @RequestMapping(value = "internal", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
     public String getInternal(String tag) throws Exception {
-        ProjectInfoModel projectInfoModel = projectInfoService.getItem(tag);
-        String pid = commandService.execCommand(CommandService.CommandOp.pid, projectInfoModel, null);
-        String command = "top -b -n 1 -p " + pid;
-        String internal = AbstractCommander.getInstance().execCommand(command);
-        String[] split = internal.split("\n");
-        StringBuilder result = new StringBuilder();
-        for (int i = 0; i < 5; i++) {
-            String s = split[i].replaceAll(" ", "&nbsp;&nbsp;");
-            result.append(s).append("<br/>");
-        }
-        JSONObject jsonObject = formatTop(internal);
         JSONObject object = new JSONObject();
-        object.put("ram", result.toString());
+        if (AbstractCommander.OS_INFO.isLinux()) {
+            ProjectInfoModel projectInfoModel = projectInfoService.getItem(tag);
+            String pid = commandService.execCommand(CommandService.CommandOp.pid, projectInfoModel, null);
+            String command = "top -b -n 1 -p " + pid;
+            String internal = AbstractCommander.getInstance().execCommand(command);
+            String[] split = internal.split("\n");
+            StringBuilder result = new StringBuilder();
+            for (int i = 0; i < 5; i++) {
+                String s = split[i].replaceAll(" ", "&nbsp;&nbsp;");
+                result.append(s).append("<br/>");
+            }
+            JSONObject jsonObject = formatTop(internal);
+            setAttribute("item", jsonObject);
+            object.put("ram", result.toString());
+        }
         object.put("tag", tag);
-        setAttribute("item", jsonObject);
         setAttribute("internal", object);
         return "manage/internal";
     }
@@ -124,6 +126,8 @@ public class InternalController extends BaseController {
             String command = String.format("%s %s %s %s", commandPath, pid, 300, fileName);
             AbstractCommander.getInstance().execCommand(command);
             downLoad(getResponse(), fileName);
+        } else {
+            getResponse().sendRedirect("internal?tag=" + tag);
         }
         return JsonMessage.getString(200, "");
     }
@@ -143,6 +147,8 @@ public class InternalController extends BaseController {
             String command = String.format("%s %s %s", commandPath, pid, fileName);
             AbstractCommander.getInstance().execCommand(command);
             downLoad(getResponse(), fileName);
+        } else {
+            getResponse().sendRedirect("internal?tag=" + tag);
         }
         return JsonMessage.getString(200, "");
     }

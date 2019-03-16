@@ -35,7 +35,7 @@
     <a class="but" href="/manage/stack?tag=$!internal.tag">导出堆栈信息</a>
     <a class="but" href="/manage/ram?tag=$!internal.tag">导出内存信息</a>
     <div class="info">
-        $internal.ram
+        $!internal.ram
     </div>
 
 </div>
