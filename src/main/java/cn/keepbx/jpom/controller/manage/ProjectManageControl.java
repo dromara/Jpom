@@ -1,5 +1,6 @@
 package cn.keepbx.jpom.controller.manage;
 
+import cn.hutool.core.text.StrSpliter;
 import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
@@ -105,19 +106,53 @@ public class ProjectManageControl extends BaseController {
             String pId = commandService.execCommand(CommandService.CommandOp.pid, projectInfoModel, null).trim();
             if (StrUtil.isNotEmpty(pId)) {
                 String cmd;
+                boolean isLinux = true;
                 if (AbstractCommander.OS_INFO.isLinux()) {
-                    cmd = "netstat -antup | grep " + pId;
+                    cmd = "netstat -antup | grep " + pId + " | head -10";
                 } else {
+                    isLinux = false;
                     cmd = "netstat -nao | findstr " + pId;
                 }
                 String result = AbstractCommander.getInstance().execSystemCommand(cmd);
-                setAttribute("port", result);
+                JSONArray array = formatRam(isLinux, result);
+                setAttribute("port", array);
                 return "manage/port";
             }
         } catch (Exception e) {
             DefaultSystemLog.ERROR().error(e.getMessage(), e);
         }
         return "manage/port";
+    }
+
+    private JSONArray formatRam(boolean isLinux, String result) {
+        List<String> netList = StrSpliter.splitTrim(result, "\n", true);
+        if (netList == null || netList.size() <= 0) {
+            return null;
+        }
+        JSONArray array = new JSONArray();
+        for (String str : netList) {
+            List<String> list = StrSpliter.splitTrim(str, " ", true);
+            JSONObject item = new JSONObject();
+            if (isLinux) {
+                item.put("protocol", list.get(0));
+                item.put("receive", list.get(1));
+                item.put("send", list.get(2));
+                item.put("local", list.get(3));
+                item.put("foreign", list.get(4));
+                item.put("status", list.get(5));
+                item.put("name", list.get(6));
+            } else {
+                item.put("protocol", list.get(0));
+                item.put("receive", 0);
+                item.put("send", 0);
+                item.put("local", list.get(1));
+                item.put("foreign", list.get(2));
+                item.put("status", list.get(3));
+                item.put("name", list.get(4));
+            }
+            array.add(item);
+        }
+        return array;
     }
 
 
