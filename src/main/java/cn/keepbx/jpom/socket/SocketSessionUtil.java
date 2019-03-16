@@ -13,7 +13,7 @@ import java.io.IOException;
  * @author jiangzeyin
  * @date 2018/9/29
  */
-public class SocketSession {
+public class SocketSessionUtil {
     /**
      * 锁
      */
@@ -22,35 +22,6 @@ public class SocketSession {
      * 错误尝试次数
      */
     private static final int ERROR_TRY_COUNT = 10;
-
-    private TailLogThread thread;
-    private Session session;
-
-
-    public SocketSession(Session session) {
-        this.session = session;
-    }
-
-    public TailLogThread getThread() {
-        return thread;
-    }
-
-    public void setThread(TailLogThread thread) {
-        this.thread = thread;
-    }
-
-    /**
-     * 发送消息
-     *
-     * @param msg 消息
-     */
-    public void sendMsg(String msg) throws IOException {
-        if (session == null) {
-            return;
-        }
-        DefaultSystemLog.LOG().info(msg);
-        send(session, msg);
-    }
 
     /**
      * 发送消息
@@ -77,7 +48,7 @@ public class SocketSession {
                 } else {
                     // 休眠一秒
                     try {
-                        Thread.sleep(1000);
+                        Thread.sleep(500);
                     } catch (InterruptedException ignored) {
                     }
                     continue;

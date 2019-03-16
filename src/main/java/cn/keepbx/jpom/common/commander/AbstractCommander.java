@@ -142,8 +142,10 @@ public abstract class AbstractCommander {
             execCommand("cp /dev/null " + projectInfoModel.getLog());
         } else if (OS_INFO.isWindows()) {
             // 清空日志
-            //            String r = execSystemCommand("echo  \"\" > " + file.getAbsolutePath());
-            //            System.out.println(r);
+            String r = execSystemCommand("echo  \"\" > " + file.getAbsolutePath());
+            if (StrUtil.isEmpty(r)) {
+                DefaultSystemLog.LOG().info(r);
+            }
         }
         return "ok";
     }
@@ -190,6 +192,12 @@ public abstract class AbstractCommander {
         return result.contains(CommandService.RUNING_TAG);
     }
 
+    /***
+     * 阻塞检查程序状态
+     * @param tag 程序tag
+     * @param status 要检查的状态
+     * @throws Exception E
+     */
     protected void loopCheckRun(String tag, boolean status) throws Exception {
         int count = 0;
         do {
@@ -197,7 +205,6 @@ public abstract class AbstractCommander {
                 return;
             }
             try {
-
                 Thread.sleep(500);
             } catch (InterruptedException ignored) {
             }
@@ -211,9 +218,9 @@ public abstract class AbstractCommander {
     public String execSystemCommand(String command) {
         String result = "error";
         try {
-            //执行linux系统命令
             String[] cmd;
             if (OS_INFO.isLinux()) {
+                //执行linux系统命令
                 cmd = new String[]{"/bin/sh", "-c", command};
             } else {
                 cmd = new String[]{"cmd", "/c", command};
@@ -246,7 +253,7 @@ public abstract class AbstractCommander {
         is.close();
         process.destroy();
         if (StrUtil.isEmpty(result) && wait != 0) {
-            result = "没有返回任何执行信息";
+            result = "没有返回任何执行信息:" + wait;
         }
         return result;
     }

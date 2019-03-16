@@ -5,7 +5,6 @@ import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.spring.SpringUtil;
-import cn.jiangzeyin.pool.ThreadPoolService;
 import cn.keepbx.jpom.model.ProjectInfoModel;
 import cn.keepbx.jpom.model.UserModel;
 import cn.keepbx.jpom.service.manage.CommandService;
@@ -19,8 +18,7 @@ import javax.websocket.*;
 import javax.websocket.server.PathParam;
 import javax.websocket.server.ServerEndpoint;
 import java.io.IOException;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutorService;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * socket 消息控制器
@@ -30,13 +28,12 @@ import java.util.concurrent.ExecutorService;
  */
 @ServerEndpoint(value = "/console/{userInfo}/{projectId}")
 @Component
-public class LogWebSocketHandle implements TailLogThread.Evn {
+public class LogWebSocketHandle {
 
     public static final String SYSTEM_ID = "system";
-
-    private static ExecutorService EXECUTOR_SERVICE = null;
     private CommandService commandService;
-    public static final ConcurrentHashMap<String, SocketSession> SESSION_CONCURRENT_HASH_MAP = new ConcurrentHashMap<>();
+    private static volatile AtomicInteger onlineCount = new AtomicInteger();
+
 
     /**
      * 新的WebSocket请求开启
@@ -47,18 +44,16 @@ public class LogWebSocketHandle implements TailLogThread.Evn {
      */
     @OnOpen
     public void onOpen(@PathParam("userInfo") String userInfo, @PathParam("projectId") String projectId, Session session) {
-        if (EXECUTOR_SERVICE == null) {
-            EXECUTOR_SERVICE = ThreadPoolService.newCachedThreadPool(LogWebSocketHandle.class);
+        if (commandService == null) {
+            commandService = SpringUtil.getBean(CommandService.class);
         }
-        commandService = SpringUtil.getBean(CommandService.class);
-        SocketSession socketSession = getItem(session);
         // 通过用户名和密码的Md5值判断是否是登录的
         try {
             ProjectInfoService projectInfoService = SpringUtil.getBean(ProjectInfoService.class);
             UserService userService = SpringUtil.getBean(UserService.class);
             UserModel userModel = userService.checkUser(userInfo);
             if (userModel == null) {
-                socketSession.sendMsg("用户名或密码错误!");
+                SocketSessionUtil.send(session, "用户名或密码错误!");
                 session.close();
                 return;
             }
@@ -66,41 +61,26 @@ public class LogWebSocketHandle implements TailLogThread.Evn {
             if (!SYSTEM_ID.equals(projectId)) {
                 ProjectInfoModel projectInfoModel = projectInfoService.getItem(projectId);
                 if (projectInfoModel == null) {
-                    socketSession.sendMsg("获取项目信息错误");
+                    SocketSessionUtil.send(session, "获取项目信息错误");
                     session.close();
                     return;
                 }
                 if (!userModel.isProject(projectInfoModel.getId())) {
-                    socketSession.sendMsg("没有项目权限");
+                    SocketSessionUtil.send(session, "没有项目权限");
                     session.close();
                     return;
                 }
             }
-            socketSession.sendMsg(StrUtil.format("欢迎加入:{} 回话id:{} 当前会话总数:{}", userModel.getName(), session.getId(), SESSION_CONCURRENT_HASH_MAP.size()));
+            SocketSessionUtil.send(session, StrUtil.format("欢迎加入:{} 回话id:{} 当前会话总数:{}", userModel.getName(), session.getId(), onlineCount.getAndIncrement()));
         } catch (Exception e) {
             DefaultSystemLog.ERROR().error(e.getMessage(), e);
             try {
-                socketSession.sendMsg(JsonMessage.getString(500, "系统错误!"));
+                SocketSessionUtil.send(session, JsonMessage.getString(500, "系统错误!"));
                 session.close();
             } catch (IOException e1) {
                 DefaultSystemLog.ERROR().error(e1.getMessage(), e1);
             }
         }
-    }
-
-    /**
-     * 工具回话对象获取 socket回话消息对象
-     *
-     * @param session session
-     * @return socket回话消息对象
-     */
-    private SocketSession getItem(Session session) {
-        SocketSession socketSession = SESSION_CONCURRENT_HASH_MAP.get(session.getId());
-        if (socketSession == null) {
-            socketSession = new SocketSession(session);
-            SESSION_CONCURRENT_HASH_MAP.put(session.getId(), socketSession);
-        }
-        return socketSession;
     }
 
     @OnMessage
@@ -112,7 +92,7 @@ public class LogWebSocketHandle implements TailLogThread.Evn {
         }
         String projectId = json.getString("projectId");
         ProjectInfoService projectInfoService = SpringUtil.getBean(ProjectInfoService.class);
-        SocketSession socketSession = getItem(session);
+//        SocketSessionUtil socketSession = getItem(session);
         ProjectInfoModel projectInfoModel = null;
         try {
             projectInfoModel = projectInfoService.getItem(projectId);
@@ -121,18 +101,17 @@ public class LogWebSocketHandle implements TailLogThread.Evn {
         }
         CommandService.CommandOp commandOp = CommandService.CommandOp.valueOf(op);
         if (projectInfoModel == null && commandOp != CommandService.CommandOp.top) {
-            socketSession.sendMsg("没有对应项目");
+            SocketSessionUtil.send(session, "没有对应项目");
             return;
         }
 
         JSONObject resultData = null;
         String strResult;
-        CommandService.EvtIml evtIml = new CommandService.EvtIml(session);
         // 执行相应命令
         switch (commandOp) {
             case start:
             case restart:
-                strResult = commandService.execCommand(commandOp, projectInfoModel, evtIml);
+                strResult = commandService.execCommand(commandOp, projectInfoModel);
                 if (strResult.contains(CommandService.RUNING_TAG)) {
                     resultData = JsonMessage.toJson(200, "操作成功:" + strResult);
                 } else {
@@ -141,7 +120,7 @@ public class LogWebSocketHandle implements TailLogThread.Evn {
                 break;
             case stop:
                 // 停止项目
-                strResult = commandService.execCommand(commandOp, projectInfoModel, evtIml);
+                strResult = commandService.execCommand(commandOp, projectInfoModel);
                 if (strResult.contains(CommandService.STOP_TAG)) {
                     resultData = JsonMessage.toJson(200, "操作成功");
                 } else {
@@ -150,16 +129,19 @@ public class LogWebSocketHandle implements TailLogThread.Evn {
                 break;
             case status:
                 // 获取项目状态
-                strResult = commandService.execCommand(commandOp, projectInfoModel, evtIml);
+                strResult = commandService.execCommand(commandOp, projectInfoModel);
                 if (strResult.contains(CommandService.RUNING_TAG)) {
                     resultData = JsonMessage.toJson(200, "运行中", strResult);
                 } else {
                     resultData = JsonMessage.toJson(404, "未运行", strResult);
                 }
                 break;
-            case showlog:
-                showLog(session, projectInfoModel);
+            case showlog: {
+                // 进入管理页面后需要实时加载日志
+                String log = projectInfoModel.getLog();
+                FileTailWatcher.addWatcher(log, session);
                 break;
+            }
             case top:
                 TopManager.addMonitor(session);
                 break;
@@ -170,33 +152,18 @@ public class LogWebSocketHandle implements TailLogThread.Evn {
         if (resultData != null) {
             resultData.put("op", op);
             DefaultSystemLog.LOG().info(resultData.toString());
-            socketSession.sendMsg(resultData.toString());
+            SocketSessionUtil.send(session, resultData.toString());
         }
     }
 
-    private void showLog(Session session, ProjectInfoModel projectInfoModel) {
-        SocketSession socketSession = getItem(session);
-        // 进入管理页面后需要实时加载日志
-        String log = projectInfoModel.getLog();
-        destroy(session, "重新打开新的对话");
-        // 一定要启动新的线程，防止InputStream阻塞处理WebSocket的线程
-        TailLogThread thread = TailLogThread.createThread(session, log, this);
-        socketSession.setThread(thread);
-        EXECUTOR_SERVICE.execute(thread);
-    }
-
-    private void destroy(Session session, String callback) {
+    private void destroy(Session session) {
+        // 清理日志监听
         try {
-            SocketSession socketSession = getItem(session);
-            if (socketSession.getThread() != null) {
-                if (callback != null) {
-                    SocketSession.send(session, callback);
-                }
-                socketSession.getThread().stop();
-            }
+            FileTailWatcher.offline(session);
         } catch (Exception e) {
             DefaultSystemLog.ERROR().error("关闭异常", e);
         }
+        onlineCount.getAndDecrement();
     }
 
     /**
@@ -205,11 +172,11 @@ public class LogWebSocketHandle implements TailLogThread.Evn {
     @OnClose
     public void onClose(Session session) {
         try {
-            destroy(session, null);
-            SESSION_CONCURRENT_HASH_MAP.remove(session.getId());
+            destroy(session);
         } catch (Exception e) {
             DefaultSystemLog.ERROR().error("关闭异常", e);
         }
+        // top
         TopManager.removeMonitor(session);
         DefaultSystemLog.LOG().info(session.getId() + " socket 关闭");
     }
@@ -218,16 +185,10 @@ public class LogWebSocketHandle implements TailLogThread.Evn {
     @OnError
     public void onError(Session session, Throwable thr) {
         // java.io.IOException: Broken pipe
-        SocketSession socketSession = getItem(session);
         try {
-            socketSession.sendMsg("服务端发生异常" + ExceptionUtil.stacktraceToString(thr));
+            SocketSessionUtil.send(session, "服务端发生异常" + ExceptionUtil.stacktraceToString(thr));
         } catch (IOException ignored) {
         }
         DefaultSystemLog.ERROR().error(session.getId() + "socket 异常", thr);
-    }
-
-    @Override
-    public void onError(Session session) {
-        onClose(session);
     }
 }
