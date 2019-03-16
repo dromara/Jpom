@@ -142,8 +142,10 @@ public abstract class AbstractCommander {
             execCommand("cp /dev/null " + projectInfoModel.getLog());
         } else if (OS_INFO.isWindows()) {
             // 清空日志
-            //            String r = execSystemCommand("echo  \"\" > " + file.getAbsolutePath());
-            //            System.out.println(r);
+            String r = execSystemCommand("echo  \"\" > " + file.getAbsolutePath());
+            if (StrUtil.isEmpty(r)) {
+                DefaultSystemLog.LOG().info(r);
+            }
         }
         return "ok";
     }

@@ -7,7 +7,7 @@ import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.spring.SpringUtil;
 import cn.keepbx.jpom.common.commander.AbstractCommander;
 import cn.keepbx.jpom.service.manage.CommandService;
-import cn.keepbx.jpom.socket.SocketSession;
+import cn.keepbx.jpom.socket.SocketSessionUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
@@ -204,7 +204,7 @@ public class TopManager {
                 content = content.replaceAll("\n", "<br/>");
                 content = content.replaceAll(" ", "&nbsp;&nbsp;");
                 try {
-                    SocketSession.send(session, content);
+                    SocketSessionUtil.send(session, content);
                 } catch (IOException e) {
                     DefaultSystemLog.ERROR().error("消息失败", e);
                     try {
@@ -232,7 +232,7 @@ public class TopManager {
         while (iterator.hasNext()) {
             Session session = iterator.next();
             try {
-                SocketSession.send(session, null);
+                SocketSessionUtil.send(session, null);
             } catch (IOException e) {
                 DefaultSystemLog.ERROR().error("消息失败", e);
             }
