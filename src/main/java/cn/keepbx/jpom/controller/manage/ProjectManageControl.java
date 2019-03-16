@@ -103,7 +103,7 @@ public class ProjectManageControl extends BaseController {
         // 查询数据
         try {
             ProjectInfoModel projectInfoModel = projectInfoService.getItem(tag);
-            String pId = commandService.execCommand(CommandService.CommandOp.pid, projectInfoModel, null).trim();
+            String pId = commandService.execCommand(CommandService.CommandOp.pid, projectInfoModel).trim();
             if (StrUtil.isNotEmpty(pId)) {
                 String cmd;
                 boolean isLinux = true;

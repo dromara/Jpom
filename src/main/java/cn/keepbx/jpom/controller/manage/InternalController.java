@@ -46,7 +46,7 @@ public class InternalController extends BaseController {
         JSONObject object = new JSONObject();
         if (AbstractCommander.OS_INFO.isLinux()) {
             ProjectInfoModel projectInfoModel = projectInfoService.getItem(tag);
-            String pid = commandService.execCommand(CommandService.CommandOp.pid, projectInfoModel, null);
+            String pid = commandService.execCommand(CommandService.CommandOp.pid, projectInfoModel);
             String command = "top -b -n 1 -p " + pid;
             String internal = AbstractCommander.getInstance().execCommand(command);
             String[] split = internal.split("\n");
@@ -118,7 +118,7 @@ public class InternalController extends BaseController {
     public String stack(String tag) throws Exception {
         if (AbstractCommander.OS_INFO.isLinux()) {
             ProjectInfoModel projectInfoModel = projectInfoService.getItem(tag);
-            String pid = commandService.execCommand(CommandService.CommandOp.pid, projectInfoModel, null).trim();
+            String pid = commandService.execCommand(CommandService.CommandOp.pid, projectInfoModel).trim();
             pid = pid.replace("\n", "");
             String fileName = ConfigBean.getInstance().getTempPathName() + "/" + tag + "_java_cpu.txt";
             fileName = FileUtil.normalize(fileName);
@@ -140,7 +140,7 @@ public class InternalController extends BaseController {
     public String ram(String tag) throws Exception {
         if (AbstractCommander.OS_INFO.isLinux()) {
             ProjectInfoModel projectInfoModel = projectInfoService.getItem(tag);
-            String pid = commandService.execCommand(CommandService.CommandOp.pid, projectInfoModel, null).trim();
+            String pid = commandService.execCommand(CommandService.CommandOp.pid, projectInfoModel).trim();
             String fileName = ConfigBean.getInstance().getTempPathName() + "/" + tag + "_java_ram.txt";
             fileName = FileUtil.normalize(fileName);
             String commandPath = ConfigBean.getInstance().getRamCommandPath();
