@@ -16,14 +16,24 @@ public class LimitQueue extends ConcurrentLinkedDeque<String> {
     }
 
     @Override
+    public boolean offerFirst(String s) {
+        pollOver();
+        return super.offerFirst(s);
+    }
+
+    @Override
     public boolean offerLast(String s) {
         pollOver();
         return super.offerLast(s);
     }
 
     private void pollOver() {
-        if (size() > limit) {
+        if (full()) {
             poll();
         }
+    }
+
+    public boolean full() {
+        return size() > limit;
     }
 }

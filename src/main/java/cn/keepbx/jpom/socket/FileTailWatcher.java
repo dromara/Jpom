@@ -83,7 +83,7 @@ public class FileTailWatcher implements Runnable {
         this.randomFile = new RandomAccessFile(file, "r");
         if (file.length() > 0) {
             // 开始读取
-            this.read(false);
+            this.startRead();
         }
     }
 
@@ -115,13 +115,48 @@ public class FileTailWatcher implements Runnable {
         }
     }
 
+    private void startRead() throws IOException {
+        long len = randomFile.length();
+        long start = randomFile.getFilePointer();
+        long nextEnd = start + len - 1;
+        randomFile.seek(nextEnd);
+        int c;
+        while (nextEnd > start) {
+            // 满
+            if (limitQueue.full()) {
+                break;
+            }
+            c = randomFile.read();
+            if (c == '\n' || c == '\r') {
+                this.readLine();
+                nextEnd--;
+            }
+            nextEnd--;
+            randomFile.seek(nextEnd);
+            if (nextEnd == 0) {
+                // 当文件指针退至文件开始处，输出第一行
+                this.readLine();
+                break;
+            }
+        }
+        // 移动到尾部
+        randomFile.seek(len);
+    }
+
+    private void readLine() throws IOException {
+        String line = randomFile.readLine();
+        if (line != null) {
+            line = CharsetUtil.convert(line, CharsetUtil.CHARSET_ISO_8859_1, CharsetUtil.systemCharset());
+            limitQueue.offerFirst(line);
+        }
+    }
+
     /**
      * 读取文件内容
      *
-     * @param send 是否立即发送
      * @throws IOException IO
      */
-    private void read(boolean send) throws IOException {
+    private void read() throws IOException {
         final long currentLength = randomFile.length();
         final long position = randomFile.getFilePointer();
         if (0 == currentLength || currentLength == position) {
@@ -136,9 +171,7 @@ public class FileTailWatcher implements Runnable {
         while ((tmp = randomFile.readLine()) != null) {
             tmp = CharsetUtil.convert(tmp, CharsetUtil.CHARSET_ISO_8859_1, CharsetUtil.systemCharset());
             limitQueue.offer(tmp);
-            if (send) {
-                sendAll(tmp);
-            }
+            sendAll(tmp);
         }
         // 记录当前读到的位置
         this.randomFile.seek(currentLength);
@@ -172,7 +205,7 @@ public class FileTailWatcher implements Runnable {
     public void run() {
         while (socketSessions.size() > 0) {
             try {
-                this.read(true);
+                this.read();
             } catch (IOException e) {
                 DefaultSystemLog.ERROR().error("读取文件发送异常", e);
                 this.sendAll("读取文件发生异常：" + e.getMessage());

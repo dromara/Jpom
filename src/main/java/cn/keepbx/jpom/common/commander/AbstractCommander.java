@@ -143,6 +143,10 @@ public abstract class AbstractCommander {
         if (!file.exists()) {
             return "not exists";
         }
+        // 空文件不处理
+        if (file.length() <= 0) {
+            return "ok";
+        }
         File backPath = projectInfoModel.getLogBack();
         backPath = new File(backPath, file.getName() + "-" + DateTime.now().toString(DatePattern.PURE_DATETIME_FORMAT) + ".log");
         FileUtil.copy(file, backPath, true);
