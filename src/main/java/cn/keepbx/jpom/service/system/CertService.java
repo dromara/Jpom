@@ -70,15 +70,7 @@ public class CertService extends BaseOperService<CertModel> {
 
     @Override
     public CertModel getItem(String id) throws IOException {
-        JSONObject jsonObject = getJsonObject(ConfigBean.CERT);
-        if (jsonObject == null) {
-            return null;
-        }
-        jsonObject = jsonObject.getJSONObject(id);
-        if (jsonObject == null) {
-            return null;
-        }
-        return jsonObject.toJavaObject(CertModel.class);
+        return getJsonObjectById(ConfigBean.CERT, id, CertModel.class);
     }
 
     /**

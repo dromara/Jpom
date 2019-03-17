@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
+import java.io.IOException;
 
 /**
  * 用户管理
@@ -73,7 +74,7 @@ public class UserInfoController extends BaseController {
      * @return json
      */
     @RequestMapping(value = "updateName", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public String updateName(String name) {
+    public String updateName(String name) throws IOException {
         if (StrUtil.isEmpty(name)) {
             return JsonMessage.getString(405, "请输入新的昵称");
         }
@@ -98,7 +99,7 @@ public class UserInfoController extends BaseController {
      * @return String
      */
     @RequestMapping(value = "deleteUser", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public String deleteUser(String id) {
+    public String deleteUser(String id) throws IOException {
         UserModel userName = getUser();
         if (!userName.isManage()) {
             return JsonMessage.getString(400, "你没有删除用户的权限");
@@ -130,7 +131,7 @@ public class UserInfoController extends BaseController {
      * @return String
      */
     @RequestMapping(value = "addUser", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public String addUser(String id) {
+    public String addUser(String id) throws IOException {
         UserModel userName = getUser();
         if (!userName.isManage()) {
             return JsonMessage.getString(400, "你还没有权限");
@@ -204,9 +205,16 @@ public class UserInfoController extends BaseController {
         userModel.setManage(manageB);
 
         manageB = "true".equals(getParameter("uploadFile"));
+        // 如果操作人没有权限  就不能管理被操作者
+        if (!userName.isUploadFile() && manageB) {
+            return JsonMessage.getString(402, "你没有管理上传文件的权限");
+        }
         userModel.setUploadFile(manageB);
 
         manageB = "true".equals(getParameter("deleteFile"));
+        if (!userName.isDeleteFile() && manageB) {
+            return JsonMessage.getString(402, "你没有管理删除文件的权限");
+        }
         userModel.setDeleteFile(manageB);
         return null;
     }
@@ -218,7 +226,7 @@ public class UserInfoController extends BaseController {
      * @return String
      */
     @RequestMapping(value = "updateUser", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public String updateUser(String id) {
+    public String updateUser(String id) throws IOException {
         UserModel userName = getUser();
         if (!userName.isManage()) {
             return JsonMessage.getString(400, "你还没有权限");

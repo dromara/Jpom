@@ -3,6 +3,8 @@ package cn.keepbx.jpom.util;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
 /**
+ * 定长队列
+ *
  * @author jiangzeyin
  * @date 2019/3/16
  */

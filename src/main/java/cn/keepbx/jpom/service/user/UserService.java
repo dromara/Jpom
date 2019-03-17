@@ -56,7 +56,7 @@ public class UserService extends BaseOperService<UserModel> {
      * @param pwd  密码
      * @return 登录
      */
-    public UserModel simpleLogin(String name, String pwd) {
+    public UserModel simpleLogin(String name, String pwd) throws IOException {
         UserModel userModel = getItem(name);
         if (userModel == null) {
             return null;
@@ -128,18 +128,8 @@ public class UserService extends BaseOperService<UserModel> {
      * @return 用户信息
      */
     @Override
-    public UserModel getItem(String userId) {
-        try {
-            JSONObject jsonObject = getJsonObject(ConfigBean.USER);
-            JSONObject user = jsonObject.getJSONObject(userId);
-            if (user == null) {
-                return null;
-            }
-            return user.toJavaObject(UserModel.class);
-        } catch (IOException e) {
-            DefaultSystemLog.ERROR().error(e.getMessage(), e);
-        }
-        return null;
+    public UserModel getItem(String userId) throws IOException {
+        return getJsonObjectById(ConfigBean.USER, userId, UserModel.class);
     }
 
     /**

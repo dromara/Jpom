@@ -54,7 +54,7 @@ public class FileTailWatcher implements Runnable {
             try {
                 return new FileTailWatcher(file, s);
             } catch (IOException e) {
-                e.printStackTrace();
+                DefaultSystemLog.ERROR().error("创建文件监听失败", e);
                 return null;
             }
         });
@@ -87,20 +87,31 @@ public class FileTailWatcher implements Runnable {
         }
     }
 
+    /**
+     * 添加监听回话
+     *
+     * @param session 回话
+     */
     private void add(Session session) {
         if (this.socketSessions.add(session)) {
-            try {
-                SocketSessionUtil.send(session, StrUtil.format("监听日志成功,目前共有{}人正在查看", this.socketSessions.size()));
-            } catch (IOException ignored) {
-            }
             if (this.limitQueue.size() <= 0) {
-                send("日志文件为空");
+                this.send(session, "日志文件为空");
                 return;
             }
+            this.send(session, StrUtil.format("监听日志成功,目前共有{}人正在查看", this.socketSessions.size()));
             // 开发发送头信息
             for (String s : this.limitQueue) {
-                send(s);
+                this.send(session, s);
             }
+        } else {
+            this.send(session, "添加日志监听失败");
+        }
+    }
+
+    private void send(Session session, String msg) {
+        try {
+            SocketSessionUtil.send(session, msg);
+        } catch (IOException ignored) {
         }
     }
 
@@ -126,14 +137,14 @@ public class FileTailWatcher implements Runnable {
             tmp = CharsetUtil.convert(tmp, CharsetUtil.CHARSET_ISO_8859_1, CharsetUtil.systemCharset());
             limitQueue.offer(tmp);
             if (send) {
-                send(tmp);
+                sendAll(tmp);
             }
         }
         // 记录当前读到的位置
         this.randomFile.seek(currentLength);
     }
 
-    private void send(String msg) {
+    private void sendAll(String msg) {
         Iterator<Session> iterator = socketSessions.iterator();
         while (iterator.hasNext()) {
             Session socketSession = iterator.next();
@@ -164,7 +175,7 @@ public class FileTailWatcher implements Runnable {
                 this.read(true);
             } catch (IOException e) {
                 DefaultSystemLog.ERROR().error("读取文件发送异常", e);
-                this.send("读取文件发生异常：" + e.getMessage());
+                this.sendAll("读取文件发生异常：" + e.getMessage());
                 break;
             }
             try {
@@ -174,13 +185,7 @@ public class FileTailWatcher implements Runnable {
         }
         // 通知客户端
         if (socketSessions.size() > 0) {
-            for (Session socketSession : socketSessions) {
-                try {
-                    SocketSessionUtil.send(socketSession, "服务主动关闭日志文件");
-                } catch (Exception e) {
-                    DefaultSystemLog.ERROR().error("发送消息失败", e);
-                }
-            }
+            this.sendAll("服务主动关闭日志文件");
         }
         IoUtil.close(this.randomFile);
         // 清理线程记录

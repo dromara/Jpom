@@ -169,9 +169,9 @@ public abstract class AbstractCommander {
         // 通过VirtualMachine.list()列出所有的java进程
         List<VirtualMachineDescriptor> descriptorList = VirtualMachine.list();
         for (VirtualMachineDescriptor virtualMachineDescriptor : descriptorList) {
-            VirtualMachine virtualMachine = VirtualMachine.attach(virtualMachineDescriptor);
             int pid = Convert.toInt(virtualMachineDescriptor.id(), 0);
             // 根据进程id查询启动属性，如果属性-Dapplication匹配，说明项目已经启动，并返回进程id
+            VirtualMachine virtualMachine = VirtualMachine.attach(virtualMachineDescriptor);
             Properties properties = virtualMachine.getAgentProperties();
             String args = StrUtil.emptyToDefault(properties.getProperty("sun.jvm.args"), "");
             if (StrUtil.containsIgnoreCase(args, tag)) {
@@ -187,7 +187,7 @@ public abstract class AbstractCommander {
         if (jmxServiceURL != null) {
             JMXConnector jmxc = JMXConnectorFactory.connect(jmxServiceURL, null);
             MBeanServerConnection mBeanServerConnection = jmxc.getMBeanServerConnection();
-            
+
             MemoryMXBean memBean = ManagementFactory.newPlatformMXBeanProxy
                     (mBeanServerConnection, ManagementFactory.MEMORY_MXBEAN_NAME, MemoryMXBean.class);
 

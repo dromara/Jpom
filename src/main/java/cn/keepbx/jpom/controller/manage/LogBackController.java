@@ -8,6 +8,7 @@ import cn.jiangzeyin.common.JsonMessage;
 import cn.keepbx.jpom.common.BaseController;
 import cn.keepbx.jpom.common.interceptor.ProjectPermission;
 import cn.keepbx.jpom.model.ProjectInfoModel;
+import cn.keepbx.jpom.service.manage.CommandService;
 import cn.keepbx.jpom.service.manage.ProjectInfoService;
 import com.alibaba.fastjson.JSONArray;
 import org.springframework.http.MediaType;
@@ -31,6 +32,9 @@ import java.io.IOException;
 public class LogBackController extends BaseController {
     @Resource
     private ProjectInfoService projectInfoService;
+
+    @Resource
+    private CommandService commandService;
 
     @RequestMapping(value = "logBack", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
     public String console(String id) {
@@ -96,4 +100,34 @@ public class LogBackController extends BaseController {
             return JsonMessage.getString(500, "没有对应文件夹");
         }
     }
+
+    @RequestMapping(value = "logSize", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @ResponseBody
+    public String logSize(String id) {
+        String info = projectInfoService.getLogSize(id);
+        if (info != null) {
+            return JsonMessage.getString(200, "ok", info);
+        }
+        return JsonMessage.getString(500, "获取日志大小失败");
+    }
+
+
+    @RequestMapping(value = "resetLog", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @ResponseBody
+    public String resetLog(String id) {
+        ProjectInfoModel pim;
+        try {
+            pim = projectInfoService.getItem(id);
+            String msg = commandService.execCommand(CommandService.CommandOp.backupLog, pim);
+            if (msg.contains("ok")) {
+                return JsonMessage.getString(200, "重置成功");
+            }
+            return JsonMessage.getString(201, "重置失败：" + msg);
+        } catch (Exception e) {
+            DefaultSystemLog.ERROR().error(e.getMessage(), e);
+            return JsonMessage.getString(500, "重置日志失败");
+        }
+    }
+
+
 }

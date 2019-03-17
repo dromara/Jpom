@@ -1,5 +1,7 @@
 package cn.keepbx.jpom.service.manage;
 
+import cn.hutool.core.io.FileUtil;
+import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.keepbx.jpom.common.BaseOperService;
 import cn.keepbx.jpom.model.ProjectInfoModel;
 import cn.keepbx.jpom.system.ConfigBean;
@@ -7,6 +9,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Set;
@@ -73,15 +76,26 @@ public class ProjectInfoService extends BaseOperService<ProjectInfoModel> {
      */
     @Override
     public ProjectInfoModel getItem(String id) throws IOException {
-        JSONObject jsonObject = getJsonObject(ConfigBean.PROJECT);
-        if (jsonObject == null) {
-            return null;
-        }
-        jsonObject = jsonObject.getJSONObject(id);
-        if (jsonObject == null) {
-            return null;
-        }
-        return jsonObject.toJavaObject(ProjectInfoModel.class);
+        return getJsonObjectById(ConfigBean.PROJECT, id, ProjectInfoModel.class);
     }
 
+    public String getLogSize(String id) {
+        ProjectInfoModel pim;
+        try {
+            pim = getItem(id);
+            if (pim == null) {
+                return null;
+            }
+        } catch (IOException e) {
+            DefaultSystemLog.ERROR().error(e.getMessage(), e);
+            return null;
+        }
+        String logSize = null;
+        File file = new File(pim.getLog());
+        if (file.exists()) {
+            long fileSize = file.length();
+            logSize = FileUtil.readableFileSize(fileSize);
+        }
+        return logSize;
+    }
 }

@@ -92,7 +92,6 @@ public class LogWebSocketHandle {
         }
         String projectId = json.getString("projectId");
         ProjectInfoService projectInfoService = SpringUtil.getBean(ProjectInfoService.class);
-//        SocketSessionUtil socketSession = getItem(session);
         ProjectInfoModel projectInfoModel = null;
         try {
             projectInfoModel = projectInfoService.getItem(projectId);
