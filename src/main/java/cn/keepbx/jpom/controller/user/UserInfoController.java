@@ -9,6 +9,7 @@ import cn.keepbx.jpom.model.UserModel;
 import cn.keepbx.jpom.service.user.UserService;
 import cn.keepbx.jpom.system.ConfigBean;
 import cn.keepbx.jpom.system.ExtConfigBean;
+import cn.keepbx.jpom.util.CheckPassword;
 import com.alibaba.fastjson.JSONArray;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -46,8 +47,8 @@ public class UserInfoController extends BaseController {
             return JsonMessage.getString(400, "新旧密码一致");
         }
         UserModel userName = getUser();
-        if (ConfigBean.getInstance().safeMode && UserModel.SYSTEM_ADMIN.equals(userName.getParent())) {
-            return JsonMessage.getString(401, "安全模式下管理员的密码不能通过WEB端修改");
+        if (UserModel.SYSTEM_ADMIN.equals(userName.getParent()) && CheckPassword.checkPassword(newPwd) != 2) {
+            return JsonMessage.getString(401, "系统管理员密码强度太低,请使用复杂的密码");
         }
         try {
             UserModel userModel = userService.simpleLogin(userName.getId(), oldPwd);
