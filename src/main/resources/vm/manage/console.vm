@@ -163,12 +163,8 @@
             ws.onclose = function () {
                 showLogDom.append('WebSocket连接已关闭！<br/>');
                 clearInterval(loopLogTime);
-                #if($manager)
-                    // 如果有权限，自动重连
-                    setTimeout(function () {
-                        window.location.reload();
-                    }, 1000);
-                #end
+                clearInterval(heart);
+                layer.alert("控制台已离线")
             };
 
             $('.btn-op').on('click', function () {

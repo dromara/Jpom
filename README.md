@@ -103,8 +103,10 @@ mvn package
 
    [http://jpom-demo.jiangzeyin.cn](http://jpom-demo.jiangzeyin.cn)
    
-    账号：admin
-    密码：admin123
+    账号：demo
+    密码：demo123
+    
+   > 演示系统有部分功能做了限制，详情功能请自行部署体验
     
    1. [Jboot案例代码](https://gitee.com/keepbx/Jpom-demo-case/tree/master/jboot-test)
    2. [SpringBoot案例代码](https://gitee.com/keepbx/Jpom-demo-case/tree/master/springboot-test)
@@ -122,10 +124,6 @@ mvn package
 [安全模式>>](/doc/safeMode.md)  
 
 [用户角色说明>>](/doc/safeMode.md#用户权限说明)
-
-### windows 开启实时查看控制台日志
-
-[飞机>>](/doc/windows-tail.md)
 
 ### 阿里云Oss配置
 

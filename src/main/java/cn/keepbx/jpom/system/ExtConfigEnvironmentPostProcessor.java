@@ -17,11 +17,8 @@ import java.io.IOException;
  */
 public class ExtConfigEnvironmentPostProcessor implements EnvironmentPostProcessor {
 
-    private static ConfigurableEnvironment configurableEnvironment;
-
     @Override
     public void postProcessEnvironment(ConfigurableEnvironment environment, SpringApplication application) {
-        configurableEnvironment = environment;
         YamlPropertySourceLoader yamlPropertySourceLoader = new YamlPropertySourceLoader();
         Resource resource = ExtConfigBean.getResource();
         try {

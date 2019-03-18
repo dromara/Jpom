@@ -42,7 +42,7 @@
             #end
             #if(!$array)
             <tr>
-                <td colspan="4">没有相关信息</td>
+                <td colspan="5">没有相关信息</td>
             </tr>
             #end
         </tbody>

@@ -61,7 +61,6 @@ public class TopManager {
             commandService = SpringUtil.getBean(CommandService.class);
         }
         CronUtil.remove(CRON_ID);
-        CronUtil.setMatchSecond(true);
         CronUtil.schedule(CRON_ID, "0/5 * * * * ?", () -> {
             try {
                 String result = AbstractCommander.getInstance().execCommand("top -b -n 1");

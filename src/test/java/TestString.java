@@ -1,3 +1,4 @@
+import ch.qos.logback.core.util.FileSize;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.lang.Validator;
 import cn.hutool.core.util.StrUtil;
@@ -7,6 +8,9 @@ import cn.hutool.core.util.StrUtil;
  */
 public class TestString {
     public static void main(String[] args) {
+        System.out.println(Math.pow(1024, 3));
+        FileSize fileSize = FileSize.valueOf("50MB");
+        System.out.println(fileSize.getSize());
         System.out.println("/jpom-project/rrr/s/s".startsWith("/jpom-project/rrr/s/"));
 
         System.out.println(FileUtil.normalize("/t/../..\\..\\.\\.\\"));

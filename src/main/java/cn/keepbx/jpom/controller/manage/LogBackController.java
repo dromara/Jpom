@@ -6,8 +6,9 @@ import cn.hutool.extra.servlet.ServletUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.keepbx.jpom.common.BaseController;
+import cn.keepbx.jpom.common.interceptor.ProjectPermission;
 import cn.keepbx.jpom.model.ProjectInfoModel;
-import cn.keepbx.jpom.model.UserModel;
+import cn.keepbx.jpom.service.manage.CommandService;
 import cn.keepbx.jpom.service.manage.ProjectInfoService;
 import com.alibaba.fastjson.JSONArray;
 import org.springframework.http.MediaType;
@@ -31,6 +32,9 @@ import java.io.IOException;
 public class LogBackController extends BaseController {
     @Resource
     private ProjectInfoService projectInfoService;
+
+    @Resource
+    private CommandService commandService;
 
     @RequestMapping(value = "logBack", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
     public String console(String id) {
@@ -77,31 +81,53 @@ public class LogBackController extends BaseController {
 
     @RequestMapping(value = "logBack_delete", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
+    @ProjectPermission(checkDelete = true)
     public String clear(String id, String name) {
-        UserModel userName = getUser();
-        if (!userName.isProject(id)) {
-            return JsonMessage.getString(400, "你没有对应操作权限操作!");
-        }
         name = pathSafe(name);
         if (StrUtil.isEmpty(name)) {
             return JsonMessage.getString(405, "非法操作:" + name);
         }
-        try {
-            ProjectInfoModel pim = projectInfoService.getItem(id);
-            File logBack = pim.getLogBack();
-            if (logBack.exists() && logBack.isDirectory()) {
-                logBack = new File(logBack, name);
-                if (logBack.exists()) {
-                    FileUtil.del(logBack);
-                    return JsonMessage.getString(200, "删除成功");
-                }
-                return JsonMessage.getString(500, "没有对应文件");
-            } else {
-                return JsonMessage.getString(500, "没有对应文件夹");
+        ProjectInfoModel pim = getProjectInfoModel();
+        File logBack = pim.getLogBack();
+        if (logBack.exists() && logBack.isDirectory()) {
+            logBack = new File(logBack, name);
+            if (logBack.exists()) {
+                FileUtil.del(logBack);
+                return JsonMessage.getString(200, "删除成功");
             }
-        } catch (IOException e) {
-            DefaultSystemLog.ERROR().error("删除文件异常", e);
+            return JsonMessage.getString(500, "没有对应文件");
+        } else {
+            return JsonMessage.getString(500, "没有对应文件夹");
         }
-        return JsonMessage.getString(500, "删除失败");
     }
+
+    @RequestMapping(value = "logSize", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @ResponseBody
+    public String logSize(String id) {
+        String info = projectInfoService.getLogSize(id);
+        if (info != null) {
+            return JsonMessage.getString(200, "ok", info);
+        }
+        return JsonMessage.getString(500, "获取日志大小失败");
+    }
+
+
+    @RequestMapping(value = "resetLog", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @ResponseBody
+    public String resetLog(String id) {
+        ProjectInfoModel pim;
+        try {
+            pim = projectInfoService.getItem(id);
+            String msg = commandService.execCommand(CommandService.CommandOp.backupLog, pim);
+            if (msg.contains("ok")) {
+                return JsonMessage.getString(200, "重置成功");
+            }
+            return JsonMessage.getString(201, "重置失败：" + msg);
+        } catch (Exception e) {
+            DefaultSystemLog.ERROR().error(e.getMessage(), e);
+            return JsonMessage.getString(500, "重置日志失败");
+        }
+    }
+
+
 }

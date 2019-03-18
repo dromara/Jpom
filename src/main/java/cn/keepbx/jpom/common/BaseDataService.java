@@ -39,7 +39,7 @@ public abstract class BaseDataService {
         JSONObject data = allData.getJSONObject(key);
         // 判断是否存在数据
         if (null != data && 0 < data.keySet().size()) {
-            throw new RuntimeException("项目名称已存在！");
+            throw new RuntimeException("数据Id已经存在啦：" + filename + " :" + key);
         } else {
             allData.put(key, json);
             JsonUtil.saveJson(getDataFilePath(filename), allData);
@@ -60,7 +60,7 @@ public abstract class BaseDataService {
 
         // 判断是否存在数据
         if (null == data || 0 == data.keySet().size()) {
-            throw new Exception("数据不存在");
+            throw new Exception("数据不存在:" + key);
         } else {
             allData.put(key, json);
             JsonUtil.saveJson(getDataFilePath(filename), allData);
@@ -98,5 +98,15 @@ public abstract class BaseDataService {
         return (JSONObject) JsonUtil.readJson(getDataFilePath(filename));
     }
 
-
+    protected <T> T getJsonObjectById(String file, String id, Class<T> cls) throws IOException {
+        JSONObject jsonObject = getJsonObject(file);
+        if (jsonObject == null) {
+            return null;
+        }
+        jsonObject = jsonObject.getJSONObject(id);
+        if (jsonObject == null) {
+            return null;
+        }
+        return jsonObject.toJavaObject(cls);
+    }
 }

@@ -239,7 +239,13 @@ public class EditProjectController extends BaseController {
                 File newsLog = new File(news.getLog());
                 FileUtil.move(oldLog, newsLog, true);
             }
+            // logBack
+            File oldLogBack = old.getLogBack();
+            if (oldLogBack.exists()) {
+                FileUtil.move(oldLogBack, news.getLogBack(), true);
+            }
         }
+
     }
 
     private JsonMessage checkPath(ProjectInfoModel projectInfoModel) throws IOException {

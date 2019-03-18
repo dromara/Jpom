@@ -48,8 +48,54 @@ public class UserModel extends BaseModel {
      * 连续登录失败次数
      */
     private int pwdErrorCount;
+    /**
+     * 最后失败时间
+     */
     private long lastPwdErrorTime;
+    /**
+     * 账号被锁定的时长
+     */
     private long lockTime;
+    /**
+     * 上传文件权限
+     */
+    private boolean uploadFile;
+    /**
+     * 删除文件权限
+     */
+    private boolean deleteFile;
+
+    /**
+     * 获取是否有上传文件的权限
+     *
+     * @return 系统管理员都用权限
+     */
+    public boolean isUploadFile() {
+        if (UserModel.SYSTEM_ADMIN.equals(getParent())) {
+            return true;
+        }
+        return uploadFile;
+    }
+
+    public void setUploadFile(boolean uploadFile) {
+        this.uploadFile = uploadFile;
+    }
+
+    /**
+     * 获取是否有删除文件的权限
+     *
+     * @return 系统管理员都用权限
+     */
+    public boolean isDeleteFile() {
+        if (UserModel.SYSTEM_ADMIN.equals(getParent())) {
+            return true;
+        }
+        return deleteFile;
+    }
+
+    public void setDeleteFile(boolean deleteFile) {
+        this.deleteFile = deleteFile;
+    }
 
     public long getLockTime() {
         return lockTime;
@@ -187,6 +233,12 @@ public class UserModel extends BaseModel {
         return manage;
     }
 
+    /**
+     * 是否能管理某个项目
+     *
+     * @param id 项目Id
+     * @return true 能管理，管理员所有项目都能管理
+     */
     public boolean isProject(String id) {
         if (isManage()) {
             return true;
