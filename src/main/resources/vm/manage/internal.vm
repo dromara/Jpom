@@ -34,13 +34,13 @@
 <div>
     <a class="but" href="/manage/stack?tag=$!internal.tag">导出堆栈信息</a>
     <a class="but" href="/manage/ram?tag=$!internal.tag">导出内存信息</a>
-    <div class="info">
-        $!internal.ram
-    </div>
+##    <div class="info">
+##        $!internal.ram
+##    </div>
 
 </div>
 
-<table class="layui-table" id="tab_ram" lay-filter="tab_ram">
+<table class="layui-table" id="tab_ram" lay-filter="tab_ram" style="margin-top: 10px">
     <thead>
     <tr>
         <th>进程id</th>
