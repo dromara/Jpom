@@ -129,7 +129,10 @@ public class NgxService extends BaseOperService {
                 jsonObject.put("inactive", time);
             }
             NgxBlock http = conf.findBlock("http");
-            List<NgxEntry> list = http.findAll(NgxBlock.class, "server");
+            List<NgxEntry> list = null;
+            if (http != null) {
+                list = http.findAll(NgxBlock.class, "server");
+            }
             if (list == null) {
                 return jsonObject;
             }

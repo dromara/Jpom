@@ -97,7 +97,7 @@
         $('#addNgx').on('click', function () {
             var url = '/system/nginx_setting?type=add';
             tabChange({
-                id: 0,
+                id: 'nginx_add',
                 url: url,
                 title: '新增配置',
             });
@@ -107,9 +107,9 @@
         function updateNgx(data) {
             var url = '/system/nginx_setting?type=update&path=' + data.path;
             tabChange({
-                id: 1,
+                id: 'nginx_' + data.path,
                 url: url,
-                title: 'nginx设置',
+                title: 'nginx设置(' + data.name + ')',
             });
         }
 
@@ -122,7 +122,9 @@
             cols: [[
                 {field: 'name', title: '文件名'},
                 {field: 'domain', title: '域名'},
-                {field: 'op', title: '操作', align: 'center', toolbar: '#bar_ngx', fixed: 'right'}
+                {
+                    field: 'op', title: '操作', align: 'center', toolbar: '#bar_ngx', fixed: 'right'
+                }
             ]],
             loading: true,
             response: {
