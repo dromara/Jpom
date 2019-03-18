@@ -4,6 +4,7 @@ import cn.hutool.core.convert.Convert;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.text.StrSpliter;
 import cn.hutool.extra.servlet.ServletUtil;
+import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.keepbx.jpom.common.BaseController;
 import cn.keepbx.jpom.common.commander.AbstractCommander;
@@ -116,17 +117,15 @@ public class InternalController extends BaseController {
     @RequestMapping(value = "stack", method = RequestMethod.GET)
     @ResponseBody
     public String stack(String tag) throws Exception {
-        if (AbstractCommander.OS_INFO.isLinux()) {
-            ProjectInfoModel projectInfoModel = projectInfoService.getItem(tag);
-            String pid = commandService.execCommand(CommandService.CommandOp.pid, projectInfoModel).trim();
-            pid = pid.replace("\n", "");
-            String fileName = ConfigBean.getInstance().getTempPathName() + "/" + tag + "_java_cpu.txt";
-            fileName = FileUtil.normalize(fileName);
-            String commandPath = ConfigBean.getInstance().getCpuCommandPath();
-            String command = String.format("%s %s %s %s", commandPath, pid, 300, fileName);
-            AbstractCommander.getInstance().execCommand(command);
+        String fileName = ConfigBean.getInstance().getTempPathName() + "/" + tag + "_java_cpu.txt";
+        fileName = FileUtil.normalize(fileName);
+        try {
+            String pid = AbstractCommander.getInstance().getPid(tag);
+            String command = String.format("jstack %s >> %s ", pid, fileName);
+            AbstractCommander.getInstance().execSystemCommand(command);
             downLoad(getResponse(), fileName);
-        } else {
+        } catch (Exception e) {
+            DefaultSystemLog.ERROR().error(e.getMessage(), e);
             getResponse().sendRedirect("internal?tag=" + tag);
         }
         return JsonMessage.getString(200, "");
@@ -138,16 +137,15 @@ public class InternalController extends BaseController {
     @RequestMapping(value = "ram", method = RequestMethod.GET)
     @ResponseBody
     public String ram(String tag) throws Exception {
-        if (AbstractCommander.OS_INFO.isLinux()) {
-            ProjectInfoModel projectInfoModel = projectInfoService.getItem(tag);
-            String pid = commandService.execCommand(CommandService.CommandOp.pid, projectInfoModel).trim();
-            String fileName = ConfigBean.getInstance().getTempPathName() + "/" + tag + "_java_ram.txt";
-            fileName = FileUtil.normalize(fileName);
-            String commandPath = ConfigBean.getInstance().getRamCommandPath();
-            String command = String.format("%s %s %s", commandPath, pid, fileName);
-            AbstractCommander.getInstance().execCommand(command);
+        String fileName = ConfigBean.getInstance().getTempPathName() + "/" + tag + "_java_ram.txt";
+        fileName = FileUtil.normalize(fileName);
+        try {
+            String pid = AbstractCommander.getInstance().getPid(tag);
+            String command = String.format("jmap -histo:live %s >> %s", pid, fileName);
+            AbstractCommander.getInstance().execSystemCommand(command);
             downLoad(getResponse(), fileName);
-        } else {
+        } catch (Exception e) {
+            DefaultSystemLog.ERROR().error(e.getMessage(), e);
             getResponse().sendRedirect("internal?tag=" + tag);
         }
         return JsonMessage.getString(200, "");
