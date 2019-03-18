@@ -8,13 +8,11 @@ import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.PreLoadClass;
 import cn.jiangzeyin.common.PreLoadMethod;
 import cn.jiangzeyin.common.spring.SpringUtil;
-import cn.keepbx.jpom.common.commander.AbstractCommander;
 import cn.keepbx.jpom.controller.system.WhitelistDirectoryController;
 import cn.keepbx.jpom.model.ProjectInfoModel;
 import cn.keepbx.jpom.service.manage.ProjectInfoService;
 import cn.keepbx.jpom.service.system.SystemService;
 import cn.keepbx.jpom.system.ConfigBean;
-import cn.keepbx.jpom.system.ConfigException;
 import cn.keepbx.jpom.system.ExtConfigBean;
 import cn.keepbx.jpom.system.WebAopLog;
 import cn.keepbx.jpom.util.JsonUtil;
@@ -36,25 +34,6 @@ import java.util.List;
  */
 @PreLoadClass
 public class CheckRunCommand {
-
-    /**
-     * 检查命令文件
-     */
-    @PreLoadMethod
-    private static void checkSh() throws Exception {
-        try {
-            ConfigBean.getInstance().getRamCommandPath();
-        } catch (ConfigException e) {
-            DefaultSystemLog.LOG().info("创建默认文件：" + e.getPath());
-            addCommandFile(ConfigBean.RAM_SH, e.getPath());
-        }
-        try {
-            ConfigBean.getInstance().getCpuCommandPath();
-        } catch (ConfigException e) {
-            DefaultSystemLog.LOG().info("创建默认文件：" + e.getPath());
-            addCommandFile(ConfigBean.CPU_SH, e.getPath());
-        }
-    }
 
     /**
      * 检查运行数据
@@ -144,14 +123,5 @@ public class CheckRunCommand {
         URL url = ResourceUtil.getResource("bin/data/" + name);
         String content = FileUtil.readString(url, CharsetUtil.UTF_8);
         FileUtil.writeString(content, file, CharsetUtil.UTF_8);
-    }
-
-    private static void addCommandFile(String command, String file) throws Exception {
-        URL url = ResourceUtil.getResource("bin/command" + command);
-        String content = FileUtil.readString(url, CharsetUtil.UTF_8);
-        FileUtil.writeString(content, file, CharsetUtil.UTF_8);
-        // 添加文件权限
-        String runCommand = "chmod 755 " + file;
-        AbstractCommander.getInstance().execCommand(runCommand);
     }
 }
