@@ -29,15 +29,21 @@
     </tr>
     </thead>
     <tbody>
-        #foreach($item in $!port)
+        #if($port)
+            #foreach($item in $!port)
+            <tr>
+                <td>$!item.protocol</td>
+                <td>$!item.receive</td>
+                <td>$!item.send</td>
+                <td>$!item.local</td>
+                <td>$!item.foreign</td>
+                <td>$!item.status</td>
+                <td>$!item.name</td>
+            </tr>
+            #end
+        #else
         <tr>
-            <td>$!item.protocol</td>
-            <td>$!item.receive</td>
-            <td>$!item.send</td>
-            <td>$!item.local</td>
-            <td>$!item.foreign</td>
-            <td>$!item.status</td>
-            <td>$!item.name</td>
+            <td colspan=7 style="text-align:center">无数据</td>
         </tr>
         #end
     </tbody>
