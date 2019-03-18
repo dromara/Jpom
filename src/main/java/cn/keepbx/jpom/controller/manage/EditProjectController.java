@@ -12,7 +12,7 @@ import cn.keepbx.jpom.common.BaseController;
 import cn.keepbx.jpom.model.ProjectInfoModel;
 import cn.keepbx.jpom.model.UserModel;
 import cn.keepbx.jpom.service.manage.ProjectInfoService;
-import cn.keepbx.jpom.service.system.SystemService;
+import cn.keepbx.jpom.service.system.WhitelistDirectoryService;
 import cn.keepbx.jpom.socket.LogWebSocketHandle;
 import com.alibaba.fastjson.JSONArray;
 import org.springframework.http.MediaType;
@@ -38,7 +38,7 @@ public class EditProjectController extends BaseController {
     @Resource
     private ProjectInfoService projectInfoService;
     @Resource
-    private SystemService systemService;
+    private WhitelistDirectoryService whitelistDirectoryService;
 
     /**
      * 修改项目页面
@@ -52,7 +52,7 @@ public class EditProjectController extends BaseController {
         ProjectInfoModel projectInfo = projectInfoService.getItem(id);
 
         // 白名单
-        JSONArray jsonArray = systemService.getWhitelistDirectory();
+        JSONArray jsonArray = whitelistDirectoryService.getProjectDirectory();
         setAttribute("whitelistDirectory", jsonArray);
 
         if (projectInfo != null && jsonArray != null) {
@@ -92,15 +92,9 @@ public class EditProjectController extends BaseController {
         if (LogWebSocketHandle.SYSTEM_ID.equals(id)) {
             return JsonMessage.getString(401, "项目id " + LogWebSocketHandle.SYSTEM_ID + " 关键词被系统占用");
         }
-        if (StrUtil.isEmpty(whitelistDirectory)) {
-            return JsonMessage.getString(401, "项目路径不能为空");
-        }
-        JSONArray jsonArray = systemService.getWhitelistDirectory();
-        if (jsonArray == null) {
-            return JsonMessage.getString(401, "还没有配置白名单");
-        }
-        if (!jsonArray.contains(whitelistDirectory)) {
-            return JsonMessage.getString(401, "请选择正确的项目路径");
+        //
+        if (!whitelistDirectoryService.checkProjectDirectory(whitelistDirectory)) {
+            return JsonMessage.getString(401, "请选择正确的项目路径,或者还没有配置白名单");
         }
         String lib = projectInfo.getLib();
         if (StrUtil.isEmpty(lib)) {

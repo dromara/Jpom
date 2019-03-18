@@ -20,14 +20,14 @@ import java.util.List;
  * @author Arno
  */
 @Service
-public class NgxService extends BaseOperService {
+public class NginxService extends BaseOperService {
 
     @Resource
-    private SystemService systemService;
+    private WhitelistDirectoryService whitelistDirectoryService;
 
     @Override
     public JSONArray list() {
-        JSONArray ngxDirectory = systemService.getNgxDirectory();
+        JSONArray ngxDirectory = whitelistDirectoryService.getNgxDirectory();
         if (ngxDirectory == null) {
             return null;
         }
