@@ -186,21 +186,29 @@ public abstract class AbstractCommander {
         return result;
     }
 
-    private static void getM(int pid) throws IOException {
-        JMXServiceURL jmxServiceURL = getLocalStubServiceURLFromPID(pid);
-        if (jmxServiceURL != null) {
-            JMXConnector jmxc = JMXConnectorFactory.connect(jmxServiceURL, null);
-            MBeanServerConnection mBeanServerConnection = jmxc.getMBeanServerConnection();
-
-            MemoryMXBean memBean = ManagementFactory.newPlatformMXBeanProxy
-                    (mBeanServerConnection, ManagementFactory.MEMORY_MXBEAN_NAME, MemoryMXBean.class);
-
-//                mBeanServerConnection.getAttribute("java.lang:type=Memory", "HeapMemoryUsage");
+    /**
+     * 获取指定程序的jvm 信息
+     *
+     * @param tag 运行tag
+     * @return null 没有运行或者获取数据
+     * @throws Exception 异常
+     */
+    public MemoryMXBean getMemoryMXBean(String tag) throws Exception {
+        String pIds = getPid(tag);
+        int pid = Convert.toInt(pIds, 0);
+        if (pid <= 0) {
+            return null;
         }
+        JMXServiceURL jmxServiceURL = getLocalStubServiceURLFromPID(pid);
+        if (jmxServiceURL == null) {
+            return null;
+        }
+        JMXConnector jmxConnector = JMXConnectorFactory.connect(jmxServiceURL, null);
+        MBeanServerConnection mBeanServerConnection = jmxConnector.getMBeanServerConnection();
+        return ManagementFactory.newPlatformMXBeanProxy(mBeanServerConnection, ManagementFactory.MEMORY_MXBEAN_NAME, MemoryMXBean.class);
     }
 
-    private static JMXServiceURL getLocalStubServiceURLFromPID(int pid)
-            throws IOException {
+    private static JMXServiceURL getLocalStubServiceURLFromPID(int pid) throws IOException {
         String address = ConnectorAddressLink.importFrom(pid);
         if (address != null) {
             return new JMXServiceURL(address);

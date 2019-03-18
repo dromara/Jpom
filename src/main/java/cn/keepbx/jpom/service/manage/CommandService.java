@@ -54,7 +54,7 @@ public class CommandService {
      * @param projectInfoModel 项目信息
      */
     public String execCommand(CommandOp commandOp, ProjectInfoModel projectInfoModel) throws Exception {
-        String result = "";
+        String result;
         AbstractCommander abstractCommander = AbstractCommander.getInstance();
         // 执行命令
         switch (commandOp) {
