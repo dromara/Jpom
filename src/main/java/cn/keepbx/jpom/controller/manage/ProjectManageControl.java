@@ -109,7 +109,7 @@ public class ProjectManageControl extends BaseController {
                 String cmd;
                 boolean isLinux = true;
                 if (AbstractCommander.OS_INFO.isLinux()) {
-                    cmd = "netstat -antup | grep " + pId + " | head -10";
+                    cmd = "netstat -antup | grep " + pId + " |grep -v \"CLOSE_WAIT\" | head -10";
                 } else {
                     isLinux = false;
                     cmd = "netstat -nao | findstr " + pId;
