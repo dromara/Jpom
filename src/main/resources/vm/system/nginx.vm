@@ -35,6 +35,7 @@
     <button id="addNgx" class="layui-btn layui-btn-sm">新增nginx配置</button>
     <button id="uploadNgx" class="layui-btn layui-btn-sm">上传nginx配置</button>
     <button id="refresh" class="layui-btn layui-btn-sm">刷新表格</button>
+    <button id="certificate" class="layui-btn layui-btn-sm">证书管理</button>
 </div>
 <table class="layui-table" id="tab_ngx" lay-filter="tab_ngx" style="margin: 0;"></table>
 
@@ -171,6 +172,16 @@
                     $('#form_uploadNgx').attr('action', '/system/nginx/uploadNgx');
                     $('#uploadNgx_submit').click();
                 }
+            });
+        });
+
+        //证书管理
+        $('#certificate').on('click', function () {
+            var url = '/system/certificate';
+            tabChange({
+                id: 'certificate',
+                url: url,
+                title: '证书管理',
             });
         });
 

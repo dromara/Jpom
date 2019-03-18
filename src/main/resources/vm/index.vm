@@ -55,10 +55,10 @@
 ##                    <a href="javascript:;"
 ##                       data-options="{'id':'certificate', 'title':'证书管理', 'url':'/system/certificate'}">证书管理</a>
 ##                </li>
-##                <li class="layui-nav-item">
-##                    <a href="javascript:;"
-##                       data-options="{'id':'nginx', 'title':'nginx管理', 'url':'/system/nginx'}">nginx管理</a>
-##                </li>
+                <li class="layui-nav-item">
+                    <a href="javascript:;"
+                       data-options="{'id':'nginx', 'title':'nginx管理', 'url':'/system/nginx'}">nginx管理</a>
+                </li>
             </ul>
         </div>
     </div>
