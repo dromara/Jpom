@@ -70,7 +70,7 @@
                 <div class="layui-form-item">
                     <label class="layui-form-label">快速配置</label>
                     <div class="layui-input-block auto">
-                        <div class="layui-form-item">
+                        <div class="layui-form-item div_hidden">
                             <label class="layui-form-label">缓存状态</label>
                             <div class="layui-input-block">
                                 <input lay-filter="cacheStatus" type="checkbox" name="cacheStatus"

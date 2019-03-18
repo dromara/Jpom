@@ -161,14 +161,12 @@ public class NgxController extends BaseController {
         String key = getParameter("key");
         String cacheStatus = getParameter("cacheStatus");
         NgxConfig config = new NgxConfig();
-        NgxBlock http = new NgxBlock();
-        http.addValue("http");
         if ("true".equals(cacheStatus)) {
             int cacheSize = getParameterInt("cacheSize", 1024);
             int inactive = getParameterInt("inactive", 30);
             String value = " proxy_cache_path " + cachePath + " levels=1:2 keys_zone=mycache:10m max_size=" + cacheSize +
                     "m inactive=" + inactive + "m use_temp_path=off";
-            addNgxParam(http, value);
+            addNgxParam(config, value);
         }
         NgxBlock sever = new NgxBlock();
         sever.addValue("server");
@@ -184,7 +182,7 @@ public class NgxController extends BaseController {
                 addNgxParam(httpSever, "listen 80");
                 addNgxParam(httpSever, "server_name " + domain);
                 addNgxParam(httpSever, "rewrite ^(.*)$  https://$host$1 permanent");
-                http.addEntry(httpSever);
+                config.addEntry(httpSever);
             }
         }
         NgxBlock locationBlock = new NgxBlock();
@@ -194,8 +192,7 @@ public class NgxController extends BaseController {
         addNgxParam(locationBlock, "proxy_set_header  X-Real-IP       $remote_addr");
         addNgxParam(locationBlock, "proxy_set_header  X-Forwarded-For $proxy_add_x_forwarded_for");
         sever.addEntry(locationBlock);
-        http.addEntry(sever);
-        config.addEntry(http);
+        config.addEntry(sever);
         return new NgxDumper(config).dump();
     }
 
