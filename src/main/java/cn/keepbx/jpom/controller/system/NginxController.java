@@ -107,13 +107,7 @@ public class NginxController extends BaseController {
         if (!whitelistDirectoryService.checkNgxDirectory(whitePath)) {
             throw new RuntimeException("请选择正确的项目路径,或者还没有配置白名单");
         }
-        File file = FileUtil.file(whitePath, name);
         boolean add = "add".equals(genre);
-        if (add) {
-            if (file.exists()) {
-                return JsonMessage.getString(400, "该文件已存在");
-            }
-        }
         if ("quick".equals(type)) {
             String port = getParameter("port");
             if (StrUtil.isEmpty(port)) {
@@ -135,6 +129,19 @@ public class NginxController extends BaseController {
             }
         }
         try {
+            File file = FileUtil.file(whitePath, name);
+            if (add) {
+                if (file.exists()) {
+                    return JsonMessage.getString(400, "该文件已存在");
+                }
+                File parentFile = file.getParentFile();
+                if (!parentFile.exists()) {
+                    boolean mkdirs = parentFile.mkdirs();
+                    if (!mkdirs) {
+                        return JsonMessage.getString(401, "创建" + whitePath + "目录失败，请手动创建");
+                    }
+                }
+            }
             FileUtil.writeString(context, file, CharsetUtil.UTF_8);
         } catch (Exception e) {
             DefaultSystemLog.ERROR().error(e.getMessage(), e);

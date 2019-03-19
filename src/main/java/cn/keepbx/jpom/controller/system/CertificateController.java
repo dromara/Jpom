@@ -93,7 +93,6 @@ public class CertificateController extends BaseController {
         if (StrUtil.isEmpty(id)) {
             throw new RuntimeException("修改证书失败");
         }
-        //
         if (!whitelistDirectoryService.checkCertificateDirectory(path)) {
             throw new RuntimeException("请选择正确的项目路径,或者还没有配置白名单");
         }
@@ -102,7 +101,7 @@ public class CertificateController extends BaseController {
         if (!file.exists()) {
             boolean mkdirs = file.mkdirs();
             if (!mkdirs) {
-                throw new RuntimeException("创建文件夹失败");
+                throw new RuntimeException("创建" + path + "目录失败,请手动创建");
             }
         }
         MultipartFileBuilder cert = createMultipart().addFieldName("cert").setSavePath(temporary).setUseOriginalFilename(true);

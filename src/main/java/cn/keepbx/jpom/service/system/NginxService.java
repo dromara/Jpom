@@ -135,11 +135,7 @@ public class NginxService extends BaseOperService {
                 String time = inactive.substring("inactive=".length(), inactive.length() - 1);
                 jsonObject.put("inactive", time);
             }
-            NgxBlock http = conf.findBlock("http");
-            List<NgxEntry> list = null;
-            if (http != null) {
-                list = http.findAll(NgxBlock.class, "server");
-            }
+            List<NgxEntry> list = conf.findAll(NgxBlock.class, "server");
             if (list == null) {
                 return jsonObject;
             }
