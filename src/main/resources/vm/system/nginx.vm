@@ -105,7 +105,7 @@
 
         // 修改
         function updateNgx(data) {
-            var url = '/system/nginx_setting?type=update&path=' + data.path;
+            var url = '/system/nginx_setting?type=update&path=' + data.path + "&name=" + data.name;
             tabChange({
                 id: 'nginx_' + data.path,
                 url: url,
@@ -142,7 +142,10 @@
                     url: '/system/nginx/delete',
                     type: 'POST',
                     dataType: 'json',
-                    data: {path: data.path},
+                    data: {
+                        path: data.path,
+                        name: data.name
+                    },
                     success: function (data) {
                         if (200 == data.code) {
                             layer.msg('删除成功！');

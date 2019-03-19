@@ -67,7 +67,7 @@ public class LogBackController extends BaseController {
             ProjectInfoModel pim = projectInfoService.getItem(id);
             File logBack = pim.getLogBack();
             if (logBack.exists() && logBack.isDirectory()) {
-                logBack = new File(logBack, key);
+                logBack = FileUtil.file(logBack, key);
                 ServletUtil.write(getResponse(), logBack);
             } else {
                 return "没有对应文件";

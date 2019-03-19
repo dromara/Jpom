@@ -13,6 +13,7 @@ import com.github.odiszapc.nginxparser.NgxParam;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
@@ -34,27 +35,29 @@ public class NginxService extends BaseOperService {
         JSONArray array = new JSONArray();
         for (Object o : ngxDirectory) {
             String parentPath = o.toString();
-            List<String> list = null;
+            File whiteDir = new File(parentPath);
+            if (!whiteDir.isDirectory()) {
+                continue;
+            }
+            List<File> list = null;
             try {
                 //获得指定目录下所有文件
-                list = FileUtil.listFileNames(parentPath);
+                list = FileUtil.loopFiles(whiteDir, pathname -> pathname.getName().endsWith(".conf"));
             } catch (Exception e) {
                 DefaultSystemLog.ERROR().error(e.getMessage(), e);
             }
             if (list == null || list.size() <= 0) {
                 continue;
             }
-            for (String s : list) {
-                if (!s.endsWith(".conf")) {
-                    continue;
-                }
-                String path = parentPath + s;
+            String absPath = whiteDir.getAbsolutePath();
+            for (File itemFile : list) {
+                String itemAbsPath = itemFile.getAbsolutePath();
+                String name = paresName(absPath, itemAbsPath);
                 JSONObject jsonObject = new JSONObject();
-                jsonObject.put("path", path);
-                jsonObject.put("name", s);
-                jsonObject.put("whitePath", parentPath);
+                jsonObject.put("path", parentPath);
+                jsonObject.put("name", name);
                 try {
-                    NgxConfig config = NgxConfig.read(path);
+                    NgxConfig config = NgxConfig.read(itemFile.getPath());
                     NgxBlock http = config.findBlock("http");
                     String severName;
                     if (null != http) {
@@ -76,6 +79,10 @@ public class NginxService extends BaseOperService {
             }
         }
         return array;
+    }
+
+    public String paresName(String whitePath, String itemAbsPath) {
+        return itemAbsPath.substring(itemAbsPath.indexOf(whitePath) + whitePath.length() + 1);
     }
 
     @Override

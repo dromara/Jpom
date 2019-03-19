@@ -56,20 +56,21 @@ public class NginxController extends BaseController {
     }
 
     @RequestMapping(value = "nginx_setting", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
-    public String setting(String path, String type) throws IOException {
+    public String setting(String path, String name, String type) throws IOException {
         JSONArray ngxDirectory = whitelistDirectoryService.getNgxDirectory();
         setAttribute("nginx", ngxDirectory);
         List<CertModel> certList = certService.list();
         setAttribute("cert", certList);
         setAttribute("type", type);
-        if (StrUtil.isNotEmpty(path)) {
-            JSONObject jsonObject = nginxService.resolveNgx(path);
-            File file = FileUtil.file(path);
+        name = pathSafe(name);
+        if (StrUtil.isNotEmpty(path) && whitelistDirectoryService.checkNgxDirectory(path)) {
+            File file = FileUtil.file(path, name);
+            JSONObject jsonObject = nginxService.resolveNgx(file.getPath());
             String string = FileUtil.readUtf8String(file);
             jsonObject.put("context", string);
-            String name = file.getName();
-            jsonObject.put("name", name);
-            jsonObject.put("whitePath", path.replace(name, ""));
+//            String name = file.getName();
+            jsonObject.put("name", nginxService.paresName(path, file.getAbsolutePath()));
+            jsonObject.put("whitePath", path);
             setAttribute("data", jsonObject);
         }
         return "system/nginxSetting";
@@ -100,10 +101,13 @@ public class NginxController extends BaseController {
         if (!name.endsWith(".conf")) {
             return JsonMessage.getString(400, "文件后缀必须为\".conf\"");
         }
+        if (!checkPathSafe(name)) {
+            return JsonMessage.getString(400, "文件名存在非法字符");
+        }
         if (!whitelistDirectoryService.checkNgxDirectory(whitePath)) {
             throw new RuntimeException("请选择正确的项目路径,或者还没有配置白名单");
         }
-        File file = FileUtil.file(whitePath + "/" + name);
+        File file = FileUtil.file(whitePath, name);
         boolean add = "add".equals(genre);
         if (add) {
             if (file.exists()) {
@@ -230,11 +234,17 @@ public class NginxController extends BaseController {
      */
     @RequestMapping(value = "nginx/delete", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
-    public String delete(String path) {
-        if (StrUtil.isEmpty(path)) {
-            return JsonMessage.getString(400, "删除失败");
+    public String delete(String path, String name) {
+        if (!whitelistDirectoryService.checkNgxDirectory(path)) {
+            return JsonMessage.getString(400, "非法操作");
         }
-        File file = FileUtil.file(path);
+        path = pathSafe(path);
+        name = pathSafe(name);
+        if (StrUtil.isEmpty(name)) {
+            return JsonMessage.getString(400, "删除失败,请正常操作");
+        }
+
+        File file = FileUtil.file(path, name);
         boolean delete = file.delete();
         if (!delete) {
             return JsonMessage.getString(400, "删除失败");
