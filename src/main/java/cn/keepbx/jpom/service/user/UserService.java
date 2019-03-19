@@ -39,7 +39,7 @@ public class UserService extends BaseOperService<UserModel> {
      */
     public int userSize() {
         try {
-            JSONObject userInfo = getJsonObject(ConfigBean.USER);
+            JSONObject userInfo = getJSONObject(ConfigBean.USER);
             if (userInfo == null) {
                 return 0;
             }
@@ -75,7 +75,7 @@ public class UserService extends BaseOperService<UserModel> {
      * @throws IOException 异常
      */
     public UserModel checkUser(String userMd5) throws IOException {
-        JSONObject jsonData = getJsonObject(ConfigBean.USER);
+        JSONObject jsonData = getJSONObject(ConfigBean.USER);
         if (jsonData == null) {
             return null;
         }
@@ -99,7 +99,7 @@ public class UserService extends BaseOperService<UserModel> {
     public List<UserModel> list() {
         JSONObject jsonObject = null;
         try {
-            jsonObject = getJsonObject(ConfigBean.USER);
+            jsonObject = getJSONObject(ConfigBean.USER);
         } catch (IOException e) {
             DefaultSystemLog.ERROR().error(e.getMessage(), e);
         }

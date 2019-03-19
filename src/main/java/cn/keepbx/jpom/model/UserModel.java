@@ -229,7 +229,15 @@ public class UserModel extends BaseModel {
         return SecureUtil.md5(String.format("%s:%s", getId(), password));
     }
 
+    /**
+     * 是否为管理员
+     *
+     * @return true 是
+     */
     public boolean isManage() {
+        if (UserModel.SYSTEM_ADMIN.equals(getParent())) {
+            return true;
+        }
         return manage;
     }
 

@@ -3,13 +3,18 @@ package cn.keepbx.jpom.controller.manage;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.text.StrSpliter;
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.servlet.ServletUtil;
 import cn.hutool.system.RuntimeInfo;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.keepbx.jpom.common.BaseController;
 import cn.keepbx.jpom.common.commander.AbstractCommander;
+import cn.keepbx.jpom.model.ProjectInfoModel;
+import cn.keepbx.jpom.service.manage.CommandService;
+import cn.keepbx.jpom.service.manage.ProjectInfoService;
 import cn.keepbx.jpom.system.ConfigBean;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
@@ -17,6 +22,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.math.BigDecimal;
@@ -30,6 +36,10 @@ import java.util.List;
 @Controller
 @RequestMapping(value = "/manage/")
 public class InternalController extends BaseController {
+    @Resource
+    private ProjectInfoService projectInfoService;
+    @Resource
+    private CommandService commandService;
 
     /**
      * 获取内存信息
@@ -202,4 +212,60 @@ public class InternalController extends BaseController {
         FileUtil.del(file);
     }
 
+    @RequestMapping(value = "port", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
+    public String getPort(String tag) {
+        // 查询数据
+        try {
+            ProjectInfoModel projectInfoModel = projectInfoService.getItem(tag);
+            String pId = commandService.execCommand(CommandService.CommandOp.pid, projectInfoModel).trim();
+            if (StrUtil.isNotEmpty(pId)) {
+                String cmd;
+                boolean isLinux = true;
+                if (AbstractCommander.OS_INFO.isLinux()) {
+                    cmd = "netstat -antup | grep " + pId + " |grep -v \"CLOSE_WAIT\" | head -10";
+                } else {
+                    isLinux = false;
+                    cmd = "netstat -nao | findstr " + pId;
+                }
+                String result = AbstractCommander.getInstance().execSystemCommand(cmd);
+                JSONArray array = formatRam(isLinux, result);
+                setAttribute("port", array);
+                return "manage/port";
+            }
+        } catch (Exception e) {
+            DefaultSystemLog.ERROR().error(e.getMessage(), e);
+        }
+        return "manage/port";
+    }
+
+    private JSONArray formatRam(boolean isLinux, String result) {
+        List<String> netList = StrSpliter.splitTrim(result, "\n", true);
+        if (netList == null || netList.size() <= 0) {
+            return null;
+        }
+        JSONArray array = new JSONArray();
+        for (String str : netList) {
+            List<String> list = StrSpliter.splitTrim(str, " ", true);
+            JSONObject item = new JSONObject();
+            if (isLinux) {
+                item.put("protocol", list.get(0));
+                item.put("receive", list.get(1));
+                item.put("send", list.get(2));
+                item.put("local", list.get(3));
+                item.put("foreign", list.get(4));
+                item.put("status", list.get(5));
+                item.put("name", list.get(6));
+            } else {
+                item.put("protocol", list.get(0));
+                item.put("receive", 0);
+                item.put("send", 0);
+                item.put("local", list.get(1));
+                item.put("foreign", list.get(2));
+                item.put("status", list.get(3));
+                item.put("name", list.get(4));
+            }
+            array.add(item);
+        }
+        return array;
+    }
 }

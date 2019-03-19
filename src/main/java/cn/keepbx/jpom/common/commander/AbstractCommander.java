@@ -232,7 +232,14 @@ public abstract class AbstractCommander {
         return "0";
     }
 
-    private boolean isRun(String tag) throws Exception {
+    /**
+     * 是否正在运行
+     *
+     * @param tag id
+     * @return true 正在运行
+     * @throws Exception 异常
+     */
+    public boolean isRun(String tag) throws Exception {
         String result = status(tag);
         return result.contains(CommandService.RUNING_TAG);
     }
