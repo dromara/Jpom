@@ -9,7 +9,6 @@ import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.controller.multipart.MultipartFileBuilder;
 import cn.keepbx.jpom.common.BaseController;
-import cn.keepbx.jpom.common.PageUtil;
 import cn.keepbx.jpom.common.interceptor.ProjectPermission;
 import cn.keepbx.jpom.model.ProjectInfoModel;
 import cn.keepbx.jpom.service.manage.ProjectInfoService;
@@ -70,7 +69,7 @@ public class ProjectFileControl extends BaseController {
                 return JsonMessage.getString(500, "目录是空");
             }
             JSONArray arrayFile = parseInfo(filesAll, false);
-            return PageUtil.getPaginate(200, "查询成功", arrayFile);
+            return JsonMessage.getString(200, "查询成功", arrayFile);
         } catch (IOException e) {
             DefaultSystemLog.ERROR().error(e.getMessage(), e);
             return JsonMessage.getString(500, "查询失败");

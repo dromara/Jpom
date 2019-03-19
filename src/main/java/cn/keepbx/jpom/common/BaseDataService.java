@@ -35,7 +35,7 @@ public abstract class BaseDataService {
     protected void saveJson(String filename, JSONObject json) throws IOException {
         String key = json.getString("id");
         // 读取文件，如果存在记录，则抛出异常
-        JSONObject allData = getJsonObject(filename);
+        JSONObject allData = getJSONObject(filename);
         JSONObject data = allData.getJSONObject(key);
         // 判断是否存在数据
         if (null != data && 0 < data.keySet().size()) {
@@ -55,7 +55,7 @@ public abstract class BaseDataService {
     protected void updateJson(String filename, JSONObject json) throws Exception {
         String key = json.getString("id");
         // 读取文件，如果不存在记录，则抛出异常
-        JSONObject allData = getJsonObject(filename);
+        JSONObject allData = getJSONObject(filename);
         JSONObject data = allData.getJSONObject(key);
 
         // 判断是否存在数据
@@ -76,7 +76,7 @@ public abstract class BaseDataService {
      */
     protected void deleteJson(String filename, String key) throws Exception {
         // 读取文件，如果存在记录，则抛出异常
-        JSONObject allData = getJsonObject(filename);
+        JSONObject allData = getJSONObject(filename);
         JSONObject data = allData.getJSONObject(key);
         // 判断是否存在数据
         if (JsonUtil.jsonIsEmpty(data)) {
@@ -94,12 +94,12 @@ public abstract class BaseDataService {
      * @return json
      * @throws IOException io
      */
-    protected JSONObject getJsonObject(String filename) throws IOException {
+    protected JSONObject getJSONObject(String filename) throws IOException {
         return (JSONObject) JsonUtil.readJson(getDataFilePath(filename));
     }
 
     protected <T> T getJsonObjectById(String file, String id, Class<T> cls) throws IOException {
-        JSONObject jsonObject = getJsonObject(file);
+        JSONObject jsonObject = getJSONObject(file);
         if (jsonObject == null) {
             return null;
         }

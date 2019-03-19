@@ -99,7 +99,7 @@ public class OssManagerService extends BaseDataService {
     }
 
     public JSONObject getConfig() throws IOException {
-        return getJsonObject(ConfigBean.ALI_OSS);
+        return getJSONObject(ConfigBean.ALI_OSS);
     }
 
     private String getBucketName() throws IOException {

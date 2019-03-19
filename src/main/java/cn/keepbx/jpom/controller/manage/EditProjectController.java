@@ -163,6 +163,12 @@ public class EditProjectController extends BaseController {
                     return JsonMessage.getString(400, "管理员才能创建项目!");
                 }
                 projectInfo.setCreateTime(DateUtil.now());
+                // 隐藏系统管理员登录名
+                if (UserModel.SYSTEM_ADMIN.equals(userName.getParent())) {
+                    projectInfo.setCreateUser("系统管理员");
+                } else {
+                    projectInfo.setCreateUser(userName.getId());
+                }
                 projectInfoService.saveProject(projectInfo);
                 return JsonMessage.getString(200, "新增成功！");
             }

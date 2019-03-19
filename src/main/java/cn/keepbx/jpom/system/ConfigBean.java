@@ -19,15 +19,33 @@ import java.io.File;
 public class ConfigBean {
     private static final String DATA = "data";
     private static ConfigBean configBean;
-
+    /**
+     * 用户数据文件
+     */
     public static final String USER = "user.json";
+    /**
+     * 项目数据文件
+     */
     public static final String PROJECT = "project.json";
+    /**
+     * 白名单文件
+     */
     public static final String WHITELIST_DIRECTORY = "whitelistDirectory.json";
+    /**
+     * 阿里oss 文件
+     */
     public static final String ALI_OSS = "aliOss.json";
+    /**
+     * 证书文件
+     */
     public static final String CERT = "cert.json";
+    /**
+     * 项目回收文件
+     */
+    public static final String PROJECT_RECOVER = "project_recover.json";
 
 
-    public static final String JPOM_PATH = "jpom.path";
+    private static final String JPOM_PATH = "jpom.path";
 
 
     public static ConfigBean getInstance() {

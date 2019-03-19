@@ -1,7 +1,11 @@
 package cn.keepbx.jpom.common;
 
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
+
 import java.io.IOException;
 import java.util.List;
+import java.util.Set;
 
 /**
  * 标准操作Service
@@ -26,4 +30,13 @@ public abstract class BaseOperService<T> extends BaseDataService {
      * @throws IOException IO
      */
     public abstract T getItem(String id) throws IOException;
+
+    protected JSONArray formatToArray(JSONObject jsonObject) {
+        Set<String> setKey = jsonObject.keySet();
+        JSONArray jsonArray = new JSONArray();
+        for (String key : setKey) {
+            jsonArray.add(jsonObject.getJSONObject(key));
+        }
+        return jsonArray;
+    }
 }

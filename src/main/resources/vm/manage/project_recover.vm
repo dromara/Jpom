@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    #parse("./common/head.vm")
+    <title>项目管理系统</title>
+    <style>
+        body {
+            padding: 20px;
+        }
+
+    </style>
+</head>
+
+<body>
+    #if($user.isManage())
+    <table class="layui-table">
+        <thead>
+        <tr>
+            <th>序号</th>
+            <th>项目名称</th>
+            <th>项目ID</th>
+            <th>项目分组</th>
+            <th>项目路径</th>
+            <th>删除时间</th>
+            <th>操作人</th>
+            <th>操作</th>
+        </tr>
+        </thead>
+        <tbody>
+
+            #foreach($item in $!array)
+                #set($hashData=true)
+            <tr>
+                <td>$!velocityCount</td>
+                <td>$!item.projectInfoModel.name</td>
+                <td>$!item.projectInfoModel.id</td>
+                <td>$!item.projectInfoModel.group</td>
+                <td>$!item.projectInfoModel.lib</td>
+                <td>$!item.delTime</td>
+                <td>$!item.delUser</td>
+                <td>
+                    <button name="delete" data-name="$item.filename" data-id="$id"
+                            class="layui-btn  layui-btn-sm">详情
+                    </button>
+                </td>
+            </tr>
+            #end
+            #if(!$hashData)
+            <tr>
+                <td colspan=8 style="text-align:center">无数据</td>
+            </tr>
+            #end
+        </tbody>
+    </table>
+    #else
+    <h1>你没有权限</h1>
+    #end
+</body>
+</html>

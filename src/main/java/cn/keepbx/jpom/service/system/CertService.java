@@ -47,7 +47,7 @@ public class CertService extends BaseOperService<CertModel> {
     @Override
     public List<CertModel> list() throws IOException {
         try {
-            JSONObject jsonObject = getJsonObject(ConfigBean.CERT);
+            JSONObject jsonObject = getJSONObject(ConfigBean.CERT);
             if (jsonObject == null) {
                 return null;
             }
@@ -80,7 +80,7 @@ public class CertService extends BaseOperService<CertModel> {
      */
     public boolean delete(String id) {
         try {
-            JSONObject jsonObject = getJsonObject(ConfigBean.CERT);
+            JSONObject jsonObject = getJSONObject(ConfigBean.CERT);
             if (jsonObject == null) {
                 return false;
             }

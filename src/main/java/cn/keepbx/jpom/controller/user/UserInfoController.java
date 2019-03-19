@@ -163,8 +163,8 @@ public class UserInfoController extends BaseController {
 
     private String parseUser(UserModel userModel, boolean create) {
         String id = getParameter("id");
-        if (StrUtil.isEmpty(id)) {
-            return JsonMessage.getString(400, "登录名不能为空");
+        if (StrUtil.isEmpty(id) || id.length() <= 4) {
+            return JsonMessage.getString(400, "登录名不能为空,并且长度必须大于4");
         }
         userModel.setId(id);
 

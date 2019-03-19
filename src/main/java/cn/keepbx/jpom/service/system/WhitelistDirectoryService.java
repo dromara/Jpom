@@ -22,7 +22,7 @@ public class WhitelistDirectoryService extends BaseDataService {
 
     public JSONObject getWhitelist() {
         try {
-            JSONObject jsonObject = getJsonObject(ConfigBean.WHITELIST_DIRECTORY);
+            JSONObject jsonObject = getJSONObject(ConfigBean.WHITELIST_DIRECTORY);
             if (jsonObject == null) {
                 return null;
             }
