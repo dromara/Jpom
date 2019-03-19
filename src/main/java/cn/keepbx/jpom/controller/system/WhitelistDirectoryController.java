@@ -5,7 +5,7 @@ import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.keepbx.jpom.common.BaseController;
 import cn.keepbx.jpom.model.UserModel;
-import cn.keepbx.jpom.service.system.SystemService;
+import cn.keepbx.jpom.service.system.WhitelistDirectoryService;
 import cn.keepbx.jpom.system.ConfigBean;
 import cn.keepbx.jpom.system.ExtConfigBean;
 import com.alibaba.fastjson.JSONArray;
@@ -29,20 +29,20 @@ import java.util.List;
 @RequestMapping(value = "/system")
 public class WhitelistDirectoryController extends BaseController {
     @Resource
-    private SystemService systemService;
+    private WhitelistDirectoryService whitelistDirectoryService;
 
     /**
      * 页面
      */
     @RequestMapping(value = "whitelistDirectory", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
     public String whitelistDirectory() {
-        JSONArray jsonArray = systemService.getWhitelistDirectory();
-        setAttribute("project", systemService.convertToLine(jsonArray));
+        JSONArray jsonArray = whitelistDirectoryService.getProjectDirectory();
+        setAttribute("project", whitelistDirectoryService.convertToLine(jsonArray));
         //
-        jsonArray = systemService.getCertificateDirectory();
-        setAttribute("certificate", systemService.convertToLine(jsonArray));
-        jsonArray = systemService.getNgxDirectory();
-        setAttribute("nginx", systemService.convertToLine(jsonArray));
+        jsonArray = whitelistDirectoryService.getCertificateDirectory();
+        setAttribute("certificate", whitelistDirectoryService.convertToLine(jsonArray));
+        jsonArray = whitelistDirectoryService.getNgxDirectory();
+        setAttribute("nginx", whitelistDirectoryService.convertToLine(jsonArray));
         return "system/whitelistDirectory";
     }
 
@@ -137,14 +137,14 @@ public class WhitelistDirectoryController extends BaseController {
                 return new JsonMessage(401, "nginx目录中不能存在包含关系：" + error);
             }
         }
-        JSONObject jsonObject = systemService.getWhitelist();
+        JSONObject jsonObject = whitelistDirectoryService.getWhitelist();
         if (jsonObject == null) {
             jsonObject = new JSONObject();
         }
         jsonObject.put("project", projectArray);
         jsonObject.put("certificate", certificateArray);
         jsonObject.put("nginx", nginxArray);
-        systemService.saveWhitelistDirectory(jsonObject);
+        whitelistDirectoryService.saveWhitelistDirectory(jsonObject);
         return new JsonMessage(200, "保存成功");
     }
 

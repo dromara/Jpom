@@ -17,12 +17,8 @@ import java.io.File;
  */
 @Configuration
 public class ConfigBean {
-    private static final String COMMAND = "command";
     private static final String DATA = "data";
     private static ConfigBean configBean;
-
-    public static final String CPU_SH = "/java_cpu.sh";
-    public static final String RAM_SH = "/java_ram.sh";
 
     public static final String USER = "user.json";
     public static final String PROJECT = "project.json";
@@ -61,17 +57,6 @@ public class ConfigBean {
     }
 
     /**
-     * 获取项目命令存储文件夹路径
-     *
-     * @return 文件夹路径
-     */
-    private String getCommandPath() {
-        String commandPath = FileUtil.normalize(getPath() + "/" + COMMAND);
-        FileUtil.mkdir(commandPath);
-        return commandPath;
-    }
-
-    /**
      * 获取项目运行数据存储文件夹路径
      *
      * @return 文件夹路径
@@ -106,41 +91,5 @@ public class ConfigBean {
         file = new File(file.getPath() + "/temp/", userName);
         FileUtil.mkdir(file);
         return file;
-    }
-
-    /**
-     * 组合命令文件路径
-     *
-     * @param item 要获取的命令文件名称
-     * @return 完整路径
-     * @throws ConfigException 配置异常
-     */
-    private String getCommandPath(String item) throws ConfigException {
-        String command = getCommandPath();
-        String runSh = FileUtil.normalize(command + item);
-        if (!FileUtil.exist(runSh)) {
-            throw new ConfigException(item + " 文件不存在:" + runSh, runSh);
-        }
-        return runSh;
-    }
-
-    /**
-     * 导出cpu 命令
-     *
-     * @return 完整路径
-     * @throws ConfigException 配置异常
-     */
-    public String getCpuCommandPath() throws ConfigException {
-        return getCommandPath(CPU_SH);
-    }
-
-    /**
-     * 导出ram 命令
-     *
-     * @return 完整路径
-     * @throws ConfigException 配置异常
-     */
-    public String getRamCommandPath() throws ConfigException {
-        return getCommandPath(RAM_SH);
     }
 }

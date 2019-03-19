@@ -8,13 +8,11 @@ import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.PreLoadClass;
 import cn.jiangzeyin.common.PreLoadMethod;
 import cn.jiangzeyin.common.spring.SpringUtil;
-import cn.keepbx.jpom.common.commander.AbstractCommander;
 import cn.keepbx.jpom.controller.system.WhitelistDirectoryController;
 import cn.keepbx.jpom.model.ProjectInfoModel;
 import cn.keepbx.jpom.service.manage.ProjectInfoService;
-import cn.keepbx.jpom.service.system.SystemService;
+import cn.keepbx.jpom.service.system.WhitelistDirectoryService;
 import cn.keepbx.jpom.system.ConfigBean;
-import cn.keepbx.jpom.system.ConfigException;
 import cn.keepbx.jpom.system.ExtConfigBean;
 import cn.keepbx.jpom.system.WebAopLog;
 import cn.keepbx.jpom.util.JsonUtil;
@@ -36,25 +34,6 @@ import java.util.List;
  */
 @PreLoadClass
 public class CheckRunCommand {
-
-    /**
-     * 检查命令文件
-     */
-    @PreLoadMethod
-    private static void checkSh() throws Exception {
-        try {
-            ConfigBean.getInstance().getRamCommandPath();
-        } catch (ConfigException e) {
-            DefaultSystemLog.LOG().info("创建默认文件：" + e.getPath());
-            addCommandFile(ConfigBean.RAM_SH, e.getPath());
-        }
-        try {
-            ConfigBean.getInstance().getCpuCommandPath();
-        } catch (ConfigException e) {
-            DefaultSystemLog.LOG().info("创建默认文件：" + e.getPath());
-            addCommandFile(ConfigBean.CPU_SH, e.getPath());
-        }
-    }
 
     /**
      * 检查运行数据
@@ -99,15 +78,15 @@ public class CheckRunCommand {
         // 自动同步项目路径
         try {
             Object object = JsonUtil.readJson(file.getPath());
-            SystemService systemService = SpringUtil.getBean(SystemService.class);
+            WhitelistDirectoryService whitelistDirectoryService = SpringUtil.getBean(WhitelistDirectoryService.class);
             WhitelistDirectoryController whitelistDirectoryController = SpringUtil.getBean(WhitelistDirectoryController.class);
             if (object instanceof JSONArray) {
                 DefaultSystemLog.LOG().info("升级白名单目录数据");
-                String all = systemService.convertToLine((JSONArray) object);
+                String all = whitelistDirectoryService.convertToLine((JSONArray) object);
                 JsonMessage message = whitelistDirectoryController.save(all, null, null);
                 DefaultSystemLog.LOG().info(message.toString());
             } else if (object instanceof JSONObject) {
-                JSONArray jsonArray = systemService.getWhitelistDirectory();
+                JSONArray jsonArray = whitelistDirectoryService.getProjectDirectory();
                 if (jsonArray == null || jsonArray.isEmpty()) {
                     DefaultSystemLog.LOG().info("升级、自动转换白名单目录数据");
                     ProjectInfoService projectInfoService = SpringUtil.getBean(ProjectInfoService.class);
@@ -119,9 +98,9 @@ public class CheckRunCommand {
                             file1 = file1.getParentFile().getParentFile();
                             paths.add(file1.getPath());
                         }
-                        JSONArray certificateDirectory = systemService.getCertificateDirectory();
+                        JSONArray certificateDirectory = whitelistDirectoryService.getCertificateDirectory();
                         List<String> certificateDirectoryStr = certificateDirectory.toJavaList(String.class);
-                        JSONArray ngxDirectory = systemService.getNgxDirectory();
+                        JSONArray ngxDirectory = whitelistDirectoryService.getNgxDirectory();
                         List<String> ngxDirectoryStr = ngxDirectory.toJavaList(String.class);
                         JsonMessage message = whitelistDirectoryController.save(paths, certificateDirectoryStr, ngxDirectoryStr);
                         DefaultSystemLog.LOG().info(message.toString());
@@ -144,14 +123,5 @@ public class CheckRunCommand {
         URL url = ResourceUtil.getResource("bin/data/" + name);
         String content = FileUtil.readString(url, CharsetUtil.UTF_8);
         FileUtil.writeString(content, file, CharsetUtil.UTF_8);
-    }
-
-    private static void addCommandFile(String command, String file) throws Exception {
-        URL url = ResourceUtil.getResource("bin/command" + command);
-        String content = FileUtil.readString(url, CharsetUtil.UTF_8);
-        FileUtil.writeString(content, file, CharsetUtil.UTF_8);
-        // 添加文件权限
-        String runCommand = "chmod 755 " + file;
-        AbstractCommander.getInstance().execCommand(runCommand);
     }
 }

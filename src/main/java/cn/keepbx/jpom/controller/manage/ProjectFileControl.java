@@ -167,7 +167,7 @@ public class ProjectFileControl extends BaseController {
         try {
             ProjectInfoModel pim = projectInfoService.getItem(id);
 //            String path = + "/" + filename;
-            File file = new File(pim.getLib(), filename);
+            File file = FileUtil.file(pim.getLib(), filename);
             if (file.isDirectory()) {
                 return "暂不支持下载文件夹";
             }

@@ -8,7 +8,7 @@ import cn.jiangzeyin.controller.multipart.MultipartFileBuilder;
 import cn.keepbx.jpom.common.BaseController;
 import cn.keepbx.jpom.model.CertModel;
 import cn.keepbx.jpom.service.system.CertService;
-import cn.keepbx.jpom.service.system.SystemService;
+import cn.keepbx.jpom.service.system.WhitelistDirectoryService;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.http.MediaType;
@@ -38,11 +38,11 @@ public class CertificateController extends BaseController {
     @Resource
     private CertService certService;
     @Resource
-    private SystemService systemService;
+    private WhitelistDirectoryService whitelistDirectoryService;
 
     @RequestMapping(value = "/certificate", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
     public String certificate() {
-        JSONArray jsonArray = systemService.getCertificateDirectory();
+        JSONArray jsonArray = whitelistDirectoryService.getCertificateDirectory();
         setAttribute("certificate", jsonArray);
         return "system/certificate";
     }
@@ -93,8 +93,9 @@ public class CertificateController extends BaseController {
         if (StrUtil.isEmpty(id)) {
             throw new RuntimeException("修改证书失败");
         }
-        if (StrUtil.isEmpty(path)) {
-            throw new RuntimeException("路径不能为空");
+        //
+        if (!whitelistDirectoryService.checkCertificateDirectory(path)) {
+            throw new RuntimeException("请选择正确的项目路径,或者还没有配置白名单");
         }
         String temporary = path + "/" + id + "/";
         File file = FileUtil.file(temporary);

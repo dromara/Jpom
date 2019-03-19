@@ -1,6 +1,7 @@
 package cn.keepbx.jpom.service.system;
 
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.keepbx.jpom.common.BaseDataService;
 import cn.keepbx.jpom.system.ConfigBean;
@@ -17,7 +18,7 @@ import java.io.FileNotFoundException;
  * @date 2019/2/28
  */
 @Service
-public class SystemService extends BaseDataService {
+public class WhitelistDirectoryService extends BaseDataService {
 
     public JSONObject getWhitelist() {
         try {
@@ -40,39 +41,49 @@ public class SystemService extends BaseDataService {
      *
      * @return project
      */
-    public JSONArray getWhitelistDirectory() {
-        try {
-            JSONObject jsonObject = getWhitelist();
-            if (jsonObject == null) {
-                return null;
-            }
-            return jsonObject.getJSONArray("project");
-        } catch (Exception e) {
-            DefaultSystemLog.ERROR().error(e.getMessage(), e);
-        }
-        return null;
+    public JSONArray getProjectDirectory() {
+        return getItemArray("project");
     }
 
+
     public JSONArray getNgxDirectory() {
-        try {
-            JSONObject jsonObject = getWhitelist();
-            if (jsonObject == null) {
-                return null;
-            }
-            return jsonObject.getJSONArray("nginx");
-        } catch (Exception e) {
-            DefaultSystemLog.ERROR().error(e.getMessage(), e);
-        }
-        return null;
+        return getItemArray("nginx");
     }
 
     public JSONArray getCertificateDirectory() {
+        return getItemArray("certificate");
+    }
+
+    public boolean checkProjectDirectory(String path) {
+        return check(path, "project");
+    }
+
+    public boolean checkNgxDirectory(String path) {
+        return check(path, "nginx");
+    }
+
+    public boolean checkCertificateDirectory(String path) {
+        return check(path, "certificate");
+    }
+
+    private boolean check(String path, String key) {
+        JSONArray jsonArray = getItemArray(key);
+        if (jsonArray == null) {
+            return false;
+        }
+        if (StrUtil.isEmpty(path)) {
+            return false;
+        }
+        return jsonArray.contains(path);
+    }
+
+    private JSONArray getItemArray(String key) {
         try {
             JSONObject jsonObject = getWhitelist();
             if (jsonObject == null) {
                 return null;
             }
-            return jsonObject.getJSONArray("certificate");
+            return jsonObject.getJSONArray(key);
         } catch (Exception e) {
             DefaultSystemLog.ERROR().error(e.getMessage(), e);
         }
