@@ -162,17 +162,24 @@ public class EditProjectController extends BaseController {
                 if (!userName.isManage()) {
                     return JsonMessage.getString(400, "管理员才能创建项目!");
                 }
-                //  return addProject(projectInfo);
                 projectInfo.setCreateTime(DateUtil.now());
                 projectInfoService.saveProject(projectInfo);
                 return JsonMessage.getString(200, "新增成功！");
             }
-//            boolean manager = userService.isManager(id, getUserName());
             if (!userName.isProject(projectInfo.getId())) {
                 return JsonMessage.getString(400, "你没有对应操作权限操作!");
             }
+            exits.setLog(projectInfo.getLog());
+            exits.setName(projectInfo.getName());
+            exits.setGroup(projectInfo.getGroup());
+            exits.setMainClass(projectInfo.getMainClass());
+            exits.setLib(projectInfo.getLib());
+            exits.setJvm(projectInfo.getJvm());
+            exits.setArgs(projectInfo.getArgs());
+            exits.setBuildTag(projectInfo.getBuildTag());
+            //
             moveTo(exits, projectInfo);
-            projectInfoService.updateProject(projectInfo);
+            projectInfoService.updateProject(exits);
             return JsonMessage.getString(200, "修改成功");
         } catch (Exception e) {
             DefaultSystemLog.ERROR().error(e.getMessage(), e);
