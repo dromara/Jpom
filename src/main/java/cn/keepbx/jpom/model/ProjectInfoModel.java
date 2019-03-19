@@ -71,6 +71,11 @@ public class ProjectInfoModel extends BaseModel {
         return modifyTime;
     }
 
+    /**
+     * 修改时间
+     *
+     * @param modifyTime time
+     */
     public void setModifyTime(String modifyTime) {
         this.modifyTime = modifyTime;
     }

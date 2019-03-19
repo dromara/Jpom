@@ -54,7 +54,7 @@
         $("button[name='install']").click(function () {
             var that = $(this);
             var name = that.attr("data-name");
-            layer.confirm('您确定要安装【' + name + '】？', {
+            layer.confirm('您确定要安装【' + name + '】,安装后会自动重启程序？', {
                 btn: ['确定', '不确定'] //按钮
             }, function (index) {
                 layer.close(index);
@@ -71,7 +71,12 @@
                     success: function (data) {
                         layer.msg(data.msg);
                         if (200 == data.code) {
-
+                            setTimeout(function () {
+                                var index = parent.layer.getFrameIndex(window.name);
+                                parent.layer.close(index);
+                                // 刷新项目列表
+                                parent.reloadTable();
+                            }, 2000);
                         }
                     },
                     error: function (err) {
@@ -84,7 +89,6 @@
             }, function () {
 
             });
-
         });
     }
 </script>

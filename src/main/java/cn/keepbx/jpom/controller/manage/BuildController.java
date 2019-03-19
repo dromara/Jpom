@@ -88,9 +88,6 @@ public class BuildController extends BaseController {
         projectInfoModel.setUseLibDesc("build");
         projectInfoService.updateProject(projectInfoModel);
         String result = commandService.execCommand(CommandService.CommandOp.restart, projectInfoModel);
-        if (result.contains(CommandService.RUNING_TAG)) {
-            return JsonMessage.getString(200, "安装成功，已自动重启");
-        }
-        return JsonMessage.getString(505, "安装失败：" + result);
+        return JsonMessage.getString(200, "安装成功，已自动重启,当前状态是：" + result);
     }
 }

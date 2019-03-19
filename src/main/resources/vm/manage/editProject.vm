@@ -150,10 +150,7 @@
                 success: function (data) {
                     layer.msg(data.msg);
                     if (200 == data.code) {
-                        var index = parent.layer.getFrameIndex(window.name);
-                        parent.layer.close(index);
-                        // 刷新项目列表
-                        parent.reloadTable();
+                        autoClose();
                     }
                 },
                 error: function (err) {
@@ -229,10 +226,7 @@
                         layer.close(index);
                         layer.msg(data.msg);
                         if (200 == data.code) {
-                            var index = parent.layer.getFrameIndex(window.name);
-                            parent.layer.close(index);
-                            // 刷新项目列表
-                            parent.reloadTable();
+                            autoClose();
                         }
                     },
                     error: function (err) {
@@ -241,6 +235,15 @@
                 });
             });
         });
+    }
+
+    function autoClose() {
+        setTimeout(function () {
+            var index = parent.layer.getFrameIndex(window.name);
+            parent.layer.close(index);
+            // 刷新项目列表
+            parent.reloadTable();
+        }, 2000);
     }
 </script>
 </html>

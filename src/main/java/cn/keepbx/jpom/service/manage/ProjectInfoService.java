@@ -1,5 +1,6 @@
 package cn.keepbx.jpom.service.manage;
 
+import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.keepbx.jpom.common.BaseOperService;
@@ -64,6 +65,7 @@ public class ProjectInfoService extends BaseOperService<ProjectInfoModel> {
      * @param projectInfo 项目信息
      */
     public void updateProject(ProjectInfoModel projectInfo) throws Exception {
+        projectInfo.setModifyTime(DateUtil.now());
         updateJson(ConfigBean.PROJECT, projectInfo.toJson());
     }
 
