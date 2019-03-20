@@ -42,8 +42,6 @@
                                value="$!data.name" required lay-verify="required" #if($type=="update")
                                disabled #end >
                     </div>
-                </div>
-                <div class="layui-form-item">
                     <label class="layui-form-label">文件路径</label>
                     <div class="layui-input-inline">
                         <select name="whitePath" id="whitePath" #if($type=="update") disabled #end
@@ -150,8 +148,6 @@
                             "update") disabled #end
                                value="$!data.name" required lay-verify="required">
                     </div>
-                </div>
-                <div class="layui-form-item">
                     <label class="layui-form-label">文件路径</label>
                     <div class="layui-input-inline">
                         <select name="whitePath" id="whitePath" #if($type=="update") disabled #end>

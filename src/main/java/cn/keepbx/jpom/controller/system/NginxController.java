@@ -221,10 +221,16 @@ public class NginxController extends BaseController {
     @RequestMapping(value = "nginx/uploadNgx", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     public String uploadNgx(String whitePath) {
+        if (StrUtil.isEmpty(whitePath)) {
+            return JsonMessage.getString(401, "请选择对应的白名单");
+        }
+        if (!whitelistDirectoryService.checkNgxDirectory(whitePath)) {
+            return JsonMessage.getString(400, "非法操作");
+        }
         try {
             MultipartFileBuilder file = createMultipart().addFieldName("file")
                     .setSavePath(whitePath)
-                    .setFileExt(".conf")
+                    .setFileExt("conf")
                     .setUseOriginalFilename(true);
             file.save();
         } catch (Exception e) {

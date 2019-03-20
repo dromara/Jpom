@@ -40,7 +40,7 @@
 <table class="layui-table" id="tab_ngx" lay-filter="tab_ngx" style="margin: 0;"></table>
 
 <div class="layui-container div-uploadNgx" id="div-uploadNgx">
-    <form action="" enctype="multipart/form-data" class="layui-form" id="form_uploadNgx" style="margin-top: 20px">
+    <form action="" class="layui-form" id="form_uploadNgx" style="margin-top: 20px">
         <div class="layui-form-item">
             <div class="layui-inline">
                 <label class="layui-form-label">文件路径</label>
@@ -57,12 +57,12 @@
             <div class="layui-inline">
                 <label class="layui-form-label">配置文件</label>
                 <div class="layui-input-block">
-                    <input type="file" id="file" name="file" placeholder="" class="layui-input" required
-                           lay-verify="required">
+                    <button type="button" class="layui-btn" id="selectConfig">
+                        <i class="layui-icon">&#xe67c;</i>选择文件
+                    </button>
                 </div>
             </div>
         </div>
-        <input type="hidden" lay-submit lay-filter="submitUploadNgx" id="uploadNgx_submit">
     </form>
 </div>
 
@@ -78,6 +78,37 @@
     var index = 0;
 
     function loadSuccess() {
+        var uploadConfig, hashSelectConfig;
+        layui.use(['upload'], function () {
+            var upload = layui.upload;
+            uploadConfig = upload.render({
+                elem: '#selectConfig',
+                url: '/system/nginx/uploadNgx',
+                multiple: false,
+                exts: 'conf',
+                acceptMime: '.conf',
+                field: 'file',
+                auto: false,
+                choose: function () {
+                    hashSelectConfig = true;
+                },
+                before: function (obj) { //obj参数包含的信息，跟 choose回调完全一致，可参见上文。
+                    layer.load(); //上传loading
+                },
+                done: function (res) {
+                    layer.closeAll('loading');
+                    layer.msg(res.msg);
+                    if (200 == data.code) {
+                        layer.closeAll('page');
+                        // 刷新表
+                        table.reload('tab_ngx');
+                    }
+                },
+                error: function () {
+                    layer.msg("上传失败");
+                }
+            });
+        });
 
         // 表格工具条事件
         table.on('tool(tab_ngx)', function (obj) {
@@ -162,7 +193,6 @@
             });
         }
 
-
         //上传配置
         $('#uploadNgx').on('click', function () {
             document.getElementById('form_uploadNgx').reset();
@@ -170,12 +200,20 @@
                 type: 1,
                 title: '上传配置',
                 content: $('#div-uploadNgx'),
-                area: ['60%', '60%'],
+                area: ['60%', '40%'],
                 btnAlign: 'c',
                 btn: ['提交'],
                 yes: function (index, layero) {
-                    $('#form_uploadNgx').attr('action', '/system/nginx/uploadNgx');
-                    $('#uploadNgx_submit').click();
+                    var val = $("#whitePath").val();
+                    if (!val || val === "") {
+                        layer.msg("请选择白名单路径")
+                        return;
+                    }
+                    if (!hashSelectConfig) {
+                        layer.msg("请选择配置文件")
+                        return;
+                    }
+                    uploadConfig.upload();
                 }
             });
         });
@@ -190,41 +228,10 @@
             });
         });
 
-        //上传配置
-        form.on('submit(submitUploadNgx)', function (data) {
-            var file = $("#file")[0].files[0];
-            var whitePath = $("#whitePath").val();
-            var formData = new FormData();
-            formData.append("whitePath", whitePath);
-            formData.append("file", file);
-            $.ajax({
-                url: data.form.action,
-                type: 'POST',
-                dataType: 'json',
-                contentType: false,
-                processData: false,
-                data: formData,
-                success: function (data) {
-                    layer.msg(data.msg);
-                    if (200 == data.code) {
-                        layer.closeAll('page');
-                        // 刷新表
-                        table.reload('tab_ngx');
-                    }
-                },
-                error: function (err) {
-                    layer.alert(err.msg);
-                }
-            });
-            return false;
-        });
-
         // 刷新
         $('#refresh').on('click', function () {
             table.reload('tab_ngx');
         });
-
-
     }
 
 </script>
