@@ -58,21 +58,23 @@
     </tr>
     </thead>
     <tbody>
-        #if($item)
-        <tr>
-            <td>$!item.pid</td>
-            <td>$!item.USER</td>
-            <td>$!item.PR</td>
-            <td>$!item.NI</td>
-            <td>$!item.VIRT</td>
-            <td>$!item.RES</td>
-            <td>$!item.SHR</td>
-            <td>$!item.S</td>
-            <td>$!item.CPU</td>
-            <td>$!item.MEM</td>
-            <td>$!item.TIME</td>
-            <td>$!item.COMMAND</td>
-        </tr>
+        #if($mem)
+            #foreach($item in $mem)
+            <tr>
+                <td>$!item.pid</td>
+                <td>$!item.USER</td>
+                <td>$!item.PR</td>
+                <td>$!item.NI</td>
+                <td>$!item.VIRT</td>
+                <td>$!item.RES</td>
+                <td>$!item.SHR</td>
+                <td>$!item.S</td>
+                <td>$!item.CPU</td>
+                <td>$!item.MEM</td>
+                <td>$!item.TIME</td>
+                <td>$!item.COMMAND</td>
+            </tr>
+            #end
         #else
         <tr>
             <td colspan=12 style="text-align:center">无数据</td>
