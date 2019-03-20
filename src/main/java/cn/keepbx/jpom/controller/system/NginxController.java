@@ -115,7 +115,7 @@ public class NginxController extends BaseController {
             }
             String domain = getParameter("domain");
             if (StrUtil.isEmpty(domain)) {
-                return JsonMessage.getString(400, "请填写监听地址");
+                return JsonMessage.getString(400, "请填写域名");
             }
             if (!whitePath.endsWith("/")) {
                 whitePath += "/";
@@ -256,15 +256,11 @@ public class NginxController extends BaseController {
         if (StrUtil.isEmpty(name)) {
             return JsonMessage.getString(400, "删除失败,请正常操作");
         }
-
         File file = FileUtil.file(path, name);
         boolean delete = file.delete();
         if (!delete) {
             return JsonMessage.getString(400, "删除失败");
         }
-        //删除缓存文件
-        String cachePath = path.substring(0, path.indexOf("."));
-        FileUtil.del(cachePath);
         return JsonMessage.getString(200, "删除成功");
     }
 

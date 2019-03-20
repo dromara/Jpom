@@ -33,8 +33,10 @@ public class WelcomeController extends BaseController {
     public String getTop() {
         String topInfo = "";
         try {
-            String s = AbstractCommander.getInstance().execCommand("top -b -n 1");
-            topInfo = TopManager.getTopInfo(s);
+            if (AbstractCommander.OS_INFO.isLinux()) {
+                String s = AbstractCommander.getInstance().execCommand("top -b -n 1");
+                topInfo = TopManager.getTopInfo(s);
+            }
         } catch (Exception e) {
             DefaultSystemLog.ERROR().error(e.getMessage(), e);
         }

@@ -17,6 +17,10 @@
             height: 65vh;
         }
 
+        .layui-input-inline {
+            width: 350px !important;
+        }
+
         .x-red {
             color: red;
         }
@@ -77,7 +81,7 @@
                                         <label class="layui-form-label"><span class="x-red">*</span>监听端口</label>
                                         <div class="layui-input-inline">
                                             <input type="text" name="port" value="$!data.port" id="port" required
-                                                   lay-verify="required" placeholder="" class="layui-input">
+                                                   readonly lay-verify="required" placeholder="" class="layui-input">
                                         </div>
                                         <div class="layui-form-mid layui-word-aux"><span class="x-red">*</span>设置listen监听端口
                                         </div>
@@ -123,7 +127,7 @@
                                             <input type="text" name="location" value="$!data.location"
                                                    placeholder="" class="layui-input">
                                         </div>
-                                        <div class="layui-form-mid layui-word-aux">设置proxy_pass跳转地址</div>
+                                        <div class="layui-form-mid layui-word-aux">设置proxy_pass代理跳转地址</div>
                                     </div>
                                 </div>
                             </div>
@@ -179,6 +183,9 @@
 
     function loadSuccess() {
         var type = "$type"
+        if ("add" === type) {
+            $("#port ").val("80");
+        }
 
         //提交配置信息
         form.on('submit(submitNgx)', function (data) {
@@ -241,6 +248,7 @@
                 $("#key").val("");
                 $("#keyAux").val("");
                 $("#certAux").val("");
+                $("#port ").val("80");
                 return false;
             }
             $("#convert").removeClass("div_hidden");
