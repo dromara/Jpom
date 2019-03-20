@@ -169,6 +169,9 @@ public class UserInfoController extends BaseController {
         if (UserModel.SYSTEM_OCCUPY_NAME.equals(id)) {
             return JsonMessage.getString(401, "当前登录名已经被系统占用");
         }
+        if (!checkPathSafe(id)) {
+            return JsonMessage.getString(400, "登录名不能包含特殊字符");
+        }
         userModel.setId(id);
 
         String name = getParameter("name");

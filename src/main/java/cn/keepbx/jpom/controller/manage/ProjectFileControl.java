@@ -215,7 +215,7 @@ public class ProjectFileControl extends BaseController {
             return JsonMessage.getString(405, "非法操作");
         }
         ProjectInfoModel pim = getProjectInfoModel();
-        File file = new File(pim.getLib(), filename);
+        File file = FileUtil.file(pim.getLib(), filename);
         if (file.exists()) {
             if (FileUtil.del(file)) {
                 return JsonMessage.getString(200, "删除成功");

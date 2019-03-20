@@ -90,7 +90,7 @@ public class LogBackController extends BaseController {
         ProjectInfoModel pim = getProjectInfoModel();
         File logBack = pim.getLogBack();
         if (logBack.exists() && logBack.isDirectory()) {
-            logBack = new File(logBack, name);
+            logBack = FileUtil.file(logBack, name);
             if (logBack.exists()) {
                 FileUtil.del(logBack);
                 return JsonMessage.getString(200, "删除成功");

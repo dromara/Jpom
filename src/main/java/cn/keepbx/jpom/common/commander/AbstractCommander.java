@@ -149,7 +149,7 @@ public abstract class AbstractCommander {
             return "ok";
         }
         File backPath = projectInfoModel.getLogBack();
-        backPath = new File(backPath, file.getName() + "-" + DateTime.now().toString(DatePattern.PURE_DATETIME_FORMAT) + ".log");
+        backPath = new File(backPath, DateTime.now().toString(DatePattern.PURE_DATETIME_FORMAT) + ".log");
         FileUtil.copy(file, backPath, true);
         if (OS_INFO.isLinux()) {
             execCommand("cp /dev/null " + projectInfoModel.getLog());

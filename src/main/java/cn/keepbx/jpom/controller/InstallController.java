@@ -64,6 +64,9 @@ public class InstallController extends BaseController {
         if (StrUtil.isEmpty(userPwd) || userPwd.length() < UserModel.USER_PWD_LEN) {
             return JsonMessage.getString(400, "密码长度为6-12位");
         }
+        if (!checkPathSafe(userName)) {
+            return JsonMessage.getString(400, "登录名不能包含特殊字符");
+        }
         // 判断密码级别
         if (CheckPassword.checkPassword(userPwd) != 2) {
             return JsonMessage.getString(401, "系统管理员密码强度太低,请使用复杂的密码");

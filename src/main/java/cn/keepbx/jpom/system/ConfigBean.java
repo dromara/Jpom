@@ -44,10 +44,11 @@ public class ConfigBean {
      */
     public static final String PROJECT_RECOVER = "project_recover.json";
 
-
-    private static final String JPOM_PATH = "jpom.path";
-
-
+    /**
+     * 单利模式
+     *
+     * @return config
+     */
     public static ConfigBean getInstance() {
         if (configBean == null) {
             configBean = SpringUtil.getBean(ConfigBean.class);
@@ -64,7 +65,7 @@ public class ConfigBean {
     /**
      * 项目运行存储路径
      */
-    @Value("${" + JPOM_PATH + "}")
+    @Value("${jpom.path}")
     private String path;
 
     public String getPath() {
