@@ -32,6 +32,9 @@ public abstract class BaseOperService<T> extends BaseDataService {
     public abstract T getItem(String id) throws IOException;
 
     protected JSONArray formatToArray(JSONObject jsonObject) {
+        if (jsonObject == null) {
+            return new JSONArray();
+        }
         Set<String> setKey = jsonObject.keySet();
         JSONArray jsonArray = new JSONArray();
         for (String key : setKey) {

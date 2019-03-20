@@ -1,6 +1,7 @@
 package cn.keepbx.jpom.common;
 
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.keepbx.jpom.system.ConfigBean;
 import cn.keepbx.jpom.util.JsonUtil;
 import com.alibaba.fastjson.JSONObject;
@@ -31,17 +32,17 @@ public abstract class BaseDataService {
      *
      * @param filename 文件名
      * @param json     json数据
-     * @throws IOException 异常
      */
-    protected void saveJson(String filename, JSONObject json) throws IOException {
+    protected void saveJson(String filename, JSONObject json) {
         String key = json.getString("id");
         // 读取文件，如果存在记录，则抛出异常
-        JSONObject allData = new JSONObject();
+        JSONObject allData;
         JSONObject data = null;
-        try {
-            allData = getJSONObject(filename);
+        allData = getJSONObject(filename);
+        if (allData != null) {
             data = allData.getJSONObject(key);
-        } catch (FileNotFoundException ignored) {
+        } else {
+            allData = new JSONObject();
         }
         // 判断是否存在数据
         if (null != data && 0 < data.keySet().size()) {
@@ -98,13 +99,19 @@ public abstract class BaseDataService {
      *
      * @param filename 文件名
      * @return json
-     * @throws IOException io
      */
-    protected JSONObject getJSONObject(String filename) throws IOException {
-        return (JSONObject) JsonUtil.readJson(getDataFilePath(filename));
+    protected JSONObject getJSONObject(String filename) {
+        try {
+            return (JSONObject) JsonUtil.readJson(getDataFilePath(filename));
+        } catch (FileNotFoundException e) {
+            return null;
+        }
     }
 
     protected <T> T getJsonObjectById(String file, String id, Class<T> cls) throws IOException {
+        if (StrUtil.isEmpty(id)) {
+            return null;
+        }
         JSONObject jsonObject = getJSONObject(file);
         if (jsonObject == null) {
             return null;

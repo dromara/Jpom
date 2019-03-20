@@ -30,10 +30,9 @@ public class ProjectInfoService extends BaseOperService<ProjectInfoModel> {
      * 查询所有项目信息
      *
      * @return list
-     * @throws IOException 异常
      */
     @Override
-    public List<ProjectInfoModel> list() throws IOException {
+    public List<ProjectInfoModel> list() {
         JSONObject jsonObject = getJSONObject(ConfigBean.PROJECT);
         JSONArray jsonArray = formatToArray(jsonObject);
         return jsonArray.toJavaList(ProjectInfoModel.class);

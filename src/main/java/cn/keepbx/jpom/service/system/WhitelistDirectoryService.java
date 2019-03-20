@@ -5,13 +5,10 @@ import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.keepbx.jpom.common.BaseDataService;
 import cn.keepbx.jpom.system.ConfigBean;
-import cn.keepbx.jpom.system.init.CheckRunCommand;
 import cn.keepbx.jpom.util.JsonUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;
-
-import java.io.FileNotFoundException;
 
 /**
  * @author jiangzeyin
@@ -27,9 +24,6 @@ public class WhitelistDirectoryService extends BaseDataService {
                 return null;
             }
             return jsonObject;
-        } catch (FileNotFoundException fileNotFoundException) {
-            CheckRunCommand.repairData();
-            return getWhitelist();
         } catch (Exception e) {
             DefaultSystemLog.ERROR().error(e.getMessage(), e);
         }

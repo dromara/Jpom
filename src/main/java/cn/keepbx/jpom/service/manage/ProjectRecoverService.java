@@ -8,9 +8,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -25,16 +23,10 @@ public class ProjectRecoverService extends BaseOperService<ProjectRecoverModel> 
      * 查询所有项目信息
      *
      * @return list
-     * @throws IOException 异常
      */
     @Override
-    public List<ProjectRecoverModel> list() throws IOException {
-        JSONObject jsonObject;
-        try {
-            jsonObject = getJSONObject(ConfigBean.PROJECT_RECOVER);
-        } catch (FileNotFoundException e) {
-            return new ArrayList<>();
-        }
+    public List<ProjectRecoverModel> list() {
+        JSONObject jsonObject = getJSONObject(ConfigBean.PROJECT_RECOVER);
         JSONArray jsonArray = formatToArray(jsonObject);
         return jsonArray.toJavaList(ProjectRecoverModel.class);
     }
