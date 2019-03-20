@@ -82,15 +82,12 @@ public class NginxService extends BaseOperService {
     }
 
     public String paresName(String whitePath, String itemAbsPath) {
-        whitePath = FileUtil.normalize(whitePath);
-        itemAbsPath = FileUtil.normalize(itemAbsPath);
-        int index = itemAbsPath.indexOf(whitePath);
-        if (index > 0) {
-            index += whitePath.length();
-        } else {
-            index += whitePath.length() + 1;
+        String path = itemAbsPath.substring(itemAbsPath.indexOf(whitePath) + whitePath.length());
+        path = FileUtil.normalize(path);
+        if (path.startsWith(StrUtil.SLASH)) {
+            path = path.substring(1);
         }
-        return itemAbsPath.substring(index);
+        return path;
     }
 
     @Override
