@@ -153,12 +153,12 @@
                     });
                 },
                 success: function (data) {
-                    layer.msg(data.msg);
                     if (200 == data.code) {
                         autoClose();
                     } else {
                         layer.closeAll();
                     }
+                    layer.msg(data.msg);
                 },
                 error: function (err) {
                     layer.closeAll();
