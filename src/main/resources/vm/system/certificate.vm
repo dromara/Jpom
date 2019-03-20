@@ -31,12 +31,8 @@
             color: red;
         }
 
-        .layui-input {
-            margin-top: 5px;
-        }
-
-        .layui-form-label {
-            margin-top: 10px;
+        .file_input {
+            margin-top: -15px;
         }
     </style>
 </head>
@@ -74,21 +70,23 @@
         <div class="layui-form-item">
             <div class="layui-inline">
                 <label class="layui-form-label">证书文件</label>
-                <div class="layui-input-block">
+                <div class="layui-input-inline">
                     <label id="certPath"></label>
-                    <input type="file" id="cert" name="cert" placeholder="" class="layui-input" required
+                    <input type="file" id="cert" name="cert" placeholder="" class="layui-input file_input" required
                            lay-verify="required">
                 </div>
+                <div class="layui-form-mid layui-word-aux">证书文件,公钥,支持pem文件</div>
             </div>
         </div>
         <div class="layui-form-item">
             <div class="layui-inline">
                 <label class="layui-form-label">私钥文件</label>
-                <div class="layui-input-block">
+                <div class="layui-input-inline">
                     <label id="keyPath"></label>
-                    <input type="file" id="key" name="key" placeholder="" class="layui-input" required
+                    <input type="file" id="key" name="key" placeholder="" class="layui-input file_input" required
                            lay-verify="required">
                 </div>
+                <div class="layui-form-mid layui-word-aux">私钥文件,支持key文件</div>
             </div>
         </div>
         <input type="hidden" lay-submit lay-filter="submitCert" id="cert_submit">

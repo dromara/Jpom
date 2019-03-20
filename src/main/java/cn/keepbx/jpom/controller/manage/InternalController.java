@@ -25,6 +25,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
+import java.lang.management.MemoryMXBean;
+import java.lang.management.MemoryUsage;
 import java.math.BigDecimal;
 import java.util.List;
 
@@ -51,6 +53,9 @@ public class InternalController extends BaseController {
         getJvmMem(tag, object);
         object.put("tag", tag);
         setAttribute("internal", object);
+        //获取端口信息
+        JSONArray port = getPort(tag);
+        setAttribute("port", port);
         return "manage/internal";
     }
 
@@ -109,8 +114,27 @@ public class InternalController extends BaseController {
                 if (v <= 0) {
                     item.put("MEM", 0);
                 }
+                getBeanMem(tag);
                 setAttribute("item", item);
             }
+        }
+    }
+
+    private void getBeanMem(String tag) {
+        try {
+            MemoryMXBean memoryMXBean = AbstractCommander.getInstance().getMemoryMXBean(tag);
+            if (memoryMXBean == null) {
+                return;
+            }
+            MemoryUsage memory = memoryMXBean.getHeapMemoryUsage();
+            long used = memory.getUsed();
+            long init = memory.getInit();
+            long committed = memory.getCommitted();
+            System.out.println("used=" + FileUtil.readableFileSize(used));
+            System.out.println("init=" + FileUtil.readableFileSize(init));
+            System.out.println("committed=" + FileUtil.readableFileSize(committed));
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
@@ -212,8 +236,12 @@ public class InternalController extends BaseController {
         FileUtil.del(file);
     }
 
-    @RequestMapping(value = "port", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
-    public String getPort(String tag) {
+    /**
+     * 获取端口
+     *
+     * @param tag 项目id
+     */
+    private JSONArray getPort(String tag) {
         // 查询数据
         try {
             ProjectInfoModel projectInfoModel = projectInfoService.getItem(tag);
@@ -228,14 +256,12 @@ public class InternalController extends BaseController {
                     cmd = "netstat -nao | findstr " + pId;
                 }
                 String result = AbstractCommander.getInstance().execSystemCommand(cmd);
-                JSONArray array = formatRam(isLinux, result);
-                setAttribute("port", array);
-                return "manage/port";
+                return formatRam(isLinux, result);
             }
         } catch (Exception e) {
             DefaultSystemLog.ERROR().error(e.getMessage(), e);
         }
-        return "manage/port";
+        return null;
     }
 
     private JSONArray formatRam(boolean isLinux, String result) {
