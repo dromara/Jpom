@@ -109,9 +109,11 @@ public class ProjectManageControl extends BaseController {
             if (AbstractCommander.getInstance().isRun(projectInfoModel.getId())) {
                 return JsonMessage.getString(401, "不能删除正在运行的项目");
             }
-            String userId = userModel.getId();
+            String userId;
             if (UserModel.SYSTEM_ADMIN.equals(userModel.getParent())) {
-                userId = "系统管理员";
+                userId = UserModel.SYSTEM_OCCUPY_NAME;
+            } else {
+                userId = userModel.getId();
             }
             projectInfoService.deleteProject(projectInfoModel, userId);
             return JsonMessage.getString(200, "删除成功！");

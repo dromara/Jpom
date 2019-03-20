@@ -62,9 +62,6 @@ public class ProjectInfoModel extends BaseModel {
      * @return true 正在运行
      */
     public boolean isStatus() {
-        if (status) {
-            return true;
-        }
         try {
             status = AbstractCommander.getInstance().isRun(getId());
         } catch (Exception e) {

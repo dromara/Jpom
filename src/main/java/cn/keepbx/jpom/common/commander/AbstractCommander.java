@@ -15,6 +15,7 @@ import cn.keepbx.jpom.common.commander.impl.LinuxCommander;
 import cn.keepbx.jpom.common.commander.impl.WindowsCommander;
 import cn.keepbx.jpom.model.ProjectInfoModel;
 import cn.keepbx.jpom.service.manage.CommandService;
+import com.sun.tools.attach.AttachNotSupportedException;
 import com.sun.tools.attach.VirtualMachine;
 import com.sun.tools.attach.VirtualMachineDescriptor;
 import sun.management.ConnectorAddressLink;
@@ -168,22 +169,27 @@ public abstract class AbstractCommander {
      * @return 查询结果
      */
     public String status(String tag) throws Exception {
+        VirtualMachine virtualMachine = getVirtualMachine(tag);
+        if (virtualMachine == null) {
+            return CommandService.STOP_TAG;
+        }
+        return StrUtil.format("{}:{}", CommandService.RUNING_TAG, virtualMachine.id());
+    }
+
+    private VirtualMachine getVirtualMachine(String tag) throws IOException, AttachNotSupportedException {
         tag = String.format("-Dapplication=%s", tag);
-        String result = CommandService.STOP_TAG;
         // 通过VirtualMachine.list()列出所有的java进程
         List<VirtualMachineDescriptor> descriptorList = VirtualMachine.list();
         for (VirtualMachineDescriptor virtualMachineDescriptor : descriptorList) {
-            int pid = Convert.toInt(virtualMachineDescriptor.id(), 0);
             // 根据进程id查询启动属性，如果属性-Dapplication匹配，说明项目已经启动，并返回进程id
             VirtualMachine virtualMachine = VirtualMachine.attach(virtualMachineDescriptor);
             Properties properties = virtualMachine.getAgentProperties();
             String args = StrUtil.emptyToDefault(properties.getProperty("sun.jvm.args"), "");
             if (StrUtil.containsIgnoreCase(args, tag)) {
-                result = StrUtil.format("{}:{}", CommandService.RUNING_TAG, pid);
-                break;
+                return virtualMachine;
             }
         }
-        return result;
+        return null;
     }
 
     /**
@@ -194,12 +200,12 @@ public abstract class AbstractCommander {
      * @throws Exception 异常
      */
     public MemoryMXBean getMemoryMXBean(String tag) throws Exception {
-        String pIds = getPid(tag);
-        int pid = Convert.toInt(pIds, 0);
-        if (pid <= 0) {
+        VirtualMachine virtualMachine = getVirtualMachine(tag);
+        if (virtualMachine == null) {
             return null;
         }
-        JMXServiceURL jmxServiceURL = getLocalStubServiceURLFromPID(pid);
+        int pid = Convert.toInt(virtualMachine.id());
+        JMXServiceURL jmxServiceURL = getLocalStubServiceURLFromPID(pid, virtualMachine);
         if (jmxServiceURL == null) {
             return null;
         }
@@ -208,8 +214,12 @@ public abstract class AbstractCommander {
         return ManagementFactory.newPlatformMXBeanProxy(mBeanServerConnection, ManagementFactory.MEMORY_MXBEAN_NAME, MemoryMXBean.class);
     }
 
-    private static JMXServiceURL getLocalStubServiceURLFromPID(int pid) throws IOException {
-        String address = ConnectorAddressLink.importFrom(pid);
+    private static JMXServiceURL getLocalStubServiceURLFromPID(int pid, VirtualMachine virtualMachine) throws IOException {
+        String address = virtualMachine.getAgentProperties().getProperty("com.sun.management.jmxremote.localConnectorAddress");
+        if (address != null) {
+            return new JMXServiceURL(address);
+        }
+        address = ConnectorAddressLink.importFrom(pid);
         if (address != null) {
             return new JMXServiceURL(address);
         }
