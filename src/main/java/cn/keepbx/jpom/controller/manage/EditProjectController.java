@@ -165,7 +165,7 @@ public class EditProjectController extends BaseController {
                 projectInfo.setCreateTime(DateUtil.now());
                 // 隐藏系统管理员登录名
                 if (UserModel.SYSTEM_ADMIN.equals(userName.getParent())) {
-                    projectInfo.setCreateUser("系统管理员");
+                    projectInfo.setCreateUser(UserModel.SYSTEM_OCCUPY_NAME);
                 } else {
                     projectInfo.setCreateUser(userName.getId());
                 }

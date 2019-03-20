@@ -20,9 +20,15 @@ public class UserModel extends BaseModel {
      */
     public static String SYSTEM_ADMIN = "sys";
     /**
+     * 系统占用名
+     */
+    public static String SYSTEM_OCCUPY_NAME = "系统管理员";
+    /**
      * 用户密码长度
      */
     public static int USER_PWD_LEN = 6;
+
+    public static int USER_NAME_MIN_LEN = 4;
 
     /**
      * 昵称

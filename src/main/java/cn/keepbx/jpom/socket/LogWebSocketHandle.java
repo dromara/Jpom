@@ -138,7 +138,11 @@ public class LogWebSocketHandle {
             case showlog: {
                 // 进入管理页面后需要实时加载日志
                 String log = projectInfoModel.getLog();
-                FileTailWatcher.addWatcher(log, session);
+                try {
+                    FileTailWatcher.addWatcher(log, session);
+                } catch (IOException io) {
+                    SocketSessionUtil.send(session, io.getMessage());
+                }
                 break;
             }
             case top:

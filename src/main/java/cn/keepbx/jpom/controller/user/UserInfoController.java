@@ -163,8 +163,11 @@ public class UserInfoController extends BaseController {
 
     private String parseUser(UserModel userModel, boolean create) {
         String id = getParameter("id");
-        if (StrUtil.isEmpty(id) || id.length() <= 4) {
+        if (StrUtil.isEmpty(id) || id.length() <= UserModel.USER_NAME_MIN_LEN) {
             return JsonMessage.getString(400, "登录名不能为空,并且长度必须大于4");
+        }
+        if (UserModel.SYSTEM_OCCUPY_NAME.equals(id)) {
+            return JsonMessage.getString(401, "当前登录名已经被系统占用");
         }
         userModel.setId(id);
 
