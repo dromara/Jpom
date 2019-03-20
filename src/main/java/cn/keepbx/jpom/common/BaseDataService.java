@@ -5,6 +5,7 @@ import cn.keepbx.jpom.system.ConfigBean;
 import cn.keepbx.jpom.util.JsonUtil;
 import com.alibaba.fastjson.JSONObject;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 
 /**
@@ -35,8 +36,13 @@ public abstract class BaseDataService {
     protected void saveJson(String filename, JSONObject json) throws IOException {
         String key = json.getString("id");
         // 读取文件，如果存在记录，则抛出异常
-        JSONObject allData = getJSONObject(filename);
-        JSONObject data = allData.getJSONObject(key);
+        JSONObject allData = new JSONObject();
+        JSONObject data = null;
+        try {
+            allData = getJSONObject(filename);
+            data = allData.getJSONObject(key);
+        } catch (FileNotFoundException ignored) {
+        }
         // 判断是否存在数据
         if (null != data && 0 < data.keySet().size()) {
             throw new RuntimeException("数据Id已经存在啦：" + filename + " :" + key);

@@ -8,6 +8,7 @@ import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.http.HttpUtil;
+import cn.hutool.system.JavaRuntimeInfo;
 import cn.hutool.system.OsInfo;
 import cn.hutool.system.SystemUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
@@ -15,9 +16,7 @@ import cn.keepbx.jpom.common.commander.impl.LinuxCommander;
 import cn.keepbx.jpom.common.commander.impl.WindowsCommander;
 import cn.keepbx.jpom.model.ProjectInfoModel;
 import cn.keepbx.jpom.service.manage.CommandService;
-import com.sun.tools.attach.AttachNotSupportedException;
-import com.sun.tools.attach.VirtualMachine;
-import com.sun.tools.attach.VirtualMachineDescriptor;
+import com.sun.tools.attach.*;
 import sun.management.ConnectorAddressLink;
 
 import javax.management.MBeanServerConnection;
@@ -44,6 +43,7 @@ public abstract class AbstractCommander {
     private static AbstractCommander abstractCommander = null;
     protected Charset charset;
     public static final OsInfo OS_INFO = SystemUtil.getOsInfo();
+    private static final JavaRuntimeInfo JAVA_RUNTIME_INFO = SystemUtil.getJavaRuntimeInfo();
 
     protected AbstractCommander(Charset charset) {
         this.charset = charset;
@@ -205,7 +205,7 @@ public abstract class AbstractCommander {
             return null;
         }
         int pid = Convert.toInt(virtualMachine.id());
-        JMXServiceURL jmxServiceURL = getLocalStubServiceURLFromPID(pid, virtualMachine);
+        JMXServiceURL jmxServiceURL = getJMXServiceURL(pid, virtualMachine);
         if (jmxServiceURL == null) {
             return null;
         }
@@ -214,12 +214,18 @@ public abstract class AbstractCommander {
         return ManagementFactory.newPlatformMXBeanProxy(mBeanServerConnection, ManagementFactory.MEMORY_MXBEAN_NAME, MemoryMXBean.class);
     }
 
-    private static JMXServiceURL getLocalStubServiceURLFromPID(int pid, VirtualMachine virtualMachine) throws IOException {
+    private static JMXServiceURL getJMXServiceURL(int pid, VirtualMachine virtualMachine) throws IOException, AgentLoadException, AgentInitializationException {
         String address = virtualMachine.getAgentProperties().getProperty("com.sun.management.jmxremote.localConnectorAddress");
         if (address != null) {
             return new JMXServiceURL(address);
         }
         address = ConnectorAddressLink.importFrom(pid);
+        if (address != null) {
+            return new JMXServiceURL(address);
+        }
+        String agent = StrUtil.format("{}{}lib{}management-agent.jar", JAVA_RUNTIME_INFO.getHomeDir(), File.separator, File.separator);
+        virtualMachine.loadAgent(agent);
+        address = virtualMachine.getAgentProperties().getProperty("com.sun.management.jmxremote.localConnectorAddress");
         if (address != null) {
             return new JMXServiceURL(address);
         }
@@ -270,7 +276,7 @@ public abstract class AbstractCommander {
                 Thread.sleep(500);
             } catch (InterruptedException ignored) {
             }
-        } while (count++ < 10);
+        } while (count++ < 20);
     }
 
     public String execCommand(String command) throws Exception {
@@ -295,6 +301,14 @@ public abstract class AbstractCommander {
         return result;
     }
 
+    /**
+     * 执行命令
+     *
+     * @param cmd 命令行
+     * @return 结果
+     * @throws IOException          IO
+     * @throws InterruptedException 等待超时
+     */
     private String exec(String[] cmd) throws IOException, InterruptedException {
         DefaultSystemLog.LOG().info(Arrays.toString(cmd));
         String result;
