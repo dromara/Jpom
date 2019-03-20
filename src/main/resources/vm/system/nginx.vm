@@ -78,7 +78,7 @@
     var index = 0;
 
     function loadSuccess() {
-        var uploadConfig, hashSelectConfig, uploadPath;
+        var uploadConfig, hashSelectConfig;
         layui.use(['upload'], function () {
             var upload = layui.upload;
             uploadConfig = upload.render({
@@ -88,13 +88,17 @@
                 exts: 'conf',
                 acceptMime: '.conf',
                 field: 'file',
+                data: {
+                    whitePath: function () {
+                        return $("#whitePath").val();
+                    }
+                },
                 auto: false,
                 choose: function () {
                     hashSelectConfig = true;
                 },
-                before: function (obj) { //obj参数包含的信息，跟 choose回调完全一致，可参见上文。
-                    layer.load(); //上传loading
-                    this.data = {whitePath: uploadPath}
+                before: function (obj) {
+                    layer.load();
                 },
                 done: function (res) {
                     layer.closeAll('loading');
@@ -205,7 +209,7 @@
                 btnAlign: 'c',
                 btn: ['提交'],
                 yes: function (index, layero) {
-                    uploadPath = $("#whitePath").val();
+                    var uploadPath = $("#whitePath").val();
                     if (!uploadPath || uploadPath === "") {
                         layer.msg("请选择白名单路径")
                         return;
