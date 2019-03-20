@@ -82,8 +82,10 @@
                 dataType: 'json',
                 success: function (data) {
                     if (200 == data.code) {
-                        var top = JSON.parse(data.data);
-                        loadEcharts(top);
+                        if (data.data) {
+                            var top = JSON.parse(data.data);
+                            loadEcharts(top);
+                        }
                     } else {
                         layer.alert(data.msg);
                     }
