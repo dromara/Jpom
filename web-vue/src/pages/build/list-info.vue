@@ -1094,8 +1094,8 @@ export default {
     },
     // 修改
     handleEdit(record) {
-      this.temp = Object.assign(record);
       this.$refs["editBuildForm"]?.resetFields();
+      this.temp = Object.assign({}, record);
       this.temp.buildMode = this.temp.buildMode || 0;
       // 设置当前临时的 额外构建信息
       this.tempExtraData = JSON.parse(record.extraData) || {};
@@ -1127,7 +1127,7 @@ export default {
       this.tempExtraData = { ...this.tempExtraData };
       this.loadRepositoryList(() => {
         // 从仓库列表里匹配对应的仓库信息
-        // console.log(this.repositoryList);
+
         this.tempRepository = this.repositoryList.filter((element) => this.temp.repositoryId === element.id)[0];
         this.editBuildVisible = true;
         this.loadBranchList();
