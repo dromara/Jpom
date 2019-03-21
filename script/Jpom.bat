@@ -17,28 +17,21 @@
 @REM   Copyright (c) 2001-2006 The Apache Software Foundation.  All rights
 @REM   reserved.
 
+
 @echo off
+setlocal enabledelayedexpansion
 
+set Tag=KeepBx-System-JpomApplication1
+set MainClass=cn.keepbx.jpom.JpomApplication
+set basePath=%~dp0
+set Lib=%basePath%lib\
+set Log=%basePath%run.log
+set JVM=-server
+set ARGS=--server.port=2123 --jpom.path=%basePath% --jpom.log=%basePath%log --jpom.safeMode=false
 
-if "%1"=="start" (
-    call:start
-)else (
-    if "%1"=="stop" (
-        call:stop
-    )else (
-        call:use
-    )
-)
-pause
+set TEMPCLASSPATH=
+for /f "delims=" %%I in ('dir /B %Lib%') do (set TEMPCLASSPATH=!TEMPCLASSPATH!%Lib%%%I;)
+@REM echo 启动成功，关闭窗口不影响运行
+cmd /S /C "javaw %JVM% -classpath %TEMPCLASSPATH%%JAVA_HOME%\lib\tools.jar -Dappliction=%Tag% -Dbasedir=%basePath% %MainClass% %ARGS% >> %Log%"
 
-:start
-echo 321
-goto:eof
-
-:stop
-echo 123
-goto:eof
-
-:use
-echo please use start
-goto:eof
+:end
