@@ -103,6 +103,12 @@ public class InternalController extends BaseController {
             item.put("SHR", -1);
             item.put("CPU", -1);
             OperatingSystemMXBean operatingSystemMXBean = (OperatingSystemMXBean) ManagementFactory.getOperatingSystemMXBean();
+            //最近jvmcpu使用率
+            double processCpuLoad = operatingSystemMXBean.getProcessCpuLoad() * 100;
+            if (processCpuLoad <= 0) {
+                processCpuLoad = 0;
+            }
+            item.put("CPU", String.format("%.2f", processCpuLoad) + "%");
             //服务器总内存
             long totalMemorySize = operatingSystemMXBean.getTotalPhysicalMemorySize();
             double v = new BigDecimal(aLong).divide(new BigDecimal(totalMemorySize / 1024), 4, BigDecimal.ROUND_HALF_UP).doubleValue() * 100;
