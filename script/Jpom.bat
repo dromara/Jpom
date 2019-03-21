@@ -29,8 +29,9 @@ set Log=%basePath%run.log
 set JVM=-server
 set ARGS=--server.port=2123 --jpom.path=%basePath% --jpom.log=%basePath%log --jpom.safeMode=false
 
-for /f "delims=" %%I in ('dir /B %Lib%') do (set CLASSPATH=!CLASSPATH!;%Lib%%%I)
+set TEMPCLASSPATH=
+for /f "delims=" %%I in ('dir /B %Lib%') do (set TEMPCLASSPATH=!TEMPCLASSPATH!%Lib%%%I;)
 @REM echo 启动成功，关闭窗口不影响运行
-cmd /S /C "javaw %JVM% -classpath %CLASSPATH% -Dappliction=%Tag% -Dbasedir=%basePath% %MainClass% %ARGS% >> %Log%"
+cmd /S /C "javaw %JVM% -classpath %TEMPCLASSPATH%%JAVA_HOME%\lib\tools.jar -Dappliction=%Tag% -Dbasedir=%basePath% %MainClass% %ARGS% >> %Log%"
 
 :end
