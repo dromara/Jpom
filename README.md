@@ -108,6 +108,7 @@
     密码：demo123
     
    > 演示系统有部分功能做了限制，详情功能请自行部署体验
+   > 如果出现登录不上，请联系我们重置密码，联系方式在最底部
     
    1. [Jboot案例代码](https://gitee.com/keepbx/Jpom-demo-case/tree/master/jboot-test)
    2. [SpringBoot案例代码](https://gitee.com/keepbx/Jpom-demo-case/tree/master/springboot-test)
