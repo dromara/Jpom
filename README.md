@@ -100,6 +100,10 @@
 1. 运行*cn.keepbx.jpom.JpomApplication*
 2. 浏览器访问（如：http://127.0.0.1:2122）
 
+### Jpom 的参数配置
+
+   在项目运行的根路径下创建[`extConfig.yml`](/src/main/resources/bin/extConfig.yml) 具体的配置说明和示例请查看：[`extConfig.yml`](/src/main/resources/bin/extConfig.yml) 
+
 ### 演示项目
 
    [http://jpom-demo.jiangzeyin.cn](http://jpom-demo.jiangzeyin.cn)
