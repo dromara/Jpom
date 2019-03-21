@@ -65,9 +65,9 @@
                                             <select id="choose_cert" lay-filter="choose_cert" class="selectBox">
                                                 <option value=""></option>
                                                 #foreach($item in $cert)
-                                                    <option value='$item.name' id="$item.domain" key="$item.key"
+                                                    <option value='$item.id' id="$item.domain" key="$item.key"
                                                             cert="$item.cert" #if($item.cert==$data.cert)
-                                                            selected #end>$!item.name</option>
+                                                            selected #end>$!item.id</option>
                                                 #end
                                             </select>
                                         </div>
