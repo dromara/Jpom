@@ -1,0 +1,8 @@
+{
+  "self_product": {
+    "id": "self_product",
+    "cert": "/etc/nginx/cert/self_product/full_chain.pem",
+    "key": "/etc/nginx/cert/self_product/private.key",
+    "whitePath": "/etc/nginx/cert/"
+  }
+}

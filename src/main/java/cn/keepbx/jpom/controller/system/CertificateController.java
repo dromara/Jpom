@@ -2,7 +2,6 @@ package cn.keepbx.jpom.controller.system;
 
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
-import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.controller.multipart.MultipartFileBuilder;
 import cn.keepbx.jpom.common.BaseController;
@@ -18,12 +17,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.annotation.Resource;
-import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.IOException;
-import java.security.cert.CertificateFactory;
-import java.security.cert.X509Certificate;
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -107,7 +102,7 @@ public class CertificateController extends BaseController {
         MultipartFileBuilder cert = createMultipart().addFieldName("cert").setSavePath(temporary).setUseOriginalFilename(true);
         String certPath = cert.save();
         //解析证书
-        JSONObject jsonObject = decodeCert(FileUtil.file(certPath));
+        JSONObject jsonObject = CertModel.decodeCert(certPath);
         if (jsonObject == null) {
             throw new RuntimeException("解析证书失败");
         }
@@ -116,47 +111,13 @@ public class CertificateController extends BaseController {
         CertModel certModel = new CertModel();
         certModel.setId(id);
         certModel.setWhitePath(path);
+        certModel.setCert(certPath);
+        certModel.setKey(keyPath);
+        //
         certModel.setDomain(jsonObject.getString("domain"));
         certModel.setExpirationTime(jsonObject.getLongValue("expirationTime"));
-        certModel.setCert(certPath);
         certModel.setEffectiveTime(jsonObject.getLongValue("effectiveTime"));
-        certModel.setKey(keyPath);
         return certModel;
-    }
-
-    /**
-     * 解析证书
-     *
-     * @param file 证书文件
-     */
-    private JSONObject decodeCert(File file) {
-        if (file == null) {
-            return null;
-        }
-        try {
-            BufferedInputStream inStream = FileUtil.getInputStream(file);
-            // 创建X509工厂类
-            CertificateFactory cf = CertificateFactory.getInstance("X.509");
-            // 创建证书对象
-            X509Certificate oCert = (X509Certificate) cf.generateCertificate(inStream);
-            inStream.close();
-            //到期时间
-            Date expirationTime = oCert.getNotAfter();
-            //生效日期
-            Date effectiveTime = oCert.getNotBefore();
-            //域名
-            String name = oCert.getSubjectDN().getName();
-            int i = name.indexOf("=");
-            String domain = name.substring(i + 1);
-            JSONObject jsonObject = new JSONObject();
-            jsonObject.put("expirationTime", expirationTime.getTime());
-            jsonObject.put("effectiveTime", effectiveTime.getTime());
-            jsonObject.put("domain", domain);
-            return jsonObject;
-        } catch (Exception e) {
-            DefaultSystemLog.ERROR().error(e.getMessage(), e);
-        }
-        return null;
     }
 
 
@@ -172,6 +133,9 @@ public class CertificateController extends BaseController {
 
     /**
      * 删除证书
+     *
+     * @param id id
+     * @return json
      */
     @RequestMapping(value = "/certificate/delete", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
@@ -185,6 +149,4 @@ public class CertificateController extends BaseController {
         }
         return JsonMessage.getString(200, "删除成功");
     }
-
-
 }
