@@ -61,34 +61,31 @@
                                 <div class="layui-colla-content layui-show" id="listen_context">
                                     <div class="layui-form-item">
                                         <label class="layui-form-label">选择SSL证书</label>
-                                        <div class="layui-input-inline">
+                                        <div class="layui-input-block">
                                             <select id="choose_cert" lay-filter="choose_cert" class="selectBox">
                                                 <option value=""></option>
                                                 #foreach($item in $cert)
-                                                    <option value='$item.id' id="$item.domain" key="$item.key"
+                                                    <option value='$item.name' id="$item.domain" key="$item.key"
                                                             cert="$item.cert" #if($item.cert==$data.cert)
-                                                            selected #end>$item.id</option>
+                                                            selected #end>$!item.name</option>
                                                 #end
                                             </select>
                                         </div>
-                                        <div class="layui-form-mid layui-word-aux">选择SSL证书，可不填</div>
                                     </div>
                                     <div class="layui-form-item">
                                         <label class="layui-form-label"><span class="x-red">*</span>监听端口</label>
-                                        <div class="layui-input-inline">
-                                            <input type="text" name="port" value="$!data.port" id="port" required
-                                                   readonly lay-verify="required" placeholder="" class="layui-input">
-                                        </div>
-                                        <div class="layui-form-mid layui-word-aux"><span class="x-red">*</span>设置listen监听端口
+                                        <div class="layui-input-block">
+                                            <input type="text" name="port" value="$!data.port" class="layui-input"
+                                                   id="port" required readonly lay-verify="required"
+                                                   placeholder="设置listen监听端口">
                                         </div>
                                     </div>
                                     <div class="layui-form-item">
                                         <label class="layui-form-label"><span class="x-red">*</span>域名</label>
-                                        <div class="layui-input-inline">
+                                        <div class="layui-input-block">
                                             <input type="text" name="domain" value="$!data.domain" id="domain" required
-                                                   lay-verify="required" placeholder="" class="layui-input">
-                                        </div>
-                                        <div class="layui-form-mid layui-word-aux"><span class="x-red">*</span>设置server_name匹配域名
+                                                   lay-verify="required" placeholder="设置server_name匹配域名"
+                                                   class="layui-input">
                                         </div>
                                     </div>
                                     <div id="convert" #if($data.cert) #else class="div_hidden" #end >
@@ -102,28 +99,27 @@
                                         </div>
                                         <div class="layui-form-item ">
                                             <label class="layui-form-label">证书路径</label>
-                                            <div class="layui-input-inline">
+                                            <div class="layui-input-block">
                                                 <input type="text" name="cert" value="$!data.cert" id="cert" readonly
                                                        class="layui-input">
                                             </div>
-                                            <div class="layui-form-mid layui-word-aux" id="certAux">$!data.cert</div>
                                         </div>
                                         <div class="layui-form-item">
                                             <label class="layui-form-label">私钥路径</label>
-                                            <div class="layui-input-inline">
+                                            <div class="layui-input-block">
                                                 <input type="text" name="key" value="$!data.key" id="key" readonly
                                                        class="layui-input">
                                             </div>
-                                            <div class="layui-form-mid layui-word-aux" id="keyAux">$!data.key</div>
                                         </div>
                                     </div>
                                     <div class="layui-form-item">
-                                        <label class="layui-form-label">跳转地址</label>
-                                        <div class="layui-input-inline">
-                                            <input type="text" name="location" value="$!data.location"
-                                                   placeholder="" class="layui-input">
+                                        <label class="layui-form-label"><span
+                                                class="x-red">*</span>跳转地址</label>
+                                        <div class="layui-input-block">
+                                            <input type="text" name="location" value="$!data.location" required
+                                                   lay-verify="required" placeholder="设置proxy_pass代理跳转地址"
+                                                   class="layui-input">
                                         </div>
-                                        <div class="layui-form-mid layui-word-aux">设置proxy_pass代理跳转地址</div>
                                     </div>
                                 </div>
                             </div>
@@ -145,14 +141,13 @@
                     <label class="layui-form-label">文件名称</label>
                     <div class="layui-input-inline">
                         <input type="text" name="name" placeholder='文件后缀必须为".conf"' class="layui-input"  #if($type==
-                            "update") disabled #end
-                               value="$!data.name" required lay-verify="required">
+                            "update") disabled #end value="$!data.name" required lay-verify="required">
                     </div>
                     <label class="layui-form-label">文件路径</label>
                     <div class="layui-input-inline">
                         <select name="whitePath" id="whitePath" #if($type=="update") disabled #end>
                             #foreach($item in $nginx)
-                                <option value="$item" #if($item==$data.whitePath) selected #end>$item</option>
+                                <option value="$item" #if($item==$data.whitePath) selected #end>$!item</option>
                             #end
                         </select>
                     </div>
@@ -172,7 +167,6 @@
             </form>
         </div>
     </div>
-
 </div>
 
 <script type="text/javascript">

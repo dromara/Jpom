@@ -49,20 +49,7 @@ public class InternalController extends BaseController {
      */
     @RequestMapping(value = "internal", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
     public String getInternal(String tag) throws Exception {
-        getMem(tag);
         setAttribute("tag", tag);
-        //获取端口信息
-        JSONArray port = getPort(tag);
-        setAttribute("port", port);
-        return "manage/internal";
-    }
-
-    /**
-     * 获取内存监控信息
-     *
-     * @param tag 项目id
-     */
-    private void getMem(String tag) throws Exception {
         String pid = AbstractCommander.getInstance().getPid(tag);
         if (AbstractCommander.OS_INFO.isLinux()) {
             String command = "top -b -n 1 -p " + pid;
@@ -71,9 +58,13 @@ public class InternalController extends BaseController {
         } else {
             JSONObject windowsMem = getWindowsMem(pid);
             setAttribute("item", windowsMem);
-            JSONObject beanMem = getBeanMem(tag);
-            setAttribute("beanMem", beanMem);
         }
+        JSONObject beanMem = getBeanMem(tag);
+        setAttribute("beanMem", beanMem);
+        //获取端口信息
+        JSONArray port = getPort(tag);
+        setAttribute("port", port);
+        return "manage/internal";
     }
 
     /**

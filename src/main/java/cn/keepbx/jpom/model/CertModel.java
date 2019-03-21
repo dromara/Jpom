@@ -18,6 +18,7 @@ import java.util.Date;
  * @author Arno
  */
 public class CertModel extends BaseModel {
+    private String name;
     /**
      * 证书文件
      */
@@ -42,6 +43,14 @@ public class CertModel extends BaseModel {
      * 白名单路径
      */
     private String whitePath;
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
 
     public String getWhitePath() {
         return whitePath;
