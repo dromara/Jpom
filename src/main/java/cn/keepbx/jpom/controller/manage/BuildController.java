@@ -6,6 +6,7 @@ import cn.hutool.core.util.ZipUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.keepbx.jpom.common.BaseController;
+import cn.keepbx.jpom.common.interceptor.ProjectPermission;
 import cn.keepbx.jpom.model.ProjectInfoModel;
 import cn.keepbx.jpom.service.manage.CommandService;
 import cn.keepbx.jpom.service.manage.ProjectInfoService;
@@ -68,14 +69,9 @@ public class BuildController extends BaseController {
 
     @RequestMapping(value = "build_install", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
+    @ProjectPermission
     public String buildInstall(String id, String key) throws Exception {
-        if (!getUser().isProject(id)) {
-            return JsonMessage.getString(400, "你没有对应操作权限操作!");
-        }
-        ProjectInfoModel projectInfoModel = projectInfoService.getItem(id);
-        if (projectInfoModel == null) {
-            return JsonMessage.getString(400, "没有对应项目");
-        }
+        ProjectInfoModel projectInfoModel = getProjectInfoModel();
         if (StrUtil.isEmpty(projectInfoModel.getBuildTag())) {
             return JsonMessage.getString(400, "项目还不支持构建");
         }
@@ -92,9 +88,6 @@ public class BuildController extends BaseController {
         projectInfoModel.setUseLibDesc("build");
         projectInfoService.updateProject(projectInfoModel);
         String result = commandService.execCommand(CommandService.CommandOp.restart, projectInfoModel);
-        if (result.contains(CommandService.RUNING_TAG)) {
-            return JsonMessage.getString(200, "安装成功，已自动重启");
-        }
-        return JsonMessage.getString(505, "安装失败：" + result);
+        return JsonMessage.getString(200, "安装成功，已自动重启,当前状态是：" + result);
     }
 }

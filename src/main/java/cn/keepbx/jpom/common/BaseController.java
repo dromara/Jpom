@@ -4,8 +4,12 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.controller.base.AbstractController;
 import cn.keepbx.jpom.common.interceptor.LoginInterceptor;
+import cn.keepbx.jpom.common.interceptor.PermissionInterceptor;
+import cn.keepbx.jpom.model.ProjectInfoModel;
 import cn.keepbx.jpom.model.UserModel;
 import org.springframework.web.context.request.RequestAttributes;
+
+import java.util.Objects;
 
 /**
  * base
@@ -29,8 +33,19 @@ public abstract class BaseController extends AbstractController {
         USER_MODEL_THREAD_LOCAL.remove();
     }
 
-    private static UserModel getUserModel() {
+    public static UserModel getUserModel() {
         return (UserModel) getRequestAttributes().getAttribute(LoginInterceptor.SESSION_NAME, RequestAttributes.SCOPE_SESSION);
+    }
+
+    /**
+     * 获取拦截器中缓存的项目信息
+     *
+     * @return this
+     */
+    protected ProjectInfoModel getProjectInfoModel() {
+        ProjectInfoModel projectInfoModel = (ProjectInfoModel) this.getRequest().getAttribute(PermissionInterceptor.CACHE_PROJECT_INFO);
+        Objects.requireNonNull(projectInfoModel, "获取项目信息失败");
+        return projectInfoModel;
     }
 
     /**

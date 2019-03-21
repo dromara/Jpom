@@ -3,7 +3,9 @@ package cn.keepbx.jpom.controller.manage;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.text.StrSpliter;
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.servlet.ServletUtil;
+import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.keepbx.jpom.common.BaseController;
 import cn.keepbx.jpom.common.commander.AbstractCommander;
@@ -11,7 +13,9 @@ import cn.keepbx.jpom.model.ProjectInfoModel;
 import cn.keepbx.jpom.service.manage.CommandService;
 import cn.keepbx.jpom.service.manage.ProjectInfoService;
 import cn.keepbx.jpom.system.ConfigBean;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.sun.management.OperatingSystemMXBean;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -21,6 +25,10 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
+import java.lang.management.ManagementFactory;
+import java.lang.management.MemoryMXBean;
+import java.lang.management.MemoryUsage;
+import java.math.BigDecimal;
 import java.util.List;
 
 /**
@@ -31,12 +39,10 @@ import java.util.List;
 @Controller
 @RequestMapping(value = "/manage/")
 public class InternalController extends BaseController {
-
-    @Resource
-    private CommandService commandService;
-
     @Resource
     private ProjectInfoService projectInfoService;
+    @Resource
+    private CommandService commandService;
 
     /**
      * 获取内存信息
@@ -44,9 +50,24 @@ public class InternalController extends BaseController {
     @RequestMapping(value = "internal", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
     public String getInternal(String tag) throws Exception {
         JSONObject object = new JSONObject();
+        //获取内存监控信息
+        getMem(tag, object);
+        object.put("tag", tag);
+        setAttribute("internal", object);
+        //获取端口信息
+        JSONArray port = getPort(tag);
+        setAttribute("port", port);
+        return "manage/internal";
+    }
+
+    /**
+     * 获取内存监控信息
+     *
+     * @param tag 项目id
+     */
+    private void getMem(String tag, JSONObject object) throws Exception {
+        String pid = AbstractCommander.getInstance().getPid(tag);
         if (AbstractCommander.OS_INFO.isLinux()) {
-            ProjectInfoModel projectInfoModel = projectInfoService.getItem(tag);
-            String pid = commandService.execCommand(CommandService.CommandOp.pid, projectInfoModel);
             String command = "top -b -n 1 -p " + pid;
             String internal = AbstractCommander.getInstance().execCommand(command);
             String[] split = internal.split("\n");
@@ -56,14 +77,102 @@ public class InternalController extends BaseController {
                 result.append(s).append("<br/>");
             }
             JSONObject jsonObject = formatTop(internal);
-            setAttribute("item", jsonObject);
+            JSONArray array = new JSONArray();
+            array.add(jsonObject);
+            setAttribute("mem", array);
             object.put("ram", result.toString());
+        } else {
+            JSONArray array = getWindowsMem(pid, tag);
+            setAttribute("mem", array);
         }
-        object.put("tag", tag);
-        setAttribute("internal", object);
-        return "manage/internal";
     }
 
+    /**
+     * 获取window下内存
+     *
+     * @param pid 进程id
+     * @param tag tag
+     */
+    private JSONArray getWindowsMem(String pid, String tag) throws Exception {
+        String command = "tasklist /V /FI \"pid eq " + pid + "\"";
+        String result = AbstractCommander.getInstance().execCommand(command);
+        List<String> list = StrSpliter.splitTrim(result, "\n", true);
+        if (list.size() >= 3) {
+            List<String> memList = StrSpliter.splitTrim(list.get(2), " ", true);
+            JSONObject item = new JSONObject();
+            item.put("pid", pid);
+            item.put("COMMAND", memList.get(0));
+            //使用内存 kb
+            String mem = memList.get(4).replace(",", "");
+            long aLong = Convert.toLong(mem, 0L);
+            item.put("RES", aLong / 1024 + " MB");
+            String status = memList.get(6);
+            if ("RUNNING".equalsIgnoreCase(status)) {
+                item.put("S", "运行");
+            } else if ("SUSPENDED".equalsIgnoreCase(status)) {
+                item.put("S", "睡眠");
+            } else if ("NOT RESPONDING".equalsIgnoreCase(status)) {
+                item.put("S", "无响应");
+            } else {
+                item.put("S", "未知");
+            }
+            item.put("USER", memList.get(7));
+            item.put("TIME", memList.get(8));
+            item.put("PR", 0);
+            item.put("NI", 0);
+            item.put("VIRT", 0);
+            item.put("SHR", 0);
+            item.put("CPU", 0);
+            OperatingSystemMXBean operatingSystemMXBean = (OperatingSystemMXBean) ManagementFactory.getOperatingSystemMXBean();
+            //服务器总内存
+            long totalMemorySize = operatingSystemMXBean.getTotalPhysicalMemorySize();
+            double v = new BigDecimal(aLong).divide(new BigDecimal(totalMemorySize / 1024), 4, BigDecimal.ROUND_HALF_UP).doubleValue() * 100;
+            item.put("MEM", v + "%");
+            if (v <= 0) {
+                item.put("MEM", 0);
+            }
+            JSONArray array = new JSONArray();
+            //jvm 内存
+            JSONObject beanMem = getBeanMem(tag);
+            if (beanMem != null) {
+                JSONObject newItem = new JSONObject();
+                newItem.putAll(item);
+                newItem.put("RES", beanMem.getString("RES"));
+                newItem.put("MEM", beanMem.getString("MEM"));
+                newItem.put("COMMAND", "java");
+                array.add(newItem);
+            }
+            array.add(item);
+            return array;
+        }
+        return null;
+    }
+
+    /**
+     * 获取jvm内存
+     *
+     * @param tag tag
+     * @return JSONObject
+     */
+    private JSONObject getBeanMem(String tag) {
+        try {
+            MemoryMXBean memoryMXBean = AbstractCommander.getInstance().getMemoryMXBean(tag);
+            if (memoryMXBean == null) {
+                return null;
+            }
+            MemoryUsage memory = memoryMXBean.getHeapMemoryUsage();
+            long used = memory.getUsed();
+            long max = memory.getMax();
+            double v = new BigDecimal(used).divide(new BigDecimal(max), 2, BigDecimal.ROUND_HALF_UP).doubleValue() * 100;
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.put("RES", FileUtil.readableFileSize(used));
+            jsonObject.put("MEM", v + "%");
+            return jsonObject;
+        } catch (Exception e) {
+            DefaultSystemLog.ERROR().error(e.getMessage(), e);
+        }
+        return null;
+    }
 
     private JSONObject formatTop(String top) {
         List<String> list = StrSpliter.splitTrim(top, "\n", true);
@@ -84,21 +193,21 @@ public class InternalController extends BaseController {
             }
             name = name.replaceAll("%", "").replace("+", "");
             if ("VIRT".equalsIgnoreCase(name) || "RES".equalsIgnoreCase(name) || "SHR".equalsIgnoreCase(name)) {
-                value = Convert.toLong(value) / 1024 + "mb";
+                value = Convert.toLong(value) / 1024 + " MB";
             }
             if ("�".equals(name)) {
                 name = "S";
             }
-            if ("S".equals(name)) {
-                if ("S".equals(value)) {
+            if ("S".equalsIgnoreCase(name)) {
+                if ("S".equalsIgnoreCase(value)) {
                     value = "睡眠";
-                } else if ("R".equals(value)) {
+                } else if ("R".equalsIgnoreCase(value)) {
                     value = "运行";
-                } else if ("T".equals(value)) {
+                } else if ("T".equalsIgnoreCase(value)) {
                     value = "跟踪/停止";
-                } else if ("Z".equals(value)) {
+                } else if ("Z".equalsIgnoreCase(value)) {
                     value = "僵尸进程 ";
-                } else if ("D".equals(value)) {
+                } else if ("D".equalsIgnoreCase(value)) {
                     value = "不可中断的睡眠状态 ";
                 }
             }
@@ -116,17 +225,15 @@ public class InternalController extends BaseController {
     @RequestMapping(value = "stack", method = RequestMethod.GET)
     @ResponseBody
     public String stack(String tag) throws Exception {
-        if (AbstractCommander.OS_INFO.isLinux()) {
-            ProjectInfoModel projectInfoModel = projectInfoService.getItem(tag);
-            String pid = commandService.execCommand(CommandService.CommandOp.pid, projectInfoModel).trim();
-            pid = pid.replace("\n", "");
-            String fileName = ConfigBean.getInstance().getTempPathName() + "/" + tag + "_java_cpu.txt";
-            fileName = FileUtil.normalize(fileName);
-            String commandPath = ConfigBean.getInstance().getCpuCommandPath();
-            String command = String.format("%s %s %s %s", commandPath, pid, 300, fileName);
-            AbstractCommander.getInstance().execCommand(command);
+        String fileName = ConfigBean.getInstance().getTempPathName() + "/" + tag + "_java_cpu.txt";
+        fileName = FileUtil.normalize(fileName);
+        try {
+            String pid = AbstractCommander.getInstance().getPid(tag);
+            String command = String.format("jstack %s >> %s ", pid, fileName);
+            AbstractCommander.getInstance().execSystemCommand(command);
             downLoad(getResponse(), fileName);
-        } else {
+        } catch (Exception e) {
+            DefaultSystemLog.ERROR().error(e.getMessage(), e);
             getResponse().sendRedirect("internal?tag=" + tag);
         }
         return JsonMessage.getString(200, "");
@@ -138,16 +245,15 @@ public class InternalController extends BaseController {
     @RequestMapping(value = "ram", method = RequestMethod.GET)
     @ResponseBody
     public String ram(String tag) throws Exception {
-        if (AbstractCommander.OS_INFO.isLinux()) {
-            ProjectInfoModel projectInfoModel = projectInfoService.getItem(tag);
-            String pid = commandService.execCommand(CommandService.CommandOp.pid, projectInfoModel).trim();
-            String fileName = ConfigBean.getInstance().getTempPathName() + "/" + tag + "_java_ram.txt";
-            fileName = FileUtil.normalize(fileName);
-            String commandPath = ConfigBean.getInstance().getRamCommandPath();
-            String command = String.format("%s %s %s", commandPath, pid, fileName);
-            AbstractCommander.getInstance().execCommand(command);
+        String fileName = ConfigBean.getInstance().getTempPathName() + "/" + tag + "_java_ram.txt";
+        fileName = FileUtil.normalize(fileName);
+        try {
+            String pid = AbstractCommander.getInstance().getPid(tag);
+            String command = String.format("jmap -histo:live %s >> %s", pid, fileName);
+            AbstractCommander.getInstance().execSystemCommand(command);
             downLoad(getResponse(), fileName);
-        } else {
+        } catch (Exception e) {
+            DefaultSystemLog.ERROR().error(e.getMessage(), e);
             getResponse().sendRedirect("internal?tag=" + tag);
         }
         return JsonMessage.getString(200, "");
@@ -166,4 +272,62 @@ public class InternalController extends BaseController {
         FileUtil.del(file);
     }
 
+    /**
+     * 获取端口
+     *
+     * @param tag 项目id
+     */
+    private JSONArray getPort(String tag) {
+        // 查询数据
+        try {
+            ProjectInfoModel projectInfoModel = projectInfoService.getItem(tag);
+            String pId = commandService.execCommand(CommandService.CommandOp.pid, projectInfoModel).trim();
+            if (StrUtil.isNotEmpty(pId)) {
+                String cmd;
+                boolean isLinux = true;
+                if (AbstractCommander.OS_INFO.isLinux()) {
+                    cmd = "netstat -antup | grep " + pId + " |grep -v \"CLOSE_WAIT\" | head -10";
+                } else {
+                    isLinux = false;
+                    cmd = "netstat -nao | findstr /V \"CLOSE_WAIT\" | findstr " + pId;
+                }
+                String result = AbstractCommander.getInstance().execSystemCommand(cmd);
+                return formatRam(isLinux, result);
+            }
+        } catch (Exception e) {
+            DefaultSystemLog.ERROR().error(e.getMessage(), e);
+        }
+        return null;
+    }
+
+    private JSONArray formatRam(boolean isLinux, String result) {
+        List<String> netList = StrSpliter.splitTrim(result, "\n", true);
+        if (netList == null || netList.size() <= 0) {
+            return null;
+        }
+        JSONArray array = new JSONArray();
+        for (String str : netList) {
+            List<String> list = StrSpliter.splitTrim(str, " ", true);
+            JSONObject item = new JSONObject();
+            if (isLinux) {
+                item.put("protocol", list.get(0));
+                item.put("receive", list.get(1));
+                item.put("send", list.get(2));
+                item.put("local", list.get(3));
+                item.put("foreign", list.get(4));
+                item.put("status", list.get(5));
+                item.put("name", list.get(6));
+            } else {
+                item.put("protocol", list.get(0));
+                item.put("receive", 0);
+                item.put("send", 0);
+                item.put("local", list.get(1));
+                item.put("foreign", list.get(2));
+                item.put("status", list.get(3));
+                item.put("name", list.get(4));
+            }
+            array.add(item);
+        }
+        return array;
+    }
 }

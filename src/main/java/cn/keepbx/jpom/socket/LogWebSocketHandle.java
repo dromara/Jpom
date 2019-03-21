@@ -71,7 +71,7 @@ public class LogWebSocketHandle {
                     return;
                 }
             }
-            SocketSessionUtil.send(session, StrUtil.format("欢迎加入:{} 回话id:{} 当前会话总数:{}", userModel.getName(), session.getId(), onlineCount.getAndIncrement()));
+            SocketSessionUtil.send(session, StrUtil.format("欢迎加入:{} 回话id:{} 当前会话总数:{}", userModel.getName(), session.getId(), onlineCount.incrementAndGet()));
         } catch (Exception e) {
             DefaultSystemLog.ERROR().error(e.getMessage(), e);
             try {
@@ -92,7 +92,6 @@ public class LogWebSocketHandle {
         }
         String projectId = json.getString("projectId");
         ProjectInfoService projectInfoService = SpringUtil.getBean(ProjectInfoService.class);
-//        SocketSessionUtil socketSession = getItem(session);
         ProjectInfoModel projectInfoModel = null;
         try {
             projectInfoModel = projectInfoService.getItem(projectId);
@@ -139,7 +138,11 @@ public class LogWebSocketHandle {
             case showlog: {
                 // 进入管理页面后需要实时加载日志
                 String log = projectInfoModel.getLog();
-                FileTailWatcher.addWatcher(log, session);
+                try {
+                    FileTailWatcher.addWatcher(log, session);
+                } catch (IOException io) {
+                    SocketSessionUtil.send(session, io.getMessage());
+                }
                 break;
             }
             case top:

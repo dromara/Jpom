@@ -14,7 +14,7 @@
 <div class="layui-row">
     <button id="addProject" onclick="editProject('');" class="layui-btn layui-btn-sm">新增项目</button>
     <button id="refresh" onclick="reloadTable();" class="layui-btn layui-btn-sm">刷新表格</button>
-
+    <button onclick="projectRecover();" class="layui-btn layui-btn-sm">回收站</button>
 </div>
 <table class="layui-table" id="tab_project" lay-filter="tab_project" style="margin: 0;"></table>
 
@@ -24,7 +24,6 @@
     <a href="javascript:;" class="layui-btn  layui-btn-sm layui-btn" lay-event="file">文件</a>
     <a href="javascript:;" class="layui-btn  layui-btn-sm layui-btn" lay-event="build">构建</a>
     <a href="javascript:;" class="layui-btn  layui-btn-sm layui-btn" lay-event="ram">监控</a>
-    <a href="javascript:;" class="layui-btn  layui-btn-sm layui-btn" lay-event="port">端口</a>
 </script>
 <script type="text/html" id="status_templ">
     <input type="checkbox" id="" disabled name="status" {{# if(d.status){ }} checked {{# } }} lay-skin="switch"
@@ -146,12 +145,18 @@
                     }
                     return "<span   name='" + d.id + "' title='分组：" + d.group + "(项目Id:" + d.id + ")' style='background: rgb(" + rgb + ");padding: 10px;'></span >" + d.name;
                 }
-            }, {
-                title: 'lib状态', width: '10%', sort: true, templet: function (d) {
-                    return (d.runLibDesc || "") + " / " + (d.useLibDesc || "");
-                }
             },
-                {field: 'createTime', title: '创建时间', sort: true, width: '13%'},
+                {
+                    title: 'lib状态', width: '10%', sort: true, templet: function (d) {
+                        return (d.runLibDesc || "") + " / " + (d.useLibDesc || "");
+                    }
+                },
+                {
+                    field: 'createTime', title: '创建时间', sort: true, width: '13%'
+                },
+                {
+                    field: 'createUser', title: '创建人', sort: true, width: '13%'
+                },
                 {field: 'modifyTime', title: '修改时间', sort: true, width: '13%'},
                 {title: '运行状态', templet: "#status_templ", sort: true, width: '10%'},
                 {field: 'op', title: '操作', toolbar: '#bar_projects'}
@@ -217,18 +222,6 @@
                     area: ['80%', '50%'],
                     content: 'internal?tag=' + data.id
                 });
-            } else if ('port' === event) {
-                if (!data.status) {
-                    layer.msg('请先运行程序！');
-                    return;
-                }
-                layer.open({
-                    type: 2,
-                    title: '端口',
-                    shade: 0.8,
-                    area: ['60%', '50%'],
-                    content: 'port?tag=' + data.id
-                });
             }
         });
 
@@ -272,6 +265,14 @@
     function reloadTable() {
         table.reload('table_project', {
             where: apiWhere
+        });
+    }
+
+    function projectRecover() {
+        tabChange({
+            id: 'projectRecover',
+            url: '/manage/project_recover',
+            title: '回收站',
         });
     }
 </script>

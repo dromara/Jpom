@@ -1,15 +1,13 @@
 package cn.keepbx.jpom.controller.manage;
 
-import cn.hutool.core.text.StrSpliter;
 import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.keepbx.jpom.common.BaseController;
-import cn.keepbx.jpom.common.PageUtil;
 import cn.keepbx.jpom.common.commander.AbstractCommander;
+import cn.keepbx.jpom.common.interceptor.ProjectPermission;
 import cn.keepbx.jpom.model.ProjectInfoModel;
 import cn.keepbx.jpom.model.UserModel;
-import cn.keepbx.jpom.service.manage.CommandService;
 import cn.keepbx.jpom.service.manage.ProjectInfoService;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -35,8 +33,6 @@ public class ProjectManageControl extends BaseController {
 
     @Resource
     private ProjectInfoService projectInfoService;
-    @Resource
-    private CommandService commandService;
 
     /**
      * 展示项目页面
@@ -73,9 +69,6 @@ public class ProjectManageControl extends BaseController {
                 if (StrUtil.isNotEmpty(group) && !group.equals(projectInfoModel.getGroup())) {
                     continue;
                 }
-                String result = commandService.execCommand(CommandService.CommandOp.status, projectInfoModel);
-                boolean status = result.contains(CommandService.RUNING_TAG);
-                projectInfoModel.setStatus(status);
                 String id = projectInfoModel.getId();
                 JSONObject object = (JSONObject) JSONObject.toJSON(projectInfoModel);
                 object.put("manager", userName.isProject(id));
@@ -91,68 +84,11 @@ public class ProjectManageControl extends BaseController {
                 }
                 return group1.compareTo(group2);
             });
-            return PageUtil.getPaginate(200, "查询成功！", array);
+            return JsonMessage.getString(200, "查询成功！", array);
         } catch (Exception e) {
             DefaultSystemLog.ERROR().error(e.getMessage(), e);
             return JsonMessage.getString(500, e.getMessage());
         }
-    }
-
-    @RequestMapping(value = "port", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
-    public String getPort(String tag) {
-        // 查询数据
-        try {
-            ProjectInfoModel projectInfoModel = projectInfoService.getItem(tag);
-            String pId = commandService.execCommand(CommandService.CommandOp.pid, projectInfoModel).trim();
-            if (StrUtil.isNotEmpty(pId)) {
-                String cmd;
-                boolean isLinux = true;
-                if (AbstractCommander.OS_INFO.isLinux()) {
-                    cmd = "netstat -antup | grep " + pId + " | head -10";
-                } else {
-                    isLinux = false;
-                    cmd = "netstat -nao | findstr " + pId;
-                }
-                String result = AbstractCommander.getInstance().execSystemCommand(cmd);
-                JSONArray array = formatRam(isLinux, result);
-                setAttribute("port", array);
-                return "manage/port";
-            }
-        } catch (Exception e) {
-            DefaultSystemLog.ERROR().error(e.getMessage(), e);
-        }
-        return "manage/port";
-    }
-
-    private JSONArray formatRam(boolean isLinux, String result) {
-        List<String> netList = StrSpliter.splitTrim(result, "\n", true);
-        if (netList == null || netList.size() <= 0) {
-            return null;
-        }
-        JSONArray array = new JSONArray();
-        for (String str : netList) {
-            List<String> list = StrSpliter.splitTrim(str, " ", true);
-            JSONObject item = new JSONObject();
-            if (isLinux) {
-                item.put("protocol", list.get(0));
-                item.put("receive", list.get(1));
-                item.put("send", list.get(2));
-                item.put("local", list.get(3));
-                item.put("foreign", list.get(4));
-                item.put("status", list.get(5));
-                item.put("name", list.get(6));
-            } else {
-                item.put("protocol", list.get(0));
-                item.put("receive", 0);
-                item.put("send", 0);
-                item.put("local", list.get(1));
-                item.put("foreign", list.get(2));
-                item.put("status", list.get(3));
-                item.put("name", list.get(4));
-            }
-            array.add(item);
-        }
-        return array;
     }
 
 
@@ -164,39 +100,22 @@ public class ProjectManageControl extends BaseController {
      */
     @RequestMapping(value = "deleteProject", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
-    public String deleteProject(String id, String type) throws IOException {
-        UserModel userName = getUser();
-        if (!userName.isProject(id)) {
-            return JsonMessage.getString(500, "你没有对应权限");
-        }
-        ProjectInfoModel projectInfoModel = projectInfoService.getItem(id);
-        if (projectInfoModel == null) {
-            return JsonMessage.getString(405, "未找到对应项目");
-        }
-        //
-        //        if ("all".equals(type)) {
-        //            if (ConfigBean.getInstance().safeMode) {
-        //                return JsonMessage.getString(405, "安全模式下，不允许彻底删除项目");
-        //            }
-        //            if (!UserModel.SYSTEM_ADMIN.equals(userName.getParent())) {
-        //                return JsonMessage.getString(405, "只有系统管理员才能彻底删除项目");
-        //            }
-        //            //
-        //            commandService.execCommand(CommandService.CommandOp.stop, projectInfoModel);
-        //            //
-        //            if (!FileUtil.del(projectInfoModel.getLib())) {
-        //                return JsonMessage.getString(500, "清除项目lib失败");
-        //            }
-        //            if (!FileUtil.del(projectInfoModel.getLogBack())) {
-        //                return JsonMessage.getString(500, "清除项目日志备份失败");
-        //            }
-        //            //
-        //            if (!FileUtil.del(projectInfoModel.getLog())) {
-        //                return JsonMessage.getString(500, "清除项目控制台日志文件失败");
-        //            }
-        //        }
+    @ProjectPermission
+    public String deleteProject(String id, String type) {
+        ProjectInfoModel projectInfoModel = getProjectInfoModel();
+        UserModel userModel = getUser();
         try {
-            projectInfoService.deleteProject(id);
+            // 运行判断
+            if (AbstractCommander.getInstance().isRun(projectInfoModel.getId())) {
+                return JsonMessage.getString(401, "不能删除正在运行的项目");
+            }
+            String userId;
+            if (UserModel.SYSTEM_ADMIN.equals(userModel.getParent())) {
+                userId = UserModel.SYSTEM_OCCUPY_NAME;
+            } else {
+                userId = userModel.getId();
+            }
+            projectInfoService.deleteProject(projectInfoModel, userId);
             return JsonMessage.getString(200, "删除成功！");
         } catch (Exception e) {
             DefaultSystemLog.ERROR().error(e.getMessage(), e);

@@ -34,7 +34,7 @@ public class OssManagerService extends BaseDataService {
     public File download(String key) throws IOException {
         File file = ConfigBean.getInstance().getTempPath();
         //getTempPath();
-        file = new File(file, key);
+        file = FileUtil.file(file, key);
         OSSClient ossClient = getOSSClient();
         //   SimplifiedObjectMeta objectMeta = ossClient.getSimplifiedObjectMeta(getBucketName(), key);
         // 下载OSS文件到本地文件。如果指定的本地文件存在会覆盖，不存在则新建。
@@ -99,7 +99,7 @@ public class OssManagerService extends BaseDataService {
     }
 
     public JSONObject getConfig() throws IOException {
-        return getJsonObject(ConfigBean.ALI_OSS);
+        return getJSONObject(ConfigBean.ALI_OSS);
     }
 
     private String getBucketName() throws IOException {

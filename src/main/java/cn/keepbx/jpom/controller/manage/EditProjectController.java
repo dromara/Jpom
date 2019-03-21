@@ -12,7 +12,7 @@ import cn.keepbx.jpom.common.BaseController;
 import cn.keepbx.jpom.model.ProjectInfoModel;
 import cn.keepbx.jpom.model.UserModel;
 import cn.keepbx.jpom.service.manage.ProjectInfoService;
-import cn.keepbx.jpom.service.system.SystemService;
+import cn.keepbx.jpom.service.system.WhitelistDirectoryService;
 import cn.keepbx.jpom.socket.LogWebSocketHandle;
 import com.alibaba.fastjson.JSONArray;
 import org.springframework.http.MediaType;
@@ -38,7 +38,7 @@ public class EditProjectController extends BaseController {
     @Resource
     private ProjectInfoService projectInfoService;
     @Resource
-    private SystemService systemService;
+    private WhitelistDirectoryService whitelistDirectoryService;
 
     /**
      * 修改项目页面
@@ -52,7 +52,7 @@ public class EditProjectController extends BaseController {
         ProjectInfoModel projectInfo = projectInfoService.getItem(id);
 
         // 白名单
-        JSONArray jsonArray = systemService.getWhitelistDirectory();
+        JSONArray jsonArray = whitelistDirectoryService.getProjectDirectory();
         setAttribute("whitelistDirectory", jsonArray);
 
         if (projectInfo != null && jsonArray != null) {
@@ -92,15 +92,9 @@ public class EditProjectController extends BaseController {
         if (LogWebSocketHandle.SYSTEM_ID.equals(id)) {
             return JsonMessage.getString(401, "项目id " + LogWebSocketHandle.SYSTEM_ID + " 关键词被系统占用");
         }
-        if (StrUtil.isEmpty(whitelistDirectory)) {
-            return JsonMessage.getString(401, "项目路径不能为空");
-        }
-        JSONArray jsonArray = systemService.getWhitelistDirectory();
-        if (jsonArray == null) {
-            return JsonMessage.getString(401, "还没有配置白名单");
-        }
-        if (!jsonArray.contains(whitelistDirectory)) {
-            return JsonMessage.getString(401, "请选择正确的项目路径");
+        //
+        if (!whitelistDirectoryService.checkProjectDirectory(whitelistDirectory)) {
+            return JsonMessage.getString(401, "请选择正确的项目路径,或者还没有配置白名单");
         }
         String lib = projectInfo.getLib();
         if (StrUtil.isEmpty(lib)) {
@@ -168,17 +162,30 @@ public class EditProjectController extends BaseController {
                 if (!userName.isManage()) {
                     return JsonMessage.getString(400, "管理员才能创建项目!");
                 }
-                //  return addProject(projectInfo);
                 projectInfo.setCreateTime(DateUtil.now());
+                // 隐藏系统管理员登录名
+                if (UserModel.SYSTEM_ADMIN.equals(userName.getParent())) {
+                    projectInfo.setCreateUser(UserModel.SYSTEM_OCCUPY_NAME);
+                } else {
+                    projectInfo.setCreateUser(userName.getId());
+                }
                 projectInfoService.saveProject(projectInfo);
                 return JsonMessage.getString(200, "新增成功！");
             }
-//            boolean manager = userService.isManager(id, getUserName());
             if (!userName.isProject(projectInfo.getId())) {
                 return JsonMessage.getString(400, "你没有对应操作权限操作!");
             }
+            exits.setLog(projectInfo.getLog());
+            exits.setName(projectInfo.getName());
+            exits.setGroup(projectInfo.getGroup());
+            exits.setMainClass(projectInfo.getMainClass());
+            exits.setLib(projectInfo.getLib());
+            exits.setJvm(projectInfo.getJvm());
+            exits.setArgs(projectInfo.getArgs());
+            exits.setBuildTag(projectInfo.getBuildTag());
+            //
             moveTo(exits, projectInfo);
-            projectInfoService.updateProject(projectInfo);
+            projectInfoService.updateProject(exits);
             return JsonMessage.getString(200, "修改成功");
         } catch (Exception e) {
             DefaultSystemLog.ERROR().error(e.getMessage(), e);
@@ -239,7 +246,13 @@ public class EditProjectController extends BaseController {
                 File newsLog = new File(news.getLog());
                 FileUtil.move(oldLog, newsLog, true);
             }
+            // logBack
+            File oldLogBack = old.getLogBack();
+            if (oldLogBack.exists()) {
+                FileUtil.move(oldLogBack, news.getLogBack(), true);
+            }
         }
+
     }
 
     private JsonMessage checkPath(ProjectInfoModel projectInfoModel) throws IOException {

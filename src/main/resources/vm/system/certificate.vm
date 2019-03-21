@@ -21,22 +21,20 @@
             margin-top: 10px;
         }
 
-        #certPath {
+        .certPath {
             padding: 5px !important;
             color: red;
+            width: 300px !important;
+            float: left;
         }
 
-        #keyPath {
-            padding: 5px !important;
-            color: red;
+
+        .file_input {
+            margin-top: -15px;
         }
 
-        .layui-input {
-            margin-top: 5px;
-        }
-
-        .layui-form-label {
-            margin-top: 10px;
+        .input_msg {
+            margin-top: 18px;
         }
     </style>
 </head>
@@ -73,22 +71,24 @@
         </div>
         <div class="layui-form-item">
             <div class="layui-inline">
-                <label class="layui-form-label">证书文件</label>
-                <div class="layui-input-block">
-                    <label id="certPath"></label>
-                    <input type="file" id="cert" name="cert" placeholder="" class="layui-input" required
+                <label class="layui-form-label input_msg">证书文件</label>
+                <div class="layui-input-inline">
+                    <label id="certPath" class="certPath"></label>
+                    <input type="file" id="cert" name="cert" placeholder="" class="layui-input file_input" required
                            lay-verify="required">
                 </div>
+                <div class="layui-form-mid layui-word-aux input_msg">证书文件,公钥,支持pem文件</div>
             </div>
         </div>
         <div class="layui-form-item">
             <div class="layui-inline">
-                <label class="layui-form-label">私钥文件</label>
-                <div class="layui-input-block">
-                    <label id="keyPath"></label>
-                    <input type="file" id="key" name="key" placeholder="" class="layui-input" required
+                <label class="layui-form-label input_msg">私钥文件</label>
+                <div class="layui-input-inline">
+                    <label id="keyPath" class="certPath"></label>
+                    <input type="file" id="key" name="key" placeholder="" class="layui-input file_input" required
                            lay-verify="required">
                 </div>
+                <div class="layui-form-mid layui-word-aux input_msg">私钥文件,支持key文件</div>
             </div>
         </div>
         <input type="hidden" lay-submit lay-filter="submitCert" id="cert_submit">
@@ -170,6 +170,8 @@
         function updateCert(data) {
             document.getElementById('form_certificate').reset();
             $('#form_certificate [name="id"]').attr('readonly', true).addClass('layui-disabled');
+            $('#form_certificate [name="path"]').attr('disabled', 'disabled');
+            form.render('select');
             for (var key in data) {
                 if ("cert" === key) {
                     $("#certPath").html(data[key]);
@@ -228,6 +230,8 @@
             // 重置表单
             document.getElementById('form_certificate').reset();
             $('#form_certificate [name="id"]').attr('readonly', false).removeClass('layui-disabled');
+            $('#form_certificate [name="path"]').attr('disabled', false);
+            form.render('select');
             $("#certPath").html("");
             $("#keyPath").html("");
             layer.open({

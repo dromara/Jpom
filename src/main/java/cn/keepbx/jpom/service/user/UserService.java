@@ -4,11 +4,9 @@ import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.keepbx.jpom.common.BaseOperService;
 import cn.keepbx.jpom.model.UserModel;
 import cn.keepbx.jpom.system.ConfigBean;
-import cn.keepbx.jpom.system.init.CheckRunCommand;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -39,7 +37,7 @@ public class UserService extends BaseOperService<UserModel> {
      */
     public int userSize() {
         try {
-            JSONObject userInfo = getJsonObject(ConfigBean.USER);
+            JSONObject userInfo = getJSONObject(ConfigBean.USER);
             if (userInfo == null) {
                 return 0;
             }
@@ -56,7 +54,7 @@ public class UserService extends BaseOperService<UserModel> {
      * @param pwd  密码
      * @return 登录
      */
-    public UserModel simpleLogin(String name, String pwd) {
+    public UserModel simpleLogin(String name, String pwd) throws IOException {
         UserModel userModel = getItem(name);
         if (userModel == null) {
             return null;
@@ -72,10 +70,9 @@ public class UserService extends BaseOperService<UserModel> {
      *
      * @param userMd5 用户md5
      * @return userModel 用户对象
-     * @throws IOException 异常
      */
-    public UserModel checkUser(String userMd5) throws IOException {
-        JSONObject jsonData = getJsonObject(ConfigBean.USER);
+    public UserModel checkUser(String userMd5) {
+        JSONObject jsonData = getJSONObject(ConfigBean.USER);
         if (jsonData == null) {
             return null;
         }
@@ -97,12 +94,7 @@ public class UserService extends BaseOperService<UserModel> {
      */
     @Override
     public List<UserModel> list() {
-        JSONObject jsonObject = null;
-        try {
-            jsonObject = getJsonObject(ConfigBean.USER);
-        } catch (IOException e) {
-            DefaultSystemLog.ERROR().error(e.getMessage(), e);
-        }
+        JSONObject jsonObject = getJSONObject(ConfigBean.USER);
         if (jsonObject == null) {
             return null;
         }
@@ -128,18 +120,8 @@ public class UserService extends BaseOperService<UserModel> {
      * @return 用户信息
      */
     @Override
-    public UserModel getItem(String userId) {
-        try {
-            JSONObject jsonObject = getJsonObject(ConfigBean.USER);
-            JSONObject user = jsonObject.getJSONObject(userId);
-            if (user == null) {
-                return null;
-            }
-            return user.toJavaObject(UserModel.class);
-        } catch (IOException e) {
-            DefaultSystemLog.ERROR().error(e.getMessage(), e);
-        }
-        return null;
+    public UserModel getItem(String userId) throws IOException {
+        return getJsonObjectById(ConfigBean.USER, userId, UserModel.class);
     }
 
     /**
@@ -168,9 +150,6 @@ public class UserService extends BaseOperService<UserModel> {
         try {
             saveJson(ConfigBean.USER, userModel.toJson());
             return true;
-        } catch (FileNotFoundException fileNotFoundException) {
-            CheckRunCommand.repairData();
-            return addUser(userModel);
         } catch (Exception e) {
             DefaultSystemLog.ERROR().error(e.getMessage(), e);
         }

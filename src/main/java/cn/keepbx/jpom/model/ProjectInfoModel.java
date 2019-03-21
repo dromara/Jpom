@@ -15,11 +15,20 @@ public class ProjectInfoModel extends BaseModel {
     public static final String NO_TOKEN = "no";
 
     private String name;
+    /**
+     * 分组
+     */
     private String group;
     private String mainClass;
     private String lib;
     private String log;
+    /**
+     * jvm 参数
+     */
     private String jvm;
+    /**
+     * WebHooks
+     */
     private String token;
     private boolean status;
     private String createTime;
@@ -34,8 +43,30 @@ public class ProjectInfoModel extends BaseModel {
      * 当前运行lib 状态
      */
     private String runLibDesc;
+    /**
+     * 创建人
+     */
+    private String createUser;
 
+    public String getCreateUser() {
+        return createUser;
+    }
+
+    public void setCreateUser(String createUser) {
+        this.createUser = createUser;
+    }
+
+    /**
+     * 项目是否正在运行，不推荐直接使用
+     *
+     * @return true 正在运行
+     */
     public boolean isStatus() {
+        try {
+            status = AbstractCommander.getInstance().isRun(getId());
+        } catch (Exception e) {
+            status = false;
+        }
         return status;
     }
 
@@ -71,6 +102,11 @@ public class ProjectInfoModel extends BaseModel {
         return modifyTime;
     }
 
+    /**
+     * 修改时间
+     *
+     * @param modifyTime time
+     */
     public void setModifyTime(String modifyTime) {
         this.modifyTime = modifyTime;
     }

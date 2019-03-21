@@ -19,7 +19,7 @@
 
 <body>
 <div class="layui-container div-project" id="div-project">
-    <form action="saveProject" class="layui-form" id="form_project">
+    <form action="saveProject" method="post" class="layui-form" id="form_project">
         <div class="layui-form-item">
             <div class="layui-inline">
                 <label class="layui-form-label">项目名名称</label>
@@ -147,16 +147,21 @@
                 type: 'POST',
                 dataType: 'json',
                 data: data.field,
+                beforeSend: function () {
+                    layer.load(1, {
+                        shade: [0.3, '#fff']
+                    });
+                },
                 success: function (data) {
-                    layer.msg(data.msg);
                     if (200 == data.code) {
-                        var index = parent.layer.getFrameIndex(window.name);
-                        parent.layer.close(index);
-                        // 刷新项目列表
-                        parent.reloadTable();
+                        autoClose();
+                    } else {
+                        layer.closeAll();
                     }
+                    layer.msg(data.msg);
                 },
                 error: function (err) {
+                    layer.closeAll();
                     layer.msg('操作失败！');
                 }
             });
@@ -225,22 +230,36 @@
                         id: id,
                         type: type
                     },
+                    beforeSend: function () {
+                        layer.load(1, {
+                            shade: [0.3, '#fff']
+                        });
+                    },
                     success: function (data) {
                         layer.close(index);
-                        layer.msg(data.msg);
                         if (200 == data.code) {
-                            var index = parent.layer.getFrameIndex(window.name);
-                            parent.layer.close(index);
-                            // 刷新项目列表
-                            parent.reloadTable();
+                            autoClose();
+                        } else {
+                            layer.closeAll();
                         }
+                        layer.msg(data.msg);
                     },
                     error: function (err) {
+                        layer.closeAll();
                         layer.msg('删除失败！');
                     }
                 });
             });
         });
+    }
+
+    function autoClose() {
+        setTimeout(function () {
+            var index = parent.layer.getFrameIndex(window.name);
+            parent.layer.close(index);
+            // 刷新项目列表
+            parent.reloadTable();
+        }, 2000);
     }
 </script>
 </html>

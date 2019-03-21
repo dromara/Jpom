@@ -42,7 +42,7 @@ public class UserListController extends BaseController {
     /**
      * 查询所有用户
      */
-    @RequestMapping(value = "getUserList", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "getUserList", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     public String getUserList() {
         UserModel userName = getUser();
@@ -52,6 +52,4 @@ public class UserListController extends BaseController {
         List<UserModel> userList = userService.list();
         return JsonMessage.getString(200, "", userList);
     }
-
-
 }

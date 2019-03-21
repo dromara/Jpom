@@ -17,23 +17,38 @@ import java.io.File;
  */
 @Configuration
 public class ConfigBean {
-    private static final String COMMAND = "command";
     private static final String DATA = "data";
     private static ConfigBean configBean;
-
-    public static final String CPU_SH = "/java_cpu.sh";
-    public static final String RAM_SH = "/java_ram.sh";
-
+    /**
+     * 用户数据文件
+     */
     public static final String USER = "user.json";
+    /**
+     * 项目数据文件
+     */
     public static final String PROJECT = "project.json";
+    /**
+     * 白名单文件
+     */
     public static final String WHITELIST_DIRECTORY = "whitelistDirectory.json";
+    /**
+     * 阿里oss 文件
+     */
     public static final String ALI_OSS = "aliOss.json";
+    /**
+     * 证书文件
+     */
     public static final String CERT = "cert.json";
+    /**
+     * 项目回收文件
+     */
+    public static final String PROJECT_RECOVER = "project_recover.json";
 
-
-    public static final String JPOM_PATH = "jpom.path";
-
-
+    /**
+     * 单利模式
+     *
+     * @return config
+     */
     public static ConfigBean getInstance() {
         if (configBean == null) {
             configBean = SpringUtil.getBean(ConfigBean.class);
@@ -50,7 +65,7 @@ public class ConfigBean {
     /**
      * 项目运行存储路径
      */
-    @Value("${" + JPOM_PATH + "}")
+    @Value("${jpom.path}")
     private String path;
 
     public String getPath() {
@@ -58,17 +73,6 @@ public class ConfigBean {
             throw new RuntimeException("请配运行路径属性【jpom.path】");
         }
         return path;
-    }
-
-    /**
-     * 获取项目命令存储文件夹路径
-     *
-     * @return 文件夹路径
-     */
-    private String getCommandPath() {
-        String commandPath = FileUtil.normalize(getPath() + "/" + COMMAND);
-        FileUtil.mkdir(commandPath);
-        return commandPath;
     }
 
     /**
@@ -106,41 +110,5 @@ public class ConfigBean {
         file = new File(file.getPath() + "/temp/", userName);
         FileUtil.mkdir(file);
         return file;
-    }
-
-    /**
-     * 组合命令文件路径
-     *
-     * @param item 要获取的命令文件名称
-     * @return 完整路径
-     * @throws ConfigException 配置异常
-     */
-    private String getCommandPath(String item) throws ConfigException {
-        String command = getCommandPath();
-        String runSh = FileUtil.normalize(command + item);
-        if (!FileUtil.exist(runSh)) {
-            throw new ConfigException(item + " 文件不存在:" + runSh, runSh);
-        }
-        return runSh;
-    }
-
-    /**
-     * 导出cpu 命令
-     *
-     * @return 完整路径
-     * @throws ConfigException 配置异常
-     */
-    public String getCpuCommandPath() throws ConfigException {
-        return getCommandPath(CPU_SH);
-    }
-
-    /**
-     * 导出ram 命令
-     *
-     * @return 完整路径
-     * @throws ConfigException 配置异常
-     */
-    public String getRamCommandPath() throws ConfigException {
-        return getCommandPath(RAM_SH);
     }
 }

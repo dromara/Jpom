@@ -20,9 +20,15 @@ public class UserModel extends BaseModel {
      */
     public static String SYSTEM_ADMIN = "sys";
     /**
+     * 系统占用名
+     */
+    public static String SYSTEM_OCCUPY_NAME = "系统管理员";
+    /**
      * 用户密码长度
      */
     public static int USER_PWD_LEN = 6;
+
+    public static int USER_NAME_MIN_LEN = 4;
 
     /**
      * 昵称
@@ -48,8 +54,54 @@ public class UserModel extends BaseModel {
      * 连续登录失败次数
      */
     private int pwdErrorCount;
+    /**
+     * 最后失败时间
+     */
     private long lastPwdErrorTime;
+    /**
+     * 账号被锁定的时长
+     */
     private long lockTime;
+    /**
+     * 上传文件权限
+     */
+    private boolean uploadFile;
+    /**
+     * 删除文件权限
+     */
+    private boolean deleteFile;
+
+    /**
+     * 获取是否有上传文件的权限
+     *
+     * @return 系统管理员都用权限
+     */
+    public boolean isUploadFile() {
+        if (UserModel.SYSTEM_ADMIN.equals(getParent())) {
+            return true;
+        }
+        return uploadFile;
+    }
+
+    public void setUploadFile(boolean uploadFile) {
+        this.uploadFile = uploadFile;
+    }
+
+    /**
+     * 获取是否有删除文件的权限
+     *
+     * @return 系统管理员都用权限
+     */
+    public boolean isDeleteFile() {
+        if (UserModel.SYSTEM_ADMIN.equals(getParent())) {
+            return true;
+        }
+        return deleteFile;
+    }
+
+    public void setDeleteFile(boolean deleteFile) {
+        this.deleteFile = deleteFile;
+    }
 
     public long getLockTime() {
         return lockTime;
@@ -183,10 +235,24 @@ public class UserModel extends BaseModel {
         return SecureUtil.md5(String.format("%s:%s", getId(), password));
     }
 
+    /**
+     * 是否为管理员
+     *
+     * @return true 是
+     */
     public boolean isManage() {
+        if (UserModel.SYSTEM_ADMIN.equals(getParent())) {
+            return true;
+        }
         return manage;
     }
 
+    /**
+     * 是否能管理某个项目
+     *
+     * @param id 项目Id
+     * @return true 能管理，管理员所有项目都能管理
+     */
     public boolean isProject(String id) {
         if (isManage()) {
             return true;

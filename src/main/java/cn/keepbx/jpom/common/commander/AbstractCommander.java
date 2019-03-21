@@ -1,5 +1,6 @@
 package cn.keepbx.jpom.common.commander;
 
+import cn.hutool.core.convert.Convert;
 import cn.hutool.core.date.DatePattern;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.io.FileUtil;
@@ -7,6 +8,7 @@ import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.http.HttpUtil;
+import cn.hutool.system.JavaRuntimeInfo;
 import cn.hutool.system.OsInfo;
 import cn.hutool.system.SystemUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
@@ -14,12 +16,18 @@ import cn.keepbx.jpom.common.commander.impl.LinuxCommander;
 import cn.keepbx.jpom.common.commander.impl.WindowsCommander;
 import cn.keepbx.jpom.model.ProjectInfoModel;
 import cn.keepbx.jpom.service.manage.CommandService;
-import com.sun.tools.attach.VirtualMachine;
-import com.sun.tools.attach.VirtualMachineDescriptor;
+import com.sun.tools.attach.*;
+import sun.management.ConnectorAddressLink;
 
+import javax.management.MBeanServerConnection;
+import javax.management.remote.JMXConnector;
+import javax.management.remote.JMXConnectorFactory;
+import javax.management.remote.JMXServiceURL;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.management.ManagementFactory;
+import java.lang.management.MemoryMXBean;
 import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.List;
@@ -35,6 +43,7 @@ public abstract class AbstractCommander {
     private static AbstractCommander abstractCommander = null;
     protected Charset charset;
     public static final OsInfo OS_INFO = SystemUtil.getOsInfo();
+    private static final JavaRuntimeInfo JAVA_RUNTIME_INFO = SystemUtil.getJavaRuntimeInfo();
 
     protected AbstractCommander(Charset charset) {
         this.charset = charset;
@@ -135,8 +144,12 @@ public abstract class AbstractCommander {
         if (!file.exists()) {
             return "not exists";
         }
+        // 空文件不处理
+        if (file.length() <= 0) {
+            return "ok";
+        }
         File backPath = projectInfoModel.getLogBack();
-        backPath = new File(backPath, file.getName() + "-" + DateTime.now().toString(DatePattern.PURE_DATETIME_FORMAT) + ".log");
+        backPath = new File(backPath, DateTime.now().toString(DatePattern.PURE_DATETIME_FORMAT) + ".log");
         FileUtil.copy(file, backPath, true);
         if (OS_INFO.isLinux()) {
             execCommand("cp /dev/null " + projectInfoModel.getLog());
@@ -156,21 +169,69 @@ public abstract class AbstractCommander {
      * @return 查询结果
      */
     public String status(String tag) throws Exception {
+        VirtualMachine virtualMachine = getVirtualMachine(tag);
+        if (virtualMachine == null) {
+            return CommandService.STOP_TAG;
+        }
+        return StrUtil.format("{}:{}", CommandService.RUNING_TAG, virtualMachine.id());
+    }
+
+    private VirtualMachine getVirtualMachine(String tag) throws IOException, AttachNotSupportedException {
         tag = String.format("-Dapplication=%s", tag);
-        String result = CommandService.STOP_TAG;
         // 通过VirtualMachine.list()列出所有的java进程
-        List<VirtualMachineDescriptor> listvm = VirtualMachine.list();
-        for (VirtualMachineDescriptor vmd : listvm) {
+        List<VirtualMachineDescriptor> descriptorList = VirtualMachine.list();
+        for (VirtualMachineDescriptor virtualMachineDescriptor : descriptorList) {
             // 根据进程id查询启动属性，如果属性-Dapplication匹配，说明项目已经启动，并返回进程id
-            Properties properties = VirtualMachine.attach(vmd.id()).getAgentProperties();
+            VirtualMachine virtualMachine = VirtualMachine.attach(virtualMachineDescriptor);
+            Properties properties = virtualMachine.getAgentProperties();
             String args = StrUtil.emptyToDefault(properties.getProperty("sun.jvm.args"), "");
             if (StrUtil.containsIgnoreCase(args, tag)) {
-                result = StrUtil.format("{}:{}", CommandService.RUNING_TAG, vmd.id());
-                break;
+                return virtualMachine;
             }
         }
-        return result;
+        return null;
     }
+
+    /**
+     * 获取指定程序的jvm 信息
+     *
+     * @param tag 运行tag
+     * @return null 没有运行或者获取数据
+     * @throws Exception 异常
+     */
+    public MemoryMXBean getMemoryMXBean(String tag) throws Exception {
+        VirtualMachine virtualMachine = getVirtualMachine(tag);
+        if (virtualMachine == null) {
+            return null;
+        }
+        int pid = Convert.toInt(virtualMachine.id());
+        JMXServiceURL jmxServiceURL = getJMXServiceURL(pid, virtualMachine);
+        if (jmxServiceURL == null) {
+            return null;
+        }
+        JMXConnector jmxConnector = JMXConnectorFactory.connect(jmxServiceURL, null);
+        MBeanServerConnection mBeanServerConnection = jmxConnector.getMBeanServerConnection();
+        return ManagementFactory.newPlatformMXBeanProxy(mBeanServerConnection, ManagementFactory.MEMORY_MXBEAN_NAME, MemoryMXBean.class);
+    }
+
+    private static JMXServiceURL getJMXServiceURL(int pid, VirtualMachine virtualMachine) throws IOException, AgentLoadException, AgentInitializationException {
+        String address = virtualMachine.getAgentProperties().getProperty("com.sun.management.jmxremote.localConnectorAddress");
+        if (address != null) {
+            return new JMXServiceURL(address);
+        }
+        address = ConnectorAddressLink.importFrom(pid);
+        if (address != null) {
+            return new JMXServiceURL(address);
+        }
+        String agent = StrUtil.format("{}{}lib{}management-agent.jar", JAVA_RUNTIME_INFO.getHomeDir(), File.separator, File.separator);
+        virtualMachine.loadAgent(agent);
+        address = virtualMachine.getAgentProperties().getProperty("com.sun.management.jmxremote.localConnectorAddress");
+        if (address != null) {
+            return new JMXServiceURL(address);
+        }
+        return null;
+    }
+
 
     /**
      * 获取进程id
@@ -187,7 +248,14 @@ public abstract class AbstractCommander {
         return "0";
     }
 
-    private boolean isRun(String tag) throws Exception {
+    /**
+     * 是否正在运行
+     *
+     * @param tag id
+     * @return true 正在运行
+     * @throws Exception 异常
+     */
+    public boolean isRun(String tag) throws Exception {
         String result = status(tag);
         return result.contains(CommandService.RUNING_TAG);
     }
@@ -208,7 +276,7 @@ public abstract class AbstractCommander {
                 Thread.sleep(500);
             } catch (InterruptedException ignored) {
             }
-        } while (count++ < 10);
+        } while (count++ < 20);
     }
 
     public String execCommand(String command) throws Exception {
@@ -233,6 +301,14 @@ public abstract class AbstractCommander {
         return result;
     }
 
+    /**
+     * 执行命令
+     *
+     * @param cmd 命令行
+     * @return 结果
+     * @throws IOException          IO
+     * @throws InterruptedException 等待超时
+     */
     private String exec(String[] cmd) throws IOException, InterruptedException {
         DefaultSystemLog.LOG().info(Arrays.toString(cmd));
         String result;

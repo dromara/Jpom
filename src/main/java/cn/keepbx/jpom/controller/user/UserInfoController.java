@@ -9,6 +9,7 @@ import cn.keepbx.jpom.model.UserModel;
 import cn.keepbx.jpom.service.user.UserService;
 import cn.keepbx.jpom.system.ConfigBean;
 import cn.keepbx.jpom.system.ExtConfigBean;
+import cn.keepbx.jpom.util.CheckPassword;
 import com.alibaba.fastjson.JSONArray;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
+import java.io.IOException;
 
 /**
  * 用户管理
@@ -45,8 +47,8 @@ public class UserInfoController extends BaseController {
             return JsonMessage.getString(400, "新旧密码一致");
         }
         UserModel userName = getUser();
-        if (ConfigBean.getInstance().safeMode && UserModel.SYSTEM_ADMIN.equals(userName.getParent())) {
-            return JsonMessage.getString(401, "安全模式下管理员的密码不能通过WEB端修改");
+        if (UserModel.SYSTEM_ADMIN.equals(userName.getParent()) && CheckPassword.checkPassword(newPwd) != 2) {
+            return JsonMessage.getString(401, "系统管理员密码强度太低,请使用复杂的密码");
         }
         try {
             UserModel userModel = userService.simpleLogin(userName.getId(), oldPwd);
@@ -73,7 +75,7 @@ public class UserInfoController extends BaseController {
      * @return json
      */
     @RequestMapping(value = "updateName", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public String updateName(String name) {
+    public String updateName(String name) throws IOException {
         if (StrUtil.isEmpty(name)) {
             return JsonMessage.getString(405, "请输入新的昵称");
         }
@@ -98,10 +100,13 @@ public class UserInfoController extends BaseController {
      * @return String
      */
     @RequestMapping(value = "deleteUser", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public String deleteUser(String id) {
+    public String deleteUser(String id) throws IOException {
         UserModel userName = getUser();
         if (!userName.isManage()) {
             return JsonMessage.getString(400, "你没有删除用户的权限");
+        }
+        if (ConfigBean.getInstance().safeMode) {
+            return JsonMessage.getString(401, "安全模式不能删除用户");
         }
         if (userName.getId().equals(id)) {
             return JsonMessage.getString(400, "不能删除自己");
@@ -123,14 +128,11 @@ public class UserInfoController extends BaseController {
     /**
      * 新增用户
      *
-     * @param id       登录名
-     * @param manage   是否为管理员
-     * @param name     用户名
-     * @param password 用户密码
+     * @param id 登录名
      * @return String
      */
     @RequestMapping(value = "addUser", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public String addUser(String id, String name, String manage, String password) {
+    public String addUser(String id) throws IOException {
         UserModel userName = getUser();
         if (!userName.isManage()) {
             return JsonMessage.getString(400, "你还没有权限");
@@ -140,44 +142,17 @@ public class UserInfoController extends BaseController {
         if (size >= ExtConfigBean.getInstance().userMaxCount) {
             return JsonMessage.getString(500, "当前用户个数超过系统上限");
         }
-        if (StrUtil.isEmpty(id)) {
-            return JsonMessage.getString(400, "登录名不能为空");
-        }
-        if (StrUtil.isEmpty(password)) {
-            return JsonMessage.getString(400, "密码不能为空");
-        }
-        int length = password.length();
-        if (length < UserModel.USER_PWD_LEN) {
-            return JsonMessage.getString(400, "密码长度为6-12位");
-        }
-        if (StrUtil.isEmpty(name)) {
-            return JsonMessage.getString(405, "请输入账户昵称");
-        }
-        int len = name.length();
-        if (len > 10 || len < 2) {
-            return JsonMessage.getString(405, "昵称长度只能是2-10");
-        }
-
-        boolean manageB = "true".equals(manage);
 
         UserModel userModel = userService.getItem(id);
         if (userModel != null) {
             return JsonMessage.getString(401, "登录名已经存在");
         }
         userModel = new UserModel();
-        userModel.setName(name);
-        userModel.setId(id);
-        userModel.setPassword(password);
-        userModel.setManage(manageB);
         userModel.setParent(userName.getId());
-
-        String[] projects = getParameters("project");
-        JSONArray jsonProjects = null;
-        if (projects != null) {
-            jsonProjects = (JSONArray) JSONArray.toJSON(projects);
+        String msg = parseUser(userModel, true);
+        if (msg != null) {
+            return msg;
         }
-
-        userModel.setProjects(jsonProjects);
 
         boolean b = userService.addUser(userModel);
         if (b) {
@@ -186,26 +161,82 @@ public class UserInfoController extends BaseController {
         return JsonMessage.getString(400, "添加失败");
     }
 
-    /**
-     * 修改用户
-     *
-     * @param id       登录名
-     * @param manage   是否为管理员
-     * @param name     用户名
-     * @param password 用户密码
-     * @return String
-     */
-    @RequestMapping(value = "updateUser", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public String updateUser(String id, String name, String manage, String password) {
+    private String parseUser(UserModel userModel, boolean create) {
+        String id = getParameter("id");
+        if (StrUtil.isEmpty(id) || id.length() <= UserModel.USER_NAME_MIN_LEN) {
+            return JsonMessage.getString(400, "登录名不能为空,并且长度必须大于4");
+        }
+        if (UserModel.SYSTEM_OCCUPY_NAME.equals(id)) {
+            return JsonMessage.getString(401, "当前登录名已经被系统占用");
+        }
+        if (!checkPathSafe(id)) {
+            return JsonMessage.getString(400, "登录名不能包含特殊字符");
+        }
+        userModel.setId(id);
+
+        String name = getParameter("name");
+        if (StrUtil.isEmpty(name)) {
+            return JsonMessage.getString(405, "请输入账户昵称");
+        }
+        int len = name.length();
+        if (len > 10 || len < 2) {
+            return JsonMessage.getString(405, "昵称长度只能是2-10");
+        }
+        userModel.setName(name);
+
         UserModel userName = getUser();
-        if (!userName.isManage()) {
-            return JsonMessage.getString(400, "你还没有权限");
+        String password = getParameter("password");
+        if (create || StrUtil.isNotEmpty(password)) {
+            if (StrUtil.isEmpty(password)) {
+                return JsonMessage.getString(400, "密码不能为空");
+            }
+            int length = password.length();
+            if (length < UserModel.USER_PWD_LEN) {
+                return JsonMessage.getString(400, "密码长度为6-12位");
+            }
+            // 修改用户
+            if (!create && !UserModel.SYSTEM_ADMIN.equals(userName.getParent())) {
+                return JsonMessage.getString(401, "只有系统管理员才能重置用户密码");
+            }
+            userModel.setPassword(password);
         }
 
         String[] projects = getParameters("project");
         JSONArray jsonProjects = null;
         if (projects != null) {
             jsonProjects = (JSONArray) JSONArray.toJSON(projects);
+        }
+        userModel.setProjects(jsonProjects);
+
+        boolean manageB = "true".equals(getParameter("manage"));
+        userModel.setManage(manageB);
+
+        manageB = "true".equals(getParameter("uploadFile"));
+        // 如果操作人没有权限  就不能管理被操作者
+        if (!userName.isUploadFile() && manageB) {
+            return JsonMessage.getString(402, "你没有管理上传文件的权限");
+        }
+        userModel.setUploadFile(manageB);
+
+        manageB = "true".equals(getParameter("deleteFile"));
+        if (!userName.isDeleteFile() && manageB) {
+            return JsonMessage.getString(402, "你没有管理删除文件的权限");
+        }
+        userModel.setDeleteFile(manageB);
+        return null;
+    }
+
+    /**
+     * 修改用户
+     *
+     * @param id 登录名
+     * @return String
+     */
+    @RequestMapping(value = "updateUser", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    public String updateUser(String id) throws IOException {
+        UserModel userName = getUser();
+        if (!userName.isManage()) {
+            return JsonMessage.getString(400, "你还没有权限");
         }
         UserModel userModel = userService.getItem(id);
         if (userModel == null) {
@@ -215,34 +246,10 @@ public class UserInfoController extends BaseController {
         if (UserModel.SYSTEM_ADMIN.equals(userModel.getParent())) {
             return JsonMessage.getString(401, "WEB端不能修改系统管理员信息");
         }
-        if (StrUtil.isEmpty(name)) {
-            return JsonMessage.getString(405, "请输入新的账户昵称");
+        String msg = parseUser(userModel, false);
+        if (msg != null) {
+            return msg;
         }
-        int len = name.length();
-        if (len > 10 || len < 2) {
-            return JsonMessage.getString(405, "昵称长度只能是2-10");
-        }
-        userModel.setName(name);
-        if (!StrUtil.isEmpty(password)) {
-            int length = password.length();
-            if (length < UserModel.USER_PWD_LEN) {
-                return JsonMessage.getString(400, "密码长度为6-12位");
-            }
-            //
-            if (UserModel.SYSTEM_ADMIN.equals(userName.getParent())) {
-                return JsonMessage.getString(401, "只有系统管理员才能重置用户密码");
-            }
-            userModel.setPassword(password);
-        }
-
-        boolean manageB = "true".equals(manage);
-
-        if (!manageB && UserModel.SYSTEM_ADMIN.equals(userModel.getParent())) {
-            return JsonMessage.getString(401, "不能取消系统管理员的管理权限");
-        }
-        userModel.setManage(manageB);
-
-        userModel.setProjects(jsonProjects);
         boolean b = userService.updateUser(userModel);
         if (b) {
             return JsonMessage.getString(200, "修改成功");

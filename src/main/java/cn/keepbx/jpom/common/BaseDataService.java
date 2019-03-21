@@ -1,10 +1,12 @@
 package cn.keepbx.jpom.common;
 
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.keepbx.jpom.system.ConfigBean;
 import cn.keepbx.jpom.util.JsonUtil;
 import com.alibaba.fastjson.JSONObject;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 
 /**
@@ -30,16 +32,21 @@ public abstract class BaseDataService {
      *
      * @param filename 文件名
      * @param json     json数据
-     * @throws IOException 异常
      */
-    protected void saveJson(String filename, JSONObject json) throws IOException {
+    protected void saveJson(String filename, JSONObject json) {
         String key = json.getString("id");
         // 读取文件，如果存在记录，则抛出异常
-        JSONObject allData = getJsonObject(filename);
-        JSONObject data = allData.getJSONObject(key);
+        JSONObject allData;
+        JSONObject data = null;
+        allData = getJSONObject(filename);
+        if (allData != null) {
+            data = allData.getJSONObject(key);
+        } else {
+            allData = new JSONObject();
+        }
         // 判断是否存在数据
         if (null != data && 0 < data.keySet().size()) {
-            throw new RuntimeException("项目名称已存在！");
+            throw new RuntimeException("数据Id已经存在啦：" + filename + " :" + key);
         } else {
             allData.put(key, json);
             JsonUtil.saveJson(getDataFilePath(filename), allData);
@@ -55,12 +62,12 @@ public abstract class BaseDataService {
     protected void updateJson(String filename, JSONObject json) throws Exception {
         String key = json.getString("id");
         // 读取文件，如果不存在记录，则抛出异常
-        JSONObject allData = getJsonObject(filename);
+        JSONObject allData = getJSONObject(filename);
         JSONObject data = allData.getJSONObject(key);
 
         // 判断是否存在数据
         if (null == data || 0 == data.keySet().size()) {
-            throw new Exception("数据不存在");
+            throw new Exception("数据不存在:" + key);
         } else {
             allData.put(key, json);
             JsonUtil.saveJson(getDataFilePath(filename), allData);
@@ -76,7 +83,7 @@ public abstract class BaseDataService {
      */
     protected void deleteJson(String filename, String key) throws Exception {
         // 读取文件，如果存在记录，则抛出异常
-        JSONObject allData = getJsonObject(filename);
+        JSONObject allData = getJSONObject(filename);
         JSONObject data = allData.getJSONObject(key);
         // 判断是否存在数据
         if (JsonUtil.jsonIsEmpty(data)) {
@@ -92,11 +99,27 @@ public abstract class BaseDataService {
      *
      * @param filename 文件名
      * @return json
-     * @throws IOException io
      */
-    protected JSONObject getJsonObject(String filename) throws IOException {
-        return (JSONObject) JsonUtil.readJson(getDataFilePath(filename));
+    protected JSONObject getJSONObject(String filename) {
+        try {
+            return (JSONObject) JsonUtil.readJson(getDataFilePath(filename));
+        } catch (FileNotFoundException e) {
+            return null;
+        }
     }
 
-
+    protected <T> T getJsonObjectById(String file, String id, Class<T> cls) throws IOException {
+        if (StrUtil.isEmpty(id)) {
+            return null;
+        }
+        JSONObject jsonObject = getJSONObject(file);
+        if (jsonObject == null) {
+            return null;
+        }
+        jsonObject = jsonObject.getJSONObject(id);
+        if (jsonObject == null) {
+            return null;
+        }
+        return jsonObject.toJavaObject(cls);
+    }
 }

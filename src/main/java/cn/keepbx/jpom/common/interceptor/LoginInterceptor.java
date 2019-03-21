@@ -16,7 +16,7 @@ import javax.servlet.http.HttpSession;
  * @author jiangzeyin
  * Created by jiangzeyin on 2017/2/4.
  */
-@InterceptorPattens
+@InterceptorPattens()
 public class LoginInterceptor extends BaseInterceptor {
     /**
      * session

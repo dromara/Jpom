@@ -13,24 +13,16 @@
             display: none;
         }
 
-        .layui-input-block {
-            margin-left: 120px;
-        }
-
-        .layui-form-label {
-            width: 90px;
-        }
-
         .context {
             height: 65vh;
         }
 
-        .layui-colla-content {
-            width: 50%;
+        .layui-input-inline {
+            width: 350px !important;
         }
 
-        .form_file {
-            width: 50%;
+        .x-red {
+            color: red;
         }
 
     </style>
@@ -47,66 +39,34 @@
             <form action="" class="layui-form" id="fast_form">
                 <input type="text" name="type" value="quick" class="layui-input div_hidden">
                 <input type="text" name="genre" value="$type" class="layui-input div_hidden">
-                <div class="form_file">
-                    <div class="layui-form-item">
-                        <label class="layui-form-label">文件名称</label>
-                        <div class="layui-input-block">
-                            <input type="text" name="name" placeholder='文件后缀必须为".conf"' class="layui-input"
-                                   value="$!data.name" required lay-verify="required" #if($type=="update")
-                                   disabled #end >
-                        </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">文件名称</label>
+                    <div class="layui-input-inline">
+                        <input type="text" name="name" placeholder='文件后缀必须为".conf"' class="layui-input"
+                               value="$!data.name" required lay-verify="required" #if($type=="update")
+                               disabled #end >
                     </div>
-                    <div class="layui-form-item">
-                        <label class="layui-form-label">文件路径</label>
-                        <div class="layui-input-block">
-                            <select name="whitePath" id="whitePath" #if($type=="update") disabled #end>
-                                #foreach($item in $nginx)
-                                    <option value="$item" #if($item==$data.whitePath) selected #end>$item</option>
-                                #end
-                            </select>
-                        </div>
+                    <label class="layui-form-label">文件路径</label>
+                    <div class="layui-input-inline">
+                        <select name="whitePath" id="whitePath" #if($type=="update") disabled #end
+                                class="selectBox">
+                            #foreach($item in $nginx)
+                                <option value="$item" #if($item==$data.whitePath) selected #end>$item</option>
+                            #end
+                        </select>
                     </div>
                 </div>
                 <div class="layui-form-item">
                     <label class="layui-form-label">快速配置</label>
                     <div class="layui-input-block auto">
-                        <div class="layui-form-item">
-                            <label class="layui-form-label">缓存状态</label>
-                            <div class="layui-input-block">
-                                <input lay-filter="cacheStatus" type="checkbox" name="cacheStatus"
-                                       lay-skin="switch" #if($data.cacheSize) checked #end value="true"
-                                       lay-text="开启|关闭">
-                            </div>
-                        </div>
-                        <div class="layui-collapse  #if($data.cacheSize) #else div_hidden #end" id="cache_setting">
-                            <div class="layui-colla-item">
-                                <h2 class="layui-colla-title">缓存设置</h2>
-                                <div class="layui-colla-content layui-show">
-                                    <div class="layui-form-item">
-                                        <label class="layui-form-label">缓存大小</label>
-                                        <div class="layui-input-block">
-                                            <input type="number" name="cacheSize" value="$!data.cacheSize"
-                                                   placeholder="缓存大小，单位为：m" class="layui-input">
-                                        </div>
-                                    </div>
-                                    <div class="layui-form-item">
-                                        <label class="layui-form-label">失效时间</label>
-                                        <div class="layui-input-block">
-                                            <input type="number" name="inactive" value="$!data.inactive"
-                                                   placeholder="失效时间，单位为分钟" class="layui-input">
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
                         <div class="layui-collapse" style="margin-top:10px;">
                             <div class="layui-colla-item">
                                 <h2 class="layui-colla-title">监听设置</h2>
                                 <div class="layui-colla-content layui-show" id="listen_context">
                                     <div class="layui-form-item">
-                                        <label class="layui-form-label">选择证书</label>
-                                        <div class="layui-input-block">
-                                            <select id="choose_cert" lay-filter="choose_cert">
+                                        <label class="layui-form-label">选择SSL证书</label>
+                                        <div class="layui-input-inline">
+                                            <select id="choose_cert" lay-filter="choose_cert" class="selectBox">
                                                 <option value=""></option>
                                                 #foreach($item in $cert)
                                                     <option value='$item.id' id="$item.domain" key="$item.key"
@@ -115,51 +75,59 @@
                                                 #end
                                             </select>
                                         </div>
+                                        <div class="layui-form-mid layui-word-aux">选择SSL证书，可不填</div>
                                     </div>
                                     <div class="layui-form-item">
-                                        <label class="layui-form-label">监听端口</label>
-                                        <div class="layui-input-block">
+                                        <label class="layui-form-label"><span class="x-red">*</span>监听端口</label>
+                                        <div class="layui-input-inline">
                                             <input type="text" name="port" value="$!data.port" id="port" required
-                                                   lay-verify="required" placeholder="监听端口" class="layui-input">
+                                                   readonly lay-verify="required" placeholder="" class="layui-input">
+                                        </div>
+                                        <div class="layui-form-mid layui-word-aux"><span class="x-red">*</span>设置listen监听端口
                                         </div>
                                     </div>
                                     <div class="layui-form-item">
-                                        <label class="layui-form-label">监听地址</label>
-                                        <div class="layui-input-block">
+                                        <label class="layui-form-label"><span class="x-red">*</span>域名</label>
+                                        <div class="layui-input-inline">
                                             <input type="text" name="domain" value="$!data.domain" id="domain" required
-                                                   lay-verify="required" placeholder="监听地址" class="layui-input">
+                                                   lay-verify="required" placeholder="" class="layui-input">
+                                        </div>
+                                        <div class="layui-form-mid layui-word-aux"><span class="x-red">*</span>设置server_name匹配域名
                                         </div>
                                     </div>
                                     <div id="convert" #if($data.cert) #else class="div_hidden" #end >
                                         <div class="layui-form-item ">
-                                            <label class="layui-form-label">自动跳转https</label>
-                                            <div class="layui-input-block">
+                                            <label class="layui-form-label">http自动跳转https</label>
+                                            <div class="layui-input-inline">
                                                 <input lay-filter="convert" name="convert" type="checkbox"
-                                                    #if($data.convert) checked #end value="true" lay-text="是|否"
+                                                    #if($data.convert) checked #end value="true" lay-text="开启|关闭"
                                                        lay-skin="switch">
                                             </div>
                                         </div>
                                         <div class="layui-form-item ">
                                             <label class="layui-form-label">证书路径</label>
-                                            <div class="layui-input-block">
+                                            <div class="layui-input-inline">
                                                 <input type="text" name="cert" value="$!data.cert" id="cert" readonly
                                                        class="layui-input">
                                             </div>
+                                            <div class="layui-form-mid layui-word-aux" id="certAux">$!data.cert</div>
                                         </div>
                                         <div class="layui-form-item">
                                             <label class="layui-form-label">私钥路径</label>
-                                            <div class="layui-input-block">
+                                            <div class="layui-input-inline">
                                                 <input type="text" name="key" value="$!data.key" id="key" readonly
                                                        class="layui-input">
                                             </div>
+                                            <div class="layui-form-mid layui-word-aux" id="keyAux">$!data.key</div>
                                         </div>
                                     </div>
                                     <div class="layui-form-item">
-                                        <label class="layui-form-label">代理地址</label>
-                                        <div class="layui-input-block">
+                                        <label class="layui-form-label">跳转地址</label>
+                                        <div class="layui-input-inline">
                                             <input type="text" name="location" value="$!data.location"
-                                                   placeholder="代理地址" class="layui-input">
+                                                   placeholder="" class="layui-input">
                                         </div>
+                                        <div class="layui-form-mid layui-word-aux">设置proxy_pass代理跳转地址</div>
                                     </div>
                                 </div>
                             </div>
@@ -177,24 +145,20 @@
             <form action="" class="layui-form" id="form_ngx">
                 <input type="text" name="type" value="manual" class="layui-input div_hidden">
                 <input type="text" name="genre" value="$type" class="layui-input div_hidden">
-                <div class="form_file">
-                    <div class="layui-form-item">
-                        <label class="layui-form-label">文件名称</label>
-                        <div class="layui-input-block">
-                            <input type="text" name="name" placeholder='文件后缀必须为".conf"' class="layui-input"  #if($type==
-                                "update") disabled #end
-                                   value="$!data.name" required lay-verify="required">
-                        </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">文件名称</label>
+                    <div class="layui-input-inline">
+                        <input type="text" name="name" placeholder='文件后缀必须为".conf"' class="layui-input"  #if($type==
+                            "update") disabled #end
+                               value="$!data.name" required lay-verify="required">
                     </div>
-                    <div class="layui-form-item">
-                        <label class="layui-form-label">文件路径</label>
-                        <div class="layui-input-block">
-                            <select name="whitePath" id="whitePath" #if($type=="update") disabled #end>
-                                #foreach($item in $nginx)
-                                    <option value="$item" #if($item==$data.whitePath) selected #end>$item</option>
-                                #end
-                            </select>
-                        </div>
+                    <label class="layui-form-label">文件路径</label>
+                    <div class="layui-input-inline">
+                        <select name="whitePath" id="whitePath" #if($type=="update") disabled #end>
+                            #foreach($item in $nginx)
+                                <option value="$item" #if($item==$data.whitePath) selected #end>$item</option>
+                            #end
+                        </select>
                     </div>
                 </div>
                 <div class="layui-form-item">
@@ -219,6 +183,9 @@
 
     function loadSuccess() {
         var type = "$type"
+        if ("add" === type) {
+            $("#port ").val("80");
+        }
 
         //提交配置信息
         form.on('submit(submitNgx)', function (data) {
@@ -279,6 +246,9 @@
                 $("#convert").addClass("div_hidden");
                 $("#cert").val("");
                 $("#key").val("");
+                $("#keyAux").val("");
+                $("#certAux").val("");
+                $("#port ").val("80");
                 return false;
             }
             $("#convert").removeClass("div_hidden");
@@ -288,8 +258,9 @@
             $("#cert").val(cert);
             $("#domain").val(domain);
             $("#key").val(key);
+            $("#keyAux").val(key);
+            $("#certAux").val(cert);
             $("#port ").val("443 ssl");
-
         });
 
     }

@@ -1,8 +1,8 @@
 # Jpom(Java Project Online Management)Java项目在线管理
 
-> 在linux 中管理jar包运行，如SpringBoot、Jboot等项目如果是打包为Jar那么我们一般是使用shell 命令来管理, 
+> 在服务器中管理jar包运行，如SpringBoot、Jboot等项目如果是打包为Jar那么我们一般是使用shell、bat 命令来管理, 
 > 在单服务器中多项目新增、更新、删除、排查日志等操作如此都不是很方便。
-> 再者想不使用电脑控制重启、关闭、开启项目。直接使用shell 登录服务器管理显然不是最简单的方法
+> 再者想不使用电脑控制重启、关闭、开启项目。直接使用管理员软件登录服务器管理显然不是最简单的方法
 > 甚至在没有专业的服务器管理软件电脑前Jpom都是你们选择
 
 
@@ -13,7 +13,7 @@
 [![travis](https://travis-ci.org/jiangzeyin/jpom.svg?branch=master)](https://travis-ci.org/jiangzeyin/jpom)
 
 
-> Jpom采用SpringBoot开发web项目(前台采用layui)+websocket来统一管理，只要能使用浏览器就ok
+> Jpom采用SpringBoot开发web项目(前台采用layui)+websocket来统一管理，只要能使用浏览器就ok，同时Jpom可以在linux和windows服务器上运行
 
 ![logo](/doc/logo.png)
 
@@ -35,7 +35,7 @@
 4. cpu、ram 监控
 5. 导出堆栈信息
 6. [阿里云 CodePipeline + Oss在线管理](/doc/CodePipeline-Oss.md)
-7. 多用户管理，用户项目权限独立
+7. 多用户管理，用户项目权限独立(上传、删除权限可控制)
 8. 此项目完全不依赖数据库，随装随用
 9. 整个服务器top监听
 10. 查看项目运行进程占用的端口
@@ -103,8 +103,10 @@ mvn package
 
    [http://jpom-demo.jiangzeyin.cn](http://jpom-demo.jiangzeyin.cn)
    
-    账号：admin
-    密码：admin123
+    账号：demo
+    密码：demo123
+    
+   > 演示系统有部分功能做了限制，详情功能请自行部署体验
     
    1. [Jboot案例代码](https://gitee.com/keepbx/Jpom-demo-case/tree/master/jboot-test)
    2. [SpringBoot案例代码](https://gitee.com/keepbx/Jpom-demo-case/tree/master/springboot-test)
@@ -122,10 +124,6 @@ mvn package
 [安全模式>>](/doc/safeMode.md)  
 
 [用户角色说明>>](/doc/safeMode.md#用户权限说明)
-
-### windows 开启实时查看控制台日志
-
-[飞机>>](/doc/windows-tail.md)
 
 ### 阿里云Oss配置
 

@@ -83,7 +83,7 @@ public class LoginControl extends BaseController {
     @RequestMapping(value = "userLogin", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     @NotLogin
-    public String userLogin(String userName, String userPwd, String code) {
+    public String userLogin(String userName, String userPwd, String code) throws IOException {
         if (StrUtil.isEmpty(userName) || StrUtil.isEmpty(userPwd)) {
             return JsonMessage.getString(405, "请输入登录信息");
         }

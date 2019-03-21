@@ -10,6 +10,7 @@ import cn.keepbx.jpom.common.interceptor.NotLogin;
 import cn.keepbx.jpom.controller.system.WhitelistDirectoryController;
 import cn.keepbx.jpom.model.UserModel;
 import cn.keepbx.jpom.service.user.UserService;
+import cn.keepbx.jpom.util.CheckPassword;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -51,6 +52,9 @@ public class InstallController extends BaseController {
     @NotLogin
     @ResponseBody
     public String installSubmit(String userName, String userPwd, String whitelistDirectory) {
+        if (!userService.userListEmpty()) {
+            return JsonMessage.getString(100, "请勿重复提交");
+        }
         if (StrUtil.isEmpty(userName)) {
             return JsonMessage.getString(400, "登录名不能为空");
         }
@@ -60,6 +64,14 @@ public class InstallController extends BaseController {
         if (StrUtil.isEmpty(userPwd) || userPwd.length() < UserModel.USER_PWD_LEN) {
             return JsonMessage.getString(400, "密码长度为6-12位");
         }
+        if (!checkPathSafe(userName)) {
+            return JsonMessage.getString(400, "登录名不能包含特殊字符");
+        }
+        // 判断密码级别
+        if (CheckPassword.checkPassword(userPwd) != 2) {
+            return JsonMessage.getString(401, "系统管理员密码强度太低,请使用复杂的密码");
+        }
+
         UserModel userModel = new UserModel();
         userModel.setName("超级管理员");
         userModel.setId(userName);

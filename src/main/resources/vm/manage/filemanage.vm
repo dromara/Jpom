@@ -70,7 +70,7 @@
                     statusCode: 200
                 }
             });
-
+            var updateFail = false;
             upload.render({
                 elem: '#uploadFile',
                 accept: 'file',
@@ -83,16 +83,28 @@
                     layer.load(1, {
                         shade: [0.5, '#fff'] //0.1透明度的白色背景
                     });
+                    updateFail = false;
                 },
                 allDone: function (obj) {
+                    setTimeout(function () {
+                        layer.closeAll();
+                    }, 1000);
+                    if (updateFail) {
+                        return;
+                    }
                     layer.msg("文件总数：" + obj.total + " 成功上传：" + obj.successful + " 上传失败：" + obj.aborted);
                     setTimeout(function () {
                         table.reload('table_file', {});
-                        layer.closeAll();
                     }, 2000);
                 },
                 done: function (res, index, upload) {
-                    //layer.msg('success');
+                    if (res.code != 200) {
+                        layer.msg(res.msg);
+                    }
+                    // 没有权限
+                    if (res.code == 302) {
+                        updateFail = true;
+                    }
                 },
                 error: function () {
                     layer.msg('上传失败');
