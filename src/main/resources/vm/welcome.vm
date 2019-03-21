@@ -72,7 +72,7 @@
 </body>
 <script>
     function loadSuccess() {
-        var ws
+        var ws;
         loadFirstEcharts();
 
         function loadFirstEcharts() {
@@ -91,7 +91,7 @@
                     }
                 },
                 error: function (err) {
-                    layer.alert("top信息错误！");
+                    layer.alert("监控信息异常！");
                 }
             });
         }

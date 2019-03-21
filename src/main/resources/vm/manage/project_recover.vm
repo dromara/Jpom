@@ -53,7 +53,8 @@
                 <td>$!item.delUser</td>
                 <td>
                     <button name="delete" onclick="projectDetail(this)" data-name="$item.filename"
-                            index="$!velocityCount" data-id="$id" class="layui-btn  layui-btn-sm">详情
+                            index="$!velocityCount" data-id="$!item.id"
+                            class="layui-btn  layui-btn-sm">详情
                     </button>
                 </td>
             </tr>
@@ -120,14 +121,6 @@
             <label class="layui-form-label text" id="build"></label>
         </div>
     </div>
-##    <div class="layui-form-item" style="padding-left: 20%">
-##        <button class="layui-btn layui-btn-normal" lay-submit lay-filter="submitProject" id="project_submit">提交
-##        </button>
-##        #if($item)
-##            <a class="layui-btn layui-btn-warm" data-id="$item.id" id="delete_project">删除</a>
-##        ##                <a class="layui-btn layui-btn-primary" type="all" data-id="$item.id" id="delete_project_all">彻底删除</a>
-##        #end
-##    </div>
 </div>
 
 </body>
@@ -135,19 +128,31 @@
 <script type="text/javascript">
 
     function projectDetail(dom) {
-        var index = dom.getAttribute("index");
-        var data = JSON.stringify($!array);
-        var projects = JSON.parse(data);
-        if (index) {
-            var project = projects[index - 1];
-            attrProject(project);
-            layer.open({
-                type: 1,
-                title: '查看项目',
-                content: $('#div-project'),
-                area: ['60%', '70%'],
-            })
-        }
+        var id = dom.getAttribute("data-id");
+        $.ajax({
+            url: '/manage/recover/project',
+            type: 'POST',
+            dataType: 'json',
+            data: {
+                id: id
+            },
+            success: function (data) {
+                if (200 == data.code) {
+                    attrProject(data.data);
+                    layer.open({
+                        type: 1,
+                        title: '查看项目',
+                        content: $('#div-project'),
+                        area: ['60%', '45%'],
+                    });
+                } else {
+                    layer.msg(data.msg);
+                }
+            },
+            error: function (err) {
+                layer.msg(err);
+            }
+        });
     }
 
     function attrProject(data) {
