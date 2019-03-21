@@ -17,10 +17,6 @@
             height: 65vh;
         }
 
-        .layui-input-inline {
-            width: 350px !important;
-        }
-
         .x-red {
             color: red;
         }
