@@ -27,7 +27,7 @@ set basePath=%~dp0
 set Lib=%basePath%lib\
 set Log=%basePath%run.log
 set JVM=-server
-set ARGS=--server.port=2123 --jpom.path=%basePath% --jpom.log=%basePath%log --jpom.safeMode=false
+set ARGS=--server.port=2122 --jpom.path=%basePath% --jpom.log=%basePath%log --jpom.safeMode=false
 
 set TEMPCLASSPATH=
 for /f "delims=" %%I in ('dir /B %Lib%') do (set TEMPCLASSPATH=!TEMPCLASSPATH!%Lib%%%I;)

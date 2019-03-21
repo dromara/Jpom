@@ -75,12 +75,13 @@
 1. 下载安装包 [https://gitee.com/keepbx/jpom/attach_files](https://gitee.com/keepbx/jpom/attach_files)
 2. 上传到服务解压到根目录
 3. 执行目录下[Jpom.sh](/script/Jpom.sh)文件（记得给命令文件添加权限奥[*chmod  755 /jpom/Jpom.sh*]）
-如
-```
-/jpom/Jpom.sh start
-```
+    如
+    ```
+    /jpom/Jpom.sh start
+    ```
 4. 如有需要修改项目端口请查看 Jpom.sh
 5. windows 下则执行Jpom.bat 命令即可
+
 ### 编译安装
 
 访问[Jpom](https://gitee.com/keepbx/jpom)的码云主页,拉取最新完整代码：
