@@ -73,7 +73,7 @@ public class ExtConfigBean {
      *
      * @see ch.qos.logback.core.util.FileSize
      */
-    @Value("${log.autoBackSize:50M}")
+    @Value("${log.autoBackSize:50MB}")
     public String autoBackSize;
 
     /**
