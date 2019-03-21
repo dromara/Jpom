@@ -44,16 +44,19 @@ public class ProjectInfoModel extends BaseModel {
      */
     private String runLibDesc;
     /**
-     * 创建人
+     * 最后修改人
      */
-    private String createUser;
+    private String modifyUser;
 
-    public String getCreateUser() {
-        return createUser;
+    public String getModifyUser() {
+        if (StrUtil.isEmpty(modifyUser)) {
+            return UserModel.SYSTEM_OCCUPY_NAME;
+        }
+        return modifyUser;
     }
 
-    public void setCreateUser(String createUser) {
-        this.createUser = createUser;
+    public void setModifyUser(String modifyUser) {
+        this.modifyUser = modifyUser;
     }
 
     /**
