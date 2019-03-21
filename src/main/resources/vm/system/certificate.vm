@@ -147,6 +147,7 @@
             even: true,
             cols: [[
                 {field: 'id', title: 'id'},
+                {field: 'name', title: '名称'},
                 {field: 'domain', title: '域名'},
                 {field: 'effectiveTime', templet: "#tem_effectiveTime", title: '生效时间'},
                 {field: 'expirationTime', templet: "#tem_expirationTime", title: '到期时间'},
