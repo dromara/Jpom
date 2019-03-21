@@ -6,7 +6,7 @@
 > 甚至在没有专业的服务器管理软件电脑前Jpom都是你们选择
 
 
-###  在这里[Jpom](https://gitee.com/keepbx/jpom) 项目将如上问题统一解决
+###  在这里[Jpom](https://gitee.com/keepbx/Jpom) 项目将如上问题统一解决
 
 ![GitHub](https://img.shields.io/github/license/jiangzeyin/jpom.svg?style=flat)
 ![jdk](https://img.shields.io/badge/JDK-1.8+-green.svg)
@@ -72,7 +72,7 @@
 
 ### 下载安装
 
-1. 下载安装包 [https://gitee.com/keepbx/jpom/attach_files](https://gitee.com/keepbx/jpom/attach_files)
+1. 下载安装包 [https://gitee.com/keepbx/Jpom/attach_files](https://gitee.com/keepbx/Jpom/attach_files)
 2. 上传到服务解压到根目录
 3. 执行目录下[Jpom.sh](/script/Jpom.sh)文件（记得给命令文件添加权限奥[*chmod  755 /jpom/Jpom.sh*]）
     如
@@ -84,19 +84,18 @@
 
 ### 编译安装
 
-访问[Jpom](https://gitee.com/keepbx/jpom)的码云主页,拉取最新完整代码：
+访问[Jpom](https://gitee.com/keepbx/Jpom)的码云主页,拉取最新完整代码：
  
-1. 项目运行日志目录确认,如需修改请查看[/src/main/resources/logback-spring.xml](/src/main/resources/logback-spring.xml)（默认：jpom 运行路径的子目录log）
-2. 进入项目目录执行，然后在目录中查看 target/jpom-x.x-release
-```
-mvn package
-```
+1. 进入项目目录执行，然后在目录中查看 target/jpom-x.x-release
+    ```
+    mvn clean package
+    ```
 3. 打包上传服务器运行
 4. 命令运行
 
 ### 编译运行
 
-访问[Jpom](https://gitee.com/keepbx/jpom)的码云主页,拉取最新完整代码：
+访问[Jpom](https://gitee.com/keepbx/Jpom)的码云主页,拉取最新完整代码：
 
 1. 运行*cn.keepbx.jpom.JpomApplication*
 2. 浏览器访问（如：http://127.0.0.1:2122）
@@ -143,7 +142,7 @@ mvn package
 
 ### 提供bug反馈或建议
 
-- [码云](https://gitee.com/keepbx/jpom/issues)
+- [码云](https://gitee.com/keepbx/Jpom/issues)
 
 ### 贡献代码
   欢迎任何人为Jpom添砖加瓦，贡献代码
