@@ -1,6 +1,7 @@
 package cn.keepbx.jpom.controller.system;
 
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.lang.Validator;
 import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.controller.multipart.MultipartFileBuilder;
@@ -18,7 +19,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.annotation.Resource;
 import java.io.File;
-import java.io.IOException;
 import java.util.List;
 
 /**
@@ -85,8 +85,15 @@ public class CertificateController extends BaseController {
     private CertModel getCertModel() throws Exception {
         String id = getParameter("id");
         String path = getParameter("path");
+        String name = getParameter("name");
         if (StrUtil.isEmpty(id)) {
-            throw new RuntimeException("修改证书失败");
+            throw new RuntimeException("证书id异常");
+        }
+        if (Validator.isChinese(id)) {
+            throw new RuntimeException("证书id不能使用中文");
+        }
+        if (StrUtil.isEmpty(name)) {
+            throw new RuntimeException("请填写证书名称");
         }
         if (!whitelistDirectoryService.checkCertificateDirectory(path)) {
             throw new RuntimeException("请选择正确的项目路径,或者还没有配置白名单");
@@ -113,7 +120,7 @@ public class CertificateController extends BaseController {
         certModel.setWhitePath(path);
         certModel.setCert(certPath);
         certModel.setKey(keyPath);
-        //
+        certModel.setName(name);
         certModel.setDomain(jsonObject.getString("domain"));
         certModel.setExpirationTime(jsonObject.getLongValue("expirationTime"));
         certModel.setEffectiveTime(jsonObject.getLongValue("effectiveTime"));
@@ -126,7 +133,7 @@ public class CertificateController extends BaseController {
      */
     @RequestMapping(value = "/certificate/getCertList", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
-    public String getCertList() throws IOException {
+    public String getCertList() {
         List<CertModel> array = certService.list();
         return JsonMessage.getString(200, "", array);
     }

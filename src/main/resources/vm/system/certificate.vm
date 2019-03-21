@@ -24,10 +24,9 @@
         .certPath {
             padding: 5px !important;
             color: red;
-            width: 300px !important;
+            width: 450px !important;
             float: left;
         }
-
 
         .file_input {
             margin-top: -15px;
@@ -53,6 +52,15 @@
                 <label class="layui-form-label">证书id</label>
                 <div class="layui-input-block">
                     <input type="text" id="id" name="id" placeholder="创建后不能修改" class="layui-input" required
+                           lay-verify="required">
+                </div>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-inline">
+                <label class="layui-form-label">证书名称</label>
+                <div class="layui-input-block">
+                    <input type="text" id="name" name="name" placeholder="" class="layui-input" required
                            lay-verify="required">
                 </div>
             </div>
@@ -258,12 +266,14 @@
             var cert = $("#cert")[0].files[0];
             var key = $("#key")[0].files[0];
             var id = $("#id").val();
+            var name = $("#name").val();
             var path = $("#path").val();
 
             var formData = new FormData();
             formData.append("path", path);
             formData.append("cert", cert);
             formData.append("key", key);
+            formData.append("name", name);
             formData.append("id", id);
             $.ajax({
                 url: data.form.action,

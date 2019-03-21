@@ -219,7 +219,7 @@
                     type: 2,
                     title: '内存',
                     shade: 0.8,
-                    area: ['80%', '50%'],
+                    area: ['80%', '80%'],
                     content: 'internal?tag=' + data.id
                 });
             }
