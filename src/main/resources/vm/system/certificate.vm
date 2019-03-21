@@ -131,13 +131,11 @@
     }
 
     function loadSuccess() {
-
-
         table.render({
             id: 'tab_certificate',
             elem: '#tab_certificate',
             url: '/system/certificate/getCertList',
-            height: 'full-52',
+            // height: 'full-52',
             even: true,
             cols: [[
                 {field: 'id', title: 'id'},
@@ -213,7 +211,9 @@
                         if (200 == data.code) {
                             layer.msg('删除成功！');
                             // 刷新项目列表
-                            table.reload('tab_certificate', {height: 'full-52'});
+                            table.reload('tab_certificate', {
+                                // height: 'full-52'
+                            });
                         } else {
                             layer.msg(data.msg);
                         }
