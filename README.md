@@ -74,17 +74,18 @@
 
 1. 下载安装包 [https://gitee.com/keepbx/jpom/attach_files](https://gitee.com/keepbx/jpom/attach_files)
 2. 上传到服务解压到根目录
-3. 执行目录下[run.sh](/bin/run.sh)文件（记得给命令文件添加权限奥[*chmod  755 /jpom/run.sh*]）
+3. 执行目录下[Jpom.sh](/script/Jpom.sh)文件（记得给命令文件添加权限奥[*chmod  755 /jpom/Jpom.sh*]）
 如
 ```
-/jpom/run.sh start
+/jpom/Jpom.sh start
 ```
-4. 如有需要修改项目端口请查看 run.sh
+4. 如有需要修改项目端口请查看 Jpom.sh
+5. windows 下则执行Jpom.bat 命令即可
 ### 编译安装
 
 访问[Jpom](https://gitee.com/keepbx/jpom)的码云主页,拉取最新完整代码：
  
-1. 项目运行日志目录确认,如需修改请查看[/src/main/resources/logback-spring.xml](/src/main/resources/logback-spring.xml)（默认：/jpom/log/）
+1. 项目运行日志目录确认,如需修改请查看[/src/main/resources/logback-spring.xml](/src/main/resources/logback-spring.xml)（默认：jpom 运行路径的子目录log）
 2. 进入项目目录执行，然后在目录中查看 target/jpom-x.x-release
 ```
 mvn package
@@ -148,7 +149,9 @@ mvn package
   
 ### 交流讨论
 
-  QQ群：[136715345](https://shang.qq.com/wpa/qunwpa?idkey=93ff8d8a37a436b752fe38d32075bb1b32a8e0b3d3ff19d0b541ca840433f561)
+  1. QQ群：[136715345](https://shang.qq.com/wpa/qunwpa?idkey=93ff8d8a37a436b752fe38d32075bb1b32a8e0b3d3ff19d0b541ca840433f561)
+  
+  2. 微信公众号：[CodeGzh](/doc/CodeGzh-QrCode.jpg)
   
   
 
