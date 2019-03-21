@@ -32,6 +32,6 @@ set ARGS=--server.port=2123 --jpom.path=%basePath% --jpom.log=%basePath%log --jp
 set TEMPCLASSPATH=
 for /f "delims=" %%I in ('dir /B %Lib%') do (set TEMPCLASSPATH=!TEMPCLASSPATH!%Lib%%%I;)
 @REM echo 启动成功，关闭窗口不影响运行
-cmd /S /C "javaw %JVM% -classpath %TEMPCLASSPATH%%JAVA_HOME%\lib\tools.jar -Dappliction=%Tag% -Dbasedir=%basePath% %MainClass% %ARGS% >> %Log%"
+cmd /S /C "javaw %JVM% -classpath %TEMPCLASSPATH%"%JAVA_HOME%"\lib\tools.jar -Dappliction=%Tag% -Dbasedir=%basePath% %MainClass% %ARGS% >> %Log%"
 
 :end
