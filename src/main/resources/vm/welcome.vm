@@ -50,6 +50,10 @@
             width: 90%;
             height: 500px;
         }
+
+        #table {
+            width: 100%;
+        }
     </style>
     <script src="//echarts.baidu.com/dist/echarts.js"></script>
 </head>
@@ -62,7 +66,6 @@
         </div>
     </div>
 </form>
-<table class="layui-table" id="tab_monitor" lay-filter="tab_monitor"></table>
 ##<div class="layui-container">
 ##    <div class="terminal"></div>
 ##</div>
@@ -70,6 +73,9 @@
     <div class="echarts" id="echarts"></div>
 </div>
 
+<div id="table" hidden>
+    <table class="layui-table" id="tab_monitor" lay-filter="tab_monitor"></table>
+</div>
 </body>
 <script>
     function loadSuccess() {
@@ -103,7 +109,6 @@
             url: '/processList',
             // height: 'full-52',
             even: true,
-            where: apiWhere,
             cols: [[
                 {field: 'pid', title: '进程id', sort: true},
                 {field: 'USER', title: '所有者',},
@@ -124,6 +129,11 @@
                 statusCode: 200
             },
             done: function (data) {
+                if (data.code == 200) {
+                    if (data.data) {
+                        $("#table").attr("hidden", false);
+                    }
+                }
             }
         });
 

@@ -156,8 +156,8 @@ public class TopManager {
             return null;
         }
         JSONArray array = new JSONArray();
-        for (int i = 0; i < list.size(); i++) {
-            List<String> memList = StrSpliter.splitTrim(list.get(2), " ", true);
+        for (String param : list) {
+            List<String> memList = StrSpliter.splitTrim(param, " ", true);
             String name = memList.get(0);
             if (!name.endsWith(".exe")) {
                 continue;
