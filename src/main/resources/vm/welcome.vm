@@ -62,6 +62,7 @@
         </div>
     </div>
 </form>
+<table class="layui-table" id="tab_monitor" lay-filter="tab_monitor"></table>
 ##<div class="layui-container">
 ##    <div class="terminal"></div>
 ##</div>
@@ -95,6 +96,36 @@
                 }
             });
         }
+
+        table.render({
+            id: 'tab_monitor',
+            elem: '#tab_monitor',
+            url: '/processList',
+            // height: 'full-52',
+            even: true,
+            where: apiWhere,
+            cols: [[
+                {field: 'pid', title: '进程id', sort: true},
+                {field: 'USER', title: '所有者',},
+                {field: 'PR', title: '优先级',},
+                {field: 'NI', title: 'nice值'},
+                {field: 'VIRT', title: '使用虚拟内存'},
+                {field: 'RES', title: '使用物理内存',},
+                {field: 'SHR', title: '共享内存'},
+                {field: 'S', title: '进程状态'},
+                {field: 'CPU', title: '占用CPU',},
+                {field: 'MEM', title: '占用物理内存'},
+                {field: 'TIME', title: '时间总计'},
+                {field: 'COMMAND', title: '进程名称'}
+            ]],
+            loading: true,
+            method: 'POST',
+            response: {
+                statusCode: 200
+            },
+            done: function (data) {
+            }
+        });
 
         function linkSocket(status) {
             if (!ws) {

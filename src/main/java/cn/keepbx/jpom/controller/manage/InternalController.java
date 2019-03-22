@@ -12,6 +12,7 @@ import cn.keepbx.jpom.common.commander.AbstractCommander;
 import cn.keepbx.jpom.model.ProjectInfoModel;
 import cn.keepbx.jpom.service.manage.CommandService;
 import cn.keepbx.jpom.service.manage.ProjectInfoService;
+import cn.keepbx.jpom.socket.top.TopManager;
 import cn.keepbx.jpom.system.ConfigBean;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -54,10 +55,17 @@ public class InternalController extends BaseController {
         if (AbstractCommander.OS_INFO.isLinux()) {
             String command = "top -b -n 1 -p " + pid;
             String internal = AbstractCommander.getInstance().execCommand(command);
-            setAttribute("item", formatTop(internal));
+            JSONArray array = TopManager.formatLinuxTop(internal);
+            if (null != array) {
+                setAttribute("item", array.getJSONObject(0));
+            }
         } else {
-            JSONObject windowsMem = getWindowsMem(pid);
-            setAttribute("item", windowsMem);
+            String command = "tasklist /V /FI \"pid eq " + pid + "\"";
+            String result = AbstractCommander.getInstance().execCommand(command);
+            JSONArray array = TopManager.formatWindowsProcess(result);
+            if (null != array) {
+                setAttribute("item", array.getJSONObject(0));
+            }
         }
         JSONObject beanMem = getBeanMem(tag);
         setAttribute("beanMem", beanMem);
@@ -65,60 +73,6 @@ public class InternalController extends BaseController {
         JSONArray port = getPort(tag);
         setAttribute("port", port);
         return "manage/internal";
-    }
-
-    /**
-     * 获取window下内存
-     *
-     * @param pid 进程id
-     */
-    private JSONObject getWindowsMem(String pid) throws Exception {
-        String command = "tasklist /V /FI \"pid eq " + pid + "\"";
-        String result = AbstractCommander.getInstance().execCommand(command);
-        List<String> list = StrSpliter.splitTrim(result, "\n", true);
-        if (list.size() >= 3) {
-            List<String> memList = StrSpliter.splitTrim(list.get(2), " ", true);
-            JSONObject item = new JSONObject();
-            item.put("pid", pid);
-            item.put("COMMAND", memList.get(0));
-            //使用内存 kb
-            String mem = memList.get(4).replace(",", "");
-            long aLong = Convert.toLong(mem, 0L);
-            item.put("RES", aLong / 1024 + " MB");
-            String status = memList.get(6);
-            if ("RUNNING".equalsIgnoreCase(status)) {
-                item.put("S", "运行");
-            } else if ("SUSPENDED".equalsIgnoreCase(status)) {
-                item.put("S", "睡眠");
-            } else if ("NOT RESPONDING".equalsIgnoreCase(status)) {
-                item.put("S", "无响应");
-            } else {
-                item.put("S", "未知");
-            }
-            item.put("USER", memList.get(7));
-            item.put("TIME", memList.get(8));
-            item.put("PR", -1);
-            item.put("NI", -1);
-            item.put("VIRT", -1);
-            item.put("SHR", -1);
-            item.put("CPU", -1);
-            OperatingSystemMXBean operatingSystemMXBean = (OperatingSystemMXBean) ManagementFactory.getOperatingSystemMXBean();
-            //最近jvmcpu使用率
-            double processCpuLoad = operatingSystemMXBean.getProcessCpuLoad() * 100;
-            if (processCpuLoad <= 0) {
-                processCpuLoad = 0;
-            }
-            item.put("CPU", String.format("%.2f", processCpuLoad) + "%");
-            //服务器总内存
-            long totalMemorySize = operatingSystemMXBean.getTotalPhysicalMemorySize();
-            double v = new BigDecimal(aLong).divide(new BigDecimal(totalMemorySize / 1024), 4, BigDecimal.ROUND_HALF_UP).doubleValue() * 100;
-            item.put("MEM", String.format("%.2f", v) + "%");
-            if (v <= 0) {
-                item.put("MEM", 0);
-            }
-            return item;
-        }
-        return null;
     }
 
     /**
@@ -167,50 +121,6 @@ public class InternalController extends BaseController {
         return null;
     }
 
-    private JSONObject formatTop(String top) {
-        List<String> list = StrSpliter.splitTrim(top, "\n", true);
-        if (list.size() < 5) {
-            return null;
-        }
-        String topName = list.get(list.size() - 2);
-        List<String> nameList = StrSpliter.splitTrim(topName, " ", true);
-        String ram = list.get(list.size() - 1);
-        List<String> ramList = StrSpliter.splitTrim(ram, " ", true);
-        JSONObject item = new JSONObject();
-        for (int i = 0; i < nameList.size(); i++) {
-            String name = nameList.get(i);
-            String value = ramList.get(i);
-            if (i == 0) {
-                item.put("pid", value);
-                continue;
-            }
-            name = name.replaceAll("%", "").replace("+", "");
-            if ("VIRT".equalsIgnoreCase(name) || "RES".equalsIgnoreCase(name) || "SHR".equalsIgnoreCase(name)) {
-                value = Convert.toLong(value) / 1024 + " MB";
-            }
-            if ("�".equals(name)) {
-                name = "S";
-            }
-            if ("S".equalsIgnoreCase(name)) {
-                if ("S".equalsIgnoreCase(value)) {
-                    value = "睡眠";
-                } else if ("R".equalsIgnoreCase(value)) {
-                    value = "运行";
-                } else if ("T".equalsIgnoreCase(value)) {
-                    value = "跟踪/停止";
-                } else if ("Z".equalsIgnoreCase(value)) {
-                    value = "僵尸进程 ";
-                } else if ("D".equalsIgnoreCase(value)) {
-                    value = "不可中断的睡眠状态 ";
-                }
-            }
-            if ("CPU".equalsIgnoreCase(name) || "MEM".equalsIgnoreCase(name)) {
-                value += "%";
-            }
-            item.put(name, value);
-        }
-        return item;
-    }
 
     /**
      * 导出堆栈信息
