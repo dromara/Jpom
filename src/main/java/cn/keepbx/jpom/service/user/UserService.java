@@ -144,16 +144,10 @@ public class UserService extends BaseOperService<UserModel> {
      * 添加用户
      *
      * @param userModel 实体
-     * @return true
      */
-    public boolean addUser(UserModel userModel) {
-        try {
-            saveJson(ConfigBean.USER, userModel.toJson());
-            return true;
-        } catch (Exception e) {
-            DefaultSystemLog.ERROR().error(e.getMessage(), e);
-        }
-        return false;
+    @Override
+    public void addItem(UserModel userModel) {
+        saveJson(ConfigBean.USER, userModel.toJson());
     }
 
     /**

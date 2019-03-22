@@ -153,12 +153,8 @@ public class UserInfoController extends BaseController {
         if (msg != null) {
             return msg;
         }
-
-        boolean b = userService.addUser(userModel);
-        if (b) {
-            return JsonMessage.getString(200, "添加成功");
-        }
-        return JsonMessage.getString(400, "添加失败");
+        userService.addItem(userModel);
+        return JsonMessage.getString(200, "添加成功");
     }
 
     private String parseUser(UserModel userModel, boolean create) {

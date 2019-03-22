@@ -26,14 +26,9 @@ public class CertService extends BaseOperService<CertModel> {
      *
      * @param certModel 证书
      */
-    public boolean addCert(CertModel certModel) {
-        try {
-            saveJson(ConfigBean.CERT, certModel.toJson());
-            return true;
-        } catch (Exception e) {
-            DefaultSystemLog.ERROR().error(e.getMessage(), e);
-        }
-        return false;
+    @Override
+    public void addItem(CertModel certModel) {
+        saveJson(ConfigBean.CERT, certModel.toJson());
     }
 
     /**

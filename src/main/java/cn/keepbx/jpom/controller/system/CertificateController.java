@@ -51,10 +51,7 @@ public class CertificateController extends BaseController {
     public String addCertificate() {
         try {
             CertModel certModel = getCertModel();
-            boolean b = certService.addCert(certModel);
-            if (!b) {
-                return JsonMessage.getString(400, "上传失败");
-            }
+            certService.addItem(certModel);
         } catch (Exception e) {
             return JsonMessage.getString(400, e.getMessage());
         }

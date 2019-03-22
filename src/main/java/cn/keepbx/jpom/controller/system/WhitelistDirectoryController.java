@@ -94,7 +94,7 @@ public class WhitelistDirectoryController extends BaseController {
         return save(list, certificate, nginx);
     }
 
-    public JsonMessage save(List<String> projects, List<String> certificate, List<String> nginx) {
+    private JsonMessage save(List<String> projects, List<String> certificate, List<String> nginx) {
         JSONArray projectArray;
         {
             projectArray = covertToArray(projects);

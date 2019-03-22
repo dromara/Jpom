@@ -164,7 +164,7 @@ public class EditProjectController extends BaseController {
                 }
                 projectInfo.setCreateTime(DateUtil.now());
                 this.modify(projectInfo);
-                projectInfoService.saveProject(projectInfo);
+                projectInfoService.addItem(projectInfo);
                 return JsonMessage.getString(200, "新增成功！");
             }
             if (!userName.isProject(projectInfo.getId())) {
