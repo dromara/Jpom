@@ -163,18 +163,14 @@ public class EditProjectController extends BaseController {
                     return JsonMessage.getString(400, "管理员才能创建项目!");
                 }
                 projectInfo.setCreateTime(DateUtil.now());
-                // 隐藏系统管理员登录名
-                if (UserModel.SYSTEM_ADMIN.equals(userName.getParent())) {
-                    projectInfo.setCreateUser(UserModel.SYSTEM_OCCUPY_NAME);
-                } else {
-                    projectInfo.setCreateUser(userName.getId());
-                }
-                projectInfoService.saveProject(projectInfo);
+                this.modify(projectInfo);
+                projectInfoService.addItem(projectInfo);
                 return JsonMessage.getString(200, "新增成功！");
             }
             if (!userName.isProject(projectInfo.getId())) {
                 return JsonMessage.getString(400, "你没有对应操作权限操作!");
             }
+            this.modify(exits);
             exits.setLog(projectInfo.getLog());
             exits.setName(projectInfo.getName());
             exits.setGroup(projectInfo.getGroup());
@@ -190,6 +186,16 @@ public class EditProjectController extends BaseController {
         } catch (Exception e) {
             DefaultSystemLog.ERROR().error(e.getMessage(), e);
             return JsonMessage.getString(500, e.getMessage());
+        }
+    }
+
+    private void modify(ProjectInfoModel exits) {
+        UserModel userName = getUser();
+        // 隐藏系统管理员登录名
+        if (UserModel.SYSTEM_ADMIN.equals(userName.getParent())) {
+            exits.setModifyUser(UserModel.SYSTEM_OCCUPY_NAME);
+        } else {
+            exits.setModifyUser(userName.getId());
         }
     }
 

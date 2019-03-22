@@ -28,7 +28,7 @@ public class UserModel extends BaseModel {
      */
     public static int USER_PWD_LEN = 6;
 
-    public static int USER_NAME_MIN_LEN = 4;
+    public static int USER_NAME_MIN_LEN = 3;
 
     /**
      * 昵称

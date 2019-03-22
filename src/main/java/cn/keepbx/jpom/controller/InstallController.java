@@ -2,6 +2,7 @@ package cn.keepbx.jpom.controller;
 
 import cn.hutool.core.lang.Validator;
 import cn.hutool.core.util.StrUtil;
+import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.spring.SpringUtil;
 import cn.keepbx.jpom.common.BaseController;
@@ -58,38 +59,44 @@ public class InstallController extends BaseController {
         if (StrUtil.isEmpty(userName)) {
             return JsonMessage.getString(400, "登录名不能为空");
         }
-        if (Validator.isChinese(userName)) {
-            return JsonMessage.getString(400, "登录名不能包含汉字");
+        if (userName.length() < UserModel.USER_NAME_MIN_LEN) {
+            return JsonMessage.getString(400, "登录名长度必须不小于" + UserModel.USER_NAME_MIN_LEN);
+        }
+        if (Validator.isChinese(userName) || !checkPathSafe(userName)) {
+            return JsonMessage.getString(400, "登录名不能包含汉字并且不能包含特殊字符");
         }
         if (StrUtil.isEmpty(userPwd) || userPwd.length() < UserModel.USER_PWD_LEN) {
             return JsonMessage.getString(400, "密码长度为6-12位");
         }
-        if (!checkPathSafe(userName)) {
-            return JsonMessage.getString(400, "登录名不能包含特殊字符");
+        if (UserModel.SYSTEM_OCCUPY_NAME.equals(userName) || UserModel.SYSTEM_ADMIN.equals(userName)) {
+            return JsonMessage.getString(401, "当前登录名已经被系统占用");
         }
+
         // 判断密码级别
         if (CheckPassword.checkPassword(userPwd) != 2) {
             return JsonMessage.getString(401, "系统管理员密码强度太低,请使用复杂的密码");
         }
 
         UserModel userModel = new UserModel();
-        userModel.setName("超级管理员");
+        userModel.setName(UserModel.SYSTEM_OCCUPY_NAME);
         userModel.setId(userName);
         userModel.setPassword(userPwd);
         userModel.setParent(UserModel.SYSTEM_ADMIN);
         userModel.setManage(true);
-        boolean b = userService.addUser(userModel);
-        if (b) {
-            // 白名单
-            WhitelistDirectoryController whitelistDirectoryController = SpringUtil.getBean(WhitelistDirectoryController.class);
-            JsonMessage jsonMessage = whitelistDirectoryController.save(whitelistDirectory, null, null);
-            if (jsonMessage.getCode() != 200) {
-                return jsonMessage.toString();
-            }
-            // 自动登录
-            setSessionAttribute(LoginInterceptor.SESSION_NAME, userModel);
-            return JsonMessage.getString(200, "初始化成功");
+        try {
+            userService.addItem(userModel);
+        } catch (Exception e) {
+            DefaultSystemLog.ERROR().error(e.getMessage(), e);
+            return JsonMessage.getString(400, "初始化失败");
         }
-        return JsonMessage.getString(400, "初始化失败");
+        // 白名单
+        WhitelistDirectoryController whitelistDirectoryController = SpringUtil.getBean(WhitelistDirectoryController.class);
+        JsonMessage jsonMessage = whitelistDirectoryController.save(whitelistDirectory, null, null);
+        if (jsonMessage.getCode() != 200) {
+            return jsonMessage.toString();
+        }
+        // 自动登录
+        setSessionAttribute(LoginInterceptor.SESSION_NAME, userModel);
+        return JsonMessage.getString(200, "初始化成功");
     }
 }

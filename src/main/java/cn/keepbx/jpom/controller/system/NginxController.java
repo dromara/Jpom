@@ -65,7 +65,7 @@ public class NginxController extends BaseController {
         name = pathSafe(name);
         if (StrUtil.isNotEmpty(path) && whitelistDirectoryService.checkNgxDirectory(path)) {
             File file = FileUtil.file(path, name);
-            JSONObject jsonObject = nginxService.resolveNgx(file.getPath());
+            JSONObject jsonObject = nginxService.getItem(file.getPath());
             String string = FileUtil.readUtf8String(file);
             jsonObject.put("context", string);
 //            String name = file.getName();

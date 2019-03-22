@@ -93,10 +93,9 @@ public class NginxService extends BaseOperService {
     }
 
     @Override
-    public Object getItem(String id) {
-        return null;
-    }
+    public void addItem(Object o) {
 
+    }
 
     /**
      * 获取域名
@@ -126,7 +125,8 @@ public class NginxService extends BaseOperService {
      *
      * @param path nginx路径
      */
-    public JSONObject resolveNgx(String path) {
+    @Override
+    public JSONObject getItem(String path) {
         JSONObject jsonObject = new JSONObject();
         try {
             NgxConfig conf = NgxConfig.read(path);

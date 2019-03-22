@@ -43,7 +43,8 @@ public class ProjectInfoService extends BaseOperService<ProjectInfoModel> {
      *
      * @param projectInfo 项目
      */
-    public void saveProject(ProjectInfoModel projectInfo) throws Exception {
+    @Override
+    public void addItem(ProjectInfoModel projectInfo) {
         // 保存
         saveJson(ConfigBean.PROJECT, projectInfo.toJson());
     }
@@ -58,7 +59,7 @@ public class ProjectInfoService extends BaseOperService<ProjectInfoModel> {
         // 添加回收记录
         ProjectRecoverModel projectRecoverModel = new ProjectRecoverModel(projectInfo);
         projectRecoverModel.setDelUser(userId);
-        projectRecoverService.addProject(projectRecoverModel);
+        projectRecoverService.addItem(projectRecoverModel);
     }
 
     /**

@@ -6,3 +6,8 @@ user:
   maxCount: 10
   # 用户连续登录失败次数，超过此数将不再被允许登录，零是不限制
   alwaysLoginError: 5
+log:
+  # 自动备份控制台日志，防止日志文件过大，目前暂只支持linux 不停服备份
+  autoBackConsoleCron: 0 0/10 * * * ?
+  # 当文件多大时自动备份
+  autoBackSize: 50MB

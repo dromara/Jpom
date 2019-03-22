@@ -1,6 +1,7 @@
 package cn.keepbx.jpom.system.init;
 
 import ch.qos.logback.core.util.FileSize;
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.cron.CronUtil;
 import cn.hutool.cron.Scheduler;
 import cn.jiangzeyin.common.DefaultSystemLog;
@@ -10,6 +11,7 @@ import cn.jiangzeyin.common.spring.SpringUtil;
 import cn.keepbx.jpom.common.commander.AbstractCommander;
 import cn.keepbx.jpom.model.ProjectInfoModel;
 import cn.keepbx.jpom.service.manage.ProjectInfoService;
+import cn.keepbx.jpom.system.ExtConfigBean;
 
 import java.io.File;
 import java.util.List;
@@ -26,7 +28,7 @@ public class AutoBackLog {
     private static final String ID = "auto_back_log";
     private static ProjectInfoService projectInfoService;
 
-    private static final FileSize MAX_SIZE = FileSize.valueOf("50MB");
+    private static FileSize MAX_SIZE;
 
     @PreLoadMethod
     private static void startAutoBackLog() {
@@ -34,8 +36,15 @@ public class AutoBackLog {
         if (projectInfoService == null) {
             projectInfoService = SpringUtil.getBean(ProjectInfoService.class);
         }
+        // 获取cron 表达式
+        String cron = StrUtil.emptyToDefault(ExtConfigBean.getInstance().autoBackConsoleCron, "");
+        if ("none".equalsIgnoreCase(cron.trim())) {
+            return;
+        }
+        String size = StrUtil.emptyToDefault(ExtConfigBean.getInstance().autoBackSize, "50MB");
+        MAX_SIZE = FileSize.valueOf(size.trim());
         //
-        CronUtil.schedule(ID, "0 0/10 * * * ?", () -> {
+        CronUtil.schedule(ID, cron, () -> {
             try {
                 List<ProjectInfoModel> list = projectInfoService.list();
                 if (list == null) {

@@ -18,6 +18,8 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
+ * 文件跟随器
+ *
  * @author jiangzeyin
  * @date 2019/3/16
  */

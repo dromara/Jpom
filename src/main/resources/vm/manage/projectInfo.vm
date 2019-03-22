@@ -155,7 +155,7 @@
                     field: 'createTime', title: '创建时间', sort: true, width: '13%'
                 },
                 {
-                    field: 'createUser', title: '创建人', sort: true, width: '13%'
+                    field: 'modifyUser', title: '最后修改人', sort: true, width: '13%'
                 },
                 {field: 'modifyTime', title: '修改时间', sort: true, width: '13%'},
                 {title: '运行状态', templet: "#status_templ", sort: true, width: '10%'},

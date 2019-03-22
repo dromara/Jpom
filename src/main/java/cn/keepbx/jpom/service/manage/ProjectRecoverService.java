@@ -37,7 +37,8 @@ public class ProjectRecoverService extends BaseOperService<ProjectRecoverModel> 
      *
      * @param projectInfo 项目
      */
-    public void addProject(ProjectRecoverModel projectInfo) throws Exception {
+    @Override
+    public void addItem(ProjectRecoverModel projectInfo) {
         projectInfo.setDelTime(DateUtil.now());
         // 保存
         saveJson(ConfigBean.PROJECT_RECOVER, projectInfo.toJson());

@@ -31,6 +31,13 @@ public abstract class BaseOperService<T> extends BaseDataService {
      */
     public abstract T getItem(String id) throws IOException;
 
+    /**
+     * 添加实体
+     *
+     * @param t 实体
+     */
+    public abstract void addItem(T t);
+
     protected JSONArray formatToArray(JSONObject jsonObject) {
         if (jsonObject == null) {
             return new JSONArray();
