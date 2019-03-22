@@ -6,6 +6,7 @@ import cn.keepbx.jpom.common.BaseController;
 import cn.keepbx.jpom.common.commander.AbstractCommander;
 import cn.keepbx.jpom.model.UserModel;
 import cn.keepbx.jpom.socket.top.TopManager;
+import com.alibaba.fastjson.JSONArray;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -35,13 +36,31 @@ public class WelcomeController extends BaseController {
         try {
             if (AbstractCommander.OS_INFO.isLinux()) {
                 String s = AbstractCommander.getInstance().execCommand("top -b -n 1");
-                topInfo = TopManager.getTopInfo(s);
+                topInfo = TopManager.getTopMonitor(s);
             } else {
-                topInfo = TopManager.getWindowsTop();
+                topInfo = TopManager.getWindowsMonitor();
             }
         } catch (Exception e) {
             DefaultSystemLog.ERROR().error(e.getMessage(), e);
         }
         return JsonMessage.getString(200, "", topInfo);
+    }
+
+    @RequestMapping(value = "processList", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @ResponseBody
+    public String getProcessList() {
+        JSONArray array = null;
+        try {
+            if (AbstractCommander.OS_INFO.isLinux()) {
+                String s = AbstractCommander.getInstance().execCommand("top | head -17");
+                array = TopManager.formatLinuxTop(s);
+            } else {
+                String s = AbstractCommander.getInstance().execSystemCommand("tasklist /V | findstr java");
+                array = TopManager.formatWindowsProcess(s);
+            }
+        } catch (Exception e) {
+            DefaultSystemLog.ERROR().error(e.getMessage(), e);
+        }
+        return JsonMessage.getString(200, "", array);
     }
 }

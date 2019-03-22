@@ -1,5 +1,7 @@
 package cn.keepbx.jpom.socket.top;
 
+import cn.hutool.core.convert.Convert;
+import cn.hutool.core.text.StrSpliter;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.cron.CronUtil;
 import cn.hutool.cron.Scheduler;
@@ -15,8 +17,10 @@ import com.sun.management.OperatingSystemMXBean;
 import javax.websocket.Session;
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
+import java.math.BigDecimal;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -68,9 +72,9 @@ public class TopManager {
                 String topInfo;
                 if (AbstractCommander.OS_INFO.isLinux()) {
                     String result = AbstractCommander.getInstance().execCommand("top -b -n 1");
-                    topInfo = getTopInfo(result);
+                    topInfo = getTopMonitor(result);
                 } else {
-                    topInfo = getWindowsTop();
+                    topInfo = getWindowsMonitor();
                 }
                 send(topInfo);
             } catch (Exception e) {
@@ -84,7 +88,12 @@ public class TopManager {
         watch = true;
     }
 
-    public static String getWindowsTop() {
+    /**
+     * 获取windows 监控
+     *
+     * @return 返回cpu占比和内存占比
+     */
+    public static String getWindowsMonitor() {
 //                https://docs.oracle.com/javase/7/docs/jre/api/management/extension/com/sun/management/OperatingSystemMXBean.html
         OperatingSystemMXBean operatingSystemMXBean = (OperatingSystemMXBean) ManagementFactory.getOperatingSystemMXBean();
         long totalPhysicalMemorySize = operatingSystemMXBean.getTotalPhysicalMemorySize();
@@ -97,29 +106,23 @@ public class TopManager {
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("top", true);
         JSONArray memory = new JSONArray();
-        JSONObject mem1 = new JSONObject();
-        mem1.put("name", "占用内存");
-        mem1.put("value", totalPhysicalMemorySize - freePhysicalMemorySize);
-        JSONObject mem2 = new JSONObject();
-        mem2.put("name", "空闲内存");
-        mem2.put("value", freePhysicalMemorySize);
-        memory.add(mem1);
-        memory.add(mem2);
-        JSONObject cpu1 = new JSONObject();
-        cpu1.put("name", "占用cpu");
-        cpu1.put("value", systemCpuLoad);
-        JSONObject cpu2 = new JSONObject();
-        cpu2.put("name", "空闲cpu");
-        cpu2.put("value", 1 - systemCpuLoad);
+        memory.add(putObject("占用内存", totalPhysicalMemorySize - freePhysicalMemorySize));
+        memory.add(putObject("空闲内存", freePhysicalMemorySize));
         JSONArray cpus = new JSONArray();
-        cpus.add(cpu1);
-        cpus.add(cpu2);
+        cpus.add(putObject("占用cpu", systemCpuLoad));
+        cpus.add(putObject("空闲cpu", 1 - systemCpuLoad));
         jsonObject.put("memory", memory);
         jsonObject.put("cpu", cpus);
         return jsonObject.toJSONString();
     }
 
-    public static String getTopInfo(String content) {
+    /**
+     * linux 监控
+     *
+     * @param content top信息
+     * @return 返回cpu占比和内存占比
+     */
+    public static String getTopMonitor(String content) {
         if (StrUtil.isEmpty(content)) {
             return "top查询失败";
         }
@@ -128,16 +131,136 @@ public class TopManager {
         JSONObject jsonObject = new JSONObject();
         if (length >= 2) {
             String cpus = split[2];
-            JSONArray cpu = getCpu(cpus);
+            //cpu占比
+            JSONArray cpu = getLinuxCpu(cpus);
             jsonObject.put("cpu", cpu);
         }
         if (length >= 3) {
             String mem = split[3];
-            JSONArray memory = getMemory(mem);
+            //内存占比
+            JSONArray memory = getLinuxMemory(mem);
             jsonObject.put("memory", memory);
         }
         jsonObject.put("top", true);
         return jsonObject.toJSONString();
+    }
+
+    /**
+     * 将windows的tasklist转为集合
+     *
+     * @param result 进程信息
+     */
+    public static JSONArray formatWindowsProcess(String result) {
+        List<String> list = StrSpliter.splitTrim(result, "\n", true);
+        if (list.size() < 3) {
+            return null;
+        }
+        JSONArray array = new JSONArray();
+        for (int i = 0; i < list.size(); i++) {
+            List<String> memList = StrSpliter.splitTrim(list.get(2), " ", true);
+            String name = memList.get(0);
+            if (!name.endsWith(".exe")) {
+                continue;
+            }
+            JSONObject item = new JSONObject();
+            item.put("pid", memList.get(1));
+            item.put("COMMAND", name);
+            //使用内存 kb
+            String mem = memList.get(4).replace(",", "");
+            long aLong = Convert.toLong(mem, 0L);
+            item.put("RES", aLong / 1024 + " MB");
+            String status = memList.get(6);
+            if ("RUNNING".equalsIgnoreCase(status)) {
+                item.put("S", "运行");
+            } else if ("SUSPENDED".equalsIgnoreCase(status)) {
+                item.put("S", "睡眠");
+            } else if ("NOT RESPONDING".equalsIgnoreCase(status)) {
+                item.put("S", "无响应");
+            } else {
+                item.put("S", "未知");
+            }
+            item.put("USER", memList.get(7));
+            item.put("TIME", memList.get(8));
+            item.put("PR", -1);
+            item.put("NI", -1);
+            item.put("VIRT", -1);
+            item.put("SHR", -1);
+            OperatingSystemMXBean operatingSystemMXBean = (OperatingSystemMXBean) ManagementFactory.getOperatingSystemMXBean();
+            //最近jvmcpu使用率
+            double processCpuLoad = operatingSystemMXBean.getProcessCpuLoad() * 100;
+            if (processCpuLoad <= 0) {
+                processCpuLoad = 0;
+            }
+            item.put("CPU", String.format("%.2f", processCpuLoad) + "%");
+            //服务器总内存
+            long totalMemorySize = operatingSystemMXBean.getTotalPhysicalMemorySize();
+            double v = new BigDecimal(aLong).divide(new BigDecimal(totalMemorySize / 1024), 4, BigDecimal.ROUND_HALF_UP).doubleValue() * 100;
+            item.put("MEM", String.format("%.2f", v) + "%");
+            if (v <= 0) {
+                item.put("MEM", 0);
+            }
+            array.add(item);
+        }
+        return array;
+    }
+
+
+    /**
+     * 将linux的top信息转为集合
+     *
+     * @param top top
+     */
+    public static JSONArray formatLinuxTop(String top) {
+        List<String> list = StrSpliter.splitTrim(top, "\n", true);
+        if (list.size() < 5) {
+            return null;
+        }
+        //top信息名称栏
+        String topName = list.get(5);
+        List<String> nameList = StrSpliter.splitTrim(topName, " ", true);
+        JSONArray array = new JSONArray();
+        for (int j = 6; j < list.size(); j++) {
+            String ram = list.get(j);
+            List<String> ramList = StrSpliter.splitTrim(ram, " ", true);
+            if (ramList.size() < nameList.size()) {
+                continue;
+            }
+            JSONObject item = new JSONObject();
+            for (int i = 0; i < nameList.size(); i++) {
+                String name = nameList.get(i);
+                String value = ramList.get(i);
+                if (i == 0) {
+                    item.put("pid", value);
+                    continue;
+                }
+                name = name.replaceAll("%", "").replace("+", "");
+                if ("VIRT".equalsIgnoreCase(name) || "RES".equalsIgnoreCase(name) || "SHR".equalsIgnoreCase(name)) {
+                    value = Convert.toLong(value) / 1024 + " MB";
+                }
+                if ("�".equals(name)) {
+                    name = "S";
+                }
+                if ("S".equalsIgnoreCase(name)) {
+                    if ("S".equalsIgnoreCase(value)) {
+                        value = "睡眠";
+                    } else if ("R".equalsIgnoreCase(value)) {
+                        value = "运行";
+                    } else if ("T".equalsIgnoreCase(value)) {
+                        value = "跟踪/停止";
+                    } else if ("Z".equalsIgnoreCase(value)) {
+                        value = "僵尸进程 ";
+                    } else if ("D".equalsIgnoreCase(value)) {
+                        value = "不可中断的睡眠状态 ";
+                    }
+                }
+                if ("CPU".equalsIgnoreCase(name) || "MEM".equalsIgnoreCase(name)) {
+                    value += "%";
+                }
+                item.put(name, value);
+            }
+            array.add(item);
+        }
+        return array;
     }
 
     /**
@@ -146,7 +269,7 @@ public class TopManager {
      * @param info 内存信息
      * @return 内存信息
      */
-    private static JSONArray getMemory(String info) {
+    private static JSONArray getLinuxMemory(String info) {
         if (StrUtil.isEmpty(info)) {
             return null;
         }
@@ -178,7 +301,7 @@ public class TopManager {
      * @param info cpu信息
      * @return cpu信息
      */
-    private static JSONArray getCpu(String info) {
+    private static JSONArray getLinuxCpu(String info) {
         if (StrUtil.isEmpty(info)) {
             return null;
         }
