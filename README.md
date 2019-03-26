@@ -84,9 +84,8 @@
 
 ### 编译安装
 
-访问[Jpom](https://gitee.com/keepbx/Jpom)的码云主页,拉取最新完整代码：
- 
-1. 进入项目目录执行，然后在目录中查看 target/jpom-x.x-release
+1. 访问[Jpom](https://gitee.com/keepbx/Jpom)的码云主页,拉取最新完整代码：
+2. 进入项目目录执行，然后在目录中查看 target/jpom-x.x-release
     ```
     mvn clean package
     ```
@@ -95,10 +94,9 @@
 
 ### 编译运行
 
-访问[Jpom](https://gitee.com/keepbx/Jpom)的码云主页,拉取最新完整代码：
-
-1. 运行*cn.keepbx.jpom.JpomApplication*
-2. 浏览器访问（如：http://127.0.0.1:2122）
+1. 访问[Jpom](https://gitee.com/keepbx/Jpom)的码云主页,拉取最新完整代码：
+2. 运行*cn.keepbx.jpom.JpomApplication*
+3. 浏览器访问（如：http://127.0.0.1:2122）
 
 ### Jpom 的参数配置
 
@@ -121,6 +119,10 @@
 ### 常见问题
 
 [常见问题>>](/FQA.md)
+
+[启动失败问题>>](https://gitee.com/keepbx/Jpom/wikis/pages?sort_id=1395625&doc_id=264493)
+
+[安装说明>>](https://gitee.com/keepbx/Jpom/wikis/pages?sort_id=1395348&doc_id=264493)
 
 ### 开发计划
 
