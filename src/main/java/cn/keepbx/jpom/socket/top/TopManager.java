@@ -92,14 +92,18 @@ public class TopManager {
         watch = true;
     }
 
+    /**
+     * 发送首页进程列表信息
+     */
     private static void sendProcessList() {
         ExecutorService executorService = ThreadPoolService.newCachedThreadPool(TopManager.class);
         executorService.execute(() -> {
             JSONArray array;
             try {
                 if (AbstractCommander.OS_INFO.isLinux()) {
-                    String head = AbstractCommander.getInstance().execSystemCommand("top -b -n 1 | head -7");
-                    String s = AbstractCommander.getInstance().execSystemCommand("top -b -n 1 | grep java");
+                    AbstractCommander instance = AbstractCommander.getInstance();
+                    String head = instance.execSystemCommand("top -b -n 1 | head -7");
+                    String s = instance.execSystemCommand("top -b -n 1 | grep java");
                     array = formatLinuxTop(head + s);
                 } else {
                     String s = AbstractCommander.getInstance().execSystemCommand("tasklist /V | findstr java");
@@ -143,6 +147,11 @@ public class TopManager {
         return jsonObject.toJSONString();
     }
 
+    /**
+     * 磁盘占用
+     *
+     * @return 磁盘占用
+     */
     private static JSONArray getHardDisk() {
         File[] files = File.listRoots();
         long freeSpace = 0;

@@ -52,8 +52,9 @@ public class WelcomeController extends BaseController {
         JSONArray array = null;
         try {
             if (AbstractCommander.OS_INFO.isLinux()) {
-                String head = AbstractCommander.getInstance().execSystemCommand("top -b -n 1 | head -7");
-                String s = AbstractCommander.getInstance().execSystemCommand("top -b -n 1 | grep java");
+                AbstractCommander instance = AbstractCommander.getInstance();
+                String head = instance.execSystemCommand("top -b -n 1 | head -7");
+                String s = instance.execSystemCommand("top -b -n 1 | grep java");
                 array = TopManager.formatLinuxTop(head + s);
             } else {
                 String s = AbstractCommander.getInstance().execSystemCommand("tasklist /V | findstr java");
