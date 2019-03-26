@@ -70,7 +70,7 @@
 
 ![查看项目占用的端口情况](/doc/images/port.png)
 
-### 下载安装
+### 下载安装 -> [操作说明](https://gitee.com/keepbx/Jpom/wikis/pages?sort_id=1395348&doc_id=264493)
 
 1. 下载安装包 [https://gitee.com/keepbx/Jpom/attach_files](https://gitee.com/keepbx/Jpom/attach_files)
 2. 上传到服务解压到根目录
@@ -82,7 +82,7 @@
 4. 如有需要修改项目端口请查看 Jpom.sh
 5. windows 下则执行Jpom.bat 命令即可
 
-### 编译安装
+### 编译安装 -> [操作说明](https://gitee.com/keepbx/Jpom/wikis/pages?sort_id=1395348&doc_id=264493)
 
 访问[Jpom](https://gitee.com/keepbx/Jpom)的码云主页,拉取最新完整代码：
  
@@ -93,7 +93,7 @@
 3. 打包上传服务器运行
 4. 命令运行
 
-### 编译运行
+### 编译运行 -> [操作说明](https://gitee.com/keepbx/Jpom/wikis/pages?sort_id=1395348&doc_id=264493)
 
 访问[Jpom](https://gitee.com/keepbx/Jpom)的码云主页,拉取最新完整代码：
 
@@ -121,6 +121,8 @@
 ### 常见问题
 
 [常见问题>>](/FQA.md)
+
+[启动失败问题>>](https://gitee.com/keepbx/Jpom/wikis/pages?sort_id=1395625&doc_id=264493)
 
 ### 开发计划
 
