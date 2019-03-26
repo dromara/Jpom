@@ -253,7 +253,11 @@ public class TopManager {
                 }
                 name = name.replaceAll("%", "").replace("+", "");
                 if ("VIRT".equalsIgnoreCase(name) || "RES".equalsIgnoreCase(name) || "SHR".equalsIgnoreCase(name)) {
-                    value = Convert.toLong(value) / 1024 + " MB";
+                    if (value.endsWith("g")) {
+                        value = String.format("%.2f MB", Convert.toDouble(value.replace("g", "")) * 1024);
+                    } else {
+                        value = Convert.toLong(value) / 1024 + " MB";
+                    }
                 }
                 if ("�".equals(name)) {
                     name = "S";
