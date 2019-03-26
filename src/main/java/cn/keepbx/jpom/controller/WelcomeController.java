@@ -52,7 +52,7 @@ public class WelcomeController extends BaseController {
         JSONArray array = null;
         try {
             if (AbstractCommander.OS_INFO.isLinux()) {
-                String s = AbstractCommander.getInstance().execCommand("top | head -17");
+                String s = AbstractCommander.getInstance().execSystemCommand("top -b -n 1| head -17");
                 array = TopManager.formatLinuxTop(s);
             } else {
                 String s = AbstractCommander.getInstance().execSystemCommand("tasklist /V | findstr java");
