@@ -15,6 +15,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.sun.management.OperatingSystemMXBean;
 
 import javax.websocket.Session;
+import java.io.File;
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.math.BigDecimal;
@@ -113,7 +114,23 @@ public class TopManager {
         cpus.add(putObject("空闲cpu", 1 - systemCpuLoad));
         jsonObject.put("memory", memory);
         jsonObject.put("cpu", cpus);
+        jsonObject.put("disk", getHardDisk());
         return jsonObject.toJSONString();
+    }
+
+    private static JSONArray getHardDisk() {
+        File[] files = File.listRoots();
+        long freeSpace = 0;
+        long useAbleSpace = 0;
+        for (File file : files) {
+            long free = file.getFreeSpace();
+            freeSpace += free;
+            useAbleSpace += file.getTotalSpace() - free;
+        }
+        JSONArray array = new JSONArray();
+        array.add(putObject("已使用磁盘", useAbleSpace));
+        array.add(putObject("空闲磁盘", freeSpace));
+        return array;
     }
 
     /**
@@ -142,6 +159,7 @@ public class TopManager {
             jsonObject.put("memory", memory);
         }
         jsonObject.put("top", true);
+        jsonObject.put("disk", getHardDisk());
         return jsonObject.toJSONString();
     }
 
