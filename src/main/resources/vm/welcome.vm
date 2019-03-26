@@ -178,8 +178,8 @@
                 info = {
                     name: 'cpu',
                     type: 'pie',
-                    center: ['25%', '45%'],
-                    radius: ['20%', '40%'],
+                    center: ['18%', '50%'],
+                    radius: ['40%', '70%'],
                     data: cpu
                 }
                 value.push(info);
@@ -189,9 +189,20 @@
                 info = {
                     name: '内存',
                     type: 'pie',
-                    center: ['65%', '45%'],
-                    radius: ['20%', '40%'],
+                    center: ['48%', '50%'],
+                    radius: ['40%', '70%'],
                     data: memory
+                }
+                value.push(info);
+            }
+            var disk = top.disk;
+            if (disk) {
+                info = {
+                    name: '磁盘',
+                    type: 'pie',
+                    center: ['78%', '50%'],
+                    radius: ['40%', '70%'],
+                    data: disk
                 }
                 value.push(info);
             }
