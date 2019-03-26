@@ -94,7 +94,7 @@ public class TopManager {
      * @return 返回cpu占比和内存占比
      */
     public static String getWindowsMonitor() {
-//                https://docs.oracle.com/javase/7/docs/jre/api/management/extension/com/sun/management/OperatingSystemMXBean.html
+        //https://docs.oracle.com/javase/7/docs/jre/api/management/extension/com/sun/management/OperatingSystemMXBean.html
         OperatingSystemMXBean operatingSystemMXBean = (OperatingSystemMXBean) ManagementFactory.getOperatingSystemMXBean();
         long totalPhysicalMemorySize = operatingSystemMXBean.getTotalPhysicalMemorySize();
         long freePhysicalMemorySize = operatingSystemMXBean.getFreePhysicalMemorySize();
@@ -156,8 +156,8 @@ public class TopManager {
             return null;
         }
         JSONArray array = new JSONArray();
-        for (int i = 0; i < list.size(); i++) {
-            List<String> memList = StrSpliter.splitTrim(list.get(2), " ", true);
+        for (String param : list) {
+            List<String> memList = StrSpliter.splitTrim(param, " ", true);
             String name = memList.get(0);
             if (!name.endsWith(".exe")) {
                 continue;
@@ -183,8 +183,8 @@ public class TopManager {
             item.put("TIME", memList.get(8));
             item.put("PR", -1);
             item.put("NI", -1);
-            item.put("VIRT", -1);
-            item.put("SHR", -1);
+            item.put("VIRT", "0 MB");
+            item.put("SHR", "0 MB");
             OperatingSystemMXBean operatingSystemMXBean = (OperatingSystemMXBean) ManagementFactory.getOperatingSystemMXBean();
             //最近jvmcpu使用率
             double processCpuLoad = operatingSystemMXBean.getProcessCpuLoad() * 100;
