@@ -22,9 +22,6 @@ spring:
     suffix: .vm
 banner:
   msg: Jpom 管理系统启动中
-#jpom 项目运行路径
-jpom:
-  log: ${jpom.path}log/
 # 静态资源配置
 interceptor:
   resourceHandler: /static/**
