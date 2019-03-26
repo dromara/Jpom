@@ -1,8 +1,4 @@
 import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.util.StrUtil;
-import com.sun.management.OperatingSystemMXBean;
-import com.sun.tools.attach.VirtualMachine;
-import com.sun.tools.attach.VirtualMachineDescriptor;
 import org.apache.commons.codec.binary.Base64;
 import sun.misc.BASE64Decoder;
 import sun.misc.BASE64Encoder;
@@ -11,7 +7,6 @@ import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
-import java.lang.management.ManagementFactory;
 import java.security.KeyFactory;
 import java.security.PrivateKey;
 import java.security.Signature;
@@ -19,20 +14,17 @@ import java.security.cert.Certificate;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.security.spec.PKCS8EncodedKeySpec;
-import java.util.List;
-import java.util.Properties;
 
 public class DTest {
 
 
     public static void main(String[] args) throws Exception {
-        List<VirtualMachineDescriptor> descriptorList = VirtualMachine.list();
-        for (VirtualMachineDescriptor virtualMachineDescriptor : descriptorList) {
-            // 根据虚拟机描述查询启动属性，如果属性-Dapplication匹配，说明项目已经启动，并返回进程id
-            VirtualMachine virtualMachine = VirtualMachine.attach(virtualMachineDescriptor);
-            Properties properties = virtualMachine.getAgentProperties();
-            String arg = properties.getProperty("sun.jvm.args", "");
-            System.out.println(properties.toString());
+        File[] files = File.listRoots();
+        for (File file : files) {
+            System.out.println(file.getPath());
+            System.out.println(FileUtil.readableFileSize(file.getFreeSpace()));
+            System.out.println(FileUtil.readableFileSize(file.getTotalSpace()));
+            System.out.println("---------------------");
         }
     }
 

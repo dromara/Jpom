@@ -178,8 +178,8 @@
                 info = {
                     name: 'cpu',
                     type: 'pie',
-                    center: ['18%', '45%'],
-                    radius: ['50%', '80%'],
+                    center: ['18%', '50%'],
+                    radius: ['40%', '70%'],
                     data: cpu
                 }
                 value.push(info);
@@ -189,8 +189,8 @@
                 info = {
                     name: '内存',
                     type: 'pie',
-                    center: ['48%', '45%'],
-                    radius: ['50%', '80%'],
+                    center: ['48%', '50%'],
+                    radius: ['40%', '70%'],
                     data: memory
                 }
                 value.push(info);
@@ -200,8 +200,8 @@
                 info = {
                     name: '磁盘',
                     type: 'pie',
-                    center: ['78%', '45%'],
-                    radius: ['50%', '80%'],
+                    center: ['78%', '50%'],
+                    radius: ['40%', '70%'],
                     data: disk
                 }
                 value.push(info);
