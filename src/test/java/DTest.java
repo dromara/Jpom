@@ -19,13 +19,7 @@ public class DTest {
 
 
     public static void main(String[] args) throws Exception {
-        File[] files = File.listRoots();
-        for (File file : files) {
-            System.out.println(file.getPath());
-            System.out.println(FileUtil.readableFileSize(file.getFreeSpace()));
-            System.out.println(FileUtil.readableFileSize(file.getTotalSpace()));
-            System.out.println("---------------------");
-        }
+
     }
 
     private static void printTrack() {
