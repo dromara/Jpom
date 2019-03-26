@@ -251,6 +251,8 @@ public class TopManager {
                         value = "僵尸进程 ";
                     } else if ("D".equalsIgnoreCase(value)) {
                         value = "不可中断的睡眠状态 ";
+                    } else if ("i".equalsIgnoreCase(value)) {
+                        value = "多线程 ";
                     }
                 }
                 if ("CPU".equalsIgnoreCase(name) || "MEM".equalsIgnoreCase(name)) {

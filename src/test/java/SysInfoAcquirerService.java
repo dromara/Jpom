@@ -1,27 +1,19 @@
-import java.io.BufferedReader;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.serializer.SerializerFeature;
+import com.sun.management.OperatingSystemMXBean;
+import org.apache.log4j.Logger;
+import org.springframework.stereotype.Service;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.LineNumberReader;
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+import java.io.*;
 import java.lang.management.ManagementFactory;
 import java.lang.management.RuntimeMXBean;
 import java.util.Formatter;
 import java.util.StringTokenizer;
 import java.util.Timer;
 import java.util.TimerTask;
-
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-
-import org.apache.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
-import com.alibaba.fastjson.serializer.SerializerFeature;
-import com.sun.management.OperatingSystemMXBean;
 
 /**
  * 网管信息信息信息采集类
@@ -32,7 +24,7 @@ import com.sun.management.OperatingSystemMXBean;
 @Service
 public class SysInfoAcquirerService {
 
-    private static final int CPUTIME = 2000;
+    private static final int CPUTIME = 5000;
     /**
      * 网管进程信息采集周期(注意：PERIOD_TIME 一定要大于 SLEEP_TIME )
      */

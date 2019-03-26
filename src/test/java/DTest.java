@@ -1,24 +1,17 @@
-import ch.qos.logback.core.util.SystemInfo;
-import cn.hutool.core.convert.Convert;
 import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.io.IoUtil;
-import cn.hutool.core.text.StrSpliter;
-import cn.hutool.core.util.CharsetUtil;
-import cn.hutool.core.util.RuntimeUtil;
 import cn.hutool.core.util.StrUtil;
-import cn.hutool.system.RuntimeInfo;
-import cn.jiangzeyin.common.DefaultSystemLog;
-import cn.keepbx.jpom.common.commander.AbstractCommander;
+import com.sun.management.OperatingSystemMXBean;
+import com.sun.tools.attach.VirtualMachine;
+import com.sun.tools.attach.VirtualMachineDescriptor;
 import org.apache.commons.codec.binary.Base64;
 import sun.misc.BASE64Decoder;
 import sun.misc.BASE64Encoder;
 
-import javax.management.MBeanServer;
-import java.io.*;
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
 import java.lang.management.ManagementFactory;
-import java.lang.management.MemoryUsage;
-import java.lang.management.OperatingSystemMXBean;
-import java.math.BigDecimal;
 import java.security.KeyFactory;
 import java.security.PrivateKey;
 import java.security.Signature;
@@ -26,47 +19,26 @@ import java.security.cert.Certificate;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.security.spec.PKCS8EncodedKeySpec;
-import java.util.Arrays;
 import java.util.List;
+import java.util.Properties;
 
 public class DTest {
 
 
     public static void main(String[] args) throws Exception {
-//        long start = System.currentTimeMillis();
-//        String s1 = execSystemCommand("netstat -antp |grep  32936 | head -1 ");
-//        System.out.println(s1);
-//        long l = System.currentTimeMillis();
-//        System.out.println(l-start);
-
-        String command = "tasklist /V /FI \"pid eq 3280\"";
-        String result = AbstractCommander.getInstance().execCommand(command);
-        List<String> list = StrSpliter.splitTrim(result, "\n", true);
-        if (list.size() >= 3) {
-            List<String> memList = StrSpliter.splitTrim(list.get(2), " ", true);
-            System.out.println(memList.get(0));
-            String mem = memList.get(4).replace(",", "");
-            long aLong = Convert.toLong(mem, 0L);
-            System.out.println(aLong);
-            RuntimeInfo runtimeInfo = new RuntimeInfo();
-            long totalMemory = runtimeInfo.getTotalMemory();
-            double d = totalMemory / 1024D;
-            System.out.println(d);
-            double v = new BigDecimal(aLong).divide(new BigDecimal(d), 2, BigDecimal.ROUND_HALF_UP).doubleValue();
-            System.out.println(v * 100 + "%");
-            System.out.println(runtimeInfo.toString());
-            System.out.println(memList.get(6));
-            System.out.println(memList.get(8));
+        List<VirtualMachineDescriptor> descriptorList = VirtualMachine.list();
+        for (VirtualMachineDescriptor virtualMachineDescriptor : descriptorList) {
+            // 根据虚拟机描述查询启动属性，如果属性-Dapplication匹配，说明项目已经启动，并返回进程id
+            VirtualMachine virtualMachine = VirtualMachine.attach(virtualMachineDescriptor);
+            Properties properties = virtualMachine.getAgentProperties();
+            String arg = properties.getProperty("sun.jvm.args", "");
+            System.out.println(properties.toString());
         }
     }
 
     private static void printTrack() {
         StackTraceElement[] st = Thread.currentThread().getStackTrace();
-        if (st == null) {
-            System.out.println("无堆栈...");
-            return;
-        }
-        StringBuffer sbf = new StringBuffer();
+        StringBuilder sbf = new StringBuilder();
         for (StackTraceElement e : st) {
             if (sbf.length() > 0) {
                 sbf.append(" <- ");
@@ -80,42 +52,6 @@ public class DTest {
         System.out.println(sbf.toString());
     }
 
-    private static String execSystemCommand(String command) {
-        String result = "error";
-        try {
-            //执行linux系统命令
-            String[] cmd = new String[]{"/bin/sh", "-c", command};
-            result = exec(cmd);
-        } catch (Exception e) {
-            DefaultSystemLog.ERROR().error("执行命令异常", e);
-            result += e.getMessage();
-        }
-        return result;
-    }
-
-    private static String exec(String[] cmd) throws IOException, InterruptedException {
-        String result;
-        Process process;
-        if (cmd.length == 1) {
-            process = Runtime.getRuntime().exec(cmd[0]);
-        } else {
-            process = Runtime.getRuntime().exec(cmd);
-        }
-        InputStream is;
-        int wait = process.waitFor();
-        if (wait == 0) {
-            is = process.getInputStream();
-        } else {
-            is = process.getErrorStream();
-        }
-        result = IoUtil.read(is, CharsetUtil.UTF_8);
-        is.close();
-        process.destroy();
-        if (StrUtil.isEmpty(result) && wait != 0) {
-            result = "没有返回任何执行信息";
-        }
-        return result;
-    }
 
     private static void cert() throws Exception {
         String plain = "aaaa";
