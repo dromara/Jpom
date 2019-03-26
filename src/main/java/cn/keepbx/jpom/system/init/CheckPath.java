@@ -22,15 +22,16 @@ public class CheckPath {
     @PreLoadMethod
     private static void init() throws IOException {
         String path = ExtConfigBean.getInstance().getPath();
+        String extConfigPath = ExtConfigBean.getResource().getURL().toString();
         File file = FileUtil.file(path);
         try {
             FileUtil.mkdir(file);
             file = FileUtil.createTempFile("jpom", ".temp", file, true);
         } catch (Exception e) {
-            DefaultSystemLog.ERROR().error(StrUtil.format("jpom 数据目录权限不足,目录位置：{},请检查当前用户是否有此目录权限", path), e);
+            DefaultSystemLog.ERROR().error(StrUtil.format("Jpom创建数据目录失败,目录位置：{},请检查当前用户是否有此目录权限或修改配置文件：{}中的jpom.path为可创建目录的路径", path, extConfigPath), e);
             System.exit(-1);
         }
         FileUtil.del(file);
-        DefaultSystemLog.LOG().info("Jpom外部配置文件路径：" + ExtConfigBean.getResource().getURL().toString());
+        DefaultSystemLog.LOG().info("Jpom外部配置文件路径：" + extConfigPath);
     }
 }

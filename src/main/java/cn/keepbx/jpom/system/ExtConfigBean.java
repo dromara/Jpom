@@ -91,13 +91,13 @@ public class ExtConfigBean {
 
     public String getPath() {
         if (StrUtil.isEmpty(path)) {
-            throw new RuntimeException("请配运行路径属性【jpom.path】");
+            throw new RuntimeException("请配置运行路径属性【jpom.path】");
         }
         return path;
     }
 
     /**
-     * 单利
+     * 单例
      *
      * @return this
      */
