@@ -3,7 +3,7 @@ package cn.keepbx.jpom.controller;
 import cn.keepbx.jpom.common.BaseController;
 import cn.keepbx.jpom.common.interceptor.NotLogin;
 import cn.keepbx.jpom.service.user.UserService;
-import cn.keepbx.jpom.system.ConfigBean;
+import cn.keepbx.jpom.system.ExtConfigBean;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -39,7 +39,7 @@ public class IndexControl extends BaseController {
             getSession().invalidate();
             return "redirect:install.html";
         }
-        setAttribute("safeMode", ConfigBean.getInstance().safeMode);
+        setAttribute("safeMode", ExtConfigBean.getInstance().safeMode);
         return "index";
     }
 

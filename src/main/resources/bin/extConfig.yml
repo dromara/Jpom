@@ -1,3 +1,8 @@
+jpom:
+  # jpom 数据存储路径
+  path: /jpom2/
+  # 是否已安全模式运行
+  safeMode: false
 whitelistDirectory:
   # 白名单目录是否验证包含关系
   checkStartsWith: true

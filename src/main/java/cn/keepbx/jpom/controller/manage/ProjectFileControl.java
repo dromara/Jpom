@@ -13,6 +13,7 @@ import cn.keepbx.jpom.common.interceptor.ProjectPermission;
 import cn.keepbx.jpom.model.ProjectInfoModel;
 import cn.keepbx.jpom.service.manage.ProjectInfoService;
 import cn.keepbx.jpom.system.ConfigBean;
+import cn.keepbx.jpom.system.ExtConfigBean;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.http.MediaType;
@@ -187,7 +188,7 @@ public class ProjectFileControl extends BaseController {
     @ResponseBody
     @ProjectPermission(checkDelete = true)
     public String clear(String id) {
-        if (ConfigBean.getInstance().safeMode) {
+        if (ExtConfigBean.getInstance().safeMode) {
             return JsonMessage.getString(400, "安全模式不能清除文件");
         }
         ProjectInfoModel pim = getProjectInfoModel();

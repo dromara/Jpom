@@ -24,10 +24,7 @@ banner:
   msg: Jpom 管理系统启动中
 #jpom 项目运行路径
 jpom:
-  path: /jpom/
   log: ${jpom.path}log/
-  # 演示模式
-  safeMode: false
 # 静态资源配置
 interceptor:
   resourceHandler: /static/**

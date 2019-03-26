@@ -1,22 +1,10 @@
 {
   "properties": [
     {
-      "name": "jpom.path",
-      "type": "java.lang.String",
-      "description": "jpom 项目运行路径",
-      "defaultValue": "/jpom/"
-    },
-    {
       "name": "jpom.log",
       "type": "java.lang.String",
       "description": "jpom 项目日常存储路径",
       "defaultValue": "/jpom/"
-    },
-    {
-      "name": "jpom.safeMode",
-      "type": "java.lang.Boolean",
-      "description": "是否以安全模式运行，安全模式不允许修改自己的密码等限制",
-      "defaultValue": false
     }
   ]
 }
