@@ -78,33 +78,12 @@
 <script>
     function loadSuccess() {
         var ws, myEcharts;
+        loadProcessList();
         loadFirstEcharts();
 
-        function loadFirstEcharts() {
-            $.ajax({
-                url: './getTop',
-                type: 'POST',
-                dataType: 'json',
-                success: function (data) {
-                    if (200 == data.code) {
-                        if (data.data) {
-                            var top = JSON.parse(data.data);
-                            loadEcharts(top);
-                        }
-                    } else {
-                        layer.alert(data.msg);
-                    }
-                },
-                error: function (err) {
-                    layer.alert("监控信息异常！");
-                }
-            });
-        }
-
-        table.render({
+        var config = {
             id: 'tab_monitor',
             elem: '#tab_monitor',
-            url: '/processList',
             // height: 'full-52',
             even: true,
             cols: [[
@@ -128,7 +107,51 @@
             },
             done: function (data) {
             }
-        });
+        };
+        table.render(config);
+
+        function loadFirstEcharts() {
+            $.ajax({
+                url: './getTop',
+                type: 'POST',
+                dataType: 'json',
+                success: function (data) {
+                    if (200 == data.code) {
+                        if (data.data) {
+                            var top = JSON.parse(data.data);
+                            loadEcharts(top);
+                        }
+                    } else {
+                        layer.alert(data.msg);
+                    }
+                },
+                error: function (err) {
+                    layer.alert("监控信息异常！");
+                }
+            });
+        }
+
+        function loadProcessList() {
+            $.ajax({
+                url: '/processList',
+                type: 'POST',
+                dataType: 'json',
+                async: true,
+                success: function (data) {
+                    if (200 == data.code) {
+                        if (data.data) {
+                            config.data = data.data;
+                            table.render(config);
+                        }
+                    } else {
+                        layer.alert(data.msg);
+                    }
+                },
+                error: function (err) {
+                    layer.alert("监控信息异常！");
+                }
+            });
+        }
 
         function linkSocket(status) {
             if (!ws) {
@@ -147,6 +170,11 @@
                             var top = JSON.parse(data.data);
                             if (top.top) {
                                 loadEcharts(top);
+                            }
+                            if (top.processList) {
+                                var processList = top.processList;
+                                config.data = processList;
+                                table.render(config);
                             }
                         }
                     } catch (e) {
