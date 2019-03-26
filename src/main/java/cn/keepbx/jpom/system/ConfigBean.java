@@ -4,7 +4,6 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.spring.SpringUtil;
 import cn.keepbx.jpom.common.BaseController;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 
 import java.io.File;
@@ -57,31 +56,12 @@ public class ConfigBean {
     }
 
     /**
-     * 标记是否为安全模式
-     */
-    @Value("${jpom.safeMode:false}")
-    public boolean safeMode;
-
-    /**
-     * 项目运行存储路径
-     */
-    @Value("${jpom.path}")
-    private String path;
-
-    public String getPath() {
-        if (StrUtil.isEmpty(path)) {
-            throw new RuntimeException("请配运行路径属性【jpom.path】");
-        }
-        return path;
-    }
-
-    /**
      * 获取项目运行数据存储文件夹路径
      *
      * @return 文件夹路径
      */
     public String getDataPath() {
-        String dataPath = FileUtil.normalize(getPath() + "/" + DATA);
+        String dataPath = FileUtil.normalize(ExtConfigBean.getInstance().getPath() + "/" + DATA);
         FileUtil.mkdir(dataPath);
         return dataPath;
     }

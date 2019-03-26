@@ -43,4 +43,9 @@
         // 创建完后切换
         element.tabChange('mainTabs', lay_id);
     }
+
+    function getSocketHost() {
+        var pro = location.protocol === 'https:' ? 'wss://' : 'ws://';
+        return pro + window.location.host;
+    }
 </script>

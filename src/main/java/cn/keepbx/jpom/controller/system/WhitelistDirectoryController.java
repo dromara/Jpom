@@ -56,7 +56,7 @@ public class WhitelistDirectoryController extends BaseController {
     @RequestMapping(value = "whitelistDirectory_submit", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     public String whitelistDirectorySubmit(String project, String certificate, String nginx) {
-        if (ConfigBean.getInstance().safeMode) {
+        if (ExtConfigBean.getInstance().safeMode) {
             return JsonMessage.getString(401, "安全模式下不能修改白名单目录");
         }
         UserModel userName = getUser();
@@ -160,7 +160,7 @@ public class WhitelistDirectoryController extends BaseController {
                 continue;
             }
             // 判断是否保护jpom 路径
-            if (val.startsWith(ConfigBean.getInstance().getPath())) {
+            if (val.startsWith(ExtConfigBean.getInstance().getPath())) {
                 return null;
             }
             array.add(val);

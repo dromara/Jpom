@@ -7,7 +7,6 @@ import cn.keepbx.jpom.common.BaseController;
 import cn.keepbx.jpom.common.interceptor.LoginInterceptor;
 import cn.keepbx.jpom.model.UserModel;
 import cn.keepbx.jpom.service.user.UserService;
-import cn.keepbx.jpom.system.ConfigBean;
 import cn.keepbx.jpom.system.ExtConfigBean;
 import cn.keepbx.jpom.util.CheckPassword;
 import com.alibaba.fastjson.JSONArray;
@@ -105,7 +104,7 @@ public class UserInfoController extends BaseController {
         if (!userName.isManage()) {
             return JsonMessage.getString(400, "你没有删除用户的权限");
         }
-        if (ConfigBean.getInstance().safeMode) {
+        if (ExtConfigBean.getInstance().safeMode) {
             return JsonMessage.getString(401, "安全模式不能删除用户");
         }
         if (userName.getId().equals(id)) {

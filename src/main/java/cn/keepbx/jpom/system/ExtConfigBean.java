@@ -1,5 +1,6 @@
 package cn.keepbx.jpom.system;
 
+import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.spring.SpringUtil;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationHome;
@@ -75,9 +76,28 @@ public class ExtConfigBean {
      */
     @Value("${log.autoBackSize:50MB}")
     public String autoBackSize;
+    /**
+     * 项目运行存储路径
+     */
+    @Value("${jpom.path}")
+    private String path;
 
     /**
-     * 单利
+     * 标记是否为安全模式
+     */
+    @Value("${jpom.safeMode:false}")
+    public boolean safeMode;
+
+
+    public String getPath() {
+        if (StrUtil.isEmpty(path)) {
+            throw new RuntimeException("请配置运行路径属性【jpom.path】");
+        }
+        return path;
+    }
+
+    /**
+     * 单例
      *
      * @return this
      */
