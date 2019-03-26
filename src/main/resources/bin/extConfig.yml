@@ -1,6 +1,6 @@
 jpom:
   # jpom 数据存储路径
-  path: /jpom/
+  path: /jpom2/
   # 是否已安全模式运行
   safeMode: false
 whitelistDirectory:
