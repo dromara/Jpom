@@ -7,6 +7,7 @@ import cn.hutool.cron.CronUtil;
 import cn.hutool.cron.Scheduler;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.spring.SpringUtil;
+import cn.jiangzeyin.pool.ThreadPoolService;
 import cn.keepbx.jpom.common.commander.AbstractCommander;
 import cn.keepbx.jpom.service.manage.CommandService;
 import cn.keepbx.jpom.socket.SocketSessionUtil;
@@ -23,6 +24,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
 
 /**
  * top命令管理，保证整个服务器只获取一个top命令
@@ -77,6 +79,7 @@ public class TopManager {
                 } else {
                     topInfo = getWindowsMonitor();
                 }
+                sendProcessList();
                 send(topInfo);
             } catch (Exception e) {
                 DefaultSystemLog.ERROR().error(e.getMessage(), e);
@@ -87,6 +90,32 @@ public class TopManager {
             CronUtil.start();
         }
         watch = true;
+    }
+
+    /**
+     * 发送首页进程列表信息
+     */
+    private static void sendProcessList() {
+        ExecutorService executorService = ThreadPoolService.newCachedThreadPool(TopManager.class);
+        executorService.execute(() -> {
+            JSONArray array;
+            try {
+                if (AbstractCommander.OS_INFO.isLinux()) {
+                    AbstractCommander instance = AbstractCommander.getInstance();
+                    String head = instance.execSystemCommand("top -b -n 1 | head -7");
+                    String s = instance.execSystemCommand("top -b -n 1 | grep java");
+                    array = formatLinuxTop(head + s);
+                } else {
+                    String s = AbstractCommander.getInstance().execSystemCommand("tasklist /V | findstr java");
+                    array = formatWindowsProcess(s);
+                }
+                JSONObject jsonObject = new JSONObject();
+                jsonObject.put("processList", array);
+                send(jsonObject.toJSONString());
+            } catch (Exception e) {
+                DefaultSystemLog.ERROR().error(e.getMessage(), e);
+            }
+        });
     }
 
     /**
@@ -118,6 +147,11 @@ public class TopManager {
         return jsonObject.toJSONString();
     }
 
+    /**
+     * 磁盘占用
+     *
+     * @return 磁盘占用
+     */
     private static JSONArray getHardDisk() {
         File[] files = File.listRoots();
         long freeSpace = 0;
