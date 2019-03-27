@@ -98,30 +98,11 @@
                     </execution>
                 </executions>
             </plugin>
-            <!-- 去掉java doc-->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>attach-javadoc</id>
-                        <phase>none</phase>
-                    </execution>
-                </executions>
+                <version>3.1.0</version>
             </plugin>
         </plugins>
     </build>
-
-    <developers>
-        <developer>
-            <name>F7575</name>
-            <email>1757518819@qq.com</email>
-            <organization>F7575</organization>
-        </developer>
-        <developer>
-            <name>jiangzeyin</name>
-            <email>bwcx_jzy@163.com</email>
-            <organization>bwcx_jzy</organization>
-        </developer>
-    </developers>
 </project>
