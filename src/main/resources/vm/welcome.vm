@@ -78,7 +78,37 @@
 <script>
     function loadSuccess() {
         var ws, myEcharts;
+        loadProcessList();
         loadFirstEcharts();
+
+        var config = {
+            id: 'tab_monitor',
+            elem: '#tab_monitor',
+            // height: 'full-52',
+            even: true,
+            cols: [[
+                {field: 'pid', title: '进程id', sort: true, width: '8%'},
+                {field: 'USER', title: '所有者', width: '12%'},
+                {field: 'PR', title: '优先级', width: '8%', sort: true},
+                {field: 'NI', title: 'nice值', width: '8%', sort: true},
+                {field: 'VIRT', title: '使用虚拟内存', width: '8%', sort: true},
+                {field: 'RES', title: '使用物理内存', width: '8%', sort: true},
+                {field: 'SHR', title: '共享内存', width: '8%', sort: true},
+                {field: 'S', title: '进程状态', width: '8%', sort: true},
+                {field: 'CPU', title: '占用CPU', width: '8%', sort: true},
+                {field: 'MEM', title: '占用物理内存', width: '8%', sort: true},
+                {field: 'TIME', title: '时间总计', width: '8%', sort: true},
+                {field: 'COMMAND', title: '进程名称'}
+            ]],
+            loading: true,
+            method: 'POST',
+            response: {
+                statusCode: 200
+            },
+            done: function (data) {
+            }
+        };
+        table.render(config);
 
         function loadFirstEcharts() {
             $.ajax({
@@ -101,34 +131,27 @@
             });
         }
 
-        table.render({
-            id: 'tab_monitor',
-            elem: '#tab_monitor',
-            url: '/processList',
-            // height: 'full-52',
-            even: true,
-            cols: [[
-                {field: 'pid', title: '进程id', sort: true, width: '8%'},
-                {field: 'USER', title: '所有者', width: '12%'},
-                {field: 'PR', title: '优先级', width: '8%'},
-                {field: 'NI', title: 'nice值', width: '8%'},
-                {field: 'VIRT', title: '使用虚拟内存', width: '8%'},
-                {field: 'RES', title: '使用物理内存', width: '8%'},
-                {field: 'SHR', title: '共享内存', width: '8%'},
-                {field: 'S', title: '进程状态', width: '8%'},
-                {field: 'CPU', title: '占用CPU', width: '8%'},
-                {field: 'MEM', title: '占用物理内存', width: '8%'},
-                {field: 'TIME', title: '时间总计', width: '8%'},
-                {field: 'COMMAND', title: '进程名称'}
-            ]],
-            loading: true,
-            method: 'POST',
-            response: {
-                statusCode: 200
-            },
-            done: function (data) {
-            }
-        });
+        function loadProcessList() {
+            $.ajax({
+                url: '/processList',
+                type: 'POST',
+                dataType: 'json',
+                async: true,
+                success: function (data) {
+                    if (200 == data.code) {
+                        if (data.data) {
+                            config.data = data.data;
+                            table.render(config);
+                        }
+                    } else {
+                        layer.alert(data.msg);
+                    }
+                },
+                error: function (err) {
+                    layer.alert("监控信息异常！");
+                }
+            });
+        }
 
         function linkSocket(status) {
             if (!ws) {
@@ -147,6 +170,11 @@
                             var top = JSON.parse(data.data);
                             if (top.top) {
                                 loadEcharts(top);
+                            }
+                            if (top.processList) {
+                                var processList = top.processList;
+                                config.data = processList;
+                                table.render(config);
                             }
                         }
                     } catch (e) {

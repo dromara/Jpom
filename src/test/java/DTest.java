@@ -20,12 +20,24 @@ public class DTest {
 
     public static void main(String[] args) throws Exception {
         File[] files = File.listRoots();
+        long freeSpace = 0;
+        long useAbleSpace = 0;
+        long totalSpace = 0;
         for (File file : files) {
+            long free = file.getFreeSpace();
+            freeSpace += free;
+            long total = file.getTotalSpace();
+            totalSpace += total;
+            useAbleSpace += total - free;
             System.out.println(file.getPath());
-            System.out.println(FileUtil.readableFileSize(file.getFreeSpace()));
-            System.out.println(FileUtil.readableFileSize(file.getTotalSpace()));
-            System.out.println("---------------------");
+            System.out.println(FileUtil.readableFileSize(free));
+            System.out.println(FileUtil.readableFileSize(total - free));
+            System.out.println(FileUtil.readableFileSize(total));
+            System.out.println("-------------------------");
         }
+        System.out.println(FileUtil.readableFileSize(freeSpace));
+        System.out.println(FileUtil.readableFileSize(useAbleSpace));
+        System.out.println(FileUtil.readableFileSize(totalSpace));
     }
 
     private static void printTrack() {
