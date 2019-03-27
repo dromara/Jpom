@@ -1,13 +1,19 @@
 package cn.keepbx.jpom.model;
 
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.io.resource.ResourceUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.crypto.BCUtil;
+import cn.hutool.crypto.asymmetric.KeyType;
+import cn.hutool.crypto.asymmetric.RSA;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.spring.SpringUtil;
 import cn.keepbx.jpom.service.system.CertService;
 import com.alibaba.fastjson.JSONObject;
 
 import java.io.BufferedInputStream;
+import java.security.PrivateKey;
+import java.security.PublicKey;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.Date;
@@ -97,7 +103,7 @@ public class CertModel extends BaseModel {
         if (!StrUtil.isEmpty(domain)) {
             return;
         }
-        JSONObject jsonObject = decodeCert(getCert());
+        JSONObject jsonObject = decodeCert(getCert(), getKey());
         if (jsonObject != null) {
             // 获取信息
             this.setDomain(jsonObject.getString("domain"));
@@ -133,12 +139,21 @@ public class CertModel extends BaseModel {
      *
      * @param file 证书文件
      */
-    public static JSONObject decodeCert(String file) {
+    public static JSONObject decodeCert(String file, String key) {
         if (file == null) {
             return null;
         }
         if (!FileUtil.exist(file)) {
             return null;
+        }
+        PrivateKey privateKey = BCUtil.readPrivateKey(ResourceUtil.getStream(key));
+        PublicKey publicKey = BCUtil.readPublicKey(ResourceUtil.getStream(file));
+        RSA rsa = new RSA(privateKey, publicKey);
+        String str = UserModel.SYSTEM_OCCUPY_NAME;
+        String encryptStr = rsa.encryptBase64(str, KeyType.PublicKey);
+        String decryptStr = rsa.decryptStr(encryptStr, KeyType.PrivateKey);
+        if (!str.equals(decryptStr)) {
+            throw new RuntimeException("证书和私钥证书不匹配");
         }
         try {
             BufferedInputStream inStream = FileUtil.getInputStream(file);

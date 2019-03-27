@@ -105,13 +105,14 @@ public class CertificateController extends BaseController {
         }
         MultipartFileBuilder cert = createMultipart().addFieldName("cert").setSavePath(temporary).setUseOriginalFilename(true);
         String certPath = cert.save();
+
+        MultipartFileBuilder key = createMultipart().addFieldName("key").setSavePath(temporary).setUseOriginalFilename(true);
+        String keyPath = key.save();
         //解析证书
-        JSONObject jsonObject = CertModel.decodeCert(certPath);
+        JSONObject jsonObject = CertModel.decodeCert(certPath, keyPath);
         if (jsonObject == null) {
             throw new RuntimeException("解析证书失败");
         }
-        MultipartFileBuilder key = createMultipart().addFieldName("key").setSavePath(temporary).setUseOriginalFilename(true);
-        String keyPath = key.save();
         CertModel certModel = new CertModel();
         certModel.setId(id);
         certModel.setWhitePath(path);
