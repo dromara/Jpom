@@ -61,3 +61,13 @@ server {
     }
 }
 ```
+
+   ### 7. 启动提示数据目录权限不足
+    
+   [https://gitee.com/keepbx/Jpom/wikis/pages?sort_id=1395625&doc_id=264493](https://gitee.com/keepbx/Jpom/wikis/pages?sort_id=1395625&doc_id=264493)
+   
+   ### 8. 启动提示JDK没有找到tools.jar
+   
+   [https://gitee.com/keepbx/Jpom/wikis/pages?sort_id=1398788&doc_id=264493](https://gitee.com/keepbx/Jpom/wikis/pages?sort_id=1398788&doc_id=264493)
+   
+   
