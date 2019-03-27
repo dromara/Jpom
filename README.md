@@ -54,7 +54,7 @@
 4. 项目列表
 ![项目列表](/doc/images/list.png)
 
-5. 监控cpu 内存
+5. 监控cpu、内存、占用的端口情况
 ![ 监控cpu 内存](/doc/images/cup_ram.png)
 
 6. 控制台日志实时查看
@@ -65,10 +65,6 @@
 
 8. top监听
 ![top监听](/doc/images/top.png)
-
-9. 查看项目占用的端口情况
-
-![查看项目占用的端口情况](/doc/images/port.png)
 
 ### 下载安装
 
