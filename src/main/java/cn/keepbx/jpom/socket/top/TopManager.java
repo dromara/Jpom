@@ -38,6 +38,7 @@ public class TopManager {
     private static final String CRON_ID = "topMonitor";
     private static CommandService commandService;
     private static boolean watch = false;
+    private static ExecutorService executorService = null;
 
     /**
      * 添加top 命令监听
@@ -69,21 +70,15 @@ public class TopManager {
         if (commandService == null) {
             commandService = SpringUtil.getBean(CommandService.class);
         }
+        if (null == executorService) {
+            executorService = ThreadPoolService.newCachedThreadPool(TopManager.class);
+        }
         CronUtil.remove(CRON_ID);
         CronUtil.schedule(CRON_ID, "0/5 * * * * ?", () -> {
-            try {
-                String topInfo;
-                if (AbstractCommander.OS_INFO.isLinux()) {
-                    String result = AbstractCommander.getInstance().execCommand("top -b -n 1");
-                    topInfo = getTopMonitor(result);
-                } else {
-                    topInfo = getWindowsMonitor();
-                }
-                sendProcessList();
-                send(topInfo);
-            } catch (Exception e) {
-                DefaultSystemLog.ERROR().error(e.getMessage(), e);
-            }
+            //发送监控信息
+            sendMonitor();
+            //发送首页进程列表信息
+            sendProcessList();
         });
         Scheduler scheduler = CronUtil.getScheduler();
         if (!scheduler.isStarted()) {
@@ -93,10 +88,29 @@ public class TopManager {
     }
 
     /**
+     * 发送监控信息
+     */
+    private static void sendMonitor() {
+        executorService.execute(() -> {
+            try {
+                String topInfo;
+                if (AbstractCommander.OS_INFO.isLinux()) {
+                    String result = AbstractCommander.getInstance().execCommand("top -b -n 1");
+                    topInfo = getTopMonitor(result);
+                } else {
+                    topInfo = getWindowsMonitor();
+                }
+                send(topInfo);
+            } catch (Exception e) {
+                DefaultSystemLog.ERROR().error(e.getMessage(), e);
+            }
+        });
+    }
+
+    /**
      * 发送首页进程列表信息
      */
     private static void sendProcessList() {
-        ExecutorService executorService = ThreadPoolService.newCachedThreadPool(TopManager.class);
         executorService.execute(() -> {
             JSONArray array;
             try {
