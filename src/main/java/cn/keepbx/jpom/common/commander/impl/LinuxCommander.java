@@ -25,7 +25,7 @@ public class LinuxCommander extends AbstractCommander {
             return msg;
         }
         // 拼接命令
-        String command = String.format("nohup java %s -classpath %s -Dapplication=%s -Dbasedir=%s %s %s >> %s 2>&1 &",
+        String command = String.format("nohup java %s %s -Dapplication=%s -Dbasedir=%s %s %s >> %s 2>&1 &",
                 projectInfoModel.getJvm(),
                 ProjectInfoModel.getClassPathLib(projectInfoModel),
                 projectInfoModel.getId(),

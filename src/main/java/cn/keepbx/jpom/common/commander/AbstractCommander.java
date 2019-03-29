@@ -177,7 +177,7 @@ public abstract class AbstractCommander {
     }
 
     private VirtualMachine getVirtualMachine(String tag) throws IOException, AttachNotSupportedException {
-        tag = String.format("-Dapplication=%s", tag);
+        tag = String.format("-Dapplication=%s ", tag);
         // 通过VirtualMachine.list()列出所有的java进程
         List<VirtualMachineDescriptor> descriptorList = VirtualMachine.list();
         for (VirtualMachineDescriptor virtualMachineDescriptor : descriptorList) {
@@ -185,6 +185,9 @@ public abstract class AbstractCommander {
             VirtualMachine virtualMachine = VirtualMachine.attach(virtualMachineDescriptor);
             Properties properties = virtualMachine.getAgentProperties();
             String args = properties.getProperty("sun.jvm.args", "");
+            if (StrUtil.isEmpty(args)) {
+                args = properties.getProperty("sun.java.command", "");
+            }
             if (StrUtil.containsIgnoreCase(args, tag)) {
                 return virtualMachine;
             }

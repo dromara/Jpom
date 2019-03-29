@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.annotation.Resource;
-import java.io.IOException;
 import java.util.List;
 
 /**
@@ -33,7 +32,7 @@ public class UserListController extends BaseController {
      * 展示用户列表
      */
     @RequestMapping(value = "list", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
-    public String projectInfo() throws IOException {
+    public String projectInfo() {
         List<ProjectInfoModel> jsonArray = projectInfoService.list();
         setAttribute("projects", jsonArray);
         return "user/list";
