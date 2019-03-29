@@ -38,6 +38,7 @@ public class TopManager {
     private static final String CRON_ID = "topMonitor";
     private static CommandService commandService;
     private static boolean watch = false;
+    private static ExecutorService executorService = ThreadPoolService.newCachedThreadPool(TopManager.class);
 
     /**
      * 添加top 命令监听
@@ -71,6 +72,7 @@ public class TopManager {
         }
         CronUtil.remove(CRON_ID);
         CronUtil.schedule(CRON_ID, "0/5 * * * * ?", () -> {
+            //发送监控信息
             try {
                 String topInfo;
                 if (AbstractCommander.OS_INFO.isLinux()) {
@@ -79,11 +81,12 @@ public class TopManager {
                 } else {
                     topInfo = getWindowsMonitor();
                 }
-                sendProcessList();
                 send(topInfo);
             } catch (Exception e) {
                 DefaultSystemLog.ERROR().error(e.getMessage(), e);
             }
+            //发送首页进程列表信息
+            sendProcessList();
         });
         Scheduler scheduler = CronUtil.getScheduler();
         if (!scheduler.isStarted()) {
@@ -92,11 +95,11 @@ public class TopManager {
         watch = true;
     }
 
+
     /**
      * 发送首页进程列表信息
      */
     private static void sendProcessList() {
-        ExecutorService executorService = ThreadPoolService.newCachedThreadPool(TopManager.class);
         executorService.execute(() -> {
             JSONArray array;
             try {
