@@ -273,19 +273,41 @@ public class EditProjectController extends BaseController {
 
     }
 
+    /**
+     * 路径存在包含关系
+     *
+     * @param projectInfoModel 比较的项目
+     * @return 不为null 则为错误
+     */
     private JsonMessage checkPath(ProjectInfoModel projectInfoModel) {
         List<ProjectInfoModel> projectInfoModelList = projectInfoService.list();
+        ProjectInfoModel projectInfoModel1 = null;
         for (ProjectInfoModel model : projectInfoModelList) {
             if (!model.getId().equals(projectInfoModel.getId())) {
-                if (model.getLib().startsWith(projectInfoModel.getLib()) || projectInfoModel.getLib().startsWith(model.getLib())) {
-                    return new JsonMessage(401, "项目lib和【" + model.getName() + "】项目冲突");
+                File file1 = new File(model.getLib());
+                File file2 = new File(projectInfoModel.getLib());
+                if (FileUtil.pathEquals(file1, file2)) {
+                    projectInfoModel1 = model;
+                    break;
                 }
-                //  log 自动生成
-                //      if (model.getLog().equals(projectInfoModel.getLog())) {
-                //          return new JsonMessage(401, "项目log和【" + model.getName() + "】项目冲突");
-                //      }
+                // 包含关系
+                if (pathContains(file1, file2) || pathContains(file2, file1)) {
+                    projectInfoModel1 = model;
+                    break;
+                }
             }
         }
+        if (projectInfoModel1 != null) {
+            return new JsonMessage(401, "项目lib和【" + projectInfoModel1.getName() + "】项目冲突:" + projectInfoModel1.getLib());
+        }
         return null;
+    }
+
+    private boolean pathContains(File file1, File file2) {
+        try {
+            return StrUtil.startWith(file1.getCanonicalPath() + File.separator, file2.getCanonicalPath() + File.separator, true);
+        } catch (Exception e) {
+            return StrUtil.startWith(file1.getAbsolutePath() + File.separator, file2.getAbsolutePath() + File.separator, true);
+        }
     }
 }

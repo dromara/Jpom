@@ -6,7 +6,7 @@ import java.io.IOException;
  */
 public class TestFile {
     public static void main(String[] args) throws IOException {
-        File file = new File("C:/WINDOWS/system32");
+        File file = new File("C:/WINDOWS/system32/");
         System.out.println(file.getAbsolutePath());
         System.out.println(file.getCanonicalPath());
 //        System.out.println(file());

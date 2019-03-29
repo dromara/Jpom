@@ -124,7 +124,7 @@ public abstract class AbstractCommander {
         String lib = projectInfoModel.getLib();
         File fileLib = new File(lib);
         File[] files = fileLib.listFiles();
-        if (files == null) {
+        if (files == null || files.length <= 0) {
             return "没有jar包";
         }
         // 备份日志
