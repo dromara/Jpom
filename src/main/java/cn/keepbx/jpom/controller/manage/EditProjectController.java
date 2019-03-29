@@ -95,7 +95,7 @@ public class EditProjectController extends BaseController {
         if (LogWebSocketHandle.SYSTEM_ID.equals(id)) {
             return JsonMessage.getString(401, "项目id " + LogWebSocketHandle.SYSTEM_ID + " 关键词被系统占用");
         }
-        //
+        // 运行模式
         String runMode = getParameter("runMode");
         ProjectInfoModel.RunMode runMode1 = ProjectInfoModel.RunMode.ClassPath;
         try {
@@ -103,8 +103,6 @@ public class EditProjectController extends BaseController {
         } catch (Exception ignored) {
         }
         projectInfo.setRunMode(runMode1);
-        System.out.println(runMode1);
-
         //
         if (!whitelistDirectoryService.checkProjectDirectory(whitelistDirectory)) {
             return JsonMessage.getString(401, "请选择正确的项目路径,或者还没有配置白名单");

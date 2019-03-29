@@ -9,6 +9,10 @@
 <script type="text/javascript" src="/static/layui/layui.js?v=$staticCacheTime"></script>
 <script type="text/javascript">
     var $, layer, form, element, table;
+    // 不缓存
+    layui.config({
+        version: true
+    });
     layui.use(['layer', 'element', 'form', 'table'], function () {
         $ = layui.$;
         element = layui.element;
