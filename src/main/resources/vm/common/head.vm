@@ -5,8 +5,8 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
 <link rel="icon" href="/static/favicon.ico" type="image/x-icon"/>
 <link rel="shortcut icon" href="/static/favicon.ico" type="image/x-icon"/>
-<link rel="stylesheet" href="/static/layui/css/layui.css" media="all">
-<script type="text/javascript" src="/static/layui/layui.js"></script>
+<link rel="stylesheet" href="/static/layui/css/layui.css?v=$staticCacheTime" media="all">
+<script type="text/javascript" src="/static/layui/layui.js?v=$staticCacheTime"></script>
 <script type="text/javascript">
     var $, layer, form, element, table;
     layui.use(['layer', 'element', 'form', 'table'], function () {

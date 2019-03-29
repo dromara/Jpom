@@ -97,6 +97,18 @@
         </div>
         <div class="layui-form-item">
             <div class="layui-inline">
+                <label class="layui-form-label">运行方式</label>
+                <div class="layui-input-block">
+                    <select name="runMode">
+                        #foreach($itemPath in $runModes)
+                            <option value="$itemPath" #if($item.runMode==$itemPath)selected#end>$itemPath</option>
+                        #end
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-inline">
                 <label class="layui-form-label">Jvm参数</label>
                 <div class="layui-input-block">
                     <input type="text" name="jvm" placeholder="jvm参数,非必填" class="layui-input"

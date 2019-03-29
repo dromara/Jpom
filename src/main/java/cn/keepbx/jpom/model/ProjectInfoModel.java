@@ -48,6 +48,19 @@ public class ProjectInfoModel extends BaseModel {
      */
     private String modifyUser;
 
+    private RunMode runMode;
+
+    public RunMode getRunMode() {
+        if (runMode == null) {
+            return RunMode.ClassPath;
+        }
+        return runMode;
+    }
+
+    public void setRunMode(RunMode runMode) {
+        this.runMode = runMode;
+    }
+
     public String getModifyUser() {
         if (StrUtil.isEmpty(modifyUser)) {
             return UserModel.SYSTEM_OCCUPY_NAME;
@@ -161,14 +174,26 @@ public class ProjectInfoModel extends BaseModel {
     public static String getClassPathLib(ProjectInfoModel projectInfoModel) {
         File fileLib = new File(projectInfoModel.getLib());
         File[] files = fileLib.listFiles();
-        if (files == null) {
+        if (files == null || files.length <= 0) {
             return "";
         }
+        int len = files.length;
         // 获取lib下面的所有jar包
         StringBuilder classPath = new StringBuilder();
-
-        for (File file : files) {
-            classPath.append(file.getAbsolutePath()).append(AbstractCommander.OS_INFO.isWindows() ? ";" : ":");
+        RunMode runMode = projectInfoModel.getRunMode();
+        if (runMode == RunMode.ClassPath) {
+            classPath.append("-classpath ");
+        } else if (runMode == RunMode.Jar) {
+            classPath.append("-jar ");
+            // 只取一个jar
+            len = 1;
+        }
+        for (int i = 0; i < len; i++) {
+            File file = files[i];
+            classPath.append(file.getAbsolutePath());
+            if (i != len - 1) {
+                classPath.append(AbstractCommander.OS_INFO.isWindows() ? ";" : ":");
+            }
         }
         return classPath.toString();
     }
@@ -233,5 +258,19 @@ public class ProjectInfoModel extends BaseModel {
 
     public JSONObject toJson() {
         return (JSONObject) JSONObject.toJSON(this);
+    }
+
+    /**
+     * 运行方式
+     */
+    public enum RunMode {
+        /**
+         * java -classpath
+         */
+        ClassPath,
+        /**
+         * java -jar
+         */
+        Jar,
     }
 }

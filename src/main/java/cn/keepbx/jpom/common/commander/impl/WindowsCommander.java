@@ -31,7 +31,7 @@ public class WindowsCommander extends AbstractCommander {
         String args = projectInfoModel.getArgs();
         String classPath = ProjectInfoModel.getClassPathLib(projectInfoModel);
 
-        String command = String.format("javaw %s -classpath %s -Dapplication=%s -Dbasedir=%s %s %s >> %s &",
+        String command = String.format("javaw %s %s -Dapplication=%s -Dbasedir=%s %s %s >> %s &",
                 jvm, classPath, tag,
                 projectInfoModel.getAbsoluteLib(), mainClass, args, projectInfoModel.getAbsoluteLog());
         // 执行命令;

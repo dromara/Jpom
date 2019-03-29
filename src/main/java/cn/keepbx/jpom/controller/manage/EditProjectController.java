@@ -69,6 +69,9 @@ public class EditProjectController extends BaseController {
             }
         }
         setAttribute("item", projectInfo);
+        // 运行模式
+        ProjectInfoModel.RunMode[] runModes = ProjectInfoModel.RunMode.values();
+        setAttribute("runModes", runModes);
         return "manage/editProject";
     }
 
@@ -92,6 +95,16 @@ public class EditProjectController extends BaseController {
         if (LogWebSocketHandle.SYSTEM_ID.equals(id)) {
             return JsonMessage.getString(401, "项目id " + LogWebSocketHandle.SYSTEM_ID + " 关键词被系统占用");
         }
+        //
+        String runMode = getParameter("runMode");
+        ProjectInfoModel.RunMode runMode1 = ProjectInfoModel.RunMode.ClassPath;
+        try {
+            runMode1 = ProjectInfoModel.RunMode.valueOf(runMode);
+        } catch (Exception ignored) {
+        }
+        projectInfo.setRunMode(runMode1);
+        System.out.println(runMode1);
+
         //
         if (!whitelistDirectoryService.checkProjectDirectory(whitelistDirectory)) {
             return JsonMessage.getString(401, "请选择正确的项目路径,或者还没有配置白名单");
@@ -179,6 +192,7 @@ public class EditProjectController extends BaseController {
             exits.setJvm(projectInfo.getJvm());
             exits.setArgs(projectInfo.getArgs());
             exits.setBuildTag(projectInfo.getBuildTag());
+            exits.setRunMode(projectInfo.getRunMode());
             //
             moveTo(exits, projectInfo);
             projectInfoService.updateProject(exits);
@@ -261,7 +275,7 @@ public class EditProjectController extends BaseController {
 
     }
 
-    private JsonMessage checkPath(ProjectInfoModel projectInfoModel) throws IOException {
+    private JsonMessage checkPath(ProjectInfoModel projectInfoModel) {
         List<ProjectInfoModel> projectInfoModelList = projectInfoService.list();
         for (ProjectInfoModel model : projectInfoModelList) {
             if (!model.getId().equals(projectInfoModel.getId())) {

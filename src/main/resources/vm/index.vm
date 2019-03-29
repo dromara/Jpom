@@ -4,7 +4,88 @@
 <head>
     <title>Jpom-项目管理系统</title>
     #parse("./common/head.vm")
-    <link rel="stylesheet" href="/static/css/index.css">
+    <style>
+        /* 选项卡 */
+        .layui-tab {
+            margin: 0;
+            height: 100%;
+        }
+
+        .layui-body {
+            bottom: 10px !important;
+        }
+
+        .layui-tab-title {
+            /*width: calc(100% - 100px)*/
+            right: 70px;
+        }
+
+        .layui-tab-content {
+            position: absolute;
+            padding: 0px;
+            top: 40px;
+            right: 0;
+            bottom: 0;
+            left: 0;
+        }
+
+        .layui-tab-item {
+            height: 100%;
+            width: 100%;
+        }
+
+        /* ��Ƕ�����ʽ*/
+        .custom-iframe {
+            width: 100%;
+            height: 100%;
+        }
+
+        .layui-tab-title li:first-child > i {
+            display: none;
+        }
+
+        .custom-nav {
+            position: absolute;
+            padding: 0px;
+            top: 0;
+            right: 0;
+            height: 42px;
+            background-color: #fff !important;
+            color: #000;
+            border-bottom: 1px solid #e2e2e2;
+            border-left: 1px solid #e2e2e2;
+        }
+
+        .custom-nav .layui-nav-item {
+            line-height: 41px;
+            background-color: #f2f2f2;
+        }
+
+        .custom-nav .layui-nav-item a {
+            color: #000;
+        }
+
+        .custom-nav .layui-nav-item a:hover {
+            color: #000;
+        }
+
+        .custom-nav .layui-nav-item .layui-nav-more {
+            top: 18px;
+            border-top-color: rgba(0, 0, 0, 0.7);
+            border-bottom-color: rgba(0, 0, 0, 0);
+        }
+
+        .custom-nav .layui-nav-item .layui-nav-mored {
+            top: 12px;
+            border-top-color: rgba(0, 0, 0, 0);
+            border-bottom-color: rgba(0, 0, 0, 1);
+        }
+
+        #div-updatePwd {
+            padding: 15px;
+            display: none;
+        }
+    </style>
 </head>
 
 <body class="layui-layout-body">
@@ -51,10 +132,10 @@
                     <a href="javascript:;"
                        data-options="{'id':'alioss', 'title':'阿里云OSS', 'url':'/system/alioss'}">阿里云OSS</a>
                 </li>
-##                <li class="layui-nav-item">
-##                    <a href="javascript:;"
-##                       data-options="{'id':'certificate', 'title':'证书管理', 'url':'/system/certificate'}">证书管理</a>
-##                </li>
+            ##                <li class="layui-nav-item">
+            ##                    <a href="javascript:;"
+            ##                       data-options="{'id':'certificate', 'title':'证书管理', 'url':'/system/certificate'}">证书管理</a>
+            ##                </li>
                 <li class="layui-nav-item">
                     <a href="javascript:;"
                        data-options="{'id':'nginx', 'title':'nginx管理', 'url':'/system/nginx'}">nginx管理</a>

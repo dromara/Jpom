@@ -1,10 +1,12 @@
 package cn.keepbx.jpom.common.interceptor;
 
+import cn.hutool.core.date.DateUtil;
 import cn.jiangzeyin.common.interceptor.BaseInterceptor;
 import cn.jiangzeyin.common.interceptor.InterceptorPattens;
 import cn.keepbx.jpom.common.BaseController;
 import cn.keepbx.jpom.model.UserModel;
 import org.springframework.web.method.HandlerMethod;
+import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -40,6 +42,16 @@ public class LoginInterceptor extends BaseInterceptor {
         }
         reload();
         return true;
+    }
+
+    @Override
+    public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler, ModelAndView modelAndView) throws Exception {
+        super.postHandle(request, response, handler, modelAndView);
+        HttpSession session = getSession();
+        Object staticCacheTime = session.getAttribute("staticCacheTime");
+        if (staticCacheTime == null) {
+            session.setAttribute("staticCacheTime", DateUtil.currentSeconds());
+        }
     }
 
     @Override
