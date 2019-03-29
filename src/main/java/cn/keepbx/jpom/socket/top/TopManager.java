@@ -123,11 +123,11 @@ public class TopManager {
 
     /**
      * 获取windows 监控
+     * https://docs.oracle.com/javase/7/docs/jre/api/management/extension/com/sun/management/OperatingSystemMXBean.html
      *
      * @return 返回cpu占比和内存占比
      */
     public static String getWindowsMonitor() {
-        //https://docs.oracle.com/javase/7/docs/jre/api/management/extension/com/sun/management/OperatingSystemMXBean.html
         OperatingSystemMXBean operatingSystemMXBean = (OperatingSystemMXBean) ManagementFactory.getOperatingSystemMXBean();
         long totalPhysicalMemorySize = operatingSystemMXBean.getTotalPhysicalMemorySize();
         long freePhysicalMemorySize = operatingSystemMXBean.getFreePhysicalMemorySize();
@@ -453,20 +453,6 @@ public class TopManager {
             return;
         }
         //
-        Iterator<Session> iterator = SESSIONS.iterator();
-        while (iterator.hasNext()) {
-            Session session = iterator.next();
-            try {
-                SocketSessionUtil.send(session, null);
-            } catch (IOException e) {
-                DefaultSystemLog.ERROR().error("消息失败", e);
-            }
-            try {
-                session.close();
-                iterator.remove();
-            } catch (IOException ignored) {
-            }
-        }
         CronUtil.remove(CRON_ID);
         watch = false;
     }
