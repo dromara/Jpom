@@ -122,6 +122,8 @@
 
 [安装说明>>](https://gitee.com/keepbx/Jpom/wikis/pages?sort_id=1395348&doc_id=264493)
 
+[更新日志>>](/CHANGELOG.md)
+
 ### 开发计划
 
 [开发计划>>](/PLANS.md)
