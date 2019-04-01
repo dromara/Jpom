@@ -28,7 +28,7 @@ interceptor:
   resourceLocation: classpath:/static/
 # session 超时时间
 tomcat:
-  sessionTimeOut: 18000
+  sessionTimeOut: 3600
 # 启动完成自动初始化指定包
 preload:
   packageName: cn.keepbx.jpom.system.init
