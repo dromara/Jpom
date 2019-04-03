@@ -181,13 +181,12 @@ public class ProjectFileControl extends BaseController {
     /**
      * 清除文件
      *
-     * @param id 项目id
      * @return json
      */
     @RequestMapping(value = "clear", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     @ProjectPermission(checkDelete = true)
-    public String clear(String id) {
+    public String clear() {
         if (ExtConfigBean.getInstance().safeMode) {
             return JsonMessage.getString(400, "安全模式不能清除文件");
         }
@@ -196,7 +195,10 @@ public class ProjectFileControl extends BaseController {
         if (FileUtil.clean(file)) {
             return JsonMessage.getString(200, "清除成功");
         }
-        return JsonMessage.getString(500, "删除失败");
+        if (pim.isStatus(true)) {
+            return JsonMessage.getString(501, "文件被占用，请先停止项目");
+        }
+        return JsonMessage.getString(500, "删除失败：" + file.getAbsolutePath());
     }
 
 
