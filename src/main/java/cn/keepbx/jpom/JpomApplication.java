@@ -10,6 +10,11 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.web.servlet.ServletComponentScan;
 import org.springframework.http.converter.StringHttpMessageConverter;
 
+import java.io.InputStream;
+import java.net.URL;
+import java.util.Enumeration;
+import java.util.jar.Manifest;
+
 /**
  * jpom 启动类
  * Created by jiangzeyin on 2017/9/14.
@@ -22,12 +27,15 @@ import org.springframework.http.converter.StringHttpMessageConverter;
 public class JpomApplication {
     private static String[] args;
 
+    private static String version;
+
     /**
      * 启动执行
      *
      * @param args 参数
      */
     public static void main(String[] args) throws Exception {
+        JpomApplication.getVersion();
         JpomApplication.args = args;
         ApplicationBuilder.createBuilder(JpomApplication.class)
                 .addHttpMessageConverter(new StringHttpMessageConverter(CharsetUtil.CHARSET_UTF_8))
@@ -50,6 +58,40 @@ public class JpomApplication {
             item = StrUtil.trim(item);
             if (item.startsWith("--" + name + "=")) {
                 return item.substring(name.length() + 3);
+            }
+        }
+        return null;
+    }
+
+    /**
+     * 获取当前jpom 版本号
+     *
+     * @return version
+     */
+    public static String getVersion() {
+        if (version == null) {
+            try {
+                ClassLoader classLoader = JpomApplication.class.getClassLoader();
+                String ver = getVersion(classLoader.getResources("META-INF/MANIFEST.MF"));
+                JpomApplication.version = StrUtil.emptyToDefault(ver, "dev");
+            } catch (Exception ignored) {
+                JpomApplication.version = "err";
+            }
+        }
+        return JpomApplication.version;
+    }
+
+    private static String getVersion(Enumeration<URL> manifestResources) {
+        while (manifestResources.hasMoreElements()) {
+            try {
+                try (InputStream inputStream = manifestResources.nextElement().openStream()) {
+                    Manifest manifest = new Manifest(inputStream);
+                    String startClass = manifest.getMainAttributes().getValue("Jpom-Project-Version");
+                    if (startClass != null) {
+                        return startClass;
+                    }
+                }
+            } catch (Exception ignored) {
             }
         }
         return null;

@@ -1,5 +1,6 @@
 package cn.keepbx.jpom.controller;
 
+import cn.keepbx.jpom.JpomApplication;
 import cn.keepbx.jpom.common.BaseController;
 import cn.keepbx.jpom.common.interceptor.NotLogin;
 import cn.keepbx.jpom.service.user.UserService;
@@ -40,6 +41,8 @@ public class IndexControl extends BaseController {
             return "redirect:install.html";
         }
         setAttribute("safeMode", ExtConfigBean.getInstance().safeMode);
+        // 版本号
+        setAttribute("version", JpomApplication.getVersion());
         return "index";
     }
 

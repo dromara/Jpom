@@ -12,7 +12,7 @@
     <artifactId>jpom</artifactId>
     <name>Jpom Java项目在线管理</name>
     <inceptionYear>2017</inceptionYear>
-    <version>2.1</version>
+    <version>2.2</version>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <java.version>1.8</java.version>
@@ -82,6 +82,12 @@
                             <!-- 指定依赖的时候声明前缀 -->
                             <classpathPrefix>./</classpathPrefix>
                         </manifest>
+                        <manifestEntries>
+                            <!-- 项目版本号 -->
+                            <Jpom-Project-Version>${project.version}</Jpom-Project-Version>
+                            <!-- 时间戳 -->
+                            <Timestamp>${maven.build.timestamp}</Timestamp>
+                        </manifestEntries>
                     </archive>
                 </configuration>
             </plugin>
