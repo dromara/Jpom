@@ -6,7 +6,7 @@ import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
-import cn.keepbx.jpom.util.FileCharsetDetector;
+import cn.keepbx.jpom.util.CharsetDetector;
 import cn.keepbx.jpom.util.LimitQueue;
 
 import javax.websocket.Session;
@@ -87,7 +87,7 @@ public class FileTailWatcher implements Runnable {
     private FileTailWatcher(File file, String log) throws IOException {
         this.log = log;
         this.randomFile = new RandomAccessFile(file, FileMode.r.name());
-        this.charset = CharsetUtil.charset(FileCharsetDetector.checkEncoding(file, FileCharsetDetector.Language.Chinese));
+        this.charset = CharsetUtil.charset(new CharsetDetector().detectChineseCharset(file));
         if (file.length() > 0) {
             // 开始读取
             this.startRead();
