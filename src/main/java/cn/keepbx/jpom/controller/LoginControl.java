@@ -59,7 +59,7 @@ public class LoginControl extends BaseController {
     }
 
 
-    @RequestMapping(value = "randCode.png")
+    @RequestMapping(value = "randCode.png", method = RequestMethod.GET)
     @ResponseBody
     @NotLogin
     public void randCode() throws IOException {

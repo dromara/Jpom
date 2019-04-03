@@ -11,8 +11,13 @@
    ### 3. 如何修改回话超时时长
         
     在管理程序命令文件中 ARGS 变量添加 --tomcat.sessionTimeOut=1800
+    
+   ### 4. 如果修改Jpom数据存储目录
+       
+    修改外部配置文件中的 jpom.path 属性
+      
         
-   ### 4. jpom 启动提示
+   ### 5. 在linux 系统中执行Jpom.sh 提示
    
    ![jpom](/doc/error/ff-unix.png)
     
@@ -32,14 +37,8 @@
     5.#sh filename
       OK!
       
-   ### 5. 启动提示
-   
-   > jpom 数据目录权限不足...
-   
-   请检查当前用户是否拥有对应目录的读写权限
    
    ### 6. Jpom使用Nginx代理推荐配置
-   
 
 ```
 server {
@@ -63,7 +62,10 @@ server {
 ```
 
    ### 7. 启动提示数据目录权限不足
-    
+   
+   > jpom 数据目录权限不足...
+       
+   请检查当前用户是否拥有对应目录的读写权限
    [https://gitee.com/keepbx/Jpom/wikis/pages?sort_id=1395625&doc_id=264493](https://gitee.com/keepbx/Jpom/wikis/pages?sort_id=1395625&doc_id=264493)
    
    ### 8. 启动提示JDK没有找到tools.jar
