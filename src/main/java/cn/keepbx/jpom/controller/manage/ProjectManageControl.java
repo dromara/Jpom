@@ -70,8 +70,9 @@ public class ProjectManageControl extends BaseController {
                     continue;
                 }
                 String id = projectInfoModel.getId();
-                JSONObject object = (JSONObject) JSONObject.toJSON(projectInfoModel);
+                JSONObject object = projectInfoModel.toJson();
                 object.put("manager", userName.isProject(id));
+                object.put("status", projectInfoModel.isStatus(true));
                 array.add(object);
             }
             array.sort((oo1, oo2) -> {

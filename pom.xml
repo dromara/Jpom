@@ -60,6 +60,12 @@
             <artifactId>bcprov-jdk15on</artifactId>
             <version>1.61</version>
         </dependency>
+
+        <dependency>
+            <groupId>net.sourceforge.jchardet</groupId>
+            <artifactId>jchardet</artifactId>
+            <version>1.0</version>
+        </dependency>
     </dependencies>
     <build>
         <plugins>
