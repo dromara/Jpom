@@ -34,7 +34,7 @@ public class WindowsCommander extends AbstractCommander {
         String command = String.format("javaw %s %s -Dapplication=%s -Dbasedir=%s %s %s >> %s &",
                 jvm, classPath, tag,
                 projectInfoModel.getAbsoluteLib(), mainClass, args, projectInfoModel.getAbsoluteLog());
-        // 执行命令;
+        // 执行命令
         GlobalThreadPool.execute(() -> execSystemCommand(command));
         //
         loopCheckRun(projectInfoModel.getId(), true);

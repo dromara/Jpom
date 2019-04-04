@@ -104,7 +104,7 @@ public class UserService extends BaseOperService<UserModel> {
             JSONObject value = (JSONObject) entry.getValue();
             UserModel userModel = value.toJavaObject(UserModel.class);
             // 不显示系统管理员信息
-            if (UserModel.SYSTEM_ADMIN.equals(userModel.getParent())) {
+            if (userModel.isSystemUser()) {
                 continue;
             }
             userModel.setPassword("");

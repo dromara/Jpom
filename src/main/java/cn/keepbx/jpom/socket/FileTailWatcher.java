@@ -1,16 +1,19 @@
 package cn.keepbx.jpom.socket;
 
 import cn.hutool.core.io.IoUtil;
+import cn.hutool.core.io.file.FileMode;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
+import cn.keepbx.jpom.util.CharsetDetector;
 import cn.keepbx.jpom.util.LimitQueue;
 
 import javax.websocket.Session;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.nio.charset.Charset;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -39,6 +42,7 @@ public class FileTailWatcher implements Runnable {
      * 是否已经开始执行
      */
     private boolean start = false;
+    private final Charset charset;
 
     /**
      * 添加文件监听
@@ -82,7 +86,8 @@ public class FileTailWatcher implements Runnable {
 
     private FileTailWatcher(File file, String log) throws IOException {
         this.log = log;
-        this.randomFile = new RandomAccessFile(file, "r");
+        this.randomFile = new RandomAccessFile(file, FileMode.r.name());
+        this.charset = CharsetUtil.charset(new CharsetDetector().detectChineseCharset(file));
         if (file.length() > 0) {
             // 开始读取
             this.startRead();
@@ -148,7 +153,7 @@ public class FileTailWatcher implements Runnable {
     private void readLine() throws IOException {
         String line = randomFile.readLine();
         if (line != null) {
-            line = CharsetUtil.convert(line, CharsetUtil.CHARSET_ISO_8859_1, CharsetUtil.systemCharset());
+            line = CharsetUtil.convert(line, CharsetUtil.CHARSET_ISO_8859_1, charset);
             limitQueue.offerFirst(line);
         }
     }
@@ -171,7 +176,7 @@ public class FileTailWatcher implements Runnable {
         }
         String tmp;
         while ((tmp = randomFile.readLine()) != null) {
-            tmp = CharsetUtil.convert(tmp, CharsetUtil.CHARSET_ISO_8859_1, CharsetUtil.systemCharset());
+            tmp = CharsetUtil.convert(tmp, CharsetUtil.CHARSET_ISO_8859_1, charset);
             limitQueue.offer(tmp);
             sendAll(tmp);
         }

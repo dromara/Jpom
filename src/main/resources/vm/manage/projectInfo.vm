@@ -12,7 +12,9 @@
 </head>
 <body>
 <div class="layui-row">
-    <button id="addProject" onclick="editProject('');" class="layui-btn layui-btn-sm">新增项目</button>
+    #if($user.isManage())
+        <button id="addProject" onclick="editProject('');" class="layui-btn layui-btn-sm">新增项目</button>
+    #end
     <button id="refresh" onclick="reloadTable();" class="layui-btn layui-btn-sm">刷新表格</button>
     <button onclick="projectRecover();" class="layui-btn layui-btn-sm">回收站</button>
 </div>
@@ -177,6 +179,12 @@
                 // 选中
                 $("#selectGroup option[value='" + apiWhere.group + "']").attr("selected", "selected");
                 form.render();
+                $("tbody").on("mouseover", "tr", function () {
+                    $(this).siblings().css("opacity", 0.3);
+                });
+                $("tbody").on("mouseout", "tr", function () {
+                    $(this).siblings().css("opacity", 1);
+                });
             }
         });
 
@@ -190,6 +198,7 @@
             reloadTable();
             return true;
         });
+
 
         // 表格工具条事件
         table.on('tool(tab_project)', function (obj) {

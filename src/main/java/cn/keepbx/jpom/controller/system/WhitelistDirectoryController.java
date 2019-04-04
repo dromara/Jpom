@@ -6,7 +6,6 @@ import cn.jiangzeyin.common.JsonMessage;
 import cn.keepbx.jpom.common.BaseController;
 import cn.keepbx.jpom.model.UserModel;
 import cn.keepbx.jpom.service.system.WhitelistDirectoryService;
-import cn.keepbx.jpom.system.ConfigBean;
 import cn.keepbx.jpom.system.ExtConfigBean;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -60,10 +59,9 @@ public class WhitelistDirectoryController extends BaseController {
             return JsonMessage.getString(401, "安全模式下不能修改白名单目录");
         }
         UserModel userName = getUser();
-        if (!UserModel.SYSTEM_ADMIN.equals(userName.getParent())) {
+        if (!userName.isSystemUser()) {
             return JsonMessage.getString(401, "你没有权限修改白名单目录");
         }
-
         //
         List<String> certificateList = null;
         if (StrUtil.isNotEmpty(certificate)) {

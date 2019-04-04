@@ -10,8 +10,10 @@
 
 ![GitHub](https://img.shields.io/github/license/jiangzeyin/jpom.svg?style=flat)
 ![jdk](https://img.shields.io/badge/JDK-1.8+-green.svg)
-[![travis](https://travis-ci.org/jiangzeyin/jpom.svg?branch=master)](https://travis-ci.org/jiangzeyin/jpom)
-
+[![travis](https://travis-ci.org/jiangzeyin/Jpom.svg?branch=master)](https://travis-ci.org/jiangzeyin/Jpom)
+[![QQ群](https://img.shields.io/badge/QQ%E7%BE%A4-136715345-yellowgreen.svg)](https://shang.qq.com/wpa/qunwpa?idkey=7be1882a2e2f07cd4af28bbb1f13362af270ba4615f2a6c7aaf9605fc0563d1b)
+[![码云](https://img.shields.io/badge/Gitee-%E7%A0%81%E4%BA%91-yellow.svg)](https://gitee.com/keepbx/Jpom)
+[![Github](https://img.shields.io/badge/Github-Github-red.svg)](https://github.com/jiangzeyin/Jpom)
 
 > Jpom采用SpringBoot开发web项目(前台采用layui)+websocket来统一管理，只要能使用浏览器就ok，同时Jpom可以在linux和windows服务器上运行
 
@@ -119,6 +121,8 @@
 [启动失败问题>>](https://gitee.com/keepbx/Jpom/wikis/pages?sort_id=1395625&doc_id=264493)
 
 [安装说明>>](https://gitee.com/keepbx/Jpom/wikis/pages?sort_id=1395348&doc_id=264493)
+
+[更新日志>>](/CHANGELOG.md)
 
 ### 开发计划
 

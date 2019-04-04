@@ -4,7 +4,6 @@ import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.keepbx.jpom.common.BaseController;
-import cn.keepbx.jpom.common.commander.AbstractCommander;
 import cn.keepbx.jpom.common.interceptor.ProjectPermission;
 import cn.keepbx.jpom.model.ProjectInfoModel;
 import cn.keepbx.jpom.model.UserModel;
@@ -70,8 +69,9 @@ public class ProjectManageControl extends BaseController {
                     continue;
                 }
                 String id = projectInfoModel.getId();
-                JSONObject object = (JSONObject) JSONObject.toJSON(projectInfoModel);
+                JSONObject object = projectInfoModel.toJson();
                 object.put("manager", userName.isProject(id));
+                object.put("status", projectInfoModel.isStatus(true));
                 array.add(object);
             }
             array.sort((oo1, oo2) -> {
@@ -95,22 +95,21 @@ public class ProjectManageControl extends BaseController {
     /**
      * 删除项目
      *
-     * @param id id
      * @return json
      */
     @RequestMapping(value = "deleteProject", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     @ProjectPermission
-    public String deleteProject(String id, String type) {
+    public String deleteProject() {
         ProjectInfoModel projectInfoModel = getProjectInfoModel();
         UserModel userModel = getUser();
         try {
             // 运行判断
-            if (AbstractCommander.getInstance().isRun(projectInfoModel.getId())) {
+            if (projectInfoModel.isStatus(true)) {
                 return JsonMessage.getString(401, "不能删除正在运行的项目");
             }
             String userId;
-            if (UserModel.SYSTEM_ADMIN.equals(userModel.getParent())) {
+            if (userModel.isSystemUser()) {
                 userId = UserModel.SYSTEM_OCCUPY_NAME;
             } else {
                 userId = userModel.getId();

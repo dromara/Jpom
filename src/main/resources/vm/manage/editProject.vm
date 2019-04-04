@@ -31,7 +31,7 @@
             <div class="layui-inline">
                 <label class="layui-form-label">分组名称</label>
                 <div class="layui-input-block">
-                    <input type="text" name="group" placeholder="项目分组名称" class="layui-input"
+                    <input type="text" name="group" placeholder="项目分组名称,非必填" class="layui-input"
                            value="#if($item)$!item.group#end">
                 </div>
             </div>
@@ -48,8 +48,8 @@
             <div class="layui-inline">
                 <label class="layui-form-label">MainClass</label>
                 <div class="layui-input-block">
-                    <input type="text" name="mainClass" placeholder="程序运行的 main 类" required
-                           lay-verify="required" class="layui-input" value="#if($item)$!item.mainClass#end">
+                    <input type="text" name="mainClass" placeholder="程序运行的 main 类(jar模式运行可以不填)" class="layui-input"
+                           value="#if($item)$!item.mainClass#end">
                 </div>
             </div>
 
@@ -77,7 +77,7 @@
             <div class="layui-inline">
                 <label class="layui-form-label" title="$!item.log">项目Lib</label>
                 <div class="layui-input-block">
-                    <input type="text" name="lib" placeholder="程序在生产服务器环境中需要的jar路径" required lay-verify="required"
+                    <input type="text" name="lib" placeholder="程序在服务器环境中需要的jar路径" required lay-verify="required"
                            class="layui-input" value="#if($item)$!item.lib#end">
                 </div>
             </div>
@@ -109,25 +109,9 @@
         </div>
         <div class="layui-form-item">
             <div class="layui-inline">
-                <label class="layui-form-label">Jvm参数</label>
-                <div class="layui-input-block">
-                    <input type="text" name="jvm" placeholder="jvm参数,非必填" class="layui-input"
-                           value="#if($item)$!item.jvm#end">
-                </div>
-            </div>
-            <div class="layui-inline">
-                <label class="layui-form-label">args</label>
-                <div class="layui-input-block">
-                    <input type="text" name="args" placeholder="Main函数 args参数,非必填" class="layui-input"
-                           value="#if($item)$!item.args#end">
-                </div>
-            </div>
-        </div>
-        <div class="layui-form-item">
-            <div class="layui-inline">
                 <label class="layui-form-label">WebHooks</label>
                 <div class="layui-input-block">
-                    <input type="text" name="token" placeholder="关闭程序时自动请求，没有请填写no" class="layui-input"
+                    <input type="text" name="token" placeholder="关闭程序时自动请求,非必填" class="layui-input"
                            value="#if($item)$!item.token#end">
                 </div>
             </div>
@@ -136,6 +120,22 @@
                 <div class="layui-input-block">
                     <input type="text" name="buildTag" placeholder="CodePipeline发布后oss中的文件标识,非必填" class="layui-input"
                            value="#if($item)$!item.buildTag#end">
+                </div>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-inline">
+                <label class="layui-form-label">Jvm参数</label>
+                <div class="layui-input-block">
+                    <textarea name="jvm" placeholder="jvm参数,非必填"
+                              class="layui-textarea">#if($item)$!item.jvm#end</textarea>
+                </div>
+            </div>
+            <div class="layui-inline">
+                <label class="layui-form-label">args参数</label>
+                <div class="layui-input-block">
+                    <textarea name="args" placeholder="Main函数 args参数,非必填"
+                              class="layui-textarea">#if($item)$!item.args#end</textarea>
                 </div>
             </div>
         </div>

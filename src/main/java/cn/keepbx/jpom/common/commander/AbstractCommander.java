@@ -93,7 +93,7 @@ public abstract class AbstractCommander {
      */
     public String stop(ProjectInfoModel projectInfoModel) throws Exception {
         String token = projectInfoModel.getToken();
-        if (StrUtil.isNotEmpty(token) && !ProjectInfoModel.NO_TOKEN.equalsIgnoreCase(token)) {
+        if (StrUtil.isNotEmpty(token)) {
             try {
                 return HttpUtil.createGet(token).execute().body();
             } catch (Exception e) {
@@ -124,7 +124,7 @@ public abstract class AbstractCommander {
         String lib = projectInfoModel.getLib();
         File fileLib = new File(lib);
         File[] files = fileLib.listFiles();
-        if (files == null) {
+        if (files == null || files.length <= 0) {
             return "没有jar包";
         }
         // 备份日志
@@ -177,6 +177,7 @@ public abstract class AbstractCommander {
     }
 
     private VirtualMachine getVirtualMachine(String tag) throws IOException, AttachNotSupportedException {
+        // 添加空格是为了防止startWith
         tag = String.format("-Dapplication=%s ", tag);
         // 通过VirtualMachine.list()列出所有的java进程
         List<VirtualMachineDescriptor> descriptorList = VirtualMachine.list();
@@ -185,9 +186,10 @@ public abstract class AbstractCommander {
             VirtualMachine virtualMachine = VirtualMachine.attach(virtualMachineDescriptor);
             Properties properties = virtualMachine.getAgentProperties();
             String args = properties.getProperty("sun.jvm.args", "");
-            if (StrUtil.isEmpty(args)) {
-                args = properties.getProperty("sun.java.command", "");
+            if (StrUtil.containsIgnoreCase(args, tag)) {
+                return virtualMachine;
             }
+            args = properties.getProperty("sun.java.command", "");
             if (StrUtil.containsIgnoreCase(args, tag)) {
                 return virtualMachine;
             }

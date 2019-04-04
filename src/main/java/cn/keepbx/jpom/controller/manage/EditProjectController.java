@@ -9,6 +9,7 @@ import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.keepbx.jpom.common.BaseController;
+import cn.keepbx.jpom.common.commander.AbstractCommander;
 import cn.keepbx.jpom.model.ProjectInfoModel;
 import cn.keepbx.jpom.model.UserModel;
 import cn.keepbx.jpom.service.manage.ProjectInfoService;
@@ -103,6 +104,11 @@ public class EditProjectController extends BaseController {
         } catch (Exception ignored) {
         }
         projectInfo.setRunMode(runMode1);
+
+        if (runMode1 == ProjectInfoModel.RunMode.ClassPath && StrUtil.isEmpty(projectInfo.getMainClass())) {
+            return JsonMessage.getString(401, "ClassPath 模式 MainClass必填");
+        }
+
         //
         if (!whitelistDirectoryService.checkProjectDirectory(whitelistDirectory)) {
             return JsonMessage.getString(401, "请选择正确的项目路径,或者还没有配置白名单");
@@ -147,14 +153,12 @@ public class EditProjectController extends BaseController {
         }
         //
         String token = projectInfo.getToken();
-        if (!ProjectInfoModel.NO_TOKEN.equals(token)) {
-            if (!ReUtil.isMatch(PatternPool.URL_HTTP, token)) {
-                return JsonMessage.getString(401, "WebHooks 地址不合法");
-            }
+        if (StrUtil.isNotEmpty(token) && !ReUtil.isMatch(PatternPool.URL_HTTP, token)) {
+            return JsonMessage.getString(401, "WebHooks 地址不合法");
         }
 
         // 判断空格
-        if (id.contains(StrUtil.SPACE) || lib.contains(StrUtil.SPACE) || log.contains(StrUtil.SPACE) || token.contains(StrUtil.SPACE)) {
+        if (id.contains(StrUtil.SPACE) || lib.contains(StrUtil.SPACE) || log.contains(StrUtil.SPACE)) {
             return JsonMessage.getString(401, "项目Id、项目Lib、WebHooks不能包含空格");
         }
 
@@ -172,6 +176,10 @@ public class EditProjectController extends BaseController {
             if (exits == null) {
                 if (!userName.isManage()) {
                     return JsonMessage.getString(400, "管理员才能创建项目!");
+                }
+                // 检查运行中的tag 是否被占用
+                if (AbstractCommander.getInstance().isRun(projectInfo.getId())) {
+                    return JsonMessage.getString(400, "当前项目id已经被正在运行的程序占用");
                 }
                 projectInfo.setCreateTime(DateUtil.now());
                 this.modify(projectInfo);
@@ -204,7 +212,7 @@ public class EditProjectController extends BaseController {
     private void modify(ProjectInfoModel exits) {
         UserModel userName = getUser();
         // 隐藏系统管理员登录名
-        if (UserModel.SYSTEM_ADMIN.equals(userName.getParent())) {
+        if (userName.isSystemUser()) {
             exits.setModifyUser(UserModel.SYSTEM_OCCUPY_NAME);
         } else {
             exits.setModifyUser(userName.getId());
@@ -273,19 +281,41 @@ public class EditProjectController extends BaseController {
 
     }
 
+    /**
+     * 路径存在包含关系
+     *
+     * @param projectInfoModel 比较的项目
+     * @return 不为null 则为错误
+     */
     private JsonMessage checkPath(ProjectInfoModel projectInfoModel) {
         List<ProjectInfoModel> projectInfoModelList = projectInfoService.list();
+        ProjectInfoModel projectInfoModel1 = null;
         for (ProjectInfoModel model : projectInfoModelList) {
             if (!model.getId().equals(projectInfoModel.getId())) {
-                if (model.getLib().startsWith(projectInfoModel.getLib()) || projectInfoModel.getLib().startsWith(model.getLib())) {
-                    return new JsonMessage(401, "项目lib和【" + model.getName() + "】项目冲突");
+                File file1 = new File(model.getLib());
+                File file2 = new File(projectInfoModel.getLib());
+                if (FileUtil.pathEquals(file1, file2)) {
+                    projectInfoModel1 = model;
+                    break;
                 }
-                //  log 自动生成
-                //      if (model.getLog().equals(projectInfoModel.getLog())) {
-                //          return new JsonMessage(401, "项目log和【" + model.getName() + "】项目冲突");
-                //      }
+                // 包含关系
+                if (pathContains(file1, file2) || pathContains(file2, file1)) {
+                    projectInfoModel1 = model;
+                    break;
+                }
             }
         }
+        if (projectInfoModel1 != null) {
+            return new JsonMessage(401, "项目lib和【" + projectInfoModel1.getName() + "】项目冲突:" + projectInfoModel1.getLib());
+        }
         return null;
+    }
+
+    private boolean pathContains(File file1, File file2) {
+        try {
+            return StrUtil.startWith(file1.getCanonicalPath() + File.separator, file2.getCanonicalPath() + File.separator, true);
+        } catch (Exception e) {
+            return StrUtil.startWith(file1.getAbsolutePath() + File.separator, file2.getAbsolutePath() + File.separator, true);
+        }
     }
 }
