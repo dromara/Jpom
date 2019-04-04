@@ -68,6 +68,14 @@
                 loading: true,
                 response: {
                     statusCode: 200
+                },
+                done: function () {
+                    $("tbody").on("mouseover", "tr", function () {
+                        $(this).siblings().css("opacity", 0.3);
+                    });
+                    $("tbody").on("mouseout", "tr", function () {
+                        $(this).siblings().css("opacity", 1);
+                    });
                 }
             });
             var updateFail = false;

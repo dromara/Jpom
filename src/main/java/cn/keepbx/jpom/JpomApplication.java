@@ -1,5 +1,7 @@
 package cn.keepbx.jpom;
 
+import cn.hutool.core.date.DateTime;
+import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.ApplicationBuilder;
@@ -118,8 +120,18 @@ public class JpomApplication {
             return timeStamp;
         }
 
+        /**
+         * 装换打包时间
+         *
+         * @param timeStamp utc时间
+         */
         public void setTimeStamp(String timeStamp) {
-            this.timeStamp = timeStamp;
+            if (StrUtil.isNotEmpty(timeStamp)) {
+                DateTime dateTime = DateUtil.parseUTC(timeStamp);
+                this.timeStamp = dateTime.toStringDefaultTimeZone();
+            } else {
+                this.timeStamp = timeStamp;
+            }
         }
     }
 }

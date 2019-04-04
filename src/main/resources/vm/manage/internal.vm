@@ -20,20 +20,13 @@
         .layui-border-box {
             height: 79px !important;
         }
-
-
-        .but {
-            width: 50px;
-            padding: 10px;
-            background: #cccccc;
-        }
     </style>
 </head>
 
 <body>
 <div>
-    <a class="but" href="/manage/stack?tag=$!tag">导出堆栈信息</a>
-    <a class="but" href="/manage/ram?tag=$!tag">导出内存信息</a>
+    <a class="layui-btn  layui-btn-sm layui-btn-normal" href="/manage/stack?tag=$!tag">导出堆栈信息</a>
+    <a class="layui-btn  layui-btn-sm layui-btn-normal" href="/manage/ram?tag=$!tag">导出内存信息</a>
 </div>
 <div class="info">
     <label>系统内存</label>
