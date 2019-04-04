@@ -12,7 +12,7 @@
         
     在管理程序命令文件中 ARGS 变量添加 --tomcat.sessionTimeOut=1800
     
-   ### 如果修改Jpom数据存储目录
+   ### 如何修改Jpom数据存储目录
        
     修改外部配置文件中的 jpom.path 属性
       
