@@ -179,6 +179,12 @@
                 // 选中
                 $("#selectGroup option[value='" + apiWhere.group + "']").attr("selected", "selected");
                 form.render();
+                $("tbody").on("mouseover", "tr", function () {
+                    $(this).siblings().css("opacity", 0.3);
+                });
+                $("tbody").on("mouseout", "tr", function () {
+                    $(this).siblings().css("opacity", 1);
+                });
             }
         });
 
@@ -192,6 +198,7 @@
             reloadTable();
             return true;
         });
+
 
         // 表格工具条事件
         table.on('tool(tab_project)', function (obj) {

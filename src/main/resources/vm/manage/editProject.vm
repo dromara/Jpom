@@ -31,7 +31,7 @@
             <div class="layui-inline">
                 <label class="layui-form-label">分组名称</label>
                 <div class="layui-input-block">
-                    <input type="text" name="group" placeholder="项目分组名称" class="layui-input"
+                    <input type="text" name="group" placeholder="项目分组名称,非必填" class="layui-input"
                            value="#if($item)$!item.group#end">
                 </div>
             </div>
@@ -77,7 +77,7 @@
             <div class="layui-inline">
                 <label class="layui-form-label" title="$!item.log">项目Lib</label>
                 <div class="layui-input-block">
-                    <input type="text" name="lib" placeholder="程序在生产服务器环境中需要的jar路径" required lay-verify="required"
+                    <input type="text" name="lib" placeholder="程序在服务器环境中需要的jar路径" required lay-verify="required"
                            class="layui-input" value="#if($item)$!item.lib#end">
                 </div>
             </div>
@@ -127,7 +127,7 @@
             <div class="layui-inline">
                 <label class="layui-form-label">WebHooks</label>
                 <div class="layui-input-block">
-                    <input type="text" name="token" placeholder="关闭程序时自动请求，没有请填写no" class="layui-input"
+                    <input type="text" name="token" placeholder="关闭程序时自动请求,非必填" class="layui-input"
                            value="#if($item)$!item.token#end">
                 </div>
             </div>

@@ -1,6 +1,7 @@
 package cn.keepbx.jpom.util;
 
 import org.mozilla.intl.chardet.nsDetector;
+import org.mozilla.intl.chardet.nsICharsetDetectionObserver;
 import org.mozilla.intl.chardet.nsPSMDetector;
 
 import java.io.*;
@@ -8,12 +9,15 @@ import java.io.*;
 /**
  * @author Administrator
  */
-public class CharsetDetector {
+public class CharsetDetector implements nsICharsetDetectionObserver {
 
     private boolean found = false;
     private String result;
 
     public String detectChineseCharset(File file) throws IOException {
+        if (!file.exists()) {
+            throw new FileNotFoundException(file.getAbsolutePath());
+        }
         String[] val = detectChineseCharset(new FileInputStream(file));
         if (val == null || val.length <= 0) {
             return null;
@@ -21,17 +25,12 @@ public class CharsetDetector {
         return val[0];
     }
 
-    public String[] detectChineseCharset(InputStream in) throws IOException {
-        int lang = nsPSMDetector.CHINESE;
-        String[] prob;
+    private String[] detectChineseCharset(InputStream in) throws IOException {
         // Initalize the nsDetector() ;
-        nsDetector det = new nsDetector(lang);
+        nsDetector det = new nsDetector(nsPSMDetector.ALL);
         // Set an observer...
         // The Notify() will be called when a matching charset is found.
-        det.Init(charset -> {
-            found = true;
-            result = charset;
-        });
+        det.Init(this);
         BufferedInputStream imp = new BufferedInputStream(in);
         byte[] buf = new byte[1024];
         int len;
@@ -51,6 +50,7 @@ public class CharsetDetector {
         imp.close();
         in.close();
         det.DataEnd();
+        String[] prob;
         if (isAscii) {
             found = true;
             prob = new String[]{"ASCII"};
@@ -60,5 +60,11 @@ public class CharsetDetector {
             prob = det.getProbableCharsets();
         }
         return prob;
+    }
+
+    @Override
+    public void Notify(String charset) {
+        found = true;
+        result = charset;
     }
 }

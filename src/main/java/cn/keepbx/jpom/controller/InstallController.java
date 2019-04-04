@@ -54,7 +54,7 @@ public class InstallController extends BaseController {
     @ResponseBody
     public String installSubmit(String userName, String userPwd, String whitelistDirectory) {
         if (!userService.userListEmpty()) {
-            return JsonMessage.getString(100, "请勿重复提交");
+            return JsonMessage.getString(100, "系统已经初始化过啦，请勿重复初始化");
         }
         if (StrUtil.isEmpty(userName)) {
             return JsonMessage.getString(400, "登录名不能为空");

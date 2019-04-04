@@ -38,6 +38,11 @@
       OK!
       
    
+   ### 6. 启动Jpom提示
+   ![jpom](/doc/error/jdk-error.png)
+   
+   Jpom需要Jdk1.8以上，请检查jdk版本
+   
    ### 6. Jpom使用Nginx代理推荐配置
 
 ```
