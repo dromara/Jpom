@@ -12,7 +12,9 @@
 </head>
 <body>
 <div class="layui-row">
-    <button id="addProject" onclick="editProject('');" class="layui-btn layui-btn-sm">新增项目</button>
+    #if($user.isManage())
+        <button id="addProject" onclick="editProject('');" class="layui-btn layui-btn-sm">新增项目</button>
+    #end
     <button id="refresh" onclick="reloadTable();" class="layui-btn layui-btn-sm">刷新表格</button>
     <button onclick="projectRecover();" class="layui-btn layui-btn-sm">回收站</button>
 </div>
