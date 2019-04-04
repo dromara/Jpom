@@ -77,7 +77,7 @@ public class UserModel extends BaseModel {
      * @return 系统管理员都用权限
      */
     public boolean isUploadFile() {
-        if (UserModel.SYSTEM_ADMIN.equals(getParent())) {
+        if (isSystemUser()) {
             return true;
         }
         return uploadFile;
@@ -93,7 +93,7 @@ public class UserModel extends BaseModel {
      * @return 系统管理员都用权限
      */
     public boolean isDeleteFile() {
-        if (UserModel.SYSTEM_ADMIN.equals(getParent())) {
+        if (isSystemUser()) {
             return true;
         }
         return deleteFile;
@@ -241,7 +241,7 @@ public class UserModel extends BaseModel {
      * @return true 是
      */
     public boolean isManage() {
-        if (UserModel.SYSTEM_ADMIN.equals(getParent())) {
+        if (isSystemUser()) {
             return true;
         }
         return manage;
@@ -265,6 +265,10 @@ public class UserModel extends BaseModel {
 
     public void setManage(boolean manage) {
         this.manage = manage;
+    }
+
+    public boolean isSystemUser() {
+        return UserModel.SYSTEM_ADMIN.equals(getParent());
     }
 
     public JSONObject toJson() {

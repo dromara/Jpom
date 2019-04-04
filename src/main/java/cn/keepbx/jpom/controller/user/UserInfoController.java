@@ -114,7 +114,7 @@ public class UserInfoController extends BaseController {
         if (userModel == null) {
             return JsonMessage.getString(501, "非法访问");
         }
-        if (UserModel.SYSTEM_ADMIN.equals(userModel.getParent())) {
+        if (userModel.isSystemUser()) {
             return JsonMessage.getString(400, "不能删除系统管理员");
         }
         boolean b = userService.deleteUser(id);
@@ -190,7 +190,7 @@ public class UserInfoController extends BaseController {
                 return JsonMessage.getString(400, "密码长度为6-12位");
             }
             // 修改用户
-            if (!create && !UserModel.SYSTEM_ADMIN.equals(userName.getParent())) {
+            if (!create && !userName.isSystemUser()) {
                 return JsonMessage.getString(401, "只有系统管理员才能重置用户密码");
             }
             userModel.setPassword(password);
@@ -238,7 +238,7 @@ public class UserInfoController extends BaseController {
             return JsonMessage.getString(400, "修改失败:-1");
         }
         // 禁止修改系统管理员信息
-        if (UserModel.SYSTEM_ADMIN.equals(userModel.getParent())) {
+        if (userModel.isSystemUser()) {
             return JsonMessage.getString(401, "WEB端不能修改系统管理员信息");
         }
         String msg = parseUser(userModel, false);
@@ -252,4 +252,28 @@ public class UserInfoController extends BaseController {
         return JsonMessage.getString(400, "修改失败");
     }
 
+    /**
+     * 解锁用户锁定状态
+     *
+     * @param id id
+     * @return json
+     * @throws IOException io
+     */
+    @RequestMapping(value = "unlock", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    public String unlock(String id) throws IOException {
+        UserModel userName = getUser();
+        if (!userName.isSystemUser()) {
+            return JsonMessage.getString(400, "你还没有权限");
+        }
+        UserModel userModel = userService.getItem(id);
+        if (userModel == null) {
+            return JsonMessage.getString(400, "修改失败:-1");
+        }
+        userModel.unLock();
+        boolean b = userService.updateUser(userModel);
+        if (b) {
+            return JsonMessage.getString(200, "解锁成功");
+        }
+        return JsonMessage.getString(400, "解锁失败");
+    }
 }

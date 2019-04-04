@@ -13,7 +13,7 @@
 
 <body>
 <div class="layui-container">
-    #if($manager)
+    #if($user.isSystemUser())
         <form action="" class="layui-form">
             <div class="layui-form-item">
                 <label class="layui-form-label">接入点</label>

@@ -96,13 +96,12 @@ public class ProjectManageControl extends BaseController {
     /**
      * 删除项目
      *
-     * @param id id
      * @return json
      */
     @RequestMapping(value = "deleteProject", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     @ProjectPermission
-    public String deleteProject(String id, String type) {
+    public String deleteProject() {
         ProjectInfoModel projectInfoModel = getProjectInfoModel();
         UserModel userModel = getUser();
         try {
@@ -111,7 +110,7 @@ public class ProjectManageControl extends BaseController {
                 return JsonMessage.getString(401, "不能删除正在运行的项目");
             }
             String userId;
-            if (UserModel.SYSTEM_ADMIN.equals(userModel.getParent())) {
+            if (userModel.isSystemUser()) {
                 userId = UserModel.SYSTEM_OCCUPY_NAME;
             } else {
                 userId = userModel.getId();

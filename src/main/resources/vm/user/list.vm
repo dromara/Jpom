@@ -44,7 +44,7 @@
                 </div>
             </div>
         </div>
-        <div class="layui-form-item">
+        <div class="layui-form-item" id="pwd-input-div">
             <div class="layui-inline">
                 <label class="layui-form-label">密码</label>
                 <div class="layui-input-block">
@@ -105,12 +105,21 @@
 </body>
 
 <script type="text/html" id="bar_projects">
-    <a href="javascript:;" class="layui-btn  layui-btn-sm layui-btn-warm" lay-event="update">编辑</a>
+    <a href="javascript:;" class="layui-btn  layui-btn-sm layui-btn-normal" lay-event="update">编辑</a>
     <a href="javascript:;" class="layui-btn  layui-btn-sm layui-btn-danger" lay-event="delete">删除</a>
+        #if($user.isSystemUser())
+        {{# if(d.pwdErrorCount>0){ }}
+        <a href="javascript:;" class="layui-btn  layui-btn-sm layui-btn-warm" lay-event="unlock">解锁</a>
+        {{# } }}
+        #end
 </script>
 <script type="text/html" id="manager_status">
-    <input type="checkbox" id="" disabled name="status" {{# if(d.manage){ }} checked {{# } }} lay-skin="switch"
-           lay-text="是|否">
+    <div title="登录失败次数：{{d.pwdErrorCount}}">
+        <input type="checkbox" id="" disabled name="status" {{# if(d.manage){ }} checked
+               {{# } }}
+               lay-skin="switch"
+               lay-text="是|否">
+    </div>
 </script>
 
 <script type="text/javascript">
@@ -142,6 +151,10 @@
             document.getElementById('form_user').reset();
             $('#form_user [name="id"]').attr('readonly', true).addClass('layui-disabled');
             $('#form_user [name="project"]').prop('checked', false);
+            // 修改密码
+            #if(!$user.isSystemUser())
+                $('#form_user').find("#pwd-input-div").hide();
+            #end
             // 设置表单值
             for (var key in data) {
                 if ("manage" === key) {
@@ -203,9 +216,7 @@
 
         // '刷新表格'点击事件
         $('#refresh').on('click', function () {
-            table.reload('tab_user', {
-                // height: 'full-52'
-            });
+            table.reload('tab_user', {});
         });
 
 
@@ -238,16 +249,44 @@
         table.on('tool(tab_user)', function (obj) {
             var data = obj.data;
             var event = obj.event;
-
             if ('update' === event) {
                 // 修改
                 updateApplication(data);
             } else if ('delete' === event) {
                 // 删除
                 deleteApplication(data);
+            } else if ('unlock' === event) {
+                // 解锁
+                unlockUser(data);
             }
         });
 
+        function unlockUser(data) {
+            #if($user.isSystemUser())
+                layer.confirm('确定解锁用户 ' + data.id + '？', {
+                    title: '系统提示'
+                }, function (index) {
+                    layer.close(index);
+                    $.ajax({
+                        url: './unlock',
+                        type: 'POST',
+                        dataType: 'json',
+                        data: {
+                            id: data.id
+                        },
+                        success: function (data) {
+                            layer.msg(data.msg);
+                            if (200 == data.code) {
+                                table.reload('tab_user', {});
+                            }
+                        },
+                        error: function (err) {
+                            layer.msg('解锁失败！');
+                        }
+                    });
+                });
+            #end
+        }
 
         // 删除用户
         function deleteApplication(data) {
@@ -263,10 +302,7 @@
                     success: function (data) {
                         if (200 == data.code) {
                             layer.msg('删除成功！');
-                            // 刷新项目列表
-                            table.reload('tab_user', {
-                                // height: 'full-52'
-                            });
+                            table.reload('tab_user', {});
                         } else {
                             layer.msg(data.msg);
                         }

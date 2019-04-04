@@ -91,8 +91,8 @@
 <body class="layui-layout-body">
 <div class="layui-layout layui-layout-admin">
     <div class="layui-header">
-        <div class="layui-logo">
-            Jpom项目管理系统($version)
+        <div class="layui-logo" title="$!jpomManifest.timeStamp">
+            Jpom项目管理系统#if($jpomManifest)($jpomManifest.version)#end
         </div>
         <ul class="layui-nav layui-layout-left">
             #if($safeMode)
@@ -101,7 +101,17 @@
         </ul>
         <ul class="layui-nav layui-layout-right" lay-filter="userOperation">
             <li class="layui-nav-item">
-                <a href="javascript:;">$user.name</a>
+                <a href="javascript:;">$user.name
+                    <font style="font-size: 10px;">
+                        (#if($user.isSystemUser())
+                        系统管理
+                    #elseif($user.isManage())
+                        管理员
+                    #else
+                        普通成员
+                    #end)
+                    </font>
+                </a>
                 <dl class="layui-nav-child">
                     <dd><a href="javascript:;" op="updatePwd">修改密码</a></dd>
                     <dd><a href="javascript:;" op="updateName">修改昵称</a></dd>
@@ -121,21 +131,21 @@
                 <li class="layui-nav-item">
                     <a href="javascript:;" data-options="{'id':'manage', 'title':'项目管理', 'url':'/manage/projectInfo'}">项目管理</a>
                 </li>
-                <li class="layui-nav-item">
-                    <a href="javascript:;" data-options="{'id':'user', 'title':'用户管理', 'url':'/user/list'}">用户管理</a>
-                </li>
+                #if($user.isManage())
+                    <li class="layui-nav-item">
+                        <a href="javascript:;" data-options="{'id':'user', 'title':'用户管理', 'url':'/user/list'}">用户管理</a>
+                    </li>
+                #end
                 <li class="layui-nav-item">
                     <a href="javascript:;"
                        data-options="{'id':'whitelistDirectory', 'title':'白名单目录', 'url':'/system/whitelistDirectory'}">白名单目录</a>
                 </li>
-                <li class="layui-nav-item">
-                    <a href="javascript:;"
-                       data-options="{'id':'alioss', 'title':'阿里云OSS', 'url':'/system/alioss'}">阿里云OSS</a>
-                </li>
-            ##                <li class="layui-nav-item">
-            ##                    <a href="javascript:;"
-            ##                       data-options="{'id':'certificate', 'title':'证书管理', 'url':'/system/certificate'}">证书管理</a>
-            ##                </li>
+                #if($user.isSystemUser())
+                    <li class="layui-nav-item">
+                        <a href="javascript:;"
+                           data-options="{'id':'alioss', 'title':'阿里云OSS', 'url':'/system/alioss'}">阿里云OSS</a>
+                    </li>
+                #end
                 <li class="layui-nav-item">
                     <a href="javascript:;"
                        data-options="{'id':'nginx', 'title':'nginx管理', 'url':'/system/nginx'}">nginx管理</a>

@@ -42,7 +42,7 @@ public class IndexControl extends BaseController {
         }
         setAttribute("safeMode", ExtConfigBean.getInstance().safeMode);
         // 版本号
-        setAttribute("version", JpomApplication.getVersion());
+        setAttribute("jpomManifest", JpomApplication.getJpomManifest());
         return "index";
     }
 
