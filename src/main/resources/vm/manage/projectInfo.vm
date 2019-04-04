@@ -8,6 +8,10 @@
         body {
             padding: 10px 10px 0px 10px;
         }
+
+        .layui-table-hover {
+
+        }
     </style>
 </head>
 <body>
@@ -16,16 +20,16 @@
         <button id="addProject" onclick="editProject('');" class="layui-btn layui-btn-sm">新增项目</button>
     #end
     <button id="refresh" onclick="reloadTable();" class="layui-btn layui-btn-sm">刷新表格</button>
-    <button onclick="projectRecover();" class="layui-btn layui-btn-sm">回收站</button>
+    <button onclick="projectRecover();" class="layui-btn layui-btn-sm layui-btn-primary">回收站</button>
 </div>
 <table class="layui-table" id="tab_project" lay-filter="tab_project" style="margin: 0;"></table>
 
 <script type="text/html" id="bar_projects">
     <a href="javascript:;" class="layui-btn  layui-btn-sm layui-btn-normal" lay-event="manage">控制台</a>
     <a href="javascript:;" class="layui-btn  layui-btn-sm layui-btn-warm" lay-event="update">配置</a>
-    <a href="javascript:;" class="layui-btn  layui-btn-sm layui-btn" lay-event="file">文件</a>
-    <a href="javascript:;" class="layui-btn  layui-btn-sm layui-btn" lay-event="build">构建</a>
-    <a href="javascript:;" class="layui-btn  layui-btn-sm layui-btn" lay-event="ram">监控</a>
+    <a href="javascript:;" class="layui-btn  layui-btn-sm" lay-event="file">文件</a>
+    <a href="javascript:;" class="layui-btn  layui-btn-sm layui-btn-normal" lay-event="build">构建</a>
+    <a href="javascript:;" class="layui-btn  layui-btn-sm" lay-event="ram">监控</a>
 </script>
 <script type="text/html" id="status_templ">
     <input type="checkbox" id="" disabled name="status" {{# if(d.status){ }} checked {{# } }} lay-skin="switch"
