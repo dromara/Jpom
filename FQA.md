@@ -1,23 +1,23 @@
 ## 常见问题
 
-   ### 1. 如何修改程序运行端口
+   ### 如何修改程序运行端口
    
     修改管理程序命令文件中 --server.port=2122
         
-   ### 2. 如何修改程序日志路径
+   ### 如何修改程序日志路径
    
     修改管理程序命令文件中 --jpom.log=/jpom/log/
         
-   ### 3. 如何修改回话超时时长
+   ### 如何修改回话超时时长
         
     在管理程序命令文件中 ARGS 变量添加 --tomcat.sessionTimeOut=1800
     
-   ### 4. 如果修改Jpom数据存储目录
+   ### 如果修改Jpom数据存储目录
        
     修改外部配置文件中的 jpom.path 属性
       
         
-   ### 5. 在linux 系统中执行Jpom.sh 提示
+   ### 在linux 系统中执行Jpom.sh 提示
    
    ![jpom](/doc/error/ff-unix.png)
     
@@ -38,12 +38,12 @@
       OK!
       
    
-   ### 6. 启动Jpom提示
+   ### 启动Jpom提示
    ![jpom](/doc/error/jdk-error.png)
    
    Jpom需要Jdk1.8以上，请检查jdk版本
    
-   ### 6. Jpom使用Nginx代理推荐配置
+   ###  Jpom使用Nginx代理推荐配置
 
 ```
 server {
@@ -66,14 +66,14 @@ server {
 }
 ```
 
-   ### 7. 启动提示数据目录权限不足
+   ### 启动提示数据目录权限不足
    
    > jpom 数据目录权限不足...
        
    请检查当前用户是否拥有对应目录的读写权限
    [https://gitee.com/keepbx/Jpom/wikis/pages?sort_id=1395625&doc_id=264493](https://gitee.com/keepbx/Jpom/wikis/pages?sort_id=1395625&doc_id=264493)
    
-   ### 8. 启动提示JDK没有找到tools.jar
+   ### 启动提示JDK没有找到tools.jar
    
    [https://gitee.com/keepbx/Jpom/wikis/pages?sort_id=1398788&doc_id=264493](https://gitee.com/keepbx/Jpom/wikis/pages?sort_id=1398788&doc_id=264493)
    
