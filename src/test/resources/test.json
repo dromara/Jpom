@@ -1,0 +1,29 @@
+{
+  "msg": "查询成功！",
+  "code": 200,
+  "data": [
+    {
+      "jvm": "-Xms256m -Xmx512m  -XX:MaxPermSize=256M",
+      "runLibDesc": "upload",
+      "lib": "/home/SpringCloud/auto-license",
+      "mainClass": "cn.phxg.LicenseServiceApplication",
+      "manager": true,
+      "log": "/home/SpringCloud/auto-license.log",
+      "runMode": "Jar",
+      "token": "",
+      "args": "--server.port=9099",
+      "absoluteLib": "/home/SpringCloud/auto-license",
+      "modifyUser": "系统管理员",
+      "absoluteLog": "/home/SpringCloud/auto-license.log",
+      "modifyTime": "2019-04-04 16:38:32",
+      "buildTag": "",
+      "createTime": "2019-04-04 14:21:40",
+      "name": "平台授权服务",
+      "id": "auto-license",
+      "logBack": "/home/SpringCloud/auto-license.log_back",
+      "useLibDesc": "upload",
+      "group": "私有云",
+      "status": false
+    }
+  ]
+}

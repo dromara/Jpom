@@ -9,6 +9,7 @@ import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.keepbx.jpom.common.BaseController;
+import cn.keepbx.jpom.common.commander.AbstractCommander;
 import cn.keepbx.jpom.model.ProjectInfoModel;
 import cn.keepbx.jpom.model.UserModel;
 import cn.keepbx.jpom.service.manage.ProjectInfoService;
@@ -103,6 +104,11 @@ public class EditProjectController extends BaseController {
         } catch (Exception ignored) {
         }
         projectInfo.setRunMode(runMode1);
+
+        if (runMode1 == ProjectInfoModel.RunMode.ClassPath && StrUtil.isEmpty(projectInfo.getMainClass())) {
+            return JsonMessage.getString(401, "ClassPath 模式 MainClass必填");
+        }
+
         //
         if (!whitelistDirectoryService.checkProjectDirectory(whitelistDirectory)) {
             return JsonMessage.getString(401, "请选择正确的项目路径,或者还没有配置白名单");
@@ -147,14 +153,12 @@ public class EditProjectController extends BaseController {
         }
         //
         String token = projectInfo.getToken();
-        if (!ProjectInfoModel.NO_TOKEN.equals(token)) {
-            if (!ReUtil.isMatch(PatternPool.URL_HTTP, token)) {
-                return JsonMessage.getString(401, "WebHooks 地址不合法");
-            }
+        if (StrUtil.isNotEmpty(token) && !ReUtil.isMatch(PatternPool.URL_HTTP, token)) {
+            return JsonMessage.getString(401, "WebHooks 地址不合法");
         }
 
         // 判断空格
-        if (id.contains(StrUtil.SPACE) || lib.contains(StrUtil.SPACE) || log.contains(StrUtil.SPACE) || token.contains(StrUtil.SPACE)) {
+        if (id.contains(StrUtil.SPACE) || lib.contains(StrUtil.SPACE) || log.contains(StrUtil.SPACE)) {
             return JsonMessage.getString(401, "项目Id、项目Lib、WebHooks不能包含空格");
         }
 
@@ -172,6 +176,10 @@ public class EditProjectController extends BaseController {
             if (exits == null) {
                 if (!userName.isManage()) {
                     return JsonMessage.getString(400, "管理员才能创建项目!");
+                }
+                // 检查运行中的tag 是否被占用
+                if (AbstractCommander.getInstance().isRun(projectInfo.getId())) {
+                    return JsonMessage.getString(400, "当前项目id已经被正在运行的程序占用");
                 }
                 projectInfo.setCreateTime(DateUtil.now());
                 this.modify(projectInfo);

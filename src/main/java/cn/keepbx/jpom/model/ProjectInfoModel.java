@@ -1,6 +1,7 @@
 package cn.keepbx.jpom.model;
 
 import cn.hutool.core.util.StrUtil;
+import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.keepbx.jpom.common.commander.AbstractCommander;
 import com.alibaba.fastjson.JSONObject;
 
@@ -12,8 +13,6 @@ import java.io.File;
  * @author jiangzeyin
  */
 public class ProjectInfoModel extends BaseModel {
-    public static final String NO_TOKEN = "no";
-
     private String name;
     /**
      * 分组
@@ -73,7 +72,7 @@ public class ProjectInfoModel extends BaseModel {
     }
 
     /**
-     * 项目是否正在运行，不推荐直接使用
+     * 项目是否正在运行
      *
      * @param get 防止并发获取
      * @return true 正在运行
@@ -85,6 +84,7 @@ public class ProjectInfoModel extends BaseModel {
         try {
             status = AbstractCommander.getInstance().isRun(getId());
         } catch (Exception e) {
+            DefaultSystemLog.ERROR().error("检查项目状态错误", e);
             status = false;
         }
         return status;
@@ -159,6 +159,9 @@ public class ProjectInfoModel extends BaseModel {
     }
 
     public String getMainClass() {
+        if (mainClass == null) {
+            return "";
+        }
         return mainClass;
     }
 
@@ -224,13 +227,14 @@ public class ProjectInfoModel extends BaseModel {
     }
 
     /**
-     * 默认 是no
+     * 默认
      *
      * @return url token
      */
     public String getToken() {
-        if (StrUtil.isEmpty(token)) {
-            token = NO_TOKEN;
+        // 兼容旧数据
+        if ("no".equalsIgnoreCase(this.token)) {
+            return "";
         }
         return token;
     }

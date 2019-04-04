@@ -4,7 +4,6 @@ import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.keepbx.jpom.common.BaseController;
-import cn.keepbx.jpom.common.commander.AbstractCommander;
 import cn.keepbx.jpom.common.interceptor.ProjectPermission;
 import cn.keepbx.jpom.model.ProjectInfoModel;
 import cn.keepbx.jpom.model.UserModel;
@@ -106,7 +105,7 @@ public class ProjectManageControl extends BaseController {
         UserModel userModel = getUser();
         try {
             // 运行判断
-            if (AbstractCommander.getInstance().isRun(projectInfoModel.getId())) {
+            if (projectInfoModel.isStatus(true)) {
                 return JsonMessage.getString(401, "不能删除正在运行的项目");
             }
             String userId;

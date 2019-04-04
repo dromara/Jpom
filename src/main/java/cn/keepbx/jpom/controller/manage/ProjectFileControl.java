@@ -115,13 +115,12 @@ public class ProjectFileControl extends BaseController {
     /**
      * 上传文件
      *
-     * @param id 项目id
      * @return json
      */
     @RequestMapping(value = "upload", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     @ProjectPermission(checkUpload = true)
-    public String upload(String id) throws Exception {
+    public String upload() throws Exception {
         ProjectInfoModel pim = getProjectInfoModel();
         MultipartFileBuilder multipartFileBuilder = createMultipart()
                 .addFieldName("file");
