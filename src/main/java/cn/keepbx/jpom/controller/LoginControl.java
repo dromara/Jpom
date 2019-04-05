@@ -63,7 +63,7 @@ public class LoginControl extends BaseController {
     @ResponseBody
     @NotLogin
     public void randCode() throws IOException {
-        CircleCaptcha circleCaptcha = CaptchaUtil.createCircleCaptcha(100, 50, 4, 10);
+        CircleCaptcha circleCaptcha = CaptchaUtil.createCircleCaptcha(100, 50, 4, 8);
         circleCaptcha.createCode();
         HttpServletResponse response = getResponse();
         circleCaptcha.write(response.getOutputStream());
