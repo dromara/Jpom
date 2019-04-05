@@ -1,6 +1,6 @@
 @REM The MIT License (MIT)
 @REM
-@REM Copyright (c) 2019 不忘初心
+@REM Copyright (c) 2019 码之科技工作室
 @REM
 @REM Permission is hereby granted, free of charge, to any person obtaining a copy of
 @REM this software and associated documentation files (the "Software"), to deal in
