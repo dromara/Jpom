@@ -15,18 +15,30 @@ import cn.keepbx.jpom.util.ArgsUtil;
 public class JpomClose {
 
     public static void main(String[] args) throws Exception {
+        if (args == null || args.length <= 0) {
+            Console.error("请传入正确的参数");
+            return;
+        }
         String tag = ArgsUtil.getArgsValue(args, "jpom.applicationTag");
         if (StrUtil.isEmpty(tag)) {
             Console.error("请传入对应：jpom.applicationTag");
             return;
         }
-        if (!AbstractCommander.getInstance().isRun(tag)) {
-            Console.error("Jpom并没有运行");
-            return;
+        String event = args[args.length - 1];
+        if ("stop".equalsIgnoreCase(event)) {
+            if (!AbstractCommander.getInstance().isRun(tag)) {
+                Console.error("Jpom并没有运行");
+                return;
+            }
+            ProjectInfoModel projectInfoModel = new ProjectInfoModel();
+            projectInfoModel.setId(tag);
+            String msg = AbstractCommander.getInstance().stop(projectInfoModel);
+            Console.log(msg);
+        } else if ("status".equalsIgnoreCase(event)) {
+            String status = AbstractCommander.getInstance().status(tag);
+            Console.log("Jpom:" + status);
+        } else {
+            Console.error("event error:" + event);
         }
-        ProjectInfoModel projectInfoModel = new ProjectInfoModel();
-        projectInfoModel.setId(tag);
-        String msg = AbstractCommander.getInstance().stop(projectInfoModel);
-        Console.log(msg);
     }
 }

@@ -6,6 +6,7 @@ import cn.hutool.extra.servlet.ServletUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.keepbx.jpom.common.BaseController;
+import cn.keepbx.jpom.common.commander.AbstractCommander;
 import cn.keepbx.jpom.common.interceptor.ProjectPermission;
 import cn.keepbx.jpom.model.ProjectInfoModel;
 import cn.keepbx.jpom.service.manage.CommandService;
@@ -118,7 +119,7 @@ public class LogBackController extends BaseController {
         ProjectInfoModel pim;
         try {
             pim = projectInfoService.getItem(id);
-            String msg = commandService.execCommand(CommandService.CommandOp.backupLog, pim);
+            String msg = AbstractCommander.getInstance().backLog(pim);
             if (msg.contains("ok")) {
                 return JsonMessage.getString(200, "重置成功");
             }

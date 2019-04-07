@@ -39,3 +39,4 @@
 2. 当存在的用户登录次数超过外部配置的`alwaysLoginError`时，将锁定30分钟
 3. 当存在的用户登录次数超过外部配置的`alwaysLoginError`两倍时，将锁定1小时
 4. 当存在的用户登录次数超过外部配置的`alwaysLoginError`超过两倍时，将锁定10小时
+5. 当登录某个Ip登录失败次数达到外部配置的`alwaysLoginError`十倍时，将锁定对应IP

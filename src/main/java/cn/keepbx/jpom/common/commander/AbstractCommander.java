@@ -92,6 +92,7 @@ public abstract class AbstractCommander {
      * @throws Exception 异常
      */
     public String stop(ProjectInfoModel projectInfoModel) throws Exception {
+        String tag = projectInfoModel.getId();
         String token = projectInfoModel.getToken();
         if (StrUtil.isNotEmpty(token)) {
             try {
@@ -100,7 +101,8 @@ public abstract class AbstractCommander {
                 return "get error";
             }
         }
-        return "";
+        // 再次查看进程信息
+        return status(tag);
     }
 
     /**
@@ -254,12 +256,22 @@ public abstract class AbstractCommander {
      * @return 未运行 返回 0
      * @throws Exception 异常
      */
-    public String getPid(String tag) throws Exception {
+    public int getPid(String tag) throws Exception {
         String result = status(tag);
+        return parsePid(result);
+    }
+
+    /**
+     * 转换pid
+     *
+     * @param result 查询信息
+     * @return int
+     */
+    protected static int parsePid(String result) {
         if (result.startsWith(CommandService.RUNING_TAG)) {
-            return result.split(":")[1];
+            return Convert.toInt(result.split(":")[1]);
         }
-        return "0";
+        return 0;
     }
 
     /**

@@ -37,12 +37,21 @@ if "%1"=="start" (
     if "%1"=="stop" (
         call:stop
     )else (
-        call:use
+         if "%1"=="restart" (
+            call:restart
+         )else (
+            if "%1"=="status" (
+               call:status
+            )else (
+               call:use
+            )
+         )
     )
 )
 pause
 exit
 
+@REM 启动
 :start
 set TEMPCLASSPATH=
 for /f "delims=" %%I in ('dir /B %Lib%') do (set TEMPCLASSPATH=!TEMPCLASSPATH!%Lib%%%I;)
@@ -51,21 +60,29 @@ cmd /S /C "javaw %JVM% -classpath %TEMPCLASSPATH%"%JAVA_HOME%"\lib\tools.jar -Da
 echo 启动中.....
 goto:eof
 
+@REM 关闭Jpom
 :stop
 set TEMPCLASSPATH=
 for /f "delims=" %%I in ('dir /B %Lib%') do (set TEMPCLASSPATH=!TEMPCLASSPATH!%Lib%%%I;)
-
 set MainClass=cn.keepbx.jpom.JpomClose
-java -classpath %TEMPCLASSPATH%"%JAVA_HOME%"\lib\tools.jar %MainClass% %ARGS%
-echo stop
+java -classpath %TEMPCLASSPATH%"%JAVA_HOME%"\lib\tools.jar %MainClass% %ARGS%" stop"
 goto:eof
 
-@REM 重启
+@REM 查看Jpom运行状态
+:status
+set TEMPCLASSPATH=
+for /f "delims=" %%I in ('dir /B %Lib%') do (set TEMPCLASSPATH=!TEMPCLASSPATH!%Lib%%%I;)
+set MainClass=cn.keepbx.jpom.JpomClose
+java -classpath %TEMPCLASSPATH%"%JAVA_HOME%"\lib\tools.jar %MainClass% %ARGS%" status"
+goto:eof
+
+@REM 重启Jpom
 :restart
 call:stop
 call:start
 goto:eof
 
+@REM 提示用法
 :use
-echo please use start
+echo please use (start|stop|restart|status)
 goto:eof

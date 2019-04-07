@@ -1,32 +1,24 @@
-package cn.keepbx.jpom.controller.manage;
+package cn.keepbx.jpom.controller.monitor;
 
-import cn.hutool.core.convert.Convert;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.text.StrSpliter;
-import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.servlet.ServletUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.keepbx.jpom.common.BaseController;
 import cn.keepbx.jpom.common.commander.AbstractCommander;
-import cn.keepbx.jpom.model.ProjectInfoModel;
-import cn.keepbx.jpom.service.manage.CommandService;
-import cn.keepbx.jpom.service.manage.ProjectInfoService;
 import cn.keepbx.jpom.socket.top.TopManager;
 import cn.keepbx.jpom.system.ConfigBean;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.sun.management.OperatingSystemMXBean;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
-import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryMXBean;
 import java.lang.management.MemoryUsage;
 import java.math.BigDecimal;
@@ -40,10 +32,6 @@ import java.util.List;
 @Controller
 @RequestMapping(value = "/manage/")
 public class InternalController extends BaseController {
-    @Resource
-    private ProjectInfoService projectInfoService;
-    @Resource
-    private CommandService commandService;
 
     /**
      * 获取内存信息
@@ -51,27 +39,29 @@ public class InternalController extends BaseController {
     @RequestMapping(value = "internal", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
     public String getInternal(String tag) throws Exception {
         setAttribute("tag", tag);
-        String pid = AbstractCommander.getInstance().getPid(tag);
-        if (AbstractCommander.OS_INFO.isLinux()) {
-            String command = "top -b -n 1 -p " + pid;
-            String internal = AbstractCommander.getInstance().execCommand(command);
-            JSONArray array = TopManager.formatLinuxTop(internal);
-            if (null != array) {
-                setAttribute("item", array.getJSONObject(0));
+        int pid = AbstractCommander.getInstance().getPid(tag);
+        if (pid > 0) {
+            if (AbstractCommander.OS_INFO.isLinux()) {
+                String command = "top -b -n 1 -p " + pid;
+                String internal = AbstractCommander.getInstance().execCommand(command);
+                JSONArray array = TopManager.formatLinuxTop(internal);
+                if (null != array) {
+                    setAttribute("item", array.getJSONObject(0));
+                }
+            } else {
+                String command = "tasklist /V /FI \"pid eq " + pid + "\"";
+                String result = AbstractCommander.getInstance().execCommand(command);
+                JSONArray array = TopManager.formatWindowsProcess(result);
+                if (null != array) {
+                    setAttribute("item", array.getJSONObject(0));
+                }
             }
-        } else {
-            String command = "tasklist /V /FI \"pid eq " + pid + "\"";
-            String result = AbstractCommander.getInstance().execCommand(command);
-            JSONArray array = TopManager.formatWindowsProcess(result);
-            if (null != array) {
-                setAttribute("item", array.getJSONObject(0));
-            }
+            JSONObject beanMem = getBeanMem(tag);
+            setAttribute("beanMem", beanMem);
+            //获取端口信息
+            JSONArray port = getPort(pid);
+            setAttribute("port", port);
         }
-        JSONObject beanMem = getBeanMem(tag);
-        setAttribute("beanMem", beanMem);
-        //获取端口信息
-        JSONArray port = getPort(tag);
-        setAttribute("port", port);
         return "manage/internal";
     }
 
@@ -131,7 +121,10 @@ public class InternalController extends BaseController {
         String fileName = ConfigBean.getInstance().getTempPathName() + "/" + tag + "_java_cpu.txt";
         fileName = FileUtil.normalize(fileName);
         try {
-            String pid = AbstractCommander.getInstance().getPid(tag);
+            int pid = AbstractCommander.getInstance().getPid(tag);
+            if (pid <= 0) {
+                return JsonMessage.getString(400, "未运行");
+            }
             String command = String.format("jstack %s >> %s ", pid, fileName);
             AbstractCommander.getInstance().execSystemCommand(command);
             downLoad(getResponse(), fileName);
@@ -151,7 +144,10 @@ public class InternalController extends BaseController {
         String fileName = ConfigBean.getInstance().getTempPathName() + "/" + tag + "_java_ram.txt";
         fileName = FileUtil.normalize(fileName);
         try {
-            String pid = AbstractCommander.getInstance().getPid(tag);
+            int pid = AbstractCommander.getInstance().getPid(tag);
+            if (pid <= 0) {
+                return JsonMessage.getString(400, "未运行");
+            }
             String command = String.format("jmap -histo:live %s >> %s", pid, fileName);
             AbstractCommander.getInstance().execSystemCommand(command);
             downLoad(getResponse(), fileName);
@@ -178,25 +174,21 @@ public class InternalController extends BaseController {
     /**
      * 获取端口
      *
-     * @param tag 项目id
+     * @param pId 进程id
      */
-    private JSONArray getPort(String tag) {
+    private JSONArray getPort(int pId) {
         // 查询数据
         try {
-            ProjectInfoModel projectInfoModel = projectInfoService.getItem(tag);
-            String pId = commandService.execCommand(CommandService.CommandOp.pid, projectInfoModel).trim();
-            if (StrUtil.isNotEmpty(pId)) {
-                String cmd;
-                boolean isLinux = true;
-                if (AbstractCommander.OS_INFO.isLinux()) {
-                    cmd = "netstat -antup | grep " + pId + " |grep -v \"CLOSE_WAIT\" | head -10";
-                } else {
-                    isLinux = false;
-                    cmd = "netstat -nao -p tcp | findstr /V \"CLOSE_WAIT\" | findstr " + pId;
-                }
-                String result = AbstractCommander.getInstance().execSystemCommand(cmd);
-                return formatRam(isLinux, result);
+            String cmd;
+            boolean isLinux = true;
+            if (AbstractCommander.OS_INFO.isLinux()) {
+                cmd = "netstat -antup | grep " + pId + " |grep -v \"CLOSE_WAIT\" | head -10";
+            } else {
+                isLinux = false;
+                cmd = "netstat -nao -p tcp | findstr /V \"CLOSE_WAIT\" | findstr " + pId;
             }
+            String result = AbstractCommander.getInstance().execSystemCommand(cmd);
+            return formatRam(isLinux, result);
         } catch (Exception e) {
             DefaultSystemLog.ERROR().error(e.getMessage(), e);
         }
