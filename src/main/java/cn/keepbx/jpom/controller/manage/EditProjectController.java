@@ -15,6 +15,7 @@ import cn.keepbx.jpom.model.UserModel;
 import cn.keepbx.jpom.service.manage.ProjectInfoService;
 import cn.keepbx.jpom.service.system.WhitelistDirectoryService;
 import cn.keepbx.jpom.socket.LogWebSocketHandle;
+import cn.keepbx.jpom.system.ConfigBean;
 import com.alibaba.fastjson.JSONArray;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
@@ -95,6 +96,10 @@ public class EditProjectController extends BaseController {
         }
         if (LogWebSocketHandle.SYSTEM_ID.equals(id)) {
             return JsonMessage.getString(401, "项目id " + LogWebSocketHandle.SYSTEM_ID + " 关键词被系统占用");
+        }
+        // 防止和Jpom冲突
+        if (StrUtil.isNotEmpty(ConfigBean.getInstance().applicationTag) && ConfigBean.getInstance().applicationTag.equalsIgnoreCase(id)) {
+            return JsonMessage.getString(401, "当前项目id已经被Jpom占用");
         }
         // 运行模式
         String runMode = getParameter("runMode");

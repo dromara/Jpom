@@ -29,7 +29,7 @@ Log="${Path}run.log"
 LogBack="${Path}log/"
 JVM="-server "
 # 修改项目端口号 日志路径
-ARGS="--server.port=2122  --jpom.log=${Path}log"
+ARGS="--jpom.applicationTag=${Tag} --server.port=2122  --jpom.log=${Path}log"
 
 echo ${Tag}
 RETVAL="0"
@@ -49,7 +49,7 @@ function start() {
 	fi
 	# classPath
     CLASSPATH=`listDir ${Lib}`
-    nohup java  ${JVM} -classpath ${CLASSPATH}${JAVA_HOME}/lib/tools.jar -Dappliction=$Tag ${MainClass} ${ARGS}  >> ${Log} 2>&1 &
+    nohup java  ${JVM} -classpath ${CLASSPATH}${JAVA_HOME}/lib/tools.jar -Dapplication=${Tag} -Dbasedir=${Path} ${MainClass} ${ARGS}  >> ${Log} 2>&1 &
     tailf ${Log}
 }
 
@@ -67,14 +67,14 @@ function listDir()
 
 # 停止程序
 function stop() {
-	pid=$(ps -ef | grep -v 'grep' | egrep $Tag| awk '{printf $2 " "}')
+	pid=$(ps -ef | grep -v 'grep' | egrep ${Tag}| awk '{printf $2 " "}')
 	if [[ "$pid" != "" ]]; then
         echo -n "boot ( pid $pid) is running" 
         echo 
         echo -n $"Shutting down boot: wait"
         kill $(pgrep -f ${Tag}) 2>/dev/null
         sleep 3
-		pid=$(ps -ef | grep -v 'grep' | egrep $Tag| awk '{printf $2 " "}')
+		pid=$(ps -ef | grep -v 'grep' | egrep ${Tag}| awk '{printf $2 " "}')
 		if [[ "$pid" != "" ]]; then
 			echo "kill boot process"
 			kill -9 "$pid"

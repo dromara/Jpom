@@ -29,11 +29,43 @@ set basePath=%~dp0
 set Lib=%basePath%lib\
 set Log=%basePath%run.log
 set JVM=-server
-set ARGS=--server.port=2122 --jpom.log=%basePath%log
+set ARGS= --jpom.applicationTag=%Tag% --jpom.log=%basePath%log --server.port=2122
 
+if "%1"=="start" (
+    call:start
+)else (
+    if "%1"=="stop" (
+        call:stop
+    )else (
+        call:use
+    )
+)
+pause
+exit
+
+:start
 set TEMPCLASSPATH=
 for /f "delims=" %%I in ('dir /B %Lib%') do (set TEMPCLASSPATH=!TEMPCLASSPATH!%Lib%%%I;)
 @REM echo 启动成功，关闭窗口不影响运行
-cmd /S /C "javaw %JVM% -classpath %TEMPCLASSPATH%"%JAVA_HOME%"\lib\tools.jar -Dappliction=%Tag% -Dbasedir=%basePath% %MainClass% %ARGS% >> %Log%"
+cmd /S /C "javaw %JVM% -classpath %TEMPCLASSPATH%"%JAVA_HOME%"\lib\tools.jar -Dapplication=%Tag% -Dbasedir=%basePath% %MainClass% %ARGS% >> %Log%"
+echo 启动中.....
+goto:eof
 
-:end
+:stop
+set TEMPCLASSPATH=
+for /f "delims=" %%I in ('dir /B %Lib%') do (set TEMPCLASSPATH=!TEMPCLASSPATH!%Lib%%%I;)
+
+set MainClass=cn.keepbx.jpom.JpomClose
+java -classpath %TEMPCLASSPATH%"%JAVA_HOME%"\lib\tools.jar %MainClass% %ARGS%
+echo stop
+goto:eof
+
+@REM 重启
+:restart
+call:stop
+call:start
+goto:eof
+
+:use
+echo please use start
+goto:eof

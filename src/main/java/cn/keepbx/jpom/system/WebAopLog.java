@@ -4,6 +4,7 @@ import ch.qos.logback.core.PropertyDefinerBase;
 import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.keepbx.jpom.JpomApplication;
+import cn.keepbx.jpom.util.ArgsUtil;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.Signature;
 import org.aspectj.lang.annotation.AfterReturning;
@@ -66,7 +67,7 @@ public class WebAopLog extends PropertyDefinerBase {
 
     @Override
     public String getPropertyValue() {
-        String path = JpomApplication.getArgs("jpom.log");
+        String path = ArgsUtil.getArgsValue(JpomApplication.getArgs(), "jpom.log");
         if (StrUtil.isEmpty(path)) {
             //
             ApplicationHome home = new ApplicationHome(WebAopLog.class);

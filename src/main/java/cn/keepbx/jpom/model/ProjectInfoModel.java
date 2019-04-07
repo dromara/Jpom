@@ -184,7 +184,6 @@ public class ProjectInfoModel extends BaseModel {
         if (files == null || files.length <= 0) {
             return "";
         }
-        int len = files.length;
         // 获取lib下面的所有jar包
         StringBuilder classPath = new StringBuilder();
         RunMode runMode = projectInfoModel.getRunMode();
@@ -192,10 +191,16 @@ public class ProjectInfoModel extends BaseModel {
             classPath.append("-classpath ");
         } else if (runMode == RunMode.Jar) {
             classPath.append("-jar ");
-            // 只取一个jar
-            len = 1;
+            // 只取一个jar文件
+            for (int i = 0, len = files.length; i < len; i++) {
+                File file = files[i];
+                if (file.isFile()) {
+                    files = new File[]{file};
+                    break;
+                }
+            }
         }
-        for (int i = 0; i < len; i++) {
+        for (int i = 0, len = files.length; i < len; i++) {
             File file = files[i];
             classPath.append(file.getAbsolutePath());
             if (i != len - 1) {

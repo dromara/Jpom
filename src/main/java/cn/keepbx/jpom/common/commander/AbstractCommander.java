@@ -140,6 +140,9 @@ public abstract class AbstractCommander {
      * @throws Exception 异常
      */
     public String backLog(ProjectInfoModel projectInfoModel) throws Exception {
+        if (StrUtil.isEmpty(projectInfoModel.getLog())) {
+            return "ok";
+        }
         File file = new File(projectInfoModel.getLog());
         if (!file.exists()) {
             return "not exists";
@@ -176,14 +179,20 @@ public abstract class AbstractCommander {
         return StrUtil.format("{}:{}", CommandService.RUNING_TAG, virtualMachine.id());
     }
 
-    private VirtualMachine getVirtualMachine(String tag) throws IOException, AttachNotSupportedException {
+    private VirtualMachine getVirtualMachine(String tag) throws IOException {
         // 添加空格是为了防止startWith
         tag = String.format("-Dapplication=%s ", tag);
         // 通过VirtualMachine.list()列出所有的java进程
         List<VirtualMachineDescriptor> descriptorList = VirtualMachine.list();
         for (VirtualMachineDescriptor virtualMachineDescriptor : descriptorList) {
             // 根据虚拟机描述查询启动属性，如果属性-Dapplication匹配，说明项目已经启动，并返回进程id
-            VirtualMachine virtualMachine = VirtualMachine.attach(virtualMachineDescriptor);
+            VirtualMachine virtualMachine;
+            try {
+                virtualMachine = VirtualMachine.attach(virtualMachineDescriptor);
+            } catch (AttachNotSupportedException e) {
+                DefaultSystemLog.ERROR().error("获取jvm信息失败：" + virtualMachineDescriptor.id(), e);
+                continue;
+            }
             Properties properties = virtualMachine.getAgentProperties();
             String args = properties.getProperty("sun.jvm.args", "");
             if (StrUtil.containsIgnoreCase(args, tag)) {
