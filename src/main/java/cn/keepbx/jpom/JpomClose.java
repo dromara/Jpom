@@ -24,12 +24,14 @@ public class JpomClose {
             Console.error("请传入对应：jpom.applicationTag");
             return;
         }
-        String event = args[args.length - 1];
+        // 事件
+        String event = ArgsUtil.getArgsValue(args, "event");
         if ("stop".equalsIgnoreCase(event)) {
             if (!AbstractCommander.getInstance().isRun(tag)) {
                 Console.error("Jpom并没有运行");
                 return;
             }
+            // 创建一个实体对象
             ProjectInfoModel projectInfoModel = new ProjectInfoModel();
             projectInfoModel.setId(tag);
             String msg = AbstractCommander.getInstance().stop(projectInfoModel);

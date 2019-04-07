@@ -49,7 +49,6 @@ if "%1"=="start" (
     )
 )
 pause
-exit
 
 @REM 启动
 :start
@@ -65,7 +64,8 @@ goto:eof
 set TEMPCLASSPATH=
 for /f "delims=" %%I in ('dir /B %Lib%') do (set TEMPCLASSPATH=!TEMPCLASSPATH!%Lib%%%I;)
 set MainClass=cn.keepbx.jpom.JpomClose
-java -classpath %TEMPCLASSPATH%"%JAVA_HOME%"\lib\tools.jar %MainClass% %ARGS%" stop"
+set ARGS= --jpom.applicationTag=%Tag% --event=stop
+java -classpath %TEMPCLASSPATH%"%JAVA_HOME%"\lib\tools.jar %MainClass% %ARGS%
 goto:eof
 
 @REM 查看Jpom运行状态
@@ -73,7 +73,8 @@ goto:eof
 set TEMPCLASSPATH=
 for /f "delims=" %%I in ('dir /B %Lib%') do (set TEMPCLASSPATH=!TEMPCLASSPATH!%Lib%%%I;)
 set MainClass=cn.keepbx.jpom.JpomClose
-java -classpath %TEMPCLASSPATH%"%JAVA_HOME%"\lib\tools.jar %MainClass% %ARGS%" status"
+set ARGS= --jpom.applicationTag=%Tag% --event=status
+java -classpath %TEMPCLASSPATH%"%JAVA_HOME%"\lib\tools.jar %MainClass% %ARGS%
 goto:eof
 
 @REM 重启Jpom
