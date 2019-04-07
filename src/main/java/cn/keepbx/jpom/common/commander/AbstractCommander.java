@@ -146,7 +146,7 @@ public abstract class AbstractCommander {
             return "ok";
         }
         File file = new File(projectInfoModel.getLog());
-        if (!file.exists()) {
+        if (!file.exists() || file.isDirectory()) {
             return "not exists";
         }
         // 空文件不处理

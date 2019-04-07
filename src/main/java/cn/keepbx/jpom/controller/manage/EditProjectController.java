@@ -304,7 +304,7 @@ public class EditProjectController extends BaseController {
                     break;
                 }
                 // 包含关系
-                if (pathContains(file1, file2) || pathContains(file2, file1)) {
+                if (FileUtil.isSub(file1, file2) || FileUtil.isSub(file2, file1)) {
                     projectInfoModel1 = model;
                     break;
                 }
@@ -314,13 +314,5 @@ public class EditProjectController extends BaseController {
             return new JsonMessage(401, "项目lib和【" + projectInfoModel1.getName() + "】项目冲突:" + projectInfoModel1.getLib());
         }
         return null;
-    }
-
-    private boolean pathContains(File file1, File file2) {
-        try {
-            return StrUtil.startWith(file1.getCanonicalPath() + File.separator, file2.getCanonicalPath() + File.separator, true);
-        } catch (Exception e) {
-            return StrUtil.startWith(file1.getAbsolutePath() + File.separator, file2.getAbsolutePath() + File.separator, true);
-        }
     }
 }
