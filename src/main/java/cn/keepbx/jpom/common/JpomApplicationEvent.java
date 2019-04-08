@@ -2,8 +2,10 @@ package cn.keepbx.jpom.common;
 
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
+import cn.hutool.core.util.CharsetUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.spring.event.ApplicationEventClient;
+import cn.keepbx.jpom.model.JpomManifest;
 import cn.keepbx.jpom.system.ConfigBean;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.ApplicationEvent;
@@ -42,6 +44,10 @@ public class JpomApplicationEvent implements ApplicationEventClient {
             } catch (IOException e) {
                 DefaultSystemLog.ERROR().error("lockFile", e);
             }
+            // 写入Jpom 信息
+            JpomManifest jpomManifest = JpomManifest.getInstance();
+            File jpomInfo = ConfigBean.getInstance().getJpomInfo();
+            FileUtil.writeString(jpomManifest.toString(), jpomInfo, CharsetUtil.CHARSET_UTF_8);
         } else if (event instanceof ContextClosedEvent) {
             // 应用关闭
             this.unLockFile();

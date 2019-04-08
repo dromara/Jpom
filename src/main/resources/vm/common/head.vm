@@ -9,7 +9,7 @@
 <script type="text/javascript" src="/static/layui/layui.js?v=$staticCacheTime"></script>
 <script type="text/javascript">
     var $, layer, form, element, table;
-    // 不缓存
+    ## 不缓存
     layui.config({
         version: true
     });
@@ -31,7 +31,7 @@
         var lay_id = 'tab_' + options.id;
         if (options.id != "welcome") {
             lay_id += options.title;
-            // 如果存在选项卡，切换，否则创建
+        ## 如果存在选项卡，切换，否则创建
             if ($('[lay-id="' + lay_id + '"]', top.document).length > 0) {
                 element.tabChange('mainTabs', lay_id);
             } else {
@@ -44,7 +44,7 @@
                 });
             }
         }
-        // 创建完后切换
+    ## 创建完后切换
         element.tabChange('mainTabs', lay_id);
     }
 
