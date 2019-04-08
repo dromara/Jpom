@@ -79,11 +79,7 @@ public class InstallController extends BaseController {
         if (UserModel.SYSTEM_OCCUPY_NAME.equals(userName) || UserModel.SYSTEM_ADMIN.equals(userName)) {
             return JsonMessage.getString(401, "当前登录名已经被系统占用");
         }
-//        // 判断密码级别
-//        if (CheckPassword.checkPassword(userPwd) != 2) {
-//            return JsonMessage.getString(401, "系统管理员密码强度太低,请使用复杂的密码");
-//        }
-        //
+        // 创建用户
         UserModel userModel = new UserModel();
         userModel.setName(UserModel.SYSTEM_OCCUPY_NAME);
         userModel.setId(userName);

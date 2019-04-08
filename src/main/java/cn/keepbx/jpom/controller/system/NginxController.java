@@ -26,7 +26,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.annotation.Resource;
 import java.io.File;
-import java.io.IOException;
 import java.util.List;
 
 /**
@@ -48,7 +47,7 @@ public class NginxController extends BaseController {
     private NginxService nginxService;
 
     @RequestMapping(value = "nginx", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
-    public String ngx() throws IOException {
+    public String ngx() {
         JSONArray ngxDirectory = whitelistDirectoryService.getNgxDirectory();
         setAttribute("nginx", ngxDirectory);
         List<CertModel> certList = certService.list();
@@ -57,7 +56,7 @@ public class NginxController extends BaseController {
     }
 
     @RequestMapping(value = "nginx_setting", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
-    public String setting(String path, String name, String type) throws IOException {
+    public String setting(String path, String name, String type) {
         JSONArray ngxDirectory = whitelistDirectoryService.getNgxDirectory();
         setAttribute("nginx", ngxDirectory);
         List<CertModel> certList = certService.list();
