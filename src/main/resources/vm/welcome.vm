@@ -269,9 +269,9 @@
                                 value = value / 1024;
                                 suffix = " GB";
                             }
-                            value = value.toFixed(2);
+                            value = Math.round(value * 100) / 100;
                         } else {
-                            value = value.toFixed(4);
+                            value = Math.round(value * 10000) / 10000;
                         }
                         return params.seriesName + '<br/>' + params.name + " : " + value + suffix + "(" + params.percent + "%)";
                     }
