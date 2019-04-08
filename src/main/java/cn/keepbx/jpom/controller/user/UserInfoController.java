@@ -146,7 +146,12 @@ public class UserInfoController extends BaseController {
             return JsonMessage.getString(401, "登录名已经存在");
         }
         userModel = new UserModel();
-        userModel.setParent(userName.getId());
+        // 隐藏系统管理员登录名
+        if (userName.isSystemUser()) {
+            userModel.setParent(UserModel.SYSTEM_OCCUPY_NAME);
+        } else {
+            userModel.setParent(userName.getId());
+        }
         String msg = parseUser(userModel, true);
         if (msg != null) {
             return msg;

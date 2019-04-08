@@ -34,7 +34,6 @@
             width: 100%;
         }
 
-        /* ��Ƕ�����ʽ*/
         .custom-iframe {
             width: 100%;
             height: 100%;
@@ -302,7 +301,7 @@
             }
         ##  密码强度
             #if($user.isSystemUser())
-                if (!checkPasswordStrong(data.field.userPwd)) {
+                if (!checkPasswordStrong(data.field.confirmPwd)) {
                     layer.msg("系统管理员密码强度太低");
                     return false;
                 }
