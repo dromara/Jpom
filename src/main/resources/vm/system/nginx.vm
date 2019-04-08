@@ -225,7 +225,7 @@
 
         //证书管理
         $('#certificate').on('click', function () {
-            var url = '/system/certificate';
+            var url = '/system/certificate/list.html';
             tabChange({
                 id: 'certificate',
                 url: url,

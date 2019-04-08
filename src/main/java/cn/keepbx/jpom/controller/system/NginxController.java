@@ -8,6 +8,7 @@ import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.controller.multipart.MultipartFileBuilder;
 import cn.keepbx.jpom.common.BaseController;
 import cn.keepbx.jpom.model.CertModel;
+import cn.keepbx.jpom.model.UserModel;
 import cn.keepbx.jpom.service.system.CertService;
 import cn.keepbx.jpom.service.system.NginxService;
 import cn.keepbx.jpom.service.system.WhitelistDirectoryService;
@@ -250,6 +251,10 @@ public class NginxController extends BaseController {
     public String delete(String path, String name) {
         if (!whitelistDirectoryService.checkNgxDirectory(path)) {
             return JsonMessage.getString(400, "非法操作");
+        }
+        UserModel userModel = getUser();
+        if (!userModel.isSystemUser()) {
+            return JsonMessage.getString(400, "你没有操作权限");
         }
         path = pathSafe(path);
         name = pathSafe(name);

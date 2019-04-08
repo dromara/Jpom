@@ -1,12 +1,14 @@
-package cn.keepbx.jpom.controller.system;
+package cn.keepbx.jpom.controller.system.ssl;
 
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.lang.Validator;
 import cn.hutool.core.util.StrUtil;
+import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.controller.multipart.MultipartFileBuilder;
 import cn.keepbx.jpom.common.BaseController;
 import cn.keepbx.jpom.model.CertModel;
+import cn.keepbx.jpom.model.UserModel;
 import cn.keepbx.jpom.service.system.CertService;
 import cn.keepbx.jpom.service.system.WhitelistDirectoryService;
 import com.alibaba.fastjson.JSONArray;
@@ -27,7 +29,7 @@ import java.util.List;
  * @author Arno
  */
 @Controller
-@RequestMapping(value = "/system")
+@RequestMapping(value = "/system/certificate")
 public class CertificateController extends BaseController {
 
     @Resource
@@ -35,7 +37,7 @@ public class CertificateController extends BaseController {
     @Resource
     private WhitelistDirectoryService whitelistDirectoryService;
 
-    @RequestMapping(value = "/certificate", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
+    @RequestMapping(value = "/list.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
     public String certificate() {
         JSONArray jsonArray = whitelistDirectoryService.getCertificateDirectory();
         setAttribute("certificate", jsonArray);
@@ -46,13 +48,14 @@ public class CertificateController extends BaseController {
     /**
      * 新增证书
      */
-    @RequestMapping(value = "/certificate/addCertificate", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "/addCertificate", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     public String addCertificate() {
         try {
             CertModel certModel = getCertModel();
             certService.addItem(certModel);
         } catch (Exception e) {
+            DefaultSystemLog.ERROR().error("证书文件", e);
             return JsonMessage.getString(400, e.getMessage());
         }
         return JsonMessage.getString(200, "上传成功");
@@ -61,7 +64,7 @@ public class CertificateController extends BaseController {
     /**
      * 修改证书
      */
-    @RequestMapping(value = "/certificate/updateCertificate", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "/updateCertificate", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     public String updateCertificate() {
         try {
@@ -71,6 +74,7 @@ public class CertificateController extends BaseController {
                 return JsonMessage.getString(400, "修改失败");
             }
         } catch (Exception e) {
+            DefaultSystemLog.ERROR().error("证书文件", e);
             return JsonMessage.getString(400, e.getMessage());
         }
         return JsonMessage.getString(200, "修改成功");
@@ -129,7 +133,7 @@ public class CertificateController extends BaseController {
     /**
      * 证书列表
      */
-    @RequestMapping(value = "/certificate/getCertList", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "/getCertList", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     public String getCertList() {
         List<CertModel> array = certService.list();
@@ -142,11 +146,15 @@ public class CertificateController extends BaseController {
      * @param id id
      * @return json
      */
-    @RequestMapping(value = "/certificate/delete", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "/delete", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     public String delete(String id) {
         if (StrUtil.isEmpty(id)) {
             return JsonMessage.getString(400, "删除失败");
+        }
+        UserModel userModel = getUser();
+        if (!userModel.isSystemUser()) {
+            return JsonMessage.getString(400, "你没有操作权限");
         }
         boolean b = certService.delete(id);
         if (!b) {
