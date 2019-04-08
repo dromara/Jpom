@@ -7,6 +7,8 @@ import org.mozilla.intl.chardet.nsPSMDetector;
 import java.io.*;
 
 /**
+ * 文件编码识别器
+ *
  * @author Administrator
  */
 public class CharsetDetector implements nsICharsetDetectionObserver {

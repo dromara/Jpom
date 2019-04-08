@@ -3,7 +3,6 @@ package cn.keepbx.jpom.common.commander.impl;
 import cn.hutool.core.thread.GlobalThreadPool;
 import cn.keepbx.jpom.common.commander.AbstractCommander;
 import cn.keepbx.jpom.model.ProjectInfoModel;
-import cn.keepbx.jpom.service.manage.CommandService;
 
 import java.nio.charset.Charset;
 
@@ -43,12 +42,11 @@ public class WindowsCommander extends AbstractCommander {
 
     @Override
     public String stop(ProjectInfoModel projectInfoModel) throws Exception {
-        super.stop(projectInfoModel);
+        String result = super.stop(projectInfoModel);
         String tag = projectInfoModel.getId();
         // 查询状态，如果正在运行，则执行杀进程命令
-        String result = status(tag);
-        if (result.startsWith(CommandService.RUNING_TAG)) {
-            String pid = result.split(":")[1];
+        int pid = parsePid(result);
+        if (pid > 0) {
             String cmd = String.format("taskkill /F /PID %s", pid);
             execCommand(cmd);
             loopCheckRun(projectInfoModel.getId(), false);

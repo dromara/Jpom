@@ -11,6 +11,8 @@ user:
   maxCount: 10
   # 用户连续登录失败次数，超过此数将被限制登录
   alwaysLoginError: 5
+  # 当ip连续登录失败，锁定对应IP时长，单位毫秒
+  ipErrorLockTime: 60*60*5*1000
 log:
   # 自动备份控制台日志，防止日志文件过大，目前暂只支持linux 不停服备份
   autoBackConsoleCron: 0 0/10 * * * ?

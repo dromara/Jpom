@@ -4,6 +4,8 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.spring.SpringUtil;
 import cn.keepbx.jpom.common.BaseController;
+import cn.keepbx.jpom.common.JpomApplicationEvent;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 
 import java.io.File;
@@ -42,6 +44,11 @@ public class ConfigBean {
      * 项目回收文件
      */
     public static final String PROJECT_RECOVER = "project_recover.json";
+    /**
+     * Jpom 程序运行的 application 标识
+     */
+    @Value("${jpom.applicationTag:}")
+    public String applicationTag;
 
     /**
      * 单利模式
@@ -64,6 +71,15 @@ public class ConfigBean {
         String dataPath = FileUtil.normalize(ExtConfigBean.getInstance().getPath() + "/" + DATA);
         FileUtil.mkdir(dataPath);
         return dataPath;
+    }
+
+    /**
+     * 获取pid文件
+     *
+     * @return file
+     */
+    public File getPidFile() {
+        return new File(getDataPath(), "pid." + JpomApplicationEvent.getPid());
     }
 
     /**

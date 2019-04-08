@@ -15,6 +15,7 @@ import cn.keepbx.jpom.model.UserModel;
 import cn.keepbx.jpom.service.manage.ProjectInfoService;
 import cn.keepbx.jpom.service.system.WhitelistDirectoryService;
 import cn.keepbx.jpom.socket.LogWebSocketHandle;
+import cn.keepbx.jpom.system.ConfigBean;
 import com.alibaba.fastjson.JSONArray;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
@@ -95,6 +96,10 @@ public class EditProjectController extends BaseController {
         }
         if (LogWebSocketHandle.SYSTEM_ID.equals(id)) {
             return JsonMessage.getString(401, "项目id " + LogWebSocketHandle.SYSTEM_ID + " 关键词被系统占用");
+        }
+        // 防止和Jpom冲突
+        if (StrUtil.isNotEmpty(ConfigBean.getInstance().applicationTag) && ConfigBean.getInstance().applicationTag.equalsIgnoreCase(id)) {
+            return JsonMessage.getString(401, "当前项目id已经被Jpom占用");
         }
         // 运行模式
         String runMode = getParameter("runMode");
@@ -299,7 +304,7 @@ public class EditProjectController extends BaseController {
                     break;
                 }
                 // 包含关系
-                if (pathContains(file1, file2) || pathContains(file2, file1)) {
+                if (FileUtil.isSub(file1, file2) || FileUtil.isSub(file2, file1)) {
                     projectInfoModel1 = model;
                     break;
                 }
@@ -309,13 +314,5 @@ public class EditProjectController extends BaseController {
             return new JsonMessage(401, "项目lib和【" + projectInfoModel1.getName() + "】项目冲突:" + projectInfoModel1.getLib());
         }
         return null;
-    }
-
-    private boolean pathContains(File file1, File file2) {
-        try {
-            return StrUtil.startWith(file1.getCanonicalPath() + File.separator, file2.getCanonicalPath() + File.separator, true);
-        } catch (Exception e) {
-            return StrUtil.startWith(file1.getAbsolutePath() + File.separator, file2.getAbsolutePath() + File.separator, true);
-        }
     }
 }

@@ -1,4 +1,5 @@
 import cn.hutool.cron.CronUtil;
+import cn.keepbx.jpom.common.JpomApplicationEvent;
 
 /**
  * Created by jiangzeyin on 2019/3/4.
@@ -12,5 +13,6 @@ public class TestCron {
             System.out.println("123");
         });
         CronUtil.restart();
+        System.out.println(JpomApplicationEvent.getPid());
     }
 }

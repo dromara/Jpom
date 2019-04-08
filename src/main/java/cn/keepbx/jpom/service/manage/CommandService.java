@@ -33,14 +33,6 @@ public class CommandService {
          */
         showlog,
         /**
-         * 获取进程id
-         */
-        pid,
-        /**
-         * 备份日志
-         */
-        backupLog,
-        /**
          * 查看内存信息
          */
         top
@@ -72,14 +64,6 @@ public class CommandService {
                 result = abstractCommander.status(tag);
                 break;
             }
-            case pid: {
-                String tag = projectInfoModel.getId();
-                result = abstractCommander.getPid(tag);
-                break;
-            }
-            case backupLog:
-                result = abstractCommander.backLog(projectInfoModel);
-                break;
             case top:
             case showlog:
             default:

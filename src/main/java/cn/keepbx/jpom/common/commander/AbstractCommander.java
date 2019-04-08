@@ -92,6 +92,7 @@ public abstract class AbstractCommander {
      * @throws Exception 异常
      */
     public String stop(ProjectInfoModel projectInfoModel) throws Exception {
+        String tag = projectInfoModel.getId();
         String token = projectInfoModel.getToken();
         if (StrUtil.isNotEmpty(token)) {
             try {
@@ -100,7 +101,8 @@ public abstract class AbstractCommander {
                 return "get error";
             }
         }
-        return "";
+        // 再次查看进程信息
+        return status(tag);
     }
 
     /**
@@ -140,8 +142,11 @@ public abstract class AbstractCommander {
      * @throws Exception 异常
      */
     public String backLog(ProjectInfoModel projectInfoModel) throws Exception {
+        if (StrUtil.isEmpty(projectInfoModel.getLog())) {
+            return "ok";
+        }
         File file = new File(projectInfoModel.getLog());
-        if (!file.exists()) {
+        if (!file.exists() || file.isDirectory()) {
             return "not exists";
         }
         // 空文件不处理
@@ -176,14 +181,20 @@ public abstract class AbstractCommander {
         return StrUtil.format("{}:{}", CommandService.RUNING_TAG, virtualMachine.id());
     }
 
-    private VirtualMachine getVirtualMachine(String tag) throws IOException, AttachNotSupportedException {
+    private VirtualMachine getVirtualMachine(String tag) throws IOException {
         // 添加空格是为了防止startWith
         tag = String.format("-Dapplication=%s ", tag);
         // 通过VirtualMachine.list()列出所有的java进程
         List<VirtualMachineDescriptor> descriptorList = VirtualMachine.list();
         for (VirtualMachineDescriptor virtualMachineDescriptor : descriptorList) {
             // 根据虚拟机描述查询启动属性，如果属性-Dapplication匹配，说明项目已经启动，并返回进程id
-            VirtualMachine virtualMachine = VirtualMachine.attach(virtualMachineDescriptor);
+            VirtualMachine virtualMachine;
+            try {
+                virtualMachine = VirtualMachine.attach(virtualMachineDescriptor);
+            } catch (AttachNotSupportedException e) {
+                DefaultSystemLog.ERROR().error("获取jvm信息失败：" + virtualMachineDescriptor.id(), e);
+                continue;
+            }
             Properties properties = virtualMachine.getAgentProperties();
             String args = properties.getProperty("sun.jvm.args", "");
             if (StrUtil.containsIgnoreCase(args, tag)) {
@@ -245,12 +256,22 @@ public abstract class AbstractCommander {
      * @return 未运行 返回 0
      * @throws Exception 异常
      */
-    public String getPid(String tag) throws Exception {
+    public int getPid(String tag) throws Exception {
         String result = status(tag);
+        return parsePid(result);
+    }
+
+    /**
+     * 转换pid
+     *
+     * @param result 查询信息
+     * @return int
+     */
+    protected static int parsePid(String result) {
         if (result.startsWith(CommandService.RUNING_TAG)) {
-            return result.split(":")[1];
+            return Convert.toInt(result.split(":")[1]);
         }
-        return "0";
+        return 0;
     }
 
     /**

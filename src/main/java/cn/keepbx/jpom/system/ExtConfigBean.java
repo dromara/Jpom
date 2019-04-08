@@ -1,6 +1,8 @@
 package cn.keepbx.jpom.system;
 
+import cn.hutool.core.convert.Convert;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.script.ScriptUtil;
 import cn.jiangzeyin.common.spring.SpringUtil;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationHome;
@@ -10,6 +12,7 @@ import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 
 import java.io.File;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 外部配置文件
@@ -87,7 +90,20 @@ public class ExtConfigBean {
      */
     @Value("${jpom.safeMode:false}")
     public boolean safeMode;
+    /**
+     * 当ip连续登录失败，锁定对应IP时长，单位毫秒
+     */
+    @Value("${user.ipErrorLockTime:60*60*5*1000}")
+    private String ipErrorLockTime;
+    private long ipErrorLockTimeValue;
 
+    public long getIpErrorLockTime() {
+        if (this.ipErrorLockTimeValue == 0) {
+            String str = StrUtil.emptyToDefault(this.ipErrorLockTime, "60*60*5*1000");
+            this.ipErrorLockTimeValue = Convert.toLong(ScriptUtil.eval(str), TimeUnit.HOURS.toMillis(5));
+        }
+        return this.ipErrorLockTimeValue;
+    }
 
     public String getPath() {
         if (StrUtil.isEmpty(path)) {
