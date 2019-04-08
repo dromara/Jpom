@@ -106,7 +106,7 @@ public class NginxController extends BaseController {
             return JsonMessage.getString(400, "文件名存在非法字符");
         }
         if (!whitelistDirectoryService.checkNgxDirectory(whitePath)) {
-            throw new RuntimeException("请选择正确的项目路径,或者还没有配置白名单");
+            return JsonMessage.getString(400, "请选择正确的白名单");
         }
         boolean add = "add".equals(genre);
         if ("quick".equals(type)) {
