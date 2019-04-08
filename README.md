@@ -74,9 +74,9 @@
 2. 上传到服务解压到根目录
 3. 执行目录下[Jpom.sh](/script/Jpom.sh)文件（记得给命令文件添加权限奥[*chmod  755 /jpom/Jpom.sh*]）
     如
-    ```
-    /jpom/Jpom.sh start
-    ```
+```
+/jpom/Jpom.sh start
+```
 4. 如有需要修改项目端口请查看 Jpom.sh
 5. windows 下则执行Jpom.bat 命令即可
 
@@ -96,9 +96,27 @@
 2. 运行*cn.keepbx.jpom.JpomApplication*
 3. 浏览器访问（如：http://127.0.0.1:2122）
 
+### 管理命令
+1. windows中Jpom.bat
+```
+Jpom.bat start     启动Jpom 
+Jpom.bat stop      停止Jpom
+Jpom.bat restart   重启Jpom
+Jpom.bat status    查看Jpom运行状态
+```
+2. linux中Jpom.sh
+```
+Jpom.sh start     启动Jpom 
+Jpom.sh stop      停止Jpom
+Jpom.sh restart   重启Jpom
+Jpom.sh status    查看Jpom运行状态
+```
+
 ### 视频教程
 
 [教程列表](https://mp.weixin.qq.com/mp/homepage?__biz=Mzg2OTEzMDIwNg==&hid=5&sn=3712b3edbe0af22c88ac3178a840a799)
+
+[直播回放](https://yq.aliyun.com/live/970)
 
 ### Jpom 的参数配置
 
