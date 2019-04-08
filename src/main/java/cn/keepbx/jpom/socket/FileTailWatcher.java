@@ -110,9 +110,10 @@ public class FileTailWatcher implements Runnable {
             for (String s : this.limitQueue) {
                 this.send(session, s);
             }
-        } else {
-            this.send(session, "添加日志监听失败");
         }
+        //        else {
+        //            this.send(session, "添加日志监听失败");
+        //        }
     }
 
     private void send(Session session, String msg) {
