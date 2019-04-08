@@ -185,9 +185,13 @@ public class NginxController extends BaseController {
         addNgxParam(sever, "listen " + port);
         addNgxParam(sever, "server_name " + domain);
         if (StrUtil.isNotEmpty(cert)) {
+            addNgxParam(sever, "ssl on");
             addNgxParam(sever, "ssl_certificate " + cert);
             addNgxParam(sever, "ssl_certificate_key " + key);
             addNgxParam(sever, "ssl_prefer_server_ciphers  on");
+            addNgxParam(sever, "ssl_session_cache  shared:SSL:1m");
+            addNgxParam(sever, "ssl_session_timeout  5m");
+            addNgxParam(sever, "ssl_ciphers  HIGH:!aNULL:!MD5");
             if ("true".equals(convert)) {
                 NgxBlock httpSever = new NgxBlock();
                 httpSever.addValue("server");
