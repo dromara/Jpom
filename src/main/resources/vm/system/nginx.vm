@@ -74,7 +74,6 @@
 
 
 <script type="text/javascript">
-    var laytpl;
     var index = 0;
 
     function loadSuccess() {
