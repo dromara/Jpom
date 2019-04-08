@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.annotation.Resource;
 import java.io.File;
+import java.io.IOException;
 import java.util.List;
 
 /**
@@ -171,10 +172,16 @@ public class CertificateController extends BaseController {
      */
     @RequestMapping(value = "/export", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
-    public void export(String path) {
-        String parent = FileUtil.file(path).getParent();
-        File zip = ZipUtil.zip(parent);
-        ServletUtil.write(getResponse(), zip);
-        FileUtil.del(zip);
+    public String export(String id) {
+        try {
+            CertModel item = certService.getItem(id);
+            String parent = FileUtil.file(item.getCert()).getParent();
+            File zip = ZipUtil.zip(parent);
+            ServletUtil.write(getResponse(), zip);
+            FileUtil.del(zip);
+        } catch (IOException e) {
+            return JsonMessage.getString(400, "导出失败");
+        }
+        return JsonMessage.getString(400, "导出成功");
     }
 }
