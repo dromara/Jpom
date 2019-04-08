@@ -83,6 +83,15 @@ public class ConfigBean {
     }
 
     /**
+     * 获取当前Jpom 运行信息文件
+     *
+     * @return file
+     */
+    public File getJpomInfo() {
+        return new File(getDataPath(), "jpom.info");
+    }
+
+    /**
      * 获取当前登录用户的临时文件存储路径，如果没有登录则抛出异常
      *
      * @return 文件夹

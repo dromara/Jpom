@@ -81,6 +81,9 @@ public class LoginControl extends BaseController {
     }
 
     private int ipError() {
+        if (ExtConfigBean.getInstance().getIpErrorLockTime() <= 0) {
+            return 0;
+        }
         String ip = getIp();
         Integer count = LFU_CACHE.get(ip);
         if (count == null) {

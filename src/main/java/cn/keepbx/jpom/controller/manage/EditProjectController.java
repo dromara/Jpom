@@ -113,7 +113,6 @@ public class EditProjectController extends BaseController {
         if (runMode1 == ProjectInfoModel.RunMode.ClassPath && StrUtil.isEmpty(projectInfo.getMainClass())) {
             return JsonMessage.getString(401, "ClassPath 模式 MainClass必填");
         }
-
         //
         if (!whitelistDirectoryService.checkProjectDirectory(whitelistDirectory)) {
             return JsonMessage.getString(401, "请选择正确的项目路径,或者还没有配置白名单");
@@ -171,6 +170,7 @@ public class EditProjectController extends BaseController {
     }
 
     private String save(ProjectInfoModel projectInfo) throws IOException {
+        String edit = getParameter("edit");
         ProjectInfoModel exits = projectInfoService.getItem(projectInfo.getId());
         try {
             UserModel userName = getUser();
@@ -190,6 +190,9 @@ public class EditProjectController extends BaseController {
                 this.modify(projectInfo);
                 projectInfoService.addItem(projectInfo);
                 return JsonMessage.getString(200, "新增成功！");
+            }
+            if (!"on".equalsIgnoreCase(edit)) {
+                return JsonMessage.getString(400, "项目id已经存在啦");
             }
             if (!userName.isProject(projectInfo.getId())) {
                 return JsonMessage.getString(400, "你没有对应操作权限操作!");

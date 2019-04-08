@@ -67,7 +67,12 @@
             //
             form.on('submit(from_login)', function (data) {
                 if (!checkPwd(data.field.userPwd)) {
-                    return;
+                    return false;
+                }
+                //  密码强度
+                if (!checkPasswordStrong(data.field.userPwd)) {
+                    layer.msg("系统管理员密码强度太低");
+                    return false;
                 }
                 var sendData = formatPwd(data.field, "userPwd");
                 $.ajax({
