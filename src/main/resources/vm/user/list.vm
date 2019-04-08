@@ -2,7 +2,7 @@
 <html>
 
 <head>
-    #parse("../common/head.vm")
+    #parse("./common/head.vm")
     <title>项目管理系统</title>
     <style>
         .layui-form-label {
@@ -121,7 +121,7 @@
                lay-text="是|否">
     </div>
 </script>
-    #parse("../common/sha1.vm")
+    #parse("./common/sha1.vm")
 <script type="text/javascript">
     function loadSuccess() {
 

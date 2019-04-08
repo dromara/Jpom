@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.annotation.Resource;
-import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
 
@@ -39,7 +38,7 @@ public class ProjectManageControl extends BaseController {
      * @return page
      */
     @RequestMapping(value = "projectInfo", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
-    public String projectInfo() throws IOException {
+    public String projectInfo() {
         //获取所有分组
         List<ProjectInfoModel> projectInfoModels = projectInfoService.list();
         HashSet<String> hashSet = new HashSet<>();
