@@ -270,6 +270,8 @@
                                 suffix = " GB";
                             }
                             value = value.toFixed(2);
+                        } else {
+                            value = value.toFixed(4);
                         }
                         return params.seriesName + '<br/>' + params.name + " : " + value + suffix + "(" + params.percent + "%)";
                     }

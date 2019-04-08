@@ -35,6 +35,10 @@
         .input_msg {
             margin-top: 18px;
         }
+
+        .certText {
+            padding: 10px;
+        }
     </style>
 </head>
 
@@ -103,6 +107,9 @@
     </form>
 </div>
 
+<div id="cert_template" class="div-certificate">
+
+</div>
 </body>
 <script type="text/html" id="bar_cert">
     <a href="javascript:;" class="layui-btn  layui-btn-sm layui-btn-warm" lay-event="update">编辑</a>
@@ -116,6 +123,48 @@
 </script>
 <script type="text/html" id="tem_expirationTime">
     {{ formateTime(d.expirationTime)  }}
+</script>
+<script type="text/html" id="tem_cert">
+    <div class="certText">
+        <table>
+            <tr>
+                <td>ssl</td>
+                <td> on;</td>
+            </tr>
+            <tr>
+                <td>listen</td>
+                <td> 443 ssl;</td>
+            </tr>
+            <tr>
+                <td>server_name</td>
+                <td> {{ d.domain }};</td>
+            </tr>
+            <tr>
+                <td>ssl_certificate</td>
+                <td> {{ d.cert }};</td>
+            </tr>
+            <tr>
+                <td>ssl_certificate_key</td>
+                <td> {{ d.key }};</td>
+            </tr>
+            <tr>
+                <td>ssl_session_cache</td>
+                <td> shared:SSL:1m;</td>
+            </tr>
+            <tr>
+                <td>ssl_session_timeout</td>
+                <td> 5m;</td>
+            </tr>
+            <tr>
+                <td>ssl_ciphers</td>
+                <td> HIGH:!aNULL:!MD5;</td>
+            </tr>
+            <tr>
+                <td>ssl_prefer_server_ciphers &nbsp;</td>
+                <td> on;</td>
+            </tr>
+        </table>
+    </div>
 </script>
 
 <script type="text/javascript">
@@ -172,8 +221,38 @@
             } else if ('delete' === event) {
                 // 删除
                 deleteCert(data);
+            } else if ('export' === event) {
+                window.location.href = "./export?path=" + data.cert;
+            } else if ('templte' === event) {
+                openTemplate(data);
             }
         });
+
+        //打开模板
+        function openTemplate(data) {
+            // $("#template").removeClass("div-certificate");
+            layer.open({
+                type: 1,
+                title: '模板',
+                content: $('#cert_template'),
+                area: ['40%', '40%'],
+                // btnAlign: 'c',
+                // btn: ['提交'],
+                yes: function (index, layero) {
+                }
+            });
+
+            var page = tem_cert.innerHTML;
+            var view = document.getElementById('cert_template');
+            layui.use(['laytpl'], function () {
+                var laytpl = layui.laytpl;
+
+                laytpl(page).render(data, function (html) {
+                    view.innerHTML = html;
+                });
+            });
+
+        }
 
         // 修改证书
         function updateCert(data) {

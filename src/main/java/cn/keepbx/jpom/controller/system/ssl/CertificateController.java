@@ -3,6 +3,8 @@ package cn.keepbx.jpom.controller.system.ssl;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.lang.Validator;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.core.util.ZipUtil;
+import cn.hutool.extra.servlet.ServletUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.controller.multipart.MultipartFileBuilder;
@@ -161,5 +163,18 @@ public class CertificateController extends BaseController {
             return JsonMessage.getString(400, "删除失败");
         }
         return JsonMessage.getString(200, "删除成功");
+    }
+
+
+    /**
+     * 导出证书
+     */
+    @RequestMapping(value = "/export", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @ResponseBody
+    public void export(String path) {
+        String parent = FileUtil.file(path).getParent();
+        File zip = ZipUtil.zip(parent);
+        ServletUtil.write(getResponse(), zip);
+        FileUtil.del(zip);
     }
 }
