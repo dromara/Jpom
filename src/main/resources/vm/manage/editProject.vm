@@ -26,6 +26,10 @@
                 <div class="layui-input-block">
                     <input type="text" name="name" placeholder="项目名称" required lay-verify="required"
                            class="layui-input" value="#if($item)#if($item.name)$!item.name#else$!item.id#end#end">
+                    <div class="layui-hide">
+                        <input type="checkbox" name="edit" #if($item)checked#end>
+                    </div>
+
                 </div>
             </div>
             <div class="layui-inline">
@@ -77,7 +81,7 @@
             <div class="layui-inline">
                 <label class="layui-form-label" title="$!item.log">项目Lib</label>
                 <div class="layui-input-block">
-                    <input type="text" name="lib" placeholder="程序在服务器环境中需要的jar路径" required lay-verify="required"
+                    <input type="text" name="lib" placeholder="jar存储的文件夹" required lay-verify="required"
                            class="layui-input" value="#if($item)$!item.lib#end">
                 </div>
             </div>
