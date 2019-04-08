@@ -22,7 +22,7 @@
     <form action="saveProject" method="post" class="layui-form" id="form_project">
         <div class="layui-form-item">
             <div class="layui-inline">
-                <label class="layui-form-label">项目名名称</label>
+                <label class="layui-form-label"><span class="x-red">*</span>项目名名称</label>
                 <div class="layui-input-block">
                     <input type="text" name="name" placeholder="项目名称" required lay-verify="required"
                            class="layui-input" value="#if($item)#if($item.name)$!item.name#else$!item.id#end#end">
@@ -42,7 +42,7 @@
         </div>
         <div class="layui-form-item">
             <div class="layui-inline">
-                <label class="layui-form-label">项目ID</label>
+                <label class="layui-form-label"><span class="x-red">*</span>项目ID</label>
                 <div class="layui-input-block">
                     <input type="text" name="id" placeholder="程序运行标志（设置后将不能修改）" required lay-verify="required"
                            class="layui-input  #if($item)layui-disabled#end" value="#if($item)$!item.id#end"
@@ -60,7 +60,7 @@
         </div>
         <div class="layui-form-item">
             <div class="layui-inline">
-                <label class="layui-form-label">项目路径</label>
+                <label class="layui-form-label"><span class="x-red">*</span>项目路径</label>
                 <div class="layui-input-block">
 
                     <select name="whitelistDirectory" lay-filter="projectLib">
@@ -79,7 +79,7 @@
                 </div>
             </div>
             <div class="layui-inline">
-                <label class="layui-form-label" title="$!item.log">项目Lib</label>
+                <label class="layui-form-label" title="$!item.log"><span class="x-red">*</span>项目Lib</label>
                 <div class="layui-input-block">
                     <input type="text" name="lib" placeholder="jar存储的文件夹" required lay-verify="required"
                            class="layui-input" value="#if($item)$!item.lib#end">
@@ -101,7 +101,7 @@
         </div>
         <div class="layui-form-item">
             <div class="layui-inline">
-                <label class="layui-form-label">运行方式</label>
+                <label class="layui-form-label"><span class="x-red">*</span>运行方式</label>
                 <div class="layui-input-block">
                     <select name="runMode">
                         #foreach($itemPath in $runModes)
@@ -143,14 +143,16 @@
                 </div>
             </div>
         </div>
-        <div class="layui-form-item" style="padding-left: 20%">
-            <button class="layui-btn layui-btn-normal" lay-submit lay-filter="submitProject" id="project_submit">提交
-            </button>
-            #if($item)
-                <a class="layui-btn layui-btn-warm" data-id="$item.id" id="delete_project">删除</a>
-            ##                <a class="layui-btn layui-btn-primary" type="all" data-id="$item.id" id="delete_project_all">彻底删除</a>
-            #end
-        </div>
+        #if($user.isProject($!item.id))
+            <div class="layui-form-item" style="padding-left: 20%">
+                <button class="layui-btn layui-btn-normal" lay-submit lay-filter="submitProject" id="project_submit">提交
+                </button>
+                #if($item)
+                    <a class="layui-btn layui-btn-warm" data-id="$item.id" id="delete_project">删除</a>
+                ##                <a class="layui-btn layui-btn-primary" type="all" data-id="$item.id" id="delete_project_all">彻底删除</a>
+                #end
+            </div>
+        #end
     </form>
 </div>
 </body>

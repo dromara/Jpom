@@ -78,15 +78,13 @@ public class EditProjectController extends BaseController {
     }
 
     /**
-     * 保存项目
+     * 基础检查
      *
-     * @param projectInfo 项目实体
-     * @return json
-     * @throws IOException IO
+     * @param projectInfo        项目实体
+     * @param whitelistDirectory 白名单
+     * @return null 检查正常
      */
-    @RequestMapping(value = "saveProject", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    @ResponseBody
-    public String saveProject(ProjectInfoModel projectInfo, String whitelistDirectory) throws IOException {
+    private String checkParameter(ProjectInfoModel projectInfo, String whitelistDirectory) {
         String id = projectInfo.getId();
         if (StrUtil.isEmptyOrUndefined(id)) {
             return JsonMessage.getString(400, "项目id不能为空");
@@ -130,7 +128,25 @@ public class EditProjectController extends BaseController {
         if (!checkPathSafe(lib)) {
             return JsonMessage.getString(401, "项目lib存在提升目录问题");
         }
+        return null;
+    }
 
+    /**
+     * 保存项目
+     *
+     * @param projectInfo 项目实体
+     * @return json
+     * @throws IOException IO
+     */
+    @RequestMapping(value = "saveProject", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @ResponseBody
+    public String saveProject(ProjectInfoModel projectInfo, String whitelistDirectory) throws IOException {
+        String error = checkParameter(projectInfo, whitelistDirectory);
+        if (error != null) {
+            return error;
+        }
+        String lib = projectInfo.getLib();
+        String id = projectInfo.getId();
         lib = String.format("%s/%s", whitelistDirectory, lib);
         lib = FileUtil.normalize(lib);
         // 重复lib
@@ -147,7 +163,7 @@ public class EditProjectController extends BaseController {
         if (checkFile.exists() && checkFile.isFile()) {
             return JsonMessage.getString(401, "项目lib是一个已经存在的文件");
         }
-
+        // 自动生成log文件
         String log = new File(lib).getParent();
         log = String.format("%s/%s.log", log, id);
         projectInfo.setLog(FileUtil.normalize(log));
@@ -160,12 +176,10 @@ public class EditProjectController extends BaseController {
         if (StrUtil.isNotEmpty(token) && !ReUtil.isMatch(PatternPool.URL_HTTP, token)) {
             return JsonMessage.getString(401, "WebHooks 地址不合法");
         }
-
         // 判断空格
         if (id.contains(StrUtil.SPACE) || lib.contains(StrUtil.SPACE) || log.contains(StrUtil.SPACE)) {
             return JsonMessage.getString(401, "项目Id、项目Lib、WebHooks不能包含空格");
         }
-
         return save(projectInfo);
     }
 
@@ -191,6 +205,7 @@ public class EditProjectController extends BaseController {
                 projectInfoService.addItem(projectInfo);
                 return JsonMessage.getString(200, "新增成功！");
             }
+            //
             if (!"on".equalsIgnoreCase(edit)) {
                 return JsonMessage.getString(400, "项目id已经存在啦");
             }
@@ -207,6 +222,7 @@ public class EditProjectController extends BaseController {
             exits.setArgs(projectInfo.getArgs());
             exits.setBuildTag(projectInfo.getBuildTag());
             exits.setRunMode(projectInfo.getRunMode());
+            exits.setToken(projectInfo.getToken());
             //
             moveTo(exits, projectInfo);
             projectInfoService.updateProject(exits);
@@ -217,6 +233,11 @@ public class EditProjectController extends BaseController {
         }
     }
 
+    /**
+     * 记录修改人
+     *
+     * @param exits 项目
+     */
     private void modify(ProjectInfoModel exits) {
         UserModel userName = getUser();
         // 隐藏系统管理员登录名
