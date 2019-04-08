@@ -106,6 +106,8 @@
 </body>
 <script type="text/html" id="bar_cert">
     <a href="javascript:;" class="layui-btn  layui-btn-sm layui-btn-warm" lay-event="update">编辑</a>
+    <a href="javascript:;" class="layui-btn  layui-btn-sm layui-btn-normal" lay-event="export">导出</a>
+    <a href="javascript:;" class="layui-btn  layui-btn-sm layui-btn-normal" lay-event="templte">模板</a>
     <a href="javascript:;" class="layui-btn  layui-btn-sm layui-btn-danger" lay-event="delete">删除</a>
 </script>
 
@@ -142,15 +144,15 @@
         table.render({
             id: 'tab_certificate',
             elem: '#tab_certificate',
-            url: '/system/certificate/getCertList',
+            url: './getCertList',
             // height: 'full-52',
             even: true,
             cols: [[
-                {field: 'id', title: 'id'},
+                {field: 'id', title: 'id', width: '10%'},
                 {field: 'name', title: '名称'},
                 {field: 'domain', title: '域名'},
-                {field: 'effectiveTime', templet: "#tem_effectiveTime", title: '生效时间'},
-                {field: 'expirationTime', templet: "#tem_expirationTime", title: '到期时间'},
+                {field: 'effectiveTime', templet: "#tem_effectiveTime", title: '生效时间', width: '14%'},
+                {field: 'expirationTime', templet: "#tem_expirationTime", title: '到期时间', width: '14%'},
                 {field: 'op', title: '操作', align: 'center', toolbar: '#bar_cert', fixed: 'right'}
             ]],
             loading: true,
@@ -195,11 +197,11 @@
                 type: 1,
                 title: '编辑',
                 content: $('#div-certificate'),
-                area: ['60%', '60%'],
+                area: ['60%', '80%'],
                 btnAlign: 'c',
                 btn: ['提交'],
                 yes: function (index, layero) {
-                    $('#form_certificate').attr('action', '/system/certificate/updateCertificate');
+                    $('#form_certificate').attr('action', './updateCertificate');
                     $('#cert_submit').click();
                 }
             });
@@ -212,7 +214,7 @@
             }, function (index) {
                 layer.close(index);
                 $.ajax({
-                    url: '/system/certificate/delete',
+                    url: './delete',
                     type: 'POST',
                     dataType: 'json',
                     data: {id: data.id},
@@ -247,11 +249,11 @@
                 type: 1,
                 title: '新增证书',
                 content: $('#div-certificate'),
-                area: ['60%', '60%'],
+                area: ['60%', '80%'],
                 btnAlign: 'c',
                 btn: ['提交'],
                 yes: function (index, layero) {
-                    $('#form_certificate').attr('action', '/system/certificate/addCertificate');
+                    $('#form_certificate').attr('action', './addCertificate');
                     $('#cert_submit').click();
                 }
             });
@@ -297,7 +299,6 @@
             });
             return false;
         });
-
     }
 </script>
 
