@@ -139,11 +139,12 @@ public class TopManager {
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("top", true);
         JSONArray memory = new JSONArray();
-        memory.add(putObject("占用内存", totalPhysicalMemorySize - freePhysicalMemorySize));
-        memory.add(putObject("空闲内存", freePhysicalMemorySize));
+        //单位 kb
+        memory.add(putObject("占用内存", (totalPhysicalMemorySize - freePhysicalMemorySize) / 1024f, "memory"));
+        memory.add(putObject("空闲内存", freePhysicalMemorySize / 1024f, "memory"));
         JSONArray cpus = new JSONArray();
-        cpus.add(putObject("占用cpu", systemCpuLoad));
-        cpus.add(putObject("空闲cpu", 1 - systemCpuLoad));
+        cpus.add(putObject("占用cpu", systemCpuLoad, "cpu"));
+        cpus.add(putObject("空闲cpu", 1 - systemCpuLoad, "cpu"));
         jsonObject.put("memory", memory);
         jsonObject.put("cpu", cpus);
         jsonObject.put("disk", getHardDisk());
@@ -165,8 +166,9 @@ public class TopManager {
             useAbleSpace += file.getTotalSpace() - free;
         }
         JSONArray array = new JSONArray();
-        array.add(putObject("已使用磁盘", useAbleSpace));
-        array.add(putObject("空闲磁盘", freeSpace));
+        //单位 kb
+        array.add(putObject("已使用磁盘", useAbleSpace / 1024f, "disk"));
+        array.add(putObject("空闲磁盘", freeSpace / 1024f, "disk"));
         return array;
     }
 
@@ -344,13 +346,13 @@ public class TopManager {
 //            13284k free — 空闲内存总量（13M）
 //            25364k buffers — 缓存的内存量 （25M）
             if (str.endsWith("free")) {
-                memory.add(putObject("空闲内存", str.replace("free", "").trim()));
+                memory.add(putObject("空闲内存", str.replace("free", "").trim(), "memory"));
             }
             if (str.endsWith("used")) {
-                memory.add(putObject("使用中的内存", str.replace("used", "").trim()));
+                memory.add(putObject("使用中的内存", str.replace("used", "").trim(), "memory"));
             }
             if (str.endsWith("buff/cache")) {
-                memory.add(putObject("缓存的内存", str.replace("buff/cache", "").trim()));
+                memory.add(putObject("缓存的内存", str.replace("buff/cache", "").trim(), "memory"));
             }
         }
         return memory;
@@ -382,25 +384,25 @@ public class TopManager {
             String tag = str.substring(str.length() - 2);
             switch (tag) {
                 case "us":
-                    cpu.add(putObject("用户空间", value));
+                    cpu.add(putObject("用户空间", value, "cpu"));
                     break;
                 case "sy":
-                    cpu.add(putObject("内核空间", value));
+                    cpu.add(putObject("内核空间", value, "cpu"));
                     break;
                 case "ni":
-                    cpu.add(putObject("改变过优先级的进程", value));
+                    cpu.add(putObject("改变过优先级的进程", value, "cpu"));
                     break;
                 case "id":
-                    cpu.add(putObject("空闲CPU", value));
+                    cpu.add(putObject("空闲CPU", value, "cpu"));
                     break;
                 case "wa":
-                    cpu.add(putObject("IO等待", value));
+                    cpu.add(putObject("IO等待", value, "cpu"));
                     break;
                 case "hi":
-                    cpu.add(putObject("硬中断", value));
+                    cpu.add(putObject("硬中断", value, "cpu"));
                     break;
                 case "si":
-                    cpu.add(putObject("软中断", value));
+                    cpu.add(putObject("软中断", value, "cpu"));
                     break;
                 default:
                     break;
@@ -409,10 +411,11 @@ public class TopManager {
         return cpu;
     }
 
-    private static JSONObject putObject(String name, Object value) {
+    private static JSONObject putObject(String name, Object value, String type) {
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("name", name);
         jsonObject.put("value", value);
+        jsonObject.put("type", type);
         return jsonObject;
     }
 
