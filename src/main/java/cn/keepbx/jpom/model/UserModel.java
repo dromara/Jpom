@@ -24,10 +24,8 @@ public class UserModel extends BaseModel {
      */
     public static String SYSTEM_OCCUPY_NAME = "系统管理员";
     /**
-     * 用户密码长度
+     * 用户名限制
      */
-    public static int USER_PWD_LEN = 6;
-
     public static int USER_NAME_MIN_LEN = 3;
 
     /**

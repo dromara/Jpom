@@ -10,8 +10,9 @@ import cn.keepbx.jpom.common.interceptor.LoginInterceptor;
 import cn.keepbx.jpom.common.interceptor.NotLogin;
 import cn.keepbx.jpom.controller.system.WhitelistDirectoryController;
 import cn.keepbx.jpom.model.UserModel;
+import cn.keepbx.jpom.service.system.WhitelistDirectoryService;
 import cn.keepbx.jpom.service.user.UserService;
-import cn.keepbx.jpom.util.CheckPassword;
+import com.alibaba.fastjson.JSONArray;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -30,11 +31,18 @@ import javax.annotation.Resource;
 public class InstallController extends BaseController {
     @Resource
     private UserService userService;
+    @Resource
+    private WhitelistDirectoryService whitelistDirectoryService;
 
     @RequestMapping(value = "install.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
     @NotLogin
     public String install() {
         if (userService.userListEmpty()) {
+            // 判断是否需要填写白名单
+            JSONArray jsonArray = whitelistDirectoryService.getProjectDirectory();
+            if (jsonArray == null || jsonArray.isEmpty()) {
+                setAttribute("whitelist", true);
+            }
             return "install";
         }
         // 已存在用户跳转到首页
@@ -65,18 +73,17 @@ public class InstallController extends BaseController {
         if (Validator.isChinese(userName) || !checkPathSafe(userName)) {
             return JsonMessage.getString(400, "登录名不能包含汉字并且不能包含特殊字符");
         }
-        if (StrUtil.isEmpty(userPwd) || userPwd.length() < UserModel.USER_PWD_LEN) {
-            return JsonMessage.getString(400, "密码长度为6-12位");
+        if (StrUtil.isEmpty(userPwd)) {
+            return JsonMessage.getString(400, "密码不能为空");
         }
         if (UserModel.SYSTEM_OCCUPY_NAME.equals(userName) || UserModel.SYSTEM_ADMIN.equals(userName)) {
             return JsonMessage.getString(401, "当前登录名已经被系统占用");
         }
-
-        // 判断密码级别
-        if (CheckPassword.checkPassword(userPwd) != 2) {
-            return JsonMessage.getString(401, "系统管理员密码强度太低,请使用复杂的密码");
-        }
-
+//        // 判断密码级别
+//        if (CheckPassword.checkPassword(userPwd) != 2) {
+//            return JsonMessage.getString(401, "系统管理员密码强度太低,请使用复杂的密码");
+//        }
+        //
         UserModel userModel = new UserModel();
         userModel.setName(UserModel.SYSTEM_OCCUPY_NAME);
         userModel.setId(userName);
@@ -89,11 +96,14 @@ public class InstallController extends BaseController {
             DefaultSystemLog.ERROR().error(e.getMessage(), e);
             return JsonMessage.getString(400, "初始化失败");
         }
-        // 白名单
-        WhitelistDirectoryController whitelistDirectoryController = SpringUtil.getBean(WhitelistDirectoryController.class);
-        JsonMessage jsonMessage = whitelistDirectoryController.save(whitelistDirectory, null, null);
-        if (jsonMessage.getCode() != 200) {
-            return jsonMessage.toString();
+        JSONArray jsonArray = whitelistDirectoryService.getProjectDirectory();
+        if (jsonArray == null || jsonArray.isEmpty()) {
+            // 白名单
+            WhitelistDirectoryController whitelistDirectoryController = SpringUtil.getBean(WhitelistDirectoryController.class);
+            JsonMessage jsonMessage = whitelistDirectoryController.save(whitelistDirectory, null, null);
+            if (jsonMessage.getCode() != 200) {
+                return jsonMessage.toString();
+            }
         }
         // 自动登录
         setSessionAttribute(LoginInterceptor.SESSION_NAME, userModel);

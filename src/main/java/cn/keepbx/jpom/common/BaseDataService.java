@@ -7,7 +7,6 @@ import cn.keepbx.jpom.util.JsonUtil;
 import com.alibaba.fastjson.JSONObject;
 
 import java.io.FileNotFoundException;
-import java.io.IOException;
 
 /**
  * 公共文件操作Service
@@ -108,7 +107,7 @@ public abstract class BaseDataService {
         }
     }
 
-    protected <T> T getJsonObjectById(String file, String id, Class<T> cls) throws IOException {
+    protected <T> T getJsonObjectById(String file, String id, Class<T> cls) {
         if (StrUtil.isEmpty(id)) {
             return null;
         }

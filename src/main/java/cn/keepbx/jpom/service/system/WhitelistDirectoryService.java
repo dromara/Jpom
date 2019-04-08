@@ -19,11 +19,7 @@ public class WhitelistDirectoryService extends BaseDataService {
 
     public JSONObject getWhitelist() {
         try {
-            JSONObject jsonObject = getJSONObject(ConfigBean.WHITELIST_DIRECTORY);
-            if (jsonObject == null) {
-                return null;
-            }
-            return jsonObject;
+            return getJSONObject(ConfigBean.WHITELIST_DIRECTORY);
         } catch (Exception e) {
             DefaultSystemLog.ERROR().error(e.getMessage(), e);
         }
@@ -38,7 +34,6 @@ public class WhitelistDirectoryService extends BaseDataService {
     public JSONArray getProjectDirectory() {
         return getItemArray("project");
     }
-
 
     public JSONArray getNgxDirectory() {
         return getItemArray("nginx");

@@ -2,7 +2,7 @@
 <html>
 
 <head>
-    #parse("./common/head.vm")
+    #parse("../common/head.vm")
     <title>项目管理系统</title>
     <style>
         .layui-form-label {
@@ -121,7 +121,7 @@
                lay-text="是|否">
     </div>
 </script>
-
+    #parse("../common/sha1.vm")
 <script type="text/javascript">
     function loadSuccess() {
 
@@ -222,13 +222,13 @@
 
         // 提交用户信息
         form.on('submit(submitUser)', function (data) {
-            var field = data.field;
-            field.project = getManageProject();
+            var sendData = formatPwd(data.field, "password");
+            sendData.project = getManageProject();
             $.ajax({
                 url: data.form.action,
                 type: 'POST',
                 dataType: 'json',
-                data: field,
+                data: sendData,
                 success: function (data) {
                     if (200 == data.code) {
                         layer.closeAll('page');
@@ -254,7 +254,7 @@
                     projects.push(dom.value);
                 }
             }
-            return projects;
+            return JSON.stringify(projects);
         }
 
         // 表格工具条事件

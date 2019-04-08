@@ -8,7 +8,6 @@ import cn.keepbx.jpom.common.interceptor.LoginInterceptor;
 import cn.keepbx.jpom.model.UserModel;
 import cn.keepbx.jpom.service.user.UserService;
 import cn.keepbx.jpom.system.ExtConfigBean;
-import cn.keepbx.jpom.util.CheckPassword;
 import com.alibaba.fastjson.JSONArray;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -39,16 +38,16 @@ public class UserInfoController extends BaseController {
      */
     @RequestMapping(value = "updatePwd", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public String updatePwd(String oldPwd, String newPwd) {
-        if (StrUtil.isEmpty(oldPwd) || StrUtil.isEmpty(newPwd) || oldPwd.length() < UserModel.USER_PWD_LEN || newPwd.length() < UserModel.USER_PWD_LEN) {
-            return JsonMessage.getString(400, "密码长度为6-12位");
+        if (StrUtil.isEmpty(oldPwd) || StrUtil.isEmpty(newPwd)) {
+            return JsonMessage.getString(400, "密码不能为空");
         }
         if (oldPwd.equals(newPwd)) {
             return JsonMessage.getString(400, "新旧密码一致");
         }
         UserModel userName = getUser();
-        if (UserModel.SYSTEM_ADMIN.equals(userName.getParent()) && CheckPassword.checkPassword(newPwd) != 2) {
-            return JsonMessage.getString(401, "系统管理员密码强度太低,请使用复杂的密码");
-        }
+//        if (UserModel.SYSTEM_ADMIN.equals(userName.getParent()) && CheckPassword.checkPassword(newPwd) != 2) {
+//            return JsonMessage.getString(401, "系统管理员密码强度太低,请使用复杂的密码");
+//        }
         try {
             UserModel userModel = userService.simpleLogin(userName.getId(), oldPwd);
             if (userModel == null || userModel.getPwdErrorCount() > 0) {
@@ -185,10 +184,6 @@ public class UserInfoController extends BaseController {
             if (StrUtil.isEmpty(password)) {
                 return JsonMessage.getString(400, "密码不能为空");
             }
-            int length = password.length();
-            if (length < UserModel.USER_PWD_LEN) {
-                return JsonMessage.getString(400, "密码长度为6-12位");
-            }
             // 修改用户
             if (!create && !userName.isSystemUser()) {
                 return JsonMessage.getString(401, "只有系统管理员才能重置用户密码");
@@ -196,7 +191,7 @@ public class UserInfoController extends BaseController {
             userModel.setPassword(password);
         }
 
-        String[] projects = getParameters("project[]");
+        String projects = getParameter("project");
         JSONArray jsonProjects = null;
         if (projects != null) {
             jsonProjects = (JSONArray) JSONArray.toJSON(projects);

@@ -200,6 +200,7 @@
     </form>
 </div>
 </body>
+    #parse("./common/sha1.vm")
 <script type="text/javascript">
     function loadSuccess() {
         // 左侧导航条事件
@@ -293,6 +294,15 @@
 
         // 提交修改密码表单
         form.on('submit(updatePwd)', function (data) {
+            if (!checkPwd(data.field.oldPwd)) {
+                return;
+            }
+            if (!checkPwd(data.field.confirmPwd)) {
+                return;
+            }
+            var sendData = formatPwd(data.field, "oldPwd");
+            sendData = formatPwd(data.field, "newPwd");
+            sendData = formatPwd(data.field, "confirmPwd")
             $.ajax({
                 url: '/user/updatePwd',
                 type: 'POST',
