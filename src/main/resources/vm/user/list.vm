@@ -223,6 +223,7 @@
         // 提交用户信息
         form.on('submit(submitUser)', function (data) {
             var field = data.field;
+            field.project = getManageProject();
             $.ajax({
                 url: data.form.action,
                 type: 'POST',
@@ -244,6 +245,17 @@
             return false;
         });
 
+        function getManageProject() {
+            var list = $('#form_user [name="project"]');
+            var projects = [];
+            for (var i = 0; i < list.length; i++) {
+                var dom = list[i];
+                if (dom.checked) {
+                    projects.push(dom.value);
+                }
+            }
+            return projects;
+        }
 
         // 表格工具条事件
         table.on('tool(tab_user)', function (obj) {
