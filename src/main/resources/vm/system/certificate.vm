@@ -192,7 +192,7 @@
                 // 删除
                 deleteCert(data);
             } else if ('export' === event) {
-                window.location.href = "./export?path=" + data.id;
+                window.location.href = "./export?id=" + data.id;
             } else if ('templte' === event) {
                 openTemplate(data);
             }
