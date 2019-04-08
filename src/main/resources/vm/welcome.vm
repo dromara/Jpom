@@ -71,11 +71,29 @@
 
 <table class="layui-table" id="tab_monitor" lay-filter="tab_monitor"></table>
 </body>
-<script>
+<script type="application/javascript">
+
     function loadSuccess() {
         var ws, myEcharts;
-        loadProcessList();
-        loadFirstEcharts();
+        loadData();
+
+        function loadData() {
+            var top = layui.data('top');
+            var openTop = false;
+            if (top) {
+                openTop = top.openTop;
+            }
+            //加载进程信息
+            loadProcessList();
+            if (openTop) {
+                $("#monitor").attr("checked", true);
+                linkSocket(openTop);
+            } else {
+                $("#monitor").attr("checked", false);
+                loadFirstEcharts();
+            }
+            form.render();
+        }
 
         var config = {
             id: 'tab_monitor',
@@ -186,6 +204,10 @@
 
         form.on('switch(filter)', function (data) {
             var check = data.elem.checked;
+            layui.data('top', {
+                key: 'openTop',
+                value: check
+            });
             if ('WebSocket' in window) {
                 linkSocket(check);
             }
@@ -233,7 +255,24 @@
             var option = {
                 tooltip: {
                     trigger: 'item',
-                    formatter: "{a} <br/>{b} : {c} ({d}%)"
+                    formatter: function (params, ticket, callback) {
+                        var value = params.value;
+                        var type = params.data.type;
+                        var suffix = "";
+                        if ("cpu" != type) {
+                            suffix = " KB";
+                            if (value > 1024) {
+                                value = value / 1024;
+                                suffix = " MB";
+                            }
+                            if (value > 1024) {
+                                value = value / 1024;
+                                suffix = " GB";
+                            }
+                            value = value.toFixed(2);
+                        }
+                        return params.seriesName + '<br/>' + params.name + " : " + value + suffix + "(" + params.percent + "%)";
+                    }
                 },
                 series: value
             };
