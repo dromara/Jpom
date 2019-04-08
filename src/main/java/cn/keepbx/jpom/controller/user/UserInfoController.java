@@ -196,7 +196,7 @@ public class UserInfoController extends BaseController {
             userModel.setPassword(password);
         }
 
-        String[] projects = getParameters("project");
+        String[] projects = getParameters("project[]");
         JSONArray jsonProjects = null;
         if (projects != null) {
             jsonProjects = (JSONArray) JSONArray.toJSON(projects);
