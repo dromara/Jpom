@@ -127,42 +127,12 @@
 <script type="text/html" id="tem_cert">
     <div class="certText">
         <table>
+            {{# layui.each(d, function(index, item){ }}
             <tr>
-                <td>ssl</td>
-                <td> on;</td>
+                <td>{{ item.name }}</td>
+                <td>{{ item.value }}</td>
             </tr>
-            <tr>
-                <td>listen</td>
-                <td> 443 ssl;</td>
-            </tr>
-            <tr>
-                <td>server_name</td>
-                <td> {{ d.domain }};</td>
-            </tr>
-            <tr>
-                <td>ssl_certificate</td>
-                <td> {{ d.cert }};</td>
-            </tr>
-            <tr>
-                <td>ssl_certificate_key</td>
-                <td> {{ d.key }};</td>
-            </tr>
-            <tr>
-                <td>ssl_session_cache</td>
-                <td> shared:SSL:1m;</td>
-            </tr>
-            <tr>
-                <td>ssl_session_timeout</td>
-                <td> 5m;</td>
-            </tr>
-            <tr>
-                <td>ssl_ciphers</td>
-                <td> HIGH:!aNULL:!MD5;</td>
-            </tr>
-            <tr>
-                <td>ssl_prefer_server_ciphers &nbsp;</td>
-                <td> on;</td>
-            </tr>
+            {{# }); }}
         </table>
     </div>
 </script>
@@ -222,7 +192,7 @@
                 // 删除
                 deleteCert(data);
             } else if ('export' === event) {
-                window.location.href = "./export?path=" + data.cert;
+                window.location.href = "./export?path=" + data.id;
             } else if ('templte' === event) {
                 openTemplate(data);
             }
@@ -242,12 +212,42 @@
                 }
             });
 
+            var param = [{
+                name: "ssl",
+                value: "on;"
+            }, {
+                name: "listen",
+                value: "443 ssl;"
+            }, {
+                name: "server_name",
+                value: data.domain + ";"
+            }, {
+                name: "ssl_certificate",
+                value: data.cert + ";"
+            }, {
+                name: "ssl_certificate_key",
+                value: data.key + ";"
+            }, {
+                name: "ssl_session_cache",
+                value: "shared:SSL:1m;"
+            }, {
+                name: "ssl_session_timeout",
+                value: "5m;"
+            }, {
+                name: "ssl_ciphers",
+                value: "HIGH:!aNULL:!MD5;"
+            }, {
+                name: "ssl_prefer_server_ciphers  &nbsp;",
+                value: "on;"
+            }];
+
+
             var page = tem_cert.innerHTML;
             var view = document.getElementById('cert_template');
             layui.use(['laytpl'], function () {
                 var laytpl = layui.laytpl;
 
-                laytpl(page).render(data, function (html) {
+                laytpl(page).render(param, function (html) {
                     view.innerHTML = html;
                 });
             });
