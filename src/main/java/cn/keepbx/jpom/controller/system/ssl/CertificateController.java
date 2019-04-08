@@ -175,6 +175,9 @@ public class CertificateController extends BaseController {
     public String export(String id) {
         try {
             CertModel item = certService.getItem(id);
+            if (null == item) {
+                return JsonMessage.getString(400, "导出失败");
+            }
             String parent = FileUtil.file(item.getCert()).getParent();
             File zip = ZipUtil.zip(parent);
             ServletUtil.write(getResponse(), zip);
