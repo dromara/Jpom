@@ -1,6 +1,5 @@
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
-import cn.keepbx.jpom.util.CheckPassword;
 
 import java.util.TimeZone;
 
@@ -9,7 +8,7 @@ import java.util.TimeZone;
  */
 public class TestString {
     public static void main(String[] args) {
-        System.out.println(CheckPassword.checkPassword("123aA!"));
+//        System.out.println(CheckPassword.checkPassword("123aA!"));
         DateTime dateTime = DateUtil.parseUTC("2019-04-04T10:11:21Z");
         System.out.println(dateTime);
         dateTime.setTimeZone(TimeZone.getDefault());

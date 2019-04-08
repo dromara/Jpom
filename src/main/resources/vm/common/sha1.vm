@@ -1,0 +1,28 @@
+<script src="//cdn.staticfile.org/js-sha1/0.6.0/sha1.min.js"></script>
+<script type="text/javascript">
+    /**
+     *  格式化密码加密
+     * @param data
+     * @param key
+     * @returns {*}
+     */
+    function formatPwd(data, key) {
+        var pwd = data[key];
+        if (pwd && pwd != "") {
+            data[key] = sha1(pwd);
+        }
+        return data;
+    }
+
+    function checkPwd(pwd) {
+        if (!pwd || pwd === "") {
+            layer.msg("请输入密码");
+            return false;
+        }
+        if (pwd.length < 6) {
+            layer.msg("密码长度至少6位")
+            return false;
+        }
+        return true;
+    }
+</script>

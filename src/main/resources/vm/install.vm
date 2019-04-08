@@ -31,12 +31,14 @@
                                name="userPwd">
                     </div>
                 </div>
-                <div class="layui-form-item">
-                    <div class="layui-input-block" style="margin-left: 0px;">
+                #if($whitelist)
+                    <div class="layui-form-item">
+                        <div class="layui-input-block" style="margin-left: 0px;">
                     <textarea name="whitelistDirectory" placeholder="请输入项目存放路径白名单，回车支持输入多个路径"
                               class="layui-textarea"></textarea>
+                        </div>
                     </div>
-                </div>
+                #end
                 <div class="layui-form-item">
                     <div class="layui-input-block" style="margin-left: 0px;">
                         <button class="layui-btn layui-btn-danger" lay-submit lay-filter="from_login"
@@ -49,6 +51,7 @@
     </div>
 </div>
 </body>
+    #parse("./common/sha1.vm")
 <script type="text/javascript">
     function loadSuccess() {
         layui.use(['carousel'], function () {
@@ -61,13 +64,17 @@
                 arrow: 'none',
                 indicator: 'none'
             });
-
+            //
             form.on('submit(from_login)', function (data) {
+                if (!checkPwd(data.field.userPwd)) {
+                    return;
+                }
+                var sendData = formatPwd(data.field, "userPwd");
                 $.ajax({
                     url: '/install_submit.json',
                     type: 'POST',
                     dataType: 'json',
-                    data: data.field,
+                    data: sendData,
                     success: function (data) {
                         if (200 == data.code) {
                             window.location.href = '/index';

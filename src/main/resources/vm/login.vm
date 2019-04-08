@@ -67,6 +67,7 @@
     </div>
 </div>
 </body>
+    #parse("./common/sha1.vm")
 <script type="text/javascript">
     function loadSuccess() {
         layui.use(['carousel'], function () {
@@ -88,17 +89,21 @@
             });
 
             form.on('submit(from_login)', function (dataForm) {
+                if (!checkPwd(dataForm.field.userPwd)) {
+                    return false;
+                }
+                var sendData = formatPwd(dataForm.field, "userPwd");
                 $.ajax({
                     url: '/userLogin',
                     type: 'POST',
                     dataType: 'json',
-                    data: dataForm.field,
+                    data: sendData,
                     success: function (data) {
                         if (200 == data.code) {
                             // 记住用户名
                             layui.data('user', {
                                 key: "userName",
-                                value: dataForm.field.userName
+                                value: sendData.userName
                             });
                             window.location.href = '/index';
                         } else {
