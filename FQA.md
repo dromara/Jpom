@@ -20,6 +20,8 @@
    ### 在linux 系统中执行Jpom.sh 提示
    
    ![jpom](/doc/error/ff-unix.png)
+   
+   ![jpom](/doc/error/command-not-found.png)
     
    执行如下命令：(https://blog.csdn.net/perter_liao/article/details/76757605)
    
