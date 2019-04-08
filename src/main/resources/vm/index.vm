@@ -300,6 +300,13 @@
             if (!checkPwd(data.field.confirmPwd)) {
                 return;
             }
+        ##  密码强度
+            #if($user.isSystemUser())
+                if (!checkPasswordStrong(data.field.userPwd)) {
+                    layer.msg("系统管理员密码强度太低");
+                    return false;
+                }
+            #end
             var sendData = formatPwd(data.field, "oldPwd");
             sendData = formatPwd(data.field, "newPwd");
             sendData = formatPwd(data.field, "confirmPwd")

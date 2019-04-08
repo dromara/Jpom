@@ -51,7 +51,7 @@
             width: 100%;
         }
     </style>
-    <script src="//echarts.baidu.com/dist/echarts.js"></script>
+    <script src="//echarts.baidu.com/dist/echarts.js?v=$staticCacheTime"></script>
 </head>
 <body>
 <form action="" class="layui-form" id="form">
