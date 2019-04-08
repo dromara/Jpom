@@ -194,7 +194,7 @@ public class UserInfoController extends BaseController {
         String projects = getParameter("project");
         JSONArray jsonProjects = null;
         if (projects != null) {
-            jsonProjects = (JSONArray) JSONArray.toJSON(projects);
+            jsonProjects = JSONArray.parseArray(projects);
         }
         userModel.setProjects(jsonProjects);
 
