@@ -84,9 +84,9 @@
 
 1. 访问[Jpom](https://gitee.com/keepbx/Jpom)的码云主页,拉取最新完整代码：
 2. 进入项目目录执行，然后在目录中查看 target/jpom-x.x-release
-    ```
-    mvn clean package
-    ```
+```
+mvn clean package
+```
 3. 打包上传服务器运行
 4. 命令运行
 
@@ -125,10 +125,10 @@ Jpom.sh status    查看Jpom运行状态
 ### 演示项目
 
    [https://jpom.keepbx.cn](https://jpom.keepbx.cn)
-   
-    账号：demo
-    密码：demo123
-    
+```   
+账号：demo
+密码：demo123
+```    
    > 演示系统有部分功能做了限制，完整功能请自行部署体验
    
    > 如果出现登录不上，请联系我们重置密码，联系方式在最底部
