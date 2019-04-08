@@ -64,7 +64,7 @@
             <!-- layui-elem-quote -->
             #if($logSize)
                 <button id="export" class="layui-btn layui-btn-sm">导出日志</button>
-                <button id="resetLog" class="layui-btn layui-btn-sm">重置(<span id="logSize">$logSize</span>)</button>
+                <button id="resetLog" class="layui-btn layui-btn-sm">重置日志(<span id="logSize">$logSize</span>)</button>
             #end
             #if($logBack)
                 <button id="logBack" class="layui-btn layui-btn-sm">备份列表</button>
@@ -201,6 +201,11 @@
 
         function scrollToBotomm() {
             var h = showLogDom[0].scrollHeight;
+            if (window.screen.height * 2 < h) {
+                showLogDom.html("已清空屏幕缓存");
+                showLogDom.scrollTop(0);
+                return;
+            }
             showLogDom.scrollTop(h);
         }
 

@@ -80,6 +80,11 @@ public class ExtConfigBean {
     @Value("${log.autoBackSize:50MB}")
     public String autoBackSize;
     /**
+     * 控制台日志保存时长单位天
+     */
+    @Value("${log.saveDays:7}")
+    private int logSaveDays;
+    /**
      * 项目运行存储路径
      */
     @Value("${jpom.path}")
@@ -110,6 +115,18 @@ public class ExtConfigBean {
             throw new RuntimeException("请配置运行路径属性【jpom.path】");
         }
         return path;
+    }
+
+    /**
+     * 配置错误或者没有，默认是7天
+     *
+     * @return int
+     */
+    public int getLogSaveDays() {
+        if (logSaveDays <= 0) {
+            return 7;
+        }
+        return logSaveDays;
     }
 
     /**

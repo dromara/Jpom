@@ -199,9 +199,10 @@
             if (val === "") {
                 val = "请填写";
                 $("#tipMsgDiv").hide();
+            } else {
+                checngeLib();
             }
             $("#projectEnd").text(val);
-            checngeLib();
         });
 
         function checngeLib() {

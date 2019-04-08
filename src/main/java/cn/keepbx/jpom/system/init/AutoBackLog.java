@@ -1,6 +1,9 @@
 package cn.keepbx.jpom.system.init;
 
 import ch.qos.logback.core.util.FileSize;
+import cn.hutool.core.date.DateTime;
+import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.cron.CronUtil;
 import cn.hutool.cron.Scheduler;
@@ -37,8 +40,9 @@ public class AutoBackLog {
             projectInfoService = SpringUtil.getBean(ProjectInfoService.class);
         }
         // 获取cron 表达式
-        String cron = StrUtil.emptyToDefault(ExtConfigBean.getInstance().autoBackConsoleCron, "");
+        String cron = StrUtil.emptyToDefault(ExtConfigBean.getInstance().autoBackConsoleCron, "none");
         if ("none".equalsIgnoreCase(cron.trim())) {
+            DefaultSystemLog.LOG().info("没有配置自动备份控制台日志表达式");
             return;
         }
         String size = StrUtil.emptyToDefault(ExtConfigBean.getInstance().autoBackSize, "50MB");
@@ -63,6 +67,16 @@ public class AutoBackLog {
                         } catch (Exception ignored) {
                         }
                     }
+                    // 清理过期的文件
+                    File logFile = projectInfoModel.getLogBack();
+                    DateTime nowTime = DateTime.now();
+                    List<File> files = FileUtil.loopFiles(logFile, pathname -> {
+                        DateTime dateTime = DateUtil.date(pathname.lastModified());
+                        long days = DateUtil.betweenDay(dateTime, nowTime, false);
+                        long saveDays = ExtConfigBean.getInstance().getLogSaveDays();
+                        return days > saveDays;
+                    });
+                    files.forEach(FileUtil::del);
                 });
             } catch (Exception e) {
                 DefaultSystemLog.ERROR().error("定时备份日志失败", e);
