@@ -72,7 +72,7 @@
     function loadSuccess() {
         layui.use(['carousel'], function () {
             var carousel = layui.carousel;
-            //判断是否在iframe中, 如果是，刷新父页面
+        ## 判断是否在iframe中, 如果是，刷新父页面
             if (self != top) {
                 parent.window.location.replace(window.location.href);
             }

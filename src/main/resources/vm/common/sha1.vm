@@ -1,4 +1,4 @@
-<script src="//cdn.staticfile.org/js-sha1/0.6.0/sha1.min.js"></script>
+<script src="//cdn.staticfile.org/js-sha1/0.6.0/sha1.min.js?v=$staticCacheTime"></script>
 <script type="text/javascript">
     ## 格式化密码加密
     function formatPwd(data, key) {

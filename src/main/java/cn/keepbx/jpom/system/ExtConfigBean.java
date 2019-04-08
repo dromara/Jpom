@@ -95,10 +95,10 @@ public class ExtConfigBean {
      */
     @Value("${user.ipErrorLockTime:60*60*5*1000}")
     private String ipErrorLockTime;
-    private long ipErrorLockTimeValue;
+    private long ipErrorLockTimeValue = -1;
 
     public long getIpErrorLockTime() {
-        if (this.ipErrorLockTimeValue == 0) {
+        if (this.ipErrorLockTimeValue == -1) {
             String str = StrUtil.emptyToDefault(this.ipErrorLockTime, "60*60*5*1000");
             this.ipErrorLockTimeValue = Convert.toLong(ScriptUtil.eval(str), TimeUnit.HOURS.toMillis(5));
         }
