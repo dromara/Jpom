@@ -24,7 +24,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.annotation.Resource;
 import java.io.File;
-import java.io.IOException;
 
 /**
  * 文件管理
@@ -58,23 +57,21 @@ public class ProjectFileControl extends BaseController {
     @ResponseBody
     @ProjectPermission
     public String getFileList(String id) {
-        try {
-            // 查询项目路径
-            ProjectInfoModel pim = projectInfoService.getItem(id);
-            File fileDir = new File(pim.getLib());
-            if (!fileDir.exists()) {
-                return JsonMessage.getString(500, "目录不存在");
-            }
-            File[] filesAll = fileDir.listFiles();
-            if (filesAll == null) {
-                return JsonMessage.getString(500, "目录是空");
-            }
-            JSONArray arrayFile = parseInfo(filesAll, false);
-            return JsonMessage.getString(200, "查询成功", arrayFile);
-        } catch (IOException e) {
-            DefaultSystemLog.ERROR().error(e.getMessage(), e);
-            return JsonMessage.getString(500, "查询失败");
+        // 查询项目路径
+        ProjectInfoModel pim = projectInfoService.getItem(id);
+        if (pim == null) {
+            return JsonMessage.getString(500, "查询失败：项目不存在");
         }
+        File fileDir = new File(pim.getLib());
+        if (!fileDir.exists()) {
+            return JsonMessage.getString(500, "目录不存在");
+        }
+        File[] filesAll = fileDir.listFiles();
+        if (filesAll == null) {
+            return JsonMessage.getString(500, "目录是空");
+        }
+        JSONArray arrayFile = parseInfo(filesAll, false);
+        return JsonMessage.getString(200, "查询成功", arrayFile);
     }
 
     public static JSONArray parseInfo(File[] files, boolean time) {

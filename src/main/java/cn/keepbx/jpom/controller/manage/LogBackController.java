@@ -9,7 +9,6 @@ import cn.keepbx.jpom.common.BaseController;
 import cn.keepbx.jpom.common.commander.AbstractCommander;
 import cn.keepbx.jpom.common.interceptor.ProjectPermission;
 import cn.keepbx.jpom.model.ProjectInfoModel;
-import cn.keepbx.jpom.service.manage.CommandService;
 import cn.keepbx.jpom.service.manage.ProjectInfoService;
 import com.alibaba.fastjson.JSONArray;
 import org.springframework.http.MediaType;
@@ -20,7 +19,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.annotation.Resource;
 import java.io.File;
-import java.io.IOException;
 
 /**
  * 控制台日志备份管理
@@ -34,14 +32,12 @@ public class LogBackController extends BaseController {
     @Resource
     private ProjectInfoService projectInfoService;
 
-    @Resource
-    private CommandService commandService;
 
     @RequestMapping(value = "logBack", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
     public String console(String id) {
-        try {
-            // 查询项目路径
-            ProjectInfoModel pim = projectInfoService.getItem(id);
+        // 查询项目路径
+        ProjectInfoModel pim = projectInfoService.getItem(id);
+        if (pim != null) {
             File logBack = pim.getLogBack();
             if (logBack.exists() && logBack.isDirectory()) {
                 File[] filesAll = logBack.listFiles();
@@ -51,8 +47,6 @@ public class LogBackController extends BaseController {
                 }
             }
             setAttribute("id", pim.getId());
-        } catch (IOException e) {
-            DefaultSystemLog.ERROR().error(e.getMessage(), e);
         }
         return "manage/logBack";
     }

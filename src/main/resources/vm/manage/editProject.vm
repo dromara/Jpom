@@ -69,7 +69,7 @@
                 <label class="layui-form-label"><span class="x-red">*</span>项目路径</label>
                 <div class="layui-input-block">
 
-                    <select name="whitelistDirectory" lay-filter="projectLib">
+                    <select name="whitelistDirectory" required lay-verify="required" lay-filter="projectLib">
                         #foreach($itemPath in $whitelistDirectory)
                             #if($item && $itemWhitelistDirectory.startsWith($itemPath))
                                 <option value="$itemPath" selected>$itemPath</option>
@@ -79,7 +79,7 @@
                             #end
                         #end
                         #if(!$hasetPath)
-                            <option value="/" selected>没有匹配项</option>
+                            <option value="">请添加白名单</option>
                         #end
                     </select>
                 </div>
@@ -162,6 +162,7 @@
 </body>
 <script type="text/javascript">
     function loadSuccess() {
+        var tipMsgDiv = ("#tipMsgDiv");
         // 提交项目表单
         form.on('submit(submitProject)', function (data) {
             $.ajax({
@@ -191,7 +192,6 @@
         });
         var selectGroup = $("select[name='group']");
         form.on('select(group)', function (data) {
-            console.log(data);
             if (data.value == "") {
                 layer.prompt({
                     title: '输入分组名，并确认',
@@ -226,7 +226,8 @@
             let val = data.value;
             if (val === "") {
                 val = "请选择";
-                $("#tipMsgDiv").hide();
+                tipMsgDiv.hide();
+                tipMsgDiv.attr("msg", "请填写项目路径")
             }
             $("#projectStart").text(val);
             if (val !== "") {
@@ -238,16 +239,23 @@
             let val = $(this).val();
             if (val === "") {
                 val = "请填写";
-                $("#tipMsgDiv").hide();
+                tipMsgDiv.hide();
+                tipMsgDiv.attr("msg", "请填写项目的jar路径")
             }
             $("#projectEnd").text(val);
             if (val !== "") {
                 checngeLib();
             }
         });
+        var whitelistDirectorySelect = $("select[name='whitelistDirectory']");
 
         function checngeLib() {
-            var lib = $("#projectStart").text() + $("#projectEnd").text();
+            var wVal = whitelistDirectorySelect.val();
+            if (wVal == "") {
+                layer.msg("请选择白名单");
+                return;
+            }
+            var lib = wVal + $("#projectEnd").text();
             $.ajax({
                 url: './judge_lib.json',
                 type: 'POST',
@@ -264,6 +272,7 @@
                     }
                 },
                 error: function (err) {
+                    layer.msg('检查路径失败，请稍后再试');
                 }
             });
         }
@@ -310,12 +319,11 @@
             });
         });
     }
-
+    ## 刷新项目列表
     function autoClose() {
         setTimeout(function () {
             var index = parent.layer.getFrameIndex(window.name);
             parent.layer.close(index);
-            // 刷新项目列表
             parent.reloadTable();
         }, 2000);
     }

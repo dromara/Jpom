@@ -92,12 +92,7 @@ public class LogWebSocketHandle {
         }
         String projectId = json.getString("projectId");
         ProjectInfoService projectInfoService = SpringUtil.getBean(ProjectInfoService.class);
-        ProjectInfoModel projectInfoModel = null;
-        try {
-            projectInfoModel = projectInfoService.getItem(projectId);
-        } catch (IOException e) {
-            DefaultSystemLog.ERROR().error("获取异常", e);
-        }
+        ProjectInfoModel projectInfoModel = projectInfoService.getItem(projectId);
         CommandService.CommandOp commandOp = CommandService.CommandOp.valueOf(op);
         if (projectInfoModel == null && commandOp != CommandService.CommandOp.top) {
             SocketSessionUtil.send(session, "没有对应项目");

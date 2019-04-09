@@ -41,12 +41,7 @@ public class ConsoleController extends BaseController {
      */
     @RequestMapping(value = "console", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
     public String console(String id) {
-        ProjectInfoModel projectInfoModel = null;
-        try {
-            projectInfoModel = projectInfoService.getItem(id);
-        } catch (IOException e) {
-            DefaultSystemLog.ERROR().error(e.getMessage(), e);
-        }
+        ProjectInfoModel projectInfoModel = projectInfoService.getItem(id);
         if (projectInfoModel != null) {
             UserModel userName = getUser();
             setAttribute("projectInfo", projectInfoModel);

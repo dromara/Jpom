@@ -26,6 +26,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import javax.annotation.Resource;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.HashSet;
 import java.util.List;
 
@@ -269,7 +270,7 @@ public class EditProjectController extends BaseController {
      */
     @RequestMapping(value = "judge_lib.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
-    public String saveProject(String id, String newLib) throws IOException {
+    public String saveProject(String id, String newLib) {
         File file = new File(newLib);
         //  填写的jar路径是一个存在的文件
         if (file.exists() && file.isFile()) {
@@ -284,6 +285,12 @@ public class EditProjectController extends BaseController {
         } else {
             // 已经存在的项目
             File oldLib = new File(exits.getLib());
+            Path newPath = file.toPath();
+            Path oldPath = oldLib.toPath();
+            if (newPath.equals(oldPath)) {
+                // 新 旧没有变更
+                return JsonMessage.getString(200, "");
+            }
             if (file.exists()) {
                 if (oldLib.exists()) {
                     // 新旧jar路径都存在，会自动覆盖新的jar路径中的文件
@@ -292,14 +299,10 @@ public class EditProjectController extends BaseController {
                 return JsonMessage.getString(401, "填写jar目录当前已经在,创建成功后会自动同步文件");
             }
         }
-        String msg = null;
         if (Validator.isChinese(newLib)) {
-            msg = "不建议使用中文目录";
+            return JsonMessage.getString(401, "不建议使用中文目录");
         }
-        if (msg == null) {
-            return JsonMessage.getString(200, "");
-        }
-        return JsonMessage.getString(400, msg);
+        return JsonMessage.getString(200, "");
     }
 
     private void moveTo(ProjectInfoModel old, ProjectInfoModel news) {
