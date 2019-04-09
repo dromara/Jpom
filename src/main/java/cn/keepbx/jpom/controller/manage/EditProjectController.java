@@ -270,24 +270,30 @@ public class EditProjectController extends BaseController {
     @RequestMapping(value = "judge_lib.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     public String saveProject(String id, String newLib) throws IOException {
-        ProjectInfoModel exits = projectInfoService.getItem(id);
         File file = new File(newLib);
-        String msg = null;
+        //  填写的jar路径是一个存在的文件
+        if (file.exists() && file.isFile()) {
+            return JsonMessage.getString(400, "填写jar目录当前是一个已经存在的文件,请修改");
+        }
+        ProjectInfoModel exits = projectInfoService.getItem(id);
         if (exits == null) {
-            if (file.exists() && file.isFile()) {
-                msg = "lib目录当前是一个已经存在的文件,请修改";
+            // 创建项目 填写的jar路径是已经存在的文件夹
+            if (file.exists()) {
+                return JsonMessage.getString(401, "填写jar目录当前已经在,创建成功后会自动同步文件");
             }
         } else {
+            // 已经存在的项目
             File oldLib = new File(exits.getLib());
-            if (file.exists() && oldLib.exists()) {
-                if (file.isFile()) {
-                    msg = "lib目录当前是一个已经存在的文件,请修改";
-                } else {
-                    msg = "lib目录已经存在,保存将覆盖原文件夹并会自动同步原lib目录";
+            if (file.exists()) {
+                if (oldLib.exists()) {
+                    // 新旧jar路径都存在，会自动覆盖新的jar路径中的文件
+                    return JsonMessage.getString(401, "原jar目录已经存在并且新的jar目录已经存在,保存将覆盖新文件夹并会自动同步原jar目录");
                 }
+                return JsonMessage.getString(401, "填写jar目录当前已经在,创建成功后会自动同步文件");
             }
         }
-        if (msg == null && Validator.isChinese(newLib)) {
+        String msg = null;
+        if (Validator.isChinese(newLib)) {
             msg = "不建议使用中文目录";
         }
         if (msg == null) {

@@ -35,10 +35,7 @@
             <div class="layui-inline">
                 <label class="layui-form-label">分组名称</label>
                 <div class="layui-input-block">
-                ##                    <input type="text" name="group" placeholder="项目分组名称,非必填" class="layui-input"
-                ##                           value="#if($item)$!item.group#end">
                     <select name="group" lay-filter="group">
-
                         #foreach($i in $groups)
                             <option value="$i">$i</option>
                         #end
@@ -89,7 +86,7 @@
             </div>
 
             <div class="layui-inline">
-                <label class="layui-form-label" title="$!item.log"><span class="x-red">*</span>项目Lib</label>
+                <label class="layui-form-label" title="$!item.log"><span class="x-red">*</span>项目Jar包</label>
                 <div class="layui-input-block">
                     <input type="text" name="lib" placeholder="jar存储的文件夹" required lay-verify="required"
                            class="layui-input" value="#if($item)$!item.lib#end">
@@ -230,20 +227,23 @@
             if (val === "") {
                 val = "请选择";
                 $("#tipMsgDiv").hide();
-            } else {
-                checngeLib();
             }
             $("#projectStart").text(val);
+            if (val !== "") {
+                checngeLib();
+            }
+
         });
         $("input[name='lib']").change(function (e) {
             let val = $(this).val();
             if (val === "") {
                 val = "请填写";
                 $("#tipMsgDiv").hide();
-            } else {
-                checngeLib();
             }
             $("#projectEnd").text(val);
+            if (val !== "") {
+                checngeLib();
+            }
         });
 
         function checngeLib() {

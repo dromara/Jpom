@@ -96,7 +96,6 @@
                 setMsg('status');
             };
 
-
             ws.onmessage = function (data) {
                 // 如果是
                 if (data.data.indexOf('{') === 0) {
@@ -284,7 +283,7 @@
     ## 刷新项目数据
     function refreshProjectData() {
         try {
-            top.frames["manage"].reloadTable();
+            top.frames["manage"].location.reload();
         } catch (e) {
             console.error(e);
         }
