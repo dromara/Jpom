@@ -19,7 +19,7 @@
 
 <body>
 <div class="layui-container div-project" id="div-project">
-    <form action="saveProject" method="post" class="layui-form" id="form_project">
+    <form action="saveProject" method="post" class="layui-form" id="form_project" lay-filter="form_project">
         <div class="layui-form-item">
             <div class="layui-inline">
                 <label class="layui-form-label"><span class="x-red">*</span>项目名名称</label>
@@ -35,8 +35,15 @@
             <div class="layui-inline">
                 <label class="layui-form-label">分组名称</label>
                 <div class="layui-input-block">
-                    <input type="text" name="group" placeholder="项目分组名称,非必填" class="layui-input"
-                           value="#if($item)$!item.group#end">
+                ##                    <input type="text" name="group" placeholder="项目分组名称,非必填" class="layui-input"
+                ##                           value="#if($item)$!item.group#end">
+                    <select name="group" lay-filter="group">
+
+                        #foreach($i in $groups)
+                            <option value="$i">$i</option>
+                        #end
+                        <option value="">选择手动添加</option>
+                    </select>
                 </div>
             </div>
         </div>
@@ -52,15 +59,13 @@
             <div class="layui-inline">
                 <label class="layui-form-label"><span class="x-red">*</span>运行方式</label>
                 <div class="layui-input-block">
-                    <select name="runMode">
+                    <select name="runMode" lay-filter="runMode">
                         #foreach($itemPath in $runModes)
                             <option value="$itemPath" #if($item.runMode==$itemPath)selected#end>$itemPath</option>
                         #end
                     </select>
                 </div>
             </div>
-
-
         </div>
         <div class="layui-form-item">
             <div class="layui-inline">
@@ -104,7 +109,7 @@
                 </div>
             </div>
         </div>
-        <div class="layui-form-item">
+        <div class="layui-form-item" #if($item)style="display: none;"#end id="mainClassDiv">
             <div class="layui-inline">
                 <label class="layui-form-label">MainClass</label>
                 <div class="layui-input-block">
@@ -187,17 +192,49 @@
             });
             return false;
         });
+        var selectGroup = $("select[name='group']");
+        form.on('select(group)', function (data) {
+            console.log(data);
+            if (data.value == "") {
+                layer.prompt({
+                    title: '输入分组名，并确认',
+                    formType: 0
+                }, function (text, index) {
+                    layer.close(index);
+                    var ext = $("select[name='group'] option[value='" + text + "']");
+                    if (ext.length <= 0) {
+                        selectGroup.find("option").first().before("<option value='" + text + "'>" + text + "</option>");
+                    }
+                    form.val("form_project", {
+                        "group": text
+                    })
+                    form.render('select');
+                });
+            }
+        });
+
+        form.on('select(runMode)', function (data) {
+            let val = data.value;
+            if (val == "ClassPath") {
+                $("#mainClassDiv").show();
+            } else {
+                $("#mainClassDiv").hide();
+            }
+        });
+        #if($item.runMode=='ClassPath')
+            $("#mainClassDiv").show();
+        #end
 
         form.on('select(projectLib)', function (data) {
             let val = data.value;
             if (val === "") {
                 val = "请选择";
                 $("#tipMsgDiv").hide();
+            } else {
+                checngeLib();
             }
             $("#projectStart").text(val);
-            checngeLib();
         });
-
         $("input[name='lib']").change(function (e) {
             let val = $(this).val();
             if (val === "") {

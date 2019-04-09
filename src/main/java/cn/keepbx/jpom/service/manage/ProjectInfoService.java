@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
 import java.io.File;
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.List;
 
 /**
@@ -36,6 +37,17 @@ public class ProjectInfoService extends BaseOperService<ProjectInfoModel> {
         JSONObject jsonObject = getJSONObject(ConfigBean.PROJECT);
         JSONArray jsonArray = formatToArray(jsonObject);
         return jsonArray.toJavaList(ProjectInfoModel.class);
+    }
+
+
+    public HashSet<String> getAllGroup() {
+        //获取所有分组
+        List<ProjectInfoModel> projectInfoModels = list();
+        HashSet<String> hashSet = new HashSet<>();
+        for (ProjectInfoModel projectInfoModel : projectInfoModels) {
+            hashSet.add(projectInfoModel.getGroup());
+        }
+        return hashSet;
     }
 
     /**

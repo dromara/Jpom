@@ -26,6 +26,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import javax.annotation.Resource;
 import java.io.File;
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.List;
 
 /**
@@ -74,6 +75,12 @@ public class EditProjectController extends BaseController {
         // 运行模式
         ProjectInfoModel.RunMode[] runModes = ProjectInfoModel.RunMode.values();
         setAttribute("runModes", runModes);
+        //
+        HashSet<String> hashSet = projectInfoService.getAllGroup();
+        if (hashSet.isEmpty()) {
+            hashSet.add("默认");
+        }
+        setAttribute("groups", hashSet);
         return "manage/editProject";
     }
 
@@ -107,9 +114,13 @@ public class EditProjectController extends BaseController {
         } catch (Exception ignored) {
         }
         projectInfo.setRunMode(runMode1);
-
-        if (runMode1 == ProjectInfoModel.RunMode.ClassPath && StrUtil.isEmpty(projectInfo.getMainClass())) {
-            return JsonMessage.getString(401, "ClassPath 模式 MainClass必填");
+        // 监测
+        if (runMode1 == ProjectInfoModel.RunMode.ClassPath) {
+            if (StrUtil.isEmpty(projectInfo.getMainClass())) {
+                return JsonMessage.getString(401, "ClassPath 模式 MainClass必填");
+            }
+        } else if (runMode1 == ProjectInfoModel.RunMode.Jar) {
+            projectInfo.setMainClass("");
         }
         //
         if (!whitelistDirectoryService.checkProjectDirectory(whitelistDirectory)) {

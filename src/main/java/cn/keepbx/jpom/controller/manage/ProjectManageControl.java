@@ -39,12 +39,7 @@ public class ProjectManageControl extends BaseController {
      */
     @RequestMapping(value = "projectInfo", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
     public String projectInfo() {
-        //获取所有分组
-        List<ProjectInfoModel> projectInfoModels = projectInfoService.list();
-        HashSet<String> hashSet = new HashSet<>();
-        for (ProjectInfoModel projectInfoModel : projectInfoModels) {
-            hashSet.add(projectInfoModel.getGroup());
-        }
+        HashSet hashSet = projectInfoService.getAllGroup();
         setAttribute("groups", hashSet);
         return "manage/projectInfo";
     }
