@@ -29,6 +29,7 @@ interceptor:
 # session 超时时间
 tomcat:
   sessionTimeOut: 3600
+  sessionCookieName: JPOMID
 # 启动完成自动初始化指定包
 preload:
   packageName: cn.keepbx.jpom.system.init
