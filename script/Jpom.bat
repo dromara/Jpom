@@ -23,40 +23,45 @@
 @echo off
 setlocal enabledelayedexpansion
 
-set Tag=KeepBx-System-JpomApplication1
+set Tag=KeepBx-System-JpomApplication
 set MainClass=cn.keepbx.jpom.JpomApplication
 set basePath=%~dp0
 set Lib=%basePath%lib\
 set Log=%basePath%run.log
 set JVM=-server
+@REM 在此次修改Jpom端口、日志存储路径等
 set ARGS= --jpom.applicationTag=%Tag% --jpom.log=%basePath%log --server.port=2122
 
-if "%1"=="start" (
-    call:start
-)else (
-    if "%1"=="stop" (
-        call:stop
-    )else (
-         if "%1"=="restart" (
-            call:restart
-         )else (
-            if "%1"=="status" (
-               call:status
-            )else (
-               call:use
-            )
-         )
-    )
-)
-pause
+color 0a
+TITLE Jpom管理系统BAT控制台
+echo. ***** Jpom管理系统BAT控制台 *****
+::*************************************************************************************************************
+echo.
+	echo.  [1] 启动 start
+	echo.  [2] 关闭 stop
+	echo.  [3] 查看运行状态 status
+	echo.  [4] 重启 restart
+	echo.  [5] 帮助 use
+	echo.  [0] 退 出 0
+echo.
+
+echo.请输入选择的序号:
+set /p ID=
+	IF "%id%"=="1" GOTO start
+	IF "%id%"=="2" GOTO stop
+	IF "%id%"=="3" GOTO status
+	IF "%id%"=="4" GOTO restart
+	IF "%id%"=="5" GOTO use
+	IF "%id%"=="0" EXIT
+PAUSE
 
 @REM 启动
 :start
 set TEMPCLASSPATH=
 for /f "delims=" %%I in ('dir /B %Lib%') do (set TEMPCLASSPATH=!TEMPCLASSPATH!%Lib%%%I;)
 @REM echo 启动成功，关闭窗口不影响运行
+echo 启动中.....关闭窗口不影响运行
 cmd /S /C "javaw %JVM% -classpath %TEMPCLASSPATH%"%JAVA_HOME%"\lib\tools.jar -Dapplication=%Tag% -Dbasedir=%basePath% %MainClass% %ARGS% >> %Log%"
-echo 启动中.....
 goto:eof
 
 @REM 关闭Jpom
