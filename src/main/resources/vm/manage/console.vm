@@ -96,6 +96,7 @@
                 setMsg('status');
             };
 
+
             ws.onmessage = function (data) {
                 // 如果是
                 if (data.data.indexOf('{') === 0) {
@@ -127,6 +128,7 @@
                                 $('.status span').text(json_data.msg);
                                 setOpBtn(true);
                             }
+                            refreshProjectData();
                             break;
                         case 'stop':
                             if (200 === json_data.code) {
@@ -136,6 +138,7 @@
                             } else {
                                 $('.status span').text(json_data.msg);
                             }
+                            refreshProjectData();
                             break;
                         case  'showlog':
                             break;
@@ -277,6 +280,14 @@
                 content: 'logBack?id=$!projectInfo.id'
             });
         })
+    }
+    ## 刷新项目数据
+    function refreshProjectData() {
+        try {
+            top.frames["manage"].reloadTable();
+        } catch (e) {
+            console.error(e);
+        }
     }
 </script>
 </html>

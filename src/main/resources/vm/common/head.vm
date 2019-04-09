@@ -41,7 +41,7 @@
                 element.tabChange('mainTabs', lay_id);
             } else {
                 // 创建
-                var tab_content = '<iframe src="' + options.url + '" frameborder="0" class="custom-iframe"></iframe>';
+                var tab_content = '<iframe name="' + options.id + '" src="' + options.url + '" frameborder="0" class="custom-iframe"></iframe>';
                 element.tabAdd('mainTabs', {
                     title: options.title,
                     content: tab_content,

@@ -17,9 +17,9 @@
 <body>
 <div class="layui-row">
     #if($user.isManage())
-        <button id="addProject" onclick="editProject('');" class="layui-btn layui-btn-sm">新增项目</button>
+        <button onclick="editProject('');" class="layui-btn layui-btn-sm">新增项目</button>
     #end
-    <button id="refresh" onclick="reloadTable();" class="layui-btn layui-btn-sm">刷新表格</button>
+    <button onclick="reloadTable();" class="layui-btn layui-btn-sm">刷新表格</button>
     <button onclick="projectRecover();" class="layui-btn layui-btn-sm layui-btn-primary">回收站</button>
 </div>
 <table class="layui-table" id="tab_project" lay-filter="tab_project" style="margin: 0;"></table>
@@ -32,7 +32,8 @@
     <a href="javascript:;" class="layui-btn  layui-btn-sm" lay-event="ram">监控</a>
 </script>
 <script type="text/html" id="status_templ">
-    <input type="checkbox" id="" disabled name="status" {{# if(d.status){ }} checked {{# } }} lay-skin="switch"
+    <input class="layui-hide" type="checkbox" id="" disabled name="status" {{# if(d.status){ }} checked {{# } }}
+           lay-skin="switch"
            lay-text="运行中|未运行">
 </script>
 
@@ -151,20 +152,22 @@
                     }
                     return "<span   name='" + d.id + "' title='分组：" + d.group + "(项目Id:" + d.id + ")' style='background: rgb(" + rgb + ");padding: 10px;'></span >" + d.name;
                 }
+            }, {
+                title: 'lib状态', width: '10%', sort: true, templet: function (d) {
+                    return (d.runLibDesc || "") + " / " + (d.useLibDesc || "");
+                }
+            }, {
+                field: 'createTime', title: '创建时间', sort: true, width: '13%'
+            }, {
+                field: 'modifyUser', title: '最后修改人', sort: true, width: '13%'
+            }, {
+                field: 'modifyTime', title: '修改时间', sort: true, width: '13%'
+            }, {
+                title: '运行状态',
+                templet: "#status_templ",
+                sort: true,
+                width: '10%'
             },
-                {
-                    title: 'lib状态', width: '10%', sort: true, templet: function (d) {
-                        return (d.runLibDesc || "") + " / " + (d.useLibDesc || "");
-                    }
-                },
-                {
-                    field: 'createTime', title: '创建时间', sort: true, width: '13%'
-                },
-                {
-                    field: 'modifyUser', title: '最后修改人', sort: true, width: '13%'
-                },
-                {field: 'modifyTime', title: '修改时间', sort: true, width: '13%'},
-                {title: '运行状态', templet: "#status_templ", sort: true, width: '10%'},
                 {field: 'op', title: '操作', toolbar: '#bar_projects'}
             ]],
             loading: true,
