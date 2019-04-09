@@ -53,6 +53,9 @@
             return modes;
         }
 
+        if (!fieldValue || fieldValue == "") {
+            return false;
+        }
     ##   密码强度等级说明，字符包括：小写字母、大写字母、数字、特殊字符
     ## 1---密码包含其中之一
     ## 2---密码包含其中之二

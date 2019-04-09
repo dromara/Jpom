@@ -6,6 +6,11 @@
 <link rel="icon" href="/static/favicon.ico" type="image/x-icon"/>
 <link rel="shortcut icon" href="/static/favicon.ico" type="image/x-icon"/>
 <link rel="stylesheet" href="/static/layui/css/layui.css?v=$staticCacheTime" media="all">
+<style>
+    .x-red {
+        color: red;
+    }
+</style>
 <script type="text/javascript" src="/static/layui/layui.js?v=$staticCacheTime"></script>
 <script type="text/javascript">
     var $, layer, form, element, table;

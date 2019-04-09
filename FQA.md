@@ -20,6 +20,8 @@
    ### 在linux 系统中执行Jpom.sh 提示
    
    ![jpom](/doc/error/ff-unix.png)
+   
+   ![jpom](/doc/error/command-not-found.png)
     
    执行如下命令：(https://blog.csdn.net/perter_liao/article/details/76757605)
    
@@ -78,3 +80,14 @@ server {
    [https://gitee.com/keepbx/Jpom/wikis/pages?sort_id=1398788&doc_id=264493](https://gitee.com/keepbx/Jpom/wikis/pages?sort_id=1398788&doc_id=264493)
    
    
+   
+   ### Jpom添加项目、启动、查看项目报错
+   1.运行的java进程有32位和64位的
+   
+   ![jpom](/doc/error/32bit.jpg)
+   
+   2.抛出异常Unable to open socket file: target process not responding or HotSpot VM not load。
+   
+   ![jpom](/doc/error/can't-open-socket-file.jpg)
+   
+   针对以上两个问题，Jpom目前采用略过这些进程的解决办法，请更新master分支到2.3.1或dev分支2.2.1以上。 

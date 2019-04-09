@@ -34,7 +34,6 @@
             width: 100%;
         }
 
-        /* ��Ƕ�����ʽ*/
         .custom-iframe {
             width: 100%;
             height: 100%;
@@ -91,7 +90,7 @@
 <body class="layui-layout-body">
 <div class="layui-layout layui-layout-admin">
     <div class="layui-header">
-        <div class="layui-logo" title="$!jpomManifest.timeStamp">
+        <div class="layui-logo" title="版本时间:$!jpomManifest.timeStamp，进程ID:$!jpomManifest.pid">
             Jpom项目管理系统#if($jpomManifest)<font style="font-size: 10px;">($jpomManifest.version)</font>#end
         </div>
         <ul class="layui-nav layui-layout-left">
@@ -302,7 +301,7 @@
             }
         ##  密码强度
             #if($user.isSystemUser())
-                if (!checkPasswordStrong(data.field.userPwd)) {
+                if (!checkPasswordStrong(data.field.confirmPwd)) {
                     layer.msg("系统管理员密码强度太低");
                     return false;
                 }

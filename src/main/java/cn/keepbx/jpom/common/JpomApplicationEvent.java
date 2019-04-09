@@ -31,6 +31,10 @@ public class JpomApplicationEvent implements ApplicationEventClient {
     private FileLock lock;
     private FileOutputStream fileOutputStream;
     private FileChannel fileChannel;
+    /**
+     * 记录当前程序进程
+     */
+    private static int PID = 0;
 
     @Override
     public void onApplicationEvent(ApplicationEvent event) {
@@ -68,6 +72,11 @@ public class JpomApplicationEvent implements ApplicationEventClient {
         IoUtil.close(fileOutputStream);
     }
 
+    /**
+     * 锁住进程文件
+     *
+     * @throws IOException IO
+     */
     private void lockFile() throws IOException {
         this.fileOutputStream = new FileOutputStream(ConfigBean.getInstance().getPidFile(), true);
         this.fileChannel = fileOutputStream.getChannel();
@@ -91,13 +100,16 @@ public class JpomApplicationEvent implements ApplicationEventClient {
      * @return pid
      */
     public static int getPid() {
-        RuntimeMXBean runtime = ManagementFactory.getRuntimeMXBean();
-        // format: "pid@hostname"
-        String name = runtime.getName();
-        try {
-            return Integer.parseInt(name.substring(0, name.indexOf('@')));
-        } catch (Exception e) {
-            return -1;
+        if (PID == 0) {
+            RuntimeMXBean runtime = ManagementFactory.getRuntimeMXBean();
+            // format: "pid@hostname"
+            String name = runtime.getName();
+            try {
+                PID = Integer.parseInt(name.substring(0, name.indexOf('@')));
+            } catch (Exception e) {
+                PID = -1;
+            }
         }
+        return PID;
     }
 }

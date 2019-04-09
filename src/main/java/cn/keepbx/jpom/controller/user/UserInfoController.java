@@ -45,9 +45,6 @@ public class UserInfoController extends BaseController {
             return JsonMessage.getString(400, "新旧密码一致");
         }
         UserModel userName = getUser();
-//        if (UserModel.SYSTEM_ADMIN.equals(userName.getParent()) && CheckPassword.checkPassword(newPwd) != 2) {
-//            return JsonMessage.getString(401, "系统管理员密码强度太低,请使用复杂的密码");
-//        }
         try {
             UserModel userModel = userService.simpleLogin(userName.getId(), oldPwd);
             if (userModel == null || userModel.getPwdErrorCount() > 0) {
@@ -146,7 +143,12 @@ public class UserInfoController extends BaseController {
             return JsonMessage.getString(401, "登录名已经存在");
         }
         userModel = new UserModel();
-        userModel.setParent(userName.getId());
+        // 隐藏系统管理员登录名
+        if (userName.isSystemUser()) {
+            userModel.setParent(UserModel.SYSTEM_OCCUPY_NAME);
+        } else {
+            userModel.setParent(userName.getId());
+        }
         String msg = parseUser(userModel, true);
         if (msg != null) {
             return msg;

@@ -34,16 +34,14 @@ public class JpomManifest {
         }
         if (manifestResources != null) {
             while (manifestResources.hasMoreElements()) {
-                try {
-                    try (InputStream inputStream = manifestResources.nextElement().openStream()) {
-                        Manifest manifest = new Manifest(inputStream);
-                        Attributes attributes = manifest.getMainAttributes();
-                        String version = attributes.getValue("Jpom-Project-Version");
-                        if (version != null) {
-                            JPOM_MANIFEST.setVersion(version);
-                            String timeStamp = attributes.getValue("Jpom-Timestamp");
-                            JPOM_MANIFEST.setTimeStamp(timeStamp);
-                        }
+                try (InputStream inputStream = manifestResources.nextElement().openStream()) {
+                    Manifest manifest = new Manifest(inputStream);
+                    Attributes attributes = manifest.getMainAttributes();
+                    String version = attributes.getValue("Jpom-Project-Version");
+                    if (version != null) {
+                        JPOM_MANIFEST.setVersion(version);
+                        String timeStamp = attributes.getValue("Jpom-Timestamp");
+                        JPOM_MANIFEST.setTimeStamp(timeStamp);
                     }
                 } catch (Exception ignored) {
                 }

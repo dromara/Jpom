@@ -34,15 +34,13 @@
 1. 创建、修改、删除项目
 2. 实时查看控制台
 3. jar包文件夹管理
-4. cpu、ram 监控
-5. 导出堆栈信息
-6. [阿里云 CodePipeline + Oss在线管理](/doc/CodePipeline-Oss.md)
-7. 多用户管理，用户项目权限独立(上传、删除权限可控制)
-8. 此项目完全不依赖数据库，随装随用
-9. 整个服务器top监听
-10. 查看项目运行进程占用的端口
-11. [安全模式](/doc/safeMode.md)运行，更好的保证服务器稳定、避免误操作
-12. 项目路径白名单模式，杜绝用户误操作系统文件
+4. cpu、ram 监控、导出堆栈信息、服务器状态监控
+5. [阿里云 CodePipeline + Oss在线管理](/doc/CodePipeline-Oss.md)
+6. 多用户管理，用户项目权限独立(上传、删除权限可控制)
+7. 此项目完全不依赖数据库，随装随用
+8. 查看项目运行进程占用的端口
+9. [安全模式](/doc/safeMode.md)运行，更好的保证服务器稳定、避免误操作
+10. 项目路径白名单模式，杜绝用户误操作系统文件
 
 
 #### 项目截图
@@ -74,19 +72,19 @@
 2. 上传到服务解压到根目录
 3. 执行目录下[Jpom.sh](/script/Jpom.sh)文件（记得给命令文件添加权限奥[*chmod  755 /jpom/Jpom.sh*]）
     如
-    ```
-    /jpom/Jpom.sh start
-    ```
+```
+/jpom/Jpom.sh start
+```
 4. 如有需要修改项目端口请查看 Jpom.sh
 5. windows 下则执行Jpom.bat 命令即可
 
 ### 编译安装
 
 1. 访问[Jpom](https://gitee.com/keepbx/Jpom)的码云主页,拉取最新完整代码：
-2. 进入项目目录执行，然后在目录中查看 target/jpom-x.x-release
-    ```
-    mvn clean package
-    ```
+2. 进入项目目录执行，然后在目录中查看 target/jpom-x.x.x-release
+```
+mvn clean package
+```
 3. 打包上传服务器运行
 4. 命令运行
 
@@ -96,9 +94,27 @@
 2. 运行*cn.keepbx.jpom.JpomApplication*
 3. 浏览器访问（如：http://127.0.0.1:2122）
 
+### 管理命令
+1. windows中Jpom.bat
+```
+Jpom.bat start     启动Jpom 
+Jpom.bat stop      停止Jpom
+Jpom.bat restart   重启Jpom
+Jpom.bat status    查看Jpom运行状态
+```
+2. linux中Jpom.sh
+```
+Jpom.sh start     启动Jpom 
+Jpom.sh stop      停止Jpom
+Jpom.sh restart   重启Jpom
+Jpom.sh status    查看Jpom运行状态
+```
+
 ### 视频教程
 
 [教程列表](https://mp.weixin.qq.com/mp/homepage?__biz=Mzg2OTEzMDIwNg==&hid=5&sn=3712b3edbe0af22c88ac3178a840a799)
+
+[直播回放](https://yq.aliyun.com/live/970)
 
 ### Jpom 的参数配置
 
@@ -107,40 +123,35 @@
 ### 演示项目
 
    [https://jpom.keepbx.cn](https://jpom.keepbx.cn)
-   
-    账号：demo
-    密码：demo123
-    
+```   
+账号：demo
+密码：demo123
+```    
    > 演示系统有部分功能做了限制，完整功能请自行部署体验
    
    > 如果出现登录不上，请联系我们重置密码，联系方式在最底部
     
    1. [Jboot案例代码](https://gitee.com/keepbx/Jpom-demo-case/tree/master/jboot-test)
-   2. [SpringBoot案例代码](https://gitee.com/keepbx/Jpom-demo-case/tree/master/springboot-test)
+   2. [SpringBoot案例代码(ClassPath)](https://gitee.com/keepbx/Jpom-demo-case/tree/master/springboot-test)
+   3. [SpringBoot案例代码(Jar)](https://gitee.com/keepbx/Jpom-demo-case/tree/master/springboot-test-jar)
 
 ### 常见问题
 
-[常见问题>>](/FQA.md)
-
+[常见问题>>](/FQA.md) 
+ 
 [启动失败问题>>](https://gitee.com/keepbx/Jpom/wikis/pages?sort_id=1395625&doc_id=264493)
 
 [安装说明>>](https://gitee.com/keepbx/Jpom/wikis/pages?sort_id=1395348&doc_id=264493)
 
 [更新日志>>](/CHANGELOG.md)
 
-### 开发计划
-
 [开发计划>>](/PLANS.md)
-
-### 安全模式说明
 
 [安全模式>>](/doc/safeMode.md)  
 
 [用户角色说明>>](/doc/safeMode.md#用户权限说明)
 
-### 阿里云Oss配置
-
-[查看文档](/doc/CodePipeline-Oss.md)
+[阿里云Oss配置>>](/doc/CodePipeline-Oss.md)
 
 
 ### 感谢

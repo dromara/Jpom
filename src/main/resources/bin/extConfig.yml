@@ -18,3 +18,5 @@ log:
   autoBackConsoleCron: 0 0/10 * * * ?
   # 当文件多大时自动备份
   autoBackSize: 50MB
+  # 保存天数 配置错误或者没有，默认是7天
+  saveDays: 7
