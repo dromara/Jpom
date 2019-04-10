@@ -8,7 +8,6 @@ import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.http.HttpUtil;
-import cn.hutool.system.JavaRuntimeInfo;
 import cn.hutool.system.OsInfo;
 import cn.hutool.system.SystemUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
@@ -17,6 +16,7 @@ import cn.keepbx.jpom.common.commander.impl.WindowsCommander;
 import cn.keepbx.jpom.model.NetstatModel;
 import cn.keepbx.jpom.model.ProjectInfoModel;
 import cn.keepbx.jpom.service.manage.CommandService;
+import cn.keepbx.jpom.system.init.CheckPath;
 import com.sun.tools.attach.*;
 import sun.management.ConnectorAddressLink;
 
@@ -44,7 +44,6 @@ public abstract class AbstractCommander {
     private static AbstractCommander abstractCommander = null;
     protected Charset charset;
     public static final OsInfo OS_INFO = SystemUtil.getOsInfo();
-    private static final JavaRuntimeInfo JAVA_RUNTIME_INFO = SystemUtil.getJavaRuntimeInfo();
 
     protected AbstractCommander(Charset charset) {
         this.charset = charset;
@@ -280,7 +279,7 @@ public abstract class AbstractCommander {
         if (address != null) {
             return new JMXServiceURL(address);
         }
-        String agent = StrUtil.format("{}{}lib{}management-agent.jar", JAVA_RUNTIME_INFO.getHomeDir(), File.separator, File.separator);
+        String agent = CheckPath.getManagementAgent();
         virtualMachine.loadAgent(agent);
         address = virtualMachine.getAgentProperties().getProperty("com.sun.management.jmxremote.localConnectorAddress");
         if (address != null) {

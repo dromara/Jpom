@@ -1,12 +1,12 @@
 package cn.keepbx.jpom.model;
 
-import com.alibaba.fastjson.JSON;
-
 /**
+ * 基础实体（带id）
+ *
  * @author jiangzeyin
  * @date 2019/3/14
  */
-public abstract class BaseModel {
+public abstract class BaseModel extends BaseJsonModel {
     private String id;
 
     public String getId() {
@@ -15,10 +15,5 @@ public abstract class BaseModel {
 
     public void setId(String id) {
         this.id = id;
-    }
-
-    @Override
-    public String toString() {
-        return JSON.toJSONString(this);
     }
 }

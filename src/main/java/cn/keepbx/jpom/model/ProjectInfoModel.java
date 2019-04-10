@@ -3,7 +3,6 @@ package cn.keepbx.jpom.model;
 import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.keepbx.jpom.common.commander.AbstractCommander;
-import com.alibaba.fastjson.JSONObject;
 
 import java.io.File;
 
@@ -178,6 +177,12 @@ public class ProjectInfoModel extends BaseModel {
         return file.getAbsolutePath();
     }
 
+    /**
+     * 拼接java 执行的jar路径
+     *
+     * @param projectInfoModel 项目
+     * @return classpath 或者 jar
+     */
     public static String getClassPathLib(ProjectInfoModel projectInfoModel) {
         File fileLib = new File(projectInfoModel.getLib());
         File[] files = fileLib.listFiles();
@@ -262,15 +267,6 @@ public class ProjectInfoModel extends BaseModel {
 
     public void setArgs(String args) {
         this.args = args;
-    }
-
-    @Override
-    public String toString() {
-        return JSONObject.toJSONString(this);
-    }
-
-    public JSONObject toJson() {
-        return (JSONObject) JSONObject.toJSON(this);
     }
 
     /**

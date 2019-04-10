@@ -1,10 +1,12 @@
 package cn.keepbx.jpom.model;
 
 /**
+ * 网络端口信息实体
+ *
  * @author jiangzeyin
  * @date 2019/4/10
  */
-public class NetstatModel {
+public class NetstatModel extends BaseJsonModel {
     private String protocol;
     private String receive;
     private String send;

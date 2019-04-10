@@ -4,7 +4,6 @@ import cn.hutool.core.date.DateUtil;
 import cn.hutool.crypto.SecureUtil;
 import cn.keepbx.jpom.system.ExtConfigBean;
 import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
 
 import java.util.concurrent.TimeUnit;
 
@@ -267,9 +266,5 @@ public class UserModel extends BaseModel {
 
     public boolean isSystemUser() {
         return UserModel.SYSTEM_ADMIN.equals(getParent());
-    }
-
-    public JSONObject toJson() {
-        return (JSONObject) JSONObject.toJSON(this);
     }
 }

@@ -129,16 +129,16 @@ public class EditProjectController extends BaseController {
         }
         String lib = projectInfo.getLib();
         if (StrUtil.isEmpty(lib)) {
-            return JsonMessage.getString(401, "项目lib不能为空");
+            return JsonMessage.getString(401, "项目Jar路径不能为空");
         }
         if (StrUtil.SLASH.equals(lib)) {
-            return JsonMessage.getString(401, "项目lib不能为顶级目录");
+            return JsonMessage.getString(401, "项目Jar路径不能为顶级目录");
         }
         if (Validator.isChinese(lib)) {
-            return JsonMessage.getString(401, "项目lib中不能包含中文");
+            return JsonMessage.getString(401, "项目Jar路径中不能包含中文");
         }
         if (!checkPathSafe(lib)) {
-            return JsonMessage.getString(401, "项目lib存在提升目录问题");
+            return JsonMessage.getString(401, "项目Jar路径存在提升目录问题");
         }
         return null;
     }
@@ -148,11 +148,10 @@ public class EditProjectController extends BaseController {
      *
      * @param projectInfo 项目实体
      * @return json
-     * @throws IOException IO
      */
     @RequestMapping(value = "saveProject", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
-    public String saveProject(ProjectInfoModel projectInfo, String whitelistDirectory) throws IOException {
+    public String saveProject(ProjectInfoModel projectInfo, String whitelistDirectory) {
         String error = checkParameter(projectInfo, whitelistDirectory);
         if (error != null) {
             return error;
@@ -166,14 +165,14 @@ public class EditProjectController extends BaseController {
         if (list != null) {
             for (ProjectInfoModel projectInfoModel : list) {
                 if (!projectInfoModel.getId().equals(id) && projectInfoModel.getLib().equals(lib)) {
-                    return JsonMessage.getString(401, "当前项目lib已经被【" + projectInfoModel.getName() + "】占用,请检查");
+                    return JsonMessage.getString(401, "当前项目Jar路径已经被【" + projectInfoModel.getName() + "】占用,请检查");
                 }
             }
         }
         projectInfo.setLib(lib);
         File checkFile = new File(projectInfo.getLib());
         if (checkFile.exists() && checkFile.isFile()) {
-            return JsonMessage.getString(401, "项目lib是一个已经存在的文件");
+            return JsonMessage.getString(401, "项目Jar路径是一个已经存在的文件");
         }
         // 自动生成log文件
         String log = new File(lib).getParent();
@@ -189,13 +188,13 @@ public class EditProjectController extends BaseController {
             return JsonMessage.getString(401, "WebHooks 地址不合法");
         }
         // 判断空格
-        if (id.contains(StrUtil.SPACE) || lib.contains(StrUtil.SPACE) || log.contains(StrUtil.SPACE)) {
-            return JsonMessage.getString(401, "项目Id、项目Lib、WebHooks不能包含空格");
+        if (id.contains(StrUtil.SPACE) || lib.contains(StrUtil.SPACE)) {
+            return JsonMessage.getString(401, "项目Id、项目Jar不能包含空格");
         }
         return save(projectInfo);
     }
 
-    private String save(ProjectInfoModel projectInfo) throws IOException {
+    private String save(ProjectInfoModel projectInfo) {
         String edit = getParameter("edit");
         ProjectInfoModel exits = projectInfoService.getItem(projectInfo.getId());
         try {
@@ -266,7 +265,6 @@ public class EditProjectController extends BaseController {
      * @param id     项目Id
      * @param newLib 新lib
      * @return json
-     * @throws IOException IO
      */
     @RequestMapping(value = "judge_lib.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
@@ -355,7 +353,7 @@ public class EditProjectController extends BaseController {
             }
         }
         if (projectInfoModel1 != null) {
-            return new JsonMessage(401, "项目lib和【" + projectInfoModel1.getName() + "】项目冲突:" + projectInfoModel1.getLib());
+            return new JsonMessage(401, "项目Jar路径和【" + projectInfoModel1.getName() + "】项目冲突:" + projectInfoModel1.getLib());
         }
         return null;
     }
