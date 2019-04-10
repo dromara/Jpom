@@ -224,22 +224,16 @@
         form.on('submit(submitUser)', function (data) {
             var sendData = formatPwd(data.field, "password");
             sendData.project = getManageProject();
-            $.ajax({
+            loadingAjax({
                 url: data.form.action,
-                type: 'POST',
-                dataType: 'json',
                 data: sendData,
                 success: function (data) {
+                    layer.msg(data.msg);
                     if (200 == data.code) {
                         layer.closeAll('page');
                         // 刷新表
                         table.reload('tab_user', {});
-                    } else {
-                        layer.msg(data.msg);
                     }
-                },
-                error: function (err) {
-                    layer.msg('操作失败！');
                 }
             });
             return false;
@@ -279,10 +273,8 @@
                     title: '系统提示'
                 }, function (index) {
                     layer.close(index);
-                    $.ajax({
+                    loadingAjax({
                         url: './unlock',
-                        type: 'POST',
-                        dataType: 'json',
                         data: {
                             id: data.id
                         },
@@ -291,9 +283,6 @@
                             if (200 == data.code) {
                                 table.reload('tab_user', {});
                             }
-                        },
-                        error: function (err) {
-                            layer.msg('解锁失败！');
                         }
                     });
                 });
@@ -306,21 +295,16 @@
                 title: '系统提示'
             }, function (index) {
                 layer.close(index);
-                $.ajax({
+                loadingAjax({
                     url: '/user/deleteUser',
-                    type: 'POST',
-                    dataType: 'json',
-                    data: {id: data.id},
-                    success: function (data) {
-                        if (200 == data.code) {
-                            layer.msg('删除成功！');
-                            table.reload('tab_user', {});
-                        } else {
-                            layer.msg(data.msg);
-                        }
+                    data: {
+                        id: data.id
                     },
-                    error: function (err) {
-                        layer.msg('删除失败！');
+                    success: function (data) {
+                        layer.msg(data.msg);
+                        if (200 == data.code) {
+                            table.reload('tab_user', {});
+                        }
                     }
                 });
             });

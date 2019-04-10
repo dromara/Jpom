@@ -93,10 +93,8 @@
                     return false;
                 }
                 var sendData = formatPwd(dataForm.field, "userPwd");
-                $.ajax({
+                loadingAjax({
                     url: '/userLogin',
-                    type: 'POST',
-                    dataType: 'json',
                     data: sendData,
                     success: function (data) {
                         if (200 == data.code) {
@@ -113,9 +111,6 @@
                             }
                             layer.msg(data.msg);
                         }
-                    },
-                    error: function (err) {
-                        layer.alert(err.msg);
                     }
                 });
                 return false;

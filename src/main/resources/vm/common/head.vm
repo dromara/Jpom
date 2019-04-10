@@ -53,8 +53,37 @@
         element.tabChange('mainTabs', lay_id);
     }
 
+    ## 获取自适应的socket
     function getSocketHost() {
         var pro = location.protocol === 'https:' ? 'wss://' : 'ws://';
         return pro + window.location.host;
+    }
+
+    ## 带loading 效果的网络请求
+    function loadingAjax(data) {
+        var success = data.success;
+        delete data.success;
+        var error = data.error;
+        delete data.error;
+        var index;
+        var defData = {
+            type: 'POST',
+            dataType: 'json',
+            beforeSend: function () {
+                index = layer.load(1, {
+                    shade: [0.3, '#fff']
+                });
+            },
+            success: function (data) {
+                layer.close(index);
+                success && success(data);
+            },
+            error: function () {
+                layer.close(index);
+                layer.msg("网络异常,请稍后再试");
+            }
+        };
+        $.extend(defData, data);
+        $.ajax(defData);
     }
 </script>

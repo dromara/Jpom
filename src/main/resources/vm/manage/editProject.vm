@@ -22,7 +22,7 @@
     <form action="saveProject" method="post" class="layui-form" id="form_project" lay-filter="form_project">
         <div class="layui-form-item">
             <div class="layui-inline">
-                <label class="layui-form-label"><span class="x-red">*</span>项目名名称</label>
+                <label class="layui-form-label"><span class="x-red">*</span>项目名称</label>
                 <div class="layui-input-block">
                     <input type="text" name="name" placeholder="项目名称" required lay-verify="required"
                            class="layui-input" value="#if($item)#if($item.name)$!item.name#else$!item.id#end#end">
@@ -165,27 +165,14 @@
         var tipMsgDiv = ("#tipMsgDiv");
         // 提交项目表单
         form.on('submit(submitProject)', function (data) {
-            $.ajax({
+            loadingAjax({
                 url: data.form.action,
-                type: 'POST',
-                dataType: 'json',
                 data: data.field,
-                beforeSend: function () {
-                    layer.load(1, {
-                        shade: [0.3, '#fff']
-                    });
-                },
                 success: function (data) {
+                    layer.msg(data.msg);
                     if (200 == data.code) {
                         autoClose();
-                    } else {
-                        layer.closeAll();
                     }
-                    layer.msg(data.msg);
-                },
-                error: function (err) {
-                    layer.closeAll();
-                    layer.msg('操作失败！');
                 }
             });
             return false;
@@ -289,31 +276,17 @@
             layer.confirm(msg, {
                 title: '系统提示'
             }, function (index) {
-                $.ajax({
+                loadingAjax({
                     url: './deleteProject',
-                    type: 'POST',
-                    dataType: 'json',
                     data: {
                         id: id,
                         type: type
                     },
-                    beforeSend: function () {
-                        layer.load(1, {
-                            shade: [0.3, '#fff']
-                        });
-                    },
                     success: function (data) {
-                        layer.close(index);
+                        layer.msg(data.msg);
                         if (200 == data.code) {
                             autoClose();
-                        } else {
-                            layer.closeAll();
                         }
-                        layer.msg(data.msg);
-                    },
-                    error: function (err) {
-                        layer.closeAll();
-                        layer.msg('删除失败！');
                     }
                 });
             });

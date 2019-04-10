@@ -166,7 +166,7 @@
                 title: '运行状态',
                 templet: "#status_templ",
                 sort: true,
-                width: '10%'
+                width: '12%'
             },
                 {field: 'op', title: '操作', toolbar: '#bar_projects'}
             ]],

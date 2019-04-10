@@ -161,26 +161,17 @@
                     title: '系统提示'
                 }, function (index) {
                     layer.close(index);
-                    $.ajax({
+                    loadingAjax({
                         url: '/file/clear',
-                        type: 'POST',
-                        dataType: 'json',
                         data: {
                             id: '$id'
                         },
                         success: function (data) {
+                            layer.msg(data.msg);
                             if (200 === data.code) {
-                                layer.msg(data.msg);
                                 // 刷新项目列表
-                                table.reload('table_file', {
-                                    height: 'full-52'
-                                });
-                            } else {
-                                layer.msg(data.msg);
+                                table.reload('table_file', {});
                             }
-                        },
-                        error: function (err) {
-                            layer.msg('删除失败！');
                         }
                     });
                 });
@@ -213,27 +204,18 @@
                     title: '系统提示'
                 }, function (index) {
                     layer.close(index);
-                    $.ajax({
+                    loadingAjax({
                         url: '/file/deleteFile',
-                        type: 'POST',
-                        dataType: 'json',
                         data: {
                             id: '$id',
                             filename: data.filename
                         },
                         success: function (data) {
+                            layer.msg(data.msg);
                             if (200 === data.code) {
-                                layer.msg('删除成功！');
                                 // 刷新项目列表
-                                table.reload('table_file', {
-                                    // height: 'full-52'
-                                });
-                            } else {
-                                layer.msg(data.msg);
+                                table.reload('table_file', {});
                             }
-                        },
-                        error: function (err) {
-                            layer.msg('删除失败！');
                         }
                     });
                 });
