@@ -128,7 +128,7 @@
         table.render({
             id: 'tab_user',
             elem: '#tab_user',
-            url: '/user/getUserList',
+            url: './getUserList',
             // height: 'full-52',
             method: 'POST',
             even: true,
@@ -183,7 +183,7 @@
                 btnAlign: 'c',
                 btn: ['提交'],
                 yes: function (index, layero) {
-                    $('#form_user').attr('action', '/user/updateUser');
+                    $('#form_user').attr('action', './updateUser');
                     $('#user_submit').click();
                 }
             });
@@ -208,7 +208,7 @@
                 btnAlign: 'c',
                 btn: ['提交'],
                 yes: function (index, layero) {
-                    $('#form_user').attr('action', '/user/addUser');
+                    $('#form_user').attr('action', './addUser');
                     $('#user_submit').click();
                 }
             });
@@ -296,7 +296,7 @@
             }, function (index) {
                 layer.close(index);
                 loadingAjax({
-                    url: '/user/deleteUser',
+                    url: './deleteUser',
                     data: {
                         id: data.id
                     },

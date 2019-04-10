@@ -180,11 +180,11 @@
                     projectId: "$!projectInfo.id"
                 };
                 layer.load(1, {
-                    shade: [0.3, '#fff'] //0.1透明度的白色背景
+                    shade: [0.3, '#fff']
                 });
                 ws.send(JSON.stringify(data));
                 setTimeout(function () {
-                    layer.closeAll();
+                    layer.closeAll('loading');
                 }, 2000);
             }
         } else {
@@ -251,10 +251,8 @@
         });
 
         $("#resetLog").on('click', function () {
-            $.ajax({
+            loadingAjax({
                 url: './resetLog',
-                type: 'POST',
-                dataType: 'json',
                 data: {
                     id: "$!projectInfo.id"
                 },
@@ -264,9 +262,6 @@
                         reqLogSize();
                     }
                 },
-                error: function () {
-                    layer.alert("重置日志失败");
-                }
             });
         });
 

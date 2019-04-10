@@ -44,7 +44,7 @@
             table.render({
                 id: 'table_file',
                 elem: '#tab_file',
-                url: '/file/getFileList',
+                url: './getFileList',
                 method: 'post',
                 // height: 'full',
                 even: true,
@@ -86,7 +86,7 @@
                     id: '$id'
                 },
                 multiple: true,
-                url: '/file/upload',
+                url: './upload',
                 before: function () {
                     layer.load(1, {
                         shade: [0.5, '#fff'] //0.1透明度的白色背景
@@ -129,7 +129,7 @@
                 multiple: false,
                 exts: 'zip',
                 acceptMime: '.zip',
-                url: '/file/upload',
+                url: './upload',
                 before: function () {
                     layer.load(1, {
                         shade: [0.5, '#fff'] //0.1透明度的白色背景
@@ -162,7 +162,7 @@
                 }, function (index) {
                     layer.close(index);
                     loadingAjax({
-                        url: '/file/clear',
+                        url: './clear',
                         data: {
                             id: '$id'
                         },
@@ -194,7 +194,7 @@
 
             //下载文件
             function downloadFile(data) {
-                var url = "/file/download?id=$id&filename=" + encodeURI(data.filename);
+                var url = "./download?id=$id&filename=" + encodeURI(data.filename);
                 self.location.href = url;
             }
 
@@ -205,7 +205,7 @@
                 }, function (index) {
                     layer.close(index);
                     loadingAjax({
-                        url: '/file/deleteFile',
+                        url: './deleteFile',
                         data: {
                             id: '$id',
                             filename: data.filename

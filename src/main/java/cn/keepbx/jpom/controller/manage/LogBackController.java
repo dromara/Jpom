@@ -8,6 +8,7 @@ import cn.jiangzeyin.common.JsonMessage;
 import cn.keepbx.jpom.common.BaseController;
 import cn.keepbx.jpom.common.commander.AbstractCommander;
 import cn.keepbx.jpom.common.interceptor.ProjectPermission;
+import cn.keepbx.jpom.controller.manage.file.ProjectFileControl;
 import cn.keepbx.jpom.model.ProjectInfoModel;
 import cn.keepbx.jpom.service.manage.ProjectInfoService;
 import com.alibaba.fastjson.JSONArray;
@@ -77,7 +78,7 @@ public class LogBackController extends BaseController {
     @RequestMapping(value = "logBack_delete", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     @ProjectPermission(checkDelete = true)
-    public String clear(String id, String name) {
+    public String clear(String name) {
         name = pathSafe(name);
         if (StrUtil.isEmpty(name)) {
             return JsonMessage.getString(405, "非法操作:" + name);
