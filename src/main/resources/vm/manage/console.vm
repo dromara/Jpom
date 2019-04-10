@@ -225,7 +225,7 @@
 
         function reqLogSize() {
             $.ajax({
-                url: './logSize',
+                url: './log/logSize',
                 type: 'POST',
                 dataType: 'json',
                 data: {
@@ -247,12 +247,12 @@
         }
 
         $('#export').on('click', function () {
-            location.href = "export.html?id=$!projectInfo.id";
+            location.href = "./log/export.html?id=$!projectInfo.id";
         });
 
         $("#resetLog").on('click', function () {
             loadingAjax({
-                url: './resetLog',
+                url: './log/resetLog',
                 data: {
                     id: "$!projectInfo.id"
                 },
@@ -271,7 +271,7 @@
                 title: '备份列表',
                 shade: 0.8,
                 area: ['80%', '90%'],
-                content: 'logBack?id=$!projectInfo.id'
+                content: './log/logBack?id=$!projectInfo.id'
             });
         })
     }

@@ -56,16 +56,5 @@ public class ConsoleController extends BaseController {
     }
 
 
-    @RequestMapping(value = "export.html", method = RequestMethod.GET)
-    @ResponseBody
-    public String export(String id) {
-        ProjectInfoModel pim = projectInfoService.getItem(id);
-        File file = new File(pim.getLog());
-        if (!file.exists()) {
-            return JsonMessage.getString(400, "没有日志文件:" + file.getPath());
-        }
-        HttpServletResponse response = getResponse();
-        ServletUtil.write(response, file);
-        return JsonMessage.getString(200, "");
-    }
+
 }
