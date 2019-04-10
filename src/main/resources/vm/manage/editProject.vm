@@ -37,7 +37,7 @@
                 <div class="layui-input-block">
                     <select name="group" lay-filter="group">
                         #foreach($i in $groups)
-                            <option value="$i">$i</option>
+                            <option value="$i" #if($item.group==$i)selected#end>$i</option>
                         #end
                         <option value="">选择手动添加</option>
                     </select>

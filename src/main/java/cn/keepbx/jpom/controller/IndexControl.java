@@ -46,14 +46,5 @@ public class IndexControl extends BaseController {
         return "index";
     }
 
-    /**
-     * 退出登录
-     *
-     * @return page
-     */
-    @RequestMapping(value = "logout")
-    public String logout() {
-        getSession().invalidate();
-        return "login";
-    }
+
 }

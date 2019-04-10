@@ -255,26 +255,19 @@
                     formType: 0,
                     value: "$user.name"
                 }, function (val, index) {
-                    $.ajax({
-                        url: '/user/updateName',
-                        type: 'POST',
-                        dataType: 'json',
+                    loadingAjax({
+                        url: './user/updateName',
                         data: {
                             name: val
                         },
                         success: function (data) {
+                            layer.msg(data.msg);
                             if (200 == data.code) {
                                 layer.close(index);
-                                layer.msg("修改成功");
                                 setTimeout(function () {
                                     window.location.reload();
                                 }, 2000);
-                            } else {
-                                layer.msg(data.msg);
                             }
-                        },
-                        error: function (err) {
-                            layer.alert('修改失败！');
                         }
                     });
                 });
@@ -309,24 +302,17 @@
             var sendData = formatPwd(data.field, "oldPwd");
             sendData = formatPwd(data.field, "newPwd");
             sendData = formatPwd(data.field, "confirmPwd")
-            $.ajax({
-                url: '/user/updatePwd',
-                type: 'POST',
-                dataType: 'json',
+            loadingAjax({
+                url: './user/updatePwd',
                 data: data.field,
                 success: function (data) {
+                    layer.msg(data.msg);
                     if (200 == data.code) {
                         layer.closeAll('page');
-                        layer.alert('修改成功，请重新登录！', function (index_confirm) {
-                            window.location.href = '/'
-                            layer.close(index_confirm);
-                        });
-                    } else {
-                        layer.alert(data.msg);
+                        setTimeout(function () {
+                            window.location.reload();
+                        }, 2000);
                     }
-                },
-                error: function (err) {
-                    layer.alert('修改失败！');
                 }
             });
             return false;
@@ -337,24 +323,24 @@
             layer.confirm('确定退出系统？', {
                 'title': '系统提示'
             }, function (index) {
-                window.location.href = "/logout";
+                window.location.href = "./logout";
                 layer.close(index);
             })
         });
 
         // // 刷新当前页
         // function refreshPage() {
-
+        //
         // }
-
+        //
         // // 关闭其他页面
         // function closeotherPage() {
-
+        //
         // }
-
+        //
         // // 关闭全部页面
         // function closeallPage() {
-
+        //
         // }
     }
 </script>

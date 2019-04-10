@@ -147,7 +147,7 @@
 
         function loadProcessList() {
             $.ajax({
-                url: '/processList',
+                url: './processList',
                 type: 'POST',
                 dataType: 'json',
                 async: true,

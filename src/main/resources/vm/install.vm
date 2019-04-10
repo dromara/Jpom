@@ -75,20 +75,14 @@
                     return false;
                 }
                 var sendData = formatPwd(data.field, "userPwd");
-                $.ajax({
-                    url: '/install_submit.json',
-                    type: 'POST',
-                    dataType: 'json',
+                loadingAjax({
+                    url: './install_submit.json',
                     data: sendData,
                     success: function (data) {
+                        layer.msg(data.msg);
                         if (200 == data.code) {
                             window.location.href = '/index';
-                        } else {
-                            layer.msg(data.msg);
                         }
-                    },
-                    error: function (err) {
-                        layer.alert(err.msg);
                     }
                 });
                 return false;
