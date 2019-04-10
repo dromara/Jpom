@@ -35,6 +35,7 @@
     <input class="layui-hide" type="checkbox" id="" disabled name="status" {{# if(d.status){ }} checked {{# } }}
            lay-skin="switch"
            lay-text="运行中|未运行">
+    <span p-Id="{{d.id}}"></span>
 </script>
 
 <script type="text/html" id="toolbarDemo">
@@ -166,7 +167,7 @@
                 title: '运行状态',
                 templet: "#status_templ",
                 sort: true,
-                width: '12%'
+                width: '11%'
             },
                 {field: 'op', title: '操作', toolbar: '#bar_projects'}
             ]],
@@ -177,12 +178,15 @@
             },
             done: function (data) {
                 var projects = data.data;
+                var ids = [];
                 for (var i = 0; i < projects.length; i++) {
                     var project = projects[i];
                     if (!project.manager) {
                         $('tr[data-index="' + i + '"').css('background-color', 'rgb(211,211,211)');
                     }
+                    ids.push(project.id);
                 }
+                getProjectMainPort(ids);
                 // 选中
                 $("#selectGroup option[value='" + apiWhere.group + "']").attr("selected", "selected");
                 form.render();
@@ -195,6 +199,29 @@
             }
         });
 
+        function getProjectMainPort(ids) {
+            if (ids.length <= 0) {
+                return
+            }
+            $.ajax({
+                url: '/manage/getProjectPort',
+                type: 'POST',
+                dataType: 'json',
+                data: {
+                    ids: JSON.stringify(ids)
+                },
+                success: function (data) {
+                    if (200 == data.code) {
+                        for (var key in data.data) {
+                            $("span[p-Id='" + key + "']").text(data.data[key]);
+                        }
+                    }
+                },
+                error: function (err) {
+
+                }
+            });
+        }
 
         form.on('select(groupName)', function (data) {
             apiWhere.group = data.value;

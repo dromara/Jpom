@@ -4,6 +4,7 @@ import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.keepbx.jpom.common.BaseController;
+import cn.keepbx.jpom.common.commander.AbstractCommander;
 import cn.keepbx.jpom.common.interceptor.ProjectPermission;
 import cn.keepbx.jpom.model.ProjectInfoModel;
 import cn.keepbx.jpom.model.UserModel;
@@ -42,6 +43,32 @@ public class ProjectManageControl extends BaseController {
         HashSet hashSet = projectInfoService.getAllGroup();
         setAttribute("groups", hashSet);
         return "manage/projectInfo";
+    }
+
+    @RequestMapping(value = "getProjectPort", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @ResponseBody
+    public String getProjectPort(String ids) {
+        if (StrUtil.isEmpty(ids)) {
+            return JsonMessage.getString(400, "");
+        }
+        JSONArray jsonArray = JSONArray.parseArray(ids);
+        JSONObject jsonObject = new JSONObject();
+        for (Object object : jsonArray) {
+            String item = object.toString();
+            int pid;
+            try {
+                pid = AbstractCommander.getInstance().getPid(item);
+            } catch (Exception e) {
+                DefaultSystemLog.ERROR().error("获取端口错误", e);
+                continue;
+            }
+            if (pid <= 0) {
+                continue;
+            }
+            int port = AbstractCommander.getInstance().getMainPort(pid);
+            jsonObject.put(item, port);
+        }
+        return JsonMessage.getString(200, "", jsonObject);
     }
 
     /**

@@ -14,6 +14,7 @@ import cn.hutool.system.SystemUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.keepbx.jpom.common.commander.impl.LinuxCommander;
 import cn.keepbx.jpom.common.commander.impl.WindowsCommander;
+import cn.keepbx.jpom.model.NetstatModel;
 import cn.keepbx.jpom.model.ProjectInfoModel;
 import cn.keepbx.jpom.service.manage.CommandService;
 import com.sun.tools.attach.*;
@@ -83,6 +84,46 @@ public abstract class AbstractCommander {
      * @throws Exception 异常
      */
     public abstract String start(ProjectInfoModel projectInfoModel) throws Exception;
+
+    /**
+     * 查询出指定端口信息
+     *
+     * @param pid 进程id
+     * @return 数组
+     */
+    public abstract List<NetstatModel> listNetstat(int pid);
+
+    /**
+     * 获取进程占用的主要端口
+     *
+     * @param pid 进程id
+     * @return 端口
+     */
+    public int getMainPort(int pid) {
+        List<NetstatModel> list = listNetstat(pid);
+        if (list == null) {
+            return 0;
+        }
+        int port = Integer.MAX_VALUE;
+        for (NetstatModel model : list) {
+            String local = model.getLocal();
+            if (StrUtil.isEmpty(local)) {
+                continue;
+            }
+            String[] ipPort = StrUtil.split(local, StrUtil.COLON);
+            if (!"0.0.0.0".equals(ipPort[0])) {
+                continue;
+            }
+            int minPort = Convert.toInt(ipPort[1], Integer.MAX_VALUE);
+            if (minPort < port) {
+                port = minPort;
+            }
+        }
+        if (port == Integer.MAX_VALUE) {
+            return 0;
+        }
+        return port;
+    }
 
     /**
      * 停止
