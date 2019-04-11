@@ -6,13 +6,25 @@
     <title>logBack</title>
     <style>
         body {
-            padding: 20px;
+            padding: 10px;
         }
     </style>
 </head>
 
 <body>
 <div class="layui-form">
+    <table class="layui-table">
+        <tbody>
+        <tr>
+            <td>控制台日志路径</td>
+            <td>$!logPath</td>
+        </tr>
+        <tr>
+            <td>控制台日志备份路径</td>
+            <td>$!logPath</td>
+        </tr>
+        </tbody>
+    </table>
     <table class="layui-table">
         <thead>
         <tr>

@@ -61,6 +61,9 @@ public class LogBackController extends BaseController {
                 }
             }
             setAttribute("id", pim.getId());
+
+            setAttribute("logPath", pim.getLog());
+            setAttribute("logBackPath", logBack.getAbsolutePath());
         }
         return "manage/logBack";
     }

@@ -171,7 +171,23 @@
 
             $('.btn-op').on('click', function () {
                 var op = $(this).attr('op');
-                setMsg(op);
+                if (op == "stop") {
+                    layer.confirm("确定要停止该项目吗？", {
+                        title: '系统提示'
+                    }, function (index) {
+                        layer.close(index);
+                        setMsg(op);
+                    });
+                } else if (op == "restart") {
+                    layer.confirm("确定要重启该项目吗？", {
+                        title: '系统提示'
+                    }, function (index) {
+                        layer.close(index);
+                        setMsg(op);
+                    });
+                } else {
+                    setMsg(op);
+                }
             });
 
             function setMsg(opt) {

@@ -6,11 +6,11 @@
     <title>项目管理系统</title>
     <style>
         body {
-            padding: 10px 10px 0px 10px;
+            padding: 10px;
         }
 
         .layui-table-hover {
-
+            /*background-color: #df0610 !important;*/
         }
     </style>
 </head>
@@ -28,13 +28,15 @@
     <a href="javascript:;" class="layui-btn  layui-btn-sm layui-btn-normal" lay-event="manage">控制台</a>
     <a href="javascript:;" class="layui-btn  layui-btn-sm layui-btn-warm" lay-event="update">配置</a>
     <a href="javascript:;" class="layui-btn  layui-btn-sm" lay-event="file">文件</a>
-    <a href="javascript:;" class="layui-btn  layui-btn-sm layui-btn-normal" lay-event="build">构建</a>
-    <a href="javascript:;" class="layui-btn  layui-btn-sm" lay-event="ram">监控</a>
+    <a href="javascript:;" class="layui-btn  layui-btn-sm layui-btn-normal" lay-event="ram">监控</a>
 </script>
 <script type="text/html" id="status_templ">
-    <input class="layui-hide" type="checkbox" id="" disabled name="status" {{# if(d.status){ }} checked {{# } }}
-           lay-skin="switch"
-           lay-text="运行中|未运行">
+    <div title="请到控制台中管理项目">
+        <input class="layui-hide" type="checkbox" id="" disabled name="status" {{# if(d.status){ }}
+               checked {{# } }}
+               lay-skin="switch"
+               lay-text="运行中|未运行">
+    </div>
 </script>
 
 <script type="text/html" id="port_templ">
@@ -100,7 +102,7 @@
             }, {
                 field: 'modifyTime', title: '修改时间', sort: true, width: '13%'
             }, {
-                field: 'modifyUser', title: '最后修改人', sort: true, width: '13%'
+                field: 'modifyUser', title: '最后操作人', sort: true, width: '13%'
             }, {
                 title: '运行状态',
                 templet: "#status_templ",
@@ -133,12 +135,12 @@
                 // 选中
                 $("#selectGroup option[value='" + apiWhere.group + "']").attr("selected", "selected");
                 form.render();
-                $("tbody").on("mouseover", "tr", function () {
-                    $(this).siblings().css("opacity", 0.3);
-                });
-                $("tbody").on("mouseout", "tr", function () {
-                    $(this).siblings().css("opacity", 1);
-                });
+                // $("tbody").on("mouseover", "tr", function () {
+                //     $(this).siblings().css("opacity", 0.3);
+                // });
+                // $("tbody").on("mouseout", "tr", function () {
+                //     $(this).siblings().css("opacity", 1);
+                // });
             }
         });
 
@@ -189,14 +191,6 @@
                 manageApplication(data);
             } else if ('file' === event) {
                 fileManage(data);
-            } else if ('build' === event) {
-                layer.open({
-                    type: 2,
-                    title: '自动构建',
-                    shade: 0.8,
-                    area: ['80%', '90%'],
-                    content: 'build?id=' + data.id
-                });
             } else if ('ram' === event) {
                 if (!data.status) {
                     layer.msg('请先运行程序！');

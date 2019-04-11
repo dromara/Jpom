@@ -251,12 +251,7 @@ public class EditProjectController extends BaseController {
      */
     private void modify(ProjectInfoModel exits) {
         UserModel userName = getUser();
-        // 隐藏系统管理员登录名
-        if (userName.isSystemUser()) {
-            exits.setModifyUser(UserModel.SYSTEM_OCCUPY_NAME);
-        } else {
-            exits.setModifyUser(userName.getId());
-        }
+        exits.logModifyUser(userName);
     }
 
     /**
