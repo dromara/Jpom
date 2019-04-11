@@ -2,7 +2,6 @@ package cn.keepbx.jpom.common.interceptor;
 
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.servlet.ServletUtil;
 import cn.jiangzeyin.common.interceptor.BaseInterceptor;
@@ -53,11 +52,12 @@ public class LoginInterceptor extends BaseInterceptor {
         super.postHandle(request, response, handler, modelAndView);
         HttpSession session = getSession();
         try {
+            // 静态资源地址参数
             Object staticCacheTime = session.getAttribute("staticCacheTime");
             if (staticCacheTime == null) {
                 session.setAttribute("staticCacheTime", DateUtil.currentSeconds());
             }
-            //
+            // 代理二级路径
             Object jpomProxyPath = session.getAttribute("jpomProxyPath");
             if (jpomProxyPath == null) {
                 String path = getHeaderProxyPath(request);
@@ -75,10 +75,7 @@ public class LoginInterceptor extends BaseInterceptor {
     }
 
     private String getHeaderProxyPath(HttpServletRequest request) {
-        String proxyPath = ServletUtil.getHeader(request, "Jpom-ProxyPath", CharsetUtil.UTF_8);
-        if (proxyPath == null) {
-            proxyPath = ServletUtil.getHeader(request, "Jpom-ProxyPath".toLowerCase(), CharsetUtil.UTF_8);
-        }
+        String proxyPath = ServletUtil.getHeaderIgnoreCase(request, "Jpom-ProxyPath");
         if (StrUtil.isEmpty(proxyPath)) {
             return StrUtil.EMPTY;
         }

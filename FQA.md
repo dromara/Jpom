@@ -64,6 +64,8 @@ server {
         #  websocket 配置
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection "upgrade";
+        #  代理的二级路径配置 值填写nginx 中location的值  如 location /test-path/ {}
+        #  proxy_set_header Jpom-ProxyPath      /test-path/;
     }
 }
 ```

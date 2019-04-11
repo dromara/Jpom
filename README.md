@@ -43,26 +43,7 @@
 
 #### 项目截图
 
-1. 创建、修改、删除项目
-![修改、删除项目](/doc/images/edit_del.png)
-
-3. 文件管理
-![文件管理](/doc/images/file.png)
-
-4. 项目列表
-![项目列表](/doc/images/list.png)
-
-5. 监控cpu、内存、占用的端口情况
-![ 监控cpu 内存](/doc/images/cup_ram.png)
-
-6. 控制台日志实时查看
-![控制台日志实时查看](/doc/images/console.png)
-
-7. 用户管理
-![用户管理](/doc/images/user_list.png)
-
-8. top监听
-![top监听](/doc/images/top.png)
+![Jpom](http://s.keepbx.cn/jpom-demo-gif.gif)
 
 ### 下载安装
 

@@ -45,6 +45,9 @@ public class UserInfoController extends BaseController {
             return JsonMessage.getString(400, "新旧密码一致");
         }
         UserModel userName = getUser();
+        if ("demo".equals(userName.getId())) {
+            return JsonMessage.getString(402, "当前账户为演示账号，不支持修改密码");
+        }
         try {
             UserModel userModel = userService.simpleLogin(userName.getId(), oldPwd);
             if (userModel == null || userModel.getPwdErrorCount() > 0) {
