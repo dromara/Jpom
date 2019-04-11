@@ -41,7 +41,7 @@
 8. 项目路径白名单模式，杜绝用户误操作系统文件
 
 
-#### 项目截图
+#### 项目操作演示
 
 ![Jpom](http://s.keepbx.cn/jpom-demo-gif.gif)
 
