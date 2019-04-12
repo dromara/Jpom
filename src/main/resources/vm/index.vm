@@ -43,43 +43,6 @@
             display: none;
         }
 
-        .custom-nav {
-            position: absolute;
-            padding: 0px;
-            top: 0;
-            right: 0;
-            height: 42px;
-            background-color: #fff !important;
-            color: #000;
-            border-bottom: 1px solid #e2e2e2;
-            border-left: 1px solid #e2e2e2;
-        }
-
-        .custom-nav .layui-nav-item {
-            line-height: 41px;
-            background-color: #f2f2f2;
-        }
-
-        .custom-nav .layui-nav-item a {
-            color: #000;
-        }
-
-        .custom-nav .layui-nav-item a:hover {
-            color: #000;
-        }
-
-        .custom-nav .layui-nav-item .layui-nav-more {
-            top: 18px;
-            border-top-color: rgba(0, 0, 0, 0.7);
-            border-bottom-color: rgba(0, 0, 0, 0);
-        }
-
-        .custom-nav .layui-nav-item .layui-nav-mored {
-            top: 12px;
-            border-top-color: rgba(0, 0, 0, 0);
-            border-bottom-color: rgba(0, 0, 0, 1);
-        }
-
         #div-updatePwd {
             padding: 15px;
             display: none;
@@ -158,16 +121,6 @@
             <ul class="layui-tab-title">
                 <li class="layui-this" lay-id="tab_welcome">首页</li>
             </ul>
-            <!-- <ul class="layui-nav custom-nav" lay-filter="tab_operation">
-                <li class="layui-nav-item">
-                    <a href="javascript:;">页面操作</a>
-                    <dl class="layui-nav-child">
-                        <dd op="refresh"><a href="javascript:;">刷新当前</a></dd>
-                        <dd op="closeother"><a href="javascript:;">关闭其他</a></dd>
-                        <dd op="closeall"><a href="javascript:;">关闭全部</a></dd>
-                    </dl>
-                </li>
-            </ul> -->
             <div class="layui-tab-content">
                 <div class="layui-tab-item layui-show">
                     <iframe src="./welcome" frameborder="0" class="custom-iframe"></iframe>
@@ -214,23 +167,6 @@
             }
             tabChange(options);
         });
-
-        // 操作
-        // element.on('nav(tab_operation)', function(elem) {
-        // 	var op = this.getAttribute('op');
-
-        // 	if ('refresh' == op) {
-        // 		// 刷新当前页
-        // 		refreshPage();
-        // 	} else if ('closeother' == op) {
-        // 		// 关闭其他页面
-        // 		closeotherPage();
-        // 	} else if ('closeall' == op) {
-        // 		// 关闭全部页面
-        // 		closeallPage();
-        // 	}
-
-        // });
 
         // 用户操作
         element.on('nav(userOperation)', function (elem) {
@@ -328,21 +264,6 @@
                 layer.close(index);
             })
         });
-
-        // // 刷新当前页
-        // function refreshPage() {
-        //
-        // }
-        //
-        // // 关闭其他页面
-        // function closeotherPage() {
-        //
-        // }
-        //
-        // // 关闭全部页面
-        // function closeallPage() {
-        //
-        // }
     }
 </script>
 </html>

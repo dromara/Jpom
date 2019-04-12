@@ -62,7 +62,6 @@ public abstract class AbstractCommander {
         if (abstractCommander != null) {
             return abstractCommander;
         }
-
         if (OS_INFO.isLinux()) {
             // Linux系统
             abstractCommander = new LinuxCommander(CharsetUtil.CHARSET_UTF_8);
@@ -98,10 +97,10 @@ public abstract class AbstractCommander {
      * @param pid 进程id
      * @return 端口
      */
-    public int getMainPort(int pid) {
+    public String getMainPort(int pid) {
         List<NetstatModel> list = listNetstat(pid);
         if (list == null) {
-            return 0;
+            return "-";
         }
         int port = Integer.MAX_VALUE;
         for (NetstatModel model : list) {
@@ -113,15 +112,16 @@ public abstract class AbstractCommander {
             if (!"0.0.0.0".equals(ipPort[0])) {
                 continue;
             }
+            // 取最小的端口号
             int minPort = Convert.toInt(ipPort[1], Integer.MAX_VALUE);
             if (minPort < port) {
                 port = minPort;
             }
         }
         if (port == Integer.MAX_VALUE) {
-            return 0;
+            return "-";
         }
-        return port;
+        return String.valueOf(port);
     }
 
     /**

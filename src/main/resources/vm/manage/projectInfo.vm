@@ -8,10 +8,6 @@
         body {
             padding: 10px;
         }
-
-        .layui-table-hover {
-            /*background-color: #df0610 !important;*/
-        }
     </style>
 </head>
 <body>
@@ -147,12 +143,6 @@
                 // 选中
                 $("#selectGroup option[value='" + apiWhere.group + "']").attr("selected", "selected");
                 form.render();
-                // $("tbody").on("mouseover", "tr", function () {
-                //     $(this).siblings().css("opacity", 0.3);
-                // });
-                // $("tbody").on("mouseout", "tr", function () {
-                //     $(this).siblings().css("opacity", 1);
-                // });
             }
         });
 

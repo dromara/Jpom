@@ -26,7 +26,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.Consumer;
 
 /**
  * top命令管理，保证整个服务器只获取一个top命令
@@ -133,17 +132,15 @@ public class TopManager {
                 array = formatWindowsProcess(s);
             }
             if (array != null) {
-                array.forEach(new Consumer<Object>() {
-                    @Override
-                    public void accept(Object o) {
-                        JSONObject jsonObject = (JSONObject) o;
-                        int pid = jsonObject.getIntValue("pid");
-                        if (pid <= 0) {
-                            return;
-                        }
-                        int port = AbstractCommander.getInstance().getMainPort(pid);
-                        jsonObject.put("port", port);
+                // 获取进程主端口信息
+                array.forEach(o -> {
+                    JSONObject jsonObject = (JSONObject) o;
+                    int pid = jsonObject.getIntValue("pid");
+                    if (pid <= 0) {
+                        return;
                     }
+                    String port = AbstractCommander.getInstance().getMainPort(pid);
+                    jsonObject.put("port", port);
                 });
             }
             return array;

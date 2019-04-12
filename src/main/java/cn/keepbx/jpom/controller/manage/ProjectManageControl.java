@@ -73,7 +73,7 @@ public class ProjectManageControl extends BaseController {
                 continue;
             }
             itemObj = new JSONObject();
-            int port = AbstractCommander.getInstance().getMainPort(pid);
+            String port = AbstractCommander.getInstance().getMainPort(pid);
             itemObj.put("port", port);
             itemObj.put("pid", pid);
             jsonObject.put(item, itemObj);
