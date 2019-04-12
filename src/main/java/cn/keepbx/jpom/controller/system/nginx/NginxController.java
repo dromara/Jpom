@@ -1,4 +1,4 @@
-package cn.keepbx.jpom.controller.system;
+package cn.keepbx.jpom.controller.system.nginx;
 
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.text.StrSpliter;
@@ -34,7 +34,7 @@ import java.util.List;
  * @author Arno
  */
 @Controller
-@RequestMapping("/system")
+@RequestMapping("/system/nginx")
 public class NginxController extends BaseController {
 
 
@@ -46,10 +46,7 @@ public class NginxController extends BaseController {
     @Resource
     private NginxService nginxService;
 
-    /**
-     * nginx管理
-     */
-    @RequestMapping(value = "nginx", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
+    @RequestMapping(value = "list.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
     public String ngx() {
         JSONArray ngxDirectory = whitelistDirectoryService.getNgxDirectory();
         setAttribute("nginx", ngxDirectory);
@@ -59,9 +56,16 @@ public class NginxController extends BaseController {
     }
 
     /**
-     * nginx配置
+     * 配置列表
      */
-    @RequestMapping(value = "nginx_setting", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
+    @RequestMapping(value = "list_data.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @ResponseBody
+    public String list() {
+        JSONArray array = nginxService.list();
+        return JsonMessage.getString(200, "", array);
+    }
+
+    @RequestMapping(value = "item.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
     public String setting(String path, String name, String type) {
         JSONArray ngxDirectory = whitelistDirectoryService.getNgxDirectory();
         setAttribute("nginx", ngxDirectory);
@@ -74,6 +78,7 @@ public class NginxController extends BaseController {
             JSONObject jsonObject = nginxService.getItem(file.getPath());
             String string = FileUtil.readUtf8String(file);
             jsonObject.put("context", string);
+//            String name = file.getName();
             jsonObject.put("name", nginxService.paresName(path, file.getAbsolutePath()));
             jsonObject.put("whitePath", path);
             setAttribute("data", jsonObject);
@@ -81,15 +86,7 @@ public class NginxController extends BaseController {
         return "system/nginxSetting";
     }
 
-    /**
-     * 配置列表
-     */
-    @RequestMapping(value = "nginx/list", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
-    @ResponseBody
-    public String list() {
-        JSONArray array = nginxService.list();
-        return JsonMessage.getString(200, "", array);
-    }
+
 
     /**
      * 新增或修改配置
@@ -97,7 +94,7 @@ public class NginxController extends BaseController {
      * @param name      文件名
      * @param whitePath 白名单路径
      */
-    @RequestMapping(value = "nginx/updateNgx", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "updateNgx", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     public String updateNgx(String name, String whitePath, String context, String type, String genre) {
         if (StrUtil.isEmpty(name)) {
@@ -429,7 +426,7 @@ public class NginxController extends BaseController {
      *
      * @param whitePath 白名单路径
      */
-    @RequestMapping(value = "nginx/uploadNgx", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "uploadNgx", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     public String uploadNgx(String whitePath) {
         if (StrUtil.isEmpty(whitePath)) {
@@ -456,7 +453,7 @@ public class NginxController extends BaseController {
      *
      * @param path 文件路径
      */
-    @RequestMapping(value = "nginx/delete", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "delete", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     public String delete(String path, String name) {
         if (!whitelistDirectoryService.checkNgxDirectory(path)) {
