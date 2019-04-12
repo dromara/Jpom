@@ -29,7 +29,7 @@ public class CharsetDetector implements nsICharsetDetectionObserver {
 
     private String[] detectChineseCharset(InputStream in) throws IOException {
         // Initalize the nsDetector() ;
-        nsDetector det = new nsDetector(nsPSMDetector.ALL);
+        nsDetector det = new nsDetector(nsPSMDetector.CHINESE);
         // Set an observer...
         // The Notify() will be called when a matching charset is found.
         det.Init(this);

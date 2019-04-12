@@ -1,6 +1,6 @@
 @REM The MIT License (MIT)
 @REM
-@REM Copyright (c) 2019 ¬Î÷Æø∆ººπ§◊˜ “
+@REM Copyright (c) 2019 Á†Å‰πãÁßëÊäÄÂ∑•‰ΩúÂÆ§
 @REM
 @REM Permission is hereby granted, free of charge, to any person obtaining a copy of
 @REM this software and associated documentation files (the "Software"), to deal in
@@ -25,83 +25,70 @@ setlocal enabledelayedexpansion
 
 set Tag=KeepBx-System-JpomApplication
 set MainClass=cn.keepbx.jpom.JpomApplication
-set CloseMainClass=cn.keepbx.jpom.JpomClose
 set basePath=%~dp0
 set Lib=%basePath%lib\
 set Log=%basePath%run.log
-set LogBack=%basePath%log\
 set JVM=-server
+@REM Âú®Ê≠§Ê¨°‰øÆÊîπJpomÁ´ØÂè£„ÄÅÊó•ÂøóÂ≠òÂÇ®Ë∑ØÂæÑÁ≠â
 set ARGS= --jpom.applicationTag=%Tag% --jpom.log=%basePath%log --server.port=2122
 
 color 0a
-TITLE Jpomπ‹¿ÌœµÕ≥BATøÿ÷∆Ã®
-echo. ***** Jpomπ‹¿ÌœµÕ≥BATøÿ÷∆Ã® *****
+TITLE JpomÁÆ°ÁêÜÁ≥ªÁªüBATÊéßÂà∂Âè∞
+echo. ***** JpomÁÆ°ÁêÜÁ≥ªÁªüBATÊéßÂà∂Âè∞ *****
 ::*************************************************************************************************************
 echo.
-	echo.  [1] ∆Ù∂Ø start
-	echo.  [2] πÿ±’ stop
-	echo.  [3] ≤Èø¥‘À––◊¥Ã¨ status
-	echo.  [4] ÷ÿ∆Ù restart
-	echo.  [5] ∞Ô÷˙ use
-	echo.  [0] ÕÀ ≥ˆ 0
+	echo.  [1] ÂêØÂä® start
+	echo.  [2] ÂÖ≥Èó≠ stop
+	echo.  [3] Êü•ÁúãËøêË°åÁä∂ÊÄÅ status
+	echo.  [4] ÈáçÂêØ restart
+	echo.  [5] Â∏ÆÂä© use
+	echo.  [0] ÈÄÄ Âá∫ 0
 echo.
 
-echo.«Î ‰»Î—°‘Òµƒ–Ú∫≈:
+echo.ËØ∑ËæìÂÖ•ÈÄâÊã©ÁöÑÂ∫èÂè∑:
 set /p ID=
-	IF "%id%"=="1" goto start
-	IF "%id%"=="2" goto stop
-	IF "%id%"=="3" goto status
-	IF "%id%"=="4" goto restart
-	IF "%id%"=="5" goto use
+	IF "%id%"=="1" GOTO start
+	IF "%id%"=="2" GOTO stop
+	IF "%id%"=="3" GOTO status
+	IF "%id%"=="4" GOTO restart
+	IF "%id%"=="5" GOTO use
 	IF "%id%"=="0" EXIT
 PAUSE
-echo º¥Ω´πÿ±’¥∞ø⁄
-timeout 3
-EXIT 1
 
-@REM ∆Ù∂Ø
+@REM ÂêØÂä®
 :start
-	rem ±∏∑›»’÷æ
-	if exist %Log% (
-		if not exist %LogBack% (
-			echo %LogBack%
-			md %LogBack%
-		)
-		move %Log% %LogBack%%date:~0,4%%date:~5,2%%date:~8,2%0%time:~1,1%%time:~3,2%%time:~6,2%.log
-		del %Log%
-	)
-	set TEMPCLASSPATH=
-	for /f "delims=" %%I in ('dir /B %Lib%') do (set TEMPCLASSPATH=!TEMPCLASSPATH!%Lib%%%I;)
-	REM echo ∆Ù∂Ø≥…π¶£¨πÿ±’¥∞ø⁄≤ª”∞œÏ‘À––
-	echo ∆Ù∂Ø÷–.....πÿ±’¥∞ø⁄≤ª”∞œÏ‘À––
-	javaw %JVM% -classpath %TEMPCLASSPATH%"%JAVA_HOME%"\lib\tools.jar -Dapplication=%Tag% -Dbasedir=%basePath% %MainClass% %ARGS% >> %Log%
-	timeout 3
+set TEMPCLASSPATH=
+for /f "delims=" %%I in ('dir /B %Lib%') do (set TEMPCLASSPATH=!TEMPCLASSPATH!%Lib%%%I;)
+@REM echo ÂêØÂä®ÊàêÂäüÔºåÂÖ≥Èó≠Á™óÂè£‰∏çÂΩ±ÂìçËøêË°å
+echo ÂêØÂä®‰∏≠.....ÂÖ≥Èó≠Á™óÂè£‰∏çÂΩ±ÂìçËøêË°å
+cmd /S /C "javaw %JVM% -classpath %TEMPCLASSPATH%"%JAVA_HOME%"\lib\tools.jar -Dapplication=%Tag% -Dbasedir=%basePath% %MainClass% %ARGS% >> %Log%"
 goto:eof
 
-@REM πÿ±’Jpom
+@REM ÂÖ≥Èó≠Jpom
 :stop
-	set TEMPCLASSPATH=
-	for /f "delims=" %%I in ('dir /B %Lib%') do (set TEMPCLASSPATH=!TEMPCLASSPATH!%Lib%%%I;)
-	java -classpath %TEMPCLASSPATH%"%JAVA_HOME%"\lib\tools.jar %CloseMainClass% %ARGS% --jpom.applicationTag=%Tag% --event=stop
+set TEMPCLASSPATH=
+for /f "delims=" %%I in ('dir /B %Lib%') do (set TEMPCLASSPATH=!TEMPCLASSPATH!%Lib%%%I;)
+set MainClass=cn.keepbx.jpom.JpomClose
+set ARGS= --jpom.applicationTag=%Tag% --event=stop
+java -classpath %TEMPCLASSPATH%"%JAVA_HOME%"\lib\tools.jar %MainClass% %ARGS%
 goto:eof
 
-@REM ≤Èø¥Jpom‘À––◊¥Ã¨
+@REM Êü•ÁúãJpomËøêË°åÁä∂ÊÄÅ
 :status
-	set TEMPCLASSPATH=
-	for /f "delims=" %%I in ('dir /B %Lib%') do (set TEMPCLASSPATH=!TEMPCLASSPATH!%Lib%%%I;)
-	java -classpath %TEMPCLASSPATH%"%JAVA_HOME%"\lib\tools.jar %CloseMainClass% %ARGS% --jpom.applicationTag=%Tag% --event=status
+set TEMPCLASSPATH=
+for /f "delims=" %%I in ('dir /B %Lib%') do (set TEMPCLASSPATH=!TEMPCLASSPATH!%Lib%%%I;)
+set MainClass=cn.keepbx.jpom.JpomClose
+set ARGS= --jpom.applicationTag=%Tag% --event=status
+java -classpath %TEMPCLASSPATH%"%JAVA_HOME%"\lib\tools.jar %MainClass% %ARGS%
 goto:eof
 
-@REM ÷ÿ∆ÙJpom
+@REM ÈáçÂêØJpom
 :restart
-	echo Õ£÷π÷–....
-	call:stop
-	timeout 3
-	echo ∆Ù∂Ø÷–....
-	call:start
+call:stop
+call:start
 goto:eof
 
-@REM Ã· æ”√∑®
+@REM ÊèêÁ§∫Áî®Ê≥ï
 :use
-	echo please use (start|stop|restart|status)
+echo please use (start|stop|restart|status)
 goto:eof

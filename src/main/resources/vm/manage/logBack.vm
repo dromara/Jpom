@@ -6,13 +6,25 @@
     <title>logBack</title>
     <style>
         body {
-            padding: 20px;
+            padding: 10px;
         }
     </style>
 </head>
 
 <body>
 <div class="layui-form">
+    <table class="layui-table">
+        <tbody>
+        <tr>
+            <td>控制台日志路径</td>
+            <td>$!logPath</td>
+        </tr>
+        <tr>
+            <td>控制台日志备份路径</td>
+            <td>$!logPath</td>
+        </tr>
+        </tbody>
+    </table>
     <table class="layui-table">
         <thead>
         <tr>
@@ -58,15 +70,9 @@
                 btn: ['确定', '不确定'] //按钮
             }, function (index) {
                 layer.close(index);
-                index = layer.load(1, {
-                    shade: [0.5, '#fff'] //0.1透明度的白色背景
-                });
-                // var key = that.attr("data-key");
                 var id = that.attr("data-id");
-                $.ajax({
+                loadingAjax({
                     url: './logBack_delete',
-                    type: 'POST',
-                    dataType: 'json',
                     data: {
                         id: id,
                         name: name
@@ -78,12 +84,6 @@
                                 window.location.reload();
                             }, 2000);
                         }
-                    },
-                    error: function (err) {
-                        layer.msg('删除失败');
-                    },
-                    complete: function () {
-                        layer.close(index);
                     }
                 });
             }, function () {

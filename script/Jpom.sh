@@ -42,12 +42,11 @@ function start() {
 		if [[ ! -d ${LogBack} ]];then
 			mkdir ${LogBack}
 		fi
-        cur_dateTime="`date +%Y-%m-%d_%H:%M:%S`.log"
-        mv ${Log}  ${LogBack}${cur_dateTime}
-        echo "mv to $LogBack$cur_dateTime"
+			cur_dateTime="`date +%Y-%m-%d_%H:%M:%S`.log"
+			mv ${Log}  ${LogBack}${cur_dateTime}
+			echo "mv to $LogBack$cur_dateTime"
+		touch ${Log}
 	fi
-	# 创建文件
-	touch ${Log}
 	# classPath
     CLASSPATH=`listDir ${Lib}`
     nohup java  ${JVM} -classpath ${CLASSPATH}${JAVA_HOME}/lib/tools.jar -Dapplication=${Tag} -Dbasedir=${Path} ${MainClass} ${ARGS}  >> ${Log} 2>&1 &
@@ -106,12 +105,6 @@ function usage()
    RETVAL="2"
 }
 
-# 判断环境变量
-if [[ -z "${JAVA_HOME}" ]] ; then
-   echo "请配置 【JAVA_HOME】 环境变量"
-   exit "0"
-fi
-
 # See how we were called.
 RETVAL="0"
 case "$1" in
@@ -124,6 +117,9 @@ case "$1" in
     restart)
         stop
         start
+        ;;
+    reload)
+        RETVAL="3"
         ;;
     status)
         status

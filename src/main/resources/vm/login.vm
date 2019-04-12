@@ -21,9 +21,9 @@
 <body>
 <div class="layui-carousel auto" id="div-carousel" style=" position: fixed; z-index: 0;">
     <div carousel-item>
-        <div><img src="/static/backgrounds/1.jpg?v=$staticCacheTime" class="auto"></div>
-        <div><img src="/static/backgrounds/2.jpg?v=$staticCacheTime" class="auto"></div>
-        <div><img src="/static/backgrounds/3.jpg?v=$staticCacheTime" class="auto"></div>
+        <div><img src="$!jpomProxyPath/static/backgrounds/1.jpg?v=$staticCacheTime" class="auto"></div>
+        <div><img src="$!jpomProxyPath/static/backgrounds/2.jpg?v=$staticCacheTime" class="auto"></div>
+        <div><img src="$!jpomProxyPath/static/backgrounds/3.jpg?v=$staticCacheTime" class="auto"></div>
     </div>
 </div>
 <div class="layui-container" style="margin-top: 150px;">
@@ -93,10 +93,8 @@
                     return false;
                 }
                 var sendData = formatPwd(dataForm.field, "userPwd");
-                $.ajax({
-                    url: '/userLogin',
-                    type: 'POST',
-                    dataType: 'json',
+                loadingAjax({
+                    url: './userLogin',
                     data: sendData,
                     success: function (data) {
                         if (200 == data.code) {
@@ -105,7 +103,7 @@
                                 key: "userName",
                                 value: sendData.userName
                             });
-                            window.location.href = '/index';
+                            window.location.href = './index';
                         } else {
                             // 显示验证码
                             if (600 == data.code) {
@@ -113,9 +111,6 @@
                             }
                             layer.msg(data.msg);
                         }
-                    },
-                    error: function (err) {
-                        layer.alert(err.msg);
                     }
                 });
                 return false;
@@ -128,7 +123,7 @@
     }
 
     function showCode() {
-        $("#codeImg").attr("src", "/randCode.png?time=" + new Date().getTime());
+        $("#codeImg").attr("src", "./randCode.png?time=" + new Date().getTime());
         $("#randCodeDiv").show();
     }
 </script>

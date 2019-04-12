@@ -26,8 +26,9 @@
 <div class="layui-row">
     <button id="uploadFile" class="layui-btn layui-btn-sm"><i class="layui-icon">&#xe67c;</i>批量上传</button>
     <button id="uploadFile_Import" class="layui-btn layui-btn-sm"><i class="layui-icon">&#xe67c;</i>覆盖导入</button>
-    <button id="refresh" class="layui-btn layui-btn-sm">刷新</button>
+    <button onclick="reloadTable();" class="layui-btn layui-btn-sm">刷新</button>
     <button id="clear" class="layui-btn layui-btn-sm layui-btn-danger">清空文件</button>
+    <button id="build" class="layui-btn  layui-btn-sm layui-btn-normal">OSS构建</button>
 </div>
 <table class="layui-table" id="tab_file" lay-filter="tab_file" style="margin: 0;"></table>
 </body>
@@ -44,7 +45,7 @@
             table.render({
                 id: 'table_file',
                 elem: '#tab_file',
-                url: '/file/getFileList',
+                url: './getFileList',
                 method: 'post',
                 // height: 'full',
                 even: true,
@@ -70,12 +71,7 @@
                     statusCode: 200
                 },
                 done: function () {
-                    $("tbody").on("mouseover", "tr", function () {
-                        $(this).siblings().css("opacity", 0.3);
-                    });
-                    $("tbody").on("mouseout", "tr", function () {
-                        $(this).siblings().css("opacity", 1);
-                    });
+
                 }
             });
             var updateFail = false;
@@ -86,7 +82,7 @@
                     id: '$id'
                 },
                 multiple: true,
-                url: '/file/upload',
+                url: './upload',
                 before: function () {
                     layer.load(1, {
                         shade: [0.5, '#fff'] //0.1透明度的白色背景
@@ -102,7 +98,7 @@
                     }
                     layer.msg("文件总数：" + obj.total + " 成功上传：" + obj.successful + " 上传失败：" + obj.aborted);
                     setTimeout(function () {
-                        table.reload('table_file', {});
+                        reloadTable();
                     }, 2000);
                 },
                 done: function (res, index, upload) {
@@ -129,7 +125,7 @@
                 multiple: false,
                 exts: 'zip',
                 acceptMime: '.zip',
-                url: '/file/upload',
+                url: './upload',
                 before: function () {
                     layer.load(1, {
                         shade: [0.5, '#fff'] //0.1透明度的白色背景
@@ -138,8 +134,8 @@
                 done: function (res, index, upload) {
                     layer.msg(res.msg);
                     setTimeout(function () {
-                        table.reload('table_file', {});
                         layer.closeAll();
+                        reloadTable();
                     }, 2000);
                 },
                 error: function () {
@@ -149,43 +145,34 @@
             });
 
             // 点击'上传文件'事件
-            $('#refresh').on('click', function () {
-                table.reload('table_file', {
-                    // height: 'full-52'
-                });
-            });
-
-            // 点击'上传文件'事件
             $('#clear').on('click', function () {
                 layer.confirm('确定清空此项目文件吗？', {
                     title: '系统提示'
                 }, function (index) {
                     layer.close(index);
-                    $.ajax({
-                        url: '/file/clear',
-                        type: 'POST',
-                        dataType: 'json',
+                    loadingAjax({
+                        url: './clear',
                         data: {
                             id: '$id'
                         },
                         success: function (data) {
+                            layer.msg(data.msg);
                             if (200 === data.code) {
-                                layer.msg(data.msg);
-                                // 刷新项目列表
-                                table.reload('table_file', {
-                                    height: 'full-52'
-                                });
-                            } else {
-                                layer.msg(data.msg);
+                                reloadTable();
                             }
-                        },
-                        error: function (err) {
-                            layer.msg('删除失败！');
                         }
                     });
                 });
             });
-
+            $("#build").click(function () {
+                layer.open({
+                    type: 2,
+                    title: '自动构建',
+                    shade: 0.8,
+                    area: ['80%', '90%'],
+                    content: '../build?id=$id'
+                });
+            });
 
             // 表格工具条事件
             table.on('tool(tab_file)', function (obj) {
@@ -194,8 +181,7 @@
                 if ('delete' === event) {
                     // 删除文件
                     deleteFile(data);
-                }
-                if ('download' === event) {
+                } else if ('download' === event) {
                     // 下载文件
                     downloadFile(data);
                 }
@@ -203,7 +189,7 @@
 
             //下载文件
             function downloadFile(data) {
-                var url = "/file/download?id=$id&filename=" + encodeURI(data.filename);
+                var url = "./download?id=$id&filename=" + encodeURI(data.filename);
                 self.location.href = url;
             }
 
@@ -213,32 +199,27 @@
                     title: '系统提示'
                 }, function (index) {
                     layer.close(index);
-                    $.ajax({
-                        url: '/file/deleteFile',
-                        type: 'POST',
-                        dataType: 'json',
+                    loadingAjax({
+                        url: './deleteFile',
                         data: {
                             id: '$id',
                             filename: data.filename
                         },
                         success: function (data) {
+                            layer.msg(data.msg);
                             if (200 === data.code) {
-                                layer.msg('删除成功！');
-                                // 刷新项目列表
-                                table.reload('table_file', {
-                                    // height: 'full-52'
-                                });
-                            } else {
-                                layer.msg(data.msg);
+                                reloadTable();
                             }
-                        },
-                        error: function (err) {
-                            layer.msg('删除失败！');
                         }
                     });
                 });
             }
         });
+    }
+
+    function reloadTable() {
+        // 刷新项目列表
+        table.reload('table_file', {});
     }
 </script>
 </html>

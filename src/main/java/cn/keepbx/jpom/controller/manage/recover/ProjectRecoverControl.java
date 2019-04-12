@@ -1,4 +1,4 @@
-package cn.keepbx.jpom.controller.manage;
+package cn.keepbx.jpom.controller.manage.recover;
 
 import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.JsonMessage;
@@ -22,7 +22,7 @@ import java.util.List;
  * @author Administrator
  */
 @Controller
-@RequestMapping(value = "/manage/")
+@RequestMapping(value = "/manage/recover")
 public class ProjectRecoverControl extends BaseController {
 
     @Resource
@@ -33,9 +33,8 @@ public class ProjectRecoverControl extends BaseController {
      *
      * @return page
      */
-    @RequestMapping(value = "project_recover", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
-    public String projectInfo() throws IOException {
-
+    @RequestMapping(value = "list.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
+    public String projectInfo() {
         UserModel userModel = getUser();
         if (userModel.isManage()) {
             List<ProjectRecoverModel> projectInfoModels = projectRecoverService.list();
@@ -44,7 +43,7 @@ public class ProjectRecoverControl extends BaseController {
         return "manage/project_recover";
     }
 
-    @RequestMapping(value = "recover/project", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "data.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     public String project(String id) throws IOException {
         if (StrUtil.isEmpty(id)) {

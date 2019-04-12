@@ -6,20 +6,20 @@
     <title>项目管理系统</title>
     <style>
         body {
-            padding: 10px 10px 0px 10px;
+            padding: 10px;
         }
 
         .layui-table-hover {
-
+            /*background-color: #df0610 !important;*/
         }
     </style>
 </head>
 <body>
 <div class="layui-row">
     #if($user.isManage())
-        <button id="addProject" onclick="editProject('');" class="layui-btn layui-btn-sm">新增项目</button>
+        <button onclick="editProject('');" class="layui-btn layui-btn-sm">新增项目</button>
     #end
-    <button id="refresh" onclick="reloadTable();" class="layui-btn layui-btn-sm">刷新表格</button>
+    <button onclick="reloadTable();" class="layui-btn layui-btn-sm">刷新表格</button>
     <button onclick="projectRecover();" class="layui-btn layui-btn-sm layui-btn-primary">回收站</button>
 </div>
 <table class="layui-table" id="tab_project" lay-filter="tab_project" style="margin: 0;"></table>
@@ -28,12 +28,19 @@
     <a href="javascript:;" class="layui-btn  layui-btn-sm layui-btn-normal" lay-event="manage">控制台</a>
     <a href="javascript:;" class="layui-btn  layui-btn-sm layui-btn-warm" lay-event="update">配置</a>
     <a href="javascript:;" class="layui-btn  layui-btn-sm" lay-event="file">文件</a>
-    <a href="javascript:;" class="layui-btn  layui-btn-sm layui-btn-normal" lay-event="build">构建</a>
-    <a href="javascript:;" class="layui-btn  layui-btn-sm" lay-event="ram">监控</a>
+    <a href="javascript:;" class="layui-btn  layui-btn-sm layui-btn-normal" lay-event="ram">监控</a>
 </script>
 <script type="text/html" id="status_templ">
-    <input type="checkbox" id="" disabled name="status" {{# if(d.status){ }} checked {{# } }} lay-skin="switch"
-           lay-text="运行中|未运行">
+    <div title="请到控制台中管理项目">
+        <input class="layui-hide" type="checkbox" id="" disabled name="status" {{# if(d.status){ }}
+               checked {{# } }}
+               lay-skin="switch"
+               lay-text="运行中|未运行">
+    </div>
+</script>
+
+<script type="text/html" id="port_templ">
+    <span p-Id="{{d.id}}" title="端口：{{ getItemPort(d) }}">{{ getItemPort(d) }}</span>
 </script>
 
 <script type="text/html" id="toolbarDemo">
@@ -56,67 +63,19 @@
 </script>
 
 </body>
-<script>
-    const HSL = [];
-
-    function randomHsl() {
-        var H = Math.random();
-        var S = Math.random();
-        var L = Math.random();
-        return [H, S, L];
-    }
-
-    // 获取HSL数组
-    function getHslArray(hslLength) {
-        var allLen = HSL.length;
-        if (HSL.length >= hslLength) {
-            return;
-        }
-        for (var i = 0; i < hslLength - allLen; i++) {
-            var ret = this.randomHsl();
-
-            // 颜色相邻颜色差异须大于 0.25
-            if (allLen > 0 && Math.abs(ret[0] - HSL[allLen - 1][0]) < 0.25) {
-                i--;
-                continue; // 重新获取随机色
-            }
-            ret[1] = 0.7 + (ret[1] * 0.2); // [0.7 - 0.9] 排除过灰颜色
-            ret[2] = 0.4 + (ret[2] * 0.4); // [0.4 - 0.8] 排除过亮过暗色
-
-            // 数据转化到小数点后两位
-            ret = ret.map(function (item) {
-                return parseFloat(item.toFixed(2));
-            });
-            HSL.push(ret);
-        }
-    }
-
-    function hslToRgb(H, S, L) {
-        var R, G, B;
-        if (+S === 0) {
-            R = G = B = L; // 饱和度为0 为灰色
-        } else {
-            var hue2Rgb = function (p, q, t) {
-                if (t < 0) t += 1;
-                if (t > 1) t -= 1;
-                if (t < 1 / 6) return p + (q - p) * 6 * t;
-                if (t < 1 / 2) return q;
-                if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
-                return p;
-            };
-            var Q = L < 0.5 ? L * (1 + S) : L + S - L * S;
-            var P = 2 * L - Q;
-            R = hue2Rgb(P, Q, H + 1 / 3);
-            G = hue2Rgb(P, Q, H);
-            B = hue2Rgb(P, Q, H - 1 / 3);
-        }
-        return [Math.round(R * 255), Math.round(G * 255), Math.round(B * 255)];
-    }
-</script>
-
 <script type="text/javascript">
-    const groupMap = new Map();
     const apiWhere = {};
+    var cachePortInfo;
+
+    function getItemPort(data) {
+        if (!data.status) {
+            return "";
+        }
+        if (!cachePortInfo) {
+            return "";
+        }
+        return cachePortInfo[data.id] || "";
+    }
 
     function loadSuccess() {
         // 获取缓存中的值
@@ -127,44 +86,34 @@
         table.render({
             id: 'table_project',
             elem: '#tab_project',
-            url: '/manage/getProjectInfo',
+            url: './getProjectInfo',
             // height: 'full-52',
             toolbar: '#toolbarDemo',
             even: true,
             where: apiWhere,
             cols: [[{
                 field: 'name', title: '项目名称', width: '15%', sort: true, templet: function (d) {
-                    var rgb;
-                    if (!d.manager) {
-                        rgb = [211, 211, 211];
-                    } else {
-                        if (d.group) {
-                            var size = groupMap.size;
-                            rgb = groupMap.get(d.group)
-                            if (!rgb) {
-                                size += 1;
-                                getHslArray(size);
-                                rgb = hslToRgb.apply(this, HSL[size - 1]);
-                                groupMap.set(d.group, rgb);
-                            }
-                        }
-                    }
-                    return "<span   name='" + d.id + "' title='分组：" + d.group + "(项目Id:" + d.id + ")' style='background: rgb(" + rgb + ");padding: 10px;'></span >" + d.name;
+                    var title = '分组:' + d.group + '  项目Id:' + d.id;
+                    title += '  lib状态:' + (d.runLibDesc || "") + " / " + (d.useLibDesc || "");
+                    return "<span  title='" + title + "'>" + d.name + "</span >";
                 }
+            }, {
+                field: 'createTime', title: '创建时间', sort: true, width: '13%'
+            }, {
+                field: 'modifyTime', title: '修改时间', sort: true, width: '13%'
+            }, {
+                field: 'modifyUser', title: '最后操作人', sort: true, width: '13%'
+            }, {
+                title: '运行状态',
+                templet: "#status_templ",
+                sort: true,
+                width: '10%'
+            }, {
+                title: '端口',
+                templet: "#port_templ",
+                sort: true,
+                width: '8%'
             },
-                {
-                    title: 'lib状态', width: '10%', sort: true, templet: function (d) {
-                        return (d.runLibDesc || "") + " / " + (d.useLibDesc || "");
-                    }
-                },
-                {
-                    field: 'createTime', title: '创建时间', sort: true, width: '13%'
-                },
-                {
-                    field: 'modifyUser', title: '最后修改人', sort: true, width: '13%'
-                },
-                {field: 'modifyTime', title: '修改时间', sort: true, width: '13%'},
-                {title: '运行状态', templet: "#status_templ", sort: true, width: '10%'},
                 {field: 'op', title: '操作', toolbar: '#bar_projects'}
             ]],
             loading: true,
@@ -174,24 +123,51 @@
             },
             done: function (data) {
                 var projects = data.data;
+                var ids = [];
                 for (var i = 0; i < projects.length; i++) {
                     var project = projects[i];
                     if (!project.manager) {
                         $('tr[data-index="' + i + '"').css('background-color', 'rgb(211,211,211)');
                     }
+                    ids.push(project.id);
                 }
+                getProjectMainPort(ids);
                 // 选中
                 $("#selectGroup option[value='" + apiWhere.group + "']").attr("selected", "selected");
                 form.render();
-                $("tbody").on("mouseover", "tr", function () {
-                    $(this).siblings().css("opacity", 0.3);
-                });
-                $("tbody").on("mouseout", "tr", function () {
-                    $(this).siblings().css("opacity", 1);
-                });
+                // $("tbody").on("mouseover", "tr", function () {
+                //     $(this).siblings().css("opacity", 0.3);
+                // });
+                // $("tbody").on("mouseout", "tr", function () {
+                //     $(this).siblings().css("opacity", 1);
+                // });
             }
         });
 
+        function getProjectMainPort(ids) {
+            if (ids.length <= 0) {
+                return
+            }
+            $.ajax({
+                url: './getProjectPort',
+                type: 'POST',
+                dataType: 'json',
+                data: {
+                    ids: JSON.stringify(ids)
+                },
+                success: function (data) {
+                    if (200 == data.code) {
+                        cachePortInfo = data.data;
+                        for (var key in data.data) {
+                            $("span[p-Id='" + key + "']").text(data.data[key]).attr("title", "端口：" + data.data[key]);
+                        }
+                    }
+                },
+                error: function (err) {
+
+                }
+            });
+        }
 
         form.on('select(groupName)', function (data) {
             apiWhere.group = data.value;
@@ -215,14 +191,6 @@
                 manageApplication(data);
             } else if ('file' === event) {
                 fileManage(data);
-            } else if ('build' === event) {
-                layer.open({
-                    type: 2,
-                    title: '自动构建',
-                    shade: 0.8,
-                    area: ['80%', '90%'],
-                    content: 'build?id=' + data.id
-                });
             } else if ('ram' === event) {
                 if (!data.status) {
                     layer.msg('请先运行程序！');
@@ -243,7 +211,7 @@
             var manager = data.manager;
             if (manager) {
                 var lay_id = 'tab_file_' + data.id;
-                var url = '/file/filemanage?id=' + data.id;
+                var url = './manage/file/list.html?id=' + data.id;
                 tabChange({
                     id: data.id,
                     url: url,
@@ -256,7 +224,7 @@
 
         // 管理
         function manageApplication(data) {
-            var url = '/manage/console?id=' + data.id;
+            var url = './manage/console?id=' + data.id;
             tabChange({
                 id: data.id,
                 url: url,
@@ -284,7 +252,7 @@
     function projectRecover() {
         tabChange({
             id: 'projectRecover',
-            url: '/manage/project_recover',
+            url: './manage/recover/list.html',
             title: '回收站',
         });
     }

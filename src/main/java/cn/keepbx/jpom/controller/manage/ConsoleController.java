@@ -1,7 +1,6 @@
 package cn.keepbx.jpom.controller.manage;
 
-import cn.hutool.core.io.IoUtil;
-import cn.jiangzeyin.common.DefaultSystemLog;
+import cn.hutool.extra.servlet.ServletUtil;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.keepbx.jpom.common.BaseController;
 import cn.keepbx.jpom.model.ProjectInfoModel;
@@ -16,9 +15,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.OutputStream;
 
 /**
  * 控制台
@@ -41,12 +37,7 @@ public class ConsoleController extends BaseController {
      */
     @RequestMapping(value = "console", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
     public String console(String id) {
-        ProjectInfoModel projectInfoModel = null;
-        try {
-            projectInfoModel = projectInfoService.getItem(id);
-        } catch (IOException e) {
-            DefaultSystemLog.ERROR().error(e.getMessage(), e);
-        }
+        ProjectInfoModel projectInfoModel = projectInfoService.getItem(id);
         if (projectInfoModel != null) {
             UserModel userName = getUser();
             setAttribute("projectInfo", projectInfoModel);
@@ -65,29 +56,5 @@ public class ConsoleController extends BaseController {
     }
 
 
-    @RequestMapping(value = "export.html", method = RequestMethod.GET)
-    @ResponseBody
-    public String export(String id) {
-        try {
-            ProjectInfoModel pim = projectInfoService.getItem(id);
-            File file = new File(pim.getLog());
-            if (!file.exists()) {
-                return JsonMessage.getString(400, "没有日志文件:" + file.getPath());
-            }
-            HttpServletResponse response = getResponse();
-            // 设置强制下载不打开
-            response.setContentType("application/force-download");
-            // 设置文件名
-            response.addHeader("Content-Disposition", "attachment;fileName=" + file.getName());
-            OutputStream os = response.getOutputStream();
-            byte[] bytes = IoUtil.readBytes(new FileInputStream(file));
-            IoUtil.write(os, false, bytes);
-            os.flush();
-            os.close();
-            return "ok";
-        } catch (IOException e) {
-            DefaultSystemLog.ERROR().error("删除文件异常", e);
-        }
-        return JsonMessage.getString(500, "导出失败");
-    }
+
 }

@@ -1,6 +1,9 @@
 package cn.keepbx.jpom.common.interceptor;
 
 import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.util.StrUtil;
+import cn.hutool.extra.servlet.ServletUtil;
 import cn.jiangzeyin.common.interceptor.BaseInterceptor;
 import cn.jiangzeyin.common.interceptor.InterceptorPattens;
 import cn.keepbx.jpom.common.BaseController;
@@ -35,7 +38,7 @@ public class LoginInterceptor extends BaseInterceptor {
             if (notLogin == null) {
                 UserModel user = (UserModel) session.getAttribute(SESSION_NAME);
                 if (user == null) {
-                    response.sendRedirect(request.getContextPath() + "/login.html");
+                    response.sendRedirect(getHeaderProxyPath(request) + "/login.html");
                     return false;
                 }
             }
@@ -49,17 +52,37 @@ public class LoginInterceptor extends BaseInterceptor {
         super.postHandle(request, response, handler, modelAndView);
         HttpSession session = getSession();
         try {
+            // 静态资源地址参数
             Object staticCacheTime = session.getAttribute("staticCacheTime");
             if (staticCacheTime == null) {
                 session.setAttribute("staticCacheTime", DateUtil.currentSeconds());
             }
+            // 代理二级路径
+            Object jpomProxyPath = session.getAttribute("jpomProxyPath");
+            if (jpomProxyPath == null) {
+                String path = getHeaderProxyPath(request);
+                session.setAttribute("jpomProxyPath", path);
+            }
         } catch (Exception ignored) {
         }
+
     }
 
     @Override
     public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
         super.afterCompletion(request, response, handler, ex);
         BaseController.remove();
+    }
+
+    private String getHeaderProxyPath(HttpServletRequest request) {
+        String proxyPath = ServletUtil.getHeaderIgnoreCase(request, "Jpom-ProxyPath");
+        if (StrUtil.isEmpty(proxyPath)) {
+            return StrUtil.EMPTY;
+        }
+        proxyPath = FileUtil.normalize(proxyPath);
+        if (proxyPath.endsWith(StrUtil.SLASH)) {
+            proxyPath = proxyPath.substring(0, proxyPath.length() - 1);
+        }
+        return proxyPath;
     }
 }

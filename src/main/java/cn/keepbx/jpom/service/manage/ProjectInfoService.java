@@ -2,7 +2,6 @@ package cn.keepbx.jpom.service.manage;
 
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.FileUtil;
-import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.keepbx.jpom.common.BaseOperService;
 import cn.keepbx.jpom.model.ProjectInfoModel;
 import cn.keepbx.jpom.model.ProjectRecoverModel;
@@ -13,7 +12,7 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.io.File;
-import java.io.IOException;
+import java.util.HashSet;
 import java.util.List;
 
 /**
@@ -36,6 +35,17 @@ public class ProjectInfoService extends BaseOperService<ProjectInfoModel> {
         JSONObject jsonObject = getJSONObject(ConfigBean.PROJECT);
         JSONArray jsonArray = formatToArray(jsonObject);
         return jsonArray.toJavaList(ProjectInfoModel.class);
+    }
+
+
+    public HashSet<String> getAllGroup() {
+        //获取所有分组
+        List<ProjectInfoModel> projectInfoModels = list();
+        HashSet<String> hashSet = new HashSet<>();
+        for (ProjectInfoModel projectInfoModel : projectInfoModels) {
+            hashSet.add(projectInfoModel.getGroup());
+        }
+        return hashSet;
     }
 
     /**
@@ -80,19 +90,14 @@ public class ProjectInfoService extends BaseOperService<ProjectInfoModel> {
      * @return model
      */
     @Override
-    public ProjectInfoModel getItem(String id) throws IOException {
+    public ProjectInfoModel getItem(String id) {
         return getJsonObjectById(ConfigBean.PROJECT, id, ProjectInfoModel.class);
     }
 
     public String getLogSize(String id) {
         ProjectInfoModel pim;
-        try {
-            pim = getItem(id);
-            if (pim == null) {
-                return null;
-            }
-        } catch (IOException e) {
-            DefaultSystemLog.ERROR().error(e.getMessage(), e);
+        pim = getItem(id);
+        if (pim == null) {
             return null;
         }
         String logSize = null;

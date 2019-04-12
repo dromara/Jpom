@@ -47,26 +47,7 @@
    
    ###  Jpom使用Nginx代理推荐配置
 
-```
-server {
-    #charset koi8-r;
-    access_log  /var/log/nginx/jpom.log main;
-    listen       80;
-    server_name  jpom.xxxxxx.com;
-    
-    location / {
-        proxy_pass   http://127.0.0.1:2122/;
-        proxy_set_header Host      $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        client_max_body_size  50000m;
-        client_body_buffer_size 128k;
-        #  websocket 配置
-        proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection "upgrade";
-    }
-}
-```
+   [查看>>](/doc/nginx-config.md)
 
    ### 启动提示数据目录权限不足
    

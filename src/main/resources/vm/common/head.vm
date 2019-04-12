@@ -3,15 +3,15 @@
 <meta content="width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1,user-scalable=no" name="viewport">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
-<link rel="icon" href="/static/favicon.ico" type="image/x-icon"/>
-<link rel="shortcut icon" href="/static/favicon.ico" type="image/x-icon"/>
-<link rel="stylesheet" href="/static/layui/css/layui.css?v=$staticCacheTime" media="all">
+<link rel="icon" href="$!jpomProxyPath/static/favicon.ico" type="image/x-icon"/>
+<link rel="shortcut icon" href="$!jpomProxyPath/static/favicon.ico" type="image/x-icon"/>
+<link rel="stylesheet" href="$!jpomProxyPath/static/layui/css/layui.css?v=$staticCacheTime" media="all">
 <style>
     .x-red {
         color: red;
     }
 </style>
-<script type="text/javascript" src="/static/layui/layui.js?v=$staticCacheTime"></script>
+<script type="text/javascript" src="$!jpomProxyPath/static/layui/layui.js?v=$staticCacheTime"></script>
 <script type="text/javascript">
     var $, layer, form, element, table;
     ## 不缓存
@@ -41,7 +41,7 @@
                 element.tabChange('mainTabs', lay_id);
             } else {
                 // 创建
-                var tab_content = '<iframe src="' + options.url + '" frameborder="0" class="custom-iframe"></iframe>';
+                var tab_content = '<iframe name="' + options.id + '" src="' + options.url + '" frameborder="0" class="custom-iframe"></iframe>';
                 element.tabAdd('mainTabs', {
                     title: options.title,
                     content: tab_content,
@@ -53,8 +53,37 @@
         element.tabChange('mainTabs', lay_id);
     }
 
+    ## 获取自适应的socket
     function getSocketHost() {
         var pro = location.protocol === 'https:' ? 'wss://' : 'ws://';
-        return pro + window.location.host;
+        return pro + window.location.host + "$!jpomProxyPath";
+    }
+
+    ## 带loading 效果的网络请求
+    function loadingAjax(data) {
+        var success = data.success;
+        delete data.success;
+        var error = data.error;
+        delete data.error;
+        var index;
+        var defData = {
+            type: 'POST',
+            dataType: 'json',
+            beforeSend: function () {
+                index = layer.load(1, {
+                    shade: [0.3, '#fff']
+                });
+            },
+            success: function (data) {
+                layer.close(index);
+                success && success(data);
+            },
+            error: function () {
+                layer.close(index);
+                layer.msg("网络异常,请稍后再试");
+            }
+        };
+        $.extend(defData, data);
+        $.ajax(defData);
     }
 </script>

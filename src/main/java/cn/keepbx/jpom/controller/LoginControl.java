@@ -65,8 +65,12 @@ public class LoginControl extends BaseController {
         return StrUtil.isNotEmpty(showCode);
     }
 
-
-    @RequestMapping(value = "randCode.png", method = RequestMethod.GET)
+    /**
+     * 验证码
+     *
+     * @throws IOException IO
+     */
+    @RequestMapping(value = "randCode.png", method = RequestMethod.GET, produces = MediaType.IMAGE_PNG_VALUE)
     @ResponseBody
     @NotLogin
     public void randCode() throws IOException {
@@ -177,5 +181,16 @@ public class LoginControl extends BaseController {
                 userService.updateUser(userModel);
             }
         }
+    }
+
+    /**
+     * 退出登录
+     *
+     * @return page
+     */
+    @RequestMapping(value = "logout", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
+    public String logout() {
+        getSession().invalidate();
+        return "redirect:index.html";
     }
 }

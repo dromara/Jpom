@@ -26,6 +26,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import javax.annotation.Resource;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.util.HashSet;
 import java.util.List;
 
 /**
@@ -74,6 +76,12 @@ public class EditProjectController extends BaseController {
         // 运行模式
         ProjectInfoModel.RunMode[] runModes = ProjectInfoModel.RunMode.values();
         setAttribute("runModes", runModes);
+        //
+        HashSet<String> hashSet = projectInfoService.getAllGroup();
+        if (hashSet.isEmpty()) {
+            hashSet.add("默认");
+        }
+        setAttribute("groups", hashSet);
         return "manage/editProject";
     }
 
@@ -107,9 +115,13 @@ public class EditProjectController extends BaseController {
         } catch (Exception ignored) {
         }
         projectInfo.setRunMode(runMode1);
-
-        if (runMode1 == ProjectInfoModel.RunMode.ClassPath && StrUtil.isEmpty(projectInfo.getMainClass())) {
-            return JsonMessage.getString(401, "ClassPath 模式 MainClass必填");
+        // 监测
+        if (runMode1 == ProjectInfoModel.RunMode.ClassPath) {
+            if (StrUtil.isEmpty(projectInfo.getMainClass())) {
+                return JsonMessage.getString(401, "ClassPath 模式 MainClass必填");
+            }
+        } else if (runMode1 == ProjectInfoModel.RunMode.Jar) {
+            projectInfo.setMainClass("");
         }
         //
         if (!whitelistDirectoryService.checkProjectDirectory(whitelistDirectory)) {
@@ -117,16 +129,16 @@ public class EditProjectController extends BaseController {
         }
         String lib = projectInfo.getLib();
         if (StrUtil.isEmpty(lib)) {
-            return JsonMessage.getString(401, "项目lib不能为空");
+            return JsonMessage.getString(401, "项目Jar路径不能为空");
         }
         if (StrUtil.SLASH.equals(lib)) {
-            return JsonMessage.getString(401, "项目lib不能为顶级目录");
+            return JsonMessage.getString(401, "项目Jar路径不能为顶级目录");
         }
         if (Validator.isChinese(lib)) {
-            return JsonMessage.getString(401, "项目lib中不能包含中文");
+            return JsonMessage.getString(401, "项目Jar路径中不能包含中文");
         }
         if (!checkPathSafe(lib)) {
-            return JsonMessage.getString(401, "项目lib存在提升目录问题");
+            return JsonMessage.getString(401, "项目Jar路径存在提升目录问题");
         }
         return null;
     }
@@ -136,11 +148,10 @@ public class EditProjectController extends BaseController {
      *
      * @param projectInfo 项目实体
      * @return json
-     * @throws IOException IO
      */
     @RequestMapping(value = "saveProject", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
-    public String saveProject(ProjectInfoModel projectInfo, String whitelistDirectory) throws IOException {
+    public String saveProject(ProjectInfoModel projectInfo, String whitelistDirectory) {
         String error = checkParameter(projectInfo, whitelistDirectory);
         if (error != null) {
             return error;
@@ -154,14 +165,14 @@ public class EditProjectController extends BaseController {
         if (list != null) {
             for (ProjectInfoModel projectInfoModel : list) {
                 if (!projectInfoModel.getId().equals(id) && projectInfoModel.getLib().equals(lib)) {
-                    return JsonMessage.getString(401, "当前项目lib已经被【" + projectInfoModel.getName() + "】占用,请检查");
+                    return JsonMessage.getString(401, "当前项目Jar路径已经被【" + projectInfoModel.getName() + "】占用,请检查");
                 }
             }
         }
         projectInfo.setLib(lib);
         File checkFile = new File(projectInfo.getLib());
         if (checkFile.exists() && checkFile.isFile()) {
-            return JsonMessage.getString(401, "项目lib是一个已经存在的文件");
+            return JsonMessage.getString(401, "项目Jar路径是一个已经存在的文件");
         }
         // 自动生成log文件
         String log = new File(lib).getParent();
@@ -177,13 +188,13 @@ public class EditProjectController extends BaseController {
             return JsonMessage.getString(401, "WebHooks 地址不合法");
         }
         // 判断空格
-        if (id.contains(StrUtil.SPACE) || lib.contains(StrUtil.SPACE) || log.contains(StrUtil.SPACE)) {
-            return JsonMessage.getString(401, "项目Id、项目Lib、WebHooks不能包含空格");
+        if (id.contains(StrUtil.SPACE) || lib.contains(StrUtil.SPACE)) {
+            return JsonMessage.getString(401, "项目Id、项目Jar不能包含空格");
         }
         return save(projectInfo);
     }
 
-    private String save(ProjectInfoModel projectInfo) throws IOException {
+    private String save(ProjectInfoModel projectInfo) {
         String edit = getParameter("edit");
         ProjectInfoModel exits = projectInfoService.getItem(projectInfo.getId());
         try {
@@ -240,12 +251,7 @@ public class EditProjectController extends BaseController {
      */
     private void modify(ProjectInfoModel exits) {
         UserModel userName = getUser();
-        // 隐藏系统管理员登录名
-        if (userName.isSystemUser()) {
-            exits.setModifyUser(UserModel.SYSTEM_OCCUPY_NAME);
-        } else {
-            exits.setModifyUser(userName.getId());
-        }
+        exits.logModifyUser(userName);
     }
 
     /**
@@ -254,35 +260,42 @@ public class EditProjectController extends BaseController {
      * @param id     项目Id
      * @param newLib 新lib
      * @return json
-     * @throws IOException IO
      */
     @RequestMapping(value = "judge_lib.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
-    public String saveProject(String id, String newLib) throws IOException {
-        ProjectInfoModel exits = projectInfoService.getItem(id);
+    public String saveProject(String id, String newLib) {
         File file = new File(newLib);
-        String msg = null;
+        //  填写的jar路径是一个存在的文件
+        if (file.exists() && file.isFile()) {
+            return JsonMessage.getString(400, "填写jar目录当前是一个已经存在的文件,请修改");
+        }
+        ProjectInfoModel exits = projectInfoService.getItem(id);
         if (exits == null) {
-            if (file.exists() && file.isFile()) {
-                msg = "lib目录当前是一个已经存在的文件,请修改";
+            // 创建项目 填写的jar路径是已经存在的文件夹
+            if (file.exists()) {
+                return JsonMessage.getString(401, "填写jar目录当前已经在,创建成功后会自动同步文件");
             }
         } else {
+            // 已经存在的项目
             File oldLib = new File(exits.getLib());
-            if (file.exists() && oldLib.exists()) {
-                if (file.isFile()) {
-                    msg = "lib目录当前是一个已经存在的文件,请修改";
-                } else {
-                    msg = "lib目录已经存在,保存将覆盖原文件夹并会自动同步原lib目录";
+            Path newPath = file.toPath();
+            Path oldPath = oldLib.toPath();
+            if (newPath.equals(oldPath)) {
+                // 新 旧没有变更
+                return JsonMessage.getString(200, "");
+            }
+            if (file.exists()) {
+                if (oldLib.exists()) {
+                    // 新旧jar路径都存在，会自动覆盖新的jar路径中的文件
+                    return JsonMessage.getString(401, "原jar目录已经存在并且新的jar目录已经存在,保存将覆盖新文件夹并会自动同步原jar目录");
                 }
+                return JsonMessage.getString(401, "填写jar目录当前已经在,创建成功后会自动同步文件");
             }
         }
-        if (msg == null && Validator.isChinese(newLib)) {
-            msg = "不建议使用中文目录";
+        if (Validator.isChinese(newLib)) {
+            return JsonMessage.getString(401, "不建议使用中文目录");
         }
-        if (msg == null) {
-            return JsonMessage.getString(200, "");
-        }
-        return JsonMessage.getString(400, msg);
+        return JsonMessage.getString(200, "");
     }
 
     private void moveTo(ProjectInfoModel old, ProjectInfoModel news) {
@@ -335,7 +348,7 @@ public class EditProjectController extends BaseController {
             }
         }
         if (projectInfoModel1 != null) {
-            return new JsonMessage(401, "项目lib和【" + projectInfoModel1.getName() + "】项目冲突:" + projectInfoModel1.getLib());
+            return new JsonMessage(401, "项目Jar路径和【" + projectInfoModel1.getName() + "】项目冲突:" + projectInfoModel1.getLib());
         }
         return null;
     }

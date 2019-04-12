@@ -166,7 +166,13 @@ public class WhitelistDirectoryController extends BaseController {
         return array;
     }
 
-
+    /**
+     * 检查白名单包含关系
+     *
+     * @param jsonArray 要检查的对象
+     * @param start     检查的坐标
+     * @return null 正常
+     */
     private String findStartsWith(JSONArray jsonArray, int start) {
         if (!ExtConfigBean.getInstance().whitelistDirectoryCheckStartsWith) {
             return null;

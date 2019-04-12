@@ -1,11 +1,12 @@
 package cn.keepbx.jpom.model;
 
+import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.keepbx.jpom.common.commander.AbstractCommander;
-import com.alibaba.fastjson.JSONObject;
 
 import java.io.File;
+import java.util.List;
 
 /**
  * 项目配置信息实体
@@ -69,6 +70,15 @@ public class ProjectInfoModel extends BaseModel {
 
     public void setModifyUser(String modifyUser) {
         this.modifyUser = modifyUser;
+    }
+
+    public void logModifyUser(UserModel userModel) {
+        // 隐藏系统管理员登录名
+        if (userModel.isSystemUser()) {
+            this.setModifyUser(UserModel.SYSTEM_OCCUPY_NAME);
+        } else {
+            this.setModifyUser(userModel.getId());
+        }
     }
 
     /**
@@ -178,30 +188,36 @@ public class ProjectInfoModel extends BaseModel {
         return file.getAbsolutePath();
     }
 
+    /**
+     * 拼接java 执行的jar路径
+     *
+     * @param projectInfoModel 项目
+     * @return classpath 或者 jar
+     */
     public static String getClassPathLib(ProjectInfoModel projectInfoModel) {
         File fileLib = new File(projectInfoModel.getLib());
-        File[] files = fileLib.listFiles();
-        if (files == null || files.length <= 0) {
+        List<File> files = FileUtil.loopFiles(fileLib, pathname -> {
+            if (!pathname.isFile()) {
+                return false;
+            }
+            return StrUtil.endWith(pathname.getName(), ".jar", true);
+        });
+        if (files == null || files.size() <= 0) {
             return "";
         }
         // 获取lib下面的所有jar包
         StringBuilder classPath = new StringBuilder();
         RunMode runMode = projectInfoModel.getRunMode();
+        int len = files.size();
         if (runMode == RunMode.ClassPath) {
             classPath.append("-classpath ");
         } else if (runMode == RunMode.Jar) {
             classPath.append("-jar ");
             // 只取一个jar文件
-            for (int i = 0, len = files.length; i < len; i++) {
-                File file = files[i];
-                if (file.isFile()) {
-                    files = new File[]{file};
-                    break;
-                }
-            }
+            len = 1;
         }
-        for (int i = 0, len = files.length; i < len; i++) {
-            File file = files[i];
+        for (int i = 0; i < len; i++) {
+            File file = files.get(i);
             classPath.append(file.getAbsolutePath());
             if (i != len - 1) {
                 classPath.append(AbstractCommander.OS_INFO.isWindows() ? ";" : ":");
@@ -262,15 +278,6 @@ public class ProjectInfoModel extends BaseModel {
 
     public void setArgs(String args) {
         this.args = args;
-    }
-
-    @Override
-    public String toString() {
-        return JSONObject.toJSONString(this);
-    }
-
-    public JSONObject toJson() {
-        return (JSONObject) JSONObject.toJSON(this);
     }
 
     /**
