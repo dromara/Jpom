@@ -70,16 +70,13 @@ mvn clean package
 ### 编译运行
 
 1. 访问[Jpom](https://gitee.com/keepbx/Jpom)的码云主页,拉取最新完整代码：
-2. 运行*cn.keepbx.jpom.JpomApplication*
+2. 运行`cn.keepbx.jpom.JpomApplication`
 3. 浏览器访问（如：http://127.0.0.1:2122）
 
 ### 管理命令
 1. windows中Jpom.bat
 ```
-Jpom.bat start     启动Jpom 
-Jpom.bat stop      停止Jpom
-Jpom.bat restart   重启Jpom
-Jpom.bat status    查看Jpom运行状态
+Jpom.bat     启动管理面板(按照面板提示输入操作)
 ```
 2. linux中Jpom.sh
 ```

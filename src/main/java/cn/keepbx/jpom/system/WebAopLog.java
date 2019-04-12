@@ -12,7 +12,6 @@ import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
-import org.springframework.boot.ApplicationHome;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -70,9 +69,7 @@ public class WebAopLog extends PropertyDefinerBase {
         String path = ArgsUtil.getArgsValue(JpomApplication.getArgs(), "jpom.log");
         if (StrUtil.isEmpty(path)) {
             //
-            ApplicationHome home = new ApplicationHome(WebAopLog.class);
-            path = (home.getSource() == null ? "" : home.getSource().getAbsolutePath());
-            File file = new File(path);
+            File file = JpomApplication.getRunPath();
             if (file.isFile()) {
                 file = file.getParentFile().getParentFile();
             }
