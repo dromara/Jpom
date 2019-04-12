@@ -40,7 +40,7 @@
 </script>
 
 <script type="text/html" id="port_templ">
-    <span p-Id="{{d.id}}" title="端口：{{ getItemPort(d) }}">{{ getItemPort(d) }}</span>
+    <span p-Id="{{d.id}}" title="端口：{{ getItemPort(d) }} 进程id:{{ getItemPId(d) }}">{{ getItemPort(d) }}</span>
 </script>
 
 <script type="text/html" id="toolbarDemo">
@@ -67,14 +67,26 @@
     const apiWhere = {};
     var cachePortInfo;
 
-    function getItemPort(data) {
+    function getCacheItemInfo(data, key) {
         if (!data.status) {
             return "";
         }
         if (!cachePortInfo) {
             return "";
         }
-        return cachePortInfo[data.id] || "";
+        if (!cachePortInfo[data.id]) {
+            return "";
+        }
+        return cachePortInfo[data.id][key] || "";
+    }
+
+    function getItemPort(data) {
+        return getCacheItemInfo(data, 'port');
+    }
+
+
+    function getItemPId(data) {
+        return getCacheItemInfo(data, 'pid');
     }
 
     function loadSuccess() {
@@ -159,7 +171,7 @@
                     if (200 == data.code) {
                         cachePortInfo = data.data;
                         for (var key in data.data) {
-                            $("span[p-Id='" + key + "']").text(data.data[key]).attr("title", "端口：" + data.data[key]);
+                            $("span[p-Id='" + key + "']").text(data.data[key].port).attr("title", "端口：" + data.data[key].port + "  进程id:" + data.data[key].pid);
                         }
                     }
                 },

@@ -45,6 +45,12 @@ public class ProjectManageControl extends BaseController {
         return "manage/projectInfo";
     }
 
+    /**
+     * 获取正在运行的项目的端口和进程id
+     *
+     * @param ids ids
+     * @return json
+     */
     @RequestMapping(value = "getProjectPort", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     public String getProjectPort(String ids) {
@@ -53,6 +59,7 @@ public class ProjectManageControl extends BaseController {
         }
         JSONArray jsonArray = JSONArray.parseArray(ids);
         JSONObject jsonObject = new JSONObject();
+        JSONObject itemObj;
         for (Object object : jsonArray) {
             String item = object.toString();
             int pid;
@@ -65,8 +72,11 @@ public class ProjectManageControl extends BaseController {
             if (pid <= 0) {
                 continue;
             }
+            itemObj = new JSONObject();
             int port = AbstractCommander.getInstance().getMainPort(pid);
-            jsonObject.put(item, port);
+            itemObj.put("port", port);
+            itemObj.put("pid", pid);
+            jsonObject.put(item, itemObj);
         }
         return JsonMessage.getString(200, "", jsonObject);
     }

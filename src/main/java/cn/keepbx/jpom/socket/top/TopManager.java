@@ -25,6 +25,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Consumer;
 
 /**
  * top命令管理，保证整个服务器只获取一个top命令
@@ -39,6 +41,10 @@ public class TopManager {
     private static CommandService commandService;
     private static boolean watch = false;
     private static ExecutorService executorService = ThreadPoolService.newCachedThreadPool(TopManager.class);
+    /**
+     * 锁定查看进程信息
+     */
+    private static final AtomicBoolean ATOMIC_BOOLEAN = new AtomicBoolean(false);
 
     /**
      * 添加top 命令监听
@@ -101,24 +107,52 @@ public class TopManager {
      */
     private static void sendProcessList() {
         executorService.execute(() -> {
-            JSONArray array;
-            try {
-                if (AbstractCommander.OS_INFO.isLinux()) {
-                    AbstractCommander instance = AbstractCommander.getInstance();
-                    String head = instance.execSystemCommand("top -b -n 1 | head -7");
-                    String s = instance.execSystemCommand("top -b -n 1 | grep java");
-                    array = formatLinuxTop(head + s);
-                } else {
-                    String s = AbstractCommander.getInstance().execSystemCommand("tasklist /V | findstr java");
-                    array = formatWindowsProcess(s);
-                }
+            JSONArray array = getProcessList();
+            if (array != null) {
                 JSONObject jsonObject = new JSONObject();
                 jsonObject.put("processList", array);
                 send(jsonObject.toJSONString());
-            } catch (Exception e) {
-                DefaultSystemLog.ERROR().error(e.getMessage(), e);
             }
         });
+    }
+
+    public static JSONArray getProcessList() {
+        if (ATOMIC_BOOLEAN.get()) {
+            return null;
+        }
+        JSONArray array;
+        try {
+            ATOMIC_BOOLEAN.set(true);
+            if (AbstractCommander.OS_INFO.isLinux()) {
+                AbstractCommander instance = AbstractCommander.getInstance();
+                String head = instance.execSystemCommand("top -b -n 1 | head -7");
+                String s = instance.execSystemCommand("top -b -n 1 | grep java");
+                array = formatLinuxTop(head + s);
+            } else {
+                String s = AbstractCommander.getInstance().execSystemCommand("tasklist /V | findstr java");
+                array = formatWindowsProcess(s);
+            }
+            if (array != null) {
+                array.forEach(new Consumer<Object>() {
+                    @Override
+                    public void accept(Object o) {
+                        JSONObject jsonObject = (JSONObject) o;
+                        int pid = jsonObject.getIntValue("pid");
+                        if (pid <= 0) {
+                            return;
+                        }
+                        int port = AbstractCommander.getInstance().getMainPort(pid);
+                        jsonObject.put("port", port);
+                    }
+                });
+            }
+            return array;
+        } catch (Exception e) {
+            DefaultSystemLog.ERROR().error(e.getMessage(), e);
+        } finally {
+            ATOMIC_BOOLEAN.set(false);
+        }
+        return null;
     }
 
     /**
