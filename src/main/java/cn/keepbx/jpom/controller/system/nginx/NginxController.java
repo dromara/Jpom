@@ -6,7 +6,6 @@ import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
-import cn.jiangzeyin.controller.multipart.MultipartFileBuilder;
 import cn.keepbx.jpom.common.BaseController;
 import cn.keepbx.jpom.model.CertModel;
 import cn.keepbx.jpom.model.UserModel;
@@ -82,9 +81,6 @@ public class NginxController extends BaseController {
             jsonObject.put("whitePath", path);
             setAttribute("data", jsonObject);
         }
-        UserModel userModel = getUser();
-        boolean systemUser = userModel.isSystemUser();
-        setAttribute("systemAdmin", systemUser);
         return "system/nginxSetting";
     }
 
@@ -427,33 +423,6 @@ public class NginxController extends BaseController {
         NgxParam ngxParam = new NgxParam();
         ngxParam.addValue(value);
         block.addEntry(ngxParam);
-    }
-
-    /**
-     * 上传配置文件
-     *
-     * @param whitePath 白名单路径
-     */
-    @RequestMapping(value = "uploadNgx", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    @ResponseBody
-    public String uploadNgx(String whitePath) {
-        if (StrUtil.isEmpty(whitePath)) {
-            return JsonMessage.getString(401, "请选择对应的白名单");
-        }
-        if (!whitelistDirectoryService.checkNgxDirectory(whitePath)) {
-            return JsonMessage.getString(400, "非法操作");
-        }
-        try {
-            MultipartFileBuilder file = createMultipart().addFieldName("file")
-                    .setSavePath(whitePath)
-                    .setFileExt("conf")
-                    .setUseOriginalFilename(true);
-            file.save();
-        } catch (Exception e) {
-            DefaultSystemLog.ERROR().error(e.getMessage(), e);
-            return JsonMessage.getString(400, "上传失败");
-        }
-        return JsonMessage.getString(200, "上传成功");
     }
 
     /**
