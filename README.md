@@ -152,5 +152,3 @@ Jpom.sh status    查看Jpom运行状态
   
   2. 微信公众号：[CodeGzh](/doc/CodeGzh-QrCode.jpg)
   
-  
-
