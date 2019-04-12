@@ -1,4 +1,4 @@
-package cn.keepbx.jpom.controller.manage.log;
+package cn.keepbx.jpom.controller.manage;
 
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
@@ -8,8 +8,8 @@ import cn.jiangzeyin.common.JsonMessage;
 import cn.keepbx.jpom.common.BaseController;
 import cn.keepbx.jpom.common.commander.AbstractCommander;
 import cn.keepbx.jpom.common.interceptor.ProjectPermission;
-import cn.keepbx.jpom.controller.manage.file.ProjectFileControl;
 import cn.keepbx.jpom.model.ProjectInfoModel;
+import cn.keepbx.jpom.service.manage.CommandService;
 import cn.keepbx.jpom.service.manage.ProjectInfoService;
 import com.alibaba.fastjson.JSONArray;
 import org.springframework.http.MediaType;
@@ -19,8 +19,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.annotation.Resource;
-import javax.servlet.http.HttpServletResponse;
 import java.io.File;
+import java.io.IOException;
 
 /**
  * 控制台日志备份管理
@@ -29,29 +29,19 @@ import java.io.File;
  * @date 2019/3/7
  */
 @Controller
-@RequestMapping(value = "/manage/log")
+@RequestMapping(value = "/manage/")
 public class LogBackController extends BaseController {
     @Resource
     private ProjectInfoService projectInfoService;
 
-    @RequestMapping(value = "export.html", method = RequestMethod.GET)
-    @ResponseBody
-    public String export(String id) {
-        ProjectInfoModel pim = projectInfoService.getItem(id);
-        File file = new File(pim.getLog());
-        if (!file.exists()) {
-            return JsonMessage.getString(400, "没有日志文件:" + file.getPath());
-        }
-        HttpServletResponse response = getResponse();
-        ServletUtil.write(response, file);
-        return JsonMessage.getString(200, "");
-    }
+    @Resource
+    private CommandService commandService;
 
     @RequestMapping(value = "logBack", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
     public String console(String id) {
-        // 查询项目路径
-        ProjectInfoModel pim = projectInfoService.getItem(id);
-        if (pim != null) {
+        try {
+            // 查询项目路径
+            ProjectInfoModel pim = projectInfoService.getItem(id);
             File logBack = pim.getLogBack();
             if (logBack.exists() && logBack.isDirectory()) {
                 File[] filesAll = logBack.listFiles();
@@ -61,9 +51,8 @@ public class LogBackController extends BaseController {
                 }
             }
             setAttribute("id", pim.getId());
-
-            setAttribute("logPath", pim.getLog());
-            setAttribute("logBackPath", logBack.getAbsolutePath());
+        } catch (IOException e) {
+            DefaultSystemLog.ERROR().error(e.getMessage(), e);
         }
         return "manage/logBack";
     }
@@ -94,7 +83,7 @@ public class LogBackController extends BaseController {
     @RequestMapping(value = "logBack_delete", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     @ProjectPermission(checkDelete = true)
-    public String clear(String name) {
+    public String clear(String id, String name) {
         name = pathSafe(name);
         if (StrUtil.isEmpty(name)) {
             return JsonMessage.getString(405, "非法操作:" + name);
@@ -140,4 +129,6 @@ public class LogBackController extends BaseController {
             return JsonMessage.getString(500, "重置日志失败");
         }
     }
+
+
 }

@@ -1,12 +1,12 @@
 package cn.keepbx.jpom.controller.monitor;
 
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.text.StrSpliter;
 import cn.hutool.extra.servlet.ServletUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.keepbx.jpom.common.BaseController;
 import cn.keepbx.jpom.common.commander.AbstractCommander;
-import cn.keepbx.jpom.model.NetstatModel;
 import cn.keepbx.jpom.socket.top.TopManager;
 import cn.keepbx.jpom.system.ConfigBean;
 import com.alibaba.fastjson.JSONArray;
@@ -59,7 +59,7 @@ public class InternalController extends BaseController {
             JSONObject beanMem = getBeanMem(tag);
             setAttribute("beanMem", beanMem);
             //获取端口信息
-            List<NetstatModel> port = AbstractCommander.getInstance().listNetstat(pid);
+            JSONArray port = getPort(pid);
             setAttribute("port", port);
         }
         return "manage/internal";
@@ -169,5 +169,63 @@ public class InternalController extends BaseController {
         File file = new File(fileName);
         ServletUtil.write(response, file);
         FileUtil.del(file);
+    }
+
+    /**
+     * 获取端口
+     *
+     * @param pId 进程id
+     */
+    private JSONArray getPort(int pId) {
+        // 查询数据
+        try {
+            String cmd;
+            boolean isLinux = true;
+            if (AbstractCommander.OS_INFO.isLinux()) {
+                cmd = "netstat -antup | grep " + pId + " |grep -v \"CLOSE_WAIT\" | head -10";
+            } else {
+                isLinux = false;
+                cmd = "netstat -nao -p tcp | findstr /V \"CLOSE_WAIT\" | findstr " + pId;
+            }
+            String result = AbstractCommander.getInstance().execSystemCommand(cmd);
+            return formatRam(isLinux, result);
+        } catch (Exception e) {
+            DefaultSystemLog.ERROR().error(e.getMessage(), e);
+        }
+        return null;
+    }
+
+    private JSONArray formatRam(boolean isLinux, String result) {
+        List<String> netList = StrSpliter.splitTrim(result, "\n", true);
+        if (netList == null || netList.size() <= 0) {
+            return null;
+        }
+        JSONArray array = new JSONArray();
+        for (String str : netList) {
+            List<String> list = StrSpliter.splitTrim(str, " ", true);
+            if (list.size() < 5) {
+                continue;
+            }
+            JSONObject item = new JSONObject();
+            if (isLinux) {
+                item.put("protocol", list.get(0));
+                item.put("receive", list.get(1));
+                item.put("send", list.get(2));
+                item.put("local", list.get(3));
+                item.put("foreign", list.get(4));
+                item.put("status", list.get(5));
+                item.put("name", list.get(6));
+            } else {
+                item.put("protocol", list.get(0));
+                item.put("receive", 0);
+                item.put("send", 0);
+                item.put("local", list.get(1));
+                item.put("foreign", list.get(2));
+                item.put("status", list.get(3));
+                item.put("name", list.get(4));
+            }
+            array.add(item);
+        }
+        return array;
     }
 }

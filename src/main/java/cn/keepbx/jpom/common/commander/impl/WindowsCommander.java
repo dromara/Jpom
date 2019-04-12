@@ -1,15 +1,10 @@
 package cn.keepbx.jpom.common.commander.impl;
 
-import cn.hutool.core.text.StrSpliter;
 import cn.hutool.core.thread.GlobalThreadPool;
-import cn.hutool.core.util.StrUtil;
 import cn.keepbx.jpom.common.commander.AbstractCommander;
-import cn.keepbx.jpom.model.NetstatModel;
 import cn.keepbx.jpom.model.ProjectInfoModel;
 
 import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * windows 版
@@ -58,30 +53,5 @@ public class WindowsCommander extends AbstractCommander {
             result = status(tag);
         }
         return result;
-    }
-
-    @Override
-    public List<NetstatModel> listNetstat(int pId) {
-        String cmd = "netstat -nao -p tcp | findstr /V \"CLOSE_WAIT\" | findstr " + pId;
-        String result = execSystemCommand(cmd);
-        List<String> netList = StrSpliter.splitTrim(result, StrUtil.LF, true);
-        if (netList == null || netList.size() <= 0) {
-            return null;
-        }
-        List<NetstatModel> array = new ArrayList<>();
-        for (String str : netList) {
-            List<String> list = StrSpliter.splitTrim(str, " ", true);
-            if (list.size() < 5) {
-                continue;
-            }
-            NetstatModel netstatModel = new NetstatModel();
-            netstatModel.setProtocol(list.get(0));
-            netstatModel.setLocal(list.get(1));
-            netstatModel.setForeign(list.get(2));
-            netstatModel.setStatus(list.get(3));
-            netstatModel.setName(list.get(4));
-            array.add(netstatModel);
-        }
-        return array;
     }
 }

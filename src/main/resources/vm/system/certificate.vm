@@ -245,8 +245,10 @@
                 formData.append("key", key);
                 formData.append("name", name);
                 formData.append("id", id);
-                loadingAjax({
+                $.ajax({
                     url: data.form.action,
+                    type: 'POST',
+                    dataType: 'json',
                     contentType: false,
                     processData: false,
                     data: formData,
@@ -257,6 +259,9 @@
                             // 刷新表
                             table.reload('tab_certificate');
                         }
+                    },
+                    error: function (err) {
+                        layer.alert(err.msg);
                     }
                 });
                 return false;
@@ -302,8 +307,10 @@
             title: '系统提示'
         }, function (index) {
             layer.close(index);
-            loadingAjax({
+            $.ajax({
                 url: './delete',
+                type: 'POST',
+                dataType: 'json',
                 data: {id: data.id},
                 success: function (data) {
                     if (200 == data.code) {
@@ -313,6 +320,9 @@
                     } else {
                         layer.msg(data.msg);
                     }
+                },
+                error: function (err) {
+                    layer.msg('删除失败！');
                 }
             });
         });

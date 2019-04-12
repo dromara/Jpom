@@ -1,14 +1,10 @@
 package cn.keepbx.jpom.common.commander.impl;
 
-import cn.hutool.core.text.StrSpliter;
 import cn.hutool.core.thread.GlobalThreadPool;
 import cn.keepbx.jpom.common.commander.AbstractCommander;
-import cn.keepbx.jpom.model.NetstatModel;
 import cn.keepbx.jpom.model.ProjectInfoModel;
 
 import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * linux
@@ -56,32 +52,5 @@ public class LinuxCommander extends AbstractCommander {
             result = status(tag);
         }
         return result;
-    }
-
-    @Override
-    public List<NetstatModel> listNetstat(int pId) {
-        String cmd = "netstat -antup | grep " + pId + " |grep -v \"CLOSE_WAIT\" | head -20";
-        String result = execSystemCommand(cmd);
-        List<String> netList = StrSpliter.splitTrim(result, "\n", true);
-        if (netList == null || netList.size() <= 0) {
-            return null;
-        }
-        List<NetstatModel> array = new ArrayList<>();
-        for (String str : netList) {
-            List<String> list = StrSpliter.splitTrim(str, " ", true);
-            if (list.size() < 5) {
-                continue;
-            }
-            NetstatModel netstatModel = new NetstatModel();
-            netstatModel.setProtocol(list.get(0));
-            netstatModel.setReceive(list.get(1));
-            netstatModel.setSend(list.get(2));
-            netstatModel.setLocal(list.get(3));
-            netstatModel.setForeign(list.get(4));
-            netstatModel.setStatus(list.get(5));
-            netstatModel.setName(list.get(6));
-            array.add(netstatModel);
-        }
-        return array;
     }
 }

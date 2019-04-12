@@ -31,19 +31,40 @@
 
 #### 项目主要功能及特点
 
-1. 创建、修改、删除项目、Jar包管理
-2. 实时查看控制台日志
-3. cpu、ram 监控、导出堆栈信息、查看项目进程端口、服务器状态监控
-4. [阿里云 CodePipeline + Oss在线管理](/doc/CodePipeline-Oss.md)
-5. 多用户管理，用户项目权限独立(上传、删除权限可控制)
-6. Jpom完全不依赖数据库，随装随用
-7. [安全模式](/doc/safeMode.md)运行，更好的保证服务器稳定、避免误操作
-8. 项目路径白名单模式，杜绝用户误操作系统文件
+1. 创建、修改、删除项目
+2. 实时查看控制台
+3. jar包文件夹管理
+4. cpu、ram 监控、导出堆栈信息、服务器状态监控
+5. [阿里云 CodePipeline + Oss在线管理](/doc/CodePipeline-Oss.md)
+6. 多用户管理，用户项目权限独立(上传、删除权限可控制)
+7. 此项目完全不依赖数据库，随装随用
+8. 查看项目运行进程占用的端口
+9. [安全模式](/doc/safeMode.md)运行，更好的保证服务器稳定、避免误操作
+10. 项目路径白名单模式，杜绝用户误操作系统文件
 
 
-#### 项目操作演示
+#### 项目截图
 
-![Jpom](http://s.keepbx.cn/jpom-demo-gif.gif)
+1. 创建、修改、删除项目
+![修改、删除项目](/doc/images/edit_del.png)
+
+3. 文件管理
+![文件管理](/doc/images/file.png)
+
+4. 项目列表
+![项目列表](/doc/images/list.png)
+
+5. 监控cpu、内存、占用的端口情况
+![ 监控cpu 内存](/doc/images/cup_ram.png)
+
+6. 控制台日志实时查看
+![控制台日志实时查看](/doc/images/console.png)
+
+7. 用户管理
+![用户管理](/doc/images/user_list.png)
+
+8. top监听
+![top监听](/doc/images/top.png)
 
 ### 下载安装
 
@@ -70,13 +91,16 @@ mvn clean package
 ### 编译运行
 
 1. 访问[Jpom](https://gitee.com/keepbx/Jpom)的码云主页,拉取最新完整代码：
-2. 运行`cn.keepbx.jpom.JpomApplication`
+2. 运行*cn.keepbx.jpom.JpomApplication*
 3. 浏览器访问（如：http://127.0.0.1:2122）
 
 ### 管理命令
 1. windows中Jpom.bat
 ```
-Jpom.bat     启动管理面板(按照面板提示输入操作)
+Jpom.bat start     启动Jpom 
+Jpom.bat stop      停止Jpom
+Jpom.bat restart   重启Jpom
+Jpom.bat status    查看Jpom运行状态
 ```
 2. linux中Jpom.sh
 ```

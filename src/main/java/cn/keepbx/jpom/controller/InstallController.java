@@ -61,11 +61,6 @@ public class InstallController extends BaseController {
     @NotLogin
     @ResponseBody
     public String installSubmit(String userName, String userPwd, String whitelistDirectory) {
-        // 先处理白名单
-        String error = whileList(whitelistDirectory);
-        if (error != null) {
-            return error;
-        }
         if (!userService.userListEmpty()) {
             return JsonMessage.getString(100, "系统已经初始化过啦，请勿重复初始化");
         }
@@ -94,21 +89,9 @@ public class InstallController extends BaseController {
         try {
             userService.addItem(userModel);
         } catch (Exception e) {
-            DefaultSystemLog.ERROR().error("初始化用户失败", e);
+            DefaultSystemLog.ERROR().error(e.getMessage(), e);
             return JsonMessage.getString(400, "初始化失败");
         }
-        // 自动登录
-        setSessionAttribute(LoginInterceptor.SESSION_NAME, userModel);
-        return JsonMessage.getString(200, "初始化成功");
-    }
-
-    /**
-     * 处理白名单信息
-     *
-     * @param whitelistDirectory 白名单
-     * @return msg
-     */
-    private String whileList(String whitelistDirectory) {
         JSONArray jsonArray = whitelistDirectoryService.getProjectDirectory();
         if (jsonArray == null || jsonArray.isEmpty()) {
             // 白名单
@@ -118,6 +101,8 @@ public class InstallController extends BaseController {
                 return jsonMessage.toString();
             }
         }
-        return null;
+        // 自动登录
+        setSessionAttribute(LoginInterceptor.SESSION_NAME, userModel);
+        return JsonMessage.getString(200, "初始化成功");
     }
 }

@@ -127,7 +127,6 @@
                                 $('.status span').text(json_data.msg);
                                 setOpBtn(true);
                             }
-                            refreshProjectData();
                             break;
                         case 'stop':
                             if (200 === json_data.code) {
@@ -137,7 +136,6 @@
                             } else {
                                 $('.status span').text(json_data.msg);
                             }
-                            refreshProjectData();
                             break;
                         case  'showlog':
                             break;
@@ -171,23 +169,7 @@
 
             $('.btn-op').on('click', function () {
                 var op = $(this).attr('op');
-                if (op == "stop") {
-                    layer.confirm("确定要停止该项目吗？", {
-                        title: '系统提示'
-                    }, function (index) {
-                        layer.close(index);
-                        setMsg(op);
-                    });
-                } else if (op == "restart") {
-                    layer.confirm("确定要重启该项目吗？", {
-                        title: '系统提示'
-                    }, function (index) {
-                        layer.close(index);
-                        setMsg(op);
-                    });
-                } else {
-                    setMsg(op);
-                }
+                setMsg(op);
             });
 
             function setMsg(opt) {
@@ -196,11 +178,11 @@
                     projectId: "$!projectInfo.id"
                 };
                 layer.load(1, {
-                    shade: [0.3, '#fff']
+                    shade: [0.3, '#fff'] //0.1透明度的白色背景
                 });
                 ws.send(JSON.stringify(data));
                 setTimeout(function () {
-                    layer.closeAll('loading');
+                    layer.closeAll();
                 }, 2000);
             }
         } else {
@@ -241,7 +223,7 @@
 
         function reqLogSize() {
             $.ajax({
-                url: './log/logSize',
+                url: './logSize',
                 type: 'POST',
                 dataType: 'json',
                 data: {
@@ -263,12 +245,14 @@
         }
 
         $('#export').on('click', function () {
-            location.href = "./log/export.html?id=$!projectInfo.id";
+            location.href = "export.html?id=$!projectInfo.id";
         });
 
         $("#resetLog").on('click', function () {
-            loadingAjax({
-                url: './log/resetLog',
+            $.ajax({
+                url: './resetLog',
+                type: 'POST',
+                dataType: 'json',
                 data: {
                     id: "$!projectInfo.id"
                 },
@@ -278,6 +262,9 @@
                         reqLogSize();
                     }
                 },
+                error: function () {
+                    layer.alert("重置日志失败");
+                }
             });
         });
 
@@ -287,17 +274,9 @@
                 title: '备份列表',
                 shade: 0.8,
                 area: ['80%', '90%'],
-                content: './log/logBack?id=$!projectInfo.id'
+                content: 'logBack?id=$!projectInfo.id'
             });
         })
-    }
-    ## 刷新项目数据
-    function refreshProjectData() {
-        try {
-            top.frames["manage"].location.reload();
-        } catch (e) {
-            console.error(e);
-        }
     }
 </script>
 </html>

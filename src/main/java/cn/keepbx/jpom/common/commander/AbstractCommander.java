@@ -8,15 +8,14 @@ import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.http.HttpUtil;
+import cn.hutool.system.JavaRuntimeInfo;
 import cn.hutool.system.OsInfo;
 import cn.hutool.system.SystemUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.keepbx.jpom.common.commander.impl.LinuxCommander;
 import cn.keepbx.jpom.common.commander.impl.WindowsCommander;
-import cn.keepbx.jpom.model.NetstatModel;
 import cn.keepbx.jpom.model.ProjectInfoModel;
 import cn.keepbx.jpom.service.manage.CommandService;
-import cn.keepbx.jpom.system.init.CheckPath;
 import com.sun.tools.attach.*;
 import sun.management.ConnectorAddressLink;
 
@@ -44,6 +43,7 @@ public abstract class AbstractCommander {
     private static AbstractCommander abstractCommander = null;
     protected Charset charset;
     public static final OsInfo OS_INFO = SystemUtil.getOsInfo();
+    private static final JavaRuntimeInfo JAVA_RUNTIME_INFO = SystemUtil.getJavaRuntimeInfo();
 
     protected AbstractCommander(Charset charset) {
         this.charset = charset;
@@ -83,46 +83,6 @@ public abstract class AbstractCommander {
      * @throws Exception 异常
      */
     public abstract String start(ProjectInfoModel projectInfoModel) throws Exception;
-
-    /**
-     * 查询出指定端口信息
-     *
-     * @param pid 进程id
-     * @return 数组
-     */
-    public abstract List<NetstatModel> listNetstat(int pid);
-
-    /**
-     * 获取进程占用的主要端口
-     *
-     * @param pid 进程id
-     * @return 端口
-     */
-    public int getMainPort(int pid) {
-        List<NetstatModel> list = listNetstat(pid);
-        if (list == null) {
-            return 0;
-        }
-        int port = Integer.MAX_VALUE;
-        for (NetstatModel model : list) {
-            String local = model.getLocal();
-            if (StrUtil.isEmpty(local)) {
-                continue;
-            }
-            String[] ipPort = StrUtil.split(local, StrUtil.COLON);
-            if (!"0.0.0.0".equals(ipPort[0])) {
-                continue;
-            }
-            int minPort = Convert.toInt(ipPort[1], Integer.MAX_VALUE);
-            if (minPort < port) {
-                port = minPort;
-            }
-        }
-        if (port == Integer.MAX_VALUE) {
-            return 0;
-        }
-        return port;
-    }
 
     /**
      * 停止
@@ -279,7 +239,7 @@ public abstract class AbstractCommander {
         if (address != null) {
             return new JMXServiceURL(address);
         }
-        String agent = CheckPath.getManagementAgent();
+        String agent = StrUtil.format("{}{}lib{}management-agent.jar", JAVA_RUNTIME_INFO.getHomeDir(), File.separator, File.separator);
         virtualMachine.loadAgent(agent);
         address = virtualMachine.getAgentProperties().getProperty("com.sun.management.jmxremote.localConnectorAddress");
         if (address != null) {

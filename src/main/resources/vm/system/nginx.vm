@@ -82,7 +82,7 @@
             var upload = layui.upload;
             uploadConfig = upload.render({
                 elem: '#selectConfig',
-                url: './uploadNgx',
+                url: '/system/nginx/uploadNgx',
                 multiple: false,
                 exts: 'conf',
                 acceptMime: '.conf',
@@ -130,7 +130,7 @@
 
         // 新增配置
         $('#addNgx').on('click', function () {
-            var url = './system/nginx/item.html?type=add';
+            var url = '/system/nginx_setting?type=add';
             tabChange({
                 id: 'nginx_add',
                 url: url,
@@ -140,7 +140,7 @@
 
         // 修改
         function updateNgx(data) {
-            var url = './system/nginx/item.html?type=update&path=' + data.path + "&name=" + data.name;
+            var url = '/system/nginx_setting?type=update&path=' + data.path + "&name=" + data.name;
             tabChange({
                 id: 'nginx_' + data.path,
                 url: url,
@@ -151,8 +151,8 @@
         table.render({
             id: 'tab_ngx',
             elem: '#tab_ngx',
-            url: './list_data.json',
-            method: 'POST',
+            url: '/system/nginx/list',
+            // height: 'full-52',
             even: true,
             cols: [[
                 {field: 'name', title: '文件名'},
@@ -173,17 +173,25 @@
                 title: '系统提示'
             }, function (index) {
                 layer.close(index);
-                loadingAjax({
-                    url: './delete',
+                $.ajax({
+                    url: '/system/nginx/delete',
+                    type: 'POST',
+                    dataType: 'json',
                     data: {
                         path: data.path,
                         name: data.name
                     },
                     success: function (data) {
-                        layer.msg(data.msg);
                         if (200 == data.code) {
+                            layer.msg('删除成功！');
+                            // 刷新项目列表
                             table.reload('tab_ngx', {});
+                        } else {
+                            layer.msg(data.msg);
                         }
+                    },
+                    error: function (err) {
+                        layer.msg('删除失败！');
                     }
                 });
             });
@@ -216,7 +224,7 @@
 
         //证书管理
         $('#certificate').on('click', function () {
-            var url = './system/certificate/list.html';
+            var url = '/system/certificate/list.html';
             tabChange({
                 id: 'certificate',
                 url: url,

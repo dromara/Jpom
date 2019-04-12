@@ -129,8 +129,10 @@
 
     function projectDetail(dom) {
         var id = dom.getAttribute("data-id");
-        loadingAjax({
-            url: './data.json',
+        $.ajax({
+            url: '/manage/recover/project',
+            type: 'POST',
+            dataType: 'json',
             data: {
                 id: id
             },
@@ -141,11 +143,14 @@
                         type: 1,
                         title: '查看项目',
                         content: $('#div-project'),
-                        area: ['60%', '80%'],
+                        area: ['60%', '45%'],
                     });
                 } else {
                     layer.msg(data.msg);
                 }
+            },
+            error: function (err) {
+                layer.msg(err);
             }
         });
     }

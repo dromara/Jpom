@@ -2,6 +2,7 @@ package cn.keepbx.jpom.common.interceptor;
 
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.servlet.ServletUtil;
+import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.interceptor.BaseInterceptor;
 import cn.jiangzeyin.common.interceptor.InterceptorPattens;
@@ -15,6 +16,7 @@ import org.springframework.web.method.HandlerMethod;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 
 /**
  * 权限拦截器
@@ -47,7 +49,12 @@ public class PermissionInterceptor extends BaseInterceptor {
                     ServletUtil.write(response, jsonMessage.toString(), MediaType.APPLICATION_JSON_UTF8_VALUE);
                     return false;
                 }
-                ProjectInfoModel projectInfoModel = projectInfoService.getItem(val);
+                ProjectInfoModel projectInfoModel = null;
+                try {
+                    projectInfoModel = projectInfoService.getItem(val);
+                } catch (IOException e) {
+                    DefaultSystemLog.ERROR().error("获取项目信息失败", e);
+                }
                 if (projectInfoModel == null) {
                     JsonMessage jsonMessage = new JsonMessage(300, "没有找到对应项目");
                     ServletUtil.write(response, jsonMessage.toString(), MediaType.APPLICATION_JSON_UTF8_VALUE);
@@ -58,6 +65,7 @@ public class PermissionInterceptor extends BaseInterceptor {
                     ServletUtil.write(response, jsonMessage.toString(), MediaType.APPLICATION_JSON_UTF8_VALUE);
                     return false;
                 }
+
 
                 if (projectPermission.checkDelete() && !userModel.isDeleteFile()) {
                     // 没有删除文件权限

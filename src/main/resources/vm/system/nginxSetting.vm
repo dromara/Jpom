@@ -9,6 +9,10 @@
             padding: 10px;
         }
 
+        .div_hidden {
+            display: none !important;
+        }
+
         .context {
             height: 65vh;
         }
@@ -171,8 +175,10 @@
 
         //提交配置信息
         form.on('submit(submitNgx)', function (data) {
-            loadingAjax({
-                url: './updateNgx',
+            $.ajax({
+                url: '/system/nginx/updateNgx',
+                type: 'POST',
+                dataType: 'json',
                 data: data.field,
                 success: function (data) {
                     layer.msg(data.msg);
@@ -181,6 +187,9 @@
                             window.location.reload()
                         }
                     }
+                },
+                error: function (err) {
+                    layer.alert(err.msg);
                 }
             });
             return false;
@@ -188,8 +197,10 @@
 
         //提交配置信息
         form.on('submit(submitFast)', function (data) {
-            loadingAjax({
-                url: './updateNgx',
+            $.ajax({
+                url: '/system/nginx/updateNgx',
+                type: 'POST',
+                dataType: 'json',
                 data: data.field,
                 success: function (data) {
                     layer.msg(data.msg);
@@ -198,6 +209,9 @@
                             window.location.reload()
                         }
                     }
+                },
+                error: function (err) {
+                    layer.alert(err.msg);
                 }
             });
             return false;

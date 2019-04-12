@@ -32,9 +32,9 @@
             font-size: 23px;
         }
 
-        /*.layui-inline {*/
-        /*    width: 200px;*/
-        /*}*/
+        .layui-inline {
+            width: 200px;
+        }
 
         .top {
             margin-top: 20px;
@@ -147,7 +147,7 @@
 
         function loadProcessList() {
             $.ajax({
-                url: './processList',
+                url: '/processList',
                 type: 'POST',
                 dataType: 'json',
                 async: true,

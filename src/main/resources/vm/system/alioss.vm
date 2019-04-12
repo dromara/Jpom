@@ -66,8 +66,10 @@
 <script type="text/javascript">
     function loadSuccess() {
         form.on('submit(formDemo)', function (data) {
-            loadingAjax({
+            $.ajax({
                 url: './alioss_submit',
+                type: 'POST',
+                dataType: 'json',
                 data: data.field,
                 success: function (data) {
                     layer.msg(data.msg);
@@ -76,6 +78,9 @@
                             window.location.reload()
                         }, 2000);
                     }
+                },
+                error: function (err) {
+                    layer.alert(err.msg);
                 }
             });
             return false;

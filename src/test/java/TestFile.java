@@ -1,3 +1,5 @@
+import cn.keepbx.jpom.util.CharsetDetector;
+
 import java.io.File;
 import java.io.IOException;
 
@@ -11,8 +13,8 @@ public class TestFile {
 //        System.out.println(file());
 
 
-        File file1 = new File("D:/keystore.p12");
-        System.out.println(file1.exists() && file1.isFile());
+        File file1 = new File("D:/jpom-test/test2.log");
+        System.out.println(new CharsetDetector().detectChineseCharset(file1));
     }
 
 

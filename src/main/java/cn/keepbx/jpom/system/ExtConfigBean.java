@@ -4,9 +4,8 @@ import cn.hutool.core.convert.Convert;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.script.ScriptUtil;
 import cn.jiangzeyin.common.spring.SpringUtil;
-import cn.keepbx.jpom.JpomApplication;
-import cn.keepbx.jpom.model.JpomManifest;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.ApplicationHome;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.FileSystemResource;
@@ -37,7 +36,9 @@ public class ExtConfigBean {
         if (resource != null) {
             return resource;
         }
-        File file = JpomApplication.getRunPath();
+        ApplicationHome home = new ApplicationHome(ExtConfigBean.class);
+        String path = (home.getSource() == null ? "" : home.getSource().getAbsolutePath());
+        File file = new File(path);
         if (file.isFile()) {
             file = file.getParentFile().getParentFile();
             file = new File(file, FILE_NAME);
@@ -111,17 +112,7 @@ public class ExtConfigBean {
 
     public String getPath() {
         if (StrUtil.isEmpty(path)) {
-            if (JpomManifest.getInstance().isDebug()) {
-                // 调试模式 为根路径的 jpom文件
-                path = "/jpom/";
-            } else {
-                // 获取当前项目运行路径的父级
-                File file = JpomApplication.getRunPath();
-                if (!file.exists() && !file.isFile()) {
-                    throw new RuntimeException("请配置运行路径属性【jpom.path】");
-                }
-                path = file.getParentFile().getParentFile().getAbsolutePath();
-            }
+            throw new RuntimeException("请配置运行路径属性【jpom.path】");
         }
         return path;
     }

@@ -1,6 +1,7 @@
 package cn.keepbx.jpom.model;
 
 import cn.hutool.core.lang.ObjectId;
+import com.alibaba.fastjson.JSONObject;
 
 /**
  * 项目回收记录实体
@@ -52,5 +53,14 @@ public class ProjectRecoverModel extends BaseModel {
 
     public void setDelTime(String delTime) {
         this.delTime = delTime;
+    }
+
+    @Override
+    public String toString() {
+        return JSONObject.toJSONString(this);
+    }
+
+    public JSONObject toJson() {
+        return (JSONObject) JSONObject.toJSON(this);
     }
 }

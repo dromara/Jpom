@@ -58,13 +58,16 @@
                 btn: ['确定', '不确定'] //按钮
             }, function (index) {
                 layer.close(index);
+                index = layer.load(1, {
+                    shade: [0.5, '#fff'] //0.1透明度的白色背景
+                });
                 var key = that.attr("data-key");
                 var id = that.attr("data-id");
-                loadingAjax({
+                $.ajax({
                     url: './build_install',
-                    data: {
-                        id: id, key: key
-                    },
+                    type: 'POST',
+                    dataType: 'json',
+                    data: {id: id, key: key},
                     success: function (data) {
                         layer.msg(data.msg);
                         if (200 == data.code) {
@@ -75,6 +78,12 @@
                                 parent.reloadTable();
                             }, 2000);
                         }
+                    },
+                    error: function (err) {
+                        layer.msg('安装失败');
+                    },
+                    complete: function () {
+                        layer.close(index);
                     }
                 });
             }, function () {

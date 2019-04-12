@@ -129,6 +129,11 @@ public class CertModel extends BaseModel {
         this.effectiveTime = effectiveTime;
     }
 
+    public JSONObject toJson() {
+        return (JSONObject) JSONObject.toJSON(this);
+    }
+
+
     /**
      * 解析证书
      *

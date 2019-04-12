@@ -92,10 +92,6 @@ public class JpomManifest {
         return version;
     }
 
-    public boolean isDebug() {
-        return "dev".equals(getVersion());
-    }
-
     public void setVersion(String version) {
         this.version = version;
     }

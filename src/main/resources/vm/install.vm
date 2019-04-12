@@ -9,7 +9,7 @@
 <body>
 <div class="layui-carousel" id="div-carousel" style="width: 100%; height: 100%; position: fixed; z-index: 0;">
     <div carousel-item>
-        <div><img src="$!jpomProxyPath/static/backgrounds/1.jpg?v=$staticCacheTime" style="width: 100%;"></div>
+        <div><img src="/static/backgrounds/1.jpg?v=$staticCacheTime" style="width: 100%;"></div>
     </div>
 </div>
 <div class="layui-container" style="margin-top: 150px;">
@@ -75,14 +75,20 @@
                     return false;
                 }
                 var sendData = formatPwd(data.field, "userPwd");
-                loadingAjax({
-                    url: './install_submit.json',
+                $.ajax({
+                    url: '/install_submit.json',
+                    type: 'POST',
+                    dataType: 'json',
                     data: sendData,
                     success: function (data) {
-                        layer.msg(data.msg);
                         if (200 == data.code) {
                             window.location.href = '/index';
+                        } else {
+                            layer.msg(data.msg);
                         }
+                    },
+                    error: function (err) {
+                        layer.alert(err.msg);
                     }
                 });
                 return false;
