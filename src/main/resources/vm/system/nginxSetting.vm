@@ -172,6 +172,8 @@
                         if ("update" === type) {
                             layer.closeAll('page');
                             window.location.reload()
+                        } else {
+                            closeTab();
                         }
                     }
                 }
@@ -188,7 +190,10 @@
                     layer.msg(data.msg);
                     if (200 == data.code) {
                         if ("update" === type) {
+                            layer.closeAll('page');
                             window.location.reload()
+                        } else {
+                            closeTab();
                         }
                     }
                 }
@@ -243,7 +248,16 @@
             $("#certAux").val(cert);
             $("#port ").val("443 ssl");
         });
+    }
 
+    function closeTab() {
+        try {
+            top.frames["nginx"].location.reload();
+        } catch (e) {
+            console.error(e);
+        }
+        var element = top.layui.element;
+        element.tabDelete('mainTabs', "tab_nginx_add新增配置");
     }
 
 </script>
