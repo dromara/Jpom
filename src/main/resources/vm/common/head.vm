@@ -44,7 +44,7 @@
             lay_id += options.title;
         ## 如果存在选项卡，切换，否则创建
             if ($('[lay-id="' + lay_id + '"]', top.document).length <= 0) {
-                var tab_content = '<iframe name="' + options.id + '" src="' + options.url + '" frameborder="0" class="custom-iframe"></iframe>';
+                var tab_content = '<iframe id="' + lay_id + '" name="' + options.id + '" src="' + options.url + '" frameborder="0" class="custom-iframe"></iframe>';
                 element.tabAdd('mainTabs', {
                     title: options.title,
                     content: tab_content,

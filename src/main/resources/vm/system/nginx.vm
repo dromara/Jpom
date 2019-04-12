@@ -87,6 +87,7 @@
             cols: [[
                 {field: 'name', title: '文件名'},
                 {field: 'domain', title: '域名'},
+                {field: 'time', title: '最后修改时间'},
                 {
                     field: 'op', title: '操作', align: 'center', toolbar: '#bar_ngx', fixed: 'right'
                 }

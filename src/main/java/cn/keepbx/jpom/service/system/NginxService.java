@@ -1,5 +1,6 @@
 package cn.keepbx.jpom.service.system;
 
+import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
@@ -56,6 +57,8 @@ public class NginxService extends BaseOperService {
                 JSONObject jsonObject = new JSONObject();
                 jsonObject.put("path", parentPath);
                 jsonObject.put("name", name);
+                long time = itemFile.lastModified();
+                jsonObject.put("time", DateUtil.date(time).toString());
                 try {
                     NgxConfig config = NgxConfig.read(itemFile.getPath());
                     NgxBlock http = config.findBlock("http");
