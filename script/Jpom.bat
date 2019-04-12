@@ -1,6 +1,6 @@
 @REM The MIT License (MIT)
 @REM
-@REM Copyright (c) 2019 Á†Å‰πãÁßëÊäÄÂ∑•‰ΩúÂÆ§
+@REM Copyright (c) 2019 ¬Î÷Æø∆ººπ§◊˜ “
 @REM
 @REM Permission is hereby granted, free of charge, to any person obtaining a copy of
 @REM this software and associated documentation files (the "Software"), to deal in
@@ -23,67 +23,85 @@
 @echo off
 setlocal enabledelayedexpansion
 
-set Tag=KeepBx-System-JpomApplication1
+set Tag=KeepBx-System-JpomApplication
 set MainClass=cn.keepbx.jpom.JpomApplication
+set CloseMainClass=cn.keepbx.jpom.JpomClose
 set basePath=%~dp0
 set Lib=%basePath%lib\
 set Log=%basePath%run.log
+set LogBack=%basePath%log\
 set JVM=-server
 set ARGS= --jpom.applicationTag=%Tag% --jpom.log=%basePath%log --server.port=2122
 
-if "%1"=="start" (
-    call:start
-)else (
-    if "%1"=="stop" (
-        call:stop
-    )else (
-         if "%1"=="restart" (
-            call:restart
-         )else (
-            if "%1"=="status" (
-               call:status
-            )else (
-               call:use
-            )
-         )
-    )
-)
-pause
+color 0a
+TITLE Jpomπ‹¿ÌœµÕ≥BATøÿ÷∆Ã®
+echo. ***** Jpomπ‹¿ÌœµÕ≥BATøÿ÷∆Ã® *****
+::*************************************************************************************************************
+echo.
+	echo.  [1] ∆Ù∂Ø start
+	echo.  [2] πÿ±’ stop
+	echo.  [3] ≤Èø¥‘À––◊¥Ã¨ status
+	echo.  [4] ÷ÿ∆Ù restart
+	echo.  [5] ∞Ô÷˙ use
+	echo.  [0] ÕÀ ≥ˆ 0
+echo.
 
-@REM ÂêØÂä®
+echo.«Î ‰»Î—°‘Òµƒ–Ú∫≈:
+set /p ID=
+	IF "%id%"=="1" goto start
+	IF "%id%"=="2" goto stop
+	IF "%id%"=="3" goto status
+	IF "%id%"=="4" goto restart
+	IF "%id%"=="5" goto use
+	IF "%id%"=="0" EXIT
+PAUSE
+echo º¥Ω´πÿ±’¥∞ø⁄
+timeout 3
+EXIT 1
+
+@REM ∆Ù∂Ø
 :start
-set TEMPCLASSPATH=
-for /f "delims=" %%I in ('dir /B %Lib%') do (set TEMPCLASSPATH=!TEMPCLASSPATH!%Lib%%%I;)
-@REM echo ÂêØÂä®ÊàêÂäüÔºåÂÖ≥Èó≠Á™óÂè£‰∏çÂΩ±ÂìçËøêË°å
-cmd /S /C "javaw %JVM% -classpath %TEMPCLASSPATH%"%JAVA_HOME%"\lib\tools.jar -Dapplication=%Tag% -Dbasedir=%basePath% %MainClass% %ARGS% >> %Log%"
-echo ÂêØÂä®‰∏≠.....
+	rem ±∏∑›»’÷æ
+	if exist %Log% (
+		if not exist %LogBack% (
+			echo %LogBack%
+			md %LogBack%
+		)
+		move %Log% %LogBack%%date:~0,4%%date:~5,2%%date:~8,2%0%time:~1,1%%time:~3,2%%time:~6,2%.log
+		del %Log%
+	)
+	set TEMPCLASSPATH=
+	for /f "delims=" %%I in ('dir /B %Lib%') do (set TEMPCLASSPATH=!TEMPCLASSPATH!%Lib%%%I;)
+	REM echo ∆Ù∂Ø≥…π¶£¨πÿ±’¥∞ø⁄≤ª”∞œÏ‘À––
+	echo ∆Ù∂Ø÷–.....πÿ±’¥∞ø⁄≤ª”∞œÏ‘À––
+	javaw %JVM% -classpath %TEMPCLASSPATH%"%JAVA_HOME%"\lib\tools.jar -Dapplication=%Tag% -Dbasedir=%basePath% %MainClass% %ARGS% >> %Log%
+	timeout 3
 goto:eof
 
-@REM ÂÖ≥Èó≠Jpom
+@REM πÿ±’Jpom
 :stop
-set TEMPCLASSPATH=
-for /f "delims=" %%I in ('dir /B %Lib%') do (set TEMPCLASSPATH=!TEMPCLASSPATH!%Lib%%%I;)
-set MainClass=cn.keepbx.jpom.JpomClose
-set ARGS= --jpom.applicationTag=%Tag% --event=stop
-java -classpath %TEMPCLASSPATH%"%JAVA_HOME%"\lib\tools.jar %MainClass% %ARGS%
+	set TEMPCLASSPATH=
+	for /f "delims=" %%I in ('dir /B %Lib%') do (set TEMPCLASSPATH=!TEMPCLASSPATH!%Lib%%%I;)
+	java -classpath %TEMPCLASSPATH%"%JAVA_HOME%"\lib\tools.jar %CloseMainClass% %ARGS% --jpom.applicationTag=%Tag% --event=stop
 goto:eof
 
-@REM Êü•ÁúãJpomËøêË°åÁä∂ÊÄÅ
+@REM ≤Èø¥Jpom‘À––◊¥Ã¨
 :status
-set TEMPCLASSPATH=
-for /f "delims=" %%I in ('dir /B %Lib%') do (set TEMPCLASSPATH=!TEMPCLASSPATH!%Lib%%%I;)
-set MainClass=cn.keepbx.jpom.JpomClose
-set ARGS= --jpom.applicationTag=%Tag% --event=status
-java -classpath %TEMPCLASSPATH%"%JAVA_HOME%"\lib\tools.jar %MainClass% %ARGS%
+	set TEMPCLASSPATH=
+	for /f "delims=" %%I in ('dir /B %Lib%') do (set TEMPCLASSPATH=!TEMPCLASSPATH!%Lib%%%I;)
+	java -classpath %TEMPCLASSPATH%"%JAVA_HOME%"\lib\tools.jar %CloseMainClass% %ARGS% --jpom.applicationTag=%Tag% --event=status
 goto:eof
 
-@REM ÈáçÂêØJpom
+@REM ÷ÿ∆ÙJpom
 :restart
-call:stop
-call:start
+	echo Õ£÷π÷–....
+	call:stop
+	timeout 3
+	echo ∆Ù∂Ø÷–....
+	call:start
 goto:eof
 
-@REM ÊèêÁ§∫Áî®Ê≥ï
+@REM Ã· æ”√∑®
 :use
-echo please use (start|stop|restart|status)
+	echo please use (start|stop|restart|status)
 goto:eof
