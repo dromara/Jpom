@@ -9,6 +9,10 @@
             padding: 10px;
         }
 
+        .div_hidden {
+            display: none !important;
+        }
+
         .context {
             height: 65vh;
         }
