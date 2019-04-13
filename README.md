@@ -37,8 +37,7 @@
 4. [阿里云 CodePipeline + Oss在线管理](/doc/CodePipeline-Oss.md)
 5. 多用户管理，用户项目权限独立(上传、删除权限可控制)
 6. Jpom完全不依赖数据库，随装随用
-7. [安全模式](/doc/safeMode.md)运行，更好的保证服务器稳定、避免误操作
-8. 项目路径白名单模式，杜绝用户误操作系统文件
+7. 项目路径白名单模式，杜绝用户误操作系统文件
 
 
 #### 项目操作演示
@@ -123,9 +122,7 @@ Jpom.sh status    查看Jpom运行状态
 
 [开发计划>>](/PLANS.md)
 
-[安全模式>>](/doc/safeMode.md)  
-
-[用户角色说明>>](/doc/safeMode.md#用户权限说明)
+[用户角色说明>>](/doc/userRole.md#用户权限说明)
 
 [阿里云Oss配置>>](/doc/CodePipeline-Oss.md)
 

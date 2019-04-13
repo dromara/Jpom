@@ -57,9 +57,7 @@
             Jpom项目管理系统#if($jpomManifest)<font style="font-size: 10px;">($jpomManifest.version)</font>#end
         </div>
         <ul class="layui-nav layui-layout-left">
-            #if($safeMode)
-                <li class="layui-nav-item" title="安全模式运行系统将有部分功能受限制，如需解除请联系系统管理员">安全模式运行中</li>
-            #end
+
         </ul>
         <ul class="layui-nav layui-layout-right" lay-filter="userOperation">
             <li class="layui-nav-item">
@@ -96,23 +94,21 @@
                 #if($user.isManage())
                     <li class="layui-nav-item">
                         <a href="javascript:;"
+                           data-options="{'id':'nginx', 'title':'nginx管理', 'url':'./system/nginx/list.html'}">nginx管理</a>
+                    </li>
+                    <li class="layui-nav-item">
+                        <a href="javascript:;"
                            data-options="{'id':'user', 'title':'用户管理', 'url':'./user/list'}">用户管理</a>
                     </li>
                 #end
-                <li class="layui-nav-item">
-                    <a href="javascript:;"
-                       data-options="{'id':'whitelistDirectory', 'title':'白名单目录', 'url':'./system/whitelistDirectory'}">白名单目录</a>
-                </li>
                 #if($user.isSystemUser())
                     <li class="layui-nav-item">
                         <a href="javascript:;"
-                           data-options="{'id':'alioss', 'title':'阿里云OSS', 'url':'./system/alioss'}">阿里云OSS</a>
+                           data-options="{'id':'whitelistDirectory', 'title':'白名单目录', 'url':'./system/whitelistDirectory'}">白名单目录</a>
                     </li>
-                #end
-                #if($user.isManage())
                     <li class="layui-nav-item">
                         <a href="javascript:;"
-                           data-options="{'id':'nginx', 'title':'nginx管理', 'url':'./system/nginx/list.html'}">nginx管理</a>
+                           data-options="{'id':'alioss', 'title':'阿里云OSS', 'url':'./system/alioss'}">阿里云OSS</a>
                     </li>
                 #end
             </ul>

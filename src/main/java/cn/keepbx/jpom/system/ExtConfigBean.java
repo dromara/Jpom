@@ -88,12 +88,6 @@ public class ExtConfigBean {
      */
     @Value("${jpom.path}")
     private String path;
-
-    /**
-     * 标记是否为安全模式
-     */
-    @Value("${jpom.safeMode:false}")
-    public boolean safeMode;
     /**
      * 当ip连续登录失败，锁定对应IP时长，单位毫秒
      */

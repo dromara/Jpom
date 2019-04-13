@@ -127,15 +127,13 @@ public class NginxService extends BaseOperService {
                         return;
                     }
                     NgxParam locationMain = ngxBlock1.findParam("proxy_pass");
-                    if (locationMain != null) {
-                        location.add(locationMain.getValue());
-                    } else {
+                    if (locationMain == null) {
                         locationMain = ngxBlock1.findParam("root");
-                        if (locationMain != null) {
-                            location.add(locationMain.getValue());
-                        }
                     }
-
+                    if (locationMain == null) {
+                        locationMain = ngxBlock1.findParam("alias");
+                    }
+                    location.add(locationMain.getValue());
                 });
             }
             // 监听的端口

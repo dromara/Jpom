@@ -9,6 +9,8 @@ import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.controller.multipart.MultipartFileBuilder;
 import cn.keepbx.jpom.common.BaseController;
+import cn.keepbx.jpom.common.Role;
+import cn.keepbx.jpom.common.interceptor.UrlPermission;
 import cn.keepbx.jpom.model.CertModel;
 import cn.keepbx.jpom.model.UserModel;
 import cn.keepbx.jpom.service.system.CertService;
@@ -61,8 +63,8 @@ public class CertificateController extends BaseController {
      */
     @RequestMapping(value = "/saveCertificate", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
+    @UrlPermission(Role.Manage)
     public String saveCertificate() {
-
         String data = getParameter("data");
         JSONObject jsonObject = JSONObject.parseObject(data);
         String type = jsonObject.getString("type");
@@ -223,6 +225,7 @@ public class CertificateController extends BaseController {
      */
     @RequestMapping(value = "/getCertList", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
+    @UrlPermission(Role.Manage)
     public String getCertList() {
         List<CertModel> array = certService.list();
         return JsonMessage.getString(200, "", array);
@@ -236,6 +239,7 @@ public class CertificateController extends BaseController {
      */
     @RequestMapping(value = "/delete", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
+    @UrlPermission(Role.Manage)
     public String delete(String id) {
         if (StrUtil.isEmpty(id)) {
             return JsonMessage.getString(400, "删除失败");
@@ -257,6 +261,7 @@ public class CertificateController extends BaseController {
      */
     @RequestMapping(value = "/export", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
+    @UrlPermission(Role.Manage)
     public String export(String id) {
         CertModel item = certService.getItem(id);
         if (null == item) {

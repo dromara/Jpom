@@ -4,7 +4,8 @@ import cn.hutool.core.text.StrSpliter;
 import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.keepbx.jpom.common.BaseController;
-import cn.keepbx.jpom.model.UserModel;
+import cn.keepbx.jpom.common.Role;
+import cn.keepbx.jpom.common.interceptor.UrlPermission;
 import cn.keepbx.jpom.service.system.WhitelistDirectoryService;
 import cn.keepbx.jpom.system.ExtConfigBean;
 import com.alibaba.fastjson.JSONArray;
@@ -54,14 +55,8 @@ public class WhitelistDirectoryController extends BaseController {
      */
     @RequestMapping(value = "whitelistDirectory_submit", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
+    @UrlPermission(Role.System)
     public String whitelistDirectorySubmit(String project, String certificate, String nginx) {
-        if (ExtConfigBean.getInstance().safeMode) {
-            return JsonMessage.getString(401, "安全模式下不能修改白名单目录");
-        }
-        UserModel userName = getUser();
-        if (!userName.isSystemUser()) {
-            return JsonMessage.getString(401, "你没有权限修改白名单目录");
-        }
         //
         List<String> certificateList = null;
         if (StrUtil.isNotEmpty(certificate)) {

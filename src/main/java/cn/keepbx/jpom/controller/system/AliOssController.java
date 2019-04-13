@@ -3,7 +3,8 @@ package cn.keepbx.jpom.controller.system;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.keepbx.jpom.common.BaseController;
-import cn.keepbx.jpom.model.UserModel;
+import cn.keepbx.jpom.common.Role;
+import cn.keepbx.jpom.common.interceptor.UrlPermission;
 import cn.keepbx.jpom.service.oss.OssManagerService;
 import com.alibaba.fastjson.JSONObject;
 import com.aliyun.oss.OSSClient;
@@ -36,13 +37,20 @@ public class AliOssController extends BaseController {
         return "system/alioss";
     }
 
+    /**
+     * 保存
+     *
+     * @param endpoint        接入点
+     * @param accessKeyId     id
+     * @param accessKeySecret secret
+     * @param bucketName      空间名称
+     * @param keyPrefix       前缀
+     * @return json
+     */
     @RequestMapping(value = "alioss_submit", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
+    @UrlPermission(Role.System)
     public String aliOssSubmit(String endpoint, String accessKeyId, String accessKeySecret, String bucketName, String keyPrefix) {
-        UserModel userModel = getUser();
-        if (!userModel.isSystemUser()) {
-            return JsonMessage.getString(401, "你没有权限管理alioss");
-        }
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("endpoint", endpoint);
         jsonObject.put("accessKeyId", accessKeyId);

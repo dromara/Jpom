@@ -4,7 +4,6 @@ import cn.keepbx.jpom.common.BaseController;
 import cn.keepbx.jpom.common.interceptor.NotLogin;
 import cn.keepbx.jpom.model.JpomManifest;
 import cn.keepbx.jpom.service.user.UserService;
-import cn.keepbx.jpom.system.ExtConfigBean;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -40,7 +39,6 @@ public class IndexControl extends BaseController {
             getSession().invalidate();
             return "redirect:install.html";
         }
-        setAttribute("safeMode", ExtConfigBean.getInstance().safeMode);
         // 版本号
         setAttribute("jpomManifest", JpomManifest.getInstance());
         return "index";

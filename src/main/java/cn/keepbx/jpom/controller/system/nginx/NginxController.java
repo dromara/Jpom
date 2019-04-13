@@ -10,6 +10,7 @@ import cn.keepbx.jpom.common.Role;
 import cn.keepbx.jpom.common.commander.AbstractCommander;
 import cn.keepbx.jpom.common.interceptor.UrlPermission;
 import cn.keepbx.jpom.model.CertModel;
+import cn.keepbx.jpom.model.UserModel;
 import cn.keepbx.jpom.service.system.CertService;
 import cn.keepbx.jpom.service.system.NginxService;
 import cn.keepbx.jpom.service.system.WhitelistDirectoryService;
@@ -115,12 +116,8 @@ public class NginxController extends BaseController {
         }
         //nginx文件
         File file = FileUtil.file(whitePath, name);
-        String msg = "修改";
-        if ("add".equals(genre)) {
-            msg = "新增";
-            if (file.exists()) {
-                return JsonMessage.getString(400, "该文件已存在");
-            }
+        if ("add".equals(genre) && file.exists()) {
+            return JsonMessage.getString(400, "该文件已存在");
         }
         if (StrUtil.isEmpty(context)) {
             return JsonMessage.getString(400, "请填写配置信息");
@@ -148,8 +145,10 @@ public class NginxController extends BaseController {
                 if (sslCertificateKey != null && !FileUtil.exist(sslCertificateKey.getValue())) {
                     return JsonMessage.getString(404, "证书文件ssl_certificate_key,不存在");
                 }
+                if (!checkRootRole(ngxBlock)) {
+                    return JsonMessage.getString(405, "非系统管理员，不能配置静态资源代理");
+                }
             }
-
         } catch (IOException e) {
             DefaultSystemLog.ERROR().error("解析失败", e);
             return JsonMessage.getString(500, "解析失败");
@@ -158,14 +157,41 @@ public class NginxController extends BaseController {
             FileUtil.writeString(context, file, CharsetUtil.UTF_8);
         } catch (Exception e) {
             DefaultSystemLog.ERROR().error(e.getMessage(), e);
-            return JsonMessage.getString(400, msg + "失败");
+            return JsonMessage.getString(400, "操作失败:" + e.getMessage());
         }
+        this.reloadNginx();
+        return JsonMessage.getString(200, "提交成功");
+    }
+
+    private void reloadNginx() {
         try {
             AbstractCommander.getInstance().execCommand("nginx -s reload");
         } catch (Exception e) {
             DefaultSystemLog.ERROR().error("reload nginx error", e);
         }
-        return JsonMessage.getString(200, msg + "成功");
+    }
+
+    /**
+     * 权限检查 防止非系统管理员配置静态资源访问
+     *
+     * @return false 不正确
+     */
+    private boolean checkRootRole(NgxBlock ngxBlock) {
+        UserModel userModel = getUser();
+        List<NgxEntry> locationAll = ngxBlock.findAll(NgxBlock.class, "location");
+        if (locationAll != null) {
+            for (NgxEntry ngxEntry1 : locationAll) {
+                NgxBlock ngxBlock1 = (NgxBlock) ngxEntry1;
+                NgxParam locationMain = ngxBlock1.findParam("root");
+                if (locationMain == null) {
+                    locationMain = ngxBlock1.findParam("alias");
+                }
+                if (locationMain != null && !userModel.isSystemUser()) {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 
     /**
@@ -186,10 +212,13 @@ public class NginxController extends BaseController {
             return JsonMessage.getString(400, "删除失败,请正常操作");
         }
         File file = FileUtil.file(path, name);
-        boolean delete = file.delete();
-        if (!delete) {
-            return JsonMessage.getString(400, "删除失败");
+        try {
+            FileUtil.rename(file, file.getName() + "_back", false, true);
+        } catch (Exception e) {
+            DefaultSystemLog.ERROR().error("删除nginx", e);
+            return JsonMessage.getString(400, "删除失败:" + e.getMessage());
         }
+        this.reloadNginx();
         return JsonMessage.getString(200, "删除成功");
     }
 
