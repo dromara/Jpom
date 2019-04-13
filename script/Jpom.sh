@@ -54,7 +54,7 @@ function start() {
 	# classPath
     CLASSPATH=`listDir ${Lib}`
     nohup java  ${JVM} -classpath ${CLASSPATH}${JAVA_HOME}/lib/tools.jar -Dapplication=${Tag} -Dbasedir=${Path} ${MainClass} ${ARGS}  >> ${Log} 2>&1 &
-    tailf ${Log}
+    tail -f ${Log}
 }
 
 # 拼接所有文件
