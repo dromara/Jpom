@@ -6,7 +6,7 @@ WORKDIR /opt/Jpom
 ADD . /tmp
 
 # 验证码图片渲染需要ttf的支持
-RUN apk add --update ttf-dejavu
+# RUN apk add --update ttf-dejavu
 
 RUN ln -snf /usr/share/zoneinfo/${TZ} /etc/localtime && \
     echo ${TZ} > /etc/timezone
@@ -17,8 +17,7 @@ RUN cd /tmp && \
     mv target/jpom-2.3.2-release/* /opt/Jpom/ && \
     # cp -f /tmp/docker/build/Jpom.sh /opt/Jpom/Jpom.sh && \
     chmod +x /opt/Jpom/Jpom.sh &&  \
-    rm -rf /tmp && \
-    rm -rf ~/.m2
+    rm -rf /tmp
 
 EXPOSE 2122
 
