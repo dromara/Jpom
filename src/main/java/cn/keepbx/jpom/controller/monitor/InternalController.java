@@ -7,10 +7,12 @@ import cn.jiangzeyin.common.JsonMessage;
 import cn.keepbx.jpom.common.BaseController;
 import cn.keepbx.jpom.common.commander.AbstractCommander;
 import cn.keepbx.jpom.model.NetstatModel;
-import cn.keepbx.jpom.socket.top.TopManager;
 import cn.keepbx.jpom.system.ConfigBean;
+import cn.keepbx.jpom.system.TopManager;
+import cn.keepbx.jpom.util.JvmUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.sun.tools.attach.VirtualMachine;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -51,7 +53,7 @@ public class InternalController extends BaseController {
             } else {
                 String command = "tasklist /V /FI \"pid eq " + pid + "\"";
                 String result = AbstractCommander.getInstance().execCommand(command);
-                JSONArray array = TopManager.formatWindowsProcess(result);
+                JSONArray array = TopManager.formatWindowsProcess(result, true);
                 if (null != array) {
                     setAttribute("item", array.getJSONObject(0));
                 }
@@ -73,7 +75,8 @@ public class InternalController extends BaseController {
      */
     private JSONObject getBeanMem(String tag) {
         try {
-            MemoryMXBean memoryMXBean = AbstractCommander.getInstance().getMemoryMXBean(tag);
+            VirtualMachine virtualMachine = AbstractCommander.getInstance().getVirtualMachine(tag);
+            MemoryMXBean memoryMXBean = JvmUtil.getMemoryMXBean(virtualMachine);
             if (memoryMXBean == null) {
                 return null;
             }

@@ -34,34 +34,34 @@
         <thead>
         <tr>
             <th>进程id</th>
+            <th>进程名称</th>
             <th>所有者</th>
-            <th>优先级</th>
-            <th>nice值</th>
-            <th>使用虚拟内存</th>
             <th>使用物理内存</th>
-            <th>共享内存</th>
             <th>进程状态</th>
             <th>占用CPU</th>
             <th>占用物理内存</th>
             <th>时间总计</th>
-            <th>进程名称</th>
+            <th>优先级</th>
+            <th>nice值</th>
+            <th>使用虚拟内存</th>
+            <th>共享内存</th>
         </tr>
         </thead>
         <tbody>
             #if($item)
             <tr>
                 <td>$!item.pid</td>
+                <td>$!item.COMMAND</td>
                 <td>$!item.USER</td>
-                <td>$!item.PR</td>
-                <td>$!item.NI</td>
-                <td>$!item.VIRT</td>
                 <td>$!item.RES</td>
-                <td>$!item.SHR</td>
                 <td>$!item.S</td>
                 <td>$!item.CPU</td>
                 <td>$!item.MEM</td>
                 <td>$!item.TIME</td>
-                <td>$!item.COMMAND</td>
+                <td>$!item.PR</td>
+                <td>$!item.NI</td>
+                <td>$!item.VIRT</td>
+                <td>$!item.SHR</td>
             </tr>
             #else
             <tr>
@@ -107,26 +107,28 @@
     <table class="layui-table" style="margin-top: 10px">
         <thead>
         <tr>
+            <th>进程id/项目名称</th>
             <th>连接协议</th>
-            <th>接收队列</th>
-            <th>发送队列</th>
+
             <th>本地地址</th>
             <th>远程地址</th>
             <th>状态</th>
-            <th>进程id/项目名称</th>
+
+            <th>接收队列</th>
+            <th>发送队列</th>
         </tr>
         </thead>
         <tbody>
             #if($port)
                 #foreach($item in $!port)
                 <tr>
+                    <td>$!item.name</td>
                     <td>$!item.protocol</td>
-                    <td>$!item.receive</td>
-                    <td>$!item.send</td>
                     <td>$!item.local</td>
                     <td>$!item.foreign</td>
                     <td>$!item.status</td>
-                    <td>$!item.name</td>
+                    <td>$!item.receive</td>
+                    <td>$!item.send</td>
                 </tr>
                 #end
             #else

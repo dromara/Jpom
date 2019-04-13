@@ -1,4 +1,4 @@
-package cn.keepbx.jpom.socket.top;
+package cn.keepbx.jpom.system;
 
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.text.StrSpliter;
@@ -11,9 +11,11 @@ import cn.jiangzeyin.pool.ThreadPoolService;
 import cn.keepbx.jpom.common.commander.AbstractCommander;
 import cn.keepbx.jpom.service.manage.CommandService;
 import cn.keepbx.jpom.socket.SocketSessionUtil;
+import cn.keepbx.jpom.util.JvmUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.sun.management.OperatingSystemMXBean;
+import com.sun.tools.attach.VirtualMachine;
 
 import javax.websocket.Session;
 import java.io.File;
@@ -129,7 +131,7 @@ public class TopManager {
                 array = formatLinuxTop(head + s);
             } else {
                 String s = AbstractCommander.getInstance().execSystemCommand("tasklist /V | findstr java");
-                array = formatWindowsProcess(s);
+                array = formatWindowsProcess(s, false);
             }
             if (array != null) {
                 // 获取进程主端口信息
@@ -160,22 +162,27 @@ public class TopManager {
      */
     public static String getWindowsMonitor() {
         OperatingSystemMXBean operatingSystemMXBean = (OperatingSystemMXBean) ManagementFactory.getOperatingSystemMXBean();
-        long totalPhysicalMemorySize = operatingSystemMXBean.getTotalPhysicalMemorySize();
-        long freePhysicalMemorySize = operatingSystemMXBean.getFreePhysicalMemorySize();
-        //最近系统cpu使用量
-        double systemCpuLoad = operatingSystemMXBean.getSystemCpuLoad();
-        if (systemCpuLoad <= 0) {
-            systemCpuLoad = 0;
-        }
+
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("top", true);
         JSONArray memory = new JSONArray();
-        //单位 kb
-        memory.add(putObject("占用内存", (totalPhysicalMemorySize - freePhysicalMemorySize) / 1024f, "memory"));
-        memory.add(putObject("空闲内存", freePhysicalMemorySize / 1024f, "memory"));
+        {
+            long totalPhysicalMemorySize = operatingSystemMXBean.getTotalPhysicalMemorySize();
+            long freePhysicalMemorySize = operatingSystemMXBean.getFreePhysicalMemorySize();
+            //单位 kb
+            memory.add(putObject("占用内存", (totalPhysicalMemorySize - freePhysicalMemorySize) / 1024f, "memory"));
+            memory.add(putObject("空闲内存", freePhysicalMemorySize / 1024f, "memory"));
+        }
         JSONArray cpus = new JSONArray();
-        cpus.add(putObject("占用cpu", systemCpuLoad, "cpu"));
-        cpus.add(putObject("空闲cpu", 1 - systemCpuLoad, "cpu"));
+        {
+            //最近系统cpu使用量
+            double systemCpuLoad = operatingSystemMXBean.getSystemCpuLoad();
+            if (systemCpuLoad <= 0) {
+                systemCpuLoad = 0;
+            }
+            cpus.add(putObject("占用cpu", systemCpuLoad, "cpu"));
+            cpus.add(putObject("空闲cpu", 1 - systemCpuLoad, "cpu"));
+        }
         jsonObject.put("memory", memory);
         jsonObject.put("cpu", cpus);
         jsonObject.put("disk", getHardDisk());
@@ -236,22 +243,20 @@ public class TopManager {
     /**
      * 将windows的tasklist转为集合
      *
+     * @param header 是否包含投信息
      * @param result 进程信息
+     * @return jsonArray
      */
-    public static JSONArray formatWindowsProcess(String result) {
+    public static JSONArray formatWindowsProcess(String result, boolean header) {
         List<String> list = StrSpliter.splitTrim(result, "\n", true);
-        if (list.size() < 3) {
-            return null;
-        }
         JSONArray array = new JSONArray();
-        for (String param : list) {
+        for (int i = header ? 2 : 0, len = list.size(); i < len; i++) {
+            String param = list.get(i);
             List<String> memList = StrSpliter.splitTrim(param, " ", true);
             String name = memList.get(0);
-            if (!name.endsWith(".exe")) {
-                continue;
-            }
             JSONObject item = new JSONObject();
-            item.put("pid", memList.get(1));
+            int pid = Convert.toInt(memList.get(1), 0);
+            item.put("pid", pid);
             item.put("COMMAND", name);
             //使用内存 kb
             String mem = memList.get(4).replace(",", "");
@@ -269,23 +274,30 @@ public class TopManager {
             }
             item.put("USER", memList.get(7));
             item.put("TIME", memList.get(8));
-            item.put("PR", -1);
-            item.put("NI", -1);
-            item.put("VIRT", "0 MB");
-            item.put("SHR", "0 MB");
-            OperatingSystemMXBean operatingSystemMXBean = (OperatingSystemMXBean) ManagementFactory.getOperatingSystemMXBean();
-            //最近jvmcpu使用率
-            double processCpuLoad = operatingSystemMXBean.getProcessCpuLoad() * 100;
-            if (processCpuLoad <= 0) {
-                processCpuLoad = 0;
-            }
-            item.put("CPU", String.format("%.2f", processCpuLoad) + "%");
-            //服务器总内存
-            long totalMemorySize = operatingSystemMXBean.getTotalPhysicalMemorySize();
-            double v = new BigDecimal(aLong).divide(new BigDecimal(totalMemorySize / 1024), 4, BigDecimal.ROUND_HALF_UP).doubleValue() * 100;
-            item.put("MEM", String.format("%.2f", v) + "%");
-            if (v <= 0) {
-                item.put("MEM", 0);
+            item.put("PR", "-");
+            item.put("NI", "-");
+            item.put("VIRT", "-");
+            item.put("SHR", "-");
+            try {
+                VirtualMachine virtualMachine = VirtualMachine.attach(String.valueOf(pid));
+                OperatingSystemMXBean operatingSystemMXBean = JvmUtil.getOperatingSystemMXBean(virtualMachine);
+                if (operatingSystemMXBean != null) {
+                    //最近jvm cpu使用率
+                    double processCpuLoad = operatingSystemMXBean.getProcessCpuLoad() * 100;
+                    if (processCpuLoad <= 0) {
+                        processCpuLoad = 0;
+                    }
+                    item.put("CPU", String.format("%.2f", processCpuLoad) + "%");
+                    //服务器总内存
+                    long totalMemorySize = operatingSystemMXBean.getTotalPhysicalMemorySize();
+                    BigDecimal total = new BigDecimal(totalMemorySize / 1024);
+                    // 进程
+                    double v = new BigDecimal(aLong).divide(total, 4, BigDecimal.ROUND_HALF_UP).doubleValue() * 100;
+                    item.put("MEM", String.format("%.2f", v) + "%");
+                }
+            } catch (Exception ignored) {
+                item.put("MEM", "-");
+                item.put("CPU", "-");
             }
             array.add(item);
         }

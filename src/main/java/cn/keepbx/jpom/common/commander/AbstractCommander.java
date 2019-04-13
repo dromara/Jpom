@@ -17,19 +17,13 @@ import cn.keepbx.jpom.common.commander.impl.WindowsCommander;
 import cn.keepbx.jpom.model.NetstatModel;
 import cn.keepbx.jpom.model.ProjectInfoModel;
 import cn.keepbx.jpom.service.manage.CommandService;
-import cn.keepbx.jpom.system.init.CheckPath;
-import com.sun.tools.attach.*;
-import sun.management.ConnectorAddressLink;
+import com.sun.tools.attach.AttachNotSupportedException;
+import com.sun.tools.attach.VirtualMachine;
+import com.sun.tools.attach.VirtualMachineDescriptor;
 
-import javax.management.MBeanServerConnection;
-import javax.management.remote.JMXConnector;
-import javax.management.remote.JMXConnectorFactory;
-import javax.management.remote.JMXServiceURL;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.management.ManagementFactory;
-import java.lang.management.MemoryMXBean;
 import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.List;
@@ -266,7 +260,7 @@ public abstract class AbstractCommander {
         return StrUtil.format("{}:{}", CommandService.RUNING_TAG, virtualMachine.id());
     }
 
-    private VirtualMachine getVirtualMachine(String tag) throws IOException {
+    public VirtualMachine getVirtualMachine(String tag) throws IOException {
         // 添加空格是为了防止startWith
         tag = String.format("-Dapplication=%s ", tag);
         // 通过VirtualMachine.list()列出所有的java进程
@@ -289,46 +283,6 @@ public abstract class AbstractCommander {
             if (StrUtil.containsIgnoreCase(args, tag)) {
                 return virtualMachine;
             }
-        }
-        return null;
-    }
-
-    /**
-     * 获取指定程序的jvm 信息
-     *
-     * @param tag 运行tag
-     * @return null 没有运行或者获取数据
-     * @throws Exception 异常
-     */
-    public MemoryMXBean getMemoryMXBean(String tag) throws Exception {
-        VirtualMachine virtualMachine = getVirtualMachine(tag);
-        if (virtualMachine == null) {
-            return null;
-        }
-        int pid = Convert.toInt(virtualMachine.id());
-        JMXServiceURL jmxServiceURL = getJMXServiceURL(pid, virtualMachine);
-        if (jmxServiceURL == null) {
-            return null;
-        }
-        JMXConnector jmxConnector = JMXConnectorFactory.connect(jmxServiceURL, null);
-        MBeanServerConnection mBeanServerConnection = jmxConnector.getMBeanServerConnection();
-        return ManagementFactory.newPlatformMXBeanProxy(mBeanServerConnection, ManagementFactory.MEMORY_MXBEAN_NAME, MemoryMXBean.class);
-    }
-
-    private static JMXServiceURL getJMXServiceURL(int pid, VirtualMachine virtualMachine) throws IOException, AgentLoadException, AgentInitializationException {
-        String address = virtualMachine.getAgentProperties().getProperty("com.sun.management.jmxremote.localConnectorAddress");
-        if (address != null) {
-            return new JMXServiceURL(address);
-        }
-        address = ConnectorAddressLink.importFrom(pid);
-        if (address != null) {
-            return new JMXServiceURL(address);
-        }
-        String agent = CheckPath.getManagementAgent();
-        virtualMachine.loadAgent(agent);
-        address = virtualMachine.getAgentProperties().getProperty("com.sun.management.jmxremote.localConnectorAddress");
-        if (address != null) {
-            return new JMXServiceURL(address);
         }
         return null;
     }

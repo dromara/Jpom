@@ -8,8 +8,8 @@ package cn.keepbx.jpom.model;
  */
 public class NetstatModel extends BaseJsonModel {
     private String protocol;
-    private String receive;
-    private String send;
+    private String receive = "-";
+    private String send = "-";
     private String local;
     private String foreign;
     private String status;

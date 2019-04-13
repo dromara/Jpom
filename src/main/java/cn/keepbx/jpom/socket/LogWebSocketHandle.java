@@ -10,7 +10,7 @@ import cn.keepbx.jpom.model.UserModel;
 import cn.keepbx.jpom.service.manage.CommandService;
 import cn.keepbx.jpom.service.manage.ProjectInfoService;
 import cn.keepbx.jpom.service.user.UserService;
-import cn.keepbx.jpom.socket.top.TopManager;
+import cn.keepbx.jpom.system.TopManager;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Component;
 
