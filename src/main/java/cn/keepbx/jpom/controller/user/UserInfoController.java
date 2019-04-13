@@ -46,7 +46,7 @@ public class UserInfoController extends BaseController {
             return JsonMessage.getString(400, "新旧密码一致");
         }
         UserModel userName = getUser();
-        if ("demo".equals(userName.getId())) {
+        if (userName.isDemoUser()) {
             return JsonMessage.getString(402, "当前账户为演示账号，不支持修改密码");
         }
         try {
@@ -108,6 +108,10 @@ public class UserInfoController extends BaseController {
         UserModel userModel = userService.getItem(id);
         if (userModel == null) {
             return JsonMessage.getString(501, "非法访问");
+        }
+        // 非系统管理员不支持删除演示账号
+        if (!userName.isSystemUser() && userModel.isDemoUser()) {
+            return JsonMessage.getString(402, "演示账号不支持删除");
         }
         if (userModel.isSystemUser()) {
             return JsonMessage.getString(400, "非法访问:-5");
@@ -235,6 +239,10 @@ public class UserInfoController extends BaseController {
         UserModel me = getUser();
         if (userModel.getId().equals(me.getId())) {
             return JsonMessage.getString(401, "不能修改自己的信息");
+        }
+        // 非系统管理员不能修改演示账号信息
+        if (!me.isSystemUser() && userModel.isDemoUser()) {
+            return JsonMessage.getString(402, "不支持修改演示账号信息");
         }
         String msg = parseUser(userModel, false);
         if (msg != null) {

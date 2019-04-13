@@ -58,7 +58,7 @@ public class OssManagerService extends BaseDataService {
             request.setMarker(nextMarker);
             ObjectListing objectListing = ossClient.listObjects(request);
             List<OSSObjectSummary> sums = objectListing.getObjectSummaries();
-//
+            //
             summaryList.addAll(sums);
             nextMarker = objectListing.getNextMarker();
             // 关闭OSSClient。
@@ -89,7 +89,8 @@ public class OssManagerService extends BaseDataService {
 
     public OSSClient getOSSClient(JSONObject config) {
         String endpoint = String.format("http://%s", config.getString("endpoint"));
-        // 阿里云主账号AccessKey拥有所有API的访问权限，风险很高。强烈建议您创建并使用RAM账号进行API访问或日常运维，请登录 https://ram.console.aliyun.com 创建RAM账号。
+        // 阿里云主账号AccessKey拥有所有API的访问权限，风险很高。强烈建议您创建并使用RAM账号进行API访问或日常运维，
+        // 请登录 https://ram.console.aliyun.com 创建RAM账号。
         String accessKeyId = config.getString("accessKeyId");
         String accessKeySecret = config.getString("accessKeySecret");
         // 创建OSSClient实例。

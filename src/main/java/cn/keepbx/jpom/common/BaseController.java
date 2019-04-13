@@ -26,7 +26,9 @@ public abstract class BaseController extends AbstractController {
     }
 
     protected UserModel getUser() {
-        return USER_MODEL_THREAD_LOCAL.get();
+        UserModel userModel = USER_MODEL_THREAD_LOCAL.get();
+        Objects.requireNonNull(userModel);
+        return userModel;
     }
 
     public static void remove() {

@@ -106,6 +106,9 @@ public class ProjectInfoService extends BaseOperService<ProjectInfoModel> {
         File file = new File(pim.getLog());
         if (file.exists()) {
             long fileSize = file.length();
+            if (fileSize <= 0) {
+                return null;
+            }
             logSize = FileUtil.readableFileSize(fileSize);
         }
         return logSize;

@@ -189,19 +189,29 @@ public class ProjectInfoModel extends BaseModel {
     }
 
     /**
+     * 获取项目文件中的所有jar 文件
+     *
+     * @param projectInfoModel 项目
+     * @return list
+     */
+    public static List<File> listJars(ProjectInfoModel projectInfoModel) {
+        File fileLib = new File(projectInfoModel.getLib());
+        return FileUtil.loopFiles(fileLib, pathname -> {
+            if (!pathname.isFile()) {
+                return false;
+            }
+            return StrUtil.endWith(pathname.getName(), ".jar", true);
+        });
+    }
+
+    /**
      * 拼接java 执行的jar路径
      *
      * @param projectInfoModel 项目
      * @return classpath 或者 jar
      */
     public static String getClassPathLib(ProjectInfoModel projectInfoModel) {
-        File fileLib = new File(projectInfoModel.getLib());
-        List<File> files = FileUtil.loopFiles(fileLib, pathname -> {
-            if (!pathname.isFile()) {
-                return false;
-            }
-            return StrUtil.endWith(pathname.getName(), ".jar", true);
-        });
+        List<File> files = listJars(projectInfoModel);
         if (files == null || files.size() <= 0) {
             return "";
         }

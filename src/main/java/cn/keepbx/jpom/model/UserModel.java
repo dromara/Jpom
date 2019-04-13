@@ -142,6 +142,10 @@ public class UserModel extends BaseModel {
         if (ExtConfigBean.getInstance().userAlwaysLoginError <= 0) {
             return 0;
         }
+        // 不限制演示账号的登录
+        if (isDemoUser()) {
+            return 0;
+        }
         // 最后一次失败时间
         long lastTime = getLastPwdErrorTime();
         if (lastTime <= 0) {
@@ -267,4 +271,14 @@ public class UserModel extends BaseModel {
     public boolean isSystemUser() {
         return UserModel.SYSTEM_ADMIN.equals(getParent());
     }
+
+    /**
+     * demo 登录名默认为系统验证账号
+     *
+     * @return true
+     */
+    public boolean isDemoUser() {
+        return "demo".equals(getId());
+    }
+
 }

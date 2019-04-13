@@ -5,6 +5,7 @@ import cn.hutool.core.date.DatePattern;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
+import cn.hutool.core.lang.JarClassLoader;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.http.HttpUtil;
@@ -33,6 +34,9 @@ import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
+import java.util.jar.Attributes;
+import java.util.jar.JarFile;
+import java.util.jar.Manifest;
 
 /**
  * 命令执行基类
@@ -159,6 +163,13 @@ public abstract class AbstractCommander {
         return start(projectInfoModel);
     }
 
+    /**
+     * 启动项目前基本检查
+     *
+     * @param projectInfoModel 项目
+     * @return null 检查一切正常
+     * @throws Exception 异常
+     */
     protected String checkStart(ProjectInfoModel projectInfoModel) throws Exception {
         if (isRun(projectInfoModel.getId())) {
             return "运行中";
@@ -167,7 +178,41 @@ public abstract class AbstractCommander {
         File fileLib = new File(lib);
         File[] files = fileLib.listFiles();
         if (files == null || files.length <= 0) {
-            return "没有jar包";
+            return "没有jar包,请先到文件管理中上传程序的jar";
+        }
+        //
+        if (projectInfoModel.getRunMode() == ProjectInfoModel.RunMode.ClassPath) {
+            JarClassLoader jarClassLoader = JarClassLoader.load(FileUtil.file(projectInfoModel.getLib()));
+            // 判断主类
+            try {
+                jarClassLoader.loadClass(projectInfoModel.getMainClass());
+            } catch (ClassNotFoundException notFound) {
+                return "没有找到对应的MainClass:" + projectInfoModel.getMainClass();
+            }
+        } else {
+            List<File> fileList = ProjectInfoModel.listJars(projectInfoModel);
+            if (fileList == null || fileList.size() <= 0) {
+                return "没有jar包,请先到文件管理中上传程序的jar";
+            }
+            File jarFile = fileList.get(0);
+            try {
+                JarFile jarFile1 = new JarFile(jarFile);
+                Manifest manifest = jarFile1.getManifest();
+                Attributes attributes = manifest.getMainAttributes();
+                String mainClass = attributes.getValue("Main-Class");
+                if (mainClass == null) {
+                    return jarFile.getAbsolutePath() + "中没有找到对应的MainClass属性";
+                }
+                JarClassLoader jarClassLoader = JarClassLoader.load(jarFile);
+                try {
+                    jarClassLoader.loadClass(mainClass);
+                } catch (ClassNotFoundException notFound) {
+                    return jarFile.getAbsolutePath() + "中没有找到对应的MainClass:" + mainClass;
+                }
+            } catch (Exception e) {
+                DefaultSystemLog.ERROR().error("解析jar", e);
+                return jarFile.getAbsolutePath() + " 解析错误:" + e.getMessage();
+            }
         }
         // 备份日志
         backLog(projectInfoModel);
@@ -189,8 +234,8 @@ public abstract class AbstractCommander {
         if (!file.exists() || file.isDirectory()) {
             return "not exists";
         }
-        // 空文件不处理
-        if (file.length() <= 0) {
+        // 文件内容太少不处理
+        if (file.length() <= 1000) {
             return "ok";
         }
         File backPath = projectInfoModel.getLogBack();
