@@ -107,7 +107,7 @@ public class UserService extends BaseOperService<UserModel> {
             if (userModel.isSystemUser()) {
                 continue;
             }
-            userModel.setPassword("");
+            userModel.setPassword(null);
             array.add(userModel);
         }
         return array;

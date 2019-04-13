@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.annotation.Resource;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -49,6 +50,17 @@ public class UserListController extends BaseController {
             return JsonMessage.getString(400, "你没有对应权限！");
         }
         List<UserModel> userList = userService.list();
+        if (userList != null) {
+            Iterator<UserModel> userModelIterator = userList.iterator();
+            // 不显示自己的信息
+            while (userModelIterator.hasNext()) {
+                UserModel item = userModelIterator.next();
+                if (item.getId().equals(userName.getId())) {
+                    userModelIterator.remove();
+                    break;
+                }
+            }
+        }
         return JsonMessage.getString(200, "", userList);
     }
 }

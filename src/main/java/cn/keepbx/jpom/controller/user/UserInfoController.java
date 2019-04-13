@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
-import java.io.IOException;
 
 /**
  * 用户管理
@@ -75,7 +74,7 @@ public class UserInfoController extends BaseController {
      * @return json
      */
     @RequestMapping(value = "updateName", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public String updateName(String name) throws IOException {
+    public String updateName(String name) {
         if (StrUtil.isEmpty(name)) {
             return JsonMessage.getString(405, "请输入新的昵称");
         }
@@ -232,6 +231,10 @@ public class UserInfoController extends BaseController {
         // 禁止修改系统管理员信息
         if (userModel.isSystemUser()) {
             return JsonMessage.getString(401, "WEB端不能修改系统管理员信息");
+        }
+        UserModel me = getUser();
+        if (userModel.getId().equals(me.getId())) {
+            return JsonMessage.getString(401, "不能修改自己的信息");
         }
         String msg = parseUser(userModel, false);
         if (msg != null) {
