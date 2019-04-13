@@ -15,7 +15,7 @@ RUN cd /tmp && \
     cp -f /tmp/docker/build/settings.xml /usr/share/maven/conf/settings.xml && \
     mvn package && \
     mv target/jpom-2.3.2-release/* /opt/Jpom/ && \
-    cp -f /tmp/docker/build/Jpom.sh /opt/Jpom/Jpom.sh && \
+    # cp -f /tmp/docker/build/Jpom.sh /opt/Jpom/Jpom.sh && \
     chmod +x /opt/Jpom/Jpom.sh &&  \
     rm -rf /tmp && \
     rm -rf ~/.m2
