@@ -19,7 +19,7 @@ RUN cd /tmp && \
     mv starter/target/jpom-2.3.2-release/* /opt/Jpom/ && \
     chmod +x /opt/Jpom/Jpom.sh &&  \
     rm -rf /tmp && \
-    rm -rf ~/.m2 &&
+    rm -rf ~/.m2
 
 EXPOSE 2122
 
