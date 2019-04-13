@@ -14,6 +14,7 @@ RUN ln -snf /usr/share/zoneinfo/${TZ} /etc/localtime && \
     echo ${TZ} > /etc/timezone
 
 RUN cd /tmp && \
+    cp -f /tmp/docker/build/settings.xml /usr/share/maven/conf/settings.xml && \
     mvn package && \
     mv starter/target/jpom-2.3.2-release/* /opt/Jpom/ && \
     chmod +x /opt/Jpom/Jpom.sh &&  \
