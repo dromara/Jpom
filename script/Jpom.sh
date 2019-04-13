@@ -60,6 +60,7 @@ function start() {
     else
         echo "还没有生成日志文件:${Log}"
     fi
+    echo ${CLASSPATH}
 }
 
 # 拼接所有文件
