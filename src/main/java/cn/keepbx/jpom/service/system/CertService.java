@@ -11,7 +11,6 @@ import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.List;
 
 /**
@@ -47,9 +46,10 @@ public class CertService extends BaseOperService<CertModel> {
     }
 
     @Override
-    public CertModel getItem(String id) throws IOException {
+    public CertModel getItem(String id) {
         return getJsonObjectById(ConfigBean.CERT, id, CertModel.class);
     }
+
 
     /**
      * 删除证书
@@ -84,7 +84,8 @@ public class CertService extends BaseOperService<CertModel> {
      *
      * @param certModel 证书
      */
-    public boolean updateCert(CertModel certModel) {
+    @Override
+    public boolean updateItem(CertModel certModel) {
         try {
             updateJson(ConfigBean.CERT, certModel.toJson());
         } catch (Exception e) {

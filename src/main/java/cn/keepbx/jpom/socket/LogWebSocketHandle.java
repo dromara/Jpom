@@ -167,7 +167,7 @@ public class LogWebSocketHandle {
                 // 记录操作人
                 projectInfoModel = projectInfoService.getItem(projectId);
                 projectInfoModel.logModifyUser(userModel);
-                projectInfoService.updateProject(projectInfoModel);
+                projectInfoService.updateItem(projectInfoModel);
             }
         }
         //

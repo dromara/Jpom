@@ -143,7 +143,7 @@ public class ProjectFileControl extends BaseController {
         }
         // 修改使用状态
         pim.setUseLibDesc("upload");
-        projectInfoService.updateProject(pim);
+        projectInfoService.updateItem(pim);
         return JsonMessage.getString(200, "上传成功");
     }
 

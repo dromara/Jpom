@@ -86,7 +86,7 @@ public class BuildController extends BaseController {
         ZipUtil.unzip(file, lib);
         // 修改使用状态
         projectInfoModel.setUseLibDesc("build");
-        projectInfoService.updateProject(projectInfoModel);
+        projectInfoService.updateItem(projectInfoModel);
         String result = commandService.execCommand(CommandService.CommandOp.restart, projectInfoModel);
         return JsonMessage.getString(200, "安装成功，已自动重启,当前状态是：" + result);
     }

@@ -13,8 +13,10 @@ import cn.keepbx.jpom.model.CertModel;
 import cn.keepbx.jpom.model.UserModel;
 import cn.keepbx.jpom.service.system.CertService;
 import cn.keepbx.jpom.service.system.WhitelistDirectoryService;
+import cn.keepbx.jpom.system.ConfigBean;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import org.apache.tomcat.util.http.fileupload.servlet.ServletFileUpload;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -24,7 +26,11 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import javax.annotation.Resource;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.util.Enumeration;
 import java.util.List;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 
 /**
  * 证书管理
@@ -49,87 +55,166 @@ public class CertificateController extends BaseController {
 
 
     /**
-     * 新增证书
+     * 保存证书
+     *
+     * @return json
      */
-    @RequestMapping(value = "/addCertificate", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "/saveCertificate", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
-    public String addCertificate() {
-        try {
-            CertModel certModel = getCertModel();
-            certService.addItem(certModel);
-        } catch (Exception e) {
-            DefaultSystemLog.ERROR().error("证书文件", e);
-            return JsonMessage.getString(400, e.getMessage());
-        }
-        return JsonMessage.getString(200, "上传成功");
-    }
+    public String saveCertificate() {
 
-    /**
-     * 修改证书
-     */
-    @RequestMapping(value = "/updateCertificate", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    @ResponseBody
-    public String updateCertificate() {
+        String data = getParameter("data");
+        JSONObject jsonObject = JSONObject.parseObject(data);
+        String type = jsonObject.getString("type");
+        String id = jsonObject.getString("id");
         try {
-            CertModel certModel = getCertModel();
-            boolean b = certService.updateCert(certModel);
-            if (!b) {
-                return JsonMessage.getString(400, "修改失败");
+            CertModel certModel;
+            if ("add".equalsIgnoreCase(type)) {
+                if (certService.getItem(id) != null) {
+                    return JsonMessage.getString(405, "证书id已经存在啦");
+                }
+                certModel = new CertModel();
+                String error = getCertModel(certModel, jsonObject);
+                if (error != null) {
+                    return error;
+                }
+                if (!hasFile()) {
+                    return JsonMessage.getString(405, "请选择证书包文件");
+                }
+                error = getCertFile(certModel, true);
+                if (error != null) {
+                    return error;
+                }
+                certService.addItem(certModel);
+            } else {
+                certModel = certService.getItem(id);
+                if (certModel == null) {
+                    return JsonMessage.getString(404, "没有找到对应证书文件");
+                }
+                String name = jsonObject.getString("name");
+                if (StrUtil.isEmpty(name)) {
+                    return JsonMessage.getString(400, "请填写证书名称");
+                }
+                certModel.setName(name);
+                if (ServletFileUpload.isMultipartContent(getRequest()) && hasFile()) {
+                    String error = getCertFile(certModel, false);
+                    if (error != null) {
+                        return error;
+                    }
+                }
+                if (!certService.updateItem(certModel)) {
+                    return JsonMessage.getString(406, "修改失败");
+                }
             }
         } catch (Exception e) {
             DefaultSystemLog.ERROR().error("证书文件", e);
             return JsonMessage.getString(400, e.getMessage());
         }
-        return JsonMessage.getString(200, "修改成功");
+        return JsonMessage.getString(200, "提交成功");
     }
+
 
     /**
      * 获取证书信息
+     *
+     * @param certModel 实体
+     * @return 错误消息
      */
-    private CertModel getCertModel() throws Exception {
-        String id = getParameter("id");
-        String path = getParameter("path");
-        String name = getParameter("name");
+    private String getCertModel(CertModel certModel, JSONObject jsonObject) {
+        String id = jsonObject.getString("id");
+        String path = jsonObject.getString("path");
+        String name = jsonObject.getString("name");
         if (StrUtil.isEmpty(id)) {
-            throw new RuntimeException("证书id异常");
+            return JsonMessage.getString(400, "请填写证书id");
         }
         if (Validator.isChinese(id)) {
-            throw new RuntimeException("证书id不能使用中文");
+            return JsonMessage.getString(400, "证书id不能使用中文");
         }
         if (StrUtil.isEmpty(name)) {
-            throw new RuntimeException("请填写证书名称");
+            return JsonMessage.getString(400, "请填写证书名称");
         }
         if (!whitelistDirectoryService.checkCertificateDirectory(path)) {
-            throw new RuntimeException("请选择正确的项目路径,或者还没有配置白名单");
+            return JsonMessage.getString(400, "请选择正确的项目路径,或者还没有配置白名单");
         }
-        String temporary = path + "/" + id + "/";
-        File file = FileUtil.file(temporary);
-        if (!file.exists()) {
-            boolean mkdirs = file.mkdirs();
-            if (!mkdirs) {
-                throw new RuntimeException("创建" + path + "目录失败,请手动创建");
-            }
-        }
-        MultipartFileBuilder cert = createMultipart().addFieldName("cert").setSavePath(temporary).setUseOriginalFilename(true);
-        String certPath = cert.save();
-
-        MultipartFileBuilder key = createMultipart().addFieldName("key").setSavePath(temporary).setUseOriginalFilename(true);
-        String keyPath = key.save();
-        //解析证书
-        JSONObject jsonObject = CertModel.decodeCert(certPath, keyPath);
-        if (jsonObject == null) {
-            throw new RuntimeException("解析证书失败");
-        }
-        CertModel certModel = new CertModel();
         certModel.setId(id);
         certModel.setWhitePath(path);
-        certModel.setCert(certPath);
-        certModel.setKey(keyPath);
         certModel.setName(name);
-        certModel.setDomain(jsonObject.getString("domain"));
-        certModel.setExpirationTime(jsonObject.getLongValue("expirationTime"));
-        certModel.setEffectiveTime(jsonObject.getLongValue("effectiveTime"));
-        return certModel;
+        return null;
+    }
+
+    private String getCertFile(CertModel certModel, boolean add) throws IOException {
+        String certPath = null;
+        String pemPath = null, keyPath = null;
+        try {
+            String path = ConfigBean.getInstance().getTempPathName();
+            MultipartFileBuilder cert = createMultipart().addFieldName("file").setSavePath(path);
+            certPath = cert.save();
+            ZipFile zipFile = new ZipFile(certPath);
+            Enumeration<? extends ZipEntry> zipEntryEnumeration = zipFile.entries();
+
+            while (zipEntryEnumeration.hasMoreElements()) {
+                ZipEntry zipEntry = zipEntryEnumeration.nextElement();
+                if (zipEntry.isDirectory()) {
+                    continue;
+                }
+                String keyName = zipEntry.getName();
+                if (pemPath == null && StrUtil.endWith(keyName, ".pem", true)) {
+                    String filePathItem = String.format("%s/%s/%s", path, certModel.getId(), keyName);
+                    InputStream inputStream = zipFile.getInputStream(zipEntry);
+                    FileUtil.writeFromStream(inputStream, filePathItem);
+                    pemPath = filePathItem;
+                }
+                //
+                if (keyPath == null && StrUtil.endWith(keyName, ".key", true)) {
+                    String filePathItem = String.format("%s/%s/%s", path, certModel.getId(), keyName);
+                    InputStream inputStream = zipFile.getInputStream(zipEntry);
+                    FileUtil.writeFromStream(inputStream, filePathItem);
+                    keyPath = filePathItem;
+                }
+                if (pemPath != null && keyPath != null) {
+                    break;
+                }
+            }
+            if (pemPath == null || keyPath == null) {
+                return JsonMessage.getString(405, "证书包中文件不完整，需要包含key、pem");
+            }
+            JSONObject jsonObject = CertModel.decodeCert(pemPath, keyPath);
+            if (jsonObject == null) {
+                return JsonMessage.getString(405, "解析证书失败");
+            }
+            String domain = jsonObject.getString("domain");
+            if (add) {
+                List<CertModel> array = certService.list();
+                if (array != null) {
+                    for (CertModel certModel1 : array) {
+                        if (StrUtil.emptyToDefault(domain, "").equals(certModel1.getDomain())) {
+                            return JsonMessage.getString(405, "证书的域名已经存在啦");
+                        }
+                    }
+                }
+            } else {
+                if (!StrUtil.emptyToDefault(domain, "").equals(certModel.getDomain())) {
+                    return JsonMessage.getString(405, "新证书的域名不一致");
+                }
+            }
+            // 移动位置
+            String temporary = certModel.getWhitePath() + "/" + certModel.getId() + "/";
+            File pemFile = FileUtil.file(temporary + certModel.getId() + ".pem");
+            File keyFile = FileUtil.file(temporary + certModel.getId() + ".key");
+            FileUtil.move(FileUtil.file(pemPath), pemFile, true);
+            FileUtil.move(FileUtil.file(keyPath), keyFile, true);
+            certModel.setCert(pemFile.getAbsolutePath());
+            certModel.setKey(keyFile.getAbsolutePath());
+            //
+            certModel.setDomain(domain);
+            certModel.setExpirationTime(jsonObject.getLongValue("expirationTime"));
+            certModel.setEffectiveTime(jsonObject.getLongValue("effectiveTime"));
+        } finally {
+            if (certPath != null) {
+                FileUtil.del(certPath);
+            }
+        }
+        return null;
     }
 
 
@@ -173,18 +258,14 @@ public class CertificateController extends BaseController {
     @RequestMapping(value = "/export", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     public String export(String id) {
-        try {
-            CertModel item = certService.getItem(id);
-            if (null == item) {
-                return JsonMessage.getString(400, "导出失败");
-            }
-            String parent = FileUtil.file(item.getCert()).getParent();
-            File zip = ZipUtil.zip(parent);
-            ServletUtil.write(getResponse(), zip);
-            FileUtil.del(zip);
-        } catch (IOException e) {
+        CertModel item = certService.getItem(id);
+        if (null == item) {
             return JsonMessage.getString(400, "导出失败");
         }
+        String parent = FileUtil.file(item.getCert()).getParent();
+        File zip = ZipUtil.zip(parent);
+        ServletUtil.write(getResponse(), zip);
+        FileUtil.del(zip);
         return JsonMessage.getString(400, "导出成功");
     }
 }

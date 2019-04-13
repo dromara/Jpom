@@ -54,7 +54,7 @@ public class UserInfoController extends BaseController {
                 return JsonMessage.getString(500, "旧密码不正确！");
             }
             userModel.setPassword(newPwd);
-            if (!userService.updateUser(userModel)) {
+            if (!userService.updateItem(userModel)) {
                 return JsonMessage.getString(500, "修改失败！");
             }
             // 如果修改成功，则销毁会话
@@ -84,7 +84,7 @@ public class UserInfoController extends BaseController {
         UserModel userModel = getUser();
         userModel = userService.getItem(userModel.getId());
         userModel.setName(name);
-        if (userService.updateUser(userModel)) {
+        if (userService.updateItem(userModel)) {
             setSessionAttribute(LoginInterceptor.SESSION_NAME, userModel);
             return JsonMessage.getString(200, "修改成功");
         }
@@ -245,7 +245,7 @@ public class UserInfoController extends BaseController {
         if (msg != null) {
             return msg;
         }
-        boolean b = userService.updateUser(userModel);
+        boolean b = userService.updateItem(userModel);
         if (b) {
             return JsonMessage.getString(200, "修改成功");
         }
@@ -270,7 +270,7 @@ public class UserInfoController extends BaseController {
             return JsonMessage.getString(400, "修改失败:-1");
         }
         userModel.unLock();
-        boolean b = userService.updateUser(userModel);
+        boolean b = userService.updateItem(userModel);
         if (b) {
             return JsonMessage.getString(200, "解锁成功");
         }

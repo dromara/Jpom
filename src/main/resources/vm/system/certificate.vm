@@ -6,7 +6,7 @@
     <title>证书管理</title>
     <style>
         body {
-            padding: 10px 10px 0px 10px;
+            padding: 10px;
         }
 
         .layui-container {
@@ -17,25 +17,6 @@
             display: none;
         }
 
-        .btn_upload {
-            margin-top: 10px;
-        }
-
-        .certPath {
-            padding: 5px !important;
-            color: red;
-            width: 450px !important;
-            float: left;
-        }
-
-        .file_input {
-            margin-top: -15px;
-        }
-
-        .input_msg {
-            margin-top: 18px;
-        }
-
         .certText {
             padding: 10px;
         }
@@ -44,70 +25,58 @@
 
 <body>
 <div class="layui-row">
-    <button id="addCertificate" class="layui-btn layui-btn-sm">新增证书</button>
+    <button id="addCertificate" class="layui-btn layui-btn-sm">导入证书</button>
     <button id="refresh" class="layui-btn layui-btn-sm">刷新表格</button>
 </div>
 <table class="layui-table" id="tab_certificate" lay-filter="tab_certificate" style="margin: 0;"></table>
 
 <div class="layui-container div-certificate" id="div-certificate">
-    <form action="" enctype="multipart/form-data" class="layui-form" id="form_certificate" style="margin-top: 20px">
+    <form action="" class="layui-form" id="form_certificate" style="margin-top: 20px">
         <div class="layui-form-item">
-            <div class="layui-inline">
-                <label class="layui-form-label">证书id</label>
-                <div class="layui-input-block">
-                    <input type="text" id="id" name="id" placeholder="创建后不能修改" class="layui-input" required
-                           lay-verify="required">
-                </div>
+
+            <label class="layui-form-label">证书id</label>
+            <div class="layui-input-block">
+                <input type="text" id="id" name="id" placeholder="创建后不能修改" class="layui-input" required
+                       lay-verify="required">
+                <input type="hidden" name="type">
             </div>
         </div>
         <div class="layui-form-item">
-            <div class="layui-inline">
-                <label class="layui-form-label">证书名称</label>
-                <div class="layui-input-block">
-                    <input type="text" id="name" name="name" placeholder="" class="layui-input" required
-                           lay-verify="required">
-                </div>
+            <label class="layui-form-label">证书名称</label>
+            <div class="layui-input-block">
+                <input type="text" id="name" name="name" placeholder="请填写证书名称" class="layui-input" required
+                       lay-verify="required">
             </div>
         </div>
         <div class="layui-form-item">
-            <div class="layui-inline">
-                <label class="layui-form-label">证书路径</label>
-                <div class="layui-input-block">
-                    <select name="path" id="path" lay-filter="aihao">
-                        #foreach($item in $certificate)
-                            <option id="path_$item" value="$item">$item</option>
-                        #end
-                    </select>
-                </div>
+            <label class="layui-form-label">证书路径</label>
+            <div class="layui-input-block">
+                <select name="path" id="path" lay-filter="aihao" required
+                        lay-verify="required">
+                    <option value="">请选择证书存放的路径</option>
+                    #foreach($item in $certificate)
+                        <option id="path_$item" value="$item">$item</option>
+                    #end
+                </select>
             </div>
         </div>
         <div class="layui-form-item">
-            <div class="layui-inline">
-                <label class="layui-form-label input_msg">证书文件</label>
-                <div class="layui-input-inline">
-                    <label id="certPath" class="certPath"></label>
-                    <input type="file" id="cert" name="cert" placeholder="" class="layui-input file_input" required
-                           lay-verify="required">
-                </div>
-                <div class="layui-form-mid layui-word-aux input_msg">证书文件,公钥,支持pem文件</div>
+            <label class="layui-form-label">证书文件包</label>
+            <div class="layui-input-inline">
+                <button type="button" class="layui-btn" id="selectZip">
+                    <i class="layui-icon">&#xe67c;</i>选择ZIP文件
+                </button>
+                <div class="layui-form-mid layui-word-aux"></div>
+                <div class="layui-form-mid layui-word-aux" id="zipResult"></div>
             </div>
-        </div>
-        <div class="layui-form-item">
-            <div class="layui-inline">
-                <label class="layui-form-label input_msg">私钥文件</label>
-                <div class="layui-input-inline">
-                    <label id="keyPath" class="certPath"></label>
-                    <input type="file" id="key" name="key" placeholder="" class="layui-input file_input" required
-                           lay-verify="required">
-                </div>
-                <div class="layui-form-mid layui-word-aux input_msg">私钥文件,支持key文件</div>
-            </div>
+            <div class="layui-form-mid layui-word-aux">证书文件包里必须有.pem .key文件</div>
+
         </div>
         <input type="hidden" lay-submit lay-filter="submitCert" id="cert_submit">
     </form>
 </div>
 
-<div id="cert_template" class="div-certificate">
+<div id="cert_template" hidden>
 
 </div>
 </body>
@@ -159,11 +128,48 @@
         return y + '-' + m + '-' + d + ' ' + h + ':' + minute + ':' + second;
     }
 
-    var laytpl;
+    var laytpl, upload;
 
     function loadSuccess() {
-        layui.use(['laytpl'], function () {
+        var uploadConfig, hashSelectConfig, updateFormData;
+        layui.use(['laytpl', 'upload'], function () {
             laytpl = layui.laytpl;
+            upload = layui.upload;
+            uploadConfig = upload.render({
+                elem: '#selectZip',
+                url: './saveCertificate',
+                multiple: false,
+                exts: 'zip',
+                acceptMime: '.zip',
+                field: 'file',
+                data: {
+                    data: function () {
+                        return JSON.stringify(updateFormData);
+                    }
+                },
+                auto: false,
+                choose: function (obj) {
+                    hashSelectConfig = true;
+                    obj.preview(function (index, file, result) {
+                        $("#zipResult").html("已选择:" + file.name);
+                    });
+                },
+                before: function (obj) {
+                    layer.load();
+                },
+                done: function (res) {
+                    layer.closeAll('loading');
+                    layer.msg(res.msg);
+                    if (200 == res.code) {
+                        layer.closeAll('page');
+                        // 刷新项目列表
+                        table.reload('tab_certificate', {});
+                    }
+                },
+                error: function () {
+                    layer.msg("上传失败");
+                }
+            });
             table.render({
                 id: 'tab_certificate',
                 elem: '#tab_certificate',
@@ -209,9 +215,9 @@
                 document.getElementById('form_certificate').reset();
                 $('#form_certificate [name="id"]').attr('readonly', false).removeClass('layui-disabled');
                 $('#form_certificate [name="path"]').attr('disabled', false);
+                $("input[name='type']").val("add");
+                $("#zipResult").html("");
                 form.render('select');
-                $("#certPath").html("");
-                $("#keyPath").html("");
                 layer.open({
                     type: 1,
                     title: '新增证书',
@@ -220,7 +226,6 @@
                     btnAlign: 'c',
                     btn: ['提交'],
                     yes: function (index, layero) {
-                        $('#form_certificate').attr('action', './addCertificate');
                         $('#cert_submit').click();
                     }
                 });
@@ -232,33 +237,30 @@
             });
 
             form.on('submit(submitCert)', function (data) {
-                //获取文件
-                var cert = $("#cert")[0].files[0];
-                var key = $("#key")[0].files[0];
-                var id = $("#id").val();
-                var name = $("#name").val();
-                var path = $("#path").val();
-
-                var formData = new FormData();
-                formData.append("path", path);
-                formData.append("cert", cert);
-                formData.append("key", key);
-                formData.append("name", name);
-                formData.append("id", id);
-                loadingAjax({
-                    url: data.form.action,
-                    contentType: false,
-                    processData: false,
-                    data: formData,
-                    success: function (data) {
-                        layer.msg(data.msg);
-                        if (200 == data.code) {
-                            layer.closeAll('page');
-                            // 刷新表
-                            table.reload('tab_certificate');
+                updateFormData = data.field;
+                if (data.field.type == "edit" && !hashSelectConfig) {
+                    loadingAjax({
+                        url: './saveCertificate',
+                        data: {
+                            data: JSON.stringify(updateFormData)
+                        },
+                        success: function (data) {
+                            layer.msg(data.msg);
+                            if (200 == data.code) {
+                                layer.closeAll('page');
+                                // 刷新表
+                                table.reload('tab_certificate');
+                            }
                         }
+                    });
+                } else {
+                    if (!hashSelectConfig) {
+                        layer.msg("请选择证书包");
+                        return false;
                     }
-                });
+                    uploadConfig.upload();
+                }
+
                 return false;
             });
         });
@@ -269,18 +271,17 @@
         document.getElementById('form_certificate').reset();
         $('#form_certificate [name="id"]').attr('readonly', true).addClass('layui-disabled');
         $('#form_certificate [name="path"]').attr('disabled', 'disabled');
-        form.render('select');
+        $("input[name='type']").val("edit");
         for (var key in data) {
-            if ("cert" === key) {
-                $("#certPath").html(data[key]);
-            } else if ("key" === key) {
-                $("#keyPath").html(data[key]);
-            } else if ("whitePath" === key) {
+            if ("whitePath" === key) {
                 document.getElementById('path_' + data[key]).setAttribute('selected', true);
+            } else if ("cert" === key) {
+                $("#zipResult").html(data[key]);
             } else {
                 $('#form_certificate [name="' + key + '"]').val(data[key]);
             }
         }
+        form.render('select');
         // 弹出
         layer.open({
             type: 1,
@@ -290,7 +291,6 @@
             btnAlign: 'c',
             btn: ['提交'],
             yes: function (index, layero) {
-                $('#form_certificate').attr('action', './updateCertificate');
                 $('#cert_submit').click();
             }
         });
@@ -306,12 +306,10 @@
                 url: './delete',
                 data: {id: data.id},
                 success: function (data) {
+                    layer.msg(data.msg);
                     if (200 == data.code) {
-                        layer.msg('删除成功！');
                         // 刷新项目列表
                         table.reload('tab_certificate', {});
-                    } else {
-                        layer.msg(data.msg);
                     }
                 }
             });

@@ -93,6 +93,11 @@ public class NginxService extends BaseOperService {
 
     }
 
+    @Override
+    public boolean updateItem(Object o) throws Exception {
+        return false;
+    }
+
     /**
      * 获取域名
      *
