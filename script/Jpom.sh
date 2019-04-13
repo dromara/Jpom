@@ -32,6 +32,7 @@ JVM="-server "
 ARGS="--jpom.applicationTag=${Tag} --server.port=2122  --jpom.log=${Path}log"
 
 echo ${Tag}
+echo ${Path}
 RETVAL="0"
 
 # 启动程序
@@ -54,7 +55,11 @@ function start() {
 	# classPath
     CLASSPATH=`listDir ${Lib}`
     nohup java  ${JVM} -classpath ${CLASSPATH}${JAVA_HOME}/lib/tools.jar -Dapplication=${Tag} -Dbasedir=${Path} ${MainClass} ${ARGS}  >> ${Log} 2>&1 &
-    tail -f ${Log}
+    if [[ -f ${Log} ]]; then
+        tail -f ${Log}
+    else
+        echo "还没有生成日志文件:${Log}"
+    fi
 }
 
 # 拼接所有文件
