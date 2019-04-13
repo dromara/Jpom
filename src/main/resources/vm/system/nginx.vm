@@ -28,8 +28,9 @@
 <body>
 <div class="layui-row">
     <button id="addNgx" class="layui-btn layui-btn-sm">新增nginx配置</button>
-    <button id="refresh" class="layui-btn layui-btn-sm">刷新表格</button>
+    <button onclick="reload();" class="layui-btn layui-btn-sm">刷新表格</button>
     <button id="certificate" class="layui-btn layui-btn-sm layui-btn-warm">证书管理</button>
+##    <button id="reload" class="layui-btn layui-btn-sm layui-btn-danger">重启nginx</button>
 </div>
 <table class="layui-table" id="tab_ngx" lay-filter="tab_ngx" style="margin: 0;"></table>
 
@@ -86,7 +87,10 @@
             even: true,
             cols: [[
                 {field: 'name', title: '文件名'},
-                {field: 'domain', title: '域名'},
+                {field: 'serverCount', title: '数量', width: "5%"},
+                {field: 'server_name', title: '域名'},
+                {field: 'location', title: '根location'},
+                {field: 'listen', title: '监听端口', width: "10%"},
                 {field: 'time', title: '最后修改时间'},
                 {
                     field: 'op', title: '操作', align: 'center', toolbar: '#bar_ngx', fixed: 'right'

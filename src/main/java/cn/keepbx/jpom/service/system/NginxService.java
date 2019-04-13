@@ -1,5 +1,6 @@
 package cn.keepbx.jpom.service.system;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
 import java.io.File;
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.List;
 
 /**
@@ -61,20 +63,11 @@ public class NginxService extends BaseOperService {
                 jsonObject.put("time", DateUtil.date(time).toString());
                 try {
                     NgxConfig config = NgxConfig.read(itemFile.getPath());
-                    NgxBlock http = config.findBlock("http");
-                    String severName;
-                    if (null != http) {
-                        List<NgxEntry> server = http.findAll(NgxBlock.class, "server");
-                        severName = findSeverName(server);
-                        if (StrUtil.isNotEmpty(severName)) {
-                            jsonObject.put("domain", severName);
-                            array.add(jsonObject);
-                            continue;
-                        }
-                    }
                     List<NgxEntry> server = config.findAll(NgxBlock.class, "server");
-                    severName = findSeverName(server);
-                    jsonObject.put("domain", severName);
+                    JSONObject data = findSeverName(server);
+                    if (data != null) {
+                        jsonObject.putAll(data);
+                    }
                 } catch (IOException e) {
                     DefaultSystemLog.ERROR().error(e.getMessage(), e);
                 }
@@ -106,20 +99,51 @@ public class NginxService extends BaseOperService {
      * @param server server块
      * @return 域名
      */
-    private String findSeverName(List<NgxEntry> server) {
-        if (null == server || server.size() <= 0) {
+    private JSONObject findSeverName(List<NgxEntry> server) {
+        if (null == server) {
             return null;
         }
+        JSONObject jsonObject = new JSONObject();
+        HashSet<String> serverNames = new HashSet<>();
+        HashSet<String> location = new HashSet<>();
+        HashSet<String> listen = new HashSet<>();
         for (NgxEntry ngxEntry : server) {
-            if (null != ngxEntry) {
-                NgxBlock ngxBlock = (NgxBlock) ngxEntry;
-                NgxParam serverName = ngxBlock.findParam("server_name");
-                if (null != serverName) {
-                    return serverName.getValue();
-                }
+
+            NgxBlock ngxBlock = (NgxBlock) ngxEntry;
+            NgxParam serverName = ngxBlock.findParam("server_name");
+            if (null != serverName) {
+                serverNames.add(serverName.getValue());
+            }
+            List<NgxEntry> locationAll = ngxBlock.findAll(NgxBlock.class, "location");
+            if (locationAll != null) {
+                locationAll.forEach(ngxEntry1 -> {
+                    NgxBlock ngxBlock1 = (NgxBlock) ngxEntry1;
+                    if (!StrUtil.SLASH.equals(ngxBlock1.getValue())) {
+                        return;
+                    }
+                    NgxParam locationMain = ngxBlock1.findParam("proxy_pass");
+                    if (locationMain != null) {
+                        location.add(locationMain.getValue());
+                    } else {
+                        locationMain = ngxBlock1.findParam("root");
+                        if (locationMain != null) {
+                            location.add(locationMain.getValue());
+                        }
+                    }
+
+                });
+            }
+            // 监听的端口
+            NgxParam listenParm = ngxBlock.findParam("listen");
+            if (listenParm != null) {
+                listen.add(listenParm.getValue());
             }
         }
-        return null;
+        jsonObject.put("serverCount", server.size());
+        jsonObject.put("server_name", CollUtil.join(serverNames, StrUtil.COMMA));
+        jsonObject.put("location", CollUtil.join(location, StrUtil.COMMA));
+        jsonObject.put("listen", CollUtil.join(listen, StrUtil.COMMA));
+        return jsonObject;
     }
 
 

@@ -61,6 +61,11 @@ EXIT 1
 
 @REM 启动
 :start
+    if "%JAVA_HOME%"=="" (
+        echo 请配置【JAVA_HOME】环境变量
+        PAUSE
+        EXIT 2
+    )
 	rem 备份日志
 	if exist %Log% (
 		if not exist %LogBack% (
@@ -99,6 +104,11 @@ goto:eof
 	timeout 3
 	echo 启动中....
 	call:start
+goto:eof
+
+@REM 重新加载Nginx
+:reloadNginx
+    nginx -s reload
 goto:eof
 
 @REM 提示用法

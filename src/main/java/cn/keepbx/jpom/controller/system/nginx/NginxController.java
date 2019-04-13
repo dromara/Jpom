@@ -6,8 +6,10 @@ import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.keepbx.jpom.common.BaseController;
+import cn.keepbx.jpom.common.Role;
+import cn.keepbx.jpom.common.commander.AbstractCommander;
+import cn.keepbx.jpom.common.interceptor.UrlPermission;
 import cn.keepbx.jpom.model.CertModel;
-import cn.keepbx.jpom.model.UserModel;
 import cn.keepbx.jpom.service.system.CertService;
 import cn.keepbx.jpom.service.system.NginxService;
 import cn.keepbx.jpom.service.system.WhitelistDirectoryService;
@@ -16,6 +18,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.github.odiszapc.nginxparser.NgxBlock;
 import com.github.odiszapc.nginxparser.NgxConfig;
 import com.github.odiszapc.nginxparser.NgxEntry;
+import com.github.odiszapc.nginxparser.NgxParam;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -61,6 +64,7 @@ public class NginxController extends BaseController {
      */
     @RequestMapping(value = "list_data.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
+    @UrlPermission(Role.Manage)
     public String list() {
         JSONArray array = nginxService.list();
         return JsonMessage.getString(200, "", array);
@@ -95,6 +99,7 @@ public class NginxController extends BaseController {
      */
     @RequestMapping(value = "updateNgx", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
+    @UrlPermission(Role.Manage)
     public String updateNgx(String name, String whitePath, String context, String genre) {
         if (StrUtil.isEmpty(name)) {
             return JsonMessage.getString(400, "请填写文件名");
@@ -117,12 +122,6 @@ public class NginxController extends BaseController {
                 return JsonMessage.getString(400, "该文件已存在");
             }
         }
-
-        //手动配置
-        UserModel user = getUser();
-        if (!user.isSystemUser()) {
-            return JsonMessage.getString(400, "你还不是系统管理员！");
-        }
         if (StrUtil.isEmpty(context)) {
             return JsonMessage.getString(400, "请填写配置信息");
         }
@@ -133,6 +132,24 @@ public class NginxController extends BaseController {
             if (list == null || list.size() <= 0) {
                 return JsonMessage.getString(404, "内容解析为空");
             }
+            for (NgxEntry ngxEntry : list) {
+                NgxBlock ngxBlock = (NgxBlock) ngxEntry;
+                // 检查日志路径
+                NgxParam accessLog = ngxBlock.findParam("access_log");
+                if (accessLog != null) {
+                    FileUtil.mkParentDirs(accessLog.getValue());
+                }
+                // 检查证书文件
+                NgxParam sslCertificate = ngxBlock.findParam("ssl_certificate");
+                if (sslCertificate != null && !FileUtil.exist(sslCertificate.getValue())) {
+                    return JsonMessage.getString(404, "证书文件ssl_certificate,不存在");
+                }
+                NgxParam sslCertificateKey = ngxBlock.findParam("ssl_certificate_key");
+                if (sslCertificateKey != null && !FileUtil.exist(sslCertificateKey.getValue())) {
+                    return JsonMessage.getString(404, "证书文件ssl_certificate_key,不存在");
+                }
+            }
+
         } catch (IOException e) {
             DefaultSystemLog.ERROR().error("解析失败", e);
             return JsonMessage.getString(500, "解析失败");
@@ -142,6 +159,11 @@ public class NginxController extends BaseController {
         } catch (Exception e) {
             DefaultSystemLog.ERROR().error(e.getMessage(), e);
             return JsonMessage.getString(400, msg + "失败");
+        }
+        try {
+            AbstractCommander.getInstance().execCommand("nginx -s reload");
+        } catch (Exception e) {
+            DefaultSystemLog.ERROR().error("reload nginx error", e);
         }
         return JsonMessage.getString(200, msg + "成功");
     }
@@ -153,13 +175,10 @@ public class NginxController extends BaseController {
      */
     @RequestMapping(value = "delete", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
+    @UrlPermission(Role.Manage)
     public String delete(String path, String name) {
         if (!whitelistDirectoryService.checkNgxDirectory(path)) {
             return JsonMessage.getString(400, "非法操作");
-        }
-        UserModel userModel = getUser();
-        if (!userModel.isSystemUser()) {
-            return JsonMessage.getString(400, "你没有操作权限");
         }
         path = pathSafe(path);
         name = pathSafe(name);
