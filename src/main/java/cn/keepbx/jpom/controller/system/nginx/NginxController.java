@@ -165,7 +165,7 @@ public class NginxController extends BaseController {
 
     private void reloadNginx() {
         try {
-            AbstractCommander.getInstance().execCommand("nginx -s reload");
+            AbstractCommander.getInstance().execSystemCommand("nginx -s reload");
         } catch (Exception e) {
             DefaultSystemLog.ERROR().error("reload nginx error", e);
         }
