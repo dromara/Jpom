@@ -18,16 +18,7 @@
     <img src='https://gitee.com/keepbx/Jpom/badge/star.svg?theme=dark' alt='gitee star'></img>
 </a>
 
-> 在服务器中管理jar包运行，如SpringBoot、Jboot等项目如果是打包为Jar那么我们一般是使用shell、bat 命令来管理, 
-> 在单服务器中多项目新增、更新、删除、排查日志等操作如此都不是很方便。
-> 再者想不使用电脑控制重启、关闭、开启项目。直接使用管理员软件登录服务器管理显然不是最简单的方法
-> 甚至在没有专业的服务器管理软件电脑前Jpom都是你们选择
-
-###  在这里[Jpom](https://gitee.com/keepbx/Jpom) 项目将如上问题统一解决
-
-> Jpom采用SpringBoot开发web项目(前台采用layui)+websocket来统一管理，只要能使用浏览器就ok，同时Jpom可以在linux和windows服务器上运行
-
-#### 你为什么需要Jpom
+#### 你为什么需要[Jpom](https://gitee.com/keepbx/Jpom)
 
 > SpringBoot、Jboot等框架开发的项目通常是以Jar的方式在后台运行的，如果只有一两个项目，管理起来不是太麻烦，但是当项目多了以后，管理起来就不是那么方便了，当项目出现问题时，能够通过Jpom即时排查问题，问题解决后还可以直接上传修改后的Jar，项目的堆栈信息，服务器CPU、内存使用情况一目了然，不必再登录服务器管理。
 
@@ -35,7 +26,9 @@
 
 ### Jpom 目标
 
-> 一款低侵入式Java运维、监控软件,要做到简而轻、低侵入
+> 一款简而轻的低侵入式Java运维、监控软件
+
+> Jpom采用SpringBoot开发web项目(前台采用layui)+websocket来统一管理，只要能使用浏览器就ok，同时Jpom可以在linux和windows服务器上运行
 
 #### 项目主要功能及特点
 
