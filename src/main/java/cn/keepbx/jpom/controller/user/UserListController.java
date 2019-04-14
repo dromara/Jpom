@@ -2,6 +2,8 @@ package cn.keepbx.jpom.controller.user;
 
 import cn.jiangzeyin.common.JsonMessage;
 import cn.keepbx.jpom.common.BaseController;
+import cn.keepbx.jpom.common.Role;
+import cn.keepbx.jpom.common.interceptor.UrlPermission;
 import cn.keepbx.jpom.model.ProjectInfoModel;
 import cn.keepbx.jpom.model.UserModel;
 import cn.keepbx.jpom.service.manage.ProjectInfoService;
@@ -44,11 +46,9 @@ public class UserListController extends BaseController {
      */
     @RequestMapping(value = "getUserList", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
+    @UrlPermission(Role.Manage)
     public String getUserList() {
         UserModel userName = getUser();
-        if (!userName.isManage()) {
-            return JsonMessage.getString(400, "你没有对应权限！");
-        }
         List<UserModel> userList = userService.list();
         if (userList != null) {
             Iterator<UserModel> userModelIterator = userList.iterator();

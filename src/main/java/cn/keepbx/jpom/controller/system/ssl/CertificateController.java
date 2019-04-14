@@ -239,7 +239,7 @@ public class CertificateController extends BaseController {
      */
     @RequestMapping(value = "/delete", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
-    @UrlPermission(Role.Manage)
+    @UrlPermission(Role.System)
     public String delete(String id) {
         if (StrUtil.isEmpty(id)) {
             return JsonMessage.getString(400, "删除失败");
