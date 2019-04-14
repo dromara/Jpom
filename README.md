@@ -104,7 +104,7 @@ Jpom.sh status    查看Jpom运行状态
 ```    
    > 演示系统有部分功能做了限制，完整功能请自行部署体验
    
-   > 如果出现登录不上，请联系我们重置密码，联系方式在最底部
+   > 如果出现登录不上，请联系我们，联系方式在最底部
     
    1. [Jboot案例代码](https://gitee.com/keepbx/Jpom-demo-case/tree/master/jboot-test)
    2. [SpringBoot案例代码(ClassPath)](https://gitee.com/keepbx/Jpom-demo-case/tree/master/springboot-test)
@@ -126,26 +126,12 @@ Jpom.sh status    查看Jpom运行状态
 
 [阿里云Oss配置>>](/doc/CodePipeline-Oss.md)
 
-
-### 感谢
- Jpom使用以下开源项目
-  - [Spring Boot](https://github.com/spring-projects/spring-boot)：核心框架
-  - [Fast-Boot](https://gitee.com/keepbx/common-parent)：针对SpringBoot 封装的一系列的快捷包 提供公共的Controller、自动化拦截器、启动加载资源接口、线程池管理
-  - [Fastjson](https://github.com/alibaba/fastjson)：用于Java的快速JSON解析器/生成器
-  - [Hutool](https://gitee.com/loolly/hutool)：一个Java工具包，也只是一个工具包，它帮助我们简化每一行代码，减少每一个方法，让Java语言也可以“甜甜的”
-  - [Layui](https://gitee.com/sentsin/layui)：前端UI框架
   
-
-### 提供bug反馈或建议
-
-- [码云](https://gitee.com/keepbx/Jpom/issues)
-
-### 贡献代码
-  欢迎任何人为Jpom添砖加瓦，贡献代码
-  
-### 交流讨论
+### 交流讨论 、提供bug反馈或建议
 
   1. QQ群：[136715345](https://shang.qq.com/wpa/qunwpa?idkey=93ff8d8a37a436b752fe38d32075bb1b32a8e0b3d3ff19d0b541ca840433f561)
   
   2. 微信公众号：[CodeGzh](/doc/CodeGzh-QrCode.jpg)
+  
+  3. 码云： [issues](https://gitee.com/keepbx/Jpom/issues)
   
