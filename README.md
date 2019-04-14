@@ -35,12 +35,12 @@
 1. 创建、修改、删除项目、Jar包管理
 2. 实时查看控制台日志
 3. cpu、ram 监控、导出堆栈信息、查看项目进程端口、服务器状态监控
-4. [阿里云 CodePipeline + Oss在线管理](/doc/CodePipeline-Oss.md)
-5. 多用户管理，用户项目权限独立(上传、删除权限可控制)
+4. 多用户管理，用户项目权限独立(上传、删除权限可控制)
+5. 项目路径白名单模式，杜绝用户误操作系统文件
 6. Jpom完全不依赖数据库，随装随用
-7. 项目路径白名单模式，杜绝用户误操作系统文件
+7. [阿里云 CodePipeline + Oss在线管理](/doc/CodePipeline-Oss.md)
 
-#### 项目操作演示
+#### 基本操作演示
 
 <img src="http://s.keepbx.cn/jpom-demo-gif.gif" ></img>
 
@@ -48,17 +48,15 @@
 
 1. 下载安装包 [https://gitee.com/keepbx/Jpom/attach_files](https://gitee.com/keepbx/Jpom/attach_files)
 2. 上传到服务解压对应路径
-3. 命令运行
+3. 命令运行（Jpom.sh、Jpom.bat）
 
 ### 编译安装
 
 1. 访问[Jpom](https://gitee.com/keepbx/Jpom)的码云主页,拉取最新完整代码：
-2. 进入项目目录执行，然后在目录中查看 target/jpom-x.x.x-release
-```
-mvn clean package
-```
-3. 打包上传服务器运行
-4. 命令运行
+2. 进入项目目录执行:`mvn clean package`
+3. 然后在目录中查看 target/jpom-x.x.x-release
+4. 打包上传服务器运行
+5. 命令运行（Jpom.sh、Jpom.bat）
 
 ### 编译运行
 
@@ -108,9 +106,13 @@ Jpom.sh status    查看Jpom运行状态
 
 [常见问题>>](/FQA.md) 
  
-[启动失败问题>>](https://gitee.com/keepbx/Jpom/wikis/pages?sort_id=1395625&doc_id=264493)
+<a target="_blank" href="https://gitee.com/keepbx/Jpom/wikis/pages?sort_id=1395625&doc_id=264493">
+启动失败问题>>
+</a>
 
-[安装说明>>](https://gitee.com/keepbx/Jpom/wikis/pages?sort_id=1395348&doc_id=264493)
+<a target="_blank" href="https://gitee.com/keepbx/Jpom/wikis/pages?sort_id=1395348&doc_id=264493">
+安装说明>>
+</a>
 
 [更新日志>>](/CHANGELOG.md)
 
