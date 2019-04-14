@@ -1,23 +1,33 @@
 # Jpom(Java Project Online Management)Java项目在线管理
 
+<img src='https://img.shields.io/github/license/jiangzeyin/jpom.svg?style=flat' alt='license'></img>
+<img src='https://img.shields.io/badge/JDK-1.8+-green.svg' alt='jdk'></img>
+<a target="_blank" href="https://travis-ci.org/jiangzeyin/Jpom">
+    <img src='https://travis-ci.org/jiangzeyin/Jpom.svg?branch=master' alt='travis'></img>
+</a>
+<a target="_blank" href="https://shang.qq.com/wpa/qunwpa?idkey=7be1882a2e2f07cd4af28bbb1f13362af270ba4615f2a6c7aaf9605fc0563d1b">
+    <img src='https://img.shields.io/badge/QQ%E7%BE%A4-136715345-yellowgreen.svg' alt='136715345'></img>
+</a>
+<a target="_blank" href="https://gitee.com/keepbx/Jpom">
+    <img src='https://img.shields.io/badge/Gitee-%E7%A0%81%E4%BA%91-yellow.svg' alt='gitee'></img>
+</a>
+<a target="_blank" href="https://github.com/jiangzeyin/Jpom">
+    <img src='https://img.shields.io/badge/Github-Github-red.svg' alt='github'></img>
+</a>
+<a target="_blank" href="https://gitee.com/keepbx/Jpom">
+    <img src='https://gitee.com/keepbx/Jpom/badge/star.svg?theme=dark' alt='gitee star'></img>
+</a>
+
+![logo](/doc/logo.png)
+
 > 在服务器中管理jar包运行，如SpringBoot、Jboot等项目如果是打包为Jar那么我们一般是使用shell、bat 命令来管理, 
 > 在单服务器中多项目新增、更新、删除、排查日志等操作如此都不是很方便。
 > 再者想不使用电脑控制重启、关闭、开启项目。直接使用管理员软件登录服务器管理显然不是最简单的方法
 > 甚至在没有专业的服务器管理软件电脑前Jpom都是你们选择
 
-
 ###  在这里[Jpom](https://gitee.com/keepbx/Jpom) 项目将如上问题统一解决
 
-![GitHub](https://img.shields.io/github/license/jiangzeyin/jpom.svg?style=flat)
-![jdk](https://img.shields.io/badge/JDK-1.8+-green.svg)
-[![travis](https://travis-ci.org/jiangzeyin/Jpom.svg?branch=master)](https://travis-ci.org/jiangzeyin/Jpom)
-[![QQ群](https://img.shields.io/badge/QQ%E7%BE%A4-136715345-yellowgreen.svg)](https://shang.qq.com/wpa/qunwpa?idkey=7be1882a2e2f07cd4af28bbb1f13362af270ba4615f2a6c7aaf9605fc0563d1b)
-[![码云](https://img.shields.io/badge/Gitee-%E7%A0%81%E4%BA%91-yellow.svg)](https://gitee.com/keepbx/Jpom)
-[![Github](https://img.shields.io/badge/Github-Github-red.svg)](https://github.com/jiangzeyin/Jpom)
-
 > Jpom采用SpringBoot开发web项目(前台采用layui)+websocket来统一管理，只要能使用浏览器就ok，同时Jpom可以在linux和windows服务器上运行
-
-![logo](/doc/logo.png)
 
 #### 你为什么需要Jpom
 
@@ -39,10 +49,9 @@
 6. Jpom完全不依赖数据库，随装随用
 7. 项目路径白名单模式，杜绝用户误操作系统文件
 
-
 #### 项目操作演示
 
-![Jpom](http://s.keepbx.cn/jpom-demo-gif.gif)
+<img src="http://s.keepbx.cn/jpom-demo-gif.gif" ></img>
 
 ### 下载安装
 
