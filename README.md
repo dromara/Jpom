@@ -85,7 +85,9 @@ Jpom.sh status    查看Jpom运行状态
 
 ### Jpom 的参数配置
 
-   在项目运行的根路径下创建[`extConfig.yml`](/src/main/resources/bin/extConfig.yml) 具体的配置说明和示例请查看：[`extConfig.yml`](/src/main/resources/bin/extConfig.yml) 
+   在项目运行的根路径下创建[`extConfig.yml`](/src/main/resources/bin/extConfig.yml) 
+   
+   具体的配置说明示例请查看[`extConfig.yml`](/src/main/resources/bin/extConfig.yml) 
 
 ### 演示项目
 
@@ -106,13 +108,9 @@ Jpom.sh status    查看Jpom运行状态
 
 [常见问题>>](/FQA.md) 
  
-<a target="_blank" href="https://gitee.com/keepbx/Jpom/wikis/pages?sort_id=1395625&doc_id=264493">
-启动失败问题>>
-</a>
+[启动失败问题>>](https://gitee.com/keepbx/Jpom/wikis/pages?sort_id=1395625&doc_id=264493)
 
-<a target="_blank" href="https://gitee.com/keepbx/Jpom/wikis/pages?sort_id=1395348&doc_id=264493">
-安装说明>>
-</a>
+[安装说明>>](https://gitee.com/keepbx/Jpom/wikis/pages?sort_id=1395348&doc_id=264493)
 
 [更新日志>>](/CHANGELOG.md)
 
