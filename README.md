@@ -18,8 +18,6 @@
     <img src='https://gitee.com/keepbx/Jpom/badge/star.svg?theme=dark' alt='gitee star'></img>
 </a>
 
-![logo](/doc/logo.png)
-
 > 在服务器中管理jar包运行，如SpringBoot、Jboot等项目如果是打包为Jar那么我们一般是使用shell、bat 命令来管理, 
 > 在单服务器中多项目新增、更新、删除、排查日志等操作如此都不是很方便。
 > 再者想不使用电脑控制重启、关闭、开启项目。直接使用管理员软件登录服务器管理显然不是最简单的方法
