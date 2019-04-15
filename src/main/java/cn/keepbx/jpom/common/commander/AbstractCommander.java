@@ -260,6 +260,13 @@ public abstract class AbstractCommander {
         return StrUtil.format("{}:{}", CommandService.RUNING_TAG, virtualMachine.id());
     }
 
+    /**
+     * 工具Jpom运行项目的id 获取virtualMachine
+     *
+     * @param tag 项目id
+     * @return VirtualMachine
+     * @throws IOException 异常
+     */
     public VirtualMachine getVirtualMachine(String tag) throws IOException {
         // 添加空格是为了防止startWith
         tag = String.format("-Dapplication=%s ", tag);

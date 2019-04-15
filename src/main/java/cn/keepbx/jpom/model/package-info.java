@@ -1,4 +1,6 @@
 /**
+ * 实体类包
+ * <p>
  * The MIT License(MIT)
  * <p>
  * Copyright(c) 2019 码之科技工作室
@@ -20,7 +22,6 @@
  * IN AN ACTION OF CONTRACT,TORT OR OTHERWISE,ARISING FROM,OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * <p>
- * 实体类包
  *
  * @author jiangzeyin
  */
