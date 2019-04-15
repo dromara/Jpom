@@ -126,10 +126,8 @@
         table.render(config);
 
         function loadFirstEcharts() {
-            $.ajax({
+            silentAjax({
                 url: './getTop',
-                type: 'POST',
-                dataType: 'json',
                 success: function (data) {
                     if (200 == data.code) {
                         if (data.data) {
@@ -139,19 +137,13 @@
                     } else {
                         layer.alert(data.msg);
                     }
-                },
-                error: function (err) {
-                    layer.alert("监控信息异常！");
                 }
             });
         }
 
         function loadProcessList() {
-            $.ajax({
+            silentAjax({
                 url: './processList',
-                type: 'POST',
-                dataType: 'json',
-                async: true,
                 success: function (data) {
                     if (200 == data.code) {
                         if (data.data) {
@@ -161,9 +153,6 @@
                     } else {
                         layer.alert(data.msg);
                     }
-                },
-                error: function (err) {
-                    layer.alert("监控信息异常！");
                 }
             });
         }

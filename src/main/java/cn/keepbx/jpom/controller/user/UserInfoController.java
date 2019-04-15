@@ -1,5 +1,6 @@
 package cn.keepbx.jpom.controller.user;
 
+import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
@@ -248,6 +249,8 @@ public class UserInfoController extends BaseController {
         if (msg != null) {
             return msg;
         }
+        // 记录修改时间，如果在线用户线退出
+        userModel.setModifyTime(DateUtil.currentSeconds());
         boolean b = userService.updateItem(userModel);
         if (b) {
             return JsonMessage.getString(200, "修改成功");

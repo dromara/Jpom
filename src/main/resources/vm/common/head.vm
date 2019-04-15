@@ -63,7 +63,7 @@
     }
 
     ## 带loading 效果的网络请求
-    function loadingAjax(data) {
+    function loadingAjax(data, closeLoading) {
         var success = data.success;
         delete data.success;
         var error = data.error;
@@ -73,12 +73,22 @@
             type: 'POST',
             dataType: 'json',
             beforeSend: function () {
-                index = layer.load(1, {
-                    shade: [0.3, '#fff']
-                });
+                if (closeLoading !== true) {
+                    index = layer.load(1, {
+                        shade: [0.3, '#fff']
+                    });
+                }
             },
             success: function (data) {
                 layer.close(index);
+                if (data.code == 800) {
+                ## 用户信息失效
+                    layer.msg(data.msg);
+                    setTimeout(function () {
+                        top.location.reload();
+                    }, 1500);
+                    return;
+                }
                 success && success(data);
             },
             error: function () {
@@ -88,5 +98,9 @@
         };
         $.extend(defData, data);
         $.ajax(defData);
+    }
+
+    function silentAjax(data) {
+        loadingAjax(data, true);
     }
 </script>

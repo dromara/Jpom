@@ -75,11 +75,12 @@
                 <dl class="layui-nav-child">
                     <dd><a href="javascript:;" op="updatePwd">修改密码</a></dd>
                     <dd><a href="javascript:;" op="updateName">修改昵称</a></dd>
+                    <dd><a href="javascript:;" op="exit">退出登录</a></dd>
                 </dl>
             </li>
-            <li class="layui-nav-item" id="li-exit">
-                <a href="javascript:;">退出</a>
-            </li>
+        ##            <li class="layui-nav-item" id="li-exit">
+        ##
+        ##            </li>
         </ul>
     </div>
     <div class="layui-side layui-bg-black">
@@ -206,6 +207,13 @@
                         }
                     });
                 });
+            } else if ('exit' == op) {
+                layer.confirm('确定退出系统？', {
+                    'title': '系统提示'
+                }, function (index) {
+                    window.location.href = "./logout";
+                    layer.close(index);
+                })
             }
         });
 
@@ -251,16 +259,6 @@
                 }
             });
             return false;
-        });
-
-        // 退出系统
-        $('#li-exit').click(function () {
-            layer.confirm('确定退出系统？', {
-                'title': '系统提示'
-            }, function (index) {
-                window.location.href = "./logout";
-                layer.close(index);
-            })
         });
     }
 </script>

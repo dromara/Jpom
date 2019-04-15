@@ -243,10 +243,8 @@
                 return;
             }
             var lib = wVal + $("#projectEnd").text();
-            $.ajax({
+            silentAjax({
                 url: './judge_lib.json',
-                type: 'POST',
-                dataType: 'json',
                 data: {
                     id: "#if($item)$!item.id#else#end",
                     newLib: lib
@@ -257,9 +255,6 @@
                     } else {
                         $("#tipMsg").text(data.msg).parent().show();
                     }
-                },
-                error: function (err) {
-                    layer.msg('检查路径失败，请稍后再试');
                 }
             });
         }

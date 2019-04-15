@@ -240,10 +240,8 @@
         }
 
         function reqLogSize() {
-            $.ajax({
+            silentAjax({
                 url: './log/logSize',
-                type: 'POST',
-                dataType: 'json',
                 data: {
                     id: "$!projectInfo.id"
                 },
@@ -255,11 +253,6 @@
                         $("#resetLog").hide();
                         layer.msg(data.msg);
                     }
-                },
-                error: function () {
-                    loopLog = false;
-                    clearInterval(loopLogTime);
-                    layer.alert("日志监听失败");
                 }
             });
         }

@@ -67,6 +67,10 @@ public class UserModel extends BaseModel {
      * 删除文件权限
      */
     private boolean deleteFile;
+    /**
+     * 记录最后修改时间
+     */
+    private long modifyTime;
 
     /**
      * 获取是否有上传文件的权限
@@ -230,6 +234,8 @@ public class UserModel extends BaseModel {
 
     public void setPassword(String password) {
         this.password = password;
+        // 记录修改时间，如果在线用户线退出
+        this.setModifyTime(DateUtil.current(false));
     }
 
     public String getUserMd5Key() {
@@ -281,4 +287,11 @@ public class UserModel extends BaseModel {
         return "demo".equals(getId());
     }
 
+    public long getModifyTime() {
+        return modifyTime;
+    }
+
+    public void setModifyTime(long modifyTime) {
+        this.modifyTime = modifyTime;
+    }
 }

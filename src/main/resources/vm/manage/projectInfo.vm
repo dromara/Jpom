@@ -150,10 +150,8 @@
             if (ids.length <= 0) {
                 return
             }
-            $.ajax({
+            silentAjax({
                 url: './getProjectPort',
-                type: 'POST',
-                dataType: 'json',
                 data: {
                     ids: JSON.stringify(ids)
                 },
@@ -164,9 +162,6 @@
                             $("span[p-Id='" + key + "']").text(data.data[key].port).attr("title", "端口：" + data.data[key].port + "  进程id:" + data.data[key].pid);
                         }
                     }
-                },
-                error: function (err) {
-
                 }
             });
         }

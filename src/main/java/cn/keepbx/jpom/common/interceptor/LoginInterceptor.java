@@ -4,16 +4,23 @@ import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.servlet.ServletUtil;
+import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.interceptor.BaseInterceptor;
 import cn.jiangzeyin.common.interceptor.InterceptorPattens;
+import cn.jiangzeyin.common.spring.SpringUtil;
 import cn.keepbx.jpom.common.BaseController;
 import cn.keepbx.jpom.model.UserModel;
+import cn.keepbx.jpom.service.user.UserService;
+import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import java.io.IOException;
 
 /**
  * 登录拦截器
@@ -38,13 +45,46 @@ public class LoginInterceptor extends BaseInterceptor {
             if (notLogin == null) {
                 UserModel user = (UserModel) session.getAttribute(SESSION_NAME);
                 if (user == null) {
-                    response.sendRedirect(getHeaderProxyPath(request) + "/login.html");
+                    this.responseLogin(request, response, handlerMethod);
+                    return false;
+                }
+                // 用户信息
+                UserService userService = SpringUtil.getBean(UserService.class);
+                UserModel newUser = userService.getItem(user.getId());
+                if (newUser == null) {
+                    // 用户被删除
+                    this.responseLogin(request, response, handlerMethod);
+                    return false;
+                }
+                if (user.getModifyTime() != newUser.getModifyTime()) {
+                    // 被修改过
+                    this.responseLogin(request, response, handlerMethod);
                     return false;
                 }
             }
         }
         reload();
         return true;
+    }
+
+    /**
+     * 提示登录
+     *
+     * @param request       req
+     * @param response      res
+     * @param handlerMethod 方法
+     * @throws IOException 异常
+     */
+    private void responseLogin(HttpServletRequest request, HttpServletResponse response, HandlerMethod handlerMethod) throws IOException {
+        ResponseBody responseBody = handlerMethod.getMethodAnnotation(ResponseBody.class);
+        if (responseBody == null) {
+            RestController restController = handlerMethod.getBeanType().getAnnotation(RestController.class);
+            if (restController == null) {
+                response.sendRedirect(getHeaderProxyPath(request) + "/login.html");
+                return;
+            }
+        }
+        ServletUtil.write(response, JsonMessage.getString(800, "登录信息已失效,重新登录"), MediaType.APPLICATION_JSON_UTF8_VALUE);
     }
 
     @Override
