@@ -341,7 +341,10 @@
             value: "5m;"
         }, {
             name: "ssl_ciphers",
-            value: "HIGH:!aNULL:!MD5;"
+            value: "ECDHE-RSA-AES128-GCM-SHA256:ECDHE:ECDH:AES:HIGH:!NULL:!aNULL:!MD5:!ADH:!RC4;"
+        }, {
+            name: "ssl_protocols",
+            value: "TLSv1 TLSv1.1 TLSv1.2;"
         }, {
             name: "ssl_prefer_server_ciphers",
             value: "on;"

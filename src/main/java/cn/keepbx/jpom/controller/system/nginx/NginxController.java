@@ -136,6 +136,10 @@ public class NginxController extends BaseController {
                 if (accessLog != null) {
                     FileUtil.mkParentDirs(accessLog.getValue());
                 }
+                accessLog = ngxBlock.findParam("error_log");
+                if (accessLog != null) {
+                    FileUtil.mkParentDirs(accessLog.getValue());
+                }
                 // 检查证书文件
                 NgxParam sslCertificate = ngxBlock.findParam("ssl_certificate");
                 if (sslCertificate != null && !FileUtil.exist(sslCertificate.getValue())) {
@@ -159,16 +163,21 @@ public class NginxController extends BaseController {
             DefaultSystemLog.ERROR().error(e.getMessage(), e);
             return JsonMessage.getString(400, "操作失败:" + e.getMessage());
         }
-        this.reloadNginx();
-        return JsonMessage.getString(200, "提交成功");
+        String msg = this.reloadNginx();
+        return JsonMessage.getString(200, "提交成功" + msg);
     }
 
-    private void reloadNginx() {
+    private String reloadNginx() {
         try {
-            AbstractCommander.getInstance().execSystemCommand("nginx -s reload");
+            String msg = AbstractCommander.getInstance().execSystemCommand("nginx -s reload");
+            if (StrUtil.isNotEmpty(msg)) {
+                DefaultSystemLog.LOG().info(msg);
+                return "(" + msg + ")";
+            }
         } catch (Exception e) {
             DefaultSystemLog.ERROR().error("reload nginx error", e);
         }
+        return StrUtil.EMPTY;
     }
 
     /**
@@ -218,8 +227,8 @@ public class NginxController extends BaseController {
             DefaultSystemLog.ERROR().error("删除nginx", e);
             return JsonMessage.getString(400, "删除失败:" + e.getMessage());
         }
-        this.reloadNginx();
-        return JsonMessage.getString(200, "删除成功");
+        String msg = this.reloadNginx();
+        return JsonMessage.getString(200, "删除成功" + msg);
     }
 
 }
