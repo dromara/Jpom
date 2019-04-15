@@ -1,5 +1,7 @@
 # Jpom(Java Project Online Management)Java项目在线管理
 
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/b3efbf0ca9a845869ed2fe8e4640becb)](https://app.codacy.com/app/jiangzeyin/Jpom?utm_source=github.com&utm_medium=referral&utm_content=jiangzeyin/Jpom&utm_campaign=Badge_Grade_Dashboard)
+
 <img src='https://img.shields.io/github/license/jiangzeyin/jpom.svg?style=flat' alt='license'></img>
 <img src='https://img.shields.io/badge/JDK-1.8+-green.svg' alt='jdk'></img>
 <a target="_blank" href="https://travis-ci.org/jiangzeyin/Jpom">
