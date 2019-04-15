@@ -9,6 +9,7 @@ import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.pool.ThreadPoolService;
 import cn.keepbx.jpom.common.commander.AbstractCommander;
 import cn.keepbx.jpom.socket.SocketSessionUtil;
+import cn.keepbx.jpom.util.CommandUtil;
 import cn.keepbx.jpom.util.JvmUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -80,7 +81,7 @@ public class TopManager {
             try {
                 String topInfo;
                 if (AbstractCommander.OS_INFO.isLinux()) {
-                    String result = AbstractCommander.getInstance().execCommand("top -b -n 1");
+                    String result = CommandUtil.execCommand("top -b -n 1");
                     topInfo = getTopMonitor(result);
                 } else {
                     topInfo = getWindowsMonitor();
@@ -122,12 +123,11 @@ public class TopManager {
         try {
             ATOMIC_BOOLEAN.set(true);
             if (AbstractCommander.OS_INFO.isLinux()) {
-                AbstractCommander instance = AbstractCommander.getInstance();
-                String head = instance.execSystemCommand("top -b -n 1 | head -7");
-                String s = instance.execSystemCommand("top -b -n 1 | grep java");
+                String head = CommandUtil.execSystemCommand("top -b -n 1 | head -7");
+                String s = CommandUtil.execSystemCommand("top -b -n 1 | grep java");
                 array = formatLinuxTop(head + s);
             } else {
-                String s = AbstractCommander.getInstance().execSystemCommand("tasklist /V | findstr java");
+                String s = CommandUtil.execSystemCommand("tasklist /V | findstr java");
                 array = formatWindowsProcess(s, false);
             }
             if (array != null) {
@@ -140,6 +140,13 @@ public class TopManager {
                     }
                     String port = AbstractCommander.getInstance().getMainPort(pid);
                     jsonObject.put("port", port);
+                    String jpomName = StrUtil.DASHED;
+                    try {
+                        jpomName = AbstractCommander.getInstance().getJpomNameByPid(pid);
+                    } catch (IOException e) {
+                        DefaultSystemLog.ERROR().error("解析进程失败", e);
+                    }
+                    jsonObject.put("jpomName", jpomName);
                 });
             }
             return array;

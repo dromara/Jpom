@@ -1,33 +1,37 @@
 package cn.keepbx.jpom.common.commander;
 
+import cn.hutool.cache.impl.LRUCache;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.date.DatePattern;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.lang.JarClassLoader;
+import cn.hutool.core.text.StrSpliter;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.http.HttpUtil;
 import cn.hutool.system.OsInfo;
 import cn.hutool.system.SystemUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
+import cn.jiangzeyin.common.spring.SpringUtil;
 import cn.keepbx.jpom.common.commander.impl.LinuxCommander;
 import cn.keepbx.jpom.common.commander.impl.WindowsCommander;
 import cn.keepbx.jpom.model.NetstatModel;
 import cn.keepbx.jpom.model.ProjectInfoModel;
 import cn.keepbx.jpom.service.manage.ConsoleService;
+import cn.keepbx.jpom.service.manage.ProjectInfoService;
+import cn.keepbx.jpom.util.CommandUtil;
 import com.sun.tools.attach.AttachNotSupportedException;
 import com.sun.tools.attach.VirtualMachine;
 import com.sun.tools.attach.VirtualMachineDescriptor;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.charset.Charset;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 import java.util.jar.Attributes;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
@@ -42,6 +46,14 @@ public abstract class AbstractCommander {
     private static AbstractCommander abstractCommander = null;
     protected Charset charset;
     public static final OsInfo OS_INFO = SystemUtil.getOsInfo();
+    /**
+     * 进程id 对应Jpom 名称
+     */
+    private static final ConcurrentHashMap<Integer, String> PID_JPOM_NAME = new ConcurrentHashMap<>();
+    /**
+     * 进程Id 获取端口号
+     */
+    private static final LRUCache<Integer, Integer> PID_PORT = new LRUCache<>(100, TimeUnit.MINUTES.toMillis(10));
 
     protected AbstractCommander(Charset charset) {
         this.charset = charset;
@@ -72,6 +84,8 @@ public abstract class AbstractCommander {
         return abstractCommander;
     }
 
+    //---------------------------------------------------- 基本操作----start
+
     /**
      * 启动
      *
@@ -90,39 +104,6 @@ public abstract class AbstractCommander {
     public abstract List<NetstatModel> listNetstat(int pid);
 
     /**
-     * 获取进程占用的主要端口
-     *
-     * @param pid 进程id
-     * @return 端口
-     */
-    public String getMainPort(int pid) {
-        List<NetstatModel> list = listNetstat(pid);
-        if (list == null) {
-            return "-";
-        }
-        int port = Integer.MAX_VALUE;
-        for (NetstatModel model : list) {
-            String local = model.getLocal();
-            if (StrUtil.isEmpty(local)) {
-                continue;
-            }
-            String[] ipPort = StrUtil.split(local, StrUtil.COLON);
-            if (!"0.0.0.0".equals(ipPort[0])) {
-                continue;
-            }
-            // 取最小的端口号
-            int minPort = Convert.toInt(ipPort[1], Integer.MAX_VALUE);
-            if (minPort < port) {
-                port = minPort;
-            }
-        }
-        if (port == Integer.MAX_VALUE) {
-            return "-";
-        }
-        return String.valueOf(port);
-    }
-
-    /**
      * 停止
      *
      * @param projectInfoModel 项目
@@ -134,13 +115,24 @@ public abstract class AbstractCommander {
         String token = projectInfoModel.getToken();
         if (StrUtil.isNotEmpty(token)) {
             try {
-                return HttpUtil.createGet(token).execute().body();
+                String body = HttpUtil.createGet(token).execute().body();
+                DefaultSystemLog.LOG().info(projectInfoModel.getName() + ":" + body);
             } catch (Exception e) {
-                return "get error";
+                DefaultSystemLog.ERROR().error("WebHooks 调用错误", e);
+                return "WebHooks error:" + e.getMessage();
             }
         }
         // 再次查看进程信息
-        return status(tag);
+        String result = status(tag);
+        //
+        int pid = parsePid(result);
+        if (pid > 0) {
+            // 清空名称缓存
+            PID_JPOM_NAME.remove(pid);
+            // 端口号缓存
+            PID_PORT.remove(pid);
+        }
+        return result;
     }
 
     /**
@@ -236,10 +228,10 @@ public abstract class AbstractCommander {
         backPath = new File(backPath, DateTime.now().toString(DatePattern.PURE_DATETIME_FORMAT) + ".log");
         FileUtil.copy(file, backPath, true);
         if (OS_INFO.isLinux()) {
-            execCommand("cp /dev/null " + projectInfoModel.getLog());
+            CommandUtil.execCommand("cp /dev/null " + projectInfoModel.getLog());
         } else if (OS_INFO.isWindows()) {
             // 清空日志
-            String r = execSystemCommand("echo  \"\" > " + file.getAbsolutePath());
+            String r = CommandUtil.execSystemCommand("echo  \"\" > " + file.getAbsolutePath());
             if (StrUtil.isEmpty(r)) {
                 DefaultSystemLog.LOG().info(r);
             }
@@ -260,6 +252,66 @@ public abstract class AbstractCommander {
         return StrUtil.format("{}:{}", ConsoleService.RUNING_TAG, virtualMachine.id());
     }
 
+    //---------------------------------------------------- 基本操作----end
+
+    /**
+     * 获取进程占用的主要端口
+     *
+     * @param pid 进程id
+     * @return 端口
+     */
+    public String getMainPort(int pid) {
+        Integer cachePort = PID_PORT.get(pid);
+        if (cachePort != null) {
+            return cachePort.toString();
+        }
+        List<NetstatModel> list = listNetstat(pid);
+        if (list == null) {
+            return StrUtil.DASHED;
+        }
+        int port = Integer.MAX_VALUE;
+        for (NetstatModel model : list) {
+            String local = model.getLocal();
+            String portStr = getPortFormLocalIp(local);
+            if (portStr == null) {
+                continue;
+            }
+            // 取最小的端口号
+            int minPort = Convert.toInt(portStr, Integer.MAX_VALUE);
+            if (minPort < port) {
+                port = minPort;
+            }
+        }
+        if (port == Integer.MAX_VALUE) {
+            return StrUtil.DASHED;
+        }
+        // 缓存
+        PID_PORT.put(pid, port);
+        return String.valueOf(port);
+    }
+
+    /**
+     * 判断ip 信息是否为本地ip
+     *
+     * @param local ip信息
+     * @return true 是本地ip
+     */
+    private String getPortFormLocalIp(String local) {
+        if (StrUtil.isEmpty(local)) {
+            return null;
+        }
+        List<String> ipPort = StrSpliter.splitTrim(local, StrUtil.COLON, true);
+        if (ipPort.isEmpty()) {
+            return null;
+        }
+        if ("0.0.0.0".equals(ipPort.get(0)) || ipPort.size() == 1) {
+            // 0.0.0.0:8084  || :::18000
+            return ipPort.get(ipPort.size() - 1);
+        }
+        return null;
+    }
+
+
     /**
      * 工具Jpom运行项目的id 获取virtualMachine
      *
@@ -269,7 +321,7 @@ public abstract class AbstractCommander {
      */
     public VirtualMachine getVirtualMachine(String tag) throws IOException {
         // 添加空格是为了防止startWith
-        tag = String.format("-Dapplication=%s ", tag);
+        String appTag = String.format("-Dapplication=%s ", tag);
         // 通过VirtualMachine.list()列出所有的java进程
         List<VirtualMachineDescriptor> descriptorList = VirtualMachine.list();
         for (VirtualMachineDescriptor virtualMachineDescriptor : descriptorList) {
@@ -283,15 +335,61 @@ public abstract class AbstractCommander {
             }
             Properties properties = virtualMachine.getAgentProperties();
             String args = properties.getProperty("sun.jvm.args", "");
-            if (StrUtil.containsIgnoreCase(args, tag)) {
+            if (StrUtil.containsIgnoreCase(args, appTag)) {
                 return virtualMachine;
             }
             args = properties.getProperty("sun.java.command", "");
-            if (StrUtil.containsIgnoreCase(args, tag)) {
+            if (StrUtil.containsIgnoreCase(args, appTag)) {
                 return virtualMachine;
             }
         }
         return null;
+    }
+
+    /**
+     * 根据指定进程id获取Jpom 名称
+     *
+     * @param pid 进程id
+     * @return false 不是来自Jpom
+     * @throws IOException 异常
+     */
+    public String getJpomNameByPid(int pid) throws IOException {
+        String name = PID_JPOM_NAME.get(pid);
+        if (name != null) {
+            return name;
+        }
+        ProjectInfoService projectInfoService = SpringUtil.getBean(ProjectInfoService.class);
+        List<ProjectInfoModel> projectInfoModels = projectInfoService.list();
+        if (projectInfoModels == null || projectInfoModels.isEmpty()) {
+            return StrUtil.DASHED;
+        }
+        VirtualMachine virtualMachine;
+        try {
+            virtualMachine = VirtualMachine.attach(String.valueOf(pid));
+        } catch (AttachNotSupportedException | IOException e) {
+            DefaultSystemLog.ERROR().error("获取jvm信息失败：" + pid, e);
+            return StrUtil.DASHED;
+        }
+        Properties properties = virtualMachine.getAgentProperties();
+        String appTag;
+        for (ProjectInfoModel projectInfoModel : projectInfoModels) {
+            appTag = String.format("-Dapplication=%s ", projectInfoModel.getId());
+            String args = properties.getProperty("sun.jvm.args", "");
+            if (StrUtil.containsIgnoreCase(args, appTag)) {
+                name = projectInfoModel.getName();
+                break;
+            }
+            args = properties.getProperty("sun.java.command", "");
+            if (StrUtil.containsIgnoreCase(args, appTag)) {
+                name = projectInfoModel.getName();
+                break;
+            }
+        }
+        if (name != null) {
+            PID_JPOM_NAME.put(pid, name);
+            return name;
+        }
+        return StrUtil.DASHED;
     }
 
 
@@ -350,60 +448,4 @@ public abstract class AbstractCommander {
             }
         } while (count++ < 20);
     }
-
-    public String execCommand(String command) throws Exception {
-        return exec(new String[]{command});
-    }
-
-    public String execSystemCommand(String command) {
-        String result = "error";
-        try {
-            String[] cmd;
-            if (OS_INFO.isLinux()) {
-                //执行linux系统命令
-                cmd = new String[]{"/bin/sh", "-c", command};
-            } else {
-                cmd = new String[]{"cmd", "/c", command};
-            }
-            result = exec(cmd);
-        } catch (Exception e) {
-            DefaultSystemLog.ERROR().error("执行命令异常", e);
-            result += e.getMessage();
-        }
-        return result;
-    }
-
-    /**
-     * 执行命令
-     *
-     * @param cmd 命令行
-     * @return 结果
-     * @throws IOException          IO
-     * @throws InterruptedException 等待超时
-     */
-    private String exec(String[] cmd) throws IOException, InterruptedException {
-        DefaultSystemLog.LOG().info(Arrays.toString(cmd));
-        String result;
-        Process process;
-        if (cmd.length == 1) {
-            process = Runtime.getRuntime().exec(cmd[0]);
-        } else {
-            process = Runtime.getRuntime().exec(cmd);
-        }
-        InputStream is;
-        int wait = process.waitFor();
-        if (wait == 0) {
-            is = process.getInputStream();
-        } else {
-            is = process.getErrorStream();
-        }
-        result = IoUtil.read(is, charset);
-        is.close();
-        process.destroy();
-        if (StrUtil.isEmpty(result) && wait != 0) {
-            result = "没有返回任何执行信息:" + wait;
-        }
-        return result;
-    }
-
 }

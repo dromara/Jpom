@@ -9,6 +9,7 @@ import cn.keepbx.jpom.common.commander.AbstractCommander;
 import cn.keepbx.jpom.model.NetstatModel;
 import cn.keepbx.jpom.system.ConfigBean;
 import cn.keepbx.jpom.system.TopManager;
+import cn.keepbx.jpom.util.CommandUtil;
 import cn.keepbx.jpom.util.JvmUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -45,14 +46,14 @@ public class InternalController extends BaseController {
         if (pid > 0) {
             if (AbstractCommander.OS_INFO.isLinux()) {
                 String command = "top -b -n 1 -p " + pid;
-                String internal = AbstractCommander.getInstance().execCommand(command);
+                String internal = CommandUtil.execCommand(command);
                 JSONArray array = TopManager.formatLinuxTop(internal);
                 if (null != array) {
                     setAttribute("item", array.getJSONObject(0));
                 }
             } else {
                 String command = "tasklist /V /FI \"pid eq " + pid + "\"";
-                String result = AbstractCommander.getInstance().execCommand(command);
+                String result = CommandUtil.execCommand(command);
                 JSONArray array = TopManager.formatWindowsProcess(result, true);
                 if (null != array) {
                     setAttribute("item", array.getJSONObject(0));
@@ -129,7 +130,7 @@ public class InternalController extends BaseController {
                 return JsonMessage.getString(400, "未运行");
             }
             String command = String.format("jstack %s >> %s ", pid, fileName);
-            AbstractCommander.getInstance().execSystemCommand(command);
+            CommandUtil.execSystemCommand(command);
             downLoad(getResponse(), fileName);
         } catch (Exception e) {
             DefaultSystemLog.ERROR().error(e.getMessage(), e);
@@ -152,7 +153,7 @@ public class InternalController extends BaseController {
                 return JsonMessage.getString(400, "未运行");
             }
             String command = String.format("jmap -histo:live %s >> %s", pid, fileName);
-            AbstractCommander.getInstance().execSystemCommand(command);
+            CommandUtil.execSystemCommand(command);
             downLoad(getResponse(), fileName);
         } catch (Exception e) {
             DefaultSystemLog.ERROR().error(e.getMessage(), e);

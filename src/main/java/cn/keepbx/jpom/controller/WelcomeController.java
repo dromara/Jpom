@@ -5,6 +5,7 @@ import cn.jiangzeyin.common.JsonMessage;
 import cn.keepbx.jpom.common.BaseController;
 import cn.keepbx.jpom.common.commander.AbstractCommander;
 import cn.keepbx.jpom.system.TopManager;
+import cn.keepbx.jpom.util.CommandUtil;
 import com.alibaba.fastjson.JSONArray;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
@@ -32,7 +33,7 @@ public class WelcomeController extends BaseController {
         String topInfo = "";
         try {
             if (AbstractCommander.OS_INFO.isLinux()) {
-                String s = AbstractCommander.getInstance().execCommand("top -b -n 1");
+                String s = CommandUtil.execCommand("top -b -n 1");
                 topInfo = TopManager.getTopMonitor(s);
             } else {
                 topInfo = TopManager.getWindowsMonitor();

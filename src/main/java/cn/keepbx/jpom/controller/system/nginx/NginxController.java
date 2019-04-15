@@ -7,13 +7,13 @@ import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.keepbx.jpom.common.BaseController;
 import cn.keepbx.jpom.common.Role;
-import cn.keepbx.jpom.common.commander.AbstractCommander;
 import cn.keepbx.jpom.common.interceptor.UrlPermission;
 import cn.keepbx.jpom.model.CertModel;
 import cn.keepbx.jpom.model.UserModel;
 import cn.keepbx.jpom.service.system.CertService;
 import cn.keepbx.jpom.service.system.NginxService;
 import cn.keepbx.jpom.service.system.WhitelistDirectoryService;
+import cn.keepbx.jpom.util.CommandUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.github.odiszapc.nginxparser.NgxBlock;
@@ -169,7 +169,7 @@ public class NginxController extends BaseController {
 
     private String reloadNginx() {
         try {
-            String msg = AbstractCommander.getInstance().execSystemCommand("nginx -s reload");
+            String msg = CommandUtil.execSystemCommand("nginx -s reload");
             if (StrUtil.isNotEmpty(msg)) {
                 DefaultSystemLog.LOG().info(msg);
                 return "(" + msg + ")";
