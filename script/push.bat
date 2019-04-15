@@ -1,6 +1,7 @@
 @REM Jpom多分支、多远端合并代码命令
 
 @echo off
+chcp 65001
 
 cd ../
 
