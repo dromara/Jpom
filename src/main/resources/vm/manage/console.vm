@@ -240,24 +240,19 @@
         }
 
         function reqLogSize() {
-            $.ajax({
+            silentAjax({
                 url: './log/logSize',
-                type: 'POST',
-                dataType: 'json',
                 data: {
                     id: "$!projectInfo.id"
                 },
                 success: function (data) {
                     if (200 == data.code) {
                         $("#logSize").html(data.data);
+                        $("#resetLog").show();
                     } else {
+                        $("#resetLog").hide();
                         layer.msg(data.msg);
                     }
-                },
-                error: function () {
-                    loopLog = false;
-                    clearInterval(loopLogTime);
-                    layer.alert("日志监听失败");
                 }
             });
         }
@@ -267,17 +262,23 @@
         });
 
         $("#resetLog").on('click', function () {
-            loadingAjax({
-                url: './log/resetLog',
-                data: {
-                    id: "$!projectInfo.id"
-                },
-                success: function (data) {
-                    layer.msg(data.msg);
-                    if (200 == data.code) {
-                        reqLogSize();
-                    }
-                },
+            layer.confirm("确定要清空当前控制台日志文件内容吗？", {
+                title: '系统提示'
+            }, function (index) {
+                layer.close(index);
+                loadingAjax({
+                    url: './log/resetLog',
+                    data: {
+                        id: "$!projectInfo.id"
+                    },
+                    success: function (data) {
+                        layer.msg(data.msg);
+                        if (200 == data.code) {
+                            // reqLogSize();
+                            $("#resetLog").hide();
+                        }
+                    },
+                });
             });
         });
 

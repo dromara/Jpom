@@ -67,6 +67,10 @@ public class UserModel extends BaseModel {
      * 删除文件权限
      */
     private boolean deleteFile;
+    /**
+     * 记录最后修改时间
+     */
+    private long modifyTime;
 
     /**
      * 获取是否有上传文件的权限
@@ -140,6 +144,10 @@ public class UserModel extends BaseModel {
      */
     public long overLockTime() {
         if (ExtConfigBean.getInstance().userAlwaysLoginError <= 0) {
+            return 0;
+        }
+        // 不限制演示账号的登录
+        if (isDemoUser()) {
             return 0;
         }
         // 最后一次失败时间
@@ -226,6 +234,8 @@ public class UserModel extends BaseModel {
 
     public void setPassword(String password) {
         this.password = password;
+        // 记录修改时间，如果在线用户线退出
+        this.setModifyTime(DateUtil.current(false));
     }
 
     public String getUserMd5Key() {
@@ -266,5 +276,22 @@ public class UserModel extends BaseModel {
 
     public boolean isSystemUser() {
         return UserModel.SYSTEM_ADMIN.equals(getParent());
+    }
+
+    /**
+     * demo 登录名默认为系统验证账号
+     *
+     * @return true
+     */
+    public boolean isDemoUser() {
+        return "demo".equals(getId());
+    }
+
+    public long getModifyTime() {
+        return modifyTime;
+    }
+
+    public void setModifyTime(long modifyTime) {
+        this.modifyTime = modifyTime;
     }
 }

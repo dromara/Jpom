@@ -5,7 +5,7 @@ import cn.jiangzeyin.common.JsonMessage;
 import cn.keepbx.jpom.common.BaseController;
 import cn.keepbx.jpom.common.commander.AbstractCommander;
 import cn.keepbx.jpom.model.UserModel;
-import cn.keepbx.jpom.socket.top.TopManager;
+import cn.keepbx.jpom.system.TopManager;
 import com.alibaba.fastjson.JSONArray;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
@@ -49,20 +49,7 @@ public class WelcomeController extends BaseController {
     @RequestMapping(value = "processList", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     public String getProcessList() {
-        JSONArray array = null;
-        try {
-            if (AbstractCommander.OS_INFO.isLinux()) {
-                AbstractCommander instance = AbstractCommander.getInstance();
-                String head = instance.execSystemCommand("top -b -n 1 | head -7");
-                String s = instance.execSystemCommand("top -b -n 1 | grep java");
-                array = TopManager.formatLinuxTop(head + s);
-            } else {
-                String s = AbstractCommander.getInstance().execSystemCommand("tasklist /V | findstr java");
-                array = TopManager.formatWindowsProcess(s);
-            }
-        } catch (Exception e) {
-            DefaultSystemLog.ERROR().error(e.getMessage(), e);
-        }
+        JSONArray array = TopManager.getProcessList();
         return JsonMessage.getString(200, "", array);
     }
 }

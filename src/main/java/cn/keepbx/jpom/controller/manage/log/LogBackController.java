@@ -36,8 +36,9 @@ public class LogBackController extends BaseController {
 
     @RequestMapping(value = "export.html", method = RequestMethod.GET)
     @ResponseBody
-    public String export(String id) {
-        ProjectInfoModel pim = projectInfoService.getItem(id);
+    @ProjectPermission
+    public String export() {
+        ProjectInfoModel pim = getProjectInfoModel();
         File file = new File(pim.getLog());
         if (!file.exists()) {
             return JsonMessage.getString(400, "没有日志文件:" + file.getPath());
@@ -61,7 +62,6 @@ public class LogBackController extends BaseController {
                 }
             }
             setAttribute("id", pim.getId());
-
             setAttribute("logPath", pim.getLog());
             setAttribute("logBackPath", logBack.getAbsolutePath());
         }
@@ -70,13 +70,14 @@ public class LogBackController extends BaseController {
 
     @RequestMapping(value = "logBack_download", method = RequestMethod.GET)
     @ResponseBody
-    public String download(String id, String key) {
+    @ProjectPermission
+    public String download(String key) {
         key = pathSafe(key);
         if (StrUtil.isEmpty(key)) {
             return JsonMessage.getString(405, "非法操作");
         }
         try {
-            ProjectInfoModel pim = projectInfoService.getItem(id);
+            ProjectInfoModel pim = getProjectInfoModel();
             File logBack = pim.getLogBack();
             if (logBack.exists() && logBack.isDirectory()) {
                 logBack = FileUtil.file(logBack, key);
@@ -123,13 +124,17 @@ public class LogBackController extends BaseController {
         return JsonMessage.getString(500, "获取日志大小失败");
     }
 
-
+    /**
+     * 重置日志
+     *
+     * @return json
+     */
     @RequestMapping(value = "resetLog", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
-    public String resetLog(String id) {
-        ProjectInfoModel pim;
+    @ProjectPermission
+    public String resetLog() {
+        ProjectInfoModel pim = getProjectInfoModel();
         try {
-            pim = projectInfoService.getItem(id);
             String msg = AbstractCommander.getInstance().backLog(pim);
             if (msg.contains("ok")) {
                 return JsonMessage.getString(200, "重置成功");

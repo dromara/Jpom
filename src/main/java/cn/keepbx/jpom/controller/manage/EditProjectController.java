@@ -236,7 +236,7 @@ public class EditProjectController extends BaseController {
             exits.setToken(projectInfo.getToken());
             //
             moveTo(exits, projectInfo);
-            projectInfoService.updateProject(exits);
+            projectInfoService.updateItem(exits);
             return JsonMessage.getString(200, "修改成功");
         } catch (Exception e) {
             DefaultSystemLog.ERROR().error(e.getMessage(), e);

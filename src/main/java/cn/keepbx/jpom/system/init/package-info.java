@@ -1,5 +1,5 @@
 /**
- * Jpom
+ * Jpom 正常启动完成自动加载包
  * <p>
  * The MIT License(MIT)
  * <p>
@@ -25,4 +25,4 @@
  *
  * @author jiangzeyin
  */
-package cn.keepbx.jpom;
+package cn.keepbx.jpom.system.init;

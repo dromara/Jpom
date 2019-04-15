@@ -76,7 +76,7 @@ public class CommandService {
                 ProjectInfoModel modify = projectInfoService.getItem(projectInfoModel.getId());
                 modify.setRunLibDesc(projectInfoModel.getUseLibDesc());
                 try {
-                    projectInfoService.updateProject(modify);
+                    projectInfoService.updateItem(modify);
                 } catch (Exception ignored) {
                 }
             }

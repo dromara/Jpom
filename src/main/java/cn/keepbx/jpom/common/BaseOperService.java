@@ -38,6 +38,15 @@ public abstract class BaseOperService<T> extends BaseDataService {
      */
     public abstract void addItem(T t);
 
+    /**
+     * 修改实体
+     *
+     * @param t 实体
+     * @return false 修改失败
+     * @throws Exception 异常
+     */
+    public abstract boolean updateItem(T t) throws Exception;
+
     protected JSONArray formatToArray(JSONObject jsonObject) {
         if (jsonObject == null) {
             return new JSONArray();

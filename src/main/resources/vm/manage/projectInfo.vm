@@ -8,10 +8,6 @@
         body {
             padding: 10px;
         }
-
-        .layui-table-hover {
-            /*background-color: #df0610 !important;*/
-        }
     </style>
 </head>
 <body>
@@ -40,7 +36,7 @@
 </script>
 
 <script type="text/html" id="port_templ">
-    <span p-Id="{{d.id}}" title="端口：{{ getItemPort(d) }}">{{ getItemPort(d) }}</span>
+    <span p-Id="{{d.id}}" title="端口：{{ getItemPort(d) }} 进程id:{{ getItemPId(d) }}">{{ getItemPort(d) }}</span>
 </script>
 
 <script type="text/html" id="toolbarDemo">
@@ -67,14 +63,26 @@
     const apiWhere = {};
     var cachePortInfo;
 
-    function getItemPort(data) {
+    function getCacheItemInfo(data, key) {
         if (!data.status) {
             return "";
         }
         if (!cachePortInfo) {
             return "";
         }
-        return cachePortInfo[data.id] || "";
+        if (!cachePortInfo[data.id]) {
+            return "";
+        }
+        return cachePortInfo[data.id][key] || "";
+    }
+
+    function getItemPort(data) {
+        return getCacheItemInfo(data, 'port');
+    }
+
+
+    function getItemPId(data) {
+        return getCacheItemInfo(data, 'pid');
     }
 
     function loadSuccess() {
@@ -135,12 +143,6 @@
                 // 选中
                 $("#selectGroup option[value='" + apiWhere.group + "']").attr("selected", "selected");
                 form.render();
-                // $("tbody").on("mouseover", "tr", function () {
-                //     $(this).siblings().css("opacity", 0.3);
-                // });
-                // $("tbody").on("mouseout", "tr", function () {
-                //     $(this).siblings().css("opacity", 1);
-                // });
             }
         });
 
@@ -148,10 +150,8 @@
             if (ids.length <= 0) {
                 return
             }
-            $.ajax({
+            silentAjax({
                 url: './getProjectPort',
-                type: 'POST',
-                dataType: 'json',
                 data: {
                     ids: JSON.stringify(ids)
                 },
@@ -159,12 +159,9 @@
                     if (200 == data.code) {
                         cachePortInfo = data.data;
                         for (var key in data.data) {
-                            $("span[p-Id='" + key + "']").text(data.data[key]).attr("title", "端口：" + data.data[key]);
+                            $("span[p-Id='" + key + "']").text(data.data[key].port).attr("title", "端口：" + data.data[key].port + "  进程id:" + data.data[key].pid);
                         }
                     }
-                },
-                error: function (err) {
-
                 }
             });
         }

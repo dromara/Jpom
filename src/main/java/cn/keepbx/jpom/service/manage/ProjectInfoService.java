@@ -77,9 +77,11 @@ public class ProjectInfoService extends BaseOperService<ProjectInfoModel> {
      *
      * @param projectInfo 项目信息
      */
-    public void updateProject(ProjectInfoModel projectInfo) throws Exception {
+    @Override
+    public boolean updateItem(ProjectInfoModel projectInfo) throws Exception {
         projectInfo.setModifyTime(DateUtil.now());
         updateJson(ConfigBean.PROJECT, projectInfo.toJson());
+        return true;
     }
 
 
@@ -104,6 +106,9 @@ public class ProjectInfoService extends BaseOperService<ProjectInfoModel> {
         File file = new File(pim.getLog());
         if (file.exists()) {
             long fileSize = file.length();
+            if (fileSize <= 0) {
+                return null;
+            }
             logSize = FileUtil.readableFileSize(fileSize);
         }
         return logSize;

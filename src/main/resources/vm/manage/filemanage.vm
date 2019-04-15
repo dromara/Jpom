@@ -38,7 +38,6 @@
     <a href="javascript:;" class="layui-btn layui-btn-sm layui-btn-normal" lay-event="download">下载</a>
 </script>
 <script type="text/javascript">
-    // var id = '';
     function loadSuccess() {
         layui.use(['upload'], function () {
             var upload = layui.upload;

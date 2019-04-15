@@ -178,7 +178,7 @@ public class LoginControl extends BaseController {
                     return JsonMessage.getString(rCode, "登录失败，请输入正确的密码和账号,多次失败将锁定账号");
                 }
             } finally {
-                userService.updateUser(userModel);
+                userService.updateItem(userModel);
             }
         }
     }

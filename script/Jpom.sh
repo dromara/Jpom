@@ -32,10 +32,15 @@ JVM="-server "
 ARGS="--jpom.applicationTag=${Tag} --server.port=2122  --jpom.log=${Path}log"
 
 echo ${Tag}
+echo ${Path}
 RETVAL="0"
 
 # 启动程序
 function start() {
+    if [[ -z "${JAVA_HOME}" ]] ; then
+        echo "请配置【JAVA_HOME】环境变量"
+        exit 2
+    fi
     echo  ${Log}
     # 备份日志
     if [[ -f ${Log} ]]; then
@@ -50,7 +55,12 @@ function start() {
 	# classPath
     CLASSPATH=`listDir ${Lib}`
     nohup java  ${JVM} -classpath ${CLASSPATH}${JAVA_HOME}/lib/tools.jar -Dapplication=${Tag} -Dbasedir=${Path} ${MainClass} ${ARGS}  >> ${Log} 2>&1 &
-    tailf ${Log}
+    if [[ -f ${Log} ]]; then
+        tail -f ${Log}
+    else
+        echo "还没有生成日志文件:${Log}"
+    fi
+    echo ${CLASSPATH}
 }
 
 # 拼接所有文件
@@ -98,10 +108,16 @@ function status()
 	fi
 }
 
+# 重新加载nginx
+function reloadNginx(){
+    nginx -t
+    nginx -s reload
+}
+
 # 提示使用语法
 function usage()
 {
-   echo "Usage: $0 {start|stop|restart|status}"
+   echo "Usage: $0 {start|stop|restart|status|reloadNginx}"
    RETVAL="2"
 }
 
@@ -118,8 +134,8 @@ case "$1" in
         stop
         start
         ;;
-    reload)
-        RETVAL="3"
+    reloadNginx)
+        reloadNginx
         ;;
     status)
         status

@@ -15,7 +15,6 @@ import com.aliyun.oss.model.ObjectListing;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
-import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Date;
@@ -31,11 +30,11 @@ import java.util.concurrent.TimeUnit;
 @Service
 public class OssManagerService extends BaseDataService {
 
-    public File download(String key) throws IOException {
+    public File download(String key) {
         File file = ConfigBean.getInstance().getTempPath();
         //getTempPath();
         file = FileUtil.file(file, key);
-        OSSClient ossClient = getOSSClient();
+        OSSClient ossClient = getOSSClient(getConfig());
         //   SimplifiedObjectMeta objectMeta = ossClient.getSimplifiedObjectMeta(getBucketName(), key);
         // 下载OSS文件到本地文件。如果指定的本地文件存在会覆盖，不存在则新建。
         ossClient.getObject(new GetObjectRequest(getBucketName(), key), file);
@@ -44,14 +43,14 @@ public class OssManagerService extends BaseDataService {
         return file;
     }
 
-    public JSONArray list(String name) throws IOException {
+    public JSONArray list(String name) {
         OSSClient ossClient;
         String prefix = String.format("%s%s", getKeyPrefix(), name);
         ListObjectsRequest request;
         List<OSSObjectSummary> summaryList = new ArrayList<>();
         String nextMarker = null;
         do {
-            ossClient = getOSSClient();
+            ossClient = getOSSClient(getConfig());
             request = new ListObjectsRequest();
             request.setBucketName(getBucketName());
             request.setPrefix(prefix);
@@ -59,7 +58,7 @@ public class OssManagerService extends BaseDataService {
             request.setMarker(nextMarker);
             ObjectListing objectListing = ossClient.listObjects(request);
             List<OSSObjectSummary> sums = objectListing.getObjectSummaries();
-//
+            //
             summaryList.addAll(sums);
             nextMarker = objectListing.getNextMarker();
             // 关闭OSSClient。
@@ -79,35 +78,35 @@ public class OssManagerService extends BaseDataService {
         return jsonArray;
     }
 
-    public URL getUrl(String key) throws IOException {
+    public URL getUrl(String key) {
         // 创建OSSClient实例。
-        OSSClient ossClient = getOSSClient();
+        OSSClient ossClient = getOSSClient(getConfig());
         // 设置URL过期时间。
         Date expiration = new Date(System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(10));
         // 生成以GET方法访问的签名URL，访客可以直接通过浏览器访问相关内容。
         return ossClient.generatePresignedUrl(getBucketName(), key, expiration);
     }
 
-    private OSSClient getOSSClient() throws IOException {
-        JSONObject config = getConfig();
+    public OSSClient getOSSClient(JSONObject config) {
         String endpoint = String.format("http://%s", config.getString("endpoint"));
-        // 阿里云主账号AccessKey拥有所有API的访问权限，风险很高。强烈建议您创建并使用RAM账号进行API访问或日常运维，请登录 https://ram.console.aliyun.com 创建RAM账号。
+        // 阿里云主账号AccessKey拥有所有API的访问权限，风险很高。强烈建议您创建并使用RAM账号进行API访问或日常运维，
+        // 请登录 https://ram.console.aliyun.com 创建RAM账号。
         String accessKeyId = config.getString("accessKeyId");
         String accessKeySecret = config.getString("accessKeySecret");
         // 创建OSSClient实例。
         return new OSSClient(endpoint, accessKeyId, accessKeySecret);
     }
 
-    public JSONObject getConfig() throws IOException {
+    public JSONObject getConfig() {
         return getJSONObject(ConfigBean.ALI_OSS);
     }
 
-    private String getBucketName() throws IOException {
+    private String getBucketName() {
         JSONObject config = getConfig();
         return config.getString("bucketName");
     }
 
-    private String getKeyPrefix() throws IOException {
+    private String getKeyPrefix() {
         JSONObject config = getConfig();
         return config.getString("keyPrefix");
     }

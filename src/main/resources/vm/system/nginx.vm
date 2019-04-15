@@ -13,11 +13,6 @@
             width: 80% !important;
         }
 
-
-        .div-uploadNgx {
-            display: none;
-        }
-
         .layui-inline {
             width: 80%;
         }
@@ -33,38 +28,11 @@
 <body>
 <div class="layui-row">
     <button id="addNgx" class="layui-btn layui-btn-sm">新增nginx配置</button>
-    <button id="uploadNgx" class="layui-btn layui-btn-sm">上传nginx配置</button>
-    <button id="refresh" class="layui-btn layui-btn-sm">刷新表格</button>
-    <button id="certificate" class="layui-btn layui-btn-sm">证书管理</button>
+    <button onclick="reload();" class="layui-btn layui-btn-sm">刷新表格</button>
+    <button id="certificate" class="layui-btn layui-btn-sm layui-btn-warm">证书管理</button>
+##    <button id="reload" class="layui-btn layui-btn-sm layui-btn-danger">重启nginx</button>
 </div>
 <table class="layui-table" id="tab_ngx" lay-filter="tab_ngx" style="margin: 0;"></table>
-
-<div class="layui-container div-uploadNgx" id="div-uploadNgx">
-    <form action="" class="layui-form" id="form_uploadNgx" style="margin-top: 20px">
-        <div class="layui-form-item">
-            <div class="layui-inline">
-                <label class="layui-form-label">文件路径</label>
-                <div class="layui-input-block">
-                    <select name="whitePath" id="whitePath">
-                        #foreach($item in $nginx)
-                            <option value="$item">$item</option>
-                        #end
-                    </select>
-                </div>
-            </div>
-        </div>
-        <div class="layui-form-item">
-            <div class="layui-inline">
-                <label class="layui-form-label">配置文件</label>
-                <div class="layui-input-block">
-                    <button type="button" class="layui-btn" id="selectConfig">
-                        <i class="layui-icon">&#xe67c;</i>选择文件
-                    </button>
-                </div>
-            </div>
-        </div>
-    </form>
-</div>
 
 </body>
 <script type="text/html" id="bar_ngx">
@@ -77,43 +45,6 @@
     var index = 0;
 
     function loadSuccess() {
-        var uploadConfig, hashSelectConfig;
-        layui.use(['upload'], function () {
-            var upload = layui.upload;
-            uploadConfig = upload.render({
-                elem: '#selectConfig',
-                url: './uploadNgx',
-                multiple: false,
-                exts: 'conf',
-                acceptMime: '.conf',
-                field: 'file',
-                data: {
-                    whitePath: function () {
-                        return $("#whitePath").val();
-                    }
-                },
-                auto: false,
-                choose: function () {
-                    hashSelectConfig = true;
-                },
-                before: function (obj) {
-                    layer.load();
-                },
-                done: function (res) {
-                    layer.closeAll('loading');
-                    layer.msg(res.msg);
-                    if (200 == res.code) {
-                        layer.closeAll('page');
-                        // 刷新表
-                        table.reload('tab_ngx');
-                    }
-                },
-                error: function () {
-                    layer.msg("上传失败");
-                }
-            });
-        });
-
         // 表格工具条事件
         table.on('tool(tab_ngx)', function (obj) {
             var data = obj.data;
@@ -156,7 +87,11 @@
             even: true,
             cols: [[
                 {field: 'name', title: '文件名'},
-                {field: 'domain', title: '域名'},
+                {field: 'serverCount', title: '数量', width: "5%"},
+                {field: 'server_name', title: '域名'},
+                {field: 'location', title: '根location'},
+                {field: 'listen', title: '监听端口', width: "10%"},
+                {field: 'time', title: '最后修改时间'},
                 {
                     field: 'op', title: '操作', align: 'center', toolbar: '#bar_ngx', fixed: 'right'
                 }
@@ -188,31 +123,6 @@
                 });
             });
         }
-
-        //上传配置
-        $('#uploadNgx').on('click', function () {
-            document.getElementById('form_uploadNgx').reset();
-            layer.open({
-                type: 1,
-                title: '上传配置',
-                content: $('#div-uploadNgx'),
-                area: ['60%', '40%'],
-                btnAlign: 'c',
-                btn: ['提交'],
-                yes: function (index, layero) {
-                    var uploadPath = $("#whitePath").val();
-                    if (!uploadPath || uploadPath === "") {
-                        layer.msg("请选择白名单路径")
-                        return;
-                    }
-                    if (!hashSelectConfig) {
-                        layer.msg("请选择配置文件")
-                        return;
-                    }
-                    uploadConfig.upload();
-                }
-            });
-        });
 
         //证书管理
         $('#certificate').on('click', function () {

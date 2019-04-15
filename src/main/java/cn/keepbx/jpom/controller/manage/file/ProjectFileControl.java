@@ -13,7 +13,6 @@ import cn.keepbx.jpom.common.interceptor.ProjectPermission;
 import cn.keepbx.jpom.model.ProjectInfoModel;
 import cn.keepbx.jpom.service.manage.ProjectInfoService;
 import cn.keepbx.jpom.system.ConfigBean;
-import cn.keepbx.jpom.system.ExtConfigBean;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.http.MediaType;
@@ -87,7 +86,6 @@ public class ProjectFileControl extends BaseController {
                 jsonObject.put("filesize", FileUtil.readableFileSize(file.length()));
             }
             jsonObject.put("filename", file.getName());
-            //   jsonObject.put("projectid", id);
             long mTime = file.lastModified();
             jsonObject.put("modifytimelong", mTime);
             jsonObject.put("modifytime", DateUtil.date(mTime).toString());
@@ -143,7 +141,7 @@ public class ProjectFileControl extends BaseController {
         }
         // 修改使用状态
         pim.setUseLibDesc("upload");
-        projectInfoService.updateProject(pim);
+        projectInfoService.updateItem(pim);
         return JsonMessage.getString(200, "上传成功");
     }
 
@@ -183,9 +181,6 @@ public class ProjectFileControl extends BaseController {
     @ResponseBody
     @ProjectPermission(checkDelete = true)
     public String clear() {
-        if (ExtConfigBean.getInstance().safeMode) {
-            return JsonMessage.getString(400, "安全模式不能清除文件");
-        }
         ProjectInfoModel pim = getProjectInfoModel();
         File file = new File(pim.getLib());
         if (FileUtil.clean(file)) {

@@ -112,7 +112,7 @@ public class CertModel extends BaseModel {
 
             // 数据持久化到文件中
             CertService certService = SpringUtil.getBean(CertService.class);
-            certService.updateCert(this);
+            certService.updateItem(this);
         }
     }
 

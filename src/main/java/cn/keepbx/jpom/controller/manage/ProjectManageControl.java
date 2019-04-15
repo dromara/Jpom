@@ -4,8 +4,10 @@ import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.keepbx.jpom.common.BaseController;
+import cn.keepbx.jpom.common.Role;
 import cn.keepbx.jpom.common.commander.AbstractCommander;
 import cn.keepbx.jpom.common.interceptor.ProjectPermission;
+import cn.keepbx.jpom.common.interceptor.UrlPermission;
 import cn.keepbx.jpom.model.ProjectInfoModel;
 import cn.keepbx.jpom.model.UserModel;
 import cn.keepbx.jpom.service.manage.ProjectInfoService;
@@ -45,6 +47,12 @@ public class ProjectManageControl extends BaseController {
         return "manage/projectInfo";
     }
 
+    /**
+     * 获取正在运行的项目的端口和进程id
+     *
+     * @param ids ids
+     * @return json
+     */
     @RequestMapping(value = "getProjectPort", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     public String getProjectPort(String ids) {
@@ -53,6 +61,7 @@ public class ProjectManageControl extends BaseController {
         }
         JSONArray jsonArray = JSONArray.parseArray(ids);
         JSONObject jsonObject = new JSONObject();
+        JSONObject itemObj;
         for (Object object : jsonArray) {
             String item = object.toString();
             int pid;
@@ -65,8 +74,11 @@ public class ProjectManageControl extends BaseController {
             if (pid <= 0) {
                 continue;
             }
-            int port = AbstractCommander.getInstance().getMainPort(pid);
-            jsonObject.put(item, port);
+            itemObj = new JSONObject();
+            String port = AbstractCommander.getInstance().getMainPort(pid);
+            itemObj.put("port", port);
+            itemObj.put("pid", pid);
+            jsonObject.put(item, itemObj);
         }
         return JsonMessage.getString(200, "", jsonObject);
     }
@@ -121,6 +133,7 @@ public class ProjectManageControl extends BaseController {
     @RequestMapping(value = "deleteProject", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     @ProjectPermission
+    @UrlPermission(Role.Manage)
     public String deleteProject() {
         ProjectInfoModel projectInfoModel = getProjectInfoModel();
         UserModel userModel = getUser();

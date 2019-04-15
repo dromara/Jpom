@@ -101,18 +101,19 @@
             // height: 'full-52',
             even: true,
             cols: [[
-                {field: 'pid', title: '进程id', sort: true, width: '8%'},
-                {field: 'USER', title: '所有者', width: '12%'},
-                {field: 'PR', title: '优先级', width: '8%', sort: true},
-                {field: 'NI', title: 'nice值', width: '8%', sort: true},
-                {field: 'VIRT', title: '使用虚拟内存', width: '8%', sort: true},
-                {field: 'RES', title: '使用物理内存', width: '8%', sort: true},
-                {field: 'SHR', title: '共享内存', width: '8%', sort: true},
+                {field: 'pid', title: '进程id', sort: true, width: '6%'},
+                {field: 'COMMAND', title: '进程名称'},
+                {field: 'port', title: '端口', sort: true, width: '6%'},
+                {field: 'USER', title: '所有者', width: '8%'},
+                {field: 'RES', title: '物理内存', width: '8%', sort: true},
                 {field: 'S', title: '进程状态', width: '8%', sort: true},
                 {field: 'CPU', title: '占用CPU', width: '8%', sort: true},
-                {field: 'MEM', title: '占用物理内存', width: '8%', sort: true},
-                {field: 'TIME', title: '时间总计', width: '8%', sort: true},
-                {field: 'COMMAND', title: '进程名称'}
+                {field: 'MEM', title: '物理内存', width: '8%', sort: true},
+                {field: 'TIME', title: '时间总计', sort: true},
+                {field: 'PR', title: '优先级', width: '6%', sort: true},
+                {field: 'NI', title: 'nice值', width: '6%', sort: true},
+                {field: 'VIRT', title: '虚拟内存', width: '8%', sort: true},
+                {field: 'SHR', title: '共享内存', width: '8%', sort: true},
             ]],
             loading: true,
             method: 'POST',
@@ -125,10 +126,8 @@
         table.render(config);
 
         function loadFirstEcharts() {
-            $.ajax({
+            silentAjax({
                 url: './getTop',
-                type: 'POST',
-                dataType: 'json',
                 success: function (data) {
                     if (200 == data.code) {
                         if (data.data) {
@@ -138,19 +137,13 @@
                     } else {
                         layer.alert(data.msg);
                     }
-                },
-                error: function (err) {
-                    layer.alert("监控信息异常！");
                 }
             });
         }
 
         function loadProcessList() {
-            $.ajax({
+            silentAjax({
                 url: './processList',
-                type: 'POST',
-                dataType: 'json',
-                async: true,
                 success: function (data) {
                     if (200 == data.code) {
                         if (data.data) {
@@ -160,9 +153,6 @@
                     } else {
                         layer.alert(data.msg);
                     }
-                },
-                error: function (err) {
-                    layer.alert("监控信息异常！");
                 }
             });
         }

@@ -55,7 +55,7 @@
             <scope>system</scope>
             <systemPath>${java.home}/../lib/tools.jar</systemPath>
         </dependency>
-        <!--        证书解密-->
+        <!--  证书解密-->
         <dependency>
             <groupId>org.bouncycastle</groupId>
             <artifactId>bcprov-jdk15on</artifactId>
@@ -67,7 +67,7 @@
             <artifactId>jchardet</artifactId>
             <version>1.0</version>
         </dependency>
-
+        <!--   数据库-->
         <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>

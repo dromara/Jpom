@@ -1,10 +1,13 @@
 package cn.keepbx.jpom.controller.user;
 
+import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.keepbx.jpom.common.BaseController;
+import cn.keepbx.jpom.common.Role;
 import cn.keepbx.jpom.common.interceptor.LoginInterceptor;
+import cn.keepbx.jpom.common.interceptor.UrlPermission;
 import cn.keepbx.jpom.model.UserModel;
 import cn.keepbx.jpom.service.user.UserService;
 import cn.keepbx.jpom.system.ExtConfigBean;
@@ -15,7 +18,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
-import java.io.IOException;
 
 /**
  * 用户管理
@@ -45,7 +47,7 @@ public class UserInfoController extends BaseController {
             return JsonMessage.getString(400, "新旧密码一致");
         }
         UserModel userName = getUser();
-        if ("demo".equals(userName.getId())) {
+        if (userName.isDemoUser()) {
             return JsonMessage.getString(402, "当前账户为演示账号，不支持修改密码");
         }
         try {
@@ -54,7 +56,7 @@ public class UserInfoController extends BaseController {
                 return JsonMessage.getString(500, "旧密码不正确！");
             }
             userModel.setPassword(newPwd);
-            if (!userService.updateUser(userModel)) {
+            if (!userService.updateItem(userModel)) {
                 return JsonMessage.getString(500, "修改失败！");
             }
             // 如果修改成功，则销毁会话
@@ -73,7 +75,7 @@ public class UserInfoController extends BaseController {
      * @return json
      */
     @RequestMapping(value = "updateName", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public String updateName(String name) throws IOException {
+    public String updateName(String name) {
         if (StrUtil.isEmpty(name)) {
             return JsonMessage.getString(405, "请输入新的昵称");
         }
@@ -84,7 +86,7 @@ public class UserInfoController extends BaseController {
         UserModel userModel = getUser();
         userModel = userService.getItem(userModel.getId());
         userModel.setName(name);
-        if (userService.updateUser(userModel)) {
+        if (userService.updateItem(userModel)) {
             setSessionAttribute(LoginInterceptor.SESSION_NAME, userModel);
             return JsonMessage.getString(200, "修改成功");
         }
@@ -98,14 +100,9 @@ public class UserInfoController extends BaseController {
      * @return String
      */
     @RequestMapping(value = "deleteUser", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public String deleteUser(String id) throws IOException {
+    @UrlPermission(Role.Manage)
+    public String deleteUser(String id) {
         UserModel userName = getUser();
-        if (!userName.isManage()) {
-            return JsonMessage.getString(400, "你没有删除用户的权限");
-        }
-        if (ExtConfigBean.getInstance().safeMode) {
-            return JsonMessage.getString(401, "安全模式不能删除用户");
-        }
         if (userName.getId().equals(id)) {
             return JsonMessage.getString(400, "不能删除自己");
         }
@@ -113,8 +110,12 @@ public class UserInfoController extends BaseController {
         if (userModel == null) {
             return JsonMessage.getString(501, "非法访问");
         }
+        // 非系统管理员不支持删除演示账号
+        if (!userName.isSystemUser() && userModel.isDemoUser()) {
+            return JsonMessage.getString(402, "演示账号不支持删除");
+        }
         if (userModel.isSystemUser()) {
-            return JsonMessage.getString(400, "不能删除系统管理员");
+            return JsonMessage.getString(400, "非法访问:-5");
         }
         boolean b = userService.deleteUser(id);
         if (b) {
@@ -130,11 +131,9 @@ public class UserInfoController extends BaseController {
      * @return String
      */
     @RequestMapping(value = "addUser", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public String addUser(String id) throws IOException {
+    @UrlPermission(Role.Manage)
+    public String addUser(String id) {
         UserModel userName = getUser();
-        if (!userName.isManage()) {
-            return JsonMessage.getString(400, "你还没有权限");
-        }
         //
         int size = userService.userSize();
         if (size >= ExtConfigBean.getInstance().userMaxCount) {
@@ -228,11 +227,8 @@ public class UserInfoController extends BaseController {
      * @return String
      */
     @RequestMapping(value = "updateUser", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public String updateUser(String id) throws IOException {
-        UserModel userName = getUser();
-        if (!userName.isManage()) {
-            return JsonMessage.getString(400, "你还没有权限");
-        }
+    @UrlPermission(Role.Manage)
+    public String updateUser(String id) {
         UserModel userModel = userService.getItem(id);
         if (userModel == null) {
             return JsonMessage.getString(400, "修改失败:-1");
@@ -241,11 +237,21 @@ public class UserInfoController extends BaseController {
         if (userModel.isSystemUser()) {
             return JsonMessage.getString(401, "WEB端不能修改系统管理员信息");
         }
+        UserModel me = getUser();
+        if (userModel.getId().equals(me.getId())) {
+            return JsonMessage.getString(401, "不能修改自己的信息");
+        }
+        // 非系统管理员不能修改演示账号信息
+        if (!me.isSystemUser() && userModel.isDemoUser()) {
+            return JsonMessage.getString(402, "不支持修改演示账号信息");
+        }
         String msg = parseUser(userModel, false);
         if (msg != null) {
             return msg;
         }
-        boolean b = userService.updateUser(userModel);
+        // 记录修改时间，如果在线用户线退出
+        userModel.setModifyTime(DateUtil.currentSeconds());
+        boolean b = userService.updateItem(userModel);
         if (b) {
             return JsonMessage.getString(200, "修改成功");
         }
@@ -257,20 +263,16 @@ public class UserInfoController extends BaseController {
      *
      * @param id id
      * @return json
-     * @throws IOException io
      */
     @RequestMapping(value = "unlock", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public String unlock(String id) throws IOException {
-        UserModel userName = getUser();
-        if (!userName.isSystemUser()) {
-            return JsonMessage.getString(400, "你还没有权限");
-        }
+    @UrlPermission(Role.System)
+    public String unlock(String id) {
         UserModel userModel = userService.getItem(id);
         if (userModel == null) {
             return JsonMessage.getString(400, "修改失败:-1");
         }
         userModel.unLock();
-        boolean b = userService.updateUser(userModel);
+        boolean b = userService.updateItem(userModel);
         if (b) {
             return JsonMessage.getString(200, "解锁成功");
         }

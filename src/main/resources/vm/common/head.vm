@@ -10,6 +10,12 @@
     .x-red {
         color: red;
     }
+
+    .layui-table-hover {
+        -webkit-box-shadow: inset 0 0 10px #8D8D8D;
+        -moz-box-shadow: inset 0 0 10px #8D8D8D;
+        box-shadow: inset 0 0 10px #8D8D8D;
+    }
 </style>
 <script type="text/javascript" src="$!jpomProxyPath/static/layui/layui.js?v=$staticCacheTime"></script>
 <script type="text/javascript">
@@ -37,11 +43,8 @@
         if (options.id != "welcome") {
             lay_id += options.title;
         ## 如果存在选项卡，切换，否则创建
-            if ($('[lay-id="' + lay_id + '"]', top.document).length > 0) {
-                element.tabChange('mainTabs', lay_id);
-            } else {
-                // 创建
-                var tab_content = '<iframe name="' + options.id + '" src="' + options.url + '" frameborder="0" class="custom-iframe"></iframe>';
+            if ($('[lay-id="' + lay_id + '"]', top.document).length <= 0) {
+                var tab_content = '<iframe id="' + lay_id + '" name="' + options.id + '" src="' + options.url + '" frameborder="0" class="custom-iframe"></iframe>';
                 element.tabAdd('mainTabs', {
                     title: options.title,
                     content: tab_content,
@@ -60,7 +63,7 @@
     }
 
     ## 带loading 效果的网络请求
-    function loadingAjax(data) {
+    function loadingAjax(data, closeLoading) {
         var success = data.success;
         delete data.success;
         var error = data.error;
@@ -70,12 +73,22 @@
             type: 'POST',
             dataType: 'json',
             beforeSend: function () {
-                index = layer.load(1, {
-                    shade: [0.3, '#fff']
-                });
+                if (closeLoading !== true) {
+                    index = layer.load(1, {
+                        shade: [0.3, '#fff']
+                    });
+                }
             },
             success: function (data) {
                 layer.close(index);
+                if (data.code == 800) {
+                ## 用户信息失效
+                    layer.msg(data.msg);
+                    setTimeout(function () {
+                        top.location.reload();
+                    }, 1500);
+                    return;
+                }
                 success && success(data);
             },
             error: function () {
@@ -85,5 +98,9 @@
         };
         $.extend(defData, data);
         $.ajax(defData);
+    }
+
+    function silentAjax(data) {
+        loadingAjax(data, true);
     }
 </script>

@@ -107,7 +107,7 @@ public class UserService extends BaseOperService<UserModel> {
             if (userModel.isSystemUser()) {
                 continue;
             }
-            userModel.setPassword("");
+            userModel.setPassword(null);
             array.add(userModel);
         }
         return array;
@@ -120,7 +120,7 @@ public class UserService extends BaseOperService<UserModel> {
      * @return 用户信息
      */
     @Override
-    public UserModel getItem(String userId) throws IOException {
+    public UserModel getItem(String userId) {
         return getJsonObjectById(ConfigBean.USER, userId, UserModel.class);
     }
 
@@ -155,7 +155,8 @@ public class UserService extends BaseOperService<UserModel> {
      *
      * @return String
      */
-    public boolean updateUser(UserModel userModel) {
+    @Override
+    public boolean updateItem(UserModel userModel) {
         try {
             updateJson(ConfigBean.USER, userModel.toJson());
             return true;

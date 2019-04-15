@@ -23,16 +23,16 @@
                 </div>
             </div>
             <div class="layui-form-item">
-                <label class="layui-form-label">accessKeyId</label>
+                <label class="layui-form-label">keyId</label>
                 <div class="layui-input-block">
                     <input type="text" name="accessKeyId" placeholder="请输入accessKeyId" required lay-verify="required"
                            value="$!item.accessKeyId" class="layui-input">
                 </div>
             </div>
             <div class="layui-form-item">
-                <label class="layui-form-label">accessKeySecret</label>
+                <label class="layui-form-label">keySecret</label>
                 <div class="layui-input-block">
-                    <input type="text" name="accessKeySecret" placeholder="请输入accessKeySecret" required
+                    <input type="password" name="accessKeySecret" placeholder="请输入accessKeySecret" required
                            lay-verify="required" value="$!item.accessKeySecret"
                            class="layui-input">
                 </div>

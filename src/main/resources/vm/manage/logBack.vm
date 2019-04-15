@@ -21,7 +21,7 @@
         </tr>
         <tr>
             <td>控制台日志备份路径</td>
-            <td>$!logPath</td>
+            <td>$!logBackPath</td>
         </tr>
         </tbody>
     </table>

@@ -20,7 +20,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.annotation.Resource;
 import java.io.File;
-import java.io.IOException;
 
 /**
  * 构建
@@ -40,7 +39,7 @@ public class BuildController extends BaseController {
     private CommandService commandService;
 
     @RequestMapping(value = "build", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
-    public String build(String id) throws IOException {
+    public String build(String id) {
         ProjectInfoModel projectInfoModel = projectInfoService.getItem(id);
         if (projectInfoModel != null && StrUtil.isNotEmpty(projectInfoModel.getBuildTag())) {
             JSONArray jsonArray = ossManagerService.list(projectInfoModel.getBuildTag());
@@ -70,7 +69,7 @@ public class BuildController extends BaseController {
     @RequestMapping(value = "build_install", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     @ProjectPermission
-    public String buildInstall(String id, String key) throws Exception {
+    public String buildInstall(String key) throws Exception {
         ProjectInfoModel projectInfoModel = getProjectInfoModel();
         if (StrUtil.isEmpty(projectInfoModel.getBuildTag())) {
             return JsonMessage.getString(400, "项目还不支持构建");
@@ -86,7 +85,7 @@ public class BuildController extends BaseController {
         ZipUtil.unzip(file, lib);
         // 修改使用状态
         projectInfoModel.setUseLibDesc("build");
-        projectInfoService.updateProject(projectInfoModel);
+        projectInfoService.updateItem(projectInfoModel);
         String result = commandService.execCommand(CommandService.CommandOp.restart, projectInfoModel);
         return JsonMessage.getString(200, "安装成功，已自动重启,当前状态是：" + result);
     }

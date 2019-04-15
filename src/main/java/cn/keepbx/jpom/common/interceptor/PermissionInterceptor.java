@@ -7,6 +7,7 @@ import cn.jiangzeyin.common.interceptor.BaseInterceptor;
 import cn.jiangzeyin.common.interceptor.InterceptorPattens;
 import cn.jiangzeyin.common.spring.SpringUtil;
 import cn.keepbx.jpom.common.BaseController;
+import cn.keepbx.jpom.common.Role;
 import cn.keepbx.jpom.model.ProjectInfoModel;
 import cn.keepbx.jpom.model.UserModel;
 import cn.keepbx.jpom.service.manage.ProjectInfoService;
@@ -75,6 +76,21 @@ public class PermissionInterceptor extends BaseInterceptor {
 
                 // 项目
                 request.setAttribute(CACHE_PROJECT_INFO, projectInfoModel);
+            }
+
+            UrlPermission urlPermission = handlerMethod.getMethodAnnotation(UrlPermission.class);
+            if (urlPermission != null) {
+                Role role = urlPermission.value();
+                if (role == Role.System && !userModel.isSystemUser()) {
+                    JsonMessage jsonMessage = new JsonMessage(302, "你没有权限:-1");
+                    ServletUtil.write(response, jsonMessage.toString(), MediaType.APPLICATION_JSON_UTF8_VALUE);
+                    return false;
+                }
+                if (role == Role.Manage && !userModel.isManage()) {
+                    JsonMessage jsonMessage = new JsonMessage(302, "你没有权限:-2");
+                    ServletUtil.write(response, jsonMessage.toString(), MediaType.APPLICATION_JSON_UTF8_VALUE);
+                    return false;
+                }
             }
         }
         return true;

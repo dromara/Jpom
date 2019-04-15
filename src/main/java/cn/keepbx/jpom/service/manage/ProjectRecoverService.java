@@ -55,4 +55,8 @@ public class ProjectRecoverService extends BaseOperService<ProjectRecoverModel> 
         return getJsonObjectById(ConfigBean.PROJECT_RECOVER, id, ProjectRecoverModel.class);
     }
 
+    @Override
+    public boolean updateItem(ProjectRecoverModel projectRecoverModel) throws Exception {
+        return false;
+    }
 }

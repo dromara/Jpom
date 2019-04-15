@@ -7,11 +7,10 @@ import cn.keepbx.jpom.JpomApplication;
 import cn.keepbx.jpom.common.JpomApplicationEvent;
 import com.alibaba.fastjson.JSON;
 
+import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
-import java.util.Enumeration;
 import java.util.jar.Attributes;
+import java.util.jar.JarFile;
 import java.util.jar.Manifest;
 
 /**
@@ -25,26 +24,21 @@ public class JpomManifest {
 
     static {
         JPOM_MANIFEST = new JpomManifest();
-        ClassLoader classLoader = JpomApplication.class.getClassLoader();
-        Enumeration<URL> manifestResources = null;
-        try {
-            manifestResources = classLoader.getResources("META-INF/MANIFEST.MF");
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        if (manifestResources != null) {
-            while (manifestResources.hasMoreElements()) {
-                try (InputStream inputStream = manifestResources.nextElement().openStream()) {
-                    Manifest manifest = new Manifest(inputStream);
-                    Attributes attributes = manifest.getMainAttributes();
-                    String version = attributes.getValue("Jpom-Project-Version");
-                    if (version != null) {
-                        JPOM_MANIFEST.setVersion(version);
-                        String timeStamp = attributes.getValue("Jpom-Timestamp");
-                        JPOM_MANIFEST.setTimeStamp(timeStamp);
-                    }
-                } catch (Exception ignored) {
+        File jarFile = JpomApplication.getRunPath();
+        if (jarFile.isFile()) {
+            JarFile jarFile1;
+            try {
+                jarFile1 = new JarFile(jarFile);
+                Manifest manifest = jarFile1.getManifest();
+                Attributes attributes = manifest.getMainAttributes();
+                String version = attributes.getValue("Jpom-Project-Version");
+                if (version != null) {
+                    JPOM_MANIFEST.setVersion(version);
+                    String timeStamp = attributes.getValue("Jpom-Timestamp");
+                    JPOM_MANIFEST.setTimeStamp(timeStamp);
                 }
+            } catch (IOException e) {
+                e.printStackTrace();
             }
         }
     }

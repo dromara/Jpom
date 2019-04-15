@@ -36,56 +36,53 @@
 <div class="layui-container div-user" id="div-user">
     <form action="" class="layui-form" id="form_user" style="margin-top: 20px">
         <div class="layui-form-item">
-            <div class="layui-inline">
-                <label class="layui-form-label">登录名</label>
-                <div class="layui-input-block">
-                    <input type="text" name="id" placeholder="登录名,创建后不能修改" required lay-verify="required"
-                           class="layui-input">
-                </div>
+
+            <label class="layui-form-label">登录名</label>
+            <div class="layui-input-block">
+                <input type="text" name="id" placeholder="登录名,创建后不能修改" required lay-verify="required"
+                       class="layui-input">
             </div>
         </div>
         <div class="layui-form-item" id="pwd-input-div">
-            <div class="layui-inline">
-                <label class="layui-form-label">密码</label>
-                <div class="layui-input-block">
-                    <input type="password" name="password" placeholder=""
-                           class="layui-input">
-                </div>
+            <label class="layui-form-label">密码</label>
+            <div class="layui-input-block">
+                <input type="password" name="password" placeholder=""
+                       class="layui-input">
             </div>
         </div>
         <div class="layui-form-item">
-            <div class="layui-form-item">
-                <div class="layui-inline">
-                    <label class="layui-form-label">昵称</label>
-                    <div class="layui-input-block">
-                        <input type="text" name="name" placeholder="昵称" required
-                               lay-verify="required" class="layui-input">
-                    </div>
-                </div>
+            <label class="layui-form-label">昵称</label>
+            <div class="layui-input-block">
+                <input type="text" name="name" placeholder="昵称" required
+                       lay-verify="required" class="layui-input">
             </div>
         </div>
         <div class="layui-form-item">
             <div class="layui-inline">
-                <label class="layui-form-label">是否是管理员</label>
+                <label class="layui-form-label">管理员</label>
                 <div class="layui-input-block">
-                    <input type="checkbox" value="true" name="manage" lay-skin="switch" lay-text="是|否">
+                    <input type="checkbox" value="true" name="manage" lay-filter="manage" lay-skin="switch"
+                           lay-text="是|否">
                 </div>
             </div>
             <div class="layui-inline">
-                <label class="layui-form-label">上传文件权限</label>
+                <label class="layui-form-label">上传文件</label>
                 <div class="layui-input-block">
                     <input type="checkbox" value="true" name="uploadFile" lay-skin="switch" lay-text="是|否">
                 </div>
             </div>
             <div class="layui-inline">
-                <label class="layui-form-label">删除文件权限</label>
+                <label class="layui-form-label">删除文件</label>
                 <div class="layui-input-block">
                     <input type="checkbox" value="true" name="deleteFile" lay-skin="switch" lay-text="是|否">
                 </div>
             </div>
         </div>
+    ##        <div class="layui-form-item">
+    ##
+    ##        </div>
         #if($projects && $projects.size()>0)
-            <div class="layui-form-item">
+            <div class="layui-form-item" id="projectsDiv">
                 <div class="layui-inline">
                     <label class="layui-form-label" title="能删除项目，启动停止项目">管理项目</label>
                     <div class="layui-input-block">
@@ -159,6 +156,12 @@
             for (var key in data) {
                 if ("manage" === key) {
                     $('#form_user [name="manage"]').prop('checked', data[key]);
+                    if (data[key]) {
+                        $("#projectsDiv").hide();
+                    } else {
+                        $("#projectsDiv").show();
+                    }
+
                 } else if ('uploadFile' === key) {
                     $('#form_user [name="uploadFile"]').prop('checked', data[key]);
                 } else if ('deleteFile' === key) {
@@ -250,6 +253,14 @@
             }
             return JSON.stringify(projects);
         }
+
+        form.on('switch(manage)', function (data) {
+            if (data.elem.checked) {
+                $("#projectsDiv").hide();
+            } else {
+                $("#projectsDiv").show();
+            }
+        });
 
         // 表格工具条事件
         table.on('tool(tab_user)', function (obj) {
