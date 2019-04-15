@@ -54,19 +54,14 @@ public class WindowsSystemCommander extends AbstractSystemCommander {
         return array.get(0);
     }
 
-
-    @Override
-    public JSONObject getAllMonitor() {
-        return getWindowsMonitor();
-    }
-
     /**
      * 获取windows 监控
      * https://docs.oracle.com/javase/7/docs/jre/api/management/extension/com/sun/management/OperatingSystemMXBean.html
      *
      * @return 返回cpu占比和内存占比
      */
-    private static JSONObject getWindowsMonitor() {
+    @Override
+    public JSONObject getAllMonitor() {
         OperatingSystemMXBean operatingSystemMXBean = (OperatingSystemMXBean) ManagementFactory.getOperatingSystemMXBean();
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("top", true);
@@ -94,7 +89,6 @@ public class WindowsSystemCommander extends AbstractSystemCommander {
         return jsonObject;
     }
 
-
     /**
      * 将windows的tasklist转为集合
      *
@@ -113,31 +107,24 @@ public class WindowsSystemCommander extends AbstractSystemCommander {
             String param = list.get(i);
             List<String> memList = StrSpliter.splitTrim(param, StrUtil.SPACE, true);
             processModel = new ProcessModel();
-            String name = memList.get(0);
-//            JSONObject item = new JSONObject();
             int pid = Convert.toInt(memList.get(1), 0);
             processModel.setPid(pid);
-//            item.put("pid", pid);
+            //
+            String name = memList.get(0);
             processModel.setCommand(name);
-//            item.put("COMMAND", name);
             //使用内存 kb
             String mem = memList.get(4).replace(",", "");
             long aLong = Convert.toLong(mem, 0L);
-//            item.put("RES", aLong / 1024 + " MB");
+//            FileUtil.readableFileSize()
             processModel.setRes(aLong / 1024 + " MB");
             String status = memList.get(6);
             processModel.setStatus(formatStatus(status));
-
-//            item.put("USER", memList.get(7));
+            //
             processModel.setUser(memList.get(7));
-//            item.put("TIME", memList.get(8));
             processModel.setTime(memList.get(8));
-//            item.put("PR", "-");
-//            item.put("NI", "-");
-//            item.put("VIRT", "-");
-//            item.put("SHR", "-");
+
             try {
-                VirtualMachine virtualMachine = VirtualMachine.attach(String.valueOf(pid));
+                VirtualMachine virtualMachine = VirtualMachine.attach(memList.get(1));
                 OperatingSystemMXBean operatingSystemMXBean = JvmUtil.getOperatingSystemMXBean(virtualMachine);
                 if (operatingSystemMXBean != null) {
                     //最近jvm cpu使用率

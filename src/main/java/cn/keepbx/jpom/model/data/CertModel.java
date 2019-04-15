@@ -1,4 +1,4 @@
-package cn.keepbx.jpom.model;
+package cn.keepbx.jpom.model.data;
 
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.resource.ResourceUtil;
@@ -8,6 +8,7 @@ import cn.hutool.crypto.asymmetric.KeyType;
 import cn.hutool.crypto.asymmetric.RSA;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.spring.SpringUtil;
+import cn.keepbx.jpom.model.BaseModel;
 import cn.keepbx.jpom.service.system.CertService;
 import com.alibaba.fastjson.JSONObject;
 

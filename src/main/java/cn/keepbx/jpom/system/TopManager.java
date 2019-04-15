@@ -62,7 +62,7 @@ public class TopManager {
             return;
         }
         CronUtil.remove(CRON_ID);
-        CronUtil.schedule(CRON_ID, "0/5 * * * * ?", () -> {
+        CronUtil.schedule(CRON_ID, "0/10 * * * * ?", () -> {
             //发送监控信息
             try {
                 JSONObject topInfo = AbstractSystemCommander.getInstance().getAllMonitor();
@@ -130,12 +130,10 @@ public class TopManager {
      */
     private static void close() {
         // 如果没有队列就停止监听
-        int size = SESSIONS.size();
-        if (size > 0) {
-            return;
+        if (SESSIONS.isEmpty()) {
+            //
+            CronUtil.remove(CRON_ID);
+            WATCH.set(false);
         }
-        //
-        CronUtil.remove(CRON_ID);
-        WATCH.set(false);
     }
 }

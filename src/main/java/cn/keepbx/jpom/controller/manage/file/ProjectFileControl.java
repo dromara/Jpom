@@ -10,7 +10,7 @@ import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.controller.multipart.MultipartFileBuilder;
 import cn.keepbx.jpom.common.BaseController;
 import cn.keepbx.jpom.common.interceptor.ProjectPermission;
-import cn.keepbx.jpom.model.ProjectInfoModel;
+import cn.keepbx.jpom.model.data.ProjectInfoModel;
 import cn.keepbx.jpom.service.manage.ProjectInfoService;
 import cn.keepbx.jpom.system.ConfigBean;
 import com.alibaba.fastjson.JSONArray;
@@ -196,14 +196,13 @@ public class ProjectFileControl extends BaseController {
     /**
      * 删除文件
      *
-     * @param id       项目id
      * @param filename 文件名称
      * @return json
      */
     @RequestMapping(value = "deleteFile", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     @ProjectPermission(checkDelete = true)
-    public String deleteFile(String id, String filename) {
+    public String deleteFile(String filename) {
         filename = pathSafe(filename);
         if (StrUtil.isEmpty(filename)) {
             return JsonMessage.getString(405, "非法操作");

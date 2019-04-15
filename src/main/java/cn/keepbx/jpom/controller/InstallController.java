@@ -9,7 +9,7 @@ import cn.keepbx.jpom.common.BaseController;
 import cn.keepbx.jpom.common.interceptor.LoginInterceptor;
 import cn.keepbx.jpom.common.interceptor.NotLogin;
 import cn.keepbx.jpom.controller.system.WhitelistDirectoryController;
-import cn.keepbx.jpom.model.UserModel;
+import cn.keepbx.jpom.model.data.UserModel;
 import cn.keepbx.jpom.service.system.WhitelistDirectoryService;
 import cn.keepbx.jpom.service.user.UserService;
 import com.alibaba.fastjson.JSONArray;

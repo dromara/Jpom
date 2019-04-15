@@ -15,5 +15,7 @@ public class TestString {
         Pattern pattern = Pattern.compile("(https://|http://)?([\\w-]+\\.)+[\\w-]+(:\\d+|/)+([\\w- ./?%&=]*)?");
         String url = "https://127.0.0.1/sys/shutdown?token=s";
         System.out.println(ReUtil.isMatch(pattern, url));
+
+        System.out.println(Math.pow(1024, 2));
     }
 }

@@ -1,7 +1,7 @@
 package cn.keepbx.jpom.service.manage;
 
 import cn.keepbx.jpom.common.commander.AbstractProjectCommander;
-import cn.keepbx.jpom.model.ProjectInfoModel;
+import cn.keepbx.jpom.model.data.ProjectInfoModel;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;

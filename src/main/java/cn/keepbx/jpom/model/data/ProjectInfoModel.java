@@ -1,9 +1,10 @@
-package cn.keepbx.jpom.model;
+package cn.keepbx.jpom.model.data;
 
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.keepbx.jpom.common.commander.AbstractProjectCommander;
+import cn.keepbx.jpom.model.BaseModel;
 
 import java.io.File;
 import java.util.List;

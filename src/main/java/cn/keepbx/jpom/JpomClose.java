@@ -3,7 +3,7 @@ package cn.keepbx.jpom;
 import cn.hutool.core.lang.Console;
 import cn.hutool.core.util.StrUtil;
 import cn.keepbx.jpom.common.commander.AbstractProjectCommander;
-import cn.keepbx.jpom.model.ProjectInfoModel;
+import cn.keepbx.jpom.model.data.ProjectInfoModel;
 import cn.keepbx.jpom.util.ArgsUtil;
 
 /**

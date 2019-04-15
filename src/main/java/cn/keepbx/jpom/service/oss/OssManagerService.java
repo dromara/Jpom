@@ -4,7 +4,7 @@ import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.keepbx.jpom.common.BaseDataService;
 import cn.keepbx.jpom.system.ConfigBean;
-import cn.keepbx.jpom.util.JsonUtil;
+import cn.keepbx.jpom.util.JsonFileUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.aliyun.oss.OSSClient;
@@ -113,6 +113,6 @@ public class OssManagerService extends BaseDataService {
 
     public void save(JSONObject jsonObject) {
         String path = getDataFilePath(ConfigBean.ALI_OSS);
-        JsonUtil.saveJson(path, jsonObject);
+        JsonFileUtil.saveJson(path, jsonObject);
     }
 }

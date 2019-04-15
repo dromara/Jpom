@@ -1,8 +1,8 @@
 package cn.keepbx.jpom.controller.manage;
 
 import cn.keepbx.jpom.common.BaseController;
-import cn.keepbx.jpom.model.ProjectInfoModel;
-import cn.keepbx.jpom.model.UserModel;
+import cn.keepbx.jpom.model.data.ProjectInfoModel;
+import cn.keepbx.jpom.model.data.UserModel;
 import cn.keepbx.jpom.service.manage.ProjectInfoService;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;

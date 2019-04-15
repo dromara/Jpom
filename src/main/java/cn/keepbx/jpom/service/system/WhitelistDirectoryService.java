@@ -5,7 +5,7 @@ import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.keepbx.jpom.common.BaseDataService;
 import cn.keepbx.jpom.system.ConfigBean;
-import cn.keepbx.jpom.util.JsonUtil;
+import cn.keepbx.jpom.util.JsonFileUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;
@@ -96,6 +96,6 @@ public class WhitelistDirectoryService extends BaseDataService {
 
     public void saveWhitelistDirectory(JSONObject jsonObject) {
         String path = getDataFilePath(ConfigBean.WHITELIST_DIRECTORY);
-        JsonUtil.saveJson(path, jsonObject);
+        JsonFileUtil.saveJson(path, jsonObject);
     }
 }

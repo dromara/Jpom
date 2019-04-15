@@ -1,6 +1,7 @@
-package cn.keepbx.jpom.model;
+package cn.keepbx.jpom.model.data;
 
 import cn.hutool.core.lang.ObjectId;
+import cn.keepbx.jpom.model.BaseModel;
 
 /**
  * 项目回收记录实体

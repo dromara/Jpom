@@ -1,7 +1,8 @@
-package cn.keepbx.jpom.model;
+package cn.keepbx.jpom.model.data;
 
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.crypto.SecureUtil;
+import cn.keepbx.jpom.model.BaseModel;
 import cn.keepbx.jpom.system.ExtConfigBean;
 import com.alibaba.fastjson.JSONArray;
 

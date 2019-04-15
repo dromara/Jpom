@@ -63,7 +63,7 @@ public class InternalController extends BaseController {
      */
     private JSONObject getBeanMem(String tag) {
         try {
-            VirtualMachine virtualMachine = AbstractProjectCommander.getInstance().getVirtualMachine(tag);
+            VirtualMachine virtualMachine = JvmUtil.getVirtualMachine(tag);
             MemoryMXBean memoryMXBean = JvmUtil.getMemoryMXBean(virtualMachine);
             if (memoryMXBean == null) {
                 return null;

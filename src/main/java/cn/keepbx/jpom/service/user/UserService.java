@@ -2,7 +2,7 @@ package cn.keepbx.jpom.service.user;
 
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.keepbx.jpom.common.BaseOperService;
-import cn.keepbx.jpom.model.UserModel;
+import cn.keepbx.jpom.model.data.UserModel;
 import cn.keepbx.jpom.system.ConfigBean;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;

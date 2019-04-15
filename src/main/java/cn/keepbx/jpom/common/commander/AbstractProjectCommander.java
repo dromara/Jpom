@@ -16,14 +16,14 @@ import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.spring.SpringUtil;
 import cn.keepbx.jpom.common.commander.impl.LinuxProjectCommander;
 import cn.keepbx.jpom.common.commander.impl.WindowsProjectCommander;
-import cn.keepbx.jpom.model.ProjectInfoModel;
+import cn.keepbx.jpom.model.data.ProjectInfoModel;
 import cn.keepbx.jpom.model.system.NetstatModel;
 import cn.keepbx.jpom.service.manage.ConsoleService;
 import cn.keepbx.jpom.service.manage.ProjectInfoService;
 import cn.keepbx.jpom.util.CommandUtil;
+import cn.keepbx.jpom.util.JvmUtil;
 import com.sun.tools.attach.AttachNotSupportedException;
 import com.sun.tools.attach.VirtualMachine;
-import com.sun.tools.attach.VirtualMachineDescriptor;
 
 import java.io.File;
 import java.io.IOException;
@@ -210,7 +210,6 @@ public abstract class AbstractProjectCommander {
      *
      * @param projectInfoModel 项目
      * @return 结果
-     * @throws Exception 异常
      */
     public String backLog(ProjectInfoModel projectInfoModel) {
         if (StrUtil.isEmpty(projectInfoModel.getLog())) {
@@ -245,7 +244,7 @@ public abstract class AbstractProjectCommander {
      * @return 查询结果
      */
     public String status(String tag) throws Exception {
-        VirtualMachine virtualMachine = getVirtualMachine(tag);
+        VirtualMachine virtualMachine = JvmUtil.getVirtualMachine(tag);
         if (virtualMachine == null) {
             return ConsoleService.STOP_TAG;
         }
@@ -311,40 +310,6 @@ public abstract class AbstractProjectCommander {
         return null;
     }
 
-
-    /**
-     * 工具Jpom运行项目的id 获取virtualMachine
-     *
-     * @param tag 项目id
-     * @return VirtualMachine
-     * @throws IOException 异常
-     */
-    public VirtualMachine getVirtualMachine(String tag) throws IOException {
-        // 添加空格是为了防止startWith
-        String appTag = String.format("-Dapplication=%s ", tag);
-        // 通过VirtualMachine.list()列出所有的java进程
-        List<VirtualMachineDescriptor> descriptorList = VirtualMachine.list();
-        for (VirtualMachineDescriptor virtualMachineDescriptor : descriptorList) {
-            // 根据虚拟机描述查询启动属性，如果属性-Dapplication匹配，说明项目已经启动，并返回进程id
-            VirtualMachine virtualMachine;
-            try {
-                virtualMachine = VirtualMachine.attach(virtualMachineDescriptor);
-            } catch (AttachNotSupportedException e) {
-                DefaultSystemLog.ERROR().error("获取jvm信息失败：" + virtualMachineDescriptor.id(), e);
-                continue;
-            }
-            Properties properties = virtualMachine.getAgentProperties();
-            String args = properties.getProperty("sun.jvm.args", "");
-            if (StrUtil.containsIgnoreCase(args, appTag)) {
-                return virtualMachine;
-            }
-            args = properties.getProperty("sun.java.command", "");
-            if (StrUtil.containsIgnoreCase(args, appTag)) {
-                return virtualMachine;
-            }
-        }
-        return null;
-    }
 
     /**
      * 根据指定进程id获取Jpom 名称

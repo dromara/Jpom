@@ -1,4 +1,4 @@
-package cn.keepbx.jpom.model;
+package cn.keepbx.jpom.model.system;
 
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;

@@ -2,7 +2,7 @@ package cn.keepbx.jpom.controller;
 
 import cn.keepbx.jpom.common.BaseController;
 import cn.keepbx.jpom.common.interceptor.NotLogin;
-import cn.keepbx.jpom.model.JpomManifest;
+import cn.keepbx.jpom.model.system.JpomManifest;
 import cn.keepbx.jpom.service.user.UserService;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
