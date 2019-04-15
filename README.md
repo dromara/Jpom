@@ -9,8 +9,8 @@
 <a target="_blank" href="https://travis-ci.org/jiangzeyin/Jpom">
     <img src='https://travis-ci.org/jiangzeyin/Jpom.svg?branch=master' alt='travis'></img>
 </a>
-<a href="https://www.codacy.com/app/jiangzeyin/Jpom?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=jiangzeyin/Jpom&amp;utm_campaign=Badge_Grade">
-    <img src="https://api.codacy.com/project/badge/Grade/9c97dc9925c84404b63e15fefbacc984"/>
+<a target="_blank" href="https://www.codacy.com/app/jiangzeyin/Jpom?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=jiangzeyin/Jpom&amp;utm_campaign=Badge_Grade">
+    <img src="https://api.codacy.com/project/badge/Grade/9c97dc9925c84404b63e15fefbacc984"></img>
 </a>
 <a target="_blank" href="https://shang.qq.com/wpa/qunwpa?idkey=7be1882a2e2f07cd4af28bbb1f13362af270ba4615f2a6c7aaf9605fc0563d1b">
     <img src='https://img.shields.io/badge/QQ%E7%BE%A4-136715345-yellowgreen.svg' alt='136715345'></img>
@@ -31,7 +31,7 @@
 
 > 当多个项目运行在同一台服务器时，运维人员通常也不只一个，如果每个人都登录服务器管理项目，难免会造成一些不必要的麻烦，甚至给服务器的安全性带来问题（服务器密码知道的人越多，越容易泄露），因为不需要登录服务器管理项目，维护人员不需要知道服务器的登录密码，只需要有Jpom的账号就行，Jpom本身可以通过权限管理，给不同用户不同的权限，这样也使得项目的稳定性得到提升。
 
-> Jpom可以在linux和windows服务器上运行
+> Jpom可以在Linux和Windows服务器上运行
 
 ### Jpom 目标
 

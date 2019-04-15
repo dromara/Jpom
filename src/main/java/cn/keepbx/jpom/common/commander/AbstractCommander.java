@@ -16,7 +16,7 @@ import cn.keepbx.jpom.common.commander.impl.LinuxCommander;
 import cn.keepbx.jpom.common.commander.impl.WindowsCommander;
 import cn.keepbx.jpom.model.NetstatModel;
 import cn.keepbx.jpom.model.ProjectInfoModel;
-import cn.keepbx.jpom.service.manage.CommandService;
+import cn.keepbx.jpom.service.manage.ConsoleService;
 import com.sun.tools.attach.AttachNotSupportedException;
 import com.sun.tools.attach.VirtualMachine;
 import com.sun.tools.attach.VirtualMachineDescriptor;
@@ -255,9 +255,9 @@ public abstract class AbstractCommander {
     public String status(String tag) throws Exception {
         VirtualMachine virtualMachine = getVirtualMachine(tag);
         if (virtualMachine == null) {
-            return CommandService.STOP_TAG;
+            return ConsoleService.STOP_TAG;
         }
-        return StrUtil.format("{}:{}", CommandService.RUNING_TAG, virtualMachine.id());
+        return StrUtil.format("{}:{}", ConsoleService.RUNING_TAG, virtualMachine.id());
     }
 
     /**
@@ -314,7 +314,7 @@ public abstract class AbstractCommander {
      * @return int
      */
     protected static int parsePid(String result) {
-        if (result.startsWith(CommandService.RUNING_TAG)) {
+        if (result.startsWith(ConsoleService.RUNING_TAG)) {
             return Convert.toInt(result.split(":")[1]);
         }
         return 0;
@@ -329,7 +329,7 @@ public abstract class AbstractCommander {
      */
     public boolean isRun(String tag) throws Exception {
         String result = status(tag);
-        return result.contains(CommandService.RUNING_TAG);
+        return result.contains(ConsoleService.RUNING_TAG);
     }
 
     /***

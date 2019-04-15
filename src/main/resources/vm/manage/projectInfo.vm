@@ -91,13 +91,11 @@
         if (project && project.group) {
             apiWhere.group = project.group;
         }
-        table.render({
+        tableRender({
             id: 'table_project',
             elem: '#tab_project',
             url: './getProjectInfo',
-            // height: 'full-52',
             toolbar: '#toolbarDemo',
-            even: true,
             where: apiWhere,
             cols: [[{
                 field: 'name', title: '项目名称', width: '15%', sort: true, templet: function (d) {
@@ -124,11 +122,6 @@
             },
                 {field: 'op', title: '操作', toolbar: '#bar_projects'}
             ]],
-            loading: true,
-            method: 'POST',
-            response: {
-                statusCode: 200
-            },
             done: function (data) {
                 var projects = data.data;
                 var ids = [];

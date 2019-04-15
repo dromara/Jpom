@@ -7,7 +7,7 @@ import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.spring.SpringUtil;
 import cn.keepbx.jpom.model.ProjectInfoModel;
 import cn.keepbx.jpom.model.UserModel;
-import cn.keepbx.jpom.service.manage.CommandService;
+import cn.keepbx.jpom.service.manage.ConsoleService;
 import cn.keepbx.jpom.service.manage.ProjectInfoService;
 import cn.keepbx.jpom.service.user.UserService;
 import cn.keepbx.jpom.system.TopManager;
@@ -32,7 +32,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class LogWebSocketHandle {
 
     public static final String SYSTEM_ID = "system";
-    private CommandService commandService;
+    private ConsoleService consoleService;
     private static volatile AtomicInteger onlineCount = new AtomicInteger();
     private static final ConcurrentHashMap<String, UserModel> USER = new ConcurrentHashMap<>();
 
@@ -45,8 +45,8 @@ public class LogWebSocketHandle {
      */
     @OnOpen
     public void onOpen(@PathParam("userInfo") String userInfo, @PathParam("projectId") String projectId, Session session) {
-        if (commandService == null) {
-            commandService = SpringUtil.getBean(CommandService.class);
+        if (consoleService == null) {
+            consoleService = SpringUtil.getBean(ConsoleService.class);
         }
         // 通过用户名和密码的Md5值判断是否是登录的
         try {
@@ -100,8 +100,8 @@ public class LogWebSocketHandle {
         String projectId = json.getString("projectId");
         ProjectInfoService projectInfoService = SpringUtil.getBean(ProjectInfoService.class);
         ProjectInfoModel projectInfoModel = projectInfoService.getItem(projectId);
-        CommandService.CommandOp commandOp = CommandService.CommandOp.valueOf(op);
-        if (projectInfoModel == null && commandOp != CommandService.CommandOp.top) {
+        ConsoleService.CommandOp commandOp = ConsoleService.CommandOp.valueOf(op);
+        if (projectInfoModel == null && commandOp != ConsoleService.CommandOp.top) {
             SocketSessionUtil.send(session, "没有对应项目");
             return;
         }
@@ -114,8 +114,8 @@ public class LogWebSocketHandle {
                 case start:
                 case restart:
                     logUser = true;
-                    strResult = commandService.execCommand(commandOp, projectInfoModel);
-                    if (strResult.contains(CommandService.RUNING_TAG)) {
+                    strResult = consoleService.execCommand(commandOp, projectInfoModel);
+                    if (strResult.contains(ConsoleService.RUNING_TAG)) {
                         resultData = JsonMessage.toJson(200, "操作成功:" + strResult);
                     } else {
                         resultData = JsonMessage.toJson(400, strResult);
@@ -124,8 +124,8 @@ public class LogWebSocketHandle {
                 case stop:
                     logUser = true;
                     // 停止项目
-                    strResult = commandService.execCommand(commandOp, projectInfoModel);
-                    if (strResult.contains(CommandService.STOP_TAG)) {
+                    strResult = consoleService.execCommand(commandOp, projectInfoModel);
+                    if (strResult.contains(ConsoleService.STOP_TAG)) {
                         resultData = JsonMessage.toJson(200, "操作成功");
                     } else {
                         resultData = JsonMessage.toJson(500, strResult);
@@ -133,8 +133,8 @@ public class LogWebSocketHandle {
                     break;
                 case status:
                     // 获取项目状态
-                    strResult = commandService.execCommand(commandOp, projectInfoModel);
-                    if (strResult.contains(CommandService.RUNING_TAG)) {
+                    strResult = consoleService.execCommand(commandOp, projectInfoModel);
+                    if (strResult.contains(ConsoleService.RUNING_TAG)) {
                         resultData = JsonMessage.toJson(200, "运行中", strResult);
                     } else {
                         resultData = JsonMessage.toJson(404, "未运行", strResult);

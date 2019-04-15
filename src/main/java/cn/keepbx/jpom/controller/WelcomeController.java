@@ -4,7 +4,6 @@ import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.keepbx.jpom.common.BaseController;
 import cn.keepbx.jpom.common.commander.AbstractCommander;
-import cn.keepbx.jpom.model.UserModel;
 import cn.keepbx.jpom.system.TopManager;
 import com.alibaba.fastjson.JSONArray;
 import org.springframework.http.MediaType;
@@ -24,8 +23,6 @@ public class WelcomeController extends BaseController {
 
     @RequestMapping(value = "welcome", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
     public String welcome() {
-        UserModel userName = getUser();
-        setAttribute("userInfo", userName.getUserMd5Key());
         return "welcome";
     }
 

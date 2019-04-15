@@ -7,12 +7,13 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
 
 /**
+ * 控制台
  * Created by jiangzeyin on 2018/9/28.
  *
  * @author jiangzeyin
  */
 @Service
-public class CommandService {
+public class ConsoleService {
     public static final String RUNING_TAG = "running";
     public static final String STOP_TAG = "stopped";
 

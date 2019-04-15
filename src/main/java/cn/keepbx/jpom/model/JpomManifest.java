@@ -86,6 +86,11 @@ public class JpomManifest {
         return version;
     }
 
+    /**
+     * 判断当前是否为调试模式
+     *
+     * @return jar 为非调试模式
+     */
     public boolean isDebug() {
         return "dev".equals(getVersion());
     }

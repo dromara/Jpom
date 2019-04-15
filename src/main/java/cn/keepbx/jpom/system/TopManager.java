@@ -6,10 +6,8 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.cron.CronUtil;
 import cn.hutool.cron.Scheduler;
 import cn.jiangzeyin.common.DefaultSystemLog;
-import cn.jiangzeyin.common.spring.SpringUtil;
 import cn.jiangzeyin.pool.ThreadPoolService;
 import cn.keepbx.jpom.common.commander.AbstractCommander;
-import cn.keepbx.jpom.service.manage.CommandService;
 import cn.keepbx.jpom.socket.SocketSessionUtil;
 import cn.keepbx.jpom.util.JvmUtil;
 import com.alibaba.fastjson.JSONArray;
@@ -39,9 +37,11 @@ public class TopManager {
 
     private static final Set<Session> SESSIONS = new HashSet<>();
     private static final String CRON_ID = "topMonitor";
-    private static CommandService commandService;
-    private static boolean watch = false;
     private static ExecutorService executorService = ThreadPoolService.newCachedThreadPool(TopManager.class);
+    /**
+     * 是否开启首页监听（自动刷新）
+     */
+    private static final AtomicBoolean WATCH = new AtomicBoolean(false);
     /**
      * 锁定查看进程信息
      */
@@ -71,11 +71,8 @@ public class TopManager {
      * 创建定时执行top
      */
     private static void addCron() {
-        if (watch) {
+        if (WATCH.get()) {
             return;
-        }
-        if (commandService == null) {
-            commandService = SpringUtil.getBean(CommandService.class);
         }
         CronUtil.remove(CRON_ID);
         CronUtil.schedule(CRON_ID, "0/5 * * * * ?", () -> {
@@ -99,7 +96,7 @@ public class TopManager {
         if (!scheduler.isStarted()) {
             CronUtil.start();
         }
-        watch = true;
+        WATCH.set(true);
     }
 
 
@@ -500,6 +497,6 @@ public class TopManager {
         }
         //
         CronUtil.remove(CRON_ID);
-        watch = false;
+        WATCH.set(false);
     }
 }

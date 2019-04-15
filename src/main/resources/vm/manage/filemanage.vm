@@ -41,13 +41,10 @@
     function loadSuccess() {
         layui.use(['upload'], function () {
             var upload = layui.upload;
-            table.render({
+            tableRender({
                 id: 'table_file',
                 elem: '#tab_file',
                 url: './getFileList',
-                method: 'post',
-                // height: 'full',
-                even: true,
                 where: {
                     id: '$id'
                 },
@@ -65,10 +62,6 @@
                     {field: 'filesize', title: '文件大小', sort: true, width: '15%'},
                     {field: 'op', title: '操作', toolbar: '#bar_projects'}
                 ]],
-                loading: true,
-                response: {
-                    statusCode: 200
-                },
                 done: function () {
 
                 }

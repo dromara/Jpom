@@ -37,7 +37,6 @@ public class ConsoleController extends BaseController {
         if (projectInfoModel != null) {
             UserModel userName = getUser();
             setAttribute("projectInfo", projectInfoModel);
-            setAttribute("userInfo", userName.getUserMd5Key());
             String logSize = projectInfoService.getLogSize(id);
             setAttribute("logSize", logSize);
             setAttribute("manager", userName.isProject(id));
@@ -50,7 +49,6 @@ public class ConsoleController extends BaseController {
         }
         return "manage/console";
     }
-
 
 
 }
