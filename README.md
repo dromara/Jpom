@@ -1,9 +1,16 @@
 # Jpom(Java Project Online Management)Java项目在线管理
 
-<img src='https://img.shields.io/github/license/jiangzeyin/jpom.svg?style=flat' alt='license'></img>
-<img src='https://img.shields.io/badge/JDK-1.8+-green.svg' alt='jdk'></img>
+<a target="_blank" href="https://gitee.com/keepbx/Jpom">
+    <img src='https://img.shields.io/github/license/jiangzeyin/jpom.svg?style=flat' alt='license'></img>
+</a>
+<a target="_blank" href="https://gitee.com/keepbx/Jpom">
+    <img src='https://img.shields.io/badge/JDK-1.8+-green.svg' alt='jdk'></img>
+</a>
 <a target="_blank" href="https://travis-ci.org/jiangzeyin/Jpom">
     <img src='https://travis-ci.org/jiangzeyin/Jpom.svg?branch=master' alt='travis'></img>
+</a>
+<a href="https://www.codacy.com/app/jiangzeyin/Jpom?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=jiangzeyin/Jpom&amp;utm_campaign=Badge_Grade">
+    <img src="https://api.codacy.com/project/badge/Grade/9c97dc9925c84404b63e15fefbacc984"/>
 </a>
 <a target="_blank" href="https://shang.qq.com/wpa/qunwpa?idkey=7be1882a2e2f07cd4af28bbb1f13362af270ba4615f2a6c7aaf9605fc0563d1b">
     <img src='https://img.shields.io/badge/QQ%E7%BE%A4-136715345-yellowgreen.svg' alt='136715345'></img>
@@ -24,21 +31,22 @@
 
 > 当多个项目运行在同一台服务器时，运维人员通常也不只一个，如果每个人都登录服务器管理项目，难免会造成一些不必要的麻烦，甚至给服务器的安全性带来问题（服务器密码知道的人越多，越容易泄露），因为不需要登录服务器管理项目，维护人员不需要知道服务器的登录密码，只需要有Jpom的账号就行，Jpom本身可以通过权限管理，给不同用户不同的权限，这样也使得项目的稳定性得到提升。
 
+> Jpom可以在linux和windows服务器上运行
+
 ### Jpom 目标
 
 > 一款简而轻的低侵入式Java运维、监控软件
 
-> Jpom采用SpringBoot开发web项目(前台采用layui)+websocket来统一管理，只要能使用浏览器就ok，同时Jpom可以在linux和windows服务器上运行
-
 #### 项目主要功能及特点
 
 1. 创建、修改、删除项目、Jar包管理
-2. 实时查看控制台日志
+2. 实时查看控制台日志、备份日志、删除日志、导出日志
 3. cpu、ram 监控、导出堆栈信息、查看项目进程端口、服务器状态监控
 4. 多用户管理，用户项目权限独立(上传、删除权限可控制)
-5. 项目路径白名单模式，杜绝用户误操作系统文件
-6. Jpom完全不依赖数据库，随装随用
-7. [阿里云 CodePipeline + Oss在线管理](/doc/CodePipeline-Oss.md)
+5. 系统路径白名单模式，杜绝用户误操作系统文件
+6. 在线管理Nginx配置、ssl证书文件
+7. Jpom完全不依赖数据库，随装随用
+8. [阿里云 CodePipeline + Oss在线管理](/doc/CodePipeline-Oss.md)
 
 #### 基本操作演示
 
@@ -52,7 +60,7 @@
 
 ### 编译安装
 
-1. 访问[Jpom](https://gitee.com/keepbx/Jpom)的码云主页,拉取最新完整代码：
+1. 访问[Jpom](https://gitee.com/keepbx/Jpom)的码云主页,拉取最新完整代码(建议使用master分支)
 2. 进入项目目录执行:`mvn clean package`
 3. 然后在目录中查看 target/jpom-x.x.x-release
 4. 打包上传服务器运行
@@ -60,7 +68,7 @@
 
 ### 编译运行
 
-1. 访问[Jpom](https://gitee.com/keepbx/Jpom)的码云主页,拉取最新完整代码：
+1. 访问[Jpom](https://gitee.com/keepbx/Jpom)的码云主页,拉取最新完整代码(建议使用master分支)
 2. 运行`cn.keepbx.jpom.JpomApplication`
 3. 浏览器访问（如：http://127.0.0.1:2122）
 
@@ -112,14 +120,13 @@ Jpom.sh status    查看Jpom运行状态
 
 [安装说明>>](https://gitee.com/keepbx/Jpom/wikis/pages?sort_id=1395348&doc_id=264493)
 
-[更新日志>>](/CHANGELOG.md)
-
-[开发计划>>](/PLANS.md)
-
-[用户角色说明>>](/doc/userRole.md#用户权限说明)
+[用户角色说明>>](/doc/userRole.md)
 
 [阿里云Oss配置>>](/doc/CodePipeline-Oss.md)
 
+[更新日志>>](/CHANGELOG.md)
+
+[开发计划>>](/PLANS.md)
   
 ### 交流讨论 、提供bug反馈或建议
 

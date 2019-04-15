@@ -71,4 +71,4 @@
    
    ![jpom](/doc/error/can't-open-socket-file.jpg)
    
-   针对以上两个问题，Jpom目前采用略过这些进程的解决办法，请更新master分支到2.3.1或dev分支2.2.1以上。 
+   针对以上两个问题，Jpom目前采用略过这些进程的解决办法，请更新到2.3.1以上。 

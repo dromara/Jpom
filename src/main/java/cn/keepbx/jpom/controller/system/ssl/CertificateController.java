@@ -153,7 +153,6 @@ public class CertificateController extends BaseController {
             certPath = cert.save();
             ZipFile zipFile = new ZipFile(certPath);
             Enumeration<? extends ZipEntry> zipEntryEnumeration = zipFile.entries();
-
             while (zipEntryEnumeration.hasMoreElements()) {
                 ZipEntry zipEntry = zipEntryEnumeration.nextElement();
                 if (zipEntry.isDirectory()) {
@@ -203,6 +202,14 @@ public class CertificateController extends BaseController {
             String temporary = certModel.getWhitePath() + "/" + certModel.getId() + "/";
             File pemFile = FileUtil.file(temporary + certModel.getId() + ".pem");
             File keyFile = FileUtil.file(temporary + certModel.getId() + ".key");
+            if (add) {
+                if (pemFile.exists()) {
+                    return JsonMessage.getString(405, pemFile.getAbsolutePath() + " 已经被占用啦");
+                }
+                if (keyFile.exists()) {
+                    return JsonMessage.getString(405, keyFile.getAbsolutePath() + " 已经被占用啦");
+                }
+            }
             FileUtil.move(FileUtil.file(pemPath), pemFile, true);
             FileUtil.move(FileUtil.file(keyPath), keyFile, true);
             certModel.setCert(pemFile.getAbsolutePath());
