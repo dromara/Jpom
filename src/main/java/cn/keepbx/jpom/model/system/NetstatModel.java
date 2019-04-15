@@ -1,4 +1,6 @@
-package cn.keepbx.jpom.model;
+package cn.keepbx.jpom.model.system;
+
+import cn.keepbx.jpom.model.BaseJsonModel;
 
 /**
  * 网络端口信息实体

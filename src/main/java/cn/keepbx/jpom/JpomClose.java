@@ -2,7 +2,7 @@ package cn.keepbx.jpom;
 
 import cn.hutool.core.lang.Console;
 import cn.hutool.core.util.StrUtil;
-import cn.keepbx.jpom.common.commander.AbstractCommander;
+import cn.keepbx.jpom.common.commander.AbstractProjectCommander;
 import cn.keepbx.jpom.model.ProjectInfoModel;
 import cn.keepbx.jpom.util.ArgsUtil;
 
@@ -27,17 +27,17 @@ public class JpomClose {
         // 事件
         String event = ArgsUtil.getArgsValue(args, "event");
         if ("stop".equalsIgnoreCase(event)) {
-            if (!AbstractCommander.getInstance().isRun(tag)) {
+            if (!AbstractProjectCommander.getInstance().isRun(tag)) {
                 Console.error("Jpom并没有运行");
                 return;
             }
             // 创建一个实体对象
             ProjectInfoModel projectInfoModel = new ProjectInfoModel();
             projectInfoModel.setId(tag);
-            String msg = AbstractCommander.getInstance().stop(projectInfoModel);
+            String msg = AbstractProjectCommander.getInstance().stop(projectInfoModel);
             Console.log(msg);
         } else if ("status".equalsIgnoreCase(event)) {
-            String status = AbstractCommander.getInstance().status(tag);
+            String status = AbstractProjectCommander.getInstance().status(tag);
             Console.log("Jpom:" + status);
         } else {
             Console.error("event error:" + event);

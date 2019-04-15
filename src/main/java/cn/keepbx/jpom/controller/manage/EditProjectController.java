@@ -9,7 +9,7 @@ import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.keepbx.jpom.common.BaseController;
-import cn.keepbx.jpom.common.commander.AbstractCommander;
+import cn.keepbx.jpom.common.commander.AbstractProjectCommander;
 import cn.keepbx.jpom.model.ProjectInfoModel;
 import cn.keepbx.jpom.model.UserModel;
 import cn.keepbx.jpom.service.manage.ProjectInfoService;
@@ -208,7 +208,7 @@ public class EditProjectController extends BaseController {
                     return JsonMessage.getString(400, "管理员才能创建项目!");
                 }
                 // 检查运行中的tag 是否被占用
-                if (AbstractCommander.getInstance().isRun(projectInfo.getId())) {
+                if (AbstractProjectCommander.getInstance().isRun(projectInfo.getId())) {
                     return JsonMessage.getString(400, "当前项目id已经被正在运行的程序占用");
                 }
                 projectInfo.setCreateTime(DateUtil.now());

@@ -3,27 +3,36 @@ package cn.keepbx.jpom.util;
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
-import cn.keepbx.jpom.common.commander.AbstractCommander;
+import cn.keepbx.jpom.common.commander.AbstractProjectCommander;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
 
 /**
+ * 命令行工具
+ *
  * @author jiangzeyin
  * @date 2019/4/15
  */
 public class CommandUtil {
 
-    public static String execCommand(String command) throws Exception {
-        return exec(new String[]{command});
+    public static String execCommand(String command) {
+        String result = "error";
+        try {
+            result = exec(new String[]{command});
+        } catch (Exception e) {
+            DefaultSystemLog.ERROR().error("执行命令异常", e);
+            result += e.getMessage();
+        }
+        return result;
     }
 
     public static String execSystemCommand(String command) {
         String result = "error";
         try {
             String[] cmd;
-            if (AbstractCommander.OS_INFO.isLinux()) {
+            if (AbstractProjectCommander.OS_INFO.isLinux()) {
                 //执行linux系统命令
                 cmd = new String[]{"/bin/sh", "-c", command};
             } else {
@@ -61,7 +70,7 @@ public class CommandUtil {
         } else {
             is = process.getErrorStream();
         }
-        result = IoUtil.read(is, AbstractCommander.getInstance().getCharset());
+        result = IoUtil.read(is, AbstractProjectCommander.getInstance().getCharset());
         is.close();
         process.destroy();
         if (StrUtil.isEmpty(result) && wait != 0) {

@@ -2,9 +2,10 @@ package cn.keepbx.jpom.common.commander.impl;
 
 import cn.hutool.core.text.StrSpliter;
 import cn.hutool.core.thread.GlobalThreadPool;
-import cn.keepbx.jpom.common.commander.AbstractCommander;
-import cn.keepbx.jpom.model.NetstatModel;
+import cn.hutool.core.util.StrUtil;
+import cn.keepbx.jpom.common.commander.AbstractProjectCommander;
 import cn.keepbx.jpom.model.ProjectInfoModel;
+import cn.keepbx.jpom.model.system.NetstatModel;
 import cn.keepbx.jpom.util.CommandUtil;
 
 import java.nio.charset.Charset;
@@ -12,13 +13,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * linux
+ * windows 版
  *
  * @author Administrator
  */
-public class LinuxCommander extends AbstractCommander {
+public class WindowsProjectCommander extends AbstractProjectCommander {
 
-    public LinuxCommander(Charset charset) {
+    public WindowsProjectCommander(Charset charset) {
         super(charset);
     }
 
@@ -29,29 +30,30 @@ public class LinuxCommander extends AbstractCommander {
             return msg;
         }
         // 拼接命令
-        String command = String.format("nohup java %s %s -Dapplication=%s -Dbasedir=%s %s %s >> %s 2>&1 &",
-                projectInfoModel.getJvm(),
-                ProjectInfoModel.getClassPathLib(projectInfoModel),
-                projectInfoModel.getId(),
-                projectInfoModel.getAbsoluteLib(),
-                projectInfoModel.getMainClass(),
-                projectInfoModel.getArgs(),
-                projectInfoModel.getAbsoluteLog());
-        //
+        String jvm = projectInfoModel.getJvm();
+        String tag = projectInfoModel.getId();
+        String mainClass = projectInfoModel.getMainClass();
+        String args = projectInfoModel.getArgs();
+        String classPath = ProjectInfoModel.getClassPathLib(projectInfoModel);
+
+        String command = String.format("javaw %s %s -Dapplication=%s -Dbasedir=%s %s %s >> %s &",
+                jvm, classPath, tag,
+                projectInfoModel.getAbsoluteLib(), mainClass, args, projectInfoModel.getAbsoluteLog());
+        // 执行命令
         GlobalThreadPool.execute(() -> CommandUtil.execSystemCommand(command));
-        // 检查是否执行完毕
+        //
         loopCheckRun(projectInfoModel.getId(), true);
         return status(projectInfoModel.getId());
     }
-
 
     @Override
     public String stop(ProjectInfoModel projectInfoModel) throws Exception {
         String result = super.stop(projectInfoModel);
         String tag = projectInfoModel.getId();
+        // 查询状态，如果正在运行，则执行杀进程命令
         int pid = parsePid(result);
         if (pid > 0) {
-            String cmd = String.format("kill  %s", pid);
+            String cmd = String.format("taskkill /F /PID %s", pid);
             CommandUtil.execCommand(cmd);
             loopCheckRun(projectInfoModel.getId(), false);
             result = status(tag);
@@ -61,9 +63,9 @@ public class LinuxCommander extends AbstractCommander {
 
     @Override
     public List<NetstatModel> listNetstat(int pId) {
-        String cmd = "netstat -antup | grep " + pId + " |grep -v \"CLOSE_WAIT\" | head -20";
+        String cmd = "netstat -nao -p tcp | findstr /V \"CLOSE_WAIT\" | findstr " + pId;
         String result = CommandUtil.execSystemCommand(cmd);
-        List<String> netList = StrSpliter.splitTrim(result, "\n", true);
+        List<String> netList = StrSpliter.splitTrim(result, StrUtil.LF, true);
         if (netList == null || netList.size() <= 0) {
             return null;
         }
@@ -75,12 +77,10 @@ public class LinuxCommander extends AbstractCommander {
             }
             NetstatModel netstatModel = new NetstatModel();
             netstatModel.setProtocol(list.get(0));
-            netstatModel.setReceive(list.get(1));
-            netstatModel.setSend(list.get(2));
-            netstatModel.setLocal(list.get(3));
-            netstatModel.setForeign(list.get(4));
-            netstatModel.setStatus(list.get(5));
-            netstatModel.setName(list.get(6));
+            netstatModel.setLocal(list.get(1));
+            netstatModel.setForeign(list.get(2));
+            netstatModel.setStatus(list.get(3));
+            netstatModel.setName(list.get(4));
             array.add(netstatModel);
         }
         return array;

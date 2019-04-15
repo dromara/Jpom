@@ -14,10 +14,10 @@ import cn.hutool.system.OsInfo;
 import cn.hutool.system.SystemUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.spring.SpringUtil;
-import cn.keepbx.jpom.common.commander.impl.LinuxCommander;
-import cn.keepbx.jpom.common.commander.impl.WindowsCommander;
-import cn.keepbx.jpom.model.NetstatModel;
+import cn.keepbx.jpom.common.commander.impl.LinuxProjectCommander;
+import cn.keepbx.jpom.common.commander.impl.WindowsProjectCommander;
 import cn.keepbx.jpom.model.ProjectInfoModel;
+import cn.keepbx.jpom.model.system.NetstatModel;
 import cn.keepbx.jpom.service.manage.ConsoleService;
 import cn.keepbx.jpom.service.manage.ProjectInfoService;
 import cn.keepbx.jpom.util.CommandUtil;
@@ -37,13 +37,13 @@ import java.util.jar.JarFile;
 import java.util.jar.Manifest;
 
 /**
- * 命令执行基类
+ * 项目命令执行基类
  *
  * @author Administrator
  */
-public abstract class AbstractCommander {
+public abstract class AbstractProjectCommander {
 
-    private static AbstractCommander abstractCommander = null;
+    private static AbstractProjectCommander abstractProjectCommander = null;
     protected Charset charset;
     public static final OsInfo OS_INFO = SystemUtil.getOsInfo();
     /**
@@ -55,7 +55,7 @@ public abstract class AbstractCommander {
      */
     private static final LRUCache<Integer, Integer> PID_PORT = new LRUCache<>(100, TimeUnit.MINUTES.toMillis(10));
 
-    protected AbstractCommander(Charset charset) {
+    protected AbstractProjectCommander(Charset charset) {
         this.charset = charset;
     }
 
@@ -68,20 +68,20 @@ public abstract class AbstractCommander {
      *
      * @return 命令执行对象
      */
-    public static AbstractCommander getInstance() {
-        if (abstractCommander != null) {
-            return abstractCommander;
+    public static AbstractProjectCommander getInstance() {
+        if (abstractProjectCommander != null) {
+            return abstractProjectCommander;
         }
         if (OS_INFO.isLinux()) {
             // Linux系统
-            abstractCommander = new LinuxCommander(CharsetUtil.CHARSET_UTF_8);
+            abstractProjectCommander = new LinuxProjectCommander(CharsetUtil.CHARSET_UTF_8);
         } else if (OS_INFO.isWindows()) {
             // Windows系统
-            abstractCommander = new WindowsCommander(CharsetUtil.CHARSET_GBK);
+            abstractProjectCommander = new WindowsProjectCommander(CharsetUtil.CHARSET_GBK);
         } else {
             throw new RuntimeException("不支持的：" + OS_INFO.getName());
         }
-        return abstractCommander;
+        return abstractProjectCommander;
     }
 
     //---------------------------------------------------- 基本操作----start
@@ -212,7 +212,7 @@ public abstract class AbstractCommander {
      * @return 结果
      * @throws Exception 异常
      */
-    public String backLog(ProjectInfoModel projectInfoModel) throws Exception {
+    public String backLog(ProjectInfoModel projectInfoModel) {
         if (StrUtil.isEmpty(projectInfoModel.getLog())) {
             return "ok";
         }
