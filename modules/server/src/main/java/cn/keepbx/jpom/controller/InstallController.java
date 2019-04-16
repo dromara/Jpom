@@ -4,15 +4,11 @@ import cn.hutool.core.lang.Validator;
 import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
-import cn.jiangzeyin.common.spring.SpringUtil;
 import cn.keepbx.jpom.common.BaseController;
 import cn.keepbx.jpom.common.interceptor.LoginInterceptor;
 import cn.keepbx.jpom.common.interceptor.NotLogin;
-import cn.keepbx.jpom.controller.node.system.WhitelistDirectoryController;
 import cn.keepbx.jpom.model.data.UserModel;
-import cn.keepbx.jpom.service.system.WhitelistDirectoryService;
 import cn.keepbx.jpom.service.user.UserService;
-import com.alibaba.fastjson.JSONArray;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -31,8 +27,8 @@ import javax.annotation.Resource;
 public class InstallController extends BaseController {
     @Resource
     private UserService userService;
-    @Resource
-    private WhitelistDirectoryService whitelistDirectoryService;
+//    @Resource
+//    private WhitelistDirectoryService whitelistDirectoryService;
 
     @RequestMapping(value = "install.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
     @NotLogin
@@ -102,22 +98,22 @@ public class InstallController extends BaseController {
         return JsonMessage.getString(200, "初始化成功");
     }
 
-    /**
-     * 处理白名单信息
-     *
-     * @param whitelistDirectory 白名单
-     * @return msg
-     */
-    private String whileList(String whitelistDirectory) {
-        JSONArray jsonArray = whitelistDirectoryService.getProjectDirectory();
-        if (jsonArray == null || jsonArray.isEmpty()) {
-            // 白名单
-            WhitelistDirectoryController whitelistDirectoryController = SpringUtil.getBean(WhitelistDirectoryController.class);
-            JsonMessage jsonMessage = whitelistDirectoryController.save(whitelistDirectory, null, null);
-            if (jsonMessage.getCode() != 200) {
-                return jsonMessage.toString();
-            }
-        }
-        return null;
-    }
+//    /**
+//     * 处理白名单信息
+//     *
+//     * @param whitelistDirectory 白名单
+//     * @return msg
+//     */
+//    private String whileList(String whitelistDirectory) {
+//        JSONArray jsonArray = whitelistDirectoryService.getProjectDirectory();
+//        if (jsonArray == null || jsonArray.isEmpty()) {
+//            // 白名单
+//            WhitelistDirectoryController whitelistDirectoryController = SpringUtil.getBean(WhitelistDirectoryController.class);
+//            JsonMessage jsonMessage = whitelistDirectoryController.save(whitelistDirectory, null, null);
+//            if (jsonMessage.getCode() != 200) {
+//                return jsonMessage.toString();
+//            }
+//        }
+//        return null;
+//    }
 }

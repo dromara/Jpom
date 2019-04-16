@@ -17,11 +17,7 @@ import java.util.concurrent.TimeUnit;
  */
 @Configuration
 public class ServerExtConfigBean {
-    /**
-     * 白名单路径是否判断包含关系
-     */
-    @Value("${whitelistDirectory.checkStartsWith:true}")
-    public boolean whitelistDirectoryCheckStartsWith;
+
 
     /**
      * 系统最多能创建多少用户

@@ -14,9 +14,7 @@ import cn.keepbx.jpom.common.interceptor.UrlPermission;
 import cn.keepbx.jpom.model.data.CertModel;
 import cn.keepbx.jpom.model.data.UserModel;
 import cn.keepbx.jpom.service.system.CertService;
-import cn.keepbx.jpom.service.system.WhitelistDirectoryService;
 import cn.keepbx.jpom.system.ServerConfigBean;
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.tomcat.util.http.fileupload.servlet.ServletFileUpload;
 import org.springframework.http.MediaType;
@@ -45,13 +43,13 @@ public class CertificateController extends BaseController {
 
     @Resource
     private CertService certService;
-    @Resource
-    private WhitelistDirectoryService whitelistDirectoryService;
+//    @Resource
+//    private WhitelistDirectoryService whitelistDirectoryService;
 
     @RequestMapping(value = "/list.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
     public String certificate() {
-        JSONArray jsonArray = whitelistDirectoryService.getCertificateDirectory();
-        setAttribute("certificate", jsonArray);
+//        JSONArray jsonArray = whitelistDirectoryService.getCertificateDirectory();
+//        setAttribute("certificate", jsonArray);
         return "node/system/certificate";
     }
 
@@ -135,9 +133,9 @@ public class CertificateController extends BaseController {
         if (StrUtil.isEmpty(name)) {
             return JsonMessage.getString(400, "请填写证书名称");
         }
-        if (!whitelistDirectoryService.checkCertificateDirectory(path)) {
-            return JsonMessage.getString(400, "请选择正确的项目路径,或者还没有配置白名单");
-        }
+//        if (!whitelistDirectoryService.checkCertificateDirectory(path)) {
+//            return JsonMessage.getString(400, "请选择正确的项目路径,或者还没有配置白名单");
+//        }
         certModel.setId(id);
         certModel.setWhitePath(path);
         certModel.setName(name);

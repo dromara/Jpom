@@ -5,11 +5,12 @@ import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
-import cn.keepbx.jpom.common.BaseController;
+import cn.keepbx.jpom.common.BaseNodeController;
 import cn.keepbx.jpom.common.Role;
 import cn.keepbx.jpom.common.interceptor.UrlPermission;
 import cn.keepbx.jpom.model.data.CertModel;
 import cn.keepbx.jpom.model.data.UserModel;
+import cn.keepbx.jpom.model.data.Whitelist;
 import cn.keepbx.jpom.service.system.CertService;
 import cn.keepbx.jpom.service.system.NginxService;
 import cn.keepbx.jpom.service.system.WhitelistDirectoryService;
@@ -40,7 +41,7 @@ import java.util.List;
  */
 @Controller
 @RequestMapping("/node/system/nginx")
-public class NginxController extends BaseController {
+public class NginxController extends BaseNodeController {
 
 
     @Resource
@@ -53,8 +54,8 @@ public class NginxController extends BaseController {
 
     @RequestMapping(value = "list.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
     public String ngx() {
-        JSONArray ngxDirectory = whitelistDirectoryService.getNgxDirectory();
-        setAttribute("nginx", ngxDirectory);
+        Whitelist ngxDirectory = whitelistDirectoryService.getData(getNode());
+        setAttribute("nginx", ngxDirectory.getNginx());
         List<CertModel> certList = certService.list();
         setAttribute("cert", certList);
         return "node/system/nginx";
@@ -73,13 +74,13 @@ public class NginxController extends BaseController {
 
     @RequestMapping(value = "item.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
     public String setting(String path, String name, String type) {
-        JSONArray ngxDirectory = whitelistDirectoryService.getNgxDirectory();
+        List<String> ngxDirectory = whitelistDirectoryService.getNgxDirectory(getNode());
         setAttribute("nginx", ngxDirectory);
         List<CertModel> certList = certService.list();
         setAttribute("cert", certList);
         setAttribute("type", type);
         name = pathSafe(name);
-        if (StrUtil.isNotEmpty(path) && whitelistDirectoryService.checkNgxDirectory(path)) {
+        if (StrUtil.isNotEmpty(path) && ngxDirectory != null && ngxDirectory.contains(path)) {
             File file = FileUtil.file(path, name);
             JSONObject jsonObject = new JSONObject();
             String string = FileUtil.readUtf8String(file);
@@ -111,9 +112,9 @@ public class NginxController extends BaseController {
         if (!checkPathSafe(name)) {
             return JsonMessage.getString(400, "文件名存在非法字符");
         }
-        if (!whitelistDirectoryService.checkNgxDirectory(whitePath)) {
-            return JsonMessage.getString(400, "请选择正确的白名单");
-        }
+//        if (!whitelistDirectoryService.checkNgxDirectory(whitePath)) {
+//            return JsonMessage.getString(400, "请选择正确的白名单");
+//        }
         //nginx文件
         File file = FileUtil.file(whitePath, name);
         if ("add".equals(genre) && file.exists()) {
@@ -212,9 +213,9 @@ public class NginxController extends BaseController {
     @ResponseBody
     @UrlPermission(Role.Manage)
     public String delete(String path, String name) {
-        if (!whitelistDirectoryService.checkNgxDirectory(path)) {
-            return JsonMessage.getString(400, "非法操作");
-        }
+//        if (!whitelistDirectoryService.checkNgxDirectory(path)) {
+//            return JsonMessage.getString(400, "非法操作");
+//        }
         path = pathSafe(path);
         name = pathSafe(name);
         if (StrUtil.isEmpty(name)) {

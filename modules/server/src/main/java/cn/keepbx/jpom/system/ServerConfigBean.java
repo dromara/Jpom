@@ -30,10 +30,7 @@ public class ServerConfigBean {
      * 节点数据文件
      */
     public static final String NODE = "node.json";
-    /**
-     * 白名单文件
-     */
-    public static final String WHITELIST_DIRECTORY = "whitelistDirectory.json";
+
     /**
      * 阿里oss 文件
      */

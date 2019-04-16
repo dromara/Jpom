@@ -6,6 +6,7 @@ import cn.hutool.http.HttpUtil;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.keepbx.jpom.model.data.NodeModel;
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Map;
@@ -27,9 +28,25 @@ public class NodeForward {
     }
 
 
+    public static <T> T requestData(NodeModel nodeModel, NodeUrl nodeUrl, Class<T> tClass) {
+        String url = StrUtil.format("http://{}{}", nodeModel.getUrl(), nodeUrl.getUrl());
+        String body = HttpUtil.createPost(url)
+                .execute()
+                .body();
+        JsonMessage jsonMessage = JSON.parseObject(body, JsonMessage.class);
+        if (jsonMessage.getCode() == 200) {
+            if (jsonMessage.getData() == null) {
+                return null;
+            }
+            return JSONObject.parseObject(jsonMessage.getData().toString(), tClass);
+        }
+        System.out.println(jsonMessage.toString());
+        return null;
+    }
+
+
     public static String getSocketUrl(NodeModel nodeModel, NodeUrl nodeUrl) {
-        String url = StrUtil.format("ws://{}{}", nodeModel.getUrl(), nodeUrl.getUrl());
-        return url;
+        return StrUtil.format("ws://{}{}", nodeModel.getUrl(), nodeUrl.getUrl());
     }
 
 }

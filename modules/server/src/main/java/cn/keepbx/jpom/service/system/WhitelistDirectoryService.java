@@ -1,29 +1,24 @@
 package cn.keepbx.jpom.service.system;
 
 import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
-import cn.keepbx.jpom.common.BaseDataService;
-import cn.keepbx.jpom.system.ServerConfigBean;
-import cn.keepbx.jpom.util.JsonFileUtil;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
+import cn.keepbx.jpom.common.forward.NodeForward;
+import cn.keepbx.jpom.common.forward.NodeUrl;
+import cn.keepbx.jpom.model.data.NodeModel;
+import cn.keepbx.jpom.model.data.Whitelist;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 /**
  * @author jiangzeyin
- * @date 2019/2/28
+ * @date 2019/4/16
  */
 @Service
-public class WhitelistDirectoryService extends BaseDataService {
+public class WhitelistDirectoryService {
 
-    public JSONObject getWhitelist() {
-        try {
-            return getJSONObject(ServerConfigBean.WHITELIST_DIRECTORY);
-        } catch (Exception e) {
-            DefaultSystemLog.ERROR().error(e.getMessage(), e);
-        }
-        return null;
+    public Whitelist getData(NodeModel model) {
+        return NodeForward.requestData(model, NodeUrl.WhitelistDirectory_data, Whitelist.class);
     }
 
     /**
@@ -31,52 +26,28 @@ public class WhitelistDirectoryService extends BaseDataService {
      *
      * @return project
      */
-    public JSONArray getProjectDirectory() {
-        return getItemArray("project");
-    }
-
-    public JSONArray getNgxDirectory() {
-        return getItemArray("nginx");
-    }
-
-    public JSONArray getCertificateDirectory() {
-        return getItemArray("certificate");
-    }
-
-    public boolean checkProjectDirectory(String path) {
-        return check(path, "project");
-    }
-
-    public boolean checkNgxDirectory(String path) {
-        return check(path, "nginx");
-    }
-
-    public boolean checkCertificateDirectory(String path) {
-        return check(path, "certificate");
-    }
-
-    private boolean check(String path, String key) {
-        JSONArray jsonArray = getItemArray(key);
-        if (jsonArray == null) {
-            return false;
+    public List<String> getProjectDirectory(NodeModel model) {
+        Whitelist whitelist = getData(model);
+        if (whitelist == null) {
+            return null;
         }
-        if (StrUtil.isEmpty(path)) {
-            return false;
-        }
-        return jsonArray.contains(path);
+        return whitelist.getProject();
     }
 
-    private JSONArray getItemArray(String key) {
-        try {
-            JSONObject jsonObject = getWhitelist();
-            if (jsonObject == null) {
-                return null;
-            }
-            return jsonObject.getJSONArray(key);
-        } catch (Exception e) {
-            DefaultSystemLog.ERROR().error(e.getMessage(), e);
+    public List<String> getNgxDirectory(NodeModel model) {
+        Whitelist whitelist = getData(model);
+        if (whitelist == null) {
+            return null;
         }
-        return null;
+        return whitelist.getNginx();
+    }
+
+    public List<String> getCertificateDirectory(NodeModel model) {
+        Whitelist whitelist = getData(model);
+        if (whitelist == null) {
+            return null;
+        }
+        return whitelist.getCertificate();
     }
 
     /**
@@ -85,17 +56,12 @@ public class WhitelistDirectoryService extends BaseDataService {
      * @param jsonArray jsonArray
      * @return str
      */
-    public String convertToLine(JSONArray jsonArray) {
+    public String convertToLine(List<String> jsonArray) {
         try {
             return CollUtil.join(jsonArray, "\r\n");
         } catch (Exception e) {
             DefaultSystemLog.ERROR().error(e.getMessage(), e);
         }
         return "";
-    }
-
-    public void saveWhitelistDirectory(JSONObject jsonObject) {
-        String path = getDataFilePath(ServerConfigBean.WHITELIST_DIRECTORY);
-        JsonFileUtil.saveJson(path, jsonObject);
     }
 }

@@ -23,7 +23,7 @@
                     $item.name
                 </div>
                 <div class="layui-layout-right" style="padding-right: 10%;">
-                    <button op="goIn" url="$!jpomProxyPath/node/index.html?id=$item.id"
+                    <button op="goIn" url="$!jpomProxyPath/node/index.html?nodeId=$item.id"
                             class="layui-btn layui-btn-sm layui-btn-primary ">
                         进入
                     </button>

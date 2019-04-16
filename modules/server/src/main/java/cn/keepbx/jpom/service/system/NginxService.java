@@ -31,7 +31,7 @@ public class NginxService extends BaseOperService {
 
     @Override
     public JSONArray list() {
-        JSONArray ngxDirectory = whitelistDirectoryService.getNgxDirectory();
+        List<String> ngxDirectory = whitelistDirectoryService.getNgxDirectory(null);
         if (ngxDirectory == null) {
             return null;
         }

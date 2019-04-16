@@ -1,16 +1,12 @@
 package cn.keepbx.jpom.controller.node.system;
 
-import cn.hutool.core.text.StrSpliter;
-import cn.hutool.core.util.StrUtil;
-import cn.jiangzeyin.common.JsonMessage;
-import cn.keepbx.jpom.common.BaseController;
+import cn.keepbx.jpom.common.BaseNodeController;
 import cn.keepbx.jpom.common.Role;
+import cn.keepbx.jpom.common.forward.NodeForward;
+import cn.keepbx.jpom.common.forward.NodeUrl;
 import cn.keepbx.jpom.common.interceptor.UrlPermission;
+import cn.keepbx.jpom.model.data.Whitelist;
 import cn.keepbx.jpom.service.system.WhitelistDirectoryService;
-import cn.keepbx.jpom.system.ExtConfigBean;
-import cn.keepbx.jpom.system.ServerExtConfigBean;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -18,7 +14,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.annotation.Resource;
-import java.util.List;
 
 /**
  * 白名单目录
@@ -28,7 +23,7 @@ import java.util.List;
  */
 @Controller
 @RequestMapping(value = "/node/system")
-public class WhitelistDirectoryController extends BaseController {
+public class WhitelistDirectoryController extends BaseNodeController {
     @Resource
     private WhitelistDirectoryService whitelistDirectoryService;
 
@@ -37,156 +32,26 @@ public class WhitelistDirectoryController extends BaseController {
      */
     @RequestMapping(value = "whitelistDirectory", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
     public String whitelistDirectory() {
-        JSONArray jsonArray = whitelistDirectoryService.getProjectDirectory();
-        setAttribute("project", whitelistDirectoryService.convertToLine(jsonArray));
-        //
-        jsonArray = whitelistDirectoryService.getCertificateDirectory();
-        setAttribute("certificate", whitelistDirectoryService.convertToLine(jsonArray));
-        jsonArray = whitelistDirectoryService.getNgxDirectory();
-        setAttribute("nginx", whitelistDirectoryService.convertToLine(jsonArray));
+        Whitelist whitelist = whitelistDirectoryService.getData(getNode());
+        if (whitelist != null) {
+            setAttribute("project", whitelistDirectoryService.convertToLine(whitelist.getProject()));
+            //
+            setAttribute("certificate", whitelistDirectoryService.convertToLine(whitelist.getCertificate()));
+            //
+            setAttribute("nginx", whitelistDirectoryService.convertToLine(whitelist.getNginx()));
+        }
         return "node/system/whitelistDirectory";
     }
 
     /**
      * 保存接口
      *
-     * @param project     项目
-     * @param certificate 证书
      * @return json
      */
     @RequestMapping(value = "whitelistDirectory_submit", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     @UrlPermission(Role.System)
-    public String whitelistDirectorySubmit(String project, String certificate, String nginx) {
-        //
-        List<String> certificateList = null;
-        if (StrUtil.isNotEmpty(certificate)) {
-            certificateList = StrSpliter.splitTrim(certificate, StrUtil.LF, true);
-            if (certificateList == null || certificateList.size() <= 0) {
-                return JsonMessage.getString(401, "证书路径白名单不能为空");
-            }
-        }
-        List<String> nList = null;
-        if (StrUtil.isNotEmpty(nginx)) {
-            nList = StrSpliter.splitTrim(nginx, StrUtil.LF, true);
-            if (nList == null || nList.size() <= 0) {
-                return JsonMessage.getString(401, "nginx路径白名单不能为空");
-            }
-        }
-        JsonMessage jsonMessage = save(project, certificateList, nList);
-        return jsonMessage.toString();
-    }
-
-    public JsonMessage save(String project, List<String> certificate, List<String> nginx) {
-        if (StrUtil.isEmpty(project)) {
-            return new JsonMessage(401, "项目路径白名单不能为空");
-        }
-        List<String> list = StrSpliter.splitTrim(project, StrUtil.LF, true);
-        if (list == null || list.size() <= 0) {
-            return new JsonMessage(401, "项目路径白名单不能为空");
-        }
-        return save(list, certificate, nginx);
-    }
-
-    private JsonMessage save(List<String> projects, List<String> certificate, List<String> nginx) {
-        JSONArray projectArray;
-        {
-            projectArray = covertToArray(projects);
-            if (projectArray == null) {
-                return new JsonMessage(401, "项目路径白名单不能位于Jpom目录下");
-            }
-            if (projectArray.isEmpty()) {
-                return new JsonMessage(401, "项目路径白名单不能为空");
-            }
-            String error = findStartsWith(projectArray, 0);
-            if (error != null) {
-                return new JsonMessage(401, "白名单目录中不能存在包含关系：" + error);
-            }
-        }
-        JSONArray certificateArray = null;
-        if (certificate != null && !certificate.isEmpty()) {
-            certificateArray = covertToArray(certificate);
-            if (certificateArray == null) {
-                return new JsonMessage(401, "证书路径白名单不能位于Jpom目录下");
-            }
-            if (certificateArray.isEmpty()) {
-                return new JsonMessage(401, "证书路径白名单不能为空");
-            }
-            String error = findStartsWith(certificateArray, 0);
-            if (error != null) {
-                return new JsonMessage(401, "证书目录中不能存在包含关系：" + error);
-            }
-        }
-        JSONArray nginxArray = null;
-        if (nginx != null && !nginx.isEmpty()) {
-            nginxArray = covertToArray(nginx);
-            if (nginxArray == null) {
-                return new JsonMessage(401, "nginx路径白名单不能位于Jpom目录下");
-            }
-            if (nginxArray.isEmpty()) {
-                return new JsonMessage(401, "nginx路径白名单不能为空");
-            }
-            String error = findStartsWith(nginxArray, 0);
-            if (error != null) {
-                return new JsonMessage(401, "nginx目录中不能存在包含关系：" + error);
-            }
-        }
-        JSONObject jsonObject = whitelistDirectoryService.getWhitelist();
-        if (jsonObject == null) {
-            jsonObject = new JSONObject();
-        }
-        jsonObject.put("project", projectArray);
-        jsonObject.put("certificate", certificateArray);
-        jsonObject.put("nginx", nginxArray);
-        whitelistDirectoryService.saveWhitelistDirectory(jsonObject);
-        return new JsonMessage(200, "保存成功");
-    }
-
-    private JSONArray covertToArray(List<String> list) {
-        JSONArray array = new JSONArray();
-        for (String s : list) {
-            String val = String.format("/%s/", s);
-            val = pathSafe(val);
-            if (StrUtil.SLASH.equals(val)) {
-                continue;
-            }
-            if (array.contains(val)) {
-                continue;
-            }
-            // 判断是否保护jpom 路径
-            if (val.startsWith(ExtConfigBean.getInstance().getPath())) {
-                return null;
-            }
-            array.add(val);
-        }
-        return array;
-    }
-
-    /**
-     * 检查白名单包含关系
-     *
-     * @param jsonArray 要检查的对象
-     * @param start     检查的坐标
-     * @return null 正常
-     */
-    private String findStartsWith(JSONArray jsonArray, int start) {
-        if (!ServerExtConfigBean.getInstance().whitelistDirectoryCheckStartsWith) {
-            return null;
-        }
-        String str = jsonArray.getString(start);
-        int len = jsonArray.size();
-        for (int i = 0; i < len; i++) {
-            if (i == start) {
-                continue;
-            }
-            String findStr = jsonArray.getString(i);
-            if (findStr.startsWith(str)) {
-                return str;
-            }
-        }
-        if (start < len - 1) {
-            return findStartsWith(jsonArray, start + 1);
-        }
-        return null;
+    public String whitelistDirectorySubmit() {
+        return NodeForward.request(getNode(), getRequest(), NodeUrl.WhitelistDirectory_Submit).toString();
     }
 }

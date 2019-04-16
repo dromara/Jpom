@@ -8,7 +8,7 @@ import cn.hutool.core.util.ReUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
-import cn.keepbx.jpom.common.BaseController;
+import cn.keepbx.jpom.common.BaseNodeController;
 import cn.keepbx.jpom.common.commander.AbstractProjectCommander;
 import cn.keepbx.jpom.model.data.ProjectInfoModel;
 import cn.keepbx.jpom.model.data.UserModel;
@@ -16,7 +16,6 @@ import cn.keepbx.jpom.service.manage.ProjectInfoService;
 import cn.keepbx.jpom.service.system.WhitelistDirectoryService;
 import cn.keepbx.jpom.socket.ServerWebSocketHandle;
 import cn.keepbx.jpom.system.ConfigBean;
-import com.alibaba.fastjson.JSONArray;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -38,7 +37,7 @@ import java.util.List;
  */
 @Controller
 @RequestMapping(value = "/node/manage/")
-public class EditProjectController extends BaseController {
+public class EditProjectController extends BaseNodeController {
     @Resource
     private ProjectInfoService projectInfoService;
     @Resource
@@ -56,7 +55,7 @@ public class EditProjectController extends BaseController {
         ProjectInfoModel projectInfo = projectInfoService.getItem(id);
 
         // 白名单
-        JSONArray jsonArray = whitelistDirectoryService.getProjectDirectory();
+        List<String> jsonArray = whitelistDirectoryService.getProjectDirectory(getNode());
         setAttribute("whitelistDirectory", jsonArray);
 
         if (projectInfo != null && jsonArray != null) {
@@ -124,9 +123,9 @@ public class EditProjectController extends BaseController {
             projectInfo.setMainClass("");
         }
         //
-        if (!whitelistDirectoryService.checkProjectDirectory(whitelistDirectory)) {
-            return JsonMessage.getString(401, "请选择正确的项目路径,或者还没有配置白名单");
-        }
+//        if (!whitelistDirectoryService.checkProjectDirectory(whitelistDirectory)) {
+//            return JsonMessage.getString(401, "请选择正确的项目路径,或者还没有配置白名单");
+//        }
         String lib = projectInfo.getLib();
         if (StrUtil.isEmpty(lib)) {
             return JsonMessage.getString(401, "项目Jar路径不能为空");

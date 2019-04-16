@@ -13,6 +13,11 @@ public enum NodeUrl {
     ProcessList("/processList"),
 
     TopSocket("/console/system"),
+
+    WhitelistDirectory_Submit("/system/whitelistDirectory_submit"),
+
+    WhitelistDirectory_data("/system/whitelistDirectory_data"),
+
     ;
 
     private String url;

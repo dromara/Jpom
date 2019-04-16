@@ -224,7 +224,7 @@
     }
 
     function editProject(id) {
-        layer.open({
+        layerOpen({
             type: 2,
             title: '管理项目配置信息',
             shade: 0.8,

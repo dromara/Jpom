@@ -97,7 +97,7 @@
             </ul>
             <div class="layui-tab-content">
                 <div class="layui-tab-item layui-show">
-                    <iframe src="./welcome?id=$!nowNodeItem.id" frameborder="0" class="custom-iframe"></iframe>
+                    <iframe src="./welcome?nodeId=$!nowNodeItem.id" frameborder="0" class="custom-iframe"></iframe>
                 </div>
             </div>
         </div>
@@ -117,8 +117,7 @@
             } catch (e) {
                 options = eval('(' + dataJSON + ')');
             }
-            var nodeId = getTopQueryString("id");
-            options.url = urlUpdateParams(options.url, "id", nodeId);
+
             tabChange(options);
         });
     }

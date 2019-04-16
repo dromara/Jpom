@@ -47,6 +47,8 @@
         var lay_id = 'tab_' + options.id;
         if (options.id != "welcome") {
             lay_id += options.title;
+            var nodeId = getTopQueryString("nodeId");
+            options.url = urlUpdateParams(options.url, "nodeId", nodeId);
         ## 如果存在选项卡，切换，否则创建
             if ($('[lay-id="' + lay_id + '"]', top.document).length <= 0) {
                 var tab_content = '<iframe id="' + lay_id + '" name="' + options.id + '" src="' + options.url + '" frameborder="0" class="custom-iframe"></iframe>';
@@ -59,6 +61,14 @@
         }
     ## 创建完后切换
         element.tabChange('mainTabs', lay_id);
+    }
+
+    function layerOpen(options) {
+        if (options.type == 2) {
+            var nodeId = getTopQueryString("nodeId");
+            options.content = urlUpdateParams(options.content, "nodeId", nodeId);
+        }
+        layer.open(options);
     }
 
     ## 获取自适应的socket
@@ -101,7 +111,7 @@
         delete data.error;
 
         var newData = {
-            nodeId: getTopQueryString("id")
+            nodeId: getTopQueryString("nodeId")
         };
         $.extend(newData, data.data);
         delete data.data;
