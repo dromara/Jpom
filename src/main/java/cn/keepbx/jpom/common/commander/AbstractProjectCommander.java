@@ -20,6 +20,7 @@ import cn.keepbx.jpom.model.data.ProjectInfoModel;
 import cn.keepbx.jpom.model.system.NetstatModel;
 import cn.keepbx.jpom.service.manage.ConsoleService;
 import cn.keepbx.jpom.service.manage.ProjectInfoService;
+import cn.keepbx.jpom.system.JpomRuntimeException;
 import cn.keepbx.jpom.util.CommandUtil;
 import cn.keepbx.jpom.util.JvmUtil;
 import com.sun.tools.attach.AttachNotSupportedException;
@@ -79,7 +80,7 @@ public abstract class AbstractProjectCommander {
             // Windows系统
             abstractProjectCommander = new WindowsProjectCommander(CharsetUtil.CHARSET_GBK);
         } else {
-            throw new RuntimeException("不支持的：" + OS_INFO.getName());
+            throw new JpomRuntimeException("不支持的：" + OS_INFO.getName());
         }
         return abstractProjectCommander;
     }

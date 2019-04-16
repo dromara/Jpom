@@ -3,14 +3,10 @@ import cn.hutool.core.io.watch.SimpleWatcher;
 import cn.hutool.core.io.watch.WatchMonitor;
 import cn.hutool.core.io.watch.WatchUtil;
 import cn.hutool.core.util.CharsetUtil;
-import cn.hutool.core.util.StrUtil;
 
 import java.io.*;
 import java.nio.file.Path;
 import java.nio.file.WatchEvent;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Created by jiangzeyin on 2019/3/15.
@@ -70,31 +66,4 @@ public class TestJavaTail {
         return result;
     }
 
-    private static long lastTimeFileSize = 0;
-
-    public static void realtimeShowLog(File logFile) throws IOException {
-        //指定文件可读可写
-        final RandomAccessFile randomFile = new RandomAccessFile(logFile, "r");
-        lastTimeFileSize = randomFile.length() - 10;
-        //启动一个线程每10秒钟读取新增的日志信息
-        ScheduledExecutorService exec = Executors.newScheduledThreadPool(1);
-        exec.scheduleWithFixedDelay(() -> {
-            try {
-                System.out.println(lastTimeFileSize);
-                //获得变化部分的
-                randomFile.seek(lastTimeFileSize);
-                String tmp;
-                while ((tmp = randomFile.readLine()) != null) {
-                    tmp = new String(tmp.getBytes(CharsetUtil.CHARSET_ISO_8859_1));
-                    if (StrUtil.isEmpty(tmp)) {
-                        continue;
-                    }
-                    System.out.println(tmp);
-                }
-                lastTimeFileSize = randomFile.length();
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        }, 0, 1, TimeUnit.SECONDS);
-    }
 }

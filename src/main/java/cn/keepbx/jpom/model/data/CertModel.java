@@ -10,6 +10,7 @@ import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.spring.SpringUtil;
 import cn.keepbx.jpom.model.BaseModel;
 import cn.keepbx.jpom.service.system.CertService;
+import cn.keepbx.jpom.system.JpomRuntimeException;
 import com.alibaba.fastjson.JSONObject;
 
 import java.io.BufferedInputStream;
@@ -149,7 +150,7 @@ public class CertModel extends BaseModel {
         String encryptStr = rsa.encryptBase64(str, KeyType.PublicKey);
         String decryptStr = rsa.decryptStr(encryptStr, KeyType.PrivateKey);
         if (!str.equals(decryptStr)) {
-            throw new RuntimeException("证书和私钥证书不匹配");
+            throw new JpomRuntimeException("证书和私钥证书不匹配");
         }
         try {
             BufferedInputStream inStream = FileUtil.getInputStream(file);

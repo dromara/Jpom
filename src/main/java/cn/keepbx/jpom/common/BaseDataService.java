@@ -4,6 +4,7 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.keepbx.jpom.system.ConfigBean;
+import cn.keepbx.jpom.system.JpomRuntimeException;
 import cn.keepbx.jpom.util.JsonFileUtil;
 import com.alibaba.fastjson.JSONObject;
 
@@ -46,7 +47,7 @@ public abstract class BaseDataService {
         }
         // 判断是否存在数据
         if (null != data && 0 < data.keySet().size()) {
-            throw new RuntimeException("数据Id已经存在啦：" + filename + " :" + key);
+            throw new JpomRuntimeException("数据Id已经存在啦：" + filename + " :" + key);
         } else {
             allData.put(key, json);
             JsonFileUtil.saveJson(getDataFilePath(filename), allData);

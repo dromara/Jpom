@@ -3,6 +3,7 @@ package cn.keepbx.jpom.common.commander;
 import cn.keepbx.jpom.common.commander.impl.LinuxSystemCommander;
 import cn.keepbx.jpom.common.commander.impl.WindowsSystemCommander;
 import cn.keepbx.jpom.model.system.ProcessModel;
+import cn.keepbx.jpom.system.JpomRuntimeException;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
@@ -29,7 +30,7 @@ public abstract class AbstractSystemCommander {
             // Windows系统
             abstractSystemCommander = new WindowsSystemCommander();
         } else {
-            throw new RuntimeException("不支持的：" + AbstractProjectCommander.OS_INFO.getName());
+            throw new JpomRuntimeException("不支持的：" + AbstractProjectCommander.OS_INFO.getName());
         }
         return abstractSystemCommander;
     }

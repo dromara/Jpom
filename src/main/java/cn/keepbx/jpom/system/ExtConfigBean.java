@@ -112,7 +112,7 @@ public class ExtConfigBean {
                 // 获取当前项目运行路径的父级
                 File file = JpomApplication.getRunPath();
                 if (!file.exists() && !file.isFile()) {
-                    throw new RuntimeException("请配置运行路径属性【jpom.path】");
+                    throw new JpomRuntimeException("请配置运行路径属性【jpom.path】");
                 }
                 path = file.getParentFile().getParentFile().getAbsolutePath();
             }

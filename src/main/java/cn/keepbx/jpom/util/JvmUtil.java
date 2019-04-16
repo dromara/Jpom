@@ -5,6 +5,7 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.system.JavaRuntimeInfo;
 import cn.hutool.system.SystemUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
+import cn.keepbx.jpom.system.JpomRuntimeException;
 import com.sun.management.OperatingSystemMXBean;
 import com.sun.tools.attach.*;
 import sun.management.ConnectorAddressLink;
@@ -65,6 +66,15 @@ public class JvmUtil {
         return ManagementFactory.newPlatformMXBeanProxy(mBeanServerConnection, ManagementFactory.OPERATING_SYSTEM_MXBEAN_NAME, OperatingSystemMXBean.class);
     }
 
+    /**
+     * 获取jmx 服务对象，如果没有加载则加载对应插件
+     *
+     * @param virtualMachine virtualMachine
+     * @return JMXServiceURL
+     * @throws IOException                  IO
+     * @throws AgentLoadException           插件加载
+     * @throws AgentInitializationException 插件初始化
+     */
     private static JMXServiceURL getJMXServiceURL(VirtualMachine virtualMachine) throws IOException, AgentLoadException, AgentInitializationException {
         String address = virtualMachine.getAgentProperties().getProperty("com.sun.management.jmxremote.localConnectorAddress");
         if (address != null) {
@@ -130,6 +140,6 @@ public class JvmUtil {
         if (file.exists() && file.isFile()) {
             return agent;
         }
-        throw new RuntimeException("JDK中" + file.getAbsolutePath() + " 文件不存在");
+        throw new JpomRuntimeException("JDK中" + file.getAbsolutePath() + " 文件不存在");
     }
 }

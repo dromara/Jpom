@@ -203,12 +203,12 @@ public class ProjectFileControl extends BaseController {
     @ResponseBody
     @ProjectPermission(checkDelete = true)
     public String deleteFile(String filename) {
-        filename = pathSafe(filename);
-        if (StrUtil.isEmpty(filename)) {
+        String fileName = pathSafe(filename);
+        if (StrUtil.isEmpty(fileName)) {
             return JsonMessage.getString(405, "非法操作");
         }
         ProjectInfoModel pim = getProjectInfoModel();
-        File file = FileUtil.file(pim.getLib(), filename);
+        File file = FileUtil.file(pim.getLib(), fileName);
         if (file.exists()) {
             if (FileUtil.del(file)) {
                 return JsonMessage.getString(200, "删除成功");

@@ -31,6 +31,7 @@ public class WebAopLog extends PropertyDefinerBase {
 
     @Pointcut("execution(public * cn.keepbx.jpom.controller..*.*(..))")
     public void webLog() {
+        //
     }
 
     @Before("webLog()")

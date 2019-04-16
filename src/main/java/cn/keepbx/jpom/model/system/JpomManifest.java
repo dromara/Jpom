@@ -58,7 +58,7 @@ public class JpomManifest {
     /**
      * 当前版本
      */
-    private String version;
+    private String version = "dev";
     /**
      * 打包时间
      */
@@ -80,9 +80,6 @@ public class JpomManifest {
     }
 
     public String getVersion() {
-        if (StrUtil.isEmpty(version)) {
-            return "dev";
-        }
         return version;
     }
 
@@ -96,7 +93,9 @@ public class JpomManifest {
     }
 
     public void setVersion(String version) {
-        this.version = version;
+        if (StrUtil.isNotEmpty(version)) {
+            this.version = version;
+        }
     }
 
     public String getTimeStamp() {
