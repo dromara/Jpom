@@ -4,14 +4,9 @@ import cn.hutool.core.convert.Convert;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.script.ScriptUtil;
 import cn.jiangzeyin.common.spring.SpringUtil;
-import cn.keepbx.jpom.model.system.JpomManifest;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.core.io.FileSystemResource;
-import org.springframework.core.io.Resource;
 
-import java.io.File;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -21,34 +16,7 @@ import java.util.concurrent.TimeUnit;
  * @date 2019/3/04
  */
 @Configuration
-public class ExtConfigBean {
-
-    static final String FILE_NAME = "extConfig.yml";
-
-    private static Resource resource;
-
-    /**
-     * 动态获取外部配置文件的 resource
-     *
-     * @return File
-     */
-    public static Resource getResource() {
-        if (resource != null) {
-            return resource;
-        }
-        File file = JpomManifest.getRunPath();
-        if (file.isFile()) {
-            file = file.getParentFile().getParentFile();
-            file = new File(file, FILE_NAME);
-            if (file.exists() && file.isFile()) {
-                resource = new FileSystemResource(file);
-                return ExtConfigBean.resource;
-            }
-        }
-        resource = new ClassPathResource("/bin/" + FILE_NAME);
-        return ExtConfigBean.resource;
-    }
-
+public class ServerExtConfigBean {
     /**
      * 白名单路径是否判断包含关系
      */
@@ -82,11 +50,7 @@ public class ExtConfigBean {
      */
     @Value("${log.saveDays:7}")
     private int logSaveDays;
-    /**
-     * 项目运行存储路径
-     */
-    @Value("${jpom.path}")
-    private String path;
+
     /**
      * 当ip连续登录失败，锁定对应IP时长，单位毫秒
      */
@@ -102,22 +66,6 @@ public class ExtConfigBean {
         return this.ipErrorLockTimeValue;
     }
 
-    public String getPath() {
-        if (StrUtil.isEmpty(path)) {
-            if (JpomManifest.getInstance().isDebug()) {
-                // 调试模式 为根路径的 jpom文件
-                path = "/jpom/";
-            } else {
-                // 获取当前项目运行路径的父级
-                File file = JpomManifest.getRunPath();
-                if (!file.exists() && !file.isFile()) {
-                    throw new JpomRuntimeException("请配置运行路径属性【jpom.path】");
-                }
-                path = file.getParentFile().getParentFile().getAbsolutePath();
-            }
-        }
-        return path;
-    }
 
     /**
      * 配置错误或者没有，默认是7天
@@ -136,7 +84,7 @@ public class ExtConfigBean {
      *
      * @return this
      */
-    public static ExtConfigBean getInstance() {
-        return SpringUtil.getBean(ExtConfigBean.class);
+    public static ServerExtConfigBean getInstance() {
+        return SpringUtil.getBean(ServerExtConfigBean.class);
     }
 }

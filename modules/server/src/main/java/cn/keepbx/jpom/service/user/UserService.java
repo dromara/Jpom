@@ -3,7 +3,7 @@ package cn.keepbx.jpom.service.user;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.keepbx.jpom.common.BaseOperService;
 import cn.keepbx.jpom.model.data.UserModel;
-import cn.keepbx.jpom.system.ConfigBean;
+import cn.keepbx.jpom.system.ServerConfigBean;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;
 
@@ -37,7 +37,7 @@ public class UserService extends BaseOperService<UserModel> {
      */
     public int userSize() {
         try {
-            JSONObject userInfo = getJSONObject(ConfigBean.USER);
+            JSONObject userInfo = getJSONObject(ServerConfigBean.USER);
             if (userInfo == null) {
                 return 0;
             }
@@ -72,7 +72,7 @@ public class UserService extends BaseOperService<UserModel> {
      * @return userModel 用户对象
      */
     public UserModel checkUser(String userMd5) {
-        JSONObject jsonData = getJSONObject(ConfigBean.USER);
+        JSONObject jsonData = getJSONObject(ServerConfigBean.USER);
         if (jsonData == null) {
             return null;
         }
@@ -94,7 +94,7 @@ public class UserService extends BaseOperService<UserModel> {
      */
     @Override
     public List<UserModel> list() {
-        JSONObject jsonObject = getJSONObject(ConfigBean.USER);
+        JSONObject jsonObject = getJSONObject(ServerConfigBean.USER);
         if (jsonObject == null) {
             return null;
         }
@@ -121,7 +121,7 @@ public class UserService extends BaseOperService<UserModel> {
      */
     @Override
     public UserModel getItem(String userId) {
-        return getJsonObjectById(ConfigBean.USER, userId, UserModel.class);
+        return getJsonObjectById(ServerConfigBean.USER, userId, UserModel.class);
     }
 
     /**
@@ -132,7 +132,7 @@ public class UserService extends BaseOperService<UserModel> {
      */
     public boolean deleteUser(String id) {
         try {
-            deleteJson(ConfigBean.USER, id);
+            deleteJson(ServerConfigBean.USER, id);
             return true;
         } catch (Exception e) {
             DefaultSystemLog.ERROR().error(e.getMessage(), e);
@@ -147,7 +147,7 @@ public class UserService extends BaseOperService<UserModel> {
      */
     @Override
     public void addItem(UserModel userModel) {
-        saveJson(ConfigBean.USER, userModel.toJson());
+        saveJson(ServerConfigBean.USER, userModel.toJson());
     }
 
     /**
@@ -158,7 +158,7 @@ public class UserService extends BaseOperService<UserModel> {
     @Override
     public boolean updateItem(UserModel userModel) {
         try {
-            updateJson(ConfigBean.USER, userModel.toJson());
+            updateJson(ServerConfigBean.USER, userModel.toJson());
             return true;
         } catch (Exception e) {
             DefaultSystemLog.ERROR().error(e.getMessage(), e);

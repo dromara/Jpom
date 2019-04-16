@@ -12,7 +12,7 @@ import cn.keepbx.jpom.common.interceptor.LoginInterceptor;
 import cn.keepbx.jpom.common.interceptor.NotLogin;
 import cn.keepbx.jpom.model.data.UserModel;
 import cn.keepbx.jpom.service.user.UserService;
-import cn.keepbx.jpom.system.ExtConfigBean;
+import cn.keepbx.jpom.system.ServerExtConfigBean;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -85,7 +85,7 @@ public class LoginControl extends BaseController {
     }
 
     private int ipError() {
-        if (ExtConfigBean.getInstance().getIpErrorLockTime() <= 0) {
+        if (ServerExtConfigBean.getInstance().getIpErrorLockTime() <= 0) {
             return 0;
         }
         String ip = getIp();
@@ -94,7 +94,7 @@ public class LoginControl extends BaseController {
             count = 0;
         }
         count++;
-        LFU_CACHE.put(ip, count, ExtConfigBean.getInstance().getIpErrorLockTime());
+        LFU_CACHE.put(ip, count, ServerExtConfigBean.getInstance().getIpErrorLockTime());
         return count;
     }
 
@@ -109,7 +109,7 @@ public class LoginControl extends BaseController {
      * @return true
      */
     private boolean ipLock() {
-        if (ExtConfigBean.getInstance().userAlwaysLoginError <= 0) {
+        if (ServerExtConfigBean.getInstance().userAlwaysLoginError <= 0) {
             return false;
         }
         String ip = getIp();
@@ -118,7 +118,7 @@ public class LoginControl extends BaseController {
             count = 0;
         }
         // 大于10倍时 封ip
-        return count > ExtConfigBean.getInstance().userAlwaysLoginError * 10;
+        return count > ServerExtConfigBean.getInstance().userAlwaysLoginError * 10;
     }
 
     /**

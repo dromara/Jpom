@@ -5,7 +5,7 @@ import cn.hutool.core.io.FileUtil;
 import cn.keepbx.jpom.common.BaseOperService;
 import cn.keepbx.jpom.model.data.ProjectInfoModel;
 import cn.keepbx.jpom.model.data.ProjectRecoverModel;
-import cn.keepbx.jpom.system.ConfigBean;
+import cn.keepbx.jpom.system.ServerConfigBean;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;
@@ -32,7 +32,7 @@ public class ProjectInfoService extends BaseOperService<ProjectInfoModel> {
      */
     @Override
     public List<ProjectInfoModel> list() {
-        JSONObject jsonObject = getJSONObject(ConfigBean.PROJECT);
+        JSONObject jsonObject = getJSONObject(ServerConfigBean.PROJECT);
         JSONArray jsonArray = formatToArray(jsonObject);
         return jsonArray.toJavaList(ProjectInfoModel.class);
     }
@@ -56,7 +56,7 @@ public class ProjectInfoService extends BaseOperService<ProjectInfoModel> {
     @Override
     public void addItem(ProjectInfoModel projectInfo) {
         // 保存
-        saveJson(ConfigBean.PROJECT, projectInfo.toJson());
+        saveJson(ServerConfigBean.PROJECT, projectInfo.toJson());
     }
 
     /**
@@ -65,7 +65,7 @@ public class ProjectInfoService extends BaseOperService<ProjectInfoModel> {
      * @param projectInfo 项目
      */
     public void deleteProject(ProjectInfoModel projectInfo, String userId) throws Exception {
-        deleteJson(ConfigBean.PROJECT, projectInfo.getId());
+        deleteJson(ServerConfigBean.PROJECT, projectInfo.getId());
         // 添加回收记录
         ProjectRecoverModel projectRecoverModel = new ProjectRecoverModel(projectInfo);
         projectRecoverModel.setDelUser(userId);
@@ -80,7 +80,7 @@ public class ProjectInfoService extends BaseOperService<ProjectInfoModel> {
     @Override
     public boolean updateItem(ProjectInfoModel projectInfo) throws Exception {
         projectInfo.setModifyTime(DateUtil.now());
-        updateJson(ConfigBean.PROJECT, projectInfo.toJson());
+        updateJson(ServerConfigBean.PROJECT, projectInfo.toJson());
         return true;
     }
 
@@ -93,7 +93,7 @@ public class ProjectInfoService extends BaseOperService<ProjectInfoModel> {
      */
     @Override
     public ProjectInfoModel getItem(String id) {
-        return getJsonObjectById(ConfigBean.PROJECT, id, ProjectInfoModel.class);
+        return getJsonObjectById(ServerConfigBean.PROJECT, id, ProjectInfoModel.class);
     }
 
     public String getLogSize(String id) {

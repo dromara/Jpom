@@ -17,7 +17,8 @@
 
             <label class="layui-form-label">节点ID</label>
             <div class="layui-input-block">
-                <input type="text" id="id" name="id" placeholder="创建后不能修改" class="layui-input" required
+                <input type="text" id="id" name="id" value="$!item.id" placeholder="创建后不能修改" class="layui-input"
+                       required
                        lay-verify="required">
                 <input type="hidden" name="type" value="$!type">
             </div>
@@ -25,28 +26,32 @@
         <div class="layui-form-item">
             <label class="layui-form-label">节点名称</label>
             <div class="layui-input-block">
-                <input type="text" id="name" name="name" placeholder="请填写节点名称" class="layui-input" required
+                <input type="text" id="name" name="name" value="$!item.name" placeholder="请填写节点名称" class="layui-input"
+                       required
                        lay-verify="required">
             </div>
         </div>
         <div class="layui-form-item">
             <label class="layui-form-label">节点地址</label>
             <div class="layui-input-block">
-                <input type="text" id="url" name="url" placeholder="请填写节点名称" class="layui-input" required
+                <input type="text" id="url" name="url" value="$!item.url" placeholder="请填写节点名称" class="layui-input"
+                       required
                        lay-verify="required">
             </div>
         </div>
         <div class="layui-form-item">
             <label class="layui-form-label">节点账号</label>
             <div class="layui-input-block">
-                <input type="text" id="loginName" name="loginName" placeholder="请填写节点登录账号" class="layui-input" required
+                <input type="text" id="loginName" name="loginName" value="$!item.loginName" placeholder="请填写节点登录账号"
+                       class="layui-input" required
                        lay-verify="required">
             </div>
         </div>
         <div class="layui-form-item">
             <label class="layui-form-label">节点密码</label>
             <div class="layui-input-block">
-                <input type="password" id="loginPwd" name="loginPwd" placeholder="请填写节点登录密码" class="layui-input"
+                <input type="password" id="loginPwd" name="loginPwd" value="$!item.loginPwd" placeholder="请填写节点登录密码"
+                       class="layui-input"
                        required
                        lay-verify="required">
             </div>
@@ -73,7 +78,10 @@
                 success: function (data) {
                     layer.msg(data.msg);
                     if (200 == data.code) {
-                        autoClose();
+                        setTimeout(function () {
+                            var index = parent.layer.getFrameIndex(window.name);
+                            parent.layer.close(index);
+                        }, 2000);
                     }
                 }
             });

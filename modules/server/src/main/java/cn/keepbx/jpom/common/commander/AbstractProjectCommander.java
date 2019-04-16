@@ -10,10 +10,9 @@ import cn.hutool.core.text.StrSpliter;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.http.HttpUtil;
-import cn.hutool.system.OsInfo;
-import cn.hutool.system.SystemUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.spring.SpringUtil;
+import cn.keepbx.jpom.BaseJpomApplication;
 import cn.keepbx.jpom.common.commander.impl.LinuxProjectCommander;
 import cn.keepbx.jpom.common.commander.impl.WindowsProjectCommander;
 import cn.keepbx.jpom.model.data.ProjectInfoModel;
@@ -28,7 +27,6 @@ import com.sun.tools.attach.VirtualMachine;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
@@ -45,8 +43,8 @@ import java.util.jar.Manifest;
 public abstract class AbstractProjectCommander {
 
     private static AbstractProjectCommander abstractProjectCommander = null;
-    protected Charset charset;
-    public static final OsInfo OS_INFO = SystemUtil.getOsInfo();
+
+
     /**
      * 进程id 对应Jpom 名称
      */
@@ -55,14 +53,6 @@ public abstract class AbstractProjectCommander {
      * 进程Id 获取端口号
      */
     private static final LRUCache<Integer, Integer> PID_PORT = new LRUCache<>(100, TimeUnit.MINUTES.toMillis(10));
-
-    protected AbstractProjectCommander(Charset charset) {
-        this.charset = charset;
-    }
-
-    public Charset getCharset() {
-        return charset;
-    }
 
     /**
      * 实例化Commander
@@ -73,14 +63,14 @@ public abstract class AbstractProjectCommander {
         if (abstractProjectCommander != null) {
             return abstractProjectCommander;
         }
-        if (OS_INFO.isLinux()) {
+        if (BaseJpomApplication.OS_INFO.isLinux()) {
             // Linux系统
-            abstractProjectCommander = new LinuxProjectCommander(CharsetUtil.CHARSET_UTF_8);
-        } else if (OS_INFO.isWindows()) {
+            abstractProjectCommander = new LinuxProjectCommander();
+        } else if (BaseJpomApplication.OS_INFO.isWindows()) {
             // Windows系统
-            abstractProjectCommander = new WindowsProjectCommander(CharsetUtil.CHARSET_GBK);
+            abstractProjectCommander = new WindowsProjectCommander();
         } else {
-            throw new JpomRuntimeException("不支持的：" + OS_INFO.getName());
+            throw new JpomRuntimeException("不支持的：" + BaseJpomApplication.OS_INFO.getName());
         }
         return abstractProjectCommander;
     }
@@ -227,9 +217,9 @@ public abstract class AbstractProjectCommander {
         File backPath = projectInfoModel.getLogBack();
         backPath = new File(backPath, DateTime.now().toString(DatePattern.PURE_DATETIME_FORMAT) + ".log");
         FileUtil.copy(file, backPath, true);
-        if (OS_INFO.isLinux()) {
+        if (BaseJpomApplication.OS_INFO.isLinux()) {
             CommandUtil.execCommand("cp /dev/null " + projectInfoModel.getLog());
-        } else if (OS_INFO.isWindows()) {
+        } else if (BaseJpomApplication.OS_INFO.isWindows()) {
             // 清空日志
             String r = CommandUtil.execSystemCommand("echo  \"\" > " + file.getAbsolutePath());
             if (StrUtil.isEmpty(r)) {

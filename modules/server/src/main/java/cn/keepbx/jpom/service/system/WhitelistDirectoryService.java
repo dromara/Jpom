@@ -4,7 +4,7 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.keepbx.jpom.common.BaseDataService;
-import cn.keepbx.jpom.system.ConfigBean;
+import cn.keepbx.jpom.system.ServerConfigBean;
 import cn.keepbx.jpom.util.JsonFileUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -19,7 +19,7 @@ public class WhitelistDirectoryService extends BaseDataService {
 
     public JSONObject getWhitelist() {
         try {
-            return getJSONObject(ConfigBean.WHITELIST_DIRECTORY);
+            return getJSONObject(ServerConfigBean.WHITELIST_DIRECTORY);
         } catch (Exception e) {
             DefaultSystemLog.ERROR().error(e.getMessage(), e);
         }
@@ -95,7 +95,7 @@ public class WhitelistDirectoryService extends BaseDataService {
     }
 
     public void saveWhitelistDirectory(JSONObject jsonObject) {
-        String path = getDataFilePath(ConfigBean.WHITELIST_DIRECTORY);
+        String path = getDataFilePath(ServerConfigBean.WHITELIST_DIRECTORY);
         JsonFileUtil.saveJson(path, jsonObject);
     }
 }

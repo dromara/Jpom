@@ -4,8 +4,6 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.spring.SpringUtil;
 import cn.keepbx.jpom.common.BaseController;
-import cn.keepbx.jpom.model.system.JpomManifest;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 
 import java.io.File;
@@ -17,9 +15,9 @@ import java.io.File;
  * @date 2019/1/16
  */
 @Configuration
-public class ConfigBean {
-    private static final String DATA = "data";
-    private static ConfigBean configBean;
+public class ServerConfigBean {
+
+    private static ServerConfigBean serverConfigBean;
     /**
      * 用户数据文件
      */
@@ -48,51 +46,17 @@ public class ConfigBean {
      * 项目回收文件
      */
     public static final String PROJECT_RECOVER = "project_recover.json";
-    /**
-     * Jpom 程序运行的 application 标识
-     */
-    @Value("${jpom.applicationTag:}")
-    public String applicationTag;
 
     /**
      * 单利模式
      *
      * @return config
      */
-    public static ConfigBean getInstance() {
-        if (configBean == null) {
-            configBean = SpringUtil.getBean(ConfigBean.class);
+    public static ServerConfigBean getInstance() {
+        if (serverConfigBean == null) {
+            serverConfigBean = SpringUtil.getBean(ServerConfigBean.class);
         }
-        return configBean;
-    }
-
-    /**
-     * 获取项目运行数据存储文件夹路径
-     *
-     * @return 文件夹路径
-     */
-    public String getDataPath() {
-        String dataPath = FileUtil.normalize(ExtConfigBean.getInstance().getPath() + "/" + DATA);
-        FileUtil.mkdir(dataPath);
-        return dataPath;
-    }
-
-    /**
-     * 获取pid文件
-     *
-     * @return file
-     */
-    public File getPidFile() {
-        return new File(getDataPath(), "pid." + JpomManifest.getInstance().getPid());
-    }
-
-    /**
-     * 获取当前Jpom 运行信息文件
-     *
-     * @return file
-     */
-    public File getJpomInfo() {
-        return new File(getDataPath(), "jpom.info");
+        return serverConfigBean;
     }
 
     /**
@@ -111,7 +75,7 @@ public class ConfigBean {
      * @return file
      */
     public File getTempPath() {
-        File file = new File(getDataPath());
+        File file = new File(ConfigBean.getInstance().getDataPath());
         String userName = BaseController.getUserName();
         if (StrUtil.isEmpty(userName)) {
             throw new JpomRuntimeException("没有登录");

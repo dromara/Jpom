@@ -1,0 +1,13 @@
+jpom:
+  # jpom 数据存储路径, 如果调试模式运行默认路径为【/jpom/】,安装运行默认为jar包文件的父级
+  path:
+whitelistDirectory:
+  # 白名单目录是否验证包含关系
+  checkStartsWith: true
+log:
+  # 自动备份控制台日志，防止日志文件过大，目前暂只支持linux 不停服备份
+  autoBackConsoleCron: 0 0/10 * * * ?
+  # 当文件多大时自动备份
+  autoBackSize: 50MB
+  # 保存天数 配置错误或者没有，默认是7天
+  saveDays: 7

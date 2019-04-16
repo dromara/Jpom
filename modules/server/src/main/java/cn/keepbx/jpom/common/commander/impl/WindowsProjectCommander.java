@@ -8,7 +8,6 @@ import cn.keepbx.jpom.model.data.ProjectInfoModel;
 import cn.keepbx.jpom.model.system.NetstatModel;
 import cn.keepbx.jpom.util.CommandUtil;
 
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,10 +17,6 @@ import java.util.List;
  * @author Administrator
  */
 public class WindowsProjectCommander extends AbstractProjectCommander {
-
-    public WindowsProjectCommander(Charset charset) {
-        super(charset);
-    }
 
     @Override
     public String start(ProjectInfoModel projectInfoModel) throws Exception {

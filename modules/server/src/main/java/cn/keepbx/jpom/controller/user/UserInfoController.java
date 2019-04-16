@@ -10,7 +10,7 @@ import cn.keepbx.jpom.common.interceptor.LoginInterceptor;
 import cn.keepbx.jpom.common.interceptor.UrlPermission;
 import cn.keepbx.jpom.model.data.UserModel;
 import cn.keepbx.jpom.service.user.UserService;
-import cn.keepbx.jpom.system.ExtConfigBean;
+import cn.keepbx.jpom.system.ServerExtConfigBean;
 import com.alibaba.fastjson.JSONArray;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -136,7 +136,7 @@ public class UserInfoController extends BaseController {
         UserModel userName = getUser();
         //
         int size = userService.userSize();
-        if (size >= ExtConfigBean.getInstance().userMaxCount) {
+        if (size >= ServerExtConfigBean.getInstance().userMaxCount) {
             return JsonMessage.getString(500, "当前用户个数超过系统上限");
         }
 

@@ -65,10 +65,10 @@ public class TopManager {
         CronUtil.schedule(CRON_ID, "0/10 * * * * ?", () -> {
             //发送监控信息
             try {
-                JSONObject topInfo = AbstractSystemCommander.getInstance().getAllMonitor();
-                if (topInfo != null) {
-                    send(topInfo.toString());
-                }
+//                JSONObject topInfo = AbstractSystemCommander.getInstance().getAllMonitor();
+//                if (topInfo != null) {
+//                    send(topInfo.toString());
+//                }
             } catch (Exception e) {
                 DefaultSystemLog.ERROR().error(e.getMessage(), e);
             }

@@ -3,7 +3,7 @@ package cn.keepbx.jpom.service.oss;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.keepbx.jpom.common.BaseDataService;
-import cn.keepbx.jpom.system.ConfigBean;
+import cn.keepbx.jpom.system.ServerConfigBean;
 import cn.keepbx.jpom.util.JsonFileUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -31,7 +31,7 @@ import java.util.concurrent.TimeUnit;
 public class OssManagerService extends BaseDataService {
 
     public File download(String key) {
-        File file = ConfigBean.getInstance().getTempPath();
+        File file = ServerConfigBean.getInstance().getTempPath();
         //getTempPath();
         file = FileUtil.file(file, key);
         OSSClient ossClient = getOSSClient(getConfig());
@@ -98,7 +98,7 @@ public class OssManagerService extends BaseDataService {
     }
 
     public JSONObject getConfig() {
-        return getJSONObject(ConfigBean.ALI_OSS);
+        return getJSONObject(ServerConfigBean.ALI_OSS);
     }
 
     private String getBucketName() {
@@ -112,7 +112,7 @@ public class OssManagerService extends BaseDataService {
     }
 
     public void save(JSONObject jsonObject) {
-        String path = getDataFilePath(ConfigBean.ALI_OSS);
+        String path = getDataFilePath(ServerConfigBean.ALI_OSS);
         JsonFileUtil.saveJson(path, jsonObject);
     }
 }

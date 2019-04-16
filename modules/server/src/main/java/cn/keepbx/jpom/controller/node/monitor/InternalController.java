@@ -9,7 +9,7 @@ import cn.keepbx.jpom.common.commander.AbstractProjectCommander;
 import cn.keepbx.jpom.common.commander.AbstractSystemCommander;
 import cn.keepbx.jpom.model.system.NetstatModel;
 import cn.keepbx.jpom.model.system.ProcessModel;
-import cn.keepbx.jpom.system.ConfigBean;
+import cn.keepbx.jpom.system.ServerConfigBean;
 import cn.keepbx.jpom.util.CommandUtil;
 import cn.keepbx.jpom.util.JvmUtil;
 import com.alibaba.fastjson.JSONObject;
@@ -109,7 +109,7 @@ public class InternalController extends BaseController {
     @RequestMapping(value = "stack", method = RequestMethod.GET)
     @ResponseBody
     public String stack(String tag) throws Exception {
-        String fileName = ConfigBean.getInstance().getTempPathName() + "/" + tag + "_java_cpu.txt";
+        String fileName = ServerConfigBean.getInstance().getTempPathName() + "/" + tag + "_java_cpu.txt";
         fileName = FileUtil.normalize(fileName);
         try {
             int pid = AbstractProjectCommander.getInstance().getPid(tag);
@@ -132,7 +132,7 @@ public class InternalController extends BaseController {
     @RequestMapping(value = "ram", method = RequestMethod.GET)
     @ResponseBody
     public String ram(String tag) throws Exception {
-        String fileName = ConfigBean.getInstance().getTempPathName() + "/" + tag + "_java_ram.txt";
+        String fileName = ServerConfigBean.getInstance().getTempPathName() + "/" + tag + "_java_ram.txt";
         fileName = FileUtil.normalize(fileName);
         try {
             int pid = AbstractProjectCommander.getInstance().getPid(tag);

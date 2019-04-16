@@ -15,7 +15,7 @@ import cn.keepbx.jpom.model.data.CertModel;
 import cn.keepbx.jpom.model.data.UserModel;
 import cn.keepbx.jpom.service.system.CertService;
 import cn.keepbx.jpom.service.system.WhitelistDirectoryService;
-import cn.keepbx.jpom.system.ConfigBean;
+import cn.keepbx.jpom.system.ServerConfigBean;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.tomcat.util.http.fileupload.servlet.ServletFileUpload;
@@ -148,7 +148,7 @@ public class CertificateController extends BaseController {
         String certPath = null;
         String pemPath = null, keyPath = null;
         try {
-            String path = ConfigBean.getInstance().getTempPathName();
+            String path = ServerConfigBean.getInstance().getTempPathName();
             MultipartFileBuilder cert = createMultipart().addFieldName("file").setSavePath(path);
             certPath = cert.save();
             ZipFile zipFile = new ZipFile(certPath);

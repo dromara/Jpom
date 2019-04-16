@@ -27,7 +27,7 @@
                             class="layui-btn layui-btn-sm layui-btn-primary ">
                         进入
                     </button>
-                    <button class="layui-btn layui-btn-sm layui-btn-primary ">
+                    <button op="edit" id="$item.id" class="layui-btn layui-btn-sm layui-btn-primary ">
                         <i class="layui-icon">&#xe642;</i>
                     </button>
                 </div>
@@ -49,6 +49,10 @@
             var op = $(this).attr("op");
             if ("goIn" == op) {
                 top.location.href = $(this).attr("url");
+                return;
+            }
+            if ("edit" == op) {
+                editProject($(this).attr("id"));
                 return;
             }
             console.log();

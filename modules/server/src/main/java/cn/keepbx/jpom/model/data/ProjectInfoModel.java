@@ -3,6 +3,7 @@ package cn.keepbx.jpom.model.data;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
+import cn.keepbx.jpom.BaseJpomApplication;
 import cn.keepbx.jpom.common.commander.AbstractProjectCommander;
 import cn.keepbx.jpom.model.BaseModel;
 
@@ -231,7 +232,7 @@ public class ProjectInfoModel extends BaseModel {
             File file = files.get(i);
             classPath.append(file.getAbsolutePath());
             if (i != len - 1) {
-                classPath.append(AbstractProjectCommander.OS_INFO.isWindows() ? ";" : ":");
+                classPath.append(BaseJpomApplication.OS_INFO.isWindows() ? ";" : ":");
             }
         }
         return classPath.toString();

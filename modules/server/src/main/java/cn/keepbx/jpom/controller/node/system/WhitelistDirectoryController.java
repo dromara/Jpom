@@ -8,6 +8,7 @@ import cn.keepbx.jpom.common.Role;
 import cn.keepbx.jpom.common.interceptor.UrlPermission;
 import cn.keepbx.jpom.service.system.WhitelistDirectoryService;
 import cn.keepbx.jpom.system.ExtConfigBean;
+import cn.keepbx.jpom.system.ServerExtConfigBean;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.http.MediaType;
@@ -169,7 +170,7 @@ public class WhitelistDirectoryController extends BaseController {
      * @return null 正常
      */
     private String findStartsWith(JSONArray jsonArray, int start) {
-        if (!ExtConfigBean.getInstance().whitelistDirectoryCheckStartsWith) {
+        if (!ServerExtConfigBean.getInstance().whitelistDirectoryCheckStartsWith) {
             return null;
         }
         String str = jsonArray.getString(start);

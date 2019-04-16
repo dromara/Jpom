@@ -12,7 +12,7 @@ import cn.keepbx.jpom.common.BaseController;
 import cn.keepbx.jpom.common.interceptor.ProjectPermission;
 import cn.keepbx.jpom.model.data.ProjectInfoModel;
 import cn.keepbx.jpom.service.manage.ProjectInfoService;
-import cn.keepbx.jpom.system.ConfigBean;
+import cn.keepbx.jpom.system.ServerConfigBean;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.http.MediaType;
@@ -121,7 +121,7 @@ public class ProjectFileControl extends BaseController {
                 .addFieldName("file");
         String type = getParameter("type");
         if ("unzip".equals(type)) {
-            multipartFileBuilder.setSavePath(ConfigBean.getInstance().getTempPathName());
+            multipartFileBuilder.setSavePath(ServerConfigBean.getInstance().getTempPathName());
             String path = multipartFileBuilder.save();
             //
             File lib = new File(pim.getLib());

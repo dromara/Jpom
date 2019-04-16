@@ -3,7 +3,7 @@ package cn.keepbx.jpom.model.data;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.crypto.SecureUtil;
 import cn.keepbx.jpom.model.BaseModel;
-import cn.keepbx.jpom.system.ExtConfigBean;
+import cn.keepbx.jpom.system.ServerExtConfigBean;
 import com.alibaba.fastjson.JSONArray;
 
 import java.util.concurrent.TimeUnit;
@@ -144,7 +144,7 @@ public class UserModel extends BaseModel {
      * @return 0是未锁定
      */
     public long overLockTime() {
-        if (ExtConfigBean.getInstance().userAlwaysLoginError <= 0) {
+        if (ServerExtConfigBean.getInstance().userAlwaysLoginError <= 0) {
             return 0;
         }
         // 不限制演示账号的登录
@@ -177,18 +177,18 @@ public class UserModel extends BaseModel {
      */
     public void errorLock() {
         // 未开启锁定功能
-        if (ExtConfigBean.getInstance().userAlwaysLoginError <= 0) {
+        if (ServerExtConfigBean.getInstance().userAlwaysLoginError <= 0) {
             return;
         }
         setPwdErrorCount(getPwdErrorCount() + 1);
         int count = getPwdErrorCount();
         // 记录错误时间
         setLastPwdErrorTime(DateUtil.currentSeconds());
-        if (count < ExtConfigBean.getInstance().userAlwaysLoginError) {
+        if (count < ServerExtConfigBean.getInstance().userAlwaysLoginError) {
             // 还未达到锁定条件
             return;
         }
-        int level = count / ExtConfigBean.getInstance().userAlwaysLoginError;
+        int level = count / ServerExtConfigBean.getInstance().userAlwaysLoginError;
         switch (level) {
             case 1:
                 // 在错误倍数 为1 锁定 30分钟

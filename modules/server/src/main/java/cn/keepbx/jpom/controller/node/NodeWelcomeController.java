@@ -1,10 +1,11 @@
 package cn.keepbx.jpom.controller.node;
 
 import cn.jiangzeyin.common.JsonMessage;
-import cn.keepbx.jpom.common.BaseController;
+import cn.keepbx.jpom.common.BaseNodeController;
+import cn.keepbx.jpom.common.NodeForward;
+import cn.keepbx.jpom.common.NodeUrl;
 import cn.keepbx.jpom.common.commander.AbstractSystemCommander;
 import cn.keepbx.jpom.model.system.ProcessModel;
-import com.alibaba.fastjson.JSONObject;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -20,7 +21,7 @@ import java.util.List;
  */
 @Controller
 @RequestMapping(value = "/node")
-public class NodeWelcomeController extends BaseController {
+public class NodeWelcomeController extends BaseNodeController {
 
     @RequestMapping(value = "welcome", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
     public String welcome() {
@@ -30,8 +31,7 @@ public class NodeWelcomeController extends BaseController {
     @RequestMapping(value = "getTop", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     public String getTop() {
-        JSONObject topInfo = AbstractSystemCommander.getInstance().getAllMonitor();
-        return JsonMessage.getString(200, "", topInfo);
+        return NodeForward.request(getNode(), getRequest(), NodeUrl.GetTop).toString();
     }
 
     @RequestMapping(value = "processList", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)

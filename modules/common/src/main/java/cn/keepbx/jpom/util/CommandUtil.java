@@ -3,7 +3,7 @@ package cn.keepbx.jpom.util;
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
-import cn.keepbx.jpom.common.commander.AbstractProjectCommander;
+import cn.keepbx.jpom.BaseJpomApplication;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -32,7 +32,7 @@ public class CommandUtil {
         String result = "error";
         try {
             String[] cmd;
-            if (AbstractProjectCommander.OS_INFO.isLinux()) {
+            if (BaseJpomApplication.OS_INFO.isLinux()) {
                 //执行linux系统命令
                 cmd = new String[]{"/bin/sh", "-c", command};
             } else {
@@ -70,7 +70,7 @@ public class CommandUtil {
         } else {
             is = process.getErrorStream();
         }
-        result = IoUtil.read(is, AbstractProjectCommander.getInstance().getCharset());
+        result = IoUtil.read(is, BaseJpomApplication.getCharset());
         is.close();
         process.destroy();
         if (StrUtil.isEmpty(result) && wait != 0) {

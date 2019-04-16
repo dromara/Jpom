@@ -67,16 +67,32 @@
         return pro + window.location.host + "$!jpomProxyPath";
     }
 
+    function getQueryString(name) {
+        var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)");
+        var r = top.location.search.substr(1).match(reg);
+        if (r != null) return unescape(r[2]);
+        return null;
+    }
+
+
     ## 带loading 效果的网络请求
     function loadingAjax(data, closeLoading) {
         var success = data.success;
         delete data.success;
         var error = data.error;
         delete data.error;
+
+        var newData = {
+            nodeId: getQueryString("id")
+        };
+        $.extend(newData, data.data);
+        delete data.data;
+
         var index;
         var defData = {
             type: 'POST',
             dataType: 'json',
+            data: newData,
             beforeSend: function () {
                 if (closeLoading !== true) {
                     index = layer.load(1, {

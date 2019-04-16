@@ -14,7 +14,7 @@ import cn.jiangzeyin.common.spring.SpringUtil;
 import cn.keepbx.jpom.common.commander.AbstractProjectCommander;
 import cn.keepbx.jpom.model.data.ProjectInfoModel;
 import cn.keepbx.jpom.service.manage.ProjectInfoService;
-import cn.keepbx.jpom.system.ExtConfigBean;
+import cn.keepbx.jpom.system.ServerExtConfigBean;
 
 import java.io.File;
 import java.util.List;
@@ -40,12 +40,12 @@ public class AutoBackLog {
             projectInfoService = SpringUtil.getBean(ProjectInfoService.class);
         }
         // 获取cron 表达式
-        String cron = StrUtil.emptyToDefault(ExtConfigBean.getInstance().autoBackConsoleCron, "none");
+        String cron = StrUtil.emptyToDefault(ServerExtConfigBean.getInstance().autoBackConsoleCron, "none");
         if ("none".equalsIgnoreCase(cron.trim())) {
             DefaultSystemLog.LOG().info("没有配置自动备份控制台日志表达式");
             return;
         }
-        String size = StrUtil.emptyToDefault(ExtConfigBean.getInstance().autoBackSize, "50MB");
+        String size = StrUtil.emptyToDefault(ServerExtConfigBean.getInstance().autoBackSize, "50MB");
         MAX_SIZE = FileSize.valueOf(size.trim());
         //
         CronUtil.schedule(ID, cron, () -> {
@@ -73,7 +73,7 @@ public class AutoBackLog {
                     List<File> files = FileUtil.loopFiles(logFile, pathname -> {
                         DateTime dateTime = DateUtil.date(pathname.lastModified());
                         long days = DateUtil.betweenDay(dateTime, nowTime, false);
-                        long saveDays = ExtConfigBean.getInstance().getLogSaveDays();
+                        long saveDays = ServerExtConfigBean.getInstance().getLogSaveDays();
                         return days > saveDays;
                     });
                     files.forEach(FileUtil::del);
