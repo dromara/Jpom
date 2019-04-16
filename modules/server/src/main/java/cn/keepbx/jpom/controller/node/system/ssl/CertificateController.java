@@ -1,4 +1,4 @@
-package cn.keepbx.jpom.controller.system.ssl;
+package cn.keepbx.jpom.controller.node.system.ssl;
 
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.lang.Validator;
@@ -40,7 +40,7 @@ import java.util.zip.ZipFile;
  * @author Arno
  */
 @Controller
-@RequestMapping(value = "/system/certificate")
+@RequestMapping(value = "/node/system/certificate")
 public class CertificateController extends BaseController {
 
     @Resource
@@ -52,7 +52,7 @@ public class CertificateController extends BaseController {
     public String certificate() {
         JSONArray jsonArray = whitelistDirectoryService.getCertificateDirectory();
         setAttribute("certificate", jsonArray);
-        return "system/certificate";
+        return "node/system/certificate";
     }
 
 

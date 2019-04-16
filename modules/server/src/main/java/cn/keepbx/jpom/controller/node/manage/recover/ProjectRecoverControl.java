@@ -1,4 +1,4 @@
-package cn.keepbx.jpom.controller.manage.recover;
+package cn.keepbx.jpom.controller.node.manage.recover;
 
 import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.JsonMessage;
@@ -22,7 +22,7 @@ import java.util.List;
  * @author Administrator
  */
 @Controller
-@RequestMapping(value = "/manage/recover")
+@RequestMapping(value = "/node/manage/recover")
 public class ProjectRecoverControl extends BaseController {
 
     @Resource
@@ -40,7 +40,7 @@ public class ProjectRecoverControl extends BaseController {
             List<ProjectRecoverModel> projectInfoModels = projectRecoverService.list();
             setAttribute("array", projectInfoModels);
         }
-        return "manage/project_recover";
+        return "node/manage/project_recover";
     }
 
     @RequestMapping(value = "data.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)

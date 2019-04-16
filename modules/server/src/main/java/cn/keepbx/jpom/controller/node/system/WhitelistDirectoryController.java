@@ -1,4 +1,4 @@
-package cn.keepbx.jpom.controller.system;
+package cn.keepbx.jpom.controller.node.system;
 
 import cn.hutool.core.text.StrSpliter;
 import cn.hutool.core.util.StrUtil;
@@ -26,7 +26,7 @@ import java.util.List;
  * @date 2019/2/28
  */
 @Controller
-@RequestMapping(value = "/system")
+@RequestMapping(value = "/node/system")
 public class WhitelistDirectoryController extends BaseController {
     @Resource
     private WhitelistDirectoryService whitelistDirectoryService;
@@ -43,7 +43,7 @@ public class WhitelistDirectoryController extends BaseController {
         setAttribute("certificate", whitelistDirectoryService.convertToLine(jsonArray));
         jsonArray = whitelistDirectoryService.getNgxDirectory();
         setAttribute("nginx", whitelistDirectoryService.convertToLine(jsonArray));
-        return "system/whitelistDirectory";
+        return "node/system/whitelistDirectory";
     }
 
     /**

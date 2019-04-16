@@ -1,6 +1,6 @@
 @REM The MIT License (MIT)
 @REM
-@REM Copyright (c) 2019 ÂëÖ®¿Æ¼¼¹¤×÷ÊÒ
+@REM Copyright (c) 2019 ç ä¹‹ç§‘æŠ€å·¥ä½œå®¤
 @REM
 @REM Permission is hereby granted, free of charge, to any person obtaining a copy of
 @REM this software and associated documentation files (the "Software"), to deal in
@@ -34,19 +34,19 @@ set JVM=-server
 set ARGS= --jpom.applicationTag=%Tag% --jpom.log=%basePath%log --server.port=2122
 
 color 0a
-TITLE Jpom¹ÜÀíÏµÍ³BAT¿ØÖÆÌ¨
-echo. ***** Jpom¹ÜÀíÏµÍ³BAT¿ØÖÆÌ¨ *****
+TITLE Jpomï¿½ï¿½ï¿½ï¿½ÏµÍ³BATï¿½ï¿½ï¿½ï¿½Ì¨
+echo. ***** Jpomï¿½ï¿½ï¿½ï¿½ÏµÍ³BATï¿½ï¿½ï¿½ï¿½Ì¨ *****
 ::*************************************************************************************************************
 echo.
-	echo.  [1] Æô¶¯ start
-	echo.  [2] ¹Ø±Õ stop
-	echo.  [3] ²é¿´ÔËÐÐ×´Ì¬ status
-	echo.  [4] ÖØÆô restart
-	echo.  [5] °ïÖú use
-	echo.  [0] ÍË ³ö 0
+	echo.  [1] ï¿½ï¿½ï¿½ï¿½ start
+	echo.  [2] ï¿½Ø±ï¿½ stop
+	echo.  [3] ï¿½é¿´ï¿½ï¿½ï¿½ï¿½×´Ì¬ status
+	echo.  [4] ï¿½ï¿½ï¿½ï¿½ restart
+	echo.  [5] ï¿½ï¿½ï¿½ï¿½ use
+	echo.  [0] ï¿½ï¿½ ï¿½ï¿½ 0
 echo.
 
-echo.ÇëÊäÈëÑ¡ÔñµÄÐòºÅ:
+echo.ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ñ¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½:
 set /p ID=
 	IF "%id%"=="1" goto start
 	IF "%id%"=="2" goto stop
@@ -55,18 +55,18 @@ set /p ID=
 	IF "%id%"=="5" goto use
 	IF "%id%"=="0" EXIT
 PAUSE
-echo ¼´½«¹Ø±Õ´°¿Ú
+echo ï¿½ï¿½ï¿½ï¿½ï¿½Ø±Õ´ï¿½ï¿½ï¿½
 timeout 3
 EXIT 1
 
-@REM Æô¶¯
+@REM ï¿½ï¿½ï¿½ï¿½
 :start
     if "%JAVA_HOME%"=="" (
-        echo ÇëÅäÖÃ¡¾JAVA_HOME¡¿»·¾³±äÁ¿
+        echo ï¿½ï¿½ï¿½ï¿½ï¿½Ã¡ï¿½JAVA_HOMEï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
         PAUSE
         EXIT 2
     )
-	rem ±¸·ÝÈÕÖ¾
+	rem ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö¾
 	if exist %Log% (
 		if not exist %LogBack% (
 			echo %LogBack%
@@ -77,41 +77,41 @@ EXIT 1
 	)
 	set TEMPCLASSPATH=
 	for /f "delims=" %%I in ('dir /B %Lib%') do (set TEMPCLASSPATH=!TEMPCLASSPATH!%Lib%%%I;)
-	REM echo Æô¶¯³É¹¦£¬¹Ø±Õ´°¿Ú²»Ó°ÏìÔËÐÐ
-	echo Æô¶¯ÖÐ.....¹Ø±Õ´°¿Ú²»Ó°ÏìÔËÐÐ
+	REM echo ï¿½ï¿½ï¿½ï¿½ï¿½É¹ï¿½ï¿½ï¿½ï¿½Ø±Õ´ï¿½ï¿½Ú²ï¿½Ó°ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+	echo ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½.....ï¿½Ø±Õ´ï¿½ï¿½Ú²ï¿½Ó°ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	javaw %JVM% -classpath %TEMPCLASSPATH%"%JAVA_HOME%"\lib\tools.jar -Dapplication=%Tag% -Dbasedir=%basePath% %MainClass% %ARGS% >> %Log%
 	timeout 3
 goto:eof
 
-@REM ¹Ø±ÕJpom
+@REM ï¿½Ø±ï¿½Jpom
 :stop
 	set TEMPCLASSPATH=
 	for /f "delims=" %%I in ('dir /B %Lib%') do (set TEMPCLASSPATH=!TEMPCLASSPATH!%Lib%%%I;)
 	java -classpath %TEMPCLASSPATH%"%JAVA_HOME%"\lib\tools.jar %CloseMainClass% %ARGS% --jpom.applicationTag=%Tag% --event=stop
 goto:eof
 
-@REM ²é¿´JpomÔËÐÐ×´Ì¬
+@REM ï¿½é¿´Jpomï¿½ï¿½ï¿½ï¿½×´Ì¬
 :status
 	set TEMPCLASSPATH=
 	for /f "delims=" %%I in ('dir /B %Lib%') do (set TEMPCLASSPATH=!TEMPCLASSPATH!%Lib%%%I;)
 	java -classpath %TEMPCLASSPATH%"%JAVA_HOME%"\lib\tools.jar %CloseMainClass% %ARGS% --jpom.applicationTag=%Tag% --event=status
 goto:eof
 
-@REM ÖØÆôJpom
+@REM ï¿½ï¿½ï¿½ï¿½Jpom
 :restart
-	echo Í£Ö¹ÖÐ....
+	echo Í£Ö¹ï¿½ï¿½....
 	call:stop
 	timeout 3
-	echo Æô¶¯ÖÐ....
+	echo ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½....
 	call:start
 goto:eof
 
-@REM ÖØÐÂ¼ÓÔØNginx
+@REM ï¿½ï¿½ï¿½Â¼ï¿½ï¿½ï¿½Nginx
 :reloadNginx
     nginx -s reload
 goto:eof
 
-@REM ÌáÊ¾ÓÃ·¨
+@REM ï¿½ï¿½Ê¾ï¿½Ã·ï¿½
 :use
 	echo please use (start|stop|restart|status)
 goto:eof

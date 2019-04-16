@@ -1,4 +1,4 @@
-package cn.keepbx.jpom.controller.system.nginx;
+package cn.keepbx.jpom.controller.node.system.nginx;
 
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.CharsetUtil;
@@ -39,7 +39,7 @@ import java.util.List;
  * @author Arno
  */
 @Controller
-@RequestMapping("/system/nginx")
+@RequestMapping("/node/system/nginx")
 public class NginxController extends BaseController {
 
 
@@ -57,7 +57,7 @@ public class NginxController extends BaseController {
         setAttribute("nginx", ngxDirectory);
         List<CertModel> certList = certService.list();
         setAttribute("cert", certList);
-        return "system/nginx";
+        return "node/system/nginx";
     }
 
     /**
@@ -88,7 +88,7 @@ public class NginxController extends BaseController {
             jsonObject.put("whitePath", path);
             setAttribute("data", jsonObject);
         }
-        return "system/nginxSetting";
+        return "node/system/nginxSetting";
     }
 
 

@@ -29,6 +29,10 @@ public class ConfigBean {
      */
     public static final String PROJECT = "project.json";
     /**
+     * 节点数据文件
+     */
+    public static final String NODE = "node.json";
+    /**
      * 白名单文件
      */
     public static final String WHITELIST_DIRECTORY = "whitelistDirectory.json";
@@ -79,7 +83,7 @@ public class ConfigBean {
      * @return file
      */
     public File getPidFile() {
-        return new File(getDataPath(), "pid." + JpomManifest.getRunPid());
+        return new File(getDataPath(), "pid." + JpomManifest.getInstance().getPid());
     }
 
     /**

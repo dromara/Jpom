@@ -1,4 +1,4 @@
-package cn.keepbx.jpom.controller.manage;
+package cn.keepbx.jpom.controller.node.manage;
 
 import cn.keepbx.jpom.common.BaseController;
 import cn.keepbx.jpom.model.data.ProjectInfoModel;
@@ -19,7 +19,7 @@ import java.io.File;
  * @date 2018/9/28
  */
 @Controller
-@RequestMapping(value = "/manage/")
+@RequestMapping(value = "/node/manage/")
 public class ConsoleController extends BaseController {
 
     @Resource
@@ -47,7 +47,7 @@ public class ConsoleController extends BaseController {
                 setAttribute("logBack", true);
             }
         }
-        return "manage/console";
+        return "node/manage/console";
     }
 
 

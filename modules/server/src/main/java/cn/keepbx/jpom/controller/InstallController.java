@@ -8,7 +8,7 @@ import cn.jiangzeyin.common.spring.SpringUtil;
 import cn.keepbx.jpom.common.BaseController;
 import cn.keepbx.jpom.common.interceptor.LoginInterceptor;
 import cn.keepbx.jpom.common.interceptor.NotLogin;
-import cn.keepbx.jpom.controller.system.WhitelistDirectoryController;
+import cn.keepbx.jpom.controller.node.system.WhitelistDirectoryController;
 import cn.keepbx.jpom.model.data.UserModel;
 import cn.keepbx.jpom.service.system.WhitelistDirectoryService;
 import cn.keepbx.jpom.service.user.UserService;
@@ -38,11 +38,11 @@ public class InstallController extends BaseController {
     @NotLogin
     public String install() {
         if (userService.userListEmpty()) {
-            // 判断是否需要填写白名单
-            JSONArray jsonArray = whitelistDirectoryService.getProjectDirectory();
-            if (jsonArray == null || jsonArray.isEmpty()) {
-                setAttribute("whitelist", true);
-            }
+//            // 判断是否需要填写白名单
+//            JSONArray jsonArray = whitelistDirectoryService.getProjectDirectory();
+//            if (jsonArray == null || jsonArray.isEmpty()) {
+//                setAttribute("whitelist", true);
+//            }
             return "install";
         }
         // 已存在用户跳转到首页
@@ -61,11 +61,11 @@ public class InstallController extends BaseController {
     @NotLogin
     @ResponseBody
     public String installSubmit(String userName, String userPwd, String whitelistDirectory) {
-        // 先处理白名单
-        String error = whileList(whitelistDirectory);
-        if (error != null) {
-            return error;
-        }
+//        // 先处理白名单
+//        String error = whileList(whitelistDirectory);
+//        if (error != null) {
+//            return error;
+//        }
         if (!userService.userListEmpty()) {
             return JsonMessage.getString(100, "系统已经初始化过啦，请勿重复初始化");
         }

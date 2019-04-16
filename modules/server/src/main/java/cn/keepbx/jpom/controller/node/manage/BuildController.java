@@ -1,4 +1,4 @@
-package cn.keepbx.jpom.controller.manage;
+package cn.keepbx.jpom.controller.node.manage;
 
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
@@ -28,7 +28,7 @@ import java.io.File;
  * @date 2018/9/29
  */
 @Controller
-@RequestMapping(value = "/manage/")
+@RequestMapping(value = "/node/manage/")
 public class BuildController extends BaseController {
 
     @Resource
@@ -46,7 +46,7 @@ public class BuildController extends BaseController {
             setAttribute("array", jsonArray);
             setAttribute("id", id);
         }
-        return "manage/build";
+        return "node/manage/build";
     }
 
     @RequestMapping(value = "build_download", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)

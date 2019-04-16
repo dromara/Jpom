@@ -1,4 +1,4 @@
-package cn.keepbx.jpom.controller.system;
+package cn.keepbx.jpom.controller.node.system;
 
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
@@ -23,7 +23,7 @@ import javax.annotation.Resource;
  * @date 2019/3/5
  */
 @Controller
-@RequestMapping(value = "/system")
+@RequestMapping(value = "/node/system")
 public class AliOssController extends BaseController {
     @Resource
     private OssManagerService ossManagerService;
@@ -34,7 +34,7 @@ public class AliOssController extends BaseController {
     @RequestMapping(value = "alioss", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
     public String whitelistDirectory() {
         setAttribute("item", ossManagerService.getConfig());
-        return "system/alioss";
+        return "node/system/alioss";
     }
 
     /**

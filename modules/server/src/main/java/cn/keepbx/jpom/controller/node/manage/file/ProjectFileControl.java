@@ -1,4 +1,4 @@
-package cn.keepbx.jpom.controller.manage.file;
+package cn.keepbx.jpom.controller.node.manage.file;
 
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.FileUtil;
@@ -30,7 +30,7 @@ import java.io.File;
  * @author Administrator
  */
 @Controller
-@RequestMapping(value = "/manage/file/")
+@RequestMapping(value = "/node/manage/file/")
 public class ProjectFileControl extends BaseController {
 
     @Resource
@@ -44,7 +44,7 @@ public class ProjectFileControl extends BaseController {
     @RequestMapping(value = "list.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
     public String fileManage(String id) {
         setAttribute("id", id);
-        return "manage/filemanage";
+        return "node/manage/filemanage";
     }
 
     /**

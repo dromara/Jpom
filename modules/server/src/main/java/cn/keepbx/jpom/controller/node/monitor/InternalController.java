@@ -1,4 +1,4 @@
-package cn.keepbx.jpom.controller.monitor;
+package cn.keepbx.jpom.controller.node.monitor;
 
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.extra.servlet.ServletUtil;
@@ -33,7 +33,7 @@ import java.util.List;
  * @author Administrator
  */
 @Controller
-@RequestMapping(value = "/manage/")
+@RequestMapping(value = "/node/manage/")
 public class InternalController extends BaseController {
 
     /**
@@ -52,7 +52,7 @@ public class InternalController extends BaseController {
             List<NetstatModel> port = AbstractProjectCommander.getInstance().listNetstat(pid);
             setAttribute("port", port);
         }
-        return "manage/internal";
+        return "node/manage/internal";
     }
 
     /**

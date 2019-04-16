@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    #parse("./common/head.vm")
+    <title>项目管理系统</title>
+    <style>
+        body {
+            padding: 10px;
+        }
+    </style>
+</head>
+<body>
+<div class="layui-container">
+    <form action="./save.json" class="layui-form" id="form_node">
+        <div class="layui-form-item">
+
+            <label class="layui-form-label">节点ID</label>
+            <div class="layui-input-block">
+                <input type="text" id="id" name="id" placeholder="创建后不能修改" class="layui-input" required
+                       lay-verify="required">
+                <input type="hidden" name="type" value="$!type">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">节点名称</label>
+            <div class="layui-input-block">
+                <input type="text" id="name" name="name" placeholder="请填写节点名称" class="layui-input" required
+                       lay-verify="required">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">节点地址</label>
+            <div class="layui-input-block">
+                <input type="text" id="url" name="url" placeholder="请填写节点名称" class="layui-input" required
+                       lay-verify="required">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">节点账号</label>
+            <div class="layui-input-block">
+                <input type="text" id="loginName" name="loginName" placeholder="请填写节点登录账号" class="layui-input" required
+                       lay-verify="required">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">节点密码</label>
+            <div class="layui-input-block">
+                <input type="password" id="loginPwd" name="loginPwd" placeholder="请填写节点登录密码" class="layui-input"
+                       required
+                       lay-verify="required">
+            </div>
+        </div>
+
+        <div class="layui-form-item" style="padding-left: 20%">
+            <button class="layui-btn layui-btn-normal" lay-submit lay-filter="submitProject" id="project_submit">提交
+            </button>
+            #if($item)
+                <a class="layui-btn layui-btn-warm" data-id="$item.id" id="delete_project">删除</a>
+            #end
+        </div>
+    </form>
+</div>
+</body>
+<script type="text/javascript">
+
+
+    function loadSuccess() {
+        form.on('submit(submitProject)', function (data) {
+            loadingAjax({
+                url: data.form.action,
+                data: data.field,
+                success: function (data) {
+                    layer.msg(data.msg);
+                    if (200 == data.code) {
+                        autoClose();
+                    }
+                }
+            });
+            return false;
+        });
+    }
+
+    function editProject(id) {
+        layer.open({
+            type: 2,
+            title: '管理项目配置信息',
+            shade: 0.8,
+            area: ['80%', '90%'],
+            content: 'editProject?id=' + id
+        });
+    }
+</script>
+</html>

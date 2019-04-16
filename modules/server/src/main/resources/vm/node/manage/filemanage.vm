@@ -49,7 +49,7 @@
                     id: '$id'
                 },
                 cols: [[
-                    {field: 'index', title: '编号', width: '10%'},
+                    {field: 'vm.node.index', title: '编号', width: '10%'},
                     {
                         field: 'filename', title: '文件名称', sort: true, width: '30%', templet: function (d) {
                             if (d.isDirectory) {

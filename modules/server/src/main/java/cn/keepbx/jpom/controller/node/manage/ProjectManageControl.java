@@ -1,4 +1,4 @@
-package cn.keepbx.jpom.controller.manage;
+package cn.keepbx.jpom.controller.node.manage;
 
 import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
@@ -29,7 +29,7 @@ import java.util.List;
  * @author Administrator
  */
 @Controller
-@RequestMapping(value = "/manage/")
+@RequestMapping(value = "/node/manage/")
 public class ProjectManageControl extends BaseController {
 
     @Resource
@@ -44,7 +44,7 @@ public class ProjectManageControl extends BaseController {
     public String projectInfo() {
         HashSet hashSet = projectInfoService.getAllGroup();
         setAttribute("groups", hashSet);
-        return "manage/projectInfo";
+        return "node/manage/projectInfo";
     }
 
     /**

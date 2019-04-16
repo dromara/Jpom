@@ -20,6 +20,7 @@
 <script type="text/javascript" src="$!jpomProxyPath/static/layui/layui.js?v=$staticCacheTime"></script>
 <script type="text/javascript">
     var $, layer, form, element, table;
+    const asyncFn = [];
     ## 不缓存
     layui.config({
         version: true
@@ -35,6 +36,10 @@
             loadSuccess && loadSuccess();
         } catch (e) {
         }
+        //
+        layui.each(asyncFn, function () {
+            this && this();
+        })
     });
 
     function tabChange(options) {

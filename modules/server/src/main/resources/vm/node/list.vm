@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    #parse("./common/head.vm")
+    <title>项目管理系统</title>
+    <style>
+        body {
+            padding: 10px;
+        }
+    </style>
+</head>
+<body>
+<div class="layui-row">
+    <button onclick="editProject('');" class="layui-btn layui-btn-sm">新增项目</button>
+</div>
+
+<div class="layui-collapse" style="margin: 10px;">
+    #foreach($item in $array)
+        <div class="layui-colla-item">
+            <div class="layui-colla-title">
+                <div>
+                    $item.name
+                </div>
+                <div class="layui-layout-right" style="padding-right: 10%;">
+                    <button op="goIn" url="$!jpomProxyPath/node/index.html?id=$item.id"
+                            class="layui-btn layui-btn-sm layui-btn-primary ">
+                        进入
+                    </button>
+                    <button class="layui-btn layui-btn-sm layui-btn-primary ">
+                        <i class="layui-icon">&#xe642;</i>
+                    </button>
+                </div>
+            </div>
+            <div class="layui-colla-content layui-show">内容区域</div>
+        </div>
+    #end
+</div>
+</body>
+<script type="text/javascript">
+    const apiWhere = {};
+    var cachePortInfo;
+
+
+    function loadSuccess() {
+        // 点击事件
+        $("button[op]").click(function (e) {
+            layui.stope(e);
+            var op = $(this).attr("op");
+            if ("goIn" == op) {
+                top.location.href = $(this).attr("url");
+                return;
+            }
+            console.log();
+        })
+    }
+
+    function editProject(id) {
+        layer.open({
+            type: 2,
+            title: '管理节点配置信息',
+            shade: 0.8,
+            area: ['60%', '60%'],
+            content: 'edit.html?id=' + id
+        });
+    }
+
+    function reloadTable() {
+        table.reload('table_project', {
+            where: apiWhere
+        });
+    }
+</script>
+</html>

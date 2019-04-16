@@ -1,4 +1,4 @@
-package cn.keepbx.jpom.controller.manage.log;
+package cn.keepbx.jpom.controller.node.manage.log;
 
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
@@ -8,7 +8,7 @@ import cn.jiangzeyin.common.JsonMessage;
 import cn.keepbx.jpom.common.BaseController;
 import cn.keepbx.jpom.common.commander.AbstractProjectCommander;
 import cn.keepbx.jpom.common.interceptor.ProjectPermission;
-import cn.keepbx.jpom.controller.manage.file.ProjectFileControl;
+import cn.keepbx.jpom.controller.node.manage.file.ProjectFileControl;
 import cn.keepbx.jpom.model.data.ProjectInfoModel;
 import cn.keepbx.jpom.service.manage.ProjectInfoService;
 import com.alibaba.fastjson.JSONArray;
@@ -29,7 +29,7 @@ import java.io.File;
  * @date 2019/3/7
  */
 @Controller
-@RequestMapping(value = "/manage/log")
+@RequestMapping(value = "node/manage/log")
 public class LogBackController extends BaseController {
     @Resource
     private ProjectInfoService projectInfoService;
@@ -65,7 +65,7 @@ public class LogBackController extends BaseController {
             setAttribute("logPath", pim.getLog());
             setAttribute("logBackPath", logBack.getAbsolutePath());
         }
-        return "manage/logBack";
+        return "node/manage/logBack";
     }
 
     @RequestMapping(value = "logBack_download", method = RequestMethod.GET)

@@ -1,4 +1,4 @@
-package cn.keepbx.jpom.controller.manage;
+package cn.keepbx.jpom.controller.node.manage;
 
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.FileUtil;
@@ -37,7 +37,7 @@ import java.util.List;
  * @date 2018/9/29
  */
 @Controller
-@RequestMapping(value = "/manage/")
+@RequestMapping(value = "/node/manage/")
 public class EditProjectController extends BaseController {
     @Resource
     private ProjectInfoService projectInfoService;
@@ -82,7 +82,7 @@ public class EditProjectController extends BaseController {
             hashSet.add("默认");
         }
         setAttribute("groups", hashSet);
-        return "manage/editProject";
+        return "node/manage/editProject";
     }
 
     /**

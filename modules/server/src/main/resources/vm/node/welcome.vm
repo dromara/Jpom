@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    #parse("./common/head.vm")
+    <title>Welcome</title>
+    <style>
+        body {
+            position: absolute;
+            top: 0px;
+            right: 0px;
+            bottom: 0px;
+            left: 0px;
+            padding: 10px;
+        }
+
+        .terminal {
+            height: 100%;
+            position: relative;
+            top: 40px;
+            right: 0px;
+            bottom: 0px;
+            left: 0px;
+            border: 1px solid #c1c1c1;
+            border-radius: 5px;
+            font-family: Consolas;
+            padding: 5px;
+            overflow: auto;
+            word-break: keep-all;
+            white-space: nowrap;
+            font-weight: bold;
+            font-size: 23px;
+        }
+
+        /*.layui-inline {*/
+        /*    width: 200px;*/
+        /*}*/
+
+        .top {
+            margin-top: 20px;
+            width: 100%;
+        }
+
+        .echarts {
+            margin: 0 auto;
+            width: 90%;
+            height: 300px;
+        }
+
+        #table {
+            width: 100%;
+        }
+    </style>
+    <script src="//echarts.baidu.com/dist/echarts.js?v=$staticCacheTime"></script>
+</head>
+<body>
+<form action="" class="layui-form" id="form">
+    <div class="layui-inline">
+        <label class="layui-form-label">自动刷新</label>
+        <div class="layui-input-block">
+            <input type="checkbox" lay-filter="filter" id="monitor" lay-skin="switch" lay-text="开启|关闭">
+        </div>
+    </div>
+</form>
+##<div class="layui-container">
+##    <div class="terminal"></div>
+##</div>
+<div class="top">
+    <div class="echarts" id="echarts"></div>
+</div>
+
+<table class="layui-table" id="tab_monitor" lay-filter="tab_monitor"></table>
+</body>
+<script type="application/javascript">
+    var ws, myEcharts;
+    var config = {
+        id: 'tab_monitor',
+        elem: '#tab_monitor',
+        cols: [[
+            {field: 'pid', title: '进程id', sort: true, width: '6%'},
+            {field: 'command', title: '进程名称'},
+            {field: 'port', title: '端口', sort: true, width: '6%'},
+            {field: 'user', title: '所有者', width: '8%', sort: true},
+            {field: 'jpomName', title: '项目名称', width: '8%', sort: true},
+            {field: 'res', title: '物理内存', width: '8%', sort: true},
+            {field: 'status', title: '进程状态', width: '8%', sort: true},
+            {field: 'cpu', title: '占用CPU', width: '8%', sort: true},
+            {field: 'mem', title: '物理内存', width: '8%', sort: true},
+            {field: 'time', title: '时间总计', sort: true},
+            {field: 'pr', title: '优先级', width: '6%', sort: true},
+            // {field: 'NI', title: 'nice值', width: '6%', sort: true},
+            {field: 'virt', title: '虚拟内存', width: '8%', sort: true},
+            {field: 'shr', title: '共享内存', width: '8%', sort: true},
+        ]],
+        done: function (data) {
+        }
+    };
+
+    function loadSuccess() {
+        var top = layui.data('top');
+        var openTop = false;
+        if (top) {
+            openTop = top.openTop;
+        }
+        //加载进程信息
+        loadProcessList();
+        //
+        loadTop();
+        $("#monitor").attr("checked", openTop);
+        if (openTop) {
+            linkSocket(openTop);
+        }
+        form.render();
+        //
+        tableRender(config);
+        // 切换
+        form.on('switch(filter)', function (data) {
+            var check = data.elem.checked;
+            layui.data('top', {
+                key: 'openTop',
+                value: check
+            });
+            linkSocket(check);
+        });
+    }
+
+    //加载病状图
+    function loadEcharts(top) {
+        if (!top) {
+            return;
+        }
+        var cpu = top.cpu;
+        var value = [];
+        if (cpu) {
+            info = {
+                name: 'cpu',
+                type: 'pie',
+                center: ['18%', '50%'],
+                radius: ['40%', '70%'],
+                data: cpu
+            }
+            value.push(info);
+        }
+        var memory = top.memory;
+        if (memory) {
+            info = {
+                name: '内存',
+                type: 'pie',
+                center: ['48%', '50%'],
+                radius: ['40%', '70%'],
+                data: memory
+            }
+            value.push(info);
+        }
+        var disk = top.disk;
+        if (disk) {
+            info = {
+                name: '磁盘',
+                type: 'pie',
+                center: ['78%', '50%'],
+                radius: ['40%', '70%'],
+                data: disk
+            }
+            value.push(info);
+        }
+        var option = {
+            tooltip: {
+                trigger: 'item',
+                formatter: function (params, ticket, callback) {
+                    var value = params.value;
+                    var type = params.data.type;
+                    var suffix = "";
+                    if ("cpu" != type) {
+                        suffix = " KB";
+                        if (value > 1024) {
+                            value = value / 1024;
+                            suffix = " MB";
+                        }
+                        if (value > 1024) {
+                            value = value / 1024;
+                            suffix = " GB";
+                        }
+                        value = Math.round(value * 100) / 100;
+                    } else {
+                        value = Math.round(value * 10000) / 10000;
+                    }
+                    return params.seriesName + '<br/>' + params.name + " : " + value + suffix + "(" + params.percent + "%)";
+                }
+            },
+            series: value
+        };
+        if (!myEcharts) {
+            myEcharts = echarts.init(document.getElementById('echarts'));
+        }
+        myEcharts.setOption(option);
+    }
+
+    function loadTop() {
+        silentAjax({
+            url: './getTop',
+            success: function (data) {
+                if (200 == data.code && data.data) {
+                    loadEcharts(data.data);
+                } else {
+                    layer.alert(data.msg);
+                }
+            }
+        });
+    }
+
+    function loadProcessList() {
+        silentAjax({
+            url: './processList',
+            success: function (data) {
+                if (200 == data.code && data.data) {
+                    config.data = data.data;
+                    tableRender(config);
+                } else if (data.msg && data.msg != "") {
+                    layer.alert(data.msg);
+                }
+            }
+        });
+    }
+
+    function linkSocket(status) {
+        if (!('WebSocket' in window)) {
+            layer.msg("不支持WebSocket");
+            return;
+        }
+        if (!ws) {
+            ws = new WebSocket(getSocketHost() + "/console/$user.getUserMd5Key()/system");
+        }
+        if (status) {
+            if (ws.readyState != 1 && ws.readyState != 0) {
+                ws = new WebSocket(getSocketHost() + "/console/$user.getUserMd5Key()/system");
+            }
+            ws.onopen = function () {
+                ws.send('{"op": "top", "projectInfo":{}}');
+            };
+            ws.onmessage = function (data) {
+                try {
+                    if (data.data) {
+                        var top = JSON.parse(data.data);
+                        if (top.top) {
+                            loadEcharts(top);
+                        }
+                        if (top.processList) {
+                            var processList = top.processList;
+                            config.data = processList;
+                            tableRender(config);
+                        }
+                    }
+                } catch (e) {
+                    return;
+                }
+            };
+            ws.onerror = function (ev) {
+                layer.msg("socket 异常");
+            };
+        } else {
+            ws.close();
+        }
+    }
+</script>
+
+</html>
