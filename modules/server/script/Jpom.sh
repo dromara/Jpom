@@ -20,8 +20,8 @@
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #!/bin/bash
 
-Tag="KeepBx-System-JpomApplication"
-MainClass="cn.keepbx.jpom.JpomServerApplication"
+Tag="KeepBx-System-BaseJpomApplication"
+MainClass="cn.keepbx.jpom.BaseJpomServerApplication"
 # 自动获取当前路径
 Path=$(cd `dirname $0`; pwd)"/"
 Lib="${Path}lib/"

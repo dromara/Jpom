@@ -4,7 +4,6 @@ import cn.hutool.core.convert.Convert;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.script.ScriptUtil;
 import cn.jiangzeyin.common.spring.SpringUtil;
-import cn.keepbx.jpom.JpomServerApplication;
 import cn.keepbx.jpom.model.system.JpomManifest;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
@@ -37,7 +36,7 @@ public class ExtConfigBean {
         if (resource != null) {
             return resource;
         }
-        File file = JpomServerApplication.getRunPath();
+        File file = JpomManifest.getRunPath();
         if (file.isFile()) {
             file = file.getParentFile().getParentFile();
             file = new File(file, FILE_NAME);
@@ -110,7 +109,7 @@ public class ExtConfigBean {
                 path = "/jpom/";
             } else {
                 // 获取当前项目运行路径的父级
-                File file = JpomServerApplication.getRunPath();
+                File file = JpomManifest.getRunPath();
                 if (!file.exists() && !file.isFile()) {
                     throw new JpomRuntimeException("请配置运行路径属性【jpom.path】");
                 }

@@ -4,7 +4,7 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.spring.SpringUtil;
 import cn.keepbx.jpom.common.BaseController;
-import cn.keepbx.jpom.common.JpomApplicationEvent;
+import cn.keepbx.jpom.model.system.JpomManifest;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 
@@ -79,7 +79,7 @@ public class ConfigBean {
      * @return file
      */
     public File getPidFile() {
-        return new File(getDataPath(), "pid." + JpomApplicationEvent.getPid());
+        return new File(getDataPath(), "pid." + JpomManifest.getRunPid());
     }
 
     /**

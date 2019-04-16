@@ -3,7 +3,8 @@ package cn.keepbx.jpom.system;
 import ch.qos.logback.core.PropertyDefinerBase;
 import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
-import cn.keepbx.jpom.JpomServerApplication;
+import cn.keepbx.jpom.BaseJpomApplication;
+import cn.keepbx.jpom.model.system.JpomManifest;
 import cn.keepbx.jpom.util.ArgsUtil;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.Signature;
@@ -67,10 +68,10 @@ public class WebAopLog extends PropertyDefinerBase {
 
     @Override
     public String getPropertyValue() {
-        String path = ArgsUtil.getArgsValue(JpomServerApplication.getArgs(), "jpom.log");
+        String path = ArgsUtil.getArgsValue(BaseJpomApplication.getArgs(), "jpom.log");
         if (StrUtil.isEmpty(path)) {
             //
-            File file = JpomServerApplication.getRunPath();
+            File file = JpomManifest.getRunPath();
             if (file.isFile()) {
                 file = file.getParentFile().getParentFile();
             }

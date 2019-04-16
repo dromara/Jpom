@@ -4,13 +4,12 @@ import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.system.SystemUtil;
 import com.alibaba.fastjson.JSON;
 import org.springframework.boot.ApplicationHome;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.management.ManagementFactory;
-import java.lang.management.RuntimeMXBean;
 import java.util.jar.Attributes;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
@@ -68,17 +67,9 @@ public class JpomManifest {
     /**
      * 进程id
      */
-    private int pid;
+    private long pid = SystemUtil.getCurrentPID();
 
-    /**
-     * 记录当前程序进程
-     */
-    private static int PID = 0;
-
-    public int getPid() {
-        if (pid == 0) {
-            this.pid = getRunPid();
-        }
+    public long getPid() {
         return pid;
     }
 
@@ -137,24 +128,5 @@ public class JpomManifest {
         ApplicationHome home = new ApplicationHome(JpomManifest.class);
         String path = (home.getSource() == null ? "" : home.getSource().getAbsolutePath());
         return FileUtil.file(path);
-    }
-
-    /**
-     * 获取当前程序进程id
-     *
-     * @return pid
-     */
-    public static int getRunPid() {
-        if (PID == 0) {
-            RuntimeMXBean runtime = ManagementFactory.getRuntimeMXBean();
-            // format: "pid@hostname"
-            String name = runtime.getName();
-            try {
-                PID = Integer.parseInt(name.substring(0, name.indexOf('@')));
-            } catch (Exception e) {
-                PID = -1;
-            }
-        }
-        return PID;
     }
 }

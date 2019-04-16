@@ -16,7 +16,7 @@ import org.springframework.http.converter.StringHttpMessageConverter;
 @SpringBootApplication
 @ServletComponentScan
 @EnableCommonBoot
-public class JpomAgentApplication {
+public class JpomAgentApplication extends BaseJpomApplication {
     private static String[] args;
 
     /**
@@ -25,7 +25,7 @@ public class JpomAgentApplication {
      * @param args 参数
      */
     public static void main(String[] args) throws Exception {
-//        JpomServerApplication.args = args;
+        JpomAgentApplication.args = args;
         ApplicationBuilder.createBuilder(JpomAgentApplication.class)
                 .addHttpMessageConverter(new StringHttpMessageConverter(CharsetUtil.CHARSET_UTF_8))
                 // 拦截器

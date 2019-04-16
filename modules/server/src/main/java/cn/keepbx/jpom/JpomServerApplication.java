@@ -19,8 +19,7 @@ import org.springframework.http.converter.StringHttpMessageConverter;
 @SpringBootApplication
 @ServletComponentScan
 @EnableCommonBoot
-public class JpomServerApplication {
-    private static String[] args;
+public class JpomServerApplication extends BaseJpomApplication {
 
     /**
      * 启动执行
@@ -36,10 +35,6 @@ public class JpomServerApplication {
                 //
                 .addApplicationEventClient(new JpomApplicationEvent())
                 .run(args);
-    }
-
-    public static String[] getArgs() {
-        return args;
     }
 
 

@@ -6,6 +6,7 @@
         <artifactId>jpom</artifactId>
         <groupId>cn.keepbx</groupId>
         <version>2.3.2</version>
+        <relativePath>../../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <groupId>cn.keepbx.jpom</groupId>

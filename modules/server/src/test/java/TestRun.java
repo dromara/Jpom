@@ -8,7 +8,7 @@ import java.io.OutputStream;
 
 public class TestRun {
     public static void main(String[] args) throws IOException, InterruptedException {
-        String[] c = new String[]{"/jpom/command/run_boot.sh restart test no cn.keepbx.jpom.JpomApplication /jpom/p/jpom /jpom/p/test.log [][--server.port=2024  --jpom.path=/jpom/p/jpom/]"};
+        String[] c = new String[]{"/jpom/command/run_boot.sh restart test no cn.keepbx.jpom.BaseJpomApplication /jpom/p/jpom /jpom/p/test.log [][--server.port=2024  --jpom.path=/jpom/p/jpom/]"};
 
         System.out.println(exec(c));
     }

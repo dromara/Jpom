@@ -69,7 +69,7 @@
 ### 编译运行
 
 1. 访问[Jpom](https://gitee.com/keepbx/Jpom)的码云主页,拉取最新完整代码(建议使用master分支)
-2. 运行`cn.keepbx.jpom.JpomApplication`
+2. 运行`cn.keepbx.jpom.BaseJpomApplication`
 3. 浏览器访问（如：http://127.0.0.1:2122）
 
 ### 管理命令
