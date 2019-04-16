@@ -1,18 +1,12 @@
 package cn.keepbx.jpom.controller.node.manage;
 
-import cn.hutool.core.util.StrUtil;
-import cn.jiangzeyin.common.DefaultSystemLog;
-import cn.jiangzeyin.common.JsonMessage;
-import cn.keepbx.jpom.common.BaseController;
+import cn.keepbx.jpom.common.BaseNodeController;
 import cn.keepbx.jpom.common.Role;
-import cn.keepbx.jpom.common.commander.AbstractProjectCommander;
+import cn.keepbx.jpom.common.forward.NodeForward;
+import cn.keepbx.jpom.common.forward.NodeUrl;
 import cn.keepbx.jpom.common.interceptor.ProjectPermission;
 import cn.keepbx.jpom.common.interceptor.UrlPermission;
-import cn.keepbx.jpom.model.data.ProjectInfoModel;
-import cn.keepbx.jpom.model.data.UserModel;
 import cn.keepbx.jpom.service.manage.ProjectInfoService;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -20,7 +14,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.annotation.Resource;
-import java.util.HashSet;
 import java.util.List;
 
 /**
@@ -30,7 +23,7 @@ import java.util.List;
  */
 @Controller
 @RequestMapping(value = "/node/manage/")
-public class ProjectManageControl extends BaseController {
+public class ProjectManageControl extends BaseNodeController {
 
     @Resource
     private ProjectInfoService projectInfoService;
@@ -42,7 +35,7 @@ public class ProjectManageControl extends BaseController {
      */
     @RequestMapping(value = "projectInfo", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
     public String projectInfo() {
-        HashSet hashSet = projectInfoService.getAllGroup();
+        List<String> hashSet = projectInfoService.getAllGroup(getNode());
         setAttribute("groups", hashSet);
         return "node/manage/projectInfo";
     }
@@ -50,37 +43,12 @@ public class ProjectManageControl extends BaseController {
     /**
      * 获取正在运行的项目的端口和进程id
      *
-     * @param ids ids
      * @return json
      */
     @RequestMapping(value = "getProjectPort", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
-    public String getProjectPort(String ids) {
-        if (StrUtil.isEmpty(ids)) {
-            return JsonMessage.getString(400, "");
-        }
-        JSONArray jsonArray = JSONArray.parseArray(ids);
-        JSONObject jsonObject = new JSONObject();
-        JSONObject itemObj;
-        for (Object object : jsonArray) {
-            String item = object.toString();
-            int pid;
-            try {
-                pid = AbstractProjectCommander.getInstance().getPid(item);
-            } catch (Exception e) {
-                DefaultSystemLog.ERROR().error("获取端口错误", e);
-                continue;
-            }
-            if (pid <= 0) {
-                continue;
-            }
-            itemObj = new JSONObject();
-            String port = AbstractProjectCommander.getInstance().getMainPort(pid);
-            itemObj.put("port", port);
-            itemObj.put("pid", pid);
-            jsonObject.put(item, itemObj);
-        }
-        return JsonMessage.getString(200, "", jsonObject);
+    public String getProjectPort() {
+        return NodeForward.request(getNode(), getRequest(), NodeUrl.Manage_GetProjectPort).toString();
     }
 
     /**
@@ -90,38 +58,8 @@ public class ProjectManageControl extends BaseController {
      */
     @RequestMapping(value = "getProjectInfo", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
-    public String getProjectInfo(String group) {
-        try {
-            UserModel userName = getUser();
-            // 查询数据
-            List<ProjectInfoModel> projectInfoModels = projectInfoService.list();
-            // 转换为数据
-            JSONArray array = new JSONArray();
-            for (ProjectInfoModel projectInfoModel : projectInfoModels) {
-                if (StrUtil.isNotEmpty(group) && !group.equals(projectInfoModel.getGroup())) {
-                    continue;
-                }
-                String id = projectInfoModel.getId();
-                JSONObject object = projectInfoModel.toJson();
-                object.put("manager", userName.isProject(id));
-                object.put("status", projectInfoModel.isStatus(true));
-                array.add(object);
-            }
-            array.sort((oo1, oo2) -> {
-                JSONObject o1 = (JSONObject) oo1;
-                JSONObject o2 = (JSONObject) oo2;
-                String group1 = o1.getString("group");
-                String group2 = o2.getString("group");
-                if (group1 == null || group2 == null) {
-                    return -1;
-                }
-                return group1.compareTo(group2);
-            });
-            return JsonMessage.getString(200, "查询成功！", array);
-        } catch (Exception e) {
-            DefaultSystemLog.ERROR().error(e.getMessage(), e);
-            return JsonMessage.getString(500, e.getMessage());
-        }
+    public String getProjectInfo() {
+        return NodeForward.request(getNode(), getRequest(), NodeUrl.Manage_GetProjectInfo).toString();
     }
 
 
@@ -135,24 +73,25 @@ public class ProjectManageControl extends BaseController {
     @ProjectPermission
     @UrlPermission(Role.Manage)
     public String deleteProject() {
-        ProjectInfoModel projectInfoModel = getProjectInfoModel();
-        UserModel userModel = getUser();
-        try {
-            // 运行判断
-            if (projectInfoModel.isStatus(true)) {
-                return JsonMessage.getString(401, "不能删除正在运行的项目");
-            }
-            String userId;
-            if (userModel.isSystemUser()) {
-                userId = UserModel.SYSTEM_OCCUPY_NAME;
-            } else {
-                userId = userModel.getId();
-            }
-            projectInfoService.deleteProject(projectInfoModel, userId);
-            return JsonMessage.getString(200, "删除成功！");
-        } catch (Exception e) {
-            DefaultSystemLog.ERROR().error(e.getMessage(), e);
-            return JsonMessage.getString(500, e.getMessage());
-        }
+        return NodeForward.request(getNode(), getRequest(), NodeUrl.Manage_DeleteProject).toString();
+//        ProjectInfoModel projectInfoModel = getProjectInfoModel();
+//        UserModel userModel = getUser();
+//        try {
+//            // 运行判断
+//            if (projectInfoModel.isStatus(true)) {
+//                return JsonMessage.getString(401, "不能删除正在运行的项目");
+//            }
+//            String userId;
+//            if (userModel.isSystemUser()) {
+//                userId = UserModel.SYSTEM_OCCUPY_NAME;
+//            } else {
+//                userId = userModel.getId();
+//            }
+//            projectInfoService.deleteProject(projectInfoModel, userId);
+//            return JsonMessage.getString(200, "删除成功！");
+//        } catch (Exception e) {
+//            DefaultSystemLog.ERROR().error(e.getMessage(), e);
+//            return JsonMessage.getString(500, e.getMessage());
+//        }
     }
 }

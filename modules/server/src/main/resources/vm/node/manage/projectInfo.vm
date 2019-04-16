@@ -186,7 +186,7 @@
                     layer.msg('请先运行程序！');
                     return;
                 }
-                layer.open({
+                layerOpen({
                     type: 2,
                     title: '内存',
                     shade: 0.8,

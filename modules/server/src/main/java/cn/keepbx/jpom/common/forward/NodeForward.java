@@ -2,6 +2,7 @@ package cn.keepbx.jpom.common.forward;
 
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.servlet.ServletUtil;
+import cn.hutool.http.HttpRequest;
 import cn.hutool.http.HttpUtil;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.keepbx.jpom.model.data.NodeModel;
@@ -29,8 +30,18 @@ public class NodeForward {
 
 
     public static <T> T requestData(NodeModel nodeModel, NodeUrl nodeUrl, Class<T> tClass) {
+        return requestData(nodeModel, nodeUrl, tClass, null, null);
+    }
+
+
+    public static <T> T requestData(NodeModel nodeModel, NodeUrl nodeUrl, Class<T> tClass, String name, Object value, Object... parameters) {
         String url = StrUtil.format("http://{}{}", nodeModel.getUrl(), nodeUrl.getUrl());
-        String body = HttpUtil.createPost(url)
+
+        HttpRequest httpRequest = HttpUtil.createPost(url);
+        if (name != null && value != null) {
+            httpRequest.form(name, value, parameters);
+        }
+        String body = httpRequest
                 .execute()
                 .body();
         JsonMessage jsonMessage = JSON.parseObject(body, JsonMessage.class);

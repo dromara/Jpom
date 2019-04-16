@@ -19,6 +19,8 @@ import java.io.IOException;
 @ServerEndpoint(value = "/console/{projectId}")
 @Component
 public class AgentWebSocketHandle {
+    public static final String SYSTEM_ID = "system";
+
 
     @OnOpen
     public void onOpen(@PathParam("projectId") String projectId, Session session) {

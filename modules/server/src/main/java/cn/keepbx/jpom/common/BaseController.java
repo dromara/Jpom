@@ -1,8 +1,6 @@
 package cn.keepbx.jpom.common;
 
 import cn.keepbx.jpom.common.interceptor.LoginInterceptor;
-import cn.keepbx.jpom.common.interceptor.PermissionInterceptor;
-import cn.keepbx.jpom.model.data.ProjectInfoModel;
 import cn.keepbx.jpom.model.data.UserModel;
 import org.springframework.web.context.request.RequestAttributes;
 
@@ -35,17 +33,17 @@ public abstract class BaseController extends BaseJpomController {
     public static UserModel getUserModel() {
         return (UserModel) getRequestAttributes().getAttribute(LoginInterceptor.SESSION_NAME, RequestAttributes.SCOPE_SESSION);
     }
-
-    /**
-     * 获取拦截器中缓存的项目信息
-     *
-     * @return this
-     */
-    protected ProjectInfoModel getProjectInfoModel() {
-        ProjectInfoModel projectInfoModel = (ProjectInfoModel) this.getRequest().getAttribute(PermissionInterceptor.CACHE_PROJECT_INFO);
-        Objects.requireNonNull(projectInfoModel, "获取项目信息失败");
-        return projectInfoModel;
-    }
+//
+//    /**
+//     * 获取拦截器中缓存的项目信息
+//     *
+//     * @return this
+//     */
+//    protected ProjectInfoModel getProjectInfoModel() {
+//        ProjectInfoModel projectInfoModel = (ProjectInfoModel) this.getRequest().getAttribute(PermissionInterceptor.CACHE_PROJECT_INFO);
+//        Objects.requireNonNull(projectInfoModel, "获取项目信息失败");
+//        return projectInfoModel;
+//    }
 
     /**
      * 获取当前登录人

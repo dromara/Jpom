@@ -30,7 +30,7 @@ public class NodeInterceptor extends BaseJpomInterceptor {
             HandlerMethod handlerMethod = (HandlerMethod) handler;
 
             if (isPage(handlerMethod)) {
-                String id = request.getParameter("id");
+                String id = request.getParameter("nodeId");
                 NodeModel nodeModel = nodeService.getItem(id);
                 request.setAttribute("nowNodeItem", nodeModel);
             }

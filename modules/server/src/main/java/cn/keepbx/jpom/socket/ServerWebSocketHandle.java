@@ -9,9 +9,7 @@ import cn.keepbx.jpom.common.forward.NodeForward;
 import cn.keepbx.jpom.common.forward.NodeUrl;
 import cn.keepbx.jpom.common.forward.ProxySession;
 import cn.keepbx.jpom.model.data.NodeModel;
-import cn.keepbx.jpom.model.data.ProjectInfoModel;
 import cn.keepbx.jpom.model.data.UserModel;
-import cn.keepbx.jpom.service.manage.ProjectInfoService;
 import cn.keepbx.jpom.service.node.NodeService;
 import cn.keepbx.jpom.service.user.UserService;
 import cn.keepbx.jpom.util.SocketSessionUtil;
@@ -34,7 +32,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Component
 public class ServerWebSocketHandle {
 
-    public static final String SYSTEM_ID = "system";
+
     private NodeService nodeService;
     private static volatile AtomicInteger onlineCount = new AtomicInteger();
     private static final ConcurrentHashMap<String, UserModel> USER = new ConcurrentHashMap<>();
@@ -54,7 +52,7 @@ public class ServerWebSocketHandle {
         }
         // 通过用户名和密码的Md5值判断是否是登录的
         try {
-            ProjectInfoService projectInfoService = SpringUtil.getBean(ProjectInfoService.class);
+//            ProjectInfoService projectInfoService = SpringUtil.getBean(ProjectInfoService.class);
             UserService userService = SpringUtil.getBean(UserService.class);
             UserModel userModel = userService.checkUser(userInfo);
             if (userModel == null) {
@@ -68,19 +66,19 @@ public class ServerWebSocketHandle {
             PROXY_SESSION_CONCURRENT_HASH_MAP.put(session.getId(), proxySession);
             System.out.println(url);
             // 判断项目
-            if (!SYSTEM_ID.equals(projectId)) {
-                ProjectInfoModel projectInfoModel = projectInfoService.getItem(projectId);
-                if (projectInfoModel == null) {
-                    SocketSessionUtil.send(session, "获取项目信息错误");
-                    session.close();
-                    return;
-                }
-                if (!userModel.isProject(projectInfoModel.getId())) {
-                    SocketSessionUtil.send(session, "没有项目权限");
-                    session.close();
-                    return;
-                }
-            }
+//            if (!SYSTEM_ID.equals(projectId)) {
+//                ProjectInfoModel projectInfoModel = projectInfoService.getItem(projectId);
+//                if (projectInfoModel == null) {
+//                    SocketSessionUtil.send(session, "获取项目信息错误");
+//                    session.close();
+//                    return;
+//                }
+//                if (!userModel.isProject(projectInfoModel.getId())) {
+//                    SocketSessionUtil.send(session, "没有项目权限");
+//                    session.close();
+//                    return;
+//                }
+//            }
             SocketSessionUtil.send(session, StrUtil.format("欢迎加入:{} 回话id:{} 当前会话总数:{}", userModel.getName(), session.getId(), onlineCount.incrementAndGet()));
             USER.put(session.getId(), userModel);
         } catch (Exception e) {

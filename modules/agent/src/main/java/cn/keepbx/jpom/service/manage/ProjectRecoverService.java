@@ -3,7 +3,7 @@ package cn.keepbx.jpom.service.manage;
 import cn.hutool.core.date.DateUtil;
 import cn.keepbx.jpom.common.BaseOperService;
 import cn.keepbx.jpom.model.data.ProjectRecoverModel;
-import cn.keepbx.jpom.system.ServerConfigBean;
+import cn.keepbx.jpom.system.AgentConfigBean;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;
@@ -26,7 +26,7 @@ public class ProjectRecoverService extends BaseOperService<ProjectRecoverModel> 
      */
     @Override
     public List<ProjectRecoverModel> list() {
-        JSONObject jsonObject = getJSONObject(ServerConfigBean.PROJECT_RECOVER);
+        JSONObject jsonObject = getJSONObject(AgentConfigBean.PROJECT_RECOVER);
         JSONArray jsonArray = formatToArray(jsonObject);
         return jsonArray.toJavaList(ProjectRecoverModel.class);
     }
@@ -41,7 +41,7 @@ public class ProjectRecoverService extends BaseOperService<ProjectRecoverModel> 
     public void addItem(ProjectRecoverModel projectInfo) {
         projectInfo.setDelTime(DateUtil.now());
         // 保存
-        saveJson(ServerConfigBean.PROJECT_RECOVER, projectInfo.toJson());
+        saveJson(AgentConfigBean.PROJECT_RECOVER, projectInfo.toJson());
     }
 
     /**
@@ -52,7 +52,7 @@ public class ProjectRecoverService extends BaseOperService<ProjectRecoverModel> 
      */
     @Override
     public ProjectRecoverModel getItem(String id) throws IOException {
-        return getJsonObjectById(ServerConfigBean.PROJECT_RECOVER, id, ProjectRecoverModel.class);
+        return getJsonObjectById(AgentConfigBean.PROJECT_RECOVER, id, ProjectRecoverModel.class);
     }
 
     @Override

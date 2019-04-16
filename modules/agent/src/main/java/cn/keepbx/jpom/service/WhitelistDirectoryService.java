@@ -8,6 +8,8 @@ import cn.keepbx.jpom.util.JsonFileUtil;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 /**
  * @author jiangzeyin
  * @date 2019/2/28
@@ -27,15 +29,18 @@ public class WhitelistDirectoryService extends BaseDataService {
         }
         return null;
     }
-//
-//    public boolean checkProjectDirectory(String path) {
-//
-//        List<String> list = getProjectDirectory();
-//        if (list == null) {
-//            return false;
-//        }
-//        return list.contains(path);
-//    }
+
+    public boolean checkProjectDirectory(String path) {
+        Whitelist whitelist = getWhitelist();
+        if (whitelist == null) {
+            return false;
+        }
+        List<String> list = whitelist.getProject();
+        if (list == null) {
+            return false;
+        }
+        return list.contains(path);
+    }
 //
 //    public boolean checkNgxDirectory(String path) {
 //        List<String> list = getNgxDirectory();
@@ -65,7 +70,6 @@ public class WhitelistDirectoryService extends BaseDataService {
 //        }
 //        return null;
 //    }
-
 
 
     public void saveWhitelistDirectory(Whitelist jsonObject) {

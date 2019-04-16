@@ -22,10 +22,7 @@ public class ServerConfigBean {
      * 用户数据文件
      */
     public static final String USER = "user.json";
-    /**
-     * 项目数据文件
-     */
-    public static final String PROJECT = "project.json";
+
     /**
      * 节点数据文件
      */
@@ -39,10 +36,7 @@ public class ServerConfigBean {
      * 证书文件
      */
     public static final String CERT = "cert.json";
-    /**
-     * 项目回收文件
-     */
-    public static final String PROJECT_RECOVER = "project_recover.json";
+
 
     /**
      * 单利模式

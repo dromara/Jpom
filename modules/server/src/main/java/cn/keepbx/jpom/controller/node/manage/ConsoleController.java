@@ -1,6 +1,6 @@
 package cn.keepbx.jpom.controller.node.manage;
 
-import cn.keepbx.jpom.common.BaseController;
+import cn.keepbx.jpom.common.BaseNodeController;
 import cn.keepbx.jpom.model.data.ProjectInfoModel;
 import cn.keepbx.jpom.model.data.UserModel;
 import cn.keepbx.jpom.service.manage.ProjectInfoService;
@@ -20,7 +20,7 @@ import java.io.File;
  */
 @Controller
 @RequestMapping(value = "/node/manage/")
-public class ConsoleController extends BaseController {
+public class ConsoleController extends BaseNodeController {
 
     @Resource
     private ProjectInfoService projectInfoService;
@@ -33,20 +33,20 @@ public class ConsoleController extends BaseController {
      */
     @RequestMapping(value = "console", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
     public String console(String id) {
-        ProjectInfoModel projectInfoModel = projectInfoService.getItem(id);
-        if (projectInfoModel != null) {
-            UserModel userName = getUser();
-            setAttribute("projectInfo", projectInfoModel);
-            String logSize = projectInfoService.getLogSize(id);
-            setAttribute("logSize", logSize);
-            setAttribute("manager", userName.isProject(id));
-
-            //获取日志备份路径
-            File logBack = projectInfoModel.getLogBack();
-            if (logBack.exists() && logBack.isDirectory()) {
-                setAttribute("logBack", true);
-            }
-        }
+//        ProjectInfoModel projectInfoModel = projectInfoService.getItem(getNode(), id);
+//        if (projectInfoModel != null) {
+//            UserModel userName = getUser();
+//            setAttribute("projectInfo", projectInfoModel);
+//            String logSize = projectInfoService.getLogSize(id);
+//            setAttribute("logSize", logSize);
+//            setAttribute("manager", userName.isProject(id));
+//
+//            //获取日志备份路径
+//            File logBack = projectInfoModel.getLogBack();
+//            if (logBack.exists() && logBack.isDirectory()) {
+//                setAttribute("logBack", true);
+//            }
+//        }
         return "node/manage/console";
     }
 

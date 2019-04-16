@@ -158,6 +158,12 @@
     function tableRender(data) {
         var done = data.done;
         delete data.done;
+
+        var newWhere = {
+            nodeId: getTopQueryString("nodeId")
+        };
+        $.extend(newWhere, data.where);
+        delete data.where;
         //
         const defData = {
             even: true,
@@ -166,6 +172,7 @@
             response: {
                 statusCode: 200
             },
+            where: newWhere,
             done: function (data) {
                 if (data.code == 800) {
                 ## 用户信息失效
