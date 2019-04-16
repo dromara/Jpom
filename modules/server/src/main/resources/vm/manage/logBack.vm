@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    #parse("./common/head.vm")
+    <title>logBack</title>
+    <style>
+        body {
+            padding: 10px;
+        }
+    </style>
+</head>
+
+<body>
+<div class="layui-form">
+    <table class="layui-table">
+        <tbody>
+        <tr>
+            <td>控制台日志路径</td>
+            <td>$!logPath</td>
+        </tr>
+        <tr>
+            <td>控制台日志备份路径</td>
+            <td>$!logBackPath</td>
+        </tr>
+        </tbody>
+    </table>
+    <table class="layui-table">
+        <thead>
+        <tr>
+            <th>序号</th>
+            <th>文件名</th>
+            <th>修改时间</th>
+            <th>文件大小</th>
+            <th>操作</th>
+        </tr>
+        </thead>
+        <tbody>
+            #foreach($item in $array)
+            <tr>
+                <td>$item.index</td>
+                <td>$item.filename</td>
+                <td>$item.modifytime</td>
+                <td>$item.filesize</td>
+                <td>
+                    <a name="download" href="logBack_download?key=$item.filename&id=$id"
+                       class="layui-btn layui-btn-warm layui-btn-sm">下载
+                    </a>
+                    <button name="delete" data-name="$item.filename" data-id="$id"
+                            class="layui-btn layui-btn-danger layui-btn-sm">删除
+                    </button>
+                </td>
+            </tr>
+            #end
+            #if(!$array)
+            <tr>
+                <td colspan="4">没有相关信息</td>
+            </tr>
+            #end
+        </tbody>
+    </table>
+</div>
+</body>
+<script type="text/javascript">
+    function loadSuccess() {
+        $("button[name='delete']").click(function () {
+            var that = $(this);
+            var name = that.attr("data-name");
+            layer.confirm('您确定要删除【' + name + '】？', {
+                btn: ['确定', '不确定'] //按钮
+            }, function (index) {
+                layer.close(index);
+                var id = that.attr("data-id");
+                loadingAjax({
+                    url: './logBack_delete',
+                    data: {
+                        id: id,
+                        name: name
+                    },
+                    success: function (data) {
+                        layer.msg(data.msg);
+                        if (200 == data.code) {
+                            setTimeout(function () {
+                                window.location.reload();
+                            }, 2000);
+                        }
+                    }
+                });
+            }, function () {
+
+            });
+
+        });
+    }
+</script>
+</html>

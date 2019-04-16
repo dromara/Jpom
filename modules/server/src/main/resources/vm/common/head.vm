@@ -1,0 +1,135 @@
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta content="width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1,user-scalable=no" name="viewport">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<link rel="icon" href="$!jpomProxyPath/static/favicon.ico" type="image/x-icon"/>
+<link rel="shortcut icon" href="$!jpomProxyPath/static/favicon.ico" type="image/x-icon"/>
+<link rel="stylesheet" href="$!jpomProxyPath/static/layui/css/layui.css?v=$staticCacheTime" media="all">
+<style>
+    .x-red {
+        color: red;
+    }
+
+    .layui-table-hover {
+        -webkit-box-shadow: inset 0 0 10px #8D8D8D;
+        -moz-box-shadow: inset 0 0 10px #8D8D8D;
+        box-shadow: inset 0 0 10px #8D8D8D;
+    }
+</style>
+<script type="text/javascript" src="$!jpomProxyPath/static/layui/layui.js?v=$staticCacheTime"></script>
+<script type="text/javascript">
+    var $, layer, form, element, table;
+    ## 不缓存
+    layui.config({
+        version: true
+    });
+    layui.use(['layer', 'element', 'form', 'table'], function () {
+        $ = layui.$;
+        element = layui.element;
+        layer = layui.layer;
+        form = layui.form;
+        table = layui.table;
+        //
+        try {
+            loadSuccess && loadSuccess();
+        } catch (e) {
+        }
+    });
+
+    function tabChange(options) {
+        var element = top.layui.element;
+        var lay_id = 'tab_' + options.id;
+        if (options.id != "welcome") {
+            lay_id += options.title;
+        ## 如果存在选项卡，切换，否则创建
+            if ($('[lay-id="' + lay_id + '"]', top.document).length <= 0) {
+                var tab_content = '<iframe id="' + lay_id + '" name="' + options.id + '" src="' + options.url + '" frameborder="0" class="custom-iframe"></iframe>';
+                element.tabAdd('mainTabs', {
+                    title: options.title,
+                    content: tab_content,
+                    id: lay_id
+                });
+            }
+        }
+    ## 创建完后切换
+        element.tabChange('mainTabs', lay_id);
+    }
+
+    ## 获取自适应的socket
+    function getSocketHost() {
+        var pro = location.protocol === 'https:' ? 'wss://' : 'ws://';
+        return pro + window.location.host + "$!jpomProxyPath";
+    }
+
+    ## 带loading 效果的网络请求
+    function loadingAjax(data, closeLoading) {
+        var success = data.success;
+        delete data.success;
+        var error = data.error;
+        delete data.error;
+        var index;
+        var defData = {
+            type: 'POST',
+            dataType: 'json',
+            beforeSend: function () {
+                if (closeLoading !== true) {
+                    index = layer.load(1, {
+                        shade: [0.3, '#fff']
+                    });
+                }
+            },
+            success: function (data) {
+                layer.close(index);
+                if (data.code == 800) {
+                ## 用户信息失效
+                    layer.msg(data.msg);
+                    setTimeout(function () {
+                        top.location.reload();
+                    }, 1500);
+                    return;
+                }
+                success && success(data);
+            },
+            error: function () {
+                layer.close(index);
+                layer.msg("网络异常,请稍后再试");
+            }
+        };
+        $.extend(defData, data);
+        $.ajax(defData);
+    }
+
+    ## 静默ajax
+    function silentAjax(data) {
+        loadingAjax(data, true);
+    }
+
+    ## 默认表格渲染
+    function tableRender(data) {
+        var done = data.done;
+        delete data.done;
+        //
+        const defData = {
+            even: true,
+            loading: true,
+            method: 'POST',
+            response: {
+                statusCode: 200
+            },
+            done: function (data) {
+                if (data.code == 800) {
+                ## 用户信息失效
+                    layer.msg(data.msg);
+                    setTimeout(function () {
+                        top.location.reload();
+                    }, 1500);
+                    return;
+                }
+                done && done(data);
+            }
+        };
+        $.extend(defData, data);
+        table.render(defData);
+    }
+</script>

@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    #parse("./common/head.vm")
+    <title>项目管理系统</title>
+    <style>
+        body {
+            padding: 20px;
+        }
+
+        .div-project {
+            width: 100%;
+            display: none;
+        }
+
+        .layui-inline {
+            width: 45%;
+        }
+
+        .text {
+            text-align: left;
+        }
+    </style>
+</head>
+
+<body>
+    #if($user.isManage())
+    <table class="layui-table">
+        <thead>
+        <tr>
+            <th>序号</th>
+            <th>项目名称</th>
+            <th>项目ID</th>
+            <th>项目分组</th>
+            <th>项目路径</th>
+            <th>删除时间</th>
+            <th>操作人</th>
+            <th>操作</th>
+        </tr>
+        </thead>
+        <tbody>
+
+            #foreach($item in $!array)
+                #set($hashData=true)
+            <tr>
+                <td>$!velocityCount</td>
+                <td>$!item.projectInfoModel.name</td>
+                <td>$!item.projectInfoModel.id</td>
+                <td>$!item.projectInfoModel.group</td>
+                <td>$!item.projectInfoModel.lib</td>
+                <td>$!item.delTime</td>
+                <td>$!item.delUser</td>
+                <td>
+                    <button name="delete" onclick="projectDetail(this)" data-name="$item.filename"
+                            index="$!velocityCount" data-id="$!item.id"
+                            class="layui-btn  layui-btn-sm">详情
+                    </button>
+                </td>
+            </tr>
+            #end
+            #if(!$hashData)
+            <tr>
+                <td colspan=8 style="text-align:center">无数据</td>
+            </tr>
+            #end
+        </tbody>
+    </table>
+    #else
+    <h1>你没有权限</h1>
+    #end
+
+<div class="layui-container div-project" id="div-project">
+    <div class="layui-form-item">
+        <div class="layui-inline">
+            <label class="layui-form-label">项目名名称:</label>
+            <label class="layui-form-label text" id="name"></label>
+        </div>
+        <div class="layui-inline">
+            <label class="layui-form-label">分组名称:</label>
+            <label class="layui-form-label text" id="group"></label>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <div class="layui-inline">
+            <label class="layui-form-label">项目ID:</label>
+            <label class="layui-form-label text" id="id"></label>
+        </div>
+        <div class="layui-inline">
+            <label class="layui-form-label">MainClass:</label>
+            <label class="layui-form-label text" id="mainClass"></label>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <div class="layui-inline">
+            <label class="layui-form-label">项目Lib:</label>
+            <label class="layui-form-label text" id="lib"></label>
+        </div>
+        <div class="layui-inline">
+            <label class="layui-form-label">日志路径:</label>
+            <label class="layui-form-label text" id="path"></label>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <div class="layui-inline">
+            <label class="layui-form-label">Jvm参数:</label>
+            <label class="layui-form-label text" id="jvm"></label>
+        </div>
+        <div class="layui-inline">
+            <label class="layui-form-label">args:</label>
+            <label class="layui-form-label text" id="args"></label>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <div class="layui-inline">
+            <label class="layui-form-label">WebHooks:</label>
+            <label class="layui-form-label text" id="webHooks"></label>
+        </div>
+        <div class="layui-inline">
+            <label class="layui-form-label">Build标识:</label>
+            <label class="layui-form-label text" id="build"></label>
+        </div>
+    </div>
+</div>
+
+</body>
+
+<script type="text/javascript">
+
+    function projectDetail(dom) {
+        var id = dom.getAttribute("data-id");
+        loadingAjax({
+            url: './data.json',
+            data: {
+                id: id
+            },
+            success: function (data) {
+                if (200 == data.code) {
+                    attrProject(data.data);
+                    layer.open({
+                        type: 1,
+                        title: '查看项目',
+                        content: $('#div-project'),
+                        area: ['60%', '80%'],
+                    });
+                } else {
+                    layer.msg(data.msg);
+                }
+            }
+        });
+    }
+
+    function attrProject(data) {
+        if (!data) {
+            return;
+        }
+        var projectInfoModel = data.projectInfoModel;
+        $("#name").html(projectInfoModel.name);
+        $("#group").html(projectInfoModel.group);
+        $("#id").html(projectInfoModel.id);
+        $("#mainClass").html(projectInfoModel.mainClass);
+        $("#path").html(projectInfoModel.log);
+        $("#lib").html(projectInfoModel.lib);
+        $("#jvm").html(projectInfoModel.jvm);
+        $("#args").html(projectInfoModel.args);
+        $("#webHooks").html(projectInfoModel.token);
+        $("#build").html(projectInfoModel.buildTag);
+    }
+
+    function loadSuccess() {
+
+
+    }
+</script>
+</html>
