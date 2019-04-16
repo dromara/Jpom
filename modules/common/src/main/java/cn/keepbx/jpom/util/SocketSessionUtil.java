@@ -2,7 +2,6 @@ package cn.keepbx.jpom.util;
 
 import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
-import cn.keepbx.jpom.util.KeyLock;
 
 import javax.websocket.Session;
 import java.io.IOException;
@@ -53,6 +52,7 @@ public class SocketSessionUtil {
                 try {
                     session.getBasicRemote().sendText(msg);
                     exception = null;
+                    break;
                 } catch (IOException e) {
                     DefaultSystemLog.ERROR().error("发送消息失败:" + tryCount, e);
                     exception = e;

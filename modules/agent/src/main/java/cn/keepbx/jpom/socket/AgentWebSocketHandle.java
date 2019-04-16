@@ -2,6 +2,7 @@ package cn.keepbx.jpom.socket;
 
 import cn.hutool.core.exceptions.ExceptionUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
+import cn.keepbx.jpom.system.TopManager;
 import cn.keepbx.jpom.util.SocketSessionUtil;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Component;
@@ -21,21 +22,28 @@ public class AgentWebSocketHandle {
 
     @OnOpen
     public void onOpen(@PathParam("projectId") String projectId, Session session) {
-
+        System.out.println(projectId);
     }
 
     @OnMessage
     public void onMessage(String message, Session session) throws Exception {
         JSONObject json = JSONObject.parseObject(message);
         String op = json.getString("op");
-        if ("heart".equals(op)) {
+        CommandOp commandOp = CommandOp.valueOf(op);
+        if (commandOp == CommandOp.heart) {
+            return;
+        }
+        if (commandOp == CommandOp.top) {
+            TopManager.addMonitor(session);
             return;
         }
     }
 
     @OnClose
     public void onClose(Session session) {
-
+        // top
+        TopManager.removeMonitor(session);
+        System.out.println("close");
     }
 
     @OnError

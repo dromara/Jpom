@@ -4,12 +4,16 @@ import cn.hutool.cron.CronUtil;
 import cn.hutool.cron.Scheduler;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.pool.ThreadPoolService;
+import cn.keepbx.jpom.common.commander.AbstractSystemCommander;
+import cn.keepbx.jpom.model.system.ProcessModel;
 import cn.keepbx.jpom.util.SocketSessionUtil;
+import com.alibaba.fastjson.JSONObject;
 
 import javax.websocket.Session;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -58,13 +62,13 @@ public class TopManager {
             return;
         }
         CronUtil.remove(CRON_ID);
-        CronUtil.schedule(CRON_ID, "0/10 * * * * ?", () -> {
+        CronUtil.schedule(CRON_ID, "0/5 * * * * ?", () -> {
             //发送监控信息
             try {
-//                JSONObject topInfo = AbstractSystemCommander.getInstance().getAllMonitor();
-//                if (topInfo != null) {
-//                    send(topInfo.toString());
-//                }
+                JSONObject topInfo = AbstractSystemCommander.getInstance().getAllMonitor();
+                if (topInfo != null) {
+                    send(topInfo.toString());
+                }
             } catch (Exception e) {
                 DefaultSystemLog.ERROR().error(e.getMessage(), e);
             }
@@ -84,12 +88,12 @@ public class TopManager {
      */
     private static void sendProcessList() {
         executorService.execute(() -> {
-//            List<ProcessModel> array = AbstractSystemCommander.getInstance().getProcessList();
-//            if (array != null) {
-//                JSONObject jsonObject = new JSONObject();
-//                jsonObject.put("processList", array);
-//                send(jsonObject.toJSONString());
-//            }
+            List<ProcessModel> array = AbstractSystemCommander.getInstance().getProcessList();
+            if (array != null) {
+                JSONObject jsonObject = new JSONObject();
+                jsonObject.put("processList", array);
+                send(jsonObject.toJSONString());
+            }
         });
     }
 

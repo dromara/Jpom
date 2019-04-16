@@ -1,6 +1,7 @@
 package cn.keepbx.jpom.socket;
 
 import cn.hutool.core.exceptions.ExceptionUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.spring.SpringUtil;
@@ -10,11 +11,9 @@ import cn.keepbx.jpom.common.forward.ProxySession;
 import cn.keepbx.jpom.model.data.NodeModel;
 import cn.keepbx.jpom.model.data.ProjectInfoModel;
 import cn.keepbx.jpom.model.data.UserModel;
-import cn.keepbx.jpom.service.manage.ConsoleService;
 import cn.keepbx.jpom.service.manage.ProjectInfoService;
 import cn.keepbx.jpom.service.node.NodeService;
 import cn.keepbx.jpom.service.user.UserService;
-import cn.keepbx.jpom.system.TopManager;
 import cn.keepbx.jpom.util.SocketSessionUtil;
 import org.springframework.stereotype.Component;
 
@@ -36,7 +35,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class ServerWebSocketHandle {
 
     public static final String SYSTEM_ID = "system";
-    private ConsoleService consoleService;
     private NodeService nodeService;
     private static volatile AtomicInteger onlineCount = new AtomicInteger();
     private static final ConcurrentHashMap<String, UserModel> USER = new ConcurrentHashMap<>();
@@ -51,9 +49,6 @@ public class ServerWebSocketHandle {
      */
     @OnOpen
     public void onOpen(@PathParam("nodeId") String nodeId, @PathParam("userInfo") String userInfo, @PathParam("projectId") String projectId, Session session) {
-        if (consoleService == null) {
-            consoleService = SpringUtil.getBean(ConsoleService.class);
-        }
         if (nodeService == null) {
             nodeService = SpringUtil.getBean(NodeService.class);
         }
@@ -86,7 +81,7 @@ public class ServerWebSocketHandle {
                     return;
                 }
             }
-            //SocketSessionUtil.send(session, StrUtil.format("欢迎加入:{} 回话id:{} 当前会话总数:{}", userModel.getName(), session.getId(), onlineCount.incrementAndGet()));
+            SocketSessionUtil.send(session, StrUtil.format("欢迎加入:{} 回话id:{} 当前会话总数:{}", userModel.getName(), session.getId(), onlineCount.incrementAndGet()));
             USER.put(session.getId(), userModel);
         } catch (Exception e) {
             DefaultSystemLog.ERROR().error("socket 错误", e);
@@ -104,10 +99,9 @@ public class ServerWebSocketHandle {
     }
 
     @OnMessage
-    public void onMessage(String message, Session session) throws Exception {
+    public void onMessage(String message, Session session) {
         ProxySession proxySession = getSession(session);
         proxySession.send(message);
-
 //        UserModel userModel = USER.get(session.getId());
 //        if (userModel == null) {
 //            SocketSessionUtil.send(session, "回话信息失效，刷新网页再试");
@@ -202,6 +196,8 @@ public class ServerWebSocketHandle {
         } catch (Exception e) {
             DefaultSystemLog.ERROR().error("关闭异常", e);
         }
+        ProxySession proxySession = getSession(session);
+        proxySession.close();
         onlineCount.getAndDecrement();
     }
 
@@ -215,8 +211,6 @@ public class ServerWebSocketHandle {
         } catch (Exception e) {
             DefaultSystemLog.ERROR().error("关闭异常", e);
         }
-        // top
-        TopManager.removeMonitor(session);
         USER.remove(session.getId());
         DefaultSystemLog.LOG().info(session.getId() + " socket 关闭");
     }

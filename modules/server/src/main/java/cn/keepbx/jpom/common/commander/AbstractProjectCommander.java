@@ -16,7 +16,6 @@ import cn.keepbx.jpom.common.commander.impl.LinuxProjectCommander;
 import cn.keepbx.jpom.common.commander.impl.WindowsProjectCommander;
 import cn.keepbx.jpom.model.data.ProjectInfoModel;
 import cn.keepbx.jpom.model.system.NetstatModel;
-import cn.keepbx.jpom.service.manage.ConsoleService;
 import cn.keepbx.jpom.service.manage.ProjectInfoService;
 import cn.keepbx.jpom.system.JpomRuntimeException;
 import cn.keepbx.jpom.util.CommandUtil;
@@ -40,6 +39,9 @@ import java.util.jar.Manifest;
  * @author Administrator
  */
 public abstract class AbstractProjectCommander {
+
+    private static final String RUNING_TAG = "running";
+    private static final String STOP_TAG = "stopped";
 
     private static AbstractProjectCommander abstractProjectCommander = null;
 
@@ -236,9 +238,9 @@ public abstract class AbstractProjectCommander {
     public String status(String tag) throws Exception {
         VirtualMachine virtualMachine = JvmUtil.getVirtualMachine(tag);
         if (virtualMachine == null) {
-            return ConsoleService.STOP_TAG;
+            return AbstractProjectCommander.STOP_TAG;
         }
-        return StrUtil.format("{}:{}", ConsoleService.RUNING_TAG, virtualMachine.id());
+        return StrUtil.format("{}:{}", AbstractProjectCommander.RUNING_TAG, virtualMachine.id());
     }
 
     //---------------------------------------------------- 基本操作----end
@@ -367,7 +369,7 @@ public abstract class AbstractProjectCommander {
      * @return int
      */
     protected static int parsePid(String result) {
-        if (result.startsWith(ConsoleService.RUNING_TAG)) {
+        if (result.startsWith(AbstractProjectCommander.RUNING_TAG)) {
             return Convert.toInt(result.split(":")[1]);
         }
         return 0;
@@ -382,7 +384,7 @@ public abstract class AbstractProjectCommander {
      */
     public boolean isRun(String tag) throws Exception {
         String result = status(tag);
-        return result.contains(ConsoleService.RUNING_TAG);
+        return result.contains(AbstractProjectCommander.RUNING_TAG);
     }
 
     /***
