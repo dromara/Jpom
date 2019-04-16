@@ -14,7 +14,7 @@ import cn.keepbx.jpom.model.data.ProjectInfoModel;
 import cn.keepbx.jpom.model.data.UserModel;
 import cn.keepbx.jpom.service.manage.ProjectInfoService;
 import cn.keepbx.jpom.service.system.WhitelistDirectoryService;
-import cn.keepbx.jpom.socket.LogWebSocketHandle;
+import cn.keepbx.jpom.socket.ServerWebSocketHandle;
 import cn.keepbx.jpom.system.ConfigBean;
 import com.alibaba.fastjson.JSONArray;
 import org.springframework.http.MediaType;
@@ -100,8 +100,8 @@ public class EditProjectController extends BaseController {
         if (Validator.isChinese(id)) {
             return JsonMessage.getString(401, "项目id不能包含中文");
         }
-        if (LogWebSocketHandle.SYSTEM_ID.equals(id)) {
-            return JsonMessage.getString(401, "项目id " + LogWebSocketHandle.SYSTEM_ID + " 关键词被系统占用");
+        if (ServerWebSocketHandle.SYSTEM_ID.equals(id)) {
+            return JsonMessage.getString(401, "项目id " + ServerWebSocketHandle.SYSTEM_ID + " 关键词被系统占用");
         }
         // 防止和Jpom冲突
         if (StrUtil.isNotEmpty(ConfigBean.getInstance().applicationTag) && ConfigBean.getInstance().applicationTag.equalsIgnoreCase(id)) {
@@ -251,7 +251,7 @@ public class EditProjectController extends BaseController {
      */
     private void modify(ProjectInfoModel exits) {
         UserModel userName = getUser();
-        exits.logModifyUser(userName);
+//        exits.logModifyUser(userName);
     }
 
     /**

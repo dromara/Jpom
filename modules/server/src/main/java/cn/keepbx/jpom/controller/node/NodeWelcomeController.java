@@ -1,18 +1,13 @@
 package cn.keepbx.jpom.controller.node;
 
-import cn.jiangzeyin.common.JsonMessage;
 import cn.keepbx.jpom.common.BaseNodeController;
-import cn.keepbx.jpom.common.NodeForward;
-import cn.keepbx.jpom.common.NodeUrl;
-import cn.keepbx.jpom.common.commander.AbstractSystemCommander;
-import cn.keepbx.jpom.model.system.ProcessModel;
+import cn.keepbx.jpom.common.forward.NodeForward;
+import cn.keepbx.jpom.common.forward.NodeUrl;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
-
-import java.util.List;
 
 /**
  * 欢迎页
@@ -37,7 +32,6 @@ public class NodeWelcomeController extends BaseNodeController {
     @RequestMapping(value = "processList", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     public String getProcessList() {
-        List<ProcessModel> array = AbstractSystemCommander.getInstance().getProcessList();
-        return JsonMessage.getString(200, "", array);
+        return NodeForward.request(getNode(), getRequest(), NodeUrl.ProcessList).toString();
     }
 }

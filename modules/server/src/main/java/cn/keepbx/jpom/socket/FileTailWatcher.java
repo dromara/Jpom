@@ -8,6 +8,7 @@ import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.keepbx.jpom.util.CharsetDetector;
 import cn.keepbx.jpom.util.LimitQueue;
+import cn.keepbx.jpom.util.SocketSessionUtil;
 
 import javax.websocket.Session;
 import java.io.File;
@@ -117,10 +118,10 @@ public class FileTailWatcher implements Runnable {
     }
 
     private void send(Session session, String msg) {
-        try {
-            SocketSessionUtil.send(session, msg);
-        } catch (IOException ignored) {
-        }
+//        try {
+////            SocketSessionUtil.send(session, msg);
+//        } catch (IOException ignored) {
+//        }
     }
 
     private void startRead() throws IOException {

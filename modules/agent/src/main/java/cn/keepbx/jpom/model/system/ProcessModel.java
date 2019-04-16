@@ -1,11 +1,7 @@
 package cn.keepbx.jpom.model.system;
 
 import cn.hutool.core.util.StrUtil;
-import cn.jiangzeyin.common.DefaultSystemLog;
-import cn.keepbx.jpom.common.commander.AbstractProjectCommander;
 import cn.keepbx.jpom.model.BaseJsonModel;
-
-import java.io.IOException;
 
 /**
  * 进程信息实体
@@ -93,17 +89,17 @@ public class ProcessModel extends BaseJsonModel {
 
     public void setPid(int pid) {
         this.pid = pid;
-        if (pid > 0) {
-            String port = AbstractProjectCommander.getInstance().getMainPort(pid);
-            this.setPort(port);
-            //
-            try {
-                String jpomName = AbstractProjectCommander.getInstance().getJpomNameByPid(pid);
-                this.setJpomName(jpomName);
-            } catch (IOException e) {
-                DefaultSystemLog.ERROR().error("解析进程失败", e);
-            }
-        }
+//        if (pid > 0) {
+//            String port = AbstractProjectCommander.getInstance().getMainPort(pid);
+//            this.setPort(port);
+//            //
+//            try {
+//                String jpomName = AbstractProjectCommander.getInstance().getJpomNameByPid(pid);
+//                this.setJpomName(jpomName);
+//            } catch (IOException e) {
+//                DefaultSystemLog.ERROR().error("解析进程失败", e);
+//            }
+//        }
 
     }
 

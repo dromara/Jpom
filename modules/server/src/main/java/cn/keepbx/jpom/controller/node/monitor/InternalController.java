@@ -6,9 +6,7 @@ import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.keepbx.jpom.common.BaseController;
 import cn.keepbx.jpom.common.commander.AbstractProjectCommander;
-import cn.keepbx.jpom.common.commander.AbstractSystemCommander;
 import cn.keepbx.jpom.model.system.NetstatModel;
-import cn.keepbx.jpom.model.system.ProcessModel;
 import cn.keepbx.jpom.system.ServerConfigBean;
 import cn.keepbx.jpom.util.CommandUtil;
 import cn.keepbx.jpom.util.JvmUtil;
@@ -44,8 +42,8 @@ public class InternalController extends BaseController {
         setAttribute("tag", tag);
         int pid = AbstractProjectCommander.getInstance().getPid(tag);
         if (pid > 0) {
-            ProcessModel item = AbstractSystemCommander.getInstance().getPidInfo(pid);
-            setAttribute("item", item);
+//            ProcessModel item = AbstractSystemCommander.getInstance().getPidInfo(pid);
+//            setAttribute("item", item);
             JSONObject beanMem = getBeanMem(tag);
             setAttribute("beanMem", beanMem);
             //获取端口信息

@@ -3,16 +3,20 @@ package cn.keepbx.jpom.common.commander;
 import cn.keepbx.jpom.BaseJpomApplication;
 import cn.keepbx.jpom.common.commander.impl.LinuxSystemCommander;
 import cn.keepbx.jpom.common.commander.impl.WindowsSystemCommander;
+import cn.keepbx.jpom.model.system.ProcessModel;
 import cn.keepbx.jpom.system.JpomRuntimeException;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import java.io.File;
+import java.util.List;
 
 /**
- * Created by jiangzeyin on 2019/4/16.
+ * @author jiangzeyin
+ * @date 2019/4/16
  */
 public abstract class AbstractSystemCommander {
+
     private static AbstractSystemCommander abstractSystemCommander = null;
 
     public static AbstractSystemCommander getInstance() {
@@ -37,6 +41,21 @@ public abstract class AbstractSystemCommander {
      * @return data
      */
     public abstract JSONObject getAllMonitor();
+
+    /**
+     * 获取当前服务器的所有进程列表
+     *
+     * @return array
+     */
+    public abstract List<ProcessModel> getProcessList();
+
+    /**
+     * 获取指定进程的 内存信息
+     *
+     * @param pid 进程id
+     * @return json
+     */
+    public abstract ProcessModel getPidInfo(int pid);
 
     protected static JSONObject putObject(String name, Object value, String type) {
         JSONObject jsonObject = new JSONObject();

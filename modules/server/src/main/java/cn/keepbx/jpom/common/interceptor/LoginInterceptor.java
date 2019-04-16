@@ -5,15 +5,13 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.servlet.ServletUtil;
 import cn.jiangzeyin.common.JsonMessage;
-import cn.jiangzeyin.common.interceptor.BaseInterceptor;
 import cn.jiangzeyin.common.interceptor.InterceptorPattens;
 import cn.jiangzeyin.common.spring.SpringUtil;
 import cn.keepbx.jpom.common.BaseController;
+import cn.keepbx.jpom.common.BaseNodeController;
 import cn.keepbx.jpom.model.data.UserModel;
 import cn.keepbx.jpom.service.user.UserService;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -29,7 +27,7 @@ import java.io.IOException;
  * Created by jiangzeyin on 2017/2/4.
  */
 @InterceptorPattens()
-public class LoginInterceptor extends BaseInterceptor {
+public class LoginInterceptor extends BaseJpomInterceptor {
     /**
      * session
      */
@@ -62,8 +60,17 @@ public class LoginInterceptor extends BaseInterceptor {
                     return false;
                 }
             }
+
+            //
+            if (isPage(handlerMethod)) {
+                if (BaseNodeController.class.isAssignableFrom(handlerMethod.getBeanType())) {
+                    // 添加node
+                }
+            }
         }
         reload();
+        //
+
         return true;
     }
 
@@ -76,16 +83,13 @@ public class LoginInterceptor extends BaseInterceptor {
      * @throws IOException 异常
      */
     private void responseLogin(HttpServletRequest request, HttpServletResponse response, HandlerMethod handlerMethod) throws IOException {
-        ResponseBody responseBody = handlerMethod.getMethodAnnotation(ResponseBody.class);
-        if (responseBody == null) {
-            RestController restController = handlerMethod.getBeanType().getAnnotation(RestController.class);
-            if (restController == null) {
-                response.sendRedirect(getHeaderProxyPath(request) + "/login.html");
-                return;
-            }
+        if (isPage(handlerMethod)) {
+            response.sendRedirect(getHeaderProxyPath(request) + "/login.html");
+            return;
         }
         ServletUtil.write(response, JsonMessage.getString(800, "登录信息已失效,重新登录"), MediaType.APPLICATION_JSON_UTF8_VALUE);
     }
+
 
     @Override
     public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler, ModelAndView modelAndView) throws Exception {

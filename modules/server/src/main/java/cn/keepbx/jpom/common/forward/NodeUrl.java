@@ -1,4 +1,4 @@
-package cn.keepbx.jpom.common;
+package cn.keepbx.jpom.common.forward;
 
 /**
  * @author jiangzeyin
@@ -8,7 +8,12 @@ public enum NodeUrl {
     /**
      *
      */
-    GetTop("/getTop");
+    GetTop("/getTop"),
+
+    ProcessList("/processList"),
+
+    TopSocket("/console/system"),
+    ;
 
     private String url;
 

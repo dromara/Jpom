@@ -4,7 +4,6 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.keepbx.jpom.BaseJpomApplication;
-import cn.keepbx.jpom.common.commander.AbstractProjectCommander;
 import cn.keepbx.jpom.model.BaseModel;
 
 import java.io.File;
@@ -65,7 +64,7 @@ public class ProjectInfoModel extends BaseModel {
 
     public String getModifyUser() {
         if (StrUtil.isEmpty(modifyUser)) {
-            return UserModel.SYSTEM_OCCUPY_NAME;
+//            return UserModel.SYSTEM_OCCUPY_NAME;
         }
         return modifyUser;
     }
@@ -74,14 +73,14 @@ public class ProjectInfoModel extends BaseModel {
         this.modifyUser = modifyUser;
     }
 
-    public void logModifyUser(UserModel userModel) {
-        // 隐藏系统管理员登录名
-        if (userModel.isSystemUser()) {
-            this.setModifyUser(UserModel.SYSTEM_OCCUPY_NAME);
-        } else {
-            this.setModifyUser(userModel.getId());
-        }
-    }
+//    public void logModifyUser(UserModel userModel) {
+//        // 隐藏系统管理员登录名
+//        if (userModel.isSystemUser()) {
+//            this.setModifyUser(UserModel.SYSTEM_OCCUPY_NAME);
+//        } else {
+//            this.setModifyUser(userModel.getId());
+//        }
+//    }
 
     /**
      * 项目是否正在运行
@@ -94,7 +93,7 @@ public class ProjectInfoModel extends BaseModel {
             return false;
         }
         try {
-            status = AbstractProjectCommander.getInstance().isRun(getId());
+//            status = AbstractProjectCommander.getInstance().isRun(getId());
         } catch (Exception e) {
             DefaultSystemLog.ERROR().error("检查项目状态错误", e);
             status = false;

@@ -64,16 +64,34 @@
     ## 获取自适应的socket
     function getSocketHost() {
         var pro = location.protocol === 'https:' ? 'wss://' : 'ws://';
-        return pro + window.location.host + "$!jpomProxyPath";
+        return pro + window.location.host + "$!jpomProxyPath/$!nowNodeItem.id";
     }
 
-    function getQueryString(name) {
+    function getTopQueryString(name) {
         var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)");
         var r = top.location.search.substr(1).match(reg);
         if (r != null) return unescape(r[2]);
         return null;
     }
 
+    function urlUpdateParams(url, name, value) {
+        var r = url;
+        if (r != null && r != 'undefined' && r != "") {
+            value = encodeURIComponent(value);
+            var reg = new RegExp("(^|)" + name + "=([^&]*)(|$)");
+            var tmp = name + "=" + value;
+            if (url.match(reg) != null) {
+                r = url.replace(eval(reg), tmp);
+            } else {
+                if (url.match("[\?]")) {
+                    r = url + "&" + tmp;
+                } else {
+                    r = url + "?" + tmp;
+                }
+            }
+        }
+        return r;
+    }
 
     ## 带loading 效果的网络请求
     function loadingAjax(data, closeLoading) {
@@ -83,7 +101,7 @@
         delete data.error;
 
         var newData = {
-            nodeId: getQueryString("id")
+            nodeId: getTopQueryString("id")
         };
         $.extend(newData, data.data);
         delete data.data;
