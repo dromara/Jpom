@@ -73,10 +73,10 @@ public abstract class BaseController extends AbstractController {
         if (path == null) {
             return null;
         }
-        path = path.replace("../", StrUtil.EMPTY);
-        path = path.replace("..\\", StrUtil.EMPTY);
-        path = path.replace("+", StrUtil.EMPTY);
-        return FileUtil.normalize(path);
+        String newPath = path.replace("../", StrUtil.EMPTY);
+        newPath = newPath.replace("..\\", StrUtil.EMPTY);
+        newPath = newPath.replace("+", StrUtil.EMPTY);
+        return FileUtil.normalize(newPath);
     }
 
     protected boolean checkPathSafe(String path) {

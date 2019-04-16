@@ -120,11 +120,10 @@ public class LinuxSystemCommander extends AbstractSystemCommander {
 
     private static String formSize(String val) {
         if (val.endsWith("g")) {
-            val = String.format("%.2f MB", Convert.toDouble(val.replace("g", "")) * 1024);
+            return String.format("%.2f MB", Convert.toDouble(val.replace("g", "")) * 1024);
         } else {
-            val = Convert.toLong(val) / 1024 + " MB";
+            return Convert.toLong(val) / 1024 + " MB";
         }
-        return val;
     }
 
 
