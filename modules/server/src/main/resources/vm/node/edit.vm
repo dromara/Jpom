@@ -24,19 +24,32 @@
             </div>
         </div>
         <div class="layui-form-item">
+
             <label class="layui-form-label">节点名称</label>
             <div class="layui-input-block">
-                <input type="text" id="name" name="name" value="$!item.name" placeholder="请填写节点名称" class="layui-input"
+                <input type="text" id="name" name="name" value="$!item.name" placeholder="请填写节点名称"
+                       class="layui-input"
                        required
                        lay-verify="required">
             </div>
         </div>
         <div class="layui-form-item">
-            <label class="layui-form-label">节点地址</label>
-            <div class="layui-input-block">
-                <input type="text" id="url" name="url" value="$!item.url" placeholder="请填写节点名称" class="layui-input"
-                       required
-                       lay-verify="required">
+            <div class="layui-inline">
+                <label class="layui-form-label">节点协议</label>
+                <div class="layui-input-block">
+                    <select name="protocol" lay-verify="required" lay-filter="aihao">
+                        <option value="http" #if($item.protocol=="http")selected #end>http</option>
+                        <option value="https" #if($item.protocol=="https")selected #end>https</option>
+                    </select>
+                </div>
+            </div>
+            <div class="layui-inline">
+                <label class="layui-form-label">节点地址</label>
+                <div class="layui-input-block">
+                    <input type="text" id="url" name="url" value="$!item.url" placeholder="请填写节点名称" class="layui-input"
+                           required
+                           lay-verify="required">
+                </div>
             </div>
         </div>
         <div class="layui-form-item">
@@ -58,10 +71,10 @@
         </div>
 
         <div class="layui-form-item" style="padding-left: 20%">
-            <button class="layui-btn layui-btn-normal" lay-submit lay-filter="submitProject" id="project_submit">提交
+            <button class="layui-btn layui-btn-normal" lay-submit lay-filter="submitNode" id="project_submit">提交
             </button>
             #if($item)
-                <a class="layui-btn layui-btn-warm" data-id="$item.id" id="delete_project">删除</a>
+                <a class="layui-btn layui-btn-warm" data-id="$item.id" id="delete_node">删除</a>
             #end
         </div>
     </form>
@@ -71,32 +84,49 @@
 
 
     function loadSuccess() {
-        form.on('submit(submitProject)', function (data) {
+        form.on('submit(submitNode)', function (data) {
             loadingAjax({
                 url: data.form.action,
                 data: data.field,
                 success: function (data) {
                     layer.msg(data.msg);
                     if (200 == data.code) {
-                        setTimeout(function () {
-                            var index = parent.layer.getFrameIndex(window.name);
-                            parent.layer.close(index);
-                        }, 2000);
+                        autoClose();
                     }
                 }
             });
             return false;
         });
+
+        $("#delete_node").click(function () {
+            var id = $(this).attr("data-id");
+            var type = $(this).attr("type");
+            var msg = '确定删除节点 ' + id + '？';
+            layer.confirm(msg, {
+                title: '系统提示'
+            }, function (index) {
+                loadingAjax({
+                    url: './del.json',
+                    data: {
+                        id: id
+                    },
+                    success: function (data) {
+                        layer.msg(data.msg);
+                        if (200 == data.code) {
+                            autoClose();
+                        }
+                    }
+                });
+            });
+        });
     }
 
-    function editProject(id) {
-        layer.open({
-            type: 2,
-            title: '管理项目配置信息',
-            shade: 0.8,
-            area: ['80%', '90%'],
-            content: 'editProject?id=' + id
-        });
+    function autoClose() {
+        setTimeout(function () {
+            var index = parent.layer.getFrameIndex(window.name);
+            parent.layer.close(index);
+            parent.location.reload();
+        }, 2000);
     }
 </script>
 </html>

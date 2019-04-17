@@ -1,5 +1,6 @@
 package cn.keepbx.jpom.service.node;
 
+import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.keepbx.jpom.common.BaseOperService;
 import cn.keepbx.jpom.model.data.NodeModel;
 import cn.keepbx.jpom.system.ServerConfigBean;
@@ -38,5 +39,15 @@ public class NodeService extends BaseOperService<NodeModel> {
     public boolean updateItem(NodeModel userModel) throws Exception {
         updateJson(ServerConfigBean.NODE, userModel.toJson());
         return true;
+    }
+
+    public boolean deleteItem(String id) {
+        try {
+            deleteJson(ServerConfigBean.NODE, id);
+            return true;
+        } catch (Exception e) {
+            DefaultSystemLog.ERROR().error(e.getMessage(), e);
+        }
+        return false;
     }
 }

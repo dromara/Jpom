@@ -21,6 +21,8 @@ import java.io.IOException;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
+ * 插件端socket
+ *
  * @author jiangzeyin
  * @date 2019/4/16
  */

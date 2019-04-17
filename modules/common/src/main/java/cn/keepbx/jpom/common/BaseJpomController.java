@@ -5,7 +5,8 @@ import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.controller.base.AbstractController;
 
 /**
- * Created by jiangzeyin on 2019/4/16.
+ * @author jiangzeyin
+ * @date 2019/4/16
  */
 public abstract class BaseJpomController extends AbstractController {
     /**

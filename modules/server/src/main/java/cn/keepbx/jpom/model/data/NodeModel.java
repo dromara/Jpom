@@ -13,6 +13,15 @@ public class NodeModel extends BaseModel {
     private String url;
     private String loginName;
     private String loginPwd;
+    private String protocol;
+
+    public String getProtocol() {
+        return protocol;
+    }
+
+    public void setProtocol(String protocol) {
+        this.protocol = protocol.toLowerCase();
+    }
 
     public String getName() {
         return name;

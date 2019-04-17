@@ -60,7 +60,8 @@ public class ServerWebSocketHandle {
             }
             NodeModel nodeModel = nodeService.getItem(nodeId);
             String url = NodeForward.getSocketUrl(nodeModel, NodeUrl.TopSocket);
-            url = StrUtil.format(url, projectId);
+            url = StrUtil.format(url, projectId, UserModel.getOptUserName(userModel));
+            System.out.println(url);
             ProxySession proxySession = new ProxySession(url, session);
             PROXY_SESSION_CONCURRENT_HASH_MAP.put(session.getId(), proxySession);
             System.out.println(url);
@@ -95,7 +96,9 @@ public class ServerWebSocketHandle {
 
     private void destroy(Session session) {
         ProxySession proxySession = getSession(session);
-        proxySession.close();
+        if (proxySession != null) {
+            proxySession.close();
+        }
         onlineCount.getAndDecrement();
     }
 

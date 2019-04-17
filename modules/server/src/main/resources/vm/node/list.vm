@@ -12,30 +12,33 @@
 </head>
 <body>
 <div class="layui-row">
-    <button onclick="editProject('');" class="layui-btn layui-btn-sm">新增项目</button>
+    <button onclick="editProject('');" class="layui-btn layui-btn-sm">创建节点</button>
 </div>
-
-<div class="layui-collapse" style="margin: 10px;">
-    #foreach($item in $array)
-        <div class="layui-colla-item">
-            <div class="layui-colla-title">
-                <div>
-                    $item.name
+    #if($array && $array.size()>0)
+    <div class="layui-collapse" style="margin: 10px;">
+        #foreach($item in $array)
+            <div class="layui-colla-item">
+                <div class="layui-colla-title">
+                    <div>
+                        $item.name
+                    </div>
+                    <div class="layui-layout-right" style="padding-right: 10%;">
+                        <button op="goIn" url="$!jpomProxyPath/node/index.html?nodeId=$item.id"
+                                class="layui-btn layui-btn-sm layui-btn-primary ">
+                            进入
+                        </button>
+                        <button op="edit" id="$item.id" class="layui-btn layui-btn-sm layui-btn-primary ">
+                            <i class="layui-icon">&#xe642;</i>
+                        </button>
+                    </div>
                 </div>
-                <div class="layui-layout-right" style="padding-right: 10%;">
-                    <button op="goIn" url="$!jpomProxyPath/node/index.html?nodeId=$item.id"
-                            class="layui-btn layui-btn-sm layui-btn-primary ">
-                        进入
-                    </button>
-                    <button op="edit" id="$item.id" class="layui-btn layui-btn-sm layui-btn-primary ">
-                        <i class="layui-icon">&#xe642;</i>
-                    </button>
-                </div>
+                <div class="layui-colla-content layui-show">内容区域</div>
             </div>
-            <div class="layui-colla-content layui-show">内容区域</div>
-        </div>
+        #end
+    </div>
+    #else
+    <h1 align="center">还没有任何节点，请先创建节点</h1>
     #end
-</div>
 </body>
 <script type="text/javascript">
     const apiWhere = {};
@@ -64,7 +67,7 @@
             type: 2,
             title: '管理节点配置信息',
             shade: 0.8,
-            area: ['60%', '60%'],
+            area: ['60%', '70%'],
             content: 'edit.html?id=' + id
         });
     }

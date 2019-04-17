@@ -1,6 +1,8 @@
 package cn.keepbx.jpom.common.forward;
 
 /**
+ * agent 端的请求地址枚举
+ *
  * @author jiangzeyin
  * @date 2019/4/16
  */
@@ -15,8 +17,10 @@ public enum NodeUrl {
     GetTop("/getTop"),
 
     ProcessList("/processList"),
-
-    TopSocket("/console/{}"),
+    /**
+     * socket 连接  ，第一节项目id 第二节用户信息
+     */
+    TopSocket("/console/{}/{}"),
 
     WhitelistDirectory_Submit("/system/whitelistDirectory_submit"),
 
