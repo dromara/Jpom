@@ -6,6 +6,10 @@ package cn.keepbx.jpom.common.forward;
  */
 public enum NodeUrl {
     /**
+     * Jpom agent 信息
+     */
+    Info("/info"),
+    /**
      *
      */
     GetTop("/getTop"),
@@ -69,6 +73,26 @@ public enum NodeUrl {
     Manage_build_download("/manage/build_download"),
 
     Manage_build_install("/manage/build_install"),
+
+    Manage_internal_data("/manage/internal_data"),
+    Manage_internal_stack("/manage/internal_stack"),
+    Manage_internal_ram("/manage/internal_ram"),
+
+    System_Nginx_list_data("/system/nginx/list_data.json"),
+
+    System_Nginx_item_data("/system/nginx/item_data"),
+
+    System_Nginx_updateNgx("/system/nginx/updateNgx"),
+
+    System_Nginx_delete("/system/nginx/delete"),
+
+    System_Certificate_saveCertificate("/system/certificate/saveCertificate"),
+
+    System_Certificate_getCertList("/system/certificate/getCertList"),
+
+    System_Certificate_delete("/system/certificate/delete"),
+
+    System_Certificate_export("/system/certificate/export"),
 
     ;
 

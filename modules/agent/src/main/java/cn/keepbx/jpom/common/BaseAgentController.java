@@ -26,6 +26,11 @@ public abstract class BaseAgentController extends BaseJpomController {
         return StrUtil.emptyToDefault(name, StrUtil.DASHED);
     }
 
+    protected boolean isSystemUser() {
+        String val = ServletUtil.getHeaderIgnoreCase(getRequest(), "Jpom-Server-SystemUserRole");
+        return Boolean.valueOf(val);
+    }
+
 
     /**
      * 获取拦截器中缓存的项目信息

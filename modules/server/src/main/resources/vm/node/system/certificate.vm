@@ -128,14 +128,13 @@
         return y + '-' + m + '-' + d + ' ' + h + ':' + minute + ':' + second;
     }
 
-    var laytpl, upload;
+    var laytpl;
 
     function loadSuccess() {
         var uploadConfig, hashSelectConfig, updateFormData;
-        layui.use(['laytpl', 'upload'], function () {
+        layui.use(['laytpl'], function () {
             laytpl = layui.laytpl;
-            upload = layui.upload;
-            uploadConfig = upload.render({
+            uploadRender({
                 elem: '#selectZip',
                 url: './saveCertificate',
                 multiple: false,
@@ -169,6 +168,8 @@
                 error: function () {
                     layer.msg("上传失败");
                 }
+            }, function (data) {
+                uploadConfig = data;
             });
             tableRender({
                 id: 'tab_certificate',

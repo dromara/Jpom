@@ -5,6 +5,8 @@ import cn.keepbx.jpom.model.BaseJsonModel;
 import java.util.List;
 
 /**
+ * 白名单
+ *
  * @author jiangzeyin
  * @date 2019/4/16
  */

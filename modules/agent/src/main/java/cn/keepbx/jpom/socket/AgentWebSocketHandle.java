@@ -1,6 +1,7 @@
 package cn.keepbx.jpom.socket;
 
 import cn.hutool.core.exceptions.ExceptionUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.spring.SpringUtil;
@@ -17,23 +18,28 @@ import javax.websocket.*;
 import javax.websocket.server.PathParam;
 import javax.websocket.server.ServerEndpoint;
 import java.io.IOException;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author jiangzeyin
  * @date 2019/4/16
  */
-@ServerEndpoint(value = "/console/{projectId}")
+@ServerEndpoint(value = "/console/{projectId}/{optUser}")
 @Component
 public class AgentWebSocketHandle {
 
+    private static final ConcurrentHashMap<String, String> USER = new ConcurrentHashMap<>();
+    private static ProjectInfoService projectInfoService;
 
     @OnOpen
-    public void onOpen(@PathParam("projectId") String projectId, Session session) {
+    public void onOpen(@PathParam("projectId") String projectId, @PathParam("optUser") String optUser, Session session) {
         System.out.println(projectId);
         try {
             // 判断项目
             if (!WebSocketConfig.SYSTEM_ID.equals(projectId)) {
-                ProjectInfoService projectInfoService = SpringUtil.getBean(ProjectInfoService.class);
+                if (projectInfoService == null) {
+                    projectInfoService = SpringUtil.getBean(ProjectInfoService.class);
+                }
                 ProjectInfoModel projectInfoModel = projectInfoService.getItem(projectId);
                 if (projectInfoModel == null) {
                     SocketSessionUtil.send(session, "获取项目信息错误");
@@ -41,6 +47,7 @@ public class AgentWebSocketHandle {
                     return;
                 }
             }
+            USER.put(session.getId(), optUser);
         } catch (Exception e) {
             DefaultSystemLog.ERROR().error("socket 错误", e);
             try {
@@ -50,7 +57,22 @@ public class AgentWebSocketHandle {
                 DefaultSystemLog.ERROR().error(e1.getMessage(), e1);
             }
         }
+    }
 
+    private String getOptUserName(Session session) {
+        String name = USER.get(session.getId());
+        return StrUtil.emptyToDefault(name, StrUtil.DASHED);
+    }
+
+    private boolean silentMsg(CommandOp commandOp, Session session) {
+        if (commandOp == CommandOp.heart) {
+            return true;
+        }
+        if (commandOp == CommandOp.top) {
+            TopManager.addMonitor(session);
+            return true;
+        }
+        return false;
     }
 
     @OnMessage
@@ -58,21 +80,21 @@ public class AgentWebSocketHandle {
         JSONObject json = JSONObject.parseObject(message);
         String op = json.getString("op");
         CommandOp commandOp = CommandOp.valueOf(op);
-        if (commandOp == CommandOp.heart) {
-            return;
-        }
-        if (commandOp == CommandOp.top) {
-            TopManager.addMonitor(session);
+        if (silentMsg(commandOp, session)) {
             return;
         }
         String projectId = json.getString("projectId");
-        ProjectInfoService projectInfoService = SpringUtil.getBean(ProjectInfoService.class);
+        projectInfoService = SpringUtil.getBean(ProjectInfoService.class);
         ProjectInfoModel projectInfoModel = projectInfoService.getItem(projectId);
         System.out.println(op + "  " + projectId);
         if (projectInfoModel == null) {
             SocketSessionUtil.send(session, "没有对应项目");
             return;
         }
+        runMsg(commandOp, session, projectInfoModel);
+    }
+
+    private void runMsg(CommandOp commandOp, Session session, ProjectInfoModel projectInfoModel) throws Exception {
         ConsoleService consoleService = SpringUtil.getBean(ConsoleService.class);
         JSONObject resultData = null;
         String strResult;
@@ -121,7 +143,7 @@ public class AgentWebSocketHandle {
                     break;
                 }
                 default:
-                    resultData = JsonMessage.toJson(404, "不支持的方式：" + op);
+                    resultData = JsonMessage.toJson(404, "不支持的方式：" + commandOp.name());
                     break;
             }
         } catch (Exception e) {
@@ -132,14 +154,15 @@ public class AgentWebSocketHandle {
         } finally {
             if (logUser) {
                 // 记录操作人
-                projectInfoModel = projectInfoService.getItem(projectId);
-//                projectInfoModel.logModifyUser(userModel);
+                projectInfoModel = projectInfoService.getItem(projectInfoModel.getId());
+                String name = getOptUserName(session);
+                projectInfoModel.setModifyUser(name);
                 projectInfoService.updateItem(projectInfoModel);
             }
         }
         //
         if (resultData != null) {
-            resultData.put("op", op);
+            resultData.put("op", commandOp.name());
             DefaultSystemLog.LOG().info(resultData.toString());
             SocketSessionUtil.send(session, resultData.toString());
         }
@@ -160,6 +183,7 @@ public class AgentWebSocketHandle {
         } catch (Exception e) {
             DefaultSystemLog.ERROR().error("关闭异常", e);
         }
+        USER.remove(session.getId());
     }
 
     @OnError

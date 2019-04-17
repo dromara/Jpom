@@ -8,6 +8,7 @@ import cn.hutool.http.HttpUtil;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.keepbx.jpom.common.BaseController;
 import cn.keepbx.jpom.model.data.NodeModel;
+import cn.keepbx.jpom.model.data.UserModel;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.web.multipart.MultipartFile;
@@ -17,8 +18,11 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Map;
+import java.util.Objects;
 
 /**
+ * 节点请求转发
+ *
  * @author jiangzeyin
  * @date 2019/4/16
  */
@@ -39,8 +43,25 @@ public class NodeForward {
         return JSON.parseObject(body, JsonMessage.class);
     }
 
+    public static <T> T requestData(NodeModel nodeModel, NodeUrl nodeUrl, HttpServletRequest request, Class<T> tClass) {
+        JsonMessage jsonMessage = request(nodeModel, request, nodeUrl);
+        return toObj(jsonMessage, tClass);
+    }
+
     public static <T> T requestData(NodeModel nodeModel, NodeUrl nodeUrl, Class<T> tClass) {
         return requestData(nodeModel, nodeUrl, tClass, null, null);
+    }
+
+    private static <T> T toObj(JsonMessage jsonMessage, Class<T> tClass) {
+        Object data = jsonMessage.getData();
+        if (jsonMessage.getCode() == 200 && null != data) {
+            if (tClass == String.class) {
+                return (T) data.toString();
+            }
+            return JSONObject.parseObject(data.toString(), tClass);
+        }
+        System.out.println(jsonMessage.toString());
+        return null;
     }
 
     public static <T> T requestData(NodeModel nodeModel, NodeUrl nodeUrl, Class<T> tClass, String name, Object value, Object... parameters) {
@@ -57,15 +78,7 @@ public class NodeForward {
                 .execute()
                 .body();
         JsonMessage jsonMessage = JSON.parseObject(body, JsonMessage.class);
-        Object data = jsonMessage.getData();
-        if (jsonMessage.getCode() == 200 && null != data) {
-            if (tClass == String.class) {
-                return (T) data.toString();
-            }
-            return JSONObject.parseObject(data.toString(), tClass);
-        }
-        System.out.println(jsonMessage.toString());
-        return null;
+        return toObj(jsonMessage, tClass);
     }
 
     public static JsonMessage requestMultipart(NodeModel nodeModel, MultipartHttpServletRequest request, NodeUrl nodeUrl) {
@@ -111,7 +124,10 @@ public class NodeForward {
 
 
     private static void addUser(HttpRequest httpRequest) {
-        httpRequest.header("Jpom-Server-UserName", BaseController.getOptUserName());
+        UserModel userModel = BaseController.getUserModel();
+        Objects.requireNonNull(userModel);
+        httpRequest.header("Jpom-Server-UserName", UserModel.getOptUserName(userModel));
+        httpRequest.header("Jpom-Server-SystemUserRole", String.valueOf(userModel.isSystemUser()));
     }
 
     public static String getSocketUrl(NodeModel nodeModel, NodeUrl nodeUrl) {

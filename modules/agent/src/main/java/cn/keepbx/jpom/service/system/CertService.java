@@ -5,7 +5,7 @@ import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.keepbx.jpom.common.BaseOperService;
 import cn.keepbx.jpom.model.data.CertModel;
-import cn.keepbx.jpom.system.ServerConfigBean;
+import cn.keepbx.jpom.system.AgentConfigBean;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;
@@ -27,7 +27,7 @@ public class CertService extends BaseOperService<CertModel> {
      */
     @Override
     public void addItem(CertModel certModel) {
-        saveJson(ServerConfigBean.CERT, certModel.toJson());
+        saveJson(AgentConfigBean.CERT, certModel.toJson());
     }
 
     /**
@@ -37,7 +37,7 @@ public class CertService extends BaseOperService<CertModel> {
      */
     @Override
     public List<CertModel> list() {
-        JSONObject jsonObject = getJSONObject(ServerConfigBean.CERT);
+        JSONObject jsonObject = getJSONObject(AgentConfigBean.CERT);
         if (jsonObject == null) {
             return null;
         }
@@ -47,7 +47,7 @@ public class CertService extends BaseOperService<CertModel> {
 
     @Override
     public CertModel getItem(String id) {
-        return getJsonObjectById(ServerConfigBean.CERT, id, CertModel.class);
+        return getJsonObjectById(AgentConfigBean.CERT, id, CertModel.class);
     }
 
 
@@ -63,7 +63,7 @@ public class CertService extends BaseOperService<CertModel> {
                 return true;
             }
             String keyPath = certModel.getCert();
-            deleteJson(ServerConfigBean.CERT, id);
+            deleteJson(AgentConfigBean.CERT, id);
             if (StrUtil.isNotEmpty(keyPath)) {
                 // 删除证书文件
                 File parentFile = FileUtil.file(keyPath).getParentFile();
@@ -84,7 +84,7 @@ public class CertService extends BaseOperService<CertModel> {
     @Override
     public boolean updateItem(CertModel certModel) {
         try {
-            updateJson(ServerConfigBean.CERT, certModel.toJson());
+            updateJson(AgentConfigBean.CERT, certModel.toJson());
         } catch (Exception e) {
             DefaultSystemLog.ERROR().error(e.getMessage(), e);
             return false;

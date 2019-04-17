@@ -44,7 +44,7 @@
                     <td>$item.modifytime</td>
                     <td>$item.filesize</td>
                     <td>
-                        <button name="download" href="logBack_download?key=$item.filename&id=$data.id"
+                        <button op="a" href="logBack_download?key=$item.filename&id=$data.id"
                                 class="layui-btn layui-btn-warm layui-btn-sm">下载
                         </button>
                         <button name="delete" data-name="$item.filename" data-id="$data.id"
@@ -90,11 +90,6 @@
             }, function () {
 
             });
-        });
-
-        $("button[name='download']").click(function () {
-            var href = $(this).attr("href");
-            location.href = appendNodeId(href);
         });
     }
 </script>

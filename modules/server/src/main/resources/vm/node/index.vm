@@ -48,15 +48,22 @@
 <body class="layui-layout-body">
 <div class="layui-layout layui-layout-admin">
     <div class="layui-header">
-
-        <div class="layui-logo">
-            <a href="../index.html" class="layui-btn layui-btn-sm layui-btn-primary">
-                <i class="layui-icon">&#xe65c;</i>
-            </a>
-            <span title="版本时间:$!jpomManifest.timeStamp，进程ID:$!jpomManifest.pid">
+        <form class="layui-form" action="">
+            <div class="layui-logo" title="版本时间:$!jpomManifest.timeStamp，进程ID:$!jpomManifest.pid">
                 $node.name #if($jpomManifest)<font style="font-size: 10px;">($jpomManifest.version)</font>#end
-            </span>
-        </div>
+            ##                <div class="layui-form-item" style="margin-top: 10px;">
+            ##                    <label class="layui-form-label">节点列表</label>
+            ##                    <div class="layui-input-block">
+            ##                        <select name="city" lay-verify="required">
+            ##                            #foreach($itemNode in $array)
+            ##                                <option value="$itemNode.id">$itemNode.name</option>
+            ##                            #end
+            ##                        </select>
+            ##                    </div>
+            ##                </div>
+            ##                </span>
+            </div>
+        </form>
         <ul class="layui-nav layui-layout-left">
 
         </ul>

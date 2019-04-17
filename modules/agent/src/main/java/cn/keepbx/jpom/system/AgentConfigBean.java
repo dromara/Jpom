@@ -36,6 +36,12 @@ public class AgentConfigBean {
      */
     public static final String ALI_OSS = "aliOss.json";
 
+    /**
+     * 证书文件
+     */
+    public static final String CERT = "cert.json";
+
+
     private static AgentConfigBean agentConfigBean;
 
     /**

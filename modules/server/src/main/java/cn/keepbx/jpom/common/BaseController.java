@@ -49,14 +49,7 @@ public abstract class BaseController extends BaseJpomController {
     }
 
     public static String getOptUserName() {
-        UserModel userModel = getUserModel();
-        String userId;
-        if (userModel.isSystemUser()) {
-            userId = UserModel.SYSTEM_OCCUPY_NAME;
-        } else {
-            userId = userModel.getId();
-        }
-        return userId;
+        return UserModel.getOptUserName(getUserModel());
     }
 
 }

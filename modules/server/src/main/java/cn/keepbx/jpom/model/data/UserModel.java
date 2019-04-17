@@ -295,4 +295,14 @@ public class UserModel extends BaseModel {
     public void setModifyTime(long modifyTime) {
         this.modifyTime = modifyTime;
     }
+
+    public static String getOptUserName(UserModel userModel) {
+        String userId;
+        if (userModel.isSystemUser()) {
+            userId = UserModel.SYSTEM_OCCUPY_NAME;
+        } else {
+            userId = userModel.getId();
+        }
+        return userId;
+    }
 }

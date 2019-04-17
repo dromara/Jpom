@@ -26,6 +26,8 @@ import java.util.Date;
  * @author Arno
  */
 public class CertModel extends BaseModel {
+
+    private static final String KEY = "Jpom 管理系统";
     private String name;
     /**
      * 证书文件
@@ -146,10 +148,10 @@ public class CertModel extends BaseModel {
         PrivateKey privateKey = BCUtil.readPrivateKey(ResourceUtil.getStream(key));
         PublicKey publicKey = BCUtil.readPublicKey(ResourceUtil.getStream(file));
         RSA rsa = new RSA(privateKey, publicKey);
-        String str = UserModel.SYSTEM_OCCUPY_NAME;
-        String encryptStr = rsa.encryptBase64(str, KeyType.PublicKey);
+//        String str = KEY;
+        String encryptStr = rsa.encryptBase64(KEY, KeyType.PublicKey);
         String decryptStr = rsa.decryptStr(encryptStr, KeyType.PrivateKey);
-        if (!str.equals(decryptStr)) {
+        if (!KEY.equals(decryptStr)) {
             throw new JpomRuntimeException("证书和私钥证书不匹配");
         }
         try {

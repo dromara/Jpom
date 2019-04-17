@@ -32,7 +32,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Component
 public class ServerWebSocketHandle {
 
-
     private NodeService nodeService;
     private static volatile AtomicInteger onlineCount = new AtomicInteger();
     private static final ConcurrentHashMap<String, UserModel> USER = new ConcurrentHashMap<>();
@@ -84,17 +83,14 @@ public class ServerWebSocketHandle {
     }
 
     @OnMessage
-    public void onMessage(String message, Session session) {
+    public void onMessage(String message, Session session) throws IOException {
+        UserModel userModel = USER.get(session.getId());
+        if (userModel == null) {
+            SocketSessionUtil.send(session, "回话信息失效，刷新网页再试");
+            return;
+        }
         ProxySession proxySession = getSession(session);
         proxySession.send(message);
-//        UserModel userModel = USER.get(session.getId());
-//        if (userModel == null) {
-//            SocketSessionUtil.send(session, "回话信息失效，刷新网页再试");
-//            return;
-//        }
-//        System.out.println(op);
-
-//
     }
 
     private void destroy(Session session) {

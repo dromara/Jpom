@@ -40,6 +40,11 @@
         layui.each(asyncFn, function () {
             this && this();
         })
+
+        $("button[op='a']").click(function () {
+            var href = $(this).attr("href");
+            location.href = appendNodeId(href);
+        });
     });
 
     function appendNodeId(url) {
@@ -194,7 +199,7 @@
 
 
     ## 文件上传渲染
-    function uploadRender(data) {
+    function uploadRender(data, fn) {
         layui.use(['upload'], function () {
             var upload = layui.upload;
             var newsData = {
@@ -206,7 +211,8 @@
                 data: newsData
             };
             $.extend(defData, data);
-            return upload.render(defData);
+            var uploadResult = upload.render(defData);
+            fn && fn(uploadResult);
         });
     }
 </script>

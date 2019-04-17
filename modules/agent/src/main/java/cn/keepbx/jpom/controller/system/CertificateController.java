@@ -1,0 +1,263 @@
+package cn.keepbx.jpom.controller.system;
+
+import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.lang.Validator;
+import cn.hutool.core.util.StrUtil;
+import cn.hutool.core.util.ZipUtil;
+import cn.hutool.extra.servlet.ServletUtil;
+import cn.jiangzeyin.common.DefaultSystemLog;
+import cn.jiangzeyin.common.JsonMessage;
+import cn.jiangzeyin.controller.multipart.MultipartFileBuilder;
+import cn.keepbx.jpom.common.BaseAgentController;
+import cn.keepbx.jpom.model.data.CertModel;
+import cn.keepbx.jpom.service.WhitelistDirectoryService;
+import cn.keepbx.jpom.service.system.CertService;
+import cn.keepbx.jpom.system.AgentConfigBean;
+import com.alibaba.fastjson.JSONObject;
+import org.apache.tomcat.util.http.fileupload.servlet.ServletFileUpload;
+import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
+
+import javax.annotation.Resource;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Enumeration;
+import java.util.List;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
+
+/**
+ * 证书管理
+ *
+ * @author Arno
+ */
+@RestController
+@RequestMapping(value = "/system/certificate")
+public class CertificateController extends BaseAgentController {
+
+    @Resource
+    private CertService certService;
+    @Resource
+    private WhitelistDirectoryService whitelistDirectoryService;
+
+
+    /**
+     * 保存证书
+     *
+     * @return json
+     */
+    @RequestMapping(value = "/saveCertificate", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    public String saveCertificate() {
+        String data = getParameter("data");
+        JSONObject jsonObject = JSONObject.parseObject(data);
+        String type = jsonObject.getString("type");
+        String id = jsonObject.getString("id");
+        try {
+            CertModel certModel;
+            if ("add".equalsIgnoreCase(type)) {
+                if (certService.getItem(id) != null) {
+                    return JsonMessage.getString(405, "证书id已经存在啦");
+                }
+                certModel = new CertModel();
+                String error = getCertModel(certModel, jsonObject);
+                if (error != null) {
+                    return error;
+                }
+                if (!hasFile()) {
+                    return JsonMessage.getString(405, "请选择证书包文件");
+                }
+                error = getCertFile(certModel, true);
+                if (error != null) {
+                    return error;
+                }
+                certService.addItem(certModel);
+            } else {
+                certModel = certService.getItem(id);
+                if (certModel == null) {
+                    return JsonMessage.getString(404, "没有找到对应证书文件");
+                }
+                String name = jsonObject.getString("name");
+                if (StrUtil.isEmpty(name)) {
+                    return JsonMessage.getString(400, "请填写证书名称");
+                }
+                certModel.setName(name);
+                if (ServletFileUpload.isMultipartContent(getRequest()) && hasFile()) {
+                    String error = getCertFile(certModel, false);
+                    if (error != null) {
+                        return error;
+                    }
+                }
+                if (!certService.updateItem(certModel)) {
+                    return JsonMessage.getString(406, "修改失败");
+                }
+            }
+        } catch (Exception e) {
+            DefaultSystemLog.ERROR().error("证书文件", e);
+            return JsonMessage.getString(400, e.getMessage());
+        }
+        return JsonMessage.getString(200, "提交成功");
+    }
+
+
+    /**
+     * 获取证书信息
+     *
+     * @param certModel 实体
+     * @return 错误消息
+     */
+    private String getCertModel(CertModel certModel, JSONObject jsonObject) {
+        String id = jsonObject.getString("id");
+        String path = jsonObject.getString("path");
+        String name = jsonObject.getString("name");
+        if (StrUtil.isEmpty(id)) {
+            return JsonMessage.getString(400, "请填写证书id");
+        }
+        if (Validator.isChinese(id)) {
+            return JsonMessage.getString(400, "证书id不能使用中文");
+        }
+        if (StrUtil.isEmpty(name)) {
+            return JsonMessage.getString(400, "请填写证书名称");
+        }
+        if (!whitelistDirectoryService.checkCertificateDirectory(path)) {
+            return JsonMessage.getString(400, "请选择正确的项目路径,或者还没有配置白名单");
+        }
+        certModel.setId(id);
+        certModel.setWhitePath(path);
+        certModel.setName(name);
+        return null;
+    }
+
+    private String getCertFile(CertModel certModel, boolean add) throws IOException {
+        String certPath = null;
+        String pemPath = null, keyPath = null;
+        try {
+            String path = AgentConfigBean.getInstance().getTempPathName();
+            MultipartFileBuilder cert = createMultipart().addFieldName("file").setSavePath(path);
+            certPath = cert.save();
+            ZipFile zipFile = new ZipFile(certPath);
+            Enumeration<? extends ZipEntry> zipEntryEnumeration = zipFile.entries();
+            while (zipEntryEnumeration.hasMoreElements()) {
+                ZipEntry zipEntry = zipEntryEnumeration.nextElement();
+                if (zipEntry.isDirectory()) {
+                    continue;
+                }
+                String keyName = zipEntry.getName();
+                if (pemPath == null && StrUtil.endWith(keyName, ".pem", true)) {
+                    String filePathItem = String.format("%s/%s/%s", path, certModel.getId(), keyName);
+                    InputStream inputStream = zipFile.getInputStream(zipEntry);
+                    FileUtil.writeFromStream(inputStream, filePathItem);
+                    pemPath = filePathItem;
+                }
+                //
+                if (keyPath == null && StrUtil.endWith(keyName, ".key", true)) {
+                    String filePathItem = String.format("%s/%s/%s", path, certModel.getId(), keyName);
+                    InputStream inputStream = zipFile.getInputStream(zipEntry);
+                    FileUtil.writeFromStream(inputStream, filePathItem);
+                    keyPath = filePathItem;
+                }
+                if (pemPath != null && keyPath != null) {
+                    break;
+                }
+            }
+            if (pemPath == null || keyPath == null) {
+                return JsonMessage.getString(405, "证书包中文件不完整，需要包含key、pem");
+            }
+            JSONObject jsonObject = CertModel.decodeCert(pemPath, keyPath);
+            if (jsonObject == null) {
+                return JsonMessage.getString(405, "解析证书失败");
+            }
+            String domain = jsonObject.getString("domain");
+            if (add) {
+                List<CertModel> array = certService.list();
+                if (array != null) {
+                    for (CertModel certModel1 : array) {
+                        if (StrUtil.emptyToDefault(domain, "").equals(certModel1.getDomain())) {
+                            return JsonMessage.getString(405, "证书的域名已经存在啦");
+                        }
+                    }
+                }
+            } else {
+                if (!StrUtil.emptyToDefault(domain, "").equals(certModel.getDomain())) {
+                    return JsonMessage.getString(405, "新证书的域名不一致");
+                }
+            }
+            // 移动位置
+            String temporary = certModel.getWhitePath() + "/" + certModel.getId() + "/";
+            File pemFile = FileUtil.file(temporary + certModel.getId() + ".pem");
+            File keyFile = FileUtil.file(temporary + certModel.getId() + ".key");
+            if (add) {
+                if (pemFile.exists()) {
+                    return JsonMessage.getString(405, pemFile.getAbsolutePath() + " 已经被占用啦");
+                }
+                if (keyFile.exists()) {
+                    return JsonMessage.getString(405, keyFile.getAbsolutePath() + " 已经被占用啦");
+                }
+            }
+            FileUtil.move(FileUtil.file(pemPath), pemFile, true);
+            FileUtil.move(FileUtil.file(keyPath), keyFile, true);
+            certModel.setCert(pemFile.getAbsolutePath());
+            certModel.setKey(keyFile.getAbsolutePath());
+            //
+            certModel.setDomain(domain);
+            certModel.setExpirationTime(jsonObject.getLongValue("expirationTime"));
+            certModel.setEffectiveTime(jsonObject.getLongValue("effectiveTime"));
+        } finally {
+            if (certPath != null) {
+                FileUtil.del(certPath);
+            }
+        }
+        return null;
+    }
+
+
+    /**
+     * 证书列表
+     */
+    @RequestMapping(value = "/getCertList", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    public String getCertList() {
+        List<CertModel> array = certService.list();
+        return JsonMessage.getString(200, "", array);
+    }
+
+    /**
+     * 删除证书
+     *
+     * @param id id
+     * @return json
+     */
+    @RequestMapping(value = "/delete", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    public String delete(String id) {
+        if (StrUtil.isEmpty(id)) {
+            return JsonMessage.getString(400, "删除失败");
+        }
+        if (!isSystemUser()) {
+            return JsonMessage.getString(400, "你没有操作权限");
+        }
+        boolean b = certService.delete(id);
+        if (!b) {
+            return JsonMessage.getString(400, "删除失败");
+        }
+        return JsonMessage.getString(200, "删除成功");
+    }
+
+
+    /**
+     * 导出证书
+     */
+    @RequestMapping(value = "/export", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    public String export(String id) {
+        CertModel item = certService.getItem(id);
+        if (null == item) {
+            return JsonMessage.getString(400, "导出失败");
+        }
+        String parent = FileUtil.file(item.getCert()).getParent();
+        File zip = ZipUtil.zip(parent);
+        ServletUtil.write(getResponse(), zip);
+        FileUtil.del(zip);
+        return JsonMessage.getString(400, "导出成功");
+    }
+}

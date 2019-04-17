@@ -34,7 +34,7 @@
                     <button name="install" data-name="$item.shortKey" data-key="$item.key" data-id="$id"
                             class="layui-btn layui-btn-danger layui-btn-sm">安装
                     </button>
-                    <button name="download" href="build_download?key=$item.key&id=$id"
+                    <button op="a" href="build_download?key=$item.key&id=$id"
                             class="layui-btn layui-btn-warm layui-btn-sm">下载
                     </button>
                 </td>
@@ -80,11 +80,6 @@
             }, function () {
 
             });
-        });
-
-        $("button[name='download']").click(function () {
-            var href = $(this).attr("href");
-            location.href = appendNodeId(href);
         });
     }
 </script>

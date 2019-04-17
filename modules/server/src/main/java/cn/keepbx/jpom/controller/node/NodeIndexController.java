@@ -1,8 +1,11 @@
 package cn.keepbx.jpom.controller.node;
 
 import cn.hutool.core.util.StrUtil;
-import cn.keepbx.jpom.common.BaseController;
+import cn.keepbx.jpom.common.BaseNodeController;
+import cn.keepbx.jpom.common.forward.NodeForward;
+import cn.keepbx.jpom.common.forward.NodeUrl;
 import cn.keepbx.jpom.model.data.NodeModel;
+import cn.keepbx.jpom.model.system.JpomManifest;
 import cn.keepbx.jpom.service.node.NodeService;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
@@ -20,7 +23,7 @@ import java.util.List;
  */
 @Controller
 @RequestMapping(value = "/node")
-public class NodeIndexController extends BaseController {
+public class NodeIndexController extends BaseNodeController {
 
     @Resource
     private NodeService nodeService;
@@ -35,10 +38,14 @@ public class NodeIndexController extends BaseController {
     @RequestMapping(value = "index.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
     public String index(String nodeId) {
         NodeModel nodeModel = nodeService.getItem(nodeId);
-        System.out.println(nodeModel);
         if (nodeModel != null) {
             setAttribute("node", nodeModel);
         }
+        List<NodeModel> nodeModels = nodeService.list();
+        setAttribute("array", nodeModels);
+        //
+        JpomManifest jpomManifest = NodeForward.requestData(getNode(), NodeUrl.Info, getRequest(), JpomManifest.class);
+        setAttribute("jpomManifest", jpomManifest);
         return "node/index";
     }
 
