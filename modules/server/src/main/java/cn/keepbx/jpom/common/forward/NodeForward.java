@@ -59,7 +59,10 @@ public class NodeForward {
         JsonMessage jsonMessage = JSON.parseObject(body, JsonMessage.class);
         Object data = jsonMessage.getData();
         if (jsonMessage.getCode() == 200 && null != data) {
-            return JSONObject.parseObject(jsonMessage.getData().toString(), tClass);
+            if (tClass == String.class) {
+                return (T) data.toString();
+            }
+            return JSONObject.parseObject(data.toString(), tClass);
         }
         System.out.println(jsonMessage.toString());
         return null;

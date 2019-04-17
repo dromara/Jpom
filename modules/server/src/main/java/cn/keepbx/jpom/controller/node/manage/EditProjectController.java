@@ -89,9 +89,7 @@ public class EditProjectController extends BaseNodeController {
                 return JsonMessage.getString(400, "管理员才能创建项目!");
             }
         }
-
         return NodeForward.request(getNode(), getRequest(), NodeUrl.Manage_SaveProject).toString();
-//        return save(projectInfo);
     }
 
 

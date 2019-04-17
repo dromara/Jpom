@@ -24,7 +24,7 @@ public class ProjectRecoverControl extends BaseJpomController {
     @Resource
     private ProjectRecoverService projectRecoverService;
 
-    @RequestMapping(value = "list_data", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
+    @RequestMapping(value = "list_data", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public String projectInfo() {
         List<ProjectRecoverModel> projectInfoModels = projectRecoverService.list();
         return JsonMessage.getString(200, "", projectInfoModels);

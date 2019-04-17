@@ -70,20 +70,6 @@ public class ProjectFileControl extends BaseNodeController {
         NodeForward.requestDownload(getNode(), getRequest(), getResponse(), NodeUrl.Manage_File_Download);
     }
 
-//    /**
-//     * 清除文件
-//     *
-//     * @return json
-//     */
-//    @RequestMapping(value = "clear", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-//    @ResponseBody
-//    @ProjectPermission(checkDelete = true)
-//    public String clear() {
-//        ProjectInfoModel pim = getProjectInfoModel();
-//
-//    }
-
-
     /**
      * 删除文件
      *

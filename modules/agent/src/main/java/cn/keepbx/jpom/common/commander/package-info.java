@@ -1,5 +1,5 @@
 /**
- * Jpom 管理项目各个端实现管理的工具包
+ * Jpom 管理项目实现管理的工具包
  * <p>
  * The MIT License(MIT)
  * <p>

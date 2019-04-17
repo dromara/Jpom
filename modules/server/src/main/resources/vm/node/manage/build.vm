@@ -27,16 +27,16 @@
             #foreach($item in $array)
             <tr>
                 <td>$velocityCount</td>
-                <td>$item.shortKey</td>
+                <td>$item.key</td>
                 <td>$item.time</td>
                 <td>$item.size</td>
                 <td>
                     <button name="install" data-name="$item.shortKey" data-key="$item.key" data-id="$id"
                             class="layui-btn layui-btn-danger layui-btn-sm">安装
                     </button>
-                    <a name="download" href="build_download?key=$item.key&id=$id"
-                       class="layui-btn layui-btn-warm layui-btn-sm">下载
-                    </a>
+                    <button name="download" href="build_download?key=$item.key&id=$id"
+                            class="layui-btn layui-btn-warm layui-btn-sm">下载
+                    </button>
                 </td>
             </tr>
             #end
@@ -80,6 +80,11 @@
             }, function () {
 
             });
+        });
+
+        $("button[name='download']").click(function () {
+            var href = $(this).attr("href");
+            location.href = appendNodeId(href);
         });
     }
 </script>

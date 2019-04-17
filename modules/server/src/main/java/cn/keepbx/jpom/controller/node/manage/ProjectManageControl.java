@@ -74,24 +74,6 @@ public class ProjectManageControl extends BaseNodeController {
     @UrlPermission(Role.Manage)
     public String deleteProject() {
         return NodeForward.request(getNode(), getRequest(), NodeUrl.Manage_DeleteProject).toString();
-//        ProjectInfoModel projectInfoModel = getProjectInfoModel();
-//        UserModel userModel = getUser();
-//        try {
-//            // 运行判断
-//            if (projectInfoModel.isStatus(true)) {
-//                return JsonMessage.getString(401, "不能删除正在运行的项目");
-//            }
-//            String userId;
-//            if (userModel.isSystemUser()) {
-//                userId = UserModel.SYSTEM_OCCUPY_NAME;
-//            } else {
-//                userId = userModel.getId();
-//            }
-//            projectInfoService.deleteProject(projectInfoModel, userId);
-//            return JsonMessage.getString(200, "删除成功！");
-//        } catch (Exception e) {
-//            DefaultSystemLog.ERROR().error(e.getMessage(), e);
-//            return JsonMessage.getString(500, e.getMessage());
-//        }
+
     }
 }

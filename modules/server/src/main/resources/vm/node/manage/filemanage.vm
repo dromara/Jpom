@@ -141,9 +141,10 @@
             }, function (index) {
                 layer.close(index);
                 loadingAjax({
-                    url: './clear',
+                    url: './deleteFile',
                     data: {
-                        id: '$id'
+                        id: '$id',
+                        type: 'clear'
                     },
                     success: function (data) {
                         layer.msg(data.msg);
@@ -155,7 +156,7 @@
             });
         });
         $("#build").click(function () {
-            layer.open({
+            layerOpen({
                 type: 2,
                 title: '自动构建',
                 shade: 0.8,

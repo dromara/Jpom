@@ -60,6 +60,16 @@ public enum NodeUrl {
     Manage_Log_logBack("/manage/log/logBack"),
 
     Manage_Log_export("/manage/log/export"),
+
+
+    System_alioss_config("/system/alioss_config"),
+    System_alioss_submit("/system/alioss_submit"),
+
+    Manage_build_data("/manage/build_data"),
+    Manage_build_download("/manage/build_download"),
+
+    Manage_build_install("/manage/build_install"),
+
     ;
 
     private String url;

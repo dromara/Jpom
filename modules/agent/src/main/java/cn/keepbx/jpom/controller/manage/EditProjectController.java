@@ -253,7 +253,19 @@ public class EditProjectController extends BaseAgentController {
 
     @RequestMapping(value = "deleteProject", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public String deleteProject() {
-        return "";
+        ProjectInfoModel projectInfoModel = getProjectInfoModel();
+        try {
+            // 运行判断
+            if (projectInfoModel.isStatus(true)) {
+                return JsonMessage.getString(401, "不能删除正在运行的项目");
+            }
+            String userId = getUserName();
+            projectInfoService.deleteProject(projectInfoModel, userId);
+            return JsonMessage.getString(200, "删除成功！");
+        } catch (Exception e) {
+            DefaultSystemLog.ERROR().error(e.getMessage(), e);
+            return JsonMessage.getString(500, e.getMessage());
+        }
     }
 
     @RequestMapping(value = "judge_lib.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)

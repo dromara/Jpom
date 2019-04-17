@@ -28,10 +28,7 @@ public class ServerConfigBean {
      */
     public static final String NODE = "node.json";
 
-    /**
-     * 阿里oss 文件
-     */
-    public static final String ALI_OSS = "aliOss.json";
+
     /**
      * 证书文件
      */
@@ -56,23 +53,10 @@ public class ServerConfigBean {
      * @return 文件夹
      */
     public String getTempPathName() {
-        File file = getTempPath();
-        return FileUtil.normalize(file.getPath());
+//        File file = getTempPath();
+        return null;
+//        return FileUtil.normalize(file.getPath());
     }
 
-    /**
-     * 获取当前登录用户的临时文件存储路径，如果没有登录则抛出异常
-     *
-     * @return file
-     */
-    public File getTempPath() {
-        File file = new File(ConfigBean.getInstance().getDataPath());
-        String userName = BaseController.getUserName();
-        if (StrUtil.isEmpty(userName)) {
-            throw new JpomRuntimeException("没有登录");
-        }
-        file = new File(file.getPath() + "/temp/", userName);
-        FileUtil.mkdir(file);
-        return file;
-    }
+
 }
