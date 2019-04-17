@@ -33,17 +33,7 @@ public abstract class BaseController extends BaseJpomController {
     public static UserModel getUserModel() {
         return (UserModel) getRequestAttributes().getAttribute(LoginInterceptor.SESSION_NAME, RequestAttributes.SCOPE_SESSION);
     }
-//
-//    /**
-//     * 获取拦截器中缓存的项目信息
-//     *
-//     * @return this
-//     */
-//    protected ProjectInfoModel getProjectInfoModel() {
-//        ProjectInfoModel projectInfoModel = (ProjectInfoModel) this.getRequest().getAttribute(PermissionInterceptor.CACHE_PROJECT_INFO);
-//        Objects.requireNonNull(projectInfoModel, "获取项目信息失败");
-//        return projectInfoModel;
-//    }
+
 
     /**
      * 获取当前登录人
@@ -58,5 +48,15 @@ public abstract class BaseController extends BaseJpomController {
         return userModel.getId();
     }
 
+    public static String getOptUserName() {
+        UserModel userModel = getUserModel();
+        String userId;
+        if (userModel.isSystemUser()) {
+            userId = UserModel.SYSTEM_OCCUPY_NAME;
+        } else {
+            userId = userModel.getId();
+        }
+        return userId;
+    }
 
 }

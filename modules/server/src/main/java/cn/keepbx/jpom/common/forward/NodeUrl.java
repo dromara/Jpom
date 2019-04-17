@@ -37,6 +37,15 @@ public enum NodeUrl {
 
     Manage_Recover_Item_Data("/manage/recover/item_data"),
 
+
+    Manage_File_GetFileList("/manage/file/getFileList"),
+
+    Manage_File_Upload("/manage/file/upload"),
+
+    Manage_File_DeleteFile("/manage/file/deleteFile"),
+
+    Manage_File_Download("/manage/file/download"),
+
     ;
 
     private String url;

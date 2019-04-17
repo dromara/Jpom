@@ -1,9 +1,11 @@
 package cn.keepbx.jpom.controller.node.manage;
 
+import cn.jiangzeyin.common.JsonMessage;
 import cn.keepbx.jpom.common.BaseNodeController;
 import cn.keepbx.jpom.common.forward.NodeForward;
 import cn.keepbx.jpom.common.forward.NodeUrl;
 import cn.keepbx.jpom.model.data.ProjectInfoModel;
+import cn.keepbx.jpom.model.data.UserModel;
 import cn.keepbx.jpom.service.manage.ProjectInfoService;
 import cn.keepbx.jpom.service.system.WhitelistDirectoryService;
 import com.alibaba.fastjson.JSONObject;
@@ -81,9 +83,12 @@ public class EditProjectController extends BaseNodeController {
      */
     @RequestMapping(value = "saveProject", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
-    public String saveProject(ProjectInfoModel projectInfo, String whitelistDirectory, String edit) {
+    public String saveProject(String edit) {
         if ("add".equalsIgnoreCase(edit)) {
-
+            UserModel userName = getUser();
+            if (!userName.isManage()) {
+                return JsonMessage.getString(400, "管理员才能创建项目!");
+            }
         }
 
         return NodeForward.request(getNode(), getRequest(), NodeUrl.Manage_SaveProject).toString();

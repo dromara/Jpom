@@ -42,13 +42,17 @@
         })
     });
 
+    function appendNodeId(url) {
+        var nodeId = getTopQueryString("nodeId");
+        return urlUpdateParams(url, "nodeId", nodeId);
+    }
+
     function tabChange(options) {
         var element = top.layui.element;
         var lay_id = 'tab_' + options.id;
         if (options.id != "welcome") {
             lay_id += options.title;
-            var nodeId = getTopQueryString("nodeId");
-            options.url = urlUpdateParams(options.url, "nodeId", nodeId);
+            options.url = appendNodeId(options.url);
         ## 如果存在选项卡，切换，否则创建
             if ($('[lay-id="' + lay_id + '"]', top.document).length <= 0) {
                 var tab_content = '<iframe id="' + lay_id + '" name="' + options.id + '" src="' + options.url + '" frameborder="0" class="custom-iframe"></iframe>';
@@ -65,8 +69,7 @@
 
     function layerOpen(options) {
         if (options.type == 2) {
-            var nodeId = getTopQueryString("nodeId");
-            options.content = urlUpdateParams(options.content, "nodeId", nodeId);
+            options.content = appendNodeId(options.content);
         }
         layer.open(options);
     }
@@ -187,5 +190,23 @@
         };
         $.extend(defData, data);
         table.render(defData);
+    }
+
+
+    ## 文件上传渲染
+    function uploadRender(data) {
+        layui.use(['upload'], function () {
+            var upload = layui.upload;
+            var newsData = {
+                nodeId: getTopQueryString("nodeId")
+            };
+            $.extend(newsData, data.data);
+            delete data.data;
+            const defData = {
+                data: newsData
+            };
+            $.extend(defData, data);
+            return upload.render(defData);
+        });
     }
 </script>

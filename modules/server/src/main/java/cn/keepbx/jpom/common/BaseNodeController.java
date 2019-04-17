@@ -4,6 +4,7 @@ import cn.keepbx.jpom.model.data.NodeModel;
 import cn.keepbx.jpom.service.node.NodeService;
 
 import javax.annotation.Resource;
+import java.util.Objects;
 
 /**
  * @author jiangzeyin
@@ -15,6 +16,8 @@ public abstract class BaseNodeController extends BaseController {
 
     protected NodeModel getNode() {
         String nodeId = getParameter("nodeId");
-        return nodeService.getItem(nodeId);
+        NodeModel nodeModel = nodeService.getItem(nodeId);
+        Objects.requireNonNull(nodeModel);
+        return nodeModel;
     }
 }
