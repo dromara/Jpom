@@ -11,7 +11,8 @@ import java.net.URISyntaxException;
 import java.util.Objects;
 
 /**
- * Created by jiangzeyin on 2019/4/16.
+ * @author jiangzeyin
+ * @date 2019/4/16
  */
 public class ProxySession extends WebSocketClient {
     private Session session;

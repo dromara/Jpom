@@ -52,7 +52,6 @@ public class ServerWebSocketHandle {
         }
         // 通过用户名和密码的Md5值判断是否是登录的
         try {
-//            ProjectInfoService projectInfoService = SpringUtil.getBean(ProjectInfoService.class);
             UserService userService = SpringUtil.getBean(UserService.class);
             UserModel userModel = userService.checkUser(userInfo);
             if (userModel == null) {
@@ -62,23 +61,11 @@ public class ServerWebSocketHandle {
             }
             NodeModel nodeModel = nodeService.getItem(nodeId);
             String url = NodeForward.getSocketUrl(nodeModel, NodeUrl.TopSocket);
+            url = StrUtil.format(url, projectId);
             ProxySession proxySession = new ProxySession(url, session);
             PROXY_SESSION_CONCURRENT_HASH_MAP.put(session.getId(), proxySession);
             System.out.println(url);
-            // 判断项目
-//            if (!SYSTEM_ID.equals(projectId)) {
-//                ProjectInfoModel projectInfoModel = projectInfoService.getItem(projectId);
-//                if (projectInfoModel == null) {
-//                    SocketSessionUtil.send(session, "获取项目信息错误");
-//                    session.close();
-//                    return;
-//                }
-//                if (!userModel.isProject(projectInfoModel.getId())) {
-//                    SocketSessionUtil.send(session, "没有项目权限");
-//                    session.close();
-//                    return;
-//                }
-//            }
+
             SocketSessionUtil.send(session, StrUtil.format("欢迎加入:{} 回话id:{} 当前会话总数:{}", userModel.getName(), session.getId(), onlineCount.incrementAndGet()));
             USER.put(session.getId(), userModel);
         } catch (Exception e) {
@@ -106,94 +93,11 @@ public class ServerWebSocketHandle {
 //            return;
 //        }
 //        System.out.println(op);
-//        String projectId = json.getString("projectId");
-//        ProjectInfoService projectInfoService = SpringUtil.getBean(ProjectInfoService.class);
-//        ProjectInfoModel projectInfoModel = projectInfoService.getItem(projectId);
-//        ConsoleService.CommandOp commandOp = ConsoleService.CommandOp.valueOf(op);
-//        if (projectInfoModel == null && commandOp != ConsoleService.CommandOp.top) {
-//            SocketSessionUtil.send(session, "没有对应项目");
-//            return;
-//        }
-//        JSONObject resultData = null;
-//        String strResult;
-//        boolean logUser = false;
-//        try {
-//            // 执行相应命令
-//            switch (commandOp) {
-//                case start:
-//                case restart:
-//                    logUser = true;
-//                    strResult = consoleService.execCommand(commandOp, projectInfoModel);
-//                    if (strResult.contains(ConsoleService.RUNING_TAG)) {
-//                        resultData = JsonMessage.toJson(200, "操作成功:" + strResult);
-//                    } else {
-//                        resultData = JsonMessage.toJson(400, strResult);
-//                    }
-//                    break;
-//                case stop:
-//                    logUser = true;
-//                    // 停止项目
-//                    strResult = consoleService.execCommand(commandOp, projectInfoModel);
-//                    if (strResult.contains(ConsoleService.STOP_TAG)) {
-//                        resultData = JsonMessage.toJson(200, "操作成功");
-//                    } else {
-//                        resultData = JsonMessage.toJson(500, strResult);
-//                    }
-//                    break;
-//                case status:
-//                    // 获取项目状态
-//                    strResult = consoleService.execCommand(commandOp, projectInfoModel);
-//                    if (strResult.contains(ConsoleService.RUNING_TAG)) {
-//                        resultData = JsonMessage.toJson(200, "运行中", strResult);
-//                    } else {
-//                        resultData = JsonMessage.toJson(404, "未运行", strResult);
-//                    }
-//                    break;
-//                case showlog: {
-//                    // 进入管理页面后需要实时加载日志
-//                    String log = projectInfoModel.getLog();
-//                    try {
-//                        FileTailWatcher.addWatcher(log, session);
-//                    } catch (IOException io) {
-//                        SocketSessionUtil.send(session, io.getMessage());
-//                    }
-//                    break;
-//                }
-//                case top:
-//                    TopManager.addMonitor(session);
-//                    break;
-//                default:
-//                    resultData = JsonMessage.toJson(404, "不支持的方式：" + op);
-//                    break;
-//            }
-//        } catch (Exception e) {
-//            DefaultSystemLog.ERROR().error("执行命令失败", e);
-//            SocketSessionUtil.send(session, "执行命令失败,详情如下：");
-//            SocketSessionUtil.send(session, ExceptionUtil.stacktraceToString(e));
-//            return;
-//        } finally {
-//            if (logUser) {
-//                // 记录操作人
-//                projectInfoModel = projectInfoService.getItem(projectId);
-//                projectInfoModel.logModifyUser(userModel);
-//                projectInfoService.updateItem(projectInfoModel);
-//            }
-//        }
-//        //
-//        if (resultData != null) {
-//            resultData.put("op", op);
-//            DefaultSystemLog.LOG().info(resultData.toString());
-//            SocketSessionUtil.send(session, resultData.toString());
-//        }
+
+//
     }
 
     private void destroy(Session session) {
-        // 清理日志监听
-        try {
-            FileTailWatcher.offline(session);
-        } catch (Exception e) {
-            DefaultSystemLog.ERROR().error("关闭异常", e);
-        }
         ProxySession proxySession = getSession(session);
         proxySession.close();
         onlineCount.getAndDecrement();

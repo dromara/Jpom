@@ -4,6 +4,7 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.keepbx.jpom.BaseJpomApplication;
+import cn.keepbx.jpom.common.commander.AbstractProjectCommander;
 import cn.keepbx.jpom.model.BaseModel;
 
 import java.io.File;
@@ -93,7 +94,7 @@ public class ProjectInfoModel extends BaseModel {
             return false;
         }
         try {
-//            status = AbstractProjectCommander.getInstance().isRun(getId());
+            status = AbstractProjectCommander.getInstance().isRun(getId());
         } catch (Exception e) {
             DefaultSystemLog.ERROR().error("检查项目状态错误", e);
             status = false;

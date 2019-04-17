@@ -40,8 +40,8 @@ import java.util.jar.Manifest;
  */
 public abstract class AbstractProjectCommander {
 
-    private static final String RUNING_TAG = "running";
-    private static final String STOP_TAG = "stopped";
+    public static final String RUNING_TAG = "running";
+    public static final String STOP_TAG = "stopped";
 
     private static AbstractProjectCommander abstractProjectCommander = null;
 

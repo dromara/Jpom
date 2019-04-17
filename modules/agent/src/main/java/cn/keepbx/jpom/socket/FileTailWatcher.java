@@ -118,10 +118,10 @@ public class FileTailWatcher implements Runnable {
     }
 
     private void send(Session session, String msg) {
-//        try {
-////            SocketSessionUtil.send(session, msg);
-//        } catch (IOException ignored) {
-//        }
+        try {
+            SocketSessionUtil.send(session, msg);
+        } catch (IOException ignored) {
+        }
     }
 
     private void startRead() throws IOException {

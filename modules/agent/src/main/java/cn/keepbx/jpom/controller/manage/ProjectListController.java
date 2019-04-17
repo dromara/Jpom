@@ -103,4 +103,10 @@ public class ProjectListController extends BaseJpomController {
         }
         return JsonMessage.getString(200, "", jsonObject);
     }
+
+    @RequestMapping(value = "getRunModes", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    public String getRunModes() {
+        ProjectInfoModel.RunMode[] runModes = ProjectInfoModel.RunMode.values();
+        return JsonMessage.getString(200, "", runModes);
+    }
 }

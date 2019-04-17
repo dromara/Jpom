@@ -17,11 +17,11 @@
         <tbody>
         <tr>
             <td>控制台日志路径</td>
-            <td>$!logPath</td>
+            <td>$!data.logPath</td>
         </tr>
         <tr>
             <td>控制台日志备份路径</td>
-            <td>$!logBackPath</td>
+            <td>$!data.logBackPath</td>
         </tr>
         </tbody>
     </table>
@@ -36,25 +36,26 @@
         </tr>
         </thead>
         <tbody>
-            #foreach($item in $array)
+            #if($data.array && $data.array.size()>0)
+                #foreach($item in $data.array)
+                <tr>
+                    <td>$item.index</td>
+                    <td>$item.filename</td>
+                    <td>$item.modifytime</td>
+                    <td>$item.filesize</td>
+                    <td>
+                        <button name="download" href="logBack_download?key=$item.filename&id=$data.id"
+                                class="layui-btn layui-btn-warm layui-btn-sm">下载
+                        </button>
+                        <button name="delete" data-name="$item.filename" data-id="$data.id"
+                                class="layui-btn layui-btn-danger layui-btn-sm">删除
+                        </button>
+                    </td>
+                </tr>
+                #end
+            #else
             <tr>
-                <td>$item.index</td>
-                <td>$item.filename</td>
-                <td>$item.modifytime</td>
-                <td>$item.filesize</td>
-                <td>
-                    <a name="download" href="logBack_download?key=$item.filename&id=$id"
-                       class="layui-btn layui-btn-warm layui-btn-sm">下载
-                    </a>
-                    <button name="delete" data-name="$item.filename" data-id="$id"
-                            class="layui-btn layui-btn-danger layui-btn-sm">删除
-                    </button>
-                </td>
-            </tr>
-            #end
-            #if(!$array)
-            <tr>
-                <td colspan="4">没有相关信息</td>
+                <td colspan="5">没有相关信息</td>
             </tr>
             #end
         </tbody>
@@ -89,7 +90,11 @@
             }, function () {
 
             });
+        });
 
+        $("button[name='download']").click(function () {
+            var href = $(this).attr("href");
+            location.href = appendNodeId(href);
         });
     }
 </script>

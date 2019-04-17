@@ -4,10 +4,10 @@ import cn.jiangzeyin.common.JsonMessage;
 import cn.keepbx.jpom.common.BaseNodeController;
 import cn.keepbx.jpom.common.forward.NodeForward;
 import cn.keepbx.jpom.common.forward.NodeUrl;
-import cn.keepbx.jpom.model.data.ProjectInfoModel;
 import cn.keepbx.jpom.model.data.UserModel;
 import cn.keepbx.jpom.service.manage.ProjectInfoService;
 import cn.keepbx.jpom.service.system.WhitelistDirectoryService;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
@@ -63,7 +63,7 @@ public class EditProjectController extends BaseNodeController {
         }
         setAttribute("item", projectInfo);
         // 运行模式
-        ProjectInfoModel.RunMode[] runModes = ProjectInfoModel.RunMode.values();
+        JSONArray runModes = projectInfoService.getRunModes(getNode());
         setAttribute("runModes", runModes);
         //
         List<String> hashSet = projectInfoService.getAllGroup(getNode());
@@ -78,7 +78,6 @@ public class EditProjectController extends BaseNodeController {
     /**
      * 保存项目
      *
-     * @param projectInfo 项目实体
      * @return json
      */
     @RequestMapping(value = "saveProject", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)

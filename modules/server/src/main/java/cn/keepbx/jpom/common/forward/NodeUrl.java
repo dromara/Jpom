@@ -12,7 +12,7 @@ public enum NodeUrl {
 
     ProcessList("/processList"),
 
-    TopSocket("/console/system"),
+    TopSocket("/console/{}"),
 
     WhitelistDirectory_Submit("/system/whitelistDirectory_submit"),
 
@@ -30,6 +30,8 @@ public enum NodeUrl {
 
     Manage_GetProjectItem("/manage/getProjectItem"),
 
+    Manage_GetRunModes("/manage/getRunModes"),
+
 
     Manage_GetProjectPort("/manage/getProjectPort"),
 
@@ -46,6 +48,18 @@ public enum NodeUrl {
 
     Manage_File_Download("/manage/file/download"),
 
+
+    Manage_Log_LogSize("/manage/log/logSize"),
+
+    Manage_Log_ResetLog("/manage/log/resetLog"),
+
+    Manage_Log_logBack_delete("/manage/log/logBack_delete"),
+
+    Manage_Log_logBack_download("/manage/log/logBack_download"),
+
+    Manage_Log_logBack("/manage/log/logBack"),
+
+    Manage_Log_export("/manage/log/export"),
     ;
 
     private String url;
