@@ -10,6 +10,7 @@ import cn.keepbx.jpom.common.interceptor.LoginInterceptor;
 import cn.keepbx.jpom.common.interceptor.UrlPermission;
 import cn.keepbx.jpom.model.data.UserModel;
 import cn.keepbx.jpom.service.user.UserService;
+import cn.keepbx.jpom.socket.WebSocketConfig;
 import cn.keepbx.jpom.system.ServerExtConfigBean;
 import com.alibaba.fastjson.JSONArray;
 import org.springframework.http.MediaType;
@@ -133,6 +134,9 @@ public class UserInfoController extends BaseController {
     @RequestMapping(value = "addUser", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @UrlPermission(Role.Manage)
     public String addUser(String id) {
+        if (WebSocketConfig.SYSTEM_ID.equalsIgnoreCase(id)) {
+            return JsonMessage.getString(400, "当前登录名已经被系统占用啦");
+        }
         UserModel userName = getUser();
         //
         int size = userService.userSize();

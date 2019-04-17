@@ -58,9 +58,15 @@ public class ServerWebSocketHandle {
                 session.close();
                 return;
             }
+            String userName;
+            if (userModel.isSystemUser()) {
+                userName = WebSocketConfig.SYSTEM_ID;
+            } else {
+                userName = userModel.getId();
+            }
             NodeModel nodeModel = nodeService.getItem(nodeId);
             String url = NodeForward.getSocketUrl(nodeModel, NodeUrl.TopSocket);
-            url = StrUtil.format(url, projectId, UserModel.getOptUserName(userModel));
+            url = StrUtil.format(url, projectId, userName);
             System.out.println(url);
             ProxySession proxySession = new ProxySession(url, session);
             PROXY_SESSION_CONCURRENT_HASH_MAP.put(session.getId(), proxySession);

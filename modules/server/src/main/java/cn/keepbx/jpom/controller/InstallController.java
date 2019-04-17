@@ -9,6 +9,7 @@ import cn.keepbx.jpom.common.interceptor.LoginInterceptor;
 import cn.keepbx.jpom.common.interceptor.NotLogin;
 import cn.keepbx.jpom.model.data.UserModel;
 import cn.keepbx.jpom.service.user.UserService;
+import cn.keepbx.jpom.socket.WebSocketConfig;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -70,6 +71,9 @@ public class InstallController extends BaseController {
         }
         if (userName.length() < UserModel.USER_NAME_MIN_LEN) {
             return JsonMessage.getString(400, "登录名长度必须不小于" + UserModel.USER_NAME_MIN_LEN);
+        }
+        if (WebSocketConfig.SYSTEM_ID.equalsIgnoreCase(userName)) {
+            return JsonMessage.getString(400, "当前登录名已经被系统占用啦");
         }
         if (Validator.isChinese(userName) || !checkPathSafe(userName)) {
             return JsonMessage.getString(400, "登录名不能包含汉字并且不能包含特殊字符");
