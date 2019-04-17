@@ -216,7 +216,7 @@
                     config.data = data.data;
                     tableRender(config);
                 } else if (data.msg && data.msg != "") {
-                    layer.alert(data.msg);
+                    layer.msg(data.msg);
                 }
             }
         });

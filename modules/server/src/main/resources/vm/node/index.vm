@@ -49,14 +49,9 @@
     #if($installed)
     <div class="layui-layout layui-layout-admin">
         <div class="layui-header">
-            <form class="layui-form" action="">
-                <div class="layui-logo" title="版本时间:$!jpomManifest.timeStamp，进程ID:$!jpomManifest.pid">
-                    $node.name #if($jpomManifest)<font style="font-size: 10px;">($jpomManifest.version)</font>#end
-                </div>
-            </form>
-            <ul class="layui-nav layui-layout-left">
-
-            </ul>
+            <a href="../index.html" class="layui-logo" title="版本时间:$!jpomManifest.timeStamp，进程ID:$!jpomManifest.pid">
+                $node.name #if($jpomManifest)<font style="font-size: 10px;">($jpomManifest.version)</font>#end
+            </a>
             #parse("./common/userHead.vm")
         </div>
         <div class="layui-side layui-bg-black">

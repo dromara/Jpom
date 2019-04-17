@@ -4,6 +4,7 @@ import cn.hutool.core.util.CharsetUtil;
 import cn.jiangzeyin.common.ApplicationBuilder;
 import cn.jiangzeyin.common.EnableCommonBoot;
 import cn.keepbx.jpom.common.JpomApplicationEvent;
+import cn.keepbx.jpom.common.Type;
 import cn.keepbx.jpom.common.interceptor.LoginInterceptor;
 import cn.keepbx.jpom.common.interceptor.NodeInterceptor;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -20,6 +21,9 @@ import org.springframework.http.converter.StringHttpMessageConverter;
 @ServletComponentScan
 @EnableCommonBoot
 public class JpomServerApplication extends BaseJpomApplication {
+    public JpomServerApplication() {
+        super(Type.Server);
+    }
 
     /**
      * 启动执行

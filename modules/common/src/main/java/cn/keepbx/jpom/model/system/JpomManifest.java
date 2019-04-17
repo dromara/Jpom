@@ -5,6 +5,8 @@ import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.system.SystemUtil;
+import cn.keepbx.jpom.BaseJpomApplication;
+import cn.keepbx.jpom.common.Type;
 import com.alibaba.fastjson.JSON;
 import org.springframework.boot.ApplicationHome;
 
@@ -68,6 +70,14 @@ public class JpomManifest {
      * 进程id
      */
     private long pid = SystemUtil.getCurrentPID();
+    /**
+     * 当前运行类型
+     */
+    private Type type = BaseJpomApplication.getAppType();
+
+    public Type getType() {
+        return type;
+    }
 
     public long getPid() {
         return pid;

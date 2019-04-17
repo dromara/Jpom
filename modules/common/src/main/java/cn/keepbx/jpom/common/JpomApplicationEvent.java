@@ -88,6 +88,4 @@ public class JpomApplicationEvent implements ApplicationEventClient {
             }
         }
     }
-
-
 }

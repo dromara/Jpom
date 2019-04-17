@@ -11,6 +11,8 @@ import javax.servlet.http.HttpServletRequest;
 import java.io.File;
 
 /**
+ * 插件端配置
+ *
  * @author jiangzeyin
  * @date 2019/4/16
  */
@@ -40,6 +42,10 @@ public class AgentConfigBean {
      * 证书文件
      */
     public static final String CERT = "cert.json";
+    /**
+     * 授权信息
+     */
+    public static final String AUTHORIZE = "agent_authorize.json";
 
 
     private static AgentConfigBean agentConfigBean;

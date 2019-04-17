@@ -1,5 +1,6 @@
 package cn.keepbx.jpom.model.data;
 
+import cn.hutool.crypto.SecureUtil;
 import cn.keepbx.jpom.model.BaseModel;
 
 /**
@@ -13,7 +14,12 @@ public class NodeModel extends BaseModel {
     private String url;
     private String loginName;
     private String loginPwd;
+    /**
+     * 节点协议
+     */
     private String protocol;
+
+    private String authorize;
 
     public String getProtocol() {
         return protocol;
@@ -53,5 +59,12 @@ public class NodeModel extends BaseModel {
 
     public void setLoginPwd(String loginPwd) {
         this.loginPwd = loginPwd;
+    }
+
+    public String getAuthorize(boolean get) {
+        if (authorize == null) {
+            authorize = SecureUtil.sha1(loginName + "@" + loginPwd);
+        }
+        return authorize;
     }
 }

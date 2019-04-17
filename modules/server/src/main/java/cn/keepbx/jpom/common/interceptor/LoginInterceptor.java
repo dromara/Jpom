@@ -1,14 +1,11 @@
 package cn.keepbx.jpom.common.interceptor;
 
 import cn.hutool.core.date.DateUtil;
-import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.servlet.ServletUtil;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.interceptor.InterceptorPattens;
 import cn.jiangzeyin.common.spring.SpringUtil;
 import cn.keepbx.jpom.common.BaseController;
-import cn.keepbx.jpom.common.BaseNodeController;
 import cn.keepbx.jpom.model.data.UserModel;
 import cn.keepbx.jpom.service.user.UserService;
 import org.springframework.http.MediaType;
@@ -39,6 +36,10 @@ public class LoginInterceptor extends BaseJpomInterceptor {
         HttpSession session = getSession();
         if (handler instanceof HandlerMethod) {
             HandlerMethod handlerMethod = (HandlerMethod) handler;
+            // 记录请求类型
+            boolean isPage = isPage(handlerMethod);
+            request.setAttribute("Page_Req", isPage);
+            //
             NotLogin notLogin = handlerMethod.getMethodAnnotation(NotLogin.class);
             if (notLogin == null) {
                 UserModel user = (UserModel) session.getAttribute(SESSION_NAME);
@@ -60,17 +61,9 @@ public class LoginInterceptor extends BaseJpomInterceptor {
                     return false;
                 }
             }
-
-            //
-            if (isPage(handlerMethod)) {
-                if (BaseNodeController.class.isAssignableFrom(handlerMethod.getBeanType())) {
-                    // 添加node
-                }
-            }
         }
         reload();
         //
-
         return true;
     }
 
@@ -118,15 +111,5 @@ public class LoginInterceptor extends BaseJpomInterceptor {
         BaseController.remove();
     }
 
-    private String getHeaderProxyPath(HttpServletRequest request) {
-        String proxyPath = ServletUtil.getHeaderIgnoreCase(request, "Jpom-ProxyPath");
-        if (StrUtil.isEmpty(proxyPath)) {
-            return StrUtil.EMPTY;
-        }
-        proxyPath = FileUtil.normalize(proxyPath);
-        if (proxyPath.endsWith(StrUtil.SLASH)) {
-            proxyPath = proxyPath.substring(0, proxyPath.length() - 1);
-        }
-        return proxyPath;
-    }
+
 }

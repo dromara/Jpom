@@ -3,6 +3,7 @@ package cn.keepbx.jpom;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.system.OsInfo;
 import cn.hutool.system.SystemUtil;
+import cn.keepbx.jpom.common.Type;
 
 import java.nio.charset.Charset;
 
@@ -17,7 +18,10 @@ public abstract class BaseJpomApplication {
     public static final OsInfo OS_INFO = SystemUtil.getOsInfo();
 
     protected static String[] args;
-
+    /**
+     * 应用类型
+     */
+    private static Type appType;
     private static Charset charset;
 
     /**
@@ -29,6 +33,15 @@ public abstract class BaseJpomApplication {
         return args;
     }
 
+    public BaseJpomApplication(Type appType) {
+        BaseJpomApplication.appType = appType;
+    }
+
+    /**
+     * 获取当前系统编码
+     *
+     * @return charset
+     */
     public static Charset getCharset() {
         if (charset == null) {
             if (OS_INFO.isLinux()) {
@@ -38,5 +51,9 @@ public abstract class BaseJpomApplication {
             }
         }
         return charset;
+    }
+
+    public static Type getAppType() {
+        return appType;
     }
 }

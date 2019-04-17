@@ -6,6 +6,7 @@ import cn.hutool.extra.servlet.ServletUtil;
 import cn.jiangzeyin.common.spring.SpringUtil;
 import cn.keepbx.jpom.model.data.ProjectInfoModel;
 import cn.keepbx.jpom.service.manage.ProjectInfoService;
+import cn.keepbx.jpom.system.ConfigBean;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Objects;
@@ -21,13 +22,13 @@ public abstract class BaseAgentController extends BaseJpomController {
     }
 
     public static String getUserName(HttpServletRequest request) {
-        String name = ServletUtil.getHeaderIgnoreCase(request, "Jpom-Server-UserName");
+        String name = ServletUtil.getHeaderIgnoreCase(request, ConfigBean.JPOM_SERVER_USER_NAME);
         name = CharsetUtil.convert(name, CharsetUtil.CHARSET_ISO_8859_1, CharsetUtil.CHARSET_UTF_8);
         return StrUtil.emptyToDefault(name, StrUtil.DASHED);
     }
 
     protected boolean isSystemUser() {
-        String val = ServletUtil.getHeaderIgnoreCase(getRequest(), "Jpom-Server-SystemUserRole");
+        String val = ServletUtil.getHeaderIgnoreCase(getRequest(), ConfigBean.JPOM_SERVER_SYSTEM_USER_ROLE);
         return Boolean.valueOf(val);
     }
 
@@ -47,7 +48,6 @@ public abstract class BaseAgentController extends BaseJpomController {
         Objects.requireNonNull(projectInfoModel, "获取项目信息失败");
         return projectInfoModel;
     }
-
 
 
 }

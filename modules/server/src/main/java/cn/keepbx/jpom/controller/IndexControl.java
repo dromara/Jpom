@@ -1,6 +1,7 @@
 package cn.keepbx.jpom.controller;
 
 import cn.keepbx.jpom.common.BaseController;
+import cn.keepbx.jpom.common.GlobalDefaultExceptionHandler;
 import cn.keepbx.jpom.common.interceptor.NotLogin;
 import cn.keepbx.jpom.model.system.JpomManifest;
 import cn.keepbx.jpom.service.user.UserService;
@@ -24,7 +25,9 @@ public class IndexControl extends BaseController {
 
     @RequestMapping(value = "error", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
     @NotLogin
-    public String error() {
+    public String error(String id) {
+        String msg = GlobalDefaultExceptionHandler.getErrorMsg(id);
+        setAttribute("msg", msg);
         return "error";
     }
 

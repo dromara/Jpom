@@ -3,6 +3,9 @@ package cn.keepbx.jpom;
 import cn.hutool.core.util.CharsetUtil;
 import cn.jiangzeyin.common.ApplicationBuilder;
 import cn.jiangzeyin.common.EnableCommonBoot;
+import cn.keepbx.jpom.common.JpomApplicationEvent;
+import cn.keepbx.jpom.common.Type;
+import cn.keepbx.jpom.common.interceptor.AuthorizeInterceptor;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.web.servlet.ServletComponentScan;
 import org.springframework.http.converter.StringHttpMessageConverter;
@@ -17,7 +20,10 @@ import org.springframework.http.converter.StringHttpMessageConverter;
 @ServletComponentScan
 @EnableCommonBoot
 public class JpomAgentApplication extends BaseJpomApplication {
-    private static String[] args;
+
+    public JpomAgentApplication() {
+        super(Type.Agent);
+    }
 
     /**
      * 启动执行
@@ -29,13 +35,10 @@ public class JpomAgentApplication extends BaseJpomApplication {
         ApplicationBuilder.createBuilder(JpomAgentApplication.class)
                 .addHttpMessageConverter(new StringHttpMessageConverter(CharsetUtil.CHARSET_UTF_8))
                 // 拦截器
-//                .addInterceptor(LoginInterceptor.class).addInterceptor(PermissionInterceptor.class)
+                .addInterceptor(AuthorizeInterceptor.class)
                 //
-//                .addApplicationEventClient(new JpomApplicationEvent())
+                .addApplicationEventClient(new JpomApplicationEvent())
                 .run(args);
     }
 
-    public static String[] getArgs() {
-        return args;
-    }
 }

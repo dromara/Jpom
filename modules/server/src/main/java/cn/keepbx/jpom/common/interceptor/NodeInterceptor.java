@@ -12,6 +12,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 /**
+ * 节点拦截器
+ *
  * @author jiangzeyin
  * @date 2019/4/16
  */

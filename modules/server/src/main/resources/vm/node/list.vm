@@ -19,7 +19,7 @@
         #foreach($item in $array)
             <div class="layui-colla-item">
                 <div class="layui-colla-title">
-                    <div>
+                    <div title="$item.id">
                         $item.name
                     </div>
                     <div class="layui-layout-right" style="padding-right: 10%;">

@@ -34,6 +34,7 @@ public class AgentExtConfigBean {
     @Value("${log.saveDays:7}")
     private int logSaveDays;
 
+
     /**
      * 配置错误或者没有，默认是7天
      *

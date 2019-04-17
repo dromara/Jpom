@@ -2,6 +2,7 @@ package cn.keepbx.jpom.controller;
 
 import cn.jiangzeyin.common.JsonMessage;
 import cn.keepbx.jpom.common.BaseAgentController;
+import cn.keepbx.jpom.common.interceptor.NotAuthorize;
 import cn.keepbx.jpom.model.system.JpomManifest;
 import cn.keepbx.jpom.service.WhitelistDirectoryService;
 import org.springframework.http.MediaType;
@@ -21,6 +22,7 @@ public class IndexController extends BaseAgentController {
     private WhitelistDirectoryService whitelistDirectoryService;
 
     @RequestMapping(value = {"index", "", "index.html", "/"}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @NotAuthorize
     public String index() {
         return "Jpom-Agent";
     }

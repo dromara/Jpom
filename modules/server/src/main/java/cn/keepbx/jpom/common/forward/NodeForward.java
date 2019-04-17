@@ -4,11 +4,16 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.servlet.ServletUtil;
 import cn.hutool.http.HttpRequest;
 import cn.hutool.http.HttpResponse;
+import cn.hutool.http.HttpStatus;
 import cn.hutool.http.HttpUtil;
+import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.keepbx.jpom.common.BaseController;
 import cn.keepbx.jpom.model.data.NodeModel;
 import cn.keepbx.jpom.model.data.UserModel;
+import cn.keepbx.jpom.system.AgentException;
+import cn.keepbx.jpom.system.AuthorizeException;
+import cn.keepbx.jpom.system.ConfigBean;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.web.multipart.MultipartFile;
@@ -36,18 +41,16 @@ public class NodeForward {
      * @return JSON
      */
     public static JsonMessage request(NodeModel nodeModel, HttpServletRequest request, NodeUrl nodeUrl) {
-        Map params = ServletUtil.getParams(request);
-        String url = StrUtil.format("http://{}{}", nodeModel.getUrl(), nodeUrl.getUrl());
-
+        String url = createUrl(nodeModel, nodeUrl);
         HttpRequest httpRequest = HttpUtil.createPost(url);
         //
-        addUser(httpRequest);
+        addUser(httpRequest, nodeModel);
+        Map params = ServletUtil.getParams(request);
         //
-        String body = httpRequest
+        HttpResponse response = httpRequest
                 .form(params)
-                .execute()
-                .body();
-        return JSON.parseObject(body, JsonMessage.class);
+                .execute();
+        return parseBody(response);
     }
 
     public static <T> T requestData(NodeModel nodeModel, NodeUrl nodeUrl, HttpServletRequest request, Class<T> tClass) {
@@ -61,7 +64,7 @@ public class NodeForward {
 
     public static <T> T toObj(JsonMessage jsonMessage, Class<T> tClass) {
         Object data = jsonMessage.getData();
-        if (jsonMessage.getCode() == 200 && null != data) {
+        if (null != data) {
             if (tClass == String.class) {
                 return (T) data.toString();
             }
@@ -72,26 +75,26 @@ public class NodeForward {
     }
 
     public static <T> T requestData(NodeModel nodeModel, NodeUrl nodeUrl, Class<T> tClass, String name, Object value, Object... parameters) {
-        String url = StrUtil.format("http://{}{}", nodeModel.getUrl(), nodeUrl.getUrl());
+        String url = createUrl(nodeModel, nodeUrl);
         //
         HttpRequest httpRequest = HttpUtil.createPost(url);
         if (name != null && value != null) {
             httpRequest.form(name, value, parameters);
         }
         //
-        addUser(httpRequest);
+        addUser(httpRequest, nodeModel);
         //
-        String body = httpRequest
-                .execute()
-                .body();
-        JsonMessage jsonMessage = JSON.parseObject(body, JsonMessage.class);
+        HttpResponse response = httpRequest
+                .execute();
+        //
+        JsonMessage jsonMessage = parseBody(response);
         return toObj(jsonMessage, tClass);
     }
 
     public static JsonMessage requestMultipart(NodeModel nodeModel, MultipartHttpServletRequest request, NodeUrl nodeUrl) {
-        String url = StrUtil.format("http://{}{}", nodeModel.getUrl(), nodeUrl.getUrl());
+        String url = createUrl(nodeModel, nodeUrl);
         HttpRequest httpRequest = HttpUtil.createPost(url);
-        addUser(httpRequest);
+        addUser(httpRequest, nodeModel);
         //
         Map params = ServletUtil.getParams(request);
         httpRequest.form(params);
@@ -101,21 +104,24 @@ public class NodeForward {
             try {
                 httpRequest.form(s, multipartFile.getBytes(), multipartFile.getOriginalFilename());
             } catch (IOException e) {
-                e.printStackTrace();
+                DefaultSystemLog.ERROR().error("转发文件异常", e);
             }
         });
-        String body = httpRequest
-                .execute()
-                .body();
-        System.out.println(body);
-        return JSON.parseObject(body, JsonMessage.class);
+        HttpResponse response = httpRequest
+                .execute();
+
+        return parseBody(response);
+    }
+
+    private static String createUrl(NodeModel nodeModel, NodeUrl nodeUrl) {
+        return StrUtil.format("{}://{}{}", nodeModel.getProtocol(), nodeModel.getUrl(), nodeUrl.getUrl());
     }
 
 
     public static void requestDownload(NodeModel nodeModel, HttpServletRequest request, HttpServletResponse response, NodeUrl nodeUrl) {
-        String url = StrUtil.format("http://{}{}", nodeModel.getUrl(), nodeUrl.getUrl());
+        String url = createUrl(nodeModel, nodeUrl);
         HttpRequest httpRequest = HttpUtil.createGet(url);
-        addUser(httpRequest);
+        addUser(httpRequest, nodeModel);
         //
         Map params = ServletUtil.getParams(request);
         httpRequest.form(params);
@@ -130,15 +136,43 @@ public class NodeForward {
     }
 
 
-    private static void addUser(HttpRequest httpRequest) {
+    private static void addUser(HttpRequest httpRequest, NodeModel nodeModel) {
         UserModel userModel = BaseController.getUserModel();
         Objects.requireNonNull(userModel);
-        httpRequest.header("Jpom-Server-UserName", UserModel.getOptUserName(userModel));
-        httpRequest.header("Jpom-Server-SystemUserRole", String.valueOf(userModel.isSystemUser()));
+        httpRequest.header(ConfigBean.JPOM_SERVER_USER_NAME, UserModel.getOptUserName(userModel));
+        httpRequest.header(ConfigBean.JPOM_SERVER_SYSTEM_USER_ROLE, String.valueOf(userModel.isSystemUser()));
+        httpRequest.header(ConfigBean.JPOM_AGENT_AUTHORIZE, nodeModel.getAuthorize(true));
     }
 
     public static String getSocketUrl(NodeModel nodeModel, NodeUrl nodeUrl) {
-        return StrUtil.format("ws://{}{}", nodeModel.getUrl(), nodeUrl.getUrl());
+        String ws;
+        if ("https".equalsIgnoreCase(nodeModel.getProtocol())) {
+            ws = "wss";
+        } else {
+            ws = "ws";
+        }
+        return StrUtil.format("{}://{}{}", ws, nodeModel.getUrl(), nodeUrl.getUrl());
     }
 
+    /**
+     * 解析结果
+     *
+     * @param response 响应
+     * @return json
+     */
+    private static JsonMessage parseBody(HttpResponse response) {
+        int status = response.getStatus();
+        if (status != HttpStatus.HTTP_OK) {
+            throw new AgentException("agent 端响应异常：" + status);
+        }
+        String body = response.body();
+        if (StrUtil.isEmpty(body)) {
+            throw new AgentException("agent 端响应内容为空");
+        }
+        JsonMessage jsonMessage = JSON.parseObject(body, JsonMessage.class);
+        if (jsonMessage.getCode() == ConfigBean.AUTHORIZE_ERROR) {
+            throw new AuthorizeException(jsonMessage, jsonMessage.getMsg());
+        }
+        return jsonMessage;
+    }
 }
