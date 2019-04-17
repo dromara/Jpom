@@ -39,7 +39,7 @@ public class GlobalDefaultExceptionHandler {
         if (BaseJpomInterceptor.isPage(request)) {
             try {
                 String id = IdUtil.fastUUID();
-                TIMED_CACHE.put(id, e.getMessage());
+                TIMED_CACHE.put(id, getErrorMsg(e));
                 response.sendRedirect(BaseJpomInterceptor.getHeaderProxyPath(request) + "/error.html?id=" + id);
             } catch (IOException ex) {
                 ex.printStackTrace();
@@ -54,6 +54,18 @@ public class GlobalDefaultExceptionHandler {
             } else {
                 ServletUtil.write(response, JsonMessage.getString(500, "服务异常：" + e.getMessage()), MediaType.APPLICATION_JSON_UTF8_VALUE);
             }
+        }
+    }
+
+    private String getErrorMsg(Exception e) {
+        if (e instanceof AuthorizeException) {
+            AuthorizeException authorizeException = (AuthorizeException) e;
+            return authorizeException.getJsonMessage().toString();
+        } else if (e instanceof AgentException) {
+            AgentException agentException = (AgentException) e;
+            return agentException.getMessage();
+        } else {
+            return "服务异常：" + e.getMessage();
         }
     }
 }

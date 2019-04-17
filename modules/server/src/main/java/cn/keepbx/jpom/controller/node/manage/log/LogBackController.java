@@ -36,7 +36,7 @@ public class LogBackController extends BaseNodeController {
 
     @RequestMapping(value = "logBack", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
     public String console(String id) {
-        JSONObject jsonObject = NodeForward.requestData(getNode(), NodeUrl.Manage_Log_logBack, JSONObject.class, "id", id);
+        JSONObject jsonObject = NodeForward.requestData(getNode(), NodeUrl.Manage_Log_logBack, getRequest(), JSONObject.class);
         setAttribute("data", jsonObject);
         return "node/manage/logBack";
     }

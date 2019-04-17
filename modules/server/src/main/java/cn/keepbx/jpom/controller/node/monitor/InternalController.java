@@ -25,7 +25,7 @@ public class InternalController extends BaseNodeController {
     @RequestMapping(value = "internal", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
     public String getInternal(String tag) throws Exception {
         setAttribute("tag", tag);
-        JSONObject data = NodeForward.requestData(getNode(), NodeUrl.Manage_internal_data, JSONObject.class, "tag", tag);
+        JSONObject data = NodeForward.requestData(getNode(), NodeUrl.Manage_internal_data, getRequest(), JSONObject.class);
         setAttribute("data", data);
         return "node/manage/internal";
     }

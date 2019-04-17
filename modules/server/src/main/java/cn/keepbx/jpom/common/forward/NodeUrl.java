@@ -15,6 +15,7 @@ public enum NodeUrl {
      *
      */
     GetTop("/getTop"),
+    Status("/status"),
 
     ProcessList("/processList"),
     /**
@@ -99,7 +100,9 @@ public enum NodeUrl {
     System_Certificate_export("/system/certificate/export"),
 
     ;
-
+    /**
+     * 相对请求地址
+     */
     private String url;
 
     public String getUrl() {

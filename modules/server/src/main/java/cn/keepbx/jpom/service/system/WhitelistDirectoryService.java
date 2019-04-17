@@ -20,7 +20,7 @@ import java.util.List;
 public class WhitelistDirectoryService {
 
     public Whitelist getData(NodeModel model) {
-        return NodeForward.requestData(model, NodeUrl.WhitelistDirectory_data, Whitelist.class);
+        return NodeForward.requestData(model, NodeUrl.WhitelistDirectory_data, null, Whitelist.class);
     }
 
     /**

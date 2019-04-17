@@ -1,6 +1,8 @@
 package cn.keepbx.jpom.model.data;
 
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SecureUtil;
+import cn.keepbx.jpom.common.forward.NodeUrl;
 import cn.keepbx.jpom.model.BaseModel;
 
 /**
@@ -17,7 +19,7 @@ public class NodeModel extends BaseModel {
     /**
      * 节点协议
      */
-    private String protocol;
+    private String protocol = "http";
 
     private String authorize;
 
@@ -66,5 +68,9 @@ public class NodeModel extends BaseModel {
             authorize = SecureUtil.sha1(loginName + "@" + loginPwd);
         }
         return authorize;
+    }
+
+    public String getRealUrl(NodeUrl nodeUrl) {
+        return StrUtil.format("{}://{}{}", getProtocol(), getUrl(), nodeUrl.getUrl());
     }
 }

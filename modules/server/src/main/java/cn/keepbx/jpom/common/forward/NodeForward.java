@@ -32,6 +32,7 @@ import java.util.Objects;
  * @date 2019/4/16
  */
 public class NodeForward {
+
     /**
      * 普通消息转发
      *
@@ -41,25 +42,39 @@ public class NodeForward {
      * @return JSON
      */
     public static JsonMessage request(NodeModel nodeModel, HttpServletRequest request, NodeUrl nodeUrl) {
-        String url = createUrl(nodeModel, nodeUrl);
+        String url = nodeModel.getRealUrl(nodeUrl);
         HttpRequest httpRequest = HttpUtil.createPost(url);
         //
         addUser(httpRequest, nodeModel);
-        Map params = ServletUtil.getParams(request);
+        Map params = null;
+        if (request != null) {
+            params = ServletUtil.getParams(request);
+        }
+        HttpResponse response;
+        try {
+            response = httpRequest
+                    .form(params)
+                    .execute();
+        } catch (Exception e) {
+            throw new AgentException(nodeModel.getName() + "节点异常：" + e.getMessage(), e);
+        }
         //
-        HttpResponse response = httpRequest
-                .form(params)
-                .execute();
         return parseBody(response);
     }
 
+    /**
+     * 普通消息转发,并解析数据
+     *
+     * @param nodeModel 节点
+     * @param request   请求
+     * @param nodeUrl   节点的url
+     * @param tClass    要解析的类
+     * @param <T>       泛型
+     * @return T
+     */
     public static <T> T requestData(NodeModel nodeModel, NodeUrl nodeUrl, HttpServletRequest request, Class<T> tClass) {
         JsonMessage jsonMessage = request(nodeModel, request, nodeUrl);
         return toObj(jsonMessage, tClass);
-    }
-
-    public static <T> T requestData(NodeModel nodeModel, NodeUrl nodeUrl, Class<T> tClass) {
-        return requestData(nodeModel, nodeUrl, tClass, null, null);
     }
 
     public static <T> T toObj(JsonMessage jsonMessage, Class<T> tClass) {
@@ -70,12 +85,20 @@ public class NodeForward {
             }
             return JSONObject.parseObject(data.toString(), tClass);
         }
-        System.out.println(jsonMessage.toString());
         return null;
     }
 
+    /**
+     * 普通消息转发,并解析数据
+     *
+     * @param nodeModel 节点
+     * @param nodeUrl   节点的url
+     * @param tClass    要解析的类
+     * @param <T>       泛型
+     * @return T
+     */
     public static <T> T requestData(NodeModel nodeModel, NodeUrl nodeUrl, Class<T> tClass, String name, Object value, Object... parameters) {
-        String url = createUrl(nodeModel, nodeUrl);
+        String url = nodeModel.getRealUrl(nodeUrl);
         //
         HttpRequest httpRequest = HttpUtil.createPost(url);
         if (name != null && value != null) {
@@ -83,16 +106,29 @@ public class NodeForward {
         }
         //
         addUser(httpRequest, nodeModel);
-        //
-        HttpResponse response = httpRequest
-                .execute();
+        HttpResponse response;
+        try {
+            //
+            response = httpRequest
+                    .execute();
+        } catch (Exception e) {
+            throw new AgentException(nodeModel.getName() + "节点异常：" + e.getMessage(), e);
+        }
         //
         JsonMessage jsonMessage = parseBody(response);
         return toObj(jsonMessage, tClass);
     }
 
+    /**
+     * 上传文件消息转发
+     *
+     * @param nodeModel 节点
+     * @param request   请求
+     * @param nodeUrl   节点的url
+     * @return json
+     */
     public static JsonMessage requestMultipart(NodeModel nodeModel, MultipartHttpServletRequest request, NodeUrl nodeUrl) {
-        String url = createUrl(nodeModel, nodeUrl);
+        String url = nodeModel.getRealUrl(nodeUrl);
         HttpRequest httpRequest = HttpUtil.createPost(url);
         addUser(httpRequest, nodeModel);
         //
@@ -107,34 +143,43 @@ public class NodeForward {
                 DefaultSystemLog.ERROR().error("转发文件异常", e);
             }
         });
-        HttpResponse response = httpRequest
-                .execute();
-
+        HttpResponse response;
+        try {
+            response = httpRequest.execute();
+        } catch (Exception e) {
+            throw new AgentException(nodeModel.getName() + "节点异常：" + e.getMessage(), e);
+        }
         return parseBody(response);
     }
 
-    private static String createUrl(NodeModel nodeModel, NodeUrl nodeUrl) {
-        return StrUtil.format("{}://{}{}", nodeModel.getProtocol(), nodeModel.getUrl(), nodeUrl.getUrl());
-    }
-
-
+    /**
+     * 下载文件消息转发
+     *
+     * @param nodeModel 节点
+     * @param request   请求
+     * @param response  响应
+     * @param nodeUrl   节点的url
+     */
     public static void requestDownload(NodeModel nodeModel, HttpServletRequest request, HttpServletResponse response, NodeUrl nodeUrl) {
-        String url = createUrl(nodeModel, nodeUrl);
+        String url = nodeModel.getRealUrl(nodeUrl);
         HttpRequest httpRequest = HttpUtil.createGet(url);
         addUser(httpRequest, nodeModel);
         //
         Map params = ServletUtil.getParams(request);
         httpRequest.form(params);
         //
-        HttpResponse response1 = httpRequest
-                .execute();
+        HttpResponse response1;
+        try {
+            response1 = httpRequest.execute();
+        } catch (Exception e) {
+            throw new AgentException(nodeModel.getName() + "节点异常：" + e.getMessage(), e);
+        }
         String contentDisposition = response1.header("Content-Disposition");
         response.setHeader("Content-Disposition", contentDisposition);
         String contentType = response1.header("Content-Type");
         response.setContentType(contentType);
         ServletUtil.write(response, response1.bodyStream());
     }
-
 
     private static void addUser(HttpRequest httpRequest, NodeModel nodeModel) {
         UserModel userModel = BaseController.getUserModel();

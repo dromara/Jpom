@@ -1,6 +1,5 @@
 package cn.keepbx.jpom.controller.node;
 
-import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.keepbx.jpom.common.BaseNodeController;
 import cn.keepbx.jpom.common.forward.NodeForward;
@@ -12,6 +11,7 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.annotation.Resource;
 import java.util.List;
@@ -52,16 +52,9 @@ public class NodeIndexController extends BaseNodeController {
         return "node/index";
     }
 
-    @RequestMapping(value = "edit.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
-    public String edit(String id) {
-        setAttribute("type", "add");
-        if (StrUtil.isNotEmpty(id)) {
-            NodeModel nodeModel = nodeService.getItem(id);
-            if (nodeModel != null) {
-                setAttribute("item", nodeModel);
-                setAttribute("type", "edit");
-            }
-        }
-        return "node/edit";
+    @RequestMapping(value = "node_status", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @ResponseBody
+    public String nodeStatus() {
+        return NodeForward.request(getNode(), getRequest(), NodeUrl.Status).toString();
     }
 }

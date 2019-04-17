@@ -4,7 +4,9 @@ import cn.jiangzeyin.common.JsonMessage;
 import cn.keepbx.jpom.common.BaseController;
 import cn.keepbx.jpom.common.Role;
 import cn.keepbx.jpom.common.interceptor.UrlPermission;
+import cn.keepbx.jpom.model.data.NodeModel;
 import cn.keepbx.jpom.model.data.UserModel;
+import cn.keepbx.jpom.service.node.NodeService;
 import cn.keepbx.jpom.service.user.UserService;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
@@ -29,6 +31,9 @@ public class UserListController extends BaseController {
 //    @Resource
 //    private ProjectInfoService projectInfoService;
 
+    @Resource
+    private NodeService nodeService;
+
     /**
      * 展示用户列表
      */
@@ -37,6 +42,13 @@ public class UserListController extends BaseController {
 //        List<ProjectInfoModel> jsonArray = projectInfoService.list();
 //        setAttribute("projects", jsonArray);
         return "user/list";
+    }
+
+    @RequestMapping(value = "edit", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
+    public String edit() {
+        List<NodeModel> nodeModels = nodeService.list();
+        setAttribute("nodeModels", nodeModels);
+        return "user/edit";
     }
 
     /**

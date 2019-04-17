@@ -28,7 +28,7 @@ public class AliOssController extends BaseNodeController {
      */
     @RequestMapping(value = "alioss", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
     public String whitelistDirectory() {
-        JSONObject item = NodeForward.requestData(getNode(), NodeUrl.System_alioss_config, JSONObject.class);
+        JSONObject item = NodeForward.requestData(getNode(), NodeUrl.System_alioss_config, getRequest(), JSONObject.class);
         setAttribute("item", item);
         return "node/system/alioss";
     }

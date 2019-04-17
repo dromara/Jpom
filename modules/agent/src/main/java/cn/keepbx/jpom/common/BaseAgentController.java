@@ -12,6 +12,8 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.Objects;
 
 /**
+ * agent 端
+ *
  * @author jiangzeyin
  * @date 2019/4/17
  */
@@ -21,12 +23,23 @@ public abstract class BaseAgentController extends BaseJpomController {
         return getUserName(getRequest());
     }
 
+    /**
+     * 获取server 端操作人
+     *
+     * @param request req
+     * @return name
+     */
     public static String getUserName(HttpServletRequest request) {
         String name = ServletUtil.getHeaderIgnoreCase(request, ConfigBean.JPOM_SERVER_USER_NAME);
         name = CharsetUtil.convert(name, CharsetUtil.CHARSET_ISO_8859_1, CharsetUtil.CHARSET_UTF_8);
         return StrUtil.emptyToDefault(name, StrUtil.DASHED);
     }
 
+    /**
+     * 操作的人员是否为系统管理员
+     *
+     * @return true
+     */
     protected boolean isSystemUser() {
         String val = ServletUtil.getHeaderIgnoreCase(getRequest(), ConfigBean.JPOM_SERVER_SYSTEM_USER_ROLE);
         return Boolean.valueOf(val);

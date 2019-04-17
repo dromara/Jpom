@@ -17,7 +17,7 @@ import java.util.List;
 public class ProjectInfoService {
 
     public List<String> getAllGroup(NodeModel nodeModel) {
-        return NodeForward.requestData(nodeModel, NodeUrl.Manage_GetProjectGroup, List.class);
+        return NodeForward.requestData(nodeModel, NodeUrl.Manage_GetProjectGroup, null, List.class);
     }
 
     public JSONObject getItem(NodeModel nodeModel, String id) {
@@ -29,6 +29,6 @@ public class ProjectInfoService {
     }
 
     public JSONArray getRunModes(NodeModel nodeModel) {
-        return NodeForward.requestData(nodeModel, NodeUrl.Manage_GetRunModes, JSONArray.class);
+        return NodeForward.requestData(nodeModel, NodeUrl.Manage_GetRunModes, null, JSONArray.class);
     }
 }

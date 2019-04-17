@@ -31,7 +31,7 @@ public class ProjectRecoverControl extends BaseNodeController {
     public String projectInfo() {
         UserModel userModel = getUser();
         if (userModel.isManage()) {
-            List list = NodeForward.requestData(getNode(), NodeUrl.Manage_Recover_List_Data, List.class);
+            List list = NodeForward.requestData(getNode(), NodeUrl.Manage_Recover_List_Data, getRequest(), List.class);
             setAttribute("array", list);
         }
         return "node/manage/project_recover";

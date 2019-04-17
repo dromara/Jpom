@@ -33,71 +33,6 @@
     <button id="refresh" class="layui-btn layui-btn-sm">刷新表格</button>
 </div>
 <table class="layui-table" id="tab_user" lay-filter="tab_user" style="margin: 0;"></table>
-<div class="layui-container div-user" id="div-user">
-    <form action="" class="layui-form" id="form_user" style="margin-top: 20px">
-        <div class="layui-form-item">
-
-            <label class="layui-form-label">登录名</label>
-            <div class="layui-input-block">
-                <input type="text" name="id" placeholder="登录名,创建后不能修改" required lay-verify="required"
-                       class="layui-input">
-            </div>
-        </div>
-        <div class="layui-form-item" id="pwd-input-div">
-            <label class="layui-form-label">密码</label>
-            <div class="layui-input-block">
-                <input type="password" name="password" placeholder=""
-                       class="layui-input">
-            </div>
-        </div>
-        <div class="layui-form-item">
-            <label class="layui-form-label">昵称</label>
-            <div class="layui-input-block">
-                <input type="text" name="name" placeholder="昵称" required
-                       lay-verify="required" class="layui-input">
-            </div>
-        </div>
-        <div class="layui-form-item">
-            <div class="layui-inline">
-                <label class="layui-form-label">管理员</label>
-                <div class="layui-input-block">
-                    <input type="checkbox" value="true" name="manage" lay-filter="manage" lay-skin="switch"
-                           lay-text="是|否">
-                </div>
-            </div>
-            <div class="layui-inline">
-                <label class="layui-form-label">上传文件</label>
-                <div class="layui-input-block">
-                    <input type="checkbox" value="true" name="uploadFile" lay-skin="switch" lay-text="是|否">
-                </div>
-            </div>
-            <div class="layui-inline">
-                <label class="layui-form-label">删除文件</label>
-                <div class="layui-input-block">
-                    <input type="checkbox" value="true" name="deleteFile" lay-skin="switch" lay-text="是|否">
-                </div>
-            </div>
-        </div>
-    ##        <div class="layui-form-item">
-    ##
-    ##        </div>
-        #if($projects && $projects.size()>0)
-            <div class="layui-form-item" id="projectsDiv">
-                <div class="layui-inline">
-                    <label class="layui-form-label" title="能删除项目，启动停止项目">管理项目</label>
-                    <div class="layui-input-block">
-                        #foreach($pItem in $projects)
-                            <input type="checkbox" name="project" project="$pItem.id" value="$pItem.id"
-                                   title="$pItem.name">
-                        #end
-                    </div>
-                </div>
-            </div>
-        #end
-
-        <input type="hidden" lay-submit lay-filter="submitUser" id="user_submit">
-    </form>
-</div>
 
 </body>
 
@@ -187,26 +122,12 @@
 
         // '添加用户'点击事件
         $('#addProject').on('click', function () {
-            // 重置表单
-            document.getElementById('form_user').reset();
-            $('#form_user [name="id"]').attr('readonly', false).removeClass('layui-disabled');
-            $('#form_user [name="manage"]').prop('checked', false);
-            $('#form_user [name="uploadFile"]').prop('checked', false);
-            $('#form_user [name="deleteFile"]').prop('checked', false);
-            $('#form_user [name="project"]').prop('checked', false);
-            // form.render();
             // 弹出
             layer.open({
-                type: 1,
+                type: 2,
                 title: '新增用户',
-                content: $('#div-user'),
-                area: ['60%', '80%'],
-                btnAlign: 'c',
-                btn: ['提交'],
-                yes: function (index, layero) {
-                    $('#form_user').attr('action', './addUser');
-                    $('#user_submit').click();
-                }
+                content: './edit',
+                area: ['80%', '80%'],
             });
         });
 
