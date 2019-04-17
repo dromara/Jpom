@@ -1,9 +1,10 @@
-package cn.keepbx.jpom.model;
+package cn.keepbx.jpom.model.data;
 
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
-import cn.keepbx.jpom.common.commander.AbstractCommander;
+import cn.keepbx.jpom.common.commander.AbstractProjectCommander;
+import cn.keepbx.jpom.model.BaseModel;
 
 import java.io.File;
 import java.util.List;
@@ -92,7 +93,7 @@ public class ProjectInfoModel extends BaseModel {
             return false;
         }
         try {
-            status = AbstractCommander.getInstance().isRun(getId());
+            status = AbstractProjectCommander.getInstance().isRun(getId());
         } catch (Exception e) {
             DefaultSystemLog.ERROR().error("检查项目状态错误", e);
             status = false;
@@ -230,7 +231,7 @@ public class ProjectInfoModel extends BaseModel {
             File file = files.get(i);
             classPath.append(file.getAbsolutePath());
             if (i != len - 1) {
-                classPath.append(AbstractCommander.OS_INFO.isWindows() ? ";" : ":");
+                classPath.append(AbstractProjectCommander.OS_INFO.isWindows() ? ";" : ":");
             }
         }
         return classPath.toString();

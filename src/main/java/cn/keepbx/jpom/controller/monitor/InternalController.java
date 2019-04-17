@@ -5,12 +5,13 @@ import cn.hutool.extra.servlet.ServletUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.keepbx.jpom.common.BaseController;
-import cn.keepbx.jpom.common.commander.AbstractCommander;
-import cn.keepbx.jpom.model.NetstatModel;
+import cn.keepbx.jpom.common.commander.AbstractProjectCommander;
+import cn.keepbx.jpom.common.commander.AbstractSystemCommander;
+import cn.keepbx.jpom.model.system.NetstatModel;
+import cn.keepbx.jpom.model.system.ProcessModel;
 import cn.keepbx.jpom.system.ConfigBean;
-import cn.keepbx.jpom.system.TopManager;
+import cn.keepbx.jpom.util.CommandUtil;
 import cn.keepbx.jpom.util.JvmUtil;
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.sun.tools.attach.VirtualMachine;
 import org.springframework.http.MediaType;
@@ -41,27 +42,14 @@ public class InternalController extends BaseController {
     @RequestMapping(value = "internal", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
     public String getInternal(String tag) throws Exception {
         setAttribute("tag", tag);
-        int pid = AbstractCommander.getInstance().getPid(tag);
+        int pid = AbstractProjectCommander.getInstance().getPid(tag);
         if (pid > 0) {
-            if (AbstractCommander.OS_INFO.isLinux()) {
-                String command = "top -b -n 1 -p " + pid;
-                String internal = AbstractCommander.getInstance().execCommand(command);
-                JSONArray array = TopManager.formatLinuxTop(internal);
-                if (null != array) {
-                    setAttribute("item", array.getJSONObject(0));
-                }
-            } else {
-                String command = "tasklist /V /FI \"pid eq " + pid + "\"";
-                String result = AbstractCommander.getInstance().execCommand(command);
-                JSONArray array = TopManager.formatWindowsProcess(result, true);
-                if (null != array) {
-                    setAttribute("item", array.getJSONObject(0));
-                }
-            }
+            ProcessModel item = AbstractSystemCommander.getInstance().getPidInfo(pid);
+            setAttribute("item", item);
             JSONObject beanMem = getBeanMem(tag);
             setAttribute("beanMem", beanMem);
             //获取端口信息
-            List<NetstatModel> port = AbstractCommander.getInstance().listNetstat(pid);
+            List<NetstatModel> port = AbstractProjectCommander.getInstance().listNetstat(pid);
             setAttribute("port", port);
         }
         return "manage/internal";
@@ -75,7 +63,7 @@ public class InternalController extends BaseController {
      */
     private JSONObject getBeanMem(String tag) {
         try {
-            VirtualMachine virtualMachine = AbstractCommander.getInstance().getVirtualMachine(tag);
+            VirtualMachine virtualMachine = JvmUtil.getVirtualMachine(tag);
             MemoryMXBean memoryMXBean = JvmUtil.getMemoryMXBean(virtualMachine);
             if (memoryMXBean == null) {
                 return null;
@@ -124,12 +112,12 @@ public class InternalController extends BaseController {
         String fileName = ConfigBean.getInstance().getTempPathName() + "/" + tag + "_java_cpu.txt";
         fileName = FileUtil.normalize(fileName);
         try {
-            int pid = AbstractCommander.getInstance().getPid(tag);
+            int pid = AbstractProjectCommander.getInstance().getPid(tag);
             if (pid <= 0) {
                 return JsonMessage.getString(400, "未运行");
             }
             String command = String.format("jstack %s >> %s ", pid, fileName);
-            AbstractCommander.getInstance().execSystemCommand(command);
+            CommandUtil.execSystemCommand(command);
             downLoad(getResponse(), fileName);
         } catch (Exception e) {
             DefaultSystemLog.ERROR().error(e.getMessage(), e);
@@ -147,12 +135,12 @@ public class InternalController extends BaseController {
         String fileName = ConfigBean.getInstance().getTempPathName() + "/" + tag + "_java_ram.txt";
         fileName = FileUtil.normalize(fileName);
         try {
-            int pid = AbstractCommander.getInstance().getPid(tag);
+            int pid = AbstractProjectCommander.getInstance().getPid(tag);
             if (pid <= 0) {
                 return JsonMessage.getString(400, "未运行");
             }
             String command = String.format("jmap -histo:live %s >> %s", pid, fileName);
-            AbstractCommander.getInstance().execSystemCommand(command);
+            CommandUtil.execSystemCommand(command);
             downLoad(getResponse(), fileName);
         } catch (Exception e) {
             DefaultSystemLog.ERROR().error(e.getMessage(), e);

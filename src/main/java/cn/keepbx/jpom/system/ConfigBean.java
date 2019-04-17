@@ -110,7 +110,7 @@ public class ConfigBean {
         File file = new File(getDataPath());
         String userName = BaseController.getUserName();
         if (StrUtil.isEmpty(userName)) {
-            throw new RuntimeException("没有登录");
+            throw new JpomRuntimeException("没有登录");
         }
         file = new File(file.getPath() + "/temp/", userName);
         FileUtil.mkdir(file);

@@ -7,13 +7,13 @@ import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.keepbx.jpom.common.BaseController;
 import cn.keepbx.jpom.common.Role;
-import cn.keepbx.jpom.common.commander.AbstractCommander;
 import cn.keepbx.jpom.common.interceptor.UrlPermission;
-import cn.keepbx.jpom.model.CertModel;
-import cn.keepbx.jpom.model.UserModel;
+import cn.keepbx.jpom.model.data.CertModel;
+import cn.keepbx.jpom.model.data.UserModel;
 import cn.keepbx.jpom.service.system.CertService;
 import cn.keepbx.jpom.service.system.NginxService;
 import cn.keepbx.jpom.service.system.WhitelistDirectoryService;
+import cn.keepbx.jpom.util.CommandUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.github.odiszapc.nginxparser.NgxBlock;
@@ -136,6 +136,10 @@ public class NginxController extends BaseController {
                 if (accessLog != null) {
                     FileUtil.mkParentDirs(accessLog.getValue());
                 }
+                accessLog = ngxBlock.findParam("error_log");
+                if (accessLog != null) {
+                    FileUtil.mkParentDirs(accessLog.getValue());
+                }
                 // 检查证书文件
                 NgxParam sslCertificate = ngxBlock.findParam("ssl_certificate");
                 if (sslCertificate != null && !FileUtil.exist(sslCertificate.getValue())) {
@@ -159,16 +163,21 @@ public class NginxController extends BaseController {
             DefaultSystemLog.ERROR().error(e.getMessage(), e);
             return JsonMessage.getString(400, "操作失败:" + e.getMessage());
         }
-        this.reloadNginx();
-        return JsonMessage.getString(200, "提交成功");
+        String msg = this.reloadNginx();
+        return JsonMessage.getString(200, "提交成功" + msg);
     }
 
-    private void reloadNginx() {
+    private String reloadNginx() {
         try {
-            AbstractCommander.getInstance().execSystemCommand("nginx -s reload");
+            String msg = CommandUtil.execSystemCommand("nginx -s reload");
+            if (StrUtil.isNotEmpty(msg)) {
+                DefaultSystemLog.LOG().info(msg);
+                return "(" + msg + ")";
+            }
         } catch (Exception e) {
             DefaultSystemLog.ERROR().error("reload nginx error", e);
         }
+        return StrUtil.EMPTY;
     }
 
     /**
@@ -218,8 +227,8 @@ public class NginxController extends BaseController {
             DefaultSystemLog.ERROR().error("删除nginx", e);
             return JsonMessage.getString(400, "删除失败:" + e.getMessage());
         }
-        this.reloadNginx();
-        return JsonMessage.getString(200, "删除成功");
+        String msg = this.reloadNginx();
+        return JsonMessage.getString(200, "删除成功" + msg);
     }
 
 }

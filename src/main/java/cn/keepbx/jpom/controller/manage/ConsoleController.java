@@ -1,8 +1,8 @@
 package cn.keepbx.jpom.controller.manage;
 
 import cn.keepbx.jpom.common.BaseController;
-import cn.keepbx.jpom.model.ProjectInfoModel;
-import cn.keepbx.jpom.model.UserModel;
+import cn.keepbx.jpom.model.data.ProjectInfoModel;
+import cn.keepbx.jpom.model.data.UserModel;
 import cn.keepbx.jpom.service.manage.ProjectInfoService;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
@@ -37,7 +37,6 @@ public class ConsoleController extends BaseController {
         if (projectInfoModel != null) {
             UserModel userName = getUser();
             setAttribute("projectInfo", projectInfoModel);
-            setAttribute("userInfo", userName.getUserMd5Key());
             String logSize = projectInfoService.getLogSize(id);
             setAttribute("logSize", logSize);
             setAttribute("manager", userName.isProject(id));
@@ -50,7 +49,6 @@ public class ConsoleController extends BaseController {
         }
         return "manage/console";
     }
-
 
 
 }

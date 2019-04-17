@@ -37,26 +37,32 @@ public class SocketSessionUtil {
         if (!session.isOpen()) {
             return;
         }
-        for (int i = 1; i <= ERROR_TRY_COUNT; i++) {
-            try {
-                LOCK.lock(session.getId());
-                session.getBasicRemote().sendText(msg);
-            } catch (IOException e) {
-                DefaultSystemLog.ERROR().error("发送消息失败:" + i, e);
-                if (i == ERROR_TRY_COUNT) {
-                    throw e;
-                } else {
-                    // 休眠一秒
+        try {
+            LOCK.lock(session.getId());
+            IOException exception = null;
+            int tryCount = 0;
+            do {
+                tryCount++;
+                if (exception != null) {
+                    // 上一次有异常、休眠 500
                     try {
                         Thread.sleep(500);
                     } catch (InterruptedException ignored) {
                     }
-                    continue;
                 }
-            } finally {
-                LOCK.unlock(session.getId());
+                try {
+                    session.getBasicRemote().sendText(msg);
+                    exception = null;
+                } catch (IOException e) {
+                    DefaultSystemLog.ERROR().error("发送消息失败:" + tryCount, e);
+                    exception = e;
+                }
+            } while (tryCount <= ERROR_TRY_COUNT);
+            if (exception != null) {
+                throw exception;
             }
-            break;
+        } finally {
+            LOCK.unlock(session.getId());
         }
     }
 }

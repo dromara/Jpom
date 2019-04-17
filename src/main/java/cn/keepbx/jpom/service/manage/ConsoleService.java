@@ -1,18 +1,19 @@
 package cn.keepbx.jpom.service.manage;
 
-import cn.keepbx.jpom.common.commander.AbstractCommander;
-import cn.keepbx.jpom.model.ProjectInfoModel;
+import cn.keepbx.jpom.common.commander.AbstractProjectCommander;
+import cn.keepbx.jpom.model.data.ProjectInfoModel;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 
 /**
+ * 控制台
  * Created by jiangzeyin on 2018/9/28.
  *
  * @author jiangzeyin
  */
 @Service
-public class CommandService {
+public class ConsoleService {
     public static final String RUNING_TAG = "running";
     public static final String STOP_TAG = "stopped";
 
@@ -47,21 +48,21 @@ public class CommandService {
      */
     public String execCommand(CommandOp commandOp, ProjectInfoModel projectInfoModel) throws Exception {
         String result;
-        AbstractCommander abstractCommander = AbstractCommander.getInstance();
+        AbstractProjectCommander abstractProjectCommander = AbstractProjectCommander.getInstance();
         // 执行命令
         switch (commandOp) {
             case restart:
-                result = abstractCommander.restart(projectInfoModel);
+                result = abstractProjectCommander.restart(projectInfoModel);
                 break;
             case start:
-                result = abstractCommander.start(projectInfoModel);
+                result = abstractProjectCommander.start(projectInfoModel);
                 break;
             case stop:
-                result = abstractCommander.stop(projectInfoModel);
+                result = abstractProjectCommander.stop(projectInfoModel);
                 break;
             case status: {
                 String tag = projectInfoModel.getId();
-                result = abstractCommander.status(tag);
+                result = abstractProjectCommander.status(tag);
                 break;
             }
             case top:

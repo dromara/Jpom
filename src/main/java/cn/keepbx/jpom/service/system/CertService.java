@@ -4,7 +4,7 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.keepbx.jpom.common.BaseOperService;
-import cn.keepbx.jpom.model.CertModel;
+import cn.keepbx.jpom.model.data.CertModel;
 import cn.keepbx.jpom.system.ConfigBean;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -58,19 +58,16 @@ public class CertService extends BaseOperService<CertModel> {
      */
     public boolean delete(String id) {
         try {
-            JSONObject jsonObject = getJSONObject(ConfigBean.CERT);
-            if (jsonObject == null) {
-                return false;
-            }
-            JSONObject cert = jsonObject.getJSONObject(id);
-            if (cert == null) {
+            CertModel certModel = getItem(id);
+            if (certModel == null) {
                 return true;
             }
-            String keyPath = cert.getString("key");
+            String keyPath = certModel.getCert();
             deleteJson(ConfigBean.CERT, id);
             if (StrUtil.isNotEmpty(keyPath)) {
+                // 删除证书文件
                 File parentFile = FileUtil.file(keyPath).getParentFile();
-                return FileUtil.del(parentFile);
+                FileUtil.del(parentFile);
             }
         } catch (Exception e) {
             DefaultSystemLog.ERROR().error(e.getMessage(), e);

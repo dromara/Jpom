@@ -170,24 +170,30 @@
                     layer.msg("上传失败");
                 }
             });
-            table.render({
+            tableRender({
                 id: 'tab_certificate',
                 elem: '#tab_certificate',
                 url: './getCertList',
-                // height: 'full-52',
-                even: true,
                 cols: [[
-                    {field: 'id', title: 'id', width: '10%'},
-                    {field: 'name', title: '名称'},
-                    {field: 'domain', title: '域名'},
-                    {field: 'effectiveTime', templet: "#tem_effectiveTime", title: '生效时间', width: '14%'},
-                    {field: 'expirationTime', templet: "#tem_expirationTime", title: '到期时间', width: '14%'},
+                    {field: 'id', title: 'id', width: '10%', sort: true},
+                    {field: 'name', title: '名称', sort: true},
+                    {field: 'domain', title: '域名', sort: true},
+                    {
+                        field: 'effectiveTime',
+                        templet: "#tem_effectiveTime",
+                        title: '生效时间',
+                        width: '14%',
+                        sort: true
+                    },
+                    {
+                        field: 'expirationTime',
+                        templet: "#tem_expirationTime",
+                        title: '到期时间',
+                        width: '14%',
+                        sort: true
+                    },
                     {field: 'op', title: '操作', align: 'center', toolbar: '#bar_cert', fixed: 'right'}
-                ]],
-                loading: true,
-                response: {
-                    statusCode: 200
-                }
+                ]]
             });
 
             // 表格工具条事件
@@ -341,7 +347,10 @@
             value: "5m;"
         }, {
             name: "ssl_ciphers",
-            value: "HIGH:!aNULL:!MD5;"
+            value: "ECDHE-RSA-AES128-GCM-SHA256:ECDHE:ECDH:AES:HIGH:!NULL:!aNULL:!MD5:!ADH:!RC4;"
+        }, {
+            name: "ssl_protocols",
+            value: "TLSv1 TLSv1.1 TLSv1.2;"
         }, {
             name: "ssl_prefer_server_ciphers",
             value: "on;"

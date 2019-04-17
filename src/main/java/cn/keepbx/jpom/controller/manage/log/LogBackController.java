@@ -6,10 +6,10 @@ import cn.hutool.extra.servlet.ServletUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.keepbx.jpom.common.BaseController;
-import cn.keepbx.jpom.common.commander.AbstractCommander;
+import cn.keepbx.jpom.common.commander.AbstractProjectCommander;
 import cn.keepbx.jpom.common.interceptor.ProjectPermission;
 import cn.keepbx.jpom.controller.manage.file.ProjectFileControl;
-import cn.keepbx.jpom.model.ProjectInfoModel;
+import cn.keepbx.jpom.model.data.ProjectInfoModel;
 import cn.keepbx.jpom.service.manage.ProjectInfoService;
 import com.alibaba.fastjson.JSONArray;
 import org.springframework.http.MediaType;
@@ -135,7 +135,7 @@ public class LogBackController extends BaseController {
     public String resetLog() {
         ProjectInfoModel pim = getProjectInfoModel();
         try {
-            String msg = AbstractCommander.getInstance().backLog(pim);
+            String msg = AbstractProjectCommander.getInstance().backLog(pim);
             if (msg.contains("ok")) {
                 return JsonMessage.getString(200, "重置成功");
             }

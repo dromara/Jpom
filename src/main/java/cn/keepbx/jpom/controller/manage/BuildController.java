@@ -7,8 +7,8 @@ import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.keepbx.jpom.common.BaseController;
 import cn.keepbx.jpom.common.interceptor.ProjectPermission;
-import cn.keepbx.jpom.model.ProjectInfoModel;
-import cn.keepbx.jpom.service.manage.CommandService;
+import cn.keepbx.jpom.model.data.ProjectInfoModel;
+import cn.keepbx.jpom.service.manage.ConsoleService;
 import cn.keepbx.jpom.service.manage.ProjectInfoService;
 import cn.keepbx.jpom.service.oss.OssManagerService;
 import com.alibaba.fastjson.JSONArray;
@@ -36,7 +36,7 @@ public class BuildController extends BaseController {
     @Resource
     private ProjectInfoService projectInfoService;
     @Resource
-    private CommandService commandService;
+    private ConsoleService consoleService;
 
     @RequestMapping(value = "build", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
     public String build(String id) {
@@ -86,7 +86,7 @@ public class BuildController extends BaseController {
         // 修改使用状态
         projectInfoModel.setUseLibDesc("build");
         projectInfoService.updateItem(projectInfoModel);
-        String result = commandService.execCommand(CommandService.CommandOp.restart, projectInfoModel);
+        String result = consoleService.execCommand(ConsoleService.CommandOp.restart, projectInfoModel);
         return JsonMessage.getString(200, "安装成功，已自动重启,当前状态是：" + result);
     }
 }

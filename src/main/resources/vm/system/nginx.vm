@@ -79,27 +79,21 @@
             });
         }
 
-        table.render({
+        tableRender({
             id: 'tab_ngx',
             elem: '#tab_ngx',
             url: './list_data.json',
-            method: 'POST',
-            even: true,
             cols: [[
-                {field: 'name', title: '文件名'},
-                {field: 'serverCount', title: '数量', width: "5%"},
-                {field: 'server_name', title: '域名'},
-                {field: 'location', title: '根location'},
-                {field: 'listen', title: '监听端口', width: "10%"},
-                {field: 'time', title: '最后修改时间'},
+                {field: 'name', title: '文件名', sort: true},
+                {field: 'serverCount', title: '数量', width: "5%", sort: true},
+                {field: 'server_name', title: '域名', sort: true},
+                {field: 'location', title: '根location', sort: true},
+                {field: 'listen', title: '监听端口', width: "10%", sort: true},
+                {field: 'time', title: '最后修改时间', sort: true},
                 {
                     field: 'op', title: '操作', align: 'center', toolbar: '#bar_ngx', fixed: 'right'
                 }
-            ]],
-            loading: true,
-            response: {
-                statusCode: 200
-            }
+            ]]
         });
 
         // 删除

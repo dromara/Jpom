@@ -1,5 +1,5 @@
 /**
- * Jpom 管理项目各个端实现管理的工具包
+ * 系统实体信息
  * <p>
  * The MIT License(MIT)
  * <p>
@@ -25,4 +25,4 @@
  *
  * @author jiangzeyin
  */
-package cn.keepbx.jpom.common.commander;
+package cn.keepbx.jpom.model.system;

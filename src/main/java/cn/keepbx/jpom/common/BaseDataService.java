@@ -1,9 +1,11 @@
 package cn.keepbx.jpom.common;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.keepbx.jpom.system.ConfigBean;
-import cn.keepbx.jpom.util.JsonUtil;
+import cn.keepbx.jpom.system.JpomRuntimeException;
+import cn.keepbx.jpom.util.JsonFileUtil;
 import com.alibaba.fastjson.JSONObject;
 
 import java.io.FileNotFoundException;
@@ -45,10 +47,10 @@ public abstract class BaseDataService {
         }
         // 判断是否存在数据
         if (null != data && 0 < data.keySet().size()) {
-            throw new RuntimeException("数据Id已经存在啦：" + filename + " :" + key);
+            throw new JpomRuntimeException("数据Id已经存在啦：" + filename + " :" + key);
         } else {
             allData.put(key, json);
-            JsonUtil.saveJson(getDataFilePath(filename), allData);
+            JsonFileUtil.saveJson(getDataFilePath(filename), allData);
         }
     }
 
@@ -69,7 +71,7 @@ public abstract class BaseDataService {
             throw new Exception("数据不存在:" + key);
         } else {
             allData.put(key, json);
-            JsonUtil.saveJson(getDataFilePath(filename), allData);
+            JsonFileUtil.saveJson(getDataFilePath(filename), allData);
         }
     }
 
@@ -85,11 +87,11 @@ public abstract class BaseDataService {
         JSONObject allData = getJSONObject(filename);
         JSONObject data = allData.getJSONObject(key);
         // 判断是否存在数据
-        if (JsonUtil.jsonIsEmpty(data)) {
+        if (CollUtil.isEmpty(data)) {
             throw new Exception("项目名称存不在！");
         } else {
             allData.remove(key);
-            JsonUtil.saveJson(getDataFilePath(filename), allData);
+            JsonFileUtil.saveJson(getDataFilePath(filename), allData);
         }
     }
 
@@ -101,7 +103,7 @@ public abstract class BaseDataService {
      */
     protected JSONObject getJSONObject(String filename) {
         try {
-            return (JSONObject) JsonUtil.readJson(getDataFilePath(filename));
+            return (JSONObject) JsonFileUtil.readJson(getDataFilePath(filename));
         } catch (FileNotFoundException e) {
             return null;
         }

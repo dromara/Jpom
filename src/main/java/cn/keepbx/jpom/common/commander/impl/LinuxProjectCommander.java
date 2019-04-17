@@ -2,9 +2,10 @@ package cn.keepbx.jpom.common.commander.impl;
 
 import cn.hutool.core.text.StrSpliter;
 import cn.hutool.core.thread.GlobalThreadPool;
-import cn.keepbx.jpom.common.commander.AbstractCommander;
-import cn.keepbx.jpom.model.NetstatModel;
-import cn.keepbx.jpom.model.ProjectInfoModel;
+import cn.keepbx.jpom.common.commander.AbstractProjectCommander;
+import cn.keepbx.jpom.model.data.ProjectInfoModel;
+import cn.keepbx.jpom.model.system.NetstatModel;
+import cn.keepbx.jpom.util.CommandUtil;
 
 import java.nio.charset.Charset;
 import java.util.ArrayList;
@@ -15,9 +16,9 @@ import java.util.List;
  *
  * @author Administrator
  */
-public class LinuxCommander extends AbstractCommander {
+public class LinuxProjectCommander extends AbstractProjectCommander {
 
-    public LinuxCommander(Charset charset) {
+    public LinuxProjectCommander(Charset charset) {
         super(charset);
     }
 
@@ -37,7 +38,7 @@ public class LinuxCommander extends AbstractCommander {
                 projectInfoModel.getArgs(),
                 projectInfoModel.getAbsoluteLog());
         //
-        GlobalThreadPool.execute(() -> execSystemCommand(command));
+        GlobalThreadPool.execute(() -> CommandUtil.execSystemCommand(command));
         // 检查是否执行完毕
         loopCheckRun(projectInfoModel.getId(), true);
         return status(projectInfoModel.getId());
@@ -51,7 +52,7 @@ public class LinuxCommander extends AbstractCommander {
         int pid = parsePid(result);
         if (pid > 0) {
             String cmd = String.format("kill  %s", pid);
-            execCommand(cmd);
+            CommandUtil.execCommand(cmd);
             loopCheckRun(projectInfoModel.getId(), false);
             result = status(tag);
         }
@@ -61,7 +62,7 @@ public class LinuxCommander extends AbstractCommander {
     @Override
     public List<NetstatModel> listNetstat(int pId) {
         String cmd = "netstat -antup | grep " + pId + " |grep -v \"CLOSE_WAIT\" | head -20";
-        String result = execSystemCommand(cmd);
+        String result = CommandUtil.execSystemCommand(cmd);
         List<String> netList = StrSpliter.splitTrim(result, "\n", true);
         if (netList == null || netList.size() <= 0) {
             return null;

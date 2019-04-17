@@ -3,9 +3,10 @@ package cn.keepbx.jpom.common.commander.impl;
 import cn.hutool.core.text.StrSpliter;
 import cn.hutool.core.thread.GlobalThreadPool;
 import cn.hutool.core.util.StrUtil;
-import cn.keepbx.jpom.common.commander.AbstractCommander;
-import cn.keepbx.jpom.model.NetstatModel;
-import cn.keepbx.jpom.model.ProjectInfoModel;
+import cn.keepbx.jpom.common.commander.AbstractProjectCommander;
+import cn.keepbx.jpom.model.data.ProjectInfoModel;
+import cn.keepbx.jpom.model.system.NetstatModel;
+import cn.keepbx.jpom.util.CommandUtil;
 
 import java.nio.charset.Charset;
 import java.util.ArrayList;
@@ -16,9 +17,9 @@ import java.util.List;
  *
  * @author Administrator
  */
-public class WindowsCommander extends AbstractCommander {
+public class WindowsProjectCommander extends AbstractProjectCommander {
 
-    public WindowsCommander(Charset charset) {
+    public WindowsProjectCommander(Charset charset) {
         super(charset);
     }
 
@@ -39,7 +40,7 @@ public class WindowsCommander extends AbstractCommander {
                 jvm, classPath, tag,
                 projectInfoModel.getAbsoluteLib(), mainClass, args, projectInfoModel.getAbsoluteLog());
         // 执行命令
-        GlobalThreadPool.execute(() -> execSystemCommand(command));
+        GlobalThreadPool.execute(() -> CommandUtil.execSystemCommand(command));
         //
         loopCheckRun(projectInfoModel.getId(), true);
         return status(projectInfoModel.getId());
@@ -53,7 +54,7 @@ public class WindowsCommander extends AbstractCommander {
         int pid = parsePid(result);
         if (pid > 0) {
             String cmd = String.format("taskkill /F /PID %s", pid);
-            execCommand(cmd);
+            CommandUtil.execCommand(cmd);
             loopCheckRun(projectInfoModel.getId(), false);
             result = status(tag);
         }
@@ -63,7 +64,7 @@ public class WindowsCommander extends AbstractCommander {
     @Override
     public List<NetstatModel> listNetstat(int pId) {
         String cmd = "netstat -nao -p tcp | findstr /V \"CLOSE_WAIT\" | findstr " + pId;
-        String result = execSystemCommand(cmd);
+        String result = CommandUtil.execSystemCommand(cmd);
         List<String> netList = StrSpliter.splitTrim(result, StrUtil.LF, true);
         if (netList == null || netList.size() <= 0) {
             return null;

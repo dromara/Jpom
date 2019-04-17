@@ -72,208 +72,194 @@
 <table class="layui-table" id="tab_monitor" lay-filter="tab_monitor"></table>
 </body>
 <script type="application/javascript">
+    var ws, myEcharts;
+    var config = {
+        id: 'tab_monitor',
+        elem: '#tab_monitor',
+        cols: [[
+            {field: 'pid', title: '进程id', sort: true, width: '6%'},
+            {field: 'command', title: '进程名称'},
+            {field: 'port', title: '端口', sort: true, width: '6%'},
+            {field: 'user', title: '所有者', width: '8%', sort: true},
+            {field: 'jpomName', title: '项目名称', width: '8%', sort: true},
+            {field: 'res', title: '物理内存', width: '8%', sort: true},
+            {field: 'status', title: '进程状态', width: '8%', sort: true},
+            {field: 'cpu', title: '占用CPU', width: '8%', sort: true},
+            {field: 'mem', title: '物理内存', width: '8%', sort: true},
+            {field: 'time', title: '时间总计', sort: true},
+            {field: 'pr', title: '优先级', width: '6%', sort: true},
+            // {field: 'NI', title: 'nice值', width: '6%', sort: true},
+            {field: 'virt', title: '虚拟内存', width: '8%', sort: true},
+            {field: 'shr', title: '共享内存', width: '8%', sort: true},
+        ]],
+        done: function (data) {
+        }
+    };
 
     function loadSuccess() {
-        var ws, myEcharts;
-        loadData();
-
-        function loadData() {
-            var top = layui.data('top');
-            var openTop = false;
-            if (top) {
-                openTop = top.openTop;
-            }
-            //加载进程信息
-            loadProcessList();
-            if (openTop) {
-                $("#monitor").attr("checked", true);
-                linkSocket(openTop);
-            } else {
-                $("#monitor").attr("checked", false);
-                loadFirstEcharts();
-            }
-            form.render();
+        var top = layui.data('top');
+        var openTop = false;
+        if (top) {
+            openTop = top.openTop;
         }
-
-        var config = {
-            id: 'tab_monitor',
-            elem: '#tab_monitor',
-            // height: 'full-52',
-            even: true,
-            cols: [[
-                {field: 'pid', title: '进程id', sort: true, width: '6%'},
-                {field: 'COMMAND', title: '进程名称'},
-                {field: 'port', title: '端口', sort: true, width: '6%'},
-                {field: 'USER', title: '所有者', width: '8%'},
-                {field: 'RES', title: '物理内存', width: '8%', sort: true},
-                {field: 'S', title: '进程状态', width: '8%', sort: true},
-                {field: 'CPU', title: '占用CPU', width: '8%', sort: true},
-                {field: 'MEM', title: '物理内存', width: '8%', sort: true},
-                {field: 'TIME', title: '时间总计', sort: true},
-                {field: 'PR', title: '优先级', width: '6%', sort: true},
-                {field: 'NI', title: 'nice值', width: '6%', sort: true},
-                {field: 'VIRT', title: '虚拟内存', width: '8%', sort: true},
-                {field: 'SHR', title: '共享内存', width: '8%', sort: true},
-            ]],
-            loading: true,
-            method: 'POST',
-            response: {
-                statusCode: 200
-            },
-            done: function (data) {
-            }
-        };
-        table.render(config);
-
-        function loadFirstEcharts() {
-            silentAjax({
-                url: './getTop',
-                success: function (data) {
-                    if (200 == data.code) {
-                        if (data.data) {
-                            var top = JSON.parse(data.data);
-                            loadEcharts(top);
-                        }
-                    } else {
-                        layer.alert(data.msg);
-                    }
-                }
-            });
+        //加载进程信息
+        loadProcessList();
+        //
+        loadTop();
+        $("#monitor").attr("checked", openTop);
+        if (openTop) {
+            linkSocket(openTop);
         }
-
-        function loadProcessList() {
-            silentAjax({
-                url: './processList',
-                success: function (data) {
-                    if (200 == data.code) {
-                        if (data.data) {
-                            config.data = data.data;
-                            table.render(config);
-                        }
-                    } else {
-                        layer.alert(data.msg);
-                    }
-                }
-            });
-        }
-
-        function linkSocket(status) {
-            if (!ws) {
-                ws = new WebSocket(getSocketHost() + "/console/$userInfo/system");
-            }
-            if (status) {
-                if (ws.readyState != 1 && ws.readyState != 0) {
-                    ws = new WebSocket(getSocketHost() + "/console/$userInfo/system");
-                }
-                ws.onopen = function () {
-                    ws.send('{"op": "top", "projectInfo":{}}');
-                };
-                ws.onmessage = function (data) {
-                    try {
-                        if (data.data) {
-                            var top = JSON.parse(data.data);
-                            if (top.top) {
-                                loadEcharts(top);
-                            }
-                            if (top.processList) {
-                                var processList = top.processList;
-                                config.data = processList;
-                                table.render(config);
-                            }
-                        }
-                    } catch (e) {
-                        return;
-                    }
-                };
-                ws.onerror = function (ev) {
-                };
-            } else {
-                ws.close();
-            }
-        }
-
+        form.render();
+        //
+        tableRender(config);
+        // 切换
         form.on('switch(filter)', function (data) {
             var check = data.elem.checked;
             layui.data('top', {
                 key: 'openTop',
                 value: check
             });
-            if ('WebSocket' in window) {
-                linkSocket(check);
-            }
-        })
+            linkSocket(check);
+        });
+    }
 
-        //加载病状图
-        function loadEcharts(top) {
-            if (!top) {
-                return;
-            }
-            var cpu = top.cpu;
-            var value = [];
-            if (cpu) {
-                info = {
-                    name: 'cpu',
-                    type: 'pie',
-                    center: ['18%', '50%'],
-                    radius: ['40%', '70%'],
-                    data: cpu
-                }
-                value.push(info);
-            }
-            var memory = top.memory;
-            if (memory) {
-                info = {
-                    name: '内存',
-                    type: 'pie',
-                    center: ['48%', '50%'],
-                    radius: ['40%', '70%'],
-                    data: memory
-                }
-                value.push(info);
-            }
-            var disk = top.disk;
-            if (disk) {
-                info = {
-                    name: '磁盘',
-                    type: 'pie',
-                    center: ['78%', '50%'],
-                    radius: ['40%', '70%'],
-                    data: disk
-                }
-                value.push(info);
-            }
-            var option = {
-                tooltip: {
-                    trigger: 'item',
-                    formatter: function (params, ticket, callback) {
-                        var value = params.value;
-                        var type = params.data.type;
-                        var suffix = "";
-                        if ("cpu" != type) {
-                            suffix = " KB";
-                            if (value > 1024) {
-                                value = value / 1024;
-                                suffix = " MB";
-                            }
-                            if (value > 1024) {
-                                value = value / 1024;
-                                suffix = " GB";
-                            }
-                            value = Math.round(value * 100) / 100;
-                        } else {
-                            value = Math.round(value * 10000) / 10000;
-                        }
-                        return params.seriesName + '<br/>' + params.name + " : " + value + suffix + "(" + params.percent + "%)";
-                    }
-                },
-                series: value
-            };
-            if (!myEcharts) {
-                myEcharts = echarts.init(document.getElementById('echarts'));
-            }
-            myEcharts.setOption(option);
+    //加载病状图
+    function loadEcharts(top) {
+        if (!top) {
+            return;
         }
+        var cpu = top.cpu;
+        var value = [];
+        if (cpu) {
+            info = {
+                name: 'cpu',
+                type: 'pie',
+                center: ['18%', '50%'],
+                radius: ['40%', '70%'],
+                data: cpu
+            }
+            value.push(info);
+        }
+        var memory = top.memory;
+        if (memory) {
+            info = {
+                name: '内存',
+                type: 'pie',
+                center: ['48%', '50%'],
+                radius: ['40%', '70%'],
+                data: memory
+            }
+            value.push(info);
+        }
+        var disk = top.disk;
+        if (disk) {
+            info = {
+                name: '磁盘',
+                type: 'pie',
+                center: ['78%', '50%'],
+                radius: ['40%', '70%'],
+                data: disk
+            }
+            value.push(info);
+        }
+        var option = {
+            tooltip: {
+                trigger: 'item',
+                formatter: function (params, ticket, callback) {
+                    var value = params.value;
+                    var type = params.data.type;
+                    var suffix = "";
+                    if ("cpu" != type) {
+                        suffix = " KB";
+                        if (value > 1024) {
+                            value = value / 1024;
+                            suffix = " MB";
+                        }
+                        if (value > 1024) {
+                            value = value / 1024;
+                            suffix = " GB";
+                        }
+                        value = Math.round(value * 100) / 100;
+                    } else {
+                        value = Math.round(value * 10000) / 10000;
+                    }
+                    return params.seriesName + '<br/>' + params.name + " : " + value + suffix + "(" + params.percent + "%)";
+                }
+            },
+            series: value
+        };
+        if (!myEcharts) {
+            myEcharts = echarts.init(document.getElementById('echarts'));
+        }
+        myEcharts.setOption(option);
+    }
 
+    function loadTop() {
+        silentAjax({
+            url: './getTop',
+            success: function (data) {
+                if (200 == data.code && data.data) {
+                    loadEcharts(data.data);
+                } else {
+                    layer.alert(data.msg);
+                }
+            }
+        });
+    }
+
+    function loadProcessList() {
+        silentAjax({
+            url: './processList',
+            success: function (data) {
+                if (200 == data.code && data.data) {
+                    config.data = data.data;
+                    tableRender(config);
+                } else if (data.msg && data.msg != "") {
+                    layer.alert(data.msg);
+                }
+            }
+        });
+    }
+
+    function linkSocket(status) {
+        if (!('WebSocket' in window)) {
+            layer.msg("不支持WebSocket");
+            return;
+        }
+        if (!ws) {
+            ws = new WebSocket(getSocketHost() + "/console/$user.getUserMd5Key()/system");
+        }
+        if (status) {
+            if (ws.readyState != 1 && ws.readyState != 0) {
+                ws = new WebSocket(getSocketHost() + "/console/$user.getUserMd5Key()/system");
+            }
+            ws.onopen = function () {
+                ws.send('{"op": "top", "projectInfo":{}}');
+            };
+            ws.onmessage = function (data) {
+                try {
+                    if (data.data) {
+                        var top = JSON.parse(data.data);
+                        if (top.top) {
+                            loadEcharts(top);
+                        }
+                        if (top.processList) {
+                            var processList = top.processList;
+                            config.data = processList;
+                            tableRender(config);
+                        }
+                    }
+                } catch (e) {
+                    return;
+                }
+            };
+            ws.onerror = function (ev) {
+                layer.msg("socket 异常");
+            };
+        } else {
+            ws.close();
+        }
     }
 </script>
 

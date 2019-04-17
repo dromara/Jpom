@@ -1,4 +1,4 @@
-package cn.keepbx.jpom.model;
+package cn.keepbx.jpom.model.system;
 
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
@@ -58,7 +58,7 @@ public class JpomManifest {
     /**
      * 当前版本
      */
-    private String version;
+    private String version = "dev";
     /**
      * 打包时间
      */
@@ -80,18 +80,22 @@ public class JpomManifest {
     }
 
     public String getVersion() {
-        if (StrUtil.isEmpty(version)) {
-            return "dev";
-        }
         return version;
     }
 
+    /**
+     * 判断当前是否为调试模式
+     *
+     * @return jar 为非调试模式
+     */
     public boolean isDebug() {
         return "dev".equals(getVersion());
     }
 
     public void setVersion(String version) {
-        this.version = version;
+        if (StrUtil.isNotEmpty(version)) {
+            this.version = version;
+        }
     }
 
     public String getTimeStamp() {

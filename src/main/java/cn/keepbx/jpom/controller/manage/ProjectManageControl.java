@@ -5,11 +5,11 @@ import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.keepbx.jpom.common.BaseController;
 import cn.keepbx.jpom.common.Role;
-import cn.keepbx.jpom.common.commander.AbstractCommander;
+import cn.keepbx.jpom.common.commander.AbstractProjectCommander;
 import cn.keepbx.jpom.common.interceptor.ProjectPermission;
 import cn.keepbx.jpom.common.interceptor.UrlPermission;
-import cn.keepbx.jpom.model.ProjectInfoModel;
-import cn.keepbx.jpom.model.UserModel;
+import cn.keepbx.jpom.model.data.ProjectInfoModel;
+import cn.keepbx.jpom.model.data.UserModel;
 import cn.keepbx.jpom.service.manage.ProjectInfoService;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -66,7 +66,7 @@ public class ProjectManageControl extends BaseController {
             String item = object.toString();
             int pid;
             try {
-                pid = AbstractCommander.getInstance().getPid(item);
+                pid = AbstractProjectCommander.getInstance().getPid(item);
             } catch (Exception e) {
                 DefaultSystemLog.ERROR().error("获取端口错误", e);
                 continue;
@@ -75,7 +75,7 @@ public class ProjectManageControl extends BaseController {
                 continue;
             }
             itemObj = new JSONObject();
-            String port = AbstractCommander.getInstance().getMainPort(pid);
+            String port = AbstractProjectCommander.getInstance().getMainPort(pid);
             itemObj.put("port", port);
             itemObj.put("pid", pid);
             jsonObject.put(item, itemObj);
