@@ -14,6 +14,8 @@ import java.io.File;
 import java.util.List;
 
 /**
+ * 白名单服务
+ *
  * @author jiangzeyin
  * @date 2019/2/28
  */
@@ -31,6 +33,15 @@ public class WhitelistDirectoryService extends BaseDataService {
             DefaultSystemLog.ERROR().error(e.getMessage(), e);
         }
         return null;
+    }
+
+    public boolean isInstalled() {
+        Whitelist whitelist = getWhitelist();
+        if (whitelist == null) {
+            return false;
+        }
+        List<String> project = whitelist.getProject();
+        return project != null && !project.isEmpty();
     }
 
     private List<String> getNgxDirectory() {
@@ -90,20 +101,6 @@ public class WhitelistDirectoryService extends BaseDataService {
         }
         return checkPath(list, path);
     }
-
-//    private JSONArray getItemArray(String key) {
-//        try {
-//            JSONObject jsonObject = getWhitelist();
-//            if (jsonObject == null) {
-//                return null;
-//            }
-//            return jsonObject.getJSONArray(key);
-//        } catch (Exception e) {
-//            DefaultSystemLog.ERROR().error(e.getMessage(), e);
-//        }
-//        return null;
-//    }
-
 
     public void saveWhitelistDirectory(Whitelist jsonObject) {
         String path = getDataFilePath(AgentConfigBean.WHITELIST_DIRECTORY);

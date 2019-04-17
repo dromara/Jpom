@@ -2,6 +2,7 @@ package cn.keepbx.jpom.socket;
 
 import cn.hutool.core.exceptions.ExceptionUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.core.util.URLUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.spring.SpringUtil;
@@ -34,7 +35,7 @@ public class AgentWebSocketHandle {
     private static ProjectInfoService projectInfoService;
 
     @OnOpen
-    public void onOpen(@PathParam("projectId") String projectId, @PathParam("optUser") String optUser, Session session) {
+    public void onOpen(@PathParam("projectId") String projectId, @PathParam("optUser") String urlOptUser, Session session) {
         System.out.println(projectId);
         try {
             // 判断项目
@@ -49,6 +50,7 @@ public class AgentWebSocketHandle {
                     return;
                 }
             }
+            String optUser = URLUtil.decode(urlOptUser);
             USER.put(session.getId(), optUser);
         } catch (Exception e) {
             DefaultSystemLog.ERROR().error("socket 错误", e);

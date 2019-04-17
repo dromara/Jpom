@@ -2,6 +2,7 @@ package cn.keepbx.jpom.socket;
 
 import cn.hutool.core.exceptions.ExceptionUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.core.util.URLUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.spring.SpringUtil;
@@ -58,12 +59,8 @@ public class ServerWebSocketHandle {
                 session.close();
                 return;
             }
-            String userName;
-            if (userModel.isSystemUser()) {
-                userName = WebSocketConfig.SYSTEM_ID;
-            } else {
-                userName = userModel.getId();
-            }
+            String userName = UserModel.getOptUserName(userModel);
+            userName = URLUtil.encode(userName);
             NodeModel nodeModel = nodeService.getItem(nodeId);
             String url = NodeForward.getSocketUrl(nodeModel, NodeUrl.TopSocket);
             url = StrUtil.format(url, projectId, userName);

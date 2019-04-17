@@ -30,6 +30,9 @@ public class WelcomeController extends AbstractController {
     @ResponseBody
     public String getProcessList() {
         List<ProcessModel> array = AbstractSystemCommander.getInstance().getProcessList();
-        return JsonMessage.getString(200, "", array);
+        if (array != null && !array.isEmpty()) {
+            return JsonMessage.getString(200, "", array);
+        }
+        return JsonMessage.getString(402, "没有获取到进程信息");
     }
 }

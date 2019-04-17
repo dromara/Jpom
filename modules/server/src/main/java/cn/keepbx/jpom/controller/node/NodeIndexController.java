@@ -1,6 +1,7 @@
 package cn.keepbx.jpom.controller.node;
 
 import cn.hutool.core.util.StrUtil;
+import cn.jiangzeyin.common.JsonMessage;
 import cn.keepbx.jpom.common.BaseNodeController;
 import cn.keepbx.jpom.common.forward.NodeForward;
 import cn.keepbx.jpom.common.forward.NodeUrl;
@@ -44,8 +45,10 @@ public class NodeIndexController extends BaseNodeController {
         List<NodeModel> nodeModels = nodeService.list();
         setAttribute("array", nodeModels);
         //
-        JpomManifest jpomManifest = NodeForward.requestData(getNode(), NodeUrl.Info, getRequest(), JpomManifest.class);
+        JsonMessage jsonMessage = NodeForward.request(getNode(), getRequest(), NodeUrl.Info);
+        JpomManifest jpomManifest = NodeForward.toObj(jsonMessage, JpomManifest.class);
         setAttribute("jpomManifest", jpomManifest);
+        setAttribute("installed", jsonMessage.getCode() == 200);
         return "node/index";
     }
 

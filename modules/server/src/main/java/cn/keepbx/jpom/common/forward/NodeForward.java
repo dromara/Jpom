@@ -59,7 +59,7 @@ public class NodeForward {
         return requestData(nodeModel, nodeUrl, tClass, null, null);
     }
 
-    private static <T> T toObj(JsonMessage jsonMessage, Class<T> tClass) {
+    public static <T> T toObj(JsonMessage jsonMessage, Class<T> tClass) {
         Object data = jsonMessage.getData();
         if (jsonMessage.getCode() == 200 && null != data) {
             if (tClass == String.class) {
