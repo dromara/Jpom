@@ -110,7 +110,7 @@
             type: 2,
             title: '管理节点配置信息',
             shade: 0.8,
-            area: ['60%', '70%'],
+            area: ['60%', '80%'],
             content: 'edit.html?id=' + id
         });
     }

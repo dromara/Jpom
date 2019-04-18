@@ -19,6 +19,7 @@
             <div class="layui-input-block">
                 <input type="text" id="id" name="id" value="$!item.id" placeholder="创建后不能修改" class="layui-input"
                        required
+                       #if($item)readonly#end
                        lay-verify="required">
                 <input type="hidden" name="type" value="$!type">
             </div>
@@ -44,12 +45,26 @@
                 </div>
             </div>
             <div class="layui-inline">
-                <label class="layui-form-label">节点地址</label>
+                <label class="layui-form-label">节点状态</label>
                 <div class="layui-input-block">
-                    <input type="text" id="url" name="url" value="$!item.url" placeholder="请填写节点名称" class="layui-input"
-                           required
-                           lay-verify="required">
+                    <input type="checkbox" value="true"
+                        #if($item.openStatus)
+                           checked
+                        #end
+                           name="openStatus"
+                           lay-skin="switch"
+                           lay-text="启用|停用">
                 </div>
+
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">节点地址</label>
+            <div class="layui-input-block">
+                <input type="text" id="url" name="url" value="$!item.url"
+                       placeholder="请填写节点地址,ip:port，如：(127.0.0.1:2123)或者域名" class="layui-input"
+                       required
+                       lay-verify="required">
             </div>
         </div>
         <div class="layui-form-item">
@@ -69,18 +84,7 @@
                        lay-verify="required">
             </div>
         </div>
-        <div class="layui-form-item">
-            <label class="layui-form-label">节点状态</label>
-            <div class="layui-input-block">
-                <input type="checkbox" value="true"
-                    #if($item.openStatus)
-                       checked
-                    #end
-                       name="openStatus"
-                       lay-skin="switch"
-                       lay-text="启用|停用">
-            </div>
-        </div>
+
         <div class="layui-form-item" style="padding-left: 20%">
             <button class="layui-btn layui-btn-normal" lay-submit lay-filter="submitNode" id="project_submit">提交
             </button>

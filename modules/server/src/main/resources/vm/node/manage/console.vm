@@ -265,6 +265,11 @@
         $('#export').on('click', function () {
             var url = "./log/export.html?id=$!projectInfo.id";
             url = appendNodeId(url);
+            layer.msg('加载中..', {
+                icon: 16,
+                shade: 0.2,
+                time: 3000
+            });
             location.href = url;
         });
 

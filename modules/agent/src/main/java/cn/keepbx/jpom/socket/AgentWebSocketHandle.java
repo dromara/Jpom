@@ -36,7 +36,6 @@ public class AgentWebSocketHandle {
 
     @OnOpen
     public void onOpen(@PathParam("projectId") String projectId, @PathParam("optUser") String urlOptUser, Session session) {
-        System.out.println(projectId);
         try {
             // 判断项目
             if (!WebSocketConfig.SYSTEM_ID.equals(projectId)) {
@@ -90,7 +89,6 @@ public class AgentWebSocketHandle {
         String projectId = json.getString("projectId");
         projectInfoService = SpringUtil.getBean(ProjectInfoService.class);
         ProjectInfoModel projectInfoModel = projectInfoService.getItem(projectId);
-        System.out.println(op + "  " + projectId);
         if (projectInfoModel == null) {
             SocketSessionUtil.send(session, "没有对应项目");
             return;
@@ -177,7 +175,6 @@ public class AgentWebSocketHandle {
         destroy(session);
         // top
         TopManager.removeMonitor(session);
-        System.out.println("close");
     }
 
     private void destroy(Session session) {

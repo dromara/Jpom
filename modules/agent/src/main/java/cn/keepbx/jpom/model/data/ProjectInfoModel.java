@@ -65,7 +65,7 @@ public class ProjectInfoModel extends BaseModel {
 
     public String getModifyUser() {
         if (StrUtil.isEmpty(modifyUser)) {
-//            return UserModel.SYSTEM_OCCUPY_NAME;
+            return StrUtil.DASHED;
         }
         return modifyUser;
     }
@@ -73,15 +73,6 @@ public class ProjectInfoModel extends BaseModel {
     public void setModifyUser(String modifyUser) {
         this.modifyUser = modifyUser;
     }
-
-//    public void logModifyUser(UserModel userModel) {
-//        // 隐藏系统管理员登录名
-//        if (userModel.isSystemUser()) {
-//            this.setModifyUser(UserModel.SYSTEM_OCCUPY_NAME);
-//        } else {
-//            this.setModifyUser(userModel.getId());
-//        }
-//    }
 
     /**
      * 项目是否正在运行
