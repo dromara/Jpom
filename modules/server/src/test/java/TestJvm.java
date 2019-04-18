@@ -13,7 +13,7 @@ import java.util.Set;
  */
 public class TestJvm {
     public static void main(String[] args) throws IOException, AttachNotSupportedException, MonitorException, URISyntaxException {
-        System.out.println(getPid());
+//        System.out.println(getPid());
 //        List<VirtualMachineDescriptor> descriptorList = VirtualMachine.list();
 //        for (VirtualMachineDescriptor virtualMachineDescriptor : descriptorList) {
 //            // 根据虚拟机描述查询启动属性，如果属性-Dapplication匹配，说明项目已经启动，并返回进程id
@@ -35,11 +35,8 @@ public class TestJvm {
             if (!"cn.keepbx.jpom.JpomAgentApplication".equals(processname)) {
                 continue;
             }
-            System.out.println(process + " ------> " + processname);
-
-            System.out.println(MonitoredVmUtil.commandLine(vm));
-            System.out.println(MonitoredVmUtil.mainArgs(vm));
-            System.out.println(MonitoredVmUtil.jvmArgs(vm));
+            System.out.println(vm.getVmIdentifier().getUserInfo());
+            System.out.println(vm.getVmIdentifier().toString());
         }
     }
 

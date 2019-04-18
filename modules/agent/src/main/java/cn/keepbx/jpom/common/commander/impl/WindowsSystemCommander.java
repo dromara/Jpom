@@ -19,6 +19,8 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
+ * windows 系统查询命令
+ *
  * @author jiangzeyin
  * @date 2019/4/16
  */

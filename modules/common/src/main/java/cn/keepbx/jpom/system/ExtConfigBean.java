@@ -3,6 +3,7 @@ package cn.keepbx.jpom.system;
 import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.spring.SpringUtil;
+import cn.keepbx.jpom.BaseJpomApplication;
 import cn.keepbx.jpom.model.system.JpomManifest;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
@@ -65,7 +66,7 @@ public class ExtConfigBean {
         if (StrUtil.isEmpty(path)) {
             if (JpomManifest.getInstance().isDebug()) {
                 // 调试模式 为根路径的 jpom文件
-                path = "/jpom/";
+                path = ("/jpom/" + BaseJpomApplication.getAppType().name() + "/").toLowerCase();
             } else {
                 // 获取当前项目运行路径的父级
                 File file = JpomManifest.getRunPath();

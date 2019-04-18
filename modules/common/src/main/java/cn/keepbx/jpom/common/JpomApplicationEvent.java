@@ -5,6 +5,7 @@ import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.util.CharsetUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.spring.event.ApplicationEventClient;
+import cn.keepbx.jpom.BaseJpomApplication;
 import cn.keepbx.jpom.model.system.JpomManifest;
 import cn.keepbx.jpom.system.ConfigBean;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
@@ -45,15 +46,23 @@ public class JpomApplicationEvent implements ApplicationEventClient {
             }
             // 写入Jpom 信息
             JpomManifest jpomManifest = JpomManifest.getInstance();
-            File jpomInfo = ConfigBean.getInstance().getJpomInfo();
-            FileUtil.writeString(jpomManifest.toString(), jpomInfo, CharsetUtil.CHARSET_UTF_8);
+            //  写入全局信息
+            File appJpomFile = ConfigBean.getInstance().getApplicationJpomInfo(BaseJpomApplication.getAppType());
+            FileUtil.writeString(jpomManifest.toString(), appJpomFile, CharsetUtil.CHARSET_UTF_8);
         } else if (event instanceof ContextClosedEvent) {
             // 应用关闭
             this.unLockFile();
+            //
             FileUtil.del(ConfigBean.getInstance().getPidFile());
+            //
+            File appJpomFile = ConfigBean.getInstance().getApplicationJpomInfo(BaseJpomApplication.getAppType());
+            FileUtil.del(appJpomFile);
         }
     }
 
+    /**
+     * 解锁进程文件
+     */
     private void unLockFile() {
         if (lock != null) {
             try {

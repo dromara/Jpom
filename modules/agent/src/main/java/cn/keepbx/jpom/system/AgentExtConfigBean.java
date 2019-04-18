@@ -5,6 +5,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 
 /**
+ * agent 端外部配置
+ *
  * @author jiangzeyin
  * @date 2019/4/16
  */

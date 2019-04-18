@@ -8,6 +8,7 @@ import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.keepbx.jpom.system.JpomRuntimeException;
 import com.sun.management.OperatingSystemMXBean;
 import com.sun.tools.attach.*;
+import sun.jvmstat.monitor.*;
 import sun.management.ConnectorAddressLink;
 
 import javax.management.MBeanServerConnection;
@@ -18,8 +19,8 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryMXBean;
-import java.util.List;
-import java.util.Properties;
+import java.net.URISyntaxException;
+import java.util.*;
 
 /**
  * jvm jmx 工具
@@ -141,5 +142,41 @@ public class JvmUtil {
             return agent;
         }
         throw new JpomRuntimeException("JDK中" + file.getAbsolutePath() + " 文件不存在");
+    }
+
+    /**
+     * 获取jdk 中的tools jar文件路径
+     *
+     * @return file
+     */
+    public static File getToolsJar() {
+        File file = new File(SystemUtil.getJavaRuntimeInfo().getHomeDir());
+        return new File(file.getParentFile(), "lib/tools.jar");
+    }
+
+    /**
+     * 工具指定的 mainClass 获取对应所有的的  MonitoredVm对象
+     *
+     * @param mainClass 程序运行主类
+     * @return list
+     * @throws MonitorException   e
+     * @throws URISyntaxException e
+     */
+    public static List<MonitoredVm> listMainClass(String mainClass) throws MonitorException, URISyntaxException {
+        List<MonitoredVm> monitoredVms = new ArrayList<>();
+        MonitoredHost local = MonitoredHost.getMonitoredHost("localhost");
+        // 取得所有在活动的虚拟机集合
+        Set<?> vmList = new HashSet<Object>(local.activeVms());
+        // 遍历集合，输出PID和进程名
+        for (Object process : vmList) {
+            MonitoredVm vm = local.getMonitoredVm(new VmIdentifier("//" + process));
+            // 获取类名
+            String processName = MonitoredVmUtil.mainClass(vm, true);
+            if (!mainClass.equals(processName)) {
+                continue;
+            }
+            monitoredVms.add(vm);
+        }
+        return monitoredVms;
     }
 }

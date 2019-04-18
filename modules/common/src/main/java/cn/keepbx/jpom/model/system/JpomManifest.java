@@ -7,6 +7,7 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.system.SystemUtil;
 import cn.keepbx.jpom.BaseJpomApplication;
 import cn.keepbx.jpom.common.Type;
+import cn.keepbx.jpom.system.ConfigBean;
 import com.alibaba.fastjson.JSON;
 import org.springframework.boot.ApplicationHome;
 
@@ -78,6 +79,14 @@ public class JpomManifest {
      * 当前运行类型
      */
     private Type type = BaseJpomApplication.getAppType();
+    /**
+     * 端口号
+     */
+    private int port;
+    /**
+     * Jpom 的数据目录
+     */
+    private String dataPath;
 
     public Type getType() {
         return type;
@@ -130,6 +139,33 @@ public class JpomManifest {
         } else {
             this.timeStamp = "dev";
         }
+    }
+
+    public void setPort(int port) {
+        this.port = port;
+    }
+
+    /**
+     * 程序运行的端口
+     *
+     * @return 端口
+     */
+    public int getPort() {
+        if (port == 0) {
+            port = ConfigBean.getInstance().getPort();
+        }
+        return port;
+    }
+
+    public String getDataPath() {
+        if (StrUtil.isEmpty(dataPath)) {
+            dataPath = ConfigBean.getInstance().getDataPath();
+        }
+        return dataPath;
+    }
+
+    public void setDataPath(String dataPath) {
+        this.dataPath = dataPath;
     }
 
     @Override
