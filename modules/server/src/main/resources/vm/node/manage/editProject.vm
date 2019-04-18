@@ -147,7 +147,7 @@
                 </div>
             </div>
         </div>
-        #if($user.isProject($!item.id))
+        #if(!$item  || $user.isProject($node.id,$!item.id))
             <div class="layui-form-item" style="padding-left: 20%">
                 <button class="layui-btn layui-btn-normal" lay-submit lay-filter="submitProject" id="project_submit">提交
                 </button>

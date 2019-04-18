@@ -1,5 +1,6 @@
 package cn.keepbx.jpom.controller.node.manage;
 
+import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.keepbx.jpom.common.BaseServerController;
 import cn.keepbx.jpom.common.forward.NodeForward;
@@ -7,6 +8,7 @@ import cn.keepbx.jpom.common.forward.NodeUrl;
 import cn.keepbx.jpom.model.data.UserModel;
 import cn.keepbx.jpom.service.manage.ProjectInfoService;
 import cn.keepbx.jpom.service.system.WhitelistDirectoryService;
+import cn.keepbx.jpom.system.ConfigBean;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.http.MediaType;
@@ -82,12 +84,16 @@ public class EditProjectController extends BaseServerController {
      */
     @RequestMapping(value = "saveProject", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
-    public String saveProject(String edit) {
+    public String saveProject(String edit, String id) {
         if ("add".equalsIgnoreCase(edit)) {
             UserModel userName = getUser();
             if (!userName.isManage(getNode().getId())) {
                 return JsonMessage.getString(400, "管理员才能创建项目!");
             }
+        }
+        // 防止和Jpom冲突
+        if (StrUtil.isNotEmpty(ConfigBean.getInstance().applicationTag) && ConfigBean.getInstance().applicationTag.equalsIgnoreCase(id)) {
+            return JsonMessage.getString(401, "当前项目id已经被Jpom占用");
         }
         return NodeForward.request(getNode(), getRequest(), NodeUrl.Manage_SaveProject).toString();
     }
