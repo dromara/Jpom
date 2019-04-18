@@ -153,7 +153,6 @@
                 </button>
                 #if($item)
                     <a class="layui-btn layui-btn-warm" data-id="$item.id" id="delete_project">删除</a>
-                ##                <a class="layui-btn layui-btn-primary" type="all" data-id="$item.id" id="delete_project_all">彻底删除</a>
                 #end
             </div>
         #end
@@ -165,13 +164,14 @@
         var tipMsgDiv = ("#tipMsgDiv");
         // 提交项目表单
         form.on('submit(submitProject)', function (data) {
+            var group = data.field.group;
             loadingAjax({
                 url: data.form.action,
                 data: data.field,
                 success: function (data) {
                     layer.msg(data.msg);
                     if (200 == data.code) {
-                        autoClose();
+                        autoClose(group);
                     }
                 }
             });
@@ -259,7 +259,8 @@
             });
         }
 
-        $("#delete_project,#delete_project_all").click(function () {
+        //
+        $("#delete_project").click(function () {
             var id = $(this).attr("data-id");
             var type = $(this).attr("type");
             var msg;
@@ -288,11 +289,11 @@
         });
     }
     ## 刷新项目列表
-    function autoClose() {
+    function autoClose(group) {
         setTimeout(function () {
             var index = parent.layer.getFrameIndex(window.name);
             parent.layer.close(index);
-            parent.reloadTable();
+            parent.reloadTable(group);
         }, 2000);
     }
 </script>

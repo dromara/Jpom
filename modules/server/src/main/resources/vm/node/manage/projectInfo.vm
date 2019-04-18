@@ -80,7 +80,6 @@
         return getCacheItemInfo(data, 'port');
     }
 
-
     function getItemPId(data) {
         return getCacheItemInfo(data, 'pid');
     }
@@ -160,11 +159,7 @@
         }
 
         form.on('select(groupName)', function (data) {
-            apiWhere.group = data.value;
-            layui.data('project', {
-                key: 'group',
-                value: data.value
-            });
+            changeGroup(data.value);
             reloadTable();
             return true;
         });
@@ -223,6 +218,14 @@
         }
     }
 
+    function changeGroup(group) {
+        apiWhere.group = group;
+        layui.data('project', {
+            key: 'group',
+            value: group
+        });
+    }
+
     function editProject(id) {
         layerOpen({
             type: 2,
@@ -233,10 +236,15 @@
         });
     }
 
-    function reloadTable() {
-        table.reload('table_project', {
-            where: apiWhere
-        });
+    function reloadTable(group) {
+        if (group) {
+            changeGroup(group);
+            window.location.reload();
+        } else {
+            table.reload('table_project', {
+                where: apiWhere
+            });
+        }
     }
 
     function projectRecover() {
