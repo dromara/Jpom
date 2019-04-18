@@ -11,6 +11,7 @@ import cn.keepbx.jpom.model.data.NodeModel;
 import cn.keepbx.jpom.model.data.UserModel;
 import cn.keepbx.jpom.model.system.JpomManifest;
 import cn.keepbx.jpom.service.node.NodeService;
+import cn.keepbx.jpom.service.user.UserService;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.annotation.Resource;
+import java.util.List;
 
 /**
  * 节点管理
@@ -31,6 +33,8 @@ public class NodeEditController extends BaseServerController {
 
     @Resource
     private NodeService nodeService;
+    @Resource
+    private UserService userService;
 
     @RequestMapping(value = "edit.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
     public String edit(String id) {
@@ -87,6 +91,12 @@ public class NodeEditController extends BaseServerController {
         return JsonMessage.getString(200, "操作成功");
     }
 
+    /**
+     * 删除节点
+     *
+     * @param id 节点id
+     * @return json
+     */
     @RequestMapping(value = "del.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @UrlPermission(Role.System)
     @ResponseBody
@@ -95,8 +105,14 @@ public class NodeEditController extends BaseServerController {
         if (!flag) {
             return JsonMessage.getString(405, "删除失败");
         }
+        // 删除授权
+        List<UserModel> list = userService.list();
+        if (list != null) {
+            list.forEach(userModel -> {
+                userModel.removeNodeRole(id);
+                userService.updateItem(userModel);
+            });
+        }
         return JsonMessage.getString(200, "操作成功");
     }
-
-
 }

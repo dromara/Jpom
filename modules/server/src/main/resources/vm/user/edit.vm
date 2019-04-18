@@ -61,83 +61,97 @@
         <div class="layui-form-item">
             <label class="layui-form-label">授权节点</label>
             <div class="layui-input-block">
+
                 <div class="layui-collapse">
-                    #foreach($item in $nodeModels)
-                        <div class="layui-colla-item">
-                            <div class="layui-colla-title">
-                                <div title="$item.id">
-                                    $item.name
+                    #if($nodeModels && $nodeModels.size()>0)
+                        #foreach($item in $nodeModels)
+                            <div class="layui-colla-item">
+                                <div class="layui-colla-title">
+                                    <div title="$item.id">
+                                        $item.name
+                                    </div>
+                                    <div class="layui-layout-right" onclick="stope()" style="padding-right: 10%;">
+                                        <div class="layui-inline">
+                                            <label class="layui-form-label" style="margin-top: 8px;">节点管理员</label>
+                                            <div class="layui-input-block">
+                                                #set($nowName=$item.id+"_manage")
+                                                <input type="checkbox" value="true" nodeId="$item.id"
+                                                    #if($userItem.nodeRole[$item.id].manage)
+                                                       checked
+                                                    #end
+                                                       name="$nowName"
+                                                       lay-filter="manage"
+                                                       lay-skin="switch"
+                                                       lay-text="是|否">
+                                            </div>
+                                        </div>
+                                        <div class="layui-inline">
+                                            <label class="layui-form-label" style="margin-top: 8px;">上传文件</label>
+                                            <div class="layui-input-block">
+                                                #set($nowName=$item.id+"_uploadFile")
+                                                <input type="checkbox" value="true"
+                                                    #if($userItem.nodeRole[$item.id].uploadFile)
+                                                       checked
+                                                    #end
+                                                       name="$nowName"
+                                                       lay-skin="switch"
+                                                       lay-text="是|否">
+                                            </div>
+                                        </div>
+                                        <div class="layui-inline">
+                                            <label class="layui-form-label" style="margin-top: 8px;">删除文件</label>
+                                            <div class="layui-input-block">
+                                                #set($nowName=$item.id+"_deleteFile")
+                                                <input type="checkbox" value="true"
+                                                    #if($userItem.nodeRole[$item.id].deleteFile)
+                                                       checked
+                                                    #end
+                                                       name="$nowName" lay-skin="switch"
+                                                       lay-text="是|否">
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div class="layui-layout-right" onclick="stope()" style="padding-right: 10%;">
-                                    <div class="layui-inline">
-                                        <label class="layui-form-label" style="margin-top: 8px;">节点管理员</label>
-                                        <div class="layui-input-block">
-                                            #set($nowName=$item.id+"_manage")
-                                            <input type="checkbox" value="true" nodeId="$item.id"
-                                                #if($userItem.nodeRole[$item.id].manage)
-                                                   checked
+                                <div class="layui-colla-content layui-show">
+                                    <div class="layui-form-item" id="projectsDiv">
+                                        <div class="layui-inline">
+                                            <label class="layui-form-label" title="能删除项目，启动停止项目">管理项目</label>
+                                            <div class="layui-input-block">
+                                                #foreach($pItem in $item.projects)
+                                                    #set($nowName="p_"+$item.id+"_"+$pItem.id)
+                                                    <input type="checkbox"
+                                                           p="p_$item.id"
+                                                           name="$nowName"
+                                                           #if($userItem.isProject($item.id,$pItem.id))checked#end
+                                                           project="$pItem.id"
+                                                           value="$pItem.id"
+                                                           title="$pItem.name">
                                                 #end
-                                                   name="$nowName"
-                                                   lay-filter="manage"
-                                                   lay-skin="switch"
-                                                   lay-text="是|否">
-                                        </div>
-                                    </div>
-                                    <div class="layui-inline">
-                                        <label class="layui-form-label" style="margin-top: 8px;">上传文件</label>
-                                        <div class="layui-input-block">
-                                            #set($nowName=$item.id+"_uploadFile")
-                                            <input type="checkbox" value="true"
-                                                #if($userItem.nodeRole[$item.id].uploadFile)
-                                                   checked
-                                                #end
-                                                   name="$nowName"
-                                                   lay-skin="switch"
-                                                   lay-text="是|否">
-                                        </div>
-                                    </div>
-                                    <div class="layui-inline">
-                                        <label class="layui-form-label" style="margin-top: 8px;">删除文件</label>
-                                        <div class="layui-input-block">
-                                            #set($nowName=$item.id+"_deleteFile")
-                                            <input type="checkbox" value="true"
-                                                #if($userItem.nodeRole[$item.id].deleteFile)
-                                                   checked
-                                                #end
-                                                   name="$nowName" lay-skin="switch"
-                                                   lay-text="是|否">
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                            <div class="layui-colla-content layui-show">
-                                <div class="layui-form-item" id="projectsDiv">
-                                    <div class="layui-inline">
-                                        <label class="layui-form-label" title="能删除项目，启动停止项目">管理项目</label>
-                                        <div class="layui-input-block">
-                                            #foreach($pItem in $item.projects)
-                                                #set($nowName="p_"+$item.id+"_"+$pItem.id)
-                                                <input type="checkbox"
-                                                       p="p_$item.id"
-                                                       name="$nowName"
-                                                       #if($userItem.isProject($item.id,$pItem.id))checked#end
-                                                       project="$pItem.id"
-                                                       value="$pItem.id"
-                                                       title="$pItem.name">
-                                            #end
-                                        </div>
-                                    </div>
-                                </div>
+                        #end
+                    #else
+                        #set($errorNode=true)
+                        <div class="layui-colla-item">
+                            <div class="layui-colla-title">
+                                没有可用节点
                             </div>
                         </div>
                     #end
                 </div>
+
+
             </div>
         </div>
-        <div class="layui-form-item" style="padding-left: 20%">
-            <button class="layui-btn layui-btn-normal" lay-submit lay-filter="submitUser" id="submitUser">提交
-            </button>
-        </div>
+        #if(!$errorNode)
+            <div class="layui-form-item" style="padding-left: 20%">
+                <button class="layui-btn layui-btn-normal" lay-submit lay-filter="submitUser" id="submitUser">提交
+                </button>
+            </div>
+        #end
     </form>
 </div>
 </body>

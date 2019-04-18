@@ -201,6 +201,10 @@ public class UserInfoController extends BaseServerController {
             }
             userModel.setPassword(password);
         }
+        return parseRole(userName, userModel);
+    }
+
+    private String parseRole(UserModel optUser, UserModel userModel) {
         String reqId = getParameter("reqId");
         List<NodeModel> list = UserListController.getNodeModel(reqId);
         if (list == null) {
@@ -208,7 +212,7 @@ public class UserInfoController extends BaseServerController {
         }
         // 服务管理员
         boolean manageB = "true".equals(getParameter("serverManager"));
-        if (!userName.isSystemUser() && manageB) {
+        if (!optUser.isSystemUser() && manageB) {
             return JsonMessage.getString(402, "你不是系统管理员不能创建服务管理员");
         }
         userModel.setServerManager(manageB);
@@ -222,13 +226,13 @@ public class UserInfoController extends BaseServerController {
 
             manageB = "true".equals(getParameter(StrUtil.format("{}_uploadFile", nodeRole.getId())));
             // 如果操作人没有权限  就不能管理被操作者
-            if (!userName.isUploadFile(nodeModel.getId()) && manageB) {
+            if (!optUser.isUploadFile(nodeModel.getId()) && manageB) {
                 return JsonMessage.getString(402, "你没有管理上传文件的权限");
             }
             nodeRole.setUploadFile(manageB);
 
             manageB = "true".equals(getParameter(StrUtil.format("{}_deleteFile", nodeRole.getId())));
-            if (!userName.isDeleteFile(nodeModel.getId()) && manageB) {
+            if (!optUser.isDeleteFile(nodeModel.getId()) && manageB) {
                 return JsonMessage.getString(402, "你没有管理删除文件的权限");
             }
             nodeRole.setDeleteFile(manageB);
@@ -246,7 +250,6 @@ public class UserInfoController extends BaseServerController {
                 nodeRole.setProjects(jsonArray1);
             }
             userModel.putNodeRole(nodeRole);
-
         }
         return null;
     }

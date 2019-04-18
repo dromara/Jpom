@@ -4,14 +4,11 @@ import cn.keepbx.jpom.common.BaseServerController;
 import cn.keepbx.jpom.common.forward.NodeForward;
 import cn.keepbx.jpom.common.forward.NodeUrl;
 import cn.keepbx.jpom.common.interceptor.ProjectPermission;
-import cn.keepbx.jpom.service.manage.ProjectInfoService;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
-
-import javax.annotation.Resource;
 
 /**
  * 文件管理
@@ -21,9 +18,6 @@ import javax.annotation.Resource;
 @Controller
 @RequestMapping(value = "/node/manage/file/")
 public class ProjectFileControl extends BaseServerController {
-
-    @Resource
-    private ProjectInfoService projectInfoService;
 
     /**
      * 文件管理页面
@@ -61,8 +55,6 @@ public class ProjectFileControl extends BaseServerController {
 
     /**
      * 下载文件
-     *
-     * @return File
      */
     @RequestMapping(value = "download", method = RequestMethod.GET)
     @ResponseBody

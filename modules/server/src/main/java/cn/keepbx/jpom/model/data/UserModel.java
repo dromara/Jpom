@@ -93,6 +93,12 @@ public class UserModel extends BaseModel {
         nodeRole.put(addNodeRole.id, addNodeRole);
     }
 
+    public void removeNodeRole(String id) {
+        if (nodeRole != null) {
+            nodeRole.remove(id);
+        }
+    }
+
     public void setNodeRole(Map<String, NodeRole> nodeRole) {
         this.nodeRole = nodeRole;
     }

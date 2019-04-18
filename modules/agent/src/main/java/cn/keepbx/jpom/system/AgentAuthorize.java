@@ -78,7 +78,7 @@ public class AgentAuthorize {
                 String json = FileUtil.readString(path, CharsetUtil.CHARSET_UTF_8);
                 AgentAutoUser autoUser = JSONObject.parseObject(json, AgentAutoUser.class);
                 String oldAgentPwd = autoUser.getAgentPwd();
-                if (!StrUtil.equals(autoUser.getAgentPwd(), this.agentName)) {
+                if (!StrUtil.equals(autoUser.getAgentName(), this.agentName)) {
                     throw new JpomRuntimeException("已经存在的登录名和配置的登录名不一致");
                 }
                 if (StrUtil.isNotEmpty(oldAgentPwd)) {
@@ -86,7 +86,8 @@ public class AgentAuthorize {
                     DefaultSystemLog.LOG().info("已有授权账号:{}  密码:{},授权信息保存位置：{}", this.agentName, this.agentPwd, FileUtil.getAbsolutePath(path));
                     return;
                 }
-
+            } catch (JpomRuntimeException e) {
+                throw e;
             } catch (Exception ignored) {
             }
         }
@@ -96,6 +97,6 @@ public class AgentAuthorize {
         autoUser.setAgentPwd(this.agentPwd);
         // 写入文件中
         JsonFileUtil.saveJson(path, autoUser.toJson());
-        DefaultSystemLog.LOG().info("已经生成授权账号:{}  密码:{},授权信息保存位置：{}", this.agentName, this.agentPwd, FileUtil.getAbsolutePath(path));
+        DefaultSystemLog.LOG().info("已经自动生成授权账号:{}  密码:{},授权信息保存位置：{}", this.agentName, this.agentPwd, FileUtil.getAbsolutePath(path));
     }
 }
