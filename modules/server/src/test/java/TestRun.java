@@ -2,15 +2,38 @@ import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 
 public class TestRun {
     public static void main(String[] args) throws IOException, InterruptedException {
-        String[] c = new String[]{"/jpom/command/run_boot.sh restart test no cn.keepbx.jpom.BaseJpomApplication /jpom/p/jpom /jpom/p/test.log [][--server.port=2024  --jpom.path=/jpom/p/jpom/]"};
+        testProcessBuilder("javaw  -jar D:\\sdfsdf\\test-jar\\springboot-test-jar-0.0.1-SNAPSHOT.jar -Dapplication=test -Dbasedir=D:\\sdfsdf\\test-jar   >> D:\\sdfsdf\\test.log");
 
-        System.out.println(exec(c));
+    }
+
+    public static void testProcessBuilder(String command) {
+        boolean err = false;
+        try {
+            ProcessBuilder processBuilder = new ProcessBuilder(command.split(" "));
+            //初始化ProcessBuilder对象
+            Process p = processBuilder.start();
+            //用于存储执行命令的结果
+            BufferedReader results = new BufferedReader(new InputStreamReader(p.getInputStream()));
+            String s;
+            while ((s = results.readLine()) != null) {
+                System.out.println(s);
+            }
+            //用于存储执行命令的错误信息
+            BufferedReader errors = new BufferedReader(new InputStreamReader(p.getErrorStream()));
+            while ((s = errors.readLine()) != null) {
+                System.err.println(s);
+                err = true;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        if (err) {
+            throw new RuntimeException("Error executing " + command);
+        }
     }
 
     private static String exec(String[] cmd) throws IOException, InterruptedException {

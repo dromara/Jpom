@@ -27,6 +27,15 @@ public class NodeModel extends BaseModel {
      * 项目信息
      */
     private JSONArray projects;
+    private boolean openStatus;
+
+    public boolean isOpenStatus() {
+        return openStatus;
+    }
+
+    public void setOpenStatus(boolean openStatus) {
+        this.openStatus = openStatus;
+    }
 
     public JSONArray getProjects() {
         return projects;

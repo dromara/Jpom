@@ -69,7 +69,18 @@
                        lay-verify="required">
             </div>
         </div>
-
+        <div class="layui-form-item">
+            <label class="layui-form-label">节点状态</label>
+            <div class="layui-input-block">
+                <input type="checkbox" value="true"
+                    #if($item.openStatus)
+                       checked
+                    #end
+                       name="openStatus"
+                       lay-skin="switch"
+                       lay-text="启用|停用">
+            </div>
+        </div>
         <div class="layui-form-item" style="padding-left: 20%">
             <button class="layui-btn layui-btn-normal" lay-submit lay-filter="submitNode" id="project_submit">提交
             </button>

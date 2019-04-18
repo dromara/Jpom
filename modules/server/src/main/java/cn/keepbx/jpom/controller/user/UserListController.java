@@ -67,6 +67,10 @@ public class UserListController extends BaseServerController {
         Iterator<NodeModel> iterator = nodeModels.iterator();
         while (iterator.hasNext()) {
             NodeModel nodeModel = iterator.next();
+            if (!nodeModel.isOpenStatus()) {
+                iterator.remove();
+                continue;
+            }
             try {
                 // 获取项目信息不需要状态
                 JsonMessage jsonMessage = NodeForward.request(nodeModel, getRequest(), NodeUrl.Manage_GetProjectInfo, "notStatus", "true");

@@ -8,8 +8,11 @@ import cn.keepbx.jpom.common.forward.NodeForward;
 import cn.keepbx.jpom.common.forward.NodeUrl;
 import cn.keepbx.jpom.common.interceptor.ProjectPermission;
 import cn.keepbx.jpom.common.interceptor.UrlPermission;
+import cn.keepbx.jpom.model.data.NodeModel;
+import cn.keepbx.jpom.model.data.UserModel;
 import cn.keepbx.jpom.service.manage.ProjectInfoService;
 import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -62,11 +65,23 @@ public class ProjectManageControl extends BaseServerController {
     @RequestMapping(value = "getProjectInfo", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     public String getProjectInfo() {
-        JsonMessage jsonMessage = NodeForward.request(getNode(), getRequest(), NodeUrl.Manage_GetProjectInfo);
+        NodeModel nodeModel = getNode();
+        JsonMessage jsonMessage = NodeForward.request(nodeModel, getRequest(), NodeUrl.Manage_GetProjectInfo);
         if (jsonMessage.getCode() == HttpStatus.HTTP_OK) {
+            UserModel userModel = getUser();
             JSONArray jsonArray = NodeForward.toObj(jsonMessage, JSONArray.class);
-            //
-//                object.put("manager", true);
+            if (jsonArray != null) {
+                JSONArray newArray = new JSONArray();
+                jsonArray.forEach(o -> {
+                    JSONObject jsonObject = (JSONObject) o;
+                    String id = jsonObject.getString("id");
+                    jsonObject.put("manager", userModel.isProject(nodeModel.getId(), id));
+                    newArray.add(jsonObject);
+                });
+                jsonArray = newArray;
+            }
+            jsonMessage.setData(jsonArray);
+
         }
         return jsonMessage.toString();
     }

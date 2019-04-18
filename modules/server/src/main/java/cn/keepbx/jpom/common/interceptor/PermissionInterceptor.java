@@ -12,6 +12,7 @@ import cn.keepbx.jpom.model.data.NodeModel;
 import cn.keepbx.jpom.model.data.UserModel;
 import cn.keepbx.jpom.service.manage.ProjectInfoService;
 import cn.keepbx.jpom.service.node.NodeService;
+import cn.keepbx.jpom.system.JpomRuntimeException;
 import org.springframework.http.MediaType;
 import org.springframework.web.method.HandlerMethod;
 
@@ -43,9 +44,12 @@ public class PermissionInterceptor extends BaseInterceptor {
         if (handler instanceof HandlerMethod && userModel != null) {
             HandlerMethod handlerMethod = (HandlerMethod) handler;
             String nodeId = request.getParameter("nodeId");
-            if (StrUtil.isNotEmpty(nodeId)) {
+            if (!StrUtil.isBlankOrUndefined(nodeId)) {
                 // 节点信息
                 NodeModel nodeModel = nodeService.getItem(nodeId);
+                if (nodeModel != null && !nodeModel.isOpenStatus()) {
+                    throw new JpomRuntimeException(nodeModel.getName() + "节点未启用");
+                }
                 request.setAttribute("node", nodeModel);
             }
             ProjectPermission projectPermission = handlerMethod.getMethodAnnotation(ProjectPermission.class);

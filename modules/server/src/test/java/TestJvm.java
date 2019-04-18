@@ -32,9 +32,13 @@ public class TestJvm {
             MonitoredVm vm = local.getMonitoredVm(new VmIdentifier("//" + process));
             // 获取类名
             String processname = MonitoredVmUtil.mainClass(vm, true);
+            if (!"cn.keepbx.jpom.JpomAgentApplication".equals(processname)) {
+                continue;
+            }
             System.out.println(process + " ------> " + processname);
 
             System.out.println(MonitoredVmUtil.commandLine(vm));
+            System.out.println(MonitoredVmUtil.mainArgs(vm));
             System.out.println(MonitoredVmUtil.jvmArgs(vm));
         }
     }
