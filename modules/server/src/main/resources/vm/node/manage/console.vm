@@ -60,7 +60,7 @@
 <body>
 <div class="console">
     #if($manager)
-        <div class="layui-row">
+        <div class="layui-row" id="optDiv">
             <!-- layui-elem-quote -->
             #if($logSize)
                 #if($logSize.logSize)
@@ -169,6 +169,7 @@
                 showLogDom.append('WebSocket连接已关闭！<br/>');
                 clearInterval(loopLogTime);
                 clearInterval(heart);
+                $("#optDiv").hide();
                 layer.alert("控制台已离线")
             };
 
@@ -223,7 +224,7 @@
         function scrollToBotomm() {
             var h = showLogDom[0].scrollHeight;
             if (window.screen.height * 2 < h) {
-                showLogDom.html("已清空屏幕缓存");
+                showLogDom.html("已清空屏幕缓存" + '<br/>');
                 showLogDom.scrollTop(0);
                 return;
             }

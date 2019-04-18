@@ -62,6 +62,11 @@ public class ServerWebSocketHandle {
             String userName = UserModel.getOptUserName(userModel);
             userName = URLUtil.encode(userName);
             NodeModel nodeModel = nodeService.getItem(nodeId);
+            // 判断权限
+            if (!userModel.isProject(nodeModel.getId(), projectId)) {
+                SocketSessionUtil.send(session, "没有项目权限");
+                return;
+            }
             String url = NodeForward.getSocketUrl(nodeModel, NodeUrl.TopSocket);
             url = StrUtil.format(url, projectId, userName);
             ProxySession proxySession = new ProxySession(url, session);
@@ -88,6 +93,7 @@ public class ServerWebSocketHandle {
         UserModel userModel = USER.get(session.getId());
         if (userModel == null) {
             SocketSessionUtil.send(session, "回话信息失效，刷新网页再试");
+            session.close();
             return;
         }
         ProxySession proxySession = getSession(session);

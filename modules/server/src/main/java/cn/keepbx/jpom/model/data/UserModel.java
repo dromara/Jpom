@@ -5,6 +5,7 @@ import cn.hutool.core.map.MapUtil;
 import cn.hutool.crypto.SecureUtil;
 import cn.keepbx.jpom.model.BaseJsonModel;
 import cn.keepbx.jpom.model.BaseModel;
+import cn.keepbx.jpom.socket.WebSocketConfig;
 import cn.keepbx.jpom.system.ServerExtConfigBean;
 import com.alibaba.fastjson.JSONArray;
 
@@ -263,6 +264,10 @@ public class UserModel extends BaseModel {
      */
     public boolean isProject(String nodeId, String id) {
         if (isManage(nodeId)) {
+            return true;
+        }
+        // 系统监控权限
+        if (WebSocketConfig.SYSTEM_ID.equals(id)) {
             return true;
         }
         NodeRole item = nodeRole.get(nodeId);

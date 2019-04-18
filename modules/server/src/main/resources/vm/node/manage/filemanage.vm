@@ -65,6 +65,7 @@
             }
         });
         var updateFail = false;
+        var listUploadCount, nowUploadCount;
         uploadRender({
             elem: '#uploadFile',
             accept: 'file',
@@ -73,9 +74,17 @@
             },
             multiple: true,
             url: './upload',
-            before: function () {
-                layer.load(1, {
-                    shade: [0.5, '#fff'] //0.1透明度的白色背景
+            choose: function (obj) {
+                nowUploadCount = listUploadCount = 0;
+                obj.preview(function (index, file, result) {
+                    listUploadCount++;
+                });
+            },
+            before: function (obj) {
+                layer.msg('上传中(' + nowUploadCount + '/' + listUploadCount + ')', {
+                    icon: 16,
+                    shade: 0.2,
+                    time: 100000000
                 });
                 updateFail = false;
             },
@@ -86,7 +95,7 @@
                 if (updateFail) {
                     return;
                 }
-                layer.msg("文件总数：" + obj.total + " 成功上传：" + obj.successful + " 上传失败：" + obj.aborted);
+                layer.msg("文件总数：" + obj.total + " 成功上传：" + nowUploadCount + " 上传失败：" + obj.aborted);
                 setTimeout(function () {
                     reloadTable();
                 }, 2000);
@@ -94,6 +103,13 @@
             done: function (res, index, upload) {
                 if (res.code != 200) {
                     layer.msg(res.msg);
+                } else {
+                    nowUploadCount++
+                    layer.msg('上传中(' + nowUploadCount + '/' + listUploadCount + ')', {
+                        icon: 16,
+                        shade: 0.2,
+                        time: 100000000
+                    });
                 }
                 // 没有权限
                 if (res.code == 302) {
@@ -101,6 +117,7 @@
                 }
             },
             error: function () {
+                layer.closeAll();
                 layer.msg('上传失败');
             }
         });

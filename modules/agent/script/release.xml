@@ -13,8 +13,8 @@
             <directory>script/</directory>
             <outputDirectory>/</outputDirectory>
             <includes>
-                <include>Jpom.sh</include>
-                <include>Jpom.bat</include>
+                <include>Agent.sh</include>
+                <include>Agent.bat</include>
             </includes>
         </fileSet>
         <!--复制外部配置文件-->
