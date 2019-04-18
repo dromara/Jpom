@@ -58,9 +58,11 @@ function start() {
     if [[ -f ${Log} ]]; then
         tail -f ${Log}
     else
-        echo "还没有生成日志文件:${Log}"
+        sleep 3
+        if [[ -f ${Log} ]]; then
+            echo "还没有生成日志文件:${Log}"
+        fi
     fi
-    echo ${CLASSPATH}
 }
 
 # 拼接所有文件

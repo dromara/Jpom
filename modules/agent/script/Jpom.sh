@@ -29,7 +29,7 @@ Log="${Path}run.log"
 LogBack="${Path}log/"
 JVM="-server "
 # 修改项目端口号 日志路径
-ARGS="--jpom.applicationTag=${Tag} --server.port=2122  --jpom.log=${Path}log"
+ARGS="--jpom.applicationTag=${Tag} --server.port=2123  --jpom.log=${Path}log"
 
 echo ${Tag}
 echo ${Path}
@@ -58,9 +58,11 @@ function start() {
     if [[ -f ${Log} ]]; then
         tail -f ${Log}
     else
-        echo "还没有生成日志文件:${Log}"
+        sleep 3
+        if [[ -f ${Log} ]]; then
+            echo "还没有生成日志文件:${Log}"
+        fi
     fi
-    echo ${CLASSPATH}
 }
 
 # 拼接所有文件

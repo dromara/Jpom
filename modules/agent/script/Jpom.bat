@@ -31,7 +31,7 @@ set Lib=%basePath%lib\
 set Log=%basePath%run.log
 set LogBack=%basePath%log\
 set JVM=-server
-set ARGS= --jpom.applicationTag=%Tag% --jpom.log=%basePath%log --server.port=2122
+set ARGS= --jpom.applicationTag=%Tag% --jpom.log=%basePath%log --server.port=2123
 
 color 0a
 TITLE Jpom管理系统BAT控制台

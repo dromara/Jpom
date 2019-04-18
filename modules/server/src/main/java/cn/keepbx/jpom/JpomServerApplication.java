@@ -22,7 +22,7 @@ import org.springframework.http.converter.StringHttpMessageConverter;
 @EnableCommonBoot
 public class JpomServerApplication extends BaseJpomApplication {
     public JpomServerApplication() {
-        super(Type.Server);
+        super(Type.Server, JpomServerApplication.class);
     }
 
     /**

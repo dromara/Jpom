@@ -22,7 +22,7 @@ import org.springframework.http.converter.StringHttpMessageConverter;
 public class JpomAgentApplication extends BaseJpomApplication {
 
     public JpomAgentApplication() {
-        super(Type.Agent);
+        super(Type.Agent, JpomAgentApplication.class);
     }
 
     /**

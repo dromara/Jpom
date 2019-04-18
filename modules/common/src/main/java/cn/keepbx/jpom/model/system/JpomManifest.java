@@ -23,9 +23,12 @@ import java.util.jar.Manifest;
  * @date 2019/4/7
  */
 public class JpomManifest {
-    private static final JpomManifest JPOM_MANIFEST;
+    private static JpomManifest JPOM_MANIFEST;
 
-    static {
+    private static synchronized void init() {
+        if (JPOM_MANIFEST != null) {
+            return;
+        }
         JPOM_MANIFEST = new JpomManifest();
         File jarFile = getRunPath();
         if (jarFile.isFile()) {
@@ -55,6 +58,7 @@ public class JpomManifest {
      * @return this
      */
     public static JpomManifest getInstance() {
+        init();
         return JPOM_MANIFEST;
     }
 
@@ -117,10 +121,14 @@ public class JpomManifest {
      */
     public void setTimeStamp(String timeStamp) {
         if (StrUtil.isNotEmpty(timeStamp)) {
-            DateTime dateTime = DateUtil.parseUTC(timeStamp);
-            this.timeStamp = dateTime.toStringDefaultTimeZone();
+            try {
+                DateTime dateTime = DateUtil.parseUTC(timeStamp);
+                this.timeStamp = dateTime.toStringDefaultTimeZone();
+            } catch (Exception e) {
+                this.timeStamp = timeStamp;
+            }
         } else {
-            this.timeStamp = timeStamp;
+            this.timeStamp = "dev";
         }
     }
 
@@ -135,7 +143,7 @@ public class JpomManifest {
      * @return jar 或者classPath
      */
     public static File getRunPath() {
-        ApplicationHome home = new ApplicationHome(JpomManifest.class);
+        ApplicationHome home = new ApplicationHome(BaseJpomApplication.getAppClass());
         String path = (home.getSource() == null ? "" : home.getSource().getAbsolutePath());
         return FileUtil.file(path);
     }

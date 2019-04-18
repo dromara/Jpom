@@ -68,7 +68,7 @@ public enum NodeUrl {
 
     Manage_Log_logBack("/manage/log/logBack"),
 
-    Manage_Log_export("/manage/log/export"),
+    Manage_Log_export("/manage/log/export.html"),
 
 
     System_alioss_config("/system/alioss_config"),

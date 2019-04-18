@@ -1,6 +1,7 @@
 package cn.keepbx.jpom.system;
 
 import cn.hutool.core.util.StrUtil;
+import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.spring.SpringUtil;
 import cn.keepbx.jpom.model.system.JpomManifest;
 import org.springframework.beans.factory.annotation.Value;
@@ -12,6 +13,8 @@ import org.springframework.core.io.Resource;
 import java.io.File;
 
 /**
+ * 外部资源配置
+ *
  * @author jiangzeyin
  * @date 2019/4/16
  */
@@ -71,6 +74,7 @@ public class ExtConfigBean {
                 }
                 path = file.getParentFile().getParentFile().getAbsolutePath();
             }
+            DefaultSystemLog.LOG().info("当前数据路径：{}", path);
         }
         return path;
     }

@@ -24,6 +24,8 @@ public abstract class BaseJpomApplication {
     private static Type appType;
     private static Charset charset;
 
+    private static Class appClass;
+
     /**
      * 获取程序命令行参数
      *
@@ -33,8 +35,9 @@ public abstract class BaseJpomApplication {
         return args;
     }
 
-    public BaseJpomApplication(Type appType) {
+    public BaseJpomApplication(Type appType, Class appClass) {
         BaseJpomApplication.appType = appType;
+        BaseJpomApplication.appClass = appClass;
     }
 
     /**
@@ -55,5 +58,12 @@ public abstract class BaseJpomApplication {
 
     public static Type getAppType() {
         return appType;
+    }
+
+    public static Class getAppClass() {
+        if (appClass == null) {
+            return BaseJpomApplication.class;
+        }
+        return appClass;
     }
 }
