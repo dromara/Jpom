@@ -18,9 +18,11 @@ import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
 /**
- * @author yangheng
- * desc 全局异常处理
- * createTime 2018/6/22 17:13
+ * 全局异常处理
+ *
+ * @author jiangzeyin
+ * <p>
+ * createTime 2019/04/17
  */
 @ControllerAdvice
 public class GlobalDefaultExceptionHandler {

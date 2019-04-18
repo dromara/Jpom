@@ -82,7 +82,7 @@
     ## 获取自适应的socket
     function getSocketHost() {
         var pro = location.protocol === 'https:' ? 'wss://' : 'ws://';
-        return pro + window.location.host + "$!jpomProxyPath/$!nowNodeItem.id";
+        return pro + window.location.host + "$!jpomProxyPath/$!node.id";
     }
 
     function getTopQueryString(name) {

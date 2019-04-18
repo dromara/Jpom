@@ -12,7 +12,7 @@
 </head>
 <body>
 <div class="layui-row">
-    #if($user.isManage())
+    #if($user.isManage($node.id))
         <button onclick="editProject('');" class="layui-btn layui-btn-sm">新增项目</button>
     #end
     <button onclick="reloadTable();" class="layui-btn layui-btn-sm">刷新表格</button>

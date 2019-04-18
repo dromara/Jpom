@@ -23,8 +23,8 @@
 @echo off
 setlocal enabledelayedexpansion
 
-set Tag=KeepBx-System-JpomApplication
-set MainClass=cn.keepbx.jpom.JpomServerApplication
+set Tag=KeepBx-Agent-System-JpomAgentApplication
+set MainClass=cn.keepbx.jpom.JpomAgentApplication
 set CloseMainClass=cn.keepbx.jpom.JpomClose
 set basePath=%~dp0
 set Lib=%basePath%lib\

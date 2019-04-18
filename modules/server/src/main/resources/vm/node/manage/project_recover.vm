@@ -25,7 +25,7 @@
 </head>
 
 <body>
-    #if($user.isManage())
+    #if($user.isManage($node.id))
     <table class="layui-table">
         <thead>
         <tr>

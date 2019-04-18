@@ -4,10 +4,18 @@
             <font style="font-size: 10px;">
                 (#if($user.isSystemUser())
                 系统管理
-            #elseif($user.isManage())
-                管理员
             #else
-                普通成员
+                #if($node)
+                    #if($user.isManage($node.id))
+                        节点管理员
+                    #else
+                        普通成员
+                    #end
+                #elseif($user.isServerManager())
+                    服务管理员
+                #else
+                    普通成员
+                #end
             #end)
             </font>
         </a>

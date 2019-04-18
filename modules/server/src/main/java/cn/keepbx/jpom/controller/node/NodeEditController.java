@@ -36,7 +36,7 @@ public class NodeEditController extends BaseServerController {
     public String edit(String id) {
         setAttribute("type", "add");
         if (StrUtil.isNotEmpty(id)) {
-            UserModel userModel = getUserModel();
+            UserModel userModel = getUser();
             NodeModel nodeModel = nodeService.getItem(id);
             if (nodeModel != null && userModel.isSystemUser()) {
                 setAttribute("item", nodeModel);

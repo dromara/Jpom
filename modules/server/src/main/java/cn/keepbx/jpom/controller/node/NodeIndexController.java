@@ -38,10 +38,6 @@ public class NodeIndexController extends BaseServerController {
 
     @RequestMapping(value = "index.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
     public String index(String nodeId) {
-        NodeModel nodeModel = nodeService.getItem(nodeId);
-        if (nodeModel != null) {
-            setAttribute("node", nodeModel);
-        }
         List<NodeModel> nodeModels = nodeService.list();
         setAttribute("array", nodeModels);
         //

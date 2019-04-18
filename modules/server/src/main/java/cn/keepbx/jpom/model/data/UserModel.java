@@ -230,7 +230,7 @@ public class UserModel extends BaseModel {
 
 
     /**
-     * 是否为管理员
+     * 是否为节点管理员
      *
      * @return true 是
      */

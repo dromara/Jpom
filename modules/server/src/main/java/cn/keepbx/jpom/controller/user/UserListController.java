@@ -35,8 +35,16 @@ import java.util.concurrent.TimeUnit;
 public class UserListController extends BaseServerController {
     private static final TimedCache<String, List<NodeModel>> TIMED_CACHE = new TimedCache<>(TimeUnit.MINUTES.toMillis(5));
 
-    public static List<NodeModel> getErrorMsg(String id) {
-        return TIMED_CACHE.get(id);
+    /**
+     * 获取页面编辑的节点信息
+     *
+     * @param id id
+     * @return list
+     */
+    static List<NodeModel> getNodeModel(String id) {
+        List<NodeModel> nodeModels = TIMED_CACHE.get(id);
+        TIMED_CACHE.remove(id);
+        return nodeModels;
     }
 
     @Resource

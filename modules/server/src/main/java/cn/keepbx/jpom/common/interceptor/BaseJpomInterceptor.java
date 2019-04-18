@@ -32,6 +32,12 @@ public abstract class BaseJpomInterceptor extends BaseInterceptor {
         return Convert.toBool(request.getAttribute("Page_Req"), true);
     }
 
+    /**
+     * 二级代理路径
+     *
+     * @param request
+     * @return
+     */
     public static String getHeaderProxyPath(HttpServletRequest request) {
         String proxyPath = ServletUtil.getHeaderIgnoreCase(request, "Jpom-ProxyPath");
         if (StrUtil.isEmpty(proxyPath)) {

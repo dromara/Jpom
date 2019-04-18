@@ -64,7 +64,7 @@
                         <a href="javascript:;"
                            data-options="{'id':'manage', 'title':'项目管理', 'url':'./manage/projectInfo'}">项目管理</a>
                     </li>
-                    #if($user.isManage())
+                    #if($user.isManage($node.id))
                         <li class="layui-nav-item">
                             <a href="javascript:;"
                                data-options="{'id':'nginx', 'title':'nginx管理', 'url':'./system/nginx/list.html'}">nginx管理</a>
@@ -90,7 +90,7 @@
                 </ul>
                 <div class="layui-tab-content">
                     <div class="layui-tab-item layui-show">
-                        <iframe src="./welcome?nodeId=$!nowNodeItem.id" frameborder="0" class="custom-iframe"></iframe>
+                        <iframe src="./welcome?nodeId=$!node.id" frameborder="0" class="custom-iframe"></iframe>
                     </div>
                 </div>
             </div>

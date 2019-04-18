@@ -202,7 +202,7 @@ public class UserInfoController extends BaseServerController {
             userModel.setPassword(password);
         }
         String reqId = getParameter("reqId");
-        List<NodeModel> list = UserListController.getErrorMsg(reqId);
+        List<NodeModel> list = UserListController.getNodeModel(reqId);
         if (list == null) {
             return JsonMessage.getString(401, "页面请求超时");
         }

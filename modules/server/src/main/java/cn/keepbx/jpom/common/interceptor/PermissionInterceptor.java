@@ -8,8 +8,10 @@ import cn.jiangzeyin.common.interceptor.InterceptorPattens;
 import cn.jiangzeyin.common.spring.SpringUtil;
 import cn.keepbx.jpom.common.BaseServerController;
 import cn.keepbx.jpom.common.Role;
+import cn.keepbx.jpom.model.data.NodeModel;
 import cn.keepbx.jpom.model.data.UserModel;
 import cn.keepbx.jpom.service.manage.ProjectInfoService;
+import cn.keepbx.jpom.service.node.NodeService;
 import org.springframework.http.MediaType;
 import org.springframework.web.method.HandlerMethod;
 
@@ -26,17 +28,26 @@ import javax.servlet.http.HttpServletResponse;
 public class PermissionInterceptor extends BaseInterceptor {
 
     private ProjectInfoService projectInfoService;
+    private NodeService nodeService;
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         if (projectInfoService == null) {
             projectInfoService = SpringUtil.getBean(ProjectInfoService.class);
         }
+        if (nodeService == null) {
+            nodeService = SpringUtil.getBean(NodeService.class);
+        }
         super.preHandle(request, response, handler);
         UserModel userModel = BaseServerController.getUserModel();
         if (handler instanceof HandlerMethod && userModel != null) {
             HandlerMethod handlerMethod = (HandlerMethod) handler;
             String nodeId = request.getParameter("nodeId");
+            if (StrUtil.isNotEmpty(nodeId)) {
+                // 节点信息
+                NodeModel nodeModel = nodeService.getItem(nodeId);
+                request.setAttribute("node", nodeModel);
+            }
             ProjectPermission projectPermission = handlerMethod.getMethodAnnotation(ProjectPermission.class);
             if (projectPermission != null) {
                 String val = request.getParameter(projectPermission.value());
