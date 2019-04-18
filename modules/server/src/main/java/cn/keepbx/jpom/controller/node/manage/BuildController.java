@@ -1,6 +1,6 @@
 package cn.keepbx.jpom.controller.node.manage;
 
-import cn.keepbx.jpom.common.BaseNodeController;
+import cn.keepbx.jpom.common.BaseServerController;
 import cn.keepbx.jpom.common.forward.NodeForward;
 import cn.keepbx.jpom.common.forward.NodeUrl;
 import cn.keepbx.jpom.common.interceptor.ProjectPermission;
@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
  */
 @Controller
 @RequestMapping(value = "/node/manage/")
-public class BuildController extends BaseNodeController {
+public class BuildController extends BaseServerController {
 
     @RequestMapping(value = "build", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
     public String build(String id) {
@@ -37,7 +37,6 @@ public class BuildController extends BaseNodeController {
         String url = NodeForward.requestData(getNode(), NodeUrl.Manage_build_download, String.class,
                 "id", id,
                 "key", key);
-        System.out.println(url);
         if (url == null) {
             return "redirect:error";
         }

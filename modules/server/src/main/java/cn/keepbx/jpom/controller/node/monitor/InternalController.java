@@ -1,6 +1,6 @@
 package cn.keepbx.jpom.controller.node.monitor;
 
-import cn.keepbx.jpom.common.BaseNodeController;
+import cn.keepbx.jpom.common.BaseServerController;
 import cn.keepbx.jpom.common.forward.NodeForward;
 import cn.keepbx.jpom.common.forward.NodeUrl;
 import com.alibaba.fastjson.JSONObject;
@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
  */
 @Controller
 @RequestMapping(value = "/node/manage/")
-public class InternalController extends BaseNodeController {
+public class InternalController extends BaseServerController {
 
     /**
      * 获取内存信息

@@ -1,6 +1,6 @@
 package cn.keepbx.jpom.controller.node.system;
 
-import cn.keepbx.jpom.common.BaseNodeController;
+import cn.keepbx.jpom.common.BaseServerController;
 import cn.keepbx.jpom.common.Role;
 import cn.keepbx.jpom.common.forward.NodeForward;
 import cn.keepbx.jpom.common.forward.NodeUrl;
@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
  */
 @Controller
 @RequestMapping(value = "/node/system")
-public class AliOssController extends BaseNodeController {
+public class AliOssController extends BaseServerController {
 
 
     /**

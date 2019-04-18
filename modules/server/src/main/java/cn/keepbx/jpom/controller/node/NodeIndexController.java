@@ -1,7 +1,7 @@
 package cn.keepbx.jpom.controller.node;
 
 import cn.jiangzeyin.common.JsonMessage;
-import cn.keepbx.jpom.common.BaseNodeController;
+import cn.keepbx.jpom.common.BaseServerController;
 import cn.keepbx.jpom.common.forward.NodeForward;
 import cn.keepbx.jpom.common.forward.NodeUrl;
 import cn.keepbx.jpom.model.data.NodeModel;
@@ -24,7 +24,7 @@ import java.util.List;
  */
 @Controller
 @RequestMapping(value = "/node")
-public class NodeIndexController extends BaseNodeController {
+public class NodeIndexController extends BaseServerController {
 
     @Resource
     private NodeService nodeService;

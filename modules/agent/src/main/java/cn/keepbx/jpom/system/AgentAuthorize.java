@@ -71,9 +71,10 @@ public class AgentAuthorize {
             // 读取旧密码
             try {
                 String json = FileUtil.readString(path, CharsetUtil.CHARSET_UTF_8);
-                AgentAuthorize oldAuthorize = JSONObject.parseObject(json, AgentAuthorize.class);
-                if (StrUtil.isNotEmpty(oldAuthorize.agentPwd)) {
-                    agentAuthorize.agentPwd = oldAuthorize.agentPwd;
+                JSONObject oldAuthorize = JSONObject.parseObject(json);
+                String oldAgentPwd = oldAuthorize.getString("agentPwd");
+                if (StrUtil.isNotEmpty(oldAgentPwd)) {
+                    agentAuthorize.agentPwd = oldAgentPwd;
                     DefaultSystemLog.LOG().info("已有授权密码：{},授权信息保存位置：{}", this.agentPwd, FileUtil.getAbsolutePath(path));
                     return;
                 }
@@ -82,10 +83,17 @@ public class AgentAuthorize {
             }
         }
         this.agentPwd = RandomUtil.randomString(10);
-        JSONObject jsonObject = new JSONObject();
-        jsonObject.put("agentName", agentName);
-        jsonObject.put("agentPwd", agentPwd);
+        JSONObject jsonObject = toJson();
         JsonFileUtil.saveJson(path, jsonObject);
         DefaultSystemLog.LOG().info("已经生成授权密码：{},授权信息保存位置：{}", this.agentPwd, FileUtil.getAbsolutePath(path));
     }
+
+    private JSONObject toJson() {
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("agentName", agentName);
+        jsonObject.put("agentPwd", agentPwd);
+        return jsonObject;
+    }
+
+
 }

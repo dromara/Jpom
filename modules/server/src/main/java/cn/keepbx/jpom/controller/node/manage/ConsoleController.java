@@ -1,6 +1,6 @@
 package cn.keepbx.jpom.controller.node.manage;
 
-import cn.keepbx.jpom.common.BaseNodeController;
+import cn.keepbx.jpom.common.BaseServerController;
 import cn.keepbx.jpom.service.manage.ProjectInfoService;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.http.MediaType;
@@ -18,7 +18,7 @@ import javax.annotation.Resource;
  */
 @Controller
 @RequestMapping(value = "/node/manage/")
-public class ConsoleController extends BaseNodeController {
+public class ConsoleController extends BaseServerController {
 
     @Resource
     private ProjectInfoService projectInfoService;

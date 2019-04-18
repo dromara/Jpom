@@ -1,6 +1,6 @@
 package cn.keepbx.jpom.controller.node.manage.file;
 
-import cn.keepbx.jpom.common.BaseNodeController;
+import cn.keepbx.jpom.common.BaseServerController;
 import cn.keepbx.jpom.common.forward.NodeForward;
 import cn.keepbx.jpom.common.forward.NodeUrl;
 import cn.keepbx.jpom.common.interceptor.ProjectPermission;
@@ -20,7 +20,7 @@ import javax.annotation.Resource;
  */
 @Controller
 @RequestMapping(value = "/node/manage/file/")
-public class ProjectFileControl extends BaseNodeController {
+public class ProjectFileControl extends BaseServerController {
 
     @Resource
     private ProjectInfoService projectInfoService;

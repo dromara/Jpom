@@ -5,7 +5,7 @@ import cn.hutool.extra.servlet.ServletUtil;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.interceptor.InterceptorPattens;
 import cn.jiangzeyin.common.spring.SpringUtil;
-import cn.keepbx.jpom.common.BaseController;
+import cn.keepbx.jpom.common.BaseServerController;
 import cn.keepbx.jpom.model.data.UserModel;
 import cn.keepbx.jpom.service.user.UserService;
 import org.springframework.http.MediaType;
@@ -108,7 +108,7 @@ public class LoginInterceptor extends BaseJpomInterceptor {
     @Override
     public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
         super.afterCompletion(request, response, handler, ex);
-        BaseController.remove();
+        BaseServerController.remove();
     }
 
 

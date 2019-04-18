@@ -1,7 +1,7 @@
 package cn.keepbx.jpom.controller.node;
 
 import cn.jiangzeyin.common.JsonMessage;
-import cn.keepbx.jpom.common.BaseNodeController;
+import cn.keepbx.jpom.common.BaseServerController;
 import cn.keepbx.jpom.common.Role;
 import cn.keepbx.jpom.common.forward.NodeForward;
 import cn.keepbx.jpom.common.forward.NodeUrl;
@@ -23,7 +23,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping(value = "/node")
-public class NodeInstallController extends BaseNodeController {
+public class NodeInstallController extends BaseServerController {
 
     @Resource
     private WhitelistDirectoryService whitelistDirectoryService;

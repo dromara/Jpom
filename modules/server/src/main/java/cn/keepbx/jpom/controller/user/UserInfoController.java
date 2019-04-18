@@ -4,21 +4,24 @@ import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
-import cn.keepbx.jpom.common.BaseController;
+import cn.keepbx.jpom.common.BaseServerController;
 import cn.keepbx.jpom.common.Role;
 import cn.keepbx.jpom.common.interceptor.LoginInterceptor;
 import cn.keepbx.jpom.common.interceptor.UrlPermission;
+import cn.keepbx.jpom.model.data.NodeModel;
 import cn.keepbx.jpom.model.data.UserModel;
 import cn.keepbx.jpom.service.user.UserService;
 import cn.keepbx.jpom.socket.WebSocketConfig;
 import cn.keepbx.jpom.system.ServerExtConfigBean;
 import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
+import java.util.List;
 
 /**
  * 用户管理
@@ -28,7 +31,7 @@ import javax.annotation.Resource;
  */
 @RestController
 @RequestMapping(value = "/user")
-public class UserInfoController extends BaseController {
+public class UserInfoController extends BaseServerController {
     @Resource
     private UserService userService;
 
@@ -101,7 +104,7 @@ public class UserInfoController extends BaseController {
      * @return String
      */
     @RequestMapping(value = "deleteUser", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    @UrlPermission(Role.Manage)
+    @UrlPermission(Role.ServerManager)
     public String deleteUser(String id) {
         UserModel userName = getUser();
         if (userName.getId().equals(id)) {
@@ -132,7 +135,7 @@ public class UserInfoController extends BaseController {
      * @return String
      */
     @RequestMapping(value = "addUser", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    @UrlPermission(Role.Manage)
+    @UrlPermission(Role.ServerManager)
     public String addUser(String id) {
         if (WebSocketConfig.SYSTEM_ID.equalsIgnoreCase(id)) {
             return JsonMessage.getString(400, "当前登录名已经被系统占用啦");
@@ -198,29 +201,53 @@ public class UserInfoController extends BaseController {
             }
             userModel.setPassword(password);
         }
-
-        String projects = getParameter("project");
-        JSONArray jsonProjects = null;
-        if (projects != null) {
-            jsonProjects = JSONArray.parseArray(projects);
+        String reqId = getParameter("reqId");
+        List<NodeModel> list = UserListController.getErrorMsg(reqId);
+        if (list == null) {
+            return JsonMessage.getString(401, "页面请求超时");
         }
-        userModel.setProjects(jsonProjects);
-
-        boolean manageB = "true".equals(getParameter("manage"));
-        userModel.setManage(manageB);
-
-        manageB = "true".equals(getParameter("uploadFile"));
-        // 如果操作人没有权限  就不能管理被操作者
-        if (!userName.isUploadFile() && manageB) {
-            return JsonMessage.getString(402, "你没有管理上传文件的权限");
+        // 服务管理员
+        boolean manageB = "true".equals(getParameter("serverManager"));
+        if (!userName.isSystemUser() && manageB) {
+            return JsonMessage.getString(402, "你不是系统管理员不能创建服务管理员");
         }
-        userModel.setUploadFile(manageB);
+        userModel.setServerManager(manageB);
 
-        manageB = "true".equals(getParameter("deleteFile"));
-        if (!userName.isDeleteFile() && manageB) {
-            return JsonMessage.getString(402, "你没有管理删除文件的权限");
+        UserModel.NodeRole nodeRole;
+        for (NodeModel nodeModel : list) {
+            nodeRole = new UserModel.NodeRole();
+            nodeRole.setId(nodeModel.getId());
+            manageB = "true".equals(getParameter(StrUtil.format("{}_manage", nodeRole.getId())));
+            nodeRole.setManage(manageB);
+
+            manageB = "true".equals(getParameter(StrUtil.format("{}_uploadFile", nodeRole.getId())));
+            // 如果操作人没有权限  就不能管理被操作者
+            if (!userName.isUploadFile(nodeModel.getId()) && manageB) {
+                return JsonMessage.getString(402, "你没有管理上传文件的权限");
+            }
+            nodeRole.setUploadFile(manageB);
+
+            manageB = "true".equals(getParameter(StrUtil.format("{}_deleteFile", nodeRole.getId())));
+            if (!userName.isDeleteFile(nodeModel.getId()) && manageB) {
+                return JsonMessage.getString(402, "你没有管理删除文件的权限");
+            }
+            nodeRole.setDeleteFile(manageB);
+            JSONArray jsonArray = nodeModel.getProjects();
+            if (jsonArray != null) {
+                JSONArray jsonArray1 = new JSONArray();
+                jsonArray.forEach(o -> {
+                    JSONObject data = (JSONObject) o;
+                    String id1 = data.getString("id");
+                    String val = getParameter(StrUtil.format("p_{}_{}", nodeModel.getId(), id1));
+                    if (id1.equals(val)) {
+                        jsonArray1.add(id1);
+                    }
+                });
+                nodeRole.setProjects(jsonArray1);
+            }
+            userModel.putNodeRole(nodeRole);
+
         }
-        userModel.setDeleteFile(manageB);
         return null;
     }
 
@@ -231,7 +258,7 @@ public class UserInfoController extends BaseController {
      * @return String
      */
     @RequestMapping(value = "updateUser", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    @UrlPermission(Role.Manage)
+    @UrlPermission(Role.ServerManager)
     public String updateUser(String id) {
         UserModel userModel = userService.getItem(id);
         if (userModel == null) {

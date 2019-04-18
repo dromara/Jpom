@@ -47,7 +47,7 @@
 </script>
 <script type="text/html" id="manager_status">
     <div title="登录失败次数：{{d.pwdErrorCount}}">
-        <input type="checkbox" id="" disabled name="status" {{# if(d.manage){ }} checked
+        <input type="checkbox" id="" disabled name="status" {{# if(d.serverManager){ }} checked
                {{# } }}
                lay-skin="switch"
                lay-text="是|否">
@@ -64,7 +64,7 @@
             cols: [[
                 {field: 'id', title: 'id'},
                 {field: 'name', title: '昵称'},
-                {field: 'manage', templet: "#manager_status", title: '是否是管理员'},
+                {field: 'serverManager', templet: "#manager_status", title: '是否是管理员'},
                 {field: 'parent', title: '创建人'},
                 {field: 'op', title: '操作', align: 'center', toolbar: '#bar_projects', fixed: 'right'}
             ]]
@@ -72,51 +72,11 @@
 
         // 编辑用户信息
         function updateApplication(data) {
-            // 重置表单
-            document.getElementById('form_user').reset();
-            $('#form_user [name="id"]').attr('readonly', true).addClass('layui-disabled');
-            $('#form_user [name="project"]').prop('checked', false);
-            // 修改密码
-            #if(!$user.isSystemUser())
-                $('#form_user').find("#pwd-input-div").hide();
-            #end
-            // 设置表单值
-            for (var key in data) {
-                if ("manage" === key) {
-                    $('#form_user [name="manage"]').prop('checked', data[key]);
-                    if (data[key]) {
-                        $("#projectsDiv").hide();
-                    } else {
-                        $("#projectsDiv").show();
-                    }
-
-                } else if ('uploadFile' === key) {
-                    $('#form_user [name="uploadFile"]').prop('checked', data[key]);
-                } else if ('deleteFile' === key) {
-                    $('#form_user [name="deleteFile"]').prop('checked', data[key]);
-                } else if ('projects' === key) {
-                    const projects = data[key];
-                    if (projects) {
-                        for (var i = 0; i < projects.length; i++) {
-                            $('input[project="' + projects[i] + '"]').prop('checked', true);
-                        }
-                    }
-                } else {
-                    $('#form_user [name="' + key + '"]').val(data[key]);
-                }
-            }
-            // 弹出
             layer.open({
-                type: 1,
-                title: '编辑',
-                content: $('#div-user'),
-                area: ['60%', '80%'],
-                btnAlign: 'c',
-                btn: ['提交'],
-                yes: function (index, layero) {
-                    $('#form_user').attr('action', './updateUser');
-                    $('#user_submit').click();
-                }
+                type: 2,
+                title: '修改用户',
+                content: './edit?id=' + data.id,
+                area: ['80%', '80%'],
             });
         }
 
@@ -137,44 +97,13 @@
         });
 
 
-        // 提交用户信息
-        form.on('submit(submitUser)', function (data) {
-            var sendData = formatPwd(data.field, "password");
-            sendData.project = getManageProject();
-            loadingAjax({
-                url: data.form.action,
-                data: sendData,
-                success: function (data) {
-                    layer.msg(data.msg);
-                    if (200 == data.code) {
-                        layer.closeAll('page');
-                        // 刷新表
-                        table.reload('tab_user', {});
-                    }
-                }
-            });
-            return false;
-        });
-
-        function getManageProject() {
-            var list = $('#form_user [name="project"]');
-            var projects = [];
-            for (var i = 0; i < list.length; i++) {
-                var dom = list[i];
-                if (dom.checked) {
-                    projects.push(dom.value);
-                }
-            }
-            return JSON.stringify(projects);
-        }
-
-        form.on('switch(manage)', function (data) {
-            if (data.elem.checked) {
-                $("#projectsDiv").hide();
-            } else {
-                $("#projectsDiv").show();
-            }
-        });
+        // form.on('switch(manage)', function (data) {
+        //     if (data.elem.checked) {
+        //         $("#projectsDiv").hide();
+        //     } else {
+        //         $("#projectsDiv").show();
+        //     }
+        // });
 
         // 表格工具条事件
         table.on('tool(tab_user)', function (obj) {

@@ -2,7 +2,7 @@ package cn.keepbx.jpom.common.interceptor;
 
 import cn.jiangzeyin.common.interceptor.InterceptorPattens;
 import cn.jiangzeyin.common.spring.SpringUtil;
-import cn.keepbx.jpom.common.BaseController;
+import cn.keepbx.jpom.common.BaseServerController;
 import cn.keepbx.jpom.model.data.NodeModel;
 import cn.keepbx.jpom.model.data.UserModel;
 import cn.keepbx.jpom.service.node.NodeService;
@@ -27,7 +27,7 @@ public class NodeInterceptor extends BaseJpomInterceptor {
             nodeService = SpringUtil.getBean(NodeService.class);
         }
         super.preHandle(request, response, handler);
-        UserModel userModel = BaseController.getUserModel();
+        UserModel userModel = BaseServerController.getUserModel();
         if (handler instanceof HandlerMethod && userModel != null) {
             HandlerMethod handlerMethod = (HandlerMethod) handler;
 

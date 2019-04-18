@@ -7,6 +7,7 @@ import cn.keepbx.jpom.common.JpomApplicationEvent;
 import cn.keepbx.jpom.common.Type;
 import cn.keepbx.jpom.common.interceptor.LoginInterceptor;
 import cn.keepbx.jpom.common.interceptor.NodeInterceptor;
+import cn.keepbx.jpom.common.interceptor.PermissionInterceptor;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.web.servlet.ServletComponentScan;
 import org.springframework.http.converter.StringHttpMessageConverter;
@@ -36,7 +37,7 @@ public class JpomServerApplication extends BaseJpomApplication {
                 .addHttpMessageConverter(new StringHttpMessageConverter(CharsetUtil.CHARSET_UTF_8))
                 // 拦截器
                 .addInterceptor(LoginInterceptor.class)
-//                .addInterceptor(PermissionInterceptor.class)
+                .addInterceptor(PermissionInterceptor.class)
                 .addInterceptor(NodeInterceptor.class)
                 //
                 .addApplicationEventClient(new JpomApplicationEvent())

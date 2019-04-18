@@ -4,7 +4,7 @@ import cn.hutool.core.lang.Validator;
 import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
-import cn.keepbx.jpom.common.BaseController;
+import cn.keepbx.jpom.common.BaseServerController;
 import cn.keepbx.jpom.common.interceptor.LoginInterceptor;
 import cn.keepbx.jpom.common.interceptor.NotLogin;
 import cn.keepbx.jpom.model.data.UserModel;
@@ -25,7 +25,7 @@ import javax.annotation.Resource;
  * @date 2019/2/22
  */
 @Controller
-public class InstallController extends BaseController {
+public class InstallController extends BaseServerController {
     @Resource
     private UserService userService;
 //    @Resource
@@ -90,7 +90,7 @@ public class InstallController extends BaseController {
         userModel.setId(userName);
         userModel.setPassword(userPwd);
         userModel.setParent(UserModel.SYSTEM_ADMIN);
-        userModel.setManage(true);
+//        userModel.setManage(true);
         try {
             userService.addItem(userModel);
         } catch (Exception e) {

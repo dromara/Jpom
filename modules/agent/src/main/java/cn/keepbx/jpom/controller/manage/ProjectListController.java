@@ -40,9 +40,16 @@ public class ProjectListController extends BaseJpomController {
         return JsonMessage.getString(200, "", strings);
     }
 
+    /**
+     * 程序项目信息
+     *
+     * @param group 分组
+     * @return json
+     */
     @RequestMapping(value = "getProjectInfo", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public String getProjectInfo(String group) {
+    public String getProjectInfo(String group, String notStatus) {
         try {
+            boolean status = StrUtil.isEmpty(notStatus);
             // 查询数据
             List<ProjectInfoModel> projectInfoModels = projectInfoService.list();
             // 转换为数据
@@ -51,11 +58,10 @@ public class ProjectListController extends BaseJpomController {
                 if (StrUtil.isNotEmpty(group) && !group.equals(projectInfoModel.getGroup())) {
                     continue;
                 }
-//                String id = projectInfoModel.getId();
-
                 JSONObject object = projectInfoModel.toJson();
-                object.put("manager", true);
-                object.put("status", projectInfoModel.isStatus(true));
+                if (status) {
+                    object.put("status", projectInfoModel.isStatus(true));
+                }
                 array.add(object);
             }
             array.sort((oo1, oo2) -> {

@@ -12,9 +12,13 @@ public enum Role {
      */
     System,
     /**
+     * 服务端管理员
+     */
+    ServerManager,
+    /**
      * 普通管理员
      */
-    Manage,
+    NodeManage,
     /**
      * 用户
      */

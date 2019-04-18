@@ -1,6 +1,6 @@
 package cn.keepbx.jpom.controller.node.manage.recover;
 
-import cn.keepbx.jpom.common.BaseNodeController;
+import cn.keepbx.jpom.common.BaseServerController;
 import cn.keepbx.jpom.common.forward.NodeForward;
 import cn.keepbx.jpom.common.forward.NodeUrl;
 import cn.keepbx.jpom.model.data.UserModel;
@@ -20,7 +20,7 @@ import java.util.List;
  */
 @Controller
 @RequestMapping(value = "/node/manage/recover")
-public class ProjectRecoverControl extends BaseNodeController {
+public class ProjectRecoverControl extends BaseServerController {
 
     /**
      * 展示项目页面
@@ -30,7 +30,7 @@ public class ProjectRecoverControl extends BaseNodeController {
     @RequestMapping(value = "list.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
     public String projectInfo() {
         UserModel userModel = getUser();
-        if (userModel.isManage()) {
+        if (userModel.isManage(getNode().getId())) {
             List list = NodeForward.requestData(getNode(), NodeUrl.Manage_Recover_List_Data, getRequest(), List.class);
             setAttribute("array", list);
         }

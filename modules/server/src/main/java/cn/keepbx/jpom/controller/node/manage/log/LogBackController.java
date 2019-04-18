@@ -1,7 +1,7 @@
 package cn.keepbx.jpom.controller.node.manage.log;
 
 import cn.jiangzeyin.common.JsonMessage;
-import cn.keepbx.jpom.common.BaseNodeController;
+import cn.keepbx.jpom.common.BaseServerController;
 import cn.keepbx.jpom.common.forward.NodeForward;
 import cn.keepbx.jpom.common.forward.NodeUrl;
 import cn.keepbx.jpom.common.interceptor.ProjectPermission;
@@ -23,7 +23,7 @@ import javax.annotation.Resource;
  */
 @Controller
 @RequestMapping(value = "node/manage/log")
-public class LogBackController extends BaseNodeController {
+public class LogBackController extends BaseServerController {
     @Resource
     private ProjectInfoService projectInfoService;
 

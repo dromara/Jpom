@@ -8,7 +8,7 @@ import cn.hutool.http.HttpStatus;
 import cn.hutool.http.HttpUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
-import cn.keepbx.jpom.common.BaseController;
+import cn.keepbx.jpom.common.BaseServerController;
 import cn.keepbx.jpom.model.data.NodeModel;
 import cn.keepbx.jpom.model.data.UserModel;
 import cn.keepbx.jpom.system.AgentException;
@@ -41,7 +41,7 @@ public class NodeForward {
      * @param nodeUrl   节点的url
      * @return JSON
      */
-    public static JsonMessage request(NodeModel nodeModel, HttpServletRequest request, NodeUrl nodeUrl) {
+    public static JsonMessage request(NodeModel nodeModel, HttpServletRequest request, NodeUrl nodeUrl, Object... val) {
         String url = nodeModel.getRealUrl(nodeUrl);
         HttpRequest httpRequest = HttpUtil.createPost(url);
         //
@@ -49,6 +49,13 @@ public class NodeForward {
         Map params = null;
         if (request != null) {
             params = ServletUtil.getParams(request);
+        }
+        if (val != null) {
+            String name;
+            for (int i = 0; i < val.length; i += 2) {
+                name = val[i].toString();
+                httpRequest.form(name, val[i + 1]);
+            }
         }
         HttpResponse response;
         try {
@@ -182,7 +189,7 @@ public class NodeForward {
     }
 
     private static void addUser(HttpRequest httpRequest, NodeModel nodeModel) {
-        UserModel userModel = BaseController.getUserModel();
+        UserModel userModel = BaseServerController.getUserModel();
         Objects.requireNonNull(userModel);
         httpRequest.header(ConfigBean.JPOM_SERVER_USER_NAME, UserModel.getOptUserName(userModel));
         httpRequest.header(ConfigBean.JPOM_SERVER_SYSTEM_USER_ROLE, String.valueOf(userModel.isSystemUser()));

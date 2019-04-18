@@ -1,6 +1,6 @@
 package cn.keepbx.jpom.controller.node.system.nginx;
 
-import cn.keepbx.jpom.common.BaseNodeController;
+import cn.keepbx.jpom.common.BaseServerController;
 import cn.keepbx.jpom.common.Role;
 import cn.keepbx.jpom.common.forward.NodeForward;
 import cn.keepbx.jpom.common.forward.NodeUrl;
@@ -23,7 +23,7 @@ import java.util.List;
  */
 @Controller
 @RequestMapping("/node/system/nginx")
-public class NginxController extends BaseNodeController {
+public class NginxController extends BaseServerController {
 
     @Resource
     private WhitelistDirectoryService whitelistDirectoryService;
@@ -39,7 +39,7 @@ public class NginxController extends BaseNodeController {
      */
     @RequestMapping(value = "list_data.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
-    @UrlPermission(Role.Manage)
+    @UrlPermission(Role.NodeManage)
     public String list() {
         return NodeForward.request(getNode(), getRequest(), NodeUrl.System_Nginx_list_data).toString();
     }
@@ -57,7 +57,7 @@ public class NginxController extends BaseNodeController {
 
     @RequestMapping(value = "updateNgx", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
-    @UrlPermission(Role.Manage)
+    @UrlPermission(Role.NodeManage)
     public String updateNgx() {
         return NodeForward.request(getNode(), getRequest(), NodeUrl.System_Nginx_updateNgx).toString();
     }
@@ -65,7 +65,7 @@ public class NginxController extends BaseNodeController {
 
     @RequestMapping(value = "delete", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
-    @UrlPermission(Role.Manage)
+    @UrlPermission(Role.NodeManage)
     public String delete() {
         return NodeForward.request(getNode(), getRequest(), NodeUrl.System_Nginx_delete).toString();
     }

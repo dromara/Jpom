@@ -1,7 +1,7 @@
 package cn.keepbx.jpom.controller.node.manage;
 
 import cn.jiangzeyin.common.JsonMessage;
-import cn.keepbx.jpom.common.BaseNodeController;
+import cn.keepbx.jpom.common.BaseServerController;
 import cn.keepbx.jpom.common.forward.NodeForward;
 import cn.keepbx.jpom.common.forward.NodeUrl;
 import cn.keepbx.jpom.model.data.UserModel;
@@ -27,7 +27,7 @@ import java.util.List;
  */
 @Controller
 @RequestMapping(value = "/node/manage/")
-public class EditProjectController extends BaseNodeController {
+public class EditProjectController extends BaseServerController {
     @Resource
     private ProjectInfoService projectInfoService;
     @Resource
@@ -85,7 +85,7 @@ public class EditProjectController extends BaseNodeController {
     public String saveProject(String edit) {
         if ("add".equalsIgnoreCase(edit)) {
             UserModel userName = getUser();
-            if (!userName.isManage()) {
+            if (!userName.isManage(getNode().getId())) {
                 return JsonMessage.getString(400, "管理员才能创建项目!");
             }
         }

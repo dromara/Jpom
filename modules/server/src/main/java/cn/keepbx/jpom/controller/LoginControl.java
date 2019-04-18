@@ -7,7 +7,7 @@ import cn.hutool.core.date.BetweenFormater;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.JsonMessage;
-import cn.keepbx.jpom.common.BaseController;
+import cn.keepbx.jpom.common.BaseServerController;
 import cn.keepbx.jpom.common.interceptor.LoginInterceptor;
 import cn.keepbx.jpom.common.interceptor.NotLogin;
 import cn.keepbx.jpom.model.data.UserModel;
@@ -29,7 +29,7 @@ import java.io.IOException;
  * @author Administrator
  */
 @Controller
-public class LoginControl extends BaseController {
+public class LoginControl extends BaseServerController {
 
     private static final LFUCache<String, Integer> LFU_CACHE = new LFUCache<>(1000);
 

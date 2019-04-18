@@ -5,6 +5,8 @@ import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.controller.base.AbstractController;
 
 /**
+ * controller
+ *
  * @author jiangzeyin
  * @date 2019/4/16
  */

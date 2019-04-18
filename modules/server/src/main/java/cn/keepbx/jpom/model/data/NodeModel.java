@@ -4,6 +4,7 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SecureUtil;
 import cn.keepbx.jpom.common.forward.NodeUrl;
 import cn.keepbx.jpom.model.BaseModel;
+import com.alibaba.fastjson.JSONArray;
 
 /**
  * 节点实体
@@ -22,6 +23,18 @@ public class NodeModel extends BaseModel {
     private String protocol = "http";
 
     private String authorize;
+    /**
+     * 项目信息
+     */
+    private JSONArray projects;
+
+    public JSONArray getProjects() {
+        return projects;
+    }
+
+    public void setProjects(JSONArray projects) {
+        this.projects = projects;
+    }
 
     public String getProtocol() {
         return protocol;

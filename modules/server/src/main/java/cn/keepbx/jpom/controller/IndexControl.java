@@ -1,6 +1,6 @@
 package cn.keepbx.jpom.controller;
 
-import cn.keepbx.jpom.common.BaseController;
+import cn.keepbx.jpom.common.BaseServerController;
 import cn.keepbx.jpom.common.GlobalDefaultExceptionHandler;
 import cn.keepbx.jpom.common.interceptor.NotLogin;
 import cn.keepbx.jpom.model.system.JpomManifest;
@@ -19,7 +19,7 @@ import javax.annotation.Resource;
  */
 @Controller
 @RequestMapping(value = "/")
-public class IndexControl extends BaseController {
+public class IndexControl extends BaseServerController {
     @Resource
     private UserService userService;
 

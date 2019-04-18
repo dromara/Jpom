@@ -1,12 +1,15 @@
 package cn.keepbx.jpom.controller.node.manage;
 
-import cn.keepbx.jpom.common.BaseNodeController;
+import cn.hutool.http.HttpStatus;
+import cn.jiangzeyin.common.JsonMessage;
+import cn.keepbx.jpom.common.BaseServerController;
 import cn.keepbx.jpom.common.Role;
 import cn.keepbx.jpom.common.forward.NodeForward;
 import cn.keepbx.jpom.common.forward.NodeUrl;
 import cn.keepbx.jpom.common.interceptor.ProjectPermission;
 import cn.keepbx.jpom.common.interceptor.UrlPermission;
 import cn.keepbx.jpom.service.manage.ProjectInfoService;
+import com.alibaba.fastjson.JSONArray;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -23,7 +26,7 @@ import java.util.List;
  */
 @Controller
 @RequestMapping(value = "/node/manage/")
-public class ProjectManageControl extends BaseNodeController {
+public class ProjectManageControl extends BaseServerController {
 
     @Resource
     private ProjectInfoService projectInfoService;
@@ -59,7 +62,13 @@ public class ProjectManageControl extends BaseNodeController {
     @RequestMapping(value = "getProjectInfo", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     public String getProjectInfo() {
-        return NodeForward.request(getNode(), getRequest(), NodeUrl.Manage_GetProjectInfo).toString();
+        JsonMessage jsonMessage = NodeForward.request(getNode(), getRequest(), NodeUrl.Manage_GetProjectInfo);
+        if (jsonMessage.getCode() == HttpStatus.HTTP_OK) {
+            JSONArray jsonArray = NodeForward.toObj(jsonMessage, JSONArray.class);
+            //
+//                object.put("manager", true);
+        }
+        return jsonMessage.toString();
     }
 
 
@@ -71,7 +80,7 @@ public class ProjectManageControl extends BaseNodeController {
     @RequestMapping(value = "deleteProject", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     @ProjectPermission
-    @UrlPermission(Role.Manage)
+    @UrlPermission(Role.NodeManage)
     public String deleteProject() {
         return NodeForward.request(getNode(), getRequest(), NodeUrl.Manage_DeleteProject).toString();
 

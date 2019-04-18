@@ -1,11 +1,14 @@
 package cn.keepbx.jpom.model.data;
 
 import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.map.MapUtil;
 import cn.hutool.crypto.SecureUtil;
+import cn.keepbx.jpom.model.BaseJsonModel;
 import cn.keepbx.jpom.model.BaseModel;
 import cn.keepbx.jpom.system.ServerExtConfigBean;
 import com.alibaba.fastjson.JSONArray;
 
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -37,14 +40,6 @@ public class UserModel extends BaseModel {
      */
     private String password;
     /**
-     * 是否为管理员
-     */
-    private boolean manage;
-    /**
-     * 授权的项目集
-     */
-    private JSONArray projects;
-    /**
      * 创建此用户的人
      */
     private String parent;
@@ -61,48 +56,45 @@ public class UserModel extends BaseModel {
      */
     private long lockTime;
     /**
-     * 上传文件权限
-     */
-    private boolean uploadFile;
-    /**
-     * 删除文件权限
-     */
-    private boolean deleteFile;
-    /**
      * 记录最后修改时间
      */
     private long modifyTime;
-
     /**
-     * 获取是否有上传文件的权限
-     *
-     * @return 系统管理员都用权限
+     * 节点权限
      */
-    public boolean isUploadFile() {
+    private Map<String, NodeRole> nodeRole;
+    /**
+     * 服务管理员
+     */
+    private boolean serverManager;
+
+    public boolean isServerManager() {
         if (isSystemUser()) {
             return true;
         }
-        return uploadFile;
+        return serverManager;
     }
 
-    public void setUploadFile(boolean uploadFile) {
-        this.uploadFile = uploadFile;
+    public void setServerManager(boolean serverManager) {
+        this.serverManager = serverManager;
     }
 
-    /**
-     * 获取是否有删除文件的权限
-     *
-     * @return 系统管理员都用权限
-     */
-    public boolean isDeleteFile() {
-        if (isSystemUser()) {
-            return true;
+    public Map<String, NodeRole> getNodeRole() {
+        if (nodeRole == null) {
+            nodeRole = MapUtil.newHashMap();
         }
-        return deleteFile;
+        return nodeRole;
     }
 
-    public void setDeleteFile(boolean deleteFile) {
-        this.deleteFile = deleteFile;
+    public void putNodeRole(NodeRole addNodeRole) {
+        if (nodeRole == null) {
+            nodeRole = MapUtil.newHashMap();
+        }
+        nodeRole.put(addNodeRole.id, addNodeRole);
+    }
+
+    public void setNodeRole(Map<String, NodeRole> nodeRole) {
+        this.nodeRole = nodeRole;
     }
 
     public long getLockTime() {
@@ -213,13 +205,6 @@ public class UserModel extends BaseModel {
         this.parent = parent;
     }
 
-    public JSONArray getProjects() {
-        return projects;
-    }
-
-    public void setProjects(JSONArray projects) {
-        this.projects = projects;
-    }
 
     public String getName() {
         return name;
@@ -243,16 +228,24 @@ public class UserModel extends BaseModel {
         return SecureUtil.md5(String.format("%s:%s", getId(), password));
     }
 
+
     /**
      * 是否为管理员
      *
      * @return true 是
      */
-    public boolean isManage() {
+    public boolean isManage(String nodeId) {
         if (isSystemUser()) {
             return true;
         }
-        return manage;
+        if (nodeRole == null) {
+            return false;
+        }
+        NodeRole item = nodeRole.get(nodeId);
+        if (item == null) {
+            return false;
+        }
+        return item.manage;
     }
 
     /**
@@ -260,19 +253,52 @@ public class UserModel extends BaseModel {
      *
      * @param id 项目Id
      * @return true 能管理，管理员所有项目都能管理
+     * @
      */
-    public boolean isProject(String id) {
-        if (isManage()) {
+    public boolean isProject(String nodeId, String id) {
+        if (isManage(nodeId)) {
             return true;
         }
-        if (projects == null) {
+        NodeRole item = nodeRole.get(nodeId);
+        if (item == null) {
             return false;
         }
-        return projects.contains(id);
+        if (item.projects == null) {
+            return false;
+        }
+        return item.projects.contains(id);
     }
 
-    public void setManage(boolean manage) {
-        this.manage = manage;
+    /**
+     * 获取是否有上传文件的权限
+     *
+     * @return 系统管理员都用权限
+     */
+    public boolean isUploadFile(String nodeId) {
+        if (isSystemUser()) {
+            return true;
+        }
+        NodeRole item = nodeRole.get(nodeId);
+        if (item == null) {
+            return false;
+        }
+        return item.uploadFile;
+    }
+
+    /**
+     * 获取是否有删除文件的权限
+     *
+     * @return 系统管理员都用权限
+     */
+    public boolean isDeleteFile(String nodeId) {
+        if (isSystemUser()) {
+            return true;
+        }
+        NodeRole item = nodeRole.get(nodeId);
+        if (item == null) {
+            return false;
+        }
+        return item.deleteFile;
     }
 
     public boolean isSystemUser() {
@@ -304,5 +330,86 @@ public class UserModel extends BaseModel {
             userId = userModel.getId();
         }
         return userId;
+    }
+
+    /**
+     * 节点权限
+     */
+    public static class NodeRole extends BaseJsonModel {
+        private String id;
+
+        /**
+         * 是否为管理员
+         */
+        private boolean manage;
+        /**
+         * 上传文件权限
+         */
+        private boolean uploadFile;
+        /**
+         * 删除文件权限
+         */
+        private boolean deleteFile;
+
+        public void setManage(boolean manage) {
+            this.manage = manage;
+        }
+
+        public String getId() {
+            return id;
+        }
+
+        public void setId(String id) {
+            this.id = id;
+        }
+
+        /**
+         * 获取是否有上传文件的权限
+         *
+         * @return 系统管理员都用权限
+         */
+        public boolean isUploadFile() {
+            return uploadFile;
+        }
+
+        public void setUploadFile(boolean uploadFile) {
+            this.uploadFile = uploadFile;
+        }
+
+        /**
+         * 获取是否有删除文件的权限
+         *
+         * @return 系统管理员都用权限
+         */
+        public boolean isDeleteFile() {
+            return deleteFile;
+        }
+
+        public void setDeleteFile(boolean deleteFile) {
+            this.deleteFile = deleteFile;
+        }
+
+        /**
+         * 是否为管理员
+         *
+         * @return true 是
+         */
+        public boolean isManage() {
+            return manage;
+        }
+
+        /**
+         * 授权的项目集
+         */
+        private JSONArray projects;
+
+
+        public JSONArray getProjects() {
+            return projects;
+        }
+
+        public void setProjects(JSONArray projects) {
+            this.projects = projects;
+        }
     }
 }

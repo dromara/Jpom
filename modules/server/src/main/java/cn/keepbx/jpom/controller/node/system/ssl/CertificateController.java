@@ -1,6 +1,6 @@
 package cn.keepbx.jpom.controller.node.system.ssl;
 
-import cn.keepbx.jpom.common.BaseNodeController;
+import cn.keepbx.jpom.common.BaseServerController;
 import cn.keepbx.jpom.common.Role;
 import cn.keepbx.jpom.common.forward.NodeForward;
 import cn.keepbx.jpom.common.forward.NodeUrl;
@@ -22,7 +22,7 @@ import java.util.List;
  */
 @Controller
 @RequestMapping(value = "/node/system/certificate")
-public class CertificateController extends BaseNodeController {
+public class CertificateController extends BaseServerController {
 
     @Resource
     private WhitelistDirectoryService whitelistDirectoryService;
@@ -42,7 +42,7 @@ public class CertificateController extends BaseNodeController {
      */
     @RequestMapping(value = "/saveCertificate", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
-    @UrlPermission(Role.Manage)
+    @UrlPermission(Role.NodeManage)
     public String saveCertificate() {
         return NodeForward.requestMultipart(getNode(), getMultiRequest(), NodeUrl.System_Certificate_saveCertificate).toString();
     }
@@ -53,7 +53,7 @@ public class CertificateController extends BaseNodeController {
      */
     @RequestMapping(value = "/getCertList", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
-    @UrlPermission(Role.Manage)
+    @UrlPermission(Role.NodeManage)
     public String getCertList() {
         return NodeForward.request(getNode(), getRequest(), NodeUrl.System_Certificate_getCertList).toString();
     }
@@ -77,7 +77,7 @@ public class CertificateController extends BaseNodeController {
      */
     @RequestMapping(value = "/export", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
-    @UrlPermission(Role.Manage)
+    @UrlPermission(Role.NodeManage)
     public void export(String id) {
         NodeForward.requestDownload(getNode(), getRequest(), getResponse(), NodeUrl.System_Certificate_export);
     }

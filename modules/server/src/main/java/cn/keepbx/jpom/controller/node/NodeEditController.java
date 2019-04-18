@@ -2,7 +2,7 @@ package cn.keepbx.jpom.controller.node;
 
 import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.JsonMessage;
-import cn.keepbx.jpom.common.BaseController;
+import cn.keepbx.jpom.common.BaseServerController;
 import cn.keepbx.jpom.common.Role;
 import cn.keepbx.jpom.common.forward.NodeForward;
 import cn.keepbx.jpom.common.forward.NodeUrl;
@@ -27,7 +27,7 @@ import javax.annotation.Resource;
  */
 @Controller
 @RequestMapping(value = "/node")
-public class NodeEditController extends BaseController {
+public class NodeEditController extends BaseServerController {
 
     @Resource
     private NodeService nodeService;
