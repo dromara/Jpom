@@ -235,7 +235,6 @@ public class UserModel extends BaseModel {
         return SecureUtil.md5(String.format("%s:%s", getId(), password));
     }
 
-
     /**
      * 是否为节点管理员
      *
@@ -333,6 +332,12 @@ public class UserModel extends BaseModel {
         this.modifyTime = modifyTime;
     }
 
+    /**
+     * 隐藏系统管理的真实id
+     *
+     * @param userModel 实体
+     * @return 系统管理员返回默认
+     */
     public static String getOptUserName(UserModel userModel) {
         String userId;
         if (userModel.isSystemUser()) {

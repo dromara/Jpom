@@ -75,10 +75,14 @@ public class ServerWebSocketHandler extends TextWebSocketHandler {
             UserModel userInfo = (UserModel) attributes.get("userInfo");
             String ip = (String) attributes.get("ip");
             NodeModel nodeModel = (NodeModel) attributes.get("nodeInfo");
+            //
+            String projectId = (String) attributes.get("projectId");
+
             String reqId = IdUtil.fastUUID();
             json.put("reqId", reqId);
+
             try {
-                operateLogController.log(reqId, userInfo, "还没有响应", ip, type, nodeModel);
+                operateLogController.log(reqId, userInfo, "还没有响应", ip, type, nodeModel, projectId);
             } catch (Exception e) {
                 DefaultSystemLog.ERROR().error("记录操作日志异常", e);
             }

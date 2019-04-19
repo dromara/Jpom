@@ -45,6 +45,18 @@ public class UserOperateLogV1 extends BaseJsonModel {
      * 操作id
      */
     private String reqId;
+    /**
+     * 数据id
+     */
+    private String dataId;
+
+    public String getDataId() {
+        return StrUtil.emptyToDefault(dataId, StrUtil.DASHED);
+    }
+
+    public void setDataId(String dataId) {
+        this.dataId = dataId;
+    }
 
     public UserOperateLogV1(String reqId) {
         this.reqId = reqId;
@@ -110,6 +122,11 @@ public class UserOperateLogV1 extends BaseJsonModel {
         return optStatus;
     }
 
+    /**
+     * 获取执行结果的描述消息
+     *
+     * @return 成功/ 失败：状态码
+     */
     public String getOptStatusMsg() {
         if (getOptStatus() == Status.Success.getCode()) {
             return Status.Success.getDesc();

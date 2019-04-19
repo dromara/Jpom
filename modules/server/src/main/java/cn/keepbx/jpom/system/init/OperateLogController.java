@@ -4,7 +4,6 @@ import cn.hutool.core.date.DateUtil;
 import cn.hutool.db.Db;
 import cn.hutool.db.Entity;
 import cn.hutool.extra.servlet.ServletUtil;
-import cn.hutool.http.HttpStatus;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.PreLoadClass;
 import cn.jiangzeyin.common.PreLoadMethod;
@@ -77,6 +76,8 @@ public class OperateLogController implements AopLogInterface {
                 cacheInfo.ip = ServletUtil.getClientIP(request);
                 // 获取节点
                 cacheInfo.nodeModel = (NodeModel) request.getAttribute("node");
+                //
+                cacheInfo.dataId = request.getParameter("id");
                 CACHE_INFO_THREAD_LOCAL.set(cacheInfo);
             }
         }
@@ -99,13 +100,16 @@ public class OperateLogController implements AopLogInterface {
         if (userModel == null) {
             return;
         }
-        this.log(userModel, value, ip, optType, cacheInfo.nodeModel);
+        this.log(userModel, value, ip, optType, cacheInfo.nodeModel, cacheInfo.dataId);
     }
 
-    public void log(String reqId, UserModel userModel, Object value, String ip, UserOperateLogV1.OptType optType, NodeModel nodeModel) {
+    public void log(String reqId, UserModel userModel,
+                    Object value, String ip,
+                    UserOperateLogV1.OptType optType,
+                    NodeModel nodeModel, String dataId) {
         UserOperateLogV1 userOperateLogV1 = new UserOperateLogV1(reqId);
         //
-        userOperateLogV1.setUserId(userModel.getId());
+        userOperateLogV1.setUserId(UserModel.getOptUserName(userModel));
         userOperateLogV1.setIp(ip);
         if (value != null) {
             // 解析结果
@@ -113,17 +117,12 @@ public class OperateLogController implements AopLogInterface {
             userOperateLogV1.setResultMsg(json);
             try {
                 JsonMessage jsonMessage = JSONObject.parseObject(json, JsonMessage.class);
-                if (jsonMessage.getCode() == HttpStatus.HTTP_OK) {
-                    userOperateLogV1.setOptStatus(UserOperateLogV1.Status.Success.getCode());
-                } else {
-                    // 没有输入验证码不记录日志
-                    if (optType == UserOperateLogV1.OptType.Login && jsonMessage.getCode() == LoginControl.INPUT_CODE) {
-                        return;
-                    }
-                    userOperateLogV1.setOptStatus(jsonMessage.getCode());
+                // 没有输入验证码不记录日志
+                if (optType == UserOperateLogV1.OptType.Login && jsonMessage.getCode() == LoginControl.INPUT_CODE) {
+                    return;
                 }
+                userOperateLogV1.setOptStatus(jsonMessage.getCode());
             } catch (Exception ignored) {
-
             }
         }
         userOperateLogV1.setOptTime(DateUtil.current(false));
@@ -132,6 +131,8 @@ public class OperateLogController implements AopLogInterface {
         if (nodeModel != null) {
             userOperateLogV1.setNodeId(nodeModel.getId());
         }
+        //
+        userOperateLogV1.setDataId(dataId);
         Db db = Db.use();
         db.setWrapper((Character) null);
         try {
@@ -143,17 +144,28 @@ public class OperateLogController implements AopLogInterface {
         }
     }
 
-    public void log(UserModel userModel, Object value, String ip, UserOperateLogV1.OptType optType, NodeModel nodeModel) {
-        this.log(null, userModel, value, ip, optType, nodeModel);
+    public void log(UserModel userModel, Object value, String ip, UserOperateLogV1.OptType optType, NodeModel nodeModel, String dataId) {
+        this.log(null, userModel, value, ip, optType, nodeModel, dataId);
     }
 
+    /**
+     * 修改执行结果
+     *
+     * @param reqId
+     * @param val
+     */
     public void updateLog(String reqId, String val) {
         Db db = Db.use();
         db.setWrapper((Character) null);
         try {
             Entity entity = new Entity(UserOperateLogV1.class.getSimpleName().toUpperCase());
             entity.set("resultMsg", val);
-
+            try {
+                JsonMessage jsonMessage = JSONObject.parseObject(val, JsonMessage.class);
+                entity.set("optStatus", jsonMessage.getCode());
+            } catch (Exception ignored) {
+            }
+            //
             Entity where = new Entity(UserOperateLogV1.class.getSimpleName().toUpperCase());
             where.set("reqId", reqId);
             db.update(entity, where);
@@ -170,5 +182,6 @@ public class OperateLogController implements AopLogInterface {
         private UserModel userModel;
         private String ip;
         private NodeModel nodeModel;
+        private String dataId;
     }
 }

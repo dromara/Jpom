@@ -45,9 +45,10 @@
             url: './list_data.json',
             page: true,
             cols: [[
-                {field: 'userId', title: '用户id'},
+                {field: 'userId', title: '操作者'},
                 {field: 'ip', title: '操作ip'},
-                {field: 'nodeId', title: '节点id'},
+                {field: 'nodeId', title: '节点Id'},
+                {field: 'dataId', title: '数据Id'},
                 {field: 'optTypeMsg', title: '操作类型'},
                 {field: 'optStatusMsg', title: '执行结果'},
                 {
