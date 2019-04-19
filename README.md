@@ -62,27 +62,47 @@
 
 1. 访问[Jpom](https://gitee.com/keepbx/Jpom)的码云主页,拉取最新完整代码(建议使用master分支)
 2. 进入项目目录执行:`mvn clean package`
-3. 然后在目录中查看 target/jpom-x.x.x-release
-4. 打包上传服务器运行
-5. 命令运行（Jpom.sh、Jpom.bat）
+3. 插件端
+    1. 查看插件端安装包 modules/agent/target/agent-x.x.x-release
+    2. 打包上传服务器运行
+    3. 命令运行（Agent.sh、Agent.bat）
+4. 服务端
+    1. 查看插件端安装包 modules/server/target/server-x.x.x-release
+    2. 打包上传服务器运行
+    3. 命令运行（Server.sh、Server.bat）
 
 ### 编译运行
 
 1. 访问[Jpom](https://gitee.com/keepbx/Jpom)的码云主页,拉取最新完整代码(建议使用master分支)
-2. 运行`cn.keepbx.jpom.BaseJpomApplication`
-3. 浏览器访问（如：http://127.0.0.1:2122）
+2. 运行插件端   
+    1. 运行`cn.keepbx.jpom.JpomAgentApplication`
+    2. 注意控制台打印的默认账号密码信息
+3. 运行服务端
+    1. 运行`cn.keepbx.jpom.JpomServerApplication`
+    2. 浏览器访问（如：http://127.0.0.1:2122）
 
 ### 管理命令
-1. windows中Jpom.bat
+1. windows中Agent.bat 、Server.bat
 ```
-Jpom.bat     启动管理面板(按照面板提示输入操作)
+# 服务端
+Server.bat     启动管理面板(按照面板提示输入操作)
+
+# 插件端
+Agent.bat     启动管理面板(按照面板提示输入操作)
 ```
-2. linux中Jpom.sh
+2. linux中Agent.bat 、Server.bat
 ```
-Jpom.sh start     启动Jpom 
-Jpom.sh stop      停止Jpom
-Jpom.sh restart   重启Jpom
-Jpom.sh status    查看Jpom运行状态
+# 服务端
+Server.sh start     启动Jpom服务端
+Server.sh stop      停止Jpom服务端
+Server.sh restart   重启Jpom服务端
+Server.sh status    查看Jpom服务端运行状态
+
+# 插件端
+Agent.sh start     启动Jpom插件端
+Agent.sh stop      停止Jpom插件端
+Agent.sh restart   重启Jpom插件端
+Agent.sh status    查看Jpom插件端运行状态
 ```
 
 ### 视频教程
