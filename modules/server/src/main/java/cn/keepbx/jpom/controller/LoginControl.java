@@ -80,7 +80,7 @@ public class LoginControl extends BaseServerController {
         circleCaptcha.write(response.getOutputStream());
         String code = circleCaptcha.getCode();
         setSessionAttribute(LOGIN_CODE, code);
-        // 回话显示验证码
+        // 会话显示验证码
         setSessionAttribute(SHOW_CODE, true);
     }
 

@@ -8,7 +8,7 @@
    
     修改管理程序命令文件中 --jpom.log=/jpom/log/
         
-   ### 如何修改回话超时时长
+   ### 如何修改会话超时时长
         
     在管理程序命令文件中 ARGS 变量添加 --tomcat.sessionTimeOut=1800
     

@@ -37,7 +37,7 @@ public class TopManager {
     /**
      * 添加top 命令监听
      *
-     * @param session 回话
+     * @param session 会话
      */
     public static void addMonitor(Session session) {
         SESSIONS.add(session);
@@ -47,7 +47,7 @@ public class TopManager {
     /**
      * 移除top 命令监控
      *
-     * @param session 回话
+     * @param session 会话
      */
     public static void removeMonitor(Session session) {
         SESSIONS.remove(session);

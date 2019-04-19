@@ -7,7 +7,7 @@ import javax.websocket.Session;
 import java.io.IOException;
 
 /**
- * socket 回话对象
+ * socket 会话对象
  *
  * @author jiangzeyin
  * @date 2018/9/29
@@ -25,7 +25,7 @@ public class SocketSessionUtil {
     /**
      * 发送消息
      *
-     * @param session 回话对象
+     * @param session 会话对象
      * @param msg     消息
      * @throws IOException 异常
      */

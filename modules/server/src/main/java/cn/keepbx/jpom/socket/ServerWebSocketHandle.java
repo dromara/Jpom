@@ -43,7 +43,7 @@ public class ServerWebSocketHandle {
      *
      * @param userInfo  用户授权信息
      * @param projectId 项目id
-     * @param session   回话
+     * @param session   会话
      */
     @OnOpen
     public void onOpen(@PathParam("nodeId") String nodeId, @PathParam("userInfo") String userInfo, @PathParam("projectId") String projectId, Session session) {
@@ -71,7 +71,7 @@ public class ServerWebSocketHandle {
             url = StrUtil.format(url, projectId, userName);
             ProxySession proxySession = new ProxySession(url, session);
             PROXY_SESSION_CONCURRENT_HASH_MAP.put(session.getId(), proxySession);
-            SocketSessionUtil.send(session, StrUtil.format("欢迎加入:{} 回话id:{} 当前会话总数:{}", userModel.getName(), session.getId(), onlineCount.incrementAndGet()));
+            SocketSessionUtil.send(session, StrUtil.format("欢迎加入:{} 会话id:{} 当前会话总数:{}", userModel.getName(), session.getId(), onlineCount.incrementAndGet()));
             USER.put(session.getId(), userModel);
         } catch (Exception e) {
             DefaultSystemLog.ERROR().error("socket 错误", e);
@@ -92,7 +92,7 @@ public class ServerWebSocketHandle {
     public void onMessage(String message, Session session) throws IOException {
         UserModel userModel = USER.get(session.getId());
         if (userModel == null) {
-            SocketSessionUtil.send(session, "回话信息失效，刷新网页再试");
+            SocketSessionUtil.send(session, "会话信息失效，刷新网页再试");
             session.close();
             return;
         }

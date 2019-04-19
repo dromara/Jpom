@@ -13,7 +13,7 @@ import java.net.URISyntaxException;
 import java.util.Objects;
 
 /**
- * 代理socket 回话
+ * 代理socket 会话
  *
  * @author jiangzeyin
  * @date 2019/4/16

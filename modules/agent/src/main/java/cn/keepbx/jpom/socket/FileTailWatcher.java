@@ -35,7 +35,7 @@ public class FileTailWatcher implements Runnable {
     private LimitQueue limitQueue = new LimitQueue(10);
     private final RandomAccessFile randomFile;
     /**
-     * 所有回话
+     * 所有会话
      */
     private Set<Session> socketSessions = new HashSet<>();
     private final String log;
@@ -49,7 +49,7 @@ public class FileTailWatcher implements Runnable {
      * 添加文件监听
      *
      * @param log     日志文件路径
-     * @param session 回话
+     * @param session 会话
      * @throws IOException 异常
      */
     public static void addWatcher(String log, Session session) throws IOException {
@@ -76,7 +76,7 @@ public class FileTailWatcher implements Runnable {
     /**
      * 有客户端离线
      *
-     * @param session 回话
+     * @param session 会话
      */
     public static void offline(Session session) {
         Collection<FileTailWatcher> collection = CONCURRENT_HASH_MAP.values();
@@ -96,9 +96,9 @@ public class FileTailWatcher implements Runnable {
     }
 
     /**
-     * 添加监听回话
+     * 添加监听会话
      *
-     * @param session 回话
+     * @param session 会话
      */
     private void add(Session session) {
         if (this.socketSessions.add(session)) {
