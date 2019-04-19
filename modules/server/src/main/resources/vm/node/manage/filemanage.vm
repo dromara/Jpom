@@ -81,11 +81,13 @@
                 });
             },
             before: function (obj) {
-                layer.msg('上传中(' + nowUploadCount + '/' + listUploadCount + ')', {
-                    icon: 16,
-                    shade: 0.2,
-                    time: 100000000
-                });
+                setTimeout(function () {
+                    layer.msg('上传中(' + nowUploadCount + '/' + listUploadCount + ')', {
+                        icon: 16,
+                        shade: 0.2,
+                        time: 100000000
+                    });
+                }, 200);
                 updateFail = false;
             },
             allDone: function (obj) {

@@ -18,7 +18,6 @@ import org.apache.tomcat.util.http.fileupload.servlet.ServletFileUpload;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
@@ -97,7 +96,7 @@ public class CertificateController extends BaseAgentController {
             }
         } catch (Exception e) {
             DefaultSystemLog.ERROR().error("证书文件", e);
-            return JsonMessage.getString(400, e.getMessage());
+            return JsonMessage.getString(400, "解析证书文件失败：" + e.getMessage());
         }
         return JsonMessage.getString(200, "提交成功");
     }
@@ -147,6 +146,13 @@ public class CertificateController extends BaseAgentController {
                 }
                 String keyName = zipEntry.getName();
                 if (pemPath == null && StrUtil.endWith(keyName, ".pem", true)) {
+                    String filePathItem = String.format("%s/%s/%s", path, certModel.getId(), keyName);
+                    InputStream inputStream = zipFile.getInputStream(zipEntry);
+                    FileUtil.writeFromStream(inputStream, filePathItem);
+                    pemPath = filePathItem;
+                }
+                // cer 文件
+                if (pemPath == null && StrUtil.endWith(keyName, ".cer", true)) {
                     String filePathItem = String.format("%s/%s/%s", path, certModel.getId(), keyName);
                     InputStream inputStream = zipFile.getInputStream(zipEntry);
                     FileUtil.writeFromStream(inputStream, filePathItem);

@@ -1,9 +1,11 @@
 package cn.keepbx.jpom.model.data;
 
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.io.resource.ResourceUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.BCUtil;
+import cn.hutool.crypto.KeyUtil;
 import cn.hutool.crypto.asymmetric.KeyType;
 import cn.hutool.crypto.asymmetric.RSA;
 import cn.jiangzeyin.common.DefaultSystemLog;
@@ -13,10 +15,9 @@ import cn.keepbx.jpom.service.system.CertService;
 import cn.keepbx.jpom.system.JpomRuntimeException;
 import com.alibaba.fastjson.JSONObject;
 
-import java.io.BufferedInputStream;
+import java.io.InputStream;
 import java.security.PrivateKey;
 import java.security.PublicKey;
-import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.Date;
 
@@ -145,22 +146,27 @@ public class CertModel extends BaseModel {
         if (!FileUtil.exist(file)) {
             return null;
         }
-        PrivateKey privateKey = BCUtil.readPrivateKey(ResourceUtil.getStream(key));
-        PublicKey publicKey = BCUtil.readPublicKey(ResourceUtil.getStream(file));
-        RSA rsa = new RSA(privateKey, publicKey);
-//        String str = KEY;
-        String encryptStr = rsa.encryptBase64(KEY, KeyType.PublicKey);
-        String decryptStr = rsa.decryptStr(encryptStr, KeyType.PrivateKey);
-        if (!KEY.equals(decryptStr)) {
-            throw new JpomRuntimeException("证书和私钥证书不匹配");
+        InputStream inputStream = null;
+        try {
+            inputStream = ResourceUtil.getStream(key);
+            PrivateKey privateKey = BCUtil.readPrivateKey(inputStream);
+            IoUtil.close(inputStream);
+            inputStream = ResourceUtil.getStream(file);
+            PublicKey publicKey = BCUtil.readPublicKey(inputStream);
+            IoUtil.close(inputStream);
+            RSA rsa = new RSA(privateKey, publicKey);
+            String encryptStr = rsa.encryptBase64(KEY, KeyType.PublicKey);
+            String decryptStr = rsa.decryptStr(encryptStr, KeyType.PrivateKey);
+            if (!KEY.equals(decryptStr)) {
+                throw new JpomRuntimeException("证书和私钥证书不匹配");
+            }
+        } finally {
+            IoUtil.close(inputStream);
         }
         try {
-            BufferedInputStream inStream = FileUtil.getInputStream(file);
-            // 创建X509工厂类
-            CertificateFactory cf = CertificateFactory.getInstance("X.509");
+            inputStream = ResourceUtil.getStream(file);
             // 创建证书对象
-            X509Certificate oCert = (X509Certificate) cf.generateCertificate(inStream);
-            inStream.close();
+            X509Certificate oCert = (X509Certificate) KeyUtil.readX509Certificate(inputStream);
             //到期时间
             Date expirationTime = oCert.getNotAfter();
             //生效日期
@@ -176,6 +182,8 @@ public class CertModel extends BaseModel {
             return jsonObject;
         } catch (Exception e) {
             DefaultSystemLog.ERROR().error(e.getMessage(), e);
+        } finally {
+            IoUtil.close(inputStream);
         }
         return null;
     }
