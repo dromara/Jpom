@@ -133,7 +133,7 @@ public class LoginControl extends BaseServerController {
     @RequestMapping(value = "userLogin", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     @NotLogin
-    @OperateType(UserOperateLogV1.Type.Login)
+    @OperateType(UserOperateLogV1.OptType.Login)
     public String userLogin(String userName, String userPwd, String code) throws IOException {
         if (StrUtil.isEmpty(userName) || StrUtil.isEmpty(userPwd)) {
             return JsonMessage.getString(405, "请输入登录信息");

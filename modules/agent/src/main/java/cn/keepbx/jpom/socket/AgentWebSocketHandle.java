@@ -38,7 +38,7 @@ public class AgentWebSocketHandle {
     public void onOpen(@PathParam("projectId") String projectId, @PathParam("optUser") String urlOptUser, Session session) {
         try {
             // 判断项目
-            if (!WebSocketConfig.SYSTEM_ID.equals(projectId)) {
+            if (!CommonSocketConfig.SYSTEM_ID.equals(projectId)) {
                 if (projectInfoService == null) {
                     projectInfoService = SpringUtil.getBean(ProjectInfoService.class);
                 }
@@ -93,10 +93,10 @@ public class AgentWebSocketHandle {
             SocketSessionUtil.send(session, "没有对应项目");
             return;
         }
-        runMsg(commandOp, session, projectInfoModel);
+        runMsg(commandOp, session, projectInfoModel, json);
     }
 
-    private void runMsg(CommandOp commandOp, Session session, ProjectInfoModel projectInfoModel) throws Exception {
+    private void runMsg(CommandOp commandOp, Session session, ProjectInfoModel projectInfoModel, JSONObject reqJson) throws Exception {
         ConsoleService consoleService = SpringUtil.getBean(ConsoleService.class);
         JSONObject resultData = null;
         String strResult;
@@ -164,9 +164,10 @@ public class AgentWebSocketHandle {
         }
         //
         if (resultData != null) {
-            resultData.put("op", commandOp.name());
-            DefaultSystemLog.LOG().info(resultData.toString());
-            SocketSessionUtil.send(session, resultData.toString());
+//            resultData.put("op", commandOp.name());
+            reqJson.putAll(resultData);
+            DefaultSystemLog.LOG().info(reqJson.toString());
+            SocketSessionUtil.send(session, reqJson.toString());
         }
     }
 

@@ -5,6 +5,7 @@ import cn.keepbx.jpom.common.Role;
 import cn.keepbx.jpom.common.forward.NodeForward;
 import cn.keepbx.jpom.common.forward.NodeUrl;
 import cn.keepbx.jpom.common.interceptor.UrlPermission;
+import cn.keepbx.jpom.model.data.UserOperateLogV1;
 import cn.keepbx.jpom.service.system.WhitelistDirectoryService;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
@@ -42,7 +43,7 @@ public class CertificateController extends BaseServerController {
      */
     @RequestMapping(value = "/saveCertificate", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
-    @UrlPermission(Role.NodeManage)
+    @UrlPermission(value = Role.NodeManage, optType = UserOperateLogV1.OptType.SaveCert)
     public String saveCertificate() {
         return NodeForward.requestMultipart(getNode(), getMultiRequest(), NodeUrl.System_Certificate_saveCertificate).toString();
     }
@@ -53,7 +54,7 @@ public class CertificateController extends BaseServerController {
      */
     @RequestMapping(value = "/getCertList", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
-    @UrlPermission(Role.NodeManage)
+//    @UrlPermission(Role.NodeManage)
     public String getCertList() {
         return NodeForward.request(getNode(), getRequest(), NodeUrl.System_Certificate_getCertList).toString();
     }
@@ -66,7 +67,7 @@ public class CertificateController extends BaseServerController {
      */
     @RequestMapping(value = "/delete", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
-    @UrlPermission(Role.System)
+    @UrlPermission(value = Role.System, optType = UserOperateLogV1.OptType.DelCert)
     public String delete(String id) {
         return NodeForward.request(getNode(), getRequest(), NodeUrl.System_Certificate_delete).toString();
     }
@@ -77,7 +78,7 @@ public class CertificateController extends BaseServerController {
      */
     @RequestMapping(value = "/export", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
-    @UrlPermission(Role.NodeManage)
+    @UrlPermission(value = Role.NodeManage, optType = UserOperateLogV1.OptType.ExportCert)
     public void export(String id) {
         NodeForward.requestDownload(getNode(), getRequest(), getResponse(), NodeUrl.System_Certificate_export);
     }

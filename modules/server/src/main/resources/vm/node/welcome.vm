@@ -227,12 +227,13 @@
             layer.msg("不支持WebSocket");
             return;
         }
+        var url = getSocketHost() + "/console?userId=$user.getUserMd5Key()&projectId=system&nodeId=$node.id";
         if (!ws) {
-            ws = new WebSocket(getSocketHost() + "/console/$user.getUserMd5Key()/system");
+            ws = new WebSocket(url);
         }
         if (status) {
             if (ws.readyState != 1 && ws.readyState != 0) {
-                ws = new WebSocket(getSocketHost() + "/console/$user.getUserMd5Key()/system");
+                ws = new WebSocket(url);
             }
             ws.onopen = function () {
                 ws.send('{"op": "top", "projectInfo":{}}');
@@ -255,6 +256,7 @@
                 }
             };
             ws.onerror = function (ev) {
+                console.log(ev);
                 layer.msg("socket 异常");
             };
         } else {

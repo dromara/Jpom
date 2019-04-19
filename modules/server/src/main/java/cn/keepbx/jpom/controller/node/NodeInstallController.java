@@ -6,6 +6,7 @@ import cn.keepbx.jpom.common.Role;
 import cn.keepbx.jpom.common.forward.NodeForward;
 import cn.keepbx.jpom.common.forward.NodeUrl;
 import cn.keepbx.jpom.common.interceptor.UrlPermission;
+import cn.keepbx.jpom.model.data.UserOperateLogV1;
 import cn.keepbx.jpom.service.system.WhitelistDirectoryService;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -29,7 +30,7 @@ public class NodeInstallController extends BaseServerController {
     private WhitelistDirectoryService whitelistDirectoryService;
 
     @RequestMapping(value = "install_node.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    @UrlPermission(Role.System)
+    @UrlPermission(value = Role.System, optType = UserOperateLogV1.OptType.InstallNode)
     public String installNode() {
         List<String> list = whitelistDirectoryService.getProjectDirectory(getNode());
         if (list != null && !list.isEmpty()) {

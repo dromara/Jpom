@@ -5,15 +5,11 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.socket.server.standard.ServerEndpointExporter;
 
 /**
- * socket 配置
- *
  * @author jiangzeyin
+ * @date 2019/4/19
  */
 @Configuration
-public class WebSocketConfig {
-
-    public static final String SYSTEM_ID = "system";
-
+public class AgentWebSocketConfig {
     @Bean
     public ServerEndpointExporter serverEndpointExporter() {
         return new ServerEndpointExporter();

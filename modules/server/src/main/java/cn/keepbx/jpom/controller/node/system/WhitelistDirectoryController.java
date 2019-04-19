@@ -5,6 +5,7 @@ import cn.keepbx.jpom.common.Role;
 import cn.keepbx.jpom.common.forward.NodeForward;
 import cn.keepbx.jpom.common.forward.NodeUrl;
 import cn.keepbx.jpom.common.interceptor.UrlPermission;
+import cn.keepbx.jpom.model.data.UserOperateLogV1;
 import cn.keepbx.jpom.model.data.Whitelist;
 import cn.keepbx.jpom.service.system.WhitelistDirectoryService;
 import org.springframework.http.MediaType;
@@ -50,7 +51,7 @@ public class WhitelistDirectoryController extends BaseServerController {
      */
     @RequestMapping(value = "whitelistDirectory_submit", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
-    @UrlPermission(Role.System)
+    @UrlPermission(value = Role.System, optType = UserOperateLogV1.OptType.EditWhitelist)
     public String whitelistDirectorySubmit() {
         return NodeForward.request(getNode(), getRequest(), NodeUrl.WhitelistDirectory_Submit).toString();
     }

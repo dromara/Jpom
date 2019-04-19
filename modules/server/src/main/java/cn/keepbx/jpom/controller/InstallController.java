@@ -9,7 +9,7 @@ import cn.keepbx.jpom.common.interceptor.LoginInterceptor;
 import cn.keepbx.jpom.common.interceptor.NotLogin;
 import cn.keepbx.jpom.model.data.UserModel;
 import cn.keepbx.jpom.service.user.UserService;
-import cn.keepbx.jpom.socket.WebSocketConfig;
+import cn.keepbx.jpom.socket.CommonSocketConfig;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -28,18 +28,11 @@ import javax.annotation.Resource;
 public class InstallController extends BaseServerController {
     @Resource
     private UserService userService;
-//    @Resource
-//    private WhitelistDirectoryService whitelistDirectoryService;
 
     @RequestMapping(value = "install.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
     @NotLogin
     public String install() {
         if (userService.userListEmpty()) {
-//            // 判断是否需要填写白名单
-//            JSONArray jsonArray = whitelistDirectoryService.getProjectDirectory();
-//            if (jsonArray == null || jsonArray.isEmpty()) {
-//                setAttribute("whitelist", true);
-//            }
             return "install";
         }
         // 已存在用户跳转到首页
@@ -49,20 +42,14 @@ public class InstallController extends BaseServerController {
     /**
      * 初始化提交
      *
-     * @param userName           系统管理员登录名
-     * @param userPwd            系统管理员的登录密码
-     * @param whitelistDirectory 默认白名单目录
+     * @param userName 系统管理员登录名
+     * @param userPwd  系统管理员的登录密码
      * @return json
      */
     @RequestMapping(value = "install_submit.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @NotLogin
     @ResponseBody
-    public String installSubmit(String userName, String userPwd, String whitelistDirectory) {
-//        // 先处理白名单
-//        String error = whileList(whitelistDirectory);
-//        if (error != null) {
-//            return error;
-//        }
+    public String installSubmit(String userName, String userPwd) {
         if (!userService.userListEmpty()) {
             return JsonMessage.getString(100, "系统已经初始化过啦，请勿重复初始化");
         }
@@ -72,7 +59,7 @@ public class InstallController extends BaseServerController {
         if (userName.length() < UserModel.USER_NAME_MIN_LEN) {
             return JsonMessage.getString(400, "登录名长度必须不小于" + UserModel.USER_NAME_MIN_LEN);
         }
-        if (WebSocketConfig.SYSTEM_ID.equalsIgnoreCase(userName)) {
+        if (CommonSocketConfig.SYSTEM_ID.equalsIgnoreCase(userName)) {
             return JsonMessage.getString(400, "当前登录名已经被系统占用啦");
         }
         if (Validator.isChinese(userName) || !checkPathSafe(userName)) {
@@ -90,7 +77,6 @@ public class InstallController extends BaseServerController {
         userModel.setId(userName);
         userModel.setPassword(userPwd);
         userModel.setParent(UserModel.SYSTEM_ADMIN);
-//        userModel.setManage(true);
         try {
             userService.addItem(userModel);
         } catch (Exception e) {
@@ -101,23 +87,4 @@ public class InstallController extends BaseServerController {
         setSessionAttribute(LoginInterceptor.SESSION_NAME, userModel);
         return JsonMessage.getString(200, "初始化成功");
     }
-
-//    /**
-//     * 处理白名单信息
-//     *
-//     * @param whitelistDirectory 白名单
-//     * @return msg
-//     */
-//    private String whileList(String whitelistDirectory) {
-//        JSONArray jsonArray = whitelistDirectoryService.getProjectDirectory();
-//        if (jsonArray == null || jsonArray.isEmpty()) {
-//            // 白名单
-//            WhitelistDirectoryController whitelistDirectoryController = SpringUtil.getBean(WhitelistDirectoryController.class);
-//            JsonMessage jsonMessage = whitelistDirectoryController.save(whitelistDirectory, null, null);
-//            if (jsonMessage.getCode() != 200) {
-//                return jsonMessage.toString();
-//            }
-//        }
-//        return null;
-//    }
 }

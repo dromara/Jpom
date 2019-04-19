@@ -87,12 +87,6 @@
     <a href="javascript:;" class="layui-btn  layui-btn-sm layui-btn-danger" lay-event="delete">删除</a>
 </script>
 
-<script type="text/html" id="tem_effectiveTime">
-    {{ formateTime(d.effectiveTime)  }}
-</script>
-<script type="text/html" id="tem_expirationTime">
-    {{ formateTime(d.expirationTime)  }}
-</script>
 <script type="text/html" id="tem_cert">
     <div class="certText">
         <table>
@@ -107,30 +101,39 @@
 </script>
 
 <script type="text/javascript">
-
-    function formateTime(time) {
-        if (!time) {
-            return 0;
-        }
-        var date = new Date();
-        date.setTime(time);
-        var y = date.getFullYear();
-        var m = date.getMonth() + 1;
-        m = m < 10 ? ('0' + m) : m;
-        var d = date.getDate();
-        d = d < 10 ? ('0' + d) : d;
-        var h = date.getHours();
-        h = h < 10 ? ('0' + h) : h;
-        var minute = date.getMinutes();
-        var second = date.getSeconds();
-        minute = minute < 10 ? ('0' + minute) : minute;
-        second = second < 10 ? ('0' + second) : second;
-        return y + '-' + m + '-' + d + ' ' + h + ':' + minute + ':' + second;
-    }
-
     var laytpl;
 
     function loadSuccess() {
+        tableRender({
+            id: 'tab_certificate',
+            elem: '#tab_certificate',
+            url: './getCertList',
+            cols: [[
+                {field: 'id', title: 'id', width: '10%', sort: true},
+                {field: 'name', title: '名称', sort: true},
+                {field: 'domain', title: '域名', sort: true},
+                {
+                    field: 'effectiveTime',
+                    title: '生效时间',
+                    width: '14%',
+                    sort: true,
+                    templet: function (d) {
+                        return formateTime(d.effectiveTime);
+                    }
+                },
+                {
+                    field: 'expirationTime',
+                    title: '到期时间',
+                    width: '14%',
+                    sort: true,
+                    templet: function (d) {
+                        return formateTime(d.expirationTime);
+                    }
+                },
+                {field: 'op', title: '操作', align: 'center', toolbar: '#bar_cert', fixed: 'right'}
+            ]]
+        });
+
         var uploadConfig, hashSelectConfig, updateFormData;
         layui.use(['laytpl'], function () {
             laytpl = layui.laytpl;
@@ -171,31 +174,7 @@
             }, function (data) {
                 uploadConfig = data;
             });
-            tableRender({
-                id: 'tab_certificate',
-                elem: '#tab_certificate',
-                url: './getCertList',
-                cols: [[
-                    {field: 'id', title: 'id', width: '10%', sort: true},
-                    {field: 'name', title: '名称', sort: true},
-                    {field: 'domain', title: '域名', sort: true},
-                    {
-                        field: 'effectiveTime',
-                        templet: "#tem_effectiveTime",
-                        title: '生效时间',
-                        width: '14%',
-                        sort: true
-                    },
-                    {
-                        field: 'expirationTime',
-                        templet: "#tem_expirationTime",
-                        title: '到期时间',
-                        width: '14%',
-                        sort: true
-                    },
-                    {field: 'op', title: '操作', align: 'center', toolbar: '#bar_cert', fixed: 'right'}
-                ]]
-            });
+
 
             // 表格工具条事件
             table.on('tool(tab_certificate)', function (obj) {

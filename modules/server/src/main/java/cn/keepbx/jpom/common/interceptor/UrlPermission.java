@@ -1,6 +1,7 @@
 package cn.keepbx.jpom.common.interceptor;
 
 import cn.keepbx.jpom.common.Role;
+import cn.keepbx.jpom.model.data.UserOperateLogV1;
 
 import java.lang.annotation.*;
 
@@ -19,4 +20,11 @@ public @interface UrlPermission {
      * @return 普通用户
      */
     Role value() default Role.User;
+
+    /**
+     * 操作类型
+     *
+     * @return
+     */
+    UserOperateLogV1.OptType optType();
 }

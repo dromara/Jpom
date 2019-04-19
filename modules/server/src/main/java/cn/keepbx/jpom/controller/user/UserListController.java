@@ -5,10 +5,8 @@ import cn.hutool.core.util.IdUtil;
 import cn.hutool.http.HttpStatus;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.keepbx.jpom.common.BaseServerController;
-import cn.keepbx.jpom.common.Role;
 import cn.keepbx.jpom.common.forward.NodeForward;
 import cn.keepbx.jpom.common.forward.NodeUrl;
-import cn.keepbx.jpom.common.interceptor.UrlPermission;
 import cn.keepbx.jpom.model.data.NodeModel;
 import cn.keepbx.jpom.model.data.UserModel;
 import cn.keepbx.jpom.service.node.NodeService;
@@ -99,9 +97,11 @@ public class UserListController extends BaseServerController {
      */
     @RequestMapping(value = "getUserList", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
-    @UrlPermission(Role.ServerManager)
     public String getUserList() {
         UserModel userName = getUser();
+        if (!userName.isServerManager()) {
+            return JsonMessage.getString(400, "没有权限");
+        }
         List<UserModel> userList = userService.list();
         if (userList != null) {
             Iterator<UserModel> userModelIterator = userList.iterator();

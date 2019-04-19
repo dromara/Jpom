@@ -13,7 +13,6 @@ import cn.keepbx.jpom.model.data.UserOperateLogV1;
 import cn.keepbx.jpom.model.system.JpomManifest;
 import cn.keepbx.jpom.service.node.NodeService;
 import cn.keepbx.jpom.service.user.UserService;
-import cn.keepbx.jpom.system.OperateType;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -53,9 +52,8 @@ public class NodeEditController extends BaseServerController {
     }
 
     @RequestMapping(value = "save.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    @UrlPermission(Role.System)
+    @UrlPermission(value = Role.System, optType = UserOperateLogV1.OptType.EditNode)
     @ResponseBody
-    @OperateType(UserOperateLogV1.Type.EditNode)
     public String save(NodeModel model, String type) throws Exception {
         if ("add".equalsIgnoreCase(type)) {
             return addNode(model);
@@ -67,6 +65,9 @@ public class NodeEditController extends BaseServerController {
     private String addNode(NodeModel nodeModel) {
         if (StrUtil.isEmpty(nodeModel.getId())) {
             return JsonMessage.getString(405, "节点id 不能为空");
+        }
+        if (nodeModel.getId().length() > 20) {
+            return JsonMessage.getString(405, "节点id 长度小于20");
         }
         if (StrUtil.isEmpty(nodeModel.getName())) {
             return JsonMessage.getString(405, "节点名称 不能为空");
@@ -101,7 +102,7 @@ public class NodeEditController extends BaseServerController {
      * @return json
      */
     @RequestMapping(value = "del.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    @UrlPermission(Role.System)
+    @UrlPermission(value = Role.System, optType = UserOperateLogV1.OptType.DelNode)
     @ResponseBody
     public String save(String id) {
         boolean flag = nodeService.deleteItem(id);

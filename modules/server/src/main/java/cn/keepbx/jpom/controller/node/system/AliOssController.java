@@ -5,6 +5,8 @@ import cn.keepbx.jpom.common.Role;
 import cn.keepbx.jpom.common.forward.NodeForward;
 import cn.keepbx.jpom.common.forward.NodeUrl;
 import cn.keepbx.jpom.common.interceptor.UrlPermission;
+import cn.keepbx.jpom.model.data.UserModel;
+import cn.keepbx.jpom.model.data.UserOperateLogV1;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
@@ -28,14 +30,17 @@ public class AliOssController extends BaseServerController {
      */
     @RequestMapping(value = "alioss", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
     public String whitelistDirectory() {
-        JSONObject item = NodeForward.requestData(getNode(), NodeUrl.System_alioss_config, getRequest(), JSONObject.class);
-        setAttribute("item", item);
+        UserModel userModel = getUserModel();
+        if (userModel.isSystemUser()) {
+            JSONObject item = NodeForward.requestData(getNode(), NodeUrl.System_alioss_config, getRequest(), JSONObject.class);
+            setAttribute("item", item);
+        }
         return "node/system/alioss";
     }
 
     @RequestMapping(value = "alioss_submit", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
-    @UrlPermission(Role.System)
+    @UrlPermission(value = Role.System, optType = UserOperateLogV1.OptType.EditAliOss)
     public String aliOssSubmit() {
         return NodeForward.request(getNode(), getRequest(), NodeUrl.System_alioss_submit).toString();
     }

@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    #parse("./common/head.vm")
+    <title>项目管理系统</title>
+    <style>
+        .layui-form-label {
+            width: 100px;
+        }
+
+        body {
+            padding: 10px 10px 0px 10px;
+        }
+
+        .layui-container {
+            width: 80% !important;
+        }
+
+        .div-user {
+            display: none;
+        }
+
+        .layui-input-block {
+            margin-left: 135px;
+        }
+    </style>
+</head>
+
+<body>
+<div class="layui-row">
+    <button id="refresh" class="layui-btn layui-btn-sm">刷新表格</button>
+</div>
+<table class="layui-table" id="tab_user" lay-filter="tab_user" style="margin: 0;"></table>
+<script type="text/html" id="bar_projects">
+    <a href="javascript:;" class="layui-btn  layui-btn-sm layui-btn-normal" lay-event="view">详情</a>
+</script>
+</body>
+<script type="text/javascript">
+    function loadSuccess() {
+
+        tableRender({
+            id: 'tab_user',
+            elem: '#tab_user',
+            url: './list_data.json',
+            page: true,
+            cols: [[
+                {field: 'userId', title: '用户id'},
+                {field: 'ip', title: '操作ip'},
+                {field: 'nodeId', title: '节点id'},
+                {field: 'optTypeMsg', title: '操作类型'},
+                {field: 'optStatusMsg', title: '执行结果'},
+                {
+                    field: 'optTime', title: '操作时间', templet: function (d) {
+                        return formateTime(d.optTime);
+                    }
+                },
+                {field: 'op', title: '操作', align: 'center', toolbar: '#bar_projects', fixed: 'right'}
+            ]],
+            parseData: function (data) {
+                return {
+                    "code": data.code,
+                    "msg": data.msg,
+                    "count": data.total,
+                    "data": data.data
+                };
+            }
+        });
+
+        // '刷新表格'点击事件
+        $('#refresh').on('click', function () {
+            table.reload('tab_user', {});
+        });
+
+        // 表格工具条事件
+        table.on('tool(tab_user)', function (obj) {
+            var data = obj.data;
+            var event = obj.event;
+            if ('view' === event) {
+                layer.open({
+                    content: data.resultMsg,
+                    scrollbar: false
+                });
+            }
+        });
+    }
+</script>
+</html>

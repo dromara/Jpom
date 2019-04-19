@@ -10,6 +10,7 @@ import cn.keepbx.jpom.common.interceptor.ProjectPermission;
 import cn.keepbx.jpom.common.interceptor.UrlPermission;
 import cn.keepbx.jpom.model.data.NodeModel;
 import cn.keepbx.jpom.model.data.UserModel;
+import cn.keepbx.jpom.model.data.UserOperateLogV1;
 import cn.keepbx.jpom.service.manage.ProjectInfoService;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -95,7 +96,7 @@ public class ProjectManageControl extends BaseServerController {
     @RequestMapping(value = "deleteProject", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     @ProjectPermission
-    @UrlPermission(Role.NodeManage)
+    @UrlPermission(value = Role.NodeManage, optType = UserOperateLogV1.OptType.DelProject)
     public String deleteProject() {
         return NodeForward.request(getNode(), getRequest(), NodeUrl.Manage_DeleteProject).toString();
 

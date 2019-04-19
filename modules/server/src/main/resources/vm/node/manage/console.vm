@@ -93,7 +93,8 @@
     function loadSuccess() {
         const showLogDom = $('.console .terminal');
         if ('WebSocket' in window) {
-            const ws = new WebSocket(getSocketHost() + "/console/$user.getUserMd5Key()/$!projectInfo.id");
+            var url = getSocketHost() + "/console?userId=$user.getUserMd5Key()&projectId=$!projectInfo.id&nodeId=$node.id";
+            const ws = new WebSocket(url);
             ws.onopen = function () {
                 showLogDom.append('WebSocket连接成功！<br/>');
                 setMsg('status');
@@ -165,7 +166,8 @@
                 scrollToBotomm();
             };
 
-            ws.onclose = function () {
+            ws.onclose = function (er) {
+                console.log(er)
                 showLogDom.append('WebSocket连接已关闭！<br/>');
                 clearInterval(loopLogTime);
                 clearInterval(heart);

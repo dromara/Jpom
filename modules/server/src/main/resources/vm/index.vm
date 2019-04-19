@@ -67,6 +67,10 @@
                     <a href="javascript:;"
                        data-options="{'id':'user', 'title':'用户管理', 'url':'./user/list'}">用户管理</a>
                 </li>
+                <li class="layui-nav-item">
+                    <a href="javascript:;"
+                       data-options="{'id':'user', 'title':'操作日志', 'url':'./user/log/list.html'}">操作日志</a>
+                </li>
             </ul>
         </div>
     </div>
