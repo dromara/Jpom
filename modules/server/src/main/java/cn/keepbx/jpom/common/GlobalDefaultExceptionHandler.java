@@ -37,7 +37,7 @@ public class GlobalDefaultExceptionHandler {
      */
     @ExceptionHandler({AgentException.class, AuthorizeException.class, RuntimeException.class, Exception.class})
     public void paramExceptionHandler(HttpServletRequest request, HttpServletResponse response, Exception e) {
-        DefaultSystemLog.ERROR().error("controller", e);
+        DefaultSystemLog.ERROR().error("controller " + request.getRequestURI(), e);
         if (BaseJpomInterceptor.isPage(request)) {
             try {
                 String id = IdUtil.fastUUID();
@@ -62,7 +62,7 @@ public class GlobalDefaultExceptionHandler {
     private String getErrorMsg(Exception e) {
         if (e instanceof AuthorizeException) {
             AuthorizeException authorizeException = (AuthorizeException) e;
-            return authorizeException.getJsonMessage().toString();
+            return authorizeException.getMessage();
         } else if (e instanceof AgentException) {
             AgentException agentException = (AgentException) e;
             return agentException.getMessage();

@@ -1,5 +1,6 @@
 package cn.keepbx.jpom.system;
 
+import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.spring.SpringUtil;
@@ -78,5 +79,9 @@ public class ExtConfigBean {
             DefaultSystemLog.LOG().info("当前数据路径：{}", path);
         }
         return path;
+    }
+
+    public String getAbsolutePath() {
+        return FileUtil.getAbsolutePath(FileUtil.file(getPath()));
     }
 }

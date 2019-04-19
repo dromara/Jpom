@@ -91,8 +91,8 @@
     function loadSuccess() {
         // 获取缓存中的值
         const project = layui.data('project');
-        if (project && project.group) {
-            apiWhere.group = project.group;
+        if (project && project["group_$node.id"]) {
+            apiWhere.group = project["group_$node.id"];
         }
         tableRender({
             id: 'table_project',
@@ -225,7 +225,7 @@
     function changeGroup(group) {
         apiWhere.group = group;
         layui.data('project', {
-            key: 'group',
+            key: 'group_$node.id',
             value: group
         });
     }

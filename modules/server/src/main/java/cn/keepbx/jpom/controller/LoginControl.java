@@ -11,7 +11,9 @@ import cn.keepbx.jpom.common.BaseServerController;
 import cn.keepbx.jpom.common.interceptor.LoginInterceptor;
 import cn.keepbx.jpom.common.interceptor.NotLogin;
 import cn.keepbx.jpom.model.data.UserModel;
+import cn.keepbx.jpom.model.data.UserOperateLogV1;
 import cn.keepbx.jpom.service.user.UserService;
+import cn.keepbx.jpom.system.OperateType;
 import cn.keepbx.jpom.system.ServerExtConfigBean;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
@@ -37,7 +39,7 @@ public class LoginControl extends BaseServerController {
 
     private static final String SHOW_CODE = "show_code";
 
-    private static final int INPUT_CODE = 600;
+    public static final int INPUT_CODE = 600;
     private static final int INPUT_CODE_ERROR_COUNT = 3;
 
     @Resource
@@ -131,6 +133,7 @@ public class LoginControl extends BaseServerController {
     @RequestMapping(value = "userLogin", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     @NotLogin
+    @OperateType(UserOperateLogV1.Type.Login)
     public String userLogin(String userName, String userPwd, String code) throws IOException {
         if (StrUtil.isEmpty(userName) || StrUtil.isEmpty(userPwd)) {
             return JsonMessage.getString(405, "请输入登录信息");

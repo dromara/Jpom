@@ -47,6 +47,11 @@ public class IndexController extends BaseAgentController {
         return JsonMessage.getString(code, "", JpomManifest.getInstance());
     }
 
+    /**
+     * 返回节点项目状态信息
+     *
+     * @return array
+     */
     @RequestMapping(value = "status", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public String status() {
         List<ProjectInfoModel> projectInfoModels = projectInfoService.list();

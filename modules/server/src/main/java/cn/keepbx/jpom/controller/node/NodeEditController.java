@@ -9,9 +9,11 @@ import cn.keepbx.jpom.common.forward.NodeUrl;
 import cn.keepbx.jpom.common.interceptor.UrlPermission;
 import cn.keepbx.jpom.model.data.NodeModel;
 import cn.keepbx.jpom.model.data.UserModel;
+import cn.keepbx.jpom.model.data.UserOperateLogV1;
 import cn.keepbx.jpom.model.system.JpomManifest;
 import cn.keepbx.jpom.service.node.NodeService;
 import cn.keepbx.jpom.service.user.UserService;
+import cn.keepbx.jpom.system.OperateType;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -53,6 +55,7 @@ public class NodeEditController extends BaseServerController {
     @RequestMapping(value = "save.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @UrlPermission(Role.System)
     @ResponseBody
+    @OperateType(UserOperateLogV1.Type.EditNode)
     public String save(NodeModel model, String type) throws Exception {
         if ("add".equalsIgnoreCase(type)) {
             return addNode(model);

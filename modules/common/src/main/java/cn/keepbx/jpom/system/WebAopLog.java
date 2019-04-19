@@ -30,6 +30,12 @@ import java.io.File;
 public class WebAopLog extends PropertyDefinerBase {
     private static final ThreadLocal<Boolean> IS_LOG = new ThreadLocal<>();
 
+    private static volatile AopLogInterface aopLogInterface;
+
+    synchronized public static void setAopLogInterface(AopLogInterface aopLogInterface) {
+        WebAopLog.aopLogInterface = aopLogInterface;
+    }
+
     @Pointcut("execution(public * cn.keepbx.jpom.controller..*.*(..))")
     public void webLog() {
         //
@@ -37,6 +43,9 @@ public class WebAopLog extends PropertyDefinerBase {
 
     @Before("webLog()")
     public void doBefore(JoinPoint joinPoint) {
+        if (aopLogInterface != null) {
+            aopLogInterface.before(joinPoint);
+        }
         // 接收到请求，记录请求内容
         IS_LOG.set(true);
         Signature signature = joinPoint.getSignature();
@@ -54,6 +63,9 @@ public class WebAopLog extends PropertyDefinerBase {
 
     @AfterReturning(returning = "ret", pointcut = "webLog()")
     public void doAfterReturning(Object ret) {
+        if (aopLogInterface != null) {
+            aopLogInterface.afterReturning(ret);
+        }
         if (ret == null) {
             return;
         }

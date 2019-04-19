@@ -100,7 +100,7 @@
         var top = layui.data('top');
         var openTop = false;
         if (top) {
-            openTop = top.openTop;
+            openTop = top["openTop_$node.id"];
         }
         //加载进程信息
         loadProcessList();
@@ -117,7 +117,7 @@
         form.on('switch(filter)', function (data) {
             var check = data.elem.checked;
             layui.data('top', {
-                key: 'openTop',
+                key: 'openTop_$node.id',
                 value: check
             });
             linkSocket(check);
