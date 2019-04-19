@@ -30,7 +30,7 @@ public class WindowsSystemCommander extends AbstractSystemCommander {
      * 锁定查看进程信息
      */
     private static final AtomicBoolean ATOMIC_BOOLEAN = new AtomicBoolean(false);
-
+    private static List<ProcessModel> lastResult;
 
     /**
      * 获取windows 监控
@@ -70,12 +70,14 @@ public class WindowsSystemCommander extends AbstractSystemCommander {
     @Override
     public List<ProcessModel> getProcessList() {
         if (ATOMIC_BOOLEAN.get()) {
-            return null;
+            // 返回上一次结果
+            return lastResult;
         }
         try {
             ATOMIC_BOOLEAN.set(true);
             String s = CommandUtil.execSystemCommand("tasklist /V | findstr java");
-            return formatWindowsProcess(s, false);
+            lastResult = formatWindowsProcess(s, false);
+            return lastResult;
         } finally {
             ATOMIC_BOOLEAN.set(false);
         }
