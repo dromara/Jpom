@@ -16,6 +16,7 @@ public class ServerWebSocketConfig implements WebSocketConfigurer {
 
     @Override
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
-        registry.addHandler(new ServerWebSocketHandler(), "/console").addInterceptors(new ServerWebSocketInterceptor());
+        registry.addHandler(new ServerWebSocketHandler(), "/console")
+                .addInterceptors(new ServerWebSocketInterceptor()).setAllowedOrigins("*");
     }
 }
