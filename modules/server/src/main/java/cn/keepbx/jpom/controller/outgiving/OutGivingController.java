@@ -155,7 +155,7 @@ public class OutGivingController extends BaseServerController {
                     if (outGivingModel1.getId().equalsIgnoreCase(outGivingModel.getId())) {
                         continue;
                     }
-                    if (outGivingModel1.checkEquals(trueProjectId)) {
+                    if (outGivingModel1.checkContains(trueProjectId)) {
                         return JsonMessage.getString(405, "已经存在相同的分发项目:" + trueProjectId);
                     }
                 }
@@ -165,8 +165,8 @@ public class OutGivingController extends BaseServerController {
             nodeProject.setProjectId(trueProjectId);
             nodeProjects.add(nodeProject);
         }
-        if (nodeProjects.isEmpty()) {
-            return JsonMessage.getString(405, "请选择节点项目");
+        if (nodeProjects.size() < 2) {
+            return JsonMessage.getString(405, "至少选择2个节点项目");
         }
         outGivingModel.setNodeProjectList(nodeProjects);
         return null;

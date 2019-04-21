@@ -10,7 +10,9 @@ import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.controller.multipart.MultipartFileBuilder;
 import cn.keepbx.jpom.common.BaseAgentController;
 import cn.keepbx.jpom.model.data.ProjectInfoModel;
+import cn.keepbx.jpom.service.manage.ConsoleService;
 import cn.keepbx.jpom.service.manage.ProjectInfoService;
+import cn.keepbx.jpom.socket.CommandOp;
 import cn.keepbx.jpom.system.AgentConfigBean;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -34,6 +36,9 @@ public class ProjectFileControl extends BaseAgentController {
 
     @Resource
     private ProjectInfoService projectInfoService;
+
+    @Resource
+    private ConsoleService consoleService;
 
     @RequestMapping(value = "getFileList", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public String getFileList(String id) {
@@ -95,6 +100,7 @@ public class ProjectFileControl extends BaseAgentController {
                 .addFieldName("file");
         String type = getParameter("type");
         if ("unzip".equals(type)) {
+            multipartFileBuilder.setInputStreamType("zip");
             multipartFileBuilder.setSavePath(AgentConfigBean.getInstance().getTempPathName());
             String path = multipartFileBuilder.save();
             //
@@ -116,6 +122,13 @@ public class ProjectFileControl extends BaseAgentController {
         // 修改使用状态
         pim.setUseLibDesc("upload");
         projectInfoService.updateItem(pim);
+        //
+        String after = getParameter("after");
+        if ("restart".equalsIgnoreCase(after)) {
+            String result = consoleService.execCommand(CommandOp.restart, pim);
+            return JsonMessage.getString(200, "上传成功并重启：" + result);
+        }
+
         return JsonMessage.getString(200, "上传成功");
     }
 

@@ -54,6 +54,9 @@ public class EditProjectController extends BaseAgentController {
         if (Validator.isChinese(id)) {
             return JsonMessage.getString(401, "项目id不能包含中文");
         }
+        if (!Validator.isGeneral(id, 2, 20)) {
+            return JsonMessage.getString(401, "项目id 长度范围2-20（英文字母 、数字和下划线）");
+        }
         if (CommonSocketConfig.SYSTEM_ID.equals(id)) {
             return JsonMessage.getString(401, "项目id " + CommonSocketConfig.SYSTEM_ID + " 关键词被系统占用");
         }

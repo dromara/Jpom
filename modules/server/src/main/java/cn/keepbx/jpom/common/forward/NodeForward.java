@@ -190,6 +190,10 @@ public class NodeForward {
 
     private static void addUser(HttpRequest httpRequest, NodeModel nodeModel) {
         UserModel userModel = BaseServerController.getUserModel();
+        addUser(httpRequest, nodeModel, userModel);
+    }
+
+    public static void addUser(HttpRequest httpRequest, NodeModel nodeModel, UserModel userModel) {
         Objects.requireNonNull(userModel);
         httpRequest.header(ConfigBean.JPOM_SERVER_USER_NAME, UserModel.getOptUserName(userModel));
         httpRequest.header(ConfigBean.JPOM_SERVER_SYSTEM_USER_ROLE, String.valueOf(userModel.isSystemUser()));
@@ -218,6 +222,10 @@ public class NodeForward {
             throw new AgentException("agent 端响应异常：" + status);
         }
         String body = response.body();
+        return toJsonMessage(body);
+    }
+
+    public static JsonMessage toJsonMessage(String body) {
         if (StrUtil.isEmpty(body)) {
             throw new AgentException("agent 端响应内容为空");
         }

@@ -1,11 +1,13 @@
 package cn.keepbx.jpom.model;
 
 import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * 基础枚举接口
@@ -86,5 +88,64 @@ public interface BaseEnum {
             return null;
         }
         return baseEnums.getDesc();
+    }
+
+    /**
+     * 获取 json
+     *
+     * @param baseEnum 枚举对象
+     * @return json
+     * @throws InvocationTargetException e
+     * @throws IllegalAccessException    e
+     */
+    static JSONObject toJSONObject(Enum baseEnum) throws InvocationTargetException, IllegalAccessException {
+        Class itemCls = baseEnum.getClass();
+        Method[] methods = itemCls.getMethods();
+        JSONObject jsonObject = new JSONObject();
+        for (Method method : methods) {
+            String name = method.getName();
+            if (!name.startsWith("get")) {
+                continue;
+            }
+            name = name.substring(3);
+            name = name.substring(0, 1).toLowerCase() + name.substring(1);
+            try {
+                itemCls.getDeclaredField(name);
+            } catch (NoSuchFieldException e) {
+                continue;
+            }
+            jsonObject.put(name, method.invoke(baseEnum));
+        }
+        return jsonObject;
+    }
+
+    /**
+     * 将枚举转化为数组
+     * 包括里面所有属性
+     *
+     * @param cls cls
+     * @return array
+     */
+    static JSONArray toJSONArray(Class<? extends Enum> cls) {
+        if (!cls.isEnum()) {
+            throw new IllegalArgumentException("不是枚举");
+        }
+        JSONArray getJsonArray = JSON_ARRAY_MAP.computeIfAbsent(cls, aClass -> {
+            JSONArray jsonArray = new JSONArray();
+            try {
+                Method values = aClass.getMethod("values");
+                Object[] objects = (Object[]) values.invoke(null);
+                for (Object item : objects) {
+                    JSONObject jsonObject = toJSONObject((Enum) item);
+                    jsonArray.add(jsonObject);
+                }
+            } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+                e.printStackTrace();
+                return null;
+            }
+            return jsonArray;
+        });
+        Objects.requireNonNull(getJsonArray);
+        return (JSONArray) getJsonArray.clone();
     }
 }

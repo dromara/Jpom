@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    #parse("./common/head.vm")
+    <title>证书管理</title>
+    <style>
+        body {
+            padding: 10px;
+        }
+    </style>
+</head>
+
+<body>
+<div class="layui-container">
+    <form action="upload" class="layui-form" style="margin-top: 20px">
+        <div class="layui-form-item">
+            <label class="layui-form-label">分发包</label>
+            <div class="layui-input-inline">
+                <button type="button" class="layui-btn" id="selectZip">
+                    <i class="layui-icon">&#xe67c;</i>选择ZIP文件
+                </button>
+                <div class="layui-form-mid layui-word-aux" id="zipResult"></div>
+            </div>
+        ##            <input type="hidden" name="id" value="">
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">分发后</label>
+            <div class="layui-input-block">
+                <select name="afterOpt" id="afterOpt" required lay-verify="required">
+                    <option value="">请选择分发后的操作</option>
+                    #foreach($item in $afterOpt)
+                        <option value="$item.code"
+                                #if($item.code==$outGivingModel.afterOpt)selected #end>$item.desc</option>
+                    #end
+                </select>
+            </div>
+        </div>
+
+        <div class="layui-form-item" style="padding-left: 20%;padding-top: 20px;">
+            <button class="layui-btn layui-btn-normal" lay-submit lay-filter="form_outgiving">提交
+            </button>
+        </div>
+    </form>
+</div>
+
+</body>
+
+
+<script type="text/javascript">
+    function loadSuccess() {
+        var uploadConfig, hashSelectConfig, updateFormData;
+        uploadRender({
+            elem: '#selectZip',
+            url: './upload',
+            multiple: false,
+            exts: 'zip',
+            acceptMime: '.zip',
+            field: 'file',
+            data: {
+                afterOpt: function () {
+                    return updateFormData.afterOpt;
+                },
+                id: getQueryString("id")
+            },
+            auto: false,
+            choose: function (obj) {
+                hashSelectConfig = true;
+                obj.preview(function (index, file, result) {
+                    $("#zipResult").html("已选择:" + file.name);
+                });
+            },
+            before: function (obj) {
+                layer.load();
+            },
+            done: function (res) {
+                // layer.closeAll('loading');
+                layer.msg(res.msg);
+                if (200 == res.code) {
+                    autoClose();
+                }
+            },
+            error: function () {
+                layer.closeAll('loading');
+                layer.msg("上传失败");
+            }
+        }, function (data) {
+            uploadConfig = data;
+        });
+
+        form.on('submit(form_outgiving)', function (data) {
+            updateFormData = data.field;
+            if (!hashSelectConfig) {
+                layer.msg("请选择证书包");
+                return false;
+            }
+            uploadConfig.upload();
+            return false;
+        });
+    }
+
+    function autoClose() {
+        setTimeout(function () {
+            var index = parent.layer.getFrameIndex(window.name);
+            parent.layer.close(index);
+            parent.location.reload();
+        }, 2000);
+    }
+</script>
+
+</html>

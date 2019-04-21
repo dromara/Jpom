@@ -86,8 +86,16 @@
     }
 
     function getTopQueryString(name) {
+        return getQueryStringByUrl(top.location.search.substr(1), name);
+    }
+
+    function getQueryString(name) {
+        return getQueryStringByUrl(location.search.substr(1), name);
+    }
+
+    function getQueryStringByUrl(url, name) {
         var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)");
-        var r = top.location.search.substr(1).match(reg);
+        var r = url.match(reg);
         if (r != null) return unescape(r[2]);
         return null;
     }

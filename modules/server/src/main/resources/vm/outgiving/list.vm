@@ -27,6 +27,10 @@
                     </div>
                     <div class="layui-layout-right" style="padding-right: 10%;">
                         #if($user.isServerManager())
+                            <button op="add" id="$item.id" class="layui-btn layui-btn-sm layui-btn-warm">
+                                <i class="layui-icon">&#xe609;</i>
+                                分发文件
+                            </button>
                             <button op="edit" id="$item.id" class="layui-btn layui-btn-sm ">
                                 <i class="layui-icon">&#xe642;</i>
                                 编辑
@@ -36,7 +40,7 @@
                 </div>
                 <div class="layui-colla-content layui-show">
                     <form class="layui-form" action="">
-                        <table class="layui-table">
+                        <table class="layui-table" id="table_$item.id">
                             <thead>
                             <tr>
                                 <th>节点名称</th>
@@ -47,7 +51,7 @@
                                 <th>操作</th>
                             </tr>
                             </thead>
-                            <tbody>
+                            <tbody id="tbody_$item.id">
                                 #foreach($tr in $item.nodeProjectList)
                                     #if($nodeData[$tr.nodeId])
                                     <tr>
@@ -66,7 +70,8 @@
                                             </div>
                                         </td>
                                         <td>
-                                            $tr.statusMsg
+                                            <div class="viewMsg"  #if($tr.status!=2)style="color: blue"#end
+                                                 msgId="msg_$!tr.nodeId$tr.projectId">$tr.statusMsg</div>
                                         </td>
                                         <td>
                                             $tr.lastOutGivingTime
@@ -85,6 +90,7 @@
                                         </td>
                                     </tr>
                                     #end
+                                <script type="text/html" id="msg_$!tr.nodeId$tr.projectId">$!tr.result</script>
                                 <script type="text/javascript">
                                     //
                                     asyncFn.push(function () {
@@ -121,6 +127,7 @@
     #end
 </body>
 <script type="text/javascript">
+
     function loadSuccess() {
         // 点击事件
         $("button[op]").click(function (e) {
@@ -129,23 +136,43 @@
             if ("conslone" == op) {
                 var nodeId = $(this).attr("nodeId");
                 var projectId = $(this).attr("projectId");
-                top.window.open("/node/index.html?nodeId=" + nodeId + "&toConsole=" + projectId)
+                //
+                var win = top.window.open("/node/index.html?nodeId=" + nodeId + "&toConsole=" + projectId, nodeId + projectId);
+                win.focus();
                 return;
             }
             if ("edit" == op) {
                 editProject($(this).attr("id"));
                 return;
             }
+            if ("add" == op) {
+                var id = $(this).attr("id");
+                layer.open({
+                    type: 2,
+                    title: '添加分发文件',
+                    shade: 0.8,
+                    area: ['40%', '60%'],
+                    content: 'addOutgiving.html?id=' + id
+                });
+                return;
+            }
         });
 
         //
-
+        $("div[class='viewMsg']").click(function () {
+            var msgId = $(this).attr("msgId");
+            var html = document.getElementById(msgId).innerHTML;
+            if (!html || html == "") {
+                return;
+            }
+            layer.alert(html);
+        });
     }
 
     function editProject(id) {
         layer.open({
             type: 2,
-            title: '管理节点配置信息',
+            title: '管理分发信息',
             shade: 0.8,
             area: ['80%', '80%'],
             content: 'edit.html?id=' + id

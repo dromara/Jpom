@@ -185,9 +185,12 @@ public class UserOperateLogV1 extends BaseJsonModel {
         SaveOutGiving(18, "保存节点分发"),
         DelOutGiving(19, "删除节点分发"),
 
+
         Start(20, "启动项目"),
         Stop(21, "停止项目"),
         Restart(22, "重启项目"),
+
+        SaveProject(23, "修改项目"),
         ;
         private int code;
         private String desc;
