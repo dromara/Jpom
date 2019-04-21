@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    #parse("./common/head.vm")
+    <title>项目管理系统</title>
+    <style>
+        body {
+            padding: 10px;
+        }
+    </style>
+</head>
+<body>
+    #if($user.isSystemUser())
+    <div class="layui-row">
+        <button onclick="editProject('');" class="layui-btn layui-btn-sm">创建关联项目</button>
+    </div>
+    #end
+    #if($array && $array.size()>0)
+
+    <div class="layui-collapse" style="margin: 10px;">
+        #foreach($item in $array)
+            <div class="layui-colla-item">
+                <div class="layui-colla-title">
+                    <div title="$item.id">
+                        $item.name
+                    </div>
+                    <div class="layui-layout-right" style="padding-right: 10%;">
+                        #if($user.isServerManager())
+                            <button op="edit" id="$item.id" class="layui-btn layui-btn-sm ">
+                                <i class="layui-icon">&#xe642;</i>
+                                编辑
+                            </button>
+                        #end
+                    </div>
+                </div>
+                <div class="layui-colla-content layui-show">
+                    <form class="layui-form" action="">
+                        <table class="layui-table">
+                            <thead>
+                            <tr>
+                                <th>节点名称</th>
+                                <th>项目名称</th>
+                                <th>项目状态</th>
+                                <th>分发状态</th>
+                                <th>最后分发时间</th>
+                                <th>操作</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                                #foreach($tr in $item.nodeProjectList)
+                                    #if($nodeData[$tr.nodeId])
+                                    <tr>
+                                        <td>
+                                            <div title="$tr.nodeId">$nodeData[$tr.nodeId].name</div>
+                                        </td>
+                                        <td>
+                                            <div title="$tr.projectId">$nodeData[$tr.nodeId].projects[$tr.projectId].name</div>
+                                        </td>
+                                        <td>
+                                            <div title="请到控制台中管理项目">
+                                                <input type="checkbox" id="status_$!tr.nodeId$!tr.projectId" disabled
+                                                       name="status"
+                                                       lay-skin="switch"
+                                                       lay-text="运行中|未运行">
+                                            </div>
+                                        </td>
+                                        <td>
+                                            $tr.statusMsg
+                                        </td>
+                                        <td>
+                                            $tr.lastOutGivingTime
+                                        </td>
+                                        <td>
+                                            <button op="conslone" nodeId="$tr.nodeId" projectId="$tr.projectId"
+                                                    class="layui-btn layui-btn-sm  layui-btn-normal">
+                                                控制台
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    #else
+                                    <tr>
+                                        <td colspan="6" align="center">
+                                            $tr.nodeId 节点不可用或者已经暂停
+                                        </td>
+                                    </tr>
+                                    #end
+                                <script type="text/javascript">
+                                    //
+                                    asyncFn.push(function () {
+                                        silentAjax({
+                                            url: "./getProjectStatus",
+                                            data: {
+                                                nodeId: "$tr.nodeId",
+                                                id: "$tr.projectId"
+                                            },
+                                            success: function (data) {
+                                                if (200 == data.code) {
+                                                    var pId = data.data.pId;
+                                                    if (pId > 0) {
+                                                        $("#status_$!tr.nodeId$!tr.projectId").attr("checked", true)
+                                                                .parent().attr("title", "运行中：" + pId);
+                                                        form.render();
+                                                    }
+                                                }
+                                            }
+                                        });
+                                    });
+                                </script>
+                                #end
+                            </tbody>
+                        </table>
+                    </form>
+                </div>
+            </div>
+        #end
+    </div>
+
+    #else
+    <h1 align="center">还没有任何分发项目，请先创建分发项目</h1>
+    #end
+</body>
+<script type="text/javascript">
+    function loadSuccess() {
+        // 点击事件
+        $("button[op]").click(function (e) {
+            layui.stope(e);
+            var op = $(this).attr("op");
+            if ("conslone" == op) {
+                var nodeId = $(this).attr("nodeId");
+                var projectId = $(this).attr("projectId");
+                top.window.open("/node/index.html?nodeId=" + nodeId + "&toConsole=" + projectId)
+                return;
+            }
+            if ("edit" == op) {
+                editProject($(this).attr("id"));
+                return;
+            }
+        });
+
+        //
+
+    }
+
+    function editProject(id) {
+        layer.open({
+            type: 2,
+            title: '管理节点配置信息',
+            shade: 0.8,
+            area: ['80%', '80%'],
+            content: 'edit.html?id=' + id
+        });
+    }
+</script>
+</html>

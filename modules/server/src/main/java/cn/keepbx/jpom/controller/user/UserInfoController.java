@@ -207,7 +207,7 @@ public class UserInfoController extends BaseServerController {
 
     private String parseRole(UserModel optUser, UserModel userModel) {
         String reqId = getParameter("reqId");
-        List<NodeModel> list = UserListController.getNodeModel(reqId);
+        List<NodeModel> list = nodeService.getNodeModel(reqId);
         if (list == null) {
             return JsonMessage.getString(401, "页面请求超时");
         }

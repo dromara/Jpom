@@ -79,3 +79,12 @@
    由于目前Jpom 启动下面的方式限制SpringBoot未能读取到对应配置文件，目前解决方案是在配置项目的args参数解决
    
    > --spring.config.location=D:\config\config.properties  
+   
+   
+   ### windows 环境 com.sun.tools.attach.AttachNotSupportedException: no providers installed 之类异常
+   
+   > 问题原因${JAVA_HOME}/jre/bin/attach.dll 文件没有找到，检查当前Jdk环境是否安装完整
+   
+   ### 常见问题未知问题
+   
+   https://github.com/alibaba/arthas/issues/347

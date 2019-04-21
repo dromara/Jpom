@@ -15,6 +15,8 @@ import java.io.IOException;
 import java.util.List;
 
 /**
+ * 回收站管理
+ *
  * @author jiangzeyin
  * @date 2019/4/16
  */

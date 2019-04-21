@@ -116,7 +116,7 @@
         $("#delete_node").click(function () {
             var id = $(this).attr("data-id");
             var type = $(this).attr("type");
-            var msg = '确定删除节点 ' + id + '？';
+            var msg = '确定删除节点 ' + id + '？（不会影响节点下的数据）';
             layer.confirm(msg, {
                 title: '系统提示'
             }, function (index) {

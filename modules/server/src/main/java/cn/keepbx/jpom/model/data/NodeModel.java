@@ -5,6 +5,10 @@ import cn.hutool.crypto.SecureUtil;
 import cn.keepbx.jpom.common.forward.NodeUrl;
 import cn.keepbx.jpom.model.BaseModel;
 import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * 节点实体
@@ -13,7 +17,7 @@ import com.alibaba.fastjson.JSONArray;
  * @date 2019/4/16
  */
 public class NodeModel extends BaseModel {
-    private String name;
+
     private String url;
     private String loginName;
     private String loginPwd;
@@ -27,6 +31,9 @@ public class NodeModel extends BaseModel {
      * 项目信息
      */
     private JSONArray projects;
+    /**
+     * 开启状态，如果关闭状态就暂停使用节点
+     */
     private boolean openStatus;
 
     public boolean isOpenStatus() {
@@ -41,6 +48,34 @@ public class NodeModel extends BaseModel {
         return projects;
     }
 
+    /**
+     * 返回按照项目分组 排列的数组
+     *
+     * @return array
+     */
+    public JSONArray getGroupProjects() {
+        JSONArray array = getProjects();
+        if (array == null) {
+            return null;
+        }
+        JSONArray newArray = new JSONArray();
+        Map<String, JSONObject> map = new HashMap<>(array.size());
+        array.forEach(o -> {
+            JSONObject pItem = (JSONObject) o;
+            String group = pItem.getString("group");
+            JSONObject jsonObject = map.computeIfAbsent(group, s -> {
+                JSONObject jsonObject1 = new JSONObject();
+                jsonObject1.put("group", s);
+                jsonObject1.put("projects", new JSONArray());
+                return jsonObject1;
+            });
+            JSONArray jsonArray = jsonObject.getJSONArray("projects");
+            jsonArray.add(pItem);
+        });
+        newArray.addAll(map.values());
+        return newArray;
+    }
+
     public void setProjects(JSONArray projects) {
         this.projects = projects;
     }
@@ -51,14 +86,6 @@ public class NodeModel extends BaseModel {
 
     public void setProtocol(String protocol) {
         this.protocol = protocol.toLowerCase();
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
     }
 
     public String getUrl() {

@@ -50,6 +50,16 @@ public class UserOperateLogV1 extends BaseJsonModel {
      */
     private String dataId;
 
+    private String userAgent;
+
+    public String getUserAgent() {
+        return userAgent;
+    }
+
+    public void setUserAgent(String userAgent) {
+        this.userAgent = userAgent;
+    }
+
     public String getDataId() {
         return StrUtil.emptyToDefault(dataId, StrUtil.DASHED);
     }
@@ -171,6 +181,9 @@ public class UserOperateLogV1 extends BaseJsonModel {
         ExportCert(15, "导出证书"),
         SaveNginx(16, "修改Nginx"),
         DelNginx(17, "删除Nginx"),
+
+        SaveOutGiving(18, "保存节点分发"),
+        DelOutGiving(19, "删除节点分发"),
 
         Start(20, "启动项目"),
         Stop(21, "停止项目"),

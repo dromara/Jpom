@@ -19,6 +19,8 @@ import java.util.HashSet;
 import java.util.List;
 
 /**
+ * 管理的信息获取接口
+ *
  * @author jiangzeyin
  * @date 2019/4/16
  */
@@ -29,16 +31,51 @@ public class ProjectListController extends BaseJpomController {
     @Resource
     private ProjectInfoService projectInfoService;
 
+    /**
+     * 获取项目的信息
+     *
+     * @param id id
+     * @return item
+     * @see ProjectInfoModel
+     */
     @RequestMapping(value = "getProjectItem", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public String getProjectItem(String id) {
         return JsonMessage.getString(200, "", projectInfoService.getItem(id));
     }
 
+    /**
+     * 获取所有的分组
+     *
+     * @return array
+     */
     @RequestMapping(value = "getProjectGroup", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public String getProjectGroup() {
         HashSet<String> strings = projectInfoService.getAllGroup();
         return JsonMessage.getString(200, "", strings);
     }
+
+    /**
+     * 获取项目的进程id
+     *
+     * @param id 项目id
+     * @return json
+     */
+    @RequestMapping(value = "getProjectStatus", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    public String getProjectStatus(String id) {
+        if (StrUtil.isEmpty(id)) {
+            return JsonMessage.getString(405, "项目id 不正确");
+        }
+        int pid = 0;
+        try {
+            pid = AbstractProjectCommander.getInstance().getPid(id);
+        } catch (Exception e) {
+            DefaultSystemLog.ERROR().error("获取项目pid 失败", e);
+        }
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("pId", pid);
+        return JsonMessage.getString(200, "", jsonObject);
+    }
+
 
     /**
      * 程序项目信息
@@ -81,6 +118,12 @@ public class ProjectListController extends BaseJpomController {
         }
     }
 
+    /**
+     * 获取项目的运行端口
+     *
+     * @param ids ids
+     * @return obj
+     */
     @RequestMapping(value = "getProjectPort", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public String getProjectGroup(String ids) {
         if (StrUtil.isEmpty(ids)) {
@@ -110,6 +153,11 @@ public class ProjectListController extends BaseJpomController {
         return JsonMessage.getString(200, "", jsonObject);
     }
 
+    /**
+     * 获取运行方式
+     *
+     * @return array
+     */
     @RequestMapping(value = "getRunModes", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public String getRunModes() {
         ProjectInfoModel.RunMode[] runModes = ProjectInfoModel.RunMode.values();

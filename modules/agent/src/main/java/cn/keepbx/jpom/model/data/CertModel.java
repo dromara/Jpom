@@ -29,7 +29,6 @@ import java.util.Date;
 public class CertModel extends BaseModel {
 
     private static final String KEY = "Jpom 管理系统";
-    private String name;
     /**
      * 证书文件
      */
@@ -55,13 +54,6 @@ public class CertModel extends BaseModel {
      */
     private String whitePath;
 
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
 
     public String getWhitePath() {
         return whitePath;

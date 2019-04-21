@@ -158,7 +158,6 @@
                 });
                 //
                 form.on('submit(from_node)', function (data) {
-                    console.log(data);
                     loadingAjax({
                         url: './install_node.json',
                         data: data.field,
@@ -175,6 +174,16 @@
                 });
             });
         #end
+        // 自动打开控制台
+        var toConsole = getTopQueryString("toConsole");
+        if (toConsole) {
+            var url = './manage/console?id=' + toConsole;
+            tabChange({
+                id: toConsole,
+                url: url,
+                title: toConsole + ' - 管理',
+            });
+        }
     }
 </script>
 

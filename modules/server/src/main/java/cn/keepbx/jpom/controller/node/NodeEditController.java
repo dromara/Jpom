@@ -1,5 +1,6 @@
 package cn.keepbx.jpom.controller.node;
 
+import cn.hutool.core.lang.Validator;
 import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.keepbx.jpom.common.BaseServerController;
@@ -63,17 +64,15 @@ public class NodeEditController extends BaseServerController {
     }
 
     private String addNode(NodeModel nodeModel) {
-        if (StrUtil.isEmpty(nodeModel.getId())) {
-            return JsonMessage.getString(405, "节点id 不能为空");
-        }
-        if (nodeModel.getId().length() > 20) {
-            return JsonMessage.getString(405, "节点id 长度小于20");
-        }
-        if (StrUtil.isEmpty(nodeModel.getName())) {
-            return JsonMessage.getString(405, "节点名称 不能为空");
+        if (!Validator.isGeneral(nodeModel.getId(), 2, 20)) {
+            return JsonMessage.getString(405, "节点id不能为空并且2-20");
         }
         if (nodeService.getItem(nodeModel.getId()) != null) {
             return JsonMessage.getString(405, "节点id已经存在啦");
+        }
+        String error = checkData(nodeModel);
+        if (error != null) {
+            return error;
         }
         JpomManifest jpomManifest = NodeForward.requestData(nodeModel, NodeUrl.Info, getRequest(), JpomManifest.class);
         if (jpomManifest == null) {
@@ -88,11 +87,27 @@ public class NodeEditController extends BaseServerController {
         if (exit == null) {
             return JsonMessage.getString(405, "节点不存在");
         }
-        if (StrUtil.isEmpty(nodeModel.getName())) {
-            return JsonMessage.getString(405, "节点名称 不能为空");
+        String error = checkData(nodeModel);
+        if (error != null) {
+            return error;
         }
         nodeService.updateItem(nodeModel);
         return JsonMessage.getString(200, "操作成功");
+    }
+
+    private String checkData(NodeModel nodeModel) {
+        if (StrUtil.isEmpty(nodeModel.getName())) {
+            return JsonMessage.getString(405, "节点名称 不能为空");
+        }
+        List<NodeModel> list = nodeService.list();
+        if (list != null) {
+            for (NodeModel model : list) {
+                if (model.getUrl().equalsIgnoreCase(nodeModel.getUrl()) && !model.getId().equalsIgnoreCase(nodeModel.getId())) {
+                    return JsonMessage.getString(405, "已经存在相同的节点地址啦");
+                }
+            }
+        }
+        return null;
     }
 
     /**

@@ -16,4 +16,9 @@ public class ServerConfigBean {
      * 节点数据文件
      */
     public static final String NODE = "node.json";
+
+    /**
+     * 分发数据文件
+     */
+    public static final String OUTGIVING = "outgiving.json";
 }

@@ -4,6 +4,7 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import java.io.File;
@@ -52,5 +53,14 @@ public class JsonFileUtil {
             String newsJson = JSON.toJSONString(json, true);
             FileUtil.writeString(newsJson, path, CharsetUtil.UTF_8);
         }
+    }
+
+    public static <T> JSONObject arrayToObjById(JSONArray array) {
+        JSONObject jsonObject = new JSONObject();
+        array.forEach(o -> {
+            JSONObject jsonObject1 = (JSONObject) o;
+            jsonObject.put(jsonObject1.getString("id"), jsonObject1);
+        });
+        return jsonObject;
     }
 }

@@ -123,7 +123,7 @@ public class LinuxSystemCommander extends AbstractSystemCommander {
         if (val.endsWith("g")) {
             return String.format("%.2f MB", Convert.toDouble(val.replace("g", "")) * 1024);
         } else {
-            return Convert.toLong(val) / 1024 + " MB";
+            return Convert.toLong(val, 0L) / 1024 + " MB";
         }
     }
 

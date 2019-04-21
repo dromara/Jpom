@@ -32,7 +32,7 @@
 </script>
 <script type="text/html" id="status_templ">
     <div title="请到控制台中管理项目">
-        <input class="layui-hide" type="checkbox" id="" disabled name="status" {{# if(d.status){ }}
+        <input type="checkbox" id="" disabled name="status" {{# if(d.status){ }}
                checked {{# } }}
                lay-skin="switch"
                lay-text="运行中|未运行">

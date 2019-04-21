@@ -31,11 +31,6 @@ public class UserModel extends BaseModel {
      * 用户名限制
      */
     public static int USER_NAME_MIN_LEN = 3;
-
-    /**
-     * 昵称
-     */
-    private String name;
     /**
      * 密码
      */
@@ -210,15 +205,6 @@ public class UserModel extends BaseModel {
 
     public void setParent(String parent) {
         this.parent = parent;
-    }
-
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
     }
 
     public String getPassword() {

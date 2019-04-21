@@ -114,11 +114,5 @@
             content: 'edit.html?id=' + id
         });
     }
-
-    function reloadTable() {
-        table.reload('table_project', {
-            where: apiWhere
-        });
-    }
 </script>
 </html>

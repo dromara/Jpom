@@ -16,7 +16,6 @@ import java.util.List;
  * @author jiangzeyin
  */
 public class ProjectInfoModel extends BaseModel {
-    private String name;
     /**
      * 分组
      */
@@ -140,14 +139,6 @@ public class ProjectInfoModel extends BaseModel {
 
     public void setJvm(String jvm) {
         this.jvm = jvm;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
     }
 
     public String getGroup() {

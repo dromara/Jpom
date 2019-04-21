@@ -60,7 +60,7 @@ public abstract class BaseDataService {
      * @param filename 文件名
      * @param json     json数据
      */
-    protected void updateJson(String filename, JSONObject json) throws Exception {
+    protected void updateJson(String filename, JSONObject json) {
         String key = json.getString("id");
         // 读取文件，如果不存在记录，则抛出异常
         JSONObject allData = getJSONObject(filename);
@@ -68,7 +68,7 @@ public abstract class BaseDataService {
 
         // 判断是否存在数据
         if (null == data || 0 == data.keySet().size()) {
-            throw new Exception("数据不存在:" + key);
+            throw new JpomRuntimeException("数据不存在:" + key);
         } else {
             allData.put(key, json);
             JsonFileUtil.saveJson(getDataFilePath(filename), allData);
@@ -80,15 +80,14 @@ public abstract class BaseDataService {
      *
      * @param filename 文件
      * @param key      key
-     * @throws Exception 异常
      */
-    protected void deleteJson(String filename, String key) throws Exception {
+    protected void deleteJson(String filename, String key) {
         // 读取文件，如果存在记录，则抛出异常
         JSONObject allData = getJSONObject(filename);
         JSONObject data = allData.getJSONObject(key);
         // 判断是否存在数据
         if (CollUtil.isEmpty(data)) {
-            throw new Exception("项目名称存不在！");
+            throw new JpomRuntimeException("项目名称存不在！");
         } else {
             allData.remove(key);
             JsonFileUtil.saveJson(getDataFilePath(filename), allData);

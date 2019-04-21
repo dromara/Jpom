@@ -22,6 +22,7 @@ import com.alibaba.fastjson.JSONObject;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.Signature;
 import org.aspectj.lang.reflect.MethodSignature;
+import org.springframework.http.HttpHeaders;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.servlet.http.HttpServletRequest;
@@ -78,6 +79,8 @@ public class OperateLogController implements AopLogInterface {
                 cacheInfo.nodeModel = (NodeModel) request.getAttribute("node");
                 //
                 cacheInfo.dataId = request.getParameter("id");
+                //
+                cacheInfo.userAgent = ServletUtil.getHeaderIgnoreCase(request, HttpHeaders.USER_AGENT);
                 CACHE_INFO_THREAD_LOCAL.set(cacheInfo);
             }
         }
@@ -151,8 +154,8 @@ public class OperateLogController implements AopLogInterface {
     /**
      * 修改执行结果
      *
-     * @param reqId
-     * @param val
+     * @param reqId 请求id
+     * @param val   结果
      */
     public void updateLog(String reqId, String val) {
         Db db = Db.use();
@@ -183,5 +186,6 @@ public class OperateLogController implements AopLogInterface {
         private String ip;
         private NodeModel nodeModel;
         private String dataId;
+        private String userAgent;
     }
 }
