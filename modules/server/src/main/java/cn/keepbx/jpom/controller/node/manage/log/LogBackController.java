@@ -5,7 +5,9 @@ import cn.keepbx.jpom.common.BaseServerController;
 import cn.keepbx.jpom.common.forward.NodeForward;
 import cn.keepbx.jpom.common.forward.NodeUrl;
 import cn.keepbx.jpom.common.interceptor.ProjectPermission;
+import cn.keepbx.jpom.model.data.UserOperateLogV1;
 import cn.keepbx.jpom.service.manage.ProjectInfoService;
+import cn.keepbx.jpom.system.OperateType;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
@@ -30,6 +32,7 @@ public class LogBackController extends BaseServerController {
     @RequestMapping(value = "export.html", method = RequestMethod.GET)
     @ResponseBody
     @ProjectPermission
+    @OperateType(UserOperateLogV1.OptType.ExportProjectLog)
     public void export() {
         NodeForward.requestDownload(getNode(), getRequest(), getResponse(), NodeUrl.Manage_Log_export);
     }
@@ -44,6 +47,7 @@ public class LogBackController extends BaseServerController {
     @RequestMapping(value = "logBack_download", method = RequestMethod.GET)
     @ResponseBody
     @ProjectPermission
+    @OperateType(UserOperateLogV1.OptType.DownloadProjectLogBack)
     public void download() {
         NodeForward.requestDownload(getNode(), getRequest(), getResponse(), NodeUrl.Manage_Log_logBack_download);
     }
@@ -51,6 +55,7 @@ public class LogBackController extends BaseServerController {
     @RequestMapping(value = "logBack_delete", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     @ProjectPermission(checkDelete = true)
+    @OperateType(UserOperateLogV1.OptType.DelProjectLogBack)
     public String clear() {
         return NodeForward.request(getNode(), getRequest(), NodeUrl.Manage_Log_logBack_delete).toString();
     }
@@ -70,6 +75,7 @@ public class LogBackController extends BaseServerController {
     @RequestMapping(value = "resetLog", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     @ProjectPermission
+    @OperateType(UserOperateLogV1.OptType.RestProjectLog)
     public String resetLog() {
         return NodeForward.request(getNode(), getRequest(), NodeUrl.Manage_Log_ResetLog).toString();
     }

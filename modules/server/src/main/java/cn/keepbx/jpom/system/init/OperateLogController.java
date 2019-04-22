@@ -1,6 +1,7 @@
 package cn.keepbx.jpom.system.init;
 
 import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.db.Db;
 import cn.hutool.db.Entity;
 import cn.hutool.extra.servlet.ServletUtil;
@@ -28,6 +29,8 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 import javax.servlet.http.HttpServletRequest;
 import java.lang.reflect.Method;
 import java.sql.SQLException;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * 操作记录控制器
@@ -81,6 +84,17 @@ public class OperateLogController implements AopLogInterface {
                 cacheInfo.dataId = request.getParameter("id");
                 //
                 cacheInfo.userAgent = ServletUtil.getHeaderIgnoreCase(request, HttpHeaders.USER_AGENT);
+                //
+                Map<String, String[]> map = request.getParameterMap();
+                // 过滤密码字段
+                Set<Map.Entry<String, String[]>> entries = map.entrySet();
+                for (Map.Entry<String, String[]> entry : entries) {
+                    String key = entry.getKey();
+                    if (StrUtil.containsIgnoreCase(key, "pwd")) {
+                        entry.setValue(new String[]{"***"});
+                    }
+                }
+                cacheInfo.setReqData(JSONObject.toJSONString(map));
                 CACHE_INFO_THREAD_LOCAL.set(cacheInfo);
             }
         }
@@ -92,8 +106,6 @@ public class OperateLogController implements AopLogInterface {
         if (cacheInfo == null) {
             return;
         }
-        UserOperateLogV1.OptType optType = cacheInfo.optType;
-        String ip = cacheInfo.ip;
         UserModel userModel = BaseServerController.getUserModel();
         if (userModel == null) {
             userModel = cacheInfo.userModel;
@@ -103,17 +115,21 @@ public class OperateLogController implements AopLogInterface {
         if (userModel == null) {
             return;
         }
-        this.log(userModel, value, ip, optType, cacheInfo.nodeModel, cacheInfo.dataId);
+        this.log(userModel, value, cacheInfo);
     }
 
     public void log(String reqId, UserModel userModel,
-                    Object value, String ip,
-                    UserOperateLogV1.OptType optType,
-                    NodeModel nodeModel, String dataId) {
+                    Object value, CacheInfo cacheInfo) {
+        String ip = cacheInfo.ip;
+        UserOperateLogV1.OptType optType = cacheInfo.optType;
+        NodeModel nodeModel = cacheInfo.nodeModel;
+        String dataId = cacheInfo.dataId;
         UserOperateLogV1 userOperateLogV1 = new UserOperateLogV1(reqId);
         //
         userOperateLogV1.setUserId(UserModel.getOptUserName(userModel));
         userOperateLogV1.setIp(ip);
+        userOperateLogV1.setUserAgent(cacheInfo.userAgent);
+        userOperateLogV1.setReqData(cacheInfo.reqData);
         if (value != null) {
             // 解析结果
             String json = value.toString();
@@ -147,8 +163,8 @@ public class OperateLogController implements AopLogInterface {
         }
     }
 
-    public void log(UserModel userModel, Object value, String ip, UserOperateLogV1.OptType optType, NodeModel nodeModel, String dataId) {
-        this.log(null, userModel, value, ip, optType, nodeModel, dataId);
+    public void log(UserModel userModel, Object value, CacheInfo cacheInfo) {
+        this.log(null, userModel, value, cacheInfo);
     }
 
     /**
@@ -180,12 +196,41 @@ public class OperateLogController implements AopLogInterface {
     /**
      * 临时缓存
      */
-    private static class CacheInfo {
+    public static class CacheInfo {
         private UserOperateLogV1.OptType optType;
         private UserModel userModel;
         private String ip;
         private NodeModel nodeModel;
         private String dataId;
         private String userAgent;
+        private String reqData;
+
+        public void setReqData(String reqData) {
+            this.reqData = reqData;
+        }
+
+        public void setOptType(UserOperateLogV1.OptType optType) {
+            this.optType = optType;
+        }
+
+        public void setUserModel(UserModel userModel) {
+            this.userModel = userModel;
+        }
+
+        public void setIp(String ip) {
+            this.ip = ip;
+        }
+
+        public void setNodeModel(NodeModel nodeModel) {
+            this.nodeModel = nodeModel;
+        }
+
+        public void setDataId(String dataId) {
+            this.dataId = dataId;
+        }
+
+        public void setUserAgent(String userAgent) {
+            this.userAgent = userAgent;
+        }
     }
 }

@@ -28,7 +28,7 @@ set MainClass=cn.keepbx.jpom.JpomAgentApplication
 set CloseMainClass=cn.keepbx.jpom.JpomClose
 set basePath=%~dp0
 set Lib=%basePath%lib\
-set Log=%basePath%run.log
+set Log=%basePath%agent.log
 set LogBack=%basePath%log\
 set JVM=-server
 set ARGS= --jpom.applicationTag=%Tag% --jpom.log=%basePath%log --server.port=2123

@@ -25,7 +25,7 @@ MainClass="cn.keepbx.jpom.JpomServerApplication"
 # 自动获取当前路径
 Path=$(cd `dirname $0`; pwd)"/"
 Lib="${Path}lib/"
-Log="${Path}run.log"
+Log="${Path}server.log"
 LogBack="${Path}log/"
 JVM="-server "
 # 修改项目端口号 日志路径
@@ -59,8 +59,10 @@ function start() {
         tail -f ${Log}
     else
         sleep 3
-        if [[ -f ${Log} ]]; then
-            echo "还没有生成日志文件:${Log}"
+        if [[  -f ${Log} ]]; then
+           tail -f ${Log}
+        else
+           echo "还没有生成日志文件:${Log}"
         fi
     fi
 }

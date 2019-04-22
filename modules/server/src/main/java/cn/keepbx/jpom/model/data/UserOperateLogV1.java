@@ -46,11 +46,25 @@ public class UserOperateLogV1 extends BaseJsonModel {
      */
     private String reqId;
     /**
+     * 请求参数
+     */
+    private String reqData;
+    /**
      * 数据id
      */
     private String dataId;
-
+    /**
+     * 浏览器标识
+     */
     private String userAgent;
+
+    public String getReqData() {
+        return reqData;
+    }
+
+    public void setReqData(String reqData) {
+        this.reqData = reqData;
+    }
 
     public String getUserAgent() {
         return userAgent;
@@ -191,6 +205,22 @@ public class UserOperateLogV1 extends BaseJsonModel {
         Restart(22, "重启项目"),
 
         SaveProject(23, "修改项目"),
+
+        UploadOutGiving(24, "分发文件"),
+
+        UploadProjectFile(25, "上传项目文件"),
+        DownloadProjectFile(26, "下载项目文件"),
+        DelProjectFile(27, "删除项目文件"),
+        ExportProjectLog(28, "导出项目日志"),
+        DownloadProjectLogBack(29, "下载项目备份日志"),
+        DelProjectLogBack(30, "删除项目备份日志"),
+        RestProjectLog(31, "重置项目日志"),
+
+        BuildDownload(32, "构建下载"),
+        BuildInstall(33, "构建安装"),
+
+        ExportStack(34, "导出项目栈"),
+        ExportRam(34, "导出项目内容"),
         ;
         private int code;
         private String desc;

@@ -3,6 +3,8 @@ package cn.keepbx.jpom.controller.node.monitor;
 import cn.keepbx.jpom.common.BaseServerController;
 import cn.keepbx.jpom.common.forward.NodeForward;
 import cn.keepbx.jpom.common.forward.NodeUrl;
+import cn.keepbx.jpom.model.data.UserOperateLogV1;
+import cn.keepbx.jpom.system.OperateType;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
@@ -35,6 +37,7 @@ public class InternalController extends BaseServerController {
      */
     @RequestMapping(value = "stack", method = RequestMethod.GET)
     @ResponseBody
+    @OperateType(UserOperateLogV1.OptType.ExportStack)
     public void stack() {
         NodeForward.requestDownload(getNode(), getRequest(), getResponse(), NodeUrl.Manage_internal_stack);
     }
@@ -44,6 +47,7 @@ public class InternalController extends BaseServerController {
      */
     @RequestMapping(value = "ram", method = RequestMethod.GET)
     @ResponseBody
+    @OperateType(UserOperateLogV1.OptType.ExportRam)
     public void ram() throws Exception {
         NodeForward.requestDownload(getNode(), getRequest(), getResponse(), NodeUrl.Manage_internal_ram);
     }

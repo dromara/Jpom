@@ -4,6 +4,8 @@ import cn.keepbx.jpom.common.BaseServerController;
 import cn.keepbx.jpom.common.forward.NodeForward;
 import cn.keepbx.jpom.common.forward.NodeUrl;
 import cn.keepbx.jpom.common.interceptor.ProjectPermission;
+import cn.keepbx.jpom.model.data.UserOperateLogV1;
+import cn.keepbx.jpom.system.OperateType;
 import com.alibaba.fastjson.JSONArray;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
@@ -31,8 +33,16 @@ public class BuildController extends BaseServerController {
         return "node/manage/build";
     }
 
+    /**
+     * 构建下载
+     *
+     * @param id  项目id
+     * @param key key
+     * @return url
+     */
     @RequestMapping(value = "build_download", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
     @ProjectPermission
+    @OperateType(UserOperateLogV1.OptType.BuildDownload)
     public String buildDownload(String id, String key) {
         String url = NodeForward.requestData(getNode(), NodeUrl.Manage_build_download, String.class,
                 "id", id,
@@ -43,9 +53,15 @@ public class BuildController extends BaseServerController {
         return "redirect:" + url;
     }
 
+    /**
+     * 构建安装
+     *
+     * @return json
+     */
     @RequestMapping(value = "build_install", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     @ProjectPermission
+    @OperateType(UserOperateLogV1.OptType.BuildInstall)
     public String buildInstall() {
         return NodeForward.request(getNode(), getRequest(), NodeUrl.Manage_build_install).toString();
     }

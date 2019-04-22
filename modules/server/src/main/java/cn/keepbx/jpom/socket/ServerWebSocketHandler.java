@@ -12,6 +12,7 @@ import cn.keepbx.jpom.model.data.UserModel;
 import cn.keepbx.jpom.model.data.UserOperateLogV1;
 import cn.keepbx.jpom.system.init.OperateLogController;
 import com.alibaba.fastjson.JSONObject;
+import org.springframework.http.HttpHeaders;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
@@ -82,7 +83,17 @@ public class ServerWebSocketHandler extends TextWebSocketHandler {
             json.put("reqId", reqId);
 
             try {
-                operateLogController.log(reqId, userInfo, "还没有响应", ip, type, nodeModel, projectId);
+                OperateLogController.CacheInfo cacheInfo = new OperateLogController.CacheInfo();
+                cacheInfo.setIp(ip);
+                cacheInfo.setOptType(type);
+                cacheInfo.setNodeModel(nodeModel);
+                cacheInfo.setDataId(projectId);
+                String userAgent = (String) attributes.get(HttpHeaders.USER_AGENT);
+                cacheInfo.setUserAgent(userAgent);
+
+                cacheInfo.setReqData(json.toString());
+
+                operateLogController.log(reqId, userInfo, "还没有响应", cacheInfo);
             } catch (Exception e) {
                 DefaultSystemLog.ERROR().error("记录操作日志异常", e);
             }

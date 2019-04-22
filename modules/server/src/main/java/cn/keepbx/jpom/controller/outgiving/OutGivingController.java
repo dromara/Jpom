@@ -56,17 +56,17 @@ public class OutGivingController extends BaseServerController {
 
     @RequestMapping(value = "edit.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
     public String edit(String id) throws IOException {
-        List<NodeModel> nodeModels = nodeService.listAndProject();
-        setAttribute("nodeModels", nodeModels);
+        UserModel userModel = getUser();
+        if (StrUtil.isNotEmpty(id) && userModel.isServerManager()) {
+            List<NodeModel> nodeModels = nodeService.listAndProject();
+            setAttribute("nodeModels", nodeModels);
+            //
+            String reqId = nodeService.cacheNodeList(nodeModels);
+            setAttribute("reqId", reqId);
+            setAttribute("type", "add");
 
-        //
-        String reqId = nodeService.cacheNodeList(nodeModels);
-        setAttribute("reqId", reqId);
-        setAttribute("type", "add");
-        if (StrUtil.isNotEmpty(id)) {
-            UserModel userModel = getUser();
             OutGivingModel outGivingModel = outGivingServer.getItem(id);
-            if (outGivingModel != null && userModel.isServerManager()) {
+            if (outGivingModel != null) {
                 setAttribute("item", outGivingModel);
                 setAttribute("type", "edit");
             }
@@ -172,7 +172,12 @@ public class OutGivingController extends BaseServerController {
         return null;
     }
 
-
+    /**
+     * 删除节点信息
+     *
+     * @param id
+     * @return
+     */
     @RequestMapping(value = "del.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     @UrlPermission(value = Role.ServerManager, optType = UserOperateLogV1.OptType.DelOutGiving)

@@ -4,6 +4,8 @@ import cn.keepbx.jpom.common.BaseServerController;
 import cn.keepbx.jpom.common.forward.NodeForward;
 import cn.keepbx.jpom.common.forward.NodeUrl;
 import cn.keepbx.jpom.common.interceptor.ProjectPermission;
+import cn.keepbx.jpom.model.data.UserOperateLogV1;
+import cn.keepbx.jpom.system.OperateType;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -49,6 +51,7 @@ public class ProjectFileControl extends BaseServerController {
     @RequestMapping(value = "upload", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     @ProjectPermission(checkUpload = true)
+    @OperateType(UserOperateLogV1.OptType.UploadProjectFile)
     public String upload() {
         return NodeForward.requestMultipart(getNode(), getMultiRequest(), NodeUrl.Manage_File_Upload).toString();
     }
@@ -58,6 +61,7 @@ public class ProjectFileControl extends BaseServerController {
      */
     @RequestMapping(value = "download", method = RequestMethod.GET)
     @ResponseBody
+    @OperateType(UserOperateLogV1.OptType.DownloadProjectFile)
     public void download() {
         NodeForward.requestDownload(getNode(), getRequest(), getResponse(), NodeUrl.Manage_File_Download);
     }
@@ -70,6 +74,7 @@ public class ProjectFileControl extends BaseServerController {
     @RequestMapping(value = "deleteFile", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     @ProjectPermission(checkDelete = true)
+    @OperateType(UserOperateLogV1.OptType.DelProjectFile)
     public String deleteFile() {
         return NodeForward.request(getNode(), getRequest(), NodeUrl.Manage_File_DeleteFile).toString();
     }

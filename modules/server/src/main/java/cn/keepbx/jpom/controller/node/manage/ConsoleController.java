@@ -40,6 +40,4 @@ public class ConsoleController extends BaseServerController {
         }
         return "node/manage/console";
     }
-
-
 }

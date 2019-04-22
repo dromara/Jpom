@@ -70,7 +70,8 @@
                                             </div>
                                         </td>
                                         <td>
-                                            <div class="viewMsg"  #if($tr.status!=2)style="color: blue"#end
+                                            <div class="viewMsg"
+                                                 #if($tr.status!=2)style="color: red;font-weight: bold;"#end
                                                  msgId="msg_$!tr.nodeId$tr.projectId">$tr.statusMsg</div>
                                         </td>
                                         <td>
@@ -104,7 +105,8 @@
                                                 if (200 == data.code) {
                                                     var pId = data.data.pId;
                                                     if (pId > 0) {
-                                                        $("#status_$!tr.nodeId$!tr.projectId").attr("checked", true)
+                                                        $("#status_$!tr.nodeId$!tr.projectId")
+                                                                .attr("checked", true)
                                                                 .parent().attr("title", "运行中：" + pId);
                                                         form.render();
                                                     }

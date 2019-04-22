@@ -5,24 +5,8 @@
     #parse("./common/head.vm")
     <title>项目管理系统</title>
     <style>
-        .layui-form-label {
-            width: 100px;
-        }
-
         body {
-            padding: 10px 10px 0px 10px;
-        }
-
-        .layui-container {
-            width: 80% !important;
-        }
-
-        .div-user {
-            display: none;
-        }
-
-        .layui-input-block {
-            margin-left: 135px;
+            padding: 10px;
         }
     </style>
 </head>
@@ -35,10 +19,31 @@
 <script type="text/html" id="bar_projects">
     <a href="javascript:;" class="layui-btn  layui-btn-sm layui-btn-normal" lay-event="view">详情</a>
 </script>
+<script type="text/html" id="showBox">
+    <div style="padding: 10px;">
+        <div class="layui-card">
+            <div class="layui-card-header">浏览器标识</div>
+            <div class="layui-card-body">
+                {{ d.userAgent }}
+            </div>
+        </div>
+        <div class="layui-card">
+            <div class="layui-card-header">请求参数</div>
+            <div class="layui-card-body">
+                {{ d.reqData }}
+            </div>
+        </div>
+        <div class="layui-card">
+            <div class="layui-card-header">响应结果</div>
+            <div class="layui-card-body">
+                {{ d.resultMsg }}
+            </div>
+        </div>
+    </div>
+</script>
 </body>
 <script type="text/javascript">
     function loadSuccess() {
-
         tableRender({
             id: 'tab_user',
             elem: '#tab_user',
@@ -73,17 +78,27 @@
             table.reload('tab_user', {});
         });
 
-        // 表格工具条事件
-        table.on('tool(tab_user)', function (obj) {
-            var data = obj.data;
-            var event = obj.event;
-            if ('view' === event) {
-                layer.open({
-                    content: data.resultMsg,
-                    scrollbar: false
-                });
-            }
+
+        layui.use(['laytpl'], function () {
+            var laytpl = layui.laytpl;
+            var showBox = document.getElementById('showBox').innerHTML;
+            // 表格工具条事件
+            table.on('tool(tab_user)', function (obj) {
+                var data = obj.data;
+                var event = obj.event;
+                if ('view' === event) {
+                    laytpl(showBox).render(data, function (html) {
+                        layer.open({
+                            type: 1,
+                            content: html,
+                            scrollbar: false
+                        });
+                    });
+
+                }
+            });
         });
+
     }
 </script>
 </html>

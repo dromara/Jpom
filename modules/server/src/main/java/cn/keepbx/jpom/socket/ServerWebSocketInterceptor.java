@@ -6,6 +6,7 @@ import cn.keepbx.jpom.model.data.NodeModel;
 import cn.keepbx.jpom.model.data.UserModel;
 import cn.keepbx.jpom.service.node.NodeService;
 import cn.keepbx.jpom.service.user.UserService;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.http.server.ServletServerHttpRequest;
@@ -49,6 +50,9 @@ public class ServerWebSocketInterceptor implements HandshakeInterceptor {
             //
             String ip = ServletUtil.getClientIP(httpServletRequest);
             attributes.put("ip", ip);
+            //
+            String userAgent = ServletUtil.getHeaderIgnoreCase(httpServletRequest, HttpHeaders.USER_AGENT);
+            attributes.put(HttpHeaders.USER_AGENT, userAgent);
             return true;
         }
         return false;
