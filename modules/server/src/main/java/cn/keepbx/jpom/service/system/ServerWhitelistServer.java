@@ -8,6 +8,8 @@ import cn.keepbx.jpom.util.JsonFileUtil;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 /**
  * @author jiangzeyin
  * @date 2019/4/22
@@ -33,4 +35,12 @@ public class ServerWhitelistServer extends BaseDataService {
         JsonFileUtil.saveJson(path, serverWhitelist.toJson());
     }
 
+
+    public List<String> getOutGiving() {
+        ServerWhitelist serverWhitelist = getWhitelist();
+        if (serverWhitelist == null) {
+            return null;
+        }
+        return serverWhitelist.getOutGiving();
+    }
 }

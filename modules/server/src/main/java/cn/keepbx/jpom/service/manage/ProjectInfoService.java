@@ -3,7 +3,6 @@ package cn.keepbx.jpom.service.manage;
 import cn.keepbx.jpom.common.forward.NodeForward;
 import cn.keepbx.jpom.common.forward.NodeUrl;
 import cn.keepbx.jpom.model.data.NodeModel;
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;
 
@@ -30,7 +29,7 @@ public class ProjectInfoService {
         return NodeForward.requestData(nodeModel, NodeUrl.Manage_Log_LogSize, JSONObject.class, "id", id);
     }
 
-    public JSONArray getRunModes(NodeModel nodeModel) {
-        return NodeForward.requestData(nodeModel, NodeUrl.Manage_GetRunModes, null, JSONArray.class);
-    }
+//    public JSONArray getRunModes(NodeModel nodeModel) {
+//        return NodeForward.requestData(nodeModel, NodeUrl.Manage_GetRunModes, null, JSONArray.class);
+//    }
 }

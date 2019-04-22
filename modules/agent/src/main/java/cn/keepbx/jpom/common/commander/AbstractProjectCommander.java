@@ -14,6 +14,7 @@ import cn.jiangzeyin.common.spring.SpringUtil;
 import cn.keepbx.jpom.BaseJpomApplication;
 import cn.keepbx.jpom.common.commander.impl.LinuxProjectCommander;
 import cn.keepbx.jpom.common.commander.impl.WindowsProjectCommander;
+import cn.keepbx.jpom.model.RunMode;
 import cn.keepbx.jpom.model.data.ProjectInfoModel;
 import cn.keepbx.jpom.model.system.NetstatModel;
 import cn.keepbx.jpom.service.manage.ProjectInfoService;
@@ -159,7 +160,7 @@ public abstract class AbstractProjectCommander {
             return "没有jar包,请先到文件管理中上传程序的jar";
         }
         //
-        if (projectInfoModel.getRunMode() == ProjectInfoModel.RunMode.ClassPath) {
+        if (projectInfoModel.getRunMode() == RunMode.ClassPath) {
             JarClassLoader jarClassLoader = JarClassLoader.load(FileUtil.file(projectInfoModel.getLib()));
             // 判断主类
             try {

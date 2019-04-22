@@ -220,7 +220,9 @@ public class UserOperateLogV1 extends BaseJsonModel {
         BuildInstall(33, "构建安装"),
 
         ExportStack(34, "导出项目栈"),
-        ExportRam(34, "导出项目内容"),
+        ExportRam(35, "导出项目内容"),
+
+        SaveOutgivingWhitelist(36, "修改节点白名单"),
         ;
         private int code;
         private String desc;

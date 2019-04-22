@@ -27,7 +27,7 @@
                     <input type="text" name="name" placeholder="项目名称" required lay-verify="required"
                            class="layui-input" value="#if($item)#if($item.name)$!item.name#else$!item.id#end#end">
                     <div class="layui-hide">
-                        <input type="checkbox" name="edit" #if($item)checked#end>
+                        <input type="hidden" name="edit" value="#if($item)on#end">
                     </div>
 
                 </div>
@@ -70,6 +70,9 @@
                 <div class="layui-input-block">
 
                     <select name="whitelistDirectory" required lay-verify="required" lay-filter="projectLib">
+                        #if(!$itemWhitelistDirectory)
+                            <option value="">请选择白名单</option>
+                        #end
                         #foreach($itemPath in $whitelistDirectory)
                             #if($item && $itemWhitelistDirectory.startsWith($itemPath))
                                 <option value="$itemPath" selected>$itemPath</option>
@@ -78,7 +81,7 @@
                                 <option value="$itemPath">$itemPath</option>
                             #end
                         #end
-                        #if(!$hasetPath)
+                        #if(!$whitelistDirectory || $whitelistDirectory.size()<=0)
                             <option value="">请添加白名单</option>
                         #end
                     </select>

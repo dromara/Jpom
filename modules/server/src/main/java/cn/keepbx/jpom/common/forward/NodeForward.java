@@ -196,7 +196,7 @@ public class NodeForward {
     public static void addUser(HttpRequest httpRequest, NodeModel nodeModel, UserModel userModel) {
         Objects.requireNonNull(userModel);
         httpRequest.header(ConfigBean.JPOM_SERVER_USER_NAME, UserModel.getOptUserName(userModel));
-        httpRequest.header(ConfigBean.JPOM_SERVER_SYSTEM_USER_ROLE, String.valueOf(userModel.isSystemUser()));
+        httpRequest.header(ConfigBean.JPOM_SERVER_SYSTEM_USER_ROLE, userModel.getUserRole(nodeModel).name());
         httpRequest.header(ConfigBean.JPOM_AGENT_AUTHORIZE, nodeModel.getAuthorize(true));
     }
 

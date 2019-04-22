@@ -7,7 +7,7 @@ import cn.jiangzeyin.common.interceptor.BaseInterceptor;
 import cn.jiangzeyin.common.interceptor.InterceptorPattens;
 import cn.jiangzeyin.common.spring.SpringUtil;
 import cn.keepbx.jpom.common.BaseServerController;
-import cn.keepbx.jpom.common.Role;
+import cn.keepbx.jpom.model.Role;
 import cn.keepbx.jpom.model.data.NodeModel;
 import cn.keepbx.jpom.model.data.UserModel;
 import cn.keepbx.jpom.service.manage.ProjectInfoService;

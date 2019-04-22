@@ -91,6 +91,9 @@ public class OutGivingModel extends BaseModel {
         return null;
     }
 
+    /**
+     * 分发后的操作
+     */
     public enum AfterOpt implements BaseEnum {
         /**
          * 操作

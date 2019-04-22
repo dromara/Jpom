@@ -6,7 +6,7 @@ import cn.hutool.core.thread.ThreadUtil;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.controller.multipart.MultipartFileBuilder;
 import cn.keepbx.jpom.common.BaseServerController;
-import cn.keepbx.jpom.common.Role;
+import cn.keepbx.jpom.model.Role;
 import cn.keepbx.jpom.common.forward.NodeForward;
 import cn.keepbx.jpom.common.forward.NodeUrl;
 import cn.keepbx.jpom.common.interceptor.UrlPermission;

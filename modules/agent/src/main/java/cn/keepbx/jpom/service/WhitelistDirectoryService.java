@@ -11,6 +11,7 @@ import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -33,6 +34,24 @@ public class WhitelistDirectoryService extends BaseDataService {
             DefaultSystemLog.ERROR().error(e.getMessage(), e);
         }
         return null;
+    }
+
+    /**
+     * 单项添加白名单
+     *
+     * @param item 白名单
+     */
+    public void addProjectWhiteList(String item) {
+        AgentWhitelist agentWhitelist = getWhitelist();
+        if (agentWhitelist == null) {
+            agentWhitelist = new AgentWhitelist();
+        }
+        List<String> project = agentWhitelist.getProject();
+        if (project == null) {
+            project = new ArrayList<>();
+        }
+        project.add(item);
+        saveWhitelistDirectory(agentWhitelist);
     }
 
     public boolean isInstalled() {

@@ -4,6 +4,7 @@ import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.servlet.ServletUtil;
 import cn.jiangzeyin.common.spring.SpringUtil;
+import cn.keepbx.jpom.model.Role;
 import cn.keepbx.jpom.model.data.ProjectInfoModel;
 import cn.keepbx.jpom.service.manage.ProjectInfoService;
 import cn.keepbx.jpom.system.ConfigBean;
@@ -40,9 +41,17 @@ public abstract class BaseAgentController extends BaseJpomController {
      *
      * @return true
      */
-    protected boolean isSystemUser() {
+    protected Role getUserRole() {
         String val = ServletUtil.getHeaderIgnoreCase(getRequest(), ConfigBean.JPOM_SERVER_SYSTEM_USER_ROLE);
-        return Boolean.valueOf(val);
+        try {
+            return Role.valueOf(val);
+        } catch (Exception e) {
+            return Role.User;
+        }
+    }
+
+    protected boolean isSystemUser() {
+        return getUserRole() == Role.System;
     }
 
 

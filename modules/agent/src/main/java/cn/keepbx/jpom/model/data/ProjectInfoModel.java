@@ -5,6 +5,7 @@ import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.keepbx.jpom.BaseJpomApplication;
 import cn.keepbx.jpom.common.commander.AbstractProjectCommander;
 import cn.keepbx.jpom.model.BaseModel;
+import cn.keepbx.jpom.model.RunMode;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -280,19 +281,5 @@ public class ProjectInfoModel extends BaseModel {
 
     public void setArgs(String args) {
         this.args = args;
-    }
-
-    /**
-     * 运行方式
-     */
-    public enum RunMode {
-        /**
-         * java -classpath
-         */
-        ClassPath,
-        /**
-         * java -jar
-         */
-        Jar,
     }
 }

@@ -1,5 +1,6 @@
 package cn.keepbx.jpom.controller.manage;
 
+import cn.hutool.core.convert.Convert;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.lang.PatternPool;
@@ -10,6 +11,8 @@ import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.keepbx.jpom.common.BaseAgentController;
 import cn.keepbx.jpom.common.commander.AbstractProjectCommander;
+import cn.keepbx.jpom.model.Role;
+import cn.keepbx.jpom.model.RunMode;
 import cn.keepbx.jpom.model.data.ProjectInfoModel;
 import cn.keepbx.jpom.service.WhitelistDirectoryService;
 import cn.keepbx.jpom.service.manage.ProjectInfoService;
@@ -44,15 +47,13 @@ public class EditProjectController extends BaseAgentController {
      *
      * @param projectInfo        项目实体
      * @param whitelistDirectory 白名单
+     * @param previewData        预检查数据
      * @return null 检查正常
      */
-    private String checkParameter(ProjectInfoModel projectInfo, String whitelistDirectory) {
+    private String checkParameter(ProjectInfoModel projectInfo, String whitelistDirectory, boolean previewData) {
         String id = projectInfo.getId();
         if (StrUtil.isEmptyOrUndefined(id)) {
             return JsonMessage.getString(400, "项目id不能为空");
-        }
-        if (Validator.isChinese(id)) {
-            return JsonMessage.getString(401, "项目id不能包含中文");
         }
         if (!Validator.isGeneral(id, 2, 20)) {
             return JsonMessage.getString(401, "项目id 长度范围2-20（英文字母 、数字和下划线）");
@@ -66,33 +67,47 @@ public class EditProjectController extends BaseAgentController {
         }
         // 运行模式
         String runMode = getParameter("runMode");
-        ProjectInfoModel.RunMode runMode1 = ProjectInfoModel.RunMode.ClassPath;
+        RunMode runMode1 = RunMode.ClassPath;
         try {
-            runMode1 = ProjectInfoModel.RunMode.valueOf(runMode);
+            runMode1 = RunMode.valueOf(runMode);
         } catch (Exception ignored) {
         }
         projectInfo.setRunMode(runMode1);
         // 监测
-        if (runMode1 == ProjectInfoModel.RunMode.ClassPath) {
+        if (runMode1 == RunMode.ClassPath) {
             if (StrUtil.isEmpty(projectInfo.getMainClass())) {
                 return JsonMessage.getString(401, "ClassPath 模式 MainClass必填");
             }
-        } else if (runMode1 == ProjectInfoModel.RunMode.Jar) {
+        } else if (runMode1 == RunMode.Jar) {
             projectInfo.setMainClass("");
         }
-
-        if (!whitelistDirectoryService.checkProjectDirectory(whitelistDirectory)) {
-            return JsonMessage.getString(401, "请选择正确的项目路径,或者还没有配置白名单");
+        if (!previewData) {
+            // 不是预检查数据才效验白名单
+            if (!whitelistDirectoryService.checkProjectDirectory(whitelistDirectory)) {
+                return JsonMessage.getString(401, "请选择正确的项目路径,或者还没有配置白名单");
+            }
+        }
+        // 判断是否为分发添加
+        String strOutGivingProject = getParameter("outGivingProject");
+        boolean outGivingProject = Boolean.valueOf(strOutGivingProject);
+        if (outGivingProject) {
+            // 检查权限
+            Role role = getUserRole();
+            if (role != Role.System && role != Role.NodeManage) {
+                return JsonMessage.getString(405, "没有权限操作分发项目管理");
+            }
+            // 检查白名单
+            if (!whitelistDirectoryService.checkProjectDirectory(whitelistDirectory)) {
+                if (role == Role.System) {
+                    whitelistDirectoryService.addProjectWhiteList(whitelistDirectory);
+                } else {
+                    return JsonMessage.getString(405, "对应白名单还没有添加,请联系管理员添加");
+                }
+            }
         }
         String lib = projectInfo.getLib();
-        if (StrUtil.isEmpty(lib)) {
-            return JsonMessage.getString(401, "项目Jar路径不能为空");
-        }
-        if (StrUtil.SLASH.equals(lib)) {
-            return JsonMessage.getString(401, "项目Jar路径不能为顶级目录");
-        }
-        if (Validator.isChinese(lib)) {
-            return JsonMessage.getString(401, "项目Jar路径中不能包含中文");
+        if (StrUtil.isEmpty(lib) || StrUtil.SLASH.equals(lib) || Validator.isChinese(lib)) {
+            return JsonMessage.getString(401, "项目Jar路径不能为空,不能为顶级目录,不能包含中文");
         }
         if (!checkPathSafe(lib)) {
             return JsonMessage.getString(401, "项目Jar路径存在提升目录问题");
@@ -102,13 +117,18 @@ public class EditProjectController extends BaseAgentController {
 
 
     @RequestMapping(value = "saveProject", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public String saveProject(ProjectInfoModel projectInfo, String whitelistDirectory, String edit) {
-        String error = checkParameter(projectInfo, whitelistDirectory);
+    public String saveProject(ProjectInfoModel projectInfo, String whitelistDirectory) {
+        // 预检查数据
+        String strPreviewData = getParameter("previewData");
+        boolean previewData = Convert.toBool(strPreviewData, false);
+        //
+        String error = checkParameter(projectInfo, whitelistDirectory, previewData);
         if (error != null) {
             return error;
         }
-        String lib = projectInfo.getLib();
         String id = projectInfo.getId();
+        //
+        String lib = projectInfo.getLib();
         lib = String.format("%s/%s", whitelistDirectory, lib);
         lib = FileUtil.normalize(lib);
         // 重复lib
@@ -142,10 +162,10 @@ public class EditProjectController extends BaseAgentController {
         if (id.contains(StrUtil.SPACE) || lib.contains(StrUtil.SPACE)) {
             return JsonMessage.getString(401, "项目Id、项目Jar不能包含空格");
         }
-        return save(projectInfo);
+        return save(projectInfo, previewData);
     }
 
-    private String save(ProjectInfoModel projectInfo) {
+    private String save(ProjectInfoModel projectInfo, boolean previewData) {
         String edit = getParameter("edit");
         ProjectInfoModel exits = projectInfoService.getItem(projectInfo.getId());
         try {
@@ -158,33 +178,40 @@ public class EditProjectController extends BaseAgentController {
                 if (AbstractProjectCommander.getInstance().isRun(projectInfo.getId())) {
                     return JsonMessage.getString(400, "当前项目id已经被正在运行的程序占用");
                 }
-                projectInfo.setCreateTime(DateUtil.now());
-                this.modify(projectInfo);
-                projectInfoService.addItem(projectInfo);
-                return JsonMessage.getString(200, "新增成功！");
+                if (previewData) {
+                    // 预检查数据
+                    return JsonMessage.getString(200, "");
+                } else {
+                    projectInfo.setCreateTime(DateUtil.now());
+                    this.modify(projectInfo);
+                    projectInfoService.addItem(projectInfo);
+                    return JsonMessage.getString(200, "新增成功！");
+                }
             }
             //
             if (!"on".equalsIgnoreCase(edit)) {
                 return JsonMessage.getString(400, "项目id已经存在啦");
             }
-//            if (!userName.isProject(projectInfo.getId())) {
-//                return JsonMessage.getString(400, "你没有对应操作权限操作!");
-//            }
-            this.modify(exits);
-            exits.setLog(projectInfo.getLog());
-            exits.setName(projectInfo.getName());
-            exits.setGroup(projectInfo.getGroup());
-            exits.setMainClass(projectInfo.getMainClass());
-            exits.setLib(projectInfo.getLib());
-            exits.setJvm(projectInfo.getJvm());
-            exits.setArgs(projectInfo.getArgs());
-            exits.setBuildTag(projectInfo.getBuildTag());
-            exits.setRunMode(projectInfo.getRunMode());
-            exits.setToken(projectInfo.getToken());
-            //
-            moveTo(exits, projectInfo);
-            projectInfoService.updateItem(exits);
-            return JsonMessage.getString(200, "修改成功");
+            if (previewData) {
+                // 预检查数据
+                return JsonMessage.getString(200, "");
+            } else {
+                this.modify(exits);
+                exits.setLog(projectInfo.getLog());
+                exits.setName(projectInfo.getName());
+                exits.setGroup(projectInfo.getGroup());
+                exits.setMainClass(projectInfo.getMainClass());
+                exits.setLib(projectInfo.getLib());
+                exits.setJvm(projectInfo.getJvm());
+                exits.setArgs(projectInfo.getArgs());
+                exits.setBuildTag(projectInfo.getBuildTag());
+                exits.setRunMode(projectInfo.getRunMode());
+                exits.setToken(projectInfo.getToken());
+                //
+                moveTo(exits, projectInfo);
+                projectInfoService.updateItem(exits);
+                return JsonMessage.getString(200, "修改成功");
+            }
         } catch (Exception e) {
             DefaultSystemLog.ERROR().error(e.getMessage(), e);
             return JsonMessage.getString(500, e.getMessage());

@@ -3,6 +3,7 @@ package cn.keepbx.jpom.model.data;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.map.MapUtil;
 import cn.hutool.crypto.SecureUtil;
+import cn.keepbx.jpom.model.Role;
 import cn.keepbx.jpom.model.BaseJsonModel;
 import cn.keepbx.jpom.model.BaseModel;
 import cn.keepbx.jpom.socket.CommonSocketConfig;
@@ -332,6 +333,22 @@ public class UserModel extends BaseModel {
             userId = userModel.getId();
         }
         return userId;
+    }
+
+    /**
+     * 获取用户的角色
+     *
+     * @param nodeModel 对应节点
+     * @return role
+     */
+    public Role getUserRole(NodeModel nodeModel) {
+        if (isSystemUser()) {
+            return Role.System;
+        }
+        if (isManage(nodeModel.getId())) {
+            return Role.NodeManage;
+        }
+        return Role.User;
     }
 
     /**

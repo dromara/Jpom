@@ -4,8 +4,8 @@ import cn.hutool.core.lang.Validator;
 import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.keepbx.jpom.common.BaseServerController;
-import cn.keepbx.jpom.common.Role;
 import cn.keepbx.jpom.common.interceptor.UrlPermission;
+import cn.keepbx.jpom.model.Role;
 import cn.keepbx.jpom.model.data.*;
 import cn.keepbx.jpom.service.node.OutGivingServer;
 import cn.keepbx.jpom.service.system.ServerWhitelistServer;
@@ -91,7 +91,7 @@ public class OutGivingController extends BaseServerController {
     public String save(String type, String id) throws IOException {
         if ("add".equalsIgnoreCase(type)) {
             if (!Validator.isGeneral(id, 2, 20)) {
-                return JsonMessage.getString(401, "分发id 不能为空并且长度在2-20");
+                return JsonMessage.getString(401, "分发id 不能为空并且长度在2-20（英文字母 、数字和下划线）");
             }
             return addOutGiving(id);
         } else {

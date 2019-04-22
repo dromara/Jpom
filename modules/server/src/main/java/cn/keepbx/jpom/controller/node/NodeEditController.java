@@ -4,7 +4,7 @@ import cn.hutool.core.lang.Validator;
 import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.keepbx.jpom.common.BaseServerController;
-import cn.keepbx.jpom.common.Role;
+import cn.keepbx.jpom.model.Role;
 import cn.keepbx.jpom.common.forward.NodeForward;
 import cn.keepbx.jpom.common.forward.NodeUrl;
 import cn.keepbx.jpom.common.interceptor.UrlPermission;
@@ -65,7 +65,7 @@ public class NodeEditController extends BaseServerController {
 
     private String addNode(NodeModel nodeModel) {
         if (!Validator.isGeneral(nodeModel.getId(), 2, 20)) {
-            return JsonMessage.getString(405, "节点id不能为空并且2-20");
+            return JsonMessage.getString(405, "节点id不能为空并且2-20（英文字母 、数字和下划线）");
         }
         if (nodeService.getItem(nodeModel.getId()) != null) {
             return JsonMessage.getString(405, "节点id已经存在啦");

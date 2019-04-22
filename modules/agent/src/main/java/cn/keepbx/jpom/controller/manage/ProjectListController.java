@@ -153,14 +153,14 @@ public class ProjectListController extends BaseJpomController {
         return JsonMessage.getString(200, "", jsonObject);
     }
 
-    /**
-     * 获取运行方式
-     *
-     * @return array
-     */
-    @RequestMapping(value = "getRunModes", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public String getRunModes() {
-        ProjectInfoModel.RunMode[] runModes = ProjectInfoModel.RunMode.values();
-        return JsonMessage.getString(200, "", runModes);
-    }
+//    /**
+//     * 获取运行方式
+//     *
+//     * @return array
+//     */
+//    @RequestMapping(value = "getRunModes", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+//    public String getRunModes() {
+//        ProjectInfoModel.RunMode[] runModes = ProjectInfoModel.RunMode.values();
+//        return JsonMessage.getString(200, "", runModes);
+//    }
 }

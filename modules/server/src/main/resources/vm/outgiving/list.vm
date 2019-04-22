@@ -15,6 +15,7 @@
 <div class="layui-row">
     #if($user.isServerManager())
         <button onclick="editProject('');" class="layui-btn layui-btn-sm layui-btn-warm">添加关联项目</button>
+        <button onclick="editAllProject('');" class="layui-btn layui-btn-sm layui-btn-warm">创建分发项目</button>
     #end
     #if($user.isSystemUser())
         <button onclick="editWhitelist();" class="layui-btn layui-btn-sm">分发白名单</button>
@@ -195,6 +196,14 @@
             shade: 0.8,
             area: ['80%', '80%'],
             content: 'edit.html?id=' + id
+        });
+    }
+
+    function editAllProject(id) {
+        tabChange({
+            id: "outgivingp-" + id,
+            url: './outgiving/editProject?id=' + id,
+            title: id + '编辑分发项目',
         });
     }
 

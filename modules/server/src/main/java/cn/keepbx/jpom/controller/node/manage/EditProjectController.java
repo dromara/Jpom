@@ -5,6 +5,7 @@ import cn.jiangzeyin.common.JsonMessage;
 import cn.keepbx.jpom.common.BaseServerController;
 import cn.keepbx.jpom.common.forward.NodeForward;
 import cn.keepbx.jpom.common.forward.NodeUrl;
+import cn.keepbx.jpom.model.RunMode;
 import cn.keepbx.jpom.model.data.UserModel;
 import cn.keepbx.jpom.model.data.UserOperateLogV1;
 import cn.keepbx.jpom.service.manage.ProjectInfoService;
@@ -67,7 +68,7 @@ public class EditProjectController extends BaseServerController {
         }
         setAttribute("item", projectInfo);
         // 运行模式
-        JSONArray runModes = projectInfoService.getRunModes(getNode());
+        JSONArray runModes = (JSONArray) JSONArray.toJSON(RunMode.values());
         setAttribute("runModes", runModes);
         //
         List<String> hashSet = projectInfoService.getAllGroup(getNode());

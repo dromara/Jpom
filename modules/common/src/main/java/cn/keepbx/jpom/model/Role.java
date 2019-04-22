@@ -1,4 +1,4 @@
-package cn.keepbx.jpom.common;
+package cn.keepbx.jpom.model;
 
 /**
  * 用户角色
@@ -16,7 +16,7 @@ public enum Role {
      */
     ServerManager,
     /**
-     * 普通管理员
+     * 节点管理员
      */
     NodeManage,
     /**

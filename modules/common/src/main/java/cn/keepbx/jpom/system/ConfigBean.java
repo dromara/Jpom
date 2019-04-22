@@ -20,8 +20,13 @@ import java.io.File;
  */
 @Configuration
 public class ConfigBean {
+    /**
+     * 用户角色header
+     */
     public static final String JPOM_SERVER_SYSTEM_USER_ROLE = "Jpom-Server-SystemUserRole";
-
+    /**
+     * 用户名header
+     */
     public static final String JPOM_SERVER_USER_NAME = "Jpom-Server-UserName";
 
     public static final String JPOM_AGENT_AUTHORIZE = "Jpom-Agent-Authorize";
