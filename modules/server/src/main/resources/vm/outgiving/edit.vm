@@ -19,10 +19,15 @@
 
 <body>
 <div class="layui-container div-project" id="div-project">
-    <blockquote class="layui-elem-quote layui-quote-nm">
-        添加关联分发项目是将已经存在的项目进行关联
-    </blockquote>
+
     <form action="save" method="post" class="layui-form" lay-filter="form_outgiving">
+        #if(!$item)
+            <div class="layui-form-item">
+                <blockquote class="layui-elem-quote layui-quote-nm">
+                    添加关联分发项目是将已经存在的项目进行关联
+                </blockquote>
+            </div>
+        #end
         <div class="layui-form-item">
             <div class="layui-inline">
                 <label class="layui-form-label"><span class="x-red">*</span>分发ID</label>

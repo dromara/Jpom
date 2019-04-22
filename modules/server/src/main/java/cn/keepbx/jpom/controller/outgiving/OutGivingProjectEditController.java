@@ -10,6 +10,8 @@ import cn.jiangzeyin.common.JsonMessage;
 import cn.keepbx.jpom.common.BaseServerController;
 import cn.keepbx.jpom.common.forward.NodeForward;
 import cn.keepbx.jpom.common.forward.NodeUrl;
+import cn.keepbx.jpom.common.interceptor.UrlPermission;
+import cn.keepbx.jpom.model.Role;
 import cn.keepbx.jpom.model.RunMode;
 import cn.keepbx.jpom.model.data.*;
 import cn.keepbx.jpom.service.node.OutGivingServer;
@@ -100,6 +102,7 @@ public class OutGivingProjectEditController extends BaseServerController {
      */
     @RequestMapping(value = "save_project", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
+    @UrlPermission(value = Role.ServerManager, optType = UserOperateLogV1.OptType.SaveOutgivingProject)
     public String save(String id, String type) throws IOException {
         if ("add".equalsIgnoreCase(type)) {
             if (!Validator.isGeneral(id, 2, 20)) {

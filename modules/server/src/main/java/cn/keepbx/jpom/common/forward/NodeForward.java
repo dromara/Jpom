@@ -14,6 +14,7 @@ import cn.keepbx.jpom.model.data.UserModel;
 import cn.keepbx.jpom.system.AgentException;
 import cn.keepbx.jpom.system.AuthorizeException;
 import cn.keepbx.jpom.system.ConfigBean;
+import cn.keepbx.jpom.system.JpomRuntimeException;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.web.multipart.MultipartFile;
@@ -189,6 +190,10 @@ public class NodeForward {
     }
 
     private static void addUser(HttpRequest httpRequest, NodeModel nodeModel) {
+        // 判断开启状态
+        if (!nodeModel.isOpenStatus()) {
+            throw new JpomRuntimeException(nodeModel.getName() + "节点未启用");
+        }
         UserModel userModel = BaseServerController.getUserModel();
         addUser(httpRequest, nodeModel, userModel);
     }

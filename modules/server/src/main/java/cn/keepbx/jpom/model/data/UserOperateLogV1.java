@@ -223,6 +223,7 @@ public class UserOperateLogV1 extends BaseJsonModel {
         ExportRam(35, "导出项目内容"),
 
         SaveOutgivingWhitelist(36, "修改节点白名单"),
+        SaveOutgivingProject(36, "保存节点分发项目"),
         ;
         private int code;
         private String desc;

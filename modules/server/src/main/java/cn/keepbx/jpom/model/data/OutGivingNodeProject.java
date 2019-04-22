@@ -1,6 +1,7 @@
 package cn.keepbx.jpom.model.data;
 
 import cn.hutool.core.util.StrUtil;
+import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.spring.SpringUtil;
 import cn.keepbx.jpom.model.BaseEnum;
 import cn.keepbx.jpom.model.BaseJsonModel;
@@ -87,7 +88,11 @@ public class OutGivingNodeProject extends BaseJsonModel {
             nodeService = SpringUtil.getBean(NodeService.class);
         }
         NodeModel nodeModel = nodeService.getItem(this.nodeId);
-        projectInfo = projectInfoService.getItem(nodeModel, this.projectId);
+        try {
+            projectInfo = projectInfoService.getItem(nodeModel, this.projectId);
+        } catch (Exception e) {
+            DefaultSystemLog.ERROR().error("获取信息异常", e);
+        }
         return projectInfo;
     }
 

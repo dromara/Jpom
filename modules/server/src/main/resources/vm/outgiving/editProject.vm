@@ -20,6 +20,13 @@
 <body>
 <div class="layui-container div-project" id="div-project">
     <form action="save_project" method="post" class="layui-form" id="form_project" lay-filter="form_project">
+        #if(!$item)
+            <div class="layui-form-item">
+                <blockquote class="layui-elem-quote layui-quote-nm">
+                    创建分发项目是在不同的节点新创建对应项目（项目路径为节点白名单中的值，然后所有节点都将自动配置对应的白名单）
+                </blockquote>
+            </div>
+        #end
         <div class="layui-form-item">
             <div class="layui-inline">
                 <label class="layui-form-label"><span class="x-red">*</span>项目ID</label>
@@ -163,7 +170,7 @@
                 #end
             </div>
         </div>
-        <div class="layui-colla-content layui-show">
+        <div class="layui-colla-content  {{# if(!d.edit){  }} layui-show  {{# } }}">
             <div class="layui-form-item">
                 <div class="layui-form-mid layui-word-aux" style="padding: 0 !important;">
                     <div class="layui-input-block" id="tipMsgDiv_{{ d.nodeId }}"
@@ -322,14 +329,20 @@
                 layui.stope(e);
                 var par = $(this).parent().parent().parent();
                 var nodeId = par.attr("nodeDiv");
-                $("select[name='nodeId'] option[value='" + nodeId + "']").attr("disabled", false);
-                form.render();
-                $("#add_selectNode").show();
-                par.remove();
+                layer.confirm('确定删除此节点项目吗【 ' + nodeId + '】？（保存后将自动删除对应节点的项目）', {
+                    title: '系统提示'
+                }, function (index) {
+                    layer.close(index);
 
-                if ($("div[nodeDiv]").length <= 0) {
-                    $("#nodeListDiv").hide();
-                }
+                    $("select[name='nodeId'] option[value='" + nodeId + "']").attr("disabled", false);
+                    form.render();
+                    $("#add_selectNode").show();
+                    par.remove();
+
+                    if ($("div[nodeDiv]").length <= 0) {
+                        $("#nodeListDiv").hide();
+                    }
+                });
                 return false;
             });
         });
@@ -338,11 +351,15 @@
 
         var selectOption, viewData;
         #foreach($nodeP in $item.outGivingNodeProjectList)
-            selectOption = $("select[name='nodeId'] option[value='$nodeP.nodeId']");
+
             #if($nodeP.getProjectData(true))
+                selectOption = $("select[name='nodeId'] option[value='$nodeP.nodeId']");
                 viewData = $nodeP.getProjectData(true);
                 viewData["nodeId"] = "$nodeP.nodeId";
+                viewData["edit"] = true;
                 addNode(viewData, selectOption)
+            #else
+                layer.alert("$nodeP.nodeId 节点未拉取到对应项目,不建议此次进行保存操作,以防止数据丢失");
             #end
 
         #end
@@ -354,10 +371,9 @@
             if (!data.nodeName) {
                 data.nodeName = nodeName;
             }
-            console.log(data);
             laytpl(html.innerHTML).render(data, function (newHtml) {
                 $("#nodeListDiv").append(newHtml).show();
-                layer.closeAll();
+                layer.close("page");
                 // 改变已经选过的选项
                 selectOption.attr("disabled", true);
                 selectOption.attr("selected", false)

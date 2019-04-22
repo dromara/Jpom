@@ -44,7 +44,7 @@
                         #end
                     </div>
                 </div>
-                <div class="layui-colla-content layui-show">
+                <div class="layui-colla-content">
                     <form class="layui-form" action="">
                         <table class="layui-table" id="table_$item.id">
                             <thead>
