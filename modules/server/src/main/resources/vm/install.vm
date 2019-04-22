@@ -31,14 +31,6 @@
                                name="userPwd">
                     </div>
                 </div>
-##                #if($whitelist)
-##                    <div class="layui-form-item">
-##                        <div class="layui-input-block" style="margin-left: 0px;">
-##                    <textarea name="whitelistDirectory" placeholder="请输入项目存放路径白名单，回车支持输入多个路径"
-##                              class="layui-textarea"></textarea>
-##                        </div>
-##                    </div>
-##                #end
                 <div class="layui-form-item">
                     <div class="layui-input-block" style="margin-left: 0px;">
                         <button class="layui-btn layui-btn-danger" lay-submit lay-filter="from_login"

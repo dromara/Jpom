@@ -6,11 +6,9 @@ import cn.jiangzeyin.common.JsonMessage;
 import cn.keepbx.jpom.common.BaseServerController;
 import cn.keepbx.jpom.common.Role;
 import cn.keepbx.jpom.common.interceptor.UrlPermission;
-import cn.keepbx.jpom.model.data.NodeModel;
-import cn.keepbx.jpom.model.data.OutGivingModel;
-import cn.keepbx.jpom.model.data.UserModel;
-import cn.keepbx.jpom.model.data.UserOperateLogV1;
+import cn.keepbx.jpom.model.data.*;
 import cn.keepbx.jpom.service.node.OutGivingServer;
+import cn.keepbx.jpom.service.system.ServerWhitelistServer;
 import cn.keepbx.jpom.util.JsonFileUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -37,6 +35,9 @@ public class OutGivingController extends BaseServerController {
     @Resource
     private OutGivingServer outGivingServer;
 
+    @Resource
+    private ServerWhitelistServer serverWhitelistServer;
+
     @RequestMapping(value = "list.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
     public String list() throws IOException {
         List<OutGivingModel> outGivingModels = outGivingServer.list();
@@ -51,6 +52,13 @@ public class OutGivingController extends BaseServerController {
             jsonObject.put(nodeModel.getId(), jsonObject1);
         });
         setAttribute("nodeData", jsonObject);
+        //
+        ServerWhitelist serverWhitelist = serverWhitelistServer.getWhitelist();
+        if (serverWhitelist != null) {
+            List<String> whiteList = serverWhitelist.getOutGiving();
+            String strWhiteList = AgentWhitelist.convertToLine(whiteList);
+            setAttribute("whiteList", strWhiteList);
+        }
         return "outgiving/list";
     }
 

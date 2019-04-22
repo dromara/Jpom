@@ -5,8 +5,8 @@ import cn.keepbx.jpom.common.Role;
 import cn.keepbx.jpom.common.forward.NodeForward;
 import cn.keepbx.jpom.common.forward.NodeUrl;
 import cn.keepbx.jpom.common.interceptor.UrlPermission;
+import cn.keepbx.jpom.model.data.AgentWhitelist;
 import cn.keepbx.jpom.model.data.UserOperateLogV1;
-import cn.keepbx.jpom.model.data.Whitelist;
 import cn.keepbx.jpom.service.system.WhitelistDirectoryService;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
@@ -33,13 +33,13 @@ public class WhitelistDirectoryController extends BaseServerController {
      */
     @RequestMapping(value = "whitelistDirectory", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
     public String whitelistDirectory() {
-        Whitelist whitelist = whitelistDirectoryService.getData(getNode());
-        if (whitelist != null) {
-            setAttribute("project", whitelistDirectoryService.convertToLine(whitelist.getProject()));
+        AgentWhitelist agentWhitelist = whitelistDirectoryService.getData(getNode());
+        if (agentWhitelist != null) {
+            setAttribute("project", AgentWhitelist.convertToLine(agentWhitelist.getProject()));
             //
-            setAttribute("certificate", whitelistDirectoryService.convertToLine(whitelist.getCertificate()));
+            setAttribute("certificate", AgentWhitelist.convertToLine(agentWhitelist.getCertificate()));
             //
-            setAttribute("nginx", whitelistDirectoryService.convertToLine(whitelist.getNginx()));
+            setAttribute("nginx", AgentWhitelist.convertToLine(agentWhitelist.getNginx()));
         }
         return "node/system/whitelistDirectory";
     }

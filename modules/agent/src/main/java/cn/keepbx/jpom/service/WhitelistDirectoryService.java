@@ -4,7 +4,7 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.keepbx.jpom.common.BaseDataService;
-import cn.keepbx.jpom.model.data.Whitelist;
+import cn.keepbx.jpom.model.data.AgentWhitelist;
 import cn.keepbx.jpom.system.AgentConfigBean;
 import cn.keepbx.jpom.util.JsonFileUtil;
 import com.alibaba.fastjson.JSONObject;
@@ -22,13 +22,13 @@ import java.util.List;
 @Service
 public class WhitelistDirectoryService extends BaseDataService {
 
-    public Whitelist getWhitelist() {
+    public AgentWhitelist getWhitelist() {
         try {
             JSONObject jsonObject = getJSONObject(AgentConfigBean.WHITELIST_DIRECTORY);
             if (jsonObject == null) {
                 return null;
             }
-            return jsonObject.toJavaObject(Whitelist.class);
+            return jsonObject.toJavaObject(AgentWhitelist.class);
         } catch (Exception e) {
             DefaultSystemLog.ERROR().error(e.getMessage(), e);
         }
@@ -36,28 +36,28 @@ public class WhitelistDirectoryService extends BaseDataService {
     }
 
     public boolean isInstalled() {
-        Whitelist whitelist = getWhitelist();
-        if (whitelist == null) {
+        AgentWhitelist agentWhitelist = getWhitelist();
+        if (agentWhitelist == null) {
             return false;
         }
-        List<String> project = whitelist.getProject();
+        List<String> project = agentWhitelist.getProject();
         return project != null && !project.isEmpty();
     }
 
     private List<String> getNgxDirectory() {
-        Whitelist whitelist = getWhitelist();
-        if (whitelist == null) {
+        AgentWhitelist agentWhitelist = getWhitelist();
+        if (agentWhitelist == null) {
             return null;
         }
-        return whitelist.getNginx();
+        return agentWhitelist.getNginx();
     }
 
     public boolean checkProjectDirectory(String path) {
-        Whitelist whitelist = getWhitelist();
-        if (whitelist == null) {
+        AgentWhitelist agentWhitelist = getWhitelist();
+        if (agentWhitelist == null) {
             return false;
         }
-        List<String> list = whitelist.getProject();
+        List<String> list = agentWhitelist.getProject();
         if (list == null) {
             return false;
         }
@@ -87,11 +87,11 @@ public class WhitelistDirectoryService extends BaseDataService {
     }
 
     private List<String> getCertificateDirectory() {
-        Whitelist whitelist = getWhitelist();
-        if (whitelist == null) {
+        AgentWhitelist agentWhitelist = getWhitelist();
+        if (agentWhitelist == null) {
             return null;
         }
-        return whitelist.getCertificate();
+        return agentWhitelist.getCertificate();
     }
 
     public boolean checkCertificateDirectory(String path) {
@@ -102,7 +102,12 @@ public class WhitelistDirectoryService extends BaseDataService {
         return checkPath(list, path);
     }
 
-    public void saveWhitelistDirectory(Whitelist jsonObject) {
+    /**
+     * 保存白名单
+     *
+     * @param jsonObject 实体
+     */
+    public void saveWhitelistDirectory(AgentWhitelist jsonObject) {
         String path = getDataFilePath(AgentConfigBean.WHITELIST_DIRECTORY);
         JsonFileUtil.saveJson(path, jsonObject.toJson());
     }

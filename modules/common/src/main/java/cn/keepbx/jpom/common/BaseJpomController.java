@@ -17,7 +17,7 @@ public abstract class BaseJpomController extends AbstractController {
      * @param path 路径
      * @return 去掉 提权字符串
      */
-    protected String pathSafe(String path) {
+    public static String pathSafe(String path) {
         if (path == null) {
             return null;
         }

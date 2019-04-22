@@ -4,8 +4,8 @@ import cn.hutool.core.collection.CollUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.keepbx.jpom.common.forward.NodeForward;
 import cn.keepbx.jpom.common.forward.NodeUrl;
+import cn.keepbx.jpom.model.data.AgentWhitelist;
 import cn.keepbx.jpom.model.data.NodeModel;
-import cn.keepbx.jpom.model.data.Whitelist;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -19,8 +19,8 @@ import java.util.List;
 @Service
 public class WhitelistDirectoryService {
 
-    public Whitelist getData(NodeModel model) {
-        return NodeForward.requestData(model, NodeUrl.WhitelistDirectory_data, null, Whitelist.class);
+    public AgentWhitelist getData(NodeModel model) {
+        return NodeForward.requestData(model, NodeUrl.WhitelistDirectory_data, null, AgentWhitelist.class);
     }
 
     /**
@@ -29,41 +29,28 @@ public class WhitelistDirectoryService {
      * @return project
      */
     public List<String> getProjectDirectory(NodeModel model) {
-        Whitelist whitelist = getData(model);
-        if (whitelist == null) {
+        AgentWhitelist agentWhitelist = getData(model);
+        if (agentWhitelist == null) {
             return null;
         }
-        return whitelist.getProject();
+        return agentWhitelist.getProject();
     }
 
     public List<String> getNgxDirectory(NodeModel model) {
-        Whitelist whitelist = getData(model);
-        if (whitelist == null) {
+        AgentWhitelist agentWhitelist = getData(model);
+        if (agentWhitelist == null) {
             return null;
         }
-        return whitelist.getNginx();
+        return agentWhitelist.getNginx();
     }
 
     public List<String> getCertificateDirectory(NodeModel model) {
-        Whitelist whitelist = getData(model);
-        if (whitelist == null) {
+        AgentWhitelist agentWhitelist = getData(model);
+        if (agentWhitelist == null) {
             return null;
         }
-        return whitelist.getCertificate();
+        return agentWhitelist.getCertificate();
     }
 
-    /**
-     * 转换为字符串
-     *
-     * @param jsonArray jsonArray
-     * @return str
-     */
-    public String convertToLine(List<String> jsonArray) {
-        try {
-            return CollUtil.join(jsonArray, "\r\n");
-        } catch (Exception e) {
-            DefaultSystemLog.ERROR().error(e.getMessage(), e);
-        }
-        return "";
-    }
+
 }

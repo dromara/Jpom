@@ -6,7 +6,7 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.keepbx.jpom.common.BaseOperService;
-import cn.keepbx.jpom.model.data.Whitelist;
+import cn.keepbx.jpom.model.data.AgentWhitelist;
 import cn.keepbx.jpom.service.WhitelistDirectoryService;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -33,11 +33,11 @@ public class NginxService extends BaseOperService {
 
     @Override
     public JSONArray list() {
-        Whitelist whitelist = whitelistDirectoryService.getWhitelist();
-        if (whitelist == null) {
+        AgentWhitelist agentWhitelist = whitelistDirectoryService.getWhitelist();
+        if (agentWhitelist == null) {
             return null;
         }
-        List<String> ngxDirectory = whitelist.getNginx();
+        List<String> ngxDirectory = agentWhitelist.getNginx();
         if (ngxDirectory == null) {
             return null;
         }

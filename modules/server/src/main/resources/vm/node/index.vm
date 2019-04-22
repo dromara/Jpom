@@ -42,6 +42,11 @@
         .layui-tab-title li:first-child > i {
             display: none;
         }
+
+        .layui-logo {
+            width: auto !important;
+            left: 20px !important;
+        }
     </style>
 </head>
 
@@ -49,9 +54,12 @@
     #if($installed)
     <div class="layui-layout layui-layout-admin">
         <div class="layui-header">
-            <a href="../index.html" class="layui-logo" title="版本时间:$!jpomManifest.timeStamp，进程ID:$!jpomManifest.pid">
-                $node.name #if($jpomManifest)<font style="font-size: 10px;">($jpomManifest.version)</font>#end
-            </a>
+            <div class="layui-logo">
+                <a href="../index.html" style="color: #009688;">Jpom项目管理系统>> </a>
+                <span title="节点信息  版本时间:$!jpomManifest.timeStamp，进程ID:$!jpomManifest.pid">
+                    $node.name #if($jpomManifest)<font style="font-size: 10px;">($jpomManifest.version)</font>#end
+                </span>
+            </div>
             #parse("./common/userHead.vm")
         </div>
         <div class="layui-side layui-bg-black">

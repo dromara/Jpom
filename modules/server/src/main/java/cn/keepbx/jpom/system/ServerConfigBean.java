@@ -30,6 +30,12 @@ public class ServerConfigBean {
      * 分发数据文件
      */
     public static final String OUTGIVING = "outgiving.json";
+
+    /**
+     * 白名单数据
+     */
+    public static final String OUTGIVING_WHITELIST = "outgiving_whitelist.json";
+
     /**
      * 分发包存储路径
      */

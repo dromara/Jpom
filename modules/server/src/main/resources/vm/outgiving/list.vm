@@ -17,7 +17,7 @@
         <button onclick="editProject('');" class="layui-btn layui-btn-sm layui-btn-warm">添加关联项目</button>
     #end
     #if($user.isSystemUser())
-        <button onclick="editProject('');" class="layui-btn layui-btn-sm">分发白名单</button>
+        <button onclick="editWhitelist();" class="layui-btn layui-btn-sm">分发白名单</button>
     #end
 </div>
     #if($array && $array.size()>0)
@@ -140,6 +140,7 @@
     <h1 align="center">还没有任何分发项目，请先创建分发项目</h1>
     #end
 </body>
+<script id="whiteList" type="text/html">$!whiteList</script>
 <script type="text/javascript">
 
     function loadSuccess() {
@@ -197,13 +198,27 @@
         });
     }
 
-    function editWhilt() {
-        layer.prompt({
-            title: '随便写点啥，并确认',
-            formType: 2
-        }, function (text, index) {
-            layer.close(index);
+    var whiteListVal = document.getElementById("whiteList").innerHTML;
 
+    function editWhitelist() {
+        layer.prompt({
+            title: '请添加节点分发的项目白名单',
+            formType: 2,
+            value: whiteListVal
+        }, function (text, index) {
+            loadingAjax({
+                url: "./whitelistDirectory_submit",
+                data: {
+                    data: text
+                },
+                success: function (data) {
+                    layer.msg(data.msg);
+                    if (200 == data.code) {
+                        layer.close(index);
+                        whiteListVal = data.data;
+                    }
+                }
+            });
         });
     }
 </script>
