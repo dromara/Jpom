@@ -1,12 +1,14 @@
 package cn.keepbx.jpom.controller;
 
 import cn.jiangzeyin.common.JsonMessage;
+import cn.keepbx.jpom.BaseJpomApplication;
 import cn.keepbx.jpom.common.BaseAgentController;
 import cn.keepbx.jpom.common.interceptor.NotAuthorize;
 import cn.keepbx.jpom.model.data.ProjectInfoModel;
 import cn.keepbx.jpom.model.system.JpomManifest;
 import cn.keepbx.jpom.service.WhitelistDirectoryService;
 import cn.keepbx.jpom.service.manage.ProjectInfoService;
+import cn.keepbx.jpom.util.JvmUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.http.MediaType;
@@ -56,6 +58,9 @@ public class IndexController extends BaseAgentController {
     public String status() {
         List<ProjectInfoModel> projectInfoModels = projectInfoService.list();
         JSONObject jsonObject = new JSONObject();
+        jsonObject.put("javaVirtualCount", JvmUtil.getJavaVirtualCount());
+        jsonObject.put("osName", BaseJpomApplication.OS_INFO.getName());
+        jsonObject.put("jpomVersion", JpomManifest.getInstance().getVersion());
         if (projectInfoModels == null) {
             jsonObject.put("count", 0);
             jsonObject.put("runCount", 0);
