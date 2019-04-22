@@ -19,7 +19,7 @@
 
 <body>
 <div class="layui-container div-project" id="div-project">
-    <form action="save" method="post" class="layui-form" id="form_project" lay-filter="form_project">
+    <form action="save_project" method="post" class="layui-form" id="form_project" lay-filter="form_project">
         <div class="layui-form-item">
             <div class="layui-inline">
                 <label class="layui-form-label"><span class="x-red">*</span>项目ID</label>
@@ -27,6 +27,8 @@
                     <input type="text" name="id" placeholder="程序运行标志（设置后将不能修改）" required lay-verify="required"
                            class="layui-input  #if($item)layui-disabled#end" value="#if($item)$!item.id#end"
                            #if($item)readonly#end>
+                    <input type="hidden" name="reqId" value="$reqId">
+                    <input type="hidden" name="type" value="$type">
                 </div>
             </div>
             <div class="layui-inline">
@@ -46,16 +48,16 @@
                 <div class="layui-input-block">
                     <select name="runMode" lay-filter="runMode">
                         #foreach($itemPath in $runModes)
-                            <option value="$itemPath" #if($item.runMode==$itemPath)selected#end>$itemPath</option>
+                            <option value="$itemPath" #if($firstData.runMode==$itemPath)selected#end>$itemPath</option>
                         #end
                     </select>
                 </div>
             </div>
-            <div class="layui-inline" #if($item)style="display: none;"#end id="mainClassDiv">
+            <div class="layui-inline" #if($firstData)style="display: none;"#end id="mainClassDiv">
                 <label class="layui-form-label">MainClass</label>
                 <div class="layui-input-block">
                     <input type="text" name="mainClass" placeholder="程序运行的 main 类(jar模式运行可以不填)" class="layui-input"
-                           value="#if($item)$!item.mainClass#end">
+                           value="#if($firstData)$!firstData.mainClass#end">
                 </div>
             </div>
         </div>
@@ -85,7 +87,7 @@
                 <label class="layui-form-label" title="$!item.log"><span class="x-red">*</span>项目Jar包</label>
                 <div class="layui-input-block">
                     <input type="text" name="lib" placeholder="jar存储的文件夹" required lay-verify="required"
-                           class="layui-input" value="#if($item)$!item.lib#end">
+                           class="layui-input" value="#if($firstData)$!firstData.lib#end">
                 </div>
             </div>
 
@@ -93,9 +95,9 @@
                 <div class="layui-input-block" style="color: red;min-height: 0px;">
                     结果：
                     <span id="projectStart">#if($hasetPath)$hasetPath#else 请选择#end</span>
-                    <span id="projectEnd" style="margin-left: -4px">#if(!$item)请填写#else$!item.lib#end</span>
-                    #if($item)
-                        <span>&nbsp;&nbsp;日志路径：$!item.log</span>
+                    <span id="projectEnd" style="margin-left: -4px">#if(!$firstData)请填写#else$!firstData.lib#end</span>
+                    #if($firstData)
+                        <span>&nbsp;&nbsp;日志路径：$!firstData.log</span>
                     #end
                 </div>
             </div>
@@ -147,6 +149,7 @@
 <script id="nodePar" type="text/html">
     <div class="layui-colla-item" nodeDiv="{{ d.nodeId }}">
         <div class="layui-colla-title">
+            <input type="hidden" name="add_{{ d.nodeId }}" value="{{= d.nodeId }}">
             <div>
                 {{ d.nodeName }}
             </div>
@@ -214,7 +217,7 @@
                 success: function (data) {
                     layer.msg(data.msg);
                     if (200 == data.code) {
-                        autoClose(group);
+                        closeTab();
                     }
                 }
             });
@@ -272,7 +275,7 @@
                 silentAjax({
                     url: '../node/manage/judge_lib.json',
                     data: {
-                        id: "",
+                        id: "#if($item)$!item.id#end",
                         nodeId: nodeId,
                         newLib: lib
                     },
@@ -331,10 +334,27 @@
             });
         });
 
+    ## 回显节点信息
+
+        var selectOption, viewData;
+        #foreach($nodeP in $item.outGivingNodeProjectList)
+            selectOption = $("select[name='nodeId'] option[value='$nodeP.nodeId']");
+            #if($nodeP.getProjectData(true))
+                viewData = $nodeP.getProjectData(true);
+                viewData["nodeId"] = "$nodeP.nodeId";
+                addNode(viewData, selectOption)
+            #end
+
+        #end
+        form.render();
 
         function addNode(data, selectOption) {
             var html = document.getElementById("nodePar");
-
+            var nodeName = selectOption.attr("nodeName");
+            if (!data.nodeName) {
+                data.nodeName = nodeName;
+            }
+            console.log(data);
             laytpl(html.innerHTML).render(data, function (newHtml) {
                 $("#nodeListDiv").append(newHtml).show();
                 layer.closeAll();
@@ -349,6 +369,19 @@
                 }
             });
         }
+    }
+
+    function closeTab() {
+        try {
+            top.frames["outgiving"].location.reload();
+        } catch (e) {
+        }
+        setTimeout(function () {
+            var element = top.layui.element;
+            var id = self.frameElement.getAttribute('id');
+            element.tabDelete('mainTabs', id);
+            element.tabChange('mainTabs', "tab_outgiving节点分发");
+        }, 1500);
     }
 
 </script>

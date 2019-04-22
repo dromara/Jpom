@@ -1,7 +1,5 @@
 package cn.keepbx.jpom.service;
 
-import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.keepbx.jpom.common.BaseDataService;
 import cn.keepbx.jpom.model.data.AgentWhitelist;
@@ -10,7 +8,6 @@ import cn.keepbx.jpom.util.JsonFileUtil;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -77,32 +74,12 @@ public class WhitelistDirectoryService extends BaseDataService {
             return false;
         }
         List<String> list = agentWhitelist.getProject();
-        if (list == null) {
-            return false;
-        }
-        return list.contains(path);
+        return AgentWhitelist.checkPath(list, path);
     }
 
     public boolean checkNgxDirectory(String path) {
         List<String> list = getNgxDirectory();
-        if (list == null) {
-            return false;
-        }
-        return checkPath(list, path);
-    }
-
-    private boolean checkPath(List<String> list, String path) {
-        if (StrUtil.isEmpty(path)) {
-            return false;
-        }
-        File file1, file2 = FileUtil.file(path);
-        for (String item : list) {
-            file1 = FileUtil.file(item);
-            if (FileUtil.pathEquals(file1, file2)) {
-                return true;
-            }
-        }
-        return false;
+        return AgentWhitelist.checkPath(list, path);
     }
 
     private List<String> getCertificateDirectory() {
@@ -118,7 +95,7 @@ public class WhitelistDirectoryService extends BaseDataService {
         if (list == null) {
             return false;
         }
-        return checkPath(list, path);
+        return AgentWhitelist.checkPath(list, path);
     }
 
     /**

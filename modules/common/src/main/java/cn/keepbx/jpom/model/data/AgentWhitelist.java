@@ -1,12 +1,14 @@
 package cn.keepbx.jpom.model.data;
 
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.keepbx.jpom.common.BaseJpomController;
 import cn.keepbx.jpom.model.BaseJsonModel;
 import cn.keepbx.jpom.system.ExtConfigBean;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -79,5 +81,29 @@ public class AgentWhitelist extends BaseJsonModel {
             DefaultSystemLog.ERROR().error(e.getMessage(), e);
         }
         return "";
+    }
+
+    /**
+     * 判断是否在白名单列表中
+     *
+     * @param list list
+     * @param path 对应项
+     * @return false 不在列表中
+     */
+    public static boolean checkPath(List<String> list, String path) {
+        if (list == null) {
+            return false;
+        }
+        if (StrUtil.isEmpty(path)) {
+            return false;
+        }
+        File file1, file2 = FileUtil.file(path);
+        for (String item : list) {
+            file1 = FileUtil.file(item);
+            if (FileUtil.pathEquals(file1, file2)) {
+                return true;
+            }
+        }
+        return false;
     }
 }

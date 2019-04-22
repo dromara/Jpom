@@ -51,6 +51,18 @@ public class ProjectInfoModel extends BaseModel {
     private String modifyUser;
 
     private RunMode runMode;
+    /**
+     * 节点分发项目，不允许在项目管理中编辑
+     */
+    private boolean outGivingProject;
+
+    public boolean isOutGivingProject() {
+        return outGivingProject;
+    }
+
+    public void setOutGivingProject(boolean outGivingProject) {
+        this.outGivingProject = outGivingProject;
+    }
 
     public RunMode getRunMode() {
         if (runMode == null) {

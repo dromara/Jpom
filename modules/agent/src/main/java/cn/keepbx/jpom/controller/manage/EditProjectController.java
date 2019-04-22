@@ -81,30 +81,32 @@ public class EditProjectController extends BaseAgentController {
         } else if (runMode1 == RunMode.Jar) {
             projectInfo.setMainClass("");
         }
-        if (!previewData) {
-            // 不是预检查数据才效验白名单
-            if (!whitelistDirectoryService.checkProjectDirectory(whitelistDirectory)) {
-                return JsonMessage.getString(401, "请选择正确的项目路径,或者还没有配置白名单");
-            }
-        }
         // 判断是否为分发添加
         String strOutGivingProject = getParameter("outGivingProject");
         boolean outGivingProject = Boolean.valueOf(strOutGivingProject);
+        // 检查权限
+        Role role = getUserRole();
         if (outGivingProject) {
-            // 检查权限
-            Role role = getUserRole();
             if (role != Role.System && role != Role.NodeManage) {
                 return JsonMessage.getString(405, "没有权限操作分发项目管理");
             }
-            // 检查白名单
+        }
+        projectInfo.setOutGivingProject(outGivingProject);
+        if (!previewData) {
+            // 不是预检查数据才效验白名单
             if (!whitelistDirectoryService.checkProjectDirectory(whitelistDirectory)) {
-                if (role == Role.System) {
-                    whitelistDirectoryService.addProjectWhiteList(whitelistDirectory);
+                if (outGivingProject) {
+                    if (role == Role.System) {
+                        whitelistDirectoryService.addProjectWhiteList(whitelistDirectory);
+                    } else {
+                        return JsonMessage.getString(405, "对应白名单还没有添加,请联系管理员添加");
+                    }
                 } else {
-                    return JsonMessage.getString(405, "对应白名单还没有添加,请联系管理员添加");
+                    return JsonMessage.getString(401, "请选择正确的项目路径,或者还没有配置白名单");
                 }
             }
         }
+
         String lib = projectInfo.getLib();
         if (StrUtil.isEmpty(lib) || StrUtil.SLASH.equals(lib) || Validator.isChinese(lib)) {
             return JsonMessage.getString(401, "项目Jar路径不能为空,不能为顶级目录,不能包含中文");

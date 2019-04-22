@@ -34,13 +34,23 @@ public class OutGivingServer extends BaseOperService<OutGivingModel> {
 
     @Override
     public void addItem(OutGivingModel outGivingModel) {
+        // 不保存临时数据
+        JSONObject jsonObject = outGivingModel.toJson();
+        jsonObject.remove("tempCacheMap");
+        OutGivingModel newData = jsonObject.toJavaObject(OutGivingModel.class);
+        newData.setTempCacheMap(null);
         // 保存
-        saveJson(ServerConfigBean.OUTGIVING, outGivingModel.toJson());
+        saveJson(ServerConfigBean.OUTGIVING, newData.toJson());
     }
 
     @Override
     public boolean updateItem(OutGivingModel outGivingModel) {
-        updateJson(ServerConfigBean.OUTGIVING, outGivingModel.toJson());
+        // 不保存临时数据
+        JSONObject jsonObject = outGivingModel.toJson();
+        jsonObject.remove("tempCacheMap");
+        OutGivingModel newData = jsonObject.toJavaObject(OutGivingModel.class);
+        newData.setTempCacheMap(null);
+        updateJson(ServerConfigBean.OUTGIVING, newData.toJson());
         return true;
     }
 

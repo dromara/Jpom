@@ -9,6 +9,7 @@ import com.alibaba.fastjson.JSONObject;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * 节点实体
@@ -121,5 +122,28 @@ public class NodeModel extends BaseModel {
 
     public String getRealUrl(NodeUrl nodeUrl) {
         return StrUtil.format("{}://{}{}", getProtocol(), getUrl(), nodeUrl.getUrl());
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        NodeModel nodeModel = (NodeModel) o;
+        return openStatus == nodeModel.openStatus &&
+                Objects.equals(url, nodeModel.url) &&
+                Objects.equals(loginName, nodeModel.loginName) &&
+                Objects.equals(loginPwd, nodeModel.loginPwd) &&
+                Objects.equals(protocol, nodeModel.protocol) &&
+                Objects.equals(authorize, nodeModel.authorize) &&
+                Objects.equals(projects, nodeModel.projects);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(url, loginName, loginPwd, protocol, authorize, projects, openStatus);
     }
 }

@@ -11,14 +11,16 @@ import cn.jiangzeyin.common.spring.SpringUtil;
 import cn.keepbx.jpom.common.forward.NodeForward;
 import cn.keepbx.jpom.common.forward.NodeUrl;
 import cn.keepbx.jpom.model.BaseEnum;
-import cn.keepbx.jpom.model.BaseJsonModel;
 import cn.keepbx.jpom.model.BaseModel;
 import cn.keepbx.jpom.service.node.NodeService;
 import cn.keepbx.jpom.service.node.OutGivingServer;
+import com.alibaba.fastjson.JSONObject;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 分发实体
@@ -27,11 +29,38 @@ import java.util.List;
  * @date 2019/4/21
  */
 public class OutGivingModel extends BaseModel {
-    private List<NodeProject> nodeProjectList;
     /**
-     *
+     * 节点下的项目列表
+     */
+    private List<OutGivingNodeProject> outGivingNodeProjectList;
+    /**
+     * 分发后的操作
      */
     private int afterOpt;
+    /**
+     * 临时缓存
+     */
+    private Map<NodeModel, JSONObject> tempCacheMap;
+    /**
+     * 是否为单独创建的分发项目
+     */
+    private boolean outGivingProject;
+
+    public boolean isOutGivingProject() {
+        return outGivingProject;
+    }
+
+    public void setOutGivingProject(boolean outGivingProject) {
+        this.outGivingProject = outGivingProject;
+    }
+
+    public Map<NodeModel, JSONObject> getTempCacheMap() {
+        return tempCacheMap;
+    }
+
+    public void setTempCacheMap(Map<NodeModel, JSONObject> tempCacheMap) {
+        this.tempCacheMap = tempCacheMap;
+    }
 
     public int getAfterOpt() {
         return afterOpt;
@@ -41,12 +70,12 @@ public class OutGivingModel extends BaseModel {
         this.afterOpt = afterOpt;
     }
 
-    public List<NodeProject> getNodeProjectList() {
-        return nodeProjectList;
+    public List<OutGivingNodeProject> getOutGivingNodeProjectList() {
+        return outGivingNodeProjectList;
     }
 
-    public void setNodeProjectList(List<NodeProject> nodeProjectList) {
-        this.nodeProjectList = nodeProjectList;
+    public void setOutGivingNodeProjectList(List<OutGivingNodeProject> outGivingNodeProjectList) {
+        this.outGivingNodeProjectList = outGivingNodeProjectList;
     }
 
     /**
@@ -55,20 +84,23 @@ public class OutGivingModel extends BaseModel {
      * @param projectId 项目id
      * @return true 包含
      */
-    public boolean checkContains(String projectId) {
-        if (projectId == null) {
-            return false;
+    public boolean checkContains(String nodeId, String projectId) {
+        return getNodeProject(nodeId, projectId) != null;
+    }
+
+    /**
+     * 获取项目的信息
+     *
+     * @param get 方式自动读取
+     * @return json
+     */
+    public JSONObject getFirstNodeProject(boolean get) {
+        List<OutGivingNodeProject> outGivingNodeProjectList = getOutGivingNodeProjectList();
+        if (outGivingNodeProjectList == null || outGivingNodeProjectList.isEmpty()) {
+            return null;
         }
-        List<NodeProject> thisPs = getNodeProjectList();
-        if (thisPs == null) {
-            return false;
-        }
-        for (NodeProject nodeProject1 : thisPs) {
-            if (StrUtil.equalsIgnoreCase(nodeProject1.getProjectId(), projectId)) {
-                return true;
-            }
-        }
-        return false;
+        OutGivingNodeProject outGivingNodeProject = outGivingNodeProjectList.get(0);
+        return outGivingNodeProject.getProjectData(true);
     }
 
     /**
@@ -76,19 +108,40 @@ public class OutGivingModel extends BaseModel {
      *
      * @param nodeId    节点
      * @param projectId 项目
-     * @return nodeProject
+     * @return outGivingNodeProject
      */
-    public NodeProject getNodeProject(String nodeId, String projectId) {
-        List<NodeProject> thisPs = getNodeProjectList();
+    public OutGivingNodeProject getNodeProject(String nodeId, String projectId) {
+        List<OutGivingNodeProject> thisPs = getOutGivingNodeProjectList();
         if (thisPs == null) {
             return null;
         }
-        for (NodeProject nodeProject1 : thisPs) {
-            if (StrUtil.equalsIgnoreCase(nodeProject1.getProjectId(), projectId) && StrUtil.equalsIgnoreCase(nodeProject1.getNodeId(), nodeId)) {
-                return nodeProject1;
+        for (OutGivingNodeProject outGivingNodeProject1 : thisPs) {
+            if (StrUtil.equalsIgnoreCase(outGivingNodeProject1.getProjectId(), projectId) && StrUtil.equalsIgnoreCase(outGivingNodeProject1.getNodeId(), nodeId)) {
+                return outGivingNodeProject1;
             }
         }
         return null;
+    }
+
+    /**
+     * 获取已经删除的节点项目
+     *
+     * @param outGivingModel 要比较的分发项目
+     * @return 已经删除过的
+     */
+    public List<OutGivingNodeProject> getDelete(OutGivingModel outGivingModel) {
+        List<OutGivingNodeProject> old = getOutGivingNodeProjectList();
+        if (old == null || old.isEmpty()) {
+            return null;
+        }
+        List<OutGivingNodeProject> delete = new ArrayList<>();
+        old.forEach(outGivingNodeProject -> {
+            if (outGivingModel.checkContains(outGivingNodeProject.getNodeId(), outGivingNodeProject.getProjectId())) {
+                return;
+            }
+            delete.add(outGivingNodeProject);
+        });
+        return delete;
     }
 
     /**
@@ -120,94 +173,11 @@ public class OutGivingModel extends BaseModel {
     }
 
     public void start() {
-        List<NodeProject> thisPs = getNodeProjectList();
+        List<OutGivingNodeProject> thisPs = getOutGivingNodeProjectList();
         if (thisPs == null) {
             return;
         }
-        thisPs.forEach(nodeProject -> nodeProject.setStatus(NodeProject.Status.Ing.getCode()));
-    }
-
-    /**
-     * 节点项目
-     */
-    public static class NodeProject extends BaseJsonModel {
-        private String nodeId;
-        private String projectId;
-        private String lastOutGivingTime;
-        private int status;
-        private String result;
-
-        public String getResult() {
-            return result;
-        }
-
-        public void setResult(String result) {
-            this.result = result;
-        }
-
-        public int getStatus() {
-            return status;
-        }
-
-        public String getStatusMsg() {
-            return BaseEnum.getDescByCode(Status.class, getStatus());
-        }
-
-        public void setStatus(int status) {
-            this.status = status;
-        }
-
-        public String getLastOutGivingTime() {
-            return StrUtil.emptyToDefault(lastOutGivingTime, StrUtil.DASHED);
-        }
-
-        public void setLastOutGivingTime(String lastOutGivingTime) {
-            this.lastOutGivingTime = lastOutGivingTime;
-        }
-
-        public String getNodeId() {
-            return nodeId;
-        }
-
-        public void setNodeId(String nodeId) {
-            this.nodeId = nodeId;
-        }
-
-        public String getProjectId() {
-            return projectId;
-        }
-
-        public void setProjectId(String projectId) {
-            this.projectId = projectId;
-        }
-
-        public enum Status implements BaseEnum {
-            /**
-             *
-             */
-            No(0, "未分发"),
-            Ing(1, "分发中"),
-            Ok(2, "分发成功"),
-            Fail(3, "分发失败"),
-            ;
-            private int code;
-            private String desc;
-
-            Status(int code, String desc) {
-                this.code = code;
-                this.desc = desc;
-            }
-
-            @Override
-            public int getCode() {
-                return code;
-            }
-
-            @Override
-            public String getDesc() {
-                return desc;
-            }
-        }
+        thisPs.forEach(outGivingNodeProject -> outGivingNodeProject.setStatus(OutGivingNodeProject.Status.Ing.getCode()));
     }
 
     /**
@@ -215,20 +185,20 @@ public class OutGivingModel extends BaseModel {
      */
     public static class OutGivingRun implements Runnable {
         private String outGivingId;
-        private NodeProject nodeProject;
+        private OutGivingNodeProject outGivingNodeProject;
         private NodeModel nodeModel;
         private File file;
         private AfterOpt afterOpt;
         private UserModel userModel;
 
-        public OutGivingRun(String outGivingId, NodeProject nodeProject, File file, AfterOpt afterOpt, UserModel userModel) {
+        public OutGivingRun(String outGivingId, OutGivingNodeProject outGivingNodeProject, File file, AfterOpt afterOpt, UserModel userModel) {
             this.outGivingId = outGivingId;
-            this.nodeProject = nodeProject;
+            this.outGivingNodeProject = outGivingNodeProject;
             this.file = file;
             this.afterOpt = afterOpt;
             //
             NodeService nodeService = SpringUtil.getBean(NodeService.class);
-            this.nodeModel = nodeService.getItem(nodeProject.getNodeId());
+            this.nodeModel = nodeService.getItem(outGivingNodeProject.getNodeId());
             //
             this.userModel = userModel;
         }
@@ -241,7 +211,7 @@ public class OutGivingModel extends BaseModel {
                 // 授权信息
                 NodeForward.addUser(request, this.nodeModel, this.userModel);
                 request.form("file", file)
-                        .form("id", this.nodeProject.projectId)
+                        .form("id", this.outGivingNodeProject.getProjectId())
                         .form("type", "unzip");
                 // 操作
                 if (afterOpt == AfterOpt.Restart) {
@@ -252,16 +222,16 @@ public class OutGivingModel extends BaseModel {
                         .body();
                 JsonMessage jsonMessage = NodeForward.toJsonMessage(body);
                 if (jsonMessage.getCode() == HttpStatus.HTTP_OK) {
-                    updateStatus(NodeProject.Status.Ok, body);
+                    updateStatus(OutGivingNodeProject.Status.Ok, body);
                 } else {
-                    updateStatus(NodeProject.Status.Fail, body);
+                    updateStatus(OutGivingNodeProject.Status.Fail, body);
                 }
             } catch (Exception e) {
-                DefaultSystemLog.ERROR().error(this.nodeProject.nodeId + " " + this.nodeProject.projectId + " " + "分发异常保存", e);
+                DefaultSystemLog.ERROR().error(this.outGivingNodeProject.getNodeId() + " " + this.outGivingNodeProject.getProjectId() + " " + "分发异常保存", e);
                 try {
-                    updateStatus(NodeProject.Status.Fail, e.getMessage());
+                    updateStatus(OutGivingNodeProject.Status.Fail, e.getMessage());
                 } catch (IOException ex) {
-                    DefaultSystemLog.ERROR().error(this.nodeProject.nodeId + " " + this.nodeProject.projectId + " " + "分发异常保存", ex);
+                    DefaultSystemLog.ERROR().error(this.outGivingNodeProject.getNodeId() + " " + this.outGivingNodeProject.getProjectId() + " " + "分发异常保存", ex);
                 }
             }
         }
@@ -269,18 +239,18 @@ public class OutGivingModel extends BaseModel {
         /**
          * 更新状态
          */
-        private void updateStatus(NodeProject.Status status, String msg) throws IOException {
+        private void updateStatus(OutGivingNodeProject.Status status, String msg) throws IOException {
             synchronized (OutGivingRun.class) {
                 OutGivingServer outGivingServer = SpringUtil.getBean(OutGivingServer.class);
                 OutGivingModel outGivingModel = outGivingServer.getItem(this.outGivingId);
-                List<NodeProject> nodeProjects = outGivingModel.getNodeProjectList();
-                for (NodeProject nodeProject : nodeProjects) {
-                    if (!nodeProject.getProjectId().equalsIgnoreCase(OutGivingRun.this.nodeProject.getProjectId())) {
+                List<OutGivingNodeProject> outGivingNodeProjects = outGivingModel.getOutGivingNodeProjectList();
+                for (OutGivingNodeProject outGivingNodeProject : outGivingNodeProjects) {
+                    if (!outGivingNodeProject.getProjectId().equalsIgnoreCase(OutGivingRun.this.outGivingNodeProject.getProjectId())) {
                         continue;
                     }
-                    nodeProject.setStatus(status.getCode());
-                    nodeProject.setResult(msg);
-                    nodeProject.setLastOutGivingTime(DateUtil.now());
+                    outGivingNodeProject.setStatus(status.getCode());
+                    outGivingNodeProject.setResult(msg);
+                    outGivingNodeProject.setLastOutGivingTime(DateUtil.now());
                 }
                 outGivingServer.updateItem(outGivingModel);
             }

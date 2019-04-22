@@ -11,6 +11,7 @@ import cn.keepbx.jpom.common.forward.NodeForward;
 import cn.keepbx.jpom.common.forward.NodeUrl;
 import cn.keepbx.jpom.common.interceptor.UrlPermission;
 import cn.keepbx.jpom.model.BaseEnum;
+import cn.keepbx.jpom.model.data.OutGivingNodeProject;
 import cn.keepbx.jpom.model.data.OutGivingModel;
 import cn.keepbx.jpom.model.data.UserOperateLogV1;
 import cn.keepbx.jpom.service.node.OutGivingServer;
@@ -92,8 +93,8 @@ public class OutGivingProjectController extends BaseServerController {
         outGivingModel.start();
         outGivingServer.updateItem(outGivingModel);
         // 开启线程
-        List<OutGivingModel.NodeProject> nodeProjects = outGivingModel.getNodeProjectList();
-        nodeProjects.forEach(nodeProject -> ThreadUtil.execute(new OutGivingModel.OutGivingRun(id, nodeProject, file, afterOpt1, getUser())));
+        List<OutGivingNodeProject> outGivingNodeProjects = outGivingModel.getOutGivingNodeProjectList();
+        outGivingNodeProjects.forEach(outGivingNodeProject -> ThreadUtil.execute(new OutGivingModel.OutGivingRun(id, outGivingNodeProject, file, afterOpt1, getUser())));
         return JsonMessage.getString(200, "上传成功");
     }
 }

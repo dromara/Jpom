@@ -3,11 +3,11 @@ package cn.keepbx.jpom.controller.node.manage;
 import cn.hutool.http.HttpStatus;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.keepbx.jpom.common.BaseServerController;
-import cn.keepbx.jpom.model.Role;
 import cn.keepbx.jpom.common.forward.NodeForward;
 import cn.keepbx.jpom.common.forward.NodeUrl;
 import cn.keepbx.jpom.common.interceptor.ProjectPermission;
 import cn.keepbx.jpom.common.interceptor.UrlPermission;
+import cn.keepbx.jpom.model.Role;
 import cn.keepbx.jpom.model.data.NodeModel;
 import cn.keepbx.jpom.model.data.OutGivingModel;
 import cn.keepbx.jpom.model.data.UserModel;
@@ -106,8 +106,9 @@ public class ProjectManageControl extends BaseServerController {
         // 检查节点分发
         List<OutGivingModel> outGivingModels = outGivingServer.list();
         if (outGivingModels != null) {
+            NodeModel nodeModel = getNode();
             for (OutGivingModel outGivingModel : outGivingModels) {
-                if (outGivingModel.checkContains(id)) {
+                if (outGivingModel.checkContains(nodeModel.getId(), id)) {
                     return JsonMessage.getString(405, "当前项目存在节点分发，不能直接删除");
                 }
             }

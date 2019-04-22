@@ -140,8 +140,8 @@ public class OutGivingController extends BaseServerController {
         }
         List<OutGivingModel> outGivingModels = outGivingServer.list();
         //
-        List<OutGivingModel.NodeProject> nodeProjects = new ArrayList<>();
-        OutGivingModel.NodeProject nodeProject;
+        List<OutGivingNodeProject> outGivingNodeProjects = new ArrayList<>();
+        OutGivingNodeProject outGivingNodeProject;
         for (NodeModel nodeModel : list) {
             String nodeIdProject = getParameter("node_" + nodeModel.getId());
             if (StrUtil.isEmpty(nodeIdProject)) {
@@ -166,23 +166,23 @@ public class OutGivingController extends BaseServerController {
                     if (outGivingModel1.getId().equalsIgnoreCase(outGivingModel.getId())) {
                         continue;
                     }
-                    if (outGivingModel1.checkContains(trueProjectId)) {
+                    if (outGivingModel1.checkContains(nodeModel.getId(), trueProjectId)) {
                         return JsonMessage.getString(405, "已经存在相同的分发项目:" + trueProjectId);
                     }
                 }
             }
-            nodeProject = outGivingModel.getNodeProject(nodeModel.getId(), trueProjectId);
-            if (nodeProject == null) {
-                nodeProject = new OutGivingModel.NodeProject();
+            outGivingNodeProject = outGivingModel.getNodeProject(nodeModel.getId(), trueProjectId);
+            if (outGivingNodeProject == null) {
+                outGivingNodeProject = new OutGivingNodeProject();
             }
-            nodeProject.setNodeId(nodeModel.getId());
-            nodeProject.setProjectId(trueProjectId);
-            nodeProjects.add(nodeProject);
+            outGivingNodeProject.setNodeId(nodeModel.getId());
+            outGivingNodeProject.setProjectId(trueProjectId);
+            outGivingNodeProjects.add(outGivingNodeProject);
         }
-        if (nodeProjects.size() < 2) {
+        if (outGivingNodeProjects.size() < 2) {
             return JsonMessage.getString(405, "至少选择2个节点项目");
         }
-        outGivingModel.setNodeProjectList(nodeProjects);
+        outGivingModel.setOutGivingNodeProjectList(outGivingNodeProjects);
         return null;
     }
 

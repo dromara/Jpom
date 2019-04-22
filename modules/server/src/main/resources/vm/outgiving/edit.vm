@@ -134,7 +134,7 @@
             //
         });
         var selectOption;
-        #foreach($nodeP in $item.nodeProjectList)
+        #foreach($nodeP in $item.outGivingNodeProjectList)
             selectOption = $("select[name='nodeId'] option[value='$nodeP.nodeId']");
             addNode("$nodeP.nodeId", selectOption)
             // 选中

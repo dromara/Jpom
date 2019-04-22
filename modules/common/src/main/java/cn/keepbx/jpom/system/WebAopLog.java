@@ -90,6 +90,7 @@ public class WebAopLog extends PropertyDefinerBase {
             file = new File(file, "log");
             path = file.getPath();
         }
+        //     System.out.println(path);
         // 配置默认日志路径
         DefaultSystemLog.configPath(path, false);
         return path;

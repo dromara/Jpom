@@ -14,8 +14,8 @@
 
 <div class="layui-row">
     #if($user.isServerManager())
-        <button onclick="editProject('');" class="layui-btn layui-btn-sm layui-btn-warm">添加关联项目</button>
-        <button onclick="editAllProject('');" class="layui-btn layui-btn-sm layui-btn-warm">创建分发项目</button>
+        <button onclick="editProject('');" class="layui-btn layui-btn-sm layui-btn-normal">添加关联项目</button>
+        <button onclick="editAllProject('');" class="layui-btn layui-btn-sm layui-btn-normal">创建分发项目</button>
     #end
     #if($user.isSystemUser())
         <button onclick="editWhitelist();" class="layui-btn layui-btn-sm">分发白名单</button>
@@ -32,11 +32,12 @@
                     </div>
                     <div class="layui-layout-right" style="padding-right: 10%;">
                         #if($user.isServerManager())
-                            <button op="add" id="$item.id" class="layui-btn layui-btn-sm layui-btn-warm">
+                            <button op="add" id="$item.id" class="layui-btn layui-btn-sm layui-btn-normal">
                                 <i class="layui-icon">&#xe609;</i>
                                 分发文件
                             </button>
-                            <button op="edit" id="$item.id" class="layui-btn layui-btn-sm ">
+                            <button op="edit" outGivingProject="$item.outGivingProject" id="$item.id"
+                                    class="layui-btn layui-btn-sm ">
                                 <i class="layui-icon">&#xe642;</i>
                                 编辑
                             </button>
@@ -57,7 +58,7 @@
                             </tr>
                             </thead>
                             <tbody id="tbody_$item.id">
-                                #foreach($tr in $item.nodeProjectList)
+                                #foreach($tr in $item.outGivingNodeProjectList)
                                     #if($nodeData[$tr.nodeId])
                                     <tr>
                                         <td>
@@ -162,7 +163,12 @@
                 return;
             }
             if ("edit" == op) {
-                editProject($(this).attr("id"));
+                var editId = $(this).attr("id");
+                if ($(this).attr("outGivingProject") == "true") {
+                    editAllProject(editId);
+                } else {
+                    editProject(editId);
+                }
                 return;
             }
             if ("add" == op) {
