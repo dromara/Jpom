@@ -71,6 +71,26 @@ public class OutGivingModel extends BaseModel {
         return false;
     }
 
+    /**
+     * 获取节点的项目信息
+     *
+     * @param nodeId    节点
+     * @param projectId 项目
+     * @return nodeProject
+     */
+    public NodeProject getNodeProject(String nodeId, String projectId) {
+        List<NodeProject> thisPs = getNodeProjectList();
+        if (thisPs == null) {
+            return null;
+        }
+        for (NodeProject nodeProject1 : thisPs) {
+            if (StrUtil.equalsIgnoreCase(nodeProject1.getProjectId(), projectId) && StrUtil.equalsIgnoreCase(nodeProject1.getNodeId(), nodeId)) {
+                return nodeProject1;
+            }
+        }
+        return null;
+    }
+
     public enum AfterOpt implements BaseEnum {
         /**
          * 操作
@@ -156,17 +176,6 @@ public class OutGivingModel extends BaseModel {
 
         public void setProjectId(String projectId) {
             this.projectId = projectId;
-        }
-
-        public boolean checkEquals(NodeProject nodeProject) {
-            if (nodeProject == null) {
-                return false;
-            }
-            if (nodeProject == this) {
-                return true;
-            }
-            return StrUtil.equalsIgnoreCase(this.getNodeId(), nodeProject.getNodeId()) &&
-                    StrUtil.equalsIgnoreCase(this.getProjectId(), nodeProject.getProjectId());
         }
 
         public enum Status implements BaseEnum {

@@ -56,20 +56,23 @@ public class OutGivingController extends BaseServerController {
 
     @RequestMapping(value = "edit.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
     public String edit(String id) throws IOException {
-        UserModel userModel = getUser();
-        if (StrUtil.isNotEmpty(id) && userModel.isServerManager()) {
-            List<NodeModel> nodeModels = nodeService.listAndProject();
-            setAttribute("nodeModels", nodeModels);
-            //
-            String reqId = nodeService.cacheNodeList(nodeModels);
-            setAttribute("reqId", reqId);
-            setAttribute("type", "add");
-
+        setAttribute("type", "add");
+        if (StrUtil.isNotEmpty(id)) {
             OutGivingModel outGivingModel = outGivingServer.getItem(id);
             if (outGivingModel != null) {
                 setAttribute("item", outGivingModel);
                 setAttribute("type", "edit");
             }
+        }
+        UserModel userModel = getUser();
+        if (userModel.isServerManager()) {
+            List<NodeModel> nodeModels = nodeService.listAndProject();
+            setAttribute("nodeModels", nodeModels);
+
+            //
+            String reqId = nodeService.cacheNodeList(nodeModels);
+            setAttribute("reqId", reqId);
+
         }
         return "outgiving/edit";
     }
@@ -160,7 +163,10 @@ public class OutGivingController extends BaseServerController {
                     }
                 }
             }
-            nodeProject = new OutGivingModel.NodeProject();
+            nodeProject = outGivingModel.getNodeProject(nodeModel.getId(), trueProjectId);
+            if (nodeProject == null) {
+                nodeProject = new OutGivingModel.NodeProject();
+            }
             nodeProject.setNodeId(nodeModel.getId());
             nodeProject.setProjectId(trueProjectId);
             nodeProjects.add(nodeProject);
@@ -173,10 +179,10 @@ public class OutGivingController extends BaseServerController {
     }
 
     /**
-     * 删除节点信息
+     * 删除分发信息
      *
-     * @param id
-     * @return
+     * @param id 分发id
+     * @return json
      */
     @RequestMapping(value = "del.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody

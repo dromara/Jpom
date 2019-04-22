@@ -1,6 +1,5 @@
 package cn.keepbx.jpom.model.data;
 
-import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.keepbx.jpom.BaseJpomApplication;
@@ -8,6 +7,7 @@ import cn.keepbx.jpom.common.commander.AbstractProjectCommander;
 import cn.keepbx.jpom.model.BaseModel;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -180,12 +180,20 @@ public class ProjectInfoModel extends BaseModel {
      */
     public static List<File> listJars(ProjectInfoModel projectInfoModel) {
         File fileLib = new File(projectInfoModel.getLib());
-        return FileUtil.loopFiles(fileLib, pathname -> {
-            if (!pathname.isFile()) {
-                return false;
+        File[] files = fileLib.listFiles();
+        List<File> files1 = new ArrayList<>();
+        if (files != null) {
+            for (File file : files) {
+                if (!file.isFile()) {
+                    continue;
+                }
+                if (StrUtil.endWith(file.getName(), ".jar", true)) {
+                    continue;
+                }
+                files1.add(file);
             }
-            return StrUtil.endWith(pathname.getName(), ".jar", true);
-        });
+        }
+        return files1;
     }
 
     /**
