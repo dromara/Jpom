@@ -11,11 +11,15 @@
     </style>
 </head>
 <body>
+
+<div class="layui-row">
     #if($user.isServerManager())
-    <div class="layui-row">
-        <button onclick="editProject('');" class="layui-btn layui-btn-sm">添加关联项目</button>
-    </div>
+        <button onclick="editProject('');" class="layui-btn layui-btn-sm layui-btn-warm">添加关联项目</button>
     #end
+    #if($user.isSystemUser())
+        <button onclick="editProject('');" class="layui-btn layui-btn-sm">分发白名单</button>
+    #end
+</div>
     #if($array && $array.size()>0)
 
     <div class="layui-collapse" style="margin: 10px;">
@@ -190,6 +194,16 @@
             shade: 0.8,
             area: ['80%', '80%'],
             content: 'edit.html?id=' + id
+        });
+    }
+
+    function editWhilt() {
+        layer.prompt({
+            title: '随便写点啥，并确认',
+            formType: 2
+        }, function (text, index) {
+            layer.close(index);
+
         });
     }
 </script>

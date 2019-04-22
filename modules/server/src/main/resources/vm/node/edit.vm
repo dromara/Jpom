@@ -48,7 +48,7 @@
                 <label class="layui-form-label">节点状态</label>
                 <div class="layui-input-block">
                     <input type="checkbox" value="true"
-                        #if($item.openStatus)
+                        #if(!$item || $item.openStatus)
                            checked
                         #end
                            name="openStatus"

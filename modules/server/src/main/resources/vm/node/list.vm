@@ -60,9 +60,12 @@
     var cachePortInfo;
     var config = {
         cols: [[
+            {field: 'osName', title: '系统名', width: "10%"},
+            {field: 'jpomVersion', title: 'Jpom版本', width: "10%"},
             {field: 'count', title: '项目个数', width: "10%"},
             {field: 'runCount', title: '运行中个数', width: "10%"},
             {field: 'stopCount', title: '未运行个数', width: "10%"},
+            {field: 'javaVirtualCount', title: 'java程序个数', width: "10%"},
         ]],
         url: "./node_status",
         loading: true,

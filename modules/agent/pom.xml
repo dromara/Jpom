@@ -42,7 +42,12 @@
             <artifactId>bcprov-jdk15on</artifactId>
             <version>1.61</version>
         </dependency>
-
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-compress</artifactId>
+            <version>1.18</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
     <build>
         <plugins>

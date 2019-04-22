@@ -95,6 +95,19 @@ public class JvmUtil {
         return null;
     }
 
+    /**
+     * 获取当前系统运行的java 程序个数
+     *
+     * @return 如果发生异常则返回0
+     */
+    public static int getJavaVirtualCount() {
+        try {
+            List<VirtualMachineDescriptor> descriptorList = VirtualMachine.list();
+            return descriptorList.size();
+        } catch (Exception e) {
+            return 0;
+        }
+    }
 
     /**
      * 工具Jpom运行项目的id 获取virtualMachine

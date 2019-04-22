@@ -13,6 +13,9 @@
 
 <body>
 <div class="layui-container">
+    <blockquote class="layui-elem-quote layui-quote-nm">
+        分发文件是上传一个压缩包，并自动分发到对应节点，分发后的操作将在文件分发结束后自动执行
+    </blockquote>
     <form action="upload" class="layui-form" style="margin-top: 20px">
         <div class="layui-form-item">
             <label class="layui-form-label">分发包</label>

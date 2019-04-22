@@ -29,8 +29,7 @@ public class WhitelistDirectoryController extends BaseJpomController {
     private WhitelistDirectoryService whitelistDirectoryService;
 
     @RequestMapping(value = "whitelistDirectory_data", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public String whitelistdirectoryData() {
-
+    public String whiteListDirectoryData() {
         Whitelist whitelist = whitelistDirectoryService.getWhitelist();
         return JsonMessage.getString(200, "", whitelist);
     }
