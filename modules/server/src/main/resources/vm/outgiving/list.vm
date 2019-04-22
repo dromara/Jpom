@@ -13,7 +13,7 @@
 <body>
     #if($user.isServerManager())
     <div class="layui-row">
-        <button onclick="editProject('');" class="layui-btn layui-btn-sm">创建关联项目</button>
+        <button onclick="editProject('');" class="layui-btn layui-btn-sm">添加关联项目</button>
     </div>
     #end
     #if($array && $array.size()>0)

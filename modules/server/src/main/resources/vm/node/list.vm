@@ -60,9 +60,9 @@
     var cachePortInfo;
     var config = {
         cols: [[
-            {field: 'count', title: '项目个数',},
-            {field: 'runCount', title: '运行中个数'},
-            {field: 'stopCount', title: '未运行个数'},
+            {field: 'count', title: '项目个数', width: "10%"},
+            {field: 'runCount', title: '运行中个数', width: "10%"},
+            {field: 'stopCount', title: '未运行个数', width: "10%"},
         ]],
         url: "./node_status",
         loading: true,

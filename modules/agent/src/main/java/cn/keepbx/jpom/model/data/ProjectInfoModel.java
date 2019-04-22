@@ -187,7 +187,7 @@ public class ProjectInfoModel extends BaseModel {
                 if (!file.isFile()) {
                     continue;
                 }
-                if (StrUtil.endWith(file.getName(), ".jar", true)) {
+                if (!StrUtil.endWith(file.getName(), ".jar", true)) {
                     continue;
                 }
                 files1.add(file);
