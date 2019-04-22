@@ -29,6 +29,12 @@
     <button onclick="reloadTable();" class="layui-btn layui-btn-sm">刷新</button>
     <button id="clear" class="layui-btn layui-btn-sm layui-btn-danger">清空文件</button>
     <button id="build" class="layui-btn  layui-btn-sm layui-btn-normal">OSS构建</button>
+
+    <div class="layui-layout-right" style="padding-right: 20px;padding-top: 10px;">
+        <div>
+            文件位置:$absLib
+        </div>
+    </div>
 </div>
 <table class="layui-table" id="tab_file" lay-filter="tab_file" style="margin: 0;"></table>
 </body>

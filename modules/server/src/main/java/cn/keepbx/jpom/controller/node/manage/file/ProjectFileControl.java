@@ -1,16 +1,21 @@
 package cn.keepbx.jpom.controller.node.manage.file;
 
+import cn.hutool.core.io.FileUtil;
 import cn.keepbx.jpom.common.BaseServerController;
 import cn.keepbx.jpom.common.forward.NodeForward;
 import cn.keepbx.jpom.common.forward.NodeUrl;
 import cn.keepbx.jpom.common.interceptor.ProjectPermission;
 import cn.keepbx.jpom.model.data.UserOperateLogV1;
+import cn.keepbx.jpom.service.manage.ProjectInfoService;
 import cn.keepbx.jpom.system.OperateType;
+import com.alibaba.fastjson.JSONObject;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
+
+import javax.annotation.Resource;
 
 /**
  * 文件管理
@@ -20,6 +25,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @Controller
 @RequestMapping(value = "/node/manage/file/")
 public class ProjectFileControl extends BaseServerController {
+    @Resource
+    private ProjectInfoService projectInfoService;
 
     /**
      * 文件管理页面
@@ -29,6 +36,10 @@ public class ProjectFileControl extends BaseServerController {
     @RequestMapping(value = "list.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
     public String fileManage(String id) {
         setAttribute("id", id);
+        JSONObject projectInfo = projectInfoService.getItem(getNode(), id);
+        String lib = projectInfo.getString("lib");
+        lib = FileUtil.getAbsolutePath(FileUtil.file(lib));
+        setAttribute("absLib", lib);
         return "node/manage/filemanage";
     }
 

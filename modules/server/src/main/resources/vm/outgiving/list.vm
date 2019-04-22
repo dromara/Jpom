@@ -11,7 +11,7 @@
     </style>
 </head>
 <body>
-    #if($user.isSystemUser())
+    #if($user.isServerManager())
     <div class="layui-row">
         <button onclick="editProject('');" class="layui-btn layui-btn-sm">创建关联项目</button>
     </div>
@@ -78,10 +78,18 @@
                                             $tr.lastOutGivingTime
                                         </td>
                                         <td>
-                                            <button op="conslone" nodeId="$tr.nodeId" projectId="$tr.projectId"
-                                                    class="layui-btn layui-btn-sm  layui-btn-normal">
-                                                控制台
-                                            </button>
+                                            #if($user.isServerManager())
+                                                <button op="conslone" nodeId="$tr.nodeId" projectId="$tr.projectId"
+                                                        class="layui-btn layui-btn-sm layui-btn-normal">
+                                                    控制台
+                                                </button>
+                                                <button op="file" nodeId="$tr.nodeId" projectId="$tr.projectId"
+                                                        class="layui-btn layui-btn-sm">
+                                                    文件管理
+                                                </button>
+                                            #else
+                                                没有权限
+                                            #end
                                         </td>
                                     </tr>
                                     #else
@@ -135,11 +143,15 @@
         $("button[op]").click(function (e) {
             layui.stope(e);
             var op = $(this).attr("op");
-            if ("conslone" == op) {
+            if ("conslone" == op || "file" == op) {
                 var nodeId = $(this).attr("nodeId");
                 var projectId = $(this).attr("projectId");
+                var parName = "file" == op ? "toFile" : "toConsole";
                 //
-                var win = top.window.open("/node/index.html?nodeId=" + nodeId + "&toConsole=" + projectId, nodeId + projectId);
+                var url = "/node/index.html";
+                url = urlUpdateParams(url, "nodeId", nodeId);
+                url = urlUpdateParams(url, parName, projectId);
+                var win = top.window.open(url, nodeId + projectId);
                 win.focus();
                 return;
             }

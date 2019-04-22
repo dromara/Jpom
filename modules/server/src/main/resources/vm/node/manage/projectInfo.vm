@@ -199,7 +199,6 @@
         function fileManage(data) {
             var manager = data.manager;
             if (manager) {
-                var lay_id = 'tab_file_' + data.id;
                 var url = './manage/file/list.html?id=' + data.id;
                 tabChange({
                     id: data.id,

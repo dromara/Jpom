@@ -184,6 +184,15 @@
                 title: toConsole + ' - 管理',
             });
         }
+        // 自动文件管理
+        var toFile = getTopQueryString("toFile");
+        if (toFile) {
+            tabChange({
+                id: toFile,
+                url: './manage/file/list.html?id=' + toFile,
+                title: toFile + ' - 文件',
+            });
+        }
     }
 </script>
 
