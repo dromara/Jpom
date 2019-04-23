@@ -50,9 +50,9 @@
 
 #### 基本操作演示
 
-![jpom-server](http://s.keepbx.cn/jpom-server.gif)
+[![jpom-server](http://s.keepbx.cn/jpom-server.gif)](https://gitee.com/keepbx/Jpom)
 
-![jpom-node-agent](http://s.keepbx.cn/jpom-node-agent.gif)
+[![jpom-node-agent](http://s.keepbx.cn/jpom-node-agent.gif)](https://gitee.com/keepbx/Jpom)
 
 ### 下载安装
 

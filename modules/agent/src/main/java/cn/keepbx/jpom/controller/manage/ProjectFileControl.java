@@ -161,14 +161,13 @@ public class ProjectFileControl extends BaseAgentController {
 
     @RequestMapping(value = "download", method = RequestMethod.GET)
     public String download(String id, String filename) {
-        filename = pathSafe(filename);
-        if (StrUtil.isEmpty(filename)) {
+        String safeFileName = pathSafe(filename);
+        if (StrUtil.isEmpty(safeFileName)) {
             return JsonMessage.getString(405, "非法操作");
         }
         try {
             ProjectInfoModel pim = projectInfoService.getItem(id);
-//            String path = + "/" + filename;
-            File file = FileUtil.file(pim.getLib(), filename);
+            File file = FileUtil.file(pim.getLib(), safeFileName);
             if (file.isDirectory()) {
                 return "暂不支持下载文件夹";
             }

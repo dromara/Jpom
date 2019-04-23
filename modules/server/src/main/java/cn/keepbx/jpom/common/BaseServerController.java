@@ -17,6 +17,8 @@ import java.util.Objects;
  * @date 2019/4/16
  */
 public abstract class BaseServerController extends BaseJpomController {
+    private static final ThreadLocal<UserModel> USER_MODEL_THREAD_LOCAL = new ThreadLocal<>();
+
     @Resource
     protected NodeService nodeService;
 
@@ -28,8 +30,6 @@ public abstract class BaseServerController extends BaseJpomController {
         }
         return nodeModel;
     }
-
-    private static final ThreadLocal<UserModel> USER_MODEL_THREAD_LOCAL = new ThreadLocal<>();
 
     @Override
     public void resetInfo() {
