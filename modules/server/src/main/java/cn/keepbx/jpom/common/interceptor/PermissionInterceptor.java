@@ -12,7 +12,7 @@ import cn.keepbx.jpom.model.data.NodeModel;
 import cn.keepbx.jpom.model.data.UserModel;
 import cn.keepbx.jpom.service.manage.ProjectInfoService;
 import cn.keepbx.jpom.service.node.NodeService;
-import cn.keepbx.jpom.system.JpomRuntimeException;
+import cn.keepbx.jpom.system.AgentException;
 import org.springframework.http.MediaType;
 import org.springframework.web.method.HandlerMethod;
 
@@ -48,7 +48,7 @@ public class PermissionInterceptor extends BaseInterceptor {
                 // 节点信息
                 NodeModel nodeModel = nodeService.getItem(nodeId);
                 if (nodeModel != null && !nodeModel.isOpenStatus()) {
-                    throw new JpomRuntimeException(nodeModel.getName() + "节点未启用");
+                    throw new AgentException(nodeModel.getName() + "节点未启用");
                 }
                 request.setAttribute("node", nodeModel);
             }
@@ -61,12 +61,6 @@ public class PermissionInterceptor extends BaseInterceptor {
                     return false;
                 }
 
-//                ProjectInfoModel projectInfoModel = projectInfoService.getItem(val);
-//                if (projectInfoModel == null) {
-//                    JsonMessage jsonMessage = new JsonMessage(300, "没有找到对应项目");
-//                    ServletUtil.write(response, jsonMessage.toString(), MediaType.APPLICATION_JSON_UTF8_VALUE);
-//                    return false;
-//                }
                 if (!userModel.isProject(nodeId, val)) {
                     JsonMessage jsonMessage = new JsonMessage(300, "你没有改项目的权限");
                     ServletUtil.write(response, jsonMessage.toString(), MediaType.APPLICATION_JSON_UTF8_VALUE);

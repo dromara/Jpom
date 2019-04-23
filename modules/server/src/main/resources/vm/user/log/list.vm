@@ -13,7 +13,7 @@
 
 <body>
 <div class="layui-row">
-    <button id="refresh" class="layui-btn layui-btn-sm">刷新表格</button>
+    <button onclick="reloadTable();" class="layui-btn layui-btn-sm">刷新表格</button>
 </div>
 <table class="layui-table" id="tab_user" lay-filter="tab_user" style="margin: 0;"></table>
 <script type="text/html" id="bar_projects">
@@ -42,13 +42,44 @@
     </div>
 </script>
 </body>
+
+<script type="text/html" id="toolbarDemo">
+    <form class="layui-form" action="">
+        <div class="layui-form-item" style="margin-bottom: 0;">
+            <div class="layui-inline">
+                <label class="layui-form-label" style="width: auto !important;">时间</label>
+                <div class="layui-input-inline" style="width: 300px;">
+                    <input type="text" class="layui-input" id="time" placeholder="请选择时间范围">
+                </div>
+            </div>
+            <div class="layui-inline">
+                <label class="layui-form-label" style="width: auto !important;">节点</label>
+                <div class="layui-input-inline">
+                    <select name="selectNode" id="selectNode" lay-verify="required" lay-filter="selectNode"
+                            lay-search="">
+                        <option value="">请选择</option>
+                        <option value="-">无节点操作</option>
+                        #foreach($item in $nodeArray)
+                            <option value="$item.id">$item.name</option>
+                        #end
+                    </select>
+                </div>
+            </div>
+        </div>
+    </form>
+</script>
 <script type="text/javascript">
+    const apiWhere = {};
+    var laydate;
+
     function loadSuccess() {
         tableRender({
             id: 'tab_user',
             elem: '#tab_user',
             url: './list_data.json',
+            toolbar: '#toolbarDemo',
             page: true,
+            where: apiWhere,
             cols: [[
                 {field: 'userId', title: '操作者'},
                 {field: 'ip', title: '操作ip'},
@@ -70,14 +101,15 @@
                     "count": data.total,
                     "data": data.data
                 };
+            },
+            done: function () {
+                $("#time").val(apiWhere.time);
+                renderDate();
+                // 选中
+                $("#selectNode option[value='" + apiWhere.selectNode + "']").attr("selected", "selected");
+                form.render();
             }
         });
-
-        // '刷新表格'点击事件
-        $('#refresh').on('click', function () {
-            table.reload('tab_user', {});
-        });
-
 
         layui.use(['laytpl'], function () {
             var laytpl = layui.laytpl;
@@ -98,7 +130,37 @@
                 }
             });
         });
+        layui.use('laydate', function () {
+            laydate = layui.laydate;
+            renderDate();
+        });
 
+        form.on('select(selectNode)', function (data) {
+            apiWhere.selectNode = data.value;
+            reloadTable();
+            return true;
+        });
+
+    }
+
+    function renderDate() {
+        var now = new Date().getTime();
+        laydate.render({
+            elem: '#time',
+            type: 'datetime',
+            range: "~",
+            max: now,
+            done: function (value, date, endDate) {
+                apiWhere.time = value;
+                reloadTable();
+            }
+        });
+    }
+
+    function reloadTable() {
+        table.reload('tab_user', {
+            where: apiWhere
+        });
     }
 </script>
 </html>

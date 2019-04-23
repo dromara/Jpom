@@ -2,6 +2,10 @@ package cn.keepbx.jpom.controller.user.log;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.bean.copier.CopyOptions;
+import cn.hutool.core.date.DatePattern;
+import cn.hutool.core.date.DateTime;
+import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.db.Db;
 import cn.hutool.db.Entity;
 import cn.hutool.db.Page;
@@ -10,7 +14,9 @@ import cn.hutool.db.sql.Direction;
 import cn.hutool.db.sql.Order;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.keepbx.jpom.common.BaseServerController;
+import cn.keepbx.jpom.model.data.NodeModel;
 import cn.keepbx.jpom.model.data.UserOperateLogV1;
+import cn.keepbx.jpom.service.node.NodeService;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.http.MediaType;
@@ -19,7 +25,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import javax.annotation.Resource;
 import java.sql.SQLException;
+import java.util.List;
 
 /**
  * 用户操作日志
@@ -30,12 +38,17 @@ import java.sql.SQLException;
 @Controller
 @RequestMapping(value = "/user/log")
 public class UserOptLogController extends BaseServerController {
+    @Resource
+    private NodeService nodeService;
 
     /**
      * 展示用户列表
      */
     @RequestMapping(value = "list.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
     public String projectInfo() {
+        // 所有节点
+        List<NodeModel> nodeModels = nodeService.list();
+        setAttribute("nodeArray", nodeModels);
         return "user/log/list";
     }
 
@@ -45,12 +58,31 @@ public class UserOptLogController extends BaseServerController {
      */
     @RequestMapping(value = "list_data.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
-    public String listData() throws SQLException {
+    public String listData(String time) throws SQLException {
         int limit = getParameterInt("limit", 10);
         int page1 = getParameterInt("page", 1);
         Page page = new Page(page1, limit);
         Entity entity = Entity.create(UserOperateLogV1.TABLE_NAME);
         page.addOrder(new Order("optTime", Direction.DESC));
+        // 时间
+        if (StrUtil.isNotEmpty(time)) {
+            String[] val = StrUtil.split(time, "~");
+            if (val.length == 2) {
+                DateTime startDateTime = DateUtil.parse(val[0], DatePattern.NORM_DATETIME_FORMAT);
+                entity.set("optTime", ">= " + startDateTime.getTime());
+
+                DateTime endDateTime = DateUtil.parse(val[1], DatePattern.NORM_DATETIME_FORMAT);
+                if (startDateTime.equals(endDateTime)) {
+                    endDateTime = DateUtil.endOfDay(endDateTime);
+                }
+                entity.set("optTime ", "<= " + endDateTime.getTime());
+            }
+        }
+        String selectNode = getParameter("selectNode");
+        if (StrUtil.isNotEmpty(selectNode)) {
+            entity.set("nodeId ", selectNode);
+        }
+
         PageResult<Entity> pageResult = Db.use().page(entity, page);
         CopyOptions copyOptions = new CopyOptions();
         copyOptions.setIgnoreError(true);

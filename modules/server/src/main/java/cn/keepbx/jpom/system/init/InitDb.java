@@ -31,9 +31,9 @@ public class InitDb {
         //
         if (JpomManifest.getInstance().isDebug()) {
             setting.set("showSql", "true");
+            setting.set("sqlLevel", "INFO");
             setting.set("showParams", "true");
         }
-
         try {
             DSFactory dsFactory = DSFactory.create(setting);
             DSFactory.setCurrentDSFactory(dsFactory);

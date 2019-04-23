@@ -190,21 +190,35 @@ public class NodeForward {
     }
 
     private static void addUser(HttpRequest httpRequest, NodeModel nodeModel) {
-        // 判断开启状态
-        if (!nodeModel.isOpenStatus()) {
-            throw new JpomRuntimeException(nodeModel.getName() + "节点未启用");
-        }
         UserModel userModel = BaseServerController.getUserModel();
         addUser(httpRequest, nodeModel, userModel);
     }
 
+    /**
+     * 添加agent 授权信息header
+     *
+     * @param httpRequest request
+     * @param nodeModel   节点
+     * @param userModel   用户
+     */
     public static void addUser(HttpRequest httpRequest, NodeModel nodeModel, UserModel userModel) {
         Objects.requireNonNull(userModel);
+        // 判断开启状态
+        if (!nodeModel.isOpenStatus()) {
+            throw new JpomRuntimeException(nodeModel.getName() + "节点未启用");
+        }
         httpRequest.header(ConfigBean.JPOM_SERVER_USER_NAME, UserModel.getOptUserName(userModel));
         httpRequest.header(ConfigBean.JPOM_SERVER_SYSTEM_USER_ROLE, userModel.getUserRole(nodeModel).name());
         httpRequest.header(ConfigBean.JPOM_AGENT_AUTHORIZE, nodeModel.getAuthorize(true));
     }
 
+    /**
+     * 获取节点socket 信息
+     *
+     * @param nodeModel 节点信息
+     * @param nodeUrl   url
+     * @return url
+     */
     public static String getSocketUrl(NodeModel nodeModel, NodeUrl nodeUrl) {
         String ws;
         if ("https".equalsIgnoreCase(nodeModel.getProtocol())) {

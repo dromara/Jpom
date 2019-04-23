@@ -23,7 +23,7 @@
         #if(!$item)
             <div class="layui-form-item">
                 <blockquote class="layui-elem-quote layui-quote-nm">
-                    创建分发项目是在不同的节点新创建对应项目（项目路径为节点白名单中的值，然后所有节点都将自动配置对应的白名单）
+                    创建分发项目是在不同的节点新创建对应项目（项目路径为节点白名单中的值，然后所有节点都将自动配置对应的白名单）,项目id、项目名称和分发id、分发名称同步
                 </blockquote>
             </div>
         #end
