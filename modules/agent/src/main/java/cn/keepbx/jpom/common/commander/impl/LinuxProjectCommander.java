@@ -2,6 +2,7 @@ package cn.keepbx.jpom.common.commander.impl;
 
 import cn.hutool.core.text.StrSpliter;
 import cn.hutool.core.thread.GlobalThreadPool;
+import cn.hutool.core.util.StrUtil;
 import cn.keepbx.jpom.common.commander.AbstractProjectCommander;
 import cn.keepbx.jpom.model.data.ProjectInfoModel;
 import cn.keepbx.jpom.model.system.NetstatModel;
@@ -74,8 +75,13 @@ public class LinuxProjectCommander extends AbstractProjectCommander {
             netstatModel.setSend(list.get(2));
             netstatModel.setLocal(list.get(3));
             netstatModel.setForeign(list.get(4));
-            netstatModel.setStatus(list.get(5));
-            netstatModel.setName(list.get(6));
+            if ("tcp".equalsIgnoreCase(netstatModel.getProtocol())) {
+                netstatModel.setStatus(list.get(5));
+                netstatModel.setName(list.get(6));
+            } else {
+                netstatModel.setStatus(StrUtil.DASHED);
+                netstatModel.setName(list.get(5));
+            }
             array.add(netstatModel);
         }
         return array;
