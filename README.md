@@ -147,13 +147,11 @@ Agent.sh status    查看Jpom插件端运行状态
 
 ### 常见问题
 
-[安装文档](/doc/install.md)
+[安装文档>>](/doc/install.md)
 
 [常见问题>>](/FQA.md) 
  
 [启动失败问题>>](https://gitee.com/keepbx/Jpom/wikis/pages?sort_id=1395625&doc_id=264493)
-
-[安装说明>>](https://gitee.com/keepbx/Jpom/wikis/pages?sort_id=1395348&doc_id=264493)
 
 [用户角色说明>>](/doc/userRole.md)
 
