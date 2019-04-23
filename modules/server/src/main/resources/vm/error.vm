@@ -1,0 +1,7 @@
+<h1 align="center">
+    #if($msg)
+        $msg
+    #else
+        系统发生错误啦
+    #end
+</h1>

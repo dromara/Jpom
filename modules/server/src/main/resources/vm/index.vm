@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Jpom-项目管理系统</title>
+    #parse("./common/head.vm")
+    <style>
+        /* 选项卡 */
+        .layui-tab {
+            margin: 0;
+            height: 100%;
+        }
+
+        .layui-body {
+            bottom: 10px !important;
+        }
+
+        .layui-tab-title {
+            /*width: calc(100% - 100px)*/
+            right: 70px;
+        }
+
+        .layui-tab-content {
+            position: absolute;
+            padding: 0px;
+            top: 40px;
+            right: 0;
+            bottom: 0;
+            left: 0;
+        }
+
+        .layui-tab-item {
+            height: 100%;
+            width: 100%;
+        }
+
+        .custom-iframe {
+            width: 100%;
+            height: 100%;
+        }
+
+        .layui-tab-title li:first-child > i {
+            display: none;
+        }
+    </style>
+</head>
+
+<body class="layui-layout-body">
+<div class="layui-layout layui-layout-admin">
+    <div class="layui-header">
+        <div class="layui-logo" title="版本时间:$!jpomManifest.timeStamp，进程ID:$!jpomManifest.pid">
+            Jpom项目管理系统#if($jpomManifest)<font style="font-size: 10px;">($jpomManifest.version)</font>#end
+        </div>
+        <ul class="layui-nav layui-layout-left">
+
+        </ul>
+        #parse("./common/userHead.vm")
+    </div>
+    <div class="layui-side layui-bg-black">
+        <div class="layui-side-scroll">
+            <ul class="layui-nav layui-nav-tree" lay-filter="menu">
+                <li class="layui-nav-item layui-this">
+                    <a href="javascript:;"
+                       data-options="{'id':'welcome', 'title':'节点管理', 'url':'./node/list.html'}">节点管理</a>
+                </li>
+                <li class="layui-nav-item">
+                    <a href="javascript:;"
+                       data-options="{'id':'outgiving', 'title':'节点分发', 'url':'./outgiving/list.html'}">节点分发</a>
+                </li>
+                <li class="layui-nav-item">
+                    <a href="javascript:;"
+                       data-options="{'id':'user', 'title':'用户管理', 'url':'./user/list'}">用户管理</a>
+                </li>
+                <li class="layui-nav-item">
+                    <a href="javascript:;"
+                       data-options="{'id':'user_log', 'title':'操作日志', 'url':'./user/log/list.html'}">操作日志</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+    <div class="layui-body" style="overflow: hidden;">
+        <div class="layui-tab layui-tab-card" lay-allowClose="true" lay-filter="mainTabs">
+            <ul class="layui-tab-title">
+                <li class="layui-this" lay-id="tab_welcome">节点管理</li>
+            </ul>
+            <div class="layui-tab-content">
+                <div class="layui-tab-item layui-show">
+                    <iframe src="./node/list.html" frameborder="0" class="custom-iframe"></iframe>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+
+<script type="text/javascript">
+    function loadSuccess() {
+        // 左侧导航条事件
+        element.on('nav(menu)', function (data) {
+            var dataJSON = $(data.context).attr("data-options");
+            var options;
+            try {
+                options = JSON.parse(dataJSON);
+            } catch (e) {
+                options = eval('(' + dataJSON + ')');
+            }
+            tabChange(options);
+        });
+    }
+</script>
+</html>

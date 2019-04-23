@@ -1,0 +1,10 @@
+jpom:
+  # jpom 数据存储路径, 如果调试模式运行默认路径为【/jpom/】,安装运行默认为jar包文件的父级
+  path:
+user:
+  # 最多能创建多少个用户
+  maxCount: 10
+  # 用户连续登录失败次数，超过此数将被限制登录
+  alwaysLoginError: 5
+  # 当ip连续登录失败，锁定对应IP时长，单位毫秒
+  ipErrorLockTime: 60*60*5*1000

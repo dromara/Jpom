@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    #parse("./common/head.vm")
+    <title>项目管理系统</title>
+    <style>
+        body {
+            padding: 10px 10px 0px 10px;
+        }
+
+        .div-uploadfiles {
+            display: none;
+            width: 100%;
+            margin: 10px 0;
+        }
+
+        .div-uploadfiles .layui-inline {
+            width: calc(50% - 5px);
+            margin-right: 0px;
+        }
+    </style>
+</head>
+
+<body>
+<div class="layui-row">
+    <button id="uploadFile" class="layui-btn layui-btn-sm"><i class="layui-icon">&#xe67c;</i>批量上传</button>
+    <button id="uploadFile_Import" class="layui-btn layui-btn-sm"><i class="layui-icon">&#xe67c;</i>覆盖导入</button>
+    <button onclick="reloadTable();" class="layui-btn layui-btn-sm">刷新</button>
+    <button id="clear" class="layui-btn layui-btn-sm layui-btn-danger">清空文件</button>
+    <button id="build" class="layui-btn  layui-btn-sm layui-btn-normal">OSS构建</button>
+
+    <div class="layui-layout-right" style="padding-right: 20px;padding-top: 10px;">
+        <div>
+            文件位置:$absLib
+        </div>
+    </div>
+</div>
+<table class="layui-table" id="tab_file" lay-filter="tab_file" style="margin: 0;"></table>
+</body>
+##	删除按钮
+<script type="text/html" id="bar_projects">
+    <a href="javascript:;" class="layui-btn layui-btn-sm layui-btn-danger" lay-event="delete">删除</a>
+    <a href="javascript:;" class="layui-btn layui-btn-sm layui-btn-normal" lay-event="download">下载</a>
+</script>
+<script type="text/javascript">
+    function loadSuccess() {
+        tableRender({
+            id: 'table_file',
+            elem: '#tab_file',
+            url: './getFileList',
+            where: {
+                id: '$id'
+            },
+            cols: [[
+                {field: 'index', title: '编号', width: '10%'},
+                {
+                    field: 'filename', title: '文件名称', sort: true, width: '30%', templet: function (d) {
+                        if (d.isDirectory) {
+                            return d.filename + '【文件夹】';
+                        }
+                        return d.filename;
+                    }
+                },
+                {field: 'modifytime', title: '修改时间', sort: true, width: '15%'},
+                {field: 'filesize', title: '文件大小', sort: true, width: '15%'},
+                {field: 'op', title: '操作', toolbar: '#bar_projects'}
+            ]],
+            done: function () {
+
+            }
+        });
+        var updateFail = false;
+        var listUploadCount, nowUploadCount;
+        uploadRender({
+            elem: '#uploadFile',
+            accept: 'file',
+            data: {
+                id: '$id'
+            },
+            multiple: true,
+            url: './upload',
+            choose: function (obj) {
+                nowUploadCount = listUploadCount = 0;
+                obj.preview(function (index, file, result) {
+                    listUploadCount++;
+                });
+            },
+            before: function (obj) {
+                setTimeout(function () {
+                    layer.msg('上传中(' + nowUploadCount + '/' + listUploadCount + ')', {
+                        icon: 16,
+                        shade: 0.2,
+                        time: 100000000
+                    });
+                }, 200);
+                updateFail = false;
+            },
+            allDone: function (obj) {
+                setTimeout(function () {
+                    layer.closeAll();
+                }, 1000);
+                if (updateFail) {
+                    return;
+                }
+                layer.msg("文件总数：" + obj.total + " 成功上传：" + nowUploadCount + " 上传失败：" + obj.aborted);
+                setTimeout(function () {
+                    reloadTable();
+                }, 2000);
+            },
+            done: function (res, index, upload) {
+                if (res.code != 200) {
+                    layer.msg(res.msg);
+                } else {
+                    nowUploadCount++
+                    layer.msg('上传中(' + nowUploadCount + '/' + listUploadCount + ')', {
+                        icon: 16,
+                        shade: 0.2,
+                        time: 100000000
+                    });
+                }
+                // 没有权限
+                if (res.code == 302) {
+                    updateFail = true;
+                }
+            },
+            error: function () {
+                layer.closeAll();
+                layer.msg('上传失败');
+            }
+        });
+
+        uploadRender({
+            elem: '#uploadFile_Import',
+            accept: 'file',
+            data: {
+                id: '$id',
+                type: "unzip"
+            },
+            multiple: false,
+            exts: 'zip',
+            acceptMime: '.zip',
+            url: './upload',
+            before: function () {
+                layer.load(1, {
+                    shade: [0.5, '#fff'] //0.1透明度的白色背景
+                });
+            },
+            done: function (res, index, upload) {
+                layer.msg(res.msg);
+                setTimeout(function () {
+                    layer.closeAll();
+                    reloadTable();
+                }, 2000);
+            },
+            error: function () {
+                layer.closeAll();
+                layer.msg('上传失败');
+            }
+        });
+
+        // 点击'上传文件'事件
+        $('#clear').on('click', function () {
+            layer.confirm('确定清空此项目文件吗？', {
+                title: '系统提示'
+            }, function (index) {
+                layer.close(index);
+                loadingAjax({
+                    url: './deleteFile',
+                    data: {
+                        id: '$id',
+                        type: 'clear'
+                    },
+                    success: function (data) {
+                        layer.msg(data.msg);
+                        if (200 === data.code) {
+                            reloadTable();
+                        }
+                    }
+                });
+            });
+        });
+        $("#build").click(function () {
+            layerOpen({
+                type: 2,
+                title: '自动构建',
+                shade: 0.8,
+                area: ['80%', '90%'],
+                content: '../build?id=$id'
+            });
+        });
+
+        // 表格工具条事件
+        table.on('tool(tab_file)', function (obj) {
+            var data = obj.data;
+            var event = obj.event;
+            if ('delete' === event) {
+                // 删除文件
+                deleteFile(data);
+            } else if ('download' === event) {
+                // 下载文件
+                downloadFile(data);
+            }
+        });
+
+
+    }
+
+    function reloadTable() {
+        // 刷新项目列表
+        table.reload('table_file', {});
+    }
+
+    //下载文件
+    function downloadFile(data) {
+        var url = "./download?id=$id&filename=" + encodeURI(data.filename);
+        url = appendNodeId(url);
+        self.location.href = url;
+    }
+
+    // 删除文件
+    function deleteFile(data) {
+        layer.confirm('确定删除文件 ' + data.filename + '？', {
+            title: '系统提示'
+        }, function (index) {
+            layer.close(index);
+            loadingAjax({
+                url: './deleteFile',
+                data: {
+                    id: '$id',
+                    filename: data.filename
+                },
+                success: function (data) {
+                    layer.msg(data.msg);
+                    if (200 === data.code) {
+                        reloadTable();
+                    }
+                }
+            });
+        });
+    }
+</script>
+</html>
