@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Jpom-项目管理系统</title>
+    #parse("./common/head.vm")
+    <style>
+        /* 选项卡 */
+        .layui-tab {
+            margin: 0;
+            height: 100%;
+        }
+
+        .layui-body {
+            bottom: 10px !important;
+        }
+
+        .layui-tab-title {
+            /*width: calc(100% - 100px)*/
+            right: 70px;
+        }
+
+        .layui-tab-content {
+            position: absolute;
+            padding: 0px;
+            top: 40px;
+            right: 0;
+            bottom: 0;
+            left: 0;
+        }
+
+        .layui-tab-item {
+            height: 100%;
+            width: 100%;
+        }
+
+        .custom-iframe {
+            width: 100%;
+            height: 100%;
+        }
+
+        .layui-tab-title li:first-child > i {
+            display: none;
+        }
+
+        .layui-logo {
+            width: auto !important;
+            left: 20px !important;
+        }
+    </style>
+</head>
+
+<body class="layui-layout-body">
+    #if($installed)
+    <div class="layui-layout layui-layout-admin">
+        <div class="layui-header">
+            <div class="layui-logo">
+                <a href="../index.html" style="color: #009688;">Jpom项目管理系统>> </a>
+                <span title="节点信息  版本时间:$!jpomManifest.timeStamp，进程ID:$!jpomManifest.pid">
+                    $node.name #if($jpomManifest)<font style="font-size: 10px;">($jpomManifest.version)</font>#end
+                </span>
+            </div>
+            #parse("./common/userHead.vm")
+        </div>
+        <div class="layui-side layui-bg-black">
+            <div class="layui-side-scroll">
+                <ul class="layui-nav layui-nav-tree" lay-filter="menu">
+                    <li class="layui-nav-item layui-this">
+                        <a href="javascript:;" data-options="{'id':'welcome', 'title':'首页', 'url':'./welcome'}">首页</a>
+                    </li>
+                    <li class="layui-nav-item">
+                        <a href="javascript:;"
+                           data-options="{'id':'manage', 'title':'项目管理', 'url':'./manage/projectInfo'}">项目管理</a>
+                    </li>
+                    #if($user.isManage($node.id))
+                        <li class="layui-nav-item">
+                            <a href="javascript:;"
+                               data-options="{'id':'nginx', 'title':'nginx管理', 'url':'./system/nginx/list.html'}">nginx管理</a>
+                        </li>
+                    #end
+                    #if($user.isSystemUser())
+                        <li class="layui-nav-item">
+                            <a href="javascript:;"
+                               data-options="{'id':'whitelistDirectory', 'title':'白名单目录', 'url':'./system/whitelistDirectory'}">白名单目录</a>
+                        </li>
+                        <li class="layui-nav-item">
+                            <a href="javascript:;"
+                               data-options="{'id':'alioss', 'title':'阿里云OSS', 'url':'./system/alioss'}">阿里云OSS</a>
+                        </li>
+                    #end
+                </ul>
+            </div>
+        </div>
+        <div class="layui-body" style="overflow: hidden;">
+            <div class="layui-tab layui-tab-card" lay-allowClose="true" lay-filter="mainTabs">
+                <ul class="layui-tab-title">
+                    <li class="layui-this" lay-id="tab_welcome">首页</li>
+                </ul>
+                <div class="layui-tab-content">
+                    <div class="layui-tab-item layui-show">
+                        <iframe src="./welcome?nodeId=$!node.id" frameborder="0" class="custom-iframe"></iframe>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    #else
+    <div class="layui-carousel" id="div-carousel" style="width: 100%; height: 100%; position: fixed; z-index: 0;">
+        <div carousel-item>
+            <div><img src="$!jpomProxyPath/static/backgrounds/1.jpg?v=$staticCacheTime" style="width: 100%;"></div>
+        </div>
+    </div>
+    <div class="layui-container" style="margin-top: 150px;">
+        <div class="layui-row">
+            <div class="layui-col-md4 layui-col-md-offset4">
+                <form class="layui-form" method="post" action="">
+                    <div class="layui-form-item" style="color: #FFF; font-size: 24px;text-align: center;">
+                        <span>初始化节点（$node.name）</span>
+                    </div>
+                    <div class="layui-form-item">
+                        <div class="layui-input-block" style="margin-left: 0px;">
+                                <textarea name="project" lay-verify="required"
+                                          placeholder="请输入项目存放路径白名单，回车支持输入多个路径"
+                                          class="layui-textarea"></textarea>
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <div class="layui-input-block" style="margin-left: 0px;">
+                            <button class="layui-btn layui-btn-danger" lay-submit lay-filter="from_node"
+                                    style="width: 100%">确定
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    #end
+    #parse("./common/sha1.vm")
+</body>
+<script type="text/javascript">
+    function loadSuccess() {
+        #if($installed)
+            // 左侧导航条事件
+            element.on('nav(menu)', function (data) {
+                var dataJSON = $(data.context).attr("data-options");
+                var options;
+                try {
+                    options = JSON.parse(dataJSON);
+                } catch (e) {
+                    options = eval('(' + dataJSON + ')');
+                }
+
+                tabChange(options);
+            });
+        #else
+            layui.use(['carousel'], function () {
+                var carousel = layui.carousel;
+                carousel.render({
+                    elem: '#div-carousel',
+                    width: '100%',
+                    height: '100%',
+                    anim: 'fade',
+                    arrow: 'none',
+                    indicator: 'none'
+                });
+                //
+                form.on('submit(from_node)', function (data) {
+                    loadingAjax({
+                        url: './install_node.json',
+                        data: data.field,
+                        success: function (data) {
+                            layer.msg(data.msg);
+                            if (200 == data.code) {
+                                setTimeout(function () {
+                                    window.location.reload();
+                                }, 1500);
+                            }
+                        }
+                    });
+                    return false;
+                });
+            });
+        #end
+        // 自动打开控制台
+        var toConsole = getTopQueryString("toConsole");
+        if (toConsole) {
+            var url = './manage/console?id=' + toConsole;
+            tabChange({
+                id: toConsole,
+                url: url,
+                title: toConsole + ' - 管理',
+            });
+        }
+        // 自动文件管理
+        var toFile = getTopQueryString("toFile");
+        if (toFile) {
+            tabChange({
+                id: toFile,
+                url: './manage/file/list.html?id=' + toFile,
+                title: toFile + ' - 文件',
+            });
+        }
+    }
+</script>
+
+</html>

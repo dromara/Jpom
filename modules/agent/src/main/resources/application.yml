@@ -1,0 +1,20 @@
+#运行端口号
+server:
+  port: 2123
+spring:
+  application:
+    name: jpomAgent
+  profiles:
+    active: dev
+banner:
+  msg: Jpom-Agent管理系统启动中
+# session 超时时间
+tomcat:
+  sessionTimeOut: 3600
+  sessionCookieName: JPOMID-AGENT
+# 启动完成自动初始化指定包
+preload:
+  packageName: cn.keepbx.jpom.system.init
+# 强制去掉空格
+request:
+  trimAll: true

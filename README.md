@@ -31,7 +31,7 @@
 
 > 当多个项目运行在同一台服务器时，运维人员通常也不只一个，如果每个人都登录服务器管理项目，难免会造成一些不必要的麻烦，甚至给服务器的安全性带来问题（服务器密码知道的人越多，越容易泄露），因为不需要登录服务器管理项目，维护人员不需要知道服务器的登录密码，只需要有Jpom的账号就行，Jpom本身可以通过权限管理，给不同用户不同的权限，这样也使得项目的稳定性得到提升。
 
-> Jpom可以在Linux和Windows服务器上运行
+> Jpom可以在Linux和Windows服务器上运行，并且Jpom采用多节点模式，随时开启关闭节点服务器，节点分发减少运维人员上传、修改操作
 
 ### Jpom 目标
 
@@ -42,47 +42,76 @@
 1. 创建、修改、删除项目、Jar包管理
 2. 实时查看控制台日志、备份日志、删除日志、导出日志
 3. cpu、ram 监控、导出堆栈信息、查看项目进程端口、服务器状态监控
-4. 多用户管理，用户项目权限独立(上传、删除权限可控制)
-5. 系统路径白名单模式，杜绝用户误操作系统文件
-6. 在线管理Nginx配置、ssl证书文件
-7. Jpom完全不依赖数据库，随装随用
+4. 多节点管理、多节点自动分发
+5. 多用户管理，用户项目权限独立(上传、删除权限可控制),完善的操作日志
+6. 系统路径白名单模式，杜绝用户误操作系统文件
+7. 在线管理Nginx配置、ssl证书文件
 8. [阿里云 CodePipeline + Oss在线管理](/doc/CodePipeline-Oss.md)
 
 #### 基本操作演示
 
-<img src="http://s.keepbx.cn/jpom-demo-gif.gif" ></img>
+![jpom-server](http://s.keepbx.cn/jpom-server.gif)
+
+![jpom-node-agent](http://s.keepbx.cn/jpom-node-agent.gif)
 
 ### 下载安装
 
 1. 下载安装包 [https://gitee.com/keepbx/Jpom/attach_files](https://gitee.com/keepbx/Jpom/attach_files)
-2. 上传到服务解压对应路径
-3. 命令运行（Jpom.sh、Jpom.bat）
+2. 解压文件
+3. 安装插件端
+    1. agent-x.x.x-release 目录为插件端的全部安装文件
+    2. 上传到对应服务器
+    3. 命令运行（Agent.sh、Agent.bat）
+4. 安装服务端
+    1. server-x.x.x-release 目录为服务端的全部安装文件
+    2. 上传到对应服务器
+    3. 命令运行（Server.sh、Server.bat）
 
 ### 编译安装
 
 1. 访问[Jpom](https://gitee.com/keepbx/Jpom)的码云主页,拉取最新完整代码(建议使用master分支)
 2. 进入项目目录执行:`mvn clean package`
-3. 然后在目录中查看 target/jpom-x.x.x-release
-4. 打包上传服务器运行
-5. 命令运行（Jpom.sh、Jpom.bat）
+3. 安装插件端
+    1. 查看插件端安装包 modules/agent/target/agent-x.x.x-release
+    2. 打包上传服务器运行
+    3. 命令运行（Agent.sh、Agent.bat）
+4. 安装服务端
+    1. 查看插件端安装包 modules/server/target/server-x.x.x-release
+    2. 打包上传服务器运行
+    3. 命令运行（Server.sh、Server.bat）
 
 ### 编译运行
 
 1. 访问[Jpom](https://gitee.com/keepbx/Jpom)的码云主页,拉取最新完整代码(建议使用master分支)
-2. 运行`cn.keepbx.jpom.JpomApplication`
-3. 浏览器访问（如：http://127.0.0.1:2122）
+2. 运行插件端   
+    1. 运行`cn.keepbx.jpom.JpomAgentApplication`
+    2. 注意控制台打印的默认账号密码信息
+3. 运行服务端
+    1. 运行`cn.keepbx.jpom.JpomServerApplication`
+    2. 浏览器访问（如：http://127.0.0.1:2122）
 
 ### 管理命令
-1. windows中Jpom.bat
+1. windows中Agent.bat 、Server.bat
 ```
-Jpom.bat     启动管理面板(按照面板提示输入操作)
+# 服务端
+Server.bat     启动管理面板(按照面板提示输入操作)
+
+# 插件端
+Agent.bat     启动管理面板(按照面板提示输入操作)
 ```
-2. linux中Jpom.sh
+2. linux中Agent.sh 、Server.sh
 ```
-Jpom.sh start     启动Jpom 
-Jpom.sh stop      停止Jpom
-Jpom.sh restart   重启Jpom
-Jpom.sh status    查看Jpom运行状态
+# 服务端
+Server.sh start     启动Jpom服务端
+Server.sh stop      停止Jpom服务端
+Server.sh restart   重启Jpom服务端
+Server.sh status    查看Jpom服务端运行状态
+
+# 插件端
+Agent.sh start     启动Jpom插件端
+Agent.sh stop      停止Jpom插件端
+Agent.sh restart   重启Jpom插件端
+Agent.sh status    查看Jpom插件端运行状态
 ```
 
 ### 视频教程
