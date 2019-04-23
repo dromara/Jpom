@@ -75,16 +75,11 @@ public class OutGivingProjectEditController extends BaseServerController {
             JSONObject projectInfo = outGivingModel.getFirstNodeProject(true);
             if (projectInfo != null) {
                 for (Object obj : jsonArray) {
-                    String path = obj.toString();
-                    String lib = projectInfo.getString("lib");
-                    if (!lib.startsWith(path)) {
-                        continue;
+                    String itemWhitelistDirectory = AgentWhitelist.getItemWhitelistDirectory(projectInfo, obj.toString());
+                    if (itemWhitelistDirectory != null) {
+                        setAttribute("itemWhitelistDirectory", itemWhitelistDirectory);
+                        break;
                     }
-                    String itemWhitelistDirectory = lib.substring(0, path.length());
-                    lib = lib.substring(path.length());
-                    setAttribute("itemWhitelistDirectory", itemWhitelistDirectory);
-                    projectInfo.put("lib", lib);
-                    break;
                 }
                 setAttribute("firstData", projectInfo);
             }

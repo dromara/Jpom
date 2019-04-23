@@ -7,6 +7,7 @@ import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.keepbx.jpom.common.BaseJpomController;
 import cn.keepbx.jpom.model.BaseJsonModel;
 import cn.keepbx.jpom.system.ExtConfigBean;
+import com.alibaba.fastjson.JSONObject;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -105,5 +106,24 @@ public class AgentWhitelist extends BaseJsonModel {
             }
         }
         return false;
+    }
+
+    /**
+     * 解析出json 中的白名单字段
+     *
+     * @param projectInfo 项目的json对象
+     * @param path        要比较的白名单
+     * @return null 不是该白名单
+     */
+    public static String getItemWhitelistDirectory(JSONObject projectInfo, String path) {
+        String lib = projectInfo.getString("lib");
+        if (lib.startsWith(path)) {
+            String itemWhitelistDirectory = lib.substring(0, path.length());
+            lib = lib.substring(path.length());
+
+            projectInfo.put("lib", lib);
+            return itemWhitelistDirectory;
+        }
+        return null;
     }
 }

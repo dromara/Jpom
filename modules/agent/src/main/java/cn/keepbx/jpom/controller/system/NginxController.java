@@ -197,12 +197,12 @@ public class NginxController extends BaseAgentController {
         if (!whitelistDirectoryService.checkNgxDirectory(path)) {
             return JsonMessage.getString(400, "非法操作");
         }
-        path = pathSafe(path);
-        name = pathSafe(name);
-        if (StrUtil.isEmpty(name)) {
+        String safePath = pathSafe(path);
+        String safeName = pathSafe(name);
+        if (StrUtil.isEmpty(safeName)) {
             return JsonMessage.getString(400, "删除失败,请正常操作");
         }
-        File file = FileUtil.file(path, name);
+        File file = FileUtil.file(safePath, safeName);
         try {
             FileUtil.rename(file, file.getName() + "_back", false, true);
         } catch (Exception e) {

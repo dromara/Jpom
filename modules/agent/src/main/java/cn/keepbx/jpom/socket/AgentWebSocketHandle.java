@@ -156,15 +156,14 @@ public class AgentWebSocketHandle {
         } finally {
             if (logUser) {
                 // 记录操作人
-                projectInfoModel = projectInfoService.getItem(projectInfoModel.getId());
+                ProjectInfoModel newProjectInfoModel = projectInfoService.getItem(projectInfoModel.getId());
                 String name = getOptUserName(session);
-                projectInfoModel.setModifyUser(name);
-                projectInfoService.updateItem(projectInfoModel);
+                newProjectInfoModel.setModifyUser(name);
+                projectInfoService.updateItem(newProjectInfoModel);
             }
         }
-        //
+        // 返回数据
         if (resultData != null) {
-//            resultData.put("op", commandOp.name());
             reqJson.putAll(resultData);
             DefaultSystemLog.LOG().info(reqJson.toString());
             SocketSessionUtil.send(session, reqJson.toString());
