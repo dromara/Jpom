@@ -16,6 +16,7 @@ import java.io.IOException;
  * @date 2019/4/7
  */
 public class JpomClose {
+    private static JpomClose jpomManager;
 
     public static void main(String[] args) throws Exception {
         if (args == null || args.length <= 0) {
@@ -45,8 +46,11 @@ public class JpomClose {
         }
     }
 
-    private static JpomClose jpomManager;
-
+    /**
+     * 单利模式
+     *
+     * @return JpomClose
+     */
     public static JpomClose getInstance() {
         if (jpomManager != null) {
             return jpomManager;

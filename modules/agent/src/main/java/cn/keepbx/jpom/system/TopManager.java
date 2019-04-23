@@ -105,13 +105,13 @@ public class TopManager {
      */
     private static void send(String content) {
         synchronized (TopManager.class) {
+            String htmlContent = content.replaceAll("\n", "<br/>");
+            htmlContent = htmlContent.replaceAll(" ", "&nbsp;&nbsp;");
             Iterator<Session> iterator = SESSIONS.iterator();
             while (iterator.hasNext()) {
                 Session session = iterator.next();
-                content = content.replaceAll("\n", "<br/>");
-                content = content.replaceAll(" ", "&nbsp;&nbsp;");
                 try {
-                    SocketSessionUtil.send(session, content);
+                    SocketSessionUtil.send(session, htmlContent);
                 } catch (IOException e) {
                     DefaultSystemLog.ERROR().error("消息失败", e);
                     try {

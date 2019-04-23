@@ -25,6 +25,30 @@ import java.util.jar.Manifest;
  */
 public class JpomManifest {
     private static JpomManifest JPOM_MANIFEST;
+    /**
+     * 当前版本
+     */
+    private String version = "dev";
+    /**
+     * 打包时间
+     */
+    private String timeStamp;
+    /**
+     * 进程id
+     */
+    private long pid = SystemUtil.getCurrentPID();
+    /**
+     * 当前运行类型
+     */
+    private Type type = BaseJpomApplication.getAppType();
+    /**
+     * 端口号
+     */
+    private int port;
+    /**
+     * Jpom 的数据目录
+     */
+    private String dataPath;
 
     private static synchronized void init() {
         if (JPOM_MANIFEST != null) {
@@ -62,31 +86,6 @@ public class JpomManifest {
         init();
         return JPOM_MANIFEST;
     }
-
-    /**
-     * 当前版本
-     */
-    private String version = "dev";
-    /**
-     * 打包时间
-     */
-    private String timeStamp;
-    /**
-     * 进程id
-     */
-    private long pid = SystemUtil.getCurrentPID();
-    /**
-     * 当前运行类型
-     */
-    private Type type = BaseJpomApplication.getAppType();
-    /**
-     * 端口号
-     */
-    private int port;
-    /**
-     * Jpom 的数据目录
-     */
-    private String dataPath;
 
     public Type getType() {
         return type;

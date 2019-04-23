@@ -29,6 +29,8 @@ import java.io.InputStream;
 import java.util.List;
 
 /**
+ * nginx 列表
+ *
  * @author jiangzeyin
  * @date 2019/4/17
  */
@@ -51,11 +53,18 @@ public class NginxController extends BaseAgentController {
         return JsonMessage.getString(200, "", array);
     }
 
+    /**
+     * 获取配置文件信息页面
+     *
+     * @param path 白名单路径
+     * @param name 名称
+     * @return 页面
+     */
     @RequestMapping(value = "item_data", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public String itemData(String path, String name, String type) {
-        name = pathSafe(name);
+    public String itemData(String path, String name) {
+        String newName = pathSafe(name);
         if (whitelistDirectoryService.checkNgxDirectory(path)) {
-            File file = FileUtil.file(path, name);
+            File file = FileUtil.file(path, newName);
             JSONObject jsonObject = new JSONObject();
             String string = FileUtil.readUtf8String(file);
             jsonObject.put("context", string);
