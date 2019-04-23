@@ -36,12 +36,14 @@ public class InitDb {
             setting.set("sqlLevel", "INFO");
             setting.set("showParams", "true");
         }
+        DefaultSystemLog.LOG().info("初始化数据中....");
         try {
+            // 创建连接
             DSFactory dsFactory = DSFactory.create(setting);
-            DSFactory.setCurrentDSFactory(dsFactory);
             InputStream inputStream = ResourceUtil.getStream("classpath:/bin/h2-db-v1.sql");
             String sql = IoUtil.read(inputStream, CharsetUtil.CHARSET_UTF_8);
-            Db.use().execute(sql);
+            Db.use(dsFactory.getDataSource()).execute(sql);
+            DSFactory.setCurrentDSFactory(dsFactory);
         } catch (Exception e) {
             DefaultSystemLog.ERROR().error("初始化数据库失败", e);
             System.exit(0);

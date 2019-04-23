@@ -17,5 +17,7 @@ public class TestString {
         System.out.println(ReUtil.isMatch(pattern, url));
 
         System.out.println(Math.pow(1024, 2));
+
+        System.out.println(Integer.MAX_VALUE);
     }
 }

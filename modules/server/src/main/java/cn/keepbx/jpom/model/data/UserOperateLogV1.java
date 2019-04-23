@@ -43,6 +43,7 @@ public class UserOperateLogV1 extends BaseJsonModel {
     private String resultMsg;
     /**
      * 操作id
+     * 用于socket 回话回调更新
      */
     private String reqId;
     /**
@@ -63,7 +64,7 @@ public class UserOperateLogV1 extends BaseJsonModel {
     }
 
     public void setReqData(String reqData) {
-        this.reqData = reqData;
+        this.reqData = StrUtil.maxLength(reqData, 999999990);
     }
 
     public String getUserAgent() {
@@ -71,7 +72,7 @@ public class UserOperateLogV1 extends BaseJsonModel {
     }
 
     public void setUserAgent(String userAgent) {
-        this.userAgent = userAgent;
+        this.userAgent = StrUtil.maxLength(userAgent, 280);
     }
 
     public String getDataId() {
@@ -83,11 +84,17 @@ public class UserOperateLogV1 extends BaseJsonModel {
     }
 
     public UserOperateLogV1(String reqId) {
-        this.reqId = reqId;
+        if (reqId == null) {
+            this.reqId = IdUtil.fastUUID();
+        } else {
+            this.reqId = reqId;
+        }
     }
 
+    /**
+     * 操作id
+     */
     public UserOperateLogV1() {
-        this(IdUtil.fastUUID());
     }
 
     public String getReqId() {
@@ -167,7 +174,7 @@ public class UserOperateLogV1 extends BaseJsonModel {
     }
 
     public void setResultMsg(String resultMsg) {
-        this.resultMsg = resultMsg;
+        this.resultMsg = StrUtil.maxLength(resultMsg, 999999990);
     }
 
     /**
@@ -246,6 +253,9 @@ public class UserOperateLogV1 extends BaseJsonModel {
         }
     }
 
+    /**
+     * 状态状态
+     */
     public enum Status implements BaseEnum {
         /**
          * 请求状态码200 为成功
