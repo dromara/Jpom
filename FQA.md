@@ -2,23 +2,23 @@
 
    ### 如何修改程序运行端口
    
-    修改管理程序命令文件中 --server.port=2122
+   > 修改管理程序命令文件中 --server.port=2122
         
    ### 如何修改程序日志路径
    
-    修改管理程序命令文件中 --jpom.log=/jpom/log/
+   > 修改管理程序命令文件中 --jpom.log=/jpom/log/
         
    ### 如何修改会话超时时长
         
-    在管理程序命令文件中 ARGS 变量添加 --tomcat.sessionTimeOut=1800
+   > 在管理程序命令文件中 ARGS 变量添加 --tomcat.sessionTimeOut=1800
     
    ### 如何修改Jpom数据存储目录
        
-    修改外部配置文件中的 jpom.path 属性
+   > 修改外部配置文件中的 jpom.path 属性
       
    ### 忘记系统管理员密码
     
-      删除Server端的数据目录中的 user.json 文件即可，删除此文件不影响其他数据
+   >  删除Server端的数据目录中的 user.json 文件即可，删除此文件不影响其他数据
         
    ### 在linux 系统中执行Jpom.sh 提示
    
@@ -29,19 +29,22 @@
    执行如下命令：(https://blog.csdn.net/perter_liao/article/details/76757605)
    
     1.编辑文件
-      #vim filename（文件名）
+    vim filename（文件名）
       
     2.进入末行模式（按esc键）
     
     3.设置文件格式
-     ：set fileformat=unix
+    :set fileformat=unix
      
     4.保存退出
-     ：wq
+     :wq
      
     5.#sh filename
       OK!
       
+   ### windows 中执行管理bat命令乱码或者执行失败
+   
+   > 请修改文件编码为当前系统默认的编码（windows中默认为GB2312）
    
    ### 启动Jpom提示
    ![jpom](/doc/error/jdk-error.png)
@@ -52,19 +55,6 @@
 
    [查看>>](/doc/nginx-config.md)
 
-   ### 启动提示数据目录权限不足
-   
-   > jpom 数据目录权限不足...
-       
-   请检查当前用户是否拥有对应目录的读写权限
-   [https://gitee.com/keepbx/Jpom/wikis/pages?sort_id=1395625&doc_id=264493](https://gitee.com/keepbx/Jpom/wikis/pages?sort_id=1395625&doc_id=264493)
-   
-   ### 启动提示JDK没有找到tools.jar
-   
-   [https://gitee.com/keepbx/Jpom/wikis/pages?sort_id=1398788&doc_id=264493](https://gitee.com/keepbx/Jpom/wikis/pages?sort_id=1398788&doc_id=264493)
-   
-   
-   
    ### Jpom添加项目、启动、查看项目报错
    1.运行的java进程有32位和64位的
    

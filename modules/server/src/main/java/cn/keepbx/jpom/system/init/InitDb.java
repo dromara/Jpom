@@ -16,6 +16,8 @@ import java.io.InputStream;
 
 
 /**
+ * 初始化数据库
+ *
  * @author jiangzeyin
  * @date 2019/4/19
  */
@@ -28,7 +30,7 @@ public class InitDb {
         setting.set("url", DbConfig.getInstance().getDbUrl());
         setting.set("user", "jpom");
         setting.set("pass", "jpom");
-        //
+        // 调试模式显示sql 信息
         if (JpomManifest.getInstance().isDebug()) {
             setting.set("showSql", "true");
             setting.set("sqlLevel", "INFO");
@@ -41,7 +43,7 @@ public class InitDb {
             String sql = IoUtil.read(inputStream, CharsetUtil.CHARSET_UTF_8);
             Db.use().execute(sql);
         } catch (Exception e) {
-            DefaultSystemLog.ERROR().error("初始化数据失败", e);
+            DefaultSystemLog.ERROR().error("初始化数据库失败", e);
             System.exit(0);
         }
     }

@@ -147,12 +147,13 @@ Agent.sh status    查看Jpom插件端运行状态
 
 ### 常见问题、操作说明
 
-| 安装 | 说明 |
+| 说明1 | 说明2 |
 | -- | -- |
 |  [安装文档>>](/doc/install.md)   |  [用户角色说明>>](/doc/userRole.md) |
 | [常见问题>>](/FQA.md)     | [阿里云Oss配置>>](/doc/CodePipeline-Oss.md) |
-|  [启动失败问题>>](https://gitee.com/keepbx/Jpom/wikis/pages?sort_id=1395625&doc_id=264493) |  [更新日志>>](/CHANGELOG.md) |
+|  [启动失败问题>>](/doc/startFail.md) |  [更新日志>>](/CHANGELOG.md) |
 |                 | [开发计划>>](/PLANS.md) |
+|  [项目属性说明>>](/doc/project.md)               | [删除项目说明>>](/doc/deleteProject.md) |
 
 ### 交流讨论 、提供bug反馈或建议
 
