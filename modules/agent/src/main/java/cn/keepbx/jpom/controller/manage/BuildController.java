@@ -8,7 +8,6 @@ import cn.jiangzeyin.common.JsonMessage;
 import cn.keepbx.jpom.common.BaseAgentController;
 import cn.keepbx.jpom.model.data.ProjectInfoModel;
 import cn.keepbx.jpom.service.manage.ConsoleService;
-import cn.keepbx.jpom.service.manage.ProjectInfoService;
 import cn.keepbx.jpom.service.oss.OssManagerService;
 import cn.keepbx.jpom.socket.CommandOp;
 import com.alibaba.fastjson.JSONArray;
@@ -32,8 +31,6 @@ public class BuildController extends BaseAgentController {
 
     @Resource
     private OssManagerService ossManagerService;
-    @Resource
-    private ProjectInfoService projectInfoService;
     @Resource
     private ConsoleService consoleService;
 

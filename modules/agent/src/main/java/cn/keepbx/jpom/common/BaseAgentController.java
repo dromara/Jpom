@@ -3,12 +3,12 @@ package cn.keepbx.jpom.common;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.servlet.ServletUtil;
-import cn.jiangzeyin.common.spring.SpringUtil;
 import cn.keepbx.jpom.model.Role;
 import cn.keepbx.jpom.model.data.ProjectInfoModel;
 import cn.keepbx.jpom.service.manage.ProjectInfoService;
 import cn.keepbx.jpom.system.ConfigBean;
 
+import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.util.Objects;
 
@@ -19,6 +19,8 @@ import java.util.Objects;
  * @date 2019/4/17
  */
 public abstract class BaseAgentController extends BaseJpomController {
+    @Resource
+    protected ProjectInfoService projectInfoService;
 
     protected String getUserName() {
         return getUserName(getRequest());
@@ -61,15 +63,17 @@ public abstract class BaseAgentController extends BaseJpomController {
      * @return this
      */
     protected ProjectInfoModel getProjectInfoModel() {
-        ProjectInfoModel projectInfoModel = null;
-        String id = getParameter("id");
-        if (StrUtil.isNotEmpty(id)) {
-            ProjectInfoService projectInfoService = SpringUtil.getBean(ProjectInfoService.class);
-            projectInfoModel = projectInfoService.getItem(id);
-        }
+        ProjectInfoModel projectInfoModel = tryGetProjectInfoModel();
         Objects.requireNonNull(projectInfoModel, "获取项目信息失败");
         return projectInfoModel;
     }
 
-
+    protected ProjectInfoModel tryGetProjectInfoModel() {
+        ProjectInfoModel projectInfoModel = null;
+        String id = getParameter("id");
+        if (StrUtil.isNotEmpty(id)) {
+            projectInfoModel = projectInfoService.getItem(id);
+        }
+        return projectInfoModel;
+    }
 }

@@ -114,6 +114,40 @@ public class OutGivingProjectEditController extends BaseServerController {
         }
     }
 
+    /**
+     * 删除分发项目
+     *
+     * @param id 项目id
+     * @return json
+     * @throws IOException IO
+     */
+    @RequestMapping(value = "delete_project", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @ResponseBody
+    @UrlPermission(value = Role.ServerManager, optType = UserOperateLogV1.OptType.DeleteOutgivingProject)
+    public String delete(String id) throws IOException {
+        OutGivingModel outGivingModel = outGivingServer.getItem(id);
+        if (outGivingModel == null) {
+            return JsonMessage.getString(200, "没有对应的分发项目");
+        }
+        if (!outGivingModel.isOutGivingProject()) {
+            return JsonMessage.getString(405, "改项目不是节点分发项目,不能在此次删除");
+        }
+        UserModel userModel = getUser();
+        List<OutGivingNodeProject> deleteNodeProject = outGivingModel.getOutGivingNodeProjectList();
+        if (deleteNodeProject != null) {
+            // 删除实际的项目
+            for (OutGivingNodeProject outGivingNodeProject1 : deleteNodeProject) {
+                NodeModel nodeModel = outGivingNodeProject1.getNodeData(true);
+                JsonMessage jsonMessage = deleteNodeProject(nodeModel, userModel, outGivingNodeProject1.getProjectId());
+                if (jsonMessage.getCode() != HttpStatus.HTTP_OK) {
+                    return JsonMessage.getString(406, nodeModel.getName() + "节点失败：" + jsonMessage.getMsg());
+                }
+            }
+        }
+        outGivingServer.deleteItem(id);
+        return JsonMessage.getString(200, "删除成功");
+    }
+
     private String addOutGiving(String id) throws IOException {
         OutGivingModel outGivingModel = outGivingServer.getItem(id);
         if (outGivingModel != null) {
@@ -152,6 +186,13 @@ public class OutGivingProjectEditController extends BaseServerController {
         return JsonMessage.getString(200, "修改成功");
     }
 
+    /**
+     * 保存节点项目数据
+     *
+     * @param outGivingModel 节点分发项目
+     * @param edit           是否为编辑模式
+     * @return 错误信息
+     */
     private String saveNodeData(OutGivingModel outGivingModel, boolean edit) {
         Map<NodeModel, JSONObject> map = outGivingModel.getTempCacheMap();
         if (map == null) {
@@ -329,13 +370,30 @@ public class OutGivingProjectEditController extends BaseServerController {
             }
             cache.put(nodeModel, allData);
         }
+        // 删除已经删除的项目
+        String error = deleteProject(outGivingModel, outGivingNodeProjects, userModel);
+        if (error != null) {
+            return error;
+        }
+        outGivingModel.setOutGivingNodeProjectList(outGivingNodeProjects);
+        outGivingModel.setTempCacheMap(cache);
+        return null;
+    }
 
+    /**
+     * 删除已经删除过的项目
+     *
+     * @param outGivingModel        分发项目
+     * @param outGivingNodeProjects 新的节点项目
+     * @param userModel             用户
+     * @return 错误信息
+     */
+    private String deleteProject(OutGivingModel outGivingModel, List<OutGivingNodeProject> outGivingNodeProjects, UserModel userModel) {
         if (outGivingNodeProjects.size() < 2) {
             return JsonMessage.getString(406, "至少选择两个节点及以上");
         }
-        outGivingModel.setOutGivingNodeProjectList(outGivingNodeProjects);
         // 删除
-        List<OutGivingNodeProject> deleteNodeProject = outGivingModel.getDelete(outGivingModel);
+        List<OutGivingNodeProject> deleteNodeProject = outGivingModel.getDelete(outGivingNodeProjects);
         if (deleteNodeProject != null) {
             JsonMessage jsonMessage;
             // 删除实际的项目
@@ -347,7 +405,6 @@ public class OutGivingProjectEditController extends BaseServerController {
                 }
             }
         }
-        outGivingModel.setTempCacheMap(cache);
         return null;
     }
 

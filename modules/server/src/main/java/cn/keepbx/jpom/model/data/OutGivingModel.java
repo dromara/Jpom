@@ -112,10 +112,22 @@ public class OutGivingModel extends BaseModel {
      */
     public OutGivingNodeProject getNodeProject(String nodeId, String projectId) {
         List<OutGivingNodeProject> thisPs = getOutGivingNodeProjectList();
-        if (thisPs == null) {
+        return getNodeProject(thisPs, nodeId, projectId);
+    }
+
+    /**
+     * 从指定数组中获取对应信息
+     *
+     * @param outGivingNodeProjects 节点项目列表
+     * @param nodeId                节点id
+     * @param projectId             项目id
+     * @return 实体
+     */
+    private OutGivingNodeProject getNodeProject(List<OutGivingNodeProject> outGivingNodeProjects, String nodeId, String projectId) {
+        if (outGivingNodeProjects == null) {
             return null;
         }
-        for (OutGivingNodeProject outGivingNodeProject1 : thisPs) {
+        for (OutGivingNodeProject outGivingNodeProject1 : outGivingNodeProjects) {
             if (StrUtil.equalsIgnoreCase(outGivingNodeProject1.getProjectId(), projectId) && StrUtil.equalsIgnoreCase(outGivingNodeProject1.getNodeId(), nodeId)) {
                 return outGivingNodeProject1;
             }
@@ -126,17 +138,17 @@ public class OutGivingModel extends BaseModel {
     /**
      * 获取已经删除的节点项目
      *
-     * @param outGivingModel 要比较的分发项目
+     * @param newsProject 要比较的分发项目
      * @return 已经删除过的
      */
-    public List<OutGivingNodeProject> getDelete(OutGivingModel outGivingModel) {
+    public List<OutGivingNodeProject> getDelete(List<OutGivingNodeProject> newsProject) {
         List<OutGivingNodeProject> old = getOutGivingNodeProjectList();
         if (old == null || old.isEmpty()) {
             return null;
         }
         List<OutGivingNodeProject> delete = new ArrayList<>();
         old.forEach(outGivingNodeProject -> {
-            if (outGivingModel.checkContains(outGivingNodeProject.getNodeId(), outGivingNodeProject.getProjectId())) {
+            if (getNodeProject(newsProject, outGivingNodeProject.getNodeId(), outGivingNodeProject.getProjectId()) != null) {
                 return;
             }
             delete.add(outGivingNodeProject);

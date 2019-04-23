@@ -15,7 +15,6 @@ import cn.keepbx.jpom.model.Role;
 import cn.keepbx.jpom.model.RunMode;
 import cn.keepbx.jpom.model.data.ProjectInfoModel;
 import cn.keepbx.jpom.service.WhitelistDirectoryService;
-import cn.keepbx.jpom.service.manage.ProjectInfoService;
 import cn.keepbx.jpom.socket.CommonSocketConfig;
 import cn.keepbx.jpom.system.ConfigBean;
 import org.springframework.http.MediaType;
@@ -39,8 +38,6 @@ import java.util.List;
 public class EditProjectController extends BaseAgentController {
     @Resource
     private WhitelistDirectoryService whitelistDirectoryService;
-    @Resource
-    private ProjectInfoService projectInfoService;
 
     /**
      * 基础检查
@@ -167,6 +164,13 @@ public class EditProjectController extends BaseAgentController {
         return save(projectInfo, previewData);
     }
 
+    /**
+     * 保存项目
+     *
+     * @param projectInfo 项目
+     * @param previewData 是否是预检查
+     * @return 错误信息
+     */
     private String save(ProjectInfoModel projectInfo, boolean previewData) {
         String edit = getParameter("edit");
         ProjectInfoModel exits = projectInfoService.getItem(projectInfo.getId());
@@ -190,7 +194,7 @@ public class EditProjectController extends BaseAgentController {
                     return JsonMessage.getString(200, "新增成功！");
                 }
             }
-            //
+            // 新增但是下面id 已经存在
             if (!"on".equalsIgnoreCase(edit)) {
                 return JsonMessage.getString(400, "项目id已经存在啦");
             }
@@ -287,7 +291,10 @@ public class EditProjectController extends BaseAgentController {
 
     @RequestMapping(value = "deleteProject", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public String deleteProject() {
-        ProjectInfoModel projectInfoModel = getProjectInfoModel();
+        ProjectInfoModel projectInfoModel = tryGetProjectInfoModel();
+        if (projectInfoModel == null) {
+            return JsonMessage.getString(200, "项目不存在");
+        }
         try {
             // 运行判断
             if (projectInfoModel.isStatus(true)) {

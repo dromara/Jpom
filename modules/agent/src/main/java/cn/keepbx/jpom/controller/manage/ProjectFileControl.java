@@ -11,7 +11,6 @@ import cn.jiangzeyin.controller.multipart.MultipartFileBuilder;
 import cn.keepbx.jpom.common.BaseAgentController;
 import cn.keepbx.jpom.model.data.ProjectInfoModel;
 import cn.keepbx.jpom.service.manage.ConsoleService;
-import cn.keepbx.jpom.service.manage.ProjectInfoService;
 import cn.keepbx.jpom.socket.CommandOp;
 import cn.keepbx.jpom.system.AgentConfigBean;
 import com.alibaba.fastjson.JSONArray;
@@ -33,10 +32,6 @@ import java.io.File;
 @RestController
 @RequestMapping(value = "/manage/file/")
 public class ProjectFileControl extends BaseAgentController {
-
-    @Resource
-    private ProjectInfoService projectInfoService;
-
     @Resource
     private ConsoleService consoleService;
 

@@ -9,7 +9,6 @@ import cn.keepbx.jpom.common.BaseAgentController;
 import cn.keepbx.jpom.common.commander.AbstractProjectCommander;
 import cn.keepbx.jpom.controller.manage.ProjectFileControl;
 import cn.keepbx.jpom.model.data.ProjectInfoModel;
-import cn.keepbx.jpom.service.manage.ProjectInfoService;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.http.MediaType;
@@ -18,7 +17,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 
@@ -29,8 +27,6 @@ import java.io.File;
 @RestController
 @RequestMapping(value = "manage/log")
 public class LogBackController extends BaseAgentController {
-    @Resource
-    private ProjectInfoService projectInfoService;
 
     @RequestMapping(value = "logSize", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public String logSize(String id) {

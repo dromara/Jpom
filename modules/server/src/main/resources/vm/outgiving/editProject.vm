@@ -115,7 +115,7 @@
             <a class="layui-btn layui-btn-sm layui-btn-warm" id="add_selectNode">添加节点项目
             </a>
         </div>
-        #if(!$item  || $user.isProject($node.id,$!item.id))
+        #if($user.isServerManager())
             <div class="layui-form-item" style="padding-left: 20%;">
                 <button class="layui-btn layui-btn-normal" lay-submit lay-filter="submitProject" id="project_submit">提交
                 </button>
@@ -211,7 +211,7 @@
     var laytpl;
 
     function loadSuccess() {
-        var tipMsgDiv = ("#tipMsgDiv");
+        // var tipMsgDiv = ("#tipMsgDiv");
         // 提交项目表单
         form.on('submit(submitProject)', function (data) {
             if ($("div[nodeDiv]").length < 2) {
@@ -247,8 +247,8 @@
             let val = data.value;
             if (val === "") {
                 val = "请选择";
-                tipMsgDiv.hide();
-                tipMsgDiv.attr("msg", "请填写项目路径")
+                // tipMsgDiv.hide();
+                // tipMsgDiv.attr("msg", "请填写项目路径")
             }
             $("#projectStart").text(val);
             if (val !== "") {
@@ -260,8 +260,8 @@
             let val = $(this).val();
             if (val === "") {
                 val = "请填写";
-                tipMsgDiv.hide();
-                tipMsgDiv.attr("msg", "请填写项目的jar路径")
+                // tipMsgDiv.hide();
+                // tipMsgDiv.attr("msg", "请填写项目的jar路径")
             }
             $("#projectEnd").text(val);
             if (val !== "") {
@@ -348,7 +348,6 @@
         });
 
     ## 回显节点信息
-
         var selectOption, viewData;
         #foreach($nodeP in $item.outGivingNodeProjectList)
 
@@ -373,7 +372,7 @@
             }
             laytpl(html.innerHTML).render(data, function (newHtml) {
                 $("#nodeListDiv").append(newHtml).show();
-                layer.close("page");
+                layer.closeAll("page");
                 // 改变已经选过的选项
                 selectOption.attr("disabled", true);
                 selectOption.attr("selected", false)
@@ -385,6 +384,27 @@
                 }
             });
         }
+
+        $("#delete_project").click(function () {
+            var id = $(this).attr("data-id");
+            var msg = '确定删除分发项目【 ' + id + '】？（会自动删除节点下的对应项目请谨慎操作）';
+            layer.confirm(msg, {
+                title: '系统提示'
+            }, function (index) {
+                loadingAjax({
+                    url: './delete_project.json',
+                    data: {
+                        id: id
+                    },
+                    success: function (data) {
+                        layer.msg(data.msg);
+                        if (200 == data.code) {
+                            closeTab();
+                        }
+                    }
+                });
+            });
+        });
     }
 
     function closeTab() {

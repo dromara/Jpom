@@ -88,3 +88,7 @@
    ### 常见问题未知问题
    
    https://github.com/alibaba/arthas/issues/347
+   
+   ### windows 环境项目在运行中不能删除文件
+   
+   > 由于系统原因，暂时还没有找到解决办法
