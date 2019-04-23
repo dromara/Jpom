@@ -44,7 +44,7 @@ public class OutGivingProjectEditController extends BaseServerController {
     private OutGivingServer outGivingServer;
 
     @RequestMapping(value = "editProject", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
-    public String addOutgiving(String id) throws IOException {
+    public String editProject(String id) throws IOException {
         setAttribute("type", "add");
         OutGivingModel outGivingModel = null;
         if (StrUtil.isNotEmpty(id)) {
