@@ -50,9 +50,9 @@
 
 #### 基本操作演示
 
-[![jpom-server](http://s.keepbx.cn/jpom-server.gif)](https://gitee.com/keepbx/Jpom)
+[![jpom-server](http://s.keepbx.cn/jpom-server.gif)](http://s.keepbx.cn/jpom-server.gif)
 
-[![jpom-node-agent](http://s.keepbx.cn/jpom-node-agent.gif)](https://gitee.com/keepbx/Jpom)
+[![jpom-node-agent](http://s.keepbx.cn/jpom-node-agent.gif)](http://s.keepbx.cn/jpom-node-agent.gif)
 
 ### 下载安装
 
@@ -126,9 +126,9 @@ Agent.sh status    查看Jpom插件端运行状态
 
 ### Jpom 的参数配置
 
-   在项目运行的根路径下创建[`extConfig.yml`](/src/main/resources/bin/extConfig.yml) 
-   
-   具体的配置说明示例请查看[`extConfig.yml`](/src/main/resources/bin/extConfig.yml) 
+   在项目运行的根路径下的`extConfig.yml`文件
+   1. 插件端示例：[`extConfig.yml`](/modules/agent/src/main/resources/bin/extConfig.yml) 
+   2. 服务端示例：[`extConfig.yml`](/modules/server/src/main/resources/bin/extConfig.yml)
 
 ### 演示项目
 
@@ -145,22 +145,15 @@ Agent.sh status    查看Jpom插件端运行状态
    2. [SpringBoot案例代码(ClassPath)](https://gitee.com/keepbx/Jpom-demo-case/tree/master/springboot-test)
    3. [SpringBoot案例代码(Jar)](https://gitee.com/keepbx/Jpom-demo-case/tree/master/springboot-test-jar)
 
-### 常见问题
+### 常见问题、操作说明
 
-[安装文档>>](/doc/install.md)
+| 安装 | 说明 |
+| -- | -- |
+|  [安装文档>>](/doc/install.md)   |  [用户角色说明>>](/doc/userRole.md) |
+| [常见问题>>](/FQA.md)     | [阿里云Oss配置>>](/doc/CodePipeline-Oss.md) |
+|  [启动失败问题>>](https://gitee.com/keepbx/Jpom/wikis/pages?sort_id=1395625&doc_id=264493) |  [更新日志>>](/CHANGELOG.md) |
+|                 | [开发计划>>](/PLANS.md) |
 
-[常见问题>>](/FQA.md) 
- 
-[启动失败问题>>](https://gitee.com/keepbx/Jpom/wikis/pages?sort_id=1395625&doc_id=264493)
-
-[用户角色说明>>](/doc/userRole.md)
-
-[阿里云Oss配置>>](/doc/CodePipeline-Oss.md)
-
-[更新日志>>](/CHANGELOG.md)
-
-[开发计划>>](/PLANS.md)
-  
 ### 交流讨论 、提供bug反馈或建议
 
   1. QQ群：[136715345](https://shang.qq.com/wpa/qunwpa?idkey=93ff8d8a37a436b752fe38d32075bb1b32a8e0b3d3ff19d0b541ca840433f561)
