@@ -56,6 +56,8 @@
 
 ### 下载安装
 
+> [帮助文档](/doc/install.md)
+
 1. 下载安装包 [https://gitee.com/keepbx/Jpom/attach_files](https://gitee.com/keepbx/Jpom/attach_files)
 2. 解压文件
 3. 安装插件端
@@ -68,6 +70,8 @@
     3. 命令运行（Server.sh、Server.bat）
 
 ### 编译安装
+
+> [帮助文档](/doc/install.md)
 
 1. 访问[Jpom](https://gitee.com/keepbx/Jpom)的码云主页,拉取最新完整代码(建议使用master分支)
 2. 进入项目目录执行:`mvn clean package`
@@ -142,6 +146,8 @@ Agent.sh status    查看Jpom插件端运行状态
    3. [SpringBoot案例代码(Jar)](https://gitee.com/keepbx/Jpom-demo-case/tree/master/springboot-test-jar)
 
 ### 常见问题
+
+[安装文档](/doc/install.md)
 
 [常见问题>>](/FQA.md) 
  
