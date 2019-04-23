@@ -23,25 +23,39 @@
 </div>
     #if($array && $array.size()>0)
 
-    <div class="layui-collapse" style="margin: 10px;">
+    <div class="layui-collapse" style="margin: 10px;" lay-accordion lay-filter="node">
         #foreach($item in $array)
             <div class="layui-colla-item">
-                <div class="layui-colla-title">
+                <div class="layui-colla-title" itemId="$item.id">
                     <div title="$item.id">
                         $item.name
+                        【
+                        #if($item.outGivingProject)
+                            独立
+                        #else
+                            关联
+                        #end
+                        】
                     </div>
                     <div class="layui-layout-right" style="padding-right: 10%;">
-                        #if($user.isServerManager())
-                            <button op="add" id="$item.id" class="layui-btn layui-btn-sm layui-btn-normal">
-                                <i class="layui-icon">&#xe609;</i>
-                                分发文件
+                        <div class="layui-btn-group">
+                            <button op="refresh" itemId="$item.id" style="display: none;"
+                                    class="layui-btn layui-btn-sm">
+                                <i class="layui-icon">&#xe669;</i>
+                                刷新
                             </button>
-                            <button op="edit" outGivingProject="$item.outGivingProject" id="$item.id"
-                                    class="layui-btn layui-btn-sm ">
-                                <i class="layui-icon">&#xe642;</i>
-                                编辑
-                            </button>
-                        #end
+                            #if($user.isServerManager())
+                                <button op="add" id="$item.id" class="layui-btn layui-btn-sm">
+                                    <i class="layui-icon">&#xe609;</i>
+                                    分发文件
+                                </button>
+                                <button op="edit" outGivingProject="$item.outGivingProject" id="$item.id"
+                                        class="layui-btn layui-btn-sm ">
+                                    <i class="layui-icon">&#xe642;</i>
+                                    编辑
+                                </button>
+                            #end
+                        </div>
                     </div>
                 </div>
                 <div class="layui-colla-content">
@@ -60,7 +74,7 @@
                             <tbody id="tbody_$item.id">
                                 #foreach($tr in $item.outGivingNodeProjectList)
                                     #if($nodeData[$tr.nodeId])
-                                    <tr>
+                                    <tr projectId="$tr.projectId" nodeId="$tr.nodeId">
                                         <td>
                                             <div title="$tr.nodeId">$nodeData[$tr.nodeId].name</div>
                                         </td>
@@ -109,24 +123,7 @@
                                 <script type="text/javascript">
                                     //
                                     asyncFn.push(function () {
-                                        silentAjax({
-                                            url: "./getProjectStatus",
-                                            data: {
-                                                nodeId: "$tr.nodeId",
-                                                id: "$tr.projectId"
-                                            },
-                                            success: function (data) {
-                                                if (200 == data.code) {
-                                                    var pId = data.data.pId;
-                                                    if (pId > 0) {
-                                                        $("#status_$!tr.nodeId$!tr.projectId")
-                                                                .attr("checked", true)
-                                                                .parent().attr("title", "运行中：" + pId);
-                                                        form.render();
-                                                    }
-                                                }
-                                            }
-                                        });
+                                        getProjectStatus("$tr.nodeId", "$tr.projectId");
                                     });
                                 </script>
                                 #end
@@ -160,7 +157,7 @@
                 url = urlUpdateParams(url, parName, projectId);
                 var win = top.window.open(url, nodeId + projectId);
                 win.focus();
-                return;
+                return false;
             }
             if ("edit" == op) {
                 var editId = $(this).attr("id");
@@ -169,7 +166,7 @@
                 } else {
                     editProject(editId);
                 }
-                return;
+                return false;
             }
             if ("add" == op) {
                 var id = $(this).attr("id");
@@ -180,8 +177,19 @@
                     area: ['40%', '60%'],
                     content: 'addOutgiving.html?id=' + id
                 });
-                return;
+                return false;
             }
+            if ("refresh" == op) {
+                var itemId = $(this).attr("itemId");
+                $("#tbody_" + itemId).find("tr").each(function () {
+                    var projectId = $(this).attr("projectId");
+                    var nodeId = $(this).attr("nodeId");
+                    if (projectId && nodeId) {
+                        getProjectStatus(nodeId, projectId);
+                    }
+                })
+            }
+            return false;
         });
 
         //
@@ -192,6 +200,14 @@
                 return;
             }
             layer.alert(html);
+        });
+
+        element.on('collapse(node)', function (data) {
+            $("button[op='refresh']").hide();
+            if (data.show) {
+                var itemId = $(data.title).attr("itemId");
+                $("button[itemId='" + itemId + "']").show();
+            }
         });
     }
 
@@ -234,6 +250,27 @@
                     }
                 }
             });
+        });
+    }
+    ## 获取项目状态
+    function getProjectStatus(nodeId, projectId) {
+        silentAjax({
+            url: "./getProjectStatus",
+            data: {
+                nodeId: nodeId,
+                id: projectId
+            },
+            success: function (data) {
+                if (200 == data.code) {
+                    var pId = data.data.pId;
+                    if (pId > 0) {
+                        $("#status_" + nodeId + projectId)
+                                .attr("checked", true)
+                                .parent().attr("title", "运行中：" + pId);
+                        form.render();
+                    }
+                }
+            }
         });
     }
 </script>

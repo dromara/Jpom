@@ -154,6 +154,7 @@ public class OutGivingProjectEditController extends BaseServerController {
             return JsonMessage.getString(405, "分发id已经存在啦");
         }
         outGivingModel = new OutGivingModel();
+        outGivingModel.setOutGivingProject(true);
         outGivingModel.setId(id);
         //
         String error = doData(outGivingModel, false);
@@ -283,6 +284,10 @@ public class OutGivingProjectEditController extends BaseServerController {
         } catch (Exception ignored) {
         }
         defData.put("runMode", runMode1.name());
+        if (runMode1 == RunMode.ClassPath) {
+            String mainClass = getParameter("mainClass");
+            defData.put("mainClass", mainClass);
+        }
         String whitelistDirectory = getParameter("whitelistDirectory");
         List<String> whitelistServerOutGiving = serverWhitelistServer.getOutGiving();
         if (!AgentWhitelist.checkPath(whitelistServerOutGiving, whitelistDirectory)) {

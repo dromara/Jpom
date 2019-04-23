@@ -6,13 +6,13 @@ import cn.hutool.core.thread.ThreadUtil;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.controller.multipart.MultipartFileBuilder;
 import cn.keepbx.jpom.common.BaseServerController;
-import cn.keepbx.jpom.model.Role;
 import cn.keepbx.jpom.common.forward.NodeForward;
 import cn.keepbx.jpom.common.forward.NodeUrl;
 import cn.keepbx.jpom.common.interceptor.UrlPermission;
 import cn.keepbx.jpom.model.BaseEnum;
-import cn.keepbx.jpom.model.data.OutGivingNodeProject;
+import cn.keepbx.jpom.model.Role;
 import cn.keepbx.jpom.model.data.OutGivingModel;
+import cn.keepbx.jpom.model.data.OutGivingNodeProject;
 import cn.keepbx.jpom.model.data.UserOperateLogV1;
 import cn.keepbx.jpom.service.node.OutGivingServer;
 import cn.keepbx.jpom.system.ConfigBean;
@@ -95,6 +95,6 @@ public class OutGivingProjectController extends BaseServerController {
         // 开启线程
         List<OutGivingNodeProject> outGivingNodeProjects = outGivingModel.getOutGivingNodeProjectList();
         outGivingNodeProjects.forEach(outGivingNodeProject -> ThreadUtil.execute(new OutGivingModel.OutGivingRun(id, outGivingNodeProject, file, afterOpt1, getUser())));
-        return JsonMessage.getString(200, "上传成功");
+        return JsonMessage.getString(200, "分发成功");
     }
 }

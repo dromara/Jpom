@@ -88,12 +88,13 @@
                     time: 100000000
                 });
                 top.location.href = $(this).attr("url");
-                return;
+                return false;
             }
             if ("edit" == op) {
                 editProject($(this).attr("id"));
-                return;
+                return false;
             }
+            return false;
         });
 
         #foreach($item in $array)
