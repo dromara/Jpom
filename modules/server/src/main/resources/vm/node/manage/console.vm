@@ -62,20 +62,22 @@
     #if($manager)
         <div class="layui-row" id="optDiv">
             <!-- layui-elem-quote -->
-            #if($logSize)
-                #if($logSize.logSize)
-                    <button id="export" class="layui-btn layui-btn-sm">导出日志</button>
-                    <button id="resetLog" class="layui-btn layui-btn-sm">重置日志(<span id="logSize">$logSize.logSize</span>)
-                    </button>
-                #end
-                #if($logSize.logBack)
-                    <button id="logBack" class="layui-btn layui-btn-sm">备份列表</button>
-                #end
-            #end
-
             <a href="javascript:;" class="btn-op layui-btn  layui-btn-sm" op="start">启动</a>
             <a href="javascript:;" class="btn-op layui-btn  layui-btn-sm layui-btn-warm" op="restart">重启</a>
             <a href="javascript:;" class="btn-op layui-btn  layui-btn-sm layui-btn-danger" op="stop">停止</a>
+            #if($logSize)
+                <div class="layui-btn-group">
+                    #if($logSize.logSize)
+                        <button id="export" class="layui-btn layui-btn-sm">导出日志</button>
+                        <button id="resetLog" class="layui-btn layui-btn-sm">重置日志(<span
+                                id="logSize">$logSize.logSize</span>)
+                        </button>
+                    #end
+                    #if($logSize.logBack)
+                        <button id="logBack" class="layui-btn layui-btn-sm">备份列表</button>
+                    #end
+                </div>
+            #end
             <div class="status">
                 <div class="status-div"></div>
                 <span></span>

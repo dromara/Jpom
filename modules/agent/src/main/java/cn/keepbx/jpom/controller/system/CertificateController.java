@@ -130,14 +130,10 @@ public class CertificateController extends BaseAgentController {
         return null;
     }
 
-    private String getCertFile(CertModel certModel, boolean add) throws IOException {
-        String certPath = null;
+    private Object getUpdateFileInfo(CertModel certModel, String certPath) throws IOException {
         String pemPath = null, keyPath = null;
-        try {
-            String path = AgentConfigBean.getInstance().getTempPathName();
-            MultipartFileBuilder cert = createMultipart().addFieldName("file").setSavePath(path);
-            certPath = cert.save();
-            ZipFile zipFile = new ZipFile(certPath);
+        String path = AgentConfigBean.getInstance().getTempPathName();
+        try (ZipFile zipFile = new ZipFile(certPath)) {
             Enumeration<? extends ZipEntry> zipEntryEnumeration = zipFile.entries();
             while (zipEntryEnumeration.hasMoreElements()) {
                 ZipEntry zipEntry = zipEntryEnumeration.nextElement();
@@ -176,6 +172,21 @@ public class CertificateController extends BaseAgentController {
             if (jsonObject == null) {
                 return JsonMessage.getString(405, "解析证书失败");
             }
+            return jsonObject;
+        }
+    }
+
+    private String getCertFile(CertModel certModel, boolean add) throws IOException {
+        String certPath = null;
+        try {
+            String path = AgentConfigBean.getInstance().getTempPathName();
+            MultipartFileBuilder cert = createMultipart().addFieldName("file").setSavePath(path);
+            certPath = cert.save();
+            Object val = getUpdateFileInfo(certModel, certPath);
+            if (val instanceof String) {
+                return val.toString();
+            }
+            JSONObject jsonObject = (JSONObject) val;
             String domain = jsonObject.getString("domain");
             if (add) {
                 List<CertModel> array = certService.list();
@@ -203,6 +214,8 @@ public class CertificateController extends BaseAgentController {
                     return JsonMessage.getString(405, keyFile.getAbsolutePath() + " 已经被占用啦");
                 }
             }
+            String pemPath = jsonObject.getString("pemPath");
+            String keyPath = jsonObject.getString("keyPath");
             FileUtil.move(FileUtil.file(pemPath), pemFile, true);
             FileUtil.move(FileUtil.file(keyPath), keyFile, true);
             certModel.setCert(pemFile.getAbsolutePath());

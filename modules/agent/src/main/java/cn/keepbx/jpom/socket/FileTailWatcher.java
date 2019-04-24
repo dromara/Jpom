@@ -6,6 +6,7 @@ import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
+import cn.keepbx.jpom.model.data.ProjectInfoModel;
 import cn.keepbx.jpom.util.CharsetDetector;
 import cn.keepbx.jpom.util.LimitQueue;
 import cn.keepbx.jpom.util.SocketSessionUtil;
@@ -48,11 +49,13 @@ public class FileTailWatcher implements Runnable {
     /**
      * 添加文件监听
      *
-     * @param log     日志文件路径
-     * @param session 会话
+     * @param projectInfoModel 项目
+     * @param session          会话
      * @throws IOException 异常
      */
-    public static void addWatcher(String log, Session session) throws IOException {
+    public static void addWatcher(ProjectInfoModel projectInfoModel, Session session) throws IOException {
+        //        日志文件路径
+        String log = projectInfoModel.getLog();
         File file = new File(log);
         if (!file.exists()) {
             throw new IOException("文件不存在:" + file.getPath());
@@ -68,7 +71,7 @@ public class FileTailWatcher implements Runnable {
         if (fileTailWatcher == null) {
             throw new IOException("加载文件异常:" + file.getPath());
         }
-        fileTailWatcher.add(session);
+        fileTailWatcher.add(session, projectInfoModel.getName());
         //
         fileTailWatcher.start();
     }
@@ -100,13 +103,13 @@ public class FileTailWatcher implements Runnable {
      *
      * @param session 会话
      */
-    private void add(Session session) {
+    private void add(Session session, String name) {
         if (this.socketSessions.add(session)) {
             if (this.limitQueue.size() <= 0) {
                 this.send(session, "日志文件为空");
                 return;
             }
-            this.send(session, StrUtil.format("监听日志成功,目前共有{}人正在查看", this.socketSessions.size()));
+            this.send(session, StrUtil.format("监听{}日志成功,目前共有{}人正在查看", name, this.socketSessions.size()));
             // 开发发送头信息
             for (String s : this.limitQueue) {
                 this.send(session, s);

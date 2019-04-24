@@ -174,8 +174,7 @@ public abstract class AbstractProjectCommander {
                 return "没有jar包,请先到文件管理中上传程序的jar";
             }
             File jarFile = fileList.get(0);
-            try {
-                JarFile jarFile1 = new JarFile(jarFile);
+            try (JarFile jarFile1 = new JarFile(jarFile)) {
                 Manifest manifest = jarFile1.getManifest();
                 Attributes attributes = manifest.getMainAttributes();
                 String mainClass = attributes.getValue("Main-Class");
