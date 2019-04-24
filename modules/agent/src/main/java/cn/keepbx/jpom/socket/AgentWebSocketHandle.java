@@ -135,11 +135,10 @@ public class AgentWebSocketHandle {
                     break;
                 case showlog: {
                     // 进入管理页面后需要实时加载日志
-                    String log = projectInfoModel.getLog();
                     try {
-                        FileTailWatcher.addWatcher(log, session);
+                        FileTailWatcher.addWatcher(projectInfoModel, session);
                     } catch (IOException io) {
-                        DefaultSystemLog.ERROR().error(io.getMessage(), io);
+                        DefaultSystemLog.ERROR().error("监听日志变化", io);
                         SocketSessionUtil.send(session, io.getMessage());
                     }
                     break;

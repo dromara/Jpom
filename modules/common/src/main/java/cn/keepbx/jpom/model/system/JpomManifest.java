@@ -57,9 +57,7 @@ public class JpomManifest {
         JPOM_MANIFEST = new JpomManifest();
         File jarFile = getRunPath();
         if (jarFile.isFile()) {
-            JarFile jarFile1;
-            try {
-                jarFile1 = new JarFile(jarFile);
+            try (JarFile jarFile1 = new JarFile(jarFile)) {
                 Manifest manifest = jarFile1.getManifest();
                 Attributes attributes = manifest.getMainAttributes();
                 String version = attributes.getValue("Jpom-Project-Version");

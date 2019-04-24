@@ -171,6 +171,8 @@ public class CertModel extends BaseModel {
             jsonObject.put("expirationTime", expirationTime.getTime());
             jsonObject.put("effectiveTime", effectiveTime.getTime());
             jsonObject.put("domain", domain);
+            jsonObject.put("pemPath", file);
+            jsonObject.put("keyPath", key);
             return jsonObject;
         } catch (Exception e) {
             DefaultSystemLog.ERROR().error(e.getMessage(), e);

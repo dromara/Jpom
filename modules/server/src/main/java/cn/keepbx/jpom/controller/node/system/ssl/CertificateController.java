@@ -54,7 +54,6 @@ public class CertificateController extends BaseServerController {
      */
     @RequestMapping(value = "/getCertList", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
-//    @UrlPermission(Role.NodeManage)
     public String getCertList() {
         return NodeForward.request(getNode(), getRequest(), NodeUrl.System_Certificate_getCertList).toString();
     }
