@@ -71,13 +71,20 @@ public class InternalController extends BaseAgentController {
         if (threadMXBean == null) {
             return JsonMessage.getString(200, "");
         }
+        //启用线程争用监视
+        threadMXBean.setThreadContentionMonitoringEnabled(true);
         ThreadInfo[] threadInfos = threadMXBean.dumpAllThreads(false, false);
         if (threadInfos == null || threadInfos.length <= 0) {
             return JsonMessage.getString(200, "");
         }
         JSONArray array = new JSONArray();
         int index = (page - 1) * limit;
-        for (int i = index; i < limit + index; i++) {
+        int len = limit + index;
+        int length = threadInfos.length;
+        if (len > length) {
+            len = length;
+        }
+        for (int i = index; i < len; i++) {
             ThreadInfo threadInfo = threadInfos[i];
             Thread.State threadState = threadInfo.getThreadState();
             JSONObject object = new JSONObject();
@@ -93,7 +100,7 @@ public class InternalController extends BaseAgentController {
             array.add(object);
         }
         JSONObject object = new JSONObject();
-        object.put("count", threadInfos.length);
+        object.put("count", length);
         object.put("data", array);
         return JsonMessage.getString(200, "", object);
     }
