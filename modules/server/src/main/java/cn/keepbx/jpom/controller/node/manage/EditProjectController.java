@@ -6,6 +6,7 @@ import cn.keepbx.jpom.common.BaseServerController;
 import cn.keepbx.jpom.common.forward.NodeForward;
 import cn.keepbx.jpom.common.forward.NodeUrl;
 import cn.keepbx.jpom.model.RunMode;
+import cn.keepbx.jpom.model.data.AgentWhitelist;
 import cn.keepbx.jpom.model.data.UserModel;
 import cn.keepbx.jpom.model.data.UserOperateLogV1;
 import cn.keepbx.jpom.service.manage.ProjectInfoService;
@@ -55,13 +56,9 @@ public class EditProjectController extends BaseServerController {
 
         if (projectInfo != null && jsonArray != null) {
             for (Object obj : jsonArray) {
-                String path = obj.toString();
-                String lib = projectInfo.getString("lib");
-                if (lib.startsWith(path)) {
-                    String itemWhitelistDirectory = lib.substring(0, path.length());
-                    lib = lib.substring(path.length());
+                String itemWhitelistDirectory = AgentWhitelist.getItemWhitelistDirectory(projectInfo, obj.toString());
+                if (itemWhitelistDirectory != null) {
                     setAttribute("itemWhitelistDirectory", itemWhitelistDirectory);
-                    projectInfo.put("lib", lib);
                     break;
                 }
             }

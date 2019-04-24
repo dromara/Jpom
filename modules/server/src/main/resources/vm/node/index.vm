@@ -72,6 +72,10 @@
                         <a href="javascript:;"
                            data-options="{'id':'manage', 'title':'项目管理', 'url':'./manage/projectInfo'}">项目管理</a>
                     </li>
+##                    <li class="layui-nav-item">
+##                        <a href="javascript:;"
+##                           data-options="{'id':'downtime', 'title':'宕机计划', 'url':'./manage/projectInfo'}">宕机计划</a>
+##                    </li>
                     #if($user.isManage($node.id))
                         <li class="layui-nav-item">
                             <a href="javascript:;"

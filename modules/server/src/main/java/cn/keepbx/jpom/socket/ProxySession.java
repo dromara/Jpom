@@ -25,7 +25,6 @@ import java.util.Objects;
 public class ProxySession extends WebSocketClient {
     private WebSocketSession session;
     private OperateLogController logController;
-    ;
 
     private ProxySession(URI uri, WebSocketSession session) {
         super(uri);

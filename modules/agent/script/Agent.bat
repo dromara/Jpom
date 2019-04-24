@@ -48,11 +48,11 @@ echo.
 
 echo.请输入选择的序号:
 set /p ID=
-	IF "%id%"=="1" goto start
-	IF "%id%"=="2" goto stop
-	IF "%id%"=="3" goto status
-	IF "%id%"=="4" goto restart
-	IF "%id%"=="5" goto use
+	IF "%id%"=="1" call:start
+	IF "%id%"=="2" call:stop
+	IF "%id%"=="3" call:status
+	IF "%id%"=="4" call:restart
+	IF "%id%"=="5" call:use
 	IF "%id%"=="0" EXIT
 PAUSE
 echo 即将关闭窗口
@@ -113,7 +113,7 @@ goto:eof
 
 @REM 提示用法
 :use
-	echo please use (start|stop|restart|status)
+	echo please use (start、stop、restart、status)
 goto:eof
 
 

@@ -31,6 +31,11 @@ public class DbConfig {
         return dbConfig;
     }
 
+    /**
+     * 获取数据库的jdbc 连接
+     *
+     * @return jdbc
+     */
     public String getDbUrl() {
         File file = FileUtil.file(ExtConfigBean.getInstance().getAbsolutePath(), DB, BaseJpomApplication.getAppType().name());
         String path = FileUtil.getAbsolutePath(file);

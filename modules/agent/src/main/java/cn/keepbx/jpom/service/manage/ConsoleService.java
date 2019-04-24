@@ -15,11 +15,8 @@ import javax.annotation.Resource;
  */
 @Service
 public class ConsoleService {
-
-
     @Resource
     private ProjectInfoService projectInfoService;
-
 
     /**
      * 执行shell命令
@@ -53,14 +50,12 @@ public class ConsoleService {
         }
         //  通知日志刷新
         if (commandOp == CommandOp.start || commandOp == CommandOp.restart) {
-            if (projectInfoModel != null) {
-                // 修改 run lib 使用情况
-                ProjectInfoModel modify = projectInfoService.getItem(projectInfoModel.getId());
-                modify.setRunLibDesc(projectInfoModel.getUseLibDesc());
-                try {
-                    projectInfoService.updateItem(modify);
-                } catch (Exception ignored) {
-                }
+            // 修改 run lib 使用情况
+            ProjectInfoModel modify = projectInfoService.getItem(projectInfoModel.getId());
+            modify.setRunLibDesc(projectInfoModel.getUseLibDesc());
+            try {
+                projectInfoService.updateItem(modify);
+            } catch (Exception ignored) {
             }
         }
         return result;

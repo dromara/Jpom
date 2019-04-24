@@ -63,24 +63,24 @@ public class UserOptLogController extends BaseServerController {
         int page1 = getParameterInt("page", 1);
         Page page = new Page(page1, limit);
         Entity entity = Entity.create(UserOperateLogV1.TABLE_NAME);
-        page.addOrder(new Order("optTime", Direction.DESC));
+        page.addOrder(new Order("optTime".toUpperCase(), Direction.DESC));
         // 时间
         if (StrUtil.isNotEmpty(time)) {
             String[] val = StrUtil.split(time, "~");
             if (val.length == 2) {
                 DateTime startDateTime = DateUtil.parse(val[0], DatePattern.NORM_DATETIME_FORMAT);
-                entity.set("optTime", ">= " + startDateTime.getTime());
+                entity.set("optTime".toUpperCase(), ">= " + startDateTime.getTime());
 
                 DateTime endDateTime = DateUtil.parse(val[1], DatePattern.NORM_DATETIME_FORMAT);
                 if (startDateTime.equals(endDateTime)) {
                     endDateTime = DateUtil.endOfDay(endDateTime);
                 }
-                entity.set("optTime ", "<= " + endDateTime.getTime());
+                entity.set("optTime ".toUpperCase(), "<= " + endDateTime.getTime());
             }
         }
         String selectNode = getParameter("selectNode");
         if (StrUtil.isNotEmpty(selectNode)) {
-            entity.set("nodeId ", selectNode);
+            entity.set("nodeId".toUpperCase(), selectNode);
         }
 
         PageResult<Entity> pageResult = Db.use().page(entity, page);

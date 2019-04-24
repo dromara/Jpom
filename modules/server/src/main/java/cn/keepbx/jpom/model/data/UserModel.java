@@ -369,6 +369,10 @@ public class UserModel extends BaseModel {
          * 删除文件权限
          */
         private boolean deleteFile;
+        /**
+         * 授权的项目集
+         */
+        private JSONArray projects;
 
         public void setManage(boolean manage) {
             this.manage = manage;
@@ -416,13 +420,7 @@ public class UserModel extends BaseModel {
         public boolean isManage() {
             return manage;
         }
-
-        /**
-         * 授权的项目集
-         */
-        private JSONArray projects;
-
-
+        
         public JSONArray getProjects() {
             return projects;
         }

@@ -3,6 +3,7 @@ package cn.keepbx.jpom.service.system;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.lang.Console;
 import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.keepbx.jpom.common.BaseOperService;
@@ -85,8 +86,8 @@ public class NginxService extends BaseOperService {
 
     public String paresName(String whitePath, String itemAbsPath) {
         File file = new File(whitePath);
-        whitePath = file.getAbsolutePath();
-        String path = itemAbsPath.substring(itemAbsPath.indexOf(whitePath) + whitePath.length());
+        String newWhitePath = file.getAbsolutePath();
+        String path = itemAbsPath.substring(itemAbsPath.indexOf(newWhitePath) + newWhitePath.length());
         path = FileUtil.normalize(path);
         if (path.startsWith(StrUtil.SLASH)) {
             path = path.substring(1);
@@ -96,7 +97,7 @@ public class NginxService extends BaseOperService {
 
     @Override
     public void addItem(Object o) {
-
+        Console.error(o);
     }
 
     @Override
