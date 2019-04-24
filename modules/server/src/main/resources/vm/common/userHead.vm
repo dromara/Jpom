@@ -83,7 +83,7 @@
                     value: "$user.name"
                 }, function (val, index) {
                     loadingAjax({
-                        url: './user/updateName',
+                        url: '#if($node).#end./user/updateName',
                         data: {
                             name: val
                         },
@@ -102,7 +102,7 @@
                 layer.confirm('确定退出系统？', {
                     'title': '系统提示'
                 }, function (index) {
-                    window.location.href = "./logout";
+                    window.location.href = "#if($node).#end./logout";
                     layer.close(index);
                 })
             }
@@ -137,7 +137,7 @@
             sendData = formatPwd(data.field, "newPwd");
             sendData = formatPwd(data.field, "confirmPwd")
             loadingAjax({
-                url: './user/updatePwd',
+                url: '#if($node).#end./user/updatePwd',
                 data: data.field,
                 success: function (data) {
                     layer.msg(data.msg);
