@@ -19,6 +19,7 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryMXBean;
+import java.lang.management.ThreadMXBean;
 import java.net.URISyntaxException;
 import java.util.*;
 
@@ -65,6 +66,24 @@ public class JvmUtil {
         JMXConnector jmxConnector = JMXConnectorFactory.connect(jmxServiceURL, null);
         MBeanServerConnection mBeanServerConnection = jmxConnector.getMBeanServerConnection();
         return ManagementFactory.newPlatformMXBeanProxy(mBeanServerConnection, ManagementFactory.OPERATING_SYSTEM_MXBEAN_NAME, OperatingSystemMXBean.class);
+    }
+
+    /**
+     * 获取指定程序的线程信息
+     *
+     * @param virtualMachine VirtualMachine
+     * @return 没有运行或者获取数据
+     * @throws Exception 异常
+     * @see ThreadMXBean
+     */
+    public static ThreadMXBean getThreadMXBean(VirtualMachine virtualMachine) throws Exception {
+        JMXServiceURL jmxServiceURL = getJMXServiceURL(virtualMachine);
+        if (jmxServiceURL == null) {
+            return null;
+        }
+        JMXConnector jmxConnector = JMXConnectorFactory.connect(jmxServiceURL, null);
+        MBeanServerConnection mBeanServerConnection = jmxConnector.getMBeanServerConnection();
+        return ManagementFactory.newPlatformMXBeanProxy(mBeanServerConnection, ManagementFactory.THREAD_MXBEAN_NAME, ThreadMXBean.class);
     }
 
     /**

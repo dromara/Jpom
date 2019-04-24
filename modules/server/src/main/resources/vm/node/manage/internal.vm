@@ -102,6 +102,46 @@
     </div>
     #end
 
+    #if($data.threadInfos)
+    <div class="info">
+        <label> 线程列表</label>
+        <table class="layui-table" style="margin-top: 10px">
+            <thead>
+            <tr>
+                <th>线程id</th>
+                <th>线程名称</th>
+                <th>线程状态</th>
+                <th>唤醒次数</th>
+                <th>运行总时间(毫秒)</th>
+                <th>阻塞次数</th>
+                <th>阻塞总时间(毫秒)</th>
+                <th>本地线程</th>
+                <th>是否挂起</th>
+            </tr>
+            </thead>
+            <tbody>
+                #foreach($item in $data.threadInfos)
+                <tr>
+                    <td>$item.id</td>
+                    <td>$item.name</td>
+                    <td>$item.status</td>
+                    <td>$item.blockedCount</td>
+                    <td>$item.blockedTime</td>
+                    <td>$item.waitedCount</td>
+                    <td>$item.waitedTime</td>
+                    <td>#if($item.isInNative)
+                        是 #else 否
+                    #end</td>
+                    <td>#if($item.isSuspended)
+                        是 #else 否
+                    #end</td>
+                </tr>
+                #end
+            </tbody>
+        </table>
+    </div>
+    #end
+
 <div class="info">
     <label>端口信息</label>
     <table class="layui-table" style="margin-top: 10px">
