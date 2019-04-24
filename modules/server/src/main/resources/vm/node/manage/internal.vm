@@ -152,6 +152,9 @@
 <script type="text/html" id="tem_isSuspended">
     {{# if(d.isSuspended){ }} 是 {{# }else{ }} 否 {{# } }}
 </script>
+<script type="text/html" id="tem_status">
+    <span title="{{ checkStatus(d.status) }}">{{ d.status }}</span>
+</script>
 
 <script type="text/javascript">
     function loadSuccess() {
@@ -178,7 +181,7 @@
                 cols: [[
                     {field: 'id', title: '线程id', sort: true},
                     {field: 'name', title: '线程名称', sort: true},
-                    {field: 'status', title: '线程状态', sort: true},
+                    {field: 'status', title: '线程状态', templet: "#tem_status", sort: true},
                     {field: 'blockedCount', title: '唤醒次数', sort: true},
                     {field: 'blockedTime', title: '运行总时间(毫秒)', sort: true},
                     {field: 'waitedCount', title: '阻塞次数', sort: true},
@@ -197,6 +200,24 @@
                 }
             });
         }
+    }
+
+    function checkStatus(desc) {
+        var data = "运行";
+        if ("NEW" == desc) {
+            data = "未启动";
+        } else if ("RUNNABLE" == desc) {
+            data = "运行中";
+        } else if ("BLOCKED" == desc) {
+            data = "阻塞中";
+        } else if ("WAITING" == desc) {
+            data = "等待中";
+        } else if ("TIMED_WAITING" == desc) {
+            data = "指定时间等待";
+        } else if ("TERMINATED" == desc) {
+            data = "已终止";
+        }
+        return data;
     }
 </script>
 </html>
