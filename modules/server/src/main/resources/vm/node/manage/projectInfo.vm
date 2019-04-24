@@ -185,12 +185,11 @@
                     layer.msg('请先运行程序！');
                     return;
                 }
-                layerOpen({
-                    type: 2,
-                    title: '内存',
-                    shade: 0.8,
-                    area: ['80%', '80%'],
-                    content: 'internal?tag=' + data.id
+                var url = "/node/manage/internal?tag=" + data.id;
+                tabChange({
+                    id: "ram_" + data.id,
+                    url: url,
+                    title: data.id + ' - 监控',
                 });
             }
         });

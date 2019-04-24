@@ -12,6 +12,7 @@ import cn.keepbx.jpom.model.system.ProcessModel;
 import cn.keepbx.jpom.system.AgentConfigBean;
 import cn.keepbx.jpom.util.CommandUtil;
 import cn.keepbx.jpom.util.JvmUtil;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.sun.tools.attach.VirtualMachine;
 import org.springframework.http.MediaType;
@@ -24,6 +25,8 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.lang.management.MemoryMXBean;
 import java.lang.management.MemoryUsage;
+import java.lang.management.ThreadInfo;
+import java.lang.management.ThreadMXBean;
 import java.math.BigDecimal;
 import java.util.List;
 
@@ -54,6 +57,45 @@ public class InternalController extends BaseAgentController {
         List<NetstatModel> netstatModels = AbstractProjectCommander.getInstance().listNetstat(pid);
         jsonObject.put("netstat", netstatModels);
         return JsonMessage.getString(200, "", jsonObject);
+    }
+
+    /**
+     * 查询监控线程列表
+     */
+    @RequestMapping(value = "threadInfos", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    public String getThreadInfos(String tag) throws Exception {
+        int limit = getParameterInt("limit", 10);
+        int page = getParameterInt("page", 1);
+        VirtualMachine virtualMachine = JvmUtil.getVirtualMachine(tag);
+        ThreadMXBean threadMXBean = JvmUtil.getThreadMXBean(virtualMachine);
+        if (threadMXBean == null) {
+            return JsonMessage.getString(200, "");
+        }
+        ThreadInfo[] threadInfos = threadMXBean.dumpAllThreads(false, false);
+        if (threadInfos == null || threadInfos.length <= 0) {
+            return JsonMessage.getString(200, "");
+        }
+        JSONArray array = new JSONArray();
+        int index = (page - 1) * limit;
+        for (int i = index; i < limit + index; i++) {
+            ThreadInfo threadInfo = threadInfos[i];
+            Thread.State threadState = threadInfo.getThreadState();
+            JSONObject object = new JSONObject();
+            object.put("id", threadInfo.getThreadId());
+            object.put("name", threadInfo.getThreadName());
+            object.put("status", threadState);
+            object.put("waitedCount", threadInfo.getWaitedCount());
+            object.put("waitedTime", threadInfo.getWaitedTime());
+            object.put("blockedCount", threadInfo.getBlockedCount());
+            object.put("blockedTime", threadInfo.getBlockedTime());
+            object.put("isInNative", threadInfo.isInNative());
+            object.put("isSuspended", threadInfo.isSuspended());
+            array.add(object);
+        }
+        JSONObject object = new JSONObject();
+        object.put("count", threadInfos.length);
+        object.put("data", array);
+        return JsonMessage.getString(200, "", object);
     }
 
     /**

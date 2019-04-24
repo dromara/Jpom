@@ -33,6 +33,15 @@ public class InternalController extends BaseServerController {
     }
 
     /**
+     * 查询监控线程列表
+     */
+    @RequestMapping(value = "threadInfos", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @ResponseBody
+    public String threadInfos() {
+        return NodeForward.request(getNode(), getRequest(), NodeUrl.Manage_internal_threadInfos).toString();
+    }
+
+    /**
      * 导出堆栈信息
      */
     @RequestMapping(value = "stack", method = RequestMethod.GET)
