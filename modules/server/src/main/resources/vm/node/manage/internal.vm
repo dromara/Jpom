@@ -17,8 +17,8 @@
             height: 80px;
         }
 
-        .layui-border-box {
-            height: 79px !important;
+        .layui-table-box {
+            height: 100%;
         }
     </style>
 </head>
@@ -27,6 +27,7 @@
 <div>
     <button op="a" class="layui-btn  layui-btn-sm layui-btn-normal" href="./stack?tag=$!tag">导出堆栈信息</button>
     <button op="a" class="layui-btn  layui-btn-sm layui-btn-normal" href="./ram?tag=$!tag">导出内存信息</button>
+    <button class="layui-btn  layui-btn-sm layui-btn-normal" id="threadInfos">查看线程</button>
 </div>
 <div class="info">
     <label>系统内存</label>
@@ -102,46 +103,6 @@
     </div>
     #end
 
-    #if($data.threadInfos)
-    <div class="info">
-        <label> 线程列表</label>
-        <table class="layui-table" style="margin-top: 10px">
-            <thead>
-            <tr>
-                <th>线程id</th>
-                <th>线程名称</th>
-                <th>线程状态</th>
-                <th>唤醒次数</th>
-                <th>运行总时间(毫秒)</th>
-                <th>阻塞次数</th>
-                <th>阻塞总时间(毫秒)</th>
-                <th>本地线程</th>
-                <th>是否挂起</th>
-            </tr>
-            </thead>
-            <tbody>
-                #foreach($item in $data.threadInfos)
-                <tr>
-                    <td>$item.id</td>
-                    <td>$item.name</td>
-                    <td>$item.status</td>
-                    <td>$item.blockedCount</td>
-                    <td>$item.blockedTime</td>
-                    <td>$item.waitedCount</td>
-                    <td>$item.waitedTime</td>
-                    <td>#if($item.isInNative)
-                        是 #else 否
-                    #end</td>
-                    <td>#if($item.isSuspended)
-                        是 #else 否
-                    #end</td>
-                </tr>
-                #end
-            </tbody>
-        </table>
-    </div>
-    #end
-
 <div class="info">
     <label>端口信息</label>
     <table class="layui-table" style="margin-top: 10px">
@@ -180,8 +141,62 @@
     </table>
 </div>
 
-</body>
-<script type="text/javascript">
+<div id="div_thread" style="padding:10px;display: none;">
+    <table class="layui-table" id="tab_threadInfos" lay-filter="tab_threadInfos" style="margin: 0;"></table>
+</div>
 
+</body>
+<script type="text/html" id="tem_isInNative">
+    {{# if(d.isInNative){ }} 是 {{# }else{ }} 否 {{# } }}
+</script>
+<script type="text/html" id="tem_isSuspended">
+    {{# if(d.isSuspended){ }} 是 {{# }else{ }} 否 {{# } }}
+</script>
+
+<script type="text/javascript">
+    function loadSuccess() {
+
+        $("#threadInfos").on("click", function () {
+            layerOpen({
+                type: 1,
+                title: '查看进程',
+                content: $('#div_thread'),
+                shade: 0.8,
+                area: ['80%', '90%'],
+                success: function (layero, index) {
+                    loadThread();
+                }
+            });
+        })
+
+        //加载进程列表
+        function loadThread() {
+            tableRender({
+                id: 'tab_threadInfos',
+                elem: '#tab_threadInfos',
+                url: './threadInfos?tag=$!tag',
+                cols: [[
+                    {field: 'id', title: '线程id', sort: true},
+                    {field: 'name', title: '线程名称', sort: true},
+                    {field: 'status', title: '线程状态', sort: true},
+                    {field: 'blockedCount', title: '唤醒次数', sort: true},
+                    {field: 'blockedTime', title: '运行总时间(毫秒)', sort: true},
+                    {field: 'waitedCount', title: '阻塞次数', sort: true},
+                    {field: 'waitedTime', title: '阻塞总时间(毫秒)', sort: true},
+                    {field: 'isInNative', title: '本地线程', templet: "#tem_isInNative", sort: true},
+                    {field: 'isSuspended', title: '是否挂起', templet: "#tem_isSuspended", sort: true}
+                ]],
+                page: true,
+                parseData: function (res) { //res 即为原始返回的数据
+                    return {
+                        "code": res.code, //解析接口状态
+                        "msg": res.msg, //解析提示文本
+                        "count": res.data.count, //解析数据长度
+                        "data": res.data.data //解析数据列表
+                    };
+                }
+            });
+        }
+    }
 </script>
 </html>

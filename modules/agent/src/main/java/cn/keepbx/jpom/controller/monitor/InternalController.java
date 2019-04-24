@@ -23,7 +23,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
-import java.io.IOException;
 import java.lang.management.MemoryMXBean;
 import java.lang.management.MemoryUsage;
 import java.lang.management.ThreadInfo;
@@ -57,32 +56,29 @@ public class InternalController extends BaseAgentController {
         //获取端口信息
         List<NetstatModel> netstatModels = AbstractProjectCommander.getInstance().listNetstat(pid);
         jsonObject.put("netstat", netstatModels);
-        JSONArray threadInfos = getThreadInfos(tag);
-        //获取jvm中的活动线程
-        jsonObject.put("threadInfos", threadInfos);
         return JsonMessage.getString(200, "", jsonObject);
     }
 
     /**
-     * 获取jvm中的活动线程
-     *
-     * @param tag tag
-     * @return 活动线程
-     * @throws Exception Exception
+     * 查询监控线程列表
      */
-    private JSONArray getThreadInfos(String tag) throws Exception {
+    @RequestMapping(value = "threadInfos", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    public String getThreadInfos(String tag) throws Exception {
+        int limit = getParameterInt("limit", 10);
+        int page = getParameterInt("page", 1);
         VirtualMachine virtualMachine = JvmUtil.getVirtualMachine(tag);
         ThreadMXBean threadMXBean = JvmUtil.getThreadMXBean(virtualMachine);
         if (threadMXBean == null) {
-            return null;
+            return JsonMessage.getString(200, "");
         }
         ThreadInfo[] threadInfos = threadMXBean.dumpAllThreads(false, false);
         if (threadInfos == null || threadInfos.length <= 0) {
-            return null;
+            return JsonMessage.getString(200, "");
         }
         JSONArray array = new JSONArray();
-        JSONArray waitArray = new JSONArray();
-        for (ThreadInfo threadInfo : threadInfos) {
+        int index = (page - 1) * limit;
+        for (int i = index; i < limit + index; i++) {
+            ThreadInfo threadInfo = threadInfos[i];
             Thread.State threadState = threadInfo.getThreadState();
             JSONObject object = new JSONObject();
             object.put("id", threadInfo.getThreadId());
@@ -94,21 +90,12 @@ public class InternalController extends BaseAgentController {
             object.put("blockedTime", threadInfo.getBlockedTime());
             object.put("isInNative", threadInfo.isInNative());
             object.put("isSuspended", threadInfo.isSuspended());
-            if (threadState == Thread.State.RUNNABLE || threadState == Thread.State.NEW) {
-                array.add(object);
-                if (array.size() == 10) {
-                    return array;
-                }
-            } else if (threadState == Thread.State.WAITING) {
-                waitArray.add(object);
-            }
+            array.add(object);
         }
-        int size = array.size();
-        if (size < 10) {
-            List<Object> objects = waitArray.subList(0, 10 - size);
-            array.addAll(objects);
-        }
-        return array;
+        JSONObject object = new JSONObject();
+        object.put("count", threadInfos.length);
+        object.put("data", array);
+        return JsonMessage.getString(200, "", object);
     }
 
     /**

@@ -82,6 +82,7 @@ public enum NodeUrl {
     Manage_internal_data("/manage/internal_data"),
     Manage_internal_stack("/manage/internal_stack"),
     Manage_internal_ram("/manage/internal_ram"),
+    Manage_internal_threadInfos("/manage/threadInfos"),
 
     System_Nginx_list_data("/system/nginx/list_data.json"),
 
