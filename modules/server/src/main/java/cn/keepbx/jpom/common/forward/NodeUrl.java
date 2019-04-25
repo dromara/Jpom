@@ -104,6 +104,9 @@ public enum NodeUrl {
     Script_List("/script/list.json"),
     Script_Item("/script/item.json"),
     Script_Save("/script/save.json"),
+    Script_Upload("/script/upload.json"),
+
+
     ;
     /**
      * 相对请求地址

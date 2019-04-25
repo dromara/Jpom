@@ -2,6 +2,7 @@ package cn.keepbx.jpom.socket;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.io.IORuntimeException;
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.io.LineHandler;
 import cn.hutool.core.thread.ThreadUtil;
@@ -33,6 +34,8 @@ public class ScriptProcessBuilder implements Runnable {
     private File logFile;
     private File scriptFile;
     private Process process;
+    private InputStream inputStream;
+    private InputStream errorInputStream;
 
     private ScriptProcessBuilder(ScriptModel scriptModel, String args) {
         this.logFile = scriptModel.getLogFile(true);
@@ -89,13 +92,13 @@ public class ScriptProcessBuilder implements Runnable {
         try {
             process = processBuilder.start();
             {
-                InputStream inputStream = process.getInputStream();
+                inputStream = process.getInputStream();
                 InputStreamReader inputStreamReader = new InputStreamReader(inputStream, BaseJpomApplication.getCharset());
                 BufferedReader results = new BufferedReader(inputStreamReader);
                 IoUtil.readLines(results, (LineHandler) ScriptProcessBuilder.this::handle);
             }
             {
-                InputStream errorInputStream = process.getErrorStream();
+                errorInputStream = process.getErrorStream();
                 InputStreamReader inputStreamReader = new InputStreamReader(errorInputStream, BaseJpomApplication.getCharset());
                 BufferedReader results = new BufferedReader(inputStreamReader);
                 IoUtil.readLines(results, (LineHandler) line -> ScriptProcessBuilder.this.handle("ERROR:" + line));
@@ -104,15 +107,25 @@ public class ScriptProcessBuilder implements Runnable {
             JSONObject jsonObject = jsonMessage.toJson();
             jsonObject.put("op", ConsoleCommandOp.stop.name());
             this.end(jsonObject.toString());
+        } catch (IORuntimeException ignored) {
+
         } catch (Exception e) {
             DefaultSystemLog.ERROR().error("执行异常", e);
             this.end("执行异常：" + e.getMessage());
         }
     }
 
+    /**
+     * 结束执行
+     *
+     * @param msg 响应的消息
+     */
     private void end(String msg) {
         if (this.process != null) {
+            // windows 中不能正常关闭
             this.process.destroy();
+            IoUtil.close(inputStream);
+            IoUtil.close(errorInputStream);
         }
         Iterator<Session> iterator = sessions.iterator();
         while (iterator.hasNext()) {
@@ -127,6 +140,11 @@ public class ScriptProcessBuilder implements Runnable {
         FILE_SCRIPT_PROCESS_BUILDER_CONCURRENT_HASH_MAP.remove(this.scriptFile);
     }
 
+    /**
+     * 响应
+     *
+     * @param line 信息
+     */
     private void handle(String line) {
         // 写入文件
         List<String> fileLine = new ArrayList<>();

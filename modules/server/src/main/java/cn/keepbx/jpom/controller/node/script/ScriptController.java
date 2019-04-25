@@ -46,11 +46,28 @@ public class ScriptController extends BaseServerController {
         return "node/script/edit";
     }
 
+    /**
+     * 保存脚本
+     *
+     * @return json
+     */
     @RequestMapping(value = "save.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
-    @UrlPermission(value = Role.NodeManage, optType = UserOperateLogV1.OptType.Save_Script)
+    @UrlPermission(value = Role.System, optType = UserOperateLogV1.OptType.Save_Script)
     public String save() {
         return NodeForward.request(getNode(), getRequest(), NodeUrl.Script_Save).toString();
+    }
+
+    /**
+     * 导入脚本
+     *
+     * @return json
+     */
+    @RequestMapping(value = "upload", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @ResponseBody
+    @UrlPermission(value = Role.System, optType = UserOperateLogV1.OptType.Save_Upload)
+    public String upload() {
+        return NodeForward.requestMultipart(getNode(), getMultiRequest(), NodeUrl.Script_Upload).toString();
     }
 
     @RequestMapping(value = "console.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)

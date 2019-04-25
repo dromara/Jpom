@@ -13,10 +13,12 @@
 
 <body>
 <div class="layui-row">
+    <button onclick="location.reload();" class="layui-btn layui-btn-sm">刷新表格</button>
     #if($user.isSystemUser())
         <button onclick="editItem('');" class="layui-btn layui-btn-sm">添加模板</button>
+        <button id="import" class="layui-btn layui-btn-sm">导入模板</button>
     #end
-    <button onclick="location.reload();" class="layui-btn layui-btn-sm">刷新表格</button>
+
 </div>
 <div class="layui-form">
     <table class="layui-table">
@@ -37,12 +39,13 @@
                 <td>$item.modifyTime</td>
                 <td>$item.lastRunUser</td>
                 <td>
-                    #if($user.isSystemUser())
-                        <button onclick="editItem('$item.id')" class="layui-btn layui-btn-danger layui-btn-sm">修改
-                        </button>
-                    #end
                     <button onclick="runScript('$item.id')" class="layui-btn layui-btn-warm layui-btn-sm">执行
                     </button>
+
+                    <button onclick="editItem('$item.id')" class="layui-btn layui-btn-sm">#if($user.isSystemUser())
+                        修改#else 预览#end
+                    </button>
+
                 </td>
             </tr>
             #end
@@ -57,7 +60,30 @@
 </body>
 <script type="text/javascript">
     function loadSuccess() {
-
+        uploadRender({
+            elem: '#import',
+            accept: 'file',
+            data: {},
+            multiple: false,
+            exts: 'bat|sh',
+            acceptMime: '.bat,.sh',
+            url: './upload',
+            before: function () {
+                layer.load(1, {
+                    shade: [0.5, '#fff']
+                });
+            },
+            done: function (res, index, upload) {
+                layer.msg(res.msg);
+                setTimeout(function () {
+                    location.reload();
+                }, 2000);
+            },
+            error: function () {
+                layer.closeAll();
+                layer.msg('上传失败');
+            }
+        });
     }
 
     function editItem(id) {

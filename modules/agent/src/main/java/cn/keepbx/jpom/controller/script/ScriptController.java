@@ -1,10 +1,14 @@
 package cn.keepbx.jpom.controller.script;
 
+import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.JsonMessage;
+import cn.jiangzeyin.controller.multipart.MultipartFileBuilder;
 import cn.keepbx.jpom.common.BaseAgentController;
 import cn.keepbx.jpom.model.data.ScriptModel;
 import cn.keepbx.jpom.service.script.ScriptServer;
+import cn.keepbx.jpom.system.AgentConfigBean;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -63,7 +67,9 @@ public class ScriptController extends BaseAgentController {
         if (eModel == null) {
             return JsonMessage.getString(405, "对应数据不存在");
         }
-        boolean b = scriptServer.updateItem(scriptModel);
+        eModel.setName(scriptModel.getName());
+        eModel.setContext(scriptModel.getContext());
+        boolean b = scriptServer.updateItem(eModel);
         if (b) {
             return JsonMessage.getString(200, "修改成功");
         }
@@ -74,5 +80,34 @@ public class ScriptController extends BaseAgentController {
     public String del(String id) throws IOException {
         scriptServer.deleteItem(id);
         return JsonMessage.getString(200, "删除成功");
+    }
+
+    @RequestMapping(value = "upload.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    public String upload() throws IOException {
+        MultipartFileBuilder multipartFileBuilder = createMultipart()
+                .addFieldName("file").setFileExt("bat", "sh");
+        multipartFileBuilder.setSavePath(AgentConfigBean.getInstance().getTempPathName());
+        multipartFileBuilder.setUseOriginalFilename(true);
+        String path = multipartFileBuilder.save();
+        File file = FileUtil.file(path);
+        String context = FileUtil.readString(path, CharsetUtil.CHARSET_UTF_8);
+        if (StrUtil.isEmpty(context)) {
+            return JsonMessage.getString(405, "脚本内容为空");
+        }
+        String id = file.getName();
+        ScriptModel eModel = scriptServer.getItem(id);
+        if (eModel != null) {
+            return JsonMessage.getString(405, "对应脚本模板已经存在啦");
+        }
+        eModel = new ScriptModel();
+        eModel.setId(id);
+        eModel.setName(id);
+        eModel.setContext(context);
+        file = eModel.getFile(true);
+        if (file.exists() || file.isDirectory()) {
+            return JsonMessage.getString(405, "当地id路径文件已经存在来，请修改");
+        }
+        scriptServer.addItem(eModel);
+        return JsonMessage.getString(200, "导入成功");
     }
 }

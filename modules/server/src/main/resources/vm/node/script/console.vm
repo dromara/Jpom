@@ -78,8 +78,6 @@
 </div>
 </body>
 <script type="text/javascript">
-    var loopLog = false;
-    var loopLogTime;
     var heart;
     var scriptId = getQueryString("id");
 
@@ -91,7 +89,6 @@
             const ws = new WebSocket(url);
             ws.onopen = function () {
                 showLogDom.append('WebSocket连接成功！<br/>');
-                // setMsg('start');
             };
 
             ws.onmessage = function (data) {
@@ -138,9 +135,6 @@
                     if (data.data) {
                         showLogDom.append(data.data + '<br/>');
                     }
-                    if (!loopLog) {
-                        loopLogAjax();
-                    }
                     clearInterval(heart);
                     // 创建心跳，防止掉线
                     heart = setInterval(function () {
@@ -156,7 +150,6 @@
 
             ws.onclose = function (er) {
                 showLogDom.append('WebSocket连接已关闭！<br/>');
-                clearInterval(loopLogTime);
                 clearInterval(heart);
                 $("#optDiv").hide();
                 layer.alert("控制台已离线")
