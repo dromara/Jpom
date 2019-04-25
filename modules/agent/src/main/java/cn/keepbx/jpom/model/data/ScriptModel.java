@@ -96,7 +96,10 @@ public class ScriptModel extends BaseModel {
     public void saveFile() {
         File file = getFile(true);
         FileUtil.writeString(getContext(), file, CharsetUtil.CHARSET_UTF_8);
-        CommandUtil.execCommand("chmod 755 " + FileUtil.getAbsolutePath(file));
+        // 添加权限
+        if (BaseJpomApplication.OS_INFO.isLinux()) {
+            CommandUtil.execCommand("chmod 755 " + FileUtil.getAbsolutePath(file));
+        }
     }
 
     /**

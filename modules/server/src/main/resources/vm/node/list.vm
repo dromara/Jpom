@@ -61,6 +61,7 @@
     var config = {
         cols: [[
             {field: 'osName', title: '系统名', width: "10%"},
+            {field: 'javaVersion', title: 'Java版本', width: "10%"},
             {field: 'jpomVersion', title: 'Jpom版本', width: "10%"},
             {field: 'count', title: '项目个数', width: "10%"},
             {field: 'runCount', title: '运行中个数', width: "10%"},

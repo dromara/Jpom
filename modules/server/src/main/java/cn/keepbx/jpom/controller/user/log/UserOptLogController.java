@@ -15,8 +15,10 @@ import cn.hutool.db.sql.Order;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.keepbx.jpom.common.BaseServerController;
 import cn.keepbx.jpom.model.data.NodeModel;
+import cn.keepbx.jpom.model.data.UserModel;
 import cn.keepbx.jpom.model.data.UserOperateLogV1;
 import cn.keepbx.jpom.service.node.NodeService;
+import cn.keepbx.jpom.service.user.UserService;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.http.MediaType;
@@ -40,6 +42,8 @@ import java.util.List;
 public class UserOptLogController extends BaseServerController {
     @Resource
     private NodeService nodeService;
+    @Resource
+    private UserService userService;
 
     /**
      * 展示用户列表
@@ -49,6 +53,9 @@ public class UserOptLogController extends BaseServerController {
         // 所有节点
         List<NodeModel> nodeModels = nodeService.list();
         setAttribute("nodeArray", nodeModels);
+        // 用户
+        List<UserModel> userModels = userService.list();
+        setAttribute("userArray", userModels);
         return "user/log/list";
     }
 
@@ -81,6 +88,11 @@ public class UserOptLogController extends BaseServerController {
         String selectNode = getParameter("selectNode");
         if (StrUtil.isNotEmpty(selectNode)) {
             entity.set("nodeId".toUpperCase(), selectNode);
+        }
+
+        String selectUser = getParameter("selectUser");
+        if (StrUtil.isNotEmpty(selectUser)) {
+            entity.set("userId".toUpperCase(), selectUser);
         }
 
         PageResult<Entity> pageResult = Db.use().page(entity, page);

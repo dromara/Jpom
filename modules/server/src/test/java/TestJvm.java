@@ -1,3 +1,4 @@
+import cn.hutool.system.SystemUtil;
 import com.sun.tools.attach.AttachNotSupportedException;
 import sun.jvmstat.monitor.*;
 
@@ -21,7 +22,7 @@ public class TestJvm {
 //            Properties properties = virtualMachine.getAgentProperties();
 //            System.out.println(properties);
 //        }
-
+        System.out.println(SystemUtil.getJavaRuntimeInfo().getVersion());
 
         // 获取监控主机
         MonitoredHost local = MonitoredHost.getMonitoredHost("localhost");
