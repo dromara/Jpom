@@ -68,7 +68,7 @@ public class ScriptServer extends BaseOperService<ScriptModel> {
     public void deleteItem(String id) {
         ScriptModel scriptModel = getItem(id);
         if (scriptModel != null) {
-            FileUtil.del(scriptModel.getFile(true));
+            FileUtil.del(scriptModel.getFile(true).getParentFile());
         }
         deleteJson(AgentConfigBean.SCRIPT, id);
     }

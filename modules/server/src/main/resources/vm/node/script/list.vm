@@ -49,7 +49,7 @@
                 </td>
             </tr>
             #end
-            #if(!$array)
+            #if(!$array || $array.size()<=0)
             <tr>
                 <td colspan="5">没有相关信息</td>
             </tr>

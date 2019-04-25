@@ -105,6 +105,7 @@ public enum NodeUrl {
     Script_Item("/script/item.json"),
     Script_Save("/script/save.json"),
     Script_Upload("/script/upload.json"),
+    Script_Del("/script/del.json"),
 
 
     ;

@@ -58,6 +58,13 @@ public class ScriptController extends BaseServerController {
         return NodeForward.request(getNode(), getRequest(), NodeUrl.Script_Save).toString();
     }
 
+    @RequestMapping(value = "del.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @ResponseBody
+    @UrlPermission(value = Role.System, optType = UserOperateLogV1.OptType.Save_Del)
+    public String del() {
+        return NodeForward.request(getNode(), getRequest(), NodeUrl.Script_Del).toString();
+    }
+
     /**
      * 导入脚本
      *
