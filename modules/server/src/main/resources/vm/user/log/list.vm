@@ -74,6 +74,7 @@
                         #foreach($item in $userArray)
                             <option value="$item.id">$item.name</option>
                         #end
+                        <option value="system">系统管理员</option>
                     </select>
                 </div>
             </div>

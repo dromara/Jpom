@@ -4,6 +4,7 @@ import cn.hutool.core.exceptions.ExceptionUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.spring.SpringUtil;
+import cn.keepbx.jpom.BaseJpomApplication;
 import cn.keepbx.jpom.common.commander.AbstractProjectCommander;
 import cn.keepbx.jpom.model.data.ProjectInfoModel;
 import cn.keepbx.jpom.service.manage.ConsoleService;
@@ -35,7 +36,7 @@ public class AgentWebSocketConsoleHandle extends BaseAgentWebSocketHandle {
     public void onOpen(@PathParam("projectId") String projectId, @PathParam("optUser") String urlOptUser, Session session) {
         try {
             // 判断项目
-            if (!CommonSocketConfig.SYSTEM_ID.equals(projectId)) {
+            if (!BaseJpomApplication.SYSTEM_ID.equals(projectId)) {
                 if (projectInfoService == null) {
                     projectInfoService = SpringUtil.getBean(ProjectInfoService.class);
                 }

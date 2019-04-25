@@ -14,7 +14,10 @@ import java.nio.charset.Charset;
  * @date 2019/4/16
  */
 public abstract class BaseJpomApplication {
-
+    /**
+     *
+     */
+    public static final String SYSTEM_ID = "system";
     public static final OsInfo OS_INFO = SystemUtil.getOsInfo();
 
     protected static String[] args;

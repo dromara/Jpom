@@ -4,6 +4,7 @@ import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
+import cn.keepbx.jpom.BaseJpomApplication;
 import cn.keepbx.jpom.common.BaseServerController;
 import cn.keepbx.jpom.common.interceptor.LoginInterceptor;
 import cn.keepbx.jpom.common.interceptor.UrlPermission;
@@ -12,7 +13,6 @@ import cn.keepbx.jpom.model.data.NodeModel;
 import cn.keepbx.jpom.model.data.UserModel;
 import cn.keepbx.jpom.model.data.UserOperateLogV1;
 import cn.keepbx.jpom.service.user.UserService;
-import cn.keepbx.jpom.socket.CommonSocketConfig;
 import cn.keepbx.jpom.system.ServerExtConfigBean;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -135,7 +135,7 @@ public class UserInfoController extends BaseServerController {
     @RequestMapping(value = "addUser", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @UrlPermission(value = Role.ServerManager, optType = UserOperateLogV1.OptType.AddUer)
     public String addUser(String id) {
-        if (CommonSocketConfig.SYSTEM_ID.equalsIgnoreCase(id)) {
+        if (BaseJpomApplication.SYSTEM_ID.equalsIgnoreCase(id)) {
             return JsonMessage.getString(400, "当前登录名已经被系统占用啦");
         }
         UserModel userName = getUser();

@@ -9,13 +9,13 @@ import cn.hutool.core.util.ReUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
+import cn.keepbx.jpom.BaseJpomApplication;
 import cn.keepbx.jpom.common.BaseAgentController;
 import cn.keepbx.jpom.common.commander.AbstractProjectCommander;
 import cn.keepbx.jpom.model.Role;
 import cn.keepbx.jpom.model.RunMode;
 import cn.keepbx.jpom.model.data.ProjectInfoModel;
 import cn.keepbx.jpom.service.WhitelistDirectoryService;
-import cn.keepbx.jpom.socket.CommonSocketConfig;
 import cn.keepbx.jpom.system.ConfigBean;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -55,8 +55,8 @@ public class EditProjectController extends BaseAgentController {
         if (!Validator.isGeneral(id, 2, 20)) {
             return JsonMessage.getString(401, "项目id 长度范围2-20（英文字母 、数字和下划线）");
         }
-        if (CommonSocketConfig.SYSTEM_ID.equals(id)) {
-            return JsonMessage.getString(401, "项目id " + CommonSocketConfig.SYSTEM_ID + " 关键词被系统占用");
+        if (BaseJpomApplication.SYSTEM_ID.equals(id)) {
+            return JsonMessage.getString(401, "项目id " + BaseJpomApplication.SYSTEM_ID + " 关键词被系统占用");
         }
         // 防止和Jpom冲突
         if (StrUtil.isNotEmpty(ConfigBean.getInstance().applicationTag) && ConfigBean.getInstance().applicationTag.equalsIgnoreCase(id)) {
