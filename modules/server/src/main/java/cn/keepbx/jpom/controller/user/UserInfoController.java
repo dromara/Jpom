@@ -122,11 +122,8 @@ public class UserInfoController extends BaseServerController {
         if (userModel.isSystemUser()) {
             return JsonMessage.getString(400, "非法访问:-5");
         }
-        boolean b = userService.deleteUser(id);
-        if (b) {
-            return JsonMessage.getString(200, "删除成功");
-        }
-        return JsonMessage.getString(400, "删除失败");
+        userService.deleteItem(id);
+        return JsonMessage.getString(200, "删除成功");
     }
 
     /**

@@ -6,6 +6,5 @@ package cn.keepbx.jpom.socket;
  */
 public class CommonSocketConfig {
 
-
     public static final String SYSTEM_ID = "system";
 }

@@ -128,16 +128,10 @@ public class UserService extends BaseOperService<UserModel> {
      * 删除用户
      *
      * @param id 用户id
-     * @return String
      */
-    public boolean deleteUser(String id) {
-        try {
-            deleteJson(ServerConfigBean.USER, id);
-            return true;
-        } catch (Exception e) {
-            DefaultSystemLog.ERROR().error(e.getMessage(), e);
-        }
-        return false;
+    @Override
+    public void deleteItem(String id) {
+        deleteJson(ServerConfigBean.USER, id);
     }
 
     /**

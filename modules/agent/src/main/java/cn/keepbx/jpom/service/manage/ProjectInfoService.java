@@ -2,6 +2,7 @@ package cn.keepbx.jpom.service.manage;
 
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.FileUtil;
+import cn.keepbx.jpom.common.BaseAgentController;
 import cn.keepbx.jpom.common.BaseOperService;
 import cn.keepbx.jpom.model.data.ProjectInfoModel;
 import cn.keepbx.jpom.model.data.ProjectRecoverModel;
@@ -62,9 +63,12 @@ public class ProjectInfoService extends BaseOperService<ProjectInfoModel> {
     /**
      * 删除项目
      *
-     * @param projectInfo 项目
+     * @param id 项目
      */
-    public void deleteProject(ProjectInfoModel projectInfo, String userId) throws Exception {
+    @Override
+    public void deleteItem(String id) {
+        ProjectInfoModel projectInfo = getItem(id);
+        String userId = BaseAgentController.getNowUserName();
         deleteJson(AgentConfigBean.PROJECT, projectInfo.getId());
         // 添加回收记录
         ProjectRecoverModel projectRecoverModel = new ProjectRecoverModel(projectInfo);

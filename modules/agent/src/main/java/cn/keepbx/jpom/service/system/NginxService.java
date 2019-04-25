@@ -105,6 +105,11 @@ public class NginxService extends BaseOperService {
         return false;
     }
 
+    @Override
+    public void deleteItem(String id) {
+
+    }
+
     /**
      * 获取域名
      *

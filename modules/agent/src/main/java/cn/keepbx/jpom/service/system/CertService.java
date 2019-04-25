@@ -56,24 +56,19 @@ public class CertService extends BaseOperService<CertModel> {
      *
      * @param id id
      */
-    public boolean delete(String id) {
-        try {
-            CertModel certModel = getItem(id);
-            if (certModel == null) {
-                return true;
-            }
-            String keyPath = certModel.getCert();
-            deleteJson(AgentConfigBean.CERT, id);
-            if (StrUtil.isNotEmpty(keyPath)) {
-                // 删除证书文件
-                File parentFile = FileUtil.file(keyPath).getParentFile();
-                FileUtil.del(parentFile);
-            }
-        } catch (Exception e) {
-            DefaultSystemLog.ERROR().error(e.getMessage(), e);
-            return false;
+    @Override
+    public void deleteItem(String id) {
+        CertModel certModel = getItem(id);
+        if (certModel == null) {
+            return;
         }
-        return true;
+        String keyPath = certModel.getCert();
+        deleteJson(AgentConfigBean.CERT, id);
+        if (StrUtil.isNotEmpty(keyPath)) {
+            // 删除证书文件
+            File parentFile = FileUtil.file(keyPath).getParentFile();
+            FileUtil.del(parentFile);
+        }
     }
 
     /**

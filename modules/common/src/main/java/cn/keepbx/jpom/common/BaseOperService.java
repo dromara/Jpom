@@ -39,6 +39,13 @@ public abstract class BaseOperService<T> extends BaseDataService {
     public abstract void addItem(T t);
 
     /**
+     * 删除实体
+     *
+     * @param id 数据id
+     */
+    public abstract void deleteItem(String id);
+
+    /**
      * 修改实体
      *
      * @param t 实体

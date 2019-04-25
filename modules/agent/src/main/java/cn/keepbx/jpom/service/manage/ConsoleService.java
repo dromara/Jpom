@@ -2,7 +2,7 @@ package cn.keepbx.jpom.service.manage;
 
 import cn.keepbx.jpom.common.commander.AbstractProjectCommander;
 import cn.keepbx.jpom.model.data.ProjectInfoModel;
-import cn.keepbx.jpom.socket.CommandOp;
+import cn.keepbx.jpom.socket.ConsoleCommandOp;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -21,14 +21,14 @@ public class ConsoleService {
     /**
      * 执行shell命令
      *
-     * @param commandOp        执行的操作
+     * @param consoleCommandOp        执行的操作
      * @param projectInfoModel 项目信息
      */
-    public String execCommand(CommandOp commandOp, ProjectInfoModel projectInfoModel) throws Exception {
+    public String execCommand(ConsoleCommandOp consoleCommandOp, ProjectInfoModel projectInfoModel) throws Exception {
         String result;
         AbstractProjectCommander abstractProjectCommander = AbstractProjectCommander.getInstance();
         // 执行命令
-        switch (commandOp) {
+        switch (consoleCommandOp) {
             case restart:
                 result = abstractProjectCommander.restart(projectInfoModel);
                 break;
@@ -46,10 +46,10 @@ public class ConsoleService {
             case top:
             case showlog:
             default:
-                throw new IllegalArgumentException(commandOp + " error");
+                throw new IllegalArgumentException(consoleCommandOp + " error");
         }
         //  通知日志刷新
-        if (commandOp == CommandOp.start || commandOp == CommandOp.restart) {
+        if (consoleCommandOp == ConsoleCommandOp.start || consoleCommandOp == ConsoleCommandOp.restart) {
             // 修改 run lib 使用情况
             ProjectInfoModel modify = projectInfoService.getItem(projectInfoModel.getId());
             modify.setRunLibDesc(projectInfoModel.getUseLibDesc());

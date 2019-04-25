@@ -1,6 +1,5 @@
 package cn.keepbx.jpom.socket;
 
-import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.core.util.URLUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
@@ -22,27 +21,32 @@ import java.io.IOException;
 import java.util.Map;
 
 /**
- * 消息处理器
+ * 服务端socket 基本类
  *
  * @author jiangzeyin
- * @date 2019/4/19
+ * @date 2019/4/25
  */
-public class ServerWebSocketHandler extends TextWebSocketHandler {
-    private OperateLogController operateLogController;
+public abstract class BaseServerWebSocketHandler extends TextWebSocketHandler {
+    protected OperateLogController operateLogController;
+
+    private NodeUrl nodeUrl;
+    private String dataParName;
+
+    public BaseServerWebSocketHandler(NodeUrl nodeUrl, String dataParName) {
+        this.nodeUrl = nodeUrl;
+        this.dataParName = dataParName;
+    }
 
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
-        if (operateLogController == null) {
-            operateLogController = SpringUtil.getBean(OperateLogController.class);
-        }
         Map<String, Object> attributes = session.getAttributes();
         NodeModel nodeModel = (NodeModel) attributes.get("nodeInfo");
-        String projectId = (String) attributes.get("projectId");
         UserModel userInfo = (UserModel) attributes.get("userInfo");
-        String url = NodeForward.getSocketUrl(nodeModel, NodeUrl.TopSocket);
+        String dataValue = (String) attributes.get(dataParName);
         String userName = UserModel.getOptUserName(userInfo);
         userName = URLUtil.encode(userName);
-        url = StrUtil.format(url, projectId, userName);
+        String url = NodeForward.getSocketUrl(nodeModel, nodeUrl);
+        url = StrUtil.format(url, dataValue, userName);
         // 连接节点
         ProxySession proxySession = new ProxySession(url, session);
         session.getAttributes().put("proxySession", proxySession);
@@ -51,56 +55,44 @@ public class ServerWebSocketHandler extends TextWebSocketHandler {
 
     @Override
     protected void handleTextMessage(WebSocketSession session, TextMessage message) {
+        if (operateLogController == null) {
+            operateLogController = SpringUtil.getBean(OperateLogController.class);
+        }
         String msg = message.getPayload();
         Map<String, Object> attributes = session.getAttributes();
         ProxySession proxySession = (ProxySession) attributes.get("proxySession");
         JSONObject json = JSONObject.parseObject(msg);
         String op = json.getString("op");
-        CommandOp commandOp = CommandOp.valueOf(op);
-        UserOperateLogV1.OptType type = null;
-        switch (commandOp) {
-            case stop:
-                type = UserOperateLogV1.OptType.Stop;
-                break;
-            case start:
-                type = UserOperateLogV1.OptType.Start;
-                break;
-            case restart:
-                type = UserOperateLogV1.OptType.Restart;
-                break;
-            default:
-                break;
-        }
-        if (type != null) {
-            // 记录操作日志
-            UserModel userInfo = (UserModel) attributes.get("userInfo");
-            String ip = (String) attributes.get("ip");
-            NodeModel nodeModel = (NodeModel) attributes.get("nodeInfo");
-            //
-            String projectId = (String) attributes.get("projectId");
+        ConsoleCommandOp consoleCommandOp = ConsoleCommandOp.valueOf(op);
+        this.handleTextMessage(attributes, proxySession, json, consoleCommandOp);
+    }
 
-            String reqId = IdUtil.fastUUID();
-            json.put("reqId", reqId);
+    /**
+     * 消息处理方法
+     *
+     * @param attributes       属性
+     * @param proxySession     代理回话
+     * @param json             数据
+     * @param consoleCommandOp 操作类型
+     */
+    protected abstract void handleTextMessage(Map<String, Object> attributes,
+                                              ProxySession proxySession,
+                                              JSONObject json,
+                                              ConsoleCommandOp consoleCommandOp);
 
-            try {
-                OperateLogController.CacheInfo cacheInfo = new OperateLogController.CacheInfo();
-                cacheInfo.setIp(ip);
-                cacheInfo.setOptType(type);
-                cacheInfo.setNodeModel(nodeModel);
-                cacheInfo.setDataId(projectId);
-                String userAgent = (String) attributes.get(HttpHeaders.USER_AGENT);
-                cacheInfo.setUserAgent(userAgent);
+    protected OperateLogController.CacheInfo cacheInfo(Map<String, Object> attributes, JSONObject json, UserOperateLogV1.OptType optType, String dataId) {
+        String ip = (String) attributes.get("ip");
+        NodeModel nodeModel = (NodeModel) attributes.get("nodeInfo");
+        OperateLogController.CacheInfo cacheInfo = new OperateLogController.CacheInfo();
+        cacheInfo.setIp(ip);
+        cacheInfo.setOptType(optType);
+        cacheInfo.setNodeModel(nodeModel);
+        cacheInfo.setDataId(dataId);
+        String userAgent = (String) attributes.get(HttpHeaders.USER_AGENT);
+        cacheInfo.setUserAgent(userAgent);
 
-                cacheInfo.setReqData(json.toString());
-
-                operateLogController.log(reqId, userInfo, "还没有响应", cacheInfo);
-            } catch (Exception e) {
-                DefaultSystemLog.ERROR().error("记录操作日志异常", e);
-            }
-            proxySession.send(json.toString());
-        } else {
-            proxySession.send(msg);
-        }
+        cacheInfo.setReqData(json.toString());
+        return cacheInfo;
     }
 
     @Override

@@ -196,10 +196,7 @@ public class OutGivingController extends BaseServerController {
     @ResponseBody
     @UrlPermission(value = Role.ServerManager, optType = UserOperateLogV1.OptType.DelOutGiving)
     public String del(String id) {
-        boolean flag = outGivingServer.deleteItem(id);
-        if (!flag) {
-            return JsonMessage.getString(405, "删除失败");
-        }
+        outGivingServer.deleteItem(id);
         return JsonMessage.getString(200, "操作成功");
     }
 }

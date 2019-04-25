@@ -288,7 +288,11 @@ public class EditProjectController extends BaseAgentController {
         return null;
     }
 
-
+    /**
+     * 删除项目
+     *
+     * @return json
+     */
     @RequestMapping(value = "deleteProject", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public String deleteProject() {
         ProjectInfoModel projectInfoModel = tryGetProjectInfoModel();
@@ -300,8 +304,7 @@ public class EditProjectController extends BaseAgentController {
             if (projectInfoModel.isStatus(true)) {
                 return JsonMessage.getString(401, "不能删除正在运行的项目");
             }
-            String userId = getUserName();
-            projectInfoService.deleteProject(projectInfoModel, userId);
+            projectInfoService.deleteItem(projectInfoModel.getId());
             return JsonMessage.getString(200, "删除成功！");
         } catch (Exception e) {
             DefaultSystemLog.ERROR().error(e.getMessage(), e);
@@ -309,6 +312,13 @@ public class EditProjectController extends BaseAgentController {
         }
     }
 
+    /**
+     * 检查项目lib 情况
+     *
+     * @param id     项目id
+     * @param newLib 新路径
+     * @return 状态码，400是一定不能操作的，401 是提醒
+     */
     @RequestMapping(value = "judge_lib.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public String saveProject(String id, String newLib) {
         File file = new File(newLib);

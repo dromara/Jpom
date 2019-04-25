@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    #parse("./common/head.vm")
+    <title>项目管理系统</title>
+    <style>
+        body {
+            padding: 20px;
+        }
+    </style>
+</head>
+
+<body>
+<div class="layui-row">
+    #if($user.isSystemUser())
+        <button onclick="editItem('');" class="layui-btn layui-btn-sm">添加模板</button>
+    #end
+    <button onclick="location.reload();" class="layui-btn layui-btn-sm">刷新表格</button>
+</div>
+<div class="layui-form">
+    <table class="layui-table">
+        <thead>
+        <tr>
+            <th>模板ID</th>
+            <th>模板名称</th>
+            <th>修改时间</th>
+            <th>最后执行人</th>
+            <th>操作</th>
+        </tr>
+        </thead>
+        <tbody>
+            #foreach($item in $array)
+            <tr>
+                <td>$item.id</td>
+                <td>$item.name</td>
+                <td>$item.modifyTime</td>
+                <td>$item.lastRunUser</td>
+                <td>
+                    #if($user.isSystemUser())
+                        <button onclick="editItem('$item.id')" class="layui-btn layui-btn-danger layui-btn-sm">修改
+                        </button>
+                    #end
+                    <button onclick="runScript('$item.id')" class="layui-btn layui-btn-warm layui-btn-sm">执行
+                    </button>
+                </td>
+            </tr>
+            #end
+            #if(!$array)
+            <tr>
+                <td colspan="5">没有相关信息</td>
+            </tr>
+            #end
+        </tbody>
+    </table>
+</div>
+</body>
+<script type="text/javascript">
+    function loadSuccess() {
+
+    }
+
+    function editItem(id) {
+        layerOpen({
+            type: 2,
+            title: '管理脚本模板',
+            shade: 0.8,
+            area: ['80%', '90%'],
+            content: 'item.html?id=' + id
+        });
+    }
+
+    function runScript(id) {
+        tabChange({
+            id: "runScript-" + id,
+            url: './script/console.html?id=' + id,
+            title: id + '控制台',
+        });
+    }
+</script>
+</html>

@@ -37,22 +37,37 @@ public class ServerWebSocketInterceptor implements HandshakeInterceptor {
                 return false;
             }
             String nodeId = httpServletRequest.getParameter("nodeId");
-            String projectId = httpServletRequest.getParameter("projectId");
             NodeService nodeService = SpringUtil.getBean(NodeService.class);
             NodeModel nodeModel = nodeService.getItem(nodeId);
-            // 判断权限
-            if (!userModel.isProject(nodeModel.getId(), projectId)) {
+            if (nodeModel == null) {
                 return false;
             }
-            attributes.put("userInfo", userModel);
-            attributes.put("nodeInfo", nodeModel);
-            attributes.put("projectId", projectId);
+            // 判断拦截类型
+            String type = httpServletRequest.getParameter("type");
+            if ("script".equalsIgnoreCase(type)) {
+                // 脚本模板
+                String scriptId = httpServletRequest.getParameter("scriptId");
+                if (!userModel.isManage(nodeId)) {
+                    return false;
+                }
+                attributes.put("scriptId", scriptId);
+            } else {
+                //控制台
+                String projectId = httpServletRequest.getParameter("projectId");
+                // 判断权限
+                if (!userModel.isProject(nodeModel.getId(), projectId)) {
+                    return false;
+                }
+                attributes.put("projectId", projectId);
+            }
             //
             String ip = ServletUtil.getClientIP(httpServletRequest);
             attributes.put("ip", ip);
             //
             String userAgent = ServletUtil.getHeaderIgnoreCase(httpServletRequest, HttpHeaders.USER_AGENT);
             attributes.put(HttpHeaders.USER_AGENT, userAgent);
+            attributes.put("nodeInfo", nodeModel);
+            attributes.put("userInfo", userModel);
             return true;
         }
         return false;

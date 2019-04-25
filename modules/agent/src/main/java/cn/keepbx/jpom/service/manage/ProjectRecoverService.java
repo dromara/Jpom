@@ -59,4 +59,9 @@ public class ProjectRecoverService extends BaseOperService<ProjectRecoverModel> 
     public boolean updateItem(ProjectRecoverModel projectRecoverModel) throws Exception {
         return false;
     }
+
+    @Override
+    public void deleteItem(String id) {
+
+    }
 }

@@ -11,7 +11,7 @@ import cn.jiangzeyin.controller.multipart.MultipartFileBuilder;
 import cn.keepbx.jpom.common.BaseAgentController;
 import cn.keepbx.jpom.model.data.ProjectInfoModel;
 import cn.keepbx.jpom.service.manage.ConsoleService;
-import cn.keepbx.jpom.socket.CommandOp;
+import cn.keepbx.jpom.socket.ConsoleCommandOp;
 import cn.keepbx.jpom.system.AgentConfigBean;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -120,7 +120,7 @@ public class ProjectFileControl extends BaseAgentController {
         //
         String after = getParameter("after");
         if ("restart".equalsIgnoreCase(after)) {
-            String result = consoleService.execCommand(CommandOp.restart, pim);
+            String result = consoleService.execCommand(ConsoleCommandOp.restart, pim);
             return JsonMessage.getString(200, "上传成功并重启：" + result);
         }
 

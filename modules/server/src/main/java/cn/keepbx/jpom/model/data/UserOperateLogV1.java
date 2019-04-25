@@ -232,6 +232,12 @@ public class UserOperateLogV1 extends BaseJsonModel {
         SaveOutgivingWhitelist(36, "修改节点白名单"),
         SaveOutgivingProject(37, "保存节点分发项目"),
         DeleteOutgivingProject(38, "删除节点分发项目"),
+
+        Save_Script(39, "保存脚本模板"),
+
+        Script_Start(40,"执行脚本"),
+        Script_Stop(41,"停止脚本"),
+
         ;
         private int code;
         private String desc;
