@@ -53,7 +53,15 @@ public class CertModel extends BaseModel {
      * 白名单路径
      */
     private String whitePath;
+    private Type type;
 
+    public Type getType() {
+        return type;
+    }
+
+    public void setType(Type type) {
+        this.type = type;
+    }
 
     public String getWhitePath() {
         return whitePath;
@@ -180,5 +188,13 @@ public class CertModel extends BaseModel {
             IoUtil.close(inputStream);
         }
         return null;
+    }
+
+    public enum Type {
+        /**
+         *
+         */
+        pem,
+        cer
     }
 }
