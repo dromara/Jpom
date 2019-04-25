@@ -9,6 +9,7 @@ import cn.hutool.core.util.StrUtil;
 import cn.keepbx.jpom.BaseJpomApplication;
 import cn.keepbx.jpom.model.BaseModel;
 import cn.keepbx.jpom.system.AgentConfigBean;
+import cn.keepbx.jpom.util.CommandUtil;
 
 import java.io.File;
 
@@ -95,6 +96,7 @@ public class ScriptModel extends BaseModel {
     public void saveFile() {
         File file = getFile(true);
         FileUtil.writeString(getContext(), file, CharsetUtil.CHARSET_UTF_8);
+        CommandUtil.execCommand("chmod 755 " + FileUtil.getAbsolutePath(file));
     }
 
     /**
