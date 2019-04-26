@@ -2,7 +2,6 @@ package cn.keepbx.jpom.service.node;
 
 import cn.hutool.cache.impl.TimedCache;
 import cn.hutool.core.util.IdUtil;
-import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.keepbx.jpom.common.BaseOperService;
 import cn.keepbx.jpom.common.forward.NodeForward;
 import cn.keepbx.jpom.common.forward.NodeUrl;
@@ -96,13 +95,8 @@ public class NodeService extends BaseOperService<NodeModel> {
         return true;
     }
 
-    public boolean deleteItem(String id) {
-        try {
-            deleteJson(ServerConfigBean.NODE, id);
-            return true;
-        } catch (Exception e) {
-            DefaultSystemLog.ERROR().error(e.getMessage(), e);
-        }
-        return false;
+    @Override
+    public void deleteItem(String id) {
+        deleteJson(ServerConfigBean.NODE, id);
     }
 }

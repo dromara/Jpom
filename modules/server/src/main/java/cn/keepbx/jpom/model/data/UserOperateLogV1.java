@@ -2,6 +2,7 @@ package cn.keepbx.jpom.model.data;
 
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.keepbx.jpom.BaseJpomApplication;
 import cn.keepbx.jpom.model.BaseEnum;
 import cn.keepbx.jpom.model.BaseJsonModel;
 
@@ -126,7 +127,11 @@ public class UserOperateLogV1 extends BaseJsonModel {
     }
 
     public void setUserId(String userId) {
-        this.userId = userId;
+        if (UserModel.SYSTEM_OCCUPY_NAME.equals(userId)) {
+            this.userId = BaseJpomApplication.SYSTEM_ID;
+        } else {
+            this.userId = userId;
+        }
     }
 
     public long getOptTime() {
@@ -232,6 +237,13 @@ public class UserOperateLogV1 extends BaseJsonModel {
         SaveOutgivingWhitelist(36, "修改节点白名单"),
         SaveOutgivingProject(37, "保存节点分发项目"),
         DeleteOutgivingProject(38, "删除节点分发项目"),
+
+        Save_Script(39, "保存脚本模板"),
+        Script_Start(40, "执行脚本"),
+        Script_Stop(41, "停止脚本"),
+        Save_Upload(34, "导入脚本模板"),
+        Save_Del(34, "删除脚本模板"),
+
         ;
         private int code;
         private String desc;

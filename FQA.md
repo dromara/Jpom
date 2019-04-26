@@ -82,6 +82,8 @@
    
    https://github.com/alibaba/arthas/issues/347
    
+   https://bugs.java.com/bugdatabase/view_bug.do?bug_id=4770092
+   
    ### windows 环境项目在运行中不能删除文件
    
    > 由于系统原因，暂时还没有找到解决办法

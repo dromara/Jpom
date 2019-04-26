@@ -93,4 +93,13 @@ public class ProxySession extends WebSocketClient {
         }
         DefaultSystemLog.ERROR().error("发生错误", ex);
     }
+
+    @Override
+    public void send(String text) {
+        try {
+            super.send(text);
+        } catch (Exception e) {
+            DefaultSystemLog.ERROR().error("转发消息失败", e);
+        }
+    }
 }

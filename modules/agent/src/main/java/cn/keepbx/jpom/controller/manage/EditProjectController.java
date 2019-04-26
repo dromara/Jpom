@@ -9,13 +9,13 @@ import cn.hutool.core.util.ReUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
+import cn.keepbx.jpom.BaseJpomApplication;
 import cn.keepbx.jpom.common.BaseAgentController;
 import cn.keepbx.jpom.common.commander.AbstractProjectCommander;
 import cn.keepbx.jpom.model.Role;
 import cn.keepbx.jpom.model.RunMode;
 import cn.keepbx.jpom.model.data.ProjectInfoModel;
 import cn.keepbx.jpom.service.WhitelistDirectoryService;
-import cn.keepbx.jpom.socket.CommonSocketConfig;
 import cn.keepbx.jpom.system.ConfigBean;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -55,8 +55,8 @@ public class EditProjectController extends BaseAgentController {
         if (!Validator.isGeneral(id, 2, 20)) {
             return JsonMessage.getString(401, "项目id 长度范围2-20（英文字母 、数字和下划线）");
         }
-        if (CommonSocketConfig.SYSTEM_ID.equals(id)) {
-            return JsonMessage.getString(401, "项目id " + CommonSocketConfig.SYSTEM_ID + " 关键词被系统占用");
+        if (BaseJpomApplication.SYSTEM_ID.equals(id)) {
+            return JsonMessage.getString(401, "项目id " + BaseJpomApplication.SYSTEM_ID + " 关键词被系统占用");
         }
         // 防止和Jpom冲突
         if (StrUtil.isNotEmpty(ConfigBean.getInstance().applicationTag) && ConfigBean.getInstance().applicationTag.equalsIgnoreCase(id)) {
@@ -288,7 +288,11 @@ public class EditProjectController extends BaseAgentController {
         return null;
     }
 
-
+    /**
+     * 删除项目
+     *
+     * @return json
+     */
     @RequestMapping(value = "deleteProject", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public String deleteProject() {
         ProjectInfoModel projectInfoModel = tryGetProjectInfoModel();
@@ -300,8 +304,7 @@ public class EditProjectController extends BaseAgentController {
             if (projectInfoModel.isStatus(true)) {
                 return JsonMessage.getString(401, "不能删除正在运行的项目");
             }
-            String userId = getUserName();
-            projectInfoService.deleteProject(projectInfoModel, userId);
+            projectInfoService.deleteItem(projectInfoModel.getId());
             return JsonMessage.getString(200, "删除成功！");
         } catch (Exception e) {
             DefaultSystemLog.ERROR().error(e.getMessage(), e);
@@ -309,6 +312,13 @@ public class EditProjectController extends BaseAgentController {
         }
     }
 
+    /**
+     * 检查项目lib 情况
+     *
+     * @param id     项目id
+     * @param newLib 新路径
+     * @return 状态码，400是一定不能操作的，401 是提醒
+     */
     @RequestMapping(value = "judge_lib.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public String saveProject(String id, String newLib) {
         File file = new File(newLib);

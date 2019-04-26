@@ -1,12 +1,12 @@
 package cn.keepbx.jpom.socket;
 
 /**
- * socket 操作枚举
+ * 控制台socket 操作枚举
  *
  * @author jiangzeyin
  * @date 2019/4/16
  */
-public enum CommandOp {
+public enum ConsoleCommandOp {
     /**
      * 启动
      */

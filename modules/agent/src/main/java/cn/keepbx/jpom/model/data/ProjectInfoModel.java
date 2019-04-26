@@ -89,13 +89,10 @@ public class ProjectInfoModel extends BaseModel {
     /**
      * 项目是否正在运行
      *
-     * @param get 防止并发获取
+     * @param get 防止自动获取
      * @return true 正在运行
      */
     public boolean isStatus(boolean get) {
-        if (!get) {
-            return false;
-        }
         try {
             status = AbstractProjectCommander.getInstance().isRun(getId());
         } catch (Exception e) {

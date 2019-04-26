@@ -22,6 +22,10 @@ public enum NodeUrl {
      * socket 连接  ，第一节项目id 第二节用户信息
      */
     TopSocket("/console/{}/{}"),
+    /**
+     * 脚本模板  模板id
+     */
+    Script_Run("/script_run/{}/{}"),
 
     WhitelistDirectory_Submit("/system/whitelistDirectory_submit"),
 
@@ -93,12 +97,16 @@ public enum NodeUrl {
     System_Nginx_delete("/system/nginx/delete"),
 
     System_Certificate_saveCertificate("/system/certificate/saveCertificate"),
-
     System_Certificate_getCertList("/system/certificate/getCertList"),
-
     System_Certificate_delete("/system/certificate/delete"),
-
     System_Certificate_export("/system/certificate/export"),
+
+    Script_List("/script/list.json"),
+    Script_Item("/script/item.json"),
+    Script_Save("/script/save.json"),
+    Script_Upload("/script/upload.json"),
+    Script_Del("/script/del.json"),
+
 
     ;
     /**

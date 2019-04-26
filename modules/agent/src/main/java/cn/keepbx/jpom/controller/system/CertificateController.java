@@ -145,6 +145,7 @@ public class CertificateController extends BaseAgentController {
                     String filePathItem = String.format("%s/%s/%s", path, certModel.getId(), keyName);
                     InputStream inputStream = zipFile.getInputStream(zipEntry);
                     FileUtil.writeFromStream(inputStream, filePathItem);
+                    certModel.setType(CertModel.Type.pem);
                     pemPath = filePathItem;
                 }
                 // cer 文件
@@ -152,6 +153,7 @@ public class CertificateController extends BaseAgentController {
                     String filePathItem = String.format("%s/%s/%s", path, certModel.getId(), keyName);
                     InputStream inputStream = zipFile.getInputStream(zipEntry);
                     FileUtil.writeFromStream(inputStream, filePathItem);
+                    certModel.setType(CertModel.Type.cer);
                     pemPath = filePathItem;
                 }
                 //
@@ -204,7 +206,7 @@ public class CertificateController extends BaseAgentController {
             }
             // 移动位置
             String temporary = certModel.getWhitePath() + "/" + certModel.getId() + "/";
-            File pemFile = FileUtil.file(temporary + certModel.getId() + ".pem");
+            File pemFile = FileUtil.file(temporary + certModel.getId() + "." + certModel.getType().name());
             File keyFile = FileUtil.file(temporary + certModel.getId() + ".key");
             if (add) {
                 if (pemFile.exists()) {
@@ -256,10 +258,7 @@ public class CertificateController extends BaseAgentController {
         if (!isSystemUser()) {
             return JsonMessage.getString(400, "你没有操作权限");
         }
-        boolean b = certService.delete(id);
-        if (!b) {
-            return JsonMessage.getString(400, "删除失败");
-        }
+        certService.deleteItem(id);
         return JsonMessage.getString(200, "删除成功");
     }
 

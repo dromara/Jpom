@@ -72,14 +72,19 @@
                         <a href="javascript:;"
                            data-options="{'id':'manage', 'title':'项目管理', 'url':'./manage/projectInfo'}">项目管理</a>
                     </li>
-##                    <li class="layui-nav-item">
-##                        <a href="javascript:;"
-##                           data-options="{'id':'downtime', 'title':'宕机计划', 'url':'./manage/projectInfo'}">宕机计划</a>
-##                    </li>
+                ##                    <li class="layui-nav-item">
+                ##                        <a href="javascript:;"
+                ##                           data-options="{'id':'downtime', 'title':'宕机计划', 'url':'./manage/projectInfo'}">宕机计划</a>
+                ##                    </li>
                     #if($user.isManage($node.id))
                         <li class="layui-nav-item">
                             <a href="javascript:;"
                                data-options="{'id':'nginx', 'title':'nginx管理', 'url':'./system/nginx/list.html'}">nginx管理</a>
+                        </li>
+
+                        <li class="layui-nav-item">
+                            <a href="javascript:;"
+                               data-options="{'id':'script', 'title':'脚本模板', 'url':'./script/list.html'}">脚本模板</a>
                         </li>
                     #end
                     #if($user.isSystemUser())

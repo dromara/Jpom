@@ -13,10 +13,15 @@ import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry
 @Configuration
 @EnableWebSocket
 public class ServerWebSocketConfig implements WebSocketConfigurer {
+    private final ServerWebSocketInterceptor serverWebSocketInterceptor = new ServerWebSocketInterceptor();
 
     @Override
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
-        registry.addHandler(new ServerWebSocketHandler(), "/console")
-                .addInterceptors(new ServerWebSocketInterceptor()).setAllowedOrigins("*");
+        // 控制台
+        registry.addHandler(new ServerWebSocketConsoleHandler(), "/console")
+                .addInterceptors(serverWebSocketInterceptor).setAllowedOrigins("*");
+        // 脚本模板
+        registry.addHandler(new ServerWebSocketScriptHandler(), "/script_run")
+                .addInterceptors(serverWebSocketInterceptor).setAllowedOrigins("*");
     }
 }

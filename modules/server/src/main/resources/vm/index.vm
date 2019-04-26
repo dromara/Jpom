@@ -63,14 +63,17 @@
                     <a href="javascript:;"
                        data-options="{'id':'welcome', 'title':'节点管理', 'url':'./node/list.html'}">节点管理</a>
                 </li>
+
                 <li class="layui-nav-item">
                     <a href="javascript:;"
                        data-options="{'id':'outgiving', 'title':'节点分发', 'url':'./outgiving/list.html'}">节点分发</a>
                 </li>
-                <li class="layui-nav-item">
-                    <a href="javascript:;"
-                       data-options="{'id':'user', 'title':'用户管理', 'url':'./user/list'}">用户管理</a>
-                </li>
+                #if($user.isServerManager())
+                    <li class="layui-nav-item">
+                        <a href="javascript:;"
+                           data-options="{'id':'user', 'title':'用户管理', 'url':'./user/list'}">用户管理</a>
+                    </li>
+                #end
                 <li class="layui-nav-item">
                     <a href="javascript:;"
                        data-options="{'id':'user_log', 'title':'操作日志', 'url':'./user/log/list.html'}">操作日志</a>

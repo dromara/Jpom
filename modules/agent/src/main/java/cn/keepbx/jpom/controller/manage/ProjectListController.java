@@ -120,7 +120,7 @@ public class ProjectListController extends BaseAgentController {
      * @return obj
      */
     @RequestMapping(value = "getProjectPort", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public String getProjectGroup(String ids) {
+    public String getProjectPort(String ids) {
         if (StrUtil.isEmpty(ids)) {
             return JsonMessage.getString(400, "");
         }
@@ -147,15 +147,4 @@ public class ProjectListController extends BaseAgentController {
         }
         return JsonMessage.getString(200, "", jsonObject);
     }
-
-//    /**
-//     * 获取运行方式
-//     *
-//     * @return array
-//     */
-//    @RequestMapping(value = "getRunModes", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-//    public String getRunModes() {
-//        ProjectInfoModel.RunMode[] runModes = ProjectInfoModel.RunMode.values();
-//        return JsonMessage.getString(200, "", runModes);
-//    }
 }

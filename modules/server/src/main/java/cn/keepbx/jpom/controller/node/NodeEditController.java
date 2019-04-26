@@ -120,10 +120,7 @@ public class NodeEditController extends BaseServerController {
     @UrlPermission(value = Role.System, optType = UserOperateLogV1.OptType.DelNode)
     @ResponseBody
     public String save(String id) {
-        boolean flag = nodeService.deleteItem(id);
-        if (!flag) {
-            return JsonMessage.getString(405, "删除失败");
-        }
+        nodeService.deleteItem(id);
         // 删除授权
         List<UserModel> list = userService.list();
         if (list != null) {

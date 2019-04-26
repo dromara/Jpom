@@ -1,5 +1,6 @@
 package cn.keepbx.jpom.controller;
 
+import cn.hutool.system.SystemUtil;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.keepbx.jpom.BaseJpomApplication;
 import cn.keepbx.jpom.common.BaseAgentController;
@@ -61,6 +62,8 @@ public class IndexController extends BaseAgentController {
         jsonObject.put("javaVirtualCount", JvmUtil.getJavaVirtualCount());
         jsonObject.put("osName", BaseJpomApplication.OS_INFO.getName());
         jsonObject.put("jpomVersion", JpomManifest.getInstance().getVersion());
+        jsonObject.put("javaVersion", SystemUtil.getJavaRuntimeInfo().getVersion());
+
         if (projectInfoModels == null) {
             jsonObject.put("count", 0);
             jsonObject.put("runCount", 0);

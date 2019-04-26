@@ -9,7 +9,7 @@ import cn.keepbx.jpom.common.BaseAgentController;
 import cn.keepbx.jpom.model.data.ProjectInfoModel;
 import cn.keepbx.jpom.service.manage.ConsoleService;
 import cn.keepbx.jpom.service.oss.OssManagerService;
-import cn.keepbx.jpom.socket.CommandOp;
+import cn.keepbx.jpom.socket.ConsoleCommandOp;
 import com.alibaba.fastjson.JSONArray;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -79,7 +79,7 @@ public class BuildController extends BaseAgentController {
         // 修改使用状态
         projectInfoModel.setUseLibDesc("build");
         projectInfoService.updateItem(projectInfoModel);
-        String result = consoleService.execCommand(CommandOp.restart, projectInfoModel);
+        String result = consoleService.execCommand(ConsoleCommandOp.restart, projectInfoModel);
         return JsonMessage.getString(200, "安装成功，已自动重启,当前状态是：" + result);
     }
 }

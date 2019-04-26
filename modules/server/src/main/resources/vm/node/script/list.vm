@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    #parse("./common/head.vm")
+    <title>项目管理系统</title>
+    <style>
+        body {
+            padding: 20px;
+        }
+    </style>
+</head>
+
+<body>
+<div class="layui-row">
+    <button onclick="location.reload();" class="layui-btn layui-btn-sm">刷新表格</button>
+    #if($user.isSystemUser())
+        <button onclick="editItem('');" class="layui-btn layui-btn-sm">添加模板</button>
+        <button id="import" class="layui-btn layui-btn-sm">导入模板</button>
+    #end
+
+</div>
+<div class="layui-form">
+    <table class="layui-table">
+        <thead>
+        <tr>
+            <th>模板ID</th>
+            <th>模板名称</th>
+            <th>修改时间</th>
+            <th>最后执行人</th>
+            <th>操作</th>
+        </tr>
+        </thead>
+        <tbody>
+            #foreach($item in $array)
+            <tr>
+                <td>$item.id</td>
+                <td>$item.name</td>
+                <td>$item.modifyTime</td>
+                <td>$item.lastRunUser</td>
+                <td>
+                    <button onclick="runScript('$item.id')" class="layui-btn layui-btn-warm layui-btn-sm">执行
+                    </button>
+
+                    <button onclick="editItem('$item.id')" class="layui-btn layui-btn-sm">#if($user.isSystemUser())
+                        修改#else 预览#end
+                    </button>
+
+                </td>
+            </tr>
+            #end
+            #if(!$array || $array.size()<=0)
+            <tr>
+                <td colspan="5">没有相关信息</td>
+            </tr>
+            #end
+        </tbody>
+    </table>
+</div>
+</body>
+<script type="text/javascript">
+    function loadSuccess() {
+        uploadRender({
+            elem: '#import',
+            accept: 'file',
+            data: {},
+            multiple: false,
+            exts: 'bat|sh',
+            acceptMime: '.bat,.sh',
+            url: './upload',
+            before: function () {
+                layer.load(1, {
+                    shade: [0.5, '#fff']
+                });
+            },
+            done: function (res, index, upload) {
+                layer.msg(res.msg);
+                setTimeout(function () {
+                    location.reload();
+                }, 2000);
+            },
+            error: function () {
+                layer.closeAll();
+                layer.msg('上传失败');
+            }
+        });
+    }
+
+    function editItem(id) {
+        layerOpen({
+            type: 2,
+            title: '管理脚本模板',
+            shade: 0.8,
+            area: ['80%', '90%'],
+            content: 'item.html?id=' + id
+        });
+    }
+
+    function runScript(id) {
+        tabChange({
+            id: "runScript-" + id,
+            url: './script/console.html?id=' + id,
+            title: id + '控制台',
+        });
+    }
+</script>
+</html>

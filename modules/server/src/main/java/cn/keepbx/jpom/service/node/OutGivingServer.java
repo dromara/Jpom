@@ -1,6 +1,5 @@
 package cn.keepbx.jpom.service.node;
 
-import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.keepbx.jpom.common.BaseOperService;
 import cn.keepbx.jpom.model.data.OutGivingModel;
 import cn.keepbx.jpom.system.ServerConfigBean;
@@ -54,13 +53,8 @@ public class OutGivingServer extends BaseOperService<OutGivingModel> {
         return true;
     }
 
-    public boolean deleteItem(String id) {
-        try {
-            deleteJson(ServerConfigBean.OUTGIVING, id);
-            return true;
-        } catch (Exception e) {
-            DefaultSystemLog.ERROR().error(e.getMessage(), e);
-        }
-        return false;
+    @Override
+    public void deleteItem(String id) {
+        deleteJson(ServerConfigBean.OUTGIVING, id);
     }
 }

@@ -65,6 +65,19 @@
                     </select>
                 </div>
             </div>
+            <div class="layui-inline">
+                <label class="layui-form-label" style="width: auto !important;">用户</label>
+                <div class="layui-input-inline">
+                    <select name="selectUser" id="selectUser" lay-verify="required" lay-filter="selectUser"
+                            lay-search="">
+                        <option value="">请选择</option>
+                        #foreach($item in $userArray)
+                            <option value="$item.id">$item.name</option>
+                        #end
+                        <option value="system">系统管理员</option>
+                    </select>
+                </div>
+            </div>
         </div>
     </form>
 </script>
@@ -107,6 +120,8 @@
                 renderDate();
                 // 选中
                 $("#selectNode option[value='" + apiWhere.selectNode + "']").attr("selected", "selected");
+                $("#selectUser option[value='" + apiWhere.selectUser + "']").attr("selected", "selected");
+
                 form.render();
             }
         });
@@ -141,6 +156,11 @@
             return true;
         });
 
+        form.on('select(selectUser)', function (data) {
+            apiWhere.selectUser = data.value;
+            reloadTable();
+            return true;
+        });
     }
 
     function renderDate() {

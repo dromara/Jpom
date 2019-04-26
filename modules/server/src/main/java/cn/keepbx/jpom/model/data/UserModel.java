@@ -3,10 +3,10 @@ package cn.keepbx.jpom.model.data;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.map.MapUtil;
 import cn.hutool.crypto.SecureUtil;
+import cn.keepbx.jpom.BaseJpomApplication;
 import cn.keepbx.jpom.model.BaseJsonModel;
 import cn.keepbx.jpom.model.BaseModel;
 import cn.keepbx.jpom.model.Role;
-import cn.keepbx.jpom.socket.CommonSocketConfig;
 import cn.keepbx.jpom.system.ServerExtConfigBean;
 import com.alibaba.fastjson.JSONArray;
 
@@ -253,7 +253,7 @@ public class UserModel extends BaseModel {
             return true;
         }
         // 系统监控权限
-        if (CommonSocketConfig.SYSTEM_ID.equals(id)) {
+        if (BaseJpomApplication.SYSTEM_ID.equals(id)) {
             return true;
         }
         NodeRole item = nodeRole.get(nodeId);
@@ -420,7 +420,7 @@ public class UserModel extends BaseModel {
         public boolean isManage() {
             return manage;
         }
-        
+
         public JSONArray getProjects() {
             return projects;
         }
