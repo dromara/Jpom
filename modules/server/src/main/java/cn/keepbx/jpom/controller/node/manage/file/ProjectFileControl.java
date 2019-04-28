@@ -89,4 +89,14 @@ public class ProjectFileControl extends BaseServerController {
     public String deleteFile() {
         return NodeForward.request(getNode(), getRequest(), NodeUrl.Manage_File_DeleteFile).toString();
     }
+
+    /**
+     * 列出目录下的文件
+     */
+    @RequestMapping(value = "lsFile", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @ResponseBody
+    @ProjectPermission
+    public String lsFile() {
+        return NodeForward.request(getNode(), getRequest(), NodeUrl.Manage_File_LsFile).toString();
+    }
 }

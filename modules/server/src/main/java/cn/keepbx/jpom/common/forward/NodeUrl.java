@@ -61,6 +61,8 @@ public enum NodeUrl {
 
     Manage_File_Download("/manage/file/download"),
 
+    Manage_File_LsFile("/manage/file/lsFile"),
+
 
     Manage_Log_LogSize("/manage/log/logSize"),
 
