@@ -1,3 +1,4 @@
+import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.ReUtil;
 
 import java.util.regex.Pattern;
@@ -19,5 +20,7 @@ public class TestString {
         System.out.println(Math.pow(1024, 2));
 
         System.out.println(Integer.MAX_VALUE);
+
+        System.out.println(CharsetUtil.defaultCharset());
     }
 }

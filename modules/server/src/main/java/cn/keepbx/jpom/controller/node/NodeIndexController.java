@@ -1,10 +1,12 @@
 package cn.keepbx.jpom.controller.node;
 
+import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.keepbx.jpom.common.BaseServerController;
 import cn.keepbx.jpom.common.forward.NodeForward;
 import cn.keepbx.jpom.common.forward.NodeUrl;
 import cn.keepbx.jpom.model.data.NodeModel;
+import cn.keepbx.jpom.model.data.UserModel;
 import cn.keepbx.jpom.model.system.JpomManifest;
 import cn.keepbx.jpom.service.node.NodeService;
 import org.springframework.http.MediaType;
@@ -37,7 +39,7 @@ public class NodeIndexController extends BaseServerController {
     }
 
     @RequestMapping(value = "index.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
-    public String index(String nodeId) {
+    public String index() {
         List<NodeModel> nodeModels = nodeService.list();
         setAttribute("array", nodeModels);
         //
@@ -45,6 +47,14 @@ public class NodeIndexController extends BaseServerController {
         JpomManifest jpomManifest = NodeForward.toObj(jsonMessage, JpomManifest.class);
         setAttribute("jpomManifest", jpomManifest);
         setAttribute("installed", jsonMessage.getCode() == 200);
+        UserModel userModel = getUser();
+        // 版本提示
+        if (!JpomManifest.getInstance().isDebug() && jpomManifest != null && userModel.isSystemUser()) {
+            JpomManifest thisInfo = JpomManifest.getInstance();
+            if (!StrUtil.equals(jpomManifest.getVersion(), thisInfo.getVersion())) {
+                setAttribute("tipUpdate", true);
+            }
+        }
         return "node/index";
     }
 
