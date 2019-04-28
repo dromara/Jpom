@@ -65,14 +65,24 @@ public class ProjectFileControl extends BaseAgentController {
         ProjectInfoModel pim = getProjectInfoModel();
         MultipartFileBuilder multipartFileBuilder = createMultipart()
                 .addFieldName("file");
+        // 压缩文件
         String type = getParameter("type");
+        // 是否清空
         String clearType = getParameter("clearType");
+        String levelName = getParameter("levelName");
+        File lib;
+        if (StrUtil.isEmpty(levelName)) {
+            lib = new File(pim.getLib());
+        } else {
+            lib = FileUtil.file(pim.getLib(), levelName);
+        }
+
         if ("unzip".equals(type)) {
             multipartFileBuilder.setInputStreamType("zip");
             multipartFileBuilder.setSavePath(AgentConfigBean.getInstance().getTempPathName());
             String path = multipartFileBuilder.save();
             //
-            File lib = new File(pim.getLib());
+
             // 判断是否需要清空
             if ("clear".equalsIgnoreCase(clearType)) {
                 if (!FileUtil.clean(lib)) {
@@ -86,7 +96,7 @@ public class ProjectFileControl extends BaseAgentController {
                 DefaultSystemLog.LOG().info("删除失败：" + file.getPath());
             }
         } else {
-            multipartFileBuilder.setSavePath(pim.getLib())
+            multipartFileBuilder.setSavePath(FileUtil.getAbsolutePath(lib))
                     .setUseOriginalFilename(true);
             // 保存
             multipartFileBuilder.save();

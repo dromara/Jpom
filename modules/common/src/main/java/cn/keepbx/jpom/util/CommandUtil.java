@@ -35,6 +35,8 @@ public class CommandUtil {
             if (BaseJpomApplication.OS_INFO.isLinux()) {
                 //执行linux系统命令
                 cmd = new String[]{"/bin/sh", "-c", command};
+            } else if (BaseJpomApplication.OS_INFO.isMac()) {
+                cmd = new String[]{"/bin/sh", "-c", command};
             } else {
                 cmd = new String[]{"cmd", "/c", command};
             }

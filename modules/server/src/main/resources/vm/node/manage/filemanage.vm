@@ -137,7 +137,7 @@
             data: {
                 id: '$id',
                 levelName: function () {
-
+                    return $("#currentPath").text();
                 }
             },
             multiple: true,
@@ -211,6 +211,9 @@
                 type: "unzip",
                 clearType: function () {
                     return $("#uploadFile_Import").attr("type");
+                },
+                levelName: function () {
+                    return $("#currentPath").text();
                 }
             },
             multiple: false,
