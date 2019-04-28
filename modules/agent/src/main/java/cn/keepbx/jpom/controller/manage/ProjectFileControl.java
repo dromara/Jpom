@@ -177,4 +177,69 @@ public class ProjectFileControl extends BaseAgentController {
         }
         return "下载失败。请刷新页面后重试";
     }
+
+    @RequestMapping(value = "lsFile", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    public String listFile(String id) {
+        // 查询项目路径
+        ProjectInfoModel pim = projectInfoService.getItem(id);
+        if (pim == null) {
+            return JsonMessage.getString(500, "查询失败：项目不存在");
+        }
+        String path = pim.getLib();
+        File fileDir = new File(path);
+        if (!fileDir.exists()) {
+            return JsonMessage.getString(500, "目录不存在");
+        }
+        JSONObject object = lsFile(path);
+        return JsonMessage.getString(200, "", object);
+    }
+
+    /**
+     * 递归查询文件夹下的所有文件夹和文件
+     *
+     * @param path 文件路径
+     * @return JSONObject
+     */
+    private JSONObject lsFile(String path) {
+        File parentFile = FileUtil.file(path);
+        JSONObject object = new JSONObject();
+        object.put("filename", parentFile.getName());
+        long mTime = parentFile.lastModified();
+        object.put("modifytime", DateUtil.date(mTime).toString());
+        object.put("modifytimelong", mTime);
+        if (parentFile.isFile()) {
+            object.put("filesize", FileUtil.readableFileSize(parentFile.length()));
+            return object;
+        } else {
+            object.put("isDirectory", true);
+            long sizeFile = FileUtil.size(parentFile);
+            object.put("filesize", FileUtil.readableFileSize(sizeFile));
+        }
+        File[] ls = FileUtil.ls(path);
+        if (ls == null) {
+            return object;
+        }
+        JSONArray array = new JSONArray();
+        JSONObject item;
+        for (int i = 0; i < ls.length; i++) {
+            File file = ls[i];
+            if (file.isDirectory()) {
+                //文件夹 递归查询
+                item = lsFile(file.getAbsolutePath());
+                item.put("isDirectory", true);
+            } else {
+                item = new JSONObject();
+                item.put("filename", file.getName());
+                item.put("filesize", FileUtil.readableFileSize(file.length()));
+                long time = file.lastModified();
+                item.put("modifytimelong", time);
+                item.put("modifytime", DateUtil.date(time).toString());
+            }
+            item.put("index", i + 1);
+            array.add(item);
+        }
+        object.put("open", true);
+        object.put("children", array);
+        return object;
+    }
 }

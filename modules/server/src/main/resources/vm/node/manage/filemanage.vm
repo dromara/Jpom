@@ -4,6 +4,9 @@
 <head>
     #parse("./common/head.vm")
     <title>项目管理系统</title>
+    <script type="text/javascript" src="//cdn.90so.net/jquery/3.4.0/jquery.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="//cdn.90so.net/ztree/3.5.40/css/zTreeStyle/zTreeStyle.css">
+    <script type="text/javascript" src="//cdn.90so.net/ztree/3.5.40/js/jquery.ztree.core.min.js"></script>
     <style>
         body {
             padding: 10px 10px 0px 10px;
@@ -36,7 +39,14 @@
         </div>
     </div>
 </div>
-<table class="layui-table" id="tab_file" lay-filter="tab_file" style="margin: 0;"></table>
+<div class="layui-row">
+    <div class="layui-col-md3">
+        <ul id="tree" class="ztree" style="width:99%; overflow:auto;"></ul>
+    </div>
+    <div class="layui-col-md9">
+        <table class="layui-table" id="tab_file" lay-filter="tab_file" style="margin: 0;"></table>
+    </div>
+</div>
 </body>
 ##	删除按钮
 <script type="text/html" id="bar_projects">
@@ -44,32 +54,33 @@
     <a href="javascript:;" class="layui-btn layui-btn-sm layui-btn-normal" lay-event="download">下载</a>
 </script>
 <script type="text/javascript">
-    function loadSuccess() {
-        tableRender({
-            id: 'table_file',
-            elem: '#tab_file',
-            url: './getFileList',
-            where: {
-                id: '$id'
-            },
-            cols: [[
-                {field: 'index', title: '编号', width: '10%'},
-                {
-                    field: 'filename', title: '文件名称', sort: true, width: '30%', templet: function (d) {
-                        if (d.isDirectory) {
-                            return d.filename + '【文件夹】';
-                        }
-                        return d.filename;
+    var tableConf = {
+        id: 'table_file',
+        elem: '#tab_file',
+        url: './getFileList',
+        where: {
+            id: '$id'
+        },
+        cols: [[
+            {field: 'index', title: '编号', width: '10%'},
+            {
+                field: 'filename', title: '文件名称', sort: true, width: '30%', templet: function (d) {
+                    if (d.isDirectory) {
+                        return d.filename + '【文件夹】';
                     }
-                },
-                {field: 'modifytime', title: '修改时间', sort: true, width: '15%'},
-                {field: 'filesize', title: '文件大小', sort: true, width: '15%'},
-                {field: 'op', title: '操作', toolbar: '#bar_projects'}
-            ]],
-            done: function () {
+                    return d.filename;
+                }
+            },
+            {field: 'modifytime', title: '修改时间', sort: true, width: '15%'},
+            {field: 'filesize', title: '文件大小', sort: true, width: '15%'},
+            {field: 'op', title: '操作', toolbar: '#bar_projects'}
+        ]]
+    }
 
-            }
-        });
+    function loadSuccess() {
+        loadTree();
+        tableRender(tableConf);
+
         var updateFail = false;
         var listUploadCount, nowUploadCount;
         uploadRender({
@@ -202,13 +213,59 @@
                 downloadFile(data);
             }
         });
+    }
 
+    //加载树
+    function loadTree() {
+        silentAjax({
+            url: './lsFile',
+            data: {
+                id: '$id'
+            },
+            success: function (ret) {
+                var array = [];
+                if (ret.data) {
+                    array.push(ret.data);
+                }
+                var setting = {
+                    data: {
+                        key: {
+                            name: "filename",
+                            children: "children"
+                        },
+                        view: {
+                            selectedMulti: false
+                        }
+                    },
+                    callback: {
+                        onClick: zTreeOnClick
+                    }
+                }
+                var zTreeObj = $.fn.zTree.init($("#tree"), setting, array);
+            }
+        });
+    }
 
+    //点击节点
+    function zTreeOnClick(event, treeId, treeNode) {
+        var children = treeNode.children;
+        if (!children) {
+            return;
+        }
+        tableConf.url = '';
+        tableConf.data = children;
+        tableRender(tableConf);
     }
 
     function reloadTable() {
         // 刷新项目列表
-        table.reload('table_file', {});
+        table.reload('table_file', {
+            url: './getFileList',
+            where: {
+                id: '$id'
+            }
+        });
+        loadTree();
     }
 
     //下载文件
