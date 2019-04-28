@@ -19,6 +19,16 @@
 </style>
 <script type="text/javascript" src="$!jpomProxyPath/static/layui/layui.js?v=$staticCacheTime"></script>
 <script type="text/javascript">
+    /**
+     * @param  {String} message 错误信息
+     * @param  {String} source  发生错误的脚本URL
+     * @param  {Number} lineno  发生错误的行号
+     * @param  {Number} colno   发生错误的列号
+     * @param  {Object} error   Error对象
+     */
+    window.onerror = function (message, source, lineno, colno, error) {
+        // ...
+    }
     var $, layer, form, element, table;
     const asyncFn = [];
     ## 不缓存
@@ -27,6 +37,8 @@
     });
     layui.use(['layer', 'element', 'form', 'table'], function () {
         $ = layui.$;
+        // ztree 调用
+        window.jQuery = $;
         element = layui.element;
         layer = layui.layer;
         form = layui.form;
@@ -40,7 +52,7 @@
         layui.each(asyncFn, function () {
             this && this();
         })
-
+    ## 统一事件
         $("button[op='a']").click(function () {
             var href = $(this).attr("href");
             location.href = appendNodeId(href);
@@ -53,6 +65,7 @@
     }
 
     function tabChange(options) {
+        console.log(options)
         var element = top.layui.element;
         var lay_id = 'tab_' + options.id;
         if (options.id != "welcome") {
@@ -224,6 +237,7 @@
         });
     }
 
+    ## 格式化时间
     function formateTime(time) {
         if (!time) {
             return 0;
@@ -243,4 +257,25 @@
         second = second < 10 ? ('0' + second) : second;
         return y + '-' + m + '-' + d + ' ' + h + ':' + minute + ':' + second;
     }
+
+    ## 异步加载js
+    function asyncLoadJs(url, callback) {
+        var script = document.createElement('script');
+        script.type = "text/javascript";
+        if (script.readyState) {
+            script.onreadystatechange = function () {
+                if (script.readyState == "loaded" || script.readyState == "complete") {
+                    script.onreadystatechange = null;
+                    callback && callback();
+                }
+            }
+        } else {
+            script.onload = function () {
+                callback && callback();
+            }
+        }
+        script.src = url;
+        document.body.appendChild(script);
+    }
+
 </script>

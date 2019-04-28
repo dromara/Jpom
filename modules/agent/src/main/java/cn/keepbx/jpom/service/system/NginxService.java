@@ -9,6 +9,7 @@ import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.keepbx.jpom.common.BaseOperService;
 import cn.keepbx.jpom.model.data.AgentWhitelist;
 import cn.keepbx.jpom.service.WhitelistDirectoryService;
+import cn.keepbx.jpom.util.FileUtils;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.github.odiszapc.nginxparser.NgxBlock;
@@ -61,8 +62,9 @@ public class NginxService extends BaseOperService {
             }
             String absPath = whiteDir.getAbsolutePath();
             for (File itemFile : list) {
-                String itemAbsPath = itemFile.getAbsolutePath();
-                String name = paresName(absPath, itemAbsPath);
+//                String itemAbsPath = itemFile.getAbsolutePath();
+                String name = FileUtils.delStartPath(itemFile, absPath, true);
+                //paresName(absPath, itemAbsPath);
                 JSONObject jsonObject = new JSONObject();
                 jsonObject.put("path", parentPath);
                 jsonObject.put("name", name);
@@ -84,16 +86,16 @@ public class NginxService extends BaseOperService {
         return array;
     }
 
-    public String paresName(String whitePath, String itemAbsPath) {
-        File file = new File(whitePath);
-        String newWhitePath = file.getAbsolutePath();
-        String path = itemAbsPath.substring(itemAbsPath.indexOf(newWhitePath) + newWhitePath.length());
-        path = FileUtil.normalize(path);
-        if (path.startsWith(StrUtil.SLASH)) {
-            path = path.substring(1);
-        }
-        return path;
-    }
+//    public String paresName(String whitePath, String itemAbsPath) {
+//        File file = new File(whitePath);
+//        String newWhitePath = file.getAbsolutePath();
+//        String path = itemAbsPath.substring(itemAbsPath.indexOf(newWhitePath) + newWhitePath.length());
+//        path = FileUtil.normalize(path);
+//        if (path.startsWith(StrUtil.SLASH)) {
+//            path = path.substring(1);
+//        }
+//        return path;
+//    }
 
     @Override
     public void addItem(Object o) {
