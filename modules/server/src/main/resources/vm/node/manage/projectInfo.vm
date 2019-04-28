@@ -16,7 +16,9 @@
         <button onclick="editProject('');" class="layui-btn layui-btn-sm">新增项目</button>
     #end
     <button onclick="reloadTable();" class="layui-btn layui-btn-sm">刷新表格</button>
-    <button onclick="projectRecover();" class="layui-btn layui-btn-sm layui-btn-primary">回收站</button>
+    #if($user.isManage($node.id))
+        <button onclick="projectRecover();" class="layui-btn layui-btn-sm layui-btn-primary">回收站</button>
+    #end
 </div>
 <table class="layui-table" id="tab_project" lay-filter="tab_project" style="margin: 0;"></table>
 

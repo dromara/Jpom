@@ -49,7 +49,7 @@
             <div class="layui-inline">
                 <label class="layui-form-label" style="width: auto !important;">时间</label>
                 <div class="layui-input-inline" style="width: 300px;">
-                    <input type="text" class="layui-input" id="time" placeholder="请选择时间范围">
+                    <input type="text" readonly class="layui-input" id="time" placeholder="请选择时间范围">
                 </div>
             </div>
             <div class="layui-inline">
