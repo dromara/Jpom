@@ -9,11 +9,21 @@ import com.alibaba.fastjson.JSONObject;
 import java.io.File;
 
 /**
+ * 文件工具
+ *
  * @author jiangzeyin
  * @date 2019/4/28
  */
 public class FileUtils {
 
+    /**
+     * 删除文件开始的路径
+     *
+     * @param file      要删除的文件
+     * @param startPath 开始的路径
+     * @param inName    是否返回文件名
+     * @return /test/a.txt /test/  a.txt
+     */
     public static String delStartPath(File file, String startPath, boolean inName) {
         String newWhitePath;
         if (inName) {
@@ -30,7 +40,7 @@ public class FileUtils {
         return path;
     }
 
-    public static JSONObject fileToJson(File file) {
+    private static JSONObject fileToJson(File file) {
         JSONObject jsonObject = new JSONObject(6);
         if (file.isDirectory()) {
             jsonObject.put("isDirectory", true);
@@ -46,6 +56,14 @@ public class FileUtils {
         return jsonObject;
     }
 
+    /**
+     * 对文件信息解析排序
+     *
+     * @param files     文件数组
+     * @param time      是否安装时间排序
+     * @param startPath 开始路径
+     * @return 排序后的json
+     */
     public static JSONArray parseInfo(File[] files, boolean time, String startPath) {
         int size = files.length;
         JSONArray arrayFile = new JSONArray(size);

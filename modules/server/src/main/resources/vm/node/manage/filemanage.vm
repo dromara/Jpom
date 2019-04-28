@@ -33,7 +33,7 @@
 <div class="layui-row">
     <button id="uploadFile" class="layui-btn layui-btn-sm"><i class="layui-icon">&#xe67c;</i>批量上传</button>
 
-    <button id="uploadFile_Import" class="layui-btn layui-btn-sm"><i class="layui-icon">&#xe67c;</i>覆盖导入</button>
+    <button id="uploadFile_Import" class="layui-btn layui-btn-sm"><i class="layui-icon">&#xe67c;</i>导入文件</button>
 
     <button id="uploadFile_Import_dom" class="layui-hide"></button>
 
