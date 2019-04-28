@@ -66,15 +66,20 @@ public class ProjectFileControl extends BaseAgentController {
         MultipartFileBuilder multipartFileBuilder = createMultipart()
                 .addFieldName("file");
         String type = getParameter("type");
+        String clearType = getParameter("clearType");
         if ("unzip".equals(type)) {
             multipartFileBuilder.setInputStreamType("zip");
             multipartFileBuilder.setSavePath(AgentConfigBean.getInstance().getTempPathName());
             String path = multipartFileBuilder.save();
             //
             File lib = new File(pim.getLib());
-            if (!FileUtil.clean(lib)) {
-                return JsonMessage.getString(500, "清除旧lib失败");
+            // 判断是否需要清空
+            if ("clear".equalsIgnoreCase(clearType)) {
+                if (!FileUtil.clean(lib)) {
+                    return JsonMessage.getString(500, "清除旧lib失败");
+                }
             }
+            // 解压
             File file = new File(path);
             ZipUtil.unzip(file, lib);
             if (!file.delete()) {
