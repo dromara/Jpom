@@ -22,7 +22,7 @@
         }
 
         .ztree {
-            height: 90vh;
+            height: 80vh;
             overflow-x: scroll;
             padding: 10px;
         }
@@ -48,6 +48,7 @@
 </div>
 <div class="layui-row">
     <div class="layui-col-md3">
+        <div class="layui-text" style="padding-top: 20px;">当前操作子级：<span id="currentPath"></span></div>
         <ul id="tree" class="ztree"></ul>
     </div>
     <div class="layui-col-md9">
@@ -134,7 +135,10 @@
             elem: '#uploadFile',
             accept: 'file',
             data: {
-                id: '$id'
+                id: '$id',
+                levelName: function () {
+
+                }
             },
             multiple: true,
             url: './upload',
@@ -231,7 +235,7 @@
             }
         });
 
-        // 点击'上传文件'事件
+        //
         $('#clear').on('click', function () {
             layer.confirm('确定清空此项目文件吗(包括子目录)？', {
                 title: '系统提示'
@@ -246,7 +250,9 @@
                     success: function (data) {
                         layer.msg(data.msg);
                         if (200 === data.code) {
-                            reloadTable();
+                            setTimeout(function () {
+                                location.reload();
+                            }, 1500);
                         }
                     }
                 });
@@ -286,6 +292,7 @@
             } else {
                 filePath = (treeNode.levelName || "") + "/" + treeNode.filename;
             }
+            $("#currentPath").text(filePath);
             tableWhre.path = filePath;
             reloadTable();
         }
