@@ -7,8 +7,8 @@ import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.keepbx.jpom.common.BaseAgentController;
 import cn.keepbx.jpom.common.commander.AbstractProjectCommander;
-import cn.keepbx.jpom.controller.manage.ProjectFileControl;
 import cn.keepbx.jpom.model.data.ProjectInfoModel;
+import cn.keepbx.jpom.util.FileUtils;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.http.MediaType;
@@ -107,7 +107,7 @@ public class LogBackController extends BaseAgentController {
         if (logBack.exists() && logBack.isDirectory()) {
             File[] filesAll = logBack.listFiles();
             if (filesAll != null) {
-                JSONArray jsonArray = ProjectFileControl.parseInfo(filesAll, true);
+                JSONArray jsonArray = FileUtils.parseInfo(filesAll, true, null);
                 jsonObject.put("array", jsonArray);
             }
         }

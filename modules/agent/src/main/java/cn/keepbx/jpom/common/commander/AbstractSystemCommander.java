@@ -31,6 +31,8 @@ public abstract class AbstractSystemCommander {
         } else if (BaseJpomApplication.OS_INFO.isWindows()) {
             // Windows系统
             abstractSystemCommander = new WindowsSystemCommander();
+        } else if (BaseJpomApplication.OS_INFO.isMac()) {
+            abstractSystemCommander = new LinuxSystemCommander();
         } else {
             throw new JpomRuntimeException("不支持的：" + BaseJpomApplication.OS_INFO.getName());
         }

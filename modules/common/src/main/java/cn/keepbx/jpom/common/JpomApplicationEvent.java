@@ -3,11 +3,13 @@ package cn.keepbx.jpom.common;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.util.CharsetUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.spring.event.ApplicationEventClient;
 import cn.keepbx.jpom.BaseJpomApplication;
 import cn.keepbx.jpom.model.system.JpomManifest;
 import cn.keepbx.jpom.system.ConfigBean;
+import cn.keepbx.jpom.system.ExtConfigBean;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.event.ContextClosedEvent;
@@ -36,6 +38,8 @@ public class JpomApplicationEvent implements ApplicationEventClient {
     public void onApplicationEvent(ApplicationEvent event) {
         // 启动最后的预加载
         if (event instanceof ApplicationReadyEvent) {
+            //
+            checkPath();
             // 清理旧进程新文件
             List<File> files = FileUtil.loopFiles(ConfigBean.getInstance().getDataPath(), pathname -> pathname.getName().startsWith("pid."));
             files.forEach(FileUtil::del);
@@ -97,4 +101,24 @@ public class JpomApplicationEvent implements ApplicationEventClient {
             }
         }
     }
+
+    private static void checkPath() {
+        String path = ExtConfigBean.getInstance().getPath();
+        String extConfigPath = null;
+        try {
+            extConfigPath = ExtConfigBean.getResource().getURL().toString();
+        } catch (IOException ignored) {
+        }
+        File file = FileUtil.file(path);
+        try {
+            FileUtil.mkdir(file);
+            file = FileUtil.createTempFile("jpom", ".temp", file, true);
+        } catch (Exception e) {
+            DefaultSystemLog.ERROR().error(StrUtil.format("Jpom创建数据目录失败,目录位置：{},请检查当前用户是否有此目录权限或修改配置文件：{}中的jpom.path为可创建目录的路径", path, extConfigPath), e);
+            System.exit(-1);
+        }
+        FileUtil.del(file);
+        DefaultSystemLog.LOG().info("Jpom外部配置文件路径：" + extConfigPath);
+    }
+
 }

@@ -52,6 +52,8 @@ public abstract class BaseJpomApplication {
         if (charset == null) {
             if (OS_INFO.isLinux()) {
                 charset = CharsetUtil.CHARSET_UTF_8;
+            } else if (OS_INFO.isMac()) {
+                charset = CharsetUtil.CHARSET_UTF_8;
             } else {
                 charset = CharsetUtil.CHARSET_GBK;
             }

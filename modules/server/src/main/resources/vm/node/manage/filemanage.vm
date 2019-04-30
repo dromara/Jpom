@@ -4,9 +4,7 @@
 <head>
     #parse("./common/head.vm")
     <title>项目管理系统</title>
-    <script type="text/javascript" src="//cdn.90so.net/jquery/3.4.0/jquery.min.js"></script>
     <link href="$!jpomProxyPath/static/ztree/zTreeStyle/zTreeStyle.css" rel="stylesheet">
-    <script src="$!jpomProxyPath/static/ztree/jquery.ztree.core.min.js"></script>
     <style>
         body {
             padding: 10px 10px 0px 10px;
@@ -22,14 +20,23 @@
             width: calc(50% - 5px);
             margin-right: 0px;
         }
+
+        .ztree {
+            height: 80vh;
+            overflow-x: scroll;
+            padding: 10px;
+        }
     </style>
 </head>
 
 <body>
 <div class="layui-row">
     <button id="uploadFile" class="layui-btn layui-btn-sm"><i class="layui-icon">&#xe67c;</i>批量上传</button>
-    <button id="uploadFile_Import" class="layui-btn layui-btn-sm"><i class="layui-icon">&#xe67c;</i>覆盖导入</button>
-    <button onclick="reloadTable();" class="layui-btn layui-btn-sm">刷新</button>
+
+    <button id="uploadFile_Import" class="layui-btn layui-btn-sm"><i class="layui-icon">&#xe67c;</i>导入文件</button>
+
+    <button id="uploadFile_Import_dom" class="layui-hide"></button>
+
     <button id="clear" class="layui-btn layui-btn-sm layui-btn-danger">清空文件</button>
     <button id="build" class="layui-btn  layui-btn-sm layui-btn-normal">OSS构建</button>
 
@@ -41,7 +48,8 @@
 </div>
 <div class="layui-row">
     <div class="layui-col-md3">
-        <ul id="tree" class="ztree" style="width:100%; overflow:auto;"></ul>
+        <div class="layui-text" style="padding-top: 20px;">当前操作子级：<span id="currentPath"></span></div>
+        <ul id="tree" class="ztree"></ul>
     </div>
     <div class="layui-col-md9">
         <table class="layui-table" id="tab_file" lay-filter="tab_file" style="margin: 0;"></table>
@@ -51,47 +59,86 @@
 ##	删除按钮
 <script type="text/html" id="bar_projects">
     <a href="javascript:;" class="layui-btn layui-btn-sm layui-btn-danger" lay-event="delete">删除</a>
+    {{# if(!d.isDirectory){ }}
     <a href="javascript:;" class="layui-btn layui-btn-sm layui-btn-normal" lay-event="download">下载</a>
+    {{# } }}
 </script>
 <script type="text/javascript">
     var zTreeObj;
+    const setting = {
+        data: {
+            key: {
+                name: "filename",
+                children: "children",
+                isParent: "isDirectory"
+            },
+            view: {
+                selectedMulti: false
+            }
+        },
+        callback: {
+            onClick: zTreeOnExpand,
+            onExpand: zTreeOnExpand
+        }
+    };
+
+    const tableWhre = {
+        id: '$id'
+    };
+
+    var curenntNode = {
+        filename: "跟路径",
+        index: -1,
+        isDirectory: true
+    };
 
     function loadSuccess() {
-        tableRender({
-            id: 'table_file',
-            elem: '#tab_file',
-            url: './getFileList',
-            where: {
-                id: '$id'
-            },
-            cols: [[
-                {field: 'index', title: '编号', width: '10%'},
-                {
-                    field: 'filename', title: '文件名称', sort: true, width: '30%', templet: function (d) {
-                        if (d.isDirectory) {
-                            return d.filename + '【文件夹】';
+        //
+        asyncLoadJs("$!jpomProxyPath/static/ztree/jquery.ztree.core.min.js", function () {
+            zTreeObj = $.fn.zTree.init($("#tree"), setting);
+            zTreeObj.addNodes(null, curenntNode, false);
+            curenntNode = zTreeObj.getNodeByTId("tree_1");
+            //
+            tableRender({
+                id: 'table_file',
+                elem: '#tab_file',
+                url: './getFileList',
+                where: tableWhre,
+                cols: [[
+                    {field: 'index', title: '编号', width: '6%'},
+                    {
+                        field: 'filename', title: '文件名称', sort: true, width: '30%', templet: function (d) {
+                            if (d.isDirectory) {
+                                return d.filename + '【文件夹】';
+                            }
+                            return d.filename;
                         }
-                        return d.filename;
+                    },
+                    {field: 'modifyTime', title: '修改时间', sort: true, width: '20%'},
+                    {field: 'fileSize', title: '文件大小', sort: true, width: '15%'},
+                    {field: 'op', title: '操作', toolbar: '#bar_projects'}
+                ]],
+                done: function (ret) {
+                    var child = ret.data;
+                    if (child) {
+                        zTreeObj.removeChildNodes(curenntNode);
+                        zTreeObj.addNodes(curenntNode, child, false);
                     }
-                },
-                {field: 'modifytime', title: '修改时间', sort: true, width: '15%'},
-                {field: 'filesize', title: '文件大小', sort: true, width: '15%'},
-                {field: 'op', title: '操作', toolbar: '#bar_projects'}
-            ]],
-            done: function (ret) {
-                if (!zTreeObj) {
-                    loadTree(ret.data)
                 }
-            }
+            });
         });
 
+        //
         var updateFail = false;
         var listUploadCount, nowUploadCount;
         uploadRender({
             elem: '#uploadFile',
             accept: 'file',
             data: {
-                id: '$id'
+                id: '$id',
+                levelName: function () {
+                    return $("#currentPath").text();
+                }
             },
             multiple: true,
             url: './upload',
@@ -144,13 +191,30 @@
                 layer.msg('上传失败');
             }
         });
-
+        $("#uploadFile_Import").click(function () {
+            var that = $(this);
+            layer.confirm('请选择覆盖方式', {
+                btn: ['清空覆盖', '不清空']
+            }, function () {
+                that.attr("type", "clear");
+                $("#uploadFile_Import_dom").click();
+            }, function () {
+                that.attr("type", "noClear");
+                $("#uploadFile_Import_dom").click();
+            });
+        });
         uploadRender({
-            elem: '#uploadFile_Import',
+            elem: '#uploadFile_Import_dom',
             accept: 'file',
             data: {
                 id: '$id',
-                type: "unzip"
+                type: "unzip",
+                clearType: function () {
+                    return $("#uploadFile_Import").attr("type");
+                },
+                levelName: function () {
+                    return $("#currentPath").text();
+                }
             },
             multiple: false,
             exts: 'zip',
@@ -174,9 +238,9 @@
             }
         });
 
-        // 点击'上传文件'事件
+        //
         $('#clear').on('click', function () {
-            layer.confirm('确定清空此项目文件吗？', {
+            layer.confirm('确定清空此项目文件吗(包括子目录)？', {
                 title: '系统提示'
             }, function (index) {
                 layer.close(index);
@@ -189,7 +253,9 @@
                     success: function (data) {
                         layer.msg(data.msg);
                         if (200 === data.code) {
-                            reloadTable();
+                            setTimeout(function () {
+                                location.reload();
+                            }, 1500);
                         }
                     }
                 });
@@ -219,93 +285,46 @@
         });
     }
 
-    //加载树
-    function loadTree(data, node) {
-        if (!data) {
-            return;
-        }
-        var setting = {
-            data: {
-                key: {
-                    name: "filename",
-                    children: "children",
-                    isParent: "isDirectory"
-                },
-                view: {
-                    selectedMulti: false
-                }
-            },
-            callback: {
-                onClick: zTreeOnClick,
-                onExpand: zTreeOnExpand
-            }
-        };
-        zTreeObj = $.fn.zTree.init($("#tree"), setting, data);
-    }
-
-    //点击节点
-    function zTreeOnClick(event, treeId, treeNode) {
-        if (treeNode.isDirectory) {
-            updateTree(treeNode);
-        }
-    }
-
     //节点展开
     function zTreeOnExpand(event, treeId, treeNode) {
-        updateTree(treeNode);
-    }
-
-    //修改节点
-    function updateTree(treeNode) {
-        var filePath = getAbsPath(treeNode);
-        table.reload('table_file', {
-            url: './getFileList',
-            where: {
-                id: '$id',
-                path: filePath
-            },
-            done: function (ret) {
-                if (ret.code == 200) {
-                    var child = ret.data;
-                    if (!treeNode.children) {
-                        zTreeObj.addNodes(treeNode, child, false);
-                    }
-                }
+        if (treeNode.isDirectory) {
+            curenntNode = treeNode;
+            var filePath = "";
+            if (treeNode.index == -1) {
+                filePath = "";
+            } else {
+                filePath = (treeNode.levelName || "") + "/" + treeNode.filename;
             }
-        });
-    }
-
-    //获取路径
-    function getAbsPath(node) {
-        var path = "/" + node.filename;
-        var parentNode = node.getParentNode();
-        if (parentNode) {
-            path = getAbsPath(parentNode) + path;
+            $("#currentPath").text(filePath);
+            tableWhre.path = filePath;
+            reloadTable();
         }
-        return path;
     }
 
-    function reloadTable(where) {
+    function reloadTable() {
         // 刷新项目列表
         table.reload('table_file', {
             url: './getFileList',
-            where: {
-                id: '$id',
-                path: ''
-            }
+            where: tableWhre
         });
     }
 
     //下载文件
     function downloadFile(data) {
-        var url = "./download?id=$id&filename=" + encodeURI(data.filename);
+        var url = "./download?id=$id&filename=" + encodeURI(data.filename) + "&levelName=" + data.levelName;
         url = appendNodeId(url);
         self.location.href = url;
     }
 
     // 删除文件
     function deleteFile(data) {
-        layer.confirm('确定删除文件 ' + data.filename + '？', {
+        var msg;
+        if (data.isDirectory) {
+            msg = '确定删除文件夹 ' + data.filename + '？'
+        } else {
+            msg = '确定删除文件 ' + data.filename + '？'
+        }
+        layer.confirm(msg, {
             title: '系统提示'
         }, function (index) {
             layer.close(index);
@@ -313,7 +332,8 @@
                 url: './deleteFile',
                 data: {
                     id: '$id',
-                    filename: data.filename
+                    filename: data.filename,
+                    levelName: data.levelName
                 },
                 success: function (data) {
                     layer.msg(data.msg);

@@ -42,7 +42,7 @@
                     <td>$item.index</td>
                     <td>$item.filename</td>
                     <td>$item.modifytime</td>
-                    <td>$item.filesize</td>
+                    <td>$item.fileSize</td>
                     <td>
                         <button op="a" href="logBack_download?key=$item.filename&id=$data.id"
                                 class="layui-btn layui-btn-warm layui-btn-sm">下载

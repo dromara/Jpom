@@ -210,6 +210,10 @@
                 title: toFile + ' - 文件',
             });
         }
+
+        #if($tipUpdate)
+            layer.alert("当前节点和服务端版本不一致，请检查更新")
+        #end
     }
 </script>
 

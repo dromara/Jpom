@@ -1,6 +1,5 @@
 package cn.keepbx.jpom.controller.manage;
 
-import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.core.util.ZipUtil;
@@ -13,8 +12,8 @@ import cn.keepbx.jpom.model.data.ProjectInfoModel;
 import cn.keepbx.jpom.service.manage.ConsoleService;
 import cn.keepbx.jpom.socket.ConsoleCommandOp;
 import cn.keepbx.jpom.system.AgentConfigBean;
+import cn.keepbx.jpom.util.FileUtils;
 import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -43,11 +42,12 @@ public class ProjectFileControl extends BaseAgentController {
             return JsonMessage.getString(500, "查询失败：项目不存在");
         }
         String lib = pim.getLib();
+        File fileDir;
         if (!StrUtil.isEmptyOrUndefined(path)) {
-            lib += path;
-            lib = FileUtil.normalize(lib);
+            fileDir = FileUtil.file(lib, path);
+        } else {
+            fileDir = new File(lib);
         }
-        File fileDir = new File(lib);
         if (!fileDir.exists()) {
             return JsonMessage.getString(500, "目录不存在");
         }
@@ -55,66 +55,48 @@ public class ProjectFileControl extends BaseAgentController {
         if (filesAll == null) {
             return JsonMessage.getString(500, "目录是空");
         }
-        JSONArray arrayFile = parseInfo(filesAll, false);
+        JSONArray arrayFile = FileUtils.parseInfo(filesAll, false, lib);
         return JsonMessage.getString(200, "查询成功", arrayFile);
     }
 
-    public static JSONArray parseInfo(File[] files, boolean time) {
-        int size = files.length;
-        JSONArray arrayFile = new JSONArray(size);
-        for (File file : files) {
-            JSONObject jsonObject = new JSONObject(6);
-            if (file.isDirectory()) {
-                jsonObject.put("isDirectory", true);
-                long sizeFile = FileUtil.size(file);
-                jsonObject.put("filesize", FileUtil.readableFileSize(sizeFile));
-            } else {
-                jsonObject.put("filesize", FileUtil.readableFileSize(file.length()));
-            }
-            jsonObject.put("filename", file.getName());
-            long mTime = file.lastModified();
-            jsonObject.put("modifytimelong", mTime);
-            jsonObject.put("modifytime", DateUtil.date(mTime).toString());
-            arrayFile.add(jsonObject);
-        }
-        arrayFile.sort((o1, o2) -> {
-            JSONObject jsonObject1 = (JSONObject) o1;
-            JSONObject jsonObject2 = (JSONObject) o2;
-            if (time) {
-                return jsonObject2.getLong("modifytimelong").compareTo(jsonObject1.getLong("modifytimelong"));
-            }
-            return jsonObject1.getString("filename").compareTo(jsonObject2.getString("filename"));
-        });
-        final int[] i = {0};
-        arrayFile.forEach(o -> {
-            JSONObject jsonObject = (JSONObject) o;
-            jsonObject.put("index", ++i[0]);
-        });
-        return arrayFile;
-    }
 
     @RequestMapping(value = "upload", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public String upload() throws Exception {
         ProjectInfoModel pim = getProjectInfoModel();
         MultipartFileBuilder multipartFileBuilder = createMultipart()
                 .addFieldName("file");
+        // 压缩文件
         String type = getParameter("type");
+        // 是否清空
+        String clearType = getParameter("clearType");
+        String levelName = getParameter("levelName");
+        File lib;
+        if (StrUtil.isEmpty(levelName)) {
+            lib = new File(pim.getLib());
+        } else {
+            lib = FileUtil.file(pim.getLib(), levelName);
+        }
+
         if ("unzip".equals(type)) {
             multipartFileBuilder.setInputStreamType("zip");
             multipartFileBuilder.setSavePath(AgentConfigBean.getInstance().getTempPathName());
             String path = multipartFileBuilder.save();
             //
-            File lib = new File(pim.getLib());
-            if (!FileUtil.clean(lib)) {
-                return JsonMessage.getString(500, "清除旧lib失败");
+
+            // 判断是否需要清空
+            if ("clear".equalsIgnoreCase(clearType)) {
+                if (!FileUtil.clean(lib)) {
+                    return JsonMessage.getString(500, "清除旧lib失败");
+                }
             }
+            // 解压
             File file = new File(path);
             ZipUtil.unzip(file, lib);
             if (!file.delete()) {
                 DefaultSystemLog.LOG().info("删除失败：" + file.getPath());
             }
         } else {
-            multipartFileBuilder.setSavePath(pim.getLib())
+            multipartFileBuilder.setSavePath(FileUtil.getAbsolutePath(lib))
                     .setUseOriginalFilename(true);
             // 保存
             multipartFileBuilder.save();
@@ -134,7 +116,7 @@ public class ProjectFileControl extends BaseAgentController {
 
 
     @RequestMapping(value = "deleteFile", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public String deleteFile(String filename, String type) {
+    public String deleteFile(String filename, String type, String levelName) {
         ProjectInfoModel pim = getProjectInfoModel();
         if ("clear".equalsIgnoreCase(type)) {
             // 清空文件
@@ -152,7 +134,12 @@ public class ProjectFileControl extends BaseAgentController {
             if (StrUtil.isEmpty(fileName)) {
                 return JsonMessage.getString(405, "非法操作");
             }
-            File file = FileUtil.file(pim.getLib(), fileName);
+            File file;
+            if (StrUtil.isEmpty(levelName)) {
+                file = FileUtil.file(pim.getLib(), fileName);
+            } else {
+                file = FileUtil.file(pim.getLib(), levelName, fileName);
+            }
             if (file.exists()) {
                 if (FileUtil.del(file)) {
                     return JsonMessage.getString(200, "删除成功");
@@ -165,14 +152,19 @@ public class ProjectFileControl extends BaseAgentController {
     }
 
     @RequestMapping(value = "download", method = RequestMethod.GET)
-    public String download(String id, String filename) {
+    public String download(String id, String filename, String levelName) {
         String safeFileName = pathSafe(filename);
         if (StrUtil.isEmpty(safeFileName)) {
             return JsonMessage.getString(405, "非法操作");
         }
         try {
             ProjectInfoModel pim = projectInfoService.getItem(id);
-            File file = FileUtil.file(pim.getLib(), safeFileName);
+            File file;
+            if (StrUtil.isEmpty(levelName)) {
+                file = FileUtil.file(pim.getLib(), filename);
+            } else {
+                file = FileUtil.file(pim.getLib(), levelName, filename);
+            }
             if (file.isDirectory()) {
                 return "暂不支持下载文件夹";
             }
