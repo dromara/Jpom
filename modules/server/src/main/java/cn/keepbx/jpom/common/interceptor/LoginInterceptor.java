@@ -90,10 +90,7 @@ public class LoginInterceptor extends BaseJpomInterceptor {
         HttpSession session = getSession();
         try {
             // 静态资源地址参数
-            Object staticCacheTime = session.getAttribute("staticCacheTime");
-            if (staticCacheTime == null) {
-                session.setAttribute("staticCacheTime", DateUtil.currentSeconds());
-            }
+            session.setAttribute("staticCacheTime", DateUtil.currentSeconds());
             // 代理二级路径
             Object jpomProxyPath = session.getAttribute("jpomProxyPath");
             if (jpomProxyPath == null) {
