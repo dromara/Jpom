@@ -65,7 +65,6 @@
     }
 
     function tabChange(options) {
-        console.log(options)
         var element = top.layui.element;
         var lay_id = 'tab_' + options.id;
         if (options.id != "welcome") {

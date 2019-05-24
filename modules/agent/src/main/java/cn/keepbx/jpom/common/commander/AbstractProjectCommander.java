@@ -41,7 +41,7 @@ import java.util.jar.Manifest;
  */
 public abstract class AbstractProjectCommander {
 
-    public static final String RUNING_TAG = "running";
+    public static final String RUNNING_TAG = "running";
     public static final String STOP_TAG = "stopped";
 
     private static AbstractProjectCommander abstractProjectCommander = null;
@@ -242,7 +242,7 @@ public abstract class AbstractProjectCommander {
         if (virtualMachine == null) {
             return AbstractProjectCommander.STOP_TAG;
         }
-        return StrUtil.format("{}:{}", AbstractProjectCommander.RUNING_TAG, virtualMachine.id());
+        return StrUtil.format("{}:{}", AbstractProjectCommander.RUNNING_TAG, virtualMachine.id());
     }
 
     //---------------------------------------------------- 基本操作----end
@@ -371,7 +371,7 @@ public abstract class AbstractProjectCommander {
      * @return int
      */
     protected static int parsePid(String result) {
-        if (result.startsWith(AbstractProjectCommander.RUNING_TAG)) {
+        if (result.startsWith(AbstractProjectCommander.RUNNING_TAG)) {
             return Convert.toInt(result.split(":")[1]);
         }
         return 0;
@@ -386,7 +386,7 @@ public abstract class AbstractProjectCommander {
      */
     public boolean isRun(String tag) throws Exception {
         String result = status(tag);
-        return result.contains(AbstractProjectCommander.RUNING_TAG);
+        return result.contains(AbstractProjectCommander.RUNNING_TAG);
     }
 
     /***

@@ -22,7 +22,7 @@
         }
 
         .ztree {
-            height: 80vh;
+            min-height: 80vh;
             overflow-x: scroll;
             padding: 10px;
         }
@@ -87,7 +87,7 @@
     };
 
     var curenntNode = {
-        filename: "跟路径",
+        filename: '根路径',
         index: -1,
         isDirectory: true
     };
