@@ -93,10 +93,11 @@ public abstract class AbstractProjectCommander {
     /**
      * 查询出指定端口信息
      *
-     * @param pid 进程id
+     * @param pid       进程id
+     * @param listening 是否只获取检查状态的
      * @return 数组
      */
-    public abstract List<NetstatModel> listNetstat(int pid);
+    public abstract List<NetstatModel> listNetstat(int pid, boolean listening);
 
     /**
      * 停止
@@ -258,7 +259,7 @@ public abstract class AbstractProjectCommander {
         if (cachePort != null) {
             return cachePort.toString();
         }
-        List<NetstatModel> list = listNetstat(pid);
+        List<NetstatModel> list = listNetstat(pid, true);
         if (list == null) {
             return StrUtil.DASHED;
         }
