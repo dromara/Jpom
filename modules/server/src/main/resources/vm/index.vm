@@ -4,6 +4,8 @@
 <head>
     <title>Jpom-项目管理系统</title>
     #parse("./common/head.vm")
+    <meta name="keywords" content="Jpom,Java项目管理,Jar管理,Java管理系统,服务器项目运维"/>
+    <meta name="description" content="Jpom-项目管理系统"/>
     <style>
         /* 选项卡 */
         .layui-tab {
