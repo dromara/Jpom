@@ -14,6 +14,7 @@ import cn.keepbx.jpom.model.data.UserOperateLogV1;
 import cn.keepbx.jpom.model.system.JpomManifest;
 import cn.keepbx.jpom.service.node.NodeService;
 import cn.keepbx.jpom.service.user.UserService;
+import cn.keepbx.jpom.util.StringUtil;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -64,7 +65,7 @@ public class NodeEditController extends BaseServerController {
     }
 
     private String addNode(NodeModel nodeModel) {
-        if (!Validator.isGeneral(nodeModel.getId(), 2, 20)) {
+        if (!StringUtil.isGeneral(nodeModel.getId(), 2, 20)) {
             return JsonMessage.getString(405, "节点id不能为空并且2-20（英文字母 、数字和下划线）");
         }
         if (nodeService.getItem(nodeModel.getId()) != null) {

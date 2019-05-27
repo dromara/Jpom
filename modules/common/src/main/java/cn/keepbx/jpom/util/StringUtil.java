@@ -1,5 +1,6 @@
 package cn.keepbx.jpom.util;
 
+import cn.hutool.core.lang.Validator;
 import cn.hutool.core.util.StrUtil;
 
 /**
@@ -8,7 +9,7 @@ import cn.hutool.core.util.StrUtil;
  * @author jiangzeyin
  * @date 2019/4/7
  */
-public class ArgsUtil {
+public class StringUtil {
     /**
      * 获取启动参数
      *
@@ -27,5 +28,18 @@ public class ArgsUtil {
             }
         }
         return null;
+    }
+
+    /**
+     * id输入规则
+     *
+     * @param value 值
+     * @param min   最短
+     * @param max   最长
+     * @return true
+     */
+    public static boolean isGeneral(CharSequence value, int min, int max) {
+        String reg = "^[a-zA-Z0-9_-]{" + min + "," + max + "}$";
+        return Validator.isMactchRegex(reg, value);
     }
 }

@@ -2,7 +2,7 @@ package cn.keepbx.jpom;
 
 import cn.hutool.core.lang.Console;
 import cn.hutool.core.util.StrUtil;
-import cn.keepbx.jpom.util.ArgsUtil;
+import cn.keepbx.jpom.util.StringUtil;
 import cn.keepbx.jpom.util.CommandUtil;
 import cn.keepbx.jpom.util.JvmUtil;
 import com.sun.tools.attach.VirtualMachine;
@@ -23,13 +23,13 @@ public class JpomClose {
             Console.error("请传入正确的参数");
             return;
         }
-        String tag = ArgsUtil.getArgsValue(args, "jpom.applicationTag");
+        String tag = StringUtil.getArgsValue(args, "jpom.applicationTag");
         if (StrUtil.isEmpty(tag)) {
             Console.error("请传入对应：jpom.applicationTag");
             return;
         }
         // 事件
-        String event = ArgsUtil.getArgsValue(args, "event");
+        String event = StringUtil.getArgsValue(args, "event");
         if ("stop".equalsIgnoreCase(event)) {
             String status = JpomClose.getInstance().status(tag);
             if (!status.contains(StrUtil.COLON)) {
