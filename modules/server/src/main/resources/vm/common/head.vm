@@ -52,6 +52,9 @@
         layui.each(asyncFn, function () {
             this && this();
         })
+    ## js Common
+        var jsCommonContext = document.getElementById("jsCommonContext").innerHTML;
+        $("body").append(jsCommonContext);
     ## 统一事件
         $("button[op='a']").click(function () {
             var href = $(this).attr("href");
@@ -278,3 +281,5 @@
     }
 
 </script>
+
+<script id="jsCommonContext" type="text/html">$!jsCommonContext</script>

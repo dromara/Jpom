@@ -1,6 +1,8 @@
 package cn.keepbx.jpom.common.interceptor;
 
 import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.extra.servlet.ServletUtil;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.interceptor.InterceptorPattens;
@@ -8,6 +10,7 @@ import cn.jiangzeyin.common.spring.SpringUtil;
 import cn.keepbx.jpom.common.BaseServerController;
 import cn.keepbx.jpom.model.data.UserModel;
 import cn.keepbx.jpom.service.user.UserService;
+import cn.keepbx.jpom.system.ExtConfigBean;
 import org.springframework.http.MediaType;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.ModelAndView;
@@ -15,6 +18,7 @@ import org.springframework.web.servlet.ModelAndView;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import java.io.File;
 import java.io.IOException;
 
 /**
@@ -99,7 +103,16 @@ public class LoginInterceptor extends BaseJpomInterceptor {
             }
         } catch (Exception ignored) {
         }
-
+        // 统一的js 注入
+        String jsCommonContext = (String) session.getAttribute("jsCommonContext");
+        if (jsCommonContext == null) {
+            String path = ExtConfigBean.getInstance().getPath();
+            File file = FileUtil.file(String.format("%s/script/common.js", path));
+            if (file.exists()) {
+                jsCommonContext = FileUtil.readString(file, CharsetUtil.CHARSET_UTF_8);
+            }
+            session.setAttribute("jsCommonContext", jsCommonContext);
+        }
     }
 
     @Override
