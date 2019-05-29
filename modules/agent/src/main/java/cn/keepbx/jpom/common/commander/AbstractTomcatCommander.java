@@ -29,6 +29,4 @@ public abstract class AbstractTomcatCommander {
     }
 
     public abstract String execCmd(TomcatInfoModel tomcatInfoModel, String cmd);
-
-    public abstract String status();
 }
