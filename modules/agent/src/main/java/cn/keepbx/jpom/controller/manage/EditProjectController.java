@@ -195,7 +195,7 @@ public class EditProjectController extends BaseAgentController {
                     return JsonMessage.getString(200, "新增成功！");
                 }
             }
-            // 新增但是下面id 已经存在
+            // 新增但是项目id 已经存在
             if (!"on".equalsIgnoreCase(edit)) {
                 return JsonMessage.getString(400, "项目id已经存在啦");
             }

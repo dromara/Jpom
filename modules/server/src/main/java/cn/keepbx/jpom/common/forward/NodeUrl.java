@@ -107,8 +107,21 @@ public enum NodeUrl {
     Script_Upload("/script/upload.json"),
     Script_Del("/script/del.json"),
 
-
-    ;
+    Tomcat_List("/tomcat/list"),
+    Tomcat_Add("/tomcat/add"),
+    Tomcat_Update("/tomcat/update"),
+    Tomcat_Delete("/tomcat/delete"),
+    Tomcat_Start("/tomcat/start"),
+    Tomcat_Stop("/tomcat/stop"),
+    Tomcat_Restart("/tomcat/restart"),
+    Tomcat_GetItem("/tomcat/getItem"),
+    Tomcat_GetTomcatProjectList("/tomcat/getTomcatProjectList"),
+    Tomcat_GetTomcatStatus("/tomcat/getTomcatStatus"),
+    Tomcat_TomcatProjectManage("/tomcat/tomcatProjectManage"),
+    Tomcat_File_GetFileList("/tomcat/getFileList"),
+    Tomcat_File_DeleteFile("/tomcat/deleteFile"),
+    Tomcat_File_Download("/tomcat/download"),
+    Tomcat_File_Upload("/tomcat/upload");
     /**
      * 相对请求地址
      */
