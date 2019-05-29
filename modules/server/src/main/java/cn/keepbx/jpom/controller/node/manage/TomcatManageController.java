@@ -189,7 +189,17 @@ public class TomcatManageController extends BaseServerController {
     @RequestMapping(value = "upload", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     public String upload() {
-        return NodeForward.requestMultipart(getNode(), getMultiRequest(), NodeUrl.Manage_File_Upload).toString();
+        return NodeForward.requestMultipart(getNode(), getMultiRequest(), NodeUrl.Tomcat_File_Upload).toString();
+    }
+
+    /**
+     * 上传War包
+     * @return 操作结果
+     */
+    @RequestMapping(value = "uploadWar", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @ResponseBody
+    public String uploadWar() {
+        return tomcatService.uploadWar(getNode(), getMultiRequest());
     }
 
     /**

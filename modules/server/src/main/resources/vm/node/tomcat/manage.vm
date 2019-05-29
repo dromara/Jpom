@@ -62,14 +62,16 @@
             key: {
                 name: "filename",
                 children: "children",
-                isParent: "hasChildren"
+                isParent: "hasChildren",
+                chkDisabled: 'chkDisabled'
             },
             view: {
                 selectedMulti: false
             }
         },
         callback: {
-            onClick: zTreeOnExpand
+            onClick: zTreeOnExpand,
+            onExpand: zTreeOnExpand,
         }
     };
 
@@ -79,9 +81,10 @@
         except: 'dir'
     };
 
-    var curenntNode = {
+    var currentNode = {
         filename: "$project".substring(1),
         index: -1,
+        path: "$project",
         isDirectory: true
     };
 
@@ -89,8 +92,8 @@
         //
         asyncLoadJs("$!jpomProxyPath/static/ztree/jquery.ztree.core.min.js", function () {
             zTreeObj = $.fn.zTree.init($("#tree"), setting);
-            zTreeObj.addNodes(null, curenntNode, false);
-            curenntNode = zTreeObj.getNodeByTId("tree_1");
+            zTreeObj.addNodes(null, currentNode, false);
+            currentNode = zTreeObj.getNodeByTId("tree_1");
 
             loadingAjax({
                 url: './getFileList',
@@ -102,14 +105,16 @@
                 success: function (data) {
                     var child = data.data;
                     if (child) {
-                        zTreeObj.removeChildNodes(curenntNode);
+                        zTreeObj.removeChildNodes(currentNode);
                         var temp = [];
                         for(var i in child) {
                             if (child[i].isDirectory) {
                                 temp.push(child[i]);
                             }
+                            child[i].hasChildren = true;
+                            child[i].chkDisabled = true;
                         }
-                        zTreeObj.addNodes(curenntNode, temp, false);
+                        zTreeObj.addNodes(currentNode, temp, false);
                     }
                 }
             });
@@ -121,7 +126,7 @@
             url: './getFileList',
             where: tableWhere,
             cols: [[
-                {field: 'index', title: '编号', width: '10%'},
+                // {field: 'index', title: '编号', width: '10%'},
                 {
                     field: 'filename', title: '文件名称', sort: true, width: '30%', templet: function (d) {
                         if (d.isDirectory) {
@@ -144,9 +149,7 @@
             accept: 'file',
             data: {
                 id: '$id',
-                levelName: function () {
-                    return $("#currentPath").text();
-                }
+                path: currentNode.path
             },
             multiple: true,
             url: './upload',
@@ -157,6 +160,7 @@
                 });
             },
             before: function (obj) {
+                this.data.path = currentNode.path;
                 setTimeout(function () {
                     layer.msg('上传中(' + nowUploadCount + '/' + listUploadCount + ')', {
                         icon: 16,
@@ -199,74 +203,41 @@
                 layer.msg('上传失败');
             }
         });
-
-        uploadRender({
-            elem: '#uploadFile_Import_dom',
-            accept: 'file',
-            data: {
-                id: '$id',
-                type: "unzip",
-                clearType: function () {
-                    return $("#uploadFile_Import").attr("type");
-                },
-                levelName: function () {
-                    return $("#currentPath").text();
-                }
-            },
-            multiple: false,
-            exts: 'zip',
-            acceptMime: '.zip',
-            url: './upload',
-            before: function () {
-                layer.load(1, {
-                    shade: [0.5, '#fff'] //0.1透明度的白色背景
-                });
-            },
-            done: function (res, index, upload) {
-                layer.msg(res.msg);
-                setTimeout(function () {
-                    layer.closeAll();
-                    reloadTable();
-                }, 2000);
-            },
-            error: function () {
-                layer.closeAll();
-                layer.msg('上传失败');
-            }
-        });
-
-        //
-        $('#clear').on('click', function () {
-            layer.confirm('确定清空此项目文件吗(包括子目录)？', {
-                title: '系统提示'
-            }, function (index) {
-                layer.close(index);
-                loadingAjax({
-                    url: './deleteFile',
-                    data: {
-                        id: '$id',
-                        type: 'clear'
-                    },
-                    success: function (data) {
-                        layer.msg(data.msg);
-                        if (200 === data.code) {
-                            setTimeout(function () {
-                                location.reload();
-                            }, 1500);
-                        }
-                    }
-                });
-            });
-        });
-        $("#build").click(function () {
-            layerOpen({
-                type: 2,
-                title: '自动构建',
-                shade: 0.8,
-                area: ['80%', '90%'],
-                content: '../build?id=$id'
-            });
-        });
+        ##
+        ## uploadRender({
+        ##     elem: '#uploadFile_Import_dom',
+        ##     accept: 'file',
+        ##     data: {
+        ##         id: '$id',
+        ##         type: "unzip",
+        ##         clearType: function () {
+        ##             return $("#uploadFile_Import").attr("type");
+        ##         },
+        ##         levelName: function () {
+        ##             return $("#currentPath").text();
+        ##         }
+        ##     },
+        ##     multiple: false,
+        ##     exts: 'zip',
+        ##     acceptMime: '.zip',
+        ##     url: './upload',
+        ##     before: function () {
+        ##         layer.load(1, {
+        ##             shade: [0.5, '#fff'] //0.1透明度的白色背景
+        ##         });
+        ##     },
+        ##     done: function (res, index, upload) {
+        ##         layer.msg(res.msg);
+        ##         setTimeout(function () {
+        ##             layer.closeAll();
+        ##             reloadTable();
+        ##         }, 2000);
+        ##     },
+        ##     error: function () {
+        ##         layer.closeAll();
+        ##         layer.msg('上传失败');
+        ##     }
+        ## });
 
         // 表格工具条事件
         table.on('tool(tab_file)', function (obj) {
@@ -284,11 +255,11 @@
 
     //节点展开
     function zTreeOnExpand(event, treeId, treeNode) {
+
         if (treeNode.isDirectory) {
-            curenntNode = treeNode;
-            var filePath = "";
-            filePath = (treeNode.levelName || "") + "/" + treeNode.filename;
-            tableWhere.path = filePath;
+            currentNode = treeNode;
+            var filePath = (treeNode.parentPath || '') + "/" + treeNode.filename;
+            currentNode.path = tableWhere.path = filePath;
             $('#currentPath').text(filePath);
             reloadTable();
         }
@@ -298,13 +269,28 @@
         // 刷新项目列表
         table.reload('table_file', {
             url: './getFileList',
-            where: tableWhere
+            where: tableWhere,
+            done: function(data) {
+                var child = data.data;
+                if (child) {
+                    zTreeObj.removeChildNodes(currentNode);
+                    var temp = [];
+                    for(var i in child) {
+                        if (child[i].isDirectory) {
+                            temp.push(child[i]);
+                        }
+                        child[i].hasChildren = true;
+                        child[i].chkDisabled = true;
+                    }
+                    zTreeObj.addNodes(currentNode, temp, false);
+                }
+            }
         });
     }
 
     //下载文件
     function downloadFile(data) {
-        var url = "./download?id=$id&filename=" + encodeURI(data.filename) + "&levelName=" + data.levelName;
+        var url = "./download?id=$id&filename=" + encodeURI(data.filename) + "&path=" + data.parentPath;
         url = appendNodeId(url);
         self.location.href = url;
     }
@@ -326,7 +312,7 @@
                 data: {
                     id: '$id',
                     filename: data.filename,
-                    levelName: data.levelName
+                    path: data.parentPath
                 },
                 success: function (data) {
                     layer.msg(data.msg);

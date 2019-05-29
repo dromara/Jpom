@@ -6,6 +6,7 @@ import cn.keepbx.jpom.model.data.NodeModel;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -155,5 +156,15 @@ public class TomcatService {
      */
     public String deleteFile(NodeModel nodeModel, HttpServletRequest request) {
         return NodeForward.request(nodeModel, request, NodeUrl.Tomcat_File_DeleteFile).toString();
+    }
+
+    /**
+     * 上传War包
+     * @param node 节点信息
+     * @param multiRequest 请求信息
+     * @return 操作结果
+     */
+    public String uploadWar(NodeModel node, MultipartHttpServletRequest multiRequest) {
+        return NodeForward.requestMultipart(node, multiRequest, NodeUrl.Tomcat_File_UploadWar).toString();
     }
 }

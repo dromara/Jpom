@@ -30,9 +30,10 @@
                     </div>
                     <div class="layui-layout-right" style="padding-right: 15px;">
                         #if($user.isSystemUser())
-                            <button op="addProject" data-id="$item.id" data-name="$item.name" class="layui-btn layui-btn-sm ">
-                                新增项目
-                            </button>
+##                            <button op="addProject" data-id="$item.id" data-name="$item.name" class="layui-btn layui-btn-sm ">
+##                                新增项目
+##                            </button>
+                            <button id="uploadFile_$item.id" style="margin-right: 10px;" class="layui-btn layui-btn-sm"><i class="layui-icon">&#xe67c;</i>上传WAR</button>
                             <button op="edit" data-id="$item.id" data-name="$item.name" class="layui-btn layui-btn-sm ">
                                 编辑
                             </button>
@@ -62,13 +63,14 @@
     <h1 align="center">还没有任何Tomcat，请先添加Tomcat</h1>
     #end
 <script type="text/html" id="toolbar_op">
-    <a href="javascript:;" class="layui-btn  layui-btn-sm layui-btn-normal" lay-event="manage">管理</a>
+    <a href="javascript:;" class="layui-btn  layui-btn-sm" lay-event="manage">管理</a>
     {{# if (d.status == "stopped") { }}
-    <a href="javascript:;" class="layui-btn  layui-btn-sm layui-btn-normal" lay-event="start">启动</a>
+    <a href="javascript:;" class="layui-btn  layui-btn-sm" lay-event="start">启动</a>
     {{# } else if (d.status == "running") { }}
     <a href="javascript:;" class="layui-btn  layui-btn-sm layui-btn-warm" lay-event="stop">停止</a>
     <a href="javascript:;" class="layui-btn  layui-btn-sm layui-btn-warm" lay-event="reload">重启</a>
     {{# } }}
+    <a href="javascript:;" class="layui-btn  layui-btn-sm layui-btn-danger" lay-event="delete">删除</a>
 </script>
 </body>
 <script type="text/javascript">
@@ -136,6 +138,7 @@
                 layer.confirm('确定停止Tomcat - ' + name + '?', {
                     btn: ['确定', '取消']
                 }, function(index) {
+                    layer.close(index);
                     execTomcatOp(id, op);
                 });
             }
@@ -144,6 +147,7 @@
                 layer.confirm('确定重启Tomcat - ' + name + '?', {
                     btn: ['确定', '取消']
                 }, function(index) {
+                    layer.close(index);
                     execTomcatOp(id, op);
                 });
             }
@@ -202,6 +206,9 @@
                 } else if ('reload' === event) {
                     // 重启项目
                     tomcatProjectManage(data, '$item.id', 'reload');
+                } else if ('delete' === event) {
+                    // 删除项目
+                    tomcatProjectManage(data, '$item.id', 'undeploy');
                 } else if ('manage' === event) {
                     tabChange({
                         id: "manage_$item.id_" + data.path,
@@ -211,6 +218,33 @@
                 }
             });
             getTomcatStatus('$item.id');
+            uploadRender({
+                elem: '#uploadFile_$item.id',
+                accept: 'file',
+                data: {
+                    id: '$item.id'
+                },
+                multiple: false,
+                exts: 'war',
+                acceptMime: '.war',
+                url: './uploadWar',
+                before: function () {
+                    layer.load(1, {
+                        shade: [0.5, '#fff'] //0.1透明度的白色背景
+                    });
+                },
+                done: function (res, index, upload) {
+                    layer.msg(res.msg);
+                    setTimeout(function () {
+                        layer.closeAll();
+
+                    }, 2000);
+                },
+                error: function () {
+                    layer.closeAll();
+                    layer.msg('上传失败');
+                }
+            });
         #end
     }
 
@@ -219,10 +253,12 @@
         var tip = {
             'stop': '确定停止项目' + data.path + '吗?',
             'reload': '确定重启项目' + data.path + '吗?',
+            'undeploy': '注意，您正面删除项目' + data.path + '，确定删除吗?',
         }
 
         if (tip[op]) {
             layer.confirm(tip[op], {
+                icon: 8,
                 btn: ['确定', '取消']
             }, function(index) {
                 layer.close(index);
@@ -280,6 +316,7 @@
                         $('[data-icon="' + id + '"]').css('background-color', '#05ff2d');
                         $('[data-title-' + id + ']').attr('title', '已运行');
                     }
+                    table.reload('table_' + id);
                 }
             }
         });

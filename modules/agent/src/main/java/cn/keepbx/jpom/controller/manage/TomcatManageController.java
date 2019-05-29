@@ -236,8 +236,12 @@ public class TomcatManageController extends BaseAgentController {
         // 查询tomcat信息
         TomcatInfoModel tomcatInfoModel = tomcatManageService.getItem(id);
 
-        String result = AbstractTomcatCommander.getInstance().execCmd(tomcatInfoModel, "startup");
-        return JsonMessage.getString(200, "启动成功", result);
+        String result = AbstractTomcatCommander.getInstance().execCmd(tomcatInfoModel, "start");
+        String msg = "启动成功";
+        if ("stopped".equals(result)) {
+            msg = "启动失败";
+        }
+        return JsonMessage.getString(200, msg, result);
     }
 
 
@@ -251,7 +255,7 @@ public class TomcatManageController extends BaseAgentController {
         // 查询tomcat信息
         TomcatInfoModel tomcatInfoModel = tomcatManageService.getItem(id);
 
-        String result = AbstractTomcatCommander.getInstance().execCmd(tomcatInfoModel, "shutdown");
+        String result = AbstractTomcatCommander.getInstance().execCmd(tomcatInfoModel, "stop");
         return JsonMessage.getString(200, "停止成功", result);
     }
 
@@ -265,8 +269,9 @@ public class TomcatManageController extends BaseAgentController {
         // 查询tomcat信息
         TomcatInfoModel tomcatInfoModel = tomcatManageService.getItem(id);
 
-        String result = AbstractTomcatCommander.getInstance().execCmd(tomcatInfoModel, "restart");
-        return JsonMessage.getString(200, "重启成功", result);
+        String stopResult = AbstractTomcatCommander.getInstance().execCmd(tomcatInfoModel, "stop");
+        String startResult = AbstractTomcatCommander.getInstance().execCmd(tomcatInfoModel, "start");
+        return JsonMessage.getString(200, "重启成功");
     }
 
     /**
@@ -312,25 +317,31 @@ public class TomcatManageController extends BaseAgentController {
 
 //        JSONArray arrayFile = FileUtils.parseInfo(filesAll, false, appBasePath);
         JSONArray arrayFile = new JSONArray();
+        JSONArray arrayDir = new JSONArray();
         for (File file : filesAll) {
             JSONObject jsonObject = new JSONObject();
-            if (file.isDirectory()) {
-                jsonObject.put("isDirectory", true);
-                long sizeFile = FileUtil.size(file);
-                jsonObject.put("fileSize", FileUtil.readableFileSize(sizeFile));
-            } else {
-                jsonObject.put("fileSize", FileUtil.readableFileSize(file.length()));
-            }
+
+            jsonObject.put("parentPath", FileUtil.normalize(file.getParent()).replace(tomcatInfoModel.getAppBase(), ""));
             jsonObject.put("filename", file.getName());
             long mTime = file.lastModified();
             jsonObject.put("modifyTimeLong", mTime);
             jsonObject.put("modifyTime", DateUtil.date(mTime).toString());
 
-
+            if (file.isDirectory()) {
+                jsonObject.put("isDirectory", true);
+                long sizeFile = FileUtil.size(file);
+                jsonObject.put("fileSize", FileUtil.readableFileSize(sizeFile));
+                arrayDir.add(jsonObject);
+            } else {
+                jsonObject.put("fileSize", FileUtil.readableFileSize(file.length()));
+                arrayFile.add(jsonObject);
+            }
         }
 
-
-        return JsonMessage.getString(200, "查询成功", arrayFile);
+        JSONArray resultArray = new JSONArray();
+        resultArray.addAll(arrayDir);
+        resultArray.addAll(arrayFile);
+        return JsonMessage.getString(200, "查询成功", resultArray);
     }
 
 
@@ -361,6 +372,32 @@ public class TomcatManageController extends BaseAgentController {
         return JsonMessage.getString(200, "上传成功");
     }
 
+    /**
+     * 上传war文件
+     * @param id tomcat id
+     * @return 操作结果
+     */
+    @RequestMapping(value = "uploadWar", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    public String uploadWar(String id) {
+        TomcatInfoModel tomcatInfoModel = tomcatManageService.getItem(id);
+
+        MultipartFileBuilder multipartFileBuilder = createMultipart()
+                .addFieldName("file");
+
+        File dir = new File(tomcatInfoModel.getAppBase());
+
+        multipartFileBuilder.setSavePath(dir.getAbsolutePath())
+                .setUseOriginalFilename(true);
+        // 保存
+        try {
+            multipartFileBuilder.save();
+        } catch (IOException e) {
+            return JsonMessage.getString(500, "上传异常");
+        }
+
+        return JsonMessage.getString(200, "上传成功");
+    }
+
 
     /**
      * 删除文件
@@ -369,13 +406,16 @@ public class TomcatManageController extends BaseAgentController {
      * @return 操作结果
      */
     @RequestMapping(value = "deleteFile", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public String deleteFile(String id, String filename) {
+    public String deleteFile(String id, String path, String filename) {
         TomcatInfoModel tomcatInfoModel = tomcatManageService.getItem(id);
         if (tomcatInfoModel == null) {
             return JsonMessage.getString(500, "tomcat不存在");
         }
 
-        File file = new File(tomcatInfoModel.getAppBase().concat(FileUtil.normalize(filename)));
+        path = FileUtil.normalize(path);
+        filename = FileUtil.normalize(filename);
+
+        File file = new File(tomcatInfoModel.getAppBase().concat(path).concat(File.separator).concat(filename));
         if (file.exists()) {
             if (file.delete()) {
                 return JsonMessage.getString(200, "删除成功");
@@ -394,12 +434,12 @@ public class TomcatManageController extends BaseAgentController {
      * @return 操作结果
      */
     @RequestMapping(value = "download", method = RequestMethod.GET)
-    public String download(String id, String filename) {
+    public String download(String id, String path, String filename) {
         filename = FileUtil.normalize(filename);
-
+        path = FileUtil.normalize(path);
         try {
             TomcatInfoModel tomcatInfoModel = tomcatManageService.getItem(id);
-            File file = new File(tomcatInfoModel.getAppBase().concat(filename));
+            File file = new File(tomcatInfoModel.getAppBase().concat(path).concat(File.separator).concat(filename));
             if (file.isDirectory()) {
                 return "暂不支持下载文件夹";
             }
