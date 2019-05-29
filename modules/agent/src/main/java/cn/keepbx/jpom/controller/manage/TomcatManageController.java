@@ -103,7 +103,7 @@ public class TomcatManageController extends BaseAgentController {
         if (tomcatInfoModelTemp == null) {
 
             if (StrUtil.isEmpty(tomcatInfoModel.getAppBase())) {
-                tomcatInfoModel.setAppBase(FileUtil.normalize(tomcatInfoModel.getPath()).concat("webapps"));
+                tomcatInfoModel.setAppBase(FileUtil.normalize(tomcatInfoModel.getPath()).concat(File.separator).concat("webapps"));
             } else {
                 String path = FileUtil.normalize(tomcatInfoModel.getAppBase());
                 if (FileUtil.isAbsolutePath(path)) {
@@ -184,7 +184,7 @@ public class TomcatManageController extends BaseAgentController {
         if (tomcatInfoModelTemp == null || tomcatInfoModelTemp.getId().equals(tomcatInfoModel.getId())) {
 
             if (StrUtil.isEmpty(tomcatInfoModel.getAppBase())) {
-                tomcatInfoModel.setAppBase(FileUtil.normalize(tomcatInfoModel.getPath()).concat("webapps"));
+                tomcatInfoModel.setAppBase(FileUtil.normalize(tomcatInfoModel.getPath()).concat(File.separator).concat("webapps"));
             } else {
                 String path = FileUtil.normalize(tomcatInfoModel.getAppBase());
                 if (FileUtil.isAbsolutePath(path)) {

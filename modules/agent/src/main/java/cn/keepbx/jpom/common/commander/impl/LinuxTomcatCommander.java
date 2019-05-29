@@ -24,7 +24,7 @@ public class LinuxTomcatCommander extends AbstractTomcatCommander {
                         "-Dcatalina.base=\"%s\" " +
                         "-Dcatalina.home=\"%s\" " +
                         "-Djava.io.tmpdir=\"%stemp/\" " +
-                        "org.apache.catalina.startup.Bootstrap %s &", tomcatInfoModel.getPath(), tomcatInfoModel.getPath(),
+                        "org.apache.catalina.startup.Bootstrap %s", tomcatInfoModel.getPath(), tomcatInfoModel.getPath(),
                 tomcatInfoModel.getPath(), tomcatInfoModel.getPath(), tomcatInfoModel.getPath(),
                 tomcatInfoModel.getPath(), tomcatInfoModel.getPath(), cmd);
         try {

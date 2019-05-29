@@ -44,6 +44,10 @@ public class TomcatManageService extends BaseOperService<TomcatInfoModel> {
     public TomcatInfoModel getItemByName(String name) {
         JSONObject allTomcat = getJSONObject(AgentConfigBean.TOMCAT);
 
+        if (allTomcat == null) {
+            return null;
+        }
+
         JSONObject tomcat = null;
         for (String key : allTomcat.keySet()) {
             JSONObject object = allTomcat.getJSONObject(key);
