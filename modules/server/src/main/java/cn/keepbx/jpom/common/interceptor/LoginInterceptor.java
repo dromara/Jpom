@@ -2,6 +2,7 @@ package cn.keepbx.jpom.common.interceptor;
 
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.net.URLEncoder;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.extra.servlet.ServletUtil;
 import cn.jiangzeyin.common.JsonMessage;
@@ -110,6 +111,7 @@ public class LoginInterceptor extends BaseJpomInterceptor {
             File file = FileUtil.file(String.format("%s/script/common.js", path));
             if (file.exists()) {
                 jsCommonContext = FileUtil.readString(file, CharsetUtil.CHARSET_UTF_8);
+                jsCommonContext = URLEncoder.DEFAULT.encode(jsCommonContext, CharsetUtil.CHARSET_UTF_8);
             }
             session.setAttribute("jsCommonContext", jsCommonContext);
         }

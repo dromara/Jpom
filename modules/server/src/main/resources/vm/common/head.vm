@@ -54,7 +54,10 @@
         })
     ## js Common
         var jsCommonContext = document.getElementById("jsCommonContext").innerHTML;
-        $("body").append(jsCommonContext);
+        if (jsCommonContext && jsCommonContext !== '') {
+            jsCommonContext = decodeURIComponent(jsCommonContext);
+            $("body").append(jsCommonContext);
+        }
     ## 统一事件
         $("button[op='a']").click(function () {
             var href = $(this).attr("href");
