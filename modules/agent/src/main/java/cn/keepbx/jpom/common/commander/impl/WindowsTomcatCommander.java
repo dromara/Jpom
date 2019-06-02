@@ -1,6 +1,5 @@
 package cn.keepbx.jpom.common.commander.impl;
 
-import cn.hutool.http.HttpRequest;
 import cn.keepbx.jpom.common.commander.AbstractTomcatCommander;
 import cn.keepbx.jpom.model.data.TomcatInfoModel;
 
@@ -8,10 +7,19 @@ import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * tomcat的Windows管理命令
+ * @author LF
+ */
 public class WindowsTomcatCommander extends AbstractTomcatCommander {
+    /**
+     * windows下执行tomcat命令
+     * @param tomcatInfoModel tomcat信息
+     * @param cmd 执行的命令，包括start stop
+     * @return 返回tomcat启动结果
+     */
     @Override
     public String execCmd(TomcatInfoModel tomcatInfoModel, String cmd) {
-        String strReturn = "start".equals(cmd) ? "stopped" : "started";
 
         // 拼接命令
         String command = String.format("cmd /c java -Djava.util.logging.config.file=\"%sconf/logging.properties\" " +
@@ -27,6 +35,7 @@ public class WindowsTomcatCommander extends AbstractTomcatCommander {
                 tomcatInfoModel.getPath(), tomcatInfoModel.getPath(), tomcatInfoModel.getPath(),
                 tomcatInfoModel.getPath(), tomcatInfoModel.getPath(), cmd);
         try {
+            // 执行命令
             Process process = Runtime.getRuntime().exec(command, null, new File(tomcatInfoModel.getPath()));
 
             process.getInputStream().close();
@@ -37,32 +46,8 @@ public class WindowsTomcatCommander extends AbstractTomcatCommander {
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         }
-        // 检查tomcat是否已经启动或停止
-        int i = 0;
-        while (i < 10) {
-            int result = 0;
-            String url = String.format("http://127.0.0.1:%d/", tomcatInfoModel.getPort());
-            HttpRequest httpRequest = new HttpRequest(url);
-            httpRequest.setConnectionTimeout(3000); // 设置超时时间为3秒
-            try {
-                httpRequest.execute();
-                result = 1;
-            } catch (Exception ignored) {}
 
-            i++;
-            if ("start".equals(cmd) && result == 1) {
-                strReturn = "started";
-                break;
-            }
-            if ("stop".equals(cmd) && result == 0) {
-                strReturn = "stopped";
-                break;
-            }
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException ignored) {}
-        }
-
-        return strReturn;
+        // 查询操作结果并返回
+        return getStatus(tomcatInfoModel, cmd);
     }
 }

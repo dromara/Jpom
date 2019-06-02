@@ -78,8 +78,8 @@
         cols: [[
             {field: 'path', title: '项目路径', width: "25%"},
             {field: 'status', title: '运行状态', width: "25%", templet: function (d) { return d.status == 'running' ? '已运行' : '已停止'; }},
-            {field: 'session', title: 'Session个数', width: "25%"},
-            {field: 'opreation', title: '操作', toolbar: '#toolbar_op'}
+            {field: 'session', title: 'Session个数', width: "20%"},
+            {field: 'opreation', title: '操作', width: "250", hide: false, toolbar: '#toolbar_op'}
         ]],
         url: "./getTomcatProject",
         loading: true,
@@ -253,7 +253,7 @@
         var tip = {
             'stop': '确定停止项目' + data.path + '吗?',
             'reload': '确定重启项目' + data.path + '吗?',
-            'undeploy': '注意，您正面删除项目' + data.path + '，确定删除吗?',
+            'undeploy': '注意，您正在删除项目' + data.path + '，确定删除吗?',
         }
 
         if (tip[op]) {

@@ -128,6 +128,8 @@ public class TomcatManageController extends BaseAgentController {
             tomcatInfoModel.setId(SecureUtil.md5(DateUtil.now()));
             tomcatInfoModel.setCreator(getUserName());
             tomcatInfoModel.setCreateTime(DateUtil.now());
+            // 设置tomcat路径，去除多余的符号
+            tomcatInfoModel.setPath(FileUtil.normalize(tomcatInfoModel.getPath()));
             tomcatManageService.addItem(tomcatInfoModel);
             return JsonMessage.getString(200, "保存成功");
         } else {
@@ -208,6 +210,8 @@ public class TomcatManageController extends BaseAgentController {
 
             tomcatInfoModel.setModifyUser(getUserName());
             tomcatInfoModel.setModifyTime(DateUtil.now());
+            // 设置tomcat路径，去除多余的符号
+            tomcatInfoModel.setPath(FileUtil.normalize(tomcatInfoModel.getPath()));
             tomcatManageService.updateItem(tomcatInfoModel);
             return JsonMessage.getString(200, "修改成功");
         } else {
@@ -256,7 +260,11 @@ public class TomcatManageController extends BaseAgentController {
         TomcatInfoModel tomcatInfoModel = tomcatManageService.getItem(id);
 
         String result = AbstractTomcatCommander.getInstance().execCmd(tomcatInfoModel, "stop");
-        return JsonMessage.getString(200, "停止成功", result);
+        String msg = "停止成功";
+        if ("started".equals(result)) {
+            msg = "停止失败";
+        }
+        return JsonMessage.getString(200, msg, result);
     }
 
     /**

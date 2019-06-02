@@ -118,7 +118,9 @@ public class TomcatManageService extends BaseOperService<TomcatInfoModel> {
         TomcatInfoModel tomcatInfoModel = getItem(id);
         String body = tomcatCmd(tomcatInfoModel, "text/list");
 
-        String[] result = body.split("\r\n");
+        String[] result = body.replace("\r\n", "$")
+                .replace("\n", "$")
+                .split("\\$");
 
         JSONArray jsonArray = new JSONArray();
 
