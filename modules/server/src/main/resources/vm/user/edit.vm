@@ -3,6 +3,7 @@
 
 <head>
     #parse("./common/head.vm")
+    <link href="$!jpomProxyPath/static/ztree/zTreeStyle/zTreeStyle.css" rel="stylesheet">
     <title>项目管理系统</title>
     <style>
 
@@ -79,34 +80,7 @@
                                                     #if($userItem.nodeRole[$item.id].manage)
                                                        checked
                                                     #end
-                                                       name="$nowName"
-                                                       lay-filter="manage"
-                                                       lay-skin="switch"
-                                                       lay-text="是|否">
-                                            </div>
-                                        </div>
-                                        <div class="layui-inline">
-                                            <label class="layui-form-label" style="margin-top: 8px;">上传文件</label>
-                                            <div class="layui-input-block">
-                                                #set($nowName=$item.id+"_uploadFile")
-                                                <input type="checkbox" value="true"
-                                                    #if($userItem.nodeRole[$item.id].uploadFile)
-                                                       checked
-                                                    #end
-                                                       name="$nowName"
-                                                       lay-skin="switch"
-                                                       lay-text="是|否">
-                                            </div>
-                                        </div>
-                                        <div class="layui-inline">
-                                            <label class="layui-form-label" style="margin-top: 8px;">删除文件</label>
-                                            <div class="layui-input-block">
-                                                #set($nowName=$item.id+"_deleteFile")
-                                                <input type="checkbox" value="true"
-                                                    #if($userItem.nodeRole[$item.id].deleteFile)
-                                                       checked
-                                                    #end
-                                                       name="$nowName" lay-skin="switch"
+                                                       name="$nowName" lay-filter="manage" lay-skin="switch"
                                                        lay-text="是|否">
                                             </div>
                                         </div>
@@ -115,19 +89,29 @@
                                 <div class="layui-colla-content layui-show">
                                     <div class="layui-form-item" id="projectsDiv">
                                         <div class="layui-inline">
-                                            <label class="layui-form-label" title="能删除项目，启动停止项目">管理项目</label>
+                                            <label class="layui-form-label">上传文件</label>
                                             <div class="layui-input-block">
-                                                #foreach($pItem in $item.projects)
-                                                    #set($nowName="p_"+$item.id+"_"+$pItem.id)
-                                                    <input type="checkbox"
-                                                           p="p_$item.id"
-                                                           name="$nowName"
-                                                           #if($userItem.isProject($item.id,$pItem.id))checked#end
-                                                           project="$pItem.id"
-                                                           value="$pItem.id"
-                                                           title="$pItem.name">
-                                                #end
+                                                #set($nowName=$item.id+"_uploadFile")
+                                                <input type="checkbox" value="true"
+                                                    #if($userItem.nodeRole[$item.id].uploadFile)
+                                                       checked
+                                                    #end
+                                                       name="$nowName" lay-skin="switch" lay-text="是|否">
                                             </div>
+                                        </div>
+                                        <div class="layui-inline">
+                                            <label class="layui-form-label">删除文件</label>
+                                            <div class="layui-input-block">
+                                                #set($nowName=$item.id+"_deleteFile")
+                                                <input type="checkbox" value="true"
+                                                    #if($userItem.nodeRole[$item.id].deleteFile)
+                                                       checked
+                                                    #end
+                                                       name="$nowName" lay-skin="switch" lay-text="是|否">
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <ul id="tree_$item.id" class="ztree"></ul>
                                         </div>
                                     </div>
                                 </div>
@@ -142,8 +126,6 @@
                         </div>
                     #end
                 </div>
-
-
             </div>
         </div>
         #if(!$errorNode)
@@ -161,10 +143,18 @@
         layui.stope(e);
     }
 
+    function evil(fn) {
+        var Fn = Function;
+        return new Fn('return ' + fn)();
+    }
+
     function loadSuccess() {
+        var treeNodes = [];
+
         // 提交用户信息
         form.on('submit(submitUser)', function (data) {
             var sendData = formatPwd(data.field, "password");
+            sendData = getCheckProject(sendData);
             loadingAjax({
                 url: data.form.action,
                 data: sendData,
@@ -181,16 +171,118 @@
             });
             return false;
         });
-        //
-        form.on('switch(manage)', function (data) {
-            var nodeId = $(data.elem).attr("nodeId");
-            if (data.elem.checked) {
-                $('input[p="p_' + nodeId + '"]').prop('disabled', false).removeClass('layui-disabled');
-            } else {
-                $('input[p="p_' + nodeId + '"]').prop('disabled', true).addClass('layui-disabled');
+
+        //勾选的项目 排除目录
+        function getCheckProject(data) {
+            if (!treeNodes || treeNodes.length <= 0) {
+                return data;
             }
-            form.render();
+            var projects = {};
+            for (var i = 0; i < treeNodes.length; i++) {
+                var treeNode = treeNodes[i];
+                var nodes = treeNode.getCheckedNodes(true);
+                if (!nodes || nodes.length <= 0) {
+                    continue;
+                }
+                var group = treeNode.group;
+                var nodeProjects = [];
+                var nodeId = "localhost";
+                for (var j = 0; j < nodes.length; j++) {
+                    var node = nodes[j];
+                    if (node.nodeId) {
+                        nodeId = node.nodeId;
+                    }
+                    var id = node.id;
+                    if (id) {
+                        nodeProjects.push(id);
+                    }
+                }
+                projects[nodeId] = nodeProjects;
+            }
+            data.projects = JSON.stringify(projects);
+            return data;
+        }
+
+        asyncLoadJs("$!jpomProxyPath/static/ztree/jquery.ztree.core.min.js", function () {
+            asyncLoadJs("$!jpomProxyPath/static/ztree/jquery.ztree.excheck.min.js", function () {
+                var nodeModels = '$nodeModels';
+                if (typeof nodeModels == "string") {
+                    nodeModels = evil(nodeModels);
+                }
+                var setting = {
+                    check: {
+                        enable: true,
+                        chkStyle: "checkbox",
+                        chkboxType: {
+                            "Y": "ps",
+                            "N": "ps"
+                        },
+                        autoCheckTrigger: true
+                    },
+                    data: {
+                        simpleData: {
+                            enable: true
+                        },
+                        key: {
+                            name: "name",
+                            children: "projects"
+                        },
+                        view: {
+                            selectedMulti: false
+                        }
+                    }
+                };
+
+                if (nodeModels && nodeModels.length > 0) {
+                    for (var j = 0; j < nodeModels.length; j++) {
+                        var nodeModel = nodeModels[j];
+                        var groupProjects = nodeModel.groupProjects;
+                        if (groupProjects && groupProjects.length > 0) {
+                            for (var i = 0; i < groupProjects.length; i++) {
+                                var project = groupProjects[i];
+                                project.name = project.group;
+                            }
+                        }
+                        var item = {
+                            name: '项目管理',
+                            projects: groupProjects,
+                            nodeId: nodeModel.id
+                        };
+                        var id = "#tree_" + nodeModel.id;
+                        var zTreeObj = $.fn.zTree.init($(id), setting, item);
+                        treeNodes.push(zTreeObj);
+                        //展开节点
+                        zTreeObj.expandAll(true);
+                    }
+                }
+                loadProjects();
+            });
         });
+
+        //渲染选中节点
+        function loadProjects() {
+            var userItem = '$!userItem';
+            if (!userItem) {
+                return false;
+            }
+            if (typeof userItem == "string") {
+                userItem = evil(userItem);
+            }
+            var nodeRole = userItem.nodeRole;
+            for (var key in nodeRole) {
+                var item = nodeRole[key];
+                var projects = item.projects;
+                if (!projects || projects.length <= 0) {
+                    continue;
+                }
+                var treeObj = $.fn.zTree.getZTreeObj("tree_" + key);
+                for (var i = 0; i < projects.length; i++) {
+                    var id = projects[i];
+                    var obj = treeObj.getNodeByParam("id", id, null);
+                    treeObj.checkNode(obj, true, true);
+                }
+            }
+        }
     }
 </script>
 </html>
