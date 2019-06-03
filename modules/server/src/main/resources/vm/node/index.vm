@@ -76,6 +76,10 @@
                 ##                        <a href="javascript:;"
                 ##                           data-options="{'id':'downtime', 'title':'宕机计划', 'url':'./manage/projectInfo'}">宕机计划</a>
                 ##                    </li>
+                    <li class="layui-nav-item">
+                        <a href="javascript:;"
+                           data-options="{'id':'tomcatManage', 'title':'Tomcat管理', 'url':'./tomcat/tomcatManage'}">Tomcat管理</a>
+                    </li>
                     #if($user.isManage($node.id))
                         <li class="layui-nav-item">
                             <a href="javascript:;"
@@ -97,11 +101,6 @@
                                data-options="{'id':'alioss', 'title':'阿里云OSS', 'url':'./system/alioss'}">阿里云OSS</a>
                         </li>
                     #end
-
-                    <li class="layui-nav-item">
-                        <a href="javascript:;"
-                           data-options="{'id':'tomcatManage', 'title':'Tomcat管理', 'url':'./tomcat/tomcatManage'}">Tomcat管理</a>
-                    </li>
                 </ul>
             </div>
         </div>

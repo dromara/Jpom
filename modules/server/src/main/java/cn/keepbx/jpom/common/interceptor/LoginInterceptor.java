@@ -104,16 +104,19 @@ public class LoginInterceptor extends BaseJpomInterceptor {
             }
         } catch (Exception ignored) {
         }
-        // 统一的js 注入
-        String jsCommonContext = (String) session.getAttribute("jsCommonContext");
-        if (jsCommonContext == null) {
-            String path = ExtConfigBean.getInstance().getPath();
-            File file = FileUtil.file(String.format("%s/script/common.js", path));
-            if (file.exists()) {
-                jsCommonContext = FileUtil.readString(file, CharsetUtil.CHARSET_UTF_8);
-                jsCommonContext = URLEncoder.DEFAULT.encode(jsCommonContext, CharsetUtil.CHARSET_UTF_8);
+        try {
+            // 统一的js 注入
+            String jsCommonContext = (String) session.getAttribute("jsCommonContext");
+            if (jsCommonContext == null) {
+                String path = ExtConfigBean.getInstance().getPath();
+                File file = FileUtil.file(String.format("%s/script/common.js", path));
+                if (file.exists()) {
+                    jsCommonContext = FileUtil.readString(file, CharsetUtil.CHARSET_UTF_8);
+                    jsCommonContext = URLEncoder.DEFAULT.encode(jsCommonContext, CharsetUtil.CHARSET_UTF_8);
+                }
+                session.setAttribute("jsCommonContext", jsCommonContext);
             }
-            session.setAttribute("jsCommonContext", jsCommonContext);
+        } catch (IllegalStateException ignored) {
         }
     }
 
