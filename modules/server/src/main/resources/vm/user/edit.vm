@@ -89,29 +89,34 @@
                                 <div class="layui-colla-content layui-show">
                                     <div class="layui-form-item" id="projectsDiv">
                                         <div class="layui-inline">
-                                            <label class="layui-form-label">上传文件</label>
-                                            <div class="layui-input-block">
-                                                #set($nowName=$item.id+"_uploadFile")
-                                                <input type="checkbox" value="true"
-                                                    #if($userItem.nodeRole[$item.id].uploadFile)
-                                                       checked
-                                                    #end
-                                                       name="$nowName" lay-skin="switch" lay-text="是|否">
+                                            <label class="layui-form-label" title="能删除项目，启动停止项目">管理项目</label>
+                                            <div class="layui-inline">
+                                                <div class="layui-inline">
+                                                    <label class="layui-form-label">上传文件</label>
+                                                    <div class="layui-input-block">
+                                                        #set($nowName=$item.id+"_uploadFile")
+                                                        <input type="checkbox" value="true"
+                                                            #if($userItem.nodeRole[$item.id].uploadFile)
+                                                               checked
+                                                            #end
+                                                               name="$nowName" lay-skin="switch" lay-text="是|否">
+                                                    </div>
+                                                </div>
+                                                <div class="layui-inline">
+                                                    <label class="layui-form-label">删除文件</label>
+                                                    <div class="layui-input-block">
+                                                        #set($nowName=$item.id+"_deleteFile")
+                                                        <input type="checkbox" value="true"
+                                                            #if($userItem.nodeRole[$item.id].deleteFile)
+                                                               checked
+                                                            #end
+                                                               name="$nowName" lay-skin="switch" lay-text="是|否">
+                                                    </div>
+                                                </div>
+                                                <div>
+                                                    <ul id="tree_$item.id" class="ztree"></ul>
+                                                </div>
                                             </div>
-                                        </div>
-                                        <div class="layui-inline">
-                                            <label class="layui-form-label">删除文件</label>
-                                            <div class="layui-input-block">
-                                                #set($nowName=$item.id+"_deleteFile")
-                                                <input type="checkbox" value="true"
-                                                    #if($userItem.nodeRole[$item.id].deleteFile)
-                                                       checked
-                                                    #end
-                                                       name="$nowName" lay-skin="switch" lay-text="是|否">
-                                            </div>
-                                        </div>
-                                        <div>
-                                            <ul id="tree_$item.id" class="ztree"></ul>
                                         </div>
                                     </div>
                                 </div>
@@ -241,15 +246,11 @@
                             for (var i = 0; i < groupProjects.length; i++) {
                                 var project = groupProjects[i];
                                 project.name = project.group;
+                                project.nodeId = nodeModel.id
                             }
                         }
-                        var item = {
-                            name: '项目管理',
-                            projects: groupProjects,
-                            nodeId: nodeModel.id
-                        };
                         var id = "#tree_" + nodeModel.id;
-                        var zTreeObj = $.fn.zTree.init($(id), setting, item);
+                        var zTreeObj = $.fn.zTree.init($(id), setting, groupProjects);
                         treeNodes.push(zTreeObj);
                         //展开节点
                         zTreeObj.expandAll(true);

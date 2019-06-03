@@ -241,15 +241,6 @@ public class UserInfoController extends BaseServerController {
             nodeRole.setDeleteFile(manageB);
             JSONArray jsonArray = nodeModel.getProjects();
             if (jsonArray != null && projectsJson != null) {
-//                JSONArray jsonArray1 = new JSONArray();
-//                jsonArray.forEach(o -> {
-//                    JSONObject data = (JSONObject) o;
-//                    String id1 = data.getString("id");
-//                    String val = getParameter(StrUtil.format("p_{}_{}", nodeModel.getId(), id1));
-//                    if (id1.equals(val)) {
-//                        jsonArray1.add(id1);
-//                    }
-//                });
                 JSONArray jsonArray1 = projectsJson.getJSONArray(nodeModel.getId());
                 nodeRole.setProjects(jsonArray1);
             }
