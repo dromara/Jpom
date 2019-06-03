@@ -216,6 +216,11 @@ public class UserInfoController extends BaseServerController {
         userModel.setServerManager(manageB);
 
         UserModel.NodeRole nodeRole;
+        String projects = getParameter("projects");
+        JSONObject projectsJson = null;
+        if (StrUtil.isNotEmpty(projects)) {
+            projectsJson = JSONObject.parseObject(projects);
+        }
         for (NodeModel nodeModel : list) {
             nodeRole = new UserModel.NodeRole();
             nodeRole.setId(nodeModel.getId());
@@ -235,16 +240,17 @@ public class UserInfoController extends BaseServerController {
             }
             nodeRole.setDeleteFile(manageB);
             JSONArray jsonArray = nodeModel.getProjects();
-            if (jsonArray != null) {
-                JSONArray jsonArray1 = new JSONArray();
-                jsonArray.forEach(o -> {
-                    JSONObject data = (JSONObject) o;
-                    String id1 = data.getString("id");
-                    String val = getParameter(StrUtil.format("p_{}_{}", nodeModel.getId(), id1));
-                    if (id1.equals(val)) {
-                        jsonArray1.add(id1);
-                    }
-                });
+            if (jsonArray != null && projectsJson != null) {
+//                JSONArray jsonArray1 = new JSONArray();
+//                jsonArray.forEach(o -> {
+//                    JSONObject data = (JSONObject) o;
+//                    String id1 = data.getString("id");
+//                    String val = getParameter(StrUtil.format("p_{}_{}", nodeModel.getId(), id1));
+//                    if (id1.equals(val)) {
+//                        jsonArray1.add(id1);
+//                    }
+//                });
+                JSONArray jsonArray1 = projectsJson.getJSONArray(nodeModel.getId());
                 nodeRole.setProjects(jsonArray1);
             }
             userModel.putNodeRole(nodeRole);
