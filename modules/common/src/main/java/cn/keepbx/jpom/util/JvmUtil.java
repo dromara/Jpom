@@ -145,7 +145,7 @@ public class JvmUtil {
             VirtualMachine virtualMachine;
             try {
                 virtualMachine = VirtualMachine.attach(virtualMachineDescriptor);
-            } catch (AttachNotSupportedException e) {
+            } catch (AttachNotSupportedException | IOException e) {
                 DefaultSystemLog.ERROR().error("获取jvm信息失败：" + virtualMachineDescriptor.id(), e);
                 continue;
             }

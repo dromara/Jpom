@@ -52,6 +52,12 @@
         layui.each(asyncFn, function () {
             this && this();
         })
+    ## js Common
+        var jsCommonContext = document.getElementById("jsCommonContext").innerHTML;
+        if (jsCommonContext && jsCommonContext !== '') {
+            jsCommonContext = decodeURIComponent(jsCommonContext);
+            $("body").append(jsCommonContext);
+        }
     ## 统一事件
         $("button[op='a']").click(function () {
             var href = $(this).attr("href");
@@ -65,7 +71,6 @@
     }
 
     function tabChange(options) {
-        console.log(options)
         var element = top.layui.element;
         var lay_id = 'tab_' + options.id;
         if (options.id != "welcome") {
@@ -279,3 +284,5 @@
     }
 
 </script>
+
+<script id="jsCommonContext" type="text/html">$!jsCommonContext</script>

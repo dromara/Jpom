@@ -56,8 +56,13 @@ public class LinuxProjectCommander extends AbstractProjectCommander {
     }
 
     @Override
-    public List<NetstatModel> listNetstat(int pId) {
-        String cmd = "netstat -antup | grep " + pId + " |grep -v \"CLOSE_WAIT\" | head -20";
+    public List<NetstatModel> listNetstat(int pId, boolean listening) {
+        String cmd;
+        if (listening) {
+            cmd = "netstat -antup | grep " + pId + " |grep \"LISTEN\" | head -20";
+        } else {
+            cmd = "netstat -antup | grep " + pId + " |grep -v \"CLOSE_WAIT\" | head -20";
+        }
         String result = CommandUtil.execSystemCommand(cmd);
         List<String> netList = StrSpliter.splitTrim(result, "\n", true);
         if (netList == null || netList.size() <= 0) {

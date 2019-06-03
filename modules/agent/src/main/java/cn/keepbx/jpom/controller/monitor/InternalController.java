@@ -54,7 +54,7 @@ public class InternalController extends BaseAgentController {
         JSONObject beanMem = getBeanMem(tag);
         jsonObject.put("beanMem", beanMem);
         //获取端口信息
-        List<NetstatModel> netstatModels = AbstractProjectCommander.getInstance().listNetstat(pid);
+        List<NetstatModel> netstatModels = AbstractProjectCommander.getInstance().listNetstat(pid, false);
         jsonObject.put("netstat", netstatModels);
         return JsonMessage.getString(200, "", jsonObject);
     }

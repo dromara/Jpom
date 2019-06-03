@@ -1,6 +1,5 @@
 package cn.keepbx.jpom.controller.outgiving;
 
-import cn.hutool.core.lang.Validator;
 import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.keepbx.jpom.common.BaseServerController;
@@ -10,6 +9,7 @@ import cn.keepbx.jpom.model.data.*;
 import cn.keepbx.jpom.service.node.OutGivingServer;
 import cn.keepbx.jpom.service.system.ServerWhitelistServer;
 import cn.keepbx.jpom.util.JsonFileUtil;
+import cn.keepbx.jpom.util.StringUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.http.MediaType;
@@ -90,7 +90,7 @@ public class OutGivingController extends BaseServerController {
     @UrlPermission(value = Role.ServerManager, optType = UserOperateLogV1.OptType.SaveOutGiving)
     public String save(String type, String id) throws IOException {
         if ("add".equalsIgnoreCase(type)) {
-            if (!Validator.isGeneral(id, 2, 20)) {
+            if (!StringUtil.isGeneral(id, 2, 20)) {
                 return JsonMessage.getString(401, "分发id 不能为空并且长度在2-20（英文字母 、数字和下划线）");
             }
             return addOutGiving(id);

@@ -24,6 +24,8 @@ public class AgentConfigBean {
      * 项目数据文件
      */
     public static final String PROJECT = "project.json";
+
+    public static final String TOMCAT = "tomcat.json";
     /**
      * 项目回收文件
      */

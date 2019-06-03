@@ -17,6 +17,7 @@ import cn.keepbx.jpom.model.RunMode;
 import cn.keepbx.jpom.model.data.ProjectInfoModel;
 import cn.keepbx.jpom.service.WhitelistDirectoryService;
 import cn.keepbx.jpom.system.ConfigBean;
+import cn.keepbx.jpom.util.StringUtil;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -52,7 +53,7 @@ public class EditProjectController extends BaseAgentController {
         if (StrUtil.isEmptyOrUndefined(id)) {
             return JsonMessage.getString(400, "项目id不能为空");
         }
-        if (!Validator.isGeneral(id, 2, 20)) {
+        if (!StringUtil.isGeneral(id, 2, 20)) {
             return JsonMessage.getString(401, "项目id 长度范围2-20（英文字母 、数字和下划线）");
         }
         if (BaseJpomApplication.SYSTEM_ID.equals(id)) {
@@ -194,7 +195,7 @@ public class EditProjectController extends BaseAgentController {
                     return JsonMessage.getString(200, "新增成功！");
                 }
             }
-            // 新增但是下面id 已经存在
+            // 新增但是项目id 已经存在
             if (!"on".equalsIgnoreCase(edit)) {
                 return JsonMessage.getString(400, "项目id已经存在啦");
             }

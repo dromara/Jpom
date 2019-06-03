@@ -107,7 +107,7 @@ public class AgentWebSocketConsoleHandle extends BaseAgentWebSocketHandle {
                 case restart:
                     logUser = true;
                     strResult = consoleService.execCommand(consoleCommandOp, projectInfoModel);
-                    if (strResult.contains(AbstractProjectCommander.RUNING_TAG)) {
+                    if (strResult.contains(AbstractProjectCommander.RUNNING_TAG)) {
                         resultData = JsonMessage.toJson(200, "操作成功:" + strResult);
                     } else {
                         resultData = JsonMessage.toJson(400, strResult);
@@ -126,7 +126,7 @@ public class AgentWebSocketConsoleHandle extends BaseAgentWebSocketHandle {
                 case status:
                     // 获取项目状态
                     strResult = consoleService.execCommand(consoleCommandOp, projectInfoModel);
-                    if (strResult.contains(AbstractProjectCommander.RUNING_TAG)) {
+                    if (strResult.contains(AbstractProjectCommander.RUNNING_TAG)) {
                         resultData = JsonMessage.toJson(200, "运行中", strResult);
                     } else {
                         resultData = JsonMessage.toJson(404, "未运行", strResult);

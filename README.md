@@ -44,8 +44,8 @@
 3. cpu、ram 监控、导出堆栈信息、查看项目进程端口、服务器状态监控
 4. 多节点管理、多节点自动分发
 5. 多用户管理，用户项目权限独立(上传、删除权限可控制),完善的操作日志
-6. 系统路径白名单模式，杜绝用户误操作系统文件
-7. 在线管理Nginx配置、ssl证书文件
+6. 系统路径[白名单模式](/doc/whitelist.md)，杜绝用户误操作系统文件
+7. [在线管理Nginx配置](/doc/nginx-manager.md)、ssl证书文件
 8. [阿里云 CodePipeline + Oss在线管理](/doc/CodePipeline-Oss.md)
 
 #### 基本操作演示
@@ -60,11 +60,11 @@
 
 1. 下载安装包 [https://gitee.com/keepbx/Jpom/attach_files](https://gitee.com/keepbx/Jpom/attach_files)
 2. 解压文件
-3. 安装插件端
+3. 安装插件端（[流程说明](/doc/install.md#安装插件端)）
     1. agent-x.x.x-release 目录为插件端的全部安装文件
     2. 上传到对应服务器
     3. 命令运行（Agent.sh、Agent.bat）
-4. 安装服务端
+4. 安装服务端（[流程说明](/doc/install.md#安装服务端)）
     1. server-x.x.x-release 目录为服务端的全部安装文件
     2. 上传到对应服务器
     3. 命令运行（Server.sh、Server.bat）
@@ -75,11 +75,11 @@
 
 1. 访问[Jpom](https://gitee.com/keepbx/Jpom)的码云主页,拉取最新完整代码(建议使用master分支)
 2. 进入项目目录执行:`mvn clean package`
-3. 安装插件端
+3. 安装插件端（[流程说明](/doc/install.md#安装插件端)）
     1. 查看插件端安装包 modules/agent/target/agent-x.x.x-release
     2. 打包上传服务器运行
     3. 命令运行（Agent.sh、Agent.bat）
-4. 安装服务端
+4. 安装服务端（[流程说明](/doc/install.md#安装服务端)）
     1. 查看插件端安装包 modules/server/target/server-x.x.x-release
     2. 打包上传服务器运行
     3. 命令运行（Server.sh、Server.bat）

@@ -241,8 +241,11 @@ public class UserOperateLogV1 extends BaseJsonModel {
         Save_Script(39, "保存脚本模板"),
         Script_Start(40, "执行脚本"),
         Script_Stop(41, "停止脚本"),
-        Save_Upload(34, "导入脚本模板"),
-        Save_Del(34, "删除脚本模板"),
+        Save_Upload(42, "导入脚本模板"),
+        Save_Del(43, "删除脚本模板"),
+
+        Save_Tomcat(44, "修改tomcat"),
+        Del_Tomcat(45, "删除tomcat"),
 
         ;
         private int code;

@@ -48,7 +48,12 @@ public class AgentWhitelist extends BaseJsonModel {
         this.nginx = nginx;
     }
 
-
+    /**
+     * 格式化，判断是否与jpom 数据路径冲突
+     *
+     * @param list list
+     * @return null 是有冲突的
+     */
     public static List<String> covertToArray(List<String> list) {
         List<String> array = new ArrayList<>();
         for (String s : list) {

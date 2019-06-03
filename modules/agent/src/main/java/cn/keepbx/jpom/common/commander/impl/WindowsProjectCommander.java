@@ -57,8 +57,13 @@ public class WindowsProjectCommander extends AbstractProjectCommander {
     }
 
     @Override
-    public List<NetstatModel> listNetstat(int pId) {
-        String cmd = "netstat -nao -p tcp | findstr /V \"CLOSE_WAIT\" | findstr " + pId;
+    public List<NetstatModel> listNetstat(int pId, boolean listening) {
+        String cmd;
+        if (listening) {
+            cmd = "netstat -nao -p tcp | findstr \"LISTENING\" | findstr " + pId;
+        } else {
+            cmd = "netstat -nao -p tcp | findstr /V \"CLOSE_WAIT\" | findstr " + pId;
+        }
         String result = CommandUtil.execSystemCommand(cmd);
         List<String> netList = StrSpliter.splitTrim(result, StrUtil.LF, true);
         if (netList == null || netList.size() <= 0) {
