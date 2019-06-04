@@ -36,8 +36,9 @@
     </div>
     <div class="layui-col-md9">
         <div class="layui-row">
-            <button id="uploadFile" class="layui-btn layui-btn-sm"><i class="layui-icon">&#xe67c;</i>上传文件</button>
-
+            #if($user.isUploadTomcatFile($node.id))
+                <button id="uploadFile" class="layui-btn layui-btn-sm"><i class="layui-icon">&#xe67c;</i>上传文件</button>
+            #end
             <div class="layui-layout-right" style="padding-right: 20px;padding-top: 10px;">
                 <div>
                     当前路径:<span id="currentPath">$project</span>
@@ -50,10 +51,14 @@
 </body>
 ##	删除按钮
 <script type="text/html" id="bar_projects">
-    <a href="javascript:;" class="layui-btn layui-btn-sm layui-btn-danger" lay-event="delete">删除</a>
-    {{# if(!d.isDirectory){ }}
-    <a href="javascript:;" class="layui-btn layui-btn-sm layui-btn-normal" lay-event="download">下载</a>
-    {{# } }}
+        #if($user.isDeleteTomcatFile($node.id))
+        <a href="javascript:;" class="layui-btn layui-btn-sm layui-btn-danger" lay-event="delete">删除</a>
+        #end
+        #if($user.isTomcat($node.id,$id))
+        {{# if(!d.isDirectory){ }}
+        <a href="javascript:;" class="layui-btn layui-btn-sm layui-btn-normal" lay-event="download">下载</a>
+        {{# } }}
+        #end
 </script>
 <script type="text/javascript">
     var zTreeObj;
@@ -107,7 +112,7 @@
                     if (child) {
                         zTreeObj.removeChildNodes(currentNode);
                         var temp = [];
-                        for(var i in child) {
+                        for (var i in child) {
                             if (child[i].isDirectory) {
                                 temp.push(child[i]);
                             }
@@ -203,41 +208,41 @@
                 layer.msg('上传失败');
             }
         });
-        ##
-        ## uploadRender({
-        ##     elem: '#uploadFile_Import_dom',
-        ##     accept: 'file',
-        ##     data: {
-        ##         id: '$id',
-        ##         type: "unzip",
-        ##         clearType: function () {
-        ##             return $("#uploadFile_Import").attr("type");
-        ##         },
-        ##         levelName: function () {
-        ##             return $("#currentPath").text();
-        ##         }
-        ##     },
-        ##     multiple: false,
-        ##     exts: 'zip',
-        ##     acceptMime: '.zip',
-        ##     url: './upload',
-        ##     before: function () {
-        ##         layer.load(1, {
-        ##             shade: [0.5, '#fff'] //0.1透明度的白色背景
-        ##         });
-        ##     },
-        ##     done: function (res, index, upload) {
-        ##         layer.msg(res.msg);
-        ##         setTimeout(function () {
-        ##             layer.closeAll();
-        ##             reloadTable();
-        ##         }, 2000);
-        ##     },
-        ##     error: function () {
-        ##         layer.closeAll();
-        ##         layer.msg('上传失败');
-        ##     }
-        ## });
+    ##
+    ## uploadRender({
+    ##     elem: '#uploadFile_Import_dom',
+    ##     accept: 'file',
+    ##     data: {
+    ##         id: '$id',
+    ##         type: "unzip",
+    ##         clearType: function () {
+    ##             return $("#uploadFile_Import").attr("type");
+    ##         },
+    ##         levelName: function () {
+    ##             return $("#currentPath").text();
+    ##         }
+    ##     },
+    ##     multiple: false,
+    ##     exts: 'zip',
+    ##     acceptMime: '.zip',
+    ##     url: './upload',
+    ##     before: function () {
+    ##         layer.load(1, {
+    ##             shade: [0.5, '#fff'] //0.1透明度的白色背景
+    ##         });
+    ##     },
+    ##     done: function (res, index, upload) {
+    ##         layer.msg(res.msg);
+    ##         setTimeout(function () {
+    ##             layer.closeAll();
+    ##             reloadTable();
+    ##         }, 2000);
+    ##     },
+    ##     error: function () {
+    ##         layer.closeAll();
+    ##         layer.msg('上传失败');
+    ##     }
+    ## });
 
         // 表格工具条事件
         table.on('tool(tab_file)', function (obj) {
@@ -270,12 +275,12 @@
         table.reload('table_file', {
             url: './getFileList',
             where: tableWhere,
-            done: function(data) {
+            done: function (data) {
                 var child = data.data;
                 if (child) {
                     zTreeObj.removeChildNodes(currentNode);
                     var temp = [];
-                    for(var i in child) {
+                    for (var i in child) {
                         if (child[i].isDirectory) {
                             temp.push(child[i]);
                         }

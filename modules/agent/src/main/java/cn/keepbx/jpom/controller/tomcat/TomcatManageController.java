@@ -2,6 +2,8 @@ package cn.keepbx.jpom.controller.tomcat;
 
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.io.resource.ResourceUtil;
+import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.core.util.ZipUtil;
 import cn.hutool.crypto.SecureUtil;
@@ -29,6 +31,7 @@ import javax.annotation.Resource;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 
 /**
@@ -97,50 +100,24 @@ public class TomcatManageController extends BaseAgentController {
      */
     @RequestMapping(value = "add", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public String add(TomcatInfoModel tomcatInfoModel) {
-        String tomcatPath = tomcatInfoModel.getPath();
-        // 判断Tomcat路径是否正确
-        if (!isTomcatRoot(tomcatPath)) {
-            return JsonMessage.getString(405, String.format("没有在路径：%s 下检测到Tomcat", tomcatPath));
-        }
-
         // 根据Tomcat名称查询tomcat是否已经存在
         String name = tomcatInfoModel.getName();
         TomcatInfoModel tomcatInfoModelTemp = tomcatManageService.getItemByName(name);
-        if (tomcatInfoModelTemp == null) {
-
-            if (StrUtil.isEmpty(tomcatInfoModel.getAppBase())) {
-                tomcatInfoModel.setAppBase(FileUtil.normalize(tomcatInfoModel.getPath()).concat(File.separator).concat("webapps"));
-            } else {
-                String path = FileUtil.normalize(tomcatInfoModel.getAppBase());
-                if (FileUtil.isAbsolutePath(path)) {
-                    // appBase如：/project/、D:/project/
-                    tomcatInfoModel.setAppBase(path);
-                } else {
-                    // appBase填写的是对相路径如：project/dir
-                    tomcatInfoModel.setAppBase(FileUtil.normalize(tomcatInfoModel.getPath()).concat(FileUtil.normalize(path)));
-                }
-            }
-
-            // 解压代理工具到tomcat的appBase目录下
-            try {
-                File file = ResourceUtils.getFile("classpath:bin/jpomAgent.zip");
-                ZipUtil.unzip(file, new File(tomcatInfoModel.getAppBase()));
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-                DefaultSystemLog.ERROR().error("jpomAgent.zip不存在", e);
-                return JsonMessage.getString(500, "jpomAgent.zip不存在");
-            }
-
-            tomcatInfoModel.setId(SecureUtil.md5(DateUtil.now()));
-            tomcatInfoModel.setCreator(getUserName());
-            tomcatInfoModel.setCreateTime(DateUtil.now());
-            // 设置tomcat路径，去除多余的符号
-            tomcatInfoModel.setPath(FileUtil.normalize(tomcatInfoModel.getPath()));
-            tomcatManageService.addItem(tomcatInfoModel);
-            return JsonMessage.getString(200, "保存成功");
-        } else {
+        if (tomcatInfoModelTemp != null) {
             return JsonMessage.getString(401, "名称已经存在，请使用其他名称！");
         }
+        String error = this.doInitTomcat(tomcatInfoModel);
+        if (error != null) {
+            return error;
+        }
+
+        tomcatInfoModel.setId(SecureUtil.md5(DateUtil.now()));
+        tomcatInfoModel.setCreator(getUserName());
+        tomcatInfoModel.setCreateTime(DateUtil.now());
+        // 设置tomcat路径，去除多余的符号
+        tomcatInfoModel.setPath(FileUtil.normalize(tomcatInfoModel.getPath()));
+        tomcatManageService.addItem(tomcatInfoModel);
+        return JsonMessage.getString(200, "保存成功");
     }
 
     /**
@@ -155,10 +132,16 @@ public class TomcatManageController extends BaseAgentController {
                 return false;
             } else {
                 File[] files = file.listFiles();
+                if (files == null) {
+                    return false;
+                }
                 // 判断该目录下是否
                 for (File child : files) {
                     if ("bin".equals(child.getName()) && child.isDirectory()) {
                         File[] binFiles = child.listFiles();
+                        if (binFiles == null) {
+                            return false;
+                        }
                         for (File binChild : binFiles) {
                             if ("bootstrap.jar".equals(binChild.getName()) && binChild.isFile()) {
                                 return true;
@@ -181,50 +164,52 @@ public class TomcatManageController extends BaseAgentController {
      */
     @RequestMapping(value = "update", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public String update(TomcatInfoModel tomcatInfoModel) {
+        // 根据Tomcat名称查询tomcat是否已经存在
+        String name = tomcatInfoModel.getName();
+        TomcatInfoModel tomcatInfoModelTemp = tomcatManageService.getItemByName(name);
+        if (tomcatInfoModelTemp != null && !tomcatInfoModelTemp.getId().equals(tomcatInfoModel.getId())) {
+            return JsonMessage.getString(401, "名称已经存在，请使用其他名称！");
+        }
+        String error = this.doInitTomcat(tomcatInfoModel);
+        if (error != null) {
+            return error;
+        }
 
+        tomcatInfoModel.setModifyUser(getUserName());
+        tomcatInfoModel.setModifyTime(DateUtil.now());
+        // 设置tomcat路径，去除多余的符号
+        tomcatInfoModel.setPath(FileUtil.normalize(tomcatInfoModel.getPath()));
+        tomcatManageService.updateItem(tomcatInfoModel);
+        return JsonMessage.getString(200, "修改成功");
+
+    }
+
+    private String doInitTomcat(TomcatInfoModel tomcatInfoModel) {
         String tomcatPath = tomcatInfoModel.getPath();
         // 判断Tomcat路径是否正确
         if (!isTomcatRoot(tomcatPath)) {
             return JsonMessage.getString(405, String.format("没有在路径：%s 下检测到Tomcat", tomcatPath));
         }
 
-        // 根据Tomcat名称查询tomcat是否已经存在
-        String name = tomcatInfoModel.getName();
-        TomcatInfoModel tomcatInfoModelTemp = tomcatManageService.getItemByName(name);
-        if (tomcatInfoModelTemp == null || tomcatInfoModelTemp.getId().equals(tomcatInfoModel.getId())) {
-
-            if (StrUtil.isEmpty(tomcatInfoModel.getAppBase())) {
-                tomcatInfoModel.setAppBase(FileUtil.normalize(tomcatInfoModel.getPath()).concat(File.separator).concat("webapps"));
-            } else {
-                String path = FileUtil.normalize(tomcatInfoModel.getAppBase());
-                if (FileUtil.isAbsolutePath(path)) {
-                    // appBase如：/project/、D:/project/
-                    tomcatInfoModel.setAppBase(path);
-                } else {
-                    // appBase填写的是对相路径如：project/dir
-                    tomcatInfoModel.setAppBase(FileUtil.normalize(tomcatInfoModel.getPath()).concat(FileUtil.normalize(path)));
-                }
-            }
-
-            // 解压代理工具到tomcat的appBase目录下
-            try {
-                File file = ResourceUtils.getFile("classpath:bin/jpomAgent.zip");
-                ZipUtil.unzip(file, new File(tomcatInfoModel.getAppBase()));
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-                DefaultSystemLog.ERROR().error("jpomAgent.zip不存在", e);
-                return JsonMessage.getString(500, "jpomAgent.zip不存在");
-            }
-
-            tomcatInfoModel.setModifyUser(getUserName());
-            tomcatInfoModel.setModifyTime(DateUtil.now());
-            // 设置tomcat路径，去除多余的符号
-            tomcatInfoModel.setPath(FileUtil.normalize(tomcatInfoModel.getPath()));
-            tomcatManageService.updateItem(tomcatInfoModel);
-            return JsonMessage.getString(200, "修改成功");
+        if (StrUtil.isEmpty(tomcatInfoModel.getAppBase())) {
+            tomcatInfoModel.setAppBase(FileUtil.normalize(tomcatInfoModel.getPath()).concat(File.separator).concat("webapps"));
         } else {
-            return JsonMessage.getString(401, "名称已经存在，请使用其他名称！");
+            String path = FileUtil.normalize(tomcatInfoModel.getAppBase());
+            if (FileUtil.isAbsolutePath(path)) {
+                // appBase如：/project/、D:/project/
+                tomcatInfoModel.setAppBase(path);
+            } else {
+                // appBase填写的是对相路径如：project/dir
+                tomcatInfoModel.setAppBase(FileUtil.normalize(tomcatInfoModel.getPath()).concat(FileUtil.normalize(path)));
+            }
         }
+        InputStream inputStream = ResourceUtil.getStream("classpath:/bin/jpomAgent.zip");
+        if (inputStream == null) {
+            return JsonMessage.getString(500, "jpomAgent.zip不存在");
+        }
+        // 解压代理工具到tomcat的appBase目录下
+        ZipUtil.unzip(inputStream, new File(tomcatInfoModel.getAppBase()), CharsetUtil.CHARSET_UTF_8);
+        return null;
     }
 
     /**
@@ -291,7 +276,7 @@ public class TomcatManageController extends BaseAgentController {
 
         String stopResult = AbstractTomcatCommander.getInstance().execCmd(tomcatInfoModel, "stop");
         String startResult = AbstractTomcatCommander.getInstance().execCmd(tomcatInfoModel, "start");
-        return JsonMessage.getString(200, "重启成功");
+        return JsonMessage.getString(200, StrUtil.format("重启成功 {}  {}", stopResult, startResult));
     }
 
     /**

@@ -76,7 +76,7 @@ public class TomcatManageController extends BaseServerController {
             JSONObject tomcatInfo = tomcatService.getTomcatInfo(getNode(), id);
             setAttribute("item", tomcatInfo);
         }
-        return "/node/tomcat/edit";
+        return "node/tomcat/edit";
     }
 
     /**
@@ -91,7 +91,7 @@ public class TomcatManageController extends BaseServerController {
             JSONObject tomcatInfo = tomcatService.getTomcatInfo(getNode(), id);
             setAttribute("item", tomcatInfo);
         }
-        return "/node/tomcat/addProject";
+        return "node/tomcat/addProject";
     }
 
     /**
@@ -105,7 +105,7 @@ public class TomcatManageController extends BaseServerController {
     public String manage(String id, String path) {
         setAttribute("id", id);
         setAttribute("project", path);
-        return "/node/tomcat/manage";
+        return "node/tomcat/manage";
     }
 
     /**
@@ -116,21 +116,12 @@ public class TomcatManageController extends BaseServerController {
      */
     @RequestMapping(value = "save", method = RequestMethod.POST, produces = MediaType.TEXT_HTML_VALUE)
     @ResponseBody
-    @OperateType(UserOperateLogV1.OptType.Save_Tomcat)
+    @UrlPermission(value = Role.System, optType = UserOperateLogV1.OptType.Save_Tomcat)
     public String save(String id) {
-        UserModel userName = getUser();
         NodeModel nodeModel = getNode();
         if (StrUtil.isEmpty(id)) {
-            // 添加Tomcat信息
-            if (!userName.isManage(nodeModel.getId())) {
-                return JsonMessage.getString(400, "管理员才能添加Tomcat!");
-            }
             return tomcatService.addTomcat(nodeModel, getRequest());
         } else {
-            if (!userName.isTomcat(nodeModel.getId(), id)) {
-                JsonMessage jsonMessage = new JsonMessage(300, "你没有改项目的权限");
-                return jsonMessage.toString();
-            }
             // 修改Tomcat信息
             return tomcatService.updateTomcat(nodeModel, getRequest());
         }
@@ -143,7 +134,6 @@ public class TomcatManageController extends BaseServerController {
      */
     @RequestMapping(value = "delete", method = RequestMethod.POST, produces = MediaType.TEXT_HTML_VALUE)
     @ResponseBody
-    @ProjectPermission(optType = UserOperateLogV1.OptType.Del_Tomcat)
     @UrlPermission(value = Role.System, optType = UserOperateLogV1.OptType.Del_Tomcat)
     public String delete() {
         return tomcatService.delete(getNode(), getRequest());

@@ -45,7 +45,8 @@
         <div class="layui-form-item">
             <label class="layui-form-label">appBase</label>
             <div class="layui-input-block">
-                <input type="text" id="appBase" name="appBase" value="$!item.appBase" placeholder="Tomcat的appBase配置所在的路径，默认是webapps目录"
+                <input type="text" id="appBase" name="appBase" value="$!item.appBase"
+                       placeholder="Tomcat的appBase配置所在的路径，默认是webapps目录"
                        class="layui-input">
             </div>
         </div>
@@ -53,6 +54,12 @@
         <div class="layui-form-item" style="padding-left: 20%">
             <button class="layui-btn layui-btn-normal" lay-submit lay-filter="submitNode" id="project_submit">提交
             </button>
+            #if($item && $user.isSystemUser())
+                <a op="delete" onclick="delTomcat('$item.id','$item.name');"
+                   class="layui-btn layui-btn-danger">
+                    移除tomcat
+                </a>
+            #end
         </div>
     </form>
 </div>
@@ -97,6 +104,24 @@
             });
         });
     }
+        #if($item && $user.isSystemUser())
+        function delTomcat(id, name) {
+            layer.confirm('确定移除Tomcat - ' + name + '?', {
+                btn: ['确定', '取消']
+            }, function (index) {
+                loadingAjax({
+                    url: './delete',
+                    data: {
+                        id: id
+                    },
+                    success: function (data) {
+                        layer.msg(data.msg);
+                        autoClose();
+                    }
+                });
+            });
+        }
+        #end
 
     function autoClose() {
         setTimeout(function () {
