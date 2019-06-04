@@ -1,5 +1,7 @@
 package cn.keepbx.jpom.common.interceptor;
 
+import cn.keepbx.jpom.model.data.UserOperateLogV1;
+
 import java.lang.annotation.*;
 
 /**
@@ -18,7 +20,24 @@ public @interface ProjectPermission {
      */
     String value() default "id";
 
+    /**
+     * 验证上传权限
+     *
+     * @return bool
+     */
     boolean checkUpload() default false;
 
+    /**
+     * 验证删除权限
+     *
+     * @return bool
+     */
     boolean checkDelete() default false;
+
+    /**
+     * 操作类型
+     *
+     * @return 枚举
+     */
+    UserOperateLogV1.OptType optType();
 }

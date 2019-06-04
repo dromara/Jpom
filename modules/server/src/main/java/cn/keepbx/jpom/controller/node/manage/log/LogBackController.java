@@ -31,8 +31,7 @@ public class LogBackController extends BaseServerController {
 
     @RequestMapping(value = "export.html", method = RequestMethod.GET)
     @ResponseBody
-    @ProjectPermission
-    @OperateType(UserOperateLogV1.OptType.ExportProjectLog)
+    @ProjectPermission(optType = UserOperateLogV1.OptType.ExportProjectLog)
     public void export() {
         NodeForward.requestDownload(getNode(), getRequest(), getResponse(), NodeUrl.Manage_Log_export);
     }
@@ -46,16 +45,14 @@ public class LogBackController extends BaseServerController {
 
     @RequestMapping(value = "logBack_download", method = RequestMethod.GET)
     @ResponseBody
-    @ProjectPermission
-    @OperateType(UserOperateLogV1.OptType.DownloadProjectLogBack)
+    @ProjectPermission(optType = UserOperateLogV1.OptType.DownloadProjectLogBack)
     public void download() {
         NodeForward.requestDownload(getNode(), getRequest(), getResponse(), NodeUrl.Manage_Log_logBack_download);
     }
 
     @RequestMapping(value = "logBack_delete", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
-    @ProjectPermission(checkDelete = true)
-    @OperateType(UserOperateLogV1.OptType.DelProjectLogBack)
+    @ProjectPermission(checkDelete = true, optType = UserOperateLogV1.OptType.DelProjectLogBack)
     public String clear() {
         return NodeForward.request(getNode(), getRequest(), NodeUrl.Manage_Log_logBack_delete).toString();
     }
@@ -74,8 +71,7 @@ public class LogBackController extends BaseServerController {
      */
     @RequestMapping(value = "resetLog", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
-    @ProjectPermission
-    @OperateType(UserOperateLogV1.OptType.RestProjectLog)
+    @ProjectPermission(optType = UserOperateLogV1.OptType.RestProjectLog)
     public String resetLog() {
         return NodeForward.request(getNode(), getRequest(), NodeUrl.Manage_Log_ResetLog).toString();
     }

@@ -143,6 +143,7 @@ public class TomcatManageController extends BaseServerController {
      */
     @RequestMapping(value = "delete", method = RequestMethod.POST, produces = MediaType.TEXT_HTML_VALUE)
     @ResponseBody
+    @ProjectPermission(optType = UserOperateLogV1.OptType.Del_Tomcat)
     @UrlPermission(value = Role.System, optType = UserOperateLogV1.OptType.Del_Tomcat)
     public String delete() {
         return tomcatService.delete(getNode(), getRequest());
@@ -177,8 +178,7 @@ public class TomcatManageController extends BaseServerController {
      */
     @RequestMapping(value = "start", method = RequestMethod.POST, produces = MediaType.TEXT_HTML_VALUE)
     @ResponseBody
-    @ProjectPermission
-    @OperateType(UserOperateLogV1.OptType.Start_Tomcat)
+    @ProjectPermission(optType = UserOperateLogV1.OptType.Start_Tomcat)
     public String start() {
         return tomcatService.start(getNode(), getRequest());
     }
@@ -190,8 +190,7 @@ public class TomcatManageController extends BaseServerController {
      */
     @RequestMapping(value = "restart", method = RequestMethod.POST, produces = MediaType.TEXT_HTML_VALUE)
     @ResponseBody
-    @ProjectPermission
-    @OperateType(UserOperateLogV1.OptType.ReStart_Tomcat)
+    @ProjectPermission(optType = UserOperateLogV1.OptType.ReStart_Tomcat)
     public String restart() {
         return tomcatService.restart(getNode(), getRequest());
     }
@@ -203,8 +202,7 @@ public class TomcatManageController extends BaseServerController {
      */
     @RequestMapping(value = "stop", method = RequestMethod.POST, produces = MediaType.TEXT_HTML_VALUE)
     @ResponseBody
-    @ProjectPermission
-    @OperateType(UserOperateLogV1.OptType.Stop_Tomcat)
+    @ProjectPermission(optType = UserOperateLogV1.OptType.Stop_Tomcat)
     public String stop() {
         return tomcatService.stop(getNode(), getRequest());
     }
@@ -229,8 +227,7 @@ public class TomcatManageController extends BaseServerController {
      */
     @RequestMapping(value = "upload", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
-    @ProjectPermission(checkUpload = true)
-    @OperateType(UserOperateLogV1.OptType.Upload_File_Tomcat)
+    @ProjectPermission(checkUpload = true, optType = UserOperateLogV1.OptType.Upload_File_Tomcat)
     public String upload() {
         return NodeForward.requestMultipart(getNode(), getMultiRequest(), NodeUrl.Tomcat_File_Upload).toString();
     }
@@ -242,8 +239,7 @@ public class TomcatManageController extends BaseServerController {
      */
     @RequestMapping(value = "uploadWar", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
-    @ProjectPermission(checkUpload = true)
-    @OperateType(UserOperateLogV1.OptType.Upload_File_War_Tomcat)
+    @ProjectPermission(checkUpload = true, optType = UserOperateLogV1.OptType.Upload_File_War_Tomcat)
     public String uploadWar() {
         return tomcatService.uploadWar(getNode(), getMultiRequest());
     }
@@ -265,8 +261,7 @@ public class TomcatManageController extends BaseServerController {
      */
     @RequestMapping(value = "deleteFile", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
-    @ProjectPermission(checkDelete = true)
-    @OperateType(UserOperateLogV1.OptType.Del_File_Tomcat)
+    @ProjectPermission(checkDelete = true, optType = UserOperateLogV1.OptType.Del_File_Tomcat)
     public String deleteFile() {
         return tomcatService.deleteFile(getNode(), getRequest());
     }
