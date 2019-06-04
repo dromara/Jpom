@@ -69,7 +69,7 @@
                 <div class="layui-form-mid layui-word-aux"></div>
                 <div class="layui-form-mid layui-word-aux" id="zipResult"></div>
             </div>
-            <div class="layui-form-mid layui-word-aux">证书文件包里必须有.pem .key文件</div>
+            <div class="layui-form-mid layui-word-aux">证书文件包里必须有(pem、crt、cer) .key文件</div>
 
         </div>
         <input type="hidden" lay-submit lay-filter="submitCert" id="cert_submit">

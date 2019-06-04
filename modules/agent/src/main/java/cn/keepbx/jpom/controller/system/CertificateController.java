@@ -141,19 +141,14 @@ public class CertificateController extends BaseAgentController {
                     continue;
                 }
                 String keyName = zipEntry.getName();
-                if (pemPath == null && StrUtil.endWith(keyName, ".pem", true)) {
+                // pem、cer、crt
+                if (pemPath == null && (StrUtil.endWith(keyName, ".pem", true) ||
+                        StrUtil.endWith(keyName, ".cer", true) ||
+                        StrUtil.endWith(keyName, ".crt", true))) {
                     String filePathItem = String.format("%s/%s/%s", path, certModel.getId(), keyName);
                     InputStream inputStream = zipFile.getInputStream(zipEntry);
                     FileUtil.writeFromStream(inputStream, filePathItem);
                     certModel.setType(CertModel.Type.pem);
-                    pemPath = filePathItem;
-                }
-                // cer 文件
-                if (pemPath == null && StrUtil.endWith(keyName, ".cer", true)) {
-                    String filePathItem = String.format("%s/%s/%s", path, certModel.getId(), keyName);
-                    InputStream inputStream = zipFile.getInputStream(zipEntry);
-                    FileUtil.writeFromStream(inputStream, filePathItem);
-                    certModel.setType(CertModel.Type.cer);
                     pemPath = filePathItem;
                 }
                 //
