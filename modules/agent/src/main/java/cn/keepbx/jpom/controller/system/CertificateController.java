@@ -145,10 +145,12 @@ public class CertificateController extends BaseAgentController {
                 if (pemPath == null && (StrUtil.endWith(keyName, ".pem", true) ||
                         StrUtil.endWith(keyName, ".cer", true) ||
                         StrUtil.endWith(keyName, ".crt", true))) {
+                    String eNmae = FileUtil.extName(keyName);
+                    CertModel.Type type = CertModel.Type.valueOf(eNmae.toLowerCase());
                     String filePathItem = String.format("%s/%s/%s", path, certModel.getId(), keyName);
                     InputStream inputStream = zipFile.getInputStream(zipEntry);
                     FileUtil.writeFromStream(inputStream, filePathItem);
-                    certModel.setType(CertModel.Type.pem);
+                    certModel.setType(type);
                     pemPath = filePathItem;
                 }
                 //

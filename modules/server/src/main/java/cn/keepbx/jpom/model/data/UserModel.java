@@ -264,7 +264,6 @@ public class UserModel extends BaseModel {
      *
      * @param id 项目Id
      * @return true 能管理，管理员所有项目都能管理
-     * @
      */
     public boolean isProject(String nodeId, String id) {
         if (isManage(nodeId)) {
@@ -289,7 +288,6 @@ public class UserModel extends BaseModel {
      *
      * @param id tomcatId
      * @return true 能管理，管理员所有tomcat都能管理
-     * @
      */
     public boolean isTomcat(String nodeId, String id) {
         if (isManage(nodeId)) {

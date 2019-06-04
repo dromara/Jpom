@@ -190,11 +190,21 @@ public class CertModel extends BaseModel {
         return null;
     }
 
+    /**
+     * 证书类型
+     */
     public enum Type {
         /**
          *
          */
         pem,
-        cer
+        /**
+         * Windows
+         */
+        cer,
+        /**
+         * Linux
+         */
+        crt
     }
 }

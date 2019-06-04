@@ -1,5 +1,4 @@
-package cn.keepbx.jpom.controller.manage;
-
+package cn.keepbx.jpom.controller.tomcat;
 
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.FileUtil;
@@ -32,6 +31,9 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.List;
 
+/**
+ * @author lf
+ */
 @RestController
 @RequestMapping(value = "/tomcat/")
 public class TomcatManageController extends BaseAgentController {
@@ -41,6 +43,7 @@ public class TomcatManageController extends BaseAgentController {
 
     /**
      * 列出所有的tomcat项目列表
+     *
      * @return Tomcat下的项目列表
      */
     @RequestMapping(value = "getTomcatProjectList", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
@@ -51,6 +54,7 @@ public class TomcatManageController extends BaseAgentController {
 
     /**
      * 查询tomcat状态
+     *
      * @param id tomcat的id
      * @return tomcat运行状态
      */
@@ -62,6 +66,7 @@ public class TomcatManageController extends BaseAgentController {
 
     /**
      * 列出所有的tomcat
+     *
      * @return Tomcat列表
      */
     @RequestMapping(value = "list", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
@@ -73,6 +78,7 @@ public class TomcatManageController extends BaseAgentController {
 
     /**
      * 根据Id查询Tomcat信息
+     *
      * @param id Tomcat的主键
      * @return 操作结果
      */
@@ -83,9 +89,9 @@ public class TomcatManageController extends BaseAgentController {
     }
 
 
-
     /**
      * 添加Tomcat
+     *
      * @param tomcatInfoModel Tomcat信息
      * @return 操作结果
      */
@@ -139,6 +145,7 @@ public class TomcatManageController extends BaseAgentController {
 
     /**
      * 判断是否是Tomcat的根路径
+     *
      * @return 返回是否是Tomcat根路径
      */
     private boolean isTomcatRoot(String path) {
@@ -150,14 +157,14 @@ public class TomcatManageController extends BaseAgentController {
                 File[] files = file.listFiles();
                 // 判断该目录下是否
                 for (File child : files) {
-                   if ("bin".equals(child.getName()) && child.isDirectory()) {
-                       File[] binFiles = child.listFiles();
-                       for (File binChild : binFiles) {
-                           if ("bootstrap.jar".equals(binChild.getName()) && binChild.isFile()) {
-                               return true;
-                           }
-                       }
-                   }
+                    if ("bin".equals(child.getName()) && child.isDirectory()) {
+                        File[] binFiles = child.listFiles();
+                        for (File binChild : binFiles) {
+                            if ("bootstrap.jar".equals(binChild.getName()) && binChild.isFile()) {
+                                return true;
+                            }
+                        }
+                    }
                 }
                 return false;
             }
@@ -168,6 +175,7 @@ public class TomcatManageController extends BaseAgentController {
 
     /**
      * 修改Tomcat信息
+     *
      * @param tomcatInfoModel Tomcat信息
      * @return 操作结果
      */
@@ -221,6 +229,7 @@ public class TomcatManageController extends BaseAgentController {
 
     /**
      * 删除tomcat
+     *
      * @param id tomcat id
      * @return 操作结果
      */
@@ -232,6 +241,7 @@ public class TomcatManageController extends BaseAgentController {
 
     /**
      * 启动tomcat
+     *
      * @param id tomcat id
      * @return 操作结果
      */
@@ -251,6 +261,7 @@ public class TomcatManageController extends BaseAgentController {
 
     /**
      * 删除tomcat
+     *
      * @param id tomcat id
      * @return 操作结果
      */
@@ -269,6 +280,7 @@ public class TomcatManageController extends BaseAgentController {
 
     /**
      * 重启tomcat
+     *
      * @param id tomcat id
      * @return 操作结果
      */
@@ -284,9 +296,10 @@ public class TomcatManageController extends BaseAgentController {
 
     /**
      * tomcat项目管理
-     * @param id tomcat id
+     *
+     * @param id   tomcat id
      * @param path 项目路径
-     * @param op 执行的操作
+     * @param op   执行的操作
      * @return 操作结果
      */
     @RequestMapping(value = "tomcatProjectManage", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
@@ -296,7 +309,8 @@ public class TomcatManageController extends BaseAgentController {
 
     /**
      * 获取项目文件列表
-     * @param id tomcat id
+     *
+     * @param id   tomcat id
      * @param path 项目路径
      * @return 文件列表
      */
@@ -355,7 +369,8 @@ public class TomcatManageController extends BaseAgentController {
 
     /**
      * 上传文件
-     * @param id tomcat id
+     *
+     * @param id   tomcat id
      * @param path 文件路径
      * @return 操作结果
      */
@@ -382,6 +397,7 @@ public class TomcatManageController extends BaseAgentController {
 
     /**
      * 上传war文件
+     *
      * @param id tomcat id
      * @return 操作结果
      */
@@ -409,7 +425,8 @@ public class TomcatManageController extends BaseAgentController {
 
     /**
      * 删除文件
-     * @param id tomcat id
+     *
+     * @param id       tomcat id
      * @param filename 文件名
      * @return 操作结果
      */
@@ -437,7 +454,8 @@ public class TomcatManageController extends BaseAgentController {
 
     /**
      * 下载文件
-     * @param id tomcat id
+     *
+     * @param id       tomcat id
      * @param filename 文件名
      * @return 操作结果
      */
