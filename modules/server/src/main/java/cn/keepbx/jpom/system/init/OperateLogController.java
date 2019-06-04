@@ -64,7 +64,7 @@ public class OperateLogController implements AopLogInterface {
                 } else {
                     ProjectPermission projectPermission = method.getAnnotation(ProjectPermission.class);
                     if (projectPermission != null) {
-
+                        optType = projectPermission.optType();
                     }
                 }
             } else {

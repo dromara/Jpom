@@ -251,10 +251,10 @@ public class UserOperateLogV1 extends BaseJsonModel {
         Stop_Tomcat(47, "停止tomcat"),
         ReStart_Tomcat(48, "重启tomcat"),
 
-        Upload_File_Tomcat(49, "启动tomcat"),
-        Del_File_Tomcat(50, "停止tomcat"),
-        Download_Tomcat(51, "重启tomcat"),
-        Upload_File_War_Tomcat(52, "启动tomcat"),
+        Upload_File_Tomcat(49, "上传tomcat文件"),
+        Del_File_Tomcat(50, "删除tomcat文件"),
+        Download_Tomcat(51, "下载tomcat文件"),
+        Upload_File_War_Tomcat(52, "上传tomcat War包"),
 
         ;
         private int code;
