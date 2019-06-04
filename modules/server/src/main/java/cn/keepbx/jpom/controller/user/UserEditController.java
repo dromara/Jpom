@@ -4,6 +4,7 @@ import cn.keepbx.jpom.common.BaseServerController;
 import cn.keepbx.jpom.model.data.NodeModel;
 import cn.keepbx.jpom.model.data.UserModel;
 import cn.keepbx.jpom.service.user.UserService;
+import com.alibaba.fastjson.JSONObject;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -30,6 +31,9 @@ public class UserEditController extends BaseServerController {
         String reqId = nodeService.cacheNodeList(nodeModels);
         setAttribute("reqId", reqId);
         setAttribute("nodeModels", nodeModels);
+        //获取tomcat列表
+        JSONObject nodeTomcat = nodeService.listAndTomcat();
+        setAttribute("nodeTomcat", nodeTomcat);
 
         UserModel item = userService.getItem(id);
         setAttribute("userItem", item);

@@ -12,6 +12,7 @@ import cn.keepbx.jpom.model.Role;
 import cn.keepbx.jpom.model.data.NodeModel;
 import cn.keepbx.jpom.model.data.UserModel;
 import cn.keepbx.jpom.model.data.UserOperateLogV1;
+import cn.keepbx.jpom.service.manage.TomcatService;
 import cn.keepbx.jpom.service.user.UserService;
 import cn.keepbx.jpom.system.ServerExtConfigBean;
 import com.alibaba.fastjson.JSONArray;
@@ -35,6 +36,9 @@ import java.util.List;
 public class UserInfoController extends BaseServerController {
     @Resource
     private UserService userService;
+
+    @Resource
+    private TomcatService tomcatService;
 
     /**
      * 修改密码
@@ -216,6 +220,7 @@ public class UserInfoController extends BaseServerController {
         userModel.setServerManager(manageB);
 
         UserModel.NodeRole nodeRole;
+        UserModel.NodeRole nodeTomcatRole;
         String projects = getParameter("projects");
         JSONObject projectsJson = null;
         if (StrUtil.isNotEmpty(projects)) {
@@ -223,9 +228,13 @@ public class UserInfoController extends BaseServerController {
         }
         for (NodeModel nodeModel : list) {
             nodeRole = new UserModel.NodeRole();
+            nodeTomcatRole = new UserModel.NodeRole();
             nodeRole.setId(nodeModel.getId());
+            nodeTomcatRole.setId(nodeModel.getId());
+
             manageB = "true".equals(getParameter(StrUtil.format("{}_manage", nodeRole.getId())));
             nodeRole.setManage(manageB);
+            nodeTomcatRole.setManage(manageB);
 
             manageB = "true".equals(getParameter(StrUtil.format("{}_uploadFile", nodeRole.getId())));
             // 如果操作人没有权限  就不能管理被操作者
@@ -234,17 +243,44 @@ public class UserInfoController extends BaseServerController {
             }
             nodeRole.setUploadFile(manageB);
 
+            manageB = "true".equals(getParameter(StrUtil.format("{}_uploadTomcatFile", nodeRole.getId())));
+            if (!optUser.isUploadTomcatFile(nodeModel.getId()) && manageB) {
+                return JsonMessage.getString(402, "你没有管理上传Tomcat文件的权限");
+            }
+            nodeTomcatRole.setUploadFile(manageB);
+
             manageB = "true".equals(getParameter(StrUtil.format("{}_deleteFile", nodeRole.getId())));
             if (!optUser.isDeleteFile(nodeModel.getId()) && manageB) {
                 return JsonMessage.getString(402, "你没有管理删除文件的权限");
             }
             nodeRole.setDeleteFile(manageB);
+
+            manageB = "true".equals(getParameter(StrUtil.format("{}_deleteTomcatFile", nodeRole.getId())));
+            if (!optUser.isDeleteTomcatFile(nodeModel.getId()) && manageB) {
+                return JsonMessage.getString(402, "你没有管理删除Tomcat文件的权限");
+            }
+            nodeTomcatRole.setDeleteFile(manageB);
+
             JSONArray jsonArray = nodeModel.getProjects();
             if (jsonArray != null && projectsJson != null) {
                 JSONArray jsonArray1 = projectsJson.getJSONArray(nodeModel.getId());
                 nodeRole.setProjects(jsonArray1);
             }
+            JSONArray tomcatList = tomcatService.getTomcatList(nodeModel);
+            if (tomcatList != null && tomcatList.size() > 0) {
+                JSONArray jsonArray1 = new JSONArray();
+                tomcatList.forEach(o -> {
+                    JSONObject data = (JSONObject) o;
+                    String id1 = data.getString("id");
+                    String val = getParameter(StrUtil.format("p_{}_{}", nodeModel.getId(), id1));
+                    if (id1.equals(val)) {
+                        jsonArray1.add(id1);
+                    }
+                });
+                nodeTomcatRole.setProjects(jsonArray1);
+            }
             userModel.putNodeRole(nodeRole);
+            userModel.putNodeTomcatRole(nodeTomcatRole);
         }
         return null;
     }

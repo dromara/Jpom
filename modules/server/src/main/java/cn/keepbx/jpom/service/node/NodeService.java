@@ -62,6 +62,36 @@ public class NodeService extends BaseOperService<NodeModel> {
         return nodeModels;
     }
 
+    /**
+     * 获取所有节点 和节点下面的tomcat
+     *
+     * @return list
+     */
+    public JSONObject listAndTomcat() {
+        List<NodeModel> nodeModels = this.list();
+        JSONObject object = new JSONObject();
+        Iterator<NodeModel> iterator = nodeModels.iterator();
+        while (iterator.hasNext()) {
+            NodeModel nodeModel = iterator.next();
+            if (!nodeModel.isOpenStatus()) {
+                iterator.remove();
+                continue;
+            }
+            try {
+                // 获取项目信息不需要状态
+                JSONArray jsonArray = NodeForward.requestData(nodeModel, NodeUrl.Tomcat_List, JSONArray.class, null, null);
+                if (jsonArray != null) {
+                    object.put(nodeModel.getId(), jsonArray);
+                } else {
+                    iterator.remove();
+                }
+            } catch (Exception e) {
+                iterator.remove();
+            }
+        }
+        return object;
+    }
+
     public String cacheNodeList(List<NodeModel> list) {
         String reqId = IdUtil.fastUUID();
         TIMED_CACHE.put(reqId, list);
