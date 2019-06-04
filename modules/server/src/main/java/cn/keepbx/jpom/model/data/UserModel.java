@@ -64,6 +64,10 @@ public class UserModel extends BaseModel {
      * 服务管理员
      */
     private boolean serverManager;
+    /**
+     * tomcat权限
+     */
+    private Map<String, NodeRole> nodeTomcatRole;
 
     public boolean isServerManager() {
         if (isSystemUser()) {
@@ -83,6 +87,19 @@ public class UserModel extends BaseModel {
         return nodeRole;
     }
 
+    public void putNodeTomcatRole(NodeRole addNodeRole) {
+        if (nodeTomcatRole == null) {
+            nodeTomcatRole = MapUtil.newHashMap();
+        }
+        nodeTomcatRole.put(addNodeRole.id, addNodeRole);
+    }
+
+    public void removeNodeTomcatRole(String id) {
+        if (nodeTomcatRole != null) {
+            nodeTomcatRole.remove(id);
+        }
+    }
+
     public void putNodeRole(NodeRole addNodeRole) {
         if (nodeRole == null) {
             nodeRole = MapUtil.newHashMap();
@@ -95,6 +112,7 @@ public class UserModel extends BaseModel {
             nodeRole.remove(id);
         }
     }
+
 
     public void setNodeRole(Map<String, NodeRole> nodeRole) {
         this.nodeRole = nodeRole;
@@ -267,6 +285,59 @@ public class UserModel extends BaseModel {
     }
 
     /**
+     * 是否能管理某个tomcat
+     *
+     * @param id tomcatId
+     * @return true 能管理，管理员所有tomcat都能管理
+     * @
+     */
+    public boolean isTomcat(String nodeId, String id) {
+        if (isManage(nodeId)) {
+            return true;
+        }
+        NodeRole item = getNodeTomcatRole().get(nodeId);
+        if (item == null) {
+            return false;
+        }
+        if (item.projects == null) {
+            return false;
+        }
+        return item.projects.contains(id);
+    }
+
+    /**
+     * 获取是否有上传Tomcat文件的权限
+     *
+     * @return 系统管理员都用权限
+     */
+    public boolean isUploadTomcatFile(String nodeId) {
+        if (isSystemUser()) {
+            return true;
+        }
+        NodeRole item = nodeTomcatRole.get(nodeId);
+        if (item == null) {
+            return false;
+        }
+        return item.uploadFile;
+    }
+
+    /**
+     * 获取是否有删除Tomcat文件的权限
+     *
+     * @return 系统管理员都用权限
+     */
+    public boolean isDeleteTomcatFile(String nodeId) {
+        if (isSystemUser()) {
+            return true;
+        }
+        NodeRole item = nodeTomcatRole.get(nodeId);
+        if (item == null) {
+            return false;
+        }
+        return item.deleteFile;
+    }
+
+    /**
      * 获取是否有上传文件的权限
      *
      * @return 系统管理员都用权限
@@ -349,6 +420,17 @@ public class UserModel extends BaseModel {
             return Role.NodeManage;
         }
         return Role.User;
+    }
+
+    public Map<String, NodeRole> getNodeTomcatRole() {
+        if (nodeTomcatRole == null) {
+            nodeTomcatRole = MapUtil.newHashMap();
+        }
+        return nodeTomcatRole;
+    }
+
+    public void setNodeTomcatRole(Map<String, NodeRole> nodeTomcatRole) {
+        this.nodeTomcatRole = nodeTomcatRole;
     }
 
     /**
