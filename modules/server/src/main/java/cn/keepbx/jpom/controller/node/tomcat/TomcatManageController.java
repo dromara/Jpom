@@ -5,11 +5,14 @@ import cn.jiangzeyin.common.JsonMessage;
 import cn.keepbx.jpom.common.BaseServerController;
 import cn.keepbx.jpom.common.forward.NodeForward;
 import cn.keepbx.jpom.common.forward.NodeUrl;
+import cn.keepbx.jpom.common.interceptor.ProjectPermission;
 import cn.keepbx.jpom.common.interceptor.UrlPermission;
 import cn.keepbx.jpom.model.Role;
+import cn.keepbx.jpom.model.data.NodeModel;
 import cn.keepbx.jpom.model.data.UserModel;
 import cn.keepbx.jpom.model.data.UserOperateLogV1;
 import cn.keepbx.jpom.service.manage.TomcatService;
+import cn.keepbx.jpom.system.OperateType;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.http.MediaType;
@@ -26,8 +29,11 @@ import javax.annotation.Resource;
  * @author lf
  */
 @Controller
-@RequestMapping(value = "/node/tomcat/")
+@RequestMapping(value = TomcatManageController.TOMCAT_URL)
 public class TomcatManageController extends BaseServerController {
+
+    public static final String TOMCAT_URL = "/node/tomcat/";
+
 
     @Resource
     private TomcatService tomcatService;
@@ -110,19 +116,37 @@ public class TomcatManageController extends BaseServerController {
      */
     @RequestMapping(value = "save", method = RequestMethod.POST, produces = MediaType.TEXT_HTML_VALUE)
     @ResponseBody
-    @UrlPermission(value = Role.NodeManage, optType = UserOperateLogV1.OptType.Save_Tomcat)
+    @OperateType(UserOperateLogV1.OptType.Save_Tomcat)
     public String save(String id) {
+        UserModel userName = getUser();
+        NodeModel nodeModel = getNode();
         if (StrUtil.isEmpty(id)) {
             // 添加Tomcat信息
-            UserModel userName = getUser();
-            if (!userName.isManage(getNode().getId())) {
+            if (!userName.isManage(nodeModel.getId())) {
                 return JsonMessage.getString(400, "管理员才能添加Tomcat!");
             }
-            return tomcatService.addTomcat(getNode(), getRequest());
+            return tomcatService.addTomcat(nodeModel, getRequest());
         } else {
+            if (!userName.isTomcat(nodeModel.getId(), id)) {
+                JsonMessage jsonMessage = new JsonMessage(300, "你没有改项目的权限");
+                return jsonMessage.toString();
+            }
             // 修改Tomcat信息
-            return tomcatService.updateTomcat(getNode(), getRequest());
+            return tomcatService.updateTomcat(nodeModel, getRequest());
         }
+    }
+
+    /**
+     * 删除tomcat
+     *
+     * @return 操作结果
+     */
+    @RequestMapping(value = "delete", method = RequestMethod.POST, produces = MediaType.TEXT_HTML_VALUE)
+    @ResponseBody
+    @ProjectPermission(optType = UserOperateLogV1.OptType.Del_Tomcat)
+    @UrlPermission(value = Role.System, optType = UserOperateLogV1.OptType.Del_Tomcat)
+    public String delete() {
+        return tomcatService.delete(getNode(), getRequest());
     }
 
     /**
@@ -154,6 +178,7 @@ public class TomcatManageController extends BaseServerController {
      */
     @RequestMapping(value = "start", method = RequestMethod.POST, produces = MediaType.TEXT_HTML_VALUE)
     @ResponseBody
+    @ProjectPermission(optType = UserOperateLogV1.OptType.Start_Tomcat)
     public String start() {
         return tomcatService.start(getNode(), getRequest());
     }
@@ -165,6 +190,7 @@ public class TomcatManageController extends BaseServerController {
      */
     @RequestMapping(value = "restart", method = RequestMethod.POST, produces = MediaType.TEXT_HTML_VALUE)
     @ResponseBody
+    @ProjectPermission(optType = UserOperateLogV1.OptType.ReStart_Tomcat)
     public String restart() {
         return tomcatService.restart(getNode(), getRequest());
     }
@@ -176,21 +202,11 @@ public class TomcatManageController extends BaseServerController {
      */
     @RequestMapping(value = "stop", method = RequestMethod.POST, produces = MediaType.TEXT_HTML_VALUE)
     @ResponseBody
+    @ProjectPermission(optType = UserOperateLogV1.OptType.Stop_Tomcat)
     public String stop() {
         return tomcatService.stop(getNode(), getRequest());
     }
 
-    /**
-     * 删除tomcat
-     *
-     * @return 操作结果
-     */
-    @RequestMapping(value = "delete", method = RequestMethod.POST, produces = MediaType.TEXT_HTML_VALUE)
-    @ResponseBody
-    @UrlPermission(value = Role.System, optType = UserOperateLogV1.OptType.Del_Tomcat)
-    public String delete() {
-        return tomcatService.delete(getNode(), getRequest());
-    }
 
     /**
      * 查询文件列表
@@ -211,6 +227,7 @@ public class TomcatManageController extends BaseServerController {
      */
     @RequestMapping(value = "upload", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
+    @ProjectPermission(checkUpload = true, optType = UserOperateLogV1.OptType.Upload_File_Tomcat)
     public String upload() {
         return NodeForward.requestMultipart(getNode(), getMultiRequest(), NodeUrl.Tomcat_File_Upload).toString();
     }
@@ -222,6 +239,7 @@ public class TomcatManageController extends BaseServerController {
      */
     @RequestMapping(value = "uploadWar", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
+    @ProjectPermission(checkUpload = true, optType = UserOperateLogV1.OptType.Upload_File_War_Tomcat)
     public String uploadWar() {
         return tomcatService.uploadWar(getNode(), getMultiRequest());
     }
@@ -231,6 +249,7 @@ public class TomcatManageController extends BaseServerController {
      */
     @RequestMapping(value = "download", method = RequestMethod.GET)
     @ResponseBody
+    @OperateType(UserOperateLogV1.OptType.Download_Tomcat)
     public void download() {
         tomcatService.download(getNode(), getRequest(), getResponse());
     }
@@ -242,6 +261,7 @@ public class TomcatManageController extends BaseServerController {
      */
     @RequestMapping(value = "deleteFile", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
+    @ProjectPermission(checkDelete = true, optType = UserOperateLogV1.OptType.Del_File_Tomcat)
     public String deleteFile() {
         return tomcatService.deleteFile(getNode(), getRequest());
     }

@@ -7,6 +7,7 @@ import cn.keepbx.jpom.common.forward.NodeForward;
 import cn.keepbx.jpom.common.forward.NodeUrl;
 import cn.keepbx.jpom.model.RunMode;
 import cn.keepbx.jpom.model.data.AgentWhitelist;
+import cn.keepbx.jpom.model.data.NodeModel;
 import cn.keepbx.jpom.model.data.UserModel;
 import cn.keepbx.jpom.model.data.UserOperateLogV1;
 import cn.keepbx.jpom.service.manage.ProjectInfoService;
@@ -86,11 +87,14 @@ public class EditProjectController extends BaseServerController {
     @ResponseBody
     @OperateType(UserOperateLogV1.OptType.SaveProject)
     public String saveProject(String edit, String id) {
-        if ("add".equalsIgnoreCase(edit)) {
-            UserModel userName = getUser();
-            if (!userName.isManage(getNode().getId())) {
-                return JsonMessage.getString(400, "管理员才能创建项目!");
-            }
+        NodeModel nodeModel = getNode();
+        UserModel userName = getUser();
+        if ("add".equalsIgnoreCase(edit) && !userName.isManage(nodeModel.getId())) {
+            return JsonMessage.getString(400, "管理员才能创建项目!");
+        }
+        if (!userName.isProject(nodeModel.getId(), id)) {
+            JsonMessage jsonMessage = new JsonMessage(300, "你没有改项目的权限");
+            return jsonMessage.toString();
         }
         // 防止和Jpom冲突
         if (StrUtil.isNotEmpty(ConfigBean.getInstance().applicationTag) && ConfigBean.getInstance().applicationTag.equalsIgnoreCase(id)) {

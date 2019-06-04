@@ -247,6 +247,15 @@ public class UserOperateLogV1 extends BaseJsonModel {
         Save_Tomcat(44, "修改tomcat"),
         Del_Tomcat(45, "删除tomcat"),
 
+        Start_Tomcat(46, "启动tomcat"),
+        Stop_Tomcat(47, "停止tomcat"),
+        ReStart_Tomcat(48, "重启tomcat"),
+
+        Upload_File_Tomcat(49, "启动tomcat"),
+        Del_File_Tomcat(50, "停止tomcat"),
+        Download_Tomcat(51, "重启tomcat"),
+        Upload_File_War_Tomcat(52, "启动tomcat"),
+
         ;
         private int code;
         private String desc;

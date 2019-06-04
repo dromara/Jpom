@@ -100,7 +100,7 @@ public class ProjectManageControl extends BaseServerController {
      */
     @RequestMapping(value = "deleteProject", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
-    @ProjectPermission
+    @ProjectPermission(optType = UserOperateLogV1.OptType.DelProject)
     @UrlPermission(value = Role.NodeManage, optType = UserOperateLogV1.OptType.DelProject)
     public String deleteProject(String id) throws IOException {
         // 检查节点分发

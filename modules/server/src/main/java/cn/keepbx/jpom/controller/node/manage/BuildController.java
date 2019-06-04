@@ -41,8 +41,7 @@ public class BuildController extends BaseServerController {
      * @return url
      */
     @RequestMapping(value = "build_download", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
-    @ProjectPermission
-    @OperateType(UserOperateLogV1.OptType.BuildDownload)
+    @ProjectPermission(optType = UserOperateLogV1.OptType.BuildDownload)
     public String buildDownload(String id, String key) {
         String url = NodeForward.requestData(getNode(), NodeUrl.Manage_build_download, String.class,
                 "id", id,
@@ -60,8 +59,7 @@ public class BuildController extends BaseServerController {
      */
     @RequestMapping(value = "build_install", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
-    @ProjectPermission
-    @OperateType(UserOperateLogV1.OptType.BuildInstall)
+    @ProjectPermission(optType = UserOperateLogV1.OptType.BuildInstall)
     public String buildInstall() {
         return NodeForward.request(getNode(), getRequest(), NodeUrl.Manage_build_install).toString();
     }
