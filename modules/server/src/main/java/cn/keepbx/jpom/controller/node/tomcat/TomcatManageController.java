@@ -76,7 +76,7 @@ public class TomcatManageController extends BaseServerController {
             JSONObject tomcatInfo = tomcatService.getTomcatInfo(getNode(), id);
             setAttribute("item", tomcatInfo);
         }
-        return "/node/tomcat/edit";
+        return "node/tomcat/edit";
     }
 
     /**
@@ -91,7 +91,7 @@ public class TomcatManageController extends BaseServerController {
             JSONObject tomcatInfo = tomcatService.getTomcatInfo(getNode(), id);
             setAttribute("item", tomcatInfo);
         }
-        return "/node/tomcat/addProject";
+        return "node/tomcat/addProject";
     }
 
     /**
@@ -105,7 +105,7 @@ public class TomcatManageController extends BaseServerController {
     public String manage(String id, String path) {
         setAttribute("id", id);
         setAttribute("project", path);
-        return "/node/tomcat/manage";
+        return "node/tomcat/manage";
     }
 
     /**
