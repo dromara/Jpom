@@ -37,7 +37,7 @@
 <td> 删除项目 </td><td> √</td><td> √ </td><td>× </td><td>×</td>
 </tr>
 <tr>
-<td> 上传、删除项目jar </td><td> √ </td><td> 单独授权</td><td>单独授权</td><td> ×</td>
+<td> 上传、删除项目jar </td><td> √ </td><td> 单独授权</td><td>单独授权</td><td>单独授权</td>
 </tr>
 
 <tr>
@@ -79,6 +79,22 @@
 </tr>
 <tr>
 <td> 删除证书 </td><td> √</td><td>× </td><td>× </td><td> ×</td>
+</tr>
+
+<tr>
+<td colspan='5'>tomcat管理</td>
+</tr>
+<tr>
+<td>添加、修改、删除</td><td> √</td><td> ×</td><td> ×</td><td> ×</td>
+</tr>
+<tr>
+<td>tomcat状态管理</td><td> √</td><td>授权tomcat</td><td>授权tomcat</td><td>授权tomcat</td>
+</tr>
+<tr>
+<td>上传tomcat文件</td><td> √</td><td>单独授权</td><td>单独授权</td><td>单独授权</td>
+</tr>
+<tr>
+<td>删除tomcat文件</td><td> √</td><td>单独授权</td><td>单独授权</td><td>单独授权</td>
 </tr>
 </table>
 
