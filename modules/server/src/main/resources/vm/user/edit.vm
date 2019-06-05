@@ -90,26 +90,28 @@
                                 <div class="layui-form-item" id="projectsDiv">
                                     <label class="layui-form-label" title="能删除项目，启动停止项目">管理项目</label>
                                     <div class="layui-inline">
-                                        <div class="layui-inline">
-                                            <label class="layui-form-label">上传文件</label>
-                                            <div class="layui-input-block">
-                                                #set($nowName=$item.id+"_uploadFile")
-                                                <input type="checkbox" value="true"
-                                                    #if($userItem.nodeRole[$item.id].uploadFile)
-                                                       checked
-                                                    #end
-                                                       name="$nowName" lay-skin="switch" lay-text="是|否">
+                                        <div id="projectOpt_$!item.id" style="display: none;">
+                                            <div class="layui-inline">
+                                                <label class="layui-form-label">上传文件</label>
+                                                <div class="layui-input-block">
+                                                    #set($nowName=$item.id+"_uploadFile")
+                                                    <input type="checkbox" value="true"
+                                                        #if($userItem.nodeRole[$item.id].uploadFile)
+                                                           checked
+                                                        #end
+                                                           name="$nowName" lay-skin="switch" lay-text="是|否">
+                                                </div>
                                             </div>
-                                        </div>
-                                        <div class="layui-inline">
-                                            <label class="layui-form-label">删除文件</label>
-                                            <div class="layui-input-block">
-                                                #set($nowName=$item.id+"_deleteFile")
-                                                <input type="checkbox" value="true"
-                                                    #if($userItem.nodeRole[$item.id].deleteFile)
-                                                       checked
-                                                    #end
-                                                       name="$nowName" lay-skin="switch" lay-text="是|否">
+                                            <div class="layui-inline">
+                                                <label class="layui-form-label">删除文件</label>
+                                                <div class="layui-input-block">
+                                                    #set($nowName=$item.id+"_deleteFile")
+                                                    <input type="checkbox" value="true"
+                                                        #if($userItem.nodeRole[$item.id].deleteFile)
+                                                           checked
+                                                        #end
+                                                           name="$nowName" lay-skin="switch" lay-text="是|否">
+                                                </div>
                                             </div>
                                         </div>
                                         <div>
@@ -124,37 +126,40 @@
                                     <div class="layui-form-item">
                                         <label class="layui-form-label">管理Tomcat</label>
                                         <div class="layui-inline">
-                                            <div class="layui-inline">
-                                                <label class="layui-form-label">上传文件</label>
-                                                <div class="layui-input-block">
-                                                    #set($nowName=$item.id+"_uploadTomcatFile")
-                                                    <input type="checkbox" value="true"
-                                                        #if($userItem.nodeTomcatRole[$item.id].uploadFile)
-                                                           checked
-                                                        #end
-                                                           name="$nowName" lay-skin="switch" lay-text="是|否">
+                                            <div id="tomcatOpt_$item.id">
+                                                <div class="layui-inline">
+                                                    <label class="layui-form-label">上传文件</label>
+                                                    <div class="layui-input-block">
+                                                        #set($nowName=$item.id+"_uploadTomcatFile")
+                                                        <input type="checkbox" value="true"
+                                                            #if($userItem.nodeTomcatRole[$item.id].uploadFile)
+                                                               checked
+                                                            #end
+                                                               name="$nowName" lay-skin="switch" lay-text="是|否">
+                                                    </div>
                                                 </div>
-                                            </div>
-                                            <div class="layui-inline">
-                                                <label class="layui-form-label">删除文件</label>
-                                                <div class="layui-input-block">
-                                                    #set($nowName=$item.id+"_deleteTomcatFile")
-                                                    <input type="checkbox" value="true"
-                                                        #if($userItem.nodeTomcatRole[$item.id].deleteFile)
-                                                           checked
-                                                        #end
-                                                           name="$nowName" lay-skin="switch" lay-text="是|否">
+                                                <div class="layui-inline">
+                                                    <label class="layui-form-label">删除文件</label>
+                                                    <div class="layui-input-block">
+                                                        #set($nowName=$item.id+"_deleteTomcatFile")
+                                                        <input type="checkbox" value="true"
+                                                            #if($userItem.nodeTomcatRole[$item.id].deleteFile)
+                                                               checked
+                                                            #end
+                                                               name="$nowName" lay-skin="switch" lay-text="是|否">
+                                                    </div>
                                                 </div>
                                             </div>
                                             <div>
                                                 #foreach($pItem in $nowTomcat)
                                                     #set($nowName="p_"+$item.id+"_"+$pItem.id)
-                                                    <input type="checkbox"
+                                                    <input type="checkbox" lay-filter="manageTomcat"
                                                            p="p_$item.id"
                                                            name="$nowName"
                                                            #if($userItem.isTomcat($item.id,$pItem.id))checked#end
                                                            project="$pItem.id"
                                                            value="$pItem.id"
+                                                           node_id="$item.id"
                                                            title="$pItem.name">
                                                 #end
                                             </div>
@@ -226,18 +231,16 @@
             var projects = {};
             for (var i = 0; i < treeNodes.length; i++) {
                 var treeNode = treeNodes[i];
+                var setting = treeNode.setting;
+                var nodeId = setting.nodeId;
                 var nodes = treeNode.getCheckedNodes(true);
                 if (!nodes || nodes.length <= 0) {
                     continue;
                 }
                 var group = treeNode.group;
                 var nodeProjects = [];
-                var nodeId = "localhost";
                 for (var j = 0; j < nodes.length; j++) {
                     var node = nodes[j];
-                    if (node.nodeId) {
-                        nodeId = node.nodeId;
-                    }
                     var id = node.id;
                     if (id) {
                         nodeProjects.push(id);
@@ -255,31 +258,33 @@
                 if (typeof nodeModels == "string") {
                     nodeModels = evil(nodeModels);
                 }
-                var setting = {
-                    check: {
-                        enable: true,
-                        chkStyle: "checkbox",
-                        chkboxType: {
-                            "Y": "ps",
-                            "N": "ps"
-                        },
-                        autoCheckTrigger: true
-                    },
-                    data: {
-                        simpleData: {
-                            enable: true
-                        },
-                        key: {
-                            name: "name",
-                            children: "projects"
-                        },
-                        view: {
-                            selectedMulti: false
-                        }
-                    }
-                };
-
                 if (nodeModels && nodeModels.length > 0) {
+                    var setting = {
+                        check: {
+                            enable: true,
+                            chkStyle: "checkbox",
+                            chkboxType: {
+                                "Y": "ps",
+                                "N": "ps"
+                            },
+                            autoCheckTrigger: true
+                        },
+                        data: {
+                            simpleData: {
+                                enable: true
+                            },
+                            key: {
+                                name: "name",
+                                children: "projects"
+                            },
+                            view: {
+                                selectedMulti: false
+                            }
+                        },
+                        callback: {
+                            onCheck: zTreeOnCheck
+                        }
+                    };
                     for (var j = 0; j < nodeModels.length; j++) {
                         var nodeModel = nodeModels[j];
                         var groupProjects = nodeModel.groupProjects;
@@ -291,15 +296,40 @@
                             }
                         }
                         var id = "#tree_" + nodeModel.id;
+                        setting.nodeId = nodeModel.id;
                         var zTreeObj = $.fn.zTree.init($(id), setting, groupProjects);
                         treeNodes.push(zTreeObj);
                         //展开节点
                         zTreeObj.expandAll(true);
+                        tomcatManage(nodeModel.id, false);
                     }
                 }
                 loadProjects();
             });
         });
+
+        //勾选回调
+        function zTreeOnCheck(event, treeId, treeNode) {
+            var check = treeNode.checked;
+            var treeObj = $.fn.zTree.getZTreeObj(treeId);
+            var setting = treeObj.setting;
+            var nodeId = setting.nodeId;
+            var id = "#projectOpt_" + nodeId;
+            if (check) {
+                $(id).css("display", "block");
+            } else {
+                var nodes = treeObj.getCheckedNodes(true);
+                //全部取消勾选 隐藏开关并重置为未选中
+                if (!nodes || nodes.length <= 0) {
+                    $(id).css("display", "none");
+                    var uploadId = $('input[name=' + nodeId + '_uploadFile]');
+                    var deleteId = $('input[name=' + nodeId + '_deleteFile]');
+                    uploadId.prop('checked', false);
+                    deleteId.prop('checked', false);
+                    form.render();
+                }
+            }
+        }
 
         //渲染选中节点
         function loadProjects() {
@@ -318,6 +348,9 @@
                     continue;
                 }
                 var treeObj = $.fn.zTree.getZTreeObj("tree_" + key);
+                if (!treeObj) {
+                    continue;
+                }
                 for (var i = 0; i < projects.length; i++) {
                     var id = projects[i];
                     var obj = treeObj.getNodeByParam("id", id, null);
@@ -326,16 +359,34 @@
             }
         }
 
-        //
-        form.on('switch(manage)', function (data) {
-            var nodeId = $(data.elem).attr("nodeId");
-            if (data.elem.checked) {
-                $('input[p="p_' + nodeId + '"]').prop('disabled', false).removeClass('layui-disabled');
-            } else {
-                $('input[p="p_' + nodeId + '"]').prop('disabled', true).addClass('layui-disabled');
-            }
-            form.render();
+        //监听tomcat选择
+        form.on('checkbox(manageTomcat)', function (data) {
+            var check = data.elem.checked;
+            var dom = data.elem;
+            var nodeId = dom.getAttribute("node_id");
+            tomcatManage(nodeId, check);
         });
+
+        //更新tomcat管理
+        function tomcatManage(nodeId, check) {
+            if (!nodeId) {
+                return;
+            }
+            var id = "#tomcatOpt_" + nodeId;
+            if (check) {
+                $(id).css("display", "block");
+            } else {
+                var list = $("input[node_id=" + nodeId + "]:checked");
+                if (!list || list.length <= 0) {
+                    $(id).css("display", "none");
+                    var uploadId = $('input[name=' + nodeId + '_uploadTomcatFile]');
+                    var deleteId = $('input[name=' + nodeId + '_deleteTomcatFile]');
+                    uploadId.prop('checked', false);
+                    deleteId.prop('checked', false);
+                    form.render();
+                }
+            }
+        }
     }
 </script>
 </html>
