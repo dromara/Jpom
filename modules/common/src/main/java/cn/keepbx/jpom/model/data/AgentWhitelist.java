@@ -82,7 +82,7 @@ public class AgentWhitelist extends BaseJsonModel {
      */
     public static String convertToLine(List<String> jsonArray) {
         try {
-            return CollUtil.join(jsonArray, "\r\n");
+            return CollUtil.join(jsonArray, StrUtil.CRLF);
         } catch (Exception e) {
             DefaultSystemLog.ERROR().error(e.getMessage(), e);
         }
