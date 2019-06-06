@@ -118,7 +118,7 @@ public class JpomApplicationEvent implements ApplicationEventClient {
             System.exit(-1);
         }
         FileUtil.del(file);
-        DefaultSystemLog.LOG().info("Jpom外部配置文件路径：" + extConfigPath);
+        DefaultSystemLog.LOG().info("Jpom[{}]外部配置文件路径：{}", JpomManifest.getInstance().getVersion(), extConfigPath);
     }
 
 }
