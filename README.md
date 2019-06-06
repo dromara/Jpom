@@ -149,12 +149,12 @@ Agent.sh status    查看Jpom插件端运行状态
 
 | 必看 | 选看1 | 选看2 |
 | -- | -- | -- | 
-| [安装文档>>](/doc/install.md)       |  [常见问题>>](/FQA.md)   | [自定义公共Js>>](/doc/addScript.md) |
-| [启动失败问题>>](/doc/startFail.md) | [阿里云Oss配置>>](/doc/CodePipeline-Oss.md)| |
+| [安装文档>>](/doc/install.md)       |  [常见问题>>](/FQA.md)   |[更新日志>>](/CHANGELOG.md)   |
+| [启动失败问题>>](/doc/startFail.md) | [阿里云Oss配置>>](/doc/CodePipeline-Oss.md)|  [自定义公共Js>>](/doc/addScript.md) |
 | [项目属性说明>>](/doc/project.md)   | [删除项目说明>>](/doc/deleteProject.md) | |
 | [白名单规则>>](/doc/whitelist.md)   | [Nginx管理规则>>](/doc/nginx-manager.md) | |
 | [用户角色说明>>](/doc/userRole.md)  | [推荐Nginx配置>>](/doc/nginx-config.md)  | |
-| [更新日志>>](/CHANGELOG.md)         | [开发计划>>](/PLANS.md) | |
+| [部署说明](/doc/deploy-doc.md)      | [开发计划>>](/PLANS.md) | |
 
 
 ### 交流讨论 、提供bug反馈或建议
