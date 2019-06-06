@@ -87,7 +87,7 @@
                                 </div>
                             </div>
                             <div class="layui-colla-content layui-show">
-                                <div class="layui-form-item" id="projectsDiv">
+                                <div class="layui-form-item" id="projectsDiv_$item.id">
                                     <label class="layui-form-label" title="能删除项目，启动停止项目">管理项目</label>
                                     <div class="layui-inline">
                                         <div id="projectOpt_$!item.id" style="display: none;">
@@ -119,10 +119,7 @@
                                         </div>
                                     </div>
                                 </div>
-                                #if($nodeTomcat)
-                                    #set($nowTomcat=$nodeTomcat[$item.id])
-                                #end
-                                #if($nowTomcat&&$nowTomcat.size()>0)
+                                #if($nodeTomcat[$item.id]&&$nodeTomcat[$item.id].size()>0)
                                     <div class="layui-form-item">
                                         <label class="layui-form-label">管理Tomcat</label>
                                         <div class="layui-inline">
@@ -151,7 +148,7 @@
                                                 </div>
                                             </div>
                                             <div>
-                                                #foreach($pItem in $nowTomcat)
+                                                #foreach($pItem in $nodeTomcat[$item.id])
                                                     #set($nowName="p_"+$item.id+"_"+$pItem.id)
                                                     <input type="checkbox" lay-filter="manageTomcat"
                                                            p="p_$item.id"
@@ -294,6 +291,10 @@
                                 project.name = project.group;
                                 project.nodeId = nodeModel.id
                             }
+                        } else {
+                            //没有项目
+                            var divId = "#projectsDiv_" + nodeModel.id;
+                            $(divId).css("display", "none");
                         }
                         var id = "#tree_" + nodeModel.id;
                         setting.nodeId = nodeModel.id;
@@ -354,7 +355,9 @@
                 for (var i = 0; i < projects.length; i++) {
                     var id = projects[i];
                     var obj = treeObj.getNodeByParam("id", id, null);
-                    treeObj.checkNode(obj, true, true);
+                    if (obj) {
+                        treeObj.checkNode(obj, true, true);
+                    }
                 }
             }
         }
