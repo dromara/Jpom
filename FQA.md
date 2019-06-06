@@ -20,7 +20,7 @@
     
    >  删除Server端的数据目录中的 user.json 文件即可，删除此文件不影响其他数据
         
-   ### 在linux 系统中执行Jpom.sh 提示
+   ### 在linux 系统中执行管理sh 提示
    
    ![jpom](/doc/error/ff-unix.png)
    
@@ -42,9 +42,11 @@
     5.#sh filename
       OK!
       
+   > 同时需要注意文件编码格式和内容换行符 
+    
    ### windows 中执行管理bat命令乱码或者执行失败
    
-   > 请修改文件编码为当前系统默认的编码（windows中默认为GB2312）
+   > 请修改文件编码为当前系统默认的编码（windows中默认为GB2312）、检查文件内容换行符
    
    ### 启动Jpom提示
    ![jpom](/doc/error/jdk-error.png)

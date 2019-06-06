@@ -144,7 +144,7 @@ public class ProjectInfoModel extends BaseModel {
     }
 
     public String getJvm() {
-        return StrUtil.replace(jvm, StrUtil.CRLF, StrUtil.SPACE);
+        return jvm;
     }
 
     public void setJvm(String jvm) {
@@ -285,7 +285,7 @@ public class ProjectInfoModel extends BaseModel {
     }
 
     public String getArgs() {
-        return StrUtil.replace(args, StrUtil.CRLF, StrUtil.SPACE);
+        return args;
     }
 
     public void setArgs(String args) {
