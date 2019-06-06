@@ -16,6 +16,11 @@
         -moz-box-shadow: inset 0 0 10px #8D8D8D;
         box-shadow: inset 0 0 10px #8D8D8D;
     }
+
+    .auto {
+        width: 100%;
+        height: 100%;
+    }
 </style>
 <script type="text/javascript" src="$!jpomProxyPath/static/layui/layui.js?v=$staticCacheTime"></script>
 <script type="text/javascript">
