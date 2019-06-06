@@ -174,7 +174,7 @@
                     type: 2,
                     title: '添加分发文件',
                     shade: 0.8,
-                    area: ['40%', '60%'],
+                    area: ['60%', '80%'],
                     content: 'addOutgiving.html?id=' + id
                 });
                 return false;

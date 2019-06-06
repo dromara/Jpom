@@ -90,11 +90,10 @@ public class OutGivingProjectController extends BaseServerController {
         //
         outGivingModel = outGivingServer.getItem(id);
         outGivingModel.setAfterOpt(afterOpt1.getCode());
-        outGivingModel.start();
+        outGivingModel.startBefore();
         outGivingServer.updateItem(outGivingModel);
-        // 开启线程
-        List<OutGivingNodeProject> outGivingNodeProjects = outGivingModel.getOutGivingNodeProjectList();
-        outGivingNodeProjects.forEach(outGivingNodeProject -> ThreadUtil.execute(new OutGivingModel.OutGivingRun(id, outGivingNodeProject, file, afterOpt1, getUser())));
+        //
+        outGivingModel.startRun(id, file, afterOpt1, getUser());
         return JsonMessage.getString(200, "分发成功");
     }
 }
