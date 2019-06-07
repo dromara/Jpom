@@ -175,7 +175,9 @@ public class OutGivingModel extends BaseModel {
          * 顺序执行项目分发
          */
         Order_Must_Restart(2, "完整顺序重启(有节点分发并重启失败将不再进行分发剩余节点)"),
-
+        /**
+         * 顺序执行项目分发
+         */
         Order_Restart(3, "顺序重启(有节点分发并重启失败将继续分发剩余节点)");
         private int code;
         private String desc;
@@ -217,13 +219,18 @@ public class OutGivingModel extends BaseModel {
         List<OutGivingNodeProject> outGivingNodeProjects = getOutGivingNodeProjectList();
         if (afterOpt == AfterOpt.Order_Restart || afterOpt == AfterOpt.Order_Must_Restart) {
             ThreadUtil.execute(() -> {
+                boolean cancel = false;
                 for (OutGivingNodeProject outGivingNodeProject : outGivingNodeProjects) {
-                    OutGivingRun outGivingRun = new OutGivingRun(id, outGivingNodeProject, file, afterOpt, userModel);
-                    OutGivingNodeProject.Status status = outGivingRun.call();
-                    if (status != OutGivingNodeProject.Status.Ok) {
-                        if (afterOpt == AfterOpt.Order_Must_Restart) {
-                            // 完整重启，不再继续剩余的节点项目
-                            break;
+                    if (cancel) {
+                        updateStatus(id, outGivingNodeProject.getProjectId(), OutGivingNodeProject.Status.Cancel, "前一个节点分发失败，取消分发");
+                    } else {
+                        OutGivingRun outGivingRun = new OutGivingRun(id, outGivingNodeProject, file, afterOpt, userModel);
+                        OutGivingNodeProject.Status status = outGivingRun.call();
+                        if (status != OutGivingNodeProject.Status.Ok) {
+                            if (afterOpt == AfterOpt.Order_Must_Restart) {
+                                // 完整重启，不再继续剩余的节点项目
+                                cancel = true;
+                            }
                         }
                     }
                 }
@@ -277,41 +284,45 @@ public class OutGivingModel extends BaseModel {
                 JsonMessage jsonMessage = NodeForward.toJsonMessage(body);
                 if (jsonMessage.getCode() == HttpStatus.HTTP_OK) {
                     result = OutGivingNodeProject.Status.Ok;
-                    updateStatus(result, body);
+                    updateStatus(this.outGivingId, this.outGivingNodeProject.getProjectId(), result, body);
                 } else {
                     result = OutGivingNodeProject.Status.Fail;
-                    updateStatus(result, body);
+                    updateStatus(this.outGivingId, this.outGivingNodeProject.getProjectId(), result, body);
                 }
             } catch (Exception e) {
                 DefaultSystemLog.ERROR().error(this.outGivingNodeProject.getNodeId() + " " + this.outGivingNodeProject.getProjectId() + " " + "分发异常保存", e);
                 result = OutGivingNodeProject.Status.Fail;
-                try {
-                    updateStatus(result, e.getMessage());
-                } catch (IOException ex) {
-                    DefaultSystemLog.ERROR().error(this.outGivingNodeProject.getNodeId() + " " + this.outGivingNodeProject.getProjectId() + " " + "分发异常保存", ex);
-                }
+                updateStatus(this.outGivingId, this.outGivingNodeProject.getProjectId(), result, e.getMessage());
             }
             return result;
         }
 
-        /**
-         * 更新状态
-         */
-        private void updateStatus(OutGivingNodeProject.Status status, String msg) throws IOException {
-            synchronized (OutGivingRun.class) {
-                OutGivingServer outGivingServer = SpringUtil.getBean(OutGivingServer.class);
-                OutGivingModel outGivingModel = outGivingServer.getItem(this.outGivingId);
-                List<OutGivingNodeProject> outGivingNodeProjects = outGivingModel.getOutGivingNodeProjectList();
-                for (OutGivingNodeProject outGivingNodeProject : outGivingNodeProjects) {
-                    if (!outGivingNodeProject.getProjectId().equalsIgnoreCase(OutGivingRun.this.outGivingNodeProject.getProjectId())) {
-                        continue;
-                    }
-                    outGivingNodeProject.setStatus(status.getCode());
-                    outGivingNodeProject.setResult(msg);
-                    outGivingNodeProject.setLastOutGivingTime(DateUtil.now());
-                }
-                outGivingServer.updateItem(outGivingModel);
+
+    }
+
+    /**
+     * 更新状态
+     */
+    private static void updateStatus(String outGivingId, String outGivingNodeProjectId, OutGivingNodeProject.Status status, String msg) {
+        synchronized (OutGivingRun.class) {
+            OutGivingServer outGivingServer = SpringUtil.getBean(OutGivingServer.class);
+            OutGivingModel outGivingModel;
+            try {
+                outGivingModel = outGivingServer.getItem(outGivingId);
+            } catch (IOException e) {
+                DefaultSystemLog.ERROR().error(outGivingId + " " + outGivingNodeProjectId + " " + "获取异常", e);
+                return;
             }
+            List<OutGivingNodeProject> outGivingNodeProjects = outGivingModel.getOutGivingNodeProjectList();
+            for (OutGivingNodeProject outGivingNodeProject : outGivingNodeProjects) {
+                if (!outGivingNodeProject.getProjectId().equalsIgnoreCase(outGivingNodeProjectId)) {
+                    continue;
+                }
+                outGivingNodeProject.setStatus(status.getCode());
+                outGivingNodeProject.setResult(msg);
+                outGivingNodeProject.setLastOutGivingTime(DateUtil.now());
+            }
+            outGivingServer.updateItem(outGivingModel);
         }
     }
 }
