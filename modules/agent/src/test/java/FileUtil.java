@@ -95,7 +95,10 @@ public class FileUtil {
         InputStream is = null;
         OutputStream os = null;
         try {
-            File destFile = new File(destDir, srcFile.getName());
+//            File destFile = new File(destDir, srcFile.getName());
+            String name = srcFile.getName();
+            name = name.replace(".bz2", "");
+            File destFile = new File(destDir, name);
             fileNames.add(srcFile.getName());
             is = new BZip2CompressorInputStream(new BufferedInputStream(new FileInputStream(srcFile), BUFFER_SIZE));
             os = new BufferedOutputStream(new FileOutputStream(destFile), BUFFER_SIZE);
@@ -121,7 +124,9 @@ public class FileUtil {
         InputStream is = null;
         OutputStream os = null;
         try {
-            File destFile = new File(destDir, srcFile.getName());
+            String name = srcFile.getName();
+            name = name.replace(".gz", "");
+            File destFile = new File(destDir, name);
             fileNames.add(srcFile.getName());
             is = new GzipCompressorInputStream(new BufferedInputStream(new FileInputStream(srcFile), BUFFER_SIZE));
             os = new BufferedOutputStream(new FileOutputStream(destFile), BUFFER_SIZE);
@@ -218,9 +223,18 @@ public class FileUtil {
     }
 
     public static void main(String[] args) throws Exception {
+        System.out.println(unGZ("D:\\systemDocument\\桌面\\zip\\aaa.txt.gz", "D:\\systemDocument\\桌面\\zip\\gz"));
+        System.out.println(unBZip2("D:\\systemDocument\\桌面\\zip\\aaa.txt.bz2", "D:\\systemDocument\\桌面\\zip\\bz"));
 
-        unCompress("D:\\SystemDocument\\Desktop\\Desktop.tar.gz", "D:\\SystemDocument\\Desktop\\Desktop-test");
-        //System.out.println(unZip("F:\\fileupload\\dna-sample.zip", "F:\\fileupload\\"));
+
+//        System.out.println(unZip("D:\\systemDocument\\桌面\\zip\\test.zip", "D:\\systemDocument\\桌面\\zip\\zip"));
+//        System.out.println(unTar("D:\\systemDocument\\桌面\\zip\\aaa.tar", "D:\\systemDocument\\桌面\\zip\\tar"));
+//        System.out.println(unTarBZip2("D:\\systemDocument\\桌面\\zip\\aaa.tar.bz2", "D:\\systemDocument\\桌面\\zip\\tarbz"));
+//        System.out.println(unTarGZ("D:\\systemDocument\\桌面\\zip\\apache-zookeeper-3.5.5.tar.gz", "D:\\systemDocument\\桌面\\zip\\targz"));
+
+
+//        unCompress("D:\\systemDocument\\桌面\\zip\\test.zip", "D:\\systemDocument\\桌面\\zip\\a");
+//        System.out.println(unZip("D:\\systemDocument\\桌面\\zip\\aaa.tar", "D:\\systemDocument\\桌面\\zip\\a"));
 //        System.out.println(unTar("F:\\fileupload\\中文test.tar", "F:\\fileupload\\"));
 
         //System.out.println(unBZip2("F:\\fileupload\\中文test.xml.bz2", "F:\\fileupload\\"));
