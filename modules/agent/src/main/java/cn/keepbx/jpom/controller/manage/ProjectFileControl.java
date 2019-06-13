@@ -78,12 +78,9 @@ public class ProjectFileControl extends BaseAgentController {
         }
 
         if ("unzip".equals(type)) {
-//            multipartFileBuilder.setInputStreamType("tar", "bz2", "zip", "gz", "tar.bz2", "tar.gz");
             multipartFileBuilder.setFileExt("tar", "bz2", "zip", "gz", "tar.bz2", "tar.gz");
             multipartFileBuilder.setSavePath(AgentConfigBean.getInstance().getTempPathName());
             String path = multipartFileBuilder.save();
-            //
-
             // 判断是否需要清空
             if ("clear".equalsIgnoreCase(clearType)) {
                 if (!FileUtil.clean(lib)) {
@@ -92,7 +89,6 @@ public class ProjectFileControl extends BaseAgentController {
             }
             // 解压
             File file = new File(path);
-//            ZipUtil.unzip(file, lib);
             CompressionFileUtil.unCompress(file.getAbsolutePath(), lib.getAbsolutePath());
             if (!file.delete()) {
                 DefaultSystemLog.LOG().info("删除失败：" + file.getPath());
