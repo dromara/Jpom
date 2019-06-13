@@ -1,4 +1,4 @@
-## 常见问题
+# 常见问题
 
 ### 如何修改程序运行端口
 
@@ -83,6 +83,10 @@ Jpom需要Jdk1.8以上，请检查jdk版本
 ### windows 环境 com.sun.tools.attach.AttachNotSupportedException: no providers installed 之类异常
 
 > 问题原因${JAVA_HOME}/jre/bin/attach.dll 文件没有找到，检查当前Jdk环境是否安装完整
+
+### 查看控制台日志中文乱码
+
+> 由于没人采用自动识别文件编码格式，可能不准确，如果明确日志问酒店编码格式。可以在插件端外部文件【extConfig.yml】中指定
 
 ### 常见问题未知问题
 
