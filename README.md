@@ -47,6 +47,7 @@
 6. 系统路径[白名单模式](/doc/whitelist.md)，杜绝用户误操作系统文件
 7. [在线管理Nginx配置](/doc/nginx-manager.md)、ssl证书文件
 8. [阿里云 CodePipeline + Oss在线管理](/doc/CodePipeline-Oss.md)
+9. Tomcat状态、文件、war包在线实时管理
 
 #### 基本操作演示
 
