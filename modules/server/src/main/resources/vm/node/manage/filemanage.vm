@@ -217,8 +217,8 @@
                 }
             },
             multiple: false,
-            exts: 'zip',
-            acceptMime: '.zip',
+            exts: 'tar|bz2|gz|zip|tar.bz2|tar.gz',
+            // acceptMime: 'application/zip,application/x-tar,application/x-gzip',
             url: './upload',
             before: function () {
                 layer.load(1, {

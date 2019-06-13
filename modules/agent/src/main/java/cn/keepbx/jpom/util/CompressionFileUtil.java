@@ -1,5 +1,7 @@
 package cn.keepbx.jpom.util;
 
+import cn.hutool.core.io.FileTypeUtil;
+import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
@@ -230,9 +232,8 @@ public class CompressionFileUtil {
     }
 
     public static void main(String[] args) throws Exception {
-        System.out.println(unGZ("D:\\systemDocument\\桌面\\zip\\aaa.txt.gz", "D:\\systemDocument\\桌面\\zip\\gz"));
-        System.out.println(unBZip2("D:\\systemDocument\\桌面\\zip\\aaa.txt.bz2", "D:\\systemDocument\\桌面\\zip\\bz"));
-
+//        System.out.println(unGZ("D:\\systemDocument\\桌面\\zip\\aaa.txt.gz", "D:\\systemDocument\\桌面\\zip\\gz"));
+//        System.out.println(unBZip2("D:\\systemDocument\\桌面\\zip\\aaa.txt.bz2", "D:\\systemDocument\\桌面\\zip\\bz"));
 
 //        System.out.println(unZip("D:\\systemDocument\\桌面\\zip\\test.zip", "D:\\systemDocument\\桌面\\zip\\zip"));
 //        System.out.println(unTar("D:\\systemDocument\\桌面\\zip\\aaa.tar", "D:\\systemDocument\\桌面\\zip\\tar"));
