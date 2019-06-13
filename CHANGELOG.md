@@ -9,6 +9,7 @@
 3. 【Server】新增所有页面添加公共Html代码
 4. 新增Tomcat管理
 5. 【Agent】导入证书文件新增对cer、crt文件支持
+6. 【Agent】导入项目包时指出多压缩包[tar|bz2|gz|zip|tar.bz2|tar.gz] (感谢@群友)
 
 ### 解决BUG、优化功能
     
