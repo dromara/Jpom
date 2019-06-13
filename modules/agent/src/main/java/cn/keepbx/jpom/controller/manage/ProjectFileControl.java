@@ -2,7 +2,6 @@ package cn.keepbx.jpom.controller.manage;
 
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
-import cn.hutool.core.util.ZipUtil;
 import cn.hutool.extra.servlet.ServletUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
@@ -12,6 +11,7 @@ import cn.keepbx.jpom.model.data.ProjectInfoModel;
 import cn.keepbx.jpom.service.manage.ConsoleService;
 import cn.keepbx.jpom.socket.ConsoleCommandOp;
 import cn.keepbx.jpom.system.AgentConfigBean;
+import cn.keepbx.jpom.util.CompressionFileUtil;
 import cn.keepbx.jpom.util.FileUtils;
 import com.alibaba.fastjson.JSONArray;
 import org.springframework.http.MediaType;
@@ -78,7 +78,8 @@ public class ProjectFileControl extends BaseAgentController {
         }
 
         if ("unzip".equals(type)) {
-            multipartFileBuilder.setInputStreamType("zip");
+//            multipartFileBuilder.setInputStreamType("tar", "bz2", "zip", "gz", "tar.bz2", "tar.gz");
+            multipartFileBuilder.setFileExt("tar", "bz2", "zip", "gz", "tar.bz2", "tar.gz");
             multipartFileBuilder.setSavePath(AgentConfigBean.getInstance().getTempPathName());
             String path = multipartFileBuilder.save();
             //
@@ -91,7 +92,8 @@ public class ProjectFileControl extends BaseAgentController {
             }
             // 解压
             File file = new File(path);
-            ZipUtil.unzip(file, lib);
+//            ZipUtil.unzip(file, lib);
+            CompressionFileUtil.unCompress(file.getAbsolutePath(), lib.getAbsolutePath());
             if (!file.delete()) {
                 DefaultSystemLog.LOG().info("删除失败：" + file.getPath());
             }
