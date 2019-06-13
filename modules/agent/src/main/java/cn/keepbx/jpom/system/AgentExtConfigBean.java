@@ -77,7 +77,10 @@ public class AgentExtConfigBean {
             agentExtConfigBean = SpringUtil.getBean(AgentExtConfigBean.class);
             // 读取配置的编码格式
             if (StrUtil.isNotBlank(agentExtConfigBean.logFileCharset)) {
-                agentExtConfigBean.logFileCharsets = CharsetUtil.charset(agentExtConfigBean.logFileCharset);
+                try {
+                    agentExtConfigBean.logFileCharsets = CharsetUtil.charset(agentExtConfigBean.logFileCharset);
+                } catch (Exception ignored) {
+                }
             }
         }
         return agentExtConfigBean;
