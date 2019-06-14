@@ -120,41 +120,6 @@ public class TomcatManageController extends BaseAgentController {
         return JsonMessage.getString(200, "保存成功");
     }
 
-    /**
-     * 判断是否是Tomcat的根路径
-     *
-     * @return 返回是否是Tomcat根路径
-     */
-    private boolean isTomcatRoot(String path) {
-        File file = new File(path);
-        if (file.exists()) {
-            if (file.isFile()) {
-                return false;
-            } else {
-                File[] files = file.listFiles();
-                if (files == null) {
-                    return false;
-                }
-                // 判断该目录下是否
-                for (File child : files) {
-                    if ("bin".equals(child.getName()) && child.isDirectory()) {
-                        File[] binFiles = child.listFiles();
-                        if (binFiles == null) {
-                            return false;
-                        }
-                        for (File binChild : binFiles) {
-                            if ("bootstrap.jar".equals(binChild.getName()) && binChild.isFile()) {
-                                return true;
-                            }
-                        }
-                    }
-                }
-                return false;
-            }
-        } else {
-            return false;
-        }
-    }
 
     /**
      * 修改Tomcat信息
@@ -187,7 +152,7 @@ public class TomcatManageController extends BaseAgentController {
     private String doInitTomcat(TomcatInfoModel tomcatInfoModel) {
         String tomcatPath = tomcatInfoModel.getPath();
         // 判断Tomcat路径是否正确
-        if (!isTomcatRoot(tomcatPath)) {
+        if (!TomcatInfoModel.isTomcatRoot(tomcatPath)) {
             return JsonMessage.getString(405, String.format("没有在路径：%s 下检测到Tomcat", tomcatPath));
         }
 

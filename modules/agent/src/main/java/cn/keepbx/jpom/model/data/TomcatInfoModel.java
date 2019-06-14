@@ -1,7 +1,16 @@
 package cn.keepbx.jpom.model.data;
 
+import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.keepbx.jpom.model.BaseModel;
 
+import java.io.File;
+
+/**
+ * tomcat 对象实体
+ *
+ * @author lf
+ */
 public class TomcatInfoModel extends BaseModel {
 
     private String path;
@@ -14,7 +23,22 @@ public class TomcatInfoModel extends BaseModel {
     private String modifyTime;
 
     public String getPath() {
-        return path;
+        if (path == null) {
+            return null;
+        }
+        return FileUtil.normalize(path + "/");
+    }
+
+    public String pathAndCheck() {
+        String path = getPath();
+        if (path == null) {
+            return null;
+        }
+        path = FileUtil.normalize(path + "/");
+        if (isTomcatRoot(path)) {
+            return path;
+        }
+        throw new RuntimeException("tomcat path error:" + path);
     }
 
     public void setPath(String path) {
@@ -75,5 +99,42 @@ public class TomcatInfoModel extends BaseModel {
 
     public void setModifyTime(String modifyTime) {
         this.modifyTime = modifyTime;
+    }
+
+
+    /**
+     * 判断是否是Tomcat的根路径
+     *
+     * @return 返回是否是Tomcat根路径
+     */
+    public static boolean isTomcatRoot(String path) {
+        File file = new File(path);
+        if (file.exists()) {
+            if (file.isFile()) {
+                return false;
+            } else {
+                File[] files = file.listFiles();
+                if (files == null) {
+                    return false;
+                }
+                // 判断该目录下是否
+                for (File child : files) {
+                    if ("bin".equals(child.getName()) && child.isDirectory()) {
+                        File[] binFiles = child.listFiles();
+                        if (binFiles == null) {
+                            return false;
+                        }
+                        for (File binChild : binFiles) {
+                            if ("bootstrap.jar".equals(binChild.getName()) && binChild.isFile()) {
+                                return true;
+                            }
+                        }
+                    }
+                }
+                return false;
+            }
+        } else {
+            return false;
+        }
     }
 }
