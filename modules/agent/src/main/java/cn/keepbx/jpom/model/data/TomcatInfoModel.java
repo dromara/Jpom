@@ -22,7 +22,10 @@ public class TomcatInfoModel extends BaseModel {
     private String modifyTime;
 
     public String getPath() {
-        return path;
+        if (path == null) {
+            return null;
+        }
+        return FileUtil.normalize(path + "/");
     }
 
     public String pathAndCheck() {
@@ -30,7 +33,6 @@ public class TomcatInfoModel extends BaseModel {
         if (path == null) {
             return null;
         }
-        path = FileUtil.normalize(path + "/");
         if (isTomcatRoot(path)) {
             return path;
         }
@@ -58,7 +60,10 @@ public class TomcatInfoModel extends BaseModel {
     }
 
     public String getAppBase() {
-        return appBase;
+        if (appBase == null) {
+            return null;
+        }
+        return FileUtil.normalize(appBase + "/");
     }
 
     public void setAppBase(String appBase) {

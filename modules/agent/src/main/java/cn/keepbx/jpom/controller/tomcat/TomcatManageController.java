@@ -276,7 +276,7 @@ public class TomcatManageController extends BaseAgentController {
         if (!StrUtil.isEmptyOrUndefined(path)) {
             fileDir = FileUtil.file(appBasePath, FileUtil.normalize(path));
         } else {
-            fileDir = new File(path);
+            fileDir = FileUtil.file(path);
         }
         if (!fileDir.exists()) {
             return JsonMessage.getString(500, "目录不存在");
@@ -286,13 +286,13 @@ public class TomcatManageController extends BaseAgentController {
             return JsonMessage.getString(500, "目录是空");
         }
 
-//        JSONArray arrayFile = FileUtils.parseInfo(filesAll, false, appBasePath);
+        // JSONArray arrayFile = FileUtils.parseInfo(filesAll, false, appBasePath);
         JSONArray arrayFile = new JSONArray();
         JSONArray arrayDir = new JSONArray();
         for (File file : filesAll) {
             JSONObject jsonObject = new JSONObject();
-
-            jsonObject.put("parentPath", FileUtil.normalize(file.getParent()).replace(tomcatInfoModel.getAppBase(), ""));
+            String parentPath = FileUtils.delStartPath(file, appBasePath, false);
+            jsonObject.put("parentPath", parentPath);
             jsonObject.put("filename", file.getName());
             long mTime = file.lastModified();
             jsonObject.put("modifyTimeLong", mTime);
