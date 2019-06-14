@@ -23,10 +23,7 @@ public class TomcatInfoModel extends BaseModel {
     private String modifyTime;
 
     public String getPath() {
-        if (path == null) {
-            return null;
-        }
-        return FileUtil.normalize(path + "/");
+        return path;
     }
 
     public String pathAndCheck() {
