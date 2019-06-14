@@ -1,11 +1,16 @@
 package cn.keepbx.jpom.common.commander;
 
 import cn.hutool.http.HttpRequest;
+import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.keepbx.jpom.BaseJpomApplication;
 import cn.keepbx.jpom.common.commander.impl.LinuxTomcatCommander;
 import cn.keepbx.jpom.common.commander.impl.WindowsTomcatCommander;
 import cn.keepbx.jpom.model.data.TomcatInfoModel;
 import cn.keepbx.jpom.system.JpomRuntimeException;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 
 /**
  * tomcat命令执行工具类
@@ -80,5 +85,20 @@ public abstract class AbstractTomcatCommander {
             }
         }
         return strReturn;
+    }
+
+    protected void exec(String command) {
+        DefaultSystemLog.LOG().info(command);
+        try {
+            // 执行命令
+            Process process = Runtime.getRuntime().exec(command);
+            process.getInputStream().close();
+            process.getErrorStream().close();
+            process.getOutputStream().close();
+            process.waitFor(5, TimeUnit.SECONDS);
+            process.destroy();
+        } catch (IOException | InterruptedException e) {
+            DefaultSystemLog.ERROR().error("tomcat执行名称失败", e);
+        }
     }
 }

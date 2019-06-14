@@ -42,19 +42,8 @@ public class WindowsTomcatCommander extends AbstractTomcatCommander {
                         "org.apache.catalina.startup.Bootstrap %s", tomcatPath, tomcatPath,
                 tomcatPath, tomcatPath, tomcatPath,
                 tomcatPath, tomcatPath, cmd);
-        try {
-            // 执行命令
-            Process process = Runtime.getRuntime().exec(command, null, new File(tomcatPath));
-
-            process.getInputStream().close();
-            process.getErrorStream().close();
-            process.getOutputStream().close();
-            process.waitFor(5, TimeUnit.SECONDS);
-            process.destroy();
-        } catch (IOException | InterruptedException e) {
-            DefaultSystemLog.ERROR().error("tomcat执行名称失败", e);
-        }
-
+        //
+        exec(command);
         // 查询操作结果并返回
         return getStatus(tomcatInfoModel, cmd);
     }
