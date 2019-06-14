@@ -1,7 +1,6 @@
 package cn.keepbx.jpom.model.data;
 
 import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.util.StrUtil;
 import cn.keepbx.jpom.model.BaseModel;
 
 import java.io.File;
@@ -35,7 +34,7 @@ public class TomcatInfoModel extends BaseModel {
         if (isTomcatRoot(path)) {
             return path;
         }
-        throw new RuntimeException("tomcat path error:" + path);
+        throw new RuntimeException("tomcat path error:" + getPath());
     }
 
     public void setPath(String path) {
@@ -106,32 +105,30 @@ public class TomcatInfoModel extends BaseModel {
      */
     public static boolean isTomcatRoot(String path) {
         File file = new File(path);
-        if (file.exists()) {
-            if (file.isFile()) {
-                return false;
-            } else {
-                File[] files = file.listFiles();
-                if (files == null) {
-                    return false;
-                }
-                // 判断该目录下是否
-                for (File child : files) {
-                    if ("bin".equals(child.getName()) && child.isDirectory()) {
-                        File[] binFiles = child.listFiles();
-                        if (binFiles == null) {
-                            return false;
-                        }
-                        for (File binChild : binFiles) {
-                            if ("bootstrap.jar".equals(binChild.getName()) && binChild.isFile()) {
-                                return true;
-                            }
-                        }
-                    }
-                }
-                return false;
-            }
-        } else {
+        if (!file.exists()) {
             return false;
         }
+        if (file.isFile()) {
+            return false;
+        }
+        File[] files = file.listFiles();
+        if (files == null) {
+            return false;
+        }
+        // 判断该目录下是否
+        for (File child : files) {
+            if ("bin".equals(child.getName()) && child.isDirectory()) {
+                File[] binFiles = child.listFiles();
+                if (binFiles == null) {
+                    return false;
+                }
+                for (File binChild : binFiles) {
+                    if ("bootstrap.jar".equals(binChild.getName()) && binChild.isFile()) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
     }
 }

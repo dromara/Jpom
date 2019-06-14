@@ -113,7 +113,7 @@ public class TomcatManageController extends BaseAgentController {
 
         tomcatInfoModel.setId(SecureUtil.md5(DateUtil.now()));
         tomcatInfoModel.setCreator(getUserName());
-        tomcatInfoModel.setCreateTime(DateUtil.now());
+
         // 设置tomcat路径，去除多余的符号
         tomcatInfoModel.setPath(FileUtil.normalize(tomcatInfoModel.getPath()));
         tomcatManageService.addItem(tomcatInfoModel);
@@ -141,7 +141,6 @@ public class TomcatManageController extends BaseAgentController {
         }
 
         tomcatInfoModel.setModifyUser(getUserName());
-        tomcatInfoModel.setModifyTime(DateUtil.now());
         // 设置tomcat路径，去除多余的符号
         tomcatInfoModel.setPath(FileUtil.normalize(tomcatInfoModel.getPath()));
         tomcatManageService.updateItem(tomcatInfoModel);

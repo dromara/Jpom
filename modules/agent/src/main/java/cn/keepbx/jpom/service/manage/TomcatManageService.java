@@ -1,5 +1,6 @@
 package cn.keepbx.jpom.service.manage;
 
+import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.http.HttpRequest;
 import cn.hutool.http.HttpResponse;
@@ -71,6 +72,7 @@ public class TomcatManageService extends BaseOperService<TomcatInfoModel> {
      */
     @Override
     public void addItem(TomcatInfoModel tomcatInfoModel) {
+        tomcatInfoModel.setCreateTime(DateUtil.now());
         saveJson(AgentConfigBean.TOMCAT, tomcatInfoModel.toJson());
     }
 
@@ -92,6 +94,7 @@ public class TomcatManageService extends BaseOperService<TomcatInfoModel> {
      */
     @Override
     public boolean updateItem(TomcatInfoModel tomcatInfoModel) {
+        tomcatInfoModel.setModifyTime(DateUtil.now());
         updateJson(AgentConfigBean.TOMCAT, tomcatInfoModel.toJson());
         return true;
     }
