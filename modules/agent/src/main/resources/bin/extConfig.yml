@@ -16,3 +16,5 @@ log:
   autoBackSize: 50MB
   # 保存天数 配置错误或者没有，默认是7天
   saveDays: 7
+  # 日志文件的编码格式，如果没有指定就自动识别，自动识别可能出现不准确的情况
+  fileCharset:

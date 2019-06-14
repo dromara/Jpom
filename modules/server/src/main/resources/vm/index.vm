@@ -65,11 +65,12 @@
                     <a href="javascript:;"
                        data-options="{'id':'welcome', 'title':'节点管理', 'url':'./node/list.html'}">节点管理</a>
                 </li>
-
-                <li class="layui-nav-item">
-                    <a href="javascript:;"
-                       data-options="{'id':'outgiving', 'title':'节点分发', 'url':'./outgiving/list.html'}">节点分发</a>
-                </li>
+                #if(${showOutGiving})
+                    <li class="layui-nav-item">
+                        <a href="javascript:;"
+                           data-options="{'id':'outgiving', 'title':'节点分发', 'url':'./outgiving/list.html'}">节点分发</a>
+                    </li>
+                #end
                 #if($user.isServerManager())
                     <li class="layui-nav-item">
                         <a href="javascript:;"

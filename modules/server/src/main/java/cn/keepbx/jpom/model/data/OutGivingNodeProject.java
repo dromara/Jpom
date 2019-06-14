@@ -22,7 +22,7 @@ public class OutGivingNodeProject extends BaseJsonModel {
     private String nodeId;
     private String projectId;
     private String lastOutGivingTime;
-    private int status;
+    private int status = Status.No.getCode();
     private String result;
 
     private JSONObject projectInfo;
@@ -120,6 +120,7 @@ public class OutGivingNodeProject extends BaseJsonModel {
         Ing(1, "分发中"),
         Ok(2, "分发成功"),
         Fail(3, "分发失败"),
+        Cancel(4, "取消分发"),
         ;
         private int code;
         private String desc;

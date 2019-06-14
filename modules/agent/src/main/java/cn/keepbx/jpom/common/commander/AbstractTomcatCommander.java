@@ -9,6 +9,7 @@ import cn.keepbx.jpom.system.JpomRuntimeException;
 
 /**
  * tomcat命令执行工具类
+ *
  * @author LF
  */
 public abstract class AbstractTomcatCommander {
@@ -35,16 +36,18 @@ public abstract class AbstractTomcatCommander {
 
     /**
      * 执行tomcat命令
+     *
      * @param tomcatInfoModel tomcat信息
-     * @param cmd 执行的命令，包括start stop
+     * @param cmd             执行的命令，包括start stop
      * @return 返回tomcat启动结果
      */
     public abstract String execCmd(TomcatInfoModel tomcatInfoModel, String cmd);
 
     /**
      * 检查tomcat状态
+     *
      * @param tomcatInfoModel tomcat信息
-     * @param cmd 操作命令
+     * @param cmd             操作命令
      * @return 状态结果
      */
     protected String getStatus(TomcatInfoModel tomcatInfoModel, String cmd) {
@@ -54,11 +57,13 @@ public abstract class AbstractTomcatCommander {
             int result = 0;
             String url = String.format("http://127.0.0.1:%d/", tomcatInfoModel.getPort());
             HttpRequest httpRequest = new HttpRequest(url);
-            httpRequest.setConnectionTimeout(3000); // 设置超时时间为3秒
+            // 设置超时时间为3秒
+            httpRequest.setConnectionTimeout(3000);
             try {
                 httpRequest.execute();
                 result = 1;
-            } catch (Exception ignored) {}
+            } catch (Exception ignored) {
+            }
 
             i++;
             if ("start".equals(cmd) && result == 1) {
@@ -71,7 +76,8 @@ public abstract class AbstractTomcatCommander {
             }
             try {
                 Thread.sleep(1000);
-            } catch (InterruptedException ignored) {}
+            } catch (InterruptedException ignored) {
+            }
         }
         return strReturn;
     }

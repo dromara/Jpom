@@ -9,11 +9,6 @@
             padding: 10px;
         }
 
-        .auto {
-            width: 100%;
-            height: 100%;
-        }
-
         .edit-div {
             width: 80%;
             height: 25vh;

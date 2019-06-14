@@ -18,9 +18,10 @@ import java.util.Arrays;
 public class CommandUtil {
 
     public static String execCommand(String command) {
+        String newCommand = StrUtil.replace(command, StrUtil.CRLF, StrUtil.SPACE);
         String result = "error";
         try {
-            result = exec(new String[]{command});
+            result = exec(new String[]{newCommand});
         } catch (Exception e) {
             DefaultSystemLog.ERROR().error("执行命令异常", e);
             result += e.getMessage();
@@ -29,16 +30,17 @@ public class CommandUtil {
     }
 
     public static String execSystemCommand(String command) {
+        String newCommand = StrUtil.replace(command, StrUtil.CRLF, StrUtil.SPACE);
         String result = "error";
         try {
             String[] cmd;
             if (BaseJpomApplication.OS_INFO.isLinux()) {
                 //执行linux系统命令
-                cmd = new String[]{"/bin/sh", "-c", command};
+                cmd = new String[]{"/bin/sh", "-c", newCommand};
             } else if (BaseJpomApplication.OS_INFO.isMac()) {
-                cmd = new String[]{"/bin/sh", "-c", command};
+                cmd = new String[]{"/bin/sh", "-c", newCommand};
             } else {
-                cmd = new String[]{"cmd", "/c", command};
+                cmd = new String[]{"cmd", "/c", newCommand};
             }
             result = exec(cmd);
         } catch (Exception e) {

@@ -113,48 +113,13 @@ public class TomcatManageController extends BaseAgentController {
 
         tomcatInfoModel.setId(SecureUtil.md5(DateUtil.now()));
         tomcatInfoModel.setCreator(getUserName());
-        tomcatInfoModel.setCreateTime(DateUtil.now());
+
         // 设置tomcat路径，去除多余的符号
         tomcatInfoModel.setPath(FileUtil.normalize(tomcatInfoModel.getPath()));
         tomcatManageService.addItem(tomcatInfoModel);
         return JsonMessage.getString(200, "保存成功");
     }
 
-    /**
-     * 判断是否是Tomcat的根路径
-     *
-     * @return 返回是否是Tomcat根路径
-     */
-    private boolean isTomcatRoot(String path) {
-        File file = new File(path);
-        if (file.exists()) {
-            if (file.isFile()) {
-                return false;
-            } else {
-                File[] files = file.listFiles();
-                if (files == null) {
-                    return false;
-                }
-                // 判断该目录下是否
-                for (File child : files) {
-                    if ("bin".equals(child.getName()) && child.isDirectory()) {
-                        File[] binFiles = child.listFiles();
-                        if (binFiles == null) {
-                            return false;
-                        }
-                        for (File binChild : binFiles) {
-                            if ("bootstrap.jar".equals(binChild.getName()) && binChild.isFile()) {
-                                return true;
-                            }
-                        }
-                    }
-                }
-                return false;
-            }
-        } else {
-            return false;
-        }
-    }
 
     /**
      * 修改Tomcat信息
@@ -176,7 +141,6 @@ public class TomcatManageController extends BaseAgentController {
         }
 
         tomcatInfoModel.setModifyUser(getUserName());
-        tomcatInfoModel.setModifyTime(DateUtil.now());
         // 设置tomcat路径，去除多余的符号
         tomcatInfoModel.setPath(FileUtil.normalize(tomcatInfoModel.getPath()));
         tomcatManageService.updateItem(tomcatInfoModel);
@@ -187,7 +151,7 @@ public class TomcatManageController extends BaseAgentController {
     private String doInitTomcat(TomcatInfoModel tomcatInfoModel) {
         String tomcatPath = tomcatInfoModel.getPath();
         // 判断Tomcat路径是否正确
-        if (!isTomcatRoot(tomcatPath)) {
+        if (!TomcatInfoModel.isTomcatRoot(tomcatPath)) {
             return JsonMessage.getString(405, String.format("没有在路径：%s 下检测到Tomcat", tomcatPath));
         }
 
@@ -306,14 +270,11 @@ public class TomcatManageController extends BaseAgentController {
         if (tomcatInfoModel == null) {
             return JsonMessage.getString(500, "查询失败：项目不存在");
         }
-
-        String appBasePath = tomcatInfoModel.getAppBase();
-        File fileDir;
-        if (!StrUtil.isEmptyOrUndefined(path)) {
-            fileDir = FileUtil.file(appBasePath, FileUtil.normalize(path));
-        } else {
-            fileDir = new File(path);
+        if (StrUtil.isEmptyOrUndefined(path)) {
+            return JsonMessage.getString(500, "path value error");
         }
+        String appBasePath = tomcatInfoModel.getAppBase();
+        File fileDir = FileUtil.file(appBasePath, FileUtil.normalize(path));
         if (!fileDir.exists()) {
             return JsonMessage.getString(500, "目录不存在");
         }
@@ -322,13 +283,13 @@ public class TomcatManageController extends BaseAgentController {
             return JsonMessage.getString(500, "目录是空");
         }
 
-//        JSONArray arrayFile = FileUtils.parseInfo(filesAll, false, appBasePath);
+        // JSONArray arrayFile = FileUtils.parseInfo(filesAll, false, appBasePath);
         JSONArray arrayFile = new JSONArray();
         JSONArray arrayDir = new JSONArray();
         for (File file : filesAll) {
             JSONObject jsonObject = new JSONObject();
-
-            jsonObject.put("parentPath", FileUtil.normalize(file.getParent()).replace(tomcatInfoModel.getAppBase(), ""));
+            String parentPath = FileUtils.delStartPath(file, appBasePath, false);
+            jsonObject.put("parentPath", parentPath);
             jsonObject.put("filename", file.getName());
             long mTime = file.lastModified();
             jsonObject.put("modifyTimeLong", mTime);

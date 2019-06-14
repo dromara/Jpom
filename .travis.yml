@@ -1,5 +1,7 @@
 language: java
 
+jdk:
+  - openjdk8
 script: "mvn install -DskipTests=true -Dmaven.javadoc.skip=true -B -V  && mvn cobertura:cobertura"
 
 notifications:
@@ -7,7 +9,7 @@ notifications:
 
 cache:
   directories:
-  - '$HOME/.m2/repository'
+    - '$HOME/.m2/repository'
 
 after_success:
   - bash <(curl -s https://codecov.io/bash)

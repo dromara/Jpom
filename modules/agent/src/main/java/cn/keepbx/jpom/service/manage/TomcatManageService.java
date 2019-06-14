@@ -1,5 +1,7 @@
 package cn.keepbx.jpom.service.manage;
 
+import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.http.HttpRequest;
 import cn.hutool.http.HttpResponse;
 import cn.jiangzeyin.common.JsonMessage;
@@ -17,6 +19,7 @@ public class TomcatManageService extends BaseOperService<TomcatInfoModel> {
 
     /**
      * 查询tomcat列表
+     *
      * @return Tomcat列表
      */
     @Override
@@ -28,6 +31,7 @@ public class TomcatManageService extends BaseOperService<TomcatInfoModel> {
 
     /**
      * 查询Tomcat信息
+     *
      * @param id 数据id
      * @return Tomcat信息
      */
@@ -38,6 +42,7 @@ public class TomcatManageService extends BaseOperService<TomcatInfoModel> {
 
     /**
      * 根据tomcat名称查询tomcat信息
+     *
      * @param name tomcat的名称
      * @return tomcat信息
      */
@@ -62,15 +67,18 @@ public class TomcatManageService extends BaseOperService<TomcatInfoModel> {
 
     /**
      * 添加Tomcat
+     *
      * @param tomcatInfoModel tomcat信息
      */
     @Override
     public void addItem(TomcatInfoModel tomcatInfoModel) {
+        tomcatInfoModel.setCreateTime(DateUtil.now());
         saveJson(AgentConfigBean.TOMCAT, tomcatInfoModel.toJson());
     }
 
     /**
      * 删除tomcat信息
+     *
      * @param id 数据id
      */
     @Override
@@ -80,17 +88,20 @@ public class TomcatManageService extends BaseOperService<TomcatInfoModel> {
 
     /**
      * 修改tomcat信息
+     *
      * @param tomcatInfoModel tomcat信息
      * @return 更新结果
      */
     @Override
     public boolean updateItem(TomcatInfoModel tomcatInfoModel) {
+        tomcatInfoModel.setModifyTime(DateUtil.now());
         updateJson(AgentConfigBean.TOMCAT, tomcatInfoModel.toJson());
         return true;
     }
 
     /**
      * 查询tomcat状态
+     *
      * @param id tomcat的id
      * @return tomcat状态0表示未运行，1表示运行中
      */
@@ -99,18 +110,20 @@ public class TomcatManageService extends BaseOperService<TomcatInfoModel> {
         TomcatInfoModel tomcatInfoModel = getItem(id);
         String url = String.format("http://127.0.0.1:%d/", tomcatInfoModel.getPort());
         HttpRequest httpRequest = new HttpRequest(url);
-        httpRequest.setConnectionTimeout(3000); // 设置超时时间为3秒
+        // 设置超时时间为3秒
+        httpRequest.setConnectionTimeout(3000);
         try {
             HttpResponse httpResponse = httpRequest.execute();
-
             result = 1;
-        } catch (Exception ignored) {}
+        } catch (Exception ignored) {
+        }
 
         return result;
     }
 
     /**
      * 查询tomcat的项目列表
+     *
      * @param id tomcat的id
      * @return tomcat的项目列表
      */
@@ -118,13 +131,13 @@ public class TomcatManageService extends BaseOperService<TomcatInfoModel> {
         TomcatInfoModel tomcatInfoModel = getItem(id);
         String body = tomcatCmd(tomcatInfoModel, "text/list");
 
-        String[] result = body.replace("\r\n", "$")
+        String[] result = body.replace(StrUtil.CRLF, "$")
                 .replace("\n", "$")
                 .split("\\$");
 
         JSONArray jsonArray = new JSONArray();
 
-        for (int i = 1;  i < result.length; i++) {
+        for (int i = 1; i < result.length; i++) {
             String str = result[i];
             JSONObject jsonObject = new JSONObject();
             String[] strs = str.split(":");
@@ -132,7 +145,7 @@ public class TomcatManageService extends BaseOperService<TomcatInfoModel> {
                 continue;
             }
 
-            jsonObject.put("path", strs[0].equals("/") ? "/ROOT" : strs[0]);
+            jsonObject.put("path", "/".equals(strs[0]) ? "/ROOT" : strs[0]);
             jsonObject.put("status", strs[1]);
             jsonObject.put("session", strs[2]);
 
@@ -144,31 +157,35 @@ public class TomcatManageService extends BaseOperService<TomcatInfoModel> {
 
     /**
      * 访问tomcat Url
+     *
      * @param tomcatInfoModel tomcat信息
-     * @param cmd 命令
+     * @param cmd             命令
      * @return 访问结果
      */
     private String tomcatCmd(TomcatInfoModel tomcatInfoModel, String cmd) {
         String url = String.format("http://127.0.0.1:%d/jpomAgent/%s", tomcatInfoModel.getPort(), cmd);
         HttpRequest httpRequest = new HttpRequest(url);
-        httpRequest.setConnectionTimeout(3000); // 设置超时时间为3秒
+        // 设置超时时间为3秒
+        httpRequest.setConnectionTimeout(3000);
         String body = "";
 
         try {
-             HttpResponse httpResponse = httpRequest.execute();
-             if (httpResponse.isOk()) {
-                 body = httpResponse.body();
-             }
-        } catch (Exception ignored) {}
+            HttpResponse httpResponse = httpRequest.execute();
+            if (httpResponse.isOk()) {
+                body = httpResponse.body();
+            }
+        } catch (Exception ignored) {
+        }
 
         return body;
     }
 
     /**
      * tomcat项目管理
-     * @param id tomcat id
+     *
+     * @param id   tomcat id
      * @param path 项目路径
-     * @param op 执行的操作 start=>启动项目 stop=>停止项目 relaod=>重启项目
+     * @param op   执行的操作 start=>启动项目 stop=>停止项目 relaod=>重启项目
      * @return 操作结果
      */
     public JsonMessage tomcatProjectManage(String id, String path, String op) {

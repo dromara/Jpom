@@ -1,8 +1,12 @@
 package cn.keepbx.jpom.system;
 
+import cn.hutool.core.util.CharsetUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.spring.SpringUtil;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
+
+import java.nio.charset.Charset;
 
 /**
  * agent 端外部配置
@@ -35,7 +39,17 @@ public class AgentExtConfigBean {
      */
     @Value("${log.saveDays:7}")
     private int logSaveDays;
+    /**
+     * 日志文件的编码格式，如果没有指定就自动识别，自动识别可能出现不准确的情况
+     */
+    @Value("${log.fileCharset:}")
+    private String logFileCharset;
+    /**
+     *
+     */
+    private Charset logFileCharsets;
 
+    private static AgentExtConfigBean agentExtConfigBean;
 
     /**
      * 配置错误或者没有，默认是7天
@@ -49,12 +63,26 @@ public class AgentExtConfigBean {
         return logSaveDays;
     }
 
+    public Charset getLogFileCharset() {
+        return logFileCharsets;
+    }
+
     /**
      * 单例
      *
      * @return this
      */
     public static AgentExtConfigBean getInstance() {
-        return SpringUtil.getBean(AgentExtConfigBean.class);
+        if (agentExtConfigBean == null) {
+            agentExtConfigBean = SpringUtil.getBean(AgentExtConfigBean.class);
+            // 读取配置的编码格式
+            if (StrUtil.isNotBlank(agentExtConfigBean.logFileCharset)) {
+                try {
+                    agentExtConfigBean.logFileCharsets = CharsetUtil.charset(agentExtConfigBean.logFileCharset);
+                } catch (Exception ignored) {
+                }
+            }
+        }
+        return agentExtConfigBean;
     }
 }

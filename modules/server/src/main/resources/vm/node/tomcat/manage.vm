@@ -271,11 +271,15 @@
     }
 
     function reloadTable() {
+        layer.load(1, {
+            shade: [0.5, '#fff']
+        });
         // 刷新项目列表
         table.reload('table_file', {
             url: './getFileList',
             where: tableWhere,
             done: function (data) {
+                layer.closeAll();
                 var child = data.data;
                 if (child) {
                     zTreeObj.removeChildNodes(currentNode);

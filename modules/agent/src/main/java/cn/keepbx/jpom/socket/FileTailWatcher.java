@@ -7,6 +7,7 @@ import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.keepbx.jpom.model.data.ProjectInfoModel;
+import cn.keepbx.jpom.system.AgentExtConfigBean;
 import cn.keepbx.jpom.util.CharsetDetector;
 import cn.keepbx.jpom.util.LimitQueue;
 import cn.keepbx.jpom.util.SocketSessionUtil;
@@ -91,7 +92,12 @@ public class FileTailWatcher implements Runnable {
     private FileTailWatcher(File file, String log) throws IOException {
         this.log = log;
         this.randomFile = new RandomAccessFile(file, FileMode.r.name());
-        this.charset = CharsetUtil.charset(new CharsetDetector().detectChineseCharset(file));
+        Charset detSet = AgentExtConfigBean.getInstance().getLogFileCharset();
+        if (detSet == null) {
+            this.charset = CharsetUtil.charset(new CharsetDetector().detectChineseCharset(file));
+        } else {
+            this.charset = detSet;
+        }
         if (file.length() > 0) {
             // 开始读取
             this.startRead();

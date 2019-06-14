@@ -47,6 +47,7 @@
 6. 系统路径[白名单模式](/doc/whitelist.md)，杜绝用户误操作系统文件
 7. [在线管理Nginx配置](/doc/nginx-manager.md)、ssl证书文件
 8. [阿里云 CodePipeline + Oss在线管理](/doc/CodePipeline-Oss.md)
+9. Tomcat状态、文件、war包在线实时管理
 
 #### 基本操作演示
 
@@ -86,7 +87,7 @@
 
 ### 编译运行
 
-1. 访问[Jpom](https://gitee.com/keepbx/Jpom)的码云主页,拉取最新完整代码(建议使用master分支)
+1. 访问[Jpom](https://gitee.com/keepbx/Jpom)的码云主页,拉取最新完整代码(建议使用master分支、如果想体验新功能请使用dev分支)
 2. 运行插件端   
     1. 运行`cn.keepbx.jpom.JpomAgentApplication`
     2. 注意控制台打印的默认账号密码信息
@@ -147,14 +148,14 @@ Agent.sh status    查看Jpom插件端运行状态
 
 ### 常见问题、操作说明
 
-| 必看 | 选看 |
-| -- | -- |
-| [安装文档>>](/doc/install.md)       |  [常见问题>>](/FQA.md)   |
-| [启动失败问题>>](/doc/startFail.md) | [阿里云Oss配置>>](/doc/CodePipeline-Oss.md)|
-| [项目属性说明>>](/doc/project.md)   | [删除项目说明>>](/doc/deleteProject.md) |
-| [白名单规则>>](/doc/whitelist.md)   | [Nginx管理规则>>](/doc/nginx-manager.md) |
-| [用户角色说明>>](/doc/userRole.md)  | [推荐Nginx配置>>](/doc/nginx-config.md)  |
-| [更新日志>>](/CHANGELOG.md)         | [开发计划>>](/PLANS.md) |
+| 必看 | 选看1 | 选看2 |
+| -- | -- | -- | 
+| [安装文档>>](/doc/install.md)       |  [常见问题>>](/FQA.md)   |[更新日志>>](/CHANGELOG.md)   |
+| [启动失败问题>>](/doc/startFail.md) | [阿里云Oss配置>>](/doc/CodePipeline-Oss.md)|  [自定义公共Js>>](/doc/addScript.md) |
+| [项目属性说明>>](/doc/project.md)   | [删除项目说明>>](/doc/deleteProject.md) | [控制台日志策略>>](/doc/conlose-log.md) |
+| [白名单规则>>](/doc/whitelist.md)   | [Nginx管理规则>>](/doc/nginx-manager.md) | [节点分发项目>>](/doc/node-outgiving.md) |
+| [用户角色说明>>](/doc/userRole.md)  | [推荐Nginx配置>>](/doc/nginx-config.md)  | |
+| [部署说明>>](/doc/deploy-doc.md)      | [开发计划>>](/PLANS.md) | |
 
 
 ### 交流讨论 、提供bug反馈或建议
