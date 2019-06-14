@@ -270,14 +270,11 @@ public class TomcatManageController extends BaseAgentController {
         if (tomcatInfoModel == null) {
             return JsonMessage.getString(500, "查询失败：项目不存在");
         }
-
-        String appBasePath = tomcatInfoModel.getAppBase();
-        File fileDir;
-        if (!StrUtil.isEmptyOrUndefined(path)) {
-            fileDir = FileUtil.file(appBasePath, FileUtil.normalize(path));
-        } else {
-            fileDir = FileUtil.file(path);
+        if (StrUtil.isEmptyOrUndefined(path)) {
+            return JsonMessage.getString(500, "path value error");
         }
+        String appBasePath = tomcatInfoModel.getAppBase();
+        File fileDir = FileUtil.file(appBasePath, FileUtil.normalize(path));
         if (!fileDir.exists()) {
             return JsonMessage.getString(500, "目录不存在");
         }
