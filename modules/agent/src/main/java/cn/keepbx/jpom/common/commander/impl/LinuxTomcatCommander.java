@@ -36,7 +36,7 @@ public class LinuxTomcatCommander extends AbstractTomcatCommander {
                 tomcatPath, tomcatPath, tomcatPath,
                 tomcatPath, tomcatPath, cmd);
         //
-        exec(command);
+        exec(command, false);
         // 查询操作结果并返回
         return getStatus(tomcatInfoModel, cmd);
     }
