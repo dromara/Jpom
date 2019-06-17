@@ -1,5 +1,6 @@
 package cn.keepbx.jpom.socket;
 
+import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.io.file.FileMode;
 import cn.hutool.core.thread.ThreadUtil;
@@ -7,6 +8,7 @@ import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.keepbx.jpom.model.data.ProjectInfoModel;
+import cn.keepbx.jpom.model.data.TomcatInfoModel;
 import cn.keepbx.jpom.system.AgentExtConfigBean;
 import cn.keepbx.jpom.util.CharsetDetector;
 import cn.keepbx.jpom.util.LimitQueue;
@@ -74,6 +76,34 @@ public class FileTailWatcher implements Runnable {
         }
         fileTailWatcher.add(session, projectInfoModel.getName());
         //
+        fileTailWatcher.start();
+    }
+
+    /**
+     * 添加文件监听
+     *
+     * @param tomcatInfoModel tomcat
+     * @param session         会话
+     * @throws IOException 异常
+     */
+    public static void addWatcher(TomcatInfoModel tomcatInfoModel, String name, Session session) throws IOException {
+        String path = tomcatInfoModel.getPath() + "/logs/" + name;
+        File file = FileUtil.file(path);
+        if (!file.exists()) {
+            throw new IOException("文件不存在:" + file.getPath());
+        }
+        FileTailWatcher fileTailWatcher = CONCURRENT_HASH_MAP.computeIfAbsent(name, s -> {
+            try {
+                return new FileTailWatcher(file, s);
+            } catch (Exception e) {
+                DefaultSystemLog.ERROR().error("创建文件监听失败", e);
+                return null;
+            }
+        });
+        if (fileTailWatcher == null) {
+            throw new IOException("加载文件失败:" + file.getPath());
+        }
+        fileTailWatcher.add(session, name);
         fileTailWatcher.start();
     }
 

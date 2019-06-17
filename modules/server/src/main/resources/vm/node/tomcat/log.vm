@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    #parse("./common/head.vm")
+    <title>项目管理系统</title>
+    <link href="$!jpomProxyPath/static/ztree/zTreeStyle/zTreeStyle.css" rel="stylesheet">
+    <style>
+        body {
+            padding: 10px 10px 0px 10px;
+        }
+
+        .ztree {
+            height: 80vh;
+            overflow-x: auto;
+            padding: 10px;
+        }
+
+        .logBox {
+            width: 96%;
+            height: 90vh;
+            border: 1px solid #000000;
+            margin: 2%;
+        }
+    </style>
+</head>
+
+<body>
+<div class="layui-row">
+    <div class="layui-col-md3">
+        <ul id="tree" class="ztree"></ul>
+    </div>
+    <div class="layui-col-md9">
+        <div id="log" class="logBox">
+            暂无日志！
+        </div>
+    </div>
+</div>
+</body>
+<script type="text/javascript">
+    var lastClickNode, ws;
+    var setting = {
+        data: {
+            key: {
+                children: "children"
+            },
+            view: {
+                selectedMulti: false
+            }
+        },
+        callback: {
+            onClick: zTreeOnClick
+        }
+    };
+
+    function loadSuccess() {
+        // 加载日志列表 -tree
+        asyncLoadJs("$!jpomProxyPath/static/ztree/jquery.ztree.core.min.js", function () {
+            loadingAjax({
+                url: './getLogList',
+                data: {
+                    id: '$id'
+                },
+                success: function (data) {
+                    var item = {
+                        name: '日志列表'
+                    };
+                    var array = [];
+                    if (data.data && data.data.length > 0) {
+                        for (var i = 0; i < data.data.length; i++) {
+                            var name = data.data[i];
+                            var obj = {
+                                name: name
+                            }
+                            array.push(obj);
+                        }
+                    }
+                    item.children = array;
+                    var zTreeObj = $.fn.zTree.init($("#tree"), setting, item);
+                    zTreeObj.expandAll(true);
+                }
+            });
+        });
+
+    }
+
+    function openSocket(fileName) {
+        if (!fileName) {
+            return;
+        }
+        if (!('WebSocket' in window)) {
+            layer.msg("不支持WebSocket");
+            return;
+        }
+        var url = getSocketHost() + "/tomcat_log?userId=$user.getUserMd5Key()&tomcatId=$id&nodeId=$node.id";
+        if (!ws) {
+            ws = new WebSocket(url);
+        }
+        if (ws.readyState != 1 && ws.readyState != 0) {
+            ws = new WebSocket(url);
+        }
+        ws.onopen = function () {
+            var item = {
+                op: "start",
+                tomcatId: '$id',
+                fileName: fileName
+            }
+            ws.send(JSON.stringify(item));
+        };
+        ws.onmessage = function (data) {
+            try {
+                console.log(data);
+                if (data.data) {
+
+                }
+            } catch (e) {
+                return;
+            }
+        };
+        ws.onerror = function (ev) {
+            console.log(ev);
+            layer.msg("socket 异常");
+        }
+    }
+
+    //节点点击
+    function zTreeOnClick(event, treeId, treeNode) {
+        if (lastClickNode === treeNode.name) {
+            return;
+        }
+        lastClickNode = treeNode.name;
+        var parentNode = treeNode.getParentNode();
+        if (parentNode) {
+            openSocket(lastClickNode);
+        }
+    }
+
+    function reloadTable() {
+        layer.load(1, {
+            shade: [0.5, '#fff']
+        });
+        // 刷新项目列表
+        table.reload('table_file', {
+            url: './getFileList',
+            where: tableWhere,
+            done: function (data) {
+                layer.closeAll();
+                var child = data.data;
+                if (child) {
+                    zTreeObj.removeChildNodes(currentNode);
+                    var temp = [];
+                    for (var i in child) {
+                        if (child[i].isDirectory) {
+                            temp.push(child[i]);
+                        }
+                        child[i].hasChildren = true;
+                        child[i].chkDisabled = true;
+                    }
+                    zTreeObj.addNodes(currentNode, temp, false);
+                }
+            }
+        });
+    }
+</script>
+</html>

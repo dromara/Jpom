@@ -30,6 +30,9 @@
                              style="height: 10px; width: 10px; border-radius: 5px; display: inline-block;"></div>
                     </div>
                     <div class="layui-layout-right" style="padding-right: 15px;">
+                        <button op="log" data-id="$item.id" data-name="$item.name" class="layui-btn layui-btn-sm ">
+                            查看日志
+                        </button>
                         #if($user.isSystemUser())
                         ##                            <button op="addProject" data-id="$item.id" data-name="$item.name" class="layui-btn layui-btn-sm ">
                         ##                                新增项目
@@ -146,6 +149,15 @@
             if ("start" == op) {
                 // 启动tomat
                 execTomcatOp(id, op);
+            }
+
+            if ("log" == op) {
+                // tomat 日志管理
+                tabChange({
+                    id: "log_manage_" + id,
+                    url: '/node/tomcat/log?id=' + id,
+                    title: name + ' - 日志管理',
+                });
             }
 
             if ("stop" == op) {

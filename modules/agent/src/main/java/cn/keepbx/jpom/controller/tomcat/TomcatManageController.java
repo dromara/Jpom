@@ -13,23 +13,18 @@ import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.controller.multipart.MultipartFileBuilder;
 import cn.keepbx.jpom.common.BaseAgentController;
 import cn.keepbx.jpom.common.commander.AbstractTomcatCommander;
-import cn.keepbx.jpom.model.data.ProjectInfoModel;
 import cn.keepbx.jpom.model.data.TomcatInfoModel;
 import cn.keepbx.jpom.service.manage.TomcatManageService;
-import cn.keepbx.jpom.socket.ConsoleCommandOp;
-import cn.keepbx.jpom.system.AgentConfigBean;
 import cn.keepbx.jpom.util.FileUtils;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.http.MediaType;
-import org.springframework.util.ResourceUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
@@ -420,5 +415,22 @@ public class TomcatManageController extends BaseAgentController {
             DefaultSystemLog.ERROR().error("下载文件异常", e);
         }
         return "下载失败。请刷新页面后重试";
+    }
+
+    /**
+     * 获取tomcat 日志列表
+     *
+     * @param id tomcat id
+     */
+    @RequestMapping(value = "logList", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    public String logList(String id) {
+        TomcatInfoModel item = tomcatManageService.getItem(id);
+        if (item == null) {
+            return JsonMessage.getString(200, "");
+        }
+        String path = item.getPath() + "/logs";
+        path = FileUtil.normalize(path);
+        List<String> strings = FileUtil.listFileNames(path);
+        return JsonMessage.getString(200, "", strings);
     }
 }

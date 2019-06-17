@@ -109,6 +109,24 @@ public class TomcatManageController extends BaseServerController {
     }
 
     /**
+     * tomcat 日志管理
+     *
+     * @param id tomcat id
+     * @return 项目管理面
+     */
+    @RequestMapping(value = "log", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
+    public String log(String id) {
+        setAttribute("id", id);
+        return "node/tomcat/log";
+    }
+
+    @RequestMapping(value = "getLogList", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @ResponseBody
+    public String getLogList() {
+        return NodeForward.request(getNode(), getRequest(), NodeUrl.Tomcat_LOG_List).toString();
+    }
+
+    /**
      * 保存Tomcat信息
      *
      * @param id tomcat的id,如果id非空则更新，如果id是空则保存
