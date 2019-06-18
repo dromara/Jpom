@@ -114,10 +114,10 @@ public class TomcatManageController extends BaseServerController {
      * @param id tomcat id
      * @return 项目管理面
      */
-    @RequestMapping(value = "log", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
-    public String log(String id) {
+    @RequestMapping(value = "console", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
+    public String console(String id) {
         setAttribute("id", id);
-        return "node/tomcat/log";
+        return "node/tomcat/console";
     }
 
     @RequestMapping(value = "getLogList", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)

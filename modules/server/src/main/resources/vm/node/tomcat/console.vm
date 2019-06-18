@@ -17,10 +17,19 @@
         }
 
         .logBox {
-            width: 96%;
-            height: 90vh;
-            border: 1px solid #000000;
-            margin: 2%;
+            position: absolute;
+            top: 40px;
+            right: 0px;
+            bottom: 0px;
+            left: 0px;
+            height: 300px;
+            border: 1px solid #c1c1c1;
+            border-radius: 5px;
+            font-family: Consolas;
+            padding: 5px;
+            overflow: auto;
+            word-break: keep-all;
+            white-space: nowrap;
         }
     </style>
 </head>
@@ -32,7 +41,6 @@
     </div>
     <div class="layui-col-md9">
         <div id="log" class="logBox">
-            暂无日志！
         </div>
     </div>
 </div>
@@ -92,29 +100,28 @@
             layer.msg("不支持WebSocket");
             return;
         }
-        var url = getSocketHost() + "/tomcat_log?userId=$user.getUserMd5Key()&tomcatId=$id&nodeId=$node.id";
+        $("#log").html("");
+        var url = getSocketHost() + "/tomcat_log?userId=$user.getUserMd5Key()&tomcatId=$id&nodeId=$node.id&type=tomcat";
         if (!ws) {
             ws = new WebSocket(url);
         }
+        var item = {
+            op: "start",
+            tomcatId: '$id',
+            fileName: fileName
+        }
         if (ws.readyState != 1 && ws.readyState != 0) {
             ws = new WebSocket(url);
+        } else if (ws.readyState == 1) {
+            console.log(item);
+            ws.send(JSON.stringify(item));
         }
         ws.onopen = function () {
-            var item = {
-                op: "start",
-                tomcatId: '$id',
-                fileName: fileName
-            }
             ws.send(JSON.stringify(item));
         };
         ws.onmessage = function (data) {
-            try {
-                console.log(data);
-                if (data.data) {
-
-                }
-            } catch (e) {
-                return;
+            if (data.data) {
+                $("#log").append(data.data + '<br/>');
             }
         };
         ws.onerror = function (ev) {

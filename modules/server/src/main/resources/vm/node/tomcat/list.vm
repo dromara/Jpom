@@ -155,7 +155,7 @@
                 // tomat 日志管理
                 tabChange({
                     id: "log_manage_" + id,
-                    url: '/node/tomcat/log?id=' + id,
+                    url: '/node/tomcat/console?id=' + id,
                     title: name + ' - 日志管理',
                 });
             }

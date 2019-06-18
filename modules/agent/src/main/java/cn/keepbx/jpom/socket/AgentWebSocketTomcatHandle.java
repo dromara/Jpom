@@ -3,6 +3,7 @@ package cn.keepbx.jpom.socket;
 import cn.hutool.core.exceptions.ExceptionUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
+import cn.jiangzeyin.common.spring.SpringUtil;
 import cn.keepbx.jpom.model.data.TomcatInfoModel;
 import cn.keepbx.jpom.service.manage.TomcatManageService;
 import cn.keepbx.jpom.system.TopManager;
@@ -10,7 +11,6 @@ import cn.keepbx.jpom.util.SocketSessionUtil;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.Resource;
 import javax.websocket.*;
 import javax.websocket.server.PathParam;
 import javax.websocket.server.ServerEndpoint;
@@ -26,12 +26,14 @@ import java.io.IOException;
 @Component
 public class AgentWebSocketTomcatHandle extends BaseAgentWebSocketHandle {
 
-    @Resource
     private TomcatManageService tomcatManageService;
 
     @OnOpen
     public void onOpen(@PathParam("tomcatId") String tomcatId, @PathParam("optUser") String urlOptUser, Session session) {
         try {
+            if (tomcatManageService == null) {
+                tomcatManageService = SpringUtil.getBean(TomcatManageService.class);
+            }
             TomcatInfoModel tomcatInfoModel = tomcatManageService.getItem(tomcatId);
             if (tomcatInfoModel == null) {
                 SocketSessionUtil.send(session, "获取tomcat信息错误");

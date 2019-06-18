@@ -166,6 +166,9 @@ public class FileTailWatcher implements Runnable {
     private void startRead() throws IOException {
         long len = randomFile.length();
         long start = randomFile.getFilePointer();
+        if (start == len) {
+            start = 0;
+        }
         long nextEnd = start + len - 1;
         randomFile.seek(nextEnd);
         int c;
