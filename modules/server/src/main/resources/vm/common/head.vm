@@ -72,7 +72,10 @@
 
     function appendNodeId(url) {
         var nodeId = getTopQueryString("nodeId");
-        return urlUpdateParams(url, "nodeId", nodeId);
+        if (nodeId) {
+            return urlUpdateParams(url, "nodeId", nodeId);
+        }
+        return url;
     }
 
     function tabChange(options) {

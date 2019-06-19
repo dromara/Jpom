@@ -71,6 +71,10 @@
                            data-options="{'id':'outgiving', 'title':'节点分发', 'url':'./outgiving/list.html'}">节点分发</a>
                     </li>
                 #end
+                <li class="layui-nav-item">
+                    <a href="javascript:;"
+                       data-options="{'id':'monitor', 'title':'监控管理', 'url':'./monitor/list.html'}">监控管理</a>
+                </li>
                 #if($user.isServerManager())
                     <li class="layui-nav-item">
                         <a href="javascript:;"
