@@ -6,8 +6,9 @@
     <title>项目管理系统</title>
     <link href="$!jpomProxyPath/static/ztree/zTreeStyle/zTreeStyle.css" rel="stylesheet">
     <style>
-        body {
-            padding: 10px 10px 0px 10px;
+        html, body {
+            width: 100%;
+            height: 100%;
         }
 
         .ztree {
@@ -17,12 +18,12 @@
         }
 
         .logBox {
+            width: 98%;
             position: absolute;
             top: 40px;
             right: 0px;
             bottom: 0px;
             left: 0px;
-            height: 300px;
             border: 1px solid #c1c1c1;
             border-radius: 5px;
             font-family: Consolas;
@@ -31,6 +32,12 @@
             word-break: keep-all;
             white-space: nowrap;
         }
+
+        .layui-row, .layui-col-md9 {
+            height: 100%;
+            position: relative;
+        }
+
     </style>
 </head>
 
@@ -40,8 +47,7 @@
         <ul id="tree" class="ztree"></ul>
     </div>
     <div class="layui-col-md9">
-        <div id="log" class="logBox">
-        </div>
+        <div id="log" class="logBox"></div>
     </div>
 </div>
 </body>
@@ -80,8 +86,13 @@
                             var obj = {
                                 name: name
                             }
+                            if (i == 0) {
+                                openSocket(name);
+                            }
                             array.push(obj);
                         }
+                    } else {
+                        $("#log").html("暂无日志");
                     }
                     item.children = array;
                     var zTreeObj = $.fn.zTree.init($("#tree"), setting, item);
@@ -90,6 +101,17 @@
             });
         });
 
+    }
+
+    function scrollToBotomm() {
+        var showLogDom = $("#log");
+        var h = showLogDom[0].scrollHeight;
+        if (window.screen.height * 2 < h) {
+            showLogDom.html("已清空屏幕缓存" + '<br/>');
+            showLogDom.scrollTop(0);
+            return;
+        }
+        showLogDom.scrollTop(h);
     }
 
     function openSocket(fileName) {
@@ -113,8 +135,9 @@
         if (ws.readyState != 1 && ws.readyState != 0) {
             ws = new WebSocket(url);
         } else if (ws.readyState == 1) {
-            console.log(item);
-            ws.send(JSON.stringify(item));
+            // ws.send(JSON.stringify(item));
+            ws.close();
+            ws = new WebSocket(url);
         }
         ws.onopen = function () {
             ws.send(JSON.stringify(item));
@@ -128,6 +151,7 @@
             console.log(ev);
             layer.msg("socket 异常");
         }
+        scrollToBotomm();
     }
 
     //节点点击
