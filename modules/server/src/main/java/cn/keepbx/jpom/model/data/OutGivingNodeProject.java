@@ -8,6 +8,9 @@ import cn.keepbx.jpom.model.BaseJsonModel;
 import cn.keepbx.jpom.service.manage.ProjectInfoService;
 import cn.keepbx.jpom.service.node.NodeService;
 import com.alibaba.fastjson.JSONObject;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  * 节点项目
@@ -15,6 +18,9 @@ import com.alibaba.fastjson.JSONObject;
  * @author jiangzeyin
  * @date 2019/4/22
  */
+@EqualsAndHashCode(callSuper = true)
+@Getter
+@Setter
 public class OutGivingNodeProject extends BaseJsonModel {
     private static ProjectInfoService projectInfoService;
     private static NodeService nodeService;
@@ -24,51 +30,14 @@ public class OutGivingNodeProject extends BaseJsonModel {
     private String lastOutGivingTime;
     private int status = Status.No.getCode();
     private String result;
-
     private JSONObject projectInfo;
-
-    public String getResult() {
-        return result;
-    }
-
-    public void setResult(String result) {
-        this.result = result;
-    }
-
-    public int getStatus() {
-        return status;
-    }
 
     public String getStatusMsg() {
         return BaseEnum.getDescByCode(Status.class, getStatus());
     }
 
-    public void setStatus(int status) {
-        this.status = status;
-    }
-
     public String getLastOutGivingTime() {
         return StrUtil.emptyToDefault(lastOutGivingTime, StrUtil.DASHED);
-    }
-
-    public void setLastOutGivingTime(String lastOutGivingTime) {
-        this.lastOutGivingTime = lastOutGivingTime;
-    }
-
-    public String getNodeId() {
-        return nodeId;
-    }
-
-    public void setNodeId(String nodeId) {
-        this.nodeId = nodeId;
-    }
-
-    public String getProjectId() {
-        return projectId;
-    }
-
-    public void setProjectId(String projectId) {
-        this.projectId = projectId;
     }
 
     /**
