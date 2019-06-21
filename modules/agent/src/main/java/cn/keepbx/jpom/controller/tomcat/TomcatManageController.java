@@ -15,6 +15,7 @@ import cn.keepbx.jpom.common.BaseAgentController;
 import cn.keepbx.jpom.common.commander.AbstractTomcatCommander;
 import cn.keepbx.jpom.model.data.TomcatInfoModel;
 import cn.keepbx.jpom.service.manage.TomcatManageService;
+import cn.keepbx.jpom.socket.FileTailWatcher;
 import cn.keepbx.jpom.util.FileUtils;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -378,10 +379,17 @@ public class TomcatManageController extends BaseAgentController {
             return JsonMessage.getString(500, "tomcat不存在");
         }
 
-        path = FileUtil.normalize(path);
-        filename = FileUtil.normalize(filename);
-
-        File file = new File(tomcatInfoModel.getAppBase().concat(path).concat(File.separator).concat(filename));
+        File file;
+        if ("_tomcat_log".equals(path)) {
+            //删除日志文件
+            FileTailWatcher.offTomcatFileListen(filename);
+            String name = tomcatInfoModel.getPath() + "/logs/" + filename;
+            file = FileUtil.file(name);
+        } else {
+            path = FileUtil.normalize(path);
+            filename = FileUtil.normalize(filename);
+            file = new File(tomcatInfoModel.getAppBase().concat(path).concat(File.separator).concat(filename));
+        }
         if (file.exists()) {
             if (file.delete()) {
                 return JsonMessage.getString(200, "删除成功");
@@ -407,6 +415,11 @@ public class TomcatManageController extends BaseAgentController {
         try {
             TomcatInfoModel tomcatInfoModel = tomcatManageService.getItem(id);
             File file = new File(tomcatInfoModel.getAppBase().concat(path).concat(File.separator).concat(filename));
+            //下载日志文件
+            if ("_tomcat_log".equals(path)) {
+                String name = tomcatInfoModel.getPath() + "/logs/" + filename;
+                file = FileUtil.file(name);
+            }
             if (file.isDirectory()) {
                 return "暂不支持下载文件夹";
             }

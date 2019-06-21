@@ -20,7 +20,7 @@
         .logBox {
             width: 98%;
             position: absolute;
-            top: 40px;
+            top: 50px;
             right: 0px;
             bottom: 0px;
             left: 0px;
@@ -47,12 +47,16 @@
         <ul id="tree" class="ztree"></ul>
     </div>
     <div class="layui-col-md9">
+        <div style="margin: 7px;">
+            <button class="layui-btn" onclick="downloadFile()">下载日志</button>
+            <button class="layui-btn" onclick="deleteFile()">删除文件</button>
+        </div>
         <div id="log" class="logBox"></div>
     </div>
 </div>
 </body>
 <script type="text/javascript">
-    var lastClickNode, ws;
+    var lastClickNode, ws, showLog, zTreeObj;
     var setting = {
         data: {
             key: {
@@ -95,13 +99,13 @@
                         $("#log").html("暂无日志");
                     }
                     item.children = array;
-                    var zTreeObj = $.fn.zTree.init($("#tree"), setting, item);
+                    zTreeObj = $.fn.zTree.init($("#tree"), setting, item);
                     zTreeObj.expandAll(true);
                 }
             });
         });
-
     }
+
 
     function scrollToBotomm() {
         var showLogDom = $("#log");
@@ -118,6 +122,7 @@
         if (!fileName) {
             return;
         }
+        lastClickNode = fileName;
         if (!('WebSocket' in window)) {
             layer.msg("不支持WebSocket");
             return;
@@ -135,16 +140,28 @@
         if (ws.readyState != 1 && ws.readyState != 0) {
             ws = new WebSocket(url);
         } else if (ws.readyState == 1) {
-            // ws.send(JSON.stringify(item));
-            ws.close();
-            ws = new WebSocket(url);
+            ws.send(JSON.stringify(item));
         }
         ws.onopen = function () {
             ws.send(JSON.stringify(item));
         };
         ws.onmessage = function (data) {
             if (data.data) {
-                $("#log").append(data.data + '<br/>');
+                try {
+                    var file = JSON.parse(data.data);
+                    if (file.fileName) {
+                        if (file.fileName == lastClickNode) {
+                            showLog = true;
+                        } else {
+                            showLog = false;
+                        }
+                        return;
+                    }
+                } catch (e) {
+                }
+                if (showLog) {
+                    $("#log").append(data.data + '<br/>');
+                }
             }
         };
         ws.onerror = function (ev) {
@@ -159,37 +176,57 @@
         if (lastClickNode === treeNode.name) {
             return;
         }
-        lastClickNode = treeNode.name;
         var parentNode = treeNode.getParentNode();
         if (parentNode) {
-            openSocket(lastClickNode);
+            openSocket(treeNode.name);
         }
     }
 
-    function reloadTable() {
-        layer.load(1, {
-            shade: [0.5, '#fff']
-        });
-        // 刷新项目列表
-        table.reload('table_file', {
-            url: './getFileList',
-            where: tableWhere,
-            done: function (data) {
-                layer.closeAll();
-                var child = data.data;
-                if (child) {
-                    zTreeObj.removeChildNodes(currentNode);
-                    var temp = [];
-                    for (var i in child) {
-                        if (child[i].isDirectory) {
-                            temp.push(child[i]);
-                        }
-                        child[i].hasChildren = true;
-                        child[i].chkDisabled = true;
+    function downloadFile() {
+        if (!lastClickNode) {
+            return;
+        }
+        var url = "./download?id=$id&filename=" + encodeURI(lastClickNode) + "&path=_tomcat_log";
+        url = appendNodeId(url);
+        self.location.href = url;
+    }
+
+    function deleteFile() {
+        if (!lastClickNode) {
+            return;
+        }
+        layer.confirm('确定删除文件 ' + lastClickNode + '？', {
+            title: '系统提示'
+        }, function (index) {
+            loadingAjax({
+                url: './deleteFile',
+                data: {
+                    id: '$id',
+                    filename: lastClickNode,
+                    path: "_tomcat_log"
+                },
+                success: function (data) {
+                    layer.msg(data.msg);
+                    if (200 === data.code) {
+                        //移除节点
+                        var nodes = zTreeObj.getNodesByParam("name", lastClickNode);
+                        zTreeObj.removeNode(nodes[0]);
+
+                        setTimeout(function () {
+                            //移除节点成功后 选中第一个子节点
+                            var treeNodes = zTreeObj.getNodes();
+                            var children = treeNodes[0].children;
+                            if (children && children.length > 0) {
+                                var child = children[0];
+                                openSocket(child.name);
+                            } else {
+                                lastClickNode = "";
+                            }
+                        }, 1000);
                     }
-                    zTreeObj.addNodes(currentNode, temp, false);
                 }
-            }
+            });
+            layer.close(index);
         });
     }
 </script>
