@@ -26,6 +26,10 @@ public enum NodeUrl {
      * 脚本模板  模板id
      */
     Script_Run("/script_run/{}/{}"),
+    /**
+     * Tomcat
+     */
+    Tomcat_Socket("/tomcat_log/{}/{}"),
 
     WhitelistDirectory_Submit("/system/whitelistDirectory_submit"),
 
@@ -115,6 +119,7 @@ public enum NodeUrl {
     Tomcat_Stop("/tomcat/stop"),
     Tomcat_Restart("/tomcat/restart"),
     Tomcat_GetItem("/tomcat/getItem"),
+    Tomcat_LOG_List("/tomcat/logList"),
     Tomcat_GetTomcatProjectList("/tomcat/getTomcatProjectList"),
     Tomcat_GetTomcatStatus("/tomcat/getTomcatStatus"),
     Tomcat_TomcatProjectManage("/tomcat/tomcatProjectManage"),

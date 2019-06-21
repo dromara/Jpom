@@ -23,5 +23,8 @@ public class ServerWebSocketConfig implements WebSocketConfigurer {
         // 脚本模板
         registry.addHandler(new ServerWebSocketScriptHandler(), "/script_run")
                 .addInterceptors(serverWebSocketInterceptor).setAllowedOrigins("*");
+        // tomca
+        registry.addHandler(new ServerWebSocketTomcatHandler(), "/tomcat_log")
+                .addInterceptors(serverWebSocketInterceptor).setAllowedOrigins("*");
     }
 }

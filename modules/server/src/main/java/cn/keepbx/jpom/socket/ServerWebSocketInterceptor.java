@@ -51,6 +51,13 @@ public class ServerWebSocketInterceptor implements HandshakeInterceptor {
                     return false;
                 }
                 attributes.put("scriptId", scriptId);
+            } else if ("tomcat".equalsIgnoreCase(type)) {
+                // 脚本模板
+                String tomcatId = httpServletRequest.getParameter("tomcatId");
+                if (!userModel.isManage(nodeId)) {
+                    return false;
+                }
+                attributes.put("tomcatId", tomcatId);
             } else {
                 //控制台
                 String projectId = httpServletRequest.getParameter("projectId");

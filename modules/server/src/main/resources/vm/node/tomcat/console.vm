@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    #parse("./common/head.vm")
+    <title>项目管理系统</title>
+    <link href="$!jpomProxyPath/static/ztree/zTreeStyle/zTreeStyle.css" rel="stylesheet">
+    <style>
+        html, body {
+            width: 100%;
+            height: 100%;
+        }
+
+        .ztree {
+            height: 80vh;
+            overflow-x: auto;
+            padding: 10px;
+        }
+
+        .logBox {
+            width: 98%;
+            position: absolute;
+            top: 50px;
+            right: 0px;
+            bottom: 0px;
+            left: 0px;
+            border: 1px solid #c1c1c1;
+            border-radius: 5px;
+            font-family: Consolas;
+            padding: 5px;
+            overflow: auto;
+            word-break: keep-all;
+            white-space: nowrap;
+        }
+
+        .layui-row, .layui-col-md9 {
+            height: 100%;
+            position: relative;
+        }
+
+    </style>
+</head>
+
+<body>
+<div class="layui-row">
+    <div class="layui-col-md3">
+        <ul id="tree" class="ztree"></ul>
+    </div>
+    <div class="layui-col-md9">
+        <div style="margin: 7px;">
+            <button class="layui-btn" onclick="downloadFile()">下载日志</button>
+            <button class="layui-btn" onclick="deleteFile()">删除文件</button>
+        </div>
+        <div id="log" class="logBox"></div>
+    </div>
+</div>
+</body>
+<script type="text/javascript">
+    var lastClickNode, ws, showLog, zTreeObj;
+    var setting = {
+        data: {
+            key: {
+                children: "children"
+            },
+            view: {
+                selectedMulti: false
+            }
+        },
+        callback: {
+            onClick: zTreeOnClick
+        }
+    };
+
+    function loadSuccess() {
+        // 加载日志列表 -tree
+        asyncLoadJs("$!jpomProxyPath/static/ztree/jquery.ztree.core.min.js", function () {
+            loadingAjax({
+                url: './getLogList',
+                data: {
+                    id: '$id'
+                },
+                success: function (data) {
+                    var item = {
+                        name: '日志列表'
+                    };
+                    var array = [];
+                    if (data.data && data.data.length > 0) {
+                        for (var i = 0; i < data.data.length; i++) {
+                            var name = data.data[i];
+                            var obj = {
+                                name: name
+                            }
+                            if (i == 0) {
+                                openSocket(name);
+                            }
+                            array.push(obj);
+                        }
+                    } else {
+                        $("#log").html("暂无日志");
+                    }
+                    item.children = array;
+                    zTreeObj = $.fn.zTree.init($("#tree"), setting, item);
+                    zTreeObj.expandAll(true);
+                }
+            });
+        });
+    }
+
+
+    function scrollToBotomm() {
+        var showLogDom = $("#log");
+        var h = showLogDom[0].scrollHeight;
+        if (window.screen.height * 2 < h) {
+            showLogDom.html("已清空屏幕缓存" + '<br/>');
+            showLogDom.scrollTop(0);
+            return;
+        }
+        showLogDom.scrollTop(h);
+    }
+
+    function openSocket(fileName) {
+        if (!fileName) {
+            return;
+        }
+        lastClickNode = fileName;
+        if (!('WebSocket' in window)) {
+            layer.msg("不支持WebSocket");
+            return;
+        }
+        $("#log").html("");
+        var url = getSocketHost() + "/tomcat_log?userId=$user.getUserMd5Key()&tomcatId=$id&nodeId=$node.id&type=tomcat";
+        if (!ws) {
+            ws = new WebSocket(url);
+        }
+        var item = {
+            op: "start",
+            tomcatId: '$id',
+            fileName: fileName
+        }
+        if (ws.readyState != 1 && ws.readyState != 0) {
+            ws = new WebSocket(url);
+        } else if (ws.readyState == 1) {
+            ws.send(JSON.stringify(item));
+        }
+        ws.onopen = function () {
+            ws.send(JSON.stringify(item));
+        };
+        ws.onmessage = function (data) {
+            if (data.data) {
+                try {
+                    var file = JSON.parse(data.data);
+                    if (file.fileName) {
+                        if (file.fileName == lastClickNode) {
+                            showLog = true;
+                        } else {
+                            showLog = false;
+                        }
+                        return;
+                    }
+                } catch (e) {
+                }
+                if (showLog) {
+                    $("#log").append(data.data + '<br/>');
+                }
+            }
+        };
+        ws.onerror = function (ev) {
+            console.log(ev);
+            layer.msg("socket 异常");
+        }
+        scrollToBotomm();
+    }
+
+    //节点点击
+    function zTreeOnClick(event, treeId, treeNode) {
+        if (lastClickNode === treeNode.name) {
+            return;
+        }
+        var parentNode = treeNode.getParentNode();
+        if (parentNode) {
+            openSocket(treeNode.name);
+        }
+    }
+
+    function downloadFile() {
+        if (!lastClickNode) {
+            return;
+        }
+        var url = "./download?id=$id&filename=" + encodeURI(lastClickNode) + "&path=_tomcat_log";
+        url = appendNodeId(url);
+        self.location.href = url;
+    }
+
+    function deleteFile() {
+        if (!lastClickNode) {
+            return;
+        }
+        layer.confirm('确定删除文件 ' + lastClickNode + '？', {
+            title: '系统提示'
+        }, function (index) {
+            loadingAjax({
+                url: './deleteFile',
+                data: {
+                    id: '$id',
+                    filename: lastClickNode,
+                    path: "_tomcat_log"
+                },
+                success: function (data) {
+                    layer.msg(data.msg);
+                    if (200 === data.code) {
+                        //移除节点
+                        var nodes = zTreeObj.getNodesByParam("name", lastClickNode);
+                        zTreeObj.removeNode(nodes[0]);
+
+                        setTimeout(function () {
+                            //移除节点成功后 选中第一个子节点
+                            var treeNodes = zTreeObj.getNodes();
+                            var children = treeNodes[0].children;
+                            if (children && children.length > 0) {
+                                var child = children[0];
+                                openSocket(child.name);
+                            } else {
+                                lastClickNode = "";
+                            }
+                        }, 1000);
+                    }
+                }
+            });
+            layer.close(index);
+        });
+    }
+</script>
+</html>

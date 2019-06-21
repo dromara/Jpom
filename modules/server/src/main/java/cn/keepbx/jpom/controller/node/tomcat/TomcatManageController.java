@@ -9,7 +9,6 @@ import cn.keepbx.jpom.common.interceptor.ProjectPermission;
 import cn.keepbx.jpom.common.interceptor.UrlPermission;
 import cn.keepbx.jpom.model.Role;
 import cn.keepbx.jpom.model.data.NodeModel;
-import cn.keepbx.jpom.model.data.UserModel;
 import cn.keepbx.jpom.model.data.UserOperateLogV1;
 import cn.keepbx.jpom.service.manage.TomcatService;
 import cn.keepbx.jpom.system.OperateType;
@@ -106,6 +105,24 @@ public class TomcatManageController extends BaseServerController {
         setAttribute("id", id);
         setAttribute("project", path);
         return "node/tomcat/manage";
+    }
+
+    /**
+     * tomcat 日志管理
+     *
+     * @param id tomcat id
+     * @return 项目管理面
+     */
+    @RequestMapping(value = "console", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
+    public String console(String id) {
+        setAttribute("id", id);
+        return "node/tomcat/console";
+    }
+
+    @RequestMapping(value = "getLogList", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @ResponseBody
+    public String getLogList() {
+        return NodeForward.request(getNode(), getRequest(), NodeUrl.Tomcat_LOG_List).toString();
     }
 
     /**
