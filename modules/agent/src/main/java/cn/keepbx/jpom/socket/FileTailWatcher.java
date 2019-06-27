@@ -20,6 +20,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -130,10 +131,10 @@ public class FileTailWatcher implements Runnable {
         this.randomFile = new RandomAccessFile(file, FileMode.r.name());
         Charset detSet = AgentExtConfigBean.getInstance().getLogFileCharset();
         if (detSet == null) {
-            this.charset = CharsetUtil.charset(new CharsetDetector().detectChineseCharset(file));
-        } else {
-            this.charset = detSet;
+            detSet = CharsetUtil.charset(new CharsetDetector().detectChineseCharset(file));
+            detSet = (detSet == StandardCharsets.US_ASCII) ? CharsetUtil.CHARSET_UTF_8 : detSet;
         }
+        this.charset = detSet;
         if (file.length() > 0) {
             // 开始读取
             this.startRead();
