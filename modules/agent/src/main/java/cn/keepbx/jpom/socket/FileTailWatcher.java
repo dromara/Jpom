@@ -132,8 +132,9 @@ public class FileTailWatcher implements Runnable {
         Charset detSet = AgentExtConfigBean.getInstance().getLogFileCharset();
         if (detSet == null) {
             detSet = CharsetUtil.charset(new CharsetDetector().detectChineseCharset(file));
+            detSet = (detSet == StandardCharsets.US_ASCII) ? CharsetUtil.CHARSET_UTF_8 : detSet;
         }
-        this.charset = (detSet == StandardCharsets.US_ASCII) ? CharsetUtil.CHARSET_UTF_8 : detSet;
+        this.charset = detSet;
         if (file.length() > 0) {
             // 开始读取
             this.startRead();
