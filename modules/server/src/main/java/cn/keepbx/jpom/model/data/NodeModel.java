@@ -6,12 +6,10 @@ import cn.keepbx.jpom.common.forward.NodeUrl;
 import cn.keepbx.jpom.model.BaseModel;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.Setter;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * 节点实体
@@ -19,9 +17,6 @@ import java.util.Map;
  * @author jiangzeyin
  * @date 2019/4/16
  */
-@EqualsAndHashCode(callSuper = true)
-@Getter
-@Setter
 public class NodeModel extends BaseModel {
 
     private String url;
@@ -41,6 +36,18 @@ public class NodeModel extends BaseModel {
      * 开启状态，如果关闭状态就暂停使用节点
      */
     private boolean openStatus;
+
+    public boolean isOpenStatus() {
+        return openStatus;
+    }
+
+    public void setOpenStatus(boolean openStatus) {
+        this.openStatus = openStatus;
+    }
+
+    public JSONArray getProjects() {
+        return projects;
+    }
 
     /**
      * 返回按照项目分组 排列的数组
@@ -70,6 +77,42 @@ public class NodeModel extends BaseModel {
         return newArray;
     }
 
+    public void setProjects(JSONArray projects) {
+        this.projects = projects;
+    }
+
+    public String getProtocol() {
+        return protocol;
+    }
+
+    public void setProtocol(String protocol) {
+        this.protocol = protocol.toLowerCase();
+    }
+
+    public String getUrl() {
+        return url;
+    }
+
+    public void setUrl(String url) {
+        this.url = url;
+    }
+
+    public String getLoginName() {
+        return loginName;
+    }
+
+    public void setLoginName(String loginName) {
+        this.loginName = loginName;
+    }
+
+    public String getLoginPwd() {
+        return loginPwd;
+    }
+
+    public void setLoginPwd(String loginPwd) {
+        this.loginPwd = loginPwd;
+    }
+
     public String getAuthorize(boolean get) {
         if (authorize == null) {
             authorize = SecureUtil.sha1(loginName + "@" + loginPwd);
@@ -79,5 +122,28 @@ public class NodeModel extends BaseModel {
 
     public String getRealUrl(NodeUrl nodeUrl) {
         return StrUtil.format("{}://{}{}", getProtocol(), getUrl(), nodeUrl.getUrl());
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        NodeModel nodeModel = (NodeModel) o;
+        return openStatus == nodeModel.openStatus &&
+                Objects.equals(url, nodeModel.url) &&
+                Objects.equals(loginName, nodeModel.loginName) &&
+                Objects.equals(loginPwd, nodeModel.loginPwd) &&
+                Objects.equals(protocol, nodeModel.protocol) &&
+                Objects.equals(authorize, nodeModel.authorize) &&
+                Objects.equals(projects, nodeModel.projects);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(url, loginName, loginPwd, protocol, authorize, projects, openStatus);
     }
 }

@@ -5,9 +5,6 @@ import cn.hutool.core.util.StrUtil;
 import cn.keepbx.jpom.BaseJpomApplication;
 import cn.keepbx.jpom.model.BaseEnum;
 import cn.keepbx.jpom.model.BaseJsonModel;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.Setter;
 
 /**
  * 用户操作日志
@@ -15,9 +12,6 @@ import lombok.Setter;
  * @author jiangzeyin
  * @date 2019/4/19
  */
-@EqualsAndHashCode(callSuper = true)
-@Getter
-@Setter
 public class UserOperateLogV1 extends BaseJsonModel {
     public static final String TABLE_NAME = UserOperateLogV1.class.getSimpleName().toUpperCase();
     /**
@@ -66,9 +60,16 @@ public class UserOperateLogV1 extends BaseJsonModel {
      */
     private String userAgent;
 
+    public String getReqData() {
+        return reqData;
+    }
 
     public void setReqData(String reqData) {
         this.reqData = StrUtil.maxLength(reqData, 999999990);
+    }
+
+    public String getUserAgent() {
+        return userAgent;
     }
 
     public void setUserAgent(String userAgent) {
@@ -77,6 +78,10 @@ public class UserOperateLogV1 extends BaseJsonModel {
 
     public String getDataId() {
         return StrUtil.emptyToDefault(dataId, StrUtil.DASHED);
+    }
+
+    public void setDataId(String dataId) {
+        this.dataId = dataId;
     }
 
     public UserOperateLogV1(String reqId) {
@@ -93,9 +98,32 @@ public class UserOperateLogV1 extends BaseJsonModel {
     public UserOperateLogV1() {
     }
 
+    public String getReqId() {
+        return reqId;
+    }
+
+    public void setReqId(String reqId) {
+        this.reqId = reqId;
+    }
 
     public String getNodeId() {
         return StrUtil.emptyToDefault(nodeId, StrUtil.DASHED);
+    }
+
+    public void setNodeId(String nodeId) {
+        this.nodeId = nodeId;
+    }
+
+    public String getIp() {
+        return ip;
+    }
+
+    public void setIp(String ip) {
+        this.ip = ip;
+    }
+
+    public String getUserId() {
+        return userId;
     }
 
     public void setUserId(String userId) {
@@ -106,8 +134,28 @@ public class UserOperateLogV1 extends BaseJsonModel {
         }
     }
 
+    public long getOptTime() {
+        return optTime;
+    }
+
+    public void setOptTime(long optTime) {
+        this.optTime = optTime;
+    }
+
+    public int getOptType() {
+        return optType;
+    }
+
     public String getOptTypeMsg() {
         return BaseEnum.getDescByCode(OptType.class, getOptType());
+    }
+
+    public void setOptType(int optType) {
+        this.optType = optType;
+    }
+
+    public int getOptStatus() {
+        return optStatus;
     }
 
     /**
@@ -120,6 +168,14 @@ public class UserOperateLogV1 extends BaseJsonModel {
             return Status.Success.getDesc();
         }
         return Status.Fail.getDesc() + ":" + getOptStatus();
+    }
+
+    public void setOptStatus(int optStatus) {
+        this.optStatus = optStatus;
+    }
+
+    public String getResultMsg() {
+        return resultMsg;
     }
 
     public void setResultMsg(String resultMsg) {

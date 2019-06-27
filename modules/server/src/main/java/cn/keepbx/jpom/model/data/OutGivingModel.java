@@ -16,9 +16,6 @@ import cn.keepbx.jpom.model.BaseModel;
 import cn.keepbx.jpom.service.node.NodeService;
 import cn.keepbx.jpom.service.node.OutGivingServer;
 import com.alibaba.fastjson.JSONObject;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.Setter;
 
 import java.io.File;
 import java.io.IOException;
@@ -34,9 +31,6 @@ import java.util.function.Consumer;
  * @author jiangzeyin
  * @date 2019/4/21
  */
-@EqualsAndHashCode(callSuper = true)
-@Getter
-@Setter
 public class OutGivingModel extends BaseModel {
     /**
      * 节点下的项目列表
@@ -54,6 +48,38 @@ public class OutGivingModel extends BaseModel {
      * 是否为单独创建的分发项目
      */
     private boolean outGivingProject;
+
+    public boolean isOutGivingProject() {
+        return outGivingProject;
+    }
+
+    public void setOutGivingProject(boolean outGivingProject) {
+        this.outGivingProject = outGivingProject;
+    }
+
+    public Map<NodeModel, JSONObject> getTempCacheMap() {
+        return tempCacheMap;
+    }
+
+    public void setTempCacheMap(Map<NodeModel, JSONObject> tempCacheMap) {
+        this.tempCacheMap = tempCacheMap;
+    }
+
+    public int getAfterOpt() {
+        return afterOpt;
+    }
+
+    public void setAfterOpt(int afterOpt) {
+        this.afterOpt = afterOpt;
+    }
+
+    public List<OutGivingNodeProject> getOutGivingNodeProjectList() {
+        return outGivingNodeProjectList;
+    }
+
+    public void setOutGivingNodeProjectList(List<OutGivingNodeProject> outGivingNodeProjectList) {
+        this.outGivingNodeProjectList = outGivingNodeProjectList;
+    }
 
     /**
      * 判断是否包含某个项目id
