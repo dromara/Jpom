@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    #parse("./common/head.vm")
+    <title>项目管理系统</title>
+    <style>
+        .layui-form-label {
+            width: 100px;
+        }
+
+        body {
+            padding: 10px 10px 0px 10px;
+        }
+
+        .layui-container {
+            width: 80% !important;
+        }
+
+        .div-user {
+            display: none;
+        }
+
+        .layui-input-block {
+            margin-left: 135px;
+        }
+    </style>
+</head>
+
+<body>
+<div class="layui-row">
+    <button id="addProject" class="layui-btn layui-btn-sm">新增用户</button>
+    <button id="refresh" class="layui-btn layui-btn-sm">刷新表格</button>
+</div>
+<table class="layui-table" id="tab_user" lay-filter="tab_user" style="margin: 0;"></table>
+
+</body>
+
+<script type="text/html" id="bar_projects">
+    <a href="javascript:;" class="layui-btn  layui-btn-sm layui-btn-normal" lay-event="update">编辑</a>
+    <a href="javascript:;" class="layui-btn  layui-btn-sm layui-btn-danger" lay-event="delete">删除</a>
+        #if($user.isSystemUser())
+        {{# if(d.pwdErrorCount>0){ }}
+        <a href="javascript:;" class="layui-btn  layui-btn-sm layui-btn-warm" lay-event="unlock">解锁</a>
+        {{# } }}
+        #end
+</script>
+<script type="text/html" id="manager_status">
+    <div title="登录失败次数：{{d.pwdErrorCount}}">
+        <input type="checkbox" id="" disabled name="status" {{# if(d.serverManager){ }} checked
+               {{# } }}
+               lay-skin="switch"
+               lay-text="是|否">
+    </div>
+</script>
+    #parse("./common/sha1.vm")
+<script type="text/javascript">
+    function loadSuccess() {
+
+        tableRender({
+            id: 'tab_user',
+            elem: '#tab_user',
+            url: './getUserList',
+            cols: [[
+                {field: 'id', title: 'id'},
+                {field: 'name', title: '昵称'},
+                {field: 'serverManager', templet: "#manager_status", title: '是否是管理员'},
+                {field: 'parent', title: '创建人'},
+                {field: 'op', title: '操作', align: 'center', toolbar: '#bar_projects', fixed: 'right'}
+            ]]
+        });
+
+        // 编辑用户信息
+        function updateApplication(data) {
+            layer.open({
+                type: 2,
+                title: '修改用户',
+                content: './edit?id=' + data.id,
+                area: ['80%', '80%'],
+            });
+        }
+
+        // '添加用户'点击事件
+        $('#addProject').on('click', function () {
+            // 弹出
+            layer.open({
+                type: 2,
+                title: '新增用户',
+                content: './edit',
+                area: ['80%', '80%'],
+            });
+        });
+
+        // '刷新表格'点击事件
+        $('#refresh').on('click', function () {
+            table.reload('tab_user', {});
+        });
+
+
+        // form.on('switch(manage)', function (data) {
+        //     if (data.elem.checked) {
+        //         $("#projectsDiv").hide();
+        //     } else {
+        //         $("#projectsDiv").show();
+        //     }
+        // });
+
+        // 表格工具条事件
+        table.on('tool(tab_user)', function (obj) {
+            var data = obj.data;
+            var event = obj.event;
+            if ('update' === event) {
+                // 修改
+                updateApplication(data);
+            } else if ('delete' === event) {
+                // 删除
+                deleteApplication(data);
+            } else if ('unlock' === event) {
+                // 解锁
+                unlockUser(data);
+            }
+        });
+
+        function unlockUser(data) {
+            #if($user.isSystemUser())
+                layer.confirm('确定解锁用户 ' + data.id + '？', {
+                    title: '系统提示'
+                }, function (index) {
+                    layer.close(index);
+                    loadingAjax({
+                        url: './unlock',
+                        data: {
+                            id: data.id
+                        },
+                        success: function (data) {
+                            layer.msg(data.msg);
+                            if (200 == data.code) {
+                                table.reload('tab_user', {});
+                            }
+                        }
+                    });
+                });
+            #end
+        }
+
+        // 删除用户
+        function deleteApplication(data) {
+            layer.confirm('确定删除用户 ' + data.id + '？', {
+                title: '系统提示'
+            }, function (index) {
+                layer.close(index);
+                loadingAjax({
+                    url: './deleteUser',
+                    data: {
+                        id: data.id
+                    },
+                    success: function (data) {
+                        layer.msg(data.msg);
+                        if (200 == data.code) {
+                            table.reload('tab_user', {});
+                        }
+                    }
+                });
+            });
+        }
+    }
+</script>
+</html>
