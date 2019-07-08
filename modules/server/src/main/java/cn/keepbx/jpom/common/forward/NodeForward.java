@@ -2,12 +2,10 @@ package cn.keepbx.jpom.common.forward;
 
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.servlet.ServletUtil;
-import cn.hutool.http.HttpRequest;
-import cn.hutool.http.HttpResponse;
-import cn.hutool.http.HttpStatus;
-import cn.hutool.http.HttpUtil;
+import cn.hutool.http.*;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
+import cn.jiangzeyin.common.request.XssFilter;
 import cn.keepbx.jpom.common.BaseServerController;
 import cn.keepbx.jpom.model.data.NodeModel;
 import cn.keepbx.jpom.model.data.UserModel;
@@ -50,6 +48,17 @@ public class NodeForward {
         Map params = null;
         if (request != null) {
             params = ServletUtil.getParams(request);
+            if (XssFilter.isXSS()) {
+                for (Map.Entry<String, String[]> entry : (Iterable<Map.Entry<String, String[]>>) params.entrySet()) {
+                    String[] values = entry.getValue();
+                    if (values != null) {
+                        for (int i = 0, len = values.length; i < len; i++) {
+                            values[i] = HtmlUtil.unescape(values[i]);
+                        }
+                        entry.setValue(values);
+                    }
+                }
+            }
         }
         if (val != null) {
             String name;
