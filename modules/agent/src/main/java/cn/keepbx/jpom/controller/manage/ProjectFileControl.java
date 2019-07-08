@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
 import java.io.File;
+import java.util.List;
 
 /**
  * 项目文件管理
@@ -89,9 +90,15 @@ public class ProjectFileControl extends BaseAgentController {
             }
             // 解压
             File file = new File(path);
-            CompressionFileUtil.unCompress(file.getAbsolutePath(), lib.getAbsolutePath());
-            if (!file.delete()) {
-                DefaultSystemLog.LOG().info("删除失败：" + file.getPath());
+            try {
+                List<String> names = CompressionFileUtil.unCompress(file.getAbsolutePath(), lib.getAbsolutePath());
+                if (names == null || names.isEmpty()) {
+                    return JsonMessage.getString(500, "没有解压出任何文件");
+                }
+            } finally {
+                if (!file.delete()) {
+                    DefaultSystemLog.LOG().info("删除失败：" + file.getPath());
+                }
             }
         } else {
             multipartFileBuilder.setSavePath(FileUtil.getAbsolutePath(lib))

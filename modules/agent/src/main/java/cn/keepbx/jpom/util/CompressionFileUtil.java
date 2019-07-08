@@ -23,12 +23,12 @@ public class CompressionFileUtil {
 
     private static int BUFFER_SIZE = 2048;
 
-    public static List<String> unTar(String tarFile, String destDir) throws Exception {
+    private static List<String> unTar(String tarFile, String destDir) throws Exception {
         File file = new File(tarFile);
         return unTar(file, destDir);
     }
 
-    public static List<String> unTar(File tarFile, String destDir) throws Exception {
+    private static List<String> unTar(File tarFile, String destDir) throws Exception {
         if (StrUtil.isBlank(destDir)) {
             destDir = tarFile.getParent();
         }
@@ -36,12 +36,12 @@ public class CompressionFileUtil {
         return unTar(new FileInputStream(tarFile), destDir);
     }
 
-    public static List<String> unTarBZip2(String file, String destDir) throws Exception {
+    private static List<String> unTarBZip2(String file, String destDir) throws Exception {
         File tarFile = new File(file);
         return unTarBZip2(tarFile, destDir);
     }
 
-    public static List<String> unTarBZip2(File tarFile, String destDir) throws Exception {
+    private static List<String> unTarBZip2(File tarFile, String destDir) throws Exception {
         if (StrUtil.isBlank(destDir)) {
             destDir = tarFile.getParent();
         }
@@ -49,12 +49,12 @@ public class CompressionFileUtil {
         return unTar(new BZip2CompressorInputStream(new FileInputStream(tarFile)), destDir);
     }
 
-    public static List<String> unBZip2(String bzip2File, String destDir) throws IOException {
+    private static List<String> unBZip2(String bzip2File, String destDir) throws IOException {
         File file = new File(bzip2File);
         return unBZip2(file, destDir);
     }
 
-    public static List<String> unTarGZ(File tarFile, String destDir) throws Exception {
+    private static List<String> unTarGZ(File tarFile, String destDir) throws Exception {
         if (StrUtil.isBlank(destDir)) {
             destDir = tarFile.getParent();
         }
@@ -62,22 +62,22 @@ public class CompressionFileUtil {
         return unTar(new GzipCompressorInputStream(new FileInputStream(tarFile)), destDir);
     }
 
-    public static List<String> unTarGZ(String file, String destDir) throws Exception {
+    private static List<String> unTarGZ(String file, String destDir) throws Exception {
         File tarFile = new File(file);
         return unTarGZ(tarFile, destDir);
     }
 
-    public static List<String> unZip(String zipfile, String destDir) throws Exception {
+    private static List<String> unZip(String zipfile, String destDir) throws Exception {
         File zipFile = new File(zipfile);
         return unZip(zipFile, destDir);
     }
 
-    public static List<String> unGZ(String gzFile, String destDir) throws IOException {
+    private static List<String> unGZ(String gzFile, String destDir) throws IOException {
         File file = new File(gzFile);
         return unGZ(file, destDir);
     }
 
-    public static void createDirectory(String outputDir, String subDir) {
+    private static void createDirectory(String outputDir, String subDir) {
         File file = new File(outputDir);
         if (!(subDir == null || "".equals(subDir.trim()))) {
             //子目录不为空
@@ -136,18 +136,14 @@ public class CompressionFileUtil {
                     }
                 }
             }
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw e;
         } finally {
             IOUtils.closeQuietly(tarIn);
         }
-
         return fileNames;
     }
 
 
-    public static List<String> unBZip2(File srcFile, String destDir) throws IOException {
+    private static List<String> unBZip2(File srcFile, String destDir) throws IOException {
         if (StrUtil.isBlank(destDir)) {
             destDir = srcFile.getParent();
         }
@@ -169,7 +165,7 @@ public class CompressionFileUtil {
         return fileNames;
     }
 
-    public static List<String> unGZ(File srcFile, String destDir) throws IOException {
+    private static List<String> unGZ(File srcFile, String destDir) throws IOException {
         if (StrUtil.isBlank(destDir)) {
             destDir = srcFile.getParent();
         }
@@ -191,7 +187,7 @@ public class CompressionFileUtil {
         return fileNames;
     }
 
-    public static List<String> unZip(File zipfile, String destDir) throws Exception {
+    private static List<String> unZip(File zipfile, String destDir) throws Exception {
         if (StrUtil.isBlank(destDir)) {
             destDir = zipfile.getParent();
         }
@@ -217,9 +213,6 @@ public class CompressionFileUtil {
                     }
                 }
             }
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw e;
         } finally {
             IOUtils.closeQuietly(is);
         }

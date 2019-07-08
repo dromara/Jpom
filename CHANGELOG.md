@@ -8,9 +8,9 @@
 
 ### 解决BUG、优化功能
 
-1. logBack页面最后修改时间不能正确显示（感谢@JAVA jesion）
-2. nginx修改内容截断，不正确情况（感谢@JAVA jesion）
-3. nginx、脚本模板保存内容xss标签还原
+1. 【Agent】logBack页面最后修改时间不能正确显示（感谢@JAVA jesion）
+2. 【Agent】nginx修改内容截断，不正确情况（感谢@JAVA jesion）
+3. 【Agent】nginx、脚本模板保存内容xss标签还原
 
 -----------------------------------------------------------
 
