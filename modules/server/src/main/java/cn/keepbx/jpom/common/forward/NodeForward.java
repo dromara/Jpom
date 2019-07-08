@@ -48,7 +48,7 @@ public class NodeForward {
         Map params = null;
         if (request != null) {
             params = ServletUtil.getParams(request);
-            if (XssFilter.isXSS()) {
+            if (XssFilter.isXSS() && params != null) {
                 for (Map.Entry<String, String[]> entry : (Iterable<Map.Entry<String, String[]>>) params.entrySet()) {
                     String[] values = entry.getValue();
                     if (values != null) {

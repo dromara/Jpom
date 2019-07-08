@@ -52,6 +52,8 @@ public class ScriptController extends BaseAgentController {
         if (StrUtil.isEmpty(scriptModel.getContext())) {
             return JsonMessage.getString(405, "内容为空");
         }
+        //
+
         ScriptModel eModel = scriptServer.getItem(scriptModel.getId());
         if ("add".equalsIgnoreCase(type)) {
             if (eModel != null) {

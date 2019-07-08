@@ -41,7 +41,7 @@
                 <tr>
                     <td>$item.index</td>
                     <td>$item.filename</td>
-                    <td>$item.modifytime</td>
+                    <td>$item.modifyTime</td>
                     <td>$item.fileSize</td>
                     <td>
                         <button op="a" href="logBack_download?key=$item.filename&id=$data.id"
