@@ -32,6 +32,8 @@ public class FileUtils {
             newWhitePath = FileUtil.getAbsolutePath(file.getParentFile());
         }
         String itemAbsPath = FileUtil.getAbsolutePath(new File(startPath));
+        itemAbsPath = FileUtil.normalize(itemAbsPath);
+        newWhitePath = FileUtil.normalize(newWhitePath);
         String path = newWhitePath.substring(newWhitePath.indexOf(itemAbsPath) + itemAbsPath.length());
         path = FileUtil.normalize(path);
         if (path.startsWith(StrUtil.SLASH)) {
