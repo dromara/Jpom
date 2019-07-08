@@ -3,6 +3,7 @@ package cn.keepbx.jpom.controller.script;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.http.HtmlUtil;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.controller.multipart.MultipartFileBuilder;
 import cn.keepbx.jpom.common.BaseAgentController;
@@ -53,7 +54,7 @@ public class ScriptController extends BaseAgentController {
             return JsonMessage.getString(405, "内容为空");
         }
         //
-
+        scriptModel.setContext(HtmlUtil.unescape(scriptModel.getContext()));
         ScriptModel eModel = scriptServer.getItem(scriptModel.getId());
         if ("add".equalsIgnoreCase(type)) {
             if (eModel != null) {
