@@ -6,7 +6,9 @@ import java.lang.annotation.*;
 
 /**
  * 需要记录操作日志的
- * Created by jiangzeyin on 2019/4/19.
+ *
+ * @author jiangzeyin
+ * @date 2019/4/19
  */
 @Documented
 @Target(ElementType.METHOD)

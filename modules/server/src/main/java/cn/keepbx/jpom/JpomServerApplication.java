@@ -13,9 +13,9 @@ import org.springframework.http.converter.StringHttpMessageConverter;
 
 /**
  * jpom 启动类
- * Created by jiangzeyin on 2017/9/14.
  *
  * @author jiangzeyin
+ * @date 2017/9/14
  */
 @SpringBootApplication
 @ServletComponentScan
