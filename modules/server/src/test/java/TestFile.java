@@ -20,6 +20,9 @@ public class TestFile {
         FileUtil.cleanEmpty(new File("D:\\sss"));
         System.out.println("----------------------------------------");
         System.out.println(FileUtil.loopFiles("D:\\sss"));
+
+        String name = FileUtil.extName("C:\\Users\\Colorful\\Desktop\\Desktop.tar.gz");
+        System.out.println(name);
     }
 
 

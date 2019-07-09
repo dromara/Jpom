@@ -13,6 +13,7 @@ import cn.keepbx.jpom.socket.ConsoleCommandOp;
 import cn.keepbx.jpom.system.AgentConfigBean;
 import cn.keepbx.jpom.util.CompressionFileUtil;
 import cn.keepbx.jpom.util.FileUtils;
+import cn.keepbx.jpom.util.StringUtil;
 import com.alibaba.fastjson.JSONArray;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -79,7 +80,7 @@ public class ProjectFileControl extends BaseAgentController {
         }
 
         if ("unzip".equals(type)) {
-            multipartFileBuilder.setFileExt("tar", "bz2", "zip", "gz", "tar.bz2", "tar.gz");
+            multipartFileBuilder.setFileExt(StringUtil.PACKAGE_EXT);
             multipartFileBuilder.setSavePath(AgentConfigBean.getInstance().getTempPathName());
             String path = multipartFileBuilder.save();
             // 判断是否需要清空

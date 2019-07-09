@@ -88,25 +88,6 @@ public class CompressionFileUtil {
         }
     }
 
-    public static List<String> unCompress(String compressFile, String destDir) throws Exception {
-        String upperName = compressFile.toUpperCase();
-        List<String> ret = null;
-        if (upperName.endsWith(".ZIP")) {
-            ret = unZip(compressFile, destDir);
-        } else if (upperName.endsWith(".TAR")) {
-            ret = unTar(compressFile, destDir);
-        } else if (upperName.endsWith(".TAR.BZ2")) {
-            ret = unTarBZip2(compressFile, destDir);
-        } else if (upperName.endsWith(".BZ2")) {
-            ret = unBZip2(compressFile, destDir);
-        } else if (upperName.endsWith(".TAR.GZ")) {
-            ret = unTarGZ(compressFile, destDir);
-        } else if (upperName.endsWith(".GZ")) {
-            ret = unGZ(compressFile, destDir);
-        }
-        return ret;
-    }
-
     private static List<String> unTar(InputStream inputStream, String destDir) throws Exception {
         List<String> fileNames = new ArrayList<>();
         TarArchiveInputStream tarIn = new TarArchiveInputStream(inputStream, BUFFER_SIZE);
@@ -141,7 +122,6 @@ public class CompressionFileUtil {
         }
         return fileNames;
     }
-
 
     private static List<String> unBZip2(File srcFile, String destDir) throws IOException {
         if (StrUtil.isBlank(destDir)) {
@@ -219,4 +199,22 @@ public class CompressionFileUtil {
         return fileNames;
     }
 
+    public static List<String> unCompress(String compressFile, String destDir) throws Exception {
+        String upperName = compressFile.toUpperCase();
+        List<String> ret = null;
+        if (upperName.endsWith(".ZIP")) {
+            ret = unZip(compressFile, destDir);
+        } else if (upperName.endsWith(".TAR")) {
+            ret = unTar(compressFile, destDir);
+        } else if (upperName.endsWith(".TAR.BZ2")) {
+            ret = unTarBZip2(compressFile, destDir);
+        } else if (upperName.endsWith(".BZ2")) {
+            ret = unBZip2(compressFile, destDir);
+        } else if (upperName.endsWith(".TAR.GZ")) {
+            ret = unTarGZ(compressFile, destDir);
+        } else if (upperName.endsWith(".GZ")) {
+            ret = unGZ(compressFile, destDir);
+        }
+        return ret;
+    }
 }

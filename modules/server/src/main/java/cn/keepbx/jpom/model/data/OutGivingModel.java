@@ -178,7 +178,8 @@ public class OutGivingModel extends BaseModel {
         /**
          * 顺序执行项目分发
          */
-        Order_Restart(3, "顺序重启(有节点分发并重启失败将继续分发剩余节点)");
+        Order_Restart(3, "顺序重启(有节点分发并重启失败将继续分发剩余节点)"),
+        ;
         private int code;
         private String desc;
 
@@ -235,8 +236,10 @@ public class OutGivingModel extends BaseModel {
                     }
                 }
             });
-        } else {
+        } else if (afterOpt == AfterOpt.Restart) {
             outGivingNodeProjects.forEach(outGivingNodeProject -> ThreadUtil.execAsync(new OutGivingRun(id, outGivingNodeProject, file, afterOpt, userModel)));
+        } else {
+            //
         }
     }
 

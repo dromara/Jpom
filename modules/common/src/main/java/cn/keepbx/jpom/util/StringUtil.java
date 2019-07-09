@@ -10,6 +10,12 @@ import cn.hutool.core.util.StrUtil;
  * @date 2019/4/7
  */
 public class StringUtil {
+
+    /**
+     * 支持的压缩包格式
+     */
+    public static final String[] PACKAGE_EXT = new String[]{"tar.bz2", "tar.gz", "tar", "bz2", "zip", "gz"};
+
     /**
      * 获取启动参数
      *

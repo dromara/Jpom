@@ -57,8 +57,8 @@
             elem: '#selectZip',
             url: './upload',
             multiple: false,
-            exts: 'zip',
-            acceptMime: '.zip',
+            exts: 'tar|bz2|gz|zip|tar.bz2|tar.gz',
+            acceptMime: '.tar,.bz2,.gz,.zip,.tar.bz2,.tar.gz',
             field: 'file',
             data: {
                 afterOpt: function () {
@@ -94,7 +94,7 @@
         form.on('submit(form_outgiving)', function (data) {
             updateFormData = data.field;
             if (!hashSelectConfig) {
-                layer.msg("请选择证书包");
+                layer.msg("请选择分发包");
                 return false;
             }
             uploadConfig.upload();

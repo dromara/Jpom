@@ -2,7 +2,6 @@ package cn.keepbx.jpom.controller.outgiving;
 
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.thread.ThreadUtil;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.controller.multipart.MultipartFileBuilder;
 import cn.keepbx.jpom.common.BaseServerController;
@@ -12,11 +11,11 @@ import cn.keepbx.jpom.common.interceptor.UrlPermission;
 import cn.keepbx.jpom.model.BaseEnum;
 import cn.keepbx.jpom.model.Role;
 import cn.keepbx.jpom.model.data.OutGivingModel;
-import cn.keepbx.jpom.model.data.OutGivingNodeProject;
 import cn.keepbx.jpom.model.data.UserOperateLogV1;
 import cn.keepbx.jpom.service.node.OutGivingServer;
 import cn.keepbx.jpom.system.ConfigBean;
 import cn.keepbx.jpom.system.ServerConfigBean;
+import cn.keepbx.jpom.util.StringUtil;
 import com.alibaba.fastjson.JSONArray;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
@@ -27,7 +26,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import javax.annotation.Resource;
 import java.io.File;
 import java.io.IOException;
-import java.util.List;
 
 /**
  * 分发文件管理
@@ -81,19 +79,27 @@ public class OutGivingProjectController extends BaseServerController {
         }
         MultipartFileBuilder multipartFileBuilder = createMultipart();
         multipartFileBuilder
-                .setInputStreamType("zip")
+                .setFileExt(StringUtil.PACKAGE_EXT)
                 .addFieldName("file")
                 .setSavePath(ServerConfigBean.getInstance().getTempPath().getAbsolutePath());
         String path = multipartFileBuilder.save();
-        File file = FileUtil.file(ConfigBean.getInstance().getDataPath(), ServerConfigBean.OUTGIVING_FILE, id + ".zip");
-        FileUtil.move(FileUtil.file(path), file, true);
+        //
+        File src = FileUtil.file(path);
+        File dest = null;
+        for (String i : StringUtil.PACKAGE_EXT) {
+            if (FileUtil.pathEndsWith(src, i)) {
+                dest = FileUtil.file(ConfigBean.getInstance().getDataPath(), ServerConfigBean.OUTGIVING_FILE, id + "." + i);
+                break;
+            }
+        }
+        FileUtil.move(src, dest, true);
         //
         outGivingModel = outGivingServer.getItem(id);
         outGivingModel.setAfterOpt(afterOpt1.getCode());
         outGivingModel.startBefore();
         outGivingServer.updateItem(outGivingModel);
         //
-        outGivingModel.startRun(id, file, afterOpt1, getUser());
+        outGivingModel.startRun(id, dest, afterOpt1, getUser());
         return JsonMessage.getString(200, "分发成功");
     }
 }
