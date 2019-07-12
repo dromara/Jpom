@@ -26,7 +26,7 @@ public class EmailUtil {
      */
     public static void sendHtmlToEmail(String nickStr, String to, String subject, String msg) {
         String from = "arnohand@163.com";
-        String password = "arnohand123";
+        String password = "";
         String host = "smtp.163.com";
         // 1.创建一个程序与邮件服务器会话对象 Session
         Properties props = new Properties();
