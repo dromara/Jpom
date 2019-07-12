@@ -60,7 +60,7 @@ public class IndexController extends BaseAgentController {
         List<ProjectInfoModel> projectInfoModels = projectInfoService.list();
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("javaVirtualCount", JvmUtil.getJavaVirtualCount());
-        jsonObject.put("osName", BaseJpomApplication.OS_INFO.getName());
+        jsonObject.put("osName", SystemUtil.getOsInfo().getName());
         jsonObject.put("jpomVersion", JpomManifest.getInstance().getVersion());
         jsonObject.put("javaVersion", SystemUtil.getJavaRuntimeInfo().getVersion());
 

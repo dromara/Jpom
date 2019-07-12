@@ -15,6 +15,7 @@ import cn.keepbx.jpom.common.commander.AbstractProjectCommander;
 import cn.keepbx.jpom.model.data.ProjectInfoModel;
 import cn.keepbx.jpom.service.manage.ProjectInfoService;
 import cn.keepbx.jpom.system.AgentExtConfigBean;
+import cn.keepbx.util.CronUtils;
 
 import java.io.File;
 import java.util.List;
@@ -35,8 +36,6 @@ public class AutoBackLog {
 
     @PreLoadMethod
     private static void startAutoBackLog() {
-        // 开启秒级表达式
-        CronUtil.setMatchSecond(true);
         if (projectInfoService == null) {
             projectInfoService = SpringUtil.getBean(ProjectInfoService.class);
         }
@@ -83,9 +82,6 @@ public class AutoBackLog {
                 DefaultSystemLog.ERROR().error("定时备份日志失败", e);
             }
         });
-        Scheduler scheduler = CronUtil.getScheduler();
-        if (!scheduler.isStarted()) {
-            CronUtil.start();
-        }
+        CronUtils.start();
     }
 }

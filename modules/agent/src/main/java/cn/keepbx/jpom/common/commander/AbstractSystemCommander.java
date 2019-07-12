@@ -1,5 +1,6 @@
 package cn.keepbx.jpom.common.commander;
 
+import cn.hutool.system.SystemUtil;
 import cn.keepbx.jpom.BaseJpomApplication;
 import cn.keepbx.jpom.common.commander.impl.LinuxSystemCommander;
 import cn.keepbx.jpom.common.commander.impl.WindowsSystemCommander;
@@ -25,16 +26,16 @@ public abstract class AbstractSystemCommander {
         if (abstractSystemCommander != null) {
             return abstractSystemCommander;
         }
-        if (BaseJpomApplication.OS_INFO.isLinux()) {
+        if (SystemUtil.getOsInfo().isLinux()) {
             // Linux系统
             abstractSystemCommander = new LinuxSystemCommander();
-        } else if (BaseJpomApplication.OS_INFO.isWindows()) {
+        } else if (SystemUtil.getOsInfo().isWindows()) {
             // Windows系统
             abstractSystemCommander = new WindowsSystemCommander();
-        } else if (BaseJpomApplication.OS_INFO.isMac()) {
+        } else if (SystemUtil.getOsInfo().isMac()) {
             abstractSystemCommander = new LinuxSystemCommander();
         } else {
-            throw new JpomRuntimeException("不支持的：" + BaseJpomApplication.OS_INFO.getName());
+            throw new JpomRuntimeException("不支持的：" + SystemUtil.getOsInfo().getName());
         }
         return abstractSystemCommander;
     }

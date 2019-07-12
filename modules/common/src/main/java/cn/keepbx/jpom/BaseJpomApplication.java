@@ -3,6 +3,7 @@ package cn.keepbx.jpom;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.system.OsInfo;
 import cn.hutool.system.SystemUtil;
+import cn.jiangzeyin.common.ApplicationBuilder;
 import cn.keepbx.jpom.common.Type;
 
 import java.nio.charset.Charset;
@@ -18,7 +19,6 @@ public abstract class BaseJpomApplication {
      *
      */
     public static final String SYSTEM_ID = "system";
-    public static final OsInfo OS_INFO = SystemUtil.getOsInfo();
 
     protected static String[] args;
     /**
@@ -38,7 +38,7 @@ public abstract class BaseJpomApplication {
         return args;
     }
 
-    public BaseJpomApplication(Type appType, Class appClass) {
+    public BaseJpomApplication(Type appType, Class<?> appClass) {
         BaseJpomApplication.appType = appType;
         BaseJpomApplication.appClass = appClass;
     }
@@ -50,9 +50,9 @@ public abstract class BaseJpomApplication {
      */
     public static Charset getCharset() {
         if (charset == null) {
-            if (OS_INFO.isLinux()) {
+            if (SystemUtil.getOsInfo().isLinux()) {
                 charset = CharsetUtil.CHARSET_UTF_8;
-            } else if (OS_INFO.isMac()) {
+            } else if (SystemUtil.getOsInfo().isMac()) {
                 charset = CharsetUtil.CHARSET_UTF_8;
             } else {
                 charset = CharsetUtil.CHARSET_GBK;

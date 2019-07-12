@@ -2,6 +2,7 @@ package cn.keepbx.jpom;
 
 import cn.hutool.core.lang.Console;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.system.SystemUtil;
 import cn.keepbx.jpom.util.StringUtil;
 import cn.keepbx.jpom.util.CommandUtil;
 import cn.keepbx.jpom.util.JvmUtil;
@@ -55,7 +56,7 @@ public class JpomClose {
         if (jpomManager != null) {
             return jpomManager;
         }
-        if (BaseJpomApplication.OS_INFO.isLinux()) {
+        if (SystemUtil.getOsInfo().isLinux()) {
             jpomManager = new Linux();
         } else {
             jpomManager = new Windows();

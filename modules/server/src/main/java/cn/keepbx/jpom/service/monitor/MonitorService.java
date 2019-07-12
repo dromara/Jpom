@@ -1,16 +1,12 @@
 package cn.keepbx.jpom.service.monitor;
 
-import cn.hutool.core.util.StrUtil;
-import cn.hutool.core.util.URLUtil;
 import cn.hutool.cron.CronUtil;
 import cn.hutool.cron.Scheduler;
 import cn.hutool.cron.task.Task;
 import cn.hutool.http.HttpRequest;
 import cn.hutool.http.HttpUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
-import cn.jiangzeyin.common.JsonMessage;
 import cn.keepbx.jpom.common.BaseOperService;
-import cn.keepbx.jpom.common.forward.NodeForward;
 import cn.keepbx.jpom.common.forward.NodeUrl;
 import cn.keepbx.jpom.model.BaseEnum;
 import cn.keepbx.jpom.model.data.MonitorModel;
@@ -19,17 +15,13 @@ import cn.keepbx.jpom.service.node.NodeService;
 import cn.keepbx.jpom.system.ConfigBean;
 import cn.keepbx.jpom.system.JpomRuntimeException;
 import cn.keepbx.jpom.system.ServerConfigBean;
-import cn.keepbx.jpom.util.DingTalkUtil;
-import cn.keepbx.jpom.util.EmailUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-import javax.servlet.http.HttpServletRequest;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * 监控管理Service
@@ -82,6 +74,22 @@ public class MonitorService extends BaseOperService<MonitorModel> {
             DefaultSystemLog.ERROR().error(e.getMessage(), e);
         }
         return false;
+    }
+
+    /**
+     * 根据周期获取list
+     *
+     * @param cycle 周期
+     * @return list
+     */
+    public List<MonitorModel> listByCycle(MonitorModel.Cycle cycle) {
+        List<MonitorModel> list = this.list();
+        if (list == null) {
+            return new ArrayList<>();
+        }
+        return list.stream()
+                .filter(monitorModel -> monitorModel.getCycle() == cycle.getCode())
+                .collect(Collectors.toList());
     }
 
     /**

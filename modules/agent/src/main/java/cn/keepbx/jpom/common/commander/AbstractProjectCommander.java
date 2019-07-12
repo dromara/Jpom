@@ -9,9 +9,9 @@ import cn.hutool.core.lang.JarClassLoader;
 import cn.hutool.core.text.StrSpliter;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.http.HttpUtil;
+import cn.hutool.system.SystemUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.spring.SpringUtil;
-import cn.keepbx.jpom.BaseJpomApplication;
 import cn.keepbx.jpom.common.commander.impl.LinuxProjectCommander;
 import cn.keepbx.jpom.common.commander.impl.WindowsProjectCommander;
 import cn.keepbx.jpom.model.RunMode;
@@ -65,16 +65,16 @@ public abstract class AbstractProjectCommander {
         if (abstractProjectCommander != null) {
             return abstractProjectCommander;
         }
-        if (BaseJpomApplication.OS_INFO.isLinux()) {
+        if (SystemUtil.getOsInfo().isLinux()) {
             // Linux系统
             abstractProjectCommander = new LinuxProjectCommander();
-        } else if (BaseJpomApplication.OS_INFO.isWindows()) {
+        } else if (SystemUtil.getOsInfo().isWindows()) {
             // Windows系统
             abstractProjectCommander = new WindowsProjectCommander();
-        } else if (BaseJpomApplication.OS_INFO.isMac()) {
+        } else if (SystemUtil.getOsInfo().isMac()) {
             abstractProjectCommander = new LinuxProjectCommander();
         } else {
-            throw new JpomRuntimeException("不支持的：" + BaseJpomApplication.OS_INFO.getName());
+            throw new JpomRuntimeException("不支持的：" + SystemUtil.getOsInfo().getName());
         }
         return abstractProjectCommander;
     }
@@ -221,9 +221,9 @@ public abstract class AbstractProjectCommander {
         File backPath = projectInfoModel.getLogBack();
         backPath = new File(backPath, DateTime.now().toString(DatePattern.PURE_DATETIME_FORMAT) + ".log");
         FileUtil.copy(file, backPath, true);
-        if (BaseJpomApplication.OS_INFO.isLinux()) {
+        if (SystemUtil.getOsInfo().isLinux()) {
             CommandUtil.execCommand("cp /dev/null " + projectInfoModel.getLog());
-        } else if (BaseJpomApplication.OS_INFO.isWindows()) {
+        } else if (SystemUtil.getOsInfo().isWindows()) {
             // 清空日志
             String r = CommandUtil.execSystemCommand("echo  \"\" > " + file.getAbsolutePath());
             if (StrUtil.isEmpty(r)) {

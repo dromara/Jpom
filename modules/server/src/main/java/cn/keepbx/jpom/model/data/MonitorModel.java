@@ -1,5 +1,6 @@
 package cn.keepbx.jpom.model.data;
 
+import cn.hutool.cron.pattern.CronPattern;
 import cn.keepbx.jpom.model.BaseEnum;
 import cn.keepbx.jpom.model.BaseModel;
 import com.alibaba.fastjson.JSONArray;
@@ -103,17 +104,23 @@ public class MonitorModel extends BaseModel {
         /**
          * 监控周期，code 代表周期时间，单位：分钟
          */
-        one(1, "1分钟"),
-        five(5, "5分钟"),
-        ten(10, "10分钟"),
-        thirty(30, "30分钟");
+        one(1, "1分钟", new CronPattern("0 0/1 * * * ?")),
+        five(5, "5分钟", new CronPattern("0 0/5 * * * ?")),
+        ten(10, "10分钟", new CronPattern("0 0/10 * * * ?")),
+        thirty(30, "30分钟", new CronPattern("0 0/30 * * * ?"));
 
         private int code;
         private String desc;
+        private CronPattern cronPattern;
 
-        Cycle(int code, String desc) {
+        Cycle(int code, String desc, CronPattern cronPattern) {
             this.code = code;
             this.desc = desc;
+            this.cronPattern = cronPattern;
+        }
+
+        public CronPattern getCronPattern() {
+            return cronPattern;
         }
 
         @Override

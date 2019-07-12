@@ -30,7 +30,7 @@ import java.util.List;
  **/
 public class TestGit {
     static UsernamePasswordCredentialsProvider usernamePasswordCredentialsProvider =
-            new UsernamePasswordCredentialsProvider("1", "1");
+            new UsernamePasswordCredentialsProvider("jiangzeyin", "love1593503371");
 
 //    private static final String REMOTE_TAG = "jpomRemote";
 
@@ -42,7 +42,7 @@ public class TestGit {
 
         List<String> l = branchList(url, file);
         System.out.println(l);
-        checkOutPull(url, file, "master");
+        //checkOutPull(url, file, "master");
         //
         ProcessBuilder processBuilder = new ProcessBuilder();
         processBuilder.directory(file);

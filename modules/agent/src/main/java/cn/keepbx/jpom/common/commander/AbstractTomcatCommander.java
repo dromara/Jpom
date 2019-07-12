@@ -1,6 +1,7 @@
 package cn.keepbx.jpom.common.commander;
 
 import cn.hutool.http.HttpRequest;
+import cn.hutool.system.SystemUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.keepbx.jpom.BaseJpomApplication;
 import cn.keepbx.jpom.common.commander.impl.LinuxTomcatCommander;
@@ -25,16 +26,16 @@ public abstract class AbstractTomcatCommander {
         if (abstractTomcatCommander != null) {
             return abstractTomcatCommander;
         }
-        if (BaseJpomApplication.OS_INFO.isLinux()) {
+        if (SystemUtil.getOsInfo().isLinux()) {
             // Linux系统
             abstractTomcatCommander = new LinuxTomcatCommander();
-        } else if (BaseJpomApplication.OS_INFO.isWindows()) {
+        } else if (SystemUtil.getOsInfo().isWindows()) {
             // Windows系统
             abstractTomcatCommander = new WindowsTomcatCommander();
-        } else if (BaseJpomApplication.OS_INFO.isMac()) {
+        } else if (SystemUtil.getOsInfo().isMac()) {
             abstractTomcatCommander = new LinuxTomcatCommander();
         } else {
-            throw new JpomRuntimeException("不支持的：" + BaseJpomApplication.OS_INFO.getName());
+            throw new JpomRuntimeException("不支持的：" + SystemUtil.getOsInfo().getName());
         }
         return abstractTomcatCommander;
     }

@@ -6,7 +6,7 @@ import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
-import cn.keepbx.jpom.BaseJpomApplication;
+import cn.hutool.system.SystemUtil;
 import cn.keepbx.jpom.model.BaseModel;
 import cn.keepbx.jpom.system.AgentConfigBean;
 import cn.keepbx.jpom.util.CommandUtil;
@@ -26,7 +26,7 @@ public class ScriptModel extends BaseModel {
     private static final String SUFFIX;
 
     static {
-        if (BaseJpomApplication.OS_INFO.isWindows()) {
+        if (SystemUtil.getOsInfo().isWindows()) {
             SUFFIX = "bat";
         } else {
             SUFFIX = "sh";
@@ -97,7 +97,7 @@ public class ScriptModel extends BaseModel {
         File file = getFile(true);
         FileUtil.writeString(getContext(), file, CharsetUtil.CHARSET_UTF_8);
         // 添加权限
-        if (BaseJpomApplication.OS_INFO.isLinux()) {
+        if (SystemUtil.getOsInfo().isLinux()) {
             CommandUtil.execCommand("chmod 755 " + FileUtil.getAbsolutePath(file));
         }
     }

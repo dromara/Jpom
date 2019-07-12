@@ -21,7 +21,7 @@ import org.springframework.http.converter.StringHttpMessageConverter;
 @ServletComponentScan
 @EnableCommonBoot
 public class JpomServerApplication extends BaseJpomApplication {
-    public JpomServerApplication() {
+    public JpomServerApplication() throws Exception {
         super(Type.Server, JpomServerApplication.class);
     }
 
