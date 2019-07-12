@@ -41,7 +41,13 @@
     <![endif]-->
     <!-- 百度统计 -->
     <script>
-
+        var _hmt = _hmt || [];
+        (function () {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?1acbde0eb1cc4225dcfe6d1143767a3d";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
     </script>
 </head>
 
@@ -118,7 +124,8 @@
                             </li>
                         </ul>
                         <div class="fh5co-tab-content active" data-tab-content="marketing">
-                            <p>SpringBoot、Jboot等框架开发的项目通常是以Jar的方式在后台运行的，如果只有一两个项目，管理起来不是太麻烦，但是当项目多了以后，管理起来就不是那么方便了，当项目出现问题时，能够通过Jpom即时排查问题，问题解决后还可以直接上传修改后的Jar，项目的堆栈信息，服务器CPU、内存使用情况一目了然，不必再登录服务器管理。</p>
+                            <p>
+                                SpringBoot、Jboot等框架开发的项目通常是以Jar的方式在后台运行的，如果只有一两个项目，管理起来不是太麻烦，但是当项目多了以后，管理起来就不是那么方便了，当项目出现问题时，能够通过Jpom即时排查问题，问题解决后还可以直接上传修改后的Jar，项目的堆栈信息，服务器CPU、内存使用情况一目了然，不必再登录服务器管理。</p>
                             <p>
                                 当多个项目运行在同一台服务器时，运维人员通常也不只一个，如果每个人都登录服务器管理项目，难免会造成一些不必要的麻烦，甚至给服务器的安全性带来问题（服务器密码知道的人越多，越容易泄露），因为不需要登录服务器管理项目，维护人员不需要知道服务器的登录密码，只需要有Jpom的账号就行，Jpom本身可以通过权限管理，给不同用户不同的权限，这样也使得项目的稳定性得到提升。
                             </p>
@@ -132,24 +139,26 @@
 
                         <div class="fh5co-tab-content" data-tab-content="strategy">
                             <div>下载安装:</div>
-
-                            <pre style="background: none; padding: 0;margin: 0;border: none;">
-										<code>
-                                           1. 下载安装包 [https://gitee.com/keepbx/Jpom/attach_files](https://gitee.com/keepbx/Jpom/attach_files)
-2. 解压文件
-3. 安装插件端（[流程说明](/doc/install.md#安装插件端)）
-    1. agent-x.x.x-release 目录为插件端的全部安装文件
-    2. 上传到对应服务器
-    3. 命令运行（Agent.sh、Agent.bat）
-4. 安装服务端（[流程说明](/doc/install.md#安装服务端)）
-    1. server-x.x.x-release 目录为服务端的全部安装文件
-    2. 上传到对应服务器
-    3. 命令运行（Server.sh、Server.bat）</code>
-									</pre>
-                            <div>编译安装:</div>
-                            <pre style="background: none; padding: 0;margin: 0;border: none;">
-										<code>compile 'cn.hutool:hutool-all:{{version}}'</code>
-									</pre>
+                            <ul>
+                                <li>下载安装包 <a href="https://gitee.com/keepbx/Jpom/attach_files">https://gitee.com/keepbx/Jpom/attach_files</a>
+                                </li>
+                                <li>解压文件</li>
+                                <li>安装插件端（<a href="https://gitee.com/keepbx/Jpom/blob/master/doc/install.md#安装插件端">
+                                    流程说明</a>）
+                                    <ul>
+                                        <li> agent-x.x.x-release 目录为插件端的全部安装文件</li>
+                                        <li> 上传到对应服务器</li>
+                                        <li> 命令运行（Agent.sh、Agent.bat）</li>
+                                    </ul>
+                                </li>
+                                <li>安装服务端（[流程说明](/doc/install.md#安装服务端)）
+                                    <ul>
+                                        <li>server-x.x.x-release 目录为服务端的全部安装文件</li>
+                                        <li>上传到对应服务器</li>
+                                        <li>命令运行（Server.sh、Server.bat）</li>
+                                    </ul>
+                                </li>
+                            </ul>
                             <p>
                                 <a href="https://gitee.com/keepbx/Jpom/blob/master/doc/install.md"
                                    class="btn btn-primary btn-outline" target="_blank">安装文档</a>
@@ -253,9 +262,9 @@
                             <li>
                                 <a href="https://gitee.com/jiangzeyin" target="_blank"><i class="icon-home"></i></a>
                             </li>
-<!--                            <li>-->
-<!--                                <a href="http://weibo.com/loolly" target="_blank"><i class="icon-weibo"></i></a>-->
-<!--                            </li>-->
+                            <!--                            <li>-->
+                            <!--                                <a href="http://weibo.com/loolly" target="_blank"><i class="icon-weibo"></i></a>-->
+                            <!--                            </li>-->
                             <li>
                                 <a href="https://github.com/jiangzeyin" target="_blank"><i class="icon-github"></i></a>
                             </li>
@@ -265,22 +274,22 @@
                 </div>
                 <div class="col-md-4">
                     <div class="person">
-                        <img src="https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/images/team/shenshanmanong.jpg"
+                        <img src="https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/images/team/lf.jpg"
                              alt=""
                              class="img-responsive">
-                        <h3>深山码农</h3>
-                        <h4>崇拜自由的生活和善良的人性</h4>
-                        <p>深山耕耘互金行业多年，熟悉互金系统架构和设计，喜欢研究新技术，善于发现和解决问题</p>
+                        <h3>蓝枫</h3>
+                        <h4>做一名有理想的键盘侠</h4>
+                        <p>一名菜鸟程序员，能在IT圈混到现在是奇迹，只会Ctrl+C、Ctrl+V，别问为什么，因为我菜啊！</p>
                         <ul class="social">
                             <li>
-                                <a href="https://my.oschina.net/u/190652" target="_blank"><i class="icon-home"></i></a>
+                                <a href="hhttps://gitee.com/F7575" target="_blank"><i class="icon-home"></i></a>
                             </li>
+                            <!--                            <li>-->
+                            <!--                                <a href="https://weibo.com/u/2647798525" target="_blank"><i class="icon-weibo"></i></a>-->
+                            <!--                            </li>-->
 <!--                            <li>-->
-<!--                                <a href="https://weibo.com/u/2647798525" target="_blank"><i class="icon-weibo"></i></a>-->
+<!--                                <a href="https://gitee.com/F7575" target="_blank"><i class="icon-github"></i></a>-->
 <!--                            </li>-->
-                            <li>
-                                <a href="https://gitee.com/jokewang1/" target="_blank"><i class="icon-github"></i></a>
-                            </li>
                         </ul>
                     </div>
                 </div>
@@ -295,9 +304,9 @@
                             <li>
                                 <a href="https://my.oschina.net/u/1782401" target="_blank"><i class="icon-home"></i></a>
                             </li>
-<!--                            <li>-->
-<!--                                <a href="https://weibo.com/u/6413995744" target="_blank"><i class="icon-weibo"></i></a>-->
-<!--                            </li>-->
+                            <!--                            <li>-->
+                            <!--                                <a href="https://weibo.com/u/6413995744" target="_blank"><i class="icon-weibo"></i></a>-->
+                            <!--                            </li>-->
                             <li>
                                 <a href="https://github.com/chinaboy-scl" target="_blank"><i
                                         class="icon-github"></i></a>
@@ -365,8 +374,9 @@
                     </div>
                     <div class="col-md-6">
                         <ul class="fh5co-social">
-                            <li><a href="https://gitee.com/jiangzeyin" target="_blank"><i class="icon-home"></i></a></li>
-<!--                            <li><a href="http://weibo.com/loolly" target="_blank"><i class="icon-weibo"></i></a></li>-->
+                            <li><a href="https://gitee.com/jiangzeyin" target="_blank"><i class="icon-home"></i></a>
+                            </li>
+                            <!--                            <li><a href="http://weibo.com/loolly" target="_blank"><i class="icon-weibo"></i></a></li>-->
                             <li><a href="https://github.com/jiangzeyin/Jpom" target="_blank"><i
                                     class="icon-github"></i></a></li>
                         </ul>
