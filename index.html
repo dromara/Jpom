@@ -72,6 +72,9 @@
                                        class="btn btn-primary btn-outline">Github</a>
                                     <a href="https://apidoc.gitee.com/keepbx/Jpom" target="_blank"
                                        class="btn btn-primary btn-outline"><b>API文档</b></a>
+                                    <a href="https://gitee.com/keepbx/Jpom/blob/master/doc/install.md" target="_blank"
+                                       class="btn btn-primary btn-outline"><b>安装文档</b></a>
+
                                 </div>
                                 <br/>
                             </div>
@@ -93,7 +96,6 @@
                         <a href="#" data-nav-section="docs">文档</a>
                         <a href="#" data-nav-section="team">团队</a>
                         <a href="#" data-nav-section="contact">加入讨论</a>
-                        <a href="#" data-nav-section="donate">赞助商</a>
                         <a href="#" data-nav-section="friends">友情链接</a>
                     </div>
                 </div>
@@ -110,48 +112,47 @@
                             <li class="active">
                                 <a href="#" data-tab="marketing">简介</a>
                             </li>
-                            <li>
-                                <a href="#" data-tab="analysis">设计哲学</a>
-                            </li>
+
                             <li>
                                 <a href="#" data-tab="strategy">安装</a>
                             </li>
                         </ul>
                         <div class="fh5co-tab-content active" data-tab-content="marketing">
-                            <p>Hutool是Hu + tool的自造词，前者致敬我的“前任公司”，后者为工具之意，谐音“糊涂”，寓意追求“<b>万事都作糊涂观，无所谓失，无所谓得</b>”的境界。</p>
+                            <p>SpringBoot、Jboot等框架开发的项目通常是以Jar的方式在后台运行的，如果只有一两个项目，管理起来不是太麻烦，但是当项目多了以后，管理起来就不是那么方便了，当项目出现问题时，能够通过Jpom即时排查问题，问题解决后还可以直接上传修改后的Jar，项目的堆栈信息，服务器CPU、内存使用情况一目了然，不必再登录服务器管理。</p>
                             <p>
-                                Hutool是一个Java工具包，也只是一个工具包，它帮助我们简化每一行代码，减少每一个方法，让Java语言也可以“甜甜的”。Hutool最初是我项目中“util”包的一个整理，后来慢慢积累并加入更多非业务相关功能，并广泛学习其它开源项目精髓，经过自己整理修改，最终形成丰富的开源工具集。</p>
+                                当多个项目运行在同一台服务器时，运维人员通常也不只一个，如果每个人都登录服务器管理项目，难免会造成一些不必要的麻烦，甚至给服务器的安全性带来问题（服务器密码知道的人越多，越容易泄露），因为不需要登录服务器管理项目，维护人员不需要知道服务器的登录密码，只需要有Jpom的账号就行，Jpom本身可以通过权限管理，给不同用户不同的权限，这样也使得项目的稳定性得到提升。
+                            </p>
                             <ul class="checked">
-                                <li>Web开发</li>
-                                <li>与其它框架无耦合</li>
-                                <li>高度可替换</li>
+                                <li>实时查看控制台日志</li>
+                                <li>多节点分发</li>
+                                <li>详细管理日志</li>
                             </ul>
                         </div>
 
-                        <div class="fh5co-tab-content" data-tab-content="analysis">
-                            <p>Hutool的设计思想是尽量减少重复的定义，让项目中的util这个package尽量少，总的来说有如下的几个思想：</p>
-                            <ul class="checked">
-                                <li>方法优先于对象</li>
-                                <li>自动识别优于用户定义</li>
-                                <li>便捷性与灵活性并存</li>
-                                <li>适配与兼容</li>
-                                <li>可选依赖原则</li>
-                                <li>无侵入原则</li>
-                            </ul>
-                        </div>
 
                         <div class="fh5co-tab-content" data-tab-content="strategy">
-                            <div>Maven:在项目的pom.xml的dependencies中加入以下内容:</div>
+                            <div>下载安装:</div>
+
                             <pre style="background: none; padding: 0;margin: 0;border: none;">
-										<code>&lt;dependency&gt;<br/>&nbsp;&nbsp;&nbsp;&nbsp;&lt;groupId&gt;cn.hutool&lt;/groupId&gt;<br/>&nbsp;&nbsp;&nbsp;&nbsp;&lt;artifactId&gt;hutool-all&lt;/artifactId&gt;<br/>&nbsp;&nbsp;&nbsp;&nbsp;&lt;version&gt;{{version}}&lt;/version&gt;<br/>&lt;/dependency&gt;</code>
+										<code>
+                                           1. 下载安装包 [https://gitee.com/keepbx/Jpom/attach_files](https://gitee.com/keepbx/Jpom/attach_files)
+2. 解压文件
+3. 安装插件端（[流程说明](/doc/install.md#安装插件端)）
+    1. agent-x.x.x-release 目录为插件端的全部安装文件
+    2. 上传到对应服务器
+    3. 命令运行（Agent.sh、Agent.bat）
+4. 安装服务端（[流程说明](/doc/install.md#安装服务端)）
+    1. server-x.x.x-release 目录为服务端的全部安装文件
+    2. 上传到对应服务器
+    3. 命令运行（Server.sh、Server.bat）</code>
 									</pre>
-                            <div>Gradle:</div>
+                            <div>编译安装:</div>
                             <pre style="background: none; padding: 0;margin: 0;border: none;">
 										<code>compile 'cn.hutool:hutool-all:{{version}}'</code>
 									</pre>
                             <p>
-                                <a href="http://search.maven.org/#search%7Cga%7C1%7Ca%3A%22hutool-all%22"
-                                   class="btn btn-primary btn-outline" target="_blank">从Maven安装</a>
+                                <a href="https://gitee.com/keepbx/Jpom/blob/master/doc/install.md"
+                                   class="btn btn-primary btn-outline" target="_blank">安装文档</a>
                             </p>
                         </div>
 
@@ -161,13 +162,13 @@
 
             </div>
             <div class="fh5co-2col fh5co-text" style="margin-top: 100px;">
-                <img src="https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/images/code_example.png" style="width: 100%;"/>
+                <img src="http://s.keepbx.cn/jpom-server.gif" style="width: 100%;"/>
             </div>
         </div>
 
         <div id="fh5co-services" data-section="docs">
             <div class="fh5co-video">
-                <a href="https://api.isoyu.com/ckplayer/index.php?url=https://tv.sohu.com/v/dXMvNTM5MzgyODgvMTMyMDkzNjQ0LnNodG1s.html"
+                <a href="http://mpvideo.qpic.cn/tjg_3869130206_50000_da68f9c5818b469dbf26e153ebc0df92.f10002.mp4?dis_k=35c13a4407d2cb72f6472fd683b4b39b&dis_t=1562908736"
                    class="popup-vimeo">
                     <i class="icon-play2"></i>
                 </a>
@@ -175,54 +176,54 @@
             </div>
             <div class="container">
                 <div class="col-md-6 col-md-offset-3 text-center fh5co-heading">
-                    <h2>Hutool 是什么</h2>
-                    <p>Hutool是一个Java工具包类库，对文件、流、加密解密、转码、正则、线程、XML等JDK方法进行封装，组成各种Util工具类</p>
+                    <h2>Jpom 是什么</h2>
+                    <p>Jpom是一款简而轻的低侵入式Java运维、监控软件</p>
                 </div>
                 <div class="col-md-4">
                     <div class="service">
-                        <div class="icon"><i class="icon-clock"></i></div>
-                        <h3>日期工具</h3>
-                        <p>通过DateUtil类，提供高度便捷的日期访问、处理和转换方式。</p>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="service">
-                        <div class="icon"><i class="icon-compass"></i></div>
-                        <h3>HTTP客户端</h3>
-                        <p>通过HttpUtil对HTTP客户端的封装，实现便捷的HTTP请求，并简化文件上传操作。</p>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="service">
-                        <div class="icon"><i class="icon-shuffle"></i></div>
-                        <h3>转换工具</h3>
-                        <p>通过Convert类中的相应静态方法，提供一整套的类型转换解决方案，并通过ConverterRegistry工厂类自定义转换。</p>
-                    </div>
-                </div>
-
-                <div class="col-md-4">
-                    <div class="service">
-                        <div class="icon"><i class="icon-settings"></i></div>
-                        <h3>配置文件工具（Setting）</h3>
-                        <p>通过Setting对象，提供兼容Properties文件的更加强大的配置文件工具，用于解决中文、分组等JDK配置文件存在的诸多问题。</p>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="service">
-                        <div class="icon"><i class="icon-note"></i></div>
-                        <h3>日志工具</h3>
-                        <p>Hutool的日志功能，通过抽象Log接口，提供对Slf4j、LogBack、Log4j、JDK-Logging的全面兼容支持。</p>
+                        <div class="icon"><i class="icon-gears"></i></div>
+                        <h3>节点管理</h3>
+                        <p>集群节点，统一管理多节点的项目，实现快速一键分发项目文件</p>
                     </div>
                 </div>
                 <div class="col-md-4">
                     <div class="service">
                         <div class="icon"><i class="icon-support"></i></div>
-                        <h3>JDBC工具类（DB模块）</h3>
-                        <p>通过db模块，提供对MySQL、Oracle等关系型数据库的JDBC封装，借助ActiveRecord思想，大大简化数据库操作。</p>
+                        <h3>项目管理</h3>
+                        <p>创建、启动、停止、实时查看项目控制台日志，管理项目文件</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="service">
+                        <div class="icon"><i class="icon-dashboard"></i></div>
+                        <h3>服务监控</h3>
+                        <p>图表监控节点的服务器状态，监控项目的状态cpu,ram，Java线程状态</p>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="service">
+                        <div class="icon"><i class="icon-user"></i></div>
+                        <h3>用户管理</h3>
+                        <p>多用户管理，实现不同用户不同权限，用户操作、管理日志完善记录</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="service">
+                        <div class="icon"><i class="icon-lock2"></i></div>
+                        <h3>白名单模式</h3>
+                        <p>为了数据安全防止用户随便查看、删除文件配置安全的白名单路径。</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="service">
+                        <div class="icon"><i class="icon-key"></i></div>
+                        <h3>Nginx配置、Ssl证书</h3>
+                        <p>在线快速方便的修改nginx配置文件，ssl证书统一管理</p>
                     </div>
                 </div>
                 <div class="col-md-12 text-center">
-                    <p>Hutool的更多功能，期待你的探索：</p>
+                    <p>Jpom的更多功能，期待你的探索：</p>
                     <p>
                         <a href="docs/" target="_blank" class="btn btn-primary btn-outline">参考文档</a>
                         <a href="https://apidoc.gitee.com/loolly/hutool" target="_blank"
@@ -247,14 +248,14 @@
                              class="img-responsive">
                         <h3>蒋小小</h3>
                         <h4> 一位单纯的程序猿</h4>
-                        <p>一个非职业的码农，混迹于非IT圈子，利用8小时之外做自己喜欢的事情，爱前端，爱数码，爱美女。</p>
+                        <p>一位单纯不忘初心的程序猿，喜欢探索新事物，学习开源项目。</p>
                         <ul class="social">
                             <li>
                                 <a href="https://gitee.com/jiangzeyin" target="_blank"><i class="icon-home"></i></a>
                             </li>
-                            <li>
-                                <a href="http://weibo.com/loolly" target="_blank"><i class="icon-weibo"></i></a>
-                            </li>
+<!--                            <li>-->
+<!--                                <a href="http://weibo.com/loolly" target="_blank"><i class="icon-weibo"></i></a>-->
+<!--                            </li>-->
                             <li>
                                 <a href="https://github.com/jiangzeyin" target="_blank"><i class="icon-github"></i></a>
                             </li>
@@ -264,7 +265,8 @@
                 </div>
                 <div class="col-md-4">
                     <div class="person">
-                        <img src="https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/images/team/shenshanmanong.jpg" alt=""
+                        <img src="https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/images/team/shenshanmanong.jpg"
+                             alt=""
                              class="img-responsive">
                         <h3>深山码农</h3>
                         <h4>崇拜自由的生活和善良的人性</h4>
@@ -273,9 +275,9 @@
                             <li>
                                 <a href="https://my.oschina.net/u/190652" target="_blank"><i class="icon-home"></i></a>
                             </li>
-                            <li>
-                                <a href="https://weibo.com/u/2647798525" target="_blank"><i class="icon-weibo"></i></a>
-                            </li>
+<!--                            <li>-->
+<!--                                <a href="https://weibo.com/u/2647798525" target="_blank"><i class="icon-weibo"></i></a>-->
+<!--                            </li>-->
                             <li>
                                 <a href="https://gitee.com/jokewang1/" target="_blank"><i class="icon-github"></i></a>
                             </li>
@@ -286,16 +288,16 @@
                     <div class="person">
                         <img src="https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/images/team/chinaboy.jpg" alt=""
                              class="img-responsive">
-                        <h3>Chinaboy</h3>
+                        <h3>精神患者</h3>
                         <h4>相信自己，明天会更好</h4>
                         <p>一个奔波于IT圈子的程序猿，拥有自己的梦想，喜欢美女、喜欢音乐、爱打篮球儿...</p>
                         <ul class="social">
                             <li>
                                 <a href="https://my.oschina.net/u/1782401" target="_blank"><i class="icon-home"></i></a>
                             </li>
-                            <li>
-                                <a href="https://weibo.com/u/6413995744" target="_blank"><i class="icon-weibo"></i></a>
-                            </li>
+<!--                            <li>-->
+<!--                                <a href="https://weibo.com/u/6413995744" target="_blank"><i class="icon-weibo"></i></a>-->
+<!--                            </li>-->
                             <li>
                                 <a href="https://github.com/chinaboy-scl" target="_blank"><i
                                         class="icon-github"></i></a>
@@ -358,16 +360,14 @@
                 <div class="row">
                     <div class="col-md-6">
                         <p>
-                            <small>蒙ICP备19001663号<br/>&copy; 2019 Jpom Project. All Rights Reserved.<br/>
-                                Designed by <a href="https://luxiaolei.com/" target="_blank">bwcx_jzy</a>, Hosted by <a
-                                        href="https://www.qiniu.com/" target="_blank">七牛云</a>
+                            <small>京ICP备17044819号<br/>&copy; 2019 Jpom Project. All Rights Reserved.
                         </p>
                     </div>
                     <div class="col-md-6">
                         <ul class="fh5co-social">
-                            <li><a href="http://www.luxiaolei.com/" target="_blank"><i class="icon-home"></i></a></li>
-                            <li><a href="http://weibo.com/loolly" target="_blank"><i class="icon-weibo"></i></a></li>
-                            <li><a href="https://github.com/looly/hutool" target="_blank"><i
+                            <li><a href="https://gitee.com/jiangzeyin" target="_blank"><i class="icon-home"></i></a></li>
+<!--                            <li><a href="http://weibo.com/loolly" target="_blank"><i class="icon-weibo"></i></a></li>-->
+                            <li><a href="https://github.com/jiangzeyin/Jpom" target="_blank"><i
                                     class="icon-github"></i></a></li>
                         </ul>
                     </div>
