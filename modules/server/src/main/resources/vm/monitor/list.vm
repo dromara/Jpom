@@ -29,84 +29,65 @@
 
 <body>
 <div class="layui-row">
-    <button id="addProject" class="layui-btn layui-btn-sm">新增用户</button>
+    <button id="addMonitor" class="layui-btn layui-btn-sm">新增监控</button>
     <button id="refresh" class="layui-btn layui-btn-sm">刷新表格</button>
 </div>
-<table class="layui-table" id="tab_user" lay-filter="tab_user" style="margin: 0;"></table>
+<table class="layui-table" id="tab_monitor" lay-filter="tab_monitor" style="margin: 0;"></table>
 
 </body>
 
-<script type="text/html" id="bar_projects">
+<script type="text/html" id="bar_monitor">
     <a href="javascript:;" class="layui-btn  layui-btn-sm layui-btn-normal" lay-event="update">编辑</a>
     <a href="javascript:;" class="layui-btn  layui-btn-sm layui-btn-danger" lay-event="delete">删除</a>
-        #if($user.isSystemUser())
-        {{# if(d.pwdErrorCount>0){ }}
-        <a href="javascript:;" class="layui-btn  layui-btn-sm layui-btn-warm" lay-event="unlock">解锁</a>
-        {{# } }}
-        #end
 </script>
-<script type="text/html" id="manager_status">
-    <div title="登录失败次数：{{d.pwdErrorCount}}">
-        <input type="checkbox" id="" disabled name="status" {{# if(d.serverManager){ }} checked
-               {{# } }}
-               lay-skin="switch"
-               lay-text="是|否">
-    </div>
+<script type="text/html" id="monitor_status">
+    <a href="javascript:;" onclick="changeStatus(this)" monitorId="{{ d.id }}" monitorStatus="{{ d.status }}">
+        <input type="checkbox" name="status" {{# if(d.status){ }} checked {{# } }}
+               lay-skin="switch" lay-text="是|否">
+    </a>
 </script>
-    #parse("./common/sha1.vm")
+<script type="text/html" id="monitor_restart">
+    <input type="checkbox" disabled name="autoRestart" {{# if(d.autoRestart){ }} checked
+           {{# } }} lay-skin="switch" lay-text="是|否">
+</script>
 <script type="text/javascript">
     function loadSuccess() {
-
         tableRender({
-            id: 'tab_user',
-            elem: '#tab_user',
-            url: './getUserList',
+            id: 'tab_monitor',
+            elem: '#tab_monitor',
+            url: './getMonitorList',
             cols: [[
-                {field: 'id', title: 'id'},
-                {field: 'name', title: '昵称'},
-                {field: 'serverManager', templet: "#manager_status", title: '是否是管理员'},
+                {field: 'name', title: '名称'},
+                {field: 'status', templet: "#monitor_status", title: '开启状态'},
+                {field: 'autoRestart', templet: "#monitor_restart", title: '自动重启监控'},
                 {field: 'parent', title: '创建人'},
-                {field: 'op', title: '操作', align: 'center', toolbar: '#bar_projects', fixed: 'right'}
+                {
+                    field: 'modifyTime', title: '修改时间', templet: function (d) {
+                        return formateTime(d.modifyTime);
+                    }
+                },
+                {field: 'op', title: '操作', align: 'center', toolbar: '#bar_monitor', fixed: 'right'}
             ]]
         });
 
-        // 编辑用户信息
-        function updateApplication(data) {
-            layer.open({
-                type: 2,
-                title: '修改用户',
-                content: './edit?id=' + data.id,
-                area: ['80%', '80%'],
-            });
-        }
-
-        // '添加用户'点击事件
-        $('#addProject').on('click', function () {
+        // '添加监控'点击事件
+        $('#addMonitor').on('click', function () {
             // 弹出
             layer.open({
                 type: 2,
-                title: '新增用户',
-                content: './edit',
+                title: '新增监控',
+                content: './edit.html',
                 area: ['80%', '80%'],
             });
         });
 
         // '刷新表格'点击事件
         $('#refresh').on('click', function () {
-            table.reload('tab_user', {});
+            table.reload('tab_monitor', {});
         });
 
-
-        // form.on('switch(manage)', function (data) {
-        //     if (data.elem.checked) {
-        //         $("#projectsDiv").hide();
-        //     } else {
-        //         $("#projectsDiv").show();
-        //     }
-        // });
-
         // 表格工具条事件
-        table.on('tool(tab_user)', function (obj) {
+        table.on('tool(tab_monitor)', function (obj) {
             var data = obj.data;
             var event = obj.event;
             if ('update' === event) {
@@ -115,54 +96,57 @@
             } else if ('delete' === event) {
                 // 删除
                 deleteApplication(data);
-            } else if ('unlock' === event) {
-                // 解锁
-                unlockUser(data);
             }
         });
 
-        function unlockUser(data) {
-            #if($user.isSystemUser())
-                layer.confirm('确定解锁用户 ' + data.id + '？', {
-                    title: '系统提示'
-                }, function (index) {
-                    layer.close(index);
-                    loadingAjax({
-                        url: './unlock',
-                        data: {
-                            id: data.id
-                        },
-                        success: function (data) {
-                            layer.msg(data.msg);
-                            if (200 == data.code) {
-                                table.reload('tab_user', {});
-                            }
-                        }
-                    });
-                });
-            #end
+        // 编辑监控
+        function updateApplication(data) {
+            layer.open({
+                type: 2,
+                title: '修改监控',
+                content: './edit.html?id=' + data.id,
+                area: ['80%', '80%'],
+            });
         }
 
-        // 删除用户
+        // 删除监控
         function deleteApplication(data) {
-            layer.confirm('确定删除用户 ' + data.id + '？', {
+            layer.confirm('确定删除监控 ' + data.name + '？', {
                 title: '系统提示'
             }, function (index) {
                 layer.close(index);
                 loadingAjax({
-                    url: './deleteUser',
+                    url: './deleteMonitor',
                     data: {
                         id: data.id
                     },
                     success: function (data) {
                         layer.msg(data.msg);
                         if (200 == data.code) {
-                            table.reload('tab_user', {});
+                            table.reload('tab_monitor', {});
                         }
                     }
                 });
             });
         }
+
+        $('#monitorStatus').on('click', function () {
+            // 弹出
+            layer.open({
+                type: 2,
+                title: '新增监控',
+                content: './edit.html',
+                area: ['80%', '80%'],
+            });
+        });
+    }
+
+    function changeStatus(dom) {
+        var monitorId = dom.getAttribute("monitorId");
+        var monitorStatus = dom.getAttribute("monitorStatus");
+        console.log(monitorId);
+        console.log(monitorStatus);
+        dom.setAttribute("monitorStatus", !monitorStatus);
     }
 </script>
 </html>

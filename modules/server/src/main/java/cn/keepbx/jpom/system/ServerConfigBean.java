@@ -41,6 +41,11 @@ public class ServerConfigBean {
      */
     public static final String OUTGIVING_FILE = "outgiving";
 
+    /**
+     * 项目监控文件
+     */
+    public static final String MONITOR_FILE = "monitor.json";
+
     private static ServerConfigBean serverConfigBean;
 
     /**

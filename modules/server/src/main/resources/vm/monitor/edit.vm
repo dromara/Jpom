@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    #parse("./common/head.vm")
+    <link href="$!jpomProxyPath/static/ztree/zTreeStyle/zTreeStyle.css" rel="stylesheet">
+    <title>项目管理系统</title>
+    <style>
+        body {
+            padding: 10px;
+        }
+    </style>
+</head>
+
+<body>
+<div class="layui-container">
+    <form action="./updateMonitor" class="layui-form" id="form_monitor">
+        <input name="id" type="hidden" value="$!model.id">
+        <div class="layui-form-item">
+            <label class="layui-form-label">名称</label>
+            <div class="layui-input-block">
+                <input type="text" name="name" required lay-verify="required" value="$!model.name" placeholder="请输入监控名称"
+                       class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">开启状态</label>
+            <div class="layui-input-block">
+                <input type="checkbox" name="status" lay-skin="switch" lay-text="开启|关闭" #if($model.status)
+                       checked  #end>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">异常后自动重启</label>
+            <div class="layui-input-block">
+                <input type="checkbox" name="autoRestart" lay-skin="switch" lay-text="是|否" #if($model.autoRestart)
+                       checked  #end>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">监控周期</label>
+            <div class="layui-input-block">
+                #foreach($item in $cycleArray)
+                    <input type="radio" name="cycle" value="$item.code" title="$item.desc" #if($model.cycle==$item.code)
+                           checked  #end>
+                #end
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">通知方式</label>
+            <div class="layui-input-block">
+                #foreach($item in $notifyTypeArray)
+                    #if($model&&$model.notify)
+                        #foreach($notice in $model.notify)
+                            #if($item.code==$notice.style)
+                                #set($nowData=$notice)
+                                #break
+                            #else
+                                #set($nowData=false)
+                            #end
+                        #end
+                    #end
+                    <div style="display: flex;margin: 5px">
+                        <input type="checkbox" name="notify_$item.code" value="$item.code"
+                               title="$item.desc" #if($nowData) checked #end
+                               lay-filter="monitorNotify">
+                            <input type="text" required id="notifyValue_$item.code" class="layui-input"
+                                   name="value_$item.code"  #if(!$nowData) style="display: none" #end
+                                   value="$!nowData.value"   placeholder=#if($item.code==0)
+                            "请输入通知的webhook地址" #elseif($item.code==1)"请输入通知的邮箱" #elseif($item.code==2) "请输入通知的手机号码" #end>
+                    </div>
+                #end
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">监控项目</label>
+            <div class="layui-input-block">
+                <div class="layui-collapse">
+                    #if($nodeModels && $nodeModels.size()>0)
+                        #foreach($item in $nodeModels)
+                            <div class="layui-colla-item">
+                                <div class="layui-colla-title">$item.name</div>
+                                <div class="layui-colla-content layui-show">
+                                    #if($item.groupProjects && $item.groupProjects.size()>0)
+                                        #foreach($groupProject in $item.groupProjects)
+                                            #foreach($project in $groupProject.projects)
+                                                #set($nowData=$item.id+"_"+$project.id)
+                                                <input type="checkbox" name="projects" value="$project.id" id="$nowData"
+                                                       lay-skin="primary" title="$project.name" nodeId="$item.id">
+                                            #end
+                                        #end
+                                    #end
+                                </div>
+                            </div>
+                        #end
+                    #else
+                        #set($errorNode=true)
+                        <div class="layui-colla-item">
+                            <div class="layui-colla-title">
+                                没有可用节点
+                            </div>
+                        </div>
+                    #end
+                </div>
+            </div>
+        </div>
+    ##提交按钮
+        <div class="layui-form-item">
+            <div class="layui-form-item" style="padding-left: 20%;margin-top: 20px;">
+                <button class="layui-btn layui-btn-normal" lay-submit lay-filter="submitMonitor" id="submitMonitor">
+                    提交
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+</body>
+<script type="text/javascript">
+    function loadSuccess() {
+        checkProject($!model.projects);
+
+        function checkProject(data) {
+            if (!data) {
+                return;
+            }
+            for (var i = 0; i < data.length; i++) {
+                var node = data[i];
+                var nodeId = node.node;
+                var projects = node.projects;
+                for (var j = 0; j < projects.length; j++) {
+                    var id = nodeId + "_" + projects[j];
+                    $("#" + id).prop("checked", true);
+                }
+            }
+            form.render('checkbox');
+        }
+
+        //通知方式的点击
+        form.on('checkbox(monitorNotify)', function (data) {
+            var id = "#notifyValue_" + data.value;
+            if (data.elem.checked) {
+                $(id).css("display", "block").attr('lay-verify', 'required');
+            } else {
+                $(id).css("display", "none").removeAttr('lay-verify');
+            }
+        });
+
+        // 提交信息
+        form.on('submit(submitMonitor)', function (data) {
+            var sendData = data.field;
+            if (!sendData.cycle) {
+                layer.msg("请选择监控周期");
+                return false;
+            }
+            var projects = getCheckProjects(sendData);
+            if (!projects || projects.length <= 0) {
+                layer.msg("请至少选择一个项目");
+                return false;
+            }
+            var notify = getNotifyType(sendData);
+            if (!notify || notify.length <= 0) {
+                layer.msg("请至少选择一个通知方式");
+                return false;
+            }
+            sendData.notify = JSON.stringify(notify);
+            console.log(sendData);
+            loadingAjax({
+                url: data.form.action,
+                data: sendData,
+                success: function (data) {
+                    layer.msg(data.msg);
+                    if (200 == data.code) {
+                        setTimeout(function () {
+                            var index = parent.layer.getFrameIndex(window.name);
+                            parent.layer.close(index);
+                            parent.location.reload();
+                        }, 1500);
+                    }
+                }
+            });
+            return false;
+        });
+
+        //获取监控选中的项目
+        function getCheckProjects(data) {
+            var projects = [];
+            var checkedList = $("input[name='projects']");
+            var len = checkedList.length;
+            if (len <= 0) {
+                return projects;
+            }
+            var node = {};
+            for (var i = 0; i < len; i++) {
+                var dom = checkedList[i];
+                if (dom.checked) {
+                    var value = dom.getAttribute("value");
+                    if (!value) {
+                        continue;
+                    }
+                    var nodeId = dom.getAttribute("nodeId");
+                    var item = node[nodeId];
+                    if (!item) {
+                        item = [];
+                    }
+                    item.push(value);
+                    node[nodeId] = item;
+                }
+            }
+            for (var key in node) {
+                projects.push({
+                    node: key,
+                    projects: node[key]
+                })
+            }
+            data.projects = JSON.stringify(projects);
+            return projects;
+        }
+
+        function getNotifyType(data) {
+            var notify = [];
+            for (var key in data) {
+                if (startWith(key, "notify_")) {
+                    var val = data[key];
+                    var val_key = "value_" + val;
+                    var value = data[val_key];
+                    var item = {
+                        style: val,
+                        value: value
+                    }
+                    notify.push(item);
+                    delete data[val_key];
+                    delete data[key];
+                }
+            }
+            return notify;
+        }
+    }
+
+    function startWith(str, suffix) {
+        if (typeof str == 'string') {
+            return str.slice(0, suffix.length) == suffix;
+        }
+        return false;
+    }
+</script>
+</html>
