@@ -240,6 +240,7 @@ public class OutGivingModel extends BaseModel {
             outGivingNodeProjects.forEach(outGivingNodeProject -> ThreadUtil.execAsync(new OutGivingRun(id, outGivingNodeProject, file, afterOpt, userModel)));
         } else {
             //
+            throw new RuntimeException("Not implemented");
         }
     }
 
