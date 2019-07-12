@@ -96,7 +96,7 @@ public class OperateLogController implements AopLogInterface {
                 Set<Map.Entry<String, String[]>> entries = map.entrySet();
                 for (Map.Entry<String, String[]> entry : entries) {
                     String key = entry.getKey();
-                    if (StrUtil.containsIgnoreCase(key, "pwd")) {
+                    if (StrUtil.containsAnyIgnoreCase(key, "pwd", "password")) {
                         entry.setValue(new String[]{"***"});
                     }
                 }
