@@ -9,7 +9,7 @@ import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.keepbx.jpom.common.BaseOperService;
 import cn.keepbx.jpom.model.data.AgentWhitelist;
 import cn.keepbx.jpom.service.WhitelistDirectoryService;
-import cn.keepbx.jpom.util.FileUtils;
+import cn.keepbx.util.FileUtils;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.github.odiszapc.nginxparser.NgxBlock;

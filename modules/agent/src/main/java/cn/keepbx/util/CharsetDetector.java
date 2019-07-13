@@ -1,4 +1,4 @@
-package cn.keepbx.jpom.util;
+package cn.keepbx.util;
 
 import org.mozilla.intl.chardet.nsDetector;
 import org.mozilla.intl.chardet.nsICharsetDetectionObserver;

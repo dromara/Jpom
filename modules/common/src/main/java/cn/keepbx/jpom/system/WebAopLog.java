@@ -5,7 +5,7 @@ import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.keepbx.jpom.BaseJpomApplication;
 import cn.keepbx.jpom.model.system.JpomManifest;
-import cn.keepbx.jpom.util.StringUtil;
+import cn.keepbx.util.StringUtil;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.Signature;
 import org.aspectj.lang.annotation.AfterReturning;

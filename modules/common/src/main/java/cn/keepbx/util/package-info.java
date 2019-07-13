@@ -25,4 +25,4 @@
  *
  * @author jiangzeyin
  */
-package cn.keepbx.jpom.util;
+package cn.keepbx.util;

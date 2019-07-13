@@ -12,7 +12,7 @@ import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.keepbx.jpom.BaseJpomApplication;
 import cn.keepbx.jpom.model.data.ScriptModel;
-import cn.keepbx.jpom.util.SocketSessionUtil;
+import cn.keepbx.util.SocketSessionUtil;
 import com.alibaba.fastjson.JSONObject;
 
 import javax.websocket.Session;

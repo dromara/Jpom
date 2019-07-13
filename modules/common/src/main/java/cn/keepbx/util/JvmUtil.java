@@ -1,4 +1,4 @@
-package cn.keepbx.jpom.util;
+package cn.keepbx.util;
 
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.util.StrUtil;

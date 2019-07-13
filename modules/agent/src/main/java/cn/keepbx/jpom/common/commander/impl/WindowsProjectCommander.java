@@ -6,7 +6,7 @@ import cn.hutool.core.util.StrUtil;
 import cn.keepbx.jpom.common.commander.AbstractProjectCommander;
 import cn.keepbx.jpom.model.data.ProjectInfoModel;
 import cn.keepbx.jpom.model.system.NetstatModel;
-import cn.keepbx.jpom.util.CommandUtil;
+import cn.keepbx.util.CommandUtil;
 
 import java.util.ArrayList;
 import java.util.List;

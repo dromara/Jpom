@@ -17,7 +17,7 @@ import cn.keepbx.jpom.model.RunMode;
 import cn.keepbx.jpom.model.data.ProjectInfoModel;
 import cn.keepbx.jpom.service.WhitelistDirectoryService;
 import cn.keepbx.jpom.system.ConfigBean;
-import cn.keepbx.jpom.util.StringUtil;
+import cn.keepbx.util.StringUtil;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;

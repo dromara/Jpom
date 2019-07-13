@@ -6,7 +6,8 @@ import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.pool.ThreadPoolService;
 import cn.keepbx.jpom.common.commander.AbstractSystemCommander;
 import cn.keepbx.jpom.model.system.ProcessModel;
-import cn.keepbx.jpom.util.SocketSessionUtil;
+import cn.keepbx.util.CronUtils;
+import cn.keepbx.util.SocketSessionUtil;
 import com.alibaba.fastjson.JSONObject;
 
 import javax.websocket.Session;
@@ -75,10 +76,7 @@ public class TopManager {
             //发送首页进程列表信息
             sendProcessList();
         });
-        Scheduler scheduler = CronUtil.getScheduler();
-        if (!scheduler.isStarted()) {
-            CronUtil.start();
-        }
+        CronUtils.start();
         WATCH.set(true);
     }
 

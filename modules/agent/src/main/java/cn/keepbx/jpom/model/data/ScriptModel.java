@@ -9,7 +9,7 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.system.SystemUtil;
 import cn.keepbx.jpom.model.BaseModel;
 import cn.keepbx.jpom.system.AgentConfigBean;
-import cn.keepbx.jpom.util.CommandUtil;
+import cn.keepbx.util.CommandUtil;
 
 import java.io.File;
 

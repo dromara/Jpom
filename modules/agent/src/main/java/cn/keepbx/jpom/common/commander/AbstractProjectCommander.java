@@ -19,8 +19,8 @@ import cn.keepbx.jpom.model.data.ProjectInfoModel;
 import cn.keepbx.jpom.model.system.NetstatModel;
 import cn.keepbx.jpom.service.manage.ProjectInfoService;
 import cn.keepbx.jpom.system.JpomRuntimeException;
-import cn.keepbx.jpom.util.CommandUtil;
-import cn.keepbx.jpom.util.JvmUtil;
+import cn.keepbx.util.CommandUtil;
+import cn.keepbx.util.JvmUtil;
 import com.sun.tools.attach.AttachNotSupportedException;
 import com.sun.tools.attach.VirtualMachine;
 

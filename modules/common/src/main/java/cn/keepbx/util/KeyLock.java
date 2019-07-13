@@ -1,4 +1,4 @@
-package cn.keepbx.jpom.util;
+package cn.keepbx.util;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;

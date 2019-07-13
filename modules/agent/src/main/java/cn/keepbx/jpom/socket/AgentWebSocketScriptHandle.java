@@ -6,7 +6,7 @@ import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.spring.SpringUtil;
 import cn.keepbx.jpom.model.data.ScriptModel;
 import cn.keepbx.jpom.service.script.ScriptServer;
-import cn.keepbx.jpom.util.SocketSessionUtil;
+import cn.keepbx.util.SocketSessionUtil;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Component;
 

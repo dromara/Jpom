@@ -3,9 +3,9 @@ package cn.keepbx.jpom;
 import cn.hutool.core.lang.Console;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.system.SystemUtil;
-import cn.keepbx.jpom.util.StringUtil;
-import cn.keepbx.jpom.util.CommandUtil;
-import cn.keepbx.jpom.util.JvmUtil;
+import cn.keepbx.util.StringUtil;
+import cn.keepbx.util.CommandUtil;
+import cn.keepbx.util.JvmUtil;
 import com.sun.tools.attach.VirtualMachine;
 
 import java.io.IOException;

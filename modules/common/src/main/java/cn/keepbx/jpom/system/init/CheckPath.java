@@ -6,7 +6,7 @@ import cn.jiangzeyin.common.PreLoadClass;
 import cn.jiangzeyin.common.PreLoadMethod;
 import cn.keepbx.jpom.BaseJpomApplication;
 import cn.keepbx.jpom.model.system.JpomManifest;
-import cn.keepbx.jpom.util.JvmUtil;
+import cn.keepbx.util.JvmUtil;
 import sun.jvmstat.monitor.MonitorException;
 import sun.jvmstat.monitor.MonitoredVm;
 import sun.jvmstat.monitor.VmIdentifier;

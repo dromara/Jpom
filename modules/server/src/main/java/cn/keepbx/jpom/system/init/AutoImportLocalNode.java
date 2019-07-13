@@ -13,7 +13,7 @@ import cn.keepbx.jpom.model.system.AgentAutoUser;
 import cn.keepbx.jpom.model.system.JpomManifest;
 import cn.keepbx.jpom.service.node.NodeService;
 import cn.keepbx.jpom.system.ConfigBean;
-import cn.keepbx.jpom.util.JvmUtil;
+import cn.keepbx.util.JvmUtil;
 import com.alibaba.fastjson.JSONObject;
 import sun.jvmstat.monitor.MonitoredVm;
 import sun.jvmstat.monitor.VmIdentifier;

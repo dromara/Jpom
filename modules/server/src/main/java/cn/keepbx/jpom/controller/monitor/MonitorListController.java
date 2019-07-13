@@ -20,7 +20,10 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.annotation.Resource;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.function.Consumer;
 
 /**
  * 监控列表
@@ -109,21 +112,33 @@ public class MonitorListController extends BaseServerController {
         if (notify == null || notifyArray.size() <= 0) {
             return JsonMessage.getString(400, "请至少选择一种通知方式");
         }
+        List<MonitorModel.Notify> notifies = new ArrayList<>();
         for (int i = 0; i < notifyArray.size(); i++) {
             JSONObject jsonObject = notifyArray.getJSONObject(i);
             int style = jsonObject.getIntValue("style");
+            MonitorModel.NotifyType notifyType = BaseEnum.getEnum(MonitorModel.NotifyType.class, style);
+            Objects.requireNonNull(notifyType);
+            //
             String value = jsonObject.getString("value");
-            if (style == MonitorModel.NotifyType.sms.getCode()) {
-                boolean mobile = Validator.isMobile(value);
-                if (!mobile) {
-                    return JsonMessage.getString(400, "请输入正确的手机号码");
-                }
-            } else if (style == MonitorModel.NotifyType.mail.getCode()) {
-                boolean email = Validator.isEmail(value);
-                if (!email) {
-                    return JsonMessage.getString(400, "请输入正确的邮箱");
-                }
+//            if (style == MonitorModel.NotifyType.sms.getCode()) {
+//                boolean mobile = Validator.isMobile(value);
+//                if (!mobile) {
+//                    return JsonMessage.getString(400, "请输入正确的手机号码");
+//                }
+//            } else
+            switch (notifyType) {
+                case mail:
+                    boolean email = Validator.isEmail(value);
+                    if (!email) {
+                        return JsonMessage.getString(400, "请输入正确的邮箱");
+                    }
+                    break;
+                case dingding:
+                    break;
+                default:
+                    break;
             }
+            notifies.add(new MonitorModel.Notify(style, value));
         }
         String projects = getParameter("projects");
         JSONArray projectsArray = JSONArray.parseArray(projects);
@@ -135,11 +150,17 @@ public class MonitorListController extends BaseServerController {
         if (monitorModel == null) {
             monitorModel = new MonitorModel();
         }
+        //
+        List<MonitorModel.NodeProject> nodeProjects = new ArrayList<>();
+        projectsArray.forEach(o -> {
+            JSONObject jsonObject = (JSONObject) o;
+            nodeProjects.add(jsonObject.toJavaObject(MonitorModel.NodeProject.class));
+        });
         monitorModel.setAutoRestart("on".equalsIgnoreCase(autoRestart));
         monitorModel.setCycle(cycle);
-        monitorModel.setProjects(projectsArray);
+        monitorModel.setProjects(nodeProjects);
         monitorModel.setStatus(start);
-        monitorModel.setNotify(notifyArray);
+        monitorModel.setNotify(notifies);
         monitorModel.setName(name);
         monitorModel.setModifyTime(DateUtil.date().getTime());
         if (StrUtil.isEmpty(id)) {
@@ -151,7 +172,7 @@ public class MonitorListController extends BaseServerController {
             monitorService.addItem(monitorModel);
             return JsonMessage.getString(200, "添加成功");
         }
-        monitorService.openMonitor(monitorModel);
+//        monitorService.openMonitor(monitorModel);
         monitorService.updateItem(monitorModel);
         return JsonMessage.getString(200, "修改成功");
     }

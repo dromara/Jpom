@@ -29,7 +29,7 @@ public class NodeModel extends BaseModel {
 
     private String authorize;
     /**
-     * 项目信息
+     * 项目信息  临时信息
      */
     private JSONArray projects;
     /**

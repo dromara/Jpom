@@ -15,7 +15,7 @@ import cn.keepbx.jpom.model.RunMode;
 import cn.keepbx.jpom.model.data.*;
 import cn.keepbx.jpom.service.node.OutGivingServer;
 import cn.keepbx.jpom.service.system.ServerWhitelistServer;
-import cn.keepbx.jpom.util.StringUtil;
+import cn.keepbx.util.StringUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.http.MediaType;

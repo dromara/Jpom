@@ -15,7 +15,7 @@ import cn.keepbx.jpom.model.data.UserOperateLogV1;
 import cn.keepbx.jpom.service.node.OutGivingServer;
 import cn.keepbx.jpom.system.ConfigBean;
 import cn.keepbx.jpom.system.ServerConfigBean;
-import cn.keepbx.jpom.util.StringUtil;
+import cn.keepbx.util.StringUtil;
 import com.alibaba.fastjson.JSONArray;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;

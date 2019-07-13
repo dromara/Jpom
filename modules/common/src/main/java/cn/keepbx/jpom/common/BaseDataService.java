@@ -5,7 +5,7 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.keepbx.jpom.system.ConfigBean;
 import cn.keepbx.jpom.system.JpomRuntimeException;
-import cn.keepbx.jpom.util.JsonFileUtil;
+import cn.keepbx.util.JsonFileUtil;
 import com.alibaba.fastjson.JSONObject;
 
 import java.io.FileNotFoundException;

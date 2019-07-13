@@ -4,7 +4,7 @@ import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.keepbx.jpom.common.BaseDataService;
 import cn.keepbx.jpom.model.data.AgentWhitelist;
 import cn.keepbx.jpom.system.AgentConfigBean;
-import cn.keepbx.jpom.util.JsonFileUtil;
+import cn.keepbx.util.JsonFileUtil;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;
 

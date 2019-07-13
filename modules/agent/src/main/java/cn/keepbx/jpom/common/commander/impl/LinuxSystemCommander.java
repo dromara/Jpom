@@ -5,7 +5,7 @@ import cn.hutool.core.text.StrSpliter;
 import cn.hutool.core.util.StrUtil;
 import cn.keepbx.jpom.common.commander.AbstractSystemCommander;
 import cn.keepbx.jpom.model.system.ProcessModel;
-import cn.keepbx.jpom.util.CommandUtil;
+import cn.keepbx.util.CommandUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 

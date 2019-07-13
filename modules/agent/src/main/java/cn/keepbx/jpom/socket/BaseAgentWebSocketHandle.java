@@ -4,7 +4,7 @@ import cn.hutool.core.exceptions.ExceptionUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.core.util.URLUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
-import cn.keepbx.jpom.util.SocketSessionUtil;
+import cn.keepbx.util.SocketSessionUtil;
 
 import javax.websocket.Session;
 import java.io.IOException;

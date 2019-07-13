@@ -16,7 +16,7 @@ import cn.keepbx.jpom.common.commander.AbstractTomcatCommander;
 import cn.keepbx.jpom.model.data.TomcatInfoModel;
 import cn.keepbx.jpom.service.manage.TomcatManageService;
 import cn.keepbx.jpom.socket.FileTailWatcher;
-import cn.keepbx.jpom.util.FileUtils;
+import cn.keepbx.util.FileUtils;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.http.MediaType;

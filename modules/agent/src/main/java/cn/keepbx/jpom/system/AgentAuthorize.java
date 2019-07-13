@@ -8,7 +8,7 @@ import cn.hutool.crypto.SecureUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.spring.SpringUtil;
 import cn.keepbx.jpom.model.system.AgentAutoUser;
-import cn.keepbx.jpom.util.JsonFileUtil;
+import cn.keepbx.util.JsonFileUtil;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;

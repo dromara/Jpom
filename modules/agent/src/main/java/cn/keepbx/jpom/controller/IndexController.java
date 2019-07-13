@@ -2,14 +2,13 @@ package cn.keepbx.jpom.controller;
 
 import cn.hutool.system.SystemUtil;
 import cn.jiangzeyin.common.JsonMessage;
-import cn.keepbx.jpom.BaseJpomApplication;
 import cn.keepbx.jpom.common.BaseAgentController;
 import cn.keepbx.jpom.common.interceptor.NotAuthorize;
 import cn.keepbx.jpom.model.data.ProjectInfoModel;
 import cn.keepbx.jpom.model.system.JpomManifest;
 import cn.keepbx.jpom.service.WhitelistDirectoryService;
 import cn.keepbx.jpom.service.manage.ProjectInfoService;
-import cn.keepbx.jpom.util.JvmUtil;
+import cn.keepbx.util.JvmUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.http.MediaType;
