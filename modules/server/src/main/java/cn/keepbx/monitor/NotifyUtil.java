@@ -20,7 +20,7 @@ public class NotifyUtil {
         NOTIFY_MAP.put(MonitorModel.NotifyType.mail, new EmailUtil());
     }
 
-    public void send(MonitorModel.Notify notify, String title, String context) {
+    public static void send(MonitorModel.Notify notify, String title, String context) {
         int style = notify.getStyle();
         MonitorModel.NotifyType notifyType = BaseEnum.getEnum(MonitorModel.NotifyType.class, style);
         Objects.requireNonNull(notifyType);

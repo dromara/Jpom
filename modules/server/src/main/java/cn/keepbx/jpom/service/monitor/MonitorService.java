@@ -33,7 +33,6 @@ import java.util.stream.Collectors;
 public class MonitorService extends BaseOperService<MonitorModel> {
 
 
-
     @Override
     public List<MonitorModel> list() {
         JSONObject jsonObject = getJSONObject(ServerConfigBean.MONITOR_FILE);
@@ -70,11 +69,12 @@ public class MonitorService extends BaseOperService<MonitorModel> {
         this.checkCronStatus();
     }
 
-    private void checkCronStatus() {
+    public boolean checkCronStatus() {
         // 关闭监听
         List<MonitorModel> list = list();
         if (list == null || list.isEmpty()) {
             Monitor.stop();
+            return false;
         } else {
             boolean stop = true;
             for (MonitorModel monitorModel : list) {
@@ -86,7 +86,9 @@ public class MonitorService extends BaseOperService<MonitorModel> {
             }
             if (stop) {
                 Monitor.stop();
+                return false;
             }
+            return true;
         }
     }
 

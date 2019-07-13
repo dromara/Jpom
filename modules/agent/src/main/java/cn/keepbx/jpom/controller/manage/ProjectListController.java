@@ -4,7 +4,6 @@ import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.keepbx.jpom.common.BaseAgentController;
-import cn.keepbx.jpom.common.commander.AbstractProjectCommander;
 import cn.keepbx.jpom.model.data.ProjectInfoModel;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -50,29 +49,6 @@ public class ProjectListController extends BaseAgentController {
     }
 
     /**
-     * 获取项目的进程id
-     *
-     * @param id 项目id
-     * @return json
-     */
-    @RequestMapping(value = "getProjectStatus", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public String getProjectStatus(String id) {
-        if (StrUtil.isEmpty(id)) {
-            return JsonMessage.getString(405, "项目id 不正确");
-        }
-        int pid = 0;
-        try {
-            pid = AbstractProjectCommander.getInstance().getPid(id);
-        } catch (Exception e) {
-            DefaultSystemLog.ERROR().error("获取项目pid 失败", e);
-        }
-        JSONObject jsonObject = new JSONObject();
-        jsonObject.put("pId", pid);
-        return JsonMessage.getString(200, "", jsonObject);
-    }
-
-
-    /**
      * 程序项目信息
      *
      * @param group 分组
@@ -111,40 +87,5 @@ public class ProjectListController extends BaseAgentController {
             DefaultSystemLog.ERROR().error(e.getMessage(), e);
             return JsonMessage.getString(500, e.getMessage());
         }
-    }
-
-    /**
-     * 获取项目的运行端口
-     *
-     * @param ids ids
-     * @return obj
-     */
-    @RequestMapping(value = "getProjectPort", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public String getProjectPort(String ids) {
-        if (StrUtil.isEmpty(ids)) {
-            return JsonMessage.getString(400, "");
-        }
-        JSONArray jsonArray = JSONArray.parseArray(ids);
-        JSONObject jsonObject = new JSONObject();
-        JSONObject itemObj;
-        for (Object object : jsonArray) {
-            String item = object.toString();
-            int pid;
-            try {
-                pid = AbstractProjectCommander.getInstance().getPid(item);
-            } catch (Exception e) {
-                DefaultSystemLog.ERROR().error("获取端口错误", e);
-                continue;
-            }
-            if (pid <= 0) {
-                continue;
-            }
-            itemObj = new JSONObject();
-            String port = AbstractProjectCommander.getInstance().getMainPort(pid);
-            itemObj.put("port", port);
-            itemObj.put("pid", pid);
-            jsonObject.put(item, itemObj);
-        }
-        return JsonMessage.getString(200, "", jsonObject);
     }
 }
