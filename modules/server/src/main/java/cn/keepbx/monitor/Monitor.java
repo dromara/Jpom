@@ -1,7 +1,10 @@
 package cn.keepbx.monitor;
 
+import cn.hutool.core.exceptions.ExceptionUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.cron.CronUtil;
 import cn.hutool.cron.task.Task;
+import cn.hutool.http.HttpStatus;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.spring.SpringUtil;
 import cn.keepbx.jpom.common.forward.NodeForward;
@@ -11,6 +14,7 @@ import cn.keepbx.jpom.model.data.NodeModel;
 import cn.keepbx.jpom.service.monitor.MonitorService;
 import cn.keepbx.jpom.service.node.NodeService;
 import cn.keepbx.util.CronUtils;
+import com.alibaba.fastjson.JSONObject;
 
 import java.util.List;
 
@@ -67,18 +71,20 @@ public class Monitor implements Task {
         }
         monitorModels.forEach(monitorModel -> {
             List<MonitorModel.NodeProject> nodeProjects = monitorModel.getProjects();
+            if (nodeProjects == null || nodeProjects.isEmpty()) {
+                return;
+            }
+            //
             List<MonitorModel.Notify> notifies = monitorModel.getNotify();
             if (notifies == null || notifies.isEmpty()) {
                 return;
             }
-            this.checkNode(nodeProjects, notifies);
+            this.checkNode(monitorModel);
         });
     }
 
-    private void checkNode(List<MonitorModel.NodeProject> nodeProjects, List<MonitorModel.Notify> notifies) {
-        if (nodeProjects == null || nodeProjects.isEmpty()) {
-            return;
-        }
+    private void checkNode(MonitorModel monitorModel) {
+        List<MonitorModel.NodeProject> nodeProjects = monitorModel.getProjects();
         NodeService nodeService = SpringUtil.getBean(NodeService.class);
         nodeProjects.forEach(nodeProject -> {
             String nodeId = nodeProject.getNode();
@@ -86,22 +92,46 @@ public class Monitor implements Task {
             if (nodeModel == null) {
                 return;
             }
-            this.reqNodeStatus(nodeModel, nodeProject.getProjects(), notifies);
+            this.reqNodeStatus(monitorModel, nodeModel, nodeProject.getProjects());
         });
     }
 
-    private void reqNodeStatus(NodeModel nodeModel, List<String> projects, List<MonitorModel.Notify> notifies) {
+    private void reqNodeStatus(MonitorModel monitorModel, NodeModel nodeModel, List<String> projects) {
         if (projects == null || projects.isEmpty()) {
             return;
         }
         projects.forEach(id -> {
+            String title;
+            String context;
             try {
                 //查询项目运行状态
                 JsonMessage jsonMessage = NodeForward.requestData(nodeModel, NodeUrl.Manage_GetProjectStatus, JsonMessage.class, "id", id);
+                if (jsonMessage.getCode() == HttpStatus.HTTP_OK) {
+                    JSONObject jsonObject = jsonMessage.dataToObj(JSONObject.class);
+                    int pid = jsonObject.getIntValue("pId");
+                    if (pid > 0) {
+                        // 正常运行
+                        return;
+                    } else {
+                        //
+                        if (monitorModel.isAutoRestart()) {
+                            // 执行重启
+                        } else {
+                            title = StrUtil.format("【{}】节点的【{}】项目已经没有运行", nodeModel.getName(), id);
+                            context = "";
+                        }
+                    }
+                } else {
+                    title = StrUtil.format("【{}】节点的状态码异常：{}", nodeModel.getName(), jsonMessage.getCode());
+                    context = jsonMessage.toString();
+                }
             } catch (Exception e) {
                 //
-
+                title = StrUtil.format("【{}】节点的运行状态异常", nodeModel.getName());
+                context = ExceptionUtil.stacktraceToString(e);
             }
+            //
+
         });
     }
 

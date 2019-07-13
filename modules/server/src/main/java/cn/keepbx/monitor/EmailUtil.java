@@ -1,6 +1,7 @@
-package cn.keepbx.util;
+package cn.keepbx.monitor;
 
 import cn.jiangzeyin.common.DefaultSystemLog;
+import cn.keepbx.jpom.model.data.MonitorModel;
 
 import javax.mail.*;
 import javax.mail.internet.InternetAddress;
@@ -14,7 +15,7 @@ import java.util.Properties;
  *
  * @author Arno
  */
-public class EmailUtil {
+public class EmailUtil implements INotify {
 
     /**
      * 默认方式。 获取站点换存中的邮箱账户和授权码
@@ -88,5 +89,10 @@ public class EmailUtil {
         } catch (Exception e) {
             DefaultSystemLog.ERROR().error("邮件发送中出现异常", e);
         }
+    }
+
+    @Override
+    public void send(MonitorModel.Notify notify, String title, String context) {
+
     }
 }
