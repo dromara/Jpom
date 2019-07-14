@@ -61,54 +61,64 @@
     <div class="layui-side layui-bg-black">
         <div class="layui-side-scroll">
             <ul class="layui-nav layui-nav-tree" lay-filter="menu">
-                <li class="layui-nav-item layui-this">
-                    <a href="javascript:;"
-                       data-options="{'id':'welcome', 'title':'节点管理', 'url':'./node/list.html'}">节点管理</a>
-                </li>
-                #if(${showOutGiving})
-                    <li class="layui-nav-item">
-                        <a href="javascript:;"
-                           data-options="{'id':'outgiving', 'title':'节点分发', 'url':'./outgiving/list.html'}">节点分发</a>
+                #foreach($mItem in $menus)
+                    #if($velocityCount==1)
+                        #set($firstItem = $mItem)
+                    #end
+                    <li class="layui-nav-item #if($velocityCount==1) layui-this#end">
+                    ## 判断动态显示菜单
+                        #set($showCur=true)
+                        #if($mItem.dynamic && !$dynamicMenus.get($mItem.dynamic))
+                            #set($showCur=false)
+                        #end
+                        #if($showCur)
+                        ##      判断角色
+                            #if($mItem.role=="ServerManager" && $user.isServerManager())
+                                <a href="javascript:;"
+                                    #if(!$mItem.childs)
+                                   data-options="{'id':'$mItem.id', 'title':'$mItem.title', 'url':'$mItem.url'}"
+                                    #end >$mItem.title</a>
+                            #else
+                                <a href="javascript:;"
+                                    #if(!$mItem.childs)
+                                   data-options="{'id':'$mItem.id', 'title':'$mItem.title', 'url':'$mItem.url'}"
+                                    #end >$mItem.title</a>
+                            #end
+                            #if($mItem.childs)
+                                <dl class="layui-nav-child">
+                                    #foreach($mCItem in $mItem.childs)
+                                        #set($showCur=true)
+                                        #if($mCItem.dynamic && !$dynamicMenus.get($mCItem.dynamic))
+                                            #set($showCur=false)
+                                        #end
+                                        #if($showCur)
+                                            <dd>
+                                                #if($mCItem.role=="ServerManager" && $user.isServerManager())
+                                                    <a href="javascript:;"
+                                                       data-options="{'id':'$mCItem.id', 'title':'$mCItem.title', 'url':'$mCItem.url'}">$mCItem.title</a>
+                                                #else
+                                                    <a href="javascript:;"
+                                                       data-options="{'id':'$mCItem.id', 'title':'$mCItem.title', 'url':'$mCItem.url'}">$mCItem.title</a>
+                                                #end
+                                            </dd>
+                                        #end
+                                    #end
+                                </dl>
+                            #end
+                        #end
                     </li>
                 #end
-                <li class="layui-nav-item">
-                    <a href="javascript:;">监控管理</a>
-                    <dl class="layui-nav-child">
-                        <dd>
-                            <a href="javascript:;"
-                               data-options="{'id':'monitor', 'title':'监控管理', 'url':'./monitor/list.html'}">监控列表</a>
-                        </dd>
-                        <dd>
-                            <a href="javascript:;"
-                               data-options="{'id':'monitorLog', 'title':'监控日志', 'url':'./monitor/list.html'}">监控日志</a>
-                        </dd>
-                        <dd>
-                            <a href="javascript:;"
-                               data-options="{'id':'monitorConfigEmail', 'title':'邮箱配置', 'url':'./monitor/list.html'}">邮箱配置</a>
-                        </dd>
-                    </dl>
-                </li>
-                #if($user.isServerManager())
-                    <li class="layui-nav-item">
-                        <a href="javascript:;"
-                           data-options="{'id':'user', 'title':'用户管理', 'url':'./user/list'}">用户管理</a>
-                    </li>
-                #end
-                <li class="layui-nav-item">
-                    <a href="javascript:;"
-                       data-options="{'id':'user_log', 'title':'操作日志', 'url':'./user/log/list.html'}">操作日志</a>
-                </li>
             </ul>
         </div>
     </div>
     <div class="layui-body" style="overflow: hidden;">
         <div class="layui-tab layui-tab-card" lay-allowClose="true" lay-filter="mainTabs">
             <ul class="layui-tab-title">
-                <li class="layui-this" lay-id="tab_welcome">节点管理</li>
+                <li class="layui-this" lay-id="tab_welcome">$!firstItem.title</li>
             </ul>
             <div class="layui-tab-content">
                 <div class="layui-tab-item layui-show">
-                    <iframe src="./node/list.html" frameborder="0" class="custom-iframe"></iframe>
+                    <iframe src="$!firstItem.url" frameborder="0" class="custom-iframe"></iframe>
                 </div>
             </div>
         </div>
