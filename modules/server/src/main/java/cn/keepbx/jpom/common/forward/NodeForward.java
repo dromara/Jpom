@@ -115,14 +115,48 @@ public class NodeForward {
      * @return T
      */
     public static <T> T requestData(NodeModel nodeModel, NodeUrl nodeUrl, Class<T> tClass, String name, Object value, Object... parameters) {
+        return requestData(nodeModel, nodeUrl, tClass, false, name, value, parameters);
+    }
+
+
+    /**
+     * 普通消息转发,并解析数据
+     *
+     * @param nodeModel 节点
+     * @param nodeUrl   节点的url
+     * @param tClass    要解析的类
+     * @param <T>       泛型
+     * @return T
+     */
+    public static <T> T requestDataBySys(NodeModel nodeModel, NodeUrl nodeUrl, Class<T> tClass, String name, Object value, Object... parameters) {
+        return requestData(nodeModel, nodeUrl, tClass, true, name, value, parameters);
+    }
+
+    /**
+     * 普通消息转发,并解析数据
+     *
+     * @param nodeModel 节点
+     * @param nodeUrl   节点的url
+     * @param tClass    要解析的类
+     * @param <T>       泛型
+     * @param systemReq 是否为系统调度访问
+     * @return T
+     */
+    private static <T> T requestData(NodeModel nodeModel, NodeUrl nodeUrl, Class<T> tClass, boolean systemReq, String name, Object value, Object... parameters) {
         String url = nodeModel.getRealUrl(nodeUrl);
         //
         HttpRequest httpRequest = HttpUtil.createPost(url);
         if (name != null && value != null) {
             httpRequest.form(name, value, parameters);
         }
+        UserModel userModel;
+        if (systemReq) {
+            userModel = null;
+        } else {
+            userModel = BaseServerController.getUserModel();
+        }
         //
-        addUser(httpRequest, nodeModel);
+        addUser(httpRequest, nodeModel, userModel);
         HttpResponse response;
         try {
             //
@@ -211,14 +245,17 @@ public class NodeForward {
      * @param userModel   用户
      */
     public static void addUser(HttpRequest httpRequest, NodeModel nodeModel, UserModel userModel) {
-        Objects.requireNonNull(userModel);
         // 判断开启状态
         if (!nodeModel.isOpenStatus()) {
             throw new JpomRuntimeException(nodeModel.getName() + "节点未启用");
         }
-        httpRequest.header(ConfigBean.JPOM_SERVER_USER_NAME, UserModel.getOptUserName(userModel));
-        httpRequest.header(ConfigBean.JPOM_SERVER_SYSTEM_USER_ROLE, userModel.getUserRole(nodeModel).name());
+        if (userModel != null) {
+            httpRequest.header(ConfigBean.JPOM_SERVER_USER_NAME, UserModel.getOptUserName(userModel));
+            httpRequest.header(ConfigBean.JPOM_SERVER_SYSTEM_USER_ROLE, userModel.getUserRole(nodeModel).name());
+        }
         httpRequest.header(ConfigBean.JPOM_AGENT_AUTHORIZE, nodeModel.getAuthorize(true));
+        //
+        httpRequest.timeout(5000);
     }
 
     /**

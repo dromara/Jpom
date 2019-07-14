@@ -45,6 +45,18 @@ public class MonitorModel extends BaseModel {
      * 监控开启状态
      */
     private boolean status;
+    /**
+     * 报警状态
+     */
+    private boolean alarm;
+
+    public boolean isAlarm() {
+        return alarm;
+    }
+
+    public void setAlarm(boolean alarm) {
+        this.alarm = alarm;
+    }
 
     public List<NodeProject> getProjects() {
         return projects;

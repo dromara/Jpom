@@ -1,27 +1,17 @@
 package cn.keepbx.jpom.service.monitor;
 
-import cn.hutool.cron.CronUtil;
-import cn.hutool.cron.Scheduler;
-import cn.hutool.cron.task.Task;
-import cn.hutool.http.HttpRequest;
-import cn.hutool.http.HttpUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.keepbx.jpom.common.BaseOperService;
-import cn.keepbx.jpom.common.forward.NodeUrl;
-import cn.keepbx.jpom.model.BaseEnum;
 import cn.keepbx.jpom.model.data.MonitorModel;
-import cn.keepbx.jpom.model.data.NodeModel;
-import cn.keepbx.jpom.service.node.NodeService;
-import cn.keepbx.jpom.system.ConfigBean;
-import cn.keepbx.jpom.system.JpomRuntimeException;
 import cn.keepbx.jpom.system.ServerConfigBean;
 import cn.keepbx.monitor.Monitor;
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -122,87 +112,16 @@ public class MonitorService extends BaseOperService<MonitorModel> {
     }
 
     /**
-     * 开启监控
+     * 设置报警状态
      *
-     * @param monitorModel 监控信息
+     * @param id    监控id
+     * @param alarm 状态
      */
-    public void openMonitor(MonitorModel monitorModel) {
-        String schedulerId = monitorModel.getId();
-        CronUtil.remove(schedulerId);
-        CronUtil.setMatchSecond(true);
-        String pattern = String.format("%d * * * * ?", monitorModel.getCycle());
-        //添加定时任务
-        CronUtil.schedule(schedulerId, "0/5 * * * * ?", () -> {
-//            JSONArray projects = monitorModel.getProjects();
-//            for (int i = 0; i < projects.size(); i++) {
-//                JSONObject item = projects.getJSONObject(i);
-//                String nodeId = item.getString("node");
-//                NodeModel nodeModel = nodeService.getItem(nodeId);
-//                JSONArray projectsArray = item.getJSONArray("projects");
-//                for (Object o : projectsArray) {
-//                    String project = (String) o;
-//                    Map<String, Object> map = new HashMap<>(1);
-//                    map.put("id", project);
-//                    //查询项目运行状态
-//                    String url = nodeModel.getRealUrl(NodeUrl.Manage_GetProjectStatus);
-//                    HttpRequest post = HttpUtil.createPost(url).form(map);
-//                    post.header(ConfigBean.JPOM_AGENT_AUTHORIZE, nodeModel.getAuthorize(true));
-//                    String body = post.execute().body();
-//                    JSONObject result = JSONObject.parseObject(body);
-//                    //处理项目状态查询后的结果
-//                    handle(monitorModel, result);
-//                }
-//            }
-        });
-        Scheduler scheduler = CronUtil.getScheduler();
-        if (!scheduler.isStarted()) {
-            CronUtil.start();
+    public synchronized void setAlarm(String id, boolean alarm) {
+        MonitorModel monitorModel = getItem(id);
+        if (monitorModel != null) {
+            monitorModel.setAlarm(alarm);
+            updateItem(monitorModel);
         }
-    }
-
-    /**
-     * 判断监控是否运行
-     *
-     * @param id 监控id
-     * @return true -运行，false-停止
-     */
-    public boolean checkMonitorRunning(String id) {
-        Scheduler scheduler = CronUtil.getScheduler();
-        Task task = scheduler.getTask(id);
-        return task != null;
-    }
-
-    /**
-     * 处理项目状态查询后的结果
-     *
-     * @param monitorModel 监控信息
-     * @param result       结果
-     */
-    private void handle(MonitorModel monitorModel, JSONObject result) {
-        int code = result.getIntValue("code");
-        if (code != 200) {
-            String msg = result.getString("msg");
-            DefaultSystemLog.ERROR().error("查询项目状态异常：" + msg);
-            throw new JpomRuntimeException("查询项目状态异常：" + msg);
-        }
-        JSONObject data = result.getJSONObject("data");
-        int pId = data.getIntValue("pId");
-        if (pId != 0) {
-            return;
-        }
-//        JSONArray notify = monitorModel.getNotify();
-//        for (int i = 0; i < notify.size(); i++) {
-//            JSONObject jsonObject = notify.getJSONObject(i);
-//            int style = jsonObject.getIntValue("style");
-//            String value = jsonObject.getString("value");
-//            BaseEnum anEnum = BaseEnum.getEnum(MonitorModel.NotifyType.class, style);
-//            if (anEnum == MonitorModel.NotifyType.dingding) {
-////                DingTalkUtil.sendMsg(value, "", "");
-////            } else if (anEnum == MonitorModel.NotifyType.sms) {
-//
-//            } else if (anEnum == MonitorModel.NotifyType.mail) {
-////                EmailUtil.sendHtmlToEmail("Jpom监控警报", value, "Jpom项目监控警报", "");
-//            }
-//        }
     }
 }

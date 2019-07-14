@@ -13,6 +13,9 @@ import cn.keepbx.jpom.model.BaseJsonModel;
  * @date 2019/4/19
  */
 public class UserOperateLogV1 extends BaseJsonModel {
+    /**
+     * 表名
+     */
     public static final String TABLE_NAME = UserOperateLogV1.class.getSimpleName().toUpperCase();
     /**
      * 操作ip

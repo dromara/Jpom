@@ -72,8 +72,21 @@
                     </li>
                 #end
                 <li class="layui-nav-item">
-                    <a href="javascript:;"
-                       data-options="{'id':'monitor', 'title':'监控管理', 'url':'./monitor/list.html'}">监控管理</a>
+                    <a href="javascript:;">监控管理</a>
+                    <dl class="layui-nav-child">
+                        <dd>
+                            <a href="javascript:;"
+                               data-options="{'id':'monitor', 'title':'监控管理', 'url':'./monitor/list.html'}">监控列表</a>
+                        </dd>
+                        <dd>
+                            <a href="javascript:;"
+                               data-options="{'id':'monitorLog', 'title':'监控日志', 'url':'./monitor/list.html'}">监控日志</a>
+                        </dd>
+                        <dd>
+                            <a href="javascript:;"
+                               data-options="{'id':'monitorConfigEmail', 'title':'邮箱配置', 'url':'./monitor/list.html'}">邮箱配置</a>
+                        </dd>
+                    </dl>
                 </li>
                 #if($user.isServerManager())
                     <li class="layui-nav-item">
@@ -109,6 +122,10 @@
         // 左侧导航条事件
         element.on('nav(menu)', function (data) {
             var dataJSON = $(data.context).attr("data-options");
+            console.log(dataJSON);
+            if (!dataJSON) {
+                return;
+            }
             var options;
             try {
                 options = JSON.parse(dataJSON);

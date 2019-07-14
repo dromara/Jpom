@@ -161,7 +161,7 @@ public class OperateLogController implements AopLogInterface {
         Db db = Db.use();
         db.setWrapper((Character) null);
         try {
-            Entity entity = new Entity(UserOperateLogV1.class.getSimpleName().toUpperCase());
+            Entity entity = new Entity(UserOperateLogV1.TABLE_NAME);
             entity.parseBean(userOperateLogV1);
             db.insert(entity);
         } catch (SQLException e) {
@@ -183,7 +183,7 @@ public class OperateLogController implements AopLogInterface {
         Db db = Db.use();
         db.setWrapper((Character) null);
         try {
-            Entity entity = new Entity(UserOperateLogV1.class.getSimpleName().toUpperCase());
+            Entity entity = new Entity(UserOperateLogV1.TABLE_NAME);
             entity.set("resultMsg", val);
             try {
                 JsonMessage jsonMessage = JSONObject.parseObject(val, JsonMessage.class);
@@ -191,7 +191,7 @@ public class OperateLogController implements AopLogInterface {
             } catch (Exception ignored) {
             }
             //
-            Entity where = new Entity(UserOperateLogV1.class.getSimpleName().toUpperCase());
+            Entity where = new Entity(UserOperateLogV1.TABLE_NAME);
             where.set("reqId", reqId);
             db.update(entity, where);
         } catch (SQLException e) {

@@ -88,10 +88,6 @@ public class MonitorListController extends BaseServerController {
         if (StrUtil.isEmpty(id)) {
             return JsonMessage.getString(400, "删除失败");
         }
-        boolean b = monitorService.checkMonitorRunning(id);
-        if (b) {
-            return JsonMessage.getString(400, "不能删除正在运行的监控");
-        }
         monitorService.deleteItem(id);
         return JsonMessage.getString(200, "删除成功");
     }

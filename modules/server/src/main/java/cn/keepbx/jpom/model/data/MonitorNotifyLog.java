@@ -9,7 +9,9 @@ import cn.keepbx.jpom.model.BaseJsonModel;
  * @date 2019/7/13
  */
 public class MonitorNotifyLog extends BaseJsonModel {
-
+    /**
+     * 表名
+     */
     public static final String TABLE_NAME = MonitorNotifyLog.class.getSimpleName().toUpperCase();
     /**
      *
@@ -31,6 +33,30 @@ public class MonitorNotifyLog extends BaseJsonModel {
      * 通知方式
      */
     private int notifyStyle;
+    /**
+     * 通知发送状态
+     */
+    private boolean notifyStatus;
+    /**
+     * 监控id
+     */
+    private String monitorId;
+
+    public boolean isNotifyStatus() {
+        return notifyStatus;
+    }
+
+    public void setNotifyStatus(boolean notifyStatus) {
+        this.notifyStatus = notifyStatus;
+    }
+
+    public String getMonitorId() {
+        return monitorId;
+    }
+
+    public void setMonitorId(String monitorId) {
+        this.monitorId = monitorId;
+    }
 
     public int getNotifyStyle() {
         return notifyStyle;

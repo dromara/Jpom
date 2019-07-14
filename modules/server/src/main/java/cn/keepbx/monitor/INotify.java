@@ -13,9 +13,9 @@ public interface INotify {
     /**
      * 发送通知
      *
-     * @param notify
-     * @param title
-     * @param context
+     * @param notify  通知方式
+     * @param title   标题
+     * @param context 内容
      */
     void send(MonitorModel.Notify notify, String title, String context);
 }
