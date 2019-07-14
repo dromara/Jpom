@@ -17,8 +17,8 @@ public class DingTalkUtil implements INotify {
     /**
      * 发送钉钉群自定义机器人消息
      *
-     * @param notify  webhook地址
-     * @param title   被@人的手机号
+     * @param notify  通知对象
+     * @param title   描述标签
      * @param context 消息内容
      */
     @Override
@@ -27,19 +27,12 @@ public class DingTalkUtil implements INotify {
         JSONObject param = new JSONObject();
         //消息内容
         text.put("content", title + "\n" + context);
-//        // 被@人的手机号
-//        if (StrUtil.isNotEmpty(phone)) {
-//            JSONArray atMobiles = new JSONArray();
-//            atMobiles.add(phone);
-//            JSONObject at = new JSONObject();
-//            at.put("atMobiles", atMobiles);
-//            param.put("at", at);
-//        }
         param.put("msgtype", "text");
         param.put("text", text);
-        HttpRequest request = HttpUtil.createPost(notify.getValue()).contentType(MediaType.APPLICATION_JSON_UTF8_VALUE).body(param.toJSONString());
-        HttpResponse execute = request.execute();
-        String body = execute.body();
-        System.out.println(body);
+        HttpRequest request = HttpUtil.
+                createPost(notify.getValue()).
+                contentType(MediaType.APPLICATION_JSON_UTF8_VALUE).
+                body(param.toJSONString());
+        request.execute();
     }
 }

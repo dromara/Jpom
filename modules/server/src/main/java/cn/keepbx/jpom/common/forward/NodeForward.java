@@ -40,11 +40,42 @@ public class NodeForward {
      * @param nodeUrl   节点的url
      * @return JSON
      */
-    public static JsonMessage request(NodeModel nodeModel, HttpServletRequest request, NodeUrl nodeUrl, Object... val) {
+    public static JsonMessage request(NodeModel nodeModel, HttpServletRequest request, NodeUrl nodeUrl) {
+        return request(nodeModel, request, nodeUrl, false, null, null);
+    }
+
+    /**
+     * 普通消息转发
+     *
+     * @param nodeModel 节点
+     * @param nodeUrl   节点的url
+     * @return JSON
+     */
+    public static JsonMessage requestBySys(NodeModel nodeModel, NodeUrl nodeUrl, String pName, Object pVal, Object... val) {
+        return request(nodeModel, null, nodeUrl, true, pName, pVal, val);
+    }
+
+
+    /**
+     * 普通消息转发
+     *
+     * @param nodeModel 节点
+     * @param request   请求
+     * @param nodeUrl   节点的url
+     * @return JSON
+     */
+    private static JsonMessage request(NodeModel nodeModel, HttpServletRequest request, NodeUrl nodeUrl, boolean systemReq, String pName, Object pVal, Object... val) {
         String url = nodeModel.getRealUrl(nodeUrl);
         HttpRequest httpRequest = HttpUtil.createPost(url);
         //
-        addUser(httpRequest, nodeModel);
+        UserModel userModel;
+        if (systemReq) {
+            userModel = null;
+        } else {
+            userModel = BaseServerController.getUserModel();
+        }
+        //
+        addUser(httpRequest, nodeModel, userModel);
         Map params = null;
         if (request != null) {
             params = request.getParameterMap();
@@ -60,13 +91,7 @@ public class NodeForward {
                 }
             }
         }
-        if (val != null) {
-            String name;
-            for (int i = 0; i < val.length; i += 2) {
-                name = val[i].toString();
-                httpRequest.form(name, val[i + 1]);
-            }
-        }
+        httpRequest.form(pName, pVal, val);
         HttpResponse response;
         try {
             response = httpRequest
@@ -115,48 +140,14 @@ public class NodeForward {
      * @return T
      */
     public static <T> T requestData(NodeModel nodeModel, NodeUrl nodeUrl, Class<T> tClass, String name, Object value, Object... parameters) {
-        return requestData(nodeModel, nodeUrl, tClass, false, name, value, parameters);
-    }
-
-
-    /**
-     * 普通消息转发,并解析数据
-     *
-     * @param nodeModel 节点
-     * @param nodeUrl   节点的url
-     * @param tClass    要解析的类
-     * @param <T>       泛型
-     * @return T
-     */
-    public static <T> T requestDataBySys(NodeModel nodeModel, NodeUrl nodeUrl, Class<T> tClass, String name, Object value, Object... parameters) {
-        return requestData(nodeModel, nodeUrl, tClass, true, name, value, parameters);
-    }
-
-    /**
-     * 普通消息转发,并解析数据
-     *
-     * @param nodeModel 节点
-     * @param nodeUrl   节点的url
-     * @param tClass    要解析的类
-     * @param <T>       泛型
-     * @param systemReq 是否为系统调度访问
-     * @return T
-     */
-    private static <T> T requestData(NodeModel nodeModel, NodeUrl nodeUrl, Class<T> tClass, boolean systemReq, String name, Object value, Object... parameters) {
         String url = nodeModel.getRealUrl(nodeUrl);
         //
         HttpRequest httpRequest = HttpUtil.createPost(url);
         if (name != null && value != null) {
             httpRequest.form(name, value, parameters);
         }
-        UserModel userModel;
-        if (systemReq) {
-            userModel = null;
-        } else {
-            userModel = BaseServerController.getUserModel();
-        }
         //
-        addUser(httpRequest, nodeModel, userModel);
+        addUser(httpRequest, nodeModel);
         HttpResponse response;
         try {
             //
@@ -169,6 +160,7 @@ public class NodeForward {
         JsonMessage jsonMessage = parseBody(response);
         return toObj(jsonMessage, tClass);
     }
+
 
     /**
      * 上传文件消息转发

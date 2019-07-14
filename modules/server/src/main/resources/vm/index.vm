@@ -122,7 +122,6 @@
         // 左侧导航条事件
         element.on('nav(menu)', function (data) {
             var dataJSON = $(data.context).attr("data-options");
-            console.log(dataJSON);
             if (!dataJSON) {
                 return;
             }

@@ -47,8 +47,12 @@
     </a>
 </script>
 <script type="text/html" id="monitor_restart">
-    <input type="checkbox" disabled name="autoRestart" {{# if(d.autoRestart){ }} checked
-           {{# } }} lay-skin="switch" lay-text="是|否">
+    <input type="checkbox" name="autoRestart" {{# if(d.autoRestart){ }} checked {{# } }} lay-skin="switch"
+           lay-text="是|否">
+</script>
+<script type="text/html" id="monitor_alarm">
+    <input type="checkbox" disabled name="alarm" {{# if(d.alarm){ }} checked {{# } }} lay-skin="switch"
+           lay-text="报警中|未报警">
 </script>
 <script type="text/javascript">
     function loadSuccess() {
@@ -60,6 +64,7 @@
                 {field: 'name', title: '名称'},
                 {field: 'status', templet: "#monitor_status", title: '开启状态'},
                 {field: 'autoRestart', templet: "#monitor_restart", title: '自动重启监控'},
+                {field: 'alarm', templet: "#monitor_alarm", title: '报警状态'},
                 {field: 'parent', title: '创建人'},
                 {
                     field: 'modifyTime', title: '修改时间', templet: function (d) {

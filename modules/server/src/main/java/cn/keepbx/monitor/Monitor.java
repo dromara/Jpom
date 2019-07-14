@@ -111,27 +111,38 @@ public class Monitor implements Task {
             return;
         }
         projects.forEach(id -> {
+            // 获取上次状态
+            boolean pre = getPreStatus(nodeModel.getId(), id);
             String title = null;
             String context = null;
             // 当前状态
             boolean runStatus = false;
             try {
                 //查询项目运行状态
-                JsonMessage jsonMessage = NodeForward.requestDataBySys(nodeModel, NodeUrl.Manage_GetProjectStatus, JsonMessage.class, "id", id);
+                JsonMessage jsonMessage = NodeForward.requestBySys(nodeModel, NodeUrl.Manage_GetProjectStatus, "id", id);
                 if (jsonMessage.getCode() == HttpStatus.HTTP_OK) {
                     JSONObject jsonObject = jsonMessage.dataToObj(JSONObject.class);
                     int pid = jsonObject.getIntValue("pId");
                     if (pid > 0) {
                         // 正常运行
                         runStatus = true;
+                        if (!pre) {
+                            // 上次是异常状态
+                            title = StrUtil.format("【{}】节点的【{}】项目已经恢复正常运行", nodeModel.getName(), id);
+                            context = "";
+                        }
                     } else {
                         //
                         if (monitorModel.isAutoRestart()) {
                             // 执行重启
                             try {
-                                JsonMessage reJson = NodeForward.requestDataBySys(nodeModel, NodeUrl.Manage_Restart, JsonMessage.class, "id", id);
+                                JsonMessage reJson = NodeForward.requestBySys(nodeModel, NodeUrl.Manage_Restart, "id", id);
                                 title = StrUtil.format("【{}】节点的【{}】项目已经停止，已经执行重启操作", nodeModel.getName(), id);
                                 context = reJson.toString();
+                                if (reJson.getCode() == HttpStatus.HTTP_OK) {
+                                    // 重启成功
+                                    runStatus = true;
+                                }
                             } catch (Exception e) {
                                 DefaultSystemLog.ERROR().error("执行重启操作", e);
                                 title = StrUtil.format("【{}】节点的【{}】项目已经停止，重启操作异常", nodeModel.getName(), id);
@@ -152,18 +163,11 @@ public class Monitor implements Task {
                 title = StrUtil.format("【{}】节点的运行状态异常", nodeModel.getName());
                 context = ExceptionUtil.stacktraceToString(e);
             }
-            //
-            boolean pre = getPre(nodeModel.getId(), id);
-            MonitorNotifyLog monitorNotifyLog = new MonitorNotifyLog();
-            if (!pre) {
-                if (runStatus) {
-                    title = StrUtil.format("【{}】节点的【{}】项目已经恢复正常运行", nodeModel.getName(), id);
-                    context = "";
-                } else {
-                    // 上一次也是异常，并且当前也是异常
-                    return;
-                }
+            if (!pre && !runStatus) {
+                // 上一次也是异常，并且当前也是异常
+                return;
             }
+            MonitorNotifyLog monitorNotifyLog = new MonitorNotifyLog();
             monitorNotifyLog.setStatus(runStatus);
             monitorNotifyLog.setTitle(title);
             monitorNotifyLog.setContent(context);
@@ -182,24 +186,29 @@ public class Monitor implements Task {
      *
      * @param nodeId    节点id
      * @param projectId 项目id
-     * @return true 为正常状态
+     * @return true 为正常状态,false 异常状态
      */
-    private boolean getPre(String nodeId, String projectId) {
+    private boolean getPreStatus(String nodeId, String projectId) {
         // 检查是否已经触发通知
         Entity entity = Entity.create(MonitorNotifyLog.TABLE_NAME);
         entity.set("nodeId", nodeId);
         entity.set("projectId", projectId);
-        entity.set("status", false);
         Page page = new Page(0, 1);
         page.addOrder(new Order("createTime", Direction.DESC));
         PageResult<Entity> pageResult;
         try {
             pageResult = Db.use().setWrapper((Character) null).page(entity, page);
-            return pageResult.isEmpty();
+            if (pageResult.isEmpty()) {
+                return false;
+            }
+            Entity entity1 = pageResult.get(0);
+            Byte byte1 = entity1.get("STATUS", (byte) 0);
+            // 0异常状态
+            return byte1.intValue() != 0;
         } catch (SQLException e) {
             DefaultSystemLog.ERROR().error("数据库查询异常", e);
             // 如果异常默认上次是正常状态
-            return true;
+            return false;
         }
     }
 
