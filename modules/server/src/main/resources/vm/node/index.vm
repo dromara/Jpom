@@ -101,18 +101,7 @@
 <script type="text/javascript">
     function loadSuccess() {
         #if($installed)
-            // 左侧导航条事件
-            element.on('nav(menu)', function (data) {
-                var dataJSON = $(data.context).attr("data-options");
-                var options;
-                try {
-                    options = JSON.parse(dataJSON);
-                } catch (e) {
-                    options = eval('(' + dataJSON + ')');
-                }
-
-                tabChange(options);
-            });
+           
         #else
             layui.use(['carousel'], function () {
                 var carousel = layui.carousel;

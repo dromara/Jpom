@@ -12,31 +12,24 @@
                         #set($showCur=false)
                     #end
                     #if($showCur)
-                    ##      判断角色
+                        #set($notRole=false)
+                    ##  判断角色
                         #if($mItem.role=="ServerManager" && $user.isServerManager())
-                            <a href="javascript:;"
-                                #if(!$mItem.childs)
-                               data-options="{'id':'$mItem.id', 'title':'$mItem.title', 'url':'$mItem.url'}"
-                                #end >$mItem.title</a>
+                            <a href="javascript:;" #if(!$mItem.childs)data-options=$mItem#end>$mItem.title</a>
                         #elseif($mItem.role=="System" && $user.isSystemUser())
                         ## 系统管理员
-                            <a href="javascript:;"
-                                #if(!$mItem.childs)
-                               data-options="{'id':'$mItem.id', 'title':'$mItem.title', 'url':'$mItem.url'}"
-                                #end >$mItem.title</a>
+                            <a href="javascript:;" #if(!$mItem.childs)data-options=$mItem#end>$mItem.title</a>
                         #elseif($mItem.role=="NodeManage" && $user.isManage($node.id))
                         ## 节点管理员
-                            <a href="javascript:;"
-                                #if(!$mItem.childs)
-                               data-options="{'id':'$mItem.id', 'title':'$mItem.title', 'url':'$mItem.url'}"
-                                #end >$mItem.title</a>
+                            <a href="javascript:;" #if(!$mItem.childs)data-options=$mItem#end>$mItem.title</a>
+                        #elseif(!$mItem.role)
+                        ## 没有角色
+                            <a href="javascript:;" #if(!$mItem.childs)data-options=$mItem#end>$mItem.title</a>
                         #else
-                            <a href="javascript:;"
-                                #if(!$mItem.childs)
-                               data-options="{'id':'$mItem.id', 'title':'$mItem.title', 'url':'$mItem.url'}"
-                                #end >$mItem.title</a>
+                        ## 没有权限
+                            #set($notRole=true)
                         #end
-                        #if($mItem.childs)
+                        #if($mItem.childs && !$notRole)
                             <dl class="layui-nav-child">
                                 #foreach($mCItem in $mItem.childs)
                                     #set($showCur=true)
@@ -46,11 +39,13 @@
                                     #if($showCur)
                                         <dd>
                                             #if($mCItem.role=="ServerManager" && $user.isServerManager())
-                                                <a href="javascript:;"
-                                                   data-options="{'id':'$mCItem.id', 'title':'$mCItem.title', 'url':'$mCItem.url'}">$mCItem.title</a>
-                                            #else
-                                                <a href="javascript:;"
-                                                   data-options="{'id':'$mCItem.id', 'title':'$mCItem.title', 'url':'$mCItem.url'}">$mCItem.title</a>
+                                                <a href="javascript:;" data-options=$mCItem>$mCItem.title</a>
+                                            #elseif($mCItem.role=="System" && $user.isSystemUser())
+                                                <a href="javascript:;" data-options=$mCItem>$mCItem.title</a>
+                                            #elseif($mCItem.role=="NodeManage" && $user.isManage($node.id))
+                                                <a href="javascript:;" data-options=$mCItem>$mCItem.title</a>
+                                            #elseif(!$mCItem.role)
+                                                <a href="javascript:;" data-options=$mCItem>$mCItem.title</a>
                                             #end
                                         </dd>
                                     #end
@@ -66,13 +61,29 @@
 <div class="layui-body" style="overflow: hidden;">
     <div class="layui-tab layui-tab-card" lay-allowClose="true" lay-filter="mainTabs">
         <ul class="layui-tab-title">
-            <li class="layui-this" lay-id="tab_welcome">$!firstItem.title</li>
+
         </ul>
         <div class="layui-tab-content">
-            <div class="layui-tab-item layui-show">
-                <iframe src="$!firstItem.url#if($node)?nodeId=$!node.id#end" frameborder="0"
-                        class="custom-iframe"></iframe>
-            </div>
         </div>
     </div>
 </div>
+<script>
+    asyncFn.push(function () {
+        tabChange($!firstItem);
+
+        // 左侧导航条事件
+        element.on('nav(menu)', function (data) {
+            var dataJSON = $(data.context).attr("data-options");
+            if (!dataJSON) {
+                return;
+            }
+            var options;
+            try {
+                options = JSON.parse(dataJSON);
+            } catch (e) {
+                options = eval('(' + dataJSON + ')');
+            }
+            tabChange(options);
+        });
+    });
+</script>

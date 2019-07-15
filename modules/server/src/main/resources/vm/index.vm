@@ -62,23 +62,4 @@
 </div>
 
 </body>
-
-<script type="text/javascript">
-    function loadSuccess() {
-        // 左侧导航条事件
-        element.on('nav(menu)', function (data) {
-            var dataJSON = $(data.context).attr("data-options");
-            if (!dataJSON) {
-                return;
-            }
-            var options;
-            try {
-                options = JSON.parse(dataJSON);
-            } catch (e) {
-                options = eval('(' + dataJSON + ')');
-            }
-            tabChange(options);
-        });
-    }
-</script>
 </html>

@@ -14,6 +14,7 @@ import sun.jvmstat.monitor.VmIdentifier;
 
 import java.io.File;
 import java.net.URISyntaxException;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -69,6 +70,9 @@ public class CheckPath {
             // 不在控制台记录请求日志信息
             DefaultSystemLog.setLogCallback((type, log) -> {
                 //
+                if (type == DefaultSystemLog.LogType.REQUEST_ERROR) {
+                    DefaultSystemLog.LOG(DefaultSystemLog.LogType.REQUEST).info(Arrays.toString(log));
+                }
             });
         }
     }

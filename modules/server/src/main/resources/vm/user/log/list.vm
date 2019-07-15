@@ -126,7 +126,7 @@
             }
         });
 
-        layui.use(['laytpl'], function () {
+        layui.use(['laytpl', 'laydate'], function () {
             var laytpl = layui.laytpl;
             var showBox = document.getElementById('showBox').innerHTML;
             // 表格工具条事件
@@ -144,8 +144,6 @@
 
                 }
             });
-        });
-        layui.use('laydate', function () {
             laydate = layui.laydate;
             renderDate();
         });
@@ -164,6 +162,9 @@
     }
 
     function renderDate() {
+        if (!laydate) {
+            return;
+        }
         var now = new Date().getTime();
         laydate.render({
             elem: '#time',
