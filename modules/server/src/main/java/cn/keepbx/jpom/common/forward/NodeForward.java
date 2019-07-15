@@ -22,7 +22,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Map;
-import java.util.Objects;
 
 /**
  * 节点请求转发
@@ -41,7 +40,18 @@ public class NodeForward {
      * @return JSON
      */
     public static JsonMessage request(NodeModel nodeModel, HttpServletRequest request, NodeUrl nodeUrl) {
-        return request(nodeModel, request, nodeUrl, false, null, null);
+        return request(nodeModel, request, nodeUrl, true, null, null, null, null);
+    }
+
+    /**
+     * 普通消息转发
+     *
+     * @param nodeModel 节点
+     * @param nodeUrl   节点的url
+     * @return JSON
+     */
+    public static JsonMessage request(NodeModel nodeModel, NodeUrl nodeUrl, UserModel userModel, JSONObject jsonObject) {
+        return request(nodeModel, null, nodeUrl, true, userModel, jsonObject, null, null);
     }
 
     /**
@@ -52,9 +62,8 @@ public class NodeForward {
      * @return JSON
      */
     public static JsonMessage requestBySys(NodeModel nodeModel, NodeUrl nodeUrl, String pName, Object pVal, Object... val) {
-        return request(nodeModel, null, nodeUrl, true, pName, pVal, val);
+        return request(nodeModel, null, nodeUrl, false, null, null, pName, pVal, val);
     }
-
 
     /**
      * 普通消息转发
@@ -64,18 +73,25 @@ public class NodeForward {
      * @param nodeUrl   节点的url
      * @return JSON
      */
-    private static JsonMessage request(NodeModel nodeModel, HttpServletRequest request, NodeUrl nodeUrl, boolean systemReq, String pName, Object pVal, Object... val) {
+    private static JsonMessage request(NodeModel nodeModel,
+                                       HttpServletRequest request,
+                                       NodeUrl nodeUrl,
+                                       boolean mustUser,
+                                       UserModel userModel,
+                                       JSONObject jsonData,
+                                       String pName,
+                                       Object pVal,
+                                       Object... val) {
         String url = nodeModel.getRealUrl(nodeUrl);
         HttpRequest httpRequest = HttpUtil.createPost(url);
         //
-        UserModel userModel;
-        if (systemReq) {
-            userModel = null;
-        } else {
-            userModel = BaseServerController.getUserModel();
+        if (mustUser) {
+            if (userModel == null) {
+                userModel = BaseServerController.getUserModel();
+            }
         }
         //
-        addUser(httpRequest, nodeModel, userModel);
+        addUser(httpRequest, nodeModel, nodeUrl, userModel);
         Map params = null;
         if (request != null) {
             params = request.getParameterMap();
@@ -92,6 +108,10 @@ public class NodeForward {
             }
         }
         httpRequest.form(pName, pVal, val);
+        //
+        if (jsonData != null) {
+            httpRequest.form(jsonData);
+        }
         HttpResponse response;
         try {
             response = httpRequest
@@ -147,7 +167,7 @@ public class NodeForward {
             httpRequest.form(name, value, parameters);
         }
         //
-        addUser(httpRequest, nodeModel);
+        addUser(httpRequest, nodeModel, nodeUrl);
         HttpResponse response;
         try {
             //
@@ -173,7 +193,7 @@ public class NodeForward {
     public static JsonMessage requestMultipart(NodeModel nodeModel, MultipartHttpServletRequest request, NodeUrl nodeUrl) {
         String url = nodeModel.getRealUrl(nodeUrl);
         HttpRequest httpRequest = HttpUtil.createPost(url);
-        addUser(httpRequest, nodeModel);
+        addUser(httpRequest, nodeModel, nodeUrl);
         //
         Map params = ServletUtil.getParams(request);
         httpRequest.form(params);
@@ -206,7 +226,7 @@ public class NodeForward {
     public static void requestDownload(NodeModel nodeModel, HttpServletRequest request, HttpServletResponse response, NodeUrl nodeUrl) {
         String url = nodeModel.getRealUrl(nodeUrl);
         HttpRequest httpRequest = HttpUtil.createGet(url);
-        addUser(httpRequest, nodeModel);
+        addUser(httpRequest, nodeModel, nodeUrl);
         //
         Map params = ServletUtil.getParams(request);
         httpRequest.form(params);
@@ -224,9 +244,9 @@ public class NodeForward {
         ServletUtil.write(response, response1.bodyStream());
     }
 
-    private static void addUser(HttpRequest httpRequest, NodeModel nodeModel) {
+    private static void addUser(HttpRequest httpRequest, NodeModel nodeModel, NodeUrl nodeUrl) {
         UserModel userModel = BaseServerController.getUserModel();
-        addUser(httpRequest, nodeModel, userModel);
+        addUser(httpRequest, nodeModel, nodeUrl, userModel);
     }
 
     /**
@@ -236,7 +256,7 @@ public class NodeForward {
      * @param nodeModel   节点
      * @param userModel   用户
      */
-    public static void addUser(HttpRequest httpRequest, NodeModel nodeModel, UserModel userModel) {
+    private static void addUser(HttpRequest httpRequest, NodeModel nodeModel, NodeUrl nodeUrl, UserModel userModel) {
         // 判断开启状态
         if (!nodeModel.isOpenStatus()) {
             throw new JpomRuntimeException(nodeModel.getName() + "节点未启用");
@@ -247,7 +267,10 @@ public class NodeForward {
         }
         httpRequest.header(ConfigBean.JPOM_AGENT_AUTHORIZE, nodeModel.getAuthorize(true));
         //
-        httpRequest.timeout(5000);
+        if (nodeUrl.getTimeOut() != -1) {
+            //
+            httpRequest.timeout(nodeModel.getTimeOut());
+        }
     }
 
     /**
@@ -282,7 +305,7 @@ public class NodeForward {
         return toJsonMessage(body);
     }
 
-    public static JsonMessage toJsonMessage(String body) {
+    private static JsonMessage toJsonMessage(String body) {
         if (StrUtil.isEmpty(body)) {
             throw new AgentException("agent 端响应内容为空");
         }

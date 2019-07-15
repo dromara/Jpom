@@ -17,7 +17,7 @@ public enum NodeUrl {
     GetTop("/getTop"),
     Status("/status"),
 
-    ProcessList("/processList"),
+    ProcessList("/processList", -1),
     /**
      * socket 连接  ，第一节项目id 第二节用户信息
      */
@@ -132,9 +132,19 @@ public enum NodeUrl {
      * 相对请求地址
      */
     private String url;
+    private int timeOut;
 
     public String getUrl() {
         return url;
+    }
+
+    public int getTimeOut() {
+        return timeOut;
+    }
+
+    NodeUrl(String url, int timeOut) {
+        this.url = url;
+        this.timeOut = timeOut;
     }
 
     NodeUrl(String url) {

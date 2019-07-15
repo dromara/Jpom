@@ -245,18 +245,20 @@ public class OutGivingProjectEditController extends BaseServerController {
      * @return json
      */
     private JsonMessage deleteNodeProject(NodeModel nodeModel, UserModel userModel, String project) {
-        // 发起预检查数据
-        String url = nodeModel.getRealUrl(NodeUrl.Manage_DeleteProject);
-        HttpRequest request = HttpUtil.createPost(url);
-        // 授权信息
-        NodeForward.addUser(request, nodeModel, userModel);
         JSONObject data = new JSONObject();
         data.put("id", project);
-        request.form(data);
-        //
-        String body = request.execute()
-                .body();
-        return NodeForward.toJsonMessage(body);
+        return NodeForward.request(nodeModel, NodeUrl.Manage_DeleteProject, userModel, data);
+//        // 发起预检查数据
+//        String url = nodeModel.getRealUrl(NodeUrl.Manage_DeleteProject);
+//        HttpRequest request = HttpUtil.createPost(url);
+//        // 授权信息
+//        NodeForward.addUser(request, nodeModel, userModel);
+
+//        request.form(data);
+//        //
+//        String body = request.execute()
+//                .body();
+//        return NodeForward.toJsonMessage(body);
     }
 
     /**
@@ -414,14 +416,6 @@ public class OutGivingProjectEditController extends BaseServerController {
         }
         data.put("outGivingProject", true);
         // 发起预检查数据
-        String url = nodeModel.getRealUrl(NodeUrl.Manage_SaveProject);
-        HttpRequest request = HttpUtil.createPost(url);
-        // 授权信息
-        NodeForward.addUser(request, nodeModel, userModel);
-        request.form(data);
-        //
-        String body = request.execute()
-                .body();
-        return NodeForward.toJsonMessage(body);
+        return NodeForward.request(nodeModel, NodeUrl.Manage_SaveProject, userModel, data);
     }
 }

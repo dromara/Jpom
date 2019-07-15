@@ -1,0 +1,78 @@
+<div class="layui-side layui-bg-black">
+    <div class="layui-side-scroll">
+        <ul class="layui-nav layui-nav-tree" lay-filter="menu">
+            #foreach($mItem in $menus)
+                #if($velocityCount==1)
+                    #set($firstItem = $mItem)
+                #end
+                <li class="layui-nav-item #if($velocityCount==1) layui-this#end">
+                ## 判断动态显示菜单
+                    #set($showCur=true)
+                    #if($mItem.dynamic && !$dynamicMenus.get($mItem.dynamic))
+                        #set($showCur=false)
+                    #end
+                    #if($showCur)
+                    ##      判断角色
+                        #if($mItem.role=="ServerManager" && $user.isServerManager())
+                            <a href="javascript:;"
+                                #if(!$mItem.childs)
+                               data-options="{'id':'$mItem.id', 'title':'$mItem.title', 'url':'$mItem.url'}"
+                                #end >$mItem.title</a>
+                        #elseif($mItem.role=="System" && $user.isSystemUser())
+                        ## 系统管理员
+                            <a href="javascript:;"
+                                #if(!$mItem.childs)
+                               data-options="{'id':'$mItem.id', 'title':'$mItem.title', 'url':'$mItem.url'}"
+                                #end >$mItem.title</a>
+                        #elseif($mItem.role=="NodeManage" && $user.isManage($node.id))
+                        ## 节点管理员
+                            <a href="javascript:;"
+                                #if(!$mItem.childs)
+                               data-options="{'id':'$mItem.id', 'title':'$mItem.title', 'url':'$mItem.url'}"
+                                #end >$mItem.title</a>
+                        #else
+                            <a href="javascript:;"
+                                #if(!$mItem.childs)
+                               data-options="{'id':'$mItem.id', 'title':'$mItem.title', 'url':'$mItem.url'}"
+                                #end >$mItem.title</a>
+                        #end
+                        #if($mItem.childs)
+                            <dl class="layui-nav-child">
+                                #foreach($mCItem in $mItem.childs)
+                                    #set($showCur=true)
+                                    #if($mCItem.dynamic && !$dynamicMenus.get($mCItem.dynamic))
+                                        #set($showCur=false)
+                                    #end
+                                    #if($showCur)
+                                        <dd>
+                                            #if($mCItem.role=="ServerManager" && $user.isServerManager())
+                                                <a href="javascript:;"
+                                                   data-options="{'id':'$mCItem.id', 'title':'$mCItem.title', 'url':'$mCItem.url'}">$mCItem.title</a>
+                                            #else
+                                                <a href="javascript:;"
+                                                   data-options="{'id':'$mCItem.id', 'title':'$mCItem.title', 'url':'$mCItem.url'}">$mCItem.title</a>
+                                            #end
+                                        </dd>
+                                    #end
+                                #end
+                            </dl>
+                        #end
+                    #end
+                </li>
+            #end
+        </ul>
+    </div>
+</div>
+<div class="layui-body" style="overflow: hidden;">
+    <div class="layui-tab layui-tab-card" lay-allowClose="true" lay-filter="mainTabs">
+        <ul class="layui-tab-title">
+            <li class="layui-this" lay-id="tab_welcome">$!firstItem.title</li>
+        </ul>
+        <div class="layui-tab-content">
+            <div class="layui-tab-item layui-show">
+                <iframe src="$!firstItem.url#if($node)?nodeId=$!node.id#end" frameborder="0"
+                        class="custom-iframe"></iframe>
+            </div>
+        </div>
+    </div>
+</div>

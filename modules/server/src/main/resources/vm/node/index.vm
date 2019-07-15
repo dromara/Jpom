@@ -62,60 +62,7 @@
             </div>
             #parse("./common/userHead.vm")
         </div>
-        <div class="layui-side layui-bg-black">
-            <div class="layui-side-scroll">
-                <ul class="layui-nav layui-nav-tree" lay-filter="menu">
-                    <li class="layui-nav-item layui-this">
-                        <a href="javascript:;" data-options="{'id':'welcome', 'title':'首页', 'url':'./welcome'}">首页</a>
-                    </li>
-                    <li class="layui-nav-item">
-                        <a href="javascript:;"
-                           data-options="{'id':'manage', 'title':'项目管理', 'url':'./manage/projectInfo'}">项目管理</a>
-                    </li>
-                ##                    <li class="layui-nav-item">
-                ##                        <a href="javascript:;"
-                ##                           data-options="{'id':'downtime', 'title':'宕机计划', 'url':'./manage/projectInfo'}">宕机计划</a>
-                ##                    </li>
-                    <li class="layui-nav-item">
-                        <a href="javascript:;"
-                           data-options="{'id':'tomcatManage', 'title':'Tomcat管理', 'url':'./tomcat/tomcatManage'}">Tomcat管理</a>
-                    </li>
-                    #if($user.isManage($node.id))
-                        <li class="layui-nav-item">
-                            <a href="javascript:;"
-                               data-options="{'id':'nginx', 'title':'nginx管理', 'url':'./system/nginx/list.html'}">nginx管理</a>
-                        </li>
-
-                        <li class="layui-nav-item">
-                            <a href="javascript:;"
-                               data-options="{'id':'script', 'title':'脚本模板', 'url':'./script/list.html'}">脚本模板</a>
-                        </li>
-                    #end
-                    #if($user.isSystemUser())
-                        <li class="layui-nav-item">
-                            <a href="javascript:;"
-                               data-options="{'id':'whitelistDirectory', 'title':'白名单目录', 'url':'./system/whitelistDirectory'}">白名单目录</a>
-                        </li>
-                        <li class="layui-nav-item">
-                            <a href="javascript:;"
-                               data-options="{'id':'alioss', 'title':'阿里云OSS', 'url':'./system/alioss'}">阿里云OSS</a>
-                        </li>
-                    #end
-                </ul>
-            </div>
-        </div>
-        <div class="layui-body" style="overflow: hidden;">
-            <div class="layui-tab layui-tab-card" lay-allowClose="true" lay-filter="mainTabs">
-                <ul class="layui-tab-title">
-                    <li class="layui-this" lay-id="tab_welcome">首页</li>
-                </ul>
-                <div class="layui-tab-content">
-                    <div class="layui-tab-item layui-show">
-                        <iframe src="./welcome?nodeId=$!node.id" frameborder="0" class="custom-iframe"></iframe>
-                    </div>
-                </div>
-            </div>
-        </div>
+        #parse("./common/indexMenus.vm")
     </div>
     #else
     <div class="layui-carousel" id="div-carousel" style="width: 100%; height: 100%; position: fixed; z-index: 0;">

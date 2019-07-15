@@ -1,0 +1,44 @@
+[
+  {
+    "id": "welcome",
+    "title": "首页",
+    "url": "./welcome"
+  },
+  {
+    "id": "manage",
+    "title": "项目管理",
+    "url": "./manage/projectInfo"
+  },
+  {
+    "id": "tomcatManage",
+    "title": "Tomcat管理",
+    "url": "./tomcat/tomcatManage"
+  },
+  {
+    "id": "nginx",
+    "title": "nginx管理",
+    "url": "./system/nginx/list.html"
+  },
+  {
+    "id": "script",
+    "title": "脚本模板",
+    "url": "./script/list.html"
+  },
+  {
+    "id": "systemConfig",
+    "title": "系统管理",
+    "role": "System",
+    "childs": [
+      {
+        "id": "whitelistDirectory",
+        "title": "白名单目录",
+        "url": "./system/whitelistDirectory"
+      },
+      {
+        "id": "alioss",
+        "title": "阿里云OSS",
+        "url": "./system/alioss"
+      }
+    ]
+  }
+]

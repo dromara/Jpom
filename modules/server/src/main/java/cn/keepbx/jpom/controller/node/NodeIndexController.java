@@ -1,5 +1,8 @@
 package cn.keepbx.jpom.controller.node;
 
+import cn.hutool.core.io.IoUtil;
+import cn.hutool.core.io.resource.ResourceUtil;
+import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.keepbx.jpom.common.BaseServerController;
@@ -9,6 +12,7 @@ import cn.keepbx.jpom.model.data.NodeModel;
 import cn.keepbx.jpom.model.data.UserModel;
 import cn.keepbx.jpom.model.system.JpomManifest;
 import cn.keepbx.jpom.service.node.NodeService;
+import com.alibaba.fastjson.JSONArray;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -16,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.annotation.Resource;
+import java.io.InputStream;
 import java.util.List;
 
 /**
@@ -55,6 +60,11 @@ public class NodeIndexController extends BaseServerController {
                 setAttribute("tipUpdate", true);
             }
         }
+        // 菜单
+        InputStream inputStream = ResourceUtil.getStream("classpath:/menus/node-index.json");
+        String json = IoUtil.read(inputStream, CharsetUtil.CHARSET_UTF_8);
+        JSONArray jsonArray = JSONArray.parseArray(json);
+        setAttribute("menus", jsonArray);
         return "node/index";
     }
 

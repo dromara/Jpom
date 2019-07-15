@@ -36,6 +36,18 @@ public class NodeModel extends BaseModel {
      * 开启状态，如果关闭状态就暂停使用节点
      */
     private boolean openStatus;
+    /**
+     * 节点超时时间
+     */
+    private int timeOut;
+
+    public int getTimeOut() {
+        return timeOut;
+    }
+
+    public void setTimeOut(int timeOut) {
+        this.timeOut = timeOut;
+    }
 
     public boolean isOpenStatus() {
         return openStatus;

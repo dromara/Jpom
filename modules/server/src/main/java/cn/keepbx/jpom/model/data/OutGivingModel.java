@@ -271,27 +271,22 @@ public class OutGivingModel extends BaseModel {
         public OutGivingNodeProject.Status call() {
             OutGivingNodeProject.Status result;
             try {
-                String url = nodeModel.getRealUrl(NodeUrl.Manage_File_Upload);
-                HttpRequest request = HttpUtil.createPost(url);
-                // 授权信息
-                NodeForward.addUser(request, this.nodeModel, this.userModel);
-                request.form("file", file)
-                        .form("id", this.outGivingNodeProject.getProjectId())
-                        .form("type", "unzip");
+                JSONObject data = new JSONObject();
+                data.put("file", file);
+                data.put("id", this.outGivingNodeProject.getProjectId());
+                data.put("type", "unzip");
                 // 操作
                 if (afterOpt != AfterOpt.No) {
-                    request.form("after", "restart");
+                    data.put("after", "restart");
                 }
                 //
-                String body = request.execute()
-                        .body();
-                JsonMessage jsonMessage = NodeForward.toJsonMessage(body);
+                JsonMessage jsonMessage = NodeForward.request(this.nodeModel, NodeUrl.Manage_File_Upload, this.userModel, data);
                 if (jsonMessage.getCode() == HttpStatus.HTTP_OK) {
                     result = OutGivingNodeProject.Status.Ok;
-                    updateStatus(this.outGivingId, this.outGivingNodeProject.getProjectId(), result, body);
+                    updateStatus(this.outGivingId, this.outGivingNodeProject.getProjectId(), result, jsonMessage.toString());
                 } else {
                     result = OutGivingNodeProject.Status.Fail;
-                    updateStatus(this.outGivingId, this.outGivingNodeProject.getProjectId(), result, body);
+                    updateStatus(this.outGivingId, this.outGivingNodeProject.getProjectId(), result, jsonMessage.toString());
                 }
             } catch (Exception e) {
                 DefaultSystemLog.ERROR().error(this.outGivingNodeProject.getNodeId() + " " + this.outGivingNodeProject.getProjectId() + " " + "分发异常保存", e);
