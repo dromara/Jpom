@@ -25,6 +25,24 @@ public class ExtConfigBean {
     static final String FILE_NAME = "extConfig.yml";
 
     private static Resource resource;
+    /**
+     * 请求日志
+     */
+    @Value("${consoleLog.reqXss:true}")
+    private boolean consoleLogReqXss;
+    /**
+     * 请求响应
+     */
+    @Value("${consoleLog.reqResponse:true}")
+    private boolean consoleLogReqResponse;
+
+    public boolean isConsoleLogReqResponse() {
+        return consoleLogReqResponse;
+    }
+
+    public boolean isConsoleLogReqXss() {
+        return consoleLogReqXss;
+    }
 
     /**
      * 动态获取外部配置文件的 resource

@@ -8,7 +8,8 @@
 2. 【Server】分发包支持更多压缩格式
 3. 页面菜单采用json文件配置
 4. 【Server】分发包支持更多类型的压缩格式
-4. 【Server】节点支持配置请求超时时间
+5. 【Server】节点支持配置请求超时时间
+6. 支持配置是否记录请求、响应日志【consoleLog.reqXss、consoleLog.reqResponse】
 
 ### 解决BUG、优化功能
 

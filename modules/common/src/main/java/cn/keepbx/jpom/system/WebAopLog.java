@@ -47,7 +47,7 @@ public class WebAopLog extends PropertyDefinerBase {
             aopLogInterface.before(joinPoint);
         }
         // 接收到请求，记录请求内容
-        IS_LOG.set(true);
+        IS_LOG.set(ExtConfigBean.getInstance().isConsoleLogReqResponse());
         Signature signature = joinPoint.getSignature();
         if (signature instanceof MethodSignature) {
             MethodSignature methodSignature = (MethodSignature) signature;
@@ -66,16 +66,19 @@ public class WebAopLog extends PropertyDefinerBase {
         if (aopLogInterface != null) {
             aopLogInterface.afterReturning(ret);
         }
-        if (ret == null) {
-            return;
+        try {
+            if (ret == null) {
+                return;
+            }
+            // 处理完请求，返回内容
+            Boolean isLog = IS_LOG.get();
+            if (isLog != null && !isLog) {
+                return;
+            }
+            DefaultSystemLog.LOG().info(" :" + ret.toString());
+        } finally {
+            IS_LOG.remove();
         }
-        // 处理完请求，返回内容
-        Boolean isLog = IS_LOG.get();
-        if (isLog != null && !isLog) {
-            return;
-        }
-        DefaultSystemLog.LOG().info(" :" + ret.toString());
-        IS_LOG.remove();
     }
 
     @Override

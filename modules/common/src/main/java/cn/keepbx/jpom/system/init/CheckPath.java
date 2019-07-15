@@ -6,6 +6,7 @@ import cn.jiangzeyin.common.PreLoadClass;
 import cn.jiangzeyin.common.PreLoadMethod;
 import cn.keepbx.jpom.BaseJpomApplication;
 import cn.keepbx.jpom.model.system.JpomManifest;
+import cn.keepbx.jpom.system.ExtConfigBean;
 import cn.keepbx.util.JvmUtil;
 import sun.jvmstat.monitor.MonitorException;
 import sun.jvmstat.monitor.MonitoredVm;
@@ -59,6 +60,16 @@ public class CheckPath {
 
             });
         } catch (MonitorException | URISyntaxException ignored) {
+        }
+    }
+
+    @PreLoadMethod(3)
+    private static void reqXssLog() {
+        if (!ExtConfigBean.getInstance().isConsoleLogReqXss()) {
+            // 不在控制台记录请求日志信息
+            DefaultSystemLog.setLogCallback((type, log) -> {
+                //
+            });
         }
     }
 }
