@@ -40,6 +40,9 @@ public class IndexControl extends BaseServerController {
     @NotLogin
     public String error(String id) {
         String msg = GlobalDefaultExceptionHandler.getErrorMsg(id);
+        if (msg == null) {
+            msg = "页面已经失效";
+        }
         setAttribute("msg", msg);
         return "error";
     }

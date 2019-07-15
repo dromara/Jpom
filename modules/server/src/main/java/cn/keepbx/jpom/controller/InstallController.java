@@ -1,9 +1,10 @@
 package cn.keepbx.jpom.controller;
 
-import cn.hutool.core.lang.Validator;
-import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
+import cn.jiangzeyin.common.validator.ValidatorConfig;
+import cn.jiangzeyin.common.validator.ValidatorItem;
+import cn.jiangzeyin.common.validator.ValidatorRule;
 import cn.keepbx.jpom.BaseJpomApplication;
 import cn.keepbx.jpom.common.BaseServerController;
 import cn.keepbx.jpom.common.interceptor.LoginInterceptor;
@@ -49,27 +50,20 @@ public class InstallController extends BaseServerController {
     @RequestMapping(value = "install_submit.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @NotLogin
     @ResponseBody
-    public String installSubmit(String userName, String userPwd) {
+    public String installSubmit(
+            @ValidatorConfig(value = {
+                    @ValidatorItem(value = ValidatorRule.NOT_EMPTY, msg = "登录名不能为空"),
+                    @ValidatorItem(value = ValidatorRule.NOT_BLANK, range = "3:20", msg = "登录名长度范围3-20"),
+                    @ValidatorItem(value = ValidatorRule.WORD, msg = "登录名不能包含汉字并且不能包含特殊字符")
+            }) String userName,
+            @ValidatorConfig(value = {
+                    @ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "密码不能为空")
+            }) String userPwd) {
         if (!userService.userListEmpty()) {
             return JsonMessage.getString(100, "系统已经初始化过啦，请勿重复初始化");
         }
-        if (StrUtil.isEmpty(userName)) {
-            return JsonMessage.getString(400, "登录名不能为空");
-        }
-        if (userName.length() < UserModel.USER_NAME_MIN_LEN) {
-            return JsonMessage.getString(400, "登录名长度必须不小于" + UserModel.USER_NAME_MIN_LEN);
-        }
-        if (BaseJpomApplication.SYSTEM_ID.equalsIgnoreCase(userName)) {
+        if (BaseJpomApplication.SYSTEM_ID.equalsIgnoreCase(userName) || UserModel.SYSTEM_ADMIN.equals(userName)) {
             return JsonMessage.getString(400, "当前登录名已经被系统占用啦");
-        }
-        if (Validator.isChinese(userName) || !checkPathSafe(userName)) {
-            return JsonMessage.getString(400, "登录名不能包含汉字并且不能包含特殊字符");
-        }
-        if (StrUtil.isEmpty(userPwd)) {
-            return JsonMessage.getString(400, "密码不能为空");
-        }
-        if (UserModel.SYSTEM_OCCUPY_NAME.equals(userName) || UserModel.SYSTEM_ADMIN.equals(userName)) {
-            return JsonMessage.getString(401, "当前登录名已经被系统占用");
         }
         // 创建用户
         UserModel userModel = new UserModel();

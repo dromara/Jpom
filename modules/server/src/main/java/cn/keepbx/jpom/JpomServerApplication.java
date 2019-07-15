@@ -3,6 +3,7 @@ package cn.keepbx.jpom;
 import cn.hutool.core.util.CharsetUtil;
 import cn.jiangzeyin.common.ApplicationBuilder;
 import cn.jiangzeyin.common.EnableCommonBoot;
+import cn.jiangzeyin.common.validator.ParameterInterceptor;
 import cn.keepbx.jpom.common.JpomApplicationEvent;
 import cn.keepbx.jpom.common.Type;
 import cn.keepbx.jpom.common.interceptor.LoginInterceptor;
@@ -37,6 +38,8 @@ public class JpomServerApplication extends BaseJpomApplication {
                 // 拦截器
                 .addInterceptor(LoginInterceptor.class)
                 .addInterceptor(PermissionInterceptor.class)
+                // 参数拦截器
+                .addInterceptor(ParameterInterceptor.class)
                 //
                 .addApplicationEventClient(new JpomApplicationEvent())
                 .run(args);

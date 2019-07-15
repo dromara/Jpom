@@ -4,6 +4,9 @@ import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
+import cn.jiangzeyin.common.validator.ValidatorConfig;
+import cn.jiangzeyin.common.validator.ValidatorItem;
+import cn.jiangzeyin.common.validator.ValidatorRule;
 import cn.keepbx.jpom.BaseJpomApplication;
 import cn.keepbx.jpom.common.BaseServerController;
 import cn.keepbx.jpom.common.interceptor.LoginInterceptor;
@@ -48,10 +51,13 @@ public class UserInfoController extends BaseServerController {
      * @return json
      */
     @RequestMapping(value = "updatePwd", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public String updatePwd(String oldPwd, String newPwd) {
-        if (StrUtil.isEmpty(oldPwd) || StrUtil.isEmpty(newPwd)) {
-            return JsonMessage.getString(400, "密码不能为空");
-        }
+    public String updatePwd(
+            @ValidatorConfig(value = {
+                    @ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "密码不能为空")
+            }) String oldPwd,
+            @ValidatorConfig(value = {
+                    @ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "密码不能为空")
+            }) String newPwd) {
         if (oldPwd.equals(newPwd)) {
             return JsonMessage.getString(400, "新旧密码一致");
         }
@@ -84,14 +90,9 @@ public class UserInfoController extends BaseServerController {
      * @return json
      */
     @RequestMapping(value = "updateName", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public String updateName(String name) {
-        if (StrUtil.isEmpty(name)) {
-            return JsonMessage.getString(405, "请输入新的昵称");
-        }
-        int len = name.length();
-        if (len > 10 || len < 2) {
-            return JsonMessage.getString(405, "昵称长度只能是2-10");
-        }
+    public String updateName(@ValidatorConfig(value = {
+            @ValidatorItem(value = ValidatorRule.NOT_BLANK, range = "2:10", msg = "昵称长度只能是2-10")
+    }) String name) {
         UserModel userModel = getUser();
         userModel = userService.getItem(userModel.getId());
         userModel.setName(name);

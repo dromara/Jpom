@@ -7,6 +7,9 @@ import cn.hutool.core.date.BetweenFormater;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.JsonMessage;
+import cn.jiangzeyin.common.validator.ValidatorConfig;
+import cn.jiangzeyin.common.validator.ValidatorItem;
+import cn.jiangzeyin.common.validator.ValidatorRule;
 import cn.keepbx.jpom.common.BaseServerController;
 import cn.keepbx.jpom.common.interceptor.LoginInterceptor;
 import cn.keepbx.jpom.common.interceptor.NotLogin;
@@ -134,10 +137,14 @@ public class LoginControl extends BaseServerController {
     @ResponseBody
     @NotLogin
     @OperateType(UserOperateLogV1.OptType.Login)
-    public String userLogin(String userName, String userPwd, String code) throws IOException {
-        if (StrUtil.isEmpty(userName) || StrUtil.isEmpty(userPwd)) {
-            return JsonMessage.getString(405, "请输入登录信息");
-        }
+    public String userLogin(
+            @ValidatorConfig(value = {
+                    @ValidatorItem(value = ValidatorRule.NOT_EMPTY, msg = "请输入登录信息")
+            }) String userName,
+            @ValidatorConfig(value = {
+                    @ValidatorItem(value = ValidatorRule.NOT_EMPTY, msg = "请输入登录信息")
+            }) String userPwd,
+            String code) throws IOException {
         if (this.ipLock()) {
             return JsonMessage.getString(400, "尝试次数太多，请稍后再来");
         }
