@@ -1,6 +1,7 @@
 package cn.keepbx.jpom.system.init;
 
 import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.db.Db;
 import cn.hutool.db.Entity;
@@ -91,7 +92,7 @@ public class OperateLogController implements AopLogInterface {
                 //
                 cacheInfo.userAgent = ServletUtil.getHeaderIgnoreCase(request, HttpHeaders.USER_AGENT);
                 //
-                Map<String, String[]> map = request.getParameterMap();
+                Map<String, String[]> map = ObjectUtil.clone(request.getParameterMap());
                 // 过滤密码字段
                 Set<Map.Entry<String, String[]>> entries = map.entrySet();
                 for (Map.Entry<String, String[]> entry : entries) {
