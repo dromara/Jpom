@@ -24,9 +24,8 @@ import java.util.List;
  **/
 public class TestGit {
     static UsernamePasswordCredentialsProvider usernamePasswordCredentialsProvider =
-            new UsernamePasswordCredentialsProvider("jiangzeyin", "love1593503371");
+            new UsernamePasswordCredentialsProvider("1", "1");
 
-//    private static final String REMOTE_TAG = "jpomRemote";
 
     public static void main(String[] args) throws GitAPIException, IOException {
 
