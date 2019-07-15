@@ -2,16 +2,24 @@
   {
     "title": "节点管理",
     "id": "welcome",
-    "url": "./node/list.html"
+    "url": "./node/list.html",
+    "icon": "layui-icon-star-fill"
   },
   {
-    "id": "outgiving",
     "title": "节点分发",
-    "url": "./outgiving/list.html",
-    "dynamic": "showOutGiving"
+    "dynamic": "showOutGiving",
+    "icon": "layui-icon-release",
+    "childs": [
+      {
+        "id": "outgiving",
+        "title": "分发列表",
+        "url": "./outgiving/list.html"
+      }
+    ]
   },
   {
     "title": "监控管理",
+    "icon": "layui-icon-chart-screen",
     "childs": [
       {
         "id": "monitor",
@@ -31,14 +39,20 @@
     ]
   },
   {
-    "id": "user",
     "title": "用户管理",
-    "url": "./user/list",
-    "role": "ServerManager"
-  },
-  {
-    "id": "user_log",
-    "title": "操作日志",
-    "url": "./user/log/list.html"
+    "icon": "layui-icon-friends",
+    "childs": [
+      {
+        "id": "user",
+        "title": "用户列表",
+        "url": "./user/list",
+        "role": "ServerManager"
+      },
+      {
+        "id": "user_log",
+        "title": "操作日志",
+        "url": "./user/log/list.html"
+      }
+    ]
   }
 ]

@@ -29,7 +29,6 @@
 <div class="layui-row">
     <button id="addNgx" class="layui-btn layui-btn-sm">新增nginx配置</button>
     <button onclick="reload();" class="layui-btn layui-btn-sm">刷新表格</button>
-    <button id="certificate" class="layui-btn layui-btn-sm layui-btn-warm">证书管理</button>
 ##    <button id="reload" class="layui-btn layui-btn-sm layui-btn-danger">重启nginx</button>
 </div>
 <table class="layui-table" id="tab_ngx" lay-filter="tab_ngx" style="margin: 0;"></table>
@@ -117,16 +116,6 @@
                 });
             });
         }
-
-        //证书管理
-        $('#certificate').on('click', function () {
-            var url = './system/certificate/list.html';
-            tabChange({
-                id: 'certificate',
-                url: url,
-                title: '证书管理',
-            });
-        });
     }
 
     function reload() {

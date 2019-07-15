@@ -12,19 +12,36 @@
                         #set($showCur=false)
                     #end
                     #if($showCur)
+
                         #set($notRole=false)
                     ##  判断角色
                         #if($mItem.role=="ServerManager" && $user.isServerManager())
-                            <a href="javascript:;" #if(!$mItem.childs)data-options=$mItem#end>$mItem.title</a>
+                            <a href="javascript:;" #if(!$mItem.childs)data-options=$mItem#end>
+                                #if($mItem.icon)
+                                    <i class="layui-icon $mItem.icon"></i>
+                                #end $mItem.title
+                            </a>
                         #elseif($mItem.role=="System" && $user.isSystemUser())
                         ## 系统管理员
-                            <a href="javascript:;" #if(!$mItem.childs)data-options=$mItem#end>$mItem.title</a>
+                            <a href="javascript:;" #if(!$mItem.childs)data-options=$mItem#end>
+                                #if($mItem.icon)
+                                    <i class="layui-icon $mItem.icon"></i>
+                                #end $mItem.title
+                            </a>
                         #elseif($mItem.role=="NodeManage" && $user.isManage($node.id))
                         ## 节点管理员
-                            <a href="javascript:;" #if(!$mItem.childs)data-options=$mItem#end>$mItem.title</a>
+                            <a href="javascript:;" #if(!$mItem.childs)data-options=$mItem#end>
+                                #if($mItem.icon)
+                                    <i class="layui-icon $mItem.icon"></i>
+                                #end $mItem.title
+                            </a>
                         #elseif(!$mItem.role)
                         ## 没有角色
-                            <a href="javascript:;" #if(!$mItem.childs)data-options=$mItem#end>$mItem.title</a>
+                            <a href="javascript:;" #if(!$mItem.childs)data-options=$mItem#end>
+                                #if($mItem.icon)
+                                    <i class="layui-icon $mItem.icon"></i>
+                                #end $mItem.title
+                            </a>
                         #else
                         ## 没有权限
                             #set($notRole=true)

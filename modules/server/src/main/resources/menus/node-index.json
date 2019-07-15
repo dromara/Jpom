@@ -2,42 +2,73 @@
   {
     "id": "welcome",
     "title": "首页",
-    "url": "./welcome"
+    "url": "./welcome",
+    "icon": "layui-icon-console"
   },
   {
     "id": "manage",
     "title": "项目管理",
-    "url": "./manage/projectInfo"
+    "icon": "layui-icon-templeate-1",
+    "childs": [
+      {
+        "id": "manageList",
+        "title": "项目列表",
+        "url": "./manage/projectInfo"
+      },
+      {
+        "id": "projectRecover",
+        "title": "项目回收",
+        "url": "./manage/recover/list.html",
+        "role": "NodeManage"
+      }
+    ]
   },
   {
     "id": "tomcatManage",
     "title": "Tomcat管理",
-    "url": "./tomcat/tomcatManage"
+    "url": "./tomcat/tomcatManage",
+    "icon": "layui-icon-circle-dot"
   },
   {
     "id": "nginx",
     "title": "nginx管理",
-    "url": "./system/nginx/list.html"
-  },
-  {
-    "id": "script",
-    "title": "脚本模板",
-    "url": "./script/list.html"
+    "role": "NodeManage",
+    "icon": "layui-icon-layer",
+    "childs": [
+      {
+        "id": "nginxList",
+        "title": "nginx列表",
+        "url": "./system/nginx/list.html"
+      },
+      {
+        "id": "certificate",
+        "url": "./system/certificate/list.html",
+        "title": "证书管理"
+      }
+    ]
   },
   {
     "id": "systemConfig",
     "title": "系统管理",
-    "role": "System",
+    "icon": "layui-icon-set-fill",
     "childs": [
+      {
+        "id": "script",
+        "title": "脚本模板",
+        "url": "./script/list.html",
+        "role": "ServerManager"
+      },
       {
         "id": "whitelistDirectory",
         "title": "白名单目录",
-        "url": "./system/whitelistDirectory"
+        "url": "./system/whitelistDirectory",
+        "role": "System"
       },
       {
         "id": "alioss",
         "title": "阿里云OSS",
-        "url": "./system/alioss"
+        "url": "./system/alioss",
+        "role": "System"
       }
     ]
   }
