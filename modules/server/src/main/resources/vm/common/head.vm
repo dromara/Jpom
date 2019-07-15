@@ -109,7 +109,11 @@
     }
 
     function getTopQueryString(name) {
-        return getQueryStringByUrl(top.location.search.substr(1), name);
+        var val = getQueryStringByUrl(top.location.search.substr(1), name);
+        if (!val) {
+            val = getQueryString(name);
+        }
+        return val;
     }
 
     function getQueryString(name) {

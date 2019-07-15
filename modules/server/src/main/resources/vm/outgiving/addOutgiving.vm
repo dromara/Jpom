@@ -77,7 +77,7 @@
                 layer.load();
             },
             done: function (res) {
-                // layer.closeAll('loading');
+                layer.closeAll('loading');
                 layer.msg(res.msg);
                 if (200 == res.code) {
                     autoClose();

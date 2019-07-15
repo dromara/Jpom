@@ -150,13 +150,18 @@
             if ("conslone" == op || "file" == op) {
                 var nodeId = $(this).attr("nodeId");
                 var projectId = $(this).attr("projectId");
-                var parName = "file" == op ? "toFile" : "toConsole";
-                //
-                var url = "/node/index.html";
+                var url = "file" == op ? "/node/manage/file/list.html" : "/node/manage/console";
                 url = urlUpdateParams(url, "nodeId", nodeId);
-                url = urlUpdateParams(url, parName, projectId);
-                var win = top.window.open(url, nodeId + projectId);
-                win.focus();
+                url = urlUpdateParams(url, "id", projectId);
+                var index = layer.open({
+                    type: 2,
+                    title: "file" == op ? '文件管理' : '控制台',
+                    shade: [0.4, '#fff'],
+                    maxmin: true,
+                    area: ['80%', '90%'],
+                    content: url
+                });
+                layer.full(index);
                 return false;
             }
             if ("edit" == op) {

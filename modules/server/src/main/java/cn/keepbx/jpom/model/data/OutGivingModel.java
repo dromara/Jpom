@@ -236,7 +236,7 @@ public class OutGivingModel extends BaseModel {
                     }
                 }
             });
-        } else if (afterOpt == AfterOpt.Restart) {
+        } else if (afterOpt == AfterOpt.Restart || afterOpt == AfterOpt.No) {
             outGivingNodeProjects.forEach(outGivingNodeProject -> ThreadUtil.execAsync(new OutGivingRun(id, outGivingNodeProject, file, afterOpt, userModel)));
         } else {
             //

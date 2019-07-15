@@ -101,7 +101,7 @@
 <script type="text/javascript">
     function loadSuccess() {
         #if($installed)
-           
+
         #else
             layui.use(['carousel'], function () {
                 var carousel = layui.carousel;
@@ -131,25 +131,6 @@
                 });
             });
         #end
-        // 自动打开控制台
-        var toConsole = getTopQueryString("toConsole");
-        if (toConsole) {
-            var url = './manage/console?id=' + toConsole;
-            tabChange({
-                id: toConsole,
-                url: url,
-                title: toConsole + ' - 管理',
-            });
-        }
-        // 自动文件管理
-        var toFile = getTopQueryString("toFile");
-        if (toFile) {
-            tabChange({
-                id: toFile,
-                url: './manage/file/list.html?id=' + toFile,
-                title: toFile + ' - 文件',
-            });
-        }
 
         #if($tipUpdate)
             layer.alert("当前节点和服务端版本不一致，请检查更新")
