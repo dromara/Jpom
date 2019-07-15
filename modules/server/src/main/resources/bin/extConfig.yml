@@ -13,3 +13,6 @@ consoleLog:
   reqXss: true
   # 是否记录接口响应日志
   reqResponse: true
+db:
+  # 日志存储条数，将自动清理旧数据,配置小于等于零则不清理
+  logStorageCount: 100000

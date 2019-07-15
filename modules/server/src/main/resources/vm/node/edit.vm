@@ -14,22 +14,24 @@
 <div class="layui-container">
     <form action="./save.json" class="layui-form" id="form_node">
         <div class="layui-form-item">
-            <label class="layui-form-label">节点ID</label>
-            <div class="layui-input-block">
-                <input type="text" id="id" name="id" value="$!item.id" placeholder="创建后不能修改" class="layui-input"
-                       required
-                       #if($item)readonly#end
-                       lay-verify="required">
-                <input type="hidden" name="type" value="$!type">
+            <div class="layui-inline">
+                <label class="layui-form-label">节点ID</label>
+                <div class="layui-input-block">
+                    <input type="text" id="id" name="id" value="$!item.id" placeholder="创建后不能修改" class="layui-input"
+                           required
+                           #if($item)readonly#end
+                           lay-verify="required">
+                    <input type="hidden" name="type" value="$!type">
+                </div>
             </div>
-        </div>
-        <div class="layui-form-item">
-            <label class="layui-form-label">节点名称</label>
-            <div class="layui-input-block">
-                <input type="text" id="name" name="name" value="$!item.name" placeholder="请填写节点名称"
-                       class="layui-input"
-                       required
-                       lay-verify="required">
+            <div class="layui-inline">
+                <label class="layui-form-label">节点名称</label>
+                <div class="layui-input-block">
+                    <input type="text" id="name" name="name" value="$!item.name" placeholder="请填写节点名称"
+                           class="layui-input"
+                           required
+                           lay-verify="required">
+                </div>
             </div>
         </div>
         <div class="layui-form-item">
@@ -54,16 +56,8 @@
                            lay-text="启用|停用">
                 </div>
             </div>
-            <div class="layui-inline">
-                <label class="layui-form-label">超时时间</label>
-                <div class="layui-input-block">
-                    <input type="text" id="timeOut" name="timeOut" value="$!item.timeOut" placeholder="节点请求超时时间（毫秒）"
-                           class="layui-input"
-                           required
-                           lay-verify="required">
-                </div>
-            </div>
         </div>
+
         <div class="layui-form-item">
             <label class="layui-form-label">节点地址</label>
             <div class="layui-input-block">
@@ -84,13 +78,23 @@
         <div class="layui-form-item">
             <label class="layui-form-label">节点密码</label>
             <div class="layui-input-block">
-                <input type="password" id="loginPwd" name="loginPwd" value="$!item.loginPwd" placeholder="请填写节点登录密码"
+                <input type="password" id="loginPwd" name="loginPwd" value="$!item.loginPwd"
+                       placeholder="请填写节点登录密码,节点默认请查看节点安装文档"
                        class="layui-input"
                        required
                        lay-verify="required">
             </div>
         </div>
-
+        <div class="layui-form-item">
+            <label class="layui-form-label">超时时间</label>
+            <div class="layui-input-block">
+                <input type="text" id="timeOut" name="timeOut" value="#if(!$item)5000#else$!item.timeOut#end"
+                       placeholder="节点请求超时时间（毫秒）"
+                       class="layui-input"
+                       required
+                       lay-verify="required">
+            </div>
+        </div>
         <div class="layui-form-item" style="padding-left: 20%">
             <button class="layui-btn layui-btn-normal" lay-submit lay-filter="submitNode" id="project_submit">提交
             </button>

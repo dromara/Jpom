@@ -10,12 +10,15 @@
 4. 【Server】分发包支持更多类型的压缩格式
 5. 【Server】节点支持配置请求超时时间
 6. 支持配置是否记录请求、响应日志【consoleLog.reqXss、consoleLog.reqResponse】
+7. 新增日志记录最大记录条数【默认100000】
 
 ### 解决BUG、优化功能
 
 1. 【Agent】logBack页面最后修改时间不能正确显示（感谢@JAVA jesion）
 2. 【Agent】nginx修改内容截断，不正确情况（感谢@JAVA jesion）
 3. 【Agent】nginx、脚本模板保存内容xss标签还原
+4. 【Server】节点分发页面的交互方式
+5. 【Server】页面菜单分类整理
 
 -----------------------------------------------------------
 

@@ -35,6 +35,11 @@ public class ServerExtConfigBean {
     @Value("${user.ipErrorLockTime:60*60*5*1000}")
     private String ipErrorLockTime;
     private long ipErrorLockTimeValue = -1;
+    /**
+     * 日志记录最大条数
+     */
+    @Value("${db.logStorageCount:100000}")
+    private int h2DbLogStorageCount;
 
     public long getIpErrorLockTime() {
         if (this.ipErrorLockTimeValue == -1) {
@@ -42,6 +47,10 @@ public class ServerExtConfigBean {
             this.ipErrorLockTimeValue = Convert.toLong(ScriptUtil.eval(str), TimeUnit.HOURS.toMillis(5));
         }
         return this.ipErrorLockTimeValue;
+    }
+
+    public int getH2DbLogStorageCount() {
+        return h2DbLogStorageCount;
     }
 
     /**

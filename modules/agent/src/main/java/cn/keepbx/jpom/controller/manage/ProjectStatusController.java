@@ -3,11 +3,15 @@ package cn.keepbx.jpom.controller.manage;
 import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
+import cn.jiangzeyin.common.validator.ValidatorConfig;
+import cn.jiangzeyin.common.validator.ValidatorItem;
+import cn.jiangzeyin.common.validator.ValidatorRule;
 import cn.keepbx.jpom.common.BaseAgentController;
 import cn.keepbx.jpom.common.commander.AbstractProjectCommander;
 import cn.keepbx.jpom.model.data.ProjectInfoModel;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -30,9 +34,10 @@ public class ProjectStatusController extends BaseAgentController {
      * @return json
      */
     @RequestMapping(value = "getProjectStatus", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public String getProjectStatus(String id) {
-        if (StrUtil.isEmpty(id)) {
-            return JsonMessage.getString(405, "项目id 不正确");
+    public String getProjectStatus(@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "项目id 不正确")) String id) {
+        ProjectInfoModel projectInfoModel = tryGetProjectInfoModel();
+        if (projectInfoModel == null) {
+            return JsonMessage.getString(HttpStatus.NOT_FOUND.value(), "项目id不存在");
         }
         int pid = 0;
         try {

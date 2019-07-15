@@ -212,8 +212,18 @@
             if (data.show) {
                 var itemId = $(data.title).attr("itemId");
                 $("button[itemId='" + itemId + "']").show();
+                // 记录最后打开的选项
+                layui.data('outgiving', {
+                    key: "lastCickTable",
+                    value: itemId
+                });
             }
         });
+
+        const outgiving = layui.data('outgiving');
+        if (outgiving.lastCickTable) {
+            $("div[itemId='" + outgiving.lastCickTable + "']").click();
+        }
     }
 
     function editProject(id) {

@@ -21,6 +21,7 @@ import cn.keepbx.jpom.service.user.UserService;
 import cn.keepbx.jpom.system.AopLogInterface;
 import cn.keepbx.jpom.system.OperateType;
 import cn.keepbx.jpom.system.WebAopLog;
+import cn.keepbx.jpom.system.db.DbConfig;
 import com.alibaba.fastjson.JSONObject;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.Signature;
@@ -165,6 +166,7 @@ public class OperateLogController implements AopLogInterface {
             Entity entity = new Entity(UserOperateLogV1.TABLE_NAME);
             entity.parseBean(userOperateLogV1);
             db.insert(entity);
+            DbConfig.autoClear(UserOperateLogV1.TABLE_NAME, "optTime");
         } catch (SQLException e) {
             e.printStackTrace();
         }

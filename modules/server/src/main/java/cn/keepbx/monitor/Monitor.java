@@ -22,6 +22,7 @@ import cn.keepbx.jpom.model.data.MonitorNotifyLog;
 import cn.keepbx.jpom.model.data.NodeModel;
 import cn.keepbx.jpom.service.monitor.MonitorService;
 import cn.keepbx.jpom.service.node.NodeService;
+import cn.keepbx.jpom.system.db.DbConfig;
 import cn.keepbx.util.CronUtils;
 import com.alibaba.fastjson.JSONObject;
 
@@ -245,6 +246,8 @@ public class Monitor implements Task {
             Entity entity = new Entity(MonitorNotifyLog.TABLE_NAME);
             entity.parseBean(monitorNotifyLog);
             db.insert(entity);
+            //
+            DbConfig.autoClear(MonitorNotifyLog.TABLE_NAME, "createTime");
         } catch (SQLException e) {
             DefaultSystemLog.ERROR().error("db error", e);
         }
