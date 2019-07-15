@@ -1,14 +1,8 @@
 import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.io.IORuntimeException;
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.io.LineHandler;
 import cn.hutool.core.util.StrUtil;
-import cn.jiangzeyin.common.DefaultSystemLog;
-import cn.jiangzeyin.common.JsonMessage;
 import cn.keepbx.jpom.BaseJpomApplication;
-import cn.keepbx.jpom.socket.ConsoleCommandOp;
-import cn.keepbx.jpom.util.CommandUtil;
-import com.alibaba.fastjson.JSONObject;
 import org.eclipse.jgit.api.CreateBranchCommand;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.ListBranchCommand;
