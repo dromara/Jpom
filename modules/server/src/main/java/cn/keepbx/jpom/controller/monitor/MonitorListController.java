@@ -98,23 +98,11 @@ public class MonitorListController extends BaseServerController {
         return JsonMessage.getString(200, "删除成功");
     }
 
-    /**
-     * 增加或修改监控
-     */
-    @RequestMapping(value = "updateMonitor", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    @ResponseBody
-    @UrlPermission(value = Role.ServerManager, optType = UserOperateLogV1.OptType.EditMonitor)
-    public String updateMonitor(String id,
-                                @ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "监控名称不能为空")) String name) {
-        String notify = getParameter("notify");
-        int cycle = getParameterInt("cycle", MonitorModel.Cycle.five.getCode());
-        String status = getParameter("status");
-        String autoRestart = getParameter("autoRestart");
+    private String checkNotifyData(String notify, List<MonitorModel.Notify> notifies) {
         JSONArray notifyArray = JSONArray.parseArray(notify);
-        if (notify == null || notifyArray.size() <= 0) {
+        if (notify == null || notifyArray.isEmpty()) {
             return JsonMessage.getString(400, "请至少选择一种通知方式");
         }
-        List<MonitorModel.Notify> notifies = new ArrayList<>();
         for (int i = 0; i < notifyArray.size(); i++) {
             JSONObject jsonObject = notifyArray.getJSONObject(i);
             int style = jsonObject.getIntValue("style");
@@ -153,6 +141,26 @@ public class MonitorListController extends BaseServerController {
             }
             notifies.add(new MonitorModel.Notify(style, value));
         }
+        return null;
+    }
+
+    /**
+     * 增加或修改监控
+     */
+    @RequestMapping(value = "updateMonitor", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @ResponseBody
+    @UrlPermission(value = Role.ServerManager, optType = UserOperateLogV1.OptType.EditMonitor)
+    public String updateMonitor(String id,
+                                @ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "监控名称不能为空")) String name,
+                                String notify) {
+        int cycle = getParameterInt("cycle", MonitorModel.Cycle.five.getCode());
+        String status = getParameter("status");
+        String autoRestart = getParameter("autoRestart");
+        List<MonitorModel.Notify> notifies = new ArrayList<>();
+        String error = checkNotifyData(notify, notifies);
+        if (error != null) {
+            return error;
+        }
         String projects = getParameter("projects");
         JSONArray projectsArray = JSONArray.parseArray(projects);
         if (projectsArray == null || projectsArray.size() <= 0) {
@@ -175,7 +183,7 @@ public class MonitorListController extends BaseServerController {
         monitorModel.setStatus(start);
         monitorModel.setNotify(notifies);
         monitorModel.setName(name);
-        monitorModel.setModifyTime(DateUtil.date().getTime());
+
         if (StrUtil.isEmpty(id)) {
             //添加监控
             id = IdUtil.objectId();
@@ -194,6 +202,7 @@ public class MonitorListController extends BaseServerController {
      */
     @RequestMapping(value = "changeStatus", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
+    @UrlPermission(value = Role.ServerManager, optType = UserOperateLogV1.OptType.ChangeStatusMonitor)
     public String changeStatus(@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "id不能为空")) String id,
                                String status, String type) {
         MonitorModel monitorModel = monitorService.getItem(id);

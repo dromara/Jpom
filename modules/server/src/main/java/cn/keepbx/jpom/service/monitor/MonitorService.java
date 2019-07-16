@@ -1,5 +1,6 @@
 package cn.keepbx.jpom.service.monitor;
 
+import cn.hutool.core.date.DateUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.keepbx.jpom.common.BaseOperService;
 import cn.keepbx.jpom.model.data.MonitorModel;
@@ -85,6 +86,7 @@ public class MonitorService extends BaseOperService<MonitorModel> {
     @Override
     public boolean updateItem(MonitorModel monitorModel) {
         try {
+            monitorModel.setModifyTime(DateUtil.date().getTime());
             updateJson(ServerConfigBean.MONITOR_FILE, monitorModel.toJson());
             return true;
         } catch (Exception e) {

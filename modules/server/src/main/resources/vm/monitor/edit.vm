@@ -163,7 +163,6 @@
                 return false;
             }
             sendData.notify = JSON.stringify(notify);
-            console.log(sendData);
             loadingAjax({
                 url: data.form.action,
                 data: sendData,

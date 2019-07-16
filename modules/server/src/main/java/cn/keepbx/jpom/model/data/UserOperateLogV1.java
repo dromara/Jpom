@@ -263,6 +263,7 @@ public class UserOperateLogV1 extends BaseJsonModel {
 
         EditMonitor(54, "修改监控"),
         DelMonitor(55, "删除监控"),
+        ChangeStatusMonitor(56, "修改监控状态"),
         ;
         private int code;
         private String desc;
