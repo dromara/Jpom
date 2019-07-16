@@ -6,6 +6,7 @@ import cn.keepbx.jpom.common.BaseOperService;
 import cn.keepbx.jpom.model.data.MonitorModel;
 import cn.keepbx.jpom.system.ServerConfigBean;
 import cn.keepbx.monitor.Monitor;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;
 
@@ -30,14 +31,8 @@ public class MonitorService extends BaseOperService<MonitorModel> {
         if (jsonObject == null) {
             return null;
         }
-        Set<Map.Entry<String, Object>> set = jsonObject.entrySet();
-        List<MonitorModel> array = new ArrayList<>();
-        for (Map.Entry entry : set) {
-            JSONObject value = (JSONObject) entry.getValue();
-            MonitorModel monitorModel = value.toJavaObject(MonitorModel.class);
-            array.add(monitorModel);
-        }
-        return array;
+        JSONArray jsonArray = formatToArray(jsonObject);
+        return jsonArray.toJavaList(MonitorModel.class);
     }
 
     @Override

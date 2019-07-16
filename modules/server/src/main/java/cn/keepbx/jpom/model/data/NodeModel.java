@@ -146,6 +146,7 @@ public class NodeModel extends BaseModel {
         }
         NodeModel nodeModel = (NodeModel) o;
         return openStatus == nodeModel.openStatus &&
+                timeOut == nodeModel.timeOut &&
                 Objects.equals(url, nodeModel.url) &&
                 Objects.equals(loginName, nodeModel.loginName) &&
                 Objects.equals(loginPwd, nodeModel.loginPwd) &&
@@ -156,6 +157,6 @@ public class NodeModel extends BaseModel {
 
     @Override
     public int hashCode() {
-        return Objects.hash(url, loginName, loginPwd, protocol, authorize, projects, openStatus);
+        return Objects.hash(url, loginName, loginPwd, protocol, authorize, projects, openStatus, timeOut);
     }
 }

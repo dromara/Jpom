@@ -3,7 +3,7 @@ package cn.keepbx.jpom.model.data;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.map.MapUtil;
 import cn.hutool.crypto.SecureUtil;
-import cn.keepbx.jpom.BaseJpomApplication;
+import cn.keepbx.jpom.JpomApplication;
 import cn.keepbx.jpom.model.BaseJsonModel;
 import cn.keepbx.jpom.model.BaseModel;
 import cn.keepbx.jpom.model.Role;
@@ -270,7 +270,7 @@ public class UserModel extends BaseModel {
             return true;
         }
         // 系统监控权限
-        if (BaseJpomApplication.SYSTEM_ID.equals(id)) {
+        if (JpomApplication.SYSTEM_ID.equals(id)) {
             return true;
         }
         NodeRole item = nodeRole.get(nodeId);

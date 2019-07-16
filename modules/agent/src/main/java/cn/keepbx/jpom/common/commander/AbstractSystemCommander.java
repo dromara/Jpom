@@ -1,7 +1,6 @@
 package cn.keepbx.jpom.common.commander;
 
 import cn.hutool.system.SystemUtil;
-import cn.keepbx.jpom.BaseJpomApplication;
 import cn.keepbx.jpom.common.commander.impl.LinuxSystemCommander;
 import cn.keepbx.jpom.common.commander.impl.WindowsSystemCommander;
 import cn.keepbx.jpom.model.system.ProcessModel;

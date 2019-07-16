@@ -5,7 +5,7 @@ import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.validator.ValidatorConfig;
 import cn.jiangzeyin.common.validator.ValidatorItem;
 import cn.jiangzeyin.common.validator.ValidatorRule;
-import cn.keepbx.jpom.BaseJpomApplication;
+import cn.keepbx.jpom.JpomApplication;
 import cn.keepbx.jpom.common.BaseServerController;
 import cn.keepbx.jpom.common.interceptor.LoginInterceptor;
 import cn.keepbx.jpom.common.interceptor.NotLogin;
@@ -62,7 +62,7 @@ public class InstallController extends BaseServerController {
         if (!userService.userListEmpty()) {
             return JsonMessage.getString(100, "系统已经初始化过啦，请勿重复初始化");
         }
-        if (BaseJpomApplication.SYSTEM_ID.equalsIgnoreCase(userName) || UserModel.SYSTEM_ADMIN.equals(userName)) {
+        if (JpomApplication.SYSTEM_ID.equalsIgnoreCase(userName) || UserModel.SYSTEM_ADMIN.equals(userName)) {
             return JsonMessage.getString(400, "当前登录名已经被系统占用啦");
         }
         // 创建用户

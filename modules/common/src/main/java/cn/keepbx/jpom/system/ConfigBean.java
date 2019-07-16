@@ -4,7 +4,7 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.system.SystemUtil;
 import cn.jiangzeyin.common.spring.SpringUtil;
-import cn.keepbx.jpom.BaseJpomApplication;
+import cn.keepbx.jpom.JpomApplication;
 import cn.keepbx.jpom.common.Type;
 import cn.keepbx.jpom.model.system.JpomManifest;
 import org.springframework.beans.factory.annotation.Value;
@@ -87,7 +87,7 @@ public class ConfigBean {
      */
     public File getPidFile() {
         return new File(getDataPath(), StrUtil.format("pid.{}.{}",
-                BaseJpomApplication.getAppType().name(), JpomManifest.getInstance().getPid()));
+                JpomApplication.getAppType().name(), JpomManifest.getInstance().getPid()));
     }
 
     /**
@@ -108,5 +108,18 @@ public class ConfigBean {
      */
     public String getAgentAutoAuthorizeFile(String dataPath) {
         return FileUtil.normalize(dataPath + "/" + ConfigBean.AUTHORIZE);
+    }
+
+
+    /**
+     * 获取临时文件存储路径
+     *
+     * @return file
+     */
+    public File getTempPath() {
+        File file = new File(ConfigBean.getInstance().getDataPath());
+        file = new File(file.getPath() + "/temp/");
+        FileUtil.mkdir(file);
+        return file;
     }
 }

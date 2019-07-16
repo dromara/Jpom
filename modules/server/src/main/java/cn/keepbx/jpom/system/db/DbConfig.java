@@ -11,7 +11,7 @@ import cn.hutool.db.PageResult;
 import cn.hutool.db.sql.Direction;
 import cn.hutool.db.sql.Order;
 import cn.jiangzeyin.common.DefaultSystemLog;
-import cn.keepbx.jpom.BaseJpomApplication;
+import cn.keepbx.jpom.JpomApplication;
 import cn.keepbx.jpom.system.ExtConfigBean;
 import cn.keepbx.jpom.system.ServerExtConfigBean;
 
@@ -48,7 +48,7 @@ public class DbConfig {
      * @return jdbc
      */
     public String getDbUrl() {
-        File file = FileUtil.file(ExtConfigBean.getInstance().getAbsolutePath(), DB, BaseJpomApplication.getAppType().name());
+        File file = FileUtil.file(ExtConfigBean.getInstance().getAbsolutePath(), DB, JpomApplication.getAppType().name());
         String path = FileUtil.getAbsolutePath(file);
         return StrUtil.format("jdbc:h2:{}", path);
     }

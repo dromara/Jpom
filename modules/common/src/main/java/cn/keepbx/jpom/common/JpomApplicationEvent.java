@@ -6,7 +6,7 @@ import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.spring.event.ApplicationEventClient;
-import cn.keepbx.jpom.BaseJpomApplication;
+import cn.keepbx.jpom.JpomApplication;
 import cn.keepbx.jpom.model.system.JpomManifest;
 import cn.keepbx.jpom.system.ConfigBean;
 import cn.keepbx.jpom.system.ExtConfigBean;
@@ -51,7 +51,7 @@ public class JpomApplicationEvent implements ApplicationEventClient {
             // 写入Jpom 信息
             JpomManifest jpomManifest = JpomManifest.getInstance();
             //  写入全局信息
-            File appJpomFile = ConfigBean.getInstance().getApplicationJpomInfo(BaseJpomApplication.getAppType());
+            File appJpomFile = ConfigBean.getInstance().getApplicationJpomInfo(JpomApplication.getAppType());
             FileUtil.writeString(jpomManifest.toString(), appJpomFile, CharsetUtil.CHARSET_UTF_8);
         } else if (event instanceof ContextClosedEvent) {
             // 应用关闭
@@ -59,7 +59,7 @@ public class JpomApplicationEvent implements ApplicationEventClient {
             //
             FileUtil.del(ConfigBean.getInstance().getPidFile());
             //
-            File appJpomFile = ConfigBean.getInstance().getApplicationJpomInfo(BaseJpomApplication.getAppType());
+            File appJpomFile = ConfigBean.getInstance().getApplicationJpomInfo(JpomApplication.getAppType());
             FileUtil.del(appJpomFile);
         }
     }

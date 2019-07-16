@@ -10,7 +10,7 @@ import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
-import cn.keepbx.jpom.BaseJpomApplication;
+import cn.keepbx.jpom.JpomApplication;
 import cn.keepbx.jpom.model.data.ScriptModel;
 import cn.keepbx.util.SocketSessionUtil;
 import com.alibaba.fastjson.JSONObject;
@@ -93,13 +93,13 @@ public class ScriptProcessBuilder implements Runnable {
             process = processBuilder.start();
             {
                 inputStream = process.getInputStream();
-                InputStreamReader inputStreamReader = new InputStreamReader(inputStream, BaseJpomApplication.getCharset());
+                InputStreamReader inputStreamReader = new InputStreamReader(inputStream, JpomApplication.getCharset());
                 BufferedReader results = new BufferedReader(inputStreamReader);
                 IoUtil.readLines(results, (LineHandler) ScriptProcessBuilder.this::handle);
             }
             {
                 errorInputStream = process.getErrorStream();
-                InputStreamReader inputStreamReader = new InputStreamReader(errorInputStream, BaseJpomApplication.getCharset());
+                InputStreamReader inputStreamReader = new InputStreamReader(errorInputStream, JpomApplication.getCharset());
                 BufferedReader results = new BufferedReader(inputStreamReader);
                 IoUtil.readLines(results, (LineHandler) line -> ScriptProcessBuilder.this.handle("ERROR:" + line));
             }

@@ -7,7 +7,7 @@ import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.validator.ValidatorConfig;
 import cn.jiangzeyin.common.validator.ValidatorItem;
 import cn.jiangzeyin.common.validator.ValidatorRule;
-import cn.keepbx.jpom.BaseJpomApplication;
+import cn.keepbx.jpom.JpomApplication;
 import cn.keepbx.jpom.common.BaseServerController;
 import cn.keepbx.jpom.common.interceptor.LoginInterceptor;
 import cn.keepbx.jpom.common.interceptor.UrlPermission;
@@ -140,7 +140,7 @@ public class UserInfoController extends BaseServerController {
     @RequestMapping(value = "addUser", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @UrlPermission(value = Role.ServerManager, optType = UserOperateLogV1.OptType.AddUer)
     public String addUser(String id) {
-        if (BaseJpomApplication.SYSTEM_ID.equalsIgnoreCase(id)) {
+        if (JpomApplication.SYSTEM_ID.equalsIgnoreCase(id)) {
             return JsonMessage.getString(400, "当前登录名已经被系统占用啦");
         }
         UserModel userName = getUser();

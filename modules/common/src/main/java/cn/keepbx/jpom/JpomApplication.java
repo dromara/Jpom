@@ -1,10 +1,12 @@
 package cn.keepbx.jpom;
 
 import cn.hutool.core.util.CharsetUtil;
-import cn.hutool.system.OsInfo;
 import cn.hutool.system.SystemUtil;
 import cn.jiangzeyin.common.ApplicationBuilder;
+import cn.jiangzeyin.common.validator.ParameterInterceptor;
+import cn.keepbx.jpom.common.JpomApplicationEvent;
 import cn.keepbx.jpom.common.Type;
+import org.springframework.http.converter.StringHttpMessageConverter;
 
 import java.nio.charset.Charset;
 
@@ -14,7 +16,7 @@ import java.nio.charset.Charset;
  * @author jiangzeyin
  * @date 2019/4/16
  */
-public abstract class BaseJpomApplication {
+public class JpomApplication extends ApplicationBuilder {
     /**
      *
      */
@@ -38,9 +40,18 @@ public abstract class BaseJpomApplication {
         return args;
     }
 
-    public BaseJpomApplication(Type appType, Class<?> appClass) {
-        BaseJpomApplication.appType = appType;
-        BaseJpomApplication.appClass = appClass;
+    public JpomApplication(Type appType, Class<?> appClass, String[] args) throws Exception {
+        super(appClass);
+        JpomApplication.appType = appType;
+        JpomApplication.appClass = appClass;
+        JpomApplication.args = args;
+
+        addHttpMessageConverter(new StringHttpMessageConverter(CharsetUtil.CHARSET_UTF_8));
+
+        // 参数拦截器
+        addInterceptor(ParameterInterceptor.class);
+        //
+        addApplicationEventClient(new JpomApplicationEvent());
     }
 
     /**
@@ -67,7 +78,7 @@ public abstract class BaseJpomApplication {
 
     public static Class getAppClass() {
         if (appClass == null) {
-            return BaseJpomApplication.class;
+            return JpomApplication.class;
         }
         return appClass;
     }

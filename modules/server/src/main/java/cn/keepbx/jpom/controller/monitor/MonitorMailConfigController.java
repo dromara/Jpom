@@ -21,7 +21,7 @@ import javax.annotation.Resource;
  * 监控邮箱配置
  *
  * @author bwcx_jzy
- * @date 2019/6/15
+ * @date 2019/7/16
  */
 @Controller
 @RequestMapping(value = "/monitor")

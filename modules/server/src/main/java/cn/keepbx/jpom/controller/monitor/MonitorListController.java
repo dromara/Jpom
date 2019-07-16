@@ -51,8 +51,6 @@ public class MonitorListController extends BaseServerController {
      */
     @RequestMapping(value = "list.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
     public String list() {
-        List<MonitorModel> list = monitorService.list();
-        setAttribute("list", list);
         return "monitor/list";
     }
 

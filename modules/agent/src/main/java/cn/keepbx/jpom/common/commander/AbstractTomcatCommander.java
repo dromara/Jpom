@@ -3,13 +3,11 @@ package cn.keepbx.jpom.common.commander;
 import cn.hutool.http.HttpRequest;
 import cn.hutool.system.SystemUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
-import cn.keepbx.jpom.BaseJpomApplication;
 import cn.keepbx.jpom.common.commander.impl.LinuxTomcatCommander;
 import cn.keepbx.jpom.common.commander.impl.WindowsTomcatCommander;
 import cn.keepbx.jpom.model.data.TomcatInfoModel;
 import cn.keepbx.jpom.system.JpomRuntimeException;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 

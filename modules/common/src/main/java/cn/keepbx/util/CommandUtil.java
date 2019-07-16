@@ -4,7 +4,7 @@ import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.system.SystemUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
-import cn.keepbx.jpom.BaseJpomApplication;
+import cn.keepbx.jpom.JpomApplication;
 
 import java.io.File;
 import java.io.IOException;
@@ -88,7 +88,7 @@ public class CommandUtil {
         } else {
             is = process.getErrorStream();
         }
-        result = IoUtil.read(is, BaseJpomApplication.getCharset());
+        result = IoUtil.read(is, JpomApplication.getCharset());
         is.close();
         process.destroy();
         if (StrUtil.isEmpty(result) && wait != 0) {

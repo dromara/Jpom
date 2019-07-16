@@ -51,6 +51,11 @@ public class ServerConfigBean {
      */
     public static final String MAIL_CONFIG = "mail_config.json";
 
+    /**
+     * 构建数据
+     */
+    public static final String BUILD = "build.json";
+
     private static ServerConfigBean serverConfigBean;
 
     /**

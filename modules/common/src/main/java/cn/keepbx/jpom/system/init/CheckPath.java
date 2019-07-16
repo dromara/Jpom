@@ -1,11 +1,13 @@
 package cn.keepbx.jpom.system.init;
 
+import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.ClassUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.PreLoadClass;
 import cn.jiangzeyin.common.PreLoadMethod;
-import cn.keepbx.jpom.BaseJpomApplication;
+import cn.keepbx.jpom.JpomApplication;
 import cn.keepbx.jpom.model.system.JpomManifest;
+import cn.keepbx.jpom.system.ConfigBean;
 import cn.keepbx.jpom.system.ExtConfigBean;
 import cn.keepbx.util.JvmUtil;
 import sun.jvmstat.monitor.MonitorException;
@@ -47,7 +49,7 @@ public class CheckPath {
 
     @PreLoadMethod(2)
     private static void checkDuplicateRun() {
-        Class appClass = BaseJpomApplication.getAppClass();
+        Class appClass = JpomApplication.getAppClass();
         List<MonitoredVm> monitoredVms;
         try {
             String pid = String.valueOf(JpomManifest.getInstance().getPid());
@@ -57,7 +59,7 @@ public class CheckPath {
                 if (pid.equals(vmIdentifier.getUserInfo())) {
                     return;
                 }
-                DefaultSystemLog.LOG().info("Jpom 程序建议一个机器上只运行一个对应的程序：" + BaseJpomApplication.getAppType());
+                DefaultSystemLog.LOG().info("Jpom 程序建议一个机器上只运行一个对应的程序：" + JpomApplication.getAppType());
 
             });
         } catch (MonitorException | URISyntaxException ignored) {
@@ -75,5 +77,11 @@ public class CheckPath {
                 }
             });
         }
+    }
+
+    @PreLoadMethod(4)
+    private static void clearTemp() {
+        File file = ConfigBean.getInstance().getTempPath();
+        FileUtil.clean(file);
     }
 }

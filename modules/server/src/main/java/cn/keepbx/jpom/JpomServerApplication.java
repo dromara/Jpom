@@ -1,16 +1,11 @@
 package cn.keepbx.jpom;
 
-import cn.hutool.core.util.CharsetUtil;
-import cn.jiangzeyin.common.ApplicationBuilder;
 import cn.jiangzeyin.common.EnableCommonBoot;
-import cn.jiangzeyin.common.validator.ParameterInterceptor;
-import cn.keepbx.jpom.common.JpomApplicationEvent;
 import cn.keepbx.jpom.common.Type;
 import cn.keepbx.jpom.common.interceptor.LoginInterceptor;
 import cn.keepbx.jpom.common.interceptor.PermissionInterceptor;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.web.servlet.ServletComponentScan;
-import org.springframework.http.converter.StringHttpMessageConverter;
 
 /**
  * jpom 启动类
@@ -21,10 +16,8 @@ import org.springframework.http.converter.StringHttpMessageConverter;
 @SpringBootApplication
 @ServletComponentScan
 @EnableCommonBoot
-public class JpomServerApplication extends BaseJpomApplication {
-    public JpomServerApplication() throws Exception {
-        super(Type.Server, JpomServerApplication.class);
-    }
+public class JpomServerApplication {
+
 
     /**
      * 启动执行
@@ -32,16 +25,11 @@ public class JpomServerApplication extends BaseJpomApplication {
      * @param args 参数
      */
     public static void main(String[] args) throws Exception {
-        JpomServerApplication.args = args;
-        ApplicationBuilder.createBuilder(JpomServerApplication.class)
-                .addHttpMessageConverter(new StringHttpMessageConverter(CharsetUtil.CHARSET_UTF_8))
+        JpomApplication jpomApplication = new JpomApplication(Type.Server, JpomServerApplication.class, args);
+        jpomApplication
                 // 拦截器
                 .addInterceptor(LoginInterceptor.class)
                 .addInterceptor(PermissionInterceptor.class)
-                // 参数拦截器
-                .addInterceptor(ParameterInterceptor.class)
-                //
-                .addApplicationEventClient(new JpomApplicationEvent())
                 .run(args);
     }
 

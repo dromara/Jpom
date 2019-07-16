@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
  */
 @Controller
 @RequestMapping(value = "/node/manage/")
-public class BuildController extends BaseServerController {
+public class OssBuildController extends BaseServerController {
 
     @RequestMapping(value = "build", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
     public String build(String id) {

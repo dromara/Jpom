@@ -2,7 +2,7 @@ import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.io.LineHandler;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.CharsetUtil;
-import cn.keepbx.jpom.BaseJpomApplication;
+import cn.keepbx.jpom.JpomApplication;
 
 import java.io.*;
 
@@ -85,7 +85,7 @@ public class TestRun {
                         @Override
                         public void handle(String line) {
 
-                            String result = CharsetUtil.convert(line, null, BaseJpomApplication.getCharset());
+                            String result = CharsetUtil.convert(line, null, JpomApplication.getCharset());
                             System.out.println("error:" + result);
                         }
                     });

@@ -2,7 +2,7 @@ package cn.keepbx.jpom.model.data;
 
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
-import cn.keepbx.jpom.BaseJpomApplication;
+import cn.keepbx.jpom.JpomApplication;
 import cn.keepbx.jpom.model.BaseEnum;
 import cn.keepbx.jpom.model.BaseJsonModel;
 
@@ -131,7 +131,7 @@ public class UserOperateLogV1 extends BaseJsonModel {
 
     public void setUserId(String userId) {
         if (UserModel.SYSTEM_OCCUPY_NAME.equals(userId)) {
-            this.userId = BaseJpomApplication.SYSTEM_ID;
+            this.userId = JpomApplication.SYSTEM_ID;
         } else {
             this.userId = userId;
         }

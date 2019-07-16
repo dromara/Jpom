@@ -5,7 +5,7 @@ import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.system.SystemUtil;
-import cn.keepbx.jpom.BaseJpomApplication;
+import cn.keepbx.jpom.JpomApplication;
 import cn.keepbx.jpom.common.Type;
 import cn.keepbx.jpom.system.ConfigBean;
 import com.alibaba.fastjson.JSON;
@@ -40,7 +40,7 @@ public class JpomManifest {
     /**
      * 当前运行类型
      */
-    private Type type = BaseJpomApplication.getAppType();
+    private Type type = JpomApplication.getAppType();
     /**
      * 端口号
      */
@@ -176,7 +176,7 @@ public class JpomManifest {
      * @return jar 或者classPath
      */
     public static File getRunPath() {
-        ApplicationHome home = new ApplicationHome(BaseJpomApplication.getAppClass());
+        ApplicationHome home = new ApplicationHome(JpomApplication.getAppClass());
         String path = (home.getSource() == null ? "" : home.getSource().getAbsolutePath());
         return FileUtil.file(path);
     }

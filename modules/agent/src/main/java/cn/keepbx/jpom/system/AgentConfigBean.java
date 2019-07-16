@@ -77,12 +77,12 @@ public class AgentConfigBean {
      * @return file
      */
     public File getTempPath() {
-        File file = new File(ConfigBean.getInstance().getDataPath());
+        File file = ConfigBean.getInstance().getTempPath();
         String userName = BaseAgentController.getNowUserName();
         if (StrUtil.isEmpty(userName)) {
             throw new JpomRuntimeException("没有登录");
         }
-        file = new File(file.getPath() + "/temp/", userName);
+        file = new File(file, userName);
         FileUtil.mkdir(file);
         return file;
     }

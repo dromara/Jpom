@@ -9,7 +9,7 @@ import cn.hutool.core.util.ReUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
-import cn.keepbx.jpom.BaseJpomApplication;
+import cn.keepbx.jpom.JpomApplication;
 import cn.keepbx.jpom.common.BaseAgentController;
 import cn.keepbx.jpom.common.commander.AbstractProjectCommander;
 import cn.keepbx.jpom.model.Role;
@@ -56,8 +56,8 @@ public class EditProjectController extends BaseAgentController {
         if (!StringUtil.isGeneral(id, 2, 20)) {
             return JsonMessage.getString(401, "项目id 长度范围2-20（英文字母 、数字和下划线）");
         }
-        if (BaseJpomApplication.SYSTEM_ID.equals(id)) {
-            return JsonMessage.getString(401, "项目id " + BaseJpomApplication.SYSTEM_ID + " 关键词被系统占用");
+        if (JpomApplication.SYSTEM_ID.equals(id)) {
+            return JsonMessage.getString(401, "项目id " + JpomApplication.SYSTEM_ID + " 关键词被系统占用");
         }
         // 防止和Jpom冲突
         if (StrUtil.isNotEmpty(ConfigBean.getInstance().applicationTag) && ConfigBean.getInstance().applicationTag.equalsIgnoreCase(id)) {

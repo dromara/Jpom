@@ -40,6 +40,22 @@
     ]
   },
   {
+    "title": "在线构建",
+    "icon": "layui-icon-tree",
+    "childs": [
+      {
+        "id": "buildList",
+        "title": "构建列表",
+        "url": "/build/list.html"
+      },
+      {
+        "id": "buildHistory",
+        "title": "构建历史",
+        "url": "./build/history.html"
+      }
+    ]
+  },
+  {
     "title": "用户管理",
     "icon": "layui-icon-friends",
     "childs": [
