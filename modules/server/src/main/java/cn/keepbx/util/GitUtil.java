@@ -2,11 +2,14 @@ package cn.keepbx.util;
 
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.keepbx.jpom.system.JpomRuntimeException;
 import org.eclipse.jgit.api.CreateBranchCommand;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.ListBranchCommand;
 import org.eclipse.jgit.api.RemoteListCommand;
 import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.api.errors.TransportException;
+import org.eclipse.jgit.internal.JGitText;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.transport.CredentialsProvider;
@@ -100,17 +103,24 @@ public class GitUtil {
      * @throws IOException     IO
      */
     public static List<String> branchList(String url, File file, CredentialsProvider credentialsProvider) throws GitAPIException, IOException {
-        Git git = initGit(url, file, credentialsProvider);
-        //
-        List<Ref> list = git.branchList().setListMode(ListBranchCommand.ListMode.REMOTE).call();
-        List<String> all = new ArrayList<>(list.size());
-        list.forEach(ref -> {
-            String name = ref.getName();
-            if (name.startsWith(Constants.R_REMOTES + Constants.DEFAULT_REMOTE_NAME)) {
-                all.add(name.substring((Constants.R_REMOTES + Constants.DEFAULT_REMOTE_NAME).length() + 1));
+        try {
+            Git git = initGit(url, file, credentialsProvider);
+            //
+            List<Ref> list = git.branchList().setListMode(ListBranchCommand.ListMode.REMOTE).call();
+            List<String> all = new ArrayList<>(list.size());
+            list.forEach(ref -> {
+                String name = ref.getName();
+                if (name.startsWith(Constants.R_REMOTES + Constants.DEFAULT_REMOTE_NAME)) {
+                    all.add(name.substring((Constants.R_REMOTES + Constants.DEFAULT_REMOTE_NAME).length() + 1));
+                }
+            });
+            return all;
+        } catch (TransportException t) {
+            if (t.getMessage().equals(JGitText.get().notAuthorized)) {
+                throw new JpomRuntimeException("git账号密码不正常");
             }
-        });
-        return all;
+            throw t;
+        }
     }
 
 

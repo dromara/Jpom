@@ -114,7 +114,7 @@ public class Monitor implements Task {
         }
         projects.forEach(id -> {
             // 获取上次状态
-            boolean pre = getPreStatus(nodeModel.getId(), id);
+            boolean pre = getPreStatus(monitorModel.getId(), nodeModel.getId(), id);
             String title = null;
             String context = null;
             // 当前状态
@@ -139,12 +139,14 @@ public class Monitor implements Task {
                             // 执行重启
                             try {
                                 JsonMessage reJson = NodeForward.requestBySys(nodeModel, NodeUrl.Manage_Restart, "id", id);
-                                title = StrUtil.format("【{}】节点的【{}】项目已经停止，已经执行重启操作", nodeModel.getName(), id);
-                                context = "重启结果：" + reJson.toString();
                                 if (reJson.getCode() == HttpStatus.HTTP_OK) {
                                     // 重启成功
                                     runStatus = true;
+                                    title = StrUtil.format("【{}】节点的【{}】项目已经停止，已经执行重启操作,结果成功", nodeModel.getName(), id);
+                                } else {
+                                    title = StrUtil.format("【{}】节点的【{}】项目已经停止，已经执行重启操作,结果失败", nodeModel.getName(), id);
                                 }
+                                context = "重启结果：" + reJson.toString();
                             } catch (Exception e) {
                                 DefaultSystemLog.ERROR().error("执行重启操作", e);
                                 title = StrUtil.format("【{}】节点的【{}】项目已经停止，重启操作异常", nodeModel.getName(), id);
@@ -186,15 +188,17 @@ public class Monitor implements Task {
     /**
      * 获取上次是否也为异常状态
      *
+     * @param monitorId 监控id
      * @param nodeId    节点id
      * @param projectId 项目id
      * @return true 为正常状态,false 异常状态
      */
-    private boolean getPreStatus(String nodeId, String projectId) {
+    private boolean getPreStatus(String monitorId, String nodeId, String projectId) {
         // 检查是否已经触发通知
         Entity entity = Entity.create(MonitorNotifyLog.TABLE_NAME);
         entity.set("nodeId", nodeId);
         entity.set("projectId", projectId);
+        entity.set("monitorId", monitorId);
         Page page = new Page(0, 1);
         page.addOrder(new Order("createTime", Direction.DESC));
         PageResult<Entity> pageResult;
