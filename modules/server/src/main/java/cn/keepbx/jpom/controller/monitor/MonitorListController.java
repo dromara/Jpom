@@ -187,7 +187,7 @@ public class MonitorListController extends BaseServerController {
             id = IdUtil.objectId();
             UserModel user = getUser();
             monitorModel.setId(id);
-            monitorModel.setParent(user.getName());
+            monitorModel.setParent(UserModel.getOptUserName(user));
             monitorService.addItem(monitorModel);
             return JsonMessage.getString(200, "添加成功");
         }

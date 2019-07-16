@@ -1,5 +1,6 @@
 package cn.keepbx.jpom.service.build;
 
+import cn.hutool.core.date.DateUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.keepbx.jpom.common.BaseOperService;
 import cn.keepbx.jpom.model.data.BuildModel;
@@ -46,7 +47,8 @@ public class BuildService extends BaseOperService<BuildModel> {
     }
 
     @Override
-    public boolean updateItem(BuildModel buildModel) throws Exception {
+    public boolean updateItem(BuildModel buildModel) {
+        buildModel.setModifyTime(DateUtil.now());
         try {
             updateJson(ServerConfigBean.BUILD, buildModel.toJson());
         } catch (Exception e) {

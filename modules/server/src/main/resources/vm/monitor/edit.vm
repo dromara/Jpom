@@ -3,7 +3,6 @@
 
 <head>
     #parse("./common/head.vm")
-    <link href="$!jpomProxyPath/static/ztree/zTreeStyle/zTreeStyle.css" rel="stylesheet">
     <title>项目管理系统</title>
     <style>
         body {

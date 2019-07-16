@@ -8,6 +8,7 @@ import cn.jiangzeyin.common.JsonMessage;
 import cn.keepbx.jpom.common.interceptor.BaseJpomInterceptor;
 import cn.keepbx.jpom.system.AgentException;
 import cn.keepbx.jpom.system.AuthorizeException;
+import cn.keepbx.jpom.system.JpomRuntimeException;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -53,6 +54,8 @@ public class GlobalDefaultExceptionHandler {
             } else if (e instanceof AgentException) {
                 AgentException agentException = (AgentException) e;
                 ServletUtil.write(response, JsonMessage.getString(500, agentException.getMessage()), MediaType.APPLICATION_JSON_UTF8_VALUE);
+            } else if (e instanceof JpomRuntimeException) {
+                ServletUtil.write(response, JsonMessage.getString(500, e.getMessage()), MediaType.APPLICATION_JSON_UTF8_VALUE);
             } else {
                 ServletUtil.write(response, JsonMessage.getString(500, "服务异常：" + e.getMessage()), MediaType.APPLICATION_JSON_UTF8_VALUE);
             }

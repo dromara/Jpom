@@ -116,35 +116,51 @@ public class GitUtil {
             });
             return all;
         } catch (TransportException t) {
-            if (t.getMessage().equals(JGitText.get().notAuthorized)) {
-                throw new JpomRuntimeException("git账号密码不正常");
+            String msg = t.getMessage();
+            if (msg.contains(JGitText.get().notAuthorized)) {
+                throw new JpomRuntimeException("git账号密码不正常", t);
             }
             throw t;
         }
     }
 
-
+    /**
+     * @param url
+     * @param file
+     * @param branchName
+     * @param credentialsProvider
+     * @throws IOException
+     * @throws GitAPIException
+     */
     public static void checkoutPull(String url, File file, String branchName, CredentialsProvider credentialsProvider) throws IOException, GitAPIException {
-        Git git = initGit(url, file, credentialsProvider);
-        // 判断本地是否存在对应分支
-        List<Ref> list = git.branchList().setListMode(ListBranchCommand.ListMode.ALL).call();
-        boolean createBranch = true;
-        for (Ref ref : list) {
-            String name = ref.getName();
-            if (name.startsWith(Constants.R_HEADS + branchName)) {
-                createBranch = false;
-                break;
+        try {
+            Git git = initGit(url, file, credentialsProvider);
+            // 判断本地是否存在对应分支
+            List<Ref> list = git.branchList().setListMode(ListBranchCommand.ListMode.ALL).call();
+            boolean createBranch = true;
+            for (Ref ref : list) {
+                String name = ref.getName();
+                if (name.startsWith(Constants.R_HEADS + branchName)) {
+                    createBranch = false;
+                    break;
+                }
             }
+            // 切换分支
+            if (!StrUtil.equals(git.getRepository().getBranch(), branchName)) {
+                git.checkout().
+                        setCreateBranch(createBranch).
+                        setName(branchName).
+                        setForceRefUpdate(true).
+                        setUpstreamMode(CreateBranchCommand.SetupUpstreamMode.SET_UPSTREAM).
+                        call();
+            }
+            git.pull().setCredentialsProvider(credentialsProvider).call();
+        } catch (TransportException t) {
+            String msg = t.getMessage();
+            if (msg.contains(JGitText.get().notAuthorized)) {
+                throw new JpomRuntimeException("git账号密码不正常", t);
+            }
+            throw t;
         }
-        // 切换分支
-        if (!StrUtil.equals(git.getRepository().getBranch(), branchName)) {
-            git.checkout().
-                    setCreateBranch(createBranch).
-                    setName(branchName).
-                    setForceRefUpdate(true).
-                    setUpstreamMode(CreateBranchCommand.SetupUpstreamMode.SET_UPSTREAM).
-                    call();
-        }
-        git.pull().setCredentialsProvider(credentialsProvider).call();
     }
 }

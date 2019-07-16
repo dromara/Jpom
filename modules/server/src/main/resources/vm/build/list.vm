@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    #parse("./common/head.vm")
+    <title>项目管理系统</title>
+    <style>
+        .layui-form-label {
+            width: 100px;
+        }
+
+        body {
+            padding: 10px 10px 0px 10px;
+        }
+
+        .layui-container {
+            width: 80% !important;
+        }
+
+        .div-user {
+            display: none;
+        }
+
+        .layui-input-block {
+            margin-left: 135px;
+        }
+    </style>
+</head>
+
+<body>
+<div class="layui-row">
+    <button id="addMonitor" class="layui-btn layui-btn-sm">新增构建</button>
+    <button id="refresh" class="layui-btn layui-btn-sm">刷新表格</button>
+</div>
+<table class="layui-table" id="tab_monitor" lay-filter="tab_monitor" style="margin: 0;"></table>
+
+</body>
+
+<script type="text/html" id="bar_build">
+    <a href="javascript:;" class="layui-btn  layui-btn-sm layui-btn-normal" lay-event="update">编辑</a>
+
+    {{# if(d.status==0 || d.status== 2 || d.status==5) { }}
+    <a href="javascript:;" class="layui-btn  layui-btn-sm layui-btn-danger" lay-event="build">构建</a>
+    {{# } }}
+    <a href="javascript:;" class="layui-btn  layui-btn-sm layui-btn-danger" lay-event="delete">删除</a>
+</script>
+
+<script type="text/javascript">
+
+    var statusArray = [];
+        #if($statusArray)
+        statusArray = $statusArray;
+        #end
+
+    function loadSuccess() {
+        tableRender({
+            id: 'tab_monitor',
+            elem: '#tab_monitor',
+            url: './list_data.json',
+            cols: [[
+                {field: 'name', title: '名称'},
+                {field: 'branchName', title: '分支'},
+                {
+                    field: 'status', title: "当前状态", templet: function (d) {
+                        for (var i = 0; i < statusArray.length; i++) {
+                            if (statusArray[i].code == d.status) {
+                                return statusArray[i].desc;
+                            }
+                        }
+                        return "未知";
+                    }
+                },
+                {
+                    field: 'buildId', title: '当前构建ID', templet: function (d) {
+                        return "#" + d.buildId;
+                    }
+                },
+                {field: 'modifyUser', title: '最后修改人'},
+                {field: 'modifyTime', title: '最后修改时间'},
+                {field: 'op', title: '操作', align: 'center', toolbar: '#bar_build', fixed: 'right'}
+            ]]
+        });
+
+        // '添加监控'点击事件
+        $('#addMonitor').on('click', function () {
+            // 弹出
+            layer.open({
+                type: 2,
+                title: '新增构建',
+                content: './edit.html',
+                area: ['80%', '80%'],
+            });
+        });
+
+        // '刷新表格'点击事件
+        $('#refresh').on('click', function () {
+            table.reload('tab_monitor', {});
+        });
+
+        // 表格工具条事件
+        table.on('tool(tab_monitor)', function (obj) {
+            var data = obj.data;
+            var event = obj.event;
+            if ('update' === event) {
+                // 修改
+                updateApplication(data);
+            } else if ('delete' === event) {
+                // 删除
+                deleteApplication(data);
+            } else if ('build' == event) {
+                loadingAjax({
+                    url: './start.json',
+                    data: {
+                        id: data.id
+                    },
+                    success: function (data) {
+                        layer.msg(data.msg);
+                        if (200 == data.code) {
+                            table.reload('tab_monitor', {});
+                        }
+                    }
+                });
+            }
+        });
+
+        // 编辑监控
+        function updateApplication(data) {
+            layer.open({
+                type: 2,
+                title: '修改监控',
+                content: './edit.html?id=' + data.id,
+                area: ['80%', '80%'],
+            });
+        }
+
+        // 删除监控
+        function deleteApplication(data) {
+            layer.confirm('确定删除监控 ' + data.name + '？', {
+                title: '系统提示'
+            }, function (index) {
+                layer.close(index);
+                loadingAjax({
+                    url: './deleteMonitor',
+                    data: {
+                        id: data.id
+                    },
+                    success: function (data) {
+                        layer.msg(data.msg);
+                        if (200 == data.code) {
+                            table.reload('tab_monitor', {});
+                        }
+                    }
+                });
+            });
+        }
+
+        $('#monitorStatus').on('click', function () {
+            // 弹出
+            layer.open({
+                type: 2,
+                title: '新增监控',
+                content: './edit.html',
+                area: ['80%', '80%'],
+            });
+        });
+    }
+</script>
+</html>
