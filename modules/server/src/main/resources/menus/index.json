@@ -29,12 +29,12 @@
       {
         "id": "monitorLog",
         "title": "监控日志",
-        "url": "./monitor/list.html"
+        "url": "./monitor/log.html"
       },
       {
         "id": "monitorConfigEmail",
         "title": "邮箱配置",
-        "url": "./monitor/list.html"
+        "url": "./monitor/mailConfig.html"
       }
     ]
   },

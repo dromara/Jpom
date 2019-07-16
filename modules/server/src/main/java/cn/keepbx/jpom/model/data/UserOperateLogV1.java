@@ -259,6 +259,10 @@ public class UserOperateLogV1 extends BaseJsonModel {
         Download_Tomcat(51, "下载tomcat文件"),
         Upload_File_War_Tomcat(52, "上传tomcat War包"),
 
+        EditMailConfig(53, "修改邮箱配置"),
+
+        EditMonitor(54, "修改监控"),
+        DelMonitor(55, "删除监控"),
         ;
         private int code;
         private String desc;

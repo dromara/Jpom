@@ -200,7 +200,7 @@ public class Monitor implements Task {
         try {
             pageResult = Db.use().setWrapper((Character) null).page(entity, page);
             if (pageResult.isEmpty()) {
-                return false;
+                return true;
             }
             Entity entity1 = pageResult.get(0);
             Byte byte1 = entity1.get("STATUS", (byte) 0);
@@ -209,7 +209,7 @@ public class Monitor implements Task {
         } catch (SQLException e) {
             DefaultSystemLog.ERROR().error("数据库查询异常", e);
             // 如果异常默认上次是正常状态
-            return false;
+            return true;
         }
     }
 

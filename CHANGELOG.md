@@ -11,6 +11,7 @@
 5. 【Server】节点支持配置请求超时时间
 6. 支持配置是否记录请求、响应日志【consoleLog.reqXss、consoleLog.reqResponse】
 7. 新增日志记录最大记录条数【默认100000】
+8. 【Server】layui 升级到2.5.4
 
 ### 解决BUG、优化功能
 

@@ -5,11 +5,15 @@ import cn.hutool.core.lang.Validator;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.JsonMessage;
+import cn.jiangzeyin.common.validator.ValidatorConfig;
+import cn.jiangzeyin.common.validator.ValidatorItem;
+import cn.jiangzeyin.common.validator.ValidatorRule;
 import cn.keepbx.jpom.common.BaseServerController;
+import cn.keepbx.jpom.common.interceptor.UrlPermission;
 import cn.keepbx.jpom.model.BaseEnum;
-import cn.keepbx.jpom.model.data.MonitorModel;
-import cn.keepbx.jpom.model.data.NodeModel;
-import cn.keepbx.jpom.model.data.UserModel;
+import cn.keepbx.jpom.model.Role;
+import cn.keepbx.jpom.model.data.*;
+import cn.keepbx.jpom.service.monitor.MonitorMailConfigService;
 import cn.keepbx.jpom.service.monitor.MonitorService;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -37,6 +41,9 @@ public class MonitorListController extends BaseServerController {
 
     @Resource
     private MonitorService monitorService;
+
+    @Resource
+    private MonitorMailConfigService monitorMailConfigService;
 
     /**
      * 展示监控页面
@@ -84,10 +91,8 @@ public class MonitorListController extends BaseServerController {
      */
     @RequestMapping(value = "deleteMonitor", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
-    public String deleteMonitor(String id) {
-        if (StrUtil.isEmpty(id)) {
-            return JsonMessage.getString(400, "删除失败");
-        }
+    @UrlPermission(value = Role.ServerManager, optType = UserOperateLogV1.OptType.DelMonitor)
+    public String deleteMonitor(@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "删除失败")) String id) {
         monitorService.deleteItem(id);
         return JsonMessage.getString(200, "删除成功");
     }
@@ -97,11 +102,11 @@ public class MonitorListController extends BaseServerController {
      */
     @RequestMapping(value = "updateMonitor", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
-    public String updateMonitor() {
-        String id = getParameter("id");
+    @UrlPermission(value = Role.ServerManager, optType = UserOperateLogV1.OptType.EditMonitor)
+    public String updateMonitor(String id,
+                                @ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "监控名称不能为空")) String name) {
         String notify = getParameter("notify");
-        String name = getParameter("name");
-        int cycle = getParameterInt("cycle", 30);
+        int cycle = getParameterInt("cycle", MonitorModel.Cycle.five.getCode());
         String status = getParameter("status");
         String autoRestart = getParameter("autoRestart");
         JSONArray notifyArray = JSONArray.parseArray(notify);
@@ -116,20 +121,31 @@ public class MonitorListController extends BaseServerController {
             Objects.requireNonNull(notifyType);
             //
             String value = jsonObject.getString("value");
-//            if (style == MonitorModel.NotifyType.sms.getCode()) {
-//                boolean mobile = Validator.isMobile(value);
-//                if (!mobile) {
-//                    return JsonMessage.getString(400, "请输入正确的手机号码");
-//                }
-//            } else
+            if (StrUtil.isBlank(value)) {
+                return JsonMessage.getString(405, "请填写通知信息");
+            }
             switch (notifyType) {
                 case mail:
-                    boolean email = Validator.isEmail(value);
-                    if (!email) {
-                        return JsonMessage.getString(400, "请输入正确的邮箱");
+                    // 检查配置
+                    MailAccountModel config = monitorMailConfigService.getConfig();
+                    if (config == null) {
+                        return JsonMessage.getString(400, "还没有配置邮箱信息，请选配置邮箱信息");
+                    }
+                    //
+                    String[] emails = StrUtil.split(value, StrUtil.COMMA);
+                    if (emails == null || emails.length <= 0) {
+                        return JsonMessage.getString(400, "请输入邮箱");
+                    }
+                    for (String email : emails) {
+                        if (!Validator.isEmail(email)) {
+                            return JsonMessage.getString(400, "请输入正确的邮箱:" + email);
+                        }
                     }
                     break;
                 case dingding:
+                    if (!Validator.isUrl(value)) {
+                        return JsonMessage.getString(400, "钉钉通知地址不正确");
+                    }
                     break;
                 default:
                     break;
@@ -168,7 +184,6 @@ public class MonitorListController extends BaseServerController {
             monitorService.addItem(monitorModel);
             return JsonMessage.getString(200, "添加成功");
         }
-//        monitorService.openMonitor(monitorModel);
         monitorService.updateItem(monitorModel);
         return JsonMessage.getString(200, "修改成功");
     }
