@@ -26,7 +26,7 @@ public class TestGit {
 
         List<String> l = GitUtil.branchList(url, file, usernamePasswordCredentialsProvider);
         System.out.println(l);
-        //checkOutPull(url, file, "master");
+        GitUtil.checkoutPull(url, file, "master", usernamePasswordCredentialsProvider);
         //
         ProcessBuilder processBuilder = new ProcessBuilder();
         processBuilder.directory(file);
