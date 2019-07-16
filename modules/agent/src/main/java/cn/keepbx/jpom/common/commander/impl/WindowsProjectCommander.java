@@ -1,5 +1,6 @@
 package cn.keepbx.jpom.common.commander.impl;
 
+import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.text.StrSpliter;
 import cn.hutool.core.thread.GlobalThreadPool;
 import cn.hutool.core.util.StrUtil;
@@ -35,7 +36,7 @@ public class WindowsProjectCommander extends AbstractProjectCommander {
                 jvm, classPath, tag,
                 projectInfoModel.getAbsoluteLib(), mainClass, args, projectInfoModel.getAbsoluteLog());
         // 执行命令
-        GlobalThreadPool.execute(() -> CommandUtil.execSystemCommand(command));
+        GlobalThreadPool.execute(() -> CommandUtil.execSystemCommand(command, FileUtil.file(projectInfoModel.getLib())));
         //
         loopCheckRun(projectInfoModel.getId(), true);
         return status(projectInfoModel.getId());

@@ -1,5 +1,6 @@
 package cn.keepbx.jpom.common.commander.impl;
 
+import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.text.StrSpliter;
 import cn.hutool.core.thread.GlobalThreadPool;
 import cn.hutool.core.util.StrUtil;
@@ -34,7 +35,7 @@ public class LinuxProjectCommander extends AbstractProjectCommander {
                 projectInfoModel.getArgs(),
                 projectInfoModel.getAbsoluteLog());
         //
-        GlobalThreadPool.execute(() -> CommandUtil.execSystemCommand(command));
+        GlobalThreadPool.execute(() -> CommandUtil.execSystemCommand(command, FileUtil.file(projectInfoModel.getLib())));
         // 检查是否执行完毕
         loopCheckRun(projectInfoModel.getId(), true);
         return status(projectInfoModel.getId());

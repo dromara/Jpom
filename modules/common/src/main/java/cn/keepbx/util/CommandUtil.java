@@ -6,6 +6,7 @@ import cn.hutool.system.SystemUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.keepbx.jpom.BaseJpomApplication;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
@@ -18,11 +19,12 @@ import java.util.Arrays;
  */
 public class CommandUtil {
 
+
     public static String execCommand(String command) {
         String newCommand = StrUtil.replace(command, StrUtil.CRLF, StrUtil.SPACE);
         String result = "error";
         try {
-            result = exec(new String[]{newCommand});
+            result = exec(new String[]{newCommand}, null);
         } catch (Exception e) {
             DefaultSystemLog.ERROR().error("执行命令异常", e);
             result += e.getMessage();
@@ -31,6 +33,17 @@ public class CommandUtil {
     }
 
     public static String execSystemCommand(String command) {
+        return execSystemCommand(command, null);
+    }
+
+    /**
+     * 在指定文件夹下执行命令
+     *
+     * @param command 命令
+     * @param file    文件夹
+     * @return msg
+     */
+    public static String execSystemCommand(String command, File file) {
         String newCommand = StrUtil.replace(command, StrUtil.CRLF, StrUtil.SPACE);
         String result = "error";
         try {
@@ -43,7 +56,7 @@ public class CommandUtil {
             } else {
                 cmd = new String[]{"cmd", "/c", newCommand};
             }
-            result = exec(cmd);
+            result = exec(cmd, file);
         } catch (Exception e) {
             DefaultSystemLog.ERROR().error("执行命令异常", e);
             result += e.getMessage();
@@ -59,14 +72,14 @@ public class CommandUtil {
      * @throws IOException          IO
      * @throws InterruptedException 等待超时
      */
-    private static String exec(String[] cmd) throws IOException, InterruptedException {
+    private static String exec(String[] cmd, File file) throws IOException, InterruptedException {
         DefaultSystemLog.LOG().info(Arrays.toString(cmd));
         String result;
         Process process;
         if (cmd.length == 1) {
             process = Runtime.getRuntime().exec(cmd[0]);
         } else {
-            process = Runtime.getRuntime().exec(cmd);
+            process = Runtime.getRuntime().exec(cmd, null, file);
         }
         InputStream is;
         int wait = process.waitFor();

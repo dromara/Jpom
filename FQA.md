@@ -74,12 +74,6 @@ Jpom需要Jdk1.8以上，请检查jdk版本
 针对以上两个问题，Jpom目前采用略过这些进程的解决办法，请更新到2.3.1以上。 
 
 
-### SpringBoot 读取jar包同路径配置文件失败
-
-由于目前Jpom 启动下面的方式限制SpringBoot未能读取到对应配置文件，目前解决方案是在配置项目的args参数解决
-
-> --spring.config.location=D:\config\config.properties  
-
 ### windows 环境 com.sun.tools.attach.AttachNotSupportedException: no providers installed 之类异常
 
 > 问题原因${JAVA_HOME}/jre/bin/attach.dll 文件没有找到，检查当前Jdk环境是否安装完整
