@@ -1,6 +1,7 @@
 package cn.keepbx.monitor;
 
 import cn.hutool.core.exceptions.ExceptionUtil;
+import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.cron.CronUtil;
@@ -139,7 +140,7 @@ public class Monitor implements Task {
                             try {
                                 JsonMessage reJson = NodeForward.requestBySys(nodeModel, NodeUrl.Manage_Restart, "id", id);
                                 title = StrUtil.format("【{}】节点的【{}】项目已经停止，已经执行重启操作", nodeModel.getName(), id);
-                                context = reJson.toString();
+                                context = "重启结果：" + reJson.toString();
                                 if (reJson.getCode() == HttpStatus.HTTP_OK) {
                                     // 重启成功
                                     runStatus = true;
@@ -178,7 +179,7 @@ public class Monitor implements Task {
             monitorNotifyLog.setMonitorId(monitorModel.getId());
             //
             List<MonitorModel.Notify> notify = monitorModel.getNotify();
-            this.notifyMsg(notify, title, context, monitorNotifyLog);
+            this.notifyMsg(notify, monitorNotifyLog);
         });
     }
 
@@ -213,25 +214,33 @@ public class Monitor implements Task {
         }
     }
 
-    private void notifyMsg(List<MonitorModel.Notify> notify, String title, String context, MonitorNotifyLog monitorNotifyLog) {
+    private void notifyMsg(final List<MonitorModel.Notify> notify, final MonitorNotifyLog monitorNotifyLog) {
         // 报警状态
         MonitorService monitorService = SpringUtil.getBean(MonitorService.class);
         monitorService.setAlarm(monitorNotifyLog.getMonitorId(), !monitorNotifyLog.isStatus());
         // 发送通知
-        if (title != null) {
+        if (monitorNotifyLog.getTitle() != null) {
             notify.forEach(notify1 -> {
                 monitorNotifyLog.setLogId(IdUtil.fastSimpleUUID());
                 monitorNotifyLog.setNotifyStyle(notify1.getStyle());
+                monitorNotifyLog.setNotifyObject(notify1.getValue());
                 insert(monitorNotifyLog);
-                try {
-                    NotifyUtil.send(notify1, title, context);
-                    updateStatus(monitorNotifyLog.getLogId(), true);
-                } catch (Exception e) {
-                    DefaultSystemLog.ERROR().error("发送报警通知异常", e);
-                    updateStatus(monitorNotifyLog.getLogId(), false);
-                }
+                send(notify1, monitorNotifyLog.getLogId(), monitorNotifyLog.getTitle(), monitorNotifyLog.getContent());
             });
         }
+    }
+
+    private void send(MonitorModel.Notify notify, String logId, String title, String context) {
+        // 异常发送
+        ThreadUtil.execute(() -> {
+            try {
+                NotifyUtil.send(notify, title, context);
+                updateStatus(logId, true, null);
+            } catch (Exception e) {
+                DefaultSystemLog.ERROR().error("发送报警通知异常", e);
+                updateStatus(logId, false, ExceptionUtil.stacktraceToString(e));
+            }
+        });
     }
 
     /**
@@ -260,13 +269,15 @@ public class Monitor implements Task {
      * @param logId  通知id
      * @param status 状态
      */
-    private void updateStatus(String logId, boolean status) {
+    private void updateStatus(String logId, boolean status, String errorMsg) {
         Db db = Db.use();
         db.setWrapper((Character) null);
         try {
             Entity entity = new Entity(MonitorNotifyLog.TABLE_NAME);
             entity.set("notifyStatus", status);
-
+            if (errorMsg != null) {
+                entity.set("notifyError", errorMsg);
+            }
             //
             Entity where = new Entity(MonitorNotifyLog.TABLE_NAME);
             where.set("logId", logId);

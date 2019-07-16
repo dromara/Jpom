@@ -32,7 +32,7 @@
             <div class="layui-form-item">
                 <label class="layui-form-label">用户名</label>
                 <div class="layui-input-block">
-                    <input type="password" name="user" placeholder="用户名" required
+                    <input type="text" name="user" placeholder="用户名" required
                            lay-verify="required" value="$!item.user"
                            class="layui-input">
                 </div>
@@ -107,7 +107,6 @@
 
         form.on('switch(sslEnable)', function (data) {
             var check = data.elem.checked;
-            console.log(check);
             if (check) {
                 $("#socketFactoryPort").show();
             } else {

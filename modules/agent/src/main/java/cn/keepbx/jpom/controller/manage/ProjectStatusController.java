@@ -86,10 +86,7 @@ public class ProjectStatusController extends BaseAgentController {
     }
 
     @RequestMapping(value = "restart", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public String restart(String id) {
-        if (StrUtil.isEmpty(id)) {
-            return JsonMessage.getString(405, "项目id 不正确");
-        }
+    public String restart(@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "项目id 不正确")) String id) {
         ProjectInfoModel item = projectInfoService.getItem(id);
         if (item == null) {
             return JsonMessage.getString(405, "没有找到对应的项目");
@@ -97,10 +94,15 @@ public class ProjectStatusController extends BaseAgentController {
         String result;
         try {
             result = AbstractProjectCommander.getInstance().restart(item);
+            boolean status = AbstractProjectCommander.getInstance().isRun(item.getId());
+            if (status) {
+                return JsonMessage.getString(200, result);
+            }
+            return JsonMessage.getString(201, "重启失败：" + result);
         } catch (Exception e) {
             DefaultSystemLog.ERROR().error("获取项目pid 失败", e);
             result = "error:" + e.getMessage();
+            return JsonMessage.getString(500, "重启异常：" + result);
         }
-        return JsonMessage.getString(200, result);
     }
 }

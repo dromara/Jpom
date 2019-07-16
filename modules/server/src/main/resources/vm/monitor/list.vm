@@ -41,14 +41,14 @@
     <a href="javascript:;" class="layui-btn  layui-btn-sm layui-btn-danger" lay-event="delete">删除</a>
 </script>
 <script type="text/html" id="monitor_status">
-    <a href="javascript:;" onclick="changeStatus(this)" monitorId="{{ d.id }}" monitorStatus="{{ d.status }}">
-        <input type="checkbox" name="status" {{# if(d.status){ }} checked {{# } }}
-               lay-skin="switch" lay-text="是|否">
-    </a>
+    <input type="checkbox" monitorId="{{ d.id }}" typeS="status" name="status" {{# if(d.status){ }} checked {{# } }}
+           lay-skin="switch" lay-text="是|否" lay-filter="monitor_status">
 </script>
 <script type="text/html" id="monitor_restart">
-    <input type="checkbox" name="autoRestart" {{# if(d.autoRestart){ }} checked {{# } }} lay-skin="switch"
-           lay-text="是|否">
+    <input type="checkbox" monitorId="{{ d.id }}" typeS="restart" name="autoRestart" {{# if(d.autoRestart){ }} checked {{#
+           } }}
+           lay-skin="switch"
+           lay-text="是|否" lay-filter="monitor_restart">
 </script>
 <script type="text/html" id="monitor_alarm">
     <input type="checkbox" disabled name="alarm" {{# if(d.alarm){ }} checked {{# } }} lay-skin="switch"
@@ -144,14 +144,30 @@
                 area: ['80%', '80%'],
             });
         });
-    }
 
-    function changeStatus(dom) {
-        var monitorId = dom.getAttribute("monitorId");
-        var monitorStatus = dom.getAttribute("monitorStatus");
-        console.log(monitorId);
-        console.log(monitorStatus);
-        dom.setAttribute("monitorStatus", !monitorStatus);
+        form.on('switch(monitor_status)', function (data) {
+            changeStatus(data);
+        });
+        form.on('switch(monitor_restart)', function (data) {
+            changeStatus(data);
+        });
+
+        function changeStatus(data) {
+            var check = data.elem.checked;
+            var monitorId = $(data.elem).attr("monitorId");
+            var type = $(data.elem).attr("typeS");
+            loadingAjax({
+                url: './changeStatus',
+                data: {
+                    id: monitorId,
+                    status: check,
+                    type: type
+                },
+                success: function (data) {
+                    layer.msg(data.msg);
+                }
+            });
+        }
     }
 </script>
 </html>

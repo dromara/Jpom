@@ -30,6 +30,20 @@
                 {{ d.content }}
             </div>
         </div>
+        <div class="layui-card">
+            <div class="layui-card-header">通知对象</div>
+            <div class="layui-card-body">
+                {{ d.notifyObject }}
+            </div>
+        </div>
+        {{# if(!d.notifyStatus){ }}
+        <div class="layui-card">
+            <div class="layui-card-header">通知异常</div>
+            <div class="layui-card-body">
+                {{ d.notifyError }}
+            </div>
+        </div>
+        {{# } }}
     </div>
 </script>
 </body>
@@ -55,7 +69,17 @@
                     </select>
                 </div>
             </div>
-
+            <div class="layui-inline">
+                <label class="layui-form-label" style="width: auto !important;">通知状态</label>
+                <div class="layui-input-inline">
+                    <select name="notifyStatus" id="notifyStatus" lay-verify="required" lay-filter="notifyStatus"
+                            lay-search="">
+                        <option value="">请选择</option>
+                        <option value="true">成功</option>
+                        <option value="false">失败</option>
+                    </select>
+                </div>
+            </div>
         </div>
     </form>
 </script>
@@ -119,7 +143,7 @@
                 renderDate();
                 // 选中
                 $("#selectNode option[value='" + apiWhere.selectNode + "']").attr("selected", "selected");
-
+                $("#notifyStatus option[value='" + apiWhere.notifyStatus + "']").attr("selected", "selected");
                 form.render();
             }
         });
@@ -136,7 +160,8 @@
                         layer.open({
                             type: 1,
                             content: html,
-                            scrollbar: false
+                            scrollbar: false,
+                            area: ["80%", "80%"]
                         });
                     });
 
@@ -148,6 +173,11 @@
 
         form.on('select(selectNode)', function (data) {
             apiWhere.selectNode = data.value;
+            reloadTable();
+            return true;
+        });
+        form.on('select(notifyStatus)', function (data) {
+            apiWhere.notifyStatus = data.value;
             reloadTable();
             return true;
         });

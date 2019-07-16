@@ -88,7 +88,7 @@
         <div class="layui-form-item">
             <label class="layui-form-label">超时时间</label>
             <div class="layui-input-block">
-                <input type="text" id="timeOut" name="timeOut" value="#if(!$item)5000#else$!item.timeOut#end"
+                <input type="text" id="timeOut" name="timeOut" value="#if(!$item)10000#else$!item.timeOut#end"
                        placeholder="节点请求超时时间（毫秒）"
                        class="layui-input"
                        required

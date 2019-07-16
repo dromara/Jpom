@@ -41,6 +41,30 @@ public class MonitorNotifyLog extends BaseJsonModel {
      * 监控id
      */
     private String monitorId;
+    /**
+     * 通知对象
+     */
+    private String notifyObject;
+    /**
+     * 通知异常消息
+     */
+    private String notifyError;
+
+    public String getNotifyObject() {
+        return notifyObject;
+    }
+
+    public void setNotifyObject(String notifyObject) {
+        this.notifyObject = notifyObject;
+    }
+
+    public String getNotifyError() {
+        return notifyError;
+    }
+
+    public void setNotifyError(String notifyError) {
+        this.notifyError = notifyError;
+    }
 
     public boolean isNotifyStatus() {
         return notifyStatus;

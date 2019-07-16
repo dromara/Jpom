@@ -138,7 +138,8 @@
                         layer.open({
                             type: 1,
                             content: html,
-                            scrollbar: false
+                            scrollbar: false,
+                            area: ["80%", "80%"]
                         });
                     });
 

@@ -37,7 +37,7 @@ public class MailAccountModel extends BaseJsonModel {
     /**
      * 指定的端口连接到在使用指定的套接字工厂。如果没有设置,将使用默认端口
      */
-    private int socketFactoryPort = 465;
+    private Integer socketFactoryPort;
 
     public String getHost() {
         return host;
@@ -87,11 +87,11 @@ public class MailAccountModel extends BaseJsonModel {
         this.sslEnable = sslEnable;
     }
 
-    public int getSocketFactoryPort() {
+    public Integer getSocketFactoryPort() {
         return socketFactoryPort;
     }
 
-    public void setSocketFactoryPort(int socketFactoryPort) {
+    public void setSocketFactoryPort(Integer socketFactoryPort) {
         this.socketFactoryPort = socketFactoryPort;
     }
 }

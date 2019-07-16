@@ -2,6 +2,7 @@ package cn.keepbx.jpom.controller.monitor;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.bean.copier.CopyOptions;
+import cn.hutool.core.convert.Convert;
 import cn.hutool.core.date.DatePattern;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
@@ -63,7 +64,7 @@ public class MonitorLogController extends BaseServerController {
      */
     @RequestMapping(value = "list_data.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
-    public String listData(String time) throws SQLException {
+    public String listData(String time, String selectNode, String notifyStatus) throws SQLException {
         int limit = getParameterInt("limit", 10);
         int page1 = getParameterInt("page", 1);
         Page page = new Page(page1, limit);
@@ -83,9 +84,13 @@ public class MonitorLogController extends BaseServerController {
                 entity.set("createTime ".toUpperCase(), "<= " + endDateTime.getTime());
             }
         }
-        String selectNode = getParameter("selectNode");
+
         if (StrUtil.isNotEmpty(selectNode)) {
             entity.set("nodeId".toUpperCase(), selectNode);
+        }
+
+        if (StrUtil.isNotEmpty(notifyStatus)) {
+            entity.set("notifyStatus".toUpperCase(), Convert.toBool(notifyStatus, true));
         }
 
         PageResult<Entity> pageResult = Db.use().page(entity, page);

@@ -1,5 +1,6 @@
 package cn.keepbx.jpom.controller.monitor;
 
+import cn.hutool.core.convert.Convert;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.lang.Validator;
 import cn.hutool.core.util.IdUtil;
@@ -193,9 +194,22 @@ public class MonitorListController extends BaseServerController {
      */
     @RequestMapping(value = "changeStatus", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
-    public String changeStatus(String id, String status) {
-
-        return JsonMessage.getString(200, "");
+    public String changeStatus(@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "id不能为空")) String id,
+                               String status, String type) {
+        MonitorModel monitorModel = monitorService.getItem(id);
+        if (monitorModel == null) {
+            return JsonMessage.getString(405, "不存在监控项啦");
+        }
+        boolean bStatus = Convert.toBool(status, false);
+        if ("status".equalsIgnoreCase(type)) {
+            monitorModel.setStatus(bStatus);
+        } else if ("restart".equalsIgnoreCase(type)) {
+            monitorModel.setAutoRestart(bStatus);
+        } else {
+            return JsonMessage.getString(405, "type不正确");
+        }
+        monitorService.updateItem(monitorModel);
+        return JsonMessage.getString(200, "修改成功");
     }
 
 

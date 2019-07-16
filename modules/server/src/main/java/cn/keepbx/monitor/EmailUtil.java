@@ -36,7 +36,9 @@ public class EmailUtil implements INotify {
         //
         if (config.getSslEnable() != null && config.getSslEnable()) {
             mailAccount.setSslEnable(config.getSslEnable());
-            mailAccount.setSocketFactoryPort(config.getSocketFactoryPort());
+            if (config.getSocketFactoryPort() != null) {
+                mailAccount.setSocketFactoryPort(config.getSocketFactoryPort());
+            }
         }
         mailAccount.setAuth(true);
         MailUtil.send(mailAccount, CollUtil.newArrayList(StrUtil.split(notify.getValue(), StrUtil.COMMA)), title, context, false);
