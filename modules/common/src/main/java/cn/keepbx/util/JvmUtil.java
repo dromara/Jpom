@@ -1,5 +1,6 @@
 package cn.keepbx.util;
 
+import cn.hutool.cache.impl.TimedCache;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.system.JavaRuntimeInfo;
@@ -22,6 +23,7 @@ import java.lang.management.MemoryMXBean;
 import java.lang.management.ThreadMXBean;
 import java.net.URISyntaxException;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 /**
  * jvm jmx 工具
@@ -32,6 +34,10 @@ import java.util.*;
 public class JvmUtil {
 
     private static final JavaRuntimeInfo JAVA_RUNTIME_INFO = SystemUtil.getJavaRuntimeInfo();
+    /**
+     * 记录错误的进程信息，避免重复获取
+     */
+    private static final TimedCache<String, Boolean> PID_ERROR = new TimedCache<>(TimeUnit.DAYS.toMillis(1));
 
     /**
      * 获取指定程序的jvm 信息
@@ -142,11 +148,17 @@ public class JvmUtil {
         List<VirtualMachineDescriptor> descriptorList = VirtualMachine.list();
         for (VirtualMachineDescriptor virtualMachineDescriptor : descriptorList) {
             // 根据虚拟机描述查询启动属性，如果属性-Dapplication匹配，说明项目已经启动，并返回进程id
+            String pid = virtualMachineDescriptor.id();
+            if (PID_ERROR.containsKey(pid)) {
+                continue;
+            }
             VirtualMachine virtualMachine;
             try {
                 virtualMachine = VirtualMachine.attach(virtualMachineDescriptor);
             } catch (AttachNotSupportedException | IOException e) {
-                DefaultSystemLog.ERROR().error("获取jvm信息失败：" + virtualMachineDescriptor.id(), e);
+                DefaultSystemLog.ERROR().error("获取jvm信息失败：" + pid, e);
+                // 记录黑名单
+                PID_ERROR.put(pid, true);
                 continue;
             }
             Properties properties = virtualMachine.getAgentProperties();
