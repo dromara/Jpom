@@ -1,18 +1,29 @@
 package cn.keepbx.jpom.controller.build;
 
+import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.bean.copier.CopyOptions;
 import cn.hutool.core.convert.Convert;
-import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.io.IoUtil;
-import cn.hutool.core.io.LineHandler;
-import cn.hutool.core.util.CharsetUtil;
+import cn.hutool.core.date.DatePattern;
+import cn.hutool.core.date.DateTime;
+import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.util.StrUtil;
+import cn.hutool.db.Db;
+import cn.hutool.db.Entity;
+import cn.hutool.db.Page;
+import cn.hutool.db.PageResult;
+import cn.hutool.db.sql.Direction;
+import cn.hutool.db.sql.Order;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.validator.ValidatorConfig;
 import cn.jiangzeyin.common.validator.ValidatorItem;
 import cn.jiangzeyin.common.validator.ValidatorRule;
-import cn.keepbx.build.BuildManage;
 import cn.keepbx.jpom.common.BaseServerController;
+import cn.keepbx.jpom.model.BaseEnum;
+import cn.keepbx.jpom.model.data.BuildHistoryLog;
 import cn.keepbx.jpom.model.data.BuildModel;
+import cn.keepbx.jpom.model.vo.BuildHistoryLogVo;
 import cn.keepbx.jpom.service.build.BuildService;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
@@ -21,10 +32,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.annotation.Resource;
-import java.io.File;
 import java.io.IOException;
-import java.util.LinkedList;
-import java.util.List;
+import java.sql.SQLException;
 
 /**
  * @author bwcx_jzy
@@ -42,41 +51,68 @@ public class BuildLogPageController extends BaseServerController {
         return "build/logPage";
     }
 
-    @RequestMapping(value = "getNowLog.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "history.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
+    public String logList() {
+        JSONArray jsonArray = BaseEnum.toJSONArray(BuildModel.Status.class);
+        setAttribute("status", jsonArray);
+        return "build/history";
+    }
+
+    @RequestMapping(value = "history_list.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
-    public String getNowLog(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据") String id,
-                            @ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "没有buildId") int buildId,
-                            String line) throws IOException {
-        BuildModel item = buildService.getItem(id);
-        if (item == null) {
-            return JsonMessage.getString(404, "没有对应数据");
-        }
-        if (buildId > item.getBuildId()) {
-            return JsonMessage.getString(405, "还没有对应的构建记录");
-        }
-        File file = BuildManage.getLogFile(item, buildId);
-        if (file.isDirectory()) {
-            return JsonMessage.getString(300, "日志文件错误");
-        }
-        if (!file.exists()) {
-            if (buildId == item.getBuildId()) {
-                return JsonMessage.getString(201, "还没有日志文件");
+    public String historyList(String time, String status,
+                              @ValidatorConfig(value = {
+                                      @ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "limit error")
+                              }, defaultVal = "10") int limit,
+                              @ValidatorConfig(value = {
+                                      @ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "page error")
+                              }, defaultVal = "1") int page) throws SQLException {
+        Page pageObj = new Page(page, limit);
+        Entity entity = Entity.create(BuildHistoryLog.TABLE_NAME);
+        pageObj.addOrder(new Order("startTime".toUpperCase(), Direction.DESC));
+        // 时间
+        if (StrUtil.isNotEmpty(time)) {
+            String[] val = StrUtil.split(time, "~");
+            if (val.length == 2) {
+                DateTime startDateTime = DateUtil.parse(val[0], DatePattern.NORM_DATETIME_FORMAT);
+                entity.set("startTime".toUpperCase(), ">= " + startDateTime.getTime());
+
+                DateTime endDateTime = DateUtil.parse(val[1], DatePattern.NORM_DATETIME_FORMAT);
+                if (startDateTime.equals(endDateTime)) {
+                    endDateTime = DateUtil.endOfDay(endDateTime);
+                }
+                entity.set("startTime ".toUpperCase(), "<= " + endDateTime.getTime());
             }
-            return JsonMessage.getString(300, "日志文件不存在");
         }
-        int linesInt = Convert.toInt(line, 1);
-        List<String> lines = new LinkedList<>();
-        final int[] readCount = {0};
-        FileUtil.readLines(file, CharsetUtil.CHARSET_UTF_8, (LineHandler) line1 -> {
-            readCount[0]++;
-            if (readCount[0] < linesInt) {
-                return;
+        BaseEnum anEnum = null;
+        if (StrUtil.isNotEmpty(status)) {
+            Integer integer = Convert.toInt(status);
+            if (integer != null) {
+                anEnum = BaseEnum.getEnum(BuildModel.Status.class, integer);
             }
-            lines.add(line1);
+        }
+
+        if (anEnum != null) {
+            entity.set("status".toUpperCase(), anEnum.getCode());
+        }
+
+        PageResult<Entity> pageResult = Db.use().page(entity, pageObj);
+        CopyOptions copyOptions = new CopyOptions();
+        copyOptions.setIgnoreError(true);
+        copyOptions.setIgnoreCase(true);
+        JSONArray jsonArray = new JSONArray();
+        pageResult.forEach(entity1 -> {
+            BuildHistoryLogVo v1 = BeanUtil.mapToBean(entity1, BuildHistoryLogVo.class, copyOptions);
+            String dataId = v1.getBuildDataId();
+            try {
+                BuildModel item = buildService.getItem(dataId);
+                v1.setBuildName(item.getName());
+            } catch (IOException ignored) {
+            }
+            jsonArray.add(v1);
         });
-        JSONObject data = new JSONObject();
-        data.put("line", readCount[0]);
-        data.put("dataLines", lines);
-        return JsonMessage.getString(200, "ok", data);
+        JSONObject jsonObject = JsonMessage.toJson(200, "获取成功", jsonArray);
+        jsonObject.put("total", pageResult.getTotal());
+        return jsonObject.toString();
     }
 }

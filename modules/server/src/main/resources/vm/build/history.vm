@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    #parse("./common/head.vm")
+    <title>项目管理系统</title>
+    <style>
+        body {
+            padding: 10px;
+        }
+    </style>
+</head>
+
+<body>
+<table class="layui-table" id="tab_user" lay-filter="tab_user" style="margin: 0;"></table>
+<script type="text/html" id="bar_projects">
+    <a href="javascript:;" class="layui-btn  layui-btn-sm layui-btn-normal" lay-event="view">详情</a>
+</script>
+</body>
+
+<script type="text/html" id="toolbarDemo">
+    <form class="layui-form" action="">
+        <div class="layui-form-item" style="margin-bottom: 0;">
+            <div class="layui-inline">
+                <label class="layui-form-label" style="width: auto !important;">时间</label>
+                <div class="layui-input-inline" style="width: 300px;">
+                    <input type="text" readonly class="layui-input" id="time" placeholder="请选择时间范围">
+                </div>
+            </div>
+            <div class="layui-inline">
+                <label class="layui-form-label" style="width: auto !important;">状态</label>
+                <div class="layui-input-inline">
+                    <select name="status" id="status" lay-verify="required" lay-filter="status"
+                            lay-search="">
+                        <option value="">请选择</option>
+                        #foreach($item in $status)
+                            #if($item.code!=0)
+                                <option value="$item.code">$item.desc</option>
+                            #end
+                        #end
+                    </select>
+                </div>
+            </div>
+        </div>
+    </form>
+</script>
+<script type="text/javascript">
+    const apiWhere = {};
+    var laydate;
+    var statusArray = [];
+        #if($status)
+        statusArray = $status;
+        #end
+    function openLog(id, buildId) {
+        layer.open({
+            type: 2,
+            title: '构建日志',
+            content: './logPage.html?id=' + id + "&buildId=" + buildId,
+            area: ['80%', '90%'],
+        });
+    }
+
+    function loadSuccess() {
+        tableRender({
+            id: 'tab_user',
+            elem: '#tab_user',
+            url: './history_list.json',
+            toolbar: '#toolbarDemo',
+            page: true,
+            where: apiWhere,
+            cols: [[
+                {field: 'buildName', title: '构建名称'},
+                {
+                    field: 'buildIdStr', title: '构建ID', templet: function (d) {
+                        return "<a herf='' style='color: blue;' onclick='openLog(\"" + d.buildDataId + "\"," + d.buildNumberId + ")'>" + d.buildIdStr + "</a>";
+                    }
+                },
+                {
+                    field: 'status', title: '状态', templet: function (d) {
+                        var status = d.status;
+                        for (var i = 0; i < statusArray.length; i++) {
+                            if (statusArray[i].code == status) {
+                                return statusArray[i].desc;
+                            }
+                        }
+                        return "未知";
+                    }
+                },
+                {
+                    field: 'startTime', title: '开始时间', templet: function (d) {
+                        return formateTime(d.startTime);
+                    }
+                },
+                {
+                    field: 'endTime', title: '结束时间', templet: function (d) {
+                        if (!d.endTime) {
+                            return "-";
+                        }
+                        return formateTime(d.endTime);
+                    }
+                },
+                {field: 'buildUser', title: '构建人'},
+                {field: 'op', title: '操作', align: 'center', toolbar: '#bar_projects', fixed: 'right'}
+            ]],
+            parseData: function (data) {
+                return {
+                    "code": data.code,
+                    "msg": data.msg,
+                    "count": data.total,
+                    "data": data.data
+                };
+            },
+            done: function () {
+                $("#time").val(apiWhere.time);
+                renderDate();
+                // 选中
+                $("#status option[value='" + apiWhere.status + "']").attr("selected", "selected");
+                form.render();
+            }
+        });
+
+        layui.use(['laydate'], function () {
+            laydate = layui.laydate;
+            renderDate();
+        });
+
+        form.on('select(status)', function (data) {
+            apiWhere.status = data.value;
+            reloadTable();
+            return true;
+        });
+    }
+
+    function renderDate() {
+        if (!laydate) {
+            return;
+        }
+        var now = new Date().getTime();
+        laydate.render({
+            elem: '#time',
+            type: 'datetime',
+            range: "~",
+            max: now,
+            done: function (value, date, endDate) {
+                apiWhere.time = value;
+                reloadTable();
+            }
+        });
+    }
+
+    function reloadTable() {
+        table.reload('tab_user', {
+            where: apiWhere
+        });
+    }
+</script>
+</html>

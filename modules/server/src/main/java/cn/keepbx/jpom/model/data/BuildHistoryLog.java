@@ -41,6 +41,18 @@ public class BuildHistoryLog extends BaseJsonModel {
      * 构建产物目录
      */
     private String resultDirFile;
+    /**
+     * 构建人
+     */
+    private String buildUser;
+
+    public String getBuildUser() {
+        return buildUser;
+    }
+
+    public void setBuildUser(String buildUser) {
+        this.buildUser = buildUser;
+    }
 
     public String getId() {
         return id;

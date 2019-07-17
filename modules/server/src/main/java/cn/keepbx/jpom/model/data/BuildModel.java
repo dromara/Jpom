@@ -151,6 +151,7 @@ public class BuildModel extends BaseModel {
         PubIng(4, "发布中"),
         PubSuccess(5, "发布成功"),
         PubError(6, "发布失败"),
+        Cancel(7, "取消构建"),
         ;
         private int code;
         private String desc;

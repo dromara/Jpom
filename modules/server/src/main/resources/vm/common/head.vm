@@ -186,6 +186,9 @@
             error: function () {
                 layer.close(index);
                 layer.msg("网络异常,请稍后再试");
+            },
+            complete: function () {
+                data.complete && data.complete();
             }
         };
         $.extend(defData, data);

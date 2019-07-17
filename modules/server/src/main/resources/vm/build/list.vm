@@ -29,10 +29,10 @@
 
 <body>
 <div class="layui-row">
-    <button id="addMonitor" class="layui-btn layui-btn-sm">新增构建</button>
+    <button id="addBuild" class="layui-btn layui-btn-sm">新增构建</button>
     <button id="refresh" class="layui-btn layui-btn-sm">刷新表格</button>
 </div>
-<table class="layui-table" id="tab_monitor" lay-filter="tab_monitor" style="margin: 0;"></table>
+<table class="layui-table" id="tab_build" lay-filter="tab_build" style="margin: 0;"></table>
 
 </body>
 
@@ -59,14 +59,14 @@
             type: 2,
             title: '构建日志',
             content: './logPage.html?id=' + id + "&buildId=" + buildId,
-            area: ['80%', '80%'],
+            area: ['80%', '90%'],
         });
     }
 
     function loadSuccess() {
         tableRender({
-            id: 'tab_monitor',
-            elem: '#tab_monitor',
+            id: 'tab_build',
+            elem: '#tab_build',
             url: './list_data.json',
             cols: [[
                 {field: 'name', title: '名称'},
@@ -93,7 +93,7 @@
         });
 
         // '添加监控'点击事件
-        $('#addMonitor').on('click', function () {
+        $('#addBuild').on('click', function () {
             // 弹出
             layer.open({
                 type: 2,
@@ -105,11 +105,11 @@
 
         // '刷新表格'点击事件
         $('#refresh').on('click', function () {
-            table.reload('tab_monitor', {});
+            table.reload('tab_build', {});
         });
 
         // 表格工具条事件
-        table.on('tool(tab_monitor)', function (obj) {
+        table.on('tool(tab_build)', function (obj) {
             var data = obj.data;
             var event = obj.event;
             if ('update' === event) {
@@ -119,15 +119,30 @@
                 // 删除
                 deleteApplication(data);
             } else if ('build' == event) {
+                var dataId = data.id;
                 loadingAjax({
                     url: './start.json',
+                    data: {
+                        id: dataId
+                    },
+                    success: function (data) {
+                        layer.msg(data.msg);
+                        if (200 == data.code) {
+                            table.reload('tab_build', {});
+                            openLog(dataId, data.data);
+                        }
+                    }
+                });
+            } else if ('stop' == event) {
+                loadingAjax({
+                    url: './cancel.json',
                     data: {
                         id: data.id
                     },
                     success: function (data) {
                         layer.msg(data.msg);
                         if (200 == data.code) {
-                            table.reload('tab_monitor', {});
+                            table.reload('tab_build', {});
                         }
                     }
                 });
@@ -158,22 +173,12 @@
                     success: function (data) {
                         layer.msg(data.msg);
                         if (200 == data.code) {
-                            table.reload('tab_monitor', {});
+                            table.reload('tab_build', {});
                         }
                     }
                 });
             });
         }
-
-        $('#monitorStatus').on('click', function () {
-            // 弹出
-            layer.open({
-                type: 2,
-                title: '新增监控',
-                content: './edit.html',
-                area: ['80%', '80%'],
-            });
-        });
     }
 </script>
 </html>

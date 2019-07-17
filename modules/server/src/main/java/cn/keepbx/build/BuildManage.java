@@ -62,11 +62,13 @@ public class BuildManage implements Runnable {
     private File logFile;
     private Process process;
     private String logId;
+    private String optUserName;
 
-    private BuildManage(final BuildModel buildModel) {
+    private BuildManage(final BuildModel buildModel, String optUserName) {
         this.buildModel = buildModel;
         this.gitFile = FileUtil.file(ConfigBean.getInstance().getDataPath(), "build", buildModel.getId(), "source");
         this.logFile = getLogFile(buildModel, buildModel.getBuildId());
+        this.optUserName = optUserName;
     }
 
     public static File getLogFile(BuildModel buildModel, int buildId) {
@@ -78,11 +80,37 @@ public class BuildManage implements Runnable {
                 "info.log");
     }
 
-    public static BuildManage create(BuildModel buildModel) {
+    /**
+     * 取消构建
+     *
+     * @param id id
+     */
+    public static void cancel(String id) {
+        BuildManage buildManage = BUILD_MANAGE_MAP.get(id);
+        if (buildManage == null) {
+            return;
+        }
+        if (buildManage.process != null) {
+            try {
+                buildManage.process.destroy();
+            } catch (Exception ignored) {
+            }
+        }
+        buildManage.updateStatus(BuildModel.Status.Cancel);
+    }
+
+    /**
+     * 创建构建
+     *
+     * @param buildModel
+     * @param optUserName
+     * @return
+     */
+    public static BuildManage create(BuildModel buildModel, String optUserName) {
         if (BUILD_MANAGE_MAP.containsKey(buildModel.getId())) {
             throw new JpomRuntimeException("当前构建还在进行中");
         }
-        BuildManage buildManage = new BuildManage(buildModel);
+        BuildManage buildManage = new BuildManage(buildModel, optUserName);
         BUILD_MANAGE_MAP.put(buildModel.getId(), buildManage);
         //
         ThreadUtil.execute(buildManage);
@@ -139,6 +167,8 @@ public class BuildManage implements Runnable {
         buildHistoryLog.setResultDirFile(buildModel.getResultDirFile());
         buildHistoryLog.setId(this.logId);
         buildHistoryLog.setStartTime(System.currentTimeMillis());
+        buildHistoryLog.setBuildNumberId(buildModel.getBuildId());
+        buildHistoryLog.setBuildUser(optUserName);
 
         Db db = Db.use();
         db.setWrapper((Character) null);
@@ -234,7 +264,7 @@ public class BuildManage implements Runnable {
         commands.add(command);
         processBuilder.command(commands);
         final boolean[] status = new boolean[1];
-        Process process = processBuilder.start();
+        process = processBuilder.start();
         //
         InputStream inputStream = process.getInputStream();
         InputStreamReader inputStreamReader = new InputStreamReader(inputStream, JpomApplication.getCharset());
@@ -251,7 +281,6 @@ public class BuildManage implements Runnable {
             log(line);
             status[0] = false;
         });
-        process = processBuilder.start();
         return status[0];
     }
 }
