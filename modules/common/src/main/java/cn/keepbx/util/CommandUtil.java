@@ -22,6 +22,7 @@ public class CommandUtil {
 
     public static String execCommand(String command) {
         String newCommand = StrUtil.replace(command, StrUtil.CRLF, StrUtil.SPACE);
+        newCommand = StrUtil.replace(newCommand, StrUtil.LF, StrUtil.SPACE);
         String result = "error";
         try {
             result = exec(new String[]{newCommand}, null);
@@ -45,6 +46,7 @@ public class CommandUtil {
      */
     public static String execSystemCommand(String command, File file) {
         String newCommand = StrUtil.replace(command, StrUtil.CRLF, StrUtil.SPACE);
+        newCommand = StrUtil.replace(newCommand, StrUtil.LF, StrUtil.SPACE);
         String result = "error";
         try {
             String[] cmd;

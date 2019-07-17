@@ -40,9 +40,11 @@
     <a href="javascript:;" class="layui-btn  layui-btn-sm layui-btn-normal" lay-event="update">编辑</a>
 
     {{# if(d.status==0 || d.status== 2 || d.status==5) { }}
-    <a href="javascript:;" class="layui-btn  layui-btn-sm layui-btn-danger" lay-event="build">构建</a>
+    <a href="javascript:;" class="layui-btn layui-btn-sm layui-btn-danger" lay-event="build">构建</a>
+    {{# }else{ }}
+    <a href="javascript:;" class="layui-btn layui-btn-sm layui-btn-danger" lay-event="stop">停止</a>
     {{# } }}
-    <a href="javascript:;" class="layui-btn  layui-btn-sm layui-btn-danger" lay-event="delete">删除</a>
+    <a href="javascript:;" class="layui-btn layui-btn-sm layui-btn-danger" lay-event="delete">删除</a>
 </script>
 
 <script type="text/javascript">
@@ -51,6 +53,15 @@
         #if($statusArray)
         statusArray = $statusArray;
         #end
+
+    function openLog(id, buildId) {
+        layer.open({
+            type: 2,
+            title: '构建日志',
+            content: './logPage.html?id=' + id + "&buildId=" + buildId,
+            area: ['80%', '80%'],
+        });
+    }
 
     function loadSuccess() {
         tableRender({
@@ -71,8 +82,8 @@
                     }
                 },
                 {
-                    field: 'buildId', title: '当前构建ID', templet: function (d) {
-                        return "#" + d.buildId;
+                    field: 'buildIdStr', title: '当前构建ID', templet: function (d) {
+                        return "<a herf='' style='color: blue;' onclick='openLog(\"" + d.id + "\"," + d.buildId + ")'>" + d.buildIdStr + "</a>";
                     }
                 },
                 {field: 'modifyUser', title: '最后修改人'},

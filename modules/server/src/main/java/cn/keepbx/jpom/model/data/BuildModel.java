@@ -56,6 +56,14 @@ public class BuildModel extends BaseModel {
         return buildId;
     }
 
+    public String getBuildIdStr() {
+        return getBuildIdStr(buildId);
+    }
+
+    public static String getBuildIdStr(int buildId) {
+        return String.format("#%s", buildId);
+    }
+
     public void setBuildId(int buildId) {
         this.buildId = buildId;
     }

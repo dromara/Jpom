@@ -1,5 +1,6 @@
 package cn.keepbx.util;
 
+import cn.hutool.core.date.DateTime;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.keepbx.jpom.system.JpomRuntimeException;
@@ -10,8 +11,12 @@ import org.eclipse.jgit.api.RemoteListCommand;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.api.errors.TransportException;
 import org.eclipse.jgit.internal.JGitText;
+import org.eclipse.jgit.lib.AnyObjectId;
 import org.eclipse.jgit.lib.Constants;
+import org.eclipse.jgit.lib.PersonIdent;
 import org.eclipse.jgit.lib.Ref;
+import org.eclipse.jgit.revwalk.RevCommit;
+import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.transport.CredentialsProvider;
 import org.eclipse.jgit.transport.RemoteConfig;
 import org.eclipse.jgit.transport.URIish;
@@ -20,6 +25,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * git工具
@@ -125,12 +131,14 @@ public class GitUtil {
     }
 
     /**
-     * @param url
-     * @param file
-     * @param branchName
-     * @param credentialsProvider
-     * @throws IOException
-     * @throws GitAPIException
+     * 拉取对应分支最新代码
+     *
+     * @param url                 远程url
+     * @param file                仓库路径
+     * @param branchName          分支名
+     * @param credentialsProvider 凭证
+     * @throws IOException     IO
+     * @throws GitAPIException api
      */
     public static void checkoutPull(String url, File file, String branchName, CredentialsProvider credentialsProvider) throws IOException, GitAPIException {
         try {
@@ -162,5 +170,36 @@ public class GitUtil {
             }
             throw t;
         }
+    }
+
+    private static AnyObjectId getAnyObjectId(Git git, String branchName) throws GitAPIException {
+        List<Ref> list = git.branchList().setListMode(ListBranchCommand.ListMode.ALL).call();
+        for (Ref ref : list) {
+            String name = ref.getName();
+            if (name.startsWith(Constants.R_HEADS + branchName)) {
+                return ref.getObjectId();
+            }
+        }
+        return null;
+    }
+
+    /**
+     * 获取对应分支的最后一次提交记录
+     *
+     * @param file       仓库文件夹
+     * @param branchName 分支
+     * @return 描述
+     * @throws IOException     IO
+     * @throws GitAPIException api
+     */
+    public static String getLastCommitMsg(File file, String branchName) throws IOException, GitAPIException {
+        Git git = Git.open(file);
+        AnyObjectId anyObjectId = getAnyObjectId(git, branchName);
+        Objects.requireNonNull(anyObjectId, "没有" + branchName + "分支");
+        RevWalk walk = new RevWalk(git.getRepository());
+        RevCommit revCommit = walk.parseCommit(anyObjectId);
+        String time = new DateTime(revCommit.getCommitTime() * 1000L).toString();
+        PersonIdent personIdent = revCommit.getAuthorIdent();
+        return StrUtil.format("{} {} {}[{}] {}", branchName, revCommit.getShortMessage(), personIdent.getName(), personIdent.getEmailAddress(), time);
     }
 }

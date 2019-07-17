@@ -30,7 +30,7 @@ public class BuildManageController extends BaseServerController {
     private BuildService buildService;
 
     @RequestMapping(value = "start.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public String start(@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "删除失败")) String id) throws IOException {
+    public String start(@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据")) String id) throws IOException {
         BuildModel item = buildService.getItem(id);
         if (item == null) {
             return JsonMessage.getString(404, "没有对应数据");
@@ -46,6 +46,6 @@ public class BuildManageController extends BaseServerController {
         item.setBuildId(item.getBuildId() + 1);
         buildService.updateItem(item);
         BuildManage.create(item);
-        return JsonMessage.getString(200, "ok:" + item.getBuildId());
+        return JsonMessage.getString(200, "开始构建中", item.getBuildId());
     }
 }

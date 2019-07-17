@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    #parse("./common/head.vm")
+    <title>log</title>
+    <style>
+        body {
+            padding: 10px;
+        }
+
+        .context {
+            height: 80vh;
+        }
+    </style>
+</head>
+
+<body>
+<form action="" class="layui-form" id="form_ngx">
+    <div class="layui-form-item">
+        <textarea name="context" placeholder="日志内容" readonly disabled
+                  class="layui-textarea context">$!data.context</textarea>
+    </div>
+</form>
+<script type="text/javascript" src="$!jpomProxyPath/static/js/auto-line-number.js?v=$staticCacheTime"></script>
+
+<script type="text/javascript">
+    var line = 0;
+
+    function loadSuccess() {
+        initPlugin();
+        $("textarea").setTextareaCount({
+            width: "30px",
+            bgColor: "#ddd",
+            color: "#000",
+            display: "inline-block"
+        });
+        loadingAjax({
+            url: './getNowLog.json',
+            data: {
+                id: getQueryString('id'),
+                buildId: getQueryString('buildId')
+            },
+            success: function (data) {
+                layer.msg(data.msg);
+                if (200 == data.code) {
+
+                }
+            }
+        });
+    }
+
+</script>
+
+</html>
