@@ -70,6 +70,7 @@
                             </thead>
                             <tbody id="tbody_$item.id">
                                 #foreach($tr in $item.outGivingNodeProjectList)
+                                    #set($dataOK=true)
                                     #if($nodeData[$tr.nodeId])
                                     <tr projectId="$tr.projectId" nodeId="$tr.nodeId">
                                         <td>
@@ -79,6 +80,7 @@
                                             #if($nodeData[$tr.nodeId] && $nodeData[$tr.nodeId].projects && $nodeData[$tr.nodeId].projects[$tr.projectId])
                                                 <div title="$tr.projectId">$nodeData[$tr.nodeId].projects[$tr.projectId].name</div>
                                             #else
+                                                #set($dataOK=false)
                                                 <div title="$tr.projectId" style="color: red;">没有数据</div>
                                             #end
 
@@ -101,14 +103,17 @@
                                         </td>
                                         <td>
                                             #if($user.isServerManager())
-                                                <button op="conslone" nodeId="$tr.nodeId" projectId="$tr.projectId"
-                                                        class="layui-btn layui-btn-sm layui-btn-normal">
-                                                    控制台
-                                                </button>
-                                                <button op="file" nodeId="$tr.nodeId" projectId="$tr.projectId"
-                                                        class="layui-btn layui-btn-sm">
-                                                    文件管理
-                                                </button>
+                                                #if($dataOK)
+                                                    <button op="conslone" nodeId="$tr.nodeId" projectId="$tr.projectId"
+                                                            class="layui-btn layui-btn-sm layui-btn-normal">
+                                                        控制台
+                                                    </button>
+                                                    <button op="file" nodeId="$tr.nodeId" projectId="$tr.projectId"
+                                                            class="layui-btn layui-btn-sm">
+                                                        文件管理
+                                                    </button>
+                                                #else
+                                                #end
                                             #else
                                                 没有权限
                                             #end
