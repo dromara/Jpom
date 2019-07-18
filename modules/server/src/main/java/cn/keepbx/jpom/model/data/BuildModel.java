@@ -55,6 +55,30 @@ public class BuildModel extends BaseModel {
      * 发布方式
      */
     private int releaseMethod;
+    /**
+     * 发布方法的数据id
+     */
+    private String releaseMethodDataId;
+    /**
+     * 分发后的操作
+     */
+    private int afterOpt;
+
+    public int getAfterOpt() {
+        return afterOpt;
+    }
+
+    public void setAfterOpt(int afterOpt) {
+        this.afterOpt = afterOpt;
+    }
+
+    public String getReleaseMethodDataId() {
+        return releaseMethodDataId;
+    }
+
+    public void setReleaseMethodDataId(String releaseMethodDataId) {
+        this.releaseMethodDataId = releaseMethodDataId;
+    }
 
     public int getReleaseMethod() {
         return releaseMethod;
@@ -196,6 +220,35 @@ public class BuildModel extends BaseModel {
         private String desc;
 
         ReleaseMethod(int code, String desc) {
+            this.code = code;
+            this.desc = desc;
+        }
+
+        @Override
+        public int getCode() {
+            return code;
+        }
+
+        @Override
+        public String getDesc() {
+            return desc;
+        }
+    }
+
+    public enum AfterOpt implements BaseEnum {
+        /**
+         * 操作
+         */
+        No(0, "不做任何操作"),
+        /**
+         * 重启
+         */
+        Restart(1, "重启"),
+        ;
+        private int code;
+        private String desc;
+
+        AfterOpt(int code, String desc) {
             this.code = code;
             this.desc = desc;
         }

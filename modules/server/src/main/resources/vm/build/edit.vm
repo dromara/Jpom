@@ -85,6 +85,46 @@
                 #end
             </div>
         </div>
+        <div class="layui-form-item" id="releaseMethodDiv1" #if($model.releaseMethod!=1)style="display: none;"#end>
+            <label class="layui-form-label">分发项目</label>
+            <div class="layui-input-block">
+                <select name="releaseMethodDataId_1">
+                    <option value="">请选择分发项目</option>
+                    #foreach($item in $outGivingModels)
+                        <option value="$item.id"
+                                #if($model.releaseMethodDataId==$item.id)selected#end>$item.name</option>
+                    #end
+                </select>
+            </div>
+        </div>
+        <div class="layui-form-item" id="releaseMethodDiv2" #if($model.releaseMethod!=2)style="display: none;"#end>
+            <div class="layui-inline">
+                <label class="layui-form-label">节点</label>
+                <div class="layui-input-block">
+                    <select name="releaseMethodDataId_2_node" lay-filter="releaseMethodDataId_2">
+                        <option value="">请选择节点</option>
+                        #foreach($i in $nodeModels)
+                            <option value="$i.id">$i.name</option>
+                        #end
+                    </select>
+                </div>
+            </div>
+            <div class="layui-inline" id="releaseMethodDiv2_Project">
+            </div>
+        </div>
+        <div class="layui-form-item" id="afterOptDiv" #if($model.releaseMethod!=2)
+             style="display: none;" #end>
+            <label class="layui-form-label">发布后</label>
+            <div class="layui-input-block">
+                <select name="afterOpt" id="afterOpt">
+                    <option value="">请选择发布后的操作</option>
+                    #foreach($item in $afterOpt)
+                        <option value="$item.code"
+                                #if($item.code==$model.afterOpt)selected #end>$item.desc</option>
+                    #end
+                </select>
+            </div>
+        </div>
     ##提交按钮
         <div class="layui-form-item">
             <div class="layui-form-item" style="padding-left: 20%;margin-top: 20px;">
@@ -96,6 +136,23 @@
     </form>
 </div>
 </body>
+    #foreach($i in $nodeModels)
+    <script type="text/html" id="node_project_$i.id">
+        <label class="layui-form-label">项目</label>
+        <div class="layui-input-block">
+            <select name="releaseMethodDataId_2_project">
+                <option value="">选择选择项目</option>
+                #foreach($ii in $i.groupProjects)
+                    <optgroup label="$ii.group">
+                        #foreach($iProject in $ii.projects)
+                            <option value="$iProject.id">$iProject.name</option>
+                        #end
+                    </optgroup>
+                #end
+            </select>
+        </div>
+    </script>
+    #end
 <script type="text/javascript">
     function getBranchList(fn) {
         loadingAjax({
@@ -160,12 +217,47 @@
         });
 
         form.on('radio(releaseMethod)', function (data) {
+            $("#releaseMethodDiv1").hide();
+            $("#releaseMethodDiv2").hide();
+            $("#afterOptDiv").hide();
             if (data.value == 1) {
-
+                $("#releaseMethodDiv1").show();
+                // $("#afterOptDiv").show();
             } else if (data.value == 2) {
                 // 项目
+                $("#releaseMethodDiv2").show();
+                $("#afterOptDiv").show();
             }
         });
+
+        layui.use(['laytpl'], function () {
+            var laytpl = layui.laytpl;
+            form.on('select(releaseMethodDataId_2)', function (data) {
+                if (!data.value || data.value == "") {
+                    $("#releaseMethodDiv2_Project").hide();
+                    return;
+                }
+                changeProject(data.value);
+            });
+            #if($model.releaseMethodDataId)
+                var releaseMethodDataId = "$model.releaseMethodDataId";
+                var ids = releaseMethodDataId.split(":");
+                changeProject(ids[0], ids[1]);
+            #end
+
+            function changeProject(nodeId, pid) {
+                var html = document.getElementById('node_project_' + nodeId);
+                laytpl(html.innerHTML).render({}, function (newHtml) {
+                    $("#releaseMethodDiv2_Project").html(newHtml);
+                    if (pid) {
+                        $("select[name='releaseMethodDataId_2_project']").val(pid);
+                        $("select[name='releaseMethodDataId_2_node']").val(nodeId);
+                    }
+                    form.render();
+                });
+            }
+        });
+
     }
 </script>
 </html>

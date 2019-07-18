@@ -97,10 +97,10 @@ public class OutGivingProjectController extends BaseServerController {
         //
         outGivingModel = outGivingServer.getItem(id);
         outGivingModel.setAfterOpt(afterOpt1.getCode());
-        outGivingModel.startBefore();
+
         outGivingServer.updateItem(outGivingModel);
         // 开启
-        OutGivingRun.startRun(id, dest, afterOpt1, getUser(), outGivingModel.getOutGivingNodeProjectList());
+        OutGivingRun.startRun(outGivingModel.getId(), dest,  getUser(), true);
         return JsonMessage.getString(200, "分发成功");
     }
 }

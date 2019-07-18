@@ -53,10 +53,8 @@ public class BuildManageController extends BaseServerController {
         }
         BuildModel.Status nowStatus = BaseEnum.getEnum(BuildModel.Status.class, item.getStatus());
         Objects.requireNonNull(nowStatus);
-        if (BuildModel.Status.No != nowStatus &&
-                BuildModel.Status.Success != nowStatus &&
-                BuildModel.Status.PubSuccess != nowStatus &&
-                BuildModel.Status.Cancel != nowStatus) {
+        if (BuildModel.Status.Ing == nowStatus ||
+                BuildModel.Status.PubIng == nowStatus) {
             return JsonMessage.getString(501, "当前还在：" + nowStatus.getDesc());
         }
         //
@@ -65,7 +63,7 @@ public class BuildManageController extends BaseServerController {
         String optUserName = UserModel.getOptUserName(userModel);
         item.setModifyUser(optUserName);
         buildService.updateItem(item);
-        BuildManage.create(item, optUserName);
+        BuildManage.create(item, userModel);
         return JsonMessage.getString(200, "开始构建中", item.getBuildId());
     }
 
@@ -126,7 +124,7 @@ public class BuildManageController extends BaseServerController {
             return JsonMessage.getString(300, "日志文件不存在");
         }
         JSONObject data = new JSONObject();
-        data.put("run", item.getStatus() == BuildModel.Status.Ing.getCode());
+        data.put("run", item.getStatus() == BuildModel.Status.Ing.getCode() || item.getStatus() == BuildModel.Status.PubIng.getCode());
         // 读取文件
         int linesInt = Convert.toInt(line, 1);
         List<String> lines = new LinkedList<>();

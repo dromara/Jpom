@@ -199,11 +199,12 @@ public class OutGivingModel extends BaseModel {
         }
     }
 
-    public void startBefore() {
+    public List<OutGivingNodeProject> startBefore() {
         List<OutGivingNodeProject> thisPs = getOutGivingNodeProjectList();
         if (thisPs == null) {
-            return;
+            return null;
         }
         thisPs.forEach(outGivingNodeProject -> outGivingNodeProject.setStatus(OutGivingNodeProject.Status.Ing.getCode()));
+        return thisPs;
     }
 }

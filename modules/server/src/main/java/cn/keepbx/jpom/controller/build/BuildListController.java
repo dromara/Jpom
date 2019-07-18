@@ -1,5 +1,6 @@
 package cn.keepbx.jpom.controller.build;
 
+import cn.hutool.core.convert.Convert;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
@@ -11,8 +12,11 @@ import cn.jiangzeyin.common.validator.ValidatorRule;
 import cn.keepbx.jpom.common.BaseServerController;
 import cn.keepbx.jpom.model.BaseEnum;
 import cn.keepbx.jpom.model.data.BuildModel;
+import cn.keepbx.jpom.model.data.NodeModel;
+import cn.keepbx.jpom.model.data.OutGivingModel;
 import cn.keepbx.jpom.model.data.UserModel;
 import cn.keepbx.jpom.service.build.BuildService;
+import cn.keepbx.jpom.service.node.OutGivingServer;
 import cn.keepbx.jpom.system.ConfigBean;
 import cn.keepbx.jpom.system.JpomRuntimeException;
 import cn.keepbx.util.GitUtil;
@@ -42,6 +46,8 @@ public class BuildListController extends BaseServerController {
 
     @Resource
     private BuildService buildService;
+    @Resource
+    private OutGivingServer outGivingServer;
 
     @RequestMapping(value = "list.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
     public String list() {
@@ -68,7 +74,9 @@ public class BuildListController extends BaseServerController {
                                 @ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "登录密码")) String password,
                                 @ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "请选择分支")) String branchName,
                                 @ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "构建产物目录不能为空")) String resultDirFile,
-                                @ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "构建命令不能为空")) String script) throws Exception {
+                                @ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "构建命令不能为空")) String script,
+                                @ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "发布方法不正确") int releaseMethod,
+                                String afterOpt) throws Exception {
         List<String> list = getBranchList(gitUrl, userName, password);
         if (!list.contains(branchName)) {
             return JsonMessage.getString(405, "没有找到对应分支：" + branchName);
@@ -87,6 +95,34 @@ public class BuildListController extends BaseServerController {
         buildModel.setScript(script);
         //
         buildModel.setModifyUser(UserModel.getOptUserName(getUser()));
+        //
+        BuildModel.ReleaseMethod releaseMethod1 = BaseEnum.getEnum(BuildModel.ReleaseMethod.class, releaseMethod);
+        if (releaseMethod1 == null) {
+            return JsonMessage.getString(405, "发布方法不正确");
+        }
+        buildModel.setReleaseMethod(releaseMethod1.getCode());
+        if (releaseMethod1 == BuildModel.ReleaseMethod.Outgiving) {
+            String releaseMethodDataId = getParameter("releaseMethodDataId_1");
+            if (StrUtil.isEmpty(releaseMethodDataId)) {
+                return JsonMessage.getString(405, "请选择分发项目");
+            }
+            buildModel.setReleaseMethodDataId(releaseMethodDataId);
+        } else if (releaseMethod1 == BuildModel.ReleaseMethod.Project) {
+            String releaseMethodDataId2Node = getParameter("releaseMethodDataId_2_node");
+            String releaseMethodDataId2Project = getParameter("releaseMethodDataId_2_project");
+            if (StrUtil.isEmpty(releaseMethodDataId2Node) || StrUtil.isEmpty(releaseMethodDataId2Project)) {
+                return JsonMessage.getString(405, "请选择节点和项目");
+            }
+            buildModel.setReleaseMethodDataId(String.format("%s:%s", releaseMethodDataId2Node, releaseMethodDataId2Project));
+            //
+            BuildModel.AfterOpt afterOpt1 = BaseEnum.getEnum(BuildModel.AfterOpt.class, Convert.toInt(afterOpt, 0));
+            if (afterOpt1 == null) {
+                return JsonMessage.getString(400, "请选择打包后的操作");
+            }
+            buildModel.setAfterOpt(afterOpt1.getCode());
+        } else {
+            buildModel.setReleaseMethodDataId(null);
+        }
         if (StrUtil.isEmpty(id)) {
             buildService.addItem(buildModel);
             return JsonMessage.getString(200, "添加成功");
@@ -105,6 +141,16 @@ public class BuildListController extends BaseServerController {
         //
         JSONArray releaseMethods = BaseEnum.toJSONArray(BuildModel.ReleaseMethod.class);
         setAttribute("releaseMethods", releaseMethods);
+        //
+        List<OutGivingModel> outGivingModels = outGivingServer.list();
+        setAttribute("outGivingModels", outGivingModels);
+
+        //
+        List<NodeModel> nodeModels = nodeService.listAndProject();
+        setAttribute("nodeModels", nodeModels);
+        //
+        JSONArray jsonArray = BaseEnum.toJSONArray(BuildModel.AfterOpt.class);
+        setAttribute("afterOpt", jsonArray);
         return "build/edit";
     }
 

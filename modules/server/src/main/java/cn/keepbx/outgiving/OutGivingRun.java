@@ -8,6 +8,7 @@ import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.spring.SpringUtil;
 import cn.keepbx.jpom.common.forward.NodeForward;
 import cn.keepbx.jpom.common.forward.NodeUrl;
+import cn.keepbx.jpom.model.BaseEnum;
 import cn.keepbx.jpom.model.data.NodeModel;
 import cn.keepbx.jpom.model.data.OutGivingModel;
 import cn.keepbx.jpom.model.data.OutGivingNodeProject;
@@ -19,6 +20,7 @@ import com.alibaba.fastjson.JSONObject;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.Callable;
 
 /**
@@ -34,20 +36,31 @@ public class OutGivingRun implements Callable<OutGivingNodeProject.Status> {
     private File file;
     private OutGivingModel.AfterOpt afterOpt;
     private UserModel userModel;
+    private boolean unzip;
 
 
     /**
      * 开始异步执行分发任务
      *
-     * @param id        需要分发的id
+     * @param id        分发id
      * @param file      文件
-     * @param afterOpt  分发后的操作
      * @param userModel 操作的用户
      */
-    public static void startRun(String id, File file,
-                                OutGivingModel.AfterOpt afterOpt,
+    public static void startRun(String id,
+                                File file,
                                 UserModel userModel,
-                                List<OutGivingNodeProject> outGivingNodeProjects) {
+                                boolean unzip) throws IOException {
+        OutGivingServer outGivingServer = SpringUtil.getBean(OutGivingServer.class);
+        OutGivingModel item = outGivingServer.getItem(id);
+        Objects.requireNonNull(item);
+        OutGivingModel.AfterOpt afterOpt = BaseEnum.getEnum(OutGivingModel.AfterOpt.class, item.getAfterOpt());
+        if (afterOpt == null) {
+            afterOpt = OutGivingModel.AfterOpt.No;
+        }
+        OutGivingModel.AfterOpt finalAfterOpt = afterOpt;
+        //
+        List<OutGivingNodeProject> outGivingNodeProjects = item.startBefore();
+        outGivingServer.updateItem(item);
         // 开启线程
         if (afterOpt == OutGivingModel.AfterOpt.Order_Restart || afterOpt == OutGivingModel.AfterOpt.Order_Must_Restart) {
             ThreadUtil.execute(() -> {
@@ -56,10 +69,10 @@ public class OutGivingRun implements Callable<OutGivingNodeProject.Status> {
                     if (cancel) {
                         updateStatus(id, outGivingNodeProject, OutGivingNodeProject.Status.Cancel, "前一个节点分发失败，取消分发");
                     } else {
-                        OutGivingRun outGivingRun = new OutGivingRun(id, outGivingNodeProject, file, afterOpt, userModel);
+                        OutGivingRun outGivingRun = new OutGivingRun(id, outGivingNodeProject, file, finalAfterOpt, userModel, unzip);
                         OutGivingNodeProject.Status status = outGivingRun.call();
                         if (status != OutGivingNodeProject.Status.Ok) {
-                            if (afterOpt == OutGivingModel.AfterOpt.Order_Must_Restart) {
+                            if (finalAfterOpt == OutGivingModel.AfterOpt.Order_Must_Restart) {
                                 // 完整重启，不再继续剩余的节点项目
                                 cancel = true;
                             }
@@ -68,15 +81,22 @@ public class OutGivingRun implements Callable<OutGivingNodeProject.Status> {
                 }
             });
         } else if (afterOpt == OutGivingModel.AfterOpt.Restart || afterOpt == OutGivingModel.AfterOpt.No) {
-            outGivingNodeProjects.forEach(outGivingNodeProject -> ThreadUtil.execAsync(new OutGivingRun(id, outGivingNodeProject, file, afterOpt, userModel)));
+
+            outGivingNodeProjects.forEach(outGivingNodeProject -> ThreadUtil.execAsync(new OutGivingRun(id, outGivingNodeProject, file, finalAfterOpt, userModel, unzip)));
         } else {
             //
             throw new RuntimeException("Not implemented");
         }
     }
 
-    private OutGivingRun(String outGivingId, OutGivingNodeProject outGivingNodeProject, File file, OutGivingModel.AfterOpt afterOpt, UserModel userModel) {
+    private OutGivingRun(String outGivingId,
+                         OutGivingNodeProject outGivingNodeProject,
+                         File file,
+                         OutGivingModel.AfterOpt afterOpt,
+                         UserModel userModel,
+                         boolean unzip) {
         this.outGivingId = outGivingId;
+        this.unzip = unzip;
         this.outGivingNodeProject = outGivingNodeProject;
         this.file = file;
         this.afterOpt = afterOpt;
@@ -91,16 +111,12 @@ public class OutGivingRun implements Callable<OutGivingNodeProject.Status> {
     public OutGivingNodeProject.Status call() {
         OutGivingNodeProject.Status result;
         try {
-            JSONObject data = new JSONObject();
-            data.put("file", file);
-            data.put("id", this.outGivingNodeProject.getProjectId());
-            data.put("type", "unzip");
-            // 操作
-            if (afterOpt != OutGivingModel.AfterOpt.No) {
-                data.put("after", "restart");
-            }
             //
-            JsonMessage jsonMessage = NodeForward.request(this.nodeModel, NodeUrl.Manage_File_Upload, this.userModel, data);
+            JsonMessage jsonMessage = fileUpload(file,
+                    this.outGivingNodeProject.getProjectId(),
+                    unzip,
+                    afterOpt != OutGivingModel.AfterOpt.No,
+                    this.nodeModel, this.userModel);
             if (jsonMessage.getCode() == HttpStatus.HTTP_OK) {
                 result = OutGivingNodeProject.Status.Ok;
                 updateStatus(this.outGivingId, this.outGivingNodeProject, result, jsonMessage.toString());
@@ -114,6 +130,21 @@ public class OutGivingRun implements Callable<OutGivingNodeProject.Status> {
             updateStatus(this.outGivingId, this.outGivingNodeProject, result, e.getMessage());
         }
         return result;
+    }
+
+
+    public static JsonMessage fileUpload(File file, String projectId, boolean unzip, boolean restart, NodeModel nodeModel, UserModel userModel) {
+        JSONObject data = new JSONObject();
+        data.put("file", file);
+        data.put("id", projectId);
+        if (unzip) {
+            data.put("type", "unzip");
+        }
+        // 操作
+        if (restart) {
+            data.put("after", "restart");
+        }
+        return NodeForward.request(nodeModel, NodeUrl.Manage_File_Upload, userModel, data);
     }
 
     /**

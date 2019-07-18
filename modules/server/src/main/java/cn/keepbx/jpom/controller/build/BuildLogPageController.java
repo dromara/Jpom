@@ -91,11 +91,8 @@ public class BuildLogPageController extends BaseServerController {
         if (logFile.isFile()) {
             ServletUtil.write(getResponse(), logFile);
         } else {
-            File zipFile = FileUtil.file(logFile.getParentFile(), FileUtil.mainName(logFile) + ".zip");
-            if (!zipFile.exists()) {
-                // 不存在则打包
-                ZipUtil.zip(logFile);
-            }
+            File zipFile = BuildManage.isDirPackage(logFile);
+            assert zipFile != null;
             ServletUtil.write(getResponse(), zipFile);
         }
     }

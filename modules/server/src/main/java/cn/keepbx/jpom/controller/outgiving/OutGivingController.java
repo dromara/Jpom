@@ -35,9 +35,6 @@ public class OutGivingController extends BaseServerController {
     @Resource
     private OutGivingServer outGivingServer;
 
-    @Resource
-    private ServerWhitelistServer serverWhitelistServer;
-
     @RequestMapping(value = "list.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
     public String list() throws IOException {
         List<OutGivingModel> outGivingModels = outGivingServer.list();
