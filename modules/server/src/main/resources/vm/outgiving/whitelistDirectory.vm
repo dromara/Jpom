@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    #parse("./common/head.vm")
+    <title>白名单目录</title>
+    <style>
+        body {
+            padding: 10px;
+        }
+
+        .edit-div {
+            width: 80%;
+            height: 25vh;
+        }
+    </style>
+</head>
+
+<body>
+<div class="layui-container">
+    <form action="" class="layui-form" id="form_user">
+        <div class="layui-form-item">
+            <div class="layui-inline edit-div">
+                <label class="layui-form-label">白名单路径</label>
+                <div class="layui-input-block auto">
+                    <textarea name="data" placeholder="请添加节点分发的项目白名单，回车支持输入多个路径，系统会自动过滤 ../ 路径、不允许输入根路径"
+                              class="layui-textarea auto">$!whiteList</textarea>
+                </div>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-input-block">
+                <button class="layui-btn" lay-submit lay-filter="formDemo">立即提交</button>
+            </div>
+        </div>
+    </form>
+</div>
+</body>
+<script type="text/javascript">
+    function loadSuccess() {
+        form.on('submit(formDemo)', function (data) {
+            loadingAjax({
+                url: './whitelistDirectory_submit',
+                data: data.field,
+                success: function (data) {
+                    layer.msg(data.msg);
+                    if (200 == data.code) {
+                        setTimeout(function () {
+                            window.location.reload()
+                        }, 2000);
+                    }
+                }
+            });
+            return false;
+        });
+    }
+</script>
+
+</html>

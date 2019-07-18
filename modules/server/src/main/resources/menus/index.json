@@ -14,6 +14,11 @@
         "id": "outgiving",
         "title": "分发列表",
         "url": "./outgiving/list.html"
+      },
+      {
+        "id": "outgivingWhitelistDirectory",
+        "title": "分发白名单",
+        "url": "./outgiving/whitelistDirectory.html"
       }
     ]
   },

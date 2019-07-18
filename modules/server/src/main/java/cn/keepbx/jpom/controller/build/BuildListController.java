@@ -102,6 +102,9 @@ public class BuildListController extends BaseServerController {
             buildModel = buildService.getItem(id);
         }
         setAttribute("model", buildModel);
+        //
+        JSONArray releaseMethods = BaseEnum.toJSONArray(BuildModel.ReleaseMethod.class);
+        setAttribute("releaseMethods", releaseMethods);
         return "build/edit";
     }
 

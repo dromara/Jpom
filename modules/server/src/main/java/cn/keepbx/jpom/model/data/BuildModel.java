@@ -51,6 +51,18 @@ public class BuildModel extends BaseModel {
      * 构建id
      */
     private int buildId;
+    /**
+     * 发布方式
+     */
+    private int releaseMethod;
+
+    public int getReleaseMethod() {
+        return releaseMethod;
+    }
+
+    public void setReleaseMethod(int releaseMethod) {
+        this.releaseMethod = releaseMethod;
+    }
 
     public int getBuildId() {
         return buildId;
@@ -157,6 +169,33 @@ public class BuildModel extends BaseModel {
         private String desc;
 
         Status(int code, String desc) {
+            this.code = code;
+            this.desc = desc;
+        }
+
+        @Override
+        public int getCode() {
+            return code;
+        }
+
+        @Override
+        public String getDesc() {
+            return desc;
+        }
+    }
+
+    public enum ReleaseMethod implements BaseEnum {
+        /**
+         * 发布
+         */
+        No(0, "不发布"),
+        Outgiving(1, "节点分发"),
+        Project(2, "项目"),
+        ;
+        private int code;
+        private String desc;
+
+        ReleaseMethod(int code, String desc) {
             this.code = code;
             this.desc = desc;
         }

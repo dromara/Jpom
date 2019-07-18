@@ -39,7 +39,7 @@
 <script type="text/html" id="bar_build">
     <a href="javascript:;" class="layui-btn  layui-btn-sm layui-btn-normal" lay-event="update">编辑</a>
 
-    {{# if(d.status==0 || d.status== 2 || d.status==5) { }}
+    {{# if(d.status==0 || d.status== 2 || d.status==5 || d.status==7) { }}
     <a href="javascript:;" class="layui-btn layui-btn-sm layui-btn-danger" lay-event="build">构建</a>
     {{# }else{ }}
     <a href="javascript:;" class="layui-btn layui-btn-sm layui-btn-danger" lay-event="stop">停止</a>

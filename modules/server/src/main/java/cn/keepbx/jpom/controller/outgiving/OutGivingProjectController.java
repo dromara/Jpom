@@ -15,6 +15,7 @@ import cn.keepbx.jpom.model.data.UserOperateLogV1;
 import cn.keepbx.jpom.service.node.OutGivingServer;
 import cn.keepbx.jpom.system.ConfigBean;
 import cn.keepbx.jpom.system.ServerConfigBean;
+import cn.keepbx.outgiving.OutGivingRun;
 import cn.keepbx.util.StringUtil;
 import com.alibaba.fastjson.JSONArray;
 import org.springframework.http.MediaType;
@@ -98,8 +99,8 @@ public class OutGivingProjectController extends BaseServerController {
         outGivingModel.setAfterOpt(afterOpt1.getCode());
         outGivingModel.startBefore();
         outGivingServer.updateItem(outGivingModel);
-        //
-        outGivingModel.startRun(id, dest, afterOpt1, getUser());
+        // 开启
+        OutGivingRun.startRun(id, dest, afterOpt1, getUser(), outGivingModel.getOutGivingNodeProjectList());
         return JsonMessage.getString(200, "分发成功");
     }
 }

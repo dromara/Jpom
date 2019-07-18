@@ -74,6 +74,17 @@
                               class="layui-textarea">$!model.script</textarea>
             </div>
         </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">发布操作</label>
+            <div class="layui-input-block">
+                #foreach($item in $releaseMethods)
+                    <input type="radio" name="releaseMethod" lay-filter="releaseMethod" value="$item.code"
+                           title="$item.desc"  #if($model.releaseMethod==$item.code)
+                           checked
+                    #end>
+                #end
+            </div>
+        </div>
     ##提交按钮
         <div class="layui-form-item">
             <div class="layui-form-item" style="padding-left: 20%;margin-top: 20px;">
@@ -146,6 +157,14 @@
                 }
             });
             return false;
+        });
+
+        form.on('radio(releaseMethod)', function (data) {
+            if (data.value == 1) {
+
+            } else if (data.value == 2) {
+                // 项目
+            }
         });
     }
 </script>

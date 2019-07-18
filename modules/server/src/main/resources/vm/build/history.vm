@@ -14,7 +14,10 @@
 <body>
 <table class="layui-table" id="tab_user" lay-filter="tab_user" style="margin: 0;"></table>
 <script type="text/html" id="bar_projects">
-    <a href="javascript:;" class="layui-btn  layui-btn-sm layui-btn-normal" lay-event="view">详情</a>
+    {{# if(d.status==2 || d.status== 4 || d.status==5 || d.status==6) { }}
+    <a href="javascript:;" class="layui-btn  layui-btn-sm layui-btn-normal" lay-event="download">下载构建物</a>
+    {{# } }}
+    <a href="javascript:;" class="layui-btn  layui-btn-sm layui-btn-normal" lay-event="delete">删除</a>
 </script>
 </body>
 
@@ -116,6 +119,27 @@
                 // 选中
                 $("#status option[value='" + apiWhere.status + "']").attr("selected", "selected");
                 form.render();
+            }
+        });
+
+        table.on('tool(tab_user)', function (obj) {
+            var data = obj.data;
+            var event = obj.event;
+            if (event == "delete") {
+                loadingAjax({
+                    url: './delete_log.json',
+                    data: {
+                        logId: data.id
+                    },
+                    success: function (data) {
+                        layer.msg(data.msg);
+                        if (200 == data.code) {
+                            table.reload('tab_user', {});
+                        }
+                    }
+                });
+            } else if (event == 'download') {
+                window.open("./download_file.html?logId=" + data.id);
             }
         });
 

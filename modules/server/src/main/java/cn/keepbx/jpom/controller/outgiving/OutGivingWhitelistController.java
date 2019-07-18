@@ -8,6 +8,7 @@ import cn.keepbx.jpom.common.interceptor.UrlPermission;
 import cn.keepbx.jpom.model.Role;
 import cn.keepbx.jpom.model.data.AgentWhitelist;
 import cn.keepbx.jpom.model.data.ServerWhitelist;
+import cn.keepbx.jpom.model.data.UserModel;
 import cn.keepbx.jpom.model.data.UserOperateLogV1;
 import cn.keepbx.jpom.service.system.ServerWhitelistServer;
 import org.springframework.http.MediaType;
@@ -30,6 +31,20 @@ import java.util.List;
 public class OutGivingWhitelistController extends BaseServerController {
     @Resource
     private ServerWhitelistServer serverWhitelistServer;
+
+
+    @RequestMapping(value = "whitelistDirectory.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
+    public String whitelistDirectory() {
+        //
+        UserModel userModel = getUser();
+        ServerWhitelist serverWhitelist = serverWhitelistServer.getWhitelist();
+        if (serverWhitelist != null && userModel.isSystemUser()) {
+            List<String> whiteList = serverWhitelist.getOutGiving();
+            String strWhiteList = AgentWhitelist.convertToLine(whiteList);
+            setAttribute("whiteList", strWhiteList);
+        }
+        return "outgiving/whitelistDirectory";
+    }
 
     /**
      * 保存节点白名单

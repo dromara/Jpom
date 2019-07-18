@@ -38,6 +38,13 @@ public class BuildManageController extends BaseServerController {
     @Resource
     private BuildService buildService;
 
+    /**
+     * 开始构建
+     *
+     * @param id id
+     * @return json
+     * @throws IOException e
+     */
     @RequestMapping(value = "start.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public String start(@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据")) String id) throws IOException {
         BuildModel item = buildService.getItem(id);
@@ -48,7 +55,8 @@ public class BuildManageController extends BaseServerController {
         Objects.requireNonNull(nowStatus);
         if (BuildModel.Status.No != nowStatus &&
                 BuildModel.Status.Success != nowStatus &&
-                BuildModel.Status.PubSuccess != nowStatus) {
+                BuildModel.Status.PubSuccess != nowStatus &&
+                BuildModel.Status.Cancel != nowStatus) {
             return JsonMessage.getString(501, "当前还在：" + nowStatus.getDesc());
         }
         //
@@ -61,6 +69,13 @@ public class BuildManageController extends BaseServerController {
         return JsonMessage.getString(200, "开始构建中", item.getBuildId());
     }
 
+    /**
+     * 取消构建
+     *
+     * @param id id
+     * @return json
+     * @throws IOException e
+     */
     @RequestMapping(value = "cancel.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public String cancel(@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据")) String id) throws IOException {
         BuildModel item = buildService.getItem(id);
@@ -72,10 +87,23 @@ public class BuildManageController extends BaseServerController {
         if (BuildModel.Status.Ing != nowStatus) {
             return JsonMessage.getString(501, "当前不在进行中");
         }
-        BuildManage.cancel(item.getId());
+        boolean status = BuildManage.cancel(item.getId());
+        if (!status) {
+            item.setStatus(BuildModel.Status.Cancel.getCode());
+            buildService.updateItem(item);
+        }
         return JsonMessage.getString(200, "取消成功");
     }
 
+    /**
+     * 获取构建的日志
+     *
+     * @param id      id
+     * @param buildId 构建编号
+     * @param line    需要获取的行号
+     * @return json
+     * @throws IOException e
+     */
     @RequestMapping(value = "getNowLog.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public String getNowLog(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据") String id,
                             @ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "没有buildId") int buildId,

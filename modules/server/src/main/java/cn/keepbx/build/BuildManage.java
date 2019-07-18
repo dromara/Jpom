@@ -71,6 +71,22 @@ public class BuildManage implements Runnable {
         this.optUserName = optUserName;
     }
 
+    public static File getHistoryPackageFile(BuildModel buildModel, int buildId, String resultFile) {
+        return FileUtil.file(ConfigBean.getInstance().getDataPath(),
+                "build",
+                buildModel.getId(),
+                "history",
+                BuildModel.getBuildIdStr(buildId),
+                resultFile);
+    }
+
+    /**
+     * 获取日志记录文件
+     *
+     * @param buildModel 对象
+     * @param buildId    构建编号
+     * @return file
+     */
     public static File getLogFile(BuildModel buildModel, int buildId) {
         return FileUtil.file(ConfigBean.getInstance().getDataPath(),
                 "build",
@@ -85,10 +101,10 @@ public class BuildManage implements Runnable {
      *
      * @param id id
      */
-    public static void cancel(String id) {
+    public static boolean cancel(String id) {
         BuildManage buildManage = BUILD_MANAGE_MAP.get(id);
         if (buildManage == null) {
-            return;
+            return false;
         }
         if (buildManage.process != null) {
             try {
@@ -97,6 +113,8 @@ public class BuildManage implements Runnable {
             }
         }
         buildManage.updateStatus(BuildModel.Status.Cancel);
+        BUILD_MANAGE_MAP.remove(id);
+        return true;
     }
 
     /**
@@ -166,6 +184,7 @@ public class BuildManage implements Runnable {
         buildHistoryLog.setBuildDataId(buildModel.getId());
         buildHistoryLog.setResultDirFile(buildModel.getResultDirFile());
         buildHistoryLog.setId(this.logId);
+        buildHistoryLog.setStatus(BuildModel.Status.Ing.getCode());
         buildHistoryLog.setStartTime(System.currentTimeMillis());
         buildHistoryLog.setBuildNumberId(buildModel.getBuildId());
         buildHistoryLog.setBuildUser(optUserName);
@@ -176,8 +195,6 @@ public class BuildManage implements Runnable {
             Entity entity = new Entity(BuildHistoryLog.TABLE_NAME);
             entity.parseBean(buildHistoryLog);
             db.insert(entity);
-            //
-            DbConfig.autoClear(BuildHistoryLog.TABLE_NAME, "startTime");
         } catch (SQLException e) {
             DefaultSystemLog.ERROR().error("db error", e);
         }
@@ -192,7 +209,7 @@ public class BuildManage implements Runnable {
             this.log(buildModel.getResultDirFile() + "不存在，处理构建产物失败");
             return;
         }
-        File toFile = FileUtil.file(ConfigBean.getInstance().getDataPath(), "build", buildModel.getId(), "history", buildModel.getBuildIdStr(), buildModel.getResultDirFile());
+        File toFile = getHistoryPackageFile(buildModel, buildModel.getBuildId(), buildModel.getResultDirFile());
         FileUtil.copyContent(file, toFile, true);
         this.log(StrUtil.format("mv {} {}", buildModel.getResultDirFile(), buildModel.getBuildIdStr()));
     }

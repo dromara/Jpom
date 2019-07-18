@@ -59,7 +59,9 @@
                 },
                 success: function (data) {
                     if (201 == data.code) {
-                        getLog();
+                        setTimeout(function () {
+                            getLog();
+                        }, 1000);
                         return;
                     }
                     if (200 == data.code) {
@@ -105,7 +107,7 @@
             loadingAjax({
                 url: './cancel.json',
                 data: {
-                    id: dataId
+                    id: getQueryString('id')
                 },
                 success: function (data) {
                     layer.msg(data.msg);

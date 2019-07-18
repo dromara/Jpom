@@ -17,9 +17,6 @@
         <button onclick="editProject('');" class="layui-btn layui-btn-sm layui-btn-normal">添加关联项目</button>
         <button onclick="editAllProject('');" class="layui-btn layui-btn-sm layui-btn-normal">创建分发项目</button>
     #end
-    #if($user.isSystemUser())
-        <button onclick="editWhitelist();" class="layui-btn layui-btn-sm">分发白名单</button>
-    #end
 </div>
     #if($array && $array.size()>0)
 
@@ -79,7 +76,12 @@
                                             <div title="$tr.nodeId">$nodeData[$tr.nodeId].name</div>
                                         </td>
                                         <td>
-                                            <div title="$tr.projectId">$nodeData[$tr.nodeId].projects[$tr.projectId].name</div>
+                                            #if($nodeData[$tr.nodeId] && $nodeData[$tr.nodeId].projects && $nodeData[$tr.nodeId].projects[$tr.projectId])
+                                                <div title="$tr.projectId">$nodeData[$tr.nodeId].projects[$tr.projectId].name</div>
+                                            #else
+                                                <div title="$tr.projectId" style="color: red;">没有数据</div>
+                                            #end
+
                                         </td>
                                         <td>
                                             <div title="请到控制台中管理项目">
@@ -139,7 +141,6 @@
     <h1 align="center">还没有任何分发项目，请先创建分发项目</h1>
     #end
 </body>
-<script id="whiteList" type="text/html">$!whiteList</script>
 <script type="text/javascript">
 
     function loadSuccess() {
@@ -244,29 +245,6 @@
         });
     }
 
-    var whiteListVal = document.getElementById("whiteList").innerHTML;
-
-    function editWhitelist() {
-        layer.prompt({
-            title: '请添加节点分发的项目白名单',
-            formType: 2,
-            value: whiteListVal
-        }, function (text, index) {
-            loadingAjax({
-                url: "./whitelistDirectory_submit",
-                data: {
-                    data: text
-                },
-                success: function (data) {
-                    layer.msg(data.msg);
-                    if (200 == data.code) {
-                        layer.close(index);
-                        whiteListVal = data.data;
-                    }
-                }
-            });
-        });
-    }
     ## 获取项目状态
     function getProjectStatus(nodeId, projectId) {
         silentAjax({

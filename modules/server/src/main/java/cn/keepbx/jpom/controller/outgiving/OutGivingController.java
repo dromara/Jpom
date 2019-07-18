@@ -52,13 +52,7 @@ public class OutGivingController extends BaseServerController {
             jsonObject.put(nodeModel.getId(), jsonObject1);
         });
         setAttribute("nodeData", jsonObject);
-        //
-        ServerWhitelist serverWhitelist = serverWhitelistServer.getWhitelist();
-        if (serverWhitelist != null) {
-            List<String> whiteList = serverWhitelist.getOutGiving();
-            String strWhiteList = AgentWhitelist.convertToLine(whiteList);
-            setAttribute("whiteList", strWhiteList);
-        }
+
         return "outgiving/list";
     }
 

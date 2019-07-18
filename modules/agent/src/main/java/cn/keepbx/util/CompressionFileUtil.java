@@ -1,7 +1,7 @@
 package cn.keepbx.util;
 
+import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.CharsetUtil;
-import cn.hutool.core.util.StrUtil;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
@@ -23,87 +23,34 @@ public class CompressionFileUtil {
 
     private static int BUFFER_SIZE = 2048;
 
-    private static List<String> unTar(String tarFile, String destDir) throws Exception {
-        File file = new File(tarFile);
-        return unTar(file, destDir);
-    }
-
-    private static List<String> unTar(File tarFile, String destDir) throws Exception {
-        if (StrUtil.isBlank(destDir)) {
-            destDir = tarFile.getParent();
-        }
-        destDir = destDir.endsWith(File.separator) ? destDir : destDir + File.separator;
+    private static List<String> unTar(File tarFile, File destDir) throws Exception {
         return unTar(new FileInputStream(tarFile), destDir);
     }
 
-    private static List<String> unTarBZip2(String file, String destDir) throws Exception {
-        File tarFile = new File(file);
-        return unTarBZip2(tarFile, destDir);
-    }
-
-    private static List<String> unTarBZip2(File tarFile, String destDir) throws Exception {
-        if (StrUtil.isBlank(destDir)) {
-            destDir = tarFile.getParent();
-        }
-        destDir = destDir.endsWith(File.separator) ? destDir : destDir + File.separator;
+    private static List<String> unTarBZip2(File tarFile, File destDir) throws Exception {
         return unTar(new BZip2CompressorInputStream(new FileInputStream(tarFile)), destDir);
     }
 
-    private static List<String> unBZip2(String bzip2File, String destDir) throws IOException {
-        File file = new File(bzip2File);
-        return unBZip2(file, destDir);
+    private static List<String> unTarGZ(File tarFile, File destDir) throws Exception {
+        return unTar(new GzipCompressorInputStream(new BufferedInputStream(new FileInputStream(tarFile))), destDir);
     }
 
-    private static List<String> unTarGZ(File tarFile, String destDir) throws Exception {
-        if (StrUtil.isBlank(destDir)) {
-            destDir = tarFile.getParent();
-        }
-        destDir = destDir.endsWith(File.separator) ? destDir : destDir + File.separator;
-        return unTar(new GzipCompressorInputStream(new FileInputStream(tarFile)), destDir);
-    }
-
-    private static List<String> unTarGZ(String file, String destDir) throws Exception {
-        File tarFile = new File(file);
-        return unTarGZ(tarFile, destDir);
-    }
-
-    private static List<String> unZip(String zipfile, String destDir) throws Exception {
-        File zipFile = new File(zipfile);
-        return unZip(zipFile, destDir);
-    }
-
-    private static List<String> unGZ(String gzFile, String destDir) throws IOException {
-        File file = new File(gzFile);
-        return unGZ(file, destDir);
-    }
-
-    private static void createDirectory(String outputDir, String subDir) {
-        File file = new File(outputDir);
-        if (!(subDir == null || "".equals(subDir.trim()))) {
-            //子目录不为空
-            file = new File(outputDir + File.separator + subDir);
-        }
-        if (!file.exists()) {
-            file.mkdirs();
-        }
-    }
-
-    private static List<String> unTar(InputStream inputStream, String destDir) throws Exception {
+    private static List<String> unTar(InputStream inputStream, File destDir) throws Exception {
         List<String> fileNames = new ArrayList<>();
-        TarArchiveInputStream tarIn = new TarArchiveInputStream(inputStream, BUFFER_SIZE);
+        TarArchiveInputStream tarIn = new TarArchiveInputStream(inputStream, BUFFER_SIZE, CharsetUtil.GBK);
         TarArchiveEntry entry;
         try {
             while ((entry = tarIn.getNextTarEntry()) != null) {
                 fileNames.add(entry.getName());
                 if (entry.isDirectory()) {
                     //是目录
-                    createDirectory(destDir, entry.getName());
+                    FileUtil.mkdir(new File(destDir, entry.getName()));
                     //创建空目录
                 } else {
                     //是文件
-                    File tmpFile = new File(destDir + File.separator + entry.getName());
+                    File tmpFile = new File(destDir, entry.getName());
                     //创建输出目录
-                    createDirectory(tmpFile.getParent() + File.separator, null);
+                    FileUtil.mkdir(destDir);
                     OutputStream out = null;
                     try {
                         out = new FileOutputStream(tmpFile);
@@ -123,11 +70,7 @@ public class CompressionFileUtil {
         return fileNames;
     }
 
-    private static List<String> unBZip2(File srcFile, String destDir) throws IOException {
-        if (StrUtil.isBlank(destDir)) {
-            destDir = srcFile.getParent();
-        }
-        destDir = destDir.endsWith(File.separator) ? destDir : destDir + File.separator;
+    private static List<String> unBZip2(File srcFile, File destDir) throws IOException {
         List<String> fileNames = new ArrayList<>();
         InputStream is = null;
         OutputStream os = null;
@@ -145,12 +88,8 @@ public class CompressionFileUtil {
         return fileNames;
     }
 
-    private static List<String> unGZ(File srcFile, String destDir) throws IOException {
-        if (StrUtil.isBlank(destDir)) {
-            destDir = srcFile.getParent();
-        }
+    private static List<String> unGZ(File srcFile, File destDir) throws IOException {
         List<String> fileNames = new ArrayList<>();
-        destDir = destDir.endsWith(File.separator) ? destDir : destDir + File.separator;
         InputStream is = null;
         OutputStream os = null;
         try {
@@ -167,22 +106,16 @@ public class CompressionFileUtil {
         return fileNames;
     }
 
-    private static List<String> unZip(File zipfile, String destDir) throws Exception {
-        if (StrUtil.isBlank(destDir)) {
-            destDir = zipfile.getParent();
-        }
-        destDir = destDir.endsWith(File.separator) ? destDir : destDir + File.separator;
+    private static List<String> unZip(File zipfile, File destDir) throws Exception {
         ZipArchiveInputStream is = null;
         List<String> fileNames = new ArrayList<>();
-
         try {
             is = new ZipArchiveInputStream(new BufferedInputStream(new FileInputStream(zipfile), BUFFER_SIZE), CharsetUtil.GBK);
             ZipArchiveEntry entry;
             while ((entry = is.getNextZipEntry()) != null) {
                 fileNames.add(entry.getName());
                 if (entry.isDirectory()) {
-                    File directory = new File(destDir, entry.getName());
-                    directory.mkdirs();
+                    FileUtil.mkdir(new File(destDir, entry.getName()));
                 } else {
                     OutputStream os = null;
                     try {
@@ -199,8 +132,8 @@ public class CompressionFileUtil {
         return fileNames;
     }
 
-    public static List<String> unCompress(String compressFile, String destDir) throws Exception {
-        String upperName = compressFile.toUpperCase();
+    public static List<String> unCompress(File compressFile, File destDir) throws Exception {
+        String upperName = FileUtil.getName(compressFile).toUpperCase();
         List<String> ret = null;
         if (upperName.endsWith(".ZIP")) {
             ret = unZip(compressFile, destDir);

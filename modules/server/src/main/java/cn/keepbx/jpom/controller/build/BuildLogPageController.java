@@ -6,22 +6,27 @@ import cn.hutool.core.convert.Convert;
 import cn.hutool.core.date.DatePattern;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.core.util.ZipUtil;
 import cn.hutool.db.Db;
 import cn.hutool.db.Entity;
 import cn.hutool.db.Page;
 import cn.hutool.db.PageResult;
 import cn.hutool.db.sql.Direction;
 import cn.hutool.db.sql.Order;
+import cn.hutool.extra.servlet.ServletUtil;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.validator.ValidatorConfig;
 import cn.jiangzeyin.common.validator.ValidatorItem;
 import cn.jiangzeyin.common.validator.ValidatorRule;
+import cn.keepbx.build.BuildManage;
 import cn.keepbx.jpom.common.BaseServerController;
 import cn.keepbx.jpom.model.BaseEnum;
 import cn.keepbx.jpom.model.data.BuildHistoryLog;
 import cn.keepbx.jpom.model.data.BuildModel;
 import cn.keepbx.jpom.model.vo.BuildHistoryLogVo;
+import cn.keepbx.jpom.service.build.BuildHistoryService;
 import cn.keepbx.jpom.service.build.BuildService;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -32,6 +37,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.annotation.Resource;
+import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
 
@@ -45,6 +51,8 @@ public class BuildLogPageController extends BaseServerController {
 
     @Resource
     private BuildService buildService;
+    @Resource
+    private BuildHistoryService buildHistoryService;
 
     @RequestMapping(value = "logPage.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
     public String logPage() {
@@ -56,6 +64,40 @@ public class BuildLogPageController extends BaseServerController {
         JSONArray jsonArray = BaseEnum.toJSONArray(BuildModel.Status.class);
         setAttribute("status", jsonArray);
         return "build/history";
+    }
+
+    /**
+     * 下载构建物
+     *
+     * @param logId 日志id
+     * @throws SQLException e
+     * @throws IOException  e
+     */
+    @RequestMapping(value = "download_file.html", method = RequestMethod.GET)
+    @ResponseBody
+    public void downloadFile(@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据")) String logId) throws SQLException, IOException {
+        BuildHistoryLog buildHistoryLog = buildHistoryService.getLog(logId);
+        if (buildHistoryLog == null) {
+            return;
+        }
+        BuildModel item = buildService.getItem(buildHistoryLog.getBuildDataId());
+        if (item == null) {
+            return;
+        }
+        File logFile = BuildManage.getHistoryPackageFile(item, buildHistoryLog.getBuildNumberId(), buildHistoryLog.getResultDirFile());
+        if (!logFile.exists()) {
+            return;
+        }
+        if (logFile.isFile()) {
+            ServletUtil.write(getResponse(), logFile);
+        } else {
+            File zipFile = FileUtil.file(logFile.getParentFile(), FileUtil.mainName(logFile) + ".zip");
+            if (!zipFile.exists()) {
+                // 不存在则打包
+                ZipUtil.zip(logFile);
+            }
+            ServletUtil.write(getResponse(), zipFile);
+        }
     }
 
     @RequestMapping(value = "history_list.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)

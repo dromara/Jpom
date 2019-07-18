@@ -92,7 +92,7 @@ public class ProjectFileControl extends BaseAgentController {
             // 解压
             File file = new File(path);
             try {
-                List<String> names = CompressionFileUtil.unCompress(file.getAbsolutePath(), lib.getAbsolutePath());
+                List<String> names = CompressionFileUtil.unCompress(file, lib);
                 if (names == null || names.isEmpty()) {
                     return JsonMessage.getString(500, "没有解压出任何文件");
                 }
