@@ -91,6 +91,7 @@
     var loopLog = false;
     var loopLogTime;
     var heart;
+    var nowStatus = false;
 
     function loadSuccess() {
         const showLogDom = $('.console .terminal');
@@ -132,6 +133,11 @@
                                 $('.status .status-div').removeClass('status-run').addClass('status-stop');
                                 $('.status span').text(json_data.msg);
                                 setOpBtn(true);
+                                #if($logSize.logSize)
+                                    if (op == 'status') {
+                                        setMsg("showlog");
+                                    }
+                                #end
                             }
                             refreshProjectData();
                             break;
@@ -152,7 +158,7 @@
                     }
                 } else {
                     showLogDom.append(data.data + '<br/>');
-                    if (!loopLog) {
+                    if (!loopLog && nowStatus) {
                         loopLogAjax();
                     }
                     clearInterval(heart);
@@ -219,9 +225,11 @@
             if (flag) {
                 $('.btn-op[op="start"]').show();
                 $('.btn-op[op="stop"],.btn-op[op="restart"]').hide();
+                nowStatus = false;
             } else {
                 $('.btn-op[op="start"]').hide();
                 $('.btn-op[op="stop"],.btn-op[op="restart"]').show();
+                nowStatus = true;
             }
         }
 
@@ -314,7 +322,6 @@
         try {
             top.frames["manage"].location.reload();
         } catch (e) {
-            console.error(e);
         }
     }
 </script>
