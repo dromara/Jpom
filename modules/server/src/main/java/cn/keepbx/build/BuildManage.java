@@ -35,6 +35,8 @@ import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
+ * 构建管理
+ *
  * @author bwcx_jzy
  * @date 2019/7/16
  */
@@ -66,24 +68,39 @@ public class BuildManage implements Runnable {
     private String optUserName;
     private UserModel userModel;
 
-    private BuildManage(final BuildModel buildModel, UserModel userModel) {
+    private BuildManage(final BuildModel buildModel, final UserModel userModel) {
         this.buildModel = buildModel;
-        this.gitFile = FileUtil.file(ConfigBean.getInstance().getDataPath(), "build", buildModel.getId(), "source");
+        this.gitFile = FileUtil.file(getBuildDataFile(buildModel.getId()), "source");
         this.logFile = getLogFile(buildModel, buildModel.getBuildId());
         this.optUserName = UserModel.getOptUserName(userModel);
         this.userModel = userModel;
     }
 
+    public static File getBuildDataFile(String id) {
+        return FileUtil.file(ConfigBean.getInstance().getDataPath(), "build", id);
+    }
+
+    /**
+     * 获取构建产物存放路径
+     *
+     * @param buildModel 构建实体
+     * @param buildId    id
+     * @param resultFile 结果目录
+     * @return file
+     */
     public static File getHistoryPackageFile(BuildModel buildModel, int buildId, String resultFile) {
-        return FileUtil.file(ConfigBean.getInstance().getDataPath(),
-                "build",
-                buildModel.getId(),
+        return FileUtil.file(getBuildDataFile(buildModel.getId()),
                 "history",
                 BuildModel.getBuildIdStr(buildId),
                 resultFile);
     }
 
-
+    /**
+     * 如果为文件夹自动打包为zip ,反之返回null
+     *
+     * @param file file
+     * @return 压缩包文件
+     */
     public static File isDirPackage(File file) {
         if (file.isFile()) {
             return null;
@@ -136,9 +153,9 @@ public class BuildManage implements Runnable {
     /**
      * 创建构建
      *
-     * @param buildModel
-     * @param userModel
-     * @return
+     * @param buildModel 构建项
+     * @param userModel  操作人
+     * @return this
      */
     public static BuildManage create(BuildModel buildModel, UserModel userModel) {
         if (BUILD_MANAGE_MAP.containsKey(buildModel.getId())) {
@@ -264,6 +281,7 @@ public class BuildManage implements Runnable {
             }
             boolean status = packageFile();
             if (status && buildModel.getReleaseMethod() != BuildModel.ReleaseMethod.No.getCode()) {
+                // 发布文件
                 this.pub();
             } else {
                 //
@@ -301,6 +319,11 @@ public class BuildManage implements Runnable {
         updateStatus(BuildModel.Status.PubSuccess);
     }
 
+    /**
+     * 发布项目
+     *
+     * @param afterOpt 后续操作
+     */
     private void doProject(BuildModel.AfterOpt afterOpt) {
         String dataId = buildModel.getReleaseMethodDataId();
         String[] strings = StrUtil.split(dataId, ":");
@@ -329,6 +352,11 @@ public class BuildManage implements Runnable {
         }
     }
 
+    /**
+     * 分发包
+     *
+     * @throws IOException IO
+     */
     private void doOutGiving() throws IOException {
         String dataId = buildModel.getReleaseMethodDataId();
         File logFile = BuildManage.getHistoryPackageFile(buildModel, buildModel.getBuildId(), buildModel.getResultDirFile());
@@ -339,13 +367,19 @@ public class BuildManage implements Runnable {
             unZip = false;
         }
         OutGivingRun.startRun(dataId, zipFile, userModel, unZip);
-        this.log("开始执行分发包啦");
+        this.log("开始执行分发包啦,请到分发中查看当前状态");
     }
 
     private void log(String title, Throwable throwable) {
         log(title, throwable, BuildModel.Status.Error);
     }
 
+    /**
+     * 发布异常日志
+     *
+     * @param title     描述
+     * @param throwable 异常
+     */
     private void pubLog(String title, Throwable throwable) {
         log(title, throwable, BuildModel.Status.PubError);
     }

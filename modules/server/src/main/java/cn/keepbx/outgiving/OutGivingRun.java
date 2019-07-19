@@ -59,7 +59,7 @@ public class OutGivingRun implements Callable<OutGivingNodeProject.Status> {
         }
         OutGivingModel.AfterOpt finalAfterOpt = afterOpt;
         //
-        List<OutGivingNodeProject> outGivingNodeProjects = item.startBefore();
+        List<OutGivingNodeProject> outGivingNodeProjects = item.getOutGivingNodeProjectList();
         outGivingServer.updateItem(item);
         // 开启线程
         if (afterOpt == OutGivingModel.AfterOpt.Order_Restart || afterOpt == OutGivingModel.AfterOpt.Order_Must_Restart) {
@@ -111,6 +111,7 @@ public class OutGivingRun implements Callable<OutGivingNodeProject.Status> {
     public OutGivingNodeProject.Status call() {
         OutGivingNodeProject.Status result;
         try {
+            updateStatus(this.outGivingId, this.outGivingNodeProject, OutGivingNodeProject.Status.Ing, "开始分发");
             //
             JsonMessage jsonMessage = fileUpload(file,
                     this.outGivingNodeProject.getProjectId(),
@@ -132,7 +133,17 @@ public class OutGivingRun implements Callable<OutGivingNodeProject.Status> {
         return result;
     }
 
-
+    /**
+     * 上传项目文件
+     *
+     * @param file      需要上传的文件
+     * @param projectId 项目id
+     * @param unzip     是否需要解压
+     * @param restart   是否需要重启
+     * @param nodeModel 节点
+     * @param userModel 操作用户
+     * @return json
+     */
     public static JsonMessage fileUpload(File file, String projectId, boolean unzip, boolean restart, NodeModel nodeModel, UserModel userModel) {
         JSONObject data = new JSONObject();
         data.put("file", file);
@@ -149,6 +160,11 @@ public class OutGivingRun implements Callable<OutGivingNodeProject.Status> {
 
     /**
      * 更新状态
+     *
+     * @param outGivingId              分发id
+     * @param outGivingNodeProjectItem 分发项
+     * @param status                   状态
+     * @param msg                      消息描述
      */
     private static void updateStatus(String outGivingId, OutGivingNodeProject outGivingNodeProjectItem, OutGivingNodeProject.Status status, String msg) {
         synchronized (OutGivingRun.class) {

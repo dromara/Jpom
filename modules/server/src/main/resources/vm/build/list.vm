@@ -5,24 +5,8 @@
     #parse("./common/head.vm")
     <title>项目管理系统</title>
     <style>
-        .layui-form-label {
-            width: 100px;
-        }
-
         body {
-            padding: 10px 10px 0px 10px;
-        }
-
-        .layui-container {
-            width: 80% !important;
-        }
-
-        .div-user {
-            display: none;
-        }
-
-        .layui-input-block {
-            margin-left: 135px;
+            padding: 10px;
         }
     </style>
 </head>
@@ -46,7 +30,9 @@
     {{# }else{ }}
     <a href="javascript:;" class="layui-btn layui-btn-sm layui-btn-danger" lay-event="build">构建</a>
     {{# } }}
-    <a href="javascript:;" class="layui-btn layui-btn-sm layui-btn-danger" lay-event="delete">删除</a>
+        #if($user.isSystemUser())
+        <a href="javascript:;" class="layui-btn layui-btn-sm layui-btn-danger" lay-event="delete">删除</a>
+        #end
 </script>
 
 <script type="text/javascript">
@@ -118,8 +104,23 @@
                 // 修改
                 updateApplication(data);
             } else if ('delete' === event) {
-                // 删除
-                deleteApplication(data);
+                layer.confirm('确定删除此构建吗 ' + data.name + '？，删除将一并删除所有构建历史', {
+                    title: '系统提示'
+                }, function (index) {
+                    layer.close(index);
+                    loadingAjax({
+                        url: './delete.json',
+                        data: {
+                            id: data.id
+                        },
+                        success: function (data) {
+                            layer.msg(data.msg);
+                            if (200 == data.code) {
+                                table.reload('tab_build', {});
+                            }
+                        }
+                    });
+                });
             } else if ('build' == event) {
                 var dataId = data.id;
                 loadingAjax({
@@ -158,27 +159,6 @@
                 title: '修改监控',
                 content: './edit.html?id=' + data.id,
                 area: ['80%', '80%'],
-            });
-        }
-
-        // 删除监控
-        function deleteApplication(data) {
-            layer.confirm('确定删除监控 ' + data.name + '？', {
-                title: '系统提示'
-            }, function (index) {
-                layer.close(index);
-                loadingAjax({
-                    url: './deleteMonitor',
-                    data: {
-                        id: data.id
-                    },
-                    success: function (data) {
-                        layer.msg(data.msg);
-                        if (200 == data.code) {
-                            table.reload('tab_build', {});
-                        }
-                    }
-                });
             });
         }
     }

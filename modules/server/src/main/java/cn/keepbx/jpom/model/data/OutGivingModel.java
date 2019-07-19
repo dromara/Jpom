@@ -198,13 +198,4 @@ public class OutGivingModel extends BaseModel {
             return desc;
         }
     }
-
-    public List<OutGivingNodeProject> startBefore() {
-        List<OutGivingNodeProject> thisPs = getOutGivingNodeProjectList();
-        if (thisPs == null) {
-            return null;
-        }
-        thisPs.forEach(outGivingNodeProject -> outGivingNodeProject.setStatus(OutGivingNodeProject.Status.Ing.getCode()));
-        return thisPs;
-    }
 }

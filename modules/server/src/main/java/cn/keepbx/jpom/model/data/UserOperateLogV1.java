@@ -264,6 +264,13 @@ public class UserOperateLogV1 extends BaseJsonModel {
         EditMonitor(54, "修改监控"),
         DelMonitor(55, "删除监控"),
         ChangeStatusMonitor(56, "修改监控状态"),
+
+        EditBuild(57, "修改构建"),
+        DelBuild(58, "删除构建"),
+        EditBuildLog(59, "删除构建日志"),
+        StartBuild(59, "开始构建"),
+        CancelBuild(59, "取消构建"),
+
         ;
         private int code;
         private String desc;

@@ -40,4 +40,12 @@ public class BuildHistoryService {
         db.setWrapper((Character) null);
         db.del(where);
     }
+
+    public void delByBuildId(String buildDataId) throws SQLException {
+        Entity where = new Entity(BuildHistoryLog.TABLE_NAME);
+        where.set("buildDataId", buildDataId);
+        Db db = Db.use();
+        db.setWrapper((Character) null);
+        db.del(where);
+    }
 }

@@ -5,6 +5,8 @@ import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.lang.Validator;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.db.Db;
+import cn.hutool.db.Entity;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.validator.ValidatorConfig;
 import cn.jiangzeyin.common.validator.ValidatorItem;
@@ -25,6 +27,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.annotation.Resource;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -90,8 +93,15 @@ public class MonitorListController extends BaseServerController {
      */
     @RequestMapping(value = "deleteMonitor", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
-    @UrlPermission(value = Role.ServerManager, optType = UserOperateLogV1.OptType.DelMonitor)
-    public String deleteMonitor(@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "删除失败")) String id) {
+    @UrlPermission(value = Role.System, optType = UserOperateLogV1.OptType.DelMonitor)
+    public String deleteMonitor(@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "删除失败")) String id) throws SQLException {
+        // 删除日志
+        Entity where = new Entity(MonitorNotifyLog.TABLE_NAME);
+        where.set("monitorId", id);
+        Db db = Db.use();
+        db.setWrapper((Character) null);
+        db.del(where);
+        //
         monitorService.deleteItem(id);
         return JsonMessage.getString(200, "删除成功");
     }

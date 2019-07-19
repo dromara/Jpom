@@ -9,12 +9,13 @@ import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.validator.ValidatorConfig;
 import cn.jiangzeyin.common.validator.ValidatorItem;
 import cn.jiangzeyin.common.validator.ValidatorRule;
+import cn.keepbx.build.BuildManage;
 import cn.keepbx.jpom.common.BaseServerController;
+import cn.keepbx.jpom.common.interceptor.UrlPermission;
 import cn.keepbx.jpom.model.BaseEnum;
-import cn.keepbx.jpom.model.data.BuildModel;
-import cn.keepbx.jpom.model.data.NodeModel;
-import cn.keepbx.jpom.model.data.OutGivingModel;
-import cn.keepbx.jpom.model.data.UserModel;
+import cn.keepbx.jpom.model.Role;
+import cn.keepbx.jpom.model.data.*;
+import cn.keepbx.jpom.service.build.BuildHistoryService;
 import cn.keepbx.jpom.service.build.BuildService;
 import cn.keepbx.jpom.service.node.OutGivingServer;
 import cn.keepbx.jpom.system.ConfigBean;
@@ -32,7 +33,9 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import javax.annotation.Resource;
 import java.io.File;
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * 构建列表
@@ -48,6 +51,8 @@ public class BuildListController extends BaseServerController {
     private BuildService buildService;
     @Resource
     private OutGivingServer outGivingServer;
+    @Resource
+    private BuildHistoryService buildHistoryService;
 
     @RequestMapping(value = "list.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
     public String list() {
@@ -67,6 +72,7 @@ public class BuildListController extends BaseServerController {
 
     @RequestMapping(value = "updateBuild", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
+    @UrlPermission(value = Role.ServerManager, optType = UserOperateLogV1.OptType.EditBuild)
     public String updateMonitor(String id,
                                 @ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "构建名称不能为空")) String name,
                                 @ValidatorConfig(@ValidatorItem(value = ValidatorRule.URL, msg = "仓库地址不正确")) String gitUrl,
@@ -177,6 +183,23 @@ public class BuildListController extends BaseServerController {
             throw new JpomRuntimeException("该仓库还没有任何分支");
         }
         return list;
+    }
+
+
+    @RequestMapping(value = "delete.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @ResponseBody
+    @UrlPermission(value = Role.System, optType = UserOperateLogV1.OptType.DelBuild)
+    public String delete(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据id") String id) throws IOException, SQLException {
+        BuildModel buildModel = buildService.getItem(id);
+        Objects.requireNonNull(buildModel, "没有对应数据");
+        buildHistoryService.delByBuildId(buildModel.getId());
+        //
+        File file = BuildManage.getBuildDataFile(buildModel.getId());
+        if (!FileUtil.del(file)) {
+            return JsonMessage.getString(500, "清理历史构建产物失败");
+        }
+        buildService.deleteItem(buildModel.getId());
+        return JsonMessage.getString(200, "清理成功");
     }
 
 }

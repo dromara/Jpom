@@ -10,9 +10,12 @@ import cn.jiangzeyin.common.validator.ValidatorItem;
 import cn.jiangzeyin.common.validator.ValidatorRule;
 import cn.keepbx.build.BuildManage;
 import cn.keepbx.jpom.common.BaseServerController;
+import cn.keepbx.jpom.common.interceptor.UrlPermission;
 import cn.keepbx.jpom.model.BaseEnum;
+import cn.keepbx.jpom.model.Role;
 import cn.keepbx.jpom.model.data.BuildModel;
 import cn.keepbx.jpom.model.data.UserModel;
+import cn.keepbx.jpom.model.data.UserOperateLogV1;
 import cn.keepbx.jpom.service.build.BuildService;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.http.MediaType;
@@ -46,6 +49,7 @@ public class BuildManageController extends BaseServerController {
      * @throws IOException e
      */
     @RequestMapping(value = "start.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @UrlPermission(value = Role.ServerManager, optType = UserOperateLogV1.OptType.StartBuild)
     public String start(@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据")) String id) throws IOException {
         BuildModel item = buildService.getItem(id);
         if (item == null) {
@@ -75,6 +79,7 @@ public class BuildManageController extends BaseServerController {
      * @throws IOException e
      */
     @RequestMapping(value = "cancel.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @UrlPermission(value = Role.ServerManager, optType = UserOperateLogV1.OptType.CancelBuild)
     public String cancel(@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据")) String id) throws IOException {
         BuildModel item = buildService.getItem(id);
         if (item == null) {
