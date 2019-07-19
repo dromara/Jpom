@@ -7,6 +7,7 @@ import cn.keepbx.jpom.common.interceptor.UrlPermission;
 import cn.keepbx.jpom.model.Role;
 import cn.keepbx.jpom.model.data.UserOperateLogV1;
 import cn.keepbx.jpom.service.system.WhitelistDirectoryService;
+import org.apache.tomcat.util.http.fileupload.servlet.ServletFileUpload;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -45,7 +46,10 @@ public class CertificateController extends BaseServerController {
     @ResponseBody
     @UrlPermission(value = Role.NodeManage, optType = UserOperateLogV1.OptType.SaveCert)
     public String saveCertificate() {
-        return NodeForward.requestMultipart(getNode(), getMultiRequest(), NodeUrl.System_Certificate_saveCertificate).toString();
+        if (ServletFileUpload.isMultipartContent(getRequest())) {
+            return NodeForward.requestMultipart(getNode(), getMultiRequest(), NodeUrl.System_Certificate_saveCertificate).toString();
+        }
+        return NodeForward.request(getNode(), getRequest(), NodeUrl.System_Certificate_saveCertificate).toString();
     }
 
 

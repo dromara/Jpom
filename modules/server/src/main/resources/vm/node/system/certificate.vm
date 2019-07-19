@@ -180,7 +180,6 @@
             table.on('tool(tab_certificate)', function (obj) {
                 var data = obj.data;
                 var event = obj.event;
-
                 if ('update' === event) {
                     // 修改
                     updateCert(data);
@@ -188,7 +187,7 @@
                     // 删除
                     deleteCert(data);
                 } else if ('export' === event) {
-                    window.location.href = "./export?id=" + data.id;
+                    window.open(appendNodeId("./export?id=" + data.id));
                 } else if ('templte' === event) {
                     openTemplate(data);
                 }
@@ -257,7 +256,6 @@
         document.getElementById('form_certificate').reset();
         $('#form_certificate [name="id"]').attr('readonly', true).addClass('layui-disabled');
         $('#form_certificate [name="path"]').attr('disabled', 'disabled');
-        $("input[name='type']").val("edit");
         for (var key in data) {
             if ("whitePath" === key) {
                 document.getElementById('path_' + data[key]).setAttribute('selected', true);
@@ -267,6 +265,7 @@
                 $('#form_certificate [name="' + key + '"]').val(data[key]);
             }
         }
+        $("input[name='type']").val("edit");
         form.render('select');
         // 弹出
         layer.open({
