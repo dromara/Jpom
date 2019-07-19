@@ -7,6 +7,7 @@ import cn.hutool.core.date.DateTime;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.lang.JarClassLoader;
 import cn.hutool.core.text.StrSpliter;
+import cn.hutool.core.thread.GlobalThreadPool;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.http.HttpUtil;
 import cn.hutool.system.SystemUtil;
@@ -82,13 +83,35 @@ public abstract class AbstractProjectCommander {
     //---------------------------------------------------- 基本操作----start
 
     /**
+     * 生成可以执行的命令
+     *
+     * @param projectInfoModel 项目
+     * @return null 是条件不足
+     */
+    public abstract String buildCommand(ProjectInfoModel projectInfoModel);
+
+    /**
      * 启动
      *
      * @param projectInfoModel 项目
      * @return 结果
      * @throws Exception 异常
      */
-    public abstract String start(ProjectInfoModel projectInfoModel) throws Exception;
+    public String start(ProjectInfoModel projectInfoModel) throws Exception {
+        String msg = checkStart(projectInfoModel);
+        if (msg != null) {
+            return msg;
+        }
+        String command = buildCommand(projectInfoModel);
+        if (command == null) {
+            throw new JpomRuntimeException("没有需要执行的命令");
+        }
+        // 执行命令
+        GlobalThreadPool.execute(() -> CommandUtil.execSystemCommand(command, FileUtil.file(projectInfoModel.getLib())));
+        //
+        loopCheckRun(projectInfoModel.getId(), true);
+        return status(projectInfoModel.getId());
+    }
 
     /**
      * 查询出指定端口信息
@@ -111,7 +134,7 @@ public abstract class AbstractProjectCommander {
         String token = projectInfoModel.getToken();
         if (StrUtil.isNotEmpty(token)) {
             try {
-                String body = HttpUtil.createGet(token).execute().body();
+                String body = HttpUtil.createGet(token).form("projectId", projectInfoModel.getId()).execute().body();
                 DefaultSystemLog.LOG().info(projectInfoModel.getName() + ":" + body);
             } catch (Exception e) {
                 DefaultSystemLog.ERROR().error("WebHooks 调用错误", e);

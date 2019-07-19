@@ -1,8 +1,6 @@
 package cn.keepbx.jpom.common.commander.impl;
 
-import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.text.StrSpliter;
-import cn.hutool.core.thread.GlobalThreadPool;
 import cn.hutool.core.util.StrUtil;
 import cn.keepbx.jpom.common.commander.AbstractProjectCommander;
 import cn.keepbx.jpom.model.data.ProjectInfoModel;
@@ -20,27 +18,21 @@ import java.util.List;
 public class LinuxProjectCommander extends AbstractProjectCommander {
 
     @Override
-    public String start(ProjectInfoModel projectInfoModel) throws Exception {
-        String msg = checkStart(projectInfoModel);
-        if (msg != null) {
-            return msg;
+    public String buildCommand(ProjectInfoModel projectInfoModel) {
+        String path = ProjectInfoModel.getClassPathLib(projectInfoModel);
+        if (StrUtil.isBlank(path)) {
+            return null;
         }
         // 拼接命令
-        String command = String.format("nohup java %s %s -Dapplication=%s -Dbasedir=%s %s %s >> %s 2>&1 &",
+        return String.format("nohup java %s %s -Dapplication=%s -Dbasedir=%s %s %s >> %s 2>&1 &",
                 projectInfoModel.getJvm(),
-                ProjectInfoModel.getClassPathLib(projectInfoModel),
+                path,
                 projectInfoModel.getId(),
                 projectInfoModel.getAbsoluteLib(),
                 projectInfoModel.getMainClass(),
                 projectInfoModel.getArgs(),
                 projectInfoModel.getAbsoluteLog());
-        //
-        GlobalThreadPool.execute(() -> CommandUtil.execSystemCommand(command, FileUtil.file(projectInfoModel.getLib())));
-        // 检查是否执行完毕
-        loopCheckRun(projectInfoModel.getId(), true);
-        return status(projectInfoModel.getId());
     }
-
 
     @Override
     public String stop(ProjectInfoModel projectInfoModel) throws Exception {

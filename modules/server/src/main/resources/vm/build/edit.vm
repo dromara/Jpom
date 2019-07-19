@@ -27,7 +27,7 @@
             <div class="layui-input-block">
                 <input type="text" name="gitUrl" required lay-verify="required"
                        value="$!model.gitUrl"
-                       placeholder="请输入构建名称"
+                       placeholder="请输入仓库地址"
                        class="layui-input">
             </div>
         </div>
@@ -75,7 +75,7 @@
             <div class="layui-input-block">
                 <input type="text" name="resultDirFile" required lay-verify="required"
                        value="$!model.resultDirFile"
-                       placeholder="构建产物目录"
+                       placeholder="构建产物目录，相对路径"
                        class="layui-input">
             </div>
         </div>
@@ -111,6 +111,7 @@
                 <label class="layui-form-label">分发后</label>
                 <div class="layui-input-block">
                     <input type="text" disabled readonly
+                           placeholder="请选择分发项目"
                            value="#if($cOutAfterOpt)#foreach($coItem in $outAfterOpt)#if($cOutAfterOpt==$coItem.code)$coItem.desc#end#end#end"
                            class="layui-input">
 

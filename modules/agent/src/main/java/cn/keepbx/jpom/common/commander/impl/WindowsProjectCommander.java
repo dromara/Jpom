@@ -1,8 +1,6 @@
 package cn.keepbx.jpom.common.commander.impl;
 
-import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.text.StrSpliter;
-import cn.hutool.core.thread.GlobalThreadPool;
 import cn.hutool.core.util.StrUtil;
 import cn.keepbx.jpom.common.commander.AbstractProjectCommander;
 import cn.keepbx.jpom.model.data.ProjectInfoModel;
@@ -20,26 +18,20 @@ import java.util.List;
 public class WindowsProjectCommander extends AbstractProjectCommander {
 
     @Override
-    public String start(ProjectInfoModel projectInfoModel) throws Exception {
-        String msg = checkStart(projectInfoModel);
-        if (msg != null) {
-            return msg;
+    public String buildCommand(ProjectInfoModel projectInfoModel) {
+        String classPath = ProjectInfoModel.getClassPathLib(projectInfoModel);
+        if (StrUtil.isBlank(classPath)) {
+            return null;
         }
         // 拼接命令
         String jvm = projectInfoModel.getJvm();
         String tag = projectInfoModel.getId();
         String mainClass = projectInfoModel.getMainClass();
         String args = projectInfoModel.getArgs();
-        String classPath = ProjectInfoModel.getClassPathLib(projectInfoModel);
 
-        String command = String.format("javaw %s %s -Dapplication=%s -Dbasedir=%s %s %s >> %s &",
+        return String.format("javaw %s %s -Dapplication=%s -Dbasedir=%s %s %s >> %s &",
                 jvm, classPath, tag,
                 projectInfoModel.getAbsoluteLib(), mainClass, args, projectInfoModel.getAbsoluteLog());
-        // 执行命令
-        GlobalThreadPool.execute(() -> CommandUtil.execSystemCommand(command, FileUtil.file(projectInfoModel.getLib())));
-        //
-        loopCheckRun(projectInfoModel.getId(), true);
-        return status(projectInfoModel.getId());
     }
 
     @Override

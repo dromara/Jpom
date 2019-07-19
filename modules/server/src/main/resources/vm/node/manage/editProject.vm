@@ -134,16 +134,6 @@
         </div>
         <div class="layui-form-item">
             <div class="layui-inline">
-                <label class="layui-form-label">WebHooks</label>
-                <div class="layui-input-block">
-                    <input  #if($item.outGivingProject)readonly#end type="text" name="token" placeholder="关闭程序时自动请求,非必填"
-                            class="layui-input"
-                            value="#if($item)$!item.token#end">
-                </div>
-            </div>
-        </div>
-        <div class="layui-form-item">
-            <div class="layui-inline">
                 <label class="layui-form-label">Jvm参数</label>
                 <div class="layui-input-block">
                     <textarea  #if($item.outGivingProject)readonly#end name="jvm"
@@ -160,15 +150,35 @@
                 </div>
             </div>
         </div>
+        <div class="layui-form-item">
+            <div class="layui-inline">
+                <label class="layui-form-label">WebHooks</label>
+                <div class="layui-input-block">
+                    <input  #if($item.outGivingProject)readonly#end type="text" name="token" placeholder="关闭程序时自动请求,非必填，GET请求"
+                            class="layui-input"
+                            value="#if($item)$!item.token#end">
+                </div>
+            </div>
+        </div>
+        #if($item.runCommand)
+            <div class="layui-form-item">
+                <label class="layui-form-label">运行命令</label>
+                <div class="layui-input-block">
+                    <blockquote class="layui-elem-quote layui-quote-nm">
+                        $item.runCommand
+                    </blockquote>
+                </div>
+            </div>
+        #end
         #if(!$item  || $user.isProject($node.id,$!item.id))
             <div class="layui-form-item" style="padding-left: 20%">
                 #if(!$item.outGivingProject)
                     <button class="layui-btn layui-btn-normal" lay-submit lay-filter="submitProject"
                             id="project_submit">提交
                     </button>
-                #end
-                #if($item && !$item.outGivingProject)
-                    <a class="layui-btn layui-btn-warm" data-id="$item.id" id="delete_project">删除</a>
+                    #if($item)
+                        <a class="layui-btn layui-btn-warm" data-id="$item.id" id="delete_project">删除</a>
+                    #end
                 #end
             </div>
         #end

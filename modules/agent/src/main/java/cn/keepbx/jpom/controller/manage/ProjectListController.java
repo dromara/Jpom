@@ -4,6 +4,7 @@ import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.keepbx.jpom.common.BaseAgentController;
+import cn.keepbx.jpom.common.commander.AbstractProjectCommander;
 import cn.keepbx.jpom.model.data.ProjectInfoModel;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -34,7 +35,13 @@ public class ProjectListController extends BaseAgentController {
      */
     @RequestMapping(value = "getProjectItem", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public String getProjectItem(String id) {
-        return JsonMessage.getString(200, "", projectInfoService.getItem(id));
+        ProjectInfoModel projectInfoModel = projectInfoService.getItem(id);
+        if (projectInfoModel != null) {
+            // 返回实际执行的命令
+            String command = AbstractProjectCommander.getInstance().buildCommand(projectInfoModel);
+            projectInfoModel.setRunCommand(command);
+        }
+        return JsonMessage.getString(200, "", projectInfoModel);
     }
 
     /**

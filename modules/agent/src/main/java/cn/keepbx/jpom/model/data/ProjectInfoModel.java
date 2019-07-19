@@ -54,6 +54,18 @@ public class ProjectInfoModel extends BaseModel {
      * 节点分发项目，不允许在项目管理中编辑
      */
     private boolean outGivingProject;
+    /**
+     * 实际运行的命令
+     */
+    private String runCommand;
+
+    public String getRunCommand() {
+        return runCommand;
+    }
+
+    public void setRunCommand(String runCommand) {
+        this.runCommand = runCommand;
+    }
 
     public boolean isOutGivingProject() {
         return outGivingProject;
