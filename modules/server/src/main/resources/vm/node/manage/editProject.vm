@@ -141,15 +141,6 @@
                             value="#if($item)$!item.token#end">
                 </div>
             </div>
-            <div class="layui-inline">
-                <label class="layui-form-label">Build标识</label>
-                <div class="layui-input-block">
-                    <input #if($item.outGivingProject)readonly#end type="text" name="buildTag"
-                           placeholder="CodePipeline发布后oss中的文件标识,非必填"
-                           class="layui-input"
-                           value="#if($item)$!item.buildTag#end">
-                </div>
-            </div>
         </div>
         <div class="layui-form-item">
             <div class="layui-inline">

@@ -211,7 +211,6 @@ public class EditProjectController extends BaseAgentController {
                 exits.setLib(projectInfo.getLib());
                 exits.setJvm(projectInfo.getJvm());
                 exits.setArgs(projectInfo.getArgs());
-                exits.setBuildTag(projectInfo.getBuildTag());
                 exits.setRunMode(projectInfo.getRunMode());
                 exits.setToken(projectInfo.getToken());
                 //

@@ -36,7 +36,6 @@ public class ProjectInfoModel extends BaseModel {
     private String createTime;
     private String modifyTime;
     private String args;
-    private String buildTag;
     /**
      * lib 目录当前文件状态
      */
@@ -120,14 +119,6 @@ public class ProjectInfoModel extends BaseModel {
 
     public void setUseLibDesc(String useLibDesc) {
         this.useLibDesc = useLibDesc;
-    }
-
-    public String getBuildTag() {
-        return buildTag;
-    }
-
-    public void setBuildTag(String buildTag) {
-        this.buildTag = buildTag;
     }
 
     public String getModifyTime() {

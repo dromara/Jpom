@@ -22,7 +22,7 @@
 3. 【Agent】nginx、脚本模板保存内容xss标签还原
 4. 【Server】节点分发页面的交互方式
 5. 【Server】页面菜单分类整理
-6. 修护SpringBoot相对文件夹下无法读取配置问题
+6. 【Agent】修护SpringBoot相对文件夹下无法读取配置问题
 7. 【Agent】缓存异常的jvm进程，避免卡死状态（感谢@java 李道甫）
 8. 【Server】节点分发状态更新到所有节点状态
 9. 【Server】节点分发白名单独立页面配置
