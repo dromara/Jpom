@@ -58,20 +58,20 @@
             </div>
         </div>
         <div class="layui-form-item">
+            <label class="layui-form-label">构建命令</label>
+            <div class="layui-input-block">
+                    <textarea name="script"
+                              placeholder="构建命令执行的命令，如：mvn clean package"
+                              class="layui-textarea">$!model.script</textarea>
+            </div>
+        </div>
+        <div class="layui-form-item">
             <label class="layui-form-label">产物目录</label>
             <div class="layui-input-block">
                 <input type="text" name="resultDirFile" required lay-verify="required"
                        value="$!model.resultDirFile"
                        placeholder="构建产物目录"
                        class="layui-input">
-            </div>
-        </div>
-        <div class="layui-form-item">
-            <label class="layui-form-label">构建命令</label>
-            <div class="layui-input-block">
-                    <textarea name="script"
-                              placeholder="构建命令执行的命令，如：mvn clean package"
-                              class="layui-textarea">$!model.script</textarea>
             </div>
         </div>
         <div class="layui-form-item">
@@ -254,9 +254,10 @@
                 $("#releaseMethodDataId_1_after").hide();
                 return;
             }
+            var afterOpt = $(data.elem).find("option[value='" + data.value + "']").attr("afterOpt");
             $("#releaseMethodDataId_1_after").show();
             for (var i = 0; i < outAfterOpt.length; i++) {
-                if (outAfterOpt[i].code == data.value) {
+                if (outAfterOpt[i].code == afterOpt) {
                     $("#releaseMethodDataId_1_after").find("input").val(outAfterOpt[i].desc);
                     break;
                 }

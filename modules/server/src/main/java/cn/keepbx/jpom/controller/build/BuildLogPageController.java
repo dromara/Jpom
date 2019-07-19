@@ -40,6 +40,7 @@ import javax.annotation.Resource;
 import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.List;
 
 /**
  * @author bwcx_jzy
@@ -60,9 +61,12 @@ public class BuildLogPageController extends BaseServerController {
     }
 
     @RequestMapping(value = "history.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
-    public String logList() {
+    public String logList() throws IOException {
         JSONArray jsonArray = BaseEnum.toJSONArray(BuildModel.Status.class);
         setAttribute("status", jsonArray);
+        //
+        List<BuildModel> list = buildService.list();
+        setAttribute("buildS", list);
         return "build/history";
     }
 
@@ -105,22 +109,23 @@ public class BuildLogPageController extends BaseServerController {
                               }, defaultVal = "10") int limit,
                               @ValidatorConfig(value = {
                                       @ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "page error")
-                              }, defaultVal = "1") int page) throws SQLException {
+                              }, defaultVal = "1") int page,
+                              String buildDataId) throws SQLException {
         Page pageObj = new Page(page, limit);
         Entity entity = Entity.create(BuildHistoryLog.TABLE_NAME);
-        pageObj.addOrder(new Order("startTime".toUpperCase(), Direction.DESC));
+        pageObj.addOrder(new Order("startTime", Direction.DESC));
         // 时间
         if (StrUtil.isNotEmpty(time)) {
             String[] val = StrUtil.split(time, "~");
             if (val.length == 2) {
                 DateTime startDateTime = DateUtil.parse(val[0], DatePattern.NORM_DATETIME_FORMAT);
-                entity.set("startTime".toUpperCase(), ">= " + startDateTime.getTime());
+                entity.set("startTime", ">= " + startDateTime.getTime());
 
                 DateTime endDateTime = DateUtil.parse(val[1], DatePattern.NORM_DATETIME_FORMAT);
                 if (startDateTime.equals(endDateTime)) {
                     endDateTime = DateUtil.endOfDay(endDateTime);
                 }
-                entity.set("startTime ".toUpperCase(), "<= " + endDateTime.getTime());
+                entity.set("startTime ", "<= " + endDateTime.getTime());
             }
         }
         BaseEnum anEnum = null;
@@ -132,7 +137,10 @@ public class BuildLogPageController extends BaseServerController {
         }
 
         if (anEnum != null) {
-            entity.set("status".toUpperCase(), anEnum.getCode());
+            entity.set("status", anEnum.getCode());
+        }
+        if (StrUtil.isNotBlank(buildDataId)) {
+            entity.set("buildDataId", buildDataId);
         }
 
         PageResult<Entity> pageResult = Db.use().page(entity, pageObj);

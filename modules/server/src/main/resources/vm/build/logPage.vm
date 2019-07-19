@@ -21,7 +21,7 @@
         <a class="layui-btn" id="cancel" style="display: none;">取消构建</a>
     </div>
     <div class="layui-form-item">
-        <textarea name="context" id="logContext" placeholder="日志内容" readonly disabled
+        <textarea name="context" id="logContext" placeholder="加载中....." readonly disabled
                   class="layui-textarea context"></textarea>
     </div>
 </form>

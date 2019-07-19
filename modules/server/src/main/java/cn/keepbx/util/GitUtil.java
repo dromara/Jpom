@@ -122,10 +122,7 @@ public class GitUtil {
             });
             return all;
         } catch (TransportException t) {
-            String msg = t.getMessage();
-            if (msg.contains(JGitText.get().notAuthorized)) {
-                throw new JpomRuntimeException("git账号密码不正常", t);
-            }
+            checkTransportException(t);
             throw t;
         }
     }
@@ -164,11 +161,15 @@ public class GitUtil {
             }
             git.pull().setCredentialsProvider(credentialsProvider).call();
         } catch (TransportException t) {
-            String msg = t.getMessage();
-            if (msg.contains(JGitText.get().notAuthorized)) {
-                throw new JpomRuntimeException("git账号密码不正常", t);
-            }
+            checkTransportException(t);
             throw t;
+        }
+    }
+
+    private static void checkTransportException(TransportException ex) {
+        String msg = ex.getMessage();
+        if (msg.contains(JGitText.get().notAuthorized) || msg.contains(JGitText.get().authenticationNotSupported)) {
+            throw new JpomRuntimeException("git账号密码不正常", ex);
         }
     }
 
