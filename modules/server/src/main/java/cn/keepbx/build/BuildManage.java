@@ -7,21 +7,20 @@ import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
-import cn.hutool.db.Db;
 import cn.hutool.db.Entity;
 import cn.hutool.system.SystemUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
+import cn.jiangzeyin.common.spring.SpringUtil;
 import cn.keepbx.jpom.JpomApplication;
 import cn.keepbx.jpom.model.data.BuildModel;
 import cn.keepbx.jpom.model.data.UserModel;
 import cn.keepbx.jpom.model.log.BuildHistoryLog;
-import cn.keepbx.jpom.model.log.MonitorNotifyLog;
+import cn.keepbx.jpom.service.dblog.DbBuildHistoryLogService;
 import cn.keepbx.jpom.system.JpomRuntimeException;
 import cn.keepbx.util.GitUtil;
 import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 
 import java.io.*;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -128,22 +127,18 @@ public class BuildManage extends BaseBuild implements Runnable {
         if (this.logId == null) {
             return;
         }
-        Db db = Db.use();
-        db.setWrapper((Character) null);
-        try {
-            Entity entity = new Entity(BuildHistoryLog.TABLE_NAME);
-            entity.set("status", status.getCode());
-            if (end) {
-                // 结束
-                entity.set("endTime", System.currentTimeMillis());
-            }
-            //
-            Entity where = new Entity(MonitorNotifyLog.TABLE_NAME);
-            where.set("id", this.logId);
-            db.update(entity, where);
-        } catch (SQLException e) {
-            DefaultSystemLog.ERROR().error("db error", e);
+
+        Entity entity = new Entity();
+        entity.set("status", status.getCode());
+        if (end) {
+            // 结束
+            entity.set("endTime", System.currentTimeMillis());
         }
+        //
+        Entity where = new Entity();
+        where.set("id", this.logId);
+        DbBuildHistoryLogService dbBuildHistoryLogService = SpringUtil.getBean(DbBuildHistoryLogService.class);
+        dbBuildHistoryLogService.update(entity, where);
     }
 
     /**
@@ -163,15 +158,8 @@ public class BuildManage extends BaseBuild implements Runnable {
         buildHistoryLog.setReleaseMethodDataId(this.buildModel.getReleaseMethodDataId());
         buildHistoryLog.setAfterOpt(this.buildModel.getAfterOpt());
 
-        Db db = Db.use();
-        db.setWrapper((Character) null);
-        try {
-            Entity entity = new Entity(BuildHistoryLog.TABLE_NAME);
-            entity.parseBean(buildHistoryLog);
-            db.insert(entity);
-        } catch (SQLException e) {
-            DefaultSystemLog.ERROR().error("db error", e);
-        }
+        DbBuildHistoryLogService dbBuildHistoryLogService = SpringUtil.getBean(DbBuildHistoryLogService.class);
+        dbBuildHistoryLogService.insert(buildHistoryLog);
     }
 
     /**

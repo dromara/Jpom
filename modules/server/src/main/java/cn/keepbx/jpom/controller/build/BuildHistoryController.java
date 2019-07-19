@@ -12,8 +12,8 @@ import cn.keepbx.jpom.model.Role;
 import cn.keepbx.jpom.model.data.BuildModel;
 import cn.keepbx.jpom.model.log.BuildHistoryLog;
 import cn.keepbx.jpom.model.log.UserOperateLogV1;
-import cn.keepbx.jpom.service.build.BuildHistoryService;
 import cn.keepbx.jpom.service.build.BuildService;
+import cn.keepbx.jpom.service.dblog.DbBuildHistoryLogService;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -35,7 +35,7 @@ public class BuildHistoryController extends BaseServerController {
     @Resource
     private BuildService buildService;
     @Resource
-    private BuildHistoryService buildHistoryService;
+    private DbBuildHistoryLogService dbBuildHistoryLogService;
 
     /**
      * 开始构建
@@ -47,7 +47,7 @@ public class BuildHistoryController extends BaseServerController {
     @RequestMapping(value = "delete_log.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @UrlPermission(value = Role.System, optType = UserOperateLogV1.OptType.EditBuildLog)
     public String delete(@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据")) String logId) throws IOException, SQLException {
-        BuildHistoryLog buildHistoryLog = buildHistoryService.getLog(logId);
+        BuildHistoryLog buildHistoryLog = dbBuildHistoryLogService.getByKey(logId);
         if (buildHistoryLog == null) {
             return JsonMessage.getString(405, "没有对应构建记录");
         }
@@ -63,8 +63,8 @@ public class BuildHistoryController extends BaseServerController {
                 return JsonMessage.getString(500, "清理文件失败");
             }
         }
-        buildHistoryService.del(logId);
-        return JsonMessage.getString(200, "删除成功");
+        int count = dbBuildHistoryLogService.delByKey(logId);
+        return JsonMessage.getString(200, "删除成功", count);
     }
 
 }

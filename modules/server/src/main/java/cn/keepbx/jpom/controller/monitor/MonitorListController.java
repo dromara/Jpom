@@ -17,6 +17,7 @@ import cn.keepbx.jpom.model.Role;
 import cn.keepbx.jpom.model.data.*;
 import cn.keepbx.jpom.model.log.MonitorNotifyLog;
 import cn.keepbx.jpom.model.log.UserOperateLogV1;
+import cn.keepbx.jpom.service.dblog.DbMonitorNotifyLogService;
 import cn.keepbx.jpom.service.monitor.MonitorMailConfigService;
 import cn.keepbx.jpom.service.monitor.MonitorService;
 import com.alibaba.fastjson.JSONArray;
@@ -48,6 +49,9 @@ public class MonitorListController extends BaseServerController {
 
     @Resource
     private MonitorMailConfigService monitorMailConfigService;
+
+    @Resource
+    private DbMonitorNotifyLogService dbMonitorNotifyLogService;
 
     /**
      * 展示监控页面
@@ -96,11 +100,9 @@ public class MonitorListController extends BaseServerController {
     @UrlPermission(value = Role.System, optType = UserOperateLogV1.OptType.DelMonitor)
     public String deleteMonitor(@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "删除失败")) String id) throws SQLException {
         // 删除日志
-        Entity where = new Entity(MonitorNotifyLog.TABLE_NAME);
+        Entity where = new Entity();
         where.set("monitorId", id);
-        Db db = Db.use();
-        db.setWrapper((Character) null);
-        db.del(where);
+        dbMonitorNotifyLogService.del(where);
         //
         monitorService.deleteItem(id);
         return JsonMessage.getString(200, "删除成功");

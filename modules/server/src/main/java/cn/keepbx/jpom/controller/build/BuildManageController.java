@@ -20,8 +20,8 @@ import cn.keepbx.jpom.model.data.BuildModel;
 import cn.keepbx.jpom.model.data.UserModel;
 import cn.keepbx.jpom.model.log.BuildHistoryLog;
 import cn.keepbx.jpom.model.log.UserOperateLogV1;
-import cn.keepbx.jpom.service.build.BuildHistoryService;
 import cn.keepbx.jpom.service.build.BuildService;
+import cn.keepbx.jpom.service.dblog.DbBuildHistoryLogService;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -47,7 +47,7 @@ public class BuildManageController extends BaseServerController {
     @Resource
     private BuildService buildService;
     @Resource
-    private BuildHistoryService buildHistoryService;
+    private DbBuildHistoryLogService dbBuildHistoryLogService;
 
     /**
      * 开始构建
@@ -123,7 +123,7 @@ public class BuildManageController extends BaseServerController {
     @RequestMapping(value = "reRelease.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @UrlPermission(value = Role.ServerManager, optType = UserOperateLogV1.OptType.ReReleaseBuild)
     public String reRelease(@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据")) String logId) throws IOException, SQLException {
-        BuildHistoryLog buildHistoryLog = buildHistoryService.getLog(logId);
+        BuildHistoryLog buildHistoryLog = dbBuildHistoryLogService.getByKey(logId);
         Objects.requireNonNull(buildHistoryLog, "没有对应构建记录.");
         BuildModel item = buildService.getItem(buildHistoryLog.getBuildDataId());
         Objects.requireNonNull(item, "没有对应数据");

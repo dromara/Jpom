@@ -9,16 +9,18 @@ import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.validator.ValidatorConfig;
 import cn.jiangzeyin.common.validator.ValidatorItem;
 import cn.jiangzeyin.common.validator.ValidatorRule;
-import cn.keepbx.build.BuildManage;
 import cn.keepbx.build.BuildUtil;
 import cn.keepbx.jpom.common.BaseServerController;
 import cn.keepbx.jpom.common.interceptor.UrlPermission;
 import cn.keepbx.jpom.model.BaseEnum;
 import cn.keepbx.jpom.model.Role;
-import cn.keepbx.jpom.model.data.*;
+import cn.keepbx.jpom.model.data.BuildModel;
+import cn.keepbx.jpom.model.data.NodeModel;
+import cn.keepbx.jpom.model.data.OutGivingModel;
+import cn.keepbx.jpom.model.data.UserModel;
 import cn.keepbx.jpom.model.log.UserOperateLogV1;
-import cn.keepbx.jpom.service.build.BuildHistoryService;
 import cn.keepbx.jpom.service.build.BuildService;
+import cn.keepbx.jpom.service.dblog.DbBuildHistoryLogService;
 import cn.keepbx.jpom.service.node.OutGivingServer;
 import cn.keepbx.jpom.system.ConfigBean;
 import cn.keepbx.jpom.system.JpomRuntimeException;
@@ -54,7 +56,7 @@ public class BuildListController extends BaseServerController {
     @Resource
     private OutGivingServer outGivingServer;
     @Resource
-    private BuildHistoryService buildHistoryService;
+    private DbBuildHistoryLogService dbBuildHistoryLogService;
 
     @RequestMapping(value = "list.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
     public String list() {
@@ -194,7 +196,7 @@ public class BuildListController extends BaseServerController {
     public String delete(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据id") String id) throws IOException, SQLException {
         BuildModel buildModel = buildService.getItem(id);
         Objects.requireNonNull(buildModel, "没有对应数据");
-        buildHistoryService.delByBuildId(buildModel.getId());
+        dbBuildHistoryLogService.delByBuildId(buildModel.getId());
         //
         File file = BuildUtil.getBuildDataFile(buildModel.getId());
         if (!FileUtil.del(file)) {

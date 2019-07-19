@@ -1,12 +1,9 @@
 package cn.keepbx.jpom.controller.user;
 
-import cn.hutool.core.bean.BeanUtil;
-import cn.hutool.core.bean.copier.CopyOptions;
 import cn.hutool.core.date.DatePattern;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.StrUtil;
-import cn.hutool.db.Db;
 import cn.hutool.db.Entity;
 import cn.hutool.db.Page;
 import cn.hutool.db.PageResult;
@@ -17,9 +14,9 @@ import cn.keepbx.jpom.common.BaseServerController;
 import cn.keepbx.jpom.model.data.NodeModel;
 import cn.keepbx.jpom.model.data.UserModel;
 import cn.keepbx.jpom.model.log.UserOperateLogV1;
+import cn.keepbx.jpom.service.dblog.DbUserOperateLogService;
 import cn.keepbx.jpom.service.node.NodeService;
 import cn.keepbx.jpom.service.user.UserService;
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
@@ -44,6 +41,8 @@ public class UserOptLogController extends BaseServerController {
     private NodeService nodeService;
     @Resource
     private UserService userService;
+    @Resource
+    private DbUserOperateLogService dbUserOperateLogService;
 
     /**
      * 展示用户列表
@@ -65,11 +64,11 @@ public class UserOptLogController extends BaseServerController {
      */
     @RequestMapping(value = "list_data.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
-    public String listData(String time) throws SQLException {
+    public String listData(String time) {
         int limit = getParameterInt("limit", 10);
         int page1 = getParameterInt("page", 1);
         Page page = new Page(page1, limit);
-        Entity entity = Entity.create(UserOperateLogV1.TABLE_NAME);
+        Entity entity = Entity.create();
         page.addOrder(new Order("optTime".toUpperCase(), Direction.DESC));
         // 时间
         if (StrUtil.isNotEmpty(time)) {
@@ -95,16 +94,8 @@ public class UserOptLogController extends BaseServerController {
             entity.set("userId".toUpperCase(), selectUser);
         }
 
-        PageResult<Entity> pageResult = Db.use().page(entity, page);
-        CopyOptions copyOptions = new CopyOptions();
-        copyOptions.setIgnoreError(true);
-        copyOptions.setIgnoreCase(true);
-        JSONArray jsonArray = new JSONArray();
-        pageResult.forEach(entity1 -> {
-            UserOperateLogV1 v1 = BeanUtil.mapToBean(entity1, UserOperateLogV1.class, copyOptions);
-            jsonArray.add(v1);
-        });
-        JSONObject jsonObject = JsonMessage.toJson(200, "获取成功", jsonArray);
+        PageResult<UserOperateLogV1> pageResult = dbUserOperateLogService.listPage(entity, page);
+        JSONObject jsonObject = JsonMessage.toJson(200, "获取成功", pageResult);
         jsonObject.put("total", pageResult.getTotal());
         return jsonObject.toString();
     }

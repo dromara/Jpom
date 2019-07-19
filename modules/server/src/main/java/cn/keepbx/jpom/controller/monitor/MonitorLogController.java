@@ -1,13 +1,10 @@
 package cn.keepbx.jpom.controller.monitor;
 
-import cn.hutool.core.bean.BeanUtil;
-import cn.hutool.core.bean.copier.CopyOptions;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.date.DatePattern;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.StrUtil;
-import cn.hutool.db.Db;
 import cn.hutool.db.Entity;
 import cn.hutool.db.Page;
 import cn.hutool.db.PageResult;
@@ -17,8 +14,9 @@ import cn.jiangzeyin.common.JsonMessage;
 import cn.keepbx.jpom.common.BaseServerController;
 import cn.keepbx.jpom.model.BaseEnum;
 import cn.keepbx.jpom.model.data.MonitorModel;
-import cn.keepbx.jpom.model.log.MonitorNotifyLog;
 import cn.keepbx.jpom.model.data.NodeModel;
+import cn.keepbx.jpom.model.log.MonitorNotifyLog;
+import cn.keepbx.jpom.service.dblog.DbMonitorNotifyLogService;
 import cn.keepbx.jpom.service.node.NodeService;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -43,6 +41,8 @@ import java.util.List;
 public class MonitorLogController extends BaseServerController {
     @Resource
     private NodeService nodeService;
+    @Resource
+    private DbMonitorNotifyLogService dbMonitorNotifyLogService;
 
     /**
      * 展示监控页面
@@ -68,7 +68,7 @@ public class MonitorLogController extends BaseServerController {
         int limit = getParameterInt("limit", 10);
         int page1 = getParameterInt("page", 1);
         Page page = new Page(page1, limit);
-        Entity entity = Entity.create(MonitorNotifyLog.TABLE_NAME);
+        Entity entity = Entity.create();
         page.addOrder(new Order("createTime".toUpperCase(), Direction.DESC));
         // 时间
         if (StrUtil.isNotEmpty(time)) {
@@ -93,16 +93,8 @@ public class MonitorLogController extends BaseServerController {
             entity.set("notifyStatus".toUpperCase(), Convert.toBool(notifyStatus, true));
         }
 
-        PageResult<Entity> pageResult = Db.use().page(entity, page);
-        CopyOptions copyOptions = new CopyOptions();
-        copyOptions.setIgnoreError(true);
-        copyOptions.setIgnoreCase(true);
-        JSONArray jsonArray = new JSONArray();
-        pageResult.forEach(entity1 -> {
-            MonitorNotifyLog v1 = BeanUtil.mapToBean(entity1, MonitorNotifyLog.class, copyOptions);
-            jsonArray.add(v1);
-        });
-        JSONObject jsonObject = JsonMessage.toJson(200, "获取成功", jsonArray);
+        PageResult<MonitorNotifyLog> pageResult = dbMonitorNotifyLogService.listPage(entity, page);
+        JSONObject jsonObject = JsonMessage.toJson(200, "获取成功", pageResult);
         jsonObject.put("total", pageResult.getTotal());
         return jsonObject.toString();
     }

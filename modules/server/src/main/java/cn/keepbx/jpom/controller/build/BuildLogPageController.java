@@ -1,13 +1,11 @@
 package cn.keepbx.jpom.controller.build;
 
 import cn.hutool.core.bean.BeanUtil;
-import cn.hutool.core.bean.copier.CopyOptions;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.date.DatePattern;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.StrUtil;
-import cn.hutool.db.Db;
 import cn.hutool.db.Entity;
 import cn.hutool.db.Page;
 import cn.hutool.db.PageResult;
@@ -24,8 +22,8 @@ import cn.keepbx.jpom.model.BaseEnum;
 import cn.keepbx.jpom.model.data.BuildModel;
 import cn.keepbx.jpom.model.log.BuildHistoryLog;
 import cn.keepbx.jpom.model.vo.BuildHistoryLogVo;
-import cn.keepbx.jpom.service.build.BuildHistoryService;
 import cn.keepbx.jpom.service.build.BuildService;
+import cn.keepbx.jpom.service.dblog.DbBuildHistoryLogService;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.http.MediaType;
@@ -38,6 +36,7 @@ import javax.annotation.Resource;
 import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -51,7 +50,7 @@ public class BuildLogPageController extends BaseServerController {
     @Resource
     private BuildService buildService;
     @Resource
-    private BuildHistoryService buildHistoryService;
+    private DbBuildHistoryLogService dbBuildHistoryLogService;
 
     @RequestMapping(value = "logPage.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
     public String logPage() {
@@ -81,7 +80,7 @@ public class BuildLogPageController extends BaseServerController {
     @RequestMapping(value = "download_file.html", method = RequestMethod.GET)
     @ResponseBody
     public void downloadFile(@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据")) String logId) throws SQLException, IOException {
-        BuildHistoryLog buildHistoryLog = buildHistoryService.getLog(logId);
+        BuildHistoryLog buildHistoryLog = dbBuildHistoryLogService.getByKey(logId);
         if (buildHistoryLog == null) {
             return;
         }
@@ -111,9 +110,9 @@ public class BuildLogPageController extends BaseServerController {
                               @ValidatorConfig(value = {
                                       @ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "page error")
                               }, defaultVal = "1") int page,
-                              String buildDataId) throws SQLException {
+                              String buildDataId) {
         Page pageObj = new Page(page, limit);
-        Entity entity = Entity.create(BuildHistoryLog.TABLE_NAME);
+        Entity entity = Entity.create();
         pageObj.addOrder(new Order("startTime", Direction.DESC));
         // 时间
         if (StrUtil.isNotEmpty(time)) {
@@ -143,23 +142,20 @@ public class BuildLogPageController extends BaseServerController {
         if (StrUtil.isNotBlank(buildDataId)) {
             entity.set("buildDataId", buildDataId);
         }
-
-        PageResult<Entity> pageResult = Db.use().page(entity, pageObj);
-        CopyOptions copyOptions = new CopyOptions();
-        copyOptions.setIgnoreError(true);
-        copyOptions.setIgnoreCase(true);
-        JSONArray jsonArray = new JSONArray();
-        pageResult.forEach(entity1 -> {
-            BuildHistoryLogVo v1 = BeanUtil.mapToBean(entity1, BuildHistoryLogVo.class, copyOptions);
-            String dataId = v1.getBuildDataId();
+        PageResult<BuildHistoryLog> pageResult = dbBuildHistoryLogService.listPage(entity, pageObj);
+        List<BuildHistoryLogVo> buildHistoryLogVos = new ArrayList<>();
+        pageResult.forEach(buildHistoryLog -> {
+            BuildHistoryLogVo historyLogVo = new BuildHistoryLogVo();
+            BeanUtil.copyProperties(buildHistoryLog, historyLogVo);
+            String dataId = buildHistoryLog.getBuildDataId();
             try {
                 BuildModel item = buildService.getItem(dataId);
-                v1.setBuildName(item.getName());
+                historyLogVo.setBuildName(item.getName());
             } catch (IOException ignored) {
             }
-            jsonArray.add(v1);
+            buildHistoryLogVos.add(historyLogVo);
         });
-        JSONObject jsonObject = JsonMessage.toJson(200, "获取成功", jsonArray);
+        JSONObject jsonObject = JsonMessage.toJson(200, "获取成功", buildHistoryLogVos);
         jsonObject.put("total", pageResult.getTotal());
         return jsonObject.toString();
     }

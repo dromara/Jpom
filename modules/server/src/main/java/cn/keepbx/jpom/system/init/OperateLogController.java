@@ -17,6 +17,7 @@ import cn.keepbx.jpom.controller.LoginControl;
 import cn.keepbx.jpom.model.data.NodeModel;
 import cn.keepbx.jpom.model.data.UserModel;
 import cn.keepbx.jpom.model.log.UserOperateLogV1;
+import cn.keepbx.jpom.service.dblog.DbUserOperateLogService;
 import cn.keepbx.jpom.service.user.UserService;
 import cn.keepbx.jpom.system.AopLogInterface;
 import cn.keepbx.jpom.system.OperateType;
@@ -160,16 +161,9 @@ public class OperateLogController implements AopLogInterface {
         }
         //
         userOperateLogV1.setDataId(dataId);
-        Db db = Db.use();
-        db.setWrapper((Character) null);
-        try {
-            Entity entity = new Entity(UserOperateLogV1.TABLE_NAME);
-            entity.parseBean(userOperateLogV1);
-            db.insert(entity);
-            DbConfig.autoClear(UserOperateLogV1.TABLE_NAME, "optTime");
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+
+        DbUserOperateLogService dbUserOperateLogService = SpringUtil.getBean(DbUserOperateLogService.class);
+        dbUserOperateLogService.insert(userOperateLogV1);
     }
 
     public void log(UserModel userModel, Object value, CacheInfo cacheInfo) {
@@ -183,23 +177,19 @@ public class OperateLogController implements AopLogInterface {
      * @param val   结果
      */
     public void updateLog(String reqId, String val) {
-        Db db = Db.use();
-        db.setWrapper((Character) null);
+        DbUserOperateLogService dbUserOperateLogService = SpringUtil.getBean(DbUserOperateLogService.class);
+
+        Entity entity = new Entity();
+        entity.set("resultMsg", val);
         try {
-            Entity entity = new Entity(UserOperateLogV1.TABLE_NAME);
-            entity.set("resultMsg", val);
-            try {
-                JsonMessage jsonMessage = JSONObject.parseObject(val, JsonMessage.class);
-                entity.set("optStatus", jsonMessage.getCode());
-            } catch (Exception ignored) {
-            }
-            //
-            Entity where = new Entity(UserOperateLogV1.TABLE_NAME);
-            where.set("reqId", reqId);
-            db.update(entity, where);
-        } catch (SQLException e) {
-            e.printStackTrace();
+            JsonMessage jsonMessage = JSONObject.parseObject(val, JsonMessage.class);
+            entity.set("optStatus", jsonMessage.getCode());
+        } catch (Exception ignored) {
         }
+        //
+        Entity where = new Entity();
+        where.set("reqId", reqId);
+        dbUserOperateLogService.update(entity, where);
     }
 
     /**

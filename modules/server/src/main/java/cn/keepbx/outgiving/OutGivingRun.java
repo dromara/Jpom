@@ -3,8 +3,6 @@ package cn.keepbx.outgiving;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.IdUtil;
-import cn.hutool.db.Db;
-import cn.hutool.db.Entity;
 import cn.hutool.http.HttpStatus;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
@@ -17,13 +15,13 @@ import cn.keepbx.jpom.model.data.OutGivingModel;
 import cn.keepbx.jpom.model.data.OutGivingNodeProject;
 import cn.keepbx.jpom.model.data.UserModel;
 import cn.keepbx.jpom.model.log.OutGivingLog;
+import cn.keepbx.jpom.service.dblog.DbOutGivingLogService;
 import cn.keepbx.jpom.service.node.NodeService;
 import cn.keepbx.jpom.service.node.OutGivingServer;
 import com.alibaba.fastjson.JSONObject;
 
 import java.io.File;
 import java.io.IOException;
-import java.sql.SQLException;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.Callable;
@@ -222,49 +220,13 @@ public class OutGivingRun implements Callable<OutGivingNodeProject.Status> {
             outGivingLog.setOutGivingId(outGivingId);
             outGivingLog.setResult(msg);
             outGivingLog.setStatus(status.getCode());
+            DbOutGivingLogService dbOutGivingLogService = SpringUtil.getBean(DbOutGivingLogService.class);
             if (status == OutGivingNodeProject.Status.Ing || status == OutGivingNodeProject.Status.Cancel) {
                 // 开始或者 取消都还没有记录
-                insertLog(outGivingLog);
+                dbOutGivingLogService.insert(outGivingLog);
             } else {
-                updateLog(outGivingLog);
+                dbOutGivingLogService.update(outGivingLog);
             }
-        }
-    }
-
-    private static void updateLog(OutGivingLog outGivingLog) {
-        Db db = Db.use();
-        db.setWrapper((Character) null);
-        try {
-            Entity entity = new Entity(OutGivingLog.TABLE_NAME);
-            entity.set("status", outGivingLog.getStatus());
-            // 结束
-            entity.set("endTime", System.currentTimeMillis());
-            entity.set("result", outGivingLog.getResult());
-            //
-            Entity where = new Entity(OutGivingLog.TABLE_NAME);
-            where.set("id", outGivingLog.getId());
-            db.update(entity, where);
-        } catch (SQLException e) {
-            DefaultSystemLog.ERROR().error("db error", e);
-        }
-    }
-
-    /**
-     * 插入记录
-     */
-    private static void insertLog(OutGivingLog outGivingLog) {
-        outGivingLog.setStartTime(System.currentTimeMillis());
-        if (outGivingLog.getStatus() == OutGivingNodeProject.Status.Cancel.getCode()) {
-            outGivingLog.setEndTime(System.currentTimeMillis());
-        }
-        Db db = Db.use();
-        db.setWrapper((Character) null);
-        try {
-            Entity entity = new Entity(OutGivingLog.TABLE_NAME);
-            entity.parseBean(outGivingLog);
-            db.insert(entity);
-        } catch (SQLException e) {
-            DefaultSystemLog.ERROR().error("db error", e);
         }
     }
 }
