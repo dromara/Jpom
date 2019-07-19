@@ -1,7 +1,7 @@
 package cn.keepbx.jpom.model.data;
 
+import cn.keepbx.build.BaseBuildModule;
 import cn.keepbx.jpom.model.BaseEnum;
-import cn.keepbx.jpom.model.BaseModel;
 
 /**
  * 在线构建
@@ -9,8 +9,9 @@ import cn.keepbx.jpom.model.BaseModel;
  * @author bwcx_jzy
  * @date 2019/7/10
  **/
-public class BuildModel extends BaseModel {
-
+public class BuildModel extends BaseBuildModule {
+    private String id;
+    private String name;
     /**
      * 仓库地址
      */
@@ -19,10 +20,6 @@ public class BuildModel extends BaseModel {
      * 拉取的分支名称
      */
     private String branchName;
-    /**
-     * 结果目录 或者文件
-     */
-    private String resultDirFile;
     /**
      * 账号
      */
@@ -51,41 +48,21 @@ public class BuildModel extends BaseModel {
      * 构建id
      */
     private int buildId;
-    /**
-     * 发布方式
-     */
-    private int releaseMethod;
-    /**
-     * 发布方法的数据id
-     */
-    private String releaseMethodDataId;
-    /**
-     * 分发后的操作
-     */
-    private int afterOpt;
 
-    public int getAfterOpt() {
-        return afterOpt;
+    public String getId() {
+        return id;
     }
 
-    public void setAfterOpt(int afterOpt) {
-        this.afterOpt = afterOpt;
+    public void setId(String id) {
+        this.id = id;
     }
 
-    public String getReleaseMethodDataId() {
-        return releaseMethodDataId;
+    public String getName() {
+        return name;
     }
 
-    public void setReleaseMethodDataId(String releaseMethodDataId) {
-        this.releaseMethodDataId = releaseMethodDataId;
-    }
-
-    public int getReleaseMethod() {
-        return releaseMethod;
-    }
-
-    public void setReleaseMethod(int releaseMethod) {
-        this.releaseMethod = releaseMethod;
+    public void setName(String name) {
+        this.name = name;
     }
 
     public int getBuildId() {
@@ -150,17 +127,6 @@ public class BuildModel extends BaseModel {
 
     public void setBranchName(String branchName) {
         this.branchName = branchName;
-    }
-
-    public String getResultDirFile() {
-        if (resultDirFile == null) {
-            return null;
-        }
-        return resultDirFile.trim();
-    }
-
-    public void setResultDirFile(String resultDirFile) {
-        this.resultDirFile = resultDirFile;
     }
 
     public String getUserName() {

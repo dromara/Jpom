@@ -271,6 +271,7 @@ public class UserOperateLogV1 extends BaseJsonModel {
         EditBuildLog(59, "删除构建日志"),
         StartBuild(59, "开始构建"),
         CancelBuild(59, "取消构建"),
+        ReReleaseBuild(60, "重复发布"),
 
         ;
         private int code;

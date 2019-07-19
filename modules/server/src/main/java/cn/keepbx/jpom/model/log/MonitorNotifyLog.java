@@ -1,6 +1,7 @@
 package cn.keepbx.jpom.model.log;
 
 import cn.keepbx.jpom.model.BaseJsonModel;
+import cn.keepbx.jpom.model.data.MonitorModel;
 
 /**
  * 监控日志
@@ -31,6 +32,8 @@ public class MonitorNotifyLog extends BaseJsonModel {
     private boolean status;
     /**
      * 通知方式
+     *
+     * @see MonitorModel.NotifyType
      */
     private int notifyStyle;
     /**

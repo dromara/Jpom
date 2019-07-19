@@ -1,6 +1,8 @@
 package cn.keepbx.jpom.model.log;
 
-import cn.keepbx.jpom.model.BaseJsonModel;
+import cn.keepbx.build.BaseBuildModule;
+import cn.keepbx.jpom.model.data.BuildModel;
+import cn.keepbx.jpom.model.data.UserModel;
 
 /**
  * 构建历史记录
@@ -8,7 +10,7 @@ import cn.keepbx.jpom.model.BaseJsonModel;
  * @author bwcx_jzy
  * @date 2019/7/17
  **/
-public class BuildHistoryLog extends BaseJsonModel {
+public class BuildHistoryLog extends BaseBuildModule {
     /**
      * 表名
      */
@@ -19,14 +21,20 @@ public class BuildHistoryLog extends BaseJsonModel {
     private String id;
     /**
      * 关联的构建id
+     *
+     * @see BuildModel#getId()
      */
     private String buildDataId;
     /**
      * 构建编号
+     *
+     * @see BuildModel#getBuildId()
      */
     private int buildNumberId;
     /**
      * 状态
+     *
+     * @see BuildModel.Status
      */
     private int status;
     /**
@@ -37,12 +45,12 @@ public class BuildHistoryLog extends BaseJsonModel {
      * 结束时间
      */
     private long endTime;
-    /**
-     * 构建产物目录
-     */
-    private String resultDirFile;
+
+
     /**
      * 构建人
+     *
+     * @see UserModel#getName()
      */
     private String buildUser;
 
@@ -100,13 +108,5 @@ public class BuildHistoryLog extends BaseJsonModel {
 
     public void setEndTime(long endTime) {
         this.endTime = endTime;
-    }
-
-    public String getResultDirFile() {
-        return resultDirFile;
-    }
-
-    public void setResultDirFile(String resultDirFile) {
-        this.resultDirFile = resultDirFile;
     }
 }

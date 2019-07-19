@@ -1,29 +1,22 @@
 package cn.keepbx.build;
 
-import cn.hutool.core.collection.CollectionUtil;
-import cn.hutool.core.exceptions.ExceptionUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.io.LineHandler;
 import cn.hutool.core.thread.ThreadUtil;
-import cn.hutool.core.util.*;
+import cn.hutool.core.util.IdUtil;
+import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.db.Db;
 import cn.hutool.db.Entity;
-import cn.hutool.http.HttpStatus;
 import cn.hutool.system.SystemUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
-import cn.jiangzeyin.common.JsonMessage;
-import cn.jiangzeyin.common.spring.SpringUtil;
 import cn.keepbx.jpom.JpomApplication;
-import cn.keepbx.jpom.model.BaseEnum;
-import cn.keepbx.jpom.model.data.*;
+import cn.keepbx.jpom.model.data.BuildModel;
+import cn.keepbx.jpom.model.data.UserModel;
 import cn.keepbx.jpom.model.log.BuildHistoryLog;
 import cn.keepbx.jpom.model.log.MonitorNotifyLog;
-import cn.keepbx.jpom.service.build.BuildService;
-import cn.keepbx.jpom.service.node.NodeService;
-import cn.keepbx.jpom.system.ConfigBean;
 import cn.keepbx.jpom.system.JpomRuntimeException;
-import cn.keepbx.outgiving.OutGivingRun;
 import cn.keepbx.util.GitUtil;
 import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 
@@ -32,7 +25,6 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -41,7 +33,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * @author bwcx_jzy
  * @date 2019/7/16
  */
-public class BuildManage implements Runnable {
+public class BuildManage extends BaseBuild implements Runnable {
 
     private static final Map<String, BuildManage> BUILD_MANAGE_MAP = new ConcurrentHashMap<>();
 
@@ -63,71 +55,18 @@ public class BuildManage implements Runnable {
 
     private BuildModel buildModel;
     private File gitFile;
-    private File logFile;
     private Process process;
     private String logId;
     private String optUserName;
     private UserModel userModel;
 
     private BuildManage(final BuildModel buildModel, final UserModel userModel) {
+        super(BuildUtil.getLogFile(buildModel.getId(), buildModel.getBuildId()),
+                buildModel.getId());
         this.buildModel = buildModel;
-        this.gitFile = FileUtil.file(getBuildDataFile(buildModel.getId()), "source");
-        this.logFile = getLogFile(buildModel, buildModel.getBuildId());
+        this.gitFile = FileUtil.file(BuildUtil.getBuildDataFile(buildModel.getId()), "source");
         this.optUserName = UserModel.getOptUserName(userModel);
         this.userModel = userModel;
-    }
-
-    public static File getBuildDataFile(String id) {
-        return FileUtil.file(ConfigBean.getInstance().getDataPath(), "build", id);
-    }
-
-    /**
-     * 获取构建产物存放路径
-     *
-     * @param buildModel 构建实体
-     * @param buildId    id
-     * @param resultFile 结果目录
-     * @return file
-     */
-    public static File getHistoryPackageFile(BuildModel buildModel, int buildId, String resultFile) {
-        return FileUtil.file(getBuildDataFile(buildModel.getId()),
-                "history",
-                BuildModel.getBuildIdStr(buildId),
-                resultFile);
-    }
-
-    /**
-     * 如果为文件夹自动打包为zip ,反之返回null
-     *
-     * @param file file
-     * @return 压缩包文件
-     */
-    public static File isDirPackage(File file) {
-        if (file.isFile()) {
-            return null;
-        }
-        File zipFile = FileUtil.file(file.getParentFile(), FileUtil.mainName(file) + ".zip");
-        if (!zipFile.exists()) {
-            // 不存在则打包
-            ZipUtil.zip(file);
-        }
-        return zipFile;
-    }
-
-    /**
-     * 获取日志记录文件
-     *
-     * @param buildModel 对象
-     * @param buildId    构建编号
-     * @return file
-     */
-    public static File getLogFile(BuildModel buildModel, int buildId) {
-        return FileUtil.file(ConfigBean.getInstance().getDataPath(),
-                "build",
-                buildModel.getId(),
-                "history",
-                BuildModel.getBuildIdStr(buildId),
-                "info.log");
     }
 
     /**
@@ -169,12 +108,10 @@ public class BuildManage implements Runnable {
         return buildManage;
     }
 
-    private boolean updateStatus(BuildModel.Status status) {
+    @Override
+    protected boolean updateStatus(BuildModel.Status status) {
         try {
-            BuildService buildService = SpringUtil.getBean(BuildService.class);
-            BuildModel item = buildService.getItem(buildModel.getId());
-            item.setStatus(status.getCode());
-            buildService.updateItem(item);
+            super.updateStatus(status);
             if (status == BuildModel.Status.Ing) {
                 this.insertLog();
             } else {
@@ -222,6 +159,9 @@ public class BuildManage implements Runnable {
         buildHistoryLog.setStartTime(System.currentTimeMillis());
         buildHistoryLog.setBuildNumberId(buildModel.getBuildId());
         buildHistoryLog.setBuildUser(optUserName);
+        buildHistoryLog.setReleaseMethod(this.buildModel.getReleaseMethod());
+        buildHistoryLog.setReleaseMethodDataId(this.buildModel.getReleaseMethodDataId());
+        buildHistoryLog.setAfterOpt(this.buildModel.getAfterOpt());
 
         Db db = Db.use();
         db.setWrapper((Character) null);
@@ -243,7 +183,7 @@ public class BuildManage implements Runnable {
             this.log(buildModel.getResultDirFile() + "不存在，处理构建产物失败");
             return false;
         }
-        File toFile = getHistoryPackageFile(buildModel, buildModel.getBuildId(), buildModel.getResultDirFile());
+        File toFile = BuildUtil.getHistoryPackageFile(buildModel.getId(), buildModel.getBuildId(), buildModel.getResultDirFile());
         FileUtil.copyContent(file, toFile, true);
         this.log(StrUtil.format("mv {} {}", buildModel.getResultDirFile(), buildModel.getBuildIdStr()));
         return true;
@@ -283,7 +223,7 @@ public class BuildManage implements Runnable {
             boolean status = packageFile();
             if (status && buildModel.getReleaseMethod() != BuildModel.ReleaseMethod.No.getCode()) {
                 // 发布文件
-                this.pub();
+                new ReleaseManage(this.buildModel, this.userModel, this).start();
             } else {
                 //
                 updateStatus(BuildModel.Status.Success);
@@ -293,108 +233,8 @@ public class BuildManage implements Runnable {
         }
     }
 
-    private void pub() {
-        updateStatus(BuildModel.Status.PubIng);
-        this.log("start pub");
-        if (buildModel.getReleaseMethod() == BuildModel.ReleaseMethod.Outgiving.getCode()) {
-            //
-            try {
-                this.doOutGiving();
-            } catch (Exception e) {
-                this.pubLog("发布分发包异常", e);
-                return;
-            }
-        } else if (buildModel.getReleaseMethod() == BuildModel.ReleaseMethod.Project.getCode()) {
-            BuildModel.AfterOpt afterOpt = BaseEnum.getEnum(BuildModel.AfterOpt.class, buildModel.getAfterOpt());
-            if (afterOpt == null) {
-                afterOpt = BuildModel.AfterOpt.No;
-            }
-            try {
-                this.doProject(afterOpt);
-            } catch (Exception e) {
-                this.pubLog("发布包异常", e);
-                return;
-            }
-        }
-        this.log("pub end");
-        updateStatus(BuildModel.Status.PubSuccess);
-    }
-
-    /**
-     * 发布项目
-     *
-     * @param afterOpt 后续操作
-     */
-    private void doProject(BuildModel.AfterOpt afterOpt) {
-        String dataId = buildModel.getReleaseMethodDataId();
-        String[] strings = StrUtil.split(dataId, ":");
-        if (strings == null || strings.length != 2) {
-            throw new JpomRuntimeException(dataId + " error");
-        }
-        NodeService nodeService = SpringUtil.getBean(NodeService.class);
-        NodeModel nodeModel = nodeService.getItem(strings[0]);
-        Objects.requireNonNull(nodeModel, "节点不存在");
-        File logFile = BuildManage.getHistoryPackageFile(buildModel, buildModel.getBuildId(), buildModel.getResultDirFile());
-        File zipFile = BuildManage.isDirPackage(logFile);
-        boolean unZip = true;
-        if (zipFile == null) {
-            zipFile = logFile;
-            unZip = false;
-        }
-        JsonMessage jsonMessage = OutGivingRun.fileUpload(zipFile,
-                strings[1],
-                unZip,
-                afterOpt != BuildModel.AfterOpt.No,
-                nodeModel, this.userModel);
-        if (jsonMessage.getCode() == HttpStatus.HTTP_OK) {
-            this.log("发布项目包成功：" + jsonMessage.toString());
-        } else {
-            throw new JpomRuntimeException("发布项目包失败：" + jsonMessage.toString());
-        }
-    }
-
-    /**
-     * 分发包
-     *
-     * @throws IOException IO
-     */
-    private void doOutGiving() throws IOException {
-        String dataId = buildModel.getReleaseMethodDataId();
-        File logFile = BuildManage.getHistoryPackageFile(buildModel, buildModel.getBuildId(), buildModel.getResultDirFile());
-        File zipFile = BuildManage.isDirPackage(logFile);
-        boolean unZip = true;
-        if (zipFile == null) {
-            zipFile = logFile;
-            unZip = false;
-        }
-        OutGivingRun.startRun(dataId, zipFile, userModel, unZip);
-        this.log("开始执行分发包啦,请到分发中查看当前状态");
-    }
-
     private void log(String title, Throwable throwable) {
         log(title, throwable, BuildModel.Status.Error);
-    }
-
-    /**
-     * 发布异常日志
-     *
-     * @param title     描述
-     * @param throwable 异常
-     */
-    private void pubLog(String title, Throwable throwable) {
-        log(title, throwable, BuildModel.Status.PubError);
-    }
-
-    private void log(String title, Throwable throwable, BuildModel.Status status) {
-        DefaultSystemLog.ERROR().error(title, throwable);
-        FileUtil.appendLines(CollectionUtil.toList(title), this.logFile, CharsetUtil.CHARSET_UTF_8);
-        String s = ExceptionUtil.stacktraceToString(throwable);
-        FileUtil.appendLines(CollectionUtil.toList(s), this.logFile, CharsetUtil.CHARSET_UTF_8);
-        updateStatus(status);
-    }
-
-    private void log(String info) {
-        FileUtil.appendLines(CollectionUtil.toList(info), this.logFile, CharsetUtil.CHARSET_UTF_8);
     }
 
     /**

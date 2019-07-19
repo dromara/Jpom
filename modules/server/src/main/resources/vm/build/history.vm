@@ -14,10 +14,17 @@
 <body>
 <table class="layui-table" id="tab_user" lay-filter="tab_user" style="margin: 0;"></table>
 <script type="text/html" id="bar_projects">
+    {{# if(d.hashFile) { }}
     {{# if(d.status==2 || d.status== 4 || d.status==5 || d.status==6) { }}
     <a href="javascript:;" class="layui-btn  layui-btn-sm layui-btn-normal" lay-event="download">下载</a>
     {{# } }}
-    <a href="javascript:;" class="layui-btn  layui-btn-sm layui-btn-normal" lay-event="delete">删除</a>
+    {{# if(d.releaseMethod!=0) { }}
+    <a href="javascript:;" class="layui-btn  layui-btn-sm layui-btn-normal" lay-event="repub">发布</a>
+    {{# } }}
+    {{# } }}
+        #if($user.isSystemUser())
+        <a href="javascript:;" class="layui-btn  layui-btn-sm layui-btn-normal" lay-event="delete">删除</a>
+        #end
 </script>
 </body>
 
@@ -66,12 +73,19 @@
         #if($status)
         statusArray = $status;
         #end
+    var releaseMethods = [];
+        #if($releaseMethods)
+        releaseMethods = $releaseMethods;
+        #end
     function openLog(id, buildId) {
         layer.open({
             type: 2,
             title: '构建日志',
             content: './logPage.html?id=' + id + "&buildId=" + buildId,
             area: ['80%', '90%'],
+            cancel: function () {
+                reloadTable();
+            }
         });
     }
 
@@ -86,7 +100,7 @@
             cols: [[
                 {field: 'buildName', title: '构建名称'},
                 {
-                    field: 'buildIdStr', title: '构建ID', templet: function (d) {
+                    field: 'buildIdStr', title: '构建ID', width: '6%', templet: function (d) {
                         return "<a herf='' style='color: blue;' onclick='openLog(\"" + d.buildDataId + "\"," + d.buildNumberId + ")'>" + d.buildIdStr + "</a>";
                     }
                 },
@@ -112,6 +126,17 @@
                             return "-";
                         }
                         return formateTime(d.endTime);
+                    }
+                },
+                {
+                    field: 'releaseMethod', title: '发布方式', width: '8%', templet: function (d) {
+                        var releaseMethod = d.releaseMethod;
+                        for (var i = 0; i < releaseMethods.length; i++) {
+                            if (releaseMethods[i].code == releaseMethod) {
+                                return releaseMethods[i].desc;
+                            }
+                        }
+                        return "未知";
                     }
                 },
                 {field: 'buildUser', title: '构建人'},
@@ -140,20 +165,45 @@
             var data = obj.data;
             var event = obj.event;
             if (event == "delete") {
-                loadingAjax({
-                    url: './delete_log.json',
-                    data: {
-                        logId: data.id
-                    },
-                    success: function (data) {
-                        layer.msg(data.msg);
-                        if (200 == data.code) {
-                            table.reload('tab_user', {});
+                layer.confirm('确定删除此构建记录吗？，删除将一并删除构建产物', {
+                    title: '系统提示'
+                }, function (index) {
+                    layer.close(index);
+                    loadingAjax({
+                        url: './delete_log.json',
+                        data: {
+                            logId: data.id
+                        },
+                        success: function (data) {
+                            layer.msg(data.msg);
+                            if (200 == data.code) {
+                                table.reload('tab_user', {});
+                            }
                         }
-                    }
+                    });
                 });
             } else if (event == 'download') {
                 window.open("./download_file.html?logId=" + data.id);
+            } else if (event == 'repub') {
+                layer.confirm('确定重新发布吗？重新发布至：' + data.releaseDesc, {
+                    title: '系统提示'
+                }, function (index) {
+                    layer.close(index);
+                    var d = data;
+                    loadingAjax({
+                        url: './reRelease.json',
+                        data: {
+                            logId: data.id
+                        },
+                        success: function (data) {
+                            layer.msg(data.msg);
+                            if (200 == data.code) {
+                                table.reload('tab_user', {});
+                                openLog(d.buildDataId, d.buildNumberId);
+                            }
+                        }
+                    });
+                });
             }
         });
 

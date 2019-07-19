@@ -88,10 +88,16 @@
                                     getLog();
                                 }, 1000);
                             }
-                            $("#cancel").show();
+                            if (data.data.buildRun) {
+                                $("#cancel").show();
+                            } else {
+                                $("#cancel").hide();
+                            }
                         } else {
                             clearInterval(timeId);
                             $("#cancel").hide();
+                            // 完成
+                            parent.reloadTable && parent.reloadTable();
                         }
                     } else {
                         layer.msg(data.msg);
@@ -113,6 +119,7 @@
                     layer.msg(data.msg);
                     if (200 == data.code) {
                         $("#cancel").hide();
+                        parent.reload && parent.reload();
                     }
                 }
             });

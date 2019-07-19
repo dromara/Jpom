@@ -18,11 +18,11 @@ import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.validator.ValidatorConfig;
 import cn.jiangzeyin.common.validator.ValidatorItem;
 import cn.jiangzeyin.common.validator.ValidatorRule;
-import cn.keepbx.build.BuildManage;
+import cn.keepbx.build.BuildUtil;
 import cn.keepbx.jpom.common.BaseServerController;
 import cn.keepbx.jpom.model.BaseEnum;
-import cn.keepbx.jpom.model.log.BuildHistoryLog;
 import cn.keepbx.jpom.model.data.BuildModel;
+import cn.keepbx.jpom.model.log.BuildHistoryLog;
 import cn.keepbx.jpom.model.vo.BuildHistoryLogVo;
 import cn.keepbx.jpom.service.build.BuildHistoryService;
 import cn.keepbx.jpom.service.build.BuildService;
@@ -65,6 +65,9 @@ public class BuildLogPageController extends BaseServerController {
         //
         List<BuildModel> list = buildService.list();
         setAttribute("buildS", list);
+        //
+        JSONArray releaseMethods = BaseEnum.toJSONArray(BuildModel.ReleaseMethod.class);
+        setAttribute("releaseMethods", releaseMethods);
         return "build/history";
     }
 
@@ -86,14 +89,14 @@ public class BuildLogPageController extends BaseServerController {
         if (item == null) {
             return;
         }
-        File logFile = BuildManage.getHistoryPackageFile(item, buildHistoryLog.getBuildNumberId(), buildHistoryLog.getResultDirFile());
+        File logFile = BuildUtil.getHistoryPackageFile(item.getId(), buildHistoryLog.getBuildNumberId(), buildHistoryLog.getResultDirFile());
         if (!logFile.exists()) {
             return;
         }
         if (logFile.isFile()) {
             ServletUtil.write(getResponse(), logFile);
         } else {
-            File zipFile = BuildManage.isDirPackage(logFile);
+            File zipFile = BuildUtil.isDirPackage(logFile);
             assert zipFile != null;
             ServletUtil.write(getResponse(), zipFile);
         }

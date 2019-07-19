@@ -61,7 +61,7 @@ public class OutGivingRun implements Callable<OutGivingNodeProject.Status> {
                                 boolean unzip) throws IOException {
         OutGivingServer outGivingServer = SpringUtil.getBean(OutGivingServer.class);
         OutGivingModel item = outGivingServer.getItem(id);
-        Objects.requireNonNull(item);
+        Objects.requireNonNull(item, "不存在分发");
         OutGivingModel.AfterOpt afterOpt = BaseEnum.getEnum(OutGivingModel.AfterOpt.class, item.getAfterOpt());
         if (afterOpt == null) {
             afterOpt = OutGivingModel.AfterOpt.No;
@@ -69,7 +69,6 @@ public class OutGivingRun implements Callable<OutGivingNodeProject.Status> {
         OutGivingModel.AfterOpt finalAfterOpt = afterOpt;
         //
         List<OutGivingNodeProject> outGivingNodeProjects = item.getOutGivingNodeProjectList();
-        outGivingServer.updateItem(item);
         // 开启线程
         if (afterOpt == OutGivingModel.AfterOpt.Order_Restart || afterOpt == OutGivingModel.AfterOpt.Order_Must_Restart) {
             ThreadUtil.execute(() -> {

@@ -48,6 +48,9 @@
             title: '构建日志',
             content: './logPage.html?id=' + id + "&buildId=" + buildId,
             area: ['80%', '90%'],
+            cancel: function () {
+                reloadTable();
+            }
         });
     }
 
@@ -71,6 +74,9 @@
                 },
                 {
                     field: 'buildIdStr', title: '当前构建ID', templet: function (d) {
+                        if (d.buildId <= 0) {
+                            return "";
+                        }
                         return "<a herf='' style='color: blue;' onclick='openLog(\"" + d.id + "\"," + d.buildId + ")'>" + d.buildIdStr + "</a>";
                     }
                 },
@@ -145,7 +151,7 @@
                     success: function (data) {
                         layer.msg(data.msg);
                         if (200 == data.code) {
-                            table.reload('tab_build', {});
+                            reloadTable();
                         }
                     }
                 });
@@ -161,6 +167,10 @@
                 area: ['80%', '80%'],
             });
         }
+    }
+
+    function reloadTable() {
+        table.reload('tab_build', {});
     }
 </script>
 </html>

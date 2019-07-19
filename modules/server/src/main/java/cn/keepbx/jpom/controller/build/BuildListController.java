@@ -10,6 +10,7 @@ import cn.jiangzeyin.common.validator.ValidatorConfig;
 import cn.jiangzeyin.common.validator.ValidatorItem;
 import cn.jiangzeyin.common.validator.ValidatorRule;
 import cn.keepbx.build.BuildManage;
+import cn.keepbx.build.BuildUtil;
 import cn.keepbx.jpom.common.BaseServerController;
 import cn.keepbx.jpom.common.interceptor.UrlPermission;
 import cn.keepbx.jpom.model.BaseEnum;
@@ -195,7 +196,7 @@ public class BuildListController extends BaseServerController {
         Objects.requireNonNull(buildModel, "没有对应数据");
         buildHistoryService.delByBuildId(buildModel.getId());
         //
-        File file = BuildManage.getBuildDataFile(buildModel.getId());
+        File file = BuildUtil.getBuildDataFile(buildModel.getId());
         if (!FileUtil.del(file)) {
             return JsonMessage.getString(500, "清理历史构建产物失败");
         }

@@ -5,12 +5,12 @@ import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.validator.ValidatorConfig;
 import cn.jiangzeyin.common.validator.ValidatorItem;
 import cn.jiangzeyin.common.validator.ValidatorRule;
-import cn.keepbx.build.BuildManage;
+import cn.keepbx.build.BuildUtil;
 import cn.keepbx.jpom.common.BaseServerController;
 import cn.keepbx.jpom.common.interceptor.UrlPermission;
 import cn.keepbx.jpom.model.Role;
-import cn.keepbx.jpom.model.log.BuildHistoryLog;
 import cn.keepbx.jpom.model.data.BuildModel;
+import cn.keepbx.jpom.model.log.BuildHistoryLog;
 import cn.keepbx.jpom.model.log.UserOperateLogV1;
 import cn.keepbx.jpom.service.build.BuildHistoryService;
 import cn.keepbx.jpom.service.build.BuildService;
@@ -55,7 +55,7 @@ public class BuildHistoryController extends BaseServerController {
         if (item == null) {
             return JsonMessage.getString(404, "没有对应数据");
         }
-        File logFile = BuildManage.getLogFile(item, buildHistoryLog.getBuildNumberId());
+        File logFile = BuildUtil.getLogFile(item.getId(), buildHistoryLog.getBuildNumberId());
         File dataFile = logFile.getParentFile();
         if (dataFile.exists()) {
             boolean s = FileUtil.del(dataFile);

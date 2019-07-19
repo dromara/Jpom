@@ -3,19 +3,24 @@ package cn.keepbx.jpom.controller.build;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.LineHandler;
+import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.CharsetUtil;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.validator.ValidatorConfig;
 import cn.jiangzeyin.common.validator.ValidatorItem;
 import cn.jiangzeyin.common.validator.ValidatorRule;
 import cn.keepbx.build.BuildManage;
+import cn.keepbx.build.BuildUtil;
+import cn.keepbx.build.ReleaseManage;
 import cn.keepbx.jpom.common.BaseServerController;
 import cn.keepbx.jpom.common.interceptor.UrlPermission;
 import cn.keepbx.jpom.model.BaseEnum;
 import cn.keepbx.jpom.model.Role;
 import cn.keepbx.jpom.model.data.BuildModel;
 import cn.keepbx.jpom.model.data.UserModel;
+import cn.keepbx.jpom.model.log.BuildHistoryLog;
 import cn.keepbx.jpom.model.log.UserOperateLogV1;
+import cn.keepbx.jpom.service.build.BuildHistoryService;
 import cn.keepbx.jpom.service.build.BuildService;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.http.MediaType;
@@ -26,6 +31,7 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.annotation.Resource;
 import java.io.File;
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
@@ -40,6 +46,8 @@ public class BuildManageController extends BaseServerController {
 
     @Resource
     private BuildService buildService;
+    @Resource
+    private BuildHistoryService buildHistoryService;
 
     /**
      * 开始构建
@@ -55,11 +63,9 @@ public class BuildManageController extends BaseServerController {
         if (item == null) {
             return JsonMessage.getString(404, "没有对应数据");
         }
-        BuildModel.Status nowStatus = BaseEnum.getEnum(BuildModel.Status.class, item.getStatus());
-        Objects.requireNonNull(nowStatus);
-        if (BuildModel.Status.Ing == nowStatus ||
-                BuildModel.Status.PubIng == nowStatus) {
-            return JsonMessage.getString(501, "当前还在：" + nowStatus.getDesc());
+        String e = checkStatus(item.getStatus());
+        if (e != null) {
+            return e;
         }
         //
         item.setBuildId(item.getBuildId() + 1);
@@ -69,6 +75,16 @@ public class BuildManageController extends BaseServerController {
         buildService.updateItem(item);
         BuildManage.create(item, userModel);
         return JsonMessage.getString(200, "开始构建中", item.getBuildId());
+    }
+
+    private String checkStatus(int status) {
+        BuildModel.Status nowStatus = BaseEnum.getEnum(BuildModel.Status.class, status);
+        Objects.requireNonNull(nowStatus);
+        if (BuildModel.Status.Ing == nowStatus ||
+                BuildModel.Status.PubIng == nowStatus) {
+            return JsonMessage.getString(501, "当前还在：" + nowStatus.getDesc());
+        }
+        return null;
     }
 
     /**
@@ -82,9 +98,7 @@ public class BuildManageController extends BaseServerController {
     @UrlPermission(value = Role.ServerManager, optType = UserOperateLogV1.OptType.CancelBuild)
     public String cancel(@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据")) String id) throws IOException {
         BuildModel item = buildService.getItem(id);
-        if (item == null) {
-            return JsonMessage.getString(404, "没有对应数据");
-        }
+        Objects.requireNonNull(item, "没有对应数据");
         BuildModel.Status nowStatus = BaseEnum.getEnum(BuildModel.Status.class, item.getStatus());
         Objects.requireNonNull(nowStatus);
         if (BuildModel.Status.Ing != nowStatus) {
@@ -96,6 +110,33 @@ public class BuildManageController extends BaseServerController {
             buildService.updateItem(item);
         }
         return JsonMessage.getString(200, "取消成功");
+    }
+
+    /**
+     * 重新发布
+     *
+     * @param logId logId
+     * @return json
+     * @throws IOException  io
+     * @throws SQLException s
+     */
+    @RequestMapping(value = "reRelease.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @UrlPermission(value = Role.ServerManager, optType = UserOperateLogV1.OptType.ReReleaseBuild)
+    public String reRelease(@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据")) String logId) throws IOException, SQLException {
+        BuildHistoryLog buildHistoryLog = buildHistoryService.getLog(logId);
+        Objects.requireNonNull(buildHistoryLog, "没有对应构建记录.");
+        BuildModel item = buildService.getItem(buildHistoryLog.getBuildDataId());
+        Objects.requireNonNull(item, "没有对应数据");
+        String e = checkStatus(item.getStatus());
+        if (e != null) {
+            return e;
+        }
+        UserModel userModel = getUser();
+        ReleaseManage releaseManage = new ReleaseManage(buildHistoryLog, userModel);
+        // 标记发布中
+        releaseManage.updateStatus(BuildModel.Status.PubIng);
+        ThreadUtil.execute(releaseManage::start2);
+        return JsonMessage.getString(200, "重新发布中");
     }
 
     /**
@@ -118,7 +159,7 @@ public class BuildManageController extends BaseServerController {
         if (buildId > item.getBuildId()) {
             return JsonMessage.getString(405, "还没有对应的构建记录");
         }
-        File file = BuildManage.getLogFile(item, buildId);
+        File file = BuildUtil.getLogFile(item.getId(), buildId);
         if (file.isDirectory()) {
             return JsonMessage.getString(300, "日志文件错误");
         }
@@ -129,7 +170,10 @@ public class BuildManageController extends BaseServerController {
             return JsonMessage.getString(300, "日志文件不存在");
         }
         JSONObject data = new JSONObject();
+        // 运行中
         data.put("run", item.getStatus() == BuildModel.Status.Ing.getCode() || item.getStatus() == BuildModel.Status.PubIng.getCode());
+        // 构建中
+        data.put("buildRun", item.getStatus() == BuildModel.Status.Ing.getCode());
         // 读取文件
         int linesInt = Convert.toInt(line, 1);
         List<String> lines = new LinkedList<>();
