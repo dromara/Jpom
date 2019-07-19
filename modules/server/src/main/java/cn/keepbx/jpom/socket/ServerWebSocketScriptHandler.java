@@ -3,7 +3,7 @@ package cn.keepbx.jpom.socket;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.keepbx.jpom.common.forward.NodeUrl;
 import cn.keepbx.jpom.model.data.UserModel;
-import cn.keepbx.jpom.model.data.UserOperateLogV1;
+import cn.keepbx.jpom.model.log.UserOperateLogV1;
 import cn.keepbx.jpom.system.init.OperateLogController;
 import com.alibaba.fastjson.JSONObject;
 

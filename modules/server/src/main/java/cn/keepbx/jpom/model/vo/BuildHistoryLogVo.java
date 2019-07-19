@@ -1,6 +1,6 @@
 package cn.keepbx.jpom.model.vo;
 
-import cn.keepbx.jpom.model.data.BuildHistoryLog;
+import cn.keepbx.jpom.model.log.BuildHistoryLog;
 import cn.keepbx.jpom.model.data.BuildModel;
 
 /**

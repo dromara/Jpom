@@ -1,10 +1,11 @@
-package cn.keepbx.jpom.model.data;
+package cn.keepbx.jpom.model.log;
 
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.keepbx.jpom.JpomApplication;
 import cn.keepbx.jpom.model.BaseEnum;
 import cn.keepbx.jpom.model.BaseJsonModel;
+import cn.keepbx.jpom.model.data.UserModel;
 
 /**
  * 用户操作日志

@@ -16,7 +16,7 @@ import cn.keepbx.jpom.common.interceptor.UrlPermission;
 import cn.keepbx.jpom.controller.LoginControl;
 import cn.keepbx.jpom.model.data.NodeModel;
 import cn.keepbx.jpom.model.data.UserModel;
-import cn.keepbx.jpom.model.data.UserOperateLogV1;
+import cn.keepbx.jpom.model.log.UserOperateLogV1;
 import cn.keepbx.jpom.service.user.UserService;
 import cn.keepbx.jpom.system.AopLogInterface;
 import cn.keepbx.jpom.system.OperateType;

@@ -9,7 +9,7 @@ import cn.keepbx.jpom.model.Role;
 import cn.keepbx.jpom.model.data.AgentWhitelist;
 import cn.keepbx.jpom.model.data.ServerWhitelist;
 import cn.keepbx.jpom.model.data.UserModel;
-import cn.keepbx.jpom.model.data.UserOperateLogV1;
+import cn.keepbx.jpom.model.log.UserOperateLogV1;
 import cn.keepbx.jpom.service.system.ServerWhitelistServer;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;

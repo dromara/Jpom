@@ -11,7 +11,7 @@ import cn.keepbx.jpom.model.Role;
 import cn.keepbx.jpom.model.data.NodeModel;
 import cn.keepbx.jpom.model.data.OutGivingModel;
 import cn.keepbx.jpom.model.data.UserModel;
-import cn.keepbx.jpom.model.data.UserOperateLogV1;
+import cn.keepbx.jpom.model.log.UserOperateLogV1;
 import cn.keepbx.jpom.service.manage.ProjectInfoService;
 import cn.keepbx.jpom.service.node.OutGivingServer;
 import com.alibaba.fastjson.JSONArray;

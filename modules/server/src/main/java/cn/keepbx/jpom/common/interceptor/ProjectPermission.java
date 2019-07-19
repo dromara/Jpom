@@ -1,6 +1,6 @@
 package cn.keepbx.jpom.common.interceptor;
 
-import cn.keepbx.jpom.model.data.UserOperateLogV1;
+import cn.keepbx.jpom.model.log.UserOperateLogV1;
 
 import java.lang.annotation.*;
 

@@ -1,4 +1,4 @@
-package cn.keepbx.jpom.model.data;
+package cn.keepbx.jpom.model.log;
 
 import cn.keepbx.jpom.model.BaseJsonModel;
 

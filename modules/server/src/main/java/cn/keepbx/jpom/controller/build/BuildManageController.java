@@ -15,7 +15,7 @@ import cn.keepbx.jpom.model.BaseEnum;
 import cn.keepbx.jpom.model.Role;
 import cn.keepbx.jpom.model.data.BuildModel;
 import cn.keepbx.jpom.model.data.UserModel;
-import cn.keepbx.jpom.model.data.UserOperateLogV1;
+import cn.keepbx.jpom.model.log.UserOperateLogV1;
 import cn.keepbx.jpom.service.build.BuildService;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.http.MediaType;

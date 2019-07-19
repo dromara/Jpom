@@ -17,7 +17,7 @@ import cn.jiangzeyin.common.JsonMessage;
 import cn.keepbx.jpom.common.BaseServerController;
 import cn.keepbx.jpom.model.BaseEnum;
 import cn.keepbx.jpom.model.data.MonitorModel;
-import cn.keepbx.jpom.model.data.MonitorNotifyLog;
+import cn.keepbx.jpom.model.log.MonitorNotifyLog;
 import cn.keepbx.jpom.model.data.NodeModel;
 import cn.keepbx.jpom.service.node.NodeService;
 import com.alibaba.fastjson.JSONArray;

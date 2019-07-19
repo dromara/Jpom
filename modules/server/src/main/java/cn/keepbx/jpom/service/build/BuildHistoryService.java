@@ -4,7 +4,7 @@ import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.bean.copier.CopyOptions;
 import cn.hutool.db.Db;
 import cn.hutool.db.Entity;
-import cn.keepbx.jpom.model.data.BuildHistoryLog;
+import cn.keepbx.jpom.model.log.BuildHistoryLog;
 import org.springframework.stereotype.Service;
 
 import java.sql.SQLException;

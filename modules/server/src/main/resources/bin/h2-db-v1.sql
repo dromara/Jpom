@@ -49,3 +49,18 @@ CREATE TABLE IF NOT EXISTS PUBLIC.BUILDHISTORYLOG
     CONSTRAINT BUILDHISTORYLOG_PK PRIMARY KEY (ID)
 );
 COMMENT ON TABLE BUILDHISTORYLOG is '构建历史记录';
+
+-- 分发日志
+CREATE TABLE IF NOT EXISTS PUBLIC.OUTGIVINGLOG
+(
+    ID          VARCHAR(50) not null comment 'id',
+    OUTGIVINGID VARCHAR(50) comment '分发id',
+    STATUS      TINYINT comment '状态',
+    STARTTIME   BIGINT comment '开始时间',
+    ENDTIME     BIGINT comment '结束时间',
+    RESULT      VARCHAR(100000) comment '消息',
+    NODEID      VARCHAR(100) comment '节点id',
+    PROJECTID   VARCHAR(100) comment '项目id',
+    CONSTRAINT OUTGIVINGLOG_PK PRIMARY KEY (ID)
+);
+comment on table OUTGIVINGLOG is '分发日志';

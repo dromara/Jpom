@@ -3,7 +3,7 @@ package cn.keepbx.jpom.controller.node.monitor;
 import cn.keepbx.jpom.common.BaseServerController;
 import cn.keepbx.jpom.common.forward.NodeForward;
 import cn.keepbx.jpom.common.forward.NodeUrl;
-import cn.keepbx.jpom.model.data.UserOperateLogV1;
+import cn.keepbx.jpom.model.log.UserOperateLogV1;
 import cn.keepbx.jpom.system.OperateType;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.http.MediaType;

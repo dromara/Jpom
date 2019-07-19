@@ -14,7 +14,7 @@ import cn.keepbx.jpom.common.BaseServerController;
 import cn.keepbx.jpom.common.interceptor.LoginInterceptor;
 import cn.keepbx.jpom.common.interceptor.NotLogin;
 import cn.keepbx.jpom.model.data.UserModel;
-import cn.keepbx.jpom.model.data.UserOperateLogV1;
+import cn.keepbx.jpom.model.log.UserOperateLogV1;
 import cn.keepbx.jpom.service.user.UserService;
 import cn.keepbx.jpom.system.OperateType;
 import cn.keepbx.jpom.system.ServerExtConfigBean;

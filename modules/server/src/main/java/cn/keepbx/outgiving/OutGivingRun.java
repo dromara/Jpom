@@ -2,6 +2,9 @@ package cn.keepbx.outgiving;
 
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.thread.ThreadUtil;
+import cn.hutool.core.util.IdUtil;
+import cn.hutool.db.Db;
+import cn.hutool.db.Entity;
 import cn.hutool.http.HttpStatus;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
@@ -13,12 +16,14 @@ import cn.keepbx.jpom.model.data.NodeModel;
 import cn.keepbx.jpom.model.data.OutGivingModel;
 import cn.keepbx.jpom.model.data.OutGivingNodeProject;
 import cn.keepbx.jpom.model.data.UserModel;
+import cn.keepbx.jpom.model.log.OutGivingLog;
 import cn.keepbx.jpom.service.node.NodeService;
 import cn.keepbx.jpom.service.node.OutGivingServer;
 import com.alibaba.fastjson.JSONObject;
 
 import java.io.File;
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.Callable;
@@ -37,6 +42,10 @@ public class OutGivingRun implements Callable<OutGivingNodeProject.Status> {
     private OutGivingModel.AfterOpt afterOpt;
     private UserModel userModel;
     private boolean unzip;
+    /**
+     * 数据库记录id
+     */
+    private String logId;
 
 
     /**
@@ -67,7 +76,8 @@ public class OutGivingRun implements Callable<OutGivingNodeProject.Status> {
                 boolean cancel = false;
                 for (OutGivingNodeProject outGivingNodeProject : outGivingNodeProjects) {
                     if (cancel) {
-                        updateStatus(id, outGivingNodeProject, OutGivingNodeProject.Status.Cancel, "前一个节点分发失败，取消分发");
+                        updateStatus(null, id, outGivingNodeProject,
+                                OutGivingNodeProject.Status.Cancel, "前一个节点分发失败，取消分发");
                     } else {
                         OutGivingRun outGivingRun = new OutGivingRun(id, outGivingNodeProject, file, finalAfterOpt, userModel, unzip);
                         OutGivingNodeProject.Status status = outGivingRun.call();
@@ -105,13 +115,15 @@ public class OutGivingRun implements Callable<OutGivingNodeProject.Status> {
         this.nodeModel = nodeService.getItem(outGivingNodeProject.getNodeId());
         //
         this.userModel = userModel;
+        this.logId = IdUtil.fastSimpleUUID();
     }
 
     @Override
     public OutGivingNodeProject.Status call() {
         OutGivingNodeProject.Status result;
         try {
-            updateStatus(this.outGivingId, this.outGivingNodeProject, OutGivingNodeProject.Status.Ing, "开始分发");
+            updateStatus(this.logId, this.outGivingId, this.outGivingNodeProject,
+                    OutGivingNodeProject.Status.Ing, "开始分发");
             //
             JsonMessage jsonMessage = fileUpload(file,
                     this.outGivingNodeProject.getProjectId(),
@@ -120,15 +132,18 @@ public class OutGivingRun implements Callable<OutGivingNodeProject.Status> {
                     this.nodeModel, this.userModel);
             if (jsonMessage.getCode() == HttpStatus.HTTP_OK) {
                 result = OutGivingNodeProject.Status.Ok;
-                updateStatus(this.outGivingId, this.outGivingNodeProject, result, jsonMessage.toString());
+                updateStatus(this.logId, this.outGivingId, this.outGivingNodeProject,
+                        result, jsonMessage.toString());
             } else {
                 result = OutGivingNodeProject.Status.Fail;
-                updateStatus(this.outGivingId, this.outGivingNodeProject, result, jsonMessage.toString());
+                updateStatus(this.logId, this.outGivingId, this.outGivingNodeProject,
+                        result, jsonMessage.toString());
             }
         } catch (Exception e) {
             DefaultSystemLog.ERROR().error(this.outGivingNodeProject.getNodeId() + " " + this.outGivingNodeProject.getProjectId() + " " + "分发异常保存", e);
             result = OutGivingNodeProject.Status.Fail;
-            updateStatus(this.outGivingId, this.outGivingNodeProject, result, e.getMessage());
+            updateStatus(this.logId, this.outGivingId, this.outGivingNodeProject,
+                    result, e.getMessage());
         }
         return result;
     }
@@ -166,7 +181,11 @@ public class OutGivingRun implements Callable<OutGivingNodeProject.Status> {
      * @param status                   状态
      * @param msg                      消息描述
      */
-    private static void updateStatus(String outGivingId, OutGivingNodeProject outGivingNodeProjectItem, OutGivingNodeProject.Status status, String msg) {
+    private static void updateStatus(String logId,
+                                     String outGivingId,
+                                     OutGivingNodeProject outGivingNodeProjectItem,
+                                     OutGivingNodeProject.Status status,
+                                     String msg) {
         synchronized (OutGivingRun.class) {
             OutGivingServer outGivingServer = SpringUtil.getBean(OutGivingServer.class);
             OutGivingModel outGivingModel;
@@ -176,6 +195,7 @@ public class OutGivingRun implements Callable<OutGivingNodeProject.Status> {
                 DefaultSystemLog.ERROR().error(outGivingId + " " + outGivingNodeProjectItem + " " + "获取异常", e);
                 return;
             }
+            OutGivingNodeProject finOutGivingNodeProject = null;
             List<OutGivingNodeProject> outGivingNodeProjects = outGivingModel.getOutGivingNodeProjectList();
             for (OutGivingNodeProject outGivingNodeProject : outGivingNodeProjects) {
                 if (!outGivingNodeProject.getProjectId().equalsIgnoreCase(outGivingNodeProjectItem.getProjectId()) ||
@@ -185,8 +205,67 @@ public class OutGivingRun implements Callable<OutGivingNodeProject.Status> {
                 outGivingNodeProject.setStatus(status.getCode());
                 outGivingNodeProject.setResult(msg);
                 outGivingNodeProject.setLastOutGivingTime(DateUtil.now());
+                //
+                finOutGivingNodeProject = outGivingNodeProject;
             }
             outGivingServer.updateItem(outGivingModel);
+            //
+            OutGivingLog outGivingLog = new OutGivingLog();
+            if (logId != null) {
+                outGivingLog.setId(logId);
+            } else {
+                outGivingLog.setId(IdUtil.fastSimpleUUID());
+            }
+            if (finOutGivingNodeProject != null) {
+                outGivingLog.setNodeId(finOutGivingNodeProject.getNodeId());
+                outGivingLog.setProjectId(finOutGivingNodeProject.getProjectId());
+            }
+            outGivingLog.setOutGivingId(outGivingId);
+            outGivingLog.setResult(msg);
+            outGivingLog.setStatus(status.getCode());
+            if (status == OutGivingNodeProject.Status.Ing || status == OutGivingNodeProject.Status.Cancel) {
+                // 开始或者 取消都还没有记录
+                insertLog(outGivingLog);
+            } else {
+                updateLog(outGivingLog);
+            }
+        }
+    }
+
+    private static void updateLog(OutGivingLog outGivingLog) {
+        Db db = Db.use();
+        db.setWrapper((Character) null);
+        try {
+            Entity entity = new Entity(OutGivingLog.TABLE_NAME);
+            entity.set("status", outGivingLog.getStatus());
+            // 结束
+            entity.set("endTime", System.currentTimeMillis());
+            entity.set("result", outGivingLog.getResult());
+            //
+            Entity where = new Entity(OutGivingLog.TABLE_NAME);
+            where.set("id", outGivingLog.getId());
+            db.update(entity, where);
+        } catch (SQLException e) {
+            DefaultSystemLog.ERROR().error("db error", e);
+        }
+    }
+
+    /**
+     * 插入记录
+     */
+    private static void insertLog(OutGivingLog outGivingLog) {
+        outGivingLog.setStartTime(System.currentTimeMillis());
+        if (outGivingLog.getStatus() == OutGivingNodeProject.Status.Cancel.getCode()) {
+            outGivingLog.setEndTime(System.currentTimeMillis());
+        }
+        Db db = Db.use();
+        db.setWrapper((Character) null);
+        try {
+            Entity entity = new Entity(OutGivingLog.TABLE_NAME);
+            entity.parseBean(outGivingLog);
+            db.insert(entity);
+        } catch (SQLException e) {
+            DefaultSystemLog.ERROR().error("db error", e);
         }
     }
 }

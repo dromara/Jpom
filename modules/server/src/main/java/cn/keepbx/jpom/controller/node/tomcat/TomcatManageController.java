@@ -9,7 +9,7 @@ import cn.keepbx.jpom.common.interceptor.ProjectPermission;
 import cn.keepbx.jpom.common.interceptor.UrlPermission;
 import cn.keepbx.jpom.model.Role;
 import cn.keepbx.jpom.model.data.NodeModel;
-import cn.keepbx.jpom.model.data.UserOperateLogV1;
+import cn.keepbx.jpom.model.log.UserOperateLogV1;
 import cn.keepbx.jpom.service.manage.TomcatService;
 import cn.keepbx.jpom.system.OperateType;
 import com.alibaba.fastjson.JSONArray;

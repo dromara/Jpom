@@ -1,10 +1,6 @@
 package cn.keepbx.jpom.controller.build;
 
-import cn.hutool.core.bean.BeanUtil;
-import cn.hutool.core.bean.copier.CopyOptions;
 import cn.hutool.core.io.FileUtil;
-import cn.hutool.db.Db;
-import cn.hutool.db.Entity;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.validator.ValidatorConfig;
 import cn.jiangzeyin.common.validator.ValidatorItem;
@@ -13,11 +9,9 @@ import cn.keepbx.build.BuildManage;
 import cn.keepbx.jpom.common.BaseServerController;
 import cn.keepbx.jpom.common.interceptor.UrlPermission;
 import cn.keepbx.jpom.model.Role;
-import cn.keepbx.jpom.model.data.BuildHistoryLog;
+import cn.keepbx.jpom.model.log.BuildHistoryLog;
 import cn.keepbx.jpom.model.data.BuildModel;
-import cn.keepbx.jpom.model.data.MonitorNotifyLog;
-import cn.keepbx.jpom.model.data.UserOperateLogV1;
-import cn.keepbx.jpom.model.vo.BuildHistoryLogVo;
+import cn.keepbx.jpom.model.log.UserOperateLogV1;
 import cn.keepbx.jpom.service.build.BuildHistoryService;
 import cn.keepbx.jpom.service.build.BuildService;
 import org.springframework.http.MediaType;

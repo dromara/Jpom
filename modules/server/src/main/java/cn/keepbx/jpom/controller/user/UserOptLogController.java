@@ -1,4 +1,4 @@
-package cn.keepbx.jpom.controller.user.log;
+package cn.keepbx.jpom.controller.user;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.bean.copier.CopyOptions;
@@ -16,7 +16,7 @@ import cn.jiangzeyin.common.JsonMessage;
 import cn.keepbx.jpom.common.BaseServerController;
 import cn.keepbx.jpom.model.data.NodeModel;
 import cn.keepbx.jpom.model.data.UserModel;
-import cn.keepbx.jpom.model.data.UserOperateLogV1;
+import cn.keepbx.jpom.model.log.UserOperateLogV1;
 import cn.keepbx.jpom.service.node.NodeService;
 import cn.keepbx.jpom.service.user.UserService;
 import com.alibaba.fastjson.JSONArray;

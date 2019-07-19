@@ -11,7 +11,7 @@ import cn.keepbx.jpom.common.interceptor.UrlPermission;
 import cn.keepbx.jpom.model.BaseEnum;
 import cn.keepbx.jpom.model.Role;
 import cn.keepbx.jpom.model.data.OutGivingModel;
-import cn.keepbx.jpom.model.data.UserOperateLogV1;
+import cn.keepbx.jpom.model.log.UserOperateLogV1;
 import cn.keepbx.jpom.service.node.OutGivingServer;
 import cn.keepbx.jpom.system.ConfigBean;
 import cn.keepbx.jpom.system.ServerConfigBean;

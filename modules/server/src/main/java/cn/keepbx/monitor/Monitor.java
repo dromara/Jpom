@@ -19,7 +19,7 @@ import cn.jiangzeyin.common.spring.SpringUtil;
 import cn.keepbx.jpom.common.forward.NodeForward;
 import cn.keepbx.jpom.common.forward.NodeUrl;
 import cn.keepbx.jpom.model.data.MonitorModel;
-import cn.keepbx.jpom.model.data.MonitorNotifyLog;
+import cn.keepbx.jpom.model.log.MonitorNotifyLog;
 import cn.keepbx.jpom.model.data.NodeModel;
 import cn.keepbx.jpom.service.monitor.MonitorService;
 import cn.keepbx.jpom.service.node.NodeService;
