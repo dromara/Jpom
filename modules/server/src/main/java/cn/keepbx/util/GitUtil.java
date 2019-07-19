@@ -45,20 +45,21 @@ public class GitUtil {
      * @throws GitAPIException E
      */
     private static boolean checkRemoteUrl(String url, File file) throws IOException, GitAPIException {
-        Git git = Git.open(file);
-        RemoteListCommand remoteListCommand = git.remoteList();
-        boolean urlTrue = false;
-        List<RemoteConfig> list = remoteListCommand.call();
-        end:
-        for (RemoteConfig remoteConfig : list) {
-            for (URIish urIish : remoteConfig.getURIs()) {
-                if (urIish.toString().equals(url)) {
-                    urlTrue = true;
-                    break end;
+        try (Git git = Git.open(file)) {
+            RemoteListCommand remoteListCommand = git.remoteList();
+            boolean urlTrue = false;
+            List<RemoteConfig> list = remoteListCommand.call();
+            end:
+            for (RemoteConfig remoteConfig : list) {
+                for (URIish urIish : remoteConfig.getURIs()) {
+                    if (urIish.toString().equals(url)) {
+                        urlTrue = true;
+                        break end;
+                    }
                 }
             }
+            return urlTrue;
         }
-        return urlTrue;
     }
 
     /**
@@ -109,8 +110,7 @@ public class GitUtil {
      * @throws IOException     IO
      */
     public static List<String> branchList(String url, File file, CredentialsProvider credentialsProvider) throws GitAPIException, IOException {
-        try {
-            Git git = initGit(url, file, credentialsProvider);
+        try (Git git = initGit(url, file, credentialsProvider)) {
             //
             List<Ref> list = git.branchList().setListMode(ListBranchCommand.ListMode.REMOTE).call();
             List<String> all = new ArrayList<>(list.size());
@@ -138,8 +138,7 @@ public class GitUtil {
      * @throws GitAPIException api
      */
     public static void checkoutPull(String url, File file, String branchName, CredentialsProvider credentialsProvider) throws IOException, GitAPIException {
-        try {
-            Git git = initGit(url, file, credentialsProvider);
+        try (Git git = initGit(url, file, credentialsProvider)) {
             // 判断本地是否存在对应分支
             List<Ref> list = git.branchList().setListMode(ListBranchCommand.ListMode.ALL).call();
             boolean createBranch = true;
@@ -194,13 +193,14 @@ public class GitUtil {
      * @throws GitAPIException api
      */
     public static String getLastCommitMsg(File file, String branchName) throws IOException, GitAPIException {
-        Git git = Git.open(file);
-        AnyObjectId anyObjectId = getAnyObjectId(git, branchName);
-        Objects.requireNonNull(anyObjectId, "没有" + branchName + "分支");
-        RevWalk walk = new RevWalk(git.getRepository());
-        RevCommit revCommit = walk.parseCommit(anyObjectId);
-        String time = new DateTime(revCommit.getCommitTime() * 1000L).toString();
-        PersonIdent personIdent = revCommit.getAuthorIdent();
-        return StrUtil.format("{} {} {}[{}] {}", branchName, revCommit.getShortMessage(), personIdent.getName(), personIdent.getEmailAddress(), time);
+        try (Git git = Git.open(file)) {
+            AnyObjectId anyObjectId = getAnyObjectId(git, branchName);
+            Objects.requireNonNull(anyObjectId, "没有" + branchName + "分支");
+            RevWalk walk = new RevWalk(git.getRepository());
+            RevCommit revCommit = walk.parseCommit(anyObjectId);
+            String time = new DateTime(revCommit.getCommitTime() * 1000L).toString();
+            PersonIdent personIdent = revCommit.getAuthorIdent();
+            return StrUtil.format("{} {} {}[{}] {}", branchName, revCommit.getShortMessage(), personIdent.getName(), personIdent.getEmailAddress(), time);
+        }
     }
 }
