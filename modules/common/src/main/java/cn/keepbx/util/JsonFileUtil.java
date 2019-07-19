@@ -55,7 +55,6 @@ public class JsonFileUtil {
      */
     public static void saveJson(String path, JSON json) {
         WRITE_LOCK.lock();
-        // 防止多线程操作文件异常
         try {
             // 输出格式化后的json 字符串
             String newsJson = JSON.toJSONString(json, true);

@@ -153,7 +153,10 @@ public class BuildModel extends BaseModel {
     }
 
     public String getResultDirFile() {
-        return resultDirFile;
+        if (resultDirFile == null) {
+            return null;
+        }
+        return resultDirFile.trim();
     }
 
     public void setResultDirFile(String resultDirFile) {
