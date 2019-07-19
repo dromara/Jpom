@@ -29,8 +29,8 @@
             <fileNamePattern>${logPath}/error/systemError-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
             <!-- 单个日志文件最多 100MB, 30天的日志周期，最大不能超过10GB -->
             <maxFileSize>100MB</maxFileSize>
-            <maxHistory>30</maxHistory>
-            <totalSizeCap>10GB</totalSizeCap>
+            <maxHistory>10</maxHistory>
+            <totalSizeCap>1GB</totalSizeCap>
         </rollingPolicy>
     </appender>
 
