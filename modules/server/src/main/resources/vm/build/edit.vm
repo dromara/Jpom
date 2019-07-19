@@ -85,18 +85,34 @@
                 #end
             </div>
         </div>
-        <div class="layui-form-item" id="releaseMethodDiv1" #if($model.releaseMethod!=1)style="display: none;"#end>
-            <label class="layui-form-label">分发项目</label>
-            <div class="layui-input-block">
-                <select name="releaseMethodDataId_1">
-                    <option value="">请选择分发项目</option>
-                    #foreach($item in $outGivingModels)
-                        <option value="$item.id"
-                                #if($model.releaseMethodDataId==$item.id)selected#end>$item.name</option>
-                    #end
-                </select>
+        <div id="releaseMethodDiv1" #if($model.releaseMethod!=1)style="display: none;"#end>
+            <div class="layui-form-item">
+                <label class="layui-form-label">分发项目</label>
+                <div class="layui-input-block">
+                    <select name="releaseMethodDataId_1" lay-filter="releaseMethodDataId_1">
+                        <option value="">请选择分发项目</option>
+                        #foreach($item in $outGivingModels)
+                            <option value="$item.id"
+                                #if($model.releaseMethodDataId==$item.id)
+                                    selected
+                                    #set($cOutAfterOpt=$item.afterOpt)
+                                #end
+                                    afterOpt="$!item.afterOpt">$item.name</option>
+                        #end
+                    </select>
+                </div>
+            </div>
+            <div class="layui-form-item" id="releaseMethodDataId_1_after">
+                <label class="layui-form-label">分发后</label>
+                <div class="layui-input-block">
+                    <input type="text" disabled readonly
+                           value="#if($cOutAfterOpt)#foreach($coItem in $outAfterOpt)#if($cOutAfterOpt==$coItem.code)$coItem.desc#end#end#end"
+                           class="layui-input">
+
+                </div>
             </div>
         </div>
+
         <div class="layui-form-item" id="releaseMethodDiv2" #if($model.releaseMethod!=2)style="display: none;"#end>
             <div class="layui-inline">
                 <label class="layui-form-label">节点</label>
@@ -227,6 +243,23 @@
                 // 项目
                 $("#releaseMethodDiv2").show();
                 $("#afterOptDiv").show();
+            }
+        });
+        var outAfterOpt = [];
+        #if($outAfterOpt)
+            outAfterOpt = $outAfterOpt;
+        #end
+        form.on('select(releaseMethodDataId_1)', function (data) {
+            if (data.value == "" || !data.value) {
+                $("#releaseMethodDataId_1_after").hide();
+                return;
+            }
+            $("#releaseMethodDataId_1_after").show();
+            for (var i = 0; i < outAfterOpt.length; i++) {
+                if (outAfterOpt[i].code == data.value) {
+                    $("#releaseMethodDataId_1_after").find("input").val(outAfterOpt[i].desc);
+                    break;
+                }
             }
         });
 

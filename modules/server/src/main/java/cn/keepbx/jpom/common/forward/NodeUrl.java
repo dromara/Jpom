@@ -78,15 +78,6 @@ public enum NodeUrl {
 
     Manage_Log_export("/manage/log/export.html"),
 
-
-    System_alioss_config("/system/alioss_config"),
-    System_alioss_submit("/system/alioss_submit"),
-
-    Manage_build_data("/manage/build_data"),
-    Manage_build_download("/manage/build_download"),
-
-    Manage_build_install("/manage/build_install"),
-
     Manage_internal_data("/manage/internal_data"),
     Manage_internal_stack("/manage/internal_stack"),
     Manage_internal_ram("/manage/internal_ram"),

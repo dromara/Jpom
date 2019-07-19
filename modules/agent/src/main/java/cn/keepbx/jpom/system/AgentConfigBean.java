@@ -31,10 +31,6 @@ public class AgentConfigBean {
      */
     public static final String PROJECT_RECOVER = "project_recover.json";
     /**
-     * 阿里oss 文件
-     */
-    public static final String ALI_OSS = "aliOss.json";
-    /**
      * 证书文件
      */
     public static final String CERT = "cert.json";

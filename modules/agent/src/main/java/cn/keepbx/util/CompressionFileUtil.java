@@ -50,7 +50,7 @@ public class CompressionFileUtil {
                     //是文件
                     File tmpFile = new File(destDir, entry.getName());
                     //创建输出目录
-                    FileUtil.mkdir(destDir);
+                    FileUtil.mkParentDirs(destDir);
                     OutputStream out = null;
                     try {
                         out = new FileOutputStream(tmpFile);
@@ -117,9 +117,11 @@ public class CompressionFileUtil {
                 if (entry.isDirectory()) {
                     FileUtil.mkdir(new File(destDir, entry.getName()));
                 } else {
+                    File file = new File(destDir, entry.getName());
+                    FileUtil.mkParentDirs(file);
                     OutputStream os = null;
                     try {
-                        os = new BufferedOutputStream(new FileOutputStream(new File(destDir, entry.getName())), BUFFER_SIZE);
+                        os = new BufferedOutputStream(new FileOutputStream(file), BUFFER_SIZE);
                         IOUtils.copy(is, os);
                     } finally {
                         IOUtils.closeQuietly(os);

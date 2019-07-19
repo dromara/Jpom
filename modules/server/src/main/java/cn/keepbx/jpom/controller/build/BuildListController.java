@@ -151,6 +151,9 @@ public class BuildListController extends BaseServerController {
         //
         JSONArray jsonArray = BaseEnum.toJSONArray(BuildModel.AfterOpt.class);
         setAttribute("afterOpt", jsonArray);
+        //
+        JSONArray outAfterOpt = BaseEnum.toJSONArray(OutGivingModel.AfterOpt.class);
+        setAttribute("outAfterOpt", outAfterOpt);
         return "build/edit";
     }
 
