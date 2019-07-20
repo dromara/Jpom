@@ -6,6 +6,8 @@ import cn.keepbx.jpom.model.log.OutGivingLog;
 import org.springframework.stereotype.Service;
 
 /**
+ * 分发日志
+ *
  * @author bwcx_jzy
  * @date 2019/7/20
  */

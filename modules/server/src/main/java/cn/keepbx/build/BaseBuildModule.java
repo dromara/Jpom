@@ -4,6 +4,8 @@ import cn.keepbx.jpom.model.BaseJsonModel;
 import cn.keepbx.jpom.model.data.BuildModel;
 
 /**
+ * 构建物基类
+ *
  * @author bwcx_jzy
  * @date 2019/7/19
  */

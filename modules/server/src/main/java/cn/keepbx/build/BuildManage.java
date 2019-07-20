@@ -33,7 +33,9 @@ import java.util.concurrent.ConcurrentHashMap;
  * @date 2019/7/16
  */
 public class BuildManage extends BaseBuild implements Runnable {
-
+    /**
+     * 缓存构建中
+     */
     private static final Map<String, BuildManage> BUILD_MANAGE_MAP = new ConcurrentHashMap<>();
 
     private static final List<String> COMMAND = new ArrayList<>();
@@ -114,7 +116,8 @@ public class BuildManage extends BaseBuild implements Runnable {
             if (status == BuildModel.Status.Ing) {
                 this.insertLog();
             } else {
-                this.updateLog(status, status != BuildModel.Status.PubIng);
+                DbBuildHistoryLogService dbBuildHistoryLogService = SpringUtil.getBean(DbBuildHistoryLogService.class);
+                dbBuildHistoryLogService.updateLog(this.logId, status);
             }
             return true;
         } catch (Exception e) {
@@ -123,23 +126,6 @@ public class BuildManage extends BaseBuild implements Runnable {
         }
     }
 
-    private void updateLog(BuildModel.Status status, boolean end) {
-        if (this.logId == null) {
-            return;
-        }
-
-        Entity entity = new Entity();
-        entity.set("status", status.getCode());
-        if (end) {
-            // 结束
-            entity.set("endTime", System.currentTimeMillis());
-        }
-        //
-        Entity where = new Entity();
-        where.set("id", this.logId);
-        DbBuildHistoryLogService dbBuildHistoryLogService = SpringUtil.getBean(DbBuildHistoryLogService.class);
-        dbBuildHistoryLogService.update(entity, where);
-    }
 
     /**
      * 插入记录

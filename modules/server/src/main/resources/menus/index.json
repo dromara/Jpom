@@ -16,6 +16,11 @@
         "url": "./outgiving/list.html"
       },
       {
+        "id": "outgivingLog",
+        "title": "分发日志",
+        "url": "./outgiving/log.html"
+      },
+      {
         "id": "outgivingWhitelistDirectory",
         "title": "分发白名单",
         "url": "./outgiving/whitelistDirectory.html"

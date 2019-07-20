@@ -6,6 +6,8 @@ import cn.keepbx.jpom.system.db.DbConfig;
 import org.springframework.stereotype.Service;
 
 /**
+ * 监控消息
+ *
  * @author bwcx_jzy
  * @date 2019/7/20
  */

@@ -19,13 +19,17 @@ import java.util.List;
  * @date 2019/7/20
  */
 public abstract class BaseDbLogService<T> {
-
+    /**
+     * 表名
+     */
     private String tableName;
     private Class<T> tClass;
-
+    /**
+     * 主键
+     */
     private String key;
 
-    public String getTableName() {
+    String getTableName() {
         return tableName;
     }
 
@@ -38,6 +42,11 @@ public abstract class BaseDbLogService<T> {
         this.key = key;
     }
 
+    /**
+     * 插入数据
+     *
+     * @param t 数据
+     */
     public void insert(T t) {
         Db db = Db.use();
         db.setWrapper((Character) null);
@@ -50,10 +59,23 @@ public abstract class BaseDbLogService<T> {
         }
     }
 
+    /**
+     * 修改数据，需要自行实现
+     *
+     * @param t 数据
+     * @return 影响行数
+     */
     public int update(T t) {
         return 0;
     }
 
+    /**
+     * 修改数据
+     *
+     * @param entity 要修改的数据
+     * @param where  条件
+     * @return 影响行数
+     */
     public int update(Entity entity, Entity where) {
         Db db = Db.use();
         db.setWrapper((Character) null);
@@ -69,12 +91,23 @@ public abstract class BaseDbLogService<T> {
         }
     }
 
-    public T getByKey(String keyValue) throws SQLException {
+    /**
+     * 根据主键查询实体
+     *
+     * @param keyValue 主键值
+     * @return 数据
+     */
+    public T getByKey(String keyValue) {
         Entity where = new Entity(tableName);
         where.set(key, keyValue);
         Db db = Db.use();
         db.setWrapper((Character) null);
-        Entity entity = db.get(where);
+        Entity entity;
+        try {
+            entity = db.get(where);
+        } catch (SQLException e) {
+            throw new JpomRuntimeException("数据库异常", e);
+        }
         if (entity == null) {
             return null;
         }
@@ -84,23 +117,45 @@ public abstract class BaseDbLogService<T> {
         return BeanUtil.mapToBean(entity, this.tClass, copyOptions);
     }
 
-
-    public int delByKey(String keyValue) throws SQLException {
+    /**
+     * 根据主键生成
+     *
+     * @param keyValue 主键值
+     * @return 影响行数
+     */
+    public int delByKey(String keyValue) {
         Entity where = new Entity(tableName);
         where.set(key, keyValue);
         return del(where);
     }
 
-    public int del(Entity where) throws SQLException {
+    /**
+     * 根据条件删除
+     *
+     * @param where 条件
+     * @return 影响行数
+     */
+    public int del(Entity where) {
         where.setTableName(tableName);
         if (where.isEmpty()) {
             throw new JpomRuntimeException("没有删除条件");
         }
         Db db = Db.use();
         db.setWrapper((Character) null);
-        return db.del(where);
+        try {
+            return db.del(where);
+        } catch (SQLException e) {
+            throw new JpomRuntimeException("数据库异常", e);
+        }
     }
 
+    /**
+     * 分页查询
+     *
+     * @param where 条件
+     * @param page  分页
+     * @return 结果
+     */
     public PageResult<T> listPage(Entity where, Page page) {
         where.setTableName(getTableName());
         PageResult<Entity> pageResult = null;

@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    #parse("./common/head.vm")
+    <title>项目管理系统</title>
+    <style>
+        body {
+            padding: 10px;
+        }
+    </style>
+</head>
+
+<body>
+<table class="layui-table" id="tab_loglist" lay-filter="tab_loglist" style="margin: 0;"></table>
+<script type="text/html" id="bar_projects">
+    <a href="javascript:;" class="layui-btn  layui-btn-sm layui-btn-normal" lay-event="view">详情</a>
+</script>
+<script type="text/html" id="showBox">
+    <div style="padding: 10px;">
+        <div class="layui-card">
+            <div class="layui-card-header">结果</div>
+            <div class="layui-card-body">
+                {{ d.result }}
+            </div>
+        </div>
+    </div>
+</script>
+</body>
+
+<script type="text/html" id="toolbarDemo">
+    <form class="layui-form" action="">
+        <div class="layui-form-item" style="margin-bottom: 0;">
+            <div class="layui-inline">
+                <label class="layui-form-label" style="width: auto !important;">时间</label>
+                <div class="layui-input-inline" style="width: 200px;">
+                    <input type="text" readonly class="layui-input" id="time" placeholder="请选择时间范围">
+                </div>
+            </div>
+            <div class="layui-inline">
+                <label class="layui-form-label" style="width: auto !important;">节点</label>
+                <div class="layui-input-inline">
+                    <select name="nodeId" id="nodeId" lay-verify="required" lay-filter="nodeId"
+                            lay-search="">
+                        <option value="">请选择</option>
+                        #foreach($item in $nodeArray)
+                            <option value="$item.id">$item.name</option>
+                        #end
+                    </select>
+                </div>
+            </div>
+            <div class="layui-inline">
+                <label class="layui-form-label" style="width: auto !important;">分发项</label>
+                <div class="layui-input-inline">
+                    <select name="outGivingId" id="outGivingId" lay-verify="required" lay-filter="outGivingId"
+                            lay-search="">
+                        <option value="">请选择分发项</option>
+                        #foreach($item in $outGivingModels)
+                            <option value="$item.id">$item.name</option>
+                        #end
+                    </select>
+                </div>
+            </div>
+            <div class="layui-inline">
+                <label class="layui-form-label" style="width: auto !important;">状态</label>
+                <div class="layui-input-inline">
+                    <select name="status" id="status" lay-verify="required" lay-filter="status"
+                            lay-search="">
+                        <option value="">请选择状态</option>
+                        #foreach($item in $status)
+                            <option value="$item.code">$item.desc</option>
+                        #end
+                    </select>
+                </div>
+            </div>
+
+        </div>
+    </form>
+</script>
+<script type="text/javascript">
+    const apiWhere = {};
+    var laydate;
+
+
+    var statusArray = [];
+        #if($status)
+        statusArray = $status;
+        #end
+    var outGivingModels = [];
+        #if($outGivingModels)
+        outGivingModels =$outGivingModels;
+        #end
+    function loadSuccess() {
+        tableRender({
+            id: 'tab_loglist',
+            elem: '#tab_loglist',
+            url: './log_list_data.json',
+            toolbar: '#toolbarDemo',
+            page: true,
+            where: apiWhere,
+            cols: [[
+                {
+                    field: 'outGivingId', title: '分发项', templet: function (d) {
+                        for (var i = 0; i < outGivingModels.length; i++) {
+                            if (outGivingModels[i].id == d.outGivingId) {
+                                return outGivingModels[i].name;
+                            }
+                        }
+                        return "未知";
+                    }
+                },
+                {field: 'nodeId', title: '节点Id'},
+                {field: 'projectId', title: '项目Id'},
+                {
+                    field: 'startTime', title: '开始时间', templet: function (d) {
+                        return formateTime(d.startTime);
+                    }
+                },
+                {
+                    field: 'endTime', title: '结束时间', templet: function (d) {
+                        if (!d.endTime) {
+                            return "-";
+                        }
+                        return formateTime(d.endTime);
+                    }
+                },
+                {
+                    field: 'status', title: '状态', templet: function (d) {
+                        for (var i = 0; i < statusArray.length; i++) {
+                            if (statusArray[i].code == d.status) {
+                                return statusArray[i].desc;
+                            }
+                        }
+                        return "未知";
+                    }
+                },
+                {field: 'op', title: '操作', align: 'center', toolbar: '#bar_projects', fixed: 'right'}
+            ]],
+            parseData: function (data) {
+                return {
+                    "code": data.code,
+                    "msg": data.msg,
+                    "count": data.total,
+                    "data": data.data
+                };
+            },
+            done: function () {
+                $("#time").val(apiWhere.time);
+                renderDate();
+                // 选中
+                $("#outGivingId option[value='" + apiWhere.outGivingId + "']").attr("selected", "selected");
+                $("#nodeId option[value='" + apiWhere.nodeId + "']").attr("selected", "selected");
+                $("#status option[value='" + apiWhere.status + "']").attr("selected", "selected");
+                form.render();
+            }
+        });
+
+        layui.use(['laytpl', 'laydate'], function () {
+            var laytpl = layui.laytpl;
+            var showBox = document.getElementById('showBox').innerHTML;
+            // 表格工具条事件
+            table.on('tool(tab_loglist)', function (obj) {
+                var data = obj.data;
+                var event = obj.event;
+                if ('view' === event) {
+                    laytpl(showBox).render(data, function (html) {
+                        layer.open({
+                            type: 1,
+                            content: html,
+                            scrollbar: false,
+                            area: ["80%", "80%"]
+                        });
+                    });
+
+                }
+            });
+            laydate = layui.laydate;
+            renderDate();
+        });
+
+        form.on('select(outGivingId)', function (data) {
+            apiWhere.outGivingId = data.value;
+            reloadTable();
+            return true;
+        });
+
+        form.on('select(nodeId)', function (data) {
+            apiWhere.nodeId = data.value;
+            reloadTable();
+            return true;
+        });
+        form.on('select(status)', function (data) {
+            apiWhere.status = data.value;
+            reloadTable();
+            return true;
+        });
+    }
+
+    function renderDate() {
+        if (!laydate) {
+            return;
+        }
+        var now = new Date().getTime();
+        laydate.render({
+            elem: '#time',
+            type: 'datetime',
+            range: "~",
+            max: now,
+            done: function (value, date, endDate) {
+                apiWhere.time = value;
+                reloadTable();
+            }
+        });
+    }
+
+    function reloadTable() {
+        table.reload('tab_loglist', {
+            where: apiWhere
+        });
+    }
+</script>
+</html>

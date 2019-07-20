@@ -41,6 +41,12 @@ public class ReleaseManage extends BaseBuild {
         this.init();
     }
 
+    /**
+     * 重新发布
+     *
+     * @param buildHistoryLog 构建历史
+     * @param userModel       用户
+     */
     public ReleaseManage(BuildHistoryLog buildHistoryLog, UserModel userModel) {
         super(BuildUtil.getLogFile(buildHistoryLog.getBuildDataId(), buildHistoryLog.getBuildNumberId()),
                 buildHistoryLog.getBuildDataId());

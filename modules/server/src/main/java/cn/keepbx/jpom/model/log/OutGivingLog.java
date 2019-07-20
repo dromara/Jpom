@@ -1,6 +1,7 @@
 package cn.keepbx.jpom.model.log;
 
 import cn.keepbx.jpom.model.BaseJsonModel;
+import cn.keepbx.jpom.model.data.OutGivingNodeProject;
 
 /**
  * 项目分发日志
@@ -21,6 +22,8 @@ public class OutGivingLog extends BaseJsonModel {
     private String outGivingId;
     /**
      * 状态
+     *
+     * @see OutGivingNodeProject.Status
      */
     private int status;
     /**

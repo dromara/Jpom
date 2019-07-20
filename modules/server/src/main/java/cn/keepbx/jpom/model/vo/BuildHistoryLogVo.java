@@ -12,6 +12,8 @@ import java.io.File;
 import java.io.IOException;
 
 /**
+ * 构建产物vo
+ *
  * @author bwcx_jzy
  * @date 2019/7/17
  */
