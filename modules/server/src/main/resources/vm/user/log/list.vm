@@ -12,9 +12,6 @@
 </head>
 
 <body>
-<div class="layui-row">
-    <button onclick="reloadTable();" class="layui-btn layui-btn-sm">刷新表格</button>
-</div>
 <table class="layui-table" id="tab_user" lay-filter="tab_user" style="margin: 0;"></table>
 <script type="text/html" id="bar_projects">
     <a href="javascript:;" class="layui-btn  layui-btn-sm layui-btn-normal" lay-event="view">详情</a>

@@ -23,6 +23,7 @@
       {
         "id": "outgivingWhitelistDirectory",
         "title": "分发白名单",
+        "role": "System",
         "url": "./outgiving/whitelistDirectory.html"
       }
     ]

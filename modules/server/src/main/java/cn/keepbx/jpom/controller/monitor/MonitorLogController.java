@@ -1,16 +1,14 @@
 package cn.keepbx.jpom.controller.monitor;
 
 import cn.hutool.core.convert.Convert;
-import cn.hutool.core.date.DatePattern;
-import cn.hutool.core.date.DateTime;
-import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.db.Entity;
 import cn.hutool.db.Page;
 import cn.hutool.db.PageResult;
-import cn.hutool.db.sql.Direction;
-import cn.hutool.db.sql.Order;
 import cn.jiangzeyin.common.JsonMessage;
+import cn.jiangzeyin.common.validator.ValidatorConfig;
+import cn.jiangzeyin.common.validator.ValidatorItem;
+import cn.jiangzeyin.common.validator.ValidatorRule;
 import cn.keepbx.jpom.common.BaseServerController;
 import cn.keepbx.jpom.model.BaseEnum;
 import cn.keepbx.jpom.model.data.MonitorModel;
@@ -27,7 +25,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.annotation.Resource;
-import java.sql.SQLException;
 import java.util.List;
 
 /**
@@ -64,36 +61,26 @@ public class MonitorLogController extends BaseServerController {
      */
     @RequestMapping(value = "list_data.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
-    public String listData(String time, String selectNode, String notifyStatus) throws SQLException {
-        int limit = getParameterInt("limit", 10);
-        int page1 = getParameterInt("page", 1);
-        Page page = new Page(page1, limit);
+    public String listData(String selectNode, String notifyStatus,
+                           @ValidatorConfig(value = {
+                                   @ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "limit error")
+                           }, defaultVal = "10") int limit,
+                           @ValidatorConfig(value = {
+                                   @ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "page error")
+                           }, defaultVal = "1") int page) {
+        Page pageObj = new Page(page, limit);
         Entity entity = Entity.create();
-        page.addOrder(new Order("createTime".toUpperCase(), Direction.DESC));
-        // 时间
-        if (StrUtil.isNotEmpty(time)) {
-            String[] val = StrUtil.split(time, "~");
-            if (val.length == 2) {
-                DateTime startDateTime = DateUtil.parse(val[0], DatePattern.NORM_DATETIME_FORMAT);
-                entity.set("createTime".toUpperCase(), ">= " + startDateTime.getTime());
-
-                DateTime endDateTime = DateUtil.parse(val[1], DatePattern.NORM_DATETIME_FORMAT);
-                if (startDateTime.equals(endDateTime)) {
-                    endDateTime = DateUtil.endOfDay(endDateTime);
-                }
-                entity.set("createTime ".toUpperCase(), "<= " + endDateTime.getTime());
-            }
-        }
+        this.doPage(pageObj, entity, "createTime");
 
         if (StrUtil.isNotEmpty(selectNode)) {
-            entity.set("nodeId".toUpperCase(), selectNode);
+            entity.set("nodeId", selectNode);
         }
 
         if (StrUtil.isNotEmpty(notifyStatus)) {
-            entity.set("notifyStatus".toUpperCase(), Convert.toBool(notifyStatus, true));
+            entity.set("notifyStatus", Convert.toBool(notifyStatus, true));
         }
 
-        PageResult<MonitorNotifyLog> pageResult = dbMonitorNotifyLogService.listPage(entity, page);
+        PageResult<MonitorNotifyLog> pageResult = dbMonitorNotifyLogService.listPage(entity, pageObj);
         JSONObject jsonObject = JsonMessage.toJson(200, "获取成功", pageResult);
         jsonObject.put("total", pageResult.getTotal());
         return jsonObject.toString();

@@ -38,17 +38,20 @@
 
 <script type="text/html" id="bar_monitor">
     <a href="javascript:;" class="layui-btn  layui-btn-sm layui-btn-normal" lay-event="update">编辑</a>
-    <a href="javascript:;" class="layui-btn  layui-btn-sm layui-btn-danger" lay-event="delete">删除</a>
+        #if($user.isSystemUser())
+        <a href="javascript:;" class="layui-btn  layui-btn-sm layui-btn-danger" lay-event="delete">删除</a>
+        #end
 </script>
 <script type="text/html" id="monitor_status">
     <input type="checkbox" monitorId="{{ d.id }}" typeS="status" name="status" {{# if(d.status){ }} checked {{# } }}
            lay-skin="switch" lay-text="是|否" lay-filter="monitor_status">
 </script>
 <script type="text/html" id="monitor_restart">
-    <input type="checkbox" monitorId="{{ d.id }}" typeS="restart" name="autoRestart" {{# if(d.autoRestart){ }} checked {{#
-           } }}
-           lay-skin="switch"
-           lay-text="是|否" lay-filter="monitor_restart">
+    <input type="checkbox" monitorId="{{ d.id }}" typeS="restart" name="autoRestart"
+           {{# if(d.autoRestart){ }}
+           checked
+           {{# } }}
+           lay-skin="switch" lay-text="是|否" lay-filter="monitor_restart">
 </script>
 <script type="text/html" id="monitor_alarm">
     <input type="checkbox" disabled name="alarm" {{# if(d.alarm){ }} checked {{# } }} lay-skin="switch"

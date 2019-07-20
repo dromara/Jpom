@@ -1,14 +1,9 @@
 package cn.keepbx.jpom.controller.outgiving;
 
-import cn.hutool.core.date.DatePattern;
-import cn.hutool.core.date.DateTime;
-import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.db.Entity;
 import cn.hutool.db.Page;
 import cn.hutool.db.PageResult;
-import cn.hutool.db.sql.Direction;
-import cn.hutool.db.sql.Order;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.validator.ValidatorConfig;
 import cn.jiangzeyin.common.validator.ValidatorItem;
@@ -63,8 +58,7 @@ public class OutGivingLogController extends BaseServerController {
 
     @RequestMapping(value = "log_list_data.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
-    public String listData(String time,
-                           String nodeId,
+    public String listData(String nodeId,
                            String outGivingId,
                            String status,
                            @ValidatorConfig(value = {
@@ -76,21 +70,7 @@ public class OutGivingLogController extends BaseServerController {
 
         Page pageObj = new Page(page, limit);
         Entity entity = Entity.create();
-        pageObj.addOrder(new Order("startTime", Direction.DESC));
-        // 时间
-        if (StrUtil.isNotEmpty(time)) {
-            String[] val = StrUtil.split(time, "~");
-            if (val.length == 2) {
-                DateTime startDateTime = DateUtil.parse(val[0], DatePattern.NORM_DATETIME_FORMAT);
-                entity.set("startTime", ">= " + startDateTime.getTime());
-
-                DateTime endDateTime = DateUtil.parse(val[1], DatePattern.NORM_DATETIME_FORMAT);
-                if (startDateTime.equals(endDateTime)) {
-                    endDateTime = DateUtil.endOfDay(endDateTime);
-                }
-                entity.set("startTime ", "<= " + endDateTime.getTime());
-            }
-        }
+        this.doPage(pageObj, entity, "startTime");
         if (StrUtil.isNotEmpty(nodeId)) {
             entity.set("nodeId", nodeId);
         }
