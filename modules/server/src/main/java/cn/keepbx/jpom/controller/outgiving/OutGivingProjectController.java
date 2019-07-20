@@ -100,7 +100,7 @@ public class OutGivingProjectController extends BaseServerController {
 
         outGivingServer.updateItem(outGivingModel);
         // 开启
-        OutGivingRun.startRun(outGivingModel.getId(), dest,  getUser(), true);
+        OutGivingRun.startRun(outGivingModel.getId(), dest, getUser(), true);
         return JsonMessage.getString(200, "分发成功");
     }
 }

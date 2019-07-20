@@ -1,7 +1,6 @@
 package cn.keepbx.monitor;
 
 import cn.hutool.http.HttpRequest;
-import cn.hutool.http.HttpResponse;
 import cn.hutool.http.HttpUtil;
 import cn.keepbx.jpom.model.data.MonitorModel;
 import com.alibaba.fastjson.JSONObject;

@@ -3,7 +3,6 @@ package cn.keepbx.jpom.system.init;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
-import cn.hutool.db.Db;
 import cn.hutool.db.Entity;
 import cn.hutool.extra.servlet.ServletUtil;
 import cn.jiangzeyin.common.JsonMessage;
@@ -22,7 +21,6 @@ import cn.keepbx.jpom.service.user.UserService;
 import cn.keepbx.jpom.system.AopLogInterface;
 import cn.keepbx.jpom.system.OperateType;
 import cn.keepbx.jpom.system.WebAopLog;
-import cn.keepbx.jpom.system.db.DbConfig;
 import com.alibaba.fastjson.JSONObject;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.Signature;
@@ -32,7 +30,6 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.servlet.http.HttpServletRequest;
 import java.lang.reflect.Method;
-import java.sql.SQLException;
 import java.util.Map;
 import java.util.Set;
 

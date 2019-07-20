@@ -21,7 +21,7 @@ public class ConsoleService {
     /**
      * 执行shell命令
      *
-     * @param consoleCommandOp        执行的操作
+     * @param consoleCommandOp 执行的操作
      * @param projectInfoModel 项目信息
      */
     public String execCommand(ConsoleCommandOp consoleCommandOp, ProjectInfoModel projectInfoModel) throws Exception {

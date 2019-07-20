@@ -1,7 +1,6 @@
 package cn.keepbx.jpom.service.dblog;
 
 import cn.hutool.db.Entity;
-import cn.jiangzeyin.common.spring.SpringUtil;
 import cn.keepbx.jpom.model.data.BuildModel;
 import cn.keepbx.jpom.model.log.BuildHistoryLog;
 import org.springframework.stereotype.Service;

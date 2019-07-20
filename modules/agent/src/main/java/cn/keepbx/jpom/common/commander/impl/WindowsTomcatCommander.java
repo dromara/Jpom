@@ -1,13 +1,8 @@
 package cn.keepbx.jpom.common.commander.impl;
 
 import cn.hutool.core.util.StrUtil;
-import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.keepbx.jpom.common.commander.AbstractTomcatCommander;
 import cn.keepbx.jpom.model.data.TomcatInfoModel;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.concurrent.TimeUnit;
 
 /**
  * tomcat的Windows管理命令
