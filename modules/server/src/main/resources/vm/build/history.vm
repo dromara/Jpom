@@ -26,6 +26,17 @@
         <a href="javascript:;" class="layui-btn  layui-btn-sm layui-btn-normal" lay-event="delete">删除</a>
         #end
 </script>
+<script type="text/html" id="tar_buildIdStr">
+    <a herf="" style="color: blue;" onclick="openLog('{{ d.buildDataId }}',{{ d.buildNumberId }})">
+        {{ d.buildIdStr }}
+    </a>
+    {{# if(d.hasLog) { }}
+    <a herf="" style="color: blue;" onclick="downloadLog('{{ d.id }}')">
+        &nbsp;
+        <i class="layui-icon layui-icon-download-circle"></i>
+    </a>
+    {{# } }}
+</script>
 </body>
 
 <script type="text/html" id="toolbarDemo">
@@ -104,15 +115,10 @@
             cols: [[
                 {field: 'buildName', title: '构建名称'},
                 {
-                    field: 'buildIdStr', title: '构建ID', width: '6%', templet: function (d) {
-                        return "<div>" +
-                                "<a herf='' style='color: blue;' onclick='openLog(\"" + d.buildDataId + "\"," + d.buildNumberId + ")'>" + d.buildIdStr + "</a>" +
-                                "<a herf='' style='color: blue;' onclick='downloadLog(\"" + d.id + "\")'>&nbsp;<i class=\"layui-icon layui-icon-download-circle\"></i>   </a>" +
-                                "</div>";
-                    }
+                    field: 'buildIdStr', title: '构建ID', width: '10%', toolbar: "#tar_buildIdStr"
                 },
                 {
-                    field: 'status', title: '状态', templet: function (d) {
+                    field: 'status', title: '状态', width: '8%', templet: function (d) {
                         var status = d.status;
                         for (var i = 0; i < statusArray.length; i++) {
                             if (statusArray[i].code == status) {

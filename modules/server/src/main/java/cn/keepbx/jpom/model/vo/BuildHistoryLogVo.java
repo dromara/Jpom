@@ -24,6 +24,20 @@ public class BuildHistoryLogVo extends BuildHistoryLog {
      * 是否存在构建产物
      */
     private boolean hashFile;
+    /**
+     * 是否存在日志
+     */
+    private boolean hasLog;
+
+    public boolean isHasLog() {
+        File file = BuildUtil.getLogFile(getBuildDataId(), getBuildNumberId());
+        hasLog = file.exists();
+        return hasLog;
+    }
+
+    public void setHasLog(boolean hasLog) {
+        this.hasLog = hasLog;
+    }
 
     public String getBuildName() {
         return buildName;
