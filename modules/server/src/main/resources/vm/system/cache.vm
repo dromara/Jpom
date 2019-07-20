@@ -17,7 +17,7 @@
     </style>
 </head>
 
-<body class="layui-layout-body">
+<body>
 
 <blockquote class="layui-elem-quote">服务端文件缓存：$!cacheFileSize
     <button type="button" class="layui-btn layui-btn-sm clear" t="serviceCacheFileSize">清空</button>
