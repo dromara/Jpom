@@ -38,7 +38,7 @@ public class FileTailWatcher implements Runnable {
     /**
      * 缓存近10条
      */
-    private LimitQueue limitQueue = new LimitQueue(10);
+    private LimitQueue<String> limitQueue = new LimitQueue<>(10);
     private final RandomAccessFile randomFile;
     /**
      * 所有会话

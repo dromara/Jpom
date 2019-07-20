@@ -89,6 +89,10 @@
         });
     }
 
+    function downloadLog(id) {
+        window.open("./download_log.html?logId=" + id);
+    }
+
     function loadSuccess() {
         tableRender({
             id: 'tab_user',
@@ -101,7 +105,10 @@
                 {field: 'buildName', title: '构建名称'},
                 {
                     field: 'buildIdStr', title: '构建ID', width: '6%', templet: function (d) {
-                        return "<a herf='' style='color: blue;' onclick='openLog(\"" + d.buildDataId + "\"," + d.buildNumberId + ")'>" + d.buildIdStr + "</a>";
+                        return "<div>" +
+                                "<a herf='' style='color: blue;' onclick='openLog(\"" + d.buildDataId + "\"," + d.buildNumberId + ")'>" + d.buildIdStr + "</a>" +
+                                "<a herf='' style='color: blue;' onclick='downloadLog(\"" + d.id + "\")'>&nbsp;<i class=\"layui-icon layui-icon-download-circle\"></i>   </a>" +
+                                "</div>";
                     }
                 },
                 {

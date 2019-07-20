@@ -22,6 +22,7 @@ import cn.keepbx.jpom.model.log.BuildHistoryLog;
 import cn.keepbx.jpom.model.log.UserOperateLogV1;
 import cn.keepbx.jpom.service.build.BuildService;
 import cn.keepbx.jpom.service.dblog.DbBuildHistoryLogService;
+import cn.keepbx.util.LimitQueue;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -32,8 +33,6 @@ import javax.annotation.Resource;
 import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Objects;
 
 /**
@@ -176,7 +175,7 @@ public class BuildManageController extends BaseServerController {
         data.put("buildRun", item.getStatus() == BuildModel.Status.Ing.getCode());
         // 读取文件
         int linesInt = Convert.toInt(line, 1);
-        List<String> lines = new LinkedList<>();
+        LimitQueue<String> lines = new LimitQueue<>(500);
         final int[] readCount = {0};
         FileUtil.readLines(file, CharsetUtil.CHARSET_UTF_8, (LineHandler) line1 -> {
             readCount[0]++;

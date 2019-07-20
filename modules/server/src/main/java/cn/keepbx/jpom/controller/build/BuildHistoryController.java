@@ -37,6 +37,7 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * 构建历史
@@ -99,6 +100,23 @@ public class BuildHistoryController extends BaseServerController {
             File zipFile = BuildUtil.isDirPackage(logFile);
             assert zipFile != null;
             ServletUtil.write(getResponse(), zipFile);
+        }
+    }
+
+
+    @RequestMapping(value = "download_log.html", method = RequestMethod.GET)
+    @ResponseBody
+    public void downloadLog(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据") String logId) throws IOException {
+        BuildHistoryLog buildHistoryLog = dbBuildHistoryLogService.getByKey(logId);
+        Objects.requireNonNull(buildHistoryLog);
+        BuildModel item = buildService.getItem(buildHistoryLog.getBuildDataId());
+        Objects.requireNonNull(item);
+        File logFile = BuildUtil.getLogFile(item.getId(), buildHistoryLog.getBuildNumberId());
+        if (!logFile.exists()) {
+            return;
+        }
+        if (logFile.isFile()) {
+            ServletUtil.write(getResponse(), logFile);
         }
     }
 

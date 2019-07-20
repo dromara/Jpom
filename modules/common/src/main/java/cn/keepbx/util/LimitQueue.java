@@ -8,7 +8,7 @@ import java.util.concurrent.ConcurrentLinkedDeque;
  * @author jiangzeyin
  * @date 2019/3/16
  */
-public class LimitQueue extends ConcurrentLinkedDeque<String> {
+public class LimitQueue<E> extends ConcurrentLinkedDeque<E> {
     private final int limit;
 
     public LimitQueue(int limit) {
@@ -16,21 +16,19 @@ public class LimitQueue extends ConcurrentLinkedDeque<String> {
     }
 
     @Override
-    public boolean offerFirst(String s) {
-        pollOver();
+    public boolean offerFirst(E s) {
+        if (full()) {
+            pollLast();
+        }
         return super.offerFirst(s);
     }
 
     @Override
-    public boolean offerLast(String s) {
-        pollOver();
-        return super.offerLast(s);
-    }
-
-    private void pollOver() {
+    public boolean offerLast(E s) {
         if (full()) {
-            poll();
+            pollFirst();
         }
+        return super.offerLast(s);
     }
 
     public boolean full() {
