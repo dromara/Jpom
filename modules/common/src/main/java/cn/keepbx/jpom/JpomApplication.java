@@ -42,6 +42,8 @@ public class JpomApplication extends ApplicationBuilder {
 
     public JpomApplication(Type appType, Class<?> appClass, String[] args) throws Exception {
         super(appClass);
+        // windows 命令关闭程序
+        checkWindows(args);
         JpomApplication.appType = appType;
         JpomApplication.appClass = appClass;
         JpomApplication.args = args;
@@ -52,6 +54,12 @@ public class JpomApplication extends ApplicationBuilder {
         addInterceptor(ParameterInterceptor.class);
         //
         addApplicationEventClient(new JpomApplicationEvent());
+    }
+
+    private void checkWindows(String[] args) throws Exception {
+        if (SystemUtil.getOsInfo().isWindows()) {
+            new JpomClose().main(args);
+        }
     }
 
     /**

@@ -28,9 +28,13 @@
     </fileSets>
 
     <!-- 依赖的 jar 包 copy 到 lib 目录下 -->
+
     <dependencySets>
         <dependencySet>
             <outputDirectory>lib</outputDirectory>
+            <includes>
+                <include>cn.keepbx.jpom:server</include>
+            </includes>
         </dependencySet>
     </dependencySets>
 

@@ -13,7 +13,9 @@
     <groupId>cn.keepbx.jpom</groupId>
     <artifactId>server</artifactId>
     <version>2.4.2</version>
-
+    <properties>
+        <start-class>cn.keepbx.jpom.JpomServerApplication</start-class>
+    </properties>
     <dependencies>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -61,7 +63,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>cn.keepbx.jpom.JpomServerApplication</mainClass>
+                            <mainClass>${start-class}</mainClass>
                             <!-- 是否指定项目classpath下的依赖 -->
                             <addClasspath>true</addClasspath>
                             <!-- 指定依赖的时候声明前缀 -->
@@ -76,7 +78,22 @@
                     </archive>
                 </configuration>
             </plugin>
-
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <fork>true</fork>
+                    <mainClass>${start-class}</mainClass>
+                    <jvmArguments>-Dfile.encoding=UTF-8</jvmArguments>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>repackage</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-assembly-plugin</artifactId>

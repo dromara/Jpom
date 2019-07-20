@@ -24,8 +24,7 @@
 setlocal enabledelayedexpansion
 
 set Tag=KeepBx-Agent-System-JpomAgentApplication
-set MainClass=cn.keepbx.jpom.JpomAgentApplication
-set CloseMainClass=cn.keepbx.jpom.JpomClose
+set MainClass=org.springframework.boot.loader.JarLauncher
 set basePath=%~dp0
 set Lib=%basePath%lib\
 set Log=%basePath%agent.log
@@ -75,26 +74,20 @@ EXIT 1
 		move %Log% %LogBack%%date:~0,4%%date:~5,2%%date:~8,2%0%time:~1,1%%time:~3,2%%time:~6,2%.log
 		del %Log%
 	)
-	set TEMPCLASSPATH=
-	for /f "delims=" %%I in ('dir /B %Lib%') do (set TEMPCLASSPATH=!TEMPCLASSPATH!%Lib%%%I;)
 	REM echo 启动成功，关闭窗口不影响运行
 	echo 启动中.....关闭窗口不影响运行
-	javaw %JVM% -classpath %TEMPCLASSPATH%"%JAVA_HOME%"\lib\tools.jar -Dapplication=%Tag% -Dbasedir=%basePath% %MainClass% %ARGS% >> %Log%
+	javaw %JVM% -Djava.ext.dirs=%Lib%;"%JAVA_HOME%"\lib\ -Dapplication=%Tag% -Dbasedir=%basePath% %MainClass% %ARGS% >> %Log%
 	timeout 3
 goto:eof
 
 @REM 关闭Jpom
 :stop
-	set TEMPCLASSPATH=
-	for /f "delims=" %%I in ('dir /B %Lib%') do (set TEMPCLASSPATH=!TEMPCLASSPATH!%Lib%%%I;)
-	java -classpath %TEMPCLASSPATH%"%JAVA_HOME%"\lib\tools.jar %CloseMainClass% %ARGS% --jpom.applicationTag=%Tag% --event=stop
+	java -Djava.ext.dirs=%Lib%;"%JAVA_HOME%"\lib\ %MainClass% %ARGS% --event=stop
 goto:eof
 
 @REM 查看Jpom运行状态
 :status
-	set TEMPCLASSPATH=
-	for /f "delims=" %%I in ('dir /B %Lib%') do (set TEMPCLASSPATH=!TEMPCLASSPATH!%Lib%%%I;)
-	java -classpath %TEMPCLASSPATH%"%JAVA_HOME%"\lib\tools.jar %CloseMainClass% %ARGS% --jpom.applicationTag=%Tag% --event=status
+	java -Djava.ext.dirs=%Lib%;"%JAVA_HOME%"\lib\ %MainClass% %ARGS% --event=status
 goto:eof
 
 @REM 重启Jpom

@@ -21,7 +21,7 @@
 #!/bin/bash
 
 Tag="KeepBx-System-JpomServerApplication"
-MainClass="cn.keepbx.jpom.JpomServerApplication"
+MainClass="org.springframework.boot.loader.JarLauncher"
 # 自动获取当前路径
 Path=$(cd `dirname $0`; pwd)"/"
 Lib="${Path}lib/"
@@ -53,8 +53,8 @@ function start() {
 		touch ${Log}
 	fi
 	# classPath
-    CLASSPATH=`listDir ${Lib}`
-    nohup java  ${JVM} -classpath ${CLASSPATH}${JAVA_HOME}/lib/tools.jar -Dapplication=${Tag} -Dbasedir=${Path} ${MainClass} ${ARGS}  >> ${Log} 2>&1 &
+    CLASSPATH=""
+    nohup java  ${JVM} -Djava.ext.dirs=${Lib}:${JAVA_HOME}/lib/:${JAVA_HOME}/jre/lib/ext -Dapplication=${Tag} -Dbasedir=${Path} ${MainClass} ${ARGS}  >> ${Log} 2>&1 &
     if [[ -f ${Log} ]]; then
         tail -f ${Log}
     else
@@ -67,17 +67,6 @@ function start() {
     fi
 }
 
-# 拼接所有文件
-function listDir()
-{
-    ALL=""
-	for file in `ls $1`
-	do
-		#得到文件的完整的目录
-        ALL="${ALL}${1}/${file}:"
-	done
-	echo ${ALL}
-}
 
 # 停止程序
 function stop() {

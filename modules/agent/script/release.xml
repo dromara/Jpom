@@ -31,6 +31,9 @@
     <dependencySets>
         <dependencySet>
             <outputDirectory>lib</outputDirectory>
+            <includes>
+                <include>cn.keepbx.jpom:agent</include>
+            </includes>
         </dependencySet>
     </dependencySets>
 

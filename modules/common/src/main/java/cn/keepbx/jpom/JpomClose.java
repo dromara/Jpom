@@ -19,31 +19,25 @@ import java.io.IOException;
 public class JpomClose {
     private static JpomClose jpomManager;
 
-    public static void main(String[] args) throws Exception {
-        if (args == null || args.length <= 0) {
-            Console.error("请传入正确的参数");
-            return;
-        }
+    public void main(String[] args) throws Exception {
         String tag = StringUtil.getArgsValue(args, "jpom.applicationTag");
-        if (StrUtil.isEmpty(tag)) {
-            Console.error("请传入对应：jpom.applicationTag");
-            return;
-        }
-        // 事件
-        String event = StringUtil.getArgsValue(args, "event");
-        if ("stop".equalsIgnoreCase(event)) {
-            String status = JpomClose.getInstance().status(tag);
-            if (!status.contains(StrUtil.COLON)) {
-                Console.error("Jpom并没有运行");
-                return;
+        if (StrUtil.isNotEmpty(tag)) {
+            // 事件
+            String event = StringUtil.getArgsValue(args, "event");
+            if ("stop".equalsIgnoreCase(event)) {
+                String status = JpomClose.getInstance().status(tag);
+                if (!status.contains(StrUtil.COLON)) {
+                    Console.error("Jpom并没有运行");
+                } else {
+                    String msg = JpomClose.getInstance().stop(tag);
+                    Console.log(msg);
+                }
+                System.exit(0);
+            } else if ("status".equalsIgnoreCase(event)) {
+                String status = JpomClose.getInstance().status(tag);
+                Console.log(status);
+                System.exit(0);
             }
-            String msg = JpomClose.getInstance().stop(tag);
-            Console.log(msg);
-        } else if ("status".equalsIgnoreCase(event)) {
-            String status = JpomClose.getInstance().status(tag);
-            Console.log(status);
-        } else {
-            Console.error("event error:" + event);
         }
     }
 
