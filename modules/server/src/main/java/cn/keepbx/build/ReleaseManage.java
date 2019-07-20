@@ -74,7 +74,7 @@ public class ReleaseManage extends BaseBuild {
      * 不修改为发布中状态
      */
     public void start2() {
-        this.log("start pub");
+        this.log("start release");
         if (this.baseBuildModule.getReleaseMethod() == BuildModel.ReleaseMethod.Outgiving.getCode()) {
             //
             try {
@@ -95,7 +95,7 @@ public class ReleaseManage extends BaseBuild {
                 return;
             }
         }
-        this.log("pub end");
+        this.log("release end");
         updateStatus(BuildModel.Status.PubSuccess);
     }
 

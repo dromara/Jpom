@@ -166,9 +166,12 @@ public class BuildManage extends BaseBuild implements Runnable {
     public void run() {
         try {
             if (!updateStatus(BuildModel.Status.Ing)) {
+                this.log("初始化构建记录失败,异常结束");
                 return;
             }
             try {
+                //
+                this.log("get clone pull");
                 GitUtil.checkoutPull(buildModel.getGitUrl(), gitFile, buildModel.getBranchName(), new UsernamePasswordCredentialsProvider(buildModel.getUserName(), buildModel.getPassword()));
                 // 记录最后一次提交记录
                 String msg = GitUtil.getLastCommitMsg(gitFile, buildModel.getBranchName());
@@ -180,12 +183,15 @@ public class BuildManage extends BaseBuild implements Runnable {
             String[] commands = StrUtil.split(buildModel.getScript(), StrUtil.LF);
             if (commands == null || commands.length <= 0) {
                 this.log("没有需要执行的命令");
+                this.updateStatus(BuildModel.Status.Error);
                 return;
             }
             for (String item : commands) {
                 try {
                     boolean s = runCommand(item);
                     if (!s) {
+                        this.log("命令执行失败");
+                        this.updateStatus(BuildModel.Status.Error);
                         return;
                     }
                 } catch (IOException e) {
@@ -201,6 +207,8 @@ public class BuildManage extends BaseBuild implements Runnable {
                 //
                 updateStatus(BuildModel.Status.Success);
             }
+        } catch (Exception e) {
+            this.log("构建失败", e);
         } finally {
             BUILD_MANAGE_MAP.remove(buildModel.getId());
         }
