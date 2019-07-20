@@ -1,7 +1,10 @@
 package cn.keepbx.util;
 
+import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.lang.Validator;
 import cn.hutool.core.util.StrUtil;
+
+import java.io.File;
 
 /**
  * main 方法运行参数工具
@@ -47,5 +50,31 @@ public class StringUtil {
     public static boolean isGeneral(CharSequence value, int min, int max) {
         String reg = "^[a-zA-Z0-9_-]{" + min + "," + max + "}$";
         return Validator.isMactchRegex(reg, value);
+    }
+
+    /**
+     * 删除文件开始的路径
+     *
+     * @param file      要删除的文件
+     * @param startPath 开始的路径
+     * @param inName    是否返回文件名
+     * @return /test/a.txt /test/  a.txt
+     */
+    public static String delStartPath(File file, String startPath, boolean inName) {
+        String newWhitePath;
+        if (inName) {
+            newWhitePath = FileUtil.getAbsolutePath(file.getAbsolutePath());
+        } else {
+            newWhitePath = FileUtil.getAbsolutePath(file.getParentFile());
+        }
+        String itemAbsPath = FileUtil.getAbsolutePath(new File(startPath));
+        itemAbsPath = FileUtil.normalize(itemAbsPath);
+        newWhitePath = FileUtil.normalize(newWhitePath);
+        String path = newWhitePath.substring(newWhitePath.indexOf(itemAbsPath) + itemAbsPath.length());
+        path = FileUtil.normalize(path);
+        if (path.startsWith(StrUtil.SLASH)) {
+            path = path.substring(1);
+        }
+        return path;
     }
 }

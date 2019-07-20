@@ -122,11 +122,16 @@ public enum NodeUrl {
     /**
      * 缓存
      */
-    Cache("/cache"),
+    Cache("/system/cache"),
     /**
      * 缓存
      */
-    ClearCache("/clearCache"),
+    ClearCache("/system/clearCache"),
+    /**
+     * 系统日志
+     */
+    SystemLog("/system/log_data.json"),
+
     ;
     /**
      * 相对请求地址

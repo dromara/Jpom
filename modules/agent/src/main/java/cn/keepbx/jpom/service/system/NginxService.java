@@ -9,7 +9,7 @@ import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.keepbx.jpom.common.BaseOperService;
 import cn.keepbx.jpom.model.data.AgentWhitelist;
 import cn.keepbx.jpom.service.WhitelistDirectoryService;
-import cn.keepbx.util.FileUtils;
+import cn.keepbx.util.StringUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.github.odiszapc.nginxparser.NgxBlock;
@@ -63,7 +63,7 @@ public class NginxService extends BaseOperService {
             String absPath = whiteDir.getAbsolutePath();
             for (File itemFile : list) {
 //                String itemAbsPath = itemFile.getAbsolutePath();
-                String name = FileUtils.delStartPath(itemFile, absPath, true);
+                String name = StringUtil.delStartPath(itemFile, absPath, true);
                 //paresName(absPath, itemAbsPath);
                 JSONObject jsonObject = new JSONObject();
                 jsonObject.put("path", parentPath);

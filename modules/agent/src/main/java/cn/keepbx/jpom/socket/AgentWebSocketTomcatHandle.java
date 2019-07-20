@@ -1,6 +1,7 @@
 package cn.keepbx.jpom.socket;
 
 import cn.hutool.core.exceptions.ExceptionUtil;
+import cn.hutool.core.io.FileUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.spring.SpringUtil;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Component;
 import javax.websocket.*;
 import javax.websocket.server.PathParam;
 import javax.websocket.server.ServerEndpoint;
+import java.io.File;
 import java.io.IOException;
 
 /**
@@ -74,8 +76,9 @@ public class AgentWebSocketTomcatHandle extends BaseAgentWebSocketHandle {
         try {
             String fileName = reqJson.getString("fileName");
             // 进入管理页面后需要实时加载日志
+            File file = FileUtil.file(tomcatInfoModel.getPath(), "logs", fileName);
             try {
-                FileTailWatcher.addWatcher(tomcatInfoModel, fileName, session);
+                FileTailWatcher.addWatcher(file, session);
             } catch (IOException io) {
                 DefaultSystemLog.ERROR().error("监听日志变化", io);
                 SocketSessionUtil.send(session, io.getMessage());

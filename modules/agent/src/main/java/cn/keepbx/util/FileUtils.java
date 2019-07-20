@@ -2,7 +2,6 @@ package cn.keepbx.util;
 
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
@@ -15,32 +14,6 @@ import java.io.File;
  * @date 2019/4/28
  */
 public class FileUtils {
-
-    /**
-     * 删除文件开始的路径
-     *
-     * @param file      要删除的文件
-     * @param startPath 开始的路径
-     * @param inName    是否返回文件名
-     * @return /test/a.txt /test/  a.txt
-     */
-    public static String delStartPath(File file, String startPath, boolean inName) {
-        String newWhitePath;
-        if (inName) {
-            newWhitePath = FileUtil.getAbsolutePath(file.getAbsolutePath());
-        } else {
-            newWhitePath = FileUtil.getAbsolutePath(file.getParentFile());
-        }
-        String itemAbsPath = FileUtil.getAbsolutePath(new File(startPath));
-        itemAbsPath = FileUtil.normalize(itemAbsPath);
-        newWhitePath = FileUtil.normalize(newWhitePath);
-        String path = newWhitePath.substring(newWhitePath.indexOf(itemAbsPath) + itemAbsPath.length());
-        path = FileUtil.normalize(path);
-        if (path.startsWith(StrUtil.SLASH)) {
-            path = path.substring(1);
-        }
-        return path;
-    }
 
     private static JSONObject fileToJson(File file) {
         JSONObject jsonObject = new JSONObject(6);
@@ -73,7 +46,7 @@ public class FileUtils {
             JSONObject jsonObject = FileUtils.fileToJson(file);
             //
             if (startPath != null) {
-                String levelName = FileUtils.delStartPath(file, startPath, false);
+                String levelName = StringUtil.delStartPath(file, startPath, false);
                 jsonObject.put("levelName", levelName);
             }
             //

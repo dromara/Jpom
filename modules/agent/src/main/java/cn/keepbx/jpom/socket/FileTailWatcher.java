@@ -7,8 +7,6 @@ import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
-import cn.keepbx.jpom.model.data.ProjectInfoModel;
-import cn.keepbx.jpom.model.data.TomcatInfoModel;
 import cn.keepbx.jpom.system.AgentExtConfigBean;
 import cn.keepbx.util.CharsetDetector;
 import cn.keepbx.util.LimitQueue;
@@ -34,7 +32,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * @date 2019/3/16
  */
 public class FileTailWatcher implements Runnable {
-    private static final ConcurrentHashMap<String, FileTailWatcher> CONCURRENT_HASH_MAP = new ConcurrentHashMap<>();
+    private static final ConcurrentHashMap<File, FileTailWatcher> CONCURRENT_HASH_MAP = new ConcurrentHashMap<>();
     /**
      * 缓存近10条
      */
@@ -43,8 +41,8 @@ public class FileTailWatcher implements Runnable {
     /**
      * 所有会话
      */
-    private Set<Session> socketSessions = new HashSet<>();
-    private final String log;
+    private final Set<Session> socketSessions = new HashSet<>();
+    private final File logFile;
     /**
      * 是否已经开始执行
      */
@@ -54,54 +52,22 @@ public class FileTailWatcher implements Runnable {
     /**
      * 添加文件监听
      *
-     * @param projectInfoModel 项目
-     * @param session          会话
+     * @param file    文件
+     * @param session 会话
      * @throws IOException 异常
      */
-    public static void addWatcher(ProjectInfoModel projectInfoModel, Session session) throws IOException {
-        //        日志文件路径
-        String log = projectInfoModel.getLog();
-        File file = new File(log);
-        if (!file.exists()) {
-            throw new IOException("文件不存在:" + file.getPath());
+    public static void addWatcher(File file, Session session) throws IOException {
+        if (!file.exists() || file.isDirectory()) {
+            throw new IOException("文件不存在或者是目录:" + file.getPath());
         }
-        FileTailWatcher fileTailWatcher = CONCURRENT_HASH_MAP.computeIfAbsent(log, s -> {
-            try {
-                return new FileTailWatcher(file, s);
-            } catch (IOException e) {
-                DefaultSystemLog.ERROR().error("创建文件监听失败", e);
-                return null;
-            }
-        });
-        if (fileTailWatcher == null) {
-            throw new IOException("加载文件异常:" + file.getPath());
-        }
-        fileTailWatcher.add(session, projectInfoModel.getName());
-        //
-        fileTailWatcher.start();
-    }
-
-    /**
-     * 添加文件监听
-     *
-     * @param tomcatInfoModel tomcat
-     * @param name            日志文件名称
-     * @param session         会话
-     * @throws IOException 异常
-     */
-    public static void addWatcher(TomcatInfoModel tomcatInfoModel, String name, Session session) throws IOException {
-        String path = tomcatInfoModel.getPath() + "/logs/" + name;
-        File file = FileUtil.file(path);
-        if (!file.exists()) {
-            throw new IOException("文件不存在:" + file.getPath());
-        }
+        String name = FileUtil.getAbsolutePath(file);
         //发送文件名  标记返回日志
         JSONObject object = new JSONObject();
         object.put("fileName", name);
         SocketSessionUtil.send(session, object.toString());
-        FileTailWatcher fileTailWatcher = CONCURRENT_HASH_MAP.computeIfAbsent(name, s -> {
+        FileTailWatcher fileTailWatcher = CONCURRENT_HASH_MAP.computeIfAbsent(file, s -> {
             try {
-                return new FileTailWatcher(file, s);
+                return new FileTailWatcher(file);
             } catch (Exception e) {
                 DefaultSystemLog.ERROR().error("创建文件监听失败", e);
                 return null;
@@ -123,11 +89,31 @@ public class FileTailWatcher implements Runnable {
         Collection<FileTailWatcher> collection = CONCURRENT_HASH_MAP.values();
         for (FileTailWatcher fileTailWatcher : collection) {
             fileTailWatcher.socketSessions.removeIf(session::equals);
+            if (fileTailWatcher.socketSessions.isEmpty()) {
+                fileTailWatcher.close();
+            }
         }
     }
 
-    private FileTailWatcher(File file, String log) throws IOException {
-        this.log = log;
+    /**
+     * 关闭文件读取流
+     *
+     * @param fileName 文件名
+     */
+    public static void offlineFile(File fileName) {
+        FileTailWatcher fileTailWatcher = CONCURRENT_HASH_MAP.get(fileName);
+        if (null == fileTailWatcher) {
+            return;
+        }
+        Set<Session> socketSessions = fileTailWatcher.socketSessions;
+        for (Session socketSession : socketSessions) {
+            offline(socketSession);
+        }
+        fileTailWatcher.close();
+    }
+
+    private FileTailWatcher(File file) throws IOException {
+        this.logFile = file;
         this.randomFile = new RandomAccessFile(file, FileMode.r.name());
         Charset detSet = AgentExtConfigBean.getInstance().getLogFileCharset();
         if (detSet == null) {
@@ -272,29 +258,18 @@ public class FileTailWatcher implements Runnable {
             }
         }
         // 通知客户端
-        if (socketSessions.size() > 0) {
+        if (socketSessions.isEmpty()) {
             this.sendAll("服务主动关闭日志文件");
         }
-        IoUtil.close(this.randomFile);
-        // 清理线程记录
-        CONCURRENT_HASH_MAP.remove(this.log);
+        this.close();
     }
 
     /**
-     * 关闭文件读取流
-     *
-     * @param fileName 文件名
+     * 关闭
      */
-    public static void offTomcatFileListen(String fileName) {
-        FileTailWatcher fileTailWatcher = CONCURRENT_HASH_MAP.get(fileName);
-        if (null == fileTailWatcher) {
-            return;
-        }
-        IoUtil.close(fileTailWatcher.randomFile);
-        Set<Session> socketSessions = fileTailWatcher.socketSessions;
-        for (Session socketSession : socketSessions) {
-            offline(socketSession);
-        }
-        CONCURRENT_HASH_MAP.remove(fileName);
+    private void close() {
+        IoUtil.close(this.randomFile);
+        // 清理线程记录
+        CONCURRENT_HASH_MAP.remove(this.logFile);
     }
 }

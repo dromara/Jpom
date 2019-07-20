@@ -7,8 +7,11 @@ import cn.jiangzeyin.common.validator.ValidatorRule;
 import cn.keepbx.jpom.common.BaseServerController;
 import cn.keepbx.jpom.common.forward.NodeForward;
 import cn.keepbx.jpom.common.forward.NodeUrl;
+import cn.keepbx.jpom.common.interceptor.UrlPermission;
 import cn.keepbx.jpom.controller.LoginControl;
+import cn.keepbx.jpom.model.Role;
 import cn.keepbx.jpom.model.data.NodeModel;
+import cn.keepbx.jpom.model.log.UserOperateLogV1;
 import cn.keepbx.jpom.system.ConfigBean;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
@@ -63,6 +66,7 @@ public class CacheManageController extends BaseServerController {
      */
     @RequestMapping(value = "clearCache.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
+    @UrlPermission(value = Role.System, optType = UserOperateLogV1.OptType.ClearCache)
     public String clearCache(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "类型错误") String type) {
         switch (type) {
             case "serviceCacheFileSize":

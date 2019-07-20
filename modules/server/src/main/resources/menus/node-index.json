@@ -63,6 +63,11 @@
         "title": "白名单目录",
         "url": "./system/whitelistDirectory",
         "role": "System"
+      },
+      {
+        "id": "logManage",
+        "title": "系统日志",
+        "url": "../system/log.html"
       }
     ]
   }

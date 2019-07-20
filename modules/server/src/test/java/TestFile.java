@@ -23,6 +23,9 @@ public class TestFile {
 
         String name = FileUtil.extName("C:\\Users\\Colorful\\Desktop\\Desktop.tar.gz");
         System.out.println(name);
+
+
+        System.out.println(FileUtil.file("dd","+ss"));
     }
 
 

@@ -1,11 +1,14 @@
 package cn.keepbx.jpom.system;
 
 import ch.qos.logback.core.PropertyDefinerBase;
+import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.keepbx.jpom.JpomApplication;
 import cn.keepbx.jpom.model.system.JpomManifest;
 import cn.keepbx.util.StringUtil;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.Signature;
 import org.aspectj.lang.annotation.AfterReturning;
@@ -96,5 +99,37 @@ public class WebAopLog extends PropertyDefinerBase {
         // 配置默认日志路径
         DefaultSystemLog.configPath(path, false);
         return path;
+    }
+
+    /**
+     * 获取树的json
+     *
+     * @return jsonArray
+     */
+    public JSONArray getTreeData() {
+        File file = FileUtil.file(getPropertyValue());
+        return readTree(file, getPropertyValue());
+    }
+
+    private JSONArray readTree(File file, String logFile) {
+        File[] files = file.listFiles();
+        if (files == null) {
+            return null;
+        }
+        JSONArray jsonArray = new JSONArray();
+        for (File file1 : files) {
+            JSONObject jsonObject = new JSONObject();
+            String path = StringUtil.delStartPath(file1, logFile, true);
+            jsonObject.put("title", file1.getName());
+            jsonObject.put("path", path);
+            if (file1.isDirectory()) {
+                JSONArray children = readTree(file1, logFile);
+                jsonObject.put("children", children);
+                //
+                jsonObject.put("spread", true);
+            }
+            jsonArray.add(jsonObject);
+        }
+        return jsonArray;
     }
 }

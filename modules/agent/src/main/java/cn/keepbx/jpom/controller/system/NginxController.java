@@ -9,7 +9,7 @@ import cn.keepbx.jpom.common.BaseAgentController;
 import cn.keepbx.jpom.service.WhitelistDirectoryService;
 import cn.keepbx.jpom.service.system.NginxService;
 import cn.keepbx.util.CommandUtil;
-import cn.keepbx.util.FileUtils;
+import cn.keepbx.util.StringUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.github.odiszapc.nginxparser.NgxBlock;
@@ -69,7 +69,7 @@ public class NginxController extends BaseAgentController {
             JSONObject jsonObject = new JSONObject();
             String string = FileUtil.readUtf8String(file);
             jsonObject.put("context", string);
-            String rName = FileUtils.delStartPath(file, path, true);
+            String rName = StringUtil.delStartPath(file, path, true);
             // nginxService.paresName(path, file.getAbsolutePath())
             jsonObject.put("name", rName);
             jsonObject.put("whitePath", path);

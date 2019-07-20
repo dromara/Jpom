@@ -16,7 +16,7 @@ import cn.keepbx.jpom.common.commander.AbstractTomcatCommander;
 import cn.keepbx.jpom.model.data.TomcatInfoModel;
 import cn.keepbx.jpom.service.manage.TomcatManageService;
 import cn.keepbx.jpom.socket.FileTailWatcher;
-import cn.keepbx.util.FileUtils;
+import cn.keepbx.util.StringUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.http.MediaType;
@@ -284,7 +284,7 @@ public class TomcatManageController extends BaseAgentController {
         JSONArray arrayDir = new JSONArray();
         for (File file : filesAll) {
             JSONObject jsonObject = new JSONObject();
-            String parentPath = FileUtils.delStartPath(file, appBasePath, false);
+            String parentPath = StringUtil.delStartPath(file, appBasePath, false);
             jsonObject.put("parentPath", parentPath);
             jsonObject.put("filename", file.getName());
             long mTime = file.lastModified();
@@ -382,9 +382,8 @@ public class TomcatManageController extends BaseAgentController {
         File file;
         if ("_tomcat_log".equals(path)) {
             //删除日志文件
-            FileTailWatcher.offTomcatFileListen(filename);
-            String name = tomcatInfoModel.getPath() + "/logs/" + filename;
-            file = FileUtil.file(name);
+            file = FileUtil.file(tomcatInfoModel.getPath(), "logs", filename);
+            FileTailWatcher.offlineFile(file);
         } else {
             path = FileUtil.normalize(path);
             filename = FileUtil.normalize(filename);

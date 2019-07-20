@@ -91,6 +91,11 @@
         "id": "cacheManage",
         "title": "缓存管理",
         "url": "./system/cache.html"
+      },
+      {
+        "id": "logManage",
+        "title": "系统日志",
+        "url": "./system/log.html"
       }
     ]
   }

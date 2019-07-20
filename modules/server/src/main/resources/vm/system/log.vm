@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Jpom-项目管理系统</title>
+    #parse("./common/head.vm")
+    <style>
+        body {
+            padding: 10px;
+            margin-top: 20px;
+        }
+
+        .context {
+            height: 90vh;
+        }
+
+    </style>
+</head>
+
+<body>
+
+<div class="layui-row">
+    <div id="treeData" class="layui-col-md3"></div>
+    <div id="log" class="layui-col-md9 logConsole">
+          <textarea name="context" id="logContext" placeholder="加载中....." readonly disabled
+                    class="layui-textarea context"></textarea>
+    </div>
+</div>
+</body>
+<script type="text/javascript">
+    var treeData = [];
+        #if($treeData)
+        treeData =$treeData;
+        #end
+    var tree;
+
+    function loadSuccess() {
+        layui.use('tree', function () {
+            tree = layui.tree;
+            //渲染
+            var treeDom = tree.render({
+                elem: '#treeData',
+                data: [],
+                id: "treeData"
+            });
+            getData();
+        });
+    }
+
+    function getData() {
+        loadingAjax({
+            url: './log_data.json',
+            data: {},
+            success: function (data) {
+                if (200 != data.code) {
+                    layer.msg(data.msg);
+                }
+                tree.reload('treeData', {
+                    data: data.data
+                });
+            }
+        });
+    }
+</script>
+</html>
