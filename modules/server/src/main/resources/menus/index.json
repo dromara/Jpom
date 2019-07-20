@@ -82,5 +82,16 @@
         "url": "./user/log/list.html"
       }
     ]
+  },
+  {
+    "title": "系统管理",
+    "icon": "layui-icon-set-fill",
+    "childs": [
+      {
+        "id": "cacheManage",
+        "title": "缓存管理",
+        "url": "./system/cache.html"
+      }
+    ]
   }
 ]

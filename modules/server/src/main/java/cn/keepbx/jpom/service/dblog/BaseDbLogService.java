@@ -158,7 +158,7 @@ public abstract class BaseDbLogService<T> {
      */
     public PageResult<T> listPage(Entity where, Page page) {
         where.setTableName(getTableName());
-        PageResult<Entity> pageResult = null;
+        PageResult<Entity> pageResult;
         try {
             pageResult = Db.use().page(where, page);
         } catch (SQLException e) {

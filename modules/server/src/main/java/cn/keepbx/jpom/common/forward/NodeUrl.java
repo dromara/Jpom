@@ -118,7 +118,16 @@ public enum NodeUrl {
     Tomcat_File_DeleteFile("/tomcat/deleteFile"),
     Tomcat_File_Download("/tomcat/download"),
     Tomcat_File_Upload("/tomcat/upload"),
-    Tomcat_File_UploadWar("/tomcat/uploadWar");
+    Tomcat_File_UploadWar("/tomcat/uploadWar"),
+    /**
+     * 缓存
+     */
+    Cache("/cache"),
+    /**
+     * 缓存
+     */
+    ClearCache("/clearCache"),
+    ;
     /**
      * 相对请求地址
      */

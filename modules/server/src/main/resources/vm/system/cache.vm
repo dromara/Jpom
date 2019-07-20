@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Jpom-项目管理系统</title>
+    #parse("./common/head.vm")
+    <style>
+        body {
+            padding: 10px;
+            margin-top: 20px;
+        }
+
+        .clear {
+            margin-left: 20px;
+            display: none;
+        }
+    </style>
+</head>
+
+<body class="layui-layout-body">
+
+<blockquote class="layui-elem-quote">服务端文件缓存：$!cacheFileSize
+    <button type="button" class="layui-btn layui-btn-sm clear" t="serviceCacheFileSize">清空</button>
+</blockquote>
+
+<blockquote class="layui-elem-quote">黑名单IP数量：$!ipSize
+    <button type="button" class="layui-btn layui-btn-sm clear" t="serviceIpSize">清空</button>
+</blockquote>
+
+<div class="layui-collapse" style="margin: 10px;">
+    #foreach($item in $nodeModels)
+        <div class="layui-colla-item">
+            <div class="layui-colla-title">
+                $item.name
+            </div>
+            <div class="layui-colla-content layui-show">
+                <blockquote class="layui-elem-quote">文件缓存：
+                    <span nodeId="$item.id" fileSize> </span>
+                    <button type="button" class="layui-btn layui-btn-sm clear" style="display: none" nodeId="$item.id"
+                            t="fileSize">清空
+                    </button>
+                </blockquote>
+                <blockquote class="layui-elem-quote">进程名缓存：
+                    <span nodeId="$item.id" pidName></span>
+                    <button type="button" class="layui-btn layui-btn-sm clear" style="display: none" nodeId="$item.id"
+                            t="pidName">清空
+                    </button>
+                </blockquote>
+                <blockquote class="layui-elem-quote">进程端口缓存：
+                    <span nodeId="$item.id" pidPort></span>
+                    <button type="button" class="layui-btn layui-btn-sm clear" style="display: none" nodeId="$item.id"
+                            t="pidPort">清空
+                    </button>
+                </blockquote>
+            </div>
+        </div>
+    #end
+</div>
+</body>
+<script>
+    function loadSuccess() {
+        #if($user.isSystemUser())
+            $(".clear").show();
+        #end
+        #foreach($item in $nodeModels)
+            getCache("$item.id");
+        #end
+
+    }
+
+    function getCache(nodeId) {
+        $("button[nodeId='" + nodeId + "']").hide();
+        loadingAjax({
+            url: './node_cache.json',
+            data: {
+                nodeId: nodeId
+            },
+            success: function (data) {
+                if (200 != data.code) {
+                    layer.msg(data.msg);
+                    return;
+                }
+                for (var key in data.data) {
+                    $("span[" + key.toLowerCase() + "][nodeId='" + nodeId + "']").text(data.data[key]);
+                }
+                $("button[nodeId='" + nodeId + "']").show();
+            }
+        });
+
+
+        $(".clear").click(function () {
+            var nodeId = $(this).attr("nodeId");
+            var t = $(this).attr("t");
+            layer.confirm('确定清除此缓存吗？', {
+                title: '系统提示'
+            }, function (index) {
+                layer.close(index);
+                loadingAjax({
+                    url: './clearCache.json',
+                    data: {
+                        type: t,
+                        nodeId: nodeId
+                    },
+                    success: function (data) {
+                        layer.msg(data.msg);
+                        if (200 == data.code) {
+                            setTimeout(function () {
+                                location.reload();
+                            }, 2000)
+                        }
+                    }
+                });
+            });
+        });
+    }
+</script>
+</html>

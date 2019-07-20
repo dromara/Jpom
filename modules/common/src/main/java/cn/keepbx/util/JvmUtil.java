@@ -135,6 +135,28 @@ public class JvmUtil {
     }
 
     /**
+     * 根据pid 获取jvm
+     *
+     * @param pid 进程id
+     * @return VirtualMachine
+     */
+    public static VirtualMachine getVirtualMachine(int pid) {
+        String pId = String.valueOf(pid);
+        if (PID_ERROR.containsKey(pId)) {
+            return null;
+        }
+        VirtualMachine virtualMachine = null;
+        try {
+            virtualMachine = VirtualMachine.attach(pId);
+        } catch (AttachNotSupportedException | IOException e) {
+            DefaultSystemLog.ERROR().error("获取jvm信息失败：" + pid, e);
+            // 记录黑名单
+            PID_ERROR.put(pId, true);
+        }
+        return virtualMachine;
+    }
+
+    /**
      * 工具Jpom运行项目的id 获取virtualMachine
      *
      * @param tag 项目id

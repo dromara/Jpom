@@ -38,7 +38,7 @@ public class LoginControl extends BaseServerController {
     /**
      * ip 黑名单
      */
-    private static final LFUCache<String, Integer> LFU_CACHE = new LFUCache<>(1000);
+    public static final LFUCache<String, Integer> LFU_CACHE = new LFUCache<>(1000);
 
     private static final String LOGIN_CODE = "login_code";
 

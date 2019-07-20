@@ -22,7 +22,6 @@ import cn.keepbx.jpom.service.manage.ProjectInfoService;
 import cn.keepbx.jpom.system.JpomRuntimeException;
 import cn.keepbx.util.CommandUtil;
 import cn.keepbx.util.JvmUtil;
-import com.sun.tools.attach.AttachNotSupportedException;
 import com.sun.tools.attach.VirtualMachine;
 
 import java.io.File;
@@ -47,15 +46,14 @@ public abstract class AbstractProjectCommander {
 
     private static AbstractProjectCommander abstractProjectCommander = null;
 
-
     /**
      * 进程id 对应Jpom 名称
      */
-    private static final ConcurrentHashMap<Integer, String> PID_JPOM_NAME = new ConcurrentHashMap<>();
+    public static final ConcurrentHashMap<Integer, String> PID_JPOM_NAME = new ConcurrentHashMap<>();
     /**
      * 进程Id 获取端口号
      */
-    private static final LRUCache<Integer, Integer> PID_PORT = new LRUCache<>(100, TimeUnit.MINUTES.toMillis(10));
+    public static final LRUCache<Integer, Integer> PID_PORT = new LRUCache<>(100, TimeUnit.MINUTES.toMillis(10));
 
     /**
      * 实例化Commander
@@ -175,7 +173,7 @@ public abstract class AbstractProjectCommander {
      * @return null 检查一切正常
      * @throws Exception 异常
      */
-    protected String checkStart(ProjectInfoModel projectInfoModel) throws Exception {
+    private String checkStart(ProjectInfoModel projectInfoModel) throws Exception {
         if (isRun(projectInfoModel.getId())) {
             return "运行中";
         }
@@ -346,11 +344,8 @@ public abstract class AbstractProjectCommander {
         if (projectInfoModels == null || projectInfoModels.isEmpty()) {
             return StrUtil.DASHED;
         }
-        VirtualMachine virtualMachine;
-        try {
-            virtualMachine = VirtualMachine.attach(String.valueOf(pid));
-        } catch (AttachNotSupportedException | IOException e) {
-            DefaultSystemLog.ERROR().error("获取jvm信息失败：" + pid, e);
+        VirtualMachine virtualMachine = JvmUtil.getVirtualMachine(pid);
+        if (virtualMachine == null) {
             return StrUtil.DASHED;
         }
         Properties properties = virtualMachine.getAgentProperties();
