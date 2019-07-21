@@ -22,11 +22,13 @@
 <div class="layui-row">
     <div id="treeData" class="layui-col-md3"></div>
     <div id="log" class="layui-col-md9 logConsole">
-          <textarea name="context" id="logContext" placeholder="加载中....." readonly disabled
-                    class="layui-textarea context"></textarea>
+        <div>当前查看：<span id="nowFileName"></span></div>
+        <textarea name="context" id="logContext" placeholder="加载中....." readonly disabled
+                  class="layui-textarea context"></textarea>
     </div>
 </div>
 </body>
+<script type="text/javascript" src="$!jpomProxyPath/static/js/auto-line-number.js?v=$staticCacheTime"></script>
 <script type="text/javascript">
     var treeData = [];
         #if($treeData)
@@ -34,18 +36,75 @@
         #end
     var tree;
 
+    var url = getSocketHost() + "/tomcat_log?userId=$user.getUserMd5Key()&tomcatId=system&nodeId=#if(!$node)system#else$!node.id#end&type=tomcat";
+    var ws;
+
     function loadSuccess() {
+        var logContext = $("#logContext");
+        initPlugin();
         layui.use('tree', function () {
             tree = layui.tree;
             //渲染
             var treeDom = tree.render({
                 elem: '#treeData',
                 data: [],
-                id: "treeData"
+                id: "treeData",
+                click: function (obj) {
+                    if (obj.data.children) {
+                        return;
+                    }
+                    $("#nowFileName").text(obj.data.title);
+                    openSocket(obj.data.path);
+                }
             });
             getData();
         });
+
+        function openSocket(fileName) {
+            if (!fileName) {
+                return;
+            }
+            if (!('WebSocket' in window)) {
+                layer.msg("不支持WebSocket");
+                return;
+            }
+            logContext.html("");
+            if (!ws) {
+                ws = new WebSocket(url);
+            }
+            var item = {
+                op: "showlog",
+                tomcatId: 'system',
+                fileName: fileName
+            }
+            if (ws.readyState != 1 && ws.readyState != 0) {
+                ws = new WebSocket(url);
+            } else if (ws.readyState == 1) {
+                ws.send(JSON.stringify(item));
+            }
+            ws.onopen = function () {
+                ws.send(JSON.stringify(item));
+            };
+            ws.onmessage = function (data) {
+                if (data.data) {
+                    logContext.append(data.data + '\r\n');
+
+                }
+                $("textarea").setTextareaCount({
+                    width: "30px",
+                    bgColor: "#ddd",
+                    color: "#000",
+                    display: "inline-block"
+                });
+            };
+            ws.onerror = function (ev) {
+                console.log(ev);
+                layer.msg("socket 异常");
+            }
+            // scrollToBotomm();
+        }
     }
+
 
     function getData() {
         loadingAjax({

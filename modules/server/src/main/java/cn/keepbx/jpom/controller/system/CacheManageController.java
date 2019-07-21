@@ -10,7 +10,6 @@ import cn.keepbx.jpom.common.forward.NodeUrl;
 import cn.keepbx.jpom.common.interceptor.UrlPermission;
 import cn.keepbx.jpom.controller.LoginControl;
 import cn.keepbx.jpom.model.Role;
-import cn.keepbx.jpom.model.data.NodeModel;
 import cn.keepbx.jpom.model.log.UserOperateLogV1;
 import cn.keepbx.jpom.system.ConfigBean;
 import org.springframework.http.MediaType;
@@ -20,7 +19,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.io.File;
-import java.util.List;
 
 /**
  * 缓存管理
@@ -42,9 +40,6 @@ public class CacheManageController extends BaseServerController {
         int size = LoginControl.LFU_CACHE.size();
         setAttribute("ipSize", size);
 
-        //
-        List<NodeModel> nodeModels = nodeService.list();
-        setAttribute("nodeModels", nodeModels);
         return "system/cache";
     }
 

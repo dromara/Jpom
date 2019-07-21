@@ -138,7 +138,7 @@ public class AgentWebSocketConsoleHandle extends BaseAgentWebSocketHandle {
                     //        日志文件路径
                     File file = new File(projectInfoModel.getLog());
                     try {
-                        FileTailWatcher.addWatcher(file, session);
+                        AgentFileTailWatcher.addWatcher(file, session);
                     } catch (IOException io) {
                         DefaultSystemLog.ERROR().error("监听日志变化", io);
                         SocketSessionUtil.send(session, io.getMessage());
@@ -171,21 +171,10 @@ public class AgentWebSocketConsoleHandle extends BaseAgentWebSocketHandle {
         }
     }
 
+    @Override
     @OnClose
     public void onClose(Session session) {
-        destroy(session);
-        // top
-        TopManager.removeMonitor(session);
-    }
-
-    private void destroy(Session session) {
-        // 清理日志监听
-        try {
-            FileTailWatcher.offline(session);
-        } catch (Exception e) {
-            DefaultSystemLog.ERROR().error("关闭异常", e);
-        }
-        USER.remove(session.getId());
+        super.onClose(session);
     }
 
     @OnError

@@ -5,9 +5,10 @@ import cn.hutool.core.io.FileUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.spring.SpringUtil;
+import cn.keepbx.jpom.JpomApplication;
 import cn.keepbx.jpom.model.data.TomcatInfoModel;
 import cn.keepbx.jpom.service.manage.TomcatManageService;
-import cn.keepbx.jpom.system.TopManager;
+import cn.keepbx.jpom.system.WebAopLog;
 import cn.keepbx.util.SocketSessionUtil;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Component;
@@ -17,6 +18,8 @@ import javax.websocket.server.PathParam;
 import javax.websocket.server.ServerEndpoint;
 import java.io.File;
 import java.io.IOException;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 插件端,控制台socket
@@ -29,6 +32,8 @@ import java.io.IOException;
 public class AgentWebSocketTomcatHandle extends BaseAgentWebSocketHandle {
 
     private TomcatManageService tomcatManageService;
+
+    private static final Map<String, File> CACHE_FILE = new ConcurrentHashMap<>();
 
     @OnOpen
     public void onOpen(@PathParam("tomcatId") String tomcatId, @PathParam("optUser") String urlOptUser, Session session) {
@@ -63,22 +68,33 @@ public class AgentWebSocketTomcatHandle extends BaseAgentWebSocketHandle {
             return;
         }
         String tomcatId = json.getString("tomcatId");
-        TomcatInfoModel tomcatInfoModel = tomcatManageService.getItem(tomcatId);
-        if (tomcatInfoModel == null) {
-            SocketSessionUtil.send(session, "没有对应tomcat");
-            session.close();
-            return;
+        if (JpomApplication.SYSTEM_ID.equalsIgnoreCase(tomcatId)) {
+            runMsg(session, json);
+        } else {
+            TomcatInfoModel tomcatInfoModel = tomcatManageService.getItem(tomcatId);
+            if (tomcatInfoModel == null) {
+                SocketSessionUtil.send(session, "没有对应tomcat");
+                session.close();
+                return;
+            }
+            runMsg(session, tomcatInfoModel, json);
         }
-        runMsg(session, tomcatInfoModel, json);
     }
 
-    private void runMsg(Session session, TomcatInfoModel tomcatInfoModel, JSONObject reqJson) throws Exception {
+    private void runMsg(Session session, JSONObject reqJson) throws Exception {
         try {
             String fileName = reqJson.getString("fileName");
+            WebAopLog webAopLog = SpringUtil.getBean(WebAopLog.class);
             // 进入管理页面后需要实时加载日志
-            File file = FileUtil.file(tomcatInfoModel.getPath(), "logs", fileName);
+            File file = FileUtil.file(webAopLog.getPropertyValue(), fileName);
+            File file1 = CACHE_FILE.get(session.getId());
+            if (file1 != null && !file1.equals(file)) {
+                // 离线上一个日志
+                AgentFileTailWatcher.offlineFile(file, session);
+            }
             try {
-                FileTailWatcher.addWatcher(file, session);
+                AgentFileTailWatcher.addWatcher(file, session);
+                CACHE_FILE.put(session.getId(), file);
             } catch (IOException io) {
                 DefaultSystemLog.ERROR().error("监听日志变化", io);
                 SocketSessionUtil.send(session, io.getMessage());
@@ -90,21 +106,28 @@ public class AgentWebSocketTomcatHandle extends BaseAgentWebSocketHandle {
         }
     }
 
-    @OnClose
-    public void onClose(Session session) {
-        destroy(session);
-        // top
-        TopManager.removeMonitor(session);
+    private void runMsg(Session session, TomcatInfoModel tomcatInfoModel, JSONObject reqJson) throws Exception {
+        try {
+            String fileName = reqJson.getString("fileName");
+            // 进入管理页面后需要实时加载日志
+            File file = FileUtil.file(tomcatInfoModel.getPath(), "logs", fileName);
+            try {
+                AgentFileTailWatcher.addWatcher(file, session);
+            } catch (IOException io) {
+                DefaultSystemLog.ERROR().error("监听日志变化", io);
+                SocketSessionUtil.send(session, io.getMessage());
+            }
+        } catch (Exception e) {
+            DefaultSystemLog.ERROR().error("执行命令失败", e);
+            SocketSessionUtil.send(session, "执行命令失败,详情如下：");
+            SocketSessionUtil.send(session, ExceptionUtil.stacktraceToString(e));
+        }
     }
 
-    private void destroy(Session session) {
-        // 清理日志监听
-        try {
-            FileTailWatcher.offline(session);
-        } catch (Exception e) {
-            DefaultSystemLog.ERROR().error("关闭异常", e);
-        }
-        USER.remove(session.getId());
+    @Override
+    @OnClose
+    public void onClose(Session session) {
+        super.onClose(session);
     }
 
     @OnError

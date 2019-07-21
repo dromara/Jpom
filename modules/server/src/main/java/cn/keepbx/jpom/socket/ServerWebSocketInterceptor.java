@@ -2,6 +2,7 @@ package cn.keepbx.jpom.socket;
 
 import cn.hutool.extra.servlet.ServletUtil;
 import cn.jiangzeyin.common.spring.SpringUtil;
+import cn.keepbx.jpom.JpomApplication;
 import cn.keepbx.jpom.model.data.NodeModel;
 import cn.keepbx.jpom.model.data.UserModel;
 import cn.keepbx.jpom.service.node.NodeService;
@@ -37,10 +38,13 @@ public class ServerWebSocketInterceptor implements HandshakeInterceptor {
                 return false;
             }
             String nodeId = httpServletRequest.getParameter("nodeId");
-            NodeService nodeService = SpringUtil.getBean(NodeService.class);
-            NodeModel nodeModel = nodeService.getItem(nodeId);
-            if (nodeModel == null) {
-                return false;
+            NodeModel nodeModel = null;
+            if (!JpomApplication.SYSTEM_ID.equals(nodeId)) {
+                NodeService nodeService = SpringUtil.getBean(NodeService.class);
+                nodeModel = nodeService.getItem(nodeId);
+                if (nodeModel == null) {
+                    return false;
+                }
             }
             // 判断拦截类型
             String type = httpServletRequest.getParameter("type");
@@ -52,17 +56,13 @@ public class ServerWebSocketInterceptor implements HandshakeInterceptor {
                 }
                 attributes.put("scriptId", scriptId);
             } else if ("tomcat".equalsIgnoreCase(type)) {
-                // 脚本模板
                 String tomcatId = httpServletRequest.getParameter("tomcatId");
-                if (!userModel.isManage(nodeId)) {
-                    return false;
-                }
                 attributes.put("tomcatId", tomcatId);
             } else {
                 //控制台
                 String projectId = httpServletRequest.getParameter("projectId");
                 // 判断权限
-                if (!userModel.isProject(nodeModel.getId(), projectId)) {
+                if (nodeModel == null || !userModel.isProject(nodeModel.getId(), projectId)) {
                     return false;
                 }
                 attributes.put("projectId", projectId);
@@ -73,7 +73,9 @@ public class ServerWebSocketInterceptor implements HandshakeInterceptor {
             //
             String userAgent = ServletUtil.getHeaderIgnoreCase(httpServletRequest, HttpHeaders.USER_AGENT);
             attributes.put(HttpHeaders.USER_AGENT, userAgent);
-            attributes.put("nodeInfo", nodeModel);
+            if (nodeModel != null) {
+                attributes.put("nodeInfo", nodeModel);
+            }
             attributes.put("userInfo", userModel);
             return true;
         }

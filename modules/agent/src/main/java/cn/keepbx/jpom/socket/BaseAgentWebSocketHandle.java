@@ -4,6 +4,7 @@ import cn.hutool.core.exceptions.ExceptionUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.core.util.URLUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
+import cn.keepbx.jpom.system.TopManager;
 import cn.keepbx.util.SocketSessionUtil;
 
 import javax.websocket.Session;
@@ -18,7 +19,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public abstract class BaseAgentWebSocketHandle {
 
-    protected static final ConcurrentHashMap<String, String> USER = new ConcurrentHashMap<>();
+    private static final ConcurrentHashMap<String, String> USER = new ConcurrentHashMap<>();
 
     public void addUser(Session session, String name) {
         String optUser = URLUtil.decode(name);
@@ -37,5 +38,17 @@ public abstract class BaseAgentWebSocketHandle {
     protected String getOptUserName(Session session) {
         String name = USER.get(session.getId());
         return StrUtil.emptyToDefault(name, StrUtil.DASHED);
+    }
+
+    public void onClose(Session session) {
+        // 清理日志监听
+        try {
+            AgentFileTailWatcher.offline(session);
+        } catch (Exception e) {
+            DefaultSystemLog.ERROR().error("关闭异常", e);
+        }
+        // top
+        TopManager.removeMonitor(session);
+        USER.remove(session.getId());
     }
 }

@@ -13,6 +13,9 @@ consoleLog:
   reqXss: true
   # 是否记录接口响应日志
   reqResponse: true
+log:
+  # 日志文件的编码格式，如果没有指定就自动识别，自动识别可能出现不准确的情况
+  fileCharset:
 db:
   # 日志存储条数，将自动清理旧数据,配置小于等于零则不清理
   logStorageCount: 100000

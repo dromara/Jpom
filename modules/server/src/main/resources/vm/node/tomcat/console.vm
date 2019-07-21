@@ -141,7 +141,7 @@
             ws = new WebSocket(url);
         }
         var item = {
-            op: "start",
+            op: "showlog",
             tomcatId: '$id',
             fileName: fileName
         }

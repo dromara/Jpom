@@ -2,6 +2,8 @@ package cn.keepbx.util;
 
 import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
+import org.springframework.web.socket.TextMessage;
+import org.springframework.web.socket.WebSocketSession;
 
 import javax.websocket.Session;
 import java.io.IOException;
@@ -34,7 +36,7 @@ public class SocketSessionUtil {
             return;
         }
         if (!session.isOpen()) {
-            return;
+            throw new RuntimeException("session close ");
         }
         try {
             LOCK.lock(session.getId());
@@ -51,6 +53,43 @@ public class SocketSessionUtil {
                 }
                 try {
                     session.getBasicRemote().sendText(msg);
+                    exception = null;
+                    break;
+                } catch (IOException e) {
+                    DefaultSystemLog.ERROR().error("发送消息失败:" + tryCount, e);
+                    exception = e;
+                }
+            } while (tryCount <= ERROR_TRY_COUNT);
+            if (exception != null) {
+                throw exception;
+            }
+        } finally {
+            LOCK.unlock(session.getId());
+        }
+    }
+
+    public static void send(WebSocketSession session, String msg) throws IOException {
+        if (StrUtil.isEmpty(msg)) {
+            return;
+        }
+        if (!session.isOpen()) {
+            throw new RuntimeException("session close ");
+        }
+        try {
+            LOCK.lock(session.getId());
+            IOException exception = null;
+            int tryCount = 0;
+            do {
+                tryCount++;
+                if (exception != null) {
+                    // 上一次有异常、休眠 500
+                    try {
+                        Thread.sleep(500);
+                    } catch (InterruptedException ignored) {
+                    }
+                }
+                try {
+                    session.sendMessage(new TextMessage(msg));
                     exception = null;
                     break;
                 } catch (IOException e) {

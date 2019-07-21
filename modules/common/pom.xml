@@ -15,6 +15,11 @@
     <version>2.4.2</version>
 
     <dependencies>
-
+        <!--  文件编码识别-->
+        <dependency>
+            <groupId>net.sourceforge.jchardet</groupId>
+            <artifactId>jchardet</artifactId>
+            <version>1.0</version>
+        </dependency>
     </dependencies>
 </project>

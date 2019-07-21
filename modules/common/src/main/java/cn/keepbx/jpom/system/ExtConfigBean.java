@@ -1,6 +1,7 @@
 package cn.keepbx.jpom.system;
 
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.spring.SpringUtil;
@@ -13,6 +14,7 @@ import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 
 import java.io.File;
+import java.nio.charset.Charset;
 
 /**
  * 外部资源配置
@@ -36,6 +38,20 @@ public class ExtConfigBean {
     @Value("${consoleLog.reqResponse:true}")
     private boolean consoleLogReqResponse;
 
+    /**
+     * 日志文件的编码格式，如果没有指定就自动识别，自动识别可能出现不准确的情况
+     */
+    @Value("${log.fileCharset:}")
+    private String logFileCharset;
+    /**
+     *
+     */
+    private Charset logFileCharsets;
+
+    public Charset getLogFileCharset() {
+        return logFileCharsets;
+    }
+
     public boolean isConsoleLogReqResponse() {
         return consoleLogReqResponse;
     }
@@ -43,6 +59,8 @@ public class ExtConfigBean {
     public boolean isConsoleLogReqXss() {
         return consoleLogReqXss;
     }
+
+    private static ExtConfigBean extConfigBean;
 
     /**
      * 动态获取外部配置文件的 resource
@@ -72,7 +90,17 @@ public class ExtConfigBean {
      * @return this
      */
     public static ExtConfigBean getInstance() {
-        return SpringUtil.getBean(ExtConfigBean.class);
+        if (extConfigBean == null) {
+            extConfigBean = SpringUtil.getBean(ExtConfigBean.class);
+            // 读取配置的编码格式
+            if (StrUtil.isNotBlank(extConfigBean.logFileCharset)) {
+                try {
+                    extConfigBean.logFileCharsets = CharsetUtil.charset(extConfigBean.logFileCharset);
+                } catch (Exception ignored) {
+                }
+            }
+        }
+        return extConfigBean;
     }
 
     /**

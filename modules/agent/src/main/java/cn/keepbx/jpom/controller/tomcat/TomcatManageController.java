@@ -15,7 +15,7 @@ import cn.keepbx.jpom.common.BaseAgentController;
 import cn.keepbx.jpom.common.commander.AbstractTomcatCommander;
 import cn.keepbx.jpom.model.data.TomcatInfoModel;
 import cn.keepbx.jpom.service.manage.TomcatManageService;
-import cn.keepbx.jpom.socket.FileTailWatcher;
+import cn.keepbx.jpom.socket.AgentFileTailWatcher;
 import cn.keepbx.util.StringUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -383,7 +383,7 @@ public class TomcatManageController extends BaseAgentController {
         if ("_tomcat_log".equals(path)) {
             //删除日志文件
             file = FileUtil.file(tomcatInfoModel.getPath(), "logs", filename);
-            FileTailWatcher.offlineFile(file);
+            AgentFileTailWatcher.offlineFile(file);
         } else {
             path = FileUtil.normalize(path);
             filename = FileUtil.normalize(filename);

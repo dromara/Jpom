@@ -45,16 +45,18 @@ public abstract class BaseServerWebSocketHandler extends TextWebSocketHandler {
         String dataValue = (String) attributes.get(dataParName);
         String userName = UserModel.getOptUserName(userInfo);
         userName = URLUtil.encode(userName);
-        String url = NodeForward.getSocketUrl(nodeModel, nodeUrl);
-        url = StrUtil.format(url, dataValue, userName);
-        // 连接节点
-        ProxySession proxySession = new ProxySession(url, session);
-        session.getAttributes().put("proxySession", proxySession);
+        if (nodeModel != null) {
+            String url = NodeForward.getSocketUrl(nodeModel, nodeUrl);
+            url = StrUtil.format(url, dataValue, userName);
+            // 连接节点
+            ProxySession proxySession = new ProxySession(url, session);
+            session.getAttributes().put("proxySession", proxySession);
+        }
         session.sendMessage(new TextMessage(StrUtil.format("欢迎加入:{} 会话id:{} ", userInfo.getName(), session.getId())));
     }
 
     @Override
-    protected void handleTextMessage(WebSocketSession session, TextMessage message) {
+    protected void handleTextMessage(WebSocketSession session, TextMessage message) throws IOException {
         if (operateLogController == null) {
             operateLogController = SpringUtil.getBean(OperateLogController.class);
         }
@@ -64,7 +66,18 @@ public abstract class BaseServerWebSocketHandler extends TextWebSocketHandler {
         JSONObject json = JSONObject.parseObject(msg);
         String op = json.getString("op");
         ConsoleCommandOp consoleCommandOp = ConsoleCommandOp.valueOf(op);
-        this.handleTextMessage(attributes, proxySession, json, consoleCommandOp);
+        if (proxySession != null) {
+            this.handleTextMessage(attributes, proxySession, json, consoleCommandOp);
+        } else {
+            this.handleTextMessage(attributes, session, json, consoleCommandOp);
+        }
+    }
+
+    protected void handleTextMessage(Map<String, Object> attributes,
+                                     WebSocketSession session,
+                                     JSONObject json,
+                                     ConsoleCommandOp consoleCommandOp) throws IOException {
+
     }
 
     /**
@@ -106,7 +119,7 @@ public abstract class BaseServerWebSocketHandler extends TextWebSocketHandler {
         destroy(session);
     }
 
-    private void destroy(WebSocketSession session) {
+    protected void destroy(WebSocketSession session) {
         try {
             if (session.isOpen()) {
                 session.close();

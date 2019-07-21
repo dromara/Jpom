@@ -91,8 +91,10 @@ public class AgentWebSocketScriptHandle extends BaseAgentWebSocketHandle {
     }
 
 
+    @Override
     @OnClose
     public void onClose(Session session) {
+        super.onClose(session);
         ScriptProcessBuilder.stopWatcher(session);
     }
 

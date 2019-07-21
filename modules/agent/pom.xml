@@ -22,12 +22,6 @@
             <artifactId>common</artifactId>
             <version>${pom.version}</version>
         </dependency>
-        <!--  文件编码识别-->
-        <dependency>
-            <groupId>net.sourceforge.jchardet</groupId>
-            <artifactId>jchardet</artifactId>
-            <version>1.0</version>
-        </dependency>
         <!--nginx-->
         <dependency>
             <groupId>com.github.odiszapc</groupId>
