@@ -44,7 +44,7 @@
 <body>
 <div class="layui-row">
     <div class="layui-col-md3">
-        <ul id="tree" class="ztree"></ul>
+        <div id="tree"></div>
     </div>
     <div class="layui-col-md9">
         <div style="margin: 7px;">
@@ -56,24 +56,13 @@
 </div>
 </body>
 <script type="text/javascript">
-    var lastClickNode, ws, showLog, zTreeObj;
-    var setting = {
-        data: {
-            key: {
-                children: "children"
-            },
-            view: {
-                selectedMulti: false
-            }
-        },
-        callback: {
-            onClick: zTreeOnClick
-        }
-    };
+    var lastClickNode, ws, showLog;
 
     function loadSuccess() {
-        // 加载日志列表 -tree
-        asyncLoadJs("$!jpomProxyPath/static/ztree/jquery.ztree.core.min.js", function () {
+        layui.use(['tree'], function () {
+            var tree = layui.tree;
+
+            //获取日志列表
             loadingAjax({
                 url: './getLogList',
                 data: {
@@ -81,14 +70,14 @@
                 },
                 success: function (data) {
                     var item = {
-                        name: '日志列表'
+                        title: '日志列表'
                     };
                     var array = [];
                     if (data.data && data.data.length > 0) {
                         for (var i = 0; i < data.data.length; i++) {
                             var name = data.data[i];
                             var obj = {
-                                name: name
+                                title: name
                             }
                             if (i == 0) {
                                 openSocket(name);
@@ -98,11 +87,31 @@
                     } else {
                         $("#log").html("暂无日志");
                     }
+                    item.spread = true;
                     item.children = array;
-                    zTreeObj = $.fn.zTree.init($("#tree"), setting, item);
-                    zTreeObj.expandAll(true);
+                    var logArray = [item];
+                    loadTree(logArray);
                 }
             });
+
+            //渲染树
+            function loadTree(data) {
+                tree.render({
+                    elem: '#tree',
+                    data: data,
+                    id: "tomcatTreeId",
+                    click: function (obj) {
+                        var title = obj.data.title;
+                        if (lastClickNode == title) {
+                            return;
+                        }
+                        if (!obj.data.children) {
+                            lastClickNode = title;
+                            openSocket(title);
+                        }
+                    }
+                });
+            }
         });
     }
 
@@ -150,7 +159,7 @@
                 try {
                     var file = JSON.parse(data.data);
                     if (file.fileName) {
-                        if (file.fileName == lastClickNode) {
+                        if (file.fileName == lastClickNode || endWith(file.fileName, lastClickNode)) {
                             showLog = true;
                         } else {
                             showLog = false;
@@ -171,16 +180,6 @@
         scrollToBotomm();
     }
 
-    //节点点击
-    function zTreeOnClick(event, treeId, treeNode) {
-        if (lastClickNode === treeNode.name) {
-            return;
-        }
-        var parentNode = treeNode.getParentNode();
-        if (parentNode) {
-            openSocket(treeNode.name);
-        }
-    }
 
     function downloadFile() {
         if (!lastClickNode) {
@@ -228,6 +227,13 @@
             });
             layer.close(index);
         });
+    }
+
+    function endWith(str, suffix) {
+        if (typeof str == 'string') {
+            return str.slice(-suffix.length) == suffix;
+        }
+        return false;
     }
 </script>
 </html>
