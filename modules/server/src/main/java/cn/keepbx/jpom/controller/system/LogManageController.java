@@ -7,6 +7,7 @@ import cn.keepbx.jpom.common.BaseServerController;
 import cn.keepbx.jpom.common.forward.NodeForward;
 import cn.keepbx.jpom.common.forward.NodeUrl;
 import cn.keepbx.jpom.system.WebAopLog;
+import cn.keepbx.util.LayuiTreeUtil;
 import com.alibaba.fastjson.JSONArray;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
@@ -36,7 +37,7 @@ public class LogManageController extends BaseServerController {
             return NodeForward.request(getNode(), getRequest(), NodeUrl.SystemLog).toString();
         }
         WebAopLog webAopLog = SpringUtil.getBean(WebAopLog.class);
-        JSONArray data = webAopLog.getTreeData();
+        JSONArray data = LayuiTreeUtil.getTreeData(webAopLog.getPropertyValue());
         return JsonMessage.getString(200, "", data);
     }
 }

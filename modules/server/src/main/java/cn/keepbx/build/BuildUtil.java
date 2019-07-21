@@ -19,6 +19,11 @@ public class BuildUtil {
         return FileUtil.file(ConfigBean.getInstance().getDataPath(), "build", id);
     }
 
+
+    public static File getBuildDataDir() {
+        return FileUtil.file(ConfigBean.getInstance().getDataPath(), "build");
+    }
+
     /**
      * 获取构建产物存放路径
      *
@@ -60,9 +65,7 @@ public class BuildUtil {
      * @return file
      */
     public static File getLogFile(String buildModelId, int buildId) {
-        return FileUtil.file(ConfigBean.getInstance().getDataPath(),
-                "build",
-                buildModelId,
+        return FileUtil.file(getBuildDataFile(buildModelId),
                 "history",
                 BuildModel.getBuildIdStr(buildId),
                 "info.log");

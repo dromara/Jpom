@@ -31,12 +31,19 @@ public abstract class BaseServerController extends BaseJpomController {
     protected NodeService nodeService;
 
     protected NodeModel getNode() {
-        String nodeId = getParameter("nodeId");
-        NodeModel nodeModel = nodeService.getItem(nodeId);
+        NodeModel nodeModel = tryGetNode();
         if (nodeModel == null) {
             throw new JpomRuntimeException("节点信息不正确");
         }
         return nodeModel;
+    }
+
+    protected NodeModel tryGetNode() {
+        String nodeId = getParameter("nodeId");
+        if (StrUtil.isEmpty(nodeId)) {
+            return null;
+        }
+        return nodeService.getItem(nodeId);
     }
 
     @Override

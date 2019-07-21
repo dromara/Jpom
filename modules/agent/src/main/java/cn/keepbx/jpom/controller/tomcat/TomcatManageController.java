@@ -2,11 +2,7 @@ package cn.keepbx.jpom.controller.tomcat;
 
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.io.resource.ResourceUtil;
-import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
-import cn.hutool.core.util.ZipUtil;
-import cn.hutool.crypto.SecureUtil;
 import cn.hutool.extra.servlet.ServletUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
@@ -14,8 +10,10 @@ import cn.jiangzeyin.controller.multipart.MultipartFileBuilder;
 import cn.keepbx.jpom.common.BaseAgentController;
 import cn.keepbx.jpom.common.commander.AbstractTomcatCommander;
 import cn.keepbx.jpom.model.data.TomcatInfoModel;
+import cn.keepbx.jpom.service.manage.TomcatEditService;
 import cn.keepbx.jpom.service.manage.TomcatManageService;
 import cn.keepbx.jpom.socket.AgentFileTailWatcher;
+import cn.keepbx.util.LayuiTreeUtil;
 import cn.keepbx.util.StringUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -27,8 +25,6 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.annotation.Resource;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.util.List;
 
 /**
  * @author lf
@@ -37,6 +33,8 @@ import java.util.List;
 @RequestMapping(value = "/tomcat/")
 public class TomcatManageController extends BaseAgentController {
 
+    @Resource
+    private TomcatEditService tomcatEditService;
     @Resource
     private TomcatManageService tomcatManageService;
 
@@ -64,127 +62,6 @@ public class TomcatManageController extends BaseAgentController {
 
 
     /**
-     * 列出所有的tomcat
-     *
-     * @return Tomcat列表
-     */
-    @RequestMapping(value = "list", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public String list() {
-        // 查询tomcat列表
-        List<TomcatInfoModel> tomcatInfoModels = tomcatManageService.list();
-        return JsonMessage.getString(200, "查询成功", tomcatInfoModels);
-    }
-
-    /**
-     * 根据Id查询Tomcat信息
-     *
-     * @param id Tomcat的主键
-     * @return 操作结果
-     */
-    @RequestMapping(value = "getItem", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public String getItem(String id) {
-        // 查询tomcat列表
-        return JsonMessage.getString(200, "查询成功", tomcatManageService.getItem(id));
-    }
-
-
-    /**
-     * 添加Tomcat
-     *
-     * @param tomcatInfoModel Tomcat信息
-     * @return 操作结果
-     */
-    @RequestMapping(value = "add", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public String add(TomcatInfoModel tomcatInfoModel) {
-        // 根据Tomcat名称查询tomcat是否已经存在
-        String name = tomcatInfoModel.getName();
-        TomcatInfoModel tomcatInfoModelTemp = tomcatManageService.getItemByName(name);
-        if (tomcatInfoModelTemp != null) {
-            return JsonMessage.getString(401, "名称已经存在，请使用其他名称！");
-        }
-        String error = this.doInitTomcat(tomcatInfoModel);
-        if (error != null) {
-            return error;
-        }
-
-        tomcatInfoModel.setId(SecureUtil.md5(DateUtil.now()));
-        tomcatInfoModel.setCreator(getUserName());
-
-        // 设置tomcat路径，去除多余的符号
-        tomcatInfoModel.setPath(FileUtil.normalize(tomcatInfoModel.getPath()));
-        tomcatManageService.addItem(tomcatInfoModel);
-        return JsonMessage.getString(200, "保存成功");
-    }
-
-
-    /**
-     * 修改Tomcat信息
-     *
-     * @param tomcatInfoModel Tomcat信息
-     * @return 操作结果
-     */
-    @RequestMapping(value = "update", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public String update(TomcatInfoModel tomcatInfoModel) {
-        // 根据Tomcat名称查询tomcat是否已经存在
-        String name = tomcatInfoModel.getName();
-        TomcatInfoModel tomcatInfoModelTemp = tomcatManageService.getItemByName(name);
-        if (tomcatInfoModelTemp != null && !tomcatInfoModelTemp.getId().equals(tomcatInfoModel.getId())) {
-            return JsonMessage.getString(401, "名称已经存在，请使用其他名称！");
-        }
-        String error = this.doInitTomcat(tomcatInfoModel);
-        if (error != null) {
-            return error;
-        }
-
-        tomcatInfoModel.setModifyUser(getUserName());
-        // 设置tomcat路径，去除多余的符号
-        tomcatInfoModel.setPath(FileUtil.normalize(tomcatInfoModel.getPath()));
-        tomcatManageService.updateItem(tomcatInfoModel);
-        return JsonMessage.getString(200, "修改成功");
-
-    }
-
-    private String doInitTomcat(TomcatInfoModel tomcatInfoModel) {
-        String tomcatPath = tomcatInfoModel.getPath();
-        // 判断Tomcat路径是否正确
-        if (!TomcatInfoModel.isTomcatRoot(tomcatPath)) {
-            return JsonMessage.getString(405, String.format("没有在路径：%s 下检测到Tomcat", tomcatPath));
-        }
-
-        if (StrUtil.isEmpty(tomcatInfoModel.getAppBase())) {
-            tomcatInfoModel.setAppBase(FileUtil.normalize(tomcatInfoModel.getPath()).concat(File.separator).concat("webapps"));
-        } else {
-            String path = FileUtil.normalize(tomcatInfoModel.getAppBase());
-            if (FileUtil.isAbsolutePath(path)) {
-                // appBase如：/project/、D:/project/
-                tomcatInfoModel.setAppBase(path);
-            } else {
-                // appBase填写的是对相路径如：project/dir
-                tomcatInfoModel.setAppBase(FileUtil.normalize(tomcatInfoModel.getPath()).concat(FileUtil.normalize(path)));
-            }
-        }
-        InputStream inputStream = ResourceUtil.getStream("classpath:/bin/jpomAgent.zip");
-        if (inputStream == null) {
-            return JsonMessage.getString(500, "jpomAgent.zip不存在");
-        }
-        // 解压代理工具到tomcat的appBase目录下
-        ZipUtil.unzip(inputStream, new File(tomcatInfoModel.getAppBase()), CharsetUtil.CHARSET_UTF_8);
-        return null;
-    }
-
-    /**
-     * 删除tomcat
-     *
-     * @param id tomcat id
-     * @return 操作结果
-     */
-    @RequestMapping(value = "delete", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public String delete(String id) {
-        tomcatManageService.deleteItem(id);
-        return JsonMessage.getString(200, "删除成功");
-    }
-
-    /**
      * 启动tomcat
      *
      * @param id tomcat id
@@ -193,7 +70,7 @@ public class TomcatManageController extends BaseAgentController {
     @RequestMapping(value = "start", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public String start(String id) {
         // 查询tomcat信息
-        TomcatInfoModel tomcatInfoModel = tomcatManageService.getItem(id);
+        TomcatInfoModel tomcatInfoModel = tomcatEditService.getItem(id);
 
         String result = AbstractTomcatCommander.getInstance().execCmd(tomcatInfoModel, "start");
         String msg = "启动成功";
@@ -213,7 +90,7 @@ public class TomcatManageController extends BaseAgentController {
     @RequestMapping(value = "stop", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public String stop(String id) {
         // 查询tomcat信息
-        TomcatInfoModel tomcatInfoModel = tomcatManageService.getItem(id);
+        TomcatInfoModel tomcatInfoModel = tomcatEditService.getItem(id);
 
         String result = AbstractTomcatCommander.getInstance().execCmd(tomcatInfoModel, "stop");
         String msg = "停止成功";
@@ -232,7 +109,7 @@ public class TomcatManageController extends BaseAgentController {
     @RequestMapping(value = "restart", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public String restart(String id) {
         // 查询tomcat信息
-        TomcatInfoModel tomcatInfoModel = tomcatManageService.getItem(id);
+        TomcatInfoModel tomcatInfoModel = tomcatEditService.getItem(id);
 
         String stopResult = AbstractTomcatCommander.getInstance().execCmd(tomcatInfoModel, "stop");
         String startResult = AbstractTomcatCommander.getInstance().execCmd(tomcatInfoModel, "start");
@@ -262,7 +139,7 @@ public class TomcatManageController extends BaseAgentController {
     @RequestMapping(value = "getFileList", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public String getFileList(String id, String path, String except) {
         // 查询项目路径
-        TomcatInfoModel tomcatInfoModel = tomcatManageService.getItem(id);
+        TomcatInfoModel tomcatInfoModel = tomcatEditService.getItem(id);
         if (tomcatInfoModel == null) {
             return JsonMessage.getString(500, "查询失败：项目不存在");
         }
@@ -318,7 +195,7 @@ public class TomcatManageController extends BaseAgentController {
      */
     @RequestMapping(value = "upload", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public String upload(String id, String path) {
-        TomcatInfoModel tomcatInfoModel = tomcatManageService.getItem(id);
+        TomcatInfoModel tomcatInfoModel = tomcatEditService.getItem(id);
 
         MultipartFileBuilder multipartFileBuilder = createMultipart()
                 .addFieldName("file");
@@ -345,7 +222,7 @@ public class TomcatManageController extends BaseAgentController {
      */
     @RequestMapping(value = "uploadWar", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public String uploadWar(String id) {
-        TomcatInfoModel tomcatInfoModel = tomcatManageService.getItem(id);
+        TomcatInfoModel tomcatInfoModel = tomcatEditService.getItem(id);
 
         MultipartFileBuilder multipartFileBuilder = createMultipart()
                 .addFieldName("file");
@@ -374,7 +251,7 @@ public class TomcatManageController extends BaseAgentController {
      */
     @RequestMapping(value = "deleteFile", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public String deleteFile(String id, String path, String filename) {
-        TomcatInfoModel tomcatInfoModel = tomcatManageService.getItem(id);
+        TomcatInfoModel tomcatInfoModel = tomcatEditService.getItem(id);
         if (tomcatInfoModel == null) {
             return JsonMessage.getString(500, "tomcat不存在");
         }
@@ -385,9 +262,10 @@ public class TomcatManageController extends BaseAgentController {
             file = FileUtil.file(tomcatInfoModel.getPath(), "logs", filename);
             AgentFileTailWatcher.offlineFile(file);
         } else {
-            path = FileUtil.normalize(path);
-            filename = FileUtil.normalize(filename);
-            file = new File(tomcatInfoModel.getAppBase().concat(path).concat(File.separator).concat(filename));
+//            path = FileUtil.normalize(path);
+//            filename = FileUtil.normalize(filename);
+            file = FileUtil.file(tomcatInfoModel.getAppBase(), path, filename);
+            //new File(.concat(path).concat(File.separator).concat(filename));
         }
         if (file.exists()) {
             if (file.delete()) {
@@ -412,7 +290,7 @@ public class TomcatManageController extends BaseAgentController {
         filename = FileUtil.normalize(filename);
         path = FileUtil.normalize(path);
         try {
-            TomcatInfoModel tomcatInfoModel = tomcatManageService.getItem(id);
+            TomcatInfoModel tomcatInfoModel = tomcatEditService.getItem(id);
             File file = new File(tomcatInfoModel.getAppBase().concat(path).concat(File.separator).concat(filename));
             //下载日志文件
             if ("_tomcat_log".equals(path)) {
@@ -436,13 +314,11 @@ public class TomcatManageController extends BaseAgentController {
      */
     @RequestMapping(value = "logList", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public String logList(String id) {
-        TomcatInfoModel item = tomcatManageService.getItem(id);
+        TomcatInfoModel item = tomcatEditService.getItem(id);
         if (item == null) {
-            return JsonMessage.getString(200, "");
+            return JsonMessage.getString(300, "没有对应数据");
         }
-        String path = item.getPath() + "/logs";
-        path = FileUtil.normalize(path);
-        List<String> strings = FileUtil.listFileNames(path);
-        return JsonMessage.getString(200, "", strings);
+        JSONArray jsonArray = LayuiTreeUtil.getTreeData(FileUtil.file(item.pathAndCheck(), "logs").getAbsolutePath());
+        return JsonMessage.getString(200, "", jsonArray);
     }
 }

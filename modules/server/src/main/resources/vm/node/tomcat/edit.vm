@@ -81,28 +81,6 @@
             });
             return false;
         });
-
-        $("#delete_node").click(function () {
-            var id = $(this).attr("data-id");
-            var type = $(this).attr("type");
-            var msg = '确定删除节点 ' + id + '？（不会影响节点下的数据）';
-            layer.confirm(msg, {
-                title: '系统提示'
-            }, function (index) {
-                loadingAjax({
-                    url: './del.json',
-                    data: {
-                        id: id
-                    },
-                    success: function (data) {
-                        layer.msg(data.msg);
-                        if (200 == data.code) {
-                            autoClose();
-                        }
-                    }
-                });
-            });
-        });
     }
         #if($item && $user.isSystemUser())
         function delTomcat(id, name) {

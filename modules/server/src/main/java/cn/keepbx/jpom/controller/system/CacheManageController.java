@@ -4,6 +4,7 @@ import cn.hutool.core.io.FileUtil;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.validator.ValidatorItem;
 import cn.jiangzeyin.common.validator.ValidatorRule;
+import cn.keepbx.build.BuildUtil;
 import cn.keepbx.jpom.common.BaseServerController;
 import cn.keepbx.jpom.common.forward.NodeForward;
 import cn.keepbx.jpom.common.forward.NodeUrl;
@@ -11,6 +12,7 @@ import cn.keepbx.jpom.common.interceptor.UrlPermission;
 import cn.keepbx.jpom.controller.LoginControl;
 import cn.keepbx.jpom.model.Role;
 import cn.keepbx.jpom.model.log.UserOperateLogV1;
+import cn.keepbx.jpom.socket.ServiceFileTailWatcher;
 import cn.keepbx.jpom.system.ConfigBean;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
@@ -32,14 +34,21 @@ public class CacheManageController extends BaseServerController {
 
     @RequestMapping(value = "cache.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
     public String cache() {
-        //
-        File file = ConfigBean.getInstance().getTempPath();
-        String fileSize = FileUtil.readableFileSize(FileUtil.size(file));
-        setAttribute("cacheFileSize", fileSize);
+        if (tryGetNode() == null) {
+            //
+            File file = ConfigBean.getInstance().getTempPath();
+            String fileSize = FileUtil.readableFileSize(FileUtil.size(file));
+            setAttribute("cacheFileSize", fileSize);
 
-        int size = LoginControl.LFU_CACHE.size();
-        setAttribute("ipSize", size);
+            int size = LoginControl.LFU_CACHE.size();
+            setAttribute("ipSize", size);
+            int oneLineCount = ServiceFileTailWatcher.getOneLineCount();
+            setAttribute("readFileOnLineCount", oneLineCount);
 
+            File buildDataDir = BuildUtil.getBuildDataDir();
+            fileSize = FileUtil.readableFileSize(FileUtil.size(buildDataDir));
+            setAttribute("cacheBuildFileSize", fileSize);
+        }
         return "system/cache";
     }
 

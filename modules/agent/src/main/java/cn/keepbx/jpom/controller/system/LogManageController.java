@@ -4,6 +4,7 @@ import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.spring.SpringUtil;
 import cn.keepbx.jpom.common.BaseAgentController;
 import cn.keepbx.jpom.system.WebAopLog;
+import cn.keepbx.util.LayuiTreeUtil;
 import com.alibaba.fastjson.JSONArray;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -24,7 +25,7 @@ public class LogManageController extends BaseAgentController {
     @RequestMapping(value = "log_data.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public String logData() {
         WebAopLog webAopLog = SpringUtil.getBean(WebAopLog.class);
-        JSONArray data = webAopLog.getTreeData();
+        JSONArray data = LayuiTreeUtil.getTreeData(webAopLog.getPropertyValue());
         return JsonMessage.getString(200, "", data);
     }
 }

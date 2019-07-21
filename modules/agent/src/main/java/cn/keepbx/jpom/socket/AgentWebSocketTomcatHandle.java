@@ -7,7 +7,7 @@ import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.spring.SpringUtil;
 import cn.keepbx.jpom.JpomApplication;
 import cn.keepbx.jpom.model.data.TomcatInfoModel;
-import cn.keepbx.jpom.service.manage.TomcatManageService;
+import cn.keepbx.jpom.service.manage.TomcatEditService;
 import cn.keepbx.jpom.system.WebAopLog;
 import cn.keepbx.util.SocketSessionUtil;
 import com.alibaba.fastjson.JSONObject;
@@ -31,18 +31,18 @@ import java.util.concurrent.ConcurrentHashMap;
 @Component
 public class AgentWebSocketTomcatHandle extends BaseAgentWebSocketHandle {
 
-    private TomcatManageService tomcatManageService;
+    private TomcatEditService tomcatEditService;
 
     private static final Map<String, File> CACHE_FILE = new ConcurrentHashMap<>();
 
     @OnOpen
     public void onOpen(@PathParam("tomcatId") String tomcatId, @PathParam("optUser") String urlOptUser, Session session) {
         try {
-            if (tomcatManageService == null) {
-                tomcatManageService = SpringUtil.getBean(TomcatManageService.class);
+            if (tomcatEditService == null) {
+                tomcatEditService = SpringUtil.getBean(TomcatEditService.class);
             }
-            TomcatInfoModel tomcatInfoModel = tomcatManageService.getItem(tomcatId);
-            if (tomcatInfoModel == null) {
+            TomcatInfoModel tomcatInfoModel = tomcatEditService.getItem(tomcatId);
+            if (tomcatInfoModel == null && !JpomApplication.SYSTEM_ID.equalsIgnoreCase(tomcatId)) {
                 SocketSessionUtil.send(session, "获取tomcat信息错误");
                 session.close();
                 return;
@@ -71,7 +71,7 @@ public class AgentWebSocketTomcatHandle extends BaseAgentWebSocketHandle {
         if (JpomApplication.SYSTEM_ID.equalsIgnoreCase(tomcatId)) {
             runMsg(session, json);
         } else {
-            TomcatInfoModel tomcatInfoModel = tomcatManageService.getItem(tomcatId);
+            TomcatInfoModel tomcatInfoModel = tomcatEditService.getItem(tomcatId);
             if (tomcatInfoModel == null) {
                 SocketSessionUtil.send(session, "没有对应tomcat");
                 session.close();

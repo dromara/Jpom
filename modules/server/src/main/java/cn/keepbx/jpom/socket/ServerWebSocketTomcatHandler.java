@@ -46,8 +46,8 @@ public class ServerWebSocketTomcatHandler extends BaseServerWebSocketHandler {
             }
             try {
                 ServiceFileTailWatcher.addWatcher(file, session);
-                attributes.put("nowFile", nowFile);
-            } catch (IOException io) {
+                attributes.put("nowFile", file);
+            } catch (Exception io) {
                 DefaultSystemLog.ERROR().error("监听日志变化", io);
                 SocketSessionUtil.send(session, io.getMessage());
             }

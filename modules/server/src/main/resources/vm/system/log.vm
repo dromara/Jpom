@@ -23,7 +23,7 @@
     <div id="treeData" class="layui-col-md3"></div>
     <div id="log" class="layui-col-md9 logConsole">
         <div>当前查看：<span id="nowFileName"></span></div>
-        <textarea name="context" id="logContext" placeholder="加载中....." readonly disabled
+        <textarea name="context" id="logContext" placeholder="选择查看的文件" readonly disabled
                   class="layui-textarea context"></textarea>
     </div>
 </div>
@@ -96,6 +96,8 @@
                     color: "#000",
                     display: "inline-block"
                 });
+                var h = logContext[0].scrollHeight;
+                logContext.scrollTop(h);
             };
             ws.onerror = function (ev) {
                 console.log(ev);

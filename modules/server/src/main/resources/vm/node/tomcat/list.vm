@@ -34,10 +34,6 @@
                             查看日志
                         </button>
                         #if($user.isSystemUser())
-                        ##                            <button op="addProject" data-id="$item.id" data-name="$item.name" class="layui-btn layui-btn-sm ">
-                        ##                                新增项目
-                        ##                            </button>
-
                             <button op="edit" data-id="$item.id" data-name="$item.name" class="layui-btn layui-btn-sm ">
                                 编辑
                             </button>
@@ -97,7 +93,7 @@
                 }
             },
             {field: 'session', title: 'Session个数', width: "20%"},
-            {field: 'opreation', title: '操作', width: "250", hide: false, toolbar: '#toolbar_op'}
+            {title: '操作', toolbar: '#toolbar_op'}
         ]],
         url: "./getTomcatProject",
         loading: true,
@@ -178,18 +174,6 @@
                     execTomcatOp(id, op);
                 });
             }
-
-            if ("addProject" == op) {
-                // 新增项目
-                layerOpen({
-                    type: 2,
-                    title: '新增项目',
-                    shade: 0.8,
-                    area: ['80%', '60%'],
-                    content: 'addProject.html?id=' + id
-                });
-            }
-
             return false;
         });
 

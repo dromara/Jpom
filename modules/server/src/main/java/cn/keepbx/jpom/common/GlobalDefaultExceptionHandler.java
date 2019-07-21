@@ -22,8 +22,7 @@ import java.util.concurrent.TimeUnit;
  * 全局异常处理
  *
  * @author jiangzeyin
- * <p>
- * createTime 2019/04/17
+ * @date 2019/04/17
  */
 @ControllerAdvice
 public class GlobalDefaultExceptionHandler {

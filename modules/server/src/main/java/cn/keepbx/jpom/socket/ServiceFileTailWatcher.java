@@ -33,6 +33,10 @@ public class ServiceFileTailWatcher extends BaseFileTailWatcher {
         super(logFile);
     }
 
+    public static int getOneLineCount() {
+        return CONCURRENT_HASH_MAP.size();
+    }
+
     /**
      * 添加文件监听
      *

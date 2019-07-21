@@ -1,9 +1,15 @@
 package cn.keepbx.jpom.model.data;
 
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.io.resource.ResourceUtil;
+import cn.hutool.core.util.CharsetUtil;
+import cn.hutool.core.util.StrUtil;
+import cn.hutool.core.util.ZipUtil;
 import cn.keepbx.jpom.model.BaseModel;
+import cn.keepbx.jpom.system.JpomRuntimeException;
 
 import java.io.File;
+import java.io.InputStream;
 
 /**
  * tomcat 对象实体
@@ -28,6 +34,11 @@ public class TomcatInfoModel extends BaseModel {
         return FileUtil.normalize(path + "/");
     }
 
+    /**
+     * 检测路径是否正确
+     *
+     * @return path
+     */
     public String pathAndCheck() {
         String path = getPath();
         if (path == null) {
@@ -36,7 +47,7 @@ public class TomcatInfoModel extends BaseModel {
         if (isTomcatRoot(path)) {
             return path;
         }
-        throw new RuntimeException("tomcat path error:" + getPath());
+        throw new RuntimeException(String.format("没有在路径：%s 下检测到Tomcat", path));
     }
 
     public void setPath(String path) {
@@ -60,7 +71,7 @@ public class TomcatInfoModel extends BaseModel {
     }
 
     public String getAppBase() {
-        if (appBase == null) {
+        if (StrUtil.isEmpty(appBase)) {
             return null;
         }
         return FileUtil.normalize(appBase + "/");
@@ -108,7 +119,7 @@ public class TomcatInfoModel extends BaseModel {
      *
      * @return 返回是否是Tomcat根路径
      */
-    public static boolean isTomcatRoot(String path) {
+    private static boolean isTomcatRoot(String path) {
         File file = new File(path);
         if (!file.exists()) {
             return false;
@@ -135,5 +146,33 @@ public class TomcatInfoModel extends BaseModel {
             }
         }
         return false;
+    }
+
+    /**
+     * 初始化
+     */
+    public void initTomcat() {
+        String tomcatPath = pathAndCheck();
+        String appBase = getAppBase();
+        if (StrUtil.isEmpty(appBase) || StrUtil.SLASH.equals(appBase)) {
+            File webapps = FileUtil.file(tomcatPath, "webapps");
+            setAppBase(webapps.getAbsolutePath());
+        } else {
+            String path = FileUtil.normalize(appBase);
+            if (FileUtil.isAbsolutePath(path)) {
+                // appBase如：/project/、D:/project/
+                setAppBase(path);
+            } else {
+                // appBase填写的是对相路径如：project/dir
+                File webapps = FileUtil.file(tomcatPath, path);
+                setAppBase(webapps.getAbsolutePath());
+            }
+        }
+        InputStream inputStream = ResourceUtil.getStream("classpath:/bin/jpomAgent.zip");
+        if (inputStream == null) {
+            throw new JpomRuntimeException("jpomAgent.zip不存在");
+        }
+        // 解压代理工具到tomcat的appBase目录下
+        ZipUtil.unzip(inputStream, new File(getAppBase()), CharsetUtil.CHARSET_UTF_8);
     }
 }

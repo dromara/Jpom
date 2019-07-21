@@ -6,6 +6,7 @@ import cn.jiangzeyin.common.validator.ValidatorItem;
 import cn.jiangzeyin.common.validator.ValidatorRule;
 import cn.keepbx.jpom.common.BaseAgentController;
 import cn.keepbx.jpom.common.commander.AbstractProjectCommander;
+import cn.keepbx.jpom.socket.AgentFileTailWatcher;
 import cn.keepbx.jpom.system.ConfigBean;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.http.MediaType;
@@ -39,6 +40,9 @@ public class AgentCacheManageController extends BaseAgentController {
         //
         jsonObject.put("pidName", AbstractProjectCommander.PID_JPOM_NAME.size());
         jsonObject.put("pidPort", AbstractProjectCommander.PID_PORT.size());
+
+        int oneLineCount = AgentFileTailWatcher.getOneLineCount();
+        jsonObject.put("readFileOnLineCount", oneLineCount);
         return JsonMessage.getString(200, "ok", jsonObject);
     }
 

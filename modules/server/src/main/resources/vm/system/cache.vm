@@ -27,27 +27,35 @@
     <blockquote class="layui-elem-quote">黑名单IP数量：$!ipSize
         <button type="button" class="layui-btn layui-btn-sm clear" t="serviceIpSize">清空</button>
     </blockquote>
+    <blockquote class="layui-elem-quote">在读取的日志文件数：$!readFileOnLineCount
+    </blockquote>
+    <blockquote class="layui-elem-quote">在线构建文件占用空间：$!cacheBuildFileSize
+    </blockquote>
+
     #else
     <blockquote class="layui-elem-quote">文件缓存：
         <span nodeId="$node.id" fileSize> </span>
-        <button type="button" class="layui-btn layui-btn-sm clear" style="display: none" nodeId="$node.id"
+        <button type="button" class="layui-btn layui-btn-sm clear" nodeId="$node.id"
                 t="fileSize">清空
         </button>
     </blockquote>
     <blockquote class="layui-elem-quote">进程名缓存：
         <span nodeId="$node.id" pidName></span>
-        <button type="button" class="layui-btn layui-btn-sm clear" style="display: none" nodeId="$node.id"
+        <button type="button" class="layui-btn layui-btn-sm clear" nodeId="$node.id"
                 t="pidName">清空
         </button>
     </blockquote>
     <blockquote class="layui-elem-quote">进程端口缓存：
         <span nodeId="$node.id" pidPort></span>
-        <button type="button" class="layui-btn layui-btn-sm clear" style="display: none" nodeId="$node.id"
+        <button type="button" class="layui-btn layui-btn-sm clear" nodeId="$node.id"
                 t="pidPort">清空
         </button>
     </blockquote>
-    #end
 
+    <blockquote class="layui-elem-quote">在读取的日志文件数：
+        <span nodeId="$node.id" readFileOnLineCount></span>
+    </blockquote>
+    #end
 </body>
 <script>
     function loadSuccess() {
