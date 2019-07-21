@@ -4,7 +4,6 @@
 <head>
     #parse("./common/head.vm")
     <title>项目管理系统</title>
-    <link href="$!jpomProxyPath/static/ztree/zTreeStyle/zTreeStyle.css" rel="stylesheet">
     <style>
         html, body {
             width: 100%;
