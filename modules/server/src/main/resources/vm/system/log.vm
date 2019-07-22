@@ -31,9 +31,6 @@
 <script type="text/javascript" src="$!jpomProxyPath/static/js/auto-line-number.js?v=$staticCacheTime"></script>
 <script type="text/javascript">
     var treeData = [];
-        #if($treeData)
-        treeData =$treeData;
-        #end
     var tree;
 
     var url = getSocketHost() + "/tomcat_log?userId=$user.getUserMd5Key()&tomcatId=system&nodeId=#if(!$node)system#else$!node.id#end&type=tomcat";
@@ -49,12 +46,51 @@
                 elem: '#treeData',
                 data: [],
                 id: "treeData",
+                edit: ['del', 'add'],
                 click: function (obj) {
                     if (obj.data.children) {
                         return;
                     }
                     $("#nowFileName").text(obj.data.title);
                     openSocket(obj.data.path);
+                },
+                operate: function (obj) {
+                    var type = obj.type;
+                    var data = obj.data;
+                    if (type === 'del') {
+                        layer.confirm('确定要删除此日志文件吗？', {
+                            title: '系统提示'
+                        }, function (index) {
+                            layer.close(index);
+                            loadingAjax({
+                                url: './log_del.json',
+                                data: {
+                                    path: data.path,
+                                    nodeId: "$!node.id"
+                                },
+                                success: function (data) {
+                                    layer.msg(data.msg);
+                                    if (200 == data.code) {
+                                        setTimeout(function () {
+                                            location.reload();
+                                        }, 2000)
+                                    } else {
+                                        reloadTree();
+                                    }
+                                }
+                            });
+                        }, function () {
+                            reloadTree();
+                        });
+                    } else if (type === 'add') {
+                        if (data.children) {
+                            layer.msg("不支持下载文件夹");
+                        } else {
+                            window.open("./log_download?path=" + data.path + "&nodeId=$!node.id");
+                        }
+                        reloadTree();
+                        return false;
+                    }
                 }
             });
             getData();
@@ -88,7 +124,6 @@
             ws.onmessage = function (data) {
                 if (data.data) {
                     logContext.append(data.data + '\r\n');
-
                 }
                 $("textarea").setTextareaCount({
                     width: "30px",
@@ -116,10 +151,15 @@
                 if (200 != data.code) {
                     layer.msg(data.msg);
                 }
-                tree.reload('treeData', {
-                    data: data.data
-                });
+                treeData = data.data;
+                reloadTree();
             }
+        });
+    }
+
+    function reloadTree() {
+        tree.reload('treeData', {
+            data: treeData
         });
     }
 </script>

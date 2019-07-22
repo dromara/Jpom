@@ -29,14 +29,16 @@
 </body>
 <script type="text/javascript" src="$!jpomProxyPath/static/js/auto-line-number.js?v=$staticCacheTime"></script>
 <script type="text/javascript">
-    var lastClickNode, ws, showLog;
+    var ws;
     var url = getSocketHost() + "/tomcat_log?userId=$user.getUserMd5Key()&tomcatId=$id&nodeId=$node.id&type=tomcat";
+    var treeData = [];
+    var tree;
 
     function loadSuccess() {
         var logContext = $("#logContext");
         initPlugin();
         layui.use(['tree'], function () {
-            var tree = layui.tree;
+            tree = layui.tree;
             //获取日志列表
             loadingAjax({
                 url: './getLogList',
@@ -44,8 +46,8 @@
                     id: '$id'
                 },
                 success: function (data) {
-                    var logArray = data.data;
-                    loadTree(logArray);
+                    treeData = data.data;
+                    loadTree(treeData);
                 }
             });
 
@@ -55,6 +57,7 @@
                     elem: '#tree',
                     data: data,
                     id: "tomcatTreeId",
+                    edit: ['del', 'add'],
                     click: function (obj) {
                         if (obj.data.children) {
                             return;
@@ -63,6 +66,48 @@
                         $("#nowFileName").text(obj.data.title);
                         if (!obj.data.children) {
                             openSocket(obj.data.path);
+                        }
+                    },
+                    operate: function (obj) {
+                        var type = obj.type;
+                        var data = obj.data;
+                        if (type === 'del') {
+                            layer.confirm('确定要删除此日志文件吗？', {
+                                title: '系统提示'
+                            }, function (index) {
+                                layer.close(index);
+                                loadingAjax({
+                                    url: './deleteFile',
+                                    data: {
+                                        path: '_tomcat_log',
+                                        filename: data.path,
+                                        nodeId: "$!node.id",
+                                        id: "$!id"
+                                    },
+                                    success: function (data) {
+                                        layer.msg(data.msg);
+                                        if (200 == data.code) {
+                                            setTimeout(function () {
+                                                location.reload();
+                                            }, 2000)
+                                        } else {
+                                            reloadTree();
+                                        }
+                                    }
+                                });
+                            }, function () {
+                                reloadTree();
+                            });
+                        } else if (type === 'add') {
+                            if (data.children) {
+                                layer.msg("不支持下载文件夹");
+                            } else {
+                                var url = "./download?id=$id&filename=" + encodeURI(data.path) + "&path=_tomcat_log";
+                                url = appendNodeId(url);
+                                window.open(url);
+                            }
+                            reloadTree();
+                            return false;
                         }
                     }
                 });
@@ -116,14 +161,10 @@
         }
     }
 
-
-    function downloadFile() {
-        if (!lastClickNode) {
-            return;
-        }
-        var url = "./download?id=$id&filename=" + encodeURI(lastClickNode) + "&path=_tomcat_log";
-        url = appendNodeId(url);
-        self.location.href = url;
+    function reloadTree() {
+        tree.reload('tomcatTreeId', {
+            data: treeData
+        });
     }
 </script>
 </html>

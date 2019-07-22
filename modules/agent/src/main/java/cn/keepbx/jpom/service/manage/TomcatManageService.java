@@ -5,6 +5,7 @@ import cn.hutool.http.HttpRequest;
 import cn.hutool.http.HttpResponse;
 import cn.hutool.http.HttpStatus;
 import cn.jiangzeyin.common.JsonMessage;
+import cn.keepbx.jpom.controller.tomcat.TomcatOp;
 import cn.keepbx.jpom.model.data.TomcatInfoModel;
 import cn.keepbx.jpom.system.JpomRuntimeException;
 import com.alibaba.fastjson.JSONArray;
@@ -99,6 +100,7 @@ public class TomcatManageService {
                 body = httpResponse.body();
             }
             if (httpResponse.getStatus() == HttpStatus.HTTP_NOT_FOUND) {
+                // 没有插件
                 tomcatInfoModel.initTomcat();
                 throw new JpomRuntimeException("tomcat 未初始化");
             }
@@ -113,19 +115,19 @@ public class TomcatManageService {
     /**
      * tomcat项目管理
      *
-     * @param id   tomcat id
-     * @param path 项目路径
-     * @param op   执行的操作 start=>启动项目 stop=>停止项目 relaod=>重启项目
+     * @param id       tomcat id
+     * @param path     项目路径
+     * @param tomcatOp 执行的操作 start=>启动项目 stop=>停止项目 relaod=>重启项目
      * @return 操作结果
      */
-    public JsonMessage tomcatProjectManage(String id, String path, String op) {
+    public JsonMessage tomcatProjectManage(String id, String path, TomcatOp tomcatOp) {
         TomcatInfoModel tomcatInfoModel = tomcatEditService.getItem(id);
-        String result = tomcatCmd(tomcatInfoModel, String.format("text/%s?path=%s", op, path));
+        String result = tomcatCmd(tomcatInfoModel, String.format("text/%s?path=%s", tomcatOp.name(), path));
 
         if (result.startsWith("OK")) {
             return new JsonMessage(200, "操作成功");
         } else {
-            return new JsonMessage(500, "操作失败");
+            return new JsonMessage(500, "操作失败:" + result);
         }
     }
 }

@@ -6,6 +6,8 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.servlet.ServletUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
+import cn.jiangzeyin.common.validator.ValidatorItem;
+import cn.jiangzeyin.common.validator.ValidatorRule;
 import cn.jiangzeyin.controller.multipart.MultipartFileBuilder;
 import cn.keepbx.jpom.common.BaseAgentController;
 import cn.keepbx.jpom.common.commander.AbstractTomcatCommander;
@@ -25,6 +27,7 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.annotation.Resource;
 import java.io.File;
 import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author lf
@@ -125,8 +128,11 @@ public class TomcatManageController extends BaseAgentController {
      * @return 操作结果
      */
     @RequestMapping(value = "tomcatProjectManage", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public String tomcatProjectManage(String id, String path, String op) {
-        return tomcatManageService.tomcatProjectManage(id, path, op).toString();
+    public String tomcatProjectManage(String id, String path,
+                                      @ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "操作项不对") String op) {
+
+        TomcatOp tomcatOp = TomcatOp.valueOf(op);
+        return tomcatManageService.tomcatProjectManage(id, path, tomcatOp).toString();
     }
 
     /**
@@ -255,17 +261,19 @@ public class TomcatManageController extends BaseAgentController {
         if (tomcatInfoModel == null) {
             return JsonMessage.getString(500, "tomcat不存在");
         }
-
         File file;
         if ("_tomcat_log".equals(path)) {
             //删除日志文件
             file = FileUtil.file(tomcatInfoModel.getPath(), "logs", filename);
+            // 判断修改时间
+            long modified = file.lastModified();
+            if (System.currentTimeMillis() - modified < TimeUnit.DAYS.toMillis(1)) {
+                return JsonMessage.getString(405, "不能删除当天的日志");
+            }
+            // 判断最后修改日期
             AgentFileTailWatcher.offlineFile(file);
         } else {
-//            path = FileUtil.normalize(path);
-//            filename = FileUtil.normalize(filename);
             file = FileUtil.file(tomcatInfoModel.getAppBase(), path, filename);
-            //new File(.concat(path).concat(File.separator).concat(filename));
         }
         if (file.exists()) {
             if (file.delete()) {
@@ -291,11 +299,12 @@ public class TomcatManageController extends BaseAgentController {
         path = FileUtil.normalize(path);
         try {
             TomcatInfoModel tomcatInfoModel = tomcatEditService.getItem(id);
-            File file = new File(tomcatInfoModel.getAppBase().concat(path).concat(File.separator).concat(filename));
+            File file;
             //下载日志文件
             if ("_tomcat_log".equals(path)) {
-                String name = tomcatInfoModel.getPath() + "/logs/" + filename;
-                file = FileUtil.file(name);
+                file = FileUtil.file(tomcatInfoModel.getPath(), "logs", filename);
+            } else {
+                file = FileUtil.file(tomcatInfoModel.getAppBase(), path, filename);
             }
             if (file.isDirectory()) {
                 return "暂不支持下载文件夹";

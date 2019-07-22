@@ -132,6 +132,11 @@ public enum NodeUrl {
      */
     SystemLog("/system/log_data.json"),
 
+    DelSystemLog("/system/log_del.json"),
+
+    DownloadSystemLog("/system/log_download"),
+
+
     ;
     /**
      * 相对请求地址
