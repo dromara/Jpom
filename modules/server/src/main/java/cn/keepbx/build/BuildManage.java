@@ -151,7 +151,7 @@ public class BuildManage extends BaseBuild implements Runnable {
      * 打包构建产物
      */
     private boolean packageFile() throws InterruptedException {
-        Thread.sleep(5000);
+        Thread.sleep(2000);
         File file = FileUtil.file(this.gitFile, buildModel.getResultDirFile());
         if (!file.exists()) {
             this.log(buildModel.getResultDirFile() + "不存在，处理构建产物失败");

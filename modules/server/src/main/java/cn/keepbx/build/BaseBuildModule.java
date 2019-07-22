@@ -1,5 +1,6 @@
 package cn.keepbx.build;
 
+import cn.hutool.core.io.FileUtil;
 import cn.keepbx.jpom.model.BaseJsonModel;
 import cn.keepbx.jpom.model.data.BuildModel;
 
@@ -63,7 +64,7 @@ public class BaseBuildModule extends BaseJsonModel {
         if (resultDirFile == null) {
             return null;
         }
-        return resultDirFile.trim();
+        return FileUtil.normalize(this.resultDirFile.trim());
     }
 
     public void setResultDirFile(String resultDirFile) {
