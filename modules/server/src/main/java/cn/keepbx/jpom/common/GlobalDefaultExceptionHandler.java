@@ -50,10 +50,7 @@ public class GlobalDefaultExceptionHandler {
             if (e instanceof AuthorizeException) {
                 AuthorizeException authorizeException = (AuthorizeException) e;
                 ServletUtil.write(response, authorizeException.getJsonMessage().toString(), MediaType.APPLICATION_JSON_UTF8_VALUE);
-            } else if (e instanceof AgentException) {
-                AgentException agentException = (AgentException) e;
-                ServletUtil.write(response, JsonMessage.getString(500, agentException.getMessage()), MediaType.APPLICATION_JSON_UTF8_VALUE);
-            } else if (e instanceof JpomRuntimeException) {
+            } else if (e instanceof AgentException || e instanceof JpomRuntimeException) {
                 ServletUtil.write(response, JsonMessage.getString(500, e.getMessage()), MediaType.APPLICATION_JSON_UTF8_VALUE);
             } else {
                 ServletUtil.write(response, JsonMessage.getString(500, "服务异常：" + e.getMessage()), MediaType.APPLICATION_JSON_UTF8_VALUE);
@@ -62,12 +59,8 @@ public class GlobalDefaultExceptionHandler {
     }
 
     private String getErrorMsg(Exception e) {
-        if (e instanceof AuthorizeException) {
-            AuthorizeException authorizeException = (AuthorizeException) e;
-            return authorizeException.getMessage();
-        } else if (e instanceof AgentException) {
-            AgentException agentException = (AgentException) e;
-            return agentException.getMessage();
+        if (e instanceof JpomRuntimeException || e instanceof AgentException || e instanceof AuthorizeException) {
+            return e.getMessage();
         } else {
             return "服务异常：" + e.getMessage();
         }

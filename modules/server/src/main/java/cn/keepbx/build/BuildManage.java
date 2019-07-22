@@ -5,9 +5,7 @@ import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.io.LineHandler;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.IdUtil;
-import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
-import cn.hutool.system.SystemUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.spring.SpringUtil;
 import cn.keepbx.jpom.JpomApplication;
@@ -16,11 +14,11 @@ import cn.keepbx.jpom.model.data.UserModel;
 import cn.keepbx.jpom.model.log.BuildHistoryLog;
 import cn.keepbx.jpom.service.dblog.DbBuildHistoryLogService;
 import cn.keepbx.jpom.system.JpomRuntimeException;
+import cn.keepbx.util.CommandUtil;
 import cn.keepbx.util.GitUtil;
 import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 
 import java.io.*;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -36,22 +34,6 @@ public class BuildManage extends BaseBuild implements Runnable {
      * 缓存构建中
      */
     private static final Map<String, BuildManage> BUILD_MANAGE_MAP = new ConcurrentHashMap<>();
-
-    private static final List<String> COMMAND = new ArrayList<>();
-
-    static {
-        if (SystemUtil.getOsInfo().isLinux()) {
-            //执行linux系统命令
-            COMMAND.add("/bin/sh");
-            COMMAND.add("-c");
-        } else if (SystemUtil.getOsInfo().isMac()) {
-            COMMAND.add("/bin/sh");
-            COMMAND.add("-c");
-        } else {
-            COMMAND.add("cmd");
-            COMMAND.add("/c");
-        }
-    }
 
     private BuildModel buildModel;
     private File gitFile;
@@ -231,7 +213,7 @@ public class BuildManage extends BaseBuild implements Runnable {
         //
         ProcessBuilder processBuilder = new ProcessBuilder();
         processBuilder.directory(this.gitFile);
-        List<String> commands = ObjectUtil.clone(COMMAND);
+        List<String> commands = CommandUtil.getCommand();
         commands.add(command);
         processBuilder.command(commands);
         final boolean[] status = new boolean[1];

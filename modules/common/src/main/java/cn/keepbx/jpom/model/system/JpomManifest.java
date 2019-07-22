@@ -1,13 +1,18 @@
 package cn.keepbx.jpom.model.system;
 
+import cn.hutool.core.date.BetweenFormater;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.lang.JarClassLoader;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.system.SystemUtil;
+import cn.jiangzeyin.common.DefaultSystemLog;
+import cn.jiangzeyin.common.JsonMessage;
 import cn.keepbx.jpom.JpomApplication;
 import cn.keepbx.jpom.common.Type;
 import cn.keepbx.jpom.system.ConfigBean;
+import cn.keepbx.jpom.system.JpomRuntimeException;
 import com.alibaba.fastjson.JSON;
 import org.springframework.boot.ApplicationHome;
 
@@ -117,6 +122,11 @@ public class JpomManifest {
     }
 
     public String getTimeStamp() {
+        if (timeStamp == null) {
+            long uptime = SystemUtil.getRuntimeMXBean().getUptime();
+            long statTime = System.currentTimeMillis() - uptime;
+            return new DateTime(statTime).toString();
+        }
         return timeStamp;
     }
 
@@ -165,6 +175,11 @@ public class JpomManifest {
         this.dataPath = dataPath;
     }
 
+    public String getUpTime() {
+        long uptime = SystemUtil.getRuntimeMXBean().getUptime();
+        return DateUtil.formatBetween(uptime, BetweenFormater.Level.SECOND);
+    }
+
     @Override
     public String toString() {
         return JSON.toJSONString(this);
@@ -179,5 +194,79 @@ public class JpomManifest {
         ApplicationHome home = new ApplicationHome(JpomApplication.getAppClass());
         String path = (home.getSource() == null ? "" : home.getSource().getAbsolutePath());
         return FileUtil.file(path);
+    }
+
+    /**
+     * 检查是否为jpom包
+     *
+     * @param path    路径
+     * @param clsName 类名
+     * @return 结果消息
+     */
+    public static JsonMessage checkJpomJar(String path, Class clsName) {
+        String version;
+        File jarFile = new File(path);
+        try (JarFile jarFile1 = new JarFile(jarFile)) {
+            Manifest manifest = jarFile1.getManifest();
+            Attributes attributes = manifest.getMainAttributes();
+            String mainClass = attributes.getValue("Main-Class");
+            if (mainClass == null) {
+                return new JsonMessage(405, "清单文件中没有找到对应的MainClass属性");
+            }
+            JarClassLoader jarClassLoader = JarClassLoader.load(jarFile);
+            try {
+                jarClassLoader.loadClass(mainClass);
+            } catch (ClassNotFoundException notFound) {
+                return new JsonMessage(405, "中没有找到对应的MainClass:" + mainClass);
+            }
+            try {
+                jarClassLoader.loadClass(clsName.getName());
+            } catch (ClassNotFoundException notFound) {
+                return new JsonMessage(405, "此包不是jpom包");
+            }
+
+            version = attributes.getValue("Jpom-Project-Version");
+            if (StrUtil.isEmpty(version)) {
+                return new JsonMessage(405, "此包没有版本号");
+            }
+            String timeStamp = attributes.getValue("Jpom-Timestamp");
+            if (StrUtil.isEmpty(timeStamp)) {
+                return new JsonMessage(405, "此包没有版本号");
+            }
+        } catch (Exception e) {
+            DefaultSystemLog.ERROR().error("解析jar", e);
+            return new JsonMessage(500, " 解析错误:" + e.getMessage());
+        }
+        return new JsonMessage(200, version);
+    }
+
+    /**
+     * 发布包到对应运行路径
+     *
+     * @param path    文件路径
+     * @param version 新版本号
+     */
+    public static void releaseJar(String path, String version) {
+        File runPath = getRunPath().getParentFile();
+        if (!runPath.isDirectory()) {
+            throw new JpomRuntimeException(runPath.getAbsolutePath() + " error");
+        }
+        File to = FileUtil.file(runPath, JpomApplication.getAppType().name().toLowerCase() + "-" + version + ".jar");
+        FileUtil.move(new File(path), to, true);
+        //
+    }
+
+    /**
+     * 获取当前的管理名文件
+     *
+     * @return file
+     */
+    public static File getScriptFile() {
+        File runPath = getRunPath().getParentFile().getParentFile();
+        File scriptFile = FileUtil.file(runPath, StrUtil.format("Server.{}", JpomApplication.SUFFIX));
+        if (!scriptFile.exists() || scriptFile.isDirectory()) {
+            throw new JpomRuntimeException("当前服务中没有命令脚本：" + StrUtil.format("Server.{}", JpomApplication.SUFFIX));
+        }
+        return scriptFile;
     }
 }

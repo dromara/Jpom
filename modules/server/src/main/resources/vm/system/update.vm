@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Jpom-项目管理系统</title>
+    #parse("./common/head.vm")
+    <style>
+        body {
+            padding: 10px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+
+<body>
+
+<blockquote class="layui-elem-quote">当前程序打包时间：
+    <span timeStamp> </span>
+</blockquote>
+<blockquote class="layui-elem-quote">当前版本号：
+    <span version></span>
+</blockquote>
+<blockquote class="layui-elem-quote">已经运行时间：
+    <span upTime></span>
+</blockquote>
+
+<div class="layui-row" style="display: none;" id="selectFile">
+    <button type="button" class="layui-btn layui-col-md-offset5" id="uploadJar">
+        <i class="layui-icon">&#xe67c;</i>上传新包
+    </button>
+</div>
+
+</body>
+<script>
+    function loadSuccess() {
+        loadingAjax({
+            url: './info',
+            data: {
+                nodeId: "$!node.id"
+            },
+            success: function (data) {
+                if (200 != data.code) {
+                    layer.msg(data.msg);
+                    return;
+                }
+                for (var key in data.data) {
+                    $("span[" + key.toLowerCase() + "]").text(data.data[key]);
+                }
+                // if (data.data.debug === false) {
+                $("#selectFile").show()
+                // }
+            }
+        });
+
+        layui.use('upload', function () {
+            var upload = layui.upload;
+            var uploadInst = upload.render({
+                elem: '#uploadJar',
+                url: './uploadJar.json',
+                data: {
+                    nodeId: "$!node.id"
+                },
+                exts: 'jar',
+                acceptMime: '.jar',
+                before: function () {
+                    top.layer.load(1, {
+                        shade: [0.5, '#fff'] //0.1透明度的白色背景
+                    });
+                },
+                done: function (res) {
+                    top.layer.closeAll('loading');
+                    layer.msg(res.msg);
+                    if (200 == res.code) {
+                        top.layer.msg('系统升级中..', {
+                            icon: 16,
+                            shade: 0.2,
+                            time: 1000 * 30,
+                            end: function () {
+                                top.location.reload();
+                            }
+                        });
+                    }
+                },
+                error: function () {
+                    top.layer.closeAll('loading');
+                    layer.msg("上传失败");
+                }
+            });
+        });
+
+
+    }
+</script>
+</html>

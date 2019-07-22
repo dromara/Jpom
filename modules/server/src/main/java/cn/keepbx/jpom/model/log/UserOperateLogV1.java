@@ -275,6 +275,8 @@ public class UserOperateLogV1 extends BaseJsonModel {
 
         ClearCache(63, "清空缓存"),
         DelSysLog(64, "删除系统日志"),
+
+        UpdateSys(65, "升级系统"),
         ;
         private int code;
         private String desc;

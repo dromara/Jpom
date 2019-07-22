@@ -7,6 +7,7 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.system.SystemUtil;
+import cn.keepbx.jpom.JpomApplication;
 import cn.keepbx.jpom.model.BaseModel;
 import cn.keepbx.jpom.system.AgentConfigBean;
 import cn.keepbx.util.CommandUtil;
@@ -20,18 +21,6 @@ import java.io.File;
  * @date 2019/4/24
  */
 public class ScriptModel extends BaseModel {
-    /**
-     * 文件后缀
-     */
-    private static final String SUFFIX;
-
-    static {
-        if (SystemUtil.getOsInfo().isWindows()) {
-            SUFFIX = "bat";
-        } else {
-            SUFFIX = "sh";
-        }
-    }
 
     /**
      * 最后执行人员
@@ -75,7 +64,7 @@ public class ScriptModel extends BaseModel {
             throw new IllegalArgumentException("id 为空");
         }
         File path = AgentConfigBean.getInstance().getScriptPath();
-        return FileUtil.file(path, getId(), "script." + SUFFIX);
+        return FileUtil.file(path, getId(), "script." + JpomApplication.SUFFIX);
     }
 
     public File getLogFile(boolean get) {

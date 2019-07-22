@@ -24,10 +24,22 @@
     ]
   },
   {
-    "id": "tomcatManage",
-    "title": "Tomcat管理",
-    "url": "./tomcat/tomcatManage",
-    "icon": "layui-icon-circle-dot"
+    "id": "otherM",
+    "title": "其他功能",
+    "icon": "layui-icon-circle-dot",
+    "childs": [
+      {
+        "id": "tomcatManage",
+        "title": "Tomcat管理",
+        "url": "./tomcat/tomcatManage"
+      },
+      {
+        "id": "script",
+        "title": "脚本模板",
+        "url": "./script/list.html",
+        "role": "ServerManager"
+      }
+    ]
   },
   {
     "id": "nginx",
@@ -52,12 +64,6 @@
     "title": "系统管理",
     "icon": "layui-icon-set-fill",
     "childs": [
-      {
-        "id": "script",
-        "title": "脚本模板",
-        "url": "./script/list.html",
-        "role": "ServerManager"
-      },
       {
         "id": "whitelistDirectory",
         "title": "白名单目录",

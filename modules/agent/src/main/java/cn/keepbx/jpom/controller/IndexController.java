@@ -1,7 +1,5 @@
 package cn.keepbx.jpom.controller;
 
-import cn.hutool.core.date.BetweenFormater;
-import cn.hutool.core.date.DateUtil;
 import cn.hutool.system.SystemUtil;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.keepbx.jpom.common.BaseAgentController;
@@ -84,9 +82,7 @@ public class IndexController extends BaseAgentController {
         jsonObject.put("runCount", runCount);
         jsonObject.put("stopCount", stopCount);
         // 运行时间
-        long uptime = SystemUtil.getRuntimeMXBean().getUptime();
-        String formatBetween = DateUtil.formatBetween(uptime, BetweenFormater.Level.SECOND);
-        jsonObject.put("runTime", formatBetween);
+        jsonObject.put("runTime", JpomManifest.getInstance().getUpTime());
         JSONArray jsonArray = new JSONArray();
         jsonArray.add(jsonObject);
         return JsonMessage.getString(200, "", jsonArray);

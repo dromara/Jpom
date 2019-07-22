@@ -18,6 +18,19 @@ import java.nio.charset.Charset;
  */
 public class JpomApplication extends ApplicationBuilder {
     /**
+     * 文件后缀
+     */
+    public static final String SUFFIX;
+
+    static {
+        if (SystemUtil.getOsInfo().isWindows()) {
+            SUFFIX = "bat";
+        } else {
+            SUFFIX = "sh";
+        }
+    }
+
+    /**
      *
      */
     public static final String SYSTEM_ID = "system";
