@@ -51,6 +51,7 @@
                     if (obj.data.children) {
                         return;
                     }
+                    $("#nowFileName").attr("path", obj.data.path);
                     $("#nowFileName").text(obj.data.title);
                     openSocket(obj.data.path);
                 },
@@ -71,9 +72,12 @@
                                 success: function (data) {
                                     layer.msg(data.msg);
                                     if (200 == data.code) {
-                                        setTimeout(function () {
-                                            location.reload();
-                                        }, 2000)
+                                        var attr = $("#nowFileName").attr("path");
+                                        if (attr == data.path) {
+                                            setTimeout(function () {
+                                                location.reload();
+                                            }, 2000)
+                                        }
                                     } else {
                                         reloadTree();
                                     }

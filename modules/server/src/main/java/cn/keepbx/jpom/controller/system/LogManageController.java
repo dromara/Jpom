@@ -13,6 +13,7 @@ import cn.keepbx.jpom.common.forward.NodeUrl;
 import cn.keepbx.jpom.common.interceptor.UrlPermission;
 import cn.keepbx.jpom.model.Role;
 import cn.keepbx.jpom.model.log.UserOperateLogV1;
+import cn.keepbx.jpom.socket.ServiceFileTailWatcher;
 import cn.keepbx.jpom.system.WebAopLog;
 import cn.keepbx.util.LayuiTreeUtil;
 import com.alibaba.fastjson.JSONArray;
@@ -74,6 +75,8 @@ public class LogManageController extends BaseServerController {
             return JsonMessage.getString(405, "不能删除当天的日志");
         }
         if (FileUtil.del(file)) {
+            // 离线上一个日志
+            ServiceFileTailWatcher.offlineFile(file);
             return JsonMessage.getString(200, "删除成功");
         }
         return JsonMessage.getString(500, "删除失败");

@@ -1,18 +1,13 @@
 package cn.keepbx.jpom.socket;
 
 import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.keepbx.util.BaseFileTailWatcher;
-import cn.keepbx.util.LimitQueue;
-import cn.keepbx.util.SocketSessionUtil;
 import org.springframework.web.socket.WebSocketSession;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -22,12 +17,8 @@ import java.util.concurrent.ConcurrentHashMap;
  * @author jiangzeyin
  * @date 2019/07/21
  */
-public class ServiceFileTailWatcher extends BaseFileTailWatcher {
-    private static final ConcurrentHashMap<File, ServiceFileTailWatcher> CONCURRENT_HASH_MAP = new ConcurrentHashMap<>();
-    /**
-     * 所有会话
-     */
-    private final Set<WebSocketSession> socketSessions = new HashSet<>();
+public class ServiceFileTailWatcher<T> extends BaseFileTailWatcher<T> {
+    private static final ConcurrentHashMap<File, ServiceFileTailWatcher<WebSocketSession>> CONCURRENT_HASH_MAP = new ConcurrentHashMap<>();
 
     private ServiceFileTailWatcher(File logFile) throws IOException {
         super(logFile);
@@ -48,9 +39,9 @@ public class ServiceFileTailWatcher extends BaseFileTailWatcher {
         if (!file.exists() || file.isDirectory()) {
             throw new IOException("文件不存在或者是目录:" + file.getPath());
         }
-        ServiceFileTailWatcher agentFileTailWatcher = CONCURRENT_HASH_MAP.computeIfAbsent(file, s -> {
+        ServiceFileTailWatcher<WebSocketSession> agentFileTailWatcher = CONCURRENT_HASH_MAP.computeIfAbsent(file, s -> {
             try {
-                return new ServiceFileTailWatcher(file);
+                return new ServiceFileTailWatcher<>(file);
             } catch (Exception e) {
                 DefaultSystemLog.ERROR().error("创建文件监听失败", e);
                 return null;
@@ -69,8 +60,8 @@ public class ServiceFileTailWatcher extends BaseFileTailWatcher {
      * @param session 会话
      */
     public static void offline(WebSocketSession session) {
-        Collection<ServiceFileTailWatcher> collection = CONCURRENT_HASH_MAP.values();
-        for (ServiceFileTailWatcher agentFileTailWatcher : collection) {
+        Collection<ServiceFileTailWatcher<WebSocketSession>> collection = CONCURRENT_HASH_MAP.values();
+        for (ServiceFileTailWatcher<WebSocketSession> agentFileTailWatcher : collection) {
             agentFileTailWatcher.socketSessions.removeIf(session::equals);
             if (agentFileTailWatcher.socketSessions.isEmpty()) {
                 agentFileTailWatcher.close();
@@ -79,75 +70,43 @@ public class ServiceFileTailWatcher extends BaseFileTailWatcher {
     }
 
     /**
+     * 关闭文件
+     *
+     * @param fileName 文件
+     */
+    public static void offlineFile(File fileName) {
+        ServiceFileTailWatcher<WebSocketSession> agentFileTailWatcher = CONCURRENT_HASH_MAP.get(fileName);
+        if (null == agentFileTailWatcher) {
+            return;
+        }
+        Set<WebSocketSession> socketSessions = agentFileTailWatcher.socketSessions;
+        for (WebSocketSession socketSession : socketSessions) {
+            offline(socketSession);
+        }
+        agentFileTailWatcher.close();
+    }
+
+    /**
      * 关闭文件读取流
      *
      * @param fileName 文件名
      */
     public static void offlineFile(File fileName, WebSocketSession session) {
-        ServiceFileTailWatcher agentFileTailWatcher = CONCURRENT_HASH_MAP.get(fileName);
-        if (null == agentFileTailWatcher) {
+        ServiceFileTailWatcher<WebSocketSession> serviceFileTailWatcher = CONCURRENT_HASH_MAP.get(fileName);
+        if (null == serviceFileTailWatcher) {
             return;
         }
-        Set<WebSocketSession> socketSessions = agentFileTailWatcher.socketSessions;
+        Set<WebSocketSession> socketSessions = serviceFileTailWatcher.socketSessions;
         for (WebSocketSession socketSession : socketSessions) {
             if (socketSession.equals(session)) {
                 offline(socketSession);
                 break;
             }
         }
-        if (agentFileTailWatcher.socketSessions.isEmpty()) {
-            agentFileTailWatcher.close();
+        if (serviceFileTailWatcher.socketSessions.isEmpty()) {
+            serviceFileTailWatcher.close();
         }
     }
-
-
-    /**
-     * 添加监听会话
-     *
-     * @param session 会话
-     */
-    private void add(WebSocketSession session, String name) {
-        if (this.socketSessions.add(session) || this.socketSessions.contains(session)) {
-            LimitQueue<String> limitQueue = this.tailWatcherRun.getLimitQueue();
-            if (limitQueue.size() <= 0) {
-                this.send(session, "日志文件为空");
-                return;
-            }
-            this.send(session, StrUtil.format("监听{}日志成功,目前共有{}人正在查看", name, this.socketSessions.size()));
-            // 开发发送头信息
-            for (String s : limitQueue) {
-                this.send(session, s);
-            }
-        }
-        //        else {
-        //            this.send(session, "添加日志监听失败");
-        //        }
-    }
-
-    private void send(WebSocketSession session, String msg) {
-        try {
-            SocketSessionUtil.send(session, msg);
-        } catch (IOException ignored) {
-        }
-    }
-
-    @Override
-    protected void sendAll(String msg) {
-        Iterator<WebSocketSession> iterator = socketSessions.iterator();
-        while (iterator.hasNext()) {
-            WebSocketSession socketSession = iterator.next();
-            try {
-                SocketSessionUtil.send(socketSession, msg);
-            } catch (Exception e) {
-                DefaultSystemLog.ERROR().error("发送消息失败", e);
-                iterator.remove();
-            }
-        }
-        if (this.socketSessions.isEmpty()) {
-            this.close();
-        }
-    }
-
 
     /**
      * 关闭
