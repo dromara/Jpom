@@ -75,6 +75,11 @@ public class ReleaseManage extends BaseBuild {
      */
     public void start2() {
         this.log("start release");
+        if (!this.resultFile.exists()) {
+            this.log("不存在构建产物");
+            updateStatus(BuildModel.Status.PubError);
+            return;
+        }
         if (this.baseBuildModule.getReleaseMethod() == BuildModel.ReleaseMethod.Outgiving.getCode()) {
             //
             try {
