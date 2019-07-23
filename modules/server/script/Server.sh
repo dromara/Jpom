@@ -81,7 +81,7 @@ function listDir()
     ALL=""
 	for file in `ls $1`
 	do
-		if [[ -f "${1}/${file}" ]]; then
+		if [[ -f "${1}/${file}" ]] &&  [[ "${file##*.}"x = "jar"x ]] ; then
 			#得到文件的完整的目录
 			ALL="${file}"
 			break
