@@ -9,15 +9,16 @@
     <!-- QQ分享卡片信息 -->
     <meta itemprop="name" content="Jpom-项目管理系统"/>
     <meta itemprop="description" content="一款简而轻的低侵入式Java运维、监控软件。"/>
-    <meta itemprop="image" content="https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/images/logo_small.jpg"/>
+    <meta itemprop="image" content="//cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/images/logo_small.jpg"/>
 
     <title>Jpom-项目管理系统文档</title>
     <meta name="viewport"
           content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
 
-    <link rel="shortcut icon" href="https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site@t1.0/favicon.ico">
+    <link rel="shortcut icon" href="//cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/favicon.ico">
+    <link rel="icon" href="//cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/favicon.ico" type="image/x-icon">
 
-    <link rel="stylesheet" href="//unpkg.com/docsify/lib/themes/vue.css">
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/docsify/lib/themes/vue.css">
     <!-- 百度统计 -->
     <script>
         var _hmt = _hmt || [];
@@ -36,7 +37,11 @@
         name: '<img src="//cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/images/logo_small.jpg" style="height:100px"  alt="logo"/>',
         repo: 'https://gitee.com/keepbx/Jpom',
         homepage: 'https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom/README.md',
-        basePath: 'https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/docs/',
+        // basePath: './docs',
+        alias: {
+            '/.*/SUMMARY.md': 'https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/docs/catalog.md',
+            '.*?/CHANGELOG': 'https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom/CHANGELOG.md'
+        },
         // loadNavbar: true,
         loadSidebar: 'catalog.md',
         //自动显示标题

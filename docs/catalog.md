@@ -1,6 +1,6 @@
-* [简介](README.md)
+* [简介]()
     * [常见问题](fqa/FQA.md)
-    * [更新记录](./CHANGELOG.md)
+    * [更新记录](CHANGELOG)
 * 安装使用
     * [说明](./install/deploy-doc.md)
     * [安装](./install/install.md)
