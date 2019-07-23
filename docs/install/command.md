@@ -1,0 +1,23 @@
+### 管理命令
+1. windows中Agent.bat 、Server.bat
+```
+# 服务端
+Server.bat     启动管理面板(按照面板提示输入操作)
+
+# 插件端
+Agent.bat     启动管理面板(按照面板提示输入操作)
+```
+2. linux中Agent.sh 、Server.sh
+```
+# 服务端
+Server.sh start     启动Jpom服务端
+Server.sh stop      停止Jpom服务端
+Server.sh restart   重启Jpom服务端
+Server.sh status    查看Jpom服务端运行状态
+
+# 插件端
+Agent.sh start     启动Jpom插件端
+Agent.sh stop      停止Jpom插件端
+Agent.sh restart   重启Jpom插件端
+Agent.sh status    查看Jpom插件端运行状态
+```
