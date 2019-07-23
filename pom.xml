@@ -15,7 +15,7 @@
         <version>1.4.7.RELEASE</version>
     </parent>
     <groupId>cn.keepbx</groupId>
-    <artifactId>jpom</artifactId>
+    <artifactId>Jpom</artifactId>
     <name>Jpom Java项目在线管理</name>
     <inceptionYear>2017</inceptionYear>
     <version>2.4.2</version>

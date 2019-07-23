@@ -79,6 +79,12 @@
         "id": "logManage",
         "title": "系统日志",
         "url": "../system/log.html"
+      },
+      {
+        "id": "update",
+        "title": "在线升级",
+        "url": "../system/update.html",
+        "role": "System"
       }
     ]
   }

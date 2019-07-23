@@ -10,11 +10,14 @@ import cn.keepbx.jpom.JpomApplication;
 import cn.keepbx.jpom.model.system.JpomManifest;
 import cn.keepbx.jpom.system.ConfigBean;
 import cn.keepbx.jpom.system.ExtConfigBean;
+import cn.keepbx.util.JsonFileUtil;
+import com.alibaba.fastjson.JSONObject;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.event.ContextClosedEvent;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.channels.FileChannel;
@@ -53,6 +56,8 @@ public class JpomApplicationEvent implements ApplicationEventClient {
             //  写入全局信息
             File appJpomFile = ConfigBean.getInstance().getApplicationJpomInfo(JpomApplication.getAppType());
             FileUtil.writeString(jpomManifest.toString(), appJpomFile, CharsetUtil.CHARSET_UTF_8);
+            // 检查更新文件
+            checkUpdate();
         } else if (event instanceof ContextClosedEvent) {
             // 应用关闭
             this.unLockFile();
@@ -119,6 +124,30 @@ public class JpomApplicationEvent implements ApplicationEventClient {
         }
         FileUtil.del(file);
         DefaultSystemLog.LOG().info("Jpom[{}]外部配置文件路径：{}", JpomManifest.getInstance().getVersion(), extConfigPath);
+    }
+
+    private static void checkUpdate() {
+        File runFile = JpomManifest.getRunPath().getParentFile();
+        String upgrade = FileUtil.file(runFile, ConfigBean.UPGRADE).getAbsolutePath();
+        JSONObject jsonObject = null;
+        try {
+            jsonObject = (JSONObject) JsonFileUtil.readJson(upgrade);
+        } catch (FileNotFoundException ignored) {
+        }
+        if (jsonObject == null) {
+            return;
+        }
+        String beforeJar = jsonObject.getString("beforeJar");
+        if (StrUtil.isEmpty(beforeJar)) {
+            return;
+        }
+        File beforeJarFile = FileUtil.file(runFile, beforeJar);
+        if (beforeJarFile.exists()) {
+            File oldJars = FileUtil.file(runFile, "oldJars");
+            FileUtil.mkdir(oldJars);
+            FileUtil.move(beforeJarFile, oldJars, true);
+            DefaultSystemLog.LOG().info("备份旧程序包：" + beforeJar);
+        }
     }
 
 }

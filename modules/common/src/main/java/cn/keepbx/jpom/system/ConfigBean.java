@@ -39,7 +39,10 @@ public class ConfigBean {
      * 授权信息
      */
     private static final String AUTHORIZE = "agent_authorize.json";
-
+    /**
+     * 程序升级信息文件
+     */
+    public static final String UPGRADE = "upgrade.json";
     /**
      * Jpom 程序运行的 application 标识
      */

@@ -24,13 +24,13 @@
 setlocal enabledelayedexpansion
 
 set Tag=KeepBx-System-JpomApplication
+set MainClass=org.springframework.boot.loader.JarLauncher
 set basePath=%~dp0
 set Lib=%basePath%lib\
 set Log=%basePath%server.log
 set LogBack=%basePath%log\
 set JVM=-server
 set ARGS= --jpom.applicationTag=%Tag% --jpom.log=%basePath%log --server.port=2122
-set RUNJAR=
 
 color 0a
 TITLE Jpom管理系统BAT控制台
@@ -74,38 +74,20 @@ EXIT 1
 		move %Log% %LogBack%%date:~0,4%%date:~5,2%%date:~8,2%0%time:~1,1%%time:~3,2%%time:~6,2%.log
 		del %Log%
 	)
-
-	call:listDir
 	REM echo 启动成功，关闭窗口不影响运行
 	echo 启动中.....关闭窗口不影响运行
-	javaw %JVM% -Xbootclasspath/a:"%JAVA_HOME%"\lib\tools.jar -jar %RUNJAR% -Dapplication=%Tag% -Dbasedir=%basePath% %ARGS% >> %Log%
+	javaw %JVM% -Djava.ext.dirs=%Lib%;"%JAVA_HOME%"\lib\ -Dapplication=%Tag% -Dbasedir=%basePath% %MainClass% %ARGS% >> %Log%
 	timeout 3
-goto:eof
-
-
-@REM 获取jar
-:listDir
-	if "%RUNJAR%"=="" (
-		for /f "delims=" %%I in ('dir /B %Lib%') do (
-			if exist %Lib%%%I if not exist %Lib%%%I\nul (
-				set RUNJAR=%Lib%%%I
-				break
-			)
-		)
-		echo 自动运行：%RUNJAR%
-	)
 goto:eof
 
 @REM 关闭Jpom
 :stop
-	call:listDir
-	java -jar %RUNJAR% %ARGS% --event=stop
+	java -Djava.ext.dirs=%Lib%;"%JAVA_HOME%"\lib\ %MainClass% %ARGS% --event=stop
 goto:eof
 
 @REM 查看Jpom运行状态
 :status
-	call:listDir
-	java -jar %RUNJAR% %ARGS% --event=status
+	java -Djava.ext.dirs=%Lib%;"%JAVA_HOME%"\lib\ %MainClass% %ARGS% --event=status
 goto:eof
 
 @REM 重启Jpom

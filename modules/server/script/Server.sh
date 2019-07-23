@@ -62,7 +62,7 @@ function start() {
         echo "没有找到jar"
         exit 2
     fi
-    nohup java  ${JVM} -Xbootclasspath/a:${JAVA_HOME}/lib/tools.jar -jar ${RUNJAR} -Dapplication=${Tag} -Dbasedir=${Path} ${ARGS}  >> ${Log} 2>&1 &
+    nohup java  ${JVM} -Xbootclasspath/a:${JAVA_HOME}/lib/tools.jar -jar ${Lib}${RUNJAR} -Dapplication=${Tag} -Dbasedir=${Path} ${ARGS}  >> ${Log} 2>&1 &
     if [[ -f ${Log} ]]; then
         tail -f ${Log}
     else
@@ -83,7 +83,7 @@ function listDir()
 	do
 		if [[ -f "${1}/${file}" ]]; then
 			#得到文件的完整的目录
-			ALL="${1}/${file}"
+			ALL="${file}"
 			break
 		fi
 	done

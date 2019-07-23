@@ -3,7 +3,7 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <artifactId>jpom</artifactId>
+        <artifactId>Jpom</artifactId>
         <groupId>cn.keepbx</groupId>
         <version>2.4.2</version>
         <relativePath>../../pom.xml</relativePath>
@@ -74,6 +74,7 @@
                             <Jpom-Project-Version>${project.version}</Jpom-Project-Version>
                             <!-- 打包时间 -->
                             <Jpom-Timestamp>${maven.build.timestamp}</Jpom-Timestamp>
+                            <Jpom-Type>${project.artifactId}</Jpom-Type>
                         </manifestEntries>
                     </archive>
                 </configuration>

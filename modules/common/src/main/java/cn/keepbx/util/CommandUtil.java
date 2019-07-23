@@ -21,7 +21,14 @@ import java.util.List;
  * @date 2019/4/15
  */
 public class CommandUtil {
+    /**
+     * 系统命令
+     */
     private static final List<String> COMMAND = new ArrayList<>();
+    /**
+     * 文件后缀
+     */
+    public static final String SUFFIX;
 
     static {
         if (SystemUtil.getOsInfo().isLinux()) {
@@ -34,6 +41,12 @@ public class CommandUtil {
         } else {
             COMMAND.add("cmd");
             COMMAND.add("/c");
+        }
+
+        if (SystemUtil.getOsInfo().isWindows()) {
+            SUFFIX = "bat";
+        } else {
+            SUFFIX = "sh";
         }
     }
 
@@ -122,7 +135,7 @@ public class CommandUtil {
      * @throws IOException 异常
      */
     public static void asyncExeLocalCommand(File file, String command) throws IOException {
-        List<String> commands = CommandUtil.getCommand();
+        List<String> commands = getCommand();
         commands.add(command);
         ProcessBuilder pb = new ProcessBuilder(commands);
         pb.directory(file);

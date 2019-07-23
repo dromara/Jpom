@@ -135,8 +135,10 @@ public enum NodeUrl {
     DelSystemLog("/system/log_del.json"),
 
     DownloadSystemLog("/system/log_download"),
-
-
+    /**
+     * 更新系统jar包
+     */
+    SystemUploadJar("/system/uploadJar.json"),
     ;
     /**
      * 相对请求地址

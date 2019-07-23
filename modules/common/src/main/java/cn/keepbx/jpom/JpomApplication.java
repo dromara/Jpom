@@ -1,13 +1,19 @@
 package cn.keepbx.jpom;
 
+import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.system.SystemUtil;
 import cn.jiangzeyin.common.ApplicationBuilder;
 import cn.jiangzeyin.common.validator.ParameterInterceptor;
 import cn.keepbx.jpom.common.JpomApplicationEvent;
 import cn.keepbx.jpom.common.Type;
+import cn.keepbx.jpom.model.system.JpomManifest;
+import cn.keepbx.util.CommandUtil;
 import org.springframework.http.converter.StringHttpMessageConverter;
 
+import java.io.File;
+import java.io.IOException;
 import java.nio.charset.Charset;
 
 /**
@@ -17,19 +23,6 @@ import java.nio.charset.Charset;
  * @date 2019/4/16
  */
 public class JpomApplication extends ApplicationBuilder {
-    /**
-     * 文件后缀
-     */
-    public static final String SUFFIX;
-
-    static {
-        if (SystemUtil.getOsInfo().isWindows()) {
-            SUFFIX = "bat";
-        } else {
-            SUFFIX = "sh";
-        }
-    }
-
     /**
      *
      */
@@ -55,8 +48,8 @@ public class JpomApplication extends ApplicationBuilder {
 
     public JpomApplication(Type appType, Class<?> appClass, String[] args) throws Exception {
         super(appClass);
-        // windows 命令关闭程序
-        checkWindows(args);
+        //
+        checkEvent(args);
         JpomApplication.appType = appType;
         JpomApplication.appClass = appClass;
         JpomApplication.args = args;
@@ -69,10 +62,8 @@ public class JpomApplication extends ApplicationBuilder {
         addApplicationEventClient(new JpomApplicationEvent());
     }
 
-    private void checkWindows(String[] args) throws Exception {
-        if (SystemUtil.getOsInfo().isWindows()) {
-            new JpomClose().main(args);
-        }
+    private void checkEvent(String[] args) throws Exception {
+        new JpomClose().main(args);
     }
 
     /**
@@ -102,5 +93,23 @@ public class JpomApplication extends ApplicationBuilder {
             return JpomApplication.class;
         }
         return appClass;
+    }
+
+    /**
+     * 重启自身
+     */
+    public static void restart() {
+        File scriptFile = JpomManifest.getScriptFile();
+        ThreadUtil.execute(() -> {
+            try {
+                Thread.sleep(2000);
+            } catch (InterruptedException ignored) {
+            }
+            try {
+                CommandUtil.asyncExeLocalCommand(scriptFile.getParentFile(), FileUtil.getAbsolutePath(scriptFile) + " restart");
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
     }
 }

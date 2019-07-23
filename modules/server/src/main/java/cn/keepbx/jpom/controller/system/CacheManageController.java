@@ -46,8 +46,12 @@ public class CacheManageController extends BaseServerController {
             setAttribute("readFileOnLineCount", oneLineCount);
 
             File buildDataDir = BuildUtil.getBuildDataDir();
-            fileSize = FileUtil.readableFileSize(FileUtil.size(buildDataDir));
-            setAttribute("cacheBuildFileSize", fileSize);
+            if (buildDataDir.exists()) {
+                fileSize = FileUtil.readableFileSize(FileUtil.size(buildDataDir));
+                setAttribute("cacheBuildFileSize", fileSize);
+            } else {
+                setAttribute("cacheBuildFileSize", 0);
+            }
         }
         return "system/cache";
     }

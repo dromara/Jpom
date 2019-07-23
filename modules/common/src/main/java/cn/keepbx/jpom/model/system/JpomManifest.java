@@ -4,6 +4,7 @@ import cn.hutool.core.date.BetweenFormater;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.io.LineHandler;
 import cn.hutool.core.lang.JarClassLoader;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.system.SystemUtil;
@@ -13,14 +14,21 @@ import cn.keepbx.jpom.JpomApplication;
 import cn.keepbx.jpom.common.Type;
 import cn.keepbx.jpom.system.ConfigBean;
 import cn.keepbx.jpom.system.JpomRuntimeException;
+import cn.keepbx.util.CommandUtil;
+import cn.keepbx.util.JsonFileUtil;
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import org.springframework.boot.ApplicationHome;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.jar.Attributes;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
+import java.util.zip.ZipEntry;
 
 /**
  * Jpom 的运行信息
@@ -136,16 +144,7 @@ public class JpomManifest {
      * @param timeStamp utc时间
      */
     public void setTimeStamp(String timeStamp) {
-        if (StrUtil.isNotEmpty(timeStamp)) {
-            try {
-                DateTime dateTime = DateUtil.parseUTC(timeStamp);
-                this.timeStamp = dateTime.toStringDefaultTimeZone();
-            } catch (Exception e) {
-                this.timeStamp = timeStamp;
-            }
-        } else {
-            this.timeStamp = "dev";
-        }
+        this.timeStamp = parseJpomTime(timeStamp);
     }
 
     public void setPort(int port) {
@@ -197,6 +196,25 @@ public class JpomManifest {
     }
 
     /**
+     * 转化时间
+     *
+     * @param timeStamp time
+     * @return 默认使用utc
+     */
+    public static String parseJpomTime(String timeStamp) {
+        if (StrUtil.isNotEmpty(timeStamp)) {
+            try {
+                DateTime dateTime = DateUtil.parseUTC(timeStamp);
+                return dateTime.toStringDefaultTimeZone();
+            } catch (Exception e) {
+                return timeStamp;
+            }
+        } else {
+            return "dev";
+        }
+    }
+
+    /**
      * 检查是否为jpom包
      *
      * @param path    路径
@@ -219,12 +237,11 @@ public class JpomManifest {
             } catch (ClassNotFoundException notFound) {
                 return new JsonMessage(405, "中没有找到对应的MainClass:" + mainClass);
             }
-            try {
-                jarClassLoader.loadClass(clsName.getName());
-            } catch (ClassNotFoundException notFound) {
-                return new JsonMessage(405, "此包不是jpom包");
+            ZipEntry entry = jarFile1.getEntry(StrUtil.format("BOOT-INF/classes/{}.class",
+                    StrUtil.replace(clsName.getName(), ".", "/")));
+            if (entry == null) {
+                return new JsonMessage(405, "此包不是Jpom【" + JpomApplication.getAppType().name() + "】包");
             }
-
             version = attributes.getValue("Jpom-Project-Version");
             if (StrUtil.isEmpty(version)) {
                 return new JsonMessage(405, "此包没有版本号");
@@ -232,6 +249,11 @@ public class JpomManifest {
             String timeStamp = attributes.getValue("Jpom-Timestamp");
             if (StrUtil.isEmpty(timeStamp)) {
                 return new JsonMessage(405, "此包没有版本号");
+            }
+            timeStamp = parseJpomTime(timeStamp);
+            if (StrUtil.equals(version, JpomManifest.getInstance().getVersion()) &&
+                    StrUtil.equals(timeStamp, JpomManifest.getInstance().getTimeStamp())) {
+                return new JsonMessage(405, "新包和正在运行的包一致");
             }
         } catch (Exception e) {
             DefaultSystemLog.ERROR().error("解析jar", e);
@@ -247,13 +269,52 @@ public class JpomManifest {
      * @param version 新版本号
      */
     public static void releaseJar(String path, String version) {
-        File runPath = getRunPath().getParentFile();
+        File runFile = getRunPath();
+        File runPath = runFile.getParentFile();
         if (!runPath.isDirectory()) {
             throw new JpomRuntimeException(runPath.getAbsolutePath() + " error");
         }
-        File to = FileUtil.file(runPath, JpomApplication.getAppType().name().toLowerCase() + "-" + version + ".jar");
+        String upgrade = FileUtil.file(runPath, ConfigBean.UPGRADE).getAbsolutePath();
+        JSONObject jsonObject = null;
+        try {
+            jsonObject = (JSONObject) JsonFileUtil.readJson(upgrade);
+        } catch (FileNotFoundException ignored) {
+        }
+        if (jsonObject == null) {
+            jsonObject = new JSONObject();
+        }
+        jsonObject.put("beforeJar", runFile.getName());
+        // 如果升级的版本号一致
+        if (StrUtil.equals(version, JpomManifest.getInstance().getVersion())) {
+            version = StrUtil.format("{}_{}", version, System.currentTimeMillis());
+        }
+        String newFile = JpomApplication.getAppType().name() + "-" + version + ".jar";
+        File to = FileUtil.file(runPath, newFile);
+        if (to.exists()) {
+            throw new JpomRuntimeException(newFile + " 已经存在啦");
+        }
         FileUtil.move(new File(path), to, true);
-        //
+        jsonObject.put("newJar", newFile);
+        jsonObject.put("updateTime", new DateTime().toString());
+        JsonFileUtil.saveJson(upgrade, jsonObject);
+        // 更新管理命令
+        List<String> newData = new LinkedList<>();
+        FileUtil.readLines(getScriptFile(), JpomApplication.getCharset(), (LineHandler) line -> {
+            if (!line.startsWith(String.valueOf(StrUtil.C_TAB)) &&
+                    !line.startsWith(String.valueOf(StrUtil.C_SPACE)) &&
+                    StrUtil.containsAny(line, "RUNJAR=")) {
+                if ("sh".equals(CommandUtil.SUFFIX)) {
+                    newData.add(StrUtil.format("RUNJAR=\"{}\"", newFile));
+                } else if ("bat".equals(CommandUtil.SUFFIX)) {
+                    newData.add(StrUtil.format("set RUNJAR={}", newFile));
+                } else {
+                    newData.add(line);
+                }
+            } else {
+                newData.add(line);
+            }
+        });
+        FileUtil.writeLines(newData, getScriptFile(), JpomApplication.getCharset());
     }
 
     /**
@@ -263,9 +324,10 @@ public class JpomManifest {
      */
     public static File getScriptFile() {
         File runPath = getRunPath().getParentFile().getParentFile();
-        File scriptFile = FileUtil.file(runPath, StrUtil.format("Server.{}", JpomApplication.SUFFIX));
+        String type = JpomApplication.getAppType().name();
+        File scriptFile = FileUtil.file(runPath, StrUtil.format("{}.{}", type, CommandUtil.SUFFIX));
         if (!scriptFile.exists() || scriptFile.isDirectory()) {
-            throw new JpomRuntimeException("当前服务中没有命令脚本：" + StrUtil.format("Server.{}", JpomApplication.SUFFIX));
+            throw new JpomRuntimeException("当前服务中没有命令脚本：" + StrUtil.format("{}.{}", type, CommandUtil.SUFFIX));
         }
         return scriptFile;
     }
