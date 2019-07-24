@@ -25,8 +25,9 @@
     <img src='https://gitee.com/keepbx/Jpom/badge/star.svg?theme=dark' alt='gitee star'></img>
 </a>
 
-
-[项目介绍](https://jpom-site.keepbx.cn/docs/) | [使用文档](https://jpom-site.keepbx.cn/docs/) 
+<p align="center">
+	<a href="https://jpom-site.keepbx.cn/">https://jpom-site.keepbx.cn/</a> | <a href="https://jpom-site.keepbx.cn/docs/">https://jpom-site.keepbx.cn/docs/</a> --
+</p>
 
  
 #### 你为什么需要[Jpom](https://gitee.com/keepbx/Jpom)
