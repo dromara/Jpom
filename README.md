@@ -1,30 +1,36 @@
-# Jpom(Java Project Online Management)Java项目在线管理
+<p align="center">
+	<a href="https://hutool.cn/"><img src="https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/images/jpom_logo.jpg" width="400"></a>
+</p>
+<p align="center">
+	<strong>一款简而轻的低侵入式在线构建、自动部署、日常运维、项目监控软件</strong>
+</p>
 
-<a target="_blank" href="https://gitee.com/keepbx/Jpom">
-    <img src='https://img.shields.io/github/license/jiangzeyin/jpom.svg?style=flat' alt='license'></img>
-</a>
-<a target="_blank" href="https://gitee.com/keepbx/Jpom">
-    <img src='https://img.shields.io/badge/JDK-1.8+-green.svg' alt='jdk'></img>
-</a>
-<a target="_blank" href="https://travis-ci.org/jiangzeyin/Jpom">
-    <img src='https://travis-ci.org/jiangzeyin/Jpom.svg?branch=master' alt='travis'></img>
-</a>
-<a target="_blank" href="https://www.codacy.com/app/jiangzeyin/Jpom?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=jiangzeyin/Jpom&amp;utm_campaign=Badge_Grade">
-    <img src="https://api.codacy.com/project/badge/Grade/9c97dc9925c84404b63e15fefbacc984"></img>
-</a>
-<a target="_blank" href="https://shang.qq.com/wpa/qunwpa?idkey=7be1882a2e2f07cd4af28bbb1f13362af270ba4615f2a6c7aaf9605fc0563d1b">
-    <img src='https://img.shields.io/badge/QQ%E7%BE%A4-136715345-yellowgreen.svg' alt='136715345'></img>
-</a>
-<a target="_blank" href="https://gitee.com/keepbx/Jpom">
-    <img src='https://img.shields.io/badge/Gitee-%E7%A0%81%E4%BA%91-yellow.svg' alt='gitee'></img>
-</a>
-<a target="_blank" href="https://github.com/jiangzeyin/Jpom">
-    <img src='https://img.shields.io/badge/Github-Github-red.svg' alt='github'></img>
-</a>
-<a target="_blank" href="https://gitee.com/keepbx/Jpom">
-    <img src='https://gitee.com/keepbx/Jpom/badge/star.svg?theme=dark' alt='gitee star'></img>
-</a>
-
+<p align="center">
+    <a target="_blank" href="https://gitee.com/keepbx/Jpom">
+        <img src='https://img.shields.io/github/license/jiangzeyin/jpom.svg?style=flat' alt='license'></img>
+    </a>
+    <a target="_blank" href="https://gitee.com/keepbx/Jpom">
+        <img src='https://img.shields.io/badge/JDK-1.8+-green.svg' alt='jdk'></img>
+    </a>
+    <a target="_blank" href="https://travis-ci.org/jiangzeyin/Jpom">
+        <img src='https://travis-ci.org/jiangzeyin/Jpom.svg?branch=master' alt='travis'></img>
+    </a>
+    <a target="_blank" href="https://www.codacy.com/app/jiangzeyin/Jpom?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=jiangzeyin/Jpom&amp;utm_campaign=Badge_Grade">
+        <img src="https://api.codacy.com/project/badge/Grade/9c97dc9925c84404b63e15fefbacc984"></img>
+    </a>
+    <a target="_blank" href="https://shang.qq.com/wpa/qunwpa?idkey=7be1882a2e2f07cd4af28bbb1f13362af270ba4615f2a6c7aaf9605fc0563d1b">
+        <img src='https://img.shields.io/badge/QQ%E7%BE%A4-136715345-yellowgreen.svg' alt='136715345'></img>
+    </a>
+    <a target="_blank" href="https://gitee.com/keepbx/Jpom">
+        <img src='https://img.shields.io/badge/Gitee-%E7%A0%81%E4%BA%91-yellow.svg' alt='gitee'></img>
+    </a>
+    <a target="_blank" href="https://github.com/jiangzeyin/Jpom">
+        <img src='https://img.shields.io/badge/Github-Github-red.svg' alt='github'></img>
+    </a>
+    <a target="_blank" href="https://gitee.com/keepbx/Jpom">
+        <img src='https://gitee.com/keepbx/Jpom/badge/star.svg?theme=dark' alt='gitee star'></img>
+    </a>
+</p>
 <p align="center">
 	<a href="https://jpom-site.keepbx.cn/">https://jpom-site.keepbx.cn/</a> | <a href="https://jpom-site.keepbx.cn/docs/">https://jpom-site.keepbx.cn/docs/</a>
 </p>
@@ -48,10 +54,6 @@
 > 4. 集群项目使用项目分发一键搞定多机部署
 > 5. 项目状态监控异常自动报警
 > 6. 在线构建不用手动上传项目包
-
-### Jpom 目标
-
-> 一款简而轻的低侵入式在线构建、自动部署、日常运维、项目监控软件
 
 #### 项目主要功能及特点
 
