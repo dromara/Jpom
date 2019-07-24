@@ -25,6 +25,10 @@
     <img src='https://gitee.com/keepbx/Jpom/badge/star.svg?theme=dark' alt='gitee star'></img>
 </a>
 
+
+[项目介绍](https://jpom-site.keepbx.cn/docs/) | [使用文档](https://jpom-site.keepbx.cn/docs/) 
+
+ 
 #### 你为什么需要[Jpom](https://gitee.com/keepbx/Jpom)
 
 > Java 项目在实际部署运维，通用的方法是登录服务器上传新的项目包，执行响应命令管理，如果管理多个项目则重复操作上述步骤
@@ -57,42 +61,36 @@
 5. 实时监控项目状态异常自动报警
 6. 在线构建项目发布项目一键搞定
 7. 多用户管理，用户项目权限独立(上传、删除权限可控制),完善的操作日志
-8. 系统路径[白名单模式](/doc/whitelist.md)，杜绝用户误操作系统文件
-9. [在线管理Nginx配置](/doc/nginx-manager.md)、ssl证书文件
+8. 系统路径白名单模式，杜绝用户误操作系统文件
+9. 在线管理Nginx配置、ssl证书文件
 10. Tomcat状态、文件、war包在线实时管理
-
-#### 基本操作演示
-
-[![jpom-server](http://s.keepbx.cn/jpom-server.gif)](http://s.keepbx.cn/jpom-server.gif)
-
-[![jpom-node-agent](http://s.keepbx.cn/jpom-node-agent.gif)](http://s.keepbx.cn/jpom-node-agent.gif)
 
 ### 下载安装
 
-> [帮助文档](/doc/install.md)
+> [帮助文档](https://jpom-site.keepbx.cn/docs/#/安装使用/开始安装)
 
 1. 下载安装包 [https://gitee.com/keepbx/Jpom/attach_files](https://gitee.com/keepbx/Jpom/attach_files)
 2. 解压文件
-3. 安装插件端（[流程说明](/doc/install.md#安装插件端)）
+3. 安装插件端（[流程说明](https://jpom-site.keepbx.cn/docs/#/安装使用/开始安装?id=安装插件端)）
     1. agent-x.x.x-release 目录为插件端的全部安装文件
     2. 上传到对应服务器
     3. 命令运行（Agent.sh、Agent.bat）
-4. 安装服务端（[流程说明](/doc/install.md#安装服务端)）
+4. 安装服务端（[流程说明](https://jpom-site.keepbx.cn/docs/#/安装使用/开始安装?id=安装服务端)）
     1. server-x.x.x-release 目录为服务端的全部安装文件
     2. 上传到对应服务器
     3. 命令运行（Server.sh、Server.bat）
 
 ### 编译安装
 
-> [帮助文档](/doc/install.md)
+> [帮助文档](https://jpom-site.keepbx.cn/docs/#/安装使用/开始安装)
 
 1. 访问[Jpom](https://gitee.com/keepbx/Jpom)的码云主页,拉取最新完整代码(建议使用master分支)
 2. 进入项目目录执行:`mvn clean package`
-3. 安装插件端（[流程说明](/doc/install.md#安装插件端)）
+3. 安装插件端（[流程说明](https://jpom-site.keepbx.cn/docs/#/安装使用/开始安装?id=安装插件端)）
     1. 查看插件端安装包 modules/agent/target/agent-x.x.x-release
     2. 打包上传服务器运行
     3. 命令运行（Agent.sh、Agent.bat）
-4. 安装服务端（[流程说明](/doc/install.md#安装服务端)）
+4. 安装服务端（[流程说明](https://jpom-site.keepbx.cn/docs/#/安装使用/开始安装?id=安装服务端)）
     1. 查看插件端安装包 modules/server/target/server-x.x.x-release
     2. 打包上传服务器运行
     3. 命令运行（Server.sh、Server.bat）
@@ -160,15 +158,9 @@ Agent.sh status    查看Jpom插件端运行状态
 
 ### 常见问题、操作说明
 
-| 必看 | 选看1 | 选看2 |
-| -- | -- | -- | 
-| [安装文档>>](/doc/install.md)       |  [常见问题>>](/FQA.md)   |[更新日志>>](/CHANGELOG.md)   |
-| [启动失败问题>>](/doc/startFail.md) | |  [自定义公共Js>>](/doc/addScript.md) |
-| [项目属性说明>>](/doc/project.md)   | [删除项目说明>>](/doc/deleteProject.md) | [控制台日志策略>>](/doc/conlose-log.md) |
-| [白名单规则>>](/doc/whitelist.md)   | [Nginx管理规则>>](/doc/nginx-manager.md) | [节点分发项目>>](/doc/node-outgiving.md) |
-| [用户角色说明>>](/doc/userRole.md)  | [推荐Nginx配置>>](/doc/nginx-config.md)  | |
-| [部署说明>>](/doc/deploy-doc.md)      | [开发计划>>](/PLANS.md) | |
+[https://jpom-site.keepbx.cn/docs/](https://jpom-site.keepbx.cn/docs/) 
 
+[https://jpom-site.keepbx.cn/docs/#/FQA/FQA](https://jpom-site.keepbx.cn/docs/#/FQA/FQA)
 
 ### 交流讨论 、提供bug反馈或建议
 
