@@ -94,7 +94,7 @@ public class ReleaseManage extends BaseBuild {
                 afterOpt = BuildModel.AfterOpt.No;
             }
             try {
-                this.doProject(afterOpt);
+                this.doProject(afterOpt, this.baseBuildModule.isClearOld());
             } catch (Exception e) {
                 this.pubLog("发布包异常", e);
                 return;
@@ -117,7 +117,7 @@ public class ReleaseManage extends BaseBuild {
      *
      * @param afterOpt 后续操作
      */
-    private void doProject(BuildModel.AfterOpt afterOpt) {
+    private void doProject(BuildModel.AfterOpt afterOpt, boolean clearOld) {
         String releaseMethodDataId = this.baseBuildModule.getReleaseMethodDataId();
         String[] strings = StrUtil.split(releaseMethodDataId, ":");
         if (strings == null || strings.length != 2) {
@@ -137,7 +137,7 @@ public class ReleaseManage extends BaseBuild {
                 strings[1],
                 unZip,
                 afterOpt != BuildModel.AfterOpt.No,
-                nodeModel, this.userModel);
+                nodeModel, this.userModel, clearOld);
         if (jsonMessage.getCode() == HttpStatus.HTTP_OK) {
             this.log("发布项目包成功：" + jsonMessage.toString());
         } else {

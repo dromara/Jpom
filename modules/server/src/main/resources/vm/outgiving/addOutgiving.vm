@@ -25,7 +25,20 @@
                 </button>
                 <div class="layui-form-mid layui-word-aux" id="zipResult"></div>
             </div>
-        ##            <input type="hidden" name="id" value="">
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-inline">
+                <label class="layui-form-label">清空发布</label>
+                <div class="layui-input-block">
+                    <input type="checkbox" value="true"
+                        #if($outGivingModel.clearOld)
+                           checked
+                        #end
+                           name="clearOld"
+                           lay-skin="switch"
+                           lay-text="是|否">
+                </div>
+            </div>
         </div>
         <div class="layui-form-item">
             <label class="layui-form-label">分发后</label>
@@ -63,6 +76,9 @@
             data: {
                 afterOpt: function () {
                     return updateFormData.afterOpt;
+                },
+                clearOld: function () {
+                    return updateFormData.clearOld
                 },
                 id: getQueryString("id")
             },

@@ -69,7 +69,7 @@ public class OutGivingProjectController extends BaseServerController {
     @RequestMapping(value = "upload", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     @UrlPermission(value = Role.ServerManager, optType = UserOperateLogV1.OptType.UploadOutGiving)
-    public String upload(String id, String afterOpt) throws IOException {
+    public String upload(String id, String afterOpt, String clearOld) throws IOException {
         OutGivingModel outGivingModel = outGivingServer.getItem(id);
         if (outGivingModel == null) {
             return JsonMessage.getString(400, "上传失败,没有找到对应的分发项目");
@@ -96,6 +96,7 @@ public class OutGivingProjectController extends BaseServerController {
         FileUtil.move(src, dest, true);
         //
         outGivingModel = outGivingServer.getItem(id);
+        outGivingModel.setClearOld(Convert.toBool(clearOld, false));
         outGivingModel.setAfterOpt(afterOpt1.getCode());
 
         outGivingServer.updateItem(outGivingModel);

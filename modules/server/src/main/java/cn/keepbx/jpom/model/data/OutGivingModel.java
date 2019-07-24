@@ -25,6 +25,10 @@ public class OutGivingModel extends BaseModel {
      */
     private int afterOpt;
     /**
+     * 是否清空旧包发布
+     */
+    private boolean clearOld;
+    /**
      * 临时缓存
      */
     private Map<NodeModel, JSONObject> tempCacheMap;
@@ -32,6 +36,14 @@ public class OutGivingModel extends BaseModel {
      * 是否为单独创建的分发项目
      */
     private boolean outGivingProject;
+
+    public boolean isClearOld() {
+        return clearOld;
+    }
+
+    public void setClearOld(boolean clearOld) {
+        this.clearOld = clearOld;
+    }
 
     public boolean isOutGivingProject() {
         return outGivingProject;

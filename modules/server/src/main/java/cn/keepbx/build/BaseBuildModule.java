@@ -27,14 +27,27 @@ public class BaseBuildModule extends BaseJsonModel {
     private String releaseMethodDataId;
     /**
      * 分发后的操作
+     * 仅在项目发布类型生效
      *
      * @see BuildModel#getAfterOpt()
      */
     private int afterOpt;
     /**
+     * 是否清空旧包发布
+     */
+    private boolean clearOld;
+    /**
      * 构建产物目录
      */
     private String resultDirFile;
+
+    public boolean isClearOld() {
+        return clearOld;
+    }
+
+    public void setClearOld(boolean clearOld) {
+        this.clearOld = clearOld;
+    }
 
     public int getReleaseMethod() {
         return releaseMethod;

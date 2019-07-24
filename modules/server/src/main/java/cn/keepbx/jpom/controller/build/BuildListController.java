@@ -86,7 +86,7 @@ public class BuildListController extends BaseServerController {
                                 @ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "构建产物目录不能为空")) String resultDirFile,
                                 @ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "构建命令不能为空")) String script,
                                 @ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "发布方法不正确") int releaseMethod,
-                                String afterOpt) throws Exception {
+                                String afterOpt, String clearOld) throws Exception {
         List<String> list = getBranchList(gitUrl, userName, password);
         if (!list.contains(branchName)) {
             return JsonMessage.getString(405, "没有找到对应分支：" + branchName);
@@ -130,6 +130,7 @@ public class BuildListController extends BaseServerController {
                 return JsonMessage.getString(400, "请选择打包后的操作");
             }
             buildModel.setAfterOpt(afterOpt1.getCode());
+            buildModel.setClearOld(Convert.toBool(clearOld, false));
         } else {
             buildModel.setReleaseMethodDataId(null);
         }

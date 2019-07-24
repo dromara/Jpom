@@ -40,6 +40,7 @@ public class OutGivingRun implements Callable<OutGivingNodeProject.Status> {
     private OutGivingModel.AfterOpt afterOpt;
     private UserModel userModel;
     private boolean unzip;
+    private boolean clearOld;
     /**
      * 数据库记录id
      */
@@ -76,7 +77,7 @@ public class OutGivingRun implements Callable<OutGivingNodeProject.Status> {
                         updateStatus(null, id, outGivingNodeProject,
                                 OutGivingNodeProject.Status.Cancel, "前一个节点分发失败，取消分发");
                     } else {
-                        OutGivingRun outGivingRun = new OutGivingRun(id, outGivingNodeProject, file, finalAfterOpt, userModel, unzip);
+                        OutGivingRun outGivingRun = new OutGivingRun(item, outGivingNodeProject, file, userModel, unzip);
                         OutGivingNodeProject.Status status = outGivingRun.call();
                         if (status != OutGivingNodeProject.Status.Ok) {
                             if (finalAfterOpt == OutGivingModel.AfterOpt.Order_Must_Restart) {
@@ -89,23 +90,28 @@ public class OutGivingRun implements Callable<OutGivingNodeProject.Status> {
             });
         } else if (afterOpt == OutGivingModel.AfterOpt.Restart || afterOpt == OutGivingModel.AfterOpt.No) {
 
-            outGivingNodeProjects.forEach(outGivingNodeProject -> ThreadUtil.execAsync(new OutGivingRun(id, outGivingNodeProject, file, finalAfterOpt, userModel, unzip)));
+            outGivingNodeProjects.forEach(outGivingNodeProject -> ThreadUtil.execAsync(
+                    new OutGivingRun(item, outGivingNodeProject, file, userModel, unzip)));
         } else {
             //
             throw new RuntimeException("Not implemented");
         }
     }
 
-    private OutGivingRun(String outGivingId,
+    private OutGivingRun(OutGivingModel item,
                          OutGivingNodeProject outGivingNodeProject,
                          File file,
-                         OutGivingModel.AfterOpt afterOpt,
                          UserModel userModel,
                          boolean unzip) {
-        this.outGivingId = outGivingId;
+        this.outGivingId = item.getId();
         this.unzip = unzip;
+        this.clearOld = item.isClearOld();
         this.outGivingNodeProject = outGivingNodeProject;
         this.file = file;
+        OutGivingModel.AfterOpt afterOpt = BaseEnum.getEnum(OutGivingModel.AfterOpt.class, item.getAfterOpt());
+        if (afterOpt == null) {
+            afterOpt = OutGivingModel.AfterOpt.No;
+        }
         this.afterOpt = afterOpt;
         //
         NodeService nodeService = SpringUtil.getBean(NodeService.class);
@@ -126,7 +132,7 @@ public class OutGivingRun implements Callable<OutGivingNodeProject.Status> {
                     this.outGivingNodeProject.getProjectId(),
                     unzip,
                     afterOpt != OutGivingModel.AfterOpt.No,
-                    this.nodeModel, this.userModel);
+                    this.nodeModel, this.userModel, this.clearOld);
             if (jsonMessage.getCode() == HttpStatus.HTTP_OK) {
                 result = OutGivingNodeProject.Status.Ok;
                 updateStatus(this.logId, this.outGivingId, this.outGivingNodeProject,
@@ -156,12 +162,20 @@ public class OutGivingRun implements Callable<OutGivingNodeProject.Status> {
      * @param userModel 操作用户
      * @return json
      */
-    public static JsonMessage fileUpload(File file, String projectId, boolean unzip, boolean restart, NodeModel nodeModel, UserModel userModel) {
+    public static JsonMessage fileUpload(File file, String projectId,
+                                         boolean unzip, boolean restart,
+                                         NodeModel nodeModel, UserModel userModel,
+                                         boolean clearOld) {
         JSONObject data = new JSONObject();
         data.put("file", file);
         data.put("id", projectId);
         if (unzip) {
+            // 解压
             data.put("type", "unzip");
+            if (clearOld) {
+                // 清空
+                data.put("clearType", "clear");
+            }
         }
         // 操作
         if (restart) {
