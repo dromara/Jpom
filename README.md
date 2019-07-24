@@ -26,7 +26,7 @@
 </a>
 
 <p align="center">
-	<a href="https://jpom-site.keepbx.cn/">https://jpom-site.keepbx.cn/</a> | <a href="https://jpom-site.keepbx.cn/docs/">https://jpom-site.keepbx.cn/docs/</a> --
+	<a href="https://jpom-site.keepbx.cn/">https://jpom-site.keepbx.cn/</a> | <a href="https://jpom-site.keepbx.cn/docs/">https://jpom-site.keepbx.cn/docs/</a>
 </p>
 
  
