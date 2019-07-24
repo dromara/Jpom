@@ -2,23 +2,46 @@
     * [常见问题](fqa/FQA.md)
     * [更新记录](CHANGELOG)
 * 安装使用
-    * [说明](./install/deploy-doc.md)
-    * [安装](./install/install.md)
-        * [下载安装](./install/download_install.md)
-        * [编译安装](./install/build_install.md)
-        * [编译运行](./install/build_run.md)
-    * [启动失败](install/startFail.md)
-    * [管理命令](install/command.md)
+    * [部署说明](安装/部署说明.md)
+    * [开始安装](安装/开始安装.md)
+        * [下载安装](安装/download_install.md)
+        * [编译安装](安装/build_install.md)
+        * [编译运行](安装/build_run.md)
+    * [启动失败](安装/启动失败.md)
+    * [管理命令](安装/管理命令.md)
+    * [启动参数](安装/启动参数.md)
 * 节点管理
-    * 项目
-        * [属性](./project/project.md)
-        * [删除项目](./project/deleteProject.md)
-        * [控制台](./project/conlose-log.md)
-    * [Nginx管理](node/nginx/nginx-manager.md)
-    * [白名单](node/whitelist.md)
+    * Jpom项目
+        * [项目属性](节点管理/项目管理/项目属性.md)
+        * [删除项目](节点管理/项目管理/删除项目.md)
+        * [控制台](节点管理/项目管理/控制台.md)
+    * [Nginx管理]
+        * [介绍](节点管理/nginx管理/介绍.md)
+    * 系统管理
+        * [白名单](节点管理/系统管理/白名单目录.md)
+        * [缓存管理](节点管理/系统管理/缓存管理.md)
+        * [系统日志](系统管理/系统日志.md)
+        * [在线升级](系统管理/在线升级.md)
+* 节点分发
+    * [分发介绍](节点分发/分发介绍.md)
+    * [分发日志](节点分发/分发日志.md)
+    * [分发白名单](节点分发/分发白名单.md)
+* 监控管理
+    * [监控介绍](监控管理/监控简绍.md)
+    * [邮箱配置](监控管理/邮箱配置.md)
+    * [监控日志](监控管理/监控日志.md)
+* 在线构建
+    * [编辑构建](在线构建/编辑构建.md)
+    * [构建日志](在线构建/构建日志.md)
 * 用户管理
-    * [角色说明](user/userRole.md)
+    * [编辑用户](用户管理/编辑用户.md)
+    * [角色说明](用户管理/用户角色.md)
+    * [操作日志](用户管理/操作日志.md)
+* 系统管理
+    * [缓存管理](系统管理/缓存管理.md)
+    * [系统日志](系统管理/系统日志.md)
+    * [在线升级](系统管理/在线升级.md)
 * Jpom配置项
     * [添加公共Js](config/addScript.md)
     * [推荐的Nginx配置](config/nginx-config.md)
-    * [运行参数](config/par.md)
+    * [运行参数](安装/启动参数.md)
