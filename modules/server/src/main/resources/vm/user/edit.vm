@@ -191,6 +191,8 @@
         layui.stope(e);
     }
 
+    var nodeModels =#if($nodeModels)$nodeModels#else[]#end;
+
     function loadSuccess() {
         var treeNodes = [];
         layui.use(['tree'], function () {
@@ -199,7 +201,7 @@
 
             //加载树
             function loadNode() {
-                var nodeModels =#if($nodeModels)$nodeModels#else[]#end;
+
                 if (nodeModels && nodeModels.length > 0) {
                     for (var j = 0; j < nodeModels.length; j++) {
                         var nodeModel = nodeModels[j];
@@ -274,11 +276,7 @@
 
             //渲染选中节点
             function loadProjects() {
-                var userItem = '$!userItem';
-                if (!userItem) {
-                    return false;
-                }
-                userItem = eval("(" + userItem + ")");
+                var userItem =  #if($userItem)$userItem#else{}#end;
                 var nodeRole = userItem.nodeRole;
                 for (var key in nodeRole) {
                     var item = nodeRole[key];
@@ -343,14 +341,6 @@
 
             //勾选的项目 排除目录
             function getCheckProject(data) {
-                var nodeModels = '$!nodeModels';
-                if (!nodeModels) {
-                    return data;
-                }
-                nodeModels = eval("(" + nodeModels + ")");
-                if (!nodeModels || nodeModels.length <= 0) {
-                    return data;
-                }
                 var projects = {};
                 for (var i = 0; i < nodeModels.length; i++) {
                     var node = nodeModels[i];
