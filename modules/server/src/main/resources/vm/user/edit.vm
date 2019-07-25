@@ -115,7 +115,7 @@
                                             </div>
                                         </div>
                                         <div>
-                                            <ul id="tree_$item.id" class="ztree"></ul>
+                                            <div id="tree_$item.id"></div>
                                         </div>
                                     </div>
                                 </div>
@@ -191,205 +191,196 @@
         layui.stope(e);
     }
 
-    function evil(fn) {
-        var Fn = Function;
-        return new Fn('return ' + fn)();
-    }
-
     function loadSuccess() {
         var treeNodes = [];
+        layui.use(['tree'], function () {
+            tree = layui.tree;
 
-        // 提交用户信息
-        form.on('submit(submitUser)', function (data) {
-            var sendData = formatPwd(data.field, "password");
-            sendData = getCheckProject(sendData);
-            loadingAjax({
-                url: data.form.action,
-                data: sendData,
-                success: function (data) {
-                    layer.msg(data.msg);
-                    if (200 == data.code) {
-                        setTimeout(function () {
-                            var index = parent.layer.getFrameIndex(window.name);
-                            parent.layer.close(index);
-                            parent.location.reload();
-                        }, 1500);
-                    }
-                }
-            });
-            return false;
-        });
+            loadNode();
 
-        //勾选的项目 排除目录
-        function getCheckProject(data) {
-            if (!treeNodes || treeNodes.length <= 0) {
-                return data;
-            }
-            var projects = {};
-            for (var i = 0; i < treeNodes.length; i++) {
-                var treeNode = treeNodes[i];
-                var setting = treeNode.setting;
-                var nodeId = setting.nodeId;
-                var nodes = treeNode.getCheckedNodes(true);
-                if (!nodes || nodes.length <= 0) {
-                    continue;
+            //加载树
+            function loadNode() {
+                var nodeModels = '$!nodeModels';
+                if (!nodeModels) {
+                    return;
                 }
-                var group = treeNode.group;
-                var nodeProjects = [];
-                for (var j = 0; j < nodes.length; j++) {
-                    var node = nodes[j];
-                    var id = node.id;
-                    if (id) {
-                        nodeProjects.push(id);
-                    }
-                }
-                projects[nodeId] = nodeProjects;
-            }
-            data.projects = JSON.stringify(projects);
-            return data;
-        }
-
-        asyncLoadJs("$!jpomProxyPath/static/ztree/jquery.ztree.core.min.js", function () {
-            asyncLoadJs("$!jpomProxyPath/static/ztree/jquery.ztree.excheck.min.js", function () {
-                var nodeModels = '$nodeModels';
-                if (typeof nodeModels == "string") {
-                    nodeModels = evil(nodeModels);
-                }
+                nodeModels = eval("(" + nodeModels + ")");
                 if (nodeModels && nodeModels.length > 0) {
-                    var setting = {
-                        check: {
-                            enable: true,
-                            chkStyle: "checkbox",
-                            chkboxType: {
-                                "Y": "ps",
-                                "N": "ps"
-                            },
-                            autoCheckTrigger: true
-                        },
-                        data: {
-                            simpleData: {
-                                enable: true
-                            },
-                            key: {
-                                name: "name",
-                                children: "projects"
-                            },
-                            view: {
-                                selectedMulti: false
-                            }
-                        },
-                        callback: {
-                            onCheck: zTreeOnCheck
-                        }
-                    };
                     for (var j = 0; j < nodeModels.length; j++) {
                         var nodeModel = nodeModels[j];
                         var groupProjects = nodeModel.groupProjects;
                         if (groupProjects && groupProjects.length > 0) {
-                            for (var i = 0; i < groupProjects.length; i++) {
-                                var project = groupProjects[i];
-                                project.name = project.group;
-                                project.nodeId = nodeModel.id
-                            }
+                            formateProjects(groupProjects, nodeModel.id);
                         } else {
                             //没有项目
                             var divId = "#projectsDiv_" + nodeModel.id;
                             $(divId).css("display", "none");
                         }
-                        var id = "#tree_" + nodeModel.id;
-                        setting.nodeId = nodeModel.id;
-                        var zTreeObj = $.fn.zTree.init($(id), setting, groupProjects);
-                        treeNodes.push(zTreeObj);
-                        //展开节点
-                        zTreeObj.expandAll(true);
-                        tomcatManage(nodeModel.id, false);
+                    }
+                    //渲染选中节点
+                    loadProjects();
+                }
+            }
+
+            //将节点项目数据转换为tree格式
+            function formateProjects(data, nodeId) {
+                if (!data || data.length <= 0) {
+                    return;
+                }
+                for (var i = 0; i < data.length; i++) {
+                    //分组
+                    var group = data[i];
+                    group.title = group.group;
+                    var projects = group.projects;
+                    group.spread = true;
+                    group.nodeId = nodeId;
+                    group.id = nodeId;
+                    group.children = projects;
+                    if (projects && projects.length > 0) {
+                        //项目
+                        for (var j = 0; j < projects.length; j++) {
+                            var project = projects[j];
+                            project.title = project.name;
+                            project.nodeId = nodeId;
+                        }
                     }
                 }
-                loadProjects();
+                //渲染树
+                loadTree(data, nodeId);
+                tomcatManage(nodeId, false);
+            }
+
+            //渲染树
+            function loadTree(data, nodeId) {
+                tree.render({
+                    elem: '#tree_' + nodeId,
+                    data: data,
+                    id: nodeId,
+                    showCheckbox: true,
+                    oncheck: function (obj) {
+                        var nodeData = obj.data;
+                        var nId = nodeData.nodeId;
+                        //获得选中的节点
+                        var checkData = tree.getChecked(nId);
+                        var projectId = "#projectOpt_" + nodeId;
+                        if (checkData && checkData.length > 0) {
+                            $(projectId).css("display", "block");
+                        } else {
+                            $(projectId).css("display", "none");
+                            var uploadId = $('input[name=' + nodeId + '_uploadFile]');
+                            var deleteId = $('input[name=' + nodeId + '_deleteFile]');
+                            uploadId.prop('checked', false);
+                            deleteId.prop('checked', false);
+                            form.render();
+                        }
+                    }
+                });
+            }
+
+            //渲染选中节点
+            function loadProjects() {
+                var userItem = '$!userItem';
+                if (!userItem) {
+                    return false;
+                }
+                userItem = eval("(" + userItem + ")");
+                var nodeRole = userItem.nodeRole;
+                for (var key in nodeRole) {
+                    var item = nodeRole[key];
+                    var projects = item.projects;
+                    if (!projects || projects.length <= 0) {
+                        continue;
+                    }
+                    //批量勾选
+                    tree.setChecked(key, projects);
+                }
+            }
+
+            //监听tomcat选择
+            form.on('checkbox(manageTomcat)', function (data) {
+                var check = data.elem.checked;
+                var dom = data.elem;
+                var nodeId = dom.getAttribute("node_id");
+                tomcatManage(nodeId, check);
             });
-        });
 
-        //勾选回调
-        function zTreeOnCheck(event, treeId, treeNode) {
-            var check = treeNode.checked;
-            var treeObj = $.fn.zTree.getZTreeObj(treeId);
-            var setting = treeObj.setting;
-            var nodeId = setting.nodeId;
-            var id = "#projectOpt_" + nodeId;
-            if (check) {
-                $(id).css("display", "block");
-            } else {
-                var nodes = treeObj.getCheckedNodes(true);
-                //全部取消勾选 隐藏开关并重置为未选中
-                if (!nodes || nodes.length <= 0) {
-                    $(id).css("display", "none");
-                    var uploadId = $('input[name=' + nodeId + '_uploadFile]');
-                    var deleteId = $('input[name=' + nodeId + '_deleteFile]');
-                    uploadId.prop('checked', false);
-                    deleteId.prop('checked', false);
-                    form.render();
+            //更新tomcat管理
+            function tomcatManage(nodeId, check) {
+                if (!nodeId) {
+                    return;
                 }
-            }
-        }
-
-        //渲染选中节点
-        function loadProjects() {
-            var userItem = '$!userItem';
-            if (!userItem) {
-                return false;
-            }
-            if (typeof userItem == "string") {
-                userItem = evil(userItem);
-            }
-            var nodeRole = userItem.nodeRole;
-            for (var key in nodeRole) {
-                var item = nodeRole[key];
-                var projects = item.projects;
-                if (!projects || projects.length <= 0) {
-                    continue;
-                }
-                var treeObj = $.fn.zTree.getZTreeObj("tree_" + key);
-                if (!treeObj) {
-                    continue;
-                }
-                for (var i = 0; i < projects.length; i++) {
-                    var id = projects[i];
-                    var obj = treeObj.getNodeByParam("id", id, null);
-                    if (obj) {
-                        treeObj.checkNode(obj, true, true);
+                var id = "#tomcatOpt_" + nodeId;
+                if (check) {
+                    $(id).css("display", "block");
+                } else {
+                    var list = $("input[node_id=" + nodeId + "]:checked");
+                    if (!list || list.length <= 0) {
+                        $(id).css("display", "none");
+                        var uploadId = $('input[name=' + nodeId + '_uploadTomcatFile]');
+                        var deleteId = $('input[name=' + nodeId + '_deleteTomcatFile]');
+                        uploadId.prop('checked', false);
+                        deleteId.prop('checked', false);
+                        form.render();
                     }
                 }
             }
-        }
 
-        //监听tomcat选择
-        form.on('checkbox(manageTomcat)', function (data) {
-            var check = data.elem.checked;
-            var dom = data.elem;
-            var nodeId = dom.getAttribute("node_id");
-            tomcatManage(nodeId, check);
-        });
+            // 提交用户信息
+            form.on('submit(submitUser)', function (data) {
+                var sendData = formatPwd(data.field, "password");
+                sendData = getCheckProject(sendData);
+                loadingAjax({
+                    url: data.form.action,
+                    data: sendData,
+                    success: function (data) {
+                        layer.msg(data.msg);
+                        if (200 == data.code) {
+                            setTimeout(function () {
+                                var index = parent.layer.getFrameIndex(window.name);
+                                parent.layer.close(index);
+                                parent.location.reload();
+                            }, 1500);
+                        }
+                    }
+                });
+                return false;
+            });
 
-        //更新tomcat管理
-        function tomcatManage(nodeId, check) {
-            if (!nodeId) {
-                return;
-            }
-            var id = "#tomcatOpt_" + nodeId;
-            if (check) {
-                $(id).css("display", "block");
-            } else {
-                var list = $("input[node_id=" + nodeId + "]:checked");
-                if (!list || list.length <= 0) {
-                    $(id).css("display", "none");
-                    var uploadId = $('input[name=' + nodeId + '_uploadTomcatFile]');
-                    var deleteId = $('input[name=' + nodeId + '_deleteTomcatFile]');
-                    uploadId.prop('checked', false);
-                    deleteId.prop('checked', false);
-                    form.render();
+            //勾选的项目 排除目录
+            function getCheckProject(data) {
+                var nodeModels = '$!nodeModels';
+                if (!nodeModels) {
+                    return data;
                 }
+                nodeModels = eval("(" + nodeModels + ")");
+                if (!nodeModels || nodeModels.length <= 0) {
+                    return data;
+                }
+                var projects = {};
+                for (var i = 0; i < nodeModels.length; i++) {
+                    var node = nodeModels[i];
+                    var nodeId = node.id;
+                    var projectArray = [];
+                    var checkData = tree.getChecked(nodeId);
+                    if (!checkData || checkData.length <= 0) {
+                        continue;
+                    }
+                    for (var j = 0; j < checkData.length; j++) {
+                        var children = checkData[j].children;
+                        if (!children || children.length <= 0) {
+                            continue;
+                        }
+                        for (var k = 0; k < children.length; k++) {
+                            var projectId = children[k].id;
+                            projectArray.push(projectId);
+                        }
+                    }
+                    projects[nodeId] = projectArray;
+                }
+                data.projects = JSON.stringify(projects);
+                return data;
             }
-        }
+        });
     }
 </script>
 </html>
