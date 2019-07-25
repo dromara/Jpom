@@ -1,5 +1,6 @@
 package cn.keepbx.jpom.common.commander.impl;
 
+import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.text.StrSpliter;
 import cn.hutool.core.util.StrUtil;
 import cn.keepbx.jpom.common.commander.AbstractProjectCommander;
@@ -42,7 +43,7 @@ public class WindowsProjectCommander extends AbstractProjectCommander {
         int pid = parsePid(result);
         if (pid > 0) {
             String cmd = String.format("taskkill /F /PID %s", pid);
-            CommandUtil.execCommand(cmd);
+            CommandUtil.asyncExeLocalCommand(FileUtil.file(projectInfoModel.getLib()), cmd);
             loopCheckRun(projectInfoModel.getId(), false);
             result = status(tag);
         }
