@@ -13,6 +13,7 @@ import cn.keepbx.jpom.model.data.UserModel;
 import cn.keepbx.jpom.model.system.JpomManifest;
 import cn.keepbx.jpom.service.node.NodeService;
 import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -71,6 +72,14 @@ public class NodeIndexController extends BaseServerController {
     @RequestMapping(value = "node_status", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     public String nodeStatus() {
-        return NodeForward.request(getNode(), getRequest(), NodeUrl.Status).toString();
+        long timeMillis = System.currentTimeMillis();
+        JSONObject jsonObject = NodeForward.requestData(getNode(), NodeUrl.Status, getRequest(), JSONObject.class);
+        if (jsonObject == null) {
+            return JsonMessage.getString(500, "获取信息失败");
+        }
+        JSONArray jsonArray = new JSONArray();
+        jsonObject.put("timeOut", System.currentTimeMillis() - timeMillis);
+        jsonArray.add(jsonObject);
+        return JsonMessage.getString(200, "", jsonArray);
     }
 }

@@ -105,7 +105,7 @@ public abstract class AbstractProjectCommander {
             throw new JpomRuntimeException("没有需要执行的命令");
         }
         // 执行命令
-        GlobalThreadPool.execute(() -> CommandUtil.execSystemCommand(command, FileUtil.file(projectInfoModel.getLib())));
+        CommandUtil.asyncExeLocalCommand(FileUtil.file(projectInfoModel.getLib()), command);
         //
         loopCheckRun(projectInfoModel.getId(), true);
         return status(projectInfoModel.getId());

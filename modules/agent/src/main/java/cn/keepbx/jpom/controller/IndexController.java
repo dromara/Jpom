@@ -62,29 +62,13 @@ public class IndexController extends BaseAgentController {
         jsonObject.put("osName", SystemUtil.getOsInfo().getName());
         jsonObject.put("jpomVersion", JpomManifest.getInstance().getVersion());
         jsonObject.put("javaVersion", SystemUtil.getJavaRuntimeInfo().getVersion());
-
-        if (projectInfoModels == null) {
-            jsonObject.put("count", 0);
-            jsonObject.put("runCount", 0);
-            jsonObject.put("stopCount", 0);
-            return JsonMessage.getString(200, "", jsonObject);
-        }
-        int count = 0, runCount = 0, stopCount = 0;
-        for (ProjectInfoModel projectInfoModel : projectInfoModels) {
-            count++;
-            if (projectInfoModel.isStatus(true)) {
-                runCount++;
-            } else {
-                stopCount++;
-            }
+        int count = 0;
+        if (projectInfoModels != null) {
+            count = projectInfoModels.size();
         }
         jsonObject.put("count", count);
-        jsonObject.put("runCount", runCount);
-        jsonObject.put("stopCount", stopCount);
         // 运行时间
         jsonObject.put("runTime", JpomManifest.getInstance().getUpTime());
-        JSONArray jsonArray = new JSONArray();
-        jsonArray.add(jsonObject);
-        return JsonMessage.getString(200, "", jsonArray);
+        return JsonMessage.getString(200, "", jsonObject);
     }
 }
