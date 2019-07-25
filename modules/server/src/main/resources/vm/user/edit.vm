@@ -195,7 +195,6 @@
         var treeNodes = [];
         layui.use(['tree'], function () {
             tree = layui.tree;
-
             loadNode();
 
             //加载树
