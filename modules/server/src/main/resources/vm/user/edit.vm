@@ -199,10 +199,7 @@
 
             //加载树
             function loadNode() {
-                var nodeModels =[];
-                #if($nodeModels)
-                    nodeModels = $nodeModels;
-                #end
+                var nodeModels =#if($nodeModels)$nodeModels#else[]#end;
                 if (nodeModels && nodeModels.length > 0) {
                     for (var j = 0; j < nodeModels.length; j++) {
                         var nodeModel = nodeModels[j];
