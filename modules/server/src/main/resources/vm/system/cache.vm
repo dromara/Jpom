@@ -51,6 +51,12 @@
                 t="pidPort">清空
         </button>
     </blockquote>
+    <blockquote class="layui-elem-quote">错误进程缓存：
+        <span nodeId="$node.id" pidError></span>
+        <button type="button" class="layui-btn layui-btn-sm clear" nodeId="$node.id"
+                t="pidPort">清空
+        </button>
+    </blockquote>
 
     <blockquote class="layui-elem-quote">在读取的日志文件数：
         <span nodeId="$node.id" readFileOnLineCount></span>

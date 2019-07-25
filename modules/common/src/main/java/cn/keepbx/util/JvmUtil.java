@@ -37,7 +37,7 @@ public class JvmUtil {
     /**
      * 记录错误的进程信息，避免重复获取
      */
-    private static final TimedCache<String, Boolean> PID_ERROR = new TimedCache<>(TimeUnit.DAYS.toMillis(1));
+    public static final TimedCache<String, Boolean> PID_ERROR = new TimedCache<>(TimeUnit.DAYS.toMillis(1));
 
     /**
      * 获取指定程序的jvm 信息

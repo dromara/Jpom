@@ -8,6 +8,7 @@ import cn.keepbx.jpom.common.BaseAgentController;
 import cn.keepbx.jpom.common.commander.AbstractProjectCommander;
 import cn.keepbx.jpom.socket.AgentFileTailWatcher;
 import cn.keepbx.jpom.system.ConfigBean;
+import cn.keepbx.util.JvmUtil;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -43,6 +44,8 @@ public class AgentCacheManageController extends BaseAgentController {
 
         int oneLineCount = AgentFileTailWatcher.getOneLineCount();
         jsonObject.put("readFileOnLineCount", oneLineCount);
+        //
+        jsonObject.put("pidError", JvmUtil.PID_ERROR.size());
         return JsonMessage.getString(200, "ok", jsonObject);
     }
 
@@ -68,6 +71,9 @@ public class AgentCacheManageController extends BaseAgentController {
                 if (!clean) {
                     return JsonMessage.getString(504, "清空文件缓存失败");
                 }
+                break;
+            case "pidError":
+                JvmUtil.PID_ERROR.clear();
                 break;
             default:
                 return JsonMessage.getString(405, "没有对应类型：" + type);
