@@ -21,23 +21,24 @@ public class JpomClose {
 
     public void main(String[] args) throws Exception {
         String tag = StringUtil.getArgsValue(args, "jpom.applicationTag");
-        if (StrUtil.isNotEmpty(tag)) {
-            // 事件
-            String event = StringUtil.getArgsValue(args, "event");
-            if ("stop".equalsIgnoreCase(event)) {
-                String status = JpomClose.getInstance().status(tag);
-                if (!status.contains(StrUtil.COLON)) {
-                    Console.error("Jpom并没有运行");
-                } else {
-                    String msg = JpomClose.getInstance().stop(tag);
-                    Console.log(msg);
-                }
-                System.exit(0);
-            } else if ("status".equalsIgnoreCase(event)) {
-                String status = JpomClose.getInstance().status(tag);
-                Console.log(status);
-                System.exit(0);
+        if (StrUtil.isEmpty(tag)) {
+            return;
+        }
+        // 事件
+        String event = StringUtil.getArgsValue(args, "event");
+        if ("stop".equalsIgnoreCase(event)) {
+            String status = JpomClose.getInstance().status(tag);
+            if (!status.contains(StrUtil.COLON)) {
+                Console.error("Jpom并没有运行");
+            } else {
+                String msg = JpomClose.getInstance().stop(tag);
+                Console.log(msg);
             }
+            System.exit(0);
+        } else if ("status".equalsIgnoreCase(event)) {
+            String status = JpomClose.getInstance().status(tag);
+            Console.log(status);
+            System.exit(0);
         }
     }
 

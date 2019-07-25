@@ -134,17 +134,33 @@
             <div class="layui-inline" id="releaseMethodDiv2_Project">
             </div>
         </div>
-        <div class="layui-form-item" id="afterOptDiv" #if($model.releaseMethod!=2)
+        <div id="afterOptDiv" #if($model.releaseMethod!=2)
              style="display: none;" #end>
-            <label class="layui-form-label">发布后</label>
-            <div class="layui-input-block">
-                <select name="afterOpt" id="afterOpt">
-                    <option value="">请选择发布后的操作</option>
-                    #foreach($item in $afterOpt)
-                        <option value="$item.code"
-                                #if($item.code==$model.afterOpt)selected #end>$item.desc</option>
-                    #end
-                </select>
+            <div class="layui-form-item">
+                <div class="layui-inline">
+                    <label class="layui-form-label">清空发布</label>
+                    <div class="layui-input-block">
+                        <input type="checkbox" value="true"
+                            #if($model.clearOld)
+                               checked
+                            #end
+                               name="clearOld"
+                               lay-skin="switch"
+                               lay-text="是|否">
+                    </div>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">发布后</label>
+                <div class="layui-input-block">
+                    <select name="afterOpt" id="afterOpt">
+                        <option value="">请选择发布后的操作</option>
+                        #foreach($item in $afterOpt)
+                            <option value="$item.code"
+                                    #if($item.code==$model.afterOpt)selected #end>$item.desc</option>
+                        #end
+                    </select>
+                </div>
             </div>
         </div>
     ##提交按钮

@@ -11,6 +11,7 @@ import cn.keepbx.jpom.common.interceptor.UrlPermission;
 import cn.keepbx.jpom.model.BaseEnum;
 import cn.keepbx.jpom.model.Role;
 import cn.keepbx.jpom.model.data.OutGivingModel;
+import cn.keepbx.jpom.model.data.OutGivingNodeProject;
 import cn.keepbx.jpom.model.log.UserOperateLogV1;
 import cn.keepbx.jpom.service.node.OutGivingServer;
 import cn.keepbx.jpom.system.ConfigBean;
@@ -27,6 +28,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import javax.annotation.Resource;
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
+import java.util.Objects;
 
 /**
  * 分发文件管理
@@ -69,10 +72,18 @@ public class OutGivingProjectController extends BaseServerController {
     @RequestMapping(value = "upload", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     @UrlPermission(value = Role.ServerManager, optType = UserOperateLogV1.OptType.UploadOutGiving)
-    public String upload(String id, String afterOpt) throws IOException {
+    public String upload(String id, String afterOpt, String clearOld) throws IOException {
         OutGivingModel outGivingModel = outGivingServer.getItem(id);
         if (outGivingModel == null) {
             return JsonMessage.getString(400, "上传失败,没有找到对应的分发项目");
+        }
+        // 检查状态
+        List<OutGivingNodeProject> outGivingNodeProjectList = outGivingModel.getOutGivingNodeProjectList();
+        Objects.requireNonNull(outGivingNodeProjectList);
+        for (OutGivingNodeProject outGivingNodeProject : outGivingNodeProjectList) {
+            if (outGivingNodeProject.getStatus() == OutGivingNodeProject.Status.Ing.getCode()) {
+                return JsonMessage.getString(400, "当前还在分发中,请等待分发结束");
+            }
         }
         OutGivingModel.AfterOpt afterOpt1 = BaseEnum.getEnum(OutGivingModel.AfterOpt.class, Convert.toInt(afterOpt, 0));
         if (afterOpt1 == null) {
@@ -96,6 +107,7 @@ public class OutGivingProjectController extends BaseServerController {
         FileUtil.move(src, dest, true);
         //
         outGivingModel = outGivingServer.getItem(id);
+        outGivingModel.setClearOld(Convert.toBool(clearOld, false));
         outGivingModel.setAfterOpt(afterOpt1.getCode());
 
         outGivingServer.updateItem(outGivingModel);

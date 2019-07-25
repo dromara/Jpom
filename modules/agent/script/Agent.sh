@@ -21,10 +21,10 @@
 #!/bin/bash
 
 Tag="KeepBx-Agent-System-JpomAgentApplication"
-MainClass="org.springframework.boot.loader.JarLauncher"
 # 自动获取当前路径
 Path=$(cd `dirname $0`; pwd)"/"
 Lib="${Path}lib/"
+RUNJAR=""
 Log="${Path}agent.log"
 LogBack="${Path}log/"
 JVM="-server "
@@ -52,9 +52,17 @@ function start() {
 			echo "mv to $LogBack$cur_dateTime"
 		touch ${Log}
 	fi
-	# classPath
-    CLASSPATH=""
-    nohup java  ${JVM} -Djava.ext.dirs=${Lib}:${JAVA_HOME}/lib/:${JAVA_HOME}/jre/lib/ext -Dapplication=${Tag} -Dbasedir=${Path} ${MainClass} ${ARGS}  >> ${Log} 2>&1 &
+	# jar
+	if [[ -z "${RUNJAR}" ]] ; then
+		RUNJAR=`listDir ${Lib}`
+		echo "自动运行：${RUNJAR}"
+	fi
+    # error
+	if [[ -z "${RUNJAR}" ]] ; then
+        echo "没有找到jar"
+        exit 2
+    fi
+    nohup java  ${JVM} -Xbootclasspath/a:${JAVA_HOME}/lib/tools.jar -jar ${Lib}${RUNJAR} -Dapplication=${Tag} -Dbasedir=${Path} ${ARGS}  >> ${Log} 2>&1 &
     if [[ -f ${Log} ]]; then
         tail -f ${Log}
     else
@@ -67,12 +75,27 @@ function start() {
     fi
 }
 
+# 找出第一个jar包
+function listDir()
+{
+    ALL=""
+	for file in `ls $1`
+	do
+		if [[ -f "${1}/${file}" ]]; then
+			#得到文件的完整的目录
+			ALL="${file}"
+			break
+		fi
+	done
+	echo ${ALL}
+}
+
 # 停止程序
 function stop() {
 	pid=$(ps -ef | grep -v 'grep' | egrep ${Tag}| awk '{printf $2 " "}')
 	if [[ "$pid" != "" ]]; then
-        echo -n "boot ( pid $pid) is running" 
-        echo 
+        echo -n "boot ( pid $pid) is running"
+        echo
         echo -n $"Shutting down boot: wait"
         kill $(pgrep -f ${Tag}) 2>/dev/null
         sleep 3

@@ -7,7 +7,6 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.system.SystemUtil;
-import cn.keepbx.jpom.JpomApplication;
 import cn.keepbx.jpom.model.BaseModel;
 import cn.keepbx.jpom.system.AgentConfigBean;
 import cn.keepbx.util.CommandUtil;
@@ -64,7 +63,7 @@ public class ScriptModel extends BaseModel {
             throw new IllegalArgumentException("id 为空");
         }
         File path = AgentConfigBean.getInstance().getScriptPath();
-        return FileUtil.file(path, getId(), "script." + JpomApplication.SUFFIX);
+        return FileUtil.file(path, getId(), "script." + CommandUtil.SUFFIX);
     }
 
     public File getLogFile(boolean get) {

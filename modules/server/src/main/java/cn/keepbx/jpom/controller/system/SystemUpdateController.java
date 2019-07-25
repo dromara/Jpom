@@ -1,10 +1,9 @@
 package cn.keepbx.jpom.controller.system;
 
-import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.http.HttpStatus;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.controller.multipart.MultipartFileBuilder;
+import cn.keepbx.jpom.JpomApplication;
 import cn.keepbx.jpom.JpomServerApplication;
 import cn.keepbx.jpom.common.BaseServerController;
 import cn.keepbx.jpom.common.forward.NodeForward;
@@ -15,15 +14,14 @@ import cn.keepbx.jpom.model.data.NodeModel;
 import cn.keepbx.jpom.model.log.UserOperateLogV1;
 import cn.keepbx.jpom.model.system.JpomManifest;
 import cn.keepbx.jpom.system.ServerConfigBean;
-import cn.keepbx.util.CommandUtil;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import java.io.File;
 import java.io.IOException;
+import java.util.Objects;
 
 /**
  * 在线升级
@@ -54,8 +52,12 @@ public class SystemUpdateController extends BaseServerController {
     @ResponseBody
     @UrlPermission(value = Role.System, optType = UserOperateLogV1.OptType.UpdateSys)
     public String uploadJar() throws IOException {
+        NodeModel nodeModel = tryGetNode();
+        if (nodeModel != null) {
+            return NodeForward.requestMultipart(getNode(), getMultiRequest(), NodeUrl.SystemUploadJar).toString();
+        }
         //
-        File scriptFile = JpomManifest.getScriptFile();
+        Objects.requireNonNull(JpomManifest.getScriptFile());
         MultipartFileBuilder multipartFileBuilder = createMultipart();
         multipartFileBuilder
                 .setFileExt("jar")
@@ -70,18 +72,8 @@ public class SystemUpdateController extends BaseServerController {
         }
         String version = error.getMsg();
         JpomManifest.releaseJar(path, version);
-        ThreadUtil.execute(() -> {
-            try {
-                Thread.sleep(2000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            try {
-                CommandUtil.asyncExeLocalCommand(scriptFile.getParentFile(), FileUtil.getAbsolutePath(scriptFile) + " restart");
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        });
+        //
+        JpomApplication.restart();
         return JsonMessage.getString(200, "升级中大约需要30秒");
     }
 }

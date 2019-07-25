@@ -46,9 +46,9 @@
                 for (var key in data.data) {
                     $("span[" + key.toLowerCase() + "]").text(data.data[key]);
                 }
-                // if (data.data.debug === false) {
-                $("#selectFile").show()
-                // }
+                if (data.data.debug === false) {
+                    $("#selectFile").show()
+                }
             }
         });
 
