@@ -4,6 +4,10 @@
 
 cd ../
 
+call git pull github master:master
+
+call git pull gitee master:master
+
 echo ÍÆËÍµ½
 
 call git push github master
