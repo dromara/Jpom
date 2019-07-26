@@ -7,7 +7,6 @@ import cn.hutool.core.date.DateTime;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.lang.JarClassLoader;
 import cn.hutool.core.text.StrSpliter;
-import cn.hutool.core.thread.GlobalThreadPool;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.http.HttpUtil;
 import cn.hutool.system.SystemUtil;
@@ -352,7 +351,7 @@ public abstract class AbstractProjectCommander {
         Properties properties = virtualMachine.getAgentProperties();
         String appTag;
         for (ProjectInfoModel projectInfoModel : projectInfoModels) {
-            appTag = String.format("-Dapplication=%s ", projectInfoModel.getId());
+            appTag = String.format("-%s=%s ", JvmUtil.OLD_JPOM_PID_TAG, projectInfoModel.getId());
             String args = properties.getProperty("sun.jvm.args", "");
             if (StrUtil.containsIgnoreCase(args, appTag)) {
                 name = projectInfoModel.getName();

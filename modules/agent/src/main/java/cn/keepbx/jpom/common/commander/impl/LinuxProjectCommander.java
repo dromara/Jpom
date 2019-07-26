@@ -7,6 +7,7 @@ import cn.keepbx.jpom.common.commander.AbstractProjectCommander;
 import cn.keepbx.jpom.model.data.ProjectInfoModel;
 import cn.keepbx.jpom.model.system.NetstatModel;
 import cn.keepbx.util.CommandUtil;
+import cn.keepbx.util.JvmUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,9 +26,10 @@ public class LinuxProjectCommander extends AbstractProjectCommander {
             return null;
         }
         // 拼接命令
-        return String.format("nohup java %s %s -Dapplication=%s -Dbasedir=%s %s %s >> %s 2>&1 &",
+        return String.format("nohup java %s %s -%s=%s -Dbasedir=%s %s %s >> %s 2>&1 &",
                 projectInfoModel.getJvm(),
                 path,
+                JvmUtil.OLD_JPOM_PID_TAG,
                 projectInfoModel.getId(),
                 projectInfoModel.getAbsoluteLib(),
                 projectInfoModel.getMainClass(),

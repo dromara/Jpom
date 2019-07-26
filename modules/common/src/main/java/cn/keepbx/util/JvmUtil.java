@@ -33,6 +33,11 @@ import java.util.concurrent.TimeUnit;
  */
 public class JvmUtil {
 
+    /**
+     * 旧版jpom进程标记
+     */
+    public static final String OLD_JPOM_PID_TAG = "Dapplication";
+
     private static final JavaRuntimeInfo JAVA_RUNTIME_INFO = SystemUtil.getJavaRuntimeInfo();
     /**
      * 记录错误的进程信息，避免重复获取
@@ -165,7 +170,7 @@ public class JvmUtil {
      */
     public static VirtualMachine getVirtualMachine(String tag) throws IOException {
         // 添加空格是为了防止startWith
-        String appTag = String.format("-Dapplication=%s ", tag);
+        String appTag = String.format("-%s=%s ", JvmUtil.OLD_JPOM_PID_TAG, tag);
         // 通过VirtualMachine.list()列出所有的java进程
         List<VirtualMachineDescriptor> descriptorList = VirtualMachine.list();
         for (VirtualMachineDescriptor virtualMachineDescriptor : descriptorList) {

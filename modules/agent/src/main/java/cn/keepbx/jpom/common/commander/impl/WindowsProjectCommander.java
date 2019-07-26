@@ -7,6 +7,7 @@ import cn.keepbx.jpom.common.commander.AbstractProjectCommander;
 import cn.keepbx.jpom.model.data.ProjectInfoModel;
 import cn.keepbx.jpom.model.system.NetstatModel;
 import cn.keepbx.util.CommandUtil;
+import cn.keepbx.util.JvmUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,8 +31,8 @@ public class WindowsProjectCommander extends AbstractProjectCommander {
         String mainClass = projectInfoModel.getMainClass();
         String args = projectInfoModel.getArgs();
 
-        return String.format("javaw %s %s -Dapplication=%s -Dbasedir=%s %s %s >> %s &",
-                jvm, classPath, tag,
+        return String.format("javaw %s %s -%s=%s -Dbasedir=%s %s %s >> %s &",
+                jvm, classPath, JvmUtil.OLD_JPOM_PID_TAG, tag,
                 projectInfoModel.getAbsoluteLib(), mainClass, args, projectInfoModel.getAbsoluteLog());
     }
 
