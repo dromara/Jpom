@@ -43,7 +43,11 @@ public class LinuxProjectCommander extends AbstractProjectCommander {
         if (pid > 0) {
             String cmd = String.format("kill  %s", pid);
             CommandUtil.asyncExeLocalCommand(FileUtil.file(projectInfoModel.getLib()), cmd);
-            loopCheckRun(projectInfoModel.getId(), false);
+            if (loopCheckRun(projectInfoModel.getId(), false)) {
+                // 强制杀进程
+                cmd = String.format("kill -9 %s", pid);
+                CommandUtil.asyncExeLocalCommand(FileUtil.file(projectInfoModel.getLib()), cmd);
+            }
             result = status(tag);
         }
         return result;

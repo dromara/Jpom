@@ -414,16 +414,17 @@ public abstract class AbstractProjectCommander {
      * @param status 要检查的状态
      * @throws Exception E
      */
-    protected void loopCheckRun(String tag, boolean status) throws Exception {
+    protected boolean loopCheckRun(String tag, boolean status) throws Exception {
         int count = 0;
         do {
             if (isRun(tag) == status) {
-                return;
+                return status;
             }
             try {
                 Thread.sleep(500);
             } catch (InterruptedException ignored) {
             }
         } while (count++ < 20);
+        return !status;
     }
 }
