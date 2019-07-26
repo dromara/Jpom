@@ -26,10 +26,10 @@ public class LinuxProjectCommander extends AbstractProjectCommander {
             return null;
         }
         // 拼接命令
-        return String.format("nohup java %s %s -%s=%s -Dbasedir=%s %s %s >> %s 2>&1 &",
+        return String.format("nohup java %s %s -%s=%s -Jpom.basedir=%s %s %s >> %s 2>&1 &",
                 projectInfoModel.getJvm(),
                 path,
-                JvmUtil.OLD_JPOM_PID_TAG,
+                JvmUtil.POM_PID_TAG,
                 projectInfoModel.getId(),
                 projectInfoModel.getAbsoluteLib(),
                 projectInfoModel.getMainClass(),

@@ -26,7 +26,6 @@ import com.sun.tools.attach.VirtualMachine;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
-import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.jar.Attributes;
@@ -348,17 +347,8 @@ public abstract class AbstractProjectCommander {
         if (virtualMachine == null) {
             return StrUtil.DASHED;
         }
-        Properties properties = virtualMachine.getAgentProperties();
-        String appTag;
         for (ProjectInfoModel projectInfoModel : projectInfoModels) {
-            appTag = String.format("-%s=%s ", JvmUtil.OLD_JPOM_PID_TAG, projectInfoModel.getId());
-            String args = properties.getProperty("sun.jvm.args", "");
-            if (StrUtil.containsIgnoreCase(args, appTag)) {
-                name = projectInfoModel.getName();
-                break;
-            }
-            args = properties.getProperty("sun.java.command", "");
-            if (StrUtil.containsIgnoreCase(args, appTag)) {
+            if (JvmUtil.checkVirtualMachineIsJpom(virtualMachine, projectInfoModel.getId())) {
                 name = projectInfoModel.getName();
                 break;
             }

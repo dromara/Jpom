@@ -3,7 +3,6 @@ package cn.keepbx.util;
 import cn.hutool.cache.impl.TimedCache;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.util.StrUtil;
-import cn.hutool.system.JavaRuntimeInfo;
 import cn.hutool.system.SystemUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.keepbx.jpom.system.JpomRuntimeException;
@@ -36,9 +35,8 @@ public class JvmUtil {
     /**
      * 旧版jpom进程标记
      */
-    public static final String OLD_JPOM_PID_TAG = "Dapplication";
-
-    private static final JavaRuntimeInfo JAVA_RUNTIME_INFO = SystemUtil.getJavaRuntimeInfo();
+    private static final String OLD_JPOM_PID_TAG = "Dapplication";
+    public static final String POM_PID_TAG = "Jpom.application";
     /**
      * 记录错误的进程信息，避免重复获取
      */
@@ -169,8 +167,6 @@ public class JvmUtil {
      * @throws IOException 异常
      */
     public static VirtualMachine getVirtualMachine(String tag) throws IOException {
-        // 添加空格是为了防止startWith
-        String appTag = String.format("-%s=%s ", JvmUtil.OLD_JPOM_PID_TAG, tag);
         // 通过VirtualMachine.list()列出所有的java进程
         List<VirtualMachineDescriptor> descriptorList = VirtualMachine.list();
         for (VirtualMachineDescriptor virtualMachineDescriptor : descriptorList) {
@@ -188,17 +184,32 @@ public class JvmUtil {
                 PID_ERROR.put(pid, true);
                 continue;
             }
-            Properties properties = virtualMachine.getAgentProperties();
-            String args = properties.getProperty("sun.jvm.args", "");
-            if (StrUtil.containsIgnoreCase(args, appTag)) {
-                return virtualMachine;
-            }
-            args = properties.getProperty("sun.java.command", "");
-            if (StrUtil.containsIgnoreCase(args, appTag)) {
+            if (checkVirtualMachineIsJpom(virtualMachine, tag)) {
                 return virtualMachine;
             }
         }
         return null;
+    }
+
+    public static boolean checkVirtualMachineIsJpom(VirtualMachine virtualMachine, String tag) throws IOException {
+        // 添加空格是为了防止startWith
+        String appTag = String.format("-%s=%s ", JvmUtil.POM_PID_TAG, tag);
+        if (checkVirtualMachineIsJpomAll(virtualMachine, appTag)) {
+            return true;
+        }
+        //
+        appTag = String.format("-%s=%s ", JvmUtil.OLD_JPOM_PID_TAG, tag);
+        return checkVirtualMachineIsJpomAll(virtualMachine, appTag);
+    }
+
+    private static boolean checkVirtualMachineIsJpomAll(VirtualMachine virtualMachine, String appTag) throws IOException {
+        Properties properties = virtualMachine.getAgentProperties();
+        String args = properties.getProperty("sun.jvm.args", "");
+        if (StrUtil.containsIgnoreCase(args, appTag)) {
+            return true;
+        }
+        args = properties.getProperty("sun.java.command", "");
+        return StrUtil.containsIgnoreCase(args, appTag);
     }
 
     /**
@@ -207,7 +218,7 @@ public class JvmUtil {
      * @return 路径
      */
     private static String getManagementAgent() {
-        String agent = StrUtil.format("{}{}lib{}management-agent.jar", JAVA_RUNTIME_INFO.getHomeDir(), File.separator, File.separator);
+        String agent = StrUtil.format("{}{}lib{}management-agent.jar", SystemUtil.getJavaRuntimeInfo().getHomeDir(), File.separator, File.separator);
         File file = new File(agent);
         if (file.exists() && file.isFile()) {
             return agent;
