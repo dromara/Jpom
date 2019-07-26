@@ -6,4 +6,5 @@
    4. 升级到SpringBoot 2.0.x
    5. 重构用户权限
    6. windows快速升级
+   7. Nginx的状态管理
    
