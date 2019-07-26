@@ -1,5 +1,5 @@
 <p align="center">
-	<a href="https://jpom.io/"><img src="https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/images/jpom_logo.jpg" width="400"></a>
+	<a href="https://jpom.io/"  target="_blank"><img src="https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/images/jpom_logo.jpg" width="400"></a>
 </p>
 <p align="center">
 	<strong>一款简而轻的低侵入式在线构建、自动部署、日常运维、项目监控软件</strong>
