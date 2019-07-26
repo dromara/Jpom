@@ -1,5 +1,5 @@
 <p align="center">
-	<a href="https://hutool.cn/"><img src="https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/images/jpom_logo.jpg" width="400"></a>
+	<a href="https://jpom.io/"><img src="https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/images/jpom_logo.jpg" width="400"></a>
 </p>
 <p align="center">
 	<strong>一款简而轻的低侵入式在线构建、自动部署、日常运维、项目监控软件</strong>
@@ -141,8 +141,8 @@ Agent.sh status    查看Jpom插件端运行状态
 ### Jpom 的参数配置
 
    在项目运行的根路径下的`extConfig.yml`文件
-   1. 插件端示例：[`extConfig.yml`](/modules/agent/src/main/resources/bin/extConfig.yml) 
-   2. 服务端示例：[`extConfig.yml`](/modules/server/src/main/resources/bin/extConfig.yml)
+   1. 插件端示例：[`extConfig.yml`](https://gitee.com/keepbx/Jpom/blob/master/modules/agent/src/main/resources/bin/extConfig.yml) 
+   2. 服务端示例：[`extConfig.yml`](https://gitee.com/keepbx/Jpom/blob/master/modules/server/src/main/resources/bin/extConfig.yml)
 
 ### 演示项目
 
@@ -169,6 +169,6 @@ Agent.sh status    查看Jpom插件端运行状态
 
   1. QQ群：[136715345](https://shang.qq.com/wpa/qunwpa?idkey=93ff8d8a37a436b752fe38d32075bb1b32a8e0b3d3ff19d0b541ca840433f561)
   
-  2. 微信公众号：[CodeGzh](/doc/CodeGzh-QrCode.jpg)
+  2. 微信公众号：[CodeGzh](http://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/docs/images/CodeGzh-QrCode.jpg)
   
   3. 码云： [issues](https://gitee.com/keepbx/Jpom/issues)
