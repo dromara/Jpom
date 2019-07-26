@@ -7,6 +7,9 @@ cd ../
 
 echo ÍÆËÍµ½gitee
 
+call git fetch github master:master
+
+call git fetch gitee master:master
 
 call git push gitee master
 
