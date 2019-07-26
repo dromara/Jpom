@@ -8,6 +8,10 @@ call git pull github master:master
 
 call git pull gitee master:master
 
+call git pull github master
+
+call git pull gitee master
+
 echo ÍÆËÍµ½
 
 call git push github master
