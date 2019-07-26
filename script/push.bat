@@ -4,18 +4,11 @@
 
 cd ../
 
-
-echo 推送到gitee
-
-call git fetch github master:master
-
-call git fetch gitee master:master
-
-call git push gitee master
-
-echo 推送到github
+echo 推送到
 
 call git push github master
+
+call git push gitee master
 
 echo 推送tags
 call git push github --tags
