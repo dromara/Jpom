@@ -38,7 +38,6 @@ public class LinuxProjectCommander extends AbstractProjectCommander {
     @Override
     public String stop(ProjectInfoModel projectInfoModel) throws Exception {
         String result = super.stop(projectInfoModel);
-        String tag = projectInfoModel.getId();
         int pid = parsePid(result);
         if (pid > 0) {
             String cmd = String.format("kill  %s", pid);
@@ -48,6 +47,7 @@ public class LinuxProjectCommander extends AbstractProjectCommander {
                 cmd = String.format("kill -9 %s", pid);
                 CommandUtil.asyncExeLocalCommand(FileUtil.file(projectInfoModel.getLib()), cmd);
             }
+            String tag = projectInfoModel.getId();
             result = status(tag);
         }
         return result;

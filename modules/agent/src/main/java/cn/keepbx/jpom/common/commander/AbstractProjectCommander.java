@@ -174,8 +174,9 @@ public abstract class AbstractProjectCommander {
      * @throws Exception 异常
      */
     private String checkStart(ProjectInfoModel projectInfoModel) throws Exception {
-        if (isRun(projectInfoModel.getId())) {
-            return "运行中";
+        int pid = getPid(projectInfoModel.getId());
+        if (pid > 0) {
+            return "当前程序正常运行中，不能重复启动,PID:" + pid;
         }
         String lib = projectInfoModel.getLib();
         File fileLib = new File(lib);
