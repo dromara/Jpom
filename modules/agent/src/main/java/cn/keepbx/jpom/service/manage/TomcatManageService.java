@@ -102,7 +102,7 @@ public class TomcatManageService {
             if (httpResponse.getStatus() == HttpStatus.HTTP_NOT_FOUND) {
                 // 没有插件
                 tomcatInfoModel.initTomcat();
-                throw new JpomRuntimeException("tomcat 未初始化");
+                throw new JpomRuntimeException("tomcat 未初始化，已经重新初始化请稍后再试");
             }
         } catch (JpomRuntimeException jpom) {
             throw jpom;
