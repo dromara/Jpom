@@ -67,13 +67,13 @@ public class TomcatEditController extends BaseAgentController {
         if (tomcatInfoModelTemp != null) {
             return JsonMessage.getString(401, "名称已经存在，请使用其他名称！");
         }
-        tomcatInfoModel.initTomcat();
         tomcatInfoModel.setId(SecureUtil.md5(DateUtil.now()));
         tomcatInfoModel.setCreator(getUserName());
 
         // 设置tomcat路径，去除多余的符号
         tomcatInfoModel.setPath(FileUtil.normalize(tomcatInfoModel.getPath()));
         tomcatEditService.addItem(tomcatInfoModel);
+        tomcatInfoModel.initTomcat();
         return JsonMessage.getString(200, "保存成功");
     }
 
@@ -92,12 +92,12 @@ public class TomcatEditController extends BaseAgentController {
         if (tomcatInfoModelTemp != null && !tomcatInfoModelTemp.getId().equals(tomcatInfoModel.getId())) {
             return JsonMessage.getString(401, "名称已经存在，请使用其他名称！");
         }
-        tomcatInfoModel.initTomcat();
 
         tomcatInfoModel.setModifyUser(getUserName());
         // 设置tomcat路径，去除多余的符号
         tomcatInfoModel.setPath(FileUtil.normalize(tomcatInfoModel.getPath()));
         tomcatEditService.updateItem(tomcatInfoModel);
+        tomcatInfoModel.initTomcat();
         return JsonMessage.getString(200, "修改成功");
 
     }
