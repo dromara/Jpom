@@ -143,6 +143,5 @@ public class CommandUtil {
         pb.redirectError(ProcessBuilder.Redirect.INHERIT);
         pb.redirectInput(ProcessBuilder.Redirect.INHERIT);
         pb.start();
-
     }
 }

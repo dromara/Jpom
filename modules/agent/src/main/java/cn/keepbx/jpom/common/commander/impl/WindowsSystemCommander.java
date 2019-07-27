@@ -164,6 +164,9 @@ public class WindowsSystemCommander extends AbstractSystemCommander {
         if ("NOT RESPONDING".equalsIgnoreCase(status)) {
             return "无响应";
         }
-        return "未知";
+        if ("Unknown".equalsIgnoreCase(status)) {
+            return "未知";
+        }
+        return status;
     }
 }
