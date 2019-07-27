@@ -4,10 +4,8 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.text.StrSpliter;
 import cn.hutool.core.util.StrUtil;
 import cn.keepbx.jpom.common.commander.AbstractProjectCommander;
-import cn.keepbx.jpom.model.RunMode;
 import cn.keepbx.jpom.model.data.ProjectInfoModel;
 import cn.keepbx.jpom.model.system.NetstatModel;
-import cn.keepbx.jpom.system.JpomRuntimeException;
 import cn.keepbx.util.CommandUtil;
 import cn.keepbx.util.JvmUtil;
 
@@ -32,17 +30,9 @@ public class WindowsProjectCommander extends AbstractProjectCommander {
         String tag = projectInfoModel.getId();
         String mainClass = projectInfoModel.getMainClass();
         String args = projectInfoModel.getArgs();
-        if (projectInfoModel.getRunMode() == RunMode.Jar) {
-            return String.format("javaw %s %s -%s=%s -Jpom.basedir=%s %s %s >> %s &",
-                    jvm, classPath, JvmUtil.POM_PID_TAG, tag,
-                    projectInfoModel.getAbsoluteLib(), mainClass, args, projectInfoModel.getAbsoluteLog());
-        }
-        if (projectInfoModel.getRunMode() == RunMode.ClassPath) {
-            return String.format("javaw %s %s  %s -%s=%s -Jpom.basedir=%s %s >> %s &",
-                    jvm, classPath, mainClass, JvmUtil.POM_PID_TAG, tag,
-                    projectInfoModel.getAbsoluteLib(), args, projectInfoModel.getAbsoluteLog());
-        }
-        throw new JpomRuntimeException("没有实现");
+        return String.format("javaw %s %s  %s -%s=%s -Jpom.basedir=%s %s >> %s &",
+                jvm, classPath, mainClass, JvmUtil.POM_PID_TAG, tag,
+                projectInfoModel.getAbsoluteLib(), args, projectInfoModel.getAbsoluteLog());
     }
 
     @Override

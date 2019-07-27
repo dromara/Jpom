@@ -4,10 +4,8 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.text.StrSpliter;
 import cn.hutool.core.util.StrUtil;
 import cn.keepbx.jpom.common.commander.AbstractProjectCommander;
-import cn.keepbx.jpom.model.RunMode;
 import cn.keepbx.jpom.model.data.ProjectInfoModel;
 import cn.keepbx.jpom.model.system.NetstatModel;
-import cn.keepbx.jpom.system.JpomRuntimeException;
 import cn.keepbx.util.CommandUtil;
 import cn.keepbx.util.JvmUtil;
 
@@ -27,30 +25,15 @@ public class LinuxProjectCommander extends AbstractProjectCommander {
         if (StrUtil.isBlank(path)) {
             return null;
         }
-        if (projectInfoModel.getRunMode() == RunMode.Jar) {
-            // 拼接命令
-            return String.format("nohup java %s %s -%s=%s -Jpom.basedir=%s %s %s >> %s 2>&1 &",
-                    projectInfoModel.getJvm(),
-                    path,
-                    JvmUtil.POM_PID_TAG,
-                    projectInfoModel.getId(),
-                    projectInfoModel.getAbsoluteLib(),
-                    projectInfoModel.getMainClass(),
-                    projectInfoModel.getArgs(),
-                    projectInfoModel.getAbsoluteLog());
-        }
-        if (projectInfoModel.getRunMode() == RunMode.ClassPath) {
-            return String.format("nohup java %s %s  %s  -%s=%s -Jpom.basedir=%s %s >> %s 2>&1 &",
-                    projectInfoModel.getJvm(),
-                    path,
-                    projectInfoModel.getMainClass(),
-                    JvmUtil.POM_PID_TAG,
-                    projectInfoModel.getId(),
-                    projectInfoModel.getAbsoluteLib(),
-                    projectInfoModel.getArgs(),
-                    projectInfoModel.getAbsoluteLog());
-        }
-        throw new JpomRuntimeException("没有实现");
+        return String.format("nohup java %s %s  %s  -%s=%s -Jpom.basedir=%s %s >> %s 2>&1 &",
+                projectInfoModel.getJvm(),
+                path,
+                projectInfoModel.getMainClass(),
+                JvmUtil.POM_PID_TAG,
+                projectInfoModel.getId(),
+                projectInfoModel.getAbsoluteLib(),
+                projectInfoModel.getArgs(),
+                projectInfoModel.getAbsoluteLog());
     }
 
     @Override
