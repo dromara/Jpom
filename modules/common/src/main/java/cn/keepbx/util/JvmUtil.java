@@ -36,11 +36,22 @@ public class JvmUtil {
      * 旧版jpom进程标记
      */
     private static final String OLD_JPOM_PID_TAG = "Dapplication";
-    public static final String POM_PID_TAG = "DJpom.application";
+    private static final String POM_PID_TAG = "DJpom.application";
     /**
      * 记录错误的进程信息，避免重复获取
      */
     public static final TimedCache<String, Boolean> PID_ERROR = new TimedCache<>(TimeUnit.DAYS.toMillis(1));
+
+    /**
+     * 获取进程标识
+     *
+     * @param id   id
+     * @param path 路径
+     * @return str
+     */
+    public static String getJpomPidTag(String id, String path) {
+        return String.format("-%s=%s -DJpom.basedir=%s", POM_PID_TAG, id, path);
+    }
 
     /**
      * 获取指定程序的jvm 信息
