@@ -2,6 +2,7 @@ package cn.keepbx.util;
 
 import cn.hutool.cache.impl.TimedCache;
 import cn.hutool.core.convert.Convert;
+import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.system.SystemUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
@@ -36,7 +37,7 @@ public class JvmUtil {
      * 旧版jpom进程标记
      */
     private static final String OLD_JPOM_PID_TAG = "Dapplication";
-    private static final String POM_PID_TAG = "DJpom.application";
+    public static final String POM_PID_TAG = "DJpom.application";
     /**
      * 记录错误的进程信息，避免重复获取
      */
@@ -181,7 +182,6 @@ public class JvmUtil {
         // 通过VirtualMachine.list()列出所有的java进程
         List<VirtualMachineDescriptor> descriptorList = VirtualMachine.list();
         for (VirtualMachineDescriptor virtualMachineDescriptor : descriptorList) {
-            // 根据虚拟机描述查询启动属性，如果属性-Dapplication匹配，说明项目已经启动，并返回进程id
             String pid = virtualMachineDescriptor.id();
             if (PID_ERROR.containsKey(pid)) {
                 continue;
@@ -203,24 +203,15 @@ public class JvmUtil {
     }
 
     public static boolean checkVirtualMachineIsJpom(VirtualMachine virtualMachine, String tag) throws IOException {
-        // 添加空格是为了防止startWith
         String appTag = String.format("-%s=%s ", JvmUtil.POM_PID_TAG, tag);
-        if (checkVirtualMachineIsJpomAll(virtualMachine, appTag)) {
-            return true;
-        }
-        //
-        appTag = String.format("-%s=%s ", JvmUtil.OLD_JPOM_PID_TAG, tag);
-        return checkVirtualMachineIsJpomAll(virtualMachine, appTag);
-    }
-
-    private static boolean checkVirtualMachineIsJpomAll(VirtualMachine virtualMachine, String appTag) throws IOException {
+        String appTag2 = String.format("-%s=%s ", JvmUtil.OLD_JPOM_PID_TAG, tag);
         Properties properties = virtualMachine.getAgentProperties();
         String args = properties.getProperty("sun.jvm.args", "");
-        if (StrUtil.containsIgnoreCase(args, appTag)) {
+        if (StrUtil.containsAnyIgnoreCase(args, appTag, appTag2)) {
             return true;
         }
         args = properties.getProperty("sun.java.command", "");
-        return StrUtil.containsIgnoreCase(args, appTag);
+        return StrUtil.containsAnyIgnoreCase(args, appTag, appTag2);
     }
 
     /**
@@ -229,10 +220,9 @@ public class JvmUtil {
      * @return 路径
      */
     private static String getManagementAgent() {
-        String agent = StrUtil.format("{}{}lib{}management-agent.jar", SystemUtil.getJavaRuntimeInfo().getHomeDir(), File.separator, File.separator);
-        File file = new File(agent);
+        File file = FileUtil.file(SystemUtil.getJavaRuntimeInfo().getHomeDir(), "lib", "management-agent.jar");
         if (file.exists() && file.isFile()) {
-            return agent;
+            return file.getAbsolutePath();
         }
         throw new JpomRuntimeException("JDK中" + file.getAbsolutePath() + " 文件不存在");
     }

@@ -320,7 +320,7 @@
     ## 刷新项目数据
     function refreshProjectData() {
         try {
-            top.frames["manage"].location.reload();
+            top.frames["manageList"].location.reload();
         } catch (e) {
         }
     }
