@@ -36,7 +36,7 @@ public class JvmUtil {
      * 旧版jpom进程标记
      */
     private static final String OLD_JPOM_PID_TAG = "Dapplication";
-    public static final String POM_PID_TAG = "Jpom.application";
+    public static final String POM_PID_TAG = "DJpom.application";
     /**
      * 记录错误的进程信息，避免重复获取
      */

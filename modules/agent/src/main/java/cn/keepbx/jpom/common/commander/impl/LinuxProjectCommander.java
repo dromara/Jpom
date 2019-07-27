@@ -25,13 +25,11 @@ public class LinuxProjectCommander extends AbstractProjectCommander {
         if (StrUtil.isBlank(path)) {
             return null;
         }
-        return String.format("nohup java %s %s  %s  -%s=%s -Jpom.basedir=%s %s >> %s 2>&1 &",
-                projectInfoModel.getJvm(),
+        return String.format("nohup java %s -%s=%s -DJpom.basedir=%s" +
+                        " %s  %s  %s >> %s 2>&1 &",
+                projectInfoModel.getJvm(), JvmUtil.POM_PID_TAG, projectInfoModel.getId(), projectInfoModel.getAbsoluteLib(),
                 path,
                 projectInfoModel.getMainClass(),
-                JvmUtil.POM_PID_TAG,
-                projectInfoModel.getId(),
-                projectInfoModel.getAbsoluteLib(),
                 projectInfoModel.getArgs(),
                 projectInfoModel.getAbsoluteLog());
     }

@@ -288,6 +288,9 @@ public class ProjectInfoModel extends BaseModel {
     }
 
     public String getArgs() {
+        if (args == null) {
+            return "";
+        }
         return args;
     }
 

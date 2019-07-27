@@ -30,9 +30,10 @@ public class WindowsProjectCommander extends AbstractProjectCommander {
         String tag = projectInfoModel.getId();
         String mainClass = projectInfoModel.getMainClass();
         String args = projectInfoModel.getArgs();
-        return String.format("javaw %s %s  %s -%s=%s -Jpom.basedir=%s %s >> %s &",
-                jvm, classPath, mainClass, JvmUtil.POM_PID_TAG, tag,
-                projectInfoModel.getAbsoluteLib(), args, projectInfoModel.getAbsoluteLog());
+        return String.format("javaw %s -%s=%s -DJpom.basedir=%s " +
+                        "%s  %s  %s >> %s &",
+                jvm, JvmUtil.POM_PID_TAG, tag, projectInfoModel.getAbsoluteLib(),
+                classPath, mainClass, args, projectInfoModel.getAbsoluteLog());
     }
 
     @Override
