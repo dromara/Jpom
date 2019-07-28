@@ -1,5 +1,7 @@
 <p align="center">
-	<a href="https://jpom.io/"  target="_blank"><img src="https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/images/jpom_logo.jpg" width="400"></a>
+	<a href="https://jpom.io/"  target="_blank">
+	    <img src="https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/images/jpom_logo.jpg" width="400" alt="logo">
+	</a>
 </p>
 <p align="center">
 	<strong>一款简而轻的低侵入式在线构建、自动部署、日常运维、项目监控软件</strong>
@@ -7,28 +9,28 @@
 
 <p align="center">
     <a target="_blank" href="https://gitee.com/keepbx/Jpom">
-        <img src='https://img.shields.io/github/license/jiangzeyin/jpom.svg?style=flat' alt='license'></img>
+        <img src='https://img.shields.io/github/license/jiangzeyin/jpom.svg?style=flat' alt='license'/>
     </a>
     <a target="_blank" href="https://gitee.com/keepbx/Jpom">
-        <img src='https://img.shields.io/badge/JDK-1.8+-green.svg' alt='jdk'></img>
+        <img src='https://img.shields.io/badge/JDK-1.8+-green.svg' alt='jdk'/>
     </a>
     <a target="_blank" href="https://travis-ci.org/jiangzeyin/Jpom">
-        <img src='https://travis-ci.org/jiangzeyin/Jpom.svg?branch=master' alt='travis'></img>
+        <img src='https://travis-ci.org/jiangzeyin/Jpom.svg?branch=master' alt='travis'/>
     </a>
     <a target="_blank" href="https://www.codacy.com/app/jiangzeyin/Jpom?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=jiangzeyin/Jpom&amp;utm_campaign=Badge_Grade">
-        <img src="https://api.codacy.com/project/badge/Grade/9c97dc9925c84404b63e15fefbacc984"></img>
+        <img src="https://api.codacy.com/project/badge/Grade/9c97dc9925c84404b63e15fefbacc984" alt="codacy"/>
     </a>
     <a target="_blank" href="https://shang.qq.com/wpa/qunwpa?idkey=7be1882a2e2f07cd4af28bbb1f13362af270ba4615f2a6c7aaf9605fc0563d1b">
-        <img src='https://img.shields.io/badge/QQ%E7%BE%A4-136715345-yellowgreen.svg' alt='136715345'></img>
+        <img src='https://img.shields.io/badge/QQ%E7%BE%A4-136715345-yellowgreen.svg' alt='136715345'/>
     </a>
     <a target="_blank" href="https://gitee.com/keepbx/Jpom">
-        <img src='https://img.shields.io/badge/Gitee-%E7%A0%81%E4%BA%91-yellow.svg' alt='gitee'></img>
+        <img src='https://img.shields.io/badge/Gitee-%E7%A0%81%E4%BA%91-yellow.svg' alt='gitee'/>
     </a>
     <a target="_blank" href="https://github.com/jiangzeyin/Jpom">
-        <img src='https://img.shields.io/badge/Github-Github-red.svg' alt='github'></img>
+        <img src='https://img.shields.io/badge/Github-Github-red.svg' alt='github'/>
     </a>
     <a target="_blank" href="https://gitee.com/keepbx/Jpom">
-        <img src='https://gitee.com/keepbx/Jpom/badge/star.svg?theme=dark' alt='gitee star'></img>
+        <img src='https://gitee.com/keepbx/Jpom/badge/star.svg?theme=dark' alt='gitee star'/>
     </a>
 </p>
 <p align="center">

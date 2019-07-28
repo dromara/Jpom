@@ -64,7 +64,16 @@ public abstract class AbstractSystemCommander {
     protected static JSONObject putObject(String name, Object value, String type) {
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("name", name);
-        jsonObject.put("value", value);
+        if (value != null) {
+            String strVal = value.toString();
+            strVal = strVal.toLowerCase();
+            if (strVal.endsWith("k") || strVal.endsWith("%")) {
+                strVal = strVal.substring(0, strVal.length() - 1);
+            }
+            jsonObject.put("value", strVal);
+        } else {
+            jsonObject.put("value", 0);
+        }
         jsonObject.put("type", type);
         return jsonObject;
     }
