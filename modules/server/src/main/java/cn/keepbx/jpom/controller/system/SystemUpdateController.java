@@ -1,6 +1,7 @@
 package cn.keepbx.jpom.controller.system;
 
 import cn.hutool.http.HttpStatus;
+import cn.hutool.system.SystemUtil;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.controller.multipart.MultipartFileBuilder;
 import cn.keepbx.jpom.JpomApplication;
@@ -52,6 +53,9 @@ public class SystemUpdateController extends BaseServerController {
     @ResponseBody
     @UrlPermission(value = Role.System, optType = UserOperateLogV1.OptType.UpdateSys)
     public String uploadJar() throws IOException {
+        if (SystemUtil.getOsInfo().isWindows()) {
+            return JsonMessage.getString(100, "windows 环境暂不支持在线升级");
+        }
         NodeModel nodeModel = tryGetNode();
         if (nodeModel != null) {
             return NodeForward.requestMultipart(getNode(), getMultiRequest(), NodeUrl.SystemUploadJar).toString();
