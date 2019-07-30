@@ -4,6 +4,7 @@ import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.net.URLEncoder;
 import cn.hutool.core.util.CharsetUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.servlet.ServletUtil;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.interceptor.InterceptorPattens;
@@ -83,10 +84,21 @@ public class LoginInterceptor extends BaseJpomInterceptor {
      */
     private void responseLogin(HttpServletRequest request, HttpServletResponse response, HandlerMethod handlerMethod) throws IOException {
         if (isPage(handlerMethod)) {
-            String url = getHeaderProxyPath(request) + "/login.html?url=" + request.getRequestURI();
+            String url = getHeaderProxyPath(request) + "/login.html";
+            String uri = request.getRequestURI();
+            boolean hasPar = false;
+            if (StrUtil.isNotEmpty(uri) && !StrUtil.SLASH.equals(uri)) {
+                url += "?url=" + uri;
+                hasPar = true;
+            }
             String header = request.getHeader(HttpHeaders.REFERER);
             if (header != null) {
-                url += "&r=" + header;
+                if (hasPar) {
+                    url += "&";
+                } else {
+                    url += "?";
+                }
+                url += "r=" + header;
             }
             response.sendRedirect(url);
             return;

@@ -26,7 +26,7 @@
 <div class="layui-container" style="margin-top: 150px;">
     <div class="layui-row">
         <div class="layui-col-md4 layui-col-md-offset4">
-            <form class="layui-form" method="post">
+            <form class="layui-form" method="post" action="userLogin">
                 <div class="layui-form-item" style="color: #FFF; font-size: 24px;text-align: center;">
                     <span>项目管理系统</span>
                 </div>
@@ -53,7 +53,7 @@
                     </div>
                 </div>
                 <div class="layui-form-item">
-                    <div class="layui-input-block" style="margin-left: 0px;">
+                    <div class="layui-input-block" style="margin-left: 0;" id="loginBtn">
                         <button class="layui-btn layui-btn-danger" lay-submit lay-filter="from_login"
                                 style="width: 100%">登录
                         </button>
@@ -84,12 +84,25 @@
                 arrow: 'none',
                 indicator: 'none'
             });
-
+            $("form").submit(function (d) {
+                const paramArray = $("form").serializeArray();
+                const jsonObj = {};
+                $(paramArray).each(function () {
+                    jsonObj[this.name] = this.value;
+                });
+                doLogin(jsonObj);
+                return false;
+            });
             form.on('submit(from_login)', function (dataForm) {
-                if (!checkPwd(dataForm.field.userPwd)) {
+                doLogin(dataForm.field);
+                return false;
+            });
+
+            function doLogin(dataForm) {
+                if (!checkPwd(dataForm.userPwd)) {
                     return false;
                 }
-                var sendData = formatPwd(dataForm.field, "userPwd");
+                var sendData = formatPwd(dataForm, "userPwd");
                 loadingAjax({
                     url: './userLogin',
                     data: sendData,
@@ -110,9 +123,7 @@
                         }
                     }
                 });
-                return false;
-            });
-
+            }
             #if($showCode)
                 showCode();
             #end
