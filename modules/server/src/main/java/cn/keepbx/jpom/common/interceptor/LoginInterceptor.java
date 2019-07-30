@@ -86,7 +86,7 @@ public class LoginInterceptor extends BaseJpomInterceptor {
             String url = getHeaderProxyPath(request) + "/login.html?url=" + request.getRequestURI();
             String header = request.getHeader(HttpHeaders.REFERER);
             if (header != null) {
-                url += "&=" + header;
+                url += "&r=" + header;
             }
             response.sendRedirect(url);
             return;
