@@ -11,8 +11,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.annotation.Resource;
-import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * 用户列表
@@ -47,15 +47,10 @@ public class UserListController extends BaseServerController {
         }
         List<UserModel> userList = userService.list();
         if (userList != null) {
-            Iterator<UserModel> userModelIterator = userList.iterator();
-            // 不显示自己的信息
-            while (userModelIterator.hasNext()) {
-                UserModel item = userModelIterator.next();
-                if (item.getId().equals(userName.getId())) {
-                    userModelIterator.remove();
-                    break;
-                }
-            }
+            userList = userList.stream().filter(userModel -> {
+                // 不显示自己的信息
+                return !userModel.getId().equals(userName.getId());
+            }).collect(Collectors.toList());
         }
         return JsonMessage.getString(200, "", userList);
     }

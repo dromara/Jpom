@@ -12,6 +12,7 @@ import cn.keepbx.jpom.common.BaseServerController;
 import cn.keepbx.jpom.model.data.UserModel;
 import cn.keepbx.jpom.service.user.UserService;
 import cn.keepbx.jpom.system.ExtConfigBean;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.ModelAndView;
@@ -82,7 +83,12 @@ public class LoginInterceptor extends BaseJpomInterceptor {
      */
     private void responseLogin(HttpServletRequest request, HttpServletResponse response, HandlerMethod handlerMethod) throws IOException {
         if (isPage(handlerMethod)) {
-            response.sendRedirect(getHeaderProxyPath(request) + "/login.html");
+            String url = getHeaderProxyPath(request) + "/login.html?url=" + request.getRequestURI();
+            String header = request.getHeader(HttpHeaders.REFERER);
+            if (header != null) {
+                url += "&=" + header;
+            }
+            response.sendRedirect(url);
             return;
         }
         ServletUtil.write(response, JsonMessage.getString(800, "登录信息已失效,重新登录"), MediaType.APPLICATION_JSON_UTF8_VALUE);
