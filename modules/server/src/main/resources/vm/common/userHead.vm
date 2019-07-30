@@ -102,8 +102,9 @@
                 layer.confirm('确定退出系统？', {
                     'title': '系统提示'
                 }, function (index) {
-                    window.location.href = "#if($node).#end./logout";
                     layer.close(index);
+                    layui.data('user', null);
+                    window.location.href = "#if($node).#end./logout";
                 })
             }
         });

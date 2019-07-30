@@ -75,7 +75,9 @@
             }
             //
             const user = layui.data('user');
-            $("input[name='userName']").val(user.userName);
+            if (user && user.userName) {
+                $("input[name='userName']").val(user.userName);
+            }
             carousel.render({
                 elem: '#div-carousel',
                 width: '100%',
