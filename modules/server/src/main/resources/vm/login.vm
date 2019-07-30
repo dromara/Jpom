@@ -115,6 +115,10 @@
                                 key: "userName",
                                 value: sendData.userName
                             });
+                            layui.data('user', {
+                                key: "loginOut",
+                                remove: true
+                            });
                             window.location.href = './index';
                         } else {
                             // 显示验证码
