@@ -8,6 +8,7 @@ import org.springframework.core.env.PropertySource;
 import org.springframework.core.io.Resource;
 
 import java.io.IOException;
+import java.util.List;
 
 /**
  * 动态读取外部配置文件
@@ -22,8 +23,8 @@ public class ExtConfigEnvironmentPostProcessor implements EnvironmentPostProcess
         YamlPropertySourceLoader yamlPropertySourceLoader = new YamlPropertySourceLoader();
         Resource resource = ExtConfigBean.getResource();
         try {
-            PropertySource propertySource = yamlPropertySourceLoader.load(ExtConfigBean.FILE_NAME, resource, null);
-            environment.getPropertySources().addLast(propertySource);
+            List<PropertySource<?>> propertySources = yamlPropertySourceLoader.load(ExtConfigBean.FILE_NAME, resource);
+            propertySources.forEach(propertySource -> environment.getPropertySources().addLast(propertySource));
         } catch (IOException e) {
             e.printStackTrace();
         }

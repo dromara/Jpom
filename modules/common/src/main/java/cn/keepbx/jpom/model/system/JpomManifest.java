@@ -18,7 +18,7 @@ import cn.keepbx.util.CommandUtil;
 import cn.keepbx.util.JsonFileUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import org.springframework.boot.ApplicationHome;
+import org.springframework.boot.system.ApplicationHome;
 
 import java.io.File;
 import java.io.FileNotFoundException;
