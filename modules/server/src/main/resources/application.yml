@@ -6,7 +6,6 @@ spring:
     name: jpomServer
   profiles:
     active: dev
-  #velocity \u6A21\u677F\u6587\u4EF6\u914D\u7F6E
   velocity:
     charset:  UTF-8
     content-type: text/html
@@ -20,6 +19,16 @@ spring:
     enabled: true
     resource-loader-path: classpath:/vm/
     suffix: .vm
+  #thymeleaf start
+  thymeleaf:
+    mode: HTML5
+    encoding: UTF-8
+    #开发时关闭缓存,不然没法看到实时页面
+    cache: false
+    servlet:
+      content-type: text/html
+    prefix: classpath:/vm/
+#thymeleaf end
 banner:
   msg: Jpom-Server 管理系统启动中
 # 静态资源配置

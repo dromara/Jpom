@@ -1,8 +1,7 @@
 <!DOCTYPE html>
-<html>
+<html xmlns:th="http://www.thymeleaf.org">
 
-<head>
-    #parse("common/head.vm")
+<head th:include="common/head::head">
     <title>Jpom-项目管理系统</title>
     <meta name="keywords" content="Jpom,Java项目管理,Jar管理,Java管理系统,服务器项目运维"/>
     <meta name="description" content="Jpom-项目管理系统"/>
@@ -64,12 +63,13 @@
     </div>
 </div>
 </body>
-    #parse("common/sha1.vm")
+#parse("common/sha1.vm")
 <script type="text/javascript">
     function loadSuccess() {
         layui.use(['carousel'], function () {
             var carousel = layui.carousel;
-        ## 判断是否在iframe中, 如果是，刷新父页面
+            #
+            # 判断是否在iframe中, 如果是，刷新父页面
             if (self != top) {
                 parent.window.location.replace(window.location.href);
             }
@@ -130,8 +130,9 @@
                     }
                 });
             }
+
             #if($showCode)
-                showCode();
+            showCode();
             #end
         });
     }
