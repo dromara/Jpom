@@ -27,14 +27,18 @@ import java.util.List;
  */
 @PreLoadClass
 public class CheckPath {
-
-    private static final String CLASS_NAME = "com.sun.tools.attach.VirtualMachine";
+    /**
+     * 待检查的类
+     */
+    private static final String[] CLASS_NAME = new String[]{"sun.jvmstat.monitor.MonitorException", "com.sun.tools.attach.VirtualMachine"};
 
 
     @PreLoadMethod(2)
     private static void checkToolsJar() {
         try {
-            ClassUtil.loadClass(CLASS_NAME, false);
+            for (String item : CLASS_NAME) {
+                ClassUtil.loadClass(item, false);
+            }
         } catch (Exception e) {
             File file = JvmUtil.getToolsJar();
             if (file.exists() && file.isFile()) {
