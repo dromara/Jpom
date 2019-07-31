@@ -103,7 +103,10 @@
                     'title': '系统提示'
                 }, function (index) {
                     layer.close(index);
-                    layui.data('user', null);
+                    layui.data('user', {
+                        key: "loginOut",
+                        value: true
+                    });
                     window.location.href = "#if($node).#end./logout";
                 })
             }
