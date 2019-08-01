@@ -45,7 +45,7 @@ public class OutGivingProjectController extends BaseServerController {
 
     @RequestMapping(value = "getProjectStatus", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
-    public String save() throws IOException {
+    public String save() {
         return NodeForward.request(getNode(), getRequest(), NodeUrl.Manage_GetProjectStatus).toString();
     }
 

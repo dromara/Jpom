@@ -1,36 +1,38 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.w3.org/1999/xhtml">
-<head th:replace="common/head::head">
+<html xmlns:th="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+    <th:block th:include="common/head::head"/>
+    <style type="text/css">
+        body {
+            position: absolute;
+            top: 0px;
+            right: 0px;
+            bottom: 0px;
+            left: 0px;
+            padding: 10px;
+        }
+
+
+        /*.layui-inline {*/
+        /*    width: 200px;*/
+        /*}*/
+
+        .top {
+            margin-top: 20px;
+            width: 100%;
+        }
+
+        .echarts {
+            margin: 0 auto;
+            width: 90%;
+            height: 300px;
+        }
+    </style>
+    <script th:src="@{${session.jpomProxyPath}+'/static/js/echarts.min.js?v='+${session.staticCacheTime}}"></script>
 </head>
-<script th:src="@{${session.jpomProxyPath}+'/static/js/echarts.min.js?v='+${staticCacheTime}}"></script>
+
 <body>
 
-<style>
-    body {
-        position: absolute;
-        top: 0px;
-        right: 0px;
-        bottom: 0px;
-        left: 0px;
-        padding: 10px;
-    }
-
-
-    /*.layui-inline {*/
-    /*    width: 200px;*/
-    /*}*/
-
-    .top {
-        margin-top: 20px;
-        width: 100%;
-    }
-
-    .echarts {
-        margin: 0 auto;
-        width: 90%;
-        height: 300px;
-    }
-</style>
 <form action="" class="layui-form" id="form">
     <div class="layui-inline">
         <label class="layui-form-label">自动刷新</label>
