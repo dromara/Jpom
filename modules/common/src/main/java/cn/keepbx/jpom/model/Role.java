@@ -10,17 +10,28 @@ public enum Role {
     /**
      * 系统管理员
      */
-    System,
+    System("系统管理员"),
     /**
      * 服务端管理员
      */
-    ServerManager,
+    ServerManager("服务端管理员"),
     /**
      * 节点管理员
      */
-    NodeManage,
+    NodeManage("节点管理员"),
     /**
      * 用户
      */
-    User
+    User("普通成员"),
+    ;
+
+    private String desc;
+
+    public String getDesc() {
+        return desc;
+    }
+
+    Role(String desc) {
+        this.desc = desc;
+    }
 }

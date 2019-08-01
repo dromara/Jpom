@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.w3.org/1999/xhtml" lang="zh">
+<div th:fragment="userHead">
+    <ul class="layui-nav layui-layout-right" lay-filter="userOperation">
+        <li class="layui-nav-item">
+            <a href="javascript:;">
+                <span th:text="${session.user.name}"></span>
+                <font style="font-size: 10px;" th:text="'('+${roleDesc}+')'"></font>
+            </a>
+            <dl class="layui-nav-child">
+                <dd><a href="javascript:;" op="updatePwd">修改密码</a></dd>
+                <dd><a href="javascript:;" op="updateName">修改昵称</a></dd>
+                <dd><a href="javascript:;" op="exit">退出登录</a></dd>
+            </dl>
+        </li>
+        <!--            <li class="layui-nav-item" id="li-exit">-->
+
+        <!--            </li>-->
+    </ul>
+
+    <div id="div-updatePwd" style="display: none;padding: 15px;">
+        <form method="POST" class="layui-form" id="form_updatePwd">
+            <div class="layui-form-item">
+                <div class="layui-form-block">
+                    <input type="password" name="oldPwd" id="oldPwd" required lay-verify="required|pass"
+                           placeholder="请输入旧密码" class="layui-input" autocomplete="off">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <div class="layui-form-block">
+                    <input type="password" name="newPwd" id="newPwd" required lay-verify="required|pass"
+                           placeholder="请输入新密码" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <div class="layui-form-block">
+                    <input type="password" name="confirmPwd" id="confirmPwd" required
+                           lay-verify="required|pass|confirmPwd"
+                           placeholder="请确认新密码" class="layui-input">
+                </div>
+            </div>
+            <input type="hidden" lay-submit lay-filter="updatePwd" id="pwd_submit">
+        </form>
+    </div>
+    <div th:replace="common/sha1::sha1"></div>
+    <script type="text/javascript">
+        asyncFn.push(function () {
+            var inNode = [[${session.node!=null?true:false}]];
+
+            // 用户操作
+            element.on('nav(userOperation)', function (elem) {
+                var op = this.getAttribute('op');
+                // 修改密码
+                if ('updatePwd' == op) {
+                    document.getElementById('form_updatePwd').reset();
+                    layer.open({
+                        type: 1,
+                        title: '修改密码',
+                        btn: ['确认'],
+                        content: $('#div-updatePwd'),
+                        area: '300px',
+                        shade: 0,
+                        shadeClose: true,
+                        yes: function (index, layero) {
+                            $('#pwd_submit').click();
+                        },
+                        cancel: function () {
+                        }
+                    });
+                } else if ('updateName' == op) {
+                    layer.prompt({
+                        title: '输入新的昵称',
+                        formType: 0,
+                        value: "[[${session.user.name}]]"
+                    }, function (val, index) {
+                        loadingAjax({
+                            url: inNode ? '../user/updateName' : './user/updateName',
+                            data: {
+                                name: val
+                            },
+                            success: function (data) {
+                                layer.msg(data.msg);
+                                if (200 == data.code) {
+                                    layer.close(index);
+                                    setTimeout(function () {
+                                        window.location.reload();
+                                    }, 2000);
+                                }
+                            }
+                        });
+                    });
+                } else if ('exit' == op) {
+                    layer.confirm('确定退出系统？', {
+                        'title': '系统提示'
+                    }, function (index) {
+                        layer.close(index);
+                        layui.data('user', {
+                            key: "loginOut",
+                            value: true
+                        });
+                        window.location.href = inNode ? "../logout" : "./logout";
+                    })
+                }
+            });
+
+            // 表单验证
+            form.verify({
+                pass: [/^[\S]{6,12}$/, '密码必须6-12位，且不能出现空格！'],
+                confirmPwd: function (value, item) {
+                    if (value != $('#newPwd').val()) {
+                        return '两次输入的密码不一致！'
+                    }
+                }
+            });
+
+            // 提交修改密码表单
+            form.on('submit(updatePwd)', function (data) {
+                if (!checkPwd(data.field.oldPwd)) {
+                    return;
+                }
+                if (!checkPwd(data.field.confirmPwd)) {
+                    return;
+                }
+                // 密码强度
+                if ([[${session.user?.isSystemUser()}]]) {
+                    if (!checkPasswordStrong(data.field.confirmPwd)) {
+                        layer.msg("系统管理员密码强度太低");
+                        return false;
+                    }
+                }
+                let sendData = formatPwd(data.field, "oldPwd");
+                sendData = formatPwd(sendData, "newPwd");
+                sendData = formatPwd(sendData, "confirmPwd");
+                loadingAjax({
+                    url: inNode ? "../user/updatePwd" : "./user/updatePwd",
+                    data: sendData,
+                    success: function (data) {
+                        layer.msg(data.msg);
+                        if (200 == data.code) {
+                            layer.closeAll('page');
+                            setTimeout(function () {
+                                window.location.reload();
+                            }, 2000);
+                        }
+                    }
+                });
+                return false;
+            });
+        });
+    </script>
+</div>
+</html>

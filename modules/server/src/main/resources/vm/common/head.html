@@ -180,8 +180,7 @@
                 success: function (data) {
                     layer.close(index);
                     if (data.code == 800) {
-                        #
-                        # 用户信息失效
+                        // 用户信息失效
                         layer.msg(data.msg);
                         setTimeout(function () {
                             top.location.reload();
@@ -228,8 +227,7 @@
                 where: newWhere,
                 done: function (data) {
                     if (data.code == 800) {
-                        #
-                        # 用户信息失效
+                        // 用户信息失效
                         layer.msg(data.msg);
                         setTimeout(function () {
                             top.location.reload();
@@ -304,6 +302,7 @@
 
     </script>
 
-    <script id="jsCommonContext" type="text/html" th:text="@{${#strings.defaultString(session.jsCommonContext,'')}}"></script>
+    <script id="jsCommonContext" type="text/html"
+            th:utext="@{${#strings.defaultString(session.jsCommonContext,'')}}"></script>
 </div>
 </html>

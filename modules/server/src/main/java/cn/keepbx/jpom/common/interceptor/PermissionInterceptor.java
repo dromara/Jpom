@@ -24,7 +24,7 @@ import javax.servlet.http.HttpServletResponse;
  * 权限拦截器
  *
  * @author jiangzeyin
- * Created by jiangzeyin on 2019/03/16.
+ * @date 2019/03/16.
  */
 @InterceptorPattens(sort = 1)
 public class PermissionInterceptor extends BaseInterceptor {

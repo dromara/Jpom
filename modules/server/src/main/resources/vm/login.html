@@ -17,9 +17,12 @@
 <body>
 <div class="layui-carousel auto" id="div-carousel" style=" position: fixed; z-index: 0;">
     <div carousel-item>
-        <div><img src="$!jpomProxyPath/static/backgrounds/1.jpg?v=$staticCacheTime" class="auto"></div>
-        <div><img src="$!jpomProxyPath/static/backgrounds/2.jpg?v=$staticCacheTime" class="auto"></div>
-        <div><img src="$!jpomProxyPath/static/backgrounds/3.jpg?v=$staticCacheTime" class="auto"></div>
+        <div><img th:src="@{${session.jpomProxyPath}+'/static/backgrounds/1.jpg?v='+${session.staticCacheTime}}"
+                  class="auto"></div>
+        <div><img th:src="@{${session.jpomProxyPath}+'/static/backgrounds/2.jpg?v='+${session.staticCacheTime}}"
+                  class="auto"></div>
+        <div><img th:src="@{${session.jpomProxyPath}+'/static/backgrounds/3.jpg?v='+${session.staticCacheTime}}"
+                  class="auto"></div>
     </div>
 </div>
 <div class="layui-container" style="margin-top: 150px;">
@@ -62,14 +65,14 @@
         </div>
     </div>
 </div>
+<div th:replace="common/sha1::sha1"></div>
 </body>
-#parse("common/sha1.vm")
 <script type="text/javascript">
     function loadSuccess() {
         layui.use(['carousel'], function () {
             var carousel = layui.carousel;
-            #
-            # 判断是否在iframe中, 如果是，刷新父页面
+
+            //   判断是否在iframe中, 如果是，刷新父页面
             if (self != top) {
                 parent.window.location.replace(window.location.href);
             }
@@ -131,9 +134,9 @@
                 });
             }
 
-            #if($showCode)
-            showCode();
-            #end
+
+            if ([[${showCode}]])
+                showCode();
         });
     }
 
