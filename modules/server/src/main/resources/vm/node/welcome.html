@@ -1,59 +1,36 @@
 <!DOCTYPE html>
-<html>
-
-<head>
-    #parse("./common/head.vm")
-    <title>Welcome</title>
-    <style>
-        body {
-            position: absolute;
-            top: 0px;
-            right: 0px;
-            bottom: 0px;
-            left: 0px;
-            padding: 10px;
-        }
-
-        .terminal {
-            height: 100%;
-            position: relative;
-            top: 40px;
-            right: 0px;
-            bottom: 0px;
-            left: 0px;
-            border: 1px solid #c1c1c1;
-            border-radius: 5px;
-            font-family: Consolas;
-            padding: 5px;
-            overflow: auto;
-            word-break: keep-all;
-            white-space: nowrap;
-            font-weight: bold;
-            font-size: 23px;
-        }
-
-        /*.layui-inline {*/
-        /*    width: 200px;*/
-        /*}*/
-
-        .top {
-            margin-top: 20px;
-            width: 100%;
-        }
-
-        .echarts {
-            margin: 0 auto;
-            width: 90%;
-            height: 300px;
-        }
-
-        #table {
-            width: 100%;
-        }
-    </style>
-    <script src="$!jpomProxyPath/static/js/echarts.min.js?v=$staticCacheTime"></script>
+<html xmlns:th="http://www.w3.org/1999/xhtml">
+<head th:replace="common/head::head">
 </head>
+<script th:src="@{${session.jpomProxyPath}+'/static/js/echarts.min.js?v='+${staticCacheTime}}"></script>
 <body>
+
+<style>
+    body {
+        position: absolute;
+        top: 0px;
+        right: 0px;
+        bottom: 0px;
+        left: 0px;
+        padding: 10px;
+    }
+
+
+    /*.layui-inline {*/
+    /*    width: 200px;*/
+    /*}*/
+
+    .top {
+        margin-top: 20px;
+        width: 100%;
+    }
+
+    .echarts {
+        margin: 0 auto;
+        width: 90%;
+        height: 300px;
+    }
+</style>
 <form action="" class="layui-form" id="form">
     <div class="layui-inline">
         <label class="layui-form-label">自动刷新</label>
@@ -62,9 +39,7 @@
         </div>
     </div>
 </form>
-##<div class="layui-container">
-##    <div class="terminal"></div>
-##</div>
+
 <div class="top">
     <div class="echarts" id="echarts"></div>
 </div>
@@ -73,25 +48,24 @@
 </body>
 <script type="application/javascript">
     var ws, myEcharts;
+    var col = [{field: 'pid', title: '进程id', sort: true, width: '6%'},
+        {field: 'command', title: '进程名称'},
+        {field: 'port', title: '端口', sort: true, width: '6%'},
+        {field: 'user', title: '所有者', width: '8%', sort: true},
+        {field: 'jpomName', title: '项目名称', width: '8%', sort: true},
+        {field: 'res', title: '物理内存', width: '8%', sort: true},
+        {field: 'status', title: '进程状态', width: '8%', sort: true},
+        {field: 'cpu', title: '占用CPU', width: '8%', sort: true},
+        {field: 'mem', title: '物理内存', width: '8%', sort: true},
+        {field: 'time', title: '时间总计', sort: true},
+        {field: 'pr', title: '优先级', width: '6%', sort: true},
+        // {field: 'NI', title: 'nice值', width: '6%', sort: true},
+        {field: 'virt', title: '虚拟内存', width: '8%', sort: true},
+        {field: 'shr', title: '共享内存', width: '8%', sort: true}];
     var config = {
         id: 'tab_monitor',
         elem: '#tab_monitor',
-        cols: [[
-            {field: 'pid', title: '进程id', sort: true, width: '6%'},
-            {field: 'command', title: '进程名称'},
-            {field: 'port', title: '端口', sort: true, width: '6%'},
-            {field: 'user', title: '所有者', width: '8%', sort: true},
-            {field: 'jpomName', title: '项目名称', width: '8%', sort: true},
-            {field: 'res', title: '物理内存', width: '8%', sort: true},
-            {field: 'status', title: '进程状态', width: '8%', sort: true},
-            {field: 'cpu', title: '占用CPU', width: '8%', sort: true},
-            {field: 'mem', title: '物理内存', width: '8%', sort: true},
-            {field: 'time', title: '时间总计', sort: true},
-            {field: 'pr', title: '优先级', width: '6%', sort: true},
-            // {field: 'NI', title: 'nice值', width: '6%', sort: true},
-            {field: 'virt', title: '虚拟内存', width: '8%', sort: true},
-            {field: 'shr', title: '共享内存', width: '8%', sort: true},
-        ]],
+        cols: [col],
         done: function (data) {
         }
     };
@@ -227,7 +201,7 @@
             layer.msg("不支持WebSocket");
             return;
         }
-        var url = getSocketHost() + "/console?userId=$user.getUserMd5Key()&projectId=system&nodeId=$node.id";
+        var url = getSocketHost() + "/console?userId=[[${session.user.getUserMd5Key()}]]&projectId=system&nodeId=[[${node.id}]]";
         if (!ws) {
             ws = new WebSocket(url);
         }

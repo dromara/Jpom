@@ -61,11 +61,6 @@ public class NodeIndexController extends BaseServerController {
                 setAttribute("tipUpdate", true);
             }
         }
-        // 菜单
-        InputStream inputStream = ResourceUtil.getStream("classpath:/menus/node-index.json");
-        String json = IoUtil.read(inputStream, CharsetUtil.CHARSET_UTF_8);
-        JSONArray jsonArray = JSONArray.parseArray(json);
-        setAttribute("menus", jsonArray);
         return "node/index";
     }
 

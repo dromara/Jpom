@@ -45,7 +45,7 @@
     <div th:replace="common/sha1::sha1"></div>
     <script type="text/javascript">
         asyncFn.push(function () {
-            var inNode = [[${session.node!=null?true:false}]];
+            var inNode = [[${node!=null?true:false}]];
 
             // 用户操作
             element.on('nav(userOperation)', function (elem) {

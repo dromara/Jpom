@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.w3.org/1999/xhtml" lang="zh">
-<div th:fragment="head">
+<head th:fragment="head">
+    <title>Jpom-项目管理系统</title>
+    <meta name="keywords" content="Jpom,Java项目管理,Jar管理,Java管理系统,服务器项目运维"/>
+    <meta name="description" content="Jpom-项目管理系统"/>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta content="width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1,user-scalable=no" name="viewport">
@@ -304,5 +307,5 @@
 
     <script id="jsCommonContext" type="text/html"
             th:utext="@{${#strings.defaultString(session.jsCommonContext,'')}}"></script>
-</div>
+</head>
 </html>

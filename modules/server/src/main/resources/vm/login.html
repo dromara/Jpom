@@ -2,19 +2,16 @@
 <html xmlns:th="http://www.thymeleaf.org">
 
 <head th:include="common/head::head">
-    <title>Jpom-项目管理系统</title>
-    <meta name="keywords" content="Jpom,Java项目管理,Jar管理,Java管理系统,服务器项目运维"/>
-    <meta name="description" content="Jpom-项目管理系统"/>
-    <style>
-        .randCode {
-            padding: 0;
-            min-height: 36px;
-            height: 38px;
-        }
-    </style>
 </head>
 
 <body>
+<style type="text/css">
+    .randCode {
+        padding: 0;
+        min-height: 36px;
+        height: 38px;
+    }
+</style>
 <div class="layui-carousel auto" id="div-carousel" style=" position: fixed; z-index: 0;">
     <div carousel-item>
         <div><img th:src="@{${session.jpomProxyPath}+'/static/backgrounds/1.jpg?v='+${session.staticCacheTime}}"

@@ -77,11 +77,12 @@
     </script>
     <script type="text/javascript">
         asyncFn.push(function () {
+            var inNode = [[${node!=null?true:false}]];
             layui.use('laytpl', function () {
                 var laytpl = layui.laytpl;
                 var innerHTML = document.getElementById("menus_tpl").innerHTML;
                 loadingAjax({
-                    url: './menus_data.json',
+                    url: inNode ? '../menus_data.json' : './menus_data.json',
                     data: {},
                     success: function (data) {
                         if (200 !== data.code) {

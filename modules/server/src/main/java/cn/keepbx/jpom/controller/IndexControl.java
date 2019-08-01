@@ -41,7 +41,7 @@ public class IndexControl extends BaseServerController {
     @Resource
     private NodeService nodeService;
 
-    @RequestMapping(value = "error", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
+    @RequestMapping(value = {"error", "error.html"}, method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
     @NotLogin
     public String error(String id) {
         String msg = GlobalDefaultExceptionHandler.getErrorMsg(id);
@@ -71,8 +71,15 @@ public class IndexControl extends BaseServerController {
     public String menusData() {
         UserModel user = getUser();
         NodeModel nodeModel = tryGetNode();
+
         // 菜单
-        InputStream inputStream = ResourceUtil.getStream("classpath:/menus/index.json");
+        InputStream inputStream;
+        if (nodeModel == null) {
+            inputStream = ResourceUtil.getStream("classpath:/menus/index.json");
+        } else {
+            inputStream = ResourceUtil.getStream("classpath:/menus/node-index.json");
+        }
+
         String json = IoUtil.read(inputStream, CharsetUtil.CHARSET_UTF_8);
         JSONArray jsonArray = JSONArray.parseArray(json);
         List<Object> collect1 = jsonArray.stream().filter(o -> {
