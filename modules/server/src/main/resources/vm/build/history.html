@@ -1,14 +1,6 @@
 <!DOCTYPE html>
-<html>
-
-<head>
-    #parse("./common/head.vm")
-    <title>项目管理系统</title>
-    <style>
-        body {
-            padding: 10px;
-        }
-    </style>
+<html xmlns:th="http://www.w3.org/1999/xhtml">
+<head th:replace="common/head::head">
 </head>
 
 <body>
@@ -22,9 +14,9 @@
     <a href="javascript:;" class="layui-btn  layui-btn-sm layui-btn-normal" lay-event="repub">发布</a>
     {{# } }}
     {{# } }}
-        #if($user.isSystemUser())
-        <a href="javascript:;" class="layui-btn  layui-btn-sm layui-btn-normal" lay-event="delete">删除</a>
-        #end
+
+    <a th:if="${session.user.isSystemUser()}" href="javascript:;" class="layui-btn  layui-btn-sm layui-btn-normal"
+       lay-event="delete">删除</a>
 </script>
 <script type="text/html" id="tar_buildIdStr">
     <a herf="" style="color: blue;" onclick="openLog('{{ d.buildDataId }}',{{ d.buildNumberId }})">
@@ -54,9 +46,7 @@
                     <select name="buildDataId" id="buildDataId" lay-verify="required" lay-filter="buildDataId"
                             lay-search="">
                         <option value="">请选择</option>
-                        #foreach($item in $buildS)
-                            <option value="$item.id">$item.name</option>
-                        #end
+                        <option th:each="item : ${buildS}" th:value="${item.id}" th:text="${item.name}"></option>
                     </select>
                 </div>
             </div>
@@ -66,28 +56,20 @@
                     <select name="status" id="status" lay-verify="required" lay-filter="status"
                             lay-search="">
                         <option value="">请选择</option>
-                        #foreach($item in $status)
-                            #if($item.code!=0)
-                                <option value="$item.code">$item.desc</option>
-                            #end
-                        #end
+                        <option th:each="item : ${status}" th:if="${item.code!=0}" th:value="${item.code}"
+                                th:text="${item.desc}"></option>
                     </select>
                 </div>
             </div>
         </div>
     </form>
 </script>
-<script type="text/javascript">
+<script type="text/javascript" th:inline="javascript">
     const apiWhere = {};
     var laydate;
-    var statusArray = [];
-        #if($status)
-        statusArray = $status;
-        #end
-    var releaseMethods = [];
-        #if($releaseMethods)
-        releaseMethods = $releaseMethods;
-        #end
+    var statusArray = [[${status}]];
+    var releaseMethods = [[${releaseMethods}]];
+
     function openLog(id, buildId) {
         layer.open({
             type: 2,
@@ -104,6 +86,50 @@
         window.open("./download_log.html?logId=" + id);
     }
 
+    var col = [
+        {field: 'buildName', title: '构建名称'},
+        {
+            field: 'buildIdStr', title: '构建ID', width: '10%', toolbar: "#tar_buildIdStr"
+        },
+        {
+            field: 'status', title: '状态', width: '8%', templet: function (d) {
+                var status = d.status;
+                for (var i = 0; i < statusArray.length; i++) {
+                    if (statusArray[i].code == status) {
+                        return statusArray[i].desc;
+                    }
+                }
+                return "未知";
+            }
+        },
+        {
+            field: 'startTime', title: '开始时间', templet: function (d) {
+                return formateTime(d.startTime);
+            }
+        },
+        {
+            field: 'endTime', title: '结束时间', templet: function (d) {
+                if (!d.endTime) {
+                    return "-";
+                }
+                return formateTime(d.endTime);
+            }
+        },
+        {
+            field: 'releaseMethod', title: '发布方式', width: '8%', templet: function (d) {
+                var releaseMethod = d.releaseMethod;
+                for (var i = 0; i < releaseMethods.length; i++) {
+                    if (releaseMethods[i].code == releaseMethod) {
+                        return releaseMethods[i].desc;
+                    }
+                }
+                return "未知";
+            }
+        },
+        {field: 'buildUser', title: '构建人'},
+        {field: 'op', title: '操作', align: 'center', toolbar: '#bar_projects', fixed: 'right'}
+    ];
+
     function loadSuccess() {
         tableRender({
             id: 'tab_user',
@@ -112,49 +138,7 @@
             toolbar: '#toolbarDemo',
             page: true,
             where: apiWhere,
-            cols: [[
-                {field: 'buildName', title: '构建名称'},
-                {
-                    field: 'buildIdStr', title: '构建ID', width: '10%', toolbar: "#tar_buildIdStr"
-                },
-                {
-                    field: 'status', title: '状态', width: '8%', templet: function (d) {
-                        var status = d.status;
-                        for (var i = 0; i < statusArray.length; i++) {
-                            if (statusArray[i].code == status) {
-                                return statusArray[i].desc;
-                            }
-                        }
-                        return "未知";
-                    }
-                },
-                {
-                    field: 'startTime', title: '开始时间', templet: function (d) {
-                        return formateTime(d.startTime);
-                    }
-                },
-                {
-                    field: 'endTime', title: '结束时间', templet: function (d) {
-                        if (!d.endTime) {
-                            return "-";
-                        }
-                        return formateTime(d.endTime);
-                    }
-                },
-                {
-                    field: 'releaseMethod', title: '发布方式', width: '8%', templet: function (d) {
-                        var releaseMethod = d.releaseMethod;
-                        for (var i = 0; i < releaseMethods.length; i++) {
-                            if (releaseMethods[i].code == releaseMethod) {
-                                return releaseMethods[i].desc;
-                            }
-                        }
-                        return "未知";
-                    }
-                },
-                {field: 'buildUser', title: '构建人'},
-                {field: 'op', title: '操作', align: 'center', toolbar: '#bar_projects', fixed: 'right'}
-            ]],
+            cols: [col],
             parseData: function (data) {
                 return {
                     "code": data.code,

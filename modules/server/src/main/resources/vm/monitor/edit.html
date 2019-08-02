@@ -6,11 +6,11 @@
 <body>
 <div class="layui-container">
     <form action="./updateMonitor" class="layui-form" id="form_monitor">
-        <input name="id" type="hidden" th:value="${model.id}">
+        <input name="id" type="hidden" th:value="${model?.id}">
         <div class="layui-form-item">
             <label class="layui-form-label">名称</label>
             <div class="layui-input-block">
-                <input type="text" name="name" required lay-verify="required" th:value="${model.name}"
+                <input type="text" name="name" required lay-verify="required" th:value="${model?.name}"
                        placeholder="请输入监控名称"
                        class="layui-input">
             </div>
@@ -42,17 +42,19 @@
             <label class="layui-form-label">通知方式</label>
             <div class="layui-input-block">
 
-                <div style="display: flex;margin: 5px" th:each="item : ${notifyTypeArray}">
+                <div style="display: flex;margin: 5px" th:each="item : ${notifyTypeArray}"
+                     th:with="nowData=${model?.getNotifyTypeValue(item.code)}">
                     <input type="checkbox" th:name="'notify_'+${item.code}" th:value="${item.code}"
                            th:title="${item.desc}"
+                           th:checked="${nowData}"
                            lay-filter="monitorNotify">
                     <th:blck th:switch="${item.code}">
                         <input th:case="0" type="text" required th:id="'notifyValue_'+${item.code}" class="layui-input"
-                               th:name="'value_'+${item.code}" #if(!$nowData) style="display: none" #end
-                               value="$!nowData.value" placeholder="请输入通知的webhook地址">
+                               th:name="'value_'+${item.code}" th:style="${nowData}?'':'display: none'"
+                               th:value="${nowData}" placeholder="请输入通知的webhook地址">
                         <input th:case="1" type="text" required th:id="'notifyValue_'+${item.code}" class="layui-input"
-                               th:name="'value_'+${item.code}" #if(!$nowData) style="display: none" #end
-                               value="$!nowData.value" placeholder="请输入通知的邮箱">
+                               th:name="'value_'+${item.code}" th:style="${nowData}?'':'display: none'"
+                               th:value="${nowData}" placeholder="请输入通知的邮箱">
                     </th:blck>
                 </div>
             </div>
@@ -61,31 +63,24 @@
             <label class="layui-form-label">监控项目</label>
             <div class="layui-input-block">
                 <div class="layui-collapse">
-                    #if($nodeModels && $nodeModels.size()>0)
-                    #foreach($item in $nodeModels)
-                    <div class="layui-colla-item">
-                        <div class="layui-colla-title">$item.name</div>
+                    <div class="layui-colla-item" th:unless="${#lists.isEmpty(nodeModels)}"
+                         th:each="item : ${nodeModels}">
+                        <div class="layui-colla-title" th:text="${item.name}"></div>
                         <div class="layui-colla-content layui-show">
-                            #if($item.groupProjects && $item.groupProjects.size()>0)
-                            #foreach($groupProject in $item.groupProjects)
-                            #foreach($project in $groupProject.projects)
-                            #set($nowData=$item.id+"_"+$project.id)
-                            <input type="checkbox" name="projects" value="$project.id" id="$nowData"
-                                   lay-skin="primary" title="$project.name" nodeId="$item.id">
-                            #end
-                            #end
-                            #end
+                            <th:block th:each="groupProject : ${item.groupProjects}">
+                                <input th:each="project : ${groupProject.projects}" type="checkbox" name="projects"
+                                       th:value="${project.id}" th:id="${item.id}+'_'+${project.id}"
+                                       th:checked="${model?.checkNodeProject(item.id,project.id)}"
+                                       lay-skin="primary" th:title="${project.name}" th:nodeId="${item.id}">
+                            </th:block>
                         </div>
                     </div>
-                    #end
-                    #else
-                    #set($errorNode=true)
-                    <div class="layui-colla-item">
+
+                    <div class="layui-colla-item" th:if="${#lists.isEmpty(nodeModels)}">
                         <div class="layui-colla-title">
                             没有可用节点
                         </div>
                     </div>
-                    #end
                 </div>
             </div>
         </div>
@@ -103,24 +98,6 @@
 </body>
 <script type="text/javascript">
     function loadSuccess() {
-        checkProject([[${model?.projects}]]);
-
-        function checkProject(data) {
-            if (!data) {
-                return;
-            }
-            for (var i = 0; i < data.length; i++) {
-                var node = data[i];
-                var nodeId = node.node;
-                var projects = node.projects;
-                for (var j = 0; j < projects.length; j++) {
-                    var id = nodeId + "_" + projects[j];
-                    $("#" + id).prop("checked", true);
-                }
-            }
-            form.render('checkbox');
-        }
-
         //通知方式的点击
         form.on('checkbox(monitorNotify)', function (data) {
             var id = "#notifyValue_" + data.value;

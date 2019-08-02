@@ -1,14 +1,8 @@
 <!DOCTYPE html>
-<html>
-
+<html xmlns:th="http://www.w3.org/1999/xhtml">
 <head>
-    #parse("./common/head.vm")
-    <title>log</title>
+    <th:block th:include="common/head::head"></th:block>
     <style>
-        body {
-            padding: 10px;
-        }
-
         .context {
             height: 80vh;
         }
@@ -25,7 +19,8 @@
                   class="layui-textarea context"></textarea>
     </div>
 </form>
-<script type="text/javascript" src="$!jpomProxyPath/static/js/auto-line-number.js?v=$staticCacheTime"></script>
+<script type="text/javascript"
+        th:src="@{${session.jpomProxyPath}+'/static/js/auto-line-number.js?v='+${staticCacheTime}}"></script>
 
 <script type="text/javascript">
     var line = 1;

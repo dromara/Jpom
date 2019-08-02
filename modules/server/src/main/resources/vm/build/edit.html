@@ -1,24 +1,17 @@
 <!DOCTYPE html>
-<html>
-
-<head>
-    #parse("./common/head.vm")
-    <title>项目管理系统</title>
-    <style>
-        body {
-            padding: 10px;
-        }
-    </style>
+<html xmlns:th="http://www.w3.org/1999/xhtml">
+<head th:replace="common/head::head">
 </head>
 
 <body>
 <div class="layui-container">
     <form action="./updateBuild" class="layui-form" id="form_build" lay-filter="form_build">
-        <input name="id" type="hidden" value="$!model.id">
+        <input name="id" type="hidden" th:value="${model?.id}">
         <div class="layui-form-item">
             <label class="layui-form-label">名称</label>
             <div class="layui-input-block">
-                <input type="text" name="name" required lay-verify="required" value="$!model.name" placeholder="请输入构建名称"
+                <input type="text" name="name" required lay-verify="required" th:value="${model?.name}"
+                       placeholder="请输入构建名称"
                        class="layui-input">
             </div>
         </div>
@@ -26,7 +19,7 @@
             <label class="layui-form-label">仓库地址</label>
             <div class="layui-input-block">
                 <input type="text" name="gitUrl" required lay-verify="required"
-                       value="$!model.gitUrl"
+                       th:value="${model?.gitUrl}"
                        placeholder="请输入仓库地址"
                        class="layui-input">
             </div>
@@ -34,7 +27,7 @@
         <div class="layui-form-item">
             <label class="layui-form-label">登录名</label>
             <div class="layui-input-block">
-                <input type="text" name="userName" required lay-verify="required" value="$!model.userName"
+                <input type="text" name="userName" required lay-verify="required" th:value="${model?.userName}"
                        placeholder="请输入登录名"
                        class="layui-input">
             </div>
@@ -43,7 +36,7 @@
             <label class="layui-form-label">密码</label>
             <div class="layui-input-block">
                 <input type="password" name="password" required lay-verify="required"
-                       value="$!model.password"
+                       th:value="${model?.password}"
                        placeholder="请输入密码"
                        class="layui-input">
             </div>
@@ -67,14 +60,14 @@
             <div class="layui-input-block">
                     <textarea name="script"
                               placeholder="构建命令执行的命令，如：mvn clean package"
-                              class="layui-textarea">$!model.script</textarea>
+                              class="layui-textarea" th:text="${model?.script}"></textarea>
             </div>
         </div>
         <div class="layui-form-item">
             <label class="layui-form-label">产物目录</label>
             <div class="layui-input-block">
                 <input type="text" name="resultDirFile" required lay-verify="required"
-                       value="$!model.resultDirFile"
+                       th:value="${model?.resultDirFile}"
                        placeholder="构建产物目录，相对路径"
                        class="layui-input">
             </div>
@@ -82,68 +75,59 @@
         <div class="layui-form-item">
             <label class="layui-form-label">发布操作</label>
             <div class="layui-input-block">
-                #foreach($item in $releaseMethods)
-                    <input type="radio" name="releaseMethod" lay-filter="releaseMethod" value="$item.code"
-                           title="$item.desc"  #if($model.releaseMethod==$item.code)
-                           checked
-                    #end>
-                #end
+                <input th:each="item : ${releaseMethods}" type="radio" name="releaseMethod" lay-filter="releaseMethod"
+                       th:value="${item.code}"
+                       th:title="${item.desc}"
+                       th:checked="${model?.releaseMethod==item.code}">
             </div>
         </div>
-        <div id="releaseMethodDiv1" #if($model.releaseMethod!=1)style="display: none;"#end>
+
+        <div id="releaseMethodDiv1" th:style="${model?.releaseMethod!=1}?'display: none':''">
             <div class="layui-form-item">
                 <label class="layui-form-label">分发项目</label>
                 <div class="layui-input-block">
                     <select name="releaseMethodDataId_1" lay-filter="releaseMethodDataId_1">
                         <option value="">请选择分发项目</option>
-                        #foreach($item in $outGivingModels)
-                            <option value="$item.id"
-                                #if($model.releaseMethodDataId==$item.id)
-                                    selected
-                                    #set($cOutAfterOpt=$item.afterOpt)
-                                #end
-                                    afterOpt="$!item.afterOpt">$item.name</option>
-                        #end
+
+                        <option th:each="item : ${outGivingModels}" th:value="${item.id}"
+                                th:selected="${model?.releaseMethodDataId==item?.id}"
+                                th:afterOpt="${item?.afterOpt}" th:text="${item.name}">
+                        </option>
                     </select>
                 </div>
             </div>
             <div class="layui-form-item" id="releaseMethodDataId_1_after">
                 <label class="layui-form-label">分发后</label>
                 <div class="layui-input-block">
-                    <input type="text" disabled readonly
+                    <input name="releaseMethodDataId_1_after_input" type="text" disabled readonly
                            placeholder="请选择分发项目"
-                           value="#if($cOutAfterOpt)#foreach($coItem in $outAfterOpt)#if($cOutAfterOpt==$coItem.code)$coItem.desc#end#end#end"
+                           value=""
                            class="layui-input">
-
                 </div>
             </div>
         </div>
 
-        <div class="layui-form-item" id="releaseMethodDiv2" #if($model.releaseMethod!=2)style="display: none;"#end>
+        <div class="layui-form-item" id="releaseMethodDiv2" th:style="${model?.releaseMethod!=2}?'display: none':''">
             <div class="layui-inline">
                 <label class="layui-form-label">节点</label>
                 <div class="layui-input-block">
                     <select name="releaseMethodDataId_2_node" lay-filter="releaseMethodDataId_2">
                         <option value="">请选择节点</option>
-                        #foreach($i in $nodeModels)
-                            <option value="$i.id">$i.name</option>
-                        #end
+
+                        <option th:each="i : ${nodeModels}" th:value="${i.id}" th:text="${i.name}"></option>
                     </select>
                 </div>
             </div>
             <div class="layui-inline" id="releaseMethodDiv2_Project">
             </div>
         </div>
-        <div id="afterOptDiv" #if($model.releaseMethod!=2)
-             style="display: none;" #end>
+        <div id="afterOptDiv" th:style="${model?.releaseMethod!=2}?'display: none':''">
             <div class="layui-form-item">
                 <div class="layui-inline">
                     <label class="layui-form-label">清空发布</label>
                     <div class="layui-input-block">
                         <input type="checkbox" value="true"
-                            #if($model.clearOld)
-                               checked
-                            #end
+                               th:checked="${model?.clearOld}"
                                name="clearOld"
                                lay-skin="switch"
                                lay-text="是|否">
@@ -155,15 +139,15 @@
                 <div class="layui-input-block">
                     <select name="afterOpt" id="afterOpt">
                         <option value="">请选择发布后的操作</option>
-                        #foreach($item in $afterOpt)
-                            <option value="$item.code"
-                                    #if($item.code==$model.afterOpt)selected #end>$item.desc</option>
-                        #end
+
+                        <option th:each="item : ${afterOpt}" th:value="${item.code}"
+                                th:selected="${item.code==$model?.afterOpt}" th:text="${item.desc}">
+                        </option>
                     </select>
                 </div>
             </div>
         </div>
-    ##提交按钮
+
         <div class="layui-form-item">
             <div class="layui-form-item" style="padding-left: 20%;margin-top: 20px;">
                 <button class="layui-btn layui-btn-normal" lay-submit lay-filter="submitBuild" id="submitBuild">
@@ -174,24 +158,64 @@
     </form>
 </div>
 </body>
-    #foreach($i in $nodeModels)
-    <script type="text/html" id="node_project_$i.id">
-        <label class="layui-form-label">项目</label>
-        <div class="layui-input-block">
-            <select name="releaseMethodDataId_2_project">
-                <option value="">选择选择项目</option>
-                #foreach($ii in $i.groupProjects)
-                    <optgroup label="$ii.group">
-                        #foreach($iProject in $ii.projects)
-                            <option value="$iProject.id">$iProject.name</option>
-                        #end
-                    </optgroup>
-                #end
-            </select>
-        </div>
-    </script>
-    #end
-<script type="text/javascript">
+
+<script type="text/html" th:id="'node_project_'+${i.id}" th:each="i : ${nodeModels}">
+    <label class="layui-form-label">项目</label>
+    <div class="layui-input-block">
+        <select name="releaseMethodDataId_2_project">
+            <option value="">选择选择项目</option>
+            <optgroup th:label="${ii.group}" th:each="ii : ${i.groupProjects}">
+                <option th:value="${iProject.id}" th:each="iProject : ${ii.projects}"
+                        th:text="${iProject.name}"></option>
+            </optgroup>
+        </select>
+    </div>
+</script>
+<script type="text/javascript" th:if="${model}">
+
+    asyncFn.push(function () {
+        getBranchList(function () {
+            form.val("form_build", {
+                "branchName": "[[${model.branchName}]]"
+            });
+
+            var afterOpt = $("select[name='releaseMethodDataId_1']").find("option:selected").attr("afterOpt");
+            for (let outAfterOptElement of outAfterOpt) {
+                if (outAfterOptElement.code === parseInt(afterOpt)) {
+                    form.val("form_build", {
+                        "releaseMethodDataId_1_after_input": outAfterOptElement.desc
+                    });
+                    break;
+                }
+            }
+        });
+        layui.use(['laytpl'], function () {
+            laytpl = layui.laytpl;
+            var releaseMethodDataId = "[[${model.releaseMethodDataId}]]";
+            var ids = releaseMethodDataId.split(":");
+            if (ids.length == 2) {
+                changeProject(ids[0], ids[1]);
+            }
+        });
+    });
+
+</script>
+<script type="text/javascript" th:inline="javascript">
+    var laytpl;
+    var outAfterOpt = [[${outAfterOpt}]];
+
+    function changeProject(nodeId, pid) {
+        var html = document.getElementById('node_project_' + nodeId);
+        laytpl(html.innerHTML).render({}, function (newHtml) {
+            $("#releaseMethodDiv2_Project").html(newHtml);
+            if (pid) {
+                $("select[name='releaseMethodDataId_2_project']").val(pid);
+                $("select[name='releaseMethodDataId_2_node']").val(nodeId);
+            }
+            form.render();
+        });
+    }
+
     function getBranchList(fn) {
         loadingAjax({
             url: './branchList.json',
@@ -223,13 +247,7 @@
         $("#getBranchList").click(function () {
             getBranchList();
         });
-        #if($model)
-            getBranchList(function () {
-                form.val("form_build", {
-                    "branchName": "$!model.branchName"
-                })
-            });
-        #end
+
         // 提交信息
         form.on('submit(submitBuild)', function (data) {
             var sendData = data.field;
@@ -267,10 +285,7 @@
                 $("#afterOptDiv").show();
             }
         });
-        var outAfterOpt = [];
-        #if($outAfterOpt)
-            outAfterOpt = $outAfterOpt;
-        #end
+
         form.on('select(releaseMethodDataId_1)', function (data) {
             if (data.value == "" || !data.value) {
                 $("#releaseMethodDataId_1_after").hide();
@@ -285,9 +300,9 @@
                 }
             }
         });
-
         layui.use(['laytpl'], function () {
-            var laytpl = layui.laytpl;
+            laytpl = layui.laytpl;
+            //
             form.on('select(releaseMethodDataId_2)', function (data) {
                 if (!data.value || data.value == "") {
                     $("#releaseMethodDiv2_Project").hide();
@@ -295,25 +310,7 @@
                 }
                 changeProject(data.value);
             });
-            #if($model.releaseMethodDataId)
-                var releaseMethodDataId = "$model.releaseMethodDataId";
-                var ids = releaseMethodDataId.split(":");
-                changeProject(ids[0], ids[1]);
-            #end
-
-            function changeProject(nodeId, pid) {
-                var html = document.getElementById('node_project_' + nodeId);
-                laytpl(html.innerHTML).render({}, function (newHtml) {
-                    $("#releaseMethodDiv2_Project").html(newHtml);
-                    if (pid) {
-                        $("select[name='releaseMethodDataId_2_project']").val(pid);
-                        $("select[name='releaseMethodDataId_2_node']").val(nodeId);
-                    }
-                    form.render();
-                });
-            }
         });
-
     }
 </script>
 </html>

@@ -148,6 +148,46 @@ public class MonitorModel extends BaseModel {
         }
     }
 
+    /**
+     * 前端使用
+     *
+     * @param style 样式
+     * @return 值
+     */
+    public String getNotifyTypeValue(int style) {
+        List<Notify> notify = getNotify();
+        if (notify == null) {
+            return null;
+        }
+        for (Notify notify1 : notify) {
+            if (notify1.getStyle() == style) {
+                return notify1.getValue();
+            }
+        }
+        return null;
+    }
+
+    public boolean checkNodeProject(String nodeId, String projectId) {
+        List<NodeProject> projects = getProjects();
+        if (projects == null) {
+            return false;
+        }
+        for (NodeProject project : projects) {
+            if (project.getNode().equals(nodeId)) {
+                List<String> projects1 = project.getProjects();
+                if (projects1 == null) {
+                    return false;
+                }
+                for (String s : projects1) {
+                    if (projectId.equals(s)) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
     public enum NotifyType implements BaseEnum {
         /**
          * 通知方式

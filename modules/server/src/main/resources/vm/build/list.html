@@ -1,14 +1,6 @@
 <!DOCTYPE html>
-<html>
-
-<head>
-    #parse("./common/head.vm")
-    <title>项目管理系统</title>
-    <style>
-        body {
-            padding: 10px;
-        }
-    </style>
+<html xmlns:th="http://www.w3.org/1999/xhtml">
+<head th:replace="common/head::head">
 </head>
 
 <body>
@@ -30,17 +22,14 @@
     {{# }else{ }}
     <a href="javascript:;" class="layui-btn layui-btn-sm layui-btn-danger" lay-event="build">构建</a>
     {{# } }}
-        #if($user.isSystemUser())
-        <a href="javascript:;" class="layui-btn layui-btn-sm layui-btn-danger" lay-event="delete">删除</a>
-        #end
+
+    <a th:if="${session.user.isSystemUser()}" href="javascript:;" class="layui-btn layui-btn-sm layui-btn-danger"
+       lay-event="delete">删除</a>
 </script>
 
-<script type="text/javascript">
+<script type="text/javascript" th:inline="javascript">
 
-    var statusArray = [];
-        #if($statusArray)
-        statusArray = $statusArray;
-        #end
+    var statusArray = [[${statusArray}]];
 
     function openLog(id, buildId) {
         layer.open({
@@ -54,36 +43,38 @@
         });
     }
 
+    var col = [
+        {field: 'name', title: '名称'},
+        {field: 'branchName', title: '分支'},
+        {
+            field: 'status', title: "当前状态", templet: function (d) {
+                for (var i = 0; i < statusArray.length; i++) {
+                    if (statusArray[i].code == d.status) {
+                        return statusArray[i].desc;
+                    }
+                }
+                return "未知";
+            }
+        },
+        {
+            field: 'buildIdStr', title: '当前构建ID', templet: function (d) {
+                if (d.buildId <= 0) {
+                    return "";
+                }
+                return "<a herf='' style='color: blue;' onclick='openLog(\"" + d.id + "\"," + d.buildId + ")'>" + d.buildIdStr + "</a>";
+            }
+        },
+        {field: 'modifyUser', title: '最后修改人'},
+        {field: 'modifyTime', title: '最后修改时间'},
+        {field: 'op', title: '操作', align: 'center', toolbar: '#bar_build', fixed: 'right'}
+    ];
+
     function loadSuccess() {
         tableRender({
             id: 'tab_build',
             elem: '#tab_build',
             url: './list_data.json',
-            cols: [[
-                {field: 'name', title: '名称'},
-                {field: 'branchName', title: '分支'},
-                {
-                    field: 'status', title: "当前状态", templet: function (d) {
-                        for (var i = 0; i < statusArray.length; i++) {
-                            if (statusArray[i].code == d.status) {
-                                return statusArray[i].desc;
-                            }
-                        }
-                        return "未知";
-                    }
-                },
-                {
-                    field: 'buildIdStr', title: '当前构建ID', templet: function (d) {
-                        if (d.buildId <= 0) {
-                            return "";
-                        }
-                        return "<a herf='' style='color: blue;' onclick='openLog(\"" + d.id + "\"," + d.buildId + ")'>" + d.buildIdStr + "</a>";
-                    }
-                },
-                {field: 'modifyUser', title: '最后修改人'},
-                {field: 'modifyTime', title: '最后修改时间'},
-                {field: 'op', title: '操作', align: 'center', toolbar: '#bar_build', fixed: 'right'}
-            ]]
+            cols: [col]
         });
 
         // '添加监控'点击事件
