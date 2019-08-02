@@ -70,8 +70,13 @@ public class OutGivingProjectController extends BaseServerController {
         JSONArray jsonArray = new JSONArray();
         outGivingNodeProjectList.forEach(outGivingNodeProject -> {
             NodeModel nodeModel = nodeService.getItem(outGivingNodeProject.getNodeId());
-            JSONObject projectInfo = projectInfoService.getItem(nodeModel, outGivingNodeProject.getProjectId());
             JSONObject jsonObject = new JSONObject();
+            JSONObject projectInfo = null;
+            try {
+                projectInfo = projectInfoService.getItem(nodeModel, outGivingNodeProject.getProjectId());
+            } catch (Exception e) {
+                jsonObject.put("errorMsg", e.getMessage());
+            }
             jsonObject.put("nodeId", outGivingNodeProject.getNodeId());
             jsonObject.put("projectId", outGivingNodeProject.getProjectId());
             jsonObject.put("nodeName", nodeModel.getName());

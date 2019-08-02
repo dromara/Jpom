@@ -1,112 +1,99 @@
 <!DOCTYPE html>
-<html>
-
-<head>
-    #parse("./common/head.vm")
-    <title>项目管理系统</title>
-    <style>
-        body {
-            padding: 10px;
-        }
-    </style>
+<html xmlns:th="http://www.w3.org/1999/xhtml">
+<head th:replace="common/head::head">
 </head>
 
 <body>
 <div class="layui-container">
     <form action="./updateMonitor" class="layui-form" id="form_monitor">
-        <input name="id" type="hidden" value="$!model.id">
+        <input name="id" type="hidden" th:value="${model.id}">
         <div class="layui-form-item">
             <label class="layui-form-label">名称</label>
             <div class="layui-input-block">
-                <input type="text" name="name" required lay-verify="required" value="$!model.name" placeholder="请输入监控名称"
+                <input type="text" name="name" required lay-verify="required" th:value="${model.name}"
+                       placeholder="请输入监控名称"
                        class="layui-input">
             </div>
         </div>
         <div class="layui-form-item">
             <label class="layui-form-label">开启状态</label>
             <div class="layui-input-block">
-                <input type="checkbox" name="status" lay-skin="switch" lay-text="开启|关闭" #if($model.status)
-                       checked  #end>
+                <input type="checkbox" name="status" lay-skin="switch" lay-text="开启|关闭"
+                       th:checked="${model?.status}">
             </div>
         </div>
         <div class="layui-form-item">
             <label class="layui-form-label">异常后自动重启</label>
             <div class="layui-input-block">
-                <input type="checkbox" name="autoRestart" lay-skin="switch" lay-text="是|否" #if($model.autoRestart)
-                       checked  #end>
+                <input type="checkbox" name="autoRestart" lay-skin="switch" lay-text="是|否"
+                       th:checked="${model?.autoRestart}">
             </div>
         </div>
         <div class="layui-form-item">
             <label class="layui-form-label">监控周期</label>
             <div class="layui-input-block">
-                #foreach($item in $cycleArray)
-                    <input type="radio" name="cycle" value="$item.code" title="$item.desc" #if($model.cycle==$item.code)
-                           checked  #end>
-                #end
+
+                <input th:each="item : ${cycleArray}" type="radio" name="cycle" th:value="${item.code}"
+                       th:title="${item.desc}"
+                       th:checked="${model?.cycle==item.code}">
             </div>
         </div>
         <div class="layui-form-item">
             <label class="layui-form-label">通知方式</label>
             <div class="layui-input-block">
-                #foreach($item in $notifyTypeArray)
-                    #if($model&&$model.notify)
-                        #foreach($notice in $model.notify)
-                            #if($item.code==$notice.style)
-                                #set($nowData=$notice)
-                                #break
-                            #else
-                                #set($nowData=false)
-                            #end
-                        #end
-                    #end
-                    <div style="display: flex;margin: 5px">
-                        <input type="checkbox" name="notify_$item.code" value="$item.code"
-                               title="$item.desc" #if($nowData) checked #end
-                               lay-filter="monitorNotify">
-                            <input type="text" required id="notifyValue_$item.code" class="layui-input"
-                                   name="value_$item.code"  #if(!$nowData) style="display: none" #end
-                                   value="$!nowData.value"   placeholder=#if($item.code==0)
-                            "请输入通知的webhook地址" #elseif($item.code==1)"请输入通知的邮箱" #elseif($item.code==2) "请输入通知的手机号码" #end>
-                    </div>
-                #end
+
+                <div style="display: flex;margin: 5px" th:each="item : ${notifyTypeArray}">
+                    <input type="checkbox" th:name="'notify_'+${item.code}" th:value="${item.code}"
+                           th:title="${item.desc}"
+                           lay-filter="monitorNotify">
+                    <th:blck th:switch="${item.code}">
+                        <input th:case="0" type="text" required th:id="'notifyValue_'+${item.code}" class="layui-input"
+                               th:name="'value_'+${item.code}" #if(!$nowData) style="display: none" #end
+                               value="$!nowData.value" placeholder="请输入通知的webhook地址">
+                        <input th:case="1" type="text" required th:id="'notifyValue_'+${item.code}" class="layui-input"
+                               th:name="'value_'+${item.code}" #if(!$nowData) style="display: none" #end
+                               value="$!nowData.value" placeholder="请输入通知的邮箱">
+                    </th:blck>
+                </div>
             </div>
         </div>
-        <div class="layui-form-item">
+        <div class=" layui-form-item">
             <label class="layui-form-label">监控项目</label>
             <div class="layui-input-block">
                 <div class="layui-collapse">
                     #if($nodeModels && $nodeModels.size()>0)
-                        #foreach($item in $nodeModels)
-                            <div class="layui-colla-item">
-                                <div class="layui-colla-title">$item.name</div>
-                                <div class="layui-colla-content layui-show">
-                                    #if($item.groupProjects && $item.groupProjects.size()>0)
-                                        #foreach($groupProject in $item.groupProjects)
-                                            #foreach($project in $groupProject.projects)
-                                                #set($nowData=$item.id+"_"+$project.id)
-                                                <input type="checkbox" name="projects" value="$project.id" id="$nowData"
-                                                       lay-skin="primary" title="$project.name" nodeId="$item.id">
-                                            #end
-                                        #end
-                                    #end
-                                </div>
-                            </div>
-                        #end
-                    #else
-                        #set($errorNode=true)
-                        <div class="layui-colla-item">
-                            <div class="layui-colla-title">
-                                没有可用节点
-                            </div>
+                    #foreach($item in $nodeModels)
+                    <div class="layui-colla-item">
+                        <div class="layui-colla-title">$item.name</div>
+                        <div class="layui-colla-content layui-show">
+                            #if($item.groupProjects && $item.groupProjects.size()>0)
+                            #foreach($groupProject in $item.groupProjects)
+                            #foreach($project in $groupProject.projects)
+                            #set($nowData=$item.id+"_"+$project.id)
+                            <input type="checkbox" name="projects" value="$project.id" id="$nowData"
+                                   lay-skin="primary" title="$project.name" nodeId="$item.id">
+                            #end
+                            #end
+                            #end
                         </div>
+                    </div>
+                    #end
+                    #else
+                    #set($errorNode=true)
+                    <div class="layui-colla-item">
+                        <div class="layui-colla-title">
+                            没有可用节点
+                        </div>
+                    </div>
                     #end
                 </div>
             </div>
         </div>
-    ##提交按钮
+
         <div class="layui-form-item">
             <div class="layui-form-item" style="padding-left: 20%;margin-top: 20px;">
-                <button class="layui-btn layui-btn-normal" lay-submit lay-filter="submitMonitor" id="submitMonitor">
+                <button class="layui-btn layui-btn-normal" lay-submit lay-filter="submitMonitor"
+                        id="submitMonitor">
                     提交
                 </button>
             </div>
@@ -116,7 +103,7 @@
 </body>
 <script type="text/javascript">
     function loadSuccess() {
-        checkProject($!model.projects);
+        checkProject([[${model?.projects}]]);
 
         function checkProject(data) {
             if (!data) {

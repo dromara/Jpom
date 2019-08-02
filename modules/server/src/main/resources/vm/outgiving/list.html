@@ -62,7 +62,7 @@
                 文件管理
             </a>
             {{# }else{ }}
-            数据异常
+            {{ d.errorMsg || '数据异常' }}
             {{# } }}
         </th:block>
         <th:block th:unless="${session.user.isServerManager()}">
