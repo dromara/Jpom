@@ -1,14 +1,6 @@
 <!DOCTYPE html>
-<html>
-
-<head>
-    #parse("./common/head.vm")
-    <title>项目管理系统</title>
-    <style>
-        body {
-            padding: 10px;
-        }
-    </style>
+<html xmlns:th="http://www.w3.org/1999/xhtml">
+<head th:replace="common/head::head">
 </head>
 
 <body>
@@ -56,9 +48,7 @@
                             lay-search="">
                         <option value="">请选择</option>
                         <option value="-">无节点操作</option>
-                        #foreach($item in $nodeArray)
-                            <option value="$item.id">$item.name</option>
-                        #end
+                        <option th:each="item : ${nodeArray}" th:value="${item.id}" th:text="${item.name}"></option>
                     </select>
                 </div>
             </div>
@@ -68,9 +58,7 @@
                     <select name="selectUser" id="selectUser" lay-verify="required" lay-filter="selectUser"
                             lay-search="">
                         <option value="">请选择</option>
-                        #foreach($item in $userArray)
-                            <option value="$item.id">$item.name</option>
-                        #end
+                        <option th:each="item : ${userArray}" th:value="${item.id}" th:text="${item.name}"></option>
                         <option value="system">系统管理员</option>
                     </select>
                 </div>
@@ -81,6 +69,20 @@
 <script type="text/javascript">
     const apiWhere = {};
     var laydate;
+    var col = [
+        {field: 'userId', title: '操作者'},
+        {field: 'ip', title: '操作ip'},
+        {field: 'nodeId', title: '节点Id'},
+        {field: 'dataId', title: '数据Id'},
+        {field: 'optTypeMsg', title: '操作类型'},
+        {field: 'optStatusMsg', title: '执行结果'},
+        {
+            field: 'optTime', title: '操作时间', templet: function (d) {
+                return formateTime(d.optTime);
+            }
+        },
+        {field: 'op', title: '操作', align: 'center', toolbar: '#bar_projects', fixed: 'right'}
+    ];
 
     function loadSuccess() {
         tableRender({
@@ -90,20 +92,7 @@
             toolbar: '#toolbarDemo',
             page: true,
             where: apiWhere,
-            cols: [[
-                {field: 'userId', title: '操作者'},
-                {field: 'ip', title: '操作ip'},
-                {field: 'nodeId', title: '节点Id'},
-                {field: 'dataId', title: '数据Id'},
-                {field: 'optTypeMsg', title: '操作类型'},
-                {field: 'optStatusMsg', title: '执行结果'},
-                {
-                    field: 'optTime', title: '操作时间', templet: function (d) {
-                        return formateTime(d.optTime);
-                    }
-                },
-                {field: 'op', title: '操作', align: 'center', toolbar: '#bar_projects', fixed: 'right'}
-            ]],
+            cols: [col],
             parseData: function (data) {
                 return {
                     "code": data.code,

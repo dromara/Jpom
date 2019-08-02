@@ -1,15 +1,7 @@
 <!DOCTYPE html>
-<html>
+<html xmlns:th="http://www.w3.org/1999/xhtml">
 
-<head>
-    <title>Jpom-项目管理系统</title>
-    #parse("./common/head.vm")
-    <style>
-        body {
-            padding: 10px;
-            margin-top: 20px;
-        }
-    </style>
+<head th:replace="common/head::head">
 </head>
 
 <body>
@@ -36,7 +28,7 @@
         loadingAjax({
             url: './info',
             data: {
-                nodeId: "$!node.id"
+                nodeId: "[[${node?.id}]]"
             },
             success: function (data) {
                 if (200 != data.code) {

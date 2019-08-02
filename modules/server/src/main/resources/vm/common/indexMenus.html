@@ -64,7 +64,7 @@
     <script type="text/html" id="menus_tpl">
         {{#  layui.each(d, function(index, item){ }}
         <li class="layui-nav-item  {{# if(index==0) { }} layui-this {{# } }} ">
-            <a href="javascript:" data-options="{{# if(!item.childs) { }}{{ JSON.stringify(item) }}{{# } }}">
+            <a href="javascript:" data-options={{# if(!item.childs) { }}{{ JSON.stringify(item) }}{{# } }}>
                 {{# if(item.icon && item.icon!=''){ }}
                 <i class="layui-icon {{ item.icon }}"></i>
                 {{# } }}
@@ -108,6 +108,7 @@
                                 try {
                                     options = JSON.parse(dataJSON);
                                 } catch (e) {
+                                    console.log(dataJSON);
                                     options = eval('(' + dataJSON + ')');
                                 }
                                 tabChange(options);

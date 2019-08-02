@@ -1,19 +1,11 @@
 <!DOCTYPE html>
-<html>
-
+<html xmlns:th="http://www.w3.org/1999/xhtml">
 <head>
-    <title>Jpom-项目管理系统</title>
-    #parse("./common/head.vm")
+    <th:block th:include="common/head::head"></th:block>
     <style>
-        body {
-            padding: 10px;
-            margin-top: 20px;
-        }
-
         .context {
             height: 90vh;
         }
-
     </style>
 </head>
 
@@ -28,12 +20,16 @@
     </div>
 </div>
 </body>
-<script type="text/javascript" src="$!jpomProxyPath/static/js/auto-line-number.js?v=$staticCacheTime"></script>
+<script type="text/javascript"
+        th:src="@{${session.jpomProxyPath}+'/static/js/auto-line-number.js?v='+${session.staticCacheTime}}"></script>
 <script type="text/javascript">
     var treeData = [];
     var tree;
-
-    var url = getSocketHost() + "/tomcat_log?userId=$user.getUserMd5Key()&tomcatId=system&nodeId=#if(!$node)system#else$!node.id#end&type=tomcat";
+    var nodeId = "system";
+    if ([[${node!=null?true:false}]]) {
+        nodeId = "[[${node?.id}]]";
+    }
+    var url = getSocketHost() + "/tomcat_log?userId=[[${session.user.getUserMd5Key()}]]&tomcatId=system&nodeId=" + nodeId + "&type=tomcat";
     var ws;
 
     function loadSuccess() {
@@ -67,7 +63,7 @@
                                 url: './log_del.json',
                                 data: {
                                     path: data.path,
-                                    nodeId: "$!node.id"
+                                    nodeId: "[[${node?.id}]]"
                                 },
                                 success: function (data) {
                                     layer.msg(data.msg);
@@ -90,7 +86,7 @@
                         if (data.children) {
                             layer.msg("不支持下载文件夹");
                         } else {
-                            window.open("./log_download?path=" + data.path + "&nodeId=$!node.id");
+                            window.open("./log_download?path=" + data.path + "&nodeId=[[${node?.id}]]");
                         }
                         reloadTree();
                         return false;

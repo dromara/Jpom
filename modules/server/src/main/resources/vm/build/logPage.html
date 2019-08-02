@@ -20,11 +20,10 @@
     </div>
 </form>
 <script type="text/javascript"
-        th:src="@{${session.jpomProxyPath}+'/static/js/auto-line-number.js?v='+${staticCacheTime}}"></script>
+        th:src="@{${session.jpomProxyPath}+'/static/js/auto-line-number.js?v='+${session.staticCacheTime}}"></script>
 
 <script type="text/javascript">
     var line = 1;
-    var showLine = 0;
 
     function loadSuccess() {
         initPlugin();

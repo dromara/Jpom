@@ -1,14 +1,8 @@
 <!DOCTYPE html>
-<html>
-
+<html xmlns:th="http://www.w3.org/1999/xhtml">
 <head>
-    <title>Jpom-项目管理系统</title>
-    #parse("./common/head.vm")
+    <th:block th:include="common/head::head"></th:block>
     <style>
-        body {
-            padding: 10px;
-            margin-top: 20px;
-        }
 
         .clear {
             margin-left: 20px;
@@ -19,79 +13,59 @@
 
 <body>
 
-    #if(!$node)
-    <blockquote class="layui-elem-quote">服务端文件缓存：$!cacheFileSize
+
+<th:block th:unless="${node}">
+    <blockquote class="layui-elem-quote">服务端文件缓存：[[${cacheFileSize}]]
         <button type="button" class="layui-btn layui-btn-sm clear" t="serviceCacheFileSize">清空</button>
     </blockquote>
 
-    <blockquote class="layui-elem-quote">黑名单IP数量：$!ipSize
+    <blockquote class="layui-elem-quote">黑名单IP数量：[[${ipSize}]]
         <button type="button" class="layui-btn layui-btn-sm clear" t="serviceIpSize">清空</button>
     </blockquote>
-    <blockquote class="layui-elem-quote">在读取的日志文件数：$!readFileOnLineCount
+    <blockquote class="layui-elem-quote">在读取的日志文件数：[[${readFileOnLineCount}]]
     </blockquote>
-    <blockquote class="layui-elem-quote">在线构建文件占用空间：$!cacheBuildFileSize
+    <blockquote class="layui-elem-quote">在线构建文件占用空间：[[${cacheBuildFileSize}]]
     </blockquote>
-
-    #else
+</th:block>
+<th:block th:if="${node}">
     <blockquote class="layui-elem-quote">文件缓存：
-        <span nodeId="$node.id" fileSize> </span>
-        <button type="button" class="layui-btn layui-btn-sm clear" nodeId="$node.id"
+        <span th:nodeId="${node?.id}" fileSize> </span>
+        <button type="button" class="layui-btn layui-btn-sm clear" th:nodeId="${node?.id}"
                 t="fileSize">清空
         </button>
     </blockquote>
     <blockquote class="layui-elem-quote">进程名缓存：
-        <span nodeId="$node.id" pidName></span>
-        <button type="button" class="layui-btn layui-btn-sm clear" nodeId="$node.id"
+        <span th:nodeId="${node?.id}" pidName></span>
+        <button type="button" class="layui-btn layui-btn-sm clear" th:nodeId="${node?.id}"
                 t="pidName">清空
         </button>
     </blockquote>
     <blockquote class="layui-elem-quote">进程端口缓存：
-        <span nodeId="$node.id" pidPort></span>
-        <button type="button" class="layui-btn layui-btn-sm clear" nodeId="$node.id"
+        <span th:nodeId="${node?.id}" pidPort></span>
+        <button type="button" class="layui-btn layui-btn-sm clear" th:nodeId="${node?.id}"
                 t="pidPort">清空
         </button>
     </blockquote>
     <blockquote class="layui-elem-quote">错误进程缓存：
-        <span nodeId="$node.id" pidError></span>
-        <button type="button" class="layui-btn layui-btn-sm clear" nodeId="$node.id"
+        <span th:nodeId="${node?.id}" pidError></span>
+        <button type="button" class="layui-btn layui-btn-sm clear" th:nodeId="${node?.id}"
                 t="pidPort">清空
         </button>
     </blockquote>
 
     <blockquote class="layui-elem-quote">在读取的日志文件数：
-        <span nodeId="$node.id" readFileOnLineCount></span>
+        <span th:nodeId="${node?.id}" readFileOnLineCount></span>
     </blockquote>
-    #end
+</th:block>
 </body>
 <script>
     function loadSuccess() {
-        #if($user.isSystemUser())
+        if ([[${session.user.isSystemUser()}]]) {
             $(".clear").show();
-        #end
-        #if($node)
-            getCache("$!node.id");
-        #end
-    }
-
-    function getCache(nodeId) {
-        $("button[nodeId='" + nodeId + "']").hide();
-        loadingAjax({
-            url: './node_cache.json',
-            data: {
-                nodeId: nodeId
-            },
-            success: function (data) {
-                if (200 != data.code) {
-                    layer.msg(data.msg);
-                    return;
-                }
-                for (var key in data.data) {
-                    $("span[" + key.toLowerCase() + "][nodeId='" + nodeId + "']").text(data.data[key]);
-                }
-                $("button[nodeId='" + nodeId + "']").show();
-            }
-        });
-
+        }
+        if ([[${node!=null?true:false}]]) {
+            getCache("[[${node?.id}]]");
+        }
 
         $(".clear").click(function () {
             var nodeId = $(this).attr("nodeId");
@@ -116,6 +90,25 @@
                     }
                 });
             });
+        });
+    }
+
+    function getCache(nodeId) {
+        loadingAjax({
+            url: './node_cache.json',
+            data: {
+                nodeId: nodeId
+            },
+            success: function (data) {
+                if (200 != data.code) {
+                    layer.msg(data.msg);
+                    return;
+                }
+                for (var key in data.data) {
+                    $("span[" + key.toLowerCase() + "][nodeId='" + nodeId + "']").text(data.data[key]);
+                }
+                $("button[nodeId='" + nodeId + "']").show();
+            }
         });
     }
 </script>
