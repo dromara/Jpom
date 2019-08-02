@@ -3,6 +3,8 @@ package cn.keepbx.jpom.controller.outgiving;
 import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.keepbx.jpom.common.BaseServerController;
+import cn.keepbx.jpom.common.forward.NodeForward;
+import cn.keepbx.jpom.common.forward.NodeUrl;
 import cn.keepbx.jpom.common.interceptor.UrlPermission;
 import cn.keepbx.jpom.model.Role;
 import cn.keepbx.jpom.model.data.NodeModel;
@@ -10,6 +12,7 @@ import cn.keepbx.jpom.model.data.OutGivingModel;
 import cn.keepbx.jpom.model.data.OutGivingNodeProject;
 import cn.keepbx.jpom.model.data.UserModel;
 import cn.keepbx.jpom.model.log.UserOperateLogV1;
+import cn.keepbx.jpom.service.build.BuildService;
 import cn.keepbx.jpom.service.node.OutGivingServer;
 import cn.keepbx.util.JsonFileUtil;
 import cn.keepbx.util.StringUtil;
@@ -25,6 +28,7 @@ import javax.annotation.Resource;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 /**
  * 分发控制
@@ -37,6 +41,8 @@ import java.util.List;
 public class OutGivingController extends BaseServerController {
     @Resource
     private OutGivingServer outGivingServer;
+    @Resource
+    private BuildService buildService;
 
     @RequestMapping(value = "list.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
     public String list() throws IOException {
@@ -189,7 +195,25 @@ public class OutGivingController extends BaseServerController {
     @RequestMapping(value = "del.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     @UrlPermission(value = Role.ServerManager, optType = UserOperateLogV1.OptType.DelOutGiving)
-    public String del(String id) {
+    public String del(String id) throws IOException {
+        // 判断构建
+        if (buildService.checkOutGiving(id)) {
+            return JsonMessage.getString(400, "当前分发存在构建项，不能删除");
+        }
+        OutGivingModel outGivingServerItem = outGivingServer.getItem(id);
+        if (outGivingServerItem.isOutGivingProject()) {
+            UserModel userModel = getUser();
+            // 解除项目分发独立分发属性
+            List<OutGivingNodeProject> outGivingNodeProjectList = outGivingServerItem.getOutGivingNodeProjectList();
+            if (outGivingNodeProjectList != null) {
+                outGivingNodeProjectList.forEach(outGivingNodeProject -> {
+                    NodeModel item = nodeService.getItem(outGivingNodeProject.getNodeId());
+                    JSONObject jsonObject = new JSONObject();
+                    jsonObject.put("id", outGivingNodeProject.getProjectId());
+                    NodeForward.request(item, NodeUrl.Manage_ReleaseOutGiving, userModel, jsonObject);
+                });
+            }
+        }
         outGivingServer.deleteItem(id);
         return JsonMessage.getString(200, "操作成功");
     }

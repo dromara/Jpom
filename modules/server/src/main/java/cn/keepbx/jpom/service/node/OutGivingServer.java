@@ -2,6 +2,7 @@ package cn.keepbx.jpom.service.node;
 
 import cn.keepbx.jpom.common.BaseOperService;
 import cn.keepbx.jpom.model.data.OutGivingModel;
+import cn.keepbx.jpom.model.data.OutGivingNodeProject;
 import cn.keepbx.jpom.system.ServerConfigBean;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -56,5 +57,23 @@ public class OutGivingServer extends BaseOperService<OutGivingModel> {
     @Override
     public void deleteItem(String id) {
         deleteJson(ServerConfigBean.OUTGIVING, id);
+    }
+
+    public boolean checkNode(String nodeId) throws IOException {
+        List<OutGivingModel> list = list();
+        if (list == null || list.isEmpty()) {
+            return false;
+        }
+        for (OutGivingModel outGivingModel : list) {
+            List<OutGivingNodeProject> outGivingNodeProjectList = outGivingModel.getOutGivingNodeProjectList();
+            if (outGivingNodeProjectList != null) {
+                for (OutGivingNodeProject outGivingNodeProject : outGivingNodeProjectList) {
+                    if (outGivingNodeProject.getNodeId().equals(nodeId)) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
     }
 }

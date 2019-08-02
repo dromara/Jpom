@@ -11,7 +11,10 @@ import cn.keepbx.jpom.model.data.NodeModel;
 import cn.keepbx.jpom.model.data.UserModel;
 import cn.keepbx.jpom.model.log.UserOperateLogV1;
 import cn.keepbx.jpom.model.system.JpomManifest;
+import cn.keepbx.jpom.service.build.BuildService;
+import cn.keepbx.jpom.service.monitor.MonitorService;
 import cn.keepbx.jpom.service.node.NodeService;
+import cn.keepbx.jpom.service.node.OutGivingServer;
 import cn.keepbx.jpom.service.user.UserService;
 import cn.keepbx.util.StringUtil;
 import org.springframework.http.MediaType;
@@ -21,6 +24,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.annotation.Resource;
+import java.io.IOException;
 import java.util.List;
 
 /**
@@ -37,6 +41,12 @@ public class NodeEditController extends BaseServerController {
     private NodeService nodeService;
     @Resource
     private UserService userService;
+    @Resource
+    private OutGivingServer outGivingServer;
+    @Resource
+    private MonitorService monitorService;
+    @Resource
+    private BuildService buildService;
 
     @RequestMapping(value = "edit.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
     public String edit(String id) {
@@ -119,7 +129,18 @@ public class NodeEditController extends BaseServerController {
     @RequestMapping(value = "del.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @UrlPermission(value = Role.System, optType = UserOperateLogV1.OptType.DelNode)
     @ResponseBody
-    public String save(String id) {
+    public String del(String id) throws IOException {
+        //  判断分发
+        if (outGivingServer.checkNode(id)) {
+            return JsonMessage.getString(400, "该节点存在分发项目，不能删除");
+        }
+        // 监控
+        if (monitorService.checkNode(id)) {
+            return JsonMessage.getString(400, "该节点存在监控项，不能删除");
+        }
+        if (buildService.checkNode(id)) {
+            return JsonMessage.getString(400, "该节点存在构建项，不能删除");
+        }
         nodeService.deleteItem(id);
         // 删除授权
         List<UserModel> list = userService.list();

@@ -39,6 +39,8 @@ public enum NodeUrl {
 
     Manage_DeleteProject("/manage/deleteProject"),
 
+    Manage_ReleaseOutGiving("/manage/releaseOutGiving"),
+
     Manage_GetProjectInfo("/manage/getProjectInfo"),
 
     Manage_Jude_Lib("/manage/judge_lib.json"),

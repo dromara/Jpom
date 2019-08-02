@@ -1,6 +1,7 @@
 package cn.keepbx.jpom.service.build;
 
 import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.keepbx.jpom.common.BaseOperService;
 import cn.keepbx.jpom.model.data.BuildModel;
@@ -56,5 +57,51 @@ public class BuildService extends BaseOperService<BuildModel> {
             return false;
         }
         return true;
+    }
+
+    public boolean checkOutGiving(String outGivingId) throws IOException {
+        List<BuildModel> list = list();
+        if (list == null || list.isEmpty()) {
+            return false;
+        }
+        for (BuildModel buildModel : list) {
+            if (buildModel.getReleaseMethod() == BuildModel.ReleaseMethod.Outgiving.getCode() &&
+                    outGivingId.equals(buildModel.getReleaseMethodDataId())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean checkNode(String nodeId) throws IOException {
+        List<BuildModel> list = list();
+        if (list == null || list.isEmpty()) {
+            return false;
+        }
+        for (BuildModel buildModel : list) {
+            if (buildModel.getReleaseMethod() == BuildModel.ReleaseMethod.Project.getCode()) {
+                String releaseMethodDataId = buildModel.getReleaseMethodDataId();
+                if (StrUtil.startWith(releaseMethodDataId, nodeId + ":")) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    public boolean checkNodeProjectId(String nodeId, String projectId) throws IOException {
+        List<BuildModel> list = list();
+        if (list == null || list.isEmpty()) {
+            return false;
+        }
+        for (BuildModel buildModel : list) {
+            if (buildModel.getReleaseMethod() == BuildModel.ReleaseMethod.Project.getCode()) {
+                String releaseMethodDataId = buildModel.getReleaseMethodDataId();
+                if (StrUtil.equals(releaseMethodDataId, nodeId + ":" + projectId)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 }

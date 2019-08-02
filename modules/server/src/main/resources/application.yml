@@ -6,25 +6,10 @@ spring:
     name: jpomServer
   profiles:
     active: dev
-  velocity:
-    charset:  UTF-8
-    content-type: text/html
-    properties:
-      input:
-        encoding: UTF-8
-      output:
-        encoding: UTF-8
-    expose-request-attributes: true
-    expose-session-attributes: true
-    enabled: true
-    resource-loader-path: classpath:/vm/
-    suffix: .vm
   #thymeleaf start
   thymeleaf:
     mode: HTML5
     encoding: UTF-8
-    #开发时关闭缓存,不然没法看到实时页面
-    cache: false
     servlet:
       content-type: text/html
     prefix: classpath:/vm/
@@ -33,8 +18,8 @@ banner:
   msg: Jpom-Server 管理系统启动中
 # 静态资源配置
 interceptor:
-  resourceHandler: /static/**
-  resourceLocation: classpath:/static/
+  resourceHandler: /static/**,favicon.ico
+  resourceLocation: classpath:/static/,classpath:/static/favicon.ico
 # session 超时时间
 tomcat:
   sessionTimeOut: 3600

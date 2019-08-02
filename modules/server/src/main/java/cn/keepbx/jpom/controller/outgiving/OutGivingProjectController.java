@@ -3,6 +3,8 @@ package cn.keepbx.jpom.controller.outgiving;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.io.FileUtil;
 import cn.jiangzeyin.common.JsonMessage;
+import cn.jiangzeyin.common.validator.ValidatorItem;
+import cn.jiangzeyin.common.validator.ValidatorRule;
 import cn.jiangzeyin.controller.multipart.MultipartFileBuilder;
 import cn.keepbx.jpom.common.BaseServerController;
 import cn.keepbx.jpom.common.forward.NodeForward;
@@ -10,15 +12,19 @@ import cn.keepbx.jpom.common.forward.NodeUrl;
 import cn.keepbx.jpom.common.interceptor.UrlPermission;
 import cn.keepbx.jpom.model.BaseEnum;
 import cn.keepbx.jpom.model.Role;
+import cn.keepbx.jpom.model.data.NodeModel;
 import cn.keepbx.jpom.model.data.OutGivingModel;
 import cn.keepbx.jpom.model.data.OutGivingNodeProject;
 import cn.keepbx.jpom.model.log.UserOperateLogV1;
+import cn.keepbx.jpom.service.manage.ProjectInfoService;
+import cn.keepbx.jpom.service.node.NodeService;
 import cn.keepbx.jpom.service.node.OutGivingServer;
 import cn.keepbx.jpom.system.ConfigBean;
 import cn.keepbx.jpom.system.ServerConfigBean;
 import cn.keepbx.outgiving.OutGivingRun;
 import cn.keepbx.util.StringUtil;
 import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -30,6 +36,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Consumer;
 
 /**
  * 分发文件管理
@@ -42,11 +49,42 @@ import java.util.Objects;
 public class OutGivingProjectController extends BaseServerController {
     @Resource
     private OutGivingServer outGivingServer;
+    @Resource
+    private NodeService nodeService;
+    @Resource
+    private ProjectInfoService projectInfoService;
 
     @RequestMapping(value = "getProjectStatus", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
-    public String save() {
+    public String getProjectStatus() {
         return NodeForward.request(getNode(), getRequest(), NodeUrl.Manage_GetProjectStatus).toString();
+    }
+
+
+    @RequestMapping(value = "getItemData.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @ResponseBody
+    public String getItemData(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "id error") String id) throws IOException {
+        OutGivingModel outGivingServerItem = outGivingServer.getItem(id);
+        Objects.requireNonNull(outGivingServerItem, "没有数据");
+        List<OutGivingNodeProject> outGivingNodeProjectList = outGivingServerItem.getOutGivingNodeProjectList();
+        JSONArray jsonArray = new JSONArray();
+        outGivingNodeProjectList.forEach(outGivingNodeProject -> {
+            NodeModel nodeModel = nodeService.getItem(outGivingNodeProject.getNodeId());
+            JSONObject projectInfo = projectInfoService.getItem(nodeModel, outGivingNodeProject.getProjectId());
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.put("nodeId", outGivingNodeProject.getNodeId());
+            jsonObject.put("projectId", outGivingNodeProject.getProjectId());
+            jsonObject.put("nodeName", nodeModel.getName());
+            if (projectInfo != null) {
+                jsonObject.put("projectName", projectInfo.getString("name"));
+            }
+            jsonObject.put("projectStatus", false);
+            jsonObject.put("outGivingStatus", outGivingNodeProject.getStatusMsg());
+            jsonObject.put("outGivingResult", outGivingNodeProject.getResult());
+            jsonObject.put("lastTime", outGivingNodeProject.getLastOutGivingTime());
+            jsonArray.add(jsonObject);
+        });
+        return JsonMessage.getString(200, "", jsonArray);
     }
 
 

@@ -312,6 +312,16 @@ public class EditProjectController extends BaseAgentController {
         }
     }
 
+    @RequestMapping(value = "releaseOutGiving", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    public String releaseOutGiving() throws Exception {
+        ProjectInfoModel projectInfoModel = tryGetProjectInfoModel();
+        if (projectInfoModel != null) {
+            projectInfoModel.setOutGivingProject(false);
+            projectInfoService.updateItem(projectInfoModel);
+        }
+        return JsonMessage.getString(200, "ok");
+    }
+
     /**
      * 检查项目lib 情况
      *

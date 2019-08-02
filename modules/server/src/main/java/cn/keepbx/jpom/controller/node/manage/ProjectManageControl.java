@@ -2,6 +2,8 @@ package cn.keepbx.jpom.controller.node.manage;
 
 import cn.hutool.http.HttpStatus;
 import cn.jiangzeyin.common.JsonMessage;
+import cn.jiangzeyin.common.validator.ValidatorItem;
+import cn.jiangzeyin.common.validator.ValidatorRule;
 import cn.keepbx.jpom.common.BaseServerController;
 import cn.keepbx.jpom.common.forward.NodeForward;
 import cn.keepbx.jpom.common.forward.NodeUrl;
@@ -12,7 +14,9 @@ import cn.keepbx.jpom.model.data.NodeModel;
 import cn.keepbx.jpom.model.data.OutGivingModel;
 import cn.keepbx.jpom.model.data.UserModel;
 import cn.keepbx.jpom.model.log.UserOperateLogV1;
+import cn.keepbx.jpom.service.build.BuildService;
 import cn.keepbx.jpom.service.manage.ProjectInfoService;
+import cn.keepbx.jpom.service.monitor.MonitorService;
 import cn.keepbx.jpom.service.node.OutGivingServer;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -39,6 +43,10 @@ public class ProjectManageControl extends BaseServerController {
     private ProjectInfoService projectInfoService;
     @Resource
     private OutGivingServer outGivingServer;
+    @Resource
+    private MonitorService monitorService;
+    @Resource
+    private BuildService buildService;
 
     /**
      * 展示项目页面
@@ -102,7 +110,7 @@ public class ProjectManageControl extends BaseServerController {
     @ResponseBody
     @ProjectPermission(optType = UserOperateLogV1.OptType.DelProject)
     @UrlPermission(value = Role.NodeManage, optType = UserOperateLogV1.OptType.DelProject)
-    public String deleteProject(String id) throws IOException {
+    public String deleteProject(@ValidatorItem(value = ValidatorRule.NOT_BLANK) String id) throws IOException {
         // 检查节点分发
         List<OutGivingModel> outGivingModels = outGivingServer.list();
         if (outGivingModels != null) {
@@ -113,6 +121,14 @@ public class ProjectManageControl extends BaseServerController {
                 }
             }
         }
-        return NodeForward.request(getNode(), getRequest(), NodeUrl.Manage_DeleteProject).toString();
+        //
+        if (monitorService.checkProject(id)) {
+            return JsonMessage.getString(405, "当前项目存在监控项，不能直接删除");
+        }
+        NodeModel node = getNode();
+        if (buildService.checkNodeProjectId(node.getId(), id)) {
+            return JsonMessage.getString(405, "当前项目存在构建项，不能直接删除");
+        }
+        return NodeForward.request(node, getRequest(), NodeUrl.Manage_DeleteProject).toString();
     }
 }

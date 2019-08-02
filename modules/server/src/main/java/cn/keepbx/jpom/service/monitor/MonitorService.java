@@ -10,6 +10,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -118,5 +119,49 @@ public class MonitorService extends BaseOperService<MonitorModel> {
             monitorModel.setAlarm(alarm);
             updateItem(monitorModel);
         }
+    }
+
+    /**
+     * 判断是否存在对应节点数据
+     *
+     * @param nodeId 节点id
+     * @return true 存在
+     */
+    public boolean checkNode(String nodeId) {
+        List<MonitorModel> list = list();
+        if (list == null || list.isEmpty()) {
+            return false;
+        }
+        for (MonitorModel monitorModel : list) {
+            List<MonitorModel.NodeProject> projects = monitorModel.getProjects();
+            if (projects != null) {
+                for (MonitorModel.NodeProject project : projects) {
+                    if (nodeId.equals(project.getNode())) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+
+    public boolean checkProject(String projectId) {
+        List<MonitorModel> list = list();
+        if (list == null || list.isEmpty()) {
+            return false;
+        }
+        for (MonitorModel monitorModel : list) {
+            List<MonitorModel.NodeProject> projects = monitorModel.getProjects();
+            if (projects != null) {
+                for (MonitorModel.NodeProject project : projects) {
+                    List<String> projects1 = project.getProjects();
+                    if (projects1 != null && projects1.contains(projectId)) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
     }
 }
