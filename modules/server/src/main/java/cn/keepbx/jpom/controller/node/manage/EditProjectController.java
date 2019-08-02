@@ -2,6 +2,7 @@ package cn.keepbx.jpom.controller.node.manage;
 
 import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.JsonMessage;
+import cn.jiangzeyin.common.validator.ValidatorItem;
 import cn.keepbx.jpom.common.BaseServerController;
 import cn.keepbx.jpom.common.forward.NodeForward;
 import cn.keepbx.jpom.common.forward.NodeUrl;
@@ -40,15 +41,21 @@ public class EditProjectController extends BaseServerController {
     @Resource
     private WhitelistDirectoryService whitelistDirectoryService;
 
+    @RequestMapping(value = "getProjectData.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @ResponseBody
+    public String getProjectData(@ValidatorItem String id) {
+        JSONObject projectInfo = projectInfoService.getItem(getNode(), id);
+        return JsonMessage.getString(200, "", projectInfo);
+    }
+
     /**
      * 修改项目页面
      *
      * @param id 项目Id
      * @return json
-     * @throws IOException IO
      */
     @RequestMapping(value = "editProject", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
-    public String editProject(String id) throws IOException {
+    public String editProject(String id) {
         JSONObject projectInfo = projectInfoService.getItem(getNode(), id);
 
         // 白名单

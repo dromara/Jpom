@@ -1,5 +1,7 @@
 package cn.keepbx.jpom.common.forward;
 
+import cn.hutool.core.net.URLEncoder;
+import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.servlet.ServletUtil;
 import cn.hutool.http.*;
@@ -262,7 +264,7 @@ public class NodeForward {
             throw new JpomRuntimeException(nodeModel.getName() + "节点未启用");
         }
         if (userModel != null) {
-            httpRequest.header(ConfigBean.JPOM_SERVER_USER_NAME, UserModel.getOptUserName(userModel));
+            httpRequest.header(ConfigBean.JPOM_SERVER_USER_NAME, URLEncoder.DEFAULT.encode(UserModel.getOptUserName(userModel), CharsetUtil.CHARSET_UTF_8));
             httpRequest.header(ConfigBean.JPOM_SERVER_SYSTEM_USER_ROLE, userModel.getUserRole(nodeModel).name());
         }
         httpRequest.header(ConfigBean.JPOM_AGENT_AUTHORIZE, nodeModel.getAuthorize(true));

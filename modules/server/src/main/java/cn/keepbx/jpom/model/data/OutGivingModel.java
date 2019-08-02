@@ -98,8 +98,13 @@ public class OutGivingModel extends BaseModel {
         if (outGivingNodeProjectList == null || outGivingNodeProjectList.isEmpty()) {
             return null;
         }
-        OutGivingNodeProject outGivingNodeProject = outGivingNodeProjectList.get(0);
-        return outGivingNodeProject.getProjectData(true);
+        for (OutGivingNodeProject outGivingNodeProject : outGivingNodeProjectList) {
+            JSONObject projectData = outGivingNodeProject.getProjectData(true);
+            if (projectData != null) {
+                return projectData;
+            }
+        }
+        return null;
     }
 
     /**

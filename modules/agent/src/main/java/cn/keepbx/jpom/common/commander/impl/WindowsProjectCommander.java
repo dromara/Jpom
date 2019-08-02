@@ -32,7 +32,7 @@ public class WindowsProjectCommander extends AbstractProjectCommander {
         String args = projectInfoModel.getArgs();
         return String.format("javaw %s %s " +
                         "%s  %s  %s >> %s &",
-                jvm, JvmUtil.getJpomPidTag(tag, projectInfoModel.getAbsoluteLib()),
+                jvm, JvmUtil.getJpomPidTag(tag, projectInfoModel.allLib()),
                 classPath, mainClass, args, projectInfoModel.getAbsoluteLog());
     }
 
@@ -44,7 +44,7 @@ public class WindowsProjectCommander extends AbstractProjectCommander {
         int pid = parsePid(result);
         if (pid > 0) {
             String cmd = String.format("taskkill /F /PID %s", pid);
-            CommandUtil.asyncExeLocalCommand(FileUtil.file(projectInfoModel.getLib()), cmd);
+            CommandUtil.asyncExeLocalCommand(FileUtil.file(projectInfoModel.allLib()), cmd);
             loopCheckRun(projectInfoModel.getId(), false);
             result = status(tag);
         }

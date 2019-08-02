@@ -43,7 +43,7 @@ public class ProjectFileControl extends BaseAgentController {
         if (pim == null) {
             return JsonMessage.getString(500, "查询失败：项目不存在");
         }
-        String lib = pim.getLib();
+        String lib = pim.allLib();
         File fileDir;
         if (!StrUtil.isEmptyOrUndefined(path)) {
             fileDir = FileUtil.file(lib, path);
@@ -74,9 +74,9 @@ public class ProjectFileControl extends BaseAgentController {
         String levelName = getParameter("levelName");
         File lib;
         if (StrUtil.isEmpty(levelName)) {
-            lib = new File(pim.getLib());
+            lib = new File(pim.allLib());
         } else {
-            lib = FileUtil.file(pim.getLib(), levelName);
+            lib = FileUtil.file(pim.allLib(), levelName);
         }
 
         if ("unzip".equals(type)) {
@@ -126,7 +126,7 @@ public class ProjectFileControl extends BaseAgentController {
         ProjectInfoModel pim = getProjectInfoModel();
         if ("clear".equalsIgnoreCase(type)) {
             // 清空文件
-            File file = new File(pim.getLib());
+            File file = new File(pim.allLib());
             if (FileUtil.clean(file)) {
                 return JsonMessage.getString(200, "清除成功");
             }
@@ -142,9 +142,9 @@ public class ProjectFileControl extends BaseAgentController {
             }
             File file;
             if (StrUtil.isEmpty(levelName)) {
-                file = FileUtil.file(pim.getLib(), fileName);
+                file = FileUtil.file(pim.allLib(), fileName);
             } else {
-                file = FileUtil.file(pim.getLib(), levelName, fileName);
+                file = FileUtil.file(pim.allLib(), levelName, fileName);
             }
             if (file.exists()) {
                 if (FileUtil.del(file)) {
@@ -167,9 +167,9 @@ public class ProjectFileControl extends BaseAgentController {
             ProjectInfoModel pim = projectInfoService.getItem(id);
             File file;
             if (StrUtil.isEmpty(levelName)) {
-                file = FileUtil.file(pim.getLib(), filename);
+                file = FileUtil.file(pim.allLib(), filename);
             } else {
-                file = FileUtil.file(pim.getLib(), levelName, filename);
+                file = FileUtil.file(pim.allLib(), levelName, filename);
             }
             if (file.isDirectory()) {
                 return "暂不支持下载文件夹";

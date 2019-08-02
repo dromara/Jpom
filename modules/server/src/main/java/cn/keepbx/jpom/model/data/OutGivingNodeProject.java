@@ -77,7 +77,7 @@ public class OutGivingNodeProject extends BaseJsonModel {
      * @param get 防止自动读取
      * @return json
      */
-    public JSONObject getProjectData(boolean get) {
+    JSONObject getProjectData(boolean get) {
         if (projectInfo != null) {
             return projectInfo;
         }

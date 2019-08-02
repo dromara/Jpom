@@ -1,30 +1,7 @@
 <!DOCTYPE html>
-<html>
+<html xmlns:th="http://www.w3.org/1999/xhtml">
 
-<head>
-    #parse("./common/head.vm")
-    <title>项目管理系统</title>
-    <style>
-        .layui-form-label {
-            width: 100px;
-        }
-
-        body {
-            padding: 10px 10px 0px 10px;
-        }
-
-        .layui-container {
-            width: 80% !important;
-        }
-
-        .div-user {
-            display: none;
-        }
-
-        .layui-input-block {
-            margin-left: 135px;
-        }
-    </style>
+<head th:replace="common/head::head">
 </head>
 
 <body>
@@ -38,44 +15,44 @@
 
 <script type="text/html" id="bar_monitor">
     <a href="javascript:;" class="layui-btn  layui-btn-sm layui-btn-normal" lay-event="update">编辑</a>
-        #if($user.isSystemUser())
-        <a href="javascript:;" class="layui-btn  layui-btn-sm layui-btn-danger" lay-event="delete">删除</a>
-        #end
+
+    <a href="javascript:;" th:if="${session.user.isSystemUser()}" class="layui-btn  layui-btn-sm layui-btn-danger"
+       lay-event="delete">删除</a>
 </script>
 <script type="text/html" id="monitor_status">
-    <input type="checkbox" monitorId="{{ d.id }}" typeS="status" name="status" {{# if(d.status){ }} checked {{# } }}
+    <input type="checkbox" monitorId="{{ d.id }}" typeS="status" name="status" {{# if(d.status){ }}checked{{# } }}
            lay-skin="switch" lay-text="是|否" lay-filter="monitor_status">
 </script>
 <script type="text/html" id="monitor_restart">
     <input type="checkbox" monitorId="{{ d.id }}" typeS="restart" name="autoRestart"
-           {{# if(d.autoRestart){ }}
-           checked
-           {{# } }}
+           {{# if(d.autoRestart){ }}checked{{# } }}
            lay-skin="switch" lay-text="是|否" lay-filter="monitor_restart">
 </script>
 <script type="text/html" id="monitor_alarm">
-    <input type="checkbox" disabled name="alarm" {{# if(d.alarm){ }} checked {{# } }} lay-skin="switch"
+    <input type="checkbox" disabled name="alarm" {{# if(d.alarm){ }}checked{{# } }} lay-skin="switch"
            lay-text="报警中|未报警">
 </script>
 <script type="text/javascript">
+    var col = [
+        {field: 'name', title: '名称'},
+        {field: 'status', templet: "#monitor_status", title: '开启状态'},
+        {field: 'autoRestart', templet: "#monitor_restart", title: '自动重启监控'},
+        {field: 'alarm', templet: "#monitor_alarm", title: '报警状态'},
+        {field: 'parent', title: '创建人'},
+        {
+            field: 'modifyTime', title: '修改时间', templet: function (d) {
+                return formateTime(d.modifyTime);
+            }
+        },
+        {field: 'op', title: '操作', align: 'center', toolbar: '#bar_monitor', fixed: 'right'}
+    ];
+
     function loadSuccess() {
         tableRender({
             id: 'tab_monitor',
             elem: '#tab_monitor',
             url: './getMonitorList',
-            cols: [[
-                {field: 'name', title: '名称'},
-                {field: 'status', templet: "#monitor_status", title: '开启状态'},
-                {field: 'autoRestart', templet: "#monitor_restart", title: '自动重启监控'},
-                {field: 'alarm', templet: "#monitor_alarm", title: '报警状态'},
-                {field: 'parent', title: '创建人'},
-                {
-                    field: 'modifyTime', title: '修改时间', templet: function (d) {
-                        return formateTime(d.modifyTime);
-                    }
-                },
-                {field: 'op', title: '操作', align: 'center', toolbar: '#bar_monitor', fixed: 'right'}
-            ]]
+            cols: [col]
         });
 
         // '添加监控'点击事件

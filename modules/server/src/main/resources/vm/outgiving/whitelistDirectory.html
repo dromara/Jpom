@@ -1,19 +1,7 @@
 <!DOCTYPE html>
-<html>
+<html xmlns:th="http://www.w3.org/1999/xhtml">
 
-<head>
-    #parse("./common/head.vm")
-    <title>白名单目录</title>
-    <style>
-        body {
-            padding: 10px;
-        }
-
-        .edit-div {
-            width: 80%;
-            height: 25vh;
-        }
-    </style>
+<head th:replace="common/head::head">
 </head>
 
 <body>
@@ -24,7 +12,7 @@
                 <label class="layui-form-label">白名单路径</label>
                 <div class="layui-input-block auto">
                     <textarea name="data" placeholder="请添加节点分发的项目白名单，回车支持输入多个路径，系统会自动过滤 ../ 路径、不允许输入根路径"
-                              class="layui-textarea auto">$!whiteList</textarea>
+                              class="layui-textarea auto" th:text="${#strings.defaultString(whiteList,'')}"></textarea>
                 </div>
             </div>
         </div>

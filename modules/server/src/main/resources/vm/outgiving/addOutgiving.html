@@ -1,14 +1,7 @@
 <!DOCTYPE html>
-<html>
+<html xmlns:th="http://www.w3.org/1999/xhtml">
 
-<head>
-    #parse("./common/head.vm")
-    <title>证书管理</title>
-    <style>
-        body {
-            padding: 10px;
-        }
-    </style>
+<head th:replace="common/head::head">
 </head>
 
 <body>
@@ -31,9 +24,7 @@
                 <label class="layui-form-label">清空发布</label>
                 <div class="layui-input-block">
                     <input type="checkbox" value="true"
-                        #if($outGivingModel.clearOld)
-                           checked
-                        #end
+                           th:checked="${outGivingModel?.clearOld}"
                            name="clearOld"
                            lay-skin="switch"
                            lay-text="是|否">
@@ -45,10 +36,10 @@
             <div class="layui-input-block">
                 <select name="afterOpt" id="afterOpt" required lay-verify="required">
                     <option value="">请选择分发后的操作</option>
-                    #foreach($item in $afterOpt)
-                        <option value="$item.code"
-                                #if($item.code==$outGivingModel.afterOpt)selected #end>$item.desc</option>
-                    #end
+
+                    <option th:each="item : ${afterOpt}" th:value="${item.code}"
+                            th:selected="${item.code==outGivingModel.afterOpt}" th:text="${item.desc}">
+                    </option>
                 </select>
             </div>
         </div>

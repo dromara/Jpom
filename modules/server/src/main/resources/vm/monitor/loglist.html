@@ -1,14 +1,6 @@
 <!DOCTYPE html>
-<html>
-
-<head>
-    #parse("./common/head.vm")
-    <title>项目管理系统</title>
-    <style>
-        body {
-            padding: 10px;
-        }
-    </style>
+<html xmlns:th="http://www.w3.org/1999/xhtml">
+<head th:replace="common/head::head">
 </head>
 
 <body>
@@ -63,9 +55,8 @@
                     <select name="selectNode" id="selectNode" lay-verify="required" lay-filter="selectNode"
                             lay-search="">
                         <option value="">请选择</option>
-                        #foreach($item in $nodeArray)
-                            <option value="$item.id">$item.name</option>
-                        #end
+
+                        <option th:value="${item.id}" th:each="item : ${nodeArray}" th:text="${item.name}"></option>
                     </select>
                 </div>
             </div>
@@ -83,13 +74,41 @@
         </div>
     </form>
 </script>
-<script type="text/javascript">
+<script type="text/javascript" th:inline="javascript">
     const apiWhere = {};
     var laydate;
-    var notifyType = [];
-        #if($notifyTypeArray)
-        notifyType = $notifyTypeArray;
-        #end
+    var notifyType = [[${notifyTypeArray}]];
+    var col = [
+        {field: 'nodeId', title: '节点Id'},
+        {field: 'projectId', title: '项目Id'},
+        {
+            field: 'status', title: '报警状态', templet: function (d) {
+                return d.status ? '正常' : '异常';
+            }
+        },
+        {
+            field: 'notifyStyle', title: '报警方式', templet: function (d) {
+                var notifyStyle = d.notifyStyle;
+                for (var i = 0; i < notifyType.length; i++) {
+                    if (notifyType[i].code == notifyStyle) {
+                        return notifyType[i].desc;
+                    }
+                }
+                return "未知";
+            }
+        },
+        {
+            field: 'optTime', title: '报警时间', templet: function (d) {
+                return formateTime(d.createTime);
+            }
+        },
+        {
+            field: 'notifyStatus', title: '通知状态', templet: function (d) {
+                return d.notifyStatus ? '成功' : '失败';
+            }
+        },
+        {field: 'op', title: '操作', align: 'center', toolbar: '#bar_projects', fixed: 'right'}
+    ];
 
     function loadSuccess() {
         tableRender({
@@ -99,37 +118,7 @@
             toolbar: '#toolbarDemo',
             page: true,
             where: apiWhere,
-            cols: [[
-                {field: 'nodeId', title: '节点Id'},
-                {field: 'projectId', title: '项目Id'},
-                {
-                    field: 'status', title: '报警状态', templet: function (d) {
-                        return d.status ? '正常' : '异常';
-                    }
-                },
-                {
-                    field: 'notifyStyle', title: '报警方式', templet: function (d) {
-                        var notifyStyle = d.notifyStyle;
-                        for (var i = 0; i < notifyType.length; i++) {
-                            if (notifyType[i].code == notifyStyle) {
-                                return notifyType[i].desc;
-                            }
-                        }
-                        return "未知";
-                    }
-                },
-                {
-                    field: 'optTime', title: '报警时间', templet: function (d) {
-                        return formateTime(d.createTime);
-                    }
-                },
-                {
-                    field: 'notifyStatus', title: '通知状态', templet: function (d) {
-                        return d.notifyStatus ? '成功' : '失败';
-                    }
-                },
-                {field: 'op', title: '操作', align: 'center', toolbar: '#bar_projects', fixed: 'right'}
-            ]],
+            cols: [col],
             parseData: function (data) {
                 return {
                     "code": data.code,

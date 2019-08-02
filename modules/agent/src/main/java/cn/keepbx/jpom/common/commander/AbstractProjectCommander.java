@@ -103,7 +103,7 @@ public abstract class AbstractProjectCommander {
             throw new JpomRuntimeException("没有需要执行的命令");
         }
         // 执行命令
-        CommandUtil.asyncExeLocalCommand(FileUtil.file(projectInfoModel.getLib()), command);
+        CommandUtil.asyncExeLocalCommand(FileUtil.file(projectInfoModel.allLib()), command);
         //
         loopCheckRun(projectInfoModel.getId(), true);
         return status(projectInfoModel.getId());
@@ -176,7 +176,7 @@ public abstract class AbstractProjectCommander {
         if (pid > 0) {
             return "当前程序正常运行中，不能重复启动,PID:" + pid;
         }
-        String lib = projectInfoModel.getLib();
+        String lib = projectInfoModel.allLib();
         File fileLib = new File(lib);
         File[] files = fileLib.listFiles();
         if (files == null || files.length <= 0) {
@@ -184,7 +184,7 @@ public abstract class AbstractProjectCommander {
         }
         //
         if (projectInfoModel.getRunMode() == RunMode.ClassPath) {
-            JarClassLoader jarClassLoader = JarClassLoader.load(FileUtil.file(projectInfoModel.getLib()));
+            JarClassLoader jarClassLoader = JarClassLoader.load(fileLib);
             // 判断主类
             try {
                 jarClassLoader.loadClass(projectInfoModel.getMainClass());

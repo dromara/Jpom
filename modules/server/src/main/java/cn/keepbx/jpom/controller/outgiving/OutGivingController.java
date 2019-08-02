@@ -48,17 +48,6 @@ public class OutGivingController extends BaseServerController {
     public String list() throws IOException {
         List<OutGivingModel> outGivingModels = outGivingServer.list();
         setAttribute("array", outGivingModels);
-        //
-        List<NodeModel> nodeModels = nodeService.listAndProject();
-        JSONObject jsonObject = new JSONObject();
-        nodeModels.forEach(nodeModel -> {
-            JSONObject jsonObject1 = nodeModel.toJson();
-            JSONObject jsonObject2 = JsonFileUtil.arrayToObjById(nodeModel.getProjects());
-            jsonObject1.put("projects", jsonObject2);
-            jsonObject.put(nodeModel.getId(), jsonObject1);
-        });
-        setAttribute("nodeData", jsonObject);
-
         return "outgiving/list";
     }
 

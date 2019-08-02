@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.w3.org/1999/xhtml">
+
+<head th:replace="common/head::head">
+
+</head>
+
+<body>
+<div class="layui-container" th:if="${session.user.isSystemUser()}">
+
+    <form action="" class="layui-form">
+        <div class="layui-form-item">
+            <label class="layui-form-label">服务器</label>
+            <div class="layui-input-block">
+                <input type="text" name="host" placeholder="SMTP服务器域名" required lay-verify="required"
+                       th:value="${item?.host}" class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">端口</label>
+            <div class="layui-input-block">
+                <input type="text" name="port" placeholder="SMTP服务端口"
+                       th:value="${item?.port}" class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">用户名</label>
+            <div class="layui-input-block">
+                <input type="text" name="user" placeholder="用户名" required
+                       lay-verify="required" th:value="${item?.user}"
+                       class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">密码</label>
+            <div class="layui-input-block">
+                <input type="password" name="pass" placeholder="密码" required lay-verify="required"
+                       class="layui-input" th:value="${item?.pass}">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">发送方</label>
+            <div class="layui-input-block">
+                <input type="text" name="from" placeholder="发送方" required lay-verify="required"
+                       class="layui-input" th:value="${item?.from}">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-inline">
+                <label class="layui-form-label">SSL连接</label>
+                <div class="layui-input-block">
+                    <input type="checkbox" value="true"
+                           th:checked="${item?.sslEnable}"
+                           name="sslEnable"
+                           lay-filter="sslEnable"
+                           lay-skin="switch"
+                           lay-text="开启|关闭">
+                </div>
+            </div>
+            <div class="layui-inline" id="socketFactoryPort"
+                 th:style="${item?.sslEnable==true}?'':'display: none;'">
+                <label class="layui-form-label">SSL端口</label>
+                <div class="layui-input-block">
+                    <input type="text" name="socketFactoryPort" placeholder="SSL端口"
+                           th:value="${item?.socketFactoryPort}" class="layui-input">
+                </div>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-input-block">
+                <button class="layui-btn" lay-submit lay-filter="formDemo">立即提交</button>
+            </div>
+        </div>
+    </form>
+</div>
+<h1 th:unless="${session.user.isSystemUser()}">没有管理权限</h1>
+</body>
+<script type="text/javascript">
+    function loadSuccess() {
+        form.on('submit(formDemo)', function (data) {
+            loadingAjax({
+                url: './mailConfig_save.json',
+                data: data.field,
+                success: function (data) {
+                    layer.msg(data.msg);
+                    if (200 == data.code) {
+                        setTimeout(function () {
+                            window.location.reload()
+                        }, 2000);
+                    }
+                }
+            });
+            return false;
+        });
+
+        form.on('switch(sslEnable)', function (data) {
+            var check = data.elem.checked;
+            if (check) {
+                $("#socketFactoryPort").show();
+            } else {
+                $("#socketFactoryPort").hide();
+            }
+        });
+    }
+</script>
+
+</html>

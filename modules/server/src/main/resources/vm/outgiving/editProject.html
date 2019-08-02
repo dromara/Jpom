@@ -1,9 +1,8 @@
 <!DOCTYPE html>
-<html>
+<html xmlns:th="http://www.w3.org/1999/xhtml" lang="zh">
 
 <head>
-    #parse("./common/head.vm")
-    <title>项目管理系统</title>
+    <th:block th:include="common/head::head"/>
     <style>
         .div-project {
             width: 100%;
@@ -20,31 +19,31 @@
 <body>
 <div class="layui-container div-project" id="div-project">
     <form action="save_project" method="post" class="layui-form" id="form_project" lay-filter="form_project">
-        #if(!$item)
-            <div class="layui-form-item">
-                <blockquote class="layui-elem-quote layui-quote-nm">
-                    创建分发项目是在不同的节点新创建对应项目（项目路径为节点白名单中的值，然后所有节点都将自动配置对应的白名单）,项目id、项目名称和分发id、分发名称同步
-                </blockquote>
-            </div>
-        #end
+
+        <div class="layui-form-item" th:unless="${item}">
+            <blockquote class="layui-elem-quote layui-quote-nm">
+                创建分发项目是在不同的节点新创建对应项目（项目路径为节点白名单中的值，然后所有节点都将自动配置对应的白名单）,项目id、项目名称和分发id、分发名称同步
+            </blockquote>
+        </div>
+
         <div class="layui-form-item">
             <div class="layui-inline">
                 <label class="layui-form-label"><span class="x-red">*</span>项目ID</label>
                 <div class="layui-input-block">
                     <input type="text" name="id" placeholder="程序运行标志（设置后将不能修改）" required lay-verify="required"
-                           class="layui-input  #if($item)layui-disabled#end" value="#if($item)$!item.id#end"
-                           #if($item)readonly#end>
-                    <input type="hidden" name="reqId" value="$reqId">
-                    <input type="hidden" name="type" value="$type">
+                           th:class="${item}?'layui-input  layui-disabled':'layui-input'" th:value="${item?.id}"
+                           th:readonly="${item}">
+                    <input type="hidden" name="reqId" th:value="${reqId}">
+                    <input type="hidden" name="type" th:value="${type}">
                 </div>
             </div>
             <div class="layui-inline">
                 <label class="layui-form-label"><span class="x-red">*</span>项目名称</label>
                 <div class="layui-input-block">
                     <input type="text" name="name" placeholder="项目名称" required lay-verify="required"
-                           class="layui-input" value="#if($item)#if($item.name)$!item.name#else$!item.id#end#end">
+                           class="layui-input" th:value="${item?.name}">
                     <div class="layui-hide">
-                        <input type="checkbox" name="edit" #if($item)checked#end>
+                        <input type="checkbox" name="edit" th:checked="${item}">
                     </div>
                 </div>
             </div>
@@ -54,17 +53,16 @@
                 <label class="layui-form-label"><span class="x-red">*</span>运行方式</label>
                 <div class="layui-input-block">
                     <select name="runMode" lay-filter="runMode">
-                        #foreach($itemPath in $runModes)
-                            <option value="$itemPath" #if($firstData.runMode==$itemPath)selected#end>$itemPath</option>
-                        #end
+                        <option th:each="itemPath : ${runModes}" th:value="${itemPath}" th:text="${itemPath}">
+                        </option>
                     </select>
                 </div>
             </div>
-            <div class="layui-inline" #if($firstData)style="display: none;"#end id="mainClassDiv">
+            <div class="layui-inline" style="display: none;"
+                 id="mainClassDiv">
                 <label class="layui-form-label">MainClass</label>
                 <div class="layui-input-block">
-                    <input type="text" name="mainClass" placeholder="程序运行的 main 类(jar模式运行可以不填)" class="layui-input"
-                           value="#if($firstData)$!firstData.mainClass#end">
+                    <input type="text" name="mainClass" placeholder="程序运行的 main 类(jar模式运行可以不填)" class="layui-input">
                 </div>
             </div>
         </div>
@@ -72,40 +70,30 @@
             <div class="layui-inline">
                 <label class="layui-form-label"><span class="x-red">*</span>项目路径</label>
                 <div class="layui-input-block">
-                    <select name="whitelistDirectory" required lay-verify="required" lay-filter="projectLib">
-                        #if(!$itemWhitelistDirectory)
+                    <select name="whitelistDirectory" required lay-verify="required" lay-filter="whitelistDirectory">、
+                        <th:block th:unless="${#lists.isEmpty(whitelistDirectory)}">
                             <option value="">请选择白名单</option>
-                        #end
-                        #foreach($itemPath in $whitelistDirectory)
-                            #if($item && $itemWhitelistDirectory.startsWith($itemPath))
-                                <option value="$itemPath" selected>$itemPath</option>
-                                #set($hasetPath=$itemPath)
-                            #else
-                                <option value="$itemPath">$itemPath</option>
-                            #end
-                        #end
-                        #if(!$whitelistDirectory || $whitelistDirectory.size()<=0)
-                            <option value="">请选择白名单</option>
-                        #end
+                            <option th:value="${itemPath}" th:each="itemPath : ${whitelistDirectory}"
+                                    th:text="${itemPath}"></option>
+                        </th:block>
+                        <option value="" th:if="${#lists.isEmpty(whitelistDirectory)}">请配置白名单</option>
                     </select>
                 </div>
             </div>
             <div class="layui-inline">
-                <label class="layui-form-label" title="$!item.log"><span class="x-red">*</span>项目Jar包</label>
+                <label class="layui-form-label"><span class="x-red">*</span>项目Jar包</label>
                 <div class="layui-input-block">
                     <input type="text" name="lib" placeholder="jar存储的文件夹" required lay-verify="required"
-                           class="layui-input" value="#if($firstData)$!firstData.lib#end">
+                           class="layui-input">
                 </div>
             </div>
 
             <div class="layui-form-mid layui-word-aux" style="padding: 0 !important;">
                 <div class="layui-input-block" style="color: red;min-height: 0px;">
                     结果：
-                    <span id="projectStart">#if($hasetPath)$hasetPath#else 请选择#end</span>
-                    <span id="projectEnd" style="margin-left: -4px">#if(!$firstData)请填写#else$!firstData.lib#end</span>
-                    #if($firstData)
-                        <span>&nbsp;&nbsp;日志路径：$!firstData.log</span>
-                    #end
+                    <span id="projectStart">请选择</span>
+                    <span id="projectEnd" style="margin-left: -4px">请填写</span>
+                    <span>日志路径：</span>
                 </div>
             </div>
         </div>
@@ -115,15 +103,12 @@
             <a class="layui-btn layui-btn-sm layui-btn-warm" id="add_selectNode">添加节点项目
             </a>
         </div>
-        #if($user.isServerManager())
-            <div class="layui-form-item" style="padding-left: 20%;">
-                <button class="layui-btn layui-btn-normal" lay-submit lay-filter="submitProject" id="project_submit">提交
-                </button>
-                #if($item)
-                    <a class="layui-btn layui-btn-warm" data-id="$item.id" id="delete_project">删除</a>
-                #end
-            </div>
-        #end
+
+        <div th:if="${session.user.isServerManager()}" class="layui-form-item" style="padding-left: 20%;">
+            <button class="layui-btn layui-btn-normal" lay-submit lay-filter="submitProject" id="project_submit">提交
+            </button>
+            <a th:if="${item}" class="layui-btn layui-btn-warm" data-id="$item.id" id="delete_project">删除</a>
+        </div>
     </form>
 </div>
 
@@ -135,9 +120,9 @@
                 <div class="layui-input-block">
                     <select name="nodeId" required lay-verify="required" lay-filter="selectNode">
                         <option value="">请选择节点</option>
-                        #foreach($i in $nodeModels)
-                            <option value="$i.id" nodeName="$i.name">$i.name</option>
-                        #end
+
+                        <option th:each="i : ${nodeModels}" th:value="${i.id}" th:nodeName="${i.name}"
+                                th:text="${i.name}"></option>
                     </select>
                 </div>
             </div>
@@ -162,12 +147,12 @@
             </div>
 
             <div class="layui-layout-right" style="padding-right: 10%;">
-                #if($user.isServerManager())
-                    <button op="del_node" class="layui-btn layui-btn-sm layui-btn-warm">
-                        <i class="layui-icon">&#xe640;</i>
-                        删除
-                    </button>
-                #end
+
+                <button th:if="${session.user.isServerManager()}" op="del_node"
+                        class="layui-btn layui-btn-sm layui-btn-warm">
+                    <i class="layui-icon">&#xe640;</i>
+                    删除
+                </button>
             </div>
         </div>
         <div class="layui-colla-content  {{# if(!d.edit){  }} layui-show  {{# } }}">
@@ -206,9 +191,58 @@
     </div>
 </script>
 
+<script type="text/javascript" th:inline="javascript"
+        th:each="nodeP,iterStat : ${item.outGivingNodeProjectList}">
+    findFirst = false;
+    asyncFn.push(function () {
+        loadingAjax({
+            url: '../node/manage/getProjectData.json',
+            data: {
+                id: [[${nodeP.projectId}]],
+                nodeId: [[${nodeP.nodeId}]]
+            },
+            success: function (data) {
+                if (200 === data.code) {
+                    var getProjectInfo = data.data;
+                    if (data.data) {
+                        var nodeId = [[${nodeP.nodeId}]];
+                        var selectOption = $('select[name="nodeId"] option[value="' + nodeId + '"]');
+                        getProjectInfo["nodeId"] = nodeId;
+                        getProjectInfo["edit"] = true;
+                        addNode(getProjectInfo, selectOption);
+                        //
+                        if (!findFirst) {
+                            form.val("form_project", {
+                                runMode: getProjectInfo.runMode,
+                                lib: getProjectInfo.lib,
+                                mainClass: getProjectInfo.mainClass,
+                                whitelistDirectory: getProjectInfo.whitelistDirectory
+                            });
+                            $("#projectEnd").text(getProjectInfo.lib);
+                            $("#projectStart").text(getProjectInfo.whitelistDirectory);
+                            if (getProjectInfo.runMode === 'ClassPath') {
+                                $("#mainClassDiv").show();
+                            }
+                            findFirst = true;
+                        }
+                        form.render();
+                    } else {
+                        layer.alert([[${nodeP.nodeId}]] + "节点未拉取到对应项目,不建议此次进行保存操作,以防止数据丢失");
+                    }
+                } else {
+                    layer.alert([[${nodeP.nodeId}]] + "节点未拉取到对应项目,不建议此次进行保存操作,以防止数据丢失:" + data.msg);
+                }
+            },
+            error: function () {
+                layer.alert("节点未拉取到对应项目,不建议此次进行保存操作,以防止数据丢失");
+            }
+        });
+    });
+</script>
 <script type="text/javascript">
 
     var laytpl;
+    var whitelistDirectorySelect;
 
     function loadSuccess() {
         // var tipMsgDiv = ("#tipMsgDiv");
@@ -233,17 +267,15 @@
 
         form.on('select(runMode)', function (data) {
             let val = data.value;
-            if (val == "ClassPath") {
+            if (val === "ClassPath") {
                 $("#mainClassDiv").show();
             } else {
                 $("#mainClassDiv").hide();
             }
         });
-        #if($item.runMode=='ClassPath')
-            $("#mainClassDiv").show();
-        #end
 
-        form.on('select(projectLib)', function (data) {
+
+        form.on('select(whitelistDirectory)', function (data) {
             let val = data.value;
             if (val === "") {
                 val = "请选择";
@@ -268,34 +300,7 @@
                 checngeLib();
             }
         });
-        var whitelistDirectorySelect = $("select[name='whitelistDirectory']");
-
-        function checngeLib() {
-            var wVal = whitelistDirectorySelect.val();
-            if (wVal == "") {
-                layer.msg("请选择白名单");
-                return;
-            }
-            var lib = wVal + $("#projectEnd").text();
-            $("div[nodeDiv]").each(function () {
-                var nodeId = $(this).attr("nodeDiv");
-                silentAjax({
-                    url: '../node/manage/judge_lib.json',
-                    data: {
-                        id: "#if($item)$!item.id#end",
-                        nodeId: nodeId,
-                        newLib: lib
-                    },
-                    success: function (data) {
-                        if (200 == data.code) {
-                            $("#tipMsgDiv_" + nodeId).hide();
-                        } else {
-                            $("#tipMsg_" + nodeId).text(data.msg).parent().show();
-                        }
-                    }
-                });
-            });
-        }
+        whitelistDirectorySelect = $("select[name='whitelistDirectory']");
 
         $("#add_selectNode").click(function () {
             layer.open({
@@ -347,43 +352,6 @@
             });
         });
 
-    ## 回显节点信息
-        var selectOption, viewData;
-        #foreach($nodeP in $item.outGivingNodeProjectList)
-
-            #if($nodeP.getProjectData(true))
-                selectOption = $("select[name='nodeId'] option[value='$nodeP.nodeId']");
-                viewData = $nodeP.getProjectData(true);
-                viewData["nodeId"] = "$nodeP.nodeId";
-                viewData["edit"] = true;
-                addNode(viewData, selectOption)
-            #else
-                layer.alert("$nodeP.nodeId 节点未拉取到对应项目,不建议此次进行保存操作,以防止数据丢失");
-            #end
-
-        #end
-        form.render();
-
-        function addNode(data, selectOption) {
-            var html = document.getElementById("nodePar");
-            var nodeName = selectOption.attr("nodeName");
-            if (!data.nodeName) {
-                data.nodeName = nodeName;
-            }
-            laytpl(html.innerHTML).render(data, function (newHtml) {
-                $("#nodeListDiv").append(newHtml).show();
-                layer.closeAll("page");
-                // 改变已经选过的选项
-                selectOption.attr("disabled", true);
-                selectOption.attr("selected", false)
-                form.render();
-                element.render();
-                // 检查按钮状态
-                if ($("div[nodeDiv]").length >= $("select[name='nodeId']").find("option").length - 1) {
-                    $("#add_selectNode").hide();
-                }
-            });
-        }
 
         $("#delete_project").click(function () {
             var id = $(this).attr("data-id");
@@ -407,6 +375,34 @@
         });
     }
 
+    function checngeLib() {
+        var wVal = whitelistDirectorySelect.val();
+        console.log(wVal);
+        if (wVal == "") {
+            layer.msg("请选择白名单");
+            return;
+        }
+        var lib = wVal + $("#projectEnd").text();
+        $("div[nodeDiv]").each(function () {
+            var nodeId = $(this).attr("nodeDiv");
+            silentAjax({
+                url: '../node/manage/judge_lib.json',
+                data: {
+                    id: "#if($item)$!item.id#end",
+                    nodeId: nodeId,
+                    newLib: lib
+                },
+                success: function (data) {
+                    if (200 == data.code) {
+                        $("#tipMsgDiv_" + nodeId).hide();
+                    } else {
+                        $("#tipMsg_" + nodeId).text(data.msg).parent().show();
+                    }
+                }
+            });
+        });
+    }
+
     function closeTab() {
         try {
             top.frames["outgiving"].location.reload();
@@ -420,5 +416,25 @@
         }, 1500);
     }
 
+    function addNode(data, selectOption) {
+        var html = document.getElementById("nodePar");
+        var nodeName = selectOption.attr("nodeName");
+        if (!data.nodeName) {
+            data.nodeName = nodeName;
+        }
+        laytpl(html.innerHTML).render(data, function (newHtml) {
+            $("#nodeListDiv").append(newHtml).show();
+            layer.closeAll("page");
+            // 改变已经选过的选项
+            selectOption.attr("disabled", true);
+            selectOption.attr("selected", false)
+            form.render();
+            element.render();
+            // 检查按钮状态
+            if ($("div[nodeDiv]").length >= $("select[name='nodeId']").find("option").length - 1) {
+                $("#add_selectNode").hide();
+            }
+        });
+    }
 </script>
 </html>

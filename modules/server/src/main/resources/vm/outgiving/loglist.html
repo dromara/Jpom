@@ -1,14 +1,7 @@
 <!DOCTYPE html>
-<html>
+<html xmlns:th="http://www.w3.org/1999/xhtml">
 
-<head>
-    #parse("./common/head.vm")
-    <title>项目管理系统</title>
-    <style>
-        body {
-            padding: 10px;
-        }
-    </style>
+<head th:replace="common/head::head">
 </head>
 
 <body>
@@ -43,9 +36,7 @@
                     <select name="nodeId" id="nodeId" lay-verify="required" lay-filter="nodeId"
                             lay-search="">
                         <option value="">请选择</option>
-                        #foreach($item in $nodeArray)
-                            <option value="$item.id">$item.name</option>
-                        #end
+                        <option th:value="${item.id}" th:each="item : ${nodeArray}" th:text="${item.name}"></option>
                     </select>
                 </div>
             </div>
@@ -55,9 +46,8 @@
                     <select name="outGivingId" id="outGivingId" lay-verify="required" lay-filter="outGivingId"
                             lay-search="">
                         <option value="">请选择分发项</option>
-                        #foreach($item in $outGivingModels)
-                            <option value="$item.id">$item.name</option>
-                        #end
+                        <option th:value="${item.id}" th:each="item : ${outGivingModels}"
+                                th:text="${item.name}"></option>
                     </select>
                 </div>
             </div>
@@ -67,9 +57,7 @@
                     <select name="status" id="status" lay-verify="required" lay-filter="status"
                             lay-search="">
                         <option value="">请选择状态</option>
-                        #foreach($item in $status)
-                            <option value="$item.code">$item.desc</option>
-                        #end
+                        <option th:value="${item.code}" th:each="item : ${status}" th:text="${item.desc}"></option>
                     </select>
                 </div>
             </div>
@@ -77,19 +65,51 @@
         </div>
     </form>
 </script>
-<script type="text/javascript">
+<script type="text/javascript" th:inline="javascript">
     const apiWhere = {};
     var laydate;
 
+    var statusArray = [[${status}]];
+    var outGivingModels = [[${outGivingModels}]];
+    var col = [
+        {
+            field: 'outGivingId', title: '分发项', templet: function (d) {
+                for (var i = 0; i < outGivingModels.length; i++) {
+                    if (outGivingModels[i].id == d.outGivingId) {
+                        return outGivingModels[i].name;
+                    }
+                }
+                return "未知";
+            }
+        },
+        {field: 'nodeId', title: '节点Id'},
+        {field: 'projectId', title: '项目Id'},
+        {
+            field: 'startTime', title: '开始时间', templet: function (d) {
+                return formateTime(d.startTime);
+            }
+        },
+        {
+            field: 'endTime', title: '结束时间', templet: function (d) {
+                if (!d.endTime) {
+                    return "-";
+                }
+                return formateTime(d.endTime);
+            }
+        },
+        {
+            field: 'status', title: '状态', templet: function (d) {
+                for (var i = 0; i < statusArray.length; i++) {
+                    if (statusArray[i].code == d.status) {
+                        return statusArray[i].desc;
+                    }
+                }
+                return "未知";
+            }
+        },
+        {field: 'op', title: '操作', align: 'center', toolbar: '#bar_projects', fixed: 'right'}
+    ];
 
-    var statusArray = [];
-        #if($status)
-        statusArray = $status;
-        #end
-    var outGivingModels = [];
-        #if($outGivingModels)
-        outGivingModels =$outGivingModels;
-        #end
     function loadSuccess() {
         tableRender({
             id: 'tab_loglist',
@@ -98,44 +118,7 @@
             toolbar: '#toolbarDemo',
             page: true,
             where: apiWhere,
-            cols: [[
-                {
-                    field: 'outGivingId', title: '分发项', templet: function (d) {
-                        for (var i = 0; i < outGivingModels.length; i++) {
-                            if (outGivingModels[i].id == d.outGivingId) {
-                                return outGivingModels[i].name;
-                            }
-                        }
-                        return "未知";
-                    }
-                },
-                {field: 'nodeId', title: '节点Id'},
-                {field: 'projectId', title: '项目Id'},
-                {
-                    field: 'startTime', title: '开始时间', templet: function (d) {
-                        return formateTime(d.startTime);
-                    }
-                },
-                {
-                    field: 'endTime', title: '结束时间', templet: function (d) {
-                        if (!d.endTime) {
-                            return "-";
-                        }
-                        return formateTime(d.endTime);
-                    }
-                },
-                {
-                    field: 'status', title: '状态', templet: function (d) {
-                        for (var i = 0; i < statusArray.length; i++) {
-                            if (statusArray[i].code == d.status) {
-                                return statusArray[i].desc;
-                            }
-                        }
-                        return "未知";
-                    }
-                },
-                {field: 'op', title: '操作', align: 'center', toolbar: '#bar_projects', fixed: 'right'}
-            ]],
+            cols: [col],
             parseData: function (data) {
                 return {
                     "code": data.code,

@@ -1,9 +1,7 @@
 <!DOCTYPE html>
-<html>
-
+<html xmlns:th="http://www.w3.org/1999/xhtml" lang="zh">
 <head>
-    #parse("./common/head.vm")
-    <title>项目管理系统</title>
+    <th:block th:include="common/head::head"/>
     <style>
         .div-project {
             width: 100%;
@@ -21,13 +19,12 @@
 <div class="layui-container div-project" id="div-project">
 
     <form action="save" method="post" class="layui-form" lay-filter="form_outgiving">
-        #if(!$item)
-            <div class="layui-form-item">
-                <blockquote class="layui-elem-quote layui-quote-nm">
-                    添加关联分发项目是将已经存在的项目进行关联
-                </blockquote>
-            </div>
-        #end
+
+        <div class="layui-form-item" th:unless="${item}">
+            <blockquote class="layui-elem-quote layui-quote-nm">
+                添加关联分发项目是将已经存在的项目进行关联
+            </blockquote>
+        </div>
         <div class="layui-form-item">
             <div class="layui-inline">
                 <label class="layui-form-label"><span class="x-red">*</span>分发ID</label>
@@ -54,15 +51,14 @@
             </a>
         </div>
 
-        #if(!$item  || $user.isProject($node.id,$!item.id))
-            <div class="layui-form-item" style="padding-left: 20%;padding-top: 20px;">
-                <button class="layui-btn layui-btn-normal" lay-submit lay-filter="form_outgiving">提交
-                </button>
-                #if($item)
-                    <a class="layui-btn layui-btn-warm" data-id="$item.id" id="delete_outgiving">删除</a>
-                #end
-            </div>
-        #end
+
+        <div th:if="${session.user.isServerManager()}" class="layui-form-item"
+             style="padding-left: 20%;padding-top: 20px;">
+            <button class="layui-btn layui-btn-normal" lay-submit lay-filter="form_outgiving">提交
+            </button>
+
+            <a th:if="${item}" class="layui-btn layui-btn-warm" data-id="$item.id" id="delete_outgiving">删除</a>
+        </div>
     </form>
 </div>
 <div id="selectNode" style="display: none;padding-top: 20px;">
@@ -74,7 +70,7 @@
                     <select name="nodeId" required lay-verify="required" lay-filter="selectNode">
                         <option value="">请选择节点</option>
                         #foreach($i in $nodeModels)
-                            <option value="$i.id" nodeName="$i.name">$i.name</option>
+                        <option value="$i.id" nodeName="$i.name">$i.name</option>
                         #end
                     </select>
                 </div>
@@ -91,32 +87,32 @@
     </form>
 </div>
 </body>
-    #foreach($i in $nodeModels)
-    <script type="text/html" id="node_project_$i.id">
-        <div class="layui-form-item" nodeDiv="$i.id">
-            <div class="layui-inline">
-                <label class="layui-form-label"><span class="x-red">*</span>{{ d.name }}</label>
-                <div class="layui-input-block">
-                    <select name="node_$i.id" required lay-verify="required">
-                        <option value="">选择选择项目</option>
-                        #foreach($ii in $i.groupProjects)
-                            <optgroup label="$ii.group">
-                                #foreach($iProject in $ii.projects)
-                                    <option value="$iProject.id">$iProject.name</option>
-                                #end
-                            </optgroup>
+#foreach($i in $nodeModels)
+<script type="text/html" id="node_project_$i.id">
+    <div class="layui-form-item" nodeDiv="$i.id">
+        <div class="layui-inline">
+            <label class="layui-form-label"><span class="x-red">*</span>{{ d.name }}</label>
+            <div class="layui-input-block">
+                <select name="node_$i.id" required lay-verify="required">
+                    <option value="">选择选择项目</option>
+                    #foreach($ii in $i.groupProjects)
+                    <optgroup label="$ii.group">
+                        #foreach($iProject in $ii.projects)
+                        <option value="$iProject.id">$iProject.name</option>
                         #end
-                    </select>
-                </div>
-            </div>
-            <div class="layui-inline">
-                <a class="layui-btn layui-btn-sm  layui-btn-danger" del="node">
-                    <i class="layui-icon">&#xe640;</i>
-                </a>
+                    </optgroup>
+                    #end
+                </select>
             </div>
         </div>
-    </script>
-    #end
+        <div class="layui-inline">
+            <a class="layui-btn layui-btn-sm  layui-btn-danger" del="node">
+                <i class="layui-icon">&#xe640;</i>
+            </a>
+        </div>
+    </div>
+</script>
+#end
 
 <script type="text/javascript">
     var laytpl;
@@ -140,10 +136,10 @@
         });
         var selectOption;
         #foreach($nodeP in $item.outGivingNodeProjectList)
-            selectOption = $("select[name='nodeId'] option[value='$nodeP.nodeId']");
-            addNode("$nodeP.nodeId", selectOption)
-            // 选中
-            $("select[name='node_$nodeP.nodeId']").val("$nodeP.projectId");
+        selectOption = $("select[name='nodeId'] option[value='$nodeP.nodeId']");
+        addNode("$nodeP.nodeId", selectOption)
+        // 选中
+        $("select[name='node_$nodeP.nodeId']").val("$nodeP.projectId");
         #end
         form.render();
 
@@ -229,7 +225,10 @@
         });
 
     }
-    ## 刷新列表
+
+    #
+    # 刷新列表
+
     function autoClose() {
         setTimeout(function () {
             var index = parent.layer.getFrameIndex(window.name);

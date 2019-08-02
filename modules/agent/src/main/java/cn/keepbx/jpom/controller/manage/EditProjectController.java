@@ -117,10 +117,11 @@ public class EditProjectController extends BaseAgentController {
 
 
     @RequestMapping(value = "saveProject", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public String saveProject(ProjectInfoModel projectInfo, String whitelistDirectory) {
+    public String saveProject(ProjectInfoModel projectInfo) {
         // 预检查数据
         String strPreviewData = getParameter("previewData");
         boolean previewData = Convert.toBool(strPreviewData, false);
+        String whitelistDirectory = projectInfo.getWhitelistDirectory();
         //
         String error = checkParameter(projectInfo, whitelistDirectory, previewData);
         if (error != null) {
@@ -128,25 +129,22 @@ public class EditProjectController extends BaseAgentController {
         }
         String id = projectInfo.getId();
         //
-        String lib = projectInfo.getLib();
-        lib = String.format("%s/%s", whitelistDirectory, lib);
-        lib = FileUtil.normalize(lib);
+        String allLib = projectInfo.allLib();
         // 重复lib
         List<ProjectInfoModel> list = projectInfoService.list();
         if (list != null) {
             for (ProjectInfoModel projectInfoModel : list) {
-                if (!projectInfoModel.getId().equals(id) && projectInfoModel.getLib().equals(lib)) {
+                if (!projectInfoModel.getId().equals(id) && projectInfoModel.allLib().equals(allLib)) {
                     return JsonMessage.getString(401, "当前项目Jar路径已经被【" + projectInfoModel.getName() + "】占用,请检查");
                 }
             }
         }
-        projectInfo.setLib(lib);
-        File checkFile = new File(projectInfo.getLib());
+        File checkFile = new File(allLib);
         if (checkFile.exists() && checkFile.isFile()) {
             return JsonMessage.getString(401, "项目Jar路径是一个已经存在的文件");
         }
         // 自动生成log文件
-        String log = new File(lib).getParent();
+        String log = new File(allLib).getParent();
         log = String.format("%s/%s.log", log, id);
         projectInfo.setLog(FileUtil.normalize(log));
         checkFile = new File(projectInfo.getLog());
@@ -159,7 +157,7 @@ public class EditProjectController extends BaseAgentController {
             return JsonMessage.getString(401, "WebHooks 地址不合法");
         }
         // 判断空格
-        if (id.contains(StrUtil.SPACE) || lib.contains(StrUtil.SPACE)) {
+        if (id.contains(StrUtil.SPACE) || allLib.contains(StrUtil.SPACE)) {
             return JsonMessage.getString(401, "项目Id、项目Jar不能包含空格");
         }
         return save(projectInfo, previewData);
@@ -212,6 +210,7 @@ public class EditProjectController extends BaseAgentController {
                 exits.setJvm(projectInfo.getJvm());
                 exits.setArgs(projectInfo.getArgs());
                 exits.setRunMode(projectInfo.getRunMode());
+                exits.setWhitelistDirectory(projectInfo.getWhitelistDirectory());
                 exits.setToken(projectInfo.getToken());
                 //
                 moveTo(exits, projectInfo);
@@ -235,10 +234,10 @@ public class EditProjectController extends BaseAgentController {
 
     private void moveTo(ProjectInfoModel old, ProjectInfoModel news) {
         // 移动目录
-        if (!old.getLib().equals(news.getLib())) {
-            File oldLib = new File(old.getLib());
+        if (!old.allLib().equals(news.allLib())) {
+            File oldLib = new File(old.allLib());
             if (oldLib.exists()) {
-                File newsLib = new File(news.getLib());
+                File newsLib = new File(news.allLib());
                 FileUtil.move(oldLib, newsLib, true);
             }
         }
@@ -269,8 +268,8 @@ public class EditProjectController extends BaseAgentController {
         ProjectInfoModel projectInfoModel1 = null;
         for (ProjectInfoModel model : projectInfoModelList) {
             if (!model.getId().equals(projectInfoModel.getId())) {
-                File file1 = new File(model.getLib());
-                File file2 = new File(projectInfoModel.getLib());
+                File file1 = new File(model.allLib());
+                File file2 = new File(projectInfoModel.allLib());
                 if (FileUtil.pathEquals(file1, file2)) {
                     projectInfoModel1 = model;
                     break;
@@ -283,7 +282,7 @@ public class EditProjectController extends BaseAgentController {
             }
         }
         if (projectInfoModel1 != null) {
-            return new JsonMessage(401, "项目Jar路径和【" + projectInfoModel1.getName() + "】项目冲突:" + projectInfoModel1.getLib());
+            return new JsonMessage(401, "项目Jar路径和【" + projectInfoModel1.getName() + "】项目冲突:" + projectInfoModel1.allLib());
         }
         return null;
     }
@@ -344,7 +343,7 @@ public class EditProjectController extends BaseAgentController {
             }
         } else {
             // 已经存在的项目
-            File oldLib = new File(exits.getLib());
+            File oldLib = new File(exits.allLib());
             Path newPath = file.toPath();
             Path oldPath = oldLib.toPath();
             if (newPath.equals(oldPath)) {

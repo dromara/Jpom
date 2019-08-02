@@ -27,7 +27,7 @@ public class LinuxProjectCommander extends AbstractProjectCommander {
         }
         return String.format("nohup java %s %s" +
                         " %s  %s  %s >> %s 2>&1 &",
-                projectInfoModel.getJvm(), JvmUtil.getJpomPidTag(projectInfoModel.getId(), projectInfoModel.getAbsoluteLib()),
+                projectInfoModel.getJvm(), JvmUtil.getJpomPidTag(projectInfoModel.getId(), projectInfoModel.allLib()),
                 path,
                 projectInfoModel.getMainClass(),
                 projectInfoModel.getArgs(),
@@ -40,11 +40,11 @@ public class LinuxProjectCommander extends AbstractProjectCommander {
         int pid = parsePid(result);
         if (pid > 0) {
             String cmd = String.format("kill  %s", pid);
-            CommandUtil.asyncExeLocalCommand(FileUtil.file(projectInfoModel.getLib()), cmd);
+            CommandUtil.asyncExeLocalCommand(FileUtil.file(projectInfoModel.allLib()), cmd);
             if (loopCheckRun(projectInfoModel.getId(), false)) {
                 // 强制杀进程
                 cmd = String.format("kill -9 %s", pid);
-                CommandUtil.asyncExeLocalCommand(FileUtil.file(projectInfoModel.getLib()), cmd);
+                CommandUtil.asyncExeLocalCommand(FileUtil.file(projectInfoModel.allLib()), cmd);
             }
             String tag = projectInfoModel.getId();
             result = status(tag);

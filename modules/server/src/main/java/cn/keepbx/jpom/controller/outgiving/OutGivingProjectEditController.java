@@ -59,7 +59,7 @@ public class OutGivingProjectEditController extends BaseServerController {
         // 权限
         UserModel userModel = getUser();
         if (userModel.isServerManager()) {
-            List<NodeModel> nodeModels = nodeService.listAndProject();
+            List<NodeModel> nodeModels = nodeService.list();
             setAttribute("nodeModels", nodeModels);
             //
             String reqId = nodeService.cacheNodeList(nodeModels);
@@ -69,20 +69,6 @@ public class OutGivingProjectEditController extends BaseServerController {
         // 白名单
         List<String> jsonArray = serverWhitelistServer.getOutGiving();
         setAttribute("whitelistDirectory", jsonArray);
-        //
-        if (outGivingModel != null && jsonArray != null) {
-            JSONObject projectInfo = outGivingModel.getFirstNodeProject(true);
-            if (projectInfo != null) {
-                for (Object obj : jsonArray) {
-                    String itemWhitelistDirectory = AgentWhitelist.getItemWhitelistDirectory(projectInfo, obj.toString());
-                    if (itemWhitelistDirectory != null) {
-                        setAttribute("itemWhitelistDirectory", itemWhitelistDirectory);
-                        break;
-                    }
-                }
-                setAttribute("firstData", projectInfo);
-            }
-        }
         return "outgiving/editProject";
     }
 

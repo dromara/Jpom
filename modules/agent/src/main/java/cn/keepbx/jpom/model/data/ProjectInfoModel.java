@@ -1,11 +1,15 @@
 package cn.keepbx.jpom.model.data;
 
+import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.system.SystemUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
+import cn.jiangzeyin.common.spring.SpringUtil;
 import cn.keepbx.jpom.common.commander.AbstractProjectCommander;
 import cn.keepbx.jpom.model.BaseModel;
 import cn.keepbx.jpom.model.RunMode;
+import cn.keepbx.jpom.service.WhitelistDirectoryService;
+import cn.keepbx.jpom.system.JpomRuntimeException;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -23,6 +27,10 @@ public class ProjectInfoModel extends BaseModel {
     private String group;
     private String mainClass;
     private String lib;
+    /**
+     * 白名单目录
+     */
+    private String whitelistDirectory;
     private String log;
     /**
      * jvm 参数
@@ -172,17 +180,48 @@ public class ProjectInfoModel extends BaseModel {
         return mainClass;
     }
 
+    private void repairWhitelist() {
+        if (StrUtil.isEmpty(whitelistDirectory) && StrUtil.isEmpty(lib)) {
+            throw new JpomRuntimeException("当前项目lib数据异常");
+        }
+        if (StrUtil.isNotEmpty(whitelistDirectory)) {
+            return;
+        }
+        WhitelistDirectoryService whitelistDirectoryService = SpringUtil.getBean(WhitelistDirectoryService.class);
+        List<String> project = whitelistDirectoryService.getWhitelist().getProject();
+        for (String path : project) {
+            if (lib.startsWith(path)) {
+                String itemWhitelistDirectory = lib.substring(0, path.length());
+                lib = lib.substring(path.length());
+                setWhitelistDirectory(itemWhitelistDirectory);
+                setLib(lib);
+            }
+        }
+    }
+
+    public String getWhitelistDirectory() {
+        this.repairWhitelist();
+        if (StrUtil.isEmpty(whitelistDirectory)) {
+            throw new JpomRuntimeException("修护白名单数据异常");
+        }
+        return whitelistDirectory;
+    }
+
+    public void setWhitelistDirectory(String whitelistDirectory) {
+        this.whitelistDirectory = whitelistDirectory;
+    }
+
     public void setMainClass(String mainClass) {
         this.mainClass = mainClass;
     }
 
     public String getLib() {
+        this.repairWhitelist();
         return lib;
     }
 
-    public String getAbsoluteLib() {
-        File file = new File(getLib());
-        return file.getAbsolutePath();
+    public String allLib() {
+        return FileUtil.file(getWhitelistDirectory(), getLib()).getAbsolutePath();
     }
 
     /**
@@ -192,7 +231,7 @@ public class ProjectInfoModel extends BaseModel {
      * @return list
      */
     public static List<File> listJars(ProjectInfoModel projectInfoModel) {
-        File fileLib = new File(projectInfoModel.getLib());
+        File fileLib = new File(projectInfoModel.allLib());
         File[] files = fileLib.listFiles();
         List<File> files1 = new ArrayList<>();
         if (files != null) {

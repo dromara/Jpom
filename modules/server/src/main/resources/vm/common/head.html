@@ -70,7 +70,11 @@
             }
             //
             layui.each(asyncFn, function () {
-                this && this();
+                try {
+                    this && this();
+                } catch (e) {
+                    console.error(e);
+                }
             });
 
             var jsCommonContext = document.getElementById("jsCommonContext").innerHTML;
@@ -199,6 +203,7 @@
                 error: function () {
                     layer.close(index);
                     layer.msg("网络异常,请稍后再试");
+                    error && error();
                 },
                 complete: function () {
                     data.complete && data.complete();
