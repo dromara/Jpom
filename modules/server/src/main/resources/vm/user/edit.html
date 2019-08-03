@@ -56,7 +56,7 @@
                                     <label class="layui-form-label" style="margin-top: 8px;">节点管理员</label>
                                     <div class="layui-input-block">
                                         <input type="checkbox" value="true" th:nodeId="${item.id}"
-                                               th:checked="${userItem?.nodeRole[item.id]?.manage}"
+                                               th:checked="${userItem!=null && userItem?.nodeRole[item.id]?.manage}"
                                                th:name="${item.id}+'_manage'" lay-filter="manage" lay-skin="switch"
                                                lay-text="是|否">
                                     </div>
@@ -72,7 +72,7 @@
                                             <label class="layui-form-label">上传文件</label>
                                             <div class="layui-input-block">
                                                 <input type="checkbox" value="true"
-                                                       th:checked="${userItem?.nodeRole[item.id]?.uploadFile}"
+                                                       th:checked="${userItem!=null && userItem?.nodeRole[item.id]?.uploadFile}"
                                                        th:name="${item.id}+'_uploadFile'" lay-skin="switch"
                                                        lay-text="是|否">
                                             </div>
@@ -81,7 +81,7 @@
                                             <label class="layui-form-label">删除文件</label>
                                             <div class="layui-input-block">
                                                 <input type="checkbox" value="true"
-                                                       th:checked="${userItem?.nodeRole[item.id]?.deleteFile}"
+                                                       th:checked="${userItem!=null &&  userItem?.nodeRole[item.id]?.deleteFile}"
                                                        th:name="${item.id}+'_deleteFile'" lay-skin="switch"
                                                        lay-text="是|否">
                                             </div>
@@ -101,7 +101,7 @@
                                             <label class="layui-form-label">上传文件</label>
                                             <div class="layui-input-block">
                                                 <input type="checkbox" value="true"
-                                                       th:checked="${userItem?.nodeTomcatRole[item.id]?.uploadFile}"
+                                                       th:checked="${userItem!=null && userItem?.nodeTomcatRole[item.id]?.uploadFile}"
                                                        th:name="${item.id}+'_uploadTomcatFile'" lay-skin="switch"
                                                        lay-text="是|否">
                                             </div>
@@ -110,7 +110,7 @@
                                             <label class="layui-form-label">删除文件</label>
                                             <div class="layui-input-block">
                                                 <input type="checkbox" value="true"
-                                                       th:checked="${userItem?.nodeTomcatRole[item.id]?.deleteFile}"
+                                                       th:checked="${userItem!=null && userItem?.nodeTomcatRole[item.id]?.deleteFile}"
                                                        th:name="${item.id}+'_deleteTomcatFile'" lay-skin="switch"
                                                        lay-text="是|否">
                                             </div>
@@ -157,7 +157,6 @@
     var nodeModels = [[${nodeModels}]];
 
     function loadSuccess() {
-        var treeNodes = [];
         layui.use(['tree'], function () {
             tree = layui.tree;
             loadNode();
@@ -194,7 +193,7 @@
                     var projects = group.projects;
                     group.spread = true;
                     group.nodeId = nodeId;
-                    group.id = nodeId;
+                    group.id = 'group_' + nodeId;
                     group.children = projects;
                     if (projects && projects.length > 0) {
                         //项目

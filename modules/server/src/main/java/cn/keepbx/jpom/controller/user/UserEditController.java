@@ -36,6 +36,7 @@ public class UserEditController extends BaseServerController {
         setAttribute("nodeTomcat", nodeTomcat);
 
         UserModel item = userService.getItem(id);
+        item.setPassword(null);
         setAttribute("userItem", item);
         return "user/edit";
     }
