@@ -1,30 +1,6 @@
 <!DOCTYPE html>
-<html>
-
-<head>
-    #parse("./common/head.vm")
-    <title>项目管理系统</title>
-    <style>
-        .layui-form-label {
-            width: 100px;
-        }
-
-        body {
-            padding: 10px 10px 0px 10px;
-        }
-
-        .layui-container {
-            width: 80% !important;
-        }
-
-        .div-user {
-            display: none;
-        }
-
-        .layui-input-block {
-            margin-left: 135px;
-        }
-    </style>
+<html xmlns:th="http://www.w3.org/1999/xhtml">
+<head th:replace="common/head::head">
 </head>
 
 <body>
@@ -39,35 +15,37 @@
 <script type="text/html" id="bar_projects">
     <a href="javascript:;" class="layui-btn  layui-btn-sm layui-btn-normal" lay-event="update">编辑</a>
     <a href="javascript:;" class="layui-btn  layui-btn-sm layui-btn-danger" lay-event="delete">删除</a>
-        #if($user.isSystemUser())
+
+    <th:block th:if="${session.user.isSystemUser()}">
         {{# if(d.pwdErrorCount>0){ }}
         <a href="javascript:;" class="layui-btn  layui-btn-sm layui-btn-warm" lay-event="unlock">解锁</a>
         {{# } }}
-        #end
+    </th:block>
 </script>
 <script type="text/html" id="manager_status">
     <div title="登录失败次数：{{d.pwdErrorCount}}">
-        <input type="checkbox" id="" disabled name="status" {{# if(d.serverManager){ }} checked
-               {{# } }}
+        <input type="checkbox" id="" disabled name="status" {{# if(d.serverManager){ }}checked{{# } }}
                lay-skin="switch"
                lay-text="是|否">
     </div>
 </script>
-    #parse("./common/sha1.vm")
+<div th:replace="common/sha1::sha1"></div>
 <script type="text/javascript">
+    var col = [
+        {field: 'id', title: 'id'},
+        {field: 'name', title: '昵称'},
+        {field: 'serverManager', templet: "#manager_status", title: '是否是管理员'},
+        {field: 'parent', title: '创建人'},
+        {field: 'op', title: '操作', align: 'center', toolbar: '#bar_projects', fixed: 'right'}
+    ];
+
     function loadSuccess() {
 
         tableRender({
             id: 'tab_user',
             elem: '#tab_user',
             url: './getUserList',
-            cols: [[
-                {field: 'id', title: 'id'},
-                {field: 'name', title: '昵称'},
-                {field: 'serverManager', templet: "#manager_status", title: '是否是管理员'},
-                {field: 'parent', title: '创建人'},
-                {field: 'op', title: '操作', align: 'center', toolbar: '#bar_projects', fixed: 'right'}
-            ]]
+            cols: [col]
         });
 
         // 编辑用户信息
@@ -121,27 +99,6 @@
             }
         });
 
-        function unlockUser(data) {
-            #if($user.isSystemUser())
-                layer.confirm('确定解锁用户 ' + data.id + '？', {
-                    title: '系统提示'
-                }, function (index) {
-                    layer.close(index);
-                    loadingAjax({
-                        url: './unlock',
-                        data: {
-                            id: data.id
-                        },
-                        success: function (data) {
-                            layer.msg(data.msg);
-                            if (200 == data.code) {
-                                table.reload('tab_user', {});
-                            }
-                        }
-                    });
-                });
-            #end
-        }
 
         // 删除用户
         function deleteApplication(data) {
@@ -165,4 +122,27 @@
         }
     }
 </script>
+
+<script type="text/javascript" th:if="${session.user.isSystemUser()}">
+    function unlockUser(data) {
+        layer.confirm('确定解锁用户 ' + data.id + '？', {
+            title: '系统提示'
+        }, function (index) {
+            layer.close(index);
+            loadingAjax({
+                url: './unlock',
+                data: {
+                    id: data.id
+                },
+                success: function (data) {
+                    layer.msg(data.msg);
+                    if (200 == data.code) {
+                        table.reload('tab_user', {});
+                    }
+                }
+            });
+        });
+    }
+</script>
+
 </html>

@@ -1,47 +1,31 @@
 <!DOCTYPE html>
-<html>
-
-<head>
-    #parse("./common/head.vm")
-    <link href="$!jpomProxyPath/static/ztree/zTreeStyle/zTreeStyle.css" rel="stylesheet">
-    <title>项目管理系统</title>
-    <style>
-
-
-        body {
-            padding: 10px;
-        }
-
-        .div-layui-form-switch {
-            margin-top: 0px !important;
-        }
-
-    </style>
+<html xmlns:th="http://www.w3.org/1999/xhtml">
+<head th:replace="common/head::head">
 </head>
 
 <body>
 <div class="layui-container">
-    <form action="#if($userItem)./updateUser#else./addUser#end" class="layui-form" id="form_user">
+    <form th:action="${userItem!=null}?'./updateUser':'./addUser'" class="layui-form" id="form_user">
         <div class="layui-form-item">
 
             <label class="layui-form-label">登录名</label>
-            <div class="layui-input-block" #if($userItem) title="不能修改登录名"#end>
+            <div class="layui-input-block" th:title="${userItem!=null}?'不能修改登录名':''">
                 <input type="text" name="id" placeholder="登录名,创建后不能修改" required lay-verify="required"
-                       class="layui-input" value="$!userItem.id" #if($userItem)readonly#end>
-                <input name="reqId" type="hidden" value="$reqId">
+                       class="layui-input" th:value="${userItem?.id}" th:readonly="${userItem}">
+                <input name="reqId" type="hidden" th:value="${reqId}">
             </div>
         </div>
         <div class="layui-form-item" id="pwd-input-div">
             <label class="layui-form-label">密码</label>
             <div class="layui-input-block">
-                <input type="password" name="password" placeholder="#if(!$userItem)请输入登录密码#else 如果不修改则不用填写#end"
+                <input type="password" name="password" th:placeholder="${userItem==null}?'请输入登录密码':'如果不修改则不用填写'"
                        class="layui-input">
             </div>
         </div>
         <div class="layui-form-item">
             <label class="layui-form-label">昵称</label>
             <div class="layui-input-block">
-                <input type="text" name="name" placeholder="昵称" value="$!userItem.name" required
+                <input type="text" name="name" placeholder="昵称" th:value="${userItem?.name}" required
                        lay-verify="required" class="layui-input">
             </div>
         </div>
@@ -50,9 +34,7 @@
                 <label class="layui-form-label">服务管理员</label>
                 <div class="layui-input-block">
                     <input type="checkbox" value="true"
-                        #if($userItem.serverManager)
-                           checked
-                        #end
+                           th:checked="${userItem?.serverManager}"
                            name="serverManager"
                            lay-skin="switch"
                            lay-text="是|否">
@@ -64,134 +46,115 @@
             <div class="layui-input-block">
 
                 <div class="layui-collapse">
-                    #if($nodeModels && $nodeModels.size()>0)
-                        #foreach($item in $nodeModels)
-                        <div class="layui-colla-item">
-                            <div class="layui-colla-title">
-                                <div title="$item.id">
-                                    $item.name
-                                </div>
-                                <div class="layui-layout-right" onclick="stope()" style="padding-right: 10%;">
-                                    <div class="layui-inline">
-                                        <label class="layui-form-label" style="margin-top: 8px;">节点管理员</label>
-                                        <div class="layui-input-block">
-                                            #set($nowName=$item.id+"_manage")
-                                            <input type="checkbox" value="true" nodeId="$item.id"
-                                                #if($userItem.nodeRole[$item.id].manage)
-                                                   checked
-                                                #end
-                                                   name="$nowName" lay-filter="manage" lay-skin="switch"
-                                                   lay-text="是|否">
-                                        </div>
-                                    </div>
-                                </div>
+
+                    <div class="layui-colla-item" th:each="item : ${nodeModels}">
+                        <div class="layui-colla-title">
+                            <div th:title="${item.id}" th:text="${item.name}">
                             </div>
-                            <div class="layui-colla-content layui-show">
-                                <div class="layui-form-item" id="projectsDiv_$item.id">
-                                    <label class="layui-form-label" title="能删除项目，启动停止项目">管理项目</label>
-                                    <div class="layui-inline">
-                                        <div id="projectOpt_$!item.id" style="display: none;">
-                                            <div class="layui-inline">
-                                                <label class="layui-form-label">上传文件</label>
-                                                <div class="layui-input-block">
-                                                    #set($nowName=$item.id+"_uploadFile")
-                                                    <input type="checkbox" value="true"
-                                                        #if($userItem.nodeRole[$item.id].uploadFile)
-                                                           checked
-                                                        #end
-                                                           name="$nowName" lay-skin="switch" lay-text="是|否">
-                                                </div>
-                                            </div>
-                                            <div class="layui-inline">
-                                                <label class="layui-form-label">删除文件</label>
-                                                <div class="layui-input-block">
-                                                    #set($nowName=$item.id+"_deleteFile")
-                                                    <input type="checkbox" value="true"
-                                                        #if($userItem.nodeRole[$item.id].deleteFile)
-                                                           checked
-                                                        #end
-                                                           name="$nowName" lay-skin="switch" lay-text="是|否">
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div>
-                                            <div id="tree_$item.id"></div>
-                                        </div>
+                            <div class="layui-layout-right" onclick="stope()" style="padding-right: 10%;">
+                                <div class="layui-inline">
+                                    <label class="layui-form-label" style="margin-top: 8px;">节点管理员</label>
+                                    <div class="layui-input-block">
+                                        <input type="checkbox" value="true" th:nodeId="${item.id}"
+                                               th:checked="${userItem?.nodeRole[item.id]?.manage}"
+                                               th:name="${item.id}+'_manage'" lay-filter="manage" lay-skin="switch"
+                                               lay-text="是|否">
                                     </div>
                                 </div>
-                                #if($nodeTomcat[$item.id]&&$nodeTomcat[$item.id].size()>0)
-                                    <div class="layui-form-item">
-                                        <label class="layui-form-label">管理Tomcat</label>
-                                        <div class="layui-inline">
-                                            <div id="tomcatOpt_$item.id">
-                                                <div class="layui-inline">
-                                                    <label class="layui-form-label">上传文件</label>
-                                                    <div class="layui-input-block">
-                                                        #set($nowName=$item.id+"_uploadTomcatFile")
-                                                        <input type="checkbox" value="true"
-                                                            #if($userItem.nodeTomcatRole[$item.id].uploadFile)
-                                                               checked
-                                                            #end
-                                                               name="$nowName" lay-skin="switch" lay-text="是|否">
-                                                    </div>
-                                                </div>
-                                                <div class="layui-inline">
-                                                    <label class="layui-form-label">删除文件</label>
-                                                    <div class="layui-input-block">
-                                                        #set($nowName=$item.id+"_deleteTomcatFile")
-                                                        <input type="checkbox" value="true"
-                                                            #if($userItem.nodeTomcatRole[$item.id].deleteFile)
-                                                               checked
-                                                            #end
-                                                               name="$nowName" lay-skin="switch" lay-text="是|否">
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div>
-                                                #foreach($pItem in $nodeTomcat[$item.id])
-                                                    #set($nowName="p_"+$item.id+"_"+$pItem.id)
-                                                    <input type="checkbox" lay-filter="manageTomcat"
-                                                           p="p_$item.id"
-                                                           name="$nowName"
-                                                           #if($userItem.isTomcat($item.id,$pItem.id))checked#end
-                                                           project="$pItem.id"
-                                                           value="$pItem.id"
-                                                           node_id="$item.id"
-                                                           title="$pItem.name">
-                                                #end
-                                            </div>
-                                        </div>
-                                    </div>
-                                #end
-                            </div>
-                        #end
-                    #else
-                        #set($errorNode=true)
-                        <div class="layui-colla-item">
-                            <div class="layui-colla-title">
-                                没有可用节点
                             </div>
                         </div>
-                    #end
-                </div>
+                        <div class="layui-colla-content layui-show">
+                            <div class="layui-form-item" th:id="'projectsDiv_'+${item.id}">
+                                <label class="layui-form-label" title="能删除项目，启动停止项目">管理项目</label>
+                                <div class="layui-inline">
+                                    <div th:id="'projectOpt_'+${item.id}" style="display: none;">
+                                        <div class="layui-inline">
+                                            <label class="layui-form-label">上传文件</label>
+                                            <div class="layui-input-block">
+                                                <input type="checkbox" value="true"
+                                                       th:checked="${userItem?.nodeRole[item.id]?.uploadFile}"
+                                                       th:name="${item.id}+'_uploadFile'" lay-skin="switch"
+                                                       lay-text="是|否">
+                                            </div>
+                                        </div>
+                                        <div class="layui-inline">
+                                            <label class="layui-form-label">删除文件</label>
+                                            <div class="layui-input-block">
+                                                <input type="checkbox" value="true"
+                                                       th:checked="${userItem?.nodeRole[item.id]?.deleteFile}"
+                                                       th:name="${item.id}+'_deleteFile'" lay-skin="switch"
+                                                       lay-text="是|否">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <div th:id="'tree_'+${item.id}"></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="layui-form-item" th:unless="${#lists.isEmpty(nodeTomcat[item.id])}">
+                                <label class="layui-form-label">管理Tomcat</label>
+                                <div class="layui-inline">
+                                    <div th:id="'tomcatOpt_'+${item.id}">
+                                        <div class="layui-inline">
+                                            <label class="layui-form-label">上传文件</label>
+                                            <div class="layui-input-block">
+                                                <input type="checkbox" value="true"
+                                                       th:checked="${userItem?.nodeTomcatRole[item.id]?.uploadFile}"
+                                                       th:name="${item.id}+'_uploadTomcatFile'" lay-skin="switch"
+                                                       lay-text="是|否">
+                                            </div>
+                                        </div>
+                                        <div class="layui-inline">
+                                            <label class="layui-form-label">删除文件</label>
+                                            <div class="layui-input-block">
+                                                <input type="checkbox" value="true"
+                                                       th:checked="${userItem?.nodeTomcatRole[item.id]?.deleteFile}"
+                                                       th:name="${item.id}+'_deleteTomcatFile'" lay-skin="switch"
+                                                       lay-text="是|否">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <input th:each="pItem : ${nodeTomcat[item.id]}" type="checkbox"
+                                               lay-filter="manageTomcat"
+                                               th:p="'p_'+${item.id}"
+                                               th:name="'p_'+${item.id}+'_'+${pItem.id}"
+                                               th:checked="${userItem?.isTomcat(item.id,pItem.id)}"
+                                               th:project="${pItem.id}"
+                                               th:value="${pItem.id}"
+                                               th:node_id="${item.id}"
+                                               th:title="${pItem.name}">
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                    <div class="layui-colla-item" th:if="${#lists.isEmpty(nodeModels)}">
+                        <div class="layui-colla-title">
+                            没有可用节点
+                        </div>
+                    </div>
                 </div>
             </div>
-            #if(!$errorNode)
-                <div class="layui-form-item" style="padding-left: 20%;margin-top: 20px;">
-                    <button class="layui-btn layui-btn-normal" lay-submit lay-filter="submitUser" id="submitUser">提交
-                    </button>
-                </div>
-            #end
+
+        </div>
+        <div class="layui-form-item" style="padding-left: 20%;margin-top: 20px;">
+            <button class="layui-btn layui-btn-normal" lay-submit lay-filter="submitUser" id="submitUser">提交
+            </button>
+        </div>
     </form>
 </div>
 </body>
-    #parse("./common/sha1.vm")
-<script type="text/javascript">
+<div th:replace="common/sha1::sha1"></div>
+<script type="text/javascript" th:inline="javascript">
     function stope(e) {
         layui.stope(e);
     }
 
-    var nodeModels =#if($nodeModels)$nodeModels#else[]#end;
+    var nodeModels = [[${nodeModels}]];
 
     function loadSuccess() {
         var treeNodes = [];
@@ -276,7 +239,10 @@
 
             //渲染选中节点
             function loadProjects() {
-                var userItem =  #if($userItem)$userItem#else{}#end;
+                var userItem = [[${userItem}]];
+                if (!userItem) {
+                    return;
+                }
                 var nodeRole = userItem.nodeRole;
                 for (var key in nodeRole) {
                     var item = nodeRole[key];
