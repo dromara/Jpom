@@ -1,20 +1,14 @@
 <!DOCTYPE html>
-<html>
+<html xmlns:th="http://www.w3.org/1999/xhtml">
 
-<head>
-    #parse("./common/head.vm")
-    <title>项目管理系统</title>
-    <style>
-        body {
-            padding: 10px;
-        }
-    </style>
+<head th:replace="common/head::head">
 </head>
 <body>
 <div class="layui-row">
-    #if($user.isManage($node.id))
-        <button onclick="editProject('');" class="layui-btn layui-btn-sm">新增项目</button>
-    #end
+
+    <button th:if="${session.user.isManage(node.id)}" onclick="editProject('');" class="layui-btn layui-btn-sm">新增项目
+    </button>
+
     <button onclick="reloadTable();" class="layui-btn layui-btn-sm">刷新表格</button>
 </div>
 <table class="layui-table" id="tab_project" lay-filter="tab_project" style="margin: 0;"></table>
@@ -31,8 +25,7 @@
 </script>
 <script type="text/html" id="status_templ">
     <div title="请到控制台中管理项目">
-        <input type="checkbox" id="" disabled name="status" {{# if(d.status){ }}
-               checked {{# } }}
+        <input type="checkbox" id="" disabled name="status" {{# if(d.status){ }}checked{{# } }}
                lay-skin="switch"
                lay-text="运行中|未运行">
     </div>
@@ -51,9 +44,7 @@
                     <select name="selectGroup" id="selectGroup" lay-verify="required" lay-filter="groupName"
                             lay-search="">
                         <option value="">请选择</option>
-                        #foreach($item in $groups)
-                            <option value="$item">$item</option>
-                        #end
+                        <option th:each="item : ${groups}" th:value="${item}" th:text="${item}"></option>
                     </select>
                 </div>
             </div>
@@ -99,7 +90,7 @@
             url: './getProjectInfo',
             toolbar: '#toolbarDemo',
             where: apiWhere,
-            cols: [[{
+            cols: [{
                 field: 'name', title: '项目名称', width: '15%', sort: true, templet: function (d) {
                     var title = '分组:' + d.group + '  项目Id:' + d.id;
                     title += '  lib状态:' + (d.runLibDesc || "") + " / " + (d.useLibDesc || "");
@@ -122,8 +113,7 @@
                 sort: true,
                 width: '8%'
             },
-                {field: 'op', title: '操作', toolbar: '#bar_projects'}
-            ]],
+                {field: 'op', title: '操作', toolbar: '#bar_projects'}],
             done: function (data) {
                 var projects = data.data;
                 var ids = [];

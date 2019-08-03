@@ -1,9 +1,8 @@
 <!DOCTYPE html>
-<html>
+<html xmlns:th="http://www.w3.org/1999/xhtml">
 
 <head>
-    #parse("./common/head.vm")
-    <title>项目管理系统</title>
+    <th:block th:include="common/head::head"></th:block>
     <style>
         body {
             position: absolute;
@@ -59,48 +58,33 @@
 
 <body>
 <div class="console">
-    #if($manager)
-        <div class="layui-row" id="optDiv">
-            <!-- layui-elem-quote -->
-            <a href="javascript:;" class="btn-op layui-btn  layui-btn-sm" op="start">启动</a>
-            <a href="javascript:;" class="btn-op layui-btn  layui-btn-sm layui-btn-warm" op="restart">重启</a>
-            <a href="javascript:;" class="btn-op layui-btn  layui-btn-sm layui-btn-danger" op="stop">停止</a>
-            #if($logSize)
-                <div class="layui-btn-group">
-                    #if($logSize.logSize)
-                        <button id="export" class="layui-btn layui-btn-sm">导出日志</button>
-                        <button id="resetLog" class="layui-btn layui-btn-sm">重置日志(<span
-                                id="logSize">$logSize.logSize</span>)
-                        </button>
-                    #end
-                    #if($logSize.logBack)
-                        <button id="logBack" class="layui-btn layui-btn-sm">备份列表</button>
-                    #end
-                </div>
-            #end
-            <div class="status">
-                <div class="status-div"></div>
-                <span></span>
-            </div>
+    <div th:if="${session.user.isManage(node.id)}" class="layui-row" id="optDiv">
+        <!-- layui-elem-quote -->
+        <a href="javascript:;" class="btn-op layui-btn  layui-btn-sm" op="start">执行</a>
+        <!--         <a href="javascript:;" class="btn-op layui-btn  layui-btn-sm layui-btn-warm" op="restart">重启</a>-->
+        <a href="javascript:;" style="display: none;" class="btn-op layui-btn  layui-btn-sm layui-btn-danger"
+           op="stop">停止</a>
+
+        <div class="status">
+            <div class="status-div"></div>
+            <span></span>
         </div>
-    #end
+    </div>
     <div class="terminal"></div>
 </div>
 </body>
 <script type="text/javascript">
-    var loopLog = false;
-    var loopLogTime;
     var heart;
-    var nowStatus = false;
+    var scriptId = getQueryString("id");
 
     function loadSuccess() {
         const showLogDom = $('.console .terminal');
+
         if ('WebSocket' in window) {
-            var url = getSocketHost() + "/console?userId=$user.getUserMd5Key()&projectId=$!projectInfo.id&nodeId=$node.id";
+            var url = getSocketHost() + "/script_run?userId=[[${session.user.getUserMd5Key()}]]&scriptId=" + scriptId + "&nodeId=[[${node.id}]]&type=script";
             const ws = new WebSocket(url);
             ws.onopen = function () {
                 showLogDom.append('WebSocket连接成功！<br/>');
-                setMsg('status');
             };
 
             ws.onmessage = function (data) {
@@ -120,26 +104,16 @@
                     showLogDom.append(json_data.msg + (json_data.data || "") + '<br/>');
                     var op = json_data.op;
                     switch (op) {
-                        case 'status':
                         case 'start':
-                        case 'restart':
                             if (200 === json_data.code) {
                                 $('.status .status-div').removeClass('status-stop').addClass('status-run');
                                 $('.status span').text('运行中');
                                 setOpBtn(false);
-                                // 运行后需要实时加载日志
-                                setMsg("showlog");
                             } else {
                                 $('.status .status-div').removeClass('status-run').addClass('status-stop');
                                 $('.status span').text(json_data.msg);
                                 setOpBtn(true);
-                                #if($logSize.logSize)
-                                    if (op == 'status') {
-                                        setMsg("showlog");
-                                    }
-                                #end
                             }
-                            refreshProjectData();
                             break;
                         case 'stop':
                             if (200 === json_data.code) {
@@ -149,24 +123,20 @@
                             } else {
                                 $('.status span').text(json_data.msg);
                             }
-                            refreshProjectData();
-                            break;
-                        case  'showlog':
                             break;
                         default:
                             break;
                     }
                 } else {
-                    showLogDom.append(data.data + '<br/>');
-                    if (!loopLog && nowStatus) {
-                        loopLogAjax();
+                    if (data.data) {
+                        showLogDom.append(data.data + '<br/>');
                     }
                     clearInterval(heart);
                     // 创建心跳，防止掉线
                     heart = setInterval(function () {
                         const data = {
                             op: "heart",
-                            projectId: "$!projectInfo.id"
+                            scriptId: scriptId
                         };
                         ws.send(JSON.stringify(data));
                     }, 5000);
@@ -175,9 +145,7 @@
             };
 
             ws.onclose = function (er) {
-                console.log(er)
                 showLogDom.append('WebSocket连接已关闭！<br/>');
-                clearInterval(loopLogTime);
                 clearInterval(heart);
                 $("#optDiv").hide();
                 layer.alert("控制台已离线")
@@ -186,28 +154,31 @@
             $('.btn-op').on('click', function () {
                 var op = $(this).attr('op');
                 if (op == "stop") {
-                    layer.confirm("确定要停止该项目吗？", {
+                    layer.confirm("确定要停止该脚本吗？", {
                         title: '系统提示'
                     }, function (index) {
                         layer.close(index);
                         setMsg(op);
                     });
-                } else if (op == "restart") {
-                    layer.confirm("确定要重启该项目吗？", {
-                        title: '系统提示'
-                    }, function (index) {
+                } else if (op == "start") {
+                    //
+                    layer.prompt({
+                        title: '请输入执行参数',
+                        formType: 2,
+                        value: ' '
+                    }, function (text, index) {
                         layer.close(index);
-                        setMsg(op);
+                        showLogDom.html("");
+                        setMsg(op, text);
                     });
-                } else {
-                    setMsg(op);
                 }
             });
 
-            function setMsg(opt) {
+            function setMsg(opt, args) {
                 const data = {
                     op: opt,
-                    projectId: "$!projectInfo.id"
+                    scriptId: scriptId,
+                    args: args
                 };
                 layer.load(1, {
                     shade: [0.3, '#fff']
@@ -224,12 +195,10 @@
         function setOpBtn(flag) {
             if (flag) {
                 $('.btn-op[op="start"]').show();
-                $('.btn-op[op="stop"],.btn-op[op="restart"]').hide();
-                nowStatus = false;
+                $('.btn-op[op="stop"]').hide();
             } else {
                 $('.btn-op[op="start"]').hide();
-                $('.btn-op[op="stop"],.btn-op[op="restart"]').show();
-                nowStatus = true;
+                $('.btn-op[op="stop"]').show();
             }
         }
 
@@ -243,86 +212,7 @@
             showLogDom.scrollTop(h);
         }
 
-        function loopLogAjax() {
-            if (loopLog) {
-                return;
-            }
-            #if($logSize)
-                loopLog = true;
-                loopLogTime = setInterval(function () {
-                    reqLogSize();
-                }, 30000)
-            #end
-        }
-
-        function reqLogSize() {
-            silentAjax({
-                url: './log/logSize',
-                data: {
-                    id: "$!projectInfo.id"
-                },
-                success: function (data) {
-                    if (200 == data.code) {
-                        if (data.data && data.data.logSize) {
-                            $("#logSize").html(data.data.logSize);
-                            $("#resetLog").show();
-                        }
-                    } else {
-                        $("#resetLog").hide();
-                        layer.msg(data.msg);
-                    }
-                }
-            });
-        }
-
-        $('#export').on('click', function () {
-            var url = "./log/export.html?id=$!projectInfo.id";
-            url = appendNodeId(url);
-            layer.msg('加载中..', {
-                icon: 16,
-                shade: 0.2,
-                time: 3000
-            });
-            location.href = url;
-        });
-
-        $("#resetLog").on('click', function () {
-            layer.confirm("确定要清空当前控制台日志文件内容吗？", {
-                title: '系统提示'
-            }, function (index) {
-                layer.close(index);
-                loadingAjax({
-                    url: './log/resetLog',
-                    data: {
-                        id: "$!projectInfo.id"
-                    },
-                    success: function (data) {
-                        layer.msg(data.msg);
-                        if (200 == data.code) {
-                            // reqLogSize();
-                            $("#resetLog").hide();
-                        }
-                    },
-                });
-            });
-        });
-
-        $("#logBack").on('click', function () {
-            layerOpen({
-                type: 2,
-                title: '备份列表',
-                shade: 0.8,
-                area: ['80%', '90%'],
-                content: './log/logBack?id=$!projectInfo.id'
-            });
-        })
     }
-    ## 刷新项目数据
-    function refreshProjectData() {
-        try {
-            top.frames["manageList"].location.reload();
-        } catch (e) {
-        }
-    }
+
 </script>
 </html>

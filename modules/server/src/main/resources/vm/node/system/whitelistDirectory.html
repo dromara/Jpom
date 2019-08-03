@@ -1,14 +1,9 @@
 <!DOCTYPE html>
-<html>
+<html xmlns:th="http://www.w3.org/1999/xhtml">
 
 <head>
-    #parse("./common/head.vm")
-    <title>白名单目录</title>
+    <th:block th:include="common/head::head"></th:block>
     <style>
-        body {
-            padding: 10px;
-        }
-
         .edit-div {
             width: 80%;
             height: 25vh;
@@ -24,7 +19,7 @@
                 <label class="layui-form-label">项目路径</label>
                 <div class="layui-input-block auto">
                     <textarea name="project" placeholder="请输入项目存放路径白名单，回车支持输入多个路径，系统会自动过滤 ../ 路径、不允许输入根路径"
-                              class="layui-textarea auto">$!project</textarea>
+                              class="layui-textarea auto" th:text="${#strings.defaultString(project,'')}"></textarea>
                 </div>
             </div>
         </div>
@@ -33,7 +28,7 @@
                 <label class="layui-form-label">证书路径</label>
                 <div class="layui-input-block auto">
                     <textarea name="certificate" placeholder="请输入证书存放路径白名单，回车支持输入多个路径，系统会自动过滤 ../ 路径、不允许输入根路径"
-                              class="layui-textarea auto">$!certificate</textarea>
+                              class="layui-textarea auto" th:text="${#strings.defaultString(certificate,'')}"></textarea>
                 </div>
             </div>
         </div>
@@ -42,7 +37,7 @@
                 <label class="layui-form-label">nginx目录</label>
                 <div class="layui-input-block auto">
                     <textarea name="nginx" placeholder="请输入nginx存放路径白名单，回车支持输入多个路径，系统会自动过滤 ../ 路径、不允许输入根路径"
-                              class="layui-textarea auto">$!nginx</textarea>
+                              class="layui-textarea auto" th:text="${#strings.defaultString(nginx,'')}"></textarea>
                 </div>
             </div>
         </div>

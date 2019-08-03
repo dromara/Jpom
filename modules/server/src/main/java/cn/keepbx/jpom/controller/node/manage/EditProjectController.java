@@ -7,7 +7,6 @@ import cn.keepbx.jpom.common.BaseServerController;
 import cn.keepbx.jpom.common.forward.NodeForward;
 import cn.keepbx.jpom.common.forward.NodeUrl;
 import cn.keepbx.jpom.model.RunMode;
-import cn.keepbx.jpom.model.data.AgentWhitelist;
 import cn.keepbx.jpom.model.data.NodeModel;
 import cn.keepbx.jpom.model.data.UserModel;
 import cn.keepbx.jpom.model.log.UserOperateLogV1;
@@ -24,7 +23,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.annotation.Resource;
-import java.io.IOException;
 import java.util.List;
 
 /**
@@ -62,15 +60,6 @@ public class EditProjectController extends BaseServerController {
         List<String> jsonArray = whitelistDirectoryService.getProjectDirectory(getNode());
         setAttribute("whitelistDirectory", jsonArray);
 
-        if (projectInfo != null && jsonArray != null) {
-            for (Object obj : jsonArray) {
-                String itemWhitelistDirectory = AgentWhitelist.getItemWhitelistDirectory(projectInfo, obj.toString());
-                if (itemWhitelistDirectory != null) {
-                    setAttribute("itemWhitelistDirectory", itemWhitelistDirectory);
-                    break;
-                }
-            }
-        }
         setAttribute("item", projectInfo);
         // 运行模式
         JSONArray runModes = (JSONArray) JSONArray.toJSON(RunMode.values());

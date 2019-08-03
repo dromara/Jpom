@@ -1,13 +1,10 @@
 package cn.keepbx.jpom.model.data;
 
 import cn.hutool.core.util.StrUtil;
-import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.spring.SpringUtil;
 import cn.keepbx.jpom.model.BaseEnum;
 import cn.keepbx.jpom.model.BaseJsonModel;
-import cn.keepbx.jpom.service.manage.ProjectInfoService;
 import cn.keepbx.jpom.service.node.NodeService;
-import com.alibaba.fastjson.JSONObject;
 
 /**
  * 节点项目
@@ -16,7 +13,6 @@ import com.alibaba.fastjson.JSONObject;
  * @date 2019/4/22
  */
 public class OutGivingNodeProject extends BaseJsonModel {
-    private static ProjectInfoService projectInfoService;
     private static NodeService nodeService;
 
     private String nodeId;
@@ -25,7 +21,6 @@ public class OutGivingNodeProject extends BaseJsonModel {
     private int status = Status.No.getCode();
     private String result;
 
-    private JSONObject projectInfo;
 
     public String getResult() {
         return result;
@@ -69,31 +64,6 @@ public class OutGivingNodeProject extends BaseJsonModel {
 
     public void setProjectId(String projectId) {
         this.projectId = projectId;
-    }
-
-    /**
-     * 获取对应的项目数据
-     *
-     * @param get 防止自动读取
-     * @return json
-     */
-    JSONObject getProjectData(boolean get) {
-        if (projectInfo != null) {
-            return projectInfo;
-        }
-        if (projectInfoService == null) {
-            projectInfoService = SpringUtil.getBean(ProjectInfoService.class);
-        }
-        if (nodeService == null) {
-            nodeService = SpringUtil.getBean(NodeService.class);
-        }
-        NodeModel nodeModel = nodeService.getItem(this.nodeId);
-        try {
-            projectInfo = projectInfoService.getItem(nodeModel, this.projectId);
-        } catch (Exception e) {
-            DefaultSystemLog.ERROR().error("获取信息异常", e);
-        }
-        return projectInfo;
     }
 
     /**

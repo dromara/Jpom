@@ -1,13 +1,8 @@
 <!DOCTYPE html>
-<html>
-
+<html xmlns:th="http://www.w3.org/1999/xhtml">
 <head>
-    #parse("./common/head.vm")
-    <title>项目管理系统</title>
+    <th:block th:include="common/head::head"></th:block>
     <style>
-        body {
-            padding: 20px;
-        }
 
         .div-project {
             width: 100%;
@@ -25,50 +20,45 @@
 </head>
 
 <body>
-    #if($user.isManage($node.id))
-    <table class="layui-table">
-        <thead>
-        <tr>
-            <th>序号</th>
-            <th>项目名称</th>
-            <th>项目ID</th>
-            <th>项目分组</th>
-            <th>项目路径</th>
-            <th>删除时间</th>
-            <th>操作人</th>
-            <th>操作</th>
-        </tr>
-        </thead>
-        <tbody>
 
-            #foreach($item in $!array)
-                #set($hashData=true)
-            <tr>
-                <td>$!velocityCount</td>
-                <td>$!item.projectInfoModel.name</td>
-                <td>$!item.projectInfoModel.id</td>
-                <td>$!item.projectInfoModel.group</td>
-                <td>$!item.projectInfoModel.lib</td>
-                <td>$!item.delTime</td>
-                <td>$!item.delUser</td>
-                <td>
-                    <button name="delete" onclick="projectDetail(this)" data-name="$item.filename"
-                            index="$!velocityCount" data-id="$!item.id"
-                            class="layui-btn  layui-btn-sm">详情
-                    </button>
-                </td>
-            </tr>
-            #end
-            #if(!$hashData)
-            <tr>
-                <td colspan=8 style="text-align:center">无数据</td>
-            </tr>
-            #end
-        </tbody>
-    </table>
-    #else
-    <h1>你没有权限</h1>
-    #end
+<table th:if="${session.user.isManage(node.id)}" class="layui-table">
+    <thead>
+    <tr>
+        <th>序号</th>
+        <th>项目名称</th>
+        <th>项目ID</th>
+        <th>项目分组</th>
+        <th>项目路径</th>
+        <th>删除时间</th>
+        <th>操作人</th>
+        <th>操作</th>
+    </tr>
+    </thead>
+    <tbody>
+
+    <tr th:each="item,i: ${array}">
+        <td th:text="${i.index}"></td>
+        <td>$!item.projectInfoModel.name</td>
+        <td>$!item.projectInfoModel.id</td>
+        <td>$!item.projectInfoModel.group</td>
+        <td>$!item.projectInfoModel.lib</td>
+        <td>$!item.delTime</td>
+        <td>$!item.delUser</td>
+        <td>
+            <button name="delete" onclick="projectDetail(this)"
+                    th:index="${i.index}" th:data-id="${item.id}"
+                    class="layui-btn  layui-btn-sm">详情
+            </button>
+        </td>
+    </tr>
+    <tr th:if="${#lists.isEmpty(array)}">
+        <td colspan=8 style="text-align:center">无数据</td>
+    </tr>
+    </tbody>
+</table>
+
+<h1 th:unless="${session.user.isManage(node.id)}">你没有权限</h1>
+
 
 <div class="layui-container div-project" id="div-project">
     <div class="layui-form-item">

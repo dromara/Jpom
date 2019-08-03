@@ -2,6 +2,7 @@ package cn.keepbx.jpom.common;
 
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.core.util.URLUtil;
 import cn.hutool.extra.servlet.ServletUtil;
 import cn.jiangzeyin.controller.base.AbstractController;
 import cn.keepbx.jpom.model.Role;
@@ -36,7 +37,8 @@ public abstract class BaseAgentController extends BaseJpomController {
     private static String getUserName(HttpServletRequest request) {
         String name = ServletUtil.getHeaderIgnoreCase(request, ConfigBean.JPOM_SERVER_USER_NAME);
         name = CharsetUtil.convert(name, CharsetUtil.CHARSET_ISO_8859_1, CharsetUtil.CHARSET_UTF_8);
-        return StrUtil.emptyToDefault(name, StrUtil.DASHED);
+        name = StrUtil.emptyToDefault(name, StrUtil.DASHED);
+        return URLUtil.decode(name, CharsetUtil.CHARSET_UTF_8);
     }
 
     /**

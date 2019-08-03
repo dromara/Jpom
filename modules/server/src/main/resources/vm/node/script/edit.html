@@ -1,14 +1,7 @@
 <!DOCTYPE html>
-<html>
+<html xmlns:th="http://www.w3.org/1999/xhtml">
 
-<head>
-    #parse("./common/head.vm")
-    <title>oss</title>
-    <style>
-        body {
-            padding-top: 20px;
-        }
-    </style>
+<head th:replace="common/head::head">
 </head>
 
 <body>
@@ -18,35 +11,31 @@
             <label class="layui-form-label">模板ID</label>
             <div class="layui-input-block">
                 <input type="text" name="id" placeholder="请输入模板Id" required lay-verify="required"
-                       value="$!item.id" #if($item)readonly#end class="layui-input">
-                <input type="hidden" name="type" value="$type">
+                       th:value="${item?.id}" th:readonly="${item}" class="layui-input">
+                <input type="hidden" name="type" th:value="${type}">
             </div>
         </div>
         <div class="layui-form-item">
             <label class="layui-form-label">模板名称</label>
             <div class="layui-input-block">
                 <input type="text" name="name" placeholder="请输入模板名称" required lay-verify="required"
-                       value="$!item.name" class="layui-input">
+                       th:value="${item?.name}" class="layui-input">
             </div>
         </div>
         <div class="layui-form-item">
             <label class="layui-form-label">模板内容</label>
             <div class="layui-input-block">
                 <textarea name="context" style="height: 50vh;" placeholder="请输入模板内容"
-                          class="layui-textarea auto">$!item.context</textarea>
+                          class="layui-textarea auto" th:text="${item?.context}"></textarea>
             </div>
         </div>
-        #if($user.isSystemUser())
-            <div class="layui-form-item">
-                <div class="layui-input-block">
-                    <button class="layui-btn" lay-submit lay-filter="formDemo">立即提交</button>
 
-                    #if($item)
-                        <a class="layui-btn layui-btn-warm" data-id="$item.id" id="delete">删除</a>
-                    #end
-                </div>
+        <div th:if="${session.user.isSystemUser()}" class="layui-form-item">
+            <div class="layui-input-block">
+                <button class="layui-btn" lay-submit lay-filter="formDemo">立即提交</button>
+                <a th:if="${item}" class="layui-btn layui-btn-warm" data-id="$item.id" id="delete">删除</a>
             </div>
-        #end
+        </div>
     </form>
 </div>
 </body>

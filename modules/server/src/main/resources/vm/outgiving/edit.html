@@ -30,17 +30,17 @@
                 <label class="layui-form-label"><span class="x-red">*</span>分发ID</label>
                 <div class="layui-input-block">
                     <input type="text" name="id" placeholder="分发ID（设置后将不能修改）" required lay-verify="required"
-                           class="layui-input  #if($item)layui-disabled#end" value="$!item.id"
-                           #if($item)readonly#end>
-                    <input type="hidden" name="reqId" value="$reqId">
-                    <input type="hidden" name="type" value="$type">
+                           th:class="${item}?'layui-input layui-disabled':'layui-input'" th:value="${item?.id}"
+                           th:readonly="${item}">
+                    <input type="hidden" name="reqId" th:value="${reqId}">
+                    <input type="hidden" name="type" value="${type}">
                 </div>
             </div>
             <div class="layui-inline">
                 <label class="layui-form-label"><span class="x-red">*</span>分发名称</label>
                 <div class="layui-input-block">
                     <input type="text" name="name" placeholder="分发名称" required lay-verify="required"
-                           class="layui-input" value="$!item.name">
+                           class="layui-input" th:value="${item?.name}">
 
                 </div>
             </div>
@@ -57,7 +57,7 @@
             <button class="layui-btn layui-btn-normal" lay-submit lay-filter="form_outgiving">提交
             </button>
 
-            <a th:if="${item}" class="layui-btn layui-btn-warm" data-id="$item.id" id="delete_outgiving">删除</a>
+            <a th:if="${item}" class="layui-btn layui-btn-warm" th:data-id="${item?.id}" id="delete_outgiving">删除</a>
         </div>
     </form>
 </div>
@@ -69,9 +69,9 @@
                 <div class="layui-input-block">
                     <select name="nodeId" required lay-verify="required" lay-filter="selectNode">
                         <option value="">请选择节点</option>
-                        #foreach($i in $nodeModels)
-                        <option value="$i.id" nodeName="$i.name">$i.name</option>
-                        #end
+
+                        <option th:each="i : ${nodeModels}" th:value="${i.id}" th:nodeName="${i.name}"
+                                th:text="${i.name}"></option>
                     </select>
                 </div>
             </div>
@@ -87,21 +87,18 @@
     </form>
 </div>
 </body>
-#foreach($i in $nodeModels)
-<script type="text/html" id="node_project_$i.id">
-    <div class="layui-form-item" nodeDiv="$i.id">
+
+<script type="text/html" th:each="i : ${nodeModels}" th:id="'node_project_'+${i.id}">
+    <div class="layui-form-item" th:nodeDiv="${i.id}">
         <div class="layui-inline">
             <label class="layui-form-label"><span class="x-red">*</span>{{ d.name }}</label>
             <div class="layui-input-block">
-                <select name="node_$i.id" required lay-verify="required">
+                <select th:name="'node_'+${i.id}" required lay-verify="required">
                     <option value="">选择选择项目</option>
-                    #foreach($ii in $i.groupProjects)
-                    <optgroup label="$ii.group">
-                        #foreach($iProject in $ii.projects)
-                        <option value="$iProject.id">$iProject.name</option>
-                        #end
+                    <optgroup th:each="ii : ${i.groupProjects}" th:label="${ii.group}">
+                        <option th:each="iProject : ${ii.projects}" th:value="${iProject.id}"
+                                th:text="${iProject.name}"></option>
                     </optgroup>
-                    #end
                 </select>
             </div>
         </div>
@@ -112,7 +109,19 @@
         </div>
     </div>
 </script>
-#end
+
+<script type="text/javascript" th:inline="javascript" th:each="nodeP : ${item?.outGivingNodeProjectList}">
+    asyncFn.push(function () {
+        var nodeId = [[${nodeP.nodeId}]];
+        var selectOption = $("select[name='nodeId'] option[value='" + nodeId + "']");
+        addNode(nodeId, selectOption);
+        // 选中
+        $("select[name='node_" + nodeId + "']").val([[${nodeP.projectId}]]);
+        form.render();
+    });
+
+
+</script>
 
 <script type="text/javascript">
     var laytpl;
@@ -134,33 +143,7 @@
             });
             //
         });
-        var selectOption;
-        #foreach($nodeP in $item.outGivingNodeProjectList)
-        selectOption = $("select[name='nodeId'] option[value='$nodeP.nodeId']");
-        addNode("$nodeP.nodeId", selectOption)
-        // 选中
-        $("select[name='node_$nodeP.nodeId']").val("$nodeP.projectId");
-        #end
-        form.render();
 
-        function addNode(nodeId, selectOption) {
-            var html = document.getElementById('node_project_' + nodeId);
-            var nodeName = selectOption.attr("nodeName");
-            laytpl(html.innerHTML).render({
-                name: nodeName
-            }, function (newHtml) {
-                $("#appendNodeDiv").before(newHtml);
-                layer.closeAll();
-                // 改变已经选过的选项
-                selectOption.attr("disabled", true);
-                selectOption.attr("selected", false)
-                form.render();
-                // 检查按钮状态
-                if ($("div[nodeDiv]").length >= $("select[name='nodeId']").find("option").length - 1) {
-                    $("#add_selectNode").hide();
-                }
-            });
-        }
 
         form.on('submit(form_outgiving)', function (data) {
             var len = $("div[nodeDiv]").length;
@@ -226,8 +209,24 @@
 
     }
 
-    #
-    # 刷新列表
+    function addNode(nodeId, selectOption) {
+        var html = document.getElementById('node_project_' + nodeId);
+        var nodeName = selectOption.attr("nodeName");
+        laytpl(html.innerHTML).render({
+            name: nodeName
+        }, function (newHtml) {
+            $("#appendNodeDiv").before(newHtml);
+            layer.closeAll();
+            // 改变已经选过的选项
+            selectOption.attr("disabled", true);
+            selectOption.attr("selected", false)
+            form.render();
+            // 检查按钮状态
+            if ($("div[nodeDiv]").length >= $("select[name='nodeId']").find("option").length - 1) {
+                $("#add_selectNode").hide();
+            }
+        });
+    }
 
     function autoClose() {
         setTimeout(function () {

@@ -1,9 +1,7 @@
 <!DOCTYPE html>
-<html>
-
+<html xmlns:th="http://www.w3.org/1999/xhtml">
 <head>
-    #parse("./common/head.vm")
-    <title>项目管理系统</title>
+    <th:block th:include="common/head::head"></th:block>
     <style>
         body {
             padding: 20px;
@@ -25,8 +23,8 @@
 
 <body>
 <div>
-    <button op="a" class="layui-btn  layui-btn-sm layui-btn-normal" href="./stack?tag=$!tag">导出堆栈信息</button>
-    <button op="a" class="layui-btn  layui-btn-sm layui-btn-normal" href="./ram?tag=$!tag">导出内存信息</button>
+    <button op="a" class="layui-btn  layui-btn-sm layui-btn-normal" th:href="@{./stack(tag=${tag})}">导出堆栈信息</button>
+    <button op="a" class="layui-btn  layui-btn-sm layui-btn-normal" th:href="@{./ram(tag=${tag})}">导出内存信息</button>
     <button class="layui-btn  layui-btn-sm layui-btn-normal" id="threadInfos">查看线程</button>
 </div>
 <div class="info">
@@ -49,59 +47,54 @@
         </tr>
         </thead>
         <tbody>
-            #if($data.process)
-            <tr>
-                <td>$!data.process.pid</td>
-                <td>$!data.process.command</td>
-                <td>$!data.process.user</td>
-                <td>$!data.process.res</td>
-                <td>$!data.process.status</td>
-                <td>$!data.process.cpu</td>
-                <td>$!data.process.mem</td>
-                <td>$!data.process.time</td>
-                <td>$!data.process.pr</td>
-                <td>$!data.process.ni</td>
-                <td>$!data.process.virt</td>
-                <td>$!data.process.shr</td>
-            </tr>
-            #else
-            <tr>
-                <td colspan=12 style="text-align:center">无数据</td>
-            </tr>
-            #end
+        <tr th:if="${data?.process}">
+            <td th:text="${data?.process?.pid}"></td>
+            <td th:text="${data?.process?.command}"></td>
+            <td th:text="${data?.process?.user}"></td>
+            <td th:text="${data?.process?.res}"></td>
+            <td th:text="${data?.process?.status}"></td>
+            <td th:text="${data?.process?.cpu}"></td>
+            <td th:text="${data?.process?.mem}"></td>
+            <td th:text="${data?.process?.time}"></td>
+            <td th:text="${data?.process?.pr}"></td>
+            <td th:text="${data?.process?.ni}"></td>
+            <td th:text="${data?.process?.virt}"></td>
+            <td th:text="${data?.process?.shr}"></td>
+        </tr>
+        <tr th:unless="${data?.process}">
+            <td colspan=12 style="text-align:center">无数据</td>
+        </tr>
         </tbody>
     </table>
 </div>
 
-    #if($data.beanMem)
-    <div class="info">
-        <label> jvm内存</label>
-        <table class="layui-table" style="margin-top: 10px">
-            <thead>
-            <tr>
-                <th>已使用堆内存</th>
-                <th>占用堆内存</th>
-                <th>已分配堆内存</th>
-                <th>已使用非堆内存</th>
-                <th>占用非堆内存</th>
-                <th>已分配非堆内存</th>
-                <th>挂起的对象</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr>
-                <td>$!data.beanMem.heapUsed</td>
-                <td>$!data.beanMem.heapProportion</td>
-                <td>$!data.beanMem.heapCommitted</td>
-                <td>$!data.beanMem.nonHeapUsed</td>
-                <td>$!data.beanMem.nonHeapProportion</td>
-                <td>$!data.beanMem.nonHeapCommitted</td>
-                <td>$!data.beanMem.mount</td>
-            </tr>
-            </tbody>
-        </table>
-    </div>
-    #end
+<div class="info" th:if="${data?.beanMem}">
+    <label> jvm内存</label>
+    <table class="layui-table" style="margin-top: 10px">
+        <thead>
+        <tr>
+            <th>已使用堆内存</th>
+            <th>占用堆内存</th>
+            <th>已分配堆内存</th>
+            <th>已使用非堆内存</th>
+            <th>占用非堆内存</th>
+            <th>已分配非堆内存</th>
+            <th>挂起的对象</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td th:text="${data?.beanMem?.heapUsed}"></td>
+            <td th:text="${data?.beanMem?.heapProportion}"></td>
+            <td th:text="${data?.beanMem?.heapCommitted}"></td>
+            <td th:text="${data?.beanMem?.nonHeapUsed}"></td>
+            <td th:text="${data?.beanMem?.nonHeapProportion}"></td>
+            <td th:text="${data?.beanMem?.nonHeapCommitted}"></td>
+            <td th:text="${data?.beanMem?.mount}"></td>
+        </tr>
+        </tbody>
+    </table>
+</div>
 
 <div class="info">
     <label>端口信息</label>
@@ -120,23 +113,20 @@
         </tr>
         </thead>
         <tbody>
-            #foreach($item in $data.netstat)
-                #set($hashNetStat=true)
-            <tr>
-                <td>$!item.name</td>
-                <td>$!item.protocol</td>
-                <td>$!item.local</td>
-                <td>$!item.foreign</td>
-                <td>$!item.status</td>
-                <td>$!item.receive</td>
-                <td>$!item.send</td>
-            </tr>
-            #end
-            #if(!$hashNetStat)
-            <tr>
-                <td colspan=7 style="text-align:center">无数据</td>
-            </tr>
-            #end
+
+        #set($hashNetStat=true)
+        <tr th:each="item : ${data?.netstat}">
+            <td th:text="${item?.name}"></td>
+            <td th:text="${item?.protocol}"></td>
+            <td th:text="${item?.local}"></td>
+            <td th:text="${item?.foreign}"></td>
+            <td th:text="${item?.status}"></td>
+            <td th:text="${item?.receive}"></td>
+            <td th:text="${item?.send}"></td>
+        </tr>
+        <tr th:if="${#lists.isEmpty(data?.netstat)}">
+            <td colspan=7 style="text-align:center">无数据</td>
+        </tr>
         </tbody>
     </table>
 </div>

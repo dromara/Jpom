@@ -1,9 +1,7 @@
 <!DOCTYPE html>
-<html>
-
+<html xmlns:th="http://www.w3.org/1999/xhtml">
 <head>
-    #parse("./common/head.vm")
-    <title>项目管理系统</title>
+    <th:block th:include="common/head::head"></th:block>
     <style>
         .div-project {
             width: 100%;
@@ -21,33 +19,30 @@
 
 
 <div class="layui-container div-project" id="div-project">
-    #if($item.outGivingProject)
-        <blockquote class="layui-elem-quote layui-quote-nm">
-            节点分发项目请在节点分发管理页面中修改
-        </blockquote>
-    #end
+
+    <blockquote th:if="${item?.outGivingProject}" class="layui-elem-quote layui-quote-nm">
+        节点分发项目请在节点分发管理页面中修改
+    </blockquote>
+
     <form action="saveProject" method="post" class="layui-form" id="form_project" lay-filter="form_project">
         <div class="layui-form-item">
             <div class="layui-inline">
                 <label class="layui-form-label"><span class="x-red">*</span>项目名称</label>
                 <div class="layui-input-block">
-                    <input #if($item.outGivingProject)readonly#end type="text" name="name" placeholder="项目名称" required
+                    <input th:readonly="${item?.outGivingProject}" type="text" name="name" placeholder="项目名称" required
                            lay-verify="required"
                            class="layui-input"
-                           value="#if($item)#if($item.name)$!item.name#else$!item.id#end#end">
-                    <div class="layui-hide">
-                        <input type="hidden" name="edit" value="#if($item)on#end">
-                    </div>
-
+                           th:value="${item?.name}">
+                    <input type="hidden" name="edit" th:value="${item!=null}?'on':''">
                 </div>
             </div>
             <div class="layui-inline">
                 <label class="layui-form-label">分组名称</label>
                 <div class="layui-input-block">
-                    <select name="group" lay-filter="group" #if($item.outGivingProject)disabled#end>
-                        #foreach($i in $groups)
-                            <option value="$i" #if($item.group==$i)selected#end>$i</option>
-                        #end
+                    <select name="group" lay-filter="group" th:disabled="${item?.outGivingProject}">
+
+                        <option th:each="i : ${groups}" th:value="${i}" th:selected="${item?.group==$i}"
+                                th:text="${i}"></option>
                         <option value="">选择手动添加</option>
                     </select>
                 </div>
@@ -58,17 +53,18 @@
                 <label class="layui-form-label"><span class="x-red">*</span>项目ID</label>
                 <div class="layui-input-block">
                     <input type="text" name="id" placeholder="程序运行标志（设置后将不能修改）" required lay-verify="required"
-                           class="layui-input  #if($item)layui-disabled#end" value="#if($item)$!item.id#end"
-                           #if($item)readonly#end>
+                           th:class="${item}?'layui-input layui-disabled':'layui-input'" th:value="${item?.id}"
+                           th:readonly="${item?.outGivingProject}">
                 </div>
             </div>
             <div class="layui-inline">
                 <label class="layui-form-label"><span class="x-red">*</span>运行方式</label>
                 <div class="layui-input-block">
-                    <select name="runMode" lay-filter="runMode" #if($item.outGivingProject)disabled#end>
-                        #foreach($itemPath in $runModes)
-                            <option value="$itemPath" #if($item.runMode==$itemPath)selected#end>$itemPath</option>
-                        #end
+                    <select name="runMode" lay-filter="runMode" th:disabled="${item?.outGivingProject}">
+
+                        <option th:each="itemPath : ${runModes}" th:value="${itemPath}"
+                                th:selected="${item?.runMode==itemPath}" th:text="${itemPath}">
+                        </option>
                     </select>
                 </div>
             </div>
@@ -77,24 +73,13 @@
             <div class="layui-inline">
                 <label class="layui-form-label"><span class="x-red">*</span>项目路径</label>
                 <div class="layui-input-block">
-
                     <select name="whitelistDirectory"
-                            #if($item.outGivingProject)disabled#end required lay-verify="required"
+                            th:disabled="${item?.outGivingProject}" required lay-verify="required"
                             lay-filter="projectLib">
-                        #if(!$itemWhitelistDirectory)
-                            <option value="">请选择白名单</option>
-                        #end
-                        #foreach($itemPath in $whitelistDirectory)
-                            #if($item && $itemWhitelistDirectory.startsWith($itemPath))
-                                <option value="$itemPath" selected>$itemPath</option>
-                                #set($hasetPath=$itemPath)
-                            #else
-                                <option value="$itemPath">$itemPath</option>
-                            #end
-                        #end
-                        #if(!$whitelistDirectory || $whitelistDirectory.size()<=0)
-                            <option value="">请添加白名单</option>
-                        #end
+                        <option th:unless="${#lists.isEmpty(whitelistDirectory)}" value="">请选择白名单</option>
+                        <option th:each="itemPath : ${whitelistDirectory}" th:value="${itemPath}"
+                                th:selected="${item?.whitelistDirectory==itemPath}" th:text="${itemPath}"></option>
+                        <option value="" th:if="${#lists.isEmpty(whitelistDirectory)}">请添加白名单</option>
                     </select>
                 </div>
             </div>
@@ -102,33 +87,40 @@
             <div class="layui-inline">
                 <label class="layui-form-label" title="$!item.log"><span class="x-red">*</span>项目Jar包</label>
                 <div class="layui-input-block">
-                    <input
-                        #if($item.outGivingProject)readonly#end type="text" name="lib" placeholder="jar存储的文件夹" required
-                        lay-verify="required"
-                        class="layui-input" value="#if($item)$!item.lib#end">
+                    <input th:readonly="${item?.outGivingProject}" type="text" name="lib" placeholder="jar存储的文件夹"
+                           required
+                           lay-verify="required"
+                           class="layui-input" th:value="${item?.lib}">
                 </div>
             </div>
             <div class="layui-form-mid layui-word-aux" style="padding: 0 !important;">
                 <div class="layui-input-block" style="color: red;min-height: 0px;">
-                    结果：
-                    <span id="projectStart">#if($hasetPath)$hasetPath#else 请选择#end</span>
-                    <span id="projectEnd" style="margin-left: -4px">#if(!$item)请填写#else$!item.lib#end</span>
-                    #if($item)
-                        <span>&nbsp;&nbsp;日志路径：$!item.log</span>
-                    #end
+                    <span id="projectStart">请选择</span>
+                    <span id="projectEnd" style="margin-left: -4px">请填写</span>
+                    <span th:if="${item}">&nbsp;&nbsp;日志路径：[[${item?.log}]]</span>
                 </div>
+
+                <script th:if="${item}" th:inline="javascript" type="text/javascript">
+                    asyncFn.push(function () {
+                        $("#projectEnd").text([[${item?.lib}]]);
+                        $("#projectStart").text([[${item?.whitelistDirectory}]]);
+                        if ([[${item?.runMode}]] === 'ClassPath') {
+                            $("#mainClassDiv").show();
+                        }
+                    });
+                </script>
                 <div class="layui-input-block" id="tipMsgDiv" style="color: red;min-height: 0px;display: none">
                     提示：<span id="tipMsg"></span>
                 </div>
             </div>
         </div>
-        <div class="layui-form-item" #if($item)style="display: none;"#end id="mainClassDiv">
+        <div class="layui-form-item" th:style="${item!=null}?'display: none;':''" id="mainClassDiv">
             <div class="layui-inline">
                 <label class="layui-form-label">MainClass</label>
                 <div class="layui-input-block">
-                    <input #if($item.outGivingProject)readonly#end type="text" name="mainClass"
+                    <input th:readonly="${item?.outGivingProject}" type="text" name="mainClass"
                            placeholder="程序运行的 main 类(jar模式运行可以不填)" class="layui-input"
-                           value="#if($item)$!item.mainClass#end">
+                           th:value="${item?.mainClass}">
                 </div>
             </div>
         </div>
@@ -136,17 +128,17 @@
             <div class="layui-inline">
                 <label class="layui-form-label">Jvm参数</label>
                 <div class="layui-input-block">
-                    <textarea  #if($item.outGivingProject)readonly#end name="jvm"
-                               placeholder="jvm参数,非必填.如：-Xmin=512m -Xmax=512m"
-                               class="layui-textarea">#if($item)$!item.jvm#end</textarea>
+                    <textarea th:readonly="${item?.outGivingProject}" name="jvm"
+                              placeholder="jvm参数,非必填.如：-Xmin=512m -Xmax=512m"
+                              class="layui-textarea" th:text="${item?.jvm}"></textarea>
                 </div>
             </div>
             <div class="layui-inline">
                 <label class="layui-form-label">args参数</label>
                 <div class="layui-input-block">
-                    <textarea #if($item.outGivingProject)readonly#end name="args"
+                    <textarea th:readonly="${item?.outGivingProject}" name="args"
                               placeholder="Main函数args参数,非必填.如：--service.port=8080"
-                              class="layui-textarea">#if($item)$!item.args#end</textarea>
+                              class="layui-textarea" th:text="${item?.args}"></textarea>
                 </div>
             </div>
         </div>
@@ -154,34 +146,34 @@
             <div class="layui-inline">
                 <label class="layui-form-label">WebHooks</label>
                 <div class="layui-input-block">
-                    <input  #if($item.outGivingProject)readonly#end type="text" name="token" placeholder="关闭程序时自动请求,非必填，GET请求"
-                            class="layui-input"
-                            value="#if($item)$!item.token#end">
+                    <input th:readonly="${item?.outGivingProject}" type="text" name="token"
+                           placeholder="关闭程序时自动请求,非必填，GET请求"
+                           class="layui-input"
+                           th:value="${item?.token}">
                 </div>
             </div>
         </div>
-        #if($item.runCommand)
-            <div class="layui-form-item">
-                <label class="layui-form-label">运行命令</label>
-                <div class="layui-input-block">
-                    <blockquote class="layui-elem-quote layui-quote-nm">
-                        $item.runCommand
-                    </blockquote>
-                </div>
+
+        <div class="layui-form-item" th:if="${item?.get('runCommand')}">
+            <label class="layui-form-label">运行命令</label>
+            <div class="layui-input-block">
+                <blockquote class="layui-elem-quote layui-quote-nm" th:text="${item?.runCommand}">
+                </blockquote>
             </div>
-        #end
-        #if(!$item  || $user.isProject($node.id,$!item.id))
-            <div class="layui-form-item" style="padding-left: 20%">
-                #if(!$item.outGivingProject)
-                    <button class="layui-btn layui-btn-normal" lay-submit lay-filter="submitProject"
-                            id="project_submit">提交
-                    </button>
-                    #if($item)
-                        <a class="layui-btn layui-btn-warm" data-id="$item.id" id="delete_project">删除</a>
-                    #end
-                #end
-            </div>
-        #end
+        </div>
+
+        <div th:if="${item==null || session.user.isProject(node.id,item?.id)}" class="layui-form-item"
+             style="padding-left: 20%">
+            <th:block th:unless="${item?.outGivingProject}">
+                <button class="layui-btn layui-btn-normal" lay-submit
+                        lay-filter="submitProject"
+                        id="project_submit">提交
+                </button>
+
+                <a th:if="${item}" class="layui-btn layui-btn-warm" data-id="$item.id" id="delete_project">删除</a>
+            </th:block>
+
+        </div>
     </form>
 </div>
 </body>
@@ -217,7 +209,7 @@
                     }
                     form.val("form_project", {
                         "group": text
-                    })
+                    });
                     form.render('select');
                 });
             }
@@ -231,9 +223,7 @@
                 $("#mainClassDiv").hide();
             }
         });
-        #if($item.runMode=='ClassPath')
-            $("#mainClassDiv").show();
-        #end
+
 
         form.on('select(projectLib)', function (data) {
             let val = data.value;
@@ -314,7 +304,7 @@
             });
         });
     }
-    ## 刷新项目列表
+
     function autoClose(group) {
         setTimeout(function () {
             var index = parent.layer.getFrameIndex(window.name);

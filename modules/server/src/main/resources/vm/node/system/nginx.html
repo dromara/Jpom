@@ -1,35 +1,15 @@
 <!DOCTYPE html>
-<html>
+<html xmlns:th="http://www.w3.org/1999/xhtml">
 
-<head>
-    #parse("./common/head.vm")
-    <title>nginx管理</title>
-    <style>
-        body {
-            padding: 10px 10px 0px 10px;
-        }
-
-        .layui-container {
-            width: 80% !important;
-        }
-
-        .layui-inline {
-            width: 80%;
-        }
-
-        .div_hidden {
-            display: none;
-        }
-
-
-    </style>
+<head th:replace="common/head::head">
 </head>
 
 <body>
 <div class="layui-row">
     <button id="addNgx" class="layui-btn layui-btn-sm">新增nginx配置</button>
     <button onclick="reload();" class="layui-btn layui-btn-sm">刷新表格</button>
-##    <button id="reload" class="layui-btn layui-btn-sm layui-btn-danger">重启nginx</button>
+
+    <button id="reload" class="layui-btn layui-btn-sm layui-btn-danger">重启nginx</button>
 </div>
 <table class="layui-table" id="tab_ngx" lay-filter="tab_ngx" style="margin: 0;"></table>
 
@@ -78,21 +58,22 @@
             });
         }
 
+        var col = [
+            {field: 'name', title: '文件名', sort: true},
+            {field: 'serverCount', title: '数量', width: "5%", sort: true},
+            {field: 'server_name', title: '域名', sort: true},
+            {field: 'location', title: '根location', sort: true},
+            {field: 'listen', title: '监听端口', width: "10%", sort: true},
+            {field: 'time', title: '最后修改时间', sort: true},
+            {
+                field: 'op', title: '操作', align: 'center', toolbar: '#bar_ngx', fixed: 'right'
+            }
+        ];
         tableRender({
             id: 'tab_ngx',
             elem: '#tab_ngx',
             url: './list_data.json',
-            cols: [[
-                {field: 'name', title: '文件名', sort: true},
-                {field: 'serverCount', title: '数量', width: "5%", sort: true},
-                {field: 'server_name', title: '域名', sort: true},
-                {field: 'location', title: '根location', sort: true},
-                {field: 'listen', title: '监听端口', width: "10%", sort: true},
-                {field: 'time', title: '最后修改时间', sort: true},
-                {
-                    field: 'op', title: '操作', align: 'center', toolbar: '#bar_ngx', fixed: 'right'
-                }
-            ]]
+            cols: [col]
         });
 
         // 删除

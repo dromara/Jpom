@@ -222,7 +222,10 @@
         function tableRender(data) {
             var done = data.done;
             delete data.done;
-
+            var cols = data.cols;
+            if (!(cols[0] instanceof Array)) {
+                data.cols = [cols];
+            }
             var newWhere = {
                 nodeId: getTopQueryString("nodeId")
             };

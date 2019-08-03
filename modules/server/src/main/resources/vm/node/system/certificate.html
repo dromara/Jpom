@@ -1,13 +1,8 @@
 <!DOCTYPE html>
-<html>
-
+<html xmlns:th="http://www.w3.org/1999/xhtml">
 <head>
-    #parse("./common/head.vm")
-    <title>证书管理</title>
+    <th:block th:include="common/head::head"></th:block>
     <style>
-        body {
-            padding: 10px;
-        }
 
         .layui-container {
             width: 80% !important;
@@ -54,9 +49,8 @@
                 <select name="path" id="path" lay-filter="aihao" required
                         lay-verify="required">
                     <option value="">请选择证书存放的路径</option>
-                    #foreach($item in $certificate)
-                        <option id="path_$item" value="$item">$item</option>
-                    #end
+
+                    <option th:each="item : ${certificate}" th:id="'path_'+${item}" th:value="${item}" th:text="${item}"></option>
                 </select>
             </div>
         </div>
@@ -102,36 +96,37 @@
 
 <script type="text/javascript">
     var laytpl;
+    var col = [
+        {field: 'id', title: 'id', width: '10%', sort: true},
+        {field: 'name', title: '名称', sort: true},
+        {field: 'domain', title: '域名', sort: true},
+        {
+            field: 'effectiveTime',
+            title: '生效时间',
+            width: '14%',
+            sort: true,
+            templet: function (d) {
+                return formateTime(d.effectiveTime);
+            }
+        },
+        {
+            field: 'expirationTime',
+            title: '到期时间',
+            width: '14%',
+            sort: true,
+            templet: function (d) {
+                return formateTime(d.expirationTime);
+            }
+        },
+        {field: 'op', title: '操作', align: 'center', toolbar: '#bar_cert', fixed: 'right'}
+    ];
 
     function loadSuccess() {
         tableRender({
             id: 'tab_certificate',
             elem: '#tab_certificate',
             url: './getCertList',
-            cols: [[
-                {field: 'id', title: 'id', width: '10%', sort: true},
-                {field: 'name', title: '名称', sort: true},
-                {field: 'domain', title: '域名', sort: true},
-                {
-                    field: 'effectiveTime',
-                    title: '生效时间',
-                    width: '14%',
-                    sort: true,
-                    templet: function (d) {
-                        return formateTime(d.effectiveTime);
-                    }
-                },
-                {
-                    field: 'expirationTime',
-                    title: '到期时间',
-                    width: '14%',
-                    sort: true,
-                    templet: function (d) {
-                        return formateTime(d.expirationTime);
-                    }
-                },
-                {field: 'op', title: '操作', align: 'center', toolbar: '#bar_cert', fixed: 'right'}
-            ]]
+            cols: [col]
         });
 
         var uploadConfig, hashSelectConfig, updateFormData;

@@ -1,10 +1,8 @@
 <!DOCTYPE html>
-<html>
-
+<html xmlns:th="http://www.w3.org/1999/xhtml">
 <head>
-    #parse("./common/head.vm")
-    <title>项目管理系统</title>
-    <link href="$!jpomProxyPath/static/ztree/zTreeStyle/zTreeStyle.css" rel="stylesheet">
+    <th:block th:include="common/head::head"></th:block>
+    <link th:href="@{${session.jpomProxyPath}+'/static/ztree/zTreeStyle/zTreeStyle.css'}" rel="stylesheet">
     <style>
         body {
             padding: 10px 10px 0px 10px;
@@ -42,7 +40,7 @@
 
     <div class="layui-layout-right" style="padding-right: 20px;padding-top: 10px;">
         <div>
-            文件位置:$absLib
+            文件位置:[[${absLib}]]
         </div>
     </div>
 </div>
@@ -56,7 +54,7 @@
     </div>
 </div>
 </body>
-##	删除按钮
+
 <script type="text/html" id="bar_projects">
     <a href="javascript:;" class="layui-btn layui-btn-sm layui-btn-danger" lay-event="delete">删除</a>
     {{# if(!d.isDirectory){ }}
@@ -83,7 +81,7 @@
     };
 
     const tableWhre = {
-        id: '$id'
+        id: '[[${id}]]'
     };
 
     var curenntNode = {
@@ -94,7 +92,7 @@
 
     function loadSuccess() {
         //
-        asyncLoadJs("$!jpomProxyPath/static/ztree/jquery.ztree.core.min.js", function () {
+        asyncLoadJs("[[${session.jpomProxyPath}]]/static/ztree/jquery.ztree.core.min.js", function () {
             zTreeObj = $.fn.zTree.init($("#tree"), setting);
             zTreeObj.addNodes(null, curenntNode, false);
             curenntNode = zTreeObj.getNodeByTId("tree_1");
@@ -104,7 +102,7 @@
                 elem: '#tab_file',
                 url: './getFileList',
                 where: tableWhre,
-                cols: [[
+                cols: [
                     {field: 'index', title: '编号', width: '6%'},
                     {
                         field: 'filename', title: '文件名称', sort: true, width: '30%', templet: function (d) {
@@ -117,7 +115,7 @@
                     {field: 'modifyTime', title: '修改时间', sort: true, width: '20%'},
                     {field: 'fileSize', title: '文件大小', sort: true, width: '15%'},
                     {field: 'op', title: '操作', toolbar: '#bar_projects'}
-                ]],
+                ],
                 done: function (ret) {
                     var child = ret.data;
                     if (child) {
@@ -135,7 +133,7 @@
             elem: '#uploadFile',
             accept: 'file',
             data: {
-                id: '$id',
+                id: '[[${id}]]',
                 levelName: function () {
                     return $("#currentPath").text();
                 }
@@ -207,7 +205,7 @@
             elem: '#uploadFile_Import_dom',
             accept: 'file',
             data: {
-                id: '$id',
+                id: '[[${id}]]',
                 type: "unzip",
                 clearType: function () {
                     return $("#uploadFile_Import").attr("type");
@@ -247,7 +245,7 @@
                 loadingAjax({
                     url: './deleteFile',
                     data: {
-                        id: '$id',
+                        id: '[[${id}]]',
                         type: 'clear'
                     },
                     success: function (data) {
@@ -302,7 +300,7 @@
 
     //下载文件
     function downloadFile(data) {
-        var url = "./download?id=$id&filename=" + encodeURI(data.filename) + "&levelName=" + data.levelName;
+        var url = "./download?id=[[${id}]]&filename=" + encodeURI(data.filename) + "&levelName=" + data.levelName;
         url = appendNodeId(url);
         self.location.href = url;
     }
@@ -322,7 +320,7 @@
             loadingAjax({
                 url: './deleteFile',
                 data: {
-                    id: '$id',
+                    id: '[[${id}]]',
                     filename: data.filename,
                     levelName: data.levelName
                 },

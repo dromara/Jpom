@@ -73,7 +73,8 @@
                     <select name="whitelistDirectory" required lay-verify="required" lay-filter="whitelistDirectory">、
                         <th:block th:unless="${#lists.isEmpty(whitelistDirectory)}">
                             <option value="">请选择白名单</option>
-                            <option th:value="${itemPath}" th:each="itemPath : ${whitelistDirectory}"
+                            <option th:value="${itemPath}"
+                                    th:each="itemPath : ${whitelistDirectory}"
                                     th:text="${itemPath}"></option>
                         </th:block>
                         <option value="" th:if="${#lists.isEmpty(whitelistDirectory)}">请配置白名单</option>
@@ -192,7 +193,7 @@
 </script>
 
 <script type="text/javascript" th:inline="javascript"
-        th:each="nodeP,iterStat : ${item.outGivingNodeProjectList}">
+        th:each="nodeP,iterStat : ${item?.outGivingNodeProjectList}">
     findFirst = false;
     asyncFn.push(function () {
         loadingAjax({
@@ -377,7 +378,6 @@
 
     function checngeLib() {
         var wVal = whitelistDirectorySelect.val();
-        console.log(wVal);
         if (wVal == "") {
             layer.msg("请选择白名单");
             return;

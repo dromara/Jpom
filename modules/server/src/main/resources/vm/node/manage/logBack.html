@@ -1,14 +1,7 @@
 <!DOCTYPE html>
-<html>
+<html xmlns:th="http://www.w3.org/1999/xhtml">
 
-<head>
-    #parse("./common/head.vm")
-    <title>logBack</title>
-    <style>
-        body {
-            padding: 10px;
-        }
-    </style>
+<head th:replace="common/head::head">
 </head>
 
 <body>
@@ -17,11 +10,11 @@
         <tbody>
         <tr>
             <td>控制台日志路径</td>
-            <td>$!data.logPath</td>
+            <td th:text="${data?.logPath}"></td>
         </tr>
         <tr>
             <td>控制台日志备份路径</td>
-            <td>$!data.logBackPath</td>
+            <td th:text="${data?.logBackPath}"></td>
         </tr>
         </tbody>
     </table>
@@ -36,28 +29,24 @@
         </tr>
         </thead>
         <tbody>
-            #if($data.array && $data.array.size()>0)
-                #foreach($item in $data.array)
-                <tr>
-                    <td>$item.index</td>
-                    <td>$item.filename</td>
-                    <td>$item.modifyTime</td>
-                    <td>$item.fileSize</td>
-                    <td>
-                        <button op="a" href="logBack_download?key=$item.filename&id=$data.id"
-                                class="layui-btn layui-btn-warm layui-btn-sm">下载
-                        </button>
-                        <button name="delete" data-name="$item.filename" data-id="$data.id"
-                                class="layui-btn layui-btn-danger layui-btn-sm">删除
-                        </button>
-                    </td>
-                </tr>
-                #end
-            #else
-            <tr>
-                <td colspan="5">没有相关信息</td>
-            </tr>
-            #end
+
+        <tr th:each="item : ${data?.array}">
+            <td th:text="${item.index}"></td>
+            <td th:text="${item.filename}"></td>
+            <td th:text="${item.modifyTime}"></td>
+            <td th:text="${item.fileSize}"></td>
+            <td>
+                <button op="a" th:href="@{logBack_download(key=${item.filename},id=${data?.id})}"
+                        class="layui-btn layui-btn-warm layui-btn-sm">下载
+                </button>
+                <button name="delete" th:data-name="${item.filename}" th:data-id="${data?.id}"
+                        class="layui-btn layui-btn-danger layui-btn-sm">删除
+                </button>
+            </td>
+        </tr>
+        <tr th:if="${#lists.isEmpty(data?.array)}">
+            <td colspan="5">没有相关信息</td>
+        </tr>
         </tbody>
     </table>
 </div>

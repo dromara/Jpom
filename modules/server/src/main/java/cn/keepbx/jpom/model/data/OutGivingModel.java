@@ -88,26 +88,6 @@ public class OutGivingModel extends BaseModel {
     }
 
     /**
-     * 获取项目的信息
-     *
-     * @param get 方式自动读取
-     * @return json
-     */
-    public JSONObject getFirstNodeProject(boolean get) {
-        List<OutGivingNodeProject> outGivingNodeProjectList = getOutGivingNodeProjectList();
-        if (outGivingNodeProjectList == null || outGivingNodeProjectList.isEmpty()) {
-            return null;
-        }
-        for (OutGivingNodeProject outGivingNodeProject : outGivingNodeProjectList) {
-            JSONObject projectData = outGivingNodeProject.getProjectData(true);
-            if (projectData != null) {
-                return projectData;
-            }
-        }
-        return null;
-    }
-
-    /**
      * 获取节点的项目信息
      *
      * @param nodeId    节点
