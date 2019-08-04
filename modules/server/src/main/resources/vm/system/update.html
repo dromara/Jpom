@@ -32,7 +32,7 @@
             },
             success: function (data) {
                 if (200 != data.code) {
-                    layer.msg(data.msg);
+                    layer.alert(data.msg);
                     return;
                 }
                 for (var key in data.data) {

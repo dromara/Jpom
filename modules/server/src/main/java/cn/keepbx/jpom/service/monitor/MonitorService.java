@@ -10,7 +10,6 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -146,7 +145,7 @@ public class MonitorService extends BaseOperService<MonitorModel> {
     }
 
 
-    public boolean checkProject(String projectId) {
+    public boolean checkProject(String nodeId, String projectId) {
         List<MonitorModel> list = list();
         if (list == null || list.isEmpty()) {
             return false;
@@ -155,9 +154,11 @@ public class MonitorService extends BaseOperService<MonitorModel> {
             List<MonitorModel.NodeProject> projects = monitorModel.getProjects();
             if (projects != null) {
                 for (MonitorModel.NodeProject project : projects) {
-                    List<String> projects1 = project.getProjects();
-                    if (projects1 != null && projects1.contains(projectId)) {
-                        return true;
+                    if (project.getNode().equals(nodeId)) {
+                        List<String> projects1 = project.getProjects();
+                        if (projects1 != null && projects1.contains(projectId)) {
+                            return true;
+                        }
                     }
                 }
             }

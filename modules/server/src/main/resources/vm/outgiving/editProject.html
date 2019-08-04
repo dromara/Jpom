@@ -108,7 +108,7 @@
         <div th:if="${session.user.isServerManager()}" class="layui-form-item" style="padding-left: 20%;">
             <button class="layui-btn layui-btn-normal" lay-submit lay-filter="submitProject" id="project_submit">提交
             </button>
-            <a th:if="${item}" class="layui-btn layui-btn-warm" data-id="$item.id" id="delete_project">删除</a>
+            <a th:if="${item}" class="layui-btn layui-btn-warm" th:data-id="${item.id}" id="delete_project">删除</a>
         </div>
     </form>
 </div>
@@ -388,7 +388,7 @@
             silentAjax({
                 url: '../node/manage/judge_lib.json',
                 data: {
-                    id: "#if($item)$!item.id#end",
+                    id: "[[${item?.id}]]",
                     nodeId: nodeId,
                     newLib: lib
                 },

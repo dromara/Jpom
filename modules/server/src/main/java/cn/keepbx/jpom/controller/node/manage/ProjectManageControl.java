@@ -111,10 +111,10 @@ public class ProjectManageControl extends BaseServerController {
     @ProjectPermission(optType = UserOperateLogV1.OptType.DelProject)
     @UrlPermission(value = Role.NodeManage, optType = UserOperateLogV1.OptType.DelProject)
     public String deleteProject(@ValidatorItem(value = ValidatorRule.NOT_BLANK) String id) throws IOException {
+        NodeModel nodeModel = getNode();
         // 检查节点分发
         List<OutGivingModel> outGivingModels = outGivingServer.list();
         if (outGivingModels != null) {
-            NodeModel nodeModel = getNode();
             for (OutGivingModel outGivingModel : outGivingModels) {
                 if (outGivingModel.checkContains(nodeModel.getId(), id)) {
                     return JsonMessage.getString(405, "当前项目存在节点分发，不能直接删除");
@@ -122,13 +122,12 @@ public class ProjectManageControl extends BaseServerController {
             }
         }
         //
-        if (monitorService.checkProject(id)) {
+        if (monitorService.checkProject(nodeModel.getId(), id)) {
             return JsonMessage.getString(405, "当前项目存在监控项，不能直接删除");
         }
-        NodeModel node = getNode();
-        if (buildService.checkNodeProjectId(node.getId(), id)) {
+        if (buildService.checkNodeProjectId(nodeModel.getId(), id)) {
             return JsonMessage.getString(405, "当前项目存在构建项，不能直接删除");
         }
-        return NodeForward.request(node, getRequest(), NodeUrl.Manage_DeleteProject).toString();
+        return NodeForward.request(nodeModel, getRequest(), NodeUrl.Manage_DeleteProject).toString();
     }
 }

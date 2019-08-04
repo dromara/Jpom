@@ -170,7 +170,7 @@
                         id="project_submit">提交
                 </button>
 
-                <a th:if="${item}" class="layui-btn layui-btn-warm" data-id="$item.id" id="delete_project">删除</a>
+                <a th:if="${item}" class="layui-btn layui-btn-warm" th:data-id="${item.id}" id="delete_project">删除</a>
             </th:block>
 
         </div>
@@ -262,7 +262,7 @@
             silentAjax({
                 url: './judge_lib.json',
                 data: {
-                    id: "#if($item)$!item.id#else#end",
+                    id: "[[${item?.id}]]",
                     newLib: lib
                 },
                 success: function (data) {
