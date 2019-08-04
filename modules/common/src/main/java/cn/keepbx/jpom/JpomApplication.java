@@ -13,7 +13,6 @@ import cn.keepbx.util.CommandUtil;
 import org.springframework.http.converter.StringHttpMessageConverter;
 
 import java.io.File;
-import java.io.IOException;
 import java.nio.charset.Charset;
 
 /**
@@ -107,7 +106,7 @@ public class JpomApplication extends ApplicationBuilder {
             }
             try {
                 CommandUtil.asyncExeLocalCommand(scriptFile.getParentFile(), FileUtil.getAbsolutePath(scriptFile) + " restart upgrade");
-            } catch (IOException e) {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         });

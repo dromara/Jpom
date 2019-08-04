@@ -7,6 +7,7 @@ import cn.hutool.core.date.DateTime;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.lang.JarClassLoader;
 import cn.hutool.core.text.StrSpliter;
+import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.http.HttpUtil;
 import cn.hutool.system.SystemUtil;
@@ -103,7 +104,13 @@ public abstract class AbstractProjectCommander {
             throw new JpomRuntimeException("没有需要执行的命令");
         }
         // 执行命令
-        CommandUtil.asyncExeLocalCommand(FileUtil.file(projectInfoModel.allLib()), command);
+        ThreadUtil.execute(() -> {
+            try {
+                CommandUtil.asyncExeLocalCommand(FileUtil.file(projectInfoModel.allLib()), command);
+            } catch (Exception e) {
+                DefaultSystemLog.ERROR().error("执行命令失败", e);
+            }
+        });
         //
         loopCheckRun(projectInfoModel.getId(), true);
         return status(projectInfoModel.getId());
