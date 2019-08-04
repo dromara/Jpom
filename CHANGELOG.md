@@ -4,6 +4,9 @@
 
 ### 新增功能
 
+1. SpringBoot 升级到2.1.x
+2. velocity模板引擎换为thymeleaf
+
 ### 解决BUG、优化功能
 
 1. 未登录重定向带入参数
