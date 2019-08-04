@@ -37,7 +37,8 @@ public class ProjectFileControl extends BaseServerController {
         setAttribute("id", id);
         JSONObject projectInfo = projectInfoService.getItem(getNode(), id);
         String lib = projectInfo.getString("lib");
-        lib = FileUtil.getAbsolutePath(FileUtil.file(lib));
+        String whitelistDirectory = projectInfo.getString("whitelistDirectory");
+        lib = FileUtil.getAbsolutePath(FileUtil.file(whitelistDirectory, lib));
         setAttribute("absLib", lib);
         return "node/manage/filemanage";
     }
