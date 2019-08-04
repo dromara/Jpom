@@ -89,6 +89,6 @@ public class AgentConfigBean {
      * @return file
      */
     public File getScriptPath() {
-        return FileUtil.file(ExtConfigBean.getInstance().getPath(), SCRIPT_DIRECTORY);
+        return FileUtil.file(ConfigBean.getInstance().getDataPath(), SCRIPT_DIRECTORY);
     }
 }

@@ -50,7 +50,7 @@
                 elem: '#uploadJar',
                 url: './uploadJar.json',
                 data: {
-                    nodeId: "$!node.id"
+                    nodeId: "[[${node?.id}]]"
                 },
                 exts: 'jar',
                 acceptMime: '.jar',

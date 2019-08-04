@@ -4,7 +4,9 @@
 <head th:replace="common/head::head">
 </head>
 <body>
-
+<blockquote class="layui-elem-quote layui-quote-nm">
+    Tomcat管理功能目前还未完善，建议不要在生产环境中使用
+</blockquote>
 <div class="layui-row">
     <button th:if="${session.user.isSystemUser()}" onclick="editTomcat('');" class="layui-btn layui-btn-sm">添加Tomcat
     </button>
