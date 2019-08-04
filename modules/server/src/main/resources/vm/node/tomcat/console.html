@@ -1,13 +1,8 @@
 <!DOCTYPE html>
-<html>
-
+<html xmlns:th="http://www.w3.org/1999/xhtml" lang="zh">
 <head>
-    #parse("./common/head.vm")
-    <title>项目管理系统</title>
+    <th:block th:include="common/head::head"/>
     <style>
-        body {
-            padding: 15px;
-        }
 
         .context {
             height: 90vh;
@@ -27,10 +22,11 @@
     </div>
 </div>
 </body>
-<script type="text/javascript" src="$!jpomProxyPath/static/js/auto-line-number.js?v=$staticCacheTime"></script>
+<script type="text/javascript"
+        th:src="@{${session.jpomProxyPath}+'/static/js/auto-line-number.js?v='+${session.staticCacheTime}}"></script>
 <script type="text/javascript">
     var ws;
-    var url = getSocketHost() + "/tomcat_log?userId=$user.getUserMd5Key()&tomcatId=$id&nodeId=$node.id&type=tomcat";
+    var url = getSocketHost() + "/tomcat_log?userId=[[${session.user.getUserMd5Key()}]]&tomcatId=[[${id}]]&nodeId=[[${node.id}]]&type=tomcat";
     var treeData = [];
     var tree;
 
@@ -43,7 +39,7 @@
             loadingAjax({
                 url: './getLogList',
                 data: {
-                    id: '$id'
+                    id: '[[${id}]]'
                 },
                 success: function (data) {
                     treeData = data.data;
@@ -102,7 +98,7 @@
                             if (data.children) {
                                 layer.msg("不支持下载文件夹");
                             } else {
-                                var url = "./download?id=$id&filename=" + encodeURI(data.path) + "&path=_tomcat_log";
+                                var url = "./download?id=[[${id}]]&filename=" + encodeURI(data.path) + "&path=_tomcat_log";
                                 url = appendNodeId(url);
                                 window.open(url);
                             }
@@ -129,7 +125,7 @@
             }
             var item = {
                 op: "showlog",
-                tomcatId: '$id',
+                tomcatId: '[[${id}]]',
                 fileName: fileName
             }
             if (ws.readyState != 1 && ws.readyState != 0) {

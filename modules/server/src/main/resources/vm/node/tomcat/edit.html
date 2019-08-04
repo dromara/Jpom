@@ -1,24 +1,17 @@
 <!DOCTYPE html>
-<html>
+<html xmlns:th="http://www.w3.org/1999/xhtml">
 
-<head>
-    #parse("./common/head.vm")
-    <title>项目管理系统</title>
-    <style>
-        body {
-            padding: 10px;
-        }
-    </style>
+<head th:replace="common/head::head">
 </head>
 <body>
 <div class="layui-container">
     <form action="./save" class="layui-form" id="form_node">
-        <input type="hidden" id="id" name="id" value="$!item.id">
+        <input type="hidden" id="id" name="id" th:value="${item?.id}">
         <div class="layui-form-item">
 
             <label class="layui-form-label">Tomcat名称<span class="x-red">*</span></label>
             <div class="layui-input-block">
-                <input type="text" id="name" name="name" value="$!item.name" placeholder="请填写Tomcat名称"
+                <input type="text" id="name" name="name" th:value="${item?.name}" placeholder="请填写Tomcat名称"
                        class="layui-input"
                        required
                        lay-verify="required">
@@ -27,7 +20,7 @@
         <div class="layui-form-item">
             <label class="layui-form-label">Tomcat路径<span class="x-red">*</span></label>
             <div class="layui-input-block">
-                <input type="text" id="path" name="path" value="$!item.path" placeholder="请填写Tomcat所在的路径"
+                <input type="text" id="path" name="path" th:value="${item?.path}" placeholder="请填写Tomcat所在的路径"
                        class="layui-input"
                        required
                        lay-verify="required">
@@ -36,7 +29,7 @@
         <div class="layui-form-item">
             <label class="layui-form-label">Tomcat端口<span class="x-red">*</span></label>
             <div class="layui-input-block">
-                <input type="text" id="port" name="port" value="$!item.port" placeholder="请填写Tomcat的端口"
+                <input type="text" id="port" name="port" th:value="${item?.port}" placeholder="请填写Tomcat的端口"
                        class="layui-input"
                        required
                        lay-verify="required">
@@ -45,7 +38,7 @@
         <div class="layui-form-item">
             <label class="layui-form-label">appBase</label>
             <div class="layui-input-block">
-                <input type="text" id="appBase" name="appBase" value="$!item.appBase"
+                <input type="text" id="appBase" name="appBase" th:value="${item?.appBase}"
                        placeholder="Tomcat的appBase配置所在的路径，默认是webapps目录"
                        class="layui-input">
             </div>
@@ -54,18 +47,35 @@
         <div class="layui-form-item" style="padding-left: 20%">
             <button class="layui-btn layui-btn-normal" lay-submit lay-filter="submitNode" id="project_submit">提交
             </button>
-            #if($item && $user.isSystemUser())
-                <a op="delete" onclick="delTomcat('$item.id','$item.name');"
-                   class="layui-btn layui-btn-danger">
-                    移除tomcat
-                </a>
-            #end
+
+            <a th:if="${item!=null && session.user.isSystemUser()}" op="delete"
+               onclick="delTomcat('[[${item?.id}]]','[[${item?.name}]]');"
+               class="layui-btn layui-btn-danger">
+                移除tomcat
+            </a>
         </div>
     </form>
 </div>
 </body>
+<script type="text/javascript" th:if="${item!=null && session.user.isSystemUser()}">
+    function delTomcat(id, name) {
+        layer.confirm('确定移除Tomcat - ' + name + '?', {
+            btn: ['确定', '取消']
+        }, function (index) {
+            loadingAjax({
+                url: './delete',
+                data: {
+                    id: id
+                },
+                success: function (data) {
+                    layer.msg(data.msg);
+                    autoClose();
+                }
+            });
+        });
+    }
+</script>
 <script type="text/javascript">
-
 
     function loadSuccess() {
         form.on('submit(submitNode)', function (data) {
@@ -82,24 +92,7 @@
             return false;
         });
     }
-        #if($item && $user.isSystemUser())
-        function delTomcat(id, name) {
-            layer.confirm('确定移除Tomcat - ' + name + '?', {
-                btn: ['确定', '取消']
-            }, function (index) {
-                loadingAjax({
-                    url: './delete',
-                    data: {
-                        id: id
-                    },
-                    success: function (data) {
-                        layer.msg(data.msg);
-                        autoClose();
-                    }
-                });
-            });
-        }
-        #end
+
 
     function autoClose() {
         setTimeout(function () {

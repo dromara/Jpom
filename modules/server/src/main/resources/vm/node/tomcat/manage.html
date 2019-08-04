@@ -1,14 +1,10 @@
 <!DOCTYPE html>
-<html>
-
+<html xmlns:th="http://www.w3.org/1999/xhtml" lang="zh">
 <head>
-    #parse("./common/head.vm")
-    <title>项目管理系统</title>
-    <link href="$!jpomProxyPath/static/ztree/zTreeStyle/zTreeStyle.css" rel="stylesheet">
+    <th:block th:include="common/head::head"/>
+    <link th:href="@{${session.jpomProxyPath}+'/static/ztree/zTreeStyle/zTreeStyle.css'}" rel="stylesheet">
     <style>
-        body {
-            padding: 10px 10px 0px 10px;
-        }
+
 
         .div-uploadfiles {
             display: none;
@@ -36,12 +32,13 @@
     </div>
     <div class="layui-col-md9">
         <div class="layui-row">
-            #if($user.isUploadTomcatFile($node.id))
-                <button id="uploadFile" class="layui-btn layui-btn-sm"><i class="layui-icon">&#xe67c;</i>上传文件</button>
-            #end
+
+            <button th:if="${session.user.isUploadTomcatFile(node.id)}" id="uploadFile" class="layui-btn layui-btn-sm">
+                <i class="layui-icon">&#xe67c;</i>上传文件
+            </button>
             <div class="layui-layout-right" style="padding-right: 20px;padding-top: 10px;">
                 <div>
-                    当前路径:<span id="currentPath">$project</span>
+                    当前路径:<span id="currentPath">[[${project}]]</span>
                 </div>
             </div>
         </div>
@@ -49,16 +46,16 @@
     </div>
 </div>
 </body>
-##	删除按钮
+
 <script type="text/html" id="bar_projects">
-        #if($user.isDeleteTomcatFile($node.id))
-        <a href="javascript:;" class="layui-btn layui-btn-sm layui-btn-danger" lay-event="delete">删除</a>
-        #end
-        #if($user.isTomcat($node.id,$id))
+
+    <a th:if="${session.user.isDeleteTomcatFile(node.id)}" href="javascript:;"
+       class="layui-btn layui-btn-sm layui-btn-danger" lay-event="delete">删除</a>
+    <th:blcok th:if="${session.user.isTomcat(node.id,id)}">
         {{# if(!d.isDirectory){ }}
         <a href="javascript:;" class="layui-btn layui-btn-sm layui-btn-normal" lay-event="download">下载</a>
         {{# } }}
-        #end
+    </th:blcok>
 </script>
 <script type="text/javascript">
     var zTreeObj;
@@ -81,21 +78,21 @@
     };
 
     const tableWhere = {
-        id: '$id',
-        path: '$project',
+        id: '[[${id}]]',
+        path: '[[${project}]]',
         except: 'dir'
     };
 
     var currentNode = {
-        filename: "$project".substring(1),
+        filename: "[[${project}]]".substring(1),
         index: -1,
-        path: "$project",
+        path: "[[${project}]]",
         isDirectory: true
     };
 
     function loadSuccess() {
         //
-        asyncLoadJs("$!jpomProxyPath/static/ztree/jquery.ztree.core.min.js", function () {
+        asyncLoadJs("[[${session.jpomProxyPath}]]/static/ztree/jquery.ztree.core.min.js", function () {
             zTreeObj = $.fn.zTree.init($("#tree"), setting);
             zTreeObj.addNodes(null, currentNode, false);
             currentNode = zTreeObj.getNodeByTId("tree_1");
@@ -103,8 +100,8 @@
             loadingAjax({
                 url: './getFileList',
                 data: {
-                    id: '$id',
-                    path: '$project',
+                    id: '[[${id}]]',
+                    path: '[[${project}]]',
                     except: 'file'
                 },
                 success: function (data) {
@@ -130,7 +127,7 @@
             elem: '#tab_file',
             url: './getFileList',
             where: tableWhere,
-            cols: [[
+            cols: [
                 // {field: 'index', title: '编号', width: '10%'},
                 {
                     field: 'filename', title: '文件名称', sort: true, width: '30%', templet: function (d) {
@@ -143,7 +140,7 @@
                 {field: 'modifyTime', title: '修改时间', sort: true, width: '20%'},
                 {field: 'fileSize', title: '文件大小', sort: true, width: '15%'},
                 {field: 'op', title: '操作', toolbar: '#bar_projects'}
-            ]]
+            ]
         });
 
         //
@@ -153,7 +150,7 @@
             elem: '#uploadFile',
             accept: 'file',
             data: {
-                id: '$id',
+                id: '[[${id}]]',
                 path: currentNode.path
             },
             multiple: true,
@@ -208,41 +205,6 @@
                 layer.msg('上传失败');
             }
         });
-    ##
-    ## uploadRender({
-    ##     elem: '#uploadFile_Import_dom',
-    ##     accept: 'file',
-    ##     data: {
-    ##         id: '$id',
-    ##         type: "unzip",
-    ##         clearType: function () {
-    ##             return $("#uploadFile_Import").attr("type");
-    ##         },
-    ##         levelName: function () {
-    ##             return $("#currentPath").text();
-    ##         }
-    ##     },
-    ##     multiple: false,
-    ##     exts: 'zip',
-    ##     acceptMime: '.zip',
-    ##     url: './upload',
-    ##     before: function () {
-    ##         layer.load(1, {
-    ##             shade: [0.5, '#fff'] //0.1透明度的白色背景
-    ##         });
-    ##     },
-    ##     done: function (res, index, upload) {
-    ##         layer.msg(res.msg);
-    ##         setTimeout(function () {
-    ##             layer.closeAll();
-    ##             reloadTable();
-    ##         }, 2000);
-    ##     },
-    ##     error: function () {
-    ##         layer.closeAll();
-    ##         layer.msg('上传失败');
-    ##     }
-    ## });
 
         // 表格工具条事件
         table.on('tool(tab_file)', function (obj) {
@@ -299,7 +261,7 @@
 
     //下载文件
     function downloadFile(data) {
-        var url = "./download?id=$id&filename=" + encodeURI(data.filename) + "&path=" + data.parentPath;
+        var url = "./download?id=[[${id}]]&filename=" + encodeURI(data.filename) + "&path=" + data.parentPath;
         url = appendNodeId(url);
         self.location.href = url;
     }
@@ -319,7 +281,7 @@
             loadingAjax({
                 url: './deleteFile',
                 data: {
-                    id: '$id',
+                    id: '[[${id}]]',
                     filename: data.filename,
                     path: data.parentPath
                 },
