@@ -29,11 +29,13 @@ Log="${Path}agent.log"
 LogBack="${Path}log/"
 JVM="-server "
 # 修改项目端口号 日志路径
-ARGS="--jpom.applicationTag=${Tag} --server.port=2123  --jpom.log=${Path}log"
+ARGS="--jpom.applicationTag=${Tag} --spring.profiles.active=pro --server.port=2123  --jpom.log=${Path}log"
 
 echo ${Tag}
 echo ${Path}
 RETVAL="0"
+# 升级执行命令标识
+upgrade="$2"
 
 # 启动程序
 function start() {
@@ -63,6 +65,10 @@ function start() {
         exit 2
     fi
     nohup java  ${JVM} -Xbootclasspath/a:${JAVA_HOME}/lib/tools.jar -jar ${Lib}${RUNJAR} -Dapplication=${Tag} -Dbasedir=${Path} ${ARGS}  >> ${Log} 2>&1 &
+    # 升级不执行查看日志
+    if [[ ${upgrade} == "upgrade" ]] ; then
+        exit 0
+    fi
     if [[ -f ${Log} ]]; then
         tail -f ${Log}
     else

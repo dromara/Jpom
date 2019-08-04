@@ -106,7 +106,7 @@ public class JpomApplication extends ApplicationBuilder {
             } catch (InterruptedException ignored) {
             }
             try {
-                CommandUtil.asyncExeLocalCommand(scriptFile.getParentFile(), FileUtil.getAbsolutePath(scriptFile) + " restart");
+                CommandUtil.asyncExeLocalCommand(scriptFile.getParentFile(), FileUtil.getAbsolutePath(scriptFile) + " restart upgrade");
             } catch (IOException e) {
                 e.printStackTrace();
             }
