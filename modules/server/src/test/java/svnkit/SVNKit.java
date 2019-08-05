@@ -21,6 +21,27 @@ import java.io.File;
  */
 public class SVNKit {
 
+    /**
+     * SVN路径
+     */
+    public static final String SvnPath = "svn://gitee.com/keepbx/Jpom-demo-case";
+
+    /**
+     * SVN检出到目标路径
+     */
+    public static final String TargetPath = "D:\\tttt";
+    // public static final String TargetPath = "/root/soft/resources";
+
+    /**
+     * SVN用户名
+     */
+    public static final String SvnUserName = "jiangzeyin";
+
+    /**
+     * SVN用户密码
+     */
+    public static final String SvnPassWord = "321";
+
     // 更新状态 true:没有程序在执行更新，反之则反
     public static Boolean DoUpdateStatus = true;
 
@@ -51,7 +72,7 @@ public class SVNKit {
         // 相关变量赋值
         SVNURL repositoryURL = null;
         try {
-            repositoryURL = SVNURL.parseURIEncoded(Constant.SvnPath);
+            repositoryURL = SVNURL.parseURIEncoded(SvnPath);
         } catch (SVNException e) {
             e.printStackTrace();
             return false;
@@ -60,10 +81,10 @@ public class SVNKit {
         DefaultSVNOptions options = SVNWCUtil.createDefaultOptions(true);
 
         // 实例化客户端管理类
-        ourClientManager = SVNClientManager.newInstance(options, Constant.SvnUserName, Constant.SvnPassWord);
+        ourClientManager = SVNClientManager.newInstance(options, SvnUserName, SvnPassWord);
 
         // 要把版本库的内容check out到的目录
-        File wcDir = new File(Constant.TargetPath);
+        File wcDir = new File(TargetPath);
 
         // 通过客户端管理类获得updateClient类的实例。
         SVNUpdateClient updateClient = ourClientManager.getUpdateClient();
@@ -96,10 +117,10 @@ public class SVNKit {
     public static Boolean doCleanup() {
         DefaultSVNOptions options = SVNWCUtil.createDefaultOptions(true);
         // 实例化客户端管理类
-        ourClientManager = SVNClientManager.newInstance(options, Constant.SvnUserName, Constant.SvnPassWord);
+        ourClientManager = SVNClientManager.newInstance(options, SvnUserName, SvnPassWord);
 
         // 要把版本库的内容check out到的目录
-        File wcDir = new File(Constant.TargetPath);
+        File wcDir = new File(TargetPath);
         if (wcDir.exists()) {
             try {
                 ourClientManager.getWCClient().doCleanup(wcDir);
@@ -132,9 +153,9 @@ public class SVNKit {
 
             DefaultSVNOptions options = SVNWCUtil.createDefaultOptions(true);
             // 实例化客户端管理类
-            ourClientManager = SVNClientManager.newInstance(options, Constant.SvnUserName, Constant.SvnPassWord);
+            ourClientManager = SVNClientManager.newInstance(options, SvnUserName, SvnPassWord);
             // 要更新的文件
-            File updateFile = new File(Constant.TargetPath);
+            File updateFile = new File(TargetPath);
             // 获得updateClient的实例
             SVNUpdateClient updateClient = ourClientManager.getUpdateClient();
             updateClient.setIgnoreExternals(false);
