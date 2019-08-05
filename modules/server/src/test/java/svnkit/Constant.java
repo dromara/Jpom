@@ -25,6 +25,6 @@ public class Constant {
     /**
      * SVN用户密码
      */
-    public static final String SvnPassWord = "love1593503371";
+    public static final String SvnPassWord = "321";
 
 }
