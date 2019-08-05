@@ -159,8 +159,10 @@ public abstract class BaseDbLogService<T> {
     public PageResult<T> listPage(Entity where, Page page) {
         where.setTableName(getTableName());
         PageResult<Entity> pageResult;
+        Db db = Db.use();
+        db.setWrapper((Character) null);
         try {
-            pageResult = Db.use().page(where, page);
+            pageResult = db.page(where, page);
         } catch (SQLException e) {
             throw new JpomRuntimeException("数据库异常", e);
         }

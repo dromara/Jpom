@@ -30,7 +30,7 @@ import java.io.IOException;
  * 登录拦截器
  *
  * @author jiangzeyin
- * Created by jiangzeyin on 2017/2/4.
+ * @date 2017/2/4.
  */
 @InterceptorPattens()
 public class LoginInterceptor extends BaseJpomInterceptor {
@@ -51,6 +51,9 @@ public class LoginInterceptor extends BaseJpomInterceptor {
             request.setAttribute("Page_Req", isPage);
             //
             NotLogin notLogin = handlerMethod.getMethodAnnotation(NotLogin.class);
+            if (notLogin == null) {
+                notLogin = handlerMethod.getBeanType().getAnnotation(NotLogin.class);
+            }
             if (notLogin == null) {
                 user = (UserModel) session.getAttribute(SESSION_NAME);
                 if (user == null) {

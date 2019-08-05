@@ -41,6 +41,17 @@ public class ServerExtConfigBean {
     @Value("${db.logStorageCount:100000}")
     private int h2DbLogStorageCount;
 
+    /**
+     * 服务端api token,长度要求大于等于6位，字母数字符号组合
+     */
+    @Value("${jpom.authorize.token:}")
+    private String authorizeToken;
+
+
+    public String getAuthorizeToken() {
+        return authorizeToken;
+    }
+
     public long getIpErrorLockTime() {
         if (this.ipErrorLockTimeValue == -1) {
             String str = StrUtil.emptyToDefault(this.ipErrorLockTime, "60*60*5*1000");

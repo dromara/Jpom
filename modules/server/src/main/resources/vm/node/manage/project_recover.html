@@ -37,13 +37,13 @@
     <tbody>
 
     <tr th:each="item,i: ${array}">
-        <td th:text="${i.index}"></td>
-        <td>$!item.projectInfoModel.name</td>
-        <td>$!item.projectInfoModel.id</td>
-        <td>$!item.projectInfoModel.group</td>
-        <td>$!item.projectInfoModel.lib</td>
-        <td>$!item.delTime</td>
-        <td>$!item.delUser</td>
+        <td th:text="${i.index+1}"></td>
+        <td th:text="${item?.projectInfoModel?.name}"></td>
+        <td th:text="${item?.projectInfoModel?.id}"></td>
+        <td th:text="${item?.projectInfoModel?.group}"></td>
+        <td th:text="${item?.projectInfoModel?.lib}"></td>
+        <td th:text="${item.delTime}"></td>
+        <td th:text="${item.delUser}"></td>
         <td>
             <button name="delete" onclick="projectDetail(this)"
                     th:index="${i.index}" th:data-id="${item.id}"
