@@ -13,7 +13,11 @@ public class BuildModel extends BaseBuildModule {
     private String id;
     private String name;
     /**
-     * 仓库地址
+     * 仓库类型
+     */
+    private int repoType;
+    /**
+     * 仓库地址 git 或者 svn
      */
     private String gitUrl;
     /**
@@ -145,6 +149,14 @@ public class BuildModel extends BaseBuildModule {
         this.password = password;
     }
 
+    public int getRepoType() {
+        return repoType;
+    }
+
+    public void setRepoType(int repoType) {
+        this.repoType = repoType;
+    }
+
     public enum Status implements BaseEnum {
         /**
          *
@@ -218,6 +230,35 @@ public class BuildModel extends BaseBuildModule {
         private String desc;
 
         AfterOpt(int code, String desc) {
+            this.code = code;
+            this.desc = desc;
+        }
+
+        @Override
+        public int getCode() {
+            return code;
+        }
+
+        @Override
+        public String getDesc() {
+            return desc;
+        }
+    }
+
+    /**
+     * 仓库类型
+     */
+    public enum RepoType implements BaseEnum {
+        /**
+         * git
+         */
+        Git(0, "Git"),
+        Svn(1, "Svn"),
+        ;
+        private int code;
+        private String desc;
+
+        RepoType(int code, String desc) {
             this.code = code;
             this.desc = desc;
         }

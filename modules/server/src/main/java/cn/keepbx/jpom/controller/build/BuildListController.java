@@ -82,14 +82,21 @@ public class BuildListController extends BaseServerController {
                                 @ValidatorConfig(@ValidatorItem(value = ValidatorRule.URL, msg = "仓库地址不正确")) String gitUrl,
                                 @ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "登录账号")) String userName,
                                 @ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "登录密码")) String password,
-                                @ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "请选择分支")) String branchName,
                                 @ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "构建产物目录不能为空")) String resultDirFile,
                                 @ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "构建命令不能为空")) String script,
                                 @ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "发布方法不正确") int releaseMethod,
-                                String afterOpt, String clearOld) throws Exception {
-        List<String> list = getBranchList(gitUrl, userName, password);
-        if (!list.contains(branchName)) {
-            return JsonMessage.getString(405, "没有找到对应分支：" + branchName);
+                                String afterOpt, String clearOld,
+                                String branchName,
+                                int repoType) throws Exception {
+        BaseEnum anEnum = BaseEnum.getEnum(BuildModel.RepoType.class, repoType);
+        if (anEnum == null) {
+            return JsonMessage.getString(405, "仓库类型选择错误");
+        }
+        if (BuildModel.RepoType.Git.getCode() == repoType) {
+            List<String> list = getBranchList(gitUrl, userName, password);
+            if (!list.contains(branchName)) {
+                return JsonMessage.getString(405, "没有找到对应分支：" + branchName);
+            }
         }
         BuildModel buildModel = buildService.getItem(id);
         if (buildModel == null) {
@@ -97,6 +104,7 @@ public class BuildListController extends BaseServerController {
             buildModel.setId(IdUtil.fastSimpleUUID());
         }
         buildModel.setName(name);
+        buildModel.setRepoType(repoType);
         buildModel.setGitUrl(gitUrl);
         buildModel.setBranchName(branchName);
         buildModel.setPassword(password);
@@ -165,6 +173,9 @@ public class BuildListController extends BaseServerController {
         //
         JSONArray outAfterOpt = BaseEnum.toJSONArray(OutGivingModel.AfterOpt.class);
         setAttribute("outAfterOpt", outAfterOpt);
+        //
+        JSONArray repoTypes = BaseEnum.toJSONArray(BuildModel.RepoType.class);
+        setAttribute("repoTypes", repoTypes);
         return "build/edit";
     }
 

@@ -6,6 +6,7 @@
 
 1. SpringBoot 升级到2.1.x
 2. 【Server】velocity模板引擎升级为thymeleaf
+3. 【Server】构建支持svn类型仓库（感谢@群友 .）
 
 ### 解决BUG、优化功能
 

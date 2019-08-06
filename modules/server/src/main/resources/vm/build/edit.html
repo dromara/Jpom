@@ -25,6 +25,16 @@
             </div>
         </div>
         <div class="layui-form-item">
+            <label class="layui-form-label">仓库类型</label>
+            <div class="layui-input-block">
+
+                <input th:each="item : ${repoTypes}" required lay-verify="required" type="radio" name="repoType"
+                       th:value="${item.code}"
+                       th:title="${item.desc}"
+                       th:checked="${model?.repoType==item.code}" lay-filter="repoType">
+            </div>
+        </div>
+        <div class="layui-form-item">
             <label class="layui-form-label">登录名</label>
             <div class="layui-input-block">
                 <input type="text" name="userName" required lay-verify="required" th:value="${model?.userName}"
@@ -41,11 +51,11 @@
                        class="layui-input">
             </div>
         </div>
-        <div class="layui-form-item">
+        <div class="layui-form-item" id="branchNameDiv">
             <div class="layui-inline">
                 <label class="layui-form-label">分支</label>
                 <div class="layui-input-block">
-                    <select name="branchName" id="branchName" lay-verify="required" lay-filter="branchName"
+                    <select name="branchName" id="branchName" lay-filter="branchName"
                             lay-search="">
                         <option value="">请先填写url、账号信息</option>
                     </select>
@@ -174,21 +184,25 @@
 <script type="text/javascript" th:if="${model}">
 
     asyncFn.push(function () {
-        getBranchList(function () {
-            form.val("form_build", {
-                "branchName": "[[${model.branchName}]]"
-            });
+        if ("[[${model?.repoType}]]" != 1) {
+            getBranchList(function () {
+                form.val("form_build", {
+                    "branchName": "[[${model.branchName}]]"
+                });
 
-            var afterOpt = $("select[name='releaseMethodDataId_1']").find("option:selected").attr("afterOpt");
-            for (let outAfterOptElement of outAfterOpt) {
-                if (outAfterOptElement.code === parseInt(afterOpt)) {
-                    form.val("form_build", {
-                        "releaseMethodDataId_1_after_input": outAfterOptElement.desc
-                    });
-                    break;
+                var afterOpt = $("select[name='releaseMethodDataId_1']").find("option:selected").attr("afterOpt");
+                for (let outAfterOptElement of outAfterOpt) {
+                    if (outAfterOptElement.code === parseInt(afterOpt)) {
+                        form.val("form_build", {
+                            "releaseMethodDataId_1_after_input": outAfterOptElement.desc
+                        });
+                        break;
+                    }
                 }
-            }
-        });
+            });
+        } else {
+            $("#branchNameDiv").hide();
+        }
         layui.use(['laytpl'], function () {
             laytpl = layui.laytpl;
             var releaseMethodDataId = "[[${model.releaseMethodDataId}]]";
@@ -310,6 +324,14 @@
                 }
                 changeProject(data.value);
             });
+        });
+
+        form.on('radio(repoType)', function (data) {
+            if (data.value != 1) {
+                $("#branchNameDiv").show();
+            } else {
+                $("#branchNameDiv").hide();
+            }
         });
     }
 </script>
