@@ -37,7 +37,11 @@ public class JvmUtil {
      * 旧版jpom进程标记
      */
     private static final String OLD_JPOM_PID_TAG = "Dapplication";
-    public static final String POM_PID_TAG = "DJpom.application";
+    /**
+     * 旧版jpom进程标记
+     */
+    private static final String OLD2_JPOM_PID_TAG = "Jpom.application";
+    private static final String POM_PID_TAG = "DJpom.application";
     /**
      * 记录错误的进程信息，避免重复获取
      */
@@ -226,13 +230,14 @@ public class JvmUtil {
     public static boolean checkVirtualMachineIsJpom(VirtualMachine virtualMachine, String tag) throws IOException {
         String appTag = String.format("-%s=%s ", JvmUtil.POM_PID_TAG, tag);
         String appTag2 = String.format("-%s=%s ", JvmUtil.OLD_JPOM_PID_TAG, tag);
+        String appTag3 = String.format("-%s=%s", JvmUtil.OLD2_JPOM_PID_TAG, tag);
         Properties properties = virtualMachine.getAgentProperties();
         String args = properties.getProperty("sun.jvm.args", "");
-        if (StrUtil.containsAnyIgnoreCase(args, appTag, appTag2)) {
+        if (StrUtil.containsAnyIgnoreCase(args, appTag, appTag2, appTag3)) {
             return true;
         }
         args = properties.getProperty("sun.java.command", "");
-        return StrUtil.containsAnyIgnoreCase(args, appTag, appTag2);
+        return StrUtil.containsAnyIgnoreCase(args, appTag, appTag2, appTag3);
     }
 
     /**
