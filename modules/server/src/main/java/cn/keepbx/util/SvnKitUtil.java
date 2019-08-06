@@ -8,6 +8,7 @@ import org.tmatesoft.svn.core.internal.io.dav.DAVRepositoryFactory;
 import org.tmatesoft.svn.core.internal.io.fs.FSRepositoryFactory;
 import org.tmatesoft.svn.core.internal.io.svn.SVNRepositoryFactoryImpl;
 import org.tmatesoft.svn.core.internal.wc.DefaultSVNOptions;
+import org.tmatesoft.svn.core.internal.wc.SVNFileUtil;
 import org.tmatesoft.svn.core.wc.*;
 
 import java.io.File;
@@ -18,7 +19,7 @@ import java.io.File;
  * @author bwcx_jzy
  * @date 2019/8/6
  */
-public class SVNKitUtil {
+public class SvnKitUtil {
 
     static {
         // 初始化库。 必须先执行此操作。具体操作封装在setupLibrary方法中。
@@ -65,16 +66,15 @@ public class SVNKitUtil {
         DefaultSVNOptions options = SVNWCUtil.createDefaultOptions(true);
         // 实例化客户端管理类
         SVNClientManager ourClientManager = SVNClientManager.newInstance(options, userName, userPwd);
-        // 执行check out 操作，返回工作副本的版本号。
         if (targetPath.exists()) {
-            ourClientManager.getWCClient().doCleanup(targetPath);
-        }
-        if (targetPath.exists()) {
-            if (!FileUtil.file(targetPath, ".svn").exists()) {
+            if (!FileUtil.file(targetPath, SVNFileUtil.getAdminDirectoryName()).exists()) {
                 FileUtil.del(targetPath);
             } else {
+                // 判断url是否变更
                 if (!checkUrl(targetPath, svnPath)) {
                     FileUtil.del(targetPath);
+                } else {
+                    ourClientManager.getWCClient().doCleanup(targetPath);
                 }
             }
         }

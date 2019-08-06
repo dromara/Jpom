@@ -16,7 +16,7 @@ import cn.keepbx.jpom.service.dblog.DbBuildHistoryLogService;
 import cn.keepbx.jpom.system.JpomRuntimeException;
 import cn.keepbx.util.CommandUtil;
 import cn.keepbx.util.GitUtil;
-import cn.keepbx.util.SVNKitUtil;
+import cn.keepbx.util.SvnKitUtil;
 import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 
 import java.io.*;
@@ -164,7 +164,7 @@ public class BuildManage extends BaseBuild implements Runnable {
                     msg = GitUtil.getLastCommitMsg(gitFile, buildModel.getBranchName());
                 } else if (buildModel.getRepoType() == BuildModel.RepoType.Svn.getCode()) {
                     // svn
-                    msg = SVNKitUtil.checkOut(buildModel.getGitUrl(), buildModel.getUserName(), buildModel.getUserName(), gitFile);
+                    msg = SvnKitUtil.checkOut(buildModel.getGitUrl(), buildModel.getUserName(), buildModel.getUserName(), gitFile);
                 }
                 this.log(msg);
             } catch (Exception e) {
