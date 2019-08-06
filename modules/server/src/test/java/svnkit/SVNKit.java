@@ -40,7 +40,7 @@ public class SVNKit {
     /**
      * SVN用户密码
      */
-    public static final String SvnPassWord = "love1593503371";
+    public static final String SvnPassWord = "";
 
     // 更新状态 true:没有程序在执行更新，反之则反
     public static Boolean DoUpdateStatus = true;

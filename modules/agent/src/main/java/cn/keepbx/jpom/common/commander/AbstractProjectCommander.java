@@ -270,7 +270,11 @@ public abstract class AbstractProjectCommander {
         if (virtualMachine == null) {
             return AbstractProjectCommander.STOP_TAG;
         }
-        return StrUtil.format("{}:{}", AbstractProjectCommander.RUNNING_TAG, virtualMachine.id());
+        try {
+            return StrUtil.format("{}:{}", AbstractProjectCommander.RUNNING_TAG, virtualMachine.id());
+        } finally {
+            virtualMachine.detach();
+        }
     }
 
     //---------------------------------------------------- 基本操作----end
@@ -354,11 +358,15 @@ public abstract class AbstractProjectCommander {
         if (virtualMachine == null) {
             return StrUtil.DASHED;
         }
-        for (ProjectInfoModel projectInfoModel : projectInfoModels) {
-            if (JvmUtil.checkVirtualMachineIsJpom(virtualMachine, projectInfoModel.getId())) {
-                name = projectInfoModel.getName();
-                break;
+        try {
+            for (ProjectInfoModel projectInfoModel : projectInfoModels) {
+                if (JvmUtil.checkVirtualMachineIsJpom(virtualMachine, projectInfoModel.getId())) {
+                    name = projectInfoModel.getName();
+                    break;
+                }
             }
+        } finally {
+            virtualMachine.detach();
         }
         if (name != null) {
             PID_JPOM_NAME.put(pid, name);

@@ -73,7 +73,11 @@ public class JpomClose {
         if (virtualMachine == null) {
             return "Jpom并没有运行";
         }
-        return "Jpom运行中:" + virtualMachine.id();
+        try {
+            return "Jpom运行中:" + virtualMachine.id();
+        } finally {
+            virtualMachine.detach();
+        }
     }
 
 

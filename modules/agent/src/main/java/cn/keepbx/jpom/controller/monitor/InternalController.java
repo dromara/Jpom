@@ -1,6 +1,7 @@
 package cn.keepbx.jpom.controller.monitor;
 
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.util.PageUtil;
 import cn.hutool.extra.servlet.ServletUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
@@ -14,7 +15,6 @@ import cn.keepbx.util.CommandUtil;
 import cn.keepbx.util.JvmUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.sun.tools.attach.VirtualMachine;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -66,19 +66,20 @@ public class InternalController extends BaseAgentController {
     public String getThreadInfos(String tag) throws Exception {
         int limit = getParameterInt("limit", 10);
         int page = getParameterInt("page", 1);
-        VirtualMachine virtualMachine = JvmUtil.getVirtualMachine(tag);
-        ThreadMXBean threadMXBean = JvmUtil.getThreadMXBean(virtualMachine);
-        if (threadMXBean == null) {
-            return JsonMessage.getString(200, "");
+
+        ThreadMXBean bean = JvmUtil.getThreadMXBean(tag);
+        if (bean == null) {
+            return JsonMessage.getString(400, "未获取到对应信息");
         }
         //启用线程争用监视
-        threadMXBean.setThreadContentionMonitoringEnabled(true);
-        ThreadInfo[] threadInfos = threadMXBean.dumpAllThreads(false, false);
+        bean.setThreadContentionMonitoringEnabled(true);
+        ThreadInfo[] threadInfos = bean.dumpAllThreads(false, false);
         if (threadInfos == null || threadInfos.length <= 0) {
-            return JsonMessage.getString(200, "");
+            return JsonMessage.getString(404, "没有获取到任何线程");
         }
+
         JSONArray array = new JSONArray();
-        int index = (page - 1) * limit;
+        int index = PageUtil.getStart(page, limit);
         int len = limit + index;
         int length = threadInfos.length;
         if (len > length) {
@@ -113,17 +114,16 @@ public class InternalController extends BaseAgentController {
      */
     private JSONObject getBeanMem(String tag) {
         try {
-            VirtualMachine virtualMachine = JvmUtil.getVirtualMachine(tag);
-            MemoryMXBean memoryMXBean = JvmUtil.getMemoryMXBean(virtualMachine);
-            if (memoryMXBean == null) {
+            MemoryMXBean bean = JvmUtil.getMemoryMXBean(tag);
+            if (bean == null) {
                 return null;
             }
             JSONObject jsonObject = new JSONObject();
-            jsonObject.put("mount", memoryMXBean.getObjectPendingFinalizationCount());
+            jsonObject.put("mount", bean.getObjectPendingFinalizationCount());
             //堆内存
-            MemoryUsage memory = memoryMXBean.getHeapMemoryUsage();
+            MemoryUsage memory = bean.getHeapMemoryUsage();
             //非堆内存
-            MemoryUsage nonHeapMemoryUsage = memoryMXBean.getNonHeapMemoryUsage();
+            MemoryUsage nonHeapMemoryUsage = bean.getNonHeapMemoryUsage();
             long used = memory.getUsed();
             long max = memory.getMax();
             //未定义

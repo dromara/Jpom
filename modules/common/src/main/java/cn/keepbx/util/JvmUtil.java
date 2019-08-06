@@ -57,54 +57,75 @@ public class JvmUtil {
     /**
      * 获取指定程序的jvm 信息
      *
-     * @param virtualMachine VirtualMachine
+     * @param jpomTag jpomTag
      * @return null 没有运行或者获取数据
      * @throws Exception 异常
      */
-    public static MemoryMXBean getMemoryMXBean(VirtualMachine virtualMachine) throws Exception {
-        JMXServiceURL jmxServiceURL = getJMXServiceURL(virtualMachine);
-        if (jmxServiceURL == null) {
+    public static MemoryMXBean getMemoryMXBean(String jpomTag) throws Exception {
+        VirtualMachine virtualMachine = JvmUtil.getVirtualMachine(jpomTag);
+        if (virtualMachine == null) {
             return null;
         }
-        JMXConnector jmxConnector = JMXConnectorFactory.connect(jmxServiceURL, null);
-        MBeanServerConnection mBeanServerConnection = jmxConnector.getMBeanServerConnection();
-        return ManagementFactory.newPlatformMXBeanProxy(mBeanServerConnection, ManagementFactory.MEMORY_MXBEAN_NAME, MemoryMXBean.class);
+        try {
+            JMXServiceURL url = getJMXServiceURL(virtualMachine);
+            if (url == null) {
+                return null;
+            }
+            JMXConnector jmxConnector = JMXConnectorFactory.connect(url, null);
+            MBeanServerConnection mBeanServerConnection = jmxConnector.getMBeanServerConnection();
+            return ManagementFactory.newPlatformMXBeanProxy(mBeanServerConnection, ManagementFactory.MEMORY_MXBEAN_NAME, MemoryMXBean.class);
+        } finally {
+            virtualMachine.detach();
+        }
     }
 
     /**
      * 获取指定程序的jvm 信息
      *
-     * @param virtualMachine VirtualMachine
+     * @param pId pId
      * @return 没有运行或者获取数据
      * @throws Exception 异常
      * @see OperatingSystemMXBean
      */
-    public static OperatingSystemMXBean getOperatingSystemMXBean(VirtualMachine virtualMachine) throws Exception {
-        JMXServiceURL jmxServiceURL = getJMXServiceURL(virtualMachine);
-        if (jmxServiceURL == null) {
-            return null;
+    public static OperatingSystemMXBean getOperatingSystemMXBean(String pId) throws Exception {
+        VirtualMachine virtualMachine = getVirtualMachine(Integer.parseInt(pId));
+        try {
+            JMXServiceURL url = getJMXServiceURL(virtualMachine);
+            if (url == null) {
+                return null;
+            }
+            JMXConnector jmxConnector = JMXConnectorFactory.connect(url, null);
+            MBeanServerConnection mBeanServerConnection = jmxConnector.getMBeanServerConnection();
+            return ManagementFactory.newPlatformMXBeanProxy(mBeanServerConnection, ManagementFactory.OPERATING_SYSTEM_MXBEAN_NAME, OperatingSystemMXBean.class);
+        } finally {
+            virtualMachine.detach();
         }
-        JMXConnector jmxConnector = JMXConnectorFactory.connect(jmxServiceURL, null);
-        MBeanServerConnection mBeanServerConnection = jmxConnector.getMBeanServerConnection();
-        return ManagementFactory.newPlatformMXBeanProxy(mBeanServerConnection, ManagementFactory.OPERATING_SYSTEM_MXBEAN_NAME, OperatingSystemMXBean.class);
     }
 
     /**
      * 获取指定程序的线程信息
      *
-     * @param virtualMachine VirtualMachine
+     * @param jpomTag jpomTag
      * @return 没有运行或者获取数据
      * @throws Exception 异常
      * @see ThreadMXBean
      */
-    public static ThreadMXBean getThreadMXBean(VirtualMachine virtualMachine) throws Exception {
-        JMXServiceURL jmxServiceURL = getJMXServiceURL(virtualMachine);
-        if (jmxServiceURL == null) {
+    public static ThreadMXBean getThreadMXBean(String jpomTag) throws Exception {
+        VirtualMachine virtualMachine = JvmUtil.getVirtualMachine(jpomTag);
+        if (virtualMachine == null) {
             return null;
         }
-        JMXConnector jmxConnector = JMXConnectorFactory.connect(jmxServiceURL, null);
-        MBeanServerConnection mBeanServerConnection = jmxConnector.getMBeanServerConnection();
-        return ManagementFactory.newPlatformMXBeanProxy(mBeanServerConnection, ManagementFactory.THREAD_MXBEAN_NAME, ThreadMXBean.class);
+        try {
+            JMXServiceURL url = getJMXServiceURL(virtualMachine);
+            if (url == null) {
+                return null;
+            }
+            JMXConnector jmxConnector = JMXConnectorFactory.connect(url, null);
+            MBeanServerConnection mBeanServerConnection = jmxConnector.getMBeanServerConnection();
+            return ManagementFactory.newPlatformMXBeanProxy(mBeanServerConnection, ManagementFactory.THREAD_MXBEAN_NAME, ThreadMXBean.class);
+        } finally {
+            virtualMachine.detach();
+        }
     }
 
     /**

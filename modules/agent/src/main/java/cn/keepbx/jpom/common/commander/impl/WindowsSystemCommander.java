@@ -130,8 +130,7 @@ public class WindowsSystemCommander extends AbstractSystemCommander {
             processModel.setTime(memList.get(8));
 
             try {
-                VirtualMachine virtualMachine = VirtualMachine.attach(memList.get(1));
-                OperatingSystemMXBean operatingSystemMXBean = JvmUtil.getOperatingSystemMXBean(virtualMachine);
+                OperatingSystemMXBean operatingSystemMXBean = JvmUtil.getOperatingSystemMXBean(memList.get(1));
                 if (operatingSystemMXBean != null) {
                     //最近jvm cpu使用率
                     double processCpuLoad = operatingSystemMXBean.getProcessCpuLoad() * 100;

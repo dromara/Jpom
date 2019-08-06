@@ -180,7 +180,7 @@
                 ],
                 page: true,
                 parseData: function (res) { //res 即为原始返回的数据
-                    if (res.code == 200) {
+                    if (res.code == 200 && res.data) {
                         return {
                             "code": res.code, //解析接口状态
                             "msg": res.msg, //解析提示文本
@@ -192,6 +192,7 @@
                             "code": res.code, //解析接口状态
                             "msg": res.msg, //解析提示文本
                             "count": 0, //解析数据长度
+                            "data": []
                         };
                     }
                 }
