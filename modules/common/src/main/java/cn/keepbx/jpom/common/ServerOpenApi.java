@@ -8,5 +8,5 @@ package cn.keepbx.jpom.common;
  */
 public class ServerOpenApi {
 
-    public static final String UPDATE_NODE_INFO = "api/node/update";
+    public static final String UPDATE_NODE_INFO = "/api/node/update";
 }

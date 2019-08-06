@@ -6,6 +6,16 @@ jpom:
     agentName: jpomAgent
     # agent 端管理密码，非必填，如果为空Jpom 会自动生成一串随机字符串当密码
     agentPwd:
+  agent:
+    # 设置插件端id，配置自动注册服务端需要
+    id:
+    # 当前节点插件端可以访问的url ,如果不设置将使用http://+本地IP+端口
+    url:
+  server:
+    # 设置服务端的url
+    url:
+    # 服务器接口请求token
+    token:
 whitelistDirectory:
   # 白名单目录是否验证包含关系
   checkStartsWith: true

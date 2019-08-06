@@ -9,7 +9,6 @@ import cn.keepbx.jpom.model.system.JpomManifest;
 import cn.keepbx.jpom.service.WhitelistDirectoryService;
 import cn.keepbx.jpom.service.manage.ProjectInfoService;
 import cn.keepbx.util.JvmUtil;
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -32,7 +31,7 @@ public class IndexController extends BaseAgentController {
     @Resource
     private ProjectInfoService projectInfoService;
 
-    @RequestMapping(value = {"index", "", "index.html", "/"}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = {"index", "", "index.html", "/"}, produces = MediaType.TEXT_PLAIN_VALUE)
     @NotAuthorize
     public String index() {
         return "Jpom-Agent";

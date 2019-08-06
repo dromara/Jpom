@@ -1,5 +1,9 @@
 package cn.keepbx.jpom.system;
 
+import cn.hutool.core.net.NetUtil;
+import cn.hutool.core.util.StrUtil;
+import cn.hutool.http.HttpRequest;
+import cn.hutool.http.HttpUtil;
 import cn.jiangzeyin.common.spring.SpringUtil;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
@@ -12,6 +16,8 @@ import org.springframework.context.annotation.Configuration;
  */
 @Configuration
 public class AgentExtConfigBean {
+
+    private static AgentExtConfigBean agentExtConfigBean;
     /**
      * 白名单路径是否判断包含关系
      */
@@ -36,8 +42,65 @@ public class AgentExtConfigBean {
     @Value("${log.saveDays:7}")
     private int logSaveDays;
 
+    @Value("${jpom.agent.id:}")
+    private String agentId;
 
-    private static AgentExtConfigBean agentExtConfigBean;
+    @Value("${jpom.agent.url:}")
+    private String agentUrl;
+
+    @Value("${jpom.server.url:}")
+    private String serverUrl;
+
+    @Value("${jpom.server.token:}")
+    private String serverToken;
+
+    public String getAgentId() {
+        return agentId;
+    }
+
+    public String getServerUrl() {
+        return serverUrl;
+    }
+
+    public String getServerToken() {
+        return serverToken;
+    }
+
+    /**
+     * 获取当前的url
+     *
+     * @return 如果没有配置将自动生成：http://+本地IP+端口
+     */
+    public String getAgentUrl() {
+        if (StrUtil.isEmpty(agentUrl)) {
+            String localhostStr = NetUtil.getLocalhostStr();
+            int port = ConfigBean.getInstance().getPort();
+            agentUrl = String.format("http://%s:%s", localhostStr, port);
+        }
+        if (StrUtil.isEmpty(agentUrl)) {
+            throw new JpomRuntimeException("获取Agent url失败");
+        }
+        return agentUrl;
+    }
+
+    /**
+     * 创建请求对象
+     *
+     * @param openApi url
+     * @return HttpRequest
+     * @see cn.keepbx.jpom.common.ServerOpenApi
+     */
+    public HttpRequest createServerRequest(String openApi) {
+        if (StrUtil.isEmpty(serverUrl)) {
+            throw new JpomRuntimeException("请先配置server端url");
+        }
+        if (StrUtil.isEmpty(serverToken)) {
+            throw new JpomRuntimeException("请先配置server端Token");
+        }
+        HttpRequest httpRequest = HttpUtil.createPost(String.format("%s%s", serverUrl, openApi));
+        httpRequest.header("JPOM-TOKEN", serverToken);
+        return httpRequest;
+    }
 
     /**
      * 配置错误或者没有，默认是7天
@@ -50,7 +113,6 @@ public class AgentExtConfigBean {
         }
         return logSaveDays;
     }
-
 
     /**
      * 单例
