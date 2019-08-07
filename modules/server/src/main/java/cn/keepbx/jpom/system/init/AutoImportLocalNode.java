@@ -1,7 +1,9 @@
 package cn.keepbx.jpom.system.init;
 
+import cn.hutool.core.date.DateTime;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.CharsetUtil;
+import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.PreLoadClass;
@@ -13,6 +15,8 @@ import cn.keepbx.jpom.model.system.AgentAutoUser;
 import cn.keepbx.jpom.model.system.JpomManifest;
 import cn.keepbx.jpom.service.node.NodeService;
 import cn.keepbx.jpom.system.ConfigBean;
+import cn.keepbx.jpom.system.ServerConfigBean;
+import cn.keepbx.util.JsonFileUtil;
 import cn.keepbx.util.JvmUtil;
 import com.alibaba.fastjson.JSONObject;
 import sun.jvmstat.monitor.MonitoredVm;
@@ -32,6 +36,19 @@ public class AutoImportLocalNode {
 
     private static final String AGENT_MAIN_CLASS = "cn.keepbx.jpom.JpomAgentApplication";
     private static NodeService nodeService;
+
+    @PreLoadMethod
+    private static void install() {
+        File file = FileUtil.file(ConfigBean.getInstance().getDataPath(), ServerConfigBean.INSTALL);
+        if (file.exists()) {
+            return;
+        }
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("installId", IdUtil.fastSimpleUUID());
+        jsonObject.put("installTime", DateTime.now().toString());
+        jsonObject.put("desc", "请勿删除此文件,服务端安装id和插件端互通关联");
+        JsonFileUtil.saveJson(file.getAbsolutePath(), jsonObject);
+    }
 
     @PreLoadMethod
     private static void loadAgent() {

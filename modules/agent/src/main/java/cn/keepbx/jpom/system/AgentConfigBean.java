@@ -43,6 +43,11 @@ public class AgentConfigBean {
      */
     public static final String SCRIPT_DIRECTORY = "script";
 
+    /**
+     * Server 端的信息
+     */
+    public static final String SERVER_ID = "SERVER.json";
+
     private static AgentConfigBean agentConfigBean;
 
     /**

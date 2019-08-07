@@ -8,5 +8,12 @@ package cn.keepbx.jpom.common;
  */
 public class ServerOpenApi {
 
+    public static final String HEAD = "JPOM-TOKEN";
+
     public static final String UPDATE_NODE_INFO = "/api/node/update";
+
+    /**
+     * 安装id
+     */
+    public static final String INSTALL_ID = "/api/installId";
 }

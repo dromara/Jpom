@@ -2,15 +2,20 @@ package cn.keepbx.jpom.service.node;
 
 import cn.hutool.cache.impl.TimedCache;
 import cn.hutool.core.util.IdUtil;
+import cn.hutool.core.util.StrUtil;
+import cn.jiangzeyin.common.JsonMessage;
 import cn.keepbx.jpom.common.BaseOperService;
 import cn.keepbx.jpom.common.forward.NodeForward;
 import cn.keepbx.jpom.common.forward.NodeUrl;
 import cn.keepbx.jpom.model.data.NodeModel;
+import cn.keepbx.jpom.model.system.JpomManifest;
 import cn.keepbx.jpom.system.ServerConfigBean;
+import cn.keepbx.util.StringUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -128,5 +133,53 @@ public class NodeService extends BaseOperService<NodeModel> {
     @Override
     public void deleteItem(String id) {
         deleteJson(ServerConfigBean.NODE, id);
+    }
+
+
+    public String addNode(NodeModel nodeModel, HttpServletRequest request) {
+        if (!StringUtil.isGeneral(nodeModel.getId(), 2, 20)) {
+            return JsonMessage.getString(405, "节点id不能为空并且2-20（英文字母 、数字和下划线）");
+        }
+        if (getItem(nodeModel.getId()) != null) {
+            return JsonMessage.getString(405, "节点id已经存在啦");
+        }
+        String error = checkData(nodeModel);
+        if (error != null) {
+            return error;
+        }
+        JpomManifest jpomManifest = NodeForward.requestData(nodeModel, NodeUrl.Info, request, JpomManifest.class);
+        if (jpomManifest == null) {
+            return JsonMessage.getString(204, "节点连接失败，请检查节点是否在线");
+        }
+        addItem(nodeModel);
+        return JsonMessage.getString(200, "操作成功");
+    }
+
+    public String updateNode(NodeModel nodeModel) throws Exception {
+        NodeModel exit = getItem(nodeModel.getId());
+        if (exit == null) {
+            return JsonMessage.getString(405, "节点不存在");
+        }
+        String error = checkData(nodeModel);
+        if (error != null) {
+            return error;
+        }
+        updateItem(nodeModel);
+        return JsonMessage.getString(200, "操作成功");
+    }
+
+    private String checkData(NodeModel nodeModel) {
+        if (StrUtil.isEmpty(nodeModel.getName())) {
+            return JsonMessage.getString(405, "节点名称 不能为空");
+        }
+        List<NodeModel> list = list();
+        if (list != null) {
+            for (NodeModel model : list) {
+                if (model.getUrl().equalsIgnoreCase(nodeModel.getUrl()) && !model.getId().equalsIgnoreCase(nodeModel.getId())) {
+                    return JsonMessage.getString(405, "已经存在相同的节点地址啦");
+                }
+            }
+        }
+        return null;
     }
 }

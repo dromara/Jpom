@@ -67,58 +67,12 @@ public class NodeEditController extends BaseServerController {
     @ResponseBody
     public String save(NodeModel model, String type) throws Exception {
         if ("add".equalsIgnoreCase(type)) {
-            return addNode(model);
+            return nodeService.addNode(model, getRequest());
         } else {
-            return updateNode(model);
+            return nodeService.updateNode(model);
         }
     }
 
-    private String addNode(NodeModel nodeModel) {
-        if (!StringUtil.isGeneral(nodeModel.getId(), 2, 20)) {
-            return JsonMessage.getString(405, "节点id不能为空并且2-20（英文字母 、数字和下划线）");
-        }
-        if (nodeService.getItem(nodeModel.getId()) != null) {
-            return JsonMessage.getString(405, "节点id已经存在啦");
-        }
-        String error = checkData(nodeModel);
-        if (error != null) {
-            return error;
-        }
-        JpomManifest jpomManifest = NodeForward.requestData(nodeModel, NodeUrl.Info, getRequest(), JpomManifest.class);
-        if (jpomManifest == null) {
-            return JsonMessage.getString(204, "节点连接失败，请检查节点是否在线");
-        }
-        nodeService.addItem(nodeModel);
-        return JsonMessage.getString(200, "操作成功");
-    }
-
-    private String updateNode(NodeModel nodeModel) throws Exception {
-        NodeModel exit = nodeService.getItem(nodeModel.getId());
-        if (exit == null) {
-            return JsonMessage.getString(405, "节点不存在");
-        }
-        String error = checkData(nodeModel);
-        if (error != null) {
-            return error;
-        }
-        nodeService.updateItem(nodeModel);
-        return JsonMessage.getString(200, "操作成功");
-    }
-
-    private String checkData(NodeModel nodeModel) {
-        if (StrUtil.isEmpty(nodeModel.getName())) {
-            return JsonMessage.getString(405, "节点名称 不能为空");
-        }
-        List<NodeModel> list = nodeService.list();
-        if (list != null) {
-            for (NodeModel model : list) {
-                if (model.getUrl().equalsIgnoreCase(nodeModel.getUrl()) && !model.getId().equalsIgnoreCase(nodeModel.getId())) {
-                    return JsonMessage.getString(405, "已经存在相同的节点地址啦");
-                }
-            }
-        }
-        return null;
-    }
 
     /**
      * 删除节点

@@ -9,7 +9,7 @@ import java.lang.annotation.*;
  * @date 2017/5/9.
  */
 @Documented
-@Target(ElementType.METHOD)
+@Target({ElementType.METHOD, ElementType.TYPE})
 @Inherited
 @Retention(RetentionPolicy.RUNTIME)
 public @interface NotLogin {

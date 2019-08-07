@@ -56,6 +56,11 @@ public class ServerConfigBean {
      */
     public static final String BUILD = "build.json";
 
+    /**
+     * 第一次服务端安装信息
+     */
+    public static final String INSTALL = "INSTALL.json";
+
     private static ServerConfigBean serverConfigBean;
 
     /**

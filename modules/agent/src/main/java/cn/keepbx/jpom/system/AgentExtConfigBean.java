@@ -2,9 +2,11 @@ package cn.keepbx.jpom.system;
 
 import cn.hutool.core.net.NetUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.crypto.SecureUtil;
 import cn.hutool.http.HttpRequest;
 import cn.hutool.http.HttpUtil;
 import cn.jiangzeyin.common.spring.SpringUtil;
+import cn.keepbx.jpom.common.ServerOpenApi;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 
@@ -91,14 +93,17 @@ public class AgentExtConfigBean {
      * @see cn.keepbx.jpom.common.ServerOpenApi
      */
     public HttpRequest createServerRequest(String openApi) {
-        if (StrUtil.isEmpty(serverUrl)) {
+        if (StrUtil.isEmpty(getServerUrl())) {
             throw new JpomRuntimeException("请先配置server端url");
         }
-        if (StrUtil.isEmpty(serverToken)) {
+        if (StrUtil.isEmpty(getServerToken())) {
             throw new JpomRuntimeException("请先配置server端Token");
         }
+        // 加密
+        String md5 = SecureUtil.md5(getServerToken());
+        md5 = SecureUtil.sha1(md5 + ServerOpenApi.HEAD);
         HttpRequest httpRequest = HttpUtil.createPost(String.format("%s%s", serverUrl, openApi));
-        httpRequest.header("JPOM-TOKEN", serverToken);
+        httpRequest.header(ServerOpenApi.HEAD, md5);
         return httpRequest;
     }
 

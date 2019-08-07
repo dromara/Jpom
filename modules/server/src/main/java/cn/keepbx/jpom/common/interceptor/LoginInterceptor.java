@@ -5,16 +5,19 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.net.URLEncoder;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.crypto.SecureUtil;
 import cn.hutool.extra.servlet.ServletUtil;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.interceptor.InterceptorPattens;
 import cn.jiangzeyin.common.spring.SpringUtil;
 import cn.keepbx.jpom.common.BaseServerController;
+import cn.keepbx.jpom.common.ServerOpenApi;
 import cn.keepbx.jpom.model.Role;
 import cn.keepbx.jpom.model.data.NodeModel;
 import cn.keepbx.jpom.model.data.UserModel;
 import cn.keepbx.jpom.service.user.UserService;
 import cn.keepbx.jpom.system.ExtConfigBean;
+import cn.keepbx.jpom.system.ServerExtConfigBean;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.web.method.HandlerMethod;
@@ -73,6 +76,13 @@ public class LoginInterceptor extends BaseJpomInterceptor {
                     this.responseLogin(request, response, handlerMethod);
                     return false;
                 }
+            } else {
+                if (notLogin.openApi()) {
+                    // openApi token 判断
+                    if (!checkOpenApi(request, response)) {
+                        return false;
+                    }
+                }
             }
         }
         reload();
@@ -80,6 +90,26 @@ public class LoginInterceptor extends BaseJpomInterceptor {
             checkRoleDesc(request, user);
         }
         //
+        return true;
+    }
+
+    private boolean checkOpenApi(HttpServletRequest request, HttpServletResponse response) {
+        String header = request.getHeader(ServerOpenApi.HEAD);
+        if (StrUtil.isEmpty(header)) {
+            ServletUtil.write(response, JsonMessage.getString(300, "token empty"), MediaType.APPLICATION_JSON_UTF8_VALUE);
+            return false;
+        }
+        String authorizeToken = ServerExtConfigBean.getInstance().getAuthorizeToken();
+        if (StrUtil.isEmpty(authorizeToken)) {
+            ServletUtil.write(response, JsonMessage.getString(300, "not config token"), MediaType.APPLICATION_JSON_UTF8_VALUE);
+            return false;
+        }
+        String md5 = SecureUtil.md5(authorizeToken);
+        md5 = SecureUtil.sha1(md5 + ServerOpenApi.HEAD);
+        if (!StrUtil.equals(header, md5)) {
+            ServletUtil.write(response, JsonMessage.getString(300, "not config token"), MediaType.APPLICATION_JSON_UTF8_VALUE);
+            return false;
+        }
         return true;
     }
 

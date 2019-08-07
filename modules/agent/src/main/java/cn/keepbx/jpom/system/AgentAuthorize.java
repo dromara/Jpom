@@ -57,7 +57,20 @@ public class AgentAuthorize {
         return agentAuthorize;
     }
 
+    public String getAgentName() {
+        return agentName;
+    }
 
+    public String getAgentPwd() {
+        return agentPwd;
+    }
+
+    /**
+     * 判断授权是否正确
+     *
+     * @param authorize 授权
+     * @return true 正确
+     */
     public boolean checkAuthorize(String authorize) {
         return StrUtil.equals(authorize, this.authorize);
     }
