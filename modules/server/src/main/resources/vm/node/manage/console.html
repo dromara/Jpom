@@ -32,10 +32,12 @@
             white-space: nowrap;
         }
 
-        .console .status {
+        .right {
             display: inline-block;
             float: right;
+            margin-right: 20px;
         }
+
 
         .console .status .status-div {
             display: inline-block;
@@ -68,16 +70,17 @@
 
             <th:block th:if="${logSize?.get('logSize')}">
                 <button id="export" class="layui-btn layui-btn-sm">导出日志</button>
-                <button id="resetLog" class="layui-btn layui-btn-sm">重置日志(<span
-                        id="logSize" th:text="${logSize?.logSize}"></span>)
                 </button>
             </th:block>
-
             <button th:if="${logSize?.logBack}" id="logBack" class="layui-btn layui-btn-sm">备份列表</button>
         </div>
-        <div class="status">
+
+        <div class="status right">
             <div class="status-div"></div>
             <span></span>
+        </div>
+        <div class="logSize right" id="logSize" style="padding:2px;" th:if="${logSize}"
+             th:text="${logSize?.logSize}">
         </div>
     </div>
     <div class="terminal"></div>
@@ -257,10 +260,10 @@
                     if (200 == data.code) {
                         if (data.data && data.data.logSize) {
                             $("#logSize").html(data.data.logSize);
-                            $("#resetLog").show();
+                            $("#logSize").show();
                         }
                     } else {
-                        $("#resetLog").hide();
+                        $("#logSize").hide();
                         layer.msg(data.msg);
                     }
                 }
@@ -278,7 +281,7 @@
             location.href = url;
         });
 
-        $("#resetLog").on('click', function () {
+        $("#logSize").on('click', function () {
             layer.confirm("确定要清空当前控制台日志文件内容吗？", {
                 title: '系统提示'
             }, function (index) {
@@ -292,7 +295,7 @@
                         layer.msg(data.msg);
                         if (200 == data.code) {
                             // reqLogSize();
-                            $("#resetLog").hide();
+                            $("#logSize").hide();
                         }
                     },
                 });

@@ -141,6 +141,12 @@ public enum NodeUrl {
      * 更新系统jar包
      */
     SystemUploadJar("/system/uploadJar.json"),
+
+    /**
+     *
+     */
+    SystemGetConfig("/system/getConfig.json"),
+    SystemSaveConfig("/system/save_config.json"),
     ;
     /**
      * 相对请求地址

@@ -85,6 +85,12 @@
         "title": "在线升级",
         "url": "../system/update.html",
         "role": "System"
+      },
+      {
+        "id": "sysConfig",
+        "title": "系统配置",
+        "url": "../system/config.html",
+        "role": "System"
       }
     ]
   }

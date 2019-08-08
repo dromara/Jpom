@@ -61,7 +61,6 @@
                 },
                 done: function (res) {
                     top.layer.closeAll('loading');
-                    layer.msg(res.msg);
                     if (200 == res.code) {
                         top.layer.msg('系统升级中..', {
                             icon: 16,
@@ -71,6 +70,8 @@
                                 top.location.reload();
                             }
                         });
+                    } else {
+                        layer.alert(res.msg);
                     }
                 },
                 error: function () {

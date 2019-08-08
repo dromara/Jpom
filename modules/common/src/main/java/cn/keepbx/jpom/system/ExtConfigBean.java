@@ -84,6 +84,13 @@ public class ExtConfigBean {
         return ExtConfigBean.resource;
     }
 
+    public static File getResourceFile() {
+        File file = JpomManifest.getRunPath();
+        file = file.getParentFile().getParentFile();
+        file = new File(file, FILE_NAME);
+        return file;
+    }
+
     /**
      * 单例
      *
