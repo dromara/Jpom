@@ -61,6 +61,11 @@ public class ServerConfigBean {
      */
     public static final String INSTALL = "INSTALL.json";
 
+    /**
+     *  ssh信息
+     */
+    public static final String SSH_LIST = "ssh_list.json";
+
     private static ServerConfigBean serverConfigBean;
 
     /**

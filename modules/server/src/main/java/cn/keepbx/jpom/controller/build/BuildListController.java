@@ -5,6 +5,7 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SecureUtil;
+import cn.hutool.system.SystemUtil;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.validator.ValidatorConfig;
 import cn.jiangzeyin.common.validator.ValidatorItem;
@@ -96,6 +97,16 @@ public class BuildListController extends BaseServerController {
             List<String> list = getBranchList(gitUrl, userName, password);
             if (!list.contains(branchName)) {
                 return JsonMessage.getString(405, "没有找到对应分支：" + branchName);
+            }
+        }
+        // 判断删除
+        if (SystemUtil.getOsInfo().isWindows()) {
+            if (StrUtil.containsAnyIgnoreCase(script, "rd ", "del ")) {
+                return JsonMessage.getString(405, "不能包含删除命令");
+            }
+        } else {
+            if (StrUtil.containsIgnoreCase(script, "rm ")) {
+                return JsonMessage.getString(405, "不能包含删除命令");
             }
         }
         BuildModel buildModel = buildService.getItem(id);

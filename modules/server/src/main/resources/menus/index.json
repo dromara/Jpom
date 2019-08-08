@@ -1,9 +1,20 @@
 [
   {
     "title": "节点管理",
-    "id": "welcome",
-    "url": "./node/list.html",
-    "icon": "layui-icon-star-fill"
+    "icon": "layui-icon-star-fill",
+    "id": "nodeManager",
+    "childs": [
+      {
+        "title": "节点列表",
+        "id": "nodeList",
+        "url": "./node/list.html"
+      },
+      {
+        "title": "SSH管理",
+        "id": "sshList",
+        "url": "./node/ssh/list.html"
+      }
+    ]
   },
   {
     "title": "节点分发",

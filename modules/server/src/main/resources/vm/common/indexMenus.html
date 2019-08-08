@@ -78,7 +78,7 @@
             {{# if(item.childs) { }}
             <dl class="layui-nav-child">
                 {{# layui.each(item.childs, function(indexC, itemC){ }}
-                <dd><a href="javascript:" data-options={{ JSON.stringify(itemC) }}>{{ itemC.title }}</a></dd>
+                <dd id="dd_{{itemC.id}}"><a href="javascript:" data-options={{ JSON.stringify(itemC) }}>{{ itemC.title }}</a></dd>
                 {{# }); }}
             </dl>
             {{# } }}
@@ -102,7 +102,11 @@
                         laytpl(innerHTML).render(data.data, function (html) {
                             $("#menuTree").html(html);
                             element.render('nav');
-                            tabChange(data.data[0]);
+                            var first = data.data[0];
+                            if (first.childs) {
+                                first = first.childs[0]
+                            }
+                            tabChange(first);
                             // 左侧导航条事件
                             element.on('nav(menu)', function (data) {
                                 var dataJSON = $(data.context).attr("data-options");

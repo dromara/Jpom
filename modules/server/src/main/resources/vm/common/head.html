@@ -111,6 +111,11 @@
                 });
             }
             element.tabChange('mainTabs', lay_id);
+            var ddItem = $("dd[id='dd_" + options.id + "']");
+            var hasClass = ddItem.hasClass('layui-this');
+            if (!hasClass) {
+                ddItem.find('a').click();
+            }
         }
 
         function layerOpen(options) {
