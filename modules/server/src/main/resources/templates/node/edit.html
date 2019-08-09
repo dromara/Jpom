@@ -43,7 +43,7 @@
                 <div class="layui-input-block">
                     <input type="checkbox" value="true"
 
-                           th:checked="${item?.openStatus || item==null}"
+                           th:checked="${item==null || item?.openStatus}"
                            name="openStatus"
                            lay-skin="switch"
                            lay-text="启用|停用">
