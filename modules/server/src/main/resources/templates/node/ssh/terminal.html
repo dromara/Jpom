@@ -12,7 +12,7 @@
     </style>
 </head>
 
-<body>
+<body onbeforeunload="goodbye()">
 <div id="terminal"></div>
 </body>
 <script type="text/javascript">
@@ -21,6 +21,14 @@
     var sock;
 
     function loadSuccess() {
+        top.layer.load({
+            icon: 16,
+            shade: 0.2,
+            time: 1000 * 30,
+            end: function () {
+                top.location.reload();
+            }
+        });
         var url = getSocketHost() + "/ssh?userId=[[${session.user.getUserMd5Key()}]]&sshId=[[${item?.id}]]&nodeId=system&type=ssh";
         var terminal = document.getElementById("#terminal");
         sock = new WebSocket(url);
@@ -35,6 +43,7 @@
         //
         sock.onopen = function () {
             term.open(terminal, true);
+            top.layer.closeAll();
         };
 
         sock.onmessage = function (msg) {
@@ -57,7 +66,6 @@
             console.log(e);
         };
         sock.onclose = function (e) {
-            console.log(e);
             term.destroy();
             term = null;
             sock = null;
@@ -76,11 +84,28 @@
             height: term._core.charMeasure.height
         };
 
-        var cols = parseInt(window.innerWidth / style.width, 10) - 1;
-        var rows = parseInt(window.innerHeight / style.height, 10);
+        var cols = parseInt((window.innerWidth) / style.width, 10);
+        var rows = parseInt((window.innerHeight * 0.95) / style.height, 10);
         var geometry = {cols: cols, rows: rows};
         term.resize(geometry.cols, geometry.rows);
         sock.send(JSON.stringify({'resize': geometry}));
     }
+
+    window.onbeforeunload = function (e) {
+        goodbye();
+    };
+
+    window.onunload = function () {
+        goodbye();
+    };
+
+    function goodbye() {
+        if (sock) {
+            sock.close();
+            sock = null;
+            term = null;
+        }
+    }
+
 </script>
 </html>

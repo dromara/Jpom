@@ -1,9 +1,9 @@
-import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.lang.PatternPool;
-import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.ReUtil;
 
 import java.nio.charset.Charset;
+import java.util.SortedMap;
+import java.util.function.Consumer;
 import java.util.regex.Pattern;
 
 /**
@@ -28,6 +28,16 @@ public class TestString {
 
         System.out.println(Integer.MAX_VALUE);
 
-        System.out.println(Charset.availableCharsets());
+        SortedMap<String, Charset> x = Charset.availableCharsets();
+        x.values().forEach(new Consumer<Charset>() {
+            @Override
+            public void accept(Charset charset) {
+                String name = charset.name();
+                if ("utf-8".equalsIgnoreCase(name)) {
+                    System.out.println(charset);
+                }
+            }
+        });
+        System.out.println(x);
     }
 }

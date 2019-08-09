@@ -26,6 +26,8 @@ import java.nio.charset.Charset;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
+ * ssh 处理
+ *
  * @author bwcx_jzy
  * @date 2019/8/9
  */
@@ -77,6 +79,10 @@ public class SshHandler extends BaseHandler {
         if (this.checkCommand(handlerItem, data)) {
             return;
         }
+        if ("\t".equals(data)) {
+            this.sendCommand(handlerItem, data);
+            return;
+        }
         if (StrUtil.CR.equals(data)) {
             if (handlerItem.dataToDst.length() > 0) {
                 data = StrUtil.CRLF;
@@ -88,11 +94,15 @@ public class SshHandler extends BaseHandler {
                 return;
             }
         }
-        handlerItem.outputStream.write(data.getBytes());
-        handlerItem.outputStream.flush();
+        this.sendCommand(handlerItem, data);
         if (!StrUtil.CRLF.equals(data) && !StrUtil.CR.equals(data)) {
             sendBinary(handlerItem.session, data);
         }
+    }
+
+    private void sendCommand(HandlerItem handlerItem, String data) throws IOException {
+        handlerItem.outputStream.write(data.getBytes());
+        handlerItem.outputStream.flush();
     }
 
     private boolean checkCommand(HandlerItem handlerItem, String data) throws Exception {
@@ -116,7 +126,7 @@ public class SshHandler extends BaseHandler {
     }
 
 
-    private static class HandlerItem {
+    private class HandlerItem implements Runnable {
         private WebSocketSession session;
         private StringBuilder dataToDst = new StringBuilder();
         private InputStream inputStream;
@@ -141,8 +151,13 @@ public class SshHandler extends BaseHandler {
 
         void startRead() throws JSchException {
             this.channel.connect();
-            ThreadUtil.execute(() -> {
-                final String[] preMsg = {""};
+            ThreadUtil.execute(this);
+        }
+
+        @Override
+        public void run() {
+            final String[] preMsg = {""};
+            try {
                 IoUtil.readLines(inputStream, charset, (LineHandler) msg -> {
                     msg = StrUtil.CRLF + msg;
                     if (preMsg[0].equals(msg)) {
@@ -160,7 +175,13 @@ public class SshHandler extends BaseHandler {
                     sendBinary(session, msg);
                     dataToDst.setLength(0);
                 });
-            });
+            } catch (Exception e) {
+                if (!this.openSession.isConnected()) {
+                    return;
+                }
+                DefaultSystemLog.ERROR().error("读取错误", e);
+                SshHandler.this.destroy(this.session);
+            }
         }
     }
 
@@ -185,7 +206,7 @@ public class SshHandler extends BaseHandler {
             try {
                 session.sendMessage(byteBuffer);
             } catch (IOException e) {
-                DefaultSystemLog.ERROR().error("发送消息失败", e);
+                DefaultSystemLog.ERROR().error("发送消息失败:" + msg, e);
             }
         }
     }
