@@ -6,43 +6,22 @@
 
 <body>
 <div class="layui-row">
-    <button id="addMonitor" class="layui-btn layui-btn-sm">添加SSH</button>
+    <button id="add" class="layui-btn layui-btn-sm">添加SSH</button>
 </div>
 <table class="layui-table" id="table" lay-filter="table" style="margin: 0;"></table>
 
 </body>
 
 <script type="text/html" id="bar_monitor">
-    <a href="javascript:;" class="layui-btn  layui-btn-sm layui-btn-normal" lay-event="update">编辑</a>
-
-    <a href="javascript:;" th:if="${session.user.isSystemUser()}" class="layui-btn  layui-btn-sm layui-btn-danger"
-       lay-event="delete">删除</a>
-</script>
-<script type="text/html" id="monitor_status">
-    <input type="checkbox" monitorId="{{ d.id }}" typeS="status" name="status" {{# if(d.status){ }}checked{{# } }}
-           lay-skin="switch" lay-text="是|否" lay-filter="monitor_status">
-</script>
-<script type="text/html" id="monitor_restart">
-    <input type="checkbox" monitorId="{{ d.id }}" typeS="restart" name="autoRestart"
-           {{# if(d.autoRestart){ }}checked{{# } }}
-           lay-skin="switch" lay-text="是|否" lay-filter="monitor_restart">
-</script>
-<script type="text/html" id="monitor_alarm">
-    <input type="checkbox" disabled name="alarm" {{# if(d.alarm){ }}checked{{# } }} lay-skin="switch"
-           lay-text="报警中|未报警">
+    <a href="javascript:;" th:if="${session.user.isSystemUser()}" class="layui-btn  layui-btn-sm layui-btn-normal"
+       lay-event="update">编辑</a>
 </script>
 <script type="text/javascript">
     var col = [
         {field: 'name', title: '名称'},
-        {field: 'status', templet: "#monitor_status", title: '开启状态'},
-        {field: 'autoRestart', templet: "#monitor_restart", title: '自动重启监控'},
-        {field: 'alarm', templet: "#monitor_alarm", title: '报警状态'},
-        {field: 'parent', title: '创建人'},
-        {
-            field: 'modifyTime', title: '修改时间', templet: function (d) {
-                return formateTime(d.modifyTime);
-            }
-        },
+        {field: 'host', title: 'host'},
+        {field: 'user', title: 'user'},
+        {field: 'port', title: 'port'},
         {field: 'op', title: '操作', align: 'center', toolbar: '#bar_monitor', fixed: 'right'}
     ];
 
@@ -55,7 +34,7 @@
         });
 
         // '添加监控'点击事件
-        $('#addMonitor').on('click', function () {
+        $('#add').on('click', function () {
             // 弹出
             layer.open({
                 type: 2,

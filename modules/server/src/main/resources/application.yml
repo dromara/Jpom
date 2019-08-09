@@ -12,7 +12,7 @@ spring:
     encoding: UTF-8
     servlet:
       content-type: text/html
-    prefix: classpath:/vm/
+    prefix: classpath:/templates/
 #thymeleaf end
 banner:
   msg: Jpom-Server 管理系统启动中
@@ -30,3 +30,4 @@ preload:
 # 强制去掉空格
 request:
   trimAll: true
+  parameterXss: false

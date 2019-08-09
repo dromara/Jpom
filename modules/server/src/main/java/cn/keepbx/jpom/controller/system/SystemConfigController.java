@@ -11,6 +11,9 @@ import cn.keepbx.jpom.JpomApplication;
 import cn.keepbx.jpom.common.BaseServerController;
 import cn.keepbx.jpom.common.forward.NodeForward;
 import cn.keepbx.jpom.common.forward.NodeUrl;
+import cn.keepbx.jpom.common.interceptor.UrlPermission;
+import cn.keepbx.jpom.model.Role;
+import cn.keepbx.jpom.model.log.UserOperateLogV1;
 import cn.keepbx.jpom.model.system.JpomManifest;
 import cn.keepbx.jpom.system.ExtConfigBean;
 import com.alibaba.fastjson.JSONObject;
@@ -50,6 +53,7 @@ public class SystemConfigController extends BaseServerController {
 
     @RequestMapping(value = "save_config.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
+    @UrlPermission(value = Role.System, optType = UserOperateLogV1.OptType.EditSysConfig)
     public String saveConfig(String nodeId, String content, String restart) {
         if (StrUtil.isNotEmpty(nodeId)) {
             return NodeForward.request(getNode(), getRequest(), NodeUrl.SystemSaveConfig).toString();

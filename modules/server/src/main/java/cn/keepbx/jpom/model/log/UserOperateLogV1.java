@@ -277,6 +277,9 @@ public class UserOperateLogV1 extends BaseJsonModel {
         DelSysLog(64, "删除系统日志"),
 
         UpdateSys(65, "升级系统"),
+
+        EditSsh(66, "修改SSH"),
+        EditSysConfig(67, "修改系统配置"),
         ;
         private int code;
         private String desc;

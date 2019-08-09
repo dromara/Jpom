@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.w3.org/1999/xhtml">
+
+<head th:replace="common/head::head">
+</head>
+<body>
+<div class="layui-container">
+    <form action="./save.json" class="layui-form" id="form_node">
+        <div class="layui-form-item">
+            <input type="hidden" id="id" name="id" th:value="${item?.id}">
+            <input type="hidden" id="type" name="type" th:value="${item}?'edit':'add'">
+            <label class="layui-form-label">SSH名称</label>
+            <div class="layui-input-block">
+                <input type="text" id="name" name="name" th:value="${item?.name}" placeholder="请填写SSH名称"
+                       class="layui-input"
+                       required
+                       lay-verify="required">
+            </div>
+
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">Hostname</label>
+            <div class="layui-input-block">
+                <input type="text" id="host" name="host" th:value="${item?.host}"
+                       placeholder="请填写节Hostname" class="layui-input"
+                       required
+                       lay-verify="required">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">Port</label>
+            <div class="layui-input-block">
+                <input type="number" id="port" name="port" th:value="${item?.port}"
+                       placeholder="请填写Port,默认22" class="layui-input"
+                       lay-verify="required">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">Username</label>
+            <div class="layui-input-block">
+                <input type="text" id="user" name="user" th:value="${item?.user}"
+                       placeholder="请填写Username" class="layui-input"
+                       lay-verify="required">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">Password</label>
+            <div class="layui-input-block">
+                <input type="password" id="password" name="password" th:value="${item?.password}"
+                       placeholder="请填写password" class="layui-input"
+                       lay-verify="required">
+            </div>
+        </div>
+        <div class="layui-form-item" style="padding-left: 20%">
+            <button class="layui-btn layui-btn-normal" lay-submit lay-filter="submit">提交
+            </button>
+
+            <a th:if="${item}" class="layui-btn layui-btn-warm" th:data-id="${item.id}" id="delete">删除</a>
+        </div>
+    </form>
+</div>
+</body>
+<script type="text/javascript">
+
+
+    function loadSuccess() {
+        form.on('submit(submit)', function (data) {
+            loadingAjax({
+                url: data.form.action,
+                data: data.field,
+                success: function (data) {
+                    layer.msg(data.msg);
+                    if (200 == data.code) {
+                        autoClose();
+                    }
+                }
+            });
+            return false;
+        });
+
+        $("#delete").click(function () {
+            var id = $(this).attr("data-id");
+            var msg = '确定删除SSH吗 ？';
+            layer.confirm(msg, {
+                title: '系统提示'
+            }, function (index) {
+                loadingAjax({
+                    url: './del.json',
+                    data: {
+                        id: id
+                    },
+                    success: function (data) {
+                        layer.msg(data.msg);
+                        if (200 == data.code) {
+                            autoClose();
+                        }
+                    }
+                });
+            });
+        });
+    }
+
+    function autoClose() {
+        setTimeout(function () {
+            var index = parent.layer.getFrameIndex(window.name);
+            parent.layer.close(index);
+            parent.location.reload();
+        }, 2000);
+    }
+</script>
+</html>

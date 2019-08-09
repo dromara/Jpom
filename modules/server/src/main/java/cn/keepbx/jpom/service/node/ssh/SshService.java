@@ -1,5 +1,6 @@
 package cn.keepbx.jpom.service.node.ssh;
 
+import cn.hutool.core.util.IdUtil;
 import cn.keepbx.jpom.common.BaseOperService;
 import cn.keepbx.jpom.model.data.SshModel;
 import cn.keepbx.jpom.system.ServerConfigBean;
@@ -31,6 +32,7 @@ public class SshService extends BaseOperService<SshModel> {
 
     @Override
     public void addItem(SshModel sshModel) {
+        sshModel.setId(IdUtil.fastSimpleUUID());
         saveJson(ServerConfigBean.SSH_LIST, sshModel.toJson());
     }
 
