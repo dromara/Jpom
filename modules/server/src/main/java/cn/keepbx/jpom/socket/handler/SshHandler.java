@@ -22,6 +22,7 @@ import org.springframework.web.socket.WebSocketSession;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.charset.Charset;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -39,7 +40,14 @@ public class SshHandler extends BaseHandler {
         Channel channel = JschUtil.createChannel(openSession, ChannelType.SHELL);
         InputStream inputStream = channel.getInputStream();
         OutputStream outputStream = channel.getOutputStream();
-        HandlerItem handlerItem = new HandlerItem(session, inputStream, outputStream, openSession, channel);
+        //
+        Charset charset;
+        try {
+            charset = Charset.forName(sshItem.getCharset());
+        } catch (Exception e) {
+            charset = CharsetUtil.CHARSET_UTF_8;
+        }
+        HandlerItem handlerItem = new HandlerItem(session, inputStream, outputStream, openSession, channel, charset);
         handlerItem.startRead();
         HANDLER_ITEM_CONCURRENT_HASH_MAP.put(session.getId(), handlerItem);
         //
@@ -100,6 +108,7 @@ public class SshHandler extends BaseHandler {
             //
             handlerItem.dataToDst.setLength(0);
             this.call(handlerItem.session, "没有权限");
+            this.call(handlerItem.session, "\\u0016");
             this.call(handlerItem.session, StrUtil.CR);
             return true;
         }
@@ -114,20 +123,27 @@ public class SshHandler extends BaseHandler {
         private OutputStream outputStream;
         private Session openSession;
         private Channel channel;
+        private Charset charset;
 
-        HandlerItem(WebSocketSession session, InputStream inputStream, OutputStream outputStream, Session openSession, Channel channel) {
+        HandlerItem(WebSocketSession session,
+                    InputStream inputStream,
+                    OutputStream outputStream,
+                    Session openSession,
+                    Channel channel,
+                    Charset charset) {
             this.session = session;
             this.inputStream = inputStream;
             this.outputStream = outputStream;
             this.openSession = openSession;
             this.channel = channel;
+            this.charset = charset;
         }
 
         void startRead() throws JSchException {
             this.channel.connect();
             ThreadUtil.execute(() -> {
                 final String[] preMsg = {""};
-                IoUtil.readLines(inputStream, CharsetUtil.CHARSET_UTF_8, (LineHandler) msg -> {
+                IoUtil.readLines(inputStream, charset, (LineHandler) msg -> {
                     msg = StrUtil.CRLF + msg;
                     if (preMsg[0].equals(msg)) {
                         sendBinary(session, msg);

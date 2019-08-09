@@ -3,6 +3,7 @@ import cn.hutool.core.lang.PatternPool;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.ReUtil;
 
+import java.nio.charset.Charset;
 import java.util.regex.Pattern;
 
 /**
@@ -21,12 +22,12 @@ public class TestString {
         System.out.println(ReUtil.isMatch(PatternPool.URL_HTTP, url));
 
 
-        System.out.println(FileUtil.file("/a", null, "", "ss"));
+//        System.out.println(FileUtil.file("/a", null, "", "ss"));
 
         System.out.println(Math.pow(1024, 2));
 
         System.out.println(Integer.MAX_VALUE);
 
-        System.out.println(CharsetUtil.defaultCharset());
+        System.out.println(Charset.availableCharsets());
     }
 }

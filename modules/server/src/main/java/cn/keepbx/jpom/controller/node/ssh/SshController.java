@@ -8,7 +8,6 @@ import cn.jiangzeyin.common.validator.ValidatorRule;
 import cn.keepbx.jpom.common.BaseServerController;
 import cn.keepbx.jpom.common.interceptor.UrlPermission;
 import cn.keepbx.jpom.model.Role;
-import cn.keepbx.jpom.model.data.NodeModel;
 import cn.keepbx.jpom.model.data.SshModel;
 import cn.keepbx.jpom.model.data.UserModel;
 import cn.keepbx.jpom.model.log.UserOperateLogV1;
@@ -22,8 +21,9 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.annotation.Resource;
 import java.io.IOException;
+import java.nio.charset.Charset;
+import java.util.Collection;
 import java.util.List;
-import java.util.function.Consumer;
 
 /**
  * @author bwcx_jzy
@@ -61,6 +61,7 @@ public class SshController extends BaseServerController {
                        @ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "user不能为空") String user,
                        @ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "password不能为空") String password,
                        @ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "port错误") int port,
+                       String charset,
                        String id, String type) throws Exception {
         SshModel sshModel;
         if ("edit".equals(type)) {
@@ -76,6 +77,8 @@ public class SshController extends BaseServerController {
         sshModel.setPort(port);
         sshModel.setUser(user);
         sshModel.setName(name);
+        Charset.forName(charset);
+        sshModel.setCharset(charset);
         try {
             Session session = JschUtil.openSession(sshModel.getHost(), sshModel.getPort(), sshModel.getUser(), sshModel.getPassword());
             JschUtil.close(session);
@@ -99,6 +102,8 @@ public class SshController extends BaseServerController {
                 setAttribute("item", sshModel);
             }
         }
+        Collection<Charset> charsets = Charset.availableCharsets().values();
+        setAttribute("charsets", charsets);
         return "node/ssh/edit";
     }
 

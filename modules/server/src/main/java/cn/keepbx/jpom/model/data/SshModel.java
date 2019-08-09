@@ -13,6 +13,7 @@ public class SshModel extends BaseModel {
     private int port;
     private String user;
     private String password;
+    private String charset;
 
     public String getHost() {
         return host;
@@ -44,5 +45,13 @@ public class SshModel extends BaseModel {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public String getCharset() {
+        return charset;
+    }
+
+    public void setCharset(String charset) {
+        this.charset = charset;
     }
 }

@@ -49,7 +49,7 @@
             <artifactId>tools</artifactId>
             <version>${java.version}</version>
             <scope>system</scope>
-            <systemPath>${env.JAVA_HOME}/lib/tools.jar</systemPath>
+            <systemPath>${toolsJar}</systemPath>
         </dependency>
 
         <dependency>
@@ -78,4 +78,31 @@
             </plugin>
         </plugins>
     </build>
+
+    <profiles>
+        <profile>
+            <id>default-profile</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+                <file>
+                    <exists>${java.home}/../lib/tools.jar</exists>
+                </file>
+            </activation>
+            <properties>
+                <toolsJar>${java.home}/../lib/tools.jar</toolsJar>
+            </properties>
+        </profile>
+        <profile>
+            <id>mac-profile</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+                <file>
+                    <exists>${java.home}/../Classes/classes.jar</exists>
+                </file>
+            </activation>
+            <properties>
+                <toolsJar>${java.home}/../Classes/classes.jar</toolsJar>
+            </properties>
+        </profile>
+    </profiles>
 </project>
