@@ -97,11 +97,11 @@
             <activation>
                 <activeByDefault>false</activeByDefault>
                 <file>
-                    <exists>${java.home}/../Classes/classes.jar</exists>
+                    <exists>${java.home}/../lib/tools.jar</exists>
                 </file>
             </activation>
             <properties>
-                <toolsJar>${java.home}/../Classes/classes.jar</toolsJar>
+                <toolsJar>${java.home}/../lib/tools.jar</toolsJar>
             </properties>
         </profile>
     </profiles>
