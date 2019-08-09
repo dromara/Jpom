@@ -95,7 +95,7 @@
     function loadSuccess() {
         const showLogDom = $('.console .terminal');
         if ('WebSocket' in window) {
-            var url = getSocketHost() + "/console?userId=[[${session.user.getUserMd5Key()}]]&projectId=[[${projectInfo?.id}]]&nodeId=[[${node?.id}]]";
+            var url = getSocketHost() + "/console?userId=[[${session.user.getUserMd5Key()}]]&projectId=[[${projectInfo?.id}]]&nodeId=[[${node?.id}]]&type=console";
             const ws = new WebSocket(url);
             ws.onopen = function () {
                 showLogDom.append('WebSocket连接成功！<br/>');

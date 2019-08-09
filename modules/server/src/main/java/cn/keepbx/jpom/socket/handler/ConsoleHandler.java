@@ -1,10 +1,13 @@
-package cn.keepbx.jpom.socket;
+package cn.keepbx.jpom.socket.handler;
 
 import cn.hutool.core.util.IdUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.keepbx.jpom.common.forward.NodeUrl;
 import cn.keepbx.jpom.model.data.UserModel;
 import cn.keepbx.jpom.model.log.UserOperateLogV1;
+import cn.keepbx.jpom.socket.BaseProxyHandler;
+import cn.keepbx.jpom.socket.ConsoleCommandOp;
+import cn.keepbx.jpom.socket.ProxySession;
 import cn.keepbx.jpom.system.init.OperateLogController;
 import com.alibaba.fastjson.JSONObject;
 
@@ -16,9 +19,9 @@ import java.util.Map;
  * @author jiangzeyin
  * @date 2019/4/19
  */
-public class ServerWebSocketConsoleHandler extends BaseServerWebSocketHandler {
+public class ConsoleHandler extends BaseProxyHandler {
 
-    public ServerWebSocketConsoleHandler() {
+    public ConsoleHandler() {
         super(NodeUrl.TopSocket, "projectId");
     }
 

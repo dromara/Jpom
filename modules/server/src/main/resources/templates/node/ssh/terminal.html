@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.w3.org/1999/xhtml">
+
+<head>
+    <th:block th:include="common/head::head"></th:block>
+    <link href="https://cdn.jsdelivr.net/npm/xterm@3.14.5/dist/xterm.css" rel="stylesheet" type="text/css"/>
+    <script src="https://cdn.jsdelivr.net/npm/xterm@3.14.5/dist/xterm.js"></script>
+    <style>
+        body {
+            padding: 0;
+        }
+    </style>
+</head>
+
+<body>
+<div id="terminal"></div>
+</body>
+<script type="text/javascript">
+    var encoding = "utf-8";
+    var term;
+    var sock;
+
+    function loadSuccess() {
+        var url = getSocketHost() + "/ssh?userId=[[${session.user.getUserMd5Key()}]]&sshId=[[${item?.id}]]&nodeId=system&type=ssh";
+        var terminal = document.getElementById("#terminal");
+        sock = new WebSocket(url);
+        term = new window.Terminal({
+            cursorBlink: true,
+        });
+
+        //
+        term.onData(function (data) {
+            sock.send(JSON.stringify({'data': data}));
+        });
+        //
+        sock.onopen = function () {
+            term.open(terminal, true);
+        };
+
+        sock.onmessage = function (msg) {
+            var reader = new window.FileReader();
+
+            reader.onloadend = function () {
+                var decoder = new window.TextDecoder(encoding);
+                var text = decoder.decode(reader.result);
+                // console.log(text);
+                term.write(text);
+                if (!term.resized) {
+                    resize_term(term, sock);
+                    term.resized = true;
+                }
+            };
+            reader.readAsArrayBuffer(msg.data);
+        };
+
+        sock.onerror = function (e) {
+            console.log(e);
+        };
+        sock.onclose = function (e) {
+            console.log(e);
+            term.destroy();
+            term = null;
+            sock = null;
+        };
+
+        $(window).resize(function () {
+            if (term && sock) {
+                resize_term(term, sock);
+            }
+        });
+    }
+
+    function resize_term(term, sock) {
+        var style = {
+            width: term._core.charMeasure.width,
+            height: term._core.charMeasure.height
+        };
+
+        var cols = parseInt(window.innerWidth / style.width, 10) - 1;
+        var rows = parseInt(window.innerHeight / style.height, 10);
+        var geometry = {cols: cols, rows: rows};
+        term.resize(geometry.cols, geometry.rows);
+        sock.send(JSON.stringify({'resize': geometry}));
+    }
+</script>
+</html>

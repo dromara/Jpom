@@ -1,5 +1,9 @@
 package cn.keepbx.jpom.socket;
 
+import cn.keepbx.jpom.socket.handler.ConsoleHandler;
+import cn.keepbx.jpom.socket.handler.ScriptHandler;
+import cn.keepbx.jpom.socket.handler.TomcatHandler;
+import cn.keepbx.jpom.socket.handler.SshHandler;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.socket.config.annotation.EnableWebSocket;
 import org.springframework.web.socket.config.annotation.WebSocketConfigurer;
@@ -18,13 +22,16 @@ public class ServerWebSocketConfig implements WebSocketConfigurer {
     @Override
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
         // 控制台
-        registry.addHandler(new ServerWebSocketConsoleHandler(), "/console")
+        registry.addHandler(new ConsoleHandler(), "/console")
                 .addInterceptors(serverWebSocketInterceptor).setAllowedOrigins("*");
         // 脚本模板
-        registry.addHandler(new ServerWebSocketScriptHandler(), "/script_run")
+        registry.addHandler(new ScriptHandler(), "/script_run")
                 .addInterceptors(serverWebSocketInterceptor).setAllowedOrigins("*");
-        // tomca
-        registry.addHandler(new ServerWebSocketTomcatHandler(), "/tomcat_log")
+        // tomcat
+        registry.addHandler(new TomcatHandler(), "/tomcat_log")
+                .addInterceptors(serverWebSocketInterceptor).setAllowedOrigins("*");
+        // ssh
+        registry.addHandler(new SshHandler(), "/ssh")
                 .addInterceptors(serverWebSocketInterceptor).setAllowedOrigins("*");
     }
 }

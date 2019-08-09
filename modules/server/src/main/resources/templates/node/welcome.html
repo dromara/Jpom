@@ -203,7 +203,7 @@
             layer.msg("不支持WebSocket");
             return;
         }
-        var url = getSocketHost() + "/console?userId=[[${session.user.getUserMd5Key()}]]&projectId=system&nodeId=[[${node.id}]]";
+        var url = getSocketHost() + "/console?userId=[[${session.user.getUserMd5Key()}]]&projectId=system&nodeId=[[${node.id}]]&type=console";
         if (!ws) {
             ws = new WebSocket(url);
         }

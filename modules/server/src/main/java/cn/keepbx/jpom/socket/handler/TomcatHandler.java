@@ -1,10 +1,14 @@
-package cn.keepbx.jpom.socket;
+package cn.keepbx.jpom.socket.handler;
 
 import cn.hutool.core.io.FileUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.spring.SpringUtil;
 import cn.keepbx.jpom.JpomApplication;
 import cn.keepbx.jpom.common.forward.NodeUrl;
+import cn.keepbx.jpom.socket.BaseProxyHandler;
+import cn.keepbx.jpom.socket.ConsoleCommandOp;
+import cn.keepbx.jpom.socket.ProxySession;
+import cn.keepbx.jpom.socket.ServiceFileTailWatcher;
 import cn.keepbx.jpom.system.WebAopLog;
 import cn.keepbx.util.SocketSessionUtil;
 import com.alibaba.fastjson.JSONObject;
@@ -20,9 +24,9 @@ import java.util.Map;
  * @author jiangzeyin
  * @date 2019/4/24
  */
-public class ServerWebSocketTomcatHandler extends BaseServerWebSocketHandler {
+public class TomcatHandler extends BaseProxyHandler {
 
-    ServerWebSocketTomcatHandler() {
+    public TomcatHandler() {
         super(NodeUrl.Tomcat_Socket, "tomcatId");
     }
 
@@ -60,7 +64,7 @@ public class ServerWebSocketTomcatHandler extends BaseServerWebSocketHandler {
     }
 
     @Override
-    protected void destroy(WebSocketSession session) {
+    public void destroy(WebSocketSession session) {
         super.destroy(session);
         ServiceFileTailWatcher.offline(session);
     }

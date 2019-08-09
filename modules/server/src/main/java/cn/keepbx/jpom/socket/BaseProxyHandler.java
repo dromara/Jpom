@@ -2,7 +2,6 @@ package cn.keepbx.jpom.socket;
 
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.core.util.URLUtil;
-import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.spring.SpringUtil;
 import cn.keepbx.jpom.common.forward.NodeForward;
 import cn.keepbx.jpom.common.forward.NodeUrl;
@@ -12,10 +11,8 @@ import cn.keepbx.jpom.model.log.UserOperateLogV1;
 import cn.keepbx.jpom.system.init.OperateLogController;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.http.HttpHeaders;
-import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
-import org.springframework.web.socket.handler.TextWebSocketHandler;
 
 import java.io.IOException;
 import java.util.Map;
@@ -26,13 +23,13 @@ import java.util.Map;
  * @author jiangzeyin
  * @date 2019/4/25
  */
-public abstract class BaseServerWebSocketHandler extends TextWebSocketHandler {
+public abstract class BaseProxyHandler extends BaseHandler {
     protected OperateLogController operateLogController;
 
     private NodeUrl nodeUrl;
     private String dataParName;
 
-    public BaseServerWebSocketHandler(NodeUrl nodeUrl, String dataParName) {
+    public BaseProxyHandler(NodeUrl nodeUrl, String dataParName) {
         this.nodeUrl = nodeUrl;
         this.dataParName = dataParName;
     }
@@ -109,17 +106,7 @@ public abstract class BaseServerWebSocketHandler extends TextWebSocketHandler {
     }
 
     @Override
-    public void handleTransportError(WebSocketSession session, Throwable exception) {
-        DefaultSystemLog.ERROR().error(session.getId() + "socket 异常", exception);
-        destroy(session);
-    }
-
-    @Override
-    public void afterConnectionClosed(WebSocketSession session, CloseStatus status) {
-        destroy(session);
-    }
-
-    protected void destroy(WebSocketSession session) {
+    public void destroy(WebSocketSession session) {
         try {
             if (session.isOpen()) {
                 session.close();

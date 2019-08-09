@@ -13,6 +13,7 @@ import cn.keepbx.jpom.model.data.SshModel;
 import cn.keepbx.jpom.model.data.UserModel;
 import cn.keepbx.jpom.model.log.UserOperateLogV1;
 import cn.keepbx.jpom.service.node.ssh.SshService;
+import com.jcraft.jsch.Session;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -76,7 +77,8 @@ public class SshController extends BaseServerController {
         sshModel.setUser(user);
         sshModel.setName(name);
         try {
-            JschUtil.openSession(sshModel.getHost(), sshModel.getPort(), sshModel.getUser(), sshModel.getPassword());
+            Session session = JschUtil.openSession(sshModel.getHost(), sshModel.getPort(), sshModel.getUser(), sshModel.getPassword());
+            JschUtil.close(session);
         } catch (Exception e) {
             return JsonMessage.getString(505, "ssh连接失败：" + e.getMessage());
         }
@@ -98,5 +100,12 @@ public class SshController extends BaseServerController {
             }
         }
         return "node/ssh/edit";
+    }
+
+    @RequestMapping(value = "terminal.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
+    public String terminal(String id) throws IOException {
+        SshModel sshModel = sshService.getItem(id);
+        setAttribute("item", sshModel);
+        return "node/ssh/terminal";
     }
 }

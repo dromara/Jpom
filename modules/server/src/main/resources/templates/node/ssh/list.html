@@ -15,6 +15,7 @@
 <script type="text/html" id="bar_monitor">
     <a href="javascript:;" th:if="${session.user.isSystemUser()}" class="layui-btn  layui-btn-sm layui-btn-normal"
        lay-event="update">编辑</a>
+    <a href="javascript:;" class="layui-btn  layui-btn-sm layui-btn-normal" lay-event="terminal">终端</a>
 </script>
 <script type="text/javascript">
     var col = [
@@ -56,9 +57,13 @@
             if ('update' === event) {
                 // 修改
                 updateApplication(data);
-            } else if ('delete' === event) {
-                // 删除
-                deleteApplication(data);
+            } else if ('terminal' === event) {
+                var url = './node/ssh/terminal.html?id=' + data.id;
+                tabChange({
+                    id: data.id,
+                    url: url,
+                    title: data.name + ' - 终端',
+                });
             }
         });
 

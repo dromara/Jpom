@@ -1,9 +1,12 @@
-package cn.keepbx.jpom.socket;
+package cn.keepbx.jpom.socket.handler;
 
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.keepbx.jpom.common.forward.NodeUrl;
 import cn.keepbx.jpom.model.data.UserModel;
 import cn.keepbx.jpom.model.log.UserOperateLogV1;
+import cn.keepbx.jpom.socket.BaseProxyHandler;
+import cn.keepbx.jpom.socket.ConsoleCommandOp;
+import cn.keepbx.jpom.socket.ProxySession;
 import cn.keepbx.jpom.system.init.OperateLogController;
 import com.alibaba.fastjson.JSONObject;
 
@@ -15,9 +18,9 @@ import java.util.Map;
  * @author jiangzeyin
  * @date 2019/4/24
  */
-public class ServerWebSocketScriptHandler extends BaseServerWebSocketHandler {
+public class ScriptHandler extends BaseProxyHandler {
 
-    public ServerWebSocketScriptHandler() {
+    public ScriptHandler() {
         super(NodeUrl.Script_Run, "scriptId");
     }
 

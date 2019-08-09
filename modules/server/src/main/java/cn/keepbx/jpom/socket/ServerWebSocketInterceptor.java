@@ -1,12 +1,16 @@
 package cn.keepbx.jpom.socket;
 
 import cn.hutool.extra.servlet.ServletUtil;
+import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.spring.SpringUtil;
 import cn.keepbx.jpom.JpomApplication;
 import cn.keepbx.jpom.model.data.NodeModel;
+import cn.keepbx.jpom.model.data.SshModel;
 import cn.keepbx.jpom.model.data.UserModel;
 import cn.keepbx.jpom.service.node.NodeService;
+import cn.keepbx.jpom.service.node.ssh.SshService;
 import cn.keepbx.jpom.service.user.UserService;
+import cn.keepbx.jpom.system.JpomRuntimeException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
@@ -48,24 +52,45 @@ public class ServerWebSocketInterceptor implements HandshakeInterceptor {
             }
             // 判断拦截类型
             String type = httpServletRequest.getParameter("type");
-            if ("script".equalsIgnoreCase(type)) {
-                // 脚本模板
-                String scriptId = httpServletRequest.getParameter("scriptId");
-                if (!userModel.isManage(nodeId)) {
+            HandlerType handlerType;
+            try {
+                handlerType = HandlerType.valueOf(type);
+            } catch (Exception e) {
+                throw new JpomRuntimeException("type 错误：" + type);
+            }
+            switch (handlerType) {
+                case console:
+                    //控制台
+                    String projectId = httpServletRequest.getParameter("projectId");
+                    // 判断权限
+                    if (nodeModel == null || !userModel.isProject(nodeModel.getId(), projectId)) {
+                        return false;
+                    }
+                    attributes.put("projectId", projectId);
+                    break;
+                case script:
+                    // 脚本模板
+                    String scriptId = httpServletRequest.getParameter("scriptId");
+                    if (!userModel.isManage(nodeId)) {
+                        return false;
+                    }
+                    attributes.put("scriptId", scriptId);
+                    break;
+                case tomcat:
+                    String tomcatId = httpServletRequest.getParameter("tomcatId");
+                    attributes.put("tomcatId", tomcatId);
+                    break;
+                case ssh:
+                    String sshId = httpServletRequest.getParameter("sshId");
+                    SshService bean = SpringUtil.getBean(SshService.class);
+                    SshModel sshModel = bean.getItem(sshId);
+                    if (sshModel == null) {
+                        return false;
+                    }
+                    attributes.put("sshItem", sshModel);
+                    break;
+                default:
                     return false;
-                }
-                attributes.put("scriptId", scriptId);
-            } else if ("tomcat".equalsIgnoreCase(type)) {
-                String tomcatId = httpServletRequest.getParameter("tomcatId");
-                attributes.put("tomcatId", tomcatId);
-            } else {
-                //控制台
-                String projectId = httpServletRequest.getParameter("projectId");
-                // 判断权限
-                if (nodeModel == null || !userModel.isProject(nodeModel.getId(), projectId)) {
-                    return false;
-                }
-                attributes.put("projectId", projectId);
             }
             //
             String ip = ServletUtil.getClientIP(httpServletRequest);
@@ -84,6 +109,8 @@ public class ServerWebSocketInterceptor implements HandshakeInterceptor {
 
     @Override
     public void afterHandshake(ServerHttpRequest request, ServerHttpResponse response, WebSocketHandler wsHandler, Exception exception) {
-
+        if (exception != null) {
+            DefaultSystemLog.ERROR().error("afterHandshake", exception);
+        }
     }
 }
