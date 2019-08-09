@@ -4,6 +4,7 @@ import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.io.LineHandler;
 import cn.hutool.core.io.file.FileMode;
 import cn.hutool.core.thread.ThreadUtil;
+import cn.hutool.core.util.CharUtil;
 import cn.hutool.core.util.CharsetUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.keepbx.jpom.system.ExtConfigBean;
@@ -22,7 +23,7 @@ public class FileTailWatcherRun implements Runnable {
     /**
      * 缓存近10条
      */
-    private final LimitQueue<String> limitQueue = new LimitQueue<>(10);
+    private final LimitQueue<String> limitQueue = new LimitQueue<>(ExtConfigBean.getInstance().getLogInitReadLine());
     private final RandomAccessFile randomFile;
     /**
      * 是否已经开始执行
@@ -51,6 +52,10 @@ public class FileTailWatcherRun implements Runnable {
     }
 
     private void startRead() throws IOException {
+        if (ExtConfigBean.getInstance().getLogInitReadLine() == 0) {
+            // 不初始读取
+            return;
+        }
         long len = randomFile.length();
         long start = randomFile.getFilePointer();
         long nextEnd = start + len - 1;
@@ -62,7 +67,7 @@ public class FileTailWatcherRun implements Runnable {
                 break;
             }
             c = randomFile.read();
-            if (c == '\n' || c == '\r') {
+            if (c == CharUtil.LF || c == CharUtil.CR) {
                 this.readLine();
                 nextEnd--;
             }

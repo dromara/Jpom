@@ -44,9 +44,21 @@ public class ExtConfigBean {
     @Value("${log.fileCharset:}")
     private String logFileCharset;
     /**
+     * 初始读取日志文件行号
+     */
+    @Value("${log.intiReadLine:10}")
+    private int logInitReadLine;
+    /**
      *
      */
     private Charset logFileCharsets;
+
+    public int getLogInitReadLine() {
+        if (logInitReadLine < 0) {
+            return 10;
+        }
+        return logInitReadLine;
+    }
 
     public Charset getLogFileCharset() {
         return logFileCharsets;

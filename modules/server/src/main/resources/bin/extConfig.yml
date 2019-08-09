@@ -19,6 +19,8 @@ consoleLog:
 log:
   # 日志文件的编码格式，如果没有指定就自动识别，自动识别可能出现不准确的情况
   fileCharset:
+  # 查看日志时初始读取最后多少行（默认10，0不读取）
+  intiReadLine: 10
 db:
   # 日志存储条数，将自动清理旧数据,配置小于等于零则不清理
   logStorageCount: 100000

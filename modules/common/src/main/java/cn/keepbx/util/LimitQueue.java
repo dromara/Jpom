@@ -12,7 +12,11 @@ public class LimitQueue<E> extends ConcurrentLinkedDeque<E> {
     private final int limit;
 
     public LimitQueue(int limit) {
-        this.limit = limit;
+        if (limit == 0) {
+            this.limit = 10;
+        } else {
+            this.limit = limit;
+        }
     }
 
     @Override
