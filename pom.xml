@@ -85,11 +85,11 @@
             <activation>
                 <activeByDefault>true</activeByDefault>
                 <file>
-                    <exists>${java.home}/../lib/tools.jar</exists>
+                    <exists>${env.JAVA_HOME}/lib/tools.jar</exists>
                 </file>
             </activation>
             <properties>
-                <toolsJar>${java.home}/../lib/tools.jar</toolsJar>
+                <toolsJar>${env.JAVA_HOME}/lib/tools.jar</toolsJar>
             </properties>
         </profile>
         <profile>
