@@ -54,7 +54,7 @@ public class SshFileController extends BaseServerController {
         return "node/ssh/file";
     }
 
-    @RequestMapping(value = "list_data.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "list_file_data.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     public String listData(String id, String path, String children, String parentIndexKey) throws IOException, SftpException {
         SshModel sshModel = sshService.getItem(id);
