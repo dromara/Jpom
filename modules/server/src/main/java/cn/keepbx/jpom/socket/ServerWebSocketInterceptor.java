@@ -87,6 +87,8 @@ public class ServerWebSocketInterceptor implements HandshakeInterceptor {
                     if (sshModel == null) {
                         return false;
                     }
+                    Map<String, String[]> parameterMap = httpServletRequest.getParameterMap();
+                    attributes.put("parameterMap", parameterMap);
                     attributes.put("sshItem", sshModel);
                     break;
                 default:

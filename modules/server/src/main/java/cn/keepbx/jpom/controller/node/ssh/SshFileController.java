@@ -1,8 +1,8 @@
 package cn.keepbx.jpom.controller.node.ssh;
 
 import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.util.IdUtil;
-import cn.hutool.core.util.StrUtil;
+import cn.hutool.core.util.*;
+import cn.hutool.extra.servlet.ServletUtil;
 import cn.hutool.extra.ssh.ChannelType;
 import cn.hutool.extra.ssh.JschUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.List;
 import java.util.Vector;
@@ -54,6 +55,34 @@ public class SshFileController extends BaseServerController {
         return "node/ssh/file";
     }
 
+
+    @RequestMapping(value = "download.html", method = RequestMethod.GET)
+    @ResponseBody
+    public void download(String id, String path, String name) throws IOException {
+        HttpServletResponse response = getResponse();
+        SshModel sshModel = sshService.getItem(id);
+        if (sshModel == null) {
+            ServletUtil.write(response, "ssh error", MediaType.TEXT_HTML_VALUE);
+            return;
+        }
+        List<String> fileDirs = sshModel.getFileDirs();
+        //
+        if (StrUtil.isEmpty(path) || !fileDirs.contains(path)) {
+            ServletUtil.write(response, "没有配置此文件夹", MediaType.TEXT_HTML_VALUE);
+            return;
+        }
+        if (StrUtil.isEmpty(name)) {
+            ServletUtil.write(response, "name error", MediaType.TEXT_HTML_VALUE);
+            return;
+        }
+        try {
+            this.downloadFile(sshModel, path, name, response);
+        } catch (SftpException e) {
+            DefaultSystemLog.ERROR().error("下载失败", e);
+            ServletUtil.write(response, "download error", MediaType.TEXT_HTML_VALUE);
+        }
+    }
+
     @RequestMapping(value = "list_file_data.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     public String listData(String id, String path, String children, String parentIndexKey) throws IOException, SftpException {
@@ -75,6 +104,24 @@ public class SshFileController extends BaseServerController {
         }
         JSONArray jsonArray = listDir(sshModel, path, children, parentIndexKey);
         return JsonMessage.getString(200, "ok", jsonArray);
+    }
+
+    private void downloadFile(SshModel sshModel, String path, String name, HttpServletResponse response) throws IOException, SftpException {
+        final String charset = ObjectUtil.defaultIfNull(response.getCharacterEncoding(), CharsetUtil.UTF_8);
+        String fileName = FileUtil.getName(name);
+        response.setHeader("Content-Disposition", StrUtil.format("attachment;filename={}", URLUtil.encode(fileName, charset)));
+        response.setContentType(MediaType.APPLICATION_OCTET_STREAM_VALUE);
+        Session session = null;
+        ChannelSftp channel = null;
+        try {
+            session = JschUtil.openSession(sshModel.getHost(), sshModel.getPort(), sshModel.getUser(), sshModel.getPassword());
+            channel = (ChannelSftp) JschUtil.openChannel(session, ChannelType.SFTP);
+            String normalize = FileUtil.normalize(path + "/" + name);
+            channel.get(normalize, response.getOutputStream());
+        } finally {
+            JschUtil.close(channel);
+            JschUtil.close(session);
+        }
     }
 
     private JSONArray listDir(SshModel sshModel, String path, String children, String parentIndexKey) throws SftpException {

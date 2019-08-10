@@ -6,9 +6,7 @@
     <link href="https://cdn.jsdelivr.net/npm/xterm@3.14.5/dist/xterm.css" rel="stylesheet" type="text/css"/>
     <script src="https://cdn.jsdelivr.net/npm/xterm@3.14.5/dist/xterm.js"></script>
     <style>
-        body {
-            padding: 10px;
-        }
+
     </style>
 </head>
 
@@ -19,6 +17,8 @@
     var encoding = "utf-8";
     var term;
     var sock;
+    //  tail 文件
+    var tail = getQueryString("tail");
 
     function loadSuccess() {
         top.layer.load({
@@ -29,7 +29,9 @@
                 top.location.reload();
             }
         });
-        var url = getSocketHost() + "/ssh?userId=[[${session.user.getUserMd5Key()}]]&sshId=[[${item?.id}]]&nodeId=system&type=ssh";
+        var url = getSocketHost() + "/ssh?userId=[[${session.user.getUserMd5Key()}]]&" +
+            "sshId=[[${item?.id}]]&nodeId=system&type=ssh&" +
+            "tail=" + tail;
         var terminal = document.getElementById("#terminal");
         sock = new WebSocket(url);
         term = new window.Terminal({
@@ -38,12 +40,18 @@
 
         //
         term.onData(function (data) {
+            if (tail) {
+                return;
+            }
             sock.send(JSON.stringify({'data': data}));
         });
 
         // 监听按键
         var startX = 2;
         term.onKey(function (key) {
+            if (tail) {
+                return;
+            }
             var ev = key.domEvent;
             // const printable = !ev.altKey && !ev.altGraphKey && !ev.ctrlKey && !ev.metaKey;
             if (ev.keyCode === 8) {

@@ -36,7 +36,7 @@
             <button type="button" id="download" class="layui-btn layui-btn-fluid">下载</button>
         </div>
         <div class="layui-form-item">
-            <button type="button" class="layui-btn layui-btn-fluid">流体按钮（最大化适应）</button>
+            <button type="button" id="tail" class="layui-btn layui-btn-fluid">tail</button>
         </div>
     </form>
 </div>
@@ -140,6 +140,18 @@
                 return;
             }
             window.open("./download.html?id=" + id + "&path=" + nowPath + "&name=" + clickData.parentDir);
+        });
+
+        $("#tail").click(function () {
+            if (!clickData) {
+                return;
+            }
+            var tailPtah = nowPath + "/" + clickData.parentDir;
+            tabChange({
+                id: id,
+                url: './node/ssh/terminal.html?id=' + id + "&tail=" + tailPtah,
+                title: '终端',
+            });
         });
     }
 </script>

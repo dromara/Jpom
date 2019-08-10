@@ -1,5 +1,6 @@
 package cn.keepbx.jpom.socket.handler;
 
+import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.io.LineHandler;
 import cn.hutool.core.thread.ThreadUtil;
@@ -23,6 +24,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -54,7 +56,16 @@ public class SshHandler extends BaseHandler {
         HANDLER_ITEM_CONCURRENT_HASH_MAP.put(session.getId(), handlerItem);
         //
         Thread.sleep(500);
-        this.call(session, StrUtil.CR);
+        Map<String, String[]> parameterMap = (Map<String, String[]>) session.getAttributes().get("parameterMap");
+        String[] tails = parameterMap.get("tail");
+        if (tails == null || tails.length <= 0 || StrUtil.isEmpty(tails[0])) {
+            this.call(session, StrUtil.CR);
+        } else {
+            String tail = tails[0];
+            tail = FileUtil.normalize(tail);
+            this.call(session, StrUtil.format("tail -f {}", tail));
+            this.call(session, StrUtil.CR);
+        }
     }
 
     private void call(WebSocketSession session, String msg) throws Exception {
