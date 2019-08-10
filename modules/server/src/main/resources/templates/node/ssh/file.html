@@ -48,6 +48,7 @@
     var tree;
     var allData;
     var clickData;
+    var openLayuiIndex;
 
     function getData(path, children, preData) {
         loadingAjax({
@@ -115,11 +116,12 @@
                         clickData = data;
                         var btnDiv = $("#btnDiv");
                         btnDiv.show();
-                        layer.open({
+                        openLayuiIndex = layer.open({
                             type: 1,
                             shade: [0.3, '#393D49'],
                             title: false,
                             content: btnDiv,
+                            shadeClose: true,
                             cancel: function () {
 
                             },
@@ -143,6 +145,7 @@
                 return;
             }
             window.open("./download.html?id=" + id + "&path=" + nowPath + "&name=" + clickData.parentDir);
+            layer.close(openLayuiIndex);
         });
 
         $("#tail").click(function () {
@@ -155,6 +158,7 @@
                 url: './node/ssh/terminal.html?id=' + id + "&tail=" + tailPtah,
                 title: clickData.name + ' - 文件终端',
             });
+            layer.close(openLayuiIndex);
         });
     }
 </script>
