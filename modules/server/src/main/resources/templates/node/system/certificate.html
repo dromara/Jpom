@@ -46,11 +46,12 @@
         <div class="layui-form-item">
             <label class="layui-form-label">证书路径</label>
             <div class="layui-input-block">
-                <select name="path" id="path" lay-filter="aihao" required
+                <select name="path" id="path" required
                         lay-verify="required">
                     <option value="">请选择证书存放的路径</option>
 
-                    <option th:each="item : ${certificate}" th:id="'path_'+${item}" th:value="${item}" th:text="${item}"></option>
+                    <option th:each="item : ${certificate}" th:id="'path_'+${item}" th:value="${item}"
+                            th:text="${item}"></option>
                 </select>
             </div>
         </div>

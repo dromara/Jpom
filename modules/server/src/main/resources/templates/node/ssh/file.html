@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.w3.org/1999/xhtml">
+
+<head>
+    <th:block th:include="common/head::head"></th:block>
+    <style>
+        #btnDiv {
+            width: 240px;
+            height: 200px;
+            padding: 10px;
+        }
+    </style>
+</head>
+<body>
+<form class="layui-form" action="" th:if="${dirs}">
+    <div class="layui-form-item">
+        <label class="layui-form-label">文件夹</label>
+        <div class="layui-input-block">
+            <select name="dir" lay-filter="dir" lay-verify="required" lay-search="">
+                <option value="">请选择文件夹</option>
+                <option th:disabled="${dir.get('error')}"
+                        th:value="${dir.path}" th:each="dir : ${dirs}"
+                        th:text="${dir.path}"></option>
+            </select>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label"></label>
+        <div class="layui-input-block" id="tree">
+        </div>
+    </div>
+</form>
+<div class="layui-container" style="display: none;" id="btnDiv">
+    <form class="layui-form">
+        <div class="layui-form-item">
+            <button type="button" id="download" class="layui-btn layui-btn-fluid">下载</button>
+        </div>
+        <div class="layui-form-item">
+            <button type="button" class="layui-btn layui-btn-fluid">流体按钮（最大化适应）</button>
+        </div>
+    </form>
+</div>
+</body>
+
+<script type="text/javascript">
+    var nowPath;
+    var id = getQueryString("id");
+    var tree;
+    var allData;
+    var clickData;
+
+    function getData(path, children, preData) {
+        loadingAjax({
+            url: './list_data.json',
+            data: {
+                id: id,
+                path: path,
+                children: children,
+                parentIndexKey: preData && preData.parentIndexKey
+            },
+            success: function (data) {
+                if (data.code !== 200) {
+                    layer.msg(data.msg);
+                    return;
+                }
+                if (!allData) {
+                    allData = data.data;
+                }
+                if (preData) {
+                    append(preData, data.data);
+                }
+                tree.reload("tree", {
+                    data: allData
+                })
+            }
+        });
+    }
+
+    function append(preData, children) {
+        var parentIndexKey = preData.parentIndexKey + "";
+        var strings = parentIndexKey.split(",");
+        var findData = allData;
+        for (var i = 0; i < strings.length; i++) {
+            var index = parseInt(strings[i]);
+            if (i === strings.length - 1) {
+                var last = findData[index];
+                last.children = children;
+                last.spread = true;
+            } else {
+                findData = findData[index].children;
+            }
+        }
+    }
+
+    function loadSuccess() {
+        form.on('select(dir)', function (data) {
+            var val = data.value;
+            if (!val || val === "") {
+                return;
+            }
+            getData(val, '');
+            nowPath = val;
+            allData = null;
+        });
+
+        layui.use('tree', function () {
+            tree = layui.tree;
+            tree.render({
+                elem: '#tree',
+                data: [],
+                id: "tree",
+                click: function (obj) {
+                    var data = obj.data;
+                    if (!data.dir) {
+                        clickData = data;
+                        var btnDiv = $("#btnDiv");
+                        btnDiv.show();
+                        layer.open({
+                            type: 1,
+                            shade: [0.3, '#393D49'],
+                            title: false,
+                            content: btnDiv,
+                            cancel: function () {
+
+                            },
+                            end: function () {
+                                btnDiv.hide();
+                                clickData = null;
+                            }
+                        });
+                        return;
+                    }
+                    getData(nowPath, data.parentDir, data);
+                }
+            });
+        });
+
+        $("#download").click(function () {
+            if (!clickData) {
+                return;
+            }
+            window.open("./download.html?id=" + id + "&path=" + nowPath + "&name=" + clickData.parentDir);
+        });
+    }
+</script>
+</html>

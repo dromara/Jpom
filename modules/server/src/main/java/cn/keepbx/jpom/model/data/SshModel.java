@@ -2,6 +2,8 @@ package cn.keepbx.jpom.model.data;
 
 import cn.keepbx.jpom.model.BaseModel;
 
+import java.util.List;
+
 /**
  * ssh 信息
  *
@@ -17,6 +19,19 @@ public class SshModel extends BaseModel {
      * 编码格式
      */
     private String charset;
+
+    /**
+     * 文件目录
+     */
+    private List<String> fileDirs;
+
+    public List<String> getFileDirs() {
+        return fileDirs;
+    }
+
+    public void setFileDirs(List<String> fileDirs) {
+        this.fileDirs = fileDirs;
+    }
 
     public String getHost() {
         return host;

@@ -16,6 +16,9 @@
     <a href="javascript:;" th:if="${session.user.isSystemUser()}" class="layui-btn  layui-btn-sm layui-btn-normal"
        lay-event="update">编辑</a>
     <a href="javascript:;" class="layui-btn  layui-btn-sm  layui-btn-warm" lay-event="terminal">终端</a>
+    {{# if(d.fileDirs){ }}
+    <a href="javascript:;" class="layui-btn  layui-btn-sm  layui-btn-warm" lay-event="files">文件</a>
+    {{# } }}
 </script>
 <script type="text/javascript">
     var col = [
@@ -58,11 +61,16 @@
                 // 修改
                 updateApplication(data);
             } else if ('terminal' === event) {
-                var url = './node/ssh/terminal.html?id=' + data.id;
                 tabChange({
                     id: data.id,
-                    url: url,
+                    url: './node/ssh/terminal.html?id=' + data.id,
                     title: data.name + ' - 终端',
+                });
+            } else if ('files' === event) {
+                tabChange({
+                    id: data.id,
+                    url: './node/ssh/file.html?id=' + data.id,
+                    title: data.name + ' - 文件',
                 });
             }
         });
