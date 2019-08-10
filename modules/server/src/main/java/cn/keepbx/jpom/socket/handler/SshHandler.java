@@ -55,12 +55,13 @@ public class SshHandler extends BaseHandler {
         handlerItem.startRead();
         HANDLER_ITEM_CONCURRENT_HASH_MAP.put(session.getId(), handlerItem);
         //
-        Thread.sleep(500);
+        Thread.sleep(1000);
         Map<String, String[]> parameterMap = (Map<String, String[]>) session.getAttributes().get("parameterMap");
         String[] tails = parameterMap.get("tail");
-        if (tails == null || tails.length <= 0 || StrUtil.isEmpty(tails[0])) {
+        if (tails == null || tails.length <= 0 || StrUtil.isEmptyOrUndefined(tails[0])) {
             this.call(session, StrUtil.CR);
         } else {
+            // 查看文件
             String tail = tails[0];
             tail = FileUtil.normalize(tail);
             this.call(session, StrUtil.format("tail -f {}", tail));

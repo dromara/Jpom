@@ -19,6 +19,7 @@
     var sock;
     //  tail 文件
     var tail = getQueryString("tail");
+    var cursorBlink = !tail;
 
     function loadSuccess() {
         top.layer.load({
@@ -35,7 +36,7 @@
         var terminal = document.getElementById("#terminal");
         sock = new WebSocket(url);
         term = new window.Terminal({
-            cursorBlink: true,
+            cursorBlink: cursorBlink,
         });
 
         //
