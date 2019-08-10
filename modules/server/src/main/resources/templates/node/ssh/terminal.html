@@ -40,10 +40,27 @@
         term.onData(function (data) {
             sock.send(JSON.stringify({'data': data}));
         });
+
+        // 监听按键
+        var startX = 2;
+        term.onKey(function (key) {
+            var ev = key.domEvent;
+            // const printable = !ev.altKey && !ev.altGraphKey && !ev.ctrlKey && !ev.metaKey;
+            if (ev.keyCode === 8) {
+                // Do not delete the prompt
+                if (term._core.buffer.x > startX) {
+                    term.write('\b \b');
+                }
+            }
+        });
         //
         sock.onopen = function () {
             term.open(terminal, true);
             top.layer.closeAll();
+            setTimeout(function () {
+                startX = term._core.buffer.x;
+                // console.log();
+            }, 2000);
         };
 
         sock.onmessage = function (msg) {

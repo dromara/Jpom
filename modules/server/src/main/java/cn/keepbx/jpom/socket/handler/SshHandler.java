@@ -201,6 +201,11 @@ public class SshHandler extends BaseHandler {
     }
 
     private static void sendBinary(WebSocketSession session, String msg) {
+        // 判断退格键
+        char[] chars = msg.toCharArray();
+        if (chars.length == 1 && chars[0] == 127) {
+            return;
+        }
         synchronized (session.getId()) {
             BinaryMessage byteBuffer = new BinaryMessage(msg.getBytes());
             try {
