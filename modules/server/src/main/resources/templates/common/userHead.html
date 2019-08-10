@@ -5,21 +5,19 @@
         <li class="layui-nav-item">
             <a href="javascript:;">
                 <span th:text="${session.user.name}"></span>
-                <font style="font-size: 10px;" th:text="'('+${roleDesc}+')'"></font>
+                <span style="font-size: 10px;" th:text="'('+${roleDesc}+')'"></span>
             </a>
             <dl class="layui-nav-child">
                 <dd><a href="javascript:;" op="updatePwd">修改密码</a></dd>
                 <dd><a href="javascript:;" op="updateName">修改昵称</a></dd>
+                <dd><a href="javascript:;" op="userInfo">用户资料</a></dd>
                 <dd><a href="javascript:;" op="exit">退出登录</a></dd>
             </dl>
         </li>
-        <!--            <li class="layui-nav-item" id="li-exit">-->
-
-        <!--            </li>-->
     </ul>
 
     <div id="div-updatePwd" style="display: none;padding: 15px;">
-        <form method="POST" class="layui-form" id="form_updatePwd">
+        <form method="post" class="layui-form" id="form_updatePwd">
             <div class="layui-form-item">
                 <div class="layui-form-block">
                     <input type="password" name="oldPwd" id="oldPwd" required lay-verify="required|pass"
@@ -50,8 +48,15 @@
             // 用户操作
             element.on('nav(userOperation)', function (elem) {
                 var op = this.getAttribute('op');
-                // 修改密码
-                if ('updatePwd' == op) {
+                if ('userInfo' == op) {
+                    layer.open({
+                        type: 2,
+                        title: '修改资料',
+                        content: './user/userInfo.html',
+                        area: ['50%', '50%'],
+                    });
+                } else if ('updatePwd' == op) {
+                    // 修改密码
                     document.getElementById('form_updatePwd').reset();
                     layer.open({
                         type: 1,

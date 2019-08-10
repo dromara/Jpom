@@ -28,6 +28,8 @@ import java.util.List;
 import java.util.Vector;
 
 /**
+ * ssh 文件管理
+ *
  * @author bwcx_jzy
  * @date 2019/8/10
  */
@@ -106,6 +108,16 @@ public class SshFileController extends BaseServerController {
         return JsonMessage.getString(200, "ok", jsonArray);
     }
 
+    /**
+     * 下载文件
+     *
+     * @param sshModel ssh
+     * @param path     路径
+     * @param name     文件
+     * @param response 响应
+     * @throws IOException   io
+     * @throws SftpException sftp
+     */
     private void downloadFile(SshModel sshModel, String path, String name, HttpServletResponse response) throws IOException, SftpException {
         final String charset = ObjectUtil.defaultIfNull(response.getCharacterEncoding(), CharsetUtil.UTF_8);
         String fileName = FileUtil.getName(name);
@@ -124,10 +136,19 @@ public class SshFileController extends BaseServerController {
         }
     }
 
+    /**
+     * 查询文件夹下所有文件
+     *
+     * @param sshModel       ssh
+     * @param path           路径
+     * @param children       文件夹
+     * @param parentIndexKey 上一级
+     * @return array
+     * @throws SftpException sftp
+     */
     private JSONArray listDir(SshModel sshModel, String path, String children, String parentIndexKey) throws SftpException {
         Session session = null;
         ChannelSftp channel = null;
-        int level = StrUtil.split(children, StrUtil.SLASH).length;
         try {
             session = JschUtil.openSession(sshModel.getHost(), sshModel.getPort(), sshModel.getUser(), sshModel.getPassword());
             channel = (ChannelSftp) JschUtil.openChannel(session, ChannelType.SFTP);
@@ -166,7 +187,6 @@ public class SshFileController extends BaseServerController {
                 } else {
                     jsonObject.put("parentDir", StrUtil.format("{}/{}", children, lsEntry.getFilename()));
                 }
-                jsonObject.put("level", level);
                 jsonArray.add(jsonObject);
             }
             return jsonArray;
@@ -196,6 +216,7 @@ public class SshFileController extends BaseServerController {
                 try {
                     channel.ls(item);
                 } catch (SftpException e) {
+                    // 标记文件夹不存在
                     jsonObject.put("error", true);
                 }
                 jsonArray.add(jsonObject);

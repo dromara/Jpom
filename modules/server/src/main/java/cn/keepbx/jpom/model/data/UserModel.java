@@ -68,6 +68,14 @@ public class UserModel extends BaseModel {
      * tomcat权限
      */
     private Map<String, NodeRole> nodeTomcatRole;
+    /**
+     * 邮箱
+     */
+    private String email;
+    /**
+     * 钉钉
+     */
+    private String dingDing;
 
     public boolean isServerManager() {
         if (isSystemUser()) {
@@ -140,6 +148,22 @@ public class UserModel extends BaseModel {
 
     public void setPwdErrorCount(int pwdErrorCount) {
         this.pwdErrorCount = pwdErrorCount;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getDingDing() {
+        return dingDing;
+    }
+
+    public void setDingDing(String dingDing) {
+        this.dingDing = dingDing;
     }
 
     /**

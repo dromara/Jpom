@@ -10,8 +10,8 @@
         <div class="layui-logo">
             <a href="../index.html" style="color: #009688;">Jpom项目管理系统>> </a>
             <span th:title="'版本时间:'+${jpomManifest.timeStamp}+'，进程ID:'+${jpomManifest.pid}">
-                [[${node.name}]]<font style="font-size: 10px;"
-                                      th:text="'('+${jpomManifest.version}+')'"></font>
+                [[${node.name}]]<span style="font-size: 10px;"
+                                      th:text="'('+${jpomManifest.version}+')'"></span>
             </span>
         </div>
         <div th:replace="common/userHead::userHead"></div>
