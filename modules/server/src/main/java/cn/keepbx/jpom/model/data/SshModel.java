@@ -13,6 +13,9 @@ public class SshModel extends BaseModel {
     private int port;
     private String user;
     private String password;
+    /**
+     * 编码格式
+     */
     private String charset;
 
     public String getHost() {
