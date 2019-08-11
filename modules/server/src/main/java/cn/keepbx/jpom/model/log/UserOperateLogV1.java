@@ -271,7 +271,7 @@ public class UserOperateLogV1 extends BaseJsonModel {
         DelBuildLog(59, "删除构建日志"),
         StartBuild(60, "开始构建"),
         CancelBuild(61, "取消构建"),
-        ReReleaseBuild(62, "重复发布"),
+        ReReleaseBuild(62, "重新发布"),
 
         ClearCache(63, "清空缓存"),
         DelSysLog(64, "删除系统日志"),
