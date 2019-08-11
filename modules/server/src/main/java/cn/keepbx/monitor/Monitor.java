@@ -243,7 +243,7 @@ public class Monitor implements Task {
                     String dingDing = item.getDingDing();
                     if (StrUtil.isNotEmpty(dingDing)) {
                         monitorNotifyLog.setLogId(IdUtil.fastSimpleUUID());
-                        MonitorModel.Notify notify1 = new MonitorModel.Notify(MonitorModel.NotifyType.dingding, email);
+                        MonitorModel.Notify notify1 = new MonitorModel.Notify(MonitorModel.NotifyType.dingding, dingDing);
                         monitorNotifyLog.setNotifyStyle(notify1.getStyle());
                         monitorNotifyLog.setNotifyObject(notify1.getValue());
                         //
