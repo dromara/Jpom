@@ -1,7 +1,6 @@
 package cn.keepbx.jpom.controller.monitor;
 
 import cn.hutool.core.convert.Convert;
-import cn.hutool.core.lang.Validator;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.db.Entity;
@@ -13,14 +12,13 @@ import cn.keepbx.jpom.common.BaseServerController;
 import cn.keepbx.jpom.common.interceptor.UrlPermission;
 import cn.keepbx.jpom.model.BaseEnum;
 import cn.keepbx.jpom.model.Role;
-import cn.keepbx.jpom.model.data.MailAccountModel;
 import cn.keepbx.jpom.model.data.MonitorModel;
 import cn.keepbx.jpom.model.data.NodeModel;
 import cn.keepbx.jpom.model.data.UserModel;
 import cn.keepbx.jpom.model.log.UserOperateLogV1;
 import cn.keepbx.jpom.service.dblog.DbMonitorNotifyLogService;
-import cn.keepbx.jpom.service.monitor.MonitorMailConfigService;
 import cn.keepbx.jpom.service.monitor.MonitorService;
+import cn.keepbx.jpom.service.user.UserService;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.http.MediaType;
@@ -33,7 +31,6 @@ import javax.annotation.Resource;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 /**
  * 监控列表
@@ -49,10 +46,10 @@ public class MonitorListController extends BaseServerController {
     private MonitorService monitorService;
 
     @Resource
-    private MonitorMailConfigService monitorMailConfigService;
+    private DbMonitorNotifyLogService dbMonitorNotifyLogService;
 
     @Resource
-    private DbMonitorNotifyLogService dbMonitorNotifyLogService;
+    private UserService userService;
 
     /**
      * 展示监控页面
@@ -75,11 +72,21 @@ public class MonitorListController extends BaseServerController {
         //监控周期
         JSONArray cycleArray = BaseEnum.toJSONArray(MonitorModel.Cycle.class);
         setAttribute("cycleArray", cycleArray);
-        //通知方式
-        JSONArray notifyTypeArray = BaseEnum.toJSONArray(MonitorModel.NotifyType.class);
-        setAttribute("notifyTypeArray", notifyTypeArray);
         List<NodeModel> nodeModels = nodeService.listAndProject();
         setAttribute("nodeModels", nodeModels);
+        //
+        List<UserModel> list = userService.list(false);
+        JSONArray jsonArray = new JSONArray();
+        list.forEach(userModel -> {
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.put("title", userModel.getName());
+            jsonObject.put("value", userModel.getId());
+            if (StrUtil.isEmpty(userModel.getEmail()) && StrUtil.isEmpty(userModel.getDingDing())) {
+                jsonObject.put("disabled", true);
+            }
+            jsonArray.add(jsonObject);
+        });
+        setAttribute("userLists", jsonArray);
         return "monitor/edit";
     }
 
@@ -109,51 +116,6 @@ public class MonitorListController extends BaseServerController {
         return JsonMessage.getString(200, "删除成功");
     }
 
-    private String checkNotifyData(String notify, List<MonitorModel.Notify> notifies) {
-        JSONArray notifyArray = JSONArray.parseArray(notify);
-        if (notify == null || notifyArray.isEmpty()) {
-            return JsonMessage.getString(400, "请至少选择一种通知方式");
-        }
-        for (int i = 0; i < notifyArray.size(); i++) {
-            JSONObject jsonObject = notifyArray.getJSONObject(i);
-            int style = jsonObject.getIntValue("style");
-            MonitorModel.NotifyType notifyType = BaseEnum.getEnum(MonitorModel.NotifyType.class, style);
-            Objects.requireNonNull(notifyType);
-            //
-            String value = jsonObject.getString("value");
-            if (StrUtil.isBlank(value)) {
-                return JsonMessage.getString(405, "请填写通知信息");
-            }
-            switch (notifyType) {
-                case mail:
-                    // 检查配置
-                    MailAccountModel config = monitorMailConfigService.getConfig();
-                    if (config == null) {
-                        return JsonMessage.getString(400, "还没有配置邮箱信息，请选配置邮箱信息");
-                    }
-                    //
-                    String[] emails = StrUtil.split(value, StrUtil.COMMA);
-                    if (emails == null || emails.length <= 0) {
-                        return JsonMessage.getString(400, "请输入邮箱");
-                    }
-                    for (String email : emails) {
-                        if (!Validator.isEmail(email)) {
-                            return JsonMessage.getString(400, "请输入正确的邮箱:" + email);
-                        }
-                    }
-                    break;
-                case dingding:
-                    if (!Validator.isUrl(value)) {
-                        return JsonMessage.getString(400, "钉钉通知地址不正确");
-                    }
-                    break;
-                default:
-                    break;
-            }
-            notifies.add(new MonitorModel.Notify(style, value));
-        }
-        return null;
-    }
 
     /**
      * 增加或修改监控
@@ -163,14 +125,15 @@ public class MonitorListController extends BaseServerController {
     @UrlPermission(value = Role.ServerManager, optType = UserOperateLogV1.OptType.EditMonitor)
     public String updateMonitor(String id,
                                 @ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "监控名称不能为空")) String name,
-                                String notify) {
+                                String notifyUser) {
         int cycle = getParameterInt("cycle", MonitorModel.Cycle.five.getCode());
         String status = getParameter("status");
         String autoRestart = getParameter("autoRestart");
-        List<MonitorModel.Notify> notifies = new ArrayList<>();
-        String error = checkNotifyData(notify, notifies);
-        if (error != null) {
-            return error;
+
+        JSONArray jsonArray = JSONArray.parseArray(notifyUser);
+        List<String> notifyUsers = jsonArray.toJavaList(String.class);
+        if (notifyUsers == null || notifyUsers.isEmpty()) {
+            return JsonMessage.getString(405, "请选择报警联系人");
         }
         String projects = getParameter("projects");
         JSONArray projectsArray = JSONArray.parseArray(projects);
@@ -192,7 +155,7 @@ public class MonitorListController extends BaseServerController {
         monitorModel.setCycle(cycle);
         monitorModel.setProjects(nodeProjects);
         monitorModel.setStatus(start);
-        monitorModel.setNotify(notifies);
+        monitorModel.setNotifyUser(notifyUsers);
         monitorModel.setName(name);
 
         if (StrUtil.isEmpty(id)) {

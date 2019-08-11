@@ -19,10 +19,12 @@ import cn.keepbx.jpom.common.forward.NodeForward;
 import cn.keepbx.jpom.common.forward.NodeUrl;
 import cn.keepbx.jpom.model.data.MonitorModel;
 import cn.keepbx.jpom.model.data.NodeModel;
+import cn.keepbx.jpom.model.data.UserModel;
 import cn.keepbx.jpom.model.log.MonitorNotifyLog;
 import cn.keepbx.jpom.service.dblog.DbMonitorNotifyLogService;
 import cn.keepbx.jpom.service.monitor.MonitorService;
 import cn.keepbx.jpom.service.node.NodeService;
+import cn.keepbx.jpom.service.user.UserService;
 import cn.keepbx.util.CronUtils;
 import com.alibaba.fastjson.JSONObject;
 
@@ -90,8 +92,8 @@ public class Monitor implements Task {
                 return;
             }
             //
-            List<MonitorModel.Notify> notifies = monitorModel.getNotify();
-            if (notifies == null || notifies.isEmpty()) {
+            List<String> notifyUser = monitorModel.getNotifyUser();
+            if (notifyUser == null || notifyUser.isEmpty()) {
                 return;
             }
             this.checkNode(monitorModel);
@@ -183,7 +185,7 @@ public class Monitor implements Task {
             monitorNotifyLog.setProjectId(id);
             monitorNotifyLog.setMonitorId(monitorModel.getId());
             //
-            List<MonitorModel.Notify> notify = monitorModel.getNotify();
+            List<String> notify = monitorModel.getNotifyUser();
             this.notifyMsg(notify, monitorNotifyLog);
         });
     }
@@ -214,20 +216,51 @@ public class Monitor implements Task {
         return entity1.isStatus();
     }
 
-    private void notifyMsg(final List<MonitorModel.Notify> notify, final MonitorNotifyLog monitorNotifyLog) {
+    private void notifyMsg(final List<String> notify, final MonitorNotifyLog monitorNotifyLog) {
         // 报警状态
         MonitorService monitorService = SpringUtil.getBean(MonitorService.class);
         monitorService.setAlarm(monitorNotifyLog.getMonitorId(), !monitorNotifyLog.isStatus());
-
+        UserService userService = SpringUtil.getBean(UserService.class);
         // 发送通知
         if (monitorNotifyLog.getTitle() != null) {
-            notify.forEach(notify1 -> {
+            notify.forEach(notifyUser -> {
+                UserModel item = userService.getItem(notifyUser);
+                boolean success = false;
+                if (item != null) {
+                    // 邮箱
+                    String email = item.getEmail();
+                    if (StrUtil.isNotEmpty(email)) {
+                        monitorNotifyLog.setLogId(IdUtil.fastSimpleUUID());
+                        MonitorModel.Notify notify1 = new MonitorModel.Notify(MonitorModel.NotifyType.mail, email);
+                        monitorNotifyLog.setNotifyStyle(notify1.getStyle());
+                        monitorNotifyLog.setNotifyObject(notify1.getValue());
+                        //
+                        dbMonitorNotifyLogService.insert(monitorNotifyLog);
+                        send(notify1, monitorNotifyLog.getLogId(), monitorNotifyLog.getTitle(), monitorNotifyLog.getContent());
+                        success = true;
+                    }
+                    // dingding
+                    String dingDing = item.getDingDing();
+                    if (StrUtil.isNotEmpty(dingDing)) {
+                        monitorNotifyLog.setLogId(IdUtil.fastSimpleUUID());
+                        MonitorModel.Notify notify1 = new MonitorModel.Notify(MonitorModel.NotifyType.dingding, email);
+                        monitorNotifyLog.setNotifyStyle(notify1.getStyle());
+                        monitorNotifyLog.setNotifyObject(notify1.getValue());
+                        //
+                        dbMonitorNotifyLogService.insert(monitorNotifyLog);
+                        send(notify1, monitorNotifyLog.getLogId(), monitorNotifyLog.getTitle(), monitorNotifyLog.getContent());
+                        success = true;
+                    }
+                }
+                if (success) {
+                    return;
+                }
                 monitorNotifyLog.setLogId(IdUtil.fastSimpleUUID());
-                monitorNotifyLog.setNotifyStyle(notify1.getStyle());
-                monitorNotifyLog.setNotifyObject(notify1.getValue());
-                //
+                monitorNotifyLog.setNotifyObject("报警联系人异常");
+                monitorNotifyLog.setNotifyStyle(MonitorModel.NotifyType.mail.getCode());
+                monitorNotifyLog.setNotifyStatus(false);
+                monitorNotifyLog.setNotifyError("报警联系人异常:" + (item == null ? "联系人不存在" : ""));
                 dbMonitorNotifyLogService.insert(monitorNotifyLog);
-                send(notify1, monitorNotifyLog.getLogId(), monitorNotifyLog.getTitle(), monitorNotifyLog.getContent());
             });
         }
     }
@@ -244,6 +277,4 @@ public class Monitor implements Task {
             }
         });
     }
-
-
 }

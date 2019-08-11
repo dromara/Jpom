@@ -94,6 +94,16 @@ public class UserService extends BaseOperService<UserModel> {
      */
     @Override
     public List<UserModel> list() {
+        return list(true);
+    }
+
+    /**
+     * 是否返回系统管理员信息
+     *
+     * @param system 系统管理员
+     * @return list
+     */
+    public List<UserModel> list(boolean system) {
         JSONObject jsonObject = getJSONObject(ServerConfigBean.USER);
         if (jsonObject == null) {
             return null;
@@ -104,7 +114,7 @@ public class UserService extends BaseOperService<UserModel> {
             JSONObject value = (JSONObject) entry.getValue();
             UserModel userModel = value.toJavaObject(UserModel.class);
             // 不显示系统管理员信息
-            if (userModel.isSystemUser()) {
+            if (system && userModel.isSystemUser()) {
                 continue;
             }
             userModel.setPassword(null);

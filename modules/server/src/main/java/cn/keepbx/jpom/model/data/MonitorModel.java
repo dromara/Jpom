@@ -18,13 +18,9 @@ public class MonitorModel extends BaseModel {
      */
     private List<NodeProject> projects;
     /**
-     * 通知方式
-     * [{
-     * style: 通知方式
-     * value：电话或邮箱等
-     * }]
+     * 报警联系人
      */
-    private List<Notify> notify;
+    private List<String> notifyUser;
     /**
      * 异常后是否自动重启
      */
@@ -66,13 +62,14 @@ public class MonitorModel extends BaseModel {
         this.projects = projects;
     }
 
-    public List<Notify> getNotify() {
-        return notify;
+    public List<String> getNotifyUser() {
+        return notifyUser;
     }
 
-    public void setNotify(List<Notify> notify) {
-        this.notify = notify;
+    public void setNotifyUser(List<String> notifyUser) {
+        this.notifyUser = notifyUser;
     }
+
 
     public boolean isAutoRestart() {
         return autoRestart;
@@ -148,24 +145,6 @@ public class MonitorModel extends BaseModel {
         }
     }
 
-    /**
-     * 前端使用
-     *
-     * @param style 样式
-     * @return 值
-     */
-    public String getNotifyTypeValue(int style) {
-        List<Notify> notify = getNotify();
-        if (notify == null) {
-            return null;
-        }
-        for (Notify notify1 : notify) {
-            if (notify1.getStyle() == style) {
-                return notify1.getValue();
-            }
-        }
-        return null;
-    }
 
     public boolean checkNodeProject(String nodeId, String projectId) {
         List<NodeProject> projects = getProjects();
@@ -226,8 +205,8 @@ public class MonitorModel extends BaseModel {
         public Notify() {
         }
 
-        public Notify(int style, String value) {
-            this.style = style;
+        public Notify(NotifyType style, String value) {
+            this.style = style.getCode();
             this.value = value;
         }
 

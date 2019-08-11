@@ -23,8 +23,8 @@
             </div>
         </div>
         <div class="layui-form-item">
-            <label class="layui-form-label">异常后自动重启</label>
-            <div class="layui-input-block">
+            <label class="layui-form-label">自动重启</label>
+            <div class="layui-input-block" title="尝试自动重启">
                 <input type="checkbox" name="autoRestart" lay-skin="switch" lay-text="是|否"
                        th:checked="${model?.autoRestart}">
             </div>
@@ -38,27 +38,7 @@
                        th:checked="${model?.cycle==item.code}">
             </div>
         </div>
-        <div class="layui-form-item">
-            <label class="layui-form-label">通知方式</label>
-            <div class="layui-input-block">
 
-                <div style="display: flex;margin: 5px" th:each="item : ${notifyTypeArray}"
-                     th:with="nowData=${model?.getNotifyTypeValue(item.code)}">
-                    <input type="checkbox" th:name="'notify_'+${item.code}" th:value="${item.code}"
-                           th:title="${item.desc}"
-                           th:checked="${nowData}"
-                           lay-filter="monitorNotify">
-                    <th:blck th:switch="${item.code}">
-                        <input th:case="0" type="text" required th:id="'notifyValue_'+${item.code}" class="layui-input"
-                               th:name="'value_'+${item.code}" th:style="${nowData}?'':'display: none'"
-                               th:value="${nowData}" placeholder="请输入通知的webhook地址">
-                        <input th:case="1" type="text" required th:id="'notifyValue_'+${item.code}" class="layui-input"
-                               th:name="'value_'+${item.code}" th:style="${nowData}?'':'display: none'"
-                               th:value="${nowData}" placeholder="请输入通知的邮箱">
-                    </th:blck>
-                </div>
-            </div>
-        </div>
         <div class=" layui-form-item">
             <label class="layui-form-label">监控项目</label>
             <div class="layui-input-block">
@@ -84,7 +64,12 @@
                 </div>
             </div>
         </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">报警联系人</label>
+            <div class="layui-input-block" id="notifyUser">
 
+            </div>
+        </div>
         <div class="layui-form-item">
             <div class="layui-form-item" style="padding-left: 20%;margin-top: 20px;">
                 <button class="layui-btn layui-btn-normal" lay-submit lay-filter="submitMonitor"
@@ -96,16 +81,24 @@
     </form>
 </div>
 </body>
-<script type="text/javascript">
+
+<script type="text/javascript" th:inline="javascript">
+    var userLists = [[${userLists}]];
+    var transfer;
+
+    var checkUser = [[${model?.notifyUser}]];
+
     function loadSuccess() {
-        //通知方式的点击
-        form.on('checkbox(monitorNotify)', function (data) {
-            var id = "#notifyValue_" + data.value;
-            if (data.elem.checked) {
-                $(id).css("display", "block").attr('lay-verify', 'required');
-            } else {
-                $(id).css("display", "none").removeAttr('lay-verify');
-            }
+        layui.use('transfer', function () {
+            transfer = layui.transfer;
+            //渲染
+            transfer.render({
+                elem: '#notifyUser',
+                data: userLists,
+                value: checkUser,
+                title: ['待选择用户', '已选择用户'],
+                id: 'notifyUser'
+            });
         });
 
         // 提交信息
@@ -120,12 +113,16 @@
                 layer.msg("请至少选择一个项目");
                 return false;
             }
-            var notify = getNotifyType(sendData);
-            if (!notify || notify.length <= 0) {
-                layer.msg("请至少选择一个通知方式");
+            var notifyUser = transfer.getData('notifyUser');
+            if (!notifyUser || notifyUser.length <= 0) {
+                layer.msg("请至少选择一个通知人");
                 return false;
             }
-            sendData.notify = JSON.stringify(notify);
+            var notifyUsers = [];
+            for (var i = 0; i < notifyUser.length; i++) {
+                notifyUsers.push(notifyUser[i].value);
+            }
+            sendData.notifyUser = JSON.stringify(notifyUsers);
             loadingAjax({
                 url: data.form.action,
                 data: sendData,
@@ -177,32 +174,6 @@
             data.projects = JSON.stringify(projects);
             return projects;
         }
-
-        function getNotifyType(data) {
-            var notify = [];
-            for (var key in data) {
-                if (startWith(key, "notify_")) {
-                    var val = data[key];
-                    var val_key = "value_" + val;
-                    var value = data[val_key];
-                    var item = {
-                        style: val,
-                        value: value
-                    }
-                    notify.push(item);
-                    delete data[val_key];
-                    delete data[key];
-                }
-            }
-            return notify;
-        }
-    }
-
-    function startWith(str, suffix) {
-        if (typeof str == 'string') {
-            return str.slice(0, suffix.length) == suffix;
-        }
-        return false;
     }
 </script>
 </html>

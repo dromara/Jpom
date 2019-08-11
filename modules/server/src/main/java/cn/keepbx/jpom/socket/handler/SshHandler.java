@@ -20,10 +20,12 @@ import org.springframework.web.socket.BinaryMessage;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -40,6 +42,30 @@ public class SshHandler extends BaseHandler {
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
         SshModel sshItem = (SshModel) session.getAttributes().get("sshItem");
+        Map<String, String[]> parameterMap = (Map<String, String[]>) session.getAttributes().get("parameterMap");
+        String[] tails = parameterMap.get("tail");
+        //
+        String tail = null;
+        if (tails != null && tails.length > 0 && !StrUtil.isEmptyOrUndefined(tails[0])) {
+            tail = tails[0];
+            List<String> fileDirs = sshItem.getFileDirs();
+            if (fileDirs == null) {
+                sendBinary(session, "没有配置路径");
+                return;
+            }
+            File file = FileUtil.file(tail);
+            boolean find = false;
+            for (String fileDir : fileDirs) {
+                if (FileUtil.isSub(FileUtil.file(fileDir), file)) {
+                    find = true;
+                    break;
+                }
+            }
+            if (!find) {
+                sendBinary(session, "非法路径");
+                return;
+            }
+        }
         Session openSession = JschUtil.openSession(sshItem.getHost(), sshItem.getPort(), sshItem.getUser(), sshItem.getPassword());
         Channel channel = JschUtil.createChannel(openSession, ChannelType.SHELL);
         InputStream inputStream = channel.getInputStream();
@@ -56,13 +82,10 @@ public class SshHandler extends BaseHandler {
         HANDLER_ITEM_CONCURRENT_HASH_MAP.put(session.getId(), handlerItem);
         //
         Thread.sleep(1000);
-        Map<String, String[]> parameterMap = (Map<String, String[]>) session.getAttributes().get("parameterMap");
-        String[] tails = parameterMap.get("tail");
-        if (tails == null || tails.length <= 0 || StrUtil.isEmptyOrUndefined(tails[0])) {
+        if (tail == null) {
             this.call(session, StrUtil.CR);
         } else {
             // 查看文件
-            String tail = tails[0];
             tail = FileUtil.normalize(tail);
             this.call(session, StrUtil.format("tail -f {}", tail));
             this.call(session, StrUtil.CR);
