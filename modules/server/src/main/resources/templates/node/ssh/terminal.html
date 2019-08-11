@@ -3,8 +3,9 @@
 
 <head>
     <th:block th:include="common/head::head"></th:block>
-    <link href="https://cdn.jsdelivr.net/npm/xterm@3.14.5/dist/xterm.css" rel="stylesheet" type="text/css"/>
-    <script src="https://cdn.jsdelivr.net/npm/xterm@3.14.5/dist/xterm.js"></script>
+    <link th:href="@{${session.jpomProxyPath}+'/static/xterm/xterm.min.css?v='+${session.staticCacheTime}}"
+          rel="stylesheet" type="text/css"/>
+    <script th:src="@{${session.jpomProxyPath}+'/static/xterm/xterm.min.js?v='+${session.staticCacheTime}}"></script>
     <style>
 
     </style>
