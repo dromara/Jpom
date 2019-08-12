@@ -8,31 +8,25 @@ import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.spring.SpringUtil;
 import cn.keepbx.jpom.model.data.SshModel;
 import cn.keepbx.jpom.service.node.ssh.SshService;
-import cn.keepbx.jpom.system.ServerConfigBean;
 import com.jcraft.jsch.ChannelSftp;
 import com.jcraft.jsch.Session;
 import com.jcraft.jsch.SftpATTRS;
-import com.jcraft.jsch.SftpException;
-import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.*;
 import io.netty.handler.codec.http.*;
 import io.netty.handler.codec.http.multipart.Attribute;
 import io.netty.handler.codec.http.multipart.HttpPostRequestDecoder;
 import io.netty.handler.codec.http.multipart.InterfaceHttpData;
-import io.netty.handler.ssl.SslHandler;
-import io.netty.handler.stream.ChunkedFile;
+import io.netty.handler.stream.ChunkedStream;
 import io.netty.util.CharsetUtil;
-import io.netty.util.internal.SystemPropertyUtil;
+import org.springframework.http.MediaType;
 import org.thymeleaf.util.StringUtils;
 
-import javax.activation.MimetypesFileTypeMap;
-import java.io.*;
-import java.net.URLDecoder;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.regex.Pattern;
 
 import static io.netty.handler.codec.http.HttpHeaderNames.*;
 import static io.netty.handler.codec.http.HttpResponseStatus.*;
@@ -42,38 +36,13 @@ import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 /**
  * 下载handler
  *
- * @author: myzf
+ * @author myzf
  * @date 2019/8/11 19:42
  */
 public class FileServerHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
     public static final String HTTP_DATE_FORMAT = "EEE, dd MMM yyyy HH:mm:ss zzz";
     public static final String HTTP_DATE_GMT_TIMEZONE = "GMT";
     public static final int HTTP_CACHE_SECONDS = 60;
-
-
-    public boolean downloadSftpFile(ChannelSftp channel, String remoteFilePath, String serverLocalFilePath) {
-        FileOutputStream fieloutput = null;
-        try {
-            File file = new File(serverLocalFilePath);
-            fieloutput = new FileOutputStream(file);
-            SftpATTRS attr = channel.stat(remoteFilePath);
-            long fileSize = attr.getSize();
-            channel.get(remoteFilePath, fieloutput, new ProgressMonitor(fileSize));
-            return true;
-        } catch (FileNotFoundException | SftpException e) {
-            e.printStackTrace();
-        } finally {
-            if (null != fieloutput) {
-                try {
-                    fieloutput.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-        return false;
-    }
-
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, FullHttpRequest request) throws Exception {
@@ -114,8 +83,48 @@ public class FileServerHandler extends SimpleChannelInboundHandler<FullHttpReque
                 session = JschUtil.openSession(sshModel.getHost(), sshModel.getPort(), sshModel.getUser(), sshModel.getPassword());
                 channel = (ChannelSftp) JschUtil.openChannel(session, ChannelType.SFTP);
                 String normalize = FileUtil.normalize(path + "/" + name);
-                savePath = FileUtil.normalize(ServerConfigBean.getInstance().getTempPath() + "/" + name);
-                downloadSftpFile(channel, normalize, savePath);
+                SftpATTRS attr = channel.stat(normalize);
+                long fileLength = attr.getSize();
+                InputStream inputStream = channel.get(normalize, null, 0L);
+
+                HttpResponse response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK);
+                HttpUtil.setContentLength(response, fileLength);
+                String s = toUtf8String(FileUtil.getName(name), request.headers());
+                response.headers().set(CONTENT_TYPE, MediaType.APPLICATION_OCTET_STREAM_VALUE);
+                // 设定默认文件输出名
+                response.headers().add("Content-disposition", "attachment; filename=" + s);
+                setDateAndCacheHeaders(response);
+                if (HttpUtil.isKeepAlive(request)) {
+                    response.headers().set("CONNECTION", HttpHeaderValues.KEEP_ALIVE);
+                }
+                ctx.write(response);
+                ChannelFuture sendFileFuture = ctx.write(new HttpChunkedInput(new ChunkedStream(inputStream)), ctx.newProgressivePromise());
+
+                sendFileFuture.addListener(new ChannelProgressiveFutureListener() {
+                    @Override
+                    public void operationProgressed(ChannelProgressiveFuture future, long progress, long total) {
+                        if (total < 0) { // total unknown
+                            System.err.println(future.channel() + " Transfer progress: " + progress);
+                        } else {
+                            System.err.println(future.channel() + " Transfer progress: " + progress + " / " + total);
+                            if (progress == total) {
+
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void operationComplete(ChannelProgressiveFuture future) {
+                        System.err.println(future.channel() + " Transfer complete.");
+                    }
+                });
+
+
+                ChannelFuture lastContentFuture = ctx.writeAndFlush(LastHttpContent.EMPTY_LAST_CONTENT);
+
+                if (!HttpUtil.isKeepAlive(request)) {
+                    lastContentFuture.addListener(ChannelFutureListener.CLOSE);
+                }
             } finally {
                 JschUtil.close(channel);
                 JschUtil.close(session);
@@ -124,87 +133,6 @@ public class FileServerHandler extends SimpleChannelInboundHandler<FullHttpReque
             DefaultSystemLog.ERROR().error("下载失败", e);
             sendError(ctx, INTERNAL_SERVER_ERROR);
             return;
-        }
-
-        //读取要下载的文件
-        File file = new File(savePath);
-        if (file.isHidden() || !file.exists()) {
-            sendError(ctx, NOT_FOUND);
-            return;
-        }
-        if (file.isDirectory()) {
-            if (uri.endsWith("/")) {
-                sendListing(ctx, file);
-            } else {
-                sendRedirect(ctx, uri + '/');
-            }
-            return;
-        }
-        if (!file.isFile()) {
-            sendError(ctx, FORBIDDEN);
-            return;
-        }
-        String ifModifiedSince = request.headers().get(IF_MODIFIED_SINCE);
-        if (ifModifiedSince != null && !ifModifiedSince.isEmpty()) {
-            SimpleDateFormat dateFormatter = new SimpleDateFormat(HTTP_DATE_FORMAT, Locale.US);
-            Date ifModifiedSinceDate = dateFormatter.parse(ifModifiedSince);
-            long ifModifiedSinceDateSeconds = ifModifiedSinceDate.getTime() / 1000;
-            long fileLastModifiedSeconds = file.lastModified() / 1000;
-            if (ifModifiedSinceDateSeconds == fileLastModifiedSeconds) {
-                sendNotModified(ctx);
-                return;
-            }
-        }
-        RandomAccessFile raf;
-        try {
-            raf = new RandomAccessFile(file, "r");
-        } catch (FileNotFoundException ignore) {
-            sendError(ctx, NOT_FOUND);
-            return;
-        }
-        long fileLength = raf.length();
-        HttpResponse response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK);
-        HttpUtil.setContentLength(response, fileLength);
-        String s = toUtf8String(file.getName(), request.headers());
-        setContentTypeHeader(response, file);
-        // 设定默认文件输出名
-        response.headers().add("Content-disposition", "attachment; filename=" + s);
-        setDateAndCacheHeaders(response, file);
-        if (HttpUtil.isKeepAlive(request)) {
-            response.headers().set("CONNECTION", HttpHeaderValues.KEEP_ALIVE);
-        }
-
-        ctx.write(response);
-        ChannelFuture sendFileFuture;
-        if (ctx.pipeline().get(SslHandler.class) == null) {
-            sendFileFuture = ctx.write(new DefaultFileRegion(raf.getChannel(), 0, fileLength), ctx.newProgressivePromise());
-        } else {
-            sendFileFuture = ctx.write(new HttpChunkedInput(new ChunkedFile(raf, 0, fileLength, 8192)), ctx.newProgressivePromise());
-        }
-        sendFileFuture.addListener(new ChannelProgressiveFutureListener() {
-            @Override
-            public void operationProgressed(ChannelProgressiveFuture future, long progress, long total) {
-                if (total < 0) { // total unknown
-                    System.err.println(future.channel() + " Transfer progress: " + progress);
-                } else {
-                    System.err.println(future.channel() + " Transfer progress: " + progress + " / " + total);
-                    if (progress == total) {
-
-                    }
-                }
-            }
-
-            @Override
-            public void operationComplete(ChannelProgressiveFuture future) {
-                System.err.println(future.channel() + " Transfer complete.");
-            }
-        });
-
-
-        ChannelFuture lastContentFuture = ctx.writeAndFlush(LastHttpContent.EMPTY_LAST_CONTENT);
-
-        if (!HttpUtil.isKeepAlive(request)) {
-            lastContentFuture.addListener(ChannelFutureListener.CLOSE);
         }
     }
 
@@ -216,80 +144,6 @@ public class FileServerHandler extends SimpleChannelInboundHandler<FullHttpReque
         }
     }
 
-    private static final Pattern INSECURE_URI = Pattern.compile(".*[<>&\"].*");
-
-    private static String sanitizeUri(String uri) {
-        try {
-            uri = URLDecoder.decode(uri, "UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            throw new Error(e);
-        }
-
-        if (!uri.startsWith("/")) {
-            return null;
-        }
-
-        uri = uri.replace('/', File.separatorChar);
-
-        if (uri.contains(File.separator + '.') || uri.contains('.' + File.separator) || uri.startsWith(".") || uri.endsWith(".")
-                || INSECURE_URI.matcher(uri).matches()) {
-            return null;
-        }
-        return SystemPropertyUtil.get("user.dir") + File.separator + uri;
-    }
-
-    private static final Pattern ALLOWED_FILE_NAME = Pattern.compile("[A-Za-z0-9][-_A-Za-z0-9\\.]*");
-
-    private static void sendListing(ChannelHandlerContext ctx, File dir) {
-        FullHttpResponse response = new DefaultFullHttpResponse(HTTP_1_1, OK);
-        response.headers().set(CONTENT_TYPE, "text/html; charset=UTF-8");
-
-        StringBuilder buf = new StringBuilder();
-        String dirPath = dir.getPath();
-
-        buf.append("<!DOCTYPE html>\r\n");
-        buf.append("<html><head><title>");
-        buf.append("Listing of: ");
-        buf.append(dirPath);
-        buf.append("</title></head><body>\r\n");
-
-        buf.append("<h3>Listing of: ");
-        buf.append(dirPath);
-        buf.append("</h3>\r\n");
-
-        buf.append("<ul>");
-        buf.append("<li><a href=\"../\">..</a></li>\r\n");
-
-        for (File f : dir.listFiles()) {
-            if (f.isHidden() || !f.canRead()) {
-                continue;
-            }
-
-            String name = f.getName();
-            if (!ALLOWED_FILE_NAME.matcher(name).matches()) {
-                continue;
-            }
-
-            buf.append("<li><a href=\"");
-            buf.append(name);
-            buf.append("\">");
-            buf.append(name);
-            buf.append("</a></li>\r\n");
-        }
-
-        buf.append("</ul></body></html>\r\n");
-        ByteBuf buffer = Unpooled.copiedBuffer(buf, CharsetUtil.UTF_8);
-        response.content().writeBytes(buffer);
-        buffer.release();
-        ctx.writeAndFlush(response).addListener(ChannelFutureListener.CLOSE);
-    }
-
-    private static void sendRedirect(ChannelHandlerContext ctx, String newUri) {
-        FullHttpResponse response = new DefaultFullHttpResponse(HTTP_1_1, FOUND);
-        response.headers().set(LOCATION, newUri);
-
-        ctx.writeAndFlush(response).addListener(ChannelFutureListener.CLOSE);
-    }
 
     private static void sendError(ChannelHandlerContext ctx, HttpResponseStatus status) {
         FullHttpResponse response = new DefaultFullHttpResponse(HTTP_1_1, status, Unpooled.copiedBuffer("Failure: " + status + "\r\n", CharsetUtil.UTF_8));
@@ -298,30 +152,8 @@ public class FileServerHandler extends SimpleChannelInboundHandler<FullHttpReque
         ctx.writeAndFlush(response).addListener(ChannelFutureListener.CLOSE);
     }
 
-    private static void sendCompelet(ChannelHandlerContext ctx, HttpResponseStatus status) {
-        FullHttpResponse response = new DefaultFullHttpResponse(HTTP_1_1, status, Unpooled.copiedBuffer("文件下载成功!" + status + "\r\n", CharsetUtil.UTF_8));
-        response.headers().set(CONTENT_TYPE, "text/plain; charset=UTF-8");
-        ctx.write(response).addListener(ChannelFutureListener.CLOSE_ON_FAILURE);
-    }
 
-
-    private static void sendNotModified(ChannelHandlerContext ctx) {
-        FullHttpResponse response = new DefaultFullHttpResponse(HTTP_1_1, NOT_MODIFIED);
-        setDateHeader(response);
-        ctx.writeAndFlush(response).addListener(ChannelFutureListener.CLOSE);
-    }
-
-
-    private static void setDateHeader(FullHttpResponse response) {
-        SimpleDateFormat dateFormatter = new SimpleDateFormat(HTTP_DATE_FORMAT, Locale.US);
-        dateFormatter.setTimeZone(TimeZone.getTimeZone(HTTP_DATE_GMT_TIMEZONE));
-
-        Calendar time = new GregorianCalendar();
-        response.headers().set(DATE, dateFormatter.format(time.getTime()));
-    }
-
-
-    private static void setDateAndCacheHeaders(HttpResponse response, File fileToCache) {
+    private static void setDateAndCacheHeaders(HttpResponse response) {
         SimpleDateFormat dateFormatter = new SimpleDateFormat(HTTP_DATE_FORMAT, Locale.US);
         dateFormatter.setTimeZone(TimeZone.getTimeZone(HTTP_DATE_GMT_TIMEZONE));
 
@@ -333,13 +165,7 @@ public class FileServerHandler extends SimpleChannelInboundHandler<FullHttpReque
         time.add(Calendar.SECOND, HTTP_CACHE_SECONDS);
         response.headers().set(EXPIRES, dateFormatter.format(time.getTime()));
         response.headers().set(CACHE_CONTROL, "private, max-age=" + HTTP_CACHE_SECONDS);
-        response.headers().set(LAST_MODIFIED, dateFormatter.format(new Date(fileToCache.lastModified())));
-    }
-
-
-    private static void setContentTypeHeader(HttpResponse response, File file) {
-        MimetypesFileTypeMap mimeTypesMap = new MimetypesFileTypeMap();
-        response.headers().set(CONTENT_TYPE, mimeTypesMap.getContentType(file.getPath()));
+//        response.headers().set(LAST_MODIFIED, dateFormatter.format(new Date(fileToCache.lastModified())));
     }
 
 
