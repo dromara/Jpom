@@ -1,19 +1,20 @@
-package cn.keepbx.jpom.common.download;
+package cn.keepbx.jpom;
 
-
+import cn.hutool.core.thread.ThreadUtil;
+import cn.keepbx.netty.NettyThread;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Service;
 
 /**
- * @package cn.myzf.gate.monitor
- * @Date Created in 2019/7/12 14:34
- * @Author myzf
+ * @author myzf
+ * @date 2019/7/12 14:34
  */
 @Service
 public class HttpFileServer implements ApplicationListener<ContextRefreshedEvent> {
+
     @Override
     public void onApplicationEvent(ContextRefreshedEvent contextRefreshedEvent) {
-        new NettyThread().start();
-        }
+        ThreadUtil.execute(new NettyThread());
+    }
 }

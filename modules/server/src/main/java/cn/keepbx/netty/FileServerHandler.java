@@ -1,11 +1,7 @@
-package cn.keepbx.jpom.common.download;
-
+package cn.keepbx.netty;
 
 import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
-import cn.hutool.core.util.URLUtil;
-import cn.hutool.extra.servlet.ServletUtil;
 import cn.hutool.extra.ssh.ChannelType;
 import cn.hutool.extra.ssh.JschUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
@@ -28,7 +24,6 @@ import io.netty.handler.ssl.SslHandler;
 import io.netty.handler.stream.ChunkedFile;
 import io.netty.util.CharsetUtil;
 import io.netty.util.internal.SystemPropertyUtil;
-import lombok.extern.slf4j.Slf4j;
 import org.thymeleaf.util.StringUtils;
 
 import javax.activation.MimetypesFileTypeMap;
@@ -45,61 +40,39 @@ import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 
 
 /**
-  * 下载handler
-  * @Author: myzf
-  * @Date: 2019/8/11 19:42
-  * @param
-*/
-
-@Slf4j
+ * 下载handler
+ *
+ * @author: myzf
+ * @date 2019/8/11 19:42
+ */
 public class FileServerHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
     public static final String HTTP_DATE_FORMAT = "EEE, dd MMM yyyy HH:mm:ss zzz";
     public static final String HTTP_DATE_GMT_TIMEZONE = "GMT";
     public static final int HTTP_CACHE_SECONDS = 60;
 
 
-
-    public boolean downloadSftpFile(ChannelSftp channel,String remoteFilePath,String serverLocalFilePath)
-    {
+    public boolean downloadSftpFile(ChannelSftp channel, String remoteFilePath, String serverLocalFilePath) {
         FileOutputStream fieloutput = null;
-        try
-        {
-            ServerConfigBean instance = ServerConfigBean.getInstance();
+        try {
             File file = new File(serverLocalFilePath);
             fieloutput = new FileOutputStream(file);
             SftpATTRS attr = channel.stat(remoteFilePath);
             long fileSize = attr.getSize();
-            channel.get(remoteFilePath, fieloutput,new ProgressMonitor(fileSize));
+            channel.get(remoteFilePath, fieloutput, new ProgressMonitor(fileSize));
             return true;
-        }
-        catch (FileNotFoundException e)
-        {
+        } catch (FileNotFoundException | SftpException e) {
             e.printStackTrace();
-        }
-        catch (SftpException e)
-        {
-            e.printStackTrace();
-        } finally
-        {
-            if (null != fieloutput)
-            {
-                try
-                {
+        } finally {
+            if (null != fieloutput) {
+                try {
                     fieloutput.close();
-                }
-                catch (IOException e)
-                {
+                } catch (IOException e) {
                     e.printStackTrace();
                 }
             }
         }
         return false;
     }
-
-
-
-
-
 
 
     @Override
@@ -109,11 +82,11 @@ public class FileServerHandler extends SimpleChannelInboundHandler<FullHttpReque
             sendError(ctx, BAD_REQUEST);
             return;
         }
-
-        Map<String, String> parse = parse(request);//获取请求参数 共下面页面单个下载用
+        //获取请求参数 共下面页面单个下载用
+        Map<String, String> parse = parse(request);
 
         final String uri = request.uri();
-      //  final String path = sanitizeUri(uri);
+        //  final String path = sanitizeUri(uri);
         String id = parse.get("id");
         String path = parse.get("path");
         String name = parse.get("name");
@@ -133,7 +106,7 @@ public class FileServerHandler extends SimpleChannelInboundHandler<FullHttpReque
             sendError(ctx, NOT_FOUND);
             return;
         }
-
+        String savePath;
         try {
             Session session = null;
             ChannelSftp channel = null;
@@ -141,7 +114,8 @@ public class FileServerHandler extends SimpleChannelInboundHandler<FullHttpReque
                 session = JschUtil.openSession(sshModel.getHost(), sshModel.getPort(), sshModel.getUser(), sshModel.getPassword());
                 channel = (ChannelSftp) JschUtil.openChannel(session, ChannelType.SFTP);
                 String normalize = FileUtil.normalize(path + "/" + name);
-                downloadSftpFile(channel,normalize,"c:" + "/" + name);
+                savePath = FileUtil.normalize(ServerConfigBean.getInstance().getTempPath() + "/" + name);
+                downloadSftpFile(channel, normalize, savePath);
             } finally {
                 JschUtil.close(channel);
                 JschUtil.close(session);
@@ -152,15 +126,8 @@ public class FileServerHandler extends SimpleChannelInboundHandler<FullHttpReque
             return;
         }
 
-        String path1 = "";
-        if (path1 == null) {
-            sendError(ctx, FORBIDDEN);
-            return;
-        }
-
-
         //读取要下载的文件
-        File file = new File("c:/"+name);
+        File file = new File(savePath);
         if (file.isHidden() || !file.exists()) {
             sendError(ctx, NOT_FOUND);
             return;
@@ -200,7 +167,8 @@ public class FileServerHandler extends SimpleChannelInboundHandler<FullHttpReque
         HttpUtil.setContentLength(response, fileLength);
         String s = toUtf8String(file.getName(), request.headers());
         setContentTypeHeader(response, file);
-        response.headers().add("Content-disposition", "attachment; filename=" + s);// 设定默认文件输出名
+        // 设定默认文件输出名
+        response.headers().add("Content-disposition", "attachment; filename=" + s);
         setDateAndCacheHeaders(response, file);
         if (HttpUtil.isKeepAlive(request)) {
             response.headers().set("CONNECTION", HttpHeaderValues.KEEP_ALIVE);
@@ -220,8 +188,8 @@ public class FileServerHandler extends SimpleChannelInboundHandler<FullHttpReque
                     System.err.println(future.channel() + " Transfer progress: " + progress);
                 } else {
                     System.err.println(future.channel() + " Transfer progress: " + progress + " / " + total);
-                    if(progress == total){
-                        log.info("下载完毕！");
+                    if (progress == total) {
+
                     }
                 }
             }
@@ -337,7 +305,6 @@ public class FileServerHandler extends SimpleChannelInboundHandler<FullHttpReque
     }
 
 
-
     private static void sendNotModified(ChannelHandlerContext ctx) {
         FullHttpResponse response = new DefaultFullHttpResponse(HTTP_1_1, NOT_MODIFIED);
         setDateHeader(response);
@@ -376,11 +343,10 @@ public class FileServerHandler extends SimpleChannelInboundHandler<FullHttpReque
     }
 
 
-
     public static String toUtf8String(String fileName, HttpHeaders headers) throws Exception {
         final String userAgent = headers.get(USER_AGENT);
         String finalFileName = null;
-        if (StringUtils.contains(userAgent, "MSIE")|| StringUtils.contains(userAgent, "Trident")) {// IE浏览器（旧版/新版）
+        if (StringUtils.contains(userAgent, "MSIE") || StringUtils.contains(userAgent, "Trident")) {// IE浏览器（旧版/新版）
             finalFileName = URLEncoder.encode(fileName, "UTF8");
         } else if (StringUtils.contains(userAgent, "Mozilla")) {// google,火狐浏览器
             finalFileName = new String(fileName.getBytes(), "ISO8859-1");
@@ -394,6 +360,7 @@ public class FileServerHandler extends SimpleChannelInboundHandler<FullHttpReque
     /**
      * 解析netty
      * 请求参数
+     *
      * @return 包含所有请求参数的键值对, 如果没有参数, 则返回空Map
      * @throws
      * @throws IOException
@@ -404,7 +371,7 @@ public class FileServerHandler extends SimpleChannelInboundHandler<FullHttpReque
         if (HttpMethod.GET == method) {
             // 是GET请求
             QueryStringDecoder decoder = new QueryStringDecoder(request.uri());
-            decoder.parameters().entrySet().forEach( entry -> {
+            decoder.parameters().entrySet().forEach(entry -> {
                 // entry.getValue()是一个List, 只取第一个元素
                 parmMap.put(entry.getKey(), entry.getValue().get(0));
             });
@@ -419,7 +386,7 @@ public class FileServerHandler extends SimpleChannelInboundHandler<FullHttpReque
             }
 
         } else {
-            log.error("不支持的请求方式");
+
         }
 
         return parmMap;

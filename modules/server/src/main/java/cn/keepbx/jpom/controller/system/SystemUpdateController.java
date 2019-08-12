@@ -67,7 +67,7 @@ public class SystemUpdateController extends BaseServerController {
                 .setFileExt("jar")
                 .addFieldName("file")
                 .setUseOriginalFilename(true)
-                .setSavePath(ServerConfigBean.getInstance().getTempPath().getAbsolutePath());
+                .setSavePath(ServerConfigBean.getInstance().getUserTempPath().getAbsolutePath());
         String path = multipartFileBuilder.save();
         // 基础检查
         JsonMessage error = JpomManifest.checkJpomJar(path, JpomServerApplication.class);

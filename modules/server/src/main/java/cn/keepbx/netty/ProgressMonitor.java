@@ -1,20 +1,19 @@
-package cn.keepbx.jpom.common.download;
+package cn.keepbx.netty;
 
+import cn.hutool.core.io.FileUtil;
 import com.jcraft.jsch.SftpProgressMonitor;
-import lombok.extern.slf4j.Slf4j;
 
 import java.util.Timer;
 import java.util.TimerTask;
 
 
 /**
-  * sftp进度条显示
-  * @Author: myzf
-  * @Date: 2019/8/11 20:10
-  * @param
-*/
-
-@Slf4j
+ * sftp进度条显示
+ *
+ * @param
+ * @Author: myzf
+ * @Date: 2019/8/11 20:10
+ */
 public class ProgressMonitor extends TimerTask implements SftpProgressMonitor {
 
     private long progressInterval = 1 * 1000; // 默认间隔时间为5秒
@@ -43,7 +42,6 @@ public class ProgressMonitor extends TimerTask implements SftpProgressMonitor {
     }
 
 
-
     protected void printProgress(double rate, long speed) {
         int downWidth = (int) (progressWidth * rate);
         StringBuilder sb = new StringBuilder();
@@ -55,7 +53,7 @@ public class ProgressMonitor extends TimerTask implements SftpProgressMonitor {
                 sb.append("□");
             }
         }
-        sb.append("] " + String.format("%.2f", rate * 100) + "%    " + String.format("%8s", ByteUtil.byteFormat(speed)) + "/S");
+        sb.append("] " + String.format("%.2f", rate * 100) + "%    " + String.format("%8s", FileUtil.readableFileSize(speed)) + "/S");
 
         System.out.println(sb.toString());
     }
@@ -67,8 +65,8 @@ public class ProgressMonitor extends TimerTask implements SftpProgressMonitor {
             if (transfered != fileSize) { // 判断当前已传输数据大小是否等于文件总大小
                 speed = transfered - before;
                 before = transfered;
-                rate = transfered/(double)fileSize;
-                        printProgress(rate,speed);
+                rate = transfered / (double) fileSize;
+                printProgress(rate, speed);
             } else {
                 setEnd(true); // 如果当前已传输数据大小等于文件总大小，说明已完成，设置end
             }
@@ -113,7 +111,7 @@ public class ProgressMonitor extends TimerTask implements SftpProgressMonitor {
      */
     public void end() {
         setEnd(true);
-        printProgress(1,speed);
+        printProgress(1, speed);
     }
 
     private synchronized void add(long count) {
@@ -137,6 +135,6 @@ public class ProgressMonitor extends TimerTask implements SftpProgressMonitor {
     }
 
     public void init(int op, String src, String dest, long max) {
-     //   log.info("开始从sftp下载文件");
+        //   log.info("开始从sftp下载文件");
     }
 }

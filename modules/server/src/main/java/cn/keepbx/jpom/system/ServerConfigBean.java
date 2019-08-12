@@ -62,7 +62,7 @@ public class ServerConfigBean {
     public static final String INSTALL = "INSTALL.json";
 
     /**
-     *  ssh信息
+     * ssh信息
      */
     public static final String SSH_LIST = "ssh_list.json";
 
@@ -85,13 +85,20 @@ public class ServerConfigBean {
      *
      * @return file
      */
-    public File getTempPath() {
-        File file = new File(ConfigBean.getInstance().getDataPath());
+    public File getUserTempPath() {
+        File file = getTempPath();
         UserModel userModel = BaseServerController.getUserModel();
         if (userModel == null) {
             throw new JpomRuntimeException("没有登录");
         }
-        file = new File(file.getPath() + "/temp/", userModel.getId());
+        file = FileUtil.file(file, userModel.getId());
+        FileUtil.mkdir(file);
+        return file;
+    }
+
+    public File getTempPath() {
+        File file = new File(ConfigBean.getInstance().getDataPath());
+        file = new File(file.getPath() + "/temp/");
         FileUtil.mkdir(file);
         return file;
     }
