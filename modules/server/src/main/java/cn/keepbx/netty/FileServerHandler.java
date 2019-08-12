@@ -1,6 +1,7 @@
 package cn.keepbx.netty;
 
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.ssh.ChannelType;
 import cn.hutool.extra.ssh.JschUtil;
@@ -11,6 +12,7 @@ import cn.keepbx.jpom.service.node.ssh.SshService;
 import com.jcraft.jsch.ChannelSftp;
 import com.jcraft.jsch.Session;
 import com.jcraft.jsch.SftpATTRS;
+import com.jcraft.jsch.SftpException;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.*;
 import io.netty.handler.codec.http.*;
@@ -23,7 +25,8 @@ import org.springframework.http.MediaType;
 import org.thymeleaf.util.StringUtils;
 
 import java.io.IOException;
-import java.io.InputStream;
+import java.io.PipedInputStream;
+import java.io.PipedOutputStream;
 import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -39,10 +42,13 @@ import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
  * @author myzf
  * @date 2019/8/11 19:42
  */
-public class FileServerHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
+public class FileServerHandler extends SimpleChannelInboundHandler<FullHttpRequest> implements ChannelProgressiveFutureListener {
     public static final String HTTP_DATE_FORMAT = "EEE, dd MMM yyyy HH:mm:ss zzz";
     public static final String HTTP_DATE_GMT_TIMEZONE = "GMT";
     public static final int HTTP_CACHE_SECONDS = 60;
+
+    private Session session = null;
+    private ChannelSftp channel = null;
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, FullHttpRequest request) throws Exception {
@@ -53,9 +59,6 @@ public class FileServerHandler extends SimpleChannelInboundHandler<FullHttpReque
         }
         //获取请求参数 共下面页面单个下载用
         Map<String, String> parse = parse(request);
-
-        final String uri = request.uri();
-        //  final String path = sanitizeUri(uri);
         String id = parse.get("id");
         String path = parse.get("path");
         String name = parse.get("name");
@@ -75,64 +78,43 @@ public class FileServerHandler extends SimpleChannelInboundHandler<FullHttpReque
             sendError(ctx, NOT_FOUND);
             return;
         }
-        String savePath;
         try {
-            Session session = null;
-            ChannelSftp channel = null;
-            try {
-                session = JschUtil.openSession(sshModel.getHost(), sshModel.getPort(), sshModel.getUser(), sshModel.getPassword());
-                channel = (ChannelSftp) JschUtil.openChannel(session, ChannelType.SFTP);
-                String normalize = FileUtil.normalize(path + "/" + name);
-                SftpATTRS attr = channel.stat(normalize);
-                long fileLength = attr.getSize();
-                InputStream inputStream = channel.get(normalize, null, 0L);
-
-                HttpResponse response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK);
-                HttpUtil.setContentLength(response, fileLength);
-                String s = toUtf8String(FileUtil.getName(name), request.headers());
-                response.headers().set(CONTENT_TYPE, MediaType.APPLICATION_OCTET_STREAM_VALUE);
-                // 设定默认文件输出名
-                response.headers().add("Content-disposition", "attachment; filename=" + s);
-                setDateAndCacheHeaders(response);
-                if (HttpUtil.isKeepAlive(request)) {
-                    response.headers().set("CONNECTION", HttpHeaderValues.KEEP_ALIVE);
+            session = JschUtil.openSession(sshModel.getHost(), sshModel.getPort(), sshModel.getUser(), sshModel.getPassword());
+            channel = (ChannelSftp) JschUtil.openChannel(session, ChannelType.SFTP);
+            String normalize = FileUtil.normalize(path + "/" + name);
+            SftpATTRS attr = channel.stat(normalize);
+            long fileLength = attr.getSize();
+            ChannelSftp finalChannel = channel;
+            PipedInputStream pipedInputStream = new PipedInputStream();
+            PipedOutputStream pipedOutputStream = new PipedOutputStream(pipedInputStream);
+            ThreadUtil.execute(() -> {
+                try {
+                    finalChannel.get(normalize, pipedOutputStream, new ProgressMonitor(pipedOutputStream));
+                } catch (SftpException e) {
+                    DefaultSystemLog.ERROR().error("下载异常", e);
                 }
-                ctx.write(response);
-                ChannelFuture sendFileFuture = ctx.write(new HttpChunkedInput(new ChunkedStream(inputStream)), ctx.newProgressivePromise());
+            });
+            HttpResponse response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK);
+            HttpUtil.setContentLength(response, fileLength);
+            String s = toUtf8String(FileUtil.getName(name), request.headers());
+            response.headers().set(CONTENT_TYPE, MediaType.APPLICATION_OCTET_STREAM_VALUE);
+            // 设定默认文件输出名
+            response.headers().add("Content-disposition", "attachment; filename=" + s);
+            setDateAndCacheHeaders(response);
+            if (HttpUtil.isKeepAlive(request)) {
+                response.headers().set("CONNECTION", HttpHeaderValues.KEEP_ALIVE);
+            }
+            ctx.write(response);
+            ChannelFuture sendFileFuture = ctx.write(new HttpChunkedInput(new ChunkedStream(pipedInputStream)), ctx.newProgressivePromise());
+            sendFileFuture.addListener(this);
+            ChannelFuture lastContentFuture = ctx.writeAndFlush(LastHttpContent.EMPTY_LAST_CONTENT);
 
-                sendFileFuture.addListener(new ChannelProgressiveFutureListener() {
-                    @Override
-                    public void operationProgressed(ChannelProgressiveFuture future, long progress, long total) {
-                        if (total < 0) { // total unknown
-                            System.err.println(future.channel() + " Transfer progress: " + progress);
-                        } else {
-                            System.err.println(future.channel() + " Transfer progress: " + progress + " / " + total);
-                            if (progress == total) {
-
-                            }
-                        }
-                    }
-
-                    @Override
-                    public void operationComplete(ChannelProgressiveFuture future) {
-                        System.err.println(future.channel() + " Transfer complete.");
-                    }
-                });
-
-
-                ChannelFuture lastContentFuture = ctx.writeAndFlush(LastHttpContent.EMPTY_LAST_CONTENT);
-
-                if (!HttpUtil.isKeepAlive(request)) {
-                    lastContentFuture.addListener(ChannelFutureListener.CLOSE);
-                }
-            } finally {
-                JschUtil.close(channel);
-                JschUtil.close(session);
+            if (!HttpUtil.isKeepAlive(request)) {
+                lastContentFuture.addListener(ChannelFutureListener.CLOSE);
             }
         } catch (Exception e) {
             DefaultSystemLog.ERROR().error("下载失败", e);
             sendError(ctx, INTERNAL_SERVER_ERROR);
-            return;
         }
     }
 
@@ -219,4 +201,26 @@ public class FileServerHandler extends SimpleChannelInboundHandler<FullHttpReque
     }
 
 
+    @Override
+    public void operationProgressed(ChannelProgressiveFuture future, long progress, long total) throws Exception {
+        if (total < 0) {
+            // total unknown
+            //                            System.err.println(future.channel() + " Transfer progress: " + progress);
+        } else {
+            //                            System.err.println(future.channel() + " Transfer progress: " + progress + " / " + total);
+            if (progress == total) {
+
+            }
+        }
+    }
+
+    @Override
+    public void operationComplete(ChannelProgressiveFuture future) throws Exception {
+        this.close();
+    }
+
+    private void close() {
+        JschUtil.close(channel);
+        JschUtil.close(session);
+    }
 }

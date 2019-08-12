@@ -1,5 +1,6 @@
 package cn.keepbx.netty;
 
+import cn.jiangzeyin.common.DefaultSystemLog;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelInitializer;
@@ -42,7 +43,7 @@ public class NettyThread implements Runnable {
             Channel ch = b.bind(Integer.valueOf("8888")).sync().channel();
             ch.closeFuture().sync();
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            DefaultSystemLog.ERROR().error("netty 错误", e);
         } finally {
             bossGroup.shutdownGracefully();
             workerGroup.shutdownGracefully();
