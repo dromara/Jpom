@@ -24,7 +24,6 @@ import com.github.odiszapc.nginxparser.NgxParam;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
@@ -229,11 +228,6 @@ public class NginxController extends BaseAgentController {
         if (StrUtil.isEmpty(name)) {
             return JsonMessage.getString(500, "服务名错误");
         }
-        if (ngxConf.size() <= 0) {
-            ngxConf.put("name", "nginx");
-            ngxConf.put("status", "open");
-            nginxService.save(ngxConf);
-        }
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("name", name);
         boolean serviceStatus = AbstractSystemCommander.getInstance().getServiceStatus(name);
@@ -248,6 +242,7 @@ public class NginxController extends BaseAgentController {
     public String updateConf(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "服务名称错误") String name) {
         JSONObject ngxConf = nginxService.getNgxConf();
         ngxConf.put("name", name);
+        nginxService.save(ngxConf);
         return JsonMessage.getString(200, "修改成功");
     }
 
