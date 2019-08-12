@@ -1,8 +1,10 @@
 package cn.keepbx.jpom.controller.system;
 
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.text.StrSpliter;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.system.SystemUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.keepbx.jpom.common.BaseAgentController;
@@ -215,5 +217,175 @@ public class NginxController extends BaseAgentController {
         }
         String msg = this.reloadNginx();
         return JsonMessage.getString(200, "删除成功" + msg);
+    }
+
+    /**
+     * 获取nginx状态
+     */
+    @RequestMapping(value = "status", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @ResponseBody
+    public String status() {
+        JSONObject ngxConf = nginxService.getNgxConf();
+        if (ngxConf.size() <= 0) {
+            ngxConf.put("name", "nginx");
+            ngxConf.put("status", "open");
+            nginxService.save(ngxConf);
+        }
+        return JsonMessage.getString(200, "", getStatus(ngxConf.getString("name")));
+    }
+
+    private JSONObject getStatus(String name) {
+        JSONObject object = new JSONObject();
+        object.put("status", "close");
+        if (SystemUtil.getOsInfo().isWindows()) {
+            String result = CommandUtil.execSystemCommand("sc query " + name);
+            List<String> strings = StrSpliter.splitTrim(result, "\n", true);
+            for (String string : strings) {
+                string = string.toUpperCase();
+                if (string.contains("STATE")) {
+                    if (string.contains("RUNNING")) {
+                        object.put("status", "open");
+                    }
+                    break;
+                }
+            }
+        } else if (SystemUtil.getOsInfo().isLinux()) {
+            String format = StrUtil.format("service {} status", name);
+            String result = CommandUtil.execCommand(format);
+            List<String> strings = StrSpliter.splitTrim(result, "\n", true);
+            for (String string : strings) {
+                string = string.toUpperCase();
+                if (string.contains("ACTIVE")) {
+                    if (string.contains("RUNNING")) {
+                        object.put("status", "open");
+                    }
+                    break;
+                }
+            }
+        }
+        return object;
+    }
+
+    /**
+     * 修改nginx配置
+     */
+    @RequestMapping(value = "updateConf", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @ResponseBody
+    public String updateConf() {
+        String name = getParameter("name");
+        String status = getParameter("status");
+        JSONObject ngxConf = nginxService.getNgxConf();
+        boolean update = !status.equals(ngxConf.getString("status"));
+        String name1 = ngxConf.getString("name");
+        if (!name.equals(name1)) {
+            update = true;
+            boolean b = nginxService.updateServiceName(name, name1);
+            if (!b) {
+                return JsonMessage.getString(400, "修改服务名称失败");
+            }
+        }
+        JSONObject object = getStatus(name1);
+        if (!status.equals(object.getString("status"))) {
+            if ("open".equals(status)) {
+                open();
+            } else if ("close".equals(status)) {
+                close();
+            }
+        }
+        if (update) {
+            ngxConf.put("name", name);
+            ngxConf.put("status", status);
+            nginxService.save(ngxConf);
+        }
+        return JsonMessage.getString(200, "修改成功");
+    }
+
+    /**
+     * 获取配置信息
+     */
+    @RequestMapping(value = "config", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @ResponseBody
+    public String config() {
+        JSONObject ngxConf = nginxService.getNgxConf();
+        return JsonMessage.getString(200, "", ngxConf);
+    }
+
+    /**
+     * 启动nginx
+     */
+    @RequestMapping(value = "open", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @ResponseBody
+    public String open() {
+        JSONObject ngxConf = nginxService.getNgxConf();
+        String name = ngxConf.getString("name");
+        String result = null;
+        if (SystemUtil.getOsInfo().isWindows()) {
+            String format = StrUtil.format("net start {}", name);
+            result = CommandUtil.execSystemCommand(format);
+        } else if (SystemUtil.getOsInfo().isLinux()) {
+            String format = StrUtil.format("service {} start", name);
+            result = CommandUtil.execSystemCommand(format);
+        }
+        return JsonMessage.getString(200, "nginx服务已启动:" + result);
+    }
+
+    /**
+     * 关闭nginx
+     */
+    @RequestMapping(value = "close", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @ResponseBody
+    public String close() {
+        JSONObject ngxConf = nginxService.getNgxConf();
+        String name = ngxConf.getString("name");
+        String result = null;
+        if (SystemUtil.getOsInfo().isWindows()) {
+            String format = StrUtil.format("net stop {}", name);
+            result = CommandUtil.execSystemCommand(format);
+        } else if (SystemUtil.getOsInfo().isLinux()) {
+            String format = StrUtil.format("service {} stop", name);
+            result = CommandUtil.execSystemCommand(format);
+        }
+        return JsonMessage.getString(200, result);
+    }
+
+    /**
+     * 重新加载
+     */
+    @RequestMapping(value = "reload", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @ResponseBody
+    public String reload() {
+        if (SystemUtil.getOsInfo().isLinux()) {
+            String result = CommandUtil.execSystemCommand("nginx -t");
+            List<String> strings = StrSpliter.splitTrim(result, "\n", true);
+            for (String str : strings) {
+                if (!str.endsWith("successful") || !str.endsWith("ok")) {
+                    return JsonMessage.getString(400, result);
+                }
+            }
+            CommandUtil.execSystemCommand("nginx -s reload");
+        } else if (SystemUtil.getOsInfo().isWindows()) {
+            JSONObject ngxConf = nginxService.getNgxConf();
+            String name = ngxConf.getString("name");
+            String result = CommandUtil.execSystemCommand("sc qc " + name);
+            List<String> strings = StrSpliter.splitTrim(result, "\n", true);
+            //服务路径
+            String path = "";
+            for (String str : strings) {
+                str = str.toUpperCase().trim();
+                if (str.startsWith("BINARY_PATH_NAME")) {
+                    path = str.substring(str.indexOf(":") + 1).replace("\"", "");
+                    break;
+                }
+            }
+            if (StrUtil.isEmpty(path)) {
+                return JsonMessage.getString(400, "未找到nginx路径");
+            }
+            File file = FileUtil.file(path).getParentFile();
+            result = CommandUtil.execSystemCommand("nginx -t", file);
+            if (StrUtil.isNotEmpty(result)) {
+                return JsonMessage.getString(400, result);
+            }
+        }
+        return JsonMessage.getString(200, "重新加载成功");
     }
 }

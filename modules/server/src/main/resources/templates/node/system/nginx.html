@@ -9,9 +9,40 @@
     <button id="addNgx" class="layui-btn layui-btn-sm">新增nginx配置</button>
     <button onclick="reload();" class="layui-btn layui-btn-sm">刷新表格</button>
 
-    <button id="reload" class="layui-btn layui-btn-sm layui-btn-danger">重启nginx</button>
+    <button id="config" class="layui-btn layui-btn-sm">nginx配置</button>
+    <button id="open" class="layui-btn layui-btn-sm layui-bg-blue" style="display: none">启动nginx</button>
+    <button id="reload" class="layui-btn layui-btn-sm layui-bg-blue" style="display: none">重新加载nginx</button>
+    <button id="close" class="layui-btn layui-btn-sm layui-bg-orange" style="display: none">停止nginx</button>
 </div>
 <table class="layui-table" id="tab_ngx" lay-filter="tab_ngx" style="margin: 0;"></table>
+
+<div style="display: none;padding: 20px;" id="div_conf">
+    <form action="./updateConf" class="layui-form" id="form_conf">
+        <div class="layui-form-item">
+            <div class="layui-inline">
+                <label class="layui-form-label">服务名称</label>
+                <div class="layui-input-block">
+                    <input type="text" id="name" name="name" placeholder="服务名称" class="layui-input" required
+                           lay-verify="required">
+                </div>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-inline">
+                <label class="layui-form-label">状态</label>
+                <div class="layui-input-block">
+                    <input type="radio" name="status" value="open" title="启动">
+                    <input type="radio" name="status" value="close" title="停止">
+                </div>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-input-block">
+                <button class="layui-btn" lay-submit lay-filter="formDemo">立即提交</button>
+            </div>
+        </div>
+    </form>
+</div>
 
 </body>
 <script type="text/html" id="bar_ngx">
@@ -21,9 +52,9 @@
 
 
 <script type="text/javascript">
-    var index = 0;
-
     function loadSuccess() {
+        getStatus();
+
         // 表格工具条事件
         table.on('tool(tab_ngx)', function (obj) {
             var data = obj.data;
@@ -97,6 +128,110 @@
                 });
             });
         }
+
+        //nginx配置
+        $('#config').on('click', function () {
+            loadingAjax({
+                url: './config',
+                success: function (ret) {
+                    if (ret.code !== 200 || !ret.data) {
+                        layer.msg(ret.msg);
+                        return;
+                    }
+                    var data = ret.data;
+                    $('#name').val(data.name);
+                    $("input[value='" + data.status + "']").attr("checked", true);
+                    form.render();
+                    layer.open({
+                        type: 1,
+                        title: '编辑',
+                        content: $('#div_conf'),
+                        area: ['60%', '80%']
+                    });
+                }
+            });
+        });
+
+        //开启nginx
+        $('#open').on('click', function () {
+            loadingAjax({
+                url: './open',
+                success: function (ret) {
+                    if (ret.msg) {
+                        layer.msg(ret.msg);
+                    }
+                    getStatus();
+                }
+            });
+        });
+
+        //重新加载nginx
+        $('#reload').on('click', function () {
+            loadingAjax({
+                url: './reload',
+                success: function (ret) {
+                    if (ret.msg) {
+                        layer.msg(ret.msg);
+                    }
+                }
+            });
+        });
+
+        //关闭nginx
+        $('#close').on('click', function () {
+            layer.confirm('确定停止nginx服务？', {
+                title: '系统提示'
+            }, function (index) {
+                layer.close(index);
+                loadingAjax({
+                    url: './close',
+                    success: function (ret) {
+                        if (ret.msg) {
+                            layer.msg(ret.msg);
+                        }
+                        getStatus();
+                    }
+                });
+            });
+        });
+
+        //获取状态
+        function getStatus() {
+            loadingAjax({
+                url: './status',
+                success: function (ret) {
+                    if (ret.code !== 200) {
+                        layer.msg(ret.msg);
+                        return;
+                    }
+                    var data = ret.data;
+                    var isOpen = "open" === data.status;
+                    if (isOpen) {
+                        $('#close').css("display", "inline");
+                        $('#reload').css("display", "inline");
+                        $('#open').css("display", "none");
+                    } else {
+                        $('#open').css("display", "inline");
+                        $('#close').css("display", "none");
+                        $('#reload').css("display", "none");
+                    }
+                }
+            });
+        }
+
+        //监听提交
+        form.on('submit(formDemo)', function (data) {
+            loadingAjax({
+                url: './updateConf',
+                data: data.field,
+                success: function (ret) {
+                    getStatus();
+                    layer.msg(ret.msg);
+                    layer.closeAll('page');
+                }
+            });
+            return false;
+        });
     }
 
     function reload() {

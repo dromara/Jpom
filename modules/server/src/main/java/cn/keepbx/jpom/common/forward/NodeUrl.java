@@ -93,6 +93,13 @@ public enum NodeUrl {
 
     System_Nginx_delete("/system/nginx/delete"),
 
+    System_Nginx_status("/system/nginx/status"),
+    System_Nginx_config("/system/nginx/config"),
+    System_Nginx_open("/system/nginx/open"),
+    System_Nginx_close("/system/nginx/close"),
+    System_Nginx_updateConf("/system/nginx/updateConf"),
+    System_Nginx_reload("/system/nginx/reload"),
+
     System_Certificate_saveCertificate("/system/certificate/saveCertificate"),
     System_Certificate_getCertList("/system/certificate/getCertList"),
     System_Certificate_delete("/system/certificate/delete"),
