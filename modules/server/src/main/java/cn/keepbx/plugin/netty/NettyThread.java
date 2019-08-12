@@ -21,6 +21,12 @@ import io.netty.handler.stream.ChunkedWriteHandler;
  */
 public class NettyThread implements Runnable {
 
+    private int port;
+
+    public NettyThread(int port) {
+        this.port = port;
+    }
+
     @Override
     public void run() {
         EventLoopGroup bossGroup = new NioEventLoopGroup(1);
@@ -39,8 +45,7 @@ public class NettyThread implements Runnable {
                             pipeline.addLast(new FileServerHandler());
                         }
                     });
-
-            Channel ch = b.bind(Integer.parseInt("8888")).sync().channel();
+            Channel ch = b.bind(port).sync().channel();
             ch.closeFuture().sync();
         } catch (InterruptedException e) {
             DefaultSystemLog.ERROR().error("netty 错误", e);

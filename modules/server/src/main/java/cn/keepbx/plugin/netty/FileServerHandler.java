@@ -1,8 +1,10 @@
 package cn.keepbx.plugin.netty;
 
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.core.util.URLUtil;
 import cn.hutool.extra.ssh.ChannelType;
 import cn.hutool.extra.ssh.JschUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
@@ -22,19 +24,17 @@ import io.netty.handler.codec.http.multipart.InterfaceHttpData;
 import io.netty.handler.stream.ChunkedStream;
 import io.netty.util.CharsetUtil;
 import org.springframework.http.MediaType;
-import org.thymeleaf.util.StringUtils;
 
 import java.io.IOException;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
-import java.net.URLEncoder;
-import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-import static io.netty.handler.codec.http.HttpHeaderNames.*;
+import static io.netty.handler.codec.http.HttpHeaderNames.CONTENT_TYPE;
 import static io.netty.handler.codec.http.HttpResponseStatus.*;
 import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
-
 
 /**
  * 下载handler
@@ -43,12 +43,10 @@ import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
  * @date 2019/8/11 19:42
  */
 public class FileServerHandler extends SimpleChannelInboundHandler<FullHttpRequest> implements ChannelProgressiveFutureListener {
-    public static final String HTTP_DATE_FORMAT = "EEE, dd MMM yyyy HH:mm:ss zzz";
-    public static final String HTTP_DATE_GMT_TIMEZONE = "GMT";
-    public static final int HTTP_CACHE_SECONDS = 60;
 
     private Session session = null;
     private ChannelSftp channel = null;
+    private long fileSize;
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, FullHttpRequest request) throws Exception {
@@ -83,27 +81,26 @@ public class FileServerHandler extends SimpleChannelInboundHandler<FullHttpReque
             channel = (ChannelSftp) JschUtil.openChannel(session, ChannelType.SFTP);
             String normalize = FileUtil.normalize(path + "/" + name);
             SftpATTRS attr = channel.stat(normalize);
-            long fileLength = attr.getSize();
+            fileSize = attr.getSize();
             ChannelSftp finalChannel = channel;
             PipedInputStream pipedInputStream = new PipedInputStream();
             PipedOutputStream pipedOutputStream = new PipedOutputStream(pipedInputStream);
             ThreadUtil.execute(() -> {
                 try {
-                    finalChannel.get(normalize, pipedOutputStream, new ProgressMonitor(pipedOutputStream));
+                    finalChannel.get(normalize, pipedOutputStream);
                 } catch (SftpException e) {
                     DefaultSystemLog.ERROR().error("下载异常", e);
                 }
+                IoUtil.close(pipedOutputStream);
             });
             HttpResponse response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK);
-            HttpUtil.setContentLength(response, fileLength);
-            String s = toUtf8String(FileUtil.getName(name), request.headers());
+            HttpUtil.setContentLength(response, fileSize);
+
             response.headers().set(CONTENT_TYPE, MediaType.APPLICATION_OCTET_STREAM_VALUE);
             // 设定默认文件输出名
-            response.headers().add("Content-disposition", "attachment; filename=" + s);
-            setDateAndCacheHeaders(response);
-            if (HttpUtil.isKeepAlive(request)) {
-                response.headers().set("CONNECTION", HttpHeaderValues.KEEP_ALIVE);
-            }
+            String fileName = URLUtil.encode(FileUtil.getName(name));
+            response.headers().add("Content-disposition", "attachment; filename=" + fileName);
+
             ctx.write(response);
             ChannelFuture sendFileFuture = ctx.write(new HttpChunkedInput(new ChunkedStream(pipedInputStream)), ctx.newProgressivePromise());
             sendFileFuture.addListener(this);
@@ -130,40 +127,8 @@ public class FileServerHandler extends SimpleChannelInboundHandler<FullHttpReque
     private static void sendError(ChannelHandlerContext ctx, HttpResponseStatus status) {
         FullHttpResponse response = new DefaultFullHttpResponse(HTTP_1_1, status, Unpooled.copiedBuffer("Failure: " + status + "\r\n", CharsetUtil.UTF_8));
         response.headers().set(CONTENT_TYPE, "text/plain; charset=UTF-8");
-
         ctx.writeAndFlush(response).addListener(ChannelFutureListener.CLOSE);
     }
-
-
-    private static void setDateAndCacheHeaders(HttpResponse response) {
-        SimpleDateFormat dateFormatter = new SimpleDateFormat(HTTP_DATE_FORMAT, Locale.US);
-        dateFormatter.setTimeZone(TimeZone.getTimeZone(HTTP_DATE_GMT_TIMEZONE));
-
-
-        Calendar time = new GregorianCalendar();
-        response.headers().set(DATE, dateFormatter.format(time.getTime()));
-
-
-        time.add(Calendar.SECOND, HTTP_CACHE_SECONDS);
-        response.headers().set(EXPIRES, dateFormatter.format(time.getTime()));
-        response.headers().set(CACHE_CONTROL, "private, max-age=" + HTTP_CACHE_SECONDS);
-//        response.headers().set(LAST_MODIFIED, dateFormatter.format(new Date(fileToCache.lastModified())));
-    }
-
-
-    public static String toUtf8String(String fileName, HttpHeaders headers) throws Exception {
-        final String userAgent = headers.get(USER_AGENT);
-        String finalFileName = null;
-        if (StringUtils.contains(userAgent, "MSIE") || StringUtils.contains(userAgent, "Trident")) {// IE浏览器（旧版/新版）
-            finalFileName = URLEncoder.encode(fileName, "UTF8");
-        } else if (StringUtils.contains(userAgent, "Mozilla")) {// google,火狐浏览器
-            finalFileName = new String(fileName.getBytes(), "ISO8859-1");
-        } else {
-            finalFileName = URLEncoder.encode(fileName, "UTF8");// 其他浏览器
-        }
-        return finalFileName;
-    }
-
 
     /**
      * 解析netty
@@ -179,9 +144,9 @@ public class FileServerHandler extends SimpleChannelInboundHandler<FullHttpReque
         if (HttpMethod.GET == method) {
             // 是GET请求
             QueryStringDecoder decoder = new QueryStringDecoder(request.uri());
-            decoder.parameters().entrySet().forEach(entry -> {
+            decoder.parameters().forEach((key, value) -> {
                 // entry.getValue()是一个List, 只取第一个元素
-                parmMap.put(entry.getKey(), entry.getValue().get(0));
+                parmMap.put(key, value.get(0));
             });
         } else if (HttpMethod.POST == method) {
             // 是POST请求
@@ -194,15 +159,14 @@ public class FileServerHandler extends SimpleChannelInboundHandler<FullHttpReque
             }
 
         } else {
-
         }
-
         return parmMap;
     }
 
 
     @Override
     public void operationProgressed(ChannelProgressiveFuture future, long progress, long total) throws Exception {
+        System.out.println(String.format("%.2f", (progress / (double) fileSize) * 100));
         if (total < 0) {
             // total unknown
             //                            System.err.println(future.channel() + " Transfer progress: " + progress);
