@@ -19,9 +19,12 @@ import io.netty.handler.stream.ChunkedWriteHandler;
  * @author myzf
  * @date 2019/8/11 18:41
  */
-public class NettyThread implements Runnable {
+public class NettyThread implements Runnable, AutoCloseable {
 
     private int port;
+    private EventLoopGroup bossGroup;
+    private EventLoopGroup workerGroup;
+    private Channel channel;
 
     public NettyThread(int port) {
         this.port = port;
@@ -29,8 +32,8 @@ public class NettyThread implements Runnable {
 
     @Override
     public void run() {
-        EventLoopGroup bossGroup = new NioEventLoopGroup(1);
-        EventLoopGroup workerGroup = new NioEventLoopGroup();
+        bossGroup = new NioEventLoopGroup(1);
+        workerGroup = new NioEventLoopGroup();
         try {
             ServerBootstrap b = new ServerBootstrap();
             b.group(bossGroup, workerGroup).channel(NioServerSocketChannel.class).handler(new LoggingHandler(LogLevel.INFO))
@@ -45,13 +48,23 @@ public class NettyThread implements Runnable {
                             pipeline.addLast(new FileServerHandler());
                         }
                     });
-            Channel ch = b.bind(port).sync().channel();
-            ch.closeFuture().sync();
+
+            channel = b.bind(port).sync().channel();
+            channel.closeFuture().sync();
         } catch (InterruptedException e) {
             DefaultSystemLog.ERROR().error("netty 错误", e);
         } finally {
-            bossGroup.shutdownGracefully();
-            workerGroup.shutdownGracefully();
+            try {
+                this.close();
+            } catch (Exception ignored) {
+            }
         }
+    }
+
+    @Override
+    public void close() throws Exception {
+        channel.close();
+        bossGroup.shutdownGracefully();
+        workerGroup.shutdownGracefully();
     }
 }
