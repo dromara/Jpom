@@ -1,4 +1,4 @@
-package cn.keepbx.netty;
+package cn.keepbx.plugin.netty;
 
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.thread.ThreadUtil;

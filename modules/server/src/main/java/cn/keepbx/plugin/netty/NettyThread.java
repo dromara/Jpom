@@ -1,4 +1,4 @@
-package cn.keepbx.netty;
+package cn.keepbx.plugin.netty;
 
 import cn.jiangzeyin.common.DefaultSystemLog;
 import io.netty.bootstrap.ServerBootstrap;
@@ -40,7 +40,7 @@ public class NettyThread implements Runnable {
                         }
                     });
 
-            Channel ch = b.bind(Integer.valueOf("8888")).sync().channel();
+            Channel ch = b.bind(Integer.parseInt("8888")).sync().channel();
             ch.closeFuture().sync();
         } catch (InterruptedException e) {
             DefaultSystemLog.ERROR().error("netty 错误", e);
