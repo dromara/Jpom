@@ -7,7 +7,10 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.system.SystemUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
+import cn.jiangzeyin.common.validator.ValidatorItem;
+import cn.jiangzeyin.common.validator.ValidatorRule;
 import cn.keepbx.jpom.common.BaseAgentController;
+import cn.keepbx.jpom.common.commander.AbstractSystemCommander;
 import cn.keepbx.jpom.service.WhitelistDirectoryService;
 import cn.keepbx.jpom.service.system.NginxService;
 import cn.keepbx.util.CommandUtil;
@@ -50,7 +53,6 @@ public class NginxController extends BaseAgentController {
      * 配置列表
      */
     @RequestMapping(value = "list_data.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    @ResponseBody
     public String list() {
         JSONArray array = nginxService.list();
         return JsonMessage.getString(200, "", array);
@@ -88,7 +90,6 @@ public class NginxController extends BaseAgentController {
      * @param whitePath 白名单路径
      */
     @RequestMapping(value = "updateNgx", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    @ResponseBody
     public String updateNgx(String name, String whitePath, String genre) {
         if (StrUtil.isEmpty(name)) {
             return JsonMessage.getString(400, "请填写文件名");
@@ -198,7 +199,6 @@ public class NginxController extends BaseAgentController {
      * @param path 文件路径
      */
     @RequestMapping(value = "delete", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    @ResponseBody
     public String delete(String path, String name) {
         if (!whitelistDirectoryService.checkNgxDirectory(path)) {
             return JsonMessage.getString(400, "非法操作");
@@ -223,80 +223,31 @@ public class NginxController extends BaseAgentController {
      * 获取nginx状态
      */
     @RequestMapping(value = "status", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    @ResponseBody
     public String status() {
         JSONObject ngxConf = nginxService.getNgxConf();
+        String name = ngxConf.getString("name");
+        if (StrUtil.isEmpty(name)) {
+            return JsonMessage.getString(500, "服务名错误");
+        }
         if (ngxConf.size() <= 0) {
             ngxConf.put("name", "nginx");
             ngxConf.put("status", "open");
             nginxService.save(ngxConf);
         }
-        return JsonMessage.getString(200, "", getStatus(ngxConf.getString("name")));
-    }
-
-    private JSONObject getStatus(String name) {
-        JSONObject object = new JSONObject();
-        object.put("status", "close");
-        if (SystemUtil.getOsInfo().isWindows()) {
-            String result = CommandUtil.execSystemCommand("sc query " + name);
-            List<String> strings = StrSpliter.splitTrim(result, "\n", true);
-            for (String string : strings) {
-                string = string.toUpperCase();
-                if (string.contains("STATE")) {
-                    if (string.contains("RUNNING")) {
-                        object.put("status", "open");
-                    }
-                    break;
-                }
-            }
-        } else if (SystemUtil.getOsInfo().isLinux()) {
-            String format = StrUtil.format("service {} status", name);
-            String result = CommandUtil.execCommand(format);
-            List<String> strings = StrSpliter.splitTrim(result, "\n", true);
-            for (String string : strings) {
-                string = string.toUpperCase();
-                if (string.contains("ACTIVE")) {
-                    if (string.contains("RUNNING")) {
-                        object.put("status", "open");
-                    }
-                    break;
-                }
-            }
-        }
-        return object;
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("name", name);
+        boolean serviceStatus = AbstractSystemCommander.getInstance().getServiceStatus(name);
+        jsonObject.put("status", serviceStatus);
+        return JsonMessage.getString(200, "", jsonObject);
     }
 
     /**
      * 修改nginx配置
      */
     @RequestMapping(value = "updateConf", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    @ResponseBody
-    public String updateConf() {
-        String name = getParameter("name");
-        String status = getParameter("status");
+    public String updateConf(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "服务名称错误") String name) {
         JSONObject ngxConf = nginxService.getNgxConf();
-        boolean update = !status.equals(ngxConf.getString("status"));
-        String name1 = ngxConf.getString("name");
-        if (!name.equals(name1)) {
-            update = true;
-            boolean b = nginxService.updateServiceName(name, name1);
-            if (!b) {
-                return JsonMessage.getString(400, "修改服务名称失败");
-            }
-        }
-        JSONObject object = getStatus(name1);
-        if (!status.equals(object.getString("status"))) {
-            if ("open".equals(status)) {
-                open();
-            } else if ("close".equals(status)) {
-                close();
-            }
-        }
-        if (update) {
-            ngxConf.put("name", name);
-            ngxConf.put("status", status);
-            nginxService.save(ngxConf);
-        }
+        ngxConf.put("name", name);
         return JsonMessage.getString(200, "修改成功");
     }
 
@@ -304,7 +255,6 @@ public class NginxController extends BaseAgentController {
      * 获取配置信息
      */
     @RequestMapping(value = "config", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    @ResponseBody
     public String config() {
         JSONObject ngxConf = nginxService.getNgxConf();
         return JsonMessage.getString(200, "", ngxConf);
@@ -314,18 +264,10 @@ public class NginxController extends BaseAgentController {
      * 启动nginx
      */
     @RequestMapping(value = "open", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    @ResponseBody
     public String open() {
         JSONObject ngxConf = nginxService.getNgxConf();
         String name = ngxConf.getString("name");
-        String result = null;
-        if (SystemUtil.getOsInfo().isWindows()) {
-            String format = StrUtil.format("net start {}", name);
-            result = CommandUtil.execSystemCommand(format);
-        } else if (SystemUtil.getOsInfo().isLinux()) {
-            String format = StrUtil.format("service {} start", name);
-            result = CommandUtil.execSystemCommand(format);
-        }
+        String result = AbstractSystemCommander.getInstance().startService(name);
         return JsonMessage.getString(200, "nginx服务已启动:" + result);
     }
 
@@ -333,18 +275,10 @@ public class NginxController extends BaseAgentController {
      * 关闭nginx
      */
     @RequestMapping(value = "close", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    @ResponseBody
     public String close() {
         JSONObject ngxConf = nginxService.getNgxConf();
         String name = ngxConf.getString("name");
-        String result = null;
-        if (SystemUtil.getOsInfo().isWindows()) {
-            String format = StrUtil.format("net stop {}", name);
-            result = CommandUtil.execSystemCommand(format);
-        } else if (SystemUtil.getOsInfo().isLinux()) {
-            String format = StrUtil.format("service {} stop", name);
-            result = CommandUtil.execSystemCommand(format);
-        }
+        String result = AbstractSystemCommander.getInstance().stopService(name);
         return JsonMessage.getString(200, result);
     }
 
@@ -352,7 +286,6 @@ public class NginxController extends BaseAgentController {
      * 重新加载
      */
     @RequestMapping(value = "reload", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    @ResponseBody
     public String reload() {
         if (SystemUtil.getOsInfo().isLinux()) {
             String result = CommandUtil.execSystemCommand("nginx -t");

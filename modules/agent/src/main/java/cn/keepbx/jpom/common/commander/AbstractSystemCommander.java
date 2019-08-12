@@ -98,4 +98,16 @@ public abstract class AbstractSystemCommander {
         array.add(putObject("空闲磁盘", freeSpace / 1024f, "disk"));
         return array;
     }
+
+    /**
+     * 查询服务状态
+     *
+     * @param serviceName 服务名称
+     * @return true 运行中
+     */
+    public abstract boolean getServiceStatus(String serviceName);
+
+    public abstract String startService(String serviceName);
+
+    public abstract String stopService(String serviceName);
 }

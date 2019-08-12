@@ -236,28 +236,16 @@ public class NginxService extends BaseOperService {
      */
     public JSONObject getNgxConf() {
         JSONObject object = getJSONObject(AgentConfigBean.NGINX_CONF);
-        return object == null ? new JSONObject() : object;
+        if (object == null) {
+            object = new JSONObject();
+            object.put("name", "nginx");
+            save(object);
+        }
+        return object;
     }
 
     public void save(JSONObject object) {
         String dataFilePath = getDataFilePath(AgentConfigBean.NGINX_CONF);
         JsonFileUtil.saveJson(dataFilePath, object);
-    }
-
-    /**
-     * 修改服务名称
-     *
-     * @param newName 新名称
-     * @param oldName 旧名称
-     */
-    public boolean updateServiceName(String newName, String oldName) {
-        if (SystemUtil.getOsInfo().isWindows()) {
-            String format = StrUtil.format("sc \\\\\\{} description {} {}", oldName, newName, newName);
-            String result = CommandUtil.execSystemCommand(format);
-            return !result.contains("失败");
-        } else if (SystemUtil.getOsInfo().isLinux()) {
-
-        }
-        return false;
     }
 }
