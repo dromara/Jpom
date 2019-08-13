@@ -1,11 +1,16 @@
 package cn.keepbx.jpom.controller.system;
 
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.text.StrSpliter;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.system.SystemUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
+import cn.jiangzeyin.common.validator.ValidatorItem;
+import cn.jiangzeyin.common.validator.ValidatorRule;
 import cn.keepbx.jpom.common.BaseAgentController;
+import cn.keepbx.jpom.common.commander.AbstractSystemCommander;
 import cn.keepbx.jpom.service.WhitelistDirectoryService;
 import cn.keepbx.jpom.service.system.NginxService;
 import cn.keepbx.util.CommandUtil;
@@ -19,7 +24,6 @@ import com.github.odiszapc.nginxparser.NgxParam;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
@@ -48,7 +52,6 @@ public class NginxController extends BaseAgentController {
      * 配置列表
      */
     @RequestMapping(value = "list_data.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    @ResponseBody
     public String list() {
         JSONArray array = nginxService.list();
         return JsonMessage.getString(200, "", array);
@@ -86,7 +89,6 @@ public class NginxController extends BaseAgentController {
      * @param whitePath 白名单路径
      */
     @RequestMapping(value = "updateNgx", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    @ResponseBody
     public String updateNgx(String name, String whitePath, String genre) {
         if (StrUtil.isEmpty(name)) {
             return JsonMessage.getString(400, "请填写文件名");
@@ -196,7 +198,6 @@ public class NginxController extends BaseAgentController {
      * @param path 文件路径
      */
     @RequestMapping(value = "delete", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    @ResponseBody
     public String delete(String path, String name) {
         if (!whitelistDirectoryService.checkNgxDirectory(path)) {
             return JsonMessage.getString(400, "非法操作");
@@ -215,5 +216,99 @@ public class NginxController extends BaseAgentController {
         }
         String msg = this.reloadNginx();
         return JsonMessage.getString(200, "删除成功" + msg);
+    }
+
+    /**
+     * 获取nginx状态
+     */
+    @RequestMapping(value = "status", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    public String status() {
+        JSONObject ngxConf = nginxService.getNgxConf();
+        String name = ngxConf.getString("name");
+        if (StrUtil.isEmpty(name)) {
+            return JsonMessage.getString(500, "服务名错误");
+        }
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("name", name);
+        boolean serviceStatus = AbstractSystemCommander.getInstance().getServiceStatus(name);
+        jsonObject.put("status", serviceStatus);
+        return JsonMessage.getString(200, "", jsonObject);
+    }
+
+    /**
+     * 修改nginx配置
+     */
+    @RequestMapping(value = "updateConf", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    public String updateConf(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "服务名称错误") String name) {
+        JSONObject ngxConf = nginxService.getNgxConf();
+        ngxConf.put("name", name);
+        nginxService.save(ngxConf);
+        return JsonMessage.getString(200, "修改成功");
+    }
+
+    /**
+     * 获取配置信息
+     */
+    @RequestMapping(value = "config", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    public String config() {
+        JSONObject ngxConf = nginxService.getNgxConf();
+        return JsonMessage.getString(200, "", ngxConf);
+    }
+
+    /**
+     * 启动nginx
+     */
+    @RequestMapping(value = "open", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    public String open() {
+        JSONObject ngxConf = nginxService.getNgxConf();
+        String name = ngxConf.getString("name");
+        String result = AbstractSystemCommander.getInstance().startService(name);
+        return JsonMessage.getString(200, "nginx服务已启动:" + result);
+    }
+
+    /**
+     * 关闭nginx
+     */
+    @RequestMapping(value = "close", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    public String close() {
+        JSONObject ngxConf = nginxService.getNgxConf();
+        String name = ngxConf.getString("name");
+        String result = AbstractSystemCommander.getInstance().stopService(name);
+        return JsonMessage.getString(200, result);
+    }
+
+    /**
+     * 重新加载
+     */
+    @RequestMapping(value = "reload", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    public String reload() {
+        if (SystemUtil.getOsInfo().isLinux()) {
+            String result = CommandUtil.execSystemCommand("nginx -t");
+            if (!result.endsWith("successful") || !result.endsWith("ok")) {
+                return JsonMessage.getString(400, result);
+            }
+            CommandUtil.execSystemCommand("nginx -s reload");
+        } else if (SystemUtil.getOsInfo().isWindows()) {
+            JSONObject ngxConf = nginxService.getNgxConf();
+            String name = ngxConf.getString("name");
+            String result = CommandUtil.execSystemCommand("sc qc " + name);
+            List<String> strings = StrSpliter.splitTrim(result, "\n", true);
+            //服务路径
+            File file = null;
+            for (String str : strings) {
+                str = str.toUpperCase().trim();
+                if (str.startsWith("BINARY_PATH_NAME")) {
+                    String path = str.substring(str.indexOf(":") + 1).replace("\"", "").trim();
+                    file = FileUtil.file(path).getParentFile();
+                    break;
+                }
+            }
+            result = CommandUtil.execSystemCommand("nginx -t", file);
+            if (StrUtil.isNotEmpty(result)) {
+                return JsonMessage.getString(400, result);
+            }
+            CommandUtil.execSystemCommand("nginx -s reload", file);
+        }
+        return JsonMessage.getString(200, "重新加载成功");
     }
 }

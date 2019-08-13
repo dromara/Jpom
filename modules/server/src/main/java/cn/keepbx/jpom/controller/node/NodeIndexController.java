@@ -49,8 +49,8 @@ public class NodeIndexController extends BaseServerController {
         List<NodeModel> nodeModels = nodeService.list();
         setAttribute("array", nodeModels);
         //
-        JsonMessage jsonMessage = NodeForward.request(getNode(), getRequest(), NodeUrl.Info);
-        JpomManifest jpomManifest = NodeForward.toObj(jsonMessage, JpomManifest.class);
+        JsonMessage<JpomManifest> jsonMessage = NodeForward.request(getNode(), getRequest(), NodeUrl.Info);
+        JpomManifest jpomManifest = jsonMessage.getData(JpomManifest.class);
         setAttribute("jpomManifest", jpomManifest);
         setAttribute("installed", jsonMessage.getCode() == 200);
         UserModel userModel = getUser();

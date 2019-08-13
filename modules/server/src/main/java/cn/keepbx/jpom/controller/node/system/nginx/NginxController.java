@@ -75,4 +75,56 @@ public class NginxController extends BaseServerController {
         return NodeForward.request(getNode(), getRequest(), NodeUrl.System_Nginx_delete).toString();
     }
 
+    /**
+     * 获取nginx状态
+     */
+    @RequestMapping(value = "status", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @ResponseBody
+    public String status() {
+        return NodeForward.request(getNode(), getRequest(), NodeUrl.System_Nginx_status).toString();
+    }
+
+    /**
+     * 获取nginx配置状态
+     */
+    @RequestMapping(value = "config", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @ResponseBody
+    public String config() {
+        return NodeForward.request(getNode(), getRequest(), NodeUrl.System_Nginx_config).toString();
+    }
+
+    /**
+     * 启动nginx
+     */
+    @RequestMapping(value = "open", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @ResponseBody
+    public String open() {
+        return NodeForward.request(getNode(), getRequest(), NodeUrl.System_Nginx_open).toString();
+    }
+
+    /**
+     * 关闭nginx
+     */
+    @RequestMapping(value = "close", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @ResponseBody
+    public String close() {
+        return NodeForward.request(getNode(), getRequest(), NodeUrl.System_Nginx_close).toString();
+    }
+
+
+    /**
+     * 修改nginx
+     */
+    @RequestMapping(value = "updateConf", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @ResponseBody
+    public String updateConf() {
+        return NodeForward.request(getNode(), getRequest(), NodeUrl.System_Nginx_updateConf).toString();
+    }
+
+    @RequestMapping(value = "reload", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @ResponseBody
+    public String reload() {
+        return NodeForward.request(getNode(), getRequest(), NodeUrl.System_Nginx_reload).toString();
+    }
+
 }

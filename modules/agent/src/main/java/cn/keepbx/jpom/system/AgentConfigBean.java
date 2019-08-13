@@ -48,6 +48,11 @@ public class AgentConfigBean {
      */
     public static final String SERVER_ID = "SERVER.json";
 
+    /**
+     * nginx配置信息
+     */
+    public static final String NGINX_CONF = "nginx_conf.json";
+
     private static AgentConfigBean agentConfigBean;
 
     /**

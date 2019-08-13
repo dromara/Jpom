@@ -5,10 +5,14 @@ import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.lang.Console;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.system.SystemUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.keepbx.jpom.common.BaseOperService;
 import cn.keepbx.jpom.model.data.AgentWhitelist;
 import cn.keepbx.jpom.service.WhitelistDirectoryService;
+import cn.keepbx.jpom.system.AgentConfigBean;
+import cn.keepbx.util.CommandUtil;
+import cn.keepbx.util.JsonFileUtil;
 import cn.keepbx.util.StringUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -223,5 +227,25 @@ public class NginxService extends BaseOperService {
             DefaultSystemLog.ERROR().error(e.getMessage(), e);
         }
         return jsonObject;
+    }
+
+    /**
+     * 获取nginx配置
+     * name 修改后的服务名
+     * status 状态：开启 open/ 关闭close
+     */
+    public JSONObject getNgxConf() {
+        JSONObject object = getJSONObject(AgentConfigBean.NGINX_CONF);
+        if (object == null) {
+            object = new JSONObject();
+            object.put("name", "nginx");
+            save(object);
+        }
+        return object;
+    }
+
+    public void save(JSONObject object) {
+        String dataFilePath = getDataFilePath(AgentConfigBean.NGINX_CONF);
+        JsonFileUtil.saveJson(dataFilePath, object);
     }
 }

@@ -1,15 +1,43 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.w3.org/1999/xhtml">
 
-<head th:replace="common/head::head">
+<head>
+    <th:block th:include="common/head::head"></th:block>
+    <style>
+        .status .status-div {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            border: 1px solid #c1c1c1;
+        }
+
+        .status .status-run {
+            background-color: #05ff2d;
+        }
+
+        .status .status-stop {
+            background-color: #ff0000;
+        }
+    </style>
 </head>
 
 <body>
 <div class="layui-row">
     <button id="addNgx" class="layui-btn layui-btn-sm">新增nginx配置</button>
     <button onclick="reload();" class="layui-btn layui-btn-sm">刷新表格</button>
+    <div class="status" style="float: right;">
+        <div class="status-div"></div>
+        <span>未运行</span>
 
-    <button id="reload" class="layui-btn layui-btn-sm layui-btn-danger">重启nginx</button>
+        <div class="layui-btn-group">
+            <button id="config" class="layui-btn layui-btn-sm">nginx配置</button>
+            <button id="open" class="layui-btn layui-btn-sm layui-bg-blue" style="display: none">启动nginx</button>
+            <button id="reload" class="layui-btn layui-btn-sm layui-bg-blue" style="display: none">重新加载nginx</button>
+            <button id="close" class="layui-btn layui-btn-sm layui-bg-orange" style="display: none">停止nginx</button>
+        </div>
+    </div>
+
 </div>
 <table class="layui-table" id="tab_ngx" lay-filter="tab_ngx" style="margin: 0;"></table>
 
@@ -21,9 +49,9 @@
 
 
 <script type="text/javascript">
-    var index = 0;
-
     function loadSuccess() {
+        getStatus();
+
         // 表格工具条事件
         table.on('tool(tab_ngx)', function (obj) {
             var data = obj.data;
@@ -95,6 +123,110 @@
                         }
                     }
                 });
+            });
+        }
+
+        //nginx配置
+        $('#config').on('click', function () {
+            loadingAjax({
+                url: './config',
+                success: function (ret) {
+                    if (ret.code !== 200 || !ret.data) {
+                        layer.msg(ret.msg);
+                        return;
+                    }
+
+                    layer.prompt({
+                        title: '输入新的服务名称',
+                        formType: 0,
+                        value: ret.data.name
+                    }, function (val, index) {
+                        loadingAjax({
+                            url: './updateConf',
+                            data: {
+                                name: val
+                            },
+                            success: function (data) {
+                                layer.msg(data.msg);
+                                if (200 == data.code) {
+                                    layer.close(index);
+                                    getStatus();
+                                }
+                            }
+                        });
+                    });
+                }
+            });
+        });
+
+        //开启nginx
+        $('#open').on('click', function () {
+            loadingAjax({
+                url: './open',
+                success: function (ret) {
+                    if (ret.msg) {
+                        layer.msg(ret.msg);
+                    }
+                    getStatus();
+                }
+            });
+        });
+
+        //重新加载nginx
+        $('#reload').on('click', function () {
+            loadingAjax({
+                url: './reload',
+                success: function (ret) {
+                    if (ret.msg) {
+                        layer.msg(ret.msg);
+                    }
+                }
+            });
+        });
+
+        //关闭nginx
+        $('#close').on('click', function () {
+            layer.confirm('确定停止nginx服务？', {
+                title: '系统提示'
+            }, function (index) {
+                layer.close(index);
+                loadingAjax({
+                    url: './close',
+                    success: function (ret) {
+                        if (ret.msg) {
+                            layer.msg(ret.msg);
+                        }
+                        getStatus();
+                    }
+                });
+            });
+        });
+
+        //获取状态
+        function getStatus() {
+            loadingAjax({
+                url: './status',
+                success: function (ret) {
+                    if (ret.code !== 200) {
+                        layer.msg(ret.msg);
+                        return;
+                    }
+                    var data = ret.data;
+                    var status = $(".status");
+                    if (data.status) {
+                        $('#close').css("display", "inline");
+                        $('#reload').css("display", "inline");
+                        $('#open').css("display", "none");
+                        status.find(".status-div").addClass('status-run').removeClass('status-stop');
+                        status.find("span").text('运行中');
+                    } else {
+                        status.find(".status-div").removeClass('status-run').addClass('status-stop');
+                        status.find("span").text('未运行');
+                        $('#open').css("display", "inline");
+                        $('#close').css("display", "none");
+                        $('#reload').css("display", "none");
+                    }
+                }
             });
         }
     }

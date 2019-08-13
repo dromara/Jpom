@@ -80,10 +80,10 @@ public class ProjectManageControl extends BaseServerController {
     @ResponseBody
     public String getProjectInfo() {
         NodeModel nodeModel = getNode();
-        JsonMessage jsonMessage = NodeForward.request(nodeModel, getRequest(), NodeUrl.Manage_GetProjectInfo);
+        JsonMessage<JSONArray> jsonMessage = NodeForward.request(nodeModel, getRequest(), NodeUrl.Manage_GetProjectInfo);
         if (jsonMessage.getCode() == HttpStatus.HTTP_OK) {
             UserModel userModel = getUser();
-            JSONArray jsonArray = NodeForward.toObj(jsonMessage, JSONArray.class);
+            JSONArray jsonArray = jsonMessage.getData();
             if (jsonArray != null) {
                 JSONArray newArray = new JSONArray();
                 jsonArray.forEach(o -> {

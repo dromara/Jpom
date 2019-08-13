@@ -215,4 +215,23 @@ public class LinuxSystemCommander extends AbstractSystemCommander {
         }
         return cpu;
     }
+
+    @Override
+    public boolean getServiceStatus(String serviceName) {
+        String format = StrUtil.format("service {} status", serviceName);
+        String result = CommandUtil.execCommand(format);
+        return StrUtil.containsIgnoreCase(result, "RUNNING");
+    }
+
+    @Override
+    public String startService(String serviceName) {
+        String format = StrUtil.format("service {} start", serviceName);
+        return CommandUtil.execSystemCommand(format);
+    }
+
+    @Override
+    public String stopService(String serviceName) {
+        String format = StrUtil.format("service {} stop", serviceName);
+        return CommandUtil.execSystemCommand(format);
+    }
 }

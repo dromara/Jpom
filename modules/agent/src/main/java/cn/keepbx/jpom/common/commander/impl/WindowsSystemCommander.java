@@ -10,7 +10,6 @@ import cn.keepbx.util.JvmUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.sun.management.OperatingSystemMXBean;
-import com.sun.tools.attach.VirtualMachine;
 
 import java.lang.management.ManagementFactory;
 import java.math.BigDecimal;
@@ -167,5 +166,23 @@ public class WindowsSystemCommander extends AbstractSystemCommander {
             return "未知";
         }
         return status;
+    }
+
+    @Override
+    public boolean getServiceStatus(String serviceName) {
+        String result = CommandUtil.execSystemCommand("sc query " + serviceName);
+        return StrUtil.containsIgnoreCase(result, "RUNNING");
+    }
+
+    @Override
+    public String startService(String serviceName) {
+        String format = StrUtil.format("net start {}", serviceName);
+        return CommandUtil.execSystemCommand(format);
+    }
+
+    @Override
+    public String stopService(String serviceName) {
+        String format = StrUtil.format("net stop {}", serviceName);
+        return CommandUtil.execSystemCommand(format);
     }
 }
