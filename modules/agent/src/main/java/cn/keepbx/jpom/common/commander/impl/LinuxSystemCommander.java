@@ -225,7 +225,7 @@ public class LinuxSystemCommander extends AbstractSystemCommander {
 
     @Override
     public String startService(String serviceName) {
-        String format = StrUtil.format("net stop {}", serviceName);
+        String format = StrUtil.format("service {} start", serviceName);
         return CommandUtil.execSystemCommand(format);
     }
 

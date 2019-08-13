@@ -107,7 +107,19 @@ public abstract class AbstractSystemCommander {
      */
     public abstract boolean getServiceStatus(String serviceName);
 
+    /**
+     * 启动服务
+     *
+     * @param serviceName 服务名称
+     * @return 结果
+     */
     public abstract String startService(String serviceName);
 
+    /**
+     * 关闭服务
+     *
+     * @param serviceName 服务名称
+     * @return 结果
+     */
     public abstract String stopService(String serviceName);
 }

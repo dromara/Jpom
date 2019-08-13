@@ -182,7 +182,7 @@ public class WindowsSystemCommander extends AbstractSystemCommander {
 
     @Override
     public String stopService(String serviceName) {
-        String format = StrUtil.format("service {} start", serviceName);
+        String format = StrUtil.format("net stop {}", serviceName);
         return CommandUtil.execSystemCommand(format);
     }
 }
