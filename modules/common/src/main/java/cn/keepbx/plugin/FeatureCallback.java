@@ -13,10 +13,10 @@ public interface FeatureCallback {
     /**
      * 方法执行
      *
-     * @param request
-     * @param classFeature
-     * @param methodFeature
-     * @param pars
+     * @param request       请求对象
+     * @param classFeature  类方法
+     * @param methodFeature 方法
+     * @param pars          辅助参数
      */
     void postHandle(HttpServletRequest request,
                     ClassFeature classFeature,

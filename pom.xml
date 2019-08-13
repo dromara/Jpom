@@ -26,6 +26,9 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <java.version>1.8</java.version>
         <common-boot.version>[2.0.0,2.0.99]</common-boot.version>
+        <docker.registryUrl>registry.cn-beijing.aliyuncs.com</docker.registryUrl>
+        <docker.registry.name>fengshunli</docker.registry.name>
+        <docker.workdir>/tmp/</docker.workdir>
     </properties>
     <dependencies>
         <dependency>
@@ -72,26 +75,26 @@
             </plugin>
 
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-javadoc-plugin</artifactId>
-                <version>3.1.0</version>
-                <executions>
-                    <execution>
-                        <id>attach-javadoc</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>jar</goal>
-                        </goals>
-                    </execution>
-                </executions>
+                <groupId>com.spotify</groupId>
+                <artifactId>docker-maven-plugin</artifactId>
+                <version>0.4.13</version>
                 <configuration>
-                    <tags>
-                        <tag>
-                            <name>date</name>
-                            <placement>a</placement>
-                            <head>创建时间</head>
-                        </tag>
-                    </tags>
+                    <pushImage>true</pushImage>
+                    <!--                    <dockerHost>http://39.105.190.109:2375</dockerHost>-->
+                    <imageName>${docker.registryUrl}/${docker.registry.name}/${project.artifactId}:${pom.version}
+                    </imageName>
+                    <baseImage>adoptopenjdk/openjdk8:jdk8u212-b03</baseImage>
+                    <maintainer>fsl 1171313930@qq.com</maintainer>
+                    <cmd>["java","-Xbootclasspath/a:/opt/java/openjdk/lib/tools.jar", "-Xms256m","-Xmx512m", "-jar",
+                        "${docker.workdir}${project.build.finalName}.jar", "--jpom.path=/opt/jpom/server"]
+                    </cmd>
+                    <resources>
+                        <resource>
+                            <targetPath>${docker.workdir}</targetPath>
+                            <directory>${project.build.directory}</directory>
+                            <include>${project.build.finalName}.jar</include>
+                        </resource>
+                    </resources>
                 </configuration>
             </plugin>
         </plugins>

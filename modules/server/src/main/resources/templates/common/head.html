@@ -344,5 +344,10 @@
 
     <script id="jsCommonContext" type="text/html"
             th:utext="@{${#strings.defaultString(session.jsCommonContext,'')}}"></script>
+
+    <!--  插件注入代码-->
+    <th:block th:inline="javascript" th:utext="${#strings.defaultString(pagePluginHtml,'')}">
+    </th:block>
 </head>
+
 </html>

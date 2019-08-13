@@ -1,8 +1,7 @@
 package cn.keepbx.plugin;
 
-import cn.hutool.core.util.ClassUtil;
-
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * 插件工厂
@@ -12,20 +11,25 @@ import java.util.Set;
  */
 public class PluginFactory {
 
-    private static volatile FeatureCallback featureCallback;
+    private static final List<FeatureCallback> FEATURE_CALLBACKS = new ArrayList<>();
 
-    public static void setFeatureCallback(FeatureCallback featureCallback) {
-        PluginFactory.featureCallback = featureCallback;
+    /**
+     * 添加回调事件
+     *
+     * @param featureCallback 回调
+     */
+    public static void addFeatureCallback(FeatureCallback featureCallback) {
+        FEATURE_CALLBACKS.add(featureCallback);
     }
 
-    public static FeatureCallback getFeatureCallback() {
-        return featureCallback;
+    public static List<FeatureCallback> getFeatureCallbacks() {
+        return FEATURE_CALLBACKS;
     }
 
+    /**
+     * 正式环境添加依赖
+     */
     public static void init() {
-        Set<Class<?>> classes = ClassUtil.scanPackageByAnnotation("cn.keepbx.jpom.controller", Feature.class);
-        for (Class<?> aClass : classes) {
-            System.out.println(aClass);
-        }
+
     }
 }

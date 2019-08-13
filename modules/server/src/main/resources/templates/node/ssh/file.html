@@ -30,16 +30,6 @@
         </div>
     </div>
 </form>
-<form class="layui-form" action="">
-    <div class="layui-form-item">
-        <label class="layui-form-label">文件夹</label>
-        <div class="layui-input-block">
-            <div class="layui-progress layui-progress-big" lay-filter="demo" lay-showPercent="true">
-                <div class="layui-progress-bar layui-bg-blue" lay-percent="0%">下载</div>
-            </div>
-        </div>
-    </div>
-</form>
 
 <div class="layui-container" style="display: none;" id="btnDiv">
     <form class="layui-form">
@@ -60,40 +50,6 @@
     var allData;
     var clickData;
     var openLayuiIndex;
-    var ee;
-    layui.use('element', function(){
-         ee = layui.element;
-    });
-
-     if ("WebSocket" in window) {
-         var ws = new WebSocket("ws://localhost:8888");
-         ws.onopen = function () {
-             //发送授权
-             var authContent =  new AuthContent(1,"[[${session.user.getUserMd5Key()}]]")
-             ws.send(JSON.stringify(authContent));
-
-         }
-         ws.onmessage = function (evt) {
-             var received_msg = evt.data;
-             if(received_msg.indexOf("%")>0){
-                 ee.progress('demo', received_msg);
-             }else if("complete"== received_msg){
-                 ee.progress('demo', '100%');
-                 alert("下载成功！")
-             }else {
-                 alert(received_msg);
-             }
-         };
-
-     }
-
-   function AuthContent(type, userId){
-        this.type = type;
-        this.userId = userId;
-    }
-
-
-
 
     function getData(path, children, preData) {
         loadingAjax({
@@ -186,11 +142,10 @@
         });
 
         $("#download").click(function () {
-            ee.init()
             if (!clickData) {
                 return;
             }
-            window.open("http://localhost:8888?id=" + id + "&path=" + nowPath + "&name=" + clickData.parentDir);
+            window.open("./download.html?id=" + id + "&path=" + nowPath + "&name=" + clickData.parentDir);
             layer.close(openLayuiIndex);
         });
 

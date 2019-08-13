@@ -1,15 +1,14 @@
 package cn.keepbx.jpom.common.interceptor;
 
 import cn.jiangzeyin.common.interceptor.BaseInterceptor;
-import cn.keepbx.plugin.ClassFeature;
-import cn.keepbx.plugin.Feature;
-import cn.keepbx.plugin.MethodFeature;
-import cn.keepbx.plugin.PluginFactory;
+import cn.jiangzeyin.common.interceptor.InterceptorPattens;
+import cn.keepbx.plugin.*;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.List;
 
 /**
  * 插件方法回调拦截器
@@ -17,17 +16,22 @@ import javax.servlet.http.HttpServletResponse;
  * @author bwcx_jzy
  * @date 2019/8/13
  */
+@InterceptorPattens(sort = Integer.MAX_VALUE)
 public class PluginFeatureInterceptor extends BaseInterceptor {
 
     @Override
     public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler, ModelAndView modelAndView) throws Exception {
         super.postHandle(request, response, handler, modelAndView);
         HandlerMethod handlerMethod = getHandlerMethod();
+        if (handlerMethod == null) {
+            return;
+        }
         Feature methodAnnotation = handlerMethod.getMethodAnnotation(Feature.class);
         Feature annotation = handlerMethod.getBeanType().getAnnotation(Feature.class);
         if (methodAnnotation != null && annotation != null) {
             if (methodAnnotation.method() != MethodFeature.NULL && annotation.cls() != ClassFeature.NULL) {
-                PluginFactory.getFeatureCallback().postHandle(request, annotation.cls(), methodAnnotation.method());
+                List<FeatureCallback> featureCallbacks = PluginFactory.getFeatureCallbacks();
+                featureCallbacks.forEach(featureCallback -> featureCallback.postHandle(request, annotation.cls(), methodAnnotation.method()));
             }
         }
     }
