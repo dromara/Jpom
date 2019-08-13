@@ -13,7 +13,7 @@ import org.springframework.boot.web.servlet.ServletComponentScan;
  * @author jiangzeyin
  * @date 2017/9/14
  */
-@SpringBootApplication
+@SpringBootApplication(scanBasePackages = {"cn.keepbx.plugin", "cn.keepbx.jpom"})
 @ServletComponentScan
 @EnableCommonBoot
 public class JpomServerApplication {

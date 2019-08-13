@@ -9,6 +9,7 @@ import cn.jiangzeyin.common.validator.ParameterInterceptor;
 import cn.keepbx.jpom.common.JpomApplicationEvent;
 import cn.keepbx.jpom.common.Type;
 import cn.keepbx.jpom.model.system.JpomManifest;
+import cn.keepbx.plugin.PluginFactory;
 import cn.keepbx.util.CommandUtil;
 import org.springframework.http.converter.StringHttpMessageConverter;
 
@@ -22,6 +23,12 @@ import java.nio.charset.Charset;
  * @date 2019/4/16
  */
 public class JpomApplication extends ApplicationBuilder {
+
+    static {
+        // 初始化插件
+        PluginFactory.init();
+    }
+
     /**
      *
      */
