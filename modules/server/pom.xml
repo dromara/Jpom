@@ -136,9 +136,9 @@
                 </plugins>
             </build>
         </profile>
-        <!--  打包插件引人-->
+        <!--  安装插件引人-->
         <profile>
-            <id>plugin-profile</id>
+            <id>install-plugin-profile</id>
         </profile>
 
         <!--  插件开发-->

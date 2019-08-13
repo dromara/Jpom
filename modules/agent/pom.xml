@@ -118,7 +118,7 @@
         </profile>
         <!--  插件-->
         <profile>
-            <id>plugin-profile</id>
+            <id>install-plugin-profile</id>
         </profile>
     </profiles>
 </project>
