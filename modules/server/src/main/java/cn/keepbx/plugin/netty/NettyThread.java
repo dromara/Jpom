@@ -11,9 +11,14 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.HttpServerCodec;
+import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolHandler;
+import io.netty.handler.codec.string.StringDecoder;
+import io.netty.handler.codec.string.StringEncoder;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 import io.netty.handler.stream.ChunkedWriteHandler;
+import io.netty.handler.timeout.IdleStateHandler;
+import io.netty.util.CharsetUtil;
 
 /**
  * @author myzf
@@ -42,10 +47,14 @@ public class NettyThread implements Runnable, AutoCloseable {
                         @Override
                         protected void initChannel(SocketChannel ch) throws Exception {
                             ChannelPipeline pipeline = ch.pipeline();
+                            pipeline.addLast("logging",new LoggingHandler("DEBUG"));//设
                             pipeline.addLast(new HttpServerCodec());
                             pipeline.addLast(new HttpObjectAggregator(65536));
                             pipeline.addLast(new ChunkedWriteHandler());
+                            pipeline.addLast(new IdleStateHandler(30, 30, 60));
+                            pipeline.addLast(new WebSocketServerProtocolHandler("/"));
                             pipeline.addLast(new FileServerHandler());
+
                         }
                     });
 
@@ -53,11 +62,6 @@ public class NettyThread implements Runnable, AutoCloseable {
             channel.closeFuture().sync();
         } catch (InterruptedException e) {
             DefaultSystemLog.ERROR().error("netty 错误", e);
-        } finally {
-            try {
-                this.close();
-            } catch (Exception ignored) {
-            }
         }
     }
 
