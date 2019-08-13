@@ -41,7 +41,7 @@ public class NodeForward {
      * @param nodeUrl   节点的url
      * @return JSON
      */
-    public static JsonMessage request(NodeModel nodeModel, HttpServletRequest request, NodeUrl nodeUrl) {
+    public static <T> JsonMessage<T> request(NodeModel nodeModel, HttpServletRequest request, NodeUrl nodeUrl) {
         return request(nodeModel, request, nodeUrl, true, null, null, null, null);
     }
 
@@ -75,15 +75,15 @@ public class NodeForward {
      * @param nodeUrl   节点的url
      * @return JSON
      */
-    private static JsonMessage request(NodeModel nodeModel,
-                                       HttpServletRequest request,
-                                       NodeUrl nodeUrl,
-                                       boolean mustUser,
-                                       UserModel userModel,
-                                       JSONObject jsonData,
-                                       String pName,
-                                       Object pVal,
-                                       Object... val) {
+    private static <T> JsonMessage<T> request(NodeModel nodeModel,
+                                              HttpServletRequest request,
+                                              NodeUrl nodeUrl,
+                                              boolean mustUser,
+                                              UserModel userModel,
+                                              JSONObject jsonData,
+                                              String pName,
+                                              Object pVal,
+                                              Object... val) {
         String url = nodeModel.getRealUrl(nodeUrl);
         HttpRequest httpRequest = HttpUtil.createPost(url);
         //
@@ -137,19 +137,8 @@ public class NodeForward {
      * @return T
      */
     public static <T> T requestData(NodeModel nodeModel, NodeUrl nodeUrl, HttpServletRequest request, Class<T> tClass) {
-        JsonMessage jsonMessage = request(nodeModel, request, nodeUrl);
-        return toObj(jsonMessage, tClass);
-    }
-
-    public static <T> T toObj(JsonMessage jsonMessage, Class<T> tClass) {
-        Object data = jsonMessage.getData();
-        if (null != data) {
-            if (tClass == String.class) {
-                return (T) data.toString();
-            }
-            return JSONObject.parseObject(data.toString(), tClass);
-        }
-        return null;
+        JsonMessage<T> jsonMessage = request(nodeModel, request, nodeUrl);
+        return jsonMessage.getData(tClass);
     }
 
     /**
@@ -179,8 +168,8 @@ public class NodeForward {
             throw new AgentException(nodeModel.getName() + "节点异常：" + e.getMessage(), e);
         }
         //
-        JsonMessage jsonMessage = parseBody(response);
-        return toObj(jsonMessage, tClass);
+        JsonMessage<T> jsonMessage = parseBody(response);
+        return jsonMessage.getData(tClass);
     }
 
 
@@ -298,7 +287,7 @@ public class NodeForward {
      * @param response 响应
      * @return json
      */
-    private static JsonMessage parseBody(HttpResponse response) {
+    private static <T> JsonMessage<T> parseBody(HttpResponse response) {
         int status = response.getStatus();
         if (status != HttpStatus.HTTP_OK) {
             throw new AgentException("agent 端响应异常：" + status);
@@ -307,11 +296,11 @@ public class NodeForward {
         return toJsonMessage(body);
     }
 
-    private static JsonMessage toJsonMessage(String body) {
+    private static <T> JsonMessage<T> toJsonMessage(String body) {
         if (StrUtil.isEmpty(body)) {
             throw new AgentException("agent 端响应内容为空");
         }
-        JsonMessage jsonMessage = JSON.parseObject(body, JsonMessage.class);
+        JsonMessage<T> jsonMessage = JSON.parseObject(body, JsonMessage.class);
         if (jsonMessage.getCode() == ConfigBean.AUTHORIZE_ERROR) {
             throw new AuthorizeException(jsonMessage, jsonMessage.getMsg());
         }

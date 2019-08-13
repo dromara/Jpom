@@ -54,7 +54,7 @@ public class AutoRegSeverNode {
             DefaultSystemLog.LOG().info("获取Server 安装id失败:" + jsonMessage);
             return;
         }
-        String installId = jsonMessage.dataToObj(String.class);
+        String installId = jsonMessage.dataToString();
         boolean eqInstall = StrUtil.equals(oldInstallId, installId);
         //
         URL url = URLUtil.toUrlForHttp(AgentExtConfigBean.getInstance().getAgentUrl());
