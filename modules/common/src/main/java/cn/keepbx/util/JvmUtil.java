@@ -3,6 +3,7 @@ package cn.keepbx.util;
 import cn.hutool.cache.impl.TimedCache;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.util.ReflectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.system.SystemUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
@@ -10,7 +11,6 @@ import cn.keepbx.jpom.system.JpomRuntimeException;
 import com.sun.management.OperatingSystemMXBean;
 import com.sun.tools.attach.*;
 import sun.jvmstat.monitor.*;
-import sun.management.ConnectorAddressLink;
 
 import javax.management.MBeanServerConnection;
 import javax.management.remote.JMXConnector;
@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryMXBean;
 import java.lang.management.ThreadMXBean;
+import java.lang.reflect.Method;
 import java.net.URISyntaxException;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -32,6 +33,26 @@ import java.util.concurrent.TimeUnit;
  * @date 2019/4/13
  */
 public class JvmUtil {
+
+    private static Method importFrom = null;
+
+    static {
+        int v = StrUtil.compareVersion(SystemUtil.getJavaInfo().getVersion(), "11.0");
+        Class cls = null;
+        try {
+            if (v >= 0) {
+                cls = Class.forName("jdk.internal.agent.ConnectorAddressLink");
+            } else {
+                cls = Class.forName("sun.management.ConnectorAddressLink");
+            }
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        if (cls != null) {
+            importFrom = ReflectUtil.getMethod(cls, "importFrom", Integer.class);
+        }
+    }
 
     /**
      * 旧版jpom进程标记
@@ -141,13 +162,13 @@ public class JvmUtil {
      * @throws AgentLoadException           插件加载
      * @throws AgentInitializationException 插件初始化
      */
-    private static JMXServiceURL getJMXServiceURL(VirtualMachine virtualMachine) throws IOException, AgentLoadException, AgentInitializationException {
+    private static JMXServiceURL getJMXServiceURL(VirtualMachine virtualMachine) throws IOException, AgentLoadException, AgentInitializationException, ClassNotFoundException {
         String address = virtualMachine.getAgentProperties().getProperty("com.sun.management.jmxremote.localConnectorAddress");
         if (address != null) {
             return new JMXServiceURL(address);
         }
         int pid = Convert.toInt(virtualMachine.id());
-        address = ConnectorAddressLink.importFrom(pid);
+        address = importFrom(pid);
         if (address != null) {
             return new JMXServiceURL(address);
         }
@@ -158,6 +179,13 @@ public class JvmUtil {
             return new JMXServiceURL(address);
         }
         return null;
+    }
+
+    public static String importFrom(int pid) {
+        if (importFrom == null) {
+            throw new JpomRuntimeException("jdk 环境不正常，没有找到：ConnectorAddressLink");
+        }
+        return ReflectUtil.invoke(null, importFrom, pid);
     }
 
     /**

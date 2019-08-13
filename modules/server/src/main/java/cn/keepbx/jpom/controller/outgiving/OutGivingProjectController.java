@@ -136,7 +136,7 @@ public class OutGivingProjectController extends BaseServerController {
         multipartFileBuilder
                 .setFileExt(StringUtil.PACKAGE_EXT)
                 .addFieldName("file")
-                .setSavePath(ServerConfigBean.getInstance().getTempPath().getAbsolutePath());
+                .setSavePath(ServerConfigBean.getInstance().getUserTempPath().getAbsolutePath());
         String path = multipartFileBuilder.save();
         //
         File src = FileUtil.file(path);
