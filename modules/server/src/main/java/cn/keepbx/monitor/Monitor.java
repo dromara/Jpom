@@ -126,9 +126,9 @@ public class Monitor implements Task {
             boolean runStatus = false;
             try {
                 //查询项目运行状态
-                JsonMessage jsonMessage = NodeForward.requestBySys(nodeModel, NodeUrl.Manage_GetProjectStatus, "id", id);
+                JsonMessage<JSONObject> jsonMessage = NodeForward.requestBySys(nodeModel, NodeUrl.Manage_GetProjectStatus, "id", id);
                 if (jsonMessage.getCode() == HttpStatus.HTTP_OK) {
-                    JSONObject jsonObject = jsonMessage.dataToObj(JSONObject.class);
+                    JSONObject jsonObject = jsonMessage.getData();
                     int pid = jsonObject.getIntValue("pId");
                     if (pid > 0) {
                         // 正常运行

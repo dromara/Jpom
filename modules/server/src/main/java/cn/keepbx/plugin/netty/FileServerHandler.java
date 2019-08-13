@@ -19,7 +19,6 @@ import com.jcraft.jsch.ChannelSftp;
 import com.jcraft.jsch.Session;
 import com.jcraft.jsch.SftpATTRS;
 import com.jcraft.jsch.SftpException;
-import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.*;
 import io.netty.channel.group.ChannelGroup;
@@ -30,8 +29,6 @@ import io.netty.handler.codec.http.multipart.HttpPostRequestDecoder;
 import io.netty.handler.codec.http.multipart.InterfaceHttpData;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
-import io.netty.handler.codec.http.websocketx.WebSocketServerHandshaker;
-import io.netty.handler.codec.http.websocketx.WebSocketServerHandshakerFactory;
 import io.netty.handler.stream.ChunkedStream;
 import io.netty.util.CharsetUtil;
 import io.netty.util.concurrent.GlobalEventExecutor;
@@ -40,14 +37,12 @@ import org.springframework.http.MediaType;
 import java.io.IOException;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
-import java.text.NumberFormat;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import static io.netty.handler.codec.http.HttpHeaderNames.CONTENT_TYPE;
 import static io.netty.handler.codec.http.HttpResponseStatus.*;
-import static io.netty.handler.codec.http.HttpUtil.isKeepAlive;
 import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 
 /**
@@ -62,94 +57,92 @@ public class FileServerHandler extends SimpleChannelInboundHandler<Object> imple
     private ChannelSftp channel = null;
     private long fileSize;
 
-    public static ChannelGroup channels =
-            new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
+    public static ChannelGroup channels = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, Object msg) throws Exception {
-        if (msg instanceof FullHttpRequest){
-            FullHttpRequest request = (FullHttpRequest)msg;
+        if (msg instanceof FullHttpRequest) {
+            FullHttpRequest request = (FullHttpRequest) msg;
 
-                //检测解码情况
-                if (!request.decoderResult().isSuccess()) {
-                    sendError(ctx, BAD_REQUEST);
-                    return;
-                }
-                Map<String, String> parse = parse(request);
-                //获取请求参数 共下面页面单个下载用
-                String id = parse.get("id");
-                String path = parse.get("path");
-                String name = parse.get("name");
-                SshService sshService = SpringUtil.getBean(SshService.class);
-                SshModel sshModel = sshService.getItem(id);
-                if (sshModel == null) {
-                    sendError(ctx, NOT_FOUND);
-                    return;
-                }
-                List<String> fileDirs = sshModel.getFileDirs();
-                //
-                if (StrUtil.isEmpty(path) || !fileDirs.contains(path)) {
-                    sendError(ctx, NOT_FOUND);
-                    return;
-                }
-                if (StrUtil.isEmpty(name)) {
-                    sendError(ctx, NOT_FOUND);
-                    return;
-                }
-                try {
-                    session = JschUtil.openSession(sshModel.getHost(), sshModel.getPort(), sshModel.getUser(), sshModel.getPassword());
-                    channel = (ChannelSftp) JschUtil.openChannel(session, ChannelType.SFTP);
-                    String normalize = FileUtil.normalize(path + "/" + name);
-                    SftpATTRS attr = channel.stat(normalize);
-                    fileSize = attr.getSize();
-                    ChannelSftp finalChannel = channel;
-                    PipedInputStream pipedInputStream = new PipedInputStream();
-                    PipedOutputStream pipedOutputStream = new PipedOutputStream(pipedInputStream);
-                    ThreadUtil.execute(() -> {
-                        try {
-                            finalChannel.get(normalize, pipedOutputStream);
-                        } catch (SftpException e) {
-                            DefaultSystemLog.ERROR().error("下载异常", e);
-                        }
-                        IoUtil.close(pipedOutputStream);
-                    });
-                    HttpResponse response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK);
-                    HttpUtil.setContentLength(response, fileSize);
-
-                    response.headers().set(CONTENT_TYPE, MediaType.APPLICATION_OCTET_STREAM_VALUE);
-                    // 设定默认文件输出名
-                    String fileName = URLUtil.encode(FileUtil.getName(name));
-                    response.headers().add("Content-disposition", "attachment; filename=" + fileName);
-
-                    ctx.write(response);
-                    ChannelFuture sendFileFuture = ctx.write(new HttpChunkedInput(new ChunkedStream(pipedInputStream)), ctx.newProgressivePromise());
-                    sendFileFuture.addListener(this);
-
-                    ChannelFuture lastContentFuture = ctx.writeAndFlush(LastHttpContent.EMPTY_LAST_CONTENT);
-
-                    if (!HttpUtil.isKeepAlive(request)) {
-                        lastContentFuture.addListener(ChannelFutureListener.CLOSE);
-                    }
-                } catch (Exception e) {
-                    DefaultSystemLog.ERROR().error("下载失败", e);
-                    sendError(ctx, INTERNAL_SERVER_ERROR);
-
+            //检测解码情况
+            if (!request.decoderResult().isSuccess()) {
+                sendError(ctx, BAD_REQUEST);
+                return;
             }
-        }else if (msg instanceof WebSocketFrame){
-            TextWebSocketFrame tmsg = (TextWebSocketFrame)msg;
+            Map<String, String> parse = parse(request);
+            //获取请求参数 共下面页面单个下载用
+            String id = parse.get("id");
+            String path = parse.get("path");
+            String name = parse.get("name");
+            SshService sshService = SpringUtil.getBean(SshService.class);
+            SshModel sshModel = sshService.getItem(id);
+            if (sshModel == null) {
+                sendError(ctx, NOT_FOUND);
+                return;
+            }
+            List<String> fileDirs = sshModel.getFileDirs();
+            //
+            if (StrUtil.isEmpty(path) || !fileDirs.contains(path)) {
+                sendError(ctx, NOT_FOUND);
+                return;
+            }
+            if (StrUtil.isEmpty(name)) {
+                sendError(ctx, NOT_FOUND);
+                return;
+            }
+            try {
+                session = JschUtil.openSession(sshModel.getHost(), sshModel.getPort(), sshModel.getUser(), sshModel.getPassword());
+                channel = (ChannelSftp) JschUtil.openChannel(session, ChannelType.SFTP);
+                String normalize = FileUtil.normalize(path + "/" + name);
+                SftpATTRS attr = channel.stat(normalize);
+                fileSize = attr.getSize();
+                ChannelSftp finalChannel = channel;
+                PipedInputStream pipedInputStream = new PipedInputStream();
+                PipedOutputStream pipedOutputStream = new PipedOutputStream(pipedInputStream);
+                ThreadUtil.execute(() -> {
+                    try {
+                        finalChannel.get(normalize, pipedOutputStream);
+                    } catch (SftpException e) {
+                        DefaultSystemLog.ERROR().error("下载异常", e);
+                    }
+                    IoUtil.close(pipedOutputStream);
+                });
+                HttpResponse response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK);
+                HttpUtil.setContentLength(response, fileSize);
+
+                response.headers().set(CONTENT_TYPE, MediaType.APPLICATION_OCTET_STREAM_VALUE);
+                // 设定默认文件输出名
+                String fileName = URLUtil.encode(FileUtil.getName(name));
+                response.headers().add("Content-disposition", "attachment; filename=" + fileName);
+
+                ctx.write(response);
+                ChannelFuture sendFileFuture = ctx.write(new HttpChunkedInput(new ChunkedStream(pipedInputStream)), ctx.newProgressivePromise());
+                sendFileFuture.addListener(this);
+
+                ChannelFuture lastContentFuture = ctx.writeAndFlush(LastHttpContent.EMPTY_LAST_CONTENT);
+
+                if (!HttpUtil.isKeepAlive(request)) {
+                    lastContentFuture.addListener(ChannelFutureListener.CLOSE);
+                }
+            } catch (Exception e) {
+                DefaultSystemLog.ERROR().error("下载失败", e);
+                sendError(ctx, INTERNAL_SERVER_ERROR);
+            }
+        } else if (msg instanceof WebSocketFrame) {
+            TextWebSocketFrame tmsg = (TextWebSocketFrame) msg;
             // 获取客户端传输过来的消息
             String content = tmsg.text();
-            if(StrUtil.hasEmpty(content)){
+            if (StrUtil.hasEmpty(content)) {
                 ctx.channel().close();
 
             }
             // 1. 获取客户端发来的消息
             AuthMsg authMsg = JSON.parseObject(content, AuthMsg.class);
-            if(UserChannelRel.get(authMsg.getUserId()) == null){
-                if(1 == authMsg.getType()){//鉴权类型的
+            if (UserChannelRel.get(authMsg.getUserId()) == null) {
+                if (1 == authMsg.getType()) {//鉴权类型的
                     UserService userService = SpringUtil.getBean(UserService.class);
                     UserModel userModel = userService.checkUser(authMsg.getUserId());
-                    if(userModel == null){
+                    if (userModel == null) {
                         //鉴权失败
                         ctx.channel().writeAndFlush(new TextWebSocketFrame("鉴权失败!"));
                         ctx.channel().close();
@@ -160,8 +153,6 @@ public class FileServerHandler extends SimpleChannelInboundHandler<Object> imple
 
 
         }
-
-
 
 
     }
@@ -238,10 +229,10 @@ public class FileServerHandler extends SimpleChannelInboundHandler<Object> imple
 
     @Override
     public void operationProgressed(ChannelProgressiveFuture future, long progress, long total) throws Exception {
-        if(total < 0 ){
-                String s = String.format("%.2f", (progress / (double) fileSize) * 100)+"%";
-                // websocket连接在线
-            for(Channel channel : channels){
+        if (total < 0) {
+            String s = String.format("%.2f", (progress / (double) fileSize) * 100) + "%";
+            // websocket连接在线
+            for (Channel channel : channels) {
                 channel.writeAndFlush(
                         new TextWebSocketFrame(
                                 s));
@@ -253,7 +244,7 @@ public class FileServerHandler extends SimpleChannelInboundHandler<Object> imple
 
     @Override
     public void operationComplete(ChannelProgressiveFuture future) throws Exception {
-        for(Channel channel : channels){
+        for (Channel channel : channels) {
             channel.writeAndFlush(
                     new TextWebSocketFrame(
                             "complete"));
