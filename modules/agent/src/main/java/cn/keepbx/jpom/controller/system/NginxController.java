@@ -284,11 +284,8 @@ public class NginxController extends BaseAgentController {
     public String reload() {
         if (SystemUtil.getOsInfo().isLinux()) {
             String result = CommandUtil.execSystemCommand("nginx -t");
-            List<String> strings = StrSpliter.splitTrim(result, "\n", true);
-            for (String str : strings) {
-                if (!str.endsWith("successful") || !str.endsWith("ok")) {
-                    return JsonMessage.getString(400, result);
-                }
+            if (!result.endsWith("successful") || !result.endsWith("ok")) {
+                return JsonMessage.getString(400, result);
             }
             CommandUtil.execSystemCommand("nginx -s reload");
         } else if (SystemUtil.getOsInfo().isWindows()) {
@@ -297,22 +294,20 @@ public class NginxController extends BaseAgentController {
             String result = CommandUtil.execSystemCommand("sc qc " + name);
             List<String> strings = StrSpliter.splitTrim(result, "\n", true);
             //服务路径
-            String path = "";
+            File file = null;
             for (String str : strings) {
                 str = str.toUpperCase().trim();
                 if (str.startsWith("BINARY_PATH_NAME")) {
-                    path = str.substring(str.indexOf(":") + 1).replace("\"", "");
+                    String path = str.substring(str.indexOf(":") + 1).replace("\"", "").trim();
+                    file = FileUtil.file(path).getParentFile();
                     break;
                 }
             }
-            if (StrUtil.isEmpty(path)) {
-                return JsonMessage.getString(400, "未找到nginx路径");
-            }
-            File file = FileUtil.file(path).getParentFile();
             result = CommandUtil.execSystemCommand("nginx -t", file);
             if (StrUtil.isNotEmpty(result)) {
                 return JsonMessage.getString(400, result);
             }
+            CommandUtil.execSystemCommand("nginx -s reload", file);
         }
         return JsonMessage.getString(200, "重新加载成功");
     }
