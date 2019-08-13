@@ -10,6 +10,9 @@ import cn.jiangzeyin.common.JsonMessage;
 import cn.keepbx.jpom.common.BaseServerController;
 import cn.keepbx.jpom.model.data.SshModel;
 import cn.keepbx.jpom.service.node.ssh.SshService;
+import cn.keepbx.plugin.ClassFeature;
+import cn.keepbx.plugin.Feature;
+import cn.keepbx.plugin.MethodFeature;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.jcraft.jsch.ChannelSftp;
@@ -33,14 +36,16 @@ import java.util.Vector;
  * @author bwcx_jzy
  * @date 2019/8/10
  */
-@Controller
-@RequestMapping(value = "/node/ssh")
+@Controller()
+@RequestMapping("node/ssh")
+@Feature(cls = ClassFeature.SSH)
 public class SshFileController extends BaseServerController {
 
     @Resource
     private SshService sshService;
 
     @RequestMapping(value = "file.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
+    @Feature(method = MethodFeature.FILE)
     public String file(String id) throws IOException {
         SshModel sshModel = sshService.getItem(id);
         if (sshModel != null) {

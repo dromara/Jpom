@@ -15,6 +15,7 @@ import cn.keepbx.jpom.model.data.SshModel;
 import cn.keepbx.jpom.model.data.UserModel;
 import cn.keepbx.jpom.model.log.UserOperateLogV1;
 import cn.keepbx.jpom.service.node.ssh.SshService;
+import cn.keepbx.plugin.ClassFeature;
 import com.jcraft.jsch.Session;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
@@ -33,7 +34,7 @@ import java.util.List;
  * @date 2019/8/9
  */
 @Controller
-@RequestMapping(value = "/node/ssh")
+@RequestMapping(value = "node/ssh")
 public class SshController extends BaseServerController {
 
     @Resource

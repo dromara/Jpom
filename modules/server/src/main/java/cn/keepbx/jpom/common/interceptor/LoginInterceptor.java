@@ -46,42 +46,43 @@ public class LoginInterceptor extends BaseJpomInterceptor {
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         super.preHandle(request, response, handler);
         HttpSession session = getSession();
+        HandlerMethod handlerMethod = getHandlerMethod();
+        if (handlerMethod == null) {
+            return true;
+        }
         UserModel user = null;
-        if (handler instanceof HandlerMethod) {
-            HandlerMethod handlerMethod = (HandlerMethod) handler;
-            // 记录请求类型
-            boolean isPage = isPage(handlerMethod);
-            request.setAttribute("Page_Req", isPage);
-            //
-            NotLogin notLogin = handlerMethod.getMethodAnnotation(NotLogin.class);
-            if (notLogin == null) {
-                notLogin = handlerMethod.getBeanType().getAnnotation(NotLogin.class);
+        // 记录请求类型
+        boolean isPage = isPage(handlerMethod);
+        request.setAttribute("Page_Req", isPage);
+        //
+        NotLogin notLogin = handlerMethod.getMethodAnnotation(NotLogin.class);
+        if (notLogin == null) {
+            notLogin = handlerMethod.getBeanType().getAnnotation(NotLogin.class);
+        }
+        if (notLogin == null) {
+            user = (UserModel) session.getAttribute(SESSION_NAME);
+            if (user == null) {
+                this.responseLogin(request, response, handlerMethod);
+                return false;
             }
-            if (notLogin == null) {
-                user = (UserModel) session.getAttribute(SESSION_NAME);
-                if (user == null) {
-                    this.responseLogin(request, response, handlerMethod);
+            // 用户信息
+            UserService userService = SpringUtil.getBean(UserService.class);
+            UserModel newUser = userService.getItem(user.getId());
+            if (newUser == null) {
+                // 用户被删除
+                this.responseLogin(request, response, handlerMethod);
+                return false;
+            }
+            if (user.getModifyTime() != newUser.getModifyTime()) {
+                // 被修改过
+                this.responseLogin(request, response, handlerMethod);
+                return false;
+            }
+        } else {
+            if (notLogin.openApi()) {
+                // openApi token 判断
+                if (!checkOpenApi(request, response)) {
                     return false;
-                }
-                // 用户信息
-                UserService userService = SpringUtil.getBean(UserService.class);
-                UserModel newUser = userService.getItem(user.getId());
-                if (newUser == null) {
-                    // 用户被删除
-                    this.responseLogin(request, response, handlerMethod);
-                    return false;
-                }
-                if (user.getModifyTime() != newUser.getModifyTime()) {
-                    // 被修改过
-                    this.responseLogin(request, response, handlerMethod);
-                    return false;
-                }
-            } else {
-                if (notLogin.openApi()) {
-                    // openApi token 判断
-                    if (!checkOpenApi(request, response)) {
-                        return false;
-                    }
                 }
             }
         }

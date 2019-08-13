@@ -8,6 +8,7 @@ import cn.jiangzeyin.common.ApplicationBuilder;
 import cn.jiangzeyin.common.validator.ParameterInterceptor;
 import cn.keepbx.jpom.common.JpomApplicationEvent;
 import cn.keepbx.jpom.common.Type;
+import cn.keepbx.jpom.common.interceptor.PluginFeatureInterceptor;
 import cn.keepbx.jpom.model.system.JpomManifest;
 import cn.keepbx.plugin.PluginFactory;
 import cn.keepbx.util.CommandUtil;
@@ -64,6 +65,7 @@ public class JpomApplication extends ApplicationBuilder {
 
         // 参数拦截器
         addInterceptor(ParameterInterceptor.class);
+        addInterceptor(PluginFeatureInterceptor.class);
         //
         addApplicationEventClient(new JpomApplicationEvent());
     }
