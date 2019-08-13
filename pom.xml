@@ -14,8 +14,8 @@
         <artifactId>spring-boot-starter-parent</artifactId>
         <version>2.1.6.RELEASE</version>
     </parent>
-    <groupId>cn.keepbx.Jpom</groupId>
-    <artifactId>Jpom</artifactId>
+    <groupId>cn.keepbx.jpom</groupId>
+    <artifactId>jpom-parent</artifactId>
     <name>Jpom Java项目在线管理</name>
     <description>
         一款简而轻的低侵入式在线构建、自动部署、日常运维、项目监控软件

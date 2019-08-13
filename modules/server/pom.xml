@@ -3,8 +3,8 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <artifactId>Jpom</artifactId>
-        <groupId>cn.keepbx.Jpom</groupId>
+        <artifactId>jpom-parent</artifactId>
+        <groupId>cn.keepbx.jpom</groupId>
         <version>2.4.3</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
@@ -22,7 +22,7 @@
         </dependency>
 
         <dependency>
-            <groupId>cn.keepbx.Jpom</groupId>
+            <groupId>cn.keepbx.jpom</groupId>
             <artifactId>common</artifactId>
             <version>${pom.version}</version>
         </dependency>
