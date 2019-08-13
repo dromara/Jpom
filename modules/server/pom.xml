@@ -22,12 +22,6 @@
         </dependency>
 
         <dependency>
-            <groupId>io.netty</groupId>
-            <artifactId>netty-all</artifactId>
-            <version>4.1.38.Final</version>
-        </dependency>
-
-        <dependency>
             <groupId>cn.keepbx.Jpom</groupId>
             <artifactId>common</artifactId>
             <version>${pom.version}</version>
@@ -142,9 +136,21 @@
                 </plugins>
             </build>
         </profile>
-        <!--  插件-->
+        <!--  打包插件引人-->
         <profile>
             <id>plugin-profile</id>
+        </profile>
+
+        <!--  插件开发-->
+        <profile>
+            <id>develop-plugin-profile</id>
+            <dependencies>
+                <dependency>
+                    <groupId>cn.keepbx.Jpom-Plugin</groupId>
+                    <artifactId>netty</artifactId>
+                    <version>LATEST</version>
+                </dependency>
+            </dependencies>
         </profile>
     </profiles>
 </project>
