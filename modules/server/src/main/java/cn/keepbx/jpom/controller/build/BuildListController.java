@@ -20,6 +20,7 @@ import cn.keepbx.jpom.model.data.NodeModel;
 import cn.keepbx.jpom.model.data.OutGivingModel;
 import cn.keepbx.jpom.model.data.UserModel;
 import cn.keepbx.jpom.model.log.UserOperateLogV1;
+import cn.keepbx.jpom.model.vo.BuildModelVo;
 import cn.keepbx.jpom.service.build.BuildService;
 import cn.keepbx.jpom.service.dblog.DbBuildHistoryLogService;
 import cn.keepbx.jpom.service.node.OutGivingServer;
@@ -71,7 +72,7 @@ public class BuildListController extends BaseServerController {
     @RequestMapping(value = "list_data.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     public String getMonitorList() throws IOException {
-        List<BuildModel> list = buildService.list();
+        List<BuildModelVo> list = buildService.list(BuildModelVo.class);
         return JsonMessage.getString(200, "", list);
     }
 
@@ -226,6 +227,22 @@ public class BuildListController extends BaseServerController {
             return JsonMessage.getString(500, "清理历史构建产物失败");
         }
         buildService.deleteItem(buildModel.getId());
+        return JsonMessage.getString(200, "清理成功");
+    }
+
+
+    @RequestMapping(value = "cleanSource.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @ResponseBody
+    @UrlPermission(value = Role.ServerManager, optType = UserOperateLogV1.OptType.BuildCleanSource)
+    public String cleanSource(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据id") String id) throws IOException, SQLException {
+        BuildModel buildModel = buildService.getItem(id);
+        Objects.requireNonNull(buildModel, "没有对应数据");
+        File source = BuildUtil.getSource(buildModel);
+        boolean del = FileUtil.del(source);
+        //
+        if (!del) {
+            return JsonMessage.getString(500, "清理构建代码失败");
+        }
         return JsonMessage.getString(200, "清理成功");
     }
 

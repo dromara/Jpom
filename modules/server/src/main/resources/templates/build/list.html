@@ -43,13 +43,39 @@
         });
     }
 
+    function cleanFile(id) {
+        layer.confirm('确定清除构建代码吗 ？', {
+            title: '系统提示'
+        }, function (index) {
+            layer.close(index);
+            loadingAjax({
+                url: './cleanSource.json',
+                data: {
+                    id: id
+                },
+                success: function (data) {
+                    layer.msg(data.msg);
+                    if (200 == data.code) {
+                        table.reload('tab_build', {});
+                    }
+                }
+            });
+        });
+    }
+
     var col = [
         {field: 'name', title: '名称'},
-        {field: 'branchName', title: '分支'},
+        {
+            field: 'branchName', title: '分支', templet: function (d) {
+                var sourceExist = d.sourceExist;
+                var delHtml = sourceExist ? "<i onclick='cleanFile(\"" + d.id + "\")' class=\"layui-icon layui-icon-delete\"  style=\"margin-left:5px;color: #1E9FFF;\"></i>" : "";
+                return "<div>" + d.branchName + delHtml + " </div>"
+            }
+        },
         {
             field: 'status', title: "当前状态", templet: function (d) {
                 for (var i = 0; i < statusArray.length; i++) {
-                    if (statusArray[i].code == d.status) {
+                    if (statusArray[i].code === d.status) {
                         return statusArray[i].desc;
                     }
                 }

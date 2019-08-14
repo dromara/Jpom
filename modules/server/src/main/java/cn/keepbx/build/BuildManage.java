@@ -47,7 +47,7 @@ public class BuildManage extends BaseBuild implements Runnable {
         super(BuildUtil.getLogFile(buildModel.getId(), buildModel.getBuildId()),
                 buildModel.getId());
         this.buildModel = buildModel;
-        this.gitFile = FileUtil.file(BuildUtil.getBuildDataFile(buildModel.getId()), "source");
+        this.gitFile = BuildUtil.getSource(buildModel);
         this.optUserName = UserModel.getOptUserName(userModel);
         this.userModel = userModel;
     }

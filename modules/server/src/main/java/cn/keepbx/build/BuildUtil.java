@@ -19,6 +19,15 @@ public class BuildUtil {
         return FileUtil.file(ConfigBean.getInstance().getDataPath(), "build", id);
     }
 
+    /**
+     * 获取代码路径
+     *
+     * @param buildModel 实体
+     * @return file
+     */
+    public static File getSource(BuildModel buildModel) {
+        return FileUtil.file(BuildUtil.getBuildDataFile(buildModel.getId()), "source");
+    }
 
     public static File getBuildDataDir() {
         return FileUtil.file(ConfigBean.getInstance().getDataPath(), "build");

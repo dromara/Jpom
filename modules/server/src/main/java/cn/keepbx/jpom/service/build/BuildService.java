@@ -24,12 +24,16 @@ public class BuildService extends BaseOperService<BuildModel> {
 
     @Override
     public List<BuildModel> list() throws IOException {
+        return list(BuildModel.class);
+    }
+
+    public <E> List<E> list(Class<E> cls) throws IOException {
         JSONObject jsonObject = getJSONObject(ServerConfigBean.BUILD);
         if (jsonObject == null) {
             return null;
         }
         JSONArray jsonArray = formatToArray(jsonObject);
-        return jsonArray.toJavaList(BuildModel.class);
+        return jsonArray.toJavaList(cls);
     }
 
     @Override
