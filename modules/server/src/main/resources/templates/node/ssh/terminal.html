@@ -15,7 +15,6 @@
 <div id="terminal"></div>
 </body>
 <script type="text/javascript">
-    var encoding = "utf-8";
     var term;
     var sock;
     //  tail 文件
@@ -35,11 +34,9 @@
             "sshId=[[${item?.id}]]&nodeId=system&type=ssh&" +
             "tail=" + tail;
         var terminal = document.getElementById("#terminal");
-        sock = new WebSocket(url);
         term = new window.Terminal({
             cursorBlink: cursorBlink,
         });
-
         //
         term.onData(function (data) {
             if (tail) {
@@ -63,6 +60,7 @@
                 }
             }
         });
+        sock = new WebSocket(url);
         //
         sock.onopen = function () {
             term.open(terminal, true);
@@ -77,7 +75,7 @@
             var reader = new window.FileReader();
 
             reader.onloadend = function () {
-                var decoder = new window.TextDecoder(encoding);
+                var decoder = new window.TextDecoder();
                 var text = decoder.decode(reader.result);
                 // console.log(text);
                 term.write(text);
@@ -86,16 +84,24 @@
                     term.resized = true;
                 }
             };
+            reader.onerror = function (e) {
+                layer.msg("解析数据异常");
+            };
             reader.readAsArrayBuffer(msg.data);
         };
 
         sock.onerror = function (e) {
-            console.log(e);
+            console.error(e);
+            layer.msg("连接异常");
         };
         sock.onclose = function (e) {
-            term.destroy();
+            console.error(e);
+            if (term) {
+                term.destroy();
+            }
             term = null;
             sock = null;
+            layer.msg("连接已经关闭：" + e.code);
         };
 
         $(window).resize(function () {
