@@ -25,11 +25,6 @@ import java.nio.charset.Charset;
  */
 public class JpomApplication extends ApplicationBuilder {
 
-    static {
-        // 初始化插件
-        PluginFactory.init();
-    }
-
     /**
      *
      */
@@ -68,6 +63,8 @@ public class JpomApplication extends ApplicationBuilder {
         addInterceptor(PluginFeatureInterceptor.class);
         //
         addApplicationEventClient(new JpomApplicationEvent());
+        // 添加初始化监听
+        this.application().addInitializers(new PluginFactory());
     }
 
     private void checkEvent(String[] args) throws Exception {

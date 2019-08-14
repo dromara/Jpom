@@ -12,6 +12,8 @@
 6. 新增WebSSH 管理功能
 7. 【Server】用户新增邮箱和钉钉群webhook 属性
 8. 【Server】监控报警通知改为联系人
+9. 【Server】引人netty插件（感谢@夜空中最亮的星）
+10. 支持docker 容器运行（感谢@24k）
 
 ### 解决BUG、优化功能
 
