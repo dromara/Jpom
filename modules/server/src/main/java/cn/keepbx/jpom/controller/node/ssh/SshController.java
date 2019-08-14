@@ -16,6 +16,8 @@ import cn.keepbx.jpom.model.data.UserModel;
 import cn.keepbx.jpom.model.log.UserOperateLogV1;
 import cn.keepbx.jpom.service.node.ssh.SshService;
 import cn.keepbx.plugin.ClassFeature;
+import cn.keepbx.plugin.Feature;
+import cn.keepbx.plugin.MethodFeature;
 import com.jcraft.jsch.Session;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
@@ -35,12 +37,14 @@ import java.util.List;
  */
 @Controller
 @RequestMapping(value = "node/ssh")
+@Feature(cls = ClassFeature.SSH)
 public class SshController extends BaseServerController {
 
     @Resource
     private SshService sshService;
 
     @RequestMapping(value = "list.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
+    @Feature(method = MethodFeature.LIST)
     public String list() {
         setAttribute("array", null);
         return "node/ssh/list";
@@ -48,6 +52,7 @@ public class SshController extends BaseServerController {
 
     @RequestMapping(value = "list_data.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
+    @Feature(method = MethodFeature.LIST)
     public String listData() throws IOException {
         List<SshModel> list = sshService.list();
         if (list != null) {
@@ -60,6 +65,7 @@ public class SshController extends BaseServerController {
     @RequestMapping(value = "save.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @UrlPermission(value = Role.System, optType = UserOperateLogV1.OptType.EditSsh)
     @ResponseBody
+    @Feature(method = MethodFeature.EDIT)
     public String save(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "ssh名称不能为空") String name,
                        @ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "host不能为空") String host,
                        @ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "user不能为空") String user,
@@ -111,6 +117,7 @@ public class SshController extends BaseServerController {
     }
 
     @RequestMapping(value = "edit.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
+    @Feature(method = MethodFeature.EDIT)
     public String edit(String id) throws IOException {
         if (StrUtil.isNotEmpty(id)) {
             UserModel userModel = getUser();
@@ -131,6 +138,7 @@ public class SshController extends BaseServerController {
     }
 
     @RequestMapping(value = "terminal.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
+    @Feature(method = MethodFeature.TERMINAL)
     public String terminal(String id) throws IOException {
         SshModel sshModel = sshService.getItem(id);
         setAttribute("item", sshModel);

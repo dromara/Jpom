@@ -16,6 +16,9 @@ import cn.keepbx.jpom.model.data.OutGivingNodeProject;
 import cn.keepbx.jpom.model.log.OutGivingLog;
 import cn.keepbx.jpom.service.dblog.DbOutGivingLogService;
 import cn.keepbx.jpom.service.node.OutGivingServer;
+import cn.keepbx.plugin.ClassFeature;
+import cn.keepbx.plugin.Feature;
+import cn.keepbx.plugin.MethodFeature;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.http.MediaType;
@@ -36,6 +39,7 @@ import java.util.List;
  */
 @Controller
 @RequestMapping(value = "/outgiving")
+@Feature(cls = ClassFeature.OUTGIVING)
 public class OutGivingLogController extends BaseServerController {
     @Resource
     private OutGivingServer outGivingServer;
@@ -43,6 +47,7 @@ public class OutGivingLogController extends BaseServerController {
     private DbOutGivingLogService dbOutGivingLogService;
 
     @RequestMapping(value = "log.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
+    @Feature(method = MethodFeature.LOG)
     public String list() throws IOException {
         // 所有节点
         List<NodeModel> nodeModels = nodeService.list();
@@ -58,6 +63,7 @@ public class OutGivingLogController extends BaseServerController {
 
     @RequestMapping(value = "log_list_data.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
+    @Feature(method = MethodFeature.LOG)
     public String listData(String nodeId,
                            String outGivingId,
                            String status,

@@ -26,6 +26,9 @@ import cn.keepbx.jpom.service.dblog.DbBuildHistoryLogService;
 import cn.keepbx.jpom.service.node.OutGivingServer;
 import cn.keepbx.jpom.system.ConfigBean;
 import cn.keepbx.jpom.system.JpomRuntimeException;
+import cn.keepbx.plugin.ClassFeature;
+import cn.keepbx.plugin.Feature;
+import cn.keepbx.plugin.MethodFeature;
 import cn.keepbx.util.GitUtil;
 import com.alibaba.fastjson.JSONArray;
 import org.eclipse.jgit.api.errors.GitAPIException;
@@ -51,6 +54,7 @@ import java.util.Objects;
  */
 @Controller
 @RequestMapping(value = "/build")
+@Feature(cls = ClassFeature.BUILD)
 public class BuildListController extends BaseServerController {
 
     @Resource
@@ -61,6 +65,7 @@ public class BuildListController extends BaseServerController {
     private DbBuildHistoryLogService dbBuildHistoryLogService;
 
     @RequestMapping(value = "list.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
+    @Feature(method = MethodFeature.LIST)
     public String list() {
         //通知方式
         JSONArray jsonArray = BaseEnum.toJSONArray(BuildModel.Status.class);
@@ -71,6 +76,7 @@ public class BuildListController extends BaseServerController {
 
     @RequestMapping(value = "list_data.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
+    @Feature(method = MethodFeature.LIST)
     public String getMonitorList() throws IOException {
         List<BuildModelVo> list = buildService.list(BuildModelVo.class);
         return JsonMessage.getString(200, "", list);
@@ -79,6 +85,7 @@ public class BuildListController extends BaseServerController {
     @RequestMapping(value = "updateBuild", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     @UrlPermission(value = Role.ServerManager, optType = UserOperateLogV1.OptType.EditBuild)
+    @Feature(method = MethodFeature.EDIT)
     public String updateMonitor(String id,
                                 @ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "构建名称不能为空")) String name,
                                 @ValidatorConfig(@ValidatorItem(value = ValidatorRule.URL, msg = "仓库地址不正确")) String gitUrl,
@@ -163,6 +170,7 @@ public class BuildListController extends BaseServerController {
     }
 
     @RequestMapping(value = "edit.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
+    @Feature(method = MethodFeature.EDIT)
     public String edit(String id) throws IOException {
         BuildModel buildModel = null;
         if (StrUtil.isNotEmpty(id)) {
@@ -217,6 +225,7 @@ public class BuildListController extends BaseServerController {
     @RequestMapping(value = "delete.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     @UrlPermission(value = Role.System, optType = UserOperateLogV1.OptType.DelBuild)
+    @Feature(method = MethodFeature.DEL)
     public String delete(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据id") String id) throws IOException, SQLException {
         BuildModel buildModel = buildService.getItem(id);
         Objects.requireNonNull(buildModel, "没有对应数据");
@@ -234,6 +243,7 @@ public class BuildListController extends BaseServerController {
     @RequestMapping(value = "cleanSource.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     @UrlPermission(value = Role.ServerManager, optType = UserOperateLogV1.OptType.BuildCleanSource)
+    @Feature(method = MethodFeature.EXECUTE)
     public String cleanSource(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据id") String id) throws IOException, SQLException {
         BuildModel buildModel = buildService.getItem(id);
         Objects.requireNonNull(buildModel, "没有对应数据");

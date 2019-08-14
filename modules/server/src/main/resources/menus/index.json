@@ -82,6 +82,12 @@
         "role": "ServerManager"
       },
       {
+        "id": "roleList",
+        "title": "角色管理",
+        "url": "./user/roleList",
+        "role": "ServerManager"
+      },
+      {
         "id": "user_log",
         "title": "操作日志",
         "url": "./user/log/list.html"

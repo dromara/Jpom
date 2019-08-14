@@ -6,7 +6,9 @@ import java.lang.annotation.*;
 
 /**
  * 项目权限
- * Created by jiangzeyin on 2019/03/16.
+ *
+ * @author jiangzeyin
+ * @date 2019/03/16
  */
 @Documented
 @Target(ElementType.METHOD)

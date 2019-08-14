@@ -19,6 +19,9 @@ import cn.keepbx.jpom.model.log.UserOperateLogV1;
 import cn.keepbx.jpom.service.dblog.DbMonitorNotifyLogService;
 import cn.keepbx.jpom.service.monitor.MonitorService;
 import cn.keepbx.jpom.service.user.UserService;
+import cn.keepbx.plugin.ClassFeature;
+import cn.keepbx.plugin.Feature;
+import cn.keepbx.plugin.MethodFeature;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.http.MediaType;
@@ -40,6 +43,7 @@ import java.util.List;
  */
 @Controller
 @RequestMapping(value = "/monitor")
+@Feature(cls = ClassFeature.MONITOR)
 public class MonitorListController extends BaseServerController {
 
     @Resource
@@ -55,6 +59,7 @@ public class MonitorListController extends BaseServerController {
      * 展示监控页面
      */
     @RequestMapping(value = "list.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
+    @Feature(method = MethodFeature.LIST)
     public String list() {
         return "monitor/list";
     }
@@ -63,6 +68,7 @@ public class MonitorListController extends BaseServerController {
      * 修改监控
      */
     @RequestMapping(value = "edit.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
+    @Feature(method = MethodFeature.EDIT)
     public String edit(String id) {
         MonitorModel monitorModel = null;
         if (StrUtil.isNotEmpty(id)) {
@@ -95,6 +101,7 @@ public class MonitorListController extends BaseServerController {
      */
     @RequestMapping(value = "getMonitorList", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
+    @Feature(method = MethodFeature.LIST)
     public String getMonitorList() {
         List<MonitorModel> list = monitorService.list();
         return JsonMessage.getString(200, "", list);
@@ -106,6 +113,7 @@ public class MonitorListController extends BaseServerController {
     @RequestMapping(value = "deleteMonitor", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     @UrlPermission(value = Role.System, optType = UserOperateLogV1.OptType.DelMonitor)
+    @Feature(method = MethodFeature.DEL)
     public String deleteMonitor(@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "删除失败")) String id) throws SQLException {
         // 删除日志
         Entity where = new Entity();
@@ -123,6 +131,7 @@ public class MonitorListController extends BaseServerController {
     @RequestMapping(value = "updateMonitor", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     @UrlPermission(value = Role.ServerManager, optType = UserOperateLogV1.OptType.EditMonitor)
+    @Feature(method = MethodFeature.EDIT)
     public String updateMonitor(String id,
                                 @ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "监控名称不能为空")) String name,
                                 String notifyUser) {
@@ -177,6 +186,7 @@ public class MonitorListController extends BaseServerController {
     @RequestMapping(value = "changeStatus", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     @UrlPermission(value = Role.ServerManager, optType = UserOperateLogV1.OptType.ChangeStatusMonitor)
+    @Feature(method = MethodFeature.EDIT)
     public String changeStatus(@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "id不能为空")) String id,
                                String status, String type) {
         MonitorModel monitorModel = monitorService.getItem(id);

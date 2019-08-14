@@ -8,10 +8,24 @@ public enum ClassFeature {
     /**
      * 没有
      */
-    NULL,
+    NULL(""),
     /**
      * ssh
      */
-    SSH,
+    SSH("SSH管理"),
+    NODE("节点管理"),
+    OUTGIVING("分发管理"),
+    MONITOR("监控管理"),
+    BUILD("在线构建"),
     ;
+
+    private String name;
+
+    public String getName() {
+        return name;
+    }
+
+    ClassFeature(String name) {
+        this.name = name;
+    }
 }

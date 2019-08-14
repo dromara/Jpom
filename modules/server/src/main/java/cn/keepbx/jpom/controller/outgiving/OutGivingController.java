@@ -14,7 +14,9 @@ import cn.keepbx.jpom.model.data.UserModel;
 import cn.keepbx.jpom.model.log.UserOperateLogV1;
 import cn.keepbx.jpom.service.build.BuildService;
 import cn.keepbx.jpom.service.node.OutGivingServer;
-import cn.keepbx.util.JsonFileUtil;
+import cn.keepbx.plugin.ClassFeature;
+import cn.keepbx.plugin.Feature;
+import cn.keepbx.plugin.MethodFeature;
 import cn.keepbx.util.StringUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -28,7 +30,6 @@ import javax.annotation.Resource;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Consumer;
 
 /**
  * 分发控制
@@ -38,6 +39,7 @@ import java.util.function.Consumer;
  */
 @Controller
 @RequestMapping(value = "/outgiving")
+@Feature(cls = ClassFeature.OUTGIVING)
 public class OutGivingController extends BaseServerController {
     @Resource
     private OutGivingServer outGivingServer;
@@ -45,6 +47,7 @@ public class OutGivingController extends BaseServerController {
     private BuildService buildService;
 
     @RequestMapping(value = "list.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
+    @Feature(method = MethodFeature.LIST)
     public String list() throws IOException {
         List<OutGivingModel> outGivingModels = outGivingServer.list();
         setAttribute("array", outGivingModels);
@@ -52,6 +55,7 @@ public class OutGivingController extends BaseServerController {
     }
 
     @RequestMapping(value = "edit.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
+    @Feature(method = MethodFeature.EDIT)
     public String edit(String id) throws IOException {
         setAttribute("type", "add");
         if (StrUtil.isNotEmpty(id)) {
@@ -77,6 +81,7 @@ public class OutGivingController extends BaseServerController {
     @RequestMapping(value = "save", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     @UrlPermission(value = Role.ServerManager, optType = UserOperateLogV1.OptType.SaveOutGiving)
+    @Feature(method = MethodFeature.EDIT)
     public String save(String type, String id) throws IOException {
         if ("add".equalsIgnoreCase(type)) {
             if (!StringUtil.isGeneral(id, 2, 20)) {
@@ -184,6 +189,7 @@ public class OutGivingController extends BaseServerController {
     @RequestMapping(value = "del.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     @UrlPermission(value = Role.ServerManager, optType = UserOperateLogV1.OptType.DelOutGiving)
+    @Feature(method = MethodFeature.DEL)
     public String del(String id) throws IOException {
         // 判断构建
         if (buildService.checkOutGiving(id)) {

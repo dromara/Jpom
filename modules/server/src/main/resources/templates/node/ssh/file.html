@@ -103,7 +103,21 @@
             getData(val, '');
             nowPath = val;
             allData = null;
+            // 缓存选择
+            layui.data('cache', {
+                key: "sshFileSelect",
+                value: val
+            });
         });
+        const cache = layui.data('cache');
+        if (cache.sshFileSelect) {
+            var length = $('select[name="dir"] option[value="' + cache.sshFileSelect + '"]').length;
+            if (length >= 1) {
+                $("select[name='dir']").val(cache.sshFileSelect);
+                form.render();
+                getData(cache.sshFileSelect, '');
+            }
+        }
 
         layui.use('tree', function () {
             tree = layui.tree;

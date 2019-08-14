@@ -22,6 +22,8 @@ import cn.keepbx.jpom.model.log.BuildHistoryLog;
 import cn.keepbx.jpom.model.log.UserOperateLogV1;
 import cn.keepbx.jpom.service.build.BuildService;
 import cn.keepbx.jpom.service.dblog.DbBuildHistoryLogService;
+import cn.keepbx.plugin.Feature;
+import cn.keepbx.plugin.MethodFeature;
 import cn.keepbx.util.LimitQueue;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.http.MediaType;
@@ -57,6 +59,7 @@ public class BuildManageController extends BaseServerController {
      */
     @RequestMapping(value = "start.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @UrlPermission(value = Role.ServerManager, optType = UserOperateLogV1.OptType.StartBuild)
+    @Feature(method = MethodFeature.EXECUTE)
     public String start(@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据")) String id) throws IOException {
         BuildModel item = buildService.getItem(id);
         if (item == null) {
@@ -95,6 +98,7 @@ public class BuildManageController extends BaseServerController {
      */
     @RequestMapping(value = "cancel.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @UrlPermission(value = Role.ServerManager, optType = UserOperateLogV1.OptType.CancelBuild)
+    @Feature(method = MethodFeature.EXECUTE)
     public String cancel(@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据")) String id) throws IOException {
         BuildModel item = buildService.getItem(id);
         Objects.requireNonNull(item, "没有对应数据");
@@ -121,6 +125,7 @@ public class BuildManageController extends BaseServerController {
      */
     @RequestMapping(value = "reRelease.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @UrlPermission(value = Role.ServerManager, optType = UserOperateLogV1.OptType.ReReleaseBuild)
+    @Feature(method = MethodFeature.EXECUTE)
     public String reRelease(@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据")) String logId) throws IOException, SQLException {
         BuildHistoryLog buildHistoryLog = dbBuildHistoryLogService.getByKey(logId);
         Objects.requireNonNull(buildHistoryLog, "没有对应构建记录.");
@@ -148,6 +153,7 @@ public class BuildManageController extends BaseServerController {
      * @throws IOException e
      */
     @RequestMapping(value = "getNowLog.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @Feature(method = MethodFeature.EXECUTE)
     public String getNowLog(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据") String id,
                             @ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "没有buildId") int buildId,
                             @ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "line") int line) throws IOException {

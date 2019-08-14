@@ -16,6 +16,9 @@ import cn.keepbx.jpom.service.node.NodeService;
 import cn.keepbx.jpom.service.node.OutGivingServer;
 import cn.keepbx.jpom.service.node.ssh.SshService;
 import cn.keepbx.jpom.service.user.UserService;
+import cn.keepbx.plugin.ClassFeature;
+import cn.keepbx.plugin.Feature;
+import cn.keepbx.plugin.MethodFeature;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.http.MediaType;
@@ -36,6 +39,7 @@ import java.util.List;
  */
 @Controller
 @RequestMapping(value = "/node")
+@Feature(cls = ClassFeature.NODE)
 public class NodeEditController extends BaseServerController {
 
     @Resource
@@ -52,6 +56,7 @@ public class NodeEditController extends BaseServerController {
     private SshService sshService;
 
     @RequestMapping(value = "edit.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
+    @Feature(method = MethodFeature.EDIT)
     public String edit(String id) throws IOException {
         setAttribute("type", "add");
         if (StrUtil.isNotEmpty(id)) {
@@ -90,6 +95,7 @@ public class NodeEditController extends BaseServerController {
     @RequestMapping(value = "save.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @UrlPermission(value = Role.System, optType = UserOperateLogV1.OptType.EditNode)
     @ResponseBody
+    @Feature(method = MethodFeature.EDIT)
     public String save(String type) throws Exception {
         NodeModel model = ServletUtil.toBean(getRequest(), NodeModel.class, true);
         if ("add".equalsIgnoreCase(type)) {
@@ -109,6 +115,7 @@ public class NodeEditController extends BaseServerController {
     @RequestMapping(value = "del.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @UrlPermission(value = Role.System, optType = UserOperateLogV1.OptType.DelNode)
     @ResponseBody
+    @Feature(method = MethodFeature.DEL)
     public String del(String id) throws IOException {
         //  判断分发
         if (outGivingServer.checkNode(id)) {

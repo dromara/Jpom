@@ -7,7 +7,9 @@ import java.lang.annotation.*;
 
 /**
  * url权限
- * Created by jiangzeyin on 2019/04/13.
+ *
+ * @author jiangzeyin
+ * @date 2019/04/13
  */
 @Documented
 @Target(ElementType.METHOD)

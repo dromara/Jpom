@@ -65,6 +65,7 @@ public class SshFileController extends BaseServerController {
 
     @RequestMapping(value = "download.html", method = RequestMethod.GET)
     @ResponseBody
+    @Feature(method = MethodFeature.DOWNLOAD)
     public void download(String id, String path, String name) throws IOException {
         HttpServletResponse response = getResponse();
         SshModel sshModel = sshService.getItem(id);
@@ -92,6 +93,7 @@ public class SshFileController extends BaseServerController {
 
     @RequestMapping(value = "list_file_data.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
+    @Feature(method = MethodFeature.FILE)
     public String listData(String id, String path, String children, String parentIndexKey) throws IOException, SftpException {
         SshModel sshModel = sshService.getItem(id);
         if (sshModel == null) {

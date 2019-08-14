@@ -14,6 +14,9 @@ import cn.keepbx.jpom.model.data.*;
 import cn.keepbx.jpom.model.log.UserOperateLogV1;
 import cn.keepbx.jpom.service.node.OutGivingServer;
 import cn.keepbx.jpom.service.system.ServerWhitelistServer;
+import cn.keepbx.plugin.ClassFeature;
+import cn.keepbx.plugin.Feature;
+import cn.keepbx.plugin.MethodFeature;
 import cn.keepbx.util.StringUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -35,6 +38,7 @@ import java.util.*;
  */
 @Controller
 @RequestMapping(value = "/outgiving")
+@Feature(cls = ClassFeature.OUTGIVING)
 public class OutGivingProjectEditController extends BaseServerController {
     @Resource
     private ServerWhitelistServer serverWhitelistServer;
@@ -43,6 +47,7 @@ public class OutGivingProjectEditController extends BaseServerController {
     private OutGivingServer outGivingServer;
 
     @RequestMapping(value = "editProject", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
+    @Feature(method = MethodFeature.EDIT)
     public String editProject(String id) throws IOException {
         setAttribute("type", "add");
         OutGivingModel outGivingModel = null;
@@ -83,6 +88,7 @@ public class OutGivingProjectEditController extends BaseServerController {
     @RequestMapping(value = "save_project", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     @UrlPermission(value = Role.ServerManager, optType = UserOperateLogV1.OptType.SaveOutgivingProject)
+    @Feature(method = MethodFeature.EDIT)
     public String save(String id, String type) throws IOException {
         if ("add".equalsIgnoreCase(type)) {
             if (!StringUtil.isGeneral(id, 2, 20)) {
@@ -104,6 +110,7 @@ public class OutGivingProjectEditController extends BaseServerController {
     @RequestMapping(value = "delete_project", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     @UrlPermission(value = Role.ServerManager, optType = UserOperateLogV1.OptType.DeleteOutgivingProject)
+    @Feature(method = MethodFeature.DEL)
     public String delete(String id) throws IOException {
         OutGivingModel outGivingModel = outGivingServer.getItem(id);
         if (outGivingModel == null) {

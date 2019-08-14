@@ -22,6 +22,9 @@ import cn.keepbx.jpom.service.node.OutGivingServer;
 import cn.keepbx.jpom.system.ConfigBean;
 import cn.keepbx.jpom.system.ServerConfigBean;
 import cn.keepbx.outgiving.OutGivingRun;
+import cn.keepbx.plugin.ClassFeature;
+import cn.keepbx.plugin.Feature;
+import cn.keepbx.plugin.MethodFeature;
 import cn.keepbx.util.StringUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -36,7 +39,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
-import java.util.function.Consumer;
 
 /**
  * 分发文件管理
@@ -46,6 +48,7 @@ import java.util.function.Consumer;
  */
 @Controller
 @RequestMapping(value = "/outgiving")
+@Feature(cls = ClassFeature.OUTGIVING)
 public class OutGivingProjectController extends BaseServerController {
     @Resource
     private OutGivingServer outGivingServer;
@@ -94,6 +97,7 @@ public class OutGivingProjectController extends BaseServerController {
 
 
     @RequestMapping(value = "addOutgiving", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
+    @Feature(method = MethodFeature.UPLOAD)
     public String addOutgiving(String id) throws IOException {
 
         JSONArray jsonArray = BaseEnum.toJSONArray(OutGivingModel.AfterOpt.class);
@@ -115,6 +119,7 @@ public class OutGivingProjectController extends BaseServerController {
     @RequestMapping(value = "upload", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     @UrlPermission(value = Role.ServerManager, optType = UserOperateLogV1.OptType.UploadOutGiving)
+    @Feature(method = MethodFeature.UPLOAD)
     public String upload(String id, String afterOpt, String clearOld) throws IOException {
         OutGivingModel outGivingModel = outGivingServer.getItem(id);
         if (outGivingModel == null) {

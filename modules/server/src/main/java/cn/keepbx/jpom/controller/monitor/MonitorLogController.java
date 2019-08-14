@@ -16,6 +16,9 @@ import cn.keepbx.jpom.model.data.NodeModel;
 import cn.keepbx.jpom.model.log.MonitorNotifyLog;
 import cn.keepbx.jpom.service.dblog.DbMonitorNotifyLogService;
 import cn.keepbx.jpom.service.node.NodeService;
+import cn.keepbx.plugin.ClassFeature;
+import cn.keepbx.plugin.Feature;
+import cn.keepbx.plugin.MethodFeature;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.http.MediaType;
@@ -35,6 +38,7 @@ import java.util.List;
  */
 @Controller
 @RequestMapping(value = "/monitor")
+@Feature(cls = ClassFeature.MONITOR)
 public class MonitorLogController extends BaseServerController {
     @Resource
     private NodeService nodeService;
@@ -45,6 +49,7 @@ public class MonitorLogController extends BaseServerController {
      * 展示监控页面
      */
     @RequestMapping(value = "log.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
+    @Feature(method = MethodFeature.LOG)
     public String list() {
         // 所有节点
         List<NodeModel> nodeModels = nodeService.list();
@@ -61,6 +66,7 @@ public class MonitorLogController extends BaseServerController {
      */
     @RequestMapping(value = "list_data.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
+    @Feature(method = MethodFeature.LOG)
     public String listData(String selectNode, String notifyStatus,
                            @ValidatorConfig(value = {
                                    @ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "limit error")

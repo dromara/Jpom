@@ -23,6 +23,9 @@ import cn.keepbx.jpom.model.log.UserOperateLogV1;
 import cn.keepbx.jpom.model.vo.BuildHistoryLogVo;
 import cn.keepbx.jpom.service.build.BuildService;
 import cn.keepbx.jpom.service.dblog.DbBuildHistoryLogService;
+import cn.keepbx.plugin.ClassFeature;
+import cn.keepbx.plugin.Feature;
+import cn.keepbx.plugin.MethodFeature;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.http.MediaType;
@@ -47,6 +50,7 @@ import java.util.Objects;
  **/
 @Controller
 @RequestMapping(value = "/build")
+@Feature(cls = ClassFeature.BUILD)
 public class BuildHistoryController extends BaseServerController {
 
     @Resource
@@ -55,11 +59,13 @@ public class BuildHistoryController extends BaseServerController {
     private DbBuildHistoryLogService dbBuildHistoryLogService;
 
     @RequestMapping(value = "logPage.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
+    @Feature(method = MethodFeature.LOG)
     public String logPage() {
         return "build/logPage";
     }
 
     @RequestMapping(value = "history.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
+    @Feature(method = MethodFeature.LOG)
     public String logList() throws IOException {
         JSONArray jsonArray = BaseEnum.toJSONArray(BuildModel.Status.class);
         setAttribute("status", jsonArray);
@@ -81,6 +87,7 @@ public class BuildHistoryController extends BaseServerController {
      */
     @RequestMapping(value = "download_file.html", method = RequestMethod.GET)
     @ResponseBody
+    @Feature(method = MethodFeature.DOWNLOAD)
     public void downloadFile(@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据")) String logId) throws SQLException, IOException {
         BuildHistoryLog buildHistoryLog = dbBuildHistoryLogService.getByKey(logId);
         if (buildHistoryLog == null) {
@@ -106,6 +113,7 @@ public class BuildHistoryController extends BaseServerController {
 
     @RequestMapping(value = "download_log.html", method = RequestMethod.GET)
     @ResponseBody
+    @Feature(method = MethodFeature.DOWNLOAD)
     public void downloadLog(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据") String logId) throws IOException {
         BuildHistoryLog buildHistoryLog = dbBuildHistoryLogService.getByKey(logId);
         Objects.requireNonNull(buildHistoryLog);
@@ -122,6 +130,7 @@ public class BuildHistoryController extends BaseServerController {
 
     @RequestMapping(value = "history_list.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
+    @Feature(method = MethodFeature.LOG)
     public String historyList(String status,
                               @ValidatorConfig(value = {
                                       @ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "limit error")
@@ -167,7 +176,7 @@ public class BuildHistoryController extends BaseServerController {
     }
 
     /**
-     * 开始构建
+     * 构建
      *
      * @param logId id
      * @return json
@@ -176,6 +185,7 @@ public class BuildHistoryController extends BaseServerController {
     @RequestMapping(value = "delete_log.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @UrlPermission(value = Role.System, optType = UserOperateLogV1.OptType.DelBuildLog)
     @ResponseBody
+    @Feature(method = MethodFeature.DEL)
     public String delete(@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据")) String logId) throws IOException, SQLException {
         BuildHistoryLog buildHistoryLog = dbBuildHistoryLogService.getByKey(logId);
         if (buildHistoryLog == null) {
