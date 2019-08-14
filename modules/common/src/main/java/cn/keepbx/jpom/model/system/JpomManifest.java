@@ -288,7 +288,7 @@ public class JpomManifest {
         if (StrUtil.equals(version, JpomManifest.getInstance().getVersion())) {
             version = StrUtil.format("{}_{}", version, System.currentTimeMillis());
         }
-        String newFile = JpomApplication.getAppType().name() + "-" + version + ".jar";
+        String newFile = JpomApplication.getAppType().name() + "-" + version + FileUtil.JAR_FILE_EXT;
         File to = FileUtil.file(runPath, newFile);
         if (to.exists()) {
             throw new JpomRuntimeException(newFile + " 已经存在啦");

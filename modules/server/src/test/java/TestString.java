@@ -2,6 +2,7 @@ import cn.hutool.core.lang.PatternPool;
 import cn.hutool.core.util.ReUtil;
 
 import java.nio.charset.Charset;
+import java.util.Collection;
 import java.util.SortedMap;
 import java.util.function.Consumer;
 import java.util.regex.Pattern;
@@ -28,16 +29,21 @@ public class TestString {
 
         System.out.println(Integer.MAX_VALUE);
 
-        SortedMap<String, Charset> x = Charset.availableCharsets();
-        x.values().forEach(new Consumer<Charset>() {
-            @Override
-            public void accept(Charset charset) {
+        while (true) {
+            SortedMap<String, Charset> x = Charset.availableCharsets();
+            Collection<Charset> values = x.values();
+            boolean find = false;
+            for (Charset charset : values) {
                 String name = charset.name();
                 if ("utf-8".equalsIgnoreCase(name)) {
-                    System.out.println(charset);
+                    find = true;
+                    break;
                 }
             }
-        });
-        System.out.println(x);
+            if (!find) {
+                System.out.println("没有找utf-8");
+            }
+        }
+//        System.out.println(x);
     }
 }

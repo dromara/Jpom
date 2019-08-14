@@ -58,7 +58,7 @@ public class PluginFactory implements ApplicationContextInitializer {
             if (!lib.exists() || lib.isFile()) {
                 continue;
             }
-            File[] listFiles = lib.listFiles((dir, name) -> StrUtil.endWith(name, ".jar", true));
+            File[] listFiles = lib.listFiles((dir, name) -> StrUtil.endWith(name, FileUtil.JAR_FILE_EXT, true));
             if (listFiles == null || listFiles.length <= 0) {
                 continue;
             }
