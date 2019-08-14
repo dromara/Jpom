@@ -14,11 +14,15 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
+ * 模板工具
+ *
  * @author bwcx_jzy
  * @date 2019/8/13
  */
 @Configuration
 public class ThymeleafUtil {
+
+    public static final String PAGE_VARIABLE = "pagePluginHtml";
 
     @Resource
     private SpringTemplateEngine springTemplateEngine;
