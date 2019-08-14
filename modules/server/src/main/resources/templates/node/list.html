@@ -23,6 +23,13 @@
                     进入
                 </button>
 
+                <button th:if="${item.sshId}" op="terminal" th:data-name="${sshName.get(item.sshId)}"
+                        th:data-id="${item.sshId}"
+                        class="layui-btn layui-btn-sm layui-btn-normal ">
+                    <i class="layui-icon   layui-icon-release"></i>
+                    终端
+                </button>
+
                 <button th:if="${session.user.isSystemUser()}" op="edit" th:id="${item.id}"
                         class="layui-btn layui-btn-sm ">
                     <i class="layui-icon">&#xe642;</i>
@@ -69,18 +76,23 @@
         $("button[op]").click(function (e) {
             layui.stope(e);
             var op = $(this).attr("op");
-            if ("goIn" == op) {
+            if ("goIn" === op) {
                 top.layer.msg('加载节点中..', {
                     icon: 16,
                     shade: 0.2,
                     time: 100000000
                 });
                 top.location.href = $(this).attr("url");
-                return false;
-            }
-            if ("edit" == op) {
+            } else if ("edit" === op) {
                 editProject($(this).attr("id"));
-                return false;
+            } else if ("terminal" === op) {
+                var attr = $(this).attr("data-id");
+                var name = $(this).attr("data-name");
+                tabChange({
+                    id: attr,
+                    url: './node/ssh/terminal.html?id=' + attr,
+                    title: name + ' - 终端',
+                });
             }
             return false;
         });

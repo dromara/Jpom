@@ -61,23 +61,27 @@
             </div>
         </div>
         <div class="layui-form-item">
-            <label class="layui-form-label">节点账号</label>
-            <div class="layui-input-block">
-                <input type="text" id="loginName" name="loginName" th:value="${item?.loginName}" placeholder="请填写节点登录账号"
-                       class="layui-input" required
-                       lay-verify="required">
+            <div class="layui-inline">
+                <label class="layui-form-label">节点账号</label>
+                <div class="layui-input-block">
+                    <input type="text" id="loginName" name="loginName" th:value="${item?.loginName}"
+                           placeholder="请填写节点登录账号"
+                           class="layui-input" required
+                           lay-verify="required">
+                </div>
+            </div>
+            <div class="layui-inline">
+                <label class="layui-form-label">节点密码</label>
+                <div class="layui-input-block">
+                    <input type="password" id="loginPwd" name="loginPwd" th:value="${item?.loginPwd}"
+                           placeholder="请填写节点登录密码,节点默认请查看节点安装文档"
+                           class="layui-input"
+                           required
+                           lay-verify="required">
+                </div>
             </div>
         </div>
-        <div class="layui-form-item">
-            <label class="layui-form-label">节点密码</label>
-            <div class="layui-input-block">
-                <input type="password" id="loginPwd" name="loginPwd" th:value="${item?.loginPwd}"
-                       placeholder="请填写节点登录密码,节点默认请查看节点安装文档"
-                       class="layui-input"
-                       required
-                       lay-verify="required">
-            </div>
-        </div>
+
         <div class="layui-form-item">
             <label class="layui-form-label">超时时间</label>
             <div class="layui-input-block">
@@ -86,6 +90,18 @@
                        class="layui-input"
                        required
                        lay-verify="required">
+            </div>
+        </div>
+        <div class="layui-form-item" th:unless="${#lists.isEmpty(sshList)}">
+            <label class="layui-form-label">绑定ssh</label>
+            <div class="layui-input-block">
+                <select name="sshId" lay-search="">
+                    <option value="">请选择绑定SSH</option>
+                    <option th:disabled="${s.get('disabled')}"
+                            th:selected="${s.id==item?.sshId}"
+                            th:value="${s.id}" th:each="s : ${sshList}"
+                            th:text="${s.name}"></option>
+                </select>
             </div>
         </div>
         <div class="layui-form-item" style="padding-left: 20%">

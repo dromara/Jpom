@@ -1,17 +1,16 @@
 package cn.keepbx.jpom.controller.node;
 
-import cn.hutool.core.io.IoUtil;
-import cn.hutool.core.io.resource.ResourceUtil;
-import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.keepbx.jpom.common.BaseServerController;
 import cn.keepbx.jpom.common.forward.NodeForward;
 import cn.keepbx.jpom.common.forward.NodeUrl;
 import cn.keepbx.jpom.model.data.NodeModel;
+import cn.keepbx.jpom.model.data.SshModel;
 import cn.keepbx.jpom.model.data.UserModel;
 import cn.keepbx.jpom.model.system.JpomManifest;
 import cn.keepbx.jpom.service.node.NodeService;
+import cn.keepbx.jpom.service.node.ssh.SshService;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.http.MediaType;
@@ -21,7 +20,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.annotation.Resource;
-import java.io.InputStream;
 import java.util.List;
 
 /**
@@ -36,11 +34,20 @@ public class NodeIndexController extends BaseServerController {
 
     @Resource
     private NodeService nodeService;
+    @Resource
+    private SshService sshService;
 
     @RequestMapping(value = "list.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
     public String list() {
         List<NodeModel> nodeModels = nodeService.list();
         setAttribute("array", nodeModels);
+        // 获取所有的ssh 名称
+        JSONObject sshName = new JSONObject();
+        List<SshModel> sshModels = sshService.list();
+        if (sshModels != null) {
+            sshModels.forEach(sshModel -> sshName.put(sshModel.getId(), sshModel.getName()));
+        }
+        setAttribute("sshName", sshName);
         return "node/list";
     }
 

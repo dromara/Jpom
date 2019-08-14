@@ -40,6 +40,18 @@ public class NodeModel extends BaseModel {
      * 节点超时时间
      */
     private int timeOut;
+    /**
+     * 绑定的sshId
+     */
+    private String sshId;
+
+    public String getSshId() {
+        return sshId;
+    }
+
+    public void setSshId(String sshId) {
+        this.sshId = sshId;
+    }
 
     public int getTimeOut() {
         return timeOut;

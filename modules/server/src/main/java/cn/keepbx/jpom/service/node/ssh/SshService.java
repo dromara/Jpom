@@ -19,7 +19,7 @@ import java.util.List;
 public class SshService extends BaseOperService<SshModel> {
 
     @Override
-    public List<SshModel> list() throws IOException {
+    public List<SshModel> list() {
         JSONObject jsonObject = getJSONObject(ServerConfigBean.SSH_LIST);
         JSONArray jsonArray = formatToArray(jsonObject);
         return jsonArray.toJavaList(SshModel.class);
