@@ -7,8 +7,6 @@ import cn.keepbx.jpom.common.BaseOperService;
 import cn.keepbx.jpom.model.data.ProjectInfoModel;
 import cn.keepbx.jpom.model.data.ProjectRecoverModel;
 import cn.keepbx.jpom.system.AgentConfigBean;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -26,18 +24,9 @@ public class ProjectInfoService extends BaseOperService<ProjectInfoModel> {
     @Resource
     private ProjectRecoverService projectRecoverService;
 
-    /**
-     * 查询所有项目信息
-     *
-     * @return list
-     */
-    @Override
-    public List<ProjectInfoModel> list() {
-        JSONObject jsonObject = getJSONObject(AgentConfigBean.PROJECT);
-        JSONArray jsonArray = formatToArray(jsonObject);
-        return jsonArray.toJavaList(ProjectInfoModel.class);
+    public ProjectInfoService() {
+        super(AgentConfigBean.PROJECT);
     }
-
 
     public HashSet<String> getAllGroup() {
         //获取所有分组
@@ -49,16 +38,6 @@ public class ProjectInfoService extends BaseOperService<ProjectInfoModel> {
         return hashSet;
     }
 
-    /**
-     * 保存项目信息
-     *
-     * @param projectInfo 项目
-     */
-    @Override
-    public void addItem(ProjectInfoModel projectInfo) {
-        // 保存
-        saveJson(AgentConfigBean.PROJECT, projectInfo.toJson());
-    }
 
     /**
      * 删除项目
@@ -69,7 +48,7 @@ public class ProjectInfoService extends BaseOperService<ProjectInfoModel> {
     public void deleteItem(String id) {
         ProjectInfoModel projectInfo = getItem(id);
         String userId = BaseAgentController.getNowUserName();
-        deleteJson(AgentConfigBean.PROJECT, projectInfo.getId());
+        super.deleteItem(id);
         // 添加回收记录
         ProjectRecoverModel projectRecoverModel = new ProjectRecoverModel(projectInfo);
         projectRecoverModel.setDelUser(userId);
@@ -82,22 +61,9 @@ public class ProjectInfoService extends BaseOperService<ProjectInfoModel> {
      * @param projectInfo 项目信息
      */
     @Override
-    public boolean updateItem(ProjectInfoModel projectInfo) throws Exception {
+    public void updateItem(ProjectInfoModel projectInfo) {
         projectInfo.setModifyTime(DateUtil.now());
-        updateJson(AgentConfigBean.PROJECT, projectInfo.toJson());
-        return true;
-    }
-
-
-    /**
-     * 根据id查询项目
-     *
-     * @param id 项目Id
-     * @return model
-     */
-    @Override
-    public ProjectInfoModel getItem(String id) {
-        return getJsonObjectById(AgentConfigBean.PROJECT, id, ProjectInfoModel.class);
+        super.updateItem(projectInfo);
     }
 
     public String getLogSize(String id) {

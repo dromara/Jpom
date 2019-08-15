@@ -66,6 +66,11 @@ public class ServerConfigBean {
      */
     public static final String SSH_LIST = "ssh_list.json";
 
+    /**
+     * 用户角色信息
+     */
+    public static final String ROLE = "user_role.json";
+
     private static ServerConfigBean serverConfigBean;
 
     /**

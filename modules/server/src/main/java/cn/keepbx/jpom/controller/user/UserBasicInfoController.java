@@ -64,11 +64,9 @@ public class UserBasicInfoController extends BaseServerController {
             return JsonMessage.getString(405, "请输入正确验钉钉地址");
         }
         userModel.setDingDing(dingDing);
-        if (userService.updateItem(userModel)) {
-            setSessionAttribute(LoginInterceptor.SESSION_NAME, userModel);
-            return JsonMessage.getString(200, "修改成功");
-        }
-        return JsonMessage.getString(500, "修改失败");
+        userService.updateItem(userModel);
+        setSessionAttribute(LoginInterceptor.SESSION_NAME, userModel);
+        return JsonMessage.getString(200, "修改成功");
     }
 
     /**

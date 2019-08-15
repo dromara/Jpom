@@ -43,12 +43,7 @@ public abstract class BaseBuild {
 
     protected boolean updateStatus(BuildModel.Status status) {
         BuildService buildService = SpringUtil.getBean(BuildService.class);
-        BuildModel item;
-        try {
-            item = buildService.getItem(this.buildModelId);
-        } catch (IOException e) {
-            throw new JpomRuntimeException("修改失败", e);
-        }
+        BuildModel item = buildService.getItem(this.buildModelId);
         item.setStatus(status.getCode());
         buildService.updateItem(item);
         return true;

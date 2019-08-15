@@ -12,6 +12,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 /**
  * 用户管理
@@ -20,6 +22,10 @@ import java.util.Set;
  */
 @Service
 public class UserService extends BaseOperService<UserModel> {
+
+    public UserService() {
+        super(ServerConfigBean.USER);
+    }
 
     /**
      * 用户列表是否为空
@@ -104,69 +110,14 @@ public class UserService extends BaseOperService<UserModel> {
      * @return list
      */
     public List<UserModel> list(boolean system) {
-        JSONObject jsonObject = getJSONObject(ServerConfigBean.USER);
-        if (jsonObject == null) {
+        List<UserModel> list = super.list();
+        if (list == null) {
             return null;
         }
-        Set<Map.Entry<String, Object>> set = jsonObject.entrySet();
-        List<UserModel> array = new ArrayList<>();
-        for (Map.Entry entry : set) {
-            JSONObject value = (JSONObject) entry.getValue();
-            UserModel userModel = value.toJavaObject(UserModel.class);
-            // 不显示系统管理员信息
-            if (system && userModel.isSystemUser()) {
-                continue;
-            }
+        return list.stream().filter(userModel -> {
             userModel.setPassword(null);
-            array.add(userModel);
-        }
-        return array;
-    }
-
-    /**
-     * 获取用户信息
-     *
-     * @param userId 用户id
-     * @return 用户信息
-     */
-    @Override
-    public UserModel getItem(String userId) {
-        return getJsonObjectById(ServerConfigBean.USER, userId, UserModel.class);
-    }
-
-    /**
-     * 删除用户
-     *
-     * @param id 用户id
-     */
-    @Override
-    public void deleteItem(String id) {
-        deleteJson(ServerConfigBean.USER, id);
-    }
-
-    /**
-     * 添加用户
-     *
-     * @param userModel 实体
-     */
-    @Override
-    public void addItem(UserModel userModel) {
-        saveJson(ServerConfigBean.USER, userModel.toJson());
-    }
-
-    /**
-     * 修改用户
-     *
-     * @return String
-     */
-    @Override
-    public boolean updateItem(UserModel userModel) {
-        try {
-            updateJson(ServerConfigBean.USER, userModel.toJson());
-            return true;
-        } catch (Exception e) {
-            DefaultSystemLog.ERROR().error(e.getMessage(), e);
-        }
-        return false;
+            // 不显示系统管理员信息
+            return !system || !userModel.isSystemUser();
+        }).collect(Collectors.toList());
     }
 }

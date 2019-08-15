@@ -4,7 +4,6 @@ import cn.keepbx.jpom.common.BaseOperService;
 import cn.keepbx.jpom.model.data.OutGivingModel;
 import cn.keepbx.jpom.model.data.OutGivingNodeProject;
 import cn.keepbx.jpom.system.ServerConfigBean;
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;
 
@@ -20,16 +19,8 @@ import java.util.List;
 @Service
 public class OutGivingServer extends BaseOperService<OutGivingModel> {
 
-    @Override
-    public List<OutGivingModel> list() throws IOException {
-        JSONObject jsonObject = getJSONObject(ServerConfigBean.OUTGIVING);
-        JSONArray jsonArray = formatToArray(jsonObject);
-        return jsonArray.toJavaList(OutGivingModel.class);
-    }
-
-    @Override
-    public OutGivingModel getItem(String id) throws IOException {
-        return getJsonObjectById(ServerConfigBean.OUTGIVING, id, OutGivingModel.class);
+    public OutGivingServer() {
+        super(ServerConfigBean.OUTGIVING);
     }
 
     @Override
@@ -40,23 +31,17 @@ public class OutGivingServer extends BaseOperService<OutGivingModel> {
         OutGivingModel newData = jsonObject.toJavaObject(OutGivingModel.class);
         newData.setTempCacheMap(null);
         // 保存
-        saveJson(ServerConfigBean.OUTGIVING, newData.toJson());
+        super.addItem(outGivingModel);
     }
 
     @Override
-    public boolean updateItem(OutGivingModel outGivingModel) {
+    public void updateItem(OutGivingModel outGivingModel) {
         // 不保存临时数据
         JSONObject jsonObject = outGivingModel.toJson();
         jsonObject.remove("tempCacheMap");
         OutGivingModel newData = jsonObject.toJavaObject(OutGivingModel.class);
         newData.setTempCacheMap(null);
-        updateJson(ServerConfigBean.OUTGIVING, newData.toJson());
-        return true;
-    }
-
-    @Override
-    public void deleteItem(String id) {
-        deleteJson(ServerConfigBean.OUTGIVING, id);
+        super.updateItem(outGivingModel);
     }
 
     public boolean checkNode(String nodeId) throws IOException {

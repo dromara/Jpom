@@ -1,15 +1,11 @@
 package cn.keepbx.jpom.service.script;
 
 import cn.hutool.core.io.FileUtil;
-import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.keepbx.jpom.common.BaseOperService;
 import cn.keepbx.jpom.model.data.ScriptModel;
 import cn.keepbx.jpom.system.AgentConfigBean;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
 import java.util.List;
 
 /**
@@ -21,14 +17,13 @@ import java.util.List;
 @Service
 public class ScriptServer extends BaseOperService<ScriptModel> {
 
+    public ScriptServer() {
+        super(AgentConfigBean.SCRIPT);
+    }
+
     @Override
-    public List<ScriptModel> list() throws IOException {
-        JSONObject jsonObject = getJSONObject(AgentConfigBean.SCRIPT);
-        if (jsonObject == null) {
-            return null;
-        }
-        JSONArray jsonArray = formatToArray(jsonObject);
-        List<ScriptModel> scriptModels = jsonArray.toJavaList(ScriptModel.class);
+    public List<ScriptModel> list() {
+        List<ScriptModel> scriptModels = super.list();
         if (scriptModels == null) {
             return null;
         }
@@ -39,7 +34,7 @@ public class ScriptServer extends BaseOperService<ScriptModel> {
 
     @Override
     public ScriptModel getItem(String id) {
-        ScriptModel scriptModel = getJsonObjectById(AgentConfigBean.SCRIPT, id, ScriptModel.class);
+        ScriptModel scriptModel = super.getItem(id);
         if (scriptModel != null) {
             scriptModel.readFileContext();
         }
@@ -48,20 +43,14 @@ public class ScriptServer extends BaseOperService<ScriptModel> {
 
     @Override
     public void addItem(ScriptModel scriptModel) {
-        saveJson(AgentConfigBean.SCRIPT, scriptModel.toJson());
+        super.addItem(scriptModel);
         scriptModel.saveFile();
     }
 
     @Override
-    public boolean updateItem(ScriptModel scriptModel) {
-        try {
-            updateJson(AgentConfigBean.SCRIPT, scriptModel.toJson());
-            scriptModel.saveFile();
-        } catch (Exception e) {
-            DefaultSystemLog.ERROR().error(e.getMessage(), e);
-            return false;
-        }
-        return true;
+    public void updateItem(ScriptModel scriptModel) {
+        super.updateItem(scriptModel);
+        scriptModel.saveFile();
     }
 
     @Override
@@ -70,6 +59,6 @@ public class ScriptServer extends BaseOperService<ScriptModel> {
         if (scriptModel != null) {
             FileUtil.del(scriptModel.getFile(true).getParentFile());
         }
-        deleteJson(AgentConfigBean.SCRIPT, id);
+        super.deleteItem(id);
     }
 }

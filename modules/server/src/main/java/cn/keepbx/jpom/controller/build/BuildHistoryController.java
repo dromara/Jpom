@@ -163,11 +163,8 @@ public class BuildHistoryController extends BaseServerController {
             BuildHistoryLogVo historyLogVo = new BuildHistoryLogVo();
             BeanUtil.copyProperties(buildHistoryLog, historyLogVo);
             String dataId = buildHistoryLog.getBuildDataId();
-            try {
-                BuildModel item = buildService.getItem(dataId);
-                historyLogVo.setBuildName(item.getName());
-            } catch (IOException ignored) {
-            }
+            BuildModel item = buildService.getItem(dataId);
+            historyLogVo.setBuildName(item.getName());
             buildHistoryLogVos.add(historyLogVo);
         });
         JSONObject jsonObject = JsonMessage.toJson(200, "获取成功", buildHistoryLogVos);

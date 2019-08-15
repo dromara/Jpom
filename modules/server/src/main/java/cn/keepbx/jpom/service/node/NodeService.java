@@ -5,10 +5,10 @@ import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.keepbx.jpom.common.BaseOperService;
+import cn.keepbx.jpom.common.JpomManifest;
 import cn.keepbx.jpom.common.forward.NodeForward;
 import cn.keepbx.jpom.common.forward.NodeUrl;
 import cn.keepbx.jpom.model.data.NodeModel;
-import cn.keepbx.jpom.common.JpomManifest;
 import cn.keepbx.jpom.system.ServerConfigBean;
 import cn.keepbx.util.StringUtil;
 import com.alibaba.fastjson.JSONArray;
@@ -31,11 +31,9 @@ public class NodeService extends BaseOperService<NodeModel> {
 
     private static final TimedCache<String, List<NodeModel>> TIMED_CACHE = new TimedCache<>(TimeUnit.MINUTES.toMillis(5));
 
-    @Override
-    public List<NodeModel> list() {
-        JSONObject jsonObject = getJSONObject(ServerConfigBean.NODE);
-        JSONArray jsonArray = formatToArray(jsonObject);
-        return jsonArray.toJavaList(NodeModel.class);
+
+    public NodeService() {
+        super(ServerConfigBean.NODE);
     }
 
     /**
@@ -112,29 +110,6 @@ public class NodeService extends BaseOperService<NodeModel> {
     public List<NodeModel> getNodeModel(String id) {
         return TIMED_CACHE.get(id);
     }
-
-    @Override
-    public NodeModel getItem(String id) {
-        return getJsonObjectById(ServerConfigBean.NODE, id, NodeModel.class);
-    }
-
-    @Override
-    public void addItem(NodeModel userModel) {
-        // 保存
-        saveJson(ServerConfigBean.NODE, userModel.toJson());
-    }
-
-    @Override
-    public boolean updateItem(NodeModel userModel) throws Exception {
-        updateJson(ServerConfigBean.NODE, userModel.toJson());
-        return true;
-    }
-
-    @Override
-    public void deleteItem(String id) {
-        deleteJson(ServerConfigBean.NODE, id);
-    }
-
 
     public String addNode(NodeModel nodeModel, HttpServletRequest request) {
         if (!StringUtil.isGeneral(nodeModel.getId(), 2, 20)) {

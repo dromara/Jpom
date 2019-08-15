@@ -90,9 +90,7 @@ public class CertificateController extends BaseAgentController {
                         return error;
                     }
                 }
-                if (!certService.updateItem(certModel)) {
-                    return JsonMessage.getString(406, "修改失败");
-                }
+                certService.updateItem(certModel);
             }
         } catch (Exception e) {
             DefaultSystemLog.ERROR().error("证书文件", e);

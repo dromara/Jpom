@@ -199,13 +199,7 @@ public class OutGivingRun implements Callable<OutGivingNodeProject.Status> {
                                      String msg) {
         synchronized (OutGivingRun.class) {
             OutGivingServer outGivingServer = SpringUtil.getBean(OutGivingServer.class);
-            OutGivingModel outGivingModel;
-            try {
-                outGivingModel = outGivingServer.getItem(outGivingId);
-            } catch (IOException e) {
-                DefaultSystemLog.ERROR().error(outGivingId + " " + outGivingNodeProjectItem + " " + "获取异常", e);
-                return;
-            }
+            OutGivingModel outGivingModel = outGivingServer.getItem(outGivingId);
             OutGivingNodeProject finOutGivingNodeProject = null;
             List<OutGivingNodeProject> outGivingNodeProjects = outGivingModel.getOutGivingNodeProjectList();
             for (OutGivingNodeProject outGivingNodeProject : outGivingNodeProjects) {

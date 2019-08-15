@@ -71,9 +71,7 @@ public class UserInfoController extends BaseServerController {
                 return JsonMessage.getString(500, "旧密码不正确！");
             }
             userModel.setPassword(newPwd);
-            if (!userService.updateItem(userModel)) {
-                return JsonMessage.getString(500, "修改失败！");
-            }
+            userService.updateItem(userModel);
             // 如果修改成功，则销毁会话
             getSession().invalidate();
             return JsonMessage.getString(200, "修改密码成功！");
@@ -96,11 +94,9 @@ public class UserInfoController extends BaseServerController {
         UserModel userModel = getUser();
         userModel = userService.getItem(userModel.getId());
         userModel.setName(name);
-        if (userService.updateItem(userModel)) {
-            setSessionAttribute(LoginInterceptor.SESSION_NAME, userModel);
-            return JsonMessage.getString(200, "修改成功");
-        }
-        return JsonMessage.getString(500, "修改失败");
+        userService.updateItem(userModel);
+        setSessionAttribute(LoginInterceptor.SESSION_NAME, userModel);
+        return JsonMessage.getString(200, "修改成功");
     }
 
     /**
@@ -317,11 +313,8 @@ public class UserInfoController extends BaseServerController {
         }
         // 记录修改时间，如果在线用户线退出
         userModel.setModifyTime(DateUtil.currentSeconds());
-        boolean b = userService.updateItem(userModel);
-        if (b) {
-            return JsonMessage.getString(200, "修改成功");
-        }
-        return JsonMessage.getString(400, "修改失败");
+        userService.updateItem(userModel);
+        return JsonMessage.getString(200, "修改成功");
     }
 
     /**
@@ -338,10 +331,7 @@ public class UserInfoController extends BaseServerController {
             return JsonMessage.getString(400, "修改失败:-1");
         }
         userModel.unLock();
-        boolean b = userService.updateItem(userModel);
-        if (b) {
-            return JsonMessage.getString(200, "解锁成功");
-        }
-        return JsonMessage.getString(400, "解锁失败");
+        userService.updateItem(userModel);
+        return JsonMessage.getString(200, "解锁成功");
     }
 }

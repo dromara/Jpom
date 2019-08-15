@@ -3,15 +3,12 @@ package cn.keepbx.jpom.service.system;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.lang.Console;
 import cn.hutool.core.util.StrUtil;
-import cn.hutool.system.SystemUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
-import cn.keepbx.jpom.common.BaseOperService;
+import cn.keepbx.jpom.common.BaseDataService;
 import cn.keepbx.jpom.model.data.AgentWhitelist;
 import cn.keepbx.jpom.service.WhitelistDirectoryService;
 import cn.keepbx.jpom.system.AgentConfigBean;
-import cn.keepbx.util.CommandUtil;
 import cn.keepbx.util.JsonFileUtil;
 import cn.keepbx.util.StringUtil;
 import com.alibaba.fastjson.JSONArray;
@@ -32,12 +29,11 @@ import java.util.List;
  * @author Arno
  */
 @Service
-public class NginxService extends BaseOperService {
+public class NginxService extends BaseDataService {
 
     @Resource
     private WhitelistDirectoryService whitelistDirectoryService;
 
-    @Override
     public JSONArray list() {
         AgentWhitelist agentWhitelist = whitelistDirectoryService.getWhitelist();
         if (agentWhitelist == null) {
@@ -88,32 +84,6 @@ public class NginxService extends BaseOperService {
             }
         }
         return array;
-    }
-
-//    public String paresName(String whitePath, String itemAbsPath) {
-//        File file = new File(whitePath);
-//        String newWhitePath = file.getAbsolutePath();
-//        String path = itemAbsPath.substring(itemAbsPath.indexOf(newWhitePath) + newWhitePath.length());
-//        path = FileUtil.normalize(path);
-//        if (path.startsWith(StrUtil.SLASH)) {
-//            path = path.substring(1);
-//        }
-//        return path;
-//    }
-
-    @Override
-    public void addItem(Object o) {
-        Console.error(o);
-    }
-
-    @Override
-    public boolean updateItem(Object o) throws Exception {
-        return false;
-    }
-
-    @Override
-    public void deleteItem(String id) {
-
     }
 
     /**
@@ -173,7 +143,6 @@ public class NginxService extends BaseOperService {
      *
      * @param path nginx路径
      */
-    @Override
     public JSONObject getItem(String path) {
         JSONObject jsonObject = new JSONObject();
         try {

@@ -85,15 +85,11 @@ public class BuildHistoryLogVo extends BuildHistoryLog {
                 }
                 case Outgiving: {
                     OutGivingServer outGivingServer = SpringUtil.getBean(OutGivingServer.class);
-                    try {
-                        OutGivingModel item = outGivingServer.getItem(releaseMethodDataId);
-                        if (item == null) {
-                            return "-";
-                        }
-                        return "【" + item.getName() + "】分发";
-                    } catch (IOException e) {
-                        return "获取分发数据异常";
+                    OutGivingModel item = outGivingServer.getItem(releaseMethodDataId);
+                    if (item == null) {
+                        return "-";
                     }
+                    return "【" + item.getName() + "】分发";
                 }
                 case No:
                 default:

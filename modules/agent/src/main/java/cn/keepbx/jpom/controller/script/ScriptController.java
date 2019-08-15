@@ -72,11 +72,8 @@ public class ScriptController extends BaseAgentController {
         }
         eModel.setName(scriptModel.getName());
         eModel.setContext(scriptModel.getContext());
-        boolean b = scriptServer.updateItem(eModel);
-        if (b) {
-            return JsonMessage.getString(200, "修改成功");
-        }
-        return JsonMessage.getString(500, "修改失败");
+        scriptServer.updateItem(eModel);
+        return JsonMessage.getString(200, "修改成功");
     }
 
     @RequestMapping(value = "del.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)

@@ -1,13 +1,10 @@
 package cn.keepbx.jpom.service.monitor;
 
 import cn.hutool.core.date.DateUtil;
-import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.keepbx.jpom.common.BaseOperService;
 import cn.keepbx.jpom.model.data.MonitorModel;
 import cn.keepbx.jpom.system.ServerConfigBean;
 import cn.keepbx.monitor.Monitor;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -22,25 +19,13 @@ import java.util.stream.Collectors;
 @Service
 public class MonitorService extends BaseOperService<MonitorModel> {
 
-
-    @Override
-    public List<MonitorModel> list() {
-        JSONObject jsonObject = getJSONObject(ServerConfigBean.MONITOR_FILE);
-        if (jsonObject == null) {
-            return null;
-        }
-        JSONArray jsonArray = formatToArray(jsonObject);
-        return jsonArray.toJavaList(MonitorModel.class);
-    }
-
-    @Override
-    public MonitorModel getItem(String id) {
-        return getJsonObjectById(ServerConfigBean.MONITOR_FILE, id, MonitorModel.class);
+    public MonitorService() {
+        super(ServerConfigBean.MONITOR_FILE);
     }
 
     @Override
     public void addItem(MonitorModel monitorModel) {
-        saveJson(ServerConfigBean.MONITOR_FILE, monitorModel.toJson());
+        super.addItem(monitorModel);
         //
         if (monitorModel.isStatus()) {
             Monitor.start();
@@ -49,7 +34,7 @@ public class MonitorService extends BaseOperService<MonitorModel> {
 
     @Override
     public void deleteItem(String id) {
-        deleteJson(ServerConfigBean.MONITOR_FILE, id);
+        super.deleteItem(id);
         this.checkCronStatus();
     }
 
@@ -77,17 +62,10 @@ public class MonitorService extends BaseOperService<MonitorModel> {
     }
 
     @Override
-    public boolean updateItem(MonitorModel monitorModel) {
-        try {
-            monitorModel.setModifyTime(DateUtil.date().getTime());
-            updateJson(ServerConfigBean.MONITOR_FILE, monitorModel.toJson());
-            return true;
-        } catch (Exception e) {
-            DefaultSystemLog.ERROR().error(e.getMessage(), e);
-        } finally {
-            this.checkCronStatus();
-        }
-        return false;
+    public void updateItem(MonitorModel monitorModel) {
+        monitorModel.setModifyTime(DateUtil.date().getTime());
+        super.updateItem(monitorModel);
+        this.checkCronStatus();
     }
 
     /**
