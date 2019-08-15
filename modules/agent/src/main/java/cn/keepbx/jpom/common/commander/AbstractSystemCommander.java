@@ -61,42 +61,21 @@ public abstract class AbstractSystemCommander {
      */
     public abstract ProcessModel getPidInfo(int pid);
 
-    protected static JSONObject putObject(String name, Object value, String type) {
-        JSONObject jsonObject = new JSONObject();
-        jsonObject.put("name", name);
-        if (value != null) {
-            String strVal = value.toString();
-            strVal = strVal.toLowerCase();
-            if (strVal.endsWith("k") || strVal.endsWith("%")) {
-                strVal = strVal.substring(0, strVal.length() - 1);
-            }
-            jsonObject.put("value", strVal);
-        } else {
-            jsonObject.put("value", 0);
-        }
-        jsonObject.put("type", type);
-        return jsonObject;
-    }
-
     /**
      * 磁盘占用
      *
      * @return 磁盘占用
      */
-    protected static JSONArray getHardDisk() {
+    protected static String getHardDisk() {
         File[] files = File.listRoots();
-        long freeSpace = 0;
-        long useAbleSpace = 0;
+        double totalSpace = 0;
+        double useAbleSpace = 0;
         for (File file : files) {
-            long free = file.getFreeSpace();
-            freeSpace += free;
-            useAbleSpace += file.getTotalSpace() - free;
+            double total = file.getTotalSpace();
+            totalSpace += total;
+            useAbleSpace += total - file.getUsableSpace();
         }
-        JSONArray array = new JSONArray();
-        //单位 kb
-        array.add(putObject("已使用磁盘", useAbleSpace / 1024f, "disk"));
-        array.add(putObject("空闲磁盘", freeSpace / 1024f, "disk"));
-        return array;
+        return String.format("%.2f", useAbleSpace / totalSpace * 100);
     }
 
     /**

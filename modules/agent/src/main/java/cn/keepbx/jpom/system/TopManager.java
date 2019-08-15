@@ -1,5 +1,7 @@
 package cn.keepbx.jpom.system;
 
+import cn.hutool.core.date.DateTime;
+import cn.hutool.core.date.DateUtil;
 import cn.hutool.cron.CronUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.pool.ThreadPoolService;
@@ -62,11 +64,19 @@ public class TopManager {
             return;
         }
         CronUtil.remove(CRON_ID);
-        CronUtil.schedule(CRON_ID, "0/5 * * * * ?", () -> {
+        CronUtil.schedule(CRON_ID, "0 0/1 * * * ?", () -> {
             //发送监控信息
             try {
                 JSONObject topInfo = AbstractSystemCommander.getInstance().getAllMonitor();
                 if (topInfo != null) {
+                    DateTime date = DateUtil.date();
+                    int hour = date.hour(true);
+                    int minute = date.minute();
+                    int day = date.dayOfMonth();
+                    topInfo.put("hour", hour);
+                    topInfo.put("minute", minute);
+                    topInfo.put("day", day);
+                    topInfo.put("time", DateUtil.format(date, "HH:mm"));
                     send(topInfo.toString());
                 }
             } catch (Exception e) {

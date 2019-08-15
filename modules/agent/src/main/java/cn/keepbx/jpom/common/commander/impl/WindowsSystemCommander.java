@@ -7,7 +7,6 @@ import cn.keepbx.jpom.common.commander.AbstractSystemCommander;
 import cn.keepbx.jpom.model.system.ProcessModel;
 import cn.keepbx.util.CommandUtil;
 import cn.keepbx.util.JvmUtil;
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.sun.management.OperatingSystemMXBean;
 
@@ -42,26 +41,15 @@ public class WindowsSystemCommander extends AbstractSystemCommander {
         OperatingSystemMXBean operatingSystemMXBean = (OperatingSystemMXBean) ManagementFactory.getOperatingSystemMXBean();
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("top", true);
-        JSONArray memory = new JSONArray();
-        {
-            long totalPhysicalMemorySize = operatingSystemMXBean.getTotalPhysicalMemorySize();
-            long freePhysicalMemorySize = operatingSystemMXBean.getFreePhysicalMemorySize();
-            //单位 kb
-            memory.add(putObject("占用内存", (totalPhysicalMemorySize - freePhysicalMemorySize) / 1024f, "memory"));
-            memory.add(putObject("空闲内存", freePhysicalMemorySize / 1024f, "memory"));
+        double total = operatingSystemMXBean.getTotalPhysicalMemorySize();
+        double free = operatingSystemMXBean.getFreePhysicalMemorySize();
+        jsonObject.put("memory", String.format("%.2f", (total - free) / total * 100));
+        //最近系统cpu使用量
+        double systemCpuLoad = operatingSystemMXBean.getSystemCpuLoad();
+        if (systemCpuLoad <= 0) {
+            systemCpuLoad = 0;
         }
-        JSONArray cpus = new JSONArray();
-        {
-            //最近系统cpu使用量
-            double systemCpuLoad = operatingSystemMXBean.getSystemCpuLoad();
-            if (systemCpuLoad <= 0) {
-                systemCpuLoad = 0;
-            }
-            cpus.add(putObject("占用cpu", systemCpuLoad, "cpu"));
-            cpus.add(putObject("空闲cpu", 1 - systemCpuLoad, "cpu"));
-        }
-        jsonObject.put("memory", memory);
-        jsonObject.put("cpu", cpus);
+        jsonObject.put("cpu", String.format("%.2f", systemCpuLoad * 100));
         jsonObject.put("disk", getHardDisk());
         return jsonObject;
     }

@@ -6,7 +6,6 @@ import cn.hutool.core.util.StrUtil;
 import cn.keepbx.jpom.common.commander.AbstractSystemCommander;
 import cn.keepbx.jpom.model.system.ProcessModel;
 import cn.keepbx.util.CommandUtil;
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import java.util.ArrayList;
@@ -30,13 +29,13 @@ public class LinuxSystemCommander extends AbstractSystemCommander {
         if (length >= 2) {
             String cpus = split[2];
             //cpu占比
-            JSONArray cpu = getLinuxCpu(cpus);
+            String cpu = getLinuxCpu(cpus);
             jsonObject.put("cpu", cpu);
         }
         if (length >= 3) {
             String mem = split[3];
             //内存占比
-            JSONArray memory = getLinuxMemory(mem);
+            String memory = getLinuxMemory(mem);
             jsonObject.put("memory", memory);
         }
         jsonObject.put("top", true);
@@ -137,47 +136,43 @@ public class LinuxSystemCommander extends AbstractSystemCommander {
      * @param info 内存信息
      * @return 内存信息
      */
-    private static JSONArray getLinuxMemory(String info) {
+    private static String getLinuxMemory(String info) {
         if (StrUtil.isEmpty(info)) {
             return null;
         }
         int index = info.indexOf(":") + 1;
         String[] split = info.substring(index).split(",");
-        JSONArray memory = new JSONArray();
-        for (String str : split) {
-            str = str.trim();
 //            509248k total — 物理内存总量（509M）
 //            495964k used — 使用中的内存总量（495M）
 //            13284k free — 空闲内存总量（13M）
 //            25364k buffers — 缓存的内存量 （25M）
-            if (str.endsWith("free")) {
-                memory.add(putObject("空闲内存", str.replace("free", "").trim(), "memory"));
-            }
+        double total = 0, used = 0;
+        for (String str : split) {
+            str = str.trim();
             if (str.endsWith("used")) {
-                memory.add(putObject("使用中的内存", str.replace("used", "").trim(), "memory"));
+                String value = str.replace("used", "").replace("k", "").trim();
+                used = Convert.toDouble(value, 0.0);
             }
-            if (str.endsWith("buff/cache")) {
-                memory.add(putObject("缓存的内存", str.replace("buff/cache", "").trim(), "memory"));
+            if (str.endsWith("total")) {
+                String value = str.replace("total", "").replace("k", "").trim();
+                total = Convert.toDouble(value, 0.0);
             }
         }
-        return memory;
+        return String.format("%.2f", used / total * 100);
     }
 
     /**
-     * 获取cpu信息
+     * 获取占用cpu信息
      *
      * @param info cpu信息
      * @return cpu信息
      */
-    private static JSONArray getLinuxCpu(String info) {
+    private static String getLinuxCpu(String info) {
         if (StrUtil.isEmpty(info)) {
             return null;
         }
         int i = info.indexOf(":");
         String[] split = info.substring(i + 1).split(",");
-        JSONArray cpu = new JSONArray();
-        for (String str : split) {
-            str = str.trim();
 //            1.3% us — 用户空间占用CPU的百分比。
 //            1.0% sy — 内核空间占用CPU的百分比。
 //            0.0% ni — 改变过优先级的进程占用CPU的百分比
@@ -185,35 +180,17 @@ public class LinuxSystemCommander extends AbstractSystemCommander {
 //            0.0% wa — IO等待占用CPU的百分比
 //            0.3% hi — 硬中断（Hardware IRQ）占用CPU的百分比
 //            0.0% si — 软中断（Software Interrupts）占用CPU的百分比
+        for (String str : split) {
+            str = str.trim();
             String value = str.substring(0, str.length() - 2).trim();
             String tag = str.substring(str.length() - 2);
-            switch (tag) {
-                case "us":
-                    cpu.add(putObject("用户空间", value, "cpu"));
-                    break;
-                case "sy":
-                    cpu.add(putObject("内核空间", value, "cpu"));
-                    break;
-                case "ni":
-                    cpu.add(putObject("改变过优先级的进程", value, "cpu"));
-                    break;
-                case "id":
-                    cpu.add(putObject("空闲CPU", value, "cpu"));
-                    break;
-                case "wa":
-                    cpu.add(putObject("IO等待", value, "cpu"));
-                    break;
-                case "hi":
-                    cpu.add(putObject("硬中断", value, "cpu"));
-                    break;
-                case "si":
-                    cpu.add(putObject("软中断", value, "cpu"));
-                    break;
-                default:
-                    break;
+            if ("id".equalsIgnoreCase(tag)) {
+                value = value.replace("%", "");
+                double val = Convert.toDouble(value, 0.0);
+                return String.format("%.2f", 100.00 - val);
             }
         }
-        return cpu;
+        return "0";
     }
 
     @Override

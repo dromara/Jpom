@@ -12,20 +12,10 @@
             padding: 10px;
         }
 
-
-        /*.layui-inline {*/
-        /*    width: 200px;*/
-        /*}*/
-
-        .top {
-            margin-top: 20px;
-            width: 100%;
-        }
-
         .echarts {
-            margin: 0 auto;
-            width: 90%;
-            height: 300px;
+            margin: 20px auto;
+            width: 94%;
+            height: 400px;
         }
     </style>
     <script th:src="@{${session.jpomProxyPath}+'/static/js/echarts.min.js?v='+${session.staticCacheTime}}"></script>
@@ -33,20 +23,8 @@
 
 <body>
 
-<form action="" class="layui-form" id="form">
-    <div class="layui-inline">
-        <label class="layui-form-label">自动刷新</label>
-        <div class="layui-input-block">
-            <input type="checkbox" lay-filter="filter" id="monitor" lay-skin="switch" lay-text="开启|关闭">
-        </div>
-    </div>
-</form>
-
-<div class="top">
-    <div class="echarts" id="echarts"></div>
-</div>
-
-<table class="layui-table" id="tab_monitor" lay-filter="tab_monitor"></table>
+<div class="echarts" id="echarts"></div>
+<table class="layui-table" id="tab_monitor" lay-filter="tab_monitor" style="margin-top:10px"></table>
 </body>
 <script type="application/javascript">
     var ws, myEcharts;
@@ -73,172 +51,211 @@
     };
 
     function loadSuccess() {
-        var top = layui.data('top');
-        var openTop = false;
-        if (top) {
-            openTop = top["openTop_$node.id"];
-        }
+        //
+        loadTopData();
         //加载进程信息
         loadProcessList();
         //
-        loadTop();
-        $("#monitor").attr("checked", openTop);
-        if (openTop) {
-            linkSocket(openTop);
-        }
-        form.render();
-        //
         tableRender(config);
-        // 切换
-        form.on('switch(filter)', function (data) {
-            var check = data.elem.checked;
-            layui.data('top', {
-                key: 'openTop_$node.id',
-                value: check
-            });
-            linkSocket(check);
-        });
-    }
+        linkSocket(true);
 
-    //加载病状图
-    function loadEcharts(top) {
-        if (!top) {
-            return;
-        }
-        var cpu = top.cpu;
-        var value = [];
-        if (cpu) {
-            info = {
-                name: 'cpu',
-                type: 'pie',
-                center: ['18%', '50%'],
-                radius: ['40%', '70%'],
-                data: cpu
+        //加载病状图
+        function loadEcharts(xAxis, series) {
+            if (!series) {
+                return;
             }
-            value.push(info);
-        }
-        var memory = top.memory;
-        if (memory) {
-            info = {
-                name: '内存',
-                type: 'pie',
-                center: ['48%', '50%'],
-                radius: ['40%', '70%'],
-                data: memory
+            let option = {
+                title: {
+                    text: '系统监控'
+                },
+                tooltip: {
+                    trigger: 'axis'
+                },
+                legend: {
+                    data: ['cpu占用', '内存占用', '磁盘占用'],
+                    right: '1%'
+                },
+                grid: {
+                    left: '1%',
+                    right: '1%',
+                    bottom: '1%',
+                    containLabel: true
+                },
+                xAxis: {
+                    type: 'category',
+                    boundaryGap: false,
+                    data: xAxis
+                },
+                yAxis: {
+                    type: 'value',
+                    axisLabel: {
+                        //设置y轴数值为%
+                        formatter: '{value} %'
+                    },
+                    max: 100
+                },
+                series: series
+            };
+            if (!myEcharts) {
+                myEcharts = echarts.init(document.getElementById('echarts'));
             }
-            value.push(info);
+            myEcharts.setOption(option);
         }
-        var disk = top.disk;
-        if (disk) {
-            info = {
-                name: '磁盘',
-                type: 'pie',
-                center: ['78%', '50%'],
-                radius: ['40%', '70%'],
-                data: disk
+
+        function linkSocket(status) {
+            if (!('WebSocket' in window)) {
+                layer.msg("不支持WebSocket");
+                return;
             }
-            value.push(info);
-        }
-        var option = {
-            tooltip: {
-                trigger: 'item',
-                formatter: function (params, ticket, callback) {
-                    var value = params.value;
-                    var type = params.data.type;
-                    var suffix = "";
-                    if ("cpu" != type) {
-                        suffix = " KB";
-                        if (value > 1024) {
-                            value = value / 1024;
-                            suffix = " MB";
+            var url = getSocketHost() + "/console?userId=[[${session.user.getUserMd5Key()}]]&projectId=system&nodeId=[[${node.id}]]&type=console";
+            if (!ws) {
+                ws = new WebSocket(url);
+            }
+            if (status) {
+                if (ws.readyState !== 1 && ws.readyState !== 0) {
+                    ws = new WebSocket(url);
+                }
+                ws.onopen = function () {
+                    ws.send('{"op": "top", "projectInfo":{}}');
+                };
+                ws.onmessage = function (data) {
+                    try {
+                        if (data.data) {
+                            var top = JSON.parse(data.data);
+                            if (top.top) {
+                                loadTopData(top);
+                            }
+                            if (top.processList) {
+                                config.data = top.processList;
+                                tableRender(config);
+                            }
                         }
-                        if (value > 1024) {
-                            value = value / 1024;
-                            suffix = " GB";
-                        }
-                        value = Math.round(value * 100) / 100;
-                    } else {
-                        value = Math.round(value * 10000) / 10000;
+                    } catch (e) {
+                        return;
                     }
-                    return params.seriesName + '<br/>' + params.name + " : " + value + suffix + "(" + params.percent + "%)";
+                };
+                ws.onerror = function (ev) {
+                    console.log(ev);
+                    layer.msg("socket 异常");
                 }
-            },
-            series: value
-        };
-        if (!myEcharts) {
-            myEcharts = echarts.init(document.getElementById('echarts'));
+            } else {
+                ws.close();
+            }
         }
-        myEcharts.setOption(option);
-    }
 
-    function loadTop() {
-        silentAjax({
-            url: './getTop',
-            success: function (data) {
-                if (200 == data.code && data.data) {
-                    loadEcharts(data.data);
-                } else {
-                    layer.alert(data.msg);
+        //保存监控数据
+        function loadTopData(topData) {
+            //默认刻度数量
+            let count = 12;
+            let dataTop = layui.data('top');
+            let top = [];
+            if (dataTop && dataTop.top) {
+                top = dataTop.top;
+            }
+            if (topData) {
+                top.push(topData);
+            }
+            let array = [];
+            let xAxis = [];
+            let cpuItem = {
+                name: 'cpu占用',
+                type: 'line',
+                data: []
+            };
+            let diskItem = {
+                name: '磁盘占用',
+                type: 'line',
+                data: []
+            };
+            let memoryItem = {
+                name: '内存占用',
+                type: 'line',
+                data: []
+            };
+            for (let i = top.length - 1; i >= 0; i--) {
+                let item = top[i];
+                let len = array.length;
+                if (len >= count) {
+                    break;
+                } else if (len > 0) {
+                    let nextItem = array[0];
+                    if (nextItem.day !== item.day || nextItem.time !== getNextMinute(item.hour, item.minute)) {
+                        break;
+                    }
+                }
+                array.splice(0, 0, item);
+                cpuItem.data.splice(0, 0, parseFloat(item.cpu));
+                diskItem.data.splice(0, 0, parseFloat(item.disk));
+                memoryItem.data.splice(0, 0, parseFloat(item.memory));
+                xAxis.splice(0, 0, item.time);
+            }
+            let len = xAxis.length;
+            if (len <= count) {
+                let item = array[array.length - 1];
+                if (!item) {
+                    var myDate = new Date(); //实例一个时间对象；
+                    item = {
+                        hour: myDate.getHours(),
+                        minute: myDate.getMinutes()
+                    }
+                }
+                let hour = item.hour;
+                let minute = item.minute;
+                for (let i = 0; i < count - len; i++) {
+                    if (i !== 0) {
+                        minute += 1;
+                        if (minute === 60) {
+                            minute = 0;
+                            hour += 1;
+                        }
+                    }
+                    xAxis.push(getNextMinute(hour, minute));
                 }
             }
-        });
+            let series = [cpuItem, memoryItem, diskItem];
+            loadEcharts(xAxis, series);
+            layui.data('top', {
+                key: 'top',
+                value: array
+            });
+        }
+    }
+
+    //下一分钟 判断时间连续性
+    function getNextMinute(hour, minute) {
+        minute += 1;
+        if (minute === 60) {
+            hour += 1;
+            minute = 0;
+        }
+        let hourStr = hour;
+        let minuteStr = minute;
+        if (hour === 24) {
+            hour = 0;
+        }
+        if (hour < 10) {
+            hourStr = "0" + hour;
+        }
+        if (minute < 10) {
+            minuteStr = "0" + minute;
+        }
+        return hourStr + ":" + minuteStr;
     }
 
     function loadProcessList() {
         silentAjax({
             url: './processList',
             success: function (data) {
-                if (200 == data.code && data.data) {
+                if (200 === data.code && data.data) {
                     config.data = data.data;
                     tableRender(config);
-                } else if (data.msg && data.msg != "") {
+                } else if (data.msg && data.msg !== "") {
                     layer.msg(data.msg);
                 }
             }
         });
     }
 
-    function linkSocket(status) {
-        if (!('WebSocket' in window)) {
-            layer.msg("不支持WebSocket");
-            return;
-        }
-        var url = getSocketHost() + "/console?userId=[[${session.user.getUserMd5Key()}]]&projectId=system&nodeId=[[${node.id}]]&type=console";
-        if (!ws) {
-            ws = new WebSocket(url);
-        }
-        if (status) {
-            if (ws.readyState != 1 && ws.readyState != 0) {
-                ws = new WebSocket(url);
-            }
-            ws.onopen = function () {
-                ws.send('{"op": "top", "projectInfo":{}}');
-            };
-            ws.onmessage = function (data) {
-                try {
-                    if (data.data) {
-                        var top = JSON.parse(data.data);
-                        if (top.top) {
-                            loadEcharts(top);
-                        }
-                        if (top.processList) {
-                            var processList = top.processList;
-                            config.data = processList;
-                            tableRender(config);
-                        }
-                    }
-                } catch (e) {
-                    return;
-                }
-            };
-            ws.onerror = function (ev) {
-                console.log(ev);
-                layer.msg("socket 异常");
-            };
-        } else {
-            ws.close();
-        }
-    }
 </script>
 
 </html>
