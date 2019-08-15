@@ -1,9 +1,11 @@
 package cn.keepbx.jpom;
 
 import cn.jiangzeyin.common.EnableCommonBoot;
+import cn.jiangzeyin.common.spring.event.ApplicationEventLoad;
 import cn.keepbx.jpom.common.Type;
 import cn.keepbx.jpom.common.interceptor.LoginInterceptor;
 import cn.keepbx.jpom.common.interceptor.PermissionInterceptor;
+import cn.keepbx.permission.CacheControllerFeature;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.web.servlet.ServletComponentScan;
 
@@ -16,7 +18,7 @@ import org.springframework.boot.web.servlet.ServletComponentScan;
 @SpringBootApplication(scanBasePackages = {"cn.keepbx.plugin", "cn.keepbx.jpom"})
 @ServletComponentScan
 @EnableCommonBoot
-public class JpomServerApplication {
+public class JpomServerApplication implements ApplicationEventLoad {
 
 
     /**
@@ -34,4 +36,8 @@ public class JpomServerApplication {
     }
 
 
+    @Override
+    public void applicationLoad() {
+        CacheControllerFeature.init();
+    }
 }

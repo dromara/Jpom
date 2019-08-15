@@ -8,7 +8,7 @@ import cn.keepbx.jpom.common.forward.NodeUrl;
 import cn.keepbx.jpom.model.data.NodeModel;
 import cn.keepbx.jpom.model.data.SshModel;
 import cn.keepbx.jpom.model.data.UserModel;
-import cn.keepbx.jpom.model.system.JpomManifest;
+import cn.keepbx.jpom.common.JpomManifest;
 import cn.keepbx.jpom.service.node.NodeService;
 import cn.keepbx.jpom.service.node.ssh.SshService;
 import com.alibaba.fastjson.JSONArray;

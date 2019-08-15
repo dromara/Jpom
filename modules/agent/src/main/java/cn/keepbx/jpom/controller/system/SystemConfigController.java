@@ -9,7 +9,7 @@ import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.keepbx.jpom.JpomApplication;
 import cn.keepbx.jpom.common.BaseAgentController;
-import cn.keepbx.jpom.model.system.JpomManifest;
+import cn.keepbx.jpom.common.JpomManifest;
 import cn.keepbx.jpom.system.ExtConfigBean;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.boot.env.YamlPropertySourceLoader;

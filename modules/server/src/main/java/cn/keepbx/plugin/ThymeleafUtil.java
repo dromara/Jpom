@@ -21,7 +21,9 @@ import java.util.Map;
  */
 @Configuration
 public class ThymeleafUtil {
-
+    /**
+     * 页面变量
+     */
     public static final String PAGE_VARIABLE = "pagePluginHtml";
 
     @Resource

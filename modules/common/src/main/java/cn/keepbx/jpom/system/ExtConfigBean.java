@@ -6,7 +6,7 @@ import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.spring.SpringUtil;
 import cn.keepbx.jpom.JpomApplication;
-import cn.keepbx.jpom.model.system.JpomManifest;
+import cn.keepbx.jpom.common.JpomManifest;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;

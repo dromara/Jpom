@@ -4,7 +4,7 @@ import ch.qos.logback.core.PropertyDefinerBase;
 import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.keepbx.jpom.JpomApplication;
-import cn.keepbx.jpom.model.system.JpomManifest;
+import cn.keepbx.jpom.common.JpomManifest;
 import cn.keepbx.util.StringUtil;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.Signature;

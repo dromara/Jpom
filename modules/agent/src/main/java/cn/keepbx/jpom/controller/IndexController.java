@@ -5,7 +5,7 @@ import cn.jiangzeyin.common.JsonMessage;
 import cn.keepbx.jpom.common.BaseAgentController;
 import cn.keepbx.jpom.common.interceptor.NotAuthorize;
 import cn.keepbx.jpom.model.data.ProjectInfoModel;
-import cn.keepbx.jpom.model.system.JpomManifest;
+import cn.keepbx.jpom.common.JpomManifest;
 import cn.keepbx.jpom.service.WhitelistDirectoryService;
 import cn.keepbx.jpom.service.manage.ProjectInfoService;
 import cn.keepbx.util.JvmUtil;

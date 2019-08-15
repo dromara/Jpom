@@ -1,4 +1,4 @@
-package cn.keepbx.jpom.model.system;
+package cn.keepbx.jpom.common;
 
 import cn.hutool.core.date.BetweenFormater;
 import cn.hutool.core.date.DateTime;
@@ -11,7 +11,6 @@ import cn.hutool.system.SystemUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.keepbx.jpom.JpomApplication;
-import cn.keepbx.jpom.common.Type;
 import cn.keepbx.jpom.system.ConfigBean;
 import cn.keepbx.jpom.system.JpomRuntimeException;
 import cn.keepbx.util.CommandUtil;

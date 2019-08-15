@@ -6,7 +6,7 @@ import cn.jiangzeyin.controller.multipart.MultipartFileBuilder;
 import cn.keepbx.jpom.JpomAgentApplication;
 import cn.keepbx.jpom.JpomApplication;
 import cn.keepbx.jpom.common.BaseAgentController;
-import cn.keepbx.jpom.model.system.JpomManifest;
+import cn.keepbx.jpom.common.JpomManifest;
 import cn.keepbx.jpom.system.AgentConfigBean;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.RequestMapping;

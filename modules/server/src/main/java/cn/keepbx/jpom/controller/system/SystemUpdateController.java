@@ -13,7 +13,7 @@ import cn.keepbx.jpom.common.interceptor.UrlPermission;
 import cn.keepbx.jpom.model.Role;
 import cn.keepbx.jpom.model.data.NodeModel;
 import cn.keepbx.jpom.model.log.UserOperateLogV1;
-import cn.keepbx.jpom.model.system.JpomManifest;
+import cn.keepbx.jpom.common.JpomManifest;
 import cn.keepbx.jpom.system.ServerConfigBean;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;

@@ -6,7 +6,7 @@ import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.PreLoadClass;
 import cn.jiangzeyin.common.PreLoadMethod;
 import cn.keepbx.jpom.JpomApplication;
-import cn.keepbx.jpom.model.system.JpomManifest;
+import cn.keepbx.jpom.common.JpomManifest;
 import cn.keepbx.jpom.system.ConfigBean;
 import cn.keepbx.jpom.system.ExtConfigBean;
 import cn.keepbx.util.JvmUtil;
@@ -50,7 +50,9 @@ public class CheckPath {
         }
     }
 
-
+    /**
+     * 判断是否重复运行
+     */
     @PreLoadMethod(2)
     private static void checkDuplicateRun() {
         Class appClass = JpomApplication.getAppClass();

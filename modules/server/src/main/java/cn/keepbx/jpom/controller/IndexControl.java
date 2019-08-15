@@ -11,7 +11,7 @@ import cn.keepbx.jpom.common.interceptor.NotLogin;
 import cn.keepbx.jpom.model.Role;
 import cn.keepbx.jpom.model.data.NodeModel;
 import cn.keepbx.jpom.model.data.UserModel;
-import cn.keepbx.jpom.model.system.JpomManifest;
+import cn.keepbx.jpom.common.JpomManifest;
 import cn.keepbx.jpom.service.node.NodeService;
 import cn.keepbx.jpom.service.user.UserService;
 import com.alibaba.fastjson.JSONArray;

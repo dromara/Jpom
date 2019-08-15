@@ -5,9 +5,10 @@ import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
+import cn.jiangzeyin.common.spring.SpringUtil;
 import cn.jiangzeyin.common.spring.event.ApplicationEventClient;
+import cn.jiangzeyin.common.spring.event.ApplicationEventLoad;
 import cn.keepbx.jpom.JpomApplication;
-import cn.keepbx.jpom.model.system.JpomManifest;
 import cn.keepbx.jpom.system.ConfigBean;
 import cn.keepbx.jpom.system.ExtConfigBean;
 import cn.keepbx.util.JsonFileUtil;
@@ -58,6 +59,11 @@ public class JpomApplicationEvent implements ApplicationEventClient {
             FileUtil.writeString(jpomManifest.toString(), appJpomFile, CharsetUtil.CHARSET_UTF_8);
             // 检查更新文件
             checkUpdate();
+            //
+            if (ApplicationEventLoad.class.isAssignableFrom(JpomApplication.getAppClass())) {
+                ApplicationEventLoad eventLoad = (ApplicationEventLoad) SpringUtil.getBean(JpomApplication.getAppClass());
+                eventLoad.applicationLoad();
+            }
         } else if (event instanceof ContextClosedEvent) {
             // 应用关闭
             this.unLockFile();

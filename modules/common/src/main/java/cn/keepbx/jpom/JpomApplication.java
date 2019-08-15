@@ -9,7 +9,7 @@ import cn.jiangzeyin.common.validator.ParameterInterceptor;
 import cn.keepbx.jpom.common.JpomApplicationEvent;
 import cn.keepbx.jpom.common.Type;
 import cn.keepbx.jpom.common.interceptor.PluginFeatureInterceptor;
-import cn.keepbx.jpom.model.system.JpomManifest;
+import cn.keepbx.jpom.common.JpomManifest;
 import cn.keepbx.plugin.PluginFactory;
 import cn.keepbx.util.CommandUtil;
 import org.springframework.http.converter.StringHttpMessageConverter;
@@ -37,7 +37,7 @@ public class JpomApplication extends ApplicationBuilder {
     private static Type appType;
     private static Charset charset;
 
-    private static Class appClass;
+    private static Class<?> appClass;
 
     /**
      * 获取程序命令行参数
@@ -93,7 +93,7 @@ public class JpomApplication extends ApplicationBuilder {
         return appType;
     }
 
-    public static Class getAppClass() {
+    public static Class<?> getAppClass() {
         if (appClass == null) {
             return JpomApplication.class;
         }

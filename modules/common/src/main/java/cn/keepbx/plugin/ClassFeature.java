@@ -1,6 +1,8 @@
 package cn.keepbx.plugin;
 
 /**
+ * 功能模块
+ *
  * @author bwcx_jzy
  * @date 2019/8/13
  */

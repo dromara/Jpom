@@ -8,7 +8,7 @@ import cn.keepbx.jpom.common.BaseOperService;
 import cn.keepbx.jpom.common.forward.NodeForward;
 import cn.keepbx.jpom.common.forward.NodeUrl;
 import cn.keepbx.jpom.model.data.NodeModel;
-import cn.keepbx.jpom.model.system.JpomManifest;
+import cn.keepbx.jpom.common.JpomManifest;
 import cn.keepbx.jpom.system.ServerConfigBean;
 import cn.keepbx.util.StringUtil;
 import com.alibaba.fastjson.JSONArray;

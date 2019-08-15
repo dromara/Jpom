@@ -12,7 +12,7 @@ import cn.jiangzeyin.common.spring.SpringUtil;
 import cn.keepbx.jpom.common.Type;
 import cn.keepbx.jpom.model.data.NodeModel;
 import cn.keepbx.jpom.model.system.AgentAutoUser;
-import cn.keepbx.jpom.model.system.JpomManifest;
+import cn.keepbx.jpom.common.JpomManifest;
 import cn.keepbx.jpom.service.node.NodeService;
 import cn.keepbx.jpom.system.ConfigBean;
 import cn.keepbx.jpom.system.ServerConfigBean;
