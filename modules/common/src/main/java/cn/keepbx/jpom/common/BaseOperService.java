@@ -1,11 +1,10 @@
 package cn.keepbx.jpom.common;
 
 import cn.hutool.core.util.ClassUtil;
-import cn.keepbx.jpom.model.BaseJsonModel;
+import cn.keepbx.jpom.model.BaseModel;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -16,7 +15,7 @@ import java.util.Set;
  * @author jiangzeyin
  * @date 2019/3/14
  */
-public abstract class BaseOperService<T extends BaseJsonModel> extends BaseDataService {
+public abstract class BaseOperService<T extends BaseModel> extends BaseDataService {
 
     private String fileName;
     private Class<?> typeArgument;

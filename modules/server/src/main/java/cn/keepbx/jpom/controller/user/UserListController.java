@@ -30,7 +30,7 @@ public class UserListController extends BaseServerController {
      * 展示用户列表
      */
     @RequestMapping(value = "list", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
-    public String projectInfo() {
+    public String list() {
         return "user/list";
     }
 

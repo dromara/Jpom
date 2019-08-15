@@ -84,7 +84,7 @@
       {
         "id": "roleList",
         "title": "角色管理",
-        "url": "./user/roleList",
+        "url": "./user/role/list.html",
         "role": "ServerManager"
       },
       {

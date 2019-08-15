@@ -1,7 +1,8 @@
 package cn.keepbx.permission;
 
-import cn.keepbx.jpom.common.BaseOperService;
+import cn.keepbx.jpom.service.BaseDynamicService;
 import cn.keepbx.jpom.service.node.NodeService;
+import cn.keepbx.jpom.service.node.OutGivingServer;
 import cn.keepbx.plugin.ClassFeature;
 import cn.keepbx.plugin.MethodFeature;
 
@@ -20,6 +21,12 @@ public class DynamicData {
 
     static {
         DYNAMIC_DATA_MAP.put(ClassFeature.NODE, new DynamicData(NodeService.class, MethodFeature.LIST));
+
+        DYNAMIC_DATA_MAP.put(ClassFeature.OUTGIVING, new DynamicData(OutGivingServer.class, MethodFeature.LIST));
+    }
+
+    public static Map<ClassFeature, DynamicData> getDynamicDataMap() {
+        return DYNAMIC_DATA_MAP;
     }
 
     /**
@@ -30,18 +37,18 @@ public class DynamicData {
     /**
      * 数据操作的server类
      */
-    private Class<? extends BaseOperService> baseOperService;
+    private Class<? extends BaseDynamicService> baseOperService;
 
     /**
      * 排除验证方法
      */
     private MethodFeature[] excludeMethod;
 
-    public DynamicData(Class<? extends BaseOperService> baseOperService, MethodFeature... excludeMethod) {
+    public DynamicData(Class<? extends BaseDynamicService> baseOperService, MethodFeature... excludeMethod) {
         this(baseOperService, "id", excludeMethod);
     }
 
-    public DynamicData(Class<? extends BaseOperService> baseOperService, String parameterName, MethodFeature... excludeMethod) {
+    public DynamicData(Class<? extends BaseDynamicService> baseOperService, String parameterName, MethodFeature... excludeMethod) {
         this.parameterName = parameterName;
         this.baseOperService = baseOperService;
         this.excludeMethod = excludeMethod;
@@ -51,7 +58,7 @@ public class DynamicData {
         return parameterName;
     }
 
-    public Class<? extends BaseOperService> getBaseOperService() {
+    public Class<? extends BaseDynamicService> getBaseOperService() {
         return baseOperService;
     }
 

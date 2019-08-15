@@ -10,8 +10,7 @@ import cn.keepbx.jpom.model.BaseEnum;
  * @date 2019/7/10
  **/
 public class BuildModel extends BaseBuildModule {
-    private String id;
-    private String name;
+
     /**
      * 仓库类型
      */
@@ -52,22 +51,6 @@ public class BuildModel extends BaseBuildModule {
      * 构建id
      */
     private int buildId;
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
 
     public int getBuildId() {
         return buildId;

@@ -15,10 +15,7 @@ public class BuildHistoryLog extends BaseBuildModule {
      * 表名
      */
     public static final String TABLE_NAME = BuildHistoryLog.class.getSimpleName().toUpperCase();
-    /**
-     * 数据id
-     */
-    private String id;
+
     /**
      * 关联的构建id
      *
@@ -60,14 +57,6 @@ public class BuildHistoryLog extends BaseBuildModule {
 
     public void setBuildUser(String buildUser) {
         this.buildUser = buildUser;
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
     }
 
     public String getBuildDataId() {

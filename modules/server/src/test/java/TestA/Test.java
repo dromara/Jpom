@@ -15,7 +15,8 @@ import java.util.Set;
  */
 public class Test {
     public static void main(String[] args) {
-        Map<ClassFeature, Set<MethodFeature>> classFeatureSetMap = CacheControllerFeature.init();
+        CacheControllerFeature.init();
+        Map<ClassFeature, Set<MethodFeature>> classFeatureSetMap = CacheControllerFeature.getFeatureMap();
         ClassFeature monitor = ClassFeature.valueOf("MONITOR");
         System.out.println(monitor.getName());
         System.out.println(classFeatureSetMap);

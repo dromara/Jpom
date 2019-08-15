@@ -14,14 +14,24 @@ import java.util.List;
  */
 public class RoleModel extends BaseModel {
 
-    private RoleFeature feature;
+    private List<RoleFeature> features;
 
-    public RoleFeature getFeature() {
-        return feature;
+    public List<RoleFeature> getFeatures() {
+        return features;
     }
 
-    public void setFeature(RoleFeature feature) {
-        this.feature = feature;
+    public void setFeatures(List<RoleFeature> features) {
+        this.features = features;
+    }
+
+    public List<MethodFeature> getMethodFeature(ClassFeature feature) {
+        List<RoleFeature> features = getFeatures();
+        for (RoleFeature roleFeature : features) {
+            if (roleFeature.getFeature() == feature) {
+                return roleFeature.getMethodFeatures();
+            }
+        }
+        return null;
     }
 
     public static class RoleFeature {

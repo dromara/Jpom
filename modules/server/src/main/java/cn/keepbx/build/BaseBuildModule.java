@@ -1,7 +1,7 @@
 package cn.keepbx.build;
 
 import cn.hutool.core.io.FileUtil;
-import cn.keepbx.jpom.model.BaseJsonModel;
+import cn.keepbx.jpom.model.BaseModel;
 import cn.keepbx.jpom.model.data.BuildModel;
 
 /**
@@ -10,8 +10,7 @@ import cn.keepbx.jpom.model.data.BuildModel;
  * @author bwcx_jzy
  * @date 2019/7/19
  */
-public class BaseBuildModule extends BaseJsonModel {
-
+public class BaseBuildModule extends BaseModel {
     /**
      * 发布方式
      *

@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.w3.org/1999/xhtml">
+<head th:replace="common/head::head">
+</head>
+
+<body>
+<div class="layui-container">
+    <form action="./saveDynamic.json" class="layui-form" id="form">
+        <div class="layui-collapse" style="margin: 10px;">
+            <div class="layui-colla-item" th:name="${item.key.name()}" th:each="item : ${dynamicDataMap}">
+                <div class="layui-colla-title">
+                    <div th:text="${item.key.name}">
+                    </div>
+                </div>
+                <div class="layui-colla-content layui-show">
+                    <div th:id="'tree_'+${item.key.name()}">
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+</body>
+<script type="text/javascript">
+    var id = getQueryString("id");
+    var tree;
+
+    function loadSuccess() {
+        layui.use('tree', function () {
+            tree = layui.tree;
+            $(".layui-colla-item").each(function () {
+                var find = $(this).find(".layui-colla-content div");
+                var attr = find.attr("id");
+                var ts = attr.split("_");
+                getData(ts[1]);
+            })
+        });
+    }
+
+    function getData(dy) {
+        loadingAjax({
+            url: './getDynamic.json',
+            data: {
+                id: id,
+                dynamic: dy
+            },
+            success: function (data) {
+                if (data.code !== 200) {
+                    layer.msg(data.msg);
+                    return;
+                }
+                tree.render({
+                    elem: '#tree_' + dy,
+                    data: data.data,
+                    id: "tree_" + dy,
+                    showCheckbox: true,
+                    click: function (obj) {
+                    }
+                });
+            }
+        });
+    }
+</script>
+</html>

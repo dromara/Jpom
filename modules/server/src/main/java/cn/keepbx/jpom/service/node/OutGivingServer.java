@@ -1,8 +1,8 @@
 package cn.keepbx.jpom.service.node;
 
-import cn.keepbx.jpom.common.BaseOperService;
 import cn.keepbx.jpom.model.data.OutGivingModel;
 import cn.keepbx.jpom.model.data.OutGivingNodeProject;
+import cn.keepbx.jpom.service.BaseDynamicService;
 import cn.keepbx.jpom.system.ServerConfigBean;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;
@@ -17,7 +17,7 @@ import java.util.List;
  * @date 2019/4/21
  */
 @Service
-public class OutGivingServer extends BaseOperService<OutGivingModel> {
+public class OutGivingServer extends BaseDynamicService<OutGivingModel> {
 
     public OutGivingServer() {
         super(ServerConfigBean.OUTGIVING);

@@ -22,10 +22,14 @@ public class CacheControllerFeature {
 
     private static final Map<ClassFeature, Set<MethodFeature>> FEATURE_MAP = new HashMap<>();
 
+    public static Map<ClassFeature, Set<MethodFeature>> getFeatureMap() {
+        return FEATURE_MAP;
+    }
+
     /**
      * 扫描包
      */
-    public static Map<ClassFeature, Set<MethodFeature>> init() {
+    public static void init() {
         Set<Class<?>> classes = ClassUtil.scanPackageByAnnotation("cn.keepbx.jpom.controller", Feature.class);
         classes.forEach(aClass -> {
             Feature annotation = aClass.getAnnotation(Feature.class);
@@ -49,6 +53,5 @@ public class CacheControllerFeature {
             }
             methodFeatures1.addAll(methodFeatures);
         });
-        return FEATURE_MAP;
     }
 }
