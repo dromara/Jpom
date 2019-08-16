@@ -1,9 +1,9 @@
 package cn.keepbx.permission;
 
 import cn.keepbx.jpom.service.BaseDynamicService;
-import cn.keepbx.jpom.service.node.manage.ProjectInfoService;
 import cn.keepbx.jpom.service.node.NodeService;
 import cn.keepbx.jpom.service.node.OutGivingServer;
+import cn.keepbx.jpom.service.node.manage.ProjectInfoService;
 import cn.keepbx.jpom.service.node.script.ScriptServer;
 import cn.keepbx.plugin.ClassFeature;
 import cn.keepbx.plugin.MethodFeature;
@@ -23,15 +23,19 @@ public class DynamicData {
 
     private static final Map<ClassFeature, DynamicData> DYNAMIC_DATA_MAP = new HashMap<>();
 
+    /**
+     * 二级数据
+     */
     private static final Map<ClassFeature, Set<ClassFeature>> PARENT = new HashMap<>();
 
     static {
+        // 节点
         put(ClassFeature.NODE, new DynamicData(NodeService.class, MethodFeature.LIST));
-
+        // 分发
         put(ClassFeature.OUTGIVING, new DynamicData(OutGivingServer.class, MethodFeature.LIST));
-
+        // 项目
         put(ClassFeature.PROJECT, new DynamicData(ProjectInfoService.class, MethodFeature.LIST));
-
+        // 脚本
         put(ClassFeature.SCRIPT, new DynamicData(ScriptServer.class, MethodFeature.LIST));
     }
 
@@ -43,6 +47,12 @@ public class DynamicData {
         }
     }
 
+    /**
+     * 获取子级功能
+     *
+     * @param classFeature 功能
+     * @return 子级
+     */
     public static Set<ClassFeature> getChildren(ClassFeature classFeature) {
         return PARENT.get(classFeature);
     }
@@ -70,7 +80,7 @@ public class DynamicData {
         this(baseOperService, "id", excludeMethod);
     }
 
-    public DynamicData(Class<? extends BaseDynamicService> baseOperService, String parameterName, MethodFeature... excludeMethod) {
+    private DynamicData(Class<? extends BaseDynamicService> baseOperService, String parameterName, MethodFeature... excludeMethod) {
         this.parameterName = parameterName;
         this.baseOperService = baseOperService;
         this.excludeMethod = excludeMethod;

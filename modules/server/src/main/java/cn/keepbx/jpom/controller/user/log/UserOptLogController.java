@@ -15,6 +15,9 @@ import cn.keepbx.jpom.model.log.UserOperateLogV1;
 import cn.keepbx.jpom.service.dblog.DbUserOperateLogService;
 import cn.keepbx.jpom.service.node.NodeService;
 import cn.keepbx.jpom.service.user.UserService;
+import cn.keepbx.plugin.ClassFeature;
+import cn.keepbx.plugin.Feature;
+import cn.keepbx.plugin.MethodFeature;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
@@ -33,6 +36,7 @@ import java.util.List;
  */
 @Controller
 @RequestMapping(value = "/user/log")
+@Feature(cls = ClassFeature.USER)
 public class UserOptLogController extends BaseServerController {
     @Resource
     private NodeService nodeService;
@@ -45,6 +49,7 @@ public class UserOptLogController extends BaseServerController {
      * 展示用户列表
      */
     @RequestMapping(value = "list.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
+    @Feature(method = MethodFeature.LOG)
     public String projectInfo() {
         // 所有节点
         List<NodeModel> nodeModels = nodeService.list();
@@ -61,6 +66,7 @@ public class UserOptLogController extends BaseServerController {
      */
     @RequestMapping(value = "list_data.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
+    @Feature(method = MethodFeature.LOG)
     public String listData(
             @ValidatorConfig(value = {
                     @ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "limit error")

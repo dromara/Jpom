@@ -66,7 +66,7 @@ public class BuildHistoryController extends BaseServerController {
 
     @RequestMapping(value = "history.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
     @Feature(method = MethodFeature.LOG)
-    public String logList() throws IOException {
+    public String logList() {
         JSONArray jsonArray = BaseEnum.toJSONArray(BuildModel.Status.class);
         setAttribute("status", jsonArray);
         //
@@ -182,7 +182,7 @@ public class BuildHistoryController extends BaseServerController {
     @RequestMapping(value = "delete_log.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @UrlPermission(value = Role.System, optType = UserOperateLogV1.OptType.DelBuildLog)
     @ResponseBody
-    @Feature(method = MethodFeature.DEL)
+    @Feature(method = MethodFeature.DEL_LOG)
     public String delete(@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据")) String logId) throws IOException, SQLException {
         BuildHistoryLog buildHistoryLog = dbBuildHistoryLogService.getByKey(logId);
         if (buildHistoryLog == null) {

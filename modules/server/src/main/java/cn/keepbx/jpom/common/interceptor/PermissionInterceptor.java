@@ -58,57 +58,6 @@ public class PermissionInterceptor extends BaseInterceptor {
                 }
                 request.setAttribute("node", nodeModel);
             }
-            ProjectPermission projectPermission = handlerMethod.getMethodAnnotation(ProjectPermission.class);
-            if (projectPermission != null) {
-                String val = request.getParameter(projectPermission.value());
-                if (StrUtil.isEmpty(val)) {
-                    JsonMessage jsonMessage = new JsonMessage(300, "请传入合法参数：" + projectPermission.value());
-                    ServletUtil.write(response, jsonMessage.toString(), MediaType.APPLICATION_JSON_UTF8_VALUE);
-                    return false;
-                }
-                boolean tomcat = isTomcat(request);
-                if (tomcat) {
-                    if (!userModel.isTomcat(nodeId, val)) {
-                        JsonMessage jsonMessage = new JsonMessage(300, "你没有改tomcat的权限");
-                        ServletUtil.write(response, jsonMessage.toString(), MediaType.APPLICATION_JSON_UTF8_VALUE);
-                        return false;
-                    }
-
-                    if (projectPermission.checkDelete() && !userModel.isDeleteTomcatFile(nodeId)) {
-                        // 没有删除文件权限
-                        JsonMessage jsonMessage = new JsonMessage(301, "你没有删除文件权限");
-                        ServletUtil.write(response, jsonMessage.toString(), MediaType.APPLICATION_JSON_UTF8_VALUE);
-                        return false;
-                    }
-
-                    if (projectPermission.checkUpload() && !userModel.isDeleteTomcatFile(nodeId)) {
-                        // 没有上传文件权限
-                        JsonMessage jsonMessage = new JsonMessage(302, "你没有上传文件权限");
-                        ServletUtil.write(response, jsonMessage.toString(), MediaType.APPLICATION_JSON_UTF8_VALUE);
-                        return false;
-                    }
-                } else {
-                    if (!userModel.isProject(nodeId, val)) {
-                        JsonMessage jsonMessage = new JsonMessage(300, "你没有改项目的权限");
-                        ServletUtil.write(response, jsonMessage.toString(), MediaType.APPLICATION_JSON_UTF8_VALUE);
-                        return false;
-                    }
-
-                    if (projectPermission.checkDelete() && !userModel.isDeleteFile(nodeId)) {
-                        // 没有删除文件权限
-                        JsonMessage jsonMessage = new JsonMessage(301, "你没有删除文件权限");
-                        ServletUtil.write(response, jsonMessage.toString(), MediaType.APPLICATION_JSON_UTF8_VALUE);
-                        return false;
-                    }
-
-                    if (projectPermission.checkUpload() && !userModel.isUploadFile(nodeId)) {
-                        // 没有上传文件权限
-                        JsonMessage jsonMessage = new JsonMessage(302, "你没有上传文件权限");
-                        ServletUtil.write(response, jsonMessage.toString(), MediaType.APPLICATION_JSON_UTF8_VALUE);
-                        return false;
-                    }
-                }
-            }
 
             UrlPermission urlPermission = handlerMethod.getMethodAnnotation(UrlPermission.class);
             if (urlPermission != null) {

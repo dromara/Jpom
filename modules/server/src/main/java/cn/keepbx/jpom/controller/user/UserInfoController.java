@@ -18,6 +18,9 @@ import cn.keepbx.jpom.model.log.UserOperateLogV1;
 import cn.keepbx.jpom.service.node.manage.TomcatService;
 import cn.keepbx.jpom.service.user.UserService;
 import cn.keepbx.jpom.system.ServerExtConfigBean;
+import cn.keepbx.plugin.ClassFeature;
+import cn.keepbx.plugin.Feature;
+import cn.keepbx.plugin.MethodFeature;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.http.MediaType;
@@ -36,6 +39,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping(value = "/user")
+@Feature(cls = ClassFeature.USER)
 public class UserInfoController extends BaseServerController {
     @Resource
     private UserService userService;
@@ -107,6 +111,7 @@ public class UserInfoController extends BaseServerController {
      */
     @RequestMapping(value = "deleteUser", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @UrlPermission(value = Role.ServerManager, optType = UserOperateLogV1.OptType.DelUer)
+    @Feature(method = MethodFeature.DEL)
     public String deleteUser(String id) {
         UserModel userName = getUser();
         if (userName.getId().equals(id)) {
@@ -135,6 +140,7 @@ public class UserInfoController extends BaseServerController {
      */
     @RequestMapping(value = "addUser", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @UrlPermission(value = Role.ServerManager, optType = UserOperateLogV1.OptType.AddUer)
+    @Feature(method = MethodFeature.EDIT)
     public String addUser(String id) {
         if (JpomApplication.SYSTEM_ID.equalsIgnoreCase(id)) {
             return JsonMessage.getString(400, "当前登录名已经被系统占用啦");
@@ -290,6 +296,7 @@ public class UserInfoController extends BaseServerController {
      */
     @RequestMapping(value = "updateUser", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @UrlPermission(value = Role.ServerManager, optType = UserOperateLogV1.OptType.EditUer)
+    @Feature(method = MethodFeature.EDIT)
     public String updateUser(String id) {
         UserModel userModel = userService.getItem(id);
         if (userModel == null) {
@@ -325,6 +332,7 @@ public class UserInfoController extends BaseServerController {
      */
     @RequestMapping(value = "unlock", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @UrlPermission(value = Role.System, optType = UserOperateLogV1.OptType.UnlockUer)
+    @Feature(method = MethodFeature.EDIT)
     public String unlock(String id) {
         UserModel userModel = userService.getItem(id);
         if (userModel == null) {

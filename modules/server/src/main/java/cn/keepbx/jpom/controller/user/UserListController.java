@@ -4,6 +4,9 @@ import cn.jiangzeyin.common.JsonMessage;
 import cn.keepbx.jpom.common.BaseServerController;
 import cn.keepbx.jpom.model.data.UserModel;
 import cn.keepbx.jpom.service.user.UserService;
+import cn.keepbx.plugin.ClassFeature;
+import cn.keepbx.plugin.Feature;
+import cn.keepbx.plugin.MethodFeature;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -21,6 +24,7 @@ import java.util.stream.Collectors;
  */
 @Controller
 @RequestMapping(value = "/user")
+@Feature(cls = ClassFeature.USER)
 public class UserListController extends BaseServerController {
 
     @Resource
@@ -30,6 +34,7 @@ public class UserListController extends BaseServerController {
      * 展示用户列表
      */
     @RequestMapping(value = "list", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
+    @Feature(method = MethodFeature.LIST)
     public String list() {
         return "user/list";
     }
@@ -40,6 +45,7 @@ public class UserListController extends BaseServerController {
      */
     @RequestMapping(value = "getUserList", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
+    @Feature(method = MethodFeature.LIST)
     public String getUserList() {
         UserModel userName = getUser();
         if (!userName.isServerManager()) {

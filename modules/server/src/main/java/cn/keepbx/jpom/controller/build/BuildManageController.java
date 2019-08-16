@@ -22,6 +22,7 @@ import cn.keepbx.jpom.model.log.BuildHistoryLog;
 import cn.keepbx.jpom.model.log.UserOperateLogV1;
 import cn.keepbx.jpom.service.build.BuildService;
 import cn.keepbx.jpom.service.dblog.DbBuildHistoryLogService;
+import cn.keepbx.plugin.ClassFeature;
 import cn.keepbx.plugin.Feature;
 import cn.keepbx.plugin.MethodFeature;
 import cn.keepbx.util.LimitQueue;
@@ -43,6 +44,7 @@ import java.util.Objects;
  */
 @RestController
 @RequestMapping(value = "/build")
+@Feature(cls = ClassFeature.BUILD)
 public class BuildManageController extends BaseServerController {
 
     @Resource

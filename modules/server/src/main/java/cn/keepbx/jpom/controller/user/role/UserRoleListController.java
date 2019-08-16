@@ -10,6 +10,7 @@ import cn.keepbx.jpom.model.data.RoleModel;
 import cn.keepbx.jpom.service.user.RoleService;
 import cn.keepbx.permission.CacheControllerFeature;
 import cn.keepbx.plugin.ClassFeature;
+import cn.keepbx.plugin.Feature;
 import cn.keepbx.plugin.MethodFeature;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -33,17 +34,20 @@ import java.util.Set;
  */
 @Controller
 @RequestMapping(value = "/user/role")
+@Feature(cls = ClassFeature.USER_ROLE)
 public class UserRoleListController extends BaseServerController {
 
     @Resource
     private RoleService roleService;
 
     @RequestMapping(value = "list.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
+    @Feature(method = MethodFeature.LIST)
     public String list() {
         return "user/role/list";
     }
 
     @RequestMapping(value = "edit.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
+    @Feature(method = MethodFeature.EDIT)
     public String edit(String id) {
         if (StrUtil.isNotEmpty(id)) {
             RoleModel item = roleService.getItem(id);
@@ -58,12 +62,14 @@ public class UserRoleListController extends BaseServerController {
      */
     @RequestMapping(value = "list_data.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
+    @Feature(method = MethodFeature.LIST)
     public String listData() {
         return JsonMessage.getString(200, "", roleService.list());
     }
 
     @RequestMapping(value = "getFeature.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
+    @Feature(method = MethodFeature.EDIT)
     public String getFeature(String id) {
         //
         RoleModel item = roleService.getItem(id);
@@ -100,6 +106,7 @@ public class UserRoleListController extends BaseServerController {
 
     @RequestMapping(value = "save.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
+    @Feature(method = MethodFeature.EDIT)
     public String save(String id,
                        @ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "请输入角色名称") String name,
                        @ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "请输入选择权限") String feature) {

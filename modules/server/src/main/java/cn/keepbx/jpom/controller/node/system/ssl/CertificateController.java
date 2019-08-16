@@ -7,6 +7,9 @@ import cn.keepbx.jpom.common.interceptor.UrlPermission;
 import cn.keepbx.jpom.model.Role;
 import cn.keepbx.jpom.model.log.UserOperateLogV1;
 import cn.keepbx.jpom.service.system.WhitelistDirectoryService;
+import cn.keepbx.plugin.ClassFeature;
+import cn.keepbx.plugin.Feature;
+import cn.keepbx.plugin.MethodFeature;
 import org.apache.tomcat.util.http.fileupload.servlet.ServletFileUpload;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
@@ -24,12 +27,14 @@ import java.util.List;
  */
 @Controller
 @RequestMapping(value = "/node/system/certificate")
+@Feature(cls = ClassFeature.SSL)
 public class CertificateController extends BaseServerController {
 
     @Resource
     private WhitelistDirectoryService whitelistDirectoryService;
 
     @RequestMapping(value = "/list.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
+    @Feature(method = MethodFeature.LIST)
     public String certificate() {
         List<String> jsonArray = whitelistDirectoryService.getCertificateDirectory(getNode());
         setAttribute("certificate", jsonArray);
@@ -45,6 +50,7 @@ public class CertificateController extends BaseServerController {
     @RequestMapping(value = "/saveCertificate", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     @UrlPermission(value = Role.NodeManage, optType = UserOperateLogV1.OptType.SaveCert)
+    @Feature(method = MethodFeature.EDIT)
     public String saveCertificate() {
         if (ServletFileUpload.isMultipartContent(getRequest())) {
             return NodeForward.requestMultipart(getNode(), getMultiRequest(), NodeUrl.System_Certificate_saveCertificate).toString();
@@ -58,6 +64,7 @@ public class CertificateController extends BaseServerController {
      */
     @RequestMapping(value = "/getCertList", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
+    @Feature(method = MethodFeature.LIST)
     public String getCertList() {
         return NodeForward.request(getNode(), getRequest(), NodeUrl.System_Certificate_getCertList).toString();
     }
@@ -71,6 +78,7 @@ public class CertificateController extends BaseServerController {
     @RequestMapping(value = "/delete", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     @UrlPermission(value = Role.System, optType = UserOperateLogV1.OptType.DelCert)
+    @Feature(method = MethodFeature.DEL)
     public String delete(String id) {
         return NodeForward.request(getNode(), getRequest(), NodeUrl.System_Certificate_delete).toString();
     }
@@ -82,6 +90,7 @@ public class CertificateController extends BaseServerController {
     @RequestMapping(value = "/export", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     @UrlPermission(value = Role.NodeManage, optType = UserOperateLogV1.OptType.ExportCert)
+    @Feature(method = MethodFeature.DOWNLOAD)
     public void export(String id) {
         NodeForward.requestDownload(getNode(), getRequest(), getResponse(), NodeUrl.System_Certificate_export);
     }

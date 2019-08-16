@@ -6,7 +6,7 @@ import cn.jiangzeyin.common.validator.ValidatorRule;
 import cn.keepbx.jpom.common.BaseServerController;
 import cn.keepbx.jpom.common.forward.NodeForward;
 import cn.keepbx.jpom.common.forward.NodeUrl;
-import cn.keepbx.jpom.common.interceptor.ProjectPermission;
+import cn.keepbx.jpom.common.interceptor.OptLog;
 import cn.keepbx.jpom.common.interceptor.UrlPermission;
 import cn.keepbx.jpom.model.Role;
 import cn.keepbx.jpom.model.data.NodeModel;
@@ -108,7 +108,7 @@ public class ProjectManageControl extends BaseServerController {
      */
     @RequestMapping(value = "deleteProject", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
-    @ProjectPermission(optType = UserOperateLogV1.OptType.DelProject)
+    @OptLog(value = UserOperateLogV1.OptType.DelProject)
     @UrlPermission(value = Role.NodeManage, optType = UserOperateLogV1.OptType.DelProject)
     @Feature(method = MethodFeature.DEL)
     public String deleteProject(@ValidatorItem(value = ValidatorRule.NOT_BLANK) String id) throws IOException {

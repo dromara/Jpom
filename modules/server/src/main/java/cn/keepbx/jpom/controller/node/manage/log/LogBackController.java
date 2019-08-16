@@ -4,7 +4,7 @@ import cn.jiangzeyin.common.JsonMessage;
 import cn.keepbx.jpom.common.BaseServerController;
 import cn.keepbx.jpom.common.forward.NodeForward;
 import cn.keepbx.jpom.common.forward.NodeUrl;
-import cn.keepbx.jpom.common.interceptor.ProjectPermission;
+import cn.keepbx.jpom.common.interceptor.OptLog;
 import cn.keepbx.jpom.model.log.UserOperateLogV1;
 import cn.keepbx.jpom.service.node.manage.ProjectInfoService;
 import cn.keepbx.plugin.ClassFeature;
@@ -34,7 +34,7 @@ public class LogBackController extends BaseServerController {
 
     @RequestMapping(value = "export.html", method = RequestMethod.GET)
     @ResponseBody
-    @ProjectPermission(optType = UserOperateLogV1.OptType.ExportProjectLog)
+    @OptLog(UserOperateLogV1.OptType.ExportProjectLog)
     @Feature(method = MethodFeature.DOWNLOAD)
     public void export() {
         NodeForward.requestDownload(getNode(), getRequest(), getResponse(), NodeUrl.Manage_Log_export);
@@ -50,7 +50,7 @@ public class LogBackController extends BaseServerController {
 
     @RequestMapping(value = "logBack_download", method = RequestMethod.GET)
     @ResponseBody
-    @ProjectPermission(optType = UserOperateLogV1.OptType.DownloadProjectLogBack)
+    @OptLog(UserOperateLogV1.OptType.DownloadProjectLogBack)
     @Feature(method = MethodFeature.DOWNLOAD)
     public void download() {
         NodeForward.requestDownload(getNode(), getRequest(), getResponse(), NodeUrl.Manage_Log_logBack_download);
@@ -58,7 +58,7 @@ public class LogBackController extends BaseServerController {
 
     @RequestMapping(value = "logBack_delete", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
-    @ProjectPermission(checkDelete = true, optType = UserOperateLogV1.OptType.DelProjectLogBack)
+    @OptLog(UserOperateLogV1.OptType.DelProjectLogBack)
     @Feature(method = MethodFeature.DEL_FILE)
     public String clear() {
         return NodeForward.request(getNode(), getRequest(), NodeUrl.Manage_Log_logBack_delete).toString();
@@ -78,7 +78,7 @@ public class LogBackController extends BaseServerController {
      */
     @RequestMapping(value = "resetLog", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
-    @ProjectPermission(optType = UserOperateLogV1.OptType.RestProjectLog)
+    @OptLog(UserOperateLogV1.OptType.RestProjectLog)
     @Feature(method = MethodFeature.EDIT)
     public String resetLog() {
         return NodeForward.request(getNode(), getRequest(), NodeUrl.Manage_Log_ResetLog).toString();

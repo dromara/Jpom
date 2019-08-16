@@ -4,7 +4,7 @@ import cn.hutool.core.io.FileUtil;
 import cn.keepbx.jpom.common.BaseServerController;
 import cn.keepbx.jpom.common.forward.NodeForward;
 import cn.keepbx.jpom.common.forward.NodeUrl;
-import cn.keepbx.jpom.common.interceptor.ProjectPermission;
+import cn.keepbx.jpom.common.interceptor.OptLog;
 import cn.keepbx.jpom.model.log.UserOperateLogV1;
 import cn.keepbx.jpom.service.node.manage.ProjectInfoService;
 import cn.keepbx.plugin.ClassFeature;
@@ -67,7 +67,7 @@ public class ProjectFileControl extends BaseServerController {
      */
     @RequestMapping(value = "upload", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
-    @ProjectPermission(checkUpload = true, optType = UserOperateLogV1.OptType.UploadProjectFile)
+    @OptLog(UserOperateLogV1.OptType.UploadProjectFile)
     @Feature(method = MethodFeature.UPLOAD)
     public String upload() {
         return NodeForward.requestMultipart(getNode(), getMultiRequest(), NodeUrl.Manage_File_Upload).toString();
@@ -78,7 +78,7 @@ public class ProjectFileControl extends BaseServerController {
      */
     @RequestMapping(value = "download", method = RequestMethod.GET)
     @ResponseBody
-    @ProjectPermission(optType = UserOperateLogV1.OptType.DownloadProjectFile)
+    @OptLog(UserOperateLogV1.OptType.DownloadProjectFile)
     @Feature(method = MethodFeature.DOWNLOAD)
     public void download() {
         NodeForward.requestDownload(getNode(), getRequest(), getResponse(), NodeUrl.Manage_File_Download);
@@ -91,7 +91,7 @@ public class ProjectFileControl extends BaseServerController {
      */
     @RequestMapping(value = "deleteFile", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
-    @ProjectPermission(checkDelete = true, optType = UserOperateLogV1.OptType.DelProjectFile)
+    @OptLog(UserOperateLogV1.OptType.DelProjectFile)
     @Feature(method = MethodFeature.DEL_FILE)
     public String deleteFile() {
         return NodeForward.request(getNode(), getRequest(), NodeUrl.Manage_File_DeleteFile).toString();

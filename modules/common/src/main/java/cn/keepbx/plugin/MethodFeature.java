@@ -26,6 +26,9 @@ public enum MethodFeature {
     WHITELIST("白名单"),
     EXECUTE("执行"),
     DEL_FILE("删除文件"),
+    CACHE("缓存"),
+    DEL_LOG("删除日志"),
+    CONFIG("配置"),
     ;
 
     private String name;

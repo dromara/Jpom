@@ -15,6 +15,9 @@ import cn.keepbx.jpom.model.Role;
 import cn.keepbx.jpom.model.log.UserOperateLogV1;
 import cn.keepbx.jpom.socket.ServiceFileTailWatcher;
 import cn.keepbx.jpom.system.WebAopLog;
+import cn.keepbx.plugin.ClassFeature;
+import cn.keepbx.plugin.Feature;
+import cn.keepbx.plugin.MethodFeature;
 import cn.keepbx.util.LayuiTreeUtil;
 import com.alibaba.fastjson.JSONArray;
 import org.springframework.http.MediaType;
@@ -34,15 +37,18 @@ import java.util.concurrent.TimeUnit;
  */
 @Controller
 @RequestMapping(value = "system")
+@Feature(cls = ClassFeature.SYSTEM)
 public class LogManageController extends BaseServerController {
 
     @RequestMapping(value = "log.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
+    @Feature(method = MethodFeature.LOG)
     public String log() {
         return "system/log";
     }
 
     @RequestMapping(value = "log_data.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
+    @Feature(method = MethodFeature.LOG)
     public String logData(String nodeId) {
         if (StrUtil.isNotEmpty(nodeId)) {
             return NodeForward.request(getNode(), getRequest(), NodeUrl.SystemLog).toString();
@@ -62,6 +68,7 @@ public class LogManageController extends BaseServerController {
     @RequestMapping(value = "log_del.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     @UrlPermission(value = Role.System, optType = UserOperateLogV1.OptType.DelSysLog)
+    @Feature(method = MethodFeature.DEL_LOG)
     public String logData(String nodeId,
                           @ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "path错误") String path) {
         if (StrUtil.isNotEmpty(nodeId)) {
@@ -85,6 +92,7 @@ public class LogManageController extends BaseServerController {
 
     @RequestMapping(value = "log_download", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
+    @Feature(method = MethodFeature.DOWNLOAD)
     public void logDownload(String nodeId,
                             @ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "path错误") String path) {
         if (StrUtil.isNotEmpty(nodeId)) {

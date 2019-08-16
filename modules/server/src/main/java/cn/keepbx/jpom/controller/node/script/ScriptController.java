@@ -8,6 +8,9 @@ import cn.keepbx.jpom.common.interceptor.UrlPermission;
 import cn.keepbx.jpom.model.Role;
 import cn.keepbx.jpom.model.log.UserOperateLogV1;
 import cn.keepbx.jpom.service.node.script.ScriptServer;
+import cn.keepbx.plugin.ClassFeature;
+import cn.keepbx.plugin.Feature;
+import cn.keepbx.plugin.MethodFeature;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.http.MediaType;
@@ -26,20 +29,22 @@ import javax.annotation.Resource;
  */
 @Controller
 @RequestMapping(value = "/node/script")
+@Feature(cls = ClassFeature.SCRIPT)
 public class ScriptController extends BaseServerController {
 
     @Resource
     private ScriptServer scriptServer;
 
     @RequestMapping(value = "list.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
+    @Feature(method = MethodFeature.LIST)
     public String list() {
         JSONArray jsonArray = scriptServer.listToArray(getNode());
         setAttribute("array", jsonArray);
         return "node/script/list";
     }
 
-
     @RequestMapping(value = "item.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
+    @Feature(method = MethodFeature.EDIT)
     public String item(String id) {
         setAttribute("type", "add");
         if (StrUtil.isNotEmpty(id)) {
@@ -60,6 +65,7 @@ public class ScriptController extends BaseServerController {
     @RequestMapping(value = "save.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     @UrlPermission(value = Role.System, optType = UserOperateLogV1.OptType.Save_Script)
+    @Feature(method = MethodFeature.EDIT)
     public String save() {
         return NodeForward.request(getNode(), getRequest(), NodeUrl.Script_Save).toString();
     }
@@ -67,6 +73,7 @@ public class ScriptController extends BaseServerController {
     @RequestMapping(value = "del.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     @UrlPermission(value = Role.System, optType = UserOperateLogV1.OptType.Save_Del)
+    @Feature(method = MethodFeature.DEL)
     public String del() {
         return NodeForward.request(getNode(), getRequest(), NodeUrl.Script_Del).toString();
     }
@@ -79,11 +86,13 @@ public class ScriptController extends BaseServerController {
     @RequestMapping(value = "upload", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     @UrlPermission(value = Role.System, optType = UserOperateLogV1.OptType.Save_Upload)
+    @Feature(method = MethodFeature.UPLOAD)
     public String upload() {
         return NodeForward.requestMultipart(getNode(), getMultiRequest(), NodeUrl.Script_Upload).toString();
     }
 
     @RequestMapping(value = "console.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
+    @Feature(method = MethodFeature.EXECUTE)
     public String console(String id) {
         return "node/script/console";
     }

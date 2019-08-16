@@ -8,6 +8,8 @@ import cn.keepbx.jpom.service.BaseDynamicService;
 import cn.keepbx.jpom.service.user.RoleService;
 import cn.keepbx.permission.DynamicData;
 import cn.keepbx.plugin.ClassFeature;
+import cn.keepbx.plugin.Feature;
+import cn.keepbx.plugin.MethodFeature;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.http.MediaType;
@@ -28,12 +30,14 @@ import java.util.Set;
  */
 @Controller
 @RequestMapping(value = "/user/role")
+@Feature(cls = ClassFeature.USER_ROLE)
 public class UserRoleDynamicController extends BaseServerController {
 
     @Resource
     private RoleService roleService;
 
     @RequestMapping(value = "dynamicData.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
+    @Feature(method = MethodFeature.EDIT)
     public String list() {
         Map<ClassFeature, DynamicData> dynamicDataMap = DynamicData.getDynamicDataMap();
         setAttribute("dynamicDataMap", dynamicDataMap);
@@ -42,6 +46,7 @@ public class UserRoleDynamicController extends BaseServerController {
 
     @RequestMapping(value = "getDynamic.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
+    @Feature(method = MethodFeature.EDIT)
     public String getDynamic(String id, String dynamic) {
         ClassFeature classFeature = ClassFeature.valueOf(dynamic);
         JSONArray jsonArray = roleService.listDynamic(id, classFeature, null);
@@ -50,6 +55,7 @@ public class UserRoleDynamicController extends BaseServerController {
 
     @RequestMapping(value = "saveDynamic.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
+    @Feature(method = MethodFeature.EDIT)
     public String saveDynamic(String id, String dynamic) {
         RoleModel item = roleService.getItem(id);
         if (item == null) {

@@ -10,7 +10,7 @@ import cn.jiangzeyin.common.PreLoadClass;
 import cn.jiangzeyin.common.PreLoadMethod;
 import cn.jiangzeyin.common.spring.SpringUtil;
 import cn.keepbx.jpom.common.BaseServerController;
-import cn.keepbx.jpom.common.interceptor.ProjectPermission;
+import cn.keepbx.jpom.common.interceptor.OptLog;
 import cn.keepbx.jpom.common.interceptor.UrlPermission;
 import cn.keepbx.jpom.controller.LoginControl;
 import cn.keepbx.jpom.model.data.NodeModel;
@@ -62,9 +62,9 @@ public class OperateLogController implements AopLogInterface {
                 if (urlPermission != null) {
                     optType = urlPermission.optType();
                 } else {
-                    ProjectPermission projectPermission = method.getAnnotation(ProjectPermission.class);
-                    if (projectPermission != null) {
-                        optType = projectPermission.optType();
+                    OptLog optLog = method.getAnnotation(OptLog.class);
+                    if (optLog != null) {
+                        optType = optLog.value();
                     }
                 }
             } else {

@@ -8,6 +8,9 @@ import cn.keepbx.jpom.model.Role;
 import cn.keepbx.jpom.model.data.UserModel;
 import cn.keepbx.jpom.model.log.UserOperateLogV1;
 import cn.keepbx.jpom.service.system.WhitelistDirectoryService;
+import cn.keepbx.plugin.ClassFeature;
+import cn.keepbx.plugin.Feature;
+import cn.keepbx.plugin.MethodFeature;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
@@ -25,6 +28,7 @@ import java.util.List;
  */
 @Controller
 @RequestMapping("/node/system/nginx")
+@Feature(cls = ClassFeature.NGINX)
 public class NginxController extends BaseServerController {
 
     @Resource
@@ -32,6 +36,7 @@ public class NginxController extends BaseServerController {
 
 
     @RequestMapping(value = "list.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
+    @Feature(method = MethodFeature.LIST)
     public String ngx() {
         return "node/system/nginx";
     }
@@ -41,12 +46,13 @@ public class NginxController extends BaseServerController {
      */
     @RequestMapping(value = "list_data.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
-    //    @UrlPermission(Role.NodeManage)
+    @Feature(method = MethodFeature.LIST)
     public String list() {
         return NodeForward.request(getNode(), getRequest(), NodeUrl.System_Nginx_list_data).toString();
     }
 
     @RequestMapping(value = "item.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
+    @Feature(method = MethodFeature.EDIT)
     public String setting(String type) {
         UserModel userModel = getUserModel();
         if (userModel.isServerManager()) {
@@ -63,6 +69,7 @@ public class NginxController extends BaseServerController {
     @RequestMapping(value = "updateNgx", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     @UrlPermission(value = Role.NodeManage, optType = UserOperateLogV1.OptType.SaveNginx)
+    @Feature(method = MethodFeature.EDIT)
     public String updateNgx() {
         return NodeForward.request(getNode(), getRequest(), NodeUrl.System_Nginx_updateNgx).toString();
     }
@@ -71,6 +78,7 @@ public class NginxController extends BaseServerController {
     @RequestMapping(value = "delete", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     @UrlPermission(value = Role.NodeManage, optType = UserOperateLogV1.OptType.DelNginx)
+    @Feature(method = MethodFeature.DEL)
     public String delete() {
         return NodeForward.request(getNode(), getRequest(), NodeUrl.System_Nginx_delete).toString();
     }
@@ -80,6 +88,7 @@ public class NginxController extends BaseServerController {
      */
     @RequestMapping(value = "status", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
+    @Feature(method = MethodFeature.LIST)
     public String status() {
         return NodeForward.request(getNode(), getRequest(), NodeUrl.System_Nginx_status).toString();
     }
@@ -89,6 +98,7 @@ public class NginxController extends BaseServerController {
      */
     @RequestMapping(value = "config", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
+    @Feature(method = MethodFeature.CONFIG)
     public String config() {
         return NodeForward.request(getNode(), getRequest(), NodeUrl.System_Nginx_config).toString();
     }
@@ -98,6 +108,7 @@ public class NginxController extends BaseServerController {
      */
     @RequestMapping(value = "open", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
+    @Feature(method = MethodFeature.EXECUTE)
     public String open() {
         return NodeForward.request(getNode(), getRequest(), NodeUrl.System_Nginx_open).toString();
     }
@@ -107,6 +118,7 @@ public class NginxController extends BaseServerController {
      */
     @RequestMapping(value = "close", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
+    @Feature(method = MethodFeature.EXECUTE)
     public String close() {
         return NodeForward.request(getNode(), getRequest(), NodeUrl.System_Nginx_close).toString();
     }
@@ -117,12 +129,14 @@ public class NginxController extends BaseServerController {
      */
     @RequestMapping(value = "updateConf", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
+    @Feature(method = MethodFeature.CONFIG)
     public String updateConf() {
         return NodeForward.request(getNode(), getRequest(), NodeUrl.System_Nginx_updateConf).toString();
     }
 
     @RequestMapping(value = "reload", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
+    @Feature(method = MethodFeature.EXECUTE)
     public String reload() {
         return NodeForward.request(getNode(), getRequest(), NodeUrl.System_Nginx_reload).toString();
     }

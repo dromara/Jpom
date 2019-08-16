@@ -5,13 +5,16 @@ import cn.jiangzeyin.common.JsonMessage;
 import cn.keepbx.jpom.common.BaseServerController;
 import cn.keepbx.jpom.common.forward.NodeForward;
 import cn.keepbx.jpom.common.forward.NodeUrl;
-import cn.keepbx.jpom.common.interceptor.ProjectPermission;
+import cn.keepbx.jpom.common.interceptor.OptLog;
 import cn.keepbx.jpom.common.interceptor.UrlPermission;
 import cn.keepbx.jpom.model.Role;
 import cn.keepbx.jpom.model.data.NodeModel;
 import cn.keepbx.jpom.model.log.UserOperateLogV1;
 import cn.keepbx.jpom.service.node.manage.TomcatService;
 import cn.keepbx.jpom.system.OperateType;
+import cn.keepbx.plugin.ClassFeature;
+import cn.keepbx.plugin.Feature;
+import cn.keepbx.plugin.MethodFeature;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.http.MediaType;
@@ -29,6 +32,7 @@ import javax.annotation.Resource;
  */
 @Controller
 @RequestMapping(value = TomcatManageController.TOMCAT_URL)
+@Feature(cls = ClassFeature.TOMCAT)
 public class TomcatManageController extends BaseServerController {
 
     public static final String TOMCAT_URL = "/node/tomcat/";
@@ -43,6 +47,7 @@ public class TomcatManageController extends BaseServerController {
      * @return tomcat列表
      */
     @RequestMapping(value = "tomcatManage", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
+    @Feature(method = MethodFeature.LIST)
     public String tomcatManage() {
         // 查询tomcat列表
         JSONArray tomcatInfos = tomcatService.getTomcatList(getNode());
@@ -57,10 +62,23 @@ public class TomcatManageController extends BaseServerController {
      */
     @RequestMapping(value = "getTomcatProject", method = RequestMethod.POST, produces = MediaType.TEXT_HTML_VALUE)
     @ResponseBody
+    @Feature(method = MethodFeature.LIST)
     public String getTomcatProject(String id) {
         // 查询tomcat管理的项目的列表
         JSONArray tomcatProjects = tomcatService.getTomcatProjectList(getNode(), id);
         return JsonMessage.getString(200, "查询成功", tomcatProjects);
+    }
+
+    /**
+     * 查询tomcat状态
+     *
+     * @return tomcat运行状态
+     */
+    @RequestMapping(value = "getTomcatStatus", method = RequestMethod.POST, produces = MediaType.TEXT_HTML_VALUE)
+    @ResponseBody
+    @Feature(method = MethodFeature.LIST)
+    public String getStatus() {
+        return tomcatService.getTomcatStatus(getNode(), getRequest());
     }
 
     /**
@@ -70,6 +88,7 @@ public class TomcatManageController extends BaseServerController {
      * @return 编辑tomcat信息页面
      */
     @RequestMapping(value = "edit.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
+    @Feature(method = MethodFeature.EDIT)
     public String edit(String id) {
         if (StrUtil.isNotEmpty(id)) {
             JSONObject tomcatInfo = tomcatService.getTomcatInfo(getNode(), id);
@@ -85,6 +104,7 @@ public class TomcatManageController extends BaseServerController {
      * @return 操作结果
      */
     @RequestMapping(value = "addProject.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
+    @Deprecated
     public String addProject(String id) {
         if (StrUtil.isNotEmpty(id)) {
             JSONObject tomcatInfo = tomcatService.getTomcatInfo(getNode(), id);
@@ -108,24 +128,6 @@ public class TomcatManageController extends BaseServerController {
     }
 
     /**
-     * tomcat 日志管理
-     *
-     * @param id tomcat id
-     * @return 项目管理面
-     */
-    @RequestMapping(value = "console", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
-    public String console(String id) {
-        setAttribute("id", id);
-        return "node/tomcat/console";
-    }
-
-    @RequestMapping(value = "getLogList", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    @ResponseBody
-    public String getLogList() {
-        return NodeForward.request(getNode(), getRequest(), NodeUrl.Tomcat_LOG_List).toString();
-    }
-
-    /**
      * 保存Tomcat信息
      *
      * @param id tomcat的id,如果id非空则更新，如果id是空则保存
@@ -134,6 +136,7 @@ public class TomcatManageController extends BaseServerController {
     @RequestMapping(value = "save", method = RequestMethod.POST, produces = MediaType.TEXT_HTML_VALUE)
     @ResponseBody
     @UrlPermission(value = Role.System, optType = UserOperateLogV1.OptType.Save_Tomcat)
+    @Feature(method = MethodFeature.EDIT)
     public String save(String id) {
         NodeModel nodeModel = getNode();
         if (StrUtil.isEmpty(id)) {
@@ -152,20 +155,11 @@ public class TomcatManageController extends BaseServerController {
     @RequestMapping(value = "delete", method = RequestMethod.POST, produces = MediaType.TEXT_HTML_VALUE)
     @ResponseBody
     @UrlPermission(value = Role.System, optType = UserOperateLogV1.OptType.Del_Tomcat)
+    @Feature(method = MethodFeature.DEL)
     public String delete() {
         return tomcatService.delete(getNode(), getRequest());
     }
 
-    /**
-     * 查询tomcat状态
-     *
-     * @return tomcat运行状态
-     */
-    @RequestMapping(value = "getTomcatStatus", method = RequestMethod.POST, produces = MediaType.TEXT_HTML_VALUE)
-    @ResponseBody
-    public String getStatus() {
-        return tomcatService.getTomcatStatus(getNode(), getRequest());
-    }
 
     /**
      * tomcat项目管理
@@ -174,6 +168,7 @@ public class TomcatManageController extends BaseServerController {
      */
     @RequestMapping(value = "tomcatProjectManage", method = RequestMethod.POST, produces = MediaType.TEXT_HTML_VALUE)
     @ResponseBody
+    @Feature(method = MethodFeature.EXECUTE)
     public String tomcatProjectManage() {
         return tomcatService.tomcatProjectManage(getNode(), getRequest());
     }
@@ -185,7 +180,8 @@ public class TomcatManageController extends BaseServerController {
      */
     @RequestMapping(value = "start", method = RequestMethod.POST, produces = MediaType.TEXT_HTML_VALUE)
     @ResponseBody
-    @ProjectPermission(optType = UserOperateLogV1.OptType.Start_Tomcat)
+    @OptLog(UserOperateLogV1.OptType.Start_Tomcat)
+    @Feature(method = MethodFeature.EXECUTE)
     public String start() {
         return tomcatService.start(getNode(), getRequest());
     }
@@ -197,7 +193,8 @@ public class TomcatManageController extends BaseServerController {
      */
     @RequestMapping(value = "restart", method = RequestMethod.POST, produces = MediaType.TEXT_HTML_VALUE)
     @ResponseBody
-    @ProjectPermission(optType = UserOperateLogV1.OptType.ReStart_Tomcat)
+    @OptLog(UserOperateLogV1.OptType.ReStart_Tomcat)
+    @Feature(method = MethodFeature.EXECUTE)
     public String restart() {
         return tomcatService.restart(getNode(), getRequest());
     }
@@ -209,7 +206,8 @@ public class TomcatManageController extends BaseServerController {
      */
     @RequestMapping(value = "stop", method = RequestMethod.POST, produces = MediaType.TEXT_HTML_VALUE)
     @ResponseBody
-    @ProjectPermission(optType = UserOperateLogV1.OptType.Stop_Tomcat)
+    @OptLog(UserOperateLogV1.OptType.Stop_Tomcat)
+    @Feature(method = MethodFeature.EXECUTE)
     public String stop() {
         return tomcatService.stop(getNode(), getRequest());
     }
@@ -222,6 +220,7 @@ public class TomcatManageController extends BaseServerController {
      */
     @RequestMapping(value = "getFileList", method = RequestMethod.POST, produces = MediaType.TEXT_HTML_VALUE)
     @ResponseBody
+    @Feature(method = MethodFeature.FILE)
     public String getFileList() {
         return tomcatService.getFileList(getNode(), getRequest());
     }
@@ -234,7 +233,8 @@ public class TomcatManageController extends BaseServerController {
      */
     @RequestMapping(value = "upload", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
-    @ProjectPermission(checkUpload = true, optType = UserOperateLogV1.OptType.Upload_File_Tomcat)
+    @OptLog(UserOperateLogV1.OptType.Upload_File_Tomcat)
+    @Feature(method = MethodFeature.UPLOAD)
     public String upload() {
         return NodeForward.requestMultipart(getNode(), getMultiRequest(), NodeUrl.Tomcat_File_Upload).toString();
     }
@@ -246,7 +246,8 @@ public class TomcatManageController extends BaseServerController {
      */
     @RequestMapping(value = "uploadWar", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
-    @ProjectPermission(checkUpload = true, optType = UserOperateLogV1.OptType.Upload_File_War_Tomcat)
+    @OptLog(UserOperateLogV1.OptType.Upload_File_War_Tomcat)
+    @Feature(method = MethodFeature.UPLOAD)
     public String uploadWar() {
         return tomcatService.uploadWar(getNode(), getMultiRequest());
     }
@@ -257,6 +258,7 @@ public class TomcatManageController extends BaseServerController {
     @RequestMapping(value = "download", method = RequestMethod.GET)
     @ResponseBody
     @OperateType(UserOperateLogV1.OptType.Download_Tomcat)
+    @Feature(method = MethodFeature.DOWNLOAD)
     public void download() {
         tomcatService.download(getNode(), getRequest(), getResponse());
     }
@@ -268,7 +270,8 @@ public class TomcatManageController extends BaseServerController {
      */
     @RequestMapping(value = "deleteFile", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
-    @ProjectPermission(checkDelete = true, optType = UserOperateLogV1.OptType.Del_File_Tomcat)
+    @OptLog(UserOperateLogV1.OptType.Del_File_Tomcat)
+    @Feature(method = MethodFeature.DEL_FILE)
     public String deleteFile() {
         return tomcatService.deleteFile(getNode(), getRequest());
     }
