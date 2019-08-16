@@ -64,7 +64,7 @@ public class TopManager {
             return;
         }
         CronUtil.remove(CRON_ID);
-        CronUtil.schedule(CRON_ID, "0 0/1 * * * ?", () -> {
+        CronUtil.schedule(CRON_ID, "0/30 * * * * ?", () -> {
             //发送监控信息
             try {
                 JSONObject topInfo = AbstractSystemCommander.getInstance().getAllMonitor();
@@ -76,7 +76,8 @@ public class TopManager {
                     topInfo.put("hour", hour);
                     topInfo.put("minute", minute);
                     topInfo.put("day", day);
-                    topInfo.put("time", DateUtil.format(date, "HH:mm"));
+                    topInfo.put("second", date.second());
+                    topInfo.put("time", DateUtil.format(date, "HH:mm:ss"));
                     send(topInfo.toString());
                 }
             } catch (Exception e) {

@@ -77,7 +77,7 @@
                 },
                 grid: {
                     left: '1%',
-                    right: '1%',
+                    right: '2%',
                     bottom: '1%',
                     containLabel: true
                 },
@@ -86,6 +86,7 @@
                     boundaryGap: false,
                     data: xAxis
                 },
+                calculable: true,
                 yAxis: {
                     type: 'value',
                     axisLabel: {
@@ -146,7 +147,7 @@
         //保存监控数据
         function loadTopData(topData) {
             //默认刻度数量
-            let count = 12;
+            let count = 24;
             let dataTop = layui.data('top');
             let top = [];
             if (dataTop && dataTop.top) {
@@ -160,28 +161,39 @@
             let cpuItem = {
                 name: 'cpu占用',
                 type: 'line',
-                data: []
+                data: [0],
+                //设置折线为曲线
+                smooth: true
             };
             let diskItem = {
                 name: '磁盘占用',
                 type: 'line',
-                data: []
+                data: [0],
+                smooth: true
             };
             let memoryItem = {
                 name: '内存占用',
                 type: 'line',
-                data: []
+                data: [0],
+                smooth: true
             };
-            for (let i = top.length - 1; i >= 0; i--) {
+            let topLen = top.length;
+            for (let i = topLen - 1; i >= 0; i--) {
                 let item = top[i];
                 let len = array.length;
                 if (len >= count) {
                     break;
                 } else if (len > 0) {
                     let nextItem = array[0];
-                    if (nextItem.day !== item.day || nextItem.time !== getNextMinute(item.hour, item.minute)) {
+                    if (nextItem.day !== item.day || nextItem.time !== getNextMinute(item.hour, item.minute, item.second)) {
                         break;
                     }
+                }
+                if (i === topLen - 1) {
+                    //删除默认0的数据
+                    cpuItem.data.splice(0, 1);
+                    diskItem.data.splice(0, 1);
+                    memoryItem.data.splice(0, 1);
                 }
                 array.splice(0, 0, item);
                 cpuItem.data.splice(0, 0, parseFloat(item.cpu));
@@ -196,20 +208,29 @@
                     var myDate = new Date(); //实例一个时间对象；
                     item = {
                         hour: myDate.getHours(),
-                        minute: myDate.getMinutes()
+                        minute: myDate.getMinutes(),
+                        second: myDate.getSeconds()
                     }
                 }
                 let hour = item.hour;
                 let minute = item.minute;
+                let second = item.second;
                 for (let i = 0; i < count - len; i++) {
                     if (i !== 0) {
-                        minute += 1;
+                        second += 30;
+                        if (second >= 60) {
+                            second = 0;
+                            minute += 1;
+                        }
                         if (minute === 60) {
                             minute = 0;
                             hour += 1;
                         }
+                        if (hour === 24) {
+                            hour = 0;
+                        }
                     }
-                    xAxis.push(getNextMinute(hour, minute));
+                    xAxis.push(getNextMinute(hour, minute, second));
                 }
             }
             let series = [cpuItem, memoryItem, diskItem];
@@ -221,15 +242,24 @@
         }
     }
 
-    //下一分钟 判断时间连续性
-    function getNextMinute(hour, minute) {
-        minute += 1;
+    //下半分钟 判断时间连续性
+    function getNextMinute(hour, minute, second) {
+        second += 30;
+        if (second <= 30 && second > 0) {
+            second = 30;
+        } else if (second >= 60) {
+            second = 0;
+            minute += 1;
+        } else {
+            second = 30;
+        }
         if (minute === 60) {
             hour += 1;
             minute = 0;
         }
         let hourStr = hour;
         let minuteStr = minute;
+        let secondStr = second;
         if (hour === 24) {
             hour = 0;
         }
@@ -239,7 +269,10 @@
         if (minute < 10) {
             minuteStr = "0" + minute;
         }
-        return hourStr + ":" + minuteStr;
+        if (second < 10) {
+            secondStr = "0" + second;
+        }
+        return hourStr + ":" + minuteStr + ":" + secondStr;
     }
 
     function loadProcessList() {
