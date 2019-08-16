@@ -47,7 +47,7 @@ public class ServerWebSocketInterceptor implements HandshakeInterceptor {
             if (!JpomApplication.SYSTEM_ID.equals(nodeId)) {
                 NodeService nodeService = SpringUtil.getBean(NodeService.class);
                 nodeModel = nodeService.getItem(nodeId);
-                if (nodeModel == null || !userService.checkUserPermission(userModel, ClassFeature.NODE, nodeId)) {
+                if (nodeModel == null || userService.checkUserPermission(userModel, ClassFeature.NODE, nodeId)) {
                     return false;
                 }
             }
@@ -64,7 +64,7 @@ public class ServerWebSocketInterceptor implements HandshakeInterceptor {
                     //控制台
                     String projectId = httpServletRequest.getParameter("projectId");
                     // 判断权限
-                    if (nodeModel == null || !userService.checkUserPermission(userModel, ClassFeature.PROJECT, projectId)) {
+                    if (nodeModel == null || userService.checkUserPermission(userModel, ClassFeature.PROJECT, projectId)) {
                         return false;
                     }
                     attributes.put("projectId", projectId);
@@ -72,7 +72,7 @@ public class ServerWebSocketInterceptor implements HandshakeInterceptor {
                 case script:
                     // 脚本模板
                     String scriptId = httpServletRequest.getParameter("scriptId");
-                    if (!userService.checkUserPermission(userModel, ClassFeature.PROJECT, scriptId)) {
+                    if (userService.checkUserPermission(userModel, ClassFeature.PROJECT, scriptId)) {
                         return false;
                     }
                     attributes.put("scriptId", scriptId);

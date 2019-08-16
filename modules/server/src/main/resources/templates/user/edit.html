@@ -29,7 +29,12 @@
                        lay-verify="required" class="layui-input">
             </div>
         </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">用户角色</label>
+            <div class="layui-input-block" id="roles">
 
+            </div>
+        </div>
         <div class="layui-form-item" style="padding-left: 20%;margin-top: 20px;">
             <button class="layui-btn layui-btn-normal" lay-submit lay-filter="submitUser" id="submitUser">提交
             </button>
@@ -40,10 +45,34 @@
 <div th:replace="common/sha1::sha1"></div>
 <script type="text/javascript" th:inline="javascript">
 
+    var checkRoles = [[${userItem?.roles}]];
+    var roles = [[${roles}]];
+
     function loadSuccess() {
+        layui.use('transfer', function () {
+            transfer = layui.transfer;
+            //渲染
+            transfer.render({
+                elem: '#roles',
+                data: roles,
+                value: checkRoles,
+                title: ['待选择角色', '已选择角色'],
+                id: 'roles'
+            });
+        });
         // 提交用户信息
         form.on('submit(submitUser)', function (data) {
             var sendData = formatPwd(data.field, "password");
+            var roles = transfer.getData('roles');
+            if (!roles || roles.length <= 0) {
+                layer.msg("请至少一个角色");
+                return false;
+            }
+            var rolesVal = [];
+            for (var i = 0; i < roles.length; i++) {
+                rolesVal.push(roles[i].value);
+            }
+            sendData.roles = JSON.stringify(rolesVal);
             loadingAjax({
                 url: data.form.action,
                 data: sendData,

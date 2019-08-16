@@ -46,10 +46,6 @@ public class ScriptController extends BaseAgentController {
         if (scriptModel == null) {
             return JsonMessage.getString(405, "没有数据");
         }
-        boolean safe = checkPathSafe(scriptModel.getId());
-        if (!safe) {
-            return JsonMessage.getString(405, "id规则不合法");
-        }
         if (StrUtil.isEmpty(scriptModel.getContext())) {
             return JsonMessage.getString(405, "内容为空");
         }

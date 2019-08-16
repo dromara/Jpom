@@ -7,14 +7,8 @@
 <body>
 <div class="layui-container">
     <form action="save.json" class="layui-form">
-        <div class="layui-form-item">
-            <label class="layui-form-label">模板ID</label>
-            <div class="layui-input-block">
-                <input type="text" name="id" placeholder="请输入模板Id" required lay-verify="required"
-                       th:value="${item?.id}" th:readonly="${item}" class="layui-input">
-                <input type="hidden" name="type" th:value="${type}">
-            </div>
-        </div>
+        <input type="hidden" name="id" th:value="${item?.id}">
+        <input type="hidden" name="type" th:value="${type}">
         <div class="layui-form-item">
             <label class="layui-form-label">模板名称</label>
             <div class="layui-input-block">

@@ -1,14 +1,17 @@
 package cn.keepbx.jpom.service.user;
 
 import cn.keepbx.jpom.common.BaseOperService;
+import cn.keepbx.jpom.model.data.RoleModel;
 import cn.keepbx.jpom.model.data.UserModel;
 import cn.keepbx.jpom.system.ServerConfigBean;
 import cn.keepbx.plugin.ClassFeature;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -18,6 +21,9 @@ import java.util.stream.Collectors;
  */
 @Service
 public class UserService extends BaseOperService<UserModel> {
+
+    @Resource
+    private RoleService roleService;
 
     public UserService() {
         super(ServerConfigBean.USER);
@@ -100,6 +106,24 @@ public class UserService extends BaseOperService<UserModel> {
     }
 
     public boolean checkUserPermission(UserModel userModel, ClassFeature classFeature, String dataId) {
+        List<String> roles = userModel.getRoles();
+        if (roles == null || roles.isEmpty()) {
+            return true;
+        }
+        for (String role : roles) {
+            RoleModel item = roleService.getItem(role);
+            if (item == null) {
+                continue;
+            }
+            Map<ClassFeature, List<String>> dynamicData = item.getDynamicData();
+            if (dynamicData == null) {
+                continue;
+            }
+            List<String> list = dynamicData.get(classFeature);
+            if (list.contains(dataId)) {
+                return false;
+            }
+        }
         return true;
     }
 

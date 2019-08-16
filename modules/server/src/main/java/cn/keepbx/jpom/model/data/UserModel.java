@@ -5,6 +5,7 @@ import cn.hutool.crypto.SecureUtil;
 import cn.keepbx.jpom.model.BaseModel;
 import cn.keepbx.jpom.system.ServerExtConfigBean;
 
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -50,7 +51,10 @@ public class UserModel extends BaseModel {
      * 记录最后修改时间
      */
     private long modifyTime;
-
+    /**
+     * 角色
+     */
+    private List<String> roles;
     /**
      * 邮箱
      */
@@ -233,5 +237,13 @@ public class UserModel extends BaseModel {
             userId = userModel.getId();
         }
         return userId;
+    }
+
+    public List<String> getRoles() {
+        return roles;
+    }
+
+    public void setRoles(List<String> roles) {
+        this.roles = roles;
     }
 }

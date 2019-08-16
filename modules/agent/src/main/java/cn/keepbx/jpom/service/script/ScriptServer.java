@@ -1,6 +1,7 @@
 package cn.keepbx.jpom.service.script;
 
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.util.IdUtil;
 import cn.keepbx.jpom.common.BaseOperService;
 import cn.keepbx.jpom.model.data.ScriptModel;
 import cn.keepbx.jpom.system.AgentConfigBean;
@@ -43,6 +44,7 @@ public class ScriptServer extends BaseOperService<ScriptModel> {
 
     @Override
     public void addItem(ScriptModel scriptModel) {
+        scriptModel.setId(IdUtil.fastSimpleUUID());
         super.addItem(scriptModel);
         scriptModel.saveFile();
     }
