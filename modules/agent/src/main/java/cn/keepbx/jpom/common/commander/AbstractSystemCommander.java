@@ -5,7 +5,6 @@ import cn.keepbx.jpom.common.commander.impl.LinuxSystemCommander;
 import cn.keepbx.jpom.common.commander.impl.WindowsSystemCommander;
 import cn.keepbx.jpom.model.system.ProcessModel;
 import cn.keepbx.jpom.system.JpomRuntimeException;
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import java.io.File;

@@ -8,10 +8,8 @@ import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.spring.SpringUtil;
 import cn.keepbx.jpom.model.data.BuildModel;
 import cn.keepbx.jpom.service.build.BuildService;
-import cn.keepbx.jpom.system.JpomRuntimeException;
 
 import java.io.File;
-import java.io.IOException;
 
 /**
  * 构建的基础类

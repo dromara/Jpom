@@ -9,7 +9,6 @@ import cn.keepbx.jpom.model.log.BuildHistoryLog;
 import cn.keepbx.jpom.service.node.OutGivingServer;
 
 import java.io.File;
-import java.io.IOException;
 
 /**
  * 构建产物vo
