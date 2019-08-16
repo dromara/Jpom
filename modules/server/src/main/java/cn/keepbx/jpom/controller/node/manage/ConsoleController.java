@@ -1,7 +1,10 @@
 package cn.keepbx.jpom.controller.node.manage;
 
 import cn.keepbx.jpom.common.BaseServerController;
-import cn.keepbx.jpom.service.manage.ProjectInfoService;
+import cn.keepbx.jpom.service.node.manage.ProjectInfoService;
+import cn.keepbx.plugin.ClassFeature;
+import cn.keepbx.plugin.Feature;
+import cn.keepbx.plugin.MethodFeature;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
@@ -18,11 +21,11 @@ import javax.annotation.Resource;
  */
 @Controller
 @RequestMapping(value = "/node/manage/")
+@Feature(cls = ClassFeature.PROJECT)
 public class ConsoleController extends BaseServerController {
 
     @Resource
     private ProjectInfoService projectInfoService;
-
 
     /**
      * 管理项目
@@ -30,6 +33,7 @@ public class ConsoleController extends BaseServerController {
      * @return page
      */
     @RequestMapping(value = "console", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
+    @Feature(method = MethodFeature.EDIT)
     public String console(String id) {
         JSONObject projectInfoModel = projectInfoService.getItem(getNode(), id);
         if (projectInfoModel != null) {

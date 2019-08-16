@@ -1,13 +1,17 @@
 package cn.keepbx.permission;
 
 import cn.keepbx.jpom.service.BaseDynamicService;
+import cn.keepbx.jpom.service.node.manage.ProjectInfoService;
 import cn.keepbx.jpom.service.node.NodeService;
 import cn.keepbx.jpom.service.node.OutGivingServer;
+import cn.keepbx.jpom.service.node.script.ScriptServer;
 import cn.keepbx.plugin.ClassFeature;
 import cn.keepbx.plugin.MethodFeature;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * 动态数据权限
@@ -19,10 +23,28 @@ public class DynamicData {
 
     private static final Map<ClassFeature, DynamicData> DYNAMIC_DATA_MAP = new HashMap<>();
 
-    static {
-        DYNAMIC_DATA_MAP.put(ClassFeature.NODE, new DynamicData(NodeService.class, MethodFeature.LIST));
+    private static final Map<ClassFeature, Set<ClassFeature>> PARENT = new HashMap<>();
 
-        DYNAMIC_DATA_MAP.put(ClassFeature.OUTGIVING, new DynamicData(OutGivingServer.class, MethodFeature.LIST));
+    static {
+        put(ClassFeature.NODE, new DynamicData(NodeService.class, MethodFeature.LIST));
+
+        put(ClassFeature.OUTGIVING, new DynamicData(OutGivingServer.class, MethodFeature.LIST));
+
+        put(ClassFeature.PROJECT, new DynamicData(ProjectInfoService.class, MethodFeature.LIST));
+
+        put(ClassFeature.SCRIPT, new DynamicData(ScriptServer.class, MethodFeature.LIST));
+    }
+
+    private static void put(ClassFeature feature, DynamicData dynamicData) {
+        DYNAMIC_DATA_MAP.put(feature, dynamicData);
+        if (feature.getParent() != null) {
+            Set<ClassFeature> classFeatures = PARENT.computeIfAbsent(feature.getParent(), classFeature -> new HashSet<>());
+            classFeatures.add(feature);
+        }
+    }
+
+    public static Set<ClassFeature> getChildren(ClassFeature classFeature) {
+        return PARENT.get(classFeature);
     }
 
     public static Map<ClassFeature, DynamicData> getDynamicDataMap() {
@@ -44,7 +66,7 @@ public class DynamicData {
      */
     private MethodFeature[] excludeMethod;
 
-    public DynamicData(Class<? extends BaseDynamicService> baseOperService, MethodFeature... excludeMethod) {
+    private DynamicData(Class<? extends BaseDynamicService> baseOperService, MethodFeature... excludeMethod) {
         this(baseOperService, "id", excludeMethod);
     }
 

@@ -6,7 +6,10 @@ import cn.keepbx.jpom.common.forward.NodeForward;
 import cn.keepbx.jpom.common.forward.NodeUrl;
 import cn.keepbx.jpom.common.interceptor.ProjectPermission;
 import cn.keepbx.jpom.model.log.UserOperateLogV1;
-import cn.keepbx.jpom.service.manage.ProjectInfoService;
+import cn.keepbx.jpom.service.node.manage.ProjectInfoService;
+import cn.keepbx.plugin.ClassFeature;
+import cn.keepbx.plugin.Feature;
+import cn.keepbx.plugin.MethodFeature;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
@@ -24,6 +27,7 @@ import javax.annotation.Resource;
  */
 @Controller
 @RequestMapping(value = "node/manage/log")
+@Feature(cls = ClassFeature.PROJECT)
 public class LogBackController extends BaseServerController {
     @Resource
     private ProjectInfoService projectInfoService;
@@ -31,11 +35,13 @@ public class LogBackController extends BaseServerController {
     @RequestMapping(value = "export.html", method = RequestMethod.GET)
     @ResponseBody
     @ProjectPermission(optType = UserOperateLogV1.OptType.ExportProjectLog)
+    @Feature(method = MethodFeature.DOWNLOAD)
     public void export() {
         NodeForward.requestDownload(getNode(), getRequest(), getResponse(), NodeUrl.Manage_Log_export);
     }
 
     @RequestMapping(value = "logBack", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
+    @Feature(method = MethodFeature.LOG)
     public String console(String id) {
         JSONObject jsonObject = NodeForward.requestData(getNode(), NodeUrl.Manage_Log_logBack, getRequest(), JSONObject.class);
         setAttribute("data", jsonObject);
@@ -45,6 +51,7 @@ public class LogBackController extends BaseServerController {
     @RequestMapping(value = "logBack_download", method = RequestMethod.GET)
     @ResponseBody
     @ProjectPermission(optType = UserOperateLogV1.OptType.DownloadProjectLogBack)
+    @Feature(method = MethodFeature.DOWNLOAD)
     public void download() {
         NodeForward.requestDownload(getNode(), getRequest(), getResponse(), NodeUrl.Manage_Log_logBack_download);
     }
@@ -52,6 +59,7 @@ public class LogBackController extends BaseServerController {
     @RequestMapping(value = "logBack_delete", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     @ProjectPermission(checkDelete = true, optType = UserOperateLogV1.OptType.DelProjectLogBack)
+    @Feature(method = MethodFeature.DEL_FILE)
     public String clear() {
         return NodeForward.request(getNode(), getRequest(), NodeUrl.Manage_Log_logBack_delete).toString();
     }
@@ -71,6 +79,7 @@ public class LogBackController extends BaseServerController {
     @RequestMapping(value = "resetLog", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     @ProjectPermission(optType = UserOperateLogV1.OptType.RestProjectLog)
+    @Feature(method = MethodFeature.EDIT)
     public String resetLog() {
         return NodeForward.request(getNode(), getRequest(), NodeUrl.Manage_Log_ResetLog).toString();
     }

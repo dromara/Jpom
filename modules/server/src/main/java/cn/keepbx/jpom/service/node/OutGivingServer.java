@@ -1,9 +1,11 @@
 package cn.keepbx.jpom.service.node;
 
+import cn.keepbx.jpom.common.BaseOperService;
 import cn.keepbx.jpom.model.data.OutGivingModel;
 import cn.keepbx.jpom.model.data.OutGivingNodeProject;
 import cn.keepbx.jpom.service.BaseDynamicService;
 import cn.keepbx.jpom.system.ServerConfigBean;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;
 
@@ -17,7 +19,7 @@ import java.util.List;
  * @date 2019/4/21
  */
 @Service
-public class OutGivingServer extends BaseDynamicService<OutGivingModel> {
+public class OutGivingServer extends BaseOperService<OutGivingModel> implements BaseDynamicService {
 
     public OutGivingServer() {
         super(ServerConfigBean.OUTGIVING);
@@ -60,5 +62,10 @@ public class OutGivingServer extends BaseDynamicService<OutGivingModel> {
             }
         }
         return false;
+    }
+
+    @Override
+    public JSONArray listToArray(String dataId) {
+        return (JSONArray) JSONArray.toJSON(this.list());
     }
 }

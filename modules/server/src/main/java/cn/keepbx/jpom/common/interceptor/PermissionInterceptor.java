@@ -11,7 +11,7 @@ import cn.keepbx.jpom.controller.node.tomcat.TomcatManageController;
 import cn.keepbx.jpom.model.Role;
 import cn.keepbx.jpom.model.data.NodeModel;
 import cn.keepbx.jpom.model.data.UserModel;
-import cn.keepbx.jpom.service.manage.ProjectInfoService;
+import cn.keepbx.jpom.service.node.manage.ProjectInfoService;
 import cn.keepbx.jpom.service.node.NodeService;
 import cn.keepbx.jpom.system.AgentException;
 import org.springframework.http.MediaType;

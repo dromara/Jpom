@@ -4,6 +4,7 @@ import cn.hutool.cache.impl.TimedCache;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.JsonMessage;
+import cn.keepbx.jpom.common.BaseOperService;
 import cn.keepbx.jpom.common.JpomManifest;
 import cn.keepbx.jpom.common.forward.NodeForward;
 import cn.keepbx.jpom.common.forward.NodeUrl;
@@ -27,7 +28,7 @@ import java.util.concurrent.TimeUnit;
  * @date 2019/4/16
  */
 @Service
-public class NodeService extends BaseDynamicService<NodeModel> {
+public class NodeService extends BaseOperService<NodeModel> implements BaseDynamicService {
 
     private static final TimedCache<String, List<NodeModel>> TIMED_CACHE = new TimedCache<>(TimeUnit.MINUTES.toMillis(5));
 
@@ -156,5 +157,10 @@ public class NodeService extends BaseDynamicService<NodeModel> {
             }
         }
         return null;
+    }
+
+    @Override
+    public JSONArray listToArray(String dataId) {
+        return (JSONArray) JSONArray.toJSON(this.list());
     }
 }

@@ -10,10 +10,13 @@ import cn.keepbx.jpom.model.RunMode;
 import cn.keepbx.jpom.model.data.NodeModel;
 import cn.keepbx.jpom.model.data.UserModel;
 import cn.keepbx.jpom.model.log.UserOperateLogV1;
-import cn.keepbx.jpom.service.manage.ProjectInfoService;
+import cn.keepbx.jpom.service.node.manage.ProjectInfoService;
 import cn.keepbx.jpom.service.system.WhitelistDirectoryService;
 import cn.keepbx.jpom.system.ConfigBean;
 import cn.keepbx.jpom.system.OperateType;
+import cn.keepbx.plugin.ClassFeature;
+import cn.keepbx.plugin.Feature;
+import cn.keepbx.plugin.MethodFeature;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.http.MediaType;
@@ -33,6 +36,7 @@ import java.util.List;
  */
 @Controller
 @RequestMapping(value = "/node/manage/")
+@Feature(cls = ClassFeature.PROJECT)
 public class EditProjectController extends BaseServerController {
     @Resource
     private ProjectInfoService projectInfoService;
@@ -53,6 +57,7 @@ public class EditProjectController extends BaseServerController {
      * @return json
      */
     @RequestMapping(value = "editProject", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
+    @Feature(method = MethodFeature.EDIT)
     public String editProject(String id) {
         JSONObject projectInfo = projectInfoService.getItem(getNode(), id);
 
@@ -82,6 +87,7 @@ public class EditProjectController extends BaseServerController {
     @RequestMapping(value = "saveProject", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     @OperateType(UserOperateLogV1.OptType.SaveProject)
+    @Feature(method = MethodFeature.EDIT)
     public String saveProject(String edit, String id) {
         NodeModel nodeModel = getNode();
         UserModel userName = getUser();

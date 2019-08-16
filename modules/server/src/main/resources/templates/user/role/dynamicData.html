@@ -7,7 +7,10 @@
 <div class="layui-container">
     <form action="./saveDynamic.json" class="layui-form" id="form">
         <div class="layui-collapse" style="margin: 10px;">
-            <div class="layui-colla-item" th:name="${item.key.name()}" th:each="item : ${dynamicDataMap}">
+            <div class="layui-colla-item" th:id="${item.key.name()}+'div'" style="display: none;"
+                 th:name="${item.key.name()}"
+                 th:unless="${item.key.parent}"
+                 th:each="item : ${dynamicDataMap}">
                 <div class="layui-colla-title">
                     <div th:text="${item.key.name}">
                     </div>
@@ -43,18 +46,23 @@
         //
         form.on('submit(submit)', function (data) {
             var checkDyData = {};
-            (".layui-colla-item").each(function () {
+            $(".layui-colla-item").each(function () {
                 var find = $(this).find(".layui-colla-content div");
                 var attr = find.attr("id");
-                var checkData = tree.getChecked(attr);
-                var ts = attr.split("_");
-                checkDyData[ts[1]] = checkData;
+                try {
+                    var checkData = tree.getChecked(attr);
+                    var ts = attr.split("_");
+                    checkDyData[ts[1]] = checkData;
+                } catch (e) {
+                    console.error(e);
+                }
             });
             var dynamic = JSON.stringify(checkDyData);
             loadingAjax({
                 url: data.form.action,
                 data: {
-                    dynamic: dynamic
+                    dynamic: dynamic,
+                    id: id
                 },
                 success: function (data) {
                     layer.msg(data.msg);
@@ -79,6 +87,9 @@
                     layer.msg(data.msg);
                     return;
                 }
+                if (!data.data || data.data.length <= 0) {
+                    return;
+                }
                 tree.render({
                     elem: '#tree_' + dy,
                     data: data.data,
@@ -87,6 +98,7 @@
                     click: function (obj) {
                     }
                 });
+                $("#" + dy + "div").show();
             }
         });
     }

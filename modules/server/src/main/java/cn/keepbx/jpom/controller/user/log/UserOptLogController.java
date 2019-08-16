@@ -1,4 +1,4 @@
-package cn.keepbx.jpom.controller.user;
+package cn.keepbx.jpom.controller.user.log;
 
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.db.Entity;

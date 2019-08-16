@@ -1,13 +1,16 @@
-package cn.keepbx.jpom.service.manage;
+package cn.keepbx.jpom.service.node.manage;
 
 import cn.keepbx.jpom.common.forward.NodeForward;
 import cn.keepbx.jpom.common.forward.NodeUrl;
 import cn.keepbx.jpom.model.data.NodeModel;
+import cn.keepbx.jpom.service.BaseDynamicService;
+import cn.keepbx.jpom.service.node.NodeService;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
+import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -17,7 +20,10 @@ import javax.servlet.http.HttpServletResponse;
  * @author lf
  */
 @Service
-public class TomcatService {
+public class TomcatService implements BaseDynamicService {
+
+    @Resource
+    private NodeService nodeService;
 
     /**
      * 查询tomcat列表
@@ -186,5 +192,11 @@ public class TomcatService {
      */
     public String uploadWar(NodeModel node, MultipartHttpServletRequest multiRequest) {
         return NodeForward.requestMultipart(node, multiRequest, NodeUrl.Tomcat_File_UploadWar).toString();
+    }
+
+    @Override
+    public JSONArray listToArray(String dataId) {
+        NodeModel item = nodeService.getItem(dataId);
+        return getTomcatList(item);
     }
 }

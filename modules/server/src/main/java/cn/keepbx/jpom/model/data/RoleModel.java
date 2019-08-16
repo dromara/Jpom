@@ -5,6 +5,7 @@ import cn.keepbx.plugin.ClassFeature;
 import cn.keepbx.plugin.MethodFeature;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * 角色
@@ -14,7 +15,23 @@ import java.util.List;
  */
 public class RoleModel extends BaseModel {
 
+    /**
+     * 角色使用功能
+     */
     private List<RoleFeature> features;
+
+    /**
+     * 动态数据
+     */
+    private Map<ClassFeature, List<String>> dynamicData;
+
+    public Map<ClassFeature, List<String>> getDynamicData() {
+        return dynamicData;
+    }
+
+    public void setDynamicData(Map<ClassFeature, List<String>> dynamicData) {
+        this.dynamicData = dynamicData;
+    }
 
     public List<RoleFeature> getFeatures() {
         return features;

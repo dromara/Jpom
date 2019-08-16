@@ -3,18 +3,24 @@ package cn.keepbx.jpom.controller.user.role;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.spring.SpringUtil;
 import cn.keepbx.jpom.common.BaseServerController;
-import cn.keepbx.jpom.model.BaseModel;
+import cn.keepbx.jpom.model.data.RoleModel;
 import cn.keepbx.jpom.service.BaseDynamicService;
+import cn.keepbx.jpom.service.user.RoleService;
 import cn.keepbx.permission.DynamicData;
 import cn.keepbx.plugin.ClassFeature;
 import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import javax.annotation.Resource;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * @author bwcx_jzy
@@ -23,6 +29,9 @@ import java.util.Map;
 @Controller
 @RequestMapping(value = "/user/role")
 public class UserRoleDynamicController extends BaseServerController {
+
+    @Resource
+    private RoleService roleService;
 
     @RequestMapping(value = "dynamicData.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
     public String list() {
@@ -35,17 +44,37 @@ public class UserRoleDynamicController extends BaseServerController {
     @ResponseBody
     public String getDynamic(String id, String dynamic) {
         ClassFeature classFeature = ClassFeature.valueOf(dynamic);
-        Map<ClassFeature, DynamicData> dynamicDataMap = DynamicData.getDynamicDataMap();
-        DynamicData dynamicData = dynamicDataMap.get(classFeature);
-        if (dynamicData == null) {
-            return JsonMessage.getString(404, "没有配置对应动态数据");
-        }
-        Class<? extends BaseDynamicService> baseOperService = dynamicData.getBaseOperService();
-        BaseDynamicService<BaseModel> bean = SpringUtil.getBean(baseOperService);
-        JSONArray jsonArray = bean.listDynamic();
-        if (jsonArray == null) {
-            return JsonMessage.getString(405, "没有动态数据");
-        }
+        JSONArray jsonArray = roleService.listDynamic(id, classFeature, null);
         return JsonMessage.getString(200, "", jsonArray);
+    }
+
+    @RequestMapping(value = "saveDynamic.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @ResponseBody
+    public String saveDynamic(String id, String dynamic) {
+        RoleModel item = roleService.getItem(id);
+        if (item == null) {
+            return JsonMessage.getString(404, "角色信息错误");
+        }
+        //
+        JSONObject jsonObject = JSONObject.parseObject(dynamic);
+        Map<ClassFeature, List<String>> dynamicData1 = new HashMap<>(jsonObject.keySet().size());
+        //
+        Set<Map.Entry<String, Object>> entries = jsonObject.entrySet();
+        for (Map.Entry<String, Object> entry : entries) {
+            ClassFeature classFeature = ClassFeature.valueOf(entry.getKey());
+            Map<ClassFeature, DynamicData> dynamicDataMap = DynamicData.getDynamicDataMap();
+            DynamicData dynamicData = dynamicDataMap.get(classFeature);
+            if (dynamicData == null) {
+                return JsonMessage.getString(404, entry.getKey() + "没有配置对应动态数据");
+            }
+            Class<? extends BaseDynamicService> baseOperService = dynamicData.getBaseOperService();
+            BaseDynamicService bean = SpringUtil.getBean(baseOperService);
+            JSONArray value = (JSONArray) entry.getValue();
+            List<String> list = bean.parserValue(dynamicData1, classFeature, value);
+            dynamicData1.put(classFeature, list);
+        }
+        item.setDynamicData(dynamicData1);
+        roleService.updateItem(item);
+        return JsonMessage.getString(200, "保存成功");
     }
 }

@@ -25,6 +25,7 @@ public enum MethodFeature {
     UPLOAD("上传"),
     WHITELIST("白名单"),
     EXECUTE("执行"),
+    DEL_FILE("删除文件"),
     ;
 
     private String name;

@@ -4,6 +4,9 @@ import cn.keepbx.jpom.common.BaseServerController;
 import cn.keepbx.jpom.common.forward.NodeForward;
 import cn.keepbx.jpom.common.forward.NodeUrl;
 import cn.keepbx.jpom.model.data.UserModel;
+import cn.keepbx.plugin.ClassFeature;
+import cn.keepbx.plugin.Feature;
+import cn.keepbx.plugin.MethodFeature;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -20,6 +23,7 @@ import java.util.List;
  */
 @Controller
 @RequestMapping(value = "/node/manage/recover")
+@Feature(cls = ClassFeature.PROJECT_RECOVER)
 public class ProjectRecoverControl extends BaseServerController {
 
     /**
@@ -28,6 +32,7 @@ public class ProjectRecoverControl extends BaseServerController {
      * @return page
      */
     @RequestMapping(value = "list.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
+    @Feature(method = MethodFeature.LIST)
     public String projectInfo() {
         UserModel userModel = getUser();
         if (userModel.isManage(getNode().getId())) {
@@ -39,6 +44,7 @@ public class ProjectRecoverControl extends BaseServerController {
 
     @RequestMapping(value = "data.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
+    @Feature(method = MethodFeature.LIST)
     public String project() throws IOException {
         return NodeForward.request(getNode(), getRequest(), NodeUrl.Manage_Recover_Item_Data).toString();
     }

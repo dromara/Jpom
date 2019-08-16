@@ -25,4 +25,4 @@
  *
  * @author jiangzeyin
  */
-package cn.keepbx.jpom.service.manage;
+package cn.keepbx.jpom.service.node.manage;

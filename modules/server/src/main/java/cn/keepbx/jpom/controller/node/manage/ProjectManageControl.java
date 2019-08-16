@@ -1,6 +1,5 @@
 package cn.keepbx.jpom.controller.node.manage;
 
-import cn.hutool.http.HttpStatus;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.validator.ValidatorItem;
 import cn.jiangzeyin.common.validator.ValidatorRule;
@@ -15,9 +14,12 @@ import cn.keepbx.jpom.model.data.OutGivingModel;
 import cn.keepbx.jpom.model.data.UserModel;
 import cn.keepbx.jpom.model.log.UserOperateLogV1;
 import cn.keepbx.jpom.service.build.BuildService;
-import cn.keepbx.jpom.service.manage.ProjectInfoService;
+import cn.keepbx.jpom.service.node.manage.ProjectInfoService;
 import cn.keepbx.jpom.service.monitor.MonitorService;
 import cn.keepbx.jpom.service.node.OutGivingServer;
+import cn.keepbx.plugin.ClassFeature;
+import cn.keepbx.plugin.Feature;
+import cn.keepbx.plugin.MethodFeature;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.http.MediaType;
@@ -37,6 +39,7 @@ import java.util.List;
  */
 @Controller
 @RequestMapping(value = "/node/manage/")
+@Feature(cls = ClassFeature.PROJECT)
 public class ProjectManageControl extends BaseServerController {
 
     @Resource
@@ -54,6 +57,7 @@ public class ProjectManageControl extends BaseServerController {
      * @return page
      */
     @RequestMapping(value = "projectInfo", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
+    @Feature(method = MethodFeature.LIST)
     public String projectInfo() {
         List<String> hashSet = projectInfoService.getAllGroup(getNode());
         setAttribute("groups", hashSet);
@@ -78,26 +82,22 @@ public class ProjectManageControl extends BaseServerController {
      */
     @RequestMapping(value = "getProjectInfo", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
+    @Feature(method = MethodFeature.LIST)
     public String getProjectInfo() {
         NodeModel nodeModel = getNode();
-        JsonMessage<JSONArray> jsonMessage = NodeForward.request(nodeModel, getRequest(), NodeUrl.Manage_GetProjectInfo);
-        if (jsonMessage.getCode() == HttpStatus.HTTP_OK) {
-            UserModel userModel = getUser();
-            JSONArray jsonArray = jsonMessage.getData();
-            if (jsonArray != null) {
-                JSONArray newArray = new JSONArray();
-                jsonArray.forEach(o -> {
-                    JSONObject jsonObject = (JSONObject) o;
-                    String id = jsonObject.getString("id");
-                    jsonObject.put("manager", userModel.isProject(nodeModel.getId(), id));
-                    newArray.add(jsonObject);
-                });
-                jsonArray = newArray;
-            }
-            jsonMessage.setData(jsonArray);
-
+        JSONArray jsonArray = projectInfoService.listAll(nodeModel, getRequest());
+        UserModel userModel = getUser();
+        if (jsonArray != null) {
+            JSONArray newArray = new JSONArray();
+            jsonArray.forEach(o -> {
+                JSONObject jsonObject = (JSONObject) o;
+                String id = jsonObject.getString("id");
+                jsonObject.put("manager", userModel.isProject(nodeModel.getId(), id));
+                newArray.add(jsonObject);
+            });
+            jsonArray = newArray;
         }
-        return jsonMessage.toString();
+        return JsonMessage.getString(200, "ok", jsonArray);
     }
 
 
@@ -110,6 +110,7 @@ public class ProjectManageControl extends BaseServerController {
     @ResponseBody
     @ProjectPermission(optType = UserOperateLogV1.OptType.DelProject)
     @UrlPermission(value = Role.NodeManage, optType = UserOperateLogV1.OptType.DelProject)
+    @Feature(method = MethodFeature.DEL)
     public String deleteProject(@ValidatorItem(value = ValidatorRule.NOT_BLANK) String id) throws IOException {
         NodeModel nodeModel = getNode();
         // 检查节点分发

@@ -7,6 +7,7 @@ import cn.keepbx.jpom.common.forward.NodeUrl;
 import cn.keepbx.jpom.common.interceptor.UrlPermission;
 import cn.keepbx.jpom.model.Role;
 import cn.keepbx.jpom.model.log.UserOperateLogV1;
+import cn.keepbx.jpom.service.node.script.ScriptServer;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.http.MediaType;
@@ -14,6 +15,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
+
+import javax.annotation.Resource;
 
 /**
  * 脚本管理
@@ -25,9 +28,12 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @RequestMapping(value = "/node/script")
 public class ScriptController extends BaseServerController {
 
+    @Resource
+    private ScriptServer scriptServer;
+
     @RequestMapping(value = "list.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
     public String list() {
-        JSONArray jsonArray = NodeForward.requestData(getNode(), NodeUrl.Script_List, getRequest(), JSONArray.class);
+        JSONArray jsonArray = scriptServer.listToArray(getNode());
         setAttribute("array", jsonArray);
         return "node/script/list";
     }
