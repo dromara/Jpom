@@ -13,10 +13,10 @@ import cn.jiangzeyin.common.validator.ValidatorRule;
 import cn.keepbx.jpom.common.BaseServerController;
 import cn.keepbx.jpom.common.interceptor.LoginInterceptor;
 import cn.keepbx.jpom.common.interceptor.NotLogin;
+import cn.keepbx.jpom.common.interceptor.OptLog;
 import cn.keepbx.jpom.model.data.UserModel;
 import cn.keepbx.jpom.model.log.UserOperateLogV1;
 import cn.keepbx.jpom.service.user.UserService;
-import cn.keepbx.jpom.system.OperateType;
 import cn.keepbx.jpom.system.ServerExtConfigBean;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
@@ -138,7 +138,7 @@ public class LoginControl extends BaseServerController {
     @RequestMapping(value = "userLogin", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     @NotLogin
-    @OperateType(UserOperateLogV1.OptType.Login)
+    @OptLog(UserOperateLogV1.OptType.Login)
     public String userLogin(
             @ValidatorConfig(value = {
                     @ValidatorItem(value = ValidatorRule.NOT_EMPTY, msg = "请输入登录信息")

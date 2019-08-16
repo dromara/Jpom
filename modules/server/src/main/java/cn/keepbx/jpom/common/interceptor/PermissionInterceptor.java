@@ -32,11 +32,6 @@ public class PermissionInterceptor extends BaseInterceptor {
     private ProjectInfoService projectInfoService;
     private NodeService nodeService;
 
-    private boolean isTomcat(HttpServletRequest request) {
-        String uri = request.getRequestURI();
-        return StrUtil.startWith(uri, TomcatManageController.TOMCAT_URL);
-    }
-
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         if (projectInfoService == null) {
@@ -59,26 +54,26 @@ public class PermissionInterceptor extends BaseInterceptor {
                 request.setAttribute("node", nodeModel);
             }
 
-            UrlPermission urlPermission = handlerMethod.getMethodAnnotation(UrlPermission.class);
-            if (urlPermission != null) {
-                Role role = urlPermission.value();
-                if (role == Role.System && !userModel.isSystemUser()) {
-                    JsonMessage jsonMessage = new JsonMessage(302, "你没有权限:-1");
-                    ServletUtil.write(response, jsonMessage.toString(), MediaType.APPLICATION_JSON_UTF8_VALUE);
-                    return false;
-                }
-                //
-                if (role == Role.ServerManager && !userModel.isServerManager()) {
-                    JsonMessage jsonMessage = new JsonMessage(302, "你没有权限:-3");
-                    ServletUtil.write(response, jsonMessage.toString(), MediaType.APPLICATION_JSON_UTF8_VALUE);
-                    return false;
-                }
-                if (role == Role.NodeManage && !userModel.isManage(nodeId)) {
-                    JsonMessage jsonMessage = new JsonMessage(302, "你没有权限:-2");
-                    ServletUtil.write(response, jsonMessage.toString(), MediaType.APPLICATION_JSON_UTF8_VALUE);
-                    return false;
-                }
-            }
+//            UrlPermission urlPermission = handlerMethod.getMethodAnnotation(UrlPermission.class);
+//            if (urlPermission != null) {
+//                Role role = urlPermission.value();
+//                if (role == Role.System && !userModel.isSystemUser()) {
+//                    JsonMessage jsonMessage = new JsonMessage(302, "你没有权限:-1");
+//                    ServletUtil.write(response, jsonMessage.toString(), MediaType.APPLICATION_JSON_UTF8_VALUE);
+//                    return false;
+//                }
+//                //
+//                if (role == Role.ServerManager && !userModel.isServerManager()) {
+//                    JsonMessage jsonMessage = new JsonMessage(302, "你没有权限:-3");
+//                    ServletUtil.write(response, jsonMessage.toString(), MediaType.APPLICATION_JSON_UTF8_VALUE);
+//                    return false;
+//                }
+//                if (role == Role.NodeManage && !userModel.isManage(nodeId)) {
+//                    JsonMessage jsonMessage = new JsonMessage(302, "你没有权限:-2");
+//                    ServletUtil.write(response, jsonMessage.toString(), MediaType.APPLICATION_JSON_UTF8_VALUE);
+//                    return false;
+//                }
+//            }
         }
         return true;
     }

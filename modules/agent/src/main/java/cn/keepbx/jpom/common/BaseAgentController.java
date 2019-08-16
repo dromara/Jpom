@@ -5,7 +5,6 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.core.util.URLUtil;
 import cn.hutool.extra.servlet.ServletUtil;
 import cn.jiangzeyin.controller.base.AbstractController;
-import cn.keepbx.jpom.model.Role;
 import cn.keepbx.jpom.model.data.ProjectInfoModel;
 import cn.keepbx.jpom.service.manage.ProjectInfoService;
 import cn.keepbx.jpom.system.ConfigBean;
@@ -53,25 +52,6 @@ public abstract class BaseAgentController extends BaseJpomController {
         }
         return getUserName(request);
     }
-
-    /**
-     * 操作的人员是否为系统管理员
-     *
-     * @return true
-     */
-    protected Role getUserRole() {
-        String val = ServletUtil.getHeaderIgnoreCase(getRequest(), ConfigBean.JPOM_SERVER_SYSTEM_USER_ROLE);
-        try {
-            return Role.valueOf(val);
-        } catch (Exception e) {
-            return Role.User;
-        }
-    }
-
-    protected boolean isSystemUser() {
-        return getUserRole() == Role.System;
-    }
-
 
     /**
      * 获取拦截器中缓存的项目信息

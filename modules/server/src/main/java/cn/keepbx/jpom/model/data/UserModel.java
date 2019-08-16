@@ -1,16 +1,10 @@
 package cn.keepbx.jpom.model.data;
 
 import cn.hutool.core.date.DateUtil;
-import cn.hutool.core.map.MapUtil;
 import cn.hutool.crypto.SecureUtil;
-import cn.keepbx.jpom.JpomApplication;
-import cn.keepbx.jpom.model.BaseJsonModel;
 import cn.keepbx.jpom.model.BaseModel;
-import cn.keepbx.jpom.model.Role;
 import cn.keepbx.jpom.system.ServerExtConfigBean;
-import com.alibaba.fastjson.JSONArray;
 
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -56,18 +50,7 @@ public class UserModel extends BaseModel {
      * 记录最后修改时间
      */
     private long modifyTime;
-    /**
-     * 节点权限
-     */
-    private Map<String, NodeRole> nodeRole;
-    /**
-     * 服务管理员
-     */
-    private boolean serverManager;
-    /**
-     * tomcat权限
-     */
-    private Map<String, NodeRole> nodeTomcatRole;
+
     /**
      * 邮箱
      */
@@ -76,55 +59,6 @@ public class UserModel extends BaseModel {
      * 钉钉
      */
     private String dingDing;
-
-    public boolean isServerManager() {
-        if (isSystemUser()) {
-            return true;
-        }
-        return serverManager;
-    }
-
-    public void setServerManager(boolean serverManager) {
-        this.serverManager = serverManager;
-    }
-
-    public Map<String, NodeRole> getNodeRole() {
-        if (nodeRole == null) {
-            nodeRole = MapUtil.newHashMap();
-        }
-        return nodeRole;
-    }
-
-    public void putNodeTomcatRole(NodeRole addNodeRole) {
-        if (nodeTomcatRole == null) {
-            nodeTomcatRole = MapUtil.newHashMap();
-        }
-        nodeTomcatRole.put(addNodeRole.id, addNodeRole);
-    }
-
-    public void removeNodeTomcatRole(String id) {
-        if (nodeTomcatRole != null) {
-            nodeTomcatRole.remove(id);
-        }
-    }
-
-    public void putNodeRole(NodeRole addNodeRole) {
-        if (nodeRole == null) {
-            nodeRole = MapUtil.newHashMap();
-        }
-        nodeRole.put(addNodeRole.id, addNodeRole);
-    }
-
-    public void removeNodeRole(String id) {
-        if (nodeRole != null) {
-            nodeRole.remove(id);
-        }
-    }
-
-
-    public void setNodeRole(Map<String, NodeRole> nodeRole) {
-        this.nodeRole = nodeRole;
-    }
 
     public long getLockTime() {
         return lockTime;
@@ -264,133 +198,6 @@ public class UserModel extends BaseModel {
         return SecureUtil.md5(String.format("%s:%s", getId(), password));
     }
 
-    /**
-     * 是否为节点管理员
-     *
-     * @return true 是
-     */
-    public boolean isManage(String nodeId) {
-        if (isSystemUser()) {
-            return true;
-        }
-        if (nodeRole == null) {
-            return false;
-        }
-        NodeRole item = nodeRole.get(nodeId);
-        if (item == null) {
-            return false;
-        }
-        return item.manage;
-    }
-
-    /**
-     * 是否能管理某个项目
-     *
-     * @param id 项目Id
-     * @return true 能管理，管理员所有项目都能管理
-     */
-    public boolean isProject(String nodeId, String id) {
-        if (isManage(nodeId)) {
-            return true;
-        }
-        // 系统监控权限
-        if (JpomApplication.SYSTEM_ID.equals(id)) {
-            return true;
-        }
-        NodeRole item = nodeRole.get(nodeId);
-        if (item == null) {
-            return false;
-        }
-        if (item.projects == null) {
-            return false;
-        }
-        return item.projects.contains(id);
-    }
-
-    /**
-     * 是否能管理某个tomcat
-     *
-     * @param id tomcatId
-     * @return true 能管理，管理员所有tomcat都能管理
-     */
-    public boolean isTomcat(String nodeId, String id) {
-        if (isManage(nodeId)) {
-            return true;
-        }
-        NodeRole item = getNodeTomcatRole().get(nodeId);
-        if (item == null) {
-            return false;
-        }
-        if (item.projects == null) {
-            return false;
-        }
-        return item.projects.contains(id);
-    }
-
-    /**
-     * 获取是否有上传Tomcat文件的权限
-     *
-     * @return 系统管理员都用权限
-     */
-    public boolean isUploadTomcatFile(String nodeId) {
-        if (isSystemUser()) {
-            return true;
-        }
-        NodeRole item = nodeTomcatRole.get(nodeId);
-        if (item == null) {
-            return false;
-        }
-        return item.uploadFile;
-    }
-
-    /**
-     * 获取是否有删除Tomcat文件的权限
-     *
-     * @return 系统管理员都用权限
-     */
-    public boolean isDeleteTomcatFile(String nodeId) {
-        if (isSystemUser()) {
-            return true;
-        }
-        NodeRole item = nodeTomcatRole.get(nodeId);
-        if (item == null) {
-            return false;
-        }
-        return item.deleteFile;
-    }
-
-    /**
-     * 获取是否有上传文件的权限
-     *
-     * @return 系统管理员都用权限
-     */
-    public boolean isUploadFile(String nodeId) {
-        if (isSystemUser()) {
-            return true;
-        }
-        NodeRole item = nodeRole.get(nodeId);
-        if (item == null) {
-            return false;
-        }
-        return item.uploadFile;
-    }
-
-    /**
-     * 获取是否有删除文件的权限
-     *
-     * @return 系统管理员都用权限
-     */
-    public boolean isDeleteFile(String nodeId) {
-        if (isSystemUser()) {
-            return true;
-        }
-        NodeRole item = nodeRole.get(nodeId);
-        if (item == null) {
-            return false;
-        }
-        return item.deleteFile;
-    }
-
     public boolean isSystemUser() {
         return UserModel.SYSTEM_ADMIN.equals(getParent());
     }
@@ -426,111 +233,5 @@ public class UserModel extends BaseModel {
             userId = userModel.getId();
         }
         return userId;
-    }
-
-    /**
-     * 获取用户的角色
-     *
-     * @param nodeModel 对应节点
-     * @return role
-     */
-    public Role getUserRole(NodeModel nodeModel) {
-        if (isSystemUser()) {
-            return Role.System;
-        }
-        if (isManage(nodeModel.getId())) {
-            return Role.NodeManage;
-        }
-        return Role.User;
-    }
-
-    public Map<String, NodeRole> getNodeTomcatRole() {
-        if (nodeTomcatRole == null) {
-            nodeTomcatRole = MapUtil.newHashMap();
-        }
-        return nodeTomcatRole;
-    }
-
-    public void setNodeTomcatRole(Map<String, NodeRole> nodeTomcatRole) {
-        this.nodeTomcatRole = nodeTomcatRole;
-    }
-
-    /**
-     * 节点权限
-     */
-    public static class NodeRole extends BaseJsonModel {
-        private String id;
-
-        /**
-         * 是否为管理员
-         */
-        private boolean manage;
-        /**
-         * 上传文件权限
-         */
-        private boolean uploadFile;
-        /**
-         * 删除文件权限
-         */
-        private boolean deleteFile;
-        /**
-         * 授权的项目集
-         */
-        private JSONArray projects;
-
-        public void setManage(boolean manage) {
-            this.manage = manage;
-        }
-
-        public String getId() {
-            return id;
-        }
-
-        public void setId(String id) {
-            this.id = id;
-        }
-
-        /**
-         * 获取是否有上传文件的权限
-         *
-         * @return 系统管理员都用权限
-         */
-        public boolean isUploadFile() {
-            return uploadFile;
-        }
-
-        public void setUploadFile(boolean uploadFile) {
-            this.uploadFile = uploadFile;
-        }
-
-        /**
-         * 获取是否有删除文件的权限
-         *
-         * @return 系统管理员都用权限
-         */
-        public boolean isDeleteFile() {
-            return deleteFile;
-        }
-
-        public void setDeleteFile(boolean deleteFile) {
-            this.deleteFile = deleteFile;
-        }
-
-        /**
-         * 是否为管理员
-         *
-         * @return true 是
-         */
-        public boolean isManage() {
-            return manage;
-        }
-
-        public JSONArray getProjects() {
-            return projects;
-        }
-
-        public void setProjects(JSONArray projects) {
-            this.projects = projects;
-        }
     }
 }

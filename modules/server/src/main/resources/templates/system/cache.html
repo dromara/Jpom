@@ -60,9 +60,8 @@
 </body>
 <script>
     function loadSuccess() {
-        if ([[${session.user.isSystemUser()}]]) {
-            $(".clear").show();
-        }
+
+        $(".clear").show();
         if ([[${node!=null?true:false}]]) {
             getCache("[[${node?.id}]]");
         }

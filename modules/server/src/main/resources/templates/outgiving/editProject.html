@@ -105,7 +105,7 @@
             </a>
         </div>
 
-        <div th:if="${session.user.isServerManager()}" class="layui-form-item" style="padding-left: 20%;">
+        <div class="layui-form-item" style="padding-left: 20%;">
             <button class="layui-btn layui-btn-normal" lay-submit lay-filter="submitProject" id="project_submit">提交
             </button>
             <a th:if="${item}" class="layui-btn layui-btn-warm" th:data-id="${item.id}" id="delete_project">删除</a>
@@ -149,7 +149,7 @@
 
             <div class="layui-layout-right" style="padding-right: 10%;">
 
-                <button th:if="${session.user.isServerManager()}" op="del_node"
+                <button op="del_node"
                         class="layui-btn layui-btn-sm layui-btn-warm">
                     <i class="layui-icon">&#xe640;</i>
                     删除

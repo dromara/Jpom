@@ -8,7 +8,7 @@
     Tomcat管理功能目前还未完善，建议不要在生产环境中使用
 </blockquote>
 <div class="layui-row">
-    <button th:if="${session.user.isSystemUser()}" onclick="editTomcat('');" class="layui-btn layui-btn-sm">添加Tomcat
+    <button onclick="editTomcat('');" class="layui-btn layui-btn-sm">添加Tomcat
     </button>
     <button onclick="refreshList();" class="layui-btn layui-btn-sm">刷新列表</button>
 </div>
@@ -27,30 +27,29 @@
                     查看日志
                 </button>
 
-                <button th:if="${session.user.isSystemUser()}" op="edit" th:data-id="${item.id}"
+                <button op="edit" th:data-id="${item.id}"
                         th:data-name="${item.name}" class="layui-btn layui-btn-sm ">
                     编辑
                 </button>
 
-                <button th:if="${session.user.isUploadTomcatFile(node.id)}" th:id="'uploadFile_'+${item.id}"
+                <button th:id="'uploadFile_'+${item.id}"
                         style="margin-right: 10px;" class="layui-btn layui-btn-sm">
                     <i class="layui-icon">&#xe67c;</i>上传WAR
                 </button>
 
-                <th:block th:if="${session.user.isTomcat(node.id,item.id)}">
-                    <button op="start" th:data-op="${item.id}" th:data-id="${item.id}" th:data-name="${item.name}"
-                            class="layui-btn layui-btn-sm">
-                        启动
-                    </button>
-                    <button op="stop" th:data-op="${item.id}" th:data-id="${item.id}" th:data-name="${item.name}"
-                            class="layui-btn layui-btn-sm layui-btn-danger">
-                        停止
-                    </button>
-                    <button op="restart" th:data-op="${item.id}" th:data-id="${item.id}" th:data-name="${item.name}"
-                            class="layui-btn layui-btn-sm  layui-btn-danger">
-                        重启
-                    </button>
-                </th:block>
+
+                <button op="start" th:data-op="${item.id}" th:data-id="${item.id}" th:data-name="${item.name}"
+                        class="layui-btn layui-btn-sm">
+                    启动
+                </button>
+                <button op="stop" th:data-op="${item.id}" th:data-id="${item.id}" th:data-name="${item.name}"
+                        class="layui-btn layui-btn-sm layui-btn-danger">
+                    停止
+                </button>
+                <button op="restart" th:data-op="${item.id}" th:data-id="${item.id}" th:data-name="${item.name}"
+                        class="layui-btn layui-btn-sm  layui-btn-danger">
+                    重启
+                </button>
             </div>
         </div>
         <div class="layui-colla-content layui-show">
@@ -132,7 +131,7 @@
     <a href="javascript:;" class="layui-btn  layui-btn-sm layui-btn-warm" lay-event="stop">停止</a>
     <a href="javascript:;" class="layui-btn  layui-btn-sm layui-btn-warm" lay-event="reload">重启</a>
     {{# } }}
-    <a th:if="${session.user.isSystemUser()}" href="javascript:;" class="layui-btn  layui-btn-sm layui-btn-danger"
+    <a href="javascript:;" class="layui-btn  layui-btn-sm layui-btn-danger"
        lay-event="delete">删除</a>
 
 </script>

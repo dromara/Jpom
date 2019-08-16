@@ -1,18 +1,14 @@
 package cn.keepbx.jpom.service.user;
 
-import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.keepbx.jpom.common.BaseOperService;
 import cn.keepbx.jpom.model.data.UserModel;
 import cn.keepbx.jpom.system.ServerConfigBean;
+import cn.keepbx.plugin.ClassFeature;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 /**
@@ -101,6 +97,10 @@ public class UserService extends BaseOperService<UserModel> {
     @Override
     public List<UserModel> list() {
         return list(true);
+    }
+
+    public boolean checkUserPermission(UserModel userModel, ClassFeature classFeature, String dataId) {
+        return true;
     }
 
     /**

@@ -14,9 +14,8 @@ import cn.jiangzeyin.common.validator.ValidatorItem;
 import cn.jiangzeyin.common.validator.ValidatorRule;
 import cn.keepbx.build.BuildUtil;
 import cn.keepbx.jpom.common.BaseServerController;
-import cn.keepbx.jpom.common.interceptor.UrlPermission;
+import cn.keepbx.jpom.common.interceptor.OptLog;
 import cn.keepbx.jpom.model.BaseEnum;
-import cn.keepbx.jpom.model.Role;
 import cn.keepbx.jpom.model.data.BuildModel;
 import cn.keepbx.jpom.model.log.BuildHistoryLog;
 import cn.keepbx.jpom.model.log.UserOperateLogV1;
@@ -180,7 +179,7 @@ public class BuildHistoryController extends BaseServerController {
      * @throws IOException e
      */
     @RequestMapping(value = "delete_log.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    @UrlPermission(value = Role.System, optType = UserOperateLogV1.OptType.DelBuildLog)
+    @OptLog(UserOperateLogV1.OptType.DelBuildLog)
     @ResponseBody
     @Feature(method = MethodFeature.DEL_LOG)
     public String delete(@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据")) String logId) throws IOException, SQLException {

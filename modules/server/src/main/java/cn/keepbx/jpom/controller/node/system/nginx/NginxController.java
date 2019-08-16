@@ -3,8 +3,7 @@ package cn.keepbx.jpom.controller.node.system.nginx;
 import cn.keepbx.jpom.common.BaseServerController;
 import cn.keepbx.jpom.common.forward.NodeForward;
 import cn.keepbx.jpom.common.forward.NodeUrl;
-import cn.keepbx.jpom.common.interceptor.UrlPermission;
-import cn.keepbx.jpom.model.Role;
+import cn.keepbx.jpom.common.interceptor.OptLog;
 import cn.keepbx.jpom.model.data.UserModel;
 import cn.keepbx.jpom.model.log.UserOperateLogV1;
 import cn.keepbx.jpom.service.system.WhitelistDirectoryService;
@@ -54,21 +53,18 @@ public class NginxController extends BaseServerController {
     @RequestMapping(value = "item.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
     @Feature(method = MethodFeature.EDIT)
     public String setting(String type) {
-        UserModel userModel = getUserModel();
-        if (userModel.isServerManager()) {
-            List<String> ngxDirectory = whitelistDirectoryService.getNgxDirectory(getNode());
-            setAttribute("nginx", ngxDirectory);
-            setAttribute("type", type);
-            JSONObject data = NodeForward.requestData(getNode(), NodeUrl.System_Nginx_item_data, getRequest(), JSONObject.class);
-            setAttribute("data", data);
-        }
+        List<String> ngxDirectory = whitelistDirectoryService.getNgxDirectory(getNode());
+        setAttribute("nginx", ngxDirectory);
+        setAttribute("type", type);
+        JSONObject data = NodeForward.requestData(getNode(), NodeUrl.System_Nginx_item_data, getRequest(), JSONObject.class);
+        setAttribute("data", data);
         return "node/system/nginxSetting";
     }
 
 
     @RequestMapping(value = "updateNgx", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
-    @UrlPermission(value = Role.NodeManage, optType = UserOperateLogV1.OptType.SaveNginx)
+    @OptLog(UserOperateLogV1.OptType.SaveNginx)
     @Feature(method = MethodFeature.EDIT)
     public String updateNgx() {
         return NodeForward.request(getNode(), getRequest(), NodeUrl.System_Nginx_updateNgx).toString();
@@ -77,7 +73,7 @@ public class NginxController extends BaseServerController {
 
     @RequestMapping(value = "delete", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
-    @UrlPermission(value = Role.NodeManage, optType = UserOperateLogV1.OptType.DelNginx)
+    @OptLog(UserOperateLogV1.OptType.DelNginx)
     @Feature(method = MethodFeature.DEL)
     public String delete() {
         return NodeForward.request(getNode(), getRequest(), NodeUrl.System_Nginx_delete).toString();

@@ -176,19 +176,17 @@ public class NginxController extends BaseAgentController {
      */
     private boolean checkRootRole(NgxBlock ngxBlock) {
 //        UserModel userModel = getUser();
-        List<NgxEntry> locationAll = ngxBlock.findAll(NgxBlock.class, "location");
-        if (locationAll != null) {
-            for (NgxEntry ngxEntry1 : locationAll) {
-                NgxBlock ngxBlock1 = (NgxBlock) ngxEntry1;
-                NgxParam locationMain = ngxBlock1.findParam("root");
-                if (locationMain == null) {
-                    locationMain = ngxBlock1.findParam("alias");
-                }
-                if (locationMain != null && !isSystemUser()) {
-                    return false;
-                }
-            }
-        }
+    //        List<NgxEntry> locationAll = ngxBlock.findAll(NgxBlock.class, "location");
+        //        if (locationAll != null) {
+        //            for (NgxEntry ngxEntry1 : locationAll) {
+        //                NgxBlock ngxBlock1 = (NgxBlock) ngxEntry1;
+        //                NgxParam locationMain = ngxBlock1.findParam("root");
+        //                if (locationMain == null) {
+        //                    locationMain = ngxBlock1.findParam("alias");
+        //                }
+        //
+        //            }
+        //        }
         return true;
     }
 

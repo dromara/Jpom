@@ -48,9 +48,6 @@ public class UserListController extends BaseServerController {
     @Feature(method = MethodFeature.LIST)
     public String getUserList() {
         UserModel userName = getUser();
-        if (!userName.isServerManager()) {
-            return JsonMessage.getString(400, "没有权限");
-        }
         List<UserModel> userList = userService.list();
         if (userList != null) {
             userList = userList.stream().filter(userModel -> {

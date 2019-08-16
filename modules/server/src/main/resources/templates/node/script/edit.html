@@ -30,7 +30,7 @@
             </div>
         </div>
 
-        <div th:if="${session.user.isSystemUser()}" class="layui-form-item">
+        <div class="layui-form-item">
             <div class="layui-input-block">
                 <button class="layui-btn" lay-submit lay-filter="formDemo">立即提交</button>
                 <a th:if="${item}" class="layui-btn layui-btn-warm" th:data-id="${item.id}" id="delete">删除</a>

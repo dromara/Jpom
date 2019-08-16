@@ -4,7 +4,7 @@
 </head>
 <body>
 
-<div class="layui-row" th:if="${session.user.isServerManager()}">
+<div class="layui-row">
     <button onclick="editProject('');" class="layui-btn layui-btn-sm layui-btn-normal">添加关联项目</button>
     <button onclick="editAllProject('');" class="layui-btn layui-btn-sm layui-btn-normal">创建分发项目</button>
 </div>
@@ -53,21 +53,17 @@
         };
     </script>
     <script type="text/html" id="bar_opt">
-        <th:block th:if="${session.user.isServerManager()}">
-            {{# if(d.projectName){ }}
-            <a lay-event="conslone" class="layui-btn layui-btn-sm layui-btn-normal">
-                控制台
-            </a>
-            <a lay-event="file" class="layui-btn layui-btn-sm">
-                文件管理
-            </a>
-            {{# }else{ }}
-            {{ d.errorMsg || '数据异常' }}
-            {{# } }}
-        </th:block>
-        <th:block th:unless="${session.user.isServerManager()}">
-            没有权限
-        </th:block>
+
+        {{# if(d.projectName){ }}
+        <a lay-event="conslone" class="layui-btn layui-btn-sm layui-btn-normal">
+            控制台
+        </a>
+        <a lay-event="file" class="layui-btn layui-btn-sm">
+            文件管理
+        </a>
+        {{# }else{ }}
+        {{ d.errorMsg || '数据异常' }}
+        {{# } }}
     </script>
     <div class="layui-colla-item" th:each="item : ${array}">
         <div class="layui-colla-title" th:itemId="${item.id}">
@@ -80,17 +76,17 @@
                         <i class="layui-icon">&#xe669;</i>
                         刷新
                     </button>
-                    <th:block th:if="${session.user.isServerManager()}">
-                        <button op="add" th:id="${item.id}" class="layui-btn layui-btn-sm">
-                            <i class="layui-icon">&#xe609;</i>
-                            分发文件
-                        </button>
-                        <button op="edit" th:outGivingProject="${item.outGivingProject}" th:id="${item.id}"
-                                class="layui-btn layui-btn-sm ">
-                            <i class="layui-icon">&#xe642;</i>
-                            编辑
-                        </button>
-                    </th:block>
+
+                    <button op="add" th:id="${item.id}" class="layui-btn layui-btn-sm">
+                        <i class="layui-icon">&#xe609;</i>
+                        分发文件
+                    </button>
+                    <button op="edit" th:outGivingProject="${item.outGivingProject}" th:id="${item.id}"
+                            class="layui-btn layui-btn-sm ">
+                        <i class="layui-icon">&#xe642;</i>
+                        编辑
+                    </button>
+
                 </div>
             </div>
         </div>

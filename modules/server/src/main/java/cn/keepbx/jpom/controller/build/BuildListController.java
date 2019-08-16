@@ -12,9 +12,8 @@ import cn.jiangzeyin.common.validator.ValidatorItem;
 import cn.jiangzeyin.common.validator.ValidatorRule;
 import cn.keepbx.build.BuildUtil;
 import cn.keepbx.jpom.common.BaseServerController;
-import cn.keepbx.jpom.common.interceptor.UrlPermission;
+import cn.keepbx.jpom.common.interceptor.OptLog;
 import cn.keepbx.jpom.model.BaseEnum;
-import cn.keepbx.jpom.model.Role;
 import cn.keepbx.jpom.model.data.BuildModel;
 import cn.keepbx.jpom.model.data.NodeModel;
 import cn.keepbx.jpom.model.data.OutGivingModel;
@@ -84,7 +83,7 @@ public class BuildListController extends BaseServerController {
 
     @RequestMapping(value = "updateBuild", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
-    @UrlPermission(value = Role.ServerManager, optType = UserOperateLogV1.OptType.EditBuild)
+    @OptLog(UserOperateLogV1.OptType.EditBuild)
     @Feature(method = MethodFeature.EDIT)
     public String updateMonitor(String id,
                                 @ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "构建名称不能为空")) String name,
@@ -224,7 +223,7 @@ public class BuildListController extends BaseServerController {
 
     @RequestMapping(value = "delete.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
-    @UrlPermission(value = Role.System, optType = UserOperateLogV1.OptType.DelBuild)
+    @OptLog(UserOperateLogV1.OptType.DelBuild)
     @Feature(method = MethodFeature.DEL)
     public String delete(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据id") String id) throws IOException, SQLException {
         BuildModel buildModel = buildService.getItem(id);
@@ -242,7 +241,7 @@ public class BuildListController extends BaseServerController {
 
     @RequestMapping(value = "cleanSource.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
-    @UrlPermission(value = Role.ServerManager, optType = UserOperateLogV1.OptType.BuildCleanSource)
+    @OptLog(UserOperateLogV1.OptType.BuildCleanSource)
     @Feature(method = MethodFeature.EXECUTE)
     public String cleanSource(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据id") String id) throws IOException, SQLException {
         BuildModel buildModel = buildService.getItem(id);

@@ -9,9 +9,8 @@ import cn.jiangzeyin.common.validator.ValidatorConfig;
 import cn.jiangzeyin.common.validator.ValidatorItem;
 import cn.jiangzeyin.common.validator.ValidatorRule;
 import cn.keepbx.jpom.common.BaseServerController;
-import cn.keepbx.jpom.common.interceptor.UrlPermission;
+import cn.keepbx.jpom.common.interceptor.OptLog;
 import cn.keepbx.jpom.model.BaseEnum;
-import cn.keepbx.jpom.model.Role;
 import cn.keepbx.jpom.model.data.MonitorModel;
 import cn.keepbx.jpom.model.data.NodeModel;
 import cn.keepbx.jpom.model.data.UserModel;
@@ -112,7 +111,7 @@ public class MonitorListController extends BaseServerController {
      */
     @RequestMapping(value = "deleteMonitor", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
-    @UrlPermission(value = Role.System, optType = UserOperateLogV1.OptType.DelMonitor)
+    @OptLog(UserOperateLogV1.OptType.DelMonitor)
     @Feature(method = MethodFeature.DEL)
     public String deleteMonitor(@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "删除失败")) String id) throws SQLException {
         // 删除日志
@@ -130,7 +129,7 @@ public class MonitorListController extends BaseServerController {
      */
     @RequestMapping(value = "updateMonitor", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
-    @UrlPermission(value = Role.ServerManager, optType = UserOperateLogV1.OptType.EditMonitor)
+    @OptLog(UserOperateLogV1.OptType.EditMonitor)
     @Feature(method = MethodFeature.EDIT)
     public String updateMonitor(String id,
                                 @ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "监控名称不能为空")) String name,
@@ -185,7 +184,7 @@ public class MonitorListController extends BaseServerController {
      */
     @RequestMapping(value = "changeStatus", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
-    @UrlPermission(value = Role.ServerManager, optType = UserOperateLogV1.OptType.ChangeStatusMonitor)
+    @OptLog(UserOperateLogV1.OptType.ChangeStatusMonitor)
     @Feature(method = MethodFeature.EDIT)
     public String changeStatus(@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "id不能为空")) String id,
                                String status, String type) {

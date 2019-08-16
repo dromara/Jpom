@@ -69,7 +69,7 @@ public class IndexControl extends BaseServerController {
     @RequestMapping(value = "menus_data.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     public String menusData() {
-        UserModel user = getUser();
+//        UserModel user = getUser();
         NodeModel nodeModel = tryGetNode();
 
         // 菜单
@@ -84,14 +84,14 @@ public class IndexControl extends BaseServerController {
         JSONArray jsonArray = JSONArray.parseArray(json);
         List<Object> collect1 = jsonArray.stream().filter(o -> {
             JSONObject jsonObject = (JSONObject) o;
-            if (!testMenus(jsonObject, user, nodeModel)) {
+            if (!testMenus(jsonObject)) {
                 return false;
             }
             JSONArray childs = jsonObject.getJSONArray("childs");
             if (childs != null) {
                 List<Object> collect = childs.stream().filter(o1 -> {
                     JSONObject jsonObject1 = (JSONObject) o1;
-                    return testMenus(jsonObject1, user, nodeModel);
+                    return testMenus(jsonObject1);
                 }).collect(Collectors.toList());
                 jsonObject.put("childs", collect);
             }
@@ -100,25 +100,7 @@ public class IndexControl extends BaseServerController {
         return JsonMessage.getString(200, "", collect1);
     }
 
-    private boolean testMenus(JSONObject jsonObject, UserModel user, NodeModel nodeModel) {
-        String role = jsonObject.getString("role");
-        if (StrUtil.isNotEmpty(role)) {
-            Role role1 = Role.valueOf(role);
-            if (role1 == Role.System && !user.isSystemUser()) {
-                return false;
-            }
-            if (role1 == Role.ServerManager && !user.isServerManager()) {
-                return false;
-            }
-            if (role1 == Role.NodeManage) {
-                if (nodeModel == null) {
-                    return false;
-                }
-                if (!user.isManage(nodeModel.getId())) {
-                    return false;
-                }
-            }
-        }
+    private boolean testMenus(JSONObject jsonObject) {
         //
         String dynamic = jsonObject.getString("dynamic");
         if (StrUtil.isNotEmpty(dynamic)) {

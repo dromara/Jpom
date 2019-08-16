@@ -6,14 +6,12 @@ import cn.jiangzeyin.common.validator.ValidatorItem;
 import cn.keepbx.jpom.common.BaseServerController;
 import cn.keepbx.jpom.common.forward.NodeForward;
 import cn.keepbx.jpom.common.forward.NodeUrl;
+import cn.keepbx.jpom.common.interceptor.OptLog;
 import cn.keepbx.jpom.model.RunMode;
-import cn.keepbx.jpom.model.data.NodeModel;
-import cn.keepbx.jpom.model.data.UserModel;
 import cn.keepbx.jpom.model.log.UserOperateLogV1;
 import cn.keepbx.jpom.service.node.manage.ProjectInfoService;
 import cn.keepbx.jpom.service.system.WhitelistDirectoryService;
 import cn.keepbx.jpom.system.ConfigBean;
-import cn.keepbx.jpom.system.OperateType;
 import cn.keepbx.plugin.ClassFeature;
 import cn.keepbx.plugin.Feature;
 import cn.keepbx.plugin.MethodFeature;
@@ -86,18 +84,9 @@ public class EditProjectController extends BaseServerController {
      */
     @RequestMapping(value = "saveProject", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
-    @OperateType(UserOperateLogV1.OptType.SaveProject)
+    @OptLog(UserOperateLogV1.OptType.SaveProject)
     @Feature(method = MethodFeature.EDIT)
-    public String saveProject(String edit, String id) {
-        NodeModel nodeModel = getNode();
-        UserModel userName = getUser();
-        if ("add".equalsIgnoreCase(edit) && !userName.isManage(nodeModel.getId())) {
-            return JsonMessage.getString(400, "管理员才能创建项目!");
-        }
-        if (!userName.isProject(nodeModel.getId(), id)) {
-            JsonMessage jsonMessage = new JsonMessage(300, "你没有改项目的权限");
-            return jsonMessage.toString();
-        }
+    public String saveProject(String id) {
         // 防止和Jpom冲突
         if (StrUtil.isNotEmpty(ConfigBean.getInstance().applicationTag) && ConfigBean.getInstance().applicationTag.equalsIgnoreCase(id)) {
             return JsonMessage.getString(401, "当前项目id已经被Jpom占用");

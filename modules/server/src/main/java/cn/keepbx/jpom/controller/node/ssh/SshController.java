@@ -8,8 +8,7 @@ import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.validator.ValidatorItem;
 import cn.jiangzeyin.common.validator.ValidatorRule;
 import cn.keepbx.jpom.common.BaseServerController;
-import cn.keepbx.jpom.common.interceptor.UrlPermission;
-import cn.keepbx.jpom.model.Role;
+import cn.keepbx.jpom.common.interceptor.OptLog;
 import cn.keepbx.jpom.model.data.AgentWhitelist;
 import cn.keepbx.jpom.model.data.SshModel;
 import cn.keepbx.jpom.model.data.UserModel;
@@ -63,7 +62,7 @@ public class SshController extends BaseServerController {
     }
 
     @RequestMapping(value = "save.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    @UrlPermission(value = Role.System, optType = UserOperateLogV1.OptType.EditSsh)
+    @OptLog(UserOperateLogV1.OptType.EditSsh)
     @ResponseBody
     @Feature(method = MethodFeature.EDIT)
     public String save(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "ssh名称不能为空") String name,
@@ -123,9 +122,7 @@ public class SshController extends BaseServerController {
             UserModel userModel = getUser();
             SshModel sshModel = sshService.getItem(id);
             if (sshModel != null) {
-                if (userModel.isSystemUser()) {
-                    setAttribute("item", sshModel);
-                }
+                setAttribute("item", sshModel);
                 //
                 String fileDirs = AgentWhitelist.convertToLine(sshModel.getFileDirs());
                 setAttribute("fileDirs", fileDirs);

@@ -16,11 +16,9 @@
     <a href="javascript:;" class="layui-btn  layui-btn-sm layui-btn-normal" lay-event="update">编辑</a>
     <a href="javascript:;" class="layui-btn  layui-btn-sm layui-btn-danger" lay-event="delete">删除</a>
 
-    <th:block th:if="${session.user.isSystemUser()}">
-        {{# if(d.pwdErrorCount>0){ }}
-        <a href="javascript:;" class="layui-btn  layui-btn-sm layui-btn-warm" lay-event="unlock">解锁</a>
-        {{# } }}
-    </th:block>
+    {{# if(d.pwdErrorCount>0){ }}
+    <a href="javascript:;" class="layui-btn  layui-btn-sm layui-btn-warm" lay-event="unlock">解锁</a>
+    {{# } }}
 </script>
 <script type="text/html" id="manager_status">
     <div title="登录失败次数：{{d.pwdErrorCount}}">
@@ -122,9 +120,7 @@
             });
         }
     }
-</script>
 
-<script type="text/javascript" th:if="${session.user.isSystemUser()}">
     function unlockUser(data) {
         layer.confirm('确定解锁用户 ' + data.id + '？', {
             title: '系统提示'
@@ -145,5 +141,4 @@
         });
     }
 </script>
-
 </html>

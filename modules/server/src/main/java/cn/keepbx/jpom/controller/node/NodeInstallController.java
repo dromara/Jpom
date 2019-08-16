@@ -4,8 +4,7 @@ import cn.jiangzeyin.common.JsonMessage;
 import cn.keepbx.jpom.common.BaseServerController;
 import cn.keepbx.jpom.common.forward.NodeForward;
 import cn.keepbx.jpom.common.forward.NodeUrl;
-import cn.keepbx.jpom.common.interceptor.UrlPermission;
-import cn.keepbx.jpom.model.Role;
+import cn.keepbx.jpom.common.interceptor.OptLog;
 import cn.keepbx.jpom.model.log.UserOperateLogV1;
 import cn.keepbx.jpom.service.system.WhitelistDirectoryService;
 import cn.keepbx.plugin.ClassFeature;
@@ -34,7 +33,7 @@ public class NodeInstallController extends BaseServerController {
     private WhitelistDirectoryService whitelistDirectoryService;
 
     @RequestMapping(value = "install_node.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    @UrlPermission(value = Role.System, optType = UserOperateLogV1.OptType.InstallNode)
+    @OptLog(UserOperateLogV1.OptType.InstallNode)
     @Feature(method = MethodFeature.INSTALL)
     public String installNode() {
         List<String> list = whitelistDirectoryService.getProjectDirectory(getNode());

@@ -10,8 +10,7 @@ import cn.jiangzeyin.common.validator.ValidatorRule;
 import cn.keepbx.jpom.common.BaseServerController;
 import cn.keepbx.jpom.common.forward.NodeForward;
 import cn.keepbx.jpom.common.forward.NodeUrl;
-import cn.keepbx.jpom.common.interceptor.UrlPermission;
-import cn.keepbx.jpom.model.Role;
+import cn.keepbx.jpom.common.interceptor.OptLog;
 import cn.keepbx.jpom.model.log.UserOperateLogV1;
 import cn.keepbx.jpom.socket.ServiceFileTailWatcher;
 import cn.keepbx.jpom.system.WebAopLog;
@@ -67,7 +66,7 @@ public class LogManageController extends BaseServerController {
      */
     @RequestMapping(value = "log_del.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
-    @UrlPermission(value = Role.System, optType = UserOperateLogV1.OptType.DelSysLog)
+    @OptLog(UserOperateLogV1.OptType.DelSysLog)
     @Feature(method = MethodFeature.DEL_LOG)
     public String logData(String nodeId,
                           @ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "path错误") String path) {

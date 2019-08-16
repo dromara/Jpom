@@ -6,12 +6,9 @@ import cn.keepbx.jpom.common.BaseServerController;
 import cn.keepbx.jpom.common.forward.NodeForward;
 import cn.keepbx.jpom.common.forward.NodeUrl;
 import cn.keepbx.jpom.common.interceptor.OptLog;
-import cn.keepbx.jpom.common.interceptor.UrlPermission;
-import cn.keepbx.jpom.model.Role;
 import cn.keepbx.jpom.model.data.NodeModel;
 import cn.keepbx.jpom.model.log.UserOperateLogV1;
 import cn.keepbx.jpom.service.node.manage.TomcatService;
-import cn.keepbx.jpom.system.OperateType;
 import cn.keepbx.plugin.ClassFeature;
 import cn.keepbx.plugin.Feature;
 import cn.keepbx.plugin.MethodFeature;
@@ -135,7 +132,7 @@ public class TomcatManageController extends BaseServerController {
      */
     @RequestMapping(value = "save", method = RequestMethod.POST, produces = MediaType.TEXT_HTML_VALUE)
     @ResponseBody
-    @UrlPermission(value = Role.System, optType = UserOperateLogV1.OptType.Save_Tomcat)
+    @OptLog(UserOperateLogV1.OptType.Save_Tomcat)
     @Feature(method = MethodFeature.EDIT)
     public String save(String id) {
         NodeModel nodeModel = getNode();
@@ -154,7 +151,7 @@ public class TomcatManageController extends BaseServerController {
      */
     @RequestMapping(value = "delete", method = RequestMethod.POST, produces = MediaType.TEXT_HTML_VALUE)
     @ResponseBody
-    @UrlPermission(value = Role.System, optType = UserOperateLogV1.OptType.Del_Tomcat)
+    @OptLog(UserOperateLogV1.OptType.Del_Tomcat)
     @Feature(method = MethodFeature.DEL)
     public String delete() {
         return tomcatService.delete(getNode(), getRequest());
@@ -257,7 +254,7 @@ public class TomcatManageController extends BaseServerController {
      */
     @RequestMapping(value = "download", method = RequestMethod.GET)
     @ResponseBody
-    @OperateType(UserOperateLogV1.OptType.Download_Tomcat)
+    @OptLog(UserOperateLogV1.OptType.Download_Tomcat)
     @Feature(method = MethodFeature.DOWNLOAD)
     public void download() {
         tomcatService.download(getNode(), getRequest(), getResponse());

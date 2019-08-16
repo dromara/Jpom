@@ -1,10 +1,9 @@
-package cn.keepbx.jpom.controller.monitor;
+package cn.keepbx.jpom.controller.node.system;
 
 import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.keepbx.jpom.common.BaseServerController;
-import cn.keepbx.jpom.common.interceptor.UrlPermission;
-import cn.keepbx.jpom.model.Role;
+import cn.keepbx.jpom.common.interceptor.OptLog;
 import cn.keepbx.jpom.model.data.MailAccountModel;
 import cn.keepbx.jpom.model.data.UserModel;
 import cn.keepbx.jpom.model.log.UserOperateLogV1;
@@ -43,12 +42,9 @@ public class MonitorMailConfigController extends BaseServerController {
         return "monitor/mailConfig";
     }
 
-    /**
-     * 展示用户列表
-     */
     @RequestMapping(value = "mailConfig_save.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
-    @UrlPermission(value = Role.System, optType = UserOperateLogV1.OptType.EditMailConfig)
+    @OptLog(UserOperateLogV1.OptType.EditMailConfig)
     public String listData(MailAccountModel mailAccountModel) {
         if (mailAccountModel == null) {
             return JsonMessage.getString(405, "请填写信息");

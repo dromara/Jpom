@@ -13,9 +13,8 @@ import cn.keepbx.build.BuildManage;
 import cn.keepbx.build.BuildUtil;
 import cn.keepbx.build.ReleaseManage;
 import cn.keepbx.jpom.common.BaseServerController;
-import cn.keepbx.jpom.common.interceptor.UrlPermission;
+import cn.keepbx.jpom.common.interceptor.OptLog;
 import cn.keepbx.jpom.model.BaseEnum;
-import cn.keepbx.jpom.model.Role;
 import cn.keepbx.jpom.model.data.BuildModel;
 import cn.keepbx.jpom.model.data.UserModel;
 import cn.keepbx.jpom.model.log.BuildHistoryLog;
@@ -60,7 +59,7 @@ public class BuildManageController extends BaseServerController {
      * @throws IOException e
      */
     @RequestMapping(value = "start.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    @UrlPermission(value = Role.ServerManager, optType = UserOperateLogV1.OptType.StartBuild)
+    @OptLog(UserOperateLogV1.OptType.StartBuild)
     @Feature(method = MethodFeature.EXECUTE)
     public String start(@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据")) String id) throws IOException {
         BuildModel item = buildService.getItem(id);
@@ -99,7 +98,7 @@ public class BuildManageController extends BaseServerController {
      * @throws IOException e
      */
     @RequestMapping(value = "cancel.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    @UrlPermission(value = Role.ServerManager, optType = UserOperateLogV1.OptType.CancelBuild)
+    @OptLog(UserOperateLogV1.OptType.CancelBuild)
     @Feature(method = MethodFeature.EXECUTE)
     public String cancel(@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据")) String id) throws IOException {
         BuildModel item = buildService.getItem(id);
@@ -126,7 +125,7 @@ public class BuildManageController extends BaseServerController {
      * @throws SQLException s
      */
     @RequestMapping(value = "reRelease.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    @UrlPermission(value = Role.ServerManager, optType = UserOperateLogV1.OptType.ReReleaseBuild)
+    @OptLog(UserOperateLogV1.OptType.ReReleaseBuild)
     @Feature(method = MethodFeature.EXECUTE)
     public String reRelease(@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据")) String logId) throws IOException, SQLException {
         BuildHistoryLog buildHistoryLog = dbBuildHistoryLogService.getByKey(logId);

@@ -21,7 +21,7 @@
 
 <body>
 
-<table th:if="${session.user.isManage(node.id)}" class="layui-table">
+<table class="layui-table">
     <thead>
     <tr>
         <th>序号</th>
@@ -56,9 +56,6 @@
     </tr>
     </tbody>
 </table>
-
-<h1 th:unless="${session.user.isManage(node.id)}">你没有权限</h1>
-
 
 <div class="layui-container div-project" id="div-project">
     <div class="layui-form-item">

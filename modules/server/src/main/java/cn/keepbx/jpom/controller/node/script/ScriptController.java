@@ -4,8 +4,7 @@ import cn.hutool.core.util.StrUtil;
 import cn.keepbx.jpom.common.BaseServerController;
 import cn.keepbx.jpom.common.forward.NodeForward;
 import cn.keepbx.jpom.common.forward.NodeUrl;
-import cn.keepbx.jpom.common.interceptor.UrlPermission;
-import cn.keepbx.jpom.model.Role;
+import cn.keepbx.jpom.common.interceptor.OptLog;
 import cn.keepbx.jpom.model.log.UserOperateLogV1;
 import cn.keepbx.jpom.service.node.script.ScriptServer;
 import cn.keepbx.plugin.ClassFeature;
@@ -64,7 +63,7 @@ public class ScriptController extends BaseServerController {
      */
     @RequestMapping(value = "save.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
-    @UrlPermission(value = Role.System, optType = UserOperateLogV1.OptType.Save_Script)
+    @OptLog(UserOperateLogV1.OptType.Save_Script)
     @Feature(method = MethodFeature.EDIT)
     public String save() {
         return NodeForward.request(getNode(), getRequest(), NodeUrl.Script_Save).toString();
@@ -72,7 +71,7 @@ public class ScriptController extends BaseServerController {
 
     @RequestMapping(value = "del.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
-    @UrlPermission(value = Role.System, optType = UserOperateLogV1.OptType.Save_Del)
+    @OptLog(UserOperateLogV1.OptType.Save_Del)
     @Feature(method = MethodFeature.DEL)
     public String del() {
         return NodeForward.request(getNode(), getRequest(), NodeUrl.Script_Del).toString();
@@ -85,7 +84,7 @@ public class ScriptController extends BaseServerController {
      */
     @RequestMapping(value = "upload", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
-    @UrlPermission(value = Role.System, optType = UserOperateLogV1.OptType.Save_Upload)
+    @OptLog(UserOperateLogV1.OptType.Save_Upload)
     @Feature(method = MethodFeature.UPLOAD)
     public String upload() {
         return NodeForward.requestMultipart(getNode(), getMultiRequest(), NodeUrl.Script_Upload).toString();

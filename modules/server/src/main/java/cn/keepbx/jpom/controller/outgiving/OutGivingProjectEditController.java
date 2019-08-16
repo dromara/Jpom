@@ -7,8 +7,7 @@ import cn.jiangzeyin.common.JsonMessage;
 import cn.keepbx.jpom.common.BaseServerController;
 import cn.keepbx.jpom.common.forward.NodeForward;
 import cn.keepbx.jpom.common.forward.NodeUrl;
-import cn.keepbx.jpom.common.interceptor.UrlPermission;
-import cn.keepbx.jpom.model.Role;
+import cn.keepbx.jpom.common.interceptor.OptLog;
 import cn.keepbx.jpom.model.RunMode;
 import cn.keepbx.jpom.model.data.*;
 import cn.keepbx.jpom.model.log.UserOperateLogV1;
@@ -62,14 +61,11 @@ public class OutGivingProjectEditController extends BaseServerController {
         JSONArray runModes = (JSONArray) JSONArray.toJSON(RunMode.values());
         setAttribute("runModes", runModes);
         // 权限
-        UserModel userModel = getUser();
-        if (userModel.isServerManager()) {
-            List<NodeModel> nodeModels = nodeService.list();
-            setAttribute("nodeModels", nodeModels);
-            //
-            String reqId = nodeService.cacheNodeList(nodeModels);
-            setAttribute("reqId", reqId);
-        }
+        List<NodeModel> nodeModels = nodeService.list();
+        setAttribute("nodeModels", nodeModels);
+        //
+        String reqId = nodeService.cacheNodeList(nodeModels);
+        setAttribute("reqId", reqId);
 
         // 白名单
         List<String> jsonArray = serverWhitelistServer.getOutGiving();
@@ -87,7 +83,7 @@ public class OutGivingProjectEditController extends BaseServerController {
      */
     @RequestMapping(value = "save_project", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
-    @UrlPermission(value = Role.ServerManager, optType = UserOperateLogV1.OptType.SaveOutgivingProject)
+    @OptLog(UserOperateLogV1.OptType.SaveOutgivingProject)
     @Feature(method = MethodFeature.EDIT)
     public String save(String id, String type) throws IOException {
         if ("add".equalsIgnoreCase(type)) {
@@ -109,7 +105,7 @@ public class OutGivingProjectEditController extends BaseServerController {
      */
     @RequestMapping(value = "delete_project", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
-    @UrlPermission(value = Role.ServerManager, optType = UserOperateLogV1.OptType.DeleteOutgivingProject)
+    @OptLog(UserOperateLogV1.OptType.DeleteOutgivingProject)
     @Feature(method = MethodFeature.DEL)
     public String delete(String id) throws IOException {
         OutGivingModel outGivingModel = outGivingServer.getItem(id);

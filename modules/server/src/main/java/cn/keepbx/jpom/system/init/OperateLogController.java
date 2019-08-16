@@ -11,7 +11,6 @@ import cn.jiangzeyin.common.PreLoadMethod;
 import cn.jiangzeyin.common.spring.SpringUtil;
 import cn.keepbx.jpom.common.BaseServerController;
 import cn.keepbx.jpom.common.interceptor.OptLog;
-import cn.keepbx.jpom.common.interceptor.UrlPermission;
 import cn.keepbx.jpom.controller.LoginControl;
 import cn.keepbx.jpom.model.data.NodeModel;
 import cn.keepbx.jpom.model.data.UserModel;
@@ -19,7 +18,6 @@ import cn.keepbx.jpom.model.log.UserOperateLogV1;
 import cn.keepbx.jpom.service.dblog.DbUserOperateLogService;
 import cn.keepbx.jpom.service.user.UserService;
 import cn.keepbx.jpom.system.AopLogInterface;
-import cn.keepbx.jpom.system.OperateType;
 import cn.keepbx.jpom.system.WebAopLog;
 import com.alibaba.fastjson.JSONObject;
 import org.aspectj.lang.JoinPoint;
@@ -56,19 +54,9 @@ public class OperateLogController implements AopLogInterface {
             MethodSignature methodSignature = (MethodSignature) signature;
             Method method = methodSignature.getMethod();
             UserOperateLogV1.OptType optType = null;
-            OperateType operateType = method.getAnnotation(OperateType.class);
-            if (operateType == null) {
-                UrlPermission urlPermission = method.getAnnotation(UrlPermission.class);
-                if (urlPermission != null) {
-                    optType = urlPermission.optType();
-                } else {
-                    OptLog optLog = method.getAnnotation(OptLog.class);
-                    if (optLog != null) {
-                        optType = optLog.value();
-                    }
-                }
-            } else {
-                optType = operateType.value();
+            OptLog optLog = method.getAnnotation(OptLog.class);
+            if (optLog != null) {
+                optType = optLog.value();
             }
             if (optType != null) {
                 CacheInfo cacheInfo = new CacheInfo();

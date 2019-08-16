@@ -26,6 +26,7 @@ import java.io.File;
 @RestController
 @RequestMapping(value = "system")
 public class AgentCacheManageController extends BaseAgentController {
+
     /**
      * 缓存信息
      *
@@ -56,9 +57,6 @@ public class AgentCacheManageController extends BaseAgentController {
      */
     @RequestMapping(value = "clearCache", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public String clearCache(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "类型错误") String type) {
-        if (!isSystemUser()) {
-            return JsonMessage.getString(405, "没有权限");
-        }
         switch (type) {
             case "pidPort":
                 AbstractProjectCommander.PID_PORT.clear();

@@ -4,8 +4,7 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.servlet.ServletUtil;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.keepbx.jpom.common.BaseServerController;
-import cn.keepbx.jpom.common.interceptor.UrlPermission;
-import cn.keepbx.jpom.model.Role;
+import cn.keepbx.jpom.common.interceptor.OptLog;
 import cn.keepbx.jpom.model.data.NodeModel;
 import cn.keepbx.jpom.model.data.SshModel;
 import cn.keepbx.jpom.model.data.UserModel;
@@ -60,9 +59,8 @@ public class NodeEditController extends BaseServerController {
     public String edit(String id) throws IOException {
         setAttribute("type", "add");
         if (StrUtil.isNotEmpty(id)) {
-            UserModel userModel = getUser();
             NodeModel nodeModel = nodeService.getItem(id);
-            if (nodeModel != null && userModel.isSystemUser()) {
+            if (nodeModel != null) {
                 setAttribute("item", nodeModel);
                 setAttribute("type", "edit");
             }
@@ -93,7 +91,7 @@ public class NodeEditController extends BaseServerController {
     }
 
     @RequestMapping(value = "save.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    @UrlPermission(value = Role.System, optType = UserOperateLogV1.OptType.EditNode)
+    @OptLog(UserOperateLogV1.OptType.EditNode)
     @ResponseBody
     @Feature(method = MethodFeature.EDIT)
     public String save(String type) throws Exception {
@@ -113,7 +111,7 @@ public class NodeEditController extends BaseServerController {
      * @return json
      */
     @RequestMapping(value = "del.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    @UrlPermission(value = Role.System, optType = UserOperateLogV1.OptType.DelNode)
+    @OptLog(UserOperateLogV1.OptType.DelNode)
     @ResponseBody
     @Feature(method = MethodFeature.DEL)
     public String del(String id) throws IOException {
@@ -133,7 +131,6 @@ public class NodeEditController extends BaseServerController {
         List<UserModel> list = userService.list();
         if (list != null) {
             list.forEach(userModel -> {
-                userModel.removeNodeRole(id);
                 userService.updateItem(userModel);
             });
         }

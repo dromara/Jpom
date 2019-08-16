@@ -34,11 +34,8 @@ public class ProjectRecoverControl extends BaseServerController {
     @RequestMapping(value = "list.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
     @Feature(method = MethodFeature.LIST)
     public String projectInfo() {
-        UserModel userModel = getUser();
-        if (userModel.isManage(getNode().getId())) {
-            List list = NodeForward.requestData(getNode(), NodeUrl.Manage_Recover_List_Data, getRequest(), List.class);
-            setAttribute("array", list);
-        }
+        List list = NodeForward.requestData(getNode(), NodeUrl.Manage_Recover_List_Data, getRequest(), List.class);
+        setAttribute("array", list);
         return "node/manage/project_recover";
     }
 

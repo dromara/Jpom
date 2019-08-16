@@ -7,16 +7,14 @@ import cn.keepbx.jpom.common.BaseServerController;
 import cn.keepbx.jpom.common.forward.NodeForward;
 import cn.keepbx.jpom.common.forward.NodeUrl;
 import cn.keepbx.jpom.common.interceptor.OptLog;
-import cn.keepbx.jpom.common.interceptor.UrlPermission;
-import cn.keepbx.jpom.model.Role;
 import cn.keepbx.jpom.model.data.NodeModel;
 import cn.keepbx.jpom.model.data.OutGivingModel;
 import cn.keepbx.jpom.model.data.UserModel;
 import cn.keepbx.jpom.model.log.UserOperateLogV1;
 import cn.keepbx.jpom.service.build.BuildService;
-import cn.keepbx.jpom.service.node.manage.ProjectInfoService;
 import cn.keepbx.jpom.service.monitor.MonitorService;
 import cn.keepbx.jpom.service.node.OutGivingServer;
+import cn.keepbx.jpom.service.node.manage.ProjectInfoService;
 import cn.keepbx.plugin.ClassFeature;
 import cn.keepbx.plugin.Feature;
 import cn.keepbx.plugin.MethodFeature;
@@ -86,17 +84,6 @@ public class ProjectManageControl extends BaseServerController {
     public String getProjectInfo() {
         NodeModel nodeModel = getNode();
         JSONArray jsonArray = projectInfoService.listAll(nodeModel, getRequest());
-        UserModel userModel = getUser();
-        if (jsonArray != null) {
-            JSONArray newArray = new JSONArray();
-            jsonArray.forEach(o -> {
-                JSONObject jsonObject = (JSONObject) o;
-                String id = jsonObject.getString("id");
-                jsonObject.put("manager", userModel.isProject(nodeModel.getId(), id));
-                newArray.add(jsonObject);
-            });
-            jsonArray = newArray;
-        }
         return JsonMessage.getString(200, "ok", jsonArray);
     }
 
@@ -109,7 +96,6 @@ public class ProjectManageControl extends BaseServerController {
     @RequestMapping(value = "deleteProject", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     @OptLog(value = UserOperateLogV1.OptType.DelProject)
-    @UrlPermission(value = Role.NodeManage, optType = UserOperateLogV1.OptType.DelProject)
     @Feature(method = MethodFeature.DEL)
     public String deleteProject(@ValidatorItem(value = ValidatorRule.NOT_BLANK) String id) throws IOException {
         NodeModel nodeModel = getNode();

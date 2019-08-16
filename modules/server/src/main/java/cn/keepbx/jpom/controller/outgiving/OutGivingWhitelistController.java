@@ -4,8 +4,7 @@ import cn.hutool.core.text.StrSpliter;
 import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.keepbx.jpom.common.BaseServerController;
-import cn.keepbx.jpom.common.interceptor.UrlPermission;
-import cn.keepbx.jpom.model.Role;
+import cn.keepbx.jpom.common.interceptor.OptLog;
 import cn.keepbx.jpom.model.data.AgentWhitelist;
 import cn.keepbx.jpom.model.data.ServerWhitelist;
 import cn.keepbx.jpom.model.data.UserModel;
@@ -59,8 +58,7 @@ public class OutGivingWhitelistController extends BaseServerController {
      */
     @RequestMapping(value = "whitelistDirectory_submit", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
-    @UrlPermission(value = Role.System, optType = UserOperateLogV1.OptType.SaveOutgivingWhitelist)
-    @Feature(method = MethodFeature.WHITELIST)
+    @OptLog(UserOperateLogV1.OptType.SaveOutgivingWhitelist)
     public String whitelistDirectorySubmit(String data) {
         List<String> list = StrSpliter.splitTrim(data, StrUtil.LF, true);
         if (list == null || list.size() <= 0) {

@@ -3,8 +3,7 @@ package cn.keepbx.jpom.controller.node.system.ssl;
 import cn.keepbx.jpom.common.BaseServerController;
 import cn.keepbx.jpom.common.forward.NodeForward;
 import cn.keepbx.jpom.common.forward.NodeUrl;
-import cn.keepbx.jpom.common.interceptor.UrlPermission;
-import cn.keepbx.jpom.model.Role;
+import cn.keepbx.jpom.common.interceptor.OptLog;
 import cn.keepbx.jpom.model.log.UserOperateLogV1;
 import cn.keepbx.jpom.service.system.WhitelistDirectoryService;
 import cn.keepbx.plugin.ClassFeature;
@@ -49,7 +48,7 @@ public class CertificateController extends BaseServerController {
      */
     @RequestMapping(value = "/saveCertificate", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
-    @UrlPermission(value = Role.NodeManage, optType = UserOperateLogV1.OptType.SaveCert)
+    @OptLog(UserOperateLogV1.OptType.SaveCert)
     @Feature(method = MethodFeature.EDIT)
     public String saveCertificate() {
         if (ServletFileUpload.isMultipartContent(getRequest())) {
@@ -77,7 +76,7 @@ public class CertificateController extends BaseServerController {
      */
     @RequestMapping(value = "/delete", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
-    @UrlPermission(value = Role.System, optType = UserOperateLogV1.OptType.DelCert)
+    @OptLog(UserOperateLogV1.OptType.DelCert)
     @Feature(method = MethodFeature.DEL)
     public String delete(String id) {
         return NodeForward.request(getNode(), getRequest(), NodeUrl.System_Certificate_delete).toString();
@@ -89,7 +88,7 @@ public class CertificateController extends BaseServerController {
      */
     @RequestMapping(value = "/export", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
-    @UrlPermission(value = Role.NodeManage, optType = UserOperateLogV1.OptType.ExportCert)
+    @OptLog(UserOperateLogV1.OptType.ExportCert)
     @Feature(method = MethodFeature.DOWNLOAD)
     public void export(String id) {
         NodeForward.requestDownload(getNode(), getRequest(), getResponse(), NodeUrl.System_Certificate_export);

@@ -7,13 +7,12 @@ import cn.jiangzeyin.controller.multipart.MultipartFileBuilder;
 import cn.keepbx.jpom.JpomApplication;
 import cn.keepbx.jpom.JpomServerApplication;
 import cn.keepbx.jpom.common.BaseServerController;
+import cn.keepbx.jpom.common.JpomManifest;
 import cn.keepbx.jpom.common.forward.NodeForward;
 import cn.keepbx.jpom.common.forward.NodeUrl;
-import cn.keepbx.jpom.common.interceptor.UrlPermission;
-import cn.keepbx.jpom.model.Role;
+import cn.keepbx.jpom.common.interceptor.OptLog;
 import cn.keepbx.jpom.model.data.NodeModel;
 import cn.keepbx.jpom.model.log.UserOperateLogV1;
-import cn.keepbx.jpom.common.JpomManifest;
 import cn.keepbx.jpom.system.ServerConfigBean;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
@@ -51,7 +50,7 @@ public class SystemUpdateController extends BaseServerController {
 
     @RequestMapping(value = "uploadJar.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
-    @UrlPermission(value = Role.System, optType = UserOperateLogV1.OptType.UpdateSys)
+    @OptLog(UserOperateLogV1.OptType.UpdateSys)
     public String uploadJar() throws IOException {
         if (SystemUtil.getOsInfo().isWindows()) {
             return JsonMessage.getString(100, "windows 环境暂不支持在线升级");

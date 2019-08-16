@@ -10,8 +10,7 @@ import cn.jiangzeyin.common.validator.ValidatorRule;
 import cn.keepbx.jpom.JpomApplication;
 import cn.keepbx.jpom.common.BaseServerController;
 import cn.keepbx.jpom.common.interceptor.LoginInterceptor;
-import cn.keepbx.jpom.common.interceptor.UrlPermission;
-import cn.keepbx.jpom.model.Role;
+import cn.keepbx.jpom.common.interceptor.OptLog;
 import cn.keepbx.jpom.model.data.NodeModel;
 import cn.keepbx.jpom.model.data.UserModel;
 import cn.keepbx.jpom.model.log.UserOperateLogV1;
@@ -110,7 +109,7 @@ public class UserInfoController extends BaseServerController {
      * @return String
      */
     @RequestMapping(value = "deleteUser", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    @UrlPermission(value = Role.ServerManager, optType = UserOperateLogV1.OptType.DelUer)
+    @OptLog(UserOperateLogV1.OptType.DelUer)
     @Feature(method = MethodFeature.DEL)
     public String deleteUser(String id) {
         UserModel userName = getUser();
@@ -139,7 +138,7 @@ public class UserInfoController extends BaseServerController {
      * @return String
      */
     @RequestMapping(value = "addUser", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    @UrlPermission(value = Role.ServerManager, optType = UserOperateLogV1.OptType.AddUer)
+    @OptLog(UserOperateLogV1.OptType.AddUer)
     @Feature(method = MethodFeature.EDIT)
     public String addUser(String id) {
         if (JpomApplication.SYSTEM_ID.equalsIgnoreCase(id)) {
@@ -206,85 +205,6 @@ public class UserInfoController extends BaseServerController {
             }
             userModel.setPassword(password);
         }
-        return parseRole(userName, userModel);
-    }
-
-    private String parseRole(UserModel optUser, UserModel userModel) {
-        String reqId = getParameter("reqId");
-        List<NodeModel> list = nodeService.getNodeModel(reqId);
-        if (list == null) {
-            return JsonMessage.getString(401, "页面请求超时");
-        }
-        // 服务管理员
-        boolean manageB = "true".equals(getParameter("serverManager"));
-        if (!optUser.isSystemUser() && manageB) {
-            return JsonMessage.getString(402, "你不是系统管理员不能创建服务管理员");
-        }
-        userModel.setServerManager(manageB);
-
-        UserModel.NodeRole nodeRole;
-        UserModel.NodeRole nodeTomcatRole;
-        String projects = getParameter("projects");
-        JSONObject projectsJson = null;
-        if (StrUtil.isNotEmpty(projects)) {
-            projectsJson = JSONObject.parseObject(projects);
-        }
-        for (NodeModel nodeModel : list) {
-            nodeRole = new UserModel.NodeRole();
-            nodeTomcatRole = new UserModel.NodeRole();
-            nodeRole.setId(nodeModel.getId());
-            nodeTomcatRole.setId(nodeModel.getId());
-
-            manageB = "true".equals(getParameter(StrUtil.format("{}_manage", nodeRole.getId())));
-            nodeRole.setManage(manageB);
-            nodeTomcatRole.setManage(manageB);
-
-            manageB = "true".equals(getParameter(StrUtil.format("{}_uploadFile", nodeRole.getId())));
-            // 如果操作人没有权限  就不能管理被操作者
-            if (!optUser.isUploadFile(nodeModel.getId()) && manageB) {
-                return JsonMessage.getString(402, "你没有管理上传文件的权限");
-            }
-            nodeRole.setUploadFile(manageB);
-
-            manageB = "true".equals(getParameter(StrUtil.format("{}_uploadTomcatFile", nodeRole.getId())));
-            if (!optUser.isUploadTomcatFile(nodeModel.getId()) && manageB) {
-                return JsonMessage.getString(402, "你没有管理上传Tomcat文件的权限");
-            }
-            nodeTomcatRole.setUploadFile(manageB);
-
-            manageB = "true".equals(getParameter(StrUtil.format("{}_deleteFile", nodeRole.getId())));
-            if (!optUser.isDeleteFile(nodeModel.getId()) && manageB) {
-                return JsonMessage.getString(402, "你没有管理删除文件的权限");
-            }
-            nodeRole.setDeleteFile(manageB);
-
-            manageB = "true".equals(getParameter(StrUtil.format("{}_deleteTomcatFile", nodeRole.getId())));
-            if (!optUser.isDeleteTomcatFile(nodeModel.getId()) && manageB) {
-                return JsonMessage.getString(402, "你没有管理删除Tomcat文件的权限");
-            }
-            nodeTomcatRole.setDeleteFile(manageB);
-
-            JSONArray jsonArray = nodeModel.getProjects();
-            if (jsonArray != null && projectsJson != null) {
-                JSONArray jsonArray1 = projectsJson.getJSONArray(nodeModel.getId());
-                nodeRole.setProjects(jsonArray1);
-            }
-            JSONArray tomcatList = tomcatService.getTomcatList(nodeModel);
-            if (tomcatList != null && tomcatList.size() > 0) {
-                JSONArray jsonArray1 = new JSONArray();
-                tomcatList.forEach(o -> {
-                    JSONObject data = (JSONObject) o;
-                    String id1 = data.getString("id");
-                    String val = getParameter(StrUtil.format("p_{}_{}", nodeModel.getId(), id1));
-                    if (id1.equals(val)) {
-                        jsonArray1.add(id1);
-                    }
-                });
-                nodeTomcatRole.setProjects(jsonArray1);
-            }
-            userModel.putNodeRole(nodeRole);
-            userModel.putNodeTomcatRole(nodeTomcatRole);
-        }
         return null;
     }
 
@@ -295,7 +215,7 @@ public class UserInfoController extends BaseServerController {
      * @return String
      */
     @RequestMapping(value = "updateUser", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    @UrlPermission(value = Role.ServerManager, optType = UserOperateLogV1.OptType.EditUer)
+    @OptLog(UserOperateLogV1.OptType.EditUer)
     @Feature(method = MethodFeature.EDIT)
     public String updateUser(String id) {
         UserModel userModel = userService.getItem(id);
@@ -331,7 +251,7 @@ public class UserInfoController extends BaseServerController {
      * @return json
      */
     @RequestMapping(value = "unlock", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    @UrlPermission(value = Role.System, optType = UserOperateLogV1.OptType.UnlockUer)
+    @OptLog(UserOperateLogV1.OptType.UnlockUer)
     @Feature(method = MethodFeature.EDIT)
     public String unlock(String id) {
         UserModel userModel = userService.getItem(id);

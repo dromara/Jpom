@@ -12,8 +12,6 @@ import cn.jiangzeyin.common.interceptor.InterceptorPattens;
 import cn.jiangzeyin.common.spring.SpringUtil;
 import cn.keepbx.jpom.common.BaseServerController;
 import cn.keepbx.jpom.common.ServerOpenApi;
-import cn.keepbx.jpom.model.Role;
-import cn.keepbx.jpom.model.data.NodeModel;
 import cn.keepbx.jpom.model.data.UserModel;
 import cn.keepbx.jpom.service.user.UserService;
 import cn.keepbx.jpom.system.ExtConfigBean;
@@ -87,9 +85,6 @@ public class LoginInterceptor extends BaseJpomInterceptor {
             }
         }
         reload();
-        if (user != null) {
-            checkRoleDesc(request, user);
-        }
         //
         return true;
     }
@@ -112,27 +107,6 @@ public class LoginInterceptor extends BaseJpomInterceptor {
             return false;
         }
         return true;
-    }
-
-    private void checkRoleDesc(HttpServletRequest request, UserModel userModel) {
-        NodeModel node = (NodeModel) request.getAttribute("node");
-        String roleDesc;
-        if (userModel.isSystemUser()) {
-            roleDesc = Role.System.getDesc();
-        } else {
-            if (node != null) {
-                if (userModel.isManage(node.getId())) {
-                    roleDesc = Role.NodeManage.getDesc();
-                } else {
-                    roleDesc = Role.User.getDesc();
-                }
-            } else if (userModel.isServerManager()) {
-                roleDesc = Role.ServerManager.getDesc();
-            } else {
-                roleDesc = Role.User.getDesc();
-            }
-        }
-        request.setAttribute("roleDesc", roleDesc);
     }
 
     /**

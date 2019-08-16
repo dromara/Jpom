@@ -48,7 +48,7 @@
             <button class="layui-btn layui-btn-normal" lay-submit lay-filter="submitNode" id="project_submit">提交
             </button>
 
-            <a th:if="${item!=null && session.user.isSystemUser()}" op="delete"
+            <a th:if="${item!=null}" op="delete"
                onclick="delTomcat('[[${item?.id}]]','[[${item?.name}]]');"
                class="layui-btn layui-btn-danger">
                 移除tomcat
@@ -57,7 +57,7 @@
     </form>
 </div>
 </body>
-<script type="text/javascript" th:if="${item!=null && session.user.isSystemUser()}">
+<script type="text/javascript" th:if="${item!=null}">
     function delTomcat(id, name) {
         layer.confirm('确定移除Tomcat - ' + name + '?', {
             btn: ['确定', '取消']

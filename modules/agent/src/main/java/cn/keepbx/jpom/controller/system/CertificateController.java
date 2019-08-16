@@ -250,9 +250,6 @@ public class CertificateController extends BaseAgentController {
         if (StrUtil.isEmpty(id)) {
             return JsonMessage.getString(400, "删除失败");
         }
-        if (!isSystemUser()) {
-            return JsonMessage.getString(400, "你没有操作权限");
-        }
         certService.deleteItem(id);
         return JsonMessage.getString(200, "删除成功");
     }

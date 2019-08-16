@@ -12,7 +12,6 @@ import cn.jiangzeyin.common.JsonMessage;
 import cn.keepbx.jpom.JpomApplication;
 import cn.keepbx.jpom.common.BaseAgentController;
 import cn.keepbx.jpom.common.commander.AbstractProjectCommander;
-import cn.keepbx.jpom.model.Role;
 import cn.keepbx.jpom.model.RunMode;
 import cn.keepbx.jpom.model.data.ProjectInfoModel;
 import cn.keepbx.jpom.service.WhitelistDirectoryService;
@@ -81,24 +80,14 @@ public class EditProjectController extends BaseAgentController {
         }
         // 判断是否为分发添加
         String strOutGivingProject = getParameter("outGivingProject");
-        boolean outGivingProject = Boolean.valueOf(strOutGivingProject);
-        // 检查权限
-        Role role = getUserRole();
-        if (outGivingProject) {
-            if (role != Role.System && role != Role.NodeManage) {
-                return JsonMessage.getString(405, "没有权限操作分发项目管理");
-            }
-        }
+        boolean outGivingProject = Boolean.parseBoolean(strOutGivingProject);
+
         projectInfo.setOutGivingProject(outGivingProject);
         if (!previewData) {
             // 不是预检查数据才效验白名单
             if (!whitelistDirectoryService.checkProjectDirectory(whitelistDirectory)) {
                 if (outGivingProject) {
-                    if (role == Role.System) {
-                        whitelistDirectoryService.addProjectWhiteList(whitelistDirectory);
-                    } else {
-                        return JsonMessage.getString(405, "对应白名单还没有添加,请联系管理员添加");
-                    }
+                    whitelistDirectoryService.addProjectWhiteList(whitelistDirectory);
                 } else {
                     return JsonMessage.getString(401, "请选择正确的项目路径,或者还没有配置白名单");
                 }

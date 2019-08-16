@@ -5,8 +5,7 @@ import cn.jiangzeyin.common.JsonMessage;
 import cn.keepbx.jpom.common.BaseServerController;
 import cn.keepbx.jpom.common.forward.NodeForward;
 import cn.keepbx.jpom.common.forward.NodeUrl;
-import cn.keepbx.jpom.common.interceptor.UrlPermission;
-import cn.keepbx.jpom.model.Role;
+import cn.keepbx.jpom.common.interceptor.OptLog;
 import cn.keepbx.jpom.model.data.NodeModel;
 import cn.keepbx.jpom.model.data.OutGivingModel;
 import cn.keepbx.jpom.model.data.OutGivingNodeProject;
@@ -66,21 +65,20 @@ public class OutGivingController extends BaseServerController {
             }
         }
         UserModel userModel = getUser();
-        if (userModel.isServerManager()) {
-            List<NodeModel> nodeModels = nodeService.listAndProject();
-            setAttribute("nodeModels", nodeModels);
 
-            //
-            String reqId = nodeService.cacheNodeList(nodeModels);
-            setAttribute("reqId", reqId);
+        List<NodeModel> nodeModels = nodeService.listAndProject();
+        setAttribute("nodeModels", nodeModels);
 
-        }
+        //
+        String reqId = nodeService.cacheNodeList(nodeModels);
+        setAttribute("reqId", reqId);
+
         return "outgiving/edit";
     }
 
     @RequestMapping(value = "save", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
-    @UrlPermission(value = Role.ServerManager, optType = UserOperateLogV1.OptType.SaveOutGiving)
+    @OptLog(UserOperateLogV1.OptType.SaveOutGiving)
     @Feature(method = MethodFeature.EDIT)
     public String save(String type, String id) throws IOException {
         if ("add".equalsIgnoreCase(type)) {
@@ -188,7 +186,7 @@ public class OutGivingController extends BaseServerController {
      */
     @RequestMapping(value = "del.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
-    @UrlPermission(value = Role.ServerManager, optType = UserOperateLogV1.OptType.DelOutGiving)
+    @OptLog(UserOperateLogV1.OptType.DelOutGiving)
     @Feature(method = MethodFeature.DEL)
     public String del(String id) throws IOException {
         // 判断构建

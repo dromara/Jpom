@@ -162,7 +162,7 @@
             </div>
         </div>
 
-        <div th:if="${item==null || session.user.isProject(node.id,item?.id)}" class="layui-form-item"
+        <div class="layui-form-item"
              style="padding-left: 20%">
             <th:block th:unless="${item?.outGivingProject}">
                 <button class="layui-btn layui-btn-normal" lay-submit

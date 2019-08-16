@@ -4,7 +4,7 @@
 <head th:replace="common/head::head"></head>
 <body>
 
-<div class="layui-row" th:if="${session.user.isSystemUser()}">
+<div class="layui-row">
     <button onclick="editProject('');" class="layui-btn layui-btn-sm">创建节点</button>
 </div>
 <div class="layui-collapse" style="margin: 10px;" th:unless="${#lists.isEmpty(array)}">
@@ -30,7 +30,7 @@
                     终端
                 </button>
 
-                <button th:if="${session.user.isSystemUser()}" op="edit" th:id="${item.id}"
+                <button op="edit" th:id="${item.id}"
                         class="layui-btn layui-btn-sm ">
                     <i class="layui-icon">&#xe642;</i>
                     编辑

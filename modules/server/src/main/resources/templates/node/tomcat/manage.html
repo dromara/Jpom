@@ -33,7 +33,7 @@
     <div class="layui-col-md9">
         <div class="layui-row">
 
-            <button th:if="${session.user.isUploadTomcatFile(node.id)}" id="uploadFile" class="layui-btn layui-btn-sm">
+            <button id="uploadFile" class="layui-btn layui-btn-sm">
                 <i class="layui-icon">&#xe67c;</i>上传文件
             </button>
             <div class="layui-layout-right" style="padding-right: 20px;padding-top: 10px;">
@@ -51,11 +51,10 @@
 
     <a th:if="${session.user.isDeleteTomcatFile(node.id)}" href="javascript:;"
        class="layui-btn layui-btn-sm layui-btn-danger" lay-event="delete">删除</a>
-    <th:blcok th:if="${session.user.isTomcat(node.id,id)}">
-        {{# if(!d.isDirectory){ }}
-        <a href="javascript:;" class="layui-btn layui-btn-sm layui-btn-normal" lay-event="download">下载</a>
-        {{# } }}
-    </th:blcok>
+
+    {{# if(!d.isDirectory){ }}
+    <a href="javascript:;" class="layui-btn layui-btn-sm layui-btn-normal" lay-event="download">下载</a>
+    {{# } }}
 </script>
 <script type="text/javascript">
     var zTreeObj;

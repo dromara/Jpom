@@ -8,10 +8,8 @@
 <div class="layui-row">
     <button onclick="location.reload();" class="layui-btn layui-btn-sm">刷新表格</button>
 
-    <th:block th:if="${session.user.isSystemUser()}">
-        <button onclick="editItem('');" class="layui-btn layui-btn-sm">添加模板</button>
-        <button id="import" class="layui-btn layui-btn-sm">导入模板</button>
-    </th:block>
+    <button onclick="editItem('');" class="layui-btn layui-btn-sm">添加模板</button>
+    <button id="import" class="layui-btn layui-btn-sm">导入模板</button>
 
 </div>
 <div class="layui-form">
@@ -34,7 +32,7 @@
             <td>
                 <button th:sId="${item.id}" onclick="runScript(this)" class="layui-btn layui-btn-warm layui-btn-sm">执行
                 </button>
-                <button th:sId="${item.id}" th:text="${session.user.isSystemUser()}?'修改':'预览'"
+                <button th:sId="${item.id}" text="修改"
                         onclick="editItem(this)"
                         class="layui-btn layui-btn-sm">
                 </button>
