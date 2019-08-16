@@ -148,7 +148,7 @@
         function loadTopData(topData) {
             //默认刻度数量
             let count = 24;
-            let dataTop = layui.data('top');
+            let dataTop = layui.data('top_[[${node.id}]]');
             let top = [];
             if (dataTop && dataTop.top) {
                 top = dataTop.top;
@@ -235,7 +235,7 @@
             }
             let series = [cpuItem, memoryItem, diskItem];
             loadEcharts(xAxis, series);
-            layui.data('top', {
+            layui.data('top_[[${node.id}]]', {
                 key: 'top',
                 value: array
             });
