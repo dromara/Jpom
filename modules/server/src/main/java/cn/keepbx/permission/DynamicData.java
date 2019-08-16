@@ -2,10 +2,13 @@ package cn.keepbx.permission;
 
 import cn.keepbx.jpom.model.log.UserOperateLogV1;
 import cn.keepbx.jpom.service.BaseDynamicService;
+import cn.keepbx.jpom.service.build.BuildService;
 import cn.keepbx.jpom.service.node.NodeService;
 import cn.keepbx.jpom.service.node.OutGivingServer;
 import cn.keepbx.jpom.service.node.manage.ProjectInfoService;
 import cn.keepbx.jpom.service.node.script.ScriptServer;
+import cn.keepbx.jpom.service.node.ssh.SshService;
+import cn.keepbx.jpom.service.node.tomcat.TomcatService;
 import cn.keepbx.plugin.ClassFeature;
 import cn.keepbx.plugin.MethodFeature;
 
@@ -37,6 +40,12 @@ public class DynamicData {
         put(ClassFeature.PROJECT, new DynamicData(ProjectInfoService.class, MethodFeature.LIST));
         // 脚本
         put(ClassFeature.SCRIPT, new DynamicData(ScriptServer.class, MethodFeature.LIST));
+        //
+        put(ClassFeature.SSH, new DynamicData(SshService.class, MethodFeature.LIST));
+        //
+        put(ClassFeature.TOMCAT, new DynamicData(TomcatService.class, MethodFeature.LIST));
+        //
+        put(ClassFeature.BUILD, new DynamicData(BuildService.class, MethodFeature.LIST));
 
 
         // 系统管理操作权限

@@ -1,4 +1,4 @@
-package cn.keepbx.jpom.service.node.manage;
+package cn.keepbx.jpom.service.node.tomcat;
 
 import cn.keepbx.jpom.common.forward.NodeForward;
 import cn.keepbx.jpom.common.forward.NodeUrl;
@@ -197,6 +197,9 @@ public class TomcatService implements BaseDynamicService {
     @Override
     public JSONArray listToArray(String dataId) {
         NodeModel item = nodeService.getItem(dataId);
+        if (item == null) {
+            return null;
+        }
         return getTomcatList(item);
     }
 }

@@ -4,7 +4,9 @@ import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.keepbx.jpom.common.BaseOperService;
 import cn.keepbx.jpom.model.data.BuildModel;
+import cn.keepbx.jpom.service.BaseDynamicService;
 import cn.keepbx.jpom.system.ServerConfigBean;
+import com.alibaba.fastjson.JSONArray;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -17,7 +19,7 @@ import java.util.List;
  * @date 2019/7/16
  **/
 @Service
-public class BuildService extends BaseOperService<BuildModel> {
+public class BuildService extends BaseOperService<BuildModel> implements BaseDynamicService {
 
     public BuildService() {
         super(ServerConfigBean.BUILD);
@@ -73,5 +75,10 @@ public class BuildService extends BaseOperService<BuildModel> {
             }
         }
         return false;
+    }
+
+    @Override
+    public JSONArray listToArray(String dataId) {
+        return (JSONArray) JSONArray.toJSON(this.list());
     }
 }

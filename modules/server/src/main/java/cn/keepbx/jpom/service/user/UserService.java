@@ -4,7 +4,9 @@ import cn.keepbx.jpom.common.BaseOperService;
 import cn.keepbx.jpom.model.data.RoleModel;
 import cn.keepbx.jpom.model.data.UserModel;
 import cn.keepbx.jpom.system.ServerConfigBean;
+import cn.keepbx.permission.DynamicData;
 import cn.keepbx.plugin.ClassFeature;
+import cn.keepbx.plugin.MethodFeature;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;
 
@@ -105,7 +107,12 @@ public class UserService extends BaseOperService<UserModel> {
         return list(true);
     }
 
-    public boolean checkUserPermission(UserModel userModel, ClassFeature classFeature, String dataId) {
+    public boolean errorDynamicPermission(UserModel userModel, ClassFeature classFeature, String dataId) {
+        DynamicData dynamicData1 = DynamicData.getDynamicDataMap().get(classFeature);
+        if (dynamicData1 == null) {
+            // 如果不是没有动态权限  就默认通过
+            return false;
+        }
         List<String> roles = userModel.getRoles();
         if (roles == null || roles.isEmpty()) {
             return true;
@@ -121,6 +128,27 @@ public class UserService extends BaseOperService<UserModel> {
             }
             List<String> list = dynamicData.get(classFeature);
             if (list.contains(dataId)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public boolean errorMethodPermission(UserModel userModel, ClassFeature classFeature, MethodFeature methodFeature) {
+        List<String> roles = userModel.getRoles();
+        if (roles == null || roles.isEmpty()) {
+            return true;
+        }
+        for (String role : roles) {
+            RoleModel item = roleService.getItem(role);
+            if (item == null) {
+                continue;
+            }
+            List<MethodFeature> methodFeatures = item.getMethodFeature(classFeature);
+            if (methodFeatures == null) {
+                continue;
+            }
+            if (methodFeatures.contains(methodFeature)) {
                 return false;
             }
         }

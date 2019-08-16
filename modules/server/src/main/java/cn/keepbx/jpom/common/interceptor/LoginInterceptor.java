@@ -33,7 +33,7 @@ import java.io.IOException;
  * @author jiangzeyin
  * @date 2017/2/4.
  */
-@InterceptorPattens()
+@InterceptorPattens(sort = -1)
 public class LoginInterceptor extends BaseJpomInterceptor {
     /**
      * session
@@ -48,7 +48,6 @@ public class LoginInterceptor extends BaseJpomInterceptor {
         if (handlerMethod == null) {
             return true;
         }
-        UserModel user = null;
         // 记录请求类型
         boolean isPage = isPage(handlerMethod);
         request.setAttribute("Page_Req", isPage);
@@ -58,7 +57,7 @@ public class LoginInterceptor extends BaseJpomInterceptor {
             notLogin = handlerMethod.getBeanType().getAnnotation(NotLogin.class);
         }
         if (notLogin == null) {
-            user = (UserModel) session.getAttribute(SESSION_NAME);
+            UserModel user = (UserModel) session.getAttribute(SESSION_NAME);
             if (user == null) {
                 this.responseLogin(request, response, handlerMethod);
                 return false;
