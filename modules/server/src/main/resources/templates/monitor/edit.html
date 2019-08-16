@@ -129,11 +129,7 @@
                 success: function (data) {
                     layer.msg(data.msg);
                     if (200 == data.code) {
-                        setTimeout(function () {
-                            var index = parent.layer.getFrameIndex(window.name);
-                            parent.layer.close(index);
-                            parent.location.reload();
-                        }, 1500);
+                        autoClose();
                     }
                 }
             });

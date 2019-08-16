@@ -19,6 +19,10 @@
                 </div>
             </div>
         </div>
+        <div class="layui-form-item" style="padding-left: 20%;margin-top: 20px;">
+            <button class="layui-btn layui-btn-normal" lay-submit lay-filter="submit">提交
+            </button>
+        </div>
     </form>
 </div>
 </body>
@@ -35,6 +39,31 @@
                 var ts = attr.split("_");
                 getData(ts[1]);
             })
+        });
+        //
+        form.on('submit(submit)', function (data) {
+            var checkDyData = {};
+            (".layui-colla-item").each(function () {
+                var find = $(this).find(".layui-colla-content div");
+                var attr = find.attr("id");
+                var checkData = tree.getChecked(attr);
+                var ts = attr.split("_");
+                checkDyData[ts[1]] = checkData;
+            });
+            var dynamic = JSON.stringify(checkDyData);
+            loadingAjax({
+                url: data.form.action,
+                data: {
+                    dynamic: dynamic
+                },
+                success: function (data) {
+                    layer.msg(data.msg);
+                    if (200 === data.code) {
+                        autoClose();
+                    }
+                }
+            });
+            return false;
         });
     }
 
