@@ -9,7 +9,6 @@ import cn.keepbx.jpom.common.BaseServerController;
 import cn.keepbx.jpom.model.data.NodeModel;
 import cn.keepbx.jpom.model.data.UserModel;
 import cn.keepbx.jpom.service.node.NodeService;
-import cn.keepbx.jpom.service.node.manage.ProjectInfoService;
 import cn.keepbx.jpom.service.user.RoleService;
 import cn.keepbx.jpom.system.AgentException;
 import cn.keepbx.permission.DynamicData;
@@ -33,14 +32,10 @@ import java.util.Map;
 @InterceptorPattens(sort = 1)
 public class PermissionInterceptor extends BaseJpomInterceptor {
 
-    private ProjectInfoService projectInfoService;
     private NodeService nodeService;
     private RoleService roleService;
 
     private void init() {
-        if (projectInfoService == null) {
-            projectInfoService = SpringUtil.getBean(ProjectInfoService.class);
-        }
         if (nodeService == null) {
             nodeService = SpringUtil.getBean(NodeService.class);
         }
@@ -72,8 +67,13 @@ public class PermissionInterceptor extends BaseJpomInterceptor {
         if (feature == null || feature.method() == MethodFeature.NULL) {
             return true;
         }
-        // 判断动态权限
         MethodFeature method = feature.method();
+        // 判断方法
+        if (roleService.errorMethodPermission(userModel, classFeature, method)) {
+            this.errorMsg(request, response);
+            return false;
+        }
+        // 判断动态权限
         Map<ClassFeature, DynamicData> dynamicDataMap = DynamicData.getDynamicDataMap();
         DynamicData dynamicData = dynamicDataMap.get(classFeature);
         if (dynamicData != null) {
@@ -100,11 +100,7 @@ public class PermissionInterceptor extends BaseJpomInterceptor {
                 return false;
             }
         }
-        // 判断方法
-        if (roleService.errorMethodPermission(userModel, classFeature, method)) {
-            this.errorMsg(request, response);
-            return false;
-        }
+
         return true;
     }
 
