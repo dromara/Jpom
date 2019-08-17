@@ -1,6 +1,5 @@
 package cn.keepbx.jpom.controller.node.ssh;
 
-import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.text.StrSpliter;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.ssh.JschUtil;
@@ -9,9 +8,10 @@ import cn.jiangzeyin.common.validator.ValidatorItem;
 import cn.jiangzeyin.common.validator.ValidatorRule;
 import cn.keepbx.jpom.common.BaseServerController;
 import cn.keepbx.jpom.common.interceptor.OptLog;
+import cn.keepbx.jpom.model.BaseModel;
 import cn.keepbx.jpom.model.data.AgentWhitelist;
+import cn.keepbx.jpom.model.data.NodeModel;
 import cn.keepbx.jpom.model.data.SshModel;
-import cn.keepbx.jpom.model.data.UserModel;
 import cn.keepbx.jpom.model.log.UserOperateLogV1;
 import cn.keepbx.jpom.service.node.ssh.SshService;
 import cn.keepbx.plugin.ClassFeature;
@@ -25,10 +25,13 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.annotation.Resource;
-import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 /**
  * @author bwcx_jzy
@@ -52,11 +55,24 @@ public class SshController extends BaseServerController {
     @RequestMapping(value = "list_data.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     @Feature(method = MethodFeature.LIST)
-    public String listData() throws IOException {
+    public String listData() {
         List<SshModel> list = sshService.list();
         if (list != null) {
-            // 不返回密码
-            list.forEach(sshModel -> sshModel.setPassword(null));
+            List<NodeModel> list1 = nodeService.list();
+            Map<String, NodeModel> map = new HashMap<>(10);
+            list1.forEach(nodeModel -> {
+                String sshId = nodeModel.getSshId();
+                if (StrUtil.isNotEmpty(sshId)) {
+                    map.put(sshId, nodeModel);
+                }
+            });
+            list.forEach(sshModel -> {
+                // 不返回密码
+                sshModel.setPassword(null);
+                // 节点信息
+                BaseModel nodeModel = map.get(sshModel.getId());
+                sshModel.setNodeModel(nodeModel);
+            });
         }
         return JsonMessage.getString(200, "", list);
     }
@@ -86,12 +102,6 @@ public class SshController extends BaseServerController {
             sshModel.setFileDirs(null);
         } else {
             List<String> list = StrSpliter.splitTrim(fileDirs, StrUtil.LF, true);
-            if (list != null) {
-                for (int i = list.size() - 1; i >= 0; i--) {
-                    String s = list.get(i);
-                    list.set(i, FileUtil.normalize(s));
-                }
-            }
             sshModel.setFileDirs(list);
         }
         sshModel.setHost(host);
@@ -117,9 +127,8 @@ public class SshController extends BaseServerController {
 
     @RequestMapping(value = "edit.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
     @Feature(method = MethodFeature.EDIT)
-    public String edit(String id) throws IOException {
+    public String edit(String id) {
         if (StrUtil.isNotEmpty(id)) {
-            UserModel userModel = getUser();
             SshModel sshModel = sshService.getItem(id);
             if (sshModel != null) {
                 setAttribute("item", sshModel);
@@ -129,14 +138,19 @@ public class SshController extends BaseServerController {
             }
         }
         Collection<Charset> charsets = Charset.availableCharsets().values();
-        setAttribute("charsets", charsets);
-
+        Collection<Charset> collect = charsets.stream().filter(new Predicate<Charset>() {
+            @Override
+            public boolean test(Charset charset) {
+                return !StrUtil.startWithAny(charset.name(), "x", "w", "IBM");
+            }
+        }).collect(Collectors.toList());
+        setAttribute("charsets", collect);
         return "node/ssh/edit";
     }
 
     @RequestMapping(value = "terminal.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
     @Feature(method = MethodFeature.TERMINAL)
-    public String terminal(String id) throws IOException {
+    public String terminal(String id) {
         SshModel sshModel = sshService.getItem(id);
         setAttribute("item", sshModel);
         return "node/ssh/terminal";

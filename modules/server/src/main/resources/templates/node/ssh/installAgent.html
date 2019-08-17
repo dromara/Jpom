@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.w3.org/1999/xhtml">
+
+<head th:replace="common/head::head">
+</head>
+
+<body>
+
+<div class="layui-container">
+    <form action="" class="layui-form" id="form">
+        <div class="layui-form-item">
+            <label class="layui-form-label">安装路径</label>
+            <div class="layui-input-block">
+                <input type="text" id="path" name="path" placeholder="请输入插件端安装路径" class="layui-input" required
+                       lay-verify="required">
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">安装包</label>
+            <div class="layui-input-inline">
+                <button type="button" class="layui-btn" id="selectZip">
+                    <i class="layui-icon">&#xe67c;</i>选择ZIP文件
+                </button>
+                <div class="layui-form-mid layui-word-aux" id="zipResult"></div>
+            </div>
+        </div>
+        <div class="layui-form-item" style="padding-left: 20%;margin-top: 20px;">
+            <button class="layui-btn layui-btn-normal" lay-submit lay-filter="submit">提交
+            </button>
+        </div>
+    </form>
+</div>
+</body>
+<script type="text/javascript">
+    var upload;
+    var uploadRender;
+    var hashSelect;
+    var installPath;
+    var id = getQueryString("id");
+
+    function loadSuccess() {
+        layui.use(['upload'], function () {
+            upload = layui.upload;
+            uploadRender = upload.render({
+                elem: '#selectZip',
+                url: './installAgentSubmit.json',
+                multiple: false,
+                exts: 'zip',
+                acceptMime: '.zip',
+                field: 'file',
+                data: {
+                    path: function () {
+                        return installPath;
+                    },
+                    id: id
+                },
+                auto: false,
+                choose: function (obj) {
+                    hashSelect = true;
+                    obj.preview(function (index, file, result) {
+                        $("#zipResult").html("已选择:" + file.name);
+                    });
+                },
+                before: function (obj) {
+                    layer.load();
+                },
+                done: function (res) {
+                    layer.closeAll('loading');
+                    layer.msg(res.msg);
+                    if (200 === res.code) {
+                        autoClose();
+                    }
+                },
+                error: function () {
+                    layer.msg("上传失败");
+                }
+            });
+        });
+        form.on('submit(submit)', function (data) {
+            installPath = data.field.path;
+            if (!hashSelect) {
+                layer.msg("请选安装包");
+                return false;
+            }
+            uploadRender.upload();
+            return false;
+        });
+    }
+</script>
+</html>

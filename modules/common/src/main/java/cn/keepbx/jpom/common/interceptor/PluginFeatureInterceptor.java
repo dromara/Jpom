@@ -22,7 +22,7 @@ public class PluginFeatureInterceptor extends BaseInterceptor {
     @Override
     public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler, ModelAndView modelAndView) throws Exception {
         super.postHandle(request, response, handler, modelAndView);
-        HandlerMethod handlerMethod = getHandlerMethod();
+        HandlerMethod handlerMethod = getHandlerMethod(handler);
         if (handlerMethod == null) {
             return;
         }

@@ -46,7 +46,7 @@ public class SshFileController extends BaseServerController {
 
     @RequestMapping(value = "file.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
     @Feature(method = MethodFeature.FILE)
-    public String file(String id) throws IOException {
+    public String file(String id) {
         SshModel sshModel = sshService.getItem(id);
         if (sshModel != null) {
             List<String> fileDirs = sshModel.getFileDirs();
@@ -133,7 +133,7 @@ public class SshFileController extends BaseServerController {
         Session session = null;
         ChannelSftp channel = null;
         try {
-            session = JschUtil.openSession(sshModel.getHost(), sshModel.getPort(), sshModel.getUser(), sshModel.getPassword());
+            session = sshService.getSession(sshModel);
             channel = (ChannelSftp) JschUtil.openChannel(session, ChannelType.SFTP);
             String normalize = FileUtil.normalize(path + "/" + name);
             channel.get(normalize, response.getOutputStream());
@@ -157,7 +157,7 @@ public class SshFileController extends BaseServerController {
         Session session = null;
         ChannelSftp channel = null;
         try {
-            session = JschUtil.openSession(sshModel.getHost(), sshModel.getPort(), sshModel.getUser(), sshModel.getPassword());
+            session = sshService.getSession(sshModel);
             channel = (ChannelSftp) JschUtil.openChannel(session, ChannelType.SFTP);
             Vector<ChannelSftp.LsEntry> vector;
             if (StrUtil.isNotEmpty(children)) {
@@ -214,7 +214,7 @@ public class SshFileController extends BaseServerController {
         Session session = null;
         ChannelSftp channel = null;
         try {
-            session = JschUtil.openSession(sshModel.getHost(), sshModel.getPort(), sshModel.getUser(), sshModel.getPassword());
+            session = sshService.getSession(sshModel);
             channel = (ChannelSftp) JschUtil.openChannel(session, ChannelType.SFTP);
             JSONArray jsonArray = new JSONArray();
             for (String item : list) {

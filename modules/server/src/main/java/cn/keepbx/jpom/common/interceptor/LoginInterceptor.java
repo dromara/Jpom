@@ -41,13 +41,8 @@ public class LoginInterceptor extends BaseJpomInterceptor {
     public static final String SESSION_NAME = "user";
 
     @Override
-    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-        super.preHandle(request, response, handler);
+    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, HandlerMethod handlerMethod) throws Exception {
         HttpSession session = getSession();
-        HandlerMethod handlerMethod = getHandlerMethod();
-        if (handlerMethod == null) {
-            return true;
-        }
         // 记录请求类型
         boolean isPage = isPage(handlerMethod);
         request.setAttribute("Page_Req", isPage);

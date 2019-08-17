@@ -45,13 +45,8 @@ public class PermissionInterceptor extends BaseJpomInterceptor {
     }
 
     @Override
-    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
+    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, HandlerMethod handlerMethod) throws Exception {
         this.init();
-        super.preHandle(request, response, handler);
-        HandlerMethod handlerMethod = getHandlerMethod();
-        if (handlerMethod == null) {
-            return true;
-        }
         this.addNode(request);
         UserModel userModel = BaseServerController.getUserModel();
         if (userModel == null || userModel.isSystemUser()) {

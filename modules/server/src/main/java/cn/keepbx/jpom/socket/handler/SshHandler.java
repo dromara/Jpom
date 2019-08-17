@@ -4,7 +4,6 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.io.LineHandler;
 import cn.hutool.core.thread.ThreadUtil;
-import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.ssh.ChannelType;
 import cn.hutool.extra.ssh.JschUtil;
@@ -71,12 +70,7 @@ public class SshHandler extends BaseHandler {
         InputStream inputStream = channel.getInputStream();
         OutputStream outputStream = channel.getOutputStream();
         //
-        Charset charset;
-        try {
-            charset = Charset.forName(sshItem.getCharset());
-        } catch (Exception e) {
-            charset = CharsetUtil.CHARSET_UTF_8;
-        }
+        Charset charset = sshItem.getCharsetT();
         HandlerItem handlerItem = new HandlerItem(session, inputStream, outputStream, openSession, channel, charset);
         handlerItem.startRead();
         HANDLER_ITEM_CONCURRENT_HASH_MAP.put(session.getId(), handlerItem);

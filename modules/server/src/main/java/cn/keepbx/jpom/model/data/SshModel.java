@@ -1,7 +1,10 @@
 package cn.keepbx.jpom.model.data;
 
+import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.util.CharsetUtil;
 import cn.keepbx.jpom.model.BaseModel;
 
+import java.nio.charset.Charset;
 import java.util.List;
 
 /**
@@ -25,11 +28,43 @@ public class SshModel extends BaseModel {
      */
     private List<String> fileDirs;
 
+    /**
+     * 临时缓存model
+     */
+    private BaseModel nodeModel;
+
+    public BaseModel getNodeModel() {
+        return nodeModel;
+    }
+
+    public void setNodeModel(BaseModel nodeModel) {
+        if (nodeModel == null) {
+            return;
+        }
+        this.nodeModel = new BaseModel() {
+            @Override
+            public String getName() {
+                return nodeModel.getName();
+            }
+
+            @Override
+            public String getId() {
+                return nodeModel.getId();
+            }
+        };
+    }
+
     public List<String> getFileDirs() {
         return fileDirs;
     }
 
     public void setFileDirs(List<String> fileDirs) {
+        if (fileDirs != null) {
+            for (int i = fileDirs.size() - 1; i >= 0; i--) {
+                String s = fileDirs.get(i);
+                fileDirs.set(i, FileUtil.normalize(s));
+            }
+        }
         this.fileDirs = fileDirs;
     }
 
@@ -71,5 +106,15 @@ public class SshModel extends BaseModel {
 
     public void setCharset(String charset) {
         this.charset = charset;
+    }
+
+    public Charset getCharsetT() {
+        Charset charset;
+        try {
+            charset = Charset.forName(this.getCharset());
+        } catch (Exception e) {
+            charset = CharsetUtil.CHARSET_UTF_8;
+        }
+        return charset;
     }
 }

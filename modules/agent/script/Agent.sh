@@ -19,7 +19,8 @@
 # IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #!/bin/bash
-
+# ssh 支持读取环境变量
+. /etc/profile
 Tag="KeepBx-Agent-System-JpomAgentApplication"
 # 自动获取当前路径
 Path=$(cd `dirname $0`; pwd)"/"

@@ -6,7 +6,7 @@
 
 <body>
 <div class="layui-row">
-    <button id="add" class="layui-btn layui-btn-sm">添加SSH</button>
+    <button onclick="edit('');" class="layui-btn layui-btn-sm">添加SSH</button>
 </div>
 <table class="layui-table" id="table" lay-filter="table" style="margin: 0;"></table>
 
@@ -20,14 +20,40 @@
     <a href="javascript:;" class="layui-btn  layui-btn-sm  layui-btn-warm" lay-event="files">文件</a>
     {{# } }}
 </script>
+<script type="text/html" id="node_templet">
+    {{# if(d.nodeModel){  }}
+    <a style="color: blue;" th:url="@{${session.jpomProxyPath}+'/node/index.html?nodeId={{d.nodeModel.id}}'}"
+       onclick="goNode(this);">
+        {{ d.nodeModel.name }}
+        <i style="font-size: 10px;" class="layui-icon layui-icon-next"></i>
+    </a>
+    {{# }else{ }}
+    <a style="color: #5FB878;" onclick='install("{{d.id}}")'>
+        安装
+        <i style="font-size: 10px;" class="layui-icon layui-icon-upload"></i>
+    </a>
+    {{# } }}
+</script>
 <script type="text/javascript">
     var col = [
         {field: 'name', title: '名称'},
+        {
+            field: 'nodeId', title: '关联节点', templet: "#node_templet"
+        },
         {field: 'host', title: 'host'},
         {field: 'user', title: 'user'},
         {field: 'port', title: 'port'},
         {field: 'op', title: '操作', align: 'center', toolbar: '#bar_monitor', fixed: 'right'}
     ];
+
+    function goNode(t) {
+        top.layer.msg('加载节点中..', {
+            icon: 16,
+            shade: 0.2,
+            time: 100000000
+        });
+        top.location.href = $(t).attr("url");
+    }
 
     function loadSuccess() {
         tableRender({
@@ -37,29 +63,13 @@
             cols: [col]
         });
 
-        // '添加监控'点击事件
-        $('#add').on('click', function () {
-            // 弹出
-            layer.open({
-                type: 2,
-                title: '新增监控',
-                content: './edit.html',
-                area: ['80%', '80%'],
-            });
-        });
-
-        // '刷新表格'点击事件
-        $('#refresh').on('click', function () {
-            table.reload('table', {});
-        });
-
         // 表格工具条事件
         table.on('tool(table)', function (obj) {
             var data = obj.data;
             var event = obj.event;
             if ('update' === event) {
                 // 修改
-                updateApplication(data);
+                edit(data.id);
             } else if ('terminal' === event) {
                 tabChange({
                     id: data.id,
@@ -74,71 +84,26 @@
                 });
             }
         });
-
-        // 编辑监控
-        function updateApplication(data) {
-            layer.open({
-                type: 2,
-                title: '修改监控',
-                content: './edit.html?id=' + data.id,
-                area: ['80%', '80%'],
-            });
-        }
-
-        // 删除监控
-        function deleteApplication(data) {
-            layer.confirm('确定删除监控 ' + data.name + '？', {
-                title: '系统提示'
-            }, function (index) {
-                layer.close(index);
-                loadingAjax({
-                    url: './deleteMonitor',
-                    data: {
-                        id: data.id
-                    },
-                    success: function (data) {
-                        layer.msg(data.msg);
-                        if (200 == data.code) {
-                            table.reload('table', {});
-                        }
-                    }
-                });
-            });
-        }
-
-        $('#monitorStatus').on('click', function () {
-            // 弹出
-            layer.open({
-                type: 2,
-                title: '新增监控',
-                content: './edit.html',
-                area: ['80%', '80%'],
-            });
-        });
-
-        form.on('switch(monitor_status)', function (data) {
-            changeStatus(data);
-        });
-        form.on('switch(monitor_restart)', function (data) {
-            changeStatus(data);
-        });
-
-        function changeStatus(data) {
-            var check = data.elem.checked;
-            var monitorId = $(data.elem).attr("monitorId");
-            var type = $(data.elem).attr("typeS");
-            loadingAjax({
-                url: './changeStatus',
-                data: {
-                    id: monitorId,
-                    status: check,
-                    type: type
-                },
-                success: function (data) {
-                    layer.msg(data.msg);
-                }
-            });
-        }
     }
+
+    // 编辑监控
+    function edit(id) {
+        layer.open({
+            type: 2,
+            title: '编辑ssh',
+            content: './edit.html?id=' + id,
+            area: ['80%', '80%'],
+        });
+    }
+
+    function install(id) {
+        layer.open({
+            type: 2,
+            title: '安装插件端',
+            content: './installAgent.html?id=' + id,
+            area: ['40%', '40%'],
+        });
+    }
+
 </script>
 </html>
