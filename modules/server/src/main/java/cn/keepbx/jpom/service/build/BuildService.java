@@ -4,8 +4,8 @@ import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.keepbx.jpom.common.BaseOperService;
 import cn.keepbx.jpom.model.data.BuildModel;
-import cn.keepbx.permission.BaseDynamicService;
 import cn.keepbx.jpom.system.ServerConfigBean;
+import cn.keepbx.permission.BaseDynamicService;
 import cn.keepbx.plugin.ClassFeature;
 import com.alibaba.fastjson.JSONArray;
 import org.springframework.stereotype.Service;
@@ -78,8 +78,11 @@ public class BuildService extends BaseOperService<BuildModel> implements BaseDyn
     }
 
     @Override
-    public List<BuildModel> list() {
-        return (List<BuildModel>) filter(super.list(), ClassFeature.BUILD);
+    public <E> List<E> list(Class<E> cls) {
+        List<E> list = super.list(cls);
+        JSONArray jsonArray = ((JSONArray) JSONArray.toJSON(list));
+        jsonArray = filter(jsonArray, ClassFeature.BUILD);
+        return jsonArray.toJavaList(cls);
     }
 
     @Override

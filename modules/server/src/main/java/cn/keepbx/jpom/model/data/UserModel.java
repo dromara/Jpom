@@ -5,7 +5,9 @@ import cn.hutool.crypto.SecureUtil;
 import cn.keepbx.jpom.model.BaseModel;
 import cn.keepbx.jpom.system.ServerExtConfigBean;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -54,7 +56,7 @@ public class UserModel extends BaseModel {
     /**
      * 角色
      */
-    private List<String> roles;
+    private Set<String> roles;
     /**
      * 邮箱
      */
@@ -239,11 +241,15 @@ public class UserModel extends BaseModel {
         return userId;
     }
 
-    public List<String> getRoles() {
+    public Set<String> getRoles() {
         return roles;
     }
 
-    public void setRoles(List<String> roles) {
+    public void setRoles(Set<String> roles) {
         this.roles = roles;
+    }
+
+    public void setRoles(List<String> roles) {
+        this.roles = new HashSet<>(roles);
     }
 }

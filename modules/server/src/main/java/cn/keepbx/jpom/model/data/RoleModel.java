@@ -25,6 +25,29 @@ public class RoleModel extends BaseModel {
      */
     private Map<ClassFeature, List<String>> dynamicData;
 
+    /**
+     * 修改时间
+     */
+    private String updateTime;
+
+    private int bindCount;
+
+    public int getBindCount() {
+        return bindCount;
+    }
+
+    public void setBindCount(int bindCount) {
+        this.bindCount = bindCount;
+    }
+
+    public String getUpdateTime() {
+        return updateTime;
+    }
+
+    public void setUpdateTime(String updateTime) {
+        this.updateTime = updateTime;
+    }
+
     public Map<ClassFeature, List<String>> getDynamicData() {
         return dynamicData;
     }

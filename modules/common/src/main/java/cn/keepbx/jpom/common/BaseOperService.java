@@ -25,9 +25,6 @@ public abstract class BaseOperService<T extends BaseModel> extends BaseDataServi
         this.typeArgument = ClassUtil.getTypeArgument(this.getClass());
     }
 
-    public BaseOperService() {
-    }
-
     /**
      * 获取所有数据
      *

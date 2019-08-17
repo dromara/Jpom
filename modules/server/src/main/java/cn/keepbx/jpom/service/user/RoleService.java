@@ -1,5 +1,6 @@
 package cn.keepbx.jpom.service.user;
 
+import cn.hutool.core.date.DateTime;
 import cn.jiangzeyin.common.spring.SpringUtil;
 import cn.keepbx.jpom.common.BaseOperService;
 import cn.keepbx.jpom.model.data.RoleModel;
@@ -23,6 +24,18 @@ public class RoleService extends BaseOperService<RoleModel> {
 
     public RoleService() {
         super(ServerConfigBean.ROLE);
+    }
+
+    @Override
+    public void addItem(RoleModel roleModel) {
+        roleModel.setUpdateTime(DateTime.now().toString());
+        super.addItem(roleModel);
+    }
+
+    @Override
+    public void updateItem(RoleModel roleModel) {
+        roleModel.setUpdateTime(DateTime.now().toString());
+        super.updateItem(roleModel);
     }
 
     /**
@@ -69,7 +82,7 @@ public class RoleService extends BaseOperService<RoleModel> {
         if (userModel.isSystemUser()) {
             return false;
         }
-        List<String> roles = userModel.getRoles();
+        Set<String> roles = userModel.getRoles();
         if (roles == null || roles.isEmpty()) {
             return true;
         }
@@ -94,7 +107,7 @@ public class RoleService extends BaseOperService<RoleModel> {
         if (userModel.isSystemUser()) {
             return false;
         }
-        List<String> roles = userModel.getRoles();
+        Set<String> roles = userModel.getRoles();
         if (roles == null || roles.isEmpty()) {
             return true;
         }
@@ -115,7 +128,7 @@ public class RoleService extends BaseOperService<RoleModel> {
     }
 
     public Set<String> getDynamicList(UserModel userModel, ClassFeature classFeature) {
-        List<String> roles = userModel.getRoles();
+        Set<String> roles = userModel.getRoles();
         if (roles == null || roles.isEmpty()) {
             return null;
         }

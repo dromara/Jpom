@@ -76,7 +76,7 @@ public class BuildListController extends BaseServerController {
     @RequestMapping(value = "list_data.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     @Feature(method = MethodFeature.LIST)
-    public String getMonitorList() throws IOException {
+    public String getMonitorList() {
         List<BuildModelVo> list = buildService.list(BuildModelVo.class);
         return JsonMessage.getString(200, "", list);
     }

@@ -7,7 +7,9 @@ import cn.jiangzeyin.common.validator.ValidatorItem;
 import cn.jiangzeyin.common.validator.ValidatorRule;
 import cn.keepbx.jpom.common.BaseServerController;
 import cn.keepbx.jpom.model.data.RoleModel;
+import cn.keepbx.jpom.model.data.UserModel;
 import cn.keepbx.jpom.service.user.RoleService;
+import cn.keepbx.jpom.service.user.UserService;
 import cn.keepbx.permission.CacheControllerFeature;
 import cn.keepbx.plugin.ClassFeature;
 import cn.keepbx.plugin.Feature;
@@ -21,10 +23,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.annotation.Resource;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * 用户权限基本管理
@@ -39,6 +38,8 @@ public class UserRoleListController extends BaseServerController {
 
     @Resource
     private RoleService roleService;
+    @Resource
+    private UserService userService;
 
     @RequestMapping(value = "list.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
     @Feature(method = MethodFeature.LIST)
@@ -64,7 +65,32 @@ public class UserRoleListController extends BaseServerController {
     @ResponseBody
     @Feature(method = MethodFeature.LIST)
     public String listData() {
-        return JsonMessage.getString(200, "", roleService.list());
+        List<RoleModel> list = roleService.list();
+        if (list != null) {
+            // 统计用户角色信息
+            List<UserModel> userList = userService.list();
+            Map<String, Integer> roleCount = new HashMap<>(list.size());
+            if (userList != null) {
+                userList.forEach(userModel -> {
+                    Set<String> roles = userModel.getRoles();
+                    if (roles == null) {
+                        return;
+                    }
+                    roles.forEach(s -> {
+                        Integer integer = roleCount.computeIfAbsent(s, s1 -> 0);
+                        roleCount.put(s, integer + 1);
+                    });
+                });
+            }
+            list.forEach(roleModel -> {
+                Integer integer = roleCount.get(roleModel.getId());
+                if (integer == null) {
+                    integer = 0;
+                }
+                roleModel.setBindCount(integer);
+            });
+        }
+        return JsonMessage.getString(200, "", list);
     }
 
     @RequestMapping(value = "getFeature.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
