@@ -57,11 +57,11 @@ public class PermissionInterceptor extends BaseJpomInterceptor {
         if (handlerMethod == null) {
             return true;
         }
+        this.addNode(request);
         UserModel userModel = BaseServerController.getUserModel();
         if (userModel == null || userModel.isSystemUser()) {
             return true;
         }
-        this.addNode(request);
         //
         Feature feature = handlerMethod.getBeanType().getAnnotation(Feature.class);
         if (feature == null || feature.cls() == ClassFeature.NULL) {
