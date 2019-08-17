@@ -2,6 +2,7 @@ package cn.keepbx.jpom.service.user;
 
 import cn.hutool.core.date.DateTime;
 import cn.jiangzeyin.common.spring.SpringUtil;
+import cn.keepbx.jpom.JpomApplication;
 import cn.keepbx.jpom.common.BaseOperService;
 import cn.keepbx.jpom.model.data.RoleModel;
 import cn.keepbx.jpom.model.data.UserModel;
@@ -74,6 +75,10 @@ public class RoleService extends BaseOperService<RoleModel> {
 
 
     public boolean errorDynamicPermission(UserModel userModel, ClassFeature classFeature, String dataId) {
+        if (JpomApplication.SYSTEM_ID.equals(dataId)) {
+            // 系统构建id
+            return false;
+        }
         DynamicData dynamicData1 = DynamicData.getDynamicDataMap().get(classFeature);
         if (dynamicData1 == null) {
             // 如果不是没有动态权限  就默认通过

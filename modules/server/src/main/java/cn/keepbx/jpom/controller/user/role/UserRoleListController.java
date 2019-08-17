@@ -160,8 +160,8 @@ public class UserRoleListController extends BaseServerController {
             children.forEach(o1 -> {
                 JSONObject childrenItem = (JSONObject) o1;
                 String id11 = childrenItem.getString("id");
-                String[] split = StrUtil.split(id11, StrUtil.UNDERLINE);
-                MethodFeature methodFeature = MethodFeature.valueOf(split[1]);
+                id11 = id11.substring(id1.length() + 1);
+                MethodFeature methodFeature = MethodFeature.valueOf(id11);
                 methodFeatures.add(methodFeature);
             });
             roleFeature.setMethodFeatures(methodFeatures);

@@ -113,7 +113,7 @@ public class LoginInterceptor extends BaseJpomInterceptor {
      */
     private void responseLogin(HttpServletRequest request, HttpServletResponse response, HandlerMethod handlerMethod) throws IOException {
         if (isPage(handlerMethod)) {
-            String url = getHeaderProxyPath(request) + "/login.html";
+            String url = "/login.html";
             String uri = request.getRequestURI();
             boolean hasPar = false;
             if (StrUtil.isNotEmpty(uri) && !StrUtil.SLASH.equals(uri)) {
@@ -129,7 +129,7 @@ public class LoginInterceptor extends BaseJpomInterceptor {
                 }
                 url += "r=" + header;
             }
-            response.sendRedirect(url);
+            super.sendRedirect(request, response, url);
             return;
         }
         ServletUtil.write(response, JsonMessage.getString(800, "登录信息已失效,重新登录"), MediaType.APPLICATION_JSON_UTF8_VALUE);
