@@ -12,7 +12,7 @@ import cn.keepbx.jpom.common.BaseServerController;
 import cn.keepbx.jpom.common.interceptor.LoginInterceptor;
 import cn.keepbx.jpom.model.data.MailAccountModel;
 import cn.keepbx.jpom.model.data.UserModel;
-import cn.keepbx.jpom.service.monitor.MonitorMailConfigService;
+import cn.keepbx.jpom.service.system.SystemMailConfigService;
 import cn.keepbx.jpom.service.user.UserService;
 import cn.keepbx.monitor.EmailUtil;
 import org.springframework.http.MediaType;
@@ -36,7 +36,7 @@ public class UserBasicInfoController extends BaseServerController {
     private static final TimedCache<String, Integer> CACHE = new TimedCache<>(TimeUnit.MINUTES.toMillis(30));
 
     @Resource
-    private MonitorMailConfigService monitorMailConfigService;
+    private SystemMailConfigService systemMailConfigService;
     @Resource
     private UserService userService;
 
@@ -78,7 +78,7 @@ public class UserBasicInfoController extends BaseServerController {
     @RequestMapping(value = "sendCode.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     public String sendCode(@ValidatorItem(value = ValidatorRule.EMAIL, msg = "邮箱格式不正确") String email) {
-        MailAccountModel config = monitorMailConfigService.getConfig();
+        MailAccountModel config = systemMailConfigService.getConfig();
         if (config == null) {
             return JsonMessage.getString(405, "管理员还没有配置系统邮箱");
         }

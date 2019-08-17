@@ -30,7 +30,7 @@ public class InstallController extends BaseServerController {
     @Resource
     private UserService userService;
 
-    @RequestMapping(value = "install.html",  produces = MediaType.TEXT_HTML_VALUE)
+    @RequestMapping(value = "install.html", produces = MediaType.TEXT_HTML_VALUE)
     @NotLogin
     public String install() {
         if (userService.userListEmpty()) {

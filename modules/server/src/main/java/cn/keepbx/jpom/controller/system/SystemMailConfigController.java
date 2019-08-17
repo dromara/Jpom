@@ -1,4 +1,4 @@
-package cn.keepbx.jpom.controller.node.system;
+package cn.keepbx.jpom.controller.system;
 
 import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.JsonMessage;
@@ -7,7 +7,7 @@ import cn.keepbx.jpom.common.interceptor.OptLog;
 import cn.keepbx.jpom.model.data.MailAccountModel;
 import cn.keepbx.jpom.model.data.UserModel;
 import cn.keepbx.jpom.model.log.UserOperateLogV1;
-import cn.keepbx.jpom.service.monitor.MonitorMailConfigService;
+import cn.keepbx.jpom.service.system.SystemMailConfigService;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -23,20 +23,20 @@ import javax.annotation.Resource;
  * @date 2019/7/16
  */
 @Controller
-@RequestMapping(value = "/monitor")
-public class MonitorMailConfigController extends BaseServerController {
+@RequestMapping(value = "system")
+public class SystemMailConfigController extends BaseServerController {
 
     @Resource
-    private MonitorMailConfigService monitorMailConfigService;
+    private SystemMailConfigService systemMailConfigService;
 
     /**
      * 展示监控页面
      */
     @RequestMapping(value = "mailConfig.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
     public String mailConfig() {
-        UserModel userModel = getUserModel();
+        UserModel userModel = getUser();
         if (userModel.isSystemUser()) {
-            MailAccountModel item = monitorMailConfigService.getConfig();
+            MailAccountModel item = systemMailConfigService.getConfig();
             setAttribute("item", item);
         }
         return "monitor/mailConfig";
@@ -61,7 +61,7 @@ public class MonitorMailConfigController extends BaseServerController {
         if (StrUtil.isBlank(mailAccountModel.getFrom())) {
             return JsonMessage.getString(405, "请填写from");
         }
-        monitorMailConfigService.save(mailAccountModel);
+        systemMailConfigService.save(mailAccountModel);
         return JsonMessage.getString(200, "保存成功");
     }
 }

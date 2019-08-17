@@ -1,4 +1,4 @@
-package cn.keepbx.jpom.service.monitor;
+package cn.keepbx.jpom.service.system;
 
 import cn.keepbx.jpom.common.BaseDataService;
 import cn.keepbx.jpom.model.data.MailAccountModel;
@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
  * @author Arno
  */
 @Service
-public class MonitorMailConfigService extends BaseDataService {
+public class SystemMailConfigService extends BaseDataService {
 
     /**
      * 获取配置

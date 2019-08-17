@@ -6,7 +6,6 @@ import cn.jiangzeyin.common.JsonMessage;
 import cn.keepbx.jpom.JpomApplication;
 import cn.keepbx.jpom.common.BaseServerController;
 import cn.keepbx.jpom.common.interceptor.OptLog;
-import cn.keepbx.jpom.model.data.NodeModel;
 import cn.keepbx.jpom.model.data.RoleModel;
 import cn.keepbx.jpom.model.data.UserModel;
 import cn.keepbx.jpom.model.log.UserOperateLogV1;

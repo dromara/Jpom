@@ -98,7 +98,7 @@
       {
         "id": "monitorConfigEmail",
         "title": "邮箱配置",
-        "url": "./monitor/mailConfig.html"
+        "url": "./system/mailConfig.html"
       },
       {
         "id": "cacheManage",

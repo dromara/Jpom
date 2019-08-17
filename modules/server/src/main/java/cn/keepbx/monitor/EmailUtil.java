@@ -11,7 +11,7 @@ import cn.hutool.extra.mail.MailUtil;
 import cn.jiangzeyin.common.spring.SpringUtil;
 import cn.keepbx.jpom.model.data.MailAccountModel;
 import cn.keepbx.jpom.model.data.MonitorModel;
-import cn.keepbx.jpom.service.monitor.MonitorMailConfigService;
+import cn.keepbx.jpom.service.system.SystemMailConfigService;
 import cn.keepbx.jpom.system.ConfigBean;
 import cn.keepbx.jpom.system.ServerConfigBean;
 
@@ -27,7 +27,7 @@ import java.util.Objects;
  */
 public class EmailUtil implements INotify {
 
-    private static MonitorMailConfigService monitorMailConfigService;
+    private static SystemMailConfigService systemMailConfigService;
     private static MailAccountModel config;
 
     static {
@@ -37,7 +37,7 @@ public class EmailUtil implements INotify {
             @Override
             public void onModify(WatchEvent<?> event, Path currentPath) {
                 // 读取新的内容
-                config = monitorMailConfigService.getConfig();
+                config = systemMailConfigService.getConfig();
             }
         });
     }
@@ -50,10 +50,10 @@ public class EmailUtil implements INotify {
 
     private static MailAccount getAccount() {
         if (config == null) {
-            if (monitorMailConfigService == null) {
-                monitorMailConfigService = SpringUtil.getBean(MonitorMailConfigService.class);
+            if (systemMailConfigService == null) {
+                systemMailConfigService = SpringUtil.getBean(SystemMailConfigService.class);
             }
-            config = monitorMailConfigService.getConfig();
+            config = systemMailConfigService.getConfig();
         }
         Objects.requireNonNull(config, "获取邮箱信息失败");
         MailAccount mailAccount = new MailAccount();
