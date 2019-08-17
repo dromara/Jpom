@@ -7,9 +7,7 @@ import cn.keepbx.jpom.common.forward.NodeUrl;
 import cn.keepbx.jpom.common.interceptor.OptLog;
 import cn.keepbx.jpom.model.log.UserOperateLogV1;
 import cn.keepbx.jpom.service.system.WhitelistDirectoryService;
-import cn.keepbx.plugin.ClassFeature;
-import cn.keepbx.plugin.Feature;
-import cn.keepbx.plugin.MethodFeature;
+import cn.keepbx.permission.SystemPermission;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -26,7 +24,6 @@ import java.util.List;
  */
 @RestController
 @RequestMapping(value = "/node")
-@Feature(cls = ClassFeature.NODE)
 public class NodeInstallController extends BaseServerController {
 
     @Resource
@@ -34,7 +31,7 @@ public class NodeInstallController extends BaseServerController {
 
     @RequestMapping(value = "install_node.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @OptLog(UserOperateLogV1.OptType.InstallNode)
-    @Feature(method = MethodFeature.INSTALL)
+    @SystemPermission
     public String installNode() {
         List<String> list = whitelistDirectoryService.getProjectDirectory(getNode());
         if (list != null && !list.isEmpty()) {

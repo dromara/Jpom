@@ -282,6 +282,7 @@ public class UserOperateLogV1 extends BaseJsonModel {
         EditSysConfig(67, "修改系统配置"),
 
         BuildCleanSource(68, "删除构建代码"),
+        SshInstallAgent(69, "ssh安装插件端"),
         ;
         private int code;
         private String desc;

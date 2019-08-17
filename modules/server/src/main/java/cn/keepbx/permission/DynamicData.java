@@ -1,6 +1,5 @@
 package cn.keepbx.permission;
 
-import cn.keepbx.jpom.model.log.UserOperateLogV1;
 import cn.keepbx.jpom.service.build.BuildService;
 import cn.keepbx.jpom.service.node.NodeService;
 import cn.keepbx.jpom.service.node.OutGivingServer;
@@ -11,7 +10,10 @@ import cn.keepbx.jpom.service.node.tomcat.TomcatService;
 import cn.keepbx.plugin.ClassFeature;
 import cn.keepbx.plugin.MethodFeature;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * 动态数据权限
@@ -28,8 +30,6 @@ public class DynamicData {
      */
     private static final Map<ClassFeature, Set<ClassFeature>> PARENT = new HashMap<>();
 
-    private static final List<UserOperateLogV1.OptType> SYSTEM_USER = new ArrayList<>();
-
     static {
         // 节点
         put(ClassFeature.NODE, new DynamicData(NodeService.class, MethodFeature.LIST));
@@ -45,14 +45,6 @@ public class DynamicData {
         put(ClassFeature.TOMCAT, new DynamicData(TomcatService.class, MethodFeature.LIST));
         //
         put(ClassFeature.BUILD, new DynamicData(BuildService.class, MethodFeature.LIST));
-
-
-        // 系统管理操作权限
-        SYSTEM_USER.add(UserOperateLogV1.OptType.EditMailConfig);
-        SYSTEM_USER.add(UserOperateLogV1.OptType.EditWhitelist);
-        SYSTEM_USER.add(UserOperateLogV1.OptType.UpdateSys);
-        SYSTEM_USER.add(UserOperateLogV1.OptType.InstallNode);
-        SYSTEM_USER.add(UserOperateLogV1.OptType.SaveOutgivingWhitelist);
     }
 
     private static void put(ClassFeature feature, DynamicData dynamicData) {

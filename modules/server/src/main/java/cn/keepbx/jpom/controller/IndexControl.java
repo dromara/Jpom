@@ -120,8 +120,14 @@ public class IndexControl extends BaseServerController {
         String url = jsonObject.getString("url");
         if (StrUtil.isNotEmpty(url)) {
             url = FileUtil.normalize(secondary + url);
-            CacheControllerFeature.UrlFeature urlFeature = CacheControllerFeature.getUrlFeature(StrUtil.SLASH + url);
+            url = StrUtil.SLASH + url;
+            if (CacheControllerFeature.isSystemUrl(url) && !userModel.isSystemUser()) {
+                // 系统管理员权限
+                return false;
+            }
+            CacheControllerFeature.UrlFeature urlFeature = CacheControllerFeature.getUrlFeature(url);
             if (urlFeature != null) {
+                // 功能权限
                 boolean b = roleService.errorMethodPermission(userModel, urlFeature.getClassFeature(), urlFeature.getMethodFeature());
                 if (b) {
                     return false;

@@ -14,6 +14,7 @@ import cn.keepbx.jpom.common.interceptor.OptLog;
 import cn.keepbx.jpom.model.data.NodeModel;
 import cn.keepbx.jpom.model.log.UserOperateLogV1;
 import cn.keepbx.jpom.system.ServerConfigBean;
+import cn.keepbx.permission.SystemPermission;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -40,6 +41,7 @@ public class SystemUpdateController extends BaseServerController {
 
     @RequestMapping(value = "info", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
+    @SystemPermission
     public String info() {
         NodeModel nodeModel = tryGetNode();
         if (nodeModel != null) {
@@ -51,6 +53,7 @@ public class SystemUpdateController extends BaseServerController {
     @RequestMapping(value = "uploadJar.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     @OptLog(UserOperateLogV1.OptType.UpdateSys)
+    @SystemPermission
     public String uploadJar() throws IOException {
         if (SystemUtil.getOsInfo().isWindows()) {
             return JsonMessage.getString(100, "windows 环境暂不支持在线升级");

@@ -13,8 +13,10 @@ import cn.jiangzeyin.common.validator.ValidatorRule;
 import cn.jiangzeyin.controller.multipart.MultipartFileBuilder;
 import cn.keepbx.jpom.common.BaseServerController;
 import cn.keepbx.jpom.common.Type;
+import cn.keepbx.jpom.common.interceptor.OptLog;
 import cn.keepbx.jpom.model.data.NodeModel;
 import cn.keepbx.jpom.model.data.SshModel;
+import cn.keepbx.jpom.model.log.UserOperateLogV1;
 import cn.keepbx.jpom.model.system.AgentAutoUser;
 import cn.keepbx.jpom.service.node.NodeService;
 import cn.keepbx.jpom.service.node.ssh.SshService;
@@ -40,6 +42,8 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
 /**
+ * ssh 安装插件端
+ *
  * @author bwcx_jzy
  * @date 2019/8/17
  */
@@ -63,6 +67,7 @@ public class SshInstallAgentController extends BaseServerController {
     @RequestMapping(value = "installAgentSubmit.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     @Feature(method = MethodFeature.INSTALL)
+    @OptLog(UserOperateLogV1.OptType.SshInstallAgent)
     public String installAgentSubmit(@ValidatorItem(value = ValidatorRule.NOT_BLANK) String id,
                                      @ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "节点数据") String nodeData,
                                      @ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "安装路径") String path) throws Exception {
@@ -129,22 +134,9 @@ public class SshInstallAgentController extends BaseServerController {
             // 休眠10秒
             Thread.sleep(10 * 1000);
             if (StrUtil.isEmpty(nodeModel.getLoginName()) || StrUtil.isEmpty(nodeModel.getLoginPwd())) {
-                File saveFile = null;
-                try {
-                    //  获取远程的授权信息
-                    String normalize = FileUtil.normalize(StrUtil.format("{}/{}/{}", path, ConfigBean.DATA, ConfigBean.AUTHORIZE));
-                    saveFile = FileUtil.file(tempFilePath, IdUtil.fastSimpleUUID() + ConfigBean.AUTHORIZE);
-                    sshService.download(sshModel, normalize, saveFile);
-                    //
-                    String json = FileUtil.readString(saveFile, CharsetUtil.CHARSET_UTF_8);
-                    AgentAutoUser autoUser = JSONObject.parseObject(json, AgentAutoUser.class);
-                    nodeModel.setLoginPwd(autoUser.getAgentPwd());
-                    nodeModel.setLoginName(autoUser.getAgentName());
-                } catch (Exception e) {
-                    DefaultSystemLog.ERROR().error("拉取授权信息失败", e);
-                    return JsonMessage.getString(500, "获取授权信息失败", e);
-                } finally {
-                    FileUtil.del(saveFile);
+                String error = this.getAuthorize(sshModel, nodeModel, path);
+                if (error != null) {
+                    return error;
                 }
             }
             nodeModel.setOpenStatus(true);
@@ -158,6 +150,28 @@ public class SshInstallAgentController extends BaseServerController {
             FileUtil.del(filePath);
             FileUtil.del(outFle);
         }
+    }
+
+    private String getAuthorize(SshModel sshModel, NodeModel nodeModel, String path) {
+        File saveFile = null;
+        try {
+            String tempFilePath = ServerConfigBean.getInstance().getUserTempPath().getAbsolutePath();
+            //  获取远程的授权信息
+            String normalize = FileUtil.normalize(StrUtil.format("{}/{}/{}", path, ConfigBean.DATA, ConfigBean.AUTHORIZE));
+            saveFile = FileUtil.file(tempFilePath, IdUtil.fastSimpleUUID() + ConfigBean.AUTHORIZE);
+            sshService.download(sshModel, normalize, saveFile);
+            //
+            String json = FileUtil.readString(saveFile, CharsetUtil.CHARSET_UTF_8);
+            AgentAutoUser autoUser = JSONObject.parseObject(json, AgentAutoUser.class);
+            nodeModel.setLoginPwd(autoUser.getAgentPwd());
+            nodeModel.setLoginName(autoUser.getAgentName());
+        } catch (Exception e) {
+            DefaultSystemLog.ERROR().error("拉取授权信息失败", e);
+            return JsonMessage.getString(500, "获取授权信息失败", e);
+        } finally {
+            FileUtil.del(saveFile);
+        }
+        return null;
     }
 
     private Object getNodeModel(String data) {

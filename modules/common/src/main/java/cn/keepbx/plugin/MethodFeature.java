@@ -23,7 +23,7 @@ public enum MethodFeature {
     DOWNLOAD("下载"),
     LOG("日志"),
     UPLOAD("上传"),
-    WHITELIST("白名单"),
+    //    WHITELIST("白名单"),
     EXECUTE("执行"),
     DEL_FILE("删除文件"),
     CACHE("缓存"),

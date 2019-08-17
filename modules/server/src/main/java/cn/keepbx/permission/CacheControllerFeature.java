@@ -23,21 +23,62 @@ public class CacheControllerFeature {
 
     private static final Map<String, UrlFeature> URL_FEATURE_MAP = new TreeMap<>();
 
+    /**
+     * 系统管理员使用的权限
+     */
+    private static final List<String> SYSTEM_URL = new ArrayList<>();
+
     public static Map<ClassFeature, Set<MethodFeature>> getFeatureMap() {
         return FEATURE_MAP;
     }
 
+    /**
+     * 判断是否为系统管理员权限url
+     *
+     * @param url url
+     * @return true 只能是系统管理员访问
+     */
+    public static boolean isSystemUrl(String url) {
+        return SYSTEM_URL.contains(url);
+    }
+
+    /**
+     * 获取url 功能方法对象
+     *
+     * @param url url
+     * @return
+     */
     public static UrlFeature getUrlFeature(String url) {
         return URL_FEATURE_MAP.get(url);
     }
+
 
     /**
      * 扫描包
      */
     public static void init() {
-        Set<Class<?>> classes = ClassUtil.scanPackageByAnnotation("cn.keepbx.jpom.controller", Feature.class);
+        // 扫描系统管理员
+        Set<Class<?>> classes = ClassUtil.scanPackage("cn.keepbx.jpom.controller");
+        classes.forEach(aClass -> {
+            RequestMapping requestMapping = aClass.getAnnotation(RequestMapping.class);
+            Method[] publicMethods = ReflectUtil.getPublicMethods(aClass);
+            for (Method publicMethod : publicMethods) {
+                SystemPermission systemPermission = publicMethod.getAnnotation(SystemPermission.class);
+                if (systemPermission == null) {
+                    continue;
+                }
+                RequestMapping methodAnnotation = publicMethod.getAnnotation(RequestMapping.class);
+                String format = String.format("/%s/%s", requestMapping.value()[0], methodAnnotation.value()[0]);
+                format = FileUtil.normalize(format);
+                SYSTEM_URL.add(format);
+            }
+        });
+        // 扫描功能方法
         classes.forEach(aClass -> {
             Feature annotation = aClass.getAnnotation(Feature.class);
+            if (annotation == null) {
+                return;
+            }
             ClassFeature classFeature = annotation.cls();
             if (classFeature == ClassFeature.NULL) {
                 return;

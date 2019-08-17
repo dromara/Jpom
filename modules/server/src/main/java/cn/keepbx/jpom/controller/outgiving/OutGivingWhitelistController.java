@@ -10,6 +10,7 @@ import cn.keepbx.jpom.model.data.ServerWhitelist;
 import cn.keepbx.jpom.model.data.UserModel;
 import cn.keepbx.jpom.model.log.UserOperateLogV1;
 import cn.keepbx.jpom.service.system.ServerWhitelistServer;
+import cn.keepbx.permission.SystemPermission;
 import cn.keepbx.plugin.ClassFeature;
 import cn.keepbx.plugin.Feature;
 import cn.keepbx.plugin.MethodFeature;
@@ -37,7 +38,7 @@ public class OutGivingWhitelistController extends BaseServerController {
 
 
     @RequestMapping(value = "whitelistDirectory.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
-    @Feature(method = MethodFeature.WHITELIST)
+    @SystemPermission
     public String whitelistDirectory() {
         //
         UserModel userModel = getUser();
@@ -59,6 +60,7 @@ public class OutGivingWhitelistController extends BaseServerController {
     @RequestMapping(value = "whitelistDirectory_submit", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     @OptLog(UserOperateLogV1.OptType.SaveOutgivingWhitelist)
+    @SystemPermission
     public String whitelistDirectorySubmit(String data) {
         List<String> list = StrSpliter.splitTrim(data, StrUtil.LF, true);
         if (list == null || list.size() <= 0) {

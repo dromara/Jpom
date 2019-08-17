@@ -15,9 +15,9 @@ import com.alibaba.fastjson.JSONObject;
 import org.springframework.boot.env.YamlPropertySourceLoader;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.MediaType;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.io.File;
 import java.io.IOException;
@@ -28,7 +28,7 @@ import java.io.IOException;
  * @author bwcx_jzy
  * @date 2019/08/08
  */
-@Controller
+@RestController
 @RequestMapping(value = "system")
 public class SystemConfigController extends BaseAgentController {
 

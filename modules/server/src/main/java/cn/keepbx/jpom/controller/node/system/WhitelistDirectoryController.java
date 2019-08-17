@@ -7,6 +7,7 @@ import cn.keepbx.jpom.common.interceptor.OptLog;
 import cn.keepbx.jpom.model.data.AgentWhitelist;
 import cn.keepbx.jpom.model.log.UserOperateLogV1;
 import cn.keepbx.jpom.service.system.WhitelistDirectoryService;
+import cn.keepbx.permission.SystemPermission;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -31,6 +32,7 @@ public class WhitelistDirectoryController extends BaseServerController {
      * 页面
      */
     @RequestMapping(value = "whitelistDirectory", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
+    @SystemPermission
     public String whitelistDirectory() {
         AgentWhitelist agentWhitelist = whitelistDirectoryService.getData(getNode());
         if (agentWhitelist != null) {
@@ -51,6 +53,7 @@ public class WhitelistDirectoryController extends BaseServerController {
     @RequestMapping(value = "whitelistDirectory_submit", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     @OptLog(UserOperateLogV1.OptType.EditWhitelist)
+    @SystemPermission
     public String whitelistDirectorySubmit() {
         return NodeForward.request(getNode(), getRequest(), NodeUrl.WhitelistDirectory_Submit).toString();
     }

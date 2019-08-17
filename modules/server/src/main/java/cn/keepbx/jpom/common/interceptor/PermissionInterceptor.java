@@ -12,6 +12,7 @@ import cn.keepbx.jpom.service.node.NodeService;
 import cn.keepbx.jpom.service.user.RoleService;
 import cn.keepbx.jpom.system.AgentException;
 import cn.keepbx.permission.DynamicData;
+import cn.keepbx.permission.SystemPermission;
 import cn.keepbx.plugin.ClassFeature;
 import cn.keepbx.plugin.Feature;
 import cn.keepbx.plugin.MethodFeature;
@@ -51,6 +52,12 @@ public class PermissionInterceptor extends BaseJpomInterceptor {
         UserModel userModel = BaseServerController.getUserModel();
         if (userModel == null || userModel.isSystemUser()) {
             return true;
+        }
+        SystemPermission systemPermission = handlerMethod.getMethodAnnotation(SystemPermission.class);
+        if (systemPermission != null && !userModel.isSystemUser()) {
+            // 系统管理员权限
+            this.errorMsg(request, response);
+            return false;
         }
         //
         Feature feature = handlerMethod.getBeanType().getAnnotation(Feature.class);

@@ -15,6 +15,7 @@ import cn.keepbx.jpom.common.forward.NodeUrl;
 import cn.keepbx.jpom.common.interceptor.OptLog;
 import cn.keepbx.jpom.model.log.UserOperateLogV1;
 import cn.keepbx.jpom.system.ExtConfigBean;
+import cn.keepbx.permission.SystemPermission;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.boot.env.YamlPropertySourceLoader;
 import org.springframework.core.io.ByteArrayResource;
@@ -38,6 +39,7 @@ import java.io.IOException;
 public class SystemConfigController extends BaseServerController {
 
     @RequestMapping(value = "config.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
+    @SystemPermission
     public String config(String nodeId) throws IOException {
         String content;
         if (StrUtil.isNotEmpty(nodeId)) {
@@ -53,6 +55,7 @@ public class SystemConfigController extends BaseServerController {
     @RequestMapping(value = "save_config.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     @OptLog(UserOperateLogV1.OptType.EditSysConfig)
+    @SystemPermission
     public String saveConfig(String nodeId, String content, String restart) {
         if (StrUtil.isNotEmpty(nodeId)) {
             return NodeForward.request(getNode(), getRequest(), NodeUrl.SystemSaveConfig).toString();
