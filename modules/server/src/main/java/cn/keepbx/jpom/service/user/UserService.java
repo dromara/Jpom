@@ -1,19 +1,12 @@
 package cn.keepbx.jpom.service.user;
 
 import cn.keepbx.jpom.common.BaseOperService;
-import cn.keepbx.jpom.model.data.RoleModel;
 import cn.keepbx.jpom.model.data.UserModel;
 import cn.keepbx.jpom.system.ServerConfigBean;
-import cn.keepbx.permission.DynamicData;
-import cn.keepbx.plugin.ClassFeature;
-import cn.keepbx.plugin.MethodFeature;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
-import java.io.IOException;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -23,9 +16,6 @@ import java.util.stream.Collectors;
  */
 @Service
 public class UserService extends BaseOperService<UserModel> {
-
-    @Resource
-    private RoleService roleService;
 
     public UserService() {
         super(ServerConfigBean.USER);
@@ -64,7 +54,7 @@ public class UserService extends BaseOperService<UserModel> {
      * @param pwd  密码
      * @return 登录
      */
-    public UserModel simpleLogin(String name, String pwd) throws IOException {
+    public UserModel simpleLogin(String name, String pwd) {
         UserModel userModel = getItem(name);
         if (userModel == null) {
             return null;
@@ -105,54 +95,6 @@ public class UserService extends BaseOperService<UserModel> {
     @Override
     public List<UserModel> list() {
         return list(true);
-    }
-
-    public boolean errorDynamicPermission(UserModel userModel, ClassFeature classFeature, String dataId) {
-        DynamicData dynamicData1 = DynamicData.getDynamicDataMap().get(classFeature);
-        if (dynamicData1 == null) {
-            // 如果不是没有动态权限  就默认通过
-            return false;
-        }
-        List<String> roles = userModel.getRoles();
-        if (roles == null || roles.isEmpty()) {
-            return true;
-        }
-        for (String role : roles) {
-            RoleModel item = roleService.getItem(role);
-            if (item == null) {
-                continue;
-            }
-            Map<ClassFeature, List<String>> dynamicData = item.getDynamicData();
-            if (dynamicData == null) {
-                continue;
-            }
-            List<String> list = dynamicData.get(classFeature);
-            if (list.contains(dataId)) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    public boolean errorMethodPermission(UserModel userModel, ClassFeature classFeature, MethodFeature methodFeature) {
-        List<String> roles = userModel.getRoles();
-        if (roles == null || roles.isEmpty()) {
-            return true;
-        }
-        for (String role : roles) {
-            RoleModel item = roleService.getItem(role);
-            if (item == null) {
-                continue;
-            }
-            List<MethodFeature> methodFeatures = item.getMethodFeature(classFeature);
-            if (methodFeatures == null) {
-                continue;
-            }
-            if (methodFeatures.contains(methodFeature)) {
-                return false;
-            }
-        }
-        return true;
     }
 
     /**

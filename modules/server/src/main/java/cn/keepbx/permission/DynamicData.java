@@ -1,7 +1,6 @@
 package cn.keepbx.permission;
 
 import cn.keepbx.jpom.model.log.UserOperateLogV1;
-import cn.keepbx.jpom.service.BaseDynamicService;
 import cn.keepbx.jpom.service.build.BuildService;
 import cn.keepbx.jpom.service.node.NodeService;
 import cn.keepbx.jpom.service.node.OutGivingServer;

@@ -4,12 +4,12 @@ import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.keepbx.jpom.common.BaseOperService;
 import cn.keepbx.jpom.model.data.BuildModel;
-import cn.keepbx.jpom.service.BaseDynamicService;
+import cn.keepbx.permission.BaseDynamicService;
 import cn.keepbx.jpom.system.ServerConfigBean;
+import cn.keepbx.plugin.ClassFeature;
 import com.alibaba.fastjson.JSONArray;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
 import java.util.List;
 
 /**
@@ -31,7 +31,7 @@ public class BuildService extends BaseOperService<BuildModel> implements BaseDyn
         super.updateItem(buildModel);
     }
 
-    public boolean checkOutGiving(String outGivingId) throws IOException {
+    public boolean checkOutGiving(String outGivingId) {
         List<BuildModel> list = list();
         if (list == null || list.isEmpty()) {
             return false;
@@ -45,7 +45,7 @@ public class BuildService extends BaseOperService<BuildModel> implements BaseDyn
         return false;
     }
 
-    public boolean checkNode(String nodeId) throws IOException {
+    public boolean checkNode(String nodeId) {
         List<BuildModel> list = list();
         if (list == null || list.isEmpty()) {
             return false;
@@ -61,7 +61,7 @@ public class BuildService extends BaseOperService<BuildModel> implements BaseDyn
         return false;
     }
 
-    public boolean checkNodeProjectId(String nodeId, String projectId) throws IOException {
+    public boolean checkNodeProjectId(String nodeId, String projectId) {
         List<BuildModel> list = list();
         if (list == null || list.isEmpty()) {
             return false;
@@ -75,6 +75,11 @@ public class BuildService extends BaseOperService<BuildModel> implements BaseDyn
             }
         }
         return false;
+    }
+
+    @Override
+    public List<BuildModel> list() {
+        return (List<BuildModel>) filter(super.list(), ClassFeature.BUILD);
     }
 
     @Override

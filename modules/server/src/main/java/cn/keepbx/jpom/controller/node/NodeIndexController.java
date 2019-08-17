@@ -11,6 +11,9 @@ import cn.keepbx.jpom.model.data.SshModel;
 import cn.keepbx.jpom.model.data.UserModel;
 import cn.keepbx.jpom.service.node.NodeService;
 import cn.keepbx.jpom.service.node.ssh.SshService;
+import cn.keepbx.plugin.ClassFeature;
+import cn.keepbx.plugin.Feature;
+import cn.keepbx.plugin.MethodFeature;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.http.MediaType;
@@ -30,6 +33,7 @@ import java.util.List;
  */
 @Controller
 @RequestMapping(value = "/node")
+@Feature(cls = ClassFeature.NODE)
 public class NodeIndexController extends BaseServerController {
 
     @Resource
@@ -38,6 +42,7 @@ public class NodeIndexController extends BaseServerController {
     private SshService sshService;
 
     @RequestMapping(value = "list.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
+    @Feature(method = MethodFeature.LIST)
     public String list() {
         List<NodeModel> nodeModels = nodeService.list();
         setAttribute("array", nodeModels);
@@ -73,6 +78,7 @@ public class NodeIndexController extends BaseServerController {
 
     @RequestMapping(value = "node_status", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
+    @Feature(method = MethodFeature.LIST)
     public String nodeStatus() {
         long timeMillis = System.currentTimeMillis();
         JSONObject jsonObject = NodeForward.requestData(getNode(), NodeUrl.Status, getRequest(), JSONObject.class);

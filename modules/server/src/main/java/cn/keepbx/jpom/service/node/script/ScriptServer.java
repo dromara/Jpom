@@ -3,8 +3,9 @@ package cn.keepbx.jpom.service.node.script;
 import cn.keepbx.jpom.common.forward.NodeForward;
 import cn.keepbx.jpom.common.forward.NodeUrl;
 import cn.keepbx.jpom.model.data.NodeModel;
-import cn.keepbx.jpom.service.BaseDynamicService;
+import cn.keepbx.permission.BaseDynamicService;
 import cn.keepbx.jpom.service.node.NodeService;
+import cn.keepbx.plugin.ClassFeature;
 import com.alibaba.fastjson.JSONArray;
 import org.springframework.stereotype.Service;
 
@@ -27,6 +28,7 @@ public class ScriptServer implements BaseDynamicService {
     }
 
     public JSONArray listToArray(NodeModel nodeModel) {
-        return NodeForward.requestData(nodeModel, NodeUrl.Script_List, null, JSONArray.class);
+        JSONArray jsonArray = NodeForward.requestData(nodeModel, NodeUrl.Script_List, null, JSONArray.class);
+        return filter(jsonArray, ClassFeature.SCRIPT);
     }
 }

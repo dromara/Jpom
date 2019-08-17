@@ -9,6 +9,7 @@ import cn.keepbx.jpom.model.data.SshModel;
 import cn.keepbx.jpom.model.data.UserModel;
 import cn.keepbx.jpom.service.node.NodeService;
 import cn.keepbx.jpom.service.node.ssh.SshService;
+import cn.keepbx.jpom.service.user.RoleService;
 import cn.keepbx.jpom.service.user.UserService;
 import cn.keepbx.jpom.system.JpomRuntimeException;
 import cn.keepbx.plugin.ClassFeature;
@@ -38,6 +39,7 @@ public class ServerWebSocketInterceptor implements HandshakeInterceptor {
             // 判断用户
             String userId = httpServletRequest.getParameter("userId");
             UserService userService = SpringUtil.getBean(UserService.class);
+            RoleService roleService = SpringUtil.getBean(RoleService.class);
             UserModel userModel = userService.checkUser(userId);
             if (userModel == null) {
                 return false;
@@ -46,7 +48,7 @@ public class ServerWebSocketInterceptor implements HandshakeInterceptor {
             if (!JpomApplication.SYSTEM_ID.equals(nodeId)) {
                 NodeService nodeService = SpringUtil.getBean(NodeService.class);
                 NodeModel nodeModel = nodeService.getItem(nodeId);
-                if (nodeModel == null || userService.errorDynamicPermission(userModel, ClassFeature.NODE, nodeId)) {
+                if (nodeModel == null || roleService.errorDynamicPermission(userModel, ClassFeature.NODE, nodeId)) {
                     return false;
                 }
                 //
@@ -65,7 +67,7 @@ public class ServerWebSocketInterceptor implements HandshakeInterceptor {
                     //控制台
                     String projectId = httpServletRequest.getParameter("projectId");
                     // 判断权限
-                    if (userService.errorDynamicPermission(userModel, ClassFeature.PROJECT, projectId)) {
+                    if (roleService.errorDynamicPermission(userModel, ClassFeature.PROJECT, projectId)) {
                         return false;
                     }
                     attributes.put("projectId", projectId);
@@ -73,21 +75,21 @@ public class ServerWebSocketInterceptor implements HandshakeInterceptor {
                 case script:
                     // 脚本模板
                     String scriptId = httpServletRequest.getParameter("scriptId");
-                    if (userService.errorDynamicPermission(userModel, ClassFeature.SCRIPT, scriptId)) {
+                    if (roleService.errorDynamicPermission(userModel, ClassFeature.SCRIPT, scriptId)) {
                         return false;
                     }
                     attributes.put("scriptId", scriptId);
                     break;
                 case tomcat:
                     String tomcatId = httpServletRequest.getParameter("tomcatId");
-                    if (userService.errorDynamicPermission(userModel, ClassFeature.TOMCAT, tomcatId)) {
+                    if (roleService.errorDynamicPermission(userModel, ClassFeature.TOMCAT, tomcatId)) {
                         return false;
                     }
                     attributes.put("tomcatId", tomcatId);
                     break;
                 case ssh:
                     String sshId = httpServletRequest.getParameter("sshId");
-                    if (userService.errorDynamicPermission(userModel, ClassFeature.SSH, sshId)) {
+                    if (roleService.errorDynamicPermission(userModel, ClassFeature.SSH, sshId)) {
                         return false;
                     }
                     SshService bean = SpringUtil.getBean(SshService.class);

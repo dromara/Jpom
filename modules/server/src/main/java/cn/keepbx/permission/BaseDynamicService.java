@@ -1,19 +1,79 @@
-package cn.keepbx.jpom.service;
+package cn.keepbx.permission;
 
 import cn.jiangzeyin.common.spring.SpringUtil;
+import cn.keepbx.jpom.common.BaseServerController;
+import cn.keepbx.jpom.model.BaseModel;
+import cn.keepbx.jpom.model.data.UserModel;
 import cn.keepbx.jpom.service.user.RoleService;
-import cn.keepbx.permission.DynamicData;
 import cn.keepbx.plugin.ClassFeature;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @author bwcx_jzy
  * @date 2019/8/15
  */
 public interface BaseDynamicService {
+
+    /***
+     *  过滤角色数据
+     * @param jsonArray 原array
+     * @param classFeature 功能
+     * @return 过滤后的，如果当前没有登录信息就不过滤
+     */
+    default JSONArray filter(JSONArray jsonArray, ClassFeature classFeature) {
+        // 获取当前用户
+        UserModel userModel = BaseServerController.getUserModel();
+        if (jsonArray == null || userModel == null) {
+            return jsonArray;
+        }
+        RoleService bean = SpringUtil.getBean(RoleService.class);
+        Set<String> dynamicList = bean.getDynamicList(userModel, classFeature);
+        if (dynamicList == null) {
+            if (userModel.isSystemUser()) {
+                // 系统管理全部权限
+                return jsonArray;
+            }
+            return null;
+        }
+        List<Object> collect = jsonArray.stream().filter(o -> {
+            JSONObject jsonObject = (JSONObject) o;
+            String id = jsonObject.getString("id");
+            return dynamicList.contains(id);
+        }).collect(Collectors.toList());
+        return (JSONArray) JSONArray.toJSON(collect);
+    }
+
+    /***
+     *  过滤角色数据
+     * @param list 原list
+     * @param classFeature 功能
+     * @return 过滤后的，如果当前没有登录信息就不过滤
+     */
+    default List<? extends BaseModel> filter(List<? extends BaseModel> list, ClassFeature classFeature) {
+        // 获取当前用户
+        UserModel userModel = BaseServerController.getUserModel();
+        if (list == null || userModel == null) {
+            return list;
+        }
+        RoleService bean = SpringUtil.getBean(RoleService.class);
+        Set<String> dynamicList = bean.getDynamicList(userModel, classFeature);
+        if (dynamicList == null) {
+            if (userModel.isSystemUser()) {
+                // 系统管理全部权限
+                return list;
+            }
+            // 没有角色没有权限
+            return null;
+        }
+        //
+        return list.stream().filter(baseModel -> dynamicList.contains(baseModel.getId())).collect(Collectors.toList());
+    }
+
+    // -------------------------------------- 转换数据为tree
 
     /**
      * 查询动态数据的array
@@ -90,6 +150,10 @@ public interface BaseDynamicService {
         return true;
     }
 
+    // -------------------------------------- 转换数据为tree  end
+
+    // -------------------------------------- 前端接收选中
+
     /**
      * 接收前端的值
      *
@@ -150,4 +214,6 @@ public interface BaseDynamicService {
         });
         return newMap;
     }
+
+    // -------------------------------------- 前端接收选中-------------------- end
 }

@@ -34,7 +34,6 @@
       {
         "id": "outgivingWhitelistDirectory",
         "title": "分发白名单",
-        "role": "System",
         "url": "./outgiving/whitelistDirectory.html"
       }
     ]
@@ -78,14 +77,12 @@
       {
         "id": "user",
         "title": "用户列表",
-        "url": "./user/list",
-        "role": "ServerManager"
+        "url": "./user/list"
       },
       {
         "id": "roleList",
         "title": "角色管理",
-        "url": "./user/role/list.html",
-        "role": "ServerManager"
+        "url": "./user/role/list.html"
       },
       {
         "id": "user_log",
@@ -101,7 +98,6 @@
       {
         "id": "monitorConfigEmail",
         "title": "邮箱配置",
-        "role": "System",
         "url": "./monitor/mailConfig.html"
       },
       {
@@ -117,14 +113,12 @@
       {
         "id": "update",
         "title": "在线升级",
-        "url": "./system/update.html",
-        "role": "System"
+        "url": "./system/update.html"
       },
       {
         "id": "sysConfig",
         "title": "系统配置",
-        "url": "./system/config.html",
-        "role": "System"
+        "url": "./system/config.html"
       }
     ]
   }

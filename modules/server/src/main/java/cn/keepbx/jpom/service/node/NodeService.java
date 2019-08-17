@@ -9,11 +9,11 @@ import cn.keepbx.jpom.common.JpomManifest;
 import cn.keepbx.jpom.common.forward.NodeForward;
 import cn.keepbx.jpom.common.forward.NodeUrl;
 import cn.keepbx.jpom.model.data.NodeModel;
-import cn.keepbx.jpom.service.BaseDynamicService;
+import cn.keepbx.permission.BaseDynamicService;
 import cn.keepbx.jpom.system.ServerConfigBean;
+import cn.keepbx.plugin.ClassFeature;
 import cn.keepbx.util.StringUtil;
 import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletRequest;
@@ -64,36 +64,6 @@ public class NodeService extends BaseOperService<NodeModel> implements BaseDynam
             }
         }
         return nodeModels;
-    }
-
-    /**
-     * 获取所有节点 和节点下面的tomcat
-     *
-     * @return list
-     */
-    public JSONObject listAndTomcat() {
-        List<NodeModel> nodeModels = this.list();
-        JSONObject object = new JSONObject();
-        Iterator<NodeModel> iterator = nodeModels.iterator();
-        while (iterator.hasNext()) {
-            NodeModel nodeModel = iterator.next();
-            if (!nodeModel.isOpenStatus()) {
-                iterator.remove();
-                continue;
-            }
-            try {
-                // 获取项目信息不需要状态
-                JSONArray jsonArray = NodeForward.requestData(nodeModel, NodeUrl.Tomcat_List, JSONArray.class, null, null);
-                if (jsonArray != null) {
-                    object.put(nodeModel.getId(), jsonArray);
-                } else {
-                    iterator.remove();
-                }
-            } catch (Exception e) {
-                iterator.remove();
-            }
-        }
-        return object;
     }
 
     public String cacheNodeList(List<NodeModel> list) {
@@ -162,5 +132,10 @@ public class NodeService extends BaseOperService<NodeModel> implements BaseDynam
     @Override
     public JSONArray listToArray(String dataId) {
         return (JSONArray) JSONArray.toJSON(this.list());
+    }
+
+    @Override
+    public List<NodeModel> list() {
+        return (List<NodeModel>) filter(super.list(), ClassFeature.NODE);
     }
 }

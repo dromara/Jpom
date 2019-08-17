@@ -3,8 +3,9 @@ package cn.keepbx.jpom.service.node.manage;
 import cn.keepbx.jpom.common.forward.NodeForward;
 import cn.keepbx.jpom.common.forward.NodeUrl;
 import cn.keepbx.jpom.model.data.NodeModel;
-import cn.keepbx.jpom.service.BaseDynamicService;
+import cn.keepbx.permission.BaseDynamicService;
 import cn.keepbx.jpom.service.node.NodeService;
+import cn.keepbx.plugin.ClassFeature;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;
@@ -33,7 +34,8 @@ public class ProjectInfoService implements BaseDynamicService {
 
 
     public JSONArray listAll(NodeModel nodeModel, HttpServletRequest request) {
-        return NodeForward.requestData(nodeModel, NodeUrl.Manage_GetProjectInfo, request, JSONArray.class);
+        JSONArray jsonArray = NodeForward.requestData(nodeModel, NodeUrl.Manage_GetProjectInfo, request, JSONArray.class);
+        return filter(jsonArray, ClassFeature.PROJECT);
     }
 
     public List<String> getAllGroup(NodeModel nodeModel) {

@@ -3,8 +3,9 @@ package cn.keepbx.jpom.service.node;
 import cn.keepbx.jpom.common.BaseOperService;
 import cn.keepbx.jpom.model.data.OutGivingModel;
 import cn.keepbx.jpom.model.data.OutGivingNodeProject;
-import cn.keepbx.jpom.service.BaseDynamicService;
+import cn.keepbx.permission.BaseDynamicService;
 import cn.keepbx.jpom.system.ServerConfigBean;
+import cn.keepbx.plugin.ClassFeature;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;
@@ -67,5 +68,10 @@ public class OutGivingServer extends BaseOperService<OutGivingModel> implements 
     @Override
     public JSONArray listToArray(String dataId) {
         return (JSONArray) JSONArray.toJSON(this.list());
+    }
+
+    @Override
+    public List<OutGivingModel> list() {
+        return (List<OutGivingModel>) filter(super.list(), ClassFeature.OUTGIVING);
     }
 }

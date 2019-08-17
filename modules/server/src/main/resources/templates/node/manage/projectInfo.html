@@ -14,14 +14,10 @@
 <table class="layui-table" id="tab_project" lay-filter="tab_project" style="margin: 0;"></table>
 
 <script type="text/html" id="bar_projects">
-    {{# if (d.manager) { }}
     <a href="javascript:;" class="layui-btn  layui-btn-sm layui-btn-normal" lay-event="manage">控制台</a>
     <a href="javascript:;" class="layui-btn  layui-btn-sm layui-btn-warm" lay-event="update">配置</a>
     <a href="javascript:;" class="layui-btn  layui-btn-sm" lay-event="file">文件</a>
     <a href="javascript:;" class="layui-btn  layui-btn-sm layui-btn-normal" lay-event="ram">监控</a>
-    {{# }else{ }}
-    没有权限
-    {{# } }}
 </script>
 <script type="text/html" id="status_templ">
     <div title="请到控制台中管理项目">
@@ -119,9 +115,6 @@
                 var ids = [];
                 for (var i = 0; i < projects.length; i++) {
                     var project = projects[i];
-                    if (!project.manager) {
-                        $('tr[data-index="' + i + '"').css('background-color', 'rgb(211,211,211)');
-                    }
                     ids.push(project.id);
                 }
                 getProjectMainPort(ids);
@@ -185,17 +178,12 @@
 
         // 文件管理
         function fileManage(data) {
-            var manager = data.manager;
-            if (manager) {
-                var url = './manage/file/list.html?id=' + data.id;
-                tabChange({
-                    id: data.id,
-                    url: url,
-                    title: data.id + ' - 文件',
-                });
-            } else {
-                layer.msg('你还没有对应权限！');
-            }
+            var url = './manage/file/list.html?id=' + data.id;
+            tabChange({
+                id: data.id,
+                url: url,
+                title: data.id + ' - 文件',
+            });
         }
 
         // 管理

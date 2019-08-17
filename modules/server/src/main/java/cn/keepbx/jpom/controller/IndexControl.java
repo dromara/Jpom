@@ -1,5 +1,6 @@
 package cn.keepbx.jpom.controller;
 
+import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.io.resource.ResourceUtil;
 import cn.hutool.core.util.CharsetUtil;
@@ -10,8 +11,11 @@ import cn.keepbx.jpom.common.GlobalDefaultExceptionHandler;
 import cn.keepbx.jpom.common.JpomManifest;
 import cn.keepbx.jpom.common.interceptor.NotLogin;
 import cn.keepbx.jpom.model.data.NodeModel;
+import cn.keepbx.jpom.model.data.UserModel;
 import cn.keepbx.jpom.service.node.NodeService;
+import cn.keepbx.jpom.service.user.RoleService;
 import cn.keepbx.jpom.service.user.UserService;
+import cn.keepbx.permission.CacheControllerFeature;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.http.MediaType;
@@ -39,12 +43,21 @@ public class IndexControl extends BaseServerController {
     @Resource
     private NodeService nodeService;
 
+    @Resource
+    private RoleService roleService;
+
     @RequestMapping(value = {"error", "error.html"}, method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
     @NotLogin
     public String error(String id) {
         String msg = GlobalDefaultExceptionHandler.getErrorMsg(id);
         setAttribute("msg", msg);
         return "error";
+    }
+
+    @RequestMapping(value = "authorize.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
+    @NotLogin
+    public String authorize() {
+        return "authorize";
     }
 
     /**
@@ -67,30 +80,35 @@ public class IndexControl extends BaseServerController {
     @RequestMapping(value = "menus_data.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     public String menusData() {
-//        UserModel user = getUser();
         NodeModel nodeModel = tryGetNode();
-
+        UserModel userModel = getUserModel();
         // 菜单
         InputStream inputStream;
+        String secondary;
         if (nodeModel == null) {
             inputStream = ResourceUtil.getStream("classpath:/menus/index.json");
+            secondary = "";
         } else {
             inputStream = ResourceUtil.getStream("classpath:/menus/node-index.json");
+            secondary = "node/";
         }
 
         String json = IoUtil.read(inputStream, CharsetUtil.CHARSET_UTF_8);
         JSONArray jsonArray = JSONArray.parseArray(json);
         List<Object> collect1 = jsonArray.stream().filter(o -> {
             JSONObject jsonObject = (JSONObject) o;
-            if (!testMenus(jsonObject)) {
+            if (!testMenus(jsonObject, userModel, secondary)) {
                 return false;
             }
             JSONArray childs = jsonObject.getJSONArray("childs");
             if (childs != null) {
                 List<Object> collect = childs.stream().filter(o1 -> {
                     JSONObject jsonObject1 = (JSONObject) o1;
-                    return testMenus(jsonObject1);
+                    return testMenus(jsonObject1, userModel, secondary);
                 }).collect(Collectors.toList());
+                if (collect.isEmpty()) {
+                    return false;
+                }
                 jsonObject.put("childs", collect);
             }
             return true;
@@ -98,7 +116,18 @@ public class IndexControl extends BaseServerController {
         return JsonMessage.getString(200, "", collect1);
     }
 
-    private boolean testMenus(JSONObject jsonObject) {
+    private boolean testMenus(JSONObject jsonObject, UserModel userModel, String secondary) {
+        String url = jsonObject.getString("url");
+        if (StrUtil.isNotEmpty(url)) {
+            url = FileUtil.normalize(secondary + url);
+            CacheControllerFeature.UrlFeature urlFeature = CacheControllerFeature.getUrlFeature(StrUtil.SLASH + url);
+            if (urlFeature != null) {
+                boolean b = roleService.errorMethodPermission(userModel, urlFeature.getClassFeature(), urlFeature.getMethodFeature());
+                if (b) {
+                    return false;
+                }
+            }
+        }
         //
         String dynamic = jsonObject.getString("dynamic");
         if (StrUtil.isNotEmpty(dynamic)) {

@@ -14,6 +14,7 @@ import cn.keepbx.jpom.model.data.UserModel;
 import cn.keepbx.jpom.service.node.NodeService;
 import cn.keepbx.jpom.system.JpomRuntimeException;
 import org.springframework.web.context.request.RequestAttributes;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.annotation.Resource;
 import java.util.Objects;
@@ -62,7 +63,11 @@ public abstract class BaseServerController extends BaseJpomController {
     }
 
     public static UserModel getUserModel() {
-        return (UserModel) getRequestAttributes().getAttribute(LoginInterceptor.SESSION_NAME, RequestAttributes.SCOPE_SESSION);
+        ServletRequestAttributes servletRequestAttributes = tryGetRequestAttributes();
+        if (servletRequestAttributes == null) {
+            return null;
+        }
+        return (UserModel) servletRequestAttributes.getAttribute(LoginInterceptor.SESSION_NAME, RequestAttributes.SCOPE_SESSION);
     }
 
     /**

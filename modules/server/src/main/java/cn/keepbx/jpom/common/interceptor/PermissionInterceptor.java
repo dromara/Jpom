@@ -10,9 +10,8 @@ import cn.keepbx.jpom.model.data.NodeModel;
 import cn.keepbx.jpom.model.data.UserModel;
 import cn.keepbx.jpom.service.node.NodeService;
 import cn.keepbx.jpom.service.node.manage.ProjectInfoService;
-import cn.keepbx.jpom.service.user.UserService;
+import cn.keepbx.jpom.service.user.RoleService;
 import cn.keepbx.jpom.system.AgentException;
-import cn.keepbx.jpom.system.JpomRuntimeException;
 import cn.keepbx.permission.DynamicData;
 import cn.keepbx.plugin.ClassFeature;
 import cn.keepbx.plugin.Feature;
@@ -22,6 +21,7 @@ import org.springframework.web.method.HandlerMethod;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.util.Map;
 
 /**
@@ -35,7 +35,7 @@ public class PermissionInterceptor extends BaseJpomInterceptor {
 
     private ProjectInfoService projectInfoService;
     private NodeService nodeService;
-    private UserService userService;
+    private RoleService roleService;
 
     private void init() {
         if (projectInfoService == null) {
@@ -44,8 +44,8 @@ public class PermissionInterceptor extends BaseJpomInterceptor {
         if (nodeService == null) {
             nodeService = SpringUtil.getBean(NodeService.class);
         }
-        if (userService == null) {
-            userService = SpringUtil.getBean(UserService.class);
+        if (roleService == null) {
+            roleService = SpringUtil.getBean(RoleService.class);
         }
     }
 
@@ -77,12 +77,7 @@ public class PermissionInterceptor extends BaseJpomInterceptor {
         Map<ClassFeature, DynamicData> dynamicDataMap = DynamicData.getDynamicDataMap();
         DynamicData dynamicData = dynamicDataMap.get(classFeature);
         if (dynamicData != null) {
-            String parameterName = dynamicData.getParameterName();
-            String parameter = request.getParameter(parameterName);
-            if (StrUtil.isEmpty(parameter)) {
-                this.errorMsg(request, response);
-                return false;
-            }
+            // 排除的方法
             MethodFeature[] excludeMethod = dynamicData.getExcludeMethod();
             if (excludeMethod != null) {
                 for (MethodFeature methodFeature : excludeMethod) {
@@ -92,22 +87,24 @@ public class PermissionInterceptor extends BaseJpomInterceptor {
                     }
                 }
             }
+            // 动态参数
+            String parameterName = dynamicData.getParameterName();
+            String parameter = request.getParameter(parameterName);
+            if (StrUtil.isEmpty(parameter)) {
+                this.errorMsg(request, response);
+                return false;
+            }
             //
-            if (userService.errorDynamicPermission(userModel, classFeature, parameter)) {
+            if (roleService.errorDynamicPermission(userModel, classFeature, parameter)) {
                 this.errorMsg(request, response);
                 return false;
             }
         }
         // 判断方法
-        if (userService.errorMethodPermission(userModel, classFeature, method)) {
+        if (roleService.errorMethodPermission(userModel, classFeature, method)) {
             this.errorMsg(request, response);
             return false;
         }
-        ClassFeature parent = classFeature.getParent();
-        if (parent != null) {
-
-        }
-
         return true;
     }
 
@@ -123,9 +120,10 @@ public class PermissionInterceptor extends BaseJpomInterceptor {
         }
     }
 
-    private void errorMsg(HttpServletRequest request, HttpServletResponse response) {
+    private void errorMsg(HttpServletRequest request, HttpServletResponse response) throws IOException {
         if (BaseJpomInterceptor.isPage(request)) {
-            throw new JpomRuntimeException("没有权限");
+            String url = getHeaderProxyPath(request) + "/authorize.html";
+            response.sendRedirect(url);
         } else {
             JsonMessage jsonMessage = new JsonMessage(302, "你没有权限:-2");
             ServletUtil.write(response, jsonMessage.toString(), MediaType.APPLICATION_JSON_UTF8_VALUE);

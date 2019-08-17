@@ -4,7 +4,7 @@ import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.spring.SpringUtil;
 import cn.keepbx.jpom.common.BaseServerController;
 import cn.keepbx.jpom.model.data.RoleModel;
-import cn.keepbx.jpom.service.BaseDynamicService;
+import cn.keepbx.permission.BaseDynamicService;
 import cn.keepbx.jpom.service.user.RoleService;
 import cn.keepbx.permission.DynamicData;
 import cn.keepbx.plugin.ClassFeature;

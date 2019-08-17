@@ -18,8 +18,7 @@
       {
         "id": "projectRecover",
         "title": "项目回收",
-        "url": "./manage/recover/list.html",
-        "role": "NodeManage"
+        "url": "./manage/recover/list.html"
       }
     ]
   },
@@ -36,15 +35,13 @@
       {
         "id": "script",
         "title": "脚本模板",
-        "url": "./script/list.html",
-        "role": "ServerManager"
+        "url": "./script/list.html"
       }
     ]
   },
   {
     "id": "nginx",
     "title": "nginx管理",
-    "role": "NodeManage",
     "icon": "layui-icon-layer",
     "childs": [
       {
@@ -67,8 +64,7 @@
       {
         "id": "whitelistDirectory",
         "title": "白名单目录",
-        "url": "./system/whitelistDirectory",
-        "role": "System"
+        "url": "./system/whitelistDirectory"
       },
       {
         "id": "cacheManage",
@@ -83,14 +79,12 @@
       {
         "id": "update",
         "title": "在线升级",
-        "url": "../system/update.html",
-        "role": "System"
+        "url": "../system/update.html"
       },
       {
         "id": "sysConfig",
         "title": "系统配置",
-        "url": "../system/config.html",
-        "role": "System"
+        "url": "../system/config.html"
       }
     ]
   }

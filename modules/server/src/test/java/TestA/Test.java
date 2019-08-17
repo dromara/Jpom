@@ -1,5 +1,6 @@
 package TestA;
 
+import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.ClassUtil;
 import cn.keepbx.jpom.service.user.RoleService;
 import cn.keepbx.permission.CacheControllerFeature;
@@ -15,6 +16,8 @@ import java.util.Set;
  */
 public class Test {
     public static void main(String[] args) {
+
+        System.out.println(FileUtil.normalize("./ssss/ssss"));
         CacheControllerFeature.init();
         Map<ClassFeature, Set<MethodFeature>> classFeatureSetMap = CacheControllerFeature.getFeatureMap();
         ClassFeature monitor = ClassFeature.valueOf("MONITOR");
