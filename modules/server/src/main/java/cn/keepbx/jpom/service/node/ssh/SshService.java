@@ -99,6 +99,15 @@ public class SshService extends BaseOperService<SshModel> implements BaseDynamic
         return false;
     }
 
+    /**
+     * 执行命令
+     *
+     * @param sshModel ssh
+     * @param command  命令
+     * @return 结果
+     * @throws IOException   io
+     * @throws JSchException jsch
+     */
     public String exec(SshModel sshModel, String command) throws IOException, JSchException {
         Session session = null;
         try {
@@ -179,6 +188,31 @@ public class SshService extends BaseOperService<SshModel> implements BaseDynamic
             channel.cd(remotePath);
         } catch (SftpException e) {
             throw new RuntimeException("切换目录失败：" + remotePath, e);
+        }
+    }
+
+    /**
+     * 下载文件
+     *
+     * @param sshModel
+     * @param remoteFile
+     * @param save
+     * @throws FileNotFoundException
+     * @throws SftpException
+     */
+    public void download(SshModel sshModel, String remoteFile, File save) throws FileNotFoundException, SftpException {
+        Session session = null;
+        ChannelSftp channel = null;
+        OutputStream output = null;
+        try {
+            session = getSession(sshModel);
+            channel = (ChannelSftp) JschUtil.openChannel(session, ChannelType.SFTP);
+            output = new FileOutputStream(save);
+            channel.get(remoteFile, output);
+        } finally {
+            IoUtil.close(output);
+            JschUtil.close(channel);
+            JschUtil.close(session);
         }
     }
 }

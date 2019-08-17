@@ -9,6 +9,49 @@
 <div class="layui-container">
     <form action="" class="layui-form" id="form">
         <div class="layui-form-item">
+            <div class="layui-inline">
+                <label class="layui-form-label">节点ID</label>
+                <div class="layui-input-block">
+                    <input type="text" id="id" name="id" placeholder="创建后不能修改"
+                           class="layui-input"
+                           required
+                           lay-verify="required">
+                </div>
+            </div>
+            <div class="layui-inline">
+                <label class="layui-form-label">节点名称</label>
+                <div class="layui-input-block">
+                    <input type="text" id="name" name="name" placeholder="请填写节点名称"
+                           class="layui-input"
+                           required
+                           lay-verify="required">
+                </div>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-inline">
+                <label class="layui-form-label">节点协议</label>
+                <div class="layui-input-block">
+                    <select name="protocol" lay-verify="required">
+                        <option value="http">http</option>
+                        <option value="https">https</option>
+                    </select>
+                </div>
+            </div>
+            <div class="layui-inline">
+
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">节点地址</label>
+            <div class="layui-input-block">
+                <input type="text" id="url" name="url"
+                       placeholder="请填写节点地址,ip:port，如：(127.0.0.1:2123)或者域名" class="layui-input"
+                       required
+                       lay-verify="required">
+            </div>
+        </div>
+        <div class="layui-form-item">
             <label class="layui-form-label">安装路径</label>
             <div class="layui-input-block">
                 <input type="text" id="path" name="path" placeholder="请输入插件端安装路径" class="layui-input" required
@@ -36,6 +79,7 @@
     var upload;
     var uploadRender;
     var hashSelect;
+    var nodeData = {};
     var installPath;
     var id = getQueryString("id");
 
@@ -50,6 +94,9 @@
                 acceptMime: '.zip',
                 field: 'file',
                 data: {
+                    nodeData: function () {
+                        return JSON.stringify(nodeData);
+                    },
                     path: function () {
                         return installPath;
                     },
@@ -78,6 +125,7 @@
             });
         });
         form.on('submit(submit)', function (data) {
+            nodeData = data.field;
             installPath = data.field.path;
             if (!hashSelect) {
                 layer.msg("请选安装包");

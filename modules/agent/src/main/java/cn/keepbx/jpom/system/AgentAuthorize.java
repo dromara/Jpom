@@ -26,12 +26,12 @@ public class AgentAuthorize {
     /**
      * 账号
      */
-    @Value("${jpom.authorize.agentName}")
+    @Value("${" + ConfigBean.AUTHORIZE_USER_KEY + "}")
     private String agentName;
     /**
      * 密码
      */
-    @Value("${jpom.authorize.agentPwd:}")
+    @Value("${" + ConfigBean.AUTHORIZE_PWD_KEY + ":}")
     private String agentPwd;
     /**
      * 授权加密字符串
