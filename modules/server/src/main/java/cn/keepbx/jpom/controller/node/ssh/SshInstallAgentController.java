@@ -129,21 +129,25 @@ public class SshInstallAgentController extends BaseServerController {
             // 休眠10秒
             Thread.sleep(10 * 1000);
             if (StrUtil.isEmpty(nodeModel.getLoginName()) || StrUtil.isEmpty(nodeModel.getLoginPwd())) {
-                File saveFile;
+                File saveFile = null;
                 try {
                     //  获取远程的授权信息
                     String normalize = FileUtil.normalize(StrUtil.format("{}/{}/{}", path, ConfigBean.DATA, ConfigBean.AUTHORIZE));
                     saveFile = FileUtil.file(tempFilePath, IdUtil.fastSimpleUUID() + ConfigBean.AUTHORIZE);
                     sshService.download(sshModel, normalize, saveFile);
+                    //
+                    String json = FileUtil.readString(saveFile, CharsetUtil.CHARSET_UTF_8);
+                    AgentAutoUser autoUser = JSONObject.parseObject(json, AgentAutoUser.class);
+                    nodeModel.setLoginPwd(autoUser.getAgentPwd());
+                    nodeModel.setLoginName(autoUser.getAgentName());
                 } catch (Exception e) {
                     DefaultSystemLog.ERROR().error("拉取授权信息失败", e);
                     return JsonMessage.getString(500, "获取授权信息失败", e);
+                } finally {
+                    FileUtil.del(saveFile);
                 }
-                String json = FileUtil.readString(saveFile, CharsetUtil.CHARSET_UTF_8);
-                AgentAutoUser autoUser = JSONObject.parseObject(json, AgentAutoUser.class);
-                nodeModel.setLoginPwd(autoUser.getAgentPwd());
-                nodeModel.setLoginName(autoUser.getAgentName());
             }
+            nodeModel.setOpenStatus(true);
             // 绑定关系
             nodeModel.setSshId(sshModel.getId());
             nodeService.addItem(nodeModel);

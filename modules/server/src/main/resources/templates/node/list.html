@@ -23,7 +23,8 @@
                     进入
                 </button>
 
-                <button th:if="${item.sshId}" op="terminal" th:data-name="${sshName.get(item.sshId)}"
+                <button th:if="${item.sshId!=null && sshName.get(item.sshId)!=null}" op="terminal"
+                        th:data-name="${sshName.get(item.sshId)}"
                         th:data-id="${item.sshId}"
                         class="layui-btn layui-btn-sm layui-btn-normal ">
                     <i class="layui-icon layui-icon-layer"></i>
