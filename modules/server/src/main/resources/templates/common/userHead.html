@@ -52,7 +52,7 @@
                     layer.open({
                         type: 2,
                         title: '修改资料',
-                        content: './user/userInfo.html',
+                        content: inNode ? '../user/userInfo.html' : './user/userInfo.html',
                         area: ['50%', '50%'],
                     });
                 } else if ('updatePwd' == op) {

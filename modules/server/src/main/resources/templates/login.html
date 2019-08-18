@@ -120,10 +120,11 @@
                                 remove: true
                             });
                             var url = getQueryString("url");
-                            if (!url) {
-                                url = './index';
+                            if (url && url.indexOf("index") > -1) {
+                                window.location.href = url;
+                            } else {
+                                window.location.href = './index.html';
                             }
-                            window.location.href = url;
                         } else {
                             // 显示验证码
                             if (600 === data.code) {
