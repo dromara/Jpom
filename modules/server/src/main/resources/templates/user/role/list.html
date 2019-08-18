@@ -42,7 +42,29 @@
                     content: './dynamicData.html?id=' + data.id,
                     area: ['80%', '80%'],
                 });
+            } else if ('delete' === event) {
+                del(data);
             }
+        });
+    }
+
+    function del(data) {
+        layer.confirm('确定删除【' + data.name + '】此角色吗？', {
+            title: '系统提示'
+        }, function (index) {
+            layer.close(index);
+            loadingAjax({
+                url: './del.json',
+                data: {
+                    id: data.id
+                },
+                success: function (data) {
+                    layer.msg(data.msg);
+                    if (200 === data.code) {
+                        table.reload('table', {});
+                    }
+                }
+            });
         });
     }
 

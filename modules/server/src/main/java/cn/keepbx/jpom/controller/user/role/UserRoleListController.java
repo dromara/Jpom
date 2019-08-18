@@ -6,8 +6,10 @@ import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.validator.ValidatorItem;
 import cn.jiangzeyin.common.validator.ValidatorRule;
 import cn.keepbx.jpom.common.BaseServerController;
+import cn.keepbx.jpom.common.interceptor.OptLog;
 import cn.keepbx.jpom.model.data.RoleModel;
 import cn.keepbx.jpom.model.data.UserModel;
+import cn.keepbx.jpom.model.log.UserOperateLogV1;
 import cn.keepbx.jpom.service.user.RoleService;
 import cn.keepbx.jpom.service.user.UserService;
 import cn.keepbx.permission.CacheControllerFeature;
@@ -133,6 +135,7 @@ public class UserRoleListController extends BaseServerController {
     @RequestMapping(value = "save.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     @Feature(method = MethodFeature.EDIT)
+    @OptLog(value = UserOperateLogV1.OptType.EditRole)
     public String save(String id,
                        @ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "请输入角色名称") String name,
                        @ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "请输入选择权限") String feature) {
@@ -174,5 +177,26 @@ public class UserRoleListController extends BaseServerController {
             roleService.addItem(item);
         }
         return JsonMessage.getString(200, "操作成功");
+    }
+
+    @RequestMapping(value = "del.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @ResponseBody
+    @Feature(method = MethodFeature.DEL)
+    @OptLog(value = UserOperateLogV1.OptType.DelRole)
+    public String del(@ValidatorItem(value = ValidatorRule.NOT_BLANK) String id) {
+        List<UserModel> userList = userService.list();
+        if (userList != null) {
+            for (UserModel userModel : userList) {
+                Set<String> roles = userModel.getRoles();
+                if (roles == null) {
+                    continue;
+                }
+                if (roles.contains(id)) {
+                    return JsonMessage.getString(100, "当前角色存在关联用户不能删除");
+                }
+            }
+        }
+        roleService.deleteItem(id);
+        return JsonMessage.getString(200, "删除成功");
     }
 }

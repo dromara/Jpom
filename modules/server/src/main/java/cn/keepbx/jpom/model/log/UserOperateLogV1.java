@@ -283,6 +283,8 @@ public class UserOperateLogV1 extends BaseJsonModel {
 
         BuildCleanSource(68, "删除构建代码"),
         SshInstallAgent(69, "ssh安装插件端"),
+        EditRole(70, "修改角色"),
+        DelRole(71, "删除角色"),
         ;
         private int code;
         private String desc;

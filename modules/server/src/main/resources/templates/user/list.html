@@ -112,7 +112,7 @@
                     },
                     success: function (data) {
                         layer.msg(data.msg);
-                        if (200 == data.code) {
+                        if (200 === data.code) {
                             table.reload('tab_user', {});
                         }
                     }

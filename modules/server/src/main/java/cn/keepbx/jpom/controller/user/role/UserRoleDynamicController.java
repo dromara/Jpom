@@ -3,7 +3,9 @@ package cn.keepbx.jpom.controller.user.role;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.spring.SpringUtil;
 import cn.keepbx.jpom.common.BaseServerController;
+import cn.keepbx.jpom.common.interceptor.OptLog;
 import cn.keepbx.jpom.model.data.RoleModel;
+import cn.keepbx.jpom.model.log.UserOperateLogV1;
 import cn.keepbx.jpom.service.user.RoleService;
 import cn.keepbx.permission.BaseDynamicService;
 import cn.keepbx.permission.DynamicData;
@@ -56,6 +58,7 @@ public class UserRoleDynamicController extends BaseServerController {
     @RequestMapping(value = "saveDynamic.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     @Feature(method = MethodFeature.EDIT)
+    @OptLog(value = UserOperateLogV1.OptType.EditRole)
     public String saveDynamic(String id, String dynamic) {
         RoleModel item = roleService.getItem(id);
         if (item == null) {
