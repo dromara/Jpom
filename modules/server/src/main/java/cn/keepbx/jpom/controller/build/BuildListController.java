@@ -124,6 +124,9 @@ public class BuildListController extends BaseServerController {
         buildModel.setName(name);
         buildModel.setRepoType(repoType);
         buildModel.setGitUrl(gitUrl);
+        if (BuildModel.RepoType.Svn.getCode() == repoType) {
+            branchName = "trunk";
+        }
         buildModel.setBranchName(branchName);
         buildModel.setPassword(password);
         buildModel.setUserName(userName);
