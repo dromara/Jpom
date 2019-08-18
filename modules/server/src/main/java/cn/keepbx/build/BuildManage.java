@@ -164,7 +164,7 @@ public class BuildManage extends BaseBuild implements Runnable {
                     msg = GitUtil.getLastCommitMsg(gitFile, buildModel.getBranchName());
                 } else if (buildModel.getRepoType() == BuildModel.RepoType.Svn.getCode()) {
                     // svn
-                    msg = SvnKitUtil.checkOut(buildModel.getGitUrl(), buildModel.getUserName(), buildModel.getUserName(), gitFile);
+                    msg = SvnKitUtil.checkOut(buildModel.getGitUrl(), buildModel.getUserName(), buildModel.getPassword(), gitFile);
                 }
                 this.log(msg);
             } catch (Exception e) {

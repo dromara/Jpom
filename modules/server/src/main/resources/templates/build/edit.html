@@ -265,10 +265,10 @@
         // 提交信息
         form.on('submit(submitBuild)', function (data) {
             var sendData = data.field;
-            if (!sendData.branchName) {
-                layer.msg("请选择分支");
-                return false;
-            }
+            // if (!sendData.branchName) {
+            //     layer.msg("请选择分支");
+            //     return false;
+            // }
             loadingAjax({
                 url: data.form.action,
                 data: sendData,
