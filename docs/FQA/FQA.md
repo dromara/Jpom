@@ -62,6 +62,14 @@ Jpom需要Jdk1.8以上，请检查jdk版本
 
 > 问题原因${JAVA_HOME}/jre/bin/attach.dll 文件没有找到，检查当前Jdk环境是否安装完整
 
+### windows 环境 java.util.ServiceConfigurationError: com.sun.tools.attach.spi.AttachProvider: Provider sun.tools.attach.WindowsAttachProvider could not be instantiated
+
+> 问题原因${JAVA_HOME}/jre/bin/attach.dll 文件没有找到，将这个文件复制到${JAVA_HOME}/bin/目录下即可；前提是${JAVA_HOME}/bin/目录已经加入到操作系统的path环境变量下；
+>
+>或者
+>
+> 解决方法：将jdk原路径下的jre/bin路径添加到环境变量path下。
+
 ### 查看控制台日志中文乱码
 
 > 由于没人采用自动识别文件编码格式，可能不准确，如果明确日志问酒店编码格式。可以在插件端外部文件【extConfig.yml】中指定
