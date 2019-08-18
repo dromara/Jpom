@@ -12,6 +12,8 @@ server {
         proxy_set_header Host      $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        # iframe 重定向
+        proxy_set_header X-Forwarded-Proto $scheme;
         client_max_body_size  50000m;
         client_body_buffer_size 128k;
         #  websocket 配置
@@ -45,6 +47,8 @@ server {
 		proxy_set_header Host      $host;
 		proxy_set_header X-Real-IP $remote_addr;
 		proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        # iframe 重定向
+        proxy_set_header X-Forwarded-Proto $scheme;
 		client_max_body_size  50000m;
 		client_body_buffer_size 128k;
 		#	websocket 配置
