@@ -5,6 +5,7 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.net.URLEncoder;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.core.util.URLUtil;
 import cn.hutool.crypto.SecureUtil;
 import cn.hutool.extra.servlet.ServletUtil;
 import cn.jiangzeyin.common.JsonMessage;
@@ -113,21 +114,18 @@ public class LoginInterceptor extends BaseJpomInterceptor {
      */
     private void responseLogin(HttpServletRequest request, HttpServletResponse response, HandlerMethod handlerMethod) throws IOException {
         if (isPage(handlerMethod)) {
-            String url = "/login.html";
+            String url = "/login.html?";
             String uri = request.getRequestURI();
-            boolean hasPar = false;
             if (StrUtil.isNotEmpty(uri) && !StrUtil.SLASH.equals(uri)) {
-                url += "?url=" + uri;
-                hasPar = true;
+                String queryString = request.getQueryString();
+                if (queryString != null) {
+                    uri += "?" + queryString;
+                }
+                url += "&url=" + URLUtil.encodeAll(uri);
             }
             String header = request.getHeader(HttpHeaders.REFERER);
             if (header != null) {
-                if (hasPar) {
-                    url += "&";
-                } else {
-                    url += "?";
-                }
-                url += "r=" + header;
+                url += "&r=" + header;
             }
             super.sendRedirect(request, response, url);
             return;

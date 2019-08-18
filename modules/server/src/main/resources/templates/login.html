@@ -70,7 +70,7 @@
             var carousel = layui.carousel;
 
             //   判断是否在iframe中, 如果是，刷新父页面
-            if (self != top) {
+            if (window.self !== window.top) {
                 parent.window.location.replace(window.location.href);
             }
             //
@@ -109,7 +109,7 @@
                     url: './userLogin',
                     data: sendData,
                     success: function (data) {
-                        if (200 == data.code) {
+                        if (200 === data.code) {
                             // 记住用户名
                             layui.data('user', {
                                 key: "userName",
@@ -119,10 +119,14 @@
                                 key: "loginOut",
                                 remove: true
                             });
-                            window.location.href = './index';
+                            var url = getQueryString("url");
+                            if (!url) {
+                                url = './index';
+                            }
+                            window.location.href = url;
                         } else {
                             // 显示验证码
-                            if (600 == data.code) {
+                            if (600 === data.code) {
                                 showCode();
                             }
                             layer.msg(data.msg);
@@ -130,7 +134,6 @@
                     }
                 });
             }
-
 
             if ([[${showCode}]])
                 showCode();

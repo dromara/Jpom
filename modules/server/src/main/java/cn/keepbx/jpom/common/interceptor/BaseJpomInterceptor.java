@@ -53,15 +53,15 @@ public abstract class BaseJpomInterceptor extends BaseInterceptor {
     /**
      * 二级代理路径
      *
-     * @param request
-     * @return
+     * @param request req
+     * @return nginx配置 + context-path
      */
     public static String getHeaderProxyPath(HttpServletRequest request) {
         String proxyPath = ServletUtil.getHeaderIgnoreCase(request, "Jpom-ProxyPath");
         if (StrUtil.isEmpty(proxyPath)) {
-            return StrUtil.EMPTY;
+            return request.getContextPath();
         }
-        proxyPath = FileUtil.normalize(proxyPath);
+        proxyPath = FileUtil.normalize(request.getContextPath() + StrUtil.SLASH + proxyPath);
         if (proxyPath.endsWith(StrUtil.SLASH)) {
             proxyPath = proxyPath.substring(0, proxyPath.length() - 1);
         }
