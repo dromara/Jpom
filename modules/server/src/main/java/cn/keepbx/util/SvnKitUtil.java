@@ -4,6 +4,7 @@ import cn.hutool.core.io.FileUtil;
 import org.tmatesoft.svn.core.SVNDepth;
 import org.tmatesoft.svn.core.SVNException;
 import org.tmatesoft.svn.core.SVNURL;
+import org.tmatesoft.svn.core.auth.ISVNAuthenticationManager;
 import org.tmatesoft.svn.core.internal.io.dav.DAVRepositoryFactory;
 import org.tmatesoft.svn.core.internal.io.fs.FSRepositoryFactory;
 import org.tmatesoft.svn.core.internal.io.svn.SVNRepositoryFactoryImpl;
@@ -46,12 +47,13 @@ public class SvnKitUtil {
      * @return true 匹配
      * @throws SVNException 异常
      */
-    private static Boolean checkUrl(File wcDir, String url) throws SVNException {
+    private static Boolean checkUrl(File wcDir, String url, String userName, String userPwd) throws SVNException {
+        ISVNAuthenticationManager authManager = SVNWCUtil.createDefaultAuthenticationManager(userName, userPwd.toCharArray());
         DefaultSVNOptions options = SVNWCUtil.createDefaultOptions(true);
         // 实例化客户端管理类
-        SVNClientManager ourClientManager = SVNClientManager.newInstance(options);
+        SVNClientManager clientManager = SVNClientManager.newInstance(options, authManager);
         // 通过客户端管理类获得updateClient类的实例。
-        SVNWCClient wcClient = ourClientManager.getWCClient();
+        SVNWCClient wcClient = clientManager.getWCClient();
         SVNInfo svnInfo = wcClient.doInfo(wcDir, SVNRevision.HEAD);
         String reUrl = svnInfo.getURL().toString();
         return reUrl.equals(url);
@@ -71,7 +73,7 @@ public class SvnKitUtil {
                 FileUtil.del(targetPath);
             } else {
                 // 判断url是否变更
-                if (!checkUrl(targetPath, svnPath)) {
+                if (!checkUrl(targetPath, svnPath, userName, userPwd)) {
                     FileUtil.del(targetPath);
                 } else {
                     ourClientManager.getWCClient().doCleanup(targetPath);
