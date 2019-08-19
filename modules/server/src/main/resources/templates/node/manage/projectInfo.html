@@ -112,12 +112,14 @@
                 {field: 'op', title: '操作', toolbar: '#bar_projects'}],
             done: function (data) {
                 var projects = data.data;
-                var ids = [];
-                for (var i = 0; i < projects.length; i++) {
-                    var project = projects[i];
-                    ids.push(project.id);
+                if (projects) {
+                    var ids = [];
+                    for (var i = 0; i < projects.length; i++) {
+                        var project = projects[i];
+                        ids.push(project.id);
+                    }
+                    getProjectMainPort(ids);
                 }
-                getProjectMainPort(ids);
                 // 选中
                 $("#selectGroup option[value='" + apiWhere.group + "']").attr("selected", "selected");
                 form.render();
