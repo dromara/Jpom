@@ -146,7 +146,7 @@
             <id>develop-plugin-profile</id>
             <dependencies>
                 <dependency>
-                    <groupId>cn.keepbx.Jpom-Plugin</groupId>
+                    <groupId>cn.keepbx.jpom-plugin</groupId>
                     <artifactId>netty</artifactId>
                     <version>LATEST</version>
                 </dependency>
