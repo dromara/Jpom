@@ -181,9 +181,7 @@ public class BuildManage extends BaseBuild implements Runnable {
                 try {
                     boolean s = runCommand(item);
                     if (!s) {
-                        this.log("命令执行失败");
-                        this.updateStatus(BuildModel.Status.Error);
-                        return;
+                        this.log("命令执行存在error");
                     }
                 } catch (IOException e) {
                     this.log(item + " 执行异常", e);

@@ -151,7 +151,7 @@
                         <option value="">请选择发布后的操作</option>
 
                         <option th:each="item : ${afterOpt}" th:value="${item.code}"
-                                th:selected="${item.code==$model?.afterOpt}" th:text="${item.desc}">
+                                th:selected="${item.code==model?.afterOpt}" th:text="${item.desc}">
                         </option>
                     </select>
                 </div>
