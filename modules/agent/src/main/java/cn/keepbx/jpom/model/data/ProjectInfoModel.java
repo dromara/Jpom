@@ -308,7 +308,7 @@ public class ProjectInfoModel extends BaseModel {
         if ("no".equalsIgnoreCase(this.token)) {
             return "";
         }
-        return token;
+        return StrUtil.emptyToDefault(token, StrUtil.EMPTY);
     }
 
     public void setToken(String token) {
