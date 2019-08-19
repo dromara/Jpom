@@ -5,7 +5,7 @@
 
 <body>
 <div class="layui-row">
-    <button id="addBuild" class="layui-btn layui-btn-sm">新增构建</button>
+    <button onclick="editData('')" class="layui-btn layui-btn-sm">新增构建</button>
     <button id="refresh" class="layui-btn layui-btn-sm">刷新表格</button>
 </div>
 <table class="layui-table" id="tab_build" lay-filter="tab_build" style="margin: 0;"></table>
@@ -103,17 +103,6 @@
             cols: [col]
         });
 
-        // '添加监控'点击事件
-        $('#addBuild').on('click', function () {
-            // 弹出
-            layer.open({
-                type: 2,
-                title: '新增构建',
-                content: './edit.html',
-                area: ['80%', '80%'],
-            });
-        });
-
         // '刷新表格'点击事件
         $('#refresh').on('click', function () {
             table.reload('tab_build', {});
@@ -125,7 +114,7 @@
             var event = obj.event;
             if ('update' === event) {
                 // 修改
-                updateApplication(data);
+                editData(data.id);
             } else if ('delete' === event) {
                 layer.confirm('确定删除此构建吗 ' + data.name + '？，删除将一并删除所有构建历史', {
                     title: '系统提示'
@@ -174,16 +163,15 @@
                 });
             }
         });
+    }
 
-        // 编辑监控
-        function updateApplication(data) {
-            layer.open({
-                type: 2,
-                title: '修改监控',
-                content: './edit.html?id=' + data.id,
-                area: ['80%', '80%'],
-            });
-        }
+    function editData(id) {
+        layer.open({
+            type: 2,
+            title: '编辑构建',
+            content: './edit.html?id=' + id,
+            area: ['80%', '80%'],
+        });
     }
 
     function reloadTable() {

@@ -155,7 +155,7 @@ public class ProjectInfoModel extends BaseModel {
     }
 
     public String getJvm() {
-        return jvm;
+        return StrUtil.emptyToDefault(jvm, StrUtil.EMPTY);
     }
 
     public void setJvm(String jvm) {
@@ -174,10 +174,7 @@ public class ProjectInfoModel extends BaseModel {
     }
 
     public String getMainClass() {
-        if (mainClass == null) {
-            return "";
-        }
-        return mainClass;
+        return StrUtil.emptyToDefault(mainClass, StrUtil.EMPTY);
     }
 
     private void repairWhitelist() {
@@ -285,7 +282,7 @@ public class ProjectInfoModel extends BaseModel {
     }
 
     public String getLog() {
-        return log;
+        return StrUtil.emptyToDefault(log, StrUtil.EMPTY);
     }
 
     public String getAbsoluteLog() {
@@ -327,10 +324,7 @@ public class ProjectInfoModel extends BaseModel {
     }
 
     public String getArgs() {
-        if (args == null) {
-            return "";
-        }
-        return args;
+        return StrUtil.emptyToDefault(args, StrUtil.EMPTY);
     }
 
     public void setArgs(String args) {

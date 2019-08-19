@@ -82,6 +82,9 @@ public class BuildService extends BaseOperService<BuildModel> implements BaseDyn
         List<E> list = super.list(cls);
         JSONArray jsonArray = ((JSONArray) JSONArray.toJSON(list));
         jsonArray = filter(jsonArray, ClassFeature.BUILD);
+        if (jsonArray == null) {
+            return null;
+        }
         return jsonArray.toJavaList(cls);
     }
 
