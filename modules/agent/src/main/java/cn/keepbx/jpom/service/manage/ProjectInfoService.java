@@ -32,6 +32,9 @@ public class ProjectInfoService extends BaseOperService<ProjectInfoModel> {
         //获取所有分组
         List<ProjectInfoModel> projectInfoModels = list();
         HashSet<String> hashSet = new HashSet<>();
+        if (projectInfoModels == null) {
+            return hashSet;
+        }
         for (ProjectInfoModel projectInfoModel : projectInfoModels) {
             hashSet.add(projectInfoModel.getGroup());
         }
