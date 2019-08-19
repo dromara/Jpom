@@ -2,6 +2,7 @@ package cn.keepbx.jpom.controller.script;
 
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.CharsetUtil;
+import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.http.HtmlUtil;
 import cn.jiangzeyin.common.JsonMessage;
@@ -56,6 +57,7 @@ public class ScriptController extends BaseAgentController {
             if (eModel != null) {
                 return JsonMessage.getString(405, "id已经存在啦");
             }
+            scriptModel.setId(IdUtil.fastSimpleUUID());
             File file = scriptModel.getFile(true);
             if (file.exists() || file.isDirectory()) {
                 return JsonMessage.getString(405, "当地id路径文件已经存在来，请修改");
