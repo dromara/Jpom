@@ -15,17 +15,8 @@ public class TestFile {
 //
 //        File file1 = new File("D:/keystore.p12");
 //        System.out.println(file1.exists() && file1.isFile());
-
-        System.out.println(FileUtil.loopFiles("D:\\sss"));
-        FileUtil.cleanEmpty(new File("D:\\sss"));
-        System.out.println("----------------------------------------");
-        System.out.println(FileUtil.loopFiles("D:\\sss"));
-
-        String name = FileUtil.extName("C:\\Users\\Colorful\\Desktop\\Desktop.tar.gz");
-        System.out.println(name);
-
-
-        System.out.println(FileUtil.file("dd","+ss"));
+        File file = FileUtil.file("D:\\jpom\\server\\data\\build\\39a61a05c63b4f56baf0d90bad498ac2\\history\\#7");
+        System.out.println(FileUtil.mainName(file));
     }
 
 

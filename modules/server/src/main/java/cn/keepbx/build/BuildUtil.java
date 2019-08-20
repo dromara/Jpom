@@ -45,7 +45,7 @@ public class BuildUtil {
         return FileUtil.file(getBuildDataFile(buildModelId),
                 "history",
                 BuildModel.getBuildIdStr(buildId),
-                resultFile);
+                resultFile, "result");
     }
 
     /**
@@ -58,7 +58,7 @@ public class BuildUtil {
         if (file.isFile()) {
             return null;
         }
-        File zipFile = FileUtil.file(file.getParentFile(), FileUtil.mainName(file) + ".zip");
+        File zipFile = FileUtil.file(file.getParentFile(), FileUtil.getName(file) + ".zip");
         if (!zipFile.exists()) {
             // 不存在则打包
             ZipUtil.zip(file);
