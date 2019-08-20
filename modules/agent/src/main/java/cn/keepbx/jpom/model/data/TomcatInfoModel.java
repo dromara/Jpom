@@ -72,7 +72,7 @@ public class TomcatInfoModel extends BaseModel {
 
     public String getAppBase() {
         if (StrUtil.isEmpty(appBase)) {
-            return null;
+            return StrUtil.EMPTY;
         }
         return FileUtil.normalize(appBase + "/");
     }
