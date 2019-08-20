@@ -8,7 +8,7 @@ if [[ ! -f "/usr/bin/unzip" ]];then
 	#rm -f /etc/yum.repos.d/epel.repo
 	yum install unzip -y
 fi
-TYPE=""
+TYPE="$1"
 # 判断
 if [[ -z "${TYPE}" ]] ; then
     TYPE="Server";
