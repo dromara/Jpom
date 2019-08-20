@@ -8,7 +8,16 @@ if [[ ! -f "/usr/bin/unzip" ]];then
 	#rm -f /etc/yum.repos.d/epel.repo
 	yum install unzip -y
 fi
+TYPE=""
+# 判断
+if [[ -z "${TYPE}" ]] ; then
+    TYPE="Server";
+fi
 # 下载
-wget -O server.zip https://jpom.keepbx.cn/api/releases/server
+wget -O ${TYPE}.zip https://jpom.keepbx.cn/api/releases/${TYPE}
 # 解压
-unzip server.zip
+unzip -o ${TYPE}.zip
+# 删除安装包
+rm -f ${TYPE}.zip
+# 启动
+sh ${TYPE}.sh start

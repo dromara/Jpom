@@ -30,8 +30,8 @@ public class ReleasesApiController extends AbstractController {
     public void releases(@PathVariable String type) throws IOException {
         HttpServletResponse response = getResponse();
         // 验证类型
-        if (StrUtil.equalsAny(type, true, Type.Agent.name(), Type.Server.name())) {
-            ServletUtil.write(response, "没有发布版", MediaType.TEXT_HTML_VALUE);
+        if (!StrUtil.equalsAny(type, false, Type.Agent.name(), Type.Server.name())) {
+            ServletUtil.write(response, "版本类型错误", MediaType.TEXT_HTML_VALUE);
             return;
         }
         // 查询最新版

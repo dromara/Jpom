@@ -70,6 +70,20 @@
 9. 在线管理Nginx配置、ssl证书文件
 10. Tomcat状态、文件、war包在线实时管理
 
+### 一键安装
+
+#### 服务端
+
+```
+yum install -y wget && wget -O install.sh https://keepbx.gitee.io/jpom/install.sh && bash install.sh Server
+```
+
+#### 插件端
+
+```
+yum install -y wget && wget -O install.sh https://keepbx.gitee.io/jpom/install.sh && bash install.sh Agent
+```
+
 ### 下载安装
 
 > [帮助文档](https://jpom-site.keepbx.cn/docs/#/安装使用/开始安装)
