@@ -45,8 +45,10 @@ public class UserEditController extends BaseServerController {
     @Feature(method = MethodFeature.EDIT)
     public String edit(String id) {
         UserModel item = userService.getItem(id);
-        item.setPassword(null);
-        setAttribute("userItem", item);
+        if (item != null) {
+            item.setPassword(null);
+            setAttribute("userItem", item);
+        }
         List<RoleModel> list = roleService.list();
         JSONArray roles = new JSONArray();
         list.forEach(userModel -> {
