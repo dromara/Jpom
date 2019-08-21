@@ -4,10 +4,17 @@ Resources:
   jpom:
     Type: 'Aliyun::Serverless::Service'
     Properties:
-      Description: 'helloworld'
+      Description: 'jpom'
     jpom-releases:
       Type: 'Aliyun::Serverless::Function'
       Properties:
         Handler: index.handler
         Runtime: python3
         CodeUri: './'
+        Description: 'Jpom 安装url处理'
+      Events:
+        install-api:
+          Type: HTTP
+          Properties:
+            AuthType: ANONYMOUS
+            Methods: ['GET']

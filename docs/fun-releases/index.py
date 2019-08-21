@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
-
 import requests
 
+END = b'OK\n'
+ERROR_END = b'EROOR\n'
 OK = '200 OK'
-response_headers = [('Content-type', 'text/plain')]
+Headers = [('Content-type', 'text/plain')]
 
 
 def handler(environ, start_response):
@@ -12,20 +13,19 @@ def handler(environ, start_response):
     json = result.json()
     tag_name = json['tag_name']
     if tag_name.strip() == '':
-        start_response(OK, response_headers)
-        return "没有发布版1"
+        start_response(OK, Headers)
+        return [ERROR_END]
     tag_name = tag_name.replace('v', '')
     # 处理请求参数
-    type = 'Server'
     try:
         query_string = environ['QUERY_STRING']
     except (KeyError):
         query_string = ""
     pars = query_string.split('&')
+    type = 'Server'
     for par in pars:
         if par.strip() == 'type':
             type = par.strip().split("=")
-    # 重定向
-    url = "https://jpom-releases.oss-cn-hangzhou.aliyuncs.com/" + type + "-" + tag_name + "-release.zip"
+    url = "https://jpom-releases.oss-cn-hangzhou.aliyuncs.com/" + type.lower() + "-" + tag_name + "-release.zip"
     start_response('302 FOUND', [('Location', url)])
-    return tag_name
+    return [END]

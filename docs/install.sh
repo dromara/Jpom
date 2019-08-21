@@ -14,7 +14,7 @@ if [[ -z "${TYPE}" ]] ; then
     TYPE="Server";
 fi
 # 下载
-wget -O ${TYPE}.zip https://jpom.keepbx.cn/api/releases/${TYPE}
+wget -O ${TYPE}.zip https://1232788122276831.cn-beijing.fc.aliyuncs.com/2016-08-15/proxy/jpom/jpom-releases/?type=${TYPE}
 # 解压
 unzip -o ${TYPE}.zip
 # 删除安装包
