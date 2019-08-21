@@ -1,10 +1,9 @@
 # -*- coding: utf-8 -*-
 import requests
 
-END = b'OK\n'
-ERROR_END = b'EROOR\n'
 OK = '200 OK'
-Headers = [('Content-type', 'text/plain')]
+FOUND = '302 FOUND'
+TEXT_HEADER = [('Content-type', 'text/plain')]
 
 
 def handler(environ, start_response):
@@ -13,8 +12,8 @@ def handler(environ, start_response):
     json = result.json()
     tag_name = json['tag_name']
     if tag_name.strip() == '':
-        start_response(OK, Headers)
-        return [ERROR_END]
+        start_response(OK, TEXT_HEADER)
+        return [bytes('没有tagName', encoding="utf8")]
     tag_name = tag_name.replace('v', '')
     # 处理请求参数
     try:
@@ -28,5 +27,5 @@ def handler(environ, start_response):
             type = par.strip().split("=")[1]
     # 重定向到下载地址
     url = "https://jpom-releases.oss-cn-hangzhou.aliyuncs.com/" + type.lower() + "-" + tag_name + "-release.zip"
-    start_response('302 FOUND', [('Location', url)])
-    return [END]
+    start_response(FOUND, [('Location', url)])
+    return [bytes(url, encoding="utf8")]

@@ -175,6 +175,8 @@ Agent.sh status    查看Jpom插件端运行状态
 
 [https://jpom-site.keepbx.cn/docs/#/FQA/FQA](https://jpom-site.keepbx.cn/docs/#/FQA/FQA)
 
+[Jpom 插件开发](https://gitee.com/keepbx/Jpom-Plugin)
+
 ### 交流讨论 、提供bug反馈或建议
 
   1. QQ群：[136715345](https://shang.qq.com/wpa/qunwpa?idkey=93ff8d8a37a436b752fe38d32075bb1b32a8e0b3d3ff19d0b541ca840433f561)
