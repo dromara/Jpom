@@ -24,8 +24,9 @@ def handler(environ, start_response):
     pars = query_string.split('&')
     type = 'Server'
     for par in pars:
-        if par.strip() == 'type':
-            type = par.strip().split("=")
+        if par.startswith('type='):
+            type = par.strip().split("=")[1]
+    # 重定向到下载地址
     url = "https://jpom-releases.oss-cn-hangzhou.aliyuncs.com/" + type.lower() + "-" + tag_name + "-release.zip"
     start_response('302 FOUND', [('Location', url)])
     return [END]
