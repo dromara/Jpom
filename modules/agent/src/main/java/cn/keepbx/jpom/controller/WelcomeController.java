@@ -4,6 +4,7 @@ import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.controller.base.AbstractController;
 import cn.keepbx.jpom.common.commander.AbstractSystemCommander;
 import cn.keepbx.jpom.model.system.ProcessModel;
+import cn.keepbx.jpom.system.TopManager;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -22,7 +23,7 @@ public class WelcomeController extends AbstractController {
 
     @RequestMapping(value = "getTop", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public String getTop() {
-        JSONObject topInfo = AbstractSystemCommander.getInstance().getAllMonitor();
+        JSONObject topInfo = TopManager.getTopMonitor();
         return JsonMessage.getString(200, "", topInfo);
     }
 

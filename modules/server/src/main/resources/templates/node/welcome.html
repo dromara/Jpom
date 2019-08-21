@@ -51,228 +51,171 @@
     };
 
     function loadSuccess() {
-        //
-        loadTopData();
+        loadTop();
         //加载进程信息
         loadProcessList();
         //
         tableRender(config);
-        linkSocket(true);
+    }
 
-        //加载病状图
-        function loadEcharts(xAxis, series) {
-            if (!series) {
-                return;
+    function loadTop() {
+        silentAjax({
+            url: './getTop',
+            success: function (data) {
+                if (200 === data.code && data.data) {
+                    loadEchartsData(data.data);
+                    //打开socket
+                    linkSocket(true);
+                }
             }
-            let option = {
-                title: {
-                    text: '系统监控'
-                },
-                tooltip: {
-                    trigger: 'axis'
-                },
-                legend: {
-                    data: ['cpu占用', '内存占用', '磁盘占用'],
-                    right: '1%'
-                },
-                grid: {
-                    left: '1%',
-                    right: '2%',
-                    bottom: '1%',
-                    containLabel: true
-                },
-                xAxis: {
-                    type: 'category',
-                    boundaryGap: false,
-                    data: xAxis
-                },
-                calculable: true,
-                yAxis: {
-                    type: 'value',
-                    axisLabel: {
-                        //设置y轴数值为%
-                        formatter: '{value} %'
-                    },
-                    max: 100
-                },
-                series: series
-            };
-            if (!myEcharts) {
-                myEcharts = echarts.init(document.getElementById('echarts'));
+        });
+    }
+
+    function loadEchartsData(data) {
+        let series = data.series;
+        let cpuItem = {
+            name: 'cpu占用',
+            type: 'line',
+            data: [0],
+            //设置折线为曲线
+            smooth: true
+        };
+        let diskItem = {
+            name: '磁盘占用',
+            type: 'line',
+            data: [0],
+            smooth: true
+        };
+        let memoryItem = {
+            name: '内存占用',
+            type: 'line',
+            data: [0],
+            smooth: true
+        };
+        for (let i = 0; i < series.length; i++) {
+            let item = series[i];
+            if (i === 0) {
+                //删除默认0的数据
+                cpuItem.data.splice(0, 1);
+                diskItem.data.splice(0, 1);
+                memoryItem.data.splice(0, 1);
             }
-            myEcharts.setOption(option);
+            cpuItem.data.push(parseFloat(item.cpu));
+            diskItem.data.push(parseFloat(item.disk));
+            memoryItem.data.push(parseFloat(item.memory));
         }
+        let array = [cpuItem, memoryItem, diskItem];
+        loadEcharts(data.scale, array);
+    }
 
-        function linkSocket(status) {
-            if (!('WebSocket' in window)) {
-                layer.msg("不支持WebSocket");
-                return;
-            }
-            var url = getSocketHost() + "/console?userId=[[${session.user.getUserMd5Key()}]]&projectId=system&nodeId=[[${node.id}]]&type=console";
-            if (!ws) {
+    //拼接监控数据
+    function addTopData(topData) {
+        let option = myEcharts.getOption();
+        let series = option.series;
+        let xAxis = option.xAxis;
+        let xAxisData = xAxis[0].data;
+
+        let cpuItem = series[0];
+        let memoryItem = series[1];
+        let diskItem = series[2];
+        cpuItem.data.push(parseFloat(topData.cpu));
+        diskItem.data.push(parseFloat(topData.disk));
+        memoryItem.data.push(parseFloat(topData.memory));
+        //删除过时数据
+        if (cpuItem.data.length > xAxisData.length) {
+            cpuItem.data.splice(0, 1);
+            diskItem.data.splice(0, 1);
+            memoryItem.data.splice(0, 1);
+            xAxisData.splice(0, 1);
+            xAxisData.push(topData.time);
+        }
+        let newSeries = [cpuItem, memoryItem, diskItem];
+        loadEcharts(xAxisData, newSeries);
+    }
+
+    function linkSocket(status) {
+        if (!('WebSocket' in window)) {
+            layer.msg("不支持WebSocket");
+            return;
+        }
+        var url = getSocketHost() + "/console?userId=[[${session.user.getUserMd5Key()}]]&projectId=system&nodeId=[[${node.id}]]&type=console";
+        if (!ws) {
+            ws = new WebSocket(url);
+        }
+        if (status) {
+            if (ws.readyState !== 1 && ws.readyState !== 0) {
                 ws = new WebSocket(url);
             }
-            if (status) {
-                if (ws.readyState !== 1 && ws.readyState !== 0) {
-                    ws = new WebSocket(url);
-                }
-                ws.onopen = function () {
-                    ws.send('{"op": "top", "projectInfo":{}}');
-                };
-                ws.onmessage = function (data) {
-                    try {
-                        if (data.data) {
-                            var top = JSON.parse(data.data);
-                            if (top.top) {
-                                loadTopData(top);
-                            }
-                            if (top.processList) {
-                                config.data = top.processList;
-                                tableRender(config);
-                            }
-                        }
-                    } catch (e) {
-                        return;
-                    }
-                };
-                ws.onerror = function (ev) {
-                    console.log(ev);
-                    layer.msg("socket 异常");
-                }
-            } else {
-                ws.close();
-            }
-        }
-
-        //保存监控数据
-        function loadTopData(topData) {
-            //默认刻度数量
-            let count = 24;
-            let dataTop = layui.data('top_[[${node.id}]]');
-            let top = [];
-            if (dataTop && dataTop.top) {
-                top = dataTop.top;
-            }
-            if (topData) {
-                top.push(topData);
-            }
-            let array = [];
-            let xAxis = [];
-            let cpuItem = {
-                name: 'cpu占用',
-                type: 'line',
-                data: [0],
-                //设置折线为曲线
-                smooth: true
+            ws.onopen = function () {
+                ws.send('{"op": "top", "projectInfo":{}}');
             };
-            let diskItem = {
-                name: '磁盘占用',
-                type: 'line',
-                data: [0],
-                smooth: true
+            ws.onmessage = function (data) {
+                try {
+                    if (data.data) {
+                        var top = JSON.parse(data.data);
+                        if (top.top) {
+                            addTopData(top);
+                        }
+                        if (top.processList) {
+                            config.data = top.processList;
+                            tableRender(config);
+                        }
+                    }
+                } catch (e) {
+                    return;
+                }
             };
-            let memoryItem = {
-                name: '内存占用',
-                type: 'line',
-                data: [0],
-                smooth: true
-            };
-            let topLen = top.length;
-            for (let i = topLen - 1; i >= 0; i--) {
-                let item = top[i];
-                let len = array.length;
-                if (len >= count) {
-                    break;
-                } else if (len > 0) {
-                    let nextItem = array[0];
-                    if (nextItem.day !== item.day || nextItem.time !== getNextMinute(item.hour, item.minute, item.second)) {
-                        break;
-                    }
-                }
-                if (i === topLen - 1) {
-                    //删除默认0的数据
-                    cpuItem.data.splice(0, 1);
-                    diskItem.data.splice(0, 1);
-                    memoryItem.data.splice(0, 1);
-                }
-                array.splice(0, 0, item);
-                cpuItem.data.splice(0, 0, parseFloat(item.cpu));
-                diskItem.data.splice(0, 0, parseFloat(item.disk));
-                memoryItem.data.splice(0, 0, parseFloat(item.memory));
-                xAxis.splice(0, 0, item.time);
+            ws.onerror = function (ev) {
+                console.log(ev);
+                layer.msg("socket 异常");
             }
-            let len = xAxis.length;
-            if (len <= count) {
-                let item = array[array.length - 1];
-                if (!item) {
-                    var myDate = new Date(); //实例一个时间对象；
-                    item = {
-                        hour: myDate.getHours(),
-                        minute: myDate.getMinutes(),
-                        second: myDate.getSeconds()
-                    }
-                }
-                let hour = item.hour;
-                let minute = item.minute;
-                let second = item.second;
-                for (let i = 0; i < count - len; i++) {
-                    if (i !== 0) {
-                        second += 30;
-                        if (second >= 60) {
-                            second = 0;
-                            minute += 1;
-                        }
-                        if (minute === 60) {
-                            minute = 0;
-                            hour += 1;
-                        }
-                        if (hour === 24) {
-                            hour = 0;
-                        }
-                    }
-                    xAxis.push(getNextMinute(hour, minute, second));
-                }
-            }
-            let series = [cpuItem, memoryItem, diskItem];
-            loadEcharts(xAxis, series);
-            layui.data('top_[[${node.id}]]', {
-                key: 'top',
-                value: array
-            });
+        } else {
+            ws.close();
         }
     }
 
-    //下半分钟 判断时间连续性
-    function getNextMinute(hour, minute, second) {
-        second += 30;
-        if (second <= 30 && second > 0) {
-            second = 30;
-        } else if (second >= 60) {
-            second = 0;
-            minute += 1;
-        } else {
-            second = 30;
+    //加载监控图
+    function loadEcharts(xAxis, series) {
+        if (!series) {
+            return;
         }
-        if (minute === 60) {
-            hour += 1;
-            minute = 0;
+        let option = {
+            title: {
+                text: '系统监控'
+            },
+            tooltip: {
+                trigger: 'axis'
+            },
+            legend: {
+                data: ['cpu占用', '内存占用', '磁盘占用'],
+                right: '1%'
+            },
+            grid: {
+                left: '1%',
+                right: '2%',
+                bottom: '1%',
+                containLabel: true
+            },
+            xAxis: {
+                type: 'category',
+                boundaryGap: false,
+                data: xAxis
+            },
+            calculable: true,
+            yAxis: {
+                type: 'value',
+                axisLabel: {
+                    //设置y轴数值为%
+                    formatter: '{value} %'
+                },
+                max: 100
+            },
+            series: series
+        };
+        if (!myEcharts) {
+            myEcharts = echarts.init(document.getElementById('echarts'));
         }
-        let hourStr = hour;
-        let minuteStr = minute;
-        let secondStr = second;
-        if (hour === 24) {
-            hour = 0;
-        }
-        if (hour < 10) {
-            hourStr = "0" + hour;
-        }
-        if (minute < 10) {
-            minuteStr = "0" + minute;
-        }
-        if (second < 10) {
-            secondStr = "0" + second;
-        }
-        return hourStr + ":" + minuteStr + ":" + secondStr;
+        myEcharts.setOption(option);
     }
 
     function loadProcessList() {

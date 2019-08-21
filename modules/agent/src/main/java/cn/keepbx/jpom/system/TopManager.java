@@ -1,7 +1,11 @@
 package cn.keepbx.jpom.system;
 
+import cn.hutool.cache.impl.CacheObj;
+import cn.hutool.cache.impl.TimedCache;
+import cn.hutool.core.date.DateField;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.cron.CronUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.pool.ThreadPoolService;
@@ -13,11 +17,9 @@ import com.alibaba.fastjson.JSONObject;
 
 import javax.websocket.Session;
 import java.io.IOException;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -31,6 +33,8 @@ public class TopManager {
     private static final Set<Session> SESSIONS = new HashSet<>();
     private static final String CRON_ID = "topMonitor";
     private static ExecutorService executorService = ThreadPoolService.newCachedThreadPool(TopManager.class);
+    private static final TimedCache<String, JSONObject> MONITOR_CACHE = new TimedCache<>(TimeUnit.MINUTES.toMillis(12), new LinkedHashMap<>());
+
     /**
      * 是否开启首页监听（自动刷新）
      */
@@ -69,15 +73,9 @@ public class TopManager {
             try {
                 JSONObject topInfo = AbstractSystemCommander.getInstance().getAllMonitor();
                 if (topInfo != null) {
-                    DateTime date = DateUtil.date();
-                    int hour = date.hour(true);
-                    int minute = date.minute();
-                    int day = date.dayOfMonth();
-                    topInfo.put("hour", hour);
-                    topInfo.put("minute", minute);
-                    topInfo.put("day", day);
-                    topInfo.put("second", date.second());
-                    topInfo.put("time", DateUtil.format(date, "HH:mm:ss"));
+                    String time = DateUtil.formatTime(DateUtil.date());
+                    topInfo.put("time", time);
+                    MONITOR_CACHE.put(time, topInfo);
                     send(topInfo.toString());
                 }
             } catch (Exception e) {
@@ -90,6 +88,66 @@ public class TopManager {
         WATCH.set(true);
     }
 
+    /**
+     * 缓存的监控信息
+     *
+     * @return 监控信息
+     */
+    public static JSONObject getTopMonitor() {
+        Iterator<CacheObj<String, JSONObject>> cacheObjIterator = MONITOR_CACHE.cacheObjIterator();
+        String lastTime = "";
+        List<JSONObject> array = new ArrayList<>();
+        List<String> scale = new ArrayList<>();
+        while (cacheObjIterator.hasNext()) {
+            CacheObj<String, JSONObject> cacheObj = cacheObjIterator.next();
+            String key = cacheObj.getKey();
+            if (StrUtil.isNotEmpty(lastTime)) {
+                if (!key.equals(getLastTime(lastTime))) {
+                    array.clear();
+                    scale.clear();
+                }
+            }
+            lastTime = key;
+            scale.add(key);
+            JSONObject value = cacheObj.getValue();
+            array.add(value);
+        }
+        int count = 24;
+        if (array.size() > count) {
+            array = array.subList(array.size() - count - 1, array.size() - 1);
+        }
+        while (scale.size() < count) {
+            if (scale.size() == 0) {
+                DateTime date = DateUtil.date();
+                int second = date.second();
+                if (second <= 30 && second > 0) {
+                    second = 30;
+                } else if (second > 30) {
+                    second = 0;
+                    date = date.offset(DateField.MINUTE, 1);
+                }
+                String format = DateUtil.format(date, "HH:mm");
+                String secondStr = ":" + second;
+                if (second < 10) {
+                    secondStr = ":0" + second;
+                }
+                scale.add(format + secondStr);
+            }
+            String time = scale.get(scale.size() - 1);
+            String newTime = getLastTime(time);
+            scale.add(newTime);
+        }
+        JSONObject object = new JSONObject();
+        object.put("scale", scale);
+        object.put("series", array);
+        return object;
+    }
+
+    private static String getLastTime(String time) {
+        DateTime dateTime = DateUtil.parseTime(time);
+        DateTime newTime = dateTime.offsetNew(DateField.SECOND, 30);
+        return DateUtil.formatTime(newTime);
+    }
 
     /**
      * 发送首页进程列表信息
