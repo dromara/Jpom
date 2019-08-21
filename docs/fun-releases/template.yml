@@ -1,0 +1,13 @@
+ROSTemplateFormatVersion: '2015-09-01'
+Transform: 'Aliyun::Serverless-2018-04-03'
+Resources:
+  jpom:
+    Type: 'Aliyun::Serverless::Service'
+    Properties:
+      Description: 'helloworld'
+    jpom-releases:
+      Type: 'Aliyun::Serverless::Function'
+      Properties:
+        Handler: index.handler
+        Runtime: python3
+        CodeUri: './'
