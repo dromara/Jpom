@@ -154,25 +154,22 @@
                             </ul>
                         </div>
                         <div class="fh5co-tab-content" data-tab-content="strategy">
-                            <div>下载安装:</div>
+                            <div>一键安装:</div>
                             <ul>
-                                <li>下载安装包 <a href="https://gitee.com/keepbx/Jpom/attach_files">https://gitee.com/keepbx/Jpom/attach_files</a>
-                                </li>
-                                <li>解压文件</li>
-                                <li>安装插件端（<a href="./docs/#/安装使用/开始安装?id=安装插件端">
-                                    流程说明</a>）
+
+                                <li>服务端
                                     <ul>
-                                        <li> agent-x.x.x-release 目录为插件端的全部安装文件</li>
-                                        <li> 上传到对应服务器</li>
-                                        <li> 命令运行（Agent.sh、Agent.bat）</li>
+                                        <li> yum install -y wget && wget -O install.sh
+                                            https://keepbx.gitee.io/jpom/install.sh && bash install.sh Server
+                                        </li>
+
                                     </ul>
                                 </li>
-                                <li>安装服务端（<a
-                                        href="./docs/#/安装使用/开始安装?id=安装服务端">流程说明</a>）
+                                <li>插件端
                                     <ul>
-                                        <li>server-x.x.x-release 目录为服务端的全部安装文件</li>
-                                        <li>上传到对应服务器</li>
-                                        <li>命令运行（Server.sh、Server.bat）</li>
+                                        <li>yum install -y wget && wget -O install.sh
+                                            https://keepbx.gitee.io/jpom/install.sh && bash install.sh Agent
+                                        </li>
                                     </ul>
                                 </li>
                             </ul>
