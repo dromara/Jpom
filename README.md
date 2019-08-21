@@ -148,12 +148,6 @@ Agent.sh restart   重启Jpom插件端
 Agent.sh status    查看Jpom插件端运行状态
 ```
 
-### 视频教程
-
-[教程列表](https://mp.weixin.qq.com/mp/homepage?__biz=Mzg2OTEzMDIwNg==&hid=5&sn=3712b3edbe0af22c88ac3178a840a799)
-
-[直播回放](https://yq.aliyun.com/live/970)
-
 ### Jpom 的参数配置
 
    在项目运行的根路径下的`extConfig.yml`文件
