@@ -8,12 +8,10 @@
 <div class="layui-container">
     <form action="" class="layui-form" id="form_user">
         <div class="layui-form-item">
-            <div class="layui-inline edit-div">
-                <label class="layui-form-label">白名单路径</label>
-                <div class="layui-input-block auto">
+            <label class="layui-form-label">白名单路径</label>
+            <div class="layui-input-block auto">
                     <textarea name="data" placeholder="请添加节点分发的项目白名单，回车支持输入多个路径，系统会自动过滤 ../ 路径、不允许输入根路径"
                               class="layui-textarea auto" th:text="${#strings.defaultString(whiteList,'')}"></textarea>
-                </div>
             </div>
         </div>
         <div class="layui-form-item">
