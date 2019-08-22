@@ -101,7 +101,7 @@ public class RoleService extends BaseOperService<RoleModel> {
                 continue;
             }
             List<String> list = dynamicData.get(classFeature);
-            if (list.contains(dataId)) {
+            if (list != null && list.contains(dataId)) {
                 return false;
             }
         }

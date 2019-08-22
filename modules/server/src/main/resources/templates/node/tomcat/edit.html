@@ -49,7 +49,7 @@
             </button>
 
             <a th:if="${item!=null}" op="delete"
-               onclick="delTomcat('[[${item?.id}]]','[[${item?.name}]]');"
+               th:onclick="delTomcat([[${item?.id}]],[[${item?.name}]]);"
                class="layui-btn layui-btn-danger">
                 移除tomcat
             </a>
