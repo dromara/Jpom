@@ -98,19 +98,28 @@ public class TopManager {
         String lastTime = "";
         List<JSONObject> array = new ArrayList<>();
         List<String> scale = new ArrayList<>();
+        JSONObject value = null;
         while (cacheObjIterator.hasNext()) {
             CacheObj<String, JSONObject> cacheObj = cacheObjIterator.next();
             String key = cacheObj.getKey();
             if (StrUtil.isNotEmpty(lastTime)) {
-                if (!key.equals(getLastTime(lastTime))) {
+                if (!key.equals(getNextScaleTime(lastTime))) {
                     array.clear();
                     scale.clear();
                 }
             }
             lastTime = key;
             scale.add(key);
-            JSONObject value = cacheObj.getValue();
+            value = cacheObj.getValue();
             array.add(value);
+        }
+        if (value != null) {
+            String time = value.getString("time");
+            //清除断开的监控数据
+            if (!getNextScaleTime(time).equals(getNowNextScale())) {
+                array.clear();
+                scale.clear();
+            }
         }
         int count = 24;
         if (array.size() > count) {
@@ -118,23 +127,10 @@ public class TopManager {
         }
         while (scale.size() < count) {
             if (scale.size() == 0) {
-                DateTime date = DateUtil.date();
-                int second = date.second();
-                if (second <= 30 && second > 0) {
-                    second = 30;
-                } else if (second > 30) {
-                    second = 0;
-                    date = date.offset(DateField.MINUTE, 1);
-                }
-                String format = DateUtil.format(date, "HH:mm");
-                String secondStr = ":" + second;
-                if (second < 10) {
-                    secondStr = ":0" + second;
-                }
-                scale.add(format + secondStr);
+                scale.add(getNowNextScale());
             }
             String time = scale.get(scale.size() - 1);
-            String newTime = getLastTime(time);
+            String newTime = getNextScaleTime(time);
             scale.add(newTime);
         }
         JSONObject object = new JSONObject();
@@ -143,7 +139,34 @@ public class TopManager {
         return object;
     }
 
-    private static String getLastTime(String time) {
+    /**
+     * 当前时间的下一个刻度
+     *
+     * @return String
+     */
+    private static String getNowNextScale() {
+        DateTime date = DateUtil.date();
+        int second = date.second();
+        if (second <= 30 && second > 0) {
+            second = 30;
+        } else if (second > 30) {
+            second = 0;
+            date = date.offset(DateField.MINUTE, 1);
+        }
+        String format = DateUtil.format(date, "HH:mm");
+        String secondStr = ":" + second;
+        if (second < 10) {
+            secondStr = ":0" + second;
+        }
+        return format + secondStr;
+    }
+
+    /**
+     * 指定时间的下一个刻度
+     *
+     * @return String
+     */
+    private static String getNextScaleTime(String time) {
         DateTime dateTime = DateUtil.parseTime(time);
         DateTime newTime = dateTime.offsetNew(DateField.SECOND, 30);
         return DateUtil.formatTime(newTime);
