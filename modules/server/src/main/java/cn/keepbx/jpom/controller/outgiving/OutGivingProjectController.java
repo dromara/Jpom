@@ -77,7 +77,7 @@ public class OutGivingProjectController extends BaseServerController {
             try {
                 projectInfo = projectInfoService.getItem(nodeModel, outGivingNodeProject.getProjectId());
             } catch (Exception e) {
-                jsonObject.put("errorMsg", e.getMessage());
+                jsonObject.put("errorMsg", "error " + e.getMessage());
             }
             jsonObject.put("nodeId", outGivingNodeProject.getNodeId());
             jsonObject.put("projectId", outGivingNodeProject.getProjectId());

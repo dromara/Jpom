@@ -146,7 +146,7 @@ public class OutGivingRun implements Callable<OutGivingNodeProject.Status> {
             DefaultSystemLog.ERROR().error(this.outGivingNodeProject.getNodeId() + " " + this.outGivingNodeProject.getProjectId() + " " + "分发异常保存", e);
             result = OutGivingNodeProject.Status.Fail;
             updateStatus(this.logId, this.outGivingId, this.outGivingNodeProject,
-                    result, e.getMessage());
+                    result, "error:" + e.getMessage());
         }
         return result;
     }

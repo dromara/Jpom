@@ -215,13 +215,18 @@
                 },
                 success: function (data) {
                     layer.close(index);
-                    if (data.code == 800) {
+                    if (data.code === 800) {
                         // 用户信息失效
                         layer.msg(data.msg);
                         setTimeout(function () {
                             top.location.reload();
                         }, 1500);
                         return;
+                    }
+                    if (data.code !== 200) {
+                        if (!data.msg || data.msg === '') {
+                            data.msg = "接口异常，并且没有返回异常信息"
+                        }
                     }
                     success && success(data);
                 },
