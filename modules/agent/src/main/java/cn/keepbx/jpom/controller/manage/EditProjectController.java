@@ -254,6 +254,9 @@ public class EditProjectController extends BaseAgentController {
      */
     private JsonMessage checkPath(ProjectInfoModel projectInfoModel) {
         List<ProjectInfoModel> projectInfoModelList = projectInfoService.list();
+        if (projectInfoModelList == null) {
+            return null;
+        }
         ProjectInfoModel projectInfoModel1 = null;
         for (ProjectInfoModel model : projectInfoModelList) {
             if (!model.getId().equals(projectInfoModel.getId())) {
