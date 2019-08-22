@@ -2,7 +2,9 @@ package cn.keepbx.jpom.controller.user;
 
 import cn.jiangzeyin.common.JsonMessage;
 import cn.keepbx.jpom.common.BaseServerController;
+import cn.keepbx.jpom.model.data.RoleModel;
 import cn.keepbx.jpom.model.data.UserModel;
+import cn.keepbx.jpom.service.user.RoleService;
 import cn.keepbx.jpom.service.user.UserService;
 import cn.keepbx.plugin.ClassFeature;
 import cn.keepbx.plugin.Feature;
@@ -30,12 +32,17 @@ public class UserListController extends BaseServerController {
     @Resource
     private UserService userService;
 
+    @Resource
+    private RoleService roleService;
+
     /**
      * 展示用户列表
      */
     @RequestMapping(value = "list", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
     @Feature(method = MethodFeature.LIST)
     public String list() {
+        List<RoleModel> roleModels = roleService.list();
+        setAttribute("roleEmpty", roleModels == null || roleModels.isEmpty());
         return "user/list";
     }
 

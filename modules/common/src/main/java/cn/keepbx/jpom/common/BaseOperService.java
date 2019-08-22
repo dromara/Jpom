@@ -5,6 +5,7 @@ import cn.keepbx.jpom.model.BaseModel;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -39,7 +40,7 @@ public abstract class BaseOperService<T extends BaseModel> extends BaseDataServi
         Objects.requireNonNull(fileName, "没有配置fileName");
         JSONObject jsonObject = getJSONObject(fileName);
         if (jsonObject == null) {
-            return null;
+            return new ArrayList<>();
         }
         JSONArray jsonArray = formatToArray(jsonObject);
         return jsonArray.toJavaList(cls);

@@ -179,7 +179,12 @@ public class SshFileController extends BaseServerController {
                     jsonObject.put("title", StrUtil.format("{}【文件夹】", lsEntry.getFilename()));
                     jsonObject.put("dir", true);
                 } else {
-                    jsonObject.put("title", lsEntry.getFilename());
+                    long fileSize = lsEntry.getAttrs().getSize();
+                    if (fileSize > 0) {
+                        jsonObject.put("title", StrUtil.format("{}   [{}]", lsEntry.getFilename(), FileUtil.readableFileSize(fileSize)));
+                    } else {
+                        jsonObject.put("title", lsEntry.getFilename());
+                    }
                 }
                 int index = jsonArray.size();
                 if (StrUtil.isEmpty(parentIndexKey)) {

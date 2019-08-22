@@ -5,7 +5,7 @@
 
 <body>
 <div class="layui-row">
-    <button id="addProject" class="layui-btn layui-btn-sm">新增用户</button>
+    <button onclick="editUser('')" class="layui-btn layui-btn-sm">新增用户</button>
     <button id="refresh" class="layui-btn layui-btn-sm">刷新表格</button>
 </div>
 <table class="layui-table" id="tab_user" lay-filter="tab_user" style="margin: 0;"></table>
@@ -33,8 +33,12 @@
         {field: 'id', title: 'id'},
         {field: 'name', title: '昵称'},
         {field: 'email', title: '邮箱'},
-        {field: 'serverManager', templet: "#manager_status", title: '是否是管理员'},
         {field: 'parent', title: '创建人'},
+        {
+            field: 'modifyTime', title: '修改时间', templet: function (d) {
+                return formateTime(d.modifyTime);
+            }
+        },
         {field: 'op', title: '操作', align: 'center', toolbar: '#bar_projects', fixed: 'right'}
     ];
 
@@ -47,40 +51,10 @@
             cols: [col]
         });
 
-        // 编辑用户信息
-        function updateApplication(data) {
-            layer.open({
-                type: 2,
-                title: '修改用户',
-                content: './edit?id=' + data.id,
-                area: ['80%', '80%'],
-            });
-        }
-
-        // '添加用户'点击事件
-        $('#addProject').on('click', function () {
-            // 弹出
-            layer.open({
-                type: 2,
-                title: '新增用户',
-                content: './edit',
-                area: ['80%', '80%'],
-            });
-        });
-
         // '刷新表格'点击事件
         $('#refresh').on('click', function () {
             table.reload('tab_user', {});
         });
-
-
-        // form.on('switch(manage)', function (data) {
-        //     if (data.elem.checked) {
-        //         $("#projectsDiv").hide();
-        //     } else {
-        //         $("#projectsDiv").show();
-        //     }
-        // });
 
         // 表格工具条事件
         table.on('tool(tab_user)', function (obj) {
@@ -88,7 +62,7 @@
             var event = obj.event;
             if ('update' === event) {
                 // 修改
-                updateApplication(data);
+                editUser(data.id);
             } else if ('delete' === event) {
                 // 删除
                 deleteApplication(data);
@@ -119,6 +93,19 @@
                 });
             });
         }
+    }
+
+    function editUser(id) {
+        if ("[[${roleEmpty}]]" === "true") {
+            layer.msg("请先创建角色");
+            return;
+        }
+        layer.open({
+            type: 2,
+            title: '编辑用户',
+            content: './edit?id=' + id,
+            area: ['80%', '80%'],
+        });
     }
 
     function unlockUser(data) {
