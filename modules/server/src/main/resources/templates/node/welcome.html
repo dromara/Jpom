@@ -129,6 +129,11 @@
             xAxisData.splice(0, 1);
             xAxisData.push(topData.time);
         }
+        if (cpuItem.data[0] === 0) {
+            cpuItem.data.splice(0, 1);
+            diskItem.data.splice(0, 1);
+            memoryItem.data.splice(0, 1);
+        }
         let newSeries = [cpuItem, memoryItem, diskItem];
         loadEcharts(xAxisData, newSeries);
     }
