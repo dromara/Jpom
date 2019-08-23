@@ -36,7 +36,7 @@ public class WebAopLog extends PropertyDefinerBase {
         WebAopLog.aopLogInterface = aopLogInterface;
     }
 
-    @Pointcut("execution(public * cn.keepbx.jpom.controller..*.*(..))")
+    @Pointcut("execution(public * io.jpom.controller..*.*(..))")
     public void webLog() {
         //
     }

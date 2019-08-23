@@ -58,7 +58,7 @@ public class CacheControllerFeature {
      */
     public static void init() {
         // 扫描系统管理员
-        Set<Class<?>> classes = ClassUtil.scanPackage("cn.keepbx.jpom.controller");
+        Set<Class<?>> classes = ClassUtil.scanPackage("io.jpom.controller");
         classes.forEach(aClass -> {
             RequestMapping requestMapping = aClass.getAnnotation(RequestMapping.class);
             Method[] publicMethods = ReflectUtil.getPublicMethods(aClass);

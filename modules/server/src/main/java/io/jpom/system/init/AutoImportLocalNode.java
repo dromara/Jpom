@@ -34,7 +34,7 @@ import java.util.List;
 @PreLoadClass
 public class AutoImportLocalNode {
 
-    private static final String AGENT_MAIN_CLASS = "cn.keepbx.jpom.JpomAgentApplication";
+    private static final String AGENT_MAIN_CLASS = "io.jpom.JpomAgentApplication";
     private static NodeService nodeService;
 
     @PreLoadMethod
