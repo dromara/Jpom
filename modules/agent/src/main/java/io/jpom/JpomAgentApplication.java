@@ -21,6 +21,7 @@ public class JpomAgentApplication {
      * 启动执行
      *
      * @param args 参数
+     * @throws Exception 异常
      */
     public static void main(String[] args) throws Exception {
         JpomApplication jpomApplication = new JpomApplication(Type.Agent, JpomAgentApplication.class, args);

@@ -44,6 +44,7 @@ public class TomcatManageController extends BaseAgentController {
     /**
      * 列出所有的tomcat项目列表
      *
+     * @param id 项目id
      * @return Tomcat下的项目列表
      */
     @RequestMapping(value = "getTomcatProjectList", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
@@ -143,7 +144,7 @@ public class TomcatManageController extends BaseAgentController {
      * @return 文件列表
      */
     @RequestMapping(value = "getFileList", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public String getFileList(String id, String path, String except) {
+    public String getFileList(String id, String path) {
         // 查询项目路径
         TomcatInfoModel tomcatInfoModel = tomcatEditService.getItem(id);
         if (tomcatInfoModel == null) {
@@ -253,6 +254,7 @@ public class TomcatManageController extends BaseAgentController {
      *
      * @param id       tomcat id
      * @param filename 文件名
+     * @param path     tomcat路径
      * @return 操作结果
      */
     @RequestMapping(value = "deleteFile", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
@@ -291,6 +293,7 @@ public class TomcatManageController extends BaseAgentController {
      *
      * @param id       tomcat id
      * @param filename 文件名
+     * @param path     tomcat路径
      * @return 操作结果
      */
     @RequestMapping(value = "download", method = RequestMethod.GET)
@@ -320,6 +323,7 @@ public class TomcatManageController extends BaseAgentController {
      * 获取tomcat 日志列表
      *
      * @param id tomcat id
+     * @return json
      */
     @RequestMapping(value = "logList", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public String logList(String id) {

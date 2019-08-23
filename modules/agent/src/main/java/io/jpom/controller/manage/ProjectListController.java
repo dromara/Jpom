@@ -58,7 +58,8 @@ public class ProjectListController extends BaseAgentController {
     /**
      * 程序项目信息
      *
-     * @param group 分组
+     * @param group     分组
+     * @param notStatus 不包含运行状态
      * @return json
      */
     @RequestMapping(value = "getProjectInfo", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)

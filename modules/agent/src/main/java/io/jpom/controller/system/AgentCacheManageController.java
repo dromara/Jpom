@@ -53,6 +53,7 @@ public class AgentCacheManageController extends BaseAgentController {
     /**
      * 清空缓存
      *
+     * @param type 缓存类型
      * @return json
      */
     @RequestMapping(value = "clearCache", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)

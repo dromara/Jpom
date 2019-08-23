@@ -263,7 +263,9 @@ public abstract class AbstractProjectCommander {
     /**
      * 查看状态
      *
+     * @param tag 运行标识
      * @return 查询结果
+     * @throws Exception 异常
      */
     public String status(String tag) throws Exception {
         VirtualMachine virtualMachine = JvmUtil.getVirtualMachine(tag);
@@ -417,7 +419,8 @@ public abstract class AbstractProjectCommander {
      * 阻塞检查程序状态
      * @param tag 程序tag
      * @param status 要检查的状态
-     * @throws Exception E
+     * @throws Exception 异常
+     * @return 和参数status相反
      */
     protected boolean loopCheckRun(String tag, boolean status) throws Exception {
         int count = 0;

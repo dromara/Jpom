@@ -50,6 +50,8 @@ public class NginxController extends BaseAgentController {
 
     /**
      * 配置列表
+     *
+     * @return json
      */
     @RequestMapping(value = "list_data.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public String list() {
@@ -87,6 +89,8 @@ public class NginxController extends BaseAgentController {
      *
      * @param name      文件名
      * @param whitePath 白名单路径
+     * @param genre     操作类型
+     * @return json
      */
     @RequestMapping(value = "updateNgx", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public String updateNgx(String name, String whitePath, String genre) {
@@ -172,6 +176,7 @@ public class NginxController extends BaseAgentController {
     /**
      * 权限检查 防止非系统管理员配置静态资源访问
      *
+     * @param ngxBlock 代码片段
      * @return false 不正确
      */
     private boolean checkRootRole(NgxBlock ngxBlock) {
@@ -194,6 +199,8 @@ public class NginxController extends BaseAgentController {
      * 删除配置
      *
      * @param path 文件路径
+     * @param name 文件名
+     * @return json
      */
     @RequestMapping(value = "delete", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public String delete(String path, String name) {
@@ -218,6 +225,8 @@ public class NginxController extends BaseAgentController {
 
     /**
      * 获取nginx状态
+     *
+     * @return json
      */
     @RequestMapping(value = "status", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public String status() {
@@ -235,6 +244,9 @@ public class NginxController extends BaseAgentController {
 
     /**
      * 修改nginx配置
+     *
+     * @param name 服务名
+     * @return json
      */
     @RequestMapping(value = "updateConf", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public String updateConf(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "服务名称错误") String name) {
@@ -246,6 +258,8 @@ public class NginxController extends BaseAgentController {
 
     /**
      * 获取配置信息
+     *
+     * @return json
      */
     @RequestMapping(value = "config", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public String config() {
@@ -255,6 +269,8 @@ public class NginxController extends BaseAgentController {
 
     /**
      * 启动nginx
+     *
+     * @return json
      */
     @RequestMapping(value = "open", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public String open() {
@@ -266,6 +282,8 @@ public class NginxController extends BaseAgentController {
 
     /**
      * 关闭nginx
+     *
+     * @return json
      */
     @RequestMapping(value = "close", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public String close() {
@@ -277,6 +295,8 @@ public class NginxController extends BaseAgentController {
 
     /**
      * 重新加载
+     *
+     * @return json
      */
     @RequestMapping(value = "reload", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public String reload() {

@@ -137,7 +137,9 @@ public class CertModel extends BaseModel {
     /**
      * 解析证书
      *
+     * @param key  zip里面文件
      * @param file 证书文件
+     * @return 处理后的json
      */
     public static JSONObject decodeCert(String file, String key) {
         if (file == null) {

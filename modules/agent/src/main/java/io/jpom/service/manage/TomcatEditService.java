@@ -60,7 +60,6 @@ public class TomcatEditService extends BaseOperService<TomcatInfoModel> {
      * 修改tomcat信息
      *
      * @param tomcatInfoModel tomcat信息
-     * @return 更新结果
      */
     @Override
     public void updateItem(TomcatInfoModel tomcatInfoModel) {

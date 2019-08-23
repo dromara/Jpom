@@ -103,7 +103,8 @@ public class CertificateController extends BaseAgentController {
     /**
      * 获取证书信息
      *
-     * @param certModel 实体
+     * @param certModel  实体
+     * @param jsonObject json对象
      * @return 错误消息
      */
     private String getCertModel(CertModel certModel, JSONObject jsonObject) {
@@ -232,6 +233,8 @@ public class CertificateController extends BaseAgentController {
 
     /**
      * 证书列表
+     *
+     * @return json
      */
     @RequestMapping(value = "/getCertList", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public String getCertList() {
@@ -257,6 +260,9 @@ public class CertificateController extends BaseAgentController {
 
     /**
      * 导出证书
+     *
+     * @param id 项目id
+     * @return 结果
      */
     @RequestMapping(value = "/export", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public String export(String id) {
