@@ -32,7 +32,7 @@
         <dependencySet>
             <outputDirectory>lib</outputDirectory>
             <includes>
-                <include>cn.keepbx.jpom:agent</include>
+                <include>io.jpom:agent</include>
             </includes>
         </dependencySet>
     </dependencySets>

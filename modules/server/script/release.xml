@@ -33,7 +33,7 @@
         <dependencySet>
             <outputDirectory>lib</outputDirectory>
             <includes>
-                <include>cn.keepbx.jpom:server</include>
+                <include>io.jpom:server</include>
             </includes>
         </dependencySet>
     </dependencySets>
