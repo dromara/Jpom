@@ -260,8 +260,8 @@ public class NginxController extends BaseAgentController {
     public String open() {
         JSONObject ngxConf = nginxService.getNgxConf();
         String name = ngxConf.getString("name");
-        String result = AbstractSystemCommander.getInstance().startService(name);
-        return JsonMessage.getString(200, "nginx服务已启动:" + result);
+        AbstractSystemCommander.getInstance().startService(name);
+        return JsonMessage.getString(200, "nginx服务已启动");
     }
 
     /**
@@ -282,7 +282,7 @@ public class NginxController extends BaseAgentController {
     public String reload() {
         if (SystemUtil.getOsInfo().isLinux()) {
             String result = CommandUtil.execSystemCommand("nginx -t");
-            if (!result.endsWith("successful") || !result.endsWith("ok")) {
+            if (StrUtil.isNotEmpty(result)) {
                 return JsonMessage.getString(400, result);
             }
             CommandUtil.execSystemCommand("nginx -s reload");
