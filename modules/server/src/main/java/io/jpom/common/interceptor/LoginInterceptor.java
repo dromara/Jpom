@@ -137,7 +137,12 @@ public class LoginInterceptor extends BaseJpomInterceptor {
     @Override
     public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler, ModelAndView modelAndView) throws Exception {
         super.postHandle(request, response, handler, modelAndView);
-        HttpSession session = getSession();
+        HttpSession session;
+        try {
+            session = getSession();
+        } catch (Exception ignored) {
+            return;
+        }
         try {
             // 静态资源地址参数
             session.setAttribute("staticCacheTime", DateUtil.currentSeconds());
