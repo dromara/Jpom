@@ -26,7 +26,7 @@ tomcat:
   sessionCookieName: JPOMID-SERVER
 # 启动完成自动初始化指定包
 preload:
-  packageName: cn.keepbx.jpom.system.init
+  packageName: io.jpom.system.init
 # 强制去掉空格
 request:
   trimAll: true
