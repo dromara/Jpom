@@ -4,7 +4,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <artifactId>jpom-parent</artifactId>
-        <groupId>cn.keepbx.jpom</groupId>
+        <groupId>io.jpom</groupId>
         <version>2.4.3</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
@@ -13,7 +13,7 @@
     <artifactId>server</artifactId>
     <version>2.4.3</version>
     <properties>
-        <start-class>cn.keepbx.jpom.JpomServerApplication</start-class>
+        <start-class>io.jpom.JpomServerApplication</start-class>
     </properties>
     <dependencies>
         <dependency>
@@ -22,7 +22,7 @@
         </dependency>
 
         <dependency>
-            <groupId>cn.keepbx.jpom</groupId>
+            <groupId>io.jpom</groupId>
             <artifactId>common</artifactId>
             <version>${pom.version}</version>
         </dependency>
@@ -146,7 +146,7 @@
             <id>develop-plugin-profile</id>
             <dependencies>
                 <dependency>
-                    <groupId>cn.keepbx.jpom-plugin</groupId>
+                    <groupId>io.jpom-plugin</groupId>
                     <artifactId>netty</artifactId>
                     <version>LATEST</version>
                 </dependency>

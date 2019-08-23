@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration debug="false">
     <!--动态定义日志路径-->
-    <define name="logPath" class="cn.keepbx.jpom.system.WebAopLog"/>
+    <define name="logPath" class="io.jpom.system.WebAopLog"/>
 
     <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
         <filter class="ch.qos.logback.classic.filter.LevelFilter">

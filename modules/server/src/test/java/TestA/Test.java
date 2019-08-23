@@ -2,10 +2,10 @@ package TestA;
 
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.ClassUtil;
-import cn.keepbx.jpom.service.user.RoleService;
-import cn.keepbx.permission.CacheControllerFeature;
-import cn.keepbx.plugin.ClassFeature;
-import cn.keepbx.plugin.MethodFeature;
+import io.jpom.service.user.RoleService;
+import io.jpom.permission.CacheControllerFeature;
+import io.jpom.plugin.ClassFeature;
+import io.jpom.plugin.MethodFeature;
 
 import java.util.Map;
 import java.util.Set;

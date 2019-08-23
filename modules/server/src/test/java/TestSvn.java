@@ -1,4 +1,4 @@
-import cn.keepbx.util.SvnKitUtil;
+import io.jpom.util.SvnKitUtil;
 import org.tmatesoft.svn.core.SVNException;
 
 import java.io.File;
