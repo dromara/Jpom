@@ -260,8 +260,8 @@ public class NginxController extends BaseAgentController {
     public String open() {
         JSONObject ngxConf = nginxService.getNgxConf();
         String name = ngxConf.getString("name");
-        AbstractSystemCommander.getInstance().startService(name);
-        return JsonMessage.getString(200, "nginx服务已启动");
+        String result = AbstractSystemCommander.getInstance().startService(name);
+        return JsonMessage.getString(200, "nginx服务已启动 " + result);
     }
 
     /**
