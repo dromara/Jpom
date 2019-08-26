@@ -1,15 +1,13 @@
 package io.jpom.util;
 
-import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.core.util.RuntimeUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.system.SystemUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
-import io.jpom.JpomApplication;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -99,32 +97,12 @@ public class CommandUtil {
      *
      * @param cmd 命令行
      * @return 结果
-     * @throws IOException          IO
-     * @throws InterruptedException 等待超时
+     * @throws IOException IO
      */
-    private static String exec(String[] cmd, File file) throws IOException, InterruptedException {
+    private static String exec(String[] cmd, File file) throws IOException {
         DefaultSystemLog.LOG().info(Arrays.toString(cmd));
-        String result;
-        Process process;
-        if (cmd.length == 1) {
-            process = Runtime.getRuntime().exec(cmd[0]);
-        } else {
-            process = Runtime.getRuntime().exec(cmd, null, file);
-        }
-        InputStream is;
-        int wait = process.waitFor();
-        if (wait == 0) {
-            is = process.getInputStream();
-        } else {
-            is = process.getErrorStream();
-        }
-        result = IoUtil.read(is, JpomApplication.getCharset());
-        is.close();
-        process.destroy();
-        if (StrUtil.isEmpty(result) && wait != 0) {
-            result = "没有返回任何执行信息:" + wait;
-        }
-        return result;
+        Process process = new ProcessBuilder(cmd).directory(file).redirectErrorStream(true).start();
+        return RuntimeUtil.getResult(process);
     }
 
     /**
