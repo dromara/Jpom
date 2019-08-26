@@ -31,7 +31,7 @@ public class EmailUtil implements INotify {
     private static MailAccountModel config;
 
     static {
-        File file = new File(FileUtil.normalize(ConfigBean.getInstance().getDataPath() + "/" + ServerConfigBean.MAIL_CONFIG));
+        File file = FileUtil.file(ConfigBean.getInstance().getDataPath(), ServerConfigBean.MAIL_CONFIG);
         WatchMonitor monitor = WatchUtil.create(file, WatchMonitor.ENTRY_MODIFY);
         monitor.setWatcher(new SimpleWatcher() {
             @Override
@@ -40,6 +40,7 @@ public class EmailUtil implements INotify {
                 config = systemMailConfigService.getConfig();
             }
         });
+        monitor.start();
     }
 
     @Override
