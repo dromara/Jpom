@@ -117,7 +117,7 @@ public class TomcatManageService {
      *
      * @param id       tomcat id
      * @param path     项目路径
-     * @param tomcatOp 执行的操作 start=>启动项目 stop=>停止项目 relaod=>重启项目
+     * @param tomcatOp 执行的操作 start=启动项目 stop=停止项目 relaod=重启项目
      * @return 操作结果
      */
     public JsonMessage tomcatProjectManage(String id, String path, TomcatOp tomcatOp) {

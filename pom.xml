@@ -22,6 +22,7 @@
     </description>
     <inceptionYear>2017</inceptionYear>
     <version>2.4.3</version>
+    <url>https://gitee.com/keepbx/Jpom</url>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <java.version>1.8</java.version>
@@ -73,7 +74,44 @@
                     <encoding>${project.build.sourceEncoding}</encoding>
                 </configuration>
             </plugin>
-
+            <!-- Javadoc -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>3.0.0</version>
+                <executions>
+                    <execution>
+                        <id>attach-javadoc</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <tags>
+                        <tag>
+                            <name>date</name>
+                            <placement>a</placement>
+                            <head>创建时间</head>
+                        </tag>
+                    </tags>
+                </configuration>
+            </plugin>
+            <!-- source插件,打包源码 -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <version>2.4</version>
+                <executions>
+                    <execution>
+                        <id>attach-sources</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
             <plugin>
                 <groupId>com.spotify</groupId>
                 <artifactId>docker-maven-plugin</artifactId>
@@ -127,6 +165,9 @@
         </profile>
         <profile>
             <id>install-plugin-profile</id>
+        </profile>
+        <profile>
+            <id>release-plugin-profile</id>
             <distributionManagement>
                 <snapshotRepository>
                     <id>maven-repo</id>
@@ -158,4 +199,12 @@
             </build>
         </profile>
     </profiles>
+
+    <licenses>
+        <license>
+            <name>MIT License</name>
+            <url>https://opensource.org/licenses/MIT</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
 </project>

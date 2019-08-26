@@ -18,7 +18,7 @@ banner:
   msg: Jpom-Server 管理系统启动中
 # 静态资源配置
 interceptor:
-  resourceHandler: /static/**,favicon.ico
+  resourceHandler: /static/**,/favicon.ico
   resourceLocation: classpath:/static/,classpath:/static/favicon.ico
 # session 超时时间
 tomcat:

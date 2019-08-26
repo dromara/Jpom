@@ -23,6 +23,8 @@ public class ConsoleService {
      *
      * @param consoleCommandOp 执行的操作
      * @param projectInfoModel 项目信息
+     * @return 执行结果
+     * @throws Exception 异常
      */
     public String execCommand(ConsoleCommandOp consoleCommandOp, ProjectInfoModel projectInfoModel) throws Exception {
         String result;

@@ -41,6 +41,10 @@ public class InternalController extends BaseAgentController {
 
     /**
      * 获取内存信息
+     *
+     * @param tag 程序运行标识
+     * @return json
+     * @throws Exception 异常
      */
     @RequestMapping(value = "internal_data", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public String getInternal(String tag) throws Exception {
@@ -61,6 +65,10 @@ public class InternalController extends BaseAgentController {
 
     /**
      * 查询监控线程列表
+     *
+     * @param tag 程序运行标识
+     * @return json
+     * @throws Exception 异常
      */
     @RequestMapping(value = "threadInfos", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public String getThreadInfos(String tag) throws Exception {
@@ -155,10 +163,13 @@ public class InternalController extends BaseAgentController {
 
     /**
      * 导出堆栈信息
+     *
+     * @param tag 程序运行标识
+     * @return json
      */
     @RequestMapping(value = "internal_stack", method = RequestMethod.GET)
     @ResponseBody
-    public String stack(String tag) throws Exception {
+    public String stack(String tag) {
         String fileName = AgentConfigBean.getInstance().getTempPathName() + "/" + tag + "_java_cpu.txt";
         fileName = FileUtil.normalize(fileName);
         try {
@@ -178,10 +189,13 @@ public class InternalController extends BaseAgentController {
 
     /**
      * 导出内存信息
+     *
+     * @param tag 程序运行标识
+     * @return json
      */
     @RequestMapping(value = "internal_ram", method = RequestMethod.GET)
     @ResponseBody
-    public String ram(String tag) throws Exception {
+    public String ram(String tag) {
         String fileName = AgentConfigBean.getInstance().getTempPathName() + "/" + tag + "_java_ram.txt";
         fileName = FileUtil.normalize(fileName);
         try {

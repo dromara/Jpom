@@ -19,8 +19,13 @@ import javax.servlet.http.HttpServletResponse;
  */
 @ControllerAdvice
 public class AgentExceptionHandler {
+
     /**
      * 声明要捕获的异常
+     *
+     * @param request  请求
+     * @param response 响应
+     * @param e        异常
      */
     @ExceptionHandler({JpomRuntimeException.class, RuntimeException.class, Exception.class})
     public void paramExceptionHandler(HttpServletRequest request, HttpServletResponse response, Exception e) {
