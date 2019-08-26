@@ -79,8 +79,8 @@
             <div class="status-div"></div>
             <span></span>
         </div>
-        <div class="logSize right" id="logSize" style="padding:2px;" th:if="${logSize}"
-             th:text="${logSize?.logSize}">
+        <div class="logSize right" id="logSize" style="padding:2px;" th:if="${logSize?.get('logSize')}"
+             th:text="${logSize?.get('logSize')}">
         </div>
     </div>
     <div class="terminal"></div>
