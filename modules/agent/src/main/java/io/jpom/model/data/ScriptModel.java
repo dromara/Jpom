@@ -6,7 +6,6 @@ import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
-import cn.hutool.system.SystemUtil;
 import io.jpom.model.BaseModel;
 import io.jpom.system.AgentConfigBean;
 import io.jpom.util.CommandUtil;
@@ -66,7 +65,7 @@ public class ScriptModel extends BaseModel {
         return FileUtil.file(path, getId(), "script." + CommandUtil.SUFFIX);
     }
 
-    public File getLogFile(boolean get) {
+    public File logFile() {
         if (StrUtil.isEmpty(getId())) {
             throw new IllegalArgumentException("id 为空");
         }
@@ -84,10 +83,10 @@ public class ScriptModel extends BaseModel {
     public void saveFile() {
         File file = getFile(true);
         FileUtil.writeString(getContext(), file, CharsetUtil.CHARSET_UTF_8);
-        // 添加权限
-        if (SystemUtil.getOsInfo().isLinux()) {
-            CommandUtil.execCommand("chmod 755 " + FileUtil.getAbsolutePath(file));
-        }
+//        // 添加权限
+//        if (SystemUtil.getOsInfo().isLinux()) {
+//            CommandUtil.execCommand("chmod 755 " + FileUtil.getAbsolutePath(file));
+//        }
     }
 
     /**

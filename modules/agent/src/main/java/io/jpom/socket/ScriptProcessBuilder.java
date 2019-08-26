@@ -8,11 +8,13 @@ import cn.hutool.core.io.LineHandler;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.system.SystemUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.JpomApplication;
 import io.jpom.model.data.ScriptModel;
+import io.jpom.util.CommandUtil;
 import io.jpom.util.SocketSessionUtil;
 
 import javax.websocket.Session;
@@ -38,13 +40,16 @@ public class ScriptProcessBuilder implements Runnable {
     private InputStream errorInputStream;
 
     private ScriptProcessBuilder(ScriptModel scriptModel, String args) {
-        this.logFile = scriptModel.getLogFile(true);
+        this.logFile = scriptModel.logFile();
         this.scriptFile = scriptModel.getFile(true);
         //
         String script = FileUtil.getAbsolutePath(scriptFile);
         processBuilder = new ProcessBuilder();
         List<String> command = StrUtil.splitTrim(args, StrUtil.SPACE);
         command.add(0, script);
+        if (SystemUtil.getOsInfo().isLinux()) {
+            command.add(0, CommandUtil.SUFFIX);
+        }
         DefaultSystemLog.LOG().info(CollUtil.join(command, StrUtil.SPACE));
         processBuilder.command(command);
     }
