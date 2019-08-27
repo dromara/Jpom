@@ -19,7 +19,7 @@ public class LinuxSystemCommander extends AbstractSystemCommander {
 
     @Override
     public JSONObject getAllMonitor() {
-        String result = CommandUtil.execCommand("top -b -n 1");
+        String result = CommandUtil.execSystemCommand("top -b -n 1");
         if (StrUtil.isEmpty(result)) {
             return null;
         }
