@@ -52,7 +52,7 @@ public class CommandUtil {
         return ObjectUtil.clone(COMMAND);
     }
 
-    public static String execCommand(String command) {
+    /*public static String execCommand(String command) {
         String newCommand = StrUtil.replace(command, StrUtil.CRLF, StrUtil.SPACE);
         newCommand = StrUtil.replace(newCommand, StrUtil.LF, StrUtil.SPACE);
         String result = "error";
@@ -63,7 +63,7 @@ public class CommandUtil {
             result += e.getMessage();
         }
         return result;
-    }
+    }*/
 
     public static String execSystemCommand(String command) {
         return execSystemCommand(command, null);

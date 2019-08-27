@@ -53,7 +53,7 @@ public class LinuxSystemCommander extends AbstractSystemCommander {
     @Override
     public ProcessModel getPidInfo(int pid) {
         String command = "top -b -n 1 -p " + pid;
-        String internal = CommandUtil.execCommand(command);
+        String internal = CommandUtil.execSystemCommand(command);
         List<ProcessModel> processModels = formatLinuxTop(internal, true);
         if (processModels == null || processModels.isEmpty()) {
             return null;
@@ -196,7 +196,7 @@ public class LinuxSystemCommander extends AbstractSystemCommander {
     @Override
     public boolean getServiceStatus(String serviceName) {
         String format = StrUtil.format("service {} status", serviceName);
-        String result = CommandUtil.execCommand(format);
+        String result = CommandUtil.execSystemCommand(format);
         return StrUtil.containsIgnoreCase(result, "RUNNING");
     }
 

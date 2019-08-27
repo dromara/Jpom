@@ -90,7 +90,7 @@ public class JpomClose {
                 return "stop";
             }
             String cmd = String.format("taskkill /F /PID %s", pid);
-            return CommandUtil.execCommand(cmd);
+            return CommandUtil.execSystemCommand(cmd);
         }
     }
 
@@ -103,7 +103,7 @@ public class JpomClose {
                 return "stop";
             }
             String cmd = String.format("kill  %s", pid);
-            return CommandUtil.execCommand(cmd);
+            return CommandUtil.execSystemCommand(cmd);
         }
     }
 }

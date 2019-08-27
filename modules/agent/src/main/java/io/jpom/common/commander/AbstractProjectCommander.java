@@ -249,7 +249,7 @@ public abstract class AbstractProjectCommander {
         backPath = new File(backPath, DateTime.now().toString(DatePattern.PURE_DATETIME_FORMAT) + ".log");
         FileUtil.copy(file, backPath, true);
         if (SystemUtil.getOsInfo().isLinux()) {
-            CommandUtil.execCommand("cp /dev/null " + projectInfoModel.getLog());
+            CommandUtil.execSystemCommand("cp /dev/null " + projectInfoModel.getLog());
         } else if (SystemUtil.getOsInfo().isWindows()) {
             // 清空日志
             String r = CommandUtil.execSystemCommand("echo  \"\" > " + file.getAbsolutePath());

@@ -73,7 +73,7 @@ public class WindowsSystemCommander extends AbstractSystemCommander {
     @Override
     public ProcessModel getPidInfo(int pid) {
         String command = "tasklist /V /FI \"pid eq " + pid + "\"";
-        String result = CommandUtil.execCommand(command);
+        String result = CommandUtil.execSystemCommand(command);
         List<ProcessModel> array = formatWindowsProcess(result, true);
         if (array == null || array.isEmpty()) {
             return null;
