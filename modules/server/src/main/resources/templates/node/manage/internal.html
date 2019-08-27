@@ -47,7 +47,7 @@
         </tr>
         </thead>
         <tbody>
-        <tr th:if="${data?.process}">
+        <tr th:if="${data?.get('process')}">
             <td th:text="${data?.process?.pid}"></td>
             <td th:text="${data?.process?.command}"></td>
             <td th:text="${data?.process?.user}"></td>
@@ -61,7 +61,7 @@
             <td th:text="${data?.process?.virt}"></td>
             <td th:text="${data?.process?.shr}"></td>
         </tr>
-        <tr th:unless="${data?.process}">
+        <tr th:unless="${data?.get('process')}">
             <td colspan=12 style="text-align:center">无数据</td>
         </tr>
         </tbody>
