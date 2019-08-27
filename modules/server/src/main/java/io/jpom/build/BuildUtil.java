@@ -45,7 +45,7 @@ public class BuildUtil {
         return FileUtil.file(getBuildDataFile(buildModelId),
                 "history",
                 BuildModel.getBuildIdStr(buildId),
-                resultFile, "result");
+                "result", resultFile);
     }
 
     /**
