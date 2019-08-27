@@ -1,6 +1,7 @@
 package io.jpom.build;
 
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.core.util.ZipUtil;
 import io.jpom.model.data.BuildModel;
 import io.jpom.system.ConfigBean;
@@ -58,10 +59,14 @@ public class BuildUtil {
         if (file.isFile()) {
             return null;
         }
-        File zipFile = FileUtil.file(file.getParentFile(), FileUtil.getName(file) + ".zip");
+        String name = FileUtil.getName(file);
+        if (StrUtil.isEmpty(name)) {
+            name = "result";
+        }
+        File zipFile = FileUtil.file(file.getParentFile().getParentFile(), name + ".zip");
         if (!zipFile.exists()) {
             // 不存在则打包
-            ZipUtil.zip(file);
+            ZipUtil.zip(file.getAbsolutePath(), zipFile.getAbsolutePath());
         }
         return zipFile;
     }
