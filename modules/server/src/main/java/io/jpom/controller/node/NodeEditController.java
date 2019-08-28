@@ -42,8 +42,6 @@ import java.util.List;
 public class NodeEditController extends BaseServerController {
 
     @Resource
-    private NodeService nodeService;
-    @Resource
     private UserService userService;
     @Resource
     private OutGivingServer outGivingServer;

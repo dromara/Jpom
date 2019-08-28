@@ -39,8 +39,6 @@ import java.util.List;
 @Feature(cls = ClassFeature.USER)
 public class UserOptLogController extends BaseServerController {
     @Resource
-    private NodeService nodeService;
-    @Resource
     private UserService userService;
     @Resource
     private DbUserOperateLogService dbUserOperateLogService;

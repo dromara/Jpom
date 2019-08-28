@@ -52,8 +52,6 @@ public class OutGivingProjectController extends BaseServerController {
     @Resource
     private OutGivingServer outGivingServer;
     @Resource
-    private NodeService nodeService;
-    @Resource
     private ProjectInfoService projectInfoService;
 
     @RequestMapping(value = "getProjectStatus", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)

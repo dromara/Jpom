@@ -37,8 +37,6 @@ import java.util.List;
 public class NodeIndexController extends BaseServerController {
 
     @Resource
-    private NodeService nodeService;
-    @Resource
     private SshService sshService;
 
     @RequestMapping(value = "list.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)

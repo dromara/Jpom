@@ -4,142 +4,149 @@
 </head>
 <body>
 
-<div class="layui-row">
-    <button onclick="editProject('');" class="layui-btn layui-btn-sm layui-btn-normal">添加关联项目</button>
-    <button onclick="editAllProject('');" class="layui-btn layui-btn-sm layui-btn-normal">创建分发项目</button>
-</div>
+<th:block th:if="${trueNode}">
 
-
-<div class="layui-collapse" style="margin: 10px;" lay-accordion lay-filter="node" th:unless="${#lists.isEmpty(array)}">
-    <script type="text/javascript">
-        var col = [
-            {field: 'nodeName', title: '节点名称'},
-            {field: 'projectName', title: '项目名称'},
-            {
-                field: 'projectStatus', title: '项目状态', templet: function (d) {
-                    return '<div title="请到控制台中管理项目">\n' +
-                        '                                <input type="checkbox" id="status_' + d.nodeId + d.projectId + '" disabled\n' +
-                        '                                       name="status"\n' +
-                        '                                       lay-skin="switch"\n' +
-                        '                                       lay-text="运行中|未运行">\n' +
-                        '                            </div>'
-                }
-            },
-            {
-                field: 'outGivingStatus', title: '分发状态', templet: function (d) {
-                    return '<div class="viewMsg" style="color:red;font-weight: bold;" outGivingResult=' + d.outGivingResult + '>' + d.outGivingStatus + '</div>'
-                }
-            },
-            {field: 'lastTime', title: '最后分发时间'},
-            {field: 'opt', title: '操作', toolbar: "#bar_opt"}
-        ];
-        var config = {
-            cols: [col],
-            url: "./getItemData.json",
-            loading: true,
-            response: {
-                statusCode: 200
-            },
-            done: function (data) {
-                //
-                $("table").delegate(".viewMsg", "click", function () {
-                    var outGivingResult = $(this).attr("outGivingResult");
-                    if (!outGivingResult || outGivingResult == "") {
-                        return;
-                    }
-                    layer.alert(outGivingResult);
-                });
-            }
-        };
-    </script>
-    <script type="text/html" id="bar_opt">
-
-        {{# if(d.projectName){ }}
-        <a lay-event="conslone" class="layui-btn layui-btn-sm layui-btn-normal">
-            控制台
-        </a>
-        <a lay-event="file" class="layui-btn layui-btn-sm">
-            文件管理
-        </a>
-        {{# }else{ }}
-        {{ d.errorMsg || '数据异常' }}
-        {{# } }}
-    </script>
-    <div class="layui-colla-item" th:each="item : ${array}">
-        <div class="layui-colla-title" th:itemId="${item.id}">
-            <div th:title="${item.id}" th:text="${item.name}+'【'+${item.outGivingProject?'独立':'关联'}+'】'">
-            </div>
-            <div class="layui-layout-right" style="padding-right: 10%;">
-                <div class="layui-btn-group">
-                    <button op="refresh" th:itemId="${item.id}" style="display: none;"
-                            class="layui-btn layui-btn-sm">
-                        <i class="layui-icon">&#xe669;</i>
-                        刷新
-                    </button>
-
-                    <button op="add" th:id="${item.id}" class="layui-btn layui-btn-sm">
-                        <i class="layui-icon">&#xe609;</i>
-                        分发文件
-                    </button>
-                    <button op="edit" th:outGivingProject="${item.outGivingProject}" th:id="${item.id}"
-                            class="layui-btn layui-btn-sm ">
-                        <i class="layui-icon">&#xe642;</i>
-                        编辑
-                    </button>
-
-                </div>
-            </div>
-        </div>
-        <div class="layui-colla-content">
-            <form class="layui-form" action="">
-                <table class="layui-table" th:id="'table_'+${item.id}" th:lay-filter="'table_'+${item.id}">
-                </table>
-                <script type="text/javascript">
-                    //
-                    asyncFn.push(function () {
-                        config.id = 'table_[[${item.id}]]';
-                        config.elem = '#table_[[${item.id}]]';
-                        config.where = {
-                            id: "[[${item.id}]]"
-                        };
-                        tableRender(config);
-
-                        // 点击事件
-                        table.on('tool(table_[[${item.id}]])', function (obj) {
-                            var op = obj.event;
-                            var data = obj.data;
-                            if ("conslone" == op || "file" == op) {
-                                var nodeId = data.nodeId;
-                                var projectId = data.projectId;
-                                var url = "file" == op ? "/node/manage/file/list.html" : "/node/manage/console";
-                                url = urlUpdateParams(url, "nodeId", nodeId);
-                                url = urlUpdateParams(url, "id", projectId);
-                                var index = layer.open({
-                                    type: 2,
-                                    title: "file" == op ? '文件管理' : '控制台',
-                                    shade: [0.4, '#fff'],
-                                    maxmin: true,
-                                    area: ['80%', '90%'],
-                                    content: url
-                                });
-                                layer.full(index);
-                            }
-                        });
-                    });
-                </script>
-                <script type="text/javascript" th:outGivingItemProject="${item.id}" th:nodeId="${tr.nodeId}"
-                        th:projectId="${tr.projectId}"
-                        th:each="tr : ${item.outGivingNodeProjectList}">
-                    asyncFn.push(function () {
-                        getProjectStatus("[[${tr.nodeId}]]", "[[${tr.projectId}]]");
-                    });
-                </script>
-            </form>
-        </div>
+    <div class="layui-row">
+        <button onclick="editProject('');" class="layui-btn layui-btn-sm layui-btn-normal">添加关联项目</button>
+        <button onclick="editAllProject('');" class="layui-btn layui-btn-sm layui-btn-normal">创建分发项目</button>
     </div>
 
-</div>
-<h1 align="center" th:if="${#lists.isEmpty(array)}">还没有任何分发项目，请先创建分发项目</h1>
+
+    <div class="layui-collapse" style="margin: 10px;" lay-accordion lay-filter="node"
+         th:unless="${#lists.isEmpty(array)}">
+        <script type="text/javascript">
+            var col = [
+                {field: 'nodeName', title: '节点名称'},
+                {field: 'projectName', title: '项目名称'},
+                {
+                    field: 'projectStatus', title: '项目状态', templet: function (d) {
+                        return '<div title="请到控制台中管理项目">\n' +
+                            '                                <input type="checkbox" id="status_' + d.nodeId + d.projectId + '" disabled\n' +
+                            '                                       name="status"\n' +
+                            '                                       lay-skin="switch"\n' +
+                            '                                       lay-text="运行中|未运行">\n' +
+                            '                            </div>'
+                    }
+                },
+                {
+                    field: 'outGivingStatus', title: '分发状态', templet: function (d) {
+                        return '<div class="viewMsg" style="color:red;font-weight: bold;" outGivingResult=' + d.outGivingResult + '>' + d.outGivingStatus + '</div>'
+                    }
+                },
+                {field: 'lastTime', title: '最后分发时间'},
+                {field: 'opt', title: '操作', toolbar: "#bar_opt"}
+            ];
+            var config = {
+                cols: [col],
+                url: "./getItemData.json",
+                loading: true,
+                response: {
+                    statusCode: 200
+                },
+                done: function (data) {
+                    //
+                    $("table").delegate(".viewMsg", "click", function () {
+                        var outGivingResult = $(this).attr("outGivingResult");
+                        if (!outGivingResult || outGivingResult == "") {
+                            return;
+                        }
+                        layer.alert(outGivingResult);
+                    });
+                }
+            };
+        </script>
+        <script type="text/html" id="bar_opt">
+
+            {{# if(d.projectName){ }}
+            <a lay-event="conslone" class="layui-btn layui-btn-sm layui-btn-normal">
+                控制台
+            </a>
+            <a lay-event="file" class="layui-btn layui-btn-sm">
+                文件管理
+            </a>
+            {{# }else{ }}
+            {{ d.errorMsg || '数据异常' }}
+            {{# } }}
+        </script>
+        <div class="layui-colla-item" th:each="item : ${array}">
+            <div class="layui-colla-title" th:itemId="${item.id}">
+                <div th:title="${item.id}" th:text="${item.name}+'【'+${item.outGivingProject?'独立':'关联'}+'】'">
+                </div>
+                <div class="layui-layout-right" style="padding-right: 10%;">
+                    <div class="layui-btn-group">
+                        <button op="refresh" th:itemId="${item.id}" style="display: none;"
+                                class="layui-btn layui-btn-sm">
+                            <i class="layui-icon">&#xe669;</i>
+                            刷新
+                        </button>
+
+                        <button op="add" th:id="${item.id}" class="layui-btn layui-btn-sm">
+                            <i class="layui-icon">&#xe609;</i>
+                            分发文件
+                        </button>
+                        <button op="edit" th:outGivingProject="${item.outGivingProject}" th:id="${item.id}"
+                                class="layui-btn layui-btn-sm ">
+                            <i class="layui-icon">&#xe642;</i>
+                            编辑
+                        </button>
+
+                    </div>
+                </div>
+            </div>
+            <div class="layui-colla-content">
+                <form class="layui-form" action="">
+                    <table class="layui-table" th:id="'table_'+${item.id}" th:lay-filter="'table_'+${item.id}">
+                    </table>
+                    <script type="text/javascript">
+                        //
+                        asyncFn.push(function () {
+                            config.id = 'table_[[${item.id}]]';
+                            config.elem = '#table_[[${item.id}]]';
+                            config.where = {
+                                id: "[[${item.id}]]"
+                            };
+                            tableRender(config);
+
+                            // 点击事件
+                            table.on('tool(table_[[${item.id}]])', function (obj) {
+                                var op = obj.event;
+                                var data = obj.data;
+                                if ("conslone" == op || "file" == op) {
+                                    var nodeId = data.nodeId;
+                                    var projectId = data.projectId;
+                                    var url = "file" == op ? "/node/manage/file/list.html" : "/node/manage/console";
+                                    url = urlUpdateParams(url, "nodeId", nodeId);
+                                    url = urlUpdateParams(url, "id", projectId);
+                                    var index = layer.open({
+                                        type: 2,
+                                        title: "file" == op ? '文件管理' : '控制台',
+                                        shade: [0.4, '#fff'],
+                                        maxmin: true,
+                                        area: ['80%', '90%'],
+                                        content: url
+                                    });
+                                    layer.full(index);
+                                }
+                            });
+                        });
+                    </script>
+                    <script type="text/javascript" th:outGivingItemProject="${item.id}" th:nodeId="${tr.nodeId}"
+                            th:projectId="${tr.projectId}"
+                            th:each="tr : ${item.outGivingNodeProjectList}">
+                        asyncFn.push(function () {
+                            getProjectStatus("[[${tr.nodeId}]]", "[[${tr.projectId}]]");
+                        });
+                    </script>
+                </form>
+            </div>
+        </div>
+
+    </div>
+    <h1 align="center" th:if="${#lists.isEmpty(array)}">还没有任何分发项目，请先创建分发项目</h1>
+</th:block>
+<th:block th:unless="${trueNode}">
+    <h1 align="center">节点分发需要节点数大于二</h1>
+</th:block>
 
 </body>
 <script type="text/javascript">
@@ -149,7 +156,7 @@
         $("button[op]").click(function (e) {
             layui.stope(e);
             var op = $(this).attr("op");
-            console.log(op);
+            // console.log(op);
             if ("edit" == op) {
                 var editId = $(this).attr("id");
                 if ($(this).attr("outGivingProject") === "true") {

@@ -55,9 +55,6 @@ public class SshInstallAgentController extends BaseServerController {
     @Resource
     private SshService sshService;
 
-    @Resource
-    private NodeService nodeService;
-
     @RequestMapping(value = "installAgent.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
     @Feature(method = MethodFeature.INSTALL)
     public String installAgent() {

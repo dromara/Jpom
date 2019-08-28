@@ -18,7 +18,6 @@
   },
   {
     "title": "节点分发",
-    "dynamic": "showOutGiving",
     "icon": "layui-icon-release",
     "childs": [
       {
@@ -29,12 +28,14 @@
       {
         "id": "outgivingLog",
         "title": "分发日志",
-        "url": "./outgiving/log.html"
+        "url": "./outgiving/log.html",
+        "dynamic": "showOutGiving"
       },
       {
         "id": "outgivingWhitelistDirectory",
         "title": "分发白名单",
-        "url": "./outgiving/whitelistDirectory.html"
+        "url": "./outgiving/whitelistDirectory.html",
+        "dynamic": "showOutGiving"
       }
     ]
   },

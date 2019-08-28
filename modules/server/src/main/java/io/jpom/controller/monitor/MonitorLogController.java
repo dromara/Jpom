@@ -40,8 +40,7 @@ import java.util.List;
 @RequestMapping(value = "/monitor")
 @Feature(cls = ClassFeature.MONITOR)
 public class MonitorLogController extends BaseServerController {
-    @Resource
-    private NodeService nodeService;
+
     @Resource
     private DbMonitorNotifyLogService dbMonitorNotifyLogService;
 

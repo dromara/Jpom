@@ -15,7 +15,6 @@ import io.jpom.common.interceptor.NotLogin;
 import io.jpom.model.data.NodeModel;
 import io.jpom.model.data.UserModel;
 import io.jpom.permission.CacheControllerFeature;
-import io.jpom.service.node.NodeService;
 import io.jpom.service.user.RoleService;
 import io.jpom.service.user.UserService;
 import org.springframework.http.MediaType;
@@ -39,9 +38,6 @@ import java.util.stream.Collectors;
 public class IndexControl extends BaseServerController {
     @Resource
     private UserService userService;
-
-    @Resource
-    private NodeService nodeService;
 
     @Resource
     private RoleService roleService;
@@ -140,7 +136,7 @@ public class IndexControl extends BaseServerController {
             if ("showOutGiving".equals(dynamic)) {
                 // 是否显示节点分发菜单
                 List<NodeModel> list = nodeService.list();
-                return list != null && !list.isEmpty();
+                return list != null && list.size() > 1;
             }
         }
         return true;
