@@ -3,6 +3,8 @@ package io.jpom.util;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.crypto.SecureUtil;
+import io.jpom.system.ConfigBean;
 import io.jpom.system.JpomRuntimeException;
 import org.eclipse.jgit.api.CreateBranchCommand;
 import org.eclipse.jgit.api.Git;
@@ -20,6 +22,7 @@ import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.transport.CredentialsProvider;
 import org.eclipse.jgit.transport.RemoteConfig;
 import org.eclipse.jgit.transport.URIish;
+import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 
 import java.io.File;
 import java.io.IOException;
@@ -109,7 +112,7 @@ public class GitUtil {
      * @throws GitAPIException api
      * @throws IOException     IO
      */
-    public static List<String> branchList(String url, File file, CredentialsProvider credentialsProvider) throws GitAPIException, IOException {
+    private static List<String> branchList(String url, File file, CredentialsProvider credentialsProvider) throws GitAPIException, IOException {
         try (Git git = initGit(url, file, credentialsProvider)) {
             //
             List<Ref> list = git.branchList().setListMode(ListBranchCommand.ListMode.REMOTE).call();
@@ -125,6 +128,18 @@ public class GitUtil {
             checkTransportException(t);
             throw t;
         }
+    }
+
+    public static List<String> getBranchList(String url, String userName, String userPwd) throws GitAPIException, IOException {
+        //  生成临时路径
+        String tempId = SecureUtil.md5(url);
+        File file = ConfigBean.getInstance().getTempPath();
+        File gitFile = FileUtil.file(file, "gitTemp", tempId);
+        List<String> list = branchList(url, gitFile, new UsernamePasswordCredentialsProvider(userName, userPwd));
+        if (list.isEmpty()) {
+            throw new JpomRuntimeException("该仓库还没有任何分支");
+        }
+        return list;
     }
 
     /**

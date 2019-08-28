@@ -4,7 +4,6 @@ import cn.hutool.core.convert.Convert;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
-import cn.hutool.crypto.SecureUtil;
 import cn.hutool.system.SystemUtil;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.validator.ValidatorConfig;
@@ -27,11 +26,8 @@ import io.jpom.plugin.MethodFeature;
 import io.jpom.service.build.BuildService;
 import io.jpom.service.dblog.DbBuildHistoryLogService;
 import io.jpom.service.node.OutGivingServer;
-import io.jpom.system.ConfigBean;
-import io.jpom.system.JpomRuntimeException;
 import io.jpom.util.GitUtil;
 import org.eclipse.jgit.api.errors.GitAPIException;
-import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -101,7 +97,7 @@ public class BuildListController extends BaseServerController {
             return JsonMessage.getString(405, "仓库类型选择错误");
         }
         if (BuildModel.RepoType.Git.getCode() == repoType) {
-            List<String> list = getBranchList(gitUrl, userName, password);
+            List<String> list = GitUtil.getBranchList(gitUrl, userName, password);
             if (!list.contains(branchName)) {
                 return JsonMessage.getString(405, "没有找到对应分支：" + branchName);
             }
@@ -173,7 +169,7 @@ public class BuildListController extends BaseServerController {
 
     @RequestMapping(value = "edit.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
     @Feature(method = MethodFeature.EDIT)
-    public String edit(String id)  {
+    public String edit(String id) {
         BuildModel buildModel = null;
         if (StrUtil.isNotEmpty(id)) {
             buildModel = buildService.getItem(id);
@@ -207,20 +203,8 @@ public class BuildListController extends BaseServerController {
             @ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "仓库地址不正确")) String url,
             @ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "登录账号")) String userName,
             @ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "登录密码")) String userPwd) throws GitAPIException, IOException {
-        List<String> list = getBranchList(url, userName, userPwd);
+        List<String> list = GitUtil.getBranchList(url, userName, userPwd);
         return JsonMessage.getString(200, "ok", list);
-    }
-
-    private List<String> getBranchList(String url, String userName, String userPwd) throws GitAPIException, IOException {
-        //  生成临时路径
-        String tempId = SecureUtil.md5(url);
-        File file = ConfigBean.getInstance().getTempPath();
-        File gitFile = FileUtil.file(file, "gitTemp", tempId);
-        List<String> list = GitUtil.branchList(url, gitFile, new UsernamePasswordCredentialsProvider(userName, userPwd));
-        if (list == null || list.isEmpty()) {
-            throw new JpomRuntimeException("该仓库还没有任何分支");
-        }
-        return list;
     }
 
 
@@ -228,7 +212,7 @@ public class BuildListController extends BaseServerController {
     @ResponseBody
     @OptLog(UserOperateLogV1.OptType.DelBuild)
     @Feature(method = MethodFeature.DEL)
-    public String delete(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据id") String id) throws IOException, SQLException {
+    public String delete(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据id") String id) throws SQLException {
         BuildModel buildModel = buildService.getItem(id);
         Objects.requireNonNull(buildModel, "没有对应数据");
         dbBuildHistoryLogService.delByBuildId(buildModel.getId());
@@ -246,7 +230,7 @@ public class BuildListController extends BaseServerController {
     @ResponseBody
     @OptLog(UserOperateLogV1.OptType.BuildCleanSource)
     @Feature(method = MethodFeature.EXECUTE)
-    public String cleanSource(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据id") String id) throws IOException, SQLException {
+    public String cleanSource(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据id") String id) {
         BuildModel buildModel = buildService.getItem(id);
         Objects.requireNonNull(buildModel, "没有对应数据");
         File source = BuildUtil.getSource(buildModel);
