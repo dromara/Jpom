@@ -72,7 +72,7 @@ public class JpomManifest {
             try (JarFile jarFile1 = new JarFile(jarFile)) {
                 Manifest manifest = jarFile1.getManifest();
                 Attributes attributes = manifest.getMainAttributes();
-                String version = attributes.getValue("Jpom-Project-Version");
+                String version = attributes.getValue(Attributes.Name.IMPLEMENTATION_VERSION);
                 if (version != null) {
                     JPOM_MANIFEST.setVersion(version);
                     String timeStamp = attributes.getValue("Jpom-Timestamp");
@@ -241,7 +241,7 @@ public class JpomManifest {
             if (entry == null) {
                 return new JsonMessage(405, "此包不是Jpom【" + JpomApplication.getAppType().name() + "】包");
             }
-            version = attributes.getValue("Jpom-Project-Version");
+            version = attributes.getValue(Attributes.Name.IMPLEMENTATION_VERSION);
             if (StrUtil.isEmpty(version)) {
                 return new JsonMessage(405, "此包没有版本号");
             }

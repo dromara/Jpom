@@ -77,7 +77,7 @@
                         </manifest>
                         <manifestEntries>
                             <!-- 项目版本号 -->
-                            <Jpom-Project-Version>${project.version}</Jpom-Project-Version>
+                            <!--    <Jpom-Project-Version>${project.version}</Jpom-Project-Version>-->
                             <!-- 打包时间 -->
                             <Jpom-Timestamp>${maven.build.timestamp}</Jpom-Timestamp>
                             <Jpom-Type>${project.artifactId}</Jpom-Type>
