@@ -77,10 +77,11 @@
                         </manifest>
                         <manifestEntries>
                             <!-- 项目版本号 -->
-                            <!--    <Jpom-Project-Version>${project.version}</Jpom-Project-Version>-->
+                            <Jpom-Project-Version>${project.version}</Jpom-Project-Version>
                             <!-- 打包时间 -->
                             <Jpom-Timestamp>${maven.build.timestamp}</Jpom-Timestamp>
                             <Jpom-Type>${project.artifactId}</Jpom-Type>
+                            <Implementation-URL>https://gitee.com/keepbx/Jpom</Implementation-URL>
                         </manifestEntries>
                     </archive>
                 </configuration>
@@ -146,7 +147,7 @@
             <id>develop-plugin-profile</id>
             <dependencies>
                 <dependency>
-                    <groupId>io.jpom-plugin</groupId>
+                    <groupId>io.jpom.jpom-plugin</groupId>
                     <artifactId>netty</artifactId>
                     <version>LATEST</version>
                 </dependency>
