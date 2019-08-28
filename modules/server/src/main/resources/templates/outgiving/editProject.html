@@ -58,7 +58,7 @@
                     </select>
                 </div>
             </div>
-            <div class="layui-inline" style="display: none;"
+            <div class="layui-inline" th:style="${item!=null}?'display: none;':''"
                  id="mainClassDiv">
                 <label class="layui-form-label">MainClass</label>
                 <div class="layui-input-block">

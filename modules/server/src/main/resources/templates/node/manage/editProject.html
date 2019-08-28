@@ -217,7 +217,7 @@
 
         form.on('select(runMode)', function (data) {
             let val = data.value;
-            if (val == "ClassPath") {
+            if (val === "ClassPath") {
                 $("#mainClassDiv").show();
             } else {
                 $("#mainClassDiv").hide();

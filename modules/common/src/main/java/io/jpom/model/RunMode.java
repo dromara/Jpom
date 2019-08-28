@@ -15,4 +15,8 @@ public enum RunMode {
      * java -jar
      */
     Jar,
+    /**
+     * java -jar  Springboot war
+     */
+    War,
 }

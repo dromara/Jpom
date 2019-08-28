@@ -236,8 +236,14 @@ public class ProjectInfoModel extends BaseModel {
                 if (!file.isFile()) {
                     continue;
                 }
-                if (!StrUtil.endWith(file.getName(), FileUtil.JAR_FILE_EXT, true)) {
-                    continue;
+                if (projectInfoModel.getRunMode() == RunMode.ClassPath || projectInfoModel.getRunMode() == RunMode.Jar) {
+                    if (!StrUtil.endWith(file.getName(), FileUtil.JAR_FILE_EXT, true)) {
+                        continue;
+                    }
+                } else if (projectInfoModel.getRunMode() == RunMode.War) {
+                    if (!StrUtil.endWith(file.getName(), "war", true)) {
+                        continue;
+                    }
                 }
                 files1.add(file);
             }
@@ -253,7 +259,7 @@ public class ProjectInfoModel extends BaseModel {
      */
     public static String getClassPathLib(ProjectInfoModel projectInfoModel) {
         List<File> files = listJars(projectInfoModel);
-        if (files == null || files.size() <= 0) {
+        if (files.size() <= 0) {
             return "";
         }
         // 获取lib下面的所有jar包
@@ -262,7 +268,7 @@ public class ProjectInfoModel extends BaseModel {
         int len = files.size();
         if (runMode == RunMode.ClassPath) {
             classPath.append("-classpath ");
-        } else if (runMode == RunMode.Jar) {
+        } else if (runMode == RunMode.Jar || runMode == RunMode.War) {
             classPath.append("-jar ");
             // 只取一个jar文件
             len = 1;

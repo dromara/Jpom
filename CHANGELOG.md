@@ -4,6 +4,8 @@
 
 ### 新增功能
 
+1. 【Agent】添加对SpringBoot war包支持
+
 ### 解决BUG、优化功能
 1. 【Server】新项目打开项目控制台页面报错（感谢@黄战虎）
 2. 【Server】修改邮箱不及时生效问题（感谢@WeChat）

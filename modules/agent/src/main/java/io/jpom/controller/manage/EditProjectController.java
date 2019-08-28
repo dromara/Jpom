@@ -75,7 +75,7 @@ public class EditProjectController extends BaseAgentController {
             if (StrUtil.isEmpty(projectInfo.getMainClass())) {
                 return JsonMessage.getString(401, "ClassPath 模式 MainClass必填");
             }
-        } else if (runMode1 == RunMode.Jar) {
+        } else if (runMode1 == RunMode.Jar || runMode1 == RunMode.War) {
             projectInfo.setMainClass("");
         }
         // 判断是否为分发添加

@@ -200,30 +200,38 @@ public abstract class AbstractProjectCommander {
             }
         } else {
             List<File> fileList = ProjectInfoModel.listJars(projectInfoModel);
-            if (fileList == null || fileList.size() <= 0) {
-                return "没有jar包,请先到文件管理中上传程序的jar";
+            if (fileList.size() <= 0) {
+                return String.format("没有%s包,请先到文件管理中上传程序的%s", projectInfoModel.getRunMode().name(), projectInfoModel.getRunMode().name());
             }
             File jarFile = fileList.get(0);
-            try (JarFile jarFile1 = new JarFile(jarFile)) {
-                Manifest manifest = jarFile1.getManifest();
-                Attributes attributes = manifest.getMainAttributes();
-                String mainClass = attributes.getValue("Main-Class");
-                if (mainClass == null) {
-                    return jarFile.getAbsolutePath() + "中没有找到对应的MainClass属性";
-                }
-                JarClassLoader jarClassLoader = JarClassLoader.load(jarFile);
-                try {
-                    jarClassLoader.loadClass(mainClass);
-                } catch (ClassNotFoundException notFound) {
-                    return jarFile.getAbsolutePath() + "中没有找到对应的MainClass:" + mainClass;
-                }
-            } catch (Exception e) {
-                DefaultSystemLog.ERROR().error("解析jar", e);
-                return jarFile.getAbsolutePath() + " 解析错误:" + e.getMessage();
+            String checkJar = checkJar(jarFile);
+            if (checkJar != null) {
+                return checkJar;
             }
         }
         // 备份日志
         backLog(projectInfoModel);
+        return null;
+    }
+
+    private static String checkJar(File jarFile) {
+        try (JarFile jarFile1 = new JarFile(jarFile)) {
+            Manifest manifest = jarFile1.getManifest();
+            Attributes attributes = manifest.getMainAttributes();
+            String mainClass = attributes.getValue("Main-Class");
+            if (mainClass == null) {
+                return jarFile.getAbsolutePath() + "中没有找到对应的MainClass属性";
+            }
+            JarClassLoader jarClassLoader = JarClassLoader.load(jarFile);
+            try {
+                jarClassLoader.loadClass(mainClass);
+            } catch (ClassNotFoundException notFound) {
+                return jarFile.getAbsolutePath() + "中没有找到对应的MainClass:" + mainClass;
+            }
+        } catch (Exception e) {
+            DefaultSystemLog.ERROR().error("解析jar", e);
+            return jarFile.getAbsolutePath() + " 解析错误:" + e.getMessage();
+        }
         return null;
     }
 
