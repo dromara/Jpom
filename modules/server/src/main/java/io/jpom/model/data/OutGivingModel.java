@@ -32,7 +32,7 @@ public class OutGivingModel extends BaseModel {
     /**
      * 临时缓存
      */
-    @JSONField(serialize = false)
+    @JSONField(serialize = false, deserialize = false)
     private Map<NodeModel, JSONObject> tempCacheMap;
     /**
      * 是否为单独创建的分发项目

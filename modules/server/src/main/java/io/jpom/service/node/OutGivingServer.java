@@ -1,7 +1,6 @@
 package io.jpom.service.node;
 
 import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
 import io.jpom.common.BaseOperService;
 import io.jpom.model.data.OutGivingModel;
 import io.jpom.model.data.OutGivingNodeProject;
@@ -23,27 +22,6 @@ public class OutGivingServer extends BaseOperService<OutGivingModel> implements 
 
     public OutGivingServer() {
         super(ServerConfigBean.OUTGIVING);
-    }
-
-    @Override
-    public void addItem(OutGivingModel outGivingModel) {
-        // 不保存临时数据
-        JSONObject jsonObject = outGivingModel.toJson();
-        jsonObject.remove("tempCacheMap");
-        OutGivingModel newData = jsonObject.toJavaObject(OutGivingModel.class);
-        newData.setTempCacheMap(null);
-        // 保存
-        super.addItem(newData);
-    }
-
-    @Override
-    public void updateItem(OutGivingModel outGivingModel) {
-        // 不保存临时数据
-        JSONObject jsonObject = outGivingModel.toJson();
-        jsonObject.remove("tempCacheMap");
-        OutGivingModel newData = jsonObject.toJavaObject(OutGivingModel.class);
-        newData.setTempCacheMap(null);
-        super.updateItem(newData);
     }
 
     public boolean checkNode(String nodeId) {
