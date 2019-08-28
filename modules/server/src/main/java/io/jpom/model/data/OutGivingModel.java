@@ -2,6 +2,7 @@ package io.jpom.model.data;
 
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.annotation.JSONField;
 import io.jpom.model.BaseEnum;
 import io.jpom.model.BaseModel;
 
@@ -31,6 +32,7 @@ public class OutGivingModel extends BaseModel {
     /**
      * 临时缓存
      */
+    @JSONField(serialize = false)
     private Map<NodeModel, JSONObject> tempCacheMap;
     /**
      * 是否为单独创建的分发项目

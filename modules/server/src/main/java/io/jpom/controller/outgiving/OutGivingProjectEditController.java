@@ -183,7 +183,7 @@ public class OutGivingProjectEditController extends BaseServerController {
             if (!edit) {
                 outGivingServer.deleteItem(outGivingModel.getId());
             }
-            return JsonMessage.getString(405, "数据异常");
+            return JsonMessage.getString(405, "数据异常,请重新操作");
         }
         UserModel userModel = getUser();
         List<Map.Entry<NodeModel, JSONObject>> success = new ArrayList<>();
