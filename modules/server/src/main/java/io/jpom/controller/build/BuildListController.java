@@ -173,7 +173,7 @@ public class BuildListController extends BaseServerController {
 
     @RequestMapping(value = "edit.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
     @Feature(method = MethodFeature.EDIT)
-    public String edit(String id) throws IOException {
+    public String edit(String id)  {
         BuildModel buildModel = null;
         if (StrUtil.isNotEmpty(id)) {
             buildModel = buildService.getItem(id);

@@ -229,9 +229,8 @@ public class JvmUtil {
      *
      * @param tag 项目id
      * @return VirtualMachine
-     * @throws IOException 异常
      */
-    public static VirtualMachine getVirtualMachine(String tag) throws IOException {
+    public static VirtualMachine getVirtualMachine(String tag) {
         // 通过VirtualMachine.list()列出所有的java进程
         List<VirtualMachineDescriptor> descriptorList = VirtualMachine.list();
         for (VirtualMachineDescriptor virtualMachineDescriptor : descriptorList) {
@@ -255,11 +254,16 @@ public class JvmUtil {
         return null;
     }
 
-    public static boolean checkVirtualMachineIsJpom(VirtualMachine virtualMachine, String tag) throws IOException {
+    public static boolean checkVirtualMachineIsJpom(VirtualMachine virtualMachine, String tag) {
         String appTag = String.format("-%s=%s ", JvmUtil.POM_PID_TAG, tag);
         String appTag2 = String.format("-%s=%s ", JvmUtil.OLD_JPOM_PID_TAG, tag);
         String appTag3 = String.format("-%s=%s", JvmUtil.OLD2_JPOM_PID_TAG, tag);
-        Properties properties = virtualMachine.getAgentProperties();
+        Properties properties;
+        try {
+            properties = virtualMachine.getAgentProperties();
+        } catch (IOException io) {
+            return false;
+        }
         String args = properties.getProperty("sun.jvm.args", "");
         if (StrUtil.containsAnyIgnoreCase(args, appTag, appTag2, appTag3)) {
             return true;
