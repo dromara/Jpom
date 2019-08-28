@@ -10,7 +10,6 @@ import io.jpom.plugin.ClassFeature;
 import io.jpom.system.ServerConfigBean;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
 import java.util.List;
 
 /**
@@ -34,7 +33,7 @@ public class OutGivingServer extends BaseOperService<OutGivingModel> implements 
         OutGivingModel newData = jsonObject.toJavaObject(OutGivingModel.class);
         newData.setTempCacheMap(null);
         // 保存
-        super.addItem(outGivingModel);
+        super.addItem(newData);
     }
 
     @Override
@@ -44,10 +43,10 @@ public class OutGivingServer extends BaseOperService<OutGivingModel> implements 
         jsonObject.remove("tempCacheMap");
         OutGivingModel newData = jsonObject.toJavaObject(OutGivingModel.class);
         newData.setTempCacheMap(null);
-        super.updateItem(outGivingModel);
+        super.updateItem(newData);
     }
 
-    public boolean checkNode(String nodeId) throws IOException {
+    public boolean checkNode(String nodeId) {
         List<OutGivingModel> list = list();
         if (list == null || list.isEmpty()) {
             return false;
