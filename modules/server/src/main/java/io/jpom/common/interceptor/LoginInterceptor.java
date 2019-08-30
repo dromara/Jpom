@@ -127,7 +127,7 @@ public class LoginInterceptor extends BaseJpomInterceptor {
             if (header != null) {
                 url += "&r=" + header;
             }
-            super.sendRedirect(request, response, url);
+            super.sendRedirects(request, response, url);
             return;
         }
         ServletUtil.write(response, JsonMessage.getString(800, "登录信息已失效,重新登录"), MediaType.APPLICATION_JSON_UTF8_VALUE);
