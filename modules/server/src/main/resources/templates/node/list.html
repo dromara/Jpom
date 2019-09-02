@@ -13,7 +13,8 @@
             <div class="layui-inline" th:unless="${#lists.isEmpty(array)}">
                 <label class="layui-form-label">筛选</label>
                 <div class="layui-input-block">
-                    <select multiple="multiple" lay-filter="nodeSelect" lay-search="">
+                    <select name="nodeSelect" multiple="multiple" lay-filter="nodeSelect" lay-search="">
+                        <option value=""></option>
                         <option th:value="${item.id}" th:each="item : ${array}" th:text="${item.name}"></option>
                     </select>
                 </div>
@@ -121,8 +122,23 @@
                         vals[$(this).val()] = true;
                     });
                     changeNodeSelect(vals);
+                    layui.data('cache', {
+                        key: "selectNodes",
+                        value: vals
+                    });
                 }, 500)
-            })
+            });
+
+            const cache = layui.data('cache');
+            if (cache.selectNodes) {
+                changeNodeSelect(cache.selectNodes);
+                //
+                var select = $("select[name='nodeSelect']");
+                for (let selectNodesKey in cache.selectNodes) {
+                    select.find('option[value="' + selectNodesKey + '"]').attr("selected", true);
+                }
+                multiSelect.render();
+            }
         });
     }
 
