@@ -73,7 +73,8 @@
         const asyncFn = [];
         // 不缓存
         layui.config({
-            version: true
+            version: true,
+            base: '/static/layui/plugin/',
         });
         layui.use(['layer', 'element', 'form', 'table'], function () {
             $ = layui.$;

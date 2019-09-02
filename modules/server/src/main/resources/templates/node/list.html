@@ -5,11 +5,25 @@
 <body>
 
 <div class="layui-row">
-    <button onclick="editProject('');" class="layui-btn layui-btn-sm">创建节点</button>
+    <form class="layui-form" action="">
+        <div class="layui-form-item">
+            <div class="layui-inline">
+                <a onclick="editProject('');" class="layui-btn layui-btn-sm">创建节点</a>
+            </div>
+            <div class="layui-inline" th:unless="${#lists.isEmpty(array)}">
+                <label class="layui-form-label">筛选</label>
+                <div class="layui-input-block">
+                    <select multiple="multiple" lay-filter="nodeSelect" lay-search="">
+                        <option th:value="${item.id}" th:each="item : ${array}" th:text="${item.name}"></option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </form>
 </div>
 <div class="layui-collapse" style="margin: 10px;" th:unless="${#lists.isEmpty(array)}">
 
-    <div class="layui-colla-item" th:each="item : ${array}">
+    <div class="layui-colla-item nodeItemDiv" th:nodeId="${item.id}" th:each="item : ${array}">
         <div class="layui-colla-title">
             <div th:title="${item.id}" th:text="${item.name}">
 
@@ -97,6 +111,34 @@
             }
             return false;
         });
+        //
+        layui.use(['multiSelect'], function () {
+            var multiSelect = layui.multiSelect;
+            form.on('select(nodeSelect)', function (nodeSelect) {
+                setTimeout(function () {
+                    var vals = {};
+                    $(nodeSelect.elem).find('option:selected').each(function () {
+                        vals[$(this).val()] = true;
+                    });
+                    changeNodeSelect(vals);
+                }, 500)
+            })
+        });
+    }
+
+    function changeNodeSelect(vals) {
+        if ($.isEmptyObject(vals)) {
+            $(".nodeItemDiv").show();
+        } else {
+            $(".nodeItemDiv").each(function () {
+                var attr = $(this).attr("nodeId");
+                if (vals[attr]) {
+                    $(this).show();
+                } else {
+                    $(this).hide();
+                }
+            });
+        }
     }
 
     function editProject(id) {
