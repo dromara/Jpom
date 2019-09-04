@@ -1,6 +1,11 @@
 #运行端口号
 server:
   port: 2123
+  servlet:
+    session:
+      timeout: 1H
+      cookie:
+        name: JPOMID-AGENT
 spring:
   application:
     name: jpomAgent
@@ -8,10 +13,6 @@ spring:
     active: dev
 banner:
   msg: Jpom-Agent管理系统启动中
-# session 超时时间
-tomcat:
-  sessionTimeOut: 3600
-  sessionCookieName: JPOMID-AGENT
 # 启动完成自动初始化指定包
 preload:
   packageName: io.jpom.system.init

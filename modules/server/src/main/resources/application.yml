@@ -1,6 +1,11 @@
 #运行端口号
 server:
   port: 2122
+  servlet:
+    session:
+      cookie:
+        name: JPOMID-SERVER
+      timeout: 1H
 spring:
   application:
     name: jpomServer
@@ -20,10 +25,6 @@ banner:
 interceptor:
   resourceHandler: /static/**,/favicon.ico
   resourceLocation: classpath:/static/,classpath:/static/favicon.ico
-# session 超时时间
-tomcat:
-  sessionTimeOut: 3600
-  sessionCookieName: JPOMID-SERVER
 # 启动完成自动初始化指定包
 preload:
   packageName: io.jpom.system.init
