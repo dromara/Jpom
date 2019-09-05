@@ -87,7 +87,7 @@
                     <button id="export" class="layui-btn layui-btn-sm">导出日志</button>
                     </button>
                 </th:block>
-                <button th:if="${logSize?.logBack}" id="logBack" class="layui-btn layui-btn-sm">备份列表</button>
+                <a th:if="${logSize?.logBack}" id="logBack" class="layui-btn layui-btn-sm">备份列表</a>
             </div>
 
             <div class="status right">
@@ -298,10 +298,9 @@
                     id: "[[${projectInfo?.id}]]"
                 },
                 success: function (data) {
-                    if (200 == data.code) {
+                    if (200 === data.code) {
                         if (data.data && data.data.logSize) {
-                            $("#logSize").html(data.data.logSize);
-                            $("#logSize").show();
+                            $("#logSize").html(data.data.logSize).show();
                         }
                     } else {
                         $("#logSize").hide();
