@@ -84,8 +84,7 @@
             <div th:if="${logSize}" class="layui-btn-group">
 
                 <th:block th:if="${logSize?.get('logSize')}">
-                    <button id="export" class="layui-btn layui-btn-sm">导出日志</button>
-                    </button>
+                    <a id="export" class="layui-btn layui-btn-sm">导出日志</a>
                 </th:block>
                 <a th:if="${logSize?.logBack}" id="logBack" class="layui-btn layui-btn-sm">备份列表</a>
             </div>
