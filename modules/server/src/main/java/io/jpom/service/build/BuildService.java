@@ -2,15 +2,20 @@ package io.jpom.service.build;
 
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.jiangzeyin.common.JsonMessage;
 import com.alibaba.fastjson.JSONArray;
+import io.jpom.build.BuildManage;
 import io.jpom.common.BaseOperService;
+import io.jpom.model.BaseEnum;
 import io.jpom.model.data.BuildModel;
+import io.jpom.model.data.UserModel;
 import io.jpom.permission.BaseDynamicService;
 import io.jpom.plugin.ClassFeature;
 import io.jpom.system.ServerConfigBean;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 
 /**
  * 构建service
@@ -91,5 +96,40 @@ public class BuildService extends BaseOperService<BuildModel> implements BaseDyn
     @Override
     public JSONArray listToArray(String dataId) {
         return (JSONArray) JSONArray.toJSON(this.list());
+    }
+
+    /**
+     * 开始构建
+     *
+     * @param userModel 用户
+     * @param id        id
+     * @return json
+     */
+    public String start(UserModel userModel, String id) {
+        BuildModel item = getItem(id);
+        if (item == null) {
+            return JsonMessage.getString(404, "没有对应数据");
+        }
+        String e = checkStatus(item.getStatus());
+        if (e != null) {
+            return e;
+        }
+        //
+        item.setBuildId(item.getBuildId() + 1);
+        String optUserName = userModel == null ? "openApi" : UserModel.getOptUserName(userModel);
+        item.setModifyUser(optUserName);
+        updateItem(item);
+        BuildManage.create(item, userModel);
+        return JsonMessage.getString(200, "开始构建中", item.getBuildId());
+    }
+
+    public String checkStatus(int status) {
+        BuildModel.Status nowStatus = BaseEnum.getEnum(BuildModel.Status.class, status);
+        Objects.requireNonNull(nowStatus);
+        if (BuildModel.Status.Ing == nowStatus ||
+                BuildModel.Status.PubIng == nowStatus) {
+            return JsonMessage.getString(501, "当前还在：" + nowStatus.getDesc());
+        }
+        return null;
     }
 }

@@ -2,7 +2,6 @@ package io.jpom.controller.openapi;
 
 import cn.jiangzeyin.controller.base.AbstractController;
 import io.jpom.common.ServerOpenApi;
-import io.jpom.common.interceptor.NotLogin;
 import io.jpom.model.data.NodeModel;
 import io.jpom.service.node.NodeService;
 import org.springframework.http.MediaType;
@@ -19,7 +18,6 @@ import javax.annotation.Resource;
  * @date 2019/8/5
  */
 @RestController
-@NotLogin(openApi = true)
 public class NodeInfoController extends AbstractController {
 
     @Resource

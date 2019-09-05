@@ -6,7 +6,7 @@
 <body>
 <div class="layui-row">
     <button onclick="editData('')" class="layui-btn layui-btn-sm">新增构建</button>
-    <button id="refresh" class="layui-btn layui-btn-sm">刷新表格</button>
+    <button onclick="reloadTable();" class="layui-btn layui-btn-sm">刷新表格</button>
 </div>
 <table class="layui-table" id="tab_build" lay-filter="tab_build" style="margin: 0;"></table>
 
@@ -14,6 +14,7 @@
 
 <script type="text/html" id="bar_build">
     <a href="javascript:;" class="layui-btn  layui-btn-sm layui-btn-normal" lay-event="update">编辑</a>
+    <a href="javascript:;" class="layui-btn  layui-btn-sm layui-btn-normal" lay-event="trigger">触发器</a>
 
     {{# if(d.status==1) { }}
     <a href="javascript:;" class="layui-btn layui-btn-sm layui-btn-danger" lay-event="stop">停止</a>
@@ -56,7 +57,7 @@
                 success: function (data) {
                     layer.msg(data.msg);
                     if (200 == data.code) {
-                        table.reload('tab_build', {});
+                        reloadTable();
                     }
                 }
             });
@@ -103,10 +104,6 @@
             cols: [col]
         });
 
-        // '刷新表格'点击事件
-        $('#refresh').on('click', function () {
-            table.reload('tab_build', {});
-        });
 
         // 表格工具条事件
         table.on('tool(tab_build)', function (obj) {
@@ -128,7 +125,7 @@
                         success: function (data) {
                             layer.msg(data.msg);
                             if (200 == data.code) {
-                                table.reload('tab_build', {});
+                                reloadTable();
                             }
                         }
                     });
@@ -143,12 +140,12 @@
                     success: function (data) {
                         layer.msg(data.msg);
                         if (200 == data.code) {
-                            table.reload('tab_build', {});
+                            reloadTable();
                             openLog(dataId, data.data);
                         }
                     }
                 });
-            } else if ('stop' == event) {
+            } else if ('stop' === event) {
                 loadingAjax({
                     url: './cancel.json',
                     data: {
@@ -156,10 +153,17 @@
                     },
                     success: function (data) {
                         layer.msg(data.msg);
-                        if (200 == data.code) {
+                        if (200 === data.code) {
                             reloadTable();
                         }
                     }
+                });
+            } else if ('trigger' === event) {
+                layer.open({
+                    type: 2,
+                    title: '查看触发器',
+                    content: './trigger.html?id=' + data.id,
+                    area: ['80%', '80%'],
                 });
             }
         });

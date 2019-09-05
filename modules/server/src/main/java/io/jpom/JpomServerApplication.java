@@ -4,6 +4,7 @@ import cn.jiangzeyin.common.EnableCommonBoot;
 import cn.jiangzeyin.common.spring.event.ApplicationEventLoad;
 import io.jpom.common.Type;
 import io.jpom.common.interceptor.LoginInterceptor;
+import io.jpom.common.interceptor.OpenApiInterceptor;
 import io.jpom.common.interceptor.PermissionInterceptor;
 import io.jpom.permission.CacheControllerFeature;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -31,6 +32,7 @@ public class JpomServerApplication implements ApplicationEventLoad {
         jpomApplication
                 // 拦截器
                 .addInterceptor(LoginInterceptor.class)
+                .addInterceptor(OpenApiInterceptor.class)
                 .addInterceptor(PermissionInterceptor.class)
                 .run(args);
     }

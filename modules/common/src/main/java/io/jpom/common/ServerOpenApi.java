@@ -16,4 +16,9 @@ public class ServerOpenApi {
      * 安装id
      */
     public static final String INSTALL_ID = "/api/installId";
+
+    /**
+     * 触发构建, 第一级构建id,第二级token
+     */
+    public static final String BUILD_TRIGGER_BUILD = "/api/build/{id}/{token}";
 }

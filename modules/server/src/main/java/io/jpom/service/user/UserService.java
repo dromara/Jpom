@@ -100,10 +100,10 @@ public class UserService extends BaseOperService<UserModel> {
     /**
      * 是否返回系统管理员信息
      *
-     * @param system 系统管理员
+     * @param hiddenSystem 隐藏系统管理员
      * @return list
      */
-    public List<UserModel> list(boolean system) {
+    public List<UserModel> list(boolean hiddenSystem) {
         List<UserModel> list = super.list();
         if (list == null) {
             return null;
@@ -111,7 +111,7 @@ public class UserService extends BaseOperService<UserModel> {
         return list.stream().filter(userModel -> {
             userModel.setPassword(null);
             // 不显示系统管理员信息
-            return !system || !userModel.isSystemUser();
+            return !hiddenSystem || !userModel.isSystemUser();
         }).collect(Collectors.toList());
     }
 }

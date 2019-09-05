@@ -51,6 +51,18 @@ public class BuildModel extends BaseBuildModule {
      * 构建id
      */
     private int buildId;
+    /**
+     * 触发器token
+     */
+    private String triggerToken;
+
+    public String getTriggerToken() {
+        return triggerToken;
+    }
+
+    public void setTriggerToken(String triggerToken) {
+        this.triggerToken = triggerToken;
+    }
 
     public int getBuildId() {
         return buildId;

@@ -62,32 +62,7 @@ public class BuildManageController extends BaseServerController {
     @OptLog(UserOperateLogV1.OptType.StartBuild)
     @Feature(method = MethodFeature.EXECUTE)
     public String start(@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据")) String id) throws IOException {
-        BuildModel item = buildService.getItem(id);
-        if (item == null) {
-            return JsonMessage.getString(404, "没有对应数据");
-        }
-        String e = checkStatus(item.getStatus());
-        if (e != null) {
-            return e;
-        }
-        //
-        item.setBuildId(item.getBuildId() + 1);
-        UserModel userModel = getUser();
-        String optUserName = UserModel.getOptUserName(userModel);
-        item.setModifyUser(optUserName);
-        buildService.updateItem(item);
-        BuildManage.create(item, userModel);
-        return JsonMessage.getString(200, "开始构建中", item.getBuildId());
-    }
-
-    private String checkStatus(int status) {
-        BuildModel.Status nowStatus = BaseEnum.getEnum(BuildModel.Status.class, status);
-        Objects.requireNonNull(nowStatus);
-        if (BuildModel.Status.Ing == nowStatus ||
-                BuildModel.Status.PubIng == nowStatus) {
-            return JsonMessage.getString(501, "当前还在：" + nowStatus.getDesc());
-        }
-        return null;
+        return buildService.start(getUser(), id);
     }
 
     /**
@@ -132,7 +107,7 @@ public class BuildManageController extends BaseServerController {
         Objects.requireNonNull(buildHistoryLog, "没有对应构建记录.");
         BuildModel item = buildService.getItem(buildHistoryLog.getBuildDataId());
         Objects.requireNonNull(item, "没有对应数据");
-        String e = checkStatus(item.getStatus());
+        String e = buildService.checkStatus(item.getStatus());
         if (e != null) {
             return e;
         }

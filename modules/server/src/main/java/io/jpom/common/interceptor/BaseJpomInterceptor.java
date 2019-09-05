@@ -21,7 +21,7 @@ import java.io.IOException;
  */
 public abstract class BaseJpomInterceptor extends BaseInterceptor {
 
-    boolean isPage(HandlerMethod handlerMethod) {
+    public static boolean isPage(HandlerMethod handlerMethod) {
         ResponseBody responseBody = handlerMethod.getMethodAnnotation(ResponseBody.class);
         if (responseBody == null) {
             RestController restController = handlerMethod.getBeanType().getAnnotation(RestController.class);

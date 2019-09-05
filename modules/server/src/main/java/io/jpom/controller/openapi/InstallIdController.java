@@ -24,7 +24,6 @@ import java.io.FileNotFoundException;
  * @date 2019/8/7
  */
 @RestController
-@NotLogin(openApi = true)
 public class InstallIdController {
 
     @RequestMapping(value = ServerOpenApi.INSTALL_ID, method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
