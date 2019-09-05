@@ -140,70 +140,12 @@
             };
 
             ws.onmessage = function (data) {
-                // 如果是
-                if (data.data.indexOf('{') === 0) {
-                    layer.closeAll();
-                    var json_data = null;
-                    try {
-                        json_data = JSON.parse(data.data);
-                    } catch (e) {
-                        showLogDom.append(data.data + '<br/>');
-                        return;
-                    }
-                    if (json_data.code !== 200) {
-                        layer.msg(json_data.msg);
-                    }
-                    showLogDom.append(json_data.msg + (json_data.data || "") + '<br/>');
-                    var op = json_data.op;
-                    switch (op) {
-                        case 'status':
-                        case 'start':
-                        case 'restart':
-                            if (200 === json_data.code) {
-                                $('.status .status-div').removeClass('status-stop').addClass('status-run');
-                                $('.status span').text('运行中');
-                                setOpBtn(false);
-                                // 运行后需要实时加载日志
-                                setMsg("showlog");
-                            } else {
-                                $('.status .status-div').removeClass('status-run').addClass('status-stop');
-                                $('.status span').text(json_data.msg);
-                                setOpBtn(true);
-                                if (op == 'status') {
-                                    setMsg("showlog");
-                                }
-                            }
-                            refreshProjectData();
-                            break;
-                        case 'stop':
-                            if (200 === json_data.code) {
-                                $('.status .status-div').removeClass('status-run').addClass('status-stop');
-                                $('.status span').text('未运行');
-                                setOpBtn(true);
-                            } else {
-                                $('.status span').text(json_data.msg);
-                            }
-                            refreshProjectData();
-                            break;
-                        case  'showlog':
-                            break;
-                        default:
-                            break;
-                    }
-                } else {
-                    showLogDom.append(data.data + '<br/>');
-                    if (!loopLog && nowStatus) {
-                        loopLogAjax();
-                    }
-                    clearInterval(heart);
-                    // 创建心跳，防止掉线
-                    heart = setInterval(function () {
-                        const data = {
-                            op: "heart",
-                            projectId: "[[${projectInfo?.id}]]"
-                        };
-                        ws.send(JSON.stringify(data));
-                    }, 5000);
+                try {
+                    var json_data = JSON.parse(data.data);
+                    handleData(json_data);
+                } catch (e) {
+                    handleMsg(data.data);
+                    return;
                 }
                 scrollToBotomm();
             };
@@ -237,6 +179,65 @@
                     setMsg(op);
                 }
             });
+
+            function handleMsg(msg) {
+                showLogDom.append(msg + '<br/>');
+                if (!loopLog && nowStatus) {
+                    loopLogAjax();
+                }
+                clearInterval(heart);
+                // 创建心跳，防止掉线
+                heart = setInterval(function () {
+                    const data = {
+                        op: "heart",
+                        projectId: "[[${projectInfo?.id}]]"
+                    };
+                    ws.send(JSON.stringify(data));
+                }, 5000);
+            }
+
+            function handleData(json_data) {
+                if (json_data.code !== 200) {
+                    layer.msg(json_data.msg);
+                }
+                showLogDom.append(json_data.msg + (json_data.data || "") + '<br/>');
+                var op = json_data.op;
+                switch (op) {
+                    case 'status':
+                    case 'start':
+                    case 'restart':
+                        if (200 === json_data.code) {
+                            $('.status .status-div').removeClass('status-stop').addClass('status-run');
+                            $('.status span').text('运行中');
+                            setOpBtn(false);
+                            // 运行后需要实时加载日志
+                            setMsg("showlog");
+                        } else {
+                            $('.status .status-div').removeClass('status-run').addClass('status-stop');
+                            $('.status span').text(json_data.msg);
+                            setOpBtn(true);
+                            if (op == 'status') {
+                                setMsg("showlog");
+                            }
+                        }
+                        refreshProjectData();
+                        break;
+                    case 'stop':
+                        if (200 === json_data.code) {
+                            $('.status .status-div').removeClass('status-run').addClass('status-stop');
+                            $('.status span').text('未运行');
+                            setOpBtn(true);
+                        } else {
+                            $('.status span').text(json_data.msg);
+                        }
+                        refreshProjectData();
+                        break;
+                    case  'showlog':
+                        break;
+                    default:
+                        break;
+                }
+            }
 
             function setMsg(opt) {
                 const data = {
@@ -333,7 +334,7 @@
                     },
                     success: function (data) {
                         layer.msg(data.msg);
-                        if (200 == data.code) {
+                        if (200 === data.code) {
                             // reqLogSize();
                             $("#logSize").hide();
                         }
