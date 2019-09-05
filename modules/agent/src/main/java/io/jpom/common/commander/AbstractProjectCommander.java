@@ -218,7 +218,7 @@ public abstract class AbstractProjectCommander {
         try (JarFile jarFile1 = new JarFile(jarFile)) {
             Manifest manifest = jarFile1.getManifest();
             Attributes attributes = manifest.getMainAttributes();
-            String mainClass = attributes.getValue("Main-Class");
+            String mainClass = attributes.getValue(Attributes.Name.MAIN_CLASS);
             if (mainClass == null) {
                 return jarFile.getAbsolutePath() + "中没有找到对应的MainClass属性";
             }

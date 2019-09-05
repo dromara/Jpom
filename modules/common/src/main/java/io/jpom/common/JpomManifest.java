@@ -226,7 +226,7 @@ public class JpomManifest {
         try (JarFile jarFile1 = new JarFile(jarFile)) {
             Manifest manifest = jarFile1.getManifest();
             Attributes attributes = manifest.getMainAttributes();
-            String mainClass = attributes.getValue("Main-Class");
+            String mainClass = attributes.getValue(Attributes.Name.MAIN_CLASS);
             if (mainClass == null) {
                 return new JsonMessage(405, "清单文件中没有找到对应的MainClass属性");
             }

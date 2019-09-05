@@ -17,20 +17,20 @@ public class ContiPerTest {
     @Rule
     public ContiPerfRule i = new ContiPerfRule();
 
-    @Test
+//    @Test
     @PerfTest(invocations = 200000000, threads = 16)
     public void test1() throws Exception {
         IdUtil.fastSimpleUUID();
     }
 
 
-    @Test
+//    @Test
     @PerfTest(invocations = 200000000, threads = 16)
     public void test2() throws Exception {
         UUID.randomUUID().toString();
     }
 
-    @Test
+//    @Test
     @PerfTest(invocations = 20000, threads = 16)
     public void testHttp() {
         HttpUtil.createGet("https://baidu.com")

@@ -25,6 +25,9 @@ import java.lang.reflect.Method;
 import java.net.URISyntaxException;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.jar.Attributes;
+import java.util.jar.JarFile;
+import java.util.jar.Manifest;
 
 /**
  * jvm jmx 工具
@@ -286,16 +289,6 @@ public class JvmUtil {
     }
 
     /**
-     * 获取jdk 中的tools jar文件路径
-     *
-     * @return file
-     */
-    public static File getToolsJar() {
-        File file = new File(SystemUtil.getJavaRuntimeInfo().getHomeDir());
-        return new File(file.getParentFile(), "lib/tools.jar");
-    }
-
-    /**
      * 工具指定的 mainClass 获取对应所有的的  MonitoredVm对象
      *
      * @param mainClass 程序运行主类
@@ -313,11 +306,28 @@ public class JvmUtil {
             MonitoredVm vm = local.getMonitoredVm(new VmIdentifier("//" + process));
             // 获取类名
             String processName = MonitoredVmUtil.mainClass(vm, true);
-            if (!mainClass.equals(processName)) {
-                continue;
+            if (mainClass.equals(processName) || checkFile(processName, mainClass)) {
+                monitoredVms.add(vm);
             }
-            monitoredVms.add(vm);
         }
         return monitoredVms;
+    }
+
+    private static boolean checkFile(String fileName, String mainClass) {
+        try {
+            File file = FileUtil.file(fileName);
+            if (!file.exists() || file.isDirectory()) {
+                return false;
+            }
+            try (JarFile jarFile1 = new JarFile(file)) {
+                Manifest manifest = jarFile1.getManifest();
+                Attributes attributes = manifest.getMainAttributes();
+                String jarMainClass = attributes.getValue(Attributes.Name.MAIN_CLASS);
+                String jarStartClass = attributes.getValue("Start-Class");
+                return StrUtil.equals(mainClass, jarMainClass) || StrUtil.equals(mainClass, jarStartClass);
+            }
+        } catch (Exception e) {
+            return false;
+        }
     }
 }

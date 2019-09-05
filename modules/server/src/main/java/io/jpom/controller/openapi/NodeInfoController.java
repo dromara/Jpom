@@ -29,10 +29,9 @@ public class NodeInfoController extends AbstractController {
      * @param model 节点对象
      * @param type  操作类型
      * @return json
-     * @throws Exception 异常
      */
     @RequestMapping(value = ServerOpenApi.UPDATE_NODE_INFO, method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public String update(NodeModel model, String type) throws Exception {
+    public String update(NodeModel model, String type) {
         if ("add".equalsIgnoreCase(type)) {
             return nodeService.addNode(model, getRequest());
         } else {

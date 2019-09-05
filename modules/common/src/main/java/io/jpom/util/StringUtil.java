@@ -3,6 +3,7 @@ package io.jpom.util;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.lang.Validator;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.system.SystemUtil;
 
 import java.io.File;
 
@@ -76,5 +77,15 @@ public class StringUtil {
             path = path.substring(1);
         }
         return path;
+    }
+
+    /**
+     * 获取jdk 中的tools jar文件路径
+     *
+     * @return file
+     */
+    public static File getToolsJar() {
+        File file = new File(SystemUtil.getJavaRuntimeInfo().getHomeDir());
+        return new File(file.getParentFile(), "lib/tools.jar");
     }
 }

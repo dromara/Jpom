@@ -5,19 +5,12 @@ import cn.hutool.core.util.ClassUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.PreLoadClass;
 import cn.jiangzeyin.common.PreLoadMethod;
-import io.jpom.JpomApplication;
-import io.jpom.common.JpomManifest;
 import io.jpom.system.ConfigBean;
 import io.jpom.system.ExtConfigBean;
-import io.jpom.util.JvmUtil;
-import sun.jvmstat.monitor.MonitorException;
-import sun.jvmstat.monitor.MonitoredVm;
-import sun.jvmstat.monitor.VmIdentifier;
+import io.jpom.util.StringUtil;
 
 import java.io.File;
-import java.net.URISyntaxException;
 import java.util.Arrays;
-import java.util.List;
 
 /**
  * 数据目录权限检查
@@ -33,14 +26,14 @@ public class CheckPath {
     private static final String[] CLASS_NAME = new String[]{"sun.jvmstat.monitor.MonitorException", "com.sun.tools.attach.VirtualMachine"};
 
 
-    @PreLoadMethod(2)
+    @PreLoadMethod(1)
     private static void checkToolsJar() {
         try {
             for (String item : CLASS_NAME) {
                 ClassUtil.loadClass(item, false);
             }
         } catch (Exception e) {
-            File file = JvmUtil.getToolsJar();
+            File file = StringUtil.getToolsJar();
             if (file.exists() && file.isFile()) {
                 DefaultSystemLog.ERROR().error("Jpom未能正常加载tools.jar,请检查当前系统环境变量是否配置：JAVA_HOME，或者检查Jpom管理命令是否正确", e);
             } else {
@@ -55,21 +48,7 @@ public class CheckPath {
      */
     @PreLoadMethod(2)
     private static void checkDuplicateRun() {
-        Class appClass = JpomApplication.getAppClass();
-        List<MonitoredVm> monitoredVms;
-        try {
-            String pid = String.valueOf(JpomManifest.getInstance().getPid());
-            monitoredVms = JvmUtil.listMainClass(appClass.getName());
-            monitoredVms.forEach(monitoredVm -> {
-                VmIdentifier vmIdentifier = monitoredVm.getVmIdentifier();
-                if (pid.equals(vmIdentifier.getUserInfo())) {
-                    return;
-                }
-                DefaultSystemLog.LOG().info("Jpom 程序建议一个机器上只运行一个对应的程序：" + JpomApplication.getAppType());
-
-            });
-        } catch (MonitorException | URISyntaxException ignored) {
-        }
+        CheckDuplicateRun.check();
     }
 
     @PreLoadMethod(3)

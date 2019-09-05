@@ -101,7 +101,7 @@ public class NodeService extends BaseOperService<NodeModel> implements BaseDynam
         return JsonMessage.getString(200, "操作成功");
     }
 
-    public String updateNode(NodeModel nodeModel) throws Exception {
+    public String updateNode(NodeModel nodeModel) {
         NodeModel exit = getItem(nodeModel.getId());
         if (exit == null) {
             return JsonMessage.getString(405, "节点不存在");

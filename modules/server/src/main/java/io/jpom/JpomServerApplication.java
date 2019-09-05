@@ -16,7 +16,7 @@ import org.springframework.boot.web.servlet.ServletComponentScan;
  * @author jiangzeyin
  * @date 2017/9/14
  */
-@SpringBootApplication(scanBasePackages = {"io.jpom"})
+@SpringBootApplication
 @ServletComponentScan
 @EnableCommonBoot
 public class JpomServerApplication implements ApplicationEventLoad {
