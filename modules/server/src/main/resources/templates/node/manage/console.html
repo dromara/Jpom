@@ -5,11 +5,10 @@
     <style>
         body {
             position: absolute;
-            top: 0px;
-            right: 0px;
-            bottom: 0px;
-            left: 0px;
-            padding: 10px;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
         }
 
         .console {
@@ -20,9 +19,9 @@
         .console .terminal {
             position: absolute;
             top: 40px;
-            right: 0px;
-            bottom: 0px;
-            left: 0px;
+            right: 0;
+            bottom: 0;
+            left: 0;
             border: 1px solid #c1c1c1;
             border-radius: 5px;
             font-family: Consolas;
@@ -35,11 +34,17 @@
         .right {
             display: inline-block;
             float: right;
-            margin-right: 20px;
+            margin-right: 10px;
         }
 
 
-        .console .status .status-div {
+        .logSize, .status {
+            line-height: 20px;
+            padding: 9px 0;
+            display: inline-block;
+        }
+
+        .status .status-div {
             display: inline-block;
             width: 10px;
             height: 10px;
@@ -47,42 +52,60 @@
             border: 1px solid #c1c1c1;
         }
 
-        .console .status .status-run {
+        .status .status-run {
             background-color: #05ff2d;
         }
 
-        .console .status .status-stop {
+        .status .status-stop {
             background-color: #ff0000;
         }
+
+        .logDiv {
+            width: 230px;
+        }
+
+        .layui-form-switch {
+            margin-top: 0 !important;
+        }
+
+
     </style>
 </head>
 
 <body>
 <div class="console">
+    <form class="layui-form" action="">
+        <div class="layui-row" id="optDiv" th:if="${manager}">
+            <!-- layui-elem-quote -->
+            <a href="javascript:;" class="btn-op layui-btn  layui-btn-sm" op="start">启动</a>
+            <a href="javascript:;" class="btn-op layui-btn  layui-btn-sm layui-btn-warm" op="restart">重启</a>
+            <a href="javascript:;" class="btn-op layui-btn  layui-btn-sm layui-btn-danger" op="stop">停止</a>
 
-    <div class="layui-row" id="optDiv" th:if="${manager}">
-        <!-- layui-elem-quote -->
-        <a href="javascript:;" class="btn-op layui-btn  layui-btn-sm" op="start">启动</a>
-        <a href="javascript:;" class="btn-op layui-btn  layui-btn-sm layui-btn-warm" op="restart">重启</a>
-        <a href="javascript:;" class="btn-op layui-btn  layui-btn-sm layui-btn-danger" op="stop">停止</a>
+            <div th:if="${logSize}" class="layui-btn-group">
 
-        <div th:if="${logSize}" class="layui-btn-group">
+                <th:block th:if="${logSize?.get('logSize')}">
+                    <button id="export" class="layui-btn layui-btn-sm">导出日志</button>
+                    </button>
+                </th:block>
+                <button th:if="${logSize?.logBack}" id="logBack" class="layui-btn layui-btn-sm">备份列表</button>
+            </div>
 
-            <th:block th:if="${logSize?.get('logSize')}">
-                <button id="export" class="layui-btn layui-btn-sm">导出日志</button>
-                </button>
-            </th:block>
-            <button th:if="${logSize?.logBack}" id="logBack" class="layui-btn layui-btn-sm">备份列表</button>
+            <div class="status right">
+                <div class="status-div"></div>
+                <span></span>
+            </div>
+
+
+            <div class="right logDiv">
+                <label class="layui-form-label">自动清屏</label>
+                <input type="checkbox" checked name="autoClear" lay-skin="switch" lay-filter="autoClear"
+                       lay-text="ON|OFF">
+                <span class="logSize" id="logSize" th:if="${logSize?.get('logSize')}"
+                      th:text="${logSize?.get('logSize')}">
+                </span>
+            </div>
         </div>
-
-        <div class="status right">
-            <div class="status-div"></div>
-            <span></span>
-        </div>
-        <div class="logSize right" id="logSize" style="padding:2px;" th:if="${logSize?.get('logSize')}"
-             th:text="${logSize?.get('logSize')}">
-        </div>
-    </div>
+    </form>
     <div class="terminal"></div>
 </div>
 </body>
@@ -92,7 +115,21 @@
     var heart;
     var nowStatus = false;
 
+    var autoClearDom;
+
     function loadSuccess() {
+        // 处理按钮
+        form.on('switch(autoClear)', function (data) {
+            layui.data('cache', {
+                key: "consoleAutoClear",
+                value: this.checked
+            });
+        });
+        const cache = layui.data('cache');
+        autoClearDom = $("input[name='autoClear']");
+        autoClearDom.attr('checked', cache.consoleAutoClear);
+        form.render('checkbox');
+        //
         const showLogDom = $('.console .terminal');
         if ('WebSocket' in window) {
             var url = getSocketHost() + "/console?userId=[[${session.user.getUserMd5Key()}]]&projectId=[[${projectInfo?.id}]]&nodeId=[[${node?.id}]]&type=console";
@@ -233,9 +270,12 @@
         function scrollToBotomm() {
             var h = showLogDom[0].scrollHeight;
             if (window.screen.height * 2 < h) {
-                showLogDom.html("已清空屏幕缓存" + '<br/>');
-                showLogDom.scrollTop(0);
-                return;
+                var attr = autoClearDom.attr('checked');
+                if (attr) {
+                    showLogDom.html("已清空屏幕缓存" + '<br/>');
+                    showLogDom.scrollTop(0);
+                    return;
+                }
             }
             showLogDom.scrollTop(h);
         }

@@ -4,3 +4,7 @@ spring:
     cache: false
 netty:
   port: 8888
+server:
+  servlet:
+    session:
+      persistent: true
