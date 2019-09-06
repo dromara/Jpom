@@ -74,7 +74,7 @@
             }
         },
         {
-            field: 'status', title: "当前状态", templet: function (d) {
+            field: 'status', title: "当前状态", width: '10%', templet: function (d) {
                 for (var i = 0; i < statusArray.length; i++) {
                     if (statusArray[i].code === d.status) {
                         return statusArray[i].desc;
@@ -84,7 +84,7 @@
             }
         },
         {
-            field: 'buildIdStr', title: '当前构建ID', templet: function (d) {
+            field: 'buildIdStr', title: '当前构建ID', width: '10%', templet: function (d) {
                 if (d.buildId <= 0) {
                     return "";
                 }

@@ -47,6 +47,12 @@ public class ServerExtConfigBean {
     @Value("${jpom.authorize.token:}")
     private String authorizeToken;
 
+    /**
+     * 构建最多报错多少份历史记录
+     */
+    @Value("${build.maxHistoryCount:50}")
+    private int buildMaxHistoryCount;
+
 
     public String getAuthorizeToken() {
         return authorizeToken;
@@ -62,6 +68,10 @@ public class ServerExtConfigBean {
 
     public int getH2DbLogStorageCount() {
         return h2DbLogStorageCount;
+    }
+
+    public static int getBuildMaxHistoryCount() {
+        return getInstance().buildMaxHistoryCount;
     }
 
     /**

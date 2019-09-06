@@ -2,7 +2,6 @@ package io.jpom.controller.build;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.convert.Convert;
-import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.db.Entity;
 import cn.hutool.db.Page;
@@ -176,30 +175,13 @@ public class BuildHistoryController extends BaseServerController {
      *
      * @param logId id
      * @return json
-     * @throws IOException e
      */
     @RequestMapping(value = "delete_log.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @OptLog(UserOperateLogV1.OptType.DelBuildLog)
     @ResponseBody
     @Feature(method = MethodFeature.DEL_LOG)
-    public String delete(@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据")) String logId) throws IOException, SQLException {
-        BuildHistoryLog buildHistoryLog = dbBuildHistoryLogService.getByKey(logId);
-        if (buildHistoryLog == null) {
-            return JsonMessage.getString(405, "没有对应构建记录");
-        }
-        BuildModel item = buildService.getItem(buildHistoryLog.getBuildDataId());
-        if (item == null) {
-            return JsonMessage.getString(404, "没有对应数据");
-        }
-        File logFile = BuildUtil.getLogFile(item.getId(), buildHistoryLog.getBuildNumberId());
-        File dataFile = logFile.getParentFile();
-        if (dataFile.exists()) {
-            boolean s = FileUtil.del(dataFile);
-            if (!s) {
-                return JsonMessage.getString(500, "清理文件失败");
-            }
-        }
-        int count = dbBuildHistoryLogService.delByKey(logId);
-        return JsonMessage.getString(200, "删除成功", count);
+    public String delete(@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据")) String logId) {
+        JsonMessage jsonMessage = dbBuildHistoryLogService.deleteLogAndFile(logId);
+        return jsonMessage.toString();
     }
 }
