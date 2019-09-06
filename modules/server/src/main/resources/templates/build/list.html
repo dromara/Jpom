@@ -16,7 +16,7 @@
     <a href="javascript:;" class="layui-btn  layui-btn-sm layui-btn-normal" lay-event="update">编辑</a>
     <a href="javascript:;" class="layui-btn  layui-btn-sm layui-btn-normal" lay-event="trigger">触发器</a>
 
-    {{# if(d.status==1) { }}
+    {{# if(d.status==1 || d.status== 4) { }}
     <a href="javascript:;" class="layui-btn layui-btn-sm layui-btn-danger" lay-event="stop">停止</a>
     {{# }else if(d.status== 4){ }}
 

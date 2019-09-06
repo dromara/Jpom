@@ -52,13 +52,13 @@
                     line: line
                 },
                 success: function (data) {
-                    if (201 == data.code) {
+                    if (201 === data.code) {
                         setTimeout(function () {
                             getLog();
                         }, 1000);
                         return;
                     }
-                    if (200 == data.code) {
+                    if (200 === data.code) {
                         //
                         var dataLines = data.data.dataLines;
                         for (var i = 0; i < dataLines.length; i++) {
@@ -111,7 +111,7 @@
                 },
                 success: function (data) {
                     layer.msg(data.msg);
-                    if (200 == data.code) {
+                    if (200 === data.code) {
                         $("#cancel").hide();
                         parent.reload && parent.reload();
                     }
