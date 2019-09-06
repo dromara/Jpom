@@ -1,5 +1,6 @@
 package io.jpom.build;
 
+import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.http.HttpStatus;
 import cn.jiangzeyin.common.JsonMessage;
@@ -74,7 +75,7 @@ public class ReleaseManage extends BaseBuild {
      * 不修改为发布中状态
      */
     public void start2() {
-        this.log("start release");
+        this.log("start release：" + FileUtil.readableFileSize(FileUtil.size(this.resultFile)));
         if (!this.resultFile.exists()) {
             this.log("不存在构建产物");
             updateStatus(BuildModel.Status.PubError);
