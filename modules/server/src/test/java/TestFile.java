@@ -1,4 +1,5 @@
 import cn.hutool.core.io.FileUtil;
+import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
@@ -19,5 +20,11 @@ public class TestFile {
         System.out.println(FileUtil.mainName(file));
     }
 
+
+    @Test
+    public void testFile() {
+        File file = FileUtil.file("D:\\Idea\\hutool\\.git");
+        System.out.println(file.isHidden());
+    }
 
 }

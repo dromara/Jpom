@@ -3,6 +3,7 @@ package io.jpom.build;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.io.LineHandler;
+import cn.hutool.core.io.file.FileCopier;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
@@ -141,7 +142,12 @@ public class BuildManage extends BaseBuild implements Runnable {
             return false;
         }
         File toFile = BuildUtil.getHistoryPackageFile(buildModel.getId(), buildModel.getBuildId(), buildModel.getResultDirFile());
-        FileUtil.copyContent(file, toFile, true);
+        FileCopier.create(file, toFile)
+                .setCopyContentIfDir(true)
+                .setOverride(true)
+                .setCopyAttributes(true)
+                .setCopyFilter(file1 -> !file1.isHidden())
+                .copy();
         this.log(StrUtil.format("mv {} {}", buildModel.getResultDirFile(), buildModel.getBuildIdStr()));
         return true;
     }
