@@ -18,6 +18,10 @@ spring:
     servlet:
       content-type: text/html
     prefix: classpath:/templates/
+  servlet:
+    multipart:
+      max-request-size: 2GB
+      max-file-size: 1GB
 #thymeleaf end
 banner:
   msg: Jpom-Server 管理系统启动中

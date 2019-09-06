@@ -11,6 +11,10 @@ spring:
     name: jpomAgent
   profiles:
     active: dev
+  servlet:
+    multipart:
+      max-request-size: 2GB
+      max-file-size: 1GB
 banner:
   msg: Jpom-Agent管理系统启动中
 # 启动完成自动初始化指定包
