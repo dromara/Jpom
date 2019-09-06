@@ -33,8 +33,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
 import java.io.File;
-import java.io.IOException;
-import java.sql.SQLException;
 import java.util.Objects;
 
 /**
@@ -56,12 +54,11 @@ public class BuildManageController extends BaseServerController {
      *
      * @param id id
      * @return json
-     * @throws IOException e
      */
     @RequestMapping(value = "start.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @OptLog(UserOperateLogV1.OptType.StartBuild)
     @Feature(method = MethodFeature.EXECUTE)
-    public String start(@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据")) String id) throws IOException {
+    public String start(@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据")) String id) {
         return buildService.start(getUser(), id);
     }
 
@@ -70,18 +67,17 @@ public class BuildManageController extends BaseServerController {
      *
      * @param id id
      * @return json
-     * @throws IOException e
      */
     @RequestMapping(value = "cancel.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @OptLog(UserOperateLogV1.OptType.CancelBuild)
     @Feature(method = MethodFeature.EXECUTE)
-    public String cancel(@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据")) String id) throws IOException {
+    public String cancel(@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据")) String id) {
         BuildModel item = buildService.getItem(id);
         Objects.requireNonNull(item, "没有对应数据");
         BuildModel.Status nowStatus = BaseEnum.getEnum(BuildModel.Status.class, item.getStatus());
         Objects.requireNonNull(nowStatus);
-        if (BuildModel.Status.Ing != nowStatus) {
-            return JsonMessage.getString(501, "当前不在进行中");
+        if (BuildModel.Status.Ing != nowStatus && BuildModel.Status.PubIng != nowStatus) {
+            return JsonMessage.getString(501, "当前状态不在进行中");
         }
         boolean status = BuildManage.cancel(item.getId());
         if (!status) {
@@ -96,13 +92,11 @@ public class BuildManageController extends BaseServerController {
      *
      * @param logId logId
      * @return json
-     * @throws IOException  io
-     * @throws SQLException s
      */
     @RequestMapping(value = "reRelease.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @OptLog(UserOperateLogV1.OptType.ReReleaseBuild)
     @Feature(method = MethodFeature.EXECUTE)
-    public String reRelease(@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据")) String logId) throws IOException, SQLException {
+    public String reRelease(@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据")) String logId) {
         BuildHistoryLog buildHistoryLog = dbBuildHistoryLogService.getByKey(logId);
         Objects.requireNonNull(buildHistoryLog, "没有对应构建记录.");
         BuildModel item = buildService.getItem(buildHistoryLog.getBuildDataId());
@@ -126,13 +120,12 @@ public class BuildManageController extends BaseServerController {
      * @param buildId 构建编号
      * @param line    需要获取的行号
      * @return json
-     * @throws IOException e
      */
     @RequestMapping(value = "getNowLog.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @Feature(method = MethodFeature.EXECUTE)
     public String getNowLog(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据") String id,
                             @ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "没有buildId") int buildId,
-                            @ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "line") int line) throws IOException {
+                            @ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "line") int line) {
         BuildModel item = buildService.getItem(id);
         if (item == null) {
             return JsonMessage.getString(404, "没有对应数据");
