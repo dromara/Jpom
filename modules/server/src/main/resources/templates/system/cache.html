@@ -3,16 +3,13 @@
 <head>
     <th:block th:include="common/head::head"></th:block>
     <style>
-
         .clear {
             margin-left: 20px;
-            display: none;
         }
     </style>
 </head>
 
 <body>
-
 
 <th:block th:unless="${node}">
     <blockquote class="layui-elem-quote">服务端文件缓存：[[${cacheFileSize}]]
@@ -60,8 +57,6 @@
 </body>
 <script>
     function loadSuccess() {
-
-        $(".clear").show();
         if ([[${node!=null?true:false}]]) {
             getCache("[[${node?.id}]]");
         }
@@ -81,7 +76,7 @@
                     },
                     success: function (data) {
                         layer.msg(data.msg);
-                        if (200 == data.code) {
+                        if (200 === data.code) {
                             setTimeout(function () {
                                 location.reload();
                             }, 2000)
@@ -99,7 +94,7 @@
                 nodeId: nodeId
             },
             success: function (data) {
-                if (200 != data.code) {
+                if (200 !== data.code) {
                     layer.msg(data.msg);
                     return;
                 }
