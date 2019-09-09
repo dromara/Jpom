@@ -164,6 +164,21 @@ public class ReleaseManage extends BaseBuild {
         } catch (IOException e) {
             this.pubLog("执行ssh发布异常", e);
         }
+        // 执行命令
+        String[] commands = StrUtil.split(this.baseBuildModule.getReleaseCommand(), StrUtil.LF);
+        if (commands == null || commands.length <= 0) {
+            this.log("没有需要s执行的ssh命令");
+            return;
+        }
+        for (String commandItem : commands) {
+            try {
+                String s = sshService.exec(item, commandItem);
+                this.log(s);
+            } catch (Exception e) {
+                this.pubLog(item + " 执行异常", e);
+                return;
+            }
+        }
     }
 
     /**
