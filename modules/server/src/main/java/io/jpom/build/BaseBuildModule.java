@@ -39,6 +39,30 @@ public class BaseBuildModule extends BaseModel {
      * 构建产物目录
      */
     private String resultDirFile;
+    /**
+     * 发布命令  ssh 才能用上
+     */
+    private String releaseCommand;
+    /**
+     * 发布到ssh中的目录
+     */
+    private String releasePath;
+
+    public String getReleasePath() {
+        return releasePath;
+    }
+
+    public void setReleasePath(String releasePath) {
+        this.releasePath = releasePath;
+    }
+
+    public String getReleaseCommand() {
+        return releaseCommand;
+    }
+
+    public void setReleaseCommand(String releaseCommand) {
+        this.releaseCommand = releaseCommand;
+    }
 
     public boolean isClearOld() {
         return clearOld;

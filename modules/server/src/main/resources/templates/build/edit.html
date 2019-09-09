@@ -108,7 +108,7 @@
             </div>
             <div class="layui-form-item" id="releaseMethodDataId_1_after">
                 <label class="layui-form-label">分发后</label>
-                <div class="layui-input-block">
+                <div class="layui-input-block" title="此处不能修改此属性，需要到分发编辑中去修改">
                     <input name="releaseMethodDataId_1_after_input" type="text" disabled readonly
                            placeholder="请选择分发项目"
                            value=""
@@ -133,18 +133,6 @@
                 </div>
             </div>
             <div class="layui-form-item">
-                <div class="layui-inline">
-                    <label class="layui-form-label">清空发布</label>
-                    <div class="layui-input-block">
-                        <input type="checkbox" value="true"
-                               th:checked="${model?.clearOld}"
-                               name="clearOld"
-                               lay-skin="switch"
-                               lay-text="是|否">
-                    </div>
-                </div>
-            </div>
-            <div class="layui-form-item">
                 <label class="layui-form-label">发布后</label>
                 <div class="layui-input-block">
                     <select name="afterOpt" id="afterOpt">
@@ -154,6 +142,16 @@
                                 th:selected="${item.code==model?.afterOpt}" th:text="${item.desc}">
                         </option>
                     </select>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">清空发布</label>
+                <div class="layui-input-block">
+                    <input type="checkbox" value="true"
+                           th:checked="${model?.clearOld}"
+                           name="clearOld"
+                           lay-skin="switch"
+                           lay-text="是|否">
                 </div>
             </div>
         </div>
@@ -173,15 +171,30 @@
                 </div>
             </div>
             <div class="layui-form-item">
-                <div class="layui-inline">
-                    <label class="layui-form-label">清空发布</label>
-                    <div class="layui-input-block">
-                        <input type="checkbox" value="true"
-                               th:checked="${model?.clearOld}"
-                               name="clearOld"
-                               lay-skin="switch"
-                               lay-text="是|否">
-                    </div>
+                <label class="layui-form-label">发布目录</label>
+                <div class="layui-input-block">
+                    <input type="text" name="releasePath"
+                           th:value="${model?.releasePath}"
+                           placeholder="发布到ssh中的目录"
+                           class="layui-input">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">发布命令</label>
+                <div class="layui-input-block">
+                    <textarea name="releaseCommand"
+                              placeholder="执行发布的命令，注意不能执行带交互的命令"
+                              class="layui-textarea" th:text="${model?.releaseCommand}"></textarea>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">清空发布</label>
+                <div class="layui-input-block">
+                    <input type="checkbox" value="true"
+                           th:checked="${model?.clearOld}"
+                           name="clearOld"
+                           lay-skin="switch"
+                           lay-text="是|否">
                 </div>
             </div>
         </div>
@@ -294,10 +307,6 @@
         // 提交信息
         form.on('submit(submitBuild)', function (data) {
             var sendData = data.field;
-            // if (!sendData.branchName) {
-            //     layer.msg("请选择分支");
-            //     return false;
-            // }
             loadingAjax({
                 url: data.form.action,
                 data: sendData,

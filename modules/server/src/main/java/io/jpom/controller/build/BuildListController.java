@@ -4,7 +4,6 @@ import cn.hutool.core.convert.Convert;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
-import cn.hutool.system.SystemUtil;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.validator.ValidatorConfig;
 import cn.jiangzeyin.common.validator.ValidatorItem;
@@ -25,6 +24,7 @@ import io.jpom.service.build.BuildService;
 import io.jpom.service.dblog.DbBuildHistoryLogService;
 import io.jpom.service.node.OutGivingServer;
 import io.jpom.service.node.ssh.SshService;
+import io.jpom.util.CommandUtil;
 import io.jpom.util.GitUtil;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.springframework.http.MediaType;
@@ -91,7 +91,6 @@ public class BuildListController extends BaseServerController {
                                 @ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "构建产物目录不能为空")) String resultDirFile,
                                 @ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "构建命令不能为空")) String script,
                                 @ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "发布方法不正确") int releaseMethod,
-                                String afterOpt, String clearOld,
                                 String branchName,
                                 int repoType) throws Exception {
         BaseEnum anEnum = BaseEnum.getEnum(BuildModel.RepoType.class, repoType);
@@ -99,20 +98,17 @@ public class BuildListController extends BaseServerController {
             return JsonMessage.getString(405, "仓库类型选择错误");
         }
         if (BuildModel.RepoType.Git.getCode() == repoType) {
+            if (StrUtil.isEmpty(branchName)) {
+                return JsonMessage.getString(405, "请选择分支");
+            }
             List<String> list = GitUtil.getBranchList(gitUrl, userName, password);
             if (!list.contains(branchName)) {
                 return JsonMessage.getString(405, "没有找到对应分支：" + branchName);
             }
         }
         // 判断删除
-        if (SystemUtil.getOsInfo().isWindows()) {
-            if (StrUtil.containsAnyIgnoreCase(script, "rd ", "del ")) {
-                return JsonMessage.getString(405, "不能包含删除命令");
-            }
-        } else {
-            if (StrUtil.containsIgnoreCase(script, "rm ")) {
-                return JsonMessage.getString(405, "不能包含删除命令");
-            }
+        if (CommandUtil.checkContainsDel(script)) {
+            return JsonMessage.getString(405, "不能包含删除命令");
         }
         BuildModel buildModel = buildService.getItem(id);
         if (buildModel == null) {
@@ -145,27 +141,15 @@ public class BuildListController extends BaseServerController {
             }
             buildModel.setReleaseMethodDataId(releaseMethodDataId);
         } else if (releaseMethod1 == BuildModel.ReleaseMethod.Project) {
-            String releaseMethodDataId2Node = getParameter("releaseMethodDataId_2_node");
-            String releaseMethodDataId2Project = getParameter("releaseMethodDataId_2_project");
-            if (StrUtil.isEmpty(releaseMethodDataId2Node) || StrUtil.isEmpty(releaseMethodDataId2Project)) {
-                return JsonMessage.getString(405, "请选择节点和项目");
+            String formatProject = formatProject(buildModel);
+            if (formatProject != null) {
+                return formatProject;
             }
-            buildModel.setReleaseMethodDataId(String.format("%s:%s", releaseMethodDataId2Node, releaseMethodDataId2Project));
-            //
-            BuildModel.AfterOpt afterOpt1 = BaseEnum.getEnum(BuildModel.AfterOpt.class, Convert.toInt(afterOpt, 0));
-            if (afterOpt1 == null) {
-                return JsonMessage.getString(400, "请选择打包后的操作");
-            }
-            buildModel.setAfterOpt(afterOpt1.getCode());
-            buildModel.setClearOld(Convert.toBool(clearOld, false));
         } else if (releaseMethod1 == BuildModel.ReleaseMethod.Ssh) {
-            //
-            String releaseMethodDataId = getParameter("releaseMethodDataId_3");
-            if (StrUtil.isEmpty(releaseMethodDataId)) {
-                return JsonMessage.getString(405, "请选择分发SSH项");
+            String formatSsh = formatSsh(buildModel);
+            if (formatSsh != null) {
+                return formatSsh;
             }
-            buildModel.setReleaseMethodDataId(releaseMethodDataId);
-            buildModel.setClearOld(Convert.toBool(clearOld, false));
         } else {
             buildModel.setReleaseMethodDataId(null);
         }
@@ -175,6 +159,70 @@ public class BuildListController extends BaseServerController {
         }
         buildService.updateItem(buildModel);
         return JsonMessage.getString(200, "修改成功");
+    }
+
+    private String formatSsh(BuildModel buildModel) {
+        //
+        String releaseMethodDataId = getParameter("releaseMethodDataId_3");
+        if (StrUtil.isEmpty(releaseMethodDataId)) {
+            return JsonMessage.getString(405, "请选择分发SSH项");
+        }
+        String releasePath = getParameter("releasePath");
+        if (StrUtil.isEmpty(releasePath)) {
+            return JsonMessage.getString(405, "请输入发布到ssh中的目录");
+        }
+        releasePath = FileUtil.normalize(releasePath);
+        if (releasePath.startsWith(StrUtil.SLASH)) {
+            // 以根路径开始
+            SshModel sshServiceItem = sshService.getItem(releaseMethodDataId);
+            if (sshServiceItem == null) {
+                return JsonMessage.getString(405, "没有对应的ssh项");
+            }
+            List<String> fileDirs = sshServiceItem.getFileDirs();
+            if (fileDirs == null || fileDirs.isEmpty()) {
+                return JsonMessage.getString(405, "此ssh未授权操作此目录");
+            }
+            boolean find = false;
+            for (String fileDir : fileDirs) {
+                if (FileUtil.isSub(new File(fileDir), new File(releasePath))) {
+                    find = true;
+                }
+            }
+            if (!find) {
+                return JsonMessage.getString(405, "此ssh未授权操作此目录");
+            }
+        }
+        //
+        String releaseCommand = getParameter("releaseCommand");
+        if (StrUtil.isEmpty(releaseCommand)) {
+            return JsonMessage.getString(405, "请输入发布命令");
+        }
+
+        buildModel.setReleasePath(releasePath);
+        buildModel.setReleaseCommand(releaseCommand);
+        buildModel.setReleaseMethodDataId(releaseMethodDataId);
+        String clearOld = getParameter("clearOld");
+        buildModel.setClearOld(Convert.toBool(clearOld, false));
+        return null;
+    }
+
+    private String formatProject(BuildModel buildModel) {
+        String releaseMethodDataId2Node = getParameter("releaseMethodDataId_2_node");
+        String releaseMethodDataId2Project = getParameter("releaseMethodDataId_2_project");
+        if (StrUtil.isEmpty(releaseMethodDataId2Node) || StrUtil.isEmpty(releaseMethodDataId2Project)) {
+            return JsonMessage.getString(405, "请选择节点和项目");
+        }
+        buildModel.setReleaseMethodDataId(String.format("%s:%s", releaseMethodDataId2Node, releaseMethodDataId2Project));
+        //
+        String afterOpt = getParameter("afterOpt");
+        BuildModel.AfterOpt afterOpt1 = BaseEnum.getEnum(BuildModel.AfterOpt.class, Convert.toInt(afterOpt, 0));
+        if (afterOpt1 == null) {
+            return JsonMessage.getString(400, "请选择打包后的操作");
+        }
+        String clearOld = getParameter("clearOld");
+        buildModel.setAfterOpt(afterOpt1.getCode());
+        buildModel.setClearOld(Convert.toBool(clearOld, false));
+        return null;
     }
 
     @RequestMapping(value = "edit.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)

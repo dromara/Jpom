@@ -126,4 +126,19 @@ public class CommandUtil {
         pb.redirectInput(ProcessBuilder.Redirect.INHERIT);
         pb.start();
     }
+
+    /**
+     * 判断是否包含删除命令
+     *
+     * @param script 命令行
+     * @return true 包含
+     */
+    public static boolean checkContainsDel(String script) {
+        // 判断删除
+        if (SystemUtil.getOsInfo().isWindows()) {
+            return StrUtil.containsAnyIgnoreCase(script, "rd ", "del ");
+        } else {
+            return StrUtil.containsIgnoreCase(script, "rm ");
+        }
+    }
 }
