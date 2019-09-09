@@ -177,7 +177,7 @@ public class InternalController extends BaseAgentController {
             if (pid <= 0) {
                 return JsonMessage.getString(400, "未运行");
             }
-            String command = String.format("jstack %s >> %s ", pid, fileName);
+            String command = String.format("jstack -F %s >> %s ", pid, fileName);
             CommandUtil.execSystemCommand(command);
             downLoad(getResponse(), fileName);
         } catch (Exception e) {
