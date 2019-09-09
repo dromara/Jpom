@@ -278,13 +278,31 @@ public abstract class AbstractProjectCommander {
     public String status(String tag) throws Exception {
         VirtualMachine virtualMachine = JvmUtil.getVirtualMachine(tag);
         if (virtualMachine == null) {
-            return AbstractProjectCommander.STOP_TAG;
+            return getJpsStatus(tag);
         }
         try {
             return StrUtil.format("{}:{}", AbstractProjectCommander.RUNNING_TAG, virtualMachine.id());
         } finally {
             virtualMachine.detach();
         }
+    }
+
+    /**
+     * 尝试jps 中查看进程id
+     *
+     * @param tag 进程标识
+     * @return 运行标识
+     */
+    private String getJpsStatus(String tag) {
+        String execSystemCommand = CommandUtil.execSystemCommand("jps -v");
+        List<String> list = StrSpliter.splitTrim(execSystemCommand, StrUtil.LF, true);
+        for (String item : list) {
+            if (JvmUtil.checkCommandLineIsJpom(item, tag)) {
+                String[] split = StrUtil.split(item, StrUtil.SPACE);
+                return StrUtil.format("{}:{}", AbstractProjectCommander.RUNNING_TAG, split[0]);
+            }
+        }
+        return AbstractProjectCommander.STOP_TAG;
     }
 
     //---------------------------------------------------- 基本操作----end

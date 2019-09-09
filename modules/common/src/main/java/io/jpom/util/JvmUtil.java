@@ -258,9 +258,6 @@ public class JvmUtil {
     }
 
     public static boolean checkVirtualMachineIsJpom(VirtualMachine virtualMachine, String tag) {
-        String appTag = String.format("-%s=%s ", JvmUtil.POM_PID_TAG, tag);
-        String appTag2 = String.format("-%s=%s ", JvmUtil.OLD_JPOM_PID_TAG, tag);
-        String appTag3 = String.format("-%s=%s", JvmUtil.OLD2_JPOM_PID_TAG, tag);
         Properties properties;
         try {
             properties = virtualMachine.getAgentProperties();
@@ -268,11 +265,25 @@ public class JvmUtil {
             return false;
         }
         String args = properties.getProperty("sun.jvm.args", "");
-        if (StrUtil.containsAnyIgnoreCase(args, appTag, appTag2, appTag3)) {
+        if (checkCommandLineIsJpom(args, tag)) {
             return true;
         }
         args = properties.getProperty("sun.java.command", "");
-        return StrUtil.containsAnyIgnoreCase(args, appTag, appTag2, appTag3);
+        return checkCommandLineIsJpom(args, tag);
+    }
+
+    /**
+     * 判断命令行是否为jpom 标识
+     *
+     * @param commandLine 命令行
+     * @param tag         标识
+     * @return true
+     */
+    public static boolean checkCommandLineIsJpom(String commandLine, String tag) {
+        String appTag = String.format("-%s=%s ", JvmUtil.POM_PID_TAG, tag);
+        String appTag2 = String.format("-%s=%s ", JvmUtil.OLD_JPOM_PID_TAG, tag);
+        String appTag3 = String.format("-%s=%s", JvmUtil.OLD2_JPOM_PID_TAG, tag);
+        return StrUtil.containsAnyIgnoreCase(commandLine, appTag, appTag2, appTag3);
     }
 
     /**
