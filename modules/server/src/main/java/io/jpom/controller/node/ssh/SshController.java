@@ -48,7 +48,6 @@ public class SshController extends BaseServerController {
     @RequestMapping(value = "list.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
     @Feature(method = MethodFeature.LIST)
     public String list() {
-        setAttribute("array", null);
         return "node/ssh/list";
     }
 
