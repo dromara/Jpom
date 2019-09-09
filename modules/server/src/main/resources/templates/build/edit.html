@@ -92,7 +92,7 @@
             </div>
         </div>
 
-        <div id="releaseMethodDiv1" th:style="${model?.releaseMethod!=1}?'display: none':''">
+        <div class="releaseMethodDiv" id="releaseMethodDiv1" th:style="${model?.releaseMethod!=1}?'display: none':''">
             <div class="layui-form-item">
                 <label class="layui-form-label">分发项目</label>
                 <div class="layui-input-block">
@@ -116,22 +116,22 @@
                 </div>
             </div>
         </div>
+        <!--节点项目分发-->
+        <div class="releaseMethodDiv" id="releaseMethodDiv2" th:style="${model?.releaseMethod!=2}?'display: none':''">
+            <div class="layui-form-item">
+                <div class="layui-inline">
+                    <label class="layui-form-label">节点</label>
+                    <div class="layui-input-block">
+                        <select name="releaseMethodDataId_2_node" lay-filter="releaseMethodDataId_2">
+                            <option value="">请选择节点</option>
 
-        <div class="layui-form-item" id="releaseMethodDiv2" th:style="${model?.releaseMethod!=2}?'display: none':''">
-            <div class="layui-inline">
-                <label class="layui-form-label">节点</label>
-                <div class="layui-input-block">
-                    <select name="releaseMethodDataId_2_node" lay-filter="releaseMethodDataId_2">
-                        <option value="">请选择节点</option>
-
-                        <option th:each="i : ${nodeModels}" th:value="${i.id}" th:text="${i.name}"></option>
-                    </select>
+                            <option th:each="i : ${nodeModels}" th:value="${i.id}" th:text="${i.name}"></option>
+                        </select>
+                    </div>
+                </div>
+                <div class="layui-inline" id="releaseMethodDiv2_Project">
                 </div>
             </div>
-            <div class="layui-inline" id="releaseMethodDiv2_Project">
-            </div>
-        </div>
-        <div id="afterOptDiv" th:style="${model?.releaseMethod!=2}?'display: none':''">
             <div class="layui-form-item">
                 <div class="layui-inline">
                     <label class="layui-form-label">清空发布</label>
@@ -157,6 +157,35 @@
                 </div>
             </div>
         </div>
+        <div class="releaseMethodDiv" id="releaseMethodDiv3" th:style="${model?.releaseMethod!=3}?'display: none':''">
+            <div class="layui-form-item">
+                <label class="layui-form-label">SSH</label>
+                <div class="layui-input-block">
+                    <select name="releaseMethodDataId_3" lay-filter="releaseMethodDataId_3">
+                        <option value="">请选择分发到的SSH</option>
+                        <option th:each="item : ${sshArray}" th:value="${item.id}"
+                                th:selected="${model?.releaseMethodDataId==item?.id && item.fileDirs!=null}"
+                                th:disabled="${item.fileDirs==null}"
+                                th:dirs="${item.fileDirs}"
+                                th:text="${item.name}">
+                        </option>
+                    </select>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <div class="layui-inline">
+                    <label class="layui-form-label">清空发布</label>
+                    <div class="layui-input-block">
+                        <input type="checkbox" value="true"
+                               th:checked="${model?.clearOld}"
+                               name="clearOld"
+                               lay-skin="switch"
+                               lay-text="是|否">
+                    </div>
+                </div>
+            </div>
+        </div>
+
 
         <div class="layui-form-item">
             <div class="layui-form-item" style="padding-left: 20%;margin-top: 20px;">
@@ -221,7 +250,7 @@
     function changeProject(nodeId, pid) {
         var html = document.getElementById('node_project_' + nodeId);
         laytpl(html.innerHTML).render({}, function (newHtml) {
-            $("#releaseMethodDiv2_Project").html(newHtml);
+            $("#releaseMethodDiv2_Project").html(newHtml).show();
             if (pid) {
                 $("select[name='releaseMethodDataId_2_project']").val(pid);
                 $("select[name='releaseMethodDataId_2_node']").val(nodeId);
@@ -283,17 +312,8 @@
         });
 
         form.on('radio(releaseMethod)', function (data) {
-            $("#releaseMethodDiv1").hide();
-            $("#releaseMethodDiv2").hide();
-            $("#afterOptDiv").hide();
-            if (data.value == 1) {
-                $("#releaseMethodDiv1").show();
-                // $("#afterOptDiv").show();
-            } else if (data.value == 2) {
-                // 项目
-                $("#releaseMethodDiv2").show();
-                $("#afterOptDiv").show();
-            }
+            $(".releaseMethodDiv").hide();
+            $("#releaseMethodDiv" + data.value).show();
         });
 
         form.on('select(releaseMethodDataId_1)', function (data) {

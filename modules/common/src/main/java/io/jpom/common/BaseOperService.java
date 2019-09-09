@@ -65,7 +65,7 @@ public abstract class BaseOperService<T extends BaseModel> extends BaseDataServi
      */
     public void addItem(T t) {
         Objects.requireNonNull(fileName, "没有配置fileName");
-        saveJson(fileName, t.toJson());
+        saveJson(fileName, t);
     }
 
     /**
@@ -85,7 +85,7 @@ public abstract class BaseOperService<T extends BaseModel> extends BaseDataServi
      */
     public void updateItem(T t) {
         Objects.requireNonNull(fileName, "没有配置fileName");
-        updateJson(fileName, t.toJson());
+        updateJson(fileName, t);
     }
 
     private JSONArray formatToArray(JSONObject jsonObject) {

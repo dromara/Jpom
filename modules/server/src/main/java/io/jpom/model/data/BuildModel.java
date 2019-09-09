@@ -191,6 +191,7 @@ public class BuildModel extends BaseBuildModule {
         No(0, "不发布"),
         Outgiving(1, "节点分发"),
         Project(2, "项目"),
+        Ssh(3, "SSH"),
         ;
         private int code;
         private String desc;

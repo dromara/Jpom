@@ -10,14 +10,12 @@ import cn.jiangzeyin.common.validator.ValidatorConfig;
 import cn.jiangzeyin.common.validator.ValidatorItem;
 import cn.jiangzeyin.common.validator.ValidatorRule;
 import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import io.jpom.build.BuildUtil;
 import io.jpom.common.BaseServerController;
 import io.jpom.common.interceptor.OptLog;
 import io.jpom.model.BaseEnum;
-import io.jpom.model.data.BuildModel;
-import io.jpom.model.data.NodeModel;
-import io.jpom.model.data.OutGivingModel;
-import io.jpom.model.data.UserModel;
+import io.jpom.model.data.*;
 import io.jpom.model.log.UserOperateLogV1;
 import io.jpom.model.vo.BuildModelVo;
 import io.jpom.plugin.ClassFeature;
@@ -26,6 +24,7 @@ import io.jpom.plugin.MethodFeature;
 import io.jpom.service.build.BuildService;
 import io.jpom.service.dblog.DbBuildHistoryLogService;
 import io.jpom.service.node.OutGivingServer;
+import io.jpom.service.node.ssh.SshService;
 import io.jpom.util.GitUtil;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.springframework.http.MediaType;
@@ -40,6 +39,7 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * 构建列表
@@ -58,6 +58,8 @@ public class BuildListController extends BaseServerController {
     private OutGivingServer outGivingServer;
     @Resource
     private DbBuildHistoryLogService dbBuildHistoryLogService;
+    @Resource
+    private SshService sshService;
 
     @RequestMapping(value = "list.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
     @Feature(method = MethodFeature.LIST)
@@ -156,6 +158,14 @@ public class BuildListController extends BaseServerController {
             }
             buildModel.setAfterOpt(afterOpt1.getCode());
             buildModel.setClearOld(Convert.toBool(clearOld, false));
+        } else if (releaseMethod1 == BuildModel.ReleaseMethod.Ssh) {
+            //
+            String releaseMethodDataId = getParameter("releaseMethodDataId_3");
+            if (StrUtil.isEmpty(releaseMethodDataId)) {
+                return JsonMessage.getString(405, "请选择分发SSH项");
+            }
+            buildModel.setReleaseMethodDataId(releaseMethodDataId);
+            buildModel.setClearOld(Convert.toBool(clearOld, false));
         } else {
             buildModel.setReleaseMethodDataId(null);
         }
@@ -177,6 +187,18 @@ public class BuildListController extends BaseServerController {
         setAttribute("model", buildModel);
         //
         JSONArray releaseMethods = BaseEnum.toJSONArray(BuildModel.ReleaseMethod.class);
+        // 获取ssh 相关信息
+        List<SshModel> list = sshService.list();
+        if (list == null || list.isEmpty()) {
+            releaseMethods = releaseMethods.stream().filter(o -> {
+                JSONObject jsonObject = (JSONObject) o;
+                return jsonObject.getIntValue("code") != BuildModel.ReleaseMethod.Ssh.getCode();
+            }).collect(Collectors.toCollection(JSONArray::new));
+
+        } else {
+            //
+            setAttribute("sshArray", list);
+        }
         setAttribute("releaseMethods", releaseMethods);
         //
         List<OutGivingModel> outGivingModels = outGivingServer.list();
