@@ -2,20 +2,25 @@ package io.jpom.build;
 
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.extra.ssh.Sftp;
 import cn.hutool.http.HttpStatus;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.spring.SpringUtil;
+import com.jcraft.jsch.Session;
 import io.jpom.model.BaseEnum;
 import io.jpom.model.data.BuildModel;
 import io.jpom.model.data.NodeModel;
+import io.jpom.model.data.SshModel;
 import io.jpom.model.data.UserModel;
 import io.jpom.model.log.BuildHistoryLog;
 import io.jpom.outgiving.OutGivingRun;
 import io.jpom.service.node.NodeService;
+import io.jpom.service.node.ssh.SshService;
 import io.jpom.system.JpomRuntimeException;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -81,25 +86,24 @@ public class ReleaseManage extends BaseBuild {
             updateStatus(BuildModel.Status.PubError);
             return;
         }
-        if (this.baseBuildModule.getReleaseMethod() == BuildModel.ReleaseMethod.Outgiving.getCode()) {
-            //
-            try {
+        try {
+            if (this.baseBuildModule.getReleaseMethod() == BuildModel.ReleaseMethod.Outgiving.getCode()) {
+                //
                 this.doOutGiving();
-            } catch (Exception e) {
-                this.pubLog("发布分发包异常", e);
-                return;
-            }
-        } else if (this.baseBuildModule.getReleaseMethod() == BuildModel.ReleaseMethod.Project.getCode()) {
-            BuildModel.AfterOpt afterOpt = BaseEnum.getEnum(BuildModel.AfterOpt.class, this.baseBuildModule.getAfterOpt());
-            if (afterOpt == null) {
-                afterOpt = BuildModel.AfterOpt.No;
-            }
-            try {
+            } else if (this.baseBuildModule.getReleaseMethod() == BuildModel.ReleaseMethod.Project.getCode()) {
+                BuildModel.AfterOpt afterOpt = BaseEnum.getEnum(BuildModel.AfterOpt.class, this.baseBuildModule.getAfterOpt());
+                if (afterOpt == null) {
+                    afterOpt = BuildModel.AfterOpt.No;
+                }
                 this.doProject(afterOpt, this.baseBuildModule.isClearOld());
-            } catch (Exception e) {
-                this.pubLog("发布包异常", e);
-                return;
+            } else if (this.baseBuildModule.getReleaseMethod() == BuildModel.ReleaseMethod.Ssh.getCode()) {
+                this.doSsh();
+            } else {
+                this.log(" 没有实现的发布分发");
             }
+        } catch (Exception e) {
+            this.pubLog("发布异常", e);
+            return;
         }
         this.log("release end");
         updateStatus(BuildModel.Status.PubSuccess);
@@ -111,6 +115,55 @@ public class ReleaseManage extends BaseBuild {
     public void start() {
         updateStatus(BuildModel.Status.PubIng);
         this.start2();
+    }
+
+    private void doSsh() {
+        String releaseMethodDataId = this.baseBuildModule.getReleaseMethodDataId();
+        SshService sshService = SpringUtil.getBean(SshService.class);
+        SshModel item = sshService.getItem(releaseMethodDataId);
+        if (item == null) {
+            this.log("没有找到对应的ssh项：" + releaseMethodDataId);
+            return;
+        }
+        Session session = sshService.getSession(item);
+        try (Sftp sftp = new Sftp(session, item.getCharsetT())) {
+            if (this.baseBuildModule.isClearOld() && StrUtil.isNotEmpty(this.baseBuildModule.getReleasePath())) {
+                sftp.delDir(this.baseBuildModule.getReleasePath());
+            }
+            String prefix = "";
+            if (!StrUtil.startWith(this.baseBuildModule.getReleasePath(), StrUtil.SLASH)) {
+                prefix = sftp.pwd();
+            }
+            if (this.resultFile.isFile()) {
+                // 文件
+                String normalizePath = FileUtil.normalize(prefix + "/" + this.baseBuildModule.getReleasePath());
+                try {
+                    sftp.mkDirs(normalizePath);
+                } catch (Exception ignored) {
+                }
+                sftp.cd(normalizePath);
+                sftp.put(this.resultFile.getAbsolutePath(), this.resultFile.getName());
+            } else if (this.resultFile.isDirectory()) {
+                // 文件夹
+                List<File> files = FileUtil.loopFiles(this.resultFile, pathname -> !pathname.isHidden());
+                String absolutePath = FileUtil.getAbsolutePath(this.resultFile);
+                //
+                for (File file : files) {
+                    String itemAbsPath = FileUtil.getAbsolutePath(file);
+                    String remoteItemAbsPath = StrUtil.removePrefix(itemAbsPath, absolutePath);
+                    remoteItemAbsPath = FileUtil.normalize(prefix + "/" + this.baseBuildModule.getReleasePath() + "/" + remoteItemAbsPath);
+                    String parent = StrUtil.subBefore(remoteItemAbsPath, StrUtil.SLASH, true);
+                    try {
+                        sftp.mkDirs(parent);
+                    } catch (Exception ignored) {
+                    }
+                    sftp.cd(parent);
+                    sftp.put(itemAbsPath, file.getName());
+                }
+            }
+        } catch (IOException e) {
+            this.pubLog("执行ssh发布异常", e);
+        }
     }
 
     /**
