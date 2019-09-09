@@ -294,7 +294,7 @@ public abstract class AbstractProjectCommander {
      * @return 运行标识
      */
     private String getJpsStatus(String tag) {
-        String execSystemCommand = CommandUtil.execSystemCommand("jps -v");
+        String execSystemCommand = CommandUtil.execSystemCommand("jps -mv");
         List<String> list = StrSpliter.splitTrim(execSystemCommand, StrUtil.LF, true);
         for (String item : list) {
             if (JvmUtil.checkCommandLineIsJpom(item, tag)) {
