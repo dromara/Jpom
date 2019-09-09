@@ -1,5 +1,6 @@
 package io.jpom.build;
 
+import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.ssh.Sftp;
@@ -164,6 +165,8 @@ public class ReleaseManage extends BaseBuild {
         } catch (IOException e) {
             this.pubLog("执行ssh发布异常", e);
         }
+        this.log("");
+        this.log(DateUtil.now() + " start exec");
         // 执行命令
         String[] commands = StrUtil.split(this.baseBuildModule.getReleaseCommand(), StrUtil.LF);
         if (commands == null || commands.length <= 0) {
