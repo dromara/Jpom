@@ -21,7 +21,6 @@ import io.jpom.outgiving.OutGivingRun;
 import io.jpom.plugin.ClassFeature;
 import io.jpom.plugin.Feature;
 import io.jpom.plugin.MethodFeature;
-import io.jpom.service.node.NodeService;
 import io.jpom.service.node.OutGivingServer;
 import io.jpom.service.node.manage.ProjectInfoService;
 import io.jpom.system.ConfigBean;
@@ -95,7 +94,7 @@ public class OutGivingProjectController extends BaseServerController {
 
     @RequestMapping(value = "addOutgiving", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
     @Feature(method = MethodFeature.UPLOAD)
-    public String addOutgiving(String id) throws IOException {
+    public String addOutgiving(String id) {
 
         JSONArray jsonArray = BaseEnum.toJSONArray(OutGivingModel.AfterOpt.class);
         setAttribute("afterOpt", jsonArray);

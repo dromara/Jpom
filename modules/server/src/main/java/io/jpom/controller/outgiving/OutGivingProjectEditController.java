@@ -1,5 +1,6 @@
 package io.jpom.controller.outgiving;
 
+import cn.hutool.core.convert.Convert;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.http.HttpStatus;
 import cn.jiangzeyin.common.DefaultSystemLog;
@@ -10,6 +11,7 @@ import io.jpom.common.BaseServerController;
 import io.jpom.common.forward.NodeForward;
 import io.jpom.common.forward.NodeUrl;
 import io.jpom.common.interceptor.OptLog;
+import io.jpom.model.BaseEnum;
 import io.jpom.model.RunMode;
 import io.jpom.model.data.*;
 import io.jpom.model.log.UserOperateLogV1;
@@ -26,7 +28,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.annotation.Resource;
-import java.io.IOException;
 import java.util.*;
 
 /**
@@ -47,7 +48,7 @@ public class OutGivingProjectEditController extends BaseServerController {
 
     @RequestMapping(value = "editProject", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
     @Feature(method = MethodFeature.EDIT)
-    public String editProject(String id) throws IOException {
+    public String editProject(String id) {
         setAttribute("type", "add");
         OutGivingModel outGivingModel = null;
         if (StrUtil.isNotEmpty(id)) {
@@ -60,6 +61,9 @@ public class OutGivingProjectEditController extends BaseServerController {
         // 运行模式
         JSONArray runModes = (JSONArray) JSONArray.toJSON(RunMode.values());
         setAttribute("runModes", runModes);
+        //
+        JSONArray afterOpt = BaseEnum.toJSONArray(OutGivingModel.AfterOpt.class);
+        setAttribute("afterOpt", afterOpt);
         // 权限
         List<NodeModel> nodeModels = nodeService.list();
         setAttribute("nodeModels", nodeModels);
@@ -79,13 +83,12 @@ public class OutGivingProjectEditController extends BaseServerController {
      * @param id   id
      * @param type 类型
      * @return json
-     * @throws IOException IO
      */
     @RequestMapping(value = "save_project", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     @OptLog(UserOperateLogV1.OptType.SaveOutgivingProject)
     @Feature(method = MethodFeature.EDIT)
-    public String save(String id, String type) throws IOException {
+    public String save(String id, String type) {
         if ("add".equalsIgnoreCase(type)) {
             if (!StringUtil.isGeneral(id, 2, 20)) {
                 return JsonMessage.getString(401, "分发id 不能为空并且长度在2-20（英文字母 、数字和下划线）");
@@ -101,13 +104,12 @@ public class OutGivingProjectEditController extends BaseServerController {
      *
      * @param id 项目id
      * @return json
-     * @throws IOException IO
      */
     @RequestMapping(value = "delete_project", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     @OptLog(UserOperateLogV1.OptType.DeleteOutgivingProject)
     @Feature(method = MethodFeature.DEL)
-    public String delete(String id) throws IOException {
+    public String delete(String id) {
         OutGivingModel outGivingModel = outGivingServer.getItem(id);
         if (outGivingModel == null) {
             return JsonMessage.getString(200, "没有对应的分发项目");
@@ -131,7 +133,7 @@ public class OutGivingProjectEditController extends BaseServerController {
         return JsonMessage.getString(200, "删除成功");
     }
 
-    private String addOutGiving(String id) throws IOException {
+    private String addOutGiving(String id) {
         OutGivingModel outGivingModel = outGivingServer.getItem(id);
         if (outGivingModel != null) {
             return JsonMessage.getString(405, "分发id已经存在啦");
@@ -153,7 +155,7 @@ public class OutGivingProjectEditController extends BaseServerController {
     }
 
 
-    private String updateGiving(String id) throws IOException {
+    private String updateGiving(String id) {
         OutGivingModel outGivingModel = outGivingServer.getItem(id);
         if (outGivingModel == null) {
             return JsonMessage.getString(405, "没有找到对应的分发id");
@@ -296,9 +298,8 @@ public class OutGivingProjectEditController extends BaseServerController {
      * @param outGivingModel 分发实体
      * @param edit           是否为编辑模式
      * @return json
-     * @throws IOException IO
      */
-    private String doData(OutGivingModel outGivingModel, boolean edit) throws IOException {
+    private String doData(OutGivingModel outGivingModel, boolean edit) {
         outGivingModel.setName(getParameter("name"));
         if (StrUtil.isEmpty(outGivingModel.getName())) {
             return JsonMessage.getString(405, "分发名称不能为空");
@@ -308,6 +309,13 @@ public class OutGivingProjectEditController extends BaseServerController {
         if (nodeModelList == null) {
             return JsonMessage.getString(401, "当前页面请求超时");
         }
+        //
+        String afterOpt = getParameter("afterOpt");
+        OutGivingModel.AfterOpt afterOpt1 = BaseEnum.getEnum(OutGivingModel.AfterOpt.class, Convert.toInt(afterOpt, 0));
+        if (afterOpt1 == null) {
+            return JsonMessage.getString(400, "请选择分发后的操作");
+        }
+        outGivingModel.setAfterOpt(afterOpt1.getCode());
         Object object = getDefData(outGivingModel, edit);
         if (object instanceof String) {
             return object.toString();
