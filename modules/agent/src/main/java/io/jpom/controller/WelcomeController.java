@@ -153,17 +153,17 @@ public class WelcomeController extends AbstractController {
         }
         int index = 1;
         writer.writeCellValue(0, 0, "监控时间");
-        writer.writeCellValue(0, 1, "占用cpu");
-        writer.writeCellValue(0, 2, "占用内存");
-        writer.writeCellValue(0, 3, "占用磁盘");
+        writer.writeCellValue(1, 0, "占用cpu");
+        writer.writeCellValue(2, 0, "占用内存");
+        writer.writeCellValue(3, 0, "占用磁盘");
         while (cacheObjIterator.hasNext()) {
             CacheObj<String, JSONObject> next = cacheObjIterator.next();
             String time = next.getKey();
             JSONObject value = next.getValue();
-            writer.writeCellValue(index, 0, time);
-            writer.writeCellValue(index, 1, value.getString("cpu") + "%");
-            writer.writeCellValue(index, 2, value.getString("memory") + "%");
-            writer.writeCellValue(index, 3, value.getString("disk") + "%");
+            writer.writeCellValue(0, index, time);
+            writer.writeCellValue(1, index, value.getString("cpu") + "%");
+            writer.writeCellValue(2, index, value.getString("memory") + "%");
+            writer.writeCellValue(3, index, value.getString("disk") + "%");
             index++;
         }
         String fileName = URLEncoder.encode("Jpom系统监控", "UTF-8");
