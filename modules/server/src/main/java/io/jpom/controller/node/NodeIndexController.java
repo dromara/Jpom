@@ -14,7 +14,6 @@ import io.jpom.model.data.UserModel;
 import io.jpom.plugin.ClassFeature;
 import io.jpom.plugin.Feature;
 import io.jpom.plugin.MethodFeature;
-import io.jpom.service.node.NodeService;
 import io.jpom.service.node.ssh.SshService;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
@@ -23,7 +22,9 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.annotation.Resource;
+import java.util.HashSet;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * 节点管理
@@ -41,8 +42,13 @@ public class NodeIndexController extends BaseServerController {
 
     @RequestMapping(value = "list.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public String list() {
+    public String list(String group) {
         List<NodeModel> nodeModels = nodeService.list();
+        //
+        if (nodeModels != null && StrUtil.isNotEmpty(group)) {
+            // 筛选
+            nodeModels = nodeModels.stream().filter(nodeModel -> StrUtil.equals(group, nodeModel.getGroup())).collect(Collectors.toList());
+        }
         setAttribute("array", nodeModels);
         // 获取所有的ssh 名称
         JSONObject sshName = new JSONObject();
@@ -51,6 +57,9 @@ public class NodeIndexController extends BaseServerController {
             sshModels.forEach(sshModel -> sshName.put(sshModel.getId(), sshModel.getName()));
         }
         setAttribute("sshName", sshName);
+        // group
+        HashSet<String> allGroup = nodeService.getAllGroup();
+        setAttribute("groups", allGroup);
         return "node/list";
     }
 

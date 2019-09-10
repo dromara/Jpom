@@ -49,7 +49,7 @@
             element.on('nav(userOperation)', function (elem) {
                 var op = this.getAttribute('op');
                 if ('userInfo' == op) {
-                    layer.open({
+                    layerOpen({
                         type: 2,
                         title: '修改资料',
                         content: inNode ? '../user/userInfo.html' : './user/userInfo.html',
@@ -58,7 +58,7 @@
                 } else if ('updatePwd' == op) {
                     // 修改密码
                     document.getElementById('form_updatePwd').reset();
-                    layer.open({
+                    layerOpen({
                         type: 1,
                         title: '修改密码',
                         btn: ['确认'],

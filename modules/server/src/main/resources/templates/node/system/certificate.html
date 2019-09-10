@@ -199,7 +199,7 @@
                 $("input[name='type']").val("add");
                 $("#zipResult").html("");
                 form.render('select');
-                layer.open({
+                layerOpen({
                     type: 1,
                     title: '新增证书',
                     content: $('#div-certificate'),
@@ -264,7 +264,7 @@
         $("input[name='type']").val("edit");
         form.render('select');
         // 弹出
-        layer.open({
+        layerOpen({
             type: 1,
             title: '编辑',
             content: $('#div-certificate'),
@@ -337,7 +337,7 @@
         laytpl(page).render(param, function (html) {
             view.innerHTML = html;
         });
-        layer.open({
+        layerOpen({
             type: 1,
             title: '模板',
             content: $('#cert_template'),

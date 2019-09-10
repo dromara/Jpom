@@ -5,7 +5,7 @@
 </head>
 <body>
 <div class="layui-container">
-    <form action="./save.json" class="layui-form" id="form_node">
+    <form action="./save.json" class="layui-form" id="form" lay-filter="form">
         <div class="layui-form-item">
             <div class="layui-inline">
                 <label class="layui-form-label">节点ID</label>
@@ -27,6 +27,17 @@
                            lay-verify="required">
                 </div>
             </div>
+            <div class="layui-inline">
+                <label class="layui-form-label">分组名称</label>
+                <div class="layui-input-block">
+                    <select name="group" lay-filter="group">
+
+                        <option th:each="i : ${groups}" th:value="${i}" th:selected="${item?.group==$i}"
+                                th:text="${i}"></option>
+                        <option value="">选择手动添加</option>
+                    </select>
+                </div>
+            </div>
         </div>
         <div class="layui-form-item">
             <div class="layui-inline">
@@ -42,7 +53,6 @@
                 <label class="layui-form-label">节点状态</label>
                 <div class="layui-input-block">
                     <input type="checkbox" value="true"
-
                            th:checked="${item==null || item?.openStatus}"
                            name="openStatus"
                            lay-skin="switch"
@@ -123,7 +133,7 @@
                 data: data.field,
                 success: function (data) {
                     layer.msg(data.msg);
-                    if (200 == data.code) {
+                    if (200 === data.code) {
                         autoClose();
                     }
                 }
@@ -145,12 +155,32 @@
                     },
                     success: function (data) {
                         layer.msg(data.msg);
-                        if (200 == data.code) {
+                        if (200 === data.code) {
                             autoClose();
                         }
                     }
                 });
             });
+        });
+
+        var selectGroup = $("select[name='group']");
+        form.on('select(group)', function (data) {
+            if (data.value === "") {
+                layer.prompt({
+                    title: '输入分组名，并确认',
+                    formType: 0
+                }, function (text, index) {
+                    layer.close(index);
+                    var ext = $("select[name='group'] option[value='" + text + "']");
+                    if (ext.length <= 0) {
+                        selectGroup.find("option").first().before("<option value='" + text + "'>" + text + "</option>");
+                    }
+                    form.val("form", {
+                        "group": text
+                    });
+                    form.render('select');
+                });
+            }
         });
     }
 </script>

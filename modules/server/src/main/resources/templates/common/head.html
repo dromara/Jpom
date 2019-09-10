@@ -140,10 +140,14 @@
         }
 
         function layerOpen(options) {
-            if (options.type == 2) {
+            if (options.type === 2) {
                 options.content = appendNodeId(options.content);
             }
-            layer.open(options);
+            var newData = {
+                maxmin: true,
+            };
+            $.extend(newData, options);
+            layer.open(newData);
         }
 
         function getSocketHost() {
@@ -166,7 +170,8 @@
         function getQueryStringByUrl(url, name) {
             var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)");
             var r = url.match(reg);
-            if (r != null) return unescape(r[2]);
+            if (r != null)
+                return decodeURI(r[2]);
             return null;
         }
 

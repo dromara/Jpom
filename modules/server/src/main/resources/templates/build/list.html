@@ -33,7 +33,7 @@
     var statusArray = [[${statusArray}]];
 
     function openLog(id, buildId) {
-        layer.open({
+        layerOpen({
             type: 2,
             title: '构建日志',
             content: './logPage.html?id=' + id + "&buildId=" + buildId,
@@ -159,7 +159,7 @@
                     }
                 });
             } else if ('trigger' === event) {
-                layer.open({
+                layerOpen({
                     type: 2,
                     title: '查看触发器',
                     content: './trigger.html?id=' + data.id,
@@ -170,7 +170,7 @@
     }
 
     function editData(id) {
-        layer.open({
+        layerOpen({
             type: 2,
             title: '编辑构建',
             content: './edit.html?id=' + id,

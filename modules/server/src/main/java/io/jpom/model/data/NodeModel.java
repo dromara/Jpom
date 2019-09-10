@@ -51,7 +51,7 @@ public class NodeModel extends BaseModel {
     private String group;
 
     public String getGroup() {
-        return group;
+        return StrUtil.emptyToDefault(group, "默认");
     }
 
     public void setGroup(String group) {

@@ -16,7 +16,6 @@ import io.jpom.plugin.Feature;
 import io.jpom.plugin.MethodFeature;
 import io.jpom.service.build.BuildService;
 import io.jpom.service.monitor.MonitorService;
-import io.jpom.service.node.NodeService;
 import io.jpom.service.node.OutGivingServer;
 import io.jpom.service.node.ssh.SshService;
 import io.jpom.service.user.UserService;
@@ -27,7 +26,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.annotation.Resource;
-import java.io.IOException;
+import java.util.HashSet;
 import java.util.List;
 
 /**
@@ -54,7 +53,7 @@ public class NodeEditController extends BaseServerController {
 
     @RequestMapping(value = "edit.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
     @Feature(method = MethodFeature.EDIT)
-    public String edit(String id) throws IOException {
+    public String edit(String id) {
         setAttribute("type", "add");
         if (StrUtil.isNotEmpty(id)) {
             NodeModel nodeModel = nodeService.getItem(id);
@@ -63,6 +62,9 @@ public class NodeEditController extends BaseServerController {
                 setAttribute("type", "edit");
             }
         }
+        // group
+        HashSet<String> allGroup = nodeService.getAllGroup();
+        setAttribute("groups", allGroup);
         // 查询ssh
         List<SshModel> sshModels = sshService.list();
         List<NodeModel> list = nodeService.list();
@@ -92,7 +94,7 @@ public class NodeEditController extends BaseServerController {
     @OptLog(UserOperateLogV1.OptType.EditNode)
     @ResponseBody
     @Feature(method = MethodFeature.EDIT)
-    public String save(String type) throws Exception {
+    public String save(String type) {
         NodeModel model = ServletUtil.toBean(getRequest(), NodeModel.class, true);
         if ("add".equalsIgnoreCase(type)) {
             return nodeService.addNode(model, getRequest());
@@ -112,7 +114,7 @@ public class NodeEditController extends BaseServerController {
     @OptLog(UserOperateLogV1.OptType.DelNode)
     @ResponseBody
     @Feature(method = MethodFeature.DEL)
-    public String del(String id) throws IOException {
+    public String del(String id) {
         //  判断分发
         if (outGivingServer.checkNode(id)) {
             return JsonMessage.getString(400, "该节点存在分发项目，不能删除");

@@ -17,6 +17,7 @@ import io.jpom.util.StringUtil;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -35,6 +36,19 @@ public class NodeService extends BaseOperService<NodeModel> implements BaseDynam
 
     public NodeService() {
         super(ServerConfigBean.NODE);
+    }
+
+    public HashSet<String> getAllGroup() {
+        //获取所有分组
+        List<NodeModel> nodeModels = list();
+        HashSet<String> hashSet = new HashSet<>();
+        if (nodeModels == null) {
+            return hashSet;
+        }
+        for (NodeModel nodeModel : nodeModels) {
+            hashSet.add(nodeModel.getGroup());
+        }
+        return hashSet;
     }
 
     /**

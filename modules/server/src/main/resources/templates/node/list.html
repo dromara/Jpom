@@ -11,12 +11,24 @@
                 <a onclick="editProject('');" class="layui-btn layui-btn-sm">创建节点</a>
             </div>
             <div class="layui-inline" th:unless="${#lists.isEmpty(array)}">
-                <label class="layui-form-label">筛选</label>
-                <div class="layui-input-block">
-                    <select name="nodeSelect" multiple="multiple" lay-filter="nodeSelect" lay-search="">
-                        <option value=""></option>
-                        <option th:value="${item.id}" th:each="item : ${array}" th:text="${item.name}"></option>
-                    </select>
+                <div class="layui-inline">
+                    <label class="layui-form-label">分组</label>
+                    <div class="layui-input-inline">
+                        <select name="selectGroup" id="selectGroup" lay-verify="required" lay-filter="groupName"
+                                lay-search="">
+                            <option value="">请选择</option>
+                            <option th:each="item : ${groups}" th:value="${item}" th:text="${item}"></option>
+                        </select>
+                    </div>
+                </div>
+                <div class="layui-inline">
+                    <label class="layui-form-label">筛选</label>
+                    <div class="layui-input-inline">
+                        <select name="nodeSelect" multiple="multiple" lay-filter="nodeSelect" lay-search="">
+                            <option value=""></option>
+                            <option th:value="${item.id}" th:each="item : ${array}" th:text="${item.name}"></option>
+                        </select>
+                    </div>
                 </div>
             </div>
         </div>
@@ -140,6 +152,37 @@
                 multiSelect.render();
             }
         });
+
+        form.on('select(groupName)', function (data) {
+            //
+            // 缓存选择
+            layui.data('cache', {
+                key: "selectNodeGroup",
+                value: data.value
+            });
+            // 防止错误选择
+            layui.data('cache', {
+                key: "selectNodes",
+                remove: true
+            });
+            var href = location.href;
+            href = urlUpdateParams(href, "group", data.value);
+            location.href = href;
+            return true;
+        });
+        var queryGroup = getQueryString("group");
+        if (queryGroup && queryGroup !== '') {
+            // 选中
+            $("#selectGroup option[value='" + queryGroup + "']").attr("selected", "selected");
+            form.render();
+        } else {
+            const cache = layui.data('cache');
+            if (cache.selectNodeGroup) {
+                var href = location.href;
+                href = urlUpdateParams(href, "group", cache.selectNodeGroup);
+                location.href = href;
+            }
+        }
     }
 
     function changeNodeSelect(vals) {
@@ -158,7 +201,8 @@
     }
 
     function editProject(id) {
-        layer.open({
+        layerOpen({
+            maxmin: true,
             type: 2,
             title: '管理节点配置信息',
             shade: 0.8,

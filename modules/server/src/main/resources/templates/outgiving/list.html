@@ -117,7 +117,7 @@
                                     var url = "file" == op ? "/node/manage/file/list.html" : "/node/manage/console";
                                     url = urlUpdateParams(url, "nodeId", nodeId);
                                     url = urlUpdateParams(url, "id", projectId);
-                                    var index = layer.open({
+                                    var index = layerOpen({
                                         type: 2,
                                         title: "file" == op ? '文件管理' : '控制台',
                                         shade: [0.4, '#fff'],
@@ -168,7 +168,7 @@
             }
             if ("add" == op) {
                 var id = $(this).attr("id");
-                layer.open({
+                layerOpen({
                     type: 2,
                     title: '添加分发文件',
                     shade: 0.8,
@@ -212,7 +212,7 @@
     }
 
     function editProject(id) {
-        layer.open({
+        layerOpen({
             type: 2,
             title: '管理分发信息',
             shade: 0.8,

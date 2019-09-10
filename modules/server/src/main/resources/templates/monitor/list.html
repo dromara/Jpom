@@ -58,7 +58,7 @@
         // '添加监控'点击事件
         $('#addMonitor').on('click', function () {
             // 弹出
-            layer.open({
+            layerOpen({
                 type: 2,
                 title: '新增监控',
                 content: './edit.html',
@@ -86,7 +86,7 @@
 
         // 编辑监控
         function updateApplication(data) {
-            layer.open({
+            layerOpen({
                 type: 2,
                 title: '修改监控',
                 content: './edit.html?id=' + data.id,
@@ -117,7 +117,7 @@
 
         $('#monitorStatus').on('click', function () {
             // 弹出
-            layer.open({
+            layerOpen({
                 type: 2,
                 title: '新增监控',
                 content: './edit.html',

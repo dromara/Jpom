@@ -36,7 +36,7 @@
                 // 修改
                 edit(data.id);
             } else if ('dynamic' === event) {
-                layer.open({
+                layerOpen({
                     type: 2,
                     title: '编辑角色',
                     content: './dynamicData.html?id=' + data.id,
@@ -69,7 +69,7 @@
     }
 
     function edit(id) {
-        layer.open({
+        layerOpen({
             type: 2,
             title: '编辑角色',
             content: './edit.html?id=' + id,
