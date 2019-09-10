@@ -45,6 +45,7 @@ public class WelcomeController extends AbstractController {
         if ("hour".equals(type)) {
             count = 96;
         }
+        JSONObject value = null;
         int minSize = 12;
         while (cacheObjIterator.hasNext()) {
             CacheObj<String, JSONObject> cacheObj = cacheObjIterator.next();
@@ -57,8 +58,16 @@ public class WelcomeController extends AbstractController {
             }
             lastTime = key;
             scale.add(key);
-            JSONObject value = cacheObj.getValue();
+            value = cacheObj.getValue();
             array.add(value);
+        }
+        if (value != null) {
+            String time = value.getString("time");
+            String nowNextScale = getNowNextScale(type);
+            String nextScaleTime = getNextScaleTime(time, type);
+            if (!nextScaleTime.equals(nowNextScale)) {
+                filling(nextScaleTime, nowNextScale, type, array, scale, count);
+            }
         }
         //限定数组最大数量
         if (array.size() > count) {
