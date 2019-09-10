@@ -5,9 +5,9 @@ import cn.hutool.cache.impl.TimedCache;
 import cn.hutool.core.date.DateField;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
-import cn.hutool.poi.excel.ExcelUtil;
-import cn.hutool.poi.excel.ExcelWriter;
+import cn.hutool.extra.servlet.ServletUtil;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.controller.base.AbstractController;
 import com.alibaba.fastjson.JSONObject;
@@ -154,32 +154,28 @@ public class WelcomeController extends AbstractController {
      */
     @RequestMapping(value = "exportTop")
     public String exportTop(String type) throws Exception {
-        ExcelWriter writer = ExcelUtil.getBigWriter();
         TimedCache<String, JSONObject> topMonitor = TopManager.getTopMonitor(type);
         Iterator<CacheObj<String, JSONObject>> cacheObjIterator = topMonitor.cacheObjIterator();
         if (topMonitor.size() <= 0) {
             return "暂无监控数据";
         }
-        int index = 1;
-        writer.writeCellValue(0, 0, "监控时间");
-        writer.writeCellValue(1, 0, "占用cpu");
-        writer.writeCellValue(2, 0, "占用内存");
-        writer.writeCellValue(3, 0, "占用磁盘");
+        StringBuilder buf = new StringBuilder();
+        buf.append("监控时间").append(",占用cpu").append(",占用内存").append(",占用磁盘").append("\r\n");
         while (cacheObjIterator.hasNext()) {
             CacheObj<String, JSONObject> next = cacheObjIterator.next();
             String time = next.getKey();
             JSONObject value = next.getValue();
-            writer.writeCellValue(0, index, time);
-            writer.writeCellValue(1, index, value.getString("cpu") + "%");
-            writer.writeCellValue(2, index, value.getString("memory") + "%");
-            writer.writeCellValue(3, index, value.getString("disk") + "%");
-            index++;
+            buf.append(time);
+            buf.append(",").append(value.getString("cpu")).append("%");
+            buf.append(",").append(value.getString("memory")).append("%");
+            buf.append(",").append(value.getString("disk")).append("%");
+            buf.append("\r\n");
         }
         String fileName = URLEncoder.encode("Jpom系统监控", "UTF-8");
         HttpServletResponse response = getResponse();
-        response.setHeader("Content-Disposition", "attachment;filename=" + new String(fileName.getBytes(StandardCharsets.UTF_8), "GBK") + ".xlsx");
-        response.setContentType("application/vnd.ms-excel;charset=utf-8");
-        writer.flush(response.getOutputStream());
+        response.setHeader("Content-Disposition", "attachment;filename=" + new String(fileName.getBytes(StandardCharsets.UTF_8), "GBK") + ".csv");
+        response.setContentType("text/csv;charset=utf-8");
+        ServletUtil.write(getResponse(), buf.toString(), CharsetUtil.UTF_8);
         return "";
     }
 

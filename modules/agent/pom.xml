@@ -38,12 +38,6 @@
             <artifactId>commons-compress</artifactId>
             <version>1.18</version>
         </dependency>
-        <!--poi-->
-        <dependency>
-            <groupId>org.apache.poi</groupId>
-            <artifactId>poi-ooxml</artifactId>
-            <version>3.17</version>
-        </dependency>
     </dependencies>
     <build>
         <plugins>
