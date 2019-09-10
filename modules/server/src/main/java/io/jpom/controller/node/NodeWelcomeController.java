@@ -29,6 +29,12 @@ public class NodeWelcomeController extends BaseServerController {
         return NodeForward.request(getNode(), getRequest(), NodeUrl.GetTop).toString();
     }
 
+    @RequestMapping(value = "exportTop")
+    @ResponseBody
+    public void exportTop() {
+        NodeForward.requestDownload(getNode(), getRequest(), getResponse(), NodeUrl.exportTop);
+    }
+
     @RequestMapping(value = "processList", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     public String getProcessList() {

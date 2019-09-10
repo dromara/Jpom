@@ -14,20 +14,43 @@
 
         .echarts {
             margin: 20px auto;
-            width: 94%;
+            width: 97%;
             height: 400px;
         }
+
+        .tool {
+            right: 3%;
+            position: absolute;
+            z-index: 999;
+        }
+
+        .choose {
+            color: #009688;
+            border: 1px #009688 solid !important;
+        }
+
+        .range {
+            padding: 5px;
+            border: 1px #ffffff solid;
+        }
+
     </style>
     <script th:src="@{${session.jpomProxyPath}+'/static/js/echarts.min.js?v='+${session.staticCacheTime}}"></script>
 </head>
 
 <body>
-
-<div class="echarts" id="echarts"></div>
+<div style="position: relative">
+    <div class="tool">
+        <span class="range choose" id="minuteData" title="查看30分钟内监控数据">30分钟</span>
+        <span class="range" id="hourData" title="查看24小时内监控数据">24小时</span>
+        <i class="layui-icon layui-icon-export" id="exportData" title="导出24小时内监控数据" style="font-size: 18px"></i>
+    </div>
+    <div class="echarts" id="echarts"></div>
+</div>
 <table class="layui-table" id="tab_monitor" lay-filter="tab_monitor" style="margin-top:10px"></table>
 </body>
 <script type="application/javascript">
-    var ws, myEcharts;
+    var ws, myEcharts, maxSize = 12;
     var col = [{field: 'pid', title: '进程id', sort: true, width: '6%'},
         {field: 'command', title: '进程名称'},
         {field: 'port', title: '端口', sort: true, width: '6%'},
@@ -56,13 +79,47 @@
         loadProcessList();
         //
         tableRender(config);
+
+        //12分钟
+        $("#minuteData").on("click", function () {
+            $("#hourData").removeClass("choose");
+            $("#minuteData").addClass("choose");
+            loadTop();
+        });
+
+        //24小时
+        $("#hourData").on("click", function () {
+            $("#minuteData").removeClass("choose");
+            $("#hourData").addClass("choose");
+            loadTop();
+        });
+
+        //导出
+        $("#exportData").on("click", function () {
+            var bool = $("#hourData").hasClass("choose");
+            let type = 'minute';
+            if (bool) {
+                type = 'hour';
+            }
+            let nodeId = getTopQueryString("nodeId");
+            self.location.href = './exportTop?nodeId=' + nodeId + '&type=' + type;
+        });
     }
 
     function loadTop() {
+        var bool = $("#hourData").hasClass("choose");
+        let type = 'minute';
+        if (bool) {
+            type = 'hour';
+        }
         silentAjax({
             url: './getTop',
+            data: {
+                type: type
+            },
             success: function (data) {
                 if (200 === data.code && data.data) {
+                    maxSize = data.data.maxSize;
                     loadEchartsData(data.data);
                     //打开socket
                     linkSocket(true);
@@ -77,6 +134,7 @@
             name: 'cpu占用',
             type: 'line',
             data: [0],
+            showSymbol: false,
             //设置折线为曲线
             smooth: true
         };
@@ -84,12 +142,14 @@
             name: '磁盘占用',
             type: 'line',
             data: [0],
+            showSymbol: false,
             smooth: true
         };
         let memoryItem = {
             name: '内存占用',
             type: 'line',
             data: [0],
+            showSymbol: false,
             smooth: true
         };
         for (let i = 0; i < series.length; i++) {
@@ -110,6 +170,10 @@
 
     //拼接监控数据
     function addTopData(topData) {
+        var bool = $("#hourData").hasClass("choose");
+        if (bool && !topData.hourTop) {
+            return;
+        }
         let option = myEcharts.getOption();
         let series = option.series;
         let xAxis = option.xAxis;
@@ -122,17 +186,19 @@
         diskItem.data.push(parseFloat(topData.disk));
         memoryItem.data.push(parseFloat(topData.memory));
         //删除过时数据
-        if (cpuItem.data.length > xAxisData.length) {
+        if (cpuItem.data.length > maxSize) {
             cpuItem.data.splice(0, 1);
             diskItem.data.splice(0, 1);
             memoryItem.data.splice(0, 1);
             xAxisData.splice(0, 1);
-            xAxisData.push(topData.time);
         }
-        if (cpuItem.data[0] === 0) {
+        if (diskItem.data[0] === 0) {
             cpuItem.data.splice(0, 1);
             diskItem.data.splice(0, 1);
             memoryItem.data.splice(0, 1);
+        }
+        if (cpuItem.data.length > xAxisData.length) {
+            xAxisData.push(topData.time);
         }
         let newSeries = [cpuItem, memoryItem, diskItem];
         loadEcharts(xAxisData, newSeries);
@@ -192,8 +258,7 @@
                 trigger: 'axis'
             },
             legend: {
-                data: ['cpu占用', '内存占用', '磁盘占用'],
-                right: '1%'
+                data: ['cpu占用', '内存占用', '磁盘占用']
             },
             grid: {
                 left: '1%',

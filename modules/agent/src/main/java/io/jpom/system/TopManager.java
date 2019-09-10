@@ -1,11 +1,8 @@
 package io.jpom.system;
 
-import cn.hutool.cache.impl.CacheObj;
 import cn.hutool.cache.impl.TimedCache;
-import cn.hutool.core.date.DateField;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
-import cn.hutool.core.util.StrUtil;
 import cn.hutool.cron.CronUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.pool.ThreadPoolService;
@@ -33,7 +30,10 @@ public class TopManager {
     private static final Set<Session> SESSIONS = new HashSet<>();
     private static final String CRON_ID = "topMonitor";
     private static ExecutorService executorService = ThreadPoolService.newCachedThreadPool(TopManager.class);
-    private static final TimedCache<String, JSONObject> MONITOR_CACHE = new TimedCache<>(TimeUnit.MINUTES.toMillis(12), new LinkedHashMap<>());
+    //最近30分钟监控数据
+    private static final TimedCache<String, JSONObject> MONITOR_CACHE = new TimedCache<>(TimeUnit.MINUTES.toMillis(30), new LinkedHashMap<>());
+    //最近24小时监控数据
+    private static final TimedCache<String, JSONObject> MONITOR_DAY_CACHE = new TimedCache<>(TimeUnit.HOURS.toMillis(24), new LinkedHashMap<>());
 
     /**
      * 是否开启首页监听（自动刷新）
@@ -73,9 +73,16 @@ public class TopManager {
             try {
                 JSONObject topInfo = AbstractSystemCommander.getInstance().getAllMonitor();
                 if (topInfo != null) {
-                    String time = DateUtil.formatTime(DateUtil.date());
+                    DateTime date = DateUtil.date();
+                    String time = DateUtil.formatTime(date);
                     topInfo.put("time", time);
                     MONITOR_CACHE.put(time, topInfo);
+                    int minute = date.minute();
+                    int second = date.second();
+                    if (minute % 15 == 0 && second == 0) {
+                        MONITOR_DAY_CACHE.put(time, topInfo);
+                        topInfo.put("hourTop", true);
+                    }
                     send(topInfo.toString());
                 }
             } catch (Exception e) {
@@ -93,84 +100,13 @@ public class TopManager {
      *
      * @return 监控信息
      */
-    public static JSONObject getTopMonitor() {
-        Iterator<CacheObj<String, JSONObject>> cacheObjIterator = MONITOR_CACHE.cacheObjIterator();
-        String lastTime = "";
-        List<JSONObject> array = new ArrayList<>();
-        List<String> scale = new ArrayList<>();
-        JSONObject value = null;
-        while (cacheObjIterator.hasNext()) {
-            CacheObj<String, JSONObject> cacheObj = cacheObjIterator.next();
-            String key = cacheObj.getKey();
-            if (StrUtil.isNotEmpty(lastTime)) {
-                if (!key.equals(getNextScaleTime(lastTime))) {
-                    array.clear();
-                    scale.clear();
-                }
-            }
-            lastTime = key;
-            scale.add(key);
-            value = cacheObj.getValue();
-            array.add(value);
+    public static TimedCache<String, JSONObject> getTopMonitor(String type) {
+        if ("hour".equals(type)) {
+            return MONITOR_DAY_CACHE;
         }
-        if (value != null) {
-            String time = value.getString("time");
-            //清除断开的监控数据
-            if (!getNextScaleTime(time).equals(getNowNextScale())) {
-                array.clear();
-                scale.clear();
-            }
-        }
-        int count = 24;
-        if (array.size() > count) {
-            array = array.subList(array.size() - count - 1, array.size() - 1);
-        }
-        while (scale.size() < count) {
-            if (scale.size() == 0) {
-                scale.add(getNowNextScale());
-            }
-            String time = scale.get(scale.size() - 1);
-            String newTime = getNextScaleTime(time);
-            scale.add(newTime);
-        }
-        JSONObject object = new JSONObject();
-        object.put("scale", scale);
-        object.put("series", array);
-        return object;
+        return MONITOR_CACHE;
     }
 
-    /**
-     * 当前时间的下一个刻度
-     *
-     * @return String
-     */
-    private static String getNowNextScale() {
-        DateTime date = DateUtil.date();
-        int second = date.second();
-        if (second <= 30 && second > 0) {
-            second = 30;
-        } else if (second > 30) {
-            second = 0;
-            date = date.offset(DateField.MINUTE, 1);
-        }
-        String format = DateUtil.format(date, "HH:mm");
-        String secondStr = ":" + second;
-        if (second < 10) {
-            secondStr = ":0" + second;
-        }
-        return format + secondStr;
-    }
-
-    /**
-     * 指定时间的下一个刻度
-     *
-     * @return String
-     */
-    private static String getNextScaleTime(String time) {
-        DateTime dateTime = DateUtil.parseTime(time);
-        DateTime newTime = dateTime.offsetNew(DateField.SECOND, 30);
-        return DateUtil.formatTime(newTime);
-    }
 
     /**
      * 发送首页进程列表信息
