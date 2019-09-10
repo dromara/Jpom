@@ -122,7 +122,7 @@ public class WelcomeController extends AbstractController {
             int hour = date.hour(true);
             String minuteStr = "00:00";
             if (minute > 15) {
-                int i = minute % 15;
+                int i = minute / 15;
                 minuteStr = i * 15 + ":00";
             }
             return getNextScaleTime(hour + ":" + minuteStr, type);
