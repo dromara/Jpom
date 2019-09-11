@@ -277,7 +277,7 @@
                 },
                 where: newWhere,
                 done: function (data) {
-                    if (data.code == 800) {
+                    if (data.code === 800) {
                         // 用户信息失效
                         layer.msg(data.msg);
                         setTimeout(function () {
@@ -301,8 +301,52 @@
                 };
                 $.extend(newsData, data.data);
                 delete data.data;
+                let done = data.done;
+                let allDone = data.allDone;
+                delete data.done;
+                delete data.allDone;
+
+                var useLayer = data.openTop ? top.layer : layer;
                 const defData = {
-                    data: newsData
+                    data: newsData,
+                    error: function () {
+                        useLayer.closeAll();
+                        useLayer.msg('上传异常');
+                    },
+                    before: function () {
+                        var uploadProgress = $("#uploadProgress");
+                        if (uploadProgress.length > 0) {
+                            return
+                        }
+                        useLayer.open({
+                            type: 1,
+                            title: false,
+                            closeBtn: 0,
+                            area: ['80%', '10%'],
+                            content: '<div style="text-align: center;margin:0 auto; width: 500px;height: 10%">' +
+                                '       <div id="uploadProgress" class="layui-progress layui-progress-big" lay-showpercent="true" lay-filter="uploadProgress">\n' +
+                                '           <div class="layui-progress-bar" lay-percent="0%"></div>\n' +
+                                '       </div>' +
+                                '     </div>',
+                            success: function (l, index) {
+                                element.render('progress');
+                                $("#layui-layer" + index).css("background-color", "transparent").css("box-shadow", "none");
+                            }
+                        });
+                    },
+                    done: function (res, index, upload) {
+                        done && done(res, index, upload);
+                    },
+                    allDone: function (obj) {
+                        setTimeout(function () {
+                            layer.closeAll();
+                        }, 1000);
+                        allDone && allDone(obj);
+                    },
+                    progress: function (n) {
+                        var percent = n + '%';
+                        element.progress('uploadProgress', percent);
+                    }
                 };
                 $.extend(defData, data);
                 var uploadResult = upload.render(defData);

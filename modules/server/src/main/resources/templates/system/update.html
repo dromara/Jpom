@@ -44,44 +44,35 @@
             }
         });
 
-        layui.use('upload', function () {
-            var upload = layui.upload;
-            var uploadInst = upload.render({
-                elem: '#uploadJar',
-                url: './uploadJar.json',
-                data: {
-                    nodeId: "[[${node?.id}]]"
-                },
-                exts: 'jar',
-                acceptMime: '.jar',
-                before: function () {
-                    top.layer.load(1, {
-                        shade: [0.5, '#fff'] //0.1透明度的白色背景
+
+        uploadRender({
+            elem: '#uploadJar',
+            url: './uploadJar.json',
+            data: {},
+            exts: 'jar',
+            acceptMime: '.jar',
+            done: function (res) {
+                top.layer.closeAll('loading');
+                if (200 == res.code) {
+                    top.layer.msg('系统升级中..', {
+                        icon: 16,
+                        shade: 0.2,
+                        time: 1000 * 30,
+                        end: function () {
+                            top.location.reload();
+                        }
                     });
-                },
-                done: function (res) {
-                    top.layer.closeAll('loading');
-                    if (200 == res.code) {
-                        top.layer.msg('系统升级中..', {
-                            icon: 16,
-                            shade: 0.2,
-                            time: 1000 * 30,
-                            end: function () {
-                                top.location.reload();
-                            }
-                        });
-                    } else {
-                        layer.alert(res.msg);
-                    }
-                },
-                error: function () {
-                    top.layer.closeAll('loading');
-                    layer.msg("上传失败");
+                } else {
+                    layer.alert(res.msg);
                 }
-            });
+            },
+            error: function () {
+                top.layer.closeAll('loading');
+                layer.msg("上传失败");
+            }
+        }, function () {
+
         });
-
-
     }
 </script>
 </html>
