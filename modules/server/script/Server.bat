@@ -31,31 +31,44 @@ set Log=%basePath%server.log
 set LogBack=%basePath%log\
 set JVM=-server
 set ARGS= --jpom.applicationTag=%Tag% --jpom.log=%basePath%log --server.port=2122
+set RUNJAR=
 
-color 0a
-TITLE Jpom管理系统BAT控制台
-echo. ***** Jpom管理系统BAT控制台 *****
-::*************************************************************************************************************
-echo.
-	echo.  [1] 启动 start
-	echo.  [2] 关闭 stop
-	echo.  [3] 查看运行状态 status
-	echo.  [4] 重启 restart
-	echo.  [5] 帮助 use
-	echo.  [0] 退 出 0
-echo.
+@REM 读取jar
+call:listDir
 
-echo.请输入选择的序号:
-set /p ID=
-	IF "%id%"=="1" call:start
-	IF "%id%"=="2" call:stop
-	IF "%id%"=="3" call:status
-	IF "%id%"=="4" call:restart
-	IF "%id%"=="5" call:use
-	IF "%id%"=="0" EXIT
+if "%1"=="" (
+    color 0a
+    TITLE Jpom管理系统BAT控制台
+    echo. ***** Jpom管理系统BAT控制台 *****
+    ::*************************************************************************************************************
+    echo.
+        echo.  [1] 启动 start
+        echo.  [2] 关闭 stop
+        echo.  [3] 查看运行状态 status
+        echo.  [4] 重启 restart
+        echo.  [5] 帮助 use
+        echo.  [0] 退 出 0
+    echo.
+    @REM 输入
+    echo.请输入选择的序号:
+    set /p ID=
+    IF "!ID!"=="1" call:start
+    IF "!ID!"=="2" call:stop
+    IF "!ID!"=="3" call:status
+    IF "!ID!"=="4" call:restart
+    IF "!ID!"=="5" call:use
+    IF "!ID!"=="0" EXIT
+    PAUSE
+    echo 即将关闭窗口
+    timeout 3
+)else (
+     if "%1"=="restart" (
+        call:restart
+     )else (
+        call:use
+     )
+)
 PAUSE
-echo 即将关闭窗口
-timeout 3
 EXIT 1
 
 @REM 启动
@@ -74,20 +87,40 @@ EXIT 1
 		move %Log% %LogBack%%date:~0,4%%date:~5,2%%date:~8,2%0%time:~1,1%%time:~3,2%%time:~6,2%.log
 		del %Log%
 	)
+
 	REM echo 启动成功，关闭窗口不影响运行
 	echo 启动中.....关闭窗口不影响运行
-	javaw %JVM% -Djava.ext.dirs=%Lib%;"%JAVA_HOME%"\lib\ -Dapplication=%Tag% -Dbasedir=%basePath% %MainClass% %ARGS% >> %Log%
+	javaw %JVM% -Djava.class.path="%JAVA_HOME%/lib/tools.jar;%RUNJAR%" -Dapplication=%Tag% -Dbasedir=%basePath%  %MainClass% %ARGS% >> %Log%
 	timeout 3
+goto:eof
+
+
+@REM 获取jar
+:listDir
+	if "%RUNJAR%"=="" (
+		for /f "delims=" %%I in ('dir /B %Lib%') do (
+			if exist %Lib%%%I if not exist %Lib%%%I\nul (
+			    if "%%~xI" ==".jar" (
+                    if "%RUNJAR%"=="" (
+				        set RUNJAR=%Lib%%%I
+                    )
+                )
+			)
+		)
+	)else (
+		set RUNJAR=%Lib%%RUNJAR%
+	)
+	echo 运行：%RUNJAR%
 goto:eof
 
 @REM 关闭Jpom
 :stop
-	java -Djava.ext.dirs=%Lib%;"%JAVA_HOME%"\lib\ %MainClass% %ARGS% --event=stop
+	java -Djava.class.path="%JAVA_HOME%/lib/tools.jar;%RUNJAR%" %MainClass% %ARGS% --event=stop
 goto:eof
 
 @REM 查看Jpom运行状态
 :status
-	java -Djava.ext.dirs=%Lib%;"%JAVA_HOME%"\lib\ %MainClass% %ARGS% --event=status
+	java -Djava.class.path="%JAVA_HOME%/lib/tools.jar;%RUNJAR%" %MainClass% %ARGS% --event=status
 goto:eof
 
 @REM 重启Jpom

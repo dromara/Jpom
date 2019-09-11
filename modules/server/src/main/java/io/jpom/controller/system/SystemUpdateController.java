@@ -56,9 +56,9 @@ public class SystemUpdateController extends BaseServerController {
     @OptLog(UserOperateLogV1.OptType.UpdateSys)
     @SystemPermission
     public String uploadJar() throws IOException {
-        if (SystemUtil.getOsInfo().isWindows()) {
-            return JsonMessage.getString(100, "windows 环境暂不支持在线升级");
-        }
+//        if (SystemUtil.getOsInfo().isWindows()) {
+//            return JsonMessage.getString(100, "windows 环境暂不支持在线升级");
+//        }
         NodeModel nodeModel = tryGetNode();
         if (nodeModel != null) {
             return NodeForward.requestMultipart(getNode(), getMultiRequest(), NodeUrl.SystemUploadJar).toString();
