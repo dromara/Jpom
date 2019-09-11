@@ -154,6 +154,19 @@ public class JpomApplicationEvent implements ApplicationEventClient {
             FileUtil.move(beforeJarFile, oldJars, true);
             DefaultSystemLog.LOG().info("备份旧程序包：" + beforeJar);
         }
+        // windows 备份日志
+        //        if (SystemUtil.getOsInfo().isWindows()) {
+        //            boolean logBack = jsonObject.getBooleanValue("logBack");
+        //            String oldLogName = jsonObject.getString("oldLogName");
+        //            if (logBack && StrUtil.isNotEmpty(oldLogName)) {
+        //                File scriptFile = JpomManifest.getScriptFile();
+        //                File oldLog = FileUtil.file(scriptFile.getParentFile(), oldLogName);
+        //                if (oldLog.exists()) {
+        //                    File logBackDir = FileUtil.file(scriptFile.getParentFile(), "log");
+        //                    FileUtil.move(oldLog, logBackDir, true);
+        //                }
+        //            }
+        //        }
     }
 
 }

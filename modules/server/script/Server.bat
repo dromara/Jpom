@@ -27,11 +27,15 @@ set Tag=KeepBx-System-JpomApplication
 set MainClass=org.springframework.boot.loader.JarLauncher
 set basePath=%~dp0
 set Lib=%basePath%lib\
-set Log=%basePath%server.log
-set LogBack=%basePath%log\
+@REM 请勿修改----------------------------------↓
+set LogName=server.log
+@REM 在线升级会自动修改此属性
+set RUNJAR=
+@REM 请勿修改----------------------------------↑
+@REM 是否开启控制台日志文件备份
+set LogBack=true
 set JVM=-server
 set ARGS= --jpom.applicationTag=%Tag% --jpom.log=%basePath%log --server.port=2122
-set RUNJAR=
 
 @REM 读取jar
 call:listDir
@@ -58,9 +62,6 @@ if "%1"=="" (
     IF "!ID!"=="4" call:restart
     IF "!ID!"=="5" call:use
     IF "!ID!"=="0" EXIT
-    PAUSE
-    echo 即将关闭窗口
-    timeout 3
 )else (
      if "%1"=="restart" (
         call:restart
@@ -68,8 +69,12 @@ if "%1"=="" (
         call:use
      )
 )
-PAUSE
-EXIT 1
+if "%2" NEQ "upgrade" (
+    PAUSE
+)else (
+ @REM 升级直接结束
+)
+EXIT 0
 
 @REM 启动
 :start
@@ -78,19 +83,9 @@ EXIT 1
         PAUSE
         EXIT 2
     )
-	rem 备份日志
-	if exist %Log% (
-		if not exist %LogBack% (
-			echo %LogBack%
-			md %LogBack%
-		)
-		move %Log% %LogBack%%date:~0,4%%date:~5,2%%date:~8,2%0%time:~1,1%%time:~3,2%%time:~6,2%.log
-		del %Log%
-	)
 
-	REM echo 启动成功，关闭窗口不影响运行
 	echo 启动中.....关闭窗口不影响运行
-	javaw %JVM% -Djava.class.path="%JAVA_HOME%/lib/tools.jar;%RUNJAR%" -Dapplication=%Tag% -Dbasedir=%basePath%  %MainClass% %ARGS% >> %Log%
+	javaw %JVM% -Djava.class.path="%JAVA_HOME%/lib/tools.jar;%RUNJAR%" -Dapplication=%Tag% -Dbasedir=%basePath%  %MainClass% %ARGS% >> %basePath%%LogName%
 	timeout 3
 goto:eof
 
@@ -130,11 +125,6 @@ goto:eof
 	timeout 3
 	echo 启动中....
 	call:start
-goto:eof
-
-@REM 重新加载Nginx
-:reloadNginx
-    nginx -s reload
 goto:eof
 
 @REM 提示用法

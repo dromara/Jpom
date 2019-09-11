@@ -1,5 +1,6 @@
 package io.jpom.common;
 
+import cn.hutool.core.convert.Convert;
 import cn.hutool.core.date.BetweenFormater;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
@@ -295,17 +296,37 @@ public class JpomManifest {
         FileUtil.move(new File(path), to, true);
         jsonObject.put("newJar", newFile);
         jsonObject.put("updateTime", new DateTime().toString());
-        JsonFileUtil.saveJson(upgrade, jsonObject);
         // 更新管理命令
         List<String> newData = new LinkedList<>();
+        //
+        String typeName = JpomApplication.getAppType().name().toLowerCase();
+        final String[] oldName = new String[]{typeName + ".log"};
+        final boolean[] logBack = {true};
         FileUtil.readLines(getScriptFile(), JpomApplication.getCharset(), (LineHandler) line -> {
             if (!line.startsWith(String.valueOf(StrUtil.C_TAB)) &&
-                    !line.startsWith(String.valueOf(StrUtil.C_SPACE)) &&
-                    StrUtil.containsAny(line, "RUNJAR=")) {
-                if ("sh".equals(CommandUtil.SUFFIX)) {
-                    newData.add(StrUtil.format("RUNJAR=\"{}\"", newFile));
-                } else if ("bat".equals(CommandUtil.SUFFIX)) {
-                    newData.add(StrUtil.format("set RUNJAR={}", newFile));
+                    !line.startsWith(String.valueOf(StrUtil.C_SPACE))) {
+                if (StrUtil.containsAny(line, "RUNJAR=")) {
+                    // jar 包
+                    if ("sh".equals(CommandUtil.SUFFIX)) {
+                        newData.add(StrUtil.format("RUNJAR=\"{}\"", newFile));
+                    } else if ("bat".equals(CommandUtil.SUFFIX)) {
+                        newData.add(StrUtil.format("set RUNJAR={}", newFile));
+                    } else {
+                        newData.add(line);
+                    }
+                } else if (SystemUtil.getOsInfo().isWindows()) {
+                    // windows 控制台文件相关
+                    if (StrUtil.containsAny(line, "set LogName=")) {
+                        //
+                        oldName[0] = StrUtil.split(line, "=")[1];
+                        newData.add(StrUtil.format("set LogName={}_{}.log", typeName, System.currentTimeMillis()));
+                    } else if (StrUtil.containsAny(line, "set LogBack=")) {
+                        // 记忆logBack
+                        logBack[0] = Convert.toBool(StrUtil.split(line, "=")[1], true);
+                        newData.add(line);
+                    } else {
+                        newData.add(line);
+                    }
                 } else {
                     newData.add(line);
                 }
@@ -313,6 +334,10 @@ public class JpomManifest {
                 newData.add(line);
             }
         });
+        jsonObject.put("oldLogName", oldName[0]);
+        jsonObject.put("logBack", logBack[0]);
+        //
+        JsonFileUtil.saveJson(upgrade, jsonObject);
         FileUtil.writeLines(newData, getScriptFile(), JpomApplication.getCharset());
     }
 

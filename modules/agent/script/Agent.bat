@@ -27,36 +27,54 @@ set Tag=KeepBx-Agent-System-JpomAgentApplication
 set MainClass=org.springframework.boot.loader.JarLauncher
 set basePath=%~dp0
 set Lib=%basePath%lib\
-set Log=%basePath%agent.log
-set LogBack=%basePath%log\
+@REM 请勿修改----------------------------------↓
+set LogName=agent.log
+@REM 在线升级会自动修改此属性
+set RUNJAR=
+@REM 请勿修改----------------------------------↑
+@REM 是否开启控制台日志文件备份
+set LogBack=true
 set JVM=-server
 set ARGS= --jpom.applicationTag=%Tag% --jpom.log=%basePath%log --server.port=2123
 
-color 0a
-TITLE Jpom管理系统BAT控制台
-echo. ***** Jpom管理系统BAT控制台 *****
-::*************************************************************************************************************
-echo.
-	echo.  [1] 启动 start
-	echo.  [2] 关闭 stop
-	echo.  [3] 查看运行状态 status
-	echo.  [4] 重启 restart
-	echo.  [5] 帮助 use
-	echo.  [0] 退 出 0
-echo.
+@REM 读取jar
+call:listDir
 
-echo.请输入选择的序号:
-set /p ID=
-	IF "%id%"=="1" call:start
-	IF "%id%"=="2" call:stop
-	IF "%id%"=="3" call:status
-	IF "%id%"=="4" call:restart
-	IF "%id%"=="5" call:use
-	IF "%id%"=="0" EXIT
-PAUSE
-echo 即将关闭窗口
-timeout 3
-EXIT 1
+if "%1"=="" (
+    color 0a
+    TITLE Jpom管理系统BAT控制台
+    echo. ***** Jpom管理系统BAT控制台 *****
+    ::*************************************************************************************************************
+    echo.
+        echo.  [1] 启动 start
+        echo.  [2] 关闭 stop
+        echo.  [3] 查看运行状态 status
+        echo.  [4] 重启 restart
+        echo.  [5] 帮助 use
+        echo.  [0] 退 出 0
+    echo.
+    @REM 输入
+    echo.请输入选择的序号:
+    set /p ID=
+    IF "!ID!"=="1" call:start
+    IF "!ID!"=="2" call:stop
+    IF "!ID!"=="3" call:status
+    IF "!ID!"=="4" call:restart
+    IF "!ID!"=="5" call:use
+    IF "!ID!"=="0" EXIT
+)else (
+     if "%1"=="restart" (
+        call:restart
+     )else (
+        call:use
+     )
+)
+if "%2" NEQ "upgrade" (
+    PAUSE
+)else (
+ @REM 升级直接结束
+)
+EXIT 0
 
 @REM 启动
 :start
@@ -65,29 +83,39 @@ EXIT 1
         PAUSE
         EXIT 2
     )
-	rem 备份日志
-	if exist %Log% (
-		if not exist %LogBack% (
-			echo %LogBack%
-			md %LogBack%
-		)
-		move %Log% %LogBack%%date:~0,4%%date:~5,2%%date:~8,2%0%time:~1,1%%time:~3,2%%time:~6,2%.log
-		del %Log%
-	)
-	REM echo 启动成功，关闭窗口不影响运行
+
 	echo 启动中.....关闭窗口不影响运行
-	javaw %JVM% -Djava.ext.dirs=%Lib%;"%JAVA_HOME%"\lib\ -Dapplication=%Tag% -Dbasedir=%basePath% %MainClass% %ARGS% >> %Log%
+	javaw %JVM% -Djava.class.path="%JAVA_HOME%/lib/tools.jar;%RUNJAR%" -Dapplication=%Tag% -Dbasedir=%basePath%  %MainClass% %ARGS% >> %basePath%%LogName%
 	timeout 3
+goto:eof
+
+
+@REM 获取jar
+:listDir
+	if "%RUNJAR%"=="" (
+		for /f "delims=" %%I in ('dir /B %Lib%') do (
+			if exist %Lib%%%I if not exist %Lib%%%I\nul (
+			    if "%%~xI" ==".jar" (
+                    if "%RUNJAR%"=="" (
+				        set RUNJAR=%Lib%%%I
+                    )
+                )
+			)
+		)
+	)else (
+		set RUNJAR=%Lib%%RUNJAR%
+	)
+	echo 运行：%RUNJAR%
 goto:eof
 
 @REM 关闭Jpom
 :stop
-	java -Djava.ext.dirs=%Lib%;"%JAVA_HOME%"\lib\ %MainClass% %ARGS% --event=stop
+	java -Djava.class.path="%JAVA_HOME%/lib/tools.jar;%RUNJAR%" %MainClass% %ARGS% --event=stop
 goto:eof
 
 @REM 查看Jpom运行状态
 :status
-	java -Djava.ext.dirs=%Lib%;"%JAVA_HOME%"\lib\ %MainClass% %ARGS% --event=status
+	java -Djava.class.path="%JAVA_HOME%/lib/tools.jar;%RUNJAR%" %MainClass% %ARGS% --event=status
 goto:eof
 
 @REM 重启Jpom
@@ -97,11 +125,6 @@ goto:eof
 	timeout 3
 	echo 启动中....
 	call:start
-goto:eof
-
-@REM 重新加载Nginx
-:reloadNginx
-    nginx -s reload
 goto:eof
 
 @REM 提示用法

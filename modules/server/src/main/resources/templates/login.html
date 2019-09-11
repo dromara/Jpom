@@ -121,7 +121,7 @@
                             });
                             var url = getQueryString("url");
                             if (url && url.indexOf("index") > -1) {
-                                window.location.href = decodeURI(url);
+                                window.location.href = decodeURIComponent(url);
                             } else {
                                 window.location.href = './index.html';
                             }
