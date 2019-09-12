@@ -170,7 +170,8 @@
             var that = $(this);
             layer.confirm('请选择覆盖方式', {
                 btn: ['清空覆盖', '不清空']
-            }, function () {
+            }, function (i) {
+                layer.close(i);
                 that.attr("type", "clear");
                 $("#uploadFile_Import_dom").click();
             }, function () {

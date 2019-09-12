@@ -337,8 +337,10 @@
                         });
                     },
                     done: function (res, index, upload) {
-                        var openIndex = $("#uploadProgress").attr("index");
-                        useLayer.close(openIndex);
+                        if (data.multiple !== true) {
+                            var openIndex = $("#uploadProgress").attr("index");
+                            useLayer.close(openIndex);
+                        }
                         done && done(res, index, upload);
                     },
                     allDone: function (obj) {
