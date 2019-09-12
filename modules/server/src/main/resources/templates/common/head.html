@@ -295,6 +295,18 @@
         //文件上传渲染
         function uploadRender(data, fn) {
             layui.use(['upload'], function () {
+                function getUploadProgress() {
+                    if (data.openTop) {
+                        return $("#uploadProgress", top.document);
+                    } else {
+                        return $("#uploadProgress");
+                    }
+                }
+
+                function getLayIndex(index) {
+                    return data.openTop ? $("#layui-layer" + index, top.document) : $("#layui-layer" + index);
+                }
+
                 var upload = layui.upload;
                 var newsData = {
                     nodeId: getTopQueryString("nodeId")
@@ -307,15 +319,16 @@
                 delete data.allDone;
                 // 打开层级
                 var useLayer = data.openTop ? top.layer : layer;
+                var useElement = data.openTop ? top.layui.element : element;
                 const defData = {
                     data: newsData,
                     error: function () {
-                        var openIndex = $("#uploadProgress").attr("index");
+                        var openIndex = getUploadProgress().attr("index");
                         useLayer.close(openIndex);
                         useLayer.msg('上传异常');
                     },
                     before: function () {
-                        var uploadProgress = $("#uploadProgress");
+                        var uploadProgress = getUploadProgress();
                         if (uploadProgress.length > 0) {
                             return
                         }
@@ -330,27 +343,27 @@
                                 '       </div>' +
                                 '     </div>',
                             success: function (l, index) {
-                                element.render('progress');
-                                $("#uploadProgress").attr("index", index);
-                                $("#layui-layer" + index).css("background-color", "transparent").css("box-shadow", "none");
+                                useElement.render('progress');
+                                getUploadProgress().attr("index", index);
+                                getLayIndex(index).css("background-color", "transparent").css("box-shadow", "none");
                             }
                         });
                     },
                     done: function (res, index, upload) {
                         if (data.multiple !== true) {
-                            var openIndex = $("#uploadProgress").attr("index");
+                            var openIndex = getUploadProgress().attr("index");
                             useLayer.close(openIndex);
                         }
                         done && done(res, index, upload);
                     },
                     allDone: function (obj) {
-                        var openIndex = $("#uploadProgress").attr("index");
+                        var openIndex = getUploadProgress().attr("index");
                         useLayer.close(openIndex);
                         allDone && allDone(obj);
                     },
                     progress: function (n) {
                         var percent = n + '%';
-                        element.progress('uploadProgress', percent);
+                        useElement.progress('uploadProgress', percent);
                     }
                 };
                 $.extend(defData, data);
