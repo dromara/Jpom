@@ -50,7 +50,7 @@
 <table class="layui-table" id="tab_monitor" lay-filter="tab_monitor" style="margin-top:10px"></table>
 </body>
 <script type="application/javascript">
-    var ws, myEcharts, maxSize = 12;
+    var myEcharts;
     var col = [{field: 'pid', title: '进程id', sort: true, width: '6%'},
         {field: 'command', title: '进程名称'},
         {field: 'port', title: '端口', sort: true, width: '6%'},
@@ -119,10 +119,7 @@
             },
             success: function (data) {
                 if (200 === data.code && data.data) {
-                    maxSize = data.data.maxSize;
                     loadEchartsData(data.data);
-                    //打开socket
-                    linkSocket(true);
                 }
             }
         });
@@ -165,84 +162,7 @@
             memoryItem.data.push(parseFloat(item.memory));
         }
         let array = [cpuItem, memoryItem, diskItem];
-        loadEcharts(data.scale, array);
-    }
-
-    //拼接监控数据
-    function addTopData(topData) {
-        var bool = $("#hourData").hasClass("choose");
-        if (bool && !topData.hourTop) {
-            return;
-        }
-        let option = myEcharts.getOption();
-        let series = option.series;
-        let xAxis = option.xAxis;
-        let xAxisData = xAxis[0].data;
-
-        let cpuItem = series[0];
-        let memoryItem = series[1];
-        let diskItem = series[2];
-        cpuItem.data.push(parseFloat(topData.cpu));
-        diskItem.data.push(parseFloat(topData.disk));
-        memoryItem.data.push(parseFloat(topData.memory));
-        //删除过时数据
-        if (cpuItem.data.length > maxSize) {
-            cpuItem.data.splice(0, 1);
-            diskItem.data.splice(0, 1);
-            memoryItem.data.splice(0, 1);
-            xAxisData.splice(0, 1);
-        }
-        if (diskItem.data[0] === 0) {
-            cpuItem.data.splice(0, 1);
-            diskItem.data.splice(0, 1);
-            memoryItem.data.splice(0, 1);
-        }
-        if (cpuItem.data.length > xAxisData.length) {
-            xAxisData.push(topData.time);
-        }
-        let newSeries = [cpuItem, memoryItem, diskItem];
-        loadEcharts(xAxisData, newSeries);
-    }
-
-    function linkSocket(status) {
-        if (!('WebSocket' in window)) {
-            layer.msg("不支持WebSocket");
-            return;
-        }
-        var url = getSocketHost() + "/console?userId=[[${session.user.getUserMd5Key()}]]&projectId=system&nodeId=[[${node.id}]]&type=console";
-        if (!ws) {
-            ws = new WebSocket(url);
-        }
-        if (status) {
-            if (ws.readyState !== 1 && ws.readyState !== 0) {
-                ws = new WebSocket(url);
-            }
-            ws.onopen = function () {
-                ws.send('{"op": "top", "projectInfo":{}}');
-            };
-            ws.onmessage = function (data) {
-                try {
-                    if (data.data) {
-                        var top = JSON.parse(data.data);
-                        if (top.top) {
-                            addTopData(top);
-                        }
-                        if (top.processList) {
-                            config.data = top.processList;
-                            tableRender(config);
-                        }
-                    }
-                } catch (e) {
-                    return;
-                }
-            };
-            ws.onerror = function (ev) {
-                console.log(ev);
-                layer.msg("socket 异常");
-            }
-        } else {
-            ws.close();
-        }
+        loadEcharts(data.scales, array);
     }
 
     //加载监控图

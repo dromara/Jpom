@@ -76,12 +76,12 @@ public class TopManager {
                     DateTime date = DateUtil.date();
                     String time = DateUtil.formatTime(date);
                     topInfo.put("time", time);
+                    topInfo.put("id", date.getTime());
                     MONITOR_CACHE.put(time, topInfo);
                     int minute = date.minute();
                     int second = date.second();
                     if (minute % 15 == 0 && second == 0) {
                         MONITOR_DAY_CACHE.put(time, topInfo);
-                        topInfo.put("hourTop", true);
                     }
                     send(topInfo.toString());
                 }
@@ -89,7 +89,7 @@ public class TopManager {
                 DefaultSystemLog.ERROR().error(e.getMessage(), e);
             }
             //发送首页进程列表信息
-            sendProcessList();
+//            sendProcessList();
         });
         CronUtils.start();
         WATCH.set(true);

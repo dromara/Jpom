@@ -42,11 +42,11 @@ public class WelcomeController extends AbstractController {
         List<JSONObject> array = new ArrayList<>();
         List<String> scale = new ArrayList<>();
         int count = 60;
-        if ("hour".equals(type)) {
+        int minSize = 30;
+        if ("day".equals(type)) {
             count = 96;
+            minSize = 24;
         }
-        JSONObject value = null;
-        int minSize = 12;
         while (cacheObjIterator.hasNext()) {
             CacheObj<String, JSONObject> cacheObj = cacheObjIterator.next();
             String key = cacheObj.getKey();
@@ -58,34 +58,34 @@ public class WelcomeController extends AbstractController {
             }
             lastTime = key;
             scale.add(key);
-            value = cacheObj.getValue();
+            JSONObject value = cacheObj.getValue();
             array.add(value);
-        }
-        if (value != null) {
-            String time = value.getString("time");
-            String nowNextScale = getNowNextScale(type);
-            String nextScaleTime = getNextScaleTime(time, type);
-            if (!nextScaleTime.equals(nowNextScale)) {
-                filling(nextScaleTime, nowNextScale, type, array, scale, count);
-            }
         }
         //限定数组最大数量
         if (array.size() > count) {
             array = array.subList(array.size() - count, array.size());
             scale = scale.subList(scale.size() - count, scale.size());
         }
-        while (scale.size() <= minSize) {
-            if (scale.size() == 0) {
-                scale.add(getNowNextScale(type));
+        if (array.size() <= 0) {
+            DateTime date = DateUtil.date();
+            for (int i = 0; i < minSize; i++) {
+                String time = DateUtil.formatTime(date);
+                scale.add(time);
+                if ("day".equals(type)) {
+                    date = DateUtil.offset(date, DateField.HOUR, 1);
+                } else {
+                    date = DateUtil.offset(date, DateField.MINUTE, 1);
+                }
             }
-            String time = scale.get(scale.size() - 1);
-            String newTime = getNextScaleTime(time, type);
-            scale.add(newTime);
+            JSONObject item = new JSONObject();
+            item.put("cpu", 0);
+            item.put("disk", 0);
+            item.put("memory", 0);
+            array.add(item);
         }
         JSONObject object = new JSONObject();
-        object.put("scale", scale);
+        object.put("scales", scale);
         object.put("series", array);
-        object.put("maxSize", count);
         return JsonMessage.getString(200, "", object);
     }
 
@@ -111,29 +111,6 @@ public class WelcomeController extends AbstractController {
     }
 
     /**
-     * 当前时间的下一个刻度
-     *
-     * @return String
-     */
-    private String getNowNextScale(String type) {
-        DateTime date = DateUtil.date();
-        if ("hour".equals(type)) {
-            int minute = date.minute();
-            int hour = date.hour(true);
-            String minuteStr = "00:00";
-            if (minute > 15) {
-                int i = minute / 15;
-                minuteStr = i * 15 + ":00";
-            }
-            return getNextScaleTime(hour + ":" + minuteStr, type);
-        }
-        int second = date.second();
-        String secondStr = second >= 30 ? "30" : "00";
-        String format = DateUtil.format(date, "HH:mm");
-        return getNextScaleTime(format + ":" + secondStr, type);
-    }
-
-    /**
      * 指定时间的下一个刻度
      *
      * @return String
@@ -141,7 +118,7 @@ public class WelcomeController extends AbstractController {
     private String getNextScaleTime(String time, String type) {
         DateTime dateTime = DateUtil.parseTime(time);
         DateTime newTime;
-        if ("hour".equals(type)) {
+        if ("day".equals(type)) {
             newTime = dateTime.offsetNew(DateField.MINUTE, 15);
         } else {
             newTime = dateTime.offsetNew(DateField.SECOND, 30);

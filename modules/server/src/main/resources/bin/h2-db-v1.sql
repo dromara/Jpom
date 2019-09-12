@@ -78,3 +78,16 @@ CREATE TABLE IF NOT EXISTS PUBLIC.OUTGIVINGLOG
     CONSTRAINT OUTGIVINGLOG_PK PRIMARY KEY (ID)
 );
 comment on table OUTGIVINGLOG is '分发日志';
+
+-- 系统监控记录
+CREATE TABLE IF NOT EXISTS PUBLIC.SYSTEMMONITORLOG
+(
+    ID           BIGINT not null comment 'id',
+    NODEID       VARCHAR(100) comment '节点id',
+    MONITORTIME  VARCHAR(50) comment '监控时间',
+    OCCUPYCPU    DOUBLE comment '占用cpu',
+    OCCUPYMEMORY DOUBLE comment '占用内存',
+    OCCUPYDISK   DOUBLE comment '占用磁盘',
+    CONSTRAINT SYSTEMMONITORLOG_PK PRIMARY KEY (ID)
+);
+comment on table SYSTEMMONITORLOG is '系统监控记录';
