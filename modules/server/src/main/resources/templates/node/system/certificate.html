@@ -152,20 +152,13 @@
                         $("#zipResult").html("已选择:" + file.name);
                     });
                 },
-                before: function (obj) {
-                    layer.load();
-                },
                 done: function (res) {
-                    layer.closeAll('loading');
                     layer.msg(res.msg);
-                    if (200 == res.code) {
+                    if (200 === res.code) {
                         layer.closeAll('page');
                         // 刷新项目列表
                         table.reload('tab_certificate', {});
                     }
-                },
-                error: function () {
-                    layer.msg("上传失败");
                 }
             }, function (data) {
                 uploadConfig = data;

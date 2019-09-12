@@ -53,7 +53,7 @@
             acceptMime: '.jar',
             done: function (res) {
                 top.layer.closeAll('loading');
-                if (200 == res.code) {
+                if (200 === res.code) {
                     top.layer.msg('系统升级中..', {
                         icon: 16,
                         shade: 0.2,
@@ -65,10 +65,6 @@
                 } else {
                     layer.alert(res.msg);
                 }
-            },
-            error: function () {
-                top.layer.closeAll('loading');
-                layer.msg("上传失败");
             }
         }, function () {
 

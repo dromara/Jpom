@@ -310,7 +310,8 @@
                 const defData = {
                     data: newsData,
                     error: function () {
-                        useLayer.closeAll();
+                        var openIndex = $("#uploadProgress").attr("index");
+                        useLayer.close(openIndex);
                         useLayer.msg('上传异常');
                     },
                     before: function () {
@@ -330,17 +331,19 @@
                                 '     </div>',
                             success: function (l, index) {
                                 element.render('progress');
+                                $("#uploadProgress").attr("index", index);
                                 $("#layui-layer" + index).css("background-color", "transparent").css("box-shadow", "none");
                             }
                         });
                     },
                     done: function (res, index, upload) {
+                        var openIndex = $("#uploadProgress").attr("index");
+                        useLayer.close(openIndex);
                         done && done(res, index, upload);
                     },
                     allDone: function (obj) {
-                        setTimeout(function () {
-                            layer.closeAll();
-                        }, 1000);
+                        var openIndex = $("#uploadProgress").attr("index");
+                        useLayer.close(openIndex);
                         allDone && allDone(obj);
                     },
                     progress: function (n) {

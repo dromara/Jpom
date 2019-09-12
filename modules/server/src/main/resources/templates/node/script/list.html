@@ -56,20 +56,11 @@
             exts: 'bat|sh',
             acceptMime: '.bat,.sh',
             url: './upload',
-            before: function () {
-                layer.load(1, {
-                    shade: [0.5, '#fff']
-                });
-            },
             done: function (res, index, upload) {
                 layer.msg(res.msg);
                 setTimeout(function () {
                     location.reload();
                 }, 2000);
-            },
-            error: function () {
-                layer.closeAll();
-                layer.msg('上传失败');
             }
         });
     }

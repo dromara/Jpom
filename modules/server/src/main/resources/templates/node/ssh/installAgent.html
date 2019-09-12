@@ -76,53 +76,44 @@
 </div>
 </body>
 <script type="text/javascript">
-    var upload;
-    var uploadRender;
+    var uploadRenderData;
     var hashSelect;
     var nodeData = {};
     var installPath;
     var id = getQueryString("id");
 
     function loadSuccess() {
-        layui.use(['upload'], function () {
-            upload = layui.upload;
-            uploadRender = upload.render({
-                elem: '#selectZip',
-                url: './installAgentSubmit.json',
-                multiple: false,
-                exts: 'zip',
-                acceptMime: '.zip',
-                field: 'file',
-                data: {
-                    nodeData: function () {
-                        return JSON.stringify(nodeData);
-                    },
-                    path: function () {
-                        return installPath;
-                    },
-                    id: id
+        uploadRender({
+            elem: '#selectZip',
+            url: './installAgentSubmit.json',
+            multiple: false,
+            exts: 'zip',
+            acceptMime: '.zip',
+            field: 'file',
+            data: {
+                nodeData: function () {
+                    return JSON.stringify(nodeData);
                 },
-                auto: false,
-                choose: function (obj) {
-                    hashSelect = true;
-                    obj.preview(function (index, file, result) {
-                        $("#zipResult").html("已选择:" + file.name);
-                    });
+                path: function () {
+                    return installPath;
                 },
-                before: function (obj) {
-                    layer.load();
-                },
-                done: function (res) {
-                    layer.closeAll('loading');
-                    layer.msg(res.msg);
-                    if (200 === res.code) {
-                        autoClose();
-                    }
-                },
-                error: function () {
-                    layer.msg("上传失败");
+                id: id
+            },
+            auto: false,
+            choose: function (obj) {
+                hashSelect = true;
+                obj.preview(function (index, file, result) {
+                    $("#zipResult").html("已选择:" + file.name);
+                });
+            },
+            done: function (res) {
+                layer.msg(res.msg);
+                if (200 === res.code) {
+                    autoClose();
                 }
-            });
+            }
+        }, function (data) {
+            uploadRenderData = data;
         });
         form.on('submit(submit)', function (data) {
             nodeData = data.field;
@@ -131,7 +122,7 @@
                 layer.msg("请选安装包");
                 return false;
             }
-            uploadRender.upload();
+            uploadRenderData.upload();
             return false;
         });
     }

@@ -80,19 +80,11 @@
                     $("#zipResult").html("已选择:" + file.name);
                 });
             },
-            before: function (obj) {
-                layer.load();
-            },
             done: function (res) {
-                layer.closeAll('loading');
                 layer.msg(res.msg);
-                if (200 == res.code) {
+                if (200 === res.code) {
                     autoClose();
                 }
-            },
-            error: function () {
-                layer.closeAll('loading');
-                layer.msg("上传失败");
             }
         }, function (data) {
             uploadConfig = data;
