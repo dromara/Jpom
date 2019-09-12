@@ -296,11 +296,7 @@
         function uploadRender(data, fn) {
             layui.use(['upload'], function () {
                 function getUploadProgress() {
-                    if (data.openTop) {
-                        return $("#uploadProgress", top.document);
-                    } else {
-                        return $("#uploadProgress");
-                    }
+                    return data.openTop ? $("#uploadProgress", top.document) : $("#uploadProgress");
                 }
 
                 function getLayIndex(index) {
