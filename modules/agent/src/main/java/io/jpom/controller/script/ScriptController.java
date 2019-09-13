@@ -1,12 +1,12 @@
 package io.jpom.controller.script;
 
 import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.http.HtmlUtil;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.controller.multipart.MultipartFileBuilder;
+import io.jpom.JpomApplication;
 import io.jpom.common.BaseAgentController;
 import io.jpom.model.data.ScriptModel;
 import io.jpom.service.script.ScriptServer;
@@ -33,17 +33,17 @@ public class ScriptController extends BaseAgentController {
     private ScriptServer scriptServer;
 
     @RequestMapping(value = "list.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public String list() throws IOException {
+    public String list() {
         return JsonMessage.getString(200, "", scriptServer.list());
     }
 
     @RequestMapping(value = "item.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public String item(String id) throws IOException {
+    public String item(String id) {
         return JsonMessage.getString(200, "", scriptServer.getItem(id));
     }
 
     @RequestMapping(value = "save.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public String save(ScriptModel scriptModel, String type) throws IOException {
+    public String save(ScriptModel scriptModel, String type) {
         if (scriptModel == null) {
             return JsonMessage.getString(405, "没有数据");
         }
@@ -75,7 +75,7 @@ public class ScriptController extends BaseAgentController {
     }
 
     @RequestMapping(value = "del.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public String del(String id) throws IOException {
+    public String del(String id) {
         scriptServer.deleteItem(id);
         return JsonMessage.getString(200, "删除成功");
     }
@@ -88,7 +88,7 @@ public class ScriptController extends BaseAgentController {
         multipartFileBuilder.setUseOriginalFilename(true);
         String path = multipartFileBuilder.save();
         File file = FileUtil.file(path);
-        String context = FileUtil.readString(path, CharsetUtil.CHARSET_UTF_8);
+        String context = FileUtil.readString(path, JpomApplication.getCharset());
         if (StrUtil.isEmpty(context)) {
             return JsonMessage.getString(405, "脚本内容为空");
         }

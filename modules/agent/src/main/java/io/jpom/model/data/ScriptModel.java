@@ -4,8 +4,8 @@ import cn.hutool.core.date.DatePattern;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
+import io.jpom.JpomApplication;
 import io.jpom.model.BaseModel;
 import io.jpom.system.AgentConfigBean;
 import io.jpom.util.CommandUtil;
@@ -82,7 +82,7 @@ public class ScriptModel extends BaseModel {
 
     public void saveFile() {
         File file = getFile(true);
-        FileUtil.writeString(getContext(), file, CharsetUtil.CHARSET_UTF_8);
+        FileUtil.writeString(getContext(), file, JpomApplication.getCharset());
 //        // 添加权限
 //        if (SystemUtil.getOsInfo().isLinux()) {
 //            CommandUtil.execCommand("chmod 755 " + FileUtil.getAbsolutePath(file));
@@ -103,7 +103,7 @@ public class ScriptModel extends BaseModel {
         File file = getFile(true);
         if (FileUtil.exist(file)) {
             //
-            String context = FileUtil.readString(file, CharsetUtil.CHARSET_UTF_8);
+            String context = FileUtil.readString(file, JpomApplication.getCharset());
             setContext(context);
         }
     }
