@@ -35,66 +35,63 @@ import java.util.List;
 public class WelcomeController extends AbstractController {
 
     @RequestMapping(value = "getTop", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public String getTop(String type) {
-        TimedCache<String, JSONObject> topMonitor = TopManager.getTopMonitor(type);
+    public String getTop() {
+        TimedCache<String, JSONObject> topMonitor = TopManager.getTopMonitor();
         Iterator<CacheObj<String, JSONObject>> cacheObjIterator = topMonitor.cacheObjIterator();
         String lastTime = "";
         List<JSONObject> array = new ArrayList<>();
         List<String> scale = new ArrayList<>();
         int count = 60;
-        int minSize = 30;
-        if ("day".equals(type)) {
-            count = 96;
-            minSize = 24;
-        }
+        JSONObject value = null;
+        int minSize = 12;
         while (cacheObjIterator.hasNext()) {
             CacheObj<String, JSONObject> cacheObj = cacheObjIterator.next();
             String key = cacheObj.getKey();
             if (StrUtil.isNotEmpty(lastTime)) {
-                String nextScaleTime = getNextScaleTime(lastTime, type);
+                String nextScaleTime = getNextScaleTime(lastTime);
                 if (!key.equals(nextScaleTime)) {
-                    filling(lastTime, key, type, array, scale, count);
+                    filling(lastTime, key, array, scale, count);
                 }
             }
             lastTime = key;
             scale.add(key);
-            JSONObject value = cacheObj.getValue();
+            value = cacheObj.getValue();
             array.add(value);
+        }
+        if (value != null) {
+            String time = value.getString("time");
+            String nowNextScale = getNowNextScale();
+            String nextScaleTime = getNextScaleTime(time);
+            if (!nextScaleTime.equals(nowNextScale)) {
+                filling(nextScaleTime, nowNextScale, array, scale, count);
+            }
         }
         //限定数组最大数量
         if (array.size() > count) {
             array = array.subList(array.size() - count, array.size());
             scale = scale.subList(scale.size() - count, scale.size());
         }
-        if (array.size() <= 0) {
-            DateTime date = DateUtil.date();
-            for (int i = 0; i < minSize; i++) {
-                String time = DateUtil.formatTime(date);
-                scale.add(time);
-                if ("day".equals(type)) {
-                    date = DateUtil.offset(date, DateField.HOUR, 1);
-                } else {
-                    date = DateUtil.offset(date, DateField.MINUTE, 1);
-                }
+        while (scale.size() <= minSize) {
+            if (scale.size() == 0) {
+                scale.add(getNowNextScale());
             }
-            JSONObject item = new JSONObject();
-            item.put("cpu", 0);
-            item.put("disk", 0);
-            item.put("memory", 0);
-            array.add(item);
+            String time = scale.get(scale.size() - 1);
+            String newTime = getNextScaleTime(time);
+            scale.add(newTime);
         }
         JSONObject object = new JSONObject();
         object.put("scales", scale);
         object.put("series", array);
+        object.put("maxSize", count);
         return JsonMessage.getString(200, "", object);
     }
 
     /**
      * 补空，将断开的监控填空
      */
-    private void filling(String startTime, String endTime, String type, List<JSONObject> data, List<String> scale, int maxSize) {
+    private void filling(String startTime, String endTime, List<JSONObject> data, List<String> scale, int maxSize) {
         for (int i = 0; i <= maxSize; i++) {
-            String nextScaleTime = getNextScaleTime(startTime, type);
+            String nextScaleTime = getNextScaleTime(startTime);
             if (nextScaleTime.equals(endTime)) {
                 return;
             }
@@ -111,18 +108,26 @@ public class WelcomeController extends AbstractController {
     }
 
     /**
+     * 当前时间的下一个刻度
+     *
+     * @return String
+     */
+    private String getNowNextScale() {
+        DateTime date = DateUtil.date();
+        int second = date.second();
+        String secondStr = second >= 30 ? "30" : "00";
+        String format = DateUtil.format(date, "HH:mm");
+        return getNextScaleTime(format + ":" + secondStr);
+    }
+
+    /**
      * 指定时间的下一个刻度
      *
      * @return String
      */
-    private String getNextScaleTime(String time, String type) {
+    private String getNextScaleTime(String time) {
         DateTime dateTime = DateUtil.parseTime(time);
-        DateTime newTime;
-        if ("day".equals(type)) {
-            newTime = dateTime.offsetNew(DateField.MINUTE, 15);
-        } else {
-            newTime = dateTime.offsetNew(DateField.SECOND, 30);
-        }
+        DateTime newTime = dateTime.offsetNew(DateField.SECOND, 30);
         return DateUtil.formatTime(newTime);
     }
 
@@ -130,8 +135,8 @@ public class WelcomeController extends AbstractController {
      * 导出
      */
     @RequestMapping(value = "exportTop")
-    public String exportTop(String type) throws Exception {
-        TimedCache<String, JSONObject> topMonitor = TopManager.getTopMonitor(type);
+    public String exportTop() throws Exception {
+        TimedCache<String, JSONObject> topMonitor = TopManager.getTopMonitor();
         Iterator<CacheObj<String, JSONObject>> cacheObjIterator = topMonitor.cacheObjIterator();
         if (topMonitor.size() <= 0) {
             return "暂无监控数据";
@@ -140,9 +145,9 @@ public class WelcomeController extends AbstractController {
         buf.append("监控时间").append(",占用cpu").append(",占用内存").append(",占用磁盘").append("\r\n");
         while (cacheObjIterator.hasNext()) {
             CacheObj<String, JSONObject> next = cacheObjIterator.next();
-            String time = next.getKey();
             JSONObject value = next.getValue();
-            buf.append(time);
+            long monitorTime = value.getLongValue("monitorTime");
+            buf.append(DateUtil.formatDateTime(DateUtil.date(monitorTime)));
             buf.append(",").append(value.getString("cpu")).append("%");
             buf.append(",").append(value.getString("memory")).append("%");
             buf.append(",").append(value.getString("disk")).append("%");

@@ -11,7 +11,7 @@ public class SystemMonitorLog extends BaseJsonModel {
      */
     public static final String TABLE_NAME = SystemMonitorLog.class.getSimpleName().toUpperCase();
 
-    private long id;
+    private String id;
     /**
      * 节点id
      */
@@ -19,7 +19,7 @@ public class SystemMonitorLog extends BaseJsonModel {
     /**
      * 监控时间
      */
-    private String monitorTime;
+    private long monitorTime;
     /**
      * 占用cpu
      */
@@ -33,11 +33,11 @@ public class SystemMonitorLog extends BaseJsonModel {
      */
     private double occupyDisk;
 
-    public long getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(long id) {
+    public void setId(String id) {
         this.id = id;
     }
 
@@ -49,11 +49,11 @@ public class SystemMonitorLog extends BaseJsonModel {
         this.nodeId = nodeId;
     }
 
-    public String getMonitorTime() {
+    public long getMonitorTime() {
         return monitorTime;
     }
 
-    public void setMonitorTime(String monitorTime) {
+    public void setMonitorTime(long monitorTime) {
         this.monitorTime = monitorTime;
     }
 
@@ -84,9 +84,9 @@ public class SystemMonitorLog extends BaseJsonModel {
     @Override
     public String toString() {
         return "SystemMonitorLog{" +
-                "id=" + id +
+                "id='" + id + '\'' +
                 ", nodeId='" + nodeId + '\'' +
-                ", monitorTime='" + monitorTime + '\'' +
+                ", monitorTime=" + monitorTime +
                 ", occupyCpu=" + occupyCpu +
                 ", occupyMemory=" + occupyMemory +
                 ", occupyDisk=" + occupyDisk +

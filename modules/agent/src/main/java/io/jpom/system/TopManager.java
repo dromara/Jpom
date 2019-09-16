@@ -32,8 +32,6 @@ public class TopManager {
     private static ExecutorService executorService = ThreadPoolService.newCachedThreadPool(TopManager.class);
     //最近30分钟监控数据
     private static final TimedCache<String, JSONObject> MONITOR_CACHE = new TimedCache<>(TimeUnit.MINUTES.toMillis(30), new LinkedHashMap<>());
-    //最近24小时监控数据
-    private static final TimedCache<String, JSONObject> MONITOR_DAY_CACHE = new TimedCache<>(TimeUnit.HOURS.toMillis(24), new LinkedHashMap<>());
 
     /**
      * 是否开启首页监听（自动刷新）
@@ -76,20 +74,15 @@ public class TopManager {
                     DateTime date = DateUtil.date();
                     String time = DateUtil.formatTime(date);
                     topInfo.put("time", time);
-                    topInfo.put("id", date.getTime());
+                    topInfo.put("monitorTime", date.getTime());
                     MONITOR_CACHE.put(time, topInfo);
-                    int minute = date.minute();
-                    int second = date.second();
-                    if (minute % 15 == 0 && second == 0) {
-                        MONITOR_DAY_CACHE.put(time, topInfo);
-                    }
                     send(topInfo.toString());
                 }
             } catch (Exception e) {
                 DefaultSystemLog.ERROR().error(e.getMessage(), e);
             }
             //发送首页进程列表信息
-//            sendProcessList();
+            sendProcessList();
         });
         CronUtils.start();
         WATCH.set(true);
@@ -100,10 +93,7 @@ public class TopManager {
      *
      * @return 监控信息
      */
-    public static TimedCache<String, JSONObject> getTopMonitor(String type) {
-        if ("hour".equals(type)) {
-            return MONITOR_DAY_CACHE;
-        }
+    public static TimedCache<String, JSONObject> getTopMonitor() {
         return MONITOR_CACHE;
     }
 
