@@ -19,5 +19,7 @@ wget -O ${TYPE}.zip https://1232788122276831.cn-beijing.fc.aliyuncs.com/2016-08-
 unzip -o ${TYPE}.zip
 # 删除安装包
 rm -f ${TYPE}.zip
+# 添加权限
+chmod 755 ${TYPE}.sh
 # 启动
 sh ${TYPE}.sh start
