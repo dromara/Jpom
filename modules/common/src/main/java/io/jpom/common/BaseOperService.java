@@ -32,18 +32,21 @@ public abstract class BaseOperService<T extends BaseModel> extends BaseDataServi
      * @return list
      */
     public List<T> list() {
-        Objects.requireNonNull(fileName, "没有配置fileName");
         return (List<T>) list(typeArgument);
     }
 
     public <E> List<E> list(Class<E> cls) {
-        Objects.requireNonNull(fileName, "没有配置fileName");
-        JSONObject jsonObject = getJSONObject(fileName);
+        JSONObject jsonObject = getJSONObject();
         if (jsonObject == null) {
             return new ArrayList<>();
         }
         JSONArray jsonArray = formatToArray(jsonObject);
         return jsonArray.toJavaList(cls);
+    }
+
+    public JSONObject getJSONObject() {
+        Objects.requireNonNull(fileName, "没有配置fileName");
+        return getJSONObject(fileName);
     }
 
     /**

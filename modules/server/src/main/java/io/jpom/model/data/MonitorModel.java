@@ -1,9 +1,9 @@
 package io.jpom.model.data;
 
-import cn.hutool.cron.pattern.CronPattern;
 import io.jpom.model.BaseEnum;
 import io.jpom.model.BaseJsonModel;
 import io.jpom.model.BaseModel;
+import io.jpom.model.Cycle;
 
 import java.util.List;
 
@@ -110,41 +110,6 @@ public class MonitorModel extends BaseModel {
     public void setStatus(boolean status) {
         this.status = status;
     }
-
-    public enum Cycle implements BaseEnum {
-        /**
-         * 监控周期，code 代表周期时间，单位：分钟
-         */
-        one(1, "1分钟"),
-        five(5, "5分钟"),
-        ten(10, "10分钟"),
-        thirty(30, "30分钟");
-
-        private int code;
-        private String desc;
-        private CronPattern cronPattern;
-
-        Cycle(int code, String desc) {
-            this.code = code;
-            this.desc = desc;
-            this.cronPattern = new CronPattern(String.format("0 0/%s * * * ?", code));
-        }
-
-        public CronPattern getCronPattern() {
-            return cronPattern;
-        }
-
-        @Override
-        public int getCode() {
-            return code;
-        }
-
-        @Override
-        public String getDesc() {
-            return desc;
-        }
-    }
-
 
     public boolean checkNodeProject(String nodeId, String projectId) {
         List<NodeProject> projects = getProjects();
