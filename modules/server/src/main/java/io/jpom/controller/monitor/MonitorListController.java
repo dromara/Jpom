@@ -12,7 +12,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.common.BaseServerController;
 import io.jpom.common.interceptor.OptLog;
-import io.jpom.model.BaseEnum;
+import io.jpom.model.Cycle;
 import io.jpom.model.data.MonitorModel;
 import io.jpom.model.data.NodeModel;
 import io.jpom.model.data.UserModel;
@@ -75,7 +75,7 @@ public class MonitorListController extends BaseServerController {
         }
         setAttribute("model", monitorModel);
         //监控周期
-        JSONArray cycleArray = BaseEnum.toJSONArray(MonitorModel.Cycle.class);
+        JSONArray cycleArray = Cycle.getJSONArray();
         setAttribute("cycleArray", cycleArray);
         List<NodeModel> nodeModels = nodeService.listAndProject();
         setAttribute("nodeModels", nodeModels);
@@ -134,7 +134,7 @@ public class MonitorListController extends BaseServerController {
     public String updateMonitor(String id,
                                 @ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "监控名称不能为空")) String name,
                                 String notifyUser) {
-        int cycle = getParameterInt("cycle", MonitorModel.Cycle.five.getCode());
+        int cycle = getParameterInt("cycle", Cycle.five.getCode());
         String status = getParameter("status");
         String autoRestart = getParameter("autoRestart");
 

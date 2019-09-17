@@ -4,11 +4,10 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.servlet.ServletUtil;
 import cn.jiangzeyin.common.JsonMessage;
 import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
 import io.jpom.common.BaseServerController;
 import io.jpom.common.interceptor.OptLog;
+import io.jpom.model.Cycle;
 import io.jpom.model.data.NodeModel;
-import io.jpom.model.data.SshModel;
 import io.jpom.model.data.UserModel;
 import io.jpom.model.log.UserOperateLogV1;
 import io.jpom.plugin.ClassFeature;
@@ -65,28 +64,11 @@ public class NodeEditController extends BaseServerController {
         // group
         HashSet<String> allGroup = nodeService.getAllGroup();
         setAttribute("groups", allGroup);
-        // 查询ssh
-        List<SshModel> sshModels = sshService.list();
-        List<NodeModel> list = nodeService.list();
-        JSONArray sshList = new JSONArray();
-        if (sshModels != null) {
-            sshModels.forEach(sshModel -> {
-                String sshModelId = sshModel.getId();
-                JSONObject jsonObject = new JSONObject();
-                jsonObject.put("id", sshModelId);
-                jsonObject.put("name", sshModel.getName());
-                if (list != null) {
-                    for (NodeModel nodeModel : list) {
-                        if (!StrUtil.equals(id, nodeModel.getId()) && StrUtil.equals(sshModelId, nodeModel.getSshId())) {
-                            jsonObject.put("disabled", true);
-                            break;
-                        }
-                    }
-                }
-                sshList.add(jsonObject);
-            });
-        }
+        JSONArray sshList = sshService.listSelect(id);
         setAttribute("sshList", sshList);
+        //监控周期
+        JSONArray cycleArray = Cycle.getAllJSONArray();
+        setAttribute("cycleArray", cycleArray);
         return "node/edit";
     }
 

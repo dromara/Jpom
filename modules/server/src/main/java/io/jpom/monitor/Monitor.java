@@ -18,6 +18,7 @@ import cn.jiangzeyin.common.spring.SpringUtil;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.common.forward.NodeForward;
 import io.jpom.common.forward.NodeUrl;
+import io.jpom.model.Cycle;
 import io.jpom.model.data.MonitorModel;
 import io.jpom.model.data.NodeModel;
 import io.jpom.model.data.UserModel;
@@ -50,7 +51,7 @@ public class Monitor implements Task {
     public static void start() {
         Task task = CronUtil.getScheduler().getTask(CRON_ID);
         if (task == null) {
-            CronUtil.schedule(CRON_ID, MonitorModel.Cycle.one.getCronPattern().toString(), new Monitor());
+            CronUtil.schedule(CRON_ID, Cycle.one.getCronPattern().toString(), new Monitor());
             CronUtils.start();
         }
         dbMonitorNotifyLogService = SpringUtil.getBean(DbMonitorNotifyLogService.class);
@@ -65,18 +66,18 @@ public class Monitor implements Task {
         long time = System.currentTimeMillis();
         MonitorService monitorService = SpringUtil.getBean(MonitorService.class);
         //
-        List<MonitorModel> monitorModels = monitorService.listRunByCycle(MonitorModel.Cycle.one);
+        List<MonitorModel> monitorModels = monitorService.listRunByCycle(Cycle.one);
         //
-        if (MonitorModel.Cycle.five.getCronPattern().match(time, CronUtil.getScheduler().isMatchSecond())) {
-            monitorModels.addAll(monitorService.listRunByCycle(MonitorModel.Cycle.five));
+        if (Cycle.five.getCronPattern().match(time, CronUtil.getScheduler().isMatchSecond())) {
+            monitorModels.addAll(monitorService.listRunByCycle(Cycle.five));
         }
         //
-        if (MonitorModel.Cycle.ten.getCronPattern().match(time, CronUtil.getScheduler().isMatchSecond())) {
-            monitorModels.addAll(monitorService.listRunByCycle(MonitorModel.Cycle.ten));
+        if (Cycle.ten.getCronPattern().match(time, CronUtil.getScheduler().isMatchSecond())) {
+            monitorModels.addAll(monitorService.listRunByCycle(Cycle.ten));
         }
         //
-        if (MonitorModel.Cycle.thirty.getCronPattern().match(time, CronUtil.getScheduler().isMatchSecond())) {
-            monitorModels.addAll(monitorService.listRunByCycle(MonitorModel.Cycle.thirty));
+        if (Cycle.thirty.getCronPattern().match(time, CronUtil.getScheduler().isMatchSecond())) {
+            monitorModels.addAll(monitorService.listRunByCycle(Cycle.thirty));
         }
         //
         this.checkList(monitorModels);

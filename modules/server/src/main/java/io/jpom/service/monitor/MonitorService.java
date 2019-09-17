@@ -2,6 +2,7 @@ package io.jpom.service.monitor;
 
 import cn.hutool.core.date.DateUtil;
 import io.jpom.common.BaseOperService;
+import io.jpom.model.Cycle;
 import io.jpom.model.data.MonitorModel;
 import io.jpom.monitor.Monitor;
 import io.jpom.system.ServerConfigBean;
@@ -74,7 +75,7 @@ public class MonitorService extends BaseOperService<MonitorModel> {
      * @param cycle 周期
      * @return list
      */
-    public List<MonitorModel> listRunByCycle(MonitorModel.Cycle cycle) {
+    public List<MonitorModel> listRunByCycle(Cycle cycle) {
         List<MonitorModel> list = this.list();
         if (list == null) {
             return new ArrayList<>();

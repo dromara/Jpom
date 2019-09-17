@@ -26,7 +26,7 @@ public abstract class BaseDataService {
      * @return path
      */
     protected String getDataFilePath(String filename) {
-        return FileUtil.normalize(ConfigBean.getInstance().getDataPath() + "/" + filename);
+        return FileUtil.normalize(ConfigBean.getInstance().getDataPath() + StrUtil.SLASH + filename);
     }
 
     /**

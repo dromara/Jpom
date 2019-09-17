@@ -6,6 +6,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.common.forward.NodeUrl;
 import io.jpom.model.BaseModel;
+import io.jpom.model.Cycle;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -49,6 +50,19 @@ public class NodeModel extends BaseModel {
      * 节点分组
      */
     private String group;
+
+    /**
+     * 监控周期
+     */
+    private int cycle = Cycle.none.getCode();
+
+    public int getCycle() {
+        return cycle;
+    }
+
+    public void setCycle(int cycle) {
+        this.cycle = cycle;
+    }
 
     public String getGroup() {
         return StrUtil.emptyToDefault(group, "默认");

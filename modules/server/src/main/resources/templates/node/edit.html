@@ -27,14 +27,24 @@
                            lay-verify="required">
                 </div>
             </div>
+        </div>
+        <div class="layui-form-item">
             <div class="layui-inline">
                 <label class="layui-form-label">分组名称</label>
                 <div class="layui-input-block">
                     <select name="group" lay-filter="group">
-
                         <option th:each="i : ${groups}" th:value="${i}" th:selected="${item?.group==$i}"
                                 th:text="${i}"></option>
                         <option value="">选择手动添加</option>
+                    </select>
+                </div>
+            </div>
+            <div class="layui-inline">
+                <label class="layui-form-label">监控周期</label>
+                <div class="layui-input-block">
+                    <select name="cycle" lay-filter="cycle">
+                        <option th:each="i : ${cycleArray}" th:value="${i.code}" th:selected="${item?.cycle==i.code}"
+                                th:text="${i.desc}"></option>
                     </select>
                 </div>
             </div>
