@@ -30,6 +30,8 @@
         <docker.registryUrl>registry.cn-beijing.aliyuncs.com</docker.registryUrl>
         <docker.registry.name>fengshunli</docker.registry.name>
         <docker.workdir>/tmp/</docker.workdir>
+        <!-- 跳过测试 -->
+        <skipTests>true</skipTests>
     </properties>
     <dependencies>
         <dependency>
