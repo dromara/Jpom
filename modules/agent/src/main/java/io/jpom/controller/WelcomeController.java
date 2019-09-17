@@ -34,6 +34,14 @@ import java.util.List;
 @RestController
 public class WelcomeController extends AbstractController {
 
+    @RequestMapping(value = "getDirectTop", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    public String getDirectTop() {
+        JSONObject topInfo = AbstractSystemCommander.getInstance().getAllMonitor();
+        //
+        topInfo.put("time", System.currentTimeMillis());
+        return JsonMessage.getString(200, "ok", topInfo);
+    }
+
     @RequestMapping(value = "getTop", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public String getTop() {
         TimedCache<String, JSONObject> topMonitor = TopManager.getTopMonitor();

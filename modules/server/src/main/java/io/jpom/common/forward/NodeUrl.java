@@ -15,6 +15,7 @@ public enum NodeUrl {
      *
      */
     GetTop("/getTop"),
+    GetDirectTop("/getDirectTop"),
     Status("/status"),
     exportTop("/exportTop"),
 

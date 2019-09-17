@@ -9,7 +9,9 @@ import io.jpom.common.BaseOperService;
 import io.jpom.common.JpomManifest;
 import io.jpom.common.forward.NodeForward;
 import io.jpom.common.forward.NodeUrl;
+import io.jpom.model.Cycle;
 import io.jpom.model.data.NodeModel;
+import io.jpom.monitor.NodeMonitor;
 import io.jpom.permission.BaseDynamicService;
 import io.jpom.plugin.ClassFeature;
 import io.jpom.system.ServerConfigBean;
@@ -17,10 +19,12 @@ import io.jpom.util.StringUtil;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 /**
  * 节点管理
@@ -151,5 +155,64 @@ public class NodeService extends BaseOperService<NodeModel> implements BaseDynam
     @Override
     public List<NodeModel> list() {
         return (List<NodeModel>) filter(super.list(), ClassFeature.NODE);
+    }
+
+    @Override
+    public void addItem(NodeModel nodeModel) {
+        super.addItem(nodeModel);
+        if (nodeModel.isOpenStatus() && nodeModel.getCycle() != Cycle.none.getCode()) {
+            NodeMonitor.start();
+        }
+    }
+
+    @Override
+    public void deleteItem(String id) {
+        super.deleteItem(id);
+        this.checkCronStatus();
+    }
+
+    @Override
+    public void updateItem(NodeModel nodeModel) {
+        super.updateItem(nodeModel);
+        this.checkCronStatus();
+    }
+
+    public boolean checkCronStatus() {
+        // 关闭监听
+        List<NodeModel> list = list();
+        if (list == null || list.isEmpty()) {
+            NodeMonitor.stop();
+            return false;
+        } else {
+            boolean stop = true;
+            for (NodeModel nodeModel : list) {
+                if (nodeModel.isOpenStatus() && nodeModel.getCycle() != Cycle.none.getCode()) {
+                    NodeMonitor.start();
+                    stop = false;
+                    break;
+                }
+            }
+            if (stop) {
+                NodeMonitor.stop();
+                return false;
+            }
+            return true;
+        }
+    }
+
+    /**
+     * 根据周期获取list
+     *
+     * @param cycle 周期
+     * @return list
+     */
+    public List<NodeModel> listByCycle(Cycle cycle) {
+        List<NodeModel> list = this.list();
+        if (list == null) {
+            return new ArrayList<>();
+        }
+        return list.stream()
+                .filter(nodeModel -> nodeModel.getCycle() == cycle.getCode() && nodeModel.isOpenStatus())
+                .collect(Collectors.toList());
     }
 }
