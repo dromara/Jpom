@@ -146,19 +146,19 @@ public class LinuxSystemCommander extends AbstractSystemCommander {
 //            495964k used — 使用中的内存总量（495M）
 //            13284k free — 空闲内存总量（13M）
 //            25364k buffers — 缓存的内存量 （25M）
-        double total = 0, used = 0;
+        double total = 0, free = 0;
         for (String str : split) {
             str = str.trim();
-            if (str.endsWith("used")) {
-                String value = str.replace("used", "").replace("k", "").trim();
-                used = Convert.toDouble(value, 0.0);
+            if (str.endsWith("free")) {
+                String value = str.replace("free", "").replace("k", "").trim();
+                free = Convert.toDouble(value, 0.0);
             }
             if (str.endsWith("total")) {
                 String value = str.replace("total", "").replace("k", "").trim();
                 total = Convert.toDouble(value, 0.0);
             }
         }
-        return String.format("%.2f", used / total * 100);
+        return String.format("%.2f", (total - free) / total * 100);
     }
 
     /**
