@@ -74,8 +74,10 @@ public class NodeWelcomeController extends BaseServerController {
         Cycle cycle = getCycle();
         NodeModel node = getNode();
         if (cycle == null || cycle == Cycle.none) {
+            // 未开启、直接查询
             return NodeForward.request(node, getRequest(), NodeUrl.GetTop).toString();
         }
+        // 开启了节点信息采集
         Page pageObj = new Page(1, 60);
         pageObj.addOrder(new Order("monitorTime", Direction.DESC));
         Entity entity = Entity.create();
