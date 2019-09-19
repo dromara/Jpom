@@ -111,7 +111,6 @@ public class JpomApplication extends ApplicationBuilder {
             } catch (InterruptedException ignored) {
             }
             try {
-
                 String command = "";
                 if (SystemUtil.getOsInfo().isLinux()) {
                     command = CommandUtil.SUFFIX;
