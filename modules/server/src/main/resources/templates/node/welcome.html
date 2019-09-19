@@ -35,7 +35,7 @@
 
 <body>
 <div style="position: relative">
-    <div class="export">
+    <div class="export" th:if="${monitorCycle}">
         <div id="exportData" style="color: #FFFFFF;width: 1px;height: 1px"></div>
         <button class="layui-icon  layui-icon-export" id="exportBtn" title="导出监控数据" style="font-size: 18px"></button>
     </div>
@@ -44,6 +44,7 @@
 <table class="layui-table" id="tab_monitor" lay-filter="tab_monitor" style="margin-top:10px"></table>
 </body>
 <script type="text/javascript">
+    var cycleTime = [[${cycleTime}]];
     var ws, myEcharts, maxSize = 12;
     var col = [{field: 'pid', title: '进程id', sort: true, width: '6%'},
         {field: 'command', title: '进程名称'},
@@ -74,7 +75,6 @@
         tableRender(config);
         loadProcessList();
 
-
         layui.use(['laydate'], function () {
             var laydate = layui.laydate;
 
@@ -87,8 +87,7 @@
                 show: false,
                 done: function (value, date, endDate) {
                     if (value) {
-                        let nodeId = getTopQueryString("nodeId");
-                        self.location.href = './exportTop?nodeId=' + nodeId + '&time=' + value;
+                        self.location.href = appendNodeId('./exportTop?time=' + value);
                     }
                 }
             });
@@ -96,15 +95,10 @@
     }
 
     function loadTop() {
-        // var bool = $("#hourData").hasClass("choose");
-        // let type = 'minute';
-        // if (bool) {
-        //     type = 'hour';
-        // }
         silentAjax({
             url: './getTop',
             data: {
-                // type: type
+                millis: cycleTime
             },
             success: function (data) {
                 if (200 === data.code && data.data) {
@@ -112,7 +106,7 @@
                     loadEchartsData(data.data);
                     setTimeout(function () {
                         loadTop();
-                    }, 2000);
+                    }, cycleTime);
                 }
             }
         });
@@ -157,79 +151,6 @@
         let array = [cpuItem, memoryItem, diskItem];
         loadEcharts(data.scales, array);
     }
-
-    //拼接监控数据
-    function addTopData(topData) {
-        var bool = $("#hourData").hasClass("choose");
-        if (bool && !topData.hourTop) {
-            return;
-        }
-        let option = myEcharts.getOption();
-        let series = option.series;
-        let xAxis = option.xAxis;
-        let xAxisData = xAxis[0].data;
-
-        let cpuItem = series[0];
-        let memoryItem = series[1];
-        let diskItem = series[2];
-        cpuItem.data.push(parseFloat(topData.cpu));
-        diskItem.data.push(parseFloat(topData.disk));
-        memoryItem.data.push(parseFloat(topData.memory));
-        //删除过时数据
-        if (cpuItem.data.length > maxSize) {
-            cpuItem.data.splice(0, 1);
-            diskItem.data.splice(0, 1);
-            memoryItem.data.splice(0, 1);
-            xAxisData.splice(0, 1);
-        }
-        if (diskItem.data[0] === 0) {
-            cpuItem.data.splice(0, 1);
-            diskItem.data.splice(0, 1);
-            memoryItem.data.splice(0, 1);
-        }
-        if (cpuItem.data.length > xAxisData.length) {
-            xAxisData.push(topData.time);
-        }
-        let newSeries = [cpuItem, memoryItem, diskItem];
-        loadEcharts(xAxisData, newSeries);
-    }
-
-    // function linkSocket(status) {
-    //     if (!('WebSocket' in window)) {
-    //         layer.msg("不支持WebSocket");
-    //         return;
-    //     }
-    //     var url = getSocketHost() + "/console?userId=[[${session.user.getUserMd5Key()}]]&projectId=system&nodeId=[[${node.id}]]&type=console";
-    //     if (!ws) {
-    //         ws = new WebSocket(url);
-    //     }
-    //     if (status) {
-    //         if (ws.readyState !== 1 && ws.readyState !== 0) {
-    //             ws = new WebSocket(url);
-    //         }
-    //         ws.onopen = function () {
-    //             ws.send('{"op": "top", "projectInfo":{}}');
-    //         };
-    //         ws.onmessage = function (data) {
-    //             try {
-    //                 if (data.data) {
-    //                     var top = JSON.parse(data.data);
-    //                     if (top.top) {
-    //                         addTopData(top);
-    //                     }
-    //                 }
-    //             } catch (e) {
-    //                 return;
-    //             }
-    //         };
-    //         ws.onerror = function (ev) {
-    //             console.log(ev);
-    //             layer.msg("socket 异常");
-    //         }
-    //     } else {
-    //         ws.close();
-    //     }
-    // }
 
     //加载监控图
     function loadEcharts(xAxis, series) {
@@ -287,7 +208,7 @@
                     tableRender(config);
                     setTimeout(function () {
                         loadProcessList();
-                    }, 2000);
+                    }, cycleTime);
                 } else if (data.msg && data.msg !== "") {
                     layer.msg(data.msg);
                 }

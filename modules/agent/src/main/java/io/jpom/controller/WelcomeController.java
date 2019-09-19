@@ -4,7 +4,6 @@ import cn.hutool.cache.impl.CacheObj;
 import cn.hutool.core.date.DateField;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
-import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.controller.base.AbstractController;
 import com.alibaba.fastjson.JSONObject;
@@ -37,18 +36,17 @@ public class WelcomeController extends AbstractController {
     }
 
     @RequestMapping(value = "getTop", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public String getTop() {
+    public String getTop(Long millis) {
         Iterator<CacheObj<String, JSONObject>> cacheObjIterator = TopManager.get();
         List<JSONObject> series = new ArrayList<>();
         List<String> scale = new ArrayList<>();
         int count = 60;
-        JSONObject value = null;
         int minSize = 12;
         while (cacheObjIterator.hasNext()) {
             CacheObj<String, JSONObject> cacheObj = cacheObjIterator.next();
             String key = cacheObj.getKey();
             scale.add(key);
-            value = cacheObj.getValue();
+            JSONObject value = cacheObj.getValue();
             series.add(value);
         }
         //限定数组最大数量
@@ -61,7 +59,7 @@ public class WelcomeController extends AbstractController {
                 scale.add(getNowNextScale());
             }
             String time = scale.get(scale.size() - 1);
-            String newTime = getNextScaleTime(time);
+            String newTime = getNextScaleTime(time, millis);
             scale.add(newTime);
         }
         JSONObject object = new JSONObject();
@@ -69,27 +67,6 @@ public class WelcomeController extends AbstractController {
         object.put("series", series);
         object.put("maxSize", count);
         return JsonMessage.getString(200, "", object);
-    }
-
-    /**
-     * 补空，将断开的监控填空
-     */
-    private void filling(String startTime, String endTime, List<JSONObject> data, List<String> scale, int maxSize) {
-        for (int i = 0; i <= maxSize; i++) {
-            String nextScaleTime = getNextScaleTime(startTime);
-            if (nextScaleTime.equals(endTime)) {
-                return;
-            }
-            JSONObject object = new JSONObject();
-            object.put("time", nextScaleTime);
-            data.add(object);
-            startTime = nextScaleTime;
-            scale.add(nextScaleTime);
-            if (i == maxSize) {
-                data.clear();
-                scale.clear();
-            }
-        }
     }
 
     /**
@@ -106,9 +83,12 @@ public class WelcomeController extends AbstractController {
      *
      * @return String
      */
-    private String getNextScaleTime(String time) {
+    private String getNextScaleTime(String time, Long millis) {
         DateTime dateTime = DateUtil.parseTime(time);
-        DateTime newTime = dateTime.offsetNew(DateField.SECOND, 30);
+        if (millis == null) {
+            millis = 30 * 1000L;
+        }
+        DateTime newTime = dateTime.offsetNew(DateField.SECOND, (int) (millis / 1000));
         return DateUtil.formatTime(newTime);
     }
 

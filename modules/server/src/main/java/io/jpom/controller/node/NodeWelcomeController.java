@@ -9,6 +9,9 @@ import cn.hutool.extra.servlet.ServletUtil;
 import io.jpom.common.BaseServerController;
 import io.jpom.common.forward.NodeForward;
 import io.jpom.common.forward.NodeUrl;
+import io.jpom.model.BaseEnum;
+import io.jpom.model.Cycle;
+import io.jpom.model.data.NodeModel;
 import io.jpom.model.log.SystemMonitorLog;
 import io.jpom.service.dblog.DbSystemMonitorLogService;
 import org.springframework.http.MediaType;
@@ -23,6 +26,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 欢迎页
@@ -38,6 +42,17 @@ public class NodeWelcomeController extends BaseServerController {
 
     @RequestMapping(value = "welcome", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
     public String welcome() {
+        NodeModel node = getNode();
+        Cycle cycle = BaseEnum.getEnum(Cycle.class, node.getCycle());
+        long millis = cycle == null ? TimeUnit.SECONDS.toMillis(30) : cycle.getMillis();
+        if (millis <= 0) {
+            millis = TimeUnit.SECONDS.toMillis(30);
+        }
+        if (cycle != null && cycle != Cycle.none) {
+            //
+            setAttribute("monitorCycle", true);
+        }
+        setAttribute("cycleTime", millis);
         return "node/welcome";
     }
 

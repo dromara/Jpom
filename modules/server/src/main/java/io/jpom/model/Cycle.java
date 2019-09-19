@@ -36,7 +36,10 @@ public enum Cycle implements BaseEnum {
         if (code > 0) {
             this.cronPattern = new CronPattern(String.format("0 0/%s * * * ?", code));
             this.millis = TimeUnit.MINUTES.toMillis(code);
-        } else if (code < 0) {
+        } else if (code == 0) {
+            //
+
+        } else {
             code = -code;
             this.cronPattern = new CronPattern(String.format("0/%s * * * * ?", code));
             this.millis = TimeUnit.SECONDS.toMillis(code);
