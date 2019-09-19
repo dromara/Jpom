@@ -1,13 +1,10 @@
 package io.jpom.controller;
 
 import cn.hutool.cache.impl.CacheObj;
-import cn.hutool.cache.impl.TimedCache;
 import cn.hutool.core.date.DateField;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
-import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
-import cn.hutool.extra.servlet.ServletUtil;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.controller.base.AbstractController;
 import com.alibaba.fastjson.JSONObject;
@@ -20,9 +17,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.servlet.http.HttpServletResponse;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -44,10 +38,9 @@ public class WelcomeController extends AbstractController {
 
     @RequestMapping(value = "getTop", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public String getTop() {
-        TimedCache<String, JSONObject> topMonitor = TopManager.getTopMonitor();
-        Iterator<CacheObj<String, JSONObject>> cacheObjIterator = topMonitor.cacheObjIterator();
+        Iterator<CacheObj<String, JSONObject>> cacheObjIterator = TopManager.get();
         String lastTime = "";
-        List<JSONObject> array = new ArrayList<>();
+        List<JSONObject> series = new ArrayList<>();
         List<String> scale = new ArrayList<>();
         int count = 60;
         JSONObject value = null;
@@ -58,25 +51,25 @@ public class WelcomeController extends AbstractController {
             if (StrUtil.isNotEmpty(lastTime)) {
                 String nextScaleTime = getNextScaleTime(lastTime);
                 if (!key.equals(nextScaleTime)) {
-                    filling(lastTime, key, array, scale, count);
+                    filling(lastTime, key, series, scale, count);
                 }
             }
             lastTime = key;
             scale.add(key);
             value = cacheObj.getValue();
-            array.add(value);
+            series.add(value);
         }
         if (value != null) {
             String time = value.getString("time");
             String nowNextScale = getNowNextScale();
             String nextScaleTime = getNextScaleTime(time);
             if (!nextScaleTime.equals(nowNextScale)) {
-                filling(nextScaleTime, nowNextScale, array, scale, count);
+                filling(nextScaleTime, nowNextScale, series, scale, count);
             }
         }
         //限定数组最大数量
-        if (array.size() > count) {
-            array = array.subList(array.size() - count, array.size());
+        if (series.size() > count) {
+            series = series.subList(series.size() - count, series.size());
             scale = scale.subList(scale.size() - count, scale.size());
         }
         while (scale.size() <= minSize) {
@@ -89,7 +82,8 @@ public class WelcomeController extends AbstractController {
         }
         JSONObject object = new JSONObject();
         object.put("scales", scale);
-        object.put("series", array);
+        System.out.println(series);
+        object.put("series", series);
         object.put("maxSize", count);
         return JsonMessage.getString(200, "", object);
     }
@@ -139,35 +133,35 @@ public class WelcomeController extends AbstractController {
         return DateUtil.formatTime(newTime);
     }
 
-    /**
-     * 导出
-     */
-    @RequestMapping(value = "exportTop")
-    public String exportTop() throws Exception {
-        TimedCache<String, JSONObject> topMonitor = TopManager.getTopMonitor();
-        Iterator<CacheObj<String, JSONObject>> cacheObjIterator = topMonitor.cacheObjIterator();
-        if (topMonitor.size() <= 0) {
-            return "暂无监控数据";
-        }
-        StringBuilder buf = new StringBuilder();
-        buf.append("监控时间").append(",占用cpu").append(",占用内存").append(",占用磁盘").append("\r\n");
-        while (cacheObjIterator.hasNext()) {
-            CacheObj<String, JSONObject> next = cacheObjIterator.next();
-            JSONObject value = next.getValue();
-            long monitorTime = value.getLongValue("monitorTime");
-            buf.append(DateUtil.formatDateTime(DateUtil.date(monitorTime)));
-            buf.append(",").append(value.getString("cpu")).append("%");
-            buf.append(",").append(value.getString("memory")).append("%");
-            buf.append(",").append(value.getString("disk")).append("%");
-            buf.append("\r\n");
-        }
-        String fileName = URLEncoder.encode("Jpom系统监控", "UTF-8");
-        HttpServletResponse response = getResponse();
-        response.setHeader("Content-Disposition", "attachment;filename=" + new String(fileName.getBytes(StandardCharsets.UTF_8), "GBK") + ".csv");
-        response.setContentType("text/csv;charset=utf-8");
-        ServletUtil.write(getResponse(), buf.toString(), CharsetUtil.UTF_8);
-        return "";
-    }
+//    /**
+//     * 导出
+//     */
+//    @RequestMapping(value = "exportTop")
+//    public String exportTop() throws Exception {
+//        TimedCache<String, JSONObject> topMonitor = TopManager.getTopMonitor();
+//        Iterator<CacheObj<String, JSONObject>> cacheObjIterator = topMonitor.cacheObjIterator();
+//        if (topMonitor.size() <= 0) {
+//            return "暂无监控数据";
+//        }
+//        StringBuilder buf = new StringBuilder();
+//        buf.append("监控时间").append(",占用cpu").append(",占用内存").append(",占用磁盘").append("\r\n");
+//        while (cacheObjIterator.hasNext()) {
+//            CacheObj<String, JSONObject> next = cacheObjIterator.next();
+//            JSONObject value = next.getValue();
+//            long monitorTime = value.getLongValue("monitorTime");
+//            buf.append(DateUtil.formatDateTime(DateUtil.date(monitorTime)));
+//            buf.append(",").append(value.getString("cpu")).append("%");
+//            buf.append(",").append(value.getString("memory")).append("%");
+//            buf.append(",").append(value.getString("disk")).append("%");
+//            buf.append("\r\n");
+//        }
+//        String fileName = URLEncoder.encode("Jpom系统监控", "UTF-8");
+//        HttpServletResponse response = getResponse();
+//        response.setHeader("Content-Disposition", "attachment;filename=" + new String(fileName.getBytes(StandardCharsets.UTF_8), "GBK") + ".csv");
+//        response.setContentType("text/csv;charset=utf-8");
+//        ServletUtil.write(getResponse(), buf.toString(), CharsetUtil.UTF_8);
+//        return "";
+//    }
 
     @RequestMapping(value = "processList", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody

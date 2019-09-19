@@ -70,9 +70,10 @@
     function loadSuccess() {
         loadTop();
         //加载进程信息
-        loadProcessList();
         //
         tableRender(config);
+        loadProcessList();
+
 
         layui.use(['laydate'], function () {
             var laydate = layui.laydate;
@@ -95,22 +96,23 @@
     }
 
     function loadTop() {
-        var bool = $("#hourData").hasClass("choose");
-        let type = 'minute';
-        if (bool) {
-            type = 'hour';
-        }
+        // var bool = $("#hourData").hasClass("choose");
+        // let type = 'minute';
+        // if (bool) {
+        //     type = 'hour';
+        // }
         silentAjax({
             url: './getTop',
             data: {
-                type: type
+                // type: type
             },
             success: function (data) {
                 if (200 === data.code && data.data) {
                     maxSize = data.data.maxSize;
                     loadEchartsData(data.data);
-                    //打开socket
-                    linkSocket(true);
+                    setTimeout(function () {
+                        loadTop();
+                    }, 2000);
                 }
             }
         });
@@ -192,46 +194,42 @@
         loadEcharts(xAxisData, newSeries);
     }
 
-    function linkSocket(status) {
-        if (!('WebSocket' in window)) {
-            layer.msg("不支持WebSocket");
-            return;
-        }
-        var url = getSocketHost() + "/console?userId=[[${session.user.getUserMd5Key()}]]&projectId=system&nodeId=[[${node.id}]]&type=console";
-        if (!ws) {
-            ws = new WebSocket(url);
-        }
-        if (status) {
-            if (ws.readyState !== 1 && ws.readyState !== 0) {
-                ws = new WebSocket(url);
-            }
-            ws.onopen = function () {
-                ws.send('{"op": "top", "projectInfo":{}}');
-            };
-            ws.onmessage = function (data) {
-                try {
-                    if (data.data) {
-                        var top = JSON.parse(data.data);
-                        if (top.top) {
-                            addTopData(top);
-                        }
-                        if (top.processList) {
-                            config.data = top.processList;
-                            tableRender(config);
-                        }
-                    }
-                } catch (e) {
-                    return;
-                }
-            };
-            ws.onerror = function (ev) {
-                console.log(ev);
-                layer.msg("socket 异常");
-            }
-        } else {
-            ws.close();
-        }
-    }
+    // function linkSocket(status) {
+    //     if (!('WebSocket' in window)) {
+    //         layer.msg("不支持WebSocket");
+    //         return;
+    //     }
+    //     var url = getSocketHost() + "/console?userId=[[${session.user.getUserMd5Key()}]]&projectId=system&nodeId=[[${node.id}]]&type=console";
+    //     if (!ws) {
+    //         ws = new WebSocket(url);
+    //     }
+    //     if (status) {
+    //         if (ws.readyState !== 1 && ws.readyState !== 0) {
+    //             ws = new WebSocket(url);
+    //         }
+    //         ws.onopen = function () {
+    //             ws.send('{"op": "top", "projectInfo":{}}');
+    //         };
+    //         ws.onmessage = function (data) {
+    //             try {
+    //                 if (data.data) {
+    //                     var top = JSON.parse(data.data);
+    //                     if (top.top) {
+    //                         addTopData(top);
+    //                     }
+    //                 }
+    //             } catch (e) {
+    //                 return;
+    //             }
+    //         };
+    //         ws.onerror = function (ev) {
+    //             console.log(ev);
+    //             layer.msg("socket 异常");
+    //         }
+    //     } else {
+    //         ws.close();
+    //     }
+    // }
 
     //加载监控图
     function loadEcharts(xAxis, series) {
@@ -287,6 +285,9 @@
                 if (200 === data.code && data.data) {
                     config.data = data.data;
                     tableRender(config);
+                    setTimeout(function () {
+                        loadProcessList();
+                    }, 2000);
                 } else if (data.msg && data.msg !== "") {
                     layer.msg(data.msg);
                 }

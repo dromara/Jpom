@@ -3,6 +3,7 @@ package io.jpom.monitor;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.cron.CronUtil;
+import cn.hutool.cron.pattern.CronPattern;
 import cn.hutool.cron.task.Task;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.spring.SpringUtil;
@@ -36,7 +37,8 @@ public class NodeMonitor implements Task {
     public static void start() {
         Task task = CronUtil.getScheduler().getTask(CRON_ID);
         if (task == null) {
-            CronUtil.schedule(CRON_ID, Cycle.seconds30.getCronPattern().toString(), new NodeMonitor());
+            CronPattern cronPattern = Cycle.seconds30.getCronPattern();
+            CronUtil.schedule(CRON_ID, cronPattern.toString(), new NodeMonitor());
             CronUtils.start();
         }
         dbSystemMonitorLogService = SpringUtil.getBean(DbSystemMonitorLogService.class);

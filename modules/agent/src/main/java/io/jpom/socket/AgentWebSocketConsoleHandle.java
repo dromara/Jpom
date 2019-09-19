@@ -10,7 +10,6 @@ import io.jpom.common.commander.AbstractProjectCommander;
 import io.jpom.model.data.ProjectInfoModel;
 import io.jpom.service.manage.ConsoleService;
 import io.jpom.service.manage.ProjectInfoService;
-import io.jpom.system.TopManager;
 import io.jpom.util.SocketSessionUtil;
 import org.springframework.stereotype.Component;
 
@@ -71,10 +70,10 @@ public class AgentWebSocketConsoleHandle extends BaseAgentWebSocketHandle {
         if (consoleCommandOp == ConsoleCommandOp.heart) {
             return true;
         }
-        if (consoleCommandOp == ConsoleCommandOp.top) {
-            TopManager.addMonitor(session);
-            return true;
-        }
+//        if (consoleCommandOp == ConsoleCommandOp.top) {
+//            TopManager.addMonitor(session);
+//            return true;
+//        }
         return false;
     }
 

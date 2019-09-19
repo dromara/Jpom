@@ -4,7 +4,6 @@ import cn.hutool.core.exceptions.ExceptionUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.core.util.URLUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
-import io.jpom.system.TopManager;
 import io.jpom.util.SocketSessionUtil;
 
 import javax.websocket.Session;
@@ -48,7 +47,7 @@ public abstract class BaseAgentWebSocketHandle {
             DefaultSystemLog.ERROR().error("关闭异常", e);
         }
         // top
-        TopManager.removeMonitor(session);
+        //        TopManager.removeMonitor(session);
         USER.remove(session.getId());
     }
 }
