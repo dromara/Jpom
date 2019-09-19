@@ -6,10 +6,12 @@ import io.jpom.model.log.SystemMonitorLog;
 import org.springframework.stereotype.Service;
 
 /**
- * @author bwcx_jzy
+ * @author Arno
+ * @date 2019/9/13
  */
 @Service
 public class DbSystemMonitorLogService extends BaseDbLogService<SystemMonitorLog> {
+
     public DbSystemMonitorLogService() {
         super(SystemMonitorLog.TABLE_NAME, SystemMonitorLog.class);
         setKey("id");

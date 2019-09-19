@@ -59,6 +59,7 @@
     <script type="text/javascript"
             th:src="@{${session.jpomProxyPath}+'/static/layui/layui.js?v='+${session.staticCacheTime}}"></script>
     <script type="text/javascript">
+        let windowsOnload = false;
         /**
          * @param  {String} message 错误信息
          * @param  {String} source  发生错误的脚本URL
@@ -68,6 +69,9 @@
          */
         window.onerror = function (message, source, lineno, colno, error) {
             // ...
+        };
+        window.onload = function () {
+            windowsOnload = true;
         };
         let $, layer, form, element, table;
         const asyncFn = [];
@@ -84,6 +88,15 @@
             layer = layui.layer;
             form = layui.form;
             table = layui.table;
+            var time = setInterval(function () {
+                if (windowsOnload === true) {
+                    clearInterval(time);
+                    allLoadCall();
+                }
+            }, 200);
+        });
+
+        function allLoadCall() {
             //
             try {
                 loadSuccess && loadSuccess();
@@ -108,7 +121,7 @@
                 var href = $(this).attr("href");
                 location.href = appendNodeId(href);
             });
-        });
+        }
 
         function appendNodeId(url) {
             var nodeId = getTopQueryString("nodeId");
