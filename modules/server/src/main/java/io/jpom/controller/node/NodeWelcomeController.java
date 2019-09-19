@@ -20,6 +20,7 @@ import io.jpom.model.Cycle;
 import io.jpom.model.data.NodeModel;
 import io.jpom.model.log.SystemMonitorLog;
 import io.jpom.service.dblog.DbSystemMonitorLogService;
+import io.jpom.util.StringUtil;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -70,7 +71,7 @@ public class NodeWelcomeController extends BaseServerController {
 
     @RequestMapping(value = "getTop", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
-    public String getTop() {
+    public String getTop(Long millis) {
         Cycle cycle = getCycle();
         NodeModel node = getNode();
         if (cycle == null || cycle == Cycle.none) {
@@ -94,6 +95,17 @@ public class NodeWelcomeController extends BaseServerController {
             jsonObject.put("disk", systemMonitorLog.getOccupyDisk());
             series.add(jsonObject);
         }
+        //
+        int minSize = 12;
+        while (scale.size() <= minSize) {
+            if (scale.size() == 0) {
+                scale.add(DateUtil.formatTime(DateUtil.date()));
+            }
+            String time = scale.get(scale.size() - 1);
+            String newTime = StringUtil.getNextScaleTime(time, millis);
+            scale.add(newTime);
+        }
+
         JSONObject object = new JSONObject();
         object.put("scales", scale);
         object.put("series", series);
@@ -102,6 +114,7 @@ public class NodeWelcomeController extends BaseServerController {
 
     @RequestMapping(value = "exportTop")
     public void exportTop(String time) throws UnsupportedEncodingException {
+        NodeModel node = getNode();
         List<String> list = StrSpliter.splitTrim(time, "~", true);
         DateTime startDate = DateUtil.parseDateTime(list.get(0));
         long startTime = startDate.getTime();
@@ -112,18 +125,18 @@ public class NodeWelcomeController extends BaseServerController {
         long endTime = endDate.getTime();
         PageResult<SystemMonitorLog> monitorData = dbSystemMonitorLogService.getMonitorData(startTime, endTime);
         if (monitorData.getTotal() <= 0) {
-            NodeForward.requestDownload(getNode(), getRequest(), getResponse(), NodeUrl.exportTop);
+            //            NodeForward.requestDownload(node, getRequest(), getResponse(), NodeUrl.exportTop);
         } else {
             StringBuilder buf = new StringBuilder();
             buf.append("监控时间").append(",占用cpu").append(",占用内存").append(",占用磁盘").append("\r\n");
             for (SystemMonitorLog log : monitorData) {
                 long monitorTime = log.getMonitorTime();
-                buf.append(DateUtil.formatDateTime(DateUtil.date(monitorTime))).append(",")
+                buf.append(DateUtil.date(monitorTime).toString()).append(",")
                         .append(log.getOccupyCpu()).append("%").append(",")
                         .append(log.getOccupyMemory()).append("%").append(",")
                         .append(log.getOccupyDisk()).append("%").append("\r\n");
             }
-            String fileName = URLEncoder.encode("Jpom系统监控", "UTF-8");
+            String fileName = URLEncoder.encode("Jpom系统监控-" + node.getId(), "UTF-8");
             HttpServletResponse response = getResponse();
             response.setHeader("Content-Disposition", "attachment;filename=" + new String(fileName.getBytes(StandardCharsets.UTF_8), "GBK") + ".csv");
             response.setContentType("text/csv;charset=utf-8");

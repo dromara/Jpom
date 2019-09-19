@@ -1,5 +1,8 @@
 package io.jpom.util;
 
+import cn.hutool.core.date.DateField;
+import cn.hutool.core.date.DateTime;
+import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.lang.Validator;
 import cn.hutool.core.util.StrUtil;
@@ -87,5 +90,19 @@ public class StringUtil {
     public static File getToolsJar() {
         File file = new File(SystemUtil.getJavaRuntimeInfo().getHomeDir());
         return new File(file.getParentFile(), "lib/tools.jar");
+    }
+
+    /**
+     * 指定时间的下一个刻度
+     *
+     * @return String
+     */
+    public static String getNextScaleTime(String time, Long millis) {
+        DateTime dateTime = DateUtil.parseTime(time);
+        if (millis == null) {
+            millis = 30 * 1000L;
+        }
+        DateTime newTime = dateTime.offsetNew(DateField.SECOND, (int) (millis / 1000));
+        return DateUtil.formatTime(newTime);
     }
 }

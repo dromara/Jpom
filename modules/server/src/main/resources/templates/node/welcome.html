@@ -43,6 +43,28 @@
 </div>
 <table class="layui-table" id="tab_monitor" lay-filter="tab_monitor" style="margin-top:10px"></table>
 </body>
+
+<script type="text/javascript" th:if="${monitorCycle}">
+    asyncFn.push(function () {
+        layui.use(['laydate'], function () {
+            var laydate = layui.laydate;
+
+            laydate.render({
+                elem: '#exportData',
+                type: 'datetime',
+                eventElem: '#exportBtn',
+                range: '~',
+                max: 0,
+                show: false,
+                done: function (value, date, endDate) {
+                    if (value) {
+                        self.location.href = appendNodeId('./exportTop?time=' + value);
+                    }
+                }
+            });
+        });
+    });
+</script>
 <script type="text/javascript">
     var cycleTime = [[${cycleTime}]];
     var ws, myEcharts;
@@ -74,24 +96,6 @@
         //
         tableRender(config);
         loadProcessList();
-
-        layui.use(['laydate'], function () {
-            var laydate = layui.laydate;
-
-            laydate.render({
-                elem: '#exportData',
-                type: 'datetime',
-                eventElem: '#exportBtn',
-                range: '~',
-                max: 0,
-                show: false,
-                done: function (value, date, endDate) {
-                    if (value) {
-                        self.location.href = appendNodeId('./exportTop?time=' + value);
-                    }
-                }
-            });
-        });
     }
 
     function loadTop() {
