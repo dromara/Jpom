@@ -39,7 +39,6 @@ public class WelcomeController extends AbstractController {
     @RequestMapping(value = "getTop", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public String getTop() {
         Iterator<CacheObj<String, JSONObject>> cacheObjIterator = TopManager.get();
-        String lastTime = "";
         List<JSONObject> series = new ArrayList<>();
         List<String> scale = new ArrayList<>();
         int count = 60;
@@ -48,24 +47,9 @@ public class WelcomeController extends AbstractController {
         while (cacheObjIterator.hasNext()) {
             CacheObj<String, JSONObject> cacheObj = cacheObjIterator.next();
             String key = cacheObj.getKey();
-            if (StrUtil.isNotEmpty(lastTime)) {
-                String nextScaleTime = getNextScaleTime(lastTime);
-                if (!key.equals(nextScaleTime)) {
-                    filling(lastTime, key, series, scale, count);
-                }
-            }
-            lastTime = key;
             scale.add(key);
             value = cacheObj.getValue();
             series.add(value);
-        }
-        if (value != null) {
-            String time = value.getString("time");
-            String nowNextScale = getNowNextScale();
-            String nextScaleTime = getNextScaleTime(time);
-            if (!nextScaleTime.equals(nowNextScale)) {
-                filling(nextScaleTime, nowNextScale, series, scale, count);
-            }
         }
         //限定数组最大数量
         if (series.size() > count) {
@@ -82,7 +66,6 @@ public class WelcomeController extends AbstractController {
         }
         JSONObject object = new JSONObject();
         object.put("scales", scale);
-        System.out.println(series);
         object.put("series", series);
         object.put("maxSize", count);
         return JsonMessage.getString(200, "", object);
@@ -115,11 +98,7 @@ public class WelcomeController extends AbstractController {
      * @return String
      */
     private String getNowNextScale() {
-        DateTime date = DateUtil.date();
-        int second = date.second();
-        String secondStr = second >= 30 ? "30" : "00";
-        String format = DateUtil.format(date, "HH:mm");
-        return getNextScaleTime(format + ":" + secondStr);
+        return DateUtil.formatTime(DateUtil.date());
     }
 
     /**

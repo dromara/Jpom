@@ -51,7 +51,6 @@ public class NodeMonitor implements Task {
     @Override
     public void execute() {
         long time = System.currentTimeMillis();
-        System.out.println(time);
         NodeService nodeService = SpringUtil.getBean(NodeService.class);
         //
         List<NodeModel> nodeModels = nodeService.listByCycle(Cycle.seconds30);
