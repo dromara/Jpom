@@ -264,9 +264,9 @@
 
         function scrollToBotomm() {
             var h = showLogDom[0].scrollHeight;
-            if (window.screen.height * 2 < h) {
+            if (window.screen.height * 5 < h) {
                 var attr = autoClearDom.attr('checked');
-                if (attr) {
+                if (attr === "checked" || attr === true || attr === "true") {
                     showLogDom.html("已清空屏幕缓存" + '<br/>');
                     showLogDom.scrollTop(0);
                     return;

@@ -146,7 +146,7 @@ public class LoginControl extends BaseServerController {
             @ValidatorConfig(value = {
                     @ValidatorItem(value = ValidatorRule.NOT_EMPTY, msg = "请输入登录信息")
             }) String userPwd,
-            String code) throws IOException {
+            String code) {
         if (this.ipLock()) {
             return JsonMessage.getString(400, "尝试次数太多，请稍后再来");
         }
