@@ -49,7 +49,7 @@
 
 <script type="text/html" id="bar_projects">
 
-    <a th:if="${session.user.isDeleteTomcatFile(node.id)}" href="javascript:;"
+    <a th:if="${session.user.isSystemUser()}" href="javascript:;"
        class="layui-btn layui-btn-sm layui-btn-danger" lay-event="delete">删除</a>
 
     {{# if(!d.isDirectory){ }}
@@ -109,11 +109,11 @@
                         zTreeObj.removeChildNodes(currentNode);
                         var temp = [];
                         for (var i in child) {
+                            temp.push(child[i]);
                             if (child[i].isDirectory) {
-                                temp.push(child[i]);
+                                child[i].hasChildren = true;
+                                child[i].chkDisabled = true;
                             }
-                            child[i].hasChildren = true;
-                            child[i].chkDisabled = true;
                         }
                         zTreeObj.addNodes(currentNode, temp, false);
                     }
@@ -220,11 +220,11 @@
                     zTreeObj.removeChildNodes(currentNode);
                     var temp = [];
                     for (var i in child) {
+                        temp.push(child[i]);
                         if (child[i].isDirectory) {
-                            temp.push(child[i]);
+                            child[i].hasChildren = true;
+                            child[i].chkDisabled = true;
                         }
-                        child[i].hasChildren = true;
-                        child[i].chkDisabled = true;
                     }
                     zTreeObj.addNodes(currentNode, temp, false);
                 }
