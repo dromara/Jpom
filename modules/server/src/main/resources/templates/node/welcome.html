@@ -45,7 +45,7 @@
 </body>
 <script type="text/javascript">
     var cycleTime = [[${cycleTime}]];
-    var ws, myEcharts, maxSize = 12;
+    var ws, myEcharts;
     var col = [{field: 'pid', title: '进程id', sort: true, width: '6%'},
         {field: 'command', title: '进程名称'},
         {field: 'port', title: '端口', sort: true, width: '6%'},
@@ -102,7 +102,6 @@
             },
             success: function (data) {
                 if (200 === data.code && data.data) {
-                    maxSize = data.data.maxSize;
                     loadEchartsData(data.data);
                     setTimeout(function () {
                         loadTop();
@@ -117,7 +116,7 @@
         let cpuItem = {
             name: 'cpu占用',
             type: 'line',
-            data: [0],
+            data: [],
             showSymbol: false,
             //设置折线为曲线
             smooth: true
@@ -125,25 +124,19 @@
         let diskItem = {
             name: '磁盘占用',
             type: 'line',
-            data: [0],
+            data: [],
             showSymbol: false,
             smooth: true
         };
         let memoryItem = {
             name: '内存占用',
             type: 'line',
-            data: [0],
+            data: [],
             showSymbol: false,
             smooth: true
         };
         for (let i = 0; i < series.length; i++) {
             let item = series[i];
-            if (i === 0) {
-                //删除默认0的数据
-                cpuItem.data.splice(0, 1);
-                diskItem.data.splice(0, 1);
-                memoryItem.data.splice(0, 1);
-            }
             cpuItem.data.push(parseFloat(item.cpu));
             diskItem.data.push(parseFloat(item.disk));
             memoryItem.data.push(parseFloat(item.memory));

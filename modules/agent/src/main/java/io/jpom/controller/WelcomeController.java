@@ -65,7 +65,6 @@ public class WelcomeController extends AbstractController {
         JSONObject object = new JSONObject();
         object.put("scales", scale);
         object.put("series", series);
-        object.put("maxSize", count);
         return JsonMessage.getString(200, "", object);
     }
 

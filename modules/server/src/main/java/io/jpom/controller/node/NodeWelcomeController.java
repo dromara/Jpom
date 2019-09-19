@@ -4,8 +4,14 @@ import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.text.StrSpliter;
 import cn.hutool.core.util.CharsetUtil;
+import cn.hutool.db.Entity;
+import cn.hutool.db.Page;
 import cn.hutool.db.PageResult;
+import cn.hutool.db.sql.Direction;
+import cn.hutool.db.sql.Order;
 import cn.hutool.extra.servlet.ServletUtil;
+import cn.jiangzeyin.common.JsonMessage;
+import com.alibaba.fastjson.JSONObject;
 import io.jpom.common.BaseServerController;
 import io.jpom.common.forward.NodeForward;
 import io.jpom.common.forward.NodeUrl;
@@ -25,6 +31,8 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -40,10 +48,14 @@ public class NodeWelcomeController extends BaseServerController {
     @Resource
     private DbSystemMonitorLogService dbSystemMonitorLogService;
 
+    private Cycle getCycle() {
+        NodeModel node = getNode();
+        return BaseEnum.getEnum(Cycle.class, node.getCycle());
+    }
+
     @RequestMapping(value = "welcome", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
     public String welcome() {
-        NodeModel node = getNode();
-        Cycle cycle = BaseEnum.getEnum(Cycle.class, node.getCycle());
+        Cycle cycle = getCycle();
         long millis = cycle == null ? TimeUnit.SECONDS.toMillis(30) : cycle.getMillis();
         if (millis <= 0) {
             millis = TimeUnit.SECONDS.toMillis(30);
@@ -59,7 +71,31 @@ public class NodeWelcomeController extends BaseServerController {
     @RequestMapping(value = "getTop", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     public String getTop() {
-        return NodeForward.request(getNode(), getRequest(), NodeUrl.GetTop).toString();
+        Cycle cycle = getCycle();
+        NodeModel node = getNode();
+        if (cycle == null || cycle == Cycle.none) {
+            return NodeForward.request(node, getRequest(), NodeUrl.GetTop).toString();
+        }
+        Page pageObj = new Page(1, 60);
+        pageObj.addOrder(new Order("monitorTime", Direction.DESC));
+        Entity entity = Entity.create();
+        entity.set("nodeId", node.getId());
+        PageResult<SystemMonitorLog> pageResult = dbSystemMonitorLogService.listPage(entity, pageObj);
+        List<JSONObject> series = new ArrayList<>();
+        List<String> scale = new ArrayList<>();
+        for (int i = pageResult.size() - 1; i >= 0; i--) {
+            SystemMonitorLog systemMonitorLog = pageResult.get(i);
+            scale.add(DateUtil.formatTime(new Date(systemMonitorLog.getMonitorTime())));
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.put("cpu", systemMonitorLog.getOccupyCpu());
+            jsonObject.put("memory", systemMonitorLog.getOccupyMemory());
+            jsonObject.put("disk", systemMonitorLog.getOccupyDisk());
+            series.add(jsonObject);
+        }
+        JSONObject object = new JSONObject();
+        object.put("scales", scale);
+        object.put("series", series);
+        return JsonMessage.getString(200, "ok", object);
     }
 
     @RequestMapping(value = "exportTop")
