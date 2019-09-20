@@ -77,8 +77,8 @@
                                     data: {
                                         path: '_tomcat_log',
                                         filename: data.path,
-                                        nodeId: "$!node.id",
-                                        id: "$!id"
+                                        nodeId: "[[${node.id}]]",
+                                        id: "[[${id}]]"
                                     },
                                     success: function (data) {
                                         layer.msg(data.msg);
