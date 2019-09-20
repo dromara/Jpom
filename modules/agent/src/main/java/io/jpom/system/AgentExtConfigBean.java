@@ -120,6 +120,16 @@ public class AgentExtConfigBean {
     }
 
     /**
+     * 是否开启日志备份
+     *
+     * @return 如果表达式配置为none 则不配置，重启业不备份
+     */
+    public boolean openLogBack() {
+        String cron = StrUtil.emptyToDefault(autoBackConsoleCron, "none");
+        return !"none".equalsIgnoreCase(cron.trim());
+    }
+
+    /**
      * 单例
      *
      * @return this

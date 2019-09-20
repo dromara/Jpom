@@ -20,6 +20,7 @@ import io.jpom.model.RunMode;
 import io.jpom.model.data.ProjectInfoModel;
 import io.jpom.model.system.NetstatModel;
 import io.jpom.service.manage.ProjectInfoService;
+import io.jpom.system.AgentExtConfigBean;
 import io.jpom.system.JpomRuntimeException;
 import io.jpom.util.CommandUtil;
 import io.jpom.util.JvmUtil;
@@ -253,9 +254,12 @@ public abstract class AbstractProjectCommander {
         if (file.length() <= 1000) {
             return "ok";
         }
-        File backPath = projectInfoModel.getLogBack();
-        backPath = new File(backPath, DateTime.now().toString(DatePattern.PURE_DATETIME_FORMAT) + ".log");
-        FileUtil.copy(file, backPath, true);
+        if (AgentExtConfigBean.getInstance().openLogBack()) {
+            // 开启日志备份才移动文件
+            File backPath = projectInfoModel.getLogBack();
+            backPath = new File(backPath, DateTime.now().toString(DatePattern.PURE_DATETIME_FORMAT) + ".log");
+            FileUtil.copy(file, backPath, true);
+        }
         if (SystemUtil.getOsInfo().isLinux()) {
             CommandUtil.execSystemCommand("cp /dev/null " + projectInfoModel.getLog());
         } else if (SystemUtil.getOsInfo().isWindows()) {
