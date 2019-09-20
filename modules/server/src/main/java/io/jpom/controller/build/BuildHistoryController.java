@@ -162,7 +162,9 @@ public class BuildHistoryController extends BaseServerController {
             BeanUtil.copyProperties(buildHistoryLog, historyLogVo);
             String dataId = buildHistoryLog.getBuildDataId();
             BuildModel item = buildService.getItem(dataId);
-            historyLogVo.setBuildName(item.getName());
+            if (item != null) {
+                historyLogVo.setBuildName(item.getName());
+            }
             buildHistoryLogVos.add(historyLogVo);
         });
         JSONObject jsonObject = JsonMessage.toJson(200, "获取成功", buildHistoryLogVos);
