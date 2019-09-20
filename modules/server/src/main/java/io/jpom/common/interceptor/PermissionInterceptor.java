@@ -92,12 +92,8 @@ public class PermissionInterceptor extends BaseJpomInterceptor {
             // 动态参数
             String parameterName = dynamicData.getParameterName();
             String parameter = request.getParameter(parameterName);
-            if (StrUtil.isEmpty(parameter)) {
-                this.errorMsg(request, response);
-                return false;
-            }
             //
-            if (roleService.errorDynamicPermission(userModel, classFeature, parameter)) {
+            if (StrUtil.isNotEmpty(parameter) && roleService.errorDynamicPermission(userModel, classFeature, parameter)) {
                 this.errorMsg(request, response);
                 return false;
             }
