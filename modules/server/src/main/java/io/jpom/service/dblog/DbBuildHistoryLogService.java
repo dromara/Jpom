@@ -81,15 +81,14 @@ public class DbBuildHistoryLogService extends BaseDbLogService<BuildHistoryLog> 
             return new JsonMessage(405, "没有对应构建记录");
         }
         BuildModel item = buildService.getItem(buildHistoryLog.getBuildDataId());
-        if (item == null) {
-            return new JsonMessage(404, "没有对应数据");
-        }
-        File logFile = BuildUtil.getLogFile(item.getId(), buildHistoryLog.getBuildNumberId());
-        File dataFile = logFile.getParentFile();
-        if (dataFile.exists()) {
-            boolean s = FileUtil.del(dataFile);
-            if (!s) {
-                return new JsonMessage(500, "清理文件失败");
+        if (item != null) {
+            File logFile = BuildUtil.getLogFile(item.getId(), buildHistoryLog.getBuildNumberId());
+            File dataFile = logFile.getParentFile();
+            if (dataFile.exists()) {
+                boolean s = FileUtil.del(dataFile);
+                if (!s) {
+                    return new JsonMessage(500, "清理文件失败");
+                }
             }
         }
         int count = delByKey(logId);
