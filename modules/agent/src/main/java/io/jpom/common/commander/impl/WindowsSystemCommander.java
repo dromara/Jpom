@@ -40,7 +40,6 @@ public class WindowsSystemCommander extends AbstractSystemCommander {
     public JSONObject getAllMonitor() {
         OperatingSystemMXBean operatingSystemMXBean = (OperatingSystemMXBean) ManagementFactory.getOperatingSystemMXBean();
         JSONObject jsonObject = new JSONObject();
-        jsonObject.put("top", true);
         double total = operatingSystemMXBean.getTotalPhysicalMemorySize();
         double free = operatingSystemMXBean.getFreePhysicalMemorySize();
         jsonObject.put("memory", String.format("%.2f", (total - free) / total * 100));

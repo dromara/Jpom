@@ -19,7 +19,7 @@ public class LinuxSystemCommander extends AbstractSystemCommander {
 
     @Override
     public JSONObject getAllMonitor() {
-        String result = CommandUtil.execSystemCommand("top -b -n 1");
+        String result = CommandUtil.execSystemCommand("top -i -b -n 1");
         if (StrUtil.isEmpty(result)) {
             return null;
         }
@@ -38,7 +38,6 @@ public class LinuxSystemCommander extends AbstractSystemCommander {
             String memory = getLinuxMemory(mem);
             jsonObject.put("memory", memory);
         }
-        jsonObject.put("top", true);
         jsonObject.put("disk", getHardDisk());
         return jsonObject;
     }
