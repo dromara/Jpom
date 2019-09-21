@@ -20,6 +20,7 @@ import io.jpom.common.forward.NodeUrl;
 import io.jpom.model.BaseEnum;
 import io.jpom.model.Cycle;
 import io.jpom.model.data.NodeModel;
+import io.jpom.model.data.UserModel;
 import io.jpom.model.log.SystemMonitorLog;
 import io.jpom.service.dblog.DbSystemMonitorLogService;
 import io.jpom.util.StringUtil;
@@ -192,5 +193,15 @@ public class NodeWelcomeController extends BaseServerController {
     @ResponseBody
     public String getProcessList() {
         return NodeForward.request(getNode(), getRequest(), NodeUrl.ProcessList).toString();
+    }
+
+    @RequestMapping(value = "kill.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @ResponseBody
+    public String kill() {
+        UserModel user = getUser();
+        if (user.isSystemUser()) {
+            return JsonMessage.getString(405, "没有权限");
+        }
+        return NodeForward.request(getNode(), getRequest(), NodeUrl.Kill).toString();
     }
 }

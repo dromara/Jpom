@@ -6,6 +6,7 @@ import io.jpom.common.commander.impl.LinuxSystemCommander;
 import io.jpom.common.commander.impl.WindowsSystemCommander;
 import io.jpom.model.system.ProcessModel;
 import io.jpom.system.JpomRuntimeException;
+import io.jpom.util.CommandUtil;
 
 import java.io.File;
 import java.util.List;
@@ -100,4 +101,22 @@ public abstract class AbstractSystemCommander {
      * @return 结果
      */
     public abstract String stopService(String serviceName);
+
+    /**
+     * 构建kill 命令
+     *
+     * @param pid 进程编号
+     * @return 结束进程命令
+     */
+    public abstract String buildKill(int pid);
+
+    /**
+     * kill
+     *
+     * @param pid 进程编号
+     */
+    public String kill(File file, int pid) {
+        String kill = buildKill(pid);
+        return CommandUtil.execSystemCommand(kill, file);
+    }
 }

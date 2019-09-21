@@ -4,6 +4,7 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.text.StrSpliter;
 import cn.hutool.core.util.StrUtil;
 import io.jpom.common.commander.AbstractProjectCommander;
+import io.jpom.common.commander.AbstractSystemCommander;
 import io.jpom.model.data.ProjectInfoModel;
 import io.jpom.model.system.NetstatModel;
 import io.jpom.util.CommandUtil;
@@ -39,11 +40,10 @@ public class LinuxProjectCommander extends AbstractProjectCommander {
         String result = super.stop(projectInfoModel);
         int pid = parsePid(result);
         if (pid > 0) {
-            String cmd = String.format("kill  %s", pid);
-            CommandUtil.asyncExeLocalCommand(FileUtil.file(projectInfoModel.allLib()), cmd);
+            AbstractSystemCommander.getInstance().kill(FileUtil.file(projectInfoModel.allLib()), pid);
             if (loopCheckRun(projectInfoModel.getId(), false)) {
                 // 强制杀进程
-                cmd = String.format("kill -9 %s", pid);
+                String cmd = String.format("kill -9 %s", pid);
                 CommandUtil.asyncExeLocalCommand(FileUtil.file(projectInfoModel.allLib()), cmd);
             }
             String tag = projectInfoModel.getId();

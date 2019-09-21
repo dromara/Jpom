@@ -173,4 +173,9 @@ public class WindowsSystemCommander extends AbstractSystemCommander {
         String format = StrUtil.format("net stop {}", serviceName);
         return CommandUtil.execSystemCommand(format);
     }
+
+    @Override
+    public String buildKill(int pid) {
+        return String.format("taskkill /F /PID %s", pid);
+    }
 }

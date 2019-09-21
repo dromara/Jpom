@@ -116,7 +116,9 @@ public class CommandUtil {
         List<String> commands = getCommand();
         commands.add(command);
         ProcessBuilder pb = new ProcessBuilder(commands);
-        pb.directory(file);
+        if (file != null) {
+            pb.directory(file);
+        }
         pb.redirectOutput(ProcessBuilder.Redirect.INHERIT);
         pb.redirectError(ProcessBuilder.Redirect.INHERIT);
         pb.redirectInput(ProcessBuilder.Redirect.INHERIT);

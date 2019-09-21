@@ -211,4 +211,9 @@ public class LinuxSystemCommander extends AbstractSystemCommander {
         String format = StrUtil.format("service {} stop", serviceName);
         return CommandUtil.execSystemCommand(format);
     }
+
+    @Override
+    public String buildKill(int pid) {
+        return String.format("kill  %s", pid);
+    }
 }

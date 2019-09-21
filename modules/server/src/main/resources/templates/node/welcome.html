@@ -52,10 +52,14 @@
         });
     });
 </script>
+<script type="text/html" id="bar">
+    <a href="javascript:;" class="layui-btn layui-btn-xs layui-btn-danger" lay-event="kill">关闭</a>
+</script>
 <script type="text/javascript">
     var cycleTime = [[${cycleTime}]];
     var ws, myEcharts;
-    var col = [{field: 'pid', title: '进程id', sort: true, width: '6%'},
+    var col = [
+        {field: 'pid', title: '进程id', sort: true, width: '6%'},
         {field: 'command', title: '进程名称'},
         {field: 'port', title: '端口', sort: true, width: '6%'},
         {field: 'user', title: '所有者', width: '8%', sort: true},
@@ -65,10 +69,12 @@
         {field: 'cpu', title: '占用CPU', width: '8%', sort: true},
         {field: 'mem', title: '物理内存', width: '8%', sort: true},
         {field: 'time', title: '时间总计', sort: true},
-        {field: 'pr', title: '优先级', width: '6%', sort: true},
+        // {field: 'pr', title: '优先级', width: '6%', sort: true},
         // {field: 'NI', title: 'nice值', width: '6%', sort: true},
         {field: 'virt', title: '虚拟内存', width: '8%', sort: true},
-        {field: 'shr', title: '共享内存', width: '8%', sort: true}];
+        {field: 'shr', title: '共享内存', width: '8%', sort: true},
+        {field: 'op', title: '操作', align: 'center', toolbar: '#bar', fixed: 'right'}
+    ];
     var config = {
         id: 'tab_monitor',
         elem: '#tab_monitor',
@@ -83,6 +89,31 @@
         //
         tableRender(config);
         loadProcessList();
+        //
+        // 表格工具条事件
+        table.on('tool(tab_monitor)', function (obj) {
+            var data = obj.data;
+            var event = obj.event;
+            if ('kill' === event) {
+                layer.confirm('确定要结束该进程吗？', {
+                    title: '系统提示'
+                }, function (index) {
+                    layer.close(index);
+                    loadingAjax({
+                        url: './kill.json',
+                        data: {
+                            pid: data.pid
+                        },
+                        success: function (data) {
+                            layer.msg(data.msg);
+                            if (200 === data.code) {
+                                loadTop();
+                            }
+                        }
+                    });
+                });
+            }
+        });
     }
 
     function loadTop() {

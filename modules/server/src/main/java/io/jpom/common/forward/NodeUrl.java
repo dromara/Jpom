@@ -18,6 +18,7 @@ public enum NodeUrl {
     GetDirectTop("/getDirectTop"),
     Status("/status"),
     exportTop("/exportTop"),
+    Kill("/kill.json"),
 
     ProcessList("/processList", -1),
     /**

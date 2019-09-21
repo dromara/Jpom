@@ -4,6 +4,7 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.text.StrSpliter;
 import cn.hutool.core.util.StrUtil;
 import io.jpom.common.commander.AbstractProjectCommander;
+import io.jpom.common.commander.AbstractSystemCommander;
 import io.jpom.model.data.ProjectInfoModel;
 import io.jpom.model.system.NetstatModel;
 import io.jpom.util.CommandUtil;
@@ -43,8 +44,7 @@ public class WindowsProjectCommander extends AbstractProjectCommander {
         // 查询状态，如果正在运行，则执行杀进程命令
         int pid = parsePid(result);
         if (pid > 0) {
-            String cmd = String.format("taskkill /F /PID %s", pid);
-            CommandUtil.asyncExeLocalCommand(FileUtil.file(projectInfoModel.allLib()), cmd);
+            AbstractSystemCommander.getInstance().kill(FileUtil.file(projectInfoModel.allLib()), pid);
             loopCheckRun(projectInfoModel.getId(), false);
             result = status(tag);
         }

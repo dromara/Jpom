@@ -2,6 +2,7 @@ package io.jpom.controller;
 
 import cn.hutool.cache.impl.CacheObj;
 import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.controller.base.AbstractController;
 import com.alibaba.fastjson.JSONObject;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
@@ -73,8 +75,20 @@ public class WelcomeController extends AbstractController {
     public String getProcessList() {
         List<ProcessModel> array = AbstractSystemCommander.getInstance().getProcessList();
         if (array != null && !array.isEmpty()) {
+            array.sort(Comparator.comparingInt(ProcessModel::getPid));
             return JsonMessage.getString(200, "", array);
         }
         return JsonMessage.getString(402, "没有获取到进程信息");
+    }
+
+
+    @RequestMapping(value = "kill.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @ResponseBody
+    public String kill(int pid) {
+        String result = AbstractSystemCommander.getInstance().kill(null, pid);
+        if (StrUtil.isEmpty(result)) {
+            result = "成功kill";
+        }
+        return JsonMessage.getString(200, result);
     }
 }
