@@ -1,9 +1,11 @@
 package io.jpom.controller.node;
 
+import cn.hutool.core.date.DatePattern;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.text.StrSpliter;
 import cn.hutool.core.util.CharsetUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.db.Entity;
 import cn.hutool.db.Page;
 import cn.hutool.db.PageResult;
@@ -54,13 +56,19 @@ public class NodeWelcomeController extends BaseServerController {
         return BaseEnum.getEnum(Cycle.class, node.getCycle());
     }
 
-    @RequestMapping(value = "welcome", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
-    public String welcome() {
+    private long getCycleMillis() {
         Cycle cycle = getCycle();
         long millis = cycle == null ? TimeUnit.SECONDS.toMillis(30) : cycle.getMillis();
         if (millis <= 0) {
             millis = TimeUnit.SECONDS.toMillis(30);
         }
+        return millis;
+    }
+
+    @RequestMapping(value = "welcome", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
+    public String welcome() {
+        Cycle cycle = getCycle();
+        long millis = getCycleMillis();
         if (cycle != null && cycle != Cycle.none) {
             //
             setAttribute("monitorCycle", true);
@@ -69,26 +77,57 @@ public class NodeWelcomeController extends BaseServerController {
         return "node/welcome";
     }
 
-    @RequestMapping(value = "getTop", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "nodeMonitor.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
+    public String nodeMonitor() {
+        return "node/nodeMonitor";
+    }
+
+    @RequestMapping(value = "nodeMonitor_data.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
-    public String getTop(Long millis) {
-        Cycle cycle = getCycle();
-        NodeModel node = getNode();
-        if (cycle == null || cycle == Cycle.none) {
-            // 未开启、直接查询
-            return NodeForward.request(node, getRequest(), NodeUrl.GetTop).toString();
+    public String nodeMonitorJson(String time) {
+        JSONObject object = getData(time);
+        return JsonMessage.getString(200, "ok", object);
+    }
+
+    private PageResult<SystemMonitorLog> getList(String time, long millis) {
+        long endTime = System.currentTimeMillis();
+        long startTime = endTime - TimeUnit.MINUTES.toMillis(30);
+        if (StrUtil.isNotEmpty(time)) {
+            //  处理时间
+            List<String> list = StrSpliter.splitTrim(time, "~", true);
+            DateTime startDate = DateUtil.parseDateTime(list.get(0));
+            startTime = startDate.getTime();
+            DateTime endDate = DateUtil.parseDateTime(list.get(1));
+            if (startDate.equals(endDate)) {
+                endDate = DateUtil.endOfDay(endDate);
+            }
+            endTime = endDate.getTime();
         }
+        int count = (int) ((endTime - startTime) / millis);
+        NodeModel node = getNode();
         // 开启了节点信息采集
-        Page pageObj = new Page(1, 60);
+        Page pageObj = new Page(1, count);
         pageObj.addOrder(new Order("monitorTime", Direction.DESC));
         Entity entity = Entity.create();
         entity.set("nodeId", node.getId());
-        PageResult<SystemMonitorLog> pageResult = dbSystemMonitorLogService.listPage(entity, pageObj);
+
+        entity.set(" MONITORTIME", ">= " + startTime);
+        entity.set("MONITORTIME", "<= " + endTime);
+        return dbSystemMonitorLogService.listPage(entity, pageObj);
+    }
+
+    private JSONObject getData(String selTime) {
+        long millis = getCycleMillis();
+        PageResult<SystemMonitorLog> pageResult = getList(selTime, millis);
         List<JSONObject> series = new ArrayList<>();
         List<String> scale = new ArrayList<>();
         for (int i = pageResult.size() - 1; i >= 0; i--) {
             SystemMonitorLog systemMonitorLog = pageResult.get(i);
-            scale.add(DateUtil.formatTime(new Date(systemMonitorLog.getMonitorTime())));
+            if (StrUtil.isEmpty(selTime)) {
+                scale.add(DateUtil.formatTime(new Date(systemMonitorLog.getMonitorTime())));
+            } else {
+                scale.add(new DateTime(systemMonitorLog.getMonitorTime()).toString(DatePattern.NORM_DATETIME_PATTERN));
+            }
             JSONObject jsonObject = new JSONObject();
             jsonObject.put("cpu", systemMonitorLog.getOccupyCpu());
             jsonObject.put("memory", systemMonitorLog.getOccupyMemory());
@@ -109,24 +148,29 @@ public class NodeWelcomeController extends BaseServerController {
         JSONObject object = new JSONObject();
         object.put("scales", scale);
         object.put("series", series);
+        return object;
+    }
+
+    @RequestMapping(value = "getTop", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @ResponseBody
+    public String getTop() {
+        Cycle cycle = getCycle();
+        NodeModel node = getNode();
+        if (cycle == null || cycle == Cycle.none) {
+            // 未开启、直接查询
+            return NodeForward.request(node, getRequest(), NodeUrl.GetTop).toString();
+        }
+        JSONObject object = getData(null);
         return JsonMessage.getString(200, "ok", object);
     }
 
     @RequestMapping(value = "exportTop")
     public void exportTop(String time) throws UnsupportedEncodingException {
-        NodeModel node = getNode();
-        List<String> list = StrSpliter.splitTrim(time, "~", true);
-        DateTime startDate = DateUtil.parseDateTime(list.get(0));
-        long startTime = startDate.getTime();
-        DateTime endDate = DateUtil.parseDateTime(list.get(1));
-        if (startDate.equals(endDate)) {
-            endDate = DateUtil.endOfDay(endDate);
-        }
-        long endTime = endDate.getTime();
-        PageResult<SystemMonitorLog> monitorData = dbSystemMonitorLogService.getMonitorData(startTime, endTime);
+        PageResult<SystemMonitorLog> monitorData = getList(time, getCycleMillis());
         if (monitorData.getTotal() <= 0) {
             //            NodeForward.requestDownload(node, getRequest(), getResponse(), NodeUrl.exportTop);
         } else {
+            NodeModel node = getNode();
             StringBuilder buf = new StringBuilder();
             buf.append("监控时间").append(",占用cpu").append(",占用内存").append(",占用磁盘").append("\r\n");
             for (SystemMonitorLog log : monitorData) {

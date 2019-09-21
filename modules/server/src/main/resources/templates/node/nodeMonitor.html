@@ -3,14 +3,6 @@
 <head>
     <th:block th:include="common/head::head"/>
     <style type="text/css">
-        body {
-            position: absolute;
-            top: 0px;
-            right: 0px;
-            bottom: 0px;
-            left: 0px;
-            padding: 10px;
-        }
 
         .echarts {
             margin: 20px auto;
@@ -18,7 +10,12 @@
             height: 400px;
         }
 
-        .view {
+        .choose {
+            color: #009688;
+            border: 1px #009688 solid !important;
+        }
+
+        .export {
             position: absolute;
             right: 3%;
             z-index: 990;
@@ -30,73 +27,64 @@
 
 <body>
 <div style="position: relative">
-    <div class="view" th:if="${monitorCycle}">
-        <button class="layui-icon  layui-icon-chart-screen" id="viewBtn" title="查看监控数据"
+    <form class="layui-form" action="">
+        <div class="layui-form-item" style="margin-bottom: 0;">
+            <div class="layui-inline">
+                <label class="layui-form-label" style="width: auto !important;">时间</label>
+                <div class="layui-input-inline" style="width: 300px;">
+                    <input type="text" readonly class="layui-input" id="time" placeholder="请选择时间范围">
+                </div>
+            </div>
+        </div>
+    </form>
+    <div class="export">
+        <div id="exportData" style="color: #FFFFFF;width: 1px;height: 1px"></div>
+        <button class="layui-icon layui-icon-export" id="exportBtn" title="导出监控数据"
                 style="font-size: 18px"></button>
     </div>
     <div class="echarts" id="echarts"></div>
 </div>
-<table class="layui-table" id="tab_monitor" lay-filter="tab_monitor" style="margin-top:10px"></table>
 </body>
 
-<script type="text/javascript" th:if="${monitorCycle}">
-    asyncFn.push(function () {
-        $("#viewBtn").click(function () {
-            layerOpen({
-                type: 2,
-                title: '查看历史记录',
-                shade: 0.8,
-                area: ['60%', '80%'],
-                content: 'nodeMonitor.html'
-            });
-        });
-    });
-</script>
 <script type="text/javascript">
-    var cycleTime = [[${cycleTime}]];
-    var ws, myEcharts;
-    var col = [{field: 'pid', title: '进程id', sort: true, width: '6%'},
-        {field: 'command', title: '进程名称'},
-        {field: 'port', title: '端口', sort: true, width: '6%'},
-        {field: 'user', title: '所有者', width: '8%', sort: true},
-        {field: 'jpomName', title: '项目名称', width: '8%', sort: true},
-        {field: 'res', title: '物理内存', width: '8%', sort: true},
-        {field: 'status', title: '进程状态', width: '8%', sort: true},
-        {field: 'cpu', title: '占用CPU', width: '8%', sort: true},
-        {field: 'mem', title: '物理内存', width: '8%', sort: true},
-        {field: 'time', title: '时间总计', sort: true},
-        {field: 'pr', title: '优先级', width: '6%', sort: true},
-        // {field: 'NI', title: 'nice值', width: '6%', sort: true},
-        {field: 'virt', title: '虚拟内存', width: '8%', sort: true},
-        {field: 'shr', title: '共享内存', width: '8%', sort: true}];
-    var config = {
-        id: 'tab_monitor',
-        elem: '#tab_monitor',
-        cols: [col],
-        done: function (data) {
-        }
-    };
+    var myEcharts;
+    var time = '';
 
     function loadSuccess() {
-        loadTop();
-        //加载进程信息
-        //
-        tableRender(config);
-        loadProcessList();
+        loadTop('');
+
+        layui.use(['laydate'], function () {
+            var laydate = layui.laydate;
+            var now = new Date().getTime();
+            laydate.render({
+                elem: '#time',
+                type: 'datetime',
+                range: "~",
+                max: now,
+                done: function (value, date, endDate) {
+                    time = value;
+                    loadTop(value);
+                }
+            });
+        });
+
+        $("#exportBtn").click(function () {
+            window.open(appendNodeId('./exportTop?time=' + time));
+        });
     }
 
-    function loadTop() {
-        silentAjax({
-            url: './getTop',
+    function loadTop(time) {
+        loadingAjax({
+            url: './nodeMonitor_data.json',
             data: {
-                millis: cycleTime
+                time: time
             },
             success: function (data) {
                 if (200 === data.code && data.data) {
                     loadEchartsData(data.data);
-                    setTimeout(function () {
-                        loadTop();
-                    }, cycleTime);
+                }
+                if (data.code !== 200) {
+                    layer.msg(data.msg);
                 }
             }
         });
@@ -181,23 +169,6 @@
         } catch (e) {
             console.error(e);
         }
-    }
-
-    function loadProcessList() {
-        silentAjax({
-            url: './processList',
-            success: function (data) {
-                if (200 === data.code && data.data) {
-                    config.data = data.data;
-                    tableRender(config);
-                    setTimeout(function () {
-                        loadProcessList();
-                    }, cycleTime);
-                } else if (data.msg && data.msg !== "") {
-                    layer.msg(data.msg);
-                }
-            }
-        });
     }
 </script>
 
