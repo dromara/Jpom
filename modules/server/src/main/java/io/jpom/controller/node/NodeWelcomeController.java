@@ -199,7 +199,7 @@ public class NodeWelcomeController extends BaseServerController {
     @ResponseBody
     public String kill() {
         UserModel user = getUser();
-        if (user.isSystemUser()) {
+        if (!user.isSystemUser()) {
             return JsonMessage.getString(405, "没有权限");
         }
         return NodeForward.request(getNode(), getRequest(), NodeUrl.Kill).toString();
