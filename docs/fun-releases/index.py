@@ -8,7 +8,7 @@ TEXT_HEADER = [('Content-type', 'text/plain')]
 
 def handler(environ, start_response):
     # 查询版本
-    result = requests.get('https://api.github.com/repos/jiangzeyin/Jpom/releases/latest')
+    result = requests.get('https://keepbx.gitee.io/jpom/versions.json')
     json = result.json()
     tag_name = json['tag_name']
     if tag_name.strip() == '':

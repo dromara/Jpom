@@ -1,3 +1,4 @@
+# https://github.com/alibaba/funcraft/blob/master/docs/specs/2018-04-03-zh-cn.md
 ROSTemplateFormatVersion: '2015-09-01'
 Transform: 'Aliyun::Serverless-2018-04-03'
 Resources:
@@ -12,6 +13,9 @@ Resources:
         Runtime: python3
         CodeUri: './'
         Description: 'Jpom 安装url处理'
+        MemorySize: 320
+        Timeout: 5
+        InitializationTimeout: 5
       Events:
         install-api:
           Type: HTTP

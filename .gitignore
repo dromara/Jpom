@@ -3,3 +3,4 @@ target/
 .idea/
 *.iml
 venv/
+node_modules/
