@@ -43,6 +43,11 @@ function start() {
         echo "请配置【JAVA_HOME】环境变量"
         exit 2
     fi
+    pid=`getPid`
+	if [[ "$pid" != "" ]]; then
+	   echo "程序正在运行中：${pid}"
+	   exit 2
+	fi
     echo  ${Log}
     # 备份日志
     if [[ -f ${Log} ]]; then
@@ -98,14 +103,14 @@ function listDir()
 
 # 停止程序
 function stop() {
-	pid=$(ps -ef | grep -v 'grep' | egrep ${Tag}| awk '{printf $2 " "}')
+	pid=`getPid`
 	if [[ "$pid" != "" ]]; then
         echo -n "boot ( pid $pid) is running"
         echo
         echo -n $"Shutting down boot: wait"
         kill $(pgrep -f ${Tag}) 2>/dev/null
         sleep 3
-		pid=$(ps -ef | grep -v 'grep' | egrep ${Tag}| awk '{printf $2 " "}')
+		pid=`getPid`
 		if [[ "$pid" != "" ]]; then
 			echo "kill boot process"
 			kill -9 "$pid"
@@ -120,13 +125,18 @@ function stop() {
 # 获取程序状态
 function status()
 {
-	pid=$(ps -ef | grep -v 'grep' | egrep ${Tag}| awk '{printf $2 " "}')
+	pid=`getPid`
 	#echo "$pid"
 	if [[ "$pid" != "" ]]; then
 		echo "boot is running,pid is $pid"
 	else
 		echo "boot is stopped"
 	fi
+}
+
+function getPid(){
+    pid=$(ps -ef | grep -v 'grep' | egrep ${Tag}| awk '{printf $2 " "}')
+    echo ${pid}
 }
 
 # 提示使用语法
