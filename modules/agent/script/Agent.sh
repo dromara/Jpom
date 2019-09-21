@@ -130,16 +130,10 @@ function status()
 	fi
 }
 
-# 重新加载nginx
-function reloadNginx(){
-    nginx -t
-    nginx -s reload
-}
-
 # 提示使用语法
 function usage()
 {
-   echo "Usage: $0 {start|stop|restart|status|reloadNginx}"
+   echo "Usage: $0 {start|stop|restart|status}"
    RETVAL="2"
 }
 
@@ -155,9 +149,6 @@ case "$1" in
     restart)
         stop
         start
-        ;;
-    reloadNginx)
-        reloadNginx
         ;;
     status)
         status
