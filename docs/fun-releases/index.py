@@ -18,7 +18,7 @@ def handler(environ, start_response):
     # 处理请求参数
     try:
         query_string = environ['QUERY_STRING']
-    except (KeyError):
+    except KeyError:
         query_string = ""
     pars = query_string.split('&')
     type = 'Server'
