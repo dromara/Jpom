@@ -9,10 +9,42 @@ Resources:
     jpom-releases:
       Type: 'Aliyun::Serverless::Function'
       Properties:
-        Handler: index.handler
+        Handler: index.ossDownload
         Runtime: python3
         CodeUri: './'
-        Description: 'Jpom 安装url处理'
+        Description: 'Jpom gitee安装url处理'
+        MemorySize: 320
+        Timeout: 5
+        InitializationTimeout: 5
+      Events:
+        install-api:
+          Type: HTTP
+          Properties:
+            AuthType: ANONYMOUS
+            Methods: ['GET']
+    jpom-releases2:
+      Type: 'Aliyun::Serverless::Function'
+      Properties:
+        Handler: index.githubOssDownload
+        Runtime: python3
+        CodeUri: './'
+        Description: 'Jpom github安装url处理'
+        MemorySize: 320
+        Timeout: 5
+        InitializationTimeout: 5
+      Events:
+        install-api:
+          Type: HTTP
+          Properties:
+            AuthType: ANONYMOUS
+            Methods: ['GET']
+    jpom-getVerson:
+      Type: 'Aliyun::Serverless::Function'
+      Properties:
+        Handler: index.showVersion
+        Runtime: python3
+        CodeUri: './'
+        Description: 'Jpom 查询最新版本号'
         MemorySize: 320
         Timeout: 5
         InitializationTimeout: 5
