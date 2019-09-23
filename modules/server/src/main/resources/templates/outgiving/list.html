@@ -182,10 +182,13 @@
                 $("script[outGivingItemProject='" + itemId + "']").each(function (i, item) {
                     var projectId = $(this).attr("projectId");
                     var nodeId = $(this).attr("nodeId");
-                    if (projectId && nodeId) {
-                        getProjectStatus(nodeId, projectId);
-                    }
-                    table.reload('table_' + itemId, {});
+                    table.reload('table_' + itemId, {
+                        done: function () {
+                            if (projectId && nodeId) {
+                                getProjectStatus(nodeId, projectId);
+                            }
+                        }
+                    });
                 });
             }
             return false;
