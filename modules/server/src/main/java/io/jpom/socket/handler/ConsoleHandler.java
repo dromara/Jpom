@@ -52,7 +52,7 @@ public class ConsoleHandler extends BaseProxyHandler {
             try {
                 operateLogController.log(reqId, userInfo, "还没有响应", cacheInfo);
             } catch (Exception e) {
-                DefaultSystemLog.ERROR().error("记录操作日志异常", e);
+                DefaultSystemLog.getLog().error("记录操作日志异常", e);
             }
         }
         proxySession.send(json.toString());

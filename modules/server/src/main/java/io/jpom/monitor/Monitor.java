@@ -154,7 +154,7 @@ public class Monitor implements Task {
                                 }
                                 context = "重启结果：" + reJson.toString();
                             } catch (Exception e) {
-                                DefaultSystemLog.ERROR().error("执行重启操作", e);
+                                DefaultSystemLog.getLog().error("执行重启操作", e);
                                 title = StrUtil.format("【{}】节点的【{}】项目已经停止，重启操作异常", nodeModel.getName(), id);
                                 context = ExceptionUtil.stacktraceToString(e);
                             }
@@ -168,7 +168,7 @@ public class Monitor implements Task {
                     context = jsonMessage.toString();
                 }
             } catch (Exception e) {
-                DefaultSystemLog.ERROR().error("节点异常", e);
+                DefaultSystemLog.getLog().error("节点异常", e);
                 //
                 title = StrUtil.format("【{}】节点的运行状态异常", nodeModel.getName());
                 context = ExceptionUtil.stacktraceToString(e);
@@ -273,7 +273,7 @@ public class Monitor implements Task {
                 NotifyUtil.send(notify, title, context);
                 dbMonitorNotifyLogService.updateStatus(logId, true, null);
             } catch (Exception e) {
-                DefaultSystemLog.ERROR().error("发送报警通知异常", e);
+                DefaultSystemLog.getLog().error("发送报警通知异常", e);
                 dbMonitorNotifyLogService.updateStatus(logId, false, ExceptionUtil.stacktraceToString(e));
             }
         });

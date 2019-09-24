@@ -55,7 +55,7 @@ public class NginxService extends BaseDataService {
                 //获得指定目录下所有文件
                 list = FileUtil.loopFiles(whiteDir, pathname -> pathname.getName().endsWith(".conf"));
             } catch (Exception e) {
-                DefaultSystemLog.ERROR().error(e.getMessage(), e);
+                DefaultSystemLog.getLog().error(e.getMessage(), e);
             }
             if (list == null || list.size() <= 0) {
                 continue;
@@ -78,7 +78,7 @@ public class NginxService extends BaseDataService {
                         jsonObject.putAll(data);
                     }
                 } catch (IOException e) {
-                    DefaultSystemLog.ERROR().error(e.getMessage(), e);
+                    DefaultSystemLog.getLog().error(e.getMessage(), e);
                 }
                 array.add(jsonObject);
             }
@@ -193,7 +193,7 @@ public class NginxService extends BaseDataService {
 
             }
         } catch (Exception e) {
-            DefaultSystemLog.ERROR().error(e.getMessage(), e);
+            DefaultSystemLog.getLog().error(e.getMessage(), e);
         }
         return jsonObject;
     }

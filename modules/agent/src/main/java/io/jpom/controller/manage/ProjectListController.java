@@ -92,7 +92,7 @@ public class ProjectListController extends BaseAgentController {
             });
             return JsonMessage.getString(200, "查询成功！", array);
         } catch (Exception e) {
-            DefaultSystemLog.ERROR().error(e.getMessage(), e);
+            DefaultSystemLog.getLog().error(e.getMessage(), e);
             return JsonMessage.getString(500, "查询异常：" + e.getMessage());
         }
     }

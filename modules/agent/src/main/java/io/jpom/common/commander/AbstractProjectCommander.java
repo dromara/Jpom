@@ -109,7 +109,7 @@ public abstract class AbstractProjectCommander {
             try {
                 CommandUtil.asyncExeLocalCommand(FileUtil.file(projectInfoModel.allLib()), command);
             } catch (Exception e) {
-                DefaultSystemLog.ERROR().error("执行命令失败", e);
+                DefaultSystemLog.getLog().error("执行命令失败", e);
             }
         });
         //
@@ -139,9 +139,9 @@ public abstract class AbstractProjectCommander {
         if (StrUtil.isNotEmpty(token)) {
             try {
                 String body = HttpUtil.createGet(token).form("projectId", projectInfoModel.getId()).execute().body();
-                DefaultSystemLog.LOG().info(projectInfoModel.getName() + ":" + body);
+                DefaultSystemLog.getLog().info(projectInfoModel.getName() + ":" + body);
             } catch (Exception e) {
-                DefaultSystemLog.ERROR().error("WebHooks 调用错误", e);
+                DefaultSystemLog.getLog().error("WebHooks 调用错误", e);
                 return "WebHooks error:" + e.getMessage();
             }
         }
@@ -230,7 +230,7 @@ public abstract class AbstractProjectCommander {
                 return jarFile.getAbsolutePath() + "中没有找到对应的MainClass:" + mainClass;
             }
         } catch (Exception e) {
-            DefaultSystemLog.ERROR().error("解析jar", e);
+            DefaultSystemLog.getLog().error("解析jar", e);
             return jarFile.getAbsolutePath() + " 解析错误:" + e.getMessage();
         }
         return null;
@@ -266,7 +266,7 @@ public abstract class AbstractProjectCommander {
             // 清空日志
             String r = CommandUtil.execSystemCommand("echo  \"\" > " + file.getAbsolutePath());
             if (StrUtil.isEmpty(r)) {
-                DefaultSystemLog.LOG().info(r);
+                DefaultSystemLog.getLog().info(r);
             }
         }
         return "ok";

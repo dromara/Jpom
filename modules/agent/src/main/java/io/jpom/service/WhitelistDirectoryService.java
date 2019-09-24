@@ -28,7 +28,7 @@ public class WhitelistDirectoryService extends BaseDataService {
             }
             return jsonObject.toJavaObject(AgentWhitelist.class);
         } catch (Exception e) {
-            DefaultSystemLog.ERROR().error(e.getMessage(), e);
+            DefaultSystemLog.getLog().error(e.getMessage(), e);
         }
         return null;
     }

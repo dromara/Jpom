@@ -185,7 +185,7 @@ public class CertModel extends BaseModel {
             jsonObject.put("keyPath", key);
             return jsonObject;
         } catch (Exception e) {
-            DefaultSystemLog.ERROR().error(e.getMessage(), e);
+            DefaultSystemLog.getLog().error(e.getMessage(), e);
         } finally {
             IoUtil.close(inputStream);
         }

@@ -25,10 +25,10 @@ class CheckDuplicateRun {
                 if (pid.equals(vmIdentifier.getUserInfo())) {
                     return;
                 }
-                DefaultSystemLog.LOG().info("Jpom 程序建议一个机器上只运行一个对应的程序：" + JpomApplication.getAppType() + "  pid:" + vmIdentifier.getUserInfo());
+                DefaultSystemLog.getLog().info("Jpom 程序建议一个机器上只运行一个对应的程序：" + JpomApplication.getAppType() + "  pid:" + vmIdentifier.getUserInfo());
             });
         } catch (Exception e) {
-            DefaultSystemLog.ERROR().error("检查异常", e);
+            DefaultSystemLog.getLog().error("检查异常", e);
         }
     }
 }

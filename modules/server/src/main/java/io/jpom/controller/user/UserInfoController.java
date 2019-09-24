@@ -67,7 +67,7 @@ public class UserInfoController extends BaseServerController {
             getSession().invalidate();
             return JsonMessage.getString(200, "修改密码成功！");
         } catch (Exception e) {
-            DefaultSystemLog.ERROR().error(e.getMessage(), e);
+            DefaultSystemLog.getLog().error(e.getMessage(), e);
             return JsonMessage.getString(500, "系统异常：" + e.getMessage());
         }
     }

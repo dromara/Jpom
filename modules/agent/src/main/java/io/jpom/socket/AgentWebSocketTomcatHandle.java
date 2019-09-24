@@ -49,12 +49,12 @@ public class AgentWebSocketTomcatHandle extends BaseAgentWebSocketHandle {
             }
             this.addUser(session, urlOptUser);
         } catch (Exception e) {
-            DefaultSystemLog.ERROR().error("socket 错误", e);
+            DefaultSystemLog.getLog().error("socket 错误", e);
             try {
                 SocketSessionUtil.send(session, JsonMessage.getString(500, "系统错误!"));
                 session.close();
             } catch (IOException e1) {
-                DefaultSystemLog.ERROR().error(e1.getMessage(), e1);
+                DefaultSystemLog.getLog().error(e1.getMessage(), e1);
             }
         }
     }
@@ -96,11 +96,11 @@ public class AgentWebSocketTomcatHandle extends BaseAgentWebSocketHandle {
                 AgentFileTailWatcher.addWatcher(file, session);
                 CACHE_FILE.put(session.getId(), file);
             } catch (IOException io) {
-                DefaultSystemLog.ERROR().error("监听日志变化", io);
+                DefaultSystemLog.getLog().error("监听日志变化", io);
                 SocketSessionUtil.send(session, io.getMessage());
             }
         } catch (Exception e) {
-            DefaultSystemLog.ERROR().error("执行命令失败", e);
+            DefaultSystemLog.getLog().error("执行命令失败", e);
             SocketSessionUtil.send(session, "执行命令失败,详情如下：");
             SocketSessionUtil.send(session, ExceptionUtil.stacktraceToString(e));
         }
@@ -114,11 +114,11 @@ public class AgentWebSocketTomcatHandle extends BaseAgentWebSocketHandle {
             try {
                 AgentFileTailWatcher.addWatcher(file, session);
             } catch (IOException io) {
-                DefaultSystemLog.ERROR().error("监听日志变化", io);
+                DefaultSystemLog.getLog().error("监听日志变化", io);
                 SocketSessionUtil.send(session, io.getMessage());
             }
         } catch (Exception e) {
-            DefaultSystemLog.ERROR().error("执行命令失败", e);
+            DefaultSystemLog.getLog().error("执行命令失败", e);
             SocketSessionUtil.send(session, "执行命令失败,详情如下：");
             SocketSessionUtil.send(session, ExceptionUtil.stacktraceToString(e));
         }

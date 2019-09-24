@@ -98,7 +98,7 @@ public class ProjectFileControl extends BaseAgentController {
                 }
             } finally {
                 if (!file.delete()) {
-                    DefaultSystemLog.LOG().info("删除失败：" + file.getPath());
+                    DefaultSystemLog.getLog().info("删除失败：" + file.getPath());
                 }
             }
         } else {
@@ -176,7 +176,7 @@ public class ProjectFileControl extends BaseAgentController {
             }
             ServletUtil.write(getResponse(), file);
         } catch (Exception e) {
-            DefaultSystemLog.ERROR().error("下载文件异常", e);
+            DefaultSystemLog.getLog().error("下载文件异常", e);
         }
         return "下载失败。请刷新页面后重试";
     }

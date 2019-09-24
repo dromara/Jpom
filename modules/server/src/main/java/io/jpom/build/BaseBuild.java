@@ -28,7 +28,7 @@ public abstract class BaseBuild {
     }
 
     protected void log(String title, Throwable throwable, BuildModel.Status status) {
-        DefaultSystemLog.ERROR().error(title, throwable);
+        DefaultSystemLog.getLog().error(title, throwable);
         FileUtil.appendLines(CollectionUtil.toList(title), this.logFile, CharsetUtil.CHARSET_UTF_8);
         String s = ExceptionUtil.stacktraceToString(throwable);
         FileUtil.appendLines(CollectionUtil.toList(s), this.logFile, CharsetUtil.CHARSET_UTF_8);

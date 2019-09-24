@@ -65,7 +65,7 @@ public class AutoImportLocalNode {
                 findPid(vmIdentifier.getUserInfo());
             });
         } catch (Exception e) {
-            DefaultSystemLog.ERROR().error("自动添加本机节点错误", e);
+            DefaultSystemLog.getLog().error("自动添加本机节点错误", e);
         }
     }
 
@@ -99,6 +99,6 @@ public class AutoImportLocalNode {
         //
         nodeModel.setOpenStatus(true);
         nodeService.addItem(nodeModel);
-        DefaultSystemLog.LOG().info("自动添加本机节点成功：" + nodeModel.getId());
+        DefaultSystemLog.getLog().info("自动添加本机节点成功：" + nodeModel.getId());
     }
 }

@@ -51,7 +51,7 @@ public class LogBackController extends BaseAgentController {
             }
             return JsonMessage.getString(201, "重置失败：" + msg);
         } catch (Exception e) {
-            DefaultSystemLog.ERROR().error(e.getMessage(), e);
+            DefaultSystemLog.getLog().error(e.getMessage(), e);
             return JsonMessage.getString(500, "重置日志失败");
         }
     }
@@ -92,7 +92,7 @@ public class LogBackController extends BaseAgentController {
                 return "没有对应文件";
             }
         } catch (Exception e) {
-            DefaultSystemLog.ERROR().error("下载文件异常", e);
+            DefaultSystemLog.getLog().error("下载文件异常", e);
         }
         return "下载失败。请刷新页面后重试";
     }

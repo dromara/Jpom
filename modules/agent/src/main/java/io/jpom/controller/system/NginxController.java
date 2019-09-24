@@ -147,13 +147,13 @@ public class NginxController extends BaseAgentController {
                 }
             }
         } catch (IOException e) {
-            DefaultSystemLog.ERROR().error("解析失败", e);
+            DefaultSystemLog.getLog().error("解析失败", e);
             return JsonMessage.getString(500, "解析失败");
         }
         try {
             FileUtil.writeString(context, file, CharsetUtil.UTF_8);
         } catch (Exception e) {
-            DefaultSystemLog.ERROR().error(e.getMessage(), e);
+            DefaultSystemLog.getLog().error(e.getMessage(), e);
             return JsonMessage.getString(400, "操作失败:" + e.getMessage());
         }
         String msg = this.reloadNginx();
@@ -164,11 +164,11 @@ public class NginxController extends BaseAgentController {
         try {
             String msg = CommandUtil.execSystemCommand("nginx -s reload");
             if (StrUtil.isNotEmpty(msg)) {
-                DefaultSystemLog.LOG().info(msg);
+                DefaultSystemLog.getLog().info(msg);
                 return "(" + msg + ")";
             }
         } catch (Exception e) {
-            DefaultSystemLog.ERROR().error("reload nginx error", e);
+            DefaultSystemLog.getLog().error("reload nginx error", e);
         }
         return StrUtil.EMPTY;
     }
@@ -216,7 +216,7 @@ public class NginxController extends BaseAgentController {
         try {
             FileUtil.rename(file, file.getName() + "_back", false, true);
         } catch (Exception e) {
-            DefaultSystemLog.ERROR().error("删除nginx", e);
+            DefaultSystemLog.getLog().error("删除nginx", e);
             return JsonMessage.getString(400, "删除失败:" + e.getMessage());
         }
         String msg = this.reloadNginx();

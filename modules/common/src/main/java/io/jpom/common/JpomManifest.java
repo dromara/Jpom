@@ -256,7 +256,7 @@ public class JpomManifest {
                 return new JsonMessage(405, "新包和正在运行的包一致");
             }
         } catch (Exception e) {
-            DefaultSystemLog.ERROR().error("解析jar", e);
+            DefaultSystemLog.getLog().error("解析jar", e);
             return new JsonMessage(500, " 解析错误:" + e.getMessage());
         }
         return new JsonMessage(200, version);

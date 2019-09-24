@@ -314,7 +314,7 @@ public class TomcatManageController extends BaseAgentController {
             }
             ServletUtil.write(getResponse(), file);
         } catch (Exception e) {
-            DefaultSystemLog.ERROR().error("下载文件异常", e);
+            DefaultSystemLog.getLog().error("下载文件异常", e);
         }
         return "下载失败。请刷新页面后重试";
     }

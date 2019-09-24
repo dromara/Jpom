@@ -67,7 +67,7 @@ public class PluginFactory implements ApplicationContextInitializer {
     }
 
     private static void addPlugin(String pluginName, File file) {
-        DefaultSystemLog.LOG().info("加载：{}插件", pluginName);
+        DefaultSystemLog.getLog().info("加载：{}插件", pluginName);
         ClassLoader contextClassLoader = ClassLoaderUtil.getClassLoader();
         JarClassLoader.loadJar((URLClassLoader) contextClassLoader, file);
     }

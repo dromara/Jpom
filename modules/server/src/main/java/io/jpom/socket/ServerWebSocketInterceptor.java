@@ -119,7 +119,7 @@ public class ServerWebSocketInterceptor implements HandshakeInterceptor {
     @Override
     public void afterHandshake(ServerHttpRequest request, ServerHttpResponse response, WebSocketHandler wsHandler, Exception exception) {
         if (exception != null) {
-            DefaultSystemLog.ERROR().error("afterHandshake", exception);
+            DefaultSystemLog.getLog().error("afterHandshake", exception);
         }
     }
 }

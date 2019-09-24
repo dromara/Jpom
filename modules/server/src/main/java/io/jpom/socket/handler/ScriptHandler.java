@@ -46,7 +46,7 @@ public class ScriptHandler extends BaseProxyHandler {
             try {
                 operateLogController.log(userInfo, "脚本模板执行...", cacheInfo);
             } catch (Exception e) {
-                DefaultSystemLog.ERROR().error("记录操作日志异常", e);
+                DefaultSystemLog.getLog().error("记录操作日志异常", e);
             }
         }
         proxySession.send(json.toString());

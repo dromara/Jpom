@@ -45,12 +45,12 @@ public class AgentWebSocketScriptHandle extends BaseAgentWebSocketHandle {
             SocketSessionUtil.send(session, "连接成功：" + scriptModel.getName());
             this.addUser(session, urlOptUser);
         } catch (Exception e) {
-            DefaultSystemLog.ERROR().error("socket 错误", e);
+            DefaultSystemLog.getLog().error("socket 错误", e);
             try {
                 SocketSessionUtil.send(session, JsonMessage.getString(500, "系统错误!"));
                 session.close();
             } catch (IOException e1) {
-                DefaultSystemLog.ERROR().error(e1.getMessage(), e1);
+                DefaultSystemLog.getLog().error(e1.getMessage(), e1);
             }
         }
     }
@@ -86,7 +86,7 @@ public class AgentWebSocketScriptHandle extends BaseAgentWebSocketHandle {
         scriptServer.updateItem(scriptModel);
         json.put("code", 200);
         json.put("msg", "执行成功");
-        DefaultSystemLog.LOG().info(json.toString());
+        DefaultSystemLog.getLog().info(json.toString());
         SocketSessionUtil.send(session, json.toString());
     }
 

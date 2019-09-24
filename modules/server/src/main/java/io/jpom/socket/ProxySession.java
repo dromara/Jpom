@@ -63,7 +63,7 @@ public class ProxySession extends WebSocketClient {
         try {
             session.sendMessage(new TextMessage(message));
         } catch (IOException e) {
-            DefaultSystemLog.ERROR().error("发送消息失败", e);
+            DefaultSystemLog.getLog().error("发送消息失败", e);
         }
         try {
             JSONObject jsonObject = JSONObject.parseObject(message);
@@ -80,7 +80,7 @@ public class ProxySession extends WebSocketClient {
         try {
             session.close();
         } catch (IOException e) {
-            DefaultSystemLog.ERROR().error("关闭错误", e);
+            DefaultSystemLog.getLog().error("关闭错误", e);
         }
     }
 
@@ -91,7 +91,7 @@ public class ProxySession extends WebSocketClient {
 //            SocketSessionUtil.send(session, );
         } catch (IOException ignored) {
         }
-        DefaultSystemLog.ERROR().error("发生错误", ex);
+        DefaultSystemLog.getLog().error("发生错误", ex);
     }
 
     @Override
@@ -99,7 +99,7 @@ public class ProxySession extends WebSocketClient {
         try {
             super.send(text);
         } catch (Exception e) {
-            DefaultSystemLog.ERROR().error("转发消息失败", e);
+            DefaultSystemLog.getLog().error("转发消息失败", e);
         }
     }
 }

@@ -19,13 +19,13 @@ public class CheckMonitor {
         MonitorService monitorService = SpringUtil.getBean(MonitorService.class);
         boolean status = monitorService.checkCronStatus();
         if (status) {
-            DefaultSystemLog.LOG().info("已经开启监听调度：监控");
+            DefaultSystemLog.getLog().info("已经开启监听调度：监控");
         }
         //
         NodeService nodeService = SpringUtil.getBean(NodeService.class);
         status = nodeService.checkCronStatus();
         if (status) {
-            DefaultSystemLog.LOG().info("已经开启监听调度：节点信息采集");
+            DefaultSystemLog.getLog().info("已经开启监听调度：节点信息采集");
         }
     }
 }

@@ -59,7 +59,7 @@ public class CommandUtil {
         try {
             result = exec(new String[]{newCommand}, null);
         } catch (Exception e) {
-            DefaultSystemLog.ERROR().error("执行命令异常", e);
+            DefaultSystemLog.getLog().error("执行命令异常", e);
             result += e.getMessage();
         }
         return result;
@@ -86,7 +86,7 @@ public class CommandUtil {
             String[] cmd = commands.toArray(new String[]{});
             result = exec(cmd, file);
         } catch (Exception e) {
-            DefaultSystemLog.ERROR().error("执行命令异常", e);
+            DefaultSystemLog.getLog().error("执行命令异常", e);
             result += e.getMessage();
         }
         return result;
@@ -100,7 +100,7 @@ public class CommandUtil {
      * @throws IOException IO
      */
     private static String exec(String[] cmd, File file) throws IOException {
-        DefaultSystemLog.LOG().info(Arrays.toString(cmd));
+        DefaultSystemLog.getLog().info(Arrays.toString(cmd));
         Process process = new ProcessBuilder(cmd).directory(file).redirectErrorStream(true).start();
         return RuntimeUtil.getResult(process);
     }

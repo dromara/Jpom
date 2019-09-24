@@ -37,7 +37,7 @@ public class GlobalDefaultExceptionHandler {
      */
     @ExceptionHandler({AgentException.class, AuthorizeException.class, RuntimeException.class, Exception.class})
     public void paramExceptionHandler(HttpServletRequest request, HttpServletResponse response, Exception e) {
-        DefaultSystemLog.ERROR().error("controller " + request.getRequestURI(), e);
+        DefaultSystemLog.getLog().error("controller " + request.getRequestURI(), e);
         if (BaseJpomInterceptor.isPage(request)) {
             try {
                 String id = IdUtil.fastUUID();

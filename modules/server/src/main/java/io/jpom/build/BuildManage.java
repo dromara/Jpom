@@ -104,7 +104,7 @@ public class BuildManage extends BaseBuild implements Runnable {
             }
             return true;
         } catch (Exception e) {
-            DefaultSystemLog.ERROR().error("构建状态变更失败", e);
+            DefaultSystemLog.getLog().error("构建状态变更失败", e);
             return false;
         }
     }

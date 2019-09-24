@@ -194,7 +194,7 @@ public class NodeForward {
             try {
                 httpRequest.form(s, multipartFile.getBytes(), multipartFile.getOriginalFilename());
             } catch (IOException e) {
-                DefaultSystemLog.ERROR().error("转发文件异常", e);
+                DefaultSystemLog.getLog().error("转发文件异常", e);
             }
         });
         HttpResponse response;

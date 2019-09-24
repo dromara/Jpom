@@ -115,7 +115,7 @@ public class ProjectInfoModel extends BaseModel {
         try {
             status = AbstractProjectCommander.getInstance().isRun(getId());
         } catch (Exception e) {
-            DefaultSystemLog.ERROR().error("检查项目状态错误", e);
+            DefaultSystemLog.getLog().error("检查项目状态错误", e);
             status = false;
         }
         return status;

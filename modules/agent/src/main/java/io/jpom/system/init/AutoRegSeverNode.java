@@ -51,7 +51,7 @@ public class AutoRegSeverNode {
         String body1 = installRequest.execute().body();
         JsonMessage jsonMessage = JSON.parseObject(body1, JsonMessage.class);
         if (jsonMessage.getCode() != HttpStatus.HTTP_OK) {
-            DefaultSystemLog.LOG().info("获取Server 安装id失败:" + jsonMessage);
+            DefaultSystemLog.getLog().info("获取Server 安装id失败:" + jsonMessage);
             return;
         }
         String installId = jsonMessage.dataToString();
@@ -70,7 +70,7 @@ public class AutoRegSeverNode {
         serverRequest.form("loginPwd", AgentAuthorize.getInstance().getAgentPwd());
         serverRequest.form("type", eqInstall ? "update" : "add");
         String body = serverRequest.execute().body();
-        DefaultSystemLog.LOG().info("自动注册Server:" + body);
+        DefaultSystemLog.getLog().info("自动注册Server:" + body);
         JsonMessage regJsonMessage = JSON.parseObject(body, JsonMessage.class);
         if (regJsonMessage.getCode() == HttpStatus.HTTP_OK) {
             if (serverJson == null) {

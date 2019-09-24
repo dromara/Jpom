@@ -68,9 +68,9 @@ public class DbConfig {
             try {
                 count = Db.use().setWrapper((Character) null).del(entity);
             } catch (SQLException e) {
-                DefaultSystemLog.ERROR().error("清理数据异常", e);
+                DefaultSystemLog.getLog().error("清理数据异常", e);
             }
-            DefaultSystemLog.LOG().info("{} 清理了 {}条数据", tableName, count);
+            DefaultSystemLog.getLog().info("{} 清理了 {}条数据", tableName, count);
         });
     }
 
@@ -103,7 +103,7 @@ public class DbConfig {
                 }
                 consumer.accept(time);
             } catch (SQLException e) {
-                DefaultSystemLog.ERROR().error("数据库查询异常", e);
+                DefaultSystemLog.getLog().error("数据库查询异常", e);
             }
         });
     }

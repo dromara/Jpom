@@ -123,14 +123,14 @@ public class DbBuildHistoryLogService extends BaseDbLogService<BuildHistoryLog> 
                 String id = v1.getId();
                 JsonMessage jsonMessage = deleteLogAndFile(id);
                 if (jsonMessage.getCode() != HttpStatus.HTTP_OK) {
-                    DefaultSystemLog.LOG().info(jsonMessage.toString());
+                    DefaultSystemLog.getLog().info(jsonMessage.toString());
                 }
             });
             if (pageResult.getTotalPage() > pageResult.getPage()) {
                 doClearPage(pageNo + 1, time);
             }
         } catch (SQLException e) {
-            DefaultSystemLog.ERROR().error("数据库查询异常", e);
+            DefaultSystemLog.getLog().error("数据库查询异常", e);
         }
     }
 }

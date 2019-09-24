@@ -163,7 +163,7 @@ public class SshInstallAgentController extends BaseServerController {
             nodeModel.setLoginPwd(autoUser.getAgentPwd());
             nodeModel.setLoginName(autoUser.getAgentName());
         } catch (Exception e) {
-            DefaultSystemLog.ERROR().error("拉取授权信息失败", e);
+            DefaultSystemLog.getLog().error("拉取授权信息失败", e);
             return JsonMessage.getString(500, "获取授权信息失败", e);
         } finally {
             FileUtil.del(saveFile);

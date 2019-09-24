@@ -31,7 +31,7 @@ public abstract class BaseAgentWebSocketHandle {
             SocketSessionUtil.send(session, "服务端发生异常" + ExceptionUtil.stacktraceToString(thr));
         } catch (IOException ignored) {
         }
-        DefaultSystemLog.ERROR().error(session.getId() + "socket 异常", thr);
+        DefaultSystemLog.getLog().error(session.getId() + "socket 异常", thr);
     }
 
     protected String getOptUserName(Session session) {
@@ -44,7 +44,7 @@ public abstract class BaseAgentWebSocketHandle {
         try {
             AgentFileTailWatcher.offline(session);
         } catch (Exception e) {
-            DefaultSystemLog.ERROR().error("关闭异常", e);
+            DefaultSystemLog.getLog().error("关闭异常", e);
         }
         // top
         //        TopManager.removeMonitor(session);

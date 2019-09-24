@@ -58,7 +58,7 @@ public abstract class BaseFileTailWatcher<T> {
             try {
                 this.send(socketSession, msg);
             } catch (Exception e) {
-                DefaultSystemLog.ERROR().error("发送消息失败", e);
+                DefaultSystemLog.getLog().error("发送消息失败", e);
                 iterator.remove();
             }
         }

@@ -56,7 +56,7 @@ public class SocketSessionUtil {
                     exception = null;
                     break;
                 } catch (IOException e) {
-                    DefaultSystemLog.ERROR().error("发送消息失败:" + tryCount, e);
+                    DefaultSystemLog.getLog().error("发送消息失败:" + tryCount, e);
                     exception = e;
                 }
             } while (tryCount <= ERROR_TRY_COUNT);
@@ -93,7 +93,7 @@ public class SocketSessionUtil {
                     exception = null;
                     break;
                 } catch (IOException e) {
-                    DefaultSystemLog.ERROR().error("发送消息失败:" + tryCount, e);
+                    DefaultSystemLog.getLog().error("发送消息失败:" + tryCount, e);
                     exception = e;
                 }
             } while (tryCount <= ERROR_TRY_COUNT);

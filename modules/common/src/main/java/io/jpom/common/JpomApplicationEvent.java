@@ -50,7 +50,7 @@ public class JpomApplicationEvent implements ApplicationEventClient {
             try {
                 this.lockFile();
             } catch (IOException e) {
-                DefaultSystemLog.ERROR().error("lockFile", e);
+                DefaultSystemLog.getLog().error("lockFile", e);
             }
             // 写入Jpom 信息
             JpomManifest jpomManifest = JpomManifest.getInstance();
@@ -125,11 +125,11 @@ public class JpomApplicationEvent implements ApplicationEventClient {
             FileUtil.mkdir(file);
             file = FileUtil.createTempFile("jpom", ".temp", file, true);
         } catch (Exception e) {
-            DefaultSystemLog.ERROR().error(StrUtil.format("Jpom创建数据目录失败,目录位置：{},请检查当前用户是否有此目录权限或修改配置文件：{}中的jpom.path为可创建目录的路径", path, extConfigPath), e);
+            DefaultSystemLog.getLog().error(StrUtil.format("Jpom创建数据目录失败,目录位置：{},请检查当前用户是否有此目录权限或修改配置文件：{}中的jpom.path为可创建目录的路径", path, extConfigPath), e);
             System.exit(-1);
         }
         FileUtil.del(file);
-        DefaultSystemLog.LOG().info("Jpom[{}]外部配置文件路径：{}", JpomManifest.getInstance().getVersion(), extConfigPath);
+        DefaultSystemLog.getLog().info("Jpom[{}]外部配置文件路径：{}", JpomManifest.getInstance().getVersion(), extConfigPath);
     }
 
     private static void checkUpdate() {
@@ -152,7 +152,7 @@ public class JpomApplicationEvent implements ApplicationEventClient {
             File oldJars = FileUtil.file(runFile, "oldJars");
             FileUtil.mkdir(oldJars);
             FileUtil.move(beforeJarFile, oldJars, true);
-            DefaultSystemLog.LOG().info("备份旧程序包：" + beforeJar);
+            DefaultSystemLog.getLog().info("备份旧程序包：" + beforeJar);
         }
         // windows 备份日志
         //        if (SystemUtil.getOsInfo().isWindows()) {

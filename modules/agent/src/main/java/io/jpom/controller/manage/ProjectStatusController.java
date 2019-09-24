@@ -43,7 +43,7 @@ public class ProjectStatusController extends BaseAgentController {
         try {
             pid = AbstractProjectCommander.getInstance().getPid(id);
         } catch (Exception e) {
-            DefaultSystemLog.ERROR().error("获取项目pid 失败", e);
+            DefaultSystemLog.getLog().error("获取项目pid 失败", e);
         }
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("pId", pid);
@@ -70,7 +70,7 @@ public class ProjectStatusController extends BaseAgentController {
             try {
                 pid = AbstractProjectCommander.getInstance().getPid(item);
             } catch (Exception e) {
-                DefaultSystemLog.ERROR().error("获取端口错误", e);
+                DefaultSystemLog.getLog().error("获取端口错误", e);
                 continue;
             }
             if (pid <= 0) {
@@ -100,7 +100,7 @@ public class ProjectStatusController extends BaseAgentController {
             }
             return JsonMessage.getString(201, "重启失败：" + result);
         } catch (Exception e) {
-            DefaultSystemLog.ERROR().error("获取项目pid 失败", e);
+            DefaultSystemLog.getLog().error("获取项目pid 失败", e);
             result = "error:" + e.getMessage();
             return JsonMessage.getString(500, "重启异常：" + result);
         }

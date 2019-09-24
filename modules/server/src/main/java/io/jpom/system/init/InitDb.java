@@ -36,7 +36,7 @@ public class InitDb {
             setting.set("sqlLevel", "INFO");
             setting.set("showParams", "true");
         }
-        DefaultSystemLog.LOG().info("初始化数据中....");
+        DefaultSystemLog.getLog().info("初始化数据中....");
         try {
             // 创建连接
             DSFactory dsFactory = DSFactory.create(setting);
@@ -45,7 +45,7 @@ public class InitDb {
             Db.use(dsFactory.getDataSource()).execute(sql);
             DSFactory.setCurrentDSFactory(dsFactory);
         } catch (Exception e) {
-            DefaultSystemLog.ERROR().error("初始化数据库失败", e);
+            DefaultSystemLog.getLog().error("初始化数据库失败", e);
             System.exit(0);
         }
     }

@@ -74,7 +74,7 @@ public class InstallController extends BaseServerController {
         try {
             userService.addItem(userModel);
         } catch (Exception e) {
-            DefaultSystemLog.ERROR().error("初始化用户失败", e);
+            DefaultSystemLog.getLog().error("初始化用户失败", e);
             return JsonMessage.getString(400, "初始化失败");
         }
         // 自动登录

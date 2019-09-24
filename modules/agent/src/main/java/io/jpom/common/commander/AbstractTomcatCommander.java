@@ -87,7 +87,7 @@ public abstract class AbstractTomcatCommander {
     }
 
     protected void exec(String command, boolean close) {
-        DefaultSystemLog.LOG().info(command);
+        DefaultSystemLog.getLog().info(command);
         try {
             // 执行命令
             Process process = Runtime.getRuntime().exec(command);
@@ -99,7 +99,7 @@ public abstract class AbstractTomcatCommander {
                 process.destroy();
             }
         } catch (IOException | InterruptedException e) {
-            DefaultSystemLog.ERROR().error("tomcat执行名称失败", e);
+            DefaultSystemLog.getLog().error("tomcat执行名称失败", e);
         }
     }
 }

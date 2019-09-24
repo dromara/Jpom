@@ -25,7 +25,7 @@ public class ServerWhitelistServer extends BaseDataService {
             }
             return jsonObject.toJavaObject(ServerWhitelist.class);
         } catch (Exception e) {
-            DefaultSystemLog.ERROR().error(e.getMessage(), e);
+            DefaultSystemLog.getLog().error(e.getMessage(), e);
         }
         return null;
     }

@@ -93,7 +93,7 @@ public class CertificateController extends BaseAgentController {
                 certService.updateItem(certModel);
             }
         } catch (Exception e) {
-            DefaultSystemLog.ERROR().error("证书文件", e);
+            DefaultSystemLog.getLog().error("证书文件", e);
             return JsonMessage.getString(400, "解析证书文件失败：" + e.getMessage());
         }
         return JsonMessage.getString(200, "提交成功");

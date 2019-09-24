@@ -75,7 +75,7 @@ public class WebAopLog extends PropertyDefinerBase {
             if (isLog != null && !isLog) {
                 return;
             }
-            DefaultSystemLog.LOG().info(" :" + ret.toString());
+            DefaultSystemLog.getLog().info(" :" + ret.toString());
         } finally {
             IS_LOG.remove();
         }
@@ -94,7 +94,7 @@ public class WebAopLog extends PropertyDefinerBase {
             path = file.getPath();
         }
         // 配置默认日志路径
-        DefaultSystemLog.configPath(path, false);
+//        DefaultSystemLog.configPath(path, false);
         return path;
     }
 }

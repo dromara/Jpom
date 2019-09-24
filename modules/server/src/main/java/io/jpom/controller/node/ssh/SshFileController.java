@@ -55,7 +55,7 @@ public class SshFileController extends BaseServerController {
                     JSONArray jsonArray = listDir(sshModel, fileDirs);
                     setAttribute("dirs", jsonArray);
                 } catch (Exception e) {
-                    DefaultSystemLog.ERROR().error("sftp错误", e);
+                    DefaultSystemLog.getLog().error("sftp错误", e);
                 }
             }
         }
@@ -86,7 +86,7 @@ public class SshFileController extends BaseServerController {
         try {
             this.downloadFile(sshModel, path, name, response);
         } catch (SftpException e) {
-            DefaultSystemLog.ERROR().error("下载失败", e);
+            DefaultSystemLog.getLog().error("下载失败", e);
             ServletUtil.write(response, "download error", MediaType.TEXT_HTML_VALUE);
         }
     }

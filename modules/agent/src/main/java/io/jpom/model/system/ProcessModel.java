@@ -101,7 +101,7 @@ public class ProcessModel extends BaseJsonModel {
                 String jpomName = AbstractProjectCommander.getInstance().getJpomNameByPid(pid);
                 this.setJpomName(jpomName);
             } catch (IOException e) {
-                DefaultSystemLog.ERROR().error("解析进程失败", e);
+                DefaultSystemLog.getLog().error("解析进程失败", e);
             }
         }
     }

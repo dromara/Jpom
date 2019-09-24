@@ -13,7 +13,7 @@ public abstract class BaseHandler extends TextWebSocketHandler {
 
     @Override
     public void handleTransportError(WebSocketSession session, Throwable exception) {
-        DefaultSystemLog.ERROR().error(session.getId() + "socket 异常", exception);
+        DefaultSystemLog.getLog().error(session.getId() + "socket 异常", exception);
         destroy(session);
     }
 

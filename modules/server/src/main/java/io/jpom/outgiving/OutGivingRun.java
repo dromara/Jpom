@@ -143,7 +143,7 @@ public class OutGivingRun implements Callable<OutGivingNodeProject.Status> {
                         result, jsonMessage.toString());
             }
         } catch (Exception e) {
-            DefaultSystemLog.ERROR().error(this.outGivingNodeProject.getNodeId() + " " + this.outGivingNodeProject.getProjectId() + " " + "分发异常保存", e);
+            DefaultSystemLog.getLog().error(this.outGivingNodeProject.getNodeId() + " " + this.outGivingNodeProject.getProjectId() + " " + "分发异常保存", e);
             result = OutGivingNodeProject.Status.Fail;
             updateStatus(this.logId, this.outGivingId, this.outGivingNodeProject,
                     result, "error:" + e.getMessage());

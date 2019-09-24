@@ -207,7 +207,7 @@ public class EditProjectController extends BaseAgentController {
                 return JsonMessage.getString(200, "修改成功");
             }
         } catch (Exception e) {
-            DefaultSystemLog.ERROR().error(e.getMessage(), e);
+            DefaultSystemLog.getLog().error(e.getMessage(), e);
             return JsonMessage.getString(500, "保存数据异常");
         }
     }
@@ -298,7 +298,7 @@ public class EditProjectController extends BaseAgentController {
             projectInfoService.deleteItem(projectInfoModel.getId());
             return JsonMessage.getString(200, "删除成功！");
         } catch (Exception e) {
-            DefaultSystemLog.ERROR().error(e.getMessage(), e);
+            DefaultSystemLog.getLog().error(e.getMessage(), e);
             return JsonMessage.getString(500, "删除异常：" + e.getMessage());
         }
     }

@@ -29,7 +29,7 @@ public class AgentExceptionHandler {
      */
     @ExceptionHandler({JpomRuntimeException.class, RuntimeException.class, Exception.class})
     public void paramExceptionHandler(HttpServletRequest request, HttpServletResponse response, Exception e) {
-        DefaultSystemLog.ERROR().error("controller " + request.getRequestURI(), e);
+        DefaultSystemLog.getLog().error("controller " + request.getRequestURI(), e);
         if (e instanceof JpomRuntimeException) {
             ServletUtil.write(response, JsonMessage.getString(500, e.getMessage()), MediaType.APPLICATION_JSON_UTF8_VALUE);
         } else {

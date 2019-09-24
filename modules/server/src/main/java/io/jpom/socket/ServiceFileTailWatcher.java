@@ -43,7 +43,7 @@ public class ServiceFileTailWatcher<T> extends BaseFileTailWatcher<T> {
             try {
                 return new ServiceFileTailWatcher<>(file);
             } catch (Exception e) {
-                DefaultSystemLog.ERROR().error("创建文件监听失败", e);
+                DefaultSystemLog.getLog().error("创建文件监听失败", e);
                 return null;
             }
         });

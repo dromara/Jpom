@@ -220,7 +220,7 @@ public class JvmUtil {
         try {
             virtualMachine = VirtualMachine.attach(pId);
         } catch (AttachNotSupportedException | IOException e) {
-            DefaultSystemLog.ERROR().error("获取jvm信息失败：" + pid, e);
+            DefaultSystemLog.getLog().error("获取jvm信息失败：" + pid, e);
             // 记录黑名单
             PID_ERROR.put(pId, true);
         }
@@ -245,7 +245,7 @@ public class JvmUtil {
             try {
                 virtualMachine = VirtualMachine.attach(virtualMachineDescriptor);
             } catch (AttachNotSupportedException | IOException e) {
-                DefaultSystemLog.ERROR().error("获取jvm信息失败：" + pid, e);
+                DefaultSystemLog.getLog().error("获取jvm信息失败：" + pid, e);
                 // 记录黑名单
                 PID_ERROR.put(pid, true);
                 continue;

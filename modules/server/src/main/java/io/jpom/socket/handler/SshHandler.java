@@ -208,7 +208,7 @@ public class SshHandler extends BaseHandler {
                 if (!this.openSession.isConnected()) {
                     return;
                 }
-                DefaultSystemLog.ERROR().error("读取错误", e);
+                DefaultSystemLog.getLog().error("读取错误", e);
                 SshHandler.this.destroy(this.session);
             }
         }
@@ -240,7 +240,7 @@ public class SshHandler extends BaseHandler {
             try {
                 session.sendMessage(byteBuffer);
             } catch (IOException e) {
-                DefaultSystemLog.ERROR().error("发送消息失败:" + msg, e);
+                DefaultSystemLog.getLog().error("发送消息失败:" + msg, e);
             }
         }
     }

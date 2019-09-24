@@ -86,7 +86,7 @@ public class UserBasicInfoController extends BaseServerController {
         try {
             EmailUtil.send(email, "Jpom 验证码", "验证码是：" + randomInt);
         } catch (Exception e) {
-            DefaultSystemLog.ERROR().error("发送失败", e);
+            DefaultSystemLog.getLog().error("发送失败", e);
             return JsonMessage.getString(500, "发送邮件失败：" + e.getMessage());
         }
         CACHE.put(email, randomInt);

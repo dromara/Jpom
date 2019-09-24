@@ -24,12 +24,12 @@ public class CheckAuthorizeToken {
             return;
         }
         if (authorizeToken.length() < 6) {
-            DefaultSystemLog.ERROR().error("", new JpomRuntimeException("配置的授权token长度小于六位不生效"));
+            DefaultSystemLog.getLog().error("", new JpomRuntimeException("配置的授权token长度小于六位不生效"));
             System.exit(-1);
         }
         int password = CheckPassword.checkPassword(authorizeToken);
         if (password != 2) {
-            DefaultSystemLog.ERROR().error("", new JpomRuntimeException("配置的授权token 需要包含数字，字母，符号的组合"));
+            DefaultSystemLog.getLog().error("", new JpomRuntimeException("配置的授权token 需要包含数字，字母，符号的组合"));
             System.exit(-1);
         }
     }

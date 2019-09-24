@@ -141,7 +141,7 @@ public class ExtConfigBean {
                 }
                 path = file.getParentFile().getParentFile().getAbsolutePath();
             }
-            DefaultSystemLog.LOG().info("当前数据路径：{}", path);
+            DefaultSystemLog.getLog().info("当前数据路径：{}", path);
         }
         return path;
     }

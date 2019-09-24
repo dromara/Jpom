@@ -50,7 +50,7 @@ public class ScriptProcessBuilder implements Runnable {
         if (SystemUtil.getOsInfo().isLinux()) {
             command.add(0, CommandUtil.SUFFIX);
         }
-        DefaultSystemLog.LOG().info(CollUtil.join(command, StrUtil.SPACE));
+        DefaultSystemLog.getLog().info(CollUtil.join(command, StrUtil.SPACE));
         processBuilder.command(command);
     }
 
@@ -68,7 +68,7 @@ public class ScriptProcessBuilder implements Runnable {
                     try {
                         SocketSessionUtil.send(session, line);
                     } catch (IOException e) {
-                        DefaultSystemLog.ERROR().error("发送消息失败", e);
+                        DefaultSystemLog.getLog().error("发送消息失败", e);
                     }
                 });
             }
@@ -115,7 +115,7 @@ public class ScriptProcessBuilder implements Runnable {
         } catch (IORuntimeException ignored) {
 
         } catch (Exception e) {
-            DefaultSystemLog.ERROR().error("执行异常", e);
+            DefaultSystemLog.getLog().error("执行异常", e);
             this.end("执行异常：" + e.getMessage());
         }
     }
@@ -138,7 +138,7 @@ public class ScriptProcessBuilder implements Runnable {
             try {
                 SocketSessionUtil.send(session, msg);
             } catch (IOException e) {
-                DefaultSystemLog.ERROR().error("发送消息失败", e);
+                DefaultSystemLog.getLog().error("发送消息失败", e);
             }
             iterator.remove();
         }
@@ -161,7 +161,7 @@ public class ScriptProcessBuilder implements Runnable {
             try {
                 SocketSessionUtil.send(session, line);
             } catch (IOException e) {
-                DefaultSystemLog.ERROR().error("发送消息失败", e);
+                DefaultSystemLog.getLog().error("发送消息失败", e);
                 iterator.remove();
             }
         }

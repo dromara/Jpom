@@ -206,7 +206,7 @@ public class OutGivingProjectEditController extends BaseServerController {
                 success.add(entry);
             }
         } catch (Exception e) {
-            DefaultSystemLog.ERROR().error("保存分发项目失败", e);
+            DefaultSystemLog.getLog().error("保存分发项目失败", e);
             if (!edit) {
                 fail = true;
                 outGivingServer.deleteItem(outGivingModel.getId());
@@ -219,7 +219,7 @@ public class OutGivingProjectEditController extends BaseServerController {
                         deleteNodeProject(entry.getKey(), userModel, outGivingModel.getId());
                     }
                 } catch (Exception e) {
-                    DefaultSystemLog.ERROR().error("还原项目失败", e);
+                    DefaultSystemLog.getLog().error("还原项目失败", e);
                 }
             }
         }

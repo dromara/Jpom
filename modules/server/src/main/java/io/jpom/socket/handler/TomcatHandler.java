@@ -52,7 +52,7 @@ public class TomcatHandler extends BaseProxyHandler {
                 ServiceFileTailWatcher.addWatcher(file, session);
                 attributes.put("nowFile", file);
             } catch (Exception io) {
-                DefaultSystemLog.ERROR().error("监听日志变化", io);
+                DefaultSystemLog.getLog().error("监听日志变化", io);
                 SocketSessionUtil.send(session, io.getMessage());
             }
         }

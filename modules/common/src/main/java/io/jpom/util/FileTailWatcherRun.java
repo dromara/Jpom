@@ -137,7 +137,7 @@ public class FileTailWatcherRun implements Runnable {
             try {
                 this.read();
             } catch (IOException e) {
-                DefaultSystemLog.ERROR().error("读取文件发送异常", e);
+                DefaultSystemLog.getLog().error("读取文件发送异常", e);
                 lineHandler.handle("读取文件发生异常：" + e.getMessage());
                 break;
             }

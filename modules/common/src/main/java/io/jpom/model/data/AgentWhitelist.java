@@ -84,7 +84,7 @@ public class AgentWhitelist extends BaseJsonModel {
         try {
             return CollUtil.join(jsonArray, StrUtil.CRLF);
         } catch (Exception e) {
-            DefaultSystemLog.ERROR().error(e.getMessage(), e);
+            DefaultSystemLog.getLog().error(e.getMessage(), e);
         }
         return "";
     }
