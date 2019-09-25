@@ -49,6 +49,9 @@
             $(".layui-colla-item").each(function () {
                 var find = $(this).find(".layui-colla-content div");
                 var attr = find.attr("id");
+                if ($(this).is(":hidden")) {
+                    return;
+                }
                 try {
                     var checkData = tree.getChecked(attr);
                     var ts = attr.split("_");

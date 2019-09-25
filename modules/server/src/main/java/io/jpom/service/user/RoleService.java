@@ -46,14 +46,13 @@ public class RoleService extends BaseOperService<RoleModel> {
      * @param classFeature 功能
      * @return list
      */
-    public List<String> listDynamicData(String roleId, ClassFeature classFeature) {
+    public List<String> listDynamicData(String roleId, ClassFeature classFeature, String dataId) {
         RoleModel item = getItem(roleId);
-        List<String> list = null;
-        Map<ClassFeature, List<String>> dynamicData1 = item.getDynamicData();
-        if (dynamicData1 != null) {
-            list = dynamicData1.get(classFeature);
+        if (item == null) {
+            return null;
         }
-        return list;
+        Set<String> treeData = item.getTreeData(classFeature, dataId);
+        return new ArrayList<>(treeData);
     }
 
     /**
@@ -96,12 +95,8 @@ public class RoleService extends BaseOperService<RoleModel> {
             if (item == null) {
                 continue;
             }
-            Map<ClassFeature, List<String>> dynamicData = item.getDynamicData();
-            if (dynamicData == null) {
-                continue;
-            }
-            List<String> list = dynamicData.get(classFeature);
-            if (list != null && list.contains(dataId)) {
+            // 判断权限
+            if (item.contains(classFeature, dataId)) {
                 return false;
             }
         }
@@ -143,11 +138,11 @@ public class RoleService extends BaseOperService<RoleModel> {
             if (item == null) {
                 continue;
             }
-            Map<ClassFeature, List<String>> dynamicData = item.getDynamicData();
+            Map<ClassFeature, List<RoleModel.TreeLevel>> dynamicData = item.getDynamicData();
             if (dynamicData == null) {
                 continue;
             }
-            List<String> list = dynamicData.get(classFeature);
+            Set<String> list = item.getTreeData(classFeature, null);
             if (list != null) {
                 allData.addAll(list);
             }

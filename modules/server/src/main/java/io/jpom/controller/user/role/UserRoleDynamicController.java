@@ -24,7 +24,6 @@ import javax.annotation.Resource;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * @author bwcx_jzy
@@ -66,22 +65,25 @@ public class UserRoleDynamicController extends BaseServerController {
         }
         //
         JSONObject jsonObject = JSONObject.parseObject(dynamic);
-        Map<ClassFeature, List<String>> dynamicData1 = new HashMap<>(jsonObject.keySet().size());
+        Map<ClassFeature, List<RoleModel.TreeLevel>> dynamicData1 = new HashMap<>(jsonObject.keySet().size());
         //
-        Set<Map.Entry<String, Object>> entries = jsonObject.entrySet();
-        for (Map.Entry<String, Object> entry : entries) {
-            ClassFeature classFeature = ClassFeature.valueOf(entry.getKey());
-            Map<ClassFeature, DynamicData> dynamicDataMap = DynamicData.getDynamicDataMap();
+        List<ClassFeature> root = DynamicData.getRoot();
+        Map<ClassFeature, DynamicData> dynamicDataMap = DynamicData.getDynamicDataMap();
+        for (ClassFeature classFeature : root) {
+            JSONArray value = jsonObject.getJSONArray(classFeature.name());
+            if (value == null || value.isEmpty()) {
+                continue;
+            }
             DynamicData dynamicData = dynamicDataMap.get(classFeature);
             if (dynamicData == null) {
-                return JsonMessage.getString(404, entry.getKey() + "没有配置对应动态数据");
+                return JsonMessage.getString(404, classFeature.getName() + "没有配置对应动态数据");
             }
             Class<? extends BaseDynamicService> baseOperService = dynamicData.getBaseOperService();
             BaseDynamicService bean = SpringUtil.getBean(baseOperService);
-            JSONArray value = (JSONArray) entry.getValue();
-            List<String> list = bean.parserValue(dynamicData1, classFeature, value);
+            List<RoleModel.TreeLevel> list = bean.parserValue(classFeature, value);
             dynamicData1.put(classFeature, list);
         }
+        System.out.println(dynamicData1);
         item.setDynamicData(dynamicData1);
         roleService.updateItem(item);
         return JsonMessage.getString(200, "保存成功");
