@@ -1,10 +1,12 @@
 package io.jpom.permission;
 
+import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.spring.SpringUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.common.BaseServerController;
 import io.jpom.model.BaseModel;
+import io.jpom.model.data.RoleModel;
 import io.jpom.model.data.UserModel;
 import io.jpom.plugin.ClassFeature;
 import io.jpom.service.user.RoleService;
@@ -103,11 +105,11 @@ public interface BaseDynamicService {
             String name = data.getString("name");
             String id = data.getString("id");
             jsonObject.put("title", name);
-            jsonObject.put("id", id);
-            RoleService bean = SpringUtil.getBean(RoleService.class);
+            jsonObject.put("id", StrUtil.emptyToDefault(dataId, "") + StrUtil.COLON + id);
             boolean doChildren = this.doChildren(classFeature, roleId, id, jsonObject);
             if (!doChildren) {
-                List<String> checkList = bean.listDynamicData(roleId, classFeature);
+                RoleService bean = SpringUtil.getBean(RoleService.class);
+                List<String> checkList = bean.listDynamicData(roleId, classFeature, dataId);
                 if (checkList != null && checkList.contains(id)) {
                     jsonObject.put("checked", true);
                 }
@@ -157,23 +159,30 @@ public interface BaseDynamicService {
     /**
      * 接收前端的值
      *
-     * @param classFeatureListMap map
-     * @param classFeature        功能
-     * @param jsonArray           array
+     * @param classFeature 功能
+     * @param jsonArray    array
      * @return list
      */
-    default List<String> parserValue(Map<ClassFeature, List<String>> classFeatureListMap, ClassFeature classFeature, JSONArray jsonArray) {
+    default List<RoleModel.TreeLevel> parserValue(ClassFeature classFeature, JSONArray jsonArray) {
         if (jsonArray == null) {
             return null;
         }
-        List<String> list = new ArrayList<>();
+        List<RoleModel.TreeLevel> list = new ArrayList<>();
         jsonArray.forEach(o -> {
             JSONObject jsonObject = (JSONObject) o;
             JSONArray children = jsonObject.getJSONArray("children");
+            RoleModel.TreeLevel treeLevel = new RoleModel.TreeLevel();
             if (children != null && !children.isEmpty()) {
-                parserChildren(classFeature, classFeatureListMap, children);
+                treeLevel.setChildren(parserChildren(classFeature, children));
             }
-            list.add(jsonObject.getString("id"));
+
+            String id = jsonObject.getString("id");
+            if (id.contains(StrUtil.COLON)) {
+                id = id.split(StrUtil.COLON)[1];
+            }
+            treeLevel.setData(id);
+            treeLevel.setClassFeature(classFeature.name());
+            list.add(treeLevel);
         });
         return list;
     }
@@ -181,21 +190,25 @@ public interface BaseDynamicService {
     /**
      * 转换子级
      *
-     * @param classFeature        功能
-     * @param classFeatureListMap map
-     * @param jsonArray           array
+     * @param classFeature 功能
+     * @param jsonArray    array
      */
-    default void parserChildren(ClassFeature classFeature, Map<ClassFeature, List<String>> classFeatureListMap, JSONArray jsonArray) {
+    default List<RoleModel.TreeLevel> parserChildren(ClassFeature classFeature, JSONArray jsonArray) {
         Set<ClassFeature> children = DynamicData.getChildren(classFeature);
         if (children == null) {
-            return;
+            return null;
         }
+        List<RoleModel.TreeLevel> list = new ArrayList<>();
         Map<ClassFeature, JSONArray> jsonArrayMap = this.convertArray(jsonArray);
         for (ClassFeature child : children) {
             JSONArray jsonArray1 = jsonArrayMap.get(child);
-            List<String> list = parserValue(classFeatureListMap, child, jsonArray1);
-            classFeatureListMap.put(child, list);
+            List<RoleModel.TreeLevel> lists = parserValue(child, jsonArray1);
+            if (lists != null) {
+                list.addAll(lists);
+            }
+//            classFeatureListMap.put(child, list);
         }
+        return list;
     }
 
     /**

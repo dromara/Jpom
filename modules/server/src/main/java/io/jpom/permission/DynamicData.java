@@ -10,10 +10,8 @@ import io.jpom.service.node.script.ScriptServer;
 import io.jpom.service.node.ssh.SshService;
 import io.jpom.service.node.tomcat.TomcatService;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * 动态数据权限
@@ -53,6 +51,16 @@ public class DynamicData {
             Set<ClassFeature> classFeatures = PARENT.computeIfAbsent(feature.getParent(), classFeature -> new HashSet<>());
             classFeatures.add(feature);
         }
+    }
+
+    /**
+     * 获取子级功能
+     *
+     * @param classFeature 功能
+     * @return 子级
+     */
+    public static List<ClassFeature> getRoot() {
+        return DYNAMIC_DATA_MAP.keySet().stream().filter(dynamicData -> dynamicData.getParent() == null).collect(Collectors.toList());
     }
 
     /**

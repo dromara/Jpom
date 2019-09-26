@@ -1,11 +1,11 @@
 package io.jpom.model.data;
 
+import cn.hutool.core.util.StrUtil;
 import io.jpom.model.BaseModel;
 import io.jpom.plugin.ClassFeature;
 import io.jpom.plugin.MethodFeature;
 
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * 角色
@@ -23,7 +23,7 @@ public class RoleModel extends BaseModel {
     /**
      * 动态数据
      */
-    private Map<ClassFeature, List<String>> dynamicData;
+    private Map<ClassFeature, List<TreeLevel>> dynamicData;
 
     /**
      * 修改时间
@@ -48,11 +48,80 @@ public class RoleModel extends BaseModel {
         this.updateTime = updateTime;
     }
 
-    public Map<ClassFeature, List<String>> getDynamicData() {
+    public Map<ClassFeature, List<TreeLevel>> getDynamicData() {
         return dynamicData;
     }
 
-    public void setDynamicData(Map<ClassFeature, List<String>> dynamicData) {
+    public boolean contains(ClassFeature classFeature, String dataId) {
+        Map<ClassFeature, List<TreeLevel>> dynamicData = getDynamicData();
+        if (dynamicData == null) {
+            return false;
+        }
+        ClassFeature root = classFeature;
+        while (root.getParent() != null) {
+            root = root.getParent();
+        }
+        List<TreeLevel> treeLevels = dynamicData.get(root);
+        return forTree(treeLevels, classFeature, dataId);
+    }
+
+    public Set<String> getTreeData(ClassFeature classFeature, String dataId) {
+        Map<ClassFeature, List<TreeLevel>> dynamicData = getDynamicData();
+        if (dynamicData == null) {
+            return new HashSet<>();
+        }
+        ClassFeature root = classFeature;
+        while (root.getParent() != null) {
+            root = root.getParent();
+        }
+        List<TreeLevel> treeLevels = dynamicData.get(root);
+        return forTreeList(treeLevels, classFeature, dataId, null);
+    }
+
+    private boolean forTree(List<TreeLevel> treeLevels, ClassFeature classFeature, String dataId) {
+        if (treeLevels == null || treeLevels.isEmpty()) {
+            return false;
+        }
+        for (TreeLevel treeLevel : treeLevels) {
+            ClassFeature nowFeature = ClassFeature.valueOf(treeLevel.getClassFeature());
+            if (nowFeature == classFeature && StrUtil.equals(treeLevel.getData(), dataId)) {
+                // 是同一个功能
+                return true;
+            }
+            if (nowFeature != classFeature) {
+                List<TreeLevel> children = treeLevel.getChildren();
+                if (forTree(children, classFeature, dataId)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private Set<String> forTreeList(List<TreeLevel> treeLevels, ClassFeature classFeature, String dataId, String parentDataId) {
+        Set<String> dataIds = new HashSet<>();
+        if (treeLevels == null || treeLevels.isEmpty()) {
+            return dataIds;
+        }
+        for (TreeLevel treeLevel : treeLevels) {
+            ClassFeature nowFeature = ClassFeature.valueOf(treeLevel.getClassFeature());
+            if (nowFeature == classFeature && StrUtil.equals(parentDataId, dataId)) {
+                // 是同一个功能
+//                System.out.println(dataId + "  " + parentDataId);
+                dataIds.add(treeLevel.getData());
+            }
+            if (nowFeature != classFeature) {
+                List<TreeLevel> children = treeLevel.getChildren();
+                Set<String> strings = forTreeList(children, classFeature, dataId, treeLevel.getData());
+                if (!strings.isEmpty()) {
+                    return strings;
+                }
+            }
+        }
+        return dataIds;
+    }
+
+    public void setDynamicData(Map<ClassFeature, List<TreeLevel>> dynamicData) {
         this.dynamicData = dynamicData;
     }
 
@@ -92,6 +161,67 @@ public class RoleModel extends BaseModel {
 
         public void setMethodFeatures(List<MethodFeature> methodFeatures) {
             this.methodFeatures = methodFeatures;
+        }
+    }
+
+    public static class TreeLevel {
+        /**
+         * 功能数据id
+         */
+        private String data;
+        /**
+         * 子级
+         */
+        private List<TreeLevel> children;
+        /**
+         * 当前功能
+         */
+        private String classFeature;
+
+        public String getClassFeature() {
+            return classFeature;
+        }
+
+        public void setClassFeature(String classFeature) {
+            this.classFeature = classFeature;
+        }
+
+        public String getData() {
+            return data;
+        }
+
+        public void setData(String data) {
+            this.data = data;
+        }
+
+        public List<TreeLevel> getChildren() {
+            return children;
+        }
+
+        public void setChildren(List<TreeLevel> children) {
+            this.children = children;
+        }
+
+        public TreeLevel() {
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) {
+                return true;
+            }
+            if (o == null || getClass() != o.getClass()) {
+                return false;
+            }
+            TreeLevel treeLevel = (TreeLevel) o;
+            return Objects.equals(data, treeLevel.data) &&
+                    Objects.equals(children, treeLevel.children) &&
+                    Objects.equals(classFeature, treeLevel.classFeature);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(data, children, classFeature);
         }
     }
 }
