@@ -105,7 +105,7 @@ public class RoleModel extends BaseModel {
         }
         for (TreeLevel treeLevel : treeLevels) {
             ClassFeature nowFeature = ClassFeature.valueOf(treeLevel.getClassFeature());
-            if (nowFeature == classFeature && StrUtil.equals(parentDataId, dataId)) {
+            if (nowFeature == classFeature && (dataId == null || StrUtil.equals(parentDataId, dataId))) {
                 // 是同一个功能
 //                System.out.println(dataId + "  " + parentDataId);
                 dataIds.add(treeLevel.getData());
