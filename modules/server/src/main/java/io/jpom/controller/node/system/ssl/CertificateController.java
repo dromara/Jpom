@@ -60,6 +60,8 @@ public class CertificateController extends BaseServerController {
 
     /**
      * 证书列表
+     *
+     * @return json
      */
     @RequestMapping(value = "/getCertList", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
@@ -71,14 +73,13 @@ public class CertificateController extends BaseServerController {
     /**
      * 删除证书
      *
-     * @param id id
      * @return json
      */
     @RequestMapping(value = "/delete", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     @OptLog(UserOperateLogV1.OptType.DelCert)
     @Feature(method = MethodFeature.DEL)
-    public String delete(String id) {
+    public String delete() {
         return NodeForward.request(getNode(), getRequest(), NodeUrl.System_Certificate_delete).toString();
     }
 
@@ -90,7 +91,7 @@ public class CertificateController extends BaseServerController {
     @ResponseBody
     @OptLog(UserOperateLogV1.OptType.ExportCert)
     @Feature(method = MethodFeature.DOWNLOAD)
-    public void export(String id) {
+    public void export() {
         NodeForward.requestDownload(getNode(), getRequest(), getResponse(), NodeUrl.System_Certificate_export);
     }
 }

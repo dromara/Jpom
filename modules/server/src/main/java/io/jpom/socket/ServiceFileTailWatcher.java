@@ -90,6 +90,7 @@ public class ServiceFileTailWatcher<T> extends BaseFileTailWatcher<T> {
      * 关闭文件读取流
      *
      * @param fileName 文件名
+     * @param session  回话
      */
     public static void offlineFile(File fileName, WebSocketSession session) {
         ServiceFileTailWatcher<WebSocketSession> serviceFileTailWatcher = CONCURRENT_HASH_MAP.get(fileName);

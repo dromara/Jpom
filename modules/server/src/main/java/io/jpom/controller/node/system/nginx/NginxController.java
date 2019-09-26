@@ -41,6 +41,8 @@ public class NginxController extends BaseServerController {
 
     /**
      * 配置列表
+     *
+     * @return json
      */
     @RequestMapping(value = "list_data.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
@@ -80,6 +82,8 @@ public class NginxController extends BaseServerController {
 
     /**
      * 获取nginx状态
+     *
+     * @return json
      */
     @RequestMapping(value = "status", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
@@ -90,6 +94,8 @@ public class NginxController extends BaseServerController {
 
     /**
      * 获取nginx配置状态
+     *
+     * @return json
      */
     @RequestMapping(value = "config", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
@@ -100,6 +106,8 @@ public class NginxController extends BaseServerController {
 
     /**
      * 启动nginx
+     *
+     * @return json
      */
     @RequestMapping(value = "open", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
@@ -110,6 +118,8 @@ public class NginxController extends BaseServerController {
 
     /**
      * 关闭nginx
+     *
+     * @return json
      */
     @RequestMapping(value = "close", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
@@ -121,6 +131,8 @@ public class NginxController extends BaseServerController {
 
     /**
      * 修改nginx
+     *
+     * @return json
      */
     @RequestMapping(value = "updateConf", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody

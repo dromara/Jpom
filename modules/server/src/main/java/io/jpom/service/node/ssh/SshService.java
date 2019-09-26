@@ -227,11 +227,11 @@ public class SshService extends BaseOperService<SshModel> implements BaseDynamic
     /**
      * 下载文件
      *
-     * @param sshModel
-     * @param remoteFile
-     * @param save
-     * @throws FileNotFoundException
-     * @throws SftpException
+     * @param sshModel   实体
+     * @param remoteFile 远程文件
+     * @param save       文件对象
+     * @throws FileNotFoundException io
+     * @throws SftpException         sftp
      */
     public void download(SshModel sshModel, String remoteFile, File save) throws FileNotFoundException, SftpException {
         Session session = null;

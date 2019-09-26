@@ -21,7 +21,6 @@ import io.jpom.service.node.NodeService;
 import io.jpom.service.node.OutGivingServer;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.Callable;
@@ -53,11 +52,12 @@ public class OutGivingRun implements Callable<OutGivingNodeProject.Status> {
      * @param id        分发id
      * @param file      文件
      * @param userModel 操作的用户
+     * @param unzip     解压
      */
     public static void startRun(String id,
                                 File file,
                                 UserModel userModel,
-                                boolean unzip) throws IOException {
+                                boolean unzip) {
         OutGivingServer outGivingServer = SpringUtil.getBean(OutGivingServer.class);
         OutGivingModel item = outGivingServer.getItem(id);
         Objects.requireNonNull(item, "不存在分发");

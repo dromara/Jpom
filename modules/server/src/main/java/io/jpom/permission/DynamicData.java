@@ -56,7 +56,6 @@ public class DynamicData {
     /**
      * 获取子级功能
      *
-     * @param classFeature 功能
      * @return 子级
      */
     public static List<ClassFeature> getRoot() {

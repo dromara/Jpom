@@ -12,6 +12,7 @@ public class CheckPassword {
      * 密码强度
      * Z = 字母 S = 数字 T = 特殊字符
      *
+     * @param passwordStr 密码字符串
      * @return 0 弱  1 中  2强
      */
     public static int checkPassword(String passwordStr) {

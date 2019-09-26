@@ -62,6 +62,8 @@ public class UserRoleListController extends BaseServerController {
 
     /**
      * 查询所有用户
+     *
+     * @return json
      */
     @RequestMapping(value = "list_data.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody

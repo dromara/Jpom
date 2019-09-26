@@ -34,6 +34,10 @@ public class GlobalDefaultExceptionHandler {
 
     /**
      * 声明要捕获的异常
+     *
+     * @param request  请求
+     * @param response 响应
+     * @param e        异常
      */
     @ExceptionHandler({AgentException.class, AuthorizeException.class, RuntimeException.class, Exception.class})
     public void paramExceptionHandler(HttpServletRequest request, HttpServletResponse response, Exception e) {

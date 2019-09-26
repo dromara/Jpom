@@ -35,6 +35,7 @@ public class ProjectFileControl extends BaseServerController {
      * 文件管理页面
      *
      * @param id 项目id
+     * @return page
      */
     @RequestMapping(value = "list.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
     @Feature(method = MethodFeature.FILE)
@@ -50,6 +51,8 @@ public class ProjectFileControl extends BaseServerController {
 
     /**
      * 列出目录下的文件
+     *
+     * @return json
      */
     @RequestMapping(value = "getFileList", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody

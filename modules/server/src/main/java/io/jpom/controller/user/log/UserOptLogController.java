@@ -17,7 +17,6 @@ import io.jpom.plugin.ClassFeature;
 import io.jpom.plugin.Feature;
 import io.jpom.plugin.MethodFeature;
 import io.jpom.service.dblog.DbUserOperateLogService;
-import io.jpom.service.node.NodeService;
 import io.jpom.service.user.UserService;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
@@ -45,6 +44,8 @@ public class UserOptLogController extends BaseServerController {
 
     /**
      * 展示用户列表
+     *
+     * @return page
      */
     @RequestMapping(value = "list.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
     @Feature(method = MethodFeature.LOG)
@@ -61,6 +62,10 @@ public class UserOptLogController extends BaseServerController {
 
     /**
      * 展示用户列表
+     *
+     * @param limit 大小
+     * @param page  page
+     * @return json
      */
     @RequestMapping(value = "list_data.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody

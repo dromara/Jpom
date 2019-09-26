@@ -24,6 +24,7 @@ public class WhitelistDirectoryService {
     /**
      * 获取项目路径白名单
      *
+     * @param model 实体
      * @return project
      */
     public List<String> getProjectDirectory(NodeModel model) {

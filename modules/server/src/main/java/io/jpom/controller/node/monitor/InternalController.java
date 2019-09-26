@@ -23,9 +23,11 @@ public class InternalController extends BaseServerController {
 
     /**
      * 获取内存信息
+     *
+     * @return page
      */
     @RequestMapping(value = "internal", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
-    public String getInternal(String tag) throws Exception {
+    public String getInternal(String tag) {
         setAttribute("tag", tag);
         JSONObject data = NodeForward.requestData(getNode(), NodeUrl.Manage_internal_data, getRequest(), JSONObject.class);
         setAttribute("data", data);
@@ -34,6 +36,8 @@ public class InternalController extends BaseServerController {
 
     /**
      * 查询监控线程列表
+     *
+     * @return json
      */
     @RequestMapping(value = "threadInfos", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
@@ -57,7 +61,7 @@ public class InternalController extends BaseServerController {
     @RequestMapping(value = "ram", method = RequestMethod.GET)
     @ResponseBody
     @OptLog(UserOperateLogV1.OptType.ExportRam)
-    public void ram() throws Exception {
+    public void ram() {
         NodeForward.requestDownload(getNode(), getRequest(), getResponse(), NodeUrl.Manage_internal_ram);
     }
 }

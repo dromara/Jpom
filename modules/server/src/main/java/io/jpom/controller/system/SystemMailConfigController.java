@@ -32,6 +32,8 @@ public class SystemMailConfigController extends BaseServerController {
 
     /**
      * 展示监控页面
+     *
+     * @return page
      */
     @RequestMapping(value = "mailConfig.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
     @SystemPermission

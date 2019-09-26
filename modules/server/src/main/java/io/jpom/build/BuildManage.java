@@ -57,6 +57,7 @@ public class BuildManage extends BaseBuild implements Runnable {
      * 取消构建
      *
      * @param id id
+     * @return bool
      */
     public static boolean cancel(String id) {
         BuildManage buildManage = BUILD_MANAGE_MAP.get(id);

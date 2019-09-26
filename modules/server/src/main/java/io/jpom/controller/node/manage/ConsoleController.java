@@ -30,6 +30,7 @@ public class ConsoleController extends BaseServerController {
     /**
      * 管理项目
      *
+     * @param id id
      * @return page
      */
     @RequestMapping(value = "console", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)

@@ -56,6 +56,8 @@ public class MonitorListController extends BaseServerController {
 
     /**
      * 展示监控页面
+     *
+     * @return page
      */
     @RequestMapping(value = "list.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
     @Feature(method = MethodFeature.LIST)
@@ -65,6 +67,9 @@ public class MonitorListController extends BaseServerController {
 
     /**
      * 修改监控
+     *
+     * @param id id
+     * @return json
      */
     @RequestMapping(value = "edit.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
     @Feature(method = MethodFeature.EDIT)
@@ -97,6 +102,8 @@ public class MonitorListController extends BaseServerController {
 
     /**
      * 展示监控列表
+     *
+     * @return json
      */
     @RequestMapping(value = "getMonitorList", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
@@ -108,6 +115,9 @@ public class MonitorListController extends BaseServerController {
 
     /**
      * 删除列表
+     *
+     * @param id id
+     * @return json
      */
     @RequestMapping(value = "deleteMonitor", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
@@ -126,6 +136,11 @@ public class MonitorListController extends BaseServerController {
 
     /**
      * 增加或修改监控
+     *
+     * @param id         id
+     * @param name       name
+     * @param notifyUser user
+     * @return json
      */
     @RequestMapping(value = "updateMonitor", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
@@ -181,6 +196,11 @@ public class MonitorListController extends BaseServerController {
 
     /**
      * 开启或关闭监控
+     *
+     * @param id     id
+     * @param status 状态
+     * @param type   类型
+     * @return json
      */
     @RequestMapping(value = "changeStatus", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody

@@ -44,6 +44,7 @@ public class RoleService extends BaseOperService<RoleModel> {
      *
      * @param roleId       角色id
      * @param classFeature 功能
+     * @param dataId       数据id
      * @return list
      */
     public List<String> listDynamicData(String roleId, ClassFeature classFeature, String dataId) {
@@ -58,10 +59,10 @@ public class RoleService extends BaseOperService<RoleModel> {
     /**
      * 调用对应功能动态数据list
      *
-     * @param roleId
-     * @param classFeature
+     * @param roleId       角色id
+     * @param classFeature 功能
      * @param dataId       数据id
-     * @return
+     * @return array
      */
     public JSONArray listDynamic(String roleId, ClassFeature classFeature, String dataId) {
         Map<ClassFeature, DynamicData> dynamicDataMap = DynamicData.getDynamicDataMap();

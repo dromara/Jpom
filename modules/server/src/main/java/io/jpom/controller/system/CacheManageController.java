@@ -75,6 +75,7 @@ public class CacheManageController extends BaseServerController {
     /**
      * 清空缓存
      *
+     * @param type 类型
      * @return json
      */
     @RequestMapping(value = "clearCache.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)

@@ -37,6 +37,8 @@ public class UserListController extends BaseServerController {
 
     /**
      * 展示用户列表
+     *
+     * @return page
      */
     @RequestMapping(value = "list", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
     @Feature(method = MethodFeature.LIST)
@@ -49,6 +51,8 @@ public class UserListController extends BaseServerController {
 
     /**
      * 查询所有用户
+     *
+     * @return json
      */
     @RequestMapping(value = "getUserList", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody

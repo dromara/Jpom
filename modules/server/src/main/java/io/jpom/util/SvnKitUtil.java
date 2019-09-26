@@ -41,8 +41,10 @@ public class SvnKitUtil {
     /**
      * 判断当前仓库url是否匹配
      *
-     * @param wcDir 仓库路径
-     * @param url   url
+     * @param wcDir    仓库路径
+     * @param url      url
+     * @param userName 用户名
+     * @param userPwd  密码
      * @return true 匹配
      * @throws SVNException 异常
      */
@@ -76,7 +78,12 @@ public class SvnKitUtil {
     /**
      * SVN检出
      *
+     * @param userName   用户名
+     * @param userPwd    密码
+     * @param svnPath    仓库路径
+     * @param targetPath 目录
      * @return Boolean
+     * @throws SVNException svn
      */
     public static String checkOut(String svnPath, String userName, String userPwd, File targetPath) throws SVNException {
         DefaultSVNOptions options = SVNWCUtil.createDefaultOptions(true);

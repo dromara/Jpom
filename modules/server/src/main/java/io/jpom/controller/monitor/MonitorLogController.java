@@ -20,7 +20,6 @@ import io.jpom.plugin.ClassFeature;
 import io.jpom.plugin.Feature;
 import io.jpom.plugin.MethodFeature;
 import io.jpom.service.dblog.DbMonitorNotifyLogService;
-import io.jpom.service.node.NodeService;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -46,6 +45,8 @@ public class MonitorLogController extends BaseServerController {
 
     /**
      * 展示监控页面
+     *
+     * @return page
      */
     @RequestMapping(value = "log.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
     @Feature(method = MethodFeature.LOG)
@@ -62,6 +63,11 @@ public class MonitorLogController extends BaseServerController {
 
     /**
      * 展示用户列表
+     *
+     * @param selectNode   节点
+     * @param limit        限制
+     * @param notifyStatus 状态
+     * @return json
      */
     @RequestMapping(value = "list_data.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody

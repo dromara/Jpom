@@ -133,6 +133,7 @@ public class LoginControl extends BaseServerController {
      *
      * @param userName 登录名
      * @param userPwd  登录密码
+     * @param code     验证码
      * @return json
      */
     @RequestMapping(value = "userLogin", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)

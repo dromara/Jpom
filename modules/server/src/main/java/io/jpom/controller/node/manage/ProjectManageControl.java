@@ -25,7 +25,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.annotation.Resource;
-import java.io.IOException;
 import java.util.List;
 
 /**
@@ -89,13 +88,14 @@ public class ProjectManageControl extends BaseServerController {
     /**
      * 删除项目
      *
+     * @param id id
      * @return json
      */
     @RequestMapping(value = "deleteProject", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     @OptLog(value = UserOperateLogV1.OptType.DelProject)
     @Feature(method = MethodFeature.DEL)
-    public String deleteProject(@ValidatorItem(value = ValidatorRule.NOT_BLANK) String id) throws IOException {
+    public String deleteProject(@ValidatorItem(value = ValidatorRule.NOT_BLANK) String id) {
         NodeModel nodeModel = getNode();
         // 检查节点分发
         List<OutGivingModel> outGivingModels = outGivingServer.list();

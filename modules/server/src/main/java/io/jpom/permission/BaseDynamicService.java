@@ -192,6 +192,7 @@ public interface BaseDynamicService {
      *
      * @param classFeature 功能
      * @param jsonArray    array
+     * @return list
      */
     default List<RoleModel.TreeLevel> parserChildren(ClassFeature classFeature, JSONArray jsonArray) {
         Set<ClassFeature> children = DynamicData.getChildren(classFeature);

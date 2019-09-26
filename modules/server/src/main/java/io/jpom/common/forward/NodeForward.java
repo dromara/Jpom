@@ -39,6 +39,7 @@ public class NodeForward {
      * @param nodeModel 节点
      * @param request   请求
      * @param nodeUrl   节点的url
+     * @param <T>       泛型
      * @return JSON
      */
     public static <T> JsonMessage<T> request(NodeModel nodeModel, HttpServletRequest request, NodeUrl nodeUrl) {
@@ -48,8 +49,10 @@ public class NodeForward {
     /**
      * 普通消息转发
      *
-     * @param nodeModel 节点
-     * @param nodeUrl   节点的url
+     * @param nodeModel  节点
+     * @param nodeUrl    节点的url
+     * @param jsonObject 数据
+     * @param userModel  user
      * @return JSON
      */
     public static JsonMessage request(NodeModel nodeModel, NodeUrl nodeUrl, UserModel userModel, JSONObject jsonObject) {
@@ -61,6 +64,9 @@ public class NodeForward {
      *
      * @param nodeModel 节点
      * @param nodeUrl   节点的url
+     * @param pName     主参数名
+     * @param pVal      主参数值
+     * @param val       其他参数
      * @return JSON
      */
     public static JsonMessage requestBySys(NodeModel nodeModel, NodeUrl nodeUrl, String pName, Object pVal, Object... val) {
@@ -73,6 +79,13 @@ public class NodeForward {
      * @param nodeModel 节点
      * @param request   请求
      * @param nodeUrl   节点的url
+     * @param pVal      主参数值
+     * @param pName     主参数名
+     * @param userModel 用户
+     * @param jsonData  数据
+     * @param mustUser  是否必须需要user
+     * @param val       其他参数
+     * @param <T>       泛型
      * @return JSON
      */
     private static <T> JsonMessage<T> request(NodeModel nodeModel,
@@ -144,10 +157,13 @@ public class NodeForward {
     /**
      * 普通消息转发,并解析数据
      *
-     * @param nodeModel 节点
-     * @param nodeUrl   节点的url
-     * @param tClass    要解析的类
-     * @param <T>       泛型
+     * @param nodeModel  节点
+     * @param nodeUrl    节点的url
+     * @param tClass     要解析的类
+     * @param <T>        泛型
+     * @param name       参数名
+     * @param parameters 其他参数
+     * @param value      值
      * @return T
      */
     public static <T> T requestData(NodeModel nodeModel, NodeUrl nodeUrl, Class<T> tClass, String name, Object value, Object... parameters) {
