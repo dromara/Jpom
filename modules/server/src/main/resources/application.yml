@@ -13,7 +13,7 @@ spring:
     active: dev
   #thymeleaf start
   thymeleaf:
-    mode: HTML5
+    mode: HTML
     encoding: UTF-8
     servlet:
       content-type: text/html
