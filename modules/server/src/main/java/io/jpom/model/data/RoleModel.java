@@ -1,6 +1,7 @@
 package io.jpom.model.data;
 
 import cn.hutool.core.util.StrUtil;
+import com.alibaba.fastjson.annotation.JSONField;
 import io.jpom.model.BaseModel;
 import io.jpom.plugin.ClassFeature;
 import io.jpom.plugin.MethodFeature;
@@ -21,9 +22,15 @@ public class RoleModel extends BaseModel {
     private List<RoleFeature> features;
 
     /**
+     * 旧版本数据
+     */
+    @JSONField(serialize = false, deserialize = false)
+    private Map<ClassFeature, List<TreeLevel>> dynamicData;
+
+    /**
      * 动态数据
      */
-    private Map<ClassFeature, List<TreeLevel>> dynamicData;
+    private Map<ClassFeature, List<TreeLevel>> dynamicData2;
 
     /**
      * 修改时间
@@ -48,12 +55,13 @@ public class RoleModel extends BaseModel {
         this.updateTime = updateTime;
     }
 
-    public Map<ClassFeature, List<TreeLevel>> getDynamicData() {
-        return dynamicData;
+
+    public Map<ClassFeature, List<TreeLevel>> getDynamicData2() {
+        return dynamicData2;
     }
 
     public boolean contains(ClassFeature classFeature, String dataId) {
-        Map<ClassFeature, List<TreeLevel>> dynamicData = getDynamicData();
+        Map<ClassFeature, List<TreeLevel>> dynamicData = getDynamicData2();
         if (dynamicData == null) {
             return false;
         }
@@ -66,7 +74,7 @@ public class RoleModel extends BaseModel {
     }
 
     public Set<String> getTreeData(ClassFeature classFeature, String dataId) {
-        Map<ClassFeature, List<TreeLevel>> dynamicData = getDynamicData();
+        Map<ClassFeature, List<TreeLevel>> dynamicData = getDynamicData2();
         if (dynamicData == null) {
             return new HashSet<>();
         }
@@ -121,8 +129,8 @@ public class RoleModel extends BaseModel {
         return dataIds;
     }
 
-    public void setDynamicData(Map<ClassFeature, List<TreeLevel>> dynamicData) {
-        this.dynamicData = dynamicData;
+    public void setDynamicData2(Map<ClassFeature, List<TreeLevel>> dynamicData) {
+        this.dynamicData2 = dynamicData;
     }
 
     public List<RoleFeature> getFeatures() {

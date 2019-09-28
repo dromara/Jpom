@@ -1,5 +1,6 @@
 package io.jpom.permission;
 
+import io.jpom.common.BaseServerController;
 import io.jpom.plugin.ClassFeature;
 import io.jpom.plugin.MethodFeature;
 import io.jpom.service.build.BuildService;
@@ -30,7 +31,7 @@ public class DynamicData {
 
     static {
         // 节点
-        put(ClassFeature.NODE, new DynamicData(NodeService.class, MethodFeature.LIST));
+        put(ClassFeature.NODE, new DynamicData(NodeService.class, "id", BaseServerController.NODE_ID, MethodFeature.LIST));
         // 分发
         put(ClassFeature.OUTGIVING, new DynamicData(OutGivingServer.class, MethodFeature.LIST));
         // 项目
@@ -54,7 +55,7 @@ public class DynamicData {
     }
 
     /**
-     * 获取子级功能
+     * 获取一级功能
      *
      * @return 子级
      */
@@ -76,6 +77,10 @@ public class DynamicData {
         return DYNAMIC_DATA_MAP;
     }
 
+    public static DynamicData getDynamicData(ClassFeature classFeature) {
+        return DYNAMIC_DATA_MAP.get(classFeature);
+    }
+
     /**
      * id 请求参数
      */
@@ -91,14 +96,25 @@ public class DynamicData {
      */
     private MethodFeature[] excludeMethod;
 
+    private String childrenParameterName;
+
     private DynamicData(Class<? extends BaseDynamicService> baseOperService, MethodFeature... excludeMethod) {
         this(baseOperService, "id", excludeMethod);
     }
 
     private DynamicData(Class<? extends BaseDynamicService> baseOperService, String parameterName, MethodFeature... excludeMethod) {
+        this(baseOperService, parameterName, null, excludeMethod);
+    }
+
+    private DynamicData(Class<? extends BaseDynamicService> baseOperService, String parameterName, String childrenParameterName, MethodFeature... excludeMethod) {
         this.parameterName = parameterName;
         this.baseOperService = baseOperService;
         this.excludeMethod = excludeMethod;
+        this.childrenParameterName = childrenParameterName;
+    }
+
+    public String getChildrenParameterName() {
+        return childrenParameterName;
     }
 
     public String getParameterName() {

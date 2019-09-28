@@ -2,6 +2,7 @@ package io.jpom.permission;
 
 import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.spring.SpringUtil;
+import cn.jiangzeyin.controller.base.AbstractController;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.common.BaseServerController;
@@ -32,13 +33,14 @@ public interface BaseDynamicService {
         if (jsonArray == null || userModel == null) {
             return jsonArray;
         }
+        if (userModel.isSystemUser()) {
+            // 系统管理全部权限
+            return jsonArray;
+        }
         RoleService bean = SpringUtil.getBean(RoleService.class);
-        Set<String> dynamicList = bean.getDynamicList(userModel, classFeature);
+        String parentId = getParameterValue(classFeature);
+        Set<String> dynamicList = bean.getDynamicList(userModel, classFeature, parentId);
         if (dynamicList == null) {
-            if (userModel.isSystemUser()) {
-                // 系统管理全部权限
-                return jsonArray;
-            }
             return null;
         }
         List<Object> collect = jsonArray.stream().filter(o -> {
@@ -61,18 +63,38 @@ public interface BaseDynamicService {
         if (list == null || userModel == null) {
             return list;
         }
+        if (userModel.isSystemUser()) {
+            // 系统管理全部权限
+            return list;
+        }
         RoleService bean = SpringUtil.getBean(RoleService.class);
-        Set<String> dynamicList = bean.getDynamicList(userModel, classFeature);
+        String parentId = getParameterValue(classFeature);
+        Set<String> dynamicList = bean.getDynamicList(userModel, classFeature, parentId);
         if (dynamicList == null) {
-            if (userModel.isSystemUser()) {
-                // 系统管理全部权限
-                return list;
-            }
             // 没有角色没有权限
             return null;
         }
         //
         return list.stream().filter(baseModel -> dynamicList.contains(baseModel.getId())).collect(Collectors.toList());
+    }
+
+    /**
+     * 获取参数
+     *
+     * @param classFeature 功能
+     * @return 参数
+     */
+    default String getParameterValue(ClassFeature classFeature) {
+        ClassFeature parent = classFeature.getParent();
+        if (parent == null) {
+            return null;
+        }
+        DynamicData dynamicData = DynamicData.getDynamicData(parent);
+        if (dynamicData == null) {
+            return null;
+        }
+        String parameterName = dynamicData.getChildrenParameterName();
+        return AbstractController.getRequestAttributes().getRequest().getParameter(parameterName);
     }
 
     // -------------------------------------- 转换数据为tree
@@ -105,9 +127,10 @@ public interface BaseDynamicService {
             String name = data.getString("name");
             String id = data.getString("id");
             jsonObject.put("title", name);
-            jsonObject.put("id", StrUtil.emptyToDefault(dataId, "") + StrUtil.COLON + id);
+            jsonObject.put("id", StrUtil.emptyToDefault(dataId, "") + StrUtil.COLON + classFeature.name() + StrUtil.COLON + id);
             boolean doChildren = this.doChildren(classFeature, roleId, id, jsonObject);
             if (!doChildren) {
+                // 没有子级
                 RoleService bean = SpringUtil.getBean(RoleService.class);
                 List<String> checkList = bean.listDynamicData(roleId, classFeature, dataId);
                 if (checkList != null && checkList.contains(id)) {
@@ -178,7 +201,7 @@ public interface BaseDynamicService {
 
             String id = jsonObject.getString("id");
             if (id.contains(StrUtil.COLON)) {
-                id = id.split(StrUtil.COLON)[1];
+                id = id.split(StrUtil.COLON)[2];
             }
             treeLevel.setData(id);
             treeLevel.setClassFeature(classFeature.name());
