@@ -32,12 +32,12 @@
 
     var statusArray = [[${statusArray}]];
 
-    function openLog(id, buildId) {
+    function openLog(id, name, buildId) {
         layerOpen({
             type: 2,
-            title: '构建日志',
+            title: '构建日志-【' + name + '】',
             content: './logPage.html?id=' + id + "&buildId=" + buildId,
-            area: ['80%', '90%'],
+            area: ['80%', '95%'],
             cancel: function () {
                 reloadTable();
             }
@@ -56,7 +56,7 @@
                 },
                 success: function (data) {
                     layer.msg(data.msg);
-                    if (200 == data.code) {
+                    if (200 === data.code) {
                         reloadTable();
                     }
                 }
@@ -88,7 +88,7 @@
                 if (d.buildId <= 0) {
                     return "";
                 }
-                return "<a herf='' style='color: blue;' onclick='openLog(\"" + d.id + "\"," + d.buildId + ")'>" + d.buildIdStr + "</a>";
+                return "<a herf='' style='color: blue;' onclick='openLog(\"" + d.id + "\",\"" + d.name + "\"," + d.buildId + ")'>" + d.buildIdStr + "</a>";
             }
         },
         {field: 'modifyUser', title: '最后修改人'},
@@ -131,7 +131,7 @@
                     });
                 });
             } else if ('build' == event) {
-                var dataId = data.id;
+                var d = data;
                 loadingAjax({
                     url: './start.json',
                     data: {
@@ -139,9 +139,9 @@
                     },
                     success: function (data) {
                         layer.msg(data.msg);
-                        if (200 == data.code) {
+                        if (200 === data.code) {
                             reloadTable();
-                            openLog(dataId, data.data);
+                            openLog(d.id, d.name, data.data);
                         }
                     }
                 });

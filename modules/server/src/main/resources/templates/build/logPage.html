@@ -11,8 +11,9 @@
 
 <body>
 <form action="" class="layui-form" id="form_ngx">
-    <div class="layui-form-item">
-        <a class="layui-btn" id="cancel" style="display: none;">取消构建</a>
+<!--    <h3 th:text="构建名称：+${item.name}"></h3>-->
+    <div class="layui-form-item" style="margin-top: 10px;">
+        <a class="layui-btn layui-btn-sm" id="cancel" style="display: none;">取消构建</a>
     </div>
     <div class="layui-form-item">
         <textarea name="context" id="logContext" placeholder="加载中....." readonly disabled
