@@ -6,6 +6,7 @@ import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import io.jpom.system.JpomRuntimeException;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -41,7 +42,11 @@ public class JsonFileUtil {
             if (StrUtil.isEmpty(json)) {
                 return new JSONObject();
             }
-            return (JSON) JSON.parse(json);
+            try {
+                return (JSON) JSON.parse(json);
+            } catch (Exception e) {
+                throw new JpomRuntimeException("数据文件内容错误，请检查文件是否被非法修改：" + path, e);
+            }
         } finally {
             READ_LOCK.unlock();
         }
