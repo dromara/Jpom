@@ -32,10 +32,15 @@
 <script type="text/javascript">
     var id = getQueryString("id");
     var tree;
+    var layIndex;
+    var layCount = layEndCount = 0;
 
     function loadSuccess() {
         layui.use('tree', function () {
             tree = layui.tree;
+            layIndex = layer.load(1, {
+                shade: [0.3, '#fff']
+            });
             $(".layui-colla-item").each(function () {
                 var find = $(this).find(".layui-colla-content div");
                 var attr = find.attr("id");
@@ -79,7 +84,8 @@
     }
 
     function getData(dy) {
-        loadingAjax({
+        layCount++;
+        silentAjax({
             url: './getDynamic.json',
             data: {
                 id: id,
@@ -102,6 +108,12 @@
                     }
                 });
                 $("#" + dy + "div").show();
+            },
+            complete: function () {
+                layEndCount++;
+                if (layCount === layEndCount) {
+                    layer.close(layIndex);
+                }
             }
         });
     }

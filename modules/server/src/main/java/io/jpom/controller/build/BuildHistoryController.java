@@ -58,7 +58,9 @@ public class BuildHistoryController extends BaseServerController {
 
     @RequestMapping(value = "logPage.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
     @Feature(method = MethodFeature.LOG)
-    public String logPage() {
+    public String logPage(String id) {
+        BuildModel item = buildService.getItem(id);
+        setAttribute("item", item);
         return "build/logPage";
     }
 

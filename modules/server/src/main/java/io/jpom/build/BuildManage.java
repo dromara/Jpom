@@ -162,7 +162,7 @@ public class BuildManage extends BaseBuild implements Runnable {
             }
             try {
                 //
-                this.log("get clone pull");
+                this.log("repository clone pull from " + this.buildModel.getBranchName());
                 String msg = "error";
                 if (buildModel.getRepoType() == BuildModel.RepoType.Git.getCode()) {
                     // git

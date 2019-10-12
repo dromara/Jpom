@@ -22,7 +22,6 @@ import org.springframework.web.method.HandlerMethod;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.Map;
 
 /**
  * 权限拦截器
@@ -76,8 +75,7 @@ public class PermissionInterceptor extends BaseJpomInterceptor {
             return false;
         }
         // 判断动态权限
-        Map<ClassFeature, DynamicData> dynamicDataMap = DynamicData.getDynamicDataMap();
-        DynamicData dynamicData = dynamicDataMap.get(classFeature);
+        DynamicData dynamicData = DynamicData.getDynamicData(classFeature);
         if (dynamicData != null) {
             // 排除的方法
             MethodFeature[] excludeMethod = dynamicData.getExcludeMethod();

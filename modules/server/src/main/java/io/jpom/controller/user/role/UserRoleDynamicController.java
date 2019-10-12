@@ -68,13 +68,12 @@ public class UserRoleDynamicController extends BaseServerController {
         Map<ClassFeature, List<RoleModel.TreeLevel>> dynamicData1 = new HashMap<>(jsonObject.keySet().size());
         //
         List<ClassFeature> root = DynamicData.getRoot();
-        Map<ClassFeature, DynamicData> dynamicDataMap = DynamicData.getDynamicDataMap();
         for (ClassFeature classFeature : root) {
             JSONArray value = jsonObject.getJSONArray(classFeature.name());
             if (value == null || value.isEmpty()) {
                 continue;
             }
-            DynamicData dynamicData = dynamicDataMap.get(classFeature);
+            DynamicData dynamicData = DynamicData.getDynamicData(classFeature);
             if (dynamicData == null) {
                 return JsonMessage.getString(404, classFeature.getName() + "没有配置对应动态数据");
             }
@@ -83,8 +82,7 @@ public class UserRoleDynamicController extends BaseServerController {
             List<RoleModel.TreeLevel> list = bean.parserValue(classFeature, value);
             dynamicData1.put(classFeature, list);
         }
-        System.out.println(dynamicData1);
-        item.setDynamicData(dynamicData1);
+        item.setDynamicData2(dynamicData1);
         roleService.updateItem(item);
         return JsonMessage.getString(200, "保存成功");
     }

@@ -35,7 +35,7 @@ set RUNJAR=
 @REM 是否开启控制台日志文件备份
 set LogBack=true
 set JVM=-server
-set ARGS= --jpom.applicationTag=%Tag% --jpom.log=%basePath%log --server.port=2123
+set ARGS= --jpom.applicationTag=%Tag% --jpom.log=%basePath%log --spring.profiles.active=pro --server.port=2123
 
 @REM 读取jar
 call:listDir

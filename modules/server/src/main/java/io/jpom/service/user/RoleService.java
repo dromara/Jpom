@@ -65,8 +65,7 @@ public class RoleService extends BaseOperService<RoleModel> {
      * @return array
      */
     public JSONArray listDynamic(String roleId, ClassFeature classFeature, String dataId) {
-        Map<ClassFeature, DynamicData> dynamicDataMap = DynamicData.getDynamicDataMap();
-        DynamicData dynamicData = dynamicDataMap.get(classFeature);
+        DynamicData dynamicData = DynamicData.getDynamicData(classFeature);
         Objects.requireNonNull(dynamicData, "没有配置对应动态数据");
         Class<? extends BaseDynamicService> baseOperService = dynamicData.getBaseOperService();
         BaseDynamicService bean = SpringUtil.getBean(baseOperService);
@@ -79,7 +78,7 @@ public class RoleService extends BaseOperService<RoleModel> {
             // 系统构建id
             return false;
         }
-        DynamicData dynamicData1 = DynamicData.getDynamicDataMap().get(classFeature);
+        DynamicData dynamicData1 = DynamicData.getDynamicData(classFeature);
         if (dynamicData1 == null) {
             // 如果不是没有动态权限  就默认通过
             return false;
@@ -104,6 +103,14 @@ public class RoleService extends BaseOperService<RoleModel> {
         return true;
     }
 
+    /**
+     * 没有有对应功能方法的权限
+     *
+     * @param userModel     用户
+     * @param classFeature  功能
+     * @param methodFeature 方法
+     * @return false 有权限  true 没有权限
+     */
     public boolean errorMethodPermission(UserModel userModel, ClassFeature classFeature, MethodFeature methodFeature) {
         if (userModel.isSystemUser()) {
             return false;
@@ -128,7 +135,7 @@ public class RoleService extends BaseOperService<RoleModel> {
         return true;
     }
 
-    public Set<String> getDynamicList(UserModel userModel, ClassFeature classFeature) {
+    public Set<String> getDynamicList(UserModel userModel, ClassFeature classFeature, String parentId) {
         Set<String> roles = userModel.getRoles();
         if (roles == null || roles.isEmpty()) {
             return null;
@@ -139,11 +146,11 @@ public class RoleService extends BaseOperService<RoleModel> {
             if (item == null) {
                 continue;
             }
-            Map<ClassFeature, List<RoleModel.TreeLevel>> dynamicData = item.getDynamicData();
+            Map<ClassFeature, List<RoleModel.TreeLevel>> dynamicData = item.getDynamicData2();
             if (dynamicData == null) {
                 continue;
             }
-            Set<String> list = item.getTreeData(classFeature, null);
+            Set<String> list = item.getTreeData(classFeature, parentId);
             if (list != null) {
                 allData.addAll(list);
             }

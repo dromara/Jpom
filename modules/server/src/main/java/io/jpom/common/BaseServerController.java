@@ -28,6 +28,8 @@ import java.util.Objects;
 public abstract class BaseServerController extends BaseJpomController {
     private static final ThreadLocal<UserModel> USER_MODEL_THREAD_LOCAL = new ThreadLocal<>();
 
+    public static final String NODE_ID = "nodeId";
+
     @Resource
     protected NodeService nodeService;
 
@@ -40,7 +42,7 @@ public abstract class BaseServerController extends BaseJpomController {
     }
 
     protected NodeModel tryGetNode() {
-        String nodeId = getParameter("nodeId");
+        String nodeId = getParameter(NODE_ID);
         if (StrUtil.isEmpty(nodeId)) {
             return null;
         }
