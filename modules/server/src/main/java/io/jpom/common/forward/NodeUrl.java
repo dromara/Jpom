@@ -89,6 +89,7 @@ public enum NodeUrl {
     Manage_internal_threadInfos("/manage/threadInfos"),
 
     System_Nginx_list_data("/system/nginx/list_data.json"),
+    System_Nginx_Tree("/system/nginx/tree.json"),
 
     System_Nginx_item_data("/system/nginx/item_data"),
 

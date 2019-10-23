@@ -51,6 +51,19 @@ public class NginxController extends BaseServerController {
         return NodeForward.request(getNode(), getRequest(), NodeUrl.System_Nginx_list_data).toString();
     }
 
+    /**
+     * 配置列表
+     *
+     * @return json
+     */
+    @RequestMapping(value = "tree.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @ResponseBody
+    @Feature(method = MethodFeature.LIST)
+    public String tree() {
+        return NodeForward.request(getNode(), getRequest(), NodeUrl.System_Nginx_Tree).toString();
+    }
+
+
     @RequestMapping(value = "item.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
     @Feature(method = MethodFeature.EDIT)
     public String setting(String type) {

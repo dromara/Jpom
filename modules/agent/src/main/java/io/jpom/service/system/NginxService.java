@@ -34,7 +34,7 @@ public class NginxService extends BaseDataService {
     @Resource
     private WhitelistDirectoryService whitelistDirectoryService;
 
-    public JSONArray list() {
+    public JSONArray list(String whitePath, String fileName) {
         AgentWhitelist agentWhitelist = whitelistDirectoryService.getWhitelist();
         if (agentWhitelist == null) {
             return null;
@@ -43,35 +43,31 @@ public class NginxService extends BaseDataService {
         if (ngxDirectory == null) {
             return null;
         }
+        String normalize = FileUtil.normalize(whitePath + "/" + fileName);
+        File[] files = FileUtil.ls(normalize);
+        if (files == null || files.length <= 0) {
+            return null;
+        }
         JSONArray array = new JSONArray();
-        for (Object o : ngxDirectory) {
-            String parentPath = o.toString();
-            File whiteDir = new File(parentPath);
-            if (!whiteDir.isDirectory()) {
-                continue;
-            }
-            List<File> list = null;
-            try {
-                //获得指定目录下所有文件
-                list = FileUtil.loopFiles(whiteDir, pathname -> pathname.getName().endsWith(".conf"));
-            } catch (Exception e) {
-                DefaultSystemLog.getLog().error(e.getMessage(), e);
-            }
-            if (list == null || list.size() <= 0) {
-                continue;
-            }
-            String absPath = whiteDir.getAbsolutePath();
-            for (File itemFile : list) {
-//                String itemAbsPath = itemFile.getAbsolutePath();
-                String name = StringUtil.delStartPath(itemFile, absPath, true);
-                //paresName(absPath, itemAbsPath);
-                JSONObject jsonObject = new JSONObject();
-                jsonObject.put("path", parentPath);
-                jsonObject.put("name", name);
-                long time = itemFile.lastModified();
-                jsonObject.put("time", DateUtil.date(time).toString());
+        for (File file : files) {
+            String name = file.getName();
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.put("path", whitePath);
+            long time = file.lastModified();
+            jsonObject.put("time", DateUtil.date(time).toString());
+            jsonObject.put("name", name);
+            if (file.isDirectory()) {
+                if (FileUtil.isEmpty(file)) {
+                    continue;
+                }
+                jsonObject.put("name", name + "【文件夹】");
+                jsonObject.put("isDirectory", true);
+            } else {
+                if (!name.endsWith(".conf")) {
+                    continue;
+                }
                 try {
-                    NgxConfig config = NgxConfig.read(itemFile.getPath());
+                    NgxConfig config = NgxConfig.read(file.getPath());
                     List<NgxEntry> server = config.findAll(NgxBlock.class, "server");
                     JSONObject data = findSeverName(server);
                     if (data != null) {
@@ -80,10 +76,82 @@ public class NginxService extends BaseDataService {
                 } catch (IOException e) {
                     DefaultSystemLog.getLog().error(e.getMessage(), e);
                 }
-                array.add(jsonObject);
             }
+            array.add(jsonObject);
         }
         return array;
+    }
+
+    /**
+     * 获取nginx树型图列表
+     *
+     * @return JSONArray
+     */
+    public JSONArray tree() {
+        JSONArray treeArray = new JSONArray();
+        AgentWhitelist agentWhitelist = whitelistDirectoryService.getWhitelist();
+        if (agentWhitelist == null) {
+            return treeArray;
+        }
+        List<String> ngxDirectory = agentWhitelist.getNginx();
+        if (ngxDirectory == null) {
+            return treeArray;
+        }
+        for (String str : ngxDirectory) {
+            JSONObject object = addChild(str, "");
+            if (object != null) {
+                object.put("title", str);
+                object.put("spread", true);
+                treeArray.add(object);
+            }
+        }
+        return treeArray;
+    }
+
+    /**
+     * 扫描目录下所有nginx配置文件
+     *
+     * @param whitePath 白名单路径
+     * @param fileName  文件路径
+     */
+    private JSONObject addChild(String whitePath, String fileName) {
+        String normalize = FileUtil.normalize(whitePath + "/" + fileName);
+        File parentFile = FileUtil.file(normalize);
+        if (parentFile.isFile()) {
+            return null;
+        }
+        String absolutePath = parentFile.getAbsolutePath();
+        File[] files = FileUtil.ls(absolutePath);
+        if (files == null || files.length <= 0) {
+            return null;
+        }
+        JSONObject object = new JSONObject();
+        String parentName = parentFile.getName();
+        object.put("title", parentName);
+        object.put("whitePath", whitePath);
+        object.put("path", fileName);
+        JSONArray array = new JSONArray();
+        for (File file : files) {
+            String name = StringUtil.delStartPath(file, whitePath, true);
+            if (file.isDirectory()) {
+                if (FileUtil.isEmpty(file)) {
+                    continue;
+                }
+                JSONObject child = addChild(whitePath, name);
+                array.add(child);
+            } else {
+                String fName = file.getName();
+                if (fName.endsWith(".conf")) {
+                    JSONObject child = new JSONObject();
+                    child.put("title", fName);
+                    child.put("whitePath", whitePath);
+                    child.put("path", name);
+                    array.add(child);
+                }
+            }
+        }
+        object.put("children", array);
+        return object;
     }
 
     /**
@@ -217,4 +285,5 @@ public class NginxService extends BaseDataService {
         String dataFilePath = getDataFilePath(AgentConfigBean.NGINX_CONF);
         JsonFileUtil.saveJson(dataFilePath, object);
     }
+
 }

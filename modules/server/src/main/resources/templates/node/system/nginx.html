@@ -19,38 +19,116 @@
         .status .status-stop {
             background-color: #ff0000;
         }
+
+        .nginx_tree {
+            width: 20%;
+        }
+
+        .nginx_table {
+            width: 78%;
+            margin-left: 1%;
+        }
+
     </style>
 </head>
 
 <body>
-<div class="layui-row">
-    <button id="addNgx" class="layui-btn layui-btn-sm">新增nginx配置</button>
-    <button onclick="reload();" class="layui-btn layui-btn-sm">刷新表格</button>
-    <div class="status" style="float: right;">
-        <div class="status-div"></div>
-        <span>未运行</span>
+<div style="width: 100%;display: flex;">
+    <div class="nginx_tree" id="tree"></div>
+    <div class="nginx_table">
+        <div class="layui-row">
+            <button id="addNgx" class="layui-btn layui-btn-sm">新增nginx配置</button>
+            <button onclick="reload();" class="layui-btn layui-btn-sm">刷新表格</button>
+            <div class="status" style="float: right;">
+                <div class="status-div"></div>
+                <span>未运行</span>
 
-        <div class="layui-btn-group">
-            <button id="config" class="layui-btn layui-btn-sm">nginx配置</button>
-            <button id="open" class="layui-btn layui-btn-sm layui-bg-blue" style="display: none">启动nginx</button>
-            <button id="reload" class="layui-btn layui-btn-sm layui-bg-blue" style="display: none">重新加载nginx</button>
-            <button id="close" class="layui-btn layui-btn-sm layui-bg-orange" style="display: none">停止nginx</button>
+                <div class="layui-btn-group">
+                    <button id="config" class="layui-btn layui-btn-sm">nginx配置</button>
+                    <button id="open" class="layui-btn layui-btn-sm layui-bg-blue" style="display: none">启动nginx
+                    </button>
+                    <button id="reload" class="layui-btn layui-btn-sm layui-bg-blue" style="display: none">重新加载nginx
+                    </button>
+                    <button id="close" class="layui-btn layui-btn-sm layui-bg-orange" style="display: none">停止nginx
+                    </button>
+                </div>
+            </div>
         </div>
+        <table class="layui-table" id="tab_ngx" lay-filter="tab_ngx" style="margin: 0;"></table>
     </div>
-
 </div>
-<table class="layui-table" id="tab_ngx" lay-filter="tab_ngx" style="margin: 0;"></table>
-
 </body>
 <script type="text/html" id="bar_ngx">
     <a href="javascript:;" class="layui-btn  layui-btn-sm layui-btn-warm" lay-event="update">编辑</a>
     <a href="javascript:;" class="layui-btn  layui-btn-sm layui-btn-danger" lay-event="delete">删除</a>
 </script>
 
-
 <script type="text/javascript">
     function loadSuccess() {
         getStatus();
+
+        var col = [
+            {field: 'name', title: '文件名', sort: true},
+            {field: 'serverCount', title: '数量', width: "7%", sort: true},
+            {field: 'server_name', title: '域名', sort: true, width: "25%"},
+            {field: 'location', title: '根location', sort: true},
+            {field: 'listen', title: '监听端口', width: "10%", sort: true},
+            {field: 'time', title: '最后修改时间', sort: true},
+            {field: 'op', title: '操作', align: 'center', toolbar: '#bar_ngx', fixed: 'right'}
+        ];
+        tableRender({
+            id: 'tab_ngx',
+            elem: '#tab_ngx',
+            cols: [col],
+            data: []
+        });
+
+        layui.use(['tree'], function () {
+            var tree = layui.tree;
+            loadTree();
+
+            function loadTree() {
+                loadingAjax({
+                    url: './tree.json',
+                    success: function (ret) {
+                        if (ret.msg) {
+                            layer.msg(ret.msg);
+                        }
+                        if (200 === ret.code) {
+                            let data = ret.data;
+                            if (!data || data.length <= 0) {
+                                return false;
+                            }
+                            //渲染
+                            tree.render({
+                                elem: '#tree',  //绑定元素
+                                id: "ngxTree",
+                                data: data,
+                                click: function (obj) {
+                                    //当前节点下是否有子节点
+                                    if (obj.data.children) {
+                                        reloadTable(obj.data.whitePath, obj.data.path);
+                                    }
+                                }
+                            });
+                            let item = data[0];
+                            reloadTable(item.whitePath, item.path);
+                        }
+                    }
+                });
+            }
+
+            //获取文件夹下的配置
+            function reloadTable(whitePath, fileName) {
+                table.reload('tab_ngx', {
+                    url: './list_data.json',
+                    where: { //设定异步数据接口的额外参数
+                        whitePath: whitePath,
+                        name: fileName
+                    }
+                });
+            }
+        });
 
         // 表格工具条事件
         table.on('tool(tab_ngx)', function (obj) {
@@ -58,6 +136,9 @@
             var event = obj.event;
 
             if ('update' === event) {
+                if (data.isDirectory) {
+                    return;
+                }
                 // 修改
                 updateNgx(data);
             } else if ('delete' === event) {
@@ -86,24 +167,6 @@
             });
         }
 
-        var col = [
-            {field: 'name', title: '文件名', sort: true},
-            {field: 'serverCount', title: '数量', width: "5%", sort: true},
-            {field: 'server_name', title: '域名', sort: true},
-            {field: 'location', title: '根location', sort: true},
-            {field: 'listen', title: '监听端口', width: "10%", sort: true},
-            {field: 'time', title: '最后修改时间', sort: true},
-            {
-                field: 'op', title: '操作', align: 'center', toolbar: '#bar_ngx', fixed: 'right'
-            }
-        ];
-        tableRender({
-            id: 'tab_ngx',
-            elem: '#tab_ngx',
-            url: './list_data.json',
-            cols: [col]
-        });
-
         // 删除
         function deleteNgx(data) {
             layer.confirm('确定删除配置 ' + data.name + '？', {
@@ -118,7 +181,7 @@
                     },
                     success: function (data) {
                         layer.msg(data.msg);
-                        if (200 == data.code) {
+                        if (200 === data.code) {
                             table.reload('tab_ngx');
                         }
                     }
@@ -148,7 +211,7 @@
                             },
                             success: function (data) {
                                 layer.msg(data.msg);
-                                if (200 == data.code) {
+                                if (200 === data.code) {
                                     layer.close(index);
                                     getStatus();
                                 }

@@ -54,8 +54,21 @@ public class NginxController extends BaseAgentController {
      * @return json
      */
     @RequestMapping(value = "list_data.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public String list() {
-        JSONArray array = nginxService.list();
+    public String list(String whitePath, String name) {
+        if (whitelistDirectoryService.checkNgxDirectory(whitePath)) {
+            String newName = pathSafe(name);
+            JSONArray array = nginxService.list(whitePath, newName);
+            return JsonMessage.getString(200, "", array);
+        }
+        return JsonMessage.getString(400, "文件路径错误");
+    }
+
+    /**
+     * nginx列表
+     */
+    @RequestMapping(value = "tree.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    public String tree() {
+        JSONArray array = nginxService.tree();
         return JsonMessage.getString(200, "", array);
     }
 
