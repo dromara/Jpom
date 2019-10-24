@@ -43,8 +43,8 @@ public class NginxService extends BaseDataService {
         if (ngxDirectory == null) {
             return null;
         }
-        String normalize = FileUtil.normalize(whitePath + "/" + fileName);
-        File[] files = FileUtil.ls(normalize);
+        File normalize = FileUtil.file(whitePath, fileName);
+        File[] files = FileUtil.ls(normalize.getAbsolutePath());
         if (files == null || files.length <= 0) {
             return null;
         }
