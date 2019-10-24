@@ -281,6 +281,12 @@ public class NginxService extends BaseDataService {
         return object;
     }
 
+
+    public String getServiceName() {
+        JSONObject ngxConf = getNgxConf();
+        return ngxConf.getString("name");
+    }
+
     public void save(JSONObject object) {
         String dataFilePath = getDataFilePath(AgentConfigBean.NGINX_CONF);
         JsonFileUtil.saveJson(dataFilePath, object);

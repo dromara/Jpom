@@ -174,8 +174,10 @@ public class NginxController extends BaseAgentController {
     }
 
     private String reloadNginx() {
+        String serviceName = nginxService.getServiceName();
         try {
-            String msg = CommandUtil.execSystemCommand("nginx -s reload");
+            String format = StrUtil.format("{} -s reload", serviceName);
+            String msg = CommandUtil.execSystemCommand(format);
             if (StrUtil.isNotEmpty(msg)) {
                 DefaultSystemLog.getLog().info(msg);
                 return "(" + msg + ")";
@@ -243,8 +245,7 @@ public class NginxController extends BaseAgentController {
      */
     @RequestMapping(value = "status", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public String status() {
-        JSONObject ngxConf = nginxService.getNgxConf();
-        String name = ngxConf.getString("name");
+        String name = nginxService.getServiceName();
         if (StrUtil.isEmpty(name)) {
             return JsonMessage.getString(500, "服务名错误");
         }
@@ -287,8 +288,7 @@ public class NginxController extends BaseAgentController {
      */
     @RequestMapping(value = "open", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public String open() {
-        JSONObject ngxConf = nginxService.getNgxConf();
-        String name = ngxConf.getString("name");
+        String name = nginxService.getServiceName();
         String result = AbstractSystemCommander.getInstance().startService(name);
         return JsonMessage.getString(200, "nginx服务已启动 " + result);
     }
@@ -300,8 +300,7 @@ public class NginxController extends BaseAgentController {
      */
     @RequestMapping(value = "close", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public String close() {
-        JSONObject ngxConf = nginxService.getNgxConf();
-        String name = ngxConf.getString("name");
+        String name = nginxService.getServiceName();
         String result = AbstractSystemCommander.getInstance().stopService(name);
         return JsonMessage.getString(200, result);
     }
@@ -313,15 +312,13 @@ public class NginxController extends BaseAgentController {
      */
     @RequestMapping(value = "reload", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public String reload() {
+        String name = nginxService.getServiceName();
         if (SystemUtil.getOsInfo().isLinux()) {
-            String result = CommandUtil.execSystemCommand("nginx -t");
+            String result = CommandUtil.execSystemCommand(StrUtil.format("{} -t", name));
             if (StrUtil.isNotEmpty(result)) {
                 return JsonMessage.getString(400, result);
             }
-            CommandUtil.execSystemCommand("nginx -s reload");
         } else if (SystemUtil.getOsInfo().isWindows()) {
-            JSONObject ngxConf = nginxService.getNgxConf();
-            String name = ngxConf.getString("name");
             String result = CommandUtil.execSystemCommand("sc qc " + name);
             List<String> strings = StrSpliter.splitTrim(result, "\n", true);
             //服务路径
@@ -338,8 +335,8 @@ public class NginxController extends BaseAgentController {
             if (StrUtil.isNotEmpty(result)) {
                 return JsonMessage.getString(400, result);
             }
-            CommandUtil.execSystemCommand("nginx -s reload", file);
         }
+        this.reloadNginx();
         return JsonMessage.getString(200, "重新加载成功");
     }
 }
