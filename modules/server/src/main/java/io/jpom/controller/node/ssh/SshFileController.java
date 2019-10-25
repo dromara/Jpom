@@ -239,4 +239,72 @@ public class SshFileController extends BaseServerController {
             JschUtil.close(session);
         }
     }
+
+
+    @RequestMapping(value = "delete.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @ResponseBody
+    @Feature(method = MethodFeature.DEL)
+    public String delete(String id, String path, String name) {
+        SshModel sshModel = sshService.getItem(id);
+        if (sshModel == null) {
+            return JsonMessage.getString(400, "ssh error");
+        }
+        List<String> fileDirs = sshModel.getFileDirs();
+        //
+        if (StrUtil.isEmpty(path) || !fileDirs.contains(path)) {
+            return JsonMessage.getString(405, "没有配置此文件夹");
+        }
+        if (StrUtil.isEmpty(name)) {
+            return JsonMessage.getString(400, "name error");
+        }
+        Session session = null;
+        ChannelSftp channel = null;
+        try {
+            String normalize = FileUtil.normalize(path + "/" + name);
+            session = sshService.getSession(sshModel);
+            channel = (ChannelSftp) JschUtil.openChannel(session, ChannelType.SFTP);
+            deleteFile(channel, normalize);
+            return JsonMessage.getString(200, "删除成功");
+        } catch (Exception e) {
+            DefaultSystemLog.getLog().error("ssh删除文件异常", e);
+            return JsonMessage.getString(400, "删除失败");
+        } finally {
+            JschUtil.close(channel);
+            JschUtil.close(session);
+        }
+    }
+
+    /**
+     * 删除文件或文件夹
+     *
+     * @param channel channel
+     * @param path    文件路径
+     * @throws SftpException SftpException
+     */
+    private void deleteFile(ChannelSftp channel, String path) throws SftpException {
+        Vector<ChannelSftp.LsEntry> vector = channel.ls(path);
+        if (null == vector) {
+            return;
+        }
+        if (vector.size() == 1) {
+            // 文件，直接删除
+            channel.rm(path);
+        } else if (vector.size() == 2) {
+            // 空文件夹，直接删除
+            channel.rmdir(path);
+        } else {
+            // 删除文件夹下所有文件
+            for (ChannelSftp.LsEntry en : vector) {
+                String fileName = en.getFilename();
+                if (".".equals(fileName) || "..".equals(fileName)) {
+                    continue;
+                } else {
+                    deleteFile(channel, path + "/" + fileName);
+                }
+            }
+            // 删除文件夹
+            channel.rmdir(path);
+        }
+    }
+
 }

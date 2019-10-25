@@ -125,6 +125,7 @@
                 elem: '#tree',
                 data: [],
                 id: "tree",
+                edit: ['del'],
                 click: function (obj) {
                     var data = obj.data;
                     if (!data.dir) {
@@ -151,8 +152,30 @@
                         return;
                     }
                     getData(nowPath, data.parentDir, data);
+                },
+                operate: function (obj) {
+                    if ('del' === obj.type) {
+                        deleteFile(obj.data);
+                    }
                 }
             });
+
+            //删除文件
+            function deleteFile(data) {
+                loadingAjax({
+                    url: './delete.json',
+                    data: {
+                        id: id,
+                        path: nowPath,
+                        name: data.parentDir
+                    },
+                    success: function (data) {
+                        layer.msg(data.msg);
+                        allData = false;
+                        getData(nowPath, '');
+                    }
+                });
+            }
         });
 
         $("#download").click(function () {
