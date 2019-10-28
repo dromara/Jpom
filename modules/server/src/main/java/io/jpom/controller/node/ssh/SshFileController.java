@@ -1,12 +1,14 @@
 package io.jpom.controller.node.ssh;
 
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.util.*;
 import cn.hutool.extra.servlet.ServletUtil;
 import cn.hutool.extra.ssh.ChannelType;
 import cn.hutool.extra.ssh.JschUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
+import cn.jiangzeyin.controller.multipart.MultipartFileBuilder;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.jcraft.jsch.ChannelSftp;
@@ -26,6 +28,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
+import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Vector;
@@ -272,6 +275,41 @@ public class SshFileController extends BaseServerController {
             JschUtil.close(channel);
             JschUtil.close(session);
         }
+    }
+
+    @RequestMapping(value = "upload", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @ResponseBody
+    @Feature(method = MethodFeature.UPLOAD)
+    public String upload(String id, String path, String name) {
+        SshModel sshModel = sshService.getItem(id);
+        if (sshModel == null) {
+            return JsonMessage.getString(400, "ssh error");
+        }
+        List<String> fileDirs = sshModel.getFileDirs();
+        if (StrUtil.isEmpty(path) || !fileDirs.contains(path)) {
+            return JsonMessage.getString(400, "没有配置此文件夹");
+        }
+        Session session = null;
+        ChannelSftp channel = null;
+        String localPath = null;
+        try {
+            session = sshService.getSession(sshModel);
+            channel = (ChannelSftp) JschUtil.openChannel(session, ChannelType.SFTP);
+            MultipartFileBuilder multipartFileBuilder = createMultipart().addFieldName("file").setUseOriginalFilename(true);
+            localPath = multipartFileBuilder.save();
+            File file = FileUtil.file(localPath);
+            String normalize = FileUtil.normalize(path + "/" + name);
+            channel.cd(normalize);
+            channel.put(IoUtil.toStream(file), file.getName());
+        } catch (Exception e) {
+            DefaultSystemLog.getLog().error("ssh上传文件异常", e);
+            return JsonMessage.getString(400, "上传失败");
+        } finally {
+            JschUtil.close(channel);
+            JschUtil.close(session);
+            FileUtil.del(localPath);
+        }
+        return JsonMessage.getString(200, "上传成功");
     }
 
 }

@@ -16,7 +16,7 @@
     <div class="layui-form-item">
         <label class="layui-form-label">文件夹</label>
         <div class="layui-input-block">
-            <select name="dir" lay-filter="dir" lay-verify="required" lay-search="">
+            <select name="dir" lay-filter="dir" lay-verify="required" lay-search="" id="dir">
                 <option value="">请选择文件夹</option>
                 <option th:disabled="${dir.get('error')}"
                         th:value="${dir.path}" th:each="dir : ${dirs}"
@@ -30,7 +30,9 @@
         </div>
     </div>
 </form>
-
+<div style="display: none">
+    <button type="button" id="uploadFile" class="layui-btn">上传文件</button>
+</div>
 <div class="layui-container" style="display: none;" id="btnDiv">
     <form class="layui-form">
         <div class="layui-form-item">
@@ -68,11 +70,21 @@
                     layer.msg(data.msg);
                     return;
                 }
+                var treeData = data.data;
+                if (treeData && treeData.length > 0) {
+                    let json = {
+                        title: '上传文件',
+                        parentDir: path,
+                        path: children,
+                        type: 'upload'
+                    };
+                    treeData.splice(0, 0, json);
+                }
                 if (!allData) {
-                    allData = data.data;
+                    allData = treeData;
                 }
                 if (preData) {
-                    append(preData, data.data);
+                    append(preData, treeData);
                 }
                 tree.reload("tree", {
                     data: allData
@@ -86,7 +98,7 @@
         var strings = parentIndexKey.split(",");
         var findData = allData;
         for (var i = 0; i < strings.length; i++) {
-            var index = parseInt(strings[i]);
+            var index = parseInt(strings[i]) + 1;
             if (i === strings.length - 1) {
                 var last = findData[index];
                 last.children = children;
@@ -122,14 +134,21 @@
             }
         }
 
-        layui.use('tree', function () {
+        layui.use(['tree'], function () {
             tree = layui.tree;
+            var uploadPtah = '';
+
             tree.render({
                 elem: '#tree',
                 data: [],
                 id: "tree",
                 click: function (obj) {
-                    var data = obj.data;
+                    let data = obj.data;
+                    if ("upload" === data.type) {
+                        uploadPtah = data.path;
+                        $("#uploadFile").click();
+                        return;
+                    }
                     if (!data.dir) {
                         clickData = data;
                         var btnDiv = $("#btnDiv");
@@ -156,6 +175,42 @@
                     getData(nowPath, data.parentDir, data);
                 }
             });
+
+            var successNum;
+            //上传文件
+            uploadRender({
+                elem: '#uploadFile',
+                accept: 'file',
+                data: {
+                    id: id,
+                    name: function () {
+                        return uploadPtah;
+                    },
+                    path: function () {
+                        let val = nowPath;
+                        if (!val) {
+                            val = $("#dir").val();
+                        }
+                        return val;
+                    }
+                },
+                multiple: true,
+                url: './upload',
+                choose: function (obj) {
+                    successNum = 0;
+                },
+                allDone: function (obj) {
+                    layer.msg("文件总数：" + obj.total + " 成功上传：" + successNum + " 上传失败：" + obj.aborted);
+                },
+                done: function (res, index, upload) {
+                    if (res.code !== 200) {
+                        layer.msg(res.msg);
+                    } else {
+                        successNum++;
+                    }
+                }
+            });
+
         });
 
         $("#download").click(function () {
@@ -164,6 +219,7 @@
             }
             window.open("./download.html?id=" + id + "&path=" + nowPath + "&name=" + clickData.parentDir);
             layer.close(openLayuiIndex);
+            layer.closeAll('page');
         });
 
         $("#delete").click(function () {
@@ -192,6 +248,7 @@
             });
 
         });
+
         $("#tail").click(function () {
             if (!clickData) {
                 return;
@@ -203,6 +260,7 @@
                 title: clickData.name + ' - 文件终端',
             });
             layer.close(openLayuiIndex);
+            layer.closeAll('page');
         });
     }
 </script>
