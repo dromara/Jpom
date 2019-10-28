@@ -39,6 +39,9 @@
         <div class="layui-form-item">
             <button type="button" id="tail" class="layui-btn layui-btn-fluid">文件终端</button>
         </div>
+        <div class="layui-form-item">
+            <button type="button" id="delete" class="layui-btn layui-btn-fluid">删除</button>
+        </div>
     </form>
 </div>
 </body>
@@ -125,7 +128,6 @@
                 elem: '#tree',
                 data: [],
                 id: "tree",
-                edit: ['del'],
                 click: function (obj) {
                     var data = obj.data;
                     if (!data.dir) {
@@ -152,30 +154,8 @@
                         return;
                     }
                     getData(nowPath, data.parentDir, data);
-                },
-                operate: function (obj) {
-                    if ('del' === obj.type) {
-                        deleteFile(obj.data);
-                    }
                 }
             });
-
-            //删除文件
-            function deleteFile(data) {
-                loadingAjax({
-                    url: './delete.json',
-                    data: {
-                        id: id,
-                        path: nowPath,
-                        name: data.parentDir
-                    },
-                    success: function (data) {
-                        layer.msg(data.msg);
-                        allData = false;
-                        getData(nowPath, '');
-                    }
-                });
-            }
         });
 
         $("#download").click(function () {
@@ -186,6 +166,32 @@
             layer.close(openLayuiIndex);
         });
 
+        $("#delete").click(function () {
+            if (!clickData) {
+                return;
+            }
+            layer.confirm("确认删除" + clickData.name + "文件？", {
+                title: '系统提示'
+            }, function (index) {
+                //关闭所有页面层
+                layer.closeAll('page');
+                // 删除文件
+                loadingAjax({
+                    url: './delete.json',
+                    data: {
+                        id: id,
+                        path: nowPath,
+                        name: clickData.parentDir
+                    },
+                    success: function (data) {
+                        layer.msg(data.msg);
+                        allData = null;
+                        getData(nowPath, '');
+                    }
+                });
+            });
+
+        });
         $("#tail").click(function () {
             if (!clickData) {
                 return;

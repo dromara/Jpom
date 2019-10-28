@@ -94,7 +94,7 @@ public class SshFileController extends BaseServerController {
     @RequestMapping(value = "list_file_data.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     @Feature(method = MethodFeature.FILE)
-    public String listData(String id, String path, String children, String parentIndexKey) throws IOException, SftpException {
+    public String listData(String id, String path, String children, String parentIndexKey) throws SftpException {
         SshModel sshModel = sshService.getItem(id);
         if (sshModel == null) {
             return JsonMessage.getString(404, "不存在对应ssh");
@@ -263,7 +263,7 @@ public class SshFileController extends BaseServerController {
             String normalize = FileUtil.normalize(path + "/" + name);
             session = sshService.getSession(sshModel);
             channel = (ChannelSftp) JschUtil.openChannel(session, ChannelType.SFTP);
-            deleteFile(channel, normalize);
+            channel.rm(normalize);
             return JsonMessage.getString(200, "删除成功");
         } catch (Exception e) {
             DefaultSystemLog.getLog().error("ssh删除文件异常", e);
@@ -271,39 +271,6 @@ public class SshFileController extends BaseServerController {
         } finally {
             JschUtil.close(channel);
             JschUtil.close(session);
-        }
-    }
-
-    /**
-     * 删除文件或文件夹
-     *
-     * @param channel channel
-     * @param path    文件路径
-     * @throws SftpException SftpException
-     */
-    private void deleteFile(ChannelSftp channel, String path) throws SftpException {
-        Vector<ChannelSftp.LsEntry> vector = channel.ls(path);
-        if (null == vector) {
-            return;
-        }
-        if (vector.size() == 1) {
-            // 文件，直接删除
-            channel.rm(path);
-        } else if (vector.size() == 2) {
-            // 空文件夹，直接删除
-            channel.rmdir(path);
-        } else {
-            // 删除文件夹下所有文件
-            for (ChannelSftp.LsEntry en : vector) {
-                String fileName = en.getFilename();
-                if (".".equals(fileName) || "..".equals(fileName)) {
-                    continue;
-                } else {
-                    deleteFile(channel, path + "/" + fileName);
-                }
-            }
-            // 删除文件夹
-            channel.rmdir(path);
         }
     }
 
