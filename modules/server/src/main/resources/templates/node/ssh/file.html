@@ -70,16 +70,14 @@
                     layer.msg(data.msg);
                     return;
                 }
-                var treeData = data.data;
-                if (treeData && treeData.length > 0) {
-                    let json = {
-                        title: '上传文件',
-                        parentDir: path,
-                        path: children,
-                        type: 'upload'
-                    };
-                    treeData.splice(0, 0, json);
-                }
+                let treeData = data.data;
+                let json = {
+                    title: '上传文件',
+                    parentDir: path,
+                    path: children,
+                    type: 'upload'
+                };
+                treeData.splice(0, 0, json);
                 if (!allData) {
                     allData = treeData;
                 }
