@@ -8,9 +8,11 @@ import cn.jiangzeyin.common.PreLoadMethod;
 import io.jpom.system.ConfigBean;
 import io.jpom.system.ExtConfigBean;
 import io.jpom.util.StringUtil;
+import org.springframework.http.HttpMethod;
 
 import java.io.File;
 import java.util.Arrays;
+import java.util.Map;
 
 /**
  * 数据目录权限检查
@@ -55,10 +57,28 @@ public class CheckPath {
     private static void reqXssLog() {
         if (!ExtConfigBean.getInstance().isConsoleLogReqXss()) {
             // 不在控制台记录请求日志信息
-            DefaultSystemLog.setLogCallback((type, log) -> {
-                //
-                if (type == DefaultSystemLog.LogType.REQUEST_ERROR) {
-                    DefaultSystemLog.getLog().info(Arrays.toString(log));
+            DefaultSystemLog.setLogCallback(new DefaultSystemLog.LogCallback() {
+                @Override
+                public void log(DefaultSystemLog.LogType type, Object... log) {
+                    //
+                    if (type == DefaultSystemLog.LogType.REQUEST_ERROR) {
+                        DefaultSystemLog.getLog().info(Arrays.toString(log));
+                    }
+                }
+
+                @Override
+                public void logStart(String id, String url, HttpMethod httpMethod, String ip, Map<String, String> parameters, Map<String, String> header) {
+
+                }
+
+                @Override
+                public void logError(String id, int status) {
+
+                }
+
+                @Override
+                public void logTimeOut(String id, long time) {
+
                 }
             });
         }

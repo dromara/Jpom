@@ -10,6 +10,7 @@ import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.request.XssFilter;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.TypeReference;
 import io.jpom.common.BaseServerController;
 import io.jpom.model.data.NodeModel;
 import io.jpom.model.data.UserModel;
@@ -316,7 +317,8 @@ public class NodeForward {
         if (StrUtil.isEmpty(body)) {
             throw new AgentException("agent 端响应内容为空");
         }
-        JsonMessage<T> jsonMessage = JSON.parseObject(body, JsonMessage.class);
+        JsonMessage<T> jsonMessage = JSON.parseObject(body, new TypeReference<JsonMessage<T>>() {
+        });
         if (jsonMessage.getCode() == ConfigBean.AUTHORIZE_ERROR) {
             throw new AuthorizeException(jsonMessage, jsonMessage.getMsg());
         }
