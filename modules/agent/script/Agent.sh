@@ -38,12 +38,24 @@ RETVAL="0"
 # 升级执行命令标识
 upgrade="$2"
 
+# now set the path to java
+if [[ -x "${JAVA_HOME}/bin/java" ]]; then
+  JAVA="${JAVA_HOME}/bin/java"
+  NOW_JAVA_HOME="${JAVA_HOME}"
+else
+  set +e
+  JAVA=`which java`
+  NOW_JAVA_HOME="${JAVA}/../../"
+  set -e
+fi
+
+if [[ ! -x "$JAVA" ]]; then
+  echo "没有找到JAVA 文件,请配置【JAVA_HOME】环境变量"
+  exit 1
+fi
+
 # 启动程序
 function start() {
-    if [[ -z "${JAVA_HOME}" ]] ; then
-        echo "请配置【JAVA_HOME】环境变量"
-        exit 2
-    fi
     pid=`getPid`
 	if [[ "$pid" != "" ]]; then
 	   echo "程序正在运行中：${pid}"
@@ -70,7 +82,7 @@ function start() {
         echo "没有找到jar"
         exit 2
     fi
-    nohup java  ${JVM} -Xbootclasspath/a:${JAVA_HOME}/lib/tools.jar -jar ${Lib}${RUNJAR} -Dapplication=${Tag} -Dbasedir=${Path} ${ARGS}  >> ${Log} 2>&1 &
+    nohup ${JAVA}  ${JVM} -Xbootclasspath/a:${NOW_JAVA_HOME}/lib/tools.jar -jar ${Lib}${RUNJAR} -Dapplication=${Tag} -Dbasedir=${Path} ${ARGS}  >> ${Log} 2>&1 &
     # 升级不执行查看日志
     if [[ ${upgrade} == "upgrade" ]] ; then
         exit 0

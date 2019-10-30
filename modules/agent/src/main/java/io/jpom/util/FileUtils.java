@@ -2,6 +2,8 @@ package io.jpom.util;
 
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.util.StrUtil;
+import cn.hutool.system.SystemUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
@@ -66,6 +68,52 @@ public class FileUtils {
             jsonObject.put("index", ++i[0]);
         });
         return arrayFile;
+    }
+
+    /**
+     * 判断路径是否满足jdk 条件
+     *
+     * @param path 路径
+     * @return 判断存在java文件
+     */
+    public static boolean isJdkPath(String path) {
+        String fileName = getJdkJavaPath(path);
+        File newPath = new File(fileName);
+        return newPath.exists() && newPath.isFile();
+    }
+
+    private static String getJdkJavaPath(String path) {
+        String fileName;
+        if (SystemUtil.getOsInfo().isWindows()) {
+            fileName = "java.exe";
+        } else {
+            fileName = "java";
+        }
+        File newPath = FileUtil.file(path, "bin", fileName);
+        return FileUtil.getAbsolutePath(newPath);
+    }
+
+    /**
+     * 获取jdk 版本
+     *
+     * @param path jdk 路径
+     * @return 获取成功返回版本号
+     */
+    public static String getJdkVersion(String path) {
+        String newPath = getJdkJavaPath(path);
+        if (path.contains(StrUtil.SPACE)) {
+            newPath = String.format("\"%s\"", newPath);
+        }
+        String command = CommandUtil.execSystemCommand(newPath + "  -version");
+        String[] split = StrUtil.split(command, StrUtil.LF);
+        if (split == null || split.length <= 0) {
+            return null;
+        }
+        String[] strings = StrUtil.split(split[0], "\"");
+        if (strings == null || strings.length <= 1) {
+            return null;
+        }
+        return strings[1];
     }
 
 }
