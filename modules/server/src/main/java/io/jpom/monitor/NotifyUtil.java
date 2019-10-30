@@ -18,8 +18,9 @@ public class NotifyUtil {
     private static final Map<MonitorModel.NotifyType, INotify> NOTIFY_MAP = new ConcurrentHashMap<>();
 
     static {
-        NOTIFY_MAP.put(MonitorModel.NotifyType.dingding, new DingTalkUtil());
+        NOTIFY_MAP.put(MonitorModel.NotifyType.dingding, new WebHookUtil());
         NOTIFY_MAP.put(MonitorModel.NotifyType.mail, new EmailUtil());
+        NOTIFY_MAP.put(MonitorModel.NotifyType.workWx, new WebHookUtil());
     }
 
     /**

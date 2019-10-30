@@ -65,6 +65,10 @@ public class UserModel extends BaseModel {
      * 钉钉
      */
     private String dingDing;
+    /**
+     * 企业微信
+     */
+    private String workWx;
 
     public long getLockTime() {
         return lockTime;
@@ -104,6 +108,14 @@ public class UserModel extends BaseModel {
 
     public void setDingDing(String dingDing) {
         this.dingDing = dingDing;
+    }
+
+    public String getWorkWx() {
+        return workWx;
+    }
+
+    public void setWorkWx(String workWx) {
+        this.workWx = workWx;
     }
 
     /**

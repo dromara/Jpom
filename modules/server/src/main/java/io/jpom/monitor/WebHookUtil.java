@@ -11,7 +11,7 @@ import org.springframework.http.MediaType;
  *
  * @author Arno
  */
-public class DingTalkUtil implements INotify {
+public class WebHookUtil implements INotify {
 
     /**
      * 发送钉钉群自定义机器人消息

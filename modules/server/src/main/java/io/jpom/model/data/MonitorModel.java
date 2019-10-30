@@ -138,6 +138,7 @@ public class MonitorModel extends BaseModel {
          */
         dingding(0, "钉钉"),
         mail(1, "邮箱"),
+        workWx(2, "企业微信"),
 //        sms(2, "短信"),
         ;
 

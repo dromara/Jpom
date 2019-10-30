@@ -162,7 +162,7 @@ public class ReleaseManage extends BaseBuild {
                     sftp.put(itemAbsPath, file.getName());
                 }
             }
-        } catch (IOException e) {
+        } catch (Exception e) {
             this.pubLog("执行ssh发布异常", e);
         }
         this.log("");

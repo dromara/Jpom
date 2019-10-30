@@ -32,6 +32,13 @@
             </div>
         </div>
         <div class="layui-form-item">
+            <label class="layui-form-label">企业微信</label>
+            <div class="layui-input-block">
+                <input type="text" name="workWx" id="workWx" th:value="${session.user?.workWx}"
+                       placeholder="请输入群webhook" class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item">
             <div class="layui-input-block">
                 <button class="layui-btn" lay-submit lay-filter="submit">提交</button>
             </div>

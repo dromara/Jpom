@@ -48,7 +48,7 @@ public class UserBasicInfoController extends BaseServerController {
     @RequestMapping(value = "save_basicInfo.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     public String saveBasicInfo(@ValidatorItem(value = ValidatorRule.EMAIL, msg = "邮箱格式不正确") String email,
-                                String dingDing, String code) {
+                                String dingDing, String workWx, String code) {
         UserModel userModel = getUser();
         userModel = userService.getItem(userModel.getId());
         // 判断是否一样
@@ -61,9 +61,13 @@ public class UserBasicInfoController extends BaseServerController {
         userModel.setEmail(email);
         //
         if (StrUtil.isNotEmpty(dingDing) && !Validator.isUrl(dingDing)) {
-            return JsonMessage.getString(405, "请输入正确验钉钉地址");
+            return JsonMessage.getString(405, "请输入正确钉钉地址");
         }
         userModel.setDingDing(dingDing);
+        if (StrUtil.isNotEmpty(workWx) && !Validator.isUrl(workWx)) {
+            return JsonMessage.getString(405, "请输入正确企业微信地址");
+        }
+        userModel.setWorkWx(workWx);
         userService.updateItem(userModel);
         setSessionAttribute(LoginInterceptor.SESSION_NAME, userModel);
         return JsonMessage.getString(200, "修改成功");

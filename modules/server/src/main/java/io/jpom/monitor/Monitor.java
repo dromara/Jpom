@@ -252,6 +252,18 @@ public class Monitor implements Task {
                         send(notify1, monitorNotifyLog.getLogId(), monitorNotifyLog.getTitle(), monitorNotifyLog.getContent());
                         success = true;
                     }
+                    // 企业微信
+                    String workWx = item.getWorkWx();
+                    if (StrUtil.isNotEmpty(workWx)) {
+                        monitorNotifyLog.setLogId(IdUtil.fastSimpleUUID());
+                        MonitorModel.Notify notify1 = new MonitorModel.Notify(MonitorModel.NotifyType.workWx, workWx);
+                        monitorNotifyLog.setNotifyStyle(notify1.getStyle());
+                        monitorNotifyLog.setNotifyObject(notify1.getValue());
+                        //
+                        dbMonitorNotifyLogService.insert(monitorNotifyLog);
+                        send(notify1, monitorNotifyLog.getLogId(), monitorNotifyLog.getTitle(), monitorNotifyLog.getContent());
+                        success = true;
+                    }
                 }
                 if (success) {
                     return;
