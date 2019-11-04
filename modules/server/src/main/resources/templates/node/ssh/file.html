@@ -52,7 +52,7 @@
     var nowPath = '';
     var rootPath;
     var col = [
-        {field: 'name', title: '文件名称', event: 'rowClick'},
+        {field: 'title', title: '文件名称', event: 'rowClick'},
         {
             field: 'dir', title: '文件类型', event: 'rowClick', templet: function (d) {
                 if (d.dir) {
@@ -167,7 +167,8 @@
                 let dir = dirs[i];
                 let path = dir.path;
                 dir.dir = true;
-                dir.name = path + "【文件夹】";
+                dir.title = path + "【文件夹】";
+                dir.name = path;
                 dir.parentDir = "/";
             }
             tableRender({
