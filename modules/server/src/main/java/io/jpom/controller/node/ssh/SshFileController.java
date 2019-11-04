@@ -184,6 +184,7 @@ public class SshFileController extends BaseServerController {
                 jsonObject.put("modifyTime", format);
                 if (lsEntry.getAttrs().isDir()) {
                     jsonObject.put("dir", true);
+                    jsonObject.put("name", lsEntry.getFilename() + "【文件夹】");
                 } else {
                     long fileSize = lsEntry.getAttrs().getSize();
                     jsonObject.put("size", FileUtil.readableFileSize(fileSize));
