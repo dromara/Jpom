@@ -1,5 +1,7 @@
 package io.jpom.controller.node.ssh;
 
+import cn.hutool.core.date.DatePattern;
+import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.util.*;
@@ -97,7 +99,7 @@ public class SshFileController extends BaseServerController {
     @RequestMapping(value = "list_file_data.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     @Feature(method = MethodFeature.FILE)
-    public String listData(String id, String path, String children, String parentIndexKey) throws SftpException {
+    public String listData(String id, String path, String children) throws SftpException {
         SshModel sshModel = sshService.getItem(id);
         if (sshModel == null) {
             return JsonMessage.getString(404, "不存在对应ssh");
@@ -114,7 +116,7 @@ public class SshFileController extends BaseServerController {
         if (!fileDirs.contains(path)) {
             return JsonMessage.getString(405, "没有配置此文件夹");
         }
-        JSONArray jsonArray = listDir(sshModel, path, children, parentIndexKey);
+        JSONArray jsonArray = listDir(sshModel, path, children);
         return JsonMessage.getString(200, "ok", jsonArray);
     }
 
@@ -149,14 +151,13 @@ public class SshFileController extends BaseServerController {
     /**
      * 查询文件夹下所有文件
      *
-     * @param sshModel       ssh
-     * @param path           路径
-     * @param children       文件夹
-     * @param parentIndexKey 上一级
+     * @param sshModel ssh
+     * @param path     路径
+     * @param children 文件夹
      * @return array
      * @throws SftpException sftp
      */
-    private JSONArray listDir(SshModel sshModel, String path, String children, String parentIndexKey) throws SftpException {
+    private JSONArray listDir(SshModel sshModel, String path, String children) throws SftpException {
         Session session = null;
         ChannelSftp channel = null;
         try {
@@ -178,23 +179,14 @@ public class SshFileController extends BaseServerController {
                 JSONObject jsonObject = new JSONObject();
                 jsonObject.put("name", lsEntry.getFilename());
                 jsonObject.put("id", IdUtil.fastSimpleUUID());
+                int mTime = lsEntry.getAttrs().getMTime();
+                String format = DateUtil.format(DateUtil.date(mTime * 1000L), DatePattern.NORM_DATETIME_MINUTE_PATTERN);
+                jsonObject.put("modifyTime", format);
                 if (lsEntry.getAttrs().isDir()) {
-                    jsonObject.put("title", StrUtil.format("{}【文件夹】", lsEntry.getFilename()));
                     jsonObject.put("dir", true);
                 } else {
                     long fileSize = lsEntry.getAttrs().getSize();
-                    if (fileSize > 0) {
-                        jsonObject.put("title", StrUtil.format("{}   [{}]", lsEntry.getFilename(), FileUtil.readableFileSize(fileSize)));
-                    } else {
-                        jsonObject.put("title", lsEntry.getFilename());
-                    }
-                }
-                int index = jsonArray.size();
-                if (StrUtil.isEmpty(parentIndexKey)) {
-                    jsonObject.put("parentIndexKey", index);
-
-                } else {
-                    jsonObject.put("parentIndexKey", StrUtil.format("{},{}", parentIndexKey, index));
+                    jsonObject.put("size", FileUtil.readableFileSize(fileSize));
                 }
                 //
                 if (StrUtil.isEmpty(children)) {
@@ -266,7 +258,8 @@ public class SshFileController extends BaseServerController {
             String normalize = FileUtil.normalize(path + "/" + name);
             session = sshService.getSession(sshModel);
             channel = (ChannelSftp) JschUtil.openChannel(session, ChannelType.SFTP);
-            channel.rm(normalize);
+            //删除文件或者文件夹
+            deleteFile(channel, normalize);
             return JsonMessage.getString(200, "删除成功");
         } catch (Exception e) {
             DefaultSystemLog.getLog().error("ssh删除文件异常", e);
@@ -274,6 +267,38 @@ public class SshFileController extends BaseServerController {
         } finally {
             JschUtil.close(channel);
             JschUtil.close(session);
+        }
+    }
+
+    /**
+     * 删除文件或者文件夹
+     *
+     * @param channel channel
+     * @param path    文件路径
+     * @throws SftpException SftpException
+     */
+    private void deleteFile(ChannelSftp channel, String path) throws SftpException {
+        Vector<ChannelSftp.LsEntry> vector = channel.ls(path);
+        if (null == vector) {
+            return;
+        }
+        int size = vector.size();
+        if (size == 1) {
+            // 文件，直接删除
+            channel.rm(path);
+        } else if (size == 2) {
+            // 空文件夹，直接删除
+            channel.rmdir(path);
+        } else {
+            // 删除文件夹下所有文件
+            String fileName;
+            for (ChannelSftp.LsEntry en : vector) {
+                fileName = en.getFilename();
+                if (!".".equals(fileName) && !"..".equals(fileName)) {
+                    deleteFile(channel, path + "/" + fileName);
+                }
+            }
+            channel.rmdir(path);
         }
     }
 
