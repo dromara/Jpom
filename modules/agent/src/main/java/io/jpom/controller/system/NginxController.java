@@ -56,6 +56,9 @@ public class NginxController extends BaseAgentController {
     @RequestMapping(value = "list_data.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public String list(String whitePath, String name) {
         if (whitelistDirectoryService.checkNgxDirectory(whitePath)) {
+            if (StrUtil.isEmpty(name)) {
+                name = "/";
+            }
             String newName = pathSafe(name);
             JSONArray array = nginxService.list(whitePath, newName);
             return JsonMessage.getString(200, "", array);
