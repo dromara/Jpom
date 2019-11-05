@@ -189,6 +189,9 @@ public class NginxService extends BaseDataService {
                     if (locationMain == null) {
                         locationMain = ngxBlock1.findParam("alias");
                     }
+                    if (locationMain == null) {
+                        return;
+                    }
                     location.add(locationMain.getValue());
                 });
             }
