@@ -166,22 +166,27 @@ public class JvmUtil {
      * @throws AgentInitializationException 插件初始化
      */
     private static JMXServiceURL getJMXServiceURL(VirtualMachine virtualMachine) throws IOException, AgentLoadException, AgentInitializationException, ClassNotFoundException {
-        String address = virtualMachine.getAgentProperties().getProperty("com.sun.management.jmxremote.localConnectorAddress");
-        if (address != null) {
-            return new JMXServiceURL(address);
+        try {
+            String address = virtualMachine.getAgentProperties().getProperty("com.sun.management.jmxremote.localConnectorAddress");
+            if (address != null) {
+                return new JMXServiceURL(address);
+            }
+            int pid = Convert.toInt(virtualMachine.id());
+            address = importFrom(pid);
+            if (address != null) {
+                return new JMXServiceURL(address);
+            }
+            String agent = getManagementAgent();
+            virtualMachine.loadAgent(agent);
+            address = virtualMachine.getAgentProperties().getProperty("com.sun.management.jmxremote.localConnectorAddress");
+            if (address != null) {
+                return new JMXServiceURL(address);
+            }
+            return null;
+        } catch (InternalError internalError) {
+            DefaultSystemLog.getLog().error("jmx 异常", internalError);
+            return null;
         }
-        int pid = Convert.toInt(virtualMachine.id());
-        address = importFrom(pid);
-        if (address != null) {
-            return new JMXServiceURL(address);
-        }
-        String agent = getManagementAgent();
-        virtualMachine.loadAgent(agent);
-        address = virtualMachine.getAgentProperties().getProperty("com.sun.management.jmxremote.localConnectorAddress");
-        if (address != null) {
-            return new JMXServiceURL(address);
-        }
-        return null;
     }
 
     public static String importFrom(int pid) {
@@ -262,6 +267,9 @@ public class JvmUtil {
         try {
             properties = virtualMachine.getAgentProperties();
         } catch (IOException io) {
+            return false;
+        } catch (InternalError internalError) {
+            DefaultSystemLog.getLog().error(tag + "异常", internalError);
             return false;
         }
         String args = properties.getProperty("sun.jvm.args", "");

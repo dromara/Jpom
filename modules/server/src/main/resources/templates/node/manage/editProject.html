@@ -85,16 +85,17 @@
             </div>
 
             <div class="layui-inline">
-                <label class="layui-form-label" title="$!item.log"><span class="x-red">*</span>项目Jar包</label>
+                <label class="layui-form-label" title="$!item.log"><span class="x-red">*</span>项目文件夹</label>
                 <div class="layui-input-block">
-                    <input th:readonly="${item?.outGivingProject}" type="text" name="lib" placeholder="jar存储的文件夹"
+                    <input th:readonly="${item?.outGivingProject}" type="text" name="lib"
+                           placeholder="项目存储的文件夹，jar包存放的文件夹"
                            required
                            lay-verify="required"
                            class="layui-input" th:value="${item?.lib}">
                 </div>
             </div>
             <div class="layui-form-mid layui-word-aux" style="padding: 0 !important;">
-                <div class="layui-input-block" style="color: red;min-height: 0px;">
+                <div class="layui-input-block x-red" th:style="${item!=null}?'display: none;':''" id="logInfoDiv">
                     <span id="projectStart">请选择</span>
                     <span id="projectEnd" style="margin-left: -4px">请填写</span>
                     <span th:if="${item}">&nbsp;&nbsp;日志路径：[[${item?.log}]]</span>
@@ -106,6 +107,10 @@
                         $("#projectStart").text([[${item?.whitelistDirectory}]]);
                         if ([[${item?.runMode}]] === 'ClassPath') {
                             $("#mainClassDiv").show();
+                        }
+                        if ([[${item?.runMode}]] !== "File") {
+                            $("#appInfoDiv").show();
+                            $("#logInfoDiv").show();
                         }
                     });
                 </script>
@@ -124,41 +129,43 @@
                 </div>
             </div>
         </div>
-        <div class="layui-form-item">
-            <div class="layui-inline">
-                <label class="layui-form-label">Jvm参数</label>
-                <div class="layui-input-block">
+        <div id="appInfoDiv" th:style="${item!=null}?'display: none;':''">
+            <div class="layui-form-item">
+                <div class="layui-inline">
+                    <label class="layui-form-label">Jvm参数</label>
+                    <div class="layui-input-block">
                     <textarea th:readonly="${item?.outGivingProject}" name="jvm"
                               placeholder="jvm参数,非必填.如：-Xmin=512m -Xmax=512m"
                               class="layui-textarea" th:text="${item?.jvm}"></textarea>
+                    </div>
                 </div>
-            </div>
-            <div class="layui-inline">
-                <label class="layui-form-label">args参数</label>
-                <div class="layui-input-block">
+                <div class="layui-inline">
+                    <label class="layui-form-label">args参数</label>
+                    <div class="layui-input-block">
                     <textarea th:readonly="${item?.outGivingProject}" name="args"
                               placeholder="Main函数args参数,非必填.如：--service.port=8080"
                               class="layui-textarea" th:text="${item?.args}"></textarea>
+                    </div>
                 </div>
             </div>
-        </div>
-        <div class="layui-form-item">
-            <div class="layui-inline">
-                <label class="layui-form-label">WebHooks</label>
-                <div class="layui-input-block">
-                    <input th:readonly="${item?.outGivingProject}" type="text" name="token"
-                           placeholder="关闭程序时自动请求,非必填，GET请求"
-                           class="layui-input"
-                           th:value="${item?.token}">
+            <div class="layui-form-item">
+                <div class="layui-inline">
+                    <label class="layui-form-label">WebHooks</label>
+                    <div class="layui-input-block">
+                        <input th:readonly="${item?.outGivingProject}" type="text" name="token"
+                               placeholder="关闭程序时自动请求,非必填，GET请求"
+                               class="layui-input"
+                               th:value="${item?.token}">
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <div class="layui-form-item" th:if="${item?.get('runCommand')}">
-            <label class="layui-form-label">运行命令</label>
-            <div class="layui-input-block">
-                <blockquote class="layui-elem-quote layui-quote-nm" th:text="${item?.runCommand}">
-                </blockquote>
+            <div class="layui-form-item" th:if="${item?.get('runCommand')}">
+                <label class="layui-form-label">运行命令</label>
+                <div class="layui-input-block">
+                    <blockquote class="layui-elem-quote layui-quote-nm" th:text="${item?.runCommand}">
+                    </blockquote>
+                </div>
             </div>
         </div>
 
@@ -221,6 +228,13 @@
                 $("#mainClassDiv").show();
             } else {
                 $("#mainClassDiv").hide();
+            }
+            if (val === "File") {
+                $("#appInfoDiv").hide();
+                $("#logInfoDiv").hide();
+            } else {
+                $("#appInfoDiv").show();
+                $("#logInfoDiv").show();
             }
         });
 

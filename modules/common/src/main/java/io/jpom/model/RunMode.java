@@ -19,4 +19,8 @@ public enum RunMode {
      * java -jar  Springboot war
      */
     War,
+    /**
+     * 纯文件管理
+     */
+    File,
 }
