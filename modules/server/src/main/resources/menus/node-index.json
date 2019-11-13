@@ -15,11 +15,11 @@
         "title": "项目列表",
         "url": "./manage/projectInfo"
       },
-      {
-        "id": "jdkList",
-        "title": "JDK管理",
-        "url": "./manage/jdklist.html"
-      },
+//      {
+//        "id": "jdkList",
+//        "title": "JDK管理",
+//        "url": "./manage/jdklist.html"
+//      },
       {
         "id": "projectRecover",
         "title": "项目回收",
