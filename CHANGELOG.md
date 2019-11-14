@@ -24,6 +24,7 @@
 ### 升级注意
 
 1. 此版本更新控制台日志级别有调整，如果使用管理命令方式运行日志级别将不再打印info级别，如果需要打印info级别的请调整管理命令中的`--spring.profiles.active=pro` 为 `--spring.profiles.active=dev`
+2. 使用Nginx 二级路径代理请一定使用Jpom 推荐nginx配置[查看配置](https://jpom-site.keepbx.cn/docs/index.html#/辅助配置/nginx-config) 
 
 -----------------------------------------------------------
 
