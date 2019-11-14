@@ -19,6 +19,7 @@
 6. json文件读取异常提示（感谢@Taller）
 9. 【Server】 优化ssh上传文件、删除文件
 10. InternalError 异常捕捉
+11. 【Server】优化Nginx 非80、443端口 二级路径代理重定向问题（感谢@😯😨😰😱 ）
 
 ### 升级注意
 
