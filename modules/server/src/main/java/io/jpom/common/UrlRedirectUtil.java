@@ -55,7 +55,12 @@ public class UrlRedirectUtil {
      * @see javax.servlet.http.HttpUtils#getRequestURL
      */
     public static void sendRedirect(HttpServletRequest request, HttpServletResponse response, String url) throws IOException {
-        sendRedirect(request, response, url, 0);
+        String proxyPort = ServletUtil.getHeaderIgnoreCase(request, "X-Forwarded-Port");
+        int port = 0;
+        if (StrUtil.isNotEmpty(proxyPort)) {
+            port = Integer.parseInt(proxyPort);
+        }
+        sendRedirect(request, response, url, port);
     }
 
     /**

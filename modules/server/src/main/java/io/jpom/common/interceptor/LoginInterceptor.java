@@ -120,7 +120,7 @@ public class LoginInterceptor extends BaseJpomInterceptor {
             // 代理二级路径
             Object jpomProxyPath = session.getAttribute("jpomProxyPath");
             if (jpomProxyPath == null) {
-                String path = getHeaderProxyPathNotPort(request);
+                String path = getHeaderProxyPath(request);
                 session.setAttribute("jpomProxyPath", path);
             }
         } catch (Exception ignored) {
