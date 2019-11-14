@@ -11,6 +11,7 @@ import com.alibaba.fastjson.JSONObject;
 import io.jpom.common.BaseServerController;
 import io.jpom.common.GlobalDefaultExceptionHandler;
 import io.jpom.common.JpomManifest;
+import io.jpom.common.interceptor.BaseJpomInterceptor;
 import io.jpom.common.interceptor.NotLogin;
 import io.jpom.model.data.NodeModel;
 import io.jpom.model.data.UserModel;
@@ -65,7 +66,7 @@ public class IndexControl extends BaseServerController {
     public String index() {
         if (userService.userListEmpty()) {
             getSession().invalidate();
-            return "redirect:install.html";
+            return BaseJpomInterceptor.getRedirect(getRequest(), "/install.html");
         }
 
         // 版本号

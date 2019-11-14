@@ -11,6 +11,7 @@ import cn.jiangzeyin.common.validator.ValidatorConfig;
 import cn.jiangzeyin.common.validator.ValidatorItem;
 import cn.jiangzeyin.common.validator.ValidatorRule;
 import io.jpom.common.BaseServerController;
+import io.jpom.common.interceptor.BaseJpomInterceptor;
 import io.jpom.common.interceptor.LoginInterceptor;
 import io.jpom.common.interceptor.NotLogin;
 import io.jpom.common.interceptor.OptLog;
@@ -60,7 +61,7 @@ public class LoginControl extends BaseServerController {
     public String login() {
         if (userService.userListEmpty()) {
             // 调整到初始化也
-            return "redirect:install.html";
+            return BaseJpomInterceptor.getRedirect(getRequest(), "/install.html");
         }
         // 是否显示验证码
         setAttribute("showCode", showCode());
@@ -202,8 +203,8 @@ public class LoginControl extends BaseServerController {
      * @return page
      */
     @RequestMapping(value = "logout", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
-    public String logout() {
+    public String logout() throws IOException {
         getSession().invalidate();
-        return "redirect:index.html";
+        return BaseJpomInterceptor.getRedirect(getRequest(), "/index.html");
     }
 }

@@ -19,16 +19,26 @@ public class UrlRedirectUtil {
     /**
      * 获取 protocol 协议完全跳转
      *
-     * @param request  请求
-     * @param response 响应
-     * @param url      跳转url
-     * @throws IOException io
+     * @param request 请求
+     * @param url     跳转url
      * @see javax.servlet.http.HttpUtils#getRequestURL
      */
-    public static void sendRedirect(HttpServletRequest request, HttpServletResponse response, String url, int port) throws IOException {
+    public static String getRedirect(HttpServletRequest request, String url) {
+        int port = getPort(request);
+        return getRedirect(request, url, port);
+    }
+
+    /**
+     * 获取 protocol 协议完全跳转
+     *
+     * @param request 请求
+     * @param url     跳转url
+     * @see javax.servlet.http.HttpUtils#getRequestURL
+     */
+    public static String getRedirect(HttpServletRequest request, String url, int port) {
         String proto = ServletUtil.getHeaderIgnoreCase(request, "X-Forwarded-Proto");
         if (proto == null) {
-            response.sendRedirect(url);
+            return url;
         } else {
             String host = request.getHeader(HttpHeaders.HOST);
             if (StrUtil.isEmpty(host)) {
@@ -39,9 +49,22 @@ public class UrlRedirectUtil {
             } else if ("https".equals(proto) && port == 0) {
                 port = 443;
             }
-            String toUrl = StrUtil.format("{}://{}:{}{}", proto, host, port, url);
-            response.sendRedirect(toUrl);
+            return StrUtil.format("{}://{}:{}{}", proto, host, port, url);
         }
+    }
+
+    /**
+     * 获取 protocol 协议完全跳转
+     *
+     * @param request  请求
+     * @param response 响应
+     * @param url      跳转url
+     * @throws IOException io
+     * @see javax.servlet.http.HttpUtils#getRequestURL
+     */
+    public static void sendRedirect(HttpServletRequest request, HttpServletResponse response, String url, int port) throws IOException {
+        String toUrl = getRedirect(request, url, port);
+        response.sendRedirect(toUrl);
     }
 
 
@@ -55,12 +78,17 @@ public class UrlRedirectUtil {
      * @see javax.servlet.http.HttpUtils#getRequestURL
      */
     public static void sendRedirect(HttpServletRequest request, HttpServletResponse response, String url) throws IOException {
+        int port = getPort(request);
+        sendRedirect(request, response, url, port);
+    }
+
+    private static int getPort(HttpServletRequest request) {
         String proxyPort = ServletUtil.getHeaderIgnoreCase(request, "X-Forwarded-Port");
         int port = 0;
         if (StrUtil.isNotEmpty(proxyPort)) {
             port = Integer.parseInt(proxyPort);
         }
-        sendRedirect(request, response, url, port);
+        return port;
     }
 
     /**
