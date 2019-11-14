@@ -1,12 +1,11 @@
 package io.jpom.common.interceptor;
 
 import cn.hutool.core.convert.Convert;
-import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.CharUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.servlet.ServletUtil;
 import cn.jiangzeyin.common.interceptor.BaseInterceptor;
-import org.springframework.http.HttpHeaders;
+import io.jpom.common.UrlRedirectUtil;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.method.HandlerMethod;
@@ -37,10 +36,15 @@ public abstract class BaseJpomInterceptor extends BaseInterceptor {
     }
 
     public static void sendRedirects(HttpServletRequest request, HttpServletResponse response, String url) throws IOException {
-        url = getHeaderProxyPathAndContextPath(request) + url;
+        String newUrl = UrlRedirectUtil.getHeaderProxyPath(request, "Jpom-ProxyPath", s -> {
+            if (StrUtil.contains(s, CharUtil.COLON)) {
+                String[] split = StrUtil.split(s, StrUtil.COLON);
+                return split[1];
+            }
+            return s;
+        }) + url;
         int proxyPort = getHeaderProxyPort(request);
-
-        sendRedirect(request, response, url, proxyPort);
+        UrlRedirectUtil.sendRedirect(request, response, newUrl, proxyPort);
     }
 
     private static String getHeaderProxyPath(HttpServletRequest request) {
@@ -64,58 +68,15 @@ public abstract class BaseJpomInterceptor extends BaseInterceptor {
         return proxyPath;
     }
 
-
     private static int getHeaderProxyPort(HttpServletRequest request) {
         String proxyPath = getHeaderProxyPath(request);
         if (StrUtil.isEmpty(proxyPath)) {
-            return 80;
+            return 0;
         }
         if (StrUtil.contains(proxyPath, CharUtil.COLON)) {
-            return Convert.toInt(StrUtil.split(proxyPath, StrUtil.COLON)[0], 80);
+            String s = StrUtil.split(proxyPath, StrUtil.COLON)[0];
+            return Integer.parseInt(s);
         }
-        return 80;
+        return 0;
     }
-
-
-    /**
-     * 二级代理路径
-     *
-     * @param request req
-     * @return nginx配置 + context-path
-     */
-    private static String getHeaderProxyPathAndContextPath(HttpServletRequest request) {
-        String proxyPath = getHeaderProxyPathNotPort(request);
-        if (StrUtil.isEmpty(proxyPath)) {
-            return request.getContextPath();
-        }
-        proxyPath = FileUtil.normalize(request.getContextPath() + StrUtil.SLASH + proxyPath);
-        if (proxyPath.endsWith(StrUtil.SLASH)) {
-            proxyPath = proxyPath.substring(0, proxyPath.length() - 1);
-        }
-        return proxyPath;
-    }
-
-    /**
-     * 获取 protocol 协议完全跳转
-     *
-     * @param request  请求
-     * @param response 响应
-     * @param url      跳转url
-     * @throws IOException io
-     */
-    public static void sendRedirect(HttpServletRequest request, HttpServletResponse response, String url,
-                                    int remotePortStr) throws IOException {
-        String proto = ServletUtil.getHeaderIgnoreCase(request, "X-Forwarded-Proto");
-        if (proto == null) {
-            response.sendRedirect(url);
-        } else {
-            String host = request.getHeader(HttpHeaders.HOST);
-            if (StrUtil.isEmpty(host)) {
-                throw new RuntimeException("请配置host header");
-            }
-            String toUrl = StrUtil.format("{}://{}:{}{}", proto, host, remotePortStr, url);
-            response.sendRedirect(toUrl);
-        }
-    }
-
 }
