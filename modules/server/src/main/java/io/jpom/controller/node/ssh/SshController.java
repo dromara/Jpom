@@ -54,7 +54,7 @@ public class SshController extends BaseServerController {
     @RequestMapping(value = "list_data.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     @Feature(method = MethodFeature.LIST)
-    public String listData() {
+    public JsonMessage<List<SshModel>> listData() {
         List<SshModel> list = sshService.list();
         if (list != null) {
             List<NodeModel> list1 = nodeService.list();
@@ -73,7 +73,7 @@ public class SshController extends BaseServerController {
                 sshModel.setNodeModel(nodeModel);
             });
         }
-        return JsonMessage.getString(200, "", list);
+        return new JsonMessage<>(200, "", list);
     }
 
     @RequestMapping(value = "save.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
