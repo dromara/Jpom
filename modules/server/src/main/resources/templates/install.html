@@ -72,8 +72,8 @@
                     data: sendData,
                     success: function (data) {
                         layer.msg(data.msg);
-                        if (200 == data.code) {
-                            window.location.href = '/index';
+                        if (200 === data.code) {
+                            window.location.href = './index.html';
                         }
                     }
                 });
