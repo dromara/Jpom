@@ -21,6 +21,8 @@ import java.io.IOException;
  */
 public abstract class BaseJpomInterceptor extends BaseInterceptor {
 
+    public static final String PROXY_PATH = "Jpom-ProxyPath";
+
     static boolean isPage(HandlerMethod handlerMethod) {
         ResponseBody responseBody = handlerMethod.getMethodAnnotation(ResponseBody.class);
         if (responseBody == null) {
@@ -34,20 +36,19 @@ public abstract class BaseJpomInterceptor extends BaseInterceptor {
         return Convert.toBool(request.getAttribute("Page_Req"), true);
     }
 
-    public static String sendRedirects(HttpServletRequest request, HttpServletResponse response, String url) throws IOException {
-        String newUrl = UrlRedirectUtil.getHeaderProxyPath(request, "Jpom-ProxyPath") + url;
+    public static void sendRedirects(HttpServletRequest request, HttpServletResponse response, String url) throws IOException {
+        String newUrl = UrlRedirectUtil.getHeaderProxyPath(request, PROXY_PATH) + url;
         UrlRedirectUtil.sendRedirect(request, response, newUrl);
-        return newUrl;
     }
 
     public static String getRedirect(HttpServletRequest request, String url) {
-        String newUrl = UrlRedirectUtil.getHeaderProxyPath(request, "Jpom-ProxyPath") + url;
+        String newUrl = UrlRedirectUtil.getHeaderProxyPath(request, PROXY_PATH) + url;
         String redirect = UrlRedirectUtil.getRedirect(request, newUrl);
         return String.format("redirect:%s", redirect);
     }
 
     static String getHeaderProxyPath(HttpServletRequest request) {
-        String proxyPath = ServletUtil.getHeaderIgnoreCase(request, "Jpom-ProxyPath");
+        String proxyPath = ServletUtil.getHeaderIgnoreCase(request, PROXY_PATH);
         if (StrUtil.isEmpty(proxyPath)) {
             return StrUtil.EMPTY;
         }

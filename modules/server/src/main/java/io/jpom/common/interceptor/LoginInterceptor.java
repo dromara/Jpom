@@ -11,6 +11,7 @@ import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.interceptor.InterceptorPattens;
 import cn.jiangzeyin.common.spring.SpringUtil;
 import io.jpom.common.BaseServerController;
+import io.jpom.common.UrlRedirectUtil;
 import io.jpom.model.data.UserModel;
 import io.jpom.service.user.UserService;
 import io.jpom.system.ExtConfigBean;
@@ -92,7 +93,10 @@ public class LoginInterceptor extends BaseJpomInterceptor {
                 if (queryString != null) {
                     uri += "?" + queryString;
                 }
-                url += "&url=" + URLUtil.encodeAll(uri);
+                // 补全
+                String newUri = UrlRedirectUtil.getHeaderProxyPath(request, BaseJpomInterceptor.PROXY_PATH) + uri;
+                newUri = UrlRedirectUtil.getRedirect(request, newUri);
+                url += "&url=" + URLUtil.encodeAll(newUri);
             }
             String header = request.getHeader(HttpHeaders.REFERER);
             if (header != null) {

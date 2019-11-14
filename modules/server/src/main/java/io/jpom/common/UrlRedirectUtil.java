@@ -11,6 +11,9 @@ import java.io.IOException;
 import java.util.function.Function;
 
 /**
+ * url 重定向
+ * 配置nginx 代理实现
+ *
  * @author bwcx_jzy
  * @date 2019/11/14
  */
