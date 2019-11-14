@@ -46,7 +46,7 @@ public class GlobalDefaultExceptionHandler {
             try {
                 String id = IdUtil.fastUUID();
                 TIMED_CACHE.put(id, getErrorMsg(e));
-                response.sendRedirect(BaseJpomInterceptor.getHeaderProxyPath(request) + "/error.html?id=" + id);
+                BaseJpomInterceptor.sendRedirects(request, response, "/error.html?id=" + id);
             } catch (IOException ex) {
                 ex.printStackTrace();
             }

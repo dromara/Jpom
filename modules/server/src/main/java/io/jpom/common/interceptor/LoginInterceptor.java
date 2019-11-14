@@ -98,7 +98,7 @@ public class LoginInterceptor extends BaseJpomInterceptor {
             if (header != null) {
                 url += "&r=" + header;
             }
-            super.sendRedirects(request, response, url);
+            sendRedirects(request, response, url);
             return;
         }
         ServletUtil.write(response, JsonMessage.getString(800, "登录信息已失效,重新登录"), MediaType.APPLICATION_JSON_UTF8_VALUE);
@@ -120,7 +120,7 @@ public class LoginInterceptor extends BaseJpomInterceptor {
             // 代理二级路径
             Object jpomProxyPath = session.getAttribute("jpomProxyPath");
             if (jpomProxyPath == null) {
-                String path = getHeaderProxyPath(request);
+                String path = getHeaderProxyPathNotPort(request);
                 session.setAttribute("jpomProxyPath", path);
             }
         } catch (Exception ignored) {
