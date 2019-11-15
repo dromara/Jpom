@@ -52,6 +52,9 @@ public abstract class BaseJpomInterceptor extends BaseInterceptor {
         if (StrUtil.isEmpty(proxyPath)) {
             return StrUtil.EMPTY;
         }
+        if (proxyPath.endsWith(StrUtil.SLASH)) {
+            proxyPath = proxyPath.substring(0, proxyPath.length() - 1);
+        }
         return proxyPath;
     }
 }

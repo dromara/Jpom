@@ -2,6 +2,7 @@ package io.jpom.common;
 
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.core.util.URLUtil;
 import cn.hutool.extra.servlet.ServletUtil;
 import org.springframework.http.HttpHeaders;
 
@@ -52,7 +53,8 @@ public class UrlRedirectUtil {
             } else if ("https".equals(proto) && port == 0) {
                 port = 443;
             }
-            return StrUtil.format("{}://{}:{}{}", proto, host, port, url);
+            String format = StrUtil.format("{}://{}:{}{}", proto, host, port, url);
+            return URLUtil.normalize(format);
         }
     }
 
