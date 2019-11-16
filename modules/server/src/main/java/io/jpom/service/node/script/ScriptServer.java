@@ -24,6 +24,9 @@ public class ScriptServer implements BaseDynamicService {
     @Override
     public JSONArray listToArray(String dataId) {
         NodeModel item = nodeService.getItem(dataId);
+        if (!item.isOpenStatus()) {
+            return null;
+        }
         return listToArray(item);
     }
 
