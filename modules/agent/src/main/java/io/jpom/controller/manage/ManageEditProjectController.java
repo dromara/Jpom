@@ -1,7 +1,6 @@
 package io.jpom.controller.manage;
 
 import cn.hutool.core.convert.Convert;
-import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.lang.PatternPool;
 import cn.hutool.core.lang.Validator;
@@ -35,7 +34,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping(value = "/manage/")
-public class EditProjectController extends BaseAgentController {
+public class ManageEditProjectController extends BaseAgentController {
     @Resource
     private WhitelistDirectoryService whitelistDirectoryService;
 
@@ -176,8 +175,6 @@ public class EditProjectController extends BaseAgentController {
                     // 预检查数据
                     return JsonMessage.getString(200, "");
                 } else {
-                    projectInfo.setCreateTime(DateUtil.now());
-                    this.modify(projectInfo);
                     projectInfoService.addItem(projectInfo);
                     return JsonMessage.getString(200, "新增成功！");
                 }
@@ -190,7 +187,6 @@ public class EditProjectController extends BaseAgentController {
                 // 预检查数据
                 return JsonMessage.getString(200, "");
             } else {
-                this.modify(exits);
                 exits.setLog(projectInfo.getLog());
                 exits.setName(projectInfo.getName());
                 exits.setGroup(projectInfo.getGroup());
@@ -210,15 +206,6 @@ public class EditProjectController extends BaseAgentController {
             DefaultSystemLog.getLog().error(e.getMessage(), e);
             return JsonMessage.getString(500, "保存数据异常");
         }
-    }
-
-    /**
-     * 记录修改人
-     *
-     * @param exits 项目
-     */
-    private void modify(ProjectInfoModel exits) {
-        exits.setModifyUser(getUserName());
     }
 
     private void moveTo(ProjectInfoModel old, ProjectInfoModel news) {

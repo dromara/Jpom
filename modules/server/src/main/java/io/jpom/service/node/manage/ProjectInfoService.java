@@ -34,6 +34,9 @@ public class ProjectInfoService implements BaseDynamicService {
 
 
     public JSONArray listAll(NodeModel nodeModel, HttpServletRequest request) {
+        if (!nodeModel.isOpenStatus()) {
+            return null;
+        }
         JSONArray jsonArray = NodeForward.requestData(nodeModel, NodeUrl.Manage_GetProjectInfo, request, JSONArray.class);
         return filter(jsonArray, ClassFeature.PROJECT);
     }
