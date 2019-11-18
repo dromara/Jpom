@@ -10,15 +10,22 @@ public class ServerOpenApi {
 
     public static final String HEAD = "JPOM-TOKEN";
 
-    public static final String UPDATE_NODE_INFO = "/api/node/update";
+    /**
+     * 用户的token
+     */
+    public static final String USER_TOKEN_HEAD = "JPOM-USER-TOKEN";
+
+    public static final String API = "/api/";
+
+    public static final String UPDATE_NODE_INFO = API + "node/update";
 
     /**
      * 安装id
      */
-    public static final String INSTALL_ID = "/api/installId";
+    public static final String INSTALL_ID = API + "/installId";
 
     /**
      * 触发构建, 第一级构建id,第二级token
      */
-    public static final String BUILD_TRIGGER_BUILD = "/api/build/{id}/{token}";
+    public static final String BUILD_TRIGGER_BUILD = API + "/build/{id}/{token}";
 }

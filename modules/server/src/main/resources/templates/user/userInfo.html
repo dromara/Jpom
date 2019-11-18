@@ -7,6 +7,13 @@
 <div class="layui-container">
     <form method="post" class="layui-form">
         <div class="layui-form-item">
+            <label class="layui-form-label">Token</label>
+            <div class="layui-input-block">
+                <input type="text" name="token" id="token" required lay-verify="email" readonly
+                       th:value="${session.user?.getUserMd5Key()}" class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item">
             <label class="layui-form-label">邮箱</label>
             <div class="layui-input-block">
                 <input type="text" name="email" id="email" required lay-verify="email"

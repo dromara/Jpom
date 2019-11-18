@@ -11,6 +11,7 @@ import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.interceptor.InterceptorPattens;
 import cn.jiangzeyin.common.spring.SpringUtil;
 import io.jpom.common.BaseServerController;
+import io.jpom.common.ServerOpenApi;
 import io.jpom.common.UrlRedirectUtil;
 import io.jpom.model.data.UserModel;
 import io.jpom.service.user.UserService;
@@ -32,7 +33,7 @@ import java.io.IOException;
  * @author jiangzeyin
  * @date 2017/2/4.
  */
-@InterceptorPattens(sort = -1, exclude = "/api/**")
+@InterceptorPattens(sort = -1, exclude = ServerOpenApi.API + "**")
 public class LoginInterceptor extends BaseJpomInterceptor {
     /**
      * session
@@ -53,6 +54,10 @@ public class LoginInterceptor extends BaseJpomInterceptor {
         if (notLogin == null) {
             UserModel user = (UserModel) session.getAttribute(SESSION_NAME);
             if (user == null) {
+                // 信息登录
+                if (tryGetHeaderUser(request, session)) {
+                    return true;
+                }
                 this.responseLogin(request, response, handlerMethod);
                 return false;
             }
@@ -75,6 +80,26 @@ public class LoginInterceptor extends BaseJpomInterceptor {
         return true;
     }
 
+    /**
+     * 尝试获取 header 中的信息
+     *
+     * @param request req
+     * @param session ses
+     * @return true 获取成功
+     */
+    private boolean tryGetHeaderUser(HttpServletRequest request, HttpSession session) {
+        String header = request.getHeader(ServerOpenApi.USER_TOKEN_HEAD);
+        if (StrUtil.isEmpty(header)) {
+            return false;
+        }
+        UserService userService = SpringUtil.getBean(UserService.class);
+        UserModel userModel = userService.checkUser(header);
+        if (userModel == null) {
+            return false;
+        }
+        session.setAttribute(LoginInterceptor.SESSION_NAME, userModel);
+        return true;
+    }
 
     /**
      * 提示登录

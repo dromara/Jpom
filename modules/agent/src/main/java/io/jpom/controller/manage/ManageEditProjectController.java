@@ -173,19 +173,15 @@ public class ManageEditProjectController extends BaseAgentController {
                 }
                 if (previewData) {
                     // 预检查数据
-                    return JsonMessage.getString(200, "");
+                    return JsonMessage.getString(200, "检查通过");
                 } else {
                     projectInfoService.addItem(projectInfo);
                     return JsonMessage.getString(200, "新增成功！");
                 }
             }
-            // 新增但是项目id 已经存在
-            if (!"on".equalsIgnoreCase(edit)) {
-                return JsonMessage.getString(400, "项目id已经存在啦");
-            }
             if (previewData) {
                 // 预检查数据
-                return JsonMessage.getString(200, "");
+                return JsonMessage.getString(200, "检查通过");
             } else {
                 exits.setLog(projectInfo.getLog());
                 exits.setName(projectInfo.getName());
