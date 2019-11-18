@@ -141,6 +141,9 @@
         <profile>
             <id>install-plugin-profile</id>
         </profile>
+        <profile>
+            <id>release-plugin-profile</id>
+        </profile>
 
         <!--  插件开发-->
         <profile>
