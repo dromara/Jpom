@@ -83,9 +83,9 @@ public class LoginInterceptor extends BaseJpomInterceptor {
     /**
      * 尝试获取 header 中的信息
      *
-     * @param request req
      * @param session ses
      * @return true 获取成功
+     * @am request req
      */
     private boolean tryGetHeaderUser(HttpServletRequest request, HttpSession session) {
         String header = request.getHeader(ServerOpenApi.USER_TOKEN_HEAD);
@@ -119,7 +119,7 @@ public class LoginInterceptor extends BaseJpomInterceptor {
                     uri += "?" + queryString;
                 }
                 // 补全
-                String newUri = UrlRedirectUtil.getHeaderProxyPath(request, BaseJpomInterceptor.PROXY_PATH) + uri;
+                String newUri = BaseJpomInterceptor.getHeaderProxyPath(request) + uri;
                 newUri = UrlRedirectUtil.getRedirect(request, newUri);
                 url += "&url=" + URLUtil.encodeAll(newUri);
             }
