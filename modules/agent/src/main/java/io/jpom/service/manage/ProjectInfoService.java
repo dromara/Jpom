@@ -66,8 +66,12 @@ public class ProjectInfoService extends BaseOperService<ProjectInfoModel> {
     @Override
     public void updateItem(ProjectInfoModel projectInfo) {
         projectInfo.setModifyTime(DateUtil.now());
-        String userName = BaseAgentController.getNowUserName();
-        projectInfo.setModifyUser(userName);
+        try {
+            String userName = BaseAgentController.getNowUserName();
+            projectInfo.setModifyUser(userName);
+        } catch (Exception ignored) {
+
+        }
         super.updateItem(projectInfo);
     }
 
