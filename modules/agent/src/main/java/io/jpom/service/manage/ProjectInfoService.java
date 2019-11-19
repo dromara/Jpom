@@ -2,6 +2,7 @@ package io.jpom.service.manage;
 
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.util.StrUtil;
 import io.jpom.common.BaseAgentController;
 import io.jpom.common.BaseOperService;
 import io.jpom.model.data.ProjectInfoModel;
@@ -66,11 +67,9 @@ public class ProjectInfoService extends BaseOperService<ProjectInfoModel> {
     @Override
     public void updateItem(ProjectInfoModel projectInfo) {
         projectInfo.setModifyTime(DateUtil.now());
-        try {
-            String userName = BaseAgentController.getNowUserName();
+        String userName = BaseAgentController.getNowUserName();
+        if (!StrUtil.DASHED.equals(userName)) {
             projectInfo.setModifyUser(userName);
-        } catch (Exception ignored) {
-
         }
         super.updateItem(projectInfo);
     }

@@ -8,6 +8,7 @@ import cn.jiangzeyin.controller.base.AbstractController;
 import io.jpom.model.data.ProjectInfoModel;
 import io.jpom.service.manage.ProjectInfoService;
 import io.jpom.system.ConfigBean;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
@@ -46,7 +47,11 @@ public abstract class BaseAgentController extends BaseJpomController {
      * @return name
      */
     public static String getNowUserName() {
-        HttpServletRequest request = AbstractController.getRequestAttributes().getRequest();
+        ServletRequestAttributes servletRequestAttributes = AbstractController.tryGetRequestAttributes();
+        if (servletRequestAttributes == null) {
+            return StrUtil.DASHED;
+        }
+        HttpServletRequest request = servletRequestAttributes.getRequest();
         if (request == null) {
             return StrUtil.DASHED;
         }
