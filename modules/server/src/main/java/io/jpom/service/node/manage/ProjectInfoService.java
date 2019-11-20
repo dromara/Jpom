@@ -57,4 +57,8 @@ public class ProjectInfoService implements BaseDynamicService {
         NodeModel item = nodeService.getItem(id);
         return NodeForward.requestData(item, NodeUrl.Manage_GetProjectItem, JSONObject.class, "id", id);
     }
+
+    public JSONArray getJdkList(NodeModel nodeModel, HttpServletRequest request) {
+        return NodeForward.requestData(nodeModel, NodeUrl.Manage_jdk_list, request, JSONArray.class);
+    }
 }

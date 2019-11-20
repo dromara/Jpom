@@ -34,7 +34,6 @@
 </div>
 </body>
 <script type="text/html" id="toolbar">
-    <a href="javascript:;" class="layui-btn  layui-btn-sm layui-btn-normal" lay-event="enable">启用</a>
     <a href="javascript:;" class="layui-btn  layui-btn-sm  layui-btn-warm" lay-event="update">修改</a>
     <a href="javascript:;" class="layui-btn  layui-btn-sm  layui-btn-danger" lay-event="delete">删除</a>
 </script>
@@ -49,13 +48,6 @@
             }, {
                 field: 'version', title: '版本', sort: true, align: 'center'
             }, {
-                field: 'name', title: '状态', align: 'center', sort: true, templet: function (d) {
-                    if ("true" === d.name) {
-                        return "已启用";
-                    }
-                    return "未启用";
-                }
-            }, {
                 field: 'path', title: '路径', sort: true, align: 'center'
             }, {
                 field: 'op', title: '操作', toolbar: '#toolbar', align: 'center'
@@ -68,18 +60,7 @@
             if (!data) {
                 return;
             }
-            if ('enable' === event) {
-                loadingAjax({
-                    url: "./jdk/setDefault",
-                    data: {id: data.id},
-                    success: function (data) {
-                        layer.msg(data.msg);
-                        if (200 === data.code) {
-                            reloadTable();
-                        }
-                    }
-                });
-            } else if ('update' === event) {
+            if ('update' === event) {
                 updateJdk(data);
             } else if ('delete' === event) {
                 layer.confirm("确认删除 " + data.version, {

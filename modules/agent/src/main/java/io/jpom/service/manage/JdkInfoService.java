@@ -26,20 +26,10 @@ public class JdkInfoService extends BaseOperService<JdkInfoModel> {
     public List<JdkInfoModel> list() {
         List<JdkInfoModel> list = super.list();
         JdkInfoModel defaultJdk = getDefaultJdk();
-        if (null == defaultJdk) {
-            return list;
-        }
         if (list.size() <= 0) {
-            addItem(defaultJdk);
-            defaultJdk.setName("true");
-            list.add(defaultJdk);
-            return list;
-        }
-        for (int i = 0; i < list.size(); i++) {
-            JdkInfoModel jdkInfoModel = list.get(i);
-            if (jdkInfoModel.getId().equals(defaultJdk.getId())) {
-                jdkInfoModel.setName("true");
-                list.set(i, jdkInfoModel);
+            if (null != defaultJdk) {
+                addItem(defaultJdk);
+                list.add(defaultJdk);
             }
         }
         return list;

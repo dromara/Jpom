@@ -44,6 +44,7 @@ public class ProjectInfoModel extends BaseModel {
     private String createTime;
     private String modifyTime;
     private String args;
+    private String jdkId;
     /**
      * lib 目录当前文件状态
      */
@@ -335,5 +336,13 @@ public class ProjectInfoModel extends BaseModel {
 
     public void setArgs(String args) {
         this.args = args;
+    }
+
+    public String getJdkId() {
+        return jdkId;
+    }
+
+    public void setJdkId(String jdkId) {
+        this.jdkId = jdkId;
     }
 }

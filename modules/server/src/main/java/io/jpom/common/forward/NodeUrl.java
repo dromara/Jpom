@@ -93,7 +93,6 @@ public enum NodeUrl {
      */
     Manage_jdk_list("/manage/jdk/list"),
     Manage_jdk_update("/manage/jdk/update"),
-    Manage_jdk_setDefault("/manage/jdk/setDefault"),
     Manage_jdk_delete("/manage/jdk/delete"),
 
     System_Nginx_list_data("/system/nginx/list_data.json"),

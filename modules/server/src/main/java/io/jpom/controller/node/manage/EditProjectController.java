@@ -73,6 +73,9 @@ public class EditProjectController extends BaseServerController {
             hashSet.add("默认");
         }
         setAttribute("groups", hashSet);
+        //jdk
+        JSONArray array = projectInfoService.getJdkList(getNode(), getRequest());
+        setAttribute("jdkArray", array);
         return "node/manage/editProject";
     }
 

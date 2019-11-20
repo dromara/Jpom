@@ -1,4 +1,4 @@
-package io.jpom.controller.manage.jdk;
+package io.jpom.controller.manage;
 
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
@@ -52,15 +52,6 @@ public class JdkListController extends BaseAgentController {
             return JsonMessage.getString(200, "添加成功");
         }
         jdkInfoService.updateItem(model);
-        return JsonMessage.getString(200, "修改成功");
-    }
-
-    @RequestMapping(value = "setDefault", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public String setDefault(String id) {
-        if (StrUtil.isEmpty(id)) {
-            return JsonMessage.getString(400, "修改失败");
-        }
-
         return JsonMessage.getString(200, "修改成功");
     }
 

@@ -39,12 +39,6 @@ public class JdkManageController extends BaseServerController {
         return NodeForward.request(getNode(), getRequest(), NodeUrl.Manage_jdk_delete).toString();
     }
 
-    @RequestMapping(value = "jdk/setDefault", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    @ResponseBody
-    public String setDefault() {
-        return NodeForward.request(getNode(), getRequest(), NodeUrl.Manage_jdk_setDefault).toString();
-    }
-
     @RequestMapping(value = "jdk/update", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     public String update() {

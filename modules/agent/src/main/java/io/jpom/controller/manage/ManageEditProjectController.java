@@ -12,8 +12,10 @@ import io.jpom.JpomApplication;
 import io.jpom.common.BaseAgentController;
 import io.jpom.common.commander.AbstractProjectCommander;
 import io.jpom.model.RunMode;
+import io.jpom.model.data.JdkInfoModel;
 import io.jpom.model.data.ProjectInfoModel;
 import io.jpom.service.WhitelistDirectoryService;
+import io.jpom.service.manage.JdkInfoService;
 import io.jpom.system.ConfigBean;
 import io.jpom.util.StringUtil;
 import org.springframework.http.MediaType;
@@ -37,6 +39,8 @@ import java.util.List;
 public class ManageEditProjectController extends BaseAgentController {
     @Resource
     private WhitelistDirectoryService whitelistDirectoryService;
+    @Resource
+    private JdkInfoService jdkInfoService;
 
     /**
      * 基础检查
@@ -148,6 +152,13 @@ public class ManageEditProjectController extends BaseAgentController {
         if (id.contains(StrUtil.SPACE) || allLib.contains(StrUtil.SPACE)) {
             return JsonMessage.getString(401, "项目Id、项目Jar不能包含空格");
         }
+        String jdkId = projectInfo.getJdkId();
+        if (StrUtil.isNotEmpty(jdkId)) {
+            JdkInfoModel item = jdkInfoService.getItem(jdkId);
+            if (null == item) {
+                return JsonMessage.getString(401, "jdk 信息错误");
+            }
+        }
         return save(projectInfo, previewData);
     }
 
@@ -193,6 +204,7 @@ public class ManageEditProjectController extends BaseAgentController {
                 exits.setRunMode(projectInfo.getRunMode());
                 exits.setWhitelistDirectory(projectInfo.getWhitelistDirectory());
                 exits.setToken(projectInfo.getToken());
+                exits.setJdkId(projectInfo.getJdkId());
                 //
                 moveTo(exits, projectInfo);
                 projectInfoService.updateItem(exits);
