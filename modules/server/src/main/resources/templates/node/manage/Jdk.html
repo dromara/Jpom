@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <th:block th:include="common/head::head"></th:block>
+    <title>Jdk管理</title>
+    <style>
+        .row_btn {
+            margin: 5px 10px;
+        }
+    </style>
+</head>
+<body>
+<div class="row_btn">
+    <button onclick="updateJdk();" class="layui-btn layui-btn-sm">新增Jdk</button>
+    <button onclick="reloadTable();" class="layui-btn layui-btn-sm">刷新表格</button>
+</div>
+<table class="layui-table" id="tab_jdk" lay-filter="tab_jdk"></table>
+
+<div style="display: none" id="updateJdk">
+    <form action="./jdk/update.json" class="layui-form" id="form_jdk" style="margin-top: 20px;width: 96%">
+        <div class="layui-form-item">
+            <input type="hidden" id="id" name="id">
+            <label class="layui-form-label">jdk路径</label>
+            <div class="layui-input-block">
+                <input type="text" id="path" name="path" placeholder="请填写jdk路径"
+                       class="layui-input" required lay-verify="required">
+            </div>
+        </div>
+        <div class="layui-form-item" style="padding-left: 10%">
+            <button class="layui-btn layui-btn-normal" lay-submit lay-filter="submit">提交
+            </button>
+        </div>
+    </form>
+</div>
+</body>
+<script type="text/html" id="toolbar">
+    <a href="javascript:;" class="layui-btn  layui-btn-sm layui-btn-normal" lay-event="enable">启用</a>
+    <a href="javascript:;" class="layui-btn  layui-btn-sm  layui-btn-warm" lay-event="update">修改</a>
+    <a href="javascript:;" class="layui-btn  layui-btn-sm  layui-btn-danger" lay-event="delete">删除</a>
+</script>
+<script type="text/javascript">
+    function loadSuccess() {
+        tableRender({
+            id: 'tab_jdk',
+            elem: '#tab_jdk',
+            url: './jdk/list',
+            cols: [{
+                field: 'id', title: 'id', hide: true
+            }, {
+                field: 'version', title: '版本', sort: true, align: 'center'
+            }, {
+                field: 'name', title: '状态', align: 'center', sort: true, templet: function (d) {
+                    if ("true" === d.name) {
+                        return "已启用";
+                    }
+                    return "未启用";
+                }
+            }, {
+                field: 'path', title: '路径', sort: true, align: 'center'
+            }, {
+                field: 'op', title: '操作', toolbar: '#toolbar', align: 'center'
+            }]
+        });
+
+        table.on('tool(tab_jdk)', function (obj) {
+            let data = obj.data;
+            let event = obj.event;
+            if (!data) {
+                return;
+            }
+            if ('enable' === event) {
+                loadingAjax({
+                    url: "./jdk/setDefault",
+                    data: {id: data.id},
+                    success: function (data) {
+                        layer.msg(data.msg);
+                        if (200 === data.code) {
+                            reloadTable();
+                        }
+                    }
+                });
+            } else if ('update' === event) {
+                updateJdk(data);
+            } else if ('delete' === event) {
+                layer.confirm("确认删除 " + data.version, {
+                    title: '系统提示'
+                }, function (index) {
+                    loadingAjax({
+                        url: "./jdk/delete",
+                        data: {id: data.id},
+                        success: function (data) {
+                            layer.msg(data.msg);
+                            if (200 === data.code) {
+                                reloadTable();
+                            }
+                        }
+                    });
+                });
+            }
+        });
+
+        form.on('submit(submit)', function (data) {
+            loadingAjax({
+                url: data.form.action,
+                data: data.field,
+                success: function (data) {
+                    layer.msg(data.msg);
+                    if (200 === data.code) {
+                        reloadTable();
+                        layer.closeAll();
+                    }
+                }
+            });
+            return false;
+        });
+    }
+
+    function updateJdk(data) {
+        let title = "新增Jdk";
+        if (data) {
+            title = "修改Jdk";
+            $('#id').val(data.id);
+            $('#path').val(data.path);
+        } else {
+            $('#id').val("");
+            $('#path').val("");
+        }
+        layerOpen({
+            type: 1,
+            title: title,
+            content: $('#updateJdk'),
+            shade: 0.8,
+            area: ['60%', '30%']
+        });
+    }
+
+    function reloadTable() {
+        table.reload('tab_jdk');
+    }
+</script>
+</html>

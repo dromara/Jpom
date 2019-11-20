@@ -53,6 +53,11 @@ public class AgentConfigBean {
      */
     public static final String NGINX_CONF = "nginx_conf.json";
 
+    /**
+     * jdk列表信息
+     */
+    public static final String JDK_CONF = "jdk_conf.json";
+
     private static AgentConfigBean agentConfigBean;
 
     /**
