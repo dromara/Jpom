@@ -56,6 +56,11 @@ public class BuildModel extends BaseBuildModule {
      */
     private String triggerToken;
 
+    /**
+     * 分组
+     */
+    private String group;
+
     public String getTriggerToken() {
         return triggerToken;
     }
@@ -150,6 +155,14 @@ public class BuildModel extends BaseBuildModule {
 
     public void setRepoType(int repoType) {
         this.repoType = repoType;
+    }
+
+    public String getGroup() {
+        return group;
+    }
+
+    public void setGroup(String group) {
+        this.group = group;
     }
 
     public enum Status implements BaseEnum {

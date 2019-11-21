@@ -1,5 +1,6 @@
 package io.jpom.service.build;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.JsonMessage;
@@ -14,8 +15,10 @@ import io.jpom.plugin.ClassFeature;
 import io.jpom.system.ServerConfigBean;
 import org.springframework.stereotype.Service;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * 构建service
@@ -131,5 +134,23 @@ public class BuildService extends BaseOperService<BuildModel> implements BaseDyn
             return JsonMessage.getString(501, "当前还在：" + nowStatus.getDesc());
         }
         return null;
+    }
+
+    /**
+     * 构建所有分组
+     */
+    public Set<String> listGroup() {
+        List<BuildModel> list = list();
+        Set<String> set = new HashSet<>();
+        if (CollUtil.isEmpty(list)) {
+            return set;
+        }
+        for (BuildModel buildModel : list) {
+            String group = buildModel.getGroup();
+            if (StrUtil.isNotEmpty(group)) {
+                set.add(group);
+            }
+        }
+        return set;
     }
 }

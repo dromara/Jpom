@@ -1,5 +1,6 @@
 package io.jpom.controller.build;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.IdUtil;
@@ -37,8 +38,10 @@ import javax.annotation.Resource;
 import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -67,6 +70,8 @@ public class BuildListController extends BaseServerController {
         //通知方式
         JSONArray jsonArray = BaseEnum.toJSONArray(BuildModel.Status.class);
         setAttribute("statusArray", jsonArray);
+        Set<String> set = buildService.listGroup();
+        setAttribute("groupArray", set);
         return "build/list";
     }
 
@@ -74,8 +79,17 @@ public class BuildListController extends BaseServerController {
     @RequestMapping(value = "list_data.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     @Feature(method = MethodFeature.LIST)
-    public String getMonitorList() {
+    public String getMonitorList(String group) {
         List<BuildModelVo> list = buildService.list(BuildModelVo.class);
+        if (StrUtil.isNotEmpty(group) && CollUtil.isNotEmpty(list)) {
+            List<BuildModelVo> array = new ArrayList<>();
+            for (BuildModelVo buildModelVo : list) {
+                if (group.equals(buildModelVo.getGroup())) {
+                    array.add(buildModelVo);
+                }
+            }
+            list = array;
+        }
         return JsonMessage.getString(200, "", list);
     }
 
@@ -91,8 +105,7 @@ public class BuildListController extends BaseServerController {
                                 @ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "构建产物目录不能为空")) String resultDirFile,
                                 @ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "构建命令不能为空")) String script,
                                 @ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "发布方法不正确") int releaseMethod,
-                                String branchName,
-                                int repoType) throws Exception {
+                                String branchName, String group, int repoType) throws Exception {
         BaseEnum anEnum = BaseEnum.getEnum(BuildModel.RepoType.class, repoType);
         if (anEnum == null) {
             return JsonMessage.getString(405, "仓库类型选择错误");
@@ -110,11 +123,15 @@ public class BuildListController extends BaseServerController {
         if (CommandUtil.checkContainsDel(script)) {
             return JsonMessage.getString(405, "不能包含删除命令");
         }
+        if (StrUtil.isEmpty("group")) {
+            return JsonMessage.getString(405, "请选择分组");
+        }
         BuildModel buildModel = buildService.getItem(id);
         if (buildModel == null) {
             buildModel = new BuildModel();
             buildModel.setId(IdUtil.fastSimpleUUID());
         }
+        buildModel.setGroup(group);
         buildModel.setName(name);
         buildModel.setRepoType(repoType);
         buildModel.setGitUrl(gitUrl);
@@ -248,6 +265,11 @@ public class BuildListController extends BaseServerController {
             setAttribute("sshArray", list);
         }
         setAttribute("releaseMethods", releaseMethods);
+        Set<String> set = buildService.listGroup();
+        if (set.isEmpty()) {
+            set.add("默认");
+        }
+        setAttribute("groupArray", set);
         //
         List<OutGivingModel> outGivingModels = outGivingServer.list();
         setAttribute("outGivingModels", outGivingModels);

@@ -11,7 +11,22 @@
 <table class="layui-table" id="tab_build" lay-filter="tab_build" style="margin: 0;"></table>
 
 </body>
-
+<script type="text/html" id="toolbarDemo">
+    <form class="layui-form" action="">
+        <div class="layui-form-item" style="margin-bottom: 0;">
+            <div class="layui-inline">
+                <label class="layui-form-label" style="width: auto !important;">分组</label>
+                <div class="layui-input-inline">
+                    <select name="selectGroup" id="selectGroup" lay-verify="required" lay-filter="groupName"
+                            lay-search="">
+                        <option value="">请选择</option>
+                        <option th:each="item : ${groupArray}" th:value="${item}" th:text="${item}"></option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </form>
+</script>
 <script type="text/html" id="bar_build">
     <a href="javascript:;" class="layui-btn  layui-btn-sm layui-btn-normal" lay-event="update">编辑</a>
     <a href="javascript:;" class="layui-btn  layui-btn-sm layui-btn-normal" lay-event="trigger">触发器</a>
@@ -29,7 +44,7 @@
 </script>
 
 <script type="text/javascript" th:inline="javascript">
-
+    const apiWhere = {};
     var statusArray = [[${statusArray}]];
 
     function openLog(id, name, buildId) {
@@ -97,11 +112,21 @@
     ];
 
     function loadSuccess() {
+        const build = layui.data('build');
+        if (build && build.group) {
+            apiWhere.group = build.group;
+        }
         tableRender({
             id: 'tab_build',
             elem: '#tab_build',
             url: './list_data.json',
-            cols: [col]
+            toolbar: '#toolbarDemo',
+            where: apiWhere,
+            cols: [col],
+            done: function (data) {
+                $("#selectGroup option[value='" + apiWhere.group + "']").attr("selected", "selected");
+                form.render();
+            }
         });
 
 
@@ -167,6 +192,20 @@
                 });
             }
         });
+
+        form.on('select(groupName)', function (data) {
+            changeGroup(data.value);
+            reloadTable();
+            return true;
+        });
+    }
+
+    function changeGroup(group) {
+        apiWhere.group = group;
+        layui.data('build', {
+            key: 'group',
+            value: group
+        });
     }
 
     function editData(id) {
@@ -178,8 +217,15 @@
         });
     }
 
-    function reloadTable() {
-        table.reload('tab_build', {});
+    function reloadTable(group) {
+        if (group) {
+            changeGroup(group);
+            window.location.reload();
+        } else {
+            table.reload('tab_build', {
+                where: apiWhere
+            });
+        }
     }
 </script>
 </html>
