@@ -47,6 +47,10 @@ public class JdkListController extends BaseAgentController {
         String id = model.getId();
         String jdkVersion = FileUtils.getJdkVersion(newPath);
         model.setVersion(jdkVersion);
+        String name = model.getName();
+        if (StrUtil.isEmpty(name)) {
+            model.setName(jdkVersion);
+        }
         if (StrUtil.isEmpty(id)) {
             model.setId(IdUtil.fastSimpleUUID());
             jdkInfoService.addItem(model);

@@ -20,6 +20,13 @@
     <form action="./jdk/update.json" class="layui-form" id="form_jdk" style="margin-top: 20px;width: 96%">
         <div class="layui-form-item">
             <input type="hidden" id="id" name="id">
+            <label class="layui-form-label">名称</label>
+            <div class="layui-input-block">
+                <input type="text" id="name" name="name" placeholder="请填写名称"
+                       class="layui-input" required lay-verify="required">
+            </div>
+        </div>
+        <div class="layui-form-item">
             <label class="layui-form-label">jdk路径</label>
             <div class="layui-input-block">
                 <input type="text" id="path" name="path" placeholder="请填写jdk路径"
@@ -45,6 +52,8 @@
             url: './jdk/list',
             cols: [{
                 field: 'id', title: 'id', hide: true
+            }, {
+                field: 'name', title: '名称', sort: true, align: 'center'
             }, {
                 field: 'version', title: '版本', sort: true, align: 'center'
             }, {
