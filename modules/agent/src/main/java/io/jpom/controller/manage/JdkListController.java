@@ -1,6 +1,7 @@
 package io.jpom.controller.manage;
 
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.JsonMessage;
 import io.jpom.common.BaseAgentController;
@@ -47,7 +48,7 @@ public class JdkListController extends BaseAgentController {
         String jdkVersion = FileUtils.getJdkVersion(newPath);
         model.setVersion(jdkVersion);
         if (StrUtil.isEmpty(id)) {
-            model.setId(jdkVersion);
+            model.setId(IdUtil.fastSimpleUUID());
             jdkInfoService.addItem(model);
             return JsonMessage.getString(200, "添加成功");
         }
