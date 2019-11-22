@@ -10,6 +10,12 @@ import io.jpom.model.data.JdkInfoModel;
 import io.jpom.system.AgentConfigBean;
 import org.springframework.stereotype.Service;
 
+/**
+ * jdk 管理
+ *
+ * @author Arno
+ * @date 2019/11/20
+ */
 @Service
 public class JdkInfoService extends BaseOperService<JdkInfoModel> {
 
