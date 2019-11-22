@@ -121,7 +121,7 @@ public class BuildService extends BaseOperService<BuildModel> implements BaseDyn
         item.setBuildId(item.getBuildId() + 1);
         String optUserName = userModel == null ? "openApi" : UserModel.getOptUserName(userModel);
         item.setModifyUser(optUserName);
-        updateItem(item);
+        this.updateItem(item);
         BuildManage.create(item, userModel);
         return JsonMessage.getString(200, "开始构建中", item.getBuildId());
     }

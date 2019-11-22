@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * @author bwcx_jzy
@@ -37,7 +38,11 @@ public class BuildTriggerApiController {
             return JsonMessage.getString(404, "没有对应数据");
         }
         List<UserModel> list = userService.list(false);
-        UserModel userModel = list.stream().filter(UserModel::isSystemUser).findFirst().get();
+        Optional<UserModel> first = list.stream().filter(UserModel::isSystemUser).findFirst();
+        if (!first.isPresent()) {
+            return JsonMessage.getString(404, "没有对应数据");
+        }
+        UserModel userModel = first.get();
         if (!StrUtil.equals(token, item.getTriggerToken())) {
             return JsonMessage.getString(404, "触发token错误");
         }
