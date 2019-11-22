@@ -1,5 +1,6 @@
 package io.jpom.controller;
 
+import cn.hutool.core.io.FileUtil;
 import cn.hutool.system.SystemUtil;
 import cn.jiangzeyin.common.JsonMessage;
 import com.alibaba.fastjson.JSONObject;
@@ -61,6 +62,12 @@ public class IndexController extends BaseAgentController {
         jsonObject.put("osName", SystemUtil.getOsInfo().getName());
         jsonObject.put("jpomVersion", JpomManifest.getInstance().getVersion());
         jsonObject.put("javaVersion", SystemUtil.getJavaRuntimeInfo().getVersion());
+        //  获取JVM中内存总大小
+        long totalMemory = SystemUtil.getTotalMemory();
+        jsonObject.put("totalMemory", FileUtil.readableFileSize(totalMemory));
+        //
+        long freeMemory = SystemUtil.getFreeMemory();
+        jsonObject.put("freeMemory", FileUtil.readableFileSize(freeMemory));
         int count = 0;
         if (projectInfoModels != null) {
             count = projectInfoModels.size();

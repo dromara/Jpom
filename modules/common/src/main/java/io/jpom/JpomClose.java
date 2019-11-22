@@ -65,7 +65,11 @@ public class JpomClose {
         if (virtualMachine == null) {
             return null;
         }
-        return virtualMachine.id();
+        try {
+            return virtualMachine.id();
+        } finally {
+            virtualMachine.detach();
+        }
     }
 
     public String status(String tag) throws IOException {
