@@ -46,7 +46,7 @@
       {
         "id": "monitor",
         "title": "监控列表",
-        "url": "/monitor/list.html"
+        "url": "./monitor/list.html"
       },
       {
         "id": "monitorLog",
@@ -62,7 +62,7 @@
       {
         "id": "buildList",
         "title": "构建列表",
-        "url": "/build/list.html"
+        "url": "./build/list.html"
       },
       {
         "id": "buildHistory",
