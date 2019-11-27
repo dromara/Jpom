@@ -5,6 +5,7 @@
 ### 新增功能
 
 1. [支持maven快速编辑节点项目](https://gitee.com/keepbx/Jpom-Plugin/tree/master/jpom-maven-plugin)（配合`jpom-maven-plugin`使用）(感谢@夜空中最亮的星)
+2. 【Agent】 新增jdk 管理，直接不同项目选择不同的jdk （GITEE@IV8ZZ）
 
 ### 解决BUG、优化功能
 

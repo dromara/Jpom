@@ -26,8 +26,9 @@ public class LinuxProjectCommander extends AbstractProjectCommander {
         if (StrUtil.isBlank(path)) {
             return null;
         }
-        return String.format("nohup java %s %s" +
+        return String.format("nohup %s %s %s" +
                         " %s  %s  %s >> %s 2>&1 &",
+                getRunJavaPath(projectInfoModel, false),
                 projectInfoModel.getJvm(), JvmUtil.getJpomPidTag(projectInfoModel.getId(), projectInfoModel.allLib()),
                 path,
                 projectInfoModel.getMainClass(),

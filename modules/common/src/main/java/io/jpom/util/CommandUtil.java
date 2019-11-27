@@ -113,6 +113,7 @@ public class CommandUtil {
      * @throws IOException 异常
      */
     public static void asyncExeLocalCommand(File file, String command) throws Exception {
+        DefaultSystemLog.getLog().info(command);
         List<String> commands = getCommand();
         commands.add(command);
         ProcessBuilder pb = new ProcessBuilder(commands);

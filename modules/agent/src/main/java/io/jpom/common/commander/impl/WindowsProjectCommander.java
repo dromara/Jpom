@@ -31,8 +31,9 @@ public class WindowsProjectCommander extends AbstractProjectCommander {
         String tag = projectInfoModel.getId();
         String mainClass = projectInfoModel.getMainClass();
         String args = projectInfoModel.getArgs();
-        return String.format("javaw %s %s " +
+        return String.format("%s %s %s " +
                         "%s  %s  %s >> %s &",
+                getRunJavaPath(projectInfoModel, true),
                 jvm, JvmUtil.getJpomPidTag(tag, projectInfoModel.allLib()),
                 classPath, mainClass, args, projectInfoModel.getAbsoluteLog());
     }

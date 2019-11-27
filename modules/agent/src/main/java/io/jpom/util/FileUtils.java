@@ -77,17 +77,24 @@ public class FileUtils {
      * @return 判断存在java文件
      */
     public static boolean isJdkPath(String path) {
-        String fileName = getJdkJavaPath(path);
+        String fileName = getJdkJavaPath(path, false);
         File newPath = new File(fileName);
         return newPath.exists() && newPath.isFile();
     }
 
-    private static String getJdkJavaPath(String path) {
+    /**
+     * 获取java 文件路径
+     *
+     * @param path path
+     * @param w    是否使用javaw
+     * @return 完整路径
+     */
+    public static String getJdkJavaPath(String path, boolean w) {
         String fileName;
         if (SystemUtil.getOsInfo().isWindows()) {
-            fileName = "java.exe";
+            fileName = w ? "javaw.exe" : "java.exe";
         } else {
-            fileName = "java";
+            fileName = w ? "java" : "javaw";
         }
         File newPath = FileUtil.file(path, "bin", fileName);
         return FileUtil.getAbsolutePath(newPath);
@@ -100,7 +107,7 @@ public class FileUtils {
      * @return 获取成功返回版本号
      */
     public static String getJdkVersion(String path) {
-        String newPath = getJdkJavaPath(path);
+        String newPath = getJdkJavaPath(path, false);
         if (path.contains(StrUtil.SPACE)) {
             newPath = String.format("\"%s\"", newPath);
         }

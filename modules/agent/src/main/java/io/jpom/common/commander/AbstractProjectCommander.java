@@ -17,12 +17,15 @@ import com.sun.tools.attach.VirtualMachine;
 import io.jpom.common.commander.impl.LinuxProjectCommander;
 import io.jpom.common.commander.impl.WindowsProjectCommander;
 import io.jpom.model.RunMode;
+import io.jpom.model.data.JdkInfoModel;
 import io.jpom.model.data.ProjectInfoModel;
 import io.jpom.model.system.NetstatModel;
+import io.jpom.service.manage.JdkInfoService;
 import io.jpom.service.manage.ProjectInfoService;
 import io.jpom.system.AgentExtConfigBean;
 import io.jpom.system.JpomRuntimeException;
 import io.jpom.util.CommandUtil;
+import io.jpom.util.FileUtils;
 import io.jpom.util.JvmUtil;
 
 import java.io.File;
@@ -87,6 +90,22 @@ public abstract class AbstractProjectCommander {
      * @return null 是条件不足
      */
     public abstract String buildCommand(ProjectInfoModel projectInfoModel);
+
+    protected String getRunJavaPath(ProjectInfoModel projectInfoModel, boolean w) {
+        if (StrUtil.isEmpty(projectInfoModel.getJdkId())) {
+            return "java";
+        }
+        JdkInfoService bean = SpringUtil.getBean(JdkInfoService.class);
+        JdkInfoModel item = bean.getItem(projectInfoModel.getJdkId());
+        if (item == null) {
+            return "java";
+        }
+        String jdkJavaPath = FileUtils.getJdkJavaPath(item.getPath(), w);
+        if (jdkJavaPath.contains(StrUtil.SPACE)) {
+            jdkJavaPath = String.format("\"%s\"", jdkJavaPath);
+        }
+        return jdkJavaPath;
+    }
 
     /**
      * 启动
