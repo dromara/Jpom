@@ -94,7 +94,7 @@ public class FileUtils {
         if (SystemUtil.getOsInfo().isWindows()) {
             fileName = w ? "javaw.exe" : "java.exe";
         } else {
-            fileName = w ? "java" : "javaw";
+            fileName = w ? "javaw" : "java";
         }
         File newPath = FileUtil.file(path, "bin", fileName);
         return FileUtil.getAbsolutePath(newPath);

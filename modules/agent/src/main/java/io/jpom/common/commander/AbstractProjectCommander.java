@@ -93,12 +93,12 @@ public abstract class AbstractProjectCommander {
 
     protected String getRunJavaPath(ProjectInfoModel projectInfoModel, boolean w) {
         if (StrUtil.isEmpty(projectInfoModel.getJdkId())) {
-            return "java";
+            return w ? "javaw" : "java";
         }
         JdkInfoService bean = SpringUtil.getBean(JdkInfoService.class);
         JdkInfoModel item = bean.getItem(projectInfoModel.getJdkId());
         if (item == null) {
-            return "java";
+            return w ? "javaw" : "java";
         }
         String jdkJavaPath = FileUtils.getJdkJavaPath(item.getPath(), w);
         if (jdkJavaPath.contains(StrUtil.SPACE)) {
