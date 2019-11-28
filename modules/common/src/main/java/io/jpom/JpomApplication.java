@@ -9,7 +9,6 @@ import cn.jiangzeyin.common.ApplicationBuilder;
 import cn.jiangzeyin.common.validator.ParameterInterceptor;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
@@ -155,7 +154,11 @@ public class JpomApplication extends ApplicationBuilder {
                     command = CommandUtil.SUFFIX;
                 }
                 command += " " + FileUtil.getAbsolutePath(scriptFile) + " restart upgrade";
-                CommandUtil.asyncExeLocalCommand(scriptFile.getParentFile(), command);
+                if (SystemUtil.getOsInfo().isWindows()) {
+                    CommandUtil.execSystemCommand(command, scriptFile.getParentFile());
+                } else {
+                    CommandUtil.asyncExeLocalCommand(scriptFile.getParentFile(), command);
+                }
             } catch (Exception e) {
                 e.printStackTrace();
             }
