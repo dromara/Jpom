@@ -126,7 +126,12 @@ public abstract class AbstractProjectCommander {
         // 执行命令
         ThreadUtil.execute(() -> {
             try {
-                CommandUtil.asyncExeLocalCommand(FileUtil.file(projectInfoModel.allLib()), command);
+                File file = FileUtil.file(projectInfoModel.allLib());
+                if (SystemUtil.getOsInfo().isWindows()) {
+                    CommandUtil.execSystemCommand(command, file);
+                } else {
+                    CommandUtil.asyncExeLocalCommand(file, command);
+                }
             } catch (Exception e) {
                 DefaultSystemLog.getLog().error("执行命令失败", e);
             }
