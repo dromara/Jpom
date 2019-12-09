@@ -288,10 +288,19 @@ public class JvmUtil {
      * @return true
      */
     public static boolean checkCommandLineIsJpom(String commandLine, String tag) {
-        String appTag = String.format("-%s=%s ", JvmUtil.POM_PID_TAG, tag);
-        String appTag2 = String.format("-%s=%s ", JvmUtil.OLD_JPOM_PID_TAG, tag);
+        if (StrUtil.isEmpty(commandLine)) {
+            return false;
+        }
+        String[] split = StrUtil.split(commandLine, StrUtil.SPACE);
+        String appTag = String.format("-%s=%s", JvmUtil.POM_PID_TAG, tag);
+        String appTag2 = String.format("-%s=%s", JvmUtil.OLD_JPOM_PID_TAG, tag);
         String appTag3 = String.format("-%s=%s", JvmUtil.OLD2_JPOM_PID_TAG, tag);
-        return StrUtil.containsAnyIgnoreCase(commandLine, appTag, appTag2, appTag3);
+        for (String item : split) {
+            if (StrUtil.equalsAnyIgnoreCase(item, appTag, appTag2, appTag3)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
