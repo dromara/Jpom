@@ -134,10 +134,16 @@ public class CommandUtil {
      */
     public static boolean checkContainsDel(String script) {
         // 判断删除
+        String[] split = StrUtil.split(script, StrUtil.SPACE);
         if (SystemUtil.getOsInfo().isWindows()) {
-            return StrUtil.containsAnyIgnoreCase(script, "rd ", "del ");
+            for (String s : split) {
+                return StrUtil.containsAnyIgnoreCase(s, "rd", "del");
+            }
         } else {
-            return StrUtil.containsIgnoreCase(script, "rm ");
+            for (String s : split) {
+                return StrUtil.containsIgnoreCase(s, "rm");
+            }
         }
+        return false;
     }
 }
