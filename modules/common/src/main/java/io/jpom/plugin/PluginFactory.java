@@ -20,7 +20,7 @@ import java.util.List;
  * @author bwcx_jzy
  * @date 2019/8/13
  */
-public class PluginFactory implements ApplicationContextInitializer {
+public class PluginFactory implements ApplicationContextInitializer<ConfigurableApplicationContext> {
 
     private static final List<FeatureCallback> FEATURE_CALLBACKS = new ArrayList<>();
 
