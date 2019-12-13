@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
+import java.io.File;
 import java.util.List;
 
 /**
@@ -39,7 +40,12 @@ public class JdkListController extends BaseAgentController {
         if (StrUtil.isEmpty(path)) {
             return JsonMessage.getString(400, "请填写jdk路径");
         }
-        String newPath = FileUtil.normalize(path.replace("bin", ""));
+        String newPath = FileUtil.normalize(path);
+        File file = FileUtil.file(newPath);
+        //去除bin
+        if ("bin".equals(file.getName())) {
+            newPath = file.getParentFile().getAbsolutePath();
+        }
         if (!FileUtils.isJdkPath(newPath)) {
             return JsonMessage.getString(400, "路径错误，该路径不是jdk路径");
         }
