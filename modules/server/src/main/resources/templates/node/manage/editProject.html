@@ -164,7 +164,7 @@
                         <select name="jdkId" lay-filter="jdkId" th:disabled="${item?.outGivingProject}">
                             <option value="" th:selected="#{item?.get('jdkId')==null}">请选择JDK</option>
                             <option th:each="itemJdk : ${jdkArray}" th:value="${itemJdk.id}"
-                                    th:selected="${item?.get('jdkId')!=null &&  item?.get('jdkId')==itemJdk.id}"
+                                    th:selected="${item?.get('jdkId')==itemJdk.id}"
                                     th:text="${itemJdk.name}">
                             </option>
                         </select>
