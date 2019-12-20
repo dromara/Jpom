@@ -68,12 +68,12 @@
         getStatus();
 
         var col = [
-            {field: 'name', title: '文件名', sort: true},
-            {field: 'serverCount', title: '数量', width: "7%", sort: true},
-            {field: 'server_name', title: '域名', sort: true, width: "25%"},
-            {field: 'location', title: '根location', sort: true},
-            {field: 'listen', title: '监听端口', width: "10%", sort: true},
-            {field: 'time', title: '最后修改时间', sort: true},
+            {field: 'name', title: '文件名', sort: true, event: 'rowClick'},
+            {field: 'serverCount', title: '数量', width: "7%", sort: true, event: 'rowClick'},
+            {field: 'server_name', title: '域名', sort: true, width: "25%", event: 'rowClick'},
+            {field: 'location', title: '根location', sort: true, event: 'rowClick'},
+            {field: 'listen', title: '监听端口', width: "10%", sort: true, event: 'rowClick'},
+            {field: 'time', title: '最后修改时间', sort: true, event: 'rowClick'},
             {field: 'op', title: '操作', align: 'center', toolbar: '#bar_ngx', fixed: 'right'}
         ];
         tableRender({
@@ -84,7 +84,7 @@
         });
 
         layui.use(['tree'], function () {
-            var tree = layui.tree;
+            let tree = layui.tree;
             loadTree();
 
             function loadTree() {
@@ -128,23 +128,28 @@
                     }
                 });
             }
-        });
 
-        // 表格工具条事件
-        table.on('tool(tab_ngx)', function (obj) {
-            var data = obj.data;
-            var event = obj.event;
+            // 表格工具条事件
+            table.on('tool(tab_ngx)', function (obj) {
+                var data = obj.data;
+                var event = obj.event;
 
-            if ('update' === event) {
-                if (data.isDirectory) {
-                    return;
+                if ('update' === event) {
+                    if (data.isDirectory) {
+                        return;
+                    }
+                    // 修改
+                    updateNgx(data);
+                } else if ('delete' === event) {
+                    // 删除
+                    deleteNgx(data);
+                } else if ("rowClick" === event) {
+                    //表格行点击
+                    if (data.isDirectory) {
+                        reloadTable(data.path, data.relativePath);
+                    }
                 }
-                // 修改
-                updateNgx(data);
-            } else if ('delete' === event) {
-                // 删除
-                deleteNgx(data);
-            }
+            });
         });
 
         // 新增配置
@@ -159,7 +164,7 @@
 
         // 修改
         function updateNgx(data) {
-            var url = './system/nginx/item.html?type=update&path=' + data.path + "&name=" + data.name;
+            var url = './system/nginx/item.html?type=update&path=' + data.path + "&name=" + data.relativePath;
             tabChange({
                 id: 'nginx_' + data.path,
                 url: url,
