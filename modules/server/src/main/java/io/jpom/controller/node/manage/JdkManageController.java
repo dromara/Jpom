@@ -22,9 +22,9 @@ public class JdkManageController extends BaseServerController {
      *
      * @return page
      */
-    @RequestMapping(value = "jdklist.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
+    @RequestMapping(value = "jdkList.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
     public String listHtml() {
-        return "node/manage/jdk";
+        return "node/manage/JdkList";
     }
 
     @RequestMapping(value = "jdk/list", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)

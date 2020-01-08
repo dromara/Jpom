@@ -56,6 +56,7 @@ public class NginxService extends BaseDataService {
             long time = file.lastModified();
             jsonObject.put("time", DateUtil.date(time).toString());
             jsonObject.put("name", name);
+            jsonObject.put("relativePath", FileUtil.normalize(fileName + "/" + name));
             if (file.isDirectory()) {
                 if (FileUtil.isEmpty(file)) {
                     continue;
