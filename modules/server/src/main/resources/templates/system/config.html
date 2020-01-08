@@ -55,14 +55,16 @@
                 success: function (data) {
                     layer.msg(data.msg);
                     if (200 === data.code) {
-                        top.layer.msg('系统重启中..', {
-                            icon: 16,
-                            shade: 0.2,
-                            time: 1000 * 30,
-                            end: function () {
-                                top.location.reload();
-                            }
-                        });
+                        if (restart) {
+                            top.layer.msg('系统重启中..', {
+                                icon: 16,
+                                shade: 0.2,
+                                time: 1000 * 30,
+                                end: function () {
+                                    top.location.reload();
+                                }
+                            });
+                        }
                     }
                 }
             });
