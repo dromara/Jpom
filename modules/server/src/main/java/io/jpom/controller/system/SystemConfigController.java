@@ -28,6 +28,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 /**
  * 系统配置
@@ -66,7 +67,7 @@ public class SystemConfigController extends BaseServerController {
         }
         try {
             YamlPropertySourceLoader yamlPropertySourceLoader = new YamlPropertySourceLoader();
-            ByteArrayResource resource = new ByteArrayResource(content.getBytes());
+            ByteArrayResource resource = new ByteArrayResource(content.getBytes(StandardCharsets.UTF_8));
             yamlPropertySourceLoader.load("test", resource);
         } catch (Exception e) {
             DefaultSystemLog.getLog().warn("内容格式错误，请检查修正", e);
