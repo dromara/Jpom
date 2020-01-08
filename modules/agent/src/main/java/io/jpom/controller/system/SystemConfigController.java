@@ -6,6 +6,7 @@ import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.JpomApplication;
@@ -50,6 +51,7 @@ public class SystemConfigController extends BaseAgentController {
             ByteArrayResource resource = new ByteArrayResource(content.getBytes());
             yamlPropertySourceLoader.load("test", resource);
         } catch (Exception e) {
+            DefaultSystemLog.getLog().warn("内容格式错误，请检查修正", e);
             return JsonMessage.getString(500, "内容格式错误，请检查修正:" + e.getMessage());
         }
         if (JpomManifest.getInstance().isDebug()) {
