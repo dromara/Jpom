@@ -91,6 +91,9 @@ public class DbConfig {
      * @param consumer  查询出超过范围的时间回调
      */
     public static void autoClear(String tableName, String timeClo, int maxCount, Consumer<Entity> whereCon, Consumer<Long> consumer) {
+        if (maxCount <= 0) {
+            return;
+        }
         ThreadUtil.execute(() -> {
             Entity entity = Entity.create(tableName);
             if (whereCon != null) {

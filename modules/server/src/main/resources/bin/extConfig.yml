@@ -29,4 +29,4 @@ build:
   # 最多保存多少份历史记录
   maxHistoryCount: 1000
   # 单个最多保存多少份历史记录
-  buildItemMaxHistoryCount: 50
+  itemMaxHistoryCount: 50
