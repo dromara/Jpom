@@ -48,10 +48,14 @@ public class ServerExtConfigBean {
     private String authorizeToken;
 
     /**
-     * 构建最多报错多少份历史记录
+     * 构建最多保存多少份历史记录
      */
-    @Value("${build.maxHistoryCount:50}")
+    @Value("${build.maxHistoryCount:1000}")
     private int buildMaxHistoryCount;
+
+
+    @Value("${build.itemMaxHistoryCount:50}")
+    private int buildItemMaxHistoryCount;
 
 
     public String getAuthorizeToken() {
@@ -70,8 +74,12 @@ public class ServerExtConfigBean {
         return h2DbLogStorageCount;
     }
 
-    public static int getBuildMaxHistoryCount() {
-        return getInstance().buildMaxHistoryCount;
+    public int getBuildMaxHistoryCount() {
+        return buildMaxHistoryCount;
+    }
+
+    public int getBuildItemMaxHistoryCount() {
+        return buildItemMaxHistoryCount;
     }
 
     /**

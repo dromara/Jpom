@@ -98,10 +98,15 @@ public class DbBuildHistoryLogService extends BaseDbLogService<BuildHistoryLog> 
     @Override
     public void insert(BuildHistoryLog buildHistoryLog) {
         super.insert(buildHistoryLog);
-        // 清理数据
-        DbConfig.autoClear(getTableName(), "startTime", ServerExtConfigBean.getBuildMaxHistoryCount(), aLong -> {
-            doClearPage(1, aLong);
-        });
+        // 清理总数据
+        int buildMaxHistoryCount = ServerExtConfigBean.getInstance().getBuildMaxHistoryCount();
+        DbConfig.autoClear(getTableName(), "startTime", buildMaxHistoryCount,
+                aLong -> doClearPage(1, aLong));
+        // 清理单个
+        int buildItemMaxHistoryCount = ServerExtConfigBean.getInstance().getBuildItemMaxHistoryCount();
+        DbConfig.autoClear(getTableName(), "startTime", buildItemMaxHistoryCount,
+                entity -> entity.set("buildDataId", buildHistoryLog.getBuildDataId()),
+                aLong -> doClearPage(1, aLong));
     }
 
     private void doClearPage(int pageNo, long time) {

@@ -27,4 +27,6 @@ db:
 # 构建相关配置
 build:
   # 最多保存多少份历史记录
-  maxHistoryCount: 50
+  maxHistoryCount: 1000
+  # 单个最多保存多少份历史记录
+  buildItemMaxHistoryCount: 50
