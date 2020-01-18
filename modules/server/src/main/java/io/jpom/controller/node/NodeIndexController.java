@@ -1,5 +1,6 @@
 package io.jpom.controller.node;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.JsonMessage;
 import com.alibaba.fastjson.JSONArray;
@@ -47,7 +48,11 @@ public class NodeIndexController extends BaseServerController {
         //
         if (nodeModels != null && StrUtil.isNotEmpty(group)) {
             // 筛选
-            nodeModels = nodeModels.stream().filter(nodeModel -> StrUtil.equals(group, nodeModel.getGroup())).collect(Collectors.toList());
+            List<NodeModel> filterList = nodeModels.stream().filter(nodeModel -> StrUtil.equals(group, nodeModel.getGroup())).collect(Collectors.toList());
+            if (CollUtil.isNotEmpty(filterList)) {
+                // 如果传入的分组找到了节点，就返回  否则返回全部
+                nodeModels = filterList;
+            }
         }
         setAttribute("array", nodeModels);
         // 获取所有的ssh 名称
