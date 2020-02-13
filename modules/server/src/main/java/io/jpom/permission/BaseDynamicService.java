@@ -1,6 +1,7 @@
 package io.jpom.permission;
 
 import cn.hutool.core.util.StrUtil;
+import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.spring.SpringUtil;
 import cn.jiangzeyin.controller.base.AbstractController;
 import com.alibaba.fastjson.JSONArray;
@@ -116,8 +117,14 @@ public interface BaseDynamicService {
      * @return tree array
      */
     default JSONArray listDynamic(ClassFeature classFeature, String roleId, String dataId) {
-        JSONArray listToArray = listToArray(dataId);
-        if (listToArray == null || listToArray.isEmpty()) {
+        JSONArray listToArray;
+        try {
+            listToArray = listToArray(dataId);
+            if (listToArray == null || listToArray.isEmpty()) {
+                return null;
+            }
+        } catch (Exception e) {
+            DefaultSystemLog.getLog().error("拉取动态信息错误", e);
             return null;
         }
         JSONArray jsonArray = new JSONArray();
