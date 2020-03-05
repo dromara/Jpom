@@ -220,6 +220,7 @@
             success: function (data) {
                 if (200 === data.code && data.data) {
                     config.data = data.data;
+                    config.limit = data.data.length;
                     tableRender(config);
                     setTimeout(function () {
                         loadProcessList();
