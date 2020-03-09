@@ -33,7 +33,7 @@
                            th:class="${item}?'layui-input layui-disabled':'layui-input'" th:value="${item?.id}"
                            th:readonly="${item}">
                     <input type="hidden" name="reqId" th:value="${reqId}">
-                    <input type="hidden" name="type" value="${type}">
+                    <input type="hidden" name="type" th:value="${type}">
                 </div>
             </div>
             <div class="layui-inline">
