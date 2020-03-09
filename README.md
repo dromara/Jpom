@@ -70,6 +70,8 @@
 9. 在线管理Nginx配置、ssl证书文件
 10. Tomcat状态、文件、war包在线实时管理
 
+> 特别提醒：在Windows服务器中可能有部分功能因为系统特性造成兼容性问题，建议在实际使用中充分测试。Linux目前兼容良好
+
 ### 一键安装
 
 #### 服务端
@@ -184,3 +186,5 @@ Agent.sh status    查看Jpom插件端运行状态
   2. 微信公众号：[CodeGzh](http://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/docs/images/CodeGzh-QrCode.jpg)
   
   3. 码云： [issues](https://gitee.com/keepbx/Jpom/issues)
+  
+  4. [捐赠、打赏 在码云仓库项目首页下方捐赠即可](https://gitee.com/keepbx/Jpom)
