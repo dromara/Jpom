@@ -24,6 +24,7 @@ import java.io.File;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.Callable;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 分发线程
@@ -84,6 +85,11 @@ public class OutGivingRun implements Callable<OutGivingNodeProject.Status> {
                                 // 完整重启，不再继续剩余的节点项目
                                 cancel = true;
                             }
+                        }
+                        // 休眠30秒 等待之前项目正常启动
+                        try {
+                            TimeUnit.SECONDS.sleep(30);
+                        } catch (InterruptedException ignored) {
                         }
                     }
                 }
