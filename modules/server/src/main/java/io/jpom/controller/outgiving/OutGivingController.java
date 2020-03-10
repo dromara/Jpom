@@ -1,5 +1,6 @@
 package io.jpom.controller.outgiving;
 
+import cn.hutool.core.convert.Convert;
 import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.JsonMessage;
 import com.alibaba.fastjson.JSONArray;
@@ -8,6 +9,7 @@ import io.jpom.common.BaseServerController;
 import io.jpom.common.forward.NodeForward;
 import io.jpom.common.forward.NodeUrl;
 import io.jpom.common.interceptor.OptLog;
+import io.jpom.model.BaseEnum;
 import io.jpom.model.data.NodeModel;
 import io.jpom.model.data.OutGivingModel;
 import io.jpom.model.data.OutGivingNodeProject;
@@ -77,6 +79,8 @@ public class OutGivingController extends BaseServerController {
         String reqId = nodeService.cacheNodeList(nodeModels);
         setAttribute("reqId", reqId);
 
+        JSONArray afterOpt = BaseEnum.toJSONArray(OutGivingModel.AfterOpt.class);
+        setAttribute("afterOpt", afterOpt);
         return "outgiving/edit";
     }
 
@@ -124,7 +128,7 @@ public class OutGivingController extends BaseServerController {
         return error;
     }
 
-    private String doData(OutGivingModel outGivingModel) throws IOException {
+    private String doData(OutGivingModel outGivingModel) {
         outGivingModel.setName(getParameter("name"));
         if (StrUtil.isEmpty(outGivingModel.getName())) {
             return JsonMessage.getString(405, "分发名称不能为空");
@@ -179,6 +183,13 @@ public class OutGivingController extends BaseServerController {
             return JsonMessage.getString(405, "至少选择2个节点项目");
         }
         outGivingModel.setOutGivingNodeProjectList(outGivingNodeProjects);
+        //
+        String afterOpt = getParameter("afterOpt");
+        OutGivingModel.AfterOpt afterOpt1 = BaseEnum.getEnum(OutGivingModel.AfterOpt.class, Convert.toInt(afterOpt, 0));
+        if (afterOpt1 == null) {
+            return JsonMessage.getString(400, "请选择分发后的操作");
+        }
+        outGivingModel.setAfterOpt(afterOpt1.getCode());
         return null;
     }
 

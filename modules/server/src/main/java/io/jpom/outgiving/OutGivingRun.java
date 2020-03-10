@@ -128,7 +128,7 @@ public class OutGivingRun implements Callable<OutGivingNodeProject.Status> {
             updateStatus(this.logId, this.outGivingId, this.outGivingNodeProject,
                     OutGivingNodeProject.Status.Ing, "开始分发");
             //
-            JsonMessage jsonMessage = fileUpload(file,
+            JsonMessage<String> jsonMessage = fileUpload(file,
                     this.outGivingNodeProject.getProjectId(),
                     unzip,
                     afterOpt != OutGivingModel.AfterOpt.No,
@@ -162,10 +162,10 @@ public class OutGivingRun implements Callable<OutGivingNodeProject.Status> {
      * @param userModel 操作用户
      * @return json
      */
-    public static JsonMessage fileUpload(File file, String projectId,
-                                         boolean unzip, boolean restart,
-                                         NodeModel nodeModel, UserModel userModel,
-                                         boolean clearOld) {
+    public static JsonMessage<String> fileUpload(File file, String projectId,
+                                                 boolean unzip, boolean restart,
+                                                 NodeModel nodeModel, UserModel userModel,
+                                                 boolean clearOld) {
         JSONObject data = new JSONObject();
         data.put("file", file);
         data.put("id", projectId);
