@@ -42,17 +42,25 @@ public class SshHandler extends BaseHandler {
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
         SshModel sshItem = (SshModel) session.getAttributes().get("sshItem");
         Map<String, String[]> parameterMap = (Map<String, String[]>) session.getAttributes().get("parameterMap");
-        String[] tails = parameterMap.get("tail");
-        //
-        String tail = null;
-        if (tails != null && tails.length > 0 && !StrUtil.isEmptyOrUndefined(tails[0])) {
-            tail = tails[0];
+        String[] fileDirAlls =null;
+        //判断url是何操作请求
+        if (parameterMap.containsKey("tail")){
+            fileDirAlls = parameterMap.get("tail");
+        }else if (parameterMap.containsKey("gz")){
+            fileDirAlls = parameterMap.get("gz");
+        }else if (parameterMap.containsKey("zip")){
+            fileDirAlls = parameterMap.get("zip");
+        }
+        //检查文件路径
+        String fileDirAll = null;
+        if (fileDirAlls != null && fileDirAlls.length > 0 && !StrUtil.isEmptyOrUndefined(fileDirAlls[0])) {
+            fileDirAll = fileDirAlls[0];
             List<String> fileDirs = sshItem.getFileDirs();
             if (fileDirs == null) {
                 sendBinary(session, "没有配置路径");
                 return;
             }
-            File file = FileUtil.file(tail);
+            File file = FileUtil.file(fileDirAll);
             boolean find = false;
             for (String fileDir : fileDirs) {
                 if (FileUtil.isSub(FileUtil.file(fileDir), file)) {
@@ -76,12 +84,25 @@ public class SshHandler extends BaseHandler {
         HANDLER_ITEM_CONCURRENT_HASH_MAP.put(session.getId(), handlerItem);
         //
         Thread.sleep(1000);
-        if (tail == null) {
+        //截取当前操作文件父路径
+        String fileLocalPath = fileDirAll.substring(0,fileDirAll.lastIndexOf("/"));
+
+        if (fileDirAll == null) {
             this.call(session, StrUtil.CR);
-        } else {
+        } else if (parameterMap.containsKey("tail")){
             // 查看文件
-            tail = FileUtil.normalize(tail);
-            this.call(session, StrUtil.format("tail -f {}", tail));
+            fileDirAll = FileUtil.normalize(fileDirAll);
+            this.call(session, StrUtil.format("tail -f {}", fileDirAll));
+            this.call(session, StrUtil.CR);
+        } else if (parameterMap.containsKey("zip")){
+            //解压zip
+            fileDirAll = FileUtil.normalize(fileDirAll);
+            this.call(session, StrUtil.format("unzip {} -d" + "{}", fileDirAll ,fileLocalPath));
+            this.call(session, StrUtil.CR);
+        }else if (parameterMap.containsKey("gz")){
+            //解压 tar和tar.gz
+            fileDirAll = FileUtil.normalize(fileDirAll);
+            this.call(session, StrUtil.format("tar -xzvf {} -C " + "{}", fileDirAll ,fileLocalPath));
             this.call(session, StrUtil.CR);
         }
     }
