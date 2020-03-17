@@ -41,7 +41,7 @@
                 <div class="layui-input-block">
                     <select name="group" lay-filter="group" th:disabled="${item?.outGivingProject}">
 
-                        <option th:each="i : ${groups}" th:value="${i}" th:selected="${item?.group==$i}"
+                        <option th:each="i : ${groups}" th:value="${i}" th:selected="${item?.group==i}"
                                 th:text="${i}"></option>
                         <option value="">选择手动添加</option>
                     </select>
