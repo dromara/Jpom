@@ -62,6 +62,9 @@ public class DbUserOperateLogService extends BaseDbLogService<UserOperateLogV1> 
                 }
             }
             List<MonitorUserOptModel> monitorUserOptModels = monitorUserOptService.listByType(optType, userOperateLogV1.getUserId());
+            if (CollUtil.isEmpty(monitorUserOptModels)) {
+                return;
+            }
             for (MonitorUserOptModel monitorUserOptModel : monitorUserOptModels) {
                 List<String> notifyUser = monitorUserOptModel.getNotifyUser();
                 if (CollUtil.isEmpty(notifyUser)) {
