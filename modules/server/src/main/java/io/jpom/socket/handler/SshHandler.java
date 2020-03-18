@@ -48,7 +48,7 @@ public class SshHandler extends BaseHandler {
             fileDirAlls = parameterMap.get("tail");
         }else if (parameterMap.containsKey("gz")){
             fileDirAlls = parameterMap.get("gz");
-        }else if (parameterMap.containsKey("zip")){
+        }else {
             fileDirAlls = parameterMap.get("zip");
         }
         //检查文件路径
@@ -85,8 +85,10 @@ public class SshHandler extends BaseHandler {
         //
         Thread.sleep(1000);
         //截取当前操作文件父路径
-        String fileLocalPath = fileDirAll.substring(0,fileDirAll.lastIndexOf("/"));
-
+        String fileLocalPath = null;
+        if (fileDirAll.lastIndexOf("/") > -1){
+            fileLocalPath = fileDirAll.substring(0,fileDirAll.lastIndexOf("/"));
+        }
         if (fileDirAll == null) {
             this.call(session, StrUtil.CR);
         } else if (parameterMap.containsKey("tail")){
@@ -97,9 +99,9 @@ public class SshHandler extends BaseHandler {
         } else if (parameterMap.containsKey("zip")){
             //解压zip
             fileDirAll = FileUtil.normalize(fileDirAll);
-            this.call(session, StrUtil.format("unzip {} -d" + "{}", fileDirAll ,fileLocalPath));
+            this.call(session, StrUtil.format("unzip -o {} -d " + "{}", fileDirAll ,fileLocalPath));
             this.call(session, StrUtil.CR);
-        }else if (parameterMap.containsKey("gz")){
+        }else {
             //解压 tar和tar.gz
             fileDirAll = FileUtil.normalize(fileDirAll);
             this.call(session, StrUtil.format("tar -xzvf {} -C " + "{}", fileDirAll ,fileLocalPath));
