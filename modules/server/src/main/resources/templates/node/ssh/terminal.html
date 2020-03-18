@@ -19,11 +19,7 @@
     var sock;
     //  tail 文件
     var tail = getQueryString("tail");
-    var zip = getQueryString("zip");
-    var gz = getQueryString("gz");
     var cursorBlink = !tail;
-    var cursorBlinkZip = !zip;
-    var cursorBlinkGz  = !gz;
 
     function loadSuccess() {
         top.layer.load({
@@ -34,28 +30,16 @@
                 top.location.reload();
             }
         });
-        if (tail !== null){
-            var url = getSocketHost() + "/ssh?userId=[[${session.user.getUserMd5Key()}]]&" +
-                "sshId=[[${item?.id}]]&nodeId=system&type=ssh&" +
-                "tail=" + tail;
-        } else if (zip !== null){
-            var url = getSocketHost() + "/ssh?userId=[[${session.user.getUserMd5Key()}]]&" +
-                "sshId=[[${item?.id}]]&nodeId=system&type=ssh&" +
-                "zip=" + zip;
-        } else if (gz !== null){
-            var url = getSocketHost() + "/ssh?userId=[[${session.user.getUserMd5Key()}]]&" +
-                "sshId=[[${item?.id}]]&nodeId=system&type=ssh&" +
-                "gz=" + gz;
-        }
+        var url = getSocketHost() + "/ssh?userId=[[${session.user.getUserMd5Key()}]]&" +
+            "sshId=[[${item?.id}]]&nodeId=system&type=ssh&" +
+            "tail=" + tail;
         var terminal = document.getElementById("#terminal");
         term = new window.Terminal({
             cursorBlink: cursorBlink,
-            cursorBlinkGz: cursorBlinkGz,
-            cursorBlinkZip: cursorBlinkZip,
         });
         //
         term.onData(function (data) {
-            if (tail || zip || gz) {
+            if (tail) {
                 return;
             }
             sock.send(JSON.stringify({'data': data}));
@@ -64,7 +48,7 @@
         // 监听按键
         var startX = 2;
         term.onKey(function (key) {
-            if (tail || zip || gz) {
+            if (tail) {
                 return;
             }
             var ev = key.domEvent;
