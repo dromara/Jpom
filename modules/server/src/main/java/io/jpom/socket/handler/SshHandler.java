@@ -29,7 +29,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * ssh 处理
+ * ssh 处理2
  *
  * @author bwcx_jzy
  * @date 2019/8/9
@@ -86,7 +86,7 @@ public class SshHandler extends BaseHandler {
         Thread.sleep(1000);
         //截取当前操作文件父路径
         String fileLocalPath = null;
-        if (fileDirAll.lastIndexOf("/") > -1){
+        if (fileDirAll !=null && fileDirAll.lastIndexOf("/") > -1){
             fileLocalPath = fileDirAll.substring(0,fileDirAll.lastIndexOf("/"));
         }
         if (fileDirAll == null) {
