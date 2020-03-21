@@ -185,7 +185,7 @@ public class Monitor implements Task {
         // 获取上次状态
         String projectCopyId = id;
         String copyMsg = StrUtil.EMPTY;
-        if (StrUtil.isNotEmpty(id)) {
+        if (StrUtil.isNotEmpty(copyId)) {
             projectCopyId = StrUtil.format("{}:{}", id, copyId);
             copyMsg = StrUtil.format("副本：{}、", copyId);
         }
