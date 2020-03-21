@@ -1,5 +1,6 @@
 package io.jpom.service.manage;
 
+import cn.hutool.core.date.DateUtil;
 import io.jpom.common.commander.AbstractProjectCommander;
 import io.jpom.model.data.ProjectInfoModel;
 import io.jpom.socket.ConsoleCommandOp;
@@ -55,6 +56,11 @@ public class ConsoleService {
         if (consoleCommandOp == ConsoleCommandOp.start || consoleCommandOp == ConsoleCommandOp.restart) {
             // 修改 run lib 使用情况
             ProjectInfoModel modify = projectInfoService.getItem(projectInfoModel.getId());
+            //
+            if (copyItem != null) {
+                ProjectInfoModel.JavaCopyItem copyItem1 = modify.findCopyItem(copyItem.getId());
+                copyItem1.setModifyTime(DateUtil.now());
+            }
             modify.setRunLibDesc(projectInfoModel.getUseLibDesc());
             try {
                 projectInfoService.updateItem(modify);

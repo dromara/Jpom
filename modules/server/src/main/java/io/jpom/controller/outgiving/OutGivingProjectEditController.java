@@ -11,6 +11,7 @@ import io.jpom.common.BaseServerController;
 import io.jpom.common.forward.NodeForward;
 import io.jpom.common.forward.NodeUrl;
 import io.jpom.common.interceptor.OptLog;
+import io.jpom.model.AfterOpt;
 import io.jpom.model.BaseEnum;
 import io.jpom.model.RunMode;
 import io.jpom.model.data.*;
@@ -62,7 +63,7 @@ public class OutGivingProjectEditController extends BaseServerController {
         JSONArray runModes = (JSONArray) JSONArray.toJSON(RunMode.values());
         setAttribute("runModes", runModes);
         //
-        JSONArray afterOpt = BaseEnum.toJSONArray(OutGivingModel.AfterOpt.class);
+        JSONArray afterOpt = BaseEnum.toJSONArray(AfterOpt.class);
         setAttribute("afterOpt", afterOpt);
         // 权限
         List<NodeModel> nodeModels = nodeService.list();
@@ -311,7 +312,7 @@ public class OutGivingProjectEditController extends BaseServerController {
         }
         //
         String afterOpt = getParameter("afterOpt");
-        OutGivingModel.AfterOpt afterOpt1 = BaseEnum.getEnum(OutGivingModel.AfterOpt.class, Convert.toInt(afterOpt, 0));
+        AfterOpt afterOpt1 = BaseEnum.getEnum(AfterOpt.class, Convert.toInt(afterOpt, 0));
         if (afterOpt1 == null) {
             return JsonMessage.getString(400, "请选择分发后的操作");
         }

@@ -52,9 +52,6 @@ public abstract class BaseAgentController extends BaseJpomController {
             return StrUtil.DASHED;
         }
         HttpServletRequest request = servletRequestAttributes.getRequest();
-        if (request == null) {
-            return StrUtil.DASHED;
-        }
         return getUserName(request);
     }
 

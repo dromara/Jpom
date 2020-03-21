@@ -10,6 +10,7 @@ import cn.jiangzeyin.common.spring.SpringUtil;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.common.forward.NodeForward;
 import io.jpom.common.forward.NodeUrl;
+import io.jpom.model.AfterOpt;
 import io.jpom.model.BaseEnum;
 import io.jpom.model.data.NodeModel;
 import io.jpom.model.data.OutGivingModel;
@@ -37,7 +38,7 @@ public class OutGivingRun implements Callable<OutGivingNodeProject.Status> {
     private OutGivingNodeProject outGivingNodeProject;
     private NodeModel nodeModel;
     private File file;
-    private OutGivingModel.AfterOpt afterOpt;
+    private AfterOpt afterOpt;
     private UserModel userModel;
     private boolean unzip;
     private boolean clearOld;
@@ -62,15 +63,15 @@ public class OutGivingRun implements Callable<OutGivingNodeProject.Status> {
         OutGivingServer outGivingServer = SpringUtil.getBean(OutGivingServer.class);
         OutGivingModel item = outGivingServer.getItem(id);
         Objects.requireNonNull(item, "不存在分发");
-        OutGivingModel.AfterOpt afterOpt = BaseEnum.getEnum(OutGivingModel.AfterOpt.class, item.getAfterOpt());
+        AfterOpt afterOpt = BaseEnum.getEnum(AfterOpt.class, item.getAfterOpt());
         if (afterOpt == null) {
-            afterOpt = OutGivingModel.AfterOpt.No;
+            afterOpt = AfterOpt.No;
         }
-        OutGivingModel.AfterOpt finalAfterOpt = afterOpt;
+        AfterOpt finalAfterOpt = afterOpt;
         //
         List<OutGivingNodeProject> outGivingNodeProjects = item.getOutGivingNodeProjectList();
         // 开启线程
-        if (afterOpt == OutGivingModel.AfterOpt.Order_Restart || afterOpt == OutGivingModel.AfterOpt.Order_Must_Restart) {
+        if (afterOpt == AfterOpt.Order_Restart || afterOpt == AfterOpt.Order_Must_Restart) {
             ThreadUtil.execute(() -> {
                 boolean cancel = false;
                 for (OutGivingNodeProject outGivingNodeProject : outGivingNodeProjects) {
@@ -81,7 +82,7 @@ public class OutGivingRun implements Callable<OutGivingNodeProject.Status> {
                         OutGivingRun outGivingRun = new OutGivingRun(item, outGivingNodeProject, file, userModel, unzip);
                         OutGivingNodeProject.Status status = outGivingRun.call();
                         if (status != OutGivingNodeProject.Status.Ok) {
-                            if (finalAfterOpt == OutGivingModel.AfterOpt.Order_Must_Restart) {
+                            if (finalAfterOpt == AfterOpt.Order_Must_Restart) {
                                 // 完整重启，不再继续剩余的节点项目
                                 cancel = true;
                             }
@@ -94,7 +95,7 @@ public class OutGivingRun implements Callable<OutGivingNodeProject.Status> {
                     }
                 }
             });
-        } else if (afterOpt == OutGivingModel.AfterOpt.Restart || afterOpt == OutGivingModel.AfterOpt.No) {
+        } else if (afterOpt == AfterOpt.Restart || afterOpt == AfterOpt.No) {
 
             outGivingNodeProjects.forEach(outGivingNodeProject -> ThreadUtil.execAsync(
                     new OutGivingRun(item, outGivingNodeProject, file, userModel, unzip)));
@@ -114,9 +115,9 @@ public class OutGivingRun implements Callable<OutGivingNodeProject.Status> {
         this.clearOld = item.isClearOld();
         this.outGivingNodeProject = outGivingNodeProject;
         this.file = file;
-        OutGivingModel.AfterOpt afterOpt = BaseEnum.getEnum(OutGivingModel.AfterOpt.class, item.getAfterOpt());
+        AfterOpt afterOpt = BaseEnum.getEnum(AfterOpt.class, item.getAfterOpt());
         if (afterOpt == null) {
-            afterOpt = OutGivingModel.AfterOpt.No;
+            afterOpt = AfterOpt.No;
         }
         this.afterOpt = afterOpt;
         //
@@ -137,7 +138,7 @@ public class OutGivingRun implements Callable<OutGivingNodeProject.Status> {
             JsonMessage<String> jsonMessage = fileUpload(file,
                     this.outGivingNodeProject.getProjectId(),
                     unzip,
-                    afterOpt != OutGivingModel.AfterOpt.No,
+                    afterOpt,
                     this.nodeModel, this.userModel, this.clearOld);
             if (jsonMessage.getCode() == HttpStatus.HTTP_OK) {
                 result = OutGivingNodeProject.Status.Ok;
@@ -163,14 +164,16 @@ public class OutGivingRun implements Callable<OutGivingNodeProject.Status> {
      * @param file      需要上传的文件
      * @param projectId 项目id
      * @param unzip     是否需要解压
-     * @param restart   是否需要重启
+     * @param afterOpt  是否需要重启
      * @param nodeModel 节点
      * @param userModel 操作用户
      * @return json
      */
     public static JsonMessage<String> fileUpload(File file, String projectId,
-                                                 boolean unzip, boolean restart,
-                                                 NodeModel nodeModel, UserModel userModel,
+                                                 boolean unzip,
+                                                 AfterOpt afterOpt,
+                                                 NodeModel nodeModel,
+                                                 UserModel userModel,
                                                  boolean clearOld) {
         JSONObject data = new JSONObject();
         data.put("file", file);
@@ -184,8 +187,8 @@ public class OutGivingRun implements Callable<OutGivingNodeProject.Status> {
             }
         }
         // 操作
-        if (restart) {
-            data.put("after", "restart");
+        if (afterOpt != AfterOpt.No) {
+            data.put("after", afterOpt.getCode());
         }
         return NodeForward.request(nodeModel, NodeUrl.Manage_File_Upload, userModel, data);
     }

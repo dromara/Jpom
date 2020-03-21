@@ -225,35 +225,6 @@ public class BuildModel extends BaseBuildModule {
         }
     }
 
-    public enum AfterOpt implements BaseEnum {
-        /**
-         * 操作
-         */
-        No(0, "不做任何操作"),
-        /**
-         * 重启
-         */
-        Restart(1, "重启"),
-        ;
-        private int code;
-        private String desc;
-
-        AfterOpt(int code, String desc) {
-            this.code = code;
-            this.desc = desc;
-        }
-
-        @Override
-        public int getCode() {
-            return code;
-        }
-
-        @Override
-        public String getDesc() {
-            return desc;
-        }
-    }
-
     /**
      * 仓库类型
      */

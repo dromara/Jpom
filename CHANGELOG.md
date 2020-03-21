@@ -10,6 +10,8 @@
 4. 【Agent】 新增[JavaExtDirsCp] 运行模式 (感谢@TXpcmgr（Geiger）)
 5. 【Server】 ssh 连接方式新增私钥证书连接
 6. 【Server】 ssh文件管理新增解压操作（感谢@TXpcmgr（Geiger）贡献）
+7. 【Agent】 项目新建副本集，方便单机快速运行多个副本
+8. 【Server】构建发布后操作支持副本集相关操作
 
 ### 解决BUG、优化功能
 

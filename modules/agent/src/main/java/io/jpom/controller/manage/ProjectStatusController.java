@@ -11,6 +11,8 @@ import com.alibaba.fastjson.JSONObject;
 import io.jpom.common.BaseAgentController;
 import io.jpom.common.commander.AbstractProjectCommander;
 import io.jpom.model.data.ProjectInfoModel;
+import io.jpom.service.manage.ConsoleService;
+import io.jpom.socket.ConsoleCommandOp;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -26,6 +28,13 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping(value = "/manage/")
 public class ProjectStatusController extends BaseAgentController {
+
+    private final ConsoleService consoleService;
+
+    public ProjectStatusController(ConsoleService consoleService) {
+        this.consoleService = consoleService;
+    }
+
 
     /**
      * 获取项目的进程id
@@ -126,16 +135,16 @@ public class ProjectStatusController extends BaseAgentController {
     }
 
     @RequestMapping(value = "restart", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public String restart(@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "项目id 不正确")) String id, String copyId) {
+    public String restart(@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "项目id 不正确")) String id) {
         ProjectInfoModel item = projectInfoService.getItem(id);
         if (item == null) {
             return JsonMessage.getString(405, "没有找到对应的项目");
         }
-        ProjectInfoModel.JavaCopyItem copyItem = item.findCopyItem(copyId);
+        ProjectInfoModel.JavaCopyItem copyItem = item.findCopyItem(null);
         String tagId = copyItem == null ? item.getId() : copyItem.getTagId();
         String result;
         try {
-            result = AbstractProjectCommander.getInstance().restart(item, copyItem);
+            result = consoleService.execCommand(ConsoleCommandOp.restart, item, copyItem);
             boolean status = AbstractProjectCommander.getInstance().isRun(tagId);
             if (status) {
                 return JsonMessage.getString(200, result);

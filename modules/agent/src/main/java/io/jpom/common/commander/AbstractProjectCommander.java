@@ -464,7 +464,7 @@ public abstract class AbstractProjectCommander {
      * @param result 查询信息
      * @return int
      */
-    protected static int parsePid(String result) {
+    public static int parsePid(String result) {
         if (result.startsWith(AbstractProjectCommander.RUNNING_TAG)) {
             return Convert.toInt(result.split(":")[1]);
         }

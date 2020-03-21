@@ -14,6 +14,7 @@ import com.alibaba.fastjson.JSONObject;
 import io.jpom.build.BuildUtil;
 import io.jpom.common.BaseServerController;
 import io.jpom.common.interceptor.OptLog;
+import io.jpom.model.AfterOpt;
 import io.jpom.model.BaseEnum;
 import io.jpom.model.data.*;
 import io.jpom.model.log.UserOperateLogV1;
@@ -232,7 +233,7 @@ public class BuildListController extends BaseServerController {
         buildModel.setReleaseMethodDataId(String.format("%s:%s", releaseMethodDataId2Node, releaseMethodDataId2Project));
         //
         String afterOpt = getParameter("afterOpt");
-        BuildModel.AfterOpt afterOpt1 = BaseEnum.getEnum(BuildModel.AfterOpt.class, Convert.toInt(afterOpt, 0));
+        AfterOpt afterOpt1 = BaseEnum.getEnum(AfterOpt.class, Convert.toInt(afterOpt, 0));
         if (afterOpt1 == null) {
             return JsonMessage.getString(400, "请选择打包后的操作");
         }
@@ -278,10 +279,10 @@ public class BuildListController extends BaseServerController {
         List<NodeModel> nodeModels = nodeService.listAndProject();
         setAttribute("nodeModels", nodeModels);
         //
-        JSONArray jsonArray = BaseEnum.toJSONArray(BuildModel.AfterOpt.class);
+        JSONArray jsonArray = BaseEnum.toJSONArray(AfterOpt.class);
         setAttribute("afterOpt", jsonArray);
         //
-        JSONArray outAfterOpt = BaseEnum.toJSONArray(OutGivingModel.AfterOpt.class);
+        JSONArray outAfterOpt = BaseEnum.toJSONArray(AfterOpt.class);
         setAttribute("outAfterOpt", outAfterOpt);
         //
         JSONArray repoTypes = BaseEnum.toJSONArray(BuildModel.RepoType.class);

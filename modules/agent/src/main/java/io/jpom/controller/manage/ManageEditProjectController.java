@@ -1,6 +1,7 @@
 package io.jpom.controller.manage;
 
 import cn.hutool.core.convert.Convert;
+import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.lang.PatternPool;
 import cn.hutool.core.lang.Validator;
@@ -125,6 +126,7 @@ public class ManageEditProjectController extends BaseAgentController {
                     ProjectInfoModel.JavaCopyItem javaCopyItem = new ProjectInfoModel.JavaCopyItem();
                     javaCopyItem.setId(copyId);
                     javaCopyItem.setParendId(id);
+                    javaCopyItem.setModifyTime(DateUtil.now());
                     javaCopyItem.setJvm(StrUtil.emptyToDefault(jvm, StrUtil.EMPTY));
                     javaCopyItem.setArgs(StrUtil.emptyToDefault(args, StrUtil.EMPTY));
                     javaCopyItemList.add(javaCopyItem);

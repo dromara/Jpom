@@ -429,7 +429,7 @@ public class ProjectInfoModel extends BaseModel {
         int size = javaCopyItemList.size();
         List<JavaCopyItem> collect = javaCopyItemList.stream().filter(javaCopyItem -> !StrUtil.equals(javaCopyItem.getId(), copyId)).collect(Collectors.toList());
         if (size - 1 == collect.size()) {
-            this.setJavaCopyItemList(collect);
+            this.javaCopyItemList = collect;
             return true;
         } else {
             return false;
@@ -455,6 +455,8 @@ public class ProjectInfoModel extends BaseModel {
          */
         private String args;
 
+        private String modifyTime;
+
         public String getId() {
             return id;
         }
@@ -479,6 +481,14 @@ public class ProjectInfoModel extends BaseModel {
                 return id;
             }
             return StrUtil.format("{}:{}", id, copyId);
+        }
+
+        public String getModifyTime() {
+            return modifyTime;
+        }
+
+        public void setModifyTime(String modifyTime) {
+            this.modifyTime = modifyTime;
         }
 
         /**
