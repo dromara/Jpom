@@ -19,6 +19,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+
 /**
  * 项目文件管理
  *
@@ -43,7 +45,7 @@ public class ProjectStatusController extends BaseAgentController {
      * @return json
      */
     @RequestMapping(value = "getProjectStatus", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public String getProjectStatus(@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "项目id 不正确")) String id) {
+    public String getProjectStatus(@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "项目id 不正确")) String id, String getCopy) {
         ProjectInfoModel projectInfoModel = tryGetProjectInfoModel();
         if (projectInfoModel == null) {
             return JsonMessage.getString(HttpStatus.NOT_FOUND.value(), "项目id不存在");
@@ -56,6 +58,20 @@ public class ProjectStatusController extends BaseAgentController {
         }
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("pId", pid);
+        //
+        if (StrUtil.isNotEmpty(getCopy)) {
+            List<ProjectInfoModel.JavaCopyItem> javaCopyItemList = projectInfoModel.getJavaCopyItemList();
+            JSONArray copys = new JSONArray();
+            if (javaCopyItemList != null) {
+                for (ProjectInfoModel.JavaCopyItem javaCopyItem : javaCopyItemList) {
+                    JSONObject jsonObject1 = new JSONObject();
+                    jsonObject1.put("copyId", javaCopyItem.getId());
+                    jsonObject1.put("status", javaCopyItem.tryGetStatus());
+                    copys.add(jsonObject1);
+                }
+            }
+            jsonObject.put("copys", copys);
+        }
         return JsonMessage.getString(200, "", jsonObject);
     }
 
@@ -135,12 +151,12 @@ public class ProjectStatusController extends BaseAgentController {
     }
 
     @RequestMapping(value = "restart", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public String restart(@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "项目id 不正确")) String id) {
+    public String restart(@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "项目id 不正确")) String id, String copyId) {
         ProjectInfoModel item = projectInfoService.getItem(id);
         if (item == null) {
             return JsonMessage.getString(405, "没有找到对应的项目");
         }
-        ProjectInfoModel.JavaCopyItem copyItem = item.findCopyItem(null);
+        ProjectInfoModel.JavaCopyItem copyItem = item.findCopyItem(copyId);
         String tagId = copyItem == null ? item.getId() : copyItem.getTagId();
         String result;
         try {

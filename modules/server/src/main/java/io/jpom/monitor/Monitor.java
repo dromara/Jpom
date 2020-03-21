@@ -1,5 +1,6 @@
 package io.jpom.monitor;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.exceptions.ExceptionUtil;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.IdUtil;
@@ -15,6 +16,7 @@ import cn.hutool.http.HttpStatus;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.spring.SpringUtil;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.common.forward.NodeForward;
 import io.jpom.common.forward.NodeUrl;
@@ -121,47 +123,26 @@ public class Monitor implements Task {
         projects.forEach(id -> {
             // 获取上次状态
             boolean pre = getPreStatus(monitorModel.getId(), nodeModel.getId(), id);
+            //
             String title = null;
             String context = null;
-            // 当前状态
-            boolean runStatus = false;
             try {
                 //查询项目运行状态
-                JsonMessage<JSONObject> jsonMessage = NodeForward.requestBySys(nodeModel, NodeUrl.Manage_GetProjectStatus, "id", id);
+                JsonMessage<JSONObject> jsonMessage = NodeForward.requestBySys(nodeModel, NodeUrl.Manage_GetProjectStatus, "id", id, "getCopy", true);
                 if (jsonMessage.getCode() == HttpStatus.HTTP_OK) {
                     JSONObject jsonObject = jsonMessage.getData();
                     int pid = jsonObject.getIntValue("pId");
-                    if (pid > 0) {
-                        // 正常运行
-                        runStatus = true;
-                        if (!pre) {
-                            // 上次是异常状态
-                            title = StrUtil.format("【{}】节点的【{}】项目已经恢复正常运行", nodeModel.getName(), id);
-                            context = "";
-                        }
-                    } else {
-                        //
-                        if (monitorModel.isAutoRestart()) {
-                            // 执行重启
-                            try {
-                                JsonMessage<String> reJson = NodeForward.requestBySys(nodeModel, NodeUrl.Manage_Restart, "id", id);
-                                if (reJson.getCode() == HttpStatus.HTTP_OK) {
-                                    // 重启成功
-                                    runStatus = true;
-                                    title = StrUtil.format("【{}】节点的【{}】项目已经停止，已经执行重启操作,结果成功", nodeModel.getName(), id);
-                                } else {
-                                    title = StrUtil.format("【{}】节点的【{}】项目已经停止，已经执行重启操作,结果失败", nodeModel.getName(), id);
-                                }
-                                context = "重启结果：" + reJson.toString();
-                            } catch (Exception e) {
-                                DefaultSystemLog.getLog().error("执行重启操作", e);
-                                title = StrUtil.format("【{}】节点的【{}】项目已经停止，重启操作异常", nodeModel.getName(), id);
-                                context = ExceptionUtil.stacktraceToString(e);
-                            }
-                        } else {
-                            title = StrUtil.format("【{}】节点的【{}】项目已经没有运行", nodeModel.getName(), id);
-                            context = "请及时检查";
-                        }
+                    boolean runStatus = pid > 0;
+                    this.checkNotify(monitorModel, nodeModel, id, null, runStatus);
+                    // 检查副本
+                    JSONArray copys = jsonObject.getJSONArray("copys");
+                    if (CollUtil.isNotEmpty(copys)) {
+                        copys.forEach(o -> {
+                            JSONObject jsonObject1 = (JSONObject) o;
+                            String copyId = jsonObject1.getString("copyId");
+                            boolean status = jsonObject1.getBooleanValue("status");
+                            Monitor.this.checkNotify(monitorModel, nodeModel, id, copyId, status);
+                        });
                     }
                 } else {
                     title = StrUtil.format("【{}】节点的状态码异常：{}", nodeModel.getName(), jsonMessage.getCode());
@@ -173,12 +154,12 @@ public class Monitor implements Task {
                 title = StrUtil.format("【{}】节点的运行状态异常", nodeModel.getName());
                 context = ExceptionUtil.stacktraceToString(e);
             }
-            if (!pre && !runStatus) {
+            if (!pre) {
                 // 上一次也是异常，并且当前也是异常
                 return;
             }
             MonitorNotifyLog monitorNotifyLog = new MonitorNotifyLog();
-            monitorNotifyLog.setStatus(runStatus);
+            monitorNotifyLog.setStatus(false);
             monitorNotifyLog.setTitle(title);
             monitorNotifyLog.setContent(context);
             monitorNotifyLog.setCreateTime(System.currentTimeMillis());
@@ -189,6 +170,74 @@ public class Monitor implements Task {
             List<String> notify = monitorModel.getNotifyUser();
             this.notifyMsg(notify, monitorNotifyLog);
         });
+    }
+
+    /**
+     * 检查状态
+     *
+     * @param monitorModel 监控信息
+     * @param nodeModel    节点信息
+     * @param id           项目id
+     * @param copyId       副本id
+     * @param runStatus    当前运行状态
+     */
+    private void checkNotify(MonitorModel monitorModel, NodeModel nodeModel, String id, String copyId, boolean runStatus) {
+        // 获取上次状态
+        String projectCopyId = id;
+        String copyMsg = StrUtil.EMPTY;
+        if (StrUtil.isNotEmpty(id)) {
+            projectCopyId = StrUtil.format("{}:{}", id, copyId);
+            copyMsg = StrUtil.format("副本：{}、", copyId);
+        }
+        boolean pre = getPreStatus(monitorModel.getId(), nodeModel.getId(), projectCopyId);
+        String title = null;
+        String context = null;
+        //查询项目运行状态
+        if (runStatus) {
+            if (!pre) {
+                // 上次是异常状态
+                title = StrUtil.format("【{}】节点的【{}】项目{}已经恢复正常运行", nodeModel.getName(), id, copyMsg);
+                context = "";
+            }
+        } else {
+            //
+            if (monitorModel.isAutoRestart()) {
+                // 执行重启
+                try {
+                    JsonMessage<String> reJson = NodeForward.requestBySys(nodeModel, NodeUrl.Manage_Restart, "id", id, "copyId", copyId);
+                    if (reJson.getCode() == HttpStatus.HTTP_OK) {
+                        // 重启成功
+                        runStatus = true;
+                        title = StrUtil.format("【{}】节点的【{}】项目{}已经停止，已经执行重启操作,结果成功", nodeModel.getName(), id, copyMsg);
+                    } else {
+                        title = StrUtil.format("【{}】节点的【{}】项目{}已经停止，已经执行重启操作,结果失败", nodeModel.getName(), id, copyMsg);
+                    }
+                    context = "重启结果：" + reJson.toString();
+                } catch (Exception e) {
+                    DefaultSystemLog.getLog().error("执行重启操作", e);
+                    title = StrUtil.format("【{}】节点的【{}】项目{}已经停止，重启操作异常", nodeModel.getName(), id, copyMsg);
+                    context = ExceptionUtil.stacktraceToString(e);
+                }
+            } else {
+                title = StrUtil.format("【{}】节点的【{}】项目{}已经没有运行", nodeModel.getName(), id, copyMsg);
+                context = "请及时检查";
+            }
+        }
+        if (!pre && !runStatus) {
+            // 上一次也是异常，并且当前也是异常
+            return;
+        }
+        MonitorNotifyLog monitorNotifyLog = new MonitorNotifyLog();
+        monitorNotifyLog.setStatus(runStatus);
+        monitorNotifyLog.setTitle(title);
+        monitorNotifyLog.setContent(context);
+        monitorNotifyLog.setCreateTime(System.currentTimeMillis());
+        monitorNotifyLog.setNodeId(nodeModel.getId());
+        monitorNotifyLog.setProjectId(id);
+        monitorNotifyLog.setMonitorId(monitorModel.getId());
+        //
+        List<String> notify = monitorModel.getNotifyUser();
+        this.notifyMsg(notify, monitorNotifyLog);
     }
 
     /**

@@ -51,6 +51,7 @@ public enum NodeUrl {
     Manage_GetProjectGroup("/manage/getProjectGroup"),
 
     Manage_GetProjectItem("/manage/getProjectItem"),
+
     Manage_GetProjectStatus("/manage/getProjectStatus"),
 
     Manage_Restart("/manage/restart"),
