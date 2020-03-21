@@ -10,6 +10,7 @@ import com.alibaba.fastjson.JSONObject;
 import io.jpom.common.BaseAgentController;
 import io.jpom.common.commander.AbstractProjectCommander;
 import io.jpom.common.commander.AbstractSystemCommander;
+import io.jpom.model.data.ProjectInfoModel;
 import io.jpom.model.system.NetstatModel;
 import io.jpom.model.system.ProcessModel;
 import io.jpom.system.AgentConfigBean;
@@ -47,15 +48,16 @@ public class InternalController extends BaseAgentController {
      * @throws Exception 异常
      */
     @RequestMapping(value = "internal_data", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public String getInternal(String tag) throws Exception {
-        int pid = AbstractProjectCommander.getInstance().getPid(tag);
+    public String getInternal(String tag, String copyId) throws Exception {
+        String tagId = ProjectInfoModel.JavaCopyItem.getTagId(tag, copyId);
+        int pid = AbstractProjectCommander.getInstance().getPid(tagId);
         if (pid <= 0) {
             return JsonMessage.getString(400, "");
         }
         JSONObject jsonObject = new JSONObject();
         ProcessModel item = AbstractSystemCommander.getInstance().getPidInfo(pid);
         jsonObject.put("process", item);
-        JSONObject beanMem = getBeanMem(tag);
+        JSONObject beanMem = getBeanMem(tagId);
         jsonObject.put("beanMem", beanMem);
         //获取端口信息
         List<NetstatModel> netstatModels = AbstractProjectCommander.getInstance().listNetstat(pid, false);
@@ -71,11 +73,11 @@ public class InternalController extends BaseAgentController {
      * @throws Exception 异常
      */
     @RequestMapping(value = "threadInfos", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public String getThreadInfos(String tag) throws Exception {
+    public String getThreadInfos(String tag, String copyId) throws Exception {
         int limit = getParameterInt("limit", 10);
         int page = getParameterInt("page", 1);
 
-        ThreadMXBean bean = JvmUtil.getThreadMXBean(tag);
+        ThreadMXBean bean = JvmUtil.getThreadMXBean(ProjectInfoModel.JavaCopyItem.getTagId(tag, copyId));
         if (bean == null) {
             return JsonMessage.getString(400, "未获取到对应信息");
         }
@@ -169,7 +171,9 @@ public class InternalController extends BaseAgentController {
      */
     @RequestMapping(value = "internal_stack", method = RequestMethod.GET)
     @ResponseBody
-    public String stack(String tag) {
+    public String stack(String tag, String copyId) {
+        tag = ProjectInfoModel.JavaCopyItem.getTagId(tag, copyId);
+        //
         String fileName = AgentConfigBean.getInstance().getTempPathName() + "/" + tag + "_java_cpu.txt";
         fileName = FileUtil.normalize(fileName);
         try {
@@ -195,7 +199,9 @@ public class InternalController extends BaseAgentController {
      */
     @RequestMapping(value = "internal_ram", method = RequestMethod.GET)
     @ResponseBody
-    public String ram(String tag) {
+    public String ram(String tag, String copyId) {
+        tag = ProjectInfoModel.JavaCopyItem.getTagId(tag, copyId);
+        //
         String fileName = AgentConfigBean.getInstance().getTempPathName() + "/" + tag + "_java_ram.txt";
         fileName = FileUtil.normalize(fileName);
         try {

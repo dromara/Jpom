@@ -1,6 +1,7 @@
 package io.jpom.socket;
 
 import cn.hutool.core.exceptions.ExceptionUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.spring.SpringUtil;
@@ -33,19 +34,14 @@ public class AgentWebSocketConsoleHandle extends BaseAgentWebSocketHandle {
     private static ProjectInfoService projectInfoService;
 
     @OnOpen
-    public void onOpen(@PathParam("projectId") String projectId, @PathParam("optUser") String urlOptUser, Session session) {
+    public void onOpen(@PathParam("projectId") String projectId, @PathParam("optUser") String urlOptUser, @PathParam("copyId") String copyId, Session session) {
         try {
             // 判断项目
             if (!JpomApplication.SYSTEM_ID.equals(projectId)) {
                 if (projectInfoService == null) {
                     projectInfoService = SpringUtil.getBean(ProjectInfoService.class);
                 }
-                ProjectInfoModel projectInfoModel = projectInfoService.getItem(projectId);
-                if (projectInfoModel == null) {
-                    SocketSessionUtil.send(session, "获取项目信息错误");
-                    session.close();
-                    return;
-                }
+                ProjectInfoModel projectInfoModel = this.checkProject(projectId, copyId, session);
             }
             this.addUser(session, urlOptUser);
         } catch (Exception e) {
@@ -77,6 +73,25 @@ public class AgentWebSocketConsoleHandle extends BaseAgentWebSocketHandle {
         return false;
     }
 
+    private ProjectInfoModel checkProject(String projectId, String copyId, Session session) throws IOException {
+        ProjectInfoModel projectInfoModel = projectInfoService.getItem(projectId);
+        if (projectInfoModel == null) {
+            SocketSessionUtil.send(session, "没有对应项目");
+            session.close();
+            return null;
+        }
+        // 判断副本集
+        if (StrUtil.isNotEmpty(copyId)) {
+            ProjectInfoModel.JavaCopyItem copyItem = projectInfoModel.findCopyItem(copyId);
+            if (copyItem == null) {
+                SocketSessionUtil.send(session, "获取项目信息错误,没有对应副本：" + copyId);
+                session.close();
+                return null;
+            }
+        }
+        return projectInfoModel;
+    }
+
     @OnMessage
     public void onMessage(String message, Session session) throws Exception {
         JSONObject json = JSONObject.parseObject(message);
@@ -86,17 +101,18 @@ public class AgentWebSocketConsoleHandle extends BaseAgentWebSocketHandle {
             return;
         }
         String projectId = json.getString("projectId");
-        ProjectInfoModel projectInfoModel = projectInfoService.getItem(projectId);
+        String copyId = json.getString("copyId");
+        ProjectInfoModel projectInfoModel = this.checkProject(projectId, copyId, session);
         if (projectInfoModel == null) {
-            SocketSessionUtil.send(session, "没有对应项目");
-            session.close();
             return;
         }
-        runMsg(consoleCommandOp, session, projectInfoModel, json);
+        runMsg(consoleCommandOp, session, projectInfoModel, copyId, json);
     }
 
-    private void runMsg(ConsoleCommandOp consoleCommandOp, Session session, ProjectInfoModel projectInfoModel, JSONObject reqJson) throws Exception {
+    private void runMsg(ConsoleCommandOp consoleCommandOp, Session session, ProjectInfoModel projectInfoModel, String copyId, JSONObject reqJson) throws Exception {
         ConsoleService consoleService = SpringUtil.getBean(ConsoleService.class);
+        //
+        ProjectInfoModel.JavaCopyItem copyItem = projectInfoModel.findCopyItem(copyId);
         JSONObject resultData = null;
         String strResult;
         boolean logUser = false;
@@ -106,7 +122,7 @@ public class AgentWebSocketConsoleHandle extends BaseAgentWebSocketHandle {
                 case start:
                 case restart:
                     logUser = true;
-                    strResult = consoleService.execCommand(consoleCommandOp, projectInfoModel);
+                    strResult = consoleService.execCommand(consoleCommandOp, projectInfoModel, copyItem);
                     if (strResult.contains(AbstractProjectCommander.RUNNING_TAG)) {
                         resultData = JsonMessage.toJson(200, "操作成功:" + strResult);
                     } else {
@@ -116,7 +132,7 @@ public class AgentWebSocketConsoleHandle extends BaseAgentWebSocketHandle {
                 case stop:
                     logUser = true;
                     // 停止项目
-                    strResult = consoleService.execCommand(consoleCommandOp, projectInfoModel);
+                    strResult = consoleService.execCommand(consoleCommandOp, projectInfoModel, copyItem);
                     if (strResult.contains(AbstractProjectCommander.STOP_TAG)) {
                         resultData = JsonMessage.toJson(200, "操作成功");
                     } else {
@@ -125,7 +141,7 @@ public class AgentWebSocketConsoleHandle extends BaseAgentWebSocketHandle {
                     break;
                 case status:
                     // 获取项目状态
-                    strResult = consoleService.execCommand(consoleCommandOp, projectInfoModel);
+                    strResult = consoleService.execCommand(consoleCommandOp, projectInfoModel, copyItem);
                     if (strResult.contains(AbstractProjectCommander.RUNNING_TAG)) {
                         resultData = JsonMessage.toJson(200, "运行中", strResult);
                     } else {
@@ -135,7 +151,7 @@ public class AgentWebSocketConsoleHandle extends BaseAgentWebSocketHandle {
                 case showlog: {
                     // 进入管理页面后需要实时加载日志
                     //        日志文件路径
-                    File file = new File(projectInfoModel.getLog());
+                    File file = copyItem == null ? new File(projectInfoModel.getLog()) : projectInfoModel.getLog(copyItem);
                     try {
                         AgentFileTailWatcher.addWatcher(file, session);
                     } catch (IOException io) {

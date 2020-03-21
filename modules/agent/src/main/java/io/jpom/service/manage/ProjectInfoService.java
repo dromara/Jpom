@@ -80,21 +80,25 @@ public class ProjectInfoService extends BaseOperService<ProjectInfoModel> {
         super.addItem(projectInfoModel);
     }
 
-    public String getLogSize(String id) {
-        ProjectInfoModel pim;
-        pim = getItem(id);
-        if (pim == null) {
+    /**
+     * 查看项目控制台日志文件大小
+     *
+     * @param projectInfoModel 项目
+     * @param copyItem  副本
+     * @return 文件大小
+     */
+    public String getLogSize(ProjectInfoModel projectInfoModel, ProjectInfoModel.JavaCopyItem copyItem) {
+        if (projectInfoModel == null) {
             return null;
         }
-        String logSize = null;
-        File file = new File(pim.getLog());
+        File file = copyItem == null ? new File(projectInfoModel.getLog()) : projectInfoModel.getLog(copyItem);
         if (file.exists()) {
             long fileSize = file.length();
             if (fileSize <= 0) {
                 return null;
             }
-            logSize = FileUtil.readableFileSize(fileSize);
+            return FileUtil.readableFileSize(fileSize);
         }
-        return logSize;
+        return null;
     }
 }

@@ -160,6 +160,11 @@
                     </div>
                 </div>
             </div>
+            <div class="layui-form-item" style="padding-left: 30%" id="appendCopyDiv">
+                <input type="hidden" name="javaCopyIds">
+                <a class="layui-btn layui-btn-sm layui-btn-warm" id="appendCopy">添加副本
+                </a>
+            </div>
             <div class="layui-form-item">
                 <div class="layui-inline">
                     <label class="layui-form-label">WebHooks</label>
@@ -209,6 +214,10 @@
 </div>
 </body>
 <script type="text/javascript">
+
+    var laytpl;
+    var copyIds = [];
+
     function loadSuccess() {
         var tipMsgDiv = ("#tipMsgDiv");
         // 提交项目表单
@@ -298,7 +307,7 @@
 
         function checngeLib() {
             var wVal = whitelistDirectorySelect.val();
-            if (wVal == "") {
+            if (wVal === "") {
                 layer.msg("请选择白名单");
                 return;
             }
@@ -310,7 +319,7 @@
                     newLib: lib
                 },
                 success: function (data) {
-                    if (200 == data.code) {
+                    if (200 === data.code) {
                         $("#tipMsgDiv").hide();
                     } else {
                         $("#tipMsg").text(data.msg).parent().show();
@@ -324,7 +333,7 @@
             var id = $(this).attr("data-id");
             var type = $(this).attr("type");
             var msg;
-            if ("all" == type) {
+            if ("all" === type) {
                 msg = '确定彻底该删除项目 ' + id + ',删除将项目日志、lib都彻底删除？';
             } else {
                 msg = '确定删除项目 ' + id + '？';
@@ -340,21 +349,105 @@
                     },
                     success: function (data) {
                         layer.msg(data.msg);
-                        if (200 == data.code) {
+                        if (200 === data.code) {
                             autoClose();
                         }
                     }
                 });
             });
         });
+
+
+        layui.use(['laytpl'], function () {
+            laytpl = layui.laytpl;
+            $("#appendCopy").click(function () {
+
+                var id;
+                while (true) {
+                    id = randomString(2);
+                    if ($("#copy_" + id).length <= 0) {
+                        break;
+                    }
+                }
+                addJavaCopy({id: id, del: true})
+            });
+        });
+
+        $("body").delegate("a[del='copy']", "click", function () {
+            // form.render();
+            var parent = $(this).parent().parent();
+            var attr = parent.attr("id");
+            var id = attr.split("_")[1];
+            copyIds.forEach(function (item, index, arr) {
+                if (item === id) {
+                    arr.splice(index, 1);
+                }
+            });
+            parent.remove();
+            $("input[name='javaCopyIds']").val(copyIds.join(","));
+        });
     }
 
-    function autoClose(group) {
-        setTimeout(function () {
-            var index = parent.layer.getFrameIndex(window.name);
-            parent.layer.close(index);
-            parent.reloadTable(group);
-        }, 2000);
+
+    function addJavaCopy(data) {
+        var copyHtml = document.getElementById('copyTempl');
+        laytpl(copyHtml.innerHTML).render(data, function (newHtml) {
+            $("#appendCopyDiv").before(newHtml);
+            copyIds.push(data.id);
+            $("input[name='javaCopyIds']").val(copyIds.join(","));
+        });
     }
+
+    function randomString(len) {
+        var $chars = 'ABCDEFGHJKMNPQRSTWXYZ0123456789';
+        /****默认去掉了容易混淆的字符oOLl,9gq,Vv,Uu,I1****/
+        var maxPos = $chars.length;
+        var pwd = '';
+        for (i = 0; i < len; i++) {
+            pwd += $chars.charAt(Math.floor(Math.random() * maxPos));
+        }
+        return pwd;
+    }
+</script>
+
+<script type="text/html" id="copyTempl">
+    <div class="layui-form-item" id="copy_{{d.id}}">
+        <div class="layui-inline" style="width: 47%; float: left;">
+            <label class="layui-form-label">副本:{{ d.id }}</label>
+            <div class="layui-input-block">
+                    <textarea name="jvm_{{d.id}}"
+                              placeholder="jvm参数,非必填.如：-Xmin=512m -Xmax=512m"
+                              class="layui-textarea">{{d.jvm || ''}}</textarea>
+            </div>
+        </div>
+        <div class="layui-input-inline" style="width: 47%;">
+            <label class="layui-form-label">副本:{{ d.id }}</label>
+            <div class="layui-input-block">
+                    <textarea name="args_{{d.id}}"
+                              placeholder="Main函数args参数,非必填.如：--service.port=8080"
+                              class="layui-textarea">{{ d.args || ''}}</textarea>
+            </div>
+        </div>
+        {{# if(d.del){ }}
+        <div class="layui-form-mid layui-word-aux" style="float: right;">
+            <a class="layui-btn layui-btn-sm layui-btn-warm" del="copy">删除
+            </a>
+        </div>
+        {{# } }}
+    </div>
+</script>
+
+<script type="text/javascript" th:inline="javascript" th:if="${item?.get('javaCopyItemList')}">
+    var javaCopyItemList = [[${item?.javaCopyItemList}]];
+
+    asyncFn.push(function () {
+        setTimeout(function () {
+            javaCopyItemList.forEach(function (item, i) {
+                item.del = false;
+                addJavaCopy(item)
+            })
+        }, 500);
+    });
+
 </script>
 </html>

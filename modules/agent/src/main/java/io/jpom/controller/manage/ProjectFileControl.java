@@ -113,7 +113,7 @@ public class ProjectFileControl extends BaseAgentController {
         //
         String after = getParameter("after");
         if ("restart".equalsIgnoreCase(after)) {
-            String result = consoleService.execCommand(ConsoleCommandOp.restart, pim);
+            String result = consoleService.execCommand(ConsoleCommandOp.restart, pim, null);
             return JsonMessage.getString(200, "上传成功并重启：" + result);
         }
 
@@ -130,7 +130,7 @@ public class ProjectFileControl extends BaseAgentController {
             if (FileUtil.clean(file)) {
                 return JsonMessage.getString(200, "清除成功");
             }
-            if (pim.isStatus(true)) {
+            if (pim.tryGetStatus()) {
                 return JsonMessage.getString(501, "文件被占用，请先停止项目");
             }
             return JsonMessage.getString(500, "删除失败：" + file.getAbsolutePath());

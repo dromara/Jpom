@@ -38,7 +38,8 @@ public class AgentFileTailWatcher<T> extends BaseFileTailWatcher<T> {
      */
     public static void addWatcher(File file, Session session) throws IOException {
         if (!file.exists() || file.isDirectory()) {
-            throw new IOException("文件不存在或者是目录:" + file.getPath());
+            DefaultSystemLog.getLog().warn("文件不存在或者是目录:" + file.getPath());
+            return;
         }
         AgentFileTailWatcher<Session> agentFileTailWatcher = CONCURRENT_HASH_MAP.computeIfAbsent(file, s -> {
             try {

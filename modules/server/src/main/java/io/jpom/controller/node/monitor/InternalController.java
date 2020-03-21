@@ -27,10 +27,11 @@ public class InternalController extends BaseServerController {
      * @return page
      */
     @RequestMapping(value = "internal", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
-    public String getInternal(String tag) {
+    public String getInternal(String tag, String copyId) {
         setAttribute("tag", tag);
         JSONObject data = NodeForward.requestData(getNode(), NodeUrl.Manage_internal_data, getRequest(), JSONObject.class);
         setAttribute("data", data);
+        setAttribute("copyId", copyId);
         return "node/manage/internal";
     }
 

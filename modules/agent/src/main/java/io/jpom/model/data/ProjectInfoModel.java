@@ -1,11 +1,13 @@
 package io.jpom.model.data;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.spring.SpringUtil;
 import io.jpom.common.commander.AbstractProjectCommander;
+import io.jpom.model.BaseJsonModel;
 import io.jpom.model.BaseModel;
 import io.jpom.model.RunMode;
 import io.jpom.service.WhitelistDirectoryService;
@@ -15,6 +17,8 @@ import io.jpom.util.FileUtils;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * 项目配置信息实体
@@ -38,13 +42,18 @@ public class ProjectInfoModel extends BaseModel {
      */
     private String jvm;
     /**
+     * java main 方法参数
+     */
+    private String args;
+
+    private List<JavaCopyItem> javaCopyItemList;
+    /**
      * WebHooks
      */
     private String token;
     private boolean status;
     private String createTime;
     private String modifyTime;
-    private String args;
     private String jdkId;
     /**
      * lib 目录当前文件状态
@@ -75,8 +84,16 @@ public class ProjectInfoModel extends BaseModel {
      */
     private String javaExtDirsCp;
 
+    public List<JavaCopyItem> getJavaCopyItemList() {
+        return javaCopyItemList;
+    }
+
+    public void setJavaCopyItemList(List<JavaCopyItem> javaCopyItemList) {
+        this.javaCopyItemList = javaCopyItemList;
+    }
+
     public String getJavaExtDirsCp() {
-        return javaExtDirsCp;
+        return StrUtil.emptyToDefault(javaExtDirsCp, StrUtil.EMPTY);
     }
 
     public void setJavaExtDirsCp(String javaExtDirsCp) {
@@ -124,10 +141,9 @@ public class ProjectInfoModel extends BaseModel {
     /**
      * 项目是否正在运行
      *
-     * @param get 防止自动获取
      * @return true 正在运行
      */
-    public boolean isStatus(boolean get) {
+    public boolean tryGetStatus() {
         try {
             status = AbstractProjectCommander.getInstance().isRun(getId());
         } catch (Exception e) {
@@ -321,13 +337,28 @@ public class ProjectInfoModel extends BaseModel {
         return StrUtil.emptyToDefault(log, StrUtil.EMPTY);
     }
 
-    public String getAbsoluteLog() {
-        File file = new File(getLog());
+    /**
+     * 副本的控制台日志文件
+     *
+     * @param javaCopyItem 副本信息
+     * @return file
+     */
+    public File getLog(JavaCopyItem javaCopyItem) {
+        File file = FileUtil.file(getLog());
+        return FileUtil.file(file.getParentFile(), getId() + "_" + javaCopyItem.getId() + ".log");
+    }
+
+    public String getAbsoluteLog(JavaCopyItem javaCopyItem) {
+        File file = javaCopyItem == null ? new File(getLog()) : getLog(javaCopyItem);
         return file.getAbsolutePath();
     }
 
     public File getLogBack() {
         return new File(getLog() + "_back");
+    }
+
+    public File getLogBack(JavaCopyItem javaCopyItem) {
+        return new File(getLog(javaCopyItem) + "_back");
     }
 
     public void setLog(String log) {
@@ -373,5 +404,119 @@ public class ProjectInfoModel extends BaseModel {
 
     public void setJdkId(String jdkId) {
         this.jdkId = jdkId;
+    }
+
+
+    public JavaCopyItem findCopyItem(String copyId) {
+        if (StrUtil.isEmpty(copyId)) {
+            return null;
+        }
+        List<JavaCopyItem> javaCopyItemList = getJavaCopyItemList();
+        if (CollUtil.isEmpty(javaCopyItemList)) {
+            return null;
+        }
+        Optional<JavaCopyItem> first = javaCopyItemList.stream().filter(javaCopyItem -> StrUtil.equals(javaCopyItem.getId(), copyId)).findFirst();
+        return first.orElse(null);
+    }
+
+    public boolean removeCopyItem(String copyId) {
+        if (StrUtil.isEmpty(copyId)) {
+            return true;
+        }
+        if (CollUtil.isEmpty(javaCopyItemList)) {
+            return true;
+        }
+        int size = javaCopyItemList.size();
+        List<JavaCopyItem> collect = javaCopyItemList.stream().filter(javaCopyItem -> !StrUtil.equals(javaCopyItem.getId(), copyId)).collect(Collectors.toList());
+        if (size - 1 == collect.size()) {
+            this.setJavaCopyItemList(collect);
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public static class JavaCopyItem extends BaseJsonModel {
+        /**
+         * 父级项目id
+         */
+        private String parendId;
+        /**
+         * id
+         */
+        private String id;
+
+        /**
+         * jvm 参数
+         */
+        private String jvm;
+        /**
+         * java main 方法参数
+         */
+        private String args;
+
+        public String getId() {
+            return id;
+        }
+
+        public void setId(String id) {
+            this.id = id;
+        }
+
+        public String getTagId() {
+            return getTagId(parendId, id);
+        }
+
+        /**
+         * 创建进程标记
+         *
+         * @param id
+         * @param copyId
+         * @return
+         */
+        public static String getTagId(String id, String copyId) {
+            if (StrUtil.isEmpty(copyId)) {
+                return id;
+            }
+            return StrUtil.format("{}:{}", id, copyId);
+        }
+
+        /**
+         * 项目是否正在运行
+         *
+         * @return true 正在运行
+         */
+        public boolean tryGetStatus() {
+            try {
+                return AbstractProjectCommander.getInstance().isRun(getTagId());
+            } catch (Exception e) {
+                DefaultSystemLog.getLog().error("检查项目状态错误", e);
+                return false;
+            }
+        }
+
+        public String getParendId() {
+            return parendId;
+        }
+
+        public void setParendId(String parendId) {
+            this.parendId = parendId;
+        }
+
+        public String getJvm() {
+            return jvm;
+        }
+
+        public void setJvm(String jvm) {
+            this.jvm = jvm;
+        }
+
+        public String getArgs() {
+            return args;
+        }
+
+        public void setArgs(String args) {
+            this.args = args;
+        }
     }
 }

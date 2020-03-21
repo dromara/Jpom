@@ -56,6 +56,7 @@ public class SshController extends BaseServerController {
     public JsonMessage<List<SshModel>> listData() {
         List<SshModel> list = sshService.list();
         if (list != null) {
+            // 读取节点信息
             List<NodeModel> list1 = nodeService.list();
             Map<String, NodeModel> map = new HashMap<>(10);
             list1.forEach(nodeModel -> {
@@ -67,6 +68,7 @@ public class SshController extends BaseServerController {
             list.forEach(sshModel -> {
                 // 不返回密码
                 sshModel.setPassword(null);
+                sshModel.setPrivateKey(null);
                 // 节点信息
                 BaseModel nodeModel = map.get(sshModel.getId());
                 sshModel.setNodeModel(nodeModel);

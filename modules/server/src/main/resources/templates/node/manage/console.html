@@ -111,6 +111,7 @@
     var nowStatus = false;
 
     var autoClearDom;
+    var copyId = getQueryString("copyId");
 
     function loadSuccess() {
         // 处理按钮
@@ -127,7 +128,7 @@
         //
         const showLogDom = $('.console .terminal');
         if ('WebSocket' in window) {
-            var url = getSocketHost() + "/console?userId=[[${session.user.getUserMd5Key()}]]&projectId=[[${projectInfo?.id}]]&nodeId=[[${node?.id}]]&type=console";
+            var url = getSocketHost() + "/console?userId=[[${session.user.getUserMd5Key()}]]&projectId=[[${projectInfo?.id}]]&nodeId=[[${node?.id}]]&type=console&copyId=" + copyId;
             const ws = new WebSocket(url);
             ws.onopen = function () {
                 showLogDom.append('WebSocket连接成功！<br/>');
@@ -184,7 +185,8 @@
                 heart = setInterval(function () {
                     const data = {
                         op: "heart",
-                        projectId: "[[${projectInfo?.id}]]"
+                        projectId: "[[${projectInfo?.id}]]",
+                        copyId: copyId
                     };
                     ws.send(JSON.stringify(data));
                 }, 5000);
@@ -236,7 +238,8 @@
             function setMsg(opt) {
                 const data = {
                     op: opt,
-                    projectId: "[[${projectInfo?.id}]]"
+                    projectId: "[[${projectInfo?.id}]]",
+                    copyId: copyId
                 };
                 layer.load(1, {
                     shade: [0.3, '#fff']
@@ -289,7 +292,8 @@
             silentAjax({
                 url: './log/logSize',
                 data: {
-                    id: "[[${projectInfo?.id}]]"
+                    id: "[[${projectInfo?.id}]]",
+                    copyId: copyId
                 },
                 success: function (data) {
                     if (200 === data.code) {
@@ -305,7 +309,7 @@
         }
 
         $('#export').on('click', function () {
-            var url = "./log/export.html?id=[[${projectInfo?.id}]]";
+            var url = "./log/export.html?id=[[${projectInfo?.id}]]&copyId=" + copyId;
             url = appendNodeId(url);
             layer.msg('加载中..', {
                 icon: 16,
@@ -323,7 +327,8 @@
                 loadingAjax({
                     url: './log/resetLog',
                     data: {
-                        id: "[[${projectInfo?.id}]]"
+                        id: "[[${projectInfo?.id}]]",
+                        copyId: copyId
                     },
                     success: function (data) {
                         layer.msg(data.msg);
@@ -342,12 +347,16 @@
                 title: '备份列表',
                 shade: 0.8,
                 area: ['80%', '90%'],
-                content: './log/logBack?id=[[${projectInfo?.id}]]'
+                content: './log/logBack?id=[[${projectInfo?.id}]]&copyId=' + copyId
             });
         })
     }
 
     function refreshProjectData() {
+        if (copyId && copyId.length > 0) {
+            // 通过副本集打开不刷新
+            return;
+        }
         try {
             top.frames["manageList"].location.reload();
         } catch (e) {

@@ -23,8 +23,12 @@
 
 <body>
 <div>
-    <button op="a" class="layui-btn  layui-btn-sm layui-btn-normal" th:href="@{./stack(tag=${tag})}">导出堆栈信息</button>
-    <button op="a" class="layui-btn  layui-btn-sm layui-btn-normal" th:href="@{./ram(tag=${tag})}">导出内存信息</button>
+    <button op="a" class="layui-btn  layui-btn-sm layui-btn-normal" th:href="@{./stack(tag=${tag},copyId=${copyId})}">
+        导出堆栈信息
+    </button>
+    <button op="a" class="layui-btn  layui-btn-sm layui-btn-normal" th:href="@{./ram(tag=${tag},copyId=${copyId})}">
+        导出内存信息
+    </button>
     <button class="layui-btn  layui-btn-sm layui-btn-normal" id="threadInfos">查看线程</button>
 </div>
 <div class="info">
@@ -159,14 +163,14 @@
                     loadThread();
                 }
             });
-        })
+        });
 
         //加载进程列表
         function loadThread() {
             tableRender({
                 id: 'tab_threadInfos',
                 elem: '#tab_threadInfos',
-                url: './threadInfos?tag=[[${tag}]]',
+                url: './threadInfos?tag=[[${tag}]]&copyId=' + getQueryString("copyId"),
                 cols: [
                     {field: 'id', title: '线程id', sort: true},
                     {field: 'name', title: '线程名称', sort: true},

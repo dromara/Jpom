@@ -59,6 +59,24 @@ public class ProjectManageControl extends BaseServerController {
         return "node/manage/projectInfo";
     }
 
+
+    @RequestMapping(value = "projectCopyLList.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
+    @Feature(method = MethodFeature.LIST)
+    public String projectInfoPage() {
+        return "node/manage/javaCopyList";
+    }
+
+
+    /**
+     * 展示项目页面
+     */
+    @RequestMapping(value = "project_copy_list", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @Feature(method = MethodFeature.LIST)
+    @ResponseBody
+    public String projectCopyList() {
+        return NodeForward.request(getNode(), getRequest(), NodeUrl.Manage_ProjectCopyList).toString();
+    }
+
     /**
      * 获取正在运行的项目的端口和进程id
      *
@@ -68,6 +86,17 @@ public class ProjectManageControl extends BaseServerController {
     @ResponseBody
     public String getProjectPort() {
         return NodeForward.request(getNode(), getRequest(), NodeUrl.Manage_GetProjectPort).toString();
+    }
+
+    /**
+     * 获取正在运行的项目的端口和进程id
+     *
+     * @return json
+     */
+    @RequestMapping(value = "getProjectCopyPort", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @ResponseBody
+    public String getProjectCopyPort() {
+        return NodeForward.request(getNode(), getRequest(), NodeUrl.Manage_GetProjectCopyPort).toString();
     }
 
     /**

@@ -36,7 +36,7 @@
             <td th:text="${item.modifyTime}"></td>
             <td th:text="${item.fileSize}"></td>
             <td>
-                <button op="a" th:href="@{logBack_download(key=${item.filename},id=${data?.id})}"
+                <button op="a" th:href="@{logBack_download(key=${item.filename},id=${data?.id},copyId=${copyId})}"
                         class="layui-btn layui-btn-warm layui-btn-sm">下载
                 </button>
                 <button name="delete" th:data-name="${item.filename}" th:data-id="${data?.id}"
@@ -52,6 +52,8 @@
 </div>
 </body>
 <script type="text/javascript">
+    var copyId = getQueryString("copyId");
+
     function loadSuccess() {
         $("button[name='delete']").click(function () {
             var that = $(this);
@@ -65,11 +67,12 @@
                     url: './logBack_delete',
                     data: {
                         id: id,
-                        name: name
+                        name: name,
+                        copyId: copyId
                     },
                     success: function (data) {
                         layer.msg(data.msg);
-                        if (200 == data.code) {
+                        if (200 === data.code) {
                             setTimeout(function () {
                                 window.location.reload();
                             }, 2000);

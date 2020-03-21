@@ -49,8 +49,8 @@ public class ProjectInfoService implements BaseDynamicService {
         return NodeForward.requestData(nodeModel, NodeUrl.Manage_GetProjectItem, JSONObject.class, "id", id);
     }
 
-    public JSONObject getLogSize(NodeModel nodeModel, String id) {
-        return NodeForward.requestData(nodeModel, NodeUrl.Manage_Log_LogSize, JSONObject.class, "id", id);
+    public JSONObject getLogSize(NodeModel nodeModel, String id, String copyId) {
+        return NodeForward.requestData(nodeModel, NodeUrl.Manage_Log_LogSize, JSONObject.class, "id", id, "copyId", copyId);
     }
 
     public JSONObject getItem(String nodeId, String id) {

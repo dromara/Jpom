@@ -21,24 +21,26 @@ import java.util.List;
 public class LinuxProjectCommander extends AbstractProjectCommander {
 
     @Override
-    public String buildCommand(ProjectInfoModel projectInfoModel) {
+    public String buildCommand(ProjectInfoModel projectInfoModel, ProjectInfoModel.JavaCopyItem javaCopyItem) {
         String path = ProjectInfoModel.getClassPathLib(projectInfoModel);
         if (StrUtil.isBlank(path)) {
             return null;
         }
+        String tag = javaCopyItem == null ? projectInfoModel.getId() : javaCopyItem.getTagId();
         return String.format("nohup %s %s %s" +
                         " %s  %s  %s >> %s 2>&1 &",
                 getRunJavaPath(projectInfoModel, false),
-                projectInfoModel.getJvm(), JvmUtil.getJpomPidTag(projectInfoModel.getId(), projectInfoModel.allLib()),
+                javaCopyItem == null ? projectInfoModel.getJvm() : javaCopyItem.getJvm(),
+                JvmUtil.getJpomPidTag(tag, projectInfoModel.allLib()),
                 path,
                 projectInfoModel.getMainClass(),
-                projectInfoModel.getArgs(),
-                projectInfoModel.getAbsoluteLog());
+                javaCopyItem == null ? projectInfoModel.getArgs() : javaCopyItem.getArgs(),
+                projectInfoModel.getAbsoluteLog(javaCopyItem));
     }
 
     @Override
-    public String stop(ProjectInfoModel projectInfoModel) throws Exception {
-        String result = super.stop(projectInfoModel);
+    public String stop(ProjectInfoModel projectInfoModel, ProjectInfoModel.JavaCopyItem javaCopyItem) throws Exception {
+        String result = super.stop(projectInfoModel, javaCopyItem);
         int pid = parsePid(result);
         if (pid > 0) {
             AbstractSystemCommander.getInstance().kill(FileUtil.file(projectInfoModel.allLib()), pid);
@@ -47,7 +49,7 @@ public class LinuxProjectCommander extends AbstractProjectCommander {
                 String cmd = String.format("kill -9 %s", pid);
                 CommandUtil.asyncExeLocalCommand(FileUtil.file(projectInfoModel.allLib()), cmd);
             }
-            String tag = projectInfoModel.getId();
+            String tag = javaCopyItem == null ? projectInfoModel.getId() : javaCopyItem.getTagId();
             result = status(tag);
         }
         return result;

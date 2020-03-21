@@ -57,6 +57,10 @@ public enum NodeUrl {
 
     Manage_GetProjectPort("/manage/getProjectPort"),
 
+    Manage_GetProjectCopyPort("/manage/getProjectCopyPort"),
+
+    Manage_ProjectCopyList("/manage/project_copy_list"),
+
     Manage_Recover_List_Data("/manage/recover/list_data"),
 
     Manage_Recover_Item_Data("/manage/recover/item_data"),

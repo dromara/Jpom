@@ -1,6 +1,7 @@
 package io.jpom.common.commander;
 
 import cn.hutool.cache.impl.LRUCache;
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.date.DatePattern;
 import cn.hutool.core.date.DateTime;
@@ -9,6 +10,7 @@ import cn.hutool.core.lang.JarClassLoader;
 import cn.hutool.core.text.StrSpliter;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.http.HttpRequest;
 import cn.hutool.http.HttpUtil;
 import cn.hutool.system.SystemUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
@@ -30,6 +32,7 @@ import io.jpom.util.JvmUtil;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
@@ -56,7 +59,7 @@ public abstract class AbstractProjectCommander {
     /**
      * 进程Id 获取端口号
      */
-    public static final LRUCache<Integer, Integer> PID_PORT = new LRUCache<>(100, TimeUnit.MINUTES.toMillis(10));
+    public static final LRUCache<Integer, String> PID_PORT = new LRUCache<>(100, TimeUnit.MINUTES.toMillis(10));
 
     /**
      * 实例化Commander
@@ -87,9 +90,10 @@ public abstract class AbstractProjectCommander {
      * 生成可以执行的命令
      *
      * @param projectInfoModel 项目
+     * @param javaCopyItem     副本信息
      * @return null 是条件不足
      */
-    public abstract String buildCommand(ProjectInfoModel projectInfoModel);
+    public abstract String buildCommand(ProjectInfoModel projectInfoModel, ProjectInfoModel.JavaCopyItem javaCopyItem);
 
     protected String getRunJavaPath(ProjectInfoModel projectInfoModel, boolean w) {
         if (StrUtil.isEmpty(projectInfoModel.getJdkId())) {
@@ -114,12 +118,12 @@ public abstract class AbstractProjectCommander {
      * @return 结果
      * @throws Exception 异常
      */
-    public String start(ProjectInfoModel projectInfoModel) throws Exception {
-        String msg = checkStart(projectInfoModel);
+    public String start(ProjectInfoModel projectInfoModel, ProjectInfoModel.JavaCopyItem javaCopyItem) throws Exception {
+        String msg = checkStart(projectInfoModel, javaCopyItem);
         if (msg != null) {
             return msg;
         }
-        String command = buildCommand(projectInfoModel);
+        String command = buildCommand(projectInfoModel, javaCopyItem);
         if (command == null) {
             throw new JpomRuntimeException("没有需要执行的命令");
         }
@@ -157,12 +161,17 @@ public abstract class AbstractProjectCommander {
      * @return 结果
      * @throws Exception 异常
      */
-    public String stop(ProjectInfoModel projectInfoModel) throws Exception {
-        String tag = projectInfoModel.getId();
+    public String stop(ProjectInfoModel projectInfoModel, ProjectInfoModel.JavaCopyItem javaCopyItem) throws Exception {
+        String tag = javaCopyItem == null ? projectInfoModel.getId() : javaCopyItem.getTagId();
         String token = projectInfoModel.getToken();
         if (StrUtil.isNotEmpty(token)) {
             try {
-                String body = HttpUtil.createGet(token).form("projectId", projectInfoModel.getId()).execute().body();
+                HttpRequest httpRequest = HttpUtil.createGet(token)
+                        .form("projectId", projectInfoModel.getId());
+                if (javaCopyItem != null) {
+                    httpRequest.form("copyId", javaCopyItem.getId());
+                }
+                String body = httpRequest.execute().body();
                 DefaultSystemLog.getLog().info(projectInfoModel.getName() + ":" + body);
             } catch (Exception e) {
                 DefaultSystemLog.getLog().error("WebHooks 调用错误", e);
@@ -189,11 +198,17 @@ public abstract class AbstractProjectCommander {
      * @return 结果
      * @throws Exception 异常
      */
-    public String restart(ProjectInfoModel projectInfoModel) throws Exception {
-        if (isRun(projectInfoModel.getId())) {
-            stop(projectInfoModel);
+    public String restart(ProjectInfoModel projectInfoModel, ProjectInfoModel.JavaCopyItem javaCopyItem) throws Exception {
+        if (javaCopyItem == null) {
+            if (isRun(projectInfoModel.getId())) {
+                stop(projectInfoModel, javaCopyItem);
+            }
+        } else {
+            if (isRun(javaCopyItem.getTagId())) {
+                stop(projectInfoModel, javaCopyItem);
+            }
         }
-        return start(projectInfoModel);
+        return start(projectInfoModel, javaCopyItem);
     }
 
     /**
@@ -203,8 +218,8 @@ public abstract class AbstractProjectCommander {
      * @return null 检查一切正常
      * @throws Exception 异常
      */
-    private String checkStart(ProjectInfoModel projectInfoModel) throws Exception {
-        int pid = getPid(projectInfoModel.getId());
+    private String checkStart(ProjectInfoModel projectInfoModel, ProjectInfoModel.JavaCopyItem javaCopyItem) throws Exception {
+        int pid = javaCopyItem == null ? getPid(projectInfoModel.getId()) : this.getPid(javaCopyItem.getTagId());
         if (pid > 0) {
             return "当前程序正常运行中，不能重复启动,PID:" + pid;
         }
@@ -235,7 +250,7 @@ public abstract class AbstractProjectCommander {
             }
         }
         // 备份日志
-        backLog(projectInfoModel);
+        backLog(projectInfoModel, javaCopyItem);
         return null;
     }
 
@@ -266,11 +281,8 @@ public abstract class AbstractProjectCommander {
      * @param projectInfoModel 项目
      * @return 结果
      */
-    public String backLog(ProjectInfoModel projectInfoModel) {
-        if (StrUtil.isEmpty(projectInfoModel.getLog())) {
-            return "ok";
-        }
-        File file = new File(projectInfoModel.getLog());
+    public String backLog(ProjectInfoModel projectInfoModel, ProjectInfoModel.JavaCopyItem javaCopyItem) {
+        File file = javaCopyItem == null ? new File(projectInfoModel.getLog()) : projectInfoModel.getLog(javaCopyItem);
         if (!file.exists() || file.isDirectory()) {
             return "not exists";
         }
@@ -280,12 +292,12 @@ public abstract class AbstractProjectCommander {
         }
         if (AgentExtConfigBean.getInstance().openLogBack()) {
             // 开启日志备份才移动文件
-            File backPath = projectInfoModel.getLogBack();
+            File backPath = javaCopyItem == null ? projectInfoModel.getLogBack() : projectInfoModel.getLogBack(javaCopyItem);
             backPath = new File(backPath, DateTime.now().toString(DatePattern.PURE_DATETIME_FORMAT) + ".log");
             FileUtil.copy(file, backPath, true);
         }
         if (SystemUtil.getOsInfo().isLinux()) {
-            CommandUtil.execSystemCommand("cp /dev/null " + projectInfoModel.getLog());
+            CommandUtil.execSystemCommand("cp /dev/null " + file.getAbsolutePath());
         } else if (SystemUtil.getOsInfo().isWindows()) {
             // 清空日志
             String r = CommandUtil.execSystemCommand("echo  \"\" > " + file.getAbsolutePath());
@@ -342,15 +354,15 @@ public abstract class AbstractProjectCommander {
      * @return 端口
      */
     public String getMainPort(int pid) {
-        Integer cachePort = PID_PORT.get(pid);
+        String cachePort = PID_PORT.get(pid);
         if (cachePort != null) {
-            return cachePort.toString();
+            return cachePort;
         }
         List<NetstatModel> list = listNetstat(pid, true);
         if (list == null) {
             return StrUtil.DASHED;
         }
-        int port = Integer.MAX_VALUE;
+        List<Integer> ports = new ArrayList<>();
         for (NetstatModel model : list) {
             String local = model.getLocal();
             String portStr = getPortFormLocalIp(local);
@@ -359,16 +371,18 @@ public abstract class AbstractProjectCommander {
             }
             // 取最小的端口号
             int minPort = Convert.toInt(portStr, Integer.MAX_VALUE);
-            if (minPort < port) {
-                port = minPort;
+            if (minPort == Integer.MAX_VALUE) {
+                continue;
             }
+            ports.add(minPort);
         }
-        if (port == Integer.MAX_VALUE) {
+        if (CollUtil.isEmpty(ports)) {
             return StrUtil.DASHED;
         }
+        String allPort = CollUtil.join(ports, ",");
         // 缓存
-        PID_PORT.put(pid, port);
-        return String.valueOf(port);
+        PID_PORT.put(pid, allPort);
+        return allPort;
     }
 
     /**
