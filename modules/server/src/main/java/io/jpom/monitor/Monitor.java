@@ -233,7 +233,7 @@ public class Monitor implements Task {
         monitorNotifyLog.setContent(context);
         monitorNotifyLog.setCreateTime(System.currentTimeMillis());
         monitorNotifyLog.setNodeId(nodeModel.getId());
-        monitorNotifyLog.setProjectId(id);
+        monitorNotifyLog.setProjectId(projectCopyId);
         monitorNotifyLog.setMonitorId(monitorModel.getId());
         //
         List<String> notify = monitorModel.getNotifyUser();
