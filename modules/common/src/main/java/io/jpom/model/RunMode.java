@@ -18,7 +18,11 @@ public enum RunMode {
     /**
      * java -jar  Springboot war
      */
-    War,
+    JarWar,
+    /**
+     * java -Djava.ext.dirs=lib -cp conf:run.jar $MAIN_CLASS
+     */
+    JavaExtDirsCp,
     /**
      * 纯文件管理
      */

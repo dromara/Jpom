@@ -215,7 +215,7 @@ public abstract class AbstractProjectCommander {
             return "没有jar包,请先到文件管理中上传程序的jar";
         }
         //
-        if (projectInfoModel.getRunMode() == RunMode.ClassPath) {
+        if (projectInfoModel.getRunMode() == RunMode.ClassPath || projectInfoModel.getRunMode() == RunMode.JavaExtDirsCp) {
             JarClassLoader jarClassLoader = JarClassLoader.load(fileLib);
             // 判断主类
             try {

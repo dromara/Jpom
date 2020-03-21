@@ -108,6 +108,10 @@
                         if ([[${item?.runMode}]] === 'ClassPath') {
                             $("#mainClassDiv").show();
                         }
+                        if ([[${item?.runMode}]] === 'JavaExtDirsCp') {
+                            $("#mainClassDiv").show();
+                            $("#javaExtDirsCp").show();
+                        }
                         if ([[${item?.runMode}]] !== "File") {
                             $("#appInfoDiv").show();
                             $("#logInfoDiv").show();
@@ -126,6 +130,14 @@
                     <input th:readonly="${item?.outGivingProject}" type="text" name="mainClass"
                            placeholder="程序运行的 main 类(jar模式运行可以不填)" class="layui-input"
                            th:value="${item?.mainClass}">
+                </div>
+            </div>
+            <div class="layui-inline" style="display: none;" id="javaExtDirsCp">
+                <label class="layui-form-label">JavaExtDirsCp</label>
+                <div class="layui-input-block">
+                    <input th:readonly="${item?.outGivingProject}" type="text" name="javaExtDirsCp"
+                           placeholder="-Dext.dirs=xxx: -cp xx  填写【xxx:xx】 " class="layui-input"
+                           th:value="${item?.javaExtDirsCp}">
                 </div>
             </div>
         </div>
@@ -207,7 +219,7 @@
                 data: data.field,
                 success: function (data) {
                     layer.msg(data.msg);
-                    if (200 == data.code) {
+                    if (200 === data.code) {
                         autoClose(group);
                     }
                 }
@@ -216,7 +228,7 @@
         });
         var selectGroup = $("select[name='group']");
         form.on('select(group)', function (data) {
-            if (data.value == "") {
+            if (data.value === "") {
                 layer.prompt({
                     title: '输入分组名，并确认',
                     formType: 0
@@ -240,6 +252,12 @@
                 $("#mainClassDiv").show();
             } else {
                 $("#mainClassDiv").hide();
+            }
+            if (val === "JavaExtDirsCp") {
+                $("#mainClassDiv").show();
+                $("#javaExtDirsCp").show();
+            } else {
+                $("#javaExtDirsCp").hide();
             }
             if (val === "File") {
                 $("#appInfoDiv").hide();

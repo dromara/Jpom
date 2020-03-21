@@ -74,12 +74,17 @@ public class ManageEditProjectController extends BaseAgentController {
         }
         projectInfo.setRunMode(runMode1);
         // 监测
-        if (runMode1 == RunMode.ClassPath) {
+        if (runMode1 == RunMode.ClassPath || runMode1 == RunMode.JavaExtDirsCp) {
             if (StrUtil.isEmpty(projectInfo.getMainClass())) {
-                return JsonMessage.getString(401, "ClassPath 模式 MainClass必填");
+                return JsonMessage.getString(401, "ClassPath、JavaExtDirsCp 模式 MainClass必填");
             }
-        } else if (runMode1 == RunMode.Jar || runMode1 == RunMode.War) {
+        } else if (runMode1 == RunMode.Jar || runMode1 == RunMode.JarWar) {
             projectInfo.setMainClass("");
+        }
+        if (runMode1 == RunMode.JavaExtDirsCp) {
+            if (StrUtil.isEmpty(projectInfo.getJavaExtDirsCp())) {
+                return JsonMessage.getString(401, "JavaExtDirsCp 模式 javaExtDirsCp必填");
+            }
         }
         // 判断是否为分发添加
         String strOutGivingProject = getParameter("outGivingProject");
@@ -205,6 +210,7 @@ public class ManageEditProjectController extends BaseAgentController {
                 exits.setWhitelistDirectory(projectInfo.getWhitelistDirectory());
                 exits.setToken(projectInfo.getToken());
                 exits.setJdkId(projectInfo.getJdkId());
+                exits.setJavaExtDirsCp(projectInfo.getJavaExtDirsCp());
                 //
                 moveTo(exits, projectInfo);
                 projectInfoService.updateItem(exits);

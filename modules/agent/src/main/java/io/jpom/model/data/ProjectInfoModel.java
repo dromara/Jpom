@@ -1,8 +1,8 @@
 package io.jpom.model.data;
 
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.StrUtil;
-import cn.hutool.system.SystemUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.spring.SpringUtil;
 import io.jpom.common.commander.AbstractProjectCommander;
@@ -10,6 +10,7 @@ import io.jpom.model.BaseModel;
 import io.jpom.model.RunMode;
 import io.jpom.service.WhitelistDirectoryService;
 import io.jpom.system.JpomRuntimeException;
+import io.jpom.util.FileUtils;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -67,6 +68,20 @@ public class ProjectInfoModel extends BaseModel {
      * 实际运行的命令
      */
     private String runCommand;
+
+    /**
+     * -Djava.ext.dirs=lib -cp conf:run.jar
+     * 填写【lib:conf】
+     */
+    private String javaExtDirsCp;
+
+    public String getJavaExtDirsCp() {
+        return javaExtDirsCp;
+    }
+
+    public void setJavaExtDirsCp(String javaExtDirsCp) {
+        this.javaExtDirsCp = javaExtDirsCp;
+    }
 
     public String getRunCommand() {
         return runCommand;
@@ -241,7 +256,7 @@ public class ProjectInfoModel extends BaseModel {
                     if (!StrUtil.endWith(file.getName(), FileUtil.JAR_FILE_EXT, true)) {
                         continue;
                     }
-                } else if (projectInfoModel.getRunMode() == RunMode.War) {
+                } else if (projectInfoModel.getRunMode() == RunMode.JarWar) {
                     if (!StrUtil.endWith(file.getName(), "war", true)) {
                         continue;
                     }
@@ -269,16 +284,30 @@ public class ProjectInfoModel extends BaseModel {
         int len = files.size();
         if (runMode == RunMode.ClassPath) {
             classPath.append("-classpath ");
-        } else if (runMode == RunMode.Jar || runMode == RunMode.War) {
+        } else if (runMode == RunMode.Jar || runMode == RunMode.JarWar) {
             classPath.append("-jar ");
             // 只取一个jar文件
             len = 1;
+        } else if (runMode == RunMode.JavaExtDirsCp) {
+            classPath.append("-Djava.ext.dirs=");
+            String javaExtDirsCp = projectInfoModel.getJavaExtDirsCp();
+            String[] split = StrUtil.split(javaExtDirsCp, StrUtil.COLON);
+            if (ArrayUtil.isEmpty(split)) {
+                classPath.append(". -cp ");
+            } else {
+                classPath.append(split[0]).append(" -cp ");
+                if (split.length > 1) {
+                    classPath.append(split[1]).append(FileUtils.getJarSeparator());
+                }
+            }
+        } else {
+            throw new IllegalArgumentException("不支持的模式");
         }
         for (int i = 0; i < len; i++) {
             File file = files.get(i);
             classPath.append(file.getAbsolutePath());
             if (i != len - 1) {
-                classPath.append(SystemUtil.getOsInfo().isWindows() ? ";" : ":");
+                classPath.append(FileUtils.getJarSeparator());
             }
         }
         return classPath.toString();
