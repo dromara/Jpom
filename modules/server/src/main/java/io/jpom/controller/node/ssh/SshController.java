@@ -30,7 +30,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 /**
@@ -83,10 +82,12 @@ public class SshController extends BaseServerController {
     public String save(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "ssh名称不能为空") String name,
                        @ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "host不能为空") String host,
                        @ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "user不能为空") String user,
-                       @ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "password不能为空") String password,
+                       String password,
+                       SshModel.ConnectType connectType,
+                       String privateKey,
                        @ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "port错误") int port,
                        String charset, String fileDirs,
-                       String id, String type) throws Exception {
+                       String id, String type) {
         SshModel sshModel;
         if ("edit".equals(type)) {
             sshModel = sshService.getItem(id);
@@ -95,6 +96,12 @@ public class SshController extends BaseServerController {
             }
         } else {
             sshModel = new SshModel();
+        }
+        if (connectType == SshModel.ConnectType.PASS && StrUtil.isEmpty(password)) {
+            return JsonMessage.getString(405, "请填写登录密码");
+        }
+        if (connectType == SshModel.ConnectType.PUBKEY && StrUtil.isEmpty(privateKey)) {
+            return JsonMessage.getString(405, "请填写证书内容");
         }
         // 目录
         if (StrUtil.isEmpty(fileDirs)) {
@@ -108,10 +115,12 @@ public class SshController extends BaseServerController {
         sshModel.setPort(port);
         sshModel.setUser(user);
         sshModel.setName(name);
+        sshModel.setConnectType(connectType);
+        sshModel.setPrivateKey(privateKey);
         Charset.forName(charset);
         sshModel.setCharset(charset);
         try {
-            Session session = JschUtil.openSession(sshModel.getHost(), sshModel.getPort(), sshModel.getUser(), sshModel.getPassword());
+            Session session = SshService.getSession(sshModel);
             JschUtil.close(session);
         } catch (Exception e) {
             return JsonMessage.getString(505, "ssh连接失败：" + e.getMessage());
@@ -137,13 +146,11 @@ public class SshController extends BaseServerController {
             }
         }
         Collection<Charset> charsets = Charset.availableCharsets().values();
-        Collection<Charset> collect = charsets.stream().filter(new Predicate<Charset>() {
-            @Override
-            public boolean test(Charset charset) {
-                return !StrUtil.startWithAny(charset.name(), "x", "w", "IBM");
-            }
-        }).collect(Collectors.toList());
+        Collection<Charset> collect = charsets.stream().filter(charset -> !StrUtil.startWithAny(charset.name(), "x", "w", "IBM")).collect(Collectors.toList());
         setAttribute("charsets", collect);
+        //
+        SshModel.ConnectType[] values = SshModel.ConnectType.values();
+        setAttribute("connectTypes", values);
         return "node/ssh/edit";
     }
 

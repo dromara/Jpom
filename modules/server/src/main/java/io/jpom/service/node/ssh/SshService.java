@@ -3,6 +3,7 @@ package io.jpom.service.node.ssh;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.io.LineHandler;
+import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.ssh.ChannelType;
@@ -83,8 +84,22 @@ public class SshService extends BaseOperService<SshModel> implements BaseDynamic
         return sshList;
     }
 
-    public Session getSession(SshModel sshModel) {
-        return JschUtil.openSession(sshModel.getHost(), sshModel.getPort(), sshModel.getUser(), sshModel.getPassword());
+    public static Session getSession(SshModel sshModel) {
+        if (sshModel.getConnectType() == SshModel.ConnectType.PASS) {
+            return JschUtil.openSession(sshModel.getHost(), sshModel.getPort(), sshModel.getUser(), sshModel.getPassword());
+        }
+        if (sshModel.getConnectType() == SshModel.ConnectType.PUBKEY) {
+            File tempPath = ServerConfigBean.getInstance().getTempPath();
+            String sshFile = StrUtil.emptyToDefault(sshModel.getId(), IdUtil.fastSimpleUUID());
+            File ssh = FileUtil.file(tempPath, "ssh", sshFile);
+            FileUtil.writeString(sshModel.getPrivateKey(), ssh, CharsetUtil.UTF_8);
+            byte[] pas = null;
+            if (StrUtil.isNotEmpty(sshModel.getPassword())) {
+                pas = sshModel.getPassword().getBytes();
+            }
+            return JschUtil.openSession(sshModel.getHost(), sshModel.getPort(), sshModel.getUser(), FileUtil.getAbsolutePath(ssh), pas);
+        }
+        throw new IllegalArgumentException("不支持的模式");
     }
 
     /**

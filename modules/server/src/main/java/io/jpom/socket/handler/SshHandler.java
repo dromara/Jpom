@@ -14,6 +14,7 @@ import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
 import io.jpom.model.data.SshModel;
 import io.jpom.model.data.UserModel;
+import io.jpom.service.node.ssh.SshService;
 import io.jpom.socket.BaseHandler;
 import org.springframework.web.socket.BinaryMessage;
 import org.springframework.web.socket.TextMessage;
@@ -42,13 +43,13 @@ public class SshHandler extends BaseHandler {
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
         SshModel sshItem = (SshModel) session.getAttributes().get("sshItem");
         Map<String, String[]> parameterMap = (Map<String, String[]>) session.getAttributes().get("parameterMap");
-        String[] fileDirAlls =null;
+        String[] fileDirAlls = null;
         //判断url是何操作请求
-        if (parameterMap.containsKey("tail")){
+        if (parameterMap.containsKey("tail")) {
             fileDirAlls = parameterMap.get("tail");
-        }else if (parameterMap.containsKey("gz")){
+        } else if (parameterMap.containsKey("gz")) {
             fileDirAlls = parameterMap.get("gz");
-        }else {
+        } else {
             fileDirAlls = parameterMap.get("zip");
         }
         //检查文件路径
@@ -73,7 +74,8 @@ public class SshHandler extends BaseHandler {
                 return;
             }
         }
-        Session openSession = JschUtil.openSession(sshItem.getHost(), sshItem.getPort(), sshItem.getUser(), sshItem.getPassword());
+        Session openSession = SshService.getSession(sshItem);
+        //JschUtil.openSession(sshItem.getHost(), sshItem.getPort(), sshItem.getUser(), sshItem.getPassword());
         Channel channel = JschUtil.createChannel(openSession, ChannelType.SHELL);
         InputStream inputStream = channel.getInputStream();
         OutputStream outputStream = channel.getOutputStream();
@@ -86,25 +88,25 @@ public class SshHandler extends BaseHandler {
         Thread.sleep(1000);
         //截取当前操作文件父路径
         String fileLocalPath = null;
-        if (fileDirAll !=null && fileDirAll.lastIndexOf("/") > -1){
-            fileLocalPath = fileDirAll.substring(0,fileDirAll.lastIndexOf("/"));
+        if (fileDirAll != null && fileDirAll.lastIndexOf("/") > -1) {
+            fileLocalPath = fileDirAll.substring(0, fileDirAll.lastIndexOf("/"));
         }
         if (fileDirAll == null) {
             this.call(session, StrUtil.CR);
-        } else if (parameterMap.containsKey("tail")){
+        } else if (parameterMap.containsKey("tail")) {
             // 查看文件
             fileDirAll = FileUtil.normalize(fileDirAll);
             this.call(session, StrUtil.format("tail -f {}", fileDirAll));
             this.call(session, StrUtil.CR);
-        } else if (parameterMap.containsKey("zip")){
+        } else if (parameterMap.containsKey("zip")) {
             //解压zip
             fileDirAll = FileUtil.normalize(fileDirAll);
-            this.call(session, StrUtil.format("unzip -o {} -d " + "{}", fileDirAll ,fileLocalPath));
+            this.call(session, StrUtil.format("unzip -o {} -d " + "{}", fileDirAll, fileLocalPath));
             this.call(session, StrUtil.CR);
-        }else {
+        } else {
             //解压 tar和tar.gz
             fileDirAll = FileUtil.normalize(fileDirAll);
-            this.call(session, StrUtil.format("tar -xzvf {} -C " + "{}", fileDirAll ,fileLocalPath));
+            this.call(session, StrUtil.format("tar -xzvf {} -C " + "{}", fileDirAll, fileLocalPath));
             this.call(session, StrUtil.CR);
         }
     }

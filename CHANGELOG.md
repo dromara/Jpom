@@ -8,6 +8,7 @@
 2. 【Agent】 新增jdk 管理，直接不同项目选择不同的jdk （GITEE@IV8ZZ）
 3. 【Server】构建新增分组属性，方便快速选择
 4. 【Agent】 新增[JavaExtDirsCp] 运行模式 (感谢@TXpcmgr（Geiger）)
+5. 【Agent】 ssh 连接方式新增私钥证书连接
 
 ### 解决BUG、优化功能
 
