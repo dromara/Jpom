@@ -354,11 +354,16 @@
 
     function refreshProjectData() {
         if (copyId && copyId.length > 0) {
-            // 通过副本集打开不刷新
+            try {
+                var reloadCopyTable = top.frames["manageList"].reloadCopyTable;
+                reloadCopyTable && reloadCopyTable();
+            } catch (e) {
+            }
             return;
         }
         try {
-            top.frames["manageList"].location.reload();
+            var reloadTable = top.frames["manageList"].reloadTable;
+            reloadTable && reloadTable();
         } catch (e) {
         }
     }

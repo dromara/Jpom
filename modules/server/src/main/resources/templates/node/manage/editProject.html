@@ -229,7 +229,12 @@
                 success: function (data) {
                     layer.msg(data.msg);
                     if (200 === data.code) {
-                        autoClose(group);
+                        try {
+                            var changeGroup = parent.window['changeGroup'];
+                            changeGroup && changeGroup(group);
+                        } catch (e) {
+                        }
+                        autoClose();
                     }
                 }
             });

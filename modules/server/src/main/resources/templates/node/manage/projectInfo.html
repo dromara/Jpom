@@ -68,6 +68,8 @@
     const apiWhere = {};
     var cachePortInfo;
 
+    var copyIframeWin;
+
     function getCacheItemInfo(data, key) {
         if (!data.status) {
             return "";
@@ -183,7 +185,10 @@
                     title: data.id + '- 项目副本集',
                     shade: 0.8,
                     area: ['80%', '60%'],
-                    content: './projectCopyLList.html?id=' + data.id
+                    content: './projectCopyLList.html?id=' + data.id,
+                    success: function (layero, index) {
+                        copyIframeWin = window[layero.find('iframe')[0]['name']];
+                    }
                 });
             } else if ('file' === event) {
                 fileManage(data);
@@ -240,14 +245,15 @@
         });
     }
 
-    function reloadTable(group) {
-        if (group) {
-            changeGroup(group);
-            window.location.reload();
-        } else {
-            table.reload('table_project', {
-                where: apiWhere
-            });
+    function reloadTable() {
+        table.reload('table_project', {
+            where: apiWhere
+        });
+    }
+
+    function reloadCopyTable() {
+        if (copyIframeWin) {
+            copyIframeWin.reloadTable && copyIframeWin.reloadTable();
         }
     }
 </script>

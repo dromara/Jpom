@@ -140,12 +140,11 @@
 
         // 管理
         function manageApplication(data) {
-
             var url = './manage/console?id=' + projectId + "&copyId=" + data.id;
             tabChange({
                 id: projectId + "_" + data.id,
                 url: url,
-                title: projectId + ' -副本管理-' + data.id,
+                title: projectId + ' -副本管理-' + data.id
             });
         }
     }
