@@ -160,9 +160,10 @@
                     </div>
                 </div>
             </div>
-            <div class="layui-form-item" style="padding-left: 30%" id="appendCopyDiv">
+            <div class="layui-form-item" style="padding-left: 30%"
+                 id="appendCopyDiv">
                 <input type="hidden" name="javaCopyIds">
-                <a class="layui-btn layui-btn-sm layui-btn-warm" id="appendCopy">添加副本
+                <a th:unless="${item?.outGivingProject}" class="layui-btn layui-btn-sm layui-btn-warm" id="appendCopy">添加副本
                 </a>
             </div>
             <div class="layui-form-item">
@@ -400,17 +401,6 @@
             copyIds.push(data.id);
             $("input[name='javaCopyIds']").val(copyIds.join(","));
         });
-    }
-
-    function randomString(len) {
-        var $chars = 'ABCDEFGHJKMNPQRSTWXYZ0123456789';
-        /****默认去掉了容易混淆的字符oOLl,9gq,Vv,Uu,I1****/
-        var maxPos = $chars.length;
-        var pwd = '';
-        for (i = 0; i < len; i++) {
-            pwd += $chars.charAt(Math.floor(Math.random() * maxPos));
-        }
-        return pwd;
     }
 </script>
 

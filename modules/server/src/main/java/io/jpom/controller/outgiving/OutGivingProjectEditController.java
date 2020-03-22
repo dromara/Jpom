@@ -51,7 +51,7 @@ public class OutGivingProjectEditController extends BaseServerController {
     @Feature(method = MethodFeature.EDIT)
     public String editProject(String id) {
         setAttribute("type", "add");
-        OutGivingModel outGivingModel = null;
+        OutGivingModel outGivingModel;
         if (StrUtil.isNotEmpty(id)) {
             outGivingModel = outGivingServer.getItem(id);
             if (outGivingModel != null) {
@@ -61,6 +61,8 @@ public class OutGivingProjectEditController extends BaseServerController {
         }
         // 运行模式
         JSONArray runModes = (JSONArray) JSONArray.toJSON(RunMode.values());
+        runModes.remove(RunMode.File.name());
+        //
         setAttribute("runModes", runModes);
         //
         JSONArray afterOpt = BaseEnum.toJSONArray(AfterOpt.class);
@@ -124,7 +126,7 @@ public class OutGivingProjectEditController extends BaseServerController {
             // 删除实际的项目
             for (OutGivingNodeProject outGivingNodeProject1 : deleteNodeProject) {
                 NodeModel nodeModel = outGivingNodeProject1.getNodeData(true);
-                JsonMessage jsonMessage = deleteNodeProject(nodeModel, userModel, outGivingNodeProject1.getProjectId());
+                JsonMessage<String> jsonMessage = deleteNodeProject(nodeModel, userModel, outGivingNodeProject1.getProjectId());
                 if (jsonMessage.getCode() != HttpStatus.HTTP_OK) {
                     return JsonMessage.getString(406, nodeModel.getName() + "节点失败：" + jsonMessage.getMsg());
                 }
@@ -193,7 +195,7 @@ public class OutGivingProjectEditController extends BaseServerController {
         boolean fail = false;
         try {
             Set<Map.Entry<NodeModel, JSONObject>> entries = map.entrySet();
-            JsonMessage jsonMessage;
+            JsonMessage<String> jsonMessage;
             for (Map.Entry<NodeModel, JSONObject> entry : entries) {
                 NodeModel nodeModel = entry.getKey();
                 jsonMessage = sendData(nodeModel, userModel, entry.getValue(), true);
@@ -235,7 +237,7 @@ public class OutGivingProjectEditController extends BaseServerController {
      * @param project   判断id
      * @return json
      */
-    private JsonMessage deleteNodeProject(NodeModel nodeModel, UserModel userModel, String project) {
+    private JsonMessage<String> deleteNodeProject(NodeModel nodeModel, UserModel userModel, String project) {
         JSONObject data = new JSONObject();
         data.put("id", project);
         return NodeForward.request(nodeModel, NodeUrl.Manage_DeleteProject, userModel, data);
@@ -366,6 +368,18 @@ public class OutGivingProjectEditController extends BaseServerController {
             allData.put("jvm", jvm);
             String args = getParameter(StrUtil.format("{}_args", nodeModel.getId()));
             allData.put("args", args);
+            // 项目副本
+            String javaCopyIds = getParameter(StrUtil.format("{}_javaCopyIds", nodeModel.getId()));
+            allData.put("javaCopyIds", javaCopyIds);
+            if (StrUtil.isNotEmpty(javaCopyIds)) {
+                String[] split = StrUtil.split(javaCopyIds, StrUtil.COMMA);
+                for (String copyId : split) {
+                    String copyJvm = getParameter(StrUtil.format("{}_jvm_{}", nodeModel.getId(), copyId));
+                    String copyArgs = getParameter(StrUtil.format("{}_args_{}", nodeModel.getId(), copyId));
+                    allData.put("jvm_" + copyId, copyJvm);
+                    allData.put("args_" + copyId, copyArgs);
+                }
+            }
             JsonMessage<String> jsonMessage = sendData(nodeModel, userModel, allData, false);
             if (jsonMessage.getCode() != HttpStatus.HTTP_OK) {
                 return JsonMessage.getString(406, nodeModel.getName() + "节点失败：" + jsonMessage.getMsg());

@@ -234,6 +234,7 @@ public class ManageEditProjectController extends BaseAgentController {
                 exits.setLib(projectInfo.getLib());
                 exits.setJvm(projectInfo.getJvm());
                 exits.setArgs(projectInfo.getArgs());
+                exits.setOutGivingProject(projectInfo.isOutGivingProject());
                 exits.setRunMode(projectInfo.getRunMode());
                 exits.setWhitelistDirectory(projectInfo.getWhitelistDirectory());
                 exits.setToken(projectInfo.getToken());

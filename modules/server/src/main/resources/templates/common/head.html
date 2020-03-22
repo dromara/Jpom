@@ -429,6 +429,17 @@
                 parent.location.reload();
             }, 2000);
         }
+
+        function randomString(len) {
+            var $chars = 'ABCDEFGHJKMNPQRSTWXYZ0123456789';
+            /****默认去掉了容易混淆的字符oOLl,9gq,Vv,Uu,I1****/
+            var maxPos = $chars.length;
+            var pwd = '';
+            for (i = 0; i < len; i++) {
+                pwd += $chars.charAt(Math.floor(Math.random() * maxPos));
+            }
+            return pwd;
+        }
     </script>
 
     <script id="jsCommonContext" type="text/html"

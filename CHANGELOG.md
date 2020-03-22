@@ -5,7 +5,7 @@
 ### 新增功能
 
 1. [支持maven快速编辑节点项目](https://gitee.com/keepbx/Jpom-Plugin/tree/master/jpom-maven-plugin)（配合`jpom-maven-plugin`使用）(感谢@夜空中最亮的星)
-2. 【Agent】 新增jdk 管理，直接不同项目选择不同的jdk （GITEE@IV8ZZ）
+2. 【Agent】 新增jdk 管理，不同项目选择不同的jdk （GITEE@IV8ZZ）
 3. 【Server】构建新增分组属性，方便快速选择
 4. 【Agent】 新增[JavaExtDirsCp] 运行模式 (感谢@TXpcmgr（Geiger）)
 5. 【Server】 ssh 连接方式新增私钥证书连接
@@ -23,6 +23,8 @@
 6. 【Server】解决节点分组筛选bug(感谢gitee@I17XEH)
 7. 【Server】角色权限动态数据，单个节点异常不影响所有节点配置（感谢@￡天空之城～龙）
 8. 【Server】关联节点分发项目支持修改发布后操作
+
+> 注意：如果在2.4.7以下项目运行方式中使用过【War】模式的由于【War】更名为【JarWar】 所有在升级后请重新修改运行方式后再运行对应项目
 
 -----------------------------------------------------------
 

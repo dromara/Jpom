@@ -212,6 +212,11 @@
                     </div>
                 </div>
             </div>
+            <div class="layui-form-item" style="padding-left: 30%" id="{{ d.nodeId }}_appendCopyDiv">
+                <input type="hidden" name="{{ d.nodeId }}_javaCopyIds">
+                <a class="layui-btn layui-btn-sm layui-btn-warm" nodeId="{{ d.nodeId }}" op="appendCopy">添加副本
+                </a>
+            </div>
         </div>
     </div>
 </script>
@@ -253,6 +258,15 @@
                                 $("#javaExtDirsCp").show();
                             }
                             findFirst = true;
+                        }
+                        // 副本集
+                        var javaCopyItemList = getProjectInfo.javaCopyItemList;
+                        if (javaCopyItemList) {
+                            javaCopyItemList.forEach(function (item, i) {
+                                item.del = false;
+                                item.nodeId = nodeId;
+                                addJavaCopy(item);
+                            })
                         }
                         form.render();
                     } else {
@@ -383,6 +397,35 @@
                     }
                 });
                 return false;
+            }).delegate("a[op='appendCopy']", "click", function (e) {
+                //
+                layui.stope(e);
+                var nodeId = $(this).attr("nodeId");
+                var id;
+                while (true) {
+                    id = randomString(2);
+                    if ($("#copy_" + id).length <= 0) {
+                        break;
+                    }
+                }
+                addJavaCopy({id: id, del: true, nodeId: nodeId});
+                return false;
+            }).delegate("a[op='delCopy']", "click", function () {
+                // form.render();
+                var parent = $(this).parent().parent();
+                var attr = parent.attr("id");
+                var id = attr.split("_")[1];
+                //
+                var nodeId = $(this).attr("nodeId");
+                var copyIds = window['copyIds' + nodeId] || [];
+                copyIds.forEach(function (item, index, arr) {
+                    if (item === id) {
+                        arr.splice(index, 1);
+                    }
+                });
+                window['copyIds' + nodeId] = copyIds;
+                parent.remove();
+                $("input[name='" + nodeId + "_javaCopyIds']").val(copyIds.join(","));
             });
         });
 
@@ -406,6 +449,18 @@
                     }
                 });
             });
+        });
+    }
+
+
+    function addJavaCopy(data) {
+        var copyHtml = document.getElementById('copyTempl');
+        laytpl(copyHtml.innerHTML).render(data, function (newHtml) {
+            $("#" + data.nodeId + "_appendCopyDiv").before(newHtml);
+            var copyIds = window['copyIds' + data.nodeId] || [];
+            copyIds.push(data.id);
+            $("input[name='" + data.nodeId + "_javaCopyIds']").val(copyIds.join(","));
+            window['copyIds' + data.nodeId] = copyIds;
         });
     }
 
@@ -469,5 +524,32 @@
             }
         });
     }
+</script>
+
+<script type="text/html" id="copyTempl">
+    <div class="layui-form-item" id="copy_{{d.id}}">
+        <div class="layui-inline" style="width: 47%; float: left;">
+            <label class="layui-form-label">副本:{{ d.id }}</label>
+            <div class="layui-input-block">
+                    <textarea name="{{ d.nodeId }}_jvm_{{d.id}}"
+                              placeholder="jvm参数,非必填.如：-Xmin=512m -Xmax=512m"
+                              class="layui-textarea">{{d.jvm || ''}}</textarea>
+            </div>
+        </div>
+        <div class="layui-input-inline" style="width: 47%;">
+            <label class="layui-form-label">副本:{{ d.id }}</label>
+            <div class="layui-input-block">
+                    <textarea name="{{ d.nodeId }}_args_{{d.id}}"
+                              placeholder="Main函数args参数,非必填.如：--service.port=8080"
+                              class="layui-textarea">{{ d.args || ''}}</textarea>
+            </div>
+        </div>
+        {{# if(d.del){ }}
+        <div class="layui-form-mid layui-word-aux" style="float: right;">
+            <a class="layui-btn layui-btn-sm layui-btn-warm" nodeId="{{d.nodeId}}" op="delCopy">删除
+            </a>
+        </div>
+        {{# } }}
+    </div>
 </script>
 </html>
