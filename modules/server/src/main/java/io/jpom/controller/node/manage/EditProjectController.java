@@ -66,6 +66,17 @@ public class EditProjectController extends BaseServerController {
         setAttribute("item", projectInfo);
         // 运行模式
         JSONArray runModes = (JSONArray) JSONArray.toJSON(RunMode.values());
+        if (projectInfo != null) {
+            try {
+                String runMode = projectInfo.getString("runMode");
+                RunMode mode = RunMode.valueOf(runMode);
+                if (mode != RunMode.File) {
+                    // java 项目不能转换为file，可能有未结束的进程
+                    runModes.remove(RunMode.File.name());
+                }
+            } catch (Exception ignored) {
+            }
+        }
         setAttribute("runModes", runModes);
         //
         List<String> hashSet = projectInfoService.getAllGroup(getNode());

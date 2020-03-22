@@ -318,7 +318,7 @@ public class ProjectInfoModel extends BaseModel {
                 }
             }
         } else {
-            throw new IllegalArgumentException("不支持的模式");
+            return StrUtil.EMPTY;
         }
         for (int i = 0; i < len; i++) {
             File file = files.get(i);
