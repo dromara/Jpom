@@ -17,6 +17,7 @@ import io.jpom.util.FileUtils;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -527,6 +528,24 @@ public class ProjectInfoModel extends BaseModel {
 
         public void setArgs(String args) {
             this.args = args;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) {
+                return true;
+            }
+            if (o == null || getClass() != o.getClass()) {
+                return false;
+            }
+            JavaCopyItem that = (JavaCopyItem) o;
+            return Objects.equals(parendId, that.parendId) &&
+                    Objects.equals(id, that.id);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(parendId, id, jvm, args, modifyTime);
         }
     }
 }

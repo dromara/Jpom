@@ -1,5 +1,6 @@
 package io.jpom.controller.manage;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.FileUtil;
@@ -237,7 +238,14 @@ public class ManageEditProjectController extends BaseAgentController {
                 exits.setWhitelistDirectory(projectInfo.getWhitelistDirectory());
                 exits.setToken(projectInfo.getToken());
                 exits.setJdkId(projectInfo.getJdkId());
-                exits.setJavaCopyItemList(projectInfo.getJavaCopyItemList());
+                // 检查是否非法删除副本集
+                List<ProjectInfoModel.JavaCopyItem> javaCopyItemList = exits.getJavaCopyItemList();
+                List<ProjectInfoModel.JavaCopyItem> javaCopyItemList1 = projectInfo.getJavaCopyItemList();
+                if (CollUtil.isNotEmpty(javaCopyItemList) && !CollUtil.containsAll(javaCopyItemList1, javaCopyItemList)) {
+                    // 重写了 equals
+                    return JsonMessage.getString(405, "修改中不能删除副本集、请到副本集中删除");
+                }
+                exits.setJavaCopyItemList(javaCopyItemList1);
                 exits.setJavaExtDirsCp(projectInfo.getJavaExtDirsCp());
                 //
                 moveTo(exits, projectInfo);
