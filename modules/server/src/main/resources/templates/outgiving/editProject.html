@@ -67,6 +67,15 @@
             </div>
         </div>
         <div class="layui-form-item">
+            <div class="layui-inline" style="display: none;" id="javaExtDirsCp">
+                <label class="layui-form-label">JavaExtDirsCp</label>
+                <div class="layui-input-block">
+                    <input type="text" name="javaExtDirsCp"
+                           placeholder="-Dext.dirs=xxx: -cp xx  填写【xxx:xx】 " class="layui-input">
+                </div>
+            </div>
+        </div>
+        <div class="layui-form-item">
             <div class="layui-inline">
                 <label class="layui-form-label"><span class="x-red">*</span>项目路径</label>
                 <div class="layui-input-block">
@@ -82,9 +91,9 @@
                 </div>
             </div>
             <div class="layui-inline">
-                <label class="layui-form-label"><span class="x-red">*</span>项目Jar包</label>
+                <label class="layui-form-label"><span class="x-red">*</span>项目文件夹</label>
                 <div class="layui-input-block">
-                    <input type="text" name="lib" placeholder="jar存储的文件夹" required lay-verify="required"
+                    <input type="text" name="lib" placeholder="存储项目的文件夹名" required lay-verify="required"
                            class="layui-input">
                 </div>
             </div>
@@ -232,12 +241,16 @@
                                 runMode: getProjectInfo.runMode,
                                 lib: getProjectInfo.lib,
                                 mainClass: getProjectInfo.mainClass,
-                                whitelistDirectory: getProjectInfo.whitelistDirectory
+                                whitelistDirectory: getProjectInfo.whitelistDirectory,
+                                javaExtDirsCp: getProjectInfo.javaExtDirsCp
                             });
                             $("#projectEnd").text(getProjectInfo.lib);
                             $("#projectStart").text(getProjectInfo.whitelistDirectory);
-                            if (getProjectInfo.runMode === 'ClassPath') {
+                            if (getProjectInfo.runMode === 'ClassPath' || getProjectInfo.runMode === 'JavaExtDirsCp') {
                                 $("#mainClassDiv").show();
+                            }
+                            if (getProjectInfo.runMode === "JavaExtDirsCp") {
+                                $("#javaExtDirsCp").show();
                             }
                             findFirst = true;
                         }
@@ -283,10 +296,15 @@
 
         form.on('select(runMode)', function (data) {
             let val = data.value;
-            if (val === "ClassPath") {
+            if (val === "ClassPath" || val === 'JavaExtDirsCp') {
                 $("#mainClassDiv").show();
             } else {
                 $("#mainClassDiv").hide();
+            }
+            if (val === "JavaExtDirsCp") {
+                $("#javaExtDirsCp").show();
+            } else {
+                $("#javaExtDirsCp").hide();
             }
         });
 

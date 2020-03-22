@@ -272,9 +272,12 @@ public class OutGivingProjectEditController extends BaseServerController {
         } catch (Exception ignored) {
         }
         defData.put("runMode", runMode1.name());
-        if (runMode1 == RunMode.ClassPath) {
+        if (runMode1 == RunMode.ClassPath || runMode1 == RunMode.JavaExtDirsCp) {
             String mainClass = getParameter("mainClass");
             defData.put("mainClass", mainClass);
+        }
+        if (runMode1 == RunMode.JavaExtDirsCp) {
+            defData.put("javaExtDirsCp", getParameter("javaExtDirsCp"));
         }
         String whitelistDirectory = getParameter("whitelistDirectory");
         List<String> whitelistServerOutGiving = serverWhitelistServer.getOutGiving();
@@ -363,7 +366,7 @@ public class OutGivingProjectEditController extends BaseServerController {
             allData.put("jvm", jvm);
             String args = getParameter(StrUtil.format("{}_args", nodeModel.getId()));
             allData.put("args", args);
-            JsonMessage jsonMessage = sendData(nodeModel, userModel, allData, false);
+            JsonMessage<String> jsonMessage = sendData(nodeModel, userModel, allData, false);
             if (jsonMessage.getCode() != HttpStatus.HTTP_OK) {
                 return JsonMessage.getString(406, nodeModel.getName() + "节点失败：" + jsonMessage.getMsg());
             }
@@ -407,7 +410,7 @@ public class OutGivingProjectEditController extends BaseServerController {
         return null;
     }
 
-    private JsonMessage sendData(NodeModel nodeModel, UserModel userModel, JSONObject data, boolean save) {
+    private JsonMessage<String> sendData(NodeModel nodeModel, UserModel userModel, JSONObject data, boolean save) {
         if (save) {
             data.remove("previewData");
         }
