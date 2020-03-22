@@ -1,5 +1,6 @@
 package io.jpom.controller.node.manage;
 
+import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.validator.ValidatorItem;
 import cn.jiangzeyin.common.validator.ValidatorRule;
@@ -124,23 +125,25 @@ public class ProjectManageControl extends BaseServerController {
     @ResponseBody
     @OptLog(value = UserOperateLogV1.OptType.DelProject)
     @Feature(method = MethodFeature.DEL)
-    public String deleteProject(@ValidatorItem(value = ValidatorRule.NOT_BLANK) String id) {
+    public String deleteProject(@ValidatorItem(value = ValidatorRule.NOT_BLANK) String id, String copyId) {
         NodeModel nodeModel = getNode();
-        // 检查节点分发
-        List<OutGivingModel> outGivingModels = outGivingServer.list();
-        if (outGivingModels != null) {
-            for (OutGivingModel outGivingModel : outGivingModels) {
-                if (outGivingModel.checkContains(nodeModel.getId(), id)) {
-                    return JsonMessage.getString(405, "当前项目存在节点分发，不能直接删除");
+        if (StrUtil.isEmpty(copyId)) {
+            // 检查节点分发
+            List<OutGivingModel> outGivingModels = outGivingServer.list();
+            if (outGivingModels != null) {
+                for (OutGivingModel outGivingModel : outGivingModels) {
+                    if (outGivingModel.checkContains(nodeModel.getId(), id)) {
+                        return JsonMessage.getString(405, "当前项目存在节点分发，不能直接删除");
+                    }
                 }
             }
-        }
-        //
-        if (monitorService.checkProject(nodeModel.getId(), id)) {
-            return JsonMessage.getString(405, "当前项目存在监控项，不能直接删除");
-        }
-        if (buildService.checkNodeProjectId(nodeModel.getId(), id)) {
-            return JsonMessage.getString(405, "当前项目存在构建项，不能直接删除");
+            //
+            if (monitorService.checkProject(nodeModel.getId(), id)) {
+                return JsonMessage.getString(405, "当前项目存在监控项，不能直接删除");
+            }
+            if (buildService.checkNodeProjectId(nodeModel.getId(), id)) {
+                return JsonMessage.getString(405, "当前项目存在构建项，不能直接删除");
+            }
         }
         return NodeForward.request(nodeModel, getRequest(), NodeUrl.Manage_DeleteProject).toString();
     }
