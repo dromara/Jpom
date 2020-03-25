@@ -1,5 +1,5 @@
 import cn.hutool.core.io.resource.ResourceUtil;
-import cn.hutool.crypto.BCUtil;
+import cn.hutool.crypto.PemUtil;
 import cn.hutool.crypto.asymmetric.KeyType;
 import cn.hutool.crypto.asymmetric.RSA;
 
@@ -18,8 +18,8 @@ public class TestCert {
 //        System.out.println(response.body());
 //        D:\SystemDocument\Desktop
 
-        PrivateKey privateKey = BCUtil.readPrivateKey(ResourceUtil.getStream("D:\\SystemDocument\\Desktop\\1979263_jpom.keepbx.cn.key"));
-        PublicKey publicKey = BCUtil.readPublicKey(ResourceUtil.getStream("D:\\SystemDocument\\Desktop\\1979263_jpom.keepbx.cn.pem"));
+        PrivateKey privateKey = PemUtil.readPemPrivateKey(ResourceUtil.getStream("D:\\SystemDocument\\Desktop\\1979263_jpom.keepbx.cn.key"));
+        PublicKey publicKey = PemUtil.readPemPublicKey(ResourceUtil.getStream("D:\\SystemDocument\\Desktop\\1979263_jpom.keepbx.cn.pem"));
 
         RSA rsa = new RSA(privateKey, publicKey);
         String str = "你好，Hutool";//测试字符串
