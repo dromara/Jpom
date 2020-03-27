@@ -17,21 +17,31 @@ public class LinuxTomcatCommander extends AbstractTomcatCommander {
         if (StrUtil.isBlank(tomcatPath)) {
             return "tomcat path blank";
         }
-        // 拼接命令
-        String command = String.format("java -Djava.util.logging.config.file=%sconf/logging.properties " +
-                        "-Djava.util.logging.manager=org.apache.juli.ClassLoaderLogManager " +
-                        "-Djdk.tls.ephemeralDHKeySize=2048 " +
-                        "-Djava.protocol.handler.pkgs=org.apache.catalina.webresources " +
-                        "-Dignore.endorsed.dirs=%s " +
-                        "-classpath %sbin/bootstrap.jar:%sbin/tomcat-juli.jar " +
-                        "-Dcatalina.base=%s " +
-                        "-Dcatalina.home=%s " +
-                        "-Djava.io.tmpdir=%stemp/ " +
-                        "org.apache.catalina.startup.Bootstrap %s", tomcatPath, tomcatPath,
-                tomcatPath, tomcatPath, tomcatPath,
-                tomcatPath, tomcatPath, cmd);
-        //
-        exec(command, false);
+        String command = null;
+        if (cmd.equals("stop")){
+            // 拼接命令
+            command = String.format("java -Djava.util.logging.config.file=%sconf/logging.properties " +
+                            "-Djava.util.logging.manager=org.apache.juli.ClassLoaderLogManager " +
+                            "-Djdk.tls.ephemeralDHKeySize=2048 " +
+                            "-Djava.protocol.handler.pkgs=org.apache.catalina.webresources " +
+                            "-Dignore.endorsed.dirs=%s " +
+                            "-classpath %sbin/bootstrap.jar:%sbin/tomcat-juli.jar " +
+                            "-Dcatalina.base=%s " +
+                            "-Dcatalina.home=%s " +
+                            "-Djava.io.tmpdir=%stemp/ " +
+                            "org.apache.catalina.startup.Bootstrap %s", tomcatPath, tomcatPath,
+                    tomcatPath, tomcatPath, tomcatPath,
+                    tomcatPath, tomcatPath, cmd);
+            //
+            exec(command, false);
+        } else {
+            command = String.format("/bin/sh -c %s/bin/startup.sh", tomcatPath);
+            //
+            exec(command, false);
+        }
+        if (StrUtil.isBlank(tomcatPath)) {
+            return "tomcat path blank";
+        }
         // 查询操作结果并返回
         return getStatus(tomcatInfoModel, cmd);
     }
