@@ -2,6 +2,7 @@ package io.jpom.service.dblog;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.bean.copier.CopyOptions;
+import cn.hutool.core.util.PageUtil;
 import cn.hutool.db.Db;
 import cn.hutool.db.Entity;
 import cn.hutool.db.Page;
@@ -31,6 +32,10 @@ public abstract class BaseDbLogService<T> {
 
     String getTableName() {
         return tableName;
+    }
+
+    static {
+        PageUtil.setFirstPageNo(1);
     }
 
     public BaseDbLogService(String tableName, Class<T> tClass) {
