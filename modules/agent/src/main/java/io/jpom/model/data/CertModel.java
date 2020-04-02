@@ -4,8 +4,8 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.io.resource.ResourceUtil;
 import cn.hutool.core.util.StrUtil;
-import cn.hutool.crypto.BCUtil;
 import cn.hutool.crypto.KeyUtil;
+import cn.hutool.crypto.PemUtil;
 import cn.hutool.crypto.asymmetric.KeyType;
 import cn.hutool.crypto.asymmetric.RSA;
 import cn.jiangzeyin.common.DefaultSystemLog;
@@ -151,10 +151,10 @@ public class CertModel extends BaseModel {
         InputStream inputStream = null;
         try {
             inputStream = ResourceUtil.getStream(key);
-            PrivateKey privateKey = BCUtil.readPrivateKey(inputStream);
+            PrivateKey privateKey = PemUtil.readPemPrivateKey(inputStream);
             IoUtil.close(inputStream);
             inputStream = ResourceUtil.getStream(file);
-            PublicKey publicKey = BCUtil.readPublicKey(inputStream);
+            PublicKey publicKey = PemUtil.readPemPublicKey(inputStream);
             IoUtil.close(inputStream);
             RSA rsa = new RSA(privateKey, publicKey);
             String encryptStr = rsa.encryptBase64(KEY, KeyType.PublicKey);

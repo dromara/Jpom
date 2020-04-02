@@ -1,5 +1,6 @@
 package io.jpom.service.manage;
 
+import cn.hutool.core.date.DateUtil;
 import io.jpom.common.commander.AbstractProjectCommander;
 import io.jpom.model.data.ProjectInfoModel;
 import io.jpom.socket.ConsoleCommandOp;
@@ -23,25 +24,26 @@ public class ConsoleService {
      *
      * @param consoleCommandOp 执行的操作
      * @param projectInfoModel 项目信息
+     * @param copyItem         副本信息
      * @return 执行结果
      * @throws Exception 异常
      */
-    public String execCommand(ConsoleCommandOp consoleCommandOp, ProjectInfoModel projectInfoModel) throws Exception {
+    public String execCommand(ConsoleCommandOp consoleCommandOp, ProjectInfoModel projectInfoModel, ProjectInfoModel.JavaCopyItem copyItem) throws Exception {
         String result;
         AbstractProjectCommander abstractProjectCommander = AbstractProjectCommander.getInstance();
         // 执行命令
         switch (consoleCommandOp) {
             case restart:
-                result = abstractProjectCommander.restart(projectInfoModel);
+                result = abstractProjectCommander.restart(projectInfoModel, copyItem);
                 break;
             case start:
-                result = abstractProjectCommander.start(projectInfoModel);
+                result = abstractProjectCommander.start(projectInfoModel, copyItem);
                 break;
             case stop:
-                result = abstractProjectCommander.stop(projectInfoModel);
+                result = abstractProjectCommander.stop(projectInfoModel, copyItem);
                 break;
             case status: {
-                String tag = projectInfoModel.getId();
+                String tag = copyItem == null ? projectInfoModel.getId() : copyItem.getTagId();
                 result = abstractProjectCommander.status(tag);
                 break;
             }
@@ -54,6 +56,11 @@ public class ConsoleService {
         if (consoleCommandOp == ConsoleCommandOp.start || consoleCommandOp == ConsoleCommandOp.restart) {
             // 修改 run lib 使用情况
             ProjectInfoModel modify = projectInfoService.getItem(projectInfoModel.getId());
+            //
+            if (copyItem != null) {
+                ProjectInfoModel.JavaCopyItem copyItem1 = modify.findCopyItem(copyItem.getId());
+                copyItem1.setModifyTime(DateUtil.now());
+            }
             modify.setRunLibDesc(projectInfoModel.getUseLibDesc());
             try {
                 projectInfoService.updateItem(modify);

@@ -8,6 +8,7 @@ import cn.hutool.http.HttpStatus;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.spring.SpringUtil;
 import com.jcraft.jsch.Session;
+import io.jpom.model.AfterOpt;
 import io.jpom.model.BaseEnum;
 import io.jpom.model.data.BuildModel;
 import io.jpom.model.data.NodeModel;
@@ -20,7 +21,6 @@ import io.jpom.service.node.ssh.SshService;
 import io.jpom.system.JpomRuntimeException;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
 
@@ -92,9 +92,9 @@ public class ReleaseManage extends BaseBuild {
                 //
                 this.doOutGiving();
             } else if (this.baseBuildModule.getReleaseMethod() == BuildModel.ReleaseMethod.Project.getCode()) {
-                BuildModel.AfterOpt afterOpt = BaseEnum.getEnum(BuildModel.AfterOpt.class, this.baseBuildModule.getAfterOpt());
+                AfterOpt afterOpt = BaseEnum.getEnum(AfterOpt.class, this.baseBuildModule.getAfterOpt());
                 if (afterOpt == null) {
-                    afterOpt = BuildModel.AfterOpt.No;
+                    afterOpt = AfterOpt.No;
                 }
                 this.doProject(afterOpt, this.baseBuildModule.isClearOld());
             } else if (this.baseBuildModule.getReleaseMethod() == BuildModel.ReleaseMethod.Ssh.getCode()) {
@@ -126,7 +126,7 @@ public class ReleaseManage extends BaseBuild {
             this.log("没有找到对应的ssh项：" + releaseMethodDataId);
             return;
         }
-        Session session = sshService.getSession(item);
+        Session session = SshService.getSession(item);
         try (Sftp sftp = new Sftp(session, item.getCharsetT())) {
             if (this.baseBuildModule.isClearOld() && StrUtil.isNotEmpty(this.baseBuildModule.getReleasePath())) {
                 sftp.delDir(this.baseBuildModule.getReleasePath());
@@ -189,7 +189,7 @@ public class ReleaseManage extends BaseBuild {
      *
      * @param afterOpt 后续操作
      */
-    private void doProject(BuildModel.AfterOpt afterOpt, boolean clearOld) {
+    private void doProject(AfterOpt afterOpt, boolean clearOld) {
         String releaseMethodDataId = this.baseBuildModule.getReleaseMethodDataId();
         String[] strings = StrUtil.split(releaseMethodDataId, ":");
         if (strings == null || strings.length != 2) {
@@ -205,10 +205,10 @@ public class ReleaseManage extends BaseBuild {
             zipFile = this.resultFile;
             unZip = false;
         }
-        JsonMessage jsonMessage = OutGivingRun.fileUpload(zipFile,
+        JsonMessage<String> jsonMessage = OutGivingRun.fileUpload(zipFile,
                 strings[1],
                 unZip,
-                afterOpt != BuildModel.AfterOpt.No,
+                afterOpt,
                 nodeModel, this.userModel, clearOld);
         if (jsonMessage.getCode() == HttpStatus.HTTP_OK) {
             this.log("发布项目包成功：" + jsonMessage.toString());
@@ -219,10 +219,8 @@ public class ReleaseManage extends BaseBuild {
 
     /**
      * 分发包
-     *
-     * @throws IOException IO
      */
-    private void doOutGiving() throws IOException {
+    private void doOutGiving() {
         String releaseMethodDataId = this.baseBuildModule.getReleaseMethodDataId();
         File zipFile = BuildUtil.isDirPackage(this.resultFile);
         boolean unZip = true;

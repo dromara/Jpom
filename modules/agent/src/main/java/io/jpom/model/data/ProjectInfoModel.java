@@ -1,19 +1,25 @@
 package io.jpom.model.data;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.StrUtil;
-import cn.hutool.system.SystemUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.spring.SpringUtil;
 import io.jpom.common.commander.AbstractProjectCommander;
+import io.jpom.model.BaseJsonModel;
 import io.jpom.model.BaseModel;
 import io.jpom.model.RunMode;
 import io.jpom.service.WhitelistDirectoryService;
 import io.jpom.system.JpomRuntimeException;
+import io.jpom.util.FileUtils;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * 项目配置信息实体
@@ -37,13 +43,18 @@ public class ProjectInfoModel extends BaseModel {
      */
     private String jvm;
     /**
+     * java main 方法参数
+     */
+    private String args;
+
+    private List<JavaCopyItem> javaCopyItemList;
+    /**
      * WebHooks
      */
     private String token;
     private boolean status;
     private String createTime;
     private String modifyTime;
-    private String args;
     private String jdkId;
     /**
      * lib 目录当前文件状态
@@ -67,6 +78,28 @@ public class ProjectInfoModel extends BaseModel {
      * 实际运行的命令
      */
     private String runCommand;
+
+    /**
+     * -Djava.ext.dirs=lib -cp conf:run.jar
+     * 填写【lib:conf】
+     */
+    private String javaExtDirsCp;
+
+    public List<JavaCopyItem> getJavaCopyItemList() {
+        return javaCopyItemList;
+    }
+
+    public void setJavaCopyItemList(List<JavaCopyItem> javaCopyItemList) {
+        this.javaCopyItemList = javaCopyItemList;
+    }
+
+    public String getJavaExtDirsCp() {
+        return StrUtil.emptyToDefault(javaExtDirsCp, StrUtil.EMPTY);
+    }
+
+    public void setJavaExtDirsCp(String javaExtDirsCp) {
+        this.javaExtDirsCp = javaExtDirsCp;
+    }
 
     public String getRunCommand() {
         return runCommand;
@@ -109,10 +142,9 @@ public class ProjectInfoModel extends BaseModel {
     /**
      * 项目是否正在运行
      *
-     * @param get 防止自动获取
      * @return true 正在运行
      */
-    public boolean isStatus(boolean get) {
+    public boolean tryGetStatus() {
         try {
             status = AbstractProjectCommander.getInstance().isRun(getId());
         } catch (Exception e) {
@@ -241,7 +273,7 @@ public class ProjectInfoModel extends BaseModel {
                     if (!StrUtil.endWith(file.getName(), FileUtil.JAR_FILE_EXT, true)) {
                         continue;
                     }
-                } else if (projectInfoModel.getRunMode() == RunMode.War) {
+                } else if (projectInfoModel.getRunMode() == RunMode.JarWar) {
                     if (!StrUtil.endWith(file.getName(), "war", true)) {
                         continue;
                     }
@@ -269,16 +301,30 @@ public class ProjectInfoModel extends BaseModel {
         int len = files.size();
         if (runMode == RunMode.ClassPath) {
             classPath.append("-classpath ");
-        } else if (runMode == RunMode.Jar || runMode == RunMode.War) {
+        } else if (runMode == RunMode.Jar || runMode == RunMode.JarWar) {
             classPath.append("-jar ");
             // 只取一个jar文件
             len = 1;
+        } else if (runMode == RunMode.JavaExtDirsCp) {
+            classPath.append("-Djava.ext.dirs=");
+            String javaExtDirsCp = projectInfoModel.getJavaExtDirsCp();
+            String[] split = StrUtil.split(javaExtDirsCp, StrUtil.COLON);
+            if (ArrayUtil.isEmpty(split)) {
+                classPath.append(". -cp ");
+            } else {
+                classPath.append(split[0]).append(" -cp ");
+                if (split.length > 1) {
+                    classPath.append(split[1]).append(FileUtils.getJarSeparator());
+                }
+            }
+        } else {
+            return StrUtil.EMPTY;
         }
         for (int i = 0; i < len; i++) {
             File file = files.get(i);
             classPath.append(file.getAbsolutePath());
             if (i != len - 1) {
-                classPath.append(SystemUtil.getOsInfo().isWindows() ? ";" : ":");
+                classPath.append(FileUtils.getJarSeparator());
             }
         }
         return classPath.toString();
@@ -292,13 +338,28 @@ public class ProjectInfoModel extends BaseModel {
         return StrUtil.emptyToDefault(log, StrUtil.EMPTY);
     }
 
-    public String getAbsoluteLog() {
-        File file = new File(getLog());
+    /**
+     * 副本的控制台日志文件
+     *
+     * @param javaCopyItem 副本信息
+     * @return file
+     */
+    public File getLog(JavaCopyItem javaCopyItem) {
+        File file = FileUtil.file(getLog());
+        return FileUtil.file(file.getParentFile(), getId() + "_" + javaCopyItem.getId() + ".log");
+    }
+
+    public String getAbsoluteLog(JavaCopyItem javaCopyItem) {
+        File file = javaCopyItem == null ? new File(getLog()) : getLog(javaCopyItem);
         return file.getAbsolutePath();
     }
 
     public File getLogBack() {
         return new File(getLog() + "_back");
+    }
+
+    public File getLogBack(JavaCopyItem javaCopyItem) {
+        return new File(getLog(javaCopyItem) + "_back");
     }
 
     public void setLog(String log) {
@@ -344,5 +405,147 @@ public class ProjectInfoModel extends BaseModel {
 
     public void setJdkId(String jdkId) {
         this.jdkId = jdkId;
+    }
+
+
+    public JavaCopyItem findCopyItem(String copyId) {
+        if (StrUtil.isEmpty(copyId)) {
+            return null;
+        }
+        List<JavaCopyItem> javaCopyItemList = getJavaCopyItemList();
+        if (CollUtil.isEmpty(javaCopyItemList)) {
+            return null;
+        }
+        Optional<JavaCopyItem> first = javaCopyItemList.stream().filter(javaCopyItem -> StrUtil.equals(javaCopyItem.getId(), copyId)).findFirst();
+        return first.orElse(null);
+    }
+
+    public boolean removeCopyItem(String copyId) {
+        if (StrUtil.isEmpty(copyId)) {
+            return true;
+        }
+        if (CollUtil.isEmpty(javaCopyItemList)) {
+            return true;
+        }
+        int size = javaCopyItemList.size();
+        List<JavaCopyItem> collect = javaCopyItemList.stream().filter(javaCopyItem -> !StrUtil.equals(javaCopyItem.getId(), copyId)).collect(Collectors.toList());
+        if (size - 1 == collect.size()) {
+            this.javaCopyItemList = collect;
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public static class JavaCopyItem extends BaseJsonModel {
+        /**
+         * 父级项目id
+         */
+        private String parendId;
+        /**
+         * id
+         */
+        private String id;
+
+        /**
+         * jvm 参数
+         */
+        private String jvm;
+        /**
+         * java main 方法参数
+         */
+        private String args;
+
+        private String modifyTime;
+
+        public String getId() {
+            return id;
+        }
+
+        public void setId(String id) {
+            this.id = id;
+        }
+
+        public String getTagId() {
+            return getTagId(parendId, id);
+        }
+
+        /**
+         * 创建进程标记
+         *
+         * @param id
+         * @param copyId
+         * @return
+         */
+        public static String getTagId(String id, String copyId) {
+            if (StrUtil.isEmpty(copyId)) {
+                return id;
+            }
+            return StrUtil.format("{}:{}", id, copyId);
+        }
+
+        public String getModifyTime() {
+            return modifyTime;
+        }
+
+        public void setModifyTime(String modifyTime) {
+            this.modifyTime = modifyTime;
+        }
+
+        /**
+         * 项目是否正在运行
+         *
+         * @return true 正在运行
+         */
+        public boolean tryGetStatus() {
+            try {
+                return AbstractProjectCommander.getInstance().isRun(getTagId());
+            } catch (Exception e) {
+                DefaultSystemLog.getLog().error("检查项目状态错误", e);
+                return false;
+            }
+        }
+
+        public String getParendId() {
+            return parendId;
+        }
+
+        public void setParendId(String parendId) {
+            this.parendId = parendId;
+        }
+
+        public String getJvm() {
+            return jvm;
+        }
+
+        public void setJvm(String jvm) {
+            this.jvm = jvm;
+        }
+
+        public String getArgs() {
+            return args;
+        }
+
+        public void setArgs(String args) {
+            this.args = args;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) {
+                return true;
+            }
+            if (o == null || getClass() != o.getClass()) {
+                return false;
+            }
+            JavaCopyItem that = (JavaCopyItem) o;
+            return Objects.equals(parendId, that.parendId) &&
+                    Objects.equals(id, that.id);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(parendId, id, jvm, args, modifyTime);
+        }
     }
 }

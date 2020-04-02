@@ -29,9 +29,35 @@ public class SshModel extends BaseModel {
     private List<String> fileDirs;
 
     /**
+     * ssh 私钥
+     */
+    private String privateKey;
+
+    private ConnectType connectType;
+
+    /**
      * 临时缓存model
      */
     private BaseModel nodeModel;
+
+    public ConnectType getConnectType() {
+        if (connectType == null) {
+            return ConnectType.PASS;
+        }
+        return connectType;
+    }
+
+    public void setConnectType(ConnectType connectType) {
+        this.connectType = connectType;
+    }
+
+    public String getPrivateKey() {
+        return privateKey;
+    }
+
+    public void setPrivateKey(String privateKey) {
+        this.privateKey = privateKey;
+    }
 
     public BaseModel getNodeModel() {
         return nodeModel;
@@ -116,5 +142,16 @@ public class SshModel extends BaseModel {
             charset = CharsetUtil.CHARSET_UTF_8;
         }
         return charset;
+    }
+
+    public enum ConnectType {
+        /**
+         * 账号密码
+         */
+        PASS,
+        /**
+         * 密钥
+         */
+        PUBKEY
     }
 }

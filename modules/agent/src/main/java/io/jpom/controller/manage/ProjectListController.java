@@ -1,5 +1,6 @@
 package io.jpom.controller.manage;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
@@ -38,7 +39,7 @@ public class ProjectListController extends BaseAgentController {
         ProjectInfoModel projectInfoModel = projectInfoService.getItem(id);
         if (projectInfoModel != null) {
             // 返回实际执行的命令
-            String command = AbstractProjectCommander.getInstance().buildCommand(projectInfoModel);
+            String command = AbstractProjectCommander.getInstance().buildCommand(projectInfoModel, null);
             projectInfoModel.setRunCommand(command);
         }
         return JsonMessage.getString(200, "", projectInfoModel);
@@ -76,7 +77,7 @@ public class ProjectListController extends BaseAgentController {
                 }
                 JSONObject object = projectInfoModel.toJson();
                 if (status) {
-                    object.put("status", projectInfoModel.isStatus(true));
+                    object.put("status", projectInfoModel.tryGetStatus());
                 }
                 array.add(object);
             }
@@ -95,5 +96,28 @@ public class ProjectListController extends BaseAgentController {
             DefaultSystemLog.getLog().error(e.getMessage(), e);
             return JsonMessage.getString(500, "查询异常：" + e.getMessage());
         }
+    }
+
+    /**
+     * 展示项目页面
+     */
+    @RequestMapping(value = "project_copy_list", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    public String projectCopyList(String id) {
+        ProjectInfoModel projectInfoModel = projectInfoService.getItem(id);
+        if (projectInfoModel == null) {
+            return JsonMessage.getString(404, "没有对应项目");
+        }
+        List<ProjectInfoModel.JavaCopyItem> javaCopyItemList = projectInfoModel.getJavaCopyItemList();
+        if (CollUtil.isEmpty(javaCopyItemList)) {
+            return JsonMessage.getString(404, "对应项目没有副本集");
+        }
+        JSONArray array = new JSONArray();
+        for (ProjectInfoModel.JavaCopyItem javaCopyItem : javaCopyItemList) {
+            JSONObject object = javaCopyItem.toJson();
+            object.put("status", javaCopyItem.tryGetStatus());
+            array.add(object);
+        }
+
+        return JsonMessage.getString(200, "", array);
     }
 }

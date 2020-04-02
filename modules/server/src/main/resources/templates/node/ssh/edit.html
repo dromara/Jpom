@@ -47,10 +47,32 @@
             <label class="layui-form-label">Password</label>
             <div class="layui-input-block">
                 <input type="password" id="password" name="password" th:value="${item?.password}"
-                       placeholder="请填写password" class="layui-input"
-                       lay-verify="required">
+                       placeholder="请填写password或者证书密码" class="layui-input">
             </div>
         </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">认证方式</label>
+            <div class="layui-input-block">
+                <input th:each="i : ${connectTypes}" type="radio" name="connectType" lay-filter="connectType"
+                       th:value="${i}"
+                       th:title="${i}"
+                       th:checked="${item?.connectType==i}">
+            </div>
+        </div>
+        <div class="layui-form-item" id="privateKey" style="display: none;">
+            <label class="layui-form-label">私钥内容</label>
+            <div class="layui-input-block">
+                <textarea name="privateKey" placeholder="-----BEGIN RSA PRIVATE KEY-----"
+                          class="layui-textarea" th:text="${item?.privateKey}"></textarea>
+            </div>
+        </div>
+        <script th:if="${item}" th:inline="javascript" type="text/javascript">
+            asyncFn.push(function () {
+                if ([[${item?.connectType}]] === 'PUBKEY') {
+                    $("#privateKey").show();
+                }
+            });
+        </script>
         <div class="layui-form-item">
             <label class="layui-form-label">编码格式</label>
             <div class="layui-input-block">
@@ -88,7 +110,7 @@
                 data: data.field,
                 success: function (data) {
                     layer.msg(data.msg);
-                    if (200 == data.code) {
+                    if (200 === data.code) {
                         autoClose();
                     }
                 }
@@ -109,12 +131,20 @@
                     },
                     success: function (data) {
                         layer.msg(data.msg);
-                        if (200 == data.code) {
+                        if (200 === data.code) {
                             autoClose();
                         }
                     }
                 });
             });
+        });
+
+        form.on('radio(connectType)', function (data) {
+            if (data.value === "PUBKEY") {
+                $("#privateKey").show();
+            } else {
+                $("#privateKey").hide();
+            }
         });
     }
 </script>

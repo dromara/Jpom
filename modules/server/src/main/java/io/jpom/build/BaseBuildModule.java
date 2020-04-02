@@ -28,6 +28,7 @@ public class BaseBuildModule extends BaseModel {
      * 分发后的操作
      * 仅在项目发布类型生效
      *
+     * @see io.jpom.model.AfterOpt
      * @see BuildModel#getAfterOpt()
      */
     private int afterOpt;

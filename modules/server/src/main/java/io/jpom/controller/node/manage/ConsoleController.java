@@ -35,11 +35,11 @@ public class ConsoleController extends BaseServerController {
      */
     @RequestMapping(value = "console", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
     @Feature(method = MethodFeature.EDIT)
-    public String console(String id) {
+    public String console(String id, String copyId) {
         JSONObject projectInfoModel = projectInfoService.getItem(getNode(), id);
         if (projectInfoModel != null) {
             setAttribute("projectInfo", projectInfoModel);
-            JSONObject logSize = projectInfoService.getLogSize(getNode(), id);
+            JSONObject logSize = projectInfoService.getLogSize(getNode(), id, copyId);
             setAttribute("logSize", logSize);
             setAttribute("manager", true);
         }

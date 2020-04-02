@@ -1,6 +1,8 @@
 package io.jpom.controller.manage;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.convert.Convert;
+import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.lang.PatternPool;
 import cn.hutool.core.lang.Validator;
@@ -26,6 +28,7 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.annotation.Resource;
 import java.io.File;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -74,12 +77,17 @@ public class ManageEditProjectController extends BaseAgentController {
         }
         projectInfo.setRunMode(runMode1);
         // 监测
-        if (runMode1 == RunMode.ClassPath) {
+        if (runMode1 == RunMode.ClassPath || runMode1 == RunMode.JavaExtDirsCp) {
             if (StrUtil.isEmpty(projectInfo.getMainClass())) {
-                return JsonMessage.getString(401, "ClassPath 模式 MainClass必填");
+                return JsonMessage.getString(401, "ClassPath、JavaExtDirsCp 模式 MainClass必填");
             }
-        } else if (runMode1 == RunMode.Jar || runMode1 == RunMode.War) {
+        } else if (runMode1 == RunMode.Jar || runMode1 == RunMode.JarWar) {
             projectInfo.setMainClass("");
+        }
+        if (runMode1 == RunMode.JavaExtDirsCp) {
+            if (StrUtil.isEmpty(projectInfo.getJavaExtDirsCp())) {
+                return JsonMessage.getString(401, "JavaExtDirsCp 模式 javaExtDirsCp必填");
+            }
         }
         // 判断是否为分发添加
         String strOutGivingProject = getParameter("outGivingProject");
@@ -103,6 +111,31 @@ public class ManageEditProjectController extends BaseAgentController {
         }
         if (!checkPathSafe(lib)) {
             return JsonMessage.getString(401, "项目Jar路径存在提升目录问题");
+        }
+        // java 程序副本
+        if (runMode1 == RunMode.ClassPath || runMode1 == RunMode.Jar || runMode1 == RunMode.JarWar || runMode1 == RunMode.JavaExtDirsCp) {
+            String javaCopyIds = getParameter("javaCopyIds");
+            if (StrUtil.isEmpty(javaCopyIds)) {
+                projectInfo.setJavaCopyItemList(null);
+            } else {
+                String[] split = StrUtil.split(javaCopyIds, StrUtil.COMMA);
+                List<ProjectInfoModel.JavaCopyItem> javaCopyItemList = new ArrayList<>(split.length);
+                for (String copyId : split) {
+                    String jvm = getParameter("jvm_" + copyId);
+                    String args = getParameter("args_" + copyId);
+                    //
+                    ProjectInfoModel.JavaCopyItem javaCopyItem = new ProjectInfoModel.JavaCopyItem();
+                    javaCopyItem.setId(copyId);
+                    javaCopyItem.setParendId(id);
+                    javaCopyItem.setModifyTime(DateUtil.now());
+                    javaCopyItem.setJvm(StrUtil.emptyToDefault(jvm, StrUtil.EMPTY));
+                    javaCopyItem.setArgs(StrUtil.emptyToDefault(args, StrUtil.EMPTY));
+                    javaCopyItemList.add(javaCopyItem);
+                }
+                projectInfo.setJavaCopyItemList(javaCopyItemList);
+            }
+        } else {
+            projectInfo.setJavaCopyItemList(null);
         }
         return null;
     }
@@ -173,7 +206,7 @@ public class ManageEditProjectController extends BaseAgentController {
         String edit = getParameter("edit");
         ProjectInfoModel exits = projectInfoService.getItem(projectInfo.getId());
         try {
-            JsonMessage jsonMessage = checkPath(projectInfo);
+            JsonMessage<String> jsonMessage = checkPath(projectInfo);
             if (jsonMessage != null) {
                 return jsonMessage.toString();
             }
@@ -201,10 +234,20 @@ public class ManageEditProjectController extends BaseAgentController {
                 exits.setLib(projectInfo.getLib());
                 exits.setJvm(projectInfo.getJvm());
                 exits.setArgs(projectInfo.getArgs());
+                exits.setOutGivingProject(projectInfo.isOutGivingProject());
                 exits.setRunMode(projectInfo.getRunMode());
                 exits.setWhitelistDirectory(projectInfo.getWhitelistDirectory());
                 exits.setToken(projectInfo.getToken());
                 exits.setJdkId(projectInfo.getJdkId());
+                // 检查是否非法删除副本集
+                List<ProjectInfoModel.JavaCopyItem> javaCopyItemList = exits.getJavaCopyItemList();
+                List<ProjectInfoModel.JavaCopyItem> javaCopyItemList1 = projectInfo.getJavaCopyItemList();
+                if (CollUtil.isNotEmpty(javaCopyItemList) && !CollUtil.containsAll(javaCopyItemList1, javaCopyItemList)) {
+                    // 重写了 equals
+                    return JsonMessage.getString(405, "修改中不能删除副本集、请到副本集中删除");
+                }
+                exits.setJavaCopyItemList(javaCopyItemList1);
+                exits.setJavaExtDirsCp(projectInfo.getJavaExtDirsCp());
                 //
                 moveTo(exits, projectInfo);
                 projectInfoService.updateItem(exits);
@@ -247,7 +290,7 @@ public class ManageEditProjectController extends BaseAgentController {
      * @param projectInfoModel 比较的项目
      * @return 不为null 则为错误
      */
-    private JsonMessage checkPath(ProjectInfoModel projectInfoModel) {
+    private JsonMessage<String> checkPath(ProjectInfoModel projectInfoModel) {
         List<ProjectInfoModel> projectInfoModelList = projectInfoService.list();
         if (projectInfoModelList == null) {
             return null;
@@ -269,7 +312,7 @@ public class ManageEditProjectController extends BaseAgentController {
             }
         }
         if (projectInfoModel1 != null) {
-            return new JsonMessage(401, "项目Jar路径和【" + projectInfoModel1.getName() + "】项目冲突:" + projectInfoModel1.allLib());
+            return new JsonMessage<>(401, "项目Jar路径和【" + projectInfoModel1.getName() + "】项目冲突:" + projectInfoModel1.allLib());
         }
         return null;
     }
@@ -280,17 +323,29 @@ public class ManageEditProjectController extends BaseAgentController {
      * @return json
      */
     @RequestMapping(value = "deleteProject", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public String deleteProject() {
+    public String deleteProject(String copyId) {
         ProjectInfoModel projectInfoModel = tryGetProjectInfoModel();
         if (projectInfoModel == null) {
             return JsonMessage.getString(200, "项目不存在");
         }
         try {
-            // 运行判断
-            if (projectInfoModel.isStatus(true)) {
-                return JsonMessage.getString(401, "不能删除正在运行的项目");
+            ProjectInfoModel.JavaCopyItem copyItem = projectInfoModel.findCopyItem(copyId);
+            if (copyItem == null) {
+                // 运行判断
+                if (projectInfoModel.tryGetStatus()) {
+                    return JsonMessage.getString(401, "不能删除正在运行的项目");
+                }
+                projectInfoService.deleteItem(projectInfoModel.getId());
+            } else {
+                if (copyItem.tryGetStatus()) {
+                    return JsonMessage.getString(401, "不能删除正在运行的项目副本");
+                }
+                boolean removeCopyItem = projectInfoModel.removeCopyItem(copyId);
+                if (!removeCopyItem) {
+                    return JsonMessage.getString(200, "删除对应副本集不存在");
+                }
+                projectInfoService.updateItem(projectInfoModel);
             }
-            projectInfoService.deleteItem(projectInfoModel.getId());
             return JsonMessage.getString(200, "删除成功！");
         } catch (Exception e) {
             DefaultSystemLog.getLog().error(e.getMessage(), e);
@@ -299,7 +354,7 @@ public class ManageEditProjectController extends BaseAgentController {
     }
 
     @RequestMapping(value = "releaseOutGiving", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public String releaseOutGiving() throws Exception {
+    public String releaseOutGiving() {
         ProjectInfoModel projectInfoModel = tryGetProjectInfoModel();
         if (projectInfoModel != null) {
             projectInfoModel.setOutGivingProject(false);

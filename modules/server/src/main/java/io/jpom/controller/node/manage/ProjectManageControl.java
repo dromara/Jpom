@@ -1,5 +1,6 @@
 package io.jpom.controller.node.manage;
 
+import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.validator.ValidatorItem;
 import cn.jiangzeyin.common.validator.ValidatorRule;
@@ -59,6 +60,24 @@ public class ProjectManageControl extends BaseServerController {
         return "node/manage/projectInfo";
     }
 
+
+    @RequestMapping(value = "projectCopyLList.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
+    @Feature(method = MethodFeature.LIST)
+    public String projectInfoPage() {
+        return "node/manage/javaCopyList";
+    }
+
+
+    /**
+     * 展示项目页面
+     */
+    @RequestMapping(value = "project_copy_list", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @Feature(method = MethodFeature.LIST)
+    @ResponseBody
+    public String projectCopyList() {
+        return NodeForward.request(getNode(), getRequest(), NodeUrl.Manage_ProjectCopyList).toString();
+    }
+
     /**
      * 获取正在运行的项目的端口和进程id
      *
@@ -68,6 +87,17 @@ public class ProjectManageControl extends BaseServerController {
     @ResponseBody
     public String getProjectPort() {
         return NodeForward.request(getNode(), getRequest(), NodeUrl.Manage_GetProjectPort).toString();
+    }
+
+    /**
+     * 获取正在运行的项目的端口和进程id
+     *
+     * @return json
+     */
+    @RequestMapping(value = "getProjectCopyPort", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @ResponseBody
+    public String getProjectCopyPort() {
+        return NodeForward.request(getNode(), getRequest(), NodeUrl.Manage_GetProjectCopyPort).toString();
     }
 
     /**
@@ -95,23 +125,25 @@ public class ProjectManageControl extends BaseServerController {
     @ResponseBody
     @OptLog(value = UserOperateLogV1.OptType.DelProject)
     @Feature(method = MethodFeature.DEL)
-    public String deleteProject(@ValidatorItem(value = ValidatorRule.NOT_BLANK) String id) {
+    public String deleteProject(@ValidatorItem(value = ValidatorRule.NOT_BLANK) String id, String copyId) {
         NodeModel nodeModel = getNode();
-        // 检查节点分发
-        List<OutGivingModel> outGivingModels = outGivingServer.list();
-        if (outGivingModels != null) {
-            for (OutGivingModel outGivingModel : outGivingModels) {
-                if (outGivingModel.checkContains(nodeModel.getId(), id)) {
-                    return JsonMessage.getString(405, "当前项目存在节点分发，不能直接删除");
+        if (StrUtil.isEmpty(copyId)) {
+            // 检查节点分发
+            List<OutGivingModel> outGivingModels = outGivingServer.list();
+            if (outGivingModels != null) {
+                for (OutGivingModel outGivingModel : outGivingModels) {
+                    if (outGivingModel.checkContains(nodeModel.getId(), id)) {
+                        return JsonMessage.getString(405, "当前项目存在节点分发，不能直接删除");
+                    }
                 }
             }
-        }
-        //
-        if (monitorService.checkProject(nodeModel.getId(), id)) {
-            return JsonMessage.getString(405, "当前项目存在监控项，不能直接删除");
-        }
-        if (buildService.checkNodeProjectId(nodeModel.getId(), id)) {
-            return JsonMessage.getString(405, "当前项目存在构建项，不能直接删除");
+            //
+            if (monitorService.checkProject(nodeModel.getId(), id)) {
+                return JsonMessage.getString(405, "当前项目存在监控项，不能直接删除");
+            }
+            if (buildService.checkNodeProjectId(nodeModel.getId(), id)) {
+                return JsonMessage.getString(405, "当前项目存在构建项，不能直接删除");
+            }
         }
         return NodeForward.request(nodeModel, getRequest(), NodeUrl.Manage_DeleteProject).toString();
     }

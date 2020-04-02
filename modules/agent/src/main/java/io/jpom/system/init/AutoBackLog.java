@@ -54,33 +54,42 @@ public class AutoBackLog {
                     return;
                 }
                 list.forEach(projectInfoModel -> {
-                    String log = projectInfoModel.getLog();
-                    File file = new File(log);
-                    if (!file.exists()) {
+                    checkProject(projectInfoModel, null);
+                    //
+                    List<ProjectInfoModel.JavaCopyItem> javaCopyItemList = projectInfoModel.getJavaCopyItemList();
+                    if (javaCopyItemList == null) {
                         return;
                     }
-                    long len = file.length();
-                    if (len > MAX_SIZE.getSize()) {
-                        try {
-                            AbstractProjectCommander.getInstance().backLog(projectInfoModel);
-                        } catch (Exception ignored) {
-                        }
-                    }
-                    // 清理过期的文件
-                    File logFile = projectInfoModel.getLogBack();
-                    DateTime nowTime = DateTime.now();
-                    List<File> files = FileUtil.loopFiles(logFile, pathname -> {
-                        DateTime dateTime = DateUtil.date(pathname.lastModified());
-                        long days = DateUtil.betweenDay(dateTime, nowTime, false);
-                        long saveDays = AgentExtConfigBean.getInstance().getLogSaveDays();
-                        return days > saveDays;
-                    });
-                    files.forEach(FileUtil::del);
+                    javaCopyItemList.forEach(javaCopyItem -> checkProject(projectInfoModel, javaCopyItem));
                 });
             } catch (Exception e) {
                 DefaultSystemLog.getLog().error("定时备份日志失败", e);
             }
         });
         CronUtils.start();
+    }
+
+    private static void checkProject(ProjectInfoModel projectInfoModel, ProjectInfoModel.JavaCopyItem javaCopyItem) {
+        File file = javaCopyItem == null ? new File(projectInfoModel.getLog()) : projectInfoModel.getLog(javaCopyItem);
+        if (!file.exists()) {
+            return;
+        }
+        long len = file.length();
+        if (len > MAX_SIZE.getSize()) {
+            try {
+                AbstractProjectCommander.getInstance().backLog(projectInfoModel, javaCopyItem);
+            } catch (Exception ignored) {
+            }
+        }
+        // 清理过期的文件
+        File logFile = javaCopyItem == null ? projectInfoModel.getLogBack() : projectInfoModel.getLogBack(javaCopyItem);
+        DateTime nowTime = DateTime.now();
+        List<File> files = FileUtil.loopFiles(logFile, pathname -> {
+            DateTime dateTime = DateUtil.date(pathname.lastModified());
+            long days = DateUtil.betweenDay(dateTime, nowTime, false);
+            long saveDays = AgentExtConfigBean.getInstance().getLogSaveDays();
+            return days > saveDays;
+        });
+        files.forEach(FileUtil::del);
     }
 }

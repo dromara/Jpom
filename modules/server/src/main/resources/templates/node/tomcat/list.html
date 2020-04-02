@@ -4,9 +4,19 @@
 <head th:replace="common/head::head">
 </head>
 <body>
-<blockquote class="layui-elem-quote layui-quote-nm">
-    Tomcat管理功能目前还未完善，建议不要在生产环境中使用
-</blockquote>
+<div class="layui-collapse">
+    <div class="layui-colla-item">
+        <h2 class="layui-colla-title" style="color: orangered">提示</h2>
+        <div class="layui-colla-content layui-show">
+            Tomcat管理功能使用建议：
+            <br>1.Windows下启动会存在控制台弹窗和cmd命令弹出，控制台弹窗关闭则Tomcat关闭，建议修改Tomcat的bin目录下：
+            <br>【setclasspath.bat】文件末尾81行左右的 【set _RUNJAVA="%JRE_HOME%\bin\java.exe"】
+            <br>==> 【set _RUNJAVA="%JRE_HOME%\bin\javaw.exe"】 则后台运行不弹出控制台弹窗，cmd弹窗可关闭
+            <br>2.Tomcat 管理功能还不健全，请生产环境谨慎使用，需测试环境多加测试
+            <br>3.Tomcat新增是指 配置服务器已有Tomcat信息，配置里面的 端口号实际是Tomcat的server.xml的端口配置
+        </div>
+    </div>
+</div>
 <div class="layui-row">
     <button onclick="editTomcat('');" class="layui-btn layui-btn-sm">添加Tomcat
     </button>

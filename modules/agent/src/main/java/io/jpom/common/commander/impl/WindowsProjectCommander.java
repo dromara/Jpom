@@ -21,27 +21,27 @@ import java.util.List;
 public class WindowsProjectCommander extends AbstractProjectCommander {
 
     @Override
-    public String buildCommand(ProjectInfoModel projectInfoModel) {
+    public String buildCommand(ProjectInfoModel projectInfoModel, ProjectInfoModel.JavaCopyItem javaCopyItem) {
         String classPath = ProjectInfoModel.getClassPathLib(projectInfoModel);
         if (StrUtil.isBlank(classPath)) {
             return null;
         }
         // 拼接命令
-        String jvm = projectInfoModel.getJvm();
-        String tag = projectInfoModel.getId();
+        String jvm = javaCopyItem == null ? projectInfoModel.getJvm() : javaCopyItem.getJvm();
+        String tag = javaCopyItem == null ? projectInfoModel.getId() : javaCopyItem.getTagId();
         String mainClass = projectInfoModel.getMainClass();
-        String args = projectInfoModel.getArgs();
+        String args = javaCopyItem == null ? projectInfoModel.getArgs() : javaCopyItem.getArgs();
         return String.format("%s %s %s " +
                         "%s  %s  %s >> %s &",
                 getRunJavaPath(projectInfoModel, true),
                 jvm, JvmUtil.getJpomPidTag(tag, projectInfoModel.allLib()),
-                classPath, mainClass, args, projectInfoModel.getAbsoluteLog());
+                classPath, mainClass, args, projectInfoModel.getAbsoluteLog(javaCopyItem));
     }
 
     @Override
-    public String stop(ProjectInfoModel projectInfoModel) throws Exception {
-        String result = super.stop(projectInfoModel);
-        String tag = projectInfoModel.getId();
+    public String stop(ProjectInfoModel projectInfoModel, ProjectInfoModel.JavaCopyItem javaCopyItem) throws Exception {
+        String result = super.stop(projectInfoModel, javaCopyItem);
+        String tag = javaCopyItem == null ? projectInfoModel.getId() : javaCopyItem.getTagId();
         // 查询状态，如果正在运行，则执行杀进程命令
         int pid = parsePid(result);
         if (pid > 0) {

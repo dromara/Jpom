@@ -99,7 +99,7 @@ public class NodeWelcomeController extends BaseServerController {
             DateTime startDate = DateUtil.parseDateTime(list.get(0));
             startTime = startDate.getTime();
             DateTime endDate = DateUtil.parseDateTime(list.get(1));
-            if (startDate.equals(endDate)) {
+            if (startDate.equals(endDate) || StrUtil.equalsAny("00:00:00", endDate.toString(DatePattern.NORM_TIME_FORMAT), startDate.toString(DatePattern.NORM_TIME_FORMAT))) {
                 endDate = DateUtil.endOfDay(endDate);
             }
             endTime = endDate.getTime();

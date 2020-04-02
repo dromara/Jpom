@@ -15,13 +15,16 @@
 
 <script type="text/html" id="bar_projects">
     {{# if(d.runMode!=='File'){ }}
-    <a href="javascript:;" class="layui-btn  layui-btn-sm layui-btn-normal" lay-event="manage">控制台</a>
+    <div class="layui-btn-group">
+        <a href="javascript:;" class="layui-btn  layui-btn-sm layui-btn-normal" lay-event="manage">控制台</a>
+        <a href="javascript:;" class="layui-btn  layui-btn-sm layui-btn-normal" lay-event="ram">监控</a>
+        {{# if(d.javaCopyItemList && d.javaCopyItemList.length>0){ }}
+        <a href="javascript:;" class="layui-btn  layui-btn-sm layui-btn-normal" lay-event="javaCopy">副本集</a>
+        {{# } }}
+    </div>
     {{# } }}
     <a href="javascript:;" class="layui-btn  layui-btn-sm layui-btn-warm" lay-event="update">配置</a>
     <a href="javascript:;" class="layui-btn  layui-btn-sm" lay-event="file">文件</a>
-    {{# if(d.runMode!=='File'){ }}
-    <a href="javascript:;" class="layui-btn  layui-btn-sm layui-btn-normal" lay-event="ram">监控</a>
-    {{# } }}
 </script>
 <script type="text/html" id="status_templ">
     {{# if(d.runMode!=='File'){ }}
@@ -64,6 +67,8 @@
 <script type="text/javascript">
     const apiWhere = {};
     var cachePortInfo;
+
+    var copyIframeWin;
 
     function getCacheItemInfo(data, key) {
         if (!data.status) {
@@ -148,7 +153,7 @@
                     ids: JSON.stringify(ids)
                 },
                 success: function (data) {
-                    if (200 == data.code) {
+                    if (200 === data.code) {
                         cachePortInfo = data.data;
                         for (var key in data.data) {
                             $("span[p-Id='" + key + "']").text(data.data[key].port).attr("title", "端口：" + data.data[key].port + "  进程id:" + data.data[key].pid);
@@ -174,6 +179,17 @@
             } else if ('manage' === event) {
                 // 管理
                 manageApplication(data);
+            } else if ('javaCopy' === event) {
+                layerOpen({
+                    type: 2,
+                    title: data.id + '- 项目副本集',
+                    shade: 0.8,
+                    area: ['80%', '60%'],
+                    content: './projectCopyLList.html?id=' + data.id,
+                    success: function (layero, index) {
+                        copyIframeWin = window[layero.find('iframe')[0]['name']];
+                    }
+                });
             } else if ('file' === event) {
                 fileManage(data);
             } else if ('ram' === event) {
@@ -229,14 +245,15 @@
         });
     }
 
-    function reloadTable(group) {
-        if (group) {
-            changeGroup(group);
-            window.location.reload();
-        } else {
-            table.reload('table_project', {
-                where: apiWhere
-            });
+    function reloadTable() {
+        table.reload('table_project', {
+            where: apiWhere
+        });
+    }
+
+    function reloadCopyTable() {
+        if (copyIframeWin) {
+            copyIframeWin.reloadTable && copyIframeWin.reloadTable();
         }
     }
 </script>

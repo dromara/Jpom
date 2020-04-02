@@ -14,6 +14,7 @@ import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
 import io.jpom.model.data.SshModel;
 import io.jpom.model.data.UserModel;
+import io.jpom.service.node.ssh.SshService;
 import io.jpom.socket.BaseHandler;
 import org.springframework.web.socket.BinaryMessage;
 import org.springframework.web.socket.TextMessage;
@@ -29,7 +30,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * ssh 处理
+ * ssh 处理2
  *
  * @author bwcx_jzy
  * @date 2019/8/9
@@ -42,17 +43,25 @@ public class SshHandler extends BaseHandler {
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
         SshModel sshItem = (SshModel) session.getAttributes().get("sshItem");
         Map<String, String[]> parameterMap = (Map<String, String[]>) session.getAttributes().get("parameterMap");
-        String[] tails = parameterMap.get("tail");
-        //
-        String tail = null;
-        if (tails != null && tails.length > 0 && !StrUtil.isEmptyOrUndefined(tails[0])) {
-            tail = tails[0];
+        String[] fileDirAlls = null;
+        //判断url是何操作请求
+        if (parameterMap.containsKey("tail")) {
+            fileDirAlls = parameterMap.get("tail");
+        } else if (parameterMap.containsKey("gz")) {
+            fileDirAlls = parameterMap.get("gz");
+        } else {
+            fileDirAlls = parameterMap.get("zip");
+        }
+        //检查文件路径
+        String fileDirAll = null;
+        if (fileDirAlls != null && fileDirAlls.length > 0 && !StrUtil.isEmptyOrUndefined(fileDirAlls[0])) {
+            fileDirAll = fileDirAlls[0];
             List<String> fileDirs = sshItem.getFileDirs();
             if (fileDirs == null) {
                 sendBinary(session, "没有配置路径");
                 return;
             }
-            File file = FileUtil.file(tail);
+            File file = FileUtil.file(fileDirAll);
             boolean find = false;
             for (String fileDir : fileDirs) {
                 if (FileUtil.isSub(FileUtil.file(fileDir), file)) {
@@ -65,7 +74,8 @@ public class SshHandler extends BaseHandler {
                 return;
             }
         }
-        Session openSession = JschUtil.openSession(sshItem.getHost(), sshItem.getPort(), sshItem.getUser(), sshItem.getPassword());
+        Session openSession = SshService.getSession(sshItem);
+        //JschUtil.openSession(sshItem.getHost(), sshItem.getPort(), sshItem.getUser(), sshItem.getPassword());
         Channel channel = JschUtil.createChannel(openSession, ChannelType.SHELL);
         InputStream inputStream = channel.getInputStream();
         OutputStream outputStream = channel.getOutputStream();
@@ -76,12 +86,27 @@ public class SshHandler extends BaseHandler {
         HANDLER_ITEM_CONCURRENT_HASH_MAP.put(session.getId(), handlerItem);
         //
         Thread.sleep(1000);
-        if (tail == null) {
+        //截取当前操作文件父路径
+        String fileLocalPath = null;
+        if (fileDirAll != null && fileDirAll.lastIndexOf("/") > -1) {
+            fileLocalPath = fileDirAll.substring(0, fileDirAll.lastIndexOf("/"));
+        }
+        if (fileDirAll == null) {
+            this.call(session, StrUtil.CR);
+        } else if (parameterMap.containsKey("tail")) {
+            // 查看文件
+            fileDirAll = FileUtil.normalize(fileDirAll);
+            this.call(session, StrUtil.format("tail -f {}", fileDirAll));
+            this.call(session, StrUtil.CR);
+        } else if (parameterMap.containsKey("zip")) {
+            //解压zip
+            fileDirAll = FileUtil.normalize(fileDirAll);
+            this.call(session, StrUtil.format("unzip -o {} -d " + "{}", fileDirAll, fileLocalPath));
             this.call(session, StrUtil.CR);
         } else {
-            // 查看文件
-            tail = FileUtil.normalize(tail);
-            this.call(session, StrUtil.format("tail -f {}", tail));
+            //解压 tar和tar.gz
+            fileDirAll = FileUtil.normalize(fileDirAll);
+            this.call(session, StrUtil.format("tar -xzvf {} -C " + "{}", fileDirAll, fileLocalPath));
             this.call(session, StrUtil.CR);
         }
     }

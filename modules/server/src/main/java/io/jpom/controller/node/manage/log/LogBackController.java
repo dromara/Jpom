@@ -42,9 +42,11 @@ public class LogBackController extends BaseServerController {
 
     @RequestMapping(value = "logBack", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
     @Feature(method = MethodFeature.LOG)
-    public String console(String id) {
+    public String console(String id, String copyId) {
         JSONObject jsonObject = NodeForward.requestData(getNode(), NodeUrl.Manage_Log_logBack, getRequest(), JSONObject.class);
         setAttribute("data", jsonObject);
+        //
+        setAttribute("copyId", copyId);
         return "node/manage/logBack";
     }
 
@@ -66,8 +68,8 @@ public class LogBackController extends BaseServerController {
 
     @RequestMapping(value = "logSize", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
-    public String logSize(String id) {
-        JSONObject info = projectInfoService.getLogSize(getNode(), id);
+    public String logSize(String id, String copyId) {
+        JSONObject info = projectInfoService.getLogSize(getNode(), id, copyId);
         return JsonMessage.getString(200, "", info);
     }
 

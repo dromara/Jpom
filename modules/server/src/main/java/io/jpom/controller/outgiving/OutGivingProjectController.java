@@ -12,6 +12,7 @@ import io.jpom.common.BaseServerController;
 import io.jpom.common.forward.NodeForward;
 import io.jpom.common.forward.NodeUrl;
 import io.jpom.common.interceptor.OptLog;
+import io.jpom.model.AfterOpt;
 import io.jpom.model.BaseEnum;
 import io.jpom.model.data.NodeModel;
 import io.jpom.model.data.OutGivingModel;
@@ -96,7 +97,7 @@ public class OutGivingProjectController extends BaseServerController {
     @Feature(method = MethodFeature.UPLOAD)
     public String addOutgiving(String id) {
 
-        JSONArray jsonArray = BaseEnum.toJSONArray(OutGivingModel.AfterOpt.class);
+        JSONArray jsonArray = BaseEnum.toJSONArray(AfterOpt.class);
         setAttribute("afterOpt", jsonArray);
         //
         OutGivingModel outGivingModel = outGivingServer.getItem(id);
@@ -129,7 +130,7 @@ public class OutGivingProjectController extends BaseServerController {
                 return JsonMessage.getString(400, "当前还在分发中,请等待分发结束");
             }
         }
-        OutGivingModel.AfterOpt afterOpt1 = BaseEnum.getEnum(OutGivingModel.AfterOpt.class, Convert.toInt(afterOpt, 0));
+        AfterOpt afterOpt1 = BaseEnum.getEnum(AfterOpt.class, Convert.toInt(afterOpt, 0));
         if (afterOpt1 == null) {
             return JsonMessage.getString(400, "请选择分发后的操作");
         }
