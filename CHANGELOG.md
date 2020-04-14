@@ -23,6 +23,8 @@
 6. 【Server】解决节点分组筛选bug(感谢gitee@I17XEH)
 7. 【Server】角色权限动态数据，单个节点异常不影响所有节点配置（感谢@￡天空之城～龙）
 8. 【Server】关联节点分发项目支持修改发布后操作
+9. 补充说明文档：[详情](https://jpom-site.keepbx.cn/docs/index.html#/) (感谢@TXpcmgr（Geiger）)
+10. 更新部分插件依赖版本【hutool、fast-boot、fastjson】
 
 > 注意：如果在2.4.7以下项目运行方式中使用过【War】模式的由于【War】更名为【JarWar】 所有在升级后请重新修改运行方式后再运行对应项目
 

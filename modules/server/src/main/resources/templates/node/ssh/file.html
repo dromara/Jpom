@@ -38,20 +38,12 @@
 <table class="layui-table" id="table" lay-filter="table" style="margin: 0;"></table>
 </body>
 <script type="text/html" id="bar_monitor">
+    <a href="javascript:;" class="layui-btn  layui-btn-sm  layui-btn-warm" lay-event="terminal">终端</a>
     {{# if(!d.path){ }}
     <a href="javascript:;" class="layui-btn  layui-btn-sm  layui-btn-danger" lay-event="delete">删除</a>
     {{# } }}
-    {{# if(!d.dir && !d.gz && !d.tar && !d.zip && !d.rar){ }}
-    <a href="javascript:;" class="layui-btn  layui-btn-sm  layui-btn-warm" lay-event="terminal">终端</a>
-    {{# } }}
     {{# if(!d.dir){ }}
     <a href="javascript:;" class="layui-btn  layui-btn-sm layui-btn-normal" lay-event="download">下载</a>
-    {{# } }}
-    {{# if(d.zip){ }}
-    <a href="javascript:;" class="layui-btn  layui-btn-sm layui-btn-normal" lay-event="compresszip">解压</a>
-    {{# } }}
-    {{# if(d.gz || d.tar){ }}
-    <a href="javascript:;" class="layui-btn  layui-btn-sm layui-btn-normal" lay-event="compressgz">解压</a>
     {{# } }}
 </script>
 <script type="text/javascript">
@@ -60,7 +52,7 @@
     var nowPath = '';
     var rootPath;
     var col = [
-        {field: 'title', title: '文件名称', event: 'rowClick',width:"25%",sort: true},
+        {field: 'title', title: '文件名称', event: 'rowClick'},
         {
             field: 'dir', title: '文件类型', event: 'rowClick', templet: function (d) {
                 if (d.dir) {
@@ -69,9 +61,9 @@
                 return '文件';
             }
         },
-        {field: 'size', title: '文件大小', event: 'rowClick' ,sort: true},
-        {field: 'modifyTime', title: '修改时间', event: 'rowClick' ,sort: true},
-        {field: 'op', title: '操作', align: 'center', toolbar: '#bar_monitor', fixed: 'right',width: "30%"}
+        {field: 'size', title: '文件大小', event: 'rowClick'},
+        {field: 'modifyTime', title: '修改时间', event: 'rowClick'},
+        {field: 'op', title: '操作', align: 'center', toolbar: '#bar_monitor', fixed: 'right'}
     ];
 
     function loadSuccess() {
@@ -102,7 +94,6 @@
             if ('download' === event) {
                 // 下载
                 if (!data.dir) {
-                    //打开一个浏览器窗口
                     window.open("./download.html?id=" + id + "&path=" + rootPath + "&name=" + data.parentDir);
                 }
             } else if ('terminal' === event) {
@@ -114,29 +105,7 @@
                 tabChange({
                     id: id + tailPtah,
                     url: './node/ssh/terminal.html?id=' + id + "&tail=" + tailPtah,
-                    title: data.name + ' -查看终端',
-                });
-            } else if ('compresszip' === event){
-                let parentDir = formatePath(data.parentDir);
-                var zipPtah = rootPath + parentDir;
-                if (!rootPath) {
-                    tailPtah = data.path;
-                }
-                tabChange({
-                    id: id + zipPtah,
-                    url: './node/ssh/terminal.html?id=' + id + "&zip=" + zipPtah,
-                    title: data.name + ' - zip解压终端',
-                });
-            } else if ('compressgz' === event){
-                let parentDir = formatePath(data.parentDir);
-                var gzPtah = rootPath + parentDir;
-                if (!rootPath) {
-                    gzPtah = data.path;
-                }
-                tabChange({
-                    id: id + gzPtah,
-                    url: './node/ssh/terminal.html?id=' + id + "&gz=" + gzPtah,
-                    title: data.name + ' - gz解压终端',
+                    title: data.name + ' - 文件终端',
                 });
             } else if ('delete' === event) {
                 let path = rootPath;
