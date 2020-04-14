@@ -75,10 +75,10 @@ public class DbBuildHistoryLogService extends BaseDbLogService<BuildHistoryLog> 
      * @param logId 记录id
      * @return json
      */
-    public JsonMessage deleteLogAndFile(String logId) {
+    public JsonMessage<String> deleteLogAndFile(String logId) {
         BuildHistoryLog buildHistoryLog = getByKey(logId);
         if (buildHistoryLog == null) {
-            return new JsonMessage(405, "没有对应构建记录");
+            return new JsonMessage<>(405, "没有对应构建记录");
         }
         BuildModel item = buildService.getItem(buildHistoryLog.getBuildDataId());
         if (item != null) {
@@ -87,12 +87,12 @@ public class DbBuildHistoryLogService extends BaseDbLogService<BuildHistoryLog> 
             if (dataFile.exists()) {
                 boolean s = FileUtil.del(dataFile);
                 if (!s) {
-                    return new JsonMessage(500, "清理文件失败");
+                    return new JsonMessage<>(500, "清理文件失败");
                 }
             }
         }
         int count = delByKey(logId);
-        return new JsonMessage<>(200, "删除成功", count);
+        return new JsonMessage<>(200, "删除成功", count + "");
     }
 
     @Override
@@ -101,17 +101,20 @@ public class DbBuildHistoryLogService extends BaseDbLogService<BuildHistoryLog> 
         // 清理总数据
         int buildMaxHistoryCount = ServerExtConfigBean.getInstance().getBuildMaxHistoryCount();
         DbConfig.autoClear(getTableName(), "startTime", buildMaxHistoryCount,
-                aLong -> doClearPage(1, aLong));
+                aLong -> doClearPage(1, aLong, null));
         // 清理单个
         int buildItemMaxHistoryCount = ServerExtConfigBean.getInstance().getBuildItemMaxHistoryCount();
         DbConfig.autoClear(getTableName(), "startTime", buildItemMaxHistoryCount,
                 entity -> entity.set("buildDataId", buildHistoryLog.getBuildDataId()),
-                aLong -> doClearPage(1, aLong));
+                aLong -> doClearPage(1, aLong, buildHistoryLog.getBuildDataId()));
     }
 
-    private void doClearPage(int pageNo, long time) {
+    private void doClearPage(int pageNo, long time, String buildDataId) {
         Entity entity = Entity.create(getTableName());
         entity.set("startTime", "< " + time);
+        if (buildDataId != null) {
+            entity.set("buildDataId", buildDataId);
+        }
         Page page = new Page(pageNo, 10);
         page.addOrder(new Order("startTime", Direction.DESC));
         PageResult<Entity> pageResult;
@@ -126,13 +129,13 @@ public class DbBuildHistoryLogService extends BaseDbLogService<BuildHistoryLog> 
                 copyOptions.setIgnoreCase(true);
                 BuildHistoryLog v1 = BeanUtil.mapToBean(entity1, BuildHistoryLog.class, copyOptions);
                 String id = v1.getId();
-                JsonMessage jsonMessage = deleteLogAndFile(id);
+                JsonMessage<String> jsonMessage = deleteLogAndFile(id);
                 if (jsonMessage.getCode() != HttpStatus.HTTP_OK) {
                     DefaultSystemLog.getLog().info(jsonMessage.toString());
                 }
             });
             if (pageResult.getTotalPage() > pageResult.getPage()) {
-                doClearPage(pageNo + 1, time);
+                doClearPage(pageNo + 1, time, buildDataId);
             }
         } catch (SQLException e) {
             DefaultSystemLog.getLog().error("数据库查询异常", e);
