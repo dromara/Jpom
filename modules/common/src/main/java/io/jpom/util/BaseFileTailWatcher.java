@@ -70,6 +70,7 @@ public abstract class BaseFileTailWatcher<T> {
     /**
      * 添加监听会话
      *
+     * @param name    文件名
      * @param session 会话
      */
     protected void add(T session, String name) {

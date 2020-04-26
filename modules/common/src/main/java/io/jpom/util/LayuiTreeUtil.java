@@ -17,6 +17,7 @@ public class LayuiTreeUtil {
     /**
      * 获取树的json
      *
+     * @param path 文件名
      * @return jsonArray
      */
     public static JSONArray getTreeData(String path) {
