@@ -10,6 +10,7 @@ import io.jpom.system.JpomRuntimeException;
 
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Pattern;
 
 /**
  * tomcat命令执行工具类
@@ -101,5 +102,11 @@ public abstract class AbstractTomcatCommander {
         } catch (IOException | InterruptedException e) {
             DefaultSystemLog.getLog().error("tomcat执行名称失败", e);
         }
+    }
+
+    //判断是否为数字型字符串
+    public static boolean isInteger(String str) {
+        Pattern pattern = Pattern.compile("^[-\\+]?[\\d]*$");
+        return pattern.matcher(str).matches();
     }
 }

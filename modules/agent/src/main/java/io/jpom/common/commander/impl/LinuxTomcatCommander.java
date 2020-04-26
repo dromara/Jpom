@@ -1,8 +1,13 @@
 package io.jpom.common.commander.impl;
 
+import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.text.StrSpliter;
 import cn.hutool.core.util.StrUtil;
 import io.jpom.common.commander.AbstractTomcatCommander;
 import io.jpom.model.data.TomcatInfoModel;
+import io.jpom.util.CommandUtil;
+
+import java.util.List;
 
 /**
  * tomcat的linux管理命令
@@ -19,21 +24,25 @@ public class LinuxTomcatCommander extends AbstractTomcatCommander {
         }
         String command = null;
         if (cmd.equals("stop")){
-            // 拼接命令
-            command = String.format("java -Djava.util.logging.config.file=%sconf/logging.properties " +
-                            "-Djava.util.logging.manager=org.apache.juli.ClassLoaderLogManager " +
-                            "-Djdk.tls.ephemeralDHKeySize=2048 " +
-                            "-Djava.protocol.handler.pkgs=org.apache.catalina.webresources " +
-                            "-Dignore.endorsed.dirs=%s " +
-                            "-classpath %sbin/bootstrap.jar:%sbin/tomcat-juli.jar " +
-                            "-Dcatalina.base=%s " +
-                            "-Dcatalina.home=%s " +
-                            "-Djava.io.tmpdir=%stemp/ " +
-                            "org.apache.catalina.startup.Bootstrap %s", tomcatPath, tomcatPath,
-                    tomcatPath, tomcatPath, tomcatPath,
-                    tomcatPath, tomcatPath, cmd);
-            //
-            exec(command, false);
+            String setPidCmd = CommandUtil.execSystemCommand("jps -mv");
+            List<String> list = StrSpliter.splitTrim(setPidCmd, StrUtil.LF, true);
+            for (String item : list){
+                //路径格式转换
+                String msg = FileUtil.normalize(item + "/");
+                //判断集合中元素是否包含指定Tomcat路径
+                boolean w = msg.contains(tomcatInfoModel.getPath());
+                if (w){
+                    //截取TomcatPid
+                    if (msg.indexOf(" ") > 1){
+                        String tmPid = msg.substring(0,msg.indexOf(" "));
+                        //判断截取的PID是否为纯数字
+                        if (isInteger(tmPid)){
+                            command = String.format("kill -9 %s",tmPid);
+                            exec(command, false);
+                        }
+                    }
+                }
+            }
         } else {
             command = String.format("/bin/sh -c %s/bin/startup.sh", tomcatPath);
             //

@@ -85,7 +85,7 @@ yum install -y wget && wget -O install.sh https://keepbx.gitee.io/jpom/install.s
 ```
 yum install -y wget && wget -O install.sh https://keepbx.gitee.io/jpom/install.sh && bash install.sh Agent
 ```
-
+>特别提醒：一键安装的时候注意执行命令不可在同一目录下，即Server端和Agent端不可安装在同一目录下
 ### 下载安装
 
 > [帮助文档](https://jpom-site.keepbx.cn/docs/#/安装使用/开始安装)
