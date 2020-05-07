@@ -32,9 +32,9 @@ import java.util.Objects;
  */
 public class ReleaseManage extends BaseBuild {
 
-    private UserModel userModel;
-    private int buildId;
-    private BaseBuildModule baseBuildModule;
+    private final UserModel userModel;
+    private final int buildId;
+    private final BaseBuildModule baseBuildModule;
     private File resultFile;
     private BaseBuild baseBuild;
 
@@ -170,7 +170,7 @@ public class ReleaseManage extends BaseBuild {
         // 执行命令
         String[] commands = StrUtil.split(this.baseBuildModule.getReleaseCommand(), StrUtil.LF);
         if (commands == null || commands.length <= 0) {
-            this.log("没有需要s执行的ssh命令");
+            this.log("没有需要执行的ssh命令");
             return;
         }
         for (String commandItem : commands) {

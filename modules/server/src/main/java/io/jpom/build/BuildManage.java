@@ -1,5 +1,6 @@
 package io.jpom.build;
 
+import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.io.LineHandler;
@@ -117,16 +118,20 @@ public class BuildManage extends BaseBuild implements Runnable {
     private void insertLog() {
         this.logId = IdUtil.fastSimpleUUID();
         BuildHistoryLog buildHistoryLog = new BuildHistoryLog();
-        buildHistoryLog.setBuildDataId(buildModel.getId());
-        buildHistoryLog.setResultDirFile(buildModel.getResultDirFile());
+
+//        buildHistoryLog.setResultDirFile(buildModel.getResultDirFile());
+//        buildHistoryLog.setReleaseMethod(this.buildModel.getReleaseMethod());
+//        buildHistoryLog.setReleaseMethodDataId(this.buildModel.getReleaseMethodDataId());
+//        buildHistoryLog.setAfterOpt(this.buildModel.getAfterOpt());
+//        buildHistoryLog.setReleaseCommand(this.buildModel.getReleaseCommand());
+        BeanUtil.copyProperties(this.buildModel, buildHistoryLog);
+
         buildHistoryLog.setId(this.logId);
+        buildHistoryLog.setBuildDataId(buildModel.getId());
         buildHistoryLog.setStatus(BuildModel.Status.Ing.getCode());
         buildHistoryLog.setStartTime(System.currentTimeMillis());
         buildHistoryLog.setBuildNumberId(buildModel.getBuildId());
         buildHistoryLog.setBuildUser(optUserName);
-        buildHistoryLog.setReleaseMethod(this.buildModel.getReleaseMethod());
-        buildHistoryLog.setReleaseMethodDataId(this.buildModel.getReleaseMethodDataId());
-        buildHistoryLog.setAfterOpt(this.buildModel.getAfterOpt());
 
         DbBuildHistoryLogService dbBuildHistoryLogService = SpringUtil.getBean(DbBuildHistoryLogService.class);
         dbBuildHistoryLogService.insert(buildHistoryLog);
