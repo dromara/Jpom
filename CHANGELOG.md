@@ -6,7 +6,7 @@
 
 ### 解决BUG、优化功能
 
-1. 构建历史中记录字段不全问题（感谢@￡天空之城～龙）
+1. 【Server】构建历史中记录字段不全问题（感谢@￡天空之城～龙）
 
 -----------------------------------------------------------
 
@@ -14,7 +14,7 @@
 
 ### 新增功能
 
-1. [支持maven快速编辑节点项目](https://gitee.com/keepbx/Jpom-Plugin/tree/master/jpom-maven-plugin)（配合`jpom-maven-plugin`使用）(感谢@夜空中最亮的星)
+1. [支持maven快速编辑节点项目](https://gitee.com/keepbx/Jpom-Plugin/tree/master/jpom-maven-plugin) （配合`jpom-maven-plugin`使用）(感谢@夜空中最亮的星)
 2. 【Agent】 新增jdk 管理，不同项目选择不同的jdk （GITEE@IV8ZZ）
 3. 【Server】构建新增分组属性，方便快速选择
 4. 【Agent】 新增[JavaExtDirsCp] 运行模式 (感谢@TXpcmgr（Geiger）)
