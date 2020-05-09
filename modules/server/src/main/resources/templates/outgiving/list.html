@@ -114,7 +114,7 @@
                                 if ("conslone" == op || "file" == op) {
                                     var nodeId = data.nodeId;
                                     var projectId = data.projectId;
-                                    var url = "file" == op ? "/node/manage/file/list.html" : "/node/manage/console";
+                                    var url = "file" == op ? "../node/manage/file/list.html" : "../node/manage/console";
                                     url = urlUpdateParams(url, "nodeId", nodeId);
                                     url = urlUpdateParams(url, "id", projectId);
                                     var index = layerOpen({

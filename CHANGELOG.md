@@ -8,6 +8,7 @@
 
 1. 【Server】构建历史中记录字段不全问题（感谢@￡天空之城～龙）
 2. 【Server】Java-WebSocket 模块漏洞版本更新 来源 [Github GHSA-gw55-jm4h-x339](https://github.com/advisories/GHSA-gw55-jm4h-x339)
+3. 【Server】节点分发列表点击控制台、文件管理404
 
 -----------------------------------------------------------
 
