@@ -105,6 +105,9 @@
                             config.where = {
                                 id: "[[${item.id}]]"
                             };
+                            config.done = function () {
+                                refreshStatus("[[${item.id}]]");
+                            }
                             tableRender(config);
 
                             // 点击事件
@@ -133,9 +136,6 @@
                     <script type="text/javascript" th:outGivingItemProject="${item.id}" th:nodeId="${tr.nodeId}"
                             th:projectId="${tr.projectId}"
                             th:each="tr : ${item.outGivingNodeProjectList}">
-                        asyncFn.push(function () {
-                            getProjectStatus("[[${tr.nodeId}]]", "[[${tr.projectId}]]");
-                        });
                     </script>
                 </form>
             </div>
@@ -150,6 +150,17 @@
 
 </body>
 <script type="text/javascript">
+
+    function refreshStatus(itemId) {
+        $("script[outGivingItemProject='" + itemId + "']").each(function (i, item) {
+            var projectId = $(this).attr("projectId");
+            var nodeId = $(this).attr("nodeId");
+
+            if (projectId && nodeId) {
+                getProjectStatus(nodeId, projectId);
+            }
+        });
+    }
 
     function loadSuccess() {
         // 点击事件
@@ -179,21 +190,14 @@
             }
             if ("refresh" == op) {
                 var itemId = $(this).attr("itemId");
-                $("script[outGivingItemProject='" + itemId + "']").each(function (i, item) {
-                    var projectId = $(this).attr("projectId");
-                    var nodeId = $(this).attr("nodeId");
-                    table.reload('table_' + itemId, {
-                        done: function () {
-                            if (projectId && nodeId) {
-                                getProjectStatus(nodeId, projectId);
-                            }
-                        }
-                    });
+                table.reload('table_' + itemId, {
+                    done: function () {
+                        refreshStatus(itemId);
+                    }
                 });
             }
             return false;
         });
-
 
         element.on('collapse(node)', function (data) {
             $("button[op='refresh']").hide();
