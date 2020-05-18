@@ -1,8 +1,10 @@
 package io.jpom.outgiving;
 
+import cn.hutool.core.convert.Convert;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.IdUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.http.HttpStatus;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
@@ -73,6 +75,11 @@ public class OutGivingRun implements Callable<OutGivingNodeProject.Status> {
         // 开启线程
         if (afterOpt == AfterOpt.Order_Restart || afterOpt == AfterOpt.Order_Must_Restart) {
             ThreadUtil.execute(() -> {
+                // 截取睡眠时间
+                String name = item.getName();
+                String afterTime = StrUtil.subAfter(name, StrUtil.COLON, true);
+                int sleepTime = Convert.toInt(afterTime, 30);
+                //
                 boolean cancel = false;
                 for (OutGivingNodeProject outGivingNodeProject : outGivingNodeProjects) {
                     if (cancel) {
@@ -87,9 +94,9 @@ public class OutGivingRun implements Callable<OutGivingNodeProject.Status> {
                                 cancel = true;
                             }
                         }
-                        // 休眠30秒 等待之前项目正常启动
+                        // 休眠x秒 等待之前项目正常启动
                         try {
-                            TimeUnit.SECONDS.sleep(30);
+                            TimeUnit.SECONDS.sleep(sleepTime);
                         } catch (InterruptedException ignored) {
                         }
                     }
