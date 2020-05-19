@@ -10,6 +10,7 @@
 2. 【Server】Java-WebSocket 模块漏洞版本更新 来源 [Github GHSA-gw55-jm4h-x339](https://github.com/advisories/GHSA-gw55-jm4h-x339)
 3. 【Server】节点分发列表点击控制台、文件管理404
 4. 【Server】节点分发顺序重启休眠时间取构建名称最后的时间（测试构建:10  则睡眠时间为10秒）
+5. 【Agent】启动完成打印授权信息日志级别调至error 
 
 -----------------------------------------------------------
 
