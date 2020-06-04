@@ -134,7 +134,7 @@ public class JpomApplicationEvent implements ApplicationEventClient {
             System.exit(-1);
         }
         FileUtil.del(file);
-        DefaultSystemLog.getLog().info("1Jpom[{}]外部配置文件路径：{}", JpomManifest.getInstance().getVersion(), extConfigPath);
+        DefaultSystemLog.getLog().info("Jpom[{}]外部配置文件路径：{}", JpomManifest.getInstance().getVersion(), extConfigPath);
     }
 
     private static void checkUpdate() {
