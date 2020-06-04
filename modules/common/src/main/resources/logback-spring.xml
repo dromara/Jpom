@@ -36,6 +36,17 @@
         </layout>
     </appender>
 
+    <appender name="consoleDebug" class="ch.qos.logback.core.ConsoleAppender">
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>DEBUG</level>
+            <onMatch>ACCEPT</onMatch>
+            <onMismatch>DENY</onMismatch>
+        </filter>
+        <layout class="ch.qos.logback.classic.PatternLayout">
+            <pattern><![CDATA[%date %level [%thread] %logger{10} [%file:%line]- x:\(%X\) %msg%n]]></pattern>
+        </layout>
+    </appender>
+
     <appender name="errorFileAppender" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <File>${logPath}/error/systemError.log</File>
         <filter class="ch.qos.logback.classic.filter.LevelFilter">
@@ -105,6 +116,12 @@
             <appender-ref ref="consoleError"/>
             <appender-ref ref="consoleWarn"/>
         </root>
+        <logger name="io.jpom" level="debug" additivity="true">
+            <appender-ref ref="consoleDebug"/>
+        </logger>
+        <logger name="cn.jiangzeyin" level="debug" additivity="true">
+            <appender-ref ref="consoleDebug"/>
+        </logger>
     </springProfile>
 
     <springProfile name="pro">
