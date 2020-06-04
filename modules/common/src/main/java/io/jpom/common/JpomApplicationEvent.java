@@ -45,7 +45,8 @@ public class JpomApplicationEvent implements ApplicationEventClient {
             //
             checkPath();
             // 清理旧进程新文件
-            List<File> files = FileUtil.loopFiles(ConfigBean.getInstance().getDataPath(), pathname -> pathname.getName().startsWith("pid."));
+            File dataDir = FileUtil.file(ConfigBean.getInstance().getDataPath());
+            List<File> files = FileUtil.loopFiles(dataDir, 1, pathname -> pathname.getName().startsWith("pid."));
             files.forEach(FileUtil::del);
             DefaultSystemLog.getLog().debug("clear old pid file success");
             try {
