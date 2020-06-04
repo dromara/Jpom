@@ -47,11 +47,13 @@ public class JpomApplicationEvent implements ApplicationEventClient {
             // 清理旧进程新文件
             List<File> files = FileUtil.loopFiles(ConfigBean.getInstance().getDataPath(), pathname -> pathname.getName().startsWith("pid."));
             files.forEach(FileUtil::del);
+            DefaultSystemLog.getLog().debug("clear old pid file success");
             try {
                 this.lockFile();
             } catch (IOException e) {
                 DefaultSystemLog.getLog().error("lockFile", e);
             }
+            DefaultSystemLog.getLog().debug("lock pid file success");
             // 写入Jpom 信息
             JpomManifest jpomManifest = JpomManifest.getInstance();
             //  写入全局信息
@@ -104,7 +106,8 @@ public class JpomApplicationEvent implements ApplicationEventClient {
             try {
                 lock = fileChannel.lock();
                 break;
-            } catch (OverlappingFileLockException | IOException ignored) {
+            } catch (OverlappingFileLockException | IOException e) {
+                DefaultSystemLog.getLog().warn("获取进程文件锁失败：" + e.getMessage());
             }
             try {
                 Thread.sleep(100);
@@ -130,7 +133,7 @@ public class JpomApplicationEvent implements ApplicationEventClient {
             System.exit(-1);
         }
         FileUtil.del(file);
-        DefaultSystemLog.getLog().info("Jpom[{}]外部配置文件路径：{}", JpomManifest.getInstance().getVersion(), extConfigPath);
+        DefaultSystemLog.getLog().info("1Jpom[{}]外部配置文件路径：{}", JpomManifest.getInstance().getVersion(), extConfigPath);
     }
 
     private static void checkUpdate() {
