@@ -108,7 +108,7 @@ public class KeyLock<K> {
      */
     private static class LockInfo {
         private final Semaphore semaphore;
-        private AtomicInteger lockCount = new AtomicInteger(0);
+        private final AtomicInteger lockCount = new AtomicInteger(0);
 
         private LockInfo() {
             this.semaphore = new Semaphore(1);

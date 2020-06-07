@@ -10,6 +10,7 @@ import io.jpom.system.ExtConfigBean;
 import io.jpom.util.StringUtil;
 import org.springframework.http.HttpMethod;
 
+import javax.servlet.http.HttpServletRequest;
 import java.io.File;
 import java.util.Arrays;
 import java.util.Map;
@@ -67,7 +68,7 @@ public class CheckPath {
                 }
 
                 @Override
-                public void logStart(String id, String url, HttpMethod httpMethod, String ip, Map<String, String> parameters, Map<String, String> header) {
+                public void logStart(HttpServletRequest request, String id, String url, HttpMethod httpMethod, String ip, Map<String, String> parameters, Map<String, String> header) {
 
                 }
 
