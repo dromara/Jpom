@@ -140,11 +140,15 @@ public class CommandUtil {
         String[] split = StrUtil.split(script, StrUtil.SPACE);
         if (SystemUtil.getOsInfo().isWindows()) {
             for (String s : split) {
-                return StrUtil.containsAnyIgnoreCase(s, "rd", "del");
+                if (StrUtil.containsAnyIgnoreCase(s, "rd", "del")) {
+                    return true;
+                }
             }
         } else {
             for (String s : split) {
-                return StrUtil.containsIgnoreCase(s, "rm");
+                if (StrUtil.containsIgnoreCase(s, "rm")) {
+                    return true;
+                }
             }
         }
         return false;
