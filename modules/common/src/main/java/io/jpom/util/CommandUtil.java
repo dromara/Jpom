@@ -146,7 +146,7 @@ public class CommandUtil {
             }
         } else {
             for (String s : split) {
-                if (StrUtil.containsIgnoreCase(s, "rm")) {
+                if (StrUtil.containsAnyIgnoreCase(s, "rm", "\rm")) {
                     return true;
                 }
             }
