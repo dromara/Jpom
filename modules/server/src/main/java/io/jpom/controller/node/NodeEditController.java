@@ -8,7 +8,6 @@ import io.jpom.common.BaseServerController;
 import io.jpom.common.interceptor.OptLog;
 import io.jpom.model.Cycle;
 import io.jpom.model.data.NodeModel;
-import io.jpom.model.data.UserModel;
 import io.jpom.model.log.UserOperateLogV1;
 import io.jpom.plugin.ClassFeature;
 import io.jpom.plugin.Feature;
@@ -26,7 +25,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.annotation.Resource;
 import java.util.HashSet;
-import java.util.List;
 
 /**
  * 节点管理
@@ -110,12 +108,12 @@ public class NodeEditController extends BaseServerController {
         }
         nodeService.deleteItem(id);
         // 删除授权
-        List<UserModel> list = userService.list();
-        if (list != null) {
-            list.forEach(userModel -> {
-                userService.updateItem(userModel);
-            });
-        }
+        //        List<UserModel> list = userService.list();
+        //        if (list != null) {
+        //            list.forEach(userModel -> {
+        //                userService.updateItem(userModel);
+        //            });
+        //        }
         return JsonMessage.getString(200, "操作成功");
     }
 }
