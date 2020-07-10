@@ -318,7 +318,11 @@ public abstract class AbstractProjectCommander {
     public String status(String tag) throws Exception {
         VirtualMachine virtualMachine = JvmUtil.getVirtualMachine(tag);
         if (virtualMachine == null) {
-            return getJpsStatus(tag);
+            String jpsStatus = getJpsStatus(tag);
+            if (StrUtil.equals(AbstractProjectCommander.STOP_TAG, jpsStatus) && SystemUtil.getOsInfo().isLinux()) {
+                return getLinuxPsStatus(tag);
+            }
+            return jpsStatus;
         }
         try {
             return StrUtil.format("{}:{}", AbstractProjectCommander.RUNNING_TAG, virtualMachine.id());
@@ -340,6 +344,25 @@ public abstract class AbstractProjectCommander {
             if (JvmUtil.checkCommandLineIsJpom(item, tag)) {
                 String[] split = StrUtil.split(item, StrUtil.SPACE);
                 return StrUtil.format("{}:{}", AbstractProjectCommander.RUNNING_TAG, split[0]);
+            }
+        }
+        return AbstractProjectCommander.STOP_TAG;
+    }
+
+
+    /**
+     * 尝试ps -ef | grep  中查看进程id
+     *
+     * @param tag 进程标识
+     * @return 运行标识
+     */
+    private String getLinuxPsStatus(String tag) {
+        String execSystemCommand = CommandUtil.execSystemCommand("ps -ef | grep " + tag);
+        List<String> list = StrSpliter.splitTrim(execSystemCommand, StrUtil.LF, true);
+        for (String item : list) {
+            if (JvmUtil.checkCommandLineIsJpom(item, tag)) {
+                String[] split = StrUtil.split(item, StrUtil.SPACE);
+                return StrUtil.format("{}:{}", AbstractProjectCommander.RUNNING_TAG, split[1]);
             }
         }
         return AbstractProjectCommander.STOP_TAG;
