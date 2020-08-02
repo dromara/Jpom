@@ -1,6 +1,7 @@
 package io.jpom.controller.build;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.db.Entity;
@@ -17,10 +18,13 @@ import io.jpom.build.BuildUtil;
 import io.jpom.common.BaseServerController;
 import io.jpom.common.interceptor.OptLog;
 import io.jpom.model.BaseEnum;
+import io.jpom.model.BaseModel;
 import io.jpom.model.data.BuildModel;
+import io.jpom.model.data.UserModel;
 import io.jpom.model.log.BuildHistoryLog;
 import io.jpom.model.log.UserOperateLogV1;
 import io.jpom.model.vo.BuildHistoryLogVo;
+import io.jpom.model.vo.BuildModelVo;
 import io.jpom.plugin.ClassFeature;
 import io.jpom.plugin.Feature;
 import io.jpom.plugin.MethodFeature;
@@ -35,10 +39,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import javax.annotation.Resource;
 import java.io.File;
 import java.io.IOException;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * 构建历史
@@ -82,13 +84,11 @@ public class BuildHistoryController extends BaseServerController {
      * 下载构建物
      *
      * @param logId 日志id
-     * @throws SQLException e
-     * @throws IOException  e
      */
     @RequestMapping(value = "download_file.html", method = RequestMethod.GET)
     @ResponseBody
     @Feature(method = MethodFeature.DOWNLOAD)
-    public void downloadFile(@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据")) String logId) throws SQLException, IOException {
+    public void downloadFile(@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据")) String logId) {
         BuildHistoryLog buildHistoryLog = dbBuildHistoryLogService.getByKey(logId);
         if (buildHistoryLog == null) {
             return;
@@ -154,8 +154,22 @@ public class BuildHistoryController extends BaseServerController {
         if (anEnum != null) {
             entity.set("status", anEnum.getCode());
         }
-        if (StrUtil.isNotBlank(buildDataId)) {
-            entity.set("buildDataId", buildDataId);
+        UserModel userModel = getUser();
+        if (userModel.isSystemUser()) {
+            if (StrUtil.isNotBlank(buildDataId)) {
+                entity.set("buildDataId", buildDataId);
+            }
+        } else {
+            Set<String> dataIds = this.getDataIds();
+            if (StrUtil.isNotBlank(buildDataId)) {
+                if (CollUtil.contains(dataIds, buildDataId)) {
+                    entity.set("buildDataId", buildDataId);
+                } else {
+                    entity.set("buildDataId", StrUtil.DASHED);
+                }
+            } else {
+                entity.set("buildDataId", dataIds);
+            }
         }
         PageResult<BuildHistoryLog> pageResult = dbBuildHistoryLogService.listPage(entity, pageObj);
         List<BuildHistoryLogVo> buildHistoryLogVos = new ArrayList<>();
@@ -174,6 +188,15 @@ public class BuildHistoryController extends BaseServerController {
         return jsonObject.toString();
     }
 
+    private Set<String> getDataIds() {
+        List<BuildModelVo> list = buildService.list(BuildModelVo.class);
+        if (CollUtil.isEmpty(list)) {
+            return new HashSet<>();
+        } else {
+            return list.stream().map(BaseModel::getId).collect(Collectors.toSet());
+        }
+    }
+
     /**
      * 构建
      *
@@ -185,7 +208,13 @@ public class BuildHistoryController extends BaseServerController {
     @ResponseBody
     @Feature(method = MethodFeature.DEL_LOG)
     public String delete(@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据")) String logId) {
-        JsonMessage jsonMessage = dbBuildHistoryLogService.deleteLogAndFile(logId);
+        BuildHistoryLog buildHistoryLog = dbBuildHistoryLogService.getByKey(logId);
+        Objects.requireNonNull(buildHistoryLog);
+
+        if (!CollUtil.contains(this.getDataIds(), buildHistoryLog.getBuildDataId())) {
+            return JsonMessage.getString(405, "没有权限");
+        }
+        JsonMessage<String> jsonMessage = dbBuildHistoryLogService.deleteLogAndFile(logId);
         return jsonMessage.toString();
     }
 }
