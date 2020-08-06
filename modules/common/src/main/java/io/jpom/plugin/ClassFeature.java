@@ -31,7 +31,7 @@ public enum ClassFeature {
     TOMCAT("Tomcat", ClassFeature.NODE),
     ;
 
-    private String name;
+    private final String name;
 
     private ClassFeature parent;
 

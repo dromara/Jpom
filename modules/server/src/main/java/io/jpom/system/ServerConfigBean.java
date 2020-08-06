@@ -47,6 +47,11 @@ public class ServerConfigBean {
     public static final String MONITOR_FILE = "monitor.json";
 
     /**
+     * 监控用户操作文件
+     */
+    public static final String MONITOR_USER_OPT_FILE = "monitor_user_opt.json";
+
+    /**
      * 邮箱配置
      */
     public static final String MAIL_CONFIG = "mail_config.json";

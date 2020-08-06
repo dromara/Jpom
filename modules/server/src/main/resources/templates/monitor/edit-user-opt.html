@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.w3.org/1999/xhtml">
+<head th:replace="common/head::head">
+</head>
+
+<body>
+<div class="layui-container">
+    <form action="./update" class="layui-form" id="form_monitor">
+        <input name="id" type="hidden" th:value="${model?.id}">
+        <div class="layui-form-item">
+            <label class="layui-form-label">名称</label>
+            <div class="layui-input-block">
+                <input type="text" name="name" required lay-verify="required" th:value="${model?.name}"
+                       placeholder="请输入监控名称"
+                       class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">开启状态</label>
+            <div class="layui-input-block">
+                <input type="checkbox" name="status" lay-skin="switch" lay-text="开启|关闭"
+                       th:checked="${model?.status}">
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">监控用户</label>
+            <div class="layui-input-block" id="monitorUser">
+
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">监控操作</label>
+            <div class="layui-input-block" id="monitorOpt">
+
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">报警联系人</label>
+            <div class="layui-input-block" id="notifyUser">
+
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-form-item" style="padding-left: 20%;margin-top: 20px;">
+                <button class="layui-btn layui-btn-normal" lay-submit lay-filter="submitMonitor"
+                        id="submitMonitor">
+                    提交
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+</body>
+
+<script type="text/javascript" th:inline="javascript">
+    var userLists = [[${userLists}]];
+    var opts = [[${opts}]];
+    var transfer;
+
+    var checkUser = [[${model?.notifyUser}]];
+    var checkMonitorUser = [[${model?.monitorUser}]];
+    var checkMonitorOpt = [[${model?.monitorOpt}]];
+
+    function loadSuccess() {
+        layui.use('transfer', function () {
+            transfer = layui.transfer;
+            //渲染
+            transfer.render({
+                elem: '#notifyUser',
+                data: userLists,
+                value: checkUser,
+                title: ['待选择用户', '已选择用户'],
+                id: 'notifyUser'
+            });
+            //
+            var newUserList = JSON.parse(JSON.stringify(userLists));
+            for (var i = 0; i < newUserList.length; i++) {
+                delete newUserList[i].disabled;
+            }
+            transfer.render({
+                elem: '#monitorUser',
+                data: newUserList,
+                value: checkMonitorUser,
+                title: ['待选择用户', '已选择用户'],
+                id: 'monitorUser'
+            });
+            //
+            transfer.render({
+                elem: '#monitorOpt',
+                data: opts,
+                value: checkMonitorOpt,
+                title: ['待选择操作', '已选择操作'],
+                id: 'monitorOpt'
+            });
+
+        });
+
+        // 提交信息
+        form.on('submit(submitMonitor)', function (data) {
+            var sendData = data.field;
+
+            var notifyUser = transfer.getData('notifyUser');
+            if (!notifyUser || notifyUser.length <= 0) {
+                layer.msg("请至少选择一个通知人");
+                return false;
+            }
+            var notifyUsers = [];
+            for (var i = 0; i < notifyUser.length; i++) {
+                notifyUsers.push(notifyUser[i].value);
+            }
+            sendData.notifyUser = JSON.stringify(notifyUsers);
+            //
+            var monitorUser = transfer.getData('monitorUser');
+            if (!monitorUser || monitorUser.length <= 0) {
+                layer.msg("请至少选择一个监控人");
+                return false;
+            }
+            var monitorUsers = [];
+            for (var i = 0; i < monitorUser.length; i++) {
+                monitorUsers.push(monitorUser[i].value);
+            }
+            sendData.monitorUser = JSON.stringify(monitorUsers);
+            //
+            var monitorOpt = transfer.getData('monitorOpt');
+            if (!monitorOpt || monitorOpt.length <= 0) {
+                layer.msg("请至少选择一个监控操作");
+                return false;
+            }
+            var monitorOpts = [];
+            for (var i = 0; i < monitorOpt.length; i++) {
+                monitorOpts.push(monitorOpt[i].value);
+            }
+            sendData.monitorOpt = JSON.stringify(monitorOpts);
+
+            loadingAjax({
+                url: data.form.action,
+                data: sendData,
+                success: function (data) {
+                    layer.msg(data.msg);
+                    if (200 == data.code) {
+                        autoClose();
+                    }
+                }
+            });
+            return false;
+        });
+    }
+</script>
+</html>

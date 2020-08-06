@@ -52,6 +52,11 @@
         "id": "monitorLog",
         "title": "监控日志",
         "url": "./monitor/log.html"
+      },
+      {
+        "id": "userOptLog",
+        "title": "操作监控",
+        "url": "./monitor_user_opt/userOpt.html"
       }
     ]
   },
