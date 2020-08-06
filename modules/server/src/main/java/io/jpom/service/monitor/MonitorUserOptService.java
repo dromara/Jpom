@@ -44,4 +44,15 @@ public class MonitorUserOptService extends BaseOperService<MonitorUserOptModel> 
             return CollUtil.contains(monitorOpt, optType);
         }).collect(Collectors.toList());
     }
+
+    public List<MonitorUserOptModel> listByType(UserOperateLogV1.OptType optType, String userId) {
+        List<MonitorUserOptModel> userOptModels = this.listByType(optType);
+        if (CollUtil.isEmpty(userOptModels)) {
+            return null;
+        }
+        return userOptModels.stream().filter(monitorUserOptModel -> {
+            List<String> monitorUser = monitorUserOptModel.getMonitorUser();
+            return CollUtil.contains(monitorUser, userId);
+        }).collect(Collectors.toList());
+    }
 }

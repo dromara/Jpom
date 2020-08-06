@@ -61,7 +61,7 @@ public class DbUserOperateLogService extends BaseDbLogService<UserOperateLogV1> 
                     otherMsg = StrUtil.format("操作的构建名称：{}\n", item.getName());
                 }
             }
-            List<MonitorUserOptModel> monitorUserOptModels = monitorUserOptService.listByType(optType);
+            List<MonitorUserOptModel> monitorUserOptModels = monitorUserOptService.listByType(optType, userOperateLogV1.getUserId());
             for (MonitorUserOptModel monitorUserOptModel : monitorUserOptModels) {
                 List<String> notifyUser = monitorUserOptModel.getNotifyUser();
                 if (CollUtil.isEmpty(notifyUser)) {
