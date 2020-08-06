@@ -142,8 +142,8 @@ public class MonitorModel extends BaseModel {
 //        sms(2, "短信"),
         ;
 
-        private int code;
-        private String desc;
+        private final int code;
+        private final String desc;
 
         NotifyType(int code, String desc) {
             this.code = code;
