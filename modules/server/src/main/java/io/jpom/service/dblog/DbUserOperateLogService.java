@@ -73,7 +73,7 @@ public class DbUserOperateLogService extends BaseDbLogService<UserOperateLogV1> 
                         continue;
                     }
                     //
-                    String context = StrUtil.format("操作用户：{}\n操作状态：{}操作类型：{}\n操作节点：{}\n 操作数据id: {}\n操作IP: {}\n{}",
+                    String context = StrUtil.format("操作用户：{}\n操作状态：{}\n操作类型：{}\n操作节点：{}\n 操作数据id: {}\n操作IP: {}\n{}",
                             optUserItem.getName(), userOperateLogV1.getOptStatusMsg(), userOperateLogV1.getOptTypeMsg(),
                             userOperateLogV1.getNodeId(), userOperateLogV1.getDataId(), userOperateLogV1.getIp(), otherMsg);
                     // 邮箱
