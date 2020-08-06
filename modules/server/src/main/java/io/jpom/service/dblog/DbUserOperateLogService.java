@@ -4,11 +4,13 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.StrUtil;
 import io.jpom.model.BaseEnum;
+import io.jpom.model.data.BuildModel;
 import io.jpom.model.data.MonitorModel;
 import io.jpom.model.data.MonitorUserOptModel;
 import io.jpom.model.data.UserModel;
 import io.jpom.model.log.UserOperateLogV1;
 import io.jpom.monitor.NotifyUtil;
+import io.jpom.service.build.BuildService;
 import io.jpom.service.monitor.MonitorUserOptService;
 import io.jpom.service.user.UserService;
 import io.jpom.system.db.DbConfig;
@@ -27,12 +29,15 @@ public class DbUserOperateLogService extends BaseDbLogService<UserOperateLogV1> 
 
     private final MonitorUserOptService monitorUserOptService;
     private final UserService userService;
+    private final BuildService buildService;
 
     public DbUserOperateLogService(MonitorUserOptService monitorUserOptService,
-                                   UserService userService) {
+                                   UserService userService,
+                                   BuildService buildService) {
         super(UserOperateLogV1.TABLE_NAME, UserOperateLogV1.class);
         this.monitorUserOptService = monitorUserOptService;
         this.userService = userService;
+        this.buildService = buildService;
         setKey("reqId");
     }
 
@@ -49,6 +54,13 @@ public class DbUserOperateLogService extends BaseDbLogService<UserOperateLogV1> 
             if (optUserItem == null) {
                 return;
             }
+            String otherMsg = "";
+            if (optType == UserOperateLogV1.OptType.StartBuild || optType == UserOperateLogV1.OptType.EditBuild) {
+                BuildModel item = buildService.getItem(userOperateLogV1.getDataId());
+                if (item != null) {
+                    otherMsg = StrUtil.format("操作的构建名称：{}\n", item.getName());
+                }
+            }
             List<MonitorUserOptModel> monitorUserOptModels = monitorUserOptService.listByType(optType);
             for (MonitorUserOptModel monitorUserOptModel : monitorUserOptModels) {
                 List<String> notifyUser = monitorUserOptModel.getNotifyUser();
@@ -61,9 +73,9 @@ public class DbUserOperateLogService extends BaseDbLogService<UserOperateLogV1> 
                         continue;
                     }
                     //
-                    String context = StrUtil.format("操作用户：{}\n操作状态：{}操作类型：{}\n操作节点：{}\n 操作数据id: {}\n操作IP: {}",
+                    String context = StrUtil.format("操作用户：{}\n操作状态：{}操作类型：{}\n操作节点：{}\n 操作数据id: {}\n操作IP: {}\n{}",
                             optUserItem.getName(), userOperateLogV1.getOptStatusMsg(), userOperateLogV1.getOptTypeMsg(),
-                            userOperateLogV1.getNodeId(), userOperateLogV1.getDataId(), userOperateLogV1.getIp());
+                            userOperateLogV1.getNodeId(), userOperateLogV1.getDataId(), userOperateLogV1.getIp(), otherMsg);
                     // 邮箱
                     String email = item.getEmail();
                     if (StrUtil.isNotEmpty(email)) {

@@ -286,8 +286,8 @@ public class UserOperateLogV1 extends BaseJsonModel {
         EditRole(70, "修改角色"),
         DelRole(71, "删除角色"),
         ;
-        private int code;
-        private String desc;
+        private final int code;
+        private final String desc;
 
         @Override
         public int getCode() {
