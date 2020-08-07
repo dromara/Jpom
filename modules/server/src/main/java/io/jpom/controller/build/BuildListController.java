@@ -38,7 +38,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import javax.annotation.Resource;
 import java.io.File;
 import java.io.IOException;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -305,14 +304,15 @@ public class BuildListController extends BaseServerController {
     @ResponseBody
     @OptLog(UserOperateLogV1.OptType.DelBuild)
     @Feature(method = MethodFeature.DEL)
-    public String delete(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据id") String id) throws SQLException {
+    public String delete(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据id") String id) {
         BuildModel buildModel = buildService.getItem(id);
         Objects.requireNonNull(buildModel, "没有对应数据");
         dbBuildHistoryLogService.delByBuildId(buildModel.getId());
         //
         File file = BuildUtil.getBuildDataFile(buildModel.getId());
         if (!FileUtil.del(file)) {
-            return JsonMessage.getString(500, "清理历史构建产物失败");
+            FileUtil.del(file.toPath());
+            return JsonMessage.getString(500, "清理历史构建产物失败,已经重新测试");
         }
         buildService.deleteItem(buildModel.getId());
         return JsonMessage.getString(200, "清理成功");
@@ -327,10 +327,8 @@ public class BuildListController extends BaseServerController {
         BuildModel buildModel = buildService.getItem(id);
         Objects.requireNonNull(buildModel, "没有对应数据");
         File source = BuildUtil.getSource(buildModel);
-        boolean del = FileUtil.del(source);
-        //
-        if (!del) {
-            return JsonMessage.getString(500, "清理构建代码失败");
+        if (!FileUtil.del(source)) {
+            FileUtil.del(source.toPath());
         }
         return JsonMessage.getString(200, "清理成功");
     }
