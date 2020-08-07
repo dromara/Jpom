@@ -140,13 +140,19 @@ public class CommandUtil {
         String[] split = StrUtil.split(script, StrUtil.SPACE);
         if (SystemUtil.getOsInfo().isWindows()) {
             for (String s : split) {
-                if (StrUtil.containsAnyIgnoreCase(s, "rd", "del")) {
+                if (StrUtil.startWithAny(s, "rd", "del")) {
+                    return true;
+                }
+                if (StrUtil.containsAnyIgnoreCase(s, " rd", " del")) {
                     return true;
                 }
             }
         } else {
             for (String s : split) {
-                if (StrUtil.containsAnyIgnoreCase(s, "rm", "\\rm")) {
+                if (StrUtil.startWithAny(s, "rm", "\\rm")) {
+                    return true;
+                }
+                if (StrUtil.containsAnyIgnoreCase(s, " rm", " \\rm", "&rm", "&\\rm")) {
                     return true;
                 }
             }
