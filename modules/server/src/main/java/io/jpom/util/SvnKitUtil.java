@@ -92,11 +92,15 @@ public class SvnKitUtil {
         try {
             if (targetPath.exists()) {
                 if (!FileUtil.file(targetPath, SVNFileUtil.getAdminDirectoryName()).exists()) {
-                    FileUtil.del(targetPath);
+                    if (!FileUtil.del(targetPath)) {
+                        FileUtil.del(targetPath.toPath());
+                    }
                 } else {
                     // 判断url是否变更
                     if (!checkUrl(targetPath, svnPath, userName, userPwd)) {
-                        FileUtil.del(targetPath);
+                        if (!FileUtil.del(targetPath)) {
+                            FileUtil.del(targetPath.toPath());
+                        }
                     } else {
                         ourClientManager.getWCClient().doCleanup(targetPath);
                     }

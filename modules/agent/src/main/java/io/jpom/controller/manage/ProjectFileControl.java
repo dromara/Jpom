@@ -92,7 +92,8 @@ public class ProjectFileControl extends BaseAgentController {
             // 判断是否需要清空
             if ("clear".equalsIgnoreCase(clearType)) {
                 if (!FileUtil.clean(lib)) {
-                    return JsonMessage.getString(500, "清除旧lib失败");
+                    FileUtil.del(lib.toPath());
+                    //return JsonMessage.getString(500, "清除旧lib失败");
                 }
             }
             // 解压

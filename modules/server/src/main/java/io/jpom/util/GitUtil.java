@@ -77,7 +77,8 @@ public class GitUtil {
      */
     private static Git reClone(String url, File file, CredentialsProvider credentialsProvider) throws GitAPIException, IOException {
         if (!FileUtil.clean(file)) {
-            throw new IOException("del error:" + file.getPath());
+            FileUtil.del(file.toPath());
+            //throw new IOException("del error:" + file.getPath());
         }
         return Git.cloneRepository()
                 .setURI(url)

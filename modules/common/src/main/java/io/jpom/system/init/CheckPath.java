@@ -88,6 +88,6 @@ public class CheckPath {
     @PreLoadMethod(4)
     private static void clearTemp() {
         File file = ConfigBean.getInstance().getTempPath();
-        FileUtil.clean(file);
+        FileUtil.del(file.toPath());
     }
 }
