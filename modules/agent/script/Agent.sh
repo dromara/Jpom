@@ -1,3 +1,4 @@
+#!/bin/bash
 # The MIT License (MIT)
 #
 # Copyright (c) 2019 码之科技工作室
@@ -18,7 +19,6 @@
 # COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
 # IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-#!/bin/bash
 # ssh 支持读取环境变量
 . /etc/profile
 Tag="KeepBx-Agent-System-JpomAgentApplication"
@@ -45,7 +45,7 @@ if [[ -x "${JAVA_HOME}/bin/java" ]]; then
 else
   set +e
   JAVA=`which java`
-  NOW_JAVA_HOME="${JAVA}/../../"
+  NOW_JAVA_HOME="${JAVA}/../"
   set -e
 fi
 
