@@ -72,7 +72,7 @@
 
 > 特别提醒：在Windows服务器中可能有部分功能因为系统特性造成兼容性问题，建议在实际使用中充分测试。Linux目前兼容良好
 
-### 一键安装
+### 一键安装（linux）
 
 #### 服务端
 
@@ -82,6 +82,11 @@ yum install -y wget && wget -O install.sh https://keepbx.gitee.io/jpom/install.s
 备用地址
 
 yum install -y wget && wget -O install.sh https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom/docs/install.sh && bash install.sh Server
+
+
+支持自动安装jdk环境
+
+yum install -y wget && wget -O install.sh https://keepbx.gitee.io/jpom/install.sh && bash install.sh Server jdk
 
 ```
 
@@ -93,6 +98,10 @@ yum install -y wget && wget -O install.sh https://keepbx.gitee.io/jpom/install.s
 备用地址
 
 yum install -y wget && wget -O install.sh https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom/docs/install.sh && bash install.sh Agent
+
+支持自动安装jdk环境
+
+yum install -y wget && wget -O install.sh https://keepbx.gitee.io/jpom/install.sh && bash install.sh Agent jdk
 
 ```
 >特别提醒：一键安装的时候注意执行命令不可在同一目录下，即Server端和Agent端不可安装在同一目录下

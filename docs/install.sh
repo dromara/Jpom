@@ -33,6 +33,8 @@ if [[ "$module" = "jdk" ]]; then
         echo 'export CLASSPATH=.:$JAVA_HOME/lib/dt.jar:$JAVA_HOME/lib/tools.jar'>>/etc/profile
         echo 'export PATH=$PATH:$JAVA_HOME/bin'>>/etc/profile
         export JAVA_HOME=/usr/java/jdk1.8.0_251
+        # 删除jdk压缩包
+        rm -f jdk-8u251-linux-x64.tar.gz
     fi
   fi
 fi
