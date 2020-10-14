@@ -13,15 +13,28 @@ TYPE="$1"
 module="$2"
 # 判断是否包含jdk
 if [[ "$module" = "jdk" ]]; then
-  # 判断是否存在文件
-  if [[ ! -f "jdk-8u251-linux-x64.tar.gz" ]]; then
-   wget -O jdk-8u251-linux-x64.tar.gz https://jpom-releases.oss-cn-hangzhou.aliyuncs.com/jdk-8u251-linux-x64.tar.gz
+    if [[ ! -x "${JAVA_HOME}/bin/java" ]]; then
+      JAVA=`which java`
+      if [[ ! -x "$JAVA" ]]; then
+        # 判断是否存在文件
+        if [[ ! -f "jdk-8u251-linux-x64.tar.gz" ]]; then
+         wget -O jdk-8u251-linux-x64.tar.gz https://jpom-releases.oss-cn-hangzhou.aliyuncs.com/jdk-8u251-linux-x64.tar.gz
+        fi
+        mkdir /usr/java/
+        #
+        tar -zxvf jdk-8u251-linux-x64.tar.gz  -C /usr/java/
+        #
+        PATH=$PATH:/usr/java/jdk1.8.0_251/bin
+        export PATH
+        echo '安装jdk,路径/usr/java/jdk1.8.0_251/'
+        # 修改环境变量
+        echo ''>>/etc/profile
+        echo 'export JAVA_HOME=/usr/java/jdk1.8.0_251'>>/etc/profile
+        echo 'export CLASSPATH=.:$JAVA_HOME/lib/dt.jar:$JAVA_HOME/lib/tools.jar'>>/etc/profile
+        echo 'export PATH=$PATH:$JAVA_HOME/bin'>>/etc/profile
+        export JAVA_HOME=/usr/java/jdk1.8.0_251
+    fi
   fi
-  #
-  tar -zxvf jdk-8u251-linux-x64.tar.gz
-  #
-  PATH=$PATH:$(cd `dirname $0`; pwd)/jdk1.8.0_251/bin
-  export PATH
 fi
 
 # 判断
