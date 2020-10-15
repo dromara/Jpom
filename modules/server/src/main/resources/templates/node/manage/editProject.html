@@ -147,7 +147,7 @@
                     <label class="layui-form-label">Jvm参数</label>
                     <div class="layui-input-block">
                     <textarea th:readonly="${item?.outGivingProject}" name="jvm"
-                              placeholder="jvm参数,非必填.如：-Xmin=512m -Xmax=512m"
+                              placeholder="jvm参数,非必填.如：-Xmx512m -Xms512m"
                               class="layui-textarea" th:text="${item?.jvm}"></textarea>
                     </div>
                 </div>
@@ -410,7 +410,7 @@
             <label class="layui-form-label">副本:{{ d.id }}</label>
             <div class="layui-input-block">
                     <textarea name="jvm_{{d.id}}"
-                              placeholder="jvm参数,非必填.如：-Xmin=512m -Xmax=512m"
+                              placeholder="jvm参数,非必填.如：-Xmx512m -Xms512m"
                               class="layui-textarea">{{d.jvm || ''}}</textarea>
             </div>
         </div>
