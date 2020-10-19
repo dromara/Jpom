@@ -7,6 +7,7 @@ import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.LineHandler;
 import cn.hutool.core.lang.JarClassLoader;
+import cn.hutool.core.util.ClassUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.system.SystemUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
@@ -18,11 +19,11 @@ import io.jpom.system.ConfigBean;
 import io.jpom.system.JpomRuntimeException;
 import io.jpom.util.CommandUtil;
 import io.jpom.util.JsonFileUtil;
-import org.springframework.boot.system.ApplicationHome;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.net.URL;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.jar.Attributes;
@@ -190,9 +191,8 @@ public class JpomManifest {
      * @return jar 或者classPath
      */
     public static File getRunPath() {
-        ApplicationHome home = new ApplicationHome(JpomApplication.getAppClass());
-        String path = (home.getSource() == null ? "" : home.getSource().getAbsolutePath());
-        return FileUtil.file(path);
+        URL location = ClassUtil.getLocation(JpomApplication.getAppClass());
+        return FileUtil.file(location);
     }
 
     /**
