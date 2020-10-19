@@ -200,7 +200,7 @@
                 <div class="layui-inline">
                     <label class="layui-form-label">Jvm参数</label>
                     <div class="layui-input-block">
-                    <textarea name="{{ d.nodeId }}_jvm" placeholder="jvm参数,非必填.如：-Xmin=512m -Xmax=512m"
+                    <textarea name="{{ d.nodeId }}_jvm" placeholder="jvm参数,非必填.如：-Xmx512m -Xms512m"
                               class="layui-textarea">{{= d.jvm }}</textarea>
                     </div>
                 </div>
@@ -532,7 +532,7 @@
             <label class="layui-form-label">副本:{{ d.id }}</label>
             <div class="layui-input-block">
                     <textarea name="{{ d.nodeId }}_jvm_{{d.id}}"
-                              placeholder="jvm参数,非必填.如：-Xmin=512m -Xmax=512m"
+                              placeholder="jvm参数,非必填.如：-Xmx512m -Xms512m"
                               class="layui-textarea">{{d.jvm || ''}}</textarea>
             </div>
         </div>
