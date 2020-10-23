@@ -14,20 +14,20 @@ import io.jpom.system.db.DbConfig;
 
 import java.io.InputStream;
 
-
 /**
  * 初始化数据库
  *
  * @author jiangzeyin
  * @date 2019/4/19
  */
-@PreLoadClass
+@PreLoadClass(-1)
 public class InitDb {
 
     @PreLoadMethod
     private static void init() {
         Setting setting = new Setting();
-        setting.set("url", DbConfig.getInstance().getDbUrl());
+        DbConfig instance = DbConfig.getInstance();
+        setting.set("url", instance.getDbUrl());
         setting.set("user", "jpom");
         setting.set("pass", "jpom");
         // 调试模式显示sql 信息
@@ -36,7 +36,7 @@ public class InitDb {
             setting.set("sqlLevel", "INFO");
             setting.set("showParams", "true");
         }
-        DefaultSystemLog.getLog().info("初始化数据中....");
+        DefaultSystemLog.getLog().warn("load h2 db");
         try {
             // 创建连接
             DSFactory dsFactory = DSFactory.create(setting);
@@ -47,6 +47,9 @@ public class InitDb {
         } catch (Exception e) {
             DefaultSystemLog.getLog().error("初始化数据库失败", e);
             System.exit(0);
+            return;
         }
+        instance.initOk();
+        DefaultSystemLog.getLog().warn("h2 db inited");
     }
 }

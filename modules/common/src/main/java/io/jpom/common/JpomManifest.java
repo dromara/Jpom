@@ -192,7 +192,9 @@ public class JpomManifest {
      */
     public static File getRunPath() {
         URL location = ClassUtil.getLocation(JpomApplication.getAppClass());
-        return FileUtil.file(location);
+        String file = location.getFile();
+        String before = StrUtil.subBefore(file, "!", false);
+        return FileUtil.file(before);
     }
 
     /**
@@ -221,7 +223,7 @@ public class JpomManifest {
      * @param clsName 类名
      * @return 结果消息
      */
-    public static JsonMessage checkJpomJar(String path, Class clsName) {
+    public static JsonMessage<String> checkJpomJar(String path, Class<?> clsName) {
         String version;
         File jarFile = new File(path);
         try (JarFile jarFile1 = new JarFile(jarFile)) {
@@ -229,37 +231,37 @@ public class JpomManifest {
             Attributes attributes = manifest.getMainAttributes();
             String mainClass = attributes.getValue(Attributes.Name.MAIN_CLASS);
             if (mainClass == null) {
-                return new JsonMessage(405, "清单文件中没有找到对应的MainClass属性");
+                return new JsonMessage<>(405, "清单文件中没有找到对应的MainClass属性");
             }
             JarClassLoader jarClassLoader = JarClassLoader.load(jarFile);
             try {
                 jarClassLoader.loadClass(mainClass);
             } catch (ClassNotFoundException notFound) {
-                return new JsonMessage(405, "中没有找到对应的MainClass:" + mainClass);
+                return new JsonMessage<>(405, "中没有找到对应的MainClass:" + mainClass);
             }
             ZipEntry entry = jarFile1.getEntry(StrUtil.format("BOOT-INF/classes/{}.class",
                     StrUtil.replace(clsName.getName(), ".", "/")));
             if (entry == null) {
-                return new JsonMessage(405, "此包不是Jpom【" + JpomApplication.getAppType().name() + "】包");
+                return new JsonMessage<>(405, "此包不是Jpom【" + JpomApplication.getAppType().name() + "】包");
             }
             version = attributes.getValue(Attributes.Name.IMPLEMENTATION_VERSION);
             if (StrUtil.isEmpty(version)) {
-                return new JsonMessage(405, "此包没有版本号");
+                return new JsonMessage<>(405, "此包没有版本号");
             }
             String timeStamp = attributes.getValue("Jpom-Timestamp");
             if (StrUtil.isEmpty(timeStamp)) {
-                return new JsonMessage(405, "此包没有版本号");
+                return new JsonMessage<>(405, "此包没有版本号");
             }
             timeStamp = parseJpomTime(timeStamp);
             if (StrUtil.equals(version, JpomManifest.getInstance().getVersion()) &&
                     StrUtil.equals(timeStamp, JpomManifest.getInstance().getTimeStamp())) {
-                return new JsonMessage(405, "新包和正在运行的包一致");
+                return new JsonMessage<>(405, "新包和正在运行的包一致");
             }
         } catch (Exception e) {
             DefaultSystemLog.getLog().error("解析jar", e);
-            return new JsonMessage(500, " 解析错误:" + e.getMessage());
+            return new JsonMessage<>(500, " 解析错误:" + e.getMessage());
         }
-        return new JsonMessage(200, version);
+        return new JsonMessage<>(200, version);
     }
 
     /**

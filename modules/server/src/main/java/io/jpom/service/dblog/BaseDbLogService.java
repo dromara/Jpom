@@ -8,6 +8,7 @@ import cn.hutool.db.Entity;
 import cn.hutool.db.Page;
 import cn.hutool.db.PageResult;
 import io.jpom.system.JpomRuntimeException;
+import io.jpom.system.db.DbConfig;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -23,8 +24,8 @@ public abstract class BaseDbLogService<T> {
     /**
      * 表名
      */
-    private String tableName;
-    private Class<T> tClass;
+    private final String tableName;
+    private final Class<T> tClass;
     /**
      * 主键
      */
@@ -53,6 +54,10 @@ public abstract class BaseDbLogService<T> {
      * @param t 数据
      */
     public void insert(T t) {
+        if (!DbConfig.getInstance().isInit()) {
+            // ignore
+            return;
+        }
         Db db = Db.use();
         db.setWrapper((Character) null);
         try {
@@ -82,6 +87,10 @@ public abstract class BaseDbLogService<T> {
      * @return 影响行数
      */
     public int update(Entity entity, Entity where) {
+        if (!DbConfig.getInstance().isInit()) {
+            // ignore
+            return 0;
+        }
         Db db = Db.use();
         db.setWrapper((Character) null);
         if (where.isEmpty()) {
@@ -103,6 +112,10 @@ public abstract class BaseDbLogService<T> {
      * @return 数据
      */
     public T getByKey(String keyValue) {
+        if (!DbConfig.getInstance().isInit()) {
+            // ignore
+            return null;
+        }
         Entity where = new Entity(tableName);
         where.set(key, keyValue);
         Db db = Db.use();
@@ -129,6 +142,10 @@ public abstract class BaseDbLogService<T> {
      * @return 影响行数
      */
     public int delByKey(String keyValue) {
+        if (!DbConfig.getInstance().isInit()) {
+            // ignore
+            return 0;
+        }
         Entity where = new Entity(tableName);
         where.set(key, keyValue);
         return del(where);
@@ -141,6 +158,10 @@ public abstract class BaseDbLogService<T> {
      * @return 影响行数
      */
     public int del(Entity where) {
+        if (!DbConfig.getInstance().isInit()) {
+            // ignore
+            return 0;
+        }
         where.setTableName(tableName);
         if (where.isEmpty()) {
             throw new JpomRuntimeException("没有删除条件");
@@ -162,6 +183,10 @@ public abstract class BaseDbLogService<T> {
      * @return 结果
      */
     public PageResult<T> listPage(Entity where, Page page) {
+        if (!DbConfig.getInstance().isInit()) {
+            // ignore
+            return new PageResult<>(page.getPageNumber(), page.getPageSize(), 0);
+        }
         where.setTableName(getTableName());
         PageResult<Entity> pageResult;
         Db db = Db.use();

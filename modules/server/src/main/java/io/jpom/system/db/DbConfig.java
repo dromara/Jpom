@@ -32,6 +32,11 @@ public class DbConfig {
     private static DbConfig dbConfig;
 
     /**
+     * 是否初始化成功
+     */
+    private volatile boolean init;
+
+    /**
      * 单利模式
      *
      * @return config
@@ -41,6 +46,14 @@ public class DbConfig {
             dbConfig = new DbConfig();
         }
         return dbConfig;
+    }
+
+    public void initOk() {
+        init = true;
+    }
+
+    public boolean isInit() {
+        return init;
     }
 
     /**
