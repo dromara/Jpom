@@ -96,7 +96,7 @@ public class AgentAuthorize {
                 }
                 if (StrUtil.isNotEmpty(oldAgentPwd)) {
                     this.agentPwd = oldAgentPwd;
-                    DefaultSystemLog.getLog().error("已有授权账号:{}  密码:{},授权信息保存位置：{}", this.agentName, this.agentPwd, FileUtil.getAbsolutePath(path));
+                    DefaultSystemLog.getLog().error("已有授权账号:{}  密码:{}  授权信息保存位置：{}", this.agentName, this.agentPwd, FileUtil.getAbsolutePath(path));
                     return;
                 }
             } catch (JpomRuntimeException e) {
@@ -110,6 +110,6 @@ public class AgentAuthorize {
         autoUser.setAgentPwd(this.agentPwd);
         // 写入文件中
         JsonFileUtil.saveJson(path, autoUser.toJson());
-        DefaultSystemLog.getLog().error("已经自动生成授权账号:{}  密码:{},授权信息保存位置：{}", this.agentName, this.agentPwd, FileUtil.getAbsolutePath(path));
+        DefaultSystemLog.getLog().error("已经自动生成授权账号:{}  密码:{}  授权信息保存位置：{}", this.agentName, this.agentPwd, FileUtil.getAbsolutePath(path));
     }
 }

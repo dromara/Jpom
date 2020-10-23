@@ -31,10 +31,10 @@ import java.util.concurrent.ConcurrentHashMap;
 public class ScriptProcessBuilder implements Runnable {
     private static final ConcurrentHashMap<File, ScriptProcessBuilder> FILE_SCRIPT_PROCESS_BUILDER_CONCURRENT_HASH_MAP = new ConcurrentHashMap<>();
 
-    private ProcessBuilder processBuilder;
-    private Set<Session> sessions = new HashSet<>();
-    private File logFile;
-    private File scriptFile;
+    private final ProcessBuilder processBuilder;
+    private final Set<Session> sessions = new HashSet<>();
+    private final File logFile;
+    private final File scriptFile;
     private Process process;
     private InputStream inputStream;
     private InputStream errorInputStream;
@@ -108,7 +108,7 @@ public class ScriptProcessBuilder implements Runnable {
                 BufferedReader results = new BufferedReader(inputStreamReader);
                 IoUtil.readLines(results, (LineHandler) line -> ScriptProcessBuilder.this.handle("ERROR:" + line));
             }
-            JsonMessage jsonMessage = new JsonMessage(200, "执行完毕");
+            JsonMessage<String> jsonMessage = new JsonMessage<>(200, "执行完毕");
             JSONObject jsonObject = jsonMessage.toJson();
             jsonObject.put("op", ConsoleCommandOp.stop.name());
             this.end(jsonObject.toString());
