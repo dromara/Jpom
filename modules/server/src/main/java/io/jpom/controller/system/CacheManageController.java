@@ -1,6 +1,7 @@
 package io.jpom.controller.system;
 
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.util.ArrayUtil;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.validator.ValidatorItem;
 import cn.jiangzeyin.common.validator.ValidatorRule;
@@ -41,7 +42,7 @@ public class CacheManageController extends BaseServerController {
         if (tryGetNode() == null) {
             //
             File file = ConfigBean.getInstance().getTempPath();
-            String fileSize = FileUtil.readableFileSize(FileUtil.size(file));
+            String fileSize = FileUtil.readableFileSize(CacheManageController.size(file));
             setAttribute("cacheFileSize", fileSize);
 
             int size = LoginControl.LFU_CACHE.size();
@@ -51,13 +52,34 @@ public class CacheManageController extends BaseServerController {
 
             File buildDataDir = BuildUtil.getBuildDataDir();
             if (buildDataDir.exists()) {
-                fileSize = FileUtil.readableFileSize(FileUtil.size(buildDataDir));
+                fileSize = FileUtil.readableFileSize(CacheManageController.size(buildDataDir));
                 setAttribute("cacheBuildFileSize", fileSize);
             } else {
                 setAttribute("cacheBuildFileSize", 0);
             }
         }
         return "system/cache";
+    }
+
+    public static long size(File file) {
+        if (null == file || !file.exists() || FileUtil.isSymlink(file)) {
+            return 0;
+        }
+
+        if (file.isDirectory()) {
+            long size = 0L;
+            File[] subFiles = file.listFiles();
+            if (ArrayUtil.isEmpty(subFiles)) {
+                // empty directory
+                return 0L;
+            }
+            for (File subFile : subFiles) {
+                size += size(subFile);
+            }
+            return size;
+        } else {
+            return file.length();
+        }
     }
 
     /**
