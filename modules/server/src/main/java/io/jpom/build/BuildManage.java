@@ -38,12 +38,12 @@ public class BuildManage extends BaseBuild implements Runnable {
      */
     private static final Map<String, BuildManage> BUILD_MANAGE_MAP = new ConcurrentHashMap<>();
 
-    private BuildModel buildModel;
-    private File gitFile;
+    private final BuildModel buildModel;
+    private final File gitFile;
     private Process process;
     private String logId;
-    private String optUserName;
-    private UserModel userModel;
+    private final String optUserName;
+    private final UserModel userModel;
 
     private BuildManage(final BuildModel buildModel, final UserModel userModel) {
         super(BuildUtil.getLogFile(buildModel.getId(), buildModel.getBuildId()),
@@ -166,6 +166,7 @@ public class BuildManage extends BaseBuild implements Runnable {
                 return;
             }
             try {
+                this.log("start build in file : " + FileUtil.getAbsolutePath(this.gitFile));
                 //
                 this.log("repository clone pull from " + this.buildModel.getBranchName());
                 String msg = "error";

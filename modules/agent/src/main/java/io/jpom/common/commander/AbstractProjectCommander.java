@@ -316,18 +316,27 @@ public abstract class AbstractProjectCommander {
      * @throws Exception 异常
      */
     public String status(String tag) throws Exception {
-        VirtualMachine virtualMachine = JvmUtil.getVirtualMachine(tag);
-        if (virtualMachine == null) {
+        boolean disableVirtualMachine = AgentExtConfigBean.getInstance().isDisableVirtualMachine();
+        if (disableVirtualMachine) {
             String jpsStatus = getJpsStatus(tag);
             if (StrUtil.equals(AbstractProjectCommander.STOP_TAG, jpsStatus) && SystemUtil.getOsInfo().isLinux()) {
                 return getLinuxPsStatus(tag);
             }
             return jpsStatus;
-        }
-        try {
-            return StrUtil.format("{}:{}", AbstractProjectCommander.RUNNING_TAG, virtualMachine.id());
-        } finally {
-            virtualMachine.detach();
+        } else {
+            VirtualMachine virtualMachine = JvmUtil.getVirtualMachine(tag);
+            if (virtualMachine == null) {
+                String jpsStatus = getJpsStatus(tag);
+                if (StrUtil.equals(AbstractProjectCommander.STOP_TAG, jpsStatus) && SystemUtil.getOsInfo().isLinux()) {
+                    return getLinuxPsStatus(tag);
+                }
+                return jpsStatus;
+            }
+            try {
+                return StrUtil.format("{}:{}", AbstractProjectCommander.RUNNING_TAG, virtualMachine.id());
+            } finally {
+                virtualMachine.detach();
+            }
         }
     }
 

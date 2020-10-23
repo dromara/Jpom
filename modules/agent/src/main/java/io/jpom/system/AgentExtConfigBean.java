@@ -56,6 +56,16 @@ public class AgentExtConfigBean {
     @Value("${jpom.server.token:}")
     private String serverToken;
 
+    /**
+     * 项目状态禁用 调用jmx获取
+     */
+    @Value("${project.disableVirtualMachine:false}")
+    private boolean disableVirtualMachine;
+
+    public boolean isDisableVirtualMachine() {
+        return disableVirtualMachine;
+    }
+
     public String getAgentId() {
         return agentId;
     }

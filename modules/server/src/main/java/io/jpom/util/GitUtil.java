@@ -136,11 +136,16 @@ public class GitUtil {
         String tempId = SecureUtil.md5(url);
         File file = ConfigBean.getInstance().getTempPath();
         File gitFile = FileUtil.file(file, "gitTemp", tempId);
-        List<String> list = branchList(url, gitFile, new UsernamePasswordCredentialsProvider(userName, userPwd));
-        if (list.isEmpty()) {
-            throw new JpomRuntimeException("该仓库还没有任何分支");
+        try {
+            List<String> list = branchList(url, gitFile, new UsernamePasswordCredentialsProvider(userName, userPwd));
+            if (list.isEmpty()) {
+                throw new JpomRuntimeException("该仓库还没有任何分支");
+            }
+            return list;
+        } catch (org.eclipse.jgit.errors.RepositoryNotFoundException ignored) {
+            FileUtil.del(gitFile);
         }
-        return list;
+        return new ArrayList<>();
     }
 
     /**

@@ -35,3 +35,6 @@ consoleLog:
   reqXss: true
   # 是否记录接口响应日志
   reqResponse: true
+project:
+  # 是否禁用 使用jmx获取项目状态
+  disableVirtualMachine: false

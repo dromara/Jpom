@@ -19,7 +19,7 @@ import java.io.File;
  */
 public abstract class BaseBuild {
 
-    private File logFile;
+    private final File logFile;
     String buildModelId;
 
     BaseBuild(File logFile, String buildModelId) {
