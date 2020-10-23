@@ -12,7 +12,7 @@
         <img src='https://img.shields.io/github/license/jiangzeyin/jpom.svg?style=flat' alt='license'/>
     </a>
     <a target="_blank" href="https://gitee.com/keepbx/Jpom">
-        <img src='https://img.shields.io/badge/JDK-1.8+-green.svg' alt='jdk'/>
+        <img src='https://img.shields.io/badge/JDK-1.8.0_40+-green.svg' alt='jdk'/>
     </a>
     <a target="_blank" href="https://travis-ci.org/jiangzeyin/Jpom">
         <img src='https://travis-ci.org/jiangzeyin/Jpom.svg?branch=master' alt='travis'/>
