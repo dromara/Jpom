@@ -40,6 +40,11 @@ public class ProjectInfoModel extends BaseModel {
      */
     private String whitelistDirectory;
     private String log;
+
+    /**
+     * 日志目录
+     */
+    private String logPath;
     /**
      * jvm 参数
      */
@@ -344,8 +349,26 @@ public class ProjectInfoModel extends BaseModel {
         this.lib = lib;
     }
 
+
+    public String getLogPath() {
+        return StrUtil.emptyToDefault(this.logPath, StrUtil.EMPTY);
+    }
+
+    public void setLogPath(String logPath) {
+        this.logPath = logPath;
+    }
+
     public String getLog() {
-        return StrUtil.emptyToDefault(log, StrUtil.EMPTY);
+        if (StrUtil.isEmpty(this.getId())) {
+            return StrUtil.EMPTY;
+        }
+        if (StrUtil.isEmpty(this.getLogPath()) && StrUtil.isNotEmpty(this.log)) {
+            return this.log;
+        }
+        String log = new File(this.allLib()).getParent();
+        this.log = String.format("%s/%s.log", log, this.getId());
+
+        return StrUtil.emptyToDefault(this.log, StrUtil.EMPTY);
     }
 
     /**

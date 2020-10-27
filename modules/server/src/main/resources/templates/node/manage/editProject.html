@@ -73,7 +73,7 @@
             <div class="layui-inline">
                 <label class="layui-form-label"><span class="x-red">*</span>项目路径</label>
                 <div class="layui-input-block">
-                    <select name="whitelistDirectory"
+                    <select name="whitelistDirectory" th:oldVal="${item?.whitelistDirectory}"
                             th:disabled="${item?.outGivingProject}" required lay-verify="required"
                             lay-filter="projectLib">
                         <option th:unless="${#lists.isEmpty(whitelistDirectory)}" value="">请选择白名单</option>
@@ -94,17 +94,29 @@
                            class="layui-input" th:value="${item?.lib}">
                 </div>
             </div>
-            <div class="layui-form-mid layui-word-aux" style="padding: 0 !important;">
-                <div class="layui-input-block x-red" th:style="${item!=null}?'display: none;':''" id="logInfoDiv">
-                    <span id="projectStart">请选择</span>
-                    <span id="projectEnd" style="margin-left: -4px">请填写</span>
-                    <span th:if="${item}">&nbsp;&nbsp;日志路径：[[${item?.log}]]</span>
+        </div>
+        <div class="layui-form-item" th:style="${item!=null}?'display: none;':''" id="logInfoDiv">
+            <div class="layui-inline">
+                <label class="layui-form-label">项目目录</label>
+                <div class="layui-input-block">
+                    <input type="text" id="projectPath" class="layui-input layui-disabled" readonly>
                 </div>
-
+            </div>
+            <div class="layui-inline" th:if="${item}">
+                <label class="layui-form-label">日志目录</label>
+                <div class="layui-input-block" th:title="${item?.log}">
+                    <input type="text" class="layui-input" th:value="${item?.logPath}">
+                </div>
+            </div>
+            <div class="layui-form-mid layui-word-aux" style="padding: 0 !important;">
                 <script th:if="${item}" th:inline="javascript" type="text/javascript">
                     asyncFn.push(function () {
-                        $("#projectEnd").text([[${item?.lib}]]);
-                        $("#projectStart").text([[${item?.whitelistDirectory}]]);
+                        var projectPath = $("#projectPath");
+                        projectPath.attr('projectEnd', [[${item?.lib}]]);
+                        projectPath.attr('projectStart', [[${item?.whitelistDirectory}]]);
+                        //$("#projectEnd").text();
+                        // $("#projectStart").text();
+                        checngeLib(true);
                         if ([[${item?.runMode}]] === 'ClassPath') {
                             $("#mainClassDiv").show();
                         }
@@ -290,7 +302,7 @@
                 tipMsgDiv.hide();
                 tipMsgDiv.attr("msg", "请填写项目路径")
             }
-            $("#projectStart").text(val);
+            $("#projectPath").attr('projectStart', val);
             if (val !== "") {
                 checngeLib();
             }
@@ -303,35 +315,13 @@
                 tipMsgDiv.hide();
                 tipMsgDiv.attr("msg", "请填写项目的jar路径")
             }
-            $("#projectEnd").text(val);
+            $("#projectPath").attr('projectEnd', val);
+            //$("#projectEnd").text(val);
             if (val !== "") {
                 checngeLib();
             }
         });
-        var whitelistDirectorySelect = $("select[name='whitelistDirectory']");
 
-        function checngeLib() {
-            var wVal = whitelistDirectorySelect.val();
-            if (wVal === "") {
-                layer.msg("请选择白名单");
-                return;
-            }
-            var lib = wVal + $("#projectEnd").text();
-            silentAjax({
-                url: './judge_lib.json',
-                data: {
-                    id: "[[${item?.id}]]",
-                    newLib: lib
-                },
-                success: function (data) {
-                    if (200 === data.code) {
-                        $("#tipMsgDiv").hide();
-                    } else {
-                        $("#tipMsg").text(data.msg).parent().show();
-                    }
-                }
-            });
-        }
 
         //
         $("#delete_project").click(function () {
@@ -393,6 +383,37 @@
         });
     }
 
+    function checngeLib(noTip) {
+        var whitelistDirectorySelect = $("select[name='whitelistDirectory']");
+        var wVal = whitelistDirectorySelect.val();
+        if (wVal === "") {
+            layer.msg("请选择白名单");
+            return;
+        }
+        var projectPath = $("#projectPath");
+        projectPath.val(projectPath.attr('projectStart') + projectPath.attr('projectEnd'));
+        if (noTip === true) {
+            return;
+        }
+        if (wVal === whitelistDirectorySelect.attr('oldVal')) {
+            return;
+        }
+        var lib = projectPath.val(); //wVal + $("#projectEnd").text();
+        silentAjax({
+            url: './judge_lib.json',
+            data: {
+                id: "[[${item?.id}]]",
+                newLib: lib
+            },
+            success: function (data) {
+                if (200 === data.code) {
+                    $("#tipMsgDiv").hide();
+                } else {
+                    $("#tipMsg").text(data.msg).parent().show();
+                }
+            }
+        });
+    }
 
     function addJavaCopy(data) {
         var copyHtml = document.getElementById('copyTempl');
