@@ -267,12 +267,13 @@ public class Monitor implements Task {
     }
 
     private void notifyMsg(final List<String> notify, final MonitorNotifyLog monitorNotifyLog) {
-        // 报警状态
-        MonitorService monitorService = SpringUtil.getBean(MonitorService.class);
-        monitorService.setAlarm(monitorNotifyLog.getMonitorId(), !monitorNotifyLog.isStatus());
         UserService userService = SpringUtil.getBean(UserService.class);
         // 发送通知
         if (monitorNotifyLog.getTitle() != null) {
+            // 报警状态
+            MonitorService monitorService = SpringUtil.getBean(MonitorService.class);
+            monitorService.setAlarm(monitorNotifyLog.getMonitorId(), !monitorNotifyLog.isStatus());
+            //
             notify.forEach(notifyUser -> {
                 UserModel item = userService.getItem(notifyUser);
                 boolean success = false;
