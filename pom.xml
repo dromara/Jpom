@@ -32,13 +32,29 @@
         <docker.workdir>/tmp/</docker.workdir>
         <!-- 跳过测试 -->
         <skipTests>true</skipTests>
+
+        <hutool-all.version>[5.4.0,5.4.99]</hutool-all.version>
     </properties>
     <dependencies>
         <dependency>
             <groupId>cn.jiangzeyin.fast-boot</groupId>
             <artifactId>common-boot</artifactId>
             <version>${common-boot.version}</version>
+
+            <exclusions>
+                <exclusion>
+                    <groupId>cn.hutool</groupId>
+                    <artifactId>hutool-all</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
+
+        <dependency>
+            <groupId>cn.hutool</groupId>
+            <artifactId>hutool-all</artifactId>
+            <version>${hutool-all.version}</version>
+        </dependency>
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-websocket</artifactId>
