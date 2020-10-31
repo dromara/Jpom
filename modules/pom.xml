@@ -5,9 +5,9 @@
     <modelVersion>4.0.0</modelVersion>
     <packaging>pom</packaging>
     <modules>
-        <module>modules/agent</module>
-        <module>modules/server</module>
-        <module>modules/common</module>
+        <module>agent</module>
+        <module>server</module>
+        <module>common</module>
     </modules>
     <parent>
         <groupId>org.springframework.boot</groupId>

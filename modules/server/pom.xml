@@ -6,7 +6,7 @@
         <artifactId>jpom-parent</artifactId>
         <groupId>io.jpom</groupId>
         <version>2.4.8</version>
-        <relativePath>../../pom.xml</relativePath>
+        <relativePath>../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <name>Jpom 服务端</name>
