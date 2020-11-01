@@ -41,10 +41,10 @@ if [[ $module = *$installJdk* ]]; then
             # 删除jdk压缩包
             rm -f jdk-8u251-linux-x64.tar.gz
          else
-            echo '已经存在java环境${JAVA}/bin/java'
+            echo "已经存在java环境${JAVA}/bin/java"
         fi
     else
-        echo '已经存在java环境${JAVA_HOME}/bin/java'
+        echo "已经存在java环境${JAVA_HOME}/bin/java"
     fi
 fi
 
@@ -74,10 +74,10 @@ if [[ $module = *$installMvn* ]]; then
             # 删除maven压缩包
             rm -f apache-maven-3.6.3-bin.tar.gz
         else
-            echo '已经存在maven环境${MAVEN_HOME}/bin/mvn'
+            echo "已经存在maven环境${MVN}/bin/mvn"
         fi
   else
-    echo '已经存在maven环境${MVN}/bin/mvn'
+    echo "已经存在maven环境${MAVEN_HOME}/bin/mvn"
   fi
 fi
 
