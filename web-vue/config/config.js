@@ -102,4 +102,5 @@ export default defineConfig({
   manifest: {
     basePath: '/',
   },
+  outputPath: '../modules/server/src/main/resources/dist/'
 });
