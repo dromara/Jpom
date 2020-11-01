@@ -107,6 +107,10 @@ yum install -y wget && wget -O install.sh https://cdn.jsdelivr.net/gh/jiangzeyin
 
 yum install -y wget && wget -O install.sh https://keepbx.gitee.io/jpom/install.sh && bash install.sh Server jdk
 
+支持自动安装jdk和maven环境
+
+yum install -y wget && wget -O install.sh https://keepbx.gitee.io/jpom/install.sh && bash install.sh Server jdk&mvn
+
 ```
 
 >特别提醒：一键安装的时候注意执行命令不可在同一目录下，即Server端和Agent端不可安装在同一目录下
