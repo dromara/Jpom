@@ -78,6 +78,21 @@
 
 ### 一键安装（linux）
 
+#### 插件端
+
+```
+yum install -y wget && wget -O install.sh https://keepbx.gitee.io/jpom/install.sh && bash install.sh Agent
+
+备用地址
+
+yum install -y wget && wget -O install.sh https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom/docs/install.sh && bash install.sh Agent
+
+支持自动安装jdk环境
+
+yum install -y wget && wget -O install.sh https://keepbx.gitee.io/jpom/install.sh && bash install.sh Agent jdk
+
+```
+
 #### 服务端
 
 ```
@@ -94,20 +109,6 @@ yum install -y wget && wget -O install.sh https://keepbx.gitee.io/jpom/install.s
 
 ```
 
-#### 插件端
-
-```
-yum install -y wget && wget -O install.sh https://keepbx.gitee.io/jpom/install.sh && bash install.sh Agent
-
-备用地址
-
-yum install -y wget && wget -O install.sh https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom/docs/install.sh && bash install.sh Agent
-
-支持自动安装jdk环境
-
-yum install -y wget && wget -O install.sh https://keepbx.gitee.io/jpom/install.sh && bash install.sh Agent jdk
-
-```
 >特别提醒：一键安装的时候注意执行命令不可在同一目录下，即Server端和Agent端不可安装在同一目录下
 ### 下载安装
 
