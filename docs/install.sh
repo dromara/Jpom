@@ -15,7 +15,7 @@ module="$2"
 # 判断是否包含jdk
 installJdk = "jdk"
 
-if [[ "$module" = *$installJdk* ]]; then
+if [[ $module = *$installJdk* ]]; then
     if [[ ! -x "${JAVA_HOME}/bin/java" ]]; then
       JAVA=`which java`
       if [[ ! -x "$JAVA" ]]; then
@@ -47,7 +47,7 @@ fi
 # 判断是否包含mvn
 installMvn = "mvn"
 
-if [[ "$module" = *$installMvn* ]]; then
+if [[ $module = *$installMvn* ]]; then
     if [[ ! -x "${MAVEN_HOME}/bin/mvn" ]]; then
       MVN=`which mvn`
       if [[ ! -x "$MVN" ]]; then
