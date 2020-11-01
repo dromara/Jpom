@@ -53,7 +53,7 @@ if [[ "$module" = *$installMvn* ]]; then
       if [[ ! -x "$MVN" ]]; then
         # 判断是否存在文件
         if [[ ! -f "apache-maven-3.6.3-bin.tar.gz" ]]; then
-         wget -O jdk-8u251-linux-x64.tar.gz https://jpom-releases.oss-cn-hangzhou.aliyuncs.com/apache-maven-3.6.3-bin.tar.gz
+         wget -O apache-maven-3.6.3-bin.tar.gz https://jpom-releases.oss-cn-hangzhou.aliyuncs.com/apache-maven-3.6.3-bin.tar.gz
         fi
         mkdir /usr/maven/
         #

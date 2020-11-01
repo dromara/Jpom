@@ -109,7 +109,7 @@ yum install -y wget && wget -O install.sh https://keepbx.gitee.io/jpom/install.s
 
 支持自动安装jdk和maven环境
 
-yum install -y wget && wget -O install.sh https://keepbx.gitee.io/jpom/install.sh && bash install.sh Server jdk&mvn
+yum install -y wget && wget -O install.sh https://keepbx.gitee.io/jpom/install.sh && bash install.sh Server jdk+mvn
 
 ```
 
