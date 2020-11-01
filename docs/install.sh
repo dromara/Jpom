@@ -86,6 +86,8 @@ fi
 unzip -o ${TYPE}.zip
 # 删除安装包
 rm -f ${TYPE}.zip
+# 删除安装命令
+rm -f install.sh
 # 添加权限
 chmod 755 ${TYPE}.sh
 # 启动
