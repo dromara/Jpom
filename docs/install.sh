@@ -13,7 +13,7 @@ TYPE="$1"
 module="$2"
 
 # 判断是否包含jdk
-installJdk = "jdk"
+installJd="jdk"
 
 if [[ $module = *$installJdk* ]]; then
     if [[ ! -x "${JAVA_HOME}/bin/java" ]]; then
@@ -49,7 +49,7 @@ if [[ $module = *$installJdk* ]]; then
 fi
 
 # 判断是否包含mvn
-installMvn = "mvn"
+installMvn="mvn"
 
 if [[ $module = *$installMvn* ]]; then
     if [[ ! -x "${MAVEN_HOME}/bin/mvn" ]]; then
