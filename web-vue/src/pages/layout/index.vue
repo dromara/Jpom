@@ -1,7 +1,9 @@
 <template>
   <a-layout id="app-layout">
     <a-layout-sider v-model="collapsed" :trigger="null" collapsible class="sider">
-      <div class="logo">Jpom</div>
+      <div class="logo">
+        <img src="../../assets/images/jpom.jpeg"/>
+      </div>
       <side-menu />
     </a-layout-sider>
     <a-layout>
@@ -60,9 +62,13 @@ export default {
 }
 
 #app-layout .logo {
+  width: 70px;
   height: 32px;
   background: rgba(255, 255, 255, 0.2);
-  margin: 16px;
+  margin: 16px auto;
+}
+#app-layout .logo img {
+  height: 32px;
 }
 .sider {
   max-height: 100vh;

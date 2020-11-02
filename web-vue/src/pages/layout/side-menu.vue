@@ -25,7 +25,6 @@ export default {
     ])
   },
   created() {
-    console.log(this.getMenus)
   },
   methods: {
   }

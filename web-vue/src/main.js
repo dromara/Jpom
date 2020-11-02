@@ -7,6 +7,7 @@ import './assets/reset.css';
 
 import router from './router';
 import store from './store';
+import './router/auth';
 
 Vue.config.productionTip = false;
 Vue.use(Antd);
