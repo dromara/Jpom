@@ -16,6 +16,7 @@ import io.jpom.common.interceptor.LoginInterceptor;
 import io.jpom.common.interceptor.NotLogin;
 import io.jpom.common.interceptor.OptLog;
 import io.jpom.model.data.UserModel;
+import io.jpom.model.dto.UserLoginDto;
 import io.jpom.model.log.UserOperateLogV1;
 import io.jpom.service.user.UserService;
 import io.jpom.system.ServerExtConfigBean;
@@ -180,7 +181,10 @@ public class LoginControl extends BaseServerController {
                     setSessionAttribute(LoginInterceptor.SESSION_NAME, userModel);
                     removeSessionAttribute(SHOW_CODE);
                     this.ipSuccess();
-                    return JsonMessage.getString(200, "登录成功");
+                    String userMd5Key = userModel.getUserMd5Key();
+                    UserLoginDto userLoginDto = new UserLoginDto();
+                    userLoginDto.setToken(userMd5Key);
+                    return JsonMessage.getString(200, "登录成功", userLoginDto);
                 } else {
                     userModel.errorLock();
                     int rCode = 501;
