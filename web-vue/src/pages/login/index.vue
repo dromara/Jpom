@@ -28,7 +28,8 @@
   </a-card>
 </template>
 <script>
-import { login } from '../../api/user'
+import { login } from '../../api/user';
+import sha1 from 'sha1';
 export default {
   data() {
     return {
@@ -49,13 +50,24 @@ export default {
       this.loginForm.validateFields((err, values) => {
         if (!err) {
           console.log('Received values of form: ', values);
-        }
-        login(values).then(res => {
-          // 登录不成功，更新验证码
-          if(res.code !== 200) {
-            this.changeCode();
+          const params = {
+            ...values,
+            userPwd: sha1(values.userPwd)
           }
-        })
+          login(params).then(res => {
+            // 登录不成功，更新验证码
+            if(res.code !== 200) {
+              this.changeCode();
+            } else {
+              this.$notification.success({
+                message: res.msg,
+                duration: 2
+              });
+              // 跳转主页面
+              this.$router.push({ path: '/' })
+            }
+          })
+        }
       });
     }
   }
