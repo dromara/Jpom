@@ -44,16 +44,23 @@
         :style="{ margin: '24px 16px', padding: '24px', background: '#fff', minHeight: '280px' }"
       >
         Content
+        {{ getToken }}
       </a-layout-content>
     </a-layout>
   </a-layout>
 </template>
 <script>
+import { mapGetters } from 'vuex';
 export default {
   data() {
     return {
       collapsed: false
     }
+  },
+  computed: {
+    ...mapGetters([
+      'getToken'
+    ])
   }
 }
 </script>

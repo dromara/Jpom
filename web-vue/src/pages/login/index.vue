@@ -63,8 +63,9 @@ export default {
                 message: res.msg,
                 duration: 2
               });
+              this.$store.dispatch('login');
               // 跳转主页面
-              this.$router.push({ path: '/' })
+              this.$router.push({ path: '/' });
             }
           })
         }
