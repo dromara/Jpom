@@ -49,7 +49,6 @@ export default {
       e.preventDefault();
       this.loginForm.validateFields((err, values) => {
         if (!err) {
-          console.log('Received values of form: ', values);
           const params = {
             ...values,
             userPwd: sha1(values.userPwd)
@@ -63,9 +62,11 @@ export default {
                 message: res.msg,
                 duration: 2
               });
-              this.$store.dispatch('login');
-              // 跳转主页面
-              this.$router.push({ path: '/' });
+              // 调用 store action 存储当前登录的用户名和 token
+              this.$store.dispatch('login', {token: res.data.token, userName: params.userName}).then(() => {
+                // 跳转主页面
+                this.$router.push({ path: '/' });
+              })
             }
           })
         }

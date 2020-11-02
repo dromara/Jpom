@@ -2,13 +2,15 @@ import axios from 'axios';
 import Qs from 'qs';
 
 import { notification } from 'ant-design-vue';
+import { TOKEN_KEY } from '../utils/const';
 
 // axios.defaults.baseURL = 'http://localhost:2122'
 
 const request = axios.create({
   timeout: 3000,
   headers: {
-    'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
+    'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+    'JPOM-USER-TOKEN': localStorage.getItem(TOKEN_KEY)
   },
   responseType: 'json'
 })
