@@ -8,3 +8,12 @@ export function login(params) {
     data: params
   })
 }
+
+// 修改昵称
+export function updatePwd(params) {
+  return axios({
+    url: '/user/updatePwd',
+    method: 'post',
+    data: params
+  })
+}
