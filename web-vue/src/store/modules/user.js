@@ -1,6 +1,6 @@
-// const USER_NAME_KEY = 'Jpom-UserName';
-// const TOKEN_KEY = 'Jpom-Token';
-// const MENU_KEY = 'Jpom-Menus';
+/**
+ * 用户相关的 store
+ */
 import {
   USER_NAME_KEY,
   TOKEN_KEY,
@@ -42,6 +42,18 @@ const user = {
         }).catch(error => {
           reject(error)
         })
+      })
+    },
+    // 退出登录 移除对应的 store
+    logOut({commit}) {
+      return new Promise((resolve) => {
+        commit('setToken', '');
+        commit('setUserName', '');
+        commit('setMenus', '');
+        localStorage.removeItem(TOKEN_KEY);
+        localStorage.removeItem(USER_NAME_KEY);
+        localStorage.removeItem(MENU_KEY);
+        resolve();
       })
     }
   },
