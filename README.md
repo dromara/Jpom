@@ -30,7 +30,7 @@
         <img src='https://img.shields.io/badge/Github-Github-red.svg' alt='github'/>
     </a>
     <a target="_blank" href="https://gitee.com/keepbx/Jpom">
-        <img src='https://gitee.com/keepbx/Jpom/badge/star.svg?theme=dark' alt='gitee star'/>
+        <img src='https://gitee.com/keepbx/Jpom/badge/star.svg?theme=gvp' alt='gitee star'/>
     </a>
 </p>
 <p align="center">
