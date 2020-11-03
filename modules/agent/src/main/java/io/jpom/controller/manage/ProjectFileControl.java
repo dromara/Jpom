@@ -2,6 +2,7 @@ package io.jpom.controller.manage;
 
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.io.file.FileWriter;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.servlet.ServletUtil;
@@ -26,6 +27,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -212,6 +214,23 @@ public class ProjectFileControl extends BaseAgentController {
             return JsonMessage.getString(500, "删除失败");
         }
     }
+
+
+    @RequestMapping(value = "readFile", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    public String readFile(String filename, String type, String levelName) {
+        ProjectInfoModel pim = getProjectInfoModel();
+        File file = FileUtil.file(pim.allLib(), filename);
+        String ymlString = FileUtil.readString(file, "Utf-8");
+        return JsonMessage.getString(200, ymlString);
+    }
+
+    @RequestMapping(value = "updateConfigFile", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    public String updateConfigFile(String filename, String type, String levelName, String fileText) {
+        ProjectInfoModel pim = getProjectInfoModel();
+        FileUtil.writeFromStream(new ByteArrayInputStream(fileText.getBytes()),FileUtil.file(pim.allLib(), filename));
+        return JsonMessage.getString(200, "文件写入成功");
+    }
+
 
     @RequestMapping(value = "download", method = RequestMethod.GET)
     public String download(String id, String filename, String levelName) {

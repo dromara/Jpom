@@ -24,6 +24,19 @@
             overflow-x: scroll;
             padding: 10px;
         }
+        #yaml {
+            color: white;
+            background-color: black;
+            font-family: "Courier New";
+            font-size: 14px;
+            width: 100%;
+            border: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 1;
+            height: 100%;
+        }
     </style>
 </head>
 
@@ -36,7 +49,7 @@
     <button id="uploadFile_Import_dom" class="layui-hide"></button>
 
     <button id="clear" class="layui-btn layui-btn-sm layui-btn-danger">清空文件</button>
-
+    <textarea name="yaml" id="yaml" cols="70" rows="20" style="display:none"></textarea>
 
     <div class="layui-layout-right" style="padding-right: 20px;padding-top: 10px;">
         <div>
@@ -54,12 +67,14 @@
     </div>
 </div>
 </body>
-
+<script type="text/javascript" src="../../../static/yaml/yaml.js"></script>
+<script type="text/javascript" src="../../../static/yaml/jquery-3.0.0.min.js"></script>
 <script type="text/html" id="bar_projects">
     <a href="javascript:;" class="layui-btn layui-btn-sm layui-btn-danger" lay-event="delete">删除</a>
     {{# if(!d.isDirectory){ }}
     <a href="javascript:;" class="layui-btn layui-btn-sm layui-btn-normal" lay-event="download">下载</a>
     {{# } }}
+    <a href="javascript:;" class="layui-btn layui-btn-sm layui-btn" lay-event="edit">编辑</a>
 </script>
 <script type="text/javascript">
     var zTreeObj;
@@ -238,6 +253,8 @@
             } else if ('download' === event) {
                 // 下载文件
                 downloadFile(data);
+            } else if ('edit' === event) {
+                readFile(data);
             }
         });
     }
@@ -271,6 +288,52 @@
         var url = "./download?id=[[${id}]]&filename=" + encodeURI(data.filename) + "&levelName=" + data.levelName;
         url = appendNodeId(url);
         self.location.href = url;
+    }
+
+    //读取文件
+    function readFile(data) {
+        loadingAjax({
+            url: './readFile',
+            data: {
+                id: '[[${id}]]',
+                filename: data.filename,
+                levelName: data.levelName
+            },
+            success: function (fileData) {
+                console.log(fileData.msg);
+                $("#yaml").val(fileData.msg);
+                layerOpen({
+                    type: 1,
+                    title: '编辑配置文件',
+                    btn: ['确认','取消'],
+                    content: $('#yaml'),
+                    area: ['60%', '70%'],
+                    shade: 0,
+                    shadeClose: true,
+                    yes: function (index, layero) {
+                        loadingAjax({
+                            url: './updateConfigFile',
+                            data: {
+                                id: '[[${id}]]',
+                                filename: data.filename,
+                                levelName: data.levelName,
+                                fileText: $("#yaml").val()
+                            },
+                            success: function (data) {
+                                layer.msg(data.msg);
+                                /*if (200 === data.code) {
+                                    reloadTable();
+                                }*/
+                            }
+                        });
+                    },btn2: function(){
+                        layer.close();
+                    },
+                    cancel: function () {
+                    }
+                });
+            }
+        });
     }
 
     // 删除文件
