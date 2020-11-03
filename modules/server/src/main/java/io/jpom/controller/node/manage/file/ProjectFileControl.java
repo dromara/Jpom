@@ -94,9 +94,33 @@ public class ProjectFileControl extends BaseServerController {
      */
     @RequestMapping(value = "deleteFile", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
-    @OptLog(UserOperateLogV1.OptType.DelProjectFile)
     @Feature(method = MethodFeature.DEL_FILE)
     public String deleteFile() {
         return NodeForward.request(getNode(), getRequest(), NodeUrl.Manage_File_DeleteFile).toString();
+    }
+
+
+    /**
+     * 删除文件
+     *
+     * @return json
+     */
+    @RequestMapping(value = "updateConfigFile", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @ResponseBody
+    @Feature(method = MethodFeature.UPDATE_CONFIG_FILE)
+    public String updateConfigFile() {
+        return NodeForward.request(getNode(), getRequest(), NodeUrl.Manage_File_UpdateConfigFile).toString();
+    }
+
+    /**
+     * 删除文件
+     *
+     * @return json
+     */
+    @RequestMapping(value = "readFile", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @ResponseBody
+    @Feature(method = MethodFeature.READ_FILE)
+    public String readFile() {
+        return NodeForward.request(getNode(), getRequest(), NodeUrl.Manage_File_ReadFile).toString();
     }
 }

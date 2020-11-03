@@ -29,6 +29,8 @@ public enum MethodFeature {
     CACHE("缓存"),
     DEL_LOG("删除日志"),
     CONFIG("配置"),
+    READ_FILE("读取文件"),
+    UPDATE_CONFIG_FILE("更新文件"),
     ;
 
     private String name;

@@ -73,6 +73,10 @@ public enum NodeUrl {
 
     Manage_File_DeleteFile("/manage/file/deleteFile"),
 
+    Manage_File_UpdateConfigFile("/manage/file/updateConfigFile"),
+
+    Manage_File_ReadFile("/manage/file/readFile"),
+
     Manage_File_Download("/manage/file/download"),
 
 
