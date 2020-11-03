@@ -9,7 +9,7 @@ export function login(params) {
   })
 }
 
-// 修改昵称
+// 修改密码
 export function updatePwd(params) {
   return axios({
     url: '/user/updatePwd',
