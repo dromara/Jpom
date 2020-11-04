@@ -77,6 +77,8 @@ public enum NodeUrl {
 
     Manage_File_ReadFile("/manage/file/readFile"),
 
+    Get_File_Format("/manage/file/getFileFormat"),
+
     Manage_File_Download("/manage/file/download"),
 
 

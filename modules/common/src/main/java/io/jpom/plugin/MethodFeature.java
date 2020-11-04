@@ -30,6 +30,7 @@ public enum MethodFeature {
     DEL_LOG("删除日志"),
     CONFIG("配置"),
     READ_FILE("读取文件"),
+    GET_FILE_FOMAT("获取在线编辑文件格式"),
     UPDATE_CONFIG_FILE("更新文件"),
     ;
 
