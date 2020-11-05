@@ -1,5 +1,5 @@
 <template>
-  <div class="right-header">
+  <div class="user-header">
     <a-dropdown>
       <a-avatar
         shape="square"
@@ -47,6 +47,8 @@ import sha1 from 'sha1';
 export default {
   data() {
     return {
+      collapsed: false,
+      // 修改密码框
       updateNamevisible: false,
       temp: {},
       // 表单校验规则
@@ -148,9 +150,8 @@ export default {
 }
 </script>
 <style scoped>
-.right-header {
+.user-header {
   margin-right: 20px;
-  float: right;
   cursor: pointer;
 }
 </style>

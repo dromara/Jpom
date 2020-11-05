@@ -4,7 +4,6 @@ jpom:
   authorize:
     # api接口请求token 长度要求大于等于6位，字母数字符号组合
     token:
-user:
   # 最多能创建多少个用户
   maxCount: 10
   # 用户连续登录失败次数，超过此数将被限制登录

@@ -12,11 +12,11 @@ const children = [
   {
     path: '/node/ssh',
     name: 'node-ssh',
-    component: () => import('../pages/node/list')
+    component: () => import('../pages/node/ssh')
   }
 ]
 
-export default new Router({
+const router = new Router({
   mode: 'hash',
   routes: [
     {
@@ -37,3 +37,5 @@ export default new Router({
     }
   ]
 })
+
+export default router
