@@ -1,8 +1,20 @@
 import Vue from 'vue';
 import Router from 'vue-router';
-import routeMenuList from './route-menu';
 
 Vue.use(Router)
+
+const children = [
+  {
+    path: '/node/list',
+    name: 'node-list',
+    component: () => import('../pages/node/list')
+  },
+  {
+    path: '/node/ssh',
+    name: 'node-ssh',
+    component: () => import('../pages/node/list')
+  }
+]
 
 export default new Router({
   mode: 'hash',
@@ -16,7 +28,7 @@ export default new Router({
       path: '/',
       name: 'home',
       component: () => import('../pages/layout'),
-      children: routeMenuList
+      children: children
     },
     {
       path: '*',
