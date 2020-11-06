@@ -30,7 +30,11 @@ export default {
     // 编辑 Tab
     onEdit(key, action) {
       if (action === 'remove') {
-        this.$store.dispatch('removeTab', key);
+        this.$store.dispatch('removeTab', key).then(() => {
+          const index = this.getTabList.findIndex(ele => ele.key === this.activeKey);
+          const activeTab = this.getTabList[index];
+          this.$router.push(activeTab.path);
+        });
       }
     },
     // 改变 Tab

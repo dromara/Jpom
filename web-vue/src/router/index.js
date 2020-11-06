@@ -5,6 +5,11 @@ Vue.use(Router)
 
 const children = [
   {
+    path: '/dashboard',
+    name: 'dashboard',
+    component: () => import('../pages/dashboard')
+  },
+  {
     path: '/node/list',
     name: 'node-list',
     component: () => import('../pages/node/list')
@@ -28,6 +33,7 @@ const router = new Router({
       path: '/',
       name: 'home',
       component: () => import('../pages/layout'),
+      redirect: '/dashboard',
       children: children
     },
     {
