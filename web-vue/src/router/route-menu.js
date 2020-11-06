@@ -5,7 +5,9 @@
  */
 const routeMenuMap = {
   'nodeList': '/node/list',
-  'sshList': '/node/ssh'
+  'sshList': '/node/ssh',
+  'user': '/user/list',
+  'roleList': '/role/list'
 }
 
 export default routeMenuMap

@@ -58,7 +58,7 @@ const user = {
       })
     },
     // 退出登录 移除对应的 store
-    logOut({commit}) {
+    logOut({dispatch, commit}) {
       return new Promise((resolve) => {
         commit('setToken', '');
         commit('setUserName', '');
@@ -66,6 +66,8 @@ const user = {
         localStorage.removeItem(TOKEN_KEY);
         localStorage.removeItem(USER_NAME_KEY);
         localStorage.removeItem(MENU_KEY);
+        // 调用其他 action
+        dispatch('clearTabs');
         resolve();
       })
     }

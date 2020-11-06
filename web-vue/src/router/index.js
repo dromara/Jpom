@@ -18,6 +18,16 @@ const children = [
     path: '/node/ssh',
     name: 'node-ssh',
     component: () => import('../pages/node/ssh')
+  },
+  {
+    path: '/user/list',
+    name: 'user-list',
+    component: () => import('../pages/user')
+  },
+  {
+    path: '/role/list',
+    name: 'role-list',
+    component: () => import('../pages/role')
   }
 ]
 

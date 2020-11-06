@@ -47,29 +47,30 @@ const app = {
         let tabList = state.tabList;
         const index = tabList.findIndex(ele => ele.key === key);
         tabList.splice(index, 1);
-        // 如果删除完了
-        // if (tabList.length === 0) {
-        //   commit('setActiveTabKey', '');
-        //   localStorage.setItem(ACTIVE_TAB_KEY, '');
-        // } else {
-          // 如果删除的是 activeTabKey
-          if (state.activeTabKey === key) {
-            let tempTab = {key: 'dashboard', path: '/dashboard'};
-            // 判断剩下的集合数量
-            if (tabList.length === 0) {
-              tabList.push(tempTab);
-            } else {
-              // 寻找下一个
-              tempTab = tabList[Math.min(index, 0)];
-            }
-            commit('setActiveTabKey', tempTab.key);
-            localStorage.setItem(ACTIVE_TAB_KEY, tempTab.key);
+        // 如果删除的是 activeTabKey
+        if (state.activeTabKey === key) {
+          let tempTab = {key: 'dashboard', path: '/dashboard'};
+          // 判断剩下的集合数量
+          if (tabList.length === 0) {
+            tabList.push(tempTab);
+          } else {
+            // 寻找下一个
+            tempTab = tabList[Math.min(index, 0)];
           }
-        // }
+          commit('setActiveTabKey', tempTab.key);
+          localStorage.setItem(ACTIVE_TAB_KEY, tempTab.key);
+        }
         commit('setTabList', tabList);
         localStorage.setItem(TAB_LIST_KEY, JSON.stringify(tabList));
         resolve()
       })
+    },
+    // 清除 tabs
+    clearTabs({commit}) {
+      commit('setTabList', []);
+      commit('setActiveTabKey', '');
+      localStorage.setItem(ACTIVE_TAB_KEY, '');
+      localStorage.setItem(TAB_LIST_KEY, JSON.stringify([]));
     }
   },
   getters: {

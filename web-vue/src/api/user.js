@@ -17,3 +17,11 @@ export function updatePwd(params) {
     data: params
   })
 }
+
+// 列表
+export function getUserList() {
+  return axios({
+    url: '/user/getUserList',
+    method: 'post'
+  })
+}
