@@ -16,7 +16,7 @@
         <content-tab />
         <user-header />
       </a-layout-header>
-      <a-layout-content :style="{ margin: '24px 16px', padding: '24px', background: '#fff', minHeight: '280px' }">
+      <a-layout-content class="layout-content">
         <keep-alive>
           <router-view/>
         </keep-alive>
@@ -77,5 +77,11 @@ export default {
 .sider {
   max-height: 100vh;
   overflow-y: auto;
+}
+.layout-content {
+  margin: 10px;
+  padding: 15px;
+  background: #fff;
+  min-height: 280px;
 }
 </style>
