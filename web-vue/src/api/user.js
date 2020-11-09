@@ -25,3 +25,21 @@ export function getUserList() {
     method: 'post'
   })
 }
+
+// 添加用户
+export function addUser(params) {
+  return axios({
+    url: '/user/addUser',
+    method: 'post',
+    data: params
+  })
+}
+
+// 修改用户
+export function updateUser(params) {
+  return axios({
+    url: '/user/updateUser',
+    method: 'post',
+    data: params
+  })
+}
