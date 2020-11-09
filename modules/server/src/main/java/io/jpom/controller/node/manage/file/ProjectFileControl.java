@@ -1,6 +1,7 @@
 package io.jpom.controller.node.manage.file;
 
 import cn.hutool.core.io.FileUtil;
+import cn.jiangzeyin.common.JsonMessage;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.common.BaseServerController;
 import io.jpom.common.forward.NodeForward;
@@ -11,6 +12,7 @@ import io.jpom.plugin.ClassFeature;
 import io.jpom.plugin.Feature;
 import io.jpom.plugin.MethodFeature;
 import io.jpom.service.node.manage.ProjectInfoService;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -31,6 +33,8 @@ public class ProjectFileControl extends BaseServerController {
     @Resource
     private ProjectInfoService projectInfoService;
 
+    @Value("${fileFormat}")
+    private String fileFormat;
     /**
      * 文件管理页面
      *
@@ -101,7 +105,7 @@ public class ProjectFileControl extends BaseServerController {
 
 
     /**
-     * 删除文件
+     * 更新配置文件
      *
      * @return json
      */
@@ -122,5 +126,20 @@ public class ProjectFileControl extends BaseServerController {
     @Feature(method = MethodFeature.READ_FILE)
     public String readFile() {
         return NodeForward.request(getNode(), getRequest(), NodeUrl.Manage_File_ReadFile).toString();
+    }
+
+    /**
+     * 获取可编辑文件格式
+     *
+     * @return json
+     */
+    @RequestMapping(value = "geFileFormat", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @ResponseBody
+    @Feature(method = MethodFeature.GET_FILE_FOMAT)
+    public String geFileFormat() {
+        String[] file = fileFormat.split("\\|");
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("fileFormat",file);
+        return JsonMessage.getString(200,"获取成功",jsonObject);
     }
 }

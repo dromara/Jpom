@@ -24,6 +24,7 @@
             overflow-x: scroll;
             padding: 10px;
         }
+
         #yaml {
             color: white;
             background-color: black;
@@ -49,7 +50,8 @@
     <button id="uploadFile_Import_dom" class="layui-hide"></button>
 
     <button id="clear" class="layui-btn layui-btn-sm layui-btn-danger">清空文件</button>
-    <textarea name="yaml" id="yaml" cols="70" rows="20" style="display:none"></textarea>
+    <!-- 在线编辑框 -->
+    <textarea name="yaml" id="yaml" cols="70" rows="20" class="layui-textarea context" style="display:none"></textarea>
 
     <div class="layui-layout-right" style="padding-right: 20px;padding-top: 10px;">
         <div>
@@ -69,12 +71,16 @@
 </body>
 <script type="text/javascript" src="../../../static/yaml/yaml.js"></script>
 <script type="text/javascript" src="../../../static/yaml/jquery-3.0.0.min.js"></script>
+<script type="text/javascript"
+        th:src="@{${session.jpomProxyPath}+'/static/js/auto-line-number.js?v='+${session.staticCacheTime}}"></script>
 <script type="text/html" id="bar_projects">
     <a href="javascript:;" class="layui-btn layui-btn-sm layui-btn-danger" lay-event="delete">删除</a>
     {{# if(!d.isDirectory){ }}
     <a href="javascript:;" class="layui-btn layui-btn-sm layui-btn-normal" lay-event="download">下载</a>
     {{# } }}
+    {{# if(!d.isDirectory&&isAssetTypeAnImage(d.filename)){ }}
     <a href="javascript:;" class="layui-btn layui-btn-sm layui-btn" lay-event="edit">编辑</a>
+    {{# } }}
 </script>
 <script type="text/javascript">
     var zTreeObj;
@@ -104,6 +110,27 @@
         index: -1,
         isDirectory: true
     };
+    var fileType;
+    //加载可在线编辑文件类型
+    jQuery.ajax({
+        url: "./geFileFormat",
+        dataType: "json",
+        type: "get",
+        success: function (result) {  //这里就是我出错的地方
+            fileType = result.data.fileFormat;
+        },
+        error: function (data) {
+            alert("请求出错");
+            alert(data);
+        }
+    });
+
+    //判断文件格式是否允许编辑
+    function isAssetTypeAnImage(ext) {
+        var index = ext.lastIndexOf(".");
+        ext = ext.substr(index + 1);
+        return fileType.indexOf(ext.toLowerCase()) !== -1;
+    }
 
     function loadSuccess() {
         //
@@ -257,6 +284,13 @@
                 readFile(data);
             }
         });
+
+        $("yaml").setTextareaCount({
+            width: "30px",
+            bgColor: "#ddd",
+            color: "#000",
+            display: "inline-block"
+        });
     }
 
     //节点展开
@@ -292,20 +326,22 @@
 
     //读取文件
     function readFile(data) {
+        var path = $("#currentPath").text();
         loadingAjax({
             url: './readFile',
             data: {
                 id: '[[${id}]]',
+                filePath: path,
                 filename: data.filename,
                 levelName: data.levelName
             },
             success: function (fileData) {
-                console.log(fileData.msg);
+                //console.log(fileData.msg);
                 $("#yaml").val(fileData.msg);
                 layerOpen({
                     type: 1,
                     title: '编辑配置文件',
-                    btn: ['确认','取消'],
+                    btn: ['确认', '取消'],
                     content: $('#yaml'),
                     area: ['60%', '70%'],
                     shade: 0,
@@ -315,6 +351,7 @@
                             url: './updateConfigFile',
                             data: {
                                 id: '[[${id}]]',
+                                filePath: path,
                                 filename: data.filename,
                                 levelName: data.levelName,
                                 fileText: $("#yaml").val()
@@ -326,8 +363,9 @@
                                 }*/
                             }
                         });
-                    },btn2: function(){
+                    }, btn2: function () {
                         layer.close();
+                        document.getElementById("yaml").style.display="none";
                     },
                     cancel: function () {
                     }
@@ -364,5 +402,6 @@
             });
         });
     }
+
 </script>
 </html>
