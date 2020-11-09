@@ -105,7 +105,7 @@ public class ProjectFileControl extends BaseServerController {
 
 
     /**
-     * 删除文件
+     * 更新配置文件
      *
      * @return json
      */

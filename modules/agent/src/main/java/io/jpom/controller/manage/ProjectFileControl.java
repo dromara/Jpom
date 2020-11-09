@@ -217,17 +217,23 @@ public class ProjectFileControl extends BaseAgentController {
 
 
     @RequestMapping(value = "readFile", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public String readFile(String filename, String type, String levelName) {
+    public String readFile(String filePath, String filename, String type, String levelName) {
         ProjectInfoModel pim = getProjectInfoModel();
-        File file = FileUtil.file(pim.allLib(), filename);
+        if (filePath != "") {
+            filePath += File.separator;
+        }
+        File file = FileUtil.file(pim.allLib(), filePath + filename);
         String ymlString = FileUtil.readString(file, "Utf-8");
         return JsonMessage.getString(200, ymlString);
     }
 
     @RequestMapping(value = "updateConfigFile", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public String updateConfigFile(String filename, String type, String levelName, String fileText) {
+    public String updateConfigFile(String filePath, String filename, String type, String levelName, String fileText) {
         ProjectInfoModel pim = getProjectInfoModel();
-        FileUtil.writeFromStream(new ByteArrayInputStream(fileText.getBytes()),FileUtil.file(pim.allLib(), filename));
+        if (filePath != "") {
+            filePath += File.separator;
+        }
+        FileUtil.writeFromStream(new ByteArrayInputStream(fileText.getBytes()), FileUtil.file(pim.allLib(), filePath + filename));
         return JsonMessage.getString(200, "文件写入成功");
     }
 

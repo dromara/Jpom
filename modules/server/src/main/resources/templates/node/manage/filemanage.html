@@ -50,7 +50,8 @@
     <button id="uploadFile_Import_dom" class="layui-hide"></button>
 
     <button id="clear" class="layui-btn layui-btn-sm layui-btn-danger">清空文件</button>
-    <textarea name="yaml" id="yaml" cols="70" rows="20" style="display:none"></textarea>
+    <!-- 在线编辑框 -->
+    <textarea name="yaml" id="yaml" cols="70" rows="20" class="layui-textarea context" style="display:none"></textarea>
 
     <div class="layui-layout-right" style="padding-right: 20px;padding-top: 10px;">
         <div>
@@ -70,6 +71,8 @@
 </body>
 <script type="text/javascript" src="../../../static/yaml/yaml.js"></script>
 <script type="text/javascript" src="../../../static/yaml/jquery-3.0.0.min.js"></script>
+<script type="text/javascript"
+        th:src="@{${session.jpomProxyPath}+'/static/js/auto-line-number.js?v='+${session.staticCacheTime}}"></script>
 <script type="text/html" id="bar_projects">
     <a href="javascript:;" class="layui-btn layui-btn-sm layui-btn-danger" lay-event="delete">删除</a>
     {{# if(!d.isDirectory){ }}
@@ -113,20 +116,22 @@
         url: "./geFileFormat",
         dataType: "json",
         type: "get",
-        success: function(result) {  //这里就是我出错的地方
-            fileType=result.data.fileFormat;
+        success: function (result) {  //这里就是我出错的地方
+            fileType = result.data.fileFormat;
         },
-        error: function(data) {
+        error: function (data) {
             alert("请求出错");
             alert(data);
         }
     });
+
     //判断文件格式是否允许编辑
     function isAssetTypeAnImage(ext) {
-        var index= ext.lastIndexOf(".");
-        ext = ext.substr(index+1);
+        var index = ext.lastIndexOf(".");
+        ext = ext.substr(index + 1);
         return fileType.indexOf(ext.toLowerCase()) !== -1;
     }
+
     function loadSuccess() {
         //
         asyncLoadJs("[[${session.jpomProxyPath}]]/static/ztree/jquery.ztree.core.min.js", function () {
@@ -279,6 +284,13 @@
                 readFile(data);
             }
         });
+
+        $("yaml").setTextareaCount({
+            width: "30px",
+            bgColor: "#ddd",
+            color: "#000",
+            display: "inline-block"
+        });
     }
 
     //节点展开
@@ -314,15 +326,13 @@
 
     //读取文件
     function readFile(data) {
-        var path=$("#currentPath").text();
-        if(path!=''&path!=null){
-            path+='/';
-        }
+        var path = $("#currentPath").text();
         loadingAjax({
             url: './readFile',
             data: {
                 id: '[[${id}]]',
-                filename: path + data.filename,
+                filePath: path,
+                filename: data.filename,
                 levelName: data.levelName
             },
             success: function (fileData) {
@@ -341,7 +351,8 @@
                             url: './updateConfigFile',
                             data: {
                                 id: '[[${id}]]',
-                                filename: $("#currentPath").text() + '\\' + data.filename,
+                                filePath: path,
+                                filename: data.filename,
                                 levelName: data.levelName,
                                 fileText: $("#yaml").val()
                             },
@@ -354,6 +365,7 @@
                         });
                     }, btn2: function () {
                         layer.close();
+                        document.getElementById("yaml").style.display="none";
                     },
                     cancel: function () {
                     }
@@ -390,5 +402,6 @@
             });
         });
     }
+
 </script>
 </html>
