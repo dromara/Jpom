@@ -28,6 +28,11 @@ const children = [
     path: '/role/list',
     name: 'role-list',
     component: () => import('../pages/role')
+  },
+  {
+    path: '/operation/log',
+    name: 'operation-log',
+    component: () => import('../pages/operation-log')
   }
 ]
 
