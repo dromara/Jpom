@@ -43,3 +43,12 @@ export function updateUser(params) {
     data: params
   })
 }
+
+// 删除用户
+export function deleteUser(id) {
+  return axios({
+    url: '/user/deleteUser',
+    method: 'post',
+    data: {id}
+  })
+}

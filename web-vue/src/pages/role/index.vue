@@ -2,9 +2,10 @@
   <div>
     <div class="filter">
       <a-button type="primary" @click="handleAdd">新增</a-button>
+      <a-button type="primary" @click="loadData">刷新</a-button>
     </div>
     <!-- 数据表格 -->
-    <a-table :data-source="list" :columns="columns" bordered :rowKey="(record, index) => index">
+    <a-table :data-source="list" :loading="loading" :columns="columns" bordered :rowKey="(record, index) => index">
       <template slot="operation" slot-scope="text, record">
         <a-button type="primary">动态</a-button>
         <a-button type="primary" @click="handleEdit(record)">编辑</a-button>
@@ -31,6 +32,7 @@ import { getRoleList, getRoleFeature, editRole, deleteRole } from '../../api/rol
 export default {
   data() {
     return {
+      loading: false,
       list: [],
       // 权限列表
       featureList: [],
@@ -47,7 +49,7 @@ export default {
         {title: '角色名称', dataIndex: 'name'},
         {title: '授权人数', dataIndex: 'bindCount'},
         {title: '修改时间', dataIndex: 'updateTime'},
-        {title: '操作', dataIndex: 'operation', scopedSlots: {customRender: 'operation'}}
+        {title: '操作', dataIndex: 'operation', scopedSlots: {customRender: 'operation'}, width: '300px'}
       ],
       // 表单校验规则
       rules: {
@@ -64,10 +66,12 @@ export default {
   methods: {
     // 加载数据
     loadData() {
+      this.loading = true;
       getRoleList().then(res => {
         if (res.code === 200) {
           this.list = res.data;
         }
+        this.loading = false;
       })
     },
     // 加载角色权限
@@ -110,7 +114,6 @@ export default {
           }
         }
       });
-      console.log(this.checkedKeys)
       this.temp.id = record.id;
       this.temp.name = record.name;
       // 显示对话框
@@ -149,7 +152,6 @@ export default {
             checkedList.push(temp);
           }
         })
-        console.log(checkedList)
         this.temp.feature = JSON.stringify(checkedList);
         // 提交数据
         editRole(this.temp).then(res => {
