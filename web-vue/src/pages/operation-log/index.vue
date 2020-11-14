@@ -12,6 +12,15 @@
     <a-table :data-source="list" :loading="loading" :columns="columns"
       :pagination="pagination" :scroll="{x: '80vw', y: tableHeight }" bordered
       :rowKey="(record, index) => index" @change="change">
+      <a-tooltip slot="nodeId" slot-scope="text" placement="topLeft" :title="text">
+        <span>{{ text }}</span>
+      </a-tooltip>
+      <a-tooltip slot="dataId" slot-scope="text" placement="topLeft" :title="text">
+        <span>{{ text }}</span>
+      </a-tooltip>
+      <a-tooltip slot="optTypeMsg" slot-scope="text" placement="topLeft" :title="text">
+        <span>{{ text }}</span>
+      </a-tooltip>
       <template slot="operation" slot-scope="text, record">
         <a-button type="primary" @click="handleDetail(record)">详情</a-button>
       </template>
@@ -50,13 +59,13 @@ export default {
       columns: [
         {title: '操作者', dataIndex: 'userId', width: 80},
         {title: 'IP', dataIndex: 'ip', width: 100},
-        {title: '节点 ID', dataIndex: 'nodeId', width: 80},
-        {title: '数据 ID', dataIndex: 'dataId', width: 80},
-        {title: '操作类型', dataIndex: 'optType', width: 100},
+        {title: '节点 ID', dataIndex: 'nodeId', width: 120, ellipsis: true, scopedSlots: {customRender: 'nodeId'}},
+        {title: '数据 ID', dataIndex: 'dataId', width: 120, ellipsis: true, scopedSlots: {customRender: 'dataId'}},
+        {title: '操作类型', dataIndex: 'optTypeMsg', width: 100, ellipsis: true, scopedSlots: {customRender: 'optTypeMsg'}},
         {title: '执行结果', dataIndex: 'optStatusMsg', width: 100},
         {title: '操作时间', dataIndex: 'optTime', customRender: (text) => {
           return parseTime(text);
-        }, width: 160},
+        }, width: 170},
         {title: '操作', dataIndex: 'operation', scopedSlots: {customRender: 'operation'}, width: 100, fixed: 'right'}
       ]
     }
