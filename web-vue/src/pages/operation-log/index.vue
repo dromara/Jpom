@@ -1,24 +1,130 @@
 <template>
   <div>
-    <div class="filter">
+    <div ref="filter" class="filter">
+      <a-select v-model="listQuery.selectUser" allowClear placeholder="请选择操作者"
+        class="filter-item" @change="handleFilter">
+        <a-select-option value="system">系统管理员</a-select-option>
+      </a-select>
+      <a-button type="primary" @click="handleFilter">搜索</a-button>
       <a-button type="primary" @click="loadData">刷新</a-button>
     </div>
+    <!-- 数据表格 -->
+    <a-table :data-source="list" :loading="loading" :columns="columns"
+      :pagination="pagination" :scroll="{x: '80vw', y: tableHeight }" bordered
+      :rowKey="(record, index) => index" @change="change">
+      <template slot="operation" slot-scope="text, record">
+        <a-button type="primary" @click="handleDetail(record)">详情</a-button>
+      </template>
+    </a-table>
+    <!-- 详情区 -->
+    <a-modal v-model="detailVisible" width="600px" title="详情信息" :footer="null">
+      <a-list item-layout="horizontal" :data-source="detailData">
+        <a-list-item slot="renderItem" slot-scope="item">
+          <a-list-item-meta :description="item.description">
+            <h4 slot="title">{{ item.title }}</h4>
+          </a-list-item-meta>
+        </a-list-item>
+      </a-list>
+    </a-modal>
   </div>
 </template>
 <script>
+import { getOperationLogList } from '../../api/operation-log';
+import { getUserList } from '../../api/user';
+import { parseTime } from '../../utils/time';
 export default {
   data() {
     return {
-      loadding: false,
+      loading: false,
+      list: [],
+      userList: [],
+      total: 0,
+      listQuery: {
+        page: 1,
+        limit: 20
+      },
+      tableHeight: '70vh',
+      temp: {},
+      detailVisible: false,
+      detailData: [],
+      columns: [
+        {title: '操作者', dataIndex: 'userId', width: 80},
+        {title: 'IP', dataIndex: 'ip', width: 100},
+        {title: '节点 ID', dataIndex: 'nodeId', width: 80},
+        {title: '数据 ID', dataIndex: 'dataId', width: 80},
+        {title: '操作类型', dataIndex: 'optType', width: 100},
+        {title: '执行结果', dataIndex: 'optStatusMsg', width: 100},
+        {title: '操作时间', dataIndex: 'optTime', customRender: (text) => {
+          return parseTime(text);
+        }, width: 160},
+        {title: '操作', dataIndex: 'operation', scopedSlots: {customRender: 'operation'}, width: 100, fixed: 'right'}
+      ]
+    }
+  },
+  computed: {
+    pagination() {
+      return {
+        total: this.total,
+        current: this.listQuery.page || 1,
+        pageSize: this.listQuery.limit || 10,
+        pageSizeOptions: ['10', '20', '50', '100'],
+        showSizeChanger: true,
+        showTotal: (total) => {
+          return `Total ${total} items`;
+        }
+      }
     }
   },
   created() {
+    this.calcTableHeight();
     this.loadData();
+    this.loadUserList();
   },
   methods: {
+    // 计算表格高度
+    calcTableHeight() {
+      this.$nextTick(() => {
+        this.tableHeight = window.innerHeight - this.$refs['filter'].clientHeight - 220;
+      })
+    },
     // 加载数据
     loadData() {
-
+      this.loading = true;
+      getOperationLogList(this.listQuery).then(res => {
+        if (res.code === 200) {
+          this.list = res.data;
+          this.total = res.total;
+        }
+        this.loading = false;
+      })
+    },
+    // 	分页、排序、筛选变化时触发
+    change(pagination) {
+      this.listQuery.page = pagination.current;
+      this.listQuery.limit = pagination.pageSize;
+      this.loadData();
+    },
+    // 加载用户列表
+    loadUserList() {
+      getUserList().then(res => {
+        if (res.code === 200) {
+          this.userList = res.data;
+        }
+      })
+    },
+    // 搜索
+    handleFilter() {
+      this.listQuery.page = 1;
+      this.loadData();
+    },
+    // 查看详情
+    handleDetail(record) {
+      this.detailData = [];
+      this.detailVisible = true;
+      this.temp = Object.assign(record);
+      this.detailData.push({title: '浏览器标识', description: this.temp.userAgent});
+      this.detailData.push({title: '请求参数', description: this.temp.reqData});
+      this.detailData.push({title: '响应结果', description: this.temp.resultMsg});
     }
   }
 }
@@ -28,6 +134,10 @@ export default {
   margin-bottom: 10px;
 }
 .ant-btn {
+  margin-right: 10px;
+}
+.filter-item {
+  width: 150px;
   margin-right: 10px;
 }
 </style>
