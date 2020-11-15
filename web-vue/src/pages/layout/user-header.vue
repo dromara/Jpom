@@ -1,5 +1,5 @@
 <template>
-  <div class="right-header">
+  <div class="user-header">
     <a-dropdown>
       <a-avatar
         shape="square"
@@ -25,7 +25,7 @@
       </a-menu>
     </a-dropdown>
     <!-- 编辑区 -->
-    <a-modal v-model="updateNamevisible" title="修改昵称" @ok="handleUpdatePwdOk" :maskClosable="false">
+    <a-modal v-model="updateNamevisible" title="修改密码" @ok="handleUpdatePwdOk" :maskClosable="false">
       <a-form-model ref="pwdForm" :rules="rules" :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 14 }">
         <a-form-model-item label="原密码" prop="oldPwd">
           <a-input-password v-model="temp.oldPwd" placeholder="Old password"/>
@@ -47,6 +47,8 @@ import sha1 from 'sha1';
 export default {
   data() {
     return {
+      collapsed: false,
+      // 修改密码框
       updateNamevisible: false,
       temp: {},
       // 表单校验规则
@@ -105,52 +107,50 @@ export default {
     handleUpdatePwd() {
       this.temp = {};
       this.updateNamevisible = true;
-      this.$nextTick(() => {
-        this.$refs['pwdForm'].resetFields();
-      })
     },
     // 修改密码
     handleUpdatePwdOk() {
       // 检验表单
-      this.$refs['pwdForm'].validate((err) => {
-        if (!err) {
-          // 判断两次新密码是否一致
-          if (this.temp.newPwd !== this.temp.confirmPwd) {
-            this.$notification.error({
-              message: '两次密码不一致...',
-              duration: 2
-            });
-            return;
-          }
-          // 提交修改
-          const params = {
-            oldPwd: sha1(this.temp.oldPwd),
-            newPwd: sha1(this.temp.newPwd)
-          }
-          updatePwd(params).then(res => {
-            // 修改成功
-            if (res.code === 200) {
-              // 退出登录
-              this.$store.dispatch('logOut').then(() => {
-                this.$notification.success({
-                  message: res.msg,
-                  duration: 2
-                });
-                this.updateNamevisible = false;
-                this.$router.push('/login');
-              })
-            }
-          })
+      this.$refs['pwdForm'].validate(valid => {
+        if (!valid) {
+          return false;
         }
+        // 判断两次新密码是否一致
+        if (this.temp.newPwd !== this.temp.confirmPwd) {
+          this.$notification.error({
+            message: '两次密码不一致...',
+            duration: 2
+          });
+          return;
+        }
+        // 提交修改
+        const params = {
+          oldPwd: sha1(this.temp.oldPwd),
+          newPwd: sha1(this.temp.newPwd)
+        }
+        updatePwd(params).then(res => {
+          // 修改成功
+          if (res.code === 200) {
+            // 退出登录
+            this.$store.dispatch('logOut').then(() => {
+              this.$notification.success({
+                message: res.msg,
+                duration: 2
+              });
+              this.$refs['pwdForm'].resetFields();
+              this.updateNamevisible = false;
+              this.$router.push('/login');
+            })
+          }
+        })
       })
     }
   }
 }
 </script>
 <style scoped>
-.right-header {
+.user-header {
   margin-right: 20px;
-  float: right;
   cursor: pointer;
 }
 </style>

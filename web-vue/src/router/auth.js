@@ -27,5 +27,9 @@ router.beforeEach((to, from, next) => {
     next('/login');
     return;
   }
-  next();
+  // 存储 store
+  console.log(to)
+  store.dispatch('addTab', {key: to.name, path: to.path}).then(() => {
+    next();
+  })
 })

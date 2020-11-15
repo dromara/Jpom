@@ -1,18 +1,14 @@
 /**
  * 路由菜单
- * id 是后台菜单指定的 id
+ * key 对应后台接口返回的菜单中的 id
+ * value 表示该路由的 path
  */
-const routeMenuList = [
-  {
-    path: '/node/list',
-    name: 'node-list',
-    component: () => import('../pages/node/list')
-  },
-  {
-    path: '/node/ssh',
-    name: 'node-ssh',
-    component: () => import('../pages/node/list')
-  }
-]
+const routeMenuMap = {
+  'nodeList': '/node/list',
+  'sshList': '/node/ssh',
+  'user': '/user/list',
+  'roleList': '/role/list',
+  'user_log': '/operation/log'
+}
 
-export default routeMenuList
+export default routeMenuMap

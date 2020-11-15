@@ -5,20 +5,17 @@
         <a-icon type="apartment" />
         <span>{{menu.title}}</span>
       </span>
-      <a-menu-item v-for="subMenu in menu.childs" :key="subMenu.id" @click="handleClick(subMenu.url)">
+      <a-menu-item v-for="subMenu in menu.childs" :key="subMenu.id" @click="handleClick(subMenu.path)">
         <span>{{subMenu.title}}</span>
       </a-menu-item>
     </a-sub-menu>
-    
   </a-menu>
 </template>
 <script>
 import { mapGetters } from 'vuex';
-import routeMenuList from '../../router/route-menu';
 export default {
   data() {
     return {
-      routeList: routeMenuList
     }
   },
   computed: {
@@ -29,15 +26,25 @@ export default {
   created() {
   },
   methods: {
-    // 匹配路由和菜单
-    checkRouteMenu(id) {
-      const tempList = this.routeList.filter(route => {
-        return route.id === id;
-      })
-      return tempList.length > 0;
-    },
+    // 点击菜单
     handleClick(path) {
-      console.log(path)
+      // 如果路由不存在
+      if (!path) {
+        this.$notification.error({
+          message: '路由无效，无法跳转',
+          duration: 2
+        });
+        return false;
+      }
+      // 如果跳转路由跟当前一致
+      if (this.$route.path === path) {
+        this.$notification.warn({
+          message: '已经在当前页面了',
+          duration: 2
+        });
+        return false;
+      }
+      // 跳转路由
       this.$router.push(path)
     }
   }

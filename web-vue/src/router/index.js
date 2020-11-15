@@ -1,10 +1,42 @@
 import Vue from 'vue';
 import Router from 'vue-router';
-import routeMenuList from './route-menu';
 
 Vue.use(Router)
 
-export default new Router({
+const children = [
+  {
+    path: '/dashboard',
+    name: 'dashboard',
+    component: () => import('../pages/dashboard')
+  },
+  {
+    path: '/node/list',
+    name: 'node-list',
+    component: () => import('../pages/node/list')
+  },
+  {
+    path: '/node/ssh',
+    name: 'node-ssh',
+    component: () => import('../pages/node/ssh')
+  },
+  {
+    path: '/user/list',
+    name: 'user-list',
+    component: () => import('../pages/user')
+  },
+  {
+    path: '/role/list',
+    name: 'role-list',
+    component: () => import('../pages/role')
+  },
+  {
+    path: '/operation/log',
+    name: 'operation-log',
+    component: () => import('../pages/operation-log')
+  }
+]
+
+const router = new Router({
   mode: 'hash',
   routes: [
     {
@@ -16,7 +48,8 @@ export default new Router({
       path: '/',
       name: 'home',
       component: () => import('../pages/layout'),
-      children: routeMenuList
+      redirect: '/dashboard',
+      children: children
     },
     {
       path: '*',
@@ -25,3 +58,5 @@ export default new Router({
     }
   ]
 })
+
+export default router

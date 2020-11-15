@@ -8,6 +8,7 @@ import {
 } from '../../utils/const'
 
 import { getSystemMenu } from '../../api/menu';
+import routeMenuMap from '../../router/route-menu';
 
 const user = {
   state: {
@@ -36,6 +37,18 @@ const user = {
         localStorage.setItem(USER_NAME_KEY, data.userName);
         // 加载系统菜单
         getSystemMenu().then(res => {
+          res.data.forEach(element => {
+            if (element.childs.length > 0) {
+              const childs = element.childs.map(child => {
+                console.log(routeMenuMap[child.id])
+                return {
+                  ...child,
+                  'path': routeMenuMap[child.id]
+                }
+              });
+              element.childs = childs;
+            }
+          });
           commit('setMenus', res.data);
           localStorage.setItem(MENU_KEY, JSON.stringify(res.data));
           resolve();
@@ -45,7 +58,7 @@ const user = {
       })
     },
     // 退出登录 移除对应的 store
-    logOut({commit}) {
+    logOut({dispatch, commit}) {
       return new Promise((resolve) => {
         commit('setToken', '');
         commit('setUserName', '');
@@ -53,6 +66,8 @@ const user = {
         localStorage.removeItem(TOKEN_KEY);
         localStorage.removeItem(USER_NAME_KEY);
         localStorage.removeItem(MENU_KEY);
+        // 调用其他 action
+        dispatch('clearTabs');
         resolve();
       })
     }

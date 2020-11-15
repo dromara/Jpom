@@ -7,29 +7,32 @@
       <side-menu />
     </a-layout-sider>
     <a-layout>
-      <a-layout-header style="background: #fff; padding: 0">
+      <a-layout-header class="app-header">
         <a-icon
           class="trigger"
           :type="collapsed ? 'menu-unfold' : 'menu-fold'"
           @click="() => (collapsed = !collapsed)"
         />
-        <top-header />
+        <content-tab />
+        <user-header />
       </a-layout-header>
-      <a-layout-content
-        :style="{ margin: '24px 16px', padding: '24px', background: '#fff', minHeight: '280px' }"
-      >
-        <router-view/>
+      <a-layout-content class="layout-content">
+        <keep-alive>
+          <router-view/>
+        </keep-alive>
       </a-layout-content>
     </a-layout>
   </a-layout>
 </template>
 <script>
 import SideMenu from './side-menu';
-import TopHeader from './top-header';
+import UserHeader from './user-header';
+import ContentTab from './content-tab';
 export default {
   components: {
     SideMenu,
-    TopHeader
+    UserHeader,
+    ContentTab
   },
   data() {
     return {
@@ -66,8 +69,19 @@ export default {
 #app-layout .logo img {
   height: 32px;
 }
+.app-header {
+  display: flex;
+  background: #fff;
+  padding: 0
+}
 .sider {
   max-height: 100vh;
   overflow-y: auto;
+}
+.layout-content {
+  margin: 10px;
+  padding: 15px;
+  background: #fff;
+  min-height: 280px;
 }
 </style>
