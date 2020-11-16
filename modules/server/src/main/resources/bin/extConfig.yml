@@ -1,0 +1,32 @@
+jpom:
+  # jpom 数据存储路径, 如果调试模式运行默认路径为【/jpom/】,安装运行默认为jar包文件的父级
+  path:
+  authorize:
+    # api接口请求token 长度要求大于等于6位，字母数字符号组合
+    token:
+user:
+  # 最多能创建多少个用户
+  maxCount: 10
+  # 用户连续登录失败次数，超过此数将被限制登录
+  alwaysLoginError: 5
+  # 当ip连续登录失败，锁定对应IP时长，单位毫秒
+  ipErrorLockTime: 60*60*5*1000
+consoleLog:
+  # 是否记录接口请求日志
+  reqXss: true
+  # 是否记录接口响应日志
+  reqResponse: true
+log:
+  # 日志文件的编码格式，如果没有指定就自动识别，自动识别可能出现不准确的情况
+  fileCharset:
+  # 查看日志时初始读取最后多少行（默认10，0不读取）
+  intiReadLine: 10
+db:
+  # 日志存储条数，将自动清理旧数据,配置小于等于零则不清理
+  logStorageCount: 100000
+# 构建相关配置
+build:
+  # 最多保存多少份历史记录
+  maxHistoryCount: 1000
+  # 单个最多保存多少份历史记录
+  itemMaxHistoryCount: 50
