@@ -18,7 +18,9 @@ const request = axios.create({
 // 请求拦截器
 request.interceptors.request.use(config => {
   // 处理数据
-  config.data = Qs.stringify(config.data); 
+  if (config.method === 'post') {
+    config.data = Qs.stringify(config.data); 
+  }
   return config;
 }, error => {
   return Promise.reject(error);

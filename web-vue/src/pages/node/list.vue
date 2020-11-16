@@ -1,34 +1,38 @@
 <template>
   <div>
     <div ref="filter" class="filter">
+      <a-select v-model="listQuery.group" allowClear placeholder="请选择分组"
+        class="filter-item" @change="handleFilter">
+        <a-select-option v-for="group in groupList" :key="group">{{ group }}</a-select-option>
+      </a-select>
+      <a-button type="primary" @click="handleFilter">搜索</a-button>
       <a-button type="primary" @click="handleAdd">新增</a-button>
       <a-button type="primary" @click="loadData">刷新</a-button>
     </div>
-    <a-layout class="layout">
-      <!-- 分组树 -->
-      <a-layout-sider class="sider">
-        <a-empty v-show="groupList.length === 0" />
-        <a-tree :load-data="onLoadTreeData" :tree-data="groupList" @select="clickTreeNode" @check="checkTreeNode" defaultExpandAll checkable />
-      </a-layout-sider>
-      <!-- 表格 -->
-      <a-layout-content class="content">
-        <a-table :data-source="list" :loading="loading" :scroll="{x: '80vw', y: tableHeight}" :columns="columns" :pagination="false" bordered :rowKey="(record, index) => index">
-          <a-tooltip slot="osName" slot-scope="text" placement="topLeft" :title="text">
-            <span>{{ text }}</span>
-          </a-tooltip>
-          <a-tooltip slot="javaVersion" slot-scope="text" placement="topLeft" :title="text">
-            <span>{{ text }}</span>
-          </a-tooltip>
-          <a-tooltip slot="runTime" slot-scope="text" placement="topLeft" :title="text">
-            <span>{{ text }}</span>
-          </a-tooltip>
-          <template slot="operation" slot-scope="text, record">
-            <a-button type="primary" @click="handleEdit(record)">编辑</a-button>
-            <a-button type="danger" @click="handleDelete(record)">删除</a-button>
-          </template>
-        </a-table>
-      </a-layout-content>
-    </a-layout>
+    <!-- 表格 -->
+    <a-table :loading="loading" :columns="columns" :data-source="list" bordered :rowKey="(record,index) => record.id"
+      @expand="expand" :pagination="false">
+      <a-tooltip slot="group" slot-scope="text" placement="topLeft" :title="text">
+        <span>{{ text }}</span>
+      </a-tooltip>
+      <template slot="operation" slot-scope="text, record">
+        <a-button type="primary" @click="handleEdit(record)">编辑</a-button>
+        <a-button type="danger" @click="handleDelete(record)">删除</a-button>
+      </template>
+      <!-- 嵌套表格 -->
+      <a-table slot="expandedRowRender" slot-scope="record" :scroll="{x: '80vw'}" :loading="childLoading" :columns="childColumns" :data-source="record.children"
+        :pagination="false" :rowKey="(record, index) => index">
+        <a-tooltip slot="osName" slot-scope="text" placement="topLeft" :title="text">
+          <span>{{ text }}</span>
+        </a-tooltip>
+        <a-tooltip slot="javaVersion" slot-scope="text" placement="topLeft" :title="text">
+          <span>{{ text }}</span>
+        </a-tooltip>
+        <a-tooltip slot="runTime" slot-scope="text" placement="topLeft" :title="text">
+          <span>{{ text }}</span>
+        </a-tooltip>
+      </a-table>
+    </a-table>
     <!-- 编辑区 -->
     <a-modal v-model="editNodeVisible" title="编辑节点" @ok="handleEditRoleOk" :maskClosable="false">
       <a-form-model ref="editNodeForm" :rules="rules" :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 14 }">
@@ -40,7 +44,7 @@
         </a-form-model-item>
         <a-form-model-item label="分组名称" prop="group">
           <a-select mode="tags" placeholder="可手动输入" @change="handleSelectChange">
-            <a-select-option v-for="item in groupList" :key="item.title">{{ item.title }}</a-select-option>
+            <a-select-option v-for="group in groupList" :key="group">{{ group }}</a-select-option>
           </a-select>
         </a-form-model-item>
         <a-form-model-item label="监控周期" prop="cycle">
@@ -85,13 +89,22 @@ export default {
   data() {
     return{
       loading: false,
+      childLoading: false,
       listQuery: {},
       groupList: [],
       list: [],
       temp: {},
       editNodeVisible: false,
-      tableHeight: '80vh',
       columns: [
+        {title: '节点 ID', dataIndex: 'id', width: 100, ellipsis: true, scopedSlots: {customRender: 'id'}},
+        {title: '节点名称', dataIndex: 'name', width: 150, ellipsis: true, scopedSlots: {customRender: 'name'}},
+        {title: '分组', dataIndex: 'group', width: 100, ellipsis: true, scopedSlots: {customRender: 'group'}},
+        {title: '节点协议', dataIndex: 'protocol', width: 100, ellipsis: true, scopedSlots: {customRender: 'protocol'}},
+        {title: '节点地址', dataIndex: 'url', width: 150, ellipsis: true, scopedSlots: {customRender: 'url'}},
+        {title: '超时时间', dataIndex: 'timeOut', width: 100, ellipsis: true},
+        {title: '操作', dataIndex: 'operation', scopedSlots: {customRender: 'operation'}, width: '200px'}
+      ],
+      childColumns: [
         {title: '系统名', dataIndex: 'osName', width: 100, ellipsis: true, scopedSlots: {customRender: 'osName'}},
         {title: 'JDK 版本', dataIndex: 'javaVersion', width: 120, ellipsis: true, scopedSlots: {customRender: 'javaVersion'}},
         {title: 'JVM 总内存', dataIndex: 'totalMemory', width: 150},
@@ -100,8 +113,7 @@ export default {
         {title: 'Java 程序数', dataIndex: 'javaVirtualCount', width: 150},
         {title: '项目数', dataIndex: 'count', width: 100},
         {title: '响应时间', dataIndex: 'timeOut', width: 120},
-        {title: '已运行时间', dataIndex: 'runTime', width: 150, ellipsis: true, scopedSlots: {customRender: 'runTime'}},
-        {title: '操作', dataIndex: 'operation', scopedSlots: {customRender: 'operation'}, width: '200px', fixed: 'right'}
+        {title: '已运行时间', dataIndex: 'runTime', width: 150, ellipsis: true, scopedSlots: {customRender: 'runTime'}}
       ],
       rules: {
         id: [
@@ -126,89 +138,40 @@ export default {
     }
   },
   created() {
-    this.calcTableHeight();
-    this.loadData();
+    this.loadGroupList();
+    this.handleFilter()
   },
   methods: {
-    // 计算表格高度
-    calcTableHeight() {
-      this.$nextTick(() => {
-        this.tableHeight = window.innerHeight - this.$refs['filter'].clientHeight - 220;
-      })
-    },
     // 分组列表
-    loadData() {
-      this.groupList = [];
+    loadGroupList() {
       getNodeGroupList().then(res => {
         if (res.code === 200) {
-          res.data.forEach(element => {
-            this.groupList.push({title: element, key: element});
-          });
+          this.groupList = res.data;
         }
       })
     },
-    // 加载树结构
-    onLoadTreeData(treeNode) {
-      return new Promise(resolve => {
-        if (treeNode.dataRef.children) {
-          resolve();
-          return;
+    // 加载数据
+    loadData() {
+      this.list = [];
+      this.loading = true;
+      getNodeList(this.listQuery).then(res => {
+        if (res.code === 200) {
+          this.list = res.data;
         }
-        setTimeout(() => {
-          const params = {group: treeNode.dataRef.title};
-          treeNode.dataRef.children = [];
-          getNodeList(params).then(res => {
-            if (res.code === 200) {
-              res.data.forEach(element => {
-                treeNode.dataRef.children.push({title: element.name, key: element.id, isLeaf: true, data: element});
-              })
-              this.groupList = [...this.groupList];
-            }
-          })
-          resolve();
-        }, 500);
+        this.loading = false;
       })
     },
-    // 点击树结点
-    clickTreeNode(selectedKeys, {node}) {
-      if (node.isLeaf) {
-        this.loading = true;
-        getNodeStatus(node.dataRef.key).then(res => {
+    // 展开行
+    expand(expanded, record) {
+      if (expanded) {
+        // 请求节点状态数据
+        this.childLoading = true;
+        getNodeStatus(record.id).then(res => {
           if (res.code === 200) {
-            this.list = res.data
+            const index = this.list.findIndex(ele => ele.id === record.id);
+            this.list[index].children = res.data;
           }
-          this.loading = false;
-        })
-      }
-    },
-    // 勾选树结点
-    checkTreeNode(selectedKeys, {checked, checkedNodes}) {
-      if (checked) {
-        // 获取选中的叶子节点
-        const checkList = checkedNodes.filter(element => element.data.props.dataRef.isLeaf === true);
-        if (checkList.length === 0) {
-          this.$notification.error({
-            message: '请选择叶子节点',
-            duration: 2
-          });
-          return false;
-        }
-        this.list = [];
-        // 获取选中的 leaf 树结点，分别加载数据
-        checkedNodes.forEach(element => {
-          if (element.data.props.dataRef.isLeaf) {
-            this.loading = true;
-            getNodeStatus(element.data.props.dataRef.key).then(res => {
-              if (res.code === 200) {
-                // 拼接结果, id 用来删除
-                res.data.forEach(ele => {
-                  ele.id = element.data.props.dataRef.data.id
-                })
-                this.list = this.list.concat(res.data);
-              }
-              this.loading = false;
-            })
-          }
+          this.childLoading = false;
         })
       }
     },
@@ -217,6 +180,10 @@ export default {
       if (value.length > 1) {
         this.temp.group = value[value.length - 1];
       }
+    },
+    // 筛选
+    handleFilter() {
+      this.loadData()
     },
     // 添加
     handleAdd() {
@@ -268,9 +235,7 @@ export default {
                 message: res.msg,
                 duration: 2
               });
-              const index = this.list.findIndex(element => element.id === record.id);
-              this.list.splice(index, 1);
-              this.loadNodeGroupList();
+              this.loadData();
             }
           })
         }
@@ -289,15 +254,5 @@ export default {
 .filter-item {
   width: 150px;
   margin-right: 10px;
-}
-.sider {
-  background-color: #fff;
-  border: 1px solid #e8e8e8;
-  height: calc(100vh - 150px);
-  overflow-y: auto;
-}
-.content {
-  background-color: #fff;
-  padding-left: 10px;
 }
 </style>
