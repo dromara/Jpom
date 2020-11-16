@@ -28,10 +28,23 @@ export function getNodeStatus(nodeId) {
 
 // 编辑 node
 export function editNode(params) {
+  const data = {
+    id: params.id,
+    name: params.name,
+    group: params.group,
+    protocol: params.protocol,
+    url: params.url,
+    timeOut: params.timeOut,
+    cycle: params.cycle,
+    openStatus: params.openStatus,
+    loginName: params.loginName,
+    loginPwd: params.loginPwd,
+    type: params.type
+  }
   return axios({
     url: '/node/save.json',
     method: 'post',
-    data: params
+    data
   })
 }
 

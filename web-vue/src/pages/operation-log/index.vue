@@ -5,6 +5,10 @@
         class="filter-item" @change="handleFilter">
         <a-select-option value="system">系统管理员</a-select-option>
       </a-select>
+      <a-select v-model="listQuery.selectNode" allowClear placeholder="请选择节点"
+        class="filter-item" @change="handleFilter">
+        <a-select-option v-for="node in nodeList" :key="node.id">{{ node.name }}</a-select-option>
+      </a-select>
       <a-button type="primary" @click="handleFilter">搜索</a-button>
       <a-button type="primary" @click="loadData">刷新</a-button>
     </div>
@@ -39,6 +43,7 @@
 </template>
 <script>
 import { getOperationLogList } from '../../api/operation-log';
+import { getNodeList } from '../../api/node';
 import { getUserList } from '../../api/user';
 import { parseTime } from '../../utils/time';
 export default {
@@ -46,6 +51,7 @@ export default {
     return {
       loading: false,
       list: [],
+      nodeList: [],
       userList: [],
       total: 0,
       listQuery: {
@@ -88,12 +94,21 @@ export default {
     this.calcTableHeight();
     this.loadData();
     this.loadUserList();
+    this.loadNodeList();
   },
   methods: {
     // 计算表格高度
     calcTableHeight() {
       this.$nextTick(() => {
         this.tableHeight = window.innerHeight - this.$refs['filter'].clientHeight - 220;
+      })
+    },
+    // 加载 node
+    loadNodeList() {
+      getNodeList().then(res => {
+        if (res.code === 200) {
+          this.nodeList = res.data;
+        }
       })
     },
     // 加载数据

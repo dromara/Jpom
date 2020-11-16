@@ -1,5 +1,6 @@
 import axios from 'axios';
 import Qs from 'qs';
+import store from '../store';
 
 import { notification } from 'ant-design-vue';
 import { TOKEN_KEY } from '../utils/const';
@@ -36,6 +37,12 @@ request.interceptors.response.use(response => {
       description: response.config.url,
       duration: 2
     });
+  }
+  // 如果是登录信息失效
+  if (res.code === 800) {
+    store.dispatch('logOut').then(() => {
+      location.reload();
+    })
   }
   return res;
 }, error => {

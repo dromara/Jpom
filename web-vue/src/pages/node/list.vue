@@ -10,7 +10,7 @@
       <a-button type="primary" @click="loadData">刷新</a-button>
     </div>
     <!-- 表格 -->
-    <a-table :loading="loading" :columns="columns" :data-source="list" bordered :rowKey="(record,index) => record.id"
+    <a-table :loading="loading" :columns="columns" :data-source="list" :scroll="{x: '80vw'}" bordered :rowKey="(record,index) => record.id"
       @expand="expand" :pagination="false">
       <a-tooltip slot="group" slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
@@ -43,7 +43,7 @@
           <a-input v-model="temp.name" placeholder="节点名称"/>
         </a-form-model-item>
         <a-form-model-item label="分组名称" prop="group">
-          <a-select mode="tags" placeholder="可手动输入" @change="handleSelectChange">
+          <a-select v-model="temp.tempGroup" mode="tags" placeholder="可手动输入" @change="handleSelectChange">
             <a-select-option v-for="group in groupList" :key="group">{{ group }}</a-select-option>
           </a-select>
         </a-form-model-item>
@@ -178,7 +178,14 @@ export default {
     // 处理下拉框
     handleSelectChange(value) {
       if (value.length > 1) {
-        this.temp.group = value[value.length - 1];
+        // 获取选中的值
+        const selectValue = value[value.length - 1];
+        // 添加到分组列表
+        if (this.groupList.indexOf(selectValue) === -1) {
+          this.groupList.push(selectValue);
+          this.temp.tempGroup = selectValue;
+          this.temp.group = selectValue;
+        }
       }
     },
     // 筛选
@@ -188,6 +195,7 @@ export default {
     // 添加
     handleAdd() {
       this.temp = {
+        type: 'add',
         cycle: 0,
         protocol: 'http',
         openStatus: true
@@ -197,6 +205,7 @@ export default {
     // 修改
     handleEdit(record) {
       this.temp = Object.assign(record);
+      this.temp.tempGroup = this.temp.group;
       this.editNodeVisible = true;
     },
     // 提交角色数据
@@ -217,6 +226,7 @@ export default {
             this.$refs['editNodeForm'].resetFields();
             this.editNodeVisible = false;
             this.loadData();
+            this.loadGroupList();
           }
         })
       })
