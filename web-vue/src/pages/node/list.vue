@@ -10,7 +10,7 @@
       <a-button type="primary" @click="loadData">刷新</a-button>
     </div>
     <!-- 表格 -->
-    <a-table :loading="loading" :columns="columns" :data-source="list" :scroll="{x: '80vw'}" bordered :rowKey="(record,index) => record.id"
+    <a-table :loading="loading" :columns="columns" :data-source="list" bordered rowKey="id" class="node-table"
       @expand="expand" :pagination="false">
       <a-tooltip slot="group" slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
@@ -168,8 +168,9 @@ export default {
         this.childLoading = true;
         getNodeStatus(record.id).then(res => {
           if (res.code === 200) {
-            const index = this.list.findIndex(ele => ele.id === record.id);
-            this.list[index].children = res.data;
+            // const index = this.list.findIndex(ele => ele.id === record.id);
+            // this.list[index].children = res.data;
+            record.children = res.data;
           }
           this.childLoading = false;
         })
@@ -264,5 +265,8 @@ export default {
 .filter-item {
   width: 150px;
   margin-right: 10px;
+}
+.node-table {
+  overflow-x: auto;
 }
 </style>
