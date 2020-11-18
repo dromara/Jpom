@@ -85,7 +85,7 @@
     <a-drawer :title="drawerTitle" placement="right" width="90vw"
       :visible="drawerVisible" @close="onClose">
       <!-- 节点管理组件 -->
-      <node-layout />
+      <node-layout :node="temp" />
     </a-drawer>
   </div>
 </template>

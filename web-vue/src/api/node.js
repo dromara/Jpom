@@ -56,3 +56,12 @@ export function deleteNode(id) {
     data: {id}
   })
 }
+
+// 节点 top 命令
+export function getNodeTop(nodeId) {
+  return axios({
+    url: '/node/getTop',
+    method: 'post',
+    data: {nodeId}
+  })
+}
