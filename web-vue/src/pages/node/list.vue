@@ -16,6 +16,7 @@
         <span>{{ text }}</span>
       </a-tooltip>
       <template slot="operation" slot-scope="text, record">
+        <a-button type="primary" @click="handleNode(record)">节点管理</a-button>
         <a-button type="primary" @click="handleEdit(record)">编辑</a-button>
         <a-button type="danger" @click="handleDelete(record)">删除</a-button>
       </template>
@@ -80,12 +81,22 @@
         </a-form-model-item>
       </a-form-model>
     </a-modal>
+    <!-- 管理节点 -->
+    <a-drawer :title="drawerTitle" placement="right" width="90vw"
+      :visible="drawerVisible" @close="onClose">
+      <!-- 节点管理组件 -->
+      <node-layout />
+    </a-drawer>
   </div>
 </template>
 <script>
 /* eslint-disable no-unused-vars */
 import { getNodeGroupList, getNodeList, getNodeStatus, editNode, deleteNode } from '../../api/node';
+import NodeLayout from './node-layout';
 export default {
+  components: {
+    NodeLayout
+  },
   data() {
     return{
       loading: false,
@@ -95,6 +106,8 @@ export default {
       list: [],
       temp: {},
       editNodeVisible: false,
+      drawerVisible: false,
+      drawerTitle: '',
       columns: [
         {title: '节点 ID', dataIndex: 'id', width: 100, ellipsis: true, scopedSlots: {customRender: 'id'}},
         {title: '节点名称', dataIndex: 'name', width: 150, ellipsis: true, scopedSlots: {customRender: 'name'}},
@@ -102,7 +115,7 @@ export default {
         {title: '节点协议', dataIndex: 'protocol', width: 100, ellipsis: true, scopedSlots: {customRender: 'protocol'}},
         {title: '节点地址', dataIndex: 'url', width: 150, ellipsis: true, scopedSlots: {customRender: 'url'}},
         {title: '超时时间', dataIndex: 'timeOut', width: 100, ellipsis: true},
-        {title: '操作', dataIndex: 'operation', scopedSlots: {customRender: 'operation'}, width: '200px'}
+        {title: '操作', dataIndex: 'operation', scopedSlots: {customRender: 'operation'}, width: '300px'}
       ],
       childColumns: [
         {title: '系统名', dataIndex: 'osName', width: 100, ellipsis: true, scopedSlots: {customRender: 'osName'}},
@@ -251,6 +264,16 @@ export default {
           })
         }
       });
+    },
+    // 管理节点
+    handleNode(record) {
+      this.temp = Object.assign(record);
+      this.drawerTitle = `${this.temp.id} (${this.temp.url})`
+      this.drawerVisible = true;
+    },
+    // 关闭抽屉层
+    onClose() {
+      this.drawerVisible = false;
     }
   }
 }
