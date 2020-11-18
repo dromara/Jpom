@@ -1,7 +1,7 @@
 <template>
   <div>
     <!-- top 图表 -->
-    <div id="top-chart">...</div>
+    <div id="top-chart">loading...</div>
   </div>
 </template>
 <script>
