@@ -65,3 +65,12 @@ export function getNodeTop(nodeId) {
     data: {nodeId}
   })
 }
+
+// 获取进程列表
+export function getProcessList(nodeId) {
+  return axios({
+    url: '/node/processList',
+    method: 'post',
+    data: {nodeId}
+  })
+}
