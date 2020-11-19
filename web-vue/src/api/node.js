@@ -74,3 +74,15 @@ export function getProcessList(nodeId) {
     data: {nodeId}
   })
 }
+
+/**
+ * 杀掉进程
+ * @param {*} params = {nodeId, pid}
+ */
+export function killPid(params) {
+  return axios({
+    url: '/node/kill.json',
+    method: 'post',
+    data: params
+  })
+}

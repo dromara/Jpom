@@ -3,7 +3,6 @@ package io.jpom.common.commander.impl;
 import cn.hutool.system.OsInfo;
 import cn.hutool.system.SystemUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
-import com.alibaba.fastjson.JSONObject;
 import org.junit.Test;
 
 public class MacOSSystemCommanderTest {
@@ -46,17 +45,5 @@ public class MacOSSystemCommanderTest {
             MacOSSystemCommander macOSSystemCommander = new MacOSSystemCommander();
             macOSSystemCommander.getAllMonitor();
         }
-    }
-
-    /**
-     * 测试 Mac OS 获取进程列表
-     */
-    @Test
-    public void testGetProcessList() {
-        // Mac OS
-//        if (osInfo.isMac() || osInfo.isMacOsX()) {
-//            MacOSSystemCommander macOSSystemCommander = new MacOSSystemCommander();
-//            macOSSystemCommander.getProcessList();
-//        }
     }
 }

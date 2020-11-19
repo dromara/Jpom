@@ -57,7 +57,7 @@ export default {
   methods: {
     // 加载菜单
     loadNodeMenu() {
-      getNodeMenu('test1').then(res => {
+      getNodeMenu(this.node.id).then(res => {
         if (res.code === 200) {
           this.nodeMenuList = res.data;
         }
@@ -73,6 +73,11 @@ export default {
 <style scoped>
 .sider {
   height: calc(100vh - 75px);
+  overflow-y: auto;
+}
+.layout-content {
+  height: calc(100vh - 95px);
+  overflow-y: auto;
 }
 /* .node-layout {
   padding: 10px;

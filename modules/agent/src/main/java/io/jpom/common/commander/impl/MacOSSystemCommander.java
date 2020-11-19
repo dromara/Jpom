@@ -18,7 +18,7 @@ import java.util.List;
 public class MacOSSystemCommander extends AbstractSystemCommander {
     @Override
     public JSONObject getAllMonitor() {
-        String result = CommandUtil.execSystemCommand("top -l 1 | head");
+        String result = CommandUtil.execSystemCommand("top -l 1 -n 1");
         if (StrUtil.isEmpty(result)) {
             return null;
         }
@@ -121,6 +121,7 @@ public class MacOSSystemCommander extends AbstractSystemCommander {
             List<String> values = StrSpliter.splitTrim(item, StrUtil.SPACE, true);
             DefaultSystemLog.getLog().debug(JSON.toJSONString(values));
             processModel.setPid(Integer.parseInt(values.get(0)));
+            processModel.setPort(values.get(6));
             processModel.setCommand(values.get(1));
             processModel.setCpu(values.get(2) + "%");
             processModel.setMem(values.get(14) + "%");

@@ -21,7 +21,7 @@
   </div>
 </template>
 <script>
-import { getNodeTop, getProcessList } from '../../../api/node';
+import { getNodeTop, getProcessList, killPid } from '../../../api/node';
 import echarts from 'echarts';
 export default {
   props: {
@@ -159,6 +159,32 @@ export default {
         }
         this.loading = false;
       })
+    },
+    // kill pid
+    kill(record) {
+      console.log(record);
+      this.$confirm({
+        title: '系统提示',
+        content: '真的要 Kill 这个进程么？',
+        okText: '确认',
+        cancelText: '取消',
+        onOk: () => {
+          // kill
+          const params = {
+            nodeId: this.node.id,
+            pid: record.pid
+          }
+          killPid(params).then(res =>  {
+            if (res.code === 200) {
+              this.$notification.success({
+                message: res.msg,
+                duration: 2
+              });
+              this.loadNodeProcess();
+            }
+          })
+        }
+      });
     }
   }
 }
