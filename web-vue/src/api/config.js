@@ -11,7 +11,6 @@ const request = axios.create({
   timeout: 3000,
   headers: {
     'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
-    'JPOM-USER-TOKEN': localStorage.getItem(TOKEN_KEY)
   },
   responseType: 'json'
 })
@@ -22,6 +21,7 @@ request.interceptors.request.use(config => {
   if (config.method === 'post') {
     config.data = Qs.stringify(config.data); 
   }
+  config.headers['JPOM-USER-TOKEN'] = localStorage.getItem(TOKEN_KEY);
   return config;
 }, error => {
   return Promise.reject(error);
