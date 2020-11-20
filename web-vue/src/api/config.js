@@ -18,7 +18,7 @@ const request = axios.create({
 // 请求拦截器
 request.interceptors.request.use(config => {
   // 处理数据
-  if (config.method === 'post') {
+  if (config.headers['Content-Type'].indexOf('application/x-www-form-urlencoded') !== -1) {
     config.data = Qs.stringify(config.data); 
   }
   config.headers['JPOM-USER-TOKEN'] = localStorage.getItem(TOKEN_KEY);
