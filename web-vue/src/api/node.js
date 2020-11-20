@@ -77,7 +77,7 @@ export function getProcessList(nodeId) {
 
 /**
  * 杀掉进程
- * @param {*} params = {nodeId, pid}
+ * @param {nodeId, pid} params
  */
 export function killPid(params) {
   return axios({

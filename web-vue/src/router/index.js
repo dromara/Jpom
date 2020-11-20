@@ -33,6 +33,11 @@ const children = [
     path: '/operation/log',
     name: 'operation-log',
     component: () => import('../pages/operation-log')
+  },
+  {
+    path: '/system/log',
+    name: 'system-log',
+    component: () => import('../pages/system/log')
   }
 ]
 

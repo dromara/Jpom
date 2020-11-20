@@ -1,12 +1,13 @@
 <template>
   <a-card hoverable class="card">
-    <a-card-meta title="404">
+    <a-card-meta>
       <template slot="description">
-        <p>Page Not Found</p>
-        <a-button type="primary" @click="goBack">
-          <a-icon type="left"/>
-          <span>Go Back</span>
-        </a-button>
+        <a-result status="404" title="404" sub-title="Sorry, the page you visited does not exist.">
+          <a-button type="primary" @click="goBack">
+            <a-icon type="left"/>
+            <span>Go Back</span>
+          </a-button>
+        </a-result>
       </template>
     </a-card-meta>
   </a-card>

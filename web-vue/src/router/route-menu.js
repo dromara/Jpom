@@ -8,7 +8,8 @@ const routeMenuMap = {
   'sshList': '/node/ssh',
   'user': '/user/list',
   'roleList': '/role/list',
-  'user_log': '/operation/log'
+  'user_log': '/operation/log',
+  'logManage': '/system/log'
 }
 
 export default routeMenuMap
