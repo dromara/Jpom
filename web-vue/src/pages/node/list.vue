@@ -77,7 +77,7 @@
           <a-input-password v-model="temp.loginPwd" placeholder="节点密码"/>
         </a-form-model-item>
         <a-form-model-item label="超时时间" prop="timeOut">
-          <a-input-number v-model="temp.timeOut" :min="1500" placeholder="毫秒 (值太小会取不到节点状态)" style="width: 100%"/>
+          <a-input-number v-model="temp.timeOut" :min="500" placeholder="毫秒 (值太小会取不到节点状态)" style="width: 100%"/>
         </a-form-model-item>
       </a-form-model>
     </a-modal>

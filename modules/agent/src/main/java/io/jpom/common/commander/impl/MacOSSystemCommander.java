@@ -18,7 +18,7 @@ import java.util.List;
 public class MacOSSystemCommander extends AbstractSystemCommander {
     @Override
     public JSONObject getAllMonitor() {
-        String result = CommandUtil.execSystemCommand("top -l 1 -n 1");
+        String result = CommandUtil.execSystemCommand("top -l 1 | head");
         if (StrUtil.isEmpty(result)) {
             return null;
         }
