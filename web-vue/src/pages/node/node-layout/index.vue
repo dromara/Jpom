@@ -22,14 +22,14 @@
     <!-- 节点管理的各个组件 -->
     <a-layout-content class="layout-content">
       <welcome v-if="currentId === 'welcome'" :node="node" />
-      <project-list v-if="currentId === 'manageList'" />
+      <project-list v-if="currentId === 'manageList'" :node="node" />
     </a-layout-content>
   </a-layout>
 </template>
 <script>
 import { getNodeMenu } from '../../../api/menu';
 import Welcome from './welcome';
-import ProjectList from './project/list';
+import ProjectList from './manage/project-list';
 export default {
   components: {
     Welcome,
