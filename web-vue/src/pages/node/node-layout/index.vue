@@ -23,17 +23,50 @@
     <a-layout-content class="layout-content">
       <welcome v-if="currentId === 'welcome'" :node="node" />
       <project-list v-if="currentId === 'manageList'" :node="node" />
+      <jdk-list v-if="currentId === 'jdkList'" :node="node" />
+      <recover v-if="currentId === 'projectRecover'" :node="node" />
+      <tomcat v-if="currentId === 'tomcatManage'" :node="node" />
+      <script-template v-if="currentId === 'script'" :node="node" />
+      <nginx-list v-if="currentId === 'nginxList'" :node="node" />
+      <cert v-if="currentId === 'certificate'" :node="node" />
+      <white-list v-if="currentId === 'whitelistDirectory'" :node="node" />
+      <cache v-if="currentId === 'cacheManage'" :node="node" />
+      <log v-if="currentId === 'logManage'" :node="node" />
+      <upgrade v-if="currentId === 'update'" :node="node" />
+      <config-file v-if="currentId === 'sysConfig'" :node="node" />
     </a-layout-content>
   </a-layout>
 </template>
 <script>
 import { getNodeMenu } from '../../../api/menu';
 import Welcome from './welcome';
-import ProjectList from './manage/project-list';
+import ProjectList from './project/project-list';
+import JdkList from './project/jdk-list';
+import Recover from './project/recover';
+import Tomcat from './other/tomcat';
+import ScriptTemplate from './other/script-template';
+import NginxList from './nginx/list';
+import Cert from './nginx/cert';
+import WhiteList from './config/white-list.vue';
+import Cache from './config/cache';
+import Log from './config/log.vue';
+import Upgrade from './config/upgrade.vue';
+import ConfigFile from './config/config-file.vue';
 export default {
   components: {
     Welcome,
-    ProjectList
+    ProjectList,
+    JdkList,
+    Recover,
+    Tomcat,
+    ScriptTemplate,
+    NginxList,
+    Cert,
+    WhiteList,
+    Cache,
+    Log,
+    Upgrade,
+    ConfigFile
   },
   props: {
     node: {
