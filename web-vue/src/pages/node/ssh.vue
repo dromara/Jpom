@@ -8,7 +8,7 @@
     <a-table :data-source="list" :loading="loading" :columns="columns" :pagination="false" bordered :rowKey="(record, index) => index">
       <template slot="nodeId" slot-scope="text, record">
         <a-button v-if="!record.nodeModel" type="primary" @click="install(record)">安装节点</a-button>
-        <span v-else>......</span>
+        <a-tag color="#2db7f5" v-else @click="toNode(record.nodeModel)">前往节点: {{ `${record.nodeModel.id}(${record.nodeModel.name})` }}</a-tag>
       </template>
       <template slot="operation" slot-scope="text, record">
         <a-button type="primary" @click="handleEdit(record)">编辑</a-button>
@@ -17,7 +17,7 @@
       </template>
     </a-table>
     <!-- 编辑区 -->
-    <a-modal v-model="editSshVisible" width="600px" title="编辑用户" @ok="handleEditRoleOk" :maskClosable="false">
+    <a-modal v-model="editSshVisible" width="600px" title="编辑 SSH" @ok="handleEditRoleOk" :maskClosable="false">
       <a-form-model ref="editSshForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
         <a-form-model-item label="SSH 名称" prop="name">
           <a-input v-model="temp.name" placeholder="SSH 名称"/>
@@ -55,37 +55,39 @@
     </a-modal>
     <!-- 安装节点 -->
     <a-modal v-model="nodeVisible" width="600px" title="安装节点" @ok="handleEditNodeOk" :maskClosable="false">
-      <a-form-model ref="nodeForm" :rules="rules" :model="tempNode" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
-        <a-form-model-item label="节点 ID" prop="id">
-          <a-input v-model="tempNode.id" placeholder="节点 ID"/>
-        </a-form-model-item>
-        <a-form-model-item label="节点名称" prop="name">
-          <a-input v-model="tempNode.name" placeholder="节点名称"/>
-        </a-form-model-item>
-        <a-form-model-item label="节点协议" prop="protocol">
-          <a-select v-model="tempNode.protocol" defaultValue="http" placeholder="节点协议">
-            <a-select-option key="http">HTTP</a-select-option>
-            <a-select-option key="https">HTTPS</a-select-option>
-          </a-select>
-        </a-form-model-item>
-        <a-form-model-item label="节点地址" prop="url">
-          <a-input v-model="tempNode.url" placeholder="节点地址 (127.0.0.1:2123)"/>
-        </a-form-model-item>
-        <a-form-model-item label="安装路径" prop="path">
-          <a-input v-model="tempNode.path" placeholder="安装路径"/>
-        </a-form-model-item>
-        <a-form-model-item label="安装文件">
-          <div class="clearfix">
-            <a-upload :file-list="fileList" :remove="handleRemove" :before-upload="beforeUpload" accept=".zip">
-              <a-button><a-icon type="upload" />选择文件</a-button>
-            </a-upload>
-          </div>
-        </a-form-model-item>
-        <template slot="footer">
-          <a-button key="back" @click="nodeVisible = false">Cancel</a-button>
-          <a-button key="submit" type="primary">Ok</a-button>
-        </template>
-      </a-form-model>
+      <a-spin :spinning="formLoading" tip="这可能会花费一些时间，请勿关闭该页面">
+        <a-form-model ref="nodeForm" :rules="rules" :model="tempNode" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
+          <a-form-model-item label="节点 ID" prop="id">
+            <a-input v-model="tempNode.id" placeholder="节点 ID"/>
+          </a-form-model-item>
+          <a-form-model-item label="节点名称" prop="name">
+            <a-input v-model="tempNode.name" placeholder="节点名称"/>
+          </a-form-model-item>
+          <a-form-model-item label="节点协议" prop="protocol">
+            <a-select v-model="tempNode.protocol" defaultValue="http" placeholder="节点协议">
+              <a-select-option key="http">HTTP</a-select-option>
+              <a-select-option key="https">HTTPS</a-select-option>
+            </a-select>
+          </a-form-model-item>
+          <a-form-model-item label="节点地址" prop="url">
+            <a-input v-model="tempNode.url" placeholder="节点地址 (127.0.0.1:2123)"/>
+          </a-form-model-item>
+          <a-form-model-item label="安装路径" prop="path">
+            <a-input v-model="tempNode.path" placeholder="安装路径"/>
+          </a-form-model-item>
+          <a-form-model-item label="安装文件">
+            <div class="clearfix">
+              <a-upload :file-list="fileList" :remove="handleRemove" :before-upload="beforeUpload" accept=".zip">
+                <a-button><a-icon type="upload" />选择文件</a-button>
+              </a-upload>
+            </div>
+          </a-form-model-item>
+          <template slot="footer">
+            <a-button key="back" @click="nodeVisible = false">Cancel</a-button>
+            <a-button key="submit" type="primary" :loadingg="formLoading" @click="handleEditNodeOk">Ok</a-button>
+          </template>
+        </a-form-model>
+      </a-spin>
     </a-modal>
   </div>
 </template>
@@ -101,6 +103,7 @@ export default {
       nodeVisible: false,
       tempNode: {},
       fileList: [],
+      formLoading: false,
       columns: [
         {title: '名称', dataIndex: 'name'},
         {title: '关联节点', dataIndex: 'nodeId', scopedSlots: {customRender: 'nodeId'}},
@@ -197,6 +200,7 @@ export default {
               duration: 2
             });
             this.$refs['editSshForm'].resetFields();
+            this.fileList = [];
             this.editSshVisible = false;
             this.loadData();
           }
@@ -228,6 +232,15 @@ export default {
         }
       });
     },
+    // 前往节点
+    toNode(node) {
+      this.$router.push({
+        path: '/node/list',
+        query: {
+          nodeId: node.id
+        }
+      });
+    },
     // 安装节点
     install(record) {
       this.temp = Object.assign(record);
@@ -236,6 +249,7 @@ export default {
         protocol: 'http'
       }
       this.nodeVisible = true;
+      this.formLoading = false;
     },
     // 处理文件移除
     handleRemove(file) {
@@ -265,18 +279,24 @@ export default {
           });
           return false;
         }
+        this.formLoading = true;
         const formData = new FormData();
         formData.append('file', this.fileList[0]);
-        formData.append('id', this.tempNode.id);
+        formData.append('id', this.temp.id);
         formData.append('nodeData', JSON.stringify({...this.tempNode}));
         formData.append('path', this.tempNode.path);
         // 提交数据
         installAgentNode(formData).then(res => {
           if(res.code === 200) {
-            console.log(res.data)
+            this.$notification.success({
+              message: '操作成功',
+              duration: 2
+            });
             this.$refs['nodeForm'].resetFields();
             this.nodeVisible = false;
+            this.loadData();
           }
+          this.formLoading = false;
         })
       })
     }

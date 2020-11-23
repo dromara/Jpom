@@ -268,7 +268,7 @@ export default {
     // 管理节点
     handleNode(record) {
       this.temp = Object.assign(record);
-      this.drawerTitle = `${this.temp.id} (${this.temp.url})`
+      this.drawerTitle = `${this.temp.id} (${this.temp.url})`;
       this.drawerVisible = true;
     },
     // 关闭抽屉层
