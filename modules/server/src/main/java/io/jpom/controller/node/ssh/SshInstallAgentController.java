@@ -38,6 +38,10 @@ import java.io.File;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -89,7 +93,7 @@ public class SshInstallAgentController extends BaseServerController {
                 ZipEntry sh = zipFile.getEntry(Type.Agent.name() + ".sh");
                 ZipEntry lib = zipFile.getEntry("lib" + StrUtil.SLASH);
                 if (sh == null || null == lib || !lib.isDirectory()) {
-                    return JsonMessage.getString(405, "不能jpom 插件包");
+                    return JsonMessage.getString(405, "不是 Jpom 插件包");
                 }
                 ZipUtil.unzip(zipFile, outFle);
             }
@@ -120,7 +124,7 @@ public class SshInstallAgentController extends BaseServerController {
             }
             // 查询远程是否运行
             if (sshService.checkSshRun(sshModel, tag)) {
-                return JsonMessage.getString(300, "对应服务器中已经存在Jpom 插件端,不需要再次安装啦");
+                return JsonMessage.getString(300, "对应服务器中已经存在 Jpom 插件端,不需要再次安装啦");
             }
             // 上传文件到服务器
             sshService.uploadDir(sshModel, path, outFle);
@@ -129,11 +133,28 @@ public class SshInstallAgentController extends BaseServerController {
             String command = StrUtil.format("sh {} start upgrade", shPtah);
             String result = sshService.exec(sshModel, command);
             // 休眠10秒
-            Thread.sleep(10 * 1000);
+            /*Thread.sleep(15 * 1000);
             if (StrUtil.isEmpty(nodeModel.getLoginName()) || StrUtil.isEmpty(nodeModel.getLoginPwd())) {
                 String error = this.getAuthorize(sshModel, nodeModel, path);
                 if (error != null) {
                     return error;
+                }
+            }*/
+            // 休眠 5 秒, 尝试 3 次
+            int time = 3;
+            while (--time >= 0) {
+                DefaultSystemLog.getLog().debug("there is left {} / 3 times try to get authorize info", time);
+                Thread.sleep(5 * 1000);
+                if (StrUtil.isEmpty(nodeModel.getLoginName()) || StrUtil.isEmpty(nodeModel.getLoginPwd())) {
+                    String error = this.getAuthorize(sshModel, nodeModel, path);
+                    // 获取授权成功就不需要继续循环了
+                    if (error == null) {
+                        time = -1;
+                    }
+                    // 获取授权失败且尝试次数用完
+                    if (error != null && time == 0) {
+                        return error;
+                    }
                 }
             }
             nodeModel.setOpenStatus(true);
@@ -184,4 +205,5 @@ public class SshInstallAgentController extends BaseServerController {
         }
         return nodeModel;
     }
+
 }
