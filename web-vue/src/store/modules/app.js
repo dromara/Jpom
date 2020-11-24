@@ -22,10 +22,9 @@ const app = {
   actions: {
     // 添加 tab
     addTab({commit, state, rootGetters}, tab) {
-      console.log(tab)
       return new Promise((resolve) => {
+        // 从 store 里面拿到 menus 匹配 path 得到当前的菜单，设置 tab 的标题
         const menus = rootGetters.getMenus;
-        console.log(menus)
         let currentMenu = {};
         menus.forEach(menu => {
           menu.childs.forEach(subMenu => {
@@ -34,7 +33,6 @@ const app = {
             }
           })
         });
-        console.log(currentMenu)
         tab.title = currentMenu.title;
         let tabList = state.tabList || [];
         // 获取下标 -1 表示可以添加 否则就是已经存在

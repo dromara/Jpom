@@ -96,6 +96,29 @@ public class SshFileController extends BaseServerController {
         }
     }
 
+    /**
+     * 根据 id 获取 fileDirs 目录集合
+     * @description for dev 3.x
+     * @author Hotstrip
+     * @param id
+     * @return
+     */
+    @RequestMapping(value = "root_file_data.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @ResponseBody
+    @Feature(method = MethodFeature.FILE)
+    public String rootFileList(String id) {
+        SshModel sshModel = sshService.getItem(id);
+        if (sshModel == null) {
+            return JsonMessage.getString(404, "不存在对应ssh");
+        }
+        List<String> fileDirs = sshModel.getFileDirs();
+        if (fileDirs == null && !fileDirs.isEmpty()) {
+            return JsonMessage.getString(405, "未设置授权目录");
+        }
+        JSONArray jsonArray = listDir(sshModel, fileDirs);
+        return JsonMessage.getString(200, "ok", jsonArray);
+    }
+
     @RequestMapping(value = "list_file_data.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     @Feature(method = MethodFeature.FILE)

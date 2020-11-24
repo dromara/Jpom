@@ -29,7 +29,6 @@ export default {
   methods: {
     // 点击菜单
     handleClick(menu) {
-      console.log(menu)
       // 如果路由不存在
       if (!menu.path) {
         this.$notification.error({

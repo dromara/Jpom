@@ -32,6 +32,7 @@ export function editNode(params) {
     id: params.id,
     name: params.name,
     group: params.group,
+    sshId: params.sshId,
     protocol: params.protocol,
     url: params.url,
     timeOut: params.timeOut,

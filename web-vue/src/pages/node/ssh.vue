@@ -13,6 +13,7 @@
       <template slot="operation" slot-scope="text, record">
         <a-button type="primary" @click="handleEdit(record)">编辑</a-button>
         <a-button type="primary" @click="handleTerminal(record)">终端</a-button>
+        <a-button type="primary" v-show="record.fileDirs" @click="handleFile(record)">文件</a-button>
         <a-button type="danger" @click="handleDelete(record)">删除</a-button>
       </template>
     </a-table>
@@ -35,11 +36,11 @@
           <a-input v-model="temp.user" placeholder="用户"/>
         </a-form-model-item>
         <!-- 新增时需要填写 -->
-        <a-form-model-item v-show="temp.connectType === 'PASS' && temp.type === 'add'"  label="Password" prop="password">
+        <a-form-model-item v-if="temp.connectType === 'PASS' && temp.type === 'add'"  label="Password" prop="password">
           <a-input-password v-model="temp.password" placeholder="密码"/>
         </a-form-model-item>
         <!-- 修改时可以不填写 -->
-        <a-form-model-item v-show="temp.connectType === 'PASS' && temp.type === 'edit'"  label="Password" prop="password-update">
+        <a-form-model-item v-if="temp.connectType === 'PASS' && temp.type === 'edit'"  label="Password" prop="password-update">
           <a-input-password v-model="temp.password" placeholder="密码若没修改可以不用填写"/>
         </a-form-model-item>
         <a-form-model-item v-if="temp.connectType === 'PUBKEY'" label="私钥内容" prop="privateKey">
@@ -89,11 +90,20 @@
         </a-form-model>
       </a-spin>
     </a-modal>
+    <!-- 文件管理 -->
+    <a-drawer :title="drawerTitle" placement="right" width="90vw"
+      :visible="drawerVisible" @close="onClose">
+      <ssh-file v-if="drawerVisible" :ssh="temp" />
+    </a-drawer>
   </div>
 </template>
 <script>
 import { getSshList, editSsh, deleteSsh, installAgentNode } from '../../api/ssh';
+import SshFile from './ssh-file.vue';
 export default {
+  components: {
+    SshFile
+  },
   data() {
     return{
       loading: false,
@@ -104,13 +114,15 @@ export default {
       tempNode: {},
       fileList: [],
       formLoading: false,
+      drawerTitle: '',
+      drawerVisible: false,
       columns: [
         {title: '名称', dataIndex: 'name'},
         {title: '关联节点', dataIndex: 'nodeId', scopedSlots: {customRender: 'nodeId'}},
         {title: 'Host', dataIndex: 'host'},
         {title: 'Port', dataIndex: 'port'},
         {title: 'User', dataIndex: 'user'},
-        {title: '操作', dataIndex: 'operation', scopedSlots: {customRender: 'operation'}, width: 300}
+        {title: '操作', dataIndex: 'operation', scopedSlots: {customRender: 'operation'}, width: 330}
       ],
       options: [
         { label: 'Password', value: 'PASS' },
@@ -180,7 +192,6 @@ export default {
     },
     // 修改
     handleEdit(record) {
-      console.log(record)
       this.temp = Object.assign(record);
       this.temp.type = 'edit';
       this.editSshVisible = true;
@@ -210,6 +221,12 @@ export default {
     // 进入终端
     handleTerminal(record) {
       console.log(record);
+    },
+    // 文件管理
+    handleFile(record) {
+      this.temp = Object.assign(record);
+      this.drawerTitle = `${this.temp.name} (${this.temp.host}) 文件管理`;
+      this.drawerVisible = true;
     },
     // 删除
     handleDelete(record) {
@@ -299,6 +316,10 @@ export default {
           this.formLoading = false;
         })
       })
+    },
+    // 关闭抽屉层
+    onClose() {
+      this.drawerVisible = false;
     }
   }
 }

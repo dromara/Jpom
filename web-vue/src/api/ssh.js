@@ -53,7 +53,7 @@ export function deleteSsh(id) {
 }
 
 /**
- * 上传文件
+ * 上传安装文件
  * @param {
  *  file: 文件 multipart/form-data,
  *  id: ssh ID,
@@ -71,5 +71,29 @@ export function installAgentNode(formData) {
     // 0 表示无超时时间
     timeout: 0, 
     data: formData
+  })
+}
+
+/**
+ * 授权目录列表
+ * @param {String} id 
+ */
+export function getRootFileList(id) {
+  return axios({
+    url: '/node/ssh/root_file_data.json',
+    method: 'post',
+    data: {id}
+  })
+}
+
+/**
+ * 文件列表
+ * @param {id, path, children} params 
+ */
+export function getFileList(params) {
+  return axios({
+    url: '/node/ssh/list_file_data.json',
+    method: 'post',
+    data: params
   })
 }

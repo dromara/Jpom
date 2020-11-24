@@ -187,7 +187,7 @@ public class SshController extends BaseServerController {
     /**
      * 根据 nodeId 查询 SSH 列表
      * @description for dev 3.x
-     * @author hotstrip
+     * @author Hotstrip
      * @param nodeId
      * @return
      */

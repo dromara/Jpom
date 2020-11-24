@@ -15,6 +15,9 @@
       <a-tooltip slot="group" slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>
+      <a-tooltip slot="url" slot-scope="text" placement="topLeft" :title="text">
+        <span>{{ text }}</span>
+      </a-tooltip>
       <template slot="operation" slot-scope="text, record">
         <a-button type="primary" @click="handleNode(record)">节点管理</a-button>
         <a-button type="primary" @click="handleEdit(record)">编辑</a-button>
@@ -82,7 +85,7 @@
           <a-input-password v-model="temp.loginPwd" placeholder="节点密码"/>
         </a-form-model-item>
         <a-form-model-item label="超时时间" prop="timeOut">
-          <a-input-number v-model="temp.timeOut" :min="500" placeholder="毫秒 (值太小会取不到节点状态)" style="width: 100%"/>
+          <a-input-number v-model="temp.timeOut" :min="0" placeholder="毫秒 (值太小可能会取不到节点状态)" style="width: 100%"/>
         </a-form-model-item>
       </a-form-model>
     </a-modal>
