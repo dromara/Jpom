@@ -1,6 +1,6 @@
 <template>
   <a-tabs v-model="activeKey" class="my-tabs" hide-add type="editable-card" @edit="onEdit" @change="changeTab">
-    <a-tab-pane v-for="tab in getTabList" :key="tab.key" :tab="tab.key" :closeable="tab.closeable">。。。</a-tab-pane>
+    <a-tab-pane v-for="tab in getTabList" :key="tab.key" :tab="tab.title" :closeable="tab.closeable">。。。</a-tab-pane>
   </a-tabs>
 </template>
 <script>
@@ -30,6 +30,13 @@ export default {
     // 编辑 Tab
     onEdit(key, action) {
       if (action === 'remove') {
+        if (this.getTabList.length === 1) {
+          this.$notification.warn({
+            message: '不能关闭了',
+            duration: 2
+          });
+          return;
+        }
         this.$store.dispatch('removeTab', key).then(() => {
           const index = this.getTabList.findIndex(ele => ele.key === this.activeKey);
           const activeTab = this.getTabList[index];

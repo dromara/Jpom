@@ -1,11 +1,11 @@
 <template>
-  <a-menu theme="dark" mode="inline">
+  <a-menu theme="dark" mode="inline" v-model="selectedKeys">
     <a-sub-menu v-for="menu in getMenus" :key="menu.id">
       <span slot="title">
         <a-icon type="apartment" />
         <span>{{menu.title}}</span>
       </span>
-      <a-menu-item v-for="subMenu in menu.childs" :key="subMenu.id" @click="handleClick(subMenu.path)">
+      <a-menu-item v-for="subMenu in menu.childs" :key="subMenu.id" @click="handleClick(subMenu)">
         <span>{{subMenu.title}}</span>
       </a-menu-item>
     </a-sub-menu>
@@ -16,6 +16,7 @@ import { mapGetters } from 'vuex';
 export default {
   data() {
     return {
+      selectedKeys: []
     }
   },
   computed: {
@@ -27,9 +28,10 @@ export default {
   },
   methods: {
     // 点击菜单
-    handleClick(path) {
+    handleClick(menu) {
+      console.log(menu)
       // 如果路由不存在
-      if (!path) {
+      if (!menu.path) {
         this.$notification.error({
           message: '路由无效，无法跳转',
           duration: 2
@@ -37,7 +39,7 @@ export default {
         return false;
       }
       // 如果跳转路由跟当前一致
-      if (this.$route.path === path) {
+      if (this.$route.path === menu.path) {
         this.$notification.warn({
           message: '已经在当前页面了',
           duration: 2
@@ -45,7 +47,7 @@ export default {
         return false;
       }
       // 跳转路由
-      this.$router.push(path)
+      this.$router.push(menu.path)
     }
   }
 }

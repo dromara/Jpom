@@ -53,7 +53,7 @@ const router = new Router({
       path: '/',
       name: 'home',
       component: () => import('../pages/layout'),
-      redirect: '/dashboard',
+      redirect: '/node/list',
       children: children
     },
     {

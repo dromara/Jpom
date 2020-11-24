@@ -21,8 +21,21 @@ const app = {
   },
   actions: {
     // 添加 tab
-    addTab({commit, state}, tab) {
+    addTab({commit, state, rootGetters}, tab) {
+      console.log(tab)
       return new Promise((resolve) => {
+        const menus = rootGetters.getMenus;
+        console.log(menus)
+        let currentMenu = {};
+        menus.forEach(menu => {
+          menu.childs.forEach(subMenu => {
+            if (subMenu.path === tab.path) {
+              currentMenu = subMenu;
+            }
+          })
+        });
+        console.log(currentMenu)
+        tab.title = currentMenu.title;
         let tabList = state.tabList || [];
         // 获取下标 -1 表示可以添加 否则就是已经存在
         const index = tabList.findIndex(ele => ele.key === tab.key);
@@ -49,14 +62,8 @@ const app = {
         tabList.splice(index, 1);
         // 如果删除的是 activeTabKey
         if (state.activeTabKey === key) {
-          let tempTab = {key: 'dashboard', path: '/dashboard'};
-          // 判断剩下的集合数量
-          if (tabList.length === 0) {
-            tabList.push(tempTab);
-          } else {
-            // 寻找下一个
-            tempTab = tabList[Math.min(index, 0)];
-          }
+          // 寻找下一个
+          const tempTab = tabList[Math.min(index, 0)];
           commit('setActiveTabKey', tempTab.key);
           localStorage.setItem(ACTIVE_TAB_KEY, tempTab.key);
         }
