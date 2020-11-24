@@ -6,6 +6,7 @@ import cn.hutool.extra.ssh.JschUtil;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.validator.ValidatorItem;
 import cn.jiangzeyin.common.validator.ValidatorRule;
+import com.alibaba.fastjson.JSONArray;
 import com.jcraft.jsch.Session;
 import io.jpom.common.BaseServerController;
 import io.jpom.common.interceptor.OptLog;
@@ -181,5 +182,20 @@ public class SshController extends BaseServerController {
         SshModel sshModel = sshService.getItem(id);
         setAttribute("item", sshModel);
         return "node/ssh/terminal";
+    }
+
+    /**
+     * 根据 nodeId 查询 SSH 列表
+     * @description for dev 3.x
+     * @author hotstrip
+     * @param nodeId
+     * @return
+     */
+    @RequestMapping(value = "list_by_node_id", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @ResponseBody
+    @Feature(method = MethodFeature.LIST)
+    public String listByNodeId(String nodeId) {
+        JSONArray sshList = sshService.listSelect(nodeId);
+        return JsonMessage.getString(200, "success", sshList);
     }
 }

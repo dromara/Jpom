@@ -8,6 +8,15 @@ export function getSshList() {
   })
 }
 
+// 根据 nodeId 查询列表
+export function getSshListByNodeId(nodeId) {
+  return axios({
+    url: '/node/ssh/list_by_node_id',
+    method: 'post',
+    data: {nodeId}
+  })
+}
+
 /**
  * 编辑 SSH
  * @param {*} params

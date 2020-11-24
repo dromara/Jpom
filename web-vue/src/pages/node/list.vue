@@ -48,6 +48,11 @@
             <a-select-option v-for="group in groupList" :key="group">{{ group }}</a-select-option>
           </a-select>
         </a-form-model-item>
+        <a-form-model-item label="绑定 SSH " prop="sshId">
+          <a-select v-model="temp.sshId" placeholder="节点协议">
+            <a-select-option v-for="ssh in sshList" :key="ssh.id" :disabled="ssh.disabled">{{ssh.name}}</a-select-option>
+          </a-select>
+        </a-form-model-item>
         <a-form-model-item label="监控周期" prop="cycle">
           <a-select v-model="temp.cycle" defaultValue="0" placeholder="监控周期">
             <a-select-option :key="0">不开启</a-select-option>
@@ -92,6 +97,7 @@
 <script>
 /* eslint-disable no-unused-vars */
 import { getNodeGroupList, getNodeList, getNodeStatus, editNode, deleteNode } from '../../api/node';
+import { getSshListByNodeId } from '../../api/ssh';
 import NodeLayout from './node-layout';
 export default {
   components: {
@@ -103,6 +109,7 @@ export default {
       childLoading: false,
       listQuery: {},
       groupList: [],
+      sshList: [],
       list: [],
       temp: {},
       editNodeVisible: false,
@@ -163,6 +170,14 @@ export default {
         }
       })
     },
+    // 加载 SSH 列表
+    loadSshList() {
+      getSshListByNodeId(this.temp.id).then(res => {
+        if (res.code === 200) {
+          this.sshList = res.data;
+        }
+      })
+    },
     // 加载数据
     loadData() {
       this.list = [];
@@ -219,6 +234,7 @@ export default {
     // 修改
     handleEdit(record) {
       this.temp = Object.assign(record);
+      this.loadSshList();
       this.temp.tempGroup = this.temp.group;
       this.editNodeVisible = true;
     },
