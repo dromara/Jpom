@@ -13,10 +13,16 @@
         <a-button type="primary">上传文件</a-button>
         <a-button type="primary" @click="loadData">刷新</a-button>
       </div>
-      <a-table :data-source="fileList" :loading="loading" :columns="columns" :scroll="{y: tableHeight}" :pagination="false" bordered :rowKey="(record, index) => index">
-        <template slot="dir" slot-scope="text">
+      <a-table :data-source="fileList" :loading="loading" :columns="columns" :scroll="{x: '80vw', y: tableHeight}" :pagination="false" bordered :rowKey="(record, index) => index">
+        <a-tooltip slot="name" slot-scope="text" placement="topLeft" :title="text">
+          <span>{{ text }}</span>
+        </a-tooltip>
+        <a-tooltip slot="dir" slot-scope="text" placement="topLeft" :title="text">
           <span>{{ text ? '目录' : '文件' }}</span>
-        </template>
+        </a-tooltip>
+        <a-tooltip slot="size" slot-scope="text" placement="topLeft" :title="text">
+          <span>{{ text }}</span>
+        </a-tooltip>
         <template slot="operation" slot-scope="text, record">
           <a-button type="primary" @click="handlePreview(record)">查看</a-button>
           <a-button type="primary" @click="handleDownload(record)">下载</a-button>
@@ -47,10 +53,10 @@ export default {
         key: 'key'
       },
       columns: [
-        {title: '文件名称', dataIndex: 'title'},
-        {title: '文件类型', dataIndex: 'dir', scopedSlots: {customRender: 'dir'}},
-        {title: '文件大小', dataIndex: 'size'},
-        {title: '修改时间', dataIndex: 'modifyTime'},
+        {title: '文件名称', dataIndex: 'title', width: 100, ellipsis: true, scopedSlots: {customRender: 'name'}},
+        {title: '文件类型', dataIndex: 'dir', width: 100, ellipsis: true, scopedSlots: {customRender: 'dir'}},
+        {title: '文件大小', dataIndex: 'size', width: 120, ellipsis: true, scopedSlots: {customRender: 'size'}},
+        {title: '修改时间', dataIndex: 'modifyTime', width: 170, ellipsis: true},
         {title: '操作', dataIndex: 'operation', scopedSlots: {customRender: 'operation'}, width: 330}
       ]
     }
