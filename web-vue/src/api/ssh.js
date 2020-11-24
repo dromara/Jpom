@@ -99,6 +99,20 @@ export function getFileList(params) {
 }
 
 /**
+ * 下载文件
+ * 下载文件的返回是 blob 类型，把 blob 用浏览器下载下来
+ * @param {id, path, name} params 
+ */
+export function downloadFile(params) {
+  return axios({
+    url: '/node/ssh/download.html',
+    method: 'get',
+    responseType: 'blob',
+    params
+  })
+}
+
+/**
  * 删除文件
  * @param {id, path, name} params x
  */

@@ -33,7 +33,7 @@
   </a-layout>
 </template>
 <script>
-import { getRootFileList, getFileList, deleteFile } from '../../api/ssh';
+import { getRootFileList, getFileList, downloadFile, deleteFile } from '../../api/ssh';
 export default {
   props: {
     ssh: {
@@ -181,11 +181,25 @@ export default {
     },
     // 下载
     handleDownload(record) {
-      console.log(record)
+      // 请求参数
+      const params = {
+        id: this.ssh.id,
+        path: record.path,
+        name: record.parentDir
+      }
+      // 请求接口拿到 blob
+      downloadFile(params).then(blob => {
+        const url = window.URL.createObjectURL(blob);
+        let link = document.createElement('a');
+        link.style.display = 'none';
+        link.href = url;
+        link.setAttribute('download', record.name);
+        document.body.appendChild(link);
+        link.click();
+      })
     },
     // 删除
     handleDelete(record) {
-      console.log(record)
       this.$confirm({
         title: '系统提示',
         content: '真的要删除节点么？',
