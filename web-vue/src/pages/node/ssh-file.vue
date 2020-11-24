@@ -33,7 +33,7 @@
   </a-layout>
 </template>
 <script>
-import { getRootFileList, getFileList } from '../../api/ssh';
+import { getRootFileList, getFileList, deleteFile } from '../../api/ssh';
 export default {
   props: {
     ssh: {
@@ -46,6 +46,7 @@ export default {
       listQuery: {},
       treeList: [],
       fileList: [],
+      tempNode: {},
       tableHeight: '80vh',
       replaceFields: {
         children: 'children',
@@ -57,7 +58,7 @@ export default {
         {title: '文件类型', dataIndex: 'dir', width: 100, ellipsis: true, scopedSlots: {customRender: 'dir'}},
         {title: '文件大小', dataIndex: 'size', width: 120, ellipsis: true, scopedSlots: {customRender: 'size'}},
         {title: '修改时间', dataIndex: 'modifyTime', width: 170, ellipsis: true},
-        {title: '操作', dataIndex: 'operation', scopedSlots: {customRender: 'operation'}, width: 330}
+        {title: '操作', dataIndex: 'operation', scopedSlots: {customRender: 'operation'}, width: 280}
       ]
     }
   },
@@ -93,7 +94,8 @@ export default {
     },
     // 选中目录
     onSelect(selectedKeys, {node}) {
-       return new Promise(resolve => {
+      return new Promise(resolve => {
+        this.tempNode = node.dataRef;
         if (node.dataRef.disabled) {
           resolve();
           return;
@@ -124,7 +126,10 @@ export default {
                 })
               } else {
                 // 设置文件表格
-                this.fileList.push(element);
+                this.fileList.push({
+                  path: node.dataRef.path,
+                  ...element
+                });
               }
             })
             // 设置目录树
@@ -135,6 +140,40 @@ export default {
         })
         resolve();
       });
+    },
+    // 加载文件列表
+    loadFileList() {
+      if (!this.tempNode) {
+        this.$notification.warn({
+          message: '请选择一个节点',
+          duration: 2
+        });
+        return false;
+      }
+      // 请求参数
+      const params = {
+        id: this.ssh.id,
+        path: this.tempNode.path,
+        children: this.tempNode.parentDir
+      }
+      this.fileList = [];
+      this.loading = true;
+      // 加载文件
+      getFileList(params).then(res => {
+        if (res.code === 200) {
+          // 区分目录和文件
+          res.data.forEach(element => {
+            if (!element.dir) {
+              // 设置文件表格
+              this.fileList.push({
+                path: this.tempNode.path,
+                ...element
+              });
+            }
+          })
+        }
+        this.loading = false;
+      })
     },
     // 查看
     handlePreview(record) {
@@ -147,6 +186,30 @@ export default {
     // 删除
     handleDelete(record) {
       console.log(record)
+      this.$confirm({
+        title: '系统提示',
+        content: '真的要删除节点么？',
+        okText: '确认',
+        cancelText: '取消',
+        onOk: () => {
+          // 请求参数
+          const params = {
+            id: this.ssh.id,
+            path: record.path,
+            name: record.parentDir
+          }
+          // 删除
+          deleteFile(params).then((res) => {
+            if (res.code === 200) {
+              this.$notification.success({
+                message: res.msg,
+                duration: 2
+              });
+              this.loadFileList();
+            }
+          })
+        }
+      });
     }
   }
 }

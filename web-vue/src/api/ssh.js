@@ -97,3 +97,15 @@ export function getFileList(params) {
     data: params
   })
 }
+
+/**
+ * 删除文件
+ * @param {id, path, name} params x
+ */
+export function deleteFile(params) {
+  return axios({
+    url: '/node/ssh/delete.json',
+    method: 'post',
+    data: params
+  })
+}
