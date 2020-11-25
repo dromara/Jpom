@@ -16,7 +16,10 @@
     "sha1": "^1.1.1",
     "vue": "^2.6.11",
     "vue-router": "^3.4.8",
-    "vuex": "^3.5.1"
+    "vuex": "^3.5.1",
+    "xterm": "^4.9.0",
+    "xterm-addon-attach": "^0.6.0",
+    "xterm-addon-fit": "^0.4.0"
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "~4.5.0",

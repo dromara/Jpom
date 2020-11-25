@@ -95,14 +95,20 @@
       :visible="drawerVisible" @close="onClose">
       <ssh-file v-if="drawerVisible" :ssh="temp" />
     </a-drawer>
+    <!-- Terminal -->
+    <a-modal v-model="terminalVisible" width="600px" title="Terminal" :footer="null" :maskClosable="false">
+      <terminal v-if="terminalVisible" :ssh="temp" />
+    </a-modal>
   </div>
 </template>
 <script>
 import { getSshList, editSsh, deleteSsh, installAgentNode } from '../../api/ssh';
 import SshFile from './ssh-file.vue';
+import Terminal from './terminal';
 export default {
   components: {
-    SshFile
+    SshFile,
+    Terminal
   },
   data() {
     return{
@@ -116,6 +122,7 @@ export default {
       formLoading: false,
       drawerTitle: '',
       drawerVisible: false,
+      terminalVisible: false,
       columns: [
         {title: '名称', dataIndex: 'name'},
         {title: '关联节点', dataIndex: 'nodeId', scopedSlots: {customRender: 'nodeId'}},
@@ -221,6 +228,8 @@ export default {
     // 进入终端
     handleTerminal(record) {
       console.log(record);
+      this.temp = Object.assign(record);
+      this.terminalVisible = true;
     },
     // 文件管理
     handleFile(record) {
