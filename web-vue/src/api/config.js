@@ -29,6 +29,11 @@ request.interceptors.request.use(config => {
 
 // 响应拦截器
 request.interceptors.response.use(response => {
+  console.log(response)
+  // 如果 responseType 是 blob 表示是下载文件
+  if (response.request.responseType === 'blob') {
+    return response.data;
+  }
   // 判断返回值，权限等...
   const res = response.data;
   if (res.code !== 200) {
