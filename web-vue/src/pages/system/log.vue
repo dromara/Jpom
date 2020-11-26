@@ -9,6 +9,9 @@
     </a-layout-sider>
     <!-- 单个文件内容 -->
     <a-layout-content class="log-content">
+      <div class="filter">
+        <a-button type="primary" @click="loadData">刷新</a-button>
+      </div>
       <div>......</div>
     </a-layout-content>
     <!-- 对话框 -->
@@ -22,7 +25,7 @@
   </a-layout>
 </template>
 <script>
-import { getLogList, downloadLogUri, deleteLog } from '../../api/system';
+import { getLogList, downloadFile, deleteLog } from '../../api/system';
 export default {
   data() {
     return {
@@ -81,7 +84,23 @@ export default {
     },
     // 下载文件
     downloadLog() {
-      console.log(downloadLogUri)
+      // 请求参数
+      const params = {
+        nodeId: null,
+        path: this.temp.path
+      }
+      // 请求接口拿到 blob
+      downloadFile(params).then(blob => {
+        const url = window.URL.createObjectURL(blob);
+        let link = document.createElement('a');
+        link.style.display = 'none';
+        link.href = url;
+        link.setAttribute('download', this.temp.title);
+        document.body.appendChild(link);
+        link.click();
+        // 关闭弹窗
+        this.visible = false;
+      })
     },
     // 删除文件
     deleteLog() {
@@ -115,13 +134,18 @@ export default {
 <style scoped>
 .log-layout {
   padding: 0;
+  margin: 0;
 }
 .sider {
+  border: 1px solid #e2e2e2;
   height: calc(100vh - 100px);
   overflow-y: auto;
 }
 .log-content {
-  height: calc(100vh - 125px);
+  margin: 0;
+  padding-left: 15px;
+  background: #fff;
+  height: calc(100vh - 100px);
   overflow-y: auto;
 }
 .op-btn {

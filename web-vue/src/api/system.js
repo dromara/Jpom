@@ -10,9 +10,17 @@ export function getLogList() {
 
 /**
  * 下载日志
- * @param {nodeId, path} params
+ * 下载文件的返回是 blob 类型，把 blob 用浏览器下载下来
+ * @param {nodeId, path} params 
  */
-export const downloadLogUri = '/system/log_download'
+export function downloadFile(params) {
+  return axios({
+    url: '/system/log_download',
+    method: 'get',
+    responseType: 'blob',
+    params
+  })
+}
 
 /**
  * 删除日志
