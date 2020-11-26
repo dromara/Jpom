@@ -18,7 +18,7 @@
       </template>
     </a-table>
     <!-- 编辑区 -->
-    <a-modal v-model="editSshVisible" width="600px" title="编辑 SSH" @ok="handleEditRoleOk" :maskClosable="false">
+    <a-modal v-model="editSshVisible" width="600px" title="编辑 SSH" @ok="handleEditSshOk" :maskClosable="false">
       <a-form-model ref="editSshForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
         <a-form-model-item label="SSH 名称" prop="name">
           <a-input v-model="temp.name" placeholder="SSH 名称"/>
@@ -203,8 +203,8 @@ export default {
       this.temp.type = 'edit';
       this.editSshVisible = true;
     },
-    // 提交角色数据
-    handleEditRoleOk() {
+    // 提交 SSH 数据
+    handleEditSshOk() {
       // 检验表单
       this.$refs['editSshForm'].validate((valid) => {
         if (!valid) {

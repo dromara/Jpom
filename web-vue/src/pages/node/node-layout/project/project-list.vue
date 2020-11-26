@@ -15,7 +15,7 @@
   </div>
 </template>
 <script>
-import { getProjectList } from '../../../../api/node-manage';
+import { getProjectList } from '../../../../api/node-project';
 export default {
   props: {
     node: {

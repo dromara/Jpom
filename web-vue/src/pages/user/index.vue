@@ -12,7 +12,7 @@
       </template>
     </a-table>
     <!-- 编辑区 -->
-    <a-modal v-model="editUserVisible" width="600px" title="编辑用户" @ok="handleEditRoleOk" :maskClosable="false">
+    <a-modal v-model="editUserVisible" width="600px" title="编辑用户" @ok="handleEditUserOk" :maskClosable="false">
       <a-form-model ref="editUserForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
         <a-form-model-item label="登录名称" prop="id">
           <a-input v-model="temp.id" placeholder="创建之后不能修改"/>
@@ -122,8 +122,8 @@ export default {
       this.targetKeys = record.roles;
       this.editUserVisible = true;
     },
-    // 提交角色数据
-    handleEditRoleOk() {
+    // 提交用户数据
+    handleEditUserOk() {
       // 检验表单
       this.$refs['editUserForm'].validate((valid) => {
         if (!valid) {

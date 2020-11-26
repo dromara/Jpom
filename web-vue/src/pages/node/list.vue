@@ -38,7 +38,7 @@
       </a-table>
     </a-table>
     <!-- 编辑区 -->
-    <a-modal v-model="editNodeVisible" title="编辑节点" @ok="handleEditRoleOk" :maskClosable="false">
+    <a-modal v-model="editNodeVisible" title="编辑节点" @ok="handleEditNodeOk" :maskClosable="false">
       <a-form-model ref="editNodeForm" :rules="rules" :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 14 }">
         <a-form-model-item label="节点 ID" prop="id">
           <a-input v-model="temp.id" placeholder="创建之后不能修改"/>
@@ -241,8 +241,8 @@ export default {
       this.temp.tempGroup = this.temp.group;
       this.editNodeVisible = true;
     },
-    // 提交角色数据
-    handleEditRoleOk() {
+    // 提交节点数据
+    handleEditNodeOk() {
        // 检验表单
       this.$refs['editNodeForm'].validate((valid) => {
         if (!valid) {
