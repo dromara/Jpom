@@ -138,14 +138,14 @@ export default {
 }
 .sider {
   border: 1px solid #e2e2e2;
-  height: calc(100vh - 100px);
+  height: calc(100vh - 110px);
   overflow-y: auto;
 }
 .log-content {
   margin: 0;
   padding-left: 15px;
   background: #fff;
-  height: calc(100vh - 100px);
+  height: calc(100vh - 110px);
   overflow-y: auto;
 }
 .op-btn {
