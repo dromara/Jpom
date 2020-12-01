@@ -6,6 +6,7 @@ import 'xterm/css/xterm.css';
 import { Terminal } from 'xterm';
 import { FitAddon } from 'xterm-addon-fit';
 import { AttachAddon } from 'xterm-addon-attach';
+import { mapGetters } from 'vuex';
 export default {
   props: {
     ssh: {
@@ -15,42 +16,97 @@ export default {
   data() {
     return {
       socket: null,
-      terminal: null
+      terminal: null,
+      // 输入的字符
+      text: '',
+      keyCode: -1
     }
   },
   computed: {
+    ...mapGetters([
+      'getToken'
+    ]),
     socketUrl() {
       const protocol = location.protocol === 'https' ? 'wss://' : 'ws://';
-      return `${protocol}192.168.12.59:8080/ssh?userId=9f4ed3b6bef32f3b2572ac8fd69ce052&sshId=f2f00f94f05040e986c04f25421867c4&nodeId=121&type=ssh`;
+      return `${protocol}${location.host}/ssh?userId=${this.getToken}&sshId=${this.ssh.id}&nodeId=${this.ssh.nodeModel.id}&type=ssh&tail=`;
     }
   },
   mounted() {
     this.initSocket();
   },
+  beforeDestroy() {
+    this.socket.close()
+    this.terminal.dispose()
+  },
   methods: {
     // 初始化 WebSocket
     initSocket() {
+      console.log(this.socketUrl)
       this.socket = new WebSocket(this.socketUrl);
-      // 链接成功后
-      this.socket.onopen = (res) => {
-        console.log(res)
+      // 连接成功后
+      this.socket.onopen = () => {
         this.initTerminal();
       }
+      // 接收到消息
+      // this.socket.onmessage = (msg) => {
+      //   console.log('msg')
+      //   console.log(new window.TextDecoder.decode(msg.data))
+      //   // this.terminal.write(new TextDecoder.decode(msg.data));
+      // }
     },
     // 初始化 Terminal 
     initTerminal() {
-      const term = new Terminal({
+      this.terminal = new Terminal({
         fontSize: 14,
-        cursorBlink: true
+        cursorBlink: true,
+        // Whether input should be disabled.
+        disableStdin: false,
       });
-      const attachAddon = new AttachAddon(this.socket);
+      this.terminal.open(document.getElementById('xterm'));
+      const attachAddon = new AttachAddon(this.socket, { bidirectional: false });
       const fitAddon = new FitAddon();
-      term.loadAddon(attachAddon);
-      term.loadAddon(fitAddon);
-      term.open(document.getElementById('xterm'));
+      this.terminal.loadAddon(attachAddon);
+      this.terminal.loadAddon(fitAddon);
       fitAddon.fit();
-      term.focus();
-      this.terminal = term
+      this.terminal.focus();
+
+      this.terminal.onKey(key => {
+        // this.terminal.write(key);
+        this.keyCode = key.domEvent.keyCode
+        if (this.keyCode === 8) {
+          if (this.text.length > 0) {
+            this.text = this.text.substring(0, this.text.length - 1);
+          } else {
+            this.text = ''
+          }
+        }
+        // const ev = key.domEvent;
+        // const printable = !ev.altKey && !ev.altGraphKey && !ev.ctrlKey && !ev.metaKey;
+        // if (ev.keyCode === 8) {
+        //     // Do not delete the prompt
+        //     if (this.terminal._core.buffer.x > 2) {
+        //       this.terminal.write(key);
+        //     }
+        // }
+      })
+      
+      this.terminal.onData(data => {
+        this.text += data;
+        console.log('text:', this.text, 'data', data)
+        // 回车
+        if (this.keyCode === 13) {
+          if (this.socket.readyState == this.socket.OPEN) {
+            let op = {
+              'data': this.text
+            }
+            this.socket.send(JSON.stringify(op))
+            this.text = '';
+          }
+        }
+        if (this.keyCode !== 8 && this.keyCode !== 13 && data.length > 0) {
+          this.terminal.write(data);
+        }
+      })
     },
   }
 }

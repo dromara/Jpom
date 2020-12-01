@@ -4,7 +4,19 @@ module.exports = {
   outputDir: '../modules/server/src/main/resources/dist',
   // 代理设置
   devServer: {
-    proxy: 'http://localhost:2122'
+    proxy: {
+      // websocket
+      '/ssh': {
+        target: 'ws://localhost:2122',
+        //  true/false: if you want to proxy websockets
+        ws: false,
+        logLevel: 'debug'
+      },
+      // http
+      '/*': {
+        target: 'http://localhost:2122'
+      }
+    }
   },
   chainWebpack: config => {
     config

@@ -3,7 +3,6 @@ import Qs from 'qs';
 import store from '../store';
 
 import { notification } from 'ant-design-vue';
-import { TOKEN_KEY } from '../utils/const';
 
 // axios.defaults.baseURL = 'http://localhost:2122'
 
@@ -21,7 +20,7 @@ request.interceptors.request.use(config => {
   if (config.headers['Content-Type'].indexOf('application/x-www-form-urlencoded') !== -1) {
     config.data = Qs.stringify(config.data); 
   }
-  config.headers['JPOM-USER-TOKEN'] = localStorage.getItem(TOKEN_KEY);
+  config.headers['JPOM-USER-TOKEN'] = store.getters.getToken;
   return config;
 }, error => {
   return Promise.reject(error);

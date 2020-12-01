@@ -96,7 +96,7 @@
       <ssh-file v-if="drawerVisible" :ssh="temp" />
     </a-drawer>
     <!-- Terminal -->
-    <a-modal v-model="terminalVisible" width="600px" title="Terminal" :footer="null" :maskClosable="false">
+    <a-modal v-model="terminalVisible" width="50%" title="Terminal" :footer="null" :maskClosable="false">
       <terminal v-if="terminalVisible" :ssh="temp" />
     </a-modal>
   </div>
@@ -227,7 +227,6 @@ export default {
     },
     // 进入终端
     handleTerminal(record) {
-      console.log(record);
       this.temp = Object.assign(record);
       this.terminalVisible = true;
     },
