@@ -3,6 +3,7 @@
 </template>
 <script>
 import 'xterm/css/xterm.css';
+import "xterm/lib/xterm.js";
 import { Terminal } from 'xterm';
 import { FitAddon } from 'xterm-addon-fit';
 import { AttachAddon } from 'xterm-addon-attach';
@@ -41,18 +42,11 @@ export default {
   methods: {
     // 初始化 WebSocket
     initSocket() {
-      console.log(this.socketUrl)
       this.socket = new WebSocket(this.socketUrl);
       // 连接成功后
       this.socket.onopen = () => {
         this.initTerminal();
       }
-      // 接收到消息
-      // this.socket.onmessage = (msg) => {
-      //   console.log('msg')
-      //   console.log(new window.TextDecoder.decode(msg.data))
-      //   // this.terminal.write(new TextDecoder.decode(msg.data));
-      // }
     },
     // 初始化 Terminal 
     initTerminal() {
@@ -61,6 +55,7 @@ export default {
         cursorBlink: true,
         // Whether input should be disabled.
         disableStdin: false,
+        rendererType: 'canvas',
       });
       this.terminal.open(document.getElementById('xterm'));
       const attachAddon = new AttachAddon(this.socket, { bidirectional: false });
@@ -70,41 +65,28 @@ export default {
       fitAddon.fit();
       this.terminal.focus();
 
-      this.terminal.onKey(key => {
-        // this.terminal.write(key);
-        this.keyCode = key.domEvent.keyCode
-        if (this.keyCode === 8) {
-          if (this.text.length > 0) {
-            this.text = this.text.substring(0, this.text.length - 1);
-          } else {
-            this.text = ''
-          }
-        }
-        // const ev = key.domEvent;
-        // const printable = !ev.altKey && !ev.altGraphKey && !ev.ctrlKey && !ev.metaKey;
-        // if (ev.keyCode === 8) {
-        //     // Do not delete the prompt
-        //     if (this.terminal._core.buffer.x > 2) {
-        //       this.terminal.write(key);
-        //     }
-        // }
-      })
-      
-      this.terminal.onData(data => {
-        this.text += data;
-        console.log('text:', this.text, 'data', data)
-        // 回车
+      this.terminal.onKey(data => {
+        this.keyCode = data.domEvent.keyCode
+        // 将输入的字符打印到黑板中
+        this.terminal.write(data.key)
+        // 输入回车
         if (this.keyCode === 13) {
-          if (this.socket.readyState == this.socket.OPEN) {
+            // 使用webscoket发送数据
             let op = {
-              'data': this.text
+              'data': this.text + '\r'
             }
             this.socket.send(JSON.stringify(op))
-            this.text = '';
-          }
-        }
-        if (this.keyCode !== 8 && this.keyCode !== 13 && data.length > 0) {
-          this.terminal.write(data);
+            this.text = ''
+        } else if(this.keyCode === 8){//删除按钮
+          // 截取字符串[0,lenth-1]
+          this.text = this.text.substr(0,this.text.length-1)
+          // 清空当前一条的命令
+          this.terminal.write("\x1b[2K\r")
+          // 简化当前的新的命令显示上
+          this.terminal.write(this.text)
+        } else {
+          // 将每次输入的字符拼凑起来
+          this.text += data.key
         }
       })
     },
