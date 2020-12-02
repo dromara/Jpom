@@ -78,8 +78,8 @@ export default {
       })
     },
     // 选择节点
-    select() {
-
+    select(selectedKeys, {node}) {
+      console.log(node)
     },
     // 右键点击
     rightClick({node}) {

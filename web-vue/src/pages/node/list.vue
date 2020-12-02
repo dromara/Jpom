@@ -19,7 +19,7 @@
         <span>{{ text }}</span>
       </a-tooltip>
       <template slot="operation" slot-scope="text, record">
-        <a-button v-if="record.sshId" type="primary" @click="handleTerminal(record)">终端</a-button>
+        <a-button type="primary" @click="handleTerminal(record)" :disabled="!record.sshId">终端</a-button>
         <a-button type="primary" @click="handleNode(record)">节点管理</a-button>
         <a-button type="primary" @click="handleEdit(record)">编辑</a-button>
         <a-button type="danger" @click="handleDelete(record)">删除</a-button>
@@ -133,7 +133,7 @@ export default {
         {title: '节点协议', dataIndex: 'protocol', width: 100, ellipsis: true, scopedSlots: {customRender: 'protocol'}},
         {title: '节点地址', dataIndex: 'url', width: 150, ellipsis: true, scopedSlots: {customRender: 'url'}},
         {title: '超时时间', dataIndex: 'timeOut', width: 100, ellipsis: true},
-        {title: '操作', dataIndex: 'operation', scopedSlots: {customRender: 'operation'}, width: '320px'}
+        {title: '操作', dataIndex: 'operation', scopedSlots: {customRender: 'operation'}, width: '320px', align: 'right'}
       ],
       childColumns: [
         {title: '系统名', dataIndex: 'osName', width: 100, ellipsis: true, scopedSlots: {customRender: 'osName'}},
