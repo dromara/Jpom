@@ -19,6 +19,7 @@
         <span>{{ text }}</span>
       </a-tooltip>
       <template slot="operation" slot-scope="text, record">
+        <a-button v-if="record.sshId" type="primary" @click="handleTerminal(record)">终端</a-button>
         <a-button type="primary" @click="handleNode(record)">节点管理</a-button>
         <a-button type="primary" @click="handleEdit(record)">编辑</a-button>
         <a-button type="danger" @click="handleDelete(record)">删除</a-button>
@@ -95,6 +96,10 @@
       <!-- 节点管理组件 -->
       <node-layout :node="temp" />
     </a-drawer>
+    <!-- Terminal -->
+    <a-modal v-model="terminalVisible" width="50%" title="Terminal" :footer="null" :maskClosable="false">
+      <terminal v-if="terminalVisible" :sshId="temp.sshId" :nodeId="temp.id" />
+    </a-modal>
   </div>
 </template>
 <script>
@@ -102,9 +107,11 @@
 import { getNodeGroupList, getNodeList, getNodeStatus, editNode, deleteNode } from '../../api/node';
 import { getSshListByNodeId } from '../../api/ssh';
 import NodeLayout from './node-layout';
+import Terminal from './terminal';
 export default {
   components: {
-    NodeLayout
+    NodeLayout,
+    Terminal
   },
   data() {
     return{
@@ -117,6 +124,7 @@ export default {
       temp: {},
       editNodeVisible: false,
       drawerVisible: false,
+      terminalVisible: false,
       drawerTitle: '',
       columns: [
         {title: '节点 ID', dataIndex: 'id', width: 100, ellipsis: true, scopedSlots: {customRender: 'id'}},
@@ -125,7 +133,7 @@ export default {
         {title: '节点协议', dataIndex: 'protocol', width: 100, ellipsis: true, scopedSlots: {customRender: 'protocol'}},
         {title: '节点地址', dataIndex: 'url', width: 150, ellipsis: true, scopedSlots: {customRender: 'url'}},
         {title: '超时时间', dataIndex: 'timeOut', width: 100, ellipsis: true},
-        {title: '操作', dataIndex: 'operation', scopedSlots: {customRender: 'operation'}, width: '300px'}
+        {title: '操作', dataIndex: 'operation', scopedSlots: {customRender: 'operation'}, width: '320px'}
       ],
       childColumns: [
         {title: '系统名', dataIndex: 'osName', width: 100, ellipsis: true, scopedSlots: {customRender: 'osName'}},
@@ -233,6 +241,11 @@ export default {
         openStatus: true
       };
       this.editNodeVisible = true;
+    },
+    // 进入终端
+    handleTerminal(record) {
+      this.temp = Object.assign(record);
+      this.terminalVisible = true;
     },
     // 修改
     handleEdit(record) {
