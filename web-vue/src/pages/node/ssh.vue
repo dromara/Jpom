@@ -97,7 +97,7 @@
     </a-drawer>
     <!-- Terminal -->
     <a-modal v-model="terminalVisible" width="50%" title="Terminal" :footer="null" :maskClosable="false">
-      <terminal v-if="terminalVisible" :ssh="temp" />
+      <terminal v-if="terminalVisible" :sshId="temp.id" :nodeId="temp.nodeModel.id" />
     </a-modal>
   </div>
 </template>

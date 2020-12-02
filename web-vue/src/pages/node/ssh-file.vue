@@ -29,16 +29,24 @@
           <a-button type="danger" @click="handleDelete(record)">删除</a-button>
         </template>
       </a-table>
+      <!-- Terminal -->
+      <a-modal v-model="terminalVisible" width="50%" title="Terminal" :footer="null" :maskClosable="false">
+        <terminal v-if="terminalVisible" :sshId="ssh.id" :nodeId="ssh.nodeModel.id" :tail="temp.path + temp.parentDir"/>
+      </a-modal>
     </a-layout-content>
   </a-layout>
 </template>
 <script>
 import { getRootFileList, getFileList, downloadFile, deleteFile } from '../../api/ssh';
+import Terminal from './terminal';
 export default {
   props: {
     ssh: {
       type: Object
     }
+  },
+  components: {
+    Terminal
   },
   data() {
     return {
@@ -47,6 +55,8 @@ export default {
       treeList: [],
       fileList: [],
       tempNode: {},
+      temp: {},
+      terminalVisible: false,
       tableHeight: '80vh',
       replaceFields: {
         children: 'children',
@@ -178,6 +188,9 @@ export default {
     // 查看
     handlePreview(record) {
       console.log(record)
+      console.log(this.tempNode)
+      this.temp = Object.assign(record);
+      this.terminalVisible = true;
     },
     // 下载
     handleDownload(record) {

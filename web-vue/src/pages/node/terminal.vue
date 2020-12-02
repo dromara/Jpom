@@ -10,8 +10,14 @@ import { AttachAddon } from 'xterm-addon-attach';
 import { mapGetters } from 'vuex';
 export default {
   props: {
-    ssh: {
-      type: Object
+    sshId: {
+      type: String
+    },
+    nodeId: {
+      type: String
+    },
+    tail: {
+      type: String
     }
   },
   data() {
@@ -29,7 +35,7 @@ export default {
     ]),
     socketUrl() {
       const protocol = location.protocol === 'https' ? 'wss://' : 'ws://';
-      return `${protocol}${location.host}/ssh?userId=${this.getToken}&sshId=${this.ssh.id}&nodeId=${this.ssh.nodeModel.id}&type=ssh&tail=`;
+      return `${protocol}${location.host}/ssh?userId=${this.getToken}&sshId=${this.sshId}&nodeId=${this.nodeId}&type=ssh&tail=${this.tail}`;
     }
   },
   mounted() {
@@ -66,28 +72,31 @@ export default {
       this.terminal.focus();
 
       this.terminal.onKey(data => {
-        this.keyCode = data.domEvent.keyCode
+        this.keyCode = data.domEvent.keyCode;
         // 将输入的字符打印到黑板中
-        this.terminal.write(data.key)
+        this.terminal.write(data.key);
         // 输入回车
         if (this.keyCode === 13) {
-            // 使用webscoket发送数据
-            let op = {
-              'data': this.text + '\r'
-            }
-            this.socket.send(JSON.stringify(op))
-            this.text = ''
-        } else if(this.keyCode === 8){//删除按钮
-          // 截取字符串[0,lenth-1]
-          this.text = this.text.substr(0,this.text.length-1)
-          // 清空当前一条的命令
-          this.terminal.write("\x1b[2K\r")
-          // 简化当前的新的命令显示上
-          this.terminal.write(this.text)
-        } else {
-          // 将每次输入的字符拼凑起来
-          this.text += data.key
+          // 使用 webscoket 发送数据
+          let op = {
+            'data': this.text + '\r'
+          }
+          this.socket.send(JSON.stringify(op));
+          this.text = '';
+          return;
         }
+        // 删除按钮
+        if (this.keyCode === 8) {
+          // 截取字符串[0,lenth-1]
+          this.text = this.text.substr(0,this.text.length-1);
+          // 清空当前一条的命令(光标前移 n 个字符，删除光标之后的数据)
+          this.terminal.write(`\x1b[${this.text.length + 1}D\x1b[0J`);
+          // 简化当前的新的命令显示上
+          this.terminal.write(this.text);
+          return;
+        }
+        // 将每次输入的字符拼凑起来
+        this.text += data.key;
       })
     },
   }

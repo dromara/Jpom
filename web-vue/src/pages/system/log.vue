@@ -3,7 +3,7 @@
     <!-- 侧边栏 文件树 -->
     <a-layout-sider theme="light" class="sider" width="20%">
       <a-empty v-if="list.length === 0" />
-      <a-directory-tree :treeData="list" :replaceFields="replaceFields" @select="select"
+      <a-directory-tree :treeData="list" :replaceFields="replaceFields" @select="onSelect"
         @rightClick="rightClick" default-expand-all>
       </a-directory-tree>
     </a-layout-sider>
@@ -73,8 +73,8 @@ export default {
       })
     },
     // 选择节点
-    select() {
-
+    onSelect(selectedKeys, {node}) {
+      console.log(node)
     },
     // 右键点击
     rightClick({node}) {
