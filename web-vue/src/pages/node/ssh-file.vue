@@ -10,8 +10,8 @@
     <!-- 表格 -->
     <a-layout-content class="file-content">
       <div ref="filter" class="filter">
-        <a-button type="primary">上传文件</a-button>
-        <a-button type="primary" @click="loadData">刷新</a-button>
+        <a-button type="primary" @click="handleUpload">上传文件</a-button>
+        <a-button type="primary" @click="loadFileList()">刷新</a-button>
       </div>
       <a-table :data-source="fileList" :loading="loading" :columns="columns" :scroll="{x: '80vw', y: tableHeight}" :pagination="false" bordered :rowKey="(record, index) => index">
         <a-tooltip slot="name" slot-scope="text" placement="topLeft" :title="text">
@@ -29,6 +29,14 @@
           <a-button type="danger" @click="handleDelete(record)">删除</a-button>
         </template>
       </a-table>
+      <!-- 上传文件 -->
+      <a-modal v-model="uploadFileVisible" width="300px" title="上传文件" :footer="null" :maskClosable="true">
+        <a-upload :file-list="uploadFileList" :remove="handleRemove" :before-upload="beforeUpload" multiple>
+          <a-button><a-icon type="upload" />选择文件</a-button>
+        </a-upload>
+        <br/>
+        <a-button type="primary" :disabled="uploadFileList.length === 0" @click="startUpload">开始上传</a-button>
+      </a-modal>
       <!-- Terminal -->
       <a-modal v-model="terminalVisible" width="50%" title="Terminal" :footer="null" :maskClosable="false">
         <terminal v-if="terminalVisible" :sshId="ssh.id" :nodeId="ssh.nodeModel.id" :tail="temp.path + temp.parentDir"/>
@@ -37,7 +45,7 @@
   </a-layout>
 </template>
 <script>
-import { getRootFileList, getFileList, downloadFile, deleteFile } from '../../api/ssh';
+import { getRootFileList, getFileList, downloadFile, deleteFile, uploadFile } from '../../api/ssh';
 import Terminal from './terminal';
 export default {
   props: {
@@ -54,8 +62,10 @@ export default {
       listQuery: {},
       treeList: [],
       fileList: [],
+      uploadFileList: [],
       tempNode: {},
       temp: {},
+      uploadFileVisible: false,
       terminalVisible: false,
       tableHeight: '80vh',
       replaceFields: {
@@ -101,6 +111,50 @@ export default {
         }
         this.loading = false;
       })
+    },
+    // 上传文件
+    handleUpload() {
+      if (Object.keys(this.tempNode).length === 0) {
+        this.$notification.error({
+          message: '请选择一个节点',
+          duration: 2
+        });
+        return;
+      }
+      this.uploadFileVisible = true;
+    },
+    handleRemove(file) {
+      const index = this.uploadFileList.indexOf(file);
+      const newFileList = this.uploadFileList.slice();
+      newFileList.splice(index, 1);
+      this.uploadFileList = newFileList;
+    },
+    beforeUpload(file) {
+      this.uploadFileList = [...this.uploadFileList, file];
+      return false;
+    },
+    // 开始上传文件
+    startUpload() {
+      this.uploadFileList.forEach(file => {
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('id', this.ssh.id);
+        formData.append('name', this.tempNode.parentDir);
+        formData.append('path', this.tempNode.path);
+        // 上传文件
+        uploadFile(formData).then(res => {
+          if (res.code === 200) {
+            this.$notification.success({
+              message: res.msg,
+              duration: 2
+            });
+          }
+        })
+      })
+      setTimeout(() => {
+        this.loadFileList();
+      }, 1000 * 3);
+      this.uploadFileList = [];
     },
     // 选中目录
     onSelect(selectedKeys, {node}) {
@@ -187,8 +241,6 @@ export default {
     },
     // 查看
     handlePreview(record) {
-      console.log(record)
-      console.log(this.tempNode)
       this.temp = Object.assign(record);
       this.terminalVisible = true;
     },
@@ -215,7 +267,7 @@ export default {
     handleDelete(record) {
       this.$confirm({
         title: '系统提示',
-        content: '真的要删除节点么？',
+        content: '真的要删除文件么？',
         okText: '确认',
         cancelText: '取消',
         onOk: () => {

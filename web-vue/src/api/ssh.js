@@ -75,6 +75,28 @@ export function installAgentNode(formData) {
 }
 
 /**
+ * 上传文件到 SSH 节点
+ * @param {
+ *  file: 文件 multipart/form-data,
+ *  id: ssh ID,
+ *  name: 当前目录,
+ *  path: 父级目录
+ * } formData 
+ */
+export function uploadFile(formData) {
+  return axios({
+    url: '/node/ssh/upload',
+    headers: {
+      'Content-Type': 'multipart/form-data;charset=UTF-8'
+    },
+    method: 'post',
+    // 0 表示无超时时间
+    timeout: 0,
+    data: formData
+  })
+}
+
+/**
  * 授权目录列表
  * @param {String} id 
  */

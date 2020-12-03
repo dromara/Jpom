@@ -312,7 +312,7 @@ export default {
         formData.append('path', this.tempNode.path);
         // 提交数据
         installAgentNode(formData).then(res => {
-          if(res.code === 200) {
+          if (res.code === 200) {
             this.$notification.success({
               message: '操作成功',
               duration: 2
