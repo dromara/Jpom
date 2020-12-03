@@ -3,7 +3,7 @@
     <!-- 侧边栏 文件树 -->
     <a-layout-sider theme="light" class="sider" width="20%">
       <a-empty v-if="list.length === 0" />
-      <a-directory-tree :treeData="list" :replaceFields="replaceFields" @select="onSelect"
+      <a-directory-tree :treeData="list" :replaceFields="replaceFields" @select="select"
         @rightClick="rightClick" default-expand-all>
       </a-directory-tree>
     </a-layout-sider>
@@ -12,7 +12,9 @@
       <div class="filter">
         <a-button type="primary" @click="loadData">刷新</a-button>
       </div>
-      <div>......</div>
+      <div>
+        <a-input v-model="logContext" readOnly type="textarea" style="resize: none;height: calc(100vh - 165px);"/>
+      </div>
     </a-layout-content>
     <!-- 对话框 -->
     <a-modal v-model="visible" title="系统提示" :footer="null">
@@ -26,10 +28,16 @@
 </template>
 <script>
 import { getLogList, downloadFile, deleteLog } from '../../api/system';
+import { mapGetters } from 'vuex';
 export default {
   data() {
     return {
       list: [],
+      socket: null,
+      // 日志内容
+      logContext: '',
+      tomcatId: 'system',
+      nodeId: 'system',
       replaceFields: {
         children: 'children',
         title: 'title',
@@ -39,8 +47,21 @@ export default {
       temp: {}
     }
   },
+  computed: {
+    ...mapGetters([
+      'getToken'
+    ]),
+    socketUrl() {
+      const protocol = location.protocol === 'https' ? 'wss://' : 'ws://';
+      return `${protocol}${location.host}/tomcat_log?userId=${this.getToken}&tomcatId=${this.tomcatId}&nodeId=${this.nodeId}&type=tomcat`;
+    }
+  },
   created() {
     this.loadData();
+    // this.initWebSocket();
+  },
+  beforeDestroy() {
+    this.socket.close();
   },
   methods: {
     // 加载数据
@@ -74,7 +95,22 @@ export default {
     },
     // 选择节点
     select(selectedKeys, {node}) {
-      console.log(node)
+      const data = {
+        op: 'showlog',
+        tomcatId: this.tomcatId,
+        fileName: node.dataRef.path
+      }
+      this.logContext = '';
+      if (!this.socket || this.socket.readyState !== this.socket.OPEN || this.socket.readyState !== this.socket.CONNECTING) {
+        this.socket = new WebSocket(this.socketUrl);
+      }
+      // 连接成功后
+      this.socket.onopen = () => {
+        this.socket.send(JSON.stringify(data));
+      }
+      this.socket.onmessage = (msg) => {
+        this.logContext += `${msg.data}\r\n`;
+      }
     },
     // 右键点击
     rightClick({node}) {

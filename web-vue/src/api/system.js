@@ -1,10 +1,14 @@
 import axios from './config';
 
-// 日志列表
-export function getLogList() {
+/**
+ * 日志列表
+ * @param {nodeId} params 
+ */
+export function getLogList(params) {
   return axios({
     url: '/system/log_data.json',
-    method: 'post'
+    method: 'post',
+    data: params
   })
 }
 

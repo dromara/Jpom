@@ -12,6 +12,12 @@ module.exports = {
         ws: false,
         logLevel: 'debug'
       },
+      '/tomcat_log': {
+        target: 'ws://localhost:2122',
+        //  true/false: if you want to proxy websockets
+        ws: false,
+        logLevel: 'debug'
+      },
       // http
       '/*': {
         target: 'http://localhost:2122'

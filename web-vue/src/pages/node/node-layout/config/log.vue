@@ -12,7 +12,9 @@
       <div class="filter">
         <a-button type="primary" @click="loadData">刷新</a-button>
       </div>
-      <div>......</div>
+      <div>
+        <a-input v-model="logContext" readOnly type="textarea" style="resize: none;height: calc(100vh - 185px);"/>
+      </div>
     </a-layout-content>
     <!-- 对话框 -->
     <a-modal v-model="visible" title="系统提示" :footer="null">
@@ -26,6 +28,7 @@
 </template>
 <script>
 import { getLogList, downloadFile, deleteLog } from '../../../../api/system';
+import { mapGetters } from 'vuex';
 export default {
   props: {
     node: {
@@ -35,6 +38,10 @@ export default {
   data() {
     return {
       list: [],
+      socket: null,
+      // 日志内容
+      logContext: '',
+      tomcatId: 'system',
       replaceFields: {
         children: 'children',
         title: 'title',
@@ -44,6 +51,15 @@ export default {
       temp: {}
     }
   },
+  computed: {
+    ...mapGetters([
+      'getToken'
+    ]),
+    socketUrl() {
+      const protocol = location.protocol === 'https' ? 'wss://' : 'ws://';
+      return `${protocol}${location.host}/tomcat_log?userId=${this.getToken}&tomcatId=${this.tomcatId}&nodeId=${this.node.id}&type=tomcat`;
+    }
+  },
   created() {
     this.loadData();
   },
@@ -51,7 +67,8 @@ export default {
     // 加载数据
     loadData() {
       this.list = [];
-      getLogList().then(res => {
+      const params = {nodeId: this.node.id};
+      getLogList(params).then(res => {
         if (res.code === 200) {
           res.data.forEach(element => {
             if (element.children) {
@@ -79,7 +96,22 @@ export default {
     },
     // 选择节点
     select(selectedKeys, {node}) {
-      console.log(node)
+      const data = {
+        op: 'showlog',
+        tomcatId: this.tomcatId,
+        fileName: node.dataRef.path
+      }
+      this.logContext = '';
+      if (!this.socket || this.socket.readyState !== this.socket.OPEN || this.socket.readyState !== this.socket.CONNECTING) {
+        this.socket = new WebSocket(this.socketUrl);
+      }
+      // 连接成功后
+      this.socket.onopen = () => {
+        this.socket.send(JSON.stringify(data));
+      }
+      this.socket.onmessage = (msg) => {
+        this.logContext += `${msg.data}\r\n`;
+      }
     },
     // 右键点击
     rightClick({node}) {
