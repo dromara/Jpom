@@ -25,8 +25,8 @@
         <a-button type="danger" @click="handleDelete(record)">删除</a-button>
       </template>
       <!-- 嵌套表格 -->
-      <a-table slot="expandedRowRender" slot-scope="record" :scroll="{x: '80vw'}" :loading="childLoading" :columns="childColumns" :data-source="record.children"
-        :pagination="false" :rowKey="(record, index) => index">
+      <a-table slot="expandedRowRender" slot-scope="text" :scroll="{x: '80vw'}" :loading="childLoading" :columns="childColumns" :data-source="text.children"
+        :pagination="false" :rowKey="(record, index) => record.id + index">
         <a-tooltip slot="osName" slot-scope="text" placement="topLeft" :title="text">
           <span>{{ text }}</span>
         </a-tooltip>
@@ -94,7 +94,7 @@
     <a-drawer :title="drawerTitle" placement="right" width="90vw"
       :visible="drawerVisible" @close="onClose">
       <!-- 节点管理组件 -->
-      <node-layout :node="temp" />
+      <node-layout v-if="drawerVisible" :node="temp" />
     </a-drawer>
     <!-- Terminal -->
     <a-modal v-model="terminalVisible" width="50%" title="Terminal" :footer="null" :maskClosable="false">
