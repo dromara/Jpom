@@ -87,3 +87,18 @@ export function killPid(params) {
     data: params
   })
 }
+
+/**
+ * 节点监控图表数据
+ * @param {
+ *  nodeId: 节点 ID,
+ *  time: 时间段，格式：yyyy-MM-dd HH:mm:ss ~ yyyy-MM-dd HH:mm:ss
+ * } params 
+ */
+export function nodeMonitorData(params) {
+  return axios({
+    url: '/node/nodeMonitor_data.json',
+    method: 'post',
+    data: params
+  })
+}
