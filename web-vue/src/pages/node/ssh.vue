@@ -5,7 +5,7 @@
       <a-button type="primary" @click="loadData">刷新</a-button>
     </div>
     <!-- 数据表格 -->
-    <a-table :data-source="list" :loading="loading" :columns="columns" :pagination="false" bordered :rowKey="(record, index) => index">
+    <a-table :data-source="list" :loading="loading" :columns="columns" :scroll="{x: '80vw'}" :pagination="false" bordered :rowKey="(record, index) => index">
       <template slot="nodeId" slot-scope="text, record">
         <a-button v-if="!record.nodeModel" type="primary" @click="install(record)">安装节点</a-button>
         <a-tag color="#2db7f5" v-else @click="toNode(record.nodeModel)">前往节点: {{ `${record.nodeModel.id}(${record.nodeModel.name})` }}</a-tag>
@@ -13,7 +13,7 @@
       <template slot="operation" slot-scope="text, record">
         <a-button type="primary" @click="handleEdit(record)">编辑</a-button>
         <a-button type="primary" @click="handleTerminal(record)">终端</a-button>
-        <a-button type="primary" v-show="record.fileDirs" @click="handleFile(record)">文件</a-button>
+        <a-button type="primary" :disabled="!record.fileDirs" @click="handleFile(record)">文件</a-button>
         <a-button type="danger" @click="handleDelete(record)">删除</a-button>
       </template>
     </a-table>
@@ -125,7 +125,7 @@ export default {
       terminalVisible: false,
       columns: [
         {title: '名称', dataIndex: 'name'},
-        {title: '关联节点', dataIndex: 'nodeId', scopedSlots: {customRender: 'nodeId'}},
+        {title: '关联节点', dataIndex: 'nodeId', scopedSlots: {customRender: 'nodeId'}, width: 160},
         {title: 'Host', dataIndex: 'host'},
         {title: 'Port', dataIndex: 'port'},
         {title: 'User', dataIndex: 'user'},
