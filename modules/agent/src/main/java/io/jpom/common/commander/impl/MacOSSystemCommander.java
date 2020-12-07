@@ -170,6 +170,12 @@ public class MacOSSystemCommander extends AbstractSystemCommander {
             String ps = getPs(serviceName);
             return StrUtil.isNotEmpty(ps);
         }
+        /**
+         * Mac OS 里面查询服务的命令是 launchctl list | grep serverName
+         * 第一个数字是进程的 PID，如果进程正在运行，如果它不在运行，则显示 "-"
+         * 第二个数字是进程的退出代码（如果已完成）。如果为负，则为终止信号的数量
+         * 第三列进程名称
+         */
         String format = StrUtil.format("service {} status", serviceName);
         String result = CommandUtil.execSystemCommand(format);
         return StrUtil.containsIgnoreCase(result, "RUNNING");
@@ -191,6 +197,9 @@ public class MacOSSystemCommander extends AbstractSystemCommander {
                 return "执行异常：" + e.getMessage();
             }
         }
+        /**
+         * Mac OS 里面启动服务命令是 launchctl start serverName
+         */
         String format = StrUtil.format("service {} start", serviceName);
         return CommandUtil.execSystemCommand(format);
     }
@@ -215,6 +224,9 @@ public class MacOSSystemCommander extends AbstractSystemCommander {
             }
             return kill(file, pid);
         }
+        /**
+         * Mac OS 里面启动服务命令是 launchctl stop serverName
+         */
         String format = StrUtil.format("service {} stop", serviceName);
         return CommandUtil.execSystemCommand(format);
     }
