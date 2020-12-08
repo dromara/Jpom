@@ -26,7 +26,23 @@ export function getNodeStatus(nodeId) {
   })
 }
 
-// 编辑 node
+/**
+ * 编辑 node
+ * @param {
+ *  id: ID,
+ *  name: 节点名称,
+ *  group: 分组名称,
+ *  sshId: SSH ID,
+ *  protocol: 协议 HTTPS || HTTP,
+ *  url: URL 地址,
+ *  timeOut: 超时时间,
+ *  cycle: 监控周期,
+ *  openStatus: 状态,
+ *  loginName: 用户名,
+ *  loginPwd: 密码,
+ *  type: 操作类型 add || update
+ * } params 
+ */
 export function editNode(params) {
   const data = {
     id: params.id,

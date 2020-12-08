@@ -37,3 +37,40 @@ export function deleteLog(params) {
     data: params
   })
 }
+
+/**
+ * server 缓存数据
+ */
+export function getServerCache() {
+  return axios({
+    url: '/system/server-cache',
+    method: 'post'
+  })
+}
+
+/**
+ * 节点缓存数据
+ * @param {String} nodeId 
+ */
+export function getNodeCache(nodeId) {
+  return axios({
+    url: '/system/node_cache.json',
+    method: 'post',
+    data: {nodeId}
+  })
+}
+
+/**
+ * 清空缓存
+ * @param {
+ *  type: 类型
+ *  nodeId: 节点 ID
+ * } params 
+ */
+export function clearCache(params) {
+  return axios({
+    url: '/system/clearCache.json',
+    method: 'post',
+    data: params
+  })
+}

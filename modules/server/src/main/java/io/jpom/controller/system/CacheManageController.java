@@ -23,6 +23,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * 缓存管理
@@ -58,6 +60,35 @@ public class CacheManageController extends BaseServerController {
             }
         }
         return "system/cache";
+    }
+
+    /**
+     * @author Hotstrip
+     * get server's cache data
+     * 获取 Server 的缓存数据
+     * @return
+     */
+    @RequestMapping(value = "server-cache", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @ResponseBody
+    public String serverCache() {
+        Map<String, Object> map = new HashMap<>();
+        File file = ConfigBean.getInstance().getTempPath();
+        String fileSize = FileUtil.readableFileSize(FileUtil.size(file));
+        map.put("cacheFileSize", fileSize);
+
+        int size = LoginControl.LFU_CACHE.size();
+        map.put("ipSize", size);
+        int oneLineCount = ServiceFileTailWatcher.getOneLineCount();
+        map.put("readFileOnLineCount", oneLineCount);
+
+        File buildDataDir = BuildUtil.getBuildDataDir();
+        if (buildDataDir.exists()) {
+            fileSize = FileUtil.readableFileSize(FileUtil.size(buildDataDir));
+            map.put("cacheBuildFileSize", fileSize);
+        } else {
+            map.put("cacheBuildFileSize", 0);
+        }
+        return JsonMessage.getString(200, "ok", map);
     }
 
     /**

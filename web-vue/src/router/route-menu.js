@@ -9,6 +9,7 @@ const routeMenuMap = {
   'user': '/user/list',
   'roleList': '/role/list',
   'user_log': '/operation/log',
+  'cacheManage': '/system/cache',
   'logManage': '/system/log'
 }
 
