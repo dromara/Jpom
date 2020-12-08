@@ -47,11 +47,11 @@ import Tomcat from './other/tomcat';
 import ScriptTemplate from './other/script-template';
 import NginxList from './nginx/list';
 import Cert from './nginx/cert';
-import WhiteList from './config/white-list.vue';
-import Cache from './config/cache';
-import Log from './config/log.vue';
-import Upgrade from './config/upgrade.vue';
-import ConfigFile from './config/config-file.vue';
+import WhiteList from './system/white-list.vue';
+import Cache from './system/cache';
+import Log from './system/log.vue';
+import Upgrade from './system/upgrade.vue';
+import ConfigFile from './system/config-file.vue';
 export default {
   components: {
     Welcome,

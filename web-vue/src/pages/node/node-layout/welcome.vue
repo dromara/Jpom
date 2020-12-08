@@ -1,7 +1,7 @@
 <template>
   <div>
     <!-- 历史监控数据 -->
-    <a-button type="primary" @click="handleHistory">历史监控图表</a-button>
+    <a-button v-show="node.cycle && node.cycle !== 0" type="primary" @click="handleHistory">历史监控图表</a-button>
     <a-divider>图表</a-divider>
     <!-- top 图表 -->
     <div id="top-chart">loading...</div>
