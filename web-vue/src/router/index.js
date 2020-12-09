@@ -43,6 +43,11 @@ const children = [
     path: '/system/log',
     name: 'system-log',
     component: () => import('../pages/system/log')
+  },
+  {
+    path: '/system/config',
+    name: 'system-config',
+    component: () => import('../pages/system/config')
   }
 ]
 

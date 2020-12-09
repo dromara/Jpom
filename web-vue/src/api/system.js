@@ -74,3 +74,31 @@ export function clearCache(params) {
     data: params
   })
 }
+
+/**
+ * 加载配置数据
+ * @param {String} nodeId 节点 ID，若为空表示加载 Server 端配置 
+ */
+export function getConfigData(nodeId) {
+  return axios({
+    url: '/system/config-data',
+    method: 'post',
+    data: {nodeId}
+  })
+}
+
+/**
+ * 编辑配置
+ * @param {
+ *  nodeId: 节点 ID,
+ *  content: 配置内容,
+ *  restart: 是否重启
+ * } params 
+ */
+export function editConfig(params) {
+  return axios({
+    url: '/system/save_config.json',
+    method: 'post',
+    data: params
+  })
+}

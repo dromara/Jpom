@@ -12,13 +12,8 @@
   </div>
 </template>
 <script>
-import { getConfigData, editConfig } from '../../../../api/system';
+import { getConfigData, editConfig } from '../../api/system';
 export default {
-  props: {
-    node: {
-      type: Object
-    }
-  },
   data() {
     return {
       temp: {
@@ -33,7 +28,7 @@ export default {
   methods: {
     // load data
     loadData() {
-      getConfigData(this.node.id).then(res => {
+      getConfigData().then(res => {
         if (res.code === 200) {
           this.temp.content = res.data;
           console.log(this.temp.content)
@@ -44,7 +39,6 @@ export default {
     onSubmit(restart) {
       // disabled submit button
       this.submitAble = true;
-      this.temp.nodeId = this.node.id;
       this.temp.restart = restart;
       editConfig(this.temp).then(res => {
         if (res.code === 200) {

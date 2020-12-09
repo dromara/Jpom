@@ -10,7 +10,8 @@ const routeMenuMap = {
   'roleList': '/role/list',
   'user_log': '/operation/log',
   'cacheManage': '/system/cache',
-  'logManage': '/system/log'
+  'logManage': '/system/log',
+  'sysConfig': '/system/config'
 }
 
 export default routeMenuMap
