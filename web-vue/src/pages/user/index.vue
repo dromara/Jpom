@@ -41,6 +41,7 @@
 import { getUserList, addUser, updateUser, deleteUser } from '../../api/user';
 import { getRoleList } from '../../api/role';
 import { parseTime } from '../../utils/time';
+import sha1 from 'sha1';
 export default {
   data() {
     return {
@@ -136,6 +137,10 @@ export default {
             duration: 2
           });
           return false;
+        }
+        // 加密密码
+        if (this.temp.password) {
+          this.temp.password = sha1(this.temp.password);
         }
         // 设置选择的角色
         this.temp.roles = JSON.stringify(this.targetKeys);
