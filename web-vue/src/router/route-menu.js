@@ -9,6 +9,7 @@ const routeMenuMap = {
   'user': '/user/list',
   'roleList': '/role/list',
   'user_log': '/operation/log',
+  'monitorConfigEmail': '/system/mail',
   'cacheManage': '/system/cache',
   'logManage': '/system/log',
   'sysConfig': '/system/config'

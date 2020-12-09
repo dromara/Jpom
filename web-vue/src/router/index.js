@@ -35,6 +35,11 @@ const children = [
     component: () => import('../pages/operation-log')
   },
   {
+    path: '/system/mail',
+    name: 'system-mail',
+    component: () => import('../pages/system/mail')
+  },
+  {
     path: '/system/cache',
     name: 'system-cache',
     component: () => import('../pages/system/cache')

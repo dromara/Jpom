@@ -46,6 +46,24 @@ public class SystemMailConfigController extends BaseServerController {
         return "monitor/mailConfig";
     }
 
+    /**
+     * @author Hotstrip
+     * load mail config data
+     * 加载邮件配置
+     * @return
+     */
+    @RequestMapping(value = "mail-config-data", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @SystemPermission
+    @ResponseBody
+    public String mailConfigData() {
+        UserModel userModel = getUser();
+        MailAccountModel item = null;
+        if (userModel.isSystemUser()) {
+            item = systemMailConfigService.getConfig();
+        }
+        return JsonMessage.getString(200, "success", item);
+    }
+
     @RequestMapping(value = "mailConfig_save.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     @OptLog(UserOperateLogV1.OptType.EditMailConfig)

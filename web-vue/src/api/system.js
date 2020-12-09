@@ -102,3 +102,33 @@ export function editConfig(params) {
     data: params
   })
 }
+
+/**
+ * 加载邮件配置
+ */
+export function getMailConfigData() {
+  return axios({
+    url: '/system/mail-config-data',
+    method: 'post'
+  })
+}
+
+/**
+ * 编辑配置
+ * @param {
+  *  host: SMTP 服务器域名,
+  *  port: SMTP 服务端口,
+  *  user: 用户名,
+  *  pass: 密码,
+  *  from: 发送方，遵循RFC-822标准,
+  *  sslEnable: 是否 SSL 安全连接,
+  *  socketFactoryPort: SSL 加密端口
+  * } params 
+  */
+ export function editMailConfig(params) {
+   return axios({
+     url: '/system/mailConfig_save.json',
+     method: 'post',
+     data: params
+   })
+ }
