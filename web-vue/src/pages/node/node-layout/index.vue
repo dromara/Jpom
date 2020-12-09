@@ -6,7 +6,7 @@
         <template v-for="menu in nodeMenuList">
           <a-sub-menu v-if="menu.childs" :key="menu.id">
             <span slot="title">
-              <a-icon type="apartment" />
+              <a-icon :type="menu.icon_v3" />
               <span>{{menu.title}}</span>
             </span>
             <a-menu-item v-for="subMenu in menu.childs" :key="subMenu.id" @click="handleMenuClick(subMenu.id)">
@@ -14,6 +14,7 @@
             </a-menu-item>
           </a-sub-menu>
           <a-menu-item v-else :key="menu.id" @click="handleMenuClick(menu.id)">
+            <a-icon :type="menu.icon_v3" />
             <span>{{menu.title}}</span>
           </a-menu-item>
         </template>

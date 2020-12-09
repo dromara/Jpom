@@ -2,7 +2,7 @@
   <a-menu theme="dark" mode="inline" v-model="selectedKeys">
     <a-sub-menu v-for="menu in getMenus" :key="menu.id">
       <span slot="title">
-        <a-icon type="apartment" />
+        <a-icon :type="menu.icon_v3" />
         <span>{{menu.title}}</span>
       </span>
       <a-menu-item v-for="subMenu in menu.childs" :key="subMenu.id" @click="handleClick(subMenu)">
