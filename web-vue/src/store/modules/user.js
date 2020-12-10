@@ -2,26 +2,27 @@
  * 用户相关的 store
  */
 import {
-  USER_NAME_KEY,
   TOKEN_KEY,
+  USER_INFO_KEY,
   MENU_KEY
 } from '../../utils/const'
 
+import { getUserInfo } from '../../api/user';
 import { getSystemMenu } from '../../api/menu';
 import routeMenuMap from '../../router/route-menu';
 
 const user = {
   state: {
-    userName: localStorage.getItem(USER_NAME_KEY),
     token: localStorage.getItem(TOKEN_KEY),
+    userInfo: JSON.parse(localStorage.getItem(USER_INFO_KEY)),
     menus: JSON.parse(localStorage.getItem(MENU_KEY))
   },
   mutations: {
-    setUserName(state, name) {
-      state.userName = name
-    },
     setToken(state, token) {
       state.token = token
+    },
+    setUserInfo(state, userInfo) {
+      state.userInfo = userInfo
     },
     setMenus(state, menus) {
       state.menus = menus
@@ -34,7 +35,13 @@ const user = {
         commit('setToken', data.token);
         commit('setUserName', data.userName);
         localStorage.setItem(TOKEN_KEY, data.token);
-        localStorage.setItem(USER_NAME_KEY, data.userName);
+        // 加载用户信息
+        getUserInfo().then(res => {
+          if (res.code === 200) {
+            commit('setUserInfo', res.data);
+            localStorage.setItem(USER_INFO_KEY, JSON.stringify(res.data));
+          }
+        })
         // 加载系统菜单
         getSystemMenu().then(res => {
           res.data.forEach(element => {
@@ -61,10 +68,8 @@ const user = {
     logOut({dispatch, commit}) {
       return new Promise((resolve) => {
         commit('setToken', '');
-        commit('setUserName', '');
         commit('setMenus', '');
         localStorage.removeItem(TOKEN_KEY);
-        localStorage.removeItem(USER_NAME_KEY);
         localStorage.removeItem(MENU_KEY);
         // 调用其他 action
         dispatch('clearTabs');
@@ -76,8 +81,8 @@ const user = {
     getToken(state) {
       return state.token;
     },
-    getUserName(state) {
-      return state.userName;
+    getUserInfo(state) {
+      return state.userInfo;
     },
     getMenus(state) {
       return state.menus;

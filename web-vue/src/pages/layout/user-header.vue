@@ -5,7 +5,7 @@
         shape="square"
         size="large"
         :style="{ backgroundColor: '#f56a00', verticalAlign: 'middle' }">
-        <a-tooltip placement="left" :title="getUserName">
+        <a-tooltip placement="left" :title="getUserInfo.name">
           {{ avatarName }}
         </a-tooltip>
       </a-avatar>
@@ -47,7 +47,7 @@
         <a-form-model-item label="邮箱地址" prop="email">
           <a-input v-model="temp.email" placeholder="邮箱地址"/>
         </a-form-model-item>
-        <a-form-model-item label="邮箱验证码" prop="code">
+        <a-form-model-item v-show="showCode" label="邮箱验证码" prop="code">
           <a-row :gutter="8">
             <a-col :span="15">
               <a-input v-model="temp.code" placeholder="邮箱验证码"/>
@@ -56,9 +56,6 @@
               <a-button type="primary" :disabled="!temp.email" @click="sendEmailCode">发送验证码</a-button>
             </a-col>
           </a-row>
-        </a-form-model-item>
-        <a-form-model-item label="邮箱验证码" prop="code">
-          <a-input v-model="temp.code" placeholder="邮箱验证码"/>
         </a-form-model-item>
         <a-form-model-item label="钉钉通知地址" prop="dingDing">
           <a-input v-model="temp.dingDing" placeholder="钉钉通知地址"/>
@@ -102,16 +99,19 @@ export default {
   computed: {
     ...mapGetters([
       'getToken',
-      'getUserName'
+      'getUserInfo'
     ]),
     // 处理展示的名称 中文 3 个字 其他 4 个字符
     avatarName() {
       const reg = new RegExp("[\u4E00-\u9FA5]+");
-      if (reg.test(this.getUserName)) {
-        return this.getUserName.substring(0, 3);
+      if (reg.test(this.getUserInfo.name)) {
+        return this.getUserInfo.name.substring(0, 3);
       } else {
-        return this.getUserName.substring(0, 4);
+        return this.getUserInfo.name.substring(0, 4);
       }
+    },
+    showCode() {
+      return this.getUserInfo.email !== this.temp.email;
     }
   },
   methods: {
@@ -181,7 +181,7 @@ export default {
     },
     // 加载修改用户资料对话框
     handleUpdateUser() {
-      this.temp = {};
+      this.temp = {...this.getUserInfo};
       this.temp.token = this.getToken;
       this.updateUserVisible = true;
     },

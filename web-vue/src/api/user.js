@@ -9,6 +9,14 @@ export function login(params) {
   })
 }
 
+// 获取用户信息
+export function getUserInfo() {
+  return axios({
+    url: '/user/user-basic-info',
+    method: 'post'
+  })
+}
+
 // 修改密码
 export function updatePwd(params) {
   return axios({

@@ -38,7 +38,7 @@
     <br/>
     <a-alert
       message="163 邮箱配置"
-      description="待完善"
+      description="SMTP 地址：【smtp.163.com, smtp.126.com...】，密码是邮箱授权码，端口默认 25，SSL 端口 465"
       type="info"
       show-icon/>
     <br/>
