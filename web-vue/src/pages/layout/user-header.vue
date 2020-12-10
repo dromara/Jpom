@@ -213,9 +213,13 @@ export default {
         editUserInfo(this.temp).then(res => {
           // 修改成功
           if (res.code === 200) {
+            this.$notification.success({
+              message: res.msg,
+              duration: 2
+            });
             // 清空表单校验
             this.$refs['userForm'].resetFields();
-            this.updateNameVisible = false;
+            this.updateUserVisible = false;
           }
         })
       })
