@@ -52,3 +52,33 @@ export function deleteUser(id) {
     data: {id}
   })
 }
+
+/**
+ * 编辑用户资料
+ * @param {
+ *  token: token,
+ *  email: 邮箱地址,
+ *  code: 邮箱验证码
+ *  dingDing: 钉钉群通知地址,
+ *  workWx: 企业微信群通知地址
+ * } params 
+ */
+export function editUserInfo(params) {
+  return axios({
+    url: '/user/save_basicInfo.json',
+    method: 'post',
+    data: params
+  })
+}
+
+/**
+ * 发送邮箱验证码
+ * @param {String} email 邮箱地址
+ */
+export function sendEmailCode(email) {
+  return axios({
+    url: '/user/sendCode.json',
+    method: 'post',
+    data: {email}
+  })
+}

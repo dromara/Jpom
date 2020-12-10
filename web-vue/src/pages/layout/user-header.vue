@@ -17,15 +17,15 @@
           <a href="javascript:;" @click="handleUpdateName">修改昵称</a>
         </a-menu-item> -->
         <a-menu-item>
-          <a href="javascript:;">用户资料</a>
+          <a href="javascript:;" @click="handleUpdateUser">用户资料</a>
         </a-menu-item>
         <a-menu-item>
           <a href="javascript:;" @click="logOut">退出登录</a>
         </a-menu-item>
       </a-menu>
     </a-dropdown>
-    <!-- 编辑区 -->
-    <a-modal v-model="updateNamevisible" title="修改密码" @ok="handleUpdatePwdOk" :maskClosable="false">
+    <!-- 修改密码区 -->
+    <a-modal v-model="updateNameVisible" title="修改密码" @ok="handleUpdatePwdOk" :maskClosable="false">
       <a-form-model ref="pwdForm" :rules="rules" :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 14 }">
         <a-form-model-item label="原密码" prop="oldPwd">
           <a-input-password v-model="temp.oldPwd" placeholder="Old password"/>
@@ -38,18 +38,49 @@
         </a-form-model-item>
       </a-form-model>
     </a-modal>
+    <!-- 修改用户资料区 -->
+    <a-modal v-model="updateUserVisible" title="修改用户资料" @ok="handleUpdateUserOk" :maskClosable="false">
+      <a-form-model ref="userForm" :rules="rules" :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 14 }">
+        <a-form-model-item label="Token" prop="token">
+          <a-input v-model="temp.token" placeholder="Token"/>
+        </a-form-model-item>
+        <a-form-model-item label="邮箱地址" prop="email">
+          <a-input v-model="temp.email" placeholder="邮箱地址"/>
+        </a-form-model-item>
+        <a-form-model-item label="邮箱验证码" prop="code">
+          <a-row :gutter="8">
+            <a-col :span="15">
+              <a-input v-model="temp.code" placeholder="邮箱验证码"/>
+            </a-col>
+            <a-col :span="4">
+              <a-button type="primary" :disabled="!temp.email" @click="sendEmailCode">发送验证码</a-button>
+            </a-col>
+          </a-row>
+        </a-form-model-item>
+        <a-form-model-item label="邮箱验证码" prop="code">
+          <a-input v-model="temp.code" placeholder="邮箱验证码"/>
+        </a-form-model-item>
+        <a-form-model-item label="钉钉通知地址" prop="dingDing">
+          <a-input v-model="temp.dingDing" placeholder="钉钉通知地址"/>
+        </a-form-model-item>
+        <a-form-model-item label="企业微信通知地址" prop="workWx">
+          <a-input v-model="temp.workWx" placeholder="企业微信通知地址"/>
+        </a-form-model-item>
+      </a-form-model>
+    </a-modal>
   </div>
 </template>
 <script>
 import { mapGetters } from 'vuex';
-import { updatePwd } from '../../api/user';
+import { updatePwd, sendEmailCode, editUserInfo } from '../../api/user';
 import sha1 from 'sha1';
 export default {
   data() {
     return {
       collapsed: false,
       // 修改密码框
-      updateNamevisible: false,
+      updateNameVisible: false,
+      updateUserVisible: false,
       temp: {},
       // 表单校验规则
       rules: {
@@ -62,6 +93,9 @@ export default {
         confirmPwd: [
           { required: true, message: 'Please input confirmPwd password', trigger: 'blur' }
         ],
+        email: [
+          { required: true, message: 'Please input email', trigger: 'blur' }
+        ]
       }
     }
   },
@@ -106,7 +140,7 @@ export default {
     // 加载修改密码对话框
     handleUpdatePwd() {
       this.temp = {};
-      this.updateNamevisible = true;
+      this.updateNameVisible = true;
     },
     // 修改密码
     handleUpdatePwdOk() {
@@ -138,9 +172,50 @@ export default {
                 duration: 2
               });
               this.$refs['pwdForm'].resetFields();
-              this.updateNamevisible = false;
+              this.updateNameVisible = false;
               this.$router.push('/login');
             })
+          }
+        })
+      })
+    },
+    // 加载修改用户资料对话框
+    handleUpdateUser() {
+      this.temp = {};
+      this.temp.token = this.getToken;
+      this.updateUserVisible = true;
+    },
+    // 发送邮箱验证码
+    sendEmailCode() {
+      if (!this.temp.email) {
+        this.$notification.error({
+          message: '请输入邮箱地址',
+          duration: 2
+        });
+        return;
+      }
+      sendEmailCode(this.temp.email).then(res => {
+        if (res.code === 200) {
+          this.$notification.success({
+            message: res.msg,
+            duration: 2
+          });
+        }
+      })
+    },
+    // 修改用户资料
+    handleUpdateUserOk() {
+      // 检验表单
+      this.$refs['userForm'].validate(valid => {
+        if (!valid) {
+          return false;
+        }
+        editUserInfo(this.temp).then(res => {
+          // 修改成功
+          if (res.code === 200) {
+            // 清空表单校验
+            this.$refs['userForm'].resetFields();
+            this.updateNameVisible = false;
           }
         })
       })

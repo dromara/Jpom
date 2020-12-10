@@ -11,7 +11,7 @@
         <a-input v-model="temp.user" type="text" placeholder="发件人名称"/>
       </a-form-model-item>
       <a-form-model-item label="密码" prop="pass">
-        <a-input v-model="temp.pass" type="text" placeholder="邮箱密码或者授权码"/>
+        <a-input-password v-model="temp.pass" type="text" placeholder="邮箱密码或者授权码"/>
       </a-form-model-item>
       <a-form-model-item label="邮箱账号" prop="from">
         <a-input v-model="temp.from" type="text" placeholder="发送方邮箱账号"/>
@@ -24,6 +24,29 @@
         <a-button type="primary" class="btn" :disabled="submitAble" @click="onSubmit">提交</a-button>
       </a-form-model-item>
     </a-form-model>
+    <a-alert
+      message="阿里云企业邮箱配置"
+      description="SMTP 地址：smtp.mxhichina.com，端口使用 465 并且开启 SSL，用户名需要和邮件发送人一致，密码为邮箱的登录密码"
+      type="info"
+      show-icon/>
+    <br/>
+    <a-alert
+      message="QQ 邮箱配置"
+      description="待完善"
+      type="info"
+      show-icon/>
+    <br/>
+    <a-alert
+      message="163 邮箱配置"
+      description="待完善"
+      type="info"
+      show-icon/>
+    <br/>
+    <a-alert
+      message="Gmail 邮箱配置"
+      description="待完善"
+      type="info"
+      show-icon/>
   </div>
 </template>
 <script>
@@ -65,6 +88,9 @@ export default {
     onSubmit() {
       // disabled submit button
       this.submitAble = true;
+      if (this.temp.sslsslEnable === false) {
+        this.temp.socketFactoryPort = '';
+      }
       editMailConfig(this.temp).then(res => {
         if (res.code === 200) {
           // 成功
