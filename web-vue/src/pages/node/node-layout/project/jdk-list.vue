@@ -70,10 +70,7 @@ export default {
     // 加载数据
     loadData() {
       this.loading = true;
-      const params = {
-        nodeId: this.node.id
-      }
-      getJdkList(params).then(res => {
+      getJdkList(this.node.id).then(res => {
         if (res.code === 200) {
           this.list = res.data;
         }

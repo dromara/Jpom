@@ -170,7 +170,7 @@ export default {
   },
   created() {
     this.loadGroupList();
-    this.handleFilter()
+    this.handleFilter();
   },
   methods: {
     // 分组列表
@@ -230,7 +230,7 @@ export default {
     },
     // 筛选
     handleFilter() {
-      this.loadData()
+      this.loadData();
     },
     // 添加
     handleAdd() {

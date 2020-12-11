@@ -12,12 +12,15 @@ export function getProjectList(params) {
   })
 }
 
-// jdk 列表
-export function getJdkList(params) {
+/**
+ * jdk 列表
+ * @param {String} nodeId 节点 ID
+ */
+export function getJdkList(nodeId) {
   return axios({
     url: '/node/manage/jdk/list',
     method: 'post',
-    data: params
+    data: {nodeId}
   })
 }
 
@@ -46,6 +49,39 @@ export function editJdk(params) {
 export function deleteJdk(params) {
   return axios({
     url: '/node/manage/jdk/delete',
+    method: 'post',
+    data: params
+  })
+}
+
+/**
+ * 加载项目分组列表
+ * @param {String} nodeId 节点 ID
+ */
+export function getPorjectGroupList(nodeId) {
+  return axios({
+    url: '/node/manage/project-group-list',
+    method: 'post',
+    data: {nodeId}
+  })
+}
+
+/**
+ * 项目白名单列表
+ * @param {String} nodeId 节点 ID
+ */
+export function getProjectAccessList(nodeId) {
+  return axios({
+    url: '/node/manage/project-access-list',
+    method: 'post',
+    data: {nodeId}
+  })
+}
+
+// 编辑项目
+export function editProject(params) {
+  return axios({
+    url: '/node/manage/saveProject',
     method: 'post',
     data: params
   })

@@ -1,8 +1,12 @@
 <template>
   <div>
     <div ref="filter" class="filter">
+      <a-select v-model="listQuery.group" allowClear placeholder="请选择分组"
+        class="filter-item" @change="handleFilter">
+        <a-select-option v-for="group in groupList" :key="group">{{ group }}</a-select-option>
+      </a-select>
       <a-button type="primary" @click="handleAdd">新增</a-button>
-      <a-button type="primary" @click="loadData">刷新</a-button>
+      <a-button type="primary" @click="handleFilter">刷新</a-button>
     </div>
     <!-- 数据表格 -->
     <a-table :data-source="list" :loading="loading" :columns="columns" :scroll="{x: '80vw', y: 500}" :pagination="false" bordered :rowKey="(record, index) => index">
@@ -12,10 +16,57 @@
         <a-button type="danger" @click="handleDelete(record)">删除</a-button> -->
       </template>
     </a-table>
+    <!-- 编辑区 -->
+    <a-modal v-model="editProjectVisible" width="800px" title="编辑项目" @ok="handleEditProjectOk" :maskClosable="false">
+      <a-form-model ref="editProjectForm" :rules="rules" :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 14 }">
+        <a-form-model-item label="项目 ID" prop="id">
+          <a-input v-model="temp.id" placeholder="创建之后不能修改"/>
+        </a-form-model-item>
+        <a-form-model-item label="项目名称" prop="name">
+          <a-input v-model="temp.id" placeholder="项目名称"/>
+        </a-form-model-item>
+        <a-form-model-item label="运行方式" prop="runMode">
+          <a-select v-model="temp.runMode" placeholder="请选择运行方式">
+            <a-select-option v-for="runMode in runModeList" :key="runMode">{{ runMode }}</a-select-option>
+          </a-select>
+        </a-form-model-item>
+        <a-form-model-item label="项目白名单路径" prop="whitelistDirectory">
+          <a-select v-model="temp.whitelistDirectory" placeholder="请选择项目白名单路径">
+            <a-select-option v-for="access in accessList" :key="access">{{ access }}</a-select-option>
+          </a-select>
+        </a-form-model-item>
+        <a-form-model-item label="项目文件夹" prop="lib">
+          <a-input v-model="temp.lib" placeholder="项目存储的文件夹，jar 包存放的文件夹"/>
+        </a-form-model-item>
+        <a-form-model-item label="分组名称" prop="group">
+          <a-select v-model="temp.tempGroup" mode="tags" placeholder="可手动输入" @change="handleSelectChange">
+            <a-select-option v-for="group in groupList" :key="group">{{ group }}</a-select-option>
+          </a-select>
+        </a-form-model-item>
+        <a-form-model-item label="JDK" prop="jdkId">
+          <a-select v-model="temp.jdkId" placeholder="请选择 JDK">
+            <a-select-option v-for="jdk in jdkList" :key="jdk.id">{{ jdk.name }}</a-select-option>
+          </a-select>
+        </a-form-model-item>
+        <a-form-model-item label="Main Class" prop="mainClass" v-show="temp.runMode !== 'Jar'">
+          <a-input v-model="temp.mainClass" placeholder="程序运行的 main 类(jar 模式运行可以不填)"/>
+        </a-form-model-item>
+        <a-form-model-item label="JVM 参数" prop="jvm">
+          <a-textarea v-model="temp.jvm" :auto-size="{ minRows: 3, maxRows: 3 }" placeholder="jvm参数,非必填.如：-Xmin=512m -Xmax=512m"/>
+        </a-form-model-item>
+        <a-form-model-item label="args参数" prop="args">
+          <a-textarea v-model="temp.args" :auto-size="{ minRows: 3, maxRows: 3 }" placeholder="Main 函数 args 参数，非必填. 如：--service.port=8080"/>
+        </a-form-model-item>
+        <a-form-model-item label="WebHooks" prop="token">
+          <a-input v-model="temp.token" placeholder="关闭程序时自动请求,非必填，GET请求"/>
+        </a-form-model-item>
+      </a-form-model>
+    </a-modal>
   </div>
 </template>
 <script>
-import { getProjectList } from '../../../../api/node-project';
+import { getJdkList } from '../../../../api/node-project';
+import { getProjectList, getPorjectGroupList, getProjectAccessList, editProject } from '../../../../api/node-project';
 export default {
   props: {
     node: {
@@ -25,7 +76,20 @@ export default {
   data() {
     return {
       loading: false,
+      listQuery: {},
+      groupList: [],
+      accessList: [],
+      jdkList: [],
+      runModeList: [
+        'ClassPath',
+        'Jar',
+        'JarWar',
+        'JavaExtDirsCp',
+        'File'
+      ],
       list: [],
+      temp: {},
+      editProjectVisible: false,
       columns: [
         {title: '项目名称', dataIndex: 'name', width: 150, ellipsis: true, scopedSlots: {customRender: 'name'}},
         {title: '创建时间', dataIndex: 'createTime', width: 170, ellipsis: true, scopedSlots: {customRender: 'createTime'}},
@@ -34,13 +98,57 @@ export default {
         {title: '运行状态', dataIndex: 'status', width: 100, ellipsis: true, scopedSlots: {customRender: 'status'}},
         {title: '端口', dataIndex: 'port', width: 100, ellipsis: true, scopedSlots: {customRender: 'port'}},
         {title: '操作', dataIndex: 'operation', scopedSlots: {customRender: 'operation'}, width: 200}
-      ]
+      ],
+      rules: {
+        id: [
+          { required: true, message: 'Please input project id', trigger: 'blur' }
+        ],
+        name: [
+          { required: true, message: 'Please input project name', trigger: 'blur' }
+        ],
+        runMode: [
+          { required: true, message: 'Please select project runMode', trigger: 'blur' }
+        ],
+        whitelistDirectory: [
+          { required: true, message: 'Please select project access path', trigger: 'blur' }
+        ],
+        lib: [
+          { required: true, message: 'Please input project lib', trigger: 'blur' }
+        ]
+      }
     }
   },
-  created() {
-    this.loadData()
+  mounted() {
+    this.loadGroupList();
+    this.loadAccesList();
+    this.loadJdkList();
+    this.handleFilter();
   },
   methods: {
+    // 加载分组列表
+    loadGroupList() {
+      getPorjectGroupList(this.node.id).then(res => {
+        if (res.code === 200) {
+          this.groupList = res.data;
+        }
+      })
+    },
+    // 加载项目白名单列表
+    loadAccesList() {
+      getProjectAccessList(this.node.id).then(res => {
+        if (res.code === 200) {
+          this.accessList = res.data;
+        }
+      })
+    },
+    // 加载 JDK 列表
+    loadJdkList() {
+      getJdkList(this.node.id).then(res => {
+        if (res.code === 200) {
+          this.jdkList = res.data;
+        }
+      })
+    },
     // 加载数据
     loadData() {
       this.loading = true;
@@ -54,9 +162,47 @@ export default {
         this.loading = false;
       })
     },
+    // 筛选
+    handleFilter() {
+      this.loadData();
+    },
+    // 处理下拉框
+    handleSelectChange(value) {
+      if (value.length > 1) {
+        // 获取选中的值
+        const selectValue = value[value.length - 1];
+        // 添加到分组列表
+        if (this.groupList.indexOf(selectValue) === -1) {
+          this.groupList.push(selectValue);
+          this.temp.tempGroup = selectValue;
+          this.temp.group = selectValue;
+        }
+      }
+    },
     // 添加
     handleAdd() {
+      this.temp = {};
+      this.editProjectVisible = true;
     },
+    // 提交
+    handleEditProjectOk() {
+      // 检验表单
+      this.$refs['editProjectForm'].validate((valid) => {
+        if (!valid) {
+          return false;
+        }
+        editProject(this.temp).then(res => {
+          if (res.code === 200) {
+            this.$notification.success({
+              message: res.msg,
+              duration: 2
+            });
+            this.$refs['editProjectForm'].resetFields();
+            this.handleFilter();
+          }
+        })
+      })
+    }
   }
 }
 </script>
@@ -65,6 +211,10 @@ export default {
   margin-bottom: 10px;
 }
 .ant-btn {
+  margin-right: 10px;
+}
+.filter-item {
+  width: 150px;
   margin-right: 10px;
 }
 </style>

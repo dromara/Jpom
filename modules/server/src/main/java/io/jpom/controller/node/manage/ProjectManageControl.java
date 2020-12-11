@@ -26,6 +26,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.annotation.Resource;
+import java.util.HashSet;
 import java.util.List;
 
 /**
@@ -98,6 +99,19 @@ public class ProjectManageControl extends BaseServerController {
     @ResponseBody
     public String getProjectCopyPort() {
         return NodeForward.request(getNode(), getRequest(), NodeUrl.Manage_GetProjectCopyPort).toString();
+    }
+
+    /**
+     * @author Hotstrip
+     * get project group
+     * 获取项目的分组信息
+     * @return
+     */
+    @RequestMapping(value = "project-group-list", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public String projectGroupList() {
+        List<String> allGroup = projectInfoService.getAllGroup(getNode());
+        return JsonMessage.getString(200, "success", allGroup);
     }
 
     /**

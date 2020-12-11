@@ -90,6 +90,18 @@ public class EditProjectController extends BaseServerController {
         return "node/manage/editProject";
     }
 
+    /**
+     * @author Hotstrip
+     * get project access list
+     * 获取项目的白名单
+     * @return
+     */
+    @RequestMapping(value = "project-access-list", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public String projectAccessList() {
+        List<String> jsonArray = whitelistDirectoryService.getProjectDirectory(getNode());
+        return JsonMessage.getString(200, "success", jsonArray);
+    }
 
     /**
      * 保存项目
