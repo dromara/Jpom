@@ -116,19 +116,51 @@ export function getMailConfigData() {
 /**
  * 编辑配置
  * @param {
-  *  host: SMTP 服务器域名,
-  *  port: SMTP 服务端口,
-  *  user: 用户名,
-  *  pass: 密码,
-  *  from: 发送方，遵循RFC-822标准,
-  *  sslEnable: 是否 SSL 安全连接,
-  *  socketFactoryPort: SSL 加密端口
-  * } params 
-  */
- export function editMailConfig(params) {
-   return axios({
-     url: '/system/mailConfig_save.json',
-     method: 'post',
-     data: params
-   })
- }
+ *  host: SMTP 服务器域名,
+ *  port: SMTP 服务端口,
+ *  user: 用户名,
+ *  pass: 密码,
+ *  from: 发送方，遵循RFC-822标准,
+ *  sslEnable: 是否 SSL 安全连接,
+ *  socketFactoryPort: SSL 加密端口
+ * } params 
+ */
+export function editMailConfig(params) {
+  return axios({
+    url: '/system/mailConfig_save.json',
+    method: 'post',
+    data: params
+  })
+}
+
+/**
+ * 系统程序信息
+ * @param {String} nodeId 节点 ID
+ */
+export function systemInfo(nodeId) {
+  return axios({
+    url: '/system/info',
+    method: 'post',
+    data: {nodeId}
+  })
+}
+
+/**
+ * 上传升级文件
+ * @param {
+ *  file: 文件 multipart/form-data,
+ *  nodeId: 节点 ID
+ * } formData 
+ */
+export function uploadUpgradeFile(formData) {
+  return axios({
+    url: '/system/uploadJar.json',
+    headers: {
+      'Content-Type': 'multipart/form-data;charset=UTF-8'
+    },
+    method: 'post',
+    // 0 表示无超时时间
+    timeout: 0, 
+    data: formData
+  })
+}

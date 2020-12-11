@@ -50,6 +50,11 @@ const children = [
     component: () => import('../pages/system/log')
   },
   {
+    path: '/system/upgrade',
+    name: 'system-upgrade',
+    component: () => import('../pages/system/upgrade')
+  },
+  {
     path: '/system/config',
     name: 'system-config',
     component: () => import('../pages/system/config')

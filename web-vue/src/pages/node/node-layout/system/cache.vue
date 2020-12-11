@@ -2,7 +2,7 @@
   <div>
     <a-timeline>
       <a-timeline-item>
-        <span class="layui-elem-quote">文件缓存{{temp.fileSize}}</span>
+        <span class="layui-elem-quote">文件缓存：{{temp.fileSize}}</span>
         <a-button type="primary" class="btn" @click="clear('fileSize')">清空</a-button>
       </a-timeline-item>
       <a-timeline-item>

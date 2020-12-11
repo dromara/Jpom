@@ -12,6 +12,7 @@ const routeMenuMap = {
   'monitorConfigEmail': '/system/mail',
   'cacheManage': '/system/cache',
   'logManage': '/system/log',
+  'update': '/system/upgrade',
   'sysConfig': '/system/config'
 }
 

@@ -20,13 +20,8 @@
   </div>
 </template>
 <script>
-import { systemInfo, uploadUpgradeFile } from '../../../../api/system';
+import { systemInfo, uploadUpgradeFile } from '../../api/system';
 export default {
-  props: {
-    node: {
-      type: Object
-    }
-  },
   data() {
     return {
       temp: {},
@@ -40,7 +35,7 @@ export default {
   methods: {
     // 加载数据
     loadData() {
-      systemInfo(this.node.id).then(res => {
+      systemInfo().then(res => {
         if (res.code === 200) {
           this.temp = res.data;
         }
@@ -64,7 +59,6 @@ export default {
       this.spinning = true;
       const formData = new FormData();
       formData.append('file', this.fileList[0]);
-      formData.append('nodeId', this.node.id);
       // 上传文件
       uploadUpgradeFile(formData).then(res => {
         if (res.code === 200) {

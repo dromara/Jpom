@@ -20,7 +20,7 @@
       </a-tooltip>
       <template slot="operation" slot-scope="text, record">
         <a-button type="primary" @click="handleTerminal(record)" :disabled="!record.sshId">终端</a-button>
-        <a-button type="primary" @click="handleNode(record)">节点管理</a-button>
+        <a-button type="primary" @click="handleNode(record)" :disabled="record.openStatus === false">节点管理</a-button>
         <a-button type="primary" @click="handleEdit(record)">编辑</a-button>
         <a-button type="danger" @click="handleDelete(record)">删除</a-button>
       </template>
