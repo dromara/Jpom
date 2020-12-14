@@ -3,15 +3,6 @@
  */
 import axios from './config';
 
-// 项目列表
-export function getProjectList(params) {
-  return axios({
-    url: '/node/manage/getProjectInfo',
-    method: 'post',
-    data: params
-  })
-}
-
 /**
  * jdk 列表
  * @param {String} nodeId 节点 ID
@@ -49,6 +40,36 @@ export function editJdk(params) {
 export function deleteJdk(params) {
   return axios({
     url: '/node/manage/jdk/delete',
+    method: 'post',
+    data: params
+  })
+}
+
+/**
+ * 项目列表
+ * @param {
+ *  nodeId: 节点 ID
+ *  group: 分组名称
+ * } params 
+ */
+export function getProjectList(params) {
+  return axios({
+    url: '/node/manage/getProjectInfo',
+    method: 'post',
+    data: params
+  })
+}
+
+/**
+ * 项目运行信息，返回项目占用端口和 pid
+ * @param {
+ *  nodeId: 节点 ID
+ *  ids: 项目 ID 数组字符串格式 ["id1", "id2"]
+ * } params 
+ */
+export function getRuningProjectInfo(params) {
+  return axios({
+    url: '/node/manage/getProjectPort',
     method: 'post',
     data: params
   })

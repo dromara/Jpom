@@ -10,10 +10,13 @@
     </div>
     <!-- 数据表格 -->
     <a-table :data-source="list" :loading="loading" :columns="columns" :scroll="{x: '80vw', y: 500}" :pagination="false" bordered :rowKey="(record, index) => index">
+      <a-switch slot="status" slot-scope="text" :checked="text" disabled checked-children="开" un-checked-children="关"/>
       <template slot="operation" slot-scope="text, record">
-        <span>占个位{{record}}</span>
-        <!-- <a-button type="primary" @click="handleEdit(record)">编辑</a-button>
-        <a-button type="danger" @click="handleDelete(record)">删除</a-button> -->
+        <a-button type="primary" @click="handleEdit(record)">编辑</a-button>
+        <a-button type="primary" @click="handleEdit(record)">文件</a-button>
+        <a-button type="primary" @click="handleEdit(record)">控制台</a-button>
+        <a-button type="primary" @click="handleEdit(record)">监控</a-button>
+        <a-button type="danger" @click="handleDelete(record)">删除</a-button>
       </template>
     </a-table>
     <!-- 编辑区 -->
@@ -65,7 +68,7 @@
   </div>
 </template>
 <script>
-import { getJdkList } from '../../../../api/node-project';
+import { getJdkList, getRuningProjectInfo } from '../../../../api/node-project';
 import { getProjectList, getPorjectGroupList, getProjectAccessList, editProject } from '../../../../api/node-project';
 export default {
   props: {
@@ -96,8 +99,9 @@ export default {
         {title: '修改时间', dataIndex: 'modifyTime', width: 170, ellipsis: true, scopedSlots: {customRender: 'modifyTime'}},
         {title: '最后操作人', dataIndex: 'modifyUser', width: 150, ellipsis: true, scopedSlots: {customRender: 'modifyUser'}},
         {title: '运行状态', dataIndex: 'status', width: 100, ellipsis: true, scopedSlots: {customRender: 'status'}},
+        {title: 'PID', dataIndex: 'pid', width: 100, ellipsis: true, scopedSlots: {customRender: 'pid'}},
         {title: '端口', dataIndex: 'port', width: 100, ellipsis: true, scopedSlots: {customRender: 'port'}},
-        {title: '操作', dataIndex: 'operation', scopedSlots: {customRender: 'operation'}, width: 200}
+        {title: '操作', dataIndex: 'operation', scopedSlots: {customRender: 'operation'}, width: 450}
       ],
       rules: {
         id: [
@@ -150,17 +154,37 @@ export default {
       })
     },
     // 加载数据
-    loadData() {
+    async loadData() {
       this.loading = true;
       const params = {
-        nodeId: this.node.id
+        nodeId: this.node.id,
+        group: this.listQuery.group
       }
-      getProjectList(params).then(res => {
-        if (res.code === 200) {
-          this.list = res.data;
+      const res1 = await getProjectList(params);
+      if (res1.code === 200) {
+        this.list = res1.data;
+        const ids = [];
+        res1.data.forEach(element => {
+          ids.push(element.id);
+        });
+        // 如果 ids 有数据就继续请求
+        if (ids.length > 0) {
+          const tempParams = {
+            nodeId: this.node.id,
+            ids: JSON.stringify(ids)
+          }
+          const res2 = await getRuningProjectInfo(tempParams);
+          if (res2.code === 200) {
+            this.list.forEach(element => {
+              if (res2.data[element.id]) {
+                element.port = res2.data[element.id].port;
+                element.pid = res2.data[element.id].pid;
+              }
+            })
+          }
         }
-        this.loading = false;
-      })
+      }
+      this.loading = false;
     },
     // 筛选
     handleFilter() {
