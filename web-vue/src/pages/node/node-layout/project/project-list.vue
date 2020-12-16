@@ -13,7 +13,7 @@
       <a-switch slot="status" slot-scope="text" :checked="text" disabled checked-children="开" un-checked-children="关"/>
       <template slot="operation" slot-scope="text, record">
         <a-button type="primary" @click="handleEdit(record)">编辑</a-button>
-        <a-button type="primary" @click="handleEdit(record)">文件</a-button>
+        <a-button type="primary" @click="handleFile(record)">文件</a-button>
         <a-button type="primary" @click="handleEdit(record)">控制台</a-button>
         <a-button type="primary" @click="handleEdit(record)">监控</a-button>
         <a-button type="danger" @click="handleDelete(record)">删除</a-button>
@@ -23,10 +23,10 @@
     <a-modal v-model="editProjectVisible" width="800px" title="编辑项目" @ok="handleEditProjectOk" :maskClosable="false">
       <a-form-model ref="editProjectForm" :rules="rules" :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 14 }">
         <a-form-model-item label="项目 ID" prop="id">
-          <a-input v-model="temp.id" placeholder="创建之后不能修改"/>
+          <a-input v-model="temp.id" :disabled="temp.type === 'edit'" placeholder="创建之后不能修改"/>
         </a-form-model-item>
         <a-form-model-item label="项目名称" prop="name">
-          <a-input v-model="temp.id" placeholder="项目名称"/>
+          <a-input v-model="temp.name" placeholder="项目名称"/>
         </a-form-model-item>
         <a-form-model-item label="运行方式" prop="runMode">
           <a-select v-model="temp.runMode" placeholder="请选择运行方式">
@@ -63,18 +63,33 @@
         <a-form-model-item label="WebHooks" prop="token">
           <a-input v-model="temp.token" placeholder="关闭程序时自动请求,非必填，GET请求"/>
         </a-form-model-item>
+        <a-form-model-item v-show="temp.type === 'edit'" label="日志路径" prop="log">
+          <a-alert :message="temp.log" type="success" />
+        </a-form-model-item>
+        <a-form-model-item v-show="temp.type === 'edit'" label="运行命令" prop="runCommand">
+          <a-alert :message="temp.runCommand" type="success" />
+        </a-form-model-item>
       </a-form-model>
     </a-modal>
+    <!-- 项目文件 -->
+    <a-drawer :title="drawerTitle" placement="right" width="85vw"
+      :visible="drawerFileVisible" @close="onFileClose">
+      <!-- 项目文件组件 -->
+      <file v-if="drawerFileVisible" :node="node" :project="temp" />
+    </a-drawer>
   </div>
 </template>
 <script>
-import { getJdkList, getRuningProjectInfo } from '../../../../api/node-project';
-import { getProjectList, getPorjectGroupList, getProjectAccessList, editProject } from '../../../../api/node-project';
+import File from './project-file';
+import { getJdkList, getRuningProjectInfo, getProjectById, deleteProject, getProjectList, getPorjectGroupList, getProjectAccessList, editProject } from '../../../../api/node-project';
 export default {
   props: {
     node: {
       type: Object
     }
+  },
+  components: {
+    File
   },
   data() {
     return {
@@ -93,6 +108,8 @@ export default {
       list: [],
       temp: {},
       editProjectVisible: false,
+      drawerTitle: '',
+      drawerFileVisible: false,
       columns: [
         {title: '项目名称', dataIndex: 'name', width: 150, ellipsis: true, scopedSlots: {customRender: 'name'}},
         {title: '创建时间', dataIndex: 'createTime', width: 170, ellipsis: true, scopedSlots: {customRender: 'createTime'}},
@@ -205,8 +222,23 @@ export default {
     },
     // 添加
     handleAdd() {
-      this.temp = {};
+      this.temp = {type: 'add'};
       this.editProjectVisible = true;
+    },
+    // 编辑
+    handleEdit(record) {
+      const params = {
+        id: record.id,
+        nodeId: this.node.id
+      }
+      getProjectById(params).then(res => {
+        if (res.code === 200) {
+          this.temp = res.data;
+          this.temp.type = 'edit';
+          this.temp.tempGroup = record.group;
+          this.editProjectVisible = true;
+        }
+      })
     },
     // 提交
     handleEditProjectOk() {
@@ -226,7 +258,42 @@ export default {
           }
         })
       })
-    }
+    },
+    // 文件管理
+    handleFile(record) {
+      this.temp = Object.assign(record);
+      this.drawerTitle = `文件管理(${this.temp.name})`
+      this.drawerFileVisible = true;
+    },
+    // 关闭文件管理对话框
+    onFileClose() {
+      this.drawerFileVisible = false;
+    },
+    // 删除 
+    handleDelete(record) {
+      this.$confirm({
+        title: '系统提示',
+        content: '真的要删除项目么？',
+        okText: '确认',
+        cancelText: '取消',
+        onOk: () => {
+          // 删除
+          const params = {
+            nodeId: this.node.id,
+            id: record.id
+          }
+          deleteProject(params).then((res) => {
+            if (res.code === 200) {
+              this.$notification.success({
+                message: res.msg,
+                duration: 2
+              });
+              this.loadData();
+            }
+          })
+        }
+      });
+    },
   }
 }
 </script>

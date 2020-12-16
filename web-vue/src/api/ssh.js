@@ -130,6 +130,7 @@ export function downloadFile(params) {
     url: '/node/ssh/download.html',
     method: 'get',
     responseType: 'blob',
+    timeout: 0,
     params
   })
 }

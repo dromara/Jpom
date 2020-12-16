@@ -13,48 +13,34 @@
         <a-button type="primary" @click="handleUpload">上传文件</a-button>
         <a-button type="primary" @click="loadFileList()">刷新</a-button>
       </div>
-      <a-table :data-source="fileList" :loading="loading" :columns="columns" :scroll="{x: '80vw', y: tableHeight}" :pagination="false" bordered :rowKey="(record, index) => index">
-        <a-tooltip slot="name" slot-scope="text" placement="topLeft" :title="text">
+      <a-table :data-source="fileList" :loading="loading" :columns="columns" :scroll="{y: tableHeight}" :pagination="false" bordered :rowKey="(record, index) => index">
+        <a-tooltip slot="filename" slot-scope="text" placement="topLeft" :title="text">
           <span>{{ text }}</span>
         </a-tooltip>
-        <a-tooltip slot="dir" slot-scope="text" placement="topLeft" :title="text">
+        <a-tooltip slot="isDirectory" slot-scope="text" placement="topLeft" :title="text">
           <span>{{ text ? '目录' : '文件' }}</span>
         </a-tooltip>
-        <a-tooltip slot="size" slot-scope="text" placement="topLeft" :title="text">
+        <a-tooltip slot="fileSize" slot-scope="text" placement="topLeft" :title="text">
           <span>{{ text }}</span>
         </a-tooltip>
         <template slot="operation" slot-scope="text, record">
-          <a-button type="primary" @click="handlePreview(record)">查看</a-button>
           <a-button type="primary" @click="handleDownload(record)">下载</a-button>
           <a-button type="danger" @click="handleDelete(record)">删除</a-button>
         </template>
       </a-table>
-      <!-- 上传文件 -->
-      <a-modal v-model="uploadFileVisible" width="300px" title="上传文件" :footer="null" :maskClosable="true">
-        <a-upload :file-list="uploadFileList" :remove="handleRemove" :before-upload="beforeUpload" multiple>
-          <a-button><a-icon type="upload" />选择文件</a-button>
-        </a-upload>
-        <br/>
-        <a-button type="primary" :disabled="uploadFileList.length === 0" @click="startUpload">开始上传</a-button>
-      </a-modal>
-      <!-- Terminal -->
-      <a-modal v-model="terminalVisible" width="50%" title="Terminal" :footer="null" :maskClosable="false">
-        <terminal v-if="terminalVisible" :sshId="ssh.id" :nodeId="ssh.nodeModel.id" :tail="temp.path + temp.parentDir"/>
-      </a-modal>
     </a-layout-content>
   </a-layout>
 </template>
 <script>
-import { getRootFileList, getFileList, downloadFile, deleteFile, uploadFile } from '../../api/ssh';
-import Terminal from './terminal';
+import { getFileList, downloadProjectFile, deleteProjectFile } from '../../../../api/node-project';
 export default {
   props: {
-    ssh: {
+    node: {
+      type: Object
+    },
+    project: {
       type: Object
     }
-  },
-  components: {
-    Terminal
   },
   data() {
     return {
@@ -65,7 +51,6 @@ export default {
       tempNode: {},
       temp: {},
       uploadFileVisible: false,
-      terminalVisible: false,
       tableHeight: '80vh',
       replaceFields: {
         children: 'children',
@@ -73,11 +58,11 @@ export default {
         key: 'key'
       },
       columns: [
-        {title: '文件名称', dataIndex: 'title', width: 100, ellipsis: true, scopedSlots: {customRender: 'name'}},
-        {title: '文件类型', dataIndex: 'dir', width: 100, ellipsis: true, scopedSlots: {customRender: 'dir'}},
-        {title: '文件大小', dataIndex: 'size', width: 120, ellipsis: true, scopedSlots: {customRender: 'size'}},
+        {title: '文件名称', dataIndex: 'filename', width: 100, ellipsis: true, scopedSlots: {customRender: 'filename'}},
+        {title: '文件类型', dataIndex: 'isDirectory', width: 100, ellipsis: true, scopedSlots: {customRender: 'isDirectory'}},
+        {title: '文件大小', dataIndex: 'fileSize', width: 120, ellipsis: true, scopedSlots: {customRender: 'fileSize'}},
         {title: '修改时间', dataIndex: 'modifyTime', width: 170, ellipsis: true},
-        {title: '操作', dataIndex: 'operation', scopedSlots: {customRender: 'operation'}, width: 280}
+        {title: '操作', dataIndex: 'operation', scopedSlots: {customRender: 'operation'}, width: 120}
       ]
     }
   },
@@ -93,23 +78,12 @@ export default {
     // 加载数据
     loadData() {
       this.loading = true;
-      getRootFileList(this.ssh.id).then(res => {
-        if (res.code === 200) {
-          let tempList = [];
-          res.data.forEach(element => {
-            tempList.push({
-              key: element.path,
-              title: element.path,
-              path: element.path,
-              parentDir: '/',
-              isLeaf: false,
-              disabled: element.error ? true : false
-            })
-          });
-          this.treeList = tempList;
-        }
-        this.loading = false;
+      this.treeList.push({
+        key: '1',
+        title: '项目根目录',
+        path: ''
       })
+      this.loading = false;
     },
     // 上传文件
     handleUpload() {
@@ -122,39 +96,6 @@ export default {
       }
       this.uploadFileVisible = true;
     },
-    handleRemove(file) {
-      const index = this.uploadFileList.indexOf(file);
-      const newFileList = this.uploadFileList.slice();
-      newFileList.splice(index, 1);
-      this.uploadFileList = newFileList;
-    },
-    beforeUpload(file) {
-      this.uploadFileList = [...this.uploadFileList, file];
-      return false;
-    },
-    // 开始上传文件
-    startUpload() {
-      this.uploadFileList.forEach(file => {
-        const formData = new FormData();
-        formData.append('file', file);
-        formData.append('id', this.ssh.id);
-        formData.append('name', this.tempNode.parentDir);
-        formData.append('path', this.tempNode.path);
-        // 上传文件
-        uploadFile(formData).then(res => {
-          if (res.code === 200) {
-            this.$notification.success({
-              message: res.msg,
-              duration: 2
-            });
-          }
-        })
-      })
-      setTimeout(() => {
-        this.loadFileList();
-      }, 1000 * 3);
-      this.uploadFileList = [];
-    },
     // 选中目录
     onSelect(selectedKeys, {node}) {
       return new Promise(resolve => {
@@ -165,9 +106,9 @@ export default {
         }
         // 请求参数
         const params = {
-          id: this.ssh.id,
-          path: node.dataRef.path,
-          children: node.dataRef.parentDir
+          nodeId: this.node.id,
+          id: this.project.id,
+          path: node.dataRef.path
         }
         this.fileList = [];
         this.loading = true;
@@ -177,20 +118,16 @@ export default {
             let children = [];
             // 区分目录和文件
             res.data.forEach(element => {
-              if (element.dir) {
+              if (element.isDirectory) {
                 children.push({
                   key: element.id,
-                  title: element.title,
-                  name: element.name,
-                  path: node.dataRef.path,
-                  parentDir: element.parentDir,
-                  isLeaf: element.dir ? false : true,
-                  disabled: element.error ? true : false
+                  title: element.filename,
+                  path: `${node.dataRef.path}/${element.filename}`,
+                  isLeaf: element.isDirectory ? false : true
                 })
               } else {
                 // 设置文件表格
                 this.fileList.push({
-                  path: node.dataRef.path,
                   ...element
                 });
               }
@@ -215,9 +152,9 @@ export default {
       }
       // 请求参数
       const params = {
-        id: this.ssh.id,
-        path: this.tempNode.path,
-        children: this.tempNode.parentDir
+        nodeId: this.node.id,
+        id: this.project.id,
+        path: this.tempNode.path
       }
       this.fileList = [];
       this.loading = true;
@@ -226,10 +163,9 @@ export default {
         if (res.code === 200) {
           // 区分目录和文件
           res.data.forEach(element => {
-            if (!element.dir) {
+            if (!element.isDirectory) {
               // 设置文件表格
               this.fileList.push({
-                path: this.tempNode.path,
                 ...element
               });
             }
@@ -238,26 +174,26 @@ export default {
         this.loading = false;
       })
     },
-    // 查看
-    handlePreview(record) {
-      this.temp = Object.assign(record);
-      this.terminalVisible = true;
-    },
     // 下载
     handleDownload(record) {
+      this.$notification.info({
+        message: '正在下载，请稍等...',
+        duration: 5
+      });
       // 请求参数
       const params = {
-        id: this.ssh.id,
-        path: record.path,
-        name: record.parentDir
+        nodeId: this.node.id,
+        id: this.project.id,
+        levelName: record.levelName,
+        filename: record.filename
       }
       // 请求接口拿到 blob
-      downloadFile(params).then(blob => {
+      downloadProjectFile(params).then(blob => {
         const url = window.URL.createObjectURL(blob);
         let link = document.createElement('a');
         link.style.display = 'none';
         link.href = url;
-        link.setAttribute('download', record.name);
+        link.setAttribute('download', record.filename);
         document.body.appendChild(link);
         link.click();
       })
@@ -272,12 +208,13 @@ export default {
         onOk: () => {
           // 请求参数
           const params = {
-            id: this.ssh.id,
-            path: record.path,
-            name: record.parentDir
+            nodeId: this.node.id,
+            id: this.project.id,
+            levelName: record.levelName,
+            filename: record.filename
           }
           // 删除
-          deleteFile(params).then((res) => {
+          deleteProjectFile(params).then((res) => {
             if (res.code === 200) {
               this.$notification.success({
                 message: res.msg,

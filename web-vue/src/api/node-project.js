@@ -76,6 +76,21 @@ export function getRuningProjectInfo(params) {
 }
 
 /**
+ * 获取单个项目信息
+ * @param {
+ *  nodeId: 节点 ID
+ *  id: 项目 ID 
+ * } params 
+ */
+export function getProjectById(params) {
+  return axios({
+    url: '/node/manage/getProjectById',
+    method: 'post',
+    data: params
+  })
+}
+
+/**
  * 加载项目分组列表
  * @param {String} nodeId 节点 ID
  */
@@ -99,10 +114,89 @@ export function getProjectAccessList(nodeId) {
   })
 }
 
-// 编辑项目
+/**
+ * 编辑项目
+ * @param {
+ *  nodeId: 节点 ID
+ *  id: 项目 ID 
+ *  name: 项目名称
+ *  runMode: 运行方式
+ *  whitelistDirectory: 项目白名单路径
+ *  lib: 项目文件夹
+ *  group: 分组名称
+ *  jdkId: JDK
+ *  ...
+ * } params 
+ */
 export function editProject(params) {
   return axios({
     url: '/node/manage/saveProject',
+    method: 'post',
+    data: params
+  })
+}
+
+/**
+ * 删除项目
+ * @param {
+ *  nodeId: 节点 ID
+ *  id: 项目 ID 
+ * } params 
+ */
+export function deleteProject(params) {
+  return axios({
+    url: '/node/manage/deleteProject',
+    method: 'post',
+    data: params
+  })
+}
+
+/**
+ * 项目文件列表
+ * @param {
+ *  nodeId: 节点 ID
+ *  id: 项目 ID 
+ * } params 
+ */
+export function getFileList(params) {
+  return axios({
+    url: '/node/manage/file/getFileList',
+    method: 'post',
+    data: params
+  })
+}
+
+/**
+ * 下载项目文件
+ * @param {
+ *  nodeId: 节点 ID
+ *  id: 项目 ID
+ *  levelName: 文件 levelName
+ *  filename: 文件名称
+ * } params 
+ */
+export function downloadProjectFile(params) {
+  return axios({
+    url: '/node/manage/file/download',
+    method: 'get',
+    responseType: 'blob',
+    timeout: 0,
+    params
+  })
+}
+
+/**
+ * 删除文件
+ * @param {
+ *  nodeId: 节点 ID
+ *  id: 项目 ID
+ *  levelName: 文件 levelName
+ *  filename: 文件名称
+ * } params
+ */
+export function deleteProjectFile(params) {
+  return axios({
+    url: '/node/manage/file/deleteFile',
     method: 'post',
     data: params
   })
