@@ -11,7 +11,8 @@
     <a-layout-content class="file-content">
       <div ref="filter" class="filter">
         <a-button type="primary" @click="handleUpload">上传文件</a-button>
-        <a-button type="primary" @click="loadFileList()">刷新</a-button>
+        <a-button type="primary" @click="loadFileList">刷新</a-button>
+        <a-button type="danger" @click="clearFile">清空项目目录</a-button>
       </div>
       <a-table :data-source="fileList" :loading="loading" :columns="columns" :scroll="{y: tableHeight}" :pagination="false" bordered :rowKey="(record, index) => index">
         <a-tooltip slot="filename" slot-scope="text" placement="topLeft" :title="text">
@@ -28,11 +29,19 @@
           <a-button type="danger" @click="handleDelete(record)">删除</a-button>
         </template>
       </a-table>
+      <!-- 上传文件 -->
+      <a-modal v-model="uploadFileVisible" width="300px" title="上传项目文件" :footer="null" :maskClosable="true">
+        <a-upload :file-list="uploadFileList" :remove="handleRemove" :before-upload="beforeUpload" multiple>
+          <a-button><a-icon type="upload" />选择文件</a-button>
+        </a-upload>
+        <br/>
+        <a-button type="primary" :disabled="uploadFileList.length === 0" @click="startUpload">开始上传</a-button>
+      </a-modal>
     </a-layout-content>
   </a-layout>
 </template>
 <script>
-import { getFileList, downloadProjectFile, deleteProjectFile } from '../../../../api/node-project';
+import { getFileList, downloadProjectFile, deleteProjectFile, uploadProjectFile } from '../../../../api/node-project';
 export default {
   props: {
     node: {
@@ -95,6 +104,39 @@ export default {
         return;
       }
       this.uploadFileVisible = true;
+    },
+    handleRemove(file) {
+      const index = this.uploadFileList.indexOf(file);
+      const newFileList = this.uploadFileList.slice();
+      newFileList.splice(index, 1);
+      this.uploadFileList = newFileList;
+    },
+    beforeUpload(file) {
+      this.uploadFileList = [...this.uploadFileList, file];
+      return false;
+    },
+    // 开始上传文件
+    startUpload() {
+      this.uploadFileList.forEach(file => {
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('nodeId', this.node.id);
+        formData.append('id', this.project.id);
+        formData.append('levelName', this.tempNode.path);
+        // 上传文件
+        uploadProjectFile(formData).then(res => {
+          if (res.code === 200) {
+            this.$notification.success({
+              message: res.msg,
+              duration: 2
+            });
+          }
+        })
+      })
+      setTimeout(() => {
+        this.loadFileList();
+      }, 1000 * 3);
+      this.uploadFileList = [];
     },
     // 选中目录
     onSelect(selectedKeys, {node}) {
@@ -173,6 +215,33 @@ export default {
         }
         this.loading = false;
       })
+    },
+    // 清空文件
+    clearFile() {
+      this.$confirm({
+        title: '系统提示',
+        content: '真的要清空项目目录和文件么？',
+        okText: '确认',
+        cancelText: '取消',
+        onOk: () => {
+          // 请求参数
+          const params = {
+            nodeId: this.node.id,
+            id: this.project.id,
+            type: 'clear'
+          }
+          // 删除
+          deleteProjectFile(params).then((res) => {
+            if (res.code === 200) {
+              this.$notification.success({
+                message: res.msg,
+                duration: 2
+              });
+              this.loadFileList();
+            }
+          })
+        }
+      });
     },
     // 下载
     handleDownload(record) {

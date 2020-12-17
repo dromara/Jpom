@@ -186,12 +186,35 @@ export function downloadProjectFile(params) {
 }
 
 /**
+ * 上传项目文件
+ * @param {
+ *  file: 文件 multipart/form-data
+ *  nodeId: 节点 ID
+ *  id: 项目 ID
+ *  levelName: 目录地址
+ * } formData 
+ */
+export function uploadProjectFile(formData) {
+  return axios({
+    url: '/node/manage/file/upload',
+    headers: {
+      'Content-Type': 'multipart/form-data;charset=UTF-8'
+    },
+    method: 'post',
+    // 0 表示无超时时间
+    timeout: 0,
+    data: formData
+  })
+}
+
+/**
  * 删除文件
  * @param {
  *  nodeId: 节点 ID
  *  id: 项目 ID
  *  levelName: 文件 levelName
  *  filename: 文件名称
+ *  type: 操作类型 {clear: 清空, noclear: 不清空} 填入此参数可以忽略 levelName 和 filename 参数
  * } params
  */
 export function deleteProjectFile(params) {
