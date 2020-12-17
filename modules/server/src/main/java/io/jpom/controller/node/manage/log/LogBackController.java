@@ -50,6 +50,19 @@ public class LogBackController extends BaseServerController {
         return "node/manage/logBack";
     }
 
+    /**
+     * get log back list
+     * 日志备份列表接口
+     * @return
+     */
+    @RequestMapping(value = "log-back-list", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @ResponseBody
+    @Feature(method = MethodFeature.LOG)
+    public String logBackList() {
+        JSONObject jsonObject = NodeForward.requestData(getNode(), NodeUrl.Manage_Log_logBack, getRequest(), JSONObject.class);
+        return JsonMessage.getString(200, "success", jsonObject);
+    }
+
     @RequestMapping(value = "logBack_download", method = RequestMethod.GET)
     @ResponseBody
     @OptLog(UserOperateLogV1.OptType.DownloadProjectLogBack)

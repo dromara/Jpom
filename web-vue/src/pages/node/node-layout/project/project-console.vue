@@ -5,16 +5,37 @@
       <a-button :disabled="!project.status" type="danger" @click="restart">重启</a-button>
       <a-button :disabled="!project.status" type="danger" @click="stop">停止</a-button>
       <a-button type="primary" @click="handleDownload">导出日志</a-button>
-      <a-button type="primary" >备份列表</a-button>
+      <a-button type="primary" @click="handleLogBack">备份列表</a-button>
       <a-tag color="#87d068">文件大小: {{project.logSize}}</a-tag>
     </div>
+    <!-- console -->
     <div>
       <a-input class="console" v-model="logContext" readOnly type="textarea" style="resize: none;"/>
     </div>
+    <!-- 日志备份 -->
+    <a-modal v-model="lobbackVisible" title="日志备份列表" width="850px" :footer="null" :maskClosable="false">
+      <div ref="model-filter" class="filter">
+        <a-tag color="orange">控制台日志路径: {{project.log}}</a-tag>
+        <a-tag color="orange">控制台日志备份路径: {{project.logBack}}</a-tag>
+      </div>
+      <!-- 数据表格 -->
+      <a-table :data-source="logBackList" :loading="loading" :columns="columns" :scroll="{y: 400}" :pagination="false" bordered :rowKey="(record, index) => index">
+        <a-tooltip slot="filename" slot-scope="text" placement="topLeft" :title="text">
+          <span>{{ text }}</span>
+        </a-tooltip>
+        <a-tooltip slot="fileSize" slot-scope="text" placement="topLeft" :title="text">
+          <span>{{ text }}</span>
+        </a-tooltip>
+        <template slot="operation" slot-scope="text, record">
+          <a-button type="primary" @click="handleDownloadLogback(record)">下载</a-button>
+          <a-button type="danger" @click="handleDelete(record)">删除</a-button>
+        </template>
+      </a-table>
+    </a-modal>
   </div>
 </template>
 <script>
-import { getProjectLogSize, downloadProjectLogFile } from '../../../../api/node-project';
+import { getProjectLogSize, downloadProjectLogFile, getLogBackList, downloadProjectLogBackFile, deleteProjectLogBackFile } from '../../../../api/node-project';
 import { mapGetters } from 'vuex';
 export default {
   props: {
@@ -30,9 +51,18 @@ export default {
   },
   data() {
     return {
+      loading: false,
       socket: null,
       // 日志内容
       logContext: '',
+      lobbackVisible: false,
+      logBackList: [],
+      columns: [
+        {title: '文件名称', dataIndex: 'filename', width: 150, ellipsis: true, scopedSlots: {customRender: 'filename'}},
+        {title: '修改时间', dataIndex: 'modifyTime', width: 150, ellipsis: true, scopedSlots: {customRender: 'modifyTime'}},
+        {title: '文件大小', dataIndex: 'fileSize', width: 100, ellipsis: true, scopedSlots: {customRender: 'fileSize'}},
+        {title: '操作', dataIndex: 'operation', scopedSlots: {customRender: 'operation'}, width: 130}
+      ],
     }
   },
   computed: {
@@ -160,6 +190,75 @@ export default {
         document.body.appendChild(link);
         link.click();
       })
+    },
+    // 日志备份列表
+    handleLogBack() {
+      this.loading = true;
+      // 设置显示的数据
+      this.detailData = [];
+      this.lobbackVisible = true;
+      const params = {
+        nodeId: this.node.id,
+        id: this.project.id
+      }
+      getLogBackList(params).then(res => {
+        if (res.code === 200) {
+          this.logBackList = res.data.array;
+        }
+        this.loading = false;
+      })
+    },
+    // 下载日志备份文件
+    handleDownloadLogback(record) {
+      this.$notification.info({
+        message: '正在下载，请稍等...',
+        duration: 5
+      });
+      // 请求参数
+      const params = {
+        nodeId: this.node.id,
+        id: this.project.id,
+        copyId: this.copyId,
+        key: record.filename
+      }
+      // 请求接口拿到 blob
+      downloadProjectLogBackFile(params).then(blob => {
+        const url = window.URL.createObjectURL(blob);
+        let link = document.createElement('a');
+        link.style.display = 'none';
+        link.href = url;
+        link.setAttribute('download', record.filename);
+        document.body.appendChild(link);
+        link.click();
+      })
+    },
+    // 删除日志备份文件
+    handleDelete(record) {
+      this.$confirm({
+        title: '系统提示',
+        content: '真的要删除文件么？',
+        okText: '确认',
+        cancelText: '取消',
+        onOk: () => {
+          // 请求参数
+          const params = {
+            nodeId: this.node.id,
+            id: this.project.id,
+            copyId: this.copyId,
+            name: record.filename
+          }
+          // 删除
+          deleteProjectLogBackFile(params).then((res) => {
+            if (res.code === 200) {
+              this.$notification.success({
+                message: res.msg,
+                duration: 2
+              });
+              this.handleLogBack();
+            }
+          })
+        }
+      });
     }
   }
 }

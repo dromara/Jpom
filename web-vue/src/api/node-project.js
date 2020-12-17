@@ -285,3 +285,54 @@ export function downloadProjectLogFile(params) {
     params
   })
 }
+
+/**
+ * 项目日志备份列表
+ * @param {
+ *  nodeId: 节点 ID
+ *  id: 项目 ID
+ * } params 
+ */
+export function getLogBackList(params) {
+  return axios({
+    url: '/node/manage/log/log-back-list',
+    method: 'post',
+    data: params
+  })
+}
+
+/**
+ * 项目日志备份文件下载
+ * @param {
+ *  nodeId: 节点 ID
+ *  id: 项目 ID
+ *  copyId: copyId
+ *  key: 文件名
+ * } params 
+ */
+export function downloadProjectLogBackFile(params) {
+  return axios({
+    url: '/node/manage/log/logBack_download',
+    method: 'get',
+    responseType: 'blob',
+    timeout: 0,
+    params
+  })
+}
+
+/**
+ * 项目日志备份文件删除
+ * @param {
+ *  nodeId: 节点 ID
+ *  id: 项目 ID
+ *  copyId: copyId
+ *  name: 文件名
+ * } params 
+ */
+export function deleteProjectLogBackFile(params) {
+  return axios({
+    url: '/node/manage/log/logBack_delete',
+    method: 'post',
+    data: params
+  })
+}
