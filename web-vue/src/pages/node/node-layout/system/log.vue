@@ -13,7 +13,7 @@
         <a-button type="primary" @click="loadData">刷新</a-button>
       </div>
       <div>
-        <a-input v-model="logContext" readOnly type="textarea" style="resize: none;height: calc(100vh - 185px);"/>
+        <a-input class="console" v-model="logContext" readOnly type="textarea" style="resize: none;"/>
       </div>
     </a-layout-content>
     <!-- 对话框 -->
@@ -190,5 +190,16 @@ export default {
 }
 .ant-btn {
   margin: 10px;
+}
+.console {
+  padding: 5px;
+  color: #fff;
+  font-size: 14px;
+  background-color: black;
+  width: 100%;
+  height: calc(100vh - 185px);
+  overflow-y: auto;
+  border: 1px solid #e2e2e2;
+  border-radius: 5px 5px;
 }
 </style>

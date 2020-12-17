@@ -251,3 +251,37 @@ export function getRecoverData(params) {
     data: params
   })
 }
+
+/**
+ * 获取项目日志文件大小
+ * @param {
+ *  nodeId: 节点 ID
+ *  id: 项目 ID
+ *  copyId: copyId
+ * } params 
+ */
+export function getProjectLogSize(params) {
+  return axios({
+    url: '/node/manage/log/logSize',
+    method: 'post',
+    data: params
+  })
+}
+
+/**
+ * 下载项目日志文件
+ * @param {
+ *  nodeId: 节点 ID
+ *  id: 项目 ID
+ *  copyId: copyId
+ * } params 
+ */
+export function downloadProjectLogFile(params) {
+  return axios({
+    url: '/node/manage/log/export.html',
+    method: 'get',
+    responseType: 'blob',
+    timeout: 0,
+    params
+  })
+}

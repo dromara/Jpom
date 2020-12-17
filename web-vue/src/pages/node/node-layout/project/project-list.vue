@@ -17,7 +17,7 @@
       <template slot="operation" slot-scope="text, record">
         <a-button type="primary" @click="handleEdit(record)">编辑</a-button>
         <a-button type="primary" @click="handleFile(record)">文件</a-button>
-        <a-button type="primary" @click="handleEdit(record)">控制台</a-button>
+        <a-button type="primary" @click="handleConsole(record)">控制台</a-button>
         <a-button type="primary" @click="handleEdit(record)">监控</a-button>
         <a-button type="danger" @click="handleDelete(record)">删除</a-button>
       </template>
@@ -74,16 +74,21 @@
         </a-form-model-item>
       </a-form-model>
     </a-modal>
-    <!-- 项目文件 -->
+    <!-- 项目文件组件 -->
     <a-drawer :title="drawerTitle" placement="right" width="85vw"
       :visible="drawerFileVisible" @close="onFileClose">
-      <!-- 项目文件组件 -->
       <file v-if="drawerFileVisible" :node="node" :project="temp" />
+    </a-drawer>
+    <!-- 项目控制台组件 -->
+    <a-drawer :title="drawerTitle" placement="right" width="85vw"
+      :visible="drawerConsoleVisible" @close="onConsoleClose">
+      <console v-if="drawerConsoleVisible" :node="node" :project="temp" />
     </a-drawer>
   </div>
 </template>
 <script>
 import File from './project-file';
+import Console from './project-console';
 import { getJdkList, getRuningProjectInfo, getProjectById, deleteProject, getProjectList, getPorjectGroupList, getProjectAccessList, editProject } from '../../../../api/node-project';
 export default {
   props: {
@@ -92,7 +97,8 @@ export default {
     }
   },
   components: {
-    File
+    File,
+    Console
   },
   data() {
     return {
@@ -113,6 +119,7 @@ export default {
       editProjectVisible: false,
       drawerTitle: '',
       drawerFileVisible: false,
+      drawerConsoleVisible: false,
       columns: [
         {title: '项目名称', dataIndex: 'name', width: 150, ellipsis: true, scopedSlots: {customRender: 'name'}},
         {title: '创建时间', dataIndex: 'createTime', width: 170, ellipsis: true, scopedSlots: {customRender: 'createTime'}},
@@ -271,6 +278,17 @@ export default {
     // 关闭文件管理对话框
     onFileClose() {
       this.drawerFileVisible = false;
+    },
+    // 控制台
+    handleConsole(record) {
+      this.temp = Object.assign(record);
+      this.drawerTitle = `控制台(${this.temp.name})`;
+      this.drawerConsoleVisible = true;
+    },
+    // 关闭控制台
+    onConsoleClose() {
+      this.drawerConsoleVisible = false;
+      this.handleFilter();
     },
     // 删除 
     handleDelete(record) {
