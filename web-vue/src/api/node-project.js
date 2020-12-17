@@ -224,3 +224,30 @@ export function deleteProjectFile(params) {
     data: params
   })
 }
+
+/**
+ * 项目回收列表
+ * @param {String} nodeId 节点 ID
+ */
+export function getRecoverList(nodeId) {
+  return axios({
+    url: '/node/manage/recover/recover-list',
+    method: 'post',
+    data: {nodeId}
+  })
+}
+
+/**
+ * 获取回收项目信息
+ * @param {
+ *  nodeId: 节点 ID
+ *  id: 项目 ID
+ * } params
+ */
+export function getRecoverData(params) {
+  return axios({
+    url: '/node/manage/recover/data.json',
+    method: 'post',
+    data: params
+  })
+}

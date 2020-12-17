@@ -43,7 +43,7 @@ import { getNodeMenu } from '../../../api/menu';
 import Welcome from './welcome';
 import ProjectList from './project/project-list';
 import JdkList from './project/jdk-list';
-import Recover from './project/recover';
+import Recover from './project/recover-list';
 import Tomcat from './other/tomcat';
 import ScriptTemplate from './other/script-template';
 import NginxList from './nginx/list';

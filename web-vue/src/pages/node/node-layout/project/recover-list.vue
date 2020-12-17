@@ -1,0 +1,92 @@
+<template>
+  <div>
+    <!-- 数据表格 -->
+    <a-table :data-source="list" :loading="loading" :columns="columns" :scroll="{y: '100%'}" :pagination="false" bordered :rowKey="(record, index) => index">
+      <a-tooltip slot="name" slot-scope="text" placement="topLeft" :title="text">
+        <span>{{ text }}</span>
+      </a-tooltip>
+      <a-tooltip slot="id" slot-scope="text" placement="topLeft" :title="text">
+        <span>{{ text }}</span>
+      </a-tooltip>
+      <a-tooltip slot="group" slot-scope="text" placement="topLeft" :title="text">
+        <span>{{ text }}</span>
+      </a-tooltip>
+      <a-tooltip slot="lib" slot-scope="text" placement="topLeft" :title="text">
+        <span>{{ text }}</span>
+      </a-tooltip>
+      <a-tooltip slot="delUser" slot-scope="text" placement="topLeft" :title="text">
+        <span>{{ text }}</span>
+      </a-tooltip>
+      <template slot="operation" slot-scope="text, record">
+        <a-button type="primary" @click="handleDetail(record)">详情</a-button>
+      </template>
+    </a-table>
+    <!-- 详情区 -->
+    <a-modal v-model="detailVisible" width="600px" title="详情信息" :footer="null">
+      <a-list item-layout="horizontal" :data-source="detailData">
+        <a-list-item slot="renderItem" slot-scope="item">
+          <a-list-item-meta :description="item.description">
+            <h4 slot="title">{{ item.title }}</h4>
+          </a-list-item-meta>
+        </a-list-item>
+      </a-list>
+    </a-modal>
+  </div>
+</template>
+<script>
+import { getRecoverList } from '../../../../api/node-project';
+export default {
+  props: {
+    node: {
+      type: Object
+    }
+  },
+  data() {
+    return {
+      loading: false,
+      list: [],
+      temp: {},
+      detailData: [],
+      detailVisible: false,
+      columns: [
+        {title: '项目名称', dataIndex: 'projectInfoModel.name', width: 150, ellipsis: true, scopedSlots: {customRender: 'name'}},
+        {title: '项目 ID', dataIndex: 'projectInfoModel.id', width: 150, ellipsis: true, scopedSlots: {customRender: 'id'}},
+        {title: '分组', dataIndex: 'projectInfoModel.group', width: 150, ellipsis: true, scopedSlots: {customRender: 'group'}},
+        {title: '项目路径', dataIndex: 'projectInfoModel.lib', width: 150, ellipsis: true, scopedSlots: {customRender: 'lib'}},
+        {title: '删除时间', dataIndex: 'delTime', width: 170, ellipsis: true, scopedSlots: {customRender: 'delTime'}},
+        {title: '操作人', dataIndex: 'delUser', width: 150, ellipsis: true, scopedSlots: {customRender: 'delUser'}},
+        {title: '操作', dataIndex: 'operation', scopedSlots: {customRender: 'operation'}, width: 100}
+      ],
+    }
+  },
+  mounted() {
+    this.loadRecoverList();
+  },
+  methods: {
+    // 加载数据
+    loadRecoverList() {
+      this.loading = true;
+      getRecoverList(this.node.id).then(res => {
+        if (res.code === 200) {
+          this.list = res.data;
+        }
+        this.loading = false;
+      })
+    },
+    // 详情
+    handleDetail(record) {
+      this.detailData = [];
+      this.detailVisible = true;
+      this.temp = Object.assign(record);
+      this.detailData.push({title: '项目信息', description: `项目名称: ${this.temp.projectInfoModel.name} | 项目 ID: ${this.temp.projectInfoModel.id} | 分组: ${this.temp.projectInfoModel.group}`});
+      this.detailData.push({title: '项目目录', description: this.temp.projectInfoModel.lib});
+      this.detailData.push({title: 'mainClass', description: this.temp.projectInfoModel.mainClass});
+      this.detailData.push({title: '日志目录', description: this.temp.projectInfoModel.log});
+      this.detailData.push({title: 'JVM 参数', description: this.temp.projectInfoModel.jvm});
+      this.detailData.push({title: 'args 参数', description: this.temp.projectInfoModel.args});
+      this.detailData.push({title: 'WebHooks', description: this.temp.projectInfoModel.token});
+      this.detailData.push({title: 'Build 标识', description: this.temp.projectInfoModel.buildTag});
+    }
+  }
+}
+</script>
