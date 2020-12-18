@@ -129,10 +129,26 @@ export function getProjectAccessList(nodeId) {
  * } params 
  */
 export function editProject(params) {
+  const data = {
+    nodeId: params.nodeId,
+    id: params.id,
+    name: params.name,
+    group: params.group,
+    jdkId: params.jdkId,
+    runMode: params.runMode,
+    whitelistDirectory: params.whitelistDirectory,
+    lib: params.lib,
+    mainClass: params.mainClass,
+    javaExtDirsCp: params.javaExtDirsCp,
+    jvm: params.jvm,
+    args: params.args,
+    javaCopyIds: params.javaCopyIds,
+    token: params.token
+  }
   return axios({
     url: '/node/manage/saveProject',
     method: 'post',
-    data: params
+    data
   })
 }
 

@@ -45,9 +45,28 @@
           <a-input v-model="temp.lib" placeholder="项目存储的文件夹，jar 包存放的文件夹"/>
         </a-form-model-item>
         <a-form-model-item label="分组名称" prop="group">
-          <a-select v-model="temp.tempGroup" mode="tags" placeholder="可手动输入" @change="handleSelectChange">
-            <a-select-option v-for="group in groupList" :key="group">{{ group }}</a-select-option>
-          </a-select>
+          <a-row>
+            <a-col :span="18">
+              <a-select v-model="temp.group" placeholder="可手动输入">
+                <a-select-option v-for="group in groupList" :key="group">{{ group }}</a-select-option>
+              </a-select>
+            </a-col>
+            <a-col :span="6">
+              <a-popover v-model="addGroupvisible" title="添加分组" trigger="click">
+                <template slot="content">
+                  <a-row>
+                    <a-col :span="18">
+                      <a-input v-model="temp.tempGroup" placeholder="分组名称"/>
+                    </a-col>
+                    <a-col :span="6">
+                      <a-button type="primary" @click="handleAddGroup">确认</a-button>
+                    </a-col>
+                  </a-row>
+                </template>
+                <a-button type="primary" class="btn-add">添加分组</a-button>
+              </a-popover>
+            </a-col>
+          </a-row>
         </a-form-model-item>
         <a-form-model-item label="JDK" prop="jdkId">
           <a-select v-model="temp.jdkId" placeholder="请选择 JDK">
@@ -120,6 +139,7 @@ export default {
       drawerTitle: '',
       drawerFileVisible: false,
       drawerConsoleVisible: false,
+      addGroupvisible: false,
       columns: [
         {title: '项目名称', dataIndex: 'name', width: 150, ellipsis: true, scopedSlots: {customRender: 'name'}},
         {title: '创建时间', dataIndex: 'createTime', width: 170, ellipsis: true, scopedSlots: {customRender: 'createTime'}},
@@ -128,7 +148,7 @@ export default {
         {title: '运行状态', dataIndex: 'status', width: 100, ellipsis: true, scopedSlots: {customRender: 'status'}},
         {title: 'PID', dataIndex: 'pid', width: 100, ellipsis: true, scopedSlots: {customRender: 'pid'}},
         {title: '端口', dataIndex: 'port', width: 100, ellipsis: true, scopedSlots: {customRender: 'port'}},
-        {title: '操作', dataIndex: 'operation', scopedSlots: {customRender: 'operation'}, width: 450}
+        {title: '操作', dataIndex: 'operation', scopedSlots: {customRender: 'operation'}, width: 420}
       ],
       rules: {
         id: [
@@ -217,19 +237,6 @@ export default {
     handleFilter() {
       this.loadData();
     },
-    // 处理下拉框
-    handleSelectChange(value) {
-      if (value.length > 1) {
-        // 获取选中的值
-        const selectValue = value[value.length - 1];
-        // 添加到分组列表
-        if (this.groupList.indexOf(selectValue) === -1) {
-          this.groupList.push(selectValue);
-          this.temp.tempGroup = selectValue;
-          this.temp.group = selectValue;
-        }
-      }
-    },
     // 添加
     handleAdd() {
       this.temp = {type: 'add'};
@@ -245,7 +252,6 @@ export default {
         if (res.code === 200) {
           this.temp = res.data;
           this.temp.type = 'edit';
-          this.temp.tempGroup = record.group;
           this.editProjectVisible = true;
         }
       })
@@ -257,13 +263,18 @@ export default {
         if (!valid) {
           return false;
         }
-        editProject(this.temp).then(res => {
+        const params = {
+          ...this.temp,
+          nodeId: this.node.id
+        }
+        editProject(params).then(res => {
           if (res.code === 200) {
             this.$notification.success({
               message: res.msg,
               duration: 2
             });
             this.$refs['editProjectForm'].resetFields();
+            this.editProjectVisible = false;
             this.handleFilter();
           }
         })
@@ -315,6 +326,19 @@ export default {
         }
       });
     },
+    // 添加分组
+    handleAddGroup() {
+      // 添加到分组列表
+      if (this.groupList.indexOf(this.temp.tempGroup) === -1) {
+        this.groupList.push(this.temp.tempGroup);
+      }
+      this.temp.tempGroup = '';
+      this.$notification.success({
+        message: '添加成功',
+        duration: 2
+      });
+      this.addGroupvisible = false;
+    }
   }
 }
 </script>
@@ -328,5 +352,9 @@ export default {
 .filter-item {
   width: 150px;
   margin-right: 10px;
+}
+.btn-add {
+  margin-left: 10px;
+  margin-right: 0;
 }
 </style>

@@ -48,9 +48,28 @@
           <a-input v-model="temp.name" placeholder="节点名称"/>
         </a-form-model-item>
         <a-form-model-item label="分组名称" prop="group">
-          <a-select v-model="temp.tempGroup" mode="tags" placeholder="可手动输入" @change="handleSelectChange">
-            <a-select-option v-for="group in groupList" :key="group">{{ group }}</a-select-option>
-          </a-select>
+          <a-row>
+            <a-col :span="18">
+              <a-select v-model="temp.group" placeholder="可手动输入">
+                <a-select-option v-for="group in groupList" :key="group">{{ group }}</a-select-option>
+              </a-select>
+            </a-col>
+            <a-col :span="6">
+              <a-popover v-model="addGroupvisible" title="添加分组" trigger="click">
+                <template slot="content">
+                  <a-row>
+                    <a-col :span="18">
+                      <a-input v-model="temp.tempGroup" placeholder="分组名称"/>
+                    </a-col>
+                    <a-col :span="6">
+                      <a-button type="primary" @click="handleAddGroup">确认</a-button>
+                    </a-col>
+                  </a-row>
+                </template>
+                <a-button type="primary" class="btn-add">添加分组</a-button>
+              </a-popover>
+            </a-col>
+          </a-row>
         </a-form-model-item>
         <a-form-model-item label="绑定 SSH " prop="sshId">
           <a-select v-model="temp.sshId" placeholder="节点协议">
@@ -125,6 +144,7 @@ export default {
       editNodeVisible: false,
       drawerVisible: false,
       terminalVisible: false,
+      addGroupvisible: false,
       drawerTitle: '',
       columns: [
         {title: '节点 ID', dataIndex: 'id', width: 100, ellipsis: true, scopedSlots: {customRender: 'id'}},
@@ -215,19 +235,6 @@ export default {
         })
       }
     },
-    // 处理下拉框
-    handleSelectChange(value) {
-      if (value.length > 1) {
-        // 获取选中的值
-        const selectValue = value[value.length - 1];
-        // 添加到分组列表
-        if (this.groupList.indexOf(selectValue) === -1) {
-          this.groupList.push(selectValue);
-          this.temp.tempGroup = selectValue;
-          this.temp.group = selectValue;
-        }
-      }
-    },
     // 筛选
     handleFilter() {
       this.loadData();
@@ -251,7 +258,7 @@ export default {
     handleEdit(record) {
       this.temp = Object.assign(record);
       this.loadSshList();
-      this.temp.tempGroup = this.temp.group;
+      this.temp.tempGroup = '';
       this.editNodeVisible = true;
     },
     // 提交节点数据
@@ -306,6 +313,19 @@ export default {
     // 关闭抽屉层
     onClose() {
       this.drawerVisible = false;
+    },
+    // 添加分组
+    handleAddGroup() {
+      // 添加到分组列表
+      if (this.groupList.indexOf(this.temp.tempGroup) === -1) {
+        this.groupList.push(this.temp.tempGroup);
+      }
+      this.temp.tempGroup = '';
+      this.$notification.success({
+        message: '添加成功',
+        duration: 2
+      });
+      this.addGroupvisible = false;
     }
   }
 }
@@ -323,5 +343,9 @@ export default {
 }
 .node-table {
   overflow-x: auto;
+}
+.btn-add {
+  margin-left: 10px;
+  margin-right: 0;
 }
 </style>
