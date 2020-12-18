@@ -352,3 +352,20 @@ export function deleteProjectLogBackFile(params) {
     data: params
   })
 }
+
+/**
+ * 获取内存信息接口
+ * @param {
+ *  nodeId: 节点 ID
+ *  tag: 项目 ID
+ *  copyId: copyId
+ * } params
+ */
+export function getInternalData(params) {
+  return axios({
+    url: '/node/manage/getInternalData',
+    method: 'post',
+    timeout: 0,
+    data: params
+  })
+}

@@ -18,7 +18,7 @@
         <a-button type="primary" @click="handleEdit(record)">编辑</a-button>
         <a-button type="primary" @click="handleFile(record)">文件</a-button>
         <a-button type="primary" @click="handleConsole(record)">控制台</a-button>
-        <a-button type="primary" @click="handleEdit(record)">监控</a-button>
+        <a-button type="primary" @click="handleMonitor(record)">监控</a-button>
         <a-button type="danger" @click="handleDelete(record)">删除</a-button>
       </template>
     </a-table>
@@ -106,11 +106,17 @@
       :visible="drawerConsoleVisible" @close="onConsoleClose">
       <console v-if="drawerConsoleVisible" :node="node" :project="temp" />
     </a-drawer>
+    <!-- 项目监控组件 -->
+    <a-drawer :title="drawerTitle" placement="right" width="85vw"
+      :visible="drawerMonitorVisible" @close="onMonitorClose">
+      <monitor v-if="drawerMonitorVisible" :node="node" :project="temp" />
+    </a-drawer>
   </div>
 </template>
 <script>
 import File from './project-file';
 import Console from './project-console';
+import Monitor from './project-monitor';
 import { getJdkList, getRuningProjectInfo, getProjectById, deleteProject, getProjectList, getPorjectGroupList, getProjectAccessList, editProject } from '../../../../api/node-project';
 export default {
   props: {
@@ -120,7 +126,8 @@ export default {
   },
   components: {
     File,
-    Console
+    Console,
+    Monitor
   },
   data() {
     return {
@@ -142,6 +149,7 @@ export default {
       drawerTitle: '',
       drawerFileVisible: false,
       drawerConsoleVisible: false,
+      drawerMonitorVisible: false,
       addGroupvisible: false,
       columns: [
         {title: '项目名称', dataIndex: 'name', width: 150, ellipsis: true, scopedSlots: {customRender: 'name'}},
@@ -303,6 +311,16 @@ export default {
     onConsoleClose() {
       this.drawerConsoleVisible = false;
       this.handleFilter();
+    },
+    // 监控
+    handleMonitor(record) {
+      this.temp = Object.assign(record);
+      this.drawerTitle = `监控(${this.temp.name})`;
+      this.drawerMonitorVisible = true;
+    },
+    // 关闭监控
+    onMonitorClose() {
+      this.drawerMonitorVisible = false;
     },
     // 删除 
     handleDelete(record) {
