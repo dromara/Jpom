@@ -130,6 +130,7 @@ public class ProjectManageControl extends BaseServerController {
     }
 
     /**
+     * @author Hotstrip
      * get project by id
      * 查询单个项目信息
      * @param id
