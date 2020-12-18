@@ -76,6 +76,9 @@
         <a-form-model-item label="Main Class" prop="mainClass" v-show="temp.runMode !== 'Jar'">
           <a-input v-model="temp.mainClass" placeholder="程序运行的 main 类(jar 模式运行可以不填)"/>
         </a-form-model-item>
+        <a-form-model-item label="JavaExtDirsCp" prop="javaExtDirsCp" v-show="temp.runMode === 'JavaExtDirsCp'">
+          <a-input v-model="temp.javaExtDirsCp" placeholder="-Dext.dirs=xxx: -cp xx  填写【xxx:xx】"/>
+        </a-form-model-item>
         <a-form-model-item label="JVM 参数" prop="jvm">
           <a-textarea v-model="temp.jvm" :auto-size="{ minRows: 3, maxRows: 3 }" placeholder="jvm参数,非必填.如：-Xmin=512m -Xmax=512m"/>
         </a-form-model-item>
@@ -131,7 +134,7 @@ export default {
         'Jar',
         'JarWar',
         'JavaExtDirsCp',
-        'File'
+        // 'File'
       ],
       list: [],
       temp: {},
@@ -239,7 +242,7 @@ export default {
     },
     // 添加
     handleAdd() {
-      this.temp = {type: 'add'};
+      // this.temp = {type: 'add'};
       this.editProjectVisible = true;
     },
     // 编辑
@@ -251,7 +254,7 @@ export default {
       getProjectById(params).then(res => {
         if (res.code === 200) {
           this.temp = res.data;
-          this.temp.type = 'edit';
+          // this.temp.type = 'edit';
           this.editProjectVisible = true;
         }
       })
