@@ -26,7 +26,8 @@ module.exports = {
       },
       // http
       '/*': {
-        target: 'http://localhost:2122'
+        target: 'http://localhost:2122',
+        timeout: 10 * 60 * 1000
       }
     }
   },

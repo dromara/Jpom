@@ -70,7 +70,7 @@ export default {
         {title: '文件名称', dataIndex: 'filename', width: 100, ellipsis: true, scopedSlots: {customRender: 'filename'}},
         {title: '文件类型', dataIndex: 'isDirectory', width: 100, ellipsis: true, scopedSlots: {customRender: 'isDirectory'}},
         {title: '文件大小', dataIndex: 'fileSize', width: 120, ellipsis: true, scopedSlots: {customRender: 'fileSize'}},
-        {title: '修改时间', dataIndex: 'modifyTime', width: 170, ellipsis: true},
+        {title: '修改时间', dataIndex: 'modifyTime', width: 180, ellipsis: true},
         {title: '操作', dataIndex: 'operation', scopedSlots: {customRender: 'operation'}, width: 120}
       ]
     }

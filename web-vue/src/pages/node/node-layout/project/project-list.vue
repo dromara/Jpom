@@ -10,6 +10,9 @@
     </div>
     <!-- 数据表格 -->
     <a-table :data-source="list" :loading="loading" :columns="columns" :scroll="{x: '80vw', y: 500}" :pagination="false" bordered :rowKey="(record, index) => index">
+      <a-tooltip slot="name" slot-scope="text" placement="topLeft" :title="text">
+        <span>{{ text }}</span>
+      </a-tooltip>
       <a-switch slot="status" slot-scope="text" :checked="text" disabled checked-children="开" un-checked-children="关"/>
       <a-tooltip slot="port" slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
@@ -153,8 +156,8 @@ export default {
       addGroupvisible: false,
       columns: [
         {title: '项目名称', dataIndex: 'name', width: 150, ellipsis: true, scopedSlots: {customRender: 'name'}},
-        {title: '创建时间', dataIndex: 'createTime', width: 170, ellipsis: true, scopedSlots: {customRender: 'createTime'}},
-        {title: '修改时间', dataIndex: 'modifyTime', width: 170, ellipsis: true, scopedSlots: {customRender: 'modifyTime'}},
+        {title: '创建时间', dataIndex: 'createTime', width: 180, ellipsis: true, scopedSlots: {customRender: 'createTime'}},
+        {title: '修改时间', dataIndex: 'modifyTime', width: 180, ellipsis: true, scopedSlots: {customRender: 'modifyTime'}},
         {title: '最后操作人', dataIndex: 'modifyUser', width: 150, ellipsis: true, scopedSlots: {customRender: 'modifyUser'}},
         {title: '运行状态', dataIndex: 'status', width: 100, ellipsis: true, scopedSlots: {customRender: 'status'}},
         {title: 'PID', dataIndex: 'pid', width: 100, ellipsis: true, scopedSlots: {customRender: 'pid'}},

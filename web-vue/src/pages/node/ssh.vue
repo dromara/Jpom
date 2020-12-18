@@ -124,11 +124,11 @@ export default {
       drawerVisible: false,
       terminalVisible: false,
       columns: [
-        {title: '名称', dataIndex: 'name'},
+        {title: '名称', dataIndex: 'name', width: 150},
         {title: '关联节点', dataIndex: 'nodeId', scopedSlots: {customRender: 'nodeId'}, width: 160},
-        {title: 'Host', dataIndex: 'host'},
-        {title: 'Port', dataIndex: 'port'},
-        {title: 'User', dataIndex: 'user'},
+        {title: 'Host', dataIndex: 'host', width: 150},
+        {title: 'Port', dataIndex: 'port', width: 80},
+        {title: 'User', dataIndex: 'user', width: 120},
         {title: '操作', dataIndex: 'operation', scopedSlots: {customRender: 'operation'}, width: 330}
       ],
       options: [

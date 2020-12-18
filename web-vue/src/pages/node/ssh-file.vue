@@ -76,7 +76,7 @@ export default {
         {title: '文件名称', dataIndex: 'title', width: 100, ellipsis: true, scopedSlots: {customRender: 'name'}},
         {title: '文件类型', dataIndex: 'dir', width: 100, ellipsis: true, scopedSlots: {customRender: 'dir'}},
         {title: '文件大小', dataIndex: 'size', width: 120, ellipsis: true, scopedSlots: {customRender: 'size'}},
-        {title: '修改时间', dataIndex: 'modifyTime', width: 170, ellipsis: true},
+        {title: '修改时间', dataIndex: 'modifyTime', width: 180, ellipsis: true},
         {title: '操作', dataIndex: 'operation', scopedSlots: {customRender: 'operation'}, width: 280}
       ]
     }

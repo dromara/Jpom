@@ -6,24 +6,12 @@
       <a-button type="danger" @click="checkThread">查看线程</a-button>
     </div>
     <!-- 系统内存 -->
-    <a-table :data-source="list" :loading="loading" :columns="columns" :scroll="{y: '100%'}" :pagination="false" bordered :rowKey="(record, index) => index">
-      <a-tooltip slot="name" slot-scope="text" placement="topLeft" :title="text">
-        <span>{{ text }}</span>
-      </a-tooltip>
-      <a-tooltip slot="id" slot-scope="text" placement="topLeft" :title="text">
-        <span>{{ text }}</span>
-      </a-tooltip>
-      <a-tooltip slot="group" slot-scope="text" placement="topLeft" :title="text">
-        <span>{{ text }}</span>
-      </a-tooltip>
-      <a-tooltip slot="lib" slot-scope="text" placement="topLeft" :title="text">
-        <span>{{ text }}</span>
-      </a-tooltip>
-      <a-tooltip slot="delUser" slot-scope="text" placement="topLeft" :title="text">
-        <span>{{ text }}</span>
-      </a-tooltip>
+    <a-table :data-source="list1" :loading="loading" :columns="columns1" :scroll="{x: '80vh'}" :pagination="false" bordered :rowKey="(record, index) => index">
     </a-table>
+    <br/>
     <!-- 端口信息 -->
+    <a-table :data-source="list2" :loading="loading" :columns="columns2" :scroll="{x: '80vh'}" :pagination="false" bordered :rowKey="(record, index) => index">
+    </a-table>
   </div>
 </template>
 <script>
@@ -43,15 +31,30 @@ export default {
   data() {
     return {
       loading: false,
-      list: [],
-      columns: [
-        {title: '项目名称', dataIndex: 'name', width: 150, ellipsis: true, scopedSlots: {customRender: 'name'}},
-        {title: '创建时间', dataIndex: 'createTime', width: 170, ellipsis: true, scopedSlots: {customRender: 'createTime'}},
-        {title: '修改时间', dataIndex: 'modifyTime', width: 170, ellipsis: true, scopedSlots: {customRender: 'modifyTime'}},
-        {title: '最后操作人', dataIndex: 'modifyUser', width: 150, ellipsis: true, scopedSlots: {customRender: 'modifyUser'}},
-        {title: '运行状态', dataIndex: 'status', width: 100, ellipsis: true, scopedSlots: {customRender: 'status'}},
-        {title: 'PID', dataIndex: 'pid', width: 100, ellipsis: true, scopedSlots: {customRender: 'pid'}},
-        {title: '端口', dataIndex: 'port', width: 100, ellipsis: true, scopedSlots: {customRender: 'port'}}
+      list1: [],
+      list2: [],
+      columns1: [
+        {title: '进程 ID', dataIndex: 'pid', width: 150, ellipsis: true, scopedSlots: {customRender: 'pid'}},
+        {title: '进程名称', dataIndex: 'command', width: 180, ellipsis: true, scopedSlots: {customRender: 'command'}},
+        {title: '所有者', dataIndex: 'user', width: 180, ellipsis: true, scopedSlots: {customRender: 'user'}},
+        {title: '使用物理内存', dataIndex: 'res', width: 150, ellipsis: true, scopedSlots: {customRender: 'res'}},
+        {title: '进程状态', dataIndex: 'status', width: 100, ellipsis: true, scopedSlots: {customRender: 'status'}},
+        {title: '占用 CPU', dataIndex: 'cpu', width: 100, ellipsis: true, scopedSlots: {customRender: 'cpu'}},
+        {title: '占用物理内存', dataIndex: 'mem', width: 150, ellipsis: true, scopedSlots: {customRender: 'mem'}},
+        {title: '时间总计', dataIndex: 'time', width: 100, ellipsis: true, scopedSlots: {customRender: 'time'}},
+        {title: '优先级', dataIndex: 'pr', width: 100, ellipsis: true, scopedSlots: {customRender: 'pr'}},
+        {title: 'nice 值', dataIndex: 'ni', width: 100, ellipsis: true, scopedSlots: {customRender: 'ni'}},
+        {title: '使用虚拟内存', dataIndex: 'virt', width: 150, ellipsis: true, scopedSlots: {customRender: 'virt'}},
+        {title: '共享内存', dataIndex: 'shr', width: 100, ellipsis: true, scopedSlots: {customRender: 'shr'}}
+      ],
+      columns2: [
+        {title: '进程 ID/项目名称', dataIndex: 'name', width: 150, ellipsis: true, scopedSlots: {customRender: 'name'}},
+        {title: '连接协议', dataIndex: 'protocol', width: 180, ellipsis: true, scopedSlots: {customRender: 'protocol'}},
+        {title: '本地地址', dataIndex: 'local', width: 180, ellipsis: true, scopedSlots: {customRender: 'local'}},
+        {title: '远程地址', dataIndex: 'foreign', width: 150, ellipsis: true, scopedSlots: {customRender: 'foreign'}},
+        {title: '状态', dataIndex: 'status', width: 100, ellipsis: true, scopedSlots: {customRender: 'status'}},
+        {title: '接收队列', dataIndex: 'receive', width: 100, ellipsis: true, scopedSlots: {customRender: 'receive'}},
+        {title: '发送队列', dataIndex: 'send', width: 100, ellipsis: true, scopedSlots: {customRender: 'send'}}
       ],
     }
   },
@@ -68,7 +71,10 @@ export default {
         copyId: this.copyId
       }
       getInternalData(params).then(res => {
-        console.log(res);
+        if (res.code === 200) {
+          this.list1.push(res.data.process);
+          this.list2 = res.data.netstat;
+        }
         this.loading = false;
       })
     },

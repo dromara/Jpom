@@ -71,7 +71,7 @@ export default {
         {title: '执行结果', dataIndex: 'optStatusMsg', width: 100},
         {title: '操作时间', dataIndex: 'optTime', customRender: (text) => {
           return parseTime(text);
-        }, width: 170},
+        }, width: 180},
         {title: '操作', dataIndex: 'operation', scopedSlots: {customRender: 'operation'}, width: 100, fixed: 'right'}
       ]
     }

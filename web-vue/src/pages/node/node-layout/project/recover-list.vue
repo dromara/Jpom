@@ -53,7 +53,7 @@ export default {
         {title: '项目 ID', dataIndex: 'projectInfoModel.id', width: 150, ellipsis: true, scopedSlots: {customRender: 'id'}},
         {title: '分组', dataIndex: 'projectInfoModel.group', width: 150, ellipsis: true, scopedSlots: {customRender: 'group'}},
         {title: '项目路径', dataIndex: 'projectInfoModel.lib', width: 150, ellipsis: true, scopedSlots: {customRender: 'lib'}},
-        {title: '删除时间', dataIndex: 'delTime', width: 170, ellipsis: true, scopedSlots: {customRender: 'delTime'}},
+        {title: '删除时间', dataIndex: 'delTime', width: 180, ellipsis: true, scopedSlots: {customRender: 'delTime'}},
         {title: '操作人', dataIndex: 'delUser', width: 150, ellipsis: true, scopedSlots: {customRender: 'delUser'}},
         {title: '操作', dataIndex: 'operation', scopedSlots: {customRender: 'operation'}, width: 100}
       ],
