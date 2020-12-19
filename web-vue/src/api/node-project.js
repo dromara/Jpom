@@ -157,6 +157,7 @@ export function editProject(params) {
  * @param {
  *  nodeId: 节点 ID
  *  id: 项目 ID 
+ *  copyId: copyId
  * } params 
  */
 export function deleteProject(params) {
@@ -420,4 +421,17 @@ export function exportRam(params) {
   })
 }
 
-
+/**
+ * 加载副本集
+ * @param {
+ *  nodeId: 节点 ID
+ *  id: 项目 ID
+ * } params 
+ */
+export function getProjectReplicaList(params) {
+  return axios({
+    url: '/node/manage/project_copy_list',
+    method: 'post',
+    data: params
+  })
+}

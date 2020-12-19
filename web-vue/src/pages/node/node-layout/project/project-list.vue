@@ -22,6 +22,7 @@
         <a-button type="primary" @click="handleFile(record)">文件</a-button>
         <a-button type="primary" @click="handleConsole(record)">控制台</a-button>
         <a-button type="primary" @click="handleMonitor(record)">监控</a-button>
+        <a-button type="primary" @click="handleReplica(record)">副本集</a-button>
         <a-button type="danger" @click="handleDelete(record)">删除</a-button>
       </template>
     </a-table>
@@ -114,12 +115,18 @@
       :visible="drawerMonitorVisible" @close="onMonitorClose">
       <monitor v-if="drawerMonitorVisible" :node="node" :project="temp" />
     </a-drawer>
+    <!-- 项目副本集组件 -->
+    <a-drawer :title="drawerTitle" placement="right" width="85vw"
+      :visible="drawerReplicaVisible" @close="onReplicaClose">
+      <replica v-if="drawerReplicaVisible" :node="node" :project="temp" />
+    </a-drawer>
   </div>
 </template>
 <script>
 import File from './project-file';
 import Console from './project-console';
 import Monitor from './project-monitor';
+import Replica from  './project-replica';
 import { getJdkList, getRuningProjectInfo, getProjectById, deleteProject, getProjectList, getPorjectGroupList, getProjectAccessList, editProject } from '../../../../api/node-project';
 export default {
   props: {
@@ -130,7 +137,8 @@ export default {
   components: {
     File,
     Console,
-    Monitor
+    Monitor,
+    Replica
   },
   data() {
     return {
@@ -153,6 +161,7 @@ export default {
       drawerFileVisible: false,
       drawerConsoleVisible: false,
       drawerMonitorVisible: false,
+      drawerReplicaVisible: false,
       addGroupvisible: false,
       columns: [
         {title: '项目名称', dataIndex: 'name', width: 150, ellipsis: true, scopedSlots: {customRender: 'name'}},
@@ -162,7 +171,7 @@ export default {
         {title: '运行状态', dataIndex: 'status', width: 100, ellipsis: true, scopedSlots: {customRender: 'status'}},
         {title: 'PID', dataIndex: 'pid', width: 100, ellipsis: true, scopedSlots: {customRender: 'pid'}},
         {title: '端口', dataIndex: 'port', width: 100, ellipsis: true, scopedSlots: {customRender: 'port'}},
-        {title: '操作', dataIndex: 'operation', scopedSlots: {customRender: 'operation'}, width: 420}
+        {title: '操作', dataIndex: 'operation', scopedSlots: {customRender: 'operation'}, width: 500}
       ],
       rules: {
         id: [
@@ -324,6 +333,16 @@ export default {
     // 关闭监控
     onMonitorClose() {
       this.drawerMonitorVisible = false;
+    },
+    // 副本集
+    handleReplica(record) {
+      this.temp = Object.assign(record);
+      this.drawerTitle = `副本集(${this.temp.name})`;
+      this.drawerReplicaVisible = true;
+    },
+    // 关闭副本集
+    onReplicaClose() {
+      this.drawerReplicaVisible = false;
     },
     // 删除 
     handleDelete(record) {

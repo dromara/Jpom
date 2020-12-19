@@ -1,12 +1,21 @@
 <template>
   <div>
     <div ref="filter" class="filter">
-      <a-button :disabled="project.status" type="primary" @click="start">启动</a-button>
-      <a-button :disabled="!project.status" type="danger" @click="restart">重启</a-button>
-      <a-button :disabled="!project.status" type="danger" @click="stop">停止</a-button>
-      <a-button type="primary" @click="handleDownload">导出日志</a-button>
-      <a-button type="primary" @click="handleLogBack">备份列表</a-button>
-      <a-tag color="#87d068">文件大小: {{project.logSize}}</a-tag>
+      <template v-if="copyId">
+        <a-button :disabled="replica.status" type="primary" @click="start">启动</a-button>
+        <a-button :disabled="!replica.status" type="danger" @click="restart">重启</a-button>
+        <a-button :disabled="!replica.status" type="danger" @click="stop">停止</a-button>
+        <a-button type="primary" @click="handleDownload">导出日志</a-button>
+        <a-tag color="#87d068">文件大小: {{project.logSize}}</a-tag>
+      </template>
+      <template v-else>
+        <a-button :disabled="project.status" type="primary" @click="start">启动</a-button>
+        <a-button :disabled="!project.status" type="danger" @click="restart">重启</a-button>
+        <a-button :disabled="!project.status" type="danger" @click="stop">停止</a-button>
+        <a-button type="primary" @click="handleDownload">导出日志</a-button>
+        <a-button type="primary" @click="handleLogBack">备份列表</a-button>
+        <a-tag color="#87d068">文件大小: {{project.logSize}}</a-tag>
+      </template>
     </div>
     <!-- console -->
     <div>
@@ -43,6 +52,9 @@ export default {
       type: Object
     },
     project: {
+      type: Object
+    },
+    replica: {
       type: Object
     },
     copyId: {
@@ -103,10 +115,18 @@ export default {
             });
             // 如果操作是启动或者停止
             if (res.op === 'stop') {
-              this.project.status = false;
+              if (this.copyId) {
+                this.replica.status = false;
+              } else {
+                this.project.status = false;
+              }
             }
             if (res.op === 'start') {
-              this.project.status = true;
+              if (this.copyId) {
+                this.replica.status = true;
+              } else {
+                this.project.status = true;
+              }
             }
           } else {
             this.$notification.error({
@@ -186,7 +206,11 @@ export default {
         let link = document.createElement('a');
         link.style.display = 'none';
         link.href = url;
-        link.setAttribute('download', this.project.log);
+        if (this.copyId) {
+          link.setAttribute('download', `${this.copyId}.log`);
+        } else {
+          link.setAttribute('download', this.project.log);
+        }
         document.body.appendChild(link);
         link.click();
       })
