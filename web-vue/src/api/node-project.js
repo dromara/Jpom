@@ -369,3 +369,55 @@ export function getInternalData(params) {
     data: params
   })
 }
+
+/**
+ * 查看线程
+ * @param {
+ *  nodeId: 节点 ID
+ * } params 
+ */
+export function getThreadInfo(params) {
+  return axios({
+    url: '/node/manage/threadInfos',
+    method: 'post',
+    data: params
+  })
+}
+
+/**
+ * 导出堆栈信息
+ * @param {
+ *  nodeId: 节点 ID
+ *  tag: 项目 ID
+ *  copyId: copyId
+ * } params
+ */
+export function exportStack(params) {
+  return axios({
+    url: '/node/manage/stack',
+    method: 'get',
+    responseType: 'blob',
+    timeout: 0,
+    params
+  })
+}
+
+/**
+ * 导出内存信息
+ * @param {
+ *  nodeId: 节点 ID
+ *  tag: 项目 ID
+ *  copyId: copyId
+ * } params
+ */
+export function exportRam(params) {
+  return axios({
+    url: '/node/manage/ram',
+    method: 'get',
+    responseType: 'blob',
+    timeout: 0,
+    params
+  })
+}
+
+
