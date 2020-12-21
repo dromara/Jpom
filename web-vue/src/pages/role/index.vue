@@ -7,7 +7,7 @@
     <!-- 数据表格 -->
     <a-table :data-source="list" :loading="loading" :columns="columns" :pagination="false" bordered :rowKey="(record, index) => index">
       <template slot="operation" slot-scope="text, record">
-        <a-button type="primary">动态</a-button>
+        <a-button type="primary" @click="handlePermission(record)">动态</a-button>
         <a-button type="primary" @click="handleEdit(record)">编辑</a-button>
         <a-button type="danger" @click="handleDelete(record)">删除</a-button>
       </template>
@@ -189,6 +189,10 @@ export default {
           })
         }
       });
+    },
+    // 分配权限
+    handlePermission(record) {
+      console.log(record);
     }
   }
 }

@@ -20,6 +20,11 @@ const children = [
     component: () => import('../pages/node/ssh')
   },
   {
+    path: '/monitor/list',
+    name: 'monitor-list',
+    component: () => import('../pages/monitor/list')
+  },
+  {
     path: '/user/list',
     name: 'user-list',
     component: () => import('../pages/user')

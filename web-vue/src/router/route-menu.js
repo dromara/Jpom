@@ -6,6 +6,7 @@
 const routeMenuMap = {
   'nodeList': '/node/list',
   'sshList': '/node/ssh',
+  'monitor': '/monitor/list',
   'user': '/user/list',
   'roleList': '/role/list',
   'user_log': '/operation/log',
