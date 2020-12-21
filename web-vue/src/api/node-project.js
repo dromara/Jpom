@@ -127,8 +127,13 @@ export function getProjectAccessList(nodeId) {
  *  jdkId: JDK
  *  ...
  * } params 
+ * @param {
+ *  javaCopyIds: 副本 xx1,xx2
+ *  jvm_xxn: 副本 n JVM 参数
+ *  args_xxn: 副本 n args 参数
+ * } replicaParams
  */
-export function editProject(params) {
+export function editProject(params, replicaParams) {
   const data = {
     nodeId: params.nodeId,
     id: params.id,
@@ -143,7 +148,8 @@ export function editProject(params) {
     jvm: params.jvm,
     args: params.args,
     javaCopyIds: params.javaCopyIds,
-    token: params.token
+    token: params.token,
+    ...replicaParams
   }
   return axios({
     url: '/node/manage/saveProject',

@@ -86,8 +86,22 @@
         <a-form-model-item label="JVM 参数" prop="jvm">
           <a-textarea v-model="temp.jvm" :auto-size="{ minRows: 3, maxRows: 3 }" placeholder="jvm参数,非必填.如：-Xmin=512m -Xmax=512m"/>
         </a-form-model-item>
-        <a-form-model-item label="args参数" prop="args">
+        <a-form-model-item label="args 参数" prop="args">
           <a-textarea v-model="temp.args" :auto-size="{ minRows: 3, maxRows: 3 }" placeholder="Main 函数 args 参数，非必填. 如：--service.port=8080"/>
+        </a-form-model-item>
+        <!-- 副本信息 -->
+        <a-row v-for="replica in temp.javaCopyItemList" :key="replica.id">
+          <a-form-model-item :label="`副本 ${replica.id} JVM 参数`" prop="jvm">
+            <a-textarea v-model="replica.jvm" :auto-size="{ minRows: 3, maxRows: 3 }" class="replica-area" placeholder="jvm参数,非必填.如：-Xmin=512m -Xmax=512m"/>
+          </a-form-model-item>
+          <a-form-model-item :label="`副本 ${replica.id} args 参数`" prop="args">
+            <a-textarea v-model="replica.args" :auto-size="{ minRows: 3, maxRows: 3 }" class="replica-area" placeholder="Main 函数 args 参数，非必填. 如：--service.port=8080"/>
+          </a-form-model-item>
+          <a-button :disabled="!replica.deleteAble" type="danger" @click="handleDeleteReplica(replica)" class="replica-btn-del">删除</a-button>
+        </a-row>
+        <!-- 添加副本 -->
+        <a-form-model-item label="操作" >
+          <a-button type="primary" @click="handleAddReplica">添加副本</a-button>
         </a-form-model-item>
         <a-form-model-item label="WebHooks" prop="token">
           <a-input v-model="temp.token" placeholder="关闭程序时自动请求,非必填，GET请求"/>
@@ -279,6 +293,29 @@ export default {
         }
       })
     },
+    // 添加副本
+    handleAddReplica() {
+      const $chars = 'ABCDEFGHJKMNPQRSTWXYZ0123456789';
+      /****默认去掉了容易混淆的字符oOLl,9gq,Vv,Uu,I1****/
+      const maxPos = $chars.length;
+      let repliccaId = '';
+      for (let i = 0; i < 2; i++) {
+        repliccaId += $chars.charAt(Math.floor(Math.random() * maxPos));
+      }
+      this.temp.javaCopyItemList.push({
+        id: repliccaId,
+        jvm: '',
+        args: '',
+        deleteAble: true
+      })
+    },
+    // 移除副本
+    handleDeleteReplica(reeplica) {
+      const index = this.temp.javaCopyItemList.findIndex(element => element.id === reeplica.id);
+      const newList = this.temp.javaCopyItemList.slice();
+      newList.splice(index, 1);
+      this.temp.javaCopyItemList = newList;
+    },
     // 提交
     handleEditProjectOk() {
       // 检验表单
@@ -290,7 +327,16 @@ export default {
           ...this.temp,
           nodeId: this.node.id
         }
-        editProject(params).then(res => {
+        // 额外参数
+        const replicaParams = {};
+        let javaCopyIds = '';
+        this.temp.javaCopyItemList.forEach(element => {
+          javaCopyIds += `${element.id},`;
+          replicaParams[`jvm_${element.id}`] = element.jvm;
+          replicaParams[`args_${element.id}`] = element.args;
+        })
+        replicaParams['javaCopyIds'] = javaCopyIds.substring(0, javaCopyIds.length-1);
+        editProject(params, replicaParams).then(res => {
           if (res.code === 200) {
             this.$notification.success({
               message: res.msg,
@@ -399,5 +445,13 @@ export default {
 .btn-add {
   margin-left: 10px;
   margin-right: 0;
+}
+.replica-area {
+  width: 340px;
+}
+.replica-btn-del {
+  position: absolute;
+  right: 120px;
+  top: 74px;
 }
 </style>
