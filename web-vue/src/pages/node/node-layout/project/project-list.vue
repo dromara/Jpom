@@ -97,7 +97,9 @@
           <a-form-model-item :label="`副本 ${replica.id} args 参数`" prop="args">
             <a-textarea v-model="replica.args" :auto-size="{ minRows: 3, maxRows: 3 }" class="replica-area" placeholder="Main 函数 args 参数，非必填. 如：--service.port=8080"/>
           </a-form-model-item>
-          <a-button :disabled="!replica.deleteAble" type="danger" @click="handleDeleteReplica(replica)" class="replica-btn-del">删除</a-button>
+          <a-tooltip placement="topLeft" title="已经添加成功的副本需要在副本管理页面去删除" class="replica-btn-del">
+            <a-button :disabled="!replica.deleteAble" type="danger" @click="handleDeleteReplica(replica)">删除</a-button>
+          </a-tooltip>
         </a-row>
         <!-- 添加副本 -->
         <a-form-model-item label="操作" >
@@ -276,7 +278,7 @@ export default {
     },
     // 添加
     handleAdd() {
-      // this.temp = {type: 'add'};
+      this.temp = {type: 'add'};
       this.editProjectVisible = true;
     },
     // 编辑
@@ -288,7 +290,7 @@ export default {
       getProjectById(params).then(res => {
         if (res.code === 200) {
           this.temp = res.data;
-          // this.temp.type = 'edit';
+          this.temp.type = 'edit';
           this.editProjectVisible = true;
         }
       })
