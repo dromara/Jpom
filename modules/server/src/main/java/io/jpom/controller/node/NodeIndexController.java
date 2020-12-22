@@ -126,4 +126,17 @@ public class NodeIndexController extends BaseServerController {
         jsonArray.add(jsonObject);
         return JsonMessage.getString(200, "", jsonArray);
     }
+
+    /**
+     * @author Hotstrip
+     * load node project list
+     * 加载节点项目列表
+     * @return
+     */
+    @RequestMapping(value = "node_project_list", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @ResponseBody
+    public String nodeProjectList() {
+        List<NodeModel> nodeModels = nodeService.listAndProject();
+        return JsonMessage.getString(200, "success", nodeModels);
+    }
 }

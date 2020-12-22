@@ -263,7 +263,7 @@ export default {
     },
     // 提交节点数据
     handleEditNodeOk() {
-       // 检验表单
+      // 检验表单
       this.$refs['editNodeForm'].validate((valid) => {
         if (!valid) {
           return false;

@@ -26,6 +26,14 @@ export function getNodeStatus(nodeId) {
   })
 }
 
+// 节点 + 项目列表
+export function getNodeProjectList() {
+  return axios({
+    url: '/node/node_project_list',
+    method: 'post'
+  })
+}
+
 /**
  * 编辑 node
  * @param {
