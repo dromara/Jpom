@@ -28,3 +28,31 @@ export function editMonitor(params) {
     data: params
   })
 }
+
+/**
+ * 修改监控状态
+ * @param {
+ *  id: 监控 ID
+ *  status: 状态 true | false
+ *  type: 状态类型 status | restart
+ * } params 
+ */
+export function changeMonitorStatus(params) {
+  return axios({
+    url: '/monitor/changeStatus',
+    method: 'post',
+    data: params
+  })
+}
+
+/**
+ * 删除监控
+ * @param {*} id 
+ */
+export function deleteMonitor(id) {
+  return axios({
+    url: '/monitor/deleteMonitor',
+    method: 'post',
+    data: {id}
+  })
+}

@@ -41,10 +41,10 @@
           </a-radio-group>
         </a-form-model-item>
         <a-form-model-item label="监控项目" prop="projects">
-          <a-select v-model="temp.tempProjects" allowClear mode="multiple" @change="handleSelectChange">
-            <a-select-opt-group v-for="node in nodeProjectList" :key="node.id">
+          <a-select v-model="projectKeys" mode="multiple" :token-separators="[',']" @change="handleSelectChange">
+            <a-select-opt-group v-for="node in nodeProjectList" :key="`group_${node.id}`">
               <span slot="label">{{node.name}}</span>
-              <a-select-option v-for="project in node.projects" :key="project.id" :value="project.id">{{project.name}}</a-select-option>
+              <a-select-option v-for="project in node.projects" :key="project.id">{{project.name}}</a-select-option>
             </a-select-opt-group>
           </a-select>
         </a-form-model-item>
@@ -63,7 +63,7 @@
   </div>
 </template>
 <script>
-import { getMonitorList, editMonitor } from '../../api/monitor';
+import { getMonitorList, editMonitor,  deleteMonitor } from '../../api/monitor';
 import { getUserList } from '../../api/user';
 import { getNodeProjectList } from '../../api/node';
 import { parseTime } from '../../utils/time';
@@ -75,6 +75,7 @@ export default {
       userList: [],
       nodeProjectList: [],
       targetKeys: [],
+      projectKeys: [],
       // tree 选中的值
       checkedKeys: {},
       temp: {},
@@ -91,12 +92,17 @@ export default {
         {title: '报警状态', dataIndex: 'alarm', scopedSlots: {customRender: 'alarm'}, width: 150},
         {title: '创建人', dataIndex: 'parent', scopedSlots: {customRender: 'parent'}, width: 120},
         {title: '修改时间', dataIndex: 'modifyTime', customRender: (text) => {
+          if (text === '0') {
+            return '';
+          }
           return parseTime(text);
         }, width: 180},
         {title: '操作', dataIndex: 'operation', scopedSlots: {customRender: 'operation'}, width: 200}
       ],
       rules: {
-
+        name: [
+          { required: true, message: 'Please input monitor name', trigger: 'blur' }
+        ],
       }
     }
   },
@@ -147,13 +153,16 @@ export default {
     },
     // 下拉框选择
     handleSelectChange(value) {
+      this.projectKeys = value;
       let projects = [];
       this.nodeProjectList.forEach(node => {
         let tempProjects = [];
         node.projects.forEach(project => {
-          if (project.id === JSON.stringify(value)) {
-            tempProjects.push(project.id);
-          }
+          this.projectKeys.forEach(element => {
+            if (project.id === element) {
+              tempProjects.push(project.id);
+            }
+          })
         })
         if (tempProjects.length > 0) {
           projects.push({
@@ -173,14 +182,12 @@ export default {
       this.temp = Object.assign(record);
       this.targetKeys = this.temp.notifyUser;
       // 设置监控项目
-      this.temp.tempProjects = [];
+      this.projectKeys = [];
       this.temp.projects.forEach(node => {
         node.projects.forEach(project => {
-          console.log(project)
-          this.temp.tempProjects.push(project);
+          this.projectKeys.push(project);
         })
       })
-      console.log(this.temp.tempProjects)
       this.editMonitorVisible = true;
     },
     handleEditMonitorOk() {
@@ -191,6 +198,8 @@ export default {
         }
         const params = {
           ...this.temp,
+          status: this.temp.status ? 'on' : 'off',
+          autoRestart: this.temp.autoRestart ? 'on' : 'off',
           projects: JSON.stringify(this.temp.projects),
           notifyUser: JSON.stringify(this.targetKeys)
         }
@@ -210,7 +219,24 @@ export default {
     },
     // 删除
     handleDelete(record) {
-      console.log(record);
+      this.$confirm({
+        title: '系统提示',
+        content: '真的要删除监控么？',
+        okText: '确认',
+        cancelText: '取消',
+        onOk: () => {
+          // 删除
+          deleteMonitor(record.id).then((res) => {
+            if (res.code === 200) {
+              this.$notification.success({
+                message: res.msg,
+                duration: 2
+              });
+              this.loadData();
+            }
+          })
+        }
+      });
     }
   }
 }
