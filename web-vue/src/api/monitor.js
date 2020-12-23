@@ -56,3 +56,15 @@ export function deleteMonitor(id) {
     data: {id}
   })
 }
+
+/**
+ * 监控日志
+ * @param {*} params 
+ */
+export function getMonitorLogList(params) {
+  return axios({
+    url: '/monitor/list_data.json',
+    method: 'post',
+    data: params
+  })
+}
