@@ -9,8 +9,9 @@
         class="filter-item" @change="handleFilter">
         <a-select-option v-for="node in nodeList" :key="node.id">{{ node.name }}</a-select-option>
       </a-select>
+      <a-range-picker class="filter-item" :show-time="{format: 'HH:mm:ss'}" format="YYYY-MM-DD HH:mm:ss" @change="onchangeTime"/>
       <a-button type="primary" @click="handleFilter">搜索</a-button>
-      <a-button type="primary" @click="loadData">刷新</a-button>
+      <a-button type="primary" @click="handleFilter">刷新</a-button>
     </div>
     <!-- 数据表格 -->
     <a-table :data-source="list" :loading="loading" :columns="columns"
@@ -58,6 +59,7 @@ export default {
         page: 1,
         limit: 20
       },
+      timeRange: '',
       tableHeight: '70vh',
       temp: {},
       detailVisible: false,
@@ -114,6 +116,7 @@ export default {
     // 加载数据
     loadData() {
       this.loading = true;
+      this.listQuery.time = this.timeRange;
       getOperationLogList(this.listQuery).then(res => {
         if (res.code === 200) {
           this.list = res.data;
@@ -135,6 +138,10 @@ export default {
           this.userList = res.data;
         }
       })
+    },
+    // 选择时间
+    onchangeTime(value, dateString) {
+      this.timeRange = `${dateString[0]} ~ ${dateString[1]}`;
     },
     // 搜索
     handleFilter() {
