@@ -25,6 +25,11 @@ const children = [
     component: () => import('../pages/monitor/list')
   },
   {
+    path: '/monitor/log',
+    name: 'monitor-log',
+    component: () => import('../pages/monitor/log')
+  },
+  {
     path: '/user/list',
     name: 'user-list',
     component: () => import('../pages/user')

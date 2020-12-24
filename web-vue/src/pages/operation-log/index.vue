@@ -122,7 +122,7 @@ export default {
         this.loading = false;
       })
     },
-    // 	分页、排序、筛选变化时触发
+    // 分页、排序、筛选变化时触发
     change(pagination) {
       this.listQuery.page = pagination.current;
       this.listQuery.limit = pagination.pageSize;

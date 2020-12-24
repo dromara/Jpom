@@ -59,7 +59,12 @@ export function deleteMonitor(id) {
 
 /**
  * 监控日志
- * @param {*} params 
+ * @param {
+ *  page: 页码
+ *  limit: 每页条数
+ *  nodeId: 节点 ID
+ *  notifyStatus: 通知状态
+ * } params 
  */
 export function getMonitorLogList(params) {
   return axios({
