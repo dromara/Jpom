@@ -74,6 +74,21 @@ public class IndexControl extends BaseServerController {
         return "index";
     }
 
+    /**
+     * @author Hotstrip
+     * 检查是否需要初始化系统
+     * check if need to init system
+     * @return
+     */
+    @RequestMapping(value = "check-system", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @ResponseBody
+    public String checkSystem() {
+        if (userService.userListEmpty()) {
+            return JsonMessage.getString(500, "need init system");
+        }
+        return JsonMessage.getString(200, "success");
+    }
+
     @RequestMapping(value = "menus_data.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     public String menusData() {
