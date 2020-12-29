@@ -30,6 +30,16 @@ const children = [
     component: () => import('../pages/monitor/log')
   },
   {
+    path: '/build/list',
+    name: 'build-list',
+    component: () => import('../pages/build/list')
+  },
+  {
+    path: '/build/history',
+    name: 'build-history',
+    component: () => import('../pages/build/history')
+  },
+  {
     path: '/user/list',
     name: 'user-list',
     component: () => import('../pages/user')

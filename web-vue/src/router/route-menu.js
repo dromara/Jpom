@@ -8,6 +8,8 @@ const routeMenuMap = {
   'sshList': '/node/ssh',
   'monitor': '/monitor/list',
   'monitorLog': '/monitor/log',
+  'buildList': '/build/list',
+  'buildHistory': '/build/history',
   'user': '/user/list',
   'roleList': '/role/list',
   'user_log': '/operation/log',
