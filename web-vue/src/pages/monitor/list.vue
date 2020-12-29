@@ -64,7 +64,7 @@
 </template>
 <script>
 import { getMonitorList, editMonitor,  deleteMonitor } from '../../api/monitor';
-import { getUserList } from '../../api/user';
+import { getAdminUserList } from '../../api/user';
 import { getNodeProjectList } from '../../api/node';
 import { parseTime } from '../../utils/time';
 export default {
@@ -127,7 +127,7 @@ export default {
     },
     // 加载用户列表
     loadUserList() {
-      getUserList().then(res => {
+      getAdminUserList().then(res => {
         if (res.code === 200) {
           res.data.forEach(element => {
             this.userList.push({key: element.id, title: element.name});

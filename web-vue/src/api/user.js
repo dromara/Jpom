@@ -26,6 +26,14 @@ export function updatePwd(params) {
   })
 }
 
+// 所有管理员列表
+export function getAdminUserList() {
+  return axios({
+    url: '/user/get-admin-user-list',
+    method: 'post'
+  })
+}
+
 // 用户列表
 export function getUserList() {
   return axios({

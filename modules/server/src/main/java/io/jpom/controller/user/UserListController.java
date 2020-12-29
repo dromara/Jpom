@@ -68,4 +68,18 @@ public class UserListController extends BaseServerController {
         }
         return JsonMessage.getString(200, "", userList);
     }
+
+    /**
+     * @author Hotstrip
+     * get all admin user list
+     * 获取所有管理员信息
+     * @return
+     */
+    @RequestMapping(value = "get-admin-user-list", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @ResponseBody
+    @Feature(method = MethodFeature.LIST)
+    public String getAdminUserList() {
+        List<UserModel> list = userService.list(false);
+        return JsonMessage.getString(200, "success", list);
+    }
 }
