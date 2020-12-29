@@ -87,6 +87,11 @@ const router = new Router({
       children: children
     },
     {
+      path: '/install',
+      name: 'install',
+      component: () => import('../pages/install')
+    },
+    {
       path: '*',
       name: '404',
       component: () => import('../pages/404')

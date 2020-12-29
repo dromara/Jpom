@@ -28,6 +28,7 @@
 import SideMenu from './side-menu';
 import UserHeader from './user-header';
 import ContentTab from './content-tab';
+import { checkSystem } from '../../api/install';
 export default {
   components: {
     SideMenu,
@@ -40,6 +41,23 @@ export default {
     }
   },
   computed: {
+  },
+  created() {
+    this.checkSystem();
+  },
+  methods: {
+    // 检查是否需要初始化
+    checkSystem() {
+      checkSystem().then(res => {
+        if (res.code !== 200) {
+          this.$notification.warn({
+            message: res.msg,
+            duration: 2
+          });
+          this.$router.push('/install');
+        }
+      })
+    }
   }
 }
 </script>
