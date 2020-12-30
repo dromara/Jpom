@@ -18,6 +18,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.annotation.Resource;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * 触发器
@@ -51,6 +53,31 @@ public class BuildTriggerController extends BaseServerController {
         String triggerBuildUrl = String.format("/%s/%s", contextPath, url);
         setAttribute("triggerBuildUrl", FileUtil.normalize(triggerBuildUrl));
         return "build/trigger";
+    }
+
+    /**
+     * @author Hotstrip
+     * get trigger url
+     * 获取触发器地址
+     * @param id
+     * @return
+     */
+    @RequestMapping(value = "trigger-url", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @ResponseBody
+    public String getTriggerUrl(String id) {
+        BuildModel item = buildService.getItem(id);
+        if (StrUtil.isEmpty(item.getTriggerToken())) {
+            item.setTriggerToken(RandomUtil.randomString(10));
+            buildService.updateItem(item);
+        }
+        String contextPath = getRequest().getContextPath();
+        String url = ServerOpenApi.BUILD_TRIGGER_BUILD.
+                replace("{id}", item.getId()).
+                replace("{token}", item.getTriggerToken());
+        String triggerBuildUrl = String.format("/%s/%s", contextPath, url);
+        Map<String, String> map = new HashMap<>();
+        map.put("triggerBuildUrl", FileUtil.normalize(triggerBuildUrl));
+        return JsonMessage.getString(200, "ok", map);
     }
 
 

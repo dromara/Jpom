@@ -74,3 +74,39 @@ export function deleteBuild(id) {
     data: {id}
   })
 }
+
+/**
+ * 获取触发器地址
+ * @param {*} id 
+ */
+export function getTriggerUrl(id) {
+  return axios({
+    url: '/build/trigger-url',
+    method: 'post',
+    data: {id}
+  })
+}
+
+/**
+ * 重置触发器
+ * @param {*} id 
+ */
+export function resetTrigger(id) {
+  return axios({
+    url: '/build/trigger_rest.json',
+    method: 'post',
+    data: {id}
+  })
+}
+
+/**
+ * 清理构建
+ * @param {*} id 
+ */
+export function clearBuid(id) {
+  return axios({
+    url: '/build/cleanSource.json',
+    method: 'post',
+    data: {id}
+  })
+}

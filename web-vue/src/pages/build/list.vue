@@ -10,24 +10,38 @@
       <a-button type="primary" @click="loadData">刷新</a-button>
     </div>
     <!-- 表格 -->
-    <a-table :loading="loading" :columns="columns" :data-source="list" bordered rowKey="id" :pagination="false">
+    <a-table :loading="loading" :columns="columns" :data-source="list" :scroll="{x: '80vw'}" bordered rowKey="id" :pagination="false">
       <a-tooltip slot="name" slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>
       <a-tooltip slot="branchName" slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>
-      <a-tooltip slot="group" slot-scope="text" placement="topLeft" :title="text">
-        <span>{{ text }}</span>
+      <template slot="status" slot-scope="text">
+        <span v-if="text === 0">未构建</span>
+        <span v-else-if="text === 1">构建中</span>
+        <span v-else-if="text === 2">构建成功</span>
+        <span v-else-if="text === 3">构建失败</span>
+        <span v-else-if="text === 4">发布中</span>
+        <span v-else-if="text === 5">发布成功</span>
+        <span v-else-if="text === 6">发布失败</span>
+        <span v-else-if="text === 7">取消构建</span>
+        <span v-else>未知状态</span>
+      </template>
+      <a-tooltip slot="buildIdStr" slot-scope="text, record" placement="topLeft" :title="text + ' ( 点击查看日志 ) '">
+        <span v-if="record.buildId <= 0"></span>
+        <a-tag v-else color="#108ee9" @click="handleBuildLog(record)">{{ text }}</a-tag>
       </a-tooltip>
       <a-tooltip slot="modifyUser" slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>
       <template slot="operation" slot-scope="text, record">
         <a-button type="primary" @click="handleEdit(record)">编辑</a-button>
-        <a-button type="primary" @click="handleEdit(record)">触发器</a-button>
-        <a-button type="primary" @click="handleEdit(record)">构建</a-button>
+        <a-button type="primary" @click="handleTrigger(record)">触发器</a-button>
+        <a-button type="danger" v-if="record.status === 1 || record.status === 4" @click="handleStopBuild(record)">停止</a-button>
+        <a-button type="primary" v-else @click="handleStartBuild(record)">构建</a-button>
         <a-button type="danger" @click="handleDelete(record)">删除</a-button>
+        <a-button type="danger" :disabled="!record.sourceExist" @click="handleClear(record)">清除构建</a-button>
       </template>
     </a-table>
     <!-- 编辑区 -->
@@ -103,10 +117,28 @@
         </a-form-model-item>
       </a-form-model>
     </a-modal>
+    <!-- 触发器 -->
+    <a-modal v-model="triggerVisible" title="触发器" :footer="null" :maskClosable="false">
+      <a-form-model ref="editTriggerForm" :rules="rules" :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 16 }">
+        <a-form-model-item label="触发器地址" prop="triggerBuildUrl">
+          <a-input v-model="temp.triggerBuildUrl" type="textarea" readonly :rows="3" style="resize: none;" placeholder="触发器地址"/>
+        </a-form-model-item>
+        <a-row>
+          <a-col :span="6"></a-col>
+          <a-col :span="16">
+            <a-button type="primary" class="btn-add" @click="resetTrigger">重置</a-button>
+          </a-col>
+        </a-row>
+      </a-form-model>
+    </a-modal>
+    <!-- 构建日志 -->
+    <a-modal v-model="buildLogVisible" title="构建日志" :footer="null" :maskClosable="false">
+      <div>构建日志</div>
+    </a-modal>
   </div>
 </template>
 <script>
-import { getBuildGroupList, getBuildList, getBranchList, editBuild, deleteBuild } from '../../api/build';
+import { getBuildGroupList, getBuildList, getBranchList, editBuild, deleteBuild, getTriggerUrl, resetTrigger, clearBuid } from '../../api/build';
 import { parseTime } from '../../utils/time';
 export default {
   data() {
@@ -119,6 +151,8 @@ export default {
       temp: {},
       editBuildVisible: false,
       addGroupvisible: false,
+      triggerVisible: false,
+      buildLogVisible: false,
       columns: [
         {title: '名称', dataIndex: 'name', width: 150, ellipsis: true, scopedSlots: {customRender: 'name'}},
         {title: '分支', dataIndex: 'branchName', width: 100, ellipsis: true, scopedSlots: {customRender: 'branchName'}},
@@ -131,13 +165,12 @@ export default {
           }
           return parseTime(text);
         }, width: 180},
-        {title: '操作', dataIndex: 'operation', scopedSlots: {customRender: 'operation'}, width: '360px', align: 'left'}
+        {title: '操作', dataIndex: 'operation', scopedSlots: {customRender: 'operation'}, width: 440, align: 'left'}
       ],
       rules: {
         name: [
           { required: true, message: 'Please input build name', trigger: 'blur' }
         ],
-
         script: [
           { required: true, message: 'Please input build script', trigger: 'blur' }
         ],
@@ -184,6 +217,7 @@ export default {
     handleEdit(record) {
       this.temp = Object.assign(record);
       this.temp.tempGroup = '';
+      this.loadBranchList();
       this.editBuildVisible = true;
     },
     // 添加分组
@@ -257,6 +291,61 @@ export default {
         }
       });
     },
+    // 触发器
+    handleTrigger(record) {
+      this.temp = Object.assign(record);
+      getTriggerUrl(record.id).then(res => {
+        if (res.code === 200) {
+          this.temp.triggerBuildUrl = `${location.protocol}${location.host}${res.data.triggerBuildUrl}`;
+          this.triggerVisible = true;
+        }
+      })
+    },
+    // 重置触发器
+    resetTrigger() {
+      resetTrigger(this.temp.id).then(res => {
+        if (res.code === 200) {
+          this.$notification.success({
+            message: res.msg,
+            duration: 2
+          });
+          this.triggerVisible = false;
+          this.handleTrigger(this.temp);
+        }
+      })
+    },
+    // 清除构建
+    handleClear(record) {
+      this.$confirm({
+        title: '系统提示',
+        content: '真的要清除构建信息么？',
+        okText: '确认',
+        cancelText: '取消',
+        onOk: () => {
+          clearBuid(record.id).then((res) => {
+            if (res.code === 200) {
+              this.$notification.success({
+                message: res.msg,
+                duration: 2
+              });
+              this.loadData();
+            }
+          })
+        }
+      });
+    },
+    // 开始构建
+    handleStartBuild(record) {
+      console.log(record)
+    },
+    // 停止构建
+    handleStopBuild(record) {
+      console.log(record)
+    },
+    // 查看构建日志
+    handleBuildLog(record) {
+      console.log(record)
+    }
   }
 }
 </script>
