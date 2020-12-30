@@ -38,10 +38,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import javax.annotation.Resource;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -75,6 +72,18 @@ public class BuildListController extends BaseServerController {
         return "build/list";
     }
 
+    /**
+     * @author Hotstrip
+     * get build group list
+     * 获取构建分组列表
+     * @return
+     */
+    @RequestMapping(value = "group-list", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public String groupList() {
+        Set<String> set = buildService.listGroup();
+        return JsonMessage.getString(200, "success", set);
+    }
 
     @RequestMapping(value = "list_data.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody

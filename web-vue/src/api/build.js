@@ -1,5 +1,13 @@
 import axios from './config';
 
+// 分组列表
+export function getBuildGroupList() {
+  return axios({
+    url: '/build/group-list',
+    method: 'get'
+  })
+}
+
 /**
  * 构建列表
  * @param {
@@ -10,6 +18,23 @@ export function getBuildList(params) {
   return axios({
     url: '/build/list_data.json',
     method: 'post',
+    data: params
+  })
+}
+
+/**
+ * 获取仓库分支信息
+ * @param {
+ *  url: 仓库地址
+ *  userName: 用户名
+ *  userPwd: 密码
+ * } params 
+ */
+export function getBranchList(params) {
+  return axios({
+    url: '/build/branchList.json',
+    method: 'post',
+    timeout: 0,
     data: params
   })
 }
@@ -27,7 +52,7 @@ export function getBuildList(params) {
  *  releaseMethod: 发布方法
  *  branchName: 分支名称
  *  group: 分组名称
- *  repoType: 仓库类型 GIT | SVN
+ *  repoType: 仓库类型 0: GIT | 1: SVN
  * } params 
  */
 export function editBuild(params) {

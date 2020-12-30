@@ -92,7 +92,7 @@ export default {
         {title: '报警状态', dataIndex: 'alarm', scopedSlots: {customRender: 'alarm'}, width: 150},
         {title: '创建人', dataIndex: 'parent', scopedSlots: {customRender: 'parent'}, width: 120},
         {title: '修改时间', dataIndex: 'modifyTime', customRender: (text) => {
-          if (text === '0') {
+          if (!text || text === '0') {
             return '';
           }
           return parseTime(text);
