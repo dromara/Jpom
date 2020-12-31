@@ -150,3 +150,44 @@ export function stopBuild(id) {
     data: {id}
   })
 }
+
+/**
+ * 构建历史
+ * @param {
+ *  buildDataId: 构建任务 ID
+ *  status: 状态
+ * } params 
+ */
+export function geteBuildHistory(params) {
+  return axios({
+    url: '/build/history_list.json',
+    method: 'post',
+    data: params
+  })
+}
+
+/**
+ * 下载构建日志
+ * @param {*} logId 
+ */
+export function downloadBuildLog(logId) {
+  return axios({
+    url: '/build/download_log.html',
+    method: 'get',
+    responseType: 'blob',
+    timeout: 0,
+    params: {logId}
+  })
+}
+
+/**
+ * 删除构建历史记录
+ * @param {*} logId 
+ */
+export function deleteBuildHistory(logId) {
+  return axios({
+    url: '/build/delete_log.json',
+    method: 'post',
+    data: {logId}
+  })
+}
