@@ -110,3 +110,43 @@ export function clearBuid(id) {
     data: {id}
   })
 }
+
+/**
+ * 查看构建日志
+ * @param {
+ *  id: 构建 ID
+ *  buildId: 构建任务 ID
+ *  line: 需要获取的行号 1 开始
+ * } params 
+ */
+export function loadBuildLog(params) {
+  return axios({
+    url: '/build/getNowLog.json',
+    method: 'post',
+    data: params
+  })
+}
+
+/**
+ * 开始构建
+ * @param {*} id 
+ */
+export function startBuild(id) {
+  return axios({
+    url: '/build/start.json',
+    method: 'post',
+    data: {id}
+  })
+}
+
+/**
+ * 停止构建
+ * @param {*} id 
+ */
+export function stopBuild(id) {
+  return axios({
+    url: '/build/cancel.json',
+    method: 'post',
+    data: {id}
+  })
+}
