@@ -25,6 +25,21 @@ const children = [
     component: () => import('../pages/monitor/list')
   },
   {
+    path: '/dispatch/list',
+    name: 'dispatch-list',
+    component: () => import('../pages/dispatch/list')
+  },
+  {
+    path: '/dispatch/log',
+    name: 'dispatch-log',
+    component: () => import('../pages/dispatch/log')
+  },
+  {
+    path: '/dispatch/white-list',
+    name: 'dispatch-white-list',
+    component: () => import('../pages/dispatch/white-list')
+  },
+  {
     path: '/monitor/log',
     name: 'monitor-log',
     component: () => import('../pages/monitor/log')
