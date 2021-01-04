@@ -7,14 +7,7 @@
       </a-select>
       <a-select v-model="listQuery.status" allowClear placeholder="请选择状态"
         class="filter-item" @change="handleFilter">
-        <!-- <a-select-option :value="0">未构建</a-select-option> -->
-        <a-select-option :value="1">构建中</a-select-option>
-        <a-select-option :value="2">构建成功</a-select-option>
-        <a-select-option :value="3">构建失败</a-select-option>
-        <a-select-option :value="4">发布中</a-select-option>
-        <a-select-option :value="5">发布成功</a-select-option>
-        <a-select-option :value="6">发布失败</a-select-option>
-        <a-select-option :value="7">取消构建</a-select-option>
+        <a-select-option v-for="(val, key) in statusMap" :key="key">{{ val }}</a-select-option>
       </a-select>
       <a-range-picker class="filter-item" :show-time="{format: 'HH:mm:ss'}" format="YYYY-MM-DD HH:mm:ss" @change="onchangeTime"/>
       <a-button type="primary" @click="handleFilter">搜索</a-button>
@@ -27,9 +20,16 @@
       <a-tooltip slot="buildName" slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>
-      <a-tooltip slot="releaseMethod" slot-scope="text" placement="topLeft" :title="text">
-        <span>{{ text }}</span>
+      <a-tooltip slot="buildIdStr" slot-scope="text, record" placement="topLeft" :title="text + ' ( 点击查看日志 ) '">
+        <span v-if="record.buildId <= 0"></span>
+        <a-tag v-else color="#108ee9" @click="handleBuildLog(record)">{{ text }}</a-tag>
       </a-tooltip>
+      <template slot="status" slot-scope="text" placement="topleft" :title="text">
+        <span>{{ statusMap[text] }}</span>
+      </template>
+      <template slot="releaseMethod" slot-scope="text" placement="topleft" :title="text">
+        <span>{{ releaseMethodMap[text] }}</span>
+      </template>
       <a-tooltip slot="buildUser" slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>
@@ -38,12 +38,20 @@
         <a-button type="danger" @click="handleDelete(record)">删除</a-button>
       </template>
     </a-table>
+    <!-- 构建日志 -->
+    <a-modal v-model="buildLogVisible" title="构建日志" :footer="null" :maskClosable="false" @cancel="closeBuildLogModel">
+      <build-log v-if="buildLogVisible" :temp="temp" />
+    </a-modal>
   </div>
 </template>
 <script>
+import BuildLog from './log';
 import { geteBuildHistory, getBuildList, downloadBuildLog, deleteBuildHistory } from '../../api/build';
 import { parseTime } from '../../utils/time';
 export default {
+  components: {
+    BuildLog
+  },
   data() {
     return {
       loading: false,
@@ -57,10 +65,11 @@ export default {
       timeRange: '',
       tableHeight: '70vh',
       temp: {},
+      buildLogVisible: false,
       columns: [
         {title: '构建名称', dataIndex: 'buildName', width: 120, ellipsis: true, scopedSlots: {customRender: 'buildName'}},
         {title: '构建 ID', dataIndex: 'buildIdStr', width: 100, ellipsis: true, scopedSlots: {customRender: 'buildIdStr'}},
-        {title: '状态', dataIndex: 'status', width: 120, ellipsis: true, scopedSlots: {customRender: 'nodeId'}},
+        {title: '状态', dataIndex: 'status', width: 120, ellipsis: true, scopedSlots: {customRender: 'status'}},
         {title: '开始时间', dataIndex: 'startTime', customRender: (text) => {
           return parseTime(text);
         }, width: 180},
@@ -70,7 +79,22 @@ export default {
         {title: '发布方式', dataIndex: 'releaseMethod', width: 100, ellipsis: true, scopedSlots: {customRender: 'releaseMethod'}},
         {title: '构建人', dataIndex: 'buildUser', width: 150, ellipsis: true, scopedSlots: {customRender: 'buildUser'}},
         {title: '操作', dataIndex: 'operation', scopedSlots: {customRender: 'operation'}, width: 230, fixed: 'right'}
-      ]
+      ],
+      statusMap: {
+        1: '构建中',
+        2: '构建成功',
+        3: '构建失败',
+        4: '发布中',
+        5: '发布成功',
+        6: '发布失败',
+        7: '取消构建',
+      },
+      releaseMethodMap: {
+        0: '不发布',
+        1: '节点分发',
+        2: '项目',
+        3: 'SSH'
+      }
     }
   },
   computed: {
@@ -171,6 +195,19 @@ export default {
           })
         }
       });
+    },
+    // 查看构建日志
+    handleBuildLog(record) {
+      this.temp = {
+        id: record.buildDataId,
+        buildId: record.buildNumberId
+      }
+      console.log(this.temp)
+      this.buildLogVisible = true;
+    },
+    // 关闭日志对话框
+    closeBuildLogModel() {
+      this.handleFilter();
     }
   }
 }
