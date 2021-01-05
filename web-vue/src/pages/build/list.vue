@@ -115,6 +115,9 @@
             <a-radio :value="3">SSH</a-radio>
           </a-radio-group>
         </a-form-model-item>
+        <a-form-model-item v-if="temp.releaseMethod === 2" label="发布项目" prop="releaseMethodDataId">
+          <a-cascader :options="cascaderList" placeholder="Please select" @change="onChangeProject" />
+        </a-form-model-item>
       </a-form-model>
     </a-modal>
     <!-- 触发器 -->
@@ -143,6 +146,7 @@ import {
   getBuildGroupList, getBuildList, getBranchList, editBuild, deleteBuild,
   getTriggerUrl, resetTrigger, clearBuid, startBuild, stopBuild
 } from '../../api/build';
+import { getNodeProjectList } from '../../api/node'
 import { parseTime } from '../../utils/time';
 export default {
   components: {
@@ -155,6 +159,7 @@ export default {
       groupList: [],
       list: [],
       branchList: [],
+      cascaderList: [],
       temp: {},
       editBuildVisible: false,
       addGroupvisible: false,
@@ -211,6 +216,29 @@ export default {
         this.loading = false;
       })
     },
+    // 加载节点项目列表
+    loadNodeProjectList() {
+      this.cascaderList = [];
+      getNodeProjectList().then(res => {
+        if (res.code === 200) {
+          res.data.forEach(node => {
+            const nodeItem = {
+              label: node.name,
+              value: node.id,
+              children: []
+            }
+            node.projects.forEach(project => {
+              const projectItem = {
+                label: project.name,
+                value: project.id
+              }
+              nodeItem.children.push(projectItem);
+            })
+            this.cascaderList.push(nodeItem)
+          })
+        }
+      })
+    },
     // 筛选
     handleFilter() {
       this.loadData();
@@ -218,6 +246,7 @@ export default {
     // 添加
     handleAdd() {
       this.temp = {};
+      this.loadNodeProjectList();
       this.editBuildVisible = true;
     },
     // 修改
@@ -225,6 +254,7 @@ export default {
       this.temp = Object.assign(record);
       this.temp.tempGroup = '';
       this.loadBranchList();
+      this.loadNodeProjectList();
       this.editBuildVisible = true;
     },
     // 添加分组
@@ -253,6 +283,10 @@ export default {
           this.branchList = res.data;
         }
       })
+    },
+    // 选择节点项目
+    onChangeProject() {
+
     },
     // 提交节点数据
     handleEditBuildOk() {
