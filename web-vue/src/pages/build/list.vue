@@ -116,7 +116,7 @@
           </a-radio-group>
         </a-form-model-item>
         <a-form-model-item v-if="temp.releaseMethod === 2" label="发布项目" prop="releaseMethodDataId">
-          <a-cascader :options="cascaderList" placeholder="Please select" @change="onChangeProject" />
+          <a-cascader v-model="temp.releaseMethodDataIdList" :options="cascaderList" placeholder="Please select" @change="onChangeProject" />
         </a-form-model-item>
       </a-form-model>
     </a-modal>
@@ -253,6 +253,9 @@ export default {
     handleEdit(record) {
       this.temp = Object.assign(record);
       this.temp.tempGroup = '';
+      if (record.releaseMethodDataId) {
+        this.temp.releaseMethodDataIdList = record.releaseMethodDataId.split(':');
+      }
       this.loadBranchList();
       this.loadNodeProjectList();
       this.editBuildVisible = true;
@@ -285,8 +288,8 @@ export default {
       })
     },
     // 选择节点项目
-    onChangeProject() {
-
+    onChangeProject(value) {
+      console.log(value)
     },
     // 提交节点数据
     handleEditBuildOk() {
@@ -294,6 +297,18 @@ export default {
       this.$refs['editBuildForm'].validate((valid) => {
         if (!valid) {
           return false;
+        }
+        // 设置参数
+        if (this.temp.releaseMethod === 2) {
+          if (this.temp.releaseMethodDataIdList.length < 2) {
+            this.$notification.warn({
+              message: '请选择节点项目',
+              duration: 2
+            });
+            return false;
+          }
+          this.temp.releaseMethodDataId_2_node = this.temp.releaseMethodDataIdList[0];
+          this.temp.releaseMethodDataId_2_project = this.temp.releaseMethodDataIdList[1];
         }
         // 提交数据
         editBuild(this.temp).then(res => {

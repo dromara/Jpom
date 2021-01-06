@@ -56,10 +56,26 @@ export function getBranchList(params) {
  * } params 
  */
 export function editBuild(params) {
+  const data = {
+    id: params.id,
+    name: params.name,
+    gitUrl: params.gitUrl,
+    userName: params.userName,
+    password: params.password,
+    resultDirFile: params.resultDirFile,
+    script: params.script,
+    releaseMethod: params.releaseMethod,
+    branchName: params.branchName,
+    group: params.group,
+    repoType: params.repoType,
+    // 其他参数
+    releaseMethodDataId_2_node: params.releaseMethodDataId_2_node,
+    releaseMethodDataId_2_project: params.releaseMethodDataId_2_project,
+  }
   return axios({
     url: '/build/updateBuild',
     method: 'post',
-    data: params
+    data
   })
 }
 
