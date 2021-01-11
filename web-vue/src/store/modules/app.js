@@ -1,5 +1,7 @@
 /**
  * 应用相关的 store
+ * 存储所有打开的 tab 窗口，并且记录当前激活的 tab
+ * 另外提供打开新 tab、跳转 tab、移除 tab 功能
  */
 import {
   ACTIVE_TAB_KEY,
@@ -62,8 +64,11 @@ const app = {
         if (state.activeTabKey === key) {
           // 寻找下一个
           const tempTab = tabList[Math.min(index, 0)];
-          commit('setActiveTabKey', tempTab.key);
-          localStorage.setItem(ACTIVE_TAB_KEY, tempTab.key);
+          // 如果还是原来激活的 tab 就不用更新
+          if (state.activeTabKey !== tempTab.key) {
+            commit('setActiveTabKey', tempTab.key);
+            localStorage.setItem(ACTIVE_TAB_KEY, tempTab.key);
+          }
         }
         commit('setTabList', tabList);
         localStorage.setItem(TAB_LIST_KEY, JSON.stringify(tabList));
