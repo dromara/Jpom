@@ -1,6 +1,9 @@
 import axios from './config';
 
-
+// 分发列表
+export function getDishPatchList() {
+  
+}
 
 
 // 获取分发白名单数据

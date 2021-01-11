@@ -8,7 +8,7 @@
     <a-table :data-source="list" :loading="loading" :columns="columns" :scroll="{x: '80vw'}" :pagination="false" bordered :rowKey="(record, index) => index">
       <template slot="nodeId" slot-scope="text, record">
         <a-button v-if="!record.nodeModel" type="primary" @click="install(record)">安装节点</a-button>
-        <a-tag color="#2db7f5" v-else @click="toNode(record.nodeModel)">前往节点: {{ `${record.nodeModel.id}(${record.nodeModel.name})` }}</a-tag>
+        <a-tag color="#2db7f5" v-else @click="toNode(record.nodeModel)">前往节点: {{ `${record.nodeModel.id} ( ${record.nodeModel.name} )` }}</a-tag>
       </template>
       <template slot="operation" slot-scope="text, record">
         <a-button type="primary" @click="handleEdit(record)">编辑</a-button>
@@ -199,7 +199,8 @@ export default {
     },
     // 修改
     handleEdit(record) {
-      this.temp = Object.assign(record);
+      this.temp = Object.assign({}, record);
+      this.temp.fileDirs = record.fileDirs.join('\r\n');
       this.temp.type = 'edit';
       this.editSshVisible = true;
     },
