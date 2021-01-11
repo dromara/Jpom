@@ -102,7 +102,7 @@
           </a-row>
         </a-form-model-item>
         <a-form-model-item label="构建命令" prop="script">
-          <a-input v-model="temp.script" type="textarea" :rows="3" style="resize: none;" placeholder="构建命令执行的命令，如：mvn clean package"/>
+          <a-input v-model="temp.script" type="textarea" :rows="3" style="resize: none;" placeholder="构建执行的命令，如：mvn clean package"/>
         </a-form-model-item>
         <a-form-model-item label="产物目录" prop="resultDirFile">
           <a-input v-model="temp.resultDirFile" placeholder="构建产物目录，相对路径"/>
@@ -115,8 +115,34 @@
             <a-radio :value="3">SSH</a-radio>
           </a-radio-group>
         </a-form-model-item>
+        <!-- 节点 -->
+
+        <!-- 项目 -->
         <a-form-model-item v-if="temp.releaseMethod === 2" label="发布项目" prop="releaseMethodDataId">
           <a-cascader v-model="temp.releaseMethodDataIdList" :options="cascaderList" placeholder="Please select" @change="onChangeProject" />
+        </a-form-model-item>
+        <a-form-model-item v-if="temp.releaseMethod === 2" label="发布后操作" prop="afterOpt">
+          <a-select v-model="temp.afterOpt" placeholder="请选择发布后操作">
+            <a-select-option :key="0">不做任何操作</a-select-option>
+            <a-select-option :key="1">并发重启</a-select-option>
+            <a-select-option :key="2">完整顺序重启(有重启失败将结束本次)</a-select-option>
+            <a-select-option :key="3">顺序重启(有重启失败将继续)</a-select-option>
+          </a-select>
+        </a-form-model-item>
+        <!-- SSH -->
+        <a-form-model-item v-if="temp.releaseMethod === 3" label="SSH" prop="releaseMethodDataId">
+          <a-select v-model="temp.releaseMethodDataId_3" placeholder="请先填写仓库地址和账号信息">
+            <a-select-option v-for="ssh in sshList" :key="ssh.id">{{ ssh.name }}</a-select-option>
+          </a-select>
+        </a-form-model-item>
+        <a-form-model-item label="发布目录" prop="releasePath">
+          <a-input v-model="temp.releasePath" placeholder="发布目录"/>
+        </a-form-model-item>
+        <a-form-model-item label="发布命令" prop="releaseCommand">
+          <a-input v-model="temp.releaseCommand" type="textarea" :rows="3" style="resize: none;" placeholder="发布执行的命令，如：mvn clean package"/>
+        </a-form-model-item>
+        <a-form-model-item v-if="temp.releaseMethod === 2 || temp.releaseMethod === 3" label="清空发布" prop="clearOld">
+          <a-switch v-model="temp.clearOld" checked-children="是" un-checked-children="否"/>
         </a-form-model-item>
       </a-form-model>
     </a-modal>
@@ -147,6 +173,7 @@ import {
   getTriggerUrl, resetTrigger, clearBuid, startBuild, stopBuild
 } from '../../api/build';
 import { getNodeProjectList } from '../../api/node'
+import { getSshList } from '../../api/ssh'
 import { parseTime } from '../../utils/time';
 export default {
   components: {
@@ -160,6 +187,7 @@ export default {
       list: [],
       branchList: [],
       cascaderList: [],
+      sshList: [],
       temp: {},
       editBuildVisible: false,
       addGroupvisible: false,
@@ -239,6 +267,15 @@ export default {
         }
       })
     },
+    // 加载 SSH 列表
+    loadSshList() {
+      this.sshList = [];
+      getSshList().then(res => {
+        if (res.code === 200) {
+          this.sshList = res.data;
+        }
+      })
+    },
     // 筛选
     handleFilter() {
       this.loadData();
@@ -247,6 +284,7 @@ export default {
     handleAdd() {
       this.temp = {};
       this.loadNodeProjectList();
+      this.loadSshList();
       this.editBuildVisible = true;
     },
     // 修改
@@ -258,6 +296,7 @@ export default {
       }
       this.loadBranchList();
       this.loadNodeProjectList();
+      this.loadSshList();
       this.editBuildVisible = true;
     },
     // 添加分组

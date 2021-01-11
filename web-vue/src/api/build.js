@@ -71,6 +71,11 @@ export function editBuild(params) {
     // 其他参数
     releaseMethodDataId_2_node: params.releaseMethodDataId_2_node,
     releaseMethodDataId_2_project: params.releaseMethodDataId_2_project,
+    afterOpt: params.afterOpt,
+    releaseMethodDataId_3: params.releaseMethodDataId_3,
+    releasePath: params.releasePath,
+    releaseCommand: params.releaseCommand,
+    clearOld: params.clearOld,
   }
   return axios({
     url: '/build/updateBuild',
