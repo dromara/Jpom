@@ -59,6 +59,12 @@
                     </div>
                 </div>
             </form>
+            <!--VUE 新版本-->
+            <div class="layui-input-block" style="margin-left: 0;" id="vueLogin">
+                <button class="layui-btn layui-btn-normal"
+                        style="width: 100%" onclick="tryVueLogin()">试试新版本
+                </button>
+            </div>
         </div>
     </div>
 </div>
@@ -139,6 +145,12 @@
             if ([[${showCode}]])
                 showCode();
         });
+    }
+
+    // 跳转到新版本
+    function tryVueLogin() {
+        layer.msg('loading...');
+        window.location.href = '/welcome';
     }
 
     function showCode() {

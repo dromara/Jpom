@@ -2,6 +2,7 @@
   {
     "title": "节点管理",
     "icon": "layui-icon-star-fill",
+    "icon_v3": "block",
     "id": "nodeManager",
     "childs": [
       {
@@ -19,6 +20,7 @@
   {
     "title": "节点分发",
     "icon": "layui-icon-release",
+    "icon_v3": "apartment",
     "childs": [
       {
         "id": "outgiving",
@@ -42,6 +44,7 @@
   {
     "title": "监控管理",
     "icon": "layui-icon-chart-screen",
+    "icon_v3": "monitor",
     "childs": [
       {
         "id": "monitor",
@@ -63,6 +66,7 @@
   {
     "title": "在线构建",
     "icon": "layui-icon-tree",
+    "icon_v3": "build",
     "childs": [
       {
         "id": "buildList",
@@ -79,6 +83,7 @@
   {
     "title": "用户管理",
     "icon": "layui-icon-friends",
+    "icon_v3": "user",
     "childs": [
       {
         "id": "user",
@@ -100,6 +105,7 @@
   {
     "title": "系统管理",
     "icon": "layui-icon-set-fill",
+    "icon_v3": "setting",
     "childs": [
       {
         "id": "monitorConfigEmail",

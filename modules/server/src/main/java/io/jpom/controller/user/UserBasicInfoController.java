@@ -22,6 +22,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.annotation.Resource;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
@@ -43,6 +45,28 @@ public class UserBasicInfoController extends BaseServerController {
     @RequestMapping(value = "userInfo.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
     public String userInfo() {
         return "user/userInfo";
+    }
+
+    /**
+     * @author Hotstrip
+     * get user basic info
+     * 获取管理员基本信息接口
+     * @return
+     */
+    @RequestMapping(value = "user-basic-info", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @ResponseBody
+    public String getUserBasicInfo() {
+        UserModel userModel = getUser();
+        userModel = userService.getItem(userModel.getId());
+        // return basic info
+        Map<String, Object> map = new HashMap<>();
+        map.put("id", userModel.getId());
+        map.put("name", userModel.getName());
+        map.put("systemUser", userModel.isSystemUser());
+        map.put("email", userModel.getEmail());
+        map.put("dingDing", userModel.getDingDing());
+        map.put("workWx", userModel.getWorkWx());
+        return JsonMessage.getString(200, "success", map);
     }
 
     @RequestMapping(value = "save_basicInfo.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)

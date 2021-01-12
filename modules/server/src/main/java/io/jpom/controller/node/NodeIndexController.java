@@ -44,16 +44,7 @@ public class NodeIndexController extends BaseServerController {
     @RequestMapping(value = "list.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
     @Feature(method = MethodFeature.LIST)
     public String list(String group) {
-        List<NodeModel> nodeModels = nodeService.list();
-        //
-        if (nodeModels != null && StrUtil.isNotEmpty(group)) {
-            // 筛选
-            List<NodeModel> filterList = nodeModels.stream().filter(nodeModel -> StrUtil.equals(group, nodeModel.getGroup())).collect(Collectors.toList());
-            if (CollUtil.isNotEmpty(filterList)) {
-                // 如果传入的分组找到了节点，就返回  否则返回全部
-                nodeModels = filterList;
-            }
-        }
+        List<NodeModel> nodeModels = this.listByGroup(group);
         setAttribute("array", nodeModels);
         // 获取所有的ssh 名称
         JSONObject sshName = new JSONObject();
@@ -67,6 +58,39 @@ public class NodeIndexController extends BaseServerController {
         setAttribute("groups", allGroup);
         return "node/list";
     }
+
+    private List<NodeModel> listByGroup(String group) {
+        List<NodeModel> nodeModels = nodeService.list();
+        //
+        if (nodeModels != null && StrUtil.isNotEmpty(group)) {
+            // 筛选
+            List<NodeModel> filterList = nodeModels.stream().filter(nodeModel -> StrUtil.equals(group, nodeModel.getGroup())).collect(Collectors.toList());
+            if (CollUtil.isNotEmpty(filterList)) {
+                // 如果传入的分组找到了节点，就返回  否则返回全部
+                nodeModels = filterList;
+            }
+        }
+        return nodeModels;
+    }
+
+
+    @RequestMapping(value = "list_data.json", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @Feature(method = MethodFeature.LIST)
+    @ResponseBody
+    public String listJson(String group) {
+        List<NodeModel> nodeModels = this.listByGroup(group);
+        return JsonMessage.getString(200, "", nodeModels);
+    }
+
+
+    @RequestMapping(value = "list_group.json", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @Feature(method = MethodFeature.LIST)
+    @ResponseBody
+    public String listAllGroup() {
+        HashSet<String> allGroup = nodeService.getAllGroup();
+        return JsonMessage.getString(200, "", allGroup);
+    }
+
 
     @RequestMapping(value = "index.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
     public String index() {
@@ -101,5 +125,18 @@ public class NodeIndexController extends BaseServerController {
         jsonObject.put("timeOut", System.currentTimeMillis() - timeMillis);
         jsonArray.add(jsonObject);
         return JsonMessage.getString(200, "", jsonArray);
+    }
+
+    /**
+     * @author Hotstrip
+     * load node project list
+     * 加载节点项目列表
+     * @return
+     */
+    @RequestMapping(value = "node_project_list", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @ResponseBody
+    public String nodeProjectList() {
+        List<NodeModel> nodeModels = nodeService.listAndProject();
+        return JsonMessage.getString(200, "success", nodeModels);
     }
 }

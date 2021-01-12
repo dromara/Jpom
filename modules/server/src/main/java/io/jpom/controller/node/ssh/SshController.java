@@ -6,6 +6,7 @@ import cn.hutool.extra.ssh.JschUtil;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.validator.ValidatorItem;
 import cn.jiangzeyin.common.validator.ValidatorRule;
+import com.alibaba.fastjson.JSONArray;
 import com.jcraft.jsch.Session;
 import io.jpom.common.BaseServerController;
 import io.jpom.common.interceptor.OptLog;
@@ -77,6 +78,21 @@ public class SshController extends BaseServerController {
         return new JsonMessage<>(200, "", list);
     }
 
+    /**
+     *
+     * @param name
+     * @param host
+     * @param user
+     * @param password
+     * @param connectType
+     * @param privateKey
+     * @param port
+     * @param charset
+     * @param fileDirs
+     * @param id
+     * @param type {'add': 新增, 'edit': 修改}
+     * @return
+     */
     @RequestMapping(value = "save.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @OptLog(UserOperateLogV1.OptType.EditSsh)
     @ResponseBody
@@ -90,6 +106,13 @@ public class SshController extends BaseServerController {
                        @ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "port错误") int port,
                        String charset, String fileDirs,
                        String id, String type) {
+        // 优先判断参数 如果是 password 在修改时可以不填写
+        if (connectType == SshModel.ConnectType.PASS && StrUtil.isEmpty(password) && "add".equals(type)) {
+            return JsonMessage.getString(405, "请填写登录密码");
+        }
+        if (connectType == SshModel.ConnectType.PUBKEY && StrUtil.isEmpty(privateKey)) {
+            return JsonMessage.getString(405, "请填写证书内容");
+        }
         SshModel sshModel;
         if ("edit".equals(type)) {
             sshModel = sshService.getItem(id);
@@ -99,12 +122,6 @@ public class SshController extends BaseServerController {
         } else {
             sshModel = new SshModel();
         }
-        if (connectType == SshModel.ConnectType.PASS && StrUtil.isEmpty(password)) {
-            return JsonMessage.getString(405, "请填写登录密码");
-        }
-        if (connectType == SshModel.ConnectType.PUBKEY && StrUtil.isEmpty(privateKey)) {
-            return JsonMessage.getString(405, "请填写证书内容");
-        }
         // 目录
         if (StrUtil.isEmpty(fileDirs)) {
             sshModel.setFileDirs(null);
@@ -113,7 +130,10 @@ public class SshController extends BaseServerController {
             sshModel.setFileDirs(list);
         }
         sshModel.setHost(host);
-        sshModel.setPassword(password);
+        // 如果密码传递不为空就设置值 因为上面已经判断了只有修改的情况下 password 才可能为空
+        if (!StrUtil.isEmpty(password)) {
+            sshModel.setPassword(password);
+        }
         sshModel.setPort(port);
         sshModel.setUser(user);
         sshModel.setName(name);
@@ -162,5 +182,20 @@ public class SshController extends BaseServerController {
         SshModel sshModel = sshService.getItem(id);
         setAttribute("item", sshModel);
         return "node/ssh/terminal";
+    }
+
+    /**
+     * 根据 nodeId 查询 SSH 列表
+     * @description for dev 3.x
+     * @author Hotstrip
+     * @param nodeId
+     * @return
+     */
+    @RequestMapping(value = "list_by_node_id", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @ResponseBody
+    @Feature(method = MethodFeature.LIST)
+    public String listByNodeId(String nodeId) {
+        JSONArray sshList = sshService.listSelect(nodeId);
+        return JsonMessage.getString(200, "success", sshList);
     }
 }

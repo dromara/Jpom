@@ -20,7 +20,9 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.annotation.Resource;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 节点白名单
@@ -48,6 +50,27 @@ public class OutGivingWhitelistController extends BaseServerController {
             setAttribute("whiteList", strWhiteList);
         }
         return "outgiving/whitelistDirectory";
+    }
+
+    /**
+     * @author Hotstrip
+     * get whiteList data
+     * 白名单数据接口
+     * @return
+     */
+    @RequestMapping(value = "white-list", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @SystemPermission
+    @ResponseBody
+    public String whiteList() {
+        Map<String, String> map = new HashMap();
+        UserModel userModel = getUser();
+        ServerWhitelist serverWhitelist = serverWhitelistServer.getWhitelist();
+        if (serverWhitelist != null && userModel.isSystemUser()) {
+            List<String> whiteList = serverWhitelist.getOutGiving();
+            String strWhiteList = AgentWhitelist.convertToLine(whiteList);
+            map.put("whiteList", strWhiteList);
+        }
+        return JsonMessage.getString(200, "ok", map);
     }
 
     /**

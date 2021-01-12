@@ -3,6 +3,7 @@ package io.jpom.common.commander;
 import cn.hutool.system.SystemUtil;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.common.commander.impl.LinuxSystemCommander;
+import io.jpom.common.commander.impl.MacOSSystemCommander;
 import io.jpom.common.commander.impl.WindowsSystemCommander;
 import io.jpom.model.system.ProcessModel;
 import io.jpom.system.JpomRuntimeException;
@@ -32,7 +33,7 @@ public abstract class AbstractSystemCommander {
             // Windows系统
             abstractSystemCommander = new WindowsSystemCommander();
         } else if (SystemUtil.getOsInfo().isMac()) {
-            abstractSystemCommander = new LinuxSystemCommander();
+            abstractSystemCommander = new MacOSSystemCommander();
         } else {
             throw new JpomRuntimeException("不支持的：" + SystemUtil.getOsInfo().getName());
         }

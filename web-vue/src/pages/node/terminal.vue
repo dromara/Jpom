@@ -1,0 +1,104 @@
+<template>
+  <div id="xterm" class="xterm" />
+</template>
+<script>
+import 'xterm/css/xterm.css';
+import "xterm/lib/xterm.js";
+import { Terminal } from 'xterm';
+import { FitAddon } from 'xterm-addon-fit';
+import { AttachAddon } from 'xterm-addon-attach';
+import { mapGetters } from 'vuex';
+export default {
+  props: {
+    sshId: {
+      type: String
+    },
+    nodeId: {
+      type: String
+    },
+    tail: {
+      type: String
+    }
+  },
+  data() {
+    return {
+      socket: null,
+      terminal: null,
+      // 输入的字符
+      text: '',
+      keyCode: -1
+    }
+  },
+  computed: {
+    ...mapGetters([
+      'getToken'
+    ]),
+    socketUrl() {
+      const protocol = location.protocol === 'https' ? 'wss://' : 'ws://';
+      return `${protocol}${location.host}/ssh?userId=${this.getToken}&sshId=${this.sshId}&nodeId=${this.nodeId}&type=ssh&tail=${this.tail}`;
+    }
+  },
+  mounted() {
+    this.initSocket();
+  },
+  beforeDestroy() {
+    this.socket.close()
+    this.terminal.dispose()
+  },
+  methods: {
+    // 初始化 WebSocket
+    initSocket() {
+      this.socket = new WebSocket(this.socketUrl);
+      // 连接成功后
+      this.socket.onopen = () => {
+        this.initTerminal();
+      }
+    },
+    // 初始化 Terminal 
+    initTerminal() {
+      this.terminal = new Terminal({
+        fontSize: 14,
+        cursorBlink: true,
+        // Whether input should be disabled.
+        disableStdin: false,
+        rendererType: 'canvas',
+      });
+      this.terminal.open(document.getElementById('xterm'));
+      const attachAddon = new AttachAddon(this.socket, { bidirectional: false });
+      const fitAddon = new FitAddon();
+      this.terminal.loadAddon(attachAddon);
+      this.terminal.loadAddon(fitAddon);
+      fitAddon.fit();
+      this.terminal.focus();
+
+      this.terminal.onKey(data => {
+        this.keyCode = data.domEvent.keyCode;
+        // 将输入的字符打印到黑板中
+        this.terminal.write(data.key);
+        // 输入回车
+        if (this.keyCode === 13) {
+          // 使用 webscoket 发送数据
+          let op = {
+            'data': this.text + '\r'
+          }
+          this.socket.send(JSON.stringify(op));
+          this.text = '';
+          return;
+        }
+        // 删除按钮
+        if (this.keyCode === 8) {
+          // 截取字符串[0,lenth-1]
+          this.text = this.text.substr(0,this.text.length-1);
+          // 清空当前一条的命令(光标前移 n 个字符，删除光标之后的数据)
+          this.terminal.write(`\x1b[${this.text.length + 1}D\x1b[0J`);
+          // 简化当前的新的命令显示上
+          this.terminal.write(this.text);
+          return;
+        }
+        // 将每次输入的字符拼凑起来
+        this.text += data.key;
+      })
+    },
+  }
+}
+</script>

@@ -17,6 +17,7 @@ import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.spring.SpringUtil;
 import com.sun.tools.attach.VirtualMachine;
 import io.jpom.common.commander.impl.LinuxProjectCommander;
+import io.jpom.common.commander.impl.MacOSProjectCommander;
 import io.jpom.common.commander.impl.WindowsProjectCommander;
 import io.jpom.model.RunMode;
 import io.jpom.model.data.JdkInfoModel;
@@ -30,6 +31,7 @@ import io.jpom.util.CommandUtil;
 import io.jpom.util.FileUtils;
 import io.jpom.util.JvmUtil;
 
+import javax.crypto.Mac;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -77,7 +79,7 @@ public abstract class AbstractProjectCommander {
             // Windows系统
             abstractProjectCommander = new WindowsProjectCommander();
         } else if (SystemUtil.getOsInfo().isMac()) {
-            abstractProjectCommander = new LinuxProjectCommander();
+            abstractProjectCommander = new MacOSProjectCommander();
         } else {
             throw new JpomRuntimeException("不支持的：" + SystemUtil.getOsInfo().getName());
         }
@@ -451,6 +453,7 @@ public abstract class AbstractProjectCommander {
         if (name != null) {
             return name;
         }
+        DefaultSystemLog.getLog().debug("getJpomNameByPid pid: {}", pid);
         ProjectInfoService projectInfoService = SpringUtil.getBean(ProjectInfoService.class);
         List<ProjectInfoModel> projectInfoModels = projectInfoService.list();
         if (projectInfoModels == null || projectInfoModels.isEmpty()) {

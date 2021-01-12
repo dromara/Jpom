@@ -54,6 +54,28 @@ public class SystemConfigController extends BaseServerController {
         return "system/config";
     }
 
+    /**
+     * @author Hotstrip
+     * get server's config or node's config
+     * 加载服务端或者节点端配置
+     * @param nodeId
+     * @return
+     * @throws IOException
+     */
+    @RequestMapping(value = "config-data", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @SystemPermission
+    @ResponseBody
+    public String configData(String nodeId) throws IOException {
+        String content;
+        if (StrUtil.isNotEmpty(nodeId)) {
+            JSONObject jsonObject = NodeForward.requestData(getNode(), NodeUrl.SystemGetConfig, getRequest(), JSONObject.class);
+            content = jsonObject.getString("content");
+        } else {
+            content = IoUtil.read(ExtConfigBean.getResource().getInputStream(), CharsetUtil.CHARSET_UTF_8);
+        }
+        return JsonMessage.getString(200, "加载成功", content);
+    }
+
     @RequestMapping(value = "save_config.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     @OptLog(UserOperateLogV1.OptType.EditSysConfig)

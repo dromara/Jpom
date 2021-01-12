@@ -1,5 +1,6 @@
 package io.jpom.controller.node.manage.recover;
 
+import cn.jiangzeyin.common.JsonMessage;
 import io.jpom.common.BaseServerController;
 import io.jpom.common.forward.NodeForward;
 import io.jpom.common.forward.NodeUrl;
@@ -36,6 +37,21 @@ public class ProjectRecoverControl extends BaseServerController {
         List list = NodeForward.requestData(getNode(), NodeUrl.Manage_Recover_List_Data, getRequest(), List.class);
         setAttribute("array", list);
         return "node/manage/project_recover";
+    }
+
+    /**
+     * @author Hotstrip
+     * get recover list
+     * 项目回收列表
+     * @return
+     * @throws IOException
+     */
+    @RequestMapping(value = "recover-list", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @ResponseBody
+    @Feature(method = MethodFeature.LIST)
+    public String recoverList() throws IOException {
+        List list = NodeForward.requestData(getNode(), NodeUrl.Manage_Recover_List_Data, getRequest(), List.class);
+        return JsonMessage.getString(200, "success", list);
     }
 
     @RequestMapping(value = "data.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)

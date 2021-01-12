@@ -5,6 +5,7 @@ import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.validator.ValidatorItem;
 import cn.jiangzeyin.common.validator.ValidatorRule;
 import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import io.jpom.common.BaseServerController;
 import io.jpom.common.forward.NodeForward;
 import io.jpom.common.forward.NodeUrl;
@@ -26,6 +27,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.annotation.Resource;
+import java.util.HashSet;
 import java.util.List;
 
 /**
@@ -101,6 +103,19 @@ public class ProjectManageControl extends BaseServerController {
     }
 
     /**
+     * @author Hotstrip
+     * get project group
+     * 获取项目的分组信息
+     * @return
+     */
+    @RequestMapping(value = "project-group-list", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public String projectGroupList() {
+        List<String> allGroup = projectInfoService.getAllGroup(getNode());
+        return JsonMessage.getString(200, "success", allGroup);
+    }
+
+    /**
      * 查询所有项目
      *
      * @return json
@@ -112,6 +127,20 @@ public class ProjectManageControl extends BaseServerController {
         NodeModel nodeModel = getNode();
         JSONArray jsonArray = projectInfoService.listAll(nodeModel, getRequest());
         return JsonMessage.getString(200, "ok", jsonArray);
+    }
+
+    /**
+     * @author Hotstrip
+     * get project by id
+     * 查询单个项目信息
+     * @param id
+     * @return
+     */
+    @RequestMapping(value = "getProjectById", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @ResponseBody
+    public String getProjectById(String id) {
+        JSONObject projectInfo = projectInfoService.getItem(getNode(), id);
+        return JsonMessage.getString(200, "ok", projectInfo);
     }
 
 
