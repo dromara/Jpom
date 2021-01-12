@@ -1,31 +1,33 @@
 <template>
-  <a-card class="login-card" hoverable style="width: 400px">
-    <a-card-meta title="Jpom Dashboard" description=""/>
-    <br/>
-    <a-form :form="loginForm" :label-col="{ span: 0 }" @submit="handleLogin">
-      <a-form-item :wrapper-col="{span: 24}">
-        <a-input v-decorator="['userName', { rules: [{ required: true, message: 'Please input your name!' }] }]" placeholder="User Name"/>
-      </a-form-item>
-      <a-form-item :wrapper-col="{span: 24}">
-        <a-input-password v-decorator="['userPwd', { rules: [{ required: true, message: 'Please input your password!' }] }]" placeholder="Password"/>
-      </a-form-item>
-      <a-form-item :wrapper-col="{span: 24}">
-        <a-row>
-          <a-col :span="14">
-            <a-input v-decorator="['code', { rules: [{ required: true, message: 'Please input your code!' }] }]" placeholder="Code"/>
-          </a-col>
-          <a-col :span="10">
-            <img :src="randCode" @click="changeCode" class="rand-code"/>
-          </a-col>
-        </a-row>
-      </a-form-item>
-      <a-form-item :wrapper-col="{ span: 24 }">
-        <a-button type="primary" html-type="submit">
-          登录
-        </a-button>
-      </a-form-item>
-    </a-form>
-  </a-card>
+  <!-- <div class="wrapper"> -->
+    <a-card class="login-card" hoverable style="width: 450px">
+      <a-card-meta title="Jpom Dashboard" description=""/>
+      <br/>
+      <a-form :form="loginForm" :label-col="{ span: 0 }" @submit="handleLogin">
+        <a-form-item :wrapper-col="{span: 24}">
+          <a-input v-decorator="['userName', { rules: [{ required: true, message: 'Please input your name!' }] }]" placeholder="User Name"/>
+        </a-form-item>
+        <a-form-item :wrapper-col="{span: 24}">
+          <a-input-password v-decorator="['userPwd', { rules: [{ required: true, message: 'Please input your password!' }] }]" placeholder="Password"/>
+        </a-form-item>
+        <a-form-item :wrapper-col="{span: 24}">
+          <a-row>
+            <a-col :span="14">
+              <a-input v-decorator="['code', { rules: [{ required: true, message: 'Please input your code!' }] }]" placeholder="Code"/>
+            </a-col>
+            <a-col :span="10">
+              <img :src="randCode" @click="changeCode" class="rand-code"/>
+            </a-col>
+          </a-row>
+        </a-form-item>
+        <a-form-item :wrapper-col="{ span: 24 }">
+          <a-button type="primary" html-type="submit" class="btn-login">
+            登录
+          </a-button>
+        </a-form-item>
+      </a-form>
+    </a-card>
+  <!-- </div> -->
 </template>
 <script>
 import { login } from '../../api/user';
@@ -85,5 +87,16 @@ export default {
 }
 .rand-code {
   height: 38px;
+}
+.btn-login {
+  width: 120px;
+}
+</style>
+<style>
+body {
+  background-color: #fbefdf;
+}
+.ant-card-meta-title {
+  font-size: 30px;
 }
 </style>

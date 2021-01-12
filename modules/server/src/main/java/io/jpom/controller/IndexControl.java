@@ -20,6 +20,7 @@ import io.jpom.service.user.RoleService;
 import io.jpom.service.user.UserService;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -72,6 +73,12 @@ public class IndexControl extends BaseServerController {
         // 版本号
         setAttribute("jpomManifest", JpomManifest.getInstance());
         return "index";
+    }
+
+    @GetMapping(value = {"welcome", "welcome.html"})
+    @NotLogin
+    public String welcome() {
+        return "../dist/index.html";
     }
 
     /**
