@@ -2,7 +2,7 @@
   <div>
     <a-form-model ref="editForm" :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 14 }">
       <a-form-model-item label="白名单路径" prop="id">
-        <a-input v-model="temp.whiteList" type="textarea" :rows="5" style="resize: none" placeholder="请输入白名单路径白名单，回车支持输入多个路径，系统会自动过滤 ../ 路径、不允许输入根路径"/>
+        <a-input v-model="temp.whiteList" type="textarea" :rows="5" style="resize: none" placeholder="请输入白名单路径，回车支持输入多个路径，系统会自动过滤 ../ 路径、不允许输入根路径"/>
       </a-form-model-item>
       <a-form-model-item :wrapper-col="{ span: 14, offset: 6 }">
         <a-button type="primary" :disabled="submitAble" @click="onSubmit">提交</a-button>

@@ -2,7 +2,10 @@ import axios from './config';
 
 // 分发列表
 export function getDishPatchList() {
-  
+  return axios({
+    url: '/outgiving/dispatch-list',
+    method: 'post'
+  })
 }
 
 

@@ -278,7 +278,10 @@ export default {
     },
     // 添加
     handleAdd() {
-      this.temp = {type: 'add'};
+      this.temp = {
+        type: 'add',
+        javaCopyItemList: []
+      };
       this.editProjectVisible = true;
     },
     // 编辑

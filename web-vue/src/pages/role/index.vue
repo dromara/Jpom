@@ -21,7 +21,7 @@
         <a-form-model-item label="权限" prop="feature" class="feature">
           <a-tree v-model="checkedKeys" 
             checkStrictly checkable defaultExpandAll :selectable="false" :tree-data="featureList" 
-            :replaceFields="replaceFields" />
+            :replaceFields="replaceFields" @check="checkNode"/>
         </a-form-model-item>
       </a-form-model>
     </a-modal>
@@ -118,6 +118,24 @@ export default {
       this.temp.name = record.name;
       // 显示对话框
       this.editRoleVisible = true;
+    },
+    // 选中角色事件
+    checkNode(checkedKeys, e) {
+      const checked = e.checked;
+      const node = e.node.dataRef;
+      // 如果选中父节点，子节点默认选中
+      if (checked && node.children) {
+        node.children.forEach(ele => {
+          this.checkedKeys.checked.push(ele.id);
+        })
+      }
+      // 如果取消选中父节点，子节点也取消选中
+      if (!checked && node.children) {
+        node.children.forEach(ele => {
+          const index = this.checkedKeys.checked.findIndex(id => ele.id === id);
+          this.checkedKeys.checked.splice(index, 1);
+        })
+      }
     },
     // 提交角色数据
     handleEditRoleOk() {
