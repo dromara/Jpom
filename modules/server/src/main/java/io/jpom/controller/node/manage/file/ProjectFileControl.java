@@ -99,6 +99,7 @@ public class ProjectFileControl extends BaseServerController {
     @RequestMapping(value = "deleteFile", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     @Feature(method = MethodFeature.DEL_FILE)
+    @OptLog(UserOperateLogV1.OptType.DelProjectFile)
     public String deleteFile() {
         return NodeForward.request(getNode(), getRequest(), NodeUrl.Manage_File_DeleteFile).toString();
     }
