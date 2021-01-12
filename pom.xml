@@ -32,7 +32,8 @@
         <docker.workdir>/tmp/</docker.workdir>
         <!-- 跳过测试 -->
         <skipTests>true</skipTests>
-
+        <maven.test.skip>true</maven.test.skip>
+        <maven.javadoc.skip>true</maven.javadoc.skip>
         <hutool-all.version>[5.4.0,5.4.99]</hutool-all.version>
     </properties>
     <dependencies>
