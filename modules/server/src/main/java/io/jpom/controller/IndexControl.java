@@ -75,6 +75,11 @@ public class IndexControl extends BaseServerController {
         return "index";
     }
 
+    /**
+     * new version login page for vue
+     * 新版本的登录页面
+     * @return
+     */
     @GetMapping(value = {"welcome", "welcome.html"})
     @NotLogin
     public String welcome() {
