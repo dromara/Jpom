@@ -60,6 +60,20 @@ public class OutGivingController extends BaseServerController {
         return "outgiving/list";
     }
 
+    /**
+     * @author Hotstrip
+     * load dispatch list
+     * 加载分发列表
+     * @return
+     */
+    @RequestMapping(value = "dispatch-list", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @ResponseBody
+    @Feature(method = MethodFeature.LIST)
+    public String dispatchList() {
+        List<OutGivingModel> list = outGivingServer.list();
+        return JsonMessage.getString(200, "success", list);
+    }
+
     @RequestMapping(value = "edit.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
     @Feature(method = MethodFeature.EDIT)
     public String edit(String id) {

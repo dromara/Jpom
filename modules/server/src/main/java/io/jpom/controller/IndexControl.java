@@ -76,6 +76,7 @@ public class IndexControl extends BaseServerController {
     }
 
     /**
+     * @author Hotstrip
      * new version login page for vue
      * 新版本的登录页面
      * @return
