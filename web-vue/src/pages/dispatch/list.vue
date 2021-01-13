@@ -7,7 +7,7 @@
     </div>
     <!-- 表格 -->
     <a-table :loading="loading" :columns="columns" :data-source="list" bordered rowKey="id" class="node-table"
-      @expand="expand" :pagination="false">
+     :pagination="false">
       <a-tooltip slot="id" slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>
@@ -42,7 +42,7 @@
     <a-modal v-model="linkDispatchVisible" width="600px" title="编辑关联项目" @ok="handleLinkDispatchOk" :maskClosable="false">
       <a-form-model ref="linkDispatchForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
         <a-form-model-item label="分发 ID" prop="id">
-          <a-input v-model="temp.id" placeholder="创建之后不能修改"/>
+          <a-input v-model="temp.id" :disabled="temp.type === 'edit'" placeholder="创建之后不能修改"/>
         </a-form-model-item>
         <a-form-model-item label="分发名称" prop="name">
           <a-input v-model="temp.name" placeholder="分发名称"/>
@@ -62,7 +62,7 @@
             @change="handleChange"
           />
         </a-form-model-item>
-        <a-form-model-item label="发布后操作" prop="afterOpt">
+        <a-form-model-item label="分发后操作" prop="afterOpt">
           <a-select v-model="temp.afterOpt" placeholder="请选择发布后操作">
             <a-select-option :key="0">不做任何操作</a-select-option>
             <a-select-option :key="1">并发重启</a-select-option>
@@ -73,10 +73,44 @@
       </a-form-model>
     </a-modal>
     <!-- 创建分发项目 -->
+    <a-modal v-model="editDispatchVisible" width="600px" title="创建分发项目" @ok="handleEditDispatchOk" :maskClosable="false">
+      <a-form-model ref="linkDispatchForm" :rules="rules" :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 18 }">
+        <a-form-model-item label="项目 ID" prop="id">
+          <a-input v-model="temp.id" :disabled="temp.type === 'edit'" placeholder="创建之后不能修改"/>
+        </a-form-model-item>
+        <a-form-model-item label="项目名称" prop="name">
+          <a-input v-model="temp.name" placeholder="项目名称"/>
+        </a-form-model-item>
+        <a-form-model-item label="运行方式" prop="runMode">
+          <a-select v-model="temp.runMode" placeholder="请选择运行方式">
+            <a-select-option v-for="runMode in runModeList" :key="runMode">{{ runMode }}</a-select-option>
+          </a-select>
+        </a-form-model-item>
+        <a-form-model-item label="Main Class" prop="mainClass" v-show="temp.runMode !== 'Jar'">
+          <a-input v-model="temp.mainClass" placeholder="程序运行的 main 类(jar 模式运行可以不填)"/>
+        </a-form-model-item>
+        <a-form-model-item label="项目白名单路径" prop="whitelistDirectory">
+          <a-select v-model="temp.whitelistDirectory" placeholder="请选择项目白名单路径">
+            <a-select-option v-for="access in accessList" :key="access">{{ access }}</a-select-option>
+          </a-select>
+        </a-form-model-item>
+        <a-form-model-item label="项目文件夹" prop="lib">
+          <a-input v-model="temp.lib" placeholder="项目存储的文件夹，jar 包存放的文件夹"/>
+        </a-form-model-item>
+        <a-form-model-item label="分发后操作" prop="afterOpt">
+          <a-select v-model="temp.afterOpt" placeholder="请选择发布后操作">
+            <a-select-option :key="0">不做任何操作</a-select-option>
+            <a-select-option :key="1">并发重启</a-select-option>
+            <a-select-option :key="2">完整顺序重启(有重启失败将结束本次)</a-select-option>
+            <a-select-option :key="3">顺序重启(有重启失败将继续)</a-select-option>
+          </a-select>
+        </a-form-model-item>
+      </a-form-model>
+    </a-modal>
   </div>
 </template>
 <script>
-import { getDishPatchList, getReqId, editDispatch } from '../../api/dispatch';
+import { getDishPatchList, getReqId, editDispatch, getDispatchWhiteList, deleteDisPatch } from '../../api/dispatch';
 import { getNodeProjectList } from '../../api/node'
 export default {
   data() {
@@ -84,12 +118,20 @@ export default {
       loading: false,
       childLoading: false,
       list: [],
+      accessList: [],
       nodeList: [],
       projectList: [],
       nodeProjectMap: {},
       targetKeys: [],
       reqId: '',
       temp: {},
+      runModeList: [
+        'ClassPath',
+        'Jar',
+        'JarWar',
+        'JavaExtDirsCp',
+        // 'File'
+      ],
       linkDispatchVisible: false,
       editDispatchVisible: false,
       columns: [
@@ -115,6 +157,15 @@ export default {
         ],
         projectId: [
           { required: true, message: 'Please select project', trigger: 'blur' }
+        ],
+        runMode: [
+          { required: true, message: 'Please select project runMode', trigger: 'blur' }
+        ],
+        whitelistDirectory: [
+          { required: true, message: 'Please select project access path', trigger: 'blur' }
+        ],
+        lib: [
+          { required: true, message: 'Please input project lib', trigger: 'blur' }
         ]
       }
     }
@@ -125,10 +176,12 @@ export default {
   methods: {
     // 加载数据
     loadData() {
+      this.loading = true;
       getDishPatchList().then(res => {
         if (res.code === 200) {
           this.list = res.data;
         }
+        this.loading = false;
       })
     },
     // 加载节点项目列表
@@ -173,28 +226,19 @@ export default {
         }
       })
     },
-    // 展开行
-    expand(expanded, record) {
-      if (expanded) {
-        // 请求节点状态数据
-        this.childLoading = true;
-        console.log(record);
-        this.childLoading = false;
-        // getNodeStatus(record.id).then(res => {
-        //   if (res.code === 200) {
-        //     // const index = this.list.findIndex(ele => ele.id === record.id);
-        //     // this.list[index].children = res.data;
-        //     record.children = res.data;
-        //   }
-        //   this.childLoading = false;
-        // })
-      }
-    },
     // 获取 reqId
     loadReqId() {
       getReqId().then(res => {
         if (res.code === 200) {
           this.reqId = res.data;
+        }
+      })
+    },
+    // 加载项目白名单列表
+    loadAccesList() {
+      getDispatchWhiteList().then(res => {
+        if (res.code === 200) {
+          this.accessList = res.data;
         }
       })
     },
@@ -211,6 +255,7 @@ export default {
       this.loadReqId();
       this.linkDispatchVisible = true;
     },
+    // 编辑
     handleEdit(record) {
       this.temp = Object.assign({}, record)
       this.temp.type = 'edit';
@@ -227,7 +272,10 @@ export default {
     },
     // 添加
     handleAdd() {
-      this.temp = {};
+      this.temp = {
+        type: 'add'
+      };
+      this.loadAccesList();
       this.editDispatchVisible = true;
     },
     // 选择项目
@@ -289,6 +337,36 @@ export default {
           }
         })
       })
+    },
+    // 提交创建分发项目
+    handleEditDispatchOk() {
+      // 检验表单
+      this.$refs['editDispatchForm'].validate((valid) => {
+        if (!valid) {
+          return false;
+        }
+      })
+    },
+    // 删除
+    handleDelete(record) {
+      this.$confirm({
+        title: '系统提示',
+        content: '真的要删除分发信息么？',
+        okText: '确认',
+        cancelText: '取消',
+        onOk: () => {
+          // 删除
+          deleteDisPatch(record.id).then((res) => {
+            if (res.code === 200) {
+              this.$notification.success({
+                message: res.msg,
+                duration: 2
+              });
+              this.handleFilter();
+            }
+          })
+        }
+      });
     }
   }
 }

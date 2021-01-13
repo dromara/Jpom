@@ -35,6 +35,20 @@ export function editDispatch(params) {
   })
 }
 
+/**
+ * 删除分发
+ * @param {*} id 分发 ID
+ */
+export function deleteDisPatch(id) {
+  return axios({
+    url: '/outgiving/del.json',
+    method: 'post',
+    data: {id}
+  })
+}
+
+// 创建分发项目
+
 // 获取分发白名单数据
 export function getDispatchWhiteList() {
   return axios({
