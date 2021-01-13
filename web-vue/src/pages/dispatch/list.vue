@@ -282,16 +282,22 @@ export default {
     handleEdit(record) {
       this.temp = Object.assign({}, record)
       this.temp.type = 'edit';
-      this.targetKeys = [];
-      // 设置选中的项目和节点
-      record.outGivingNodeProjectList.forEach(ele => {
-        if (!this.temp.projectId) {
-          this.temp.projectId = ele.projectId;
-        }
-        this.targetKeys.push(ele.nodeId);
-      })
-      this.loadReqId();
-      this.linkDispatchVisible = true;
+      // 判断分发项目类型
+      if (this.temp.outGivingProject) {
+        this.loadAccesList();
+        this.editDispatchVisible = true;
+      } else {
+        this.targetKeys = [];
+        // 设置选中的项目和节点
+        record.outGivingNodeProjectList.forEach(ele => {
+          if (!this.temp.projectId) {
+            this.temp.projectId = ele.projectId;
+          }
+          this.targetKeys.push(ele.nodeId);
+        })
+        this.loadReqId();
+        this.linkDispatchVisible = true;
+      }
     },
     // 添加
     handleAdd() {
