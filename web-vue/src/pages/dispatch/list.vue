@@ -116,17 +116,22 @@
       :visible="drawerFileVisible" @close="onFileClose">
       <file v-if="drawerFileVisible" :nodeId="temp.nodeId" :projectId="temp.projectId" />
     </a-drawer>
+    <!-- 项目控制台组件 -->
+    <a-drawer :title="drawerTitle" placement="right" width="85vw"
+      :visible="drawerConsoleVisible" @close="onConsoleClose">
+      <console v-if="drawerConsoleVisible" :nodeId="temp.nodeId" :projectId="temp.projectId" />
+    </a-drawer>
   </div>
 </template>
 <script>
 import File from '../node/node-layout/project/project-file';
-// import Console from '../node/node-layout/project/project-console';
+import Console from '../node/node-layout/project/project-console';
 import { getDishPatchList, getReqId, editDispatch, getDispatchWhiteList, deleteDisPatch } from '../../api/dispatch';
 import { getNodeProjectList } from '../../api/node'
 export default {
   components: {
     File,
-    // Console
+    Console
   },
   data() {
     return {
@@ -151,6 +156,7 @@ export default {
       editDispatchVisible: false,
       drawerTitle: '',
       drawerFileVisible: false,
+      drawerConsoleVisible: false,
       columns: [
         {title: '分发 ID', dataIndex: 'id', width: 100, ellipsis: true, scopedSlots: {customRender: 'id'}},
         {title: '分发名称', dataIndex: 'name', width: 150, ellipsis: true, scopedSlots: {customRender: 'name'}},
@@ -398,8 +404,13 @@ export default {
     // 控制台
     handleConsole(record) {
       this.temp = Object.assign(record);
-      this.drawerTitle = `控制台(${this.temp.name})`;
+      this.drawerTitle = `控制台(${this.temp.projectId})`;
       this.drawerConsoleVisible = true;
+    },
+    // 关闭控制台
+    onConsoleClose() {
+      this.drawerConsoleVisible = false;
+      this.handleFilter();
     }
   }
 }

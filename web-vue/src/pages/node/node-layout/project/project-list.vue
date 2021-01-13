@@ -124,7 +124,7 @@
     <!-- 项目控制台组件 -->
     <a-drawer :title="drawerTitle" placement="right" width="85vw"
       :visible="drawerConsoleVisible" @close="onConsoleClose">
-      <console v-if="drawerConsoleVisible" :node="node" :project="temp" />
+      <console v-if="drawerConsoleVisible" :nodeId="node.id" :projectId="temp.id" />
     </a-drawer>
     <!-- 项目监控组件 -->
     <a-drawer :title="drawerTitle" placement="right" width="85vw"

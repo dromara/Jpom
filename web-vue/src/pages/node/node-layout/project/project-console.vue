@@ -44,15 +44,15 @@
   </div>
 </template>
 <script>
-import { getProjectLogSize, downloadProjectLogFile, getLogBackList, downloadProjectLogBackFile, deleteProjectLogBackFile } from '../../../../api/node-project';
+import { getProjectById, getProjectLogSize, downloadProjectLogFile, getLogBackList, downloadProjectLogBackFile, deleteProjectLogBackFile } from '../../../../api/node-project';
 import { mapGetters } from 'vuex';
 export default {
   props: {
-    node: {
-      type: Object
+    nodeId: {
+      type: String
     },
-    project: {
-      type: Object
+    projectId: {
+      type: String
     },
     replica: {
       type: Object
@@ -63,6 +63,7 @@ export default {
   },
   data() {
     return {
+      project: {},
       loading: false,
       socket: null,
       // 日志内容
@@ -83,17 +84,31 @@ export default {
     ]),
     socketUrl() {
       const protocol = location.protocol === 'https' ? 'wss://' : 'ws://';
-      return `${protocol}${location.host}/console?userId=${this.getToken}&projectId=${this.project.id}&nodeId=${this.node.id}&type=console&copyId=${this.copyId}`;
+      return `${protocol}${location.host}/console?userId=${this.getToken}&projectId=${this.projectId}&nodeId=${this.nodeId}&type=console&copyId=${this.copyId}`;
     }
   },
   mounted() {
+    this.loadProject();
     this.initWebSocket();
-    this.loadFileSize();
   },
   beforeDestroy() {
     this.socket.close();
   },
   methods: {
+    // 加载项目
+    loadProject() {
+      const params = {
+        id: this.projectId,
+        nodeId: this.nodeId
+      }
+      getProjectById(params).then(res => {
+        if (res.code === 200) {
+          this.project = res.data;
+          // 加载日志文件大小
+          this.loadFileSize();
+        }
+      })
+    },
     // 初始化
     initWebSocket() {
       this.logContext = '';
@@ -142,7 +157,7 @@ export default {
     sendMsg(op) {
       const data = {
         op: op,
-        projectId: this.project.id,
+        projectId: this.projectId,
         copyId: this.copyId
       }
       this.socket.send(JSON.stringify(data));
@@ -150,8 +165,8 @@ export default {
     // 加载日志文件大小
     loadFileSize() {
       const params = {
-        nodeId: this.node.id,
-        id: this.project.id,
+        nodeId: this.nodeId,
+        id: this.projectId,
         copyId: this.copyId
       }
       getProjectLogSize(params).then(res => {
@@ -196,8 +211,8 @@ export default {
       });
       // 请求参数
       const params = {
-        nodeId: this.node.id,
-        id: this.project.id,
+        nodeId: this.nodeId,
+        id: this.projectId,
         copyId: this.copyId
       }
       // 请求接口拿到 blob
@@ -222,8 +237,8 @@ export default {
       this.detailData = [];
       this.lobbackVisible = true;
       const params = {
-        nodeId: this.node.id,
-        id: this.project.id
+        nodeId: this.nodeId,
+        id: this.projectId
       }
       getLogBackList(params).then(res => {
         if (res.code === 200) {
@@ -240,8 +255,8 @@ export default {
       });
       // 请求参数
       const params = {
-        nodeId: this.node.id,
-        id: this.project.id,
+        nodeId: this.nodeId,
+        id: this.projectId,
         copyId: this.copyId,
         key: record.filename
       }
@@ -266,8 +281,8 @@ export default {
         onOk: () => {
           // 请求参数
           const params = {
-            nodeId: this.node.id,
-            id: this.project.id,
+            nodeId: this.nodeId,
+            id: this.projectId,
             copyId: this.copyId,
             name: record.filename
           }
