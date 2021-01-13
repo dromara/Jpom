@@ -119,7 +119,7 @@
     <!-- 项目文件组件 -->
     <a-drawer :title="drawerTitle" placement="right" width="85vw"
       :visible="drawerFileVisible" @close="onFileClose">
-      <file v-if="drawerFileVisible" :node="node" :project="temp" />
+      <file v-if="drawerFileVisible" :nodeId="node.id" :projectId="temp.id" />
     </a-drawer>
     <!-- 项目控制台组件 -->
     <a-drawer :title="drawerTitle" placement="right" width="85vw"

@@ -36,6 +36,10 @@
         <a-tooltip slot="lastOutGivingTime" slot-scope="text" placement="topLeft" :title="text">
           <span>{{ text }}</span>
         </a-tooltip>
+        <template slot="child-operation" slot-scope="text, record">
+          <a-button type="primary" @click="handleFile(record)">文件</a-button>
+          <a-button type="primary" @click="handleConsole(record)">控制台</a-button>
+        </template>
       </a-table>
     </a-table>
     <!-- 添加关联项目 -->
@@ -107,12 +111,23 @@
         </a-form-model-item>
       </a-form-model>
     </a-modal>
+    <!-- 项目文件组件 -->
+    <a-drawer :title="drawerTitle" placement="right" width="85vw"
+      :visible="drawerFileVisible" @close="onFileClose">
+      <file v-if="drawerFileVisible" :nodeId="temp.nodeId" :projectId="temp.projectId" />
+    </a-drawer>
   </div>
 </template>
 <script>
+import File from '../node/node-layout/project/project-file';
+// import Console from '../node/node-layout/project/project-console';
 import { getDishPatchList, getReqId, editDispatch, getDispatchWhiteList, deleteDisPatch } from '../../api/dispatch';
 import { getNodeProjectList } from '../../api/node'
 export default {
+  components: {
+    File,
+    // Console
+  },
   data() {
     return {
       loading: false,
@@ -134,6 +149,8 @@ export default {
       ],
       linkDispatchVisible: false,
       editDispatchVisible: false,
+      drawerTitle: '',
+      drawerFileVisible: false,
       columns: [
         {title: '分发 ID', dataIndex: 'id', width: 100, ellipsis: true, scopedSlots: {customRender: 'id'}},
         {title: '分发名称', dataIndex: 'name', width: 150, ellipsis: true, scopedSlots: {customRender: 'name'}},
@@ -146,7 +163,7 @@ export default {
         {title: '项目状态', dataIndex: 'status', width: 150, ellipsis: true, scopedSlots: {customRender: 'status'}},
         {title: '分发状态', dataIndex: 'statusMsg', width: 180},
         {title: '最后分发时间', dataIndex: 'lastOutGivingTime', width: 180, ellipsis: true, scopedSlots: {customRender: 'lastOutGivingTime'}},
-        {title: '操作', dataIndex: 'operation', scopedSlots: {customRender: 'operation'}, width: 200, align: 'left'}
+        {title: '操作', dataIndex: 'child-operation', scopedSlots: {customRender: 'child-operation'}, width: 200, align: 'left'}
       ],
       rules: {
         id: [
@@ -367,6 +384,22 @@ export default {
           })
         }
       });
+    },
+    // 文件管理
+    handleFile(record) {
+      this.temp = Object.assign(record);
+      this.drawerTitle = `文件管理(${this.temp.projectId})`
+      this.drawerFileVisible = true;
+    },
+    // 关闭文件管理对话框
+    onFileClose() {
+      this.drawerFileVisible = false;
+    },
+    // 控制台
+    handleConsole(record) {
+      this.temp = Object.assign(record);
+      this.drawerTitle = `控制台(${this.temp.name})`;
+      this.drawerConsoleVisible = true;
     }
   }
 }
