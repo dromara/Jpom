@@ -99,6 +99,20 @@ public class OutGivingController extends BaseServerController {
         return "outgiving/edit";
     }
 
+    /**
+     * @author Hotstrip
+     * get reqId for edit feature
+     * 获取编辑时需要的 reqId
+     * @return
+     */
+    @RequestMapping(value = "get-reqId", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @ResponseBody
+    public String getReqId() {
+        List<NodeModel> nodeModels = nodeService.listAndProject();
+        String reqId = nodeService.cacheNodeList(nodeModels);
+        return JsonMessage.getString(200, "success", reqId);
+    }
+
     @RequestMapping(value = "save", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     @OptLog(UserOperateLogV1.OptType.SaveOutGiving)

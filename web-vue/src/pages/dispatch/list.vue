@@ -8,28 +8,32 @@
     <!-- 表格 -->
     <a-table :loading="loading" :columns="columns" :data-source="list" bordered rowKey="id" class="node-table"
       @expand="expand" :pagination="false">
-      <a-tooltip slot="group" slot-scope="text" placement="topLeft" :title="text">
+      <a-tooltip slot="id" slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>
-      <a-tooltip slot="url" slot-scope="text" placement="topLeft" :title="text">
+      <a-tooltip slot="name" slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>
+      <template slot="outGivingProject" slot-scope="text">
+        <span v-if="text">独立</span>
+        <span v-else>关联</span>
+      </template>
       <template slot="operation" slot-scope="text, record">
-        <a-button type="primary" @click="handleTerminal(record)" :disabled="!record.sshId">终端</a-button>
-        <a-button type="primary" @click="handleNode(record)" :disabled="record.openStatus === false">节点管理</a-button>
+        <a-button type="primary" @click="handleDispatch(record)">分发文件</a-button>
         <a-button type="primary" @click="handleEdit(record)">编辑</a-button>
         <a-button type="danger" @click="handleDelete(record)">删除</a-button>
       </template>
       <!-- 嵌套表格 -->
-      <a-table slot="expandedRowRender" slot-scope="text" :scroll="{x: '80vw'}" :loading="childLoading" :columns="childColumns" :data-source="text.children"
-        :pagination="false" :rowKey="(record, index) => record.id + index">
-        <a-tooltip slot="osName" slot-scope="text" placement="topLeft" :title="text">
+      <a-table slot="expandedRowRender" slot-scope="text" :scroll="{x: '80vw'}" :loading="childLoading" :columns="childColumns" :data-source="text.outGivingNodeProjectList"
+        :pagination="false" :rowKey="(record, index) => record.nodeId + record.projectId + index">
+        <a-tooltip slot="nodeId" slot-scope="text" placement="topLeft" :title="text">
           <span>{{ text }}</span>
         </a-tooltip>
-        <a-tooltip slot="javaVersion" slot-scope="text" placement="topLeft" :title="text">
+        <a-tooltip slot="projectId" slot-scope="text" placement="topLeft" :title="text">
           <span>{{ text }}</span>
         </a-tooltip>
-        <a-tooltip slot="runTime" slot-scope="text" placement="topLeft" :title="text">
+        <a-switch slot="status" slot-scope="text" :checked="text === 1" checked-children="运行中" un-checked-children="未运行"/>
+        <a-tooltip slot="lastOutGivingTime" slot-scope="text" placement="topLeft" :title="text">
           <span>{{ text }}</span>
         </a-tooltip>
       </a-table>
@@ -44,7 +48,7 @@
           <a-input v-model="temp.name" placeholder="分发名称"/>
         </a-form-model-item>
         <a-form-model-item label="分发项目" prop="projectId">
-          <a-select v-model="temp.projectId" placeholder="请选择需要分发的项目">
+          <a-select v-model="temp.projectId" placeholder="请选择需要分发的项目" @select="selectProject">
             <a-select-option v-for="project in projectList" :key="project.id">{{ project.name }}</a-select-option>
           </a-select>
         </a-form-model-item>
@@ -72,7 +76,7 @@
   </div>
 </template>
 <script>
-import { getDishPatchList } from '../../api/dispatch';
+import { getDishPatchList, getReqId, editDispatch } from '../../api/dispatch';
 import { getNodeProjectList } from '../../api/node'
 export default {
   data() {
@@ -82,29 +86,25 @@ export default {
       list: [],
       nodeList: [],
       projectList: [],
+      nodeProjectMap: {},
       targetKeys: [],
+      reqId: '',
       temp: {},
       linkDispatchVisible: false,
       editDispatchVisible: false,
       columns: [
-        {title: '节点 ID', dataIndex: 'id', width: 100, ellipsis: true, scopedSlots: {customRender: 'id'}},
-        {title: '节点名称', dataIndex: 'name', width: 150, ellipsis: true, scopedSlots: {customRender: 'name'}},
-        {title: '分组', dataIndex: 'group', width: 100, ellipsis: true, scopedSlots: {customRender: 'group'}},
-        {title: '节点协议', dataIndex: 'protocol', width: 100, ellipsis: true, scopedSlots: {customRender: 'protocol'}},
-        {title: '节点地址', dataIndex: 'url', width: 150, ellipsis: true, scopedSlots: {customRender: 'url'}},
-        {title: '超时时间', dataIndex: 'timeOut', width: 100, ellipsis: true},
-        {title: '操作', dataIndex: 'operation', scopedSlots: {customRender: 'operation'}, width: '360px', align: 'left'}
+        {title: '分发 ID', dataIndex: 'id', width: 100, ellipsis: true, scopedSlots: {customRender: 'id'}},
+        {title: '分发名称', dataIndex: 'name', width: 150, ellipsis: true, scopedSlots: {customRender: 'name'}},
+        {title: '类型', dataIndex: 'outGivingProject', width: 100, ellipsis: true, scopedSlots: {customRender: 'outGivingProject'}},
+        {title: '操作', dataIndex: 'operation', scopedSlots: {customRender: 'operation'}, width: 300, align: 'left'}
       ],
       childColumns: [
-        {title: '系统名', dataIndex: 'osName', width: 100, ellipsis: true, scopedSlots: {customRender: 'osName'}},
-        {title: 'JDK 版本', dataIndex: 'javaVersion', width: 120, ellipsis: true, scopedSlots: {customRender: 'javaVersion'}},
-        {title: 'JVM 总内存', dataIndex: 'totalMemory', width: 150},
-        {title: 'JVM 剩余内存', dataIndex: 'freeMemory', width: 180},
-        {title: 'Jpom 版本', dataIndex: 'jpomVersion', width: 140},
-        {title: 'Java 程序数', dataIndex: 'javaVirtualCount', width: 150},
-        {title: '项目数', dataIndex: 'count', width: 100},
-        {title: '响应时间', dataIndex: 'timeOut', width: 120},
-        {title: '已运行时间', dataIndex: 'runTime', width: 150, ellipsis: true, scopedSlots: {customRender: 'runTime'}}
+        {title: '节点名称', dataIndex: 'nodeId', width: 100, ellipsis: true, scopedSlots: {customRender: 'nodeId'}},
+        {title: '项目名称', dataIndex: 'projectId', width: 120, ellipsis: true, scopedSlots: {customRender: 'projectId'}},
+        {title: '项目状态', dataIndex: 'status', width: 150, ellipsis: true, scopedSlots: {customRender: 'status'}},
+        {title: '分发状态', dataIndex: 'statusMsg', width: 180},
+        {title: '最后分发时间', dataIndex: 'lastOutGivingTime', width: 180, ellipsis: true, scopedSlots: {customRender: 'lastOutGivingTime'}},
+        {title: '操作', dataIndex: 'operation', scopedSlots: {customRender: 'operation'}, width: 200, align: 'left'}
       ],
       rules: {
         id: [
@@ -135,21 +135,40 @@ export default {
     loadNodeProjectList() {
       this.nodeList = [];
       this.projectList = [];
+      // nodeProjectMap 这个对象用来判断项目对应的节点是否该禁用
+      this.nodeProjectMap = {};
       getNodeProjectList().then(res => {
         if (res.code === 200) {
           res.data.forEach(node => {
             const nodeItem = {
               title: node.name,
-              key: node.id
+              key: node.id,
+              disabled: true
             }
             node.projects.forEach(project => {
-              const projectItem = {
-                name: project.name,
-                id: project.id
+              // 如果项目 ID 存在就不用继续添加
+              const index = this.projectList.findIndex(p => p.id === project.id);
+              if (index === -1) {
+                const projectItem = {
+                  name: `${project.name} ( ${project.id} )`,
+                  id: project.id
+                }
+                this.projectList.push(projectItem);
               }
-              this.projectList.push(projectItem);
+              // 判断对象是否存在
+              if (!this.nodeProjectMap[`${project.id}`]) {
+                this.nodeProjectMap[`${project.id}`] = [
+                  ...this.nodeProjectMap[`${project.id}`] || [],
+                  node.id
+                ];
+              } else {
+                const tempIndex = this.nodeProjectMap[`${project.id}`].findIndex(nodeId => node.id === nodeId);
+                if (tempIndex === -1) {
+                  this.nodeProjectMap[`${project.id}`].push(node.id);
+                }
+              }
             })
-            this.nodeList.push(nodeItem)
+            this.nodeList.push(nodeItem);
           })
         }
       })
@@ -160,6 +179,7 @@ export default {
         // 请求节点状态数据
         this.childLoading = true;
         console.log(record);
+        this.childLoading = false;
         // getNodeStatus(record.id).then(res => {
         //   if (res.code === 200) {
         //     // const index = this.list.findIndex(ele => ele.id === record.id);
@@ -170,6 +190,14 @@ export default {
         // })
       }
     },
+    // 获取 reqId
+    loadReqId() {
+      getReqId().then(res => {
+        if (res.code === 200) {
+          this.reqId = res.data;
+        }
+      })
+    },
     // 筛选
     handleFilter() {
       this.loadData();
@@ -177,13 +205,35 @@ export default {
     },
     // 关联
     handleLink() {
-      this.temp = {};
+      this.temp = {
+        type: 'add'
+      };
+      this.loadReqId();
       this.linkDispatchVisible = true;
     },
     // 添加
     handleAdd() {
       this.temp = {};
       this.editDispatchVisible = true;
+    },
+    // 选择项目
+    selectProject(value) {
+      this.nodeList.forEach(node => {
+        node.disabled = true;
+      })
+      this.nodeProjectMap[value].forEach(nodeId => {
+        this.nodeList.forEach(node => {
+          if (node.key === nodeId) {
+            node.disabled = false;
+          }
+        })
+      })
+      // this.nodeProjectMap[value]
+      Object.keys(this.nodeProjectMap).forEach(key => {
+        this.nodeProjectMap[key].forEach(project => {
+          console.log(project)
+        })
+      })
     },
     // 穿梭框筛选
     filterOption(inputValue, option) {
@@ -195,7 +245,39 @@ export default {
     },
     // 提交关联项目
     handleLinkDispatchOk() {
-
+      // 检验表单
+      this.$refs['linkDispatchForm'].validate((valid) => {
+        if (!valid) {
+          return false;
+        }
+        // 检查
+        if (this.targetKeys.length < 2) {
+          this.$notification.warn({
+            message: '请至少选择 2 个节点',
+            duration: 2
+          });
+          return false;
+        }
+        // 设置 reqId
+        this.temp.reqId = this.reqId;
+        this.targetKeys.forEach(key => {
+          this.temp[`node_${key}`] = this.temp.projectId;
+        })
+        // 提交
+        editDispatch(this.temp).then(res => {
+          if (res.code === 200) {
+            // 成功
+            this.$notification.success({
+              message: res.msg,
+              duration: 2
+            });
+            this.targetKeys = [];
+            this.$refs['linkDispatchForm'].resetFields();
+            this.linkDispatchVisible = false;
+            this.handleFilter();
+          }
+        })
+      })
     }
   }
 }
