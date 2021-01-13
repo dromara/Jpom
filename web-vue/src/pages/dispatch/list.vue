@@ -211,6 +211,20 @@ export default {
       this.loadReqId();
       this.linkDispatchVisible = true;
     },
+    handleEdit(record) {
+      this.temp = Object.assign({}, record)
+      this.temp.type = 'edit';
+      this.targetKeys = [];
+      // 设置选中的项目和节点
+      record.outGivingNodeProjectList.forEach(ele => {
+        if (!this.temp.projectId) {
+          this.temp.projectId = ele.projectId;
+        }
+        this.targetKeys.push(ele.nodeId);
+      })
+      this.loadReqId();
+      this.linkDispatchVisible = true;
+    },
     // 添加
     handleAdd() {
       this.temp = {};
@@ -218,6 +232,7 @@ export default {
     },
     // 选择项目
     selectProject(value) {
+      this.targetKeys = [];
       this.nodeList.forEach(node => {
         node.disabled = true;
       })
@@ -226,12 +241,6 @@ export default {
           if (node.key === nodeId) {
             node.disabled = false;
           }
-        })
-      })
-      // this.nodeProjectMap[value]
-      Object.keys(this.nodeProjectMap).forEach(key => {
-        this.nodeProjectMap[key].forEach(project => {
-          console.log(project)
         })
       })
     },
@@ -275,6 +284,8 @@ export default {
             this.$refs['linkDispatchForm'].resetFields();
             this.linkDispatchVisible = false;
             this.handleFilter();
+          } else {
+            this.targetKeys = [];
           }
         })
       })
