@@ -103,6 +103,19 @@ public class ProjectManageControl extends BaseServerController {
     }
 
     /**
+     * @author Hotstrip
+     * get project group
+     * 获取项目的分组信息
+     * @return
+     */
+    @RequestMapping(value = "project-group-list", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public String projectGroupList() {
+        List<String> allGroup = projectInfoService.getAllGroup(getNode());
+        return JsonMessage.getString(200, "success", allGroup);
+    }
+
+    /**
      * 查询所有项目
      *
      * @return json
@@ -115,21 +128,6 @@ public class ProjectManageControl extends BaseServerController {
         JSONArray jsonArray = projectInfoService.listAll(nodeModel, getRequest());
         return JsonMessage.getString(200, "ok", jsonArray);
     }
-
-    /**
-     * @author Hotstrip
-     * get project by id
-     * 查询单个项目信息
-     * @param id
-     * @return
-     */
-    @RequestMapping(value = "getProjectById", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    @ResponseBody
-    public String getProjectById(String id) {
-        JSONObject projectInfo = projectInfoService.getItem(getNode(), id);
-        return JsonMessage.getString(200, "ok", projectInfo);
-    }
-
 
     /**
      * 删除项目
