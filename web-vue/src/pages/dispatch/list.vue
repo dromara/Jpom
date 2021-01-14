@@ -79,7 +79,7 @@
     </a-modal>
     <!-- 创建分发项目 -->
     <a-modal v-model="editDispatchVisible" width="600px" title="创建分发项目" @ok="handleEditDispatchOk" :maskClosable="false">
-      <a-form-model ref="linkDispatchForm" :rules="rules" :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 18 }">
+      <a-form-model ref="editDispatchForm" :rules="rules" :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 18 }">
         <a-form-model-item label="项目 ID" prop="id">
           <a-input v-model="temp.id" :disabled="temp.type === 'edit'" placeholder="创建之后不能修改"/>
         </a-form-model-item>
@@ -110,7 +110,41 @@
             <a-select-option :key="3">顺序重启(有重启失败将继续)</a-select-option>
           </a-select>
         </a-form-model-item>
-        
+        <!-- 节点 -->
+        <a-form-model-item label="分发节点节点" prop="nodeId">
+          <a-select v-model="temp.nodeIdList" mode="multiple" placeholder="请选择分发节点">
+            <a-select-option v-for="node in nodeList" :key="node.key">{{ `${node.title} ( ${node.key} )` }}</a-select-option>
+          </a-select>
+        </a-form-model-item>
+        <a-collapse>
+          <a-collapse-panel v-for="nodeId in temp.nodeIdList" :key="nodeId" :header="nodeId">
+            <a-form-model-item label="WebHooks" prop="token">
+              <a-input v-model="temp[`${nodeId}_token`]" placeholder="关闭程序时自动请求,非必填，GET请求"/>
+            </a-form-model-item>
+            <a-form-model-item label="JVM 参数" prop="jvm">
+              <a-textarea v-model="temp[`${nodeId}_jvm`]" :auto-size="{ minRows: 3, maxRows: 3 }" placeholder="jvm参数,非必填.如：-Xmin=512m -Xmax=512m"/>
+            </a-form-model-item>
+            <a-form-model-item label="args 参数" prop="args">
+              <a-textarea v-model="temp[`${nodeId}_args`]" :auto-size="{ minRows: 3, maxRows: 3 }" placeholder="Main 函数 args 参数，非必填. 如：--service.port=8080"/>
+            </a-form-model-item>
+            <!-- 副本信息 -->
+            <a-row v-for="replica in temp.javaCopyItemList" :key="replica.id">
+              <a-form-model-item :label="`副本 ${replica.id} JVM 参数`" prop="jvm">
+                <a-textarea v-model="temp[`${nodeId}_jvm_${replica.id}`]" :auto-size="{ minRows: 3, maxRows: 3 }" class="replica-area" placeholder="jvm参数,非必填.如：-Xmin=512m -Xmax=512m"/>
+              </a-form-model-item>
+              <a-form-model-item :label="`副本 ${replica.id} args 参数`" prop="args">
+                <a-textarea v-model="temp[`${nodeId}_args_${replica.id}`]" :auto-size="{ minRows: 3, maxRows: 3 }" class="replica-area" placeholder="Main 函数 args 参数，非必填. 如：--service.port=8080"/>
+              </a-form-model-item>
+              <a-tooltip placement="topLeft" title="已经添加成功的副本需要在副本管理页面去删除" class="replica-btn-del">
+                <a-button :disabled="!replica.deleteAble" type="danger" @click="handleDeleteReplica(replica)">删除</a-button>
+              </a-tooltip>
+            </a-row>
+            <!-- 添加副本 -->
+            <a-form-model-item label="操作" >
+              <a-button type="primary" @click="handleAddReplica">添加副本</a-button>
+            </a-form-model-item>
+          </a-collapse-panel>
+        </a-collapse>
       </a-form-model>
     </a-modal>
     <!-- 项目文件组件 -->
@@ -128,7 +162,7 @@
 <script>
 import File from '../node/node-layout/project/project-file';
 import Console from '../node/node-layout/project/project-console';
-import { getDishPatchList, getReqId, editDispatch, /*editDispatchProject,*/ getDispatchWhiteList, deleteDisPatch } from '../../api/dispatch';
+import { getDishPatchList, getReqId, editDispatch, editDispatchProject, getDispatchWhiteList, deleteDisPatch } from '../../api/dispatch';
 import { getNodeProjectList } from '../../api/node'
 export default {
   components: {
@@ -298,15 +332,26 @@ export default {
     // 添加分发项目
     handleAdd() {
       this.temp = {
-        type: 'add'
+        type: 'add',
+        nodeIdList: [],
+        javaCopyItemList: []
       };
       this.loadAccesList();
+      this.loadReqId();
       this.editDispatchVisible = true;
     },
     // 编辑分发项目
     handleEditDispatchProject(record) {
-      this.temp = Object.assign({}, record)
-      this.temp.type = 'edit';
+      this.temp = {
+        ...record,
+        type: 'edit'
+      };
+      if (!this.temp.javaCopyItemList) {
+        this.temp = {
+          ...this.temp,
+          javaCopyItemList: []
+        };
+      }
       this.loadAccesList();
       this.loadReqId();
       this.editDispatchVisible = true;
@@ -371,6 +416,29 @@ export default {
         })
       })
     },
+    // 添加副本
+    handleAddReplica() {
+      const $chars = 'ABCDEFGHJKMNPQRSTWXYZ0123456789';
+      /****默认去掉了容易混淆的字符oOLl,9gq,Vv,Uu,I1****/
+      const maxPos = $chars.length;
+      let repliccaId = '';
+      for (let i = 0; i < 2; i++) {
+        repliccaId += $chars.charAt(Math.floor(Math.random() * maxPos));
+      }
+      this.temp.javaCopyItemList.push({
+        id: repliccaId,
+        jvm: '',
+        args: '',
+        deleteAble: true
+      })
+    },
+    // 移除副本
+    handleDeleteReplica(reeplica) {
+      const index = this.temp.javaCopyItemList.findIndex(element => element.id === reeplica.id);
+      const newList = this.temp.javaCopyItemList.slice();
+      newList.splice(index, 1);
+      this.temp.javaCopyItemList = newList;
+    },
     // 提交创建分发项目
     handleEditDispatchOk() {
       // 检验表单
@@ -378,6 +446,33 @@ export default {
         if (!valid) {
           return false;
         }
+        // 检查
+        if (this.temp.nodeIdList.length < 2) {
+          this.$notification.warn({
+            message: '请至少选择 2 个节点',
+            duration: 2
+          });
+          return false;
+        }
+        // 设置 reqId
+        this.temp.reqId = this.reqId;
+        this.temp.nodeIdList.forEach(key => {
+          this.temp[`add_${key}`] = key;
+        })
+        console.log(this.temp)
+        // 提交
+        editDispatchProject(this.temp).then(res => {
+          if (res.code === 200) {
+            // 成功
+            this.$notification.success({
+              message: res.msg,
+              duration: 2
+            });
+            this.$refs['editDispatchForm'].resetFields();
+            this.editDispatchVisible = false;
+            this.handleFilter();
+          }
+        })
       })
     },
     // 删除
@@ -431,5 +526,13 @@ export default {
 }
 .ant-btn {
   margin-right: 10px;
+}
+.replica-area {
+  width: 300px;
+}
+.replica-btn-del {
+  position: absolute;
+  right: 0px;
+  top: 74px;
 }
 </style>

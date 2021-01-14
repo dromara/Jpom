@@ -44,7 +44,7 @@
   </div>
 </template>
 <script>
-import { getProjectById, getProjectLogSize, downloadProjectLogFile, getLogBackList, downloadProjectLogBackFile, deleteProjectLogBackFile } from '../../../../api/node-project';
+import { getProjectData, getProjectLogSize, downloadProjectLogFile, getLogBackList, downloadProjectLogBackFile, deleteProjectLogBackFile } from '../../../../api/node-project';
 import { mapGetters } from 'vuex';
 export default {
   props: {
@@ -101,7 +101,7 @@ export default {
         id: this.projectId,
         nodeId: this.nodeId
       }
-      getProjectById(params).then(res => {
+      getProjectData(params).then(res => {
         if (res.code === 200) {
           this.project = res.data;
           // 加载日志文件大小

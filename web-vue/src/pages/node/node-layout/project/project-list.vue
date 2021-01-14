@@ -143,7 +143,7 @@ import File from './project-file';
 import Console from './project-console';
 import Monitor from './project-monitor';
 import Replica from  './project-replica';
-import { getJdkList, getRuningProjectInfo, getProjectById, deleteProject, getProjectList, getPorjectGroupList, getProjectAccessList, editProject } from '../../../../api/node-project';
+import { getJdkList, getRuningProjectInfo, getProjectData, deleteProject, getProjectList, getPorjectGroupList, getProjectAccessList, editProject } from '../../../../api/node-project';
 export default {
   props: {
     node: {
@@ -290,7 +290,7 @@ export default {
         id: record.id,
         nodeId: this.node.id
       }
-      getProjectById(params).then(res => {
+      getProjectData(params).then(res => {
         if (res.code === 200) {
           this.temp = {
             ...res.data,
@@ -321,7 +321,6 @@ export default {
         args: '',
         deleteAble: true
       })
-      console.log(this.temp)
     },
     // 移除副本
     handleDeleteReplica(reeplica) {

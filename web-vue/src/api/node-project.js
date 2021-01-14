@@ -82,9 +82,9 @@ export function getRuningProjectInfo(params) {
  *  id: 项目 ID 
  * } params 
  */
-export function getProjectById(params) {
+export function getProjectData(params) {
   return axios({
-    url: '/node/manage/getProjectById',
+    url: '/node/manage/getProjectData.json',
     method: 'post',
     data: params
   })
