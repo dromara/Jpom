@@ -128,20 +128,20 @@
               <a-textarea v-model="temp[`${nodeId}_args`]" :auto-size="{ minRows: 3, maxRows: 3 }" placeholder="Main 函数 args 参数，非必填. 如：--service.port=8080"/>
             </a-form-model-item>
             <!-- 副本信息 -->
-            <a-row v-for="replica in temp.javaCopyItemList" :key="replica.id">
+            <a-row v-for="replica in temp[`${nodeId}_javaCopyItemList`]" :key="replica.id">
               <a-form-model-item :label="`副本 ${replica.id} JVM 参数`" prop="jvm">
-                <a-textarea v-model="temp[`${nodeId}_jvm_${replica.id}`]" :auto-size="{ minRows: 3, maxRows: 3 }" class="replica-area" placeholder="jvm参数,非必填.如：-Xmin=512m -Xmax=512m"/>
+                <a-textarea v-model="replica.jvm" :auto-size="{ minRows: 3, maxRows: 3 }" class="replica-area" placeholder="jvm参数,非必填.如：-Xmin=512m -Xmax=512m"/>
               </a-form-model-item>
               <a-form-model-item :label="`副本 ${replica.id} args 参数`" prop="args">
-                <a-textarea v-model="temp[`${nodeId}_args_${replica.id}`]" :auto-size="{ minRows: 3, maxRows: 3 }" class="replica-area" placeholder="Main 函数 args 参数，非必填. 如：--service.port=8080"/>
+                <a-textarea v-model="replica.args" :auto-size="{ minRows: 3, maxRows: 3 }" class="replica-area" placeholder="Main 函数 args 参数，非必填. 如：--service.port=8080"/>
               </a-form-model-item>
               <a-tooltip placement="topLeft" title="已经添加成功的副本需要在副本管理页面去删除" class="replica-btn-del">
-                <a-button :disabled="!replica.deleteAble" type="danger" @click="handleDeleteReplica(replica)">删除</a-button>
+                <a-button :disabled="!replica.deleteAble" type="danger" @click="handleDeleteReplica(nodeId, replica)">删除</a-button>
               </a-tooltip>
             </a-row>
             <!-- 添加副本 -->
             <a-form-model-item label="操作" >
-              <a-button type="primary" @click="handleAddReplica">添加副本</a-button>
+              <a-button type="primary" @click="handleAddReplica(nodeId)">添加副本</a-button>
             </a-form-model-item>
           </a-collapse-panel>
         </a-collapse>
@@ -163,7 +163,8 @@
 import File from '../node/node-layout/project/project-file';
 import Console from '../node/node-layout/project/project-console';
 import { getDishPatchList, getReqId, editDispatch, editDispatchProject, getDispatchWhiteList, deleteDisPatch } from '../../api/dispatch';
-import { getNodeProjectList } from '../../api/node'
+import { getNodeProjectList } from '../../api/node';
+import { getProjectData } from '../../api/node-project';
 export default {
   components: {
     File,
@@ -329,33 +330,6 @@ export default {
       this.loadReqId();
       this.linkDispatchVisible = true;
     },
-    // 添加分发项目
-    handleAdd() {
-      this.temp = {
-        type: 'add',
-        nodeIdList: [],
-        javaCopyItemList: []
-      };
-      this.loadAccesList();
-      this.loadReqId();
-      this.editDispatchVisible = true;
-    },
-    // 编辑分发项目
-    handleEditDispatchProject(record) {
-      this.temp = {
-        ...record,
-        type: 'edit'
-      };
-      if (!this.temp.javaCopyItemList) {
-        this.temp = {
-          ...this.temp,
-          javaCopyItemList: []
-        };
-      }
-      this.loadAccesList();
-      this.loadReqId();
-      this.editDispatchVisible = true;
-    },
     // 选择项目
     selectProject(value) {
       this.targetKeys = [];
@@ -416,8 +390,59 @@ export default {
         })
       })
     },
+    // 添加分发项目
+    handleAdd() {
+      this.temp = {
+        type: 'add',
+        nodeIdList: []
+      };
+      // 添加 javaCopyItemList
+      this.nodeList.forEach(node => {
+        this.temp[`${node.key}_javaCopyItemList`] = [];
+      })
+      this.loadAccesList();
+      this.loadReqId();
+      this.editDispatchVisible = true;
+    },
+    // 编辑分发项目
+    handleEditDispatchProject(record) {
+      this.temp = {};
+      record.outGivingNodeProjectList.forEach(ele => {
+        const params = {
+          id: ele.projectId,
+          nodeId: ele.nodeId
+        }
+        getProjectData(params).then(res => {
+          if (res.code === 200) {
+            // 如果 temp.id 不存在
+            if (!this.temp.id) {
+              this.temp = {
+                id: res.data.id,
+                name: res.data.name,
+                type: 'edit',
+                afterOpt: res.data.afterOpt,
+                runMode: res.data.runMode,
+                mainClass: res.data.mainClass,
+                javaExtDirsCp: res.data.javaExtDirsCp,
+                whitelistDirectory: res.data.whitelistDirectory,
+                lib: res.data.lib,
+                nodeIdList: []
+              }
+            }
+            // 添加 nodeIdList
+            this.temp.nodeIdList.push(ele.nodeId);
+            // 添加 javaCopyItemList
+            this.temp[`${ele.nodeId}_javaCopyItemList`] = res.data.javaCopyItemList || [];
+          }
+        })
+      })
+      // 加载其他数据
+      this.loadAccesList();
+      this.loadReqId();
+      this.editDispatchVisible = true;
+    },
     // 添加副本
-    handleAddReplica() {
+    handleAddReplica(nodeId) {
       const $chars = 'ABCDEFGHJKMNPQRSTWXYZ0123456789';
       /****默认去掉了容易混淆的字符oOLl,9gq,Vv,Uu,I1****/
       const maxPos = $chars.length;
@@ -425,19 +450,20 @@ export default {
       for (let i = 0; i < 2; i++) {
         repliccaId += $chars.charAt(Math.floor(Math.random() * maxPos));
       }
-      this.temp.javaCopyItemList.push({
+      this.temp[`${nodeId}_javaCopyItemList`].push({
         id: repliccaId,
         jvm: '',
         args: '',
         deleteAble: true
       })
+      this.temp = {...this.temp};
     },
     // 移除副本
-    handleDeleteReplica(reeplica) {
-      const index = this.temp.javaCopyItemList.findIndex(element => element.id === reeplica.id);
-      const newList = this.temp.javaCopyItemList.slice();
+    handleDeleteReplica(nodeId, reeplica) {
+      const index = this.temp[`${nodeId}_javaCopyItemList`].findIndex(element => element.id === reeplica.id);
+      const newList = this.temp[`${nodeId}_javaCopyItemList`].slice();
       newList.splice(index, 1);
-      this.temp.javaCopyItemList = newList;
+      this.temp[`${nodeId}_javaCopyItemList`] = newList;
     },
     // 提交创建分发项目
     handleEditDispatchOk() {
@@ -456,8 +482,18 @@ export default {
         }
         // 设置 reqId
         this.temp.reqId = this.reqId;
+        // 设置节点
         this.temp.nodeIdList.forEach(key => {
           this.temp[`add_${key}`] = key;
+          // 设置副本
+          this.temp[`${key}_javaCopyIds`] = '';
+          this.temp[`${key}_javaCopyItemList`].forEach(element => {
+            this.temp[`${key}_javaCopyIds`] += `${element.id},`;
+            this.temp[`${key}_jvm_${element.id}`] = element.jvm;
+            this.temp[`${key}_args_${element.id}`] = element.args;
+          })
+          // 移除多余的后缀 ,
+          this.temp[`${key}_javaCopyIds`] = this.temp[`${key}_javaCopyIds`].substring(0, this.temp[`${key}_javaCopyIds`].length-1);
         })
         console.log(this.temp)
         // 提交
