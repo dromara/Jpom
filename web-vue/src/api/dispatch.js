@@ -36,6 +36,34 @@ export function editDispatch(params) {
 }
 
 /**
+ * 编辑分发项目
+ * @param {
+ *  id: 分发 ID
+ *  name: 分发名称
+ *  reqId: 请求 ID
+ *  type: 类型 add | edit
+ *  afterOpt: 发布后操作
+ *  runMode: 运行方式
+ *  mainClass: 启动类
+ *  javaExtDirsCp: 目录地址
+ *  whitelistDirectory: 白名单地址
+ *  lib: lib
+ *  add_xxx: xxx 表示添加的节点信息
+ *  xxx_token: xxx 节点的 webhook 地址
+ *  xxx_jvm: jvm 参数
+ *  xxx_args: args 参数
+ *  xxx_javaCopyIds: xxx 节点副本 ID （如果有副本，还需要加上 xxx_jvm_${副本ID} | xxx_args_${副本ID} 参数）
+ * } params 
+ */
+export function editDispatchProject(params) {
+  return axios({
+    url: '/outgiving/save_project',
+    method: 'post',
+    data: params
+  })
+}
+
+/**
  * 删除分发
  * @param {*} id 分发 ID
  */

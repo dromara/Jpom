@@ -292,8 +292,16 @@ export default {
       }
       getProjectById(params).then(res => {
         if (res.code === 200) {
-          this.temp = res.data;
-          this.temp.type = 'edit';
+          this.temp = {
+            ...res.data,
+            type: 'edit'
+          };
+          if (!this.temp.javaCopyItemList) {
+            this.temp = {
+              ...this.temp,
+              javaCopyItemList: []
+            };
+          }
           this.editProjectVisible = true;
         }
       })
@@ -313,6 +321,7 @@ export default {
         args: '',
         deleteAble: true
       })
+      console.log(this.temp)
     },
     // 移除副本
     handleDeleteReplica(reeplica) {

@@ -20,7 +20,8 @@
       </template>
       <template slot="operation" slot-scope="text, record">
         <a-button type="primary" @click="handleDispatch(record)">分发文件</a-button>
-        <a-button type="primary" @click="handleEdit(record)">编辑</a-button>
+        <a-button type="primary" v-if="record.outGivingProject" @click="handleEditDispatchProject(record)">编辑</a-button>
+        <a-button type="primary" v-else @click="handleEditDispatch(record)">编辑</a-button>
         <a-button type="danger" @click="handleDelete(record)">删除</a-button>
       </template>
       <!-- 嵌套表格 -->
@@ -109,6 +110,7 @@
             <a-select-option :key="3">顺序重启(有重启失败将继续)</a-select-option>
           </a-select>
         </a-form-model-item>
+        
       </a-form-model>
     </a-modal>
     <!-- 项目文件组件 -->
@@ -126,7 +128,7 @@
 <script>
 import File from '../node/node-layout/project/project-file';
 import Console from '../node/node-layout/project/project-console';
-import { getDishPatchList, getReqId, editDispatch, getDispatchWhiteList, deleteDisPatch } from '../../api/dispatch';
+import { getDishPatchList, getReqId, editDispatch, /*editDispatchProject,*/ getDispatchWhiteList, deleteDisPatch } from '../../api/dispatch';
 import { getNodeProjectList } from '../../api/node'
 export default {
   components: {
@@ -270,7 +272,7 @@ export default {
       this.loadData();
       this.loadNodeProjectList();
     },
-    // 关联
+    // 关联分发
     handleLink() {
       this.temp = {
         type: 'add'
@@ -278,33 +280,35 @@ export default {
       this.loadReqId();
       this.linkDispatchVisible = true;
     },
-    // 编辑
-    handleEdit(record) {
+    // 编辑分发
+    handleEditDispatch(record) {
       this.temp = Object.assign({}, record)
       this.temp.type = 'edit';
-      // 判断分发项目类型
-      if (this.temp.outGivingProject) {
-        this.loadAccesList();
-        this.editDispatchVisible = true;
-      } else {
-        this.targetKeys = [];
-        // 设置选中的项目和节点
-        record.outGivingNodeProjectList.forEach(ele => {
-          if (!this.temp.projectId) {
-            this.temp.projectId = ele.projectId;
-          }
-          this.targetKeys.push(ele.nodeId);
-        })
-        this.loadReqId();
-        this.linkDispatchVisible = true;
-      }
+      this.targetKeys = [];
+      // 设置选中的项目和节点
+      record.outGivingNodeProjectList.forEach(ele => {
+        if (!this.temp.projectId) {
+          this.temp.projectId = ele.projectId;
+        }
+        this.targetKeys.push(ele.nodeId);
+      })
+      this.loadReqId();
+      this.linkDispatchVisible = true;
     },
-    // 添加
+    // 添加分发项目
     handleAdd() {
       this.temp = {
         type: 'add'
       };
       this.loadAccesList();
+      this.editDispatchVisible = true;
+    },
+    // 编辑分发项目
+    handleEditDispatchProject(record) {
+      this.temp = Object.assign({}, record)
+      this.temp.type = 'edit';
+      this.loadAccesList();
+      this.loadReqId();
       this.editDispatchVisible = true;
     },
     // 选择项目
