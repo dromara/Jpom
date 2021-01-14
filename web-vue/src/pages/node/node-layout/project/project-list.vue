@@ -119,12 +119,12 @@
     <!-- 项目文件组件 -->
     <a-drawer :title="drawerTitle" placement="right" width="85vw"
       :visible="drawerFileVisible" @close="onFileClose">
-      <file v-if="drawerFileVisible" :node="node" :project="temp" />
+      <file v-if="drawerFileVisible" :nodeId="node.id" :projectId="temp.id" />
     </a-drawer>
     <!-- 项目控制台组件 -->
     <a-drawer :title="drawerTitle" placement="right" width="85vw"
       :visible="drawerConsoleVisible" @close="onConsoleClose">
-      <console v-if="drawerConsoleVisible" :node="node" :project="temp" />
+      <console v-if="drawerConsoleVisible" :nodeId="node.id" :projectId="temp.id" />
     </a-drawer>
     <!-- 项目监控组件 -->
     <a-drawer :title="drawerTitle" placement="right" width="85vw"
@@ -292,8 +292,16 @@ export default {
       }
       getProjectById(params).then(res => {
         if (res.code === 200) {
-          this.temp = res.data;
-          this.temp.type = 'edit';
+          this.temp = {
+            ...res.data,
+            type: 'edit'
+          };
+          if (!this.temp.javaCopyItemList) {
+            this.temp = {
+              ...this.temp,
+              javaCopyItemList: []
+            };
+          }
           this.editProjectVisible = true;
         }
       })
@@ -313,6 +321,7 @@ export default {
         args: '',
         deleteAble: true
       })
+      console.log(this.temp)
     },
     // 移除副本
     handleDeleteReplica(reeplica) {

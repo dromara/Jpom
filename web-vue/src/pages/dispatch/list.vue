@@ -20,7 +20,8 @@
       </template>
       <template slot="operation" slot-scope="text, record">
         <a-button type="primary" @click="handleDispatch(record)">分发文件</a-button>
-        <a-button type="primary" @click="handleEdit(record)">编辑</a-button>
+        <a-button type="primary" v-if="record.outGivingProject" @click="handleEditDispatchProject(record)">编辑</a-button>
+        <a-button type="primary" v-else @click="handleEditDispatch(record)">编辑</a-button>
         <a-button type="danger" @click="handleDelete(record)">删除</a-button>
       </template>
       <!-- 嵌套表格 -->
@@ -36,6 +37,10 @@
         <a-tooltip slot="lastOutGivingTime" slot-scope="text" placement="topLeft" :title="text">
           <span>{{ text }}</span>
         </a-tooltip>
+        <template slot="child-operation" slot-scope="text, record">
+          <a-button type="primary" @click="handleFile(record)">文件</a-button>
+          <a-button type="primary" @click="handleConsole(record)">控制台</a-button>
+        </template>
       </a-table>
     </a-table>
     <!-- 添加关联项目 -->
@@ -105,14 +110,31 @@
             <a-select-option :key="3">顺序重启(有重启失败将继续)</a-select-option>
           </a-select>
         </a-form-model-item>
+        
       </a-form-model>
     </a-modal>
+    <!-- 项目文件组件 -->
+    <a-drawer :title="drawerTitle" placement="right" width="85vw"
+      :visible="drawerFileVisible" @close="onFileClose">
+      <file v-if="drawerFileVisible" :nodeId="temp.nodeId" :projectId="temp.projectId" />
+    </a-drawer>
+    <!-- 项目控制台组件 -->
+    <a-drawer :title="drawerTitle" placement="right" width="85vw"
+      :visible="drawerConsoleVisible" @close="onConsoleClose">
+      <console v-if="drawerConsoleVisible" :nodeId="temp.nodeId" :projectId="temp.projectId" />
+    </a-drawer>
   </div>
 </template>
 <script>
-import { getDishPatchList, getReqId, editDispatch, getDispatchWhiteList, deleteDisPatch } from '../../api/dispatch';
+import File from '../node/node-layout/project/project-file';
+import Console from '../node/node-layout/project/project-console';
+import { getDishPatchList, getReqId, editDispatch, /*editDispatchProject,*/ getDispatchWhiteList, deleteDisPatch } from '../../api/dispatch';
 import { getNodeProjectList } from '../../api/node'
 export default {
+  components: {
+    File,
+    Console
+  },
   data() {
     return {
       loading: false,
@@ -134,6 +156,9 @@ export default {
       ],
       linkDispatchVisible: false,
       editDispatchVisible: false,
+      drawerTitle: '',
+      drawerFileVisible: false,
+      drawerConsoleVisible: false,
       columns: [
         {title: '分发 ID', dataIndex: 'id', width: 100, ellipsis: true, scopedSlots: {customRender: 'id'}},
         {title: '分发名称', dataIndex: 'name', width: 150, ellipsis: true, scopedSlots: {customRender: 'name'}},
@@ -146,7 +171,7 @@ export default {
         {title: '项目状态', dataIndex: 'status', width: 150, ellipsis: true, scopedSlots: {customRender: 'status'}},
         {title: '分发状态', dataIndex: 'statusMsg', width: 180},
         {title: '最后分发时间', dataIndex: 'lastOutGivingTime', width: 180, ellipsis: true, scopedSlots: {customRender: 'lastOutGivingTime'}},
-        {title: '操作', dataIndex: 'operation', scopedSlots: {customRender: 'operation'}, width: 200, align: 'left'}
+        {title: '操作', dataIndex: 'child-operation', scopedSlots: {customRender: 'child-operation'}, width: 200, align: 'left'}
       ],
       rules: {
         id: [
@@ -247,7 +272,7 @@ export default {
       this.loadData();
       this.loadNodeProjectList();
     },
-    // 关联
+    // 关联分发
     handleLink() {
       this.temp = {
         type: 'add'
@@ -255,8 +280,8 @@ export default {
       this.loadReqId();
       this.linkDispatchVisible = true;
     },
-    // 编辑
-    handleEdit(record) {
+    // 编辑分发
+    handleEditDispatch(record) {
       this.temp = Object.assign({}, record)
       this.temp.type = 'edit';
       this.targetKeys = [];
@@ -270,12 +295,20 @@ export default {
       this.loadReqId();
       this.linkDispatchVisible = true;
     },
-    // 添加
+    // 添加分发项目
     handleAdd() {
       this.temp = {
         type: 'add'
       };
       this.loadAccesList();
+      this.editDispatchVisible = true;
+    },
+    // 编辑分发项目
+    handleEditDispatchProject(record) {
+      this.temp = Object.assign({}, record)
+      this.temp.type = 'edit';
+      this.loadAccesList();
+      this.loadReqId();
       this.editDispatchVisible = true;
     },
     // 选择项目
@@ -367,6 +400,27 @@ export default {
           })
         }
       });
+    },
+    // 文件管理
+    handleFile(record) {
+      this.temp = Object.assign(record);
+      this.drawerTitle = `文件管理(${this.temp.projectId})`
+      this.drawerFileVisible = true;
+    },
+    // 关闭文件管理对话框
+    onFileClose() {
+      this.drawerFileVisible = false;
+    },
+    // 控制台
+    handleConsole(record) {
+      this.temp = Object.assign(record);
+      this.drawerTitle = `控制台(${this.temp.projectId})`;
+      this.drawerConsoleVisible = true;
+    },
+    // 关闭控制台
+    onConsoleClose() {
+      this.drawerConsoleVisible = false;
+      this.handleFilter();
     }
   }
 }

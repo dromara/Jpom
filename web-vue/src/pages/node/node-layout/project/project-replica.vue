@@ -15,7 +15,7 @@
     <!-- 项目控制台组件 -->
     <a-drawer :title="drawerTitle" placement="right" width="85vw"
       :visible="drawerConsoleVisible" @close="onConsoleClose">
-      <console v-if="drawerConsoleVisible" :node="node" :project="project" :replica="temp" :copyId="temp.id" />
+      <console v-if="drawerConsoleVisible" :nodeId="node.id" :projectId="project.id" :replica="temp" :copyId="temp.id" />
     </a-drawer>
     <!-- 项目监控组件 -->
     <a-drawer :title="drawerTitle" placement="right" width="85vw"

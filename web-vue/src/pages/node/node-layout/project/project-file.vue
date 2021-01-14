@@ -44,11 +44,11 @@
 import { getFileList, downloadProjectFile, deleteProjectFile, uploadProjectFile } from '../../../../api/node-project';
 export default {
   props: {
-    node: {
-      type: Object
+    nodeId: {
+      type: String
     },
-    project: {
-      type: Object
+    projectId: {
+      type: String
     }
   },
   data() {
@@ -120,8 +120,8 @@ export default {
       this.uploadFileList.forEach(file => {
         const formData = new FormData();
         formData.append('file', file);
-        formData.append('nodeId', this.node.id);
-        formData.append('id', this.project.id);
+        formData.append('nodeId', this.nodeId);
+        formData.append('id', this.projectId);
         formData.append('levelName', this.tempNode.path);
         // 上传文件
         uploadProjectFile(formData).then(res => {
@@ -148,8 +148,8 @@ export default {
         }
         // 请求参数
         const params = {
-          nodeId: this.node.id,
-          id: this.project.id,
+          nodeId: this.nodeId,
+          id: this.projectId,
           path: node.dataRef.path
         }
         this.fileList = [];
@@ -194,8 +194,8 @@ export default {
       }
       // 请求参数
       const params = {
-        nodeId: this.node.id,
-        id: this.project.id,
+        nodeId: this.nodeId,
+        id: this.projectId,
         path: this.tempNode.path
       }
       this.fileList = [];
@@ -226,8 +226,8 @@ export default {
         onOk: () => {
           // 请求参数
           const params = {
-            nodeId: this.node.id,
-            id: this.project.id,
+            nodeId: this.nodeId,
+            id: this.projectId,
             type: 'clear'
           }
           // 删除
@@ -251,8 +251,8 @@ export default {
       });
       // 请求参数
       const params = {
-        nodeId: this.node.id,
-        id: this.project.id,
+        nodeId: this.nodeId,
+        id: this.projectId,
         levelName: record.levelName,
         filename: record.filename
       }
@@ -277,8 +277,8 @@ export default {
         onOk: () => {
           // 请求参数
           const params = {
-            nodeId: this.node.id,
-            id: this.project.id,
+            nodeId: this.nodeId,
+            id: this.projectId,
             levelName: record.levelName,
             filename: record.filename
           }
