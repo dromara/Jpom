@@ -314,6 +314,9 @@ export default {
       };
       this.loadReqId();
       this.linkDispatchVisible = true;
+      this.$nextTick(() => {
+        this.$refs['linkDispatchForm'].resetFields();
+      })
     },
     // 编辑分发
     handleEditDispatch(record) {
@@ -329,6 +332,9 @@ export default {
       })
       this.loadReqId();
       this.linkDispatchVisible = true;
+      this.$nextTick(() => {
+        this.$refs['linkDispatchForm'].resetFields();
+      })
     },
     // 选择项目
     selectProject(value) {
@@ -403,6 +409,9 @@ export default {
       this.loadAccesList();
       this.loadReqId();
       this.editDispatchVisible = true;
+      this.$nextTick(() => {
+        this.$refs['editDispatchForm'].resetFields();
+      })
     },
     // 编辑分发项目
     handleEditDispatchProject(record) {
@@ -440,6 +449,9 @@ export default {
       this.loadAccesList();
       this.loadReqId();
       this.editDispatchVisible = true;
+      this.$nextTick(() => {
+        this.$refs['editDispatchForm'].resetFields();
+      })
     },
     // 添加副本
     handleAddReplica(nodeId) {

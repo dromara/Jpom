@@ -115,18 +115,19 @@
             <a-radio :value="3">SSH</a-radio>
           </a-radio-group>
         </a-form-model-item>
-        <!-- 节点 -->
-
+        <!-- 节点分发 -->
+        <a-form-model-item v-if="temp.releaseMethod === 1" label="分发项目" prop="releaseMethodDataId">
+          <a-select v-model="temp.releaseMethodDataId_1" placeholder="请选择分发项目">
+            <a-select-option v-for="dispatch in dispatchList" :key="dispatch.id">{{ dispatch.name }}</a-select-option>
+          </a-select>
+        </a-form-model-item>
         <!-- 项目 -->
         <a-form-model-item v-if="temp.releaseMethod === 2" label="发布项目" prop="releaseMethodDataId">
-          <a-cascader v-model="temp.releaseMethodDataIdList" :options="cascaderList" placeholder="Please select" @change="onChangeProject" />
+          <a-cascader v-model="temp.releaseMethodDataIdList" :options="cascaderList" placeholder="Please select" />
         </a-form-model-item>
         <a-form-model-item v-if="temp.releaseMethod === 2" label="发布后操作" prop="afterOpt">
           <a-select v-model="temp.afterOpt" placeholder="请选择发布后操作">
-            <a-select-option :key="0">不做任何操作</a-select-option>
-            <a-select-option :key="1">并发重启</a-select-option>
-            <a-select-option :key="2">完整顺序重启(有重启失败将结束本次)</a-select-option>
-            <a-select-option :key="3">顺序重启(有重启失败将继续)</a-select-option>
+            <a-select-option v-for="opt in afterOptList" :key="opt.value">{{ opt.title }}</a-select-option>
           </a-select>
         </a-form-model-item>
         <!-- SSH -->
@@ -172,6 +173,7 @@ import {
   getBuildGroupList, getBuildList, getBranchList, editBuild, deleteBuild,
   getTriggerUrl, resetTrigger, clearBuid, startBuild, stopBuild
 } from '../../api/build';
+import { getDishPatchList } from '../../api/dispatch';
 import { getNodeProjectList } from '../../api/node'
 import { getSshList } from '../../api/ssh'
 import { parseTime } from '../../utils/time';
@@ -186,6 +188,7 @@ export default {
       groupList: [],
       list: [],
       branchList: [],
+      dispatchList: [],
       cascaderList: [],
       sshList: [],
       temp: {},
@@ -193,6 +196,12 @@ export default {
       addGroupvisible: false,
       triggerVisible: false,
       buildLogVisible: false,
+      afterOptList: [
+        {title: '不做任何操作', value: 0},
+        {title: '并发重启', value: 1},
+        {title: '完整顺序重启(有重启失败将结束本次)', value: 2},
+        {title: '顺序重启(有重启失败将继续)', value: 3},
+      ],
       columns: [
         {title: '名称', dataIndex: 'name', width: 150, ellipsis: true, scopedSlots: {customRender: 'name'}},
         {title: '分支', dataIndex: 'branchName', width: 100, ellipsis: true, scopedSlots: {customRender: 'branchName'}},
@@ -216,6 +225,9 @@ export default {
         ],
         resultDirFile: [
           { required: true, message: 'Please input build target path', trigger: 'blur' }
+        ],
+        releasePath: [
+          { required: true, message: 'Please input release path', trigger: 'blur' }
         ]
       }
     }
@@ -242,6 +254,15 @@ export default {
           this.list = res.data;
         }
         this.loading = false;
+      })
+    },
+    // 加载节点分发列表
+    loadDispatchList() {
+      this.dispatchList = [];
+      getDishPatchList().then(res => {
+        if (res.code === 200) {
+          this.dispatchList = res.data;
+        }
       })
     },
     // 加载节点项目列表
@@ -283,6 +304,8 @@ export default {
     // 添加
     handleAdd() {
       this.temp = {};
+      this.branchList = [];
+      this.loadDispatchList();
       this.loadNodeProjectList();
       this.loadSshList();
       this.editBuildVisible = true;
@@ -291,10 +314,20 @@ export default {
     handleEdit(record) {
       this.temp = Object.assign(record);
       this.temp.tempGroup = '';
+      // 设置发布方式的数据
       if (record.releaseMethodDataId) {
-        this.temp.releaseMethodDataIdList = record.releaseMethodDataId.split(':');
+        if (record.releaseMethod === 1) {
+          this.temp.releaseMethodDataId_1 = record.releaseMethodDataId;
+        }
+        if (record.releaseMethod === 2) {
+          this.temp.releaseMethodDataIdList = record.releaseMethodDataId.split(':');
+        }
+        if (record.releaseMethod === 3) {
+          this.temp.releaseMethodDataId_3 = record.releaseMethodDataId;
+        }
       }
       this.loadBranchList();
+      this.loadDispatchList();
       this.loadNodeProjectList();
       this.loadSshList();
       this.editBuildVisible = true;
@@ -325,10 +358,6 @@ export default {
           this.branchList = res.data;
         }
       })
-    },
-    // 选择节点项目
-    onChangeProject(value) {
-      console.log(value)
     },
     // 提交节点数据
     handleEditBuildOk() {

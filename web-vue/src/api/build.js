@@ -69,6 +69,7 @@ export function editBuild(params) {
     group: params.group,
     repoType: params.repoType,
     // 其他参数
+    releaseMethodDataId_1: params.releaseMethodDataId_1,
     releaseMethodDataId_2_node: params.releaseMethodDataId_2_node,
     releaseMethodDataId_2_project: params.releaseMethodDataId_2_project,
     afterOpt: params.afterOpt,
