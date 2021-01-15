@@ -75,7 +75,22 @@ export function deleteDisPatch(id) {
   })
 }
 
-// 创建分发项目
+/**
+ * 分发日志
+ * @param {
+ *  nodeId: 节点 ID
+ *  outGivingId: 分发 ID
+ *  status: 分发状态
+ *  time: 时间区间 2021-01-04 00:00:00 ~ 2021-01-12 00:00:00
+ * } params 
+ */
+export function getDishPatchLogList(params) {
+  return axios({
+    url: '/outgiving/log_list_data.json',
+    method: 'post',
+    data: params
+  })
+}
 
 // 获取分发白名单数据
 export function getDispatchWhiteList() {
