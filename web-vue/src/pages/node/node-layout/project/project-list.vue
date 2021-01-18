@@ -112,7 +112,7 @@
           <a-alert :message="temp.log" type="success" />
         </a-form-model-item>
         <a-form-model-item v-show="temp.type === 'edit'" label="运行命令" prop="runCommand">
-          <a-alert :message="temp.runCommand" type="success" />
+          <a-alert :message="temp.runCommand || '无'" type="success" />
         </a-form-model-item>
       </a-form-model>
     </a-modal>

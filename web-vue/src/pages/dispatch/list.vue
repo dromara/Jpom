@@ -147,6 +147,22 @@
         </a-collapse>
       </a-form-model>
     </a-modal>
+    <!-- 分发项目 -->
+    <a-modal v-model="dispatchVisible" width="600px" title="分发项目" @ok="handleEditDispatchOk" :maskClosable="false">
+      <a-form-model ref="dispatchForm" :rules="rules" :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 18 }">
+        <a-form-model-item label="清空发布" prop="clearOld">
+          <a-switch v-model="temp.clearOld" checked-children="是" un-checked-children="否"/>
+        </a-form-model-item>
+        <a-form-model-item label="分发后操作" prop="afterOpt">
+          <a-select v-model="temp.afterOpt" placeholder="请选择发布后操作">
+            <a-select-option :key="0">不做任何操作</a-select-option>
+            <a-select-option :key="1">并发重启</a-select-option>
+            <a-select-option :key="2">完整顺序重启(有重启失败将结束本次)</a-select-option>
+            <a-select-option :key="3">顺序重启(有重启失败将继续)</a-select-option>
+          </a-select>
+        </a-form-model-item>
+      </a-form-model>
+    </a-modal>
     <!-- 项目文件组件 -->
     <a-drawer :title="drawerTitle" placement="right" width="85vw"
       :visible="drawerFileVisible" @close="onFileClose">
@@ -191,6 +207,7 @@ export default {
       ],
       linkDispatchVisible: false,
       editDispatchVisible: false,
+      dispatchVisible: false,
       drawerTitle: '',
       drawerFileVisible: false,
       drawerConsoleVisible: false,
@@ -522,6 +539,10 @@ export default {
           }
         })
       })
+    },
+    handleDispatch(record) {
+      this.temp = Object.assign({}, record);
+      this.dispatchVisible = true;
     },
     // 删除
     handleDelete(record) {
