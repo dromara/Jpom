@@ -23,7 +23,7 @@
     </div>
     <!-- 数据表格 -->
     <a-table :data-source="list" :loading="loading" :columns="columns"
-      :scroll="{x: '80vw', y: tableHeight }" bordered
+      :pagination="pagination" :scroll="{x: '80vw', y: tableHeight }" bordered
       :rowKey="(record, index) => index">
       <a-tooltip slot="nodeId" slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
@@ -57,8 +57,12 @@ export default {
       nodeList: [],
       dispatchList: [],
       total: 0,
-      listQuery: {},
+      listQuery: {
+        page: 1,
+        limit: 20
+      },
       timeRange: '',
+      tableHeight: '70vh',
       columns: [
         {title: '节点 ID', dataIndex: 'nodeId', width: 100, ellipsis: true, scopedSlots: {customRender: 'nodeId'}},
         {title: '项目 ID', dataIndex: 'projectId', width: 100,  ellipsis: true, scopedSlots: {customRender: 'projectId'}},
@@ -72,10 +76,31 @@ export default {
       ]
     }
   },
+  computed: {
+    pagination() {
+      return {
+        total: this.total,
+        current: this.listQuery.page || 1,
+        pageSize: this.listQuery.limit || 10,
+        pageSizeOptions: ['10', '20', '50', '100'],
+        showSizeChanger: true,
+        showTotal: (total) => {
+          return `Total ${total} items`;
+        }
+      }
+    }
+  },
   created() {
+    this.calcTableHeight();
     this.handleFilter();
   },
   methods: {
+    // 计算表格高度
+    calcTableHeight() {
+      this.$nextTick(() => {
+        this.tableHeight = window.innerHeight - this.$refs['filter'].clientHeight - 220;
+      })
+    },
     // 搜索
     handleFilter() {
       this.loadNodeList();
