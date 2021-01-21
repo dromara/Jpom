@@ -9,7 +9,7 @@
         class="filter-item" @change="loadData">
         <a-select-option v-for="dispatch in dispatchList" :key="dispatch.id">{{ dispatch.name }}</a-select-option>
       </a-select>
-      <a-select v-model="listQuery.status" allowClear placeholder="请选择通知状态"
+      <a-select v-model="listQuery.status" allowClear placeholder="请选择状态"
         class="filter-item" @change="loadData">
         <a-select-option :value="0">未分发</a-select-option>
         <a-select-option :value="1">分发中</a-select-option>
@@ -25,24 +25,35 @@
     <a-table :data-source="list" :loading="loading" :columns="columns"
       :pagination="pagination" :scroll="{x: '80vw', y: tableHeight }" bordered
       :rowKey="(record, index) => index">
+      <a-tooltip slot="outGivingId" slot-scope="text" placement="topLeft" :title="text">
+        <span>{{ text }}</span>
+      </a-tooltip>
       <a-tooltip slot="nodeId" slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>
       <a-tooltip slot="projectId" slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>
-      <span slot="status" slot-scope="text">{{ text ? '正常' : '异常'  }}</span>
-      <template slot="notifyStyle" slot-scope="text">
-        <span v-if="text === 0">钉钉</span>
-        <span v-else-if="text === 1">邮箱</span>
-        <span v-else-if="text === 2">企业微信</span>
-        <span v-else>未知</span>
+      <template slot="status" slot-scope="text">
+        <span v-if="text === 0">未分发</span>
+        <span v-if="text === 1">未分发</span>
+        <span v-if="text === 2">未分发</span>
+        <span v-if="text === 3">未分发</span>
+        <span v-if="text === 4">未分发</span>
       </template>
-      <span slot="notifyStatus" slot-scope="text">{{ text ? '成功' : '失败'  }}</span>
       <template slot="operation" slot-scope="text, record">
         <a-button type="primary" @click="handleDetail(record)">详情</a-button>
       </template>
-    </a-table>
+    </a-table><!-- 详情区 -->
+    <a-modal v-model="detailVisible" width="600px" title="详情信息" :footer="null">
+      <a-list item-layout="horizontal" :data-source="detailData">
+        <a-list-item slot="renderItem" slot-scope="item">
+          <a-list-item-meta :description="item.description">
+            <h4 slot="title">{{ item.title }}</h4>
+          </a-list-item-meta>
+        </a-list-item>
+      </a-list>
+    </a-modal>
   </div>
 </template>
 <script>
@@ -63,15 +74,20 @@ export default {
       },
       timeRange: '',
       tableHeight: '70vh',
+      temp: {},
+      detailVisible: false,
+      detailData: [],
       columns: [
+        {title: '分发项目 ID', dataIndex: 'outGivingId', width: 100, ellipsis: true, scopedSlots: {customRender: 'outGivingId'}},
         {title: '节点 ID', dataIndex: 'nodeId', width: 100, ellipsis: true, scopedSlots: {customRender: 'nodeId'}},
         {title: '项目 ID', dataIndex: 'projectId', width: 100,  ellipsis: true, scopedSlots: {customRender: 'projectId'}},
-        {title: '报警状态', dataIndex: 'status', width: 100, ellipsis: true, scopedSlots: {customRender: 'status'}},
-        {title: '报警方式', dataIndex: 'notifyStyle', width: 100, ellipsis: true, scopedSlots: {customRender: 'notifyStyle'}},
-        {title: '报警时间', dataIndex: 'createTime', customRender: (text) => {
+        {title: '开始时间', dataIndex: 'startTime', customRender: (text) => {
           return parseTime(text);
         }, width: 180},
-        {title: '通知状态', dataIndex: 'notifyStatus', width: 100, ellipsis: true, scopedSlots: {customRender: 'notifyStatus'}},
+        {title: '结束时间', dataIndex: 'endTime', customRender: (text) => {
+          return parseTime(text);
+        }, width: 180},
+        {title: '状态', dataIndex: 'status', width: 100, ellipsis: true, scopedSlots: {customRender: 'status'}},
         {title: '操作', dataIndex: 'operation', scopedSlots: {customRender: 'operation'}, width: 100}
       ]
     }
@@ -126,7 +142,7 @@ export default {
     // 加载数据
     loadData() {
       this.loading = true;
-      this.listQuery.time = this.timeRange;
+      this.listQuery.time = this.timeRange === ' ~ ' ? '' : this.timeRange;
       getDishPatchLogList(this.listQuery).then(res => {
         if (res.code === 200) {
           this.list = res.data;
@@ -137,6 +153,13 @@ export default {
     // 选择时间
     onchangeTime(value, dateString) {
       this.timeRange = `${dateString[0]} ~ ${dateString[1]}`;
+    },
+    // 查看详情
+    handleDetail(record) {
+      this.detailData = [];
+      this.detailVisible = true;
+      this.temp = Object.assign(record);
+      this.detailData.push({title: '分发结果', description: this.temp.result});
     }
   }
 }
