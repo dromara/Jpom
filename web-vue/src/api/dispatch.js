@@ -64,6 +64,28 @@ export function editDispatchProject(params) {
 }
 
 /**
+ * 上传分发文件
+ * @param {
+ *  id: 分发 ID
+ *  afterOpt: 发布后操作
+ *  clearOld: 是否清除
+ *  file: 文件 multipart/form-data
+ * } formData 
+ */
+export function uploadDispatchFile(formData) {
+  return axios({
+    url: '/outgiving/upload',
+    headers: {
+      'Content-Type': 'multipart/form-data;charset=UTF-8'
+    },
+    method: 'post',
+    // 0 表示无超时时间
+    timeout: 0,
+    data: formData
+  })
+}
+
+/**
  * 删除分发
  * @param {*} id 分发 ID
  */

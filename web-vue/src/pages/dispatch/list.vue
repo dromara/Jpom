@@ -148,8 +148,13 @@
       </a-form-model>
     </a-modal>
     <!-- 分发项目 -->
-    <a-modal v-model="dispatchVisible" width="600px" title="分发项目" @ok="handleEditDispatchOk" :maskClosable="false">
+    <a-modal v-model="dispatchVisible" width="600px" title="分发项目" @ok="handleDispatchOk" :maskClosable="false">
       <a-form-model ref="dispatchForm" :rules="rules" :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 18 }">
+        <a-form-model-item label="选择分发文件" prop="clearOld">
+          <a-upload :file-list="fileList" :remove="handleRemove" :before-upload="beforeUpload" accept=".zip,.tar,.gz,.bz2">
+            <a-button type="primary"><a-icon type="upload" />选择文件上传</a-button>
+          </a-upload>
+        </a-form-model-item>
         <a-form-model-item label="清空发布" prop="clearOld">
           <a-switch v-model="temp.clearOld" checked-children="是" un-checked-children="否"/>
         </a-form-model-item>
@@ -178,7 +183,7 @@
 <script>
 import File from '../node/node-layout/project/project-file';
 import Console from '../node/node-layout/project/project-console';
-import { getDishPatchList, getReqId, editDispatch, editDispatchProject, getDispatchWhiteList, deleteDisPatch } from '../../api/dispatch';
+import { getDishPatchList, getReqId, editDispatch, editDispatchProject, uploadDispatchFile, getDispatchWhiteList, deleteDisPatch } from '../../api/dispatch';
 import { getNodeProjectList } from '../../api/node';
 import { getProjectData } from '../../api/node-project';
 export default {
@@ -198,6 +203,7 @@ export default {
       targetKeys: [],
       reqId: '',
       temp: {},
+      fileList: [],
       runModeList: [
         'ClassPath',
         'Jar',
@@ -524,7 +530,6 @@ export default {
           // 移除多余的后缀 ,
           this.temp[`${key}_javaCopyIds`] = this.temp[`${key}_javaCopyIds`].substring(0, this.temp[`${key}_javaCopyIds`].length-1);
         })
-        console.log(this.temp)
         // 提交
         editDispatchProject(this.temp).then(res => {
           if (res.code === 200) {
@@ -540,9 +545,59 @@ export default {
         })
       })
     },
+    // 处理分发
     handleDispatch(record) {
       this.temp = Object.assign({}, record);
       this.dispatchVisible = true;
+    },
+    // 处理文件移除
+    handleRemove(file) {
+      const index = this.fileList.indexOf(file);
+      const newFileList = this.fileList.slice();
+      newFileList.splice(index, 1);
+      this.fileList = newFileList;
+    },
+    // 准备上传文件
+    beforeUpload(file) {
+      // 只允许上传单个文件
+      this.fileList = [file];
+      return false;
+    },
+    // 提交分发文件
+    handleDispatchOk() {
+      // 检验表单
+      this.$refs['dispatchForm'].validate((valid) => {
+        if (!valid) {
+          return false;
+        }
+        // 判断文件
+        if (this.fileList.length === 0) {
+          this.$notification.error({
+            message: '请选择文件',
+            duration: 2
+          });
+          return false;
+        }
+        this.$message.loading('正在上传文件...', 2);
+        // 上传文件
+        const formData = new FormData();
+        formData.append('file', this.fileList[0]);
+        formData.append('id', this.temp.id);
+        formData.append('afterOpt', this.temp.afterOpt);
+        formData.append('clearOld', this.temp.clearOld);
+        uploadDispatchFile(formData).then(res => {
+          if (res.code === 200) {
+            this.$notification.success({
+              message: res.msg,
+              duration: 2
+            });
+            this.$refs['dispatchForm'].resetFields();
+            this.fileList = [];
+            this.loadData();
+            this.dispatchVisible = false;
+          }
+        })
+      })
     },
     // 删除
     handleDelete(record) {
