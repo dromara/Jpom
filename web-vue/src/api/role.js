@@ -34,3 +34,27 @@ export function deleteRole(id) {
     data: {id}
   })
 }
+
+// 角色动态
+export function getDynamicList() {
+  return axios({
+    url: '/user/role/dynamic-list',
+    method: 'get'
+  })
+}
+
+/**
+ * getDynamic
+ * @param {
+ *  id: 角色 ID
+ *  dynamic: dynamic
+ * } params 
+ */
+export function getRoleDynamicList(params) {
+  return axios({
+    url: '/user/role/getDynamic.json',
+    method: 'post',
+    timeout: 0,
+    data: params
+  })
+}

@@ -25,10 +25,20 @@
         </a-form-model-item>
       </a-form-model>
     </a-modal>
+    <!-- 动态区 -->
+    <a-modal v-model="editDynamicVisible" title="角色动态" @ok="handleEditDynamicOk" :maskClosable="false">
+      <a-collapse @change="changeCollapse">
+          <a-collapse-panel v-for="item in dynamicList.filter(ele => !ele.parent)" :key="item.id" :header="item.name">
+            <a-tree checkStrictly checkable defaultExpandAll :selectable="false"
+              :tree-data="item.dynamicList" 
+              :replaceFields="replaceFields" @check="checkDynamicNode"/>
+          </a-collapse-panel>
+      </a-collapse>
+    </a-modal>
   </div>
 </template>
 <script>
-import { getRoleList, getRoleFeature, editRole, deleteRole } from '../../api/role';
+import { getRoleList, getRoleFeature, editRole, deleteRole, getDynamicList, getRoleDynamicList } from '../../api/role';
 export default {
   data() {
     return {
@@ -37,6 +47,8 @@ export default {
       // 权限列表
       featureList: [],
       editRoleVisible: false,
+      dynamicList: [],
+      editDynamicVisible: false,
       temp: {},
       // tree 选中的值
       checkedKeys: {},
@@ -188,7 +200,6 @@ export default {
     },
     // 删除角色
     handleDelete(record) {
-      console.log(record);
       this.$confirm({
         title: '系统提示',
         content: '真的要删除角色么？',
@@ -209,8 +220,74 @@ export default {
       });
     },
     // 分配权限
-    handlePermission(record) {
-      console.log(record);
+    async handlePermission(record) {
+      this.temp = Object.assign({}, record);
+      const res = await getDynamicList();
+      if (res.code === 200) {
+        this.dynamicList = res.data;
+        this.dynamicList = [...this.dynamicList];
+        this.editDynamicVisible = true;
+      }
+    },
+    // 切换面板
+    changeCollapse(keys) {
+      keys.forEach(key => {
+        const index = this.dynamicList.findIndex(p => p.id === key);
+        // load = true 表示已经加载过了
+        if (!this.dynamicList[index].load) {
+          const params = {
+            id: this.temp.id,
+            dynamic: key
+          }
+          getRoleDynamicList(params).then(res => {
+            if (res.code === 200) {
+              // 禁用 id = PROJECT
+              res.data.forEach(p => {
+                if (p.children) {
+                  p.children.forEach(ele => {
+                    if (ele.id === 'PROJECT') {
+                      ele.disabled = true;
+                    }
+                  })
+                }
+              })
+              this.dynamicList[index].dynamicList = res.data;
+              this.dynamicList[index].load = true;
+              this.dynamicList = [...this.dynamicList];
+            }
+          })
+        }
+      })
+    },
+    // 选择 dynamic
+    checkDynamicNode(checkedKeys, e) {
+      console.log(checkedKeys)
+      // const checked = e.checked;
+      const node = e.node.dataRef;
+      node.checkedKeys = checkedKeys;
+      // // 如果选中父节点，子节点默认选中
+      // if (checked && node.children) {
+      //   node.children.forEach(ele => {
+      //     if (!node.checkedKeys) {
+      //       node.checkedKeys = {};
+      //     }
+      //     if (!node.checkedKeys.checked) {
+      //       node.checkedKeys.checked = [];
+      //     }
+      //     node.checkedKeys.checked.push(ele.id);
+      //   })
+      // }
+      // // 如果取消选中父节点，子节点也取消选中
+      // if (!checked && node.children) {
+      //   node.children.forEach(ele => {
+      //     const index = node.checkedKeys.checked.findIndex(id => ele.id === id);
+      //     node.checkedKeys.checked.splice(index, 1);
+      //   })
+      // }
+    },
+    // 编辑 dynamic
+    handleEditDynamicOk() {
+      console.log(this.dynamicList);
     }
   }
 }

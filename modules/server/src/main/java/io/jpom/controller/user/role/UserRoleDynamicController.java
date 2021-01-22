@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.annotation.Resource;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -43,6 +44,29 @@ public class UserRoleDynamicController extends BaseServerController {
         Map<ClassFeature, DynamicData> dynamicDataMap = DynamicData.getDynamicDataMap();
         setAttribute("dynamicDataMap", dynamicDataMap);
         return "user/role/dynamicData";
+    }
+
+    /**
+     * @author Hotstrip
+     * load role dynamic data
+     * 加载角色的动态资源数据
+     * @return
+     */
+    @RequestMapping(value = "dynamic-list", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @ResponseBody
+    public String roleDynamicData() {
+        Map<ClassFeature, DynamicData> dynamicDataMap = DynamicData.getDynamicDataMap();
+        List<Map<String, String>> list = new ArrayList<>();
+        dynamicDataMap.keySet().forEach(key -> {
+            HashMap<String, String> valueMap = new HashMap<>();
+            valueMap.put("id", key.name());
+            valueMap.put("name", key.getName());
+            if (key.getParent() != null) {
+                valueMap.put("parent", key.getParent().name());
+            }
+            list.add(valueMap);
+        });
+        return JsonMessage.getString(200, "success", list);
     }
 
     @RequestMapping(value = "getDynamic.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
