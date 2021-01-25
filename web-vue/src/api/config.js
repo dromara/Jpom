@@ -7,7 +7,7 @@ import { notification } from 'ant-design-vue';
 // axios.defaults.baseURL = 'http://localhost:2122'
 
 const request = axios.create({
-  timeout: 3000,
+  timeout: 10000,
   headers: {
     'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
   },
