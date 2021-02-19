@@ -107,7 +107,7 @@ public class ProjectFileControl extends BaseAgentController {
                 }
             } finally {
                 if (!file.delete()) {
-                    DefaultSystemLog.getLog().info("删除失败：" + file.getPath());
+                    DefaultSystemLog.getLog().error("删除文件失败：" + file.getPath());
                 }
             }
         } else {

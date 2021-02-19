@@ -67,7 +67,7 @@ public class JpomApplicationEvent implements ApplicationEventClient {
                 ApplicationEventLoad eventLoad = (ApplicationEventLoad) SpringUtil.getBean(JpomApplication.getAppClass());
                 eventLoad.applicationLoad();
             }
-            DefaultSystemLog.getLog().error("Jpom 启动成功");
+            DefaultSystemLog.getLog().info("Jpom 启动成功");
         } else if (event instanceof ContextClosedEvent) {
             // 应用关闭
             this.unLockFile();

@@ -10,7 +10,7 @@
             <onMismatch>DENY</onMismatch>
         </filter>
         <layout class="ch.qos.logback.classic.PatternLayout">
-            <pattern><![CDATA[%date %level [%thread] %logger{10} [%file:%line]- x:\(%X\) %msg%n]]></pattern>
+            <pattern><![CDATA[%date %highlight(%level) [%thread] %logger{10} [%file:%line]- x:\(%X\) %highlight(%msg) %n]]></pattern>
         </layout>
     </appender>
 
@@ -21,7 +21,7 @@
             <onMismatch>DENY</onMismatch>
         </filter>
         <layout class="ch.qos.logback.classic.PatternLayout">
-            <pattern><![CDATA[%date %level [%thread] %logger{10} [%file:%line]- x:\(%X\) %msg%n]]></pattern>
+            <pattern><![CDATA[%date %highlight(%level) [%thread] %logger{10} [%file:%line]- x:\(%X\) %highlight(%msg) %n]]></pattern>
         </layout>
     </appender>
 
@@ -43,7 +43,7 @@
             <onMismatch>DENY</onMismatch>
         </filter>
         <layout class="ch.qos.logback.classic.PatternLayout">
-            <pattern><![CDATA[%date %level [%thread] %logger{10} [%file:%line]- x:\(%X\) %msg%n]]></pattern>
+            <pattern><![CDATA[%date %highlight(%level) [%thread] %logger{10} [%file:%line]- x:\(%X\) %highlight(%msg) %n]]></pattern>
         </layout>
     </appender>
 
@@ -108,7 +108,7 @@
     </appender>
 
     <springProfile name="dev">
-        <root level="info">
+        <root level="debug">
             <appender-ref ref="errorFileAppender"/>
             <appender-ref ref="infoFileAppender"/>
             <appender-ref ref="warnFileAppender"/>
@@ -130,6 +130,7 @@
             <appender-ref ref="warnFileAppender"/>
             <appender-ref ref="consoleWarn"/>
             <appender-ref ref="consoleError"/>
+            <appender-ref ref="consoleInfo"/>
         </root>
     </springProfile>
 </configuration>

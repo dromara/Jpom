@@ -134,7 +134,14 @@ public class NodeForward {
                     .form(params)
                     .execute();
         } catch (Exception e) {
-            throw new AgentException(nodeModel.getName() + "节点异常：" + e.getMessage(), e);
+            /**
+             * @author Hotstrip
+             * there is no need to throw exception, just return error response is ok
+             * or else, very much exception log well be write into the log file
+             */
+            DefaultSystemLog.getLog().error("node [{}] connect failed, caused by [{}]", nodeModel.getName(), e.getMessage());
+            // throw new AgentException(nodeModel.getName() + "节点异常：" + e.getMessage());
+            return toJsonMessage(JsonMessage.getString(500, "node connect failed"));
         }
         //
         return parseBody(response);

@@ -51,7 +51,7 @@ public class AutoRegSeverNode {
         String body1 = installRequest.execute().body();
         JsonMessage jsonMessage = JSON.parseObject(body1, JsonMessage.class);
         if (jsonMessage.getCode() != HttpStatus.HTTP_OK) {
-            DefaultSystemLog.getLog().info("获取Server 安装id失败:" + jsonMessage);
+            DefaultSystemLog.getLog().error("获取Server 安装id失败:" + jsonMessage);
             return;
         }
         String installId = jsonMessage.dataToString();

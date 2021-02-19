@@ -33,7 +33,13 @@ public class InitDb {
         // 调试模式显示sql 信息
         if (JpomManifest.getInstance().isDebug()) {
             setting.set("showSql", "true");
-            setting.set("sqlLevel", "INFO");
+            /**
+             * @author Hotstrip
+             * sql log only show when it's needed,
+             * if you want to check init sql,
+             * set the [sqlLevel] from [DEBUG] to [INFO]
+             */
+            setting.set("sqlLevel", "DEBUG");
             setting.set("showParams", "true");
         }
         DefaultSystemLog.getLog().warn("load h2 db");

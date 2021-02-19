@@ -88,6 +88,11 @@ public class CheckPath {
     @PreLoadMethod(4)
     private static void clearTemp() {
         File file = ConfigBean.getInstance().getTempPath();
-        FileUtil.del(file.toPath());
+        /**
+         * @author Hotstrip
+         * use Hutool's FileUtil.del method just put file as param not file's path
+         * or else,  may be return Accessdenied exception
+         */
+        FileUtil.del(file);
     }
 }
