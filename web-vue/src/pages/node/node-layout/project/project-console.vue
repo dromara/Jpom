@@ -67,7 +67,7 @@ export default {
       loading: false,
       socket: null,
       // 日志内容
-      logContext: '',
+      logContext: 'choose file loading context...',
       lobbackVisible: false,
       logBackList: [],
       columns: [

@@ -10,33 +10,32 @@ module.exports = {
         target: 'ws://localhost:2122',
         //  true/false: if you want to proxy websockets
         ws: false,
-        logLevel: 'debug'
+        secure: false,
       },
       '/tomcat_log': {
         target: 'ws://localhost:2122',
         //  true/false: if you want to proxy websockets
         ws: false,
-        logLevel: 'debug'
+        secure: false,
       },
       '/console': {
         target: 'ws://localhost:2122',
         //  true/false: if you want to proxy websockets
         ws: false,
-        logLevel: 'debug'
+        secure: false,
       },
       // http
       '/*': {
         target: 'http://localhost:2122',
         timeout: 10 * 60 * 1000
       }
-    }
+    },
   },
   chainWebpack: config => {
-    config
-        .plugin('html')
-        .tap(args => {
-          args[0].title= 'Jpom项目管理系统'
-          return args
-        })
+    config.plugin('html')
+    .tap(args => {
+      args[0].title= 'Jpom项目管理系统'
+      return args
+    })
   }
 }

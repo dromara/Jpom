@@ -35,7 +35,7 @@ export default {
       list: [],
       socket: null,
       // 日志内容
-      logContext: '',
+      logContext: 'choose file loading context...',
       tomcatId: 'system',
       nodeId: 'system',
       replaceFields: {
