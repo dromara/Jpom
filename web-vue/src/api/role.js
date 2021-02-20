@@ -58,3 +58,19 @@ export function getRoleDynamicList(params) {
     data: params
   })
 }
+
+/**
+ * editRoleDynamic
+ * @param {
+ *  id: 角色 ID
+ *  dynamic: dynamic
+ * } params 
+ */
+export function editRoleDynamic(params) {
+  return axios({
+    url: '/user/role/saveDynamic.json',
+    method: 'post',
+    timeout: 0,
+    data: params
+  })
+}
