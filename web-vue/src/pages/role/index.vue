@@ -27,7 +27,20 @@
     </a-modal>
     <!-- 动态区 -->
     <a-modal v-model="editDynamicVisible" title="角色动态" @ok="handleEditDynamicOk" :maskClosable="false">
-      <a-spin :spinning="spinning" :delay="500">
+        <div v-for="(val, key, index) in dynamicData" :key="index">
+          <h3>{{ getDynamicNameById(key) }}</h3>
+          <div v-for="item in val" :key="item.id">
+            <a-checkbox :value="item.id" :checked="item.checked" class="box-1" @change="changeCheckBox(item.id)">{{ item.title }}</a-checkbox><br/>
+            <div v-for="child in item.children" :key="child.id">
+              <a-checkbox :value="child.id" :checked="child.checked" class="box-2" @change="changeCheckBox(item.id)">{{ child.title }}</a-checkbox><br/>
+              <div v-for="ele in child.children" :key="ele.id">
+                <a-checkbox :value="ele.id" :checked="ele.checked" class="box-3" @change="changeCheckBox(item.id)">{{ ele.title }}</a-checkbox>
+              </div>
+            </div>
+          </div>
+          <a-divider />
+        </div>
+        <!-- <a-checkbox-group v-model="checkedList" :options="plainOptions" @change="onChange" /> -->
         <a-collapse @change="changeCollapse">
             <a-collapse-panel v-for="item in dynamicList.filter(ele => !ele.parent)" :key="item.id" :header="item.name">
               <a-tree checkable defaultExpandAll :selectable="false"
@@ -35,7 +48,6 @@
                 :replaceFields="replaceFields" @check="checkDynamicNode"/>
             </a-collapse-panel>
         </a-collapse>
-      </a-spin>
     </a-modal>
   </div>
 </template>
@@ -45,12 +57,12 @@ export default {
   data() {
     return {
       loading: false,
-      spinning: false,
       list: [],
       // 权限列表
       featureList: [],
       editRoleVisible: false,
       dynamicList: [],
+      dynamicData: {},
       editDynamicVisible: false,
       temp: {},
       // tree 选中的值
@@ -231,8 +243,27 @@ export default {
       if (res.code === 200) {
         this.dynamicList = res.data;
         this.dynamicList = [...this.dynamicList];
+        this.loadDynamicData();
+        console.log(this.dynamicData)
         this.editDynamicVisible = true;
       }
+    },
+    // 加载动态数据
+    async loadDynamicData() {
+      this.dynamicList.forEach(async ele => {
+        const params = {
+          id: this.temp.id,
+          dynamic: ele.id
+        }
+        const res = await getRoleDynamicList(params);
+        if (res.code === 200) {
+          ele.dynamicList = res.data;
+          this.dynamicList = [...this.dynamicList];
+          if (res.data){
+            this.doDynamicListParam(this.dynamicList);
+          }
+        }
+      })
     },
     // 切换面板
     changeCollapse(keys) {
@@ -240,7 +271,6 @@ export default {
         const index = this.dynamicList.findIndex(p => p.id === key);
         // load = true 表示已经加载过了
         if (!this.dynamicList[index].load) {
-          this.spinning = true;
           const params = {
             id: this.temp.id,
             dynamic: key
@@ -260,7 +290,6 @@ export default {
               this.dynamicList[index].dynamicList = res.data;
               this.dynamicList[index].load = true;
               this.dynamicList = [...this.dynamicList];
-              this.spinning = false;
             }
           })
         }
@@ -311,7 +340,29 @@ export default {
         }
       })
     },
-    // 处理 dynamic 参数
+    // 处理 dynamic dynamicList 参数
+    doDynamicListParam(list) {
+      list.forEach(ele => {
+        if (!ele.parent) {
+          this.dynamicData[ele.id] = [];
+          if (ele.dynamicList) {
+            ele.dynamicList.forEach(p => {
+              let children = this.doChildrenParam(p);
+              let temp = {
+                id: p.id,
+                title: p.title,
+                checked: p.checked || false
+              }
+              if (children.length > 0) {
+                temp.children = children;
+              }
+              this.dynamicData[ele.id].push(temp)
+            })
+          }
+        }
+      })
+    },
+    // 处理 dynamic children 参数
     doChildrenParam(element) {
       let children = [];
       // 判断 children 是否存在
@@ -319,7 +370,8 @@ export default {
         element.children.forEach(c => {
           let temp = {
             id: c.id,
-            title: c.title
+            title: c.title,
+            checked: c.checked || false
           }
           // 判断 children 是否存在
           let tempChildren = this.doChildrenParam(c);
@@ -330,6 +382,36 @@ export default {
         })
       }
       return children;
+    },
+    // 根据 id 加载动态的名称
+    getDynamicNameById(id) {
+      const index = this.dynamicList.findIndex(ele => ele.id === id);
+      return this.dynamicList[index].name;
+    },
+    // 选中 checkbox
+    changeCheckBox(id) {
+      console.log(id)
+      Object.keys(this.dynamicData).forEach(key => {
+        this.dynamicData[key].forEach(ele => {
+          if (ele.id === id) {
+            ele.checked = true;
+          }
+          if (ele.children) {
+            ele.children.forEach(child => {
+              if (child.id === id) {
+                child.checked = true;
+              }
+              if (child.children) {
+                child.children.forEach(p => {
+                  if (p.id === id) {
+                    p.checked = true;
+                  }
+                })
+              }
+            })
+          }
+        })
+      })
     }
   }
 }
@@ -344,5 +426,14 @@ export default {
 }
 .ant-btn {
   margin-right: 10px;
+}
+.box-1 {
+  margin-left: 10px;
+}
+.box-2 {
+  margin-left: 40px;
+}
+.box-3 {
+  margin-left: 70px;
 }
 </style>
