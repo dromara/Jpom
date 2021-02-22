@@ -27,27 +27,19 @@
     </a-modal>
     <!-- 动态区 -->
     <a-modal v-model="editDynamicVisible" title="角色动态" @ok="handleEditDynamicOk" :maskClosable="false">
-        <div v-for="(val, key, index) in dynamicData" :key="index">
-          <h3>{{ getDynamicNameById(key) }}</h3>
-          <div v-for="item in val" :key="item.id">
-            <a-checkbox :value="item.id" :checked="item.checked" class="box-1" @change="changeCheckBox(item.id)">{{ item.title }}</a-checkbox><br/>
-            <div v-for="child in item.children" :key="child.id">
-              <a-checkbox :value="child.id" :checked="child.checked" class="box-2" @change="changeCheckBox(item.id)">{{ child.title }}</a-checkbox><br/>
-              <div v-for="ele in child.children" :key="ele.id">
-                <a-checkbox :value="ele.id" :checked="ele.checked" class="box-3" @change="changeCheckBox(item.id)">{{ ele.title }}</a-checkbox>
-              </div>
+      <div v-for="(val, key, index) in dynamicData" :key="index">
+        <h3>{{ getDynamicNameById(key) }}</h3>
+        <div v-for="item in val" :key="item.id">
+          <a-checkbox :value="item.id" :disabled="item.disabled" :checked="item.checked" class="box-1" @change="changeCheckBox(item.id)">{{ item.title }}</a-checkbox><br/>
+          <div v-for="child in item.children" :key="child.id">
+            <a-checkbox :value="child.id" :disabled="child.disabled" :checked="child.checked" class="box-2" @change="changeCheckBox(child.id)">{{ child.title }}</a-checkbox><br/>
+            <div v-for="ele in child.children" :key="ele.id">
+              <a-checkbox :value="ele.id" :checked="ele.checked" class="box-3" @change="changeCheckBox(ele.id)">{{ ele.title }}</a-checkbox>
             </div>
           </div>
-          <a-divider />
         </div>
-        <!-- <a-checkbox-group v-model="checkedList" :options="plainOptions" @change="onChange" /> -->
-        <a-collapse @change="changeCollapse">
-            <a-collapse-panel v-for="item in dynamicList.filter(ele => !ele.parent)" :key="item.id" :header="item.name">
-              <a-tree checkable defaultExpandAll :selectable="false"
-                :tree-data="item.dynamicList" 
-                :replaceFields="replaceFields" @check="checkDynamicNode"/>
-            </a-collapse-panel>
-        </a-collapse>
+        <a-divider />
+      </div>
     </a-modal>
   </div>
 </template>
@@ -265,69 +257,12 @@ export default {
         }
       })
     },
-    // 切换面板
-    changeCollapse(keys) {
-      keys.forEach(key => {
-        const index = this.dynamicList.findIndex(p => p.id === key);
-        // load = true 表示已经加载过了
-        if (!this.dynamicList[index].load) {
-          const params = {
-            id: this.temp.id,
-            dynamic: key
-          }
-          getRoleDynamicList(params).then(res => {
-            if (res.code === 200) {
-              // 禁用 id = PROJECT
-              // res.data.forEach(p => {
-              //   if (p.children) {
-              //     p.children.forEach(ele => {
-              //       if (ele.id === 'PROJECT') {
-              //         ele.disabled = true;
-              //       }
-              //     })
-              //   }
-              // })
-              this.dynamicList[index].dynamicList = res.data;
-              this.dynamicList[index].load = true;
-              this.dynamicList = [...this.dynamicList];
-            }
-          })
-        }
-      })
-    },
-    // 选择 dynamic
-    checkDynamicNode(checkedKeys) {
-      this.checkedDynamicKeys = checkedKeys;
-    },
     // 编辑 dynamic
     handleEditDynamicOk() {
-      let dynamic = {};
-      this.dynamicList.forEach(ele => {
-        if (!ele.parent) {
-          dynamic[ele.id] = [];
-          if (ele.dynamicList) {
-            ele.dynamicList.forEach(p => {
-              let children = this.doChildrenParam(p);
-              // 判断该节点是否选中
-              const index = this.checkedDynamicKeys.findIndex(checkedId => p.id === checkedId);
-              if (index > -1) {
-                let temp = {
-                  id: p.id,
-                  title: p.title
-                }
-                if (children.length > 0) {
-                  temp.children = children;
-                }
-                dynamic[ele.id].push(temp)
-              }
-            })
-          }
-        }
-      })
       // 组装参数
       const params = {
         id: this.temp.id,
-        dynamic: JSON.stringify(dynamic)
+        dynamic: JSON.stringify(this.dynamicData)
       }
       // 提交数据
       editRoleDynamic(params).then(res => {
@@ -351,7 +286,8 @@ export default {
               let temp = {
                 id: p.id,
                 title: p.title,
-                checked: p.checked || false
+                checked: p.checked || false,
+                disabled: (p.id.indexOf(':NODE') === 0 || p.id.indexOf('PROJECT') === 0) || false
               }
               if (children.length > 0) {
                 temp.children = children;
@@ -361,6 +297,7 @@ export default {
           }
         }
       })
+      this.dynamicData = {...this.dynamicData};
     },
     // 处理 dynamic children 参数
     doChildrenParam(element) {
@@ -371,7 +308,8 @@ export default {
           let temp = {
             id: c.id,
             title: c.title,
-            checked: c.checked || false
+            checked: c.checked || false,
+            disabled: (c.id.indexOf(':NODE') === 0 || c.id.indexOf('PROJECT') === 0) || false
           }
           // 判断 children 是否存在
           let tempChildren = this.doChildrenParam(c);
@@ -390,21 +328,20 @@ export default {
     },
     // 选中 checkbox
     changeCheckBox(id) {
-      console.log(id)
       Object.keys(this.dynamicData).forEach(key => {
         this.dynamicData[key].forEach(ele => {
           if (ele.id === id) {
-            ele.checked = true;
+            ele.checked = !ele.checked;
           }
           if (ele.children) {
             ele.children.forEach(child => {
               if (child.id === id) {
-                child.checked = true;
+                child.checked = !child.checked;
               }
               if (child.children) {
                 child.children.forEach(p => {
                   if (p.id === id) {
-                    p.checked = true;
+                    p.checked = !p.checked;
                   }
                 })
               }
@@ -412,6 +349,7 @@ export default {
           }
         })
       })
+      this.dynamicData = {...this.dynamicData};
     }
   }
 }
