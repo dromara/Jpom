@@ -51,7 +51,6 @@ const user = {
           res.data.forEach(element => {
             if (element.childs.length > 0) {
               const childs = element.childs.map(child => {
-                console.log(routeMenuMap[child.id])
                 return {
                   ...child,
                   'path': routeMenuMap[child.id]

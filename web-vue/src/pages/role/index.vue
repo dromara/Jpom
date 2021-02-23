@@ -287,7 +287,6 @@ export default {
           }
         })
       })
-      console.log(dynamic);
       // 组装参数
       const params = {
         id: this.temp.id,

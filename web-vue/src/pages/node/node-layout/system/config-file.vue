@@ -36,7 +36,6 @@ export default {
       getConfigData(this.node.id).then(res => {
         if (res.code === 200) {
           this.temp.content = res.data;
-          console.log(this.temp.content)
         }
       })
     },

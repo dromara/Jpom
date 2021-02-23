@@ -202,7 +202,6 @@ export default {
         id: record.buildDataId,
         buildId: record.buildNumberId
       }
-      console.log(this.temp)
       this.buildLogVisible = true;
     },
     // 关闭日志对话框
