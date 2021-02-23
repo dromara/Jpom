@@ -103,7 +103,7 @@
 </template>
 <script>
 import { getSshList, editSsh, deleteSsh, installAgentNode } from '../../api/ssh';
-import SshFile from './ssh-file.vue';
+import SshFile from './ssh-file';
 import Terminal from './terminal';
 export default {
   components: {

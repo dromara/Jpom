@@ -53,6 +53,18 @@ public class TomcatManageController extends BaseServerController {
     }
 
     /**
+     * @Hotstrip
+     * get tomcat list
+     * @return
+     */
+    @RequestMapping(value = "list", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public String tomcatList() {
+        JSONArray jsonArray = tomcatService.getTomcatList(getNode());
+        return JsonMessage.getString(200, "success", jsonArray);
+    }
+
+    /**
      * 查询tomcat的项目
      *
      * @param id id

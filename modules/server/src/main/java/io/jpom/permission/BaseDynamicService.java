@@ -124,7 +124,7 @@ public interface BaseDynamicService {
                 return null;
             }
         } catch (Exception e) {
-            DefaultSystemLog.getLog().error("拉取动态信息错误", e);
+            DefaultSystemLog.getLog().error("拉取动态信息错误, roleId: [{}], dataId: [{}], caused by [{}]", roleId, dataId, e.getMessage());
             return null;
         }
         JSONArray jsonArray = new JSONArray();

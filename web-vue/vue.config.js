@@ -4,6 +4,7 @@ module.exports = {
   outputDir: '../modules/server/src/main/resources/dist',
   // 代理设置
   devServer: {
+    port: 3000,
     proxy: {
       // websocket
       '/ssh': {
