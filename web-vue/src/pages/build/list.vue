@@ -490,7 +490,6 @@ export default {
         id: record.id,
         buildId: record.buildId
       }
-      console.log(this.temp)
       this.buildLogVisible = true;
     },
     // 关闭日志对话框

@@ -229,40 +229,69 @@ export default {
     },
     // 分配权限
     async handlePermission(record) {
+      this.$message.info('加载中，请勿重新点击');
       this.checkedDynamicKeys = [];
       this.temp = Object.assign({}, record);
       const res = await getDynamicList();
       if (res.code === 200) {
         this.dynamicList = res.data;
         this.dynamicList = [...this.dynamicList];
-        this.loadDynamicData();
-        console.log(this.dynamicData)
-        this.editDynamicVisible = true;
+        this.loadDynamicData().then(() => {
+          this.editDynamicVisible = true;
+        })
       }
     },
     // 加载动态数据
-    async loadDynamicData() {
-      this.dynamicList.forEach(async ele => {
-        const params = {
-          id: this.temp.id,
-          dynamic: ele.id
-        }
-        const res = await getRoleDynamicList(params);
-        if (res.code === 200) {
-          ele.dynamicList = res.data;
-          this.dynamicList = [...this.dynamicList];
-          if (res.data){
-            this.doDynamicListParam(this.dynamicList);
+    loadDynamicData() {
+      return new Promise((resolve) => {
+        let count = 0;
+        this.dynamicList.forEach(ele => {
+          const params = {
+            id: this.temp.id,
+            dynamic: ele.id
           }
-        }
+          getRoleDynamicList(params).then(res => {
+            if (res.code === 200) {
+              ele.dynamicList = res.data;
+              this.dynamicList = [...this.dynamicList];
+              if (res.data){
+                this.doDynamicListParam(this.dynamicList);
+              }
+              count++;
+              if (this.dynamicList.length === count) {
+                resolve();
+              }
+            }
+          })
+        })
       })
     },
     // 编辑 dynamic
     handleEditDynamicOk() {
+      let dynamic = JSON.parse(JSON.stringify(this.dynamicData));
+      Object.keys(dynamic).forEach((key) => {
+        let index = dynamic[key].findIndex(p => !p.disabled && !p.checked);
+        while(index > -1) {
+          dynamic[key].splice(index, 1);
+          index = dynamic[key].findIndex(p => !p.disabled && !p.checked);
+        }
+        dynamic[key].forEach(ele => {
+          if (ele.children) {
+            ele.children.forEach(child => {
+              index = child.children.findIndex(p => !p.disabled && !p.checked);
+              while(index > -1) {
+                child.children.splice(index, 1);
+                index = child.children.findIndex(p => !p.disabled && !p.checked);
+              }
+            })
+          }
+        })
+      })
+      console.log(dynamic);
       // 组装参数
       const params = {
         id: this.temp.id,
-        dynamic: JSON.stringify(this.dynamicData)
+        dynamic: JSON.stringify(dynamic)
       }
       // 提交数据
       editRoleDynamic(params).then(res => {
