@@ -13,11 +13,12 @@
         <span>{{ text }}</span>
       </a-tooltip>
       <template slot="operation" slot-scope="text, record">
-        <a-button type="primary" @click="handleFile(record)">日志</a-button>
+        <a-button type="primary" @click="handleLog(record)">日志</a-button>
         <a-button type="primary" @click="handleEdit(record)">编辑</a-button>
         <a-button type="primary" @click="handleConsole(record)">上传 WAR 文件</a-button>
-        <a-button type="danger" @click="handleMonitor(record)">停止</a-button>
-        <a-button type="danger" @click="handleReplica(record)">重启</a-button>
+        <a-button :disabled="record.tomcatStatus !== 0" type="primary" @click="handleMonitor(record)">启动</a-button>
+        <a-button :disabled="record.tomcatStatus === 0" type="danger" @click="handleMonitor(record)">停止</a-button>
+        <a-button :disabled="record.tomcatStatus === 0" type="danger" @click="handleReplica(record)">重启</a-button>
         <a-button type="danger" @click="handleDelete(record)">删除</a-button>
       </template>
       <!-- 嵌套表格 -->
@@ -54,11 +55,20 @@
         </a-form-model-item>
       </a-form-model>
     </a-modal>
+    <!-- Tomcat 日志组件 -->
+    <a-drawer :title="drawerTitle" placement="right" width="85vw"
+      :visible="drawerLogVisible" @close="onLogClose">
+      <tomcat-log v-if="drawerLogVisible" :nodeId="node.id" :tomcatId="temp.id" />
+    </a-drawer>
   </div>
 </template>
 <script>
-import { getTomcatList, editTomcat, deleteTomcat, getTomcatProjectList } from '../../../../api/node-other';
+import { getTomcatList, editTomcat, deleteTomcat, getTomcatProjectList, getTomcatStatus } from '../../../../api/node-other';
+import TomcatLog from './tomcat-log';
 export default {
+  components: {
+    TomcatLog
+  },
   props: {
     node: {
       type: Object
@@ -71,12 +81,14 @@ export default {
       list: [],
       temp: {},
       editTomcatVisible: false,
+      drawerTitle: '',
+      drawerLogVisible: false,
       columns: [
         {title: 'Tomcat 名称', dataIndex: 'name', width: 150, ellipsis: true, scopedSlots: {customRender: 'name'}},
         {title: 'Tomcat 路径', dataIndex: 'path', width: 150, ellipsis: true, scopedSlots: {customRender: 'path'}},
         {title: '修改时间', dataIndex: 'modifyTime', width: 180, ellipsis: true, scopedSlots: {customRender: 'modifyTime'}},
         {title: '最后操作人', dataIndex: 'modifyUser', width: 150, ellipsis: true, scopedSlots: {customRender: 'modifyUser'}},
-        {title: '操作', dataIndex: 'operation', scopedSlots: {customRender: 'operation'}, width: 540}
+        {title: '操作', dataIndex: 'operation', scopedSlots: {customRender: 'operation'}, width: 620}
       ],
       childColumns: [
         {title: '项目路径', dataIndex: 'path', width: 200, ellipsis: true, scopedSlots: {customRender: 'path'}},
@@ -110,6 +122,21 @@ export default {
       this.loading = true;
       getTomcatList(this.node.id).then(res => {
         if (res.code === 200) {
+          res.data.forEach(element => {
+            // 默认 tomcat 状态未运行
+            element.tomcatStatus = 0;
+            const params = {
+              nodeId: this.node.id,
+              id: element.id
+            }
+            getTomcatStatus(params).then(rsp => {
+              if (rsp.code === 200) {
+                // rsp.data === 0 表示 Tomcat 未运行
+                element.tomcatStatus = rsp.data;
+                this.list = [...this.list];
+              }
+            })
+          });
           this.list = res.data;
         }
         this.loading = false;
@@ -193,6 +220,16 @@ export default {
           this.childLoading = false;
         })
       }
+    },
+    // 查看日志
+    handleLog(record) {
+      this.temp = Object.assign(record);
+      this.drawerTitle = `Tomcat 日志(${this.temp.name})`
+      this.drawerLogVisible = true;
+    },
+    // 关闭日志对话框
+    onLogClose() {
+      this.drawerLogVisible = false;
     },
   }
 }

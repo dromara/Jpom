@@ -250,9 +250,11 @@ export default {
       if (res1.code === 200) {
         this.list = res1.data;
         const ids = [];
-        res1.data.forEach(element => {
-          ids.push(element.id);
-        });
+        if (res1.data) {
+          res1.data.forEach(element => {
+            ids.push(element.id);
+          });
+        }
         // 如果 ids 有数据就继续请求
         if (ids.length > 0) {
           const tempParams = {
