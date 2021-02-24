@@ -27,7 +27,7 @@
   </a-layout>
 </template>
 <script>
-import { getTomcatLogList, downloadTomcatFile, deleteTomcatLog } from '../../../../api/node-other'
+import { getTomcatLogList, downloadTomcatFile, deleteTomcatFile } from '../../../../api/node-other'
 import { mapGetters } from 'vuex';
 export default {
   props: {
@@ -161,7 +161,7 @@ export default {
             id: this.tomcatId
           }
           // 删除日志
-          deleteTomcatLog(params).then(res => {
+          deleteTomcatFile(params).then(res => {
             if(res.code === 200) {
               this.$notification.success({
                 message: res.msg,

@@ -30,12 +30,13 @@
         <a-tooltip slot="status" slot-scope="text" placement="topLeft" :title="text">
           <span>{{ text === 'running' ? '运行中' : '未运行' }}</span>
         </a-tooltip>
-        <template slot="operation" slot-scope="text, record">
-        <a-button type="primary" @click="handleFile(record)">管理</a-button>
-        <a-button type="danger" @click="handleMonitor(record)">停止</a-button>
-        <a-button type="danger" @click="handleReplica(record)">重启</a-button>
-        <a-button type="danger" @click="handleDelete(record)">删除</a-button>
-      </template>
+        <template slot="operation" slot-scope="operation, record">
+          <a-button type="primary" @click="handleProjectFile(record, text)">管理</a-button>
+          <a-button :disabled="record.status === 'running'" type="primary" @click="handleProjectCommand(record, text, 'start')">启动</a-button>
+          <a-button :disabled="record.status === 'stopped'" type="danger" @click="handleProjectCommand(record, text, 'stop')">停止</a-button>
+          <a-button :disabled="record.status === 'stopped'" type="danger" @click="handleProjectCommand(record, text, 'reload')">重启</a-button>
+          <a-button type="danger" @click="handleProjectCommand(record, text, 'undeploy')">删除</a-button>
+        </template>
       </a-table>
     </a-table>
     <!-- 编辑区 -->
@@ -60,14 +61,21 @@
       :visible="drawerLogVisible" @close="onLogClose">
       <tomcat-log v-if="drawerLogVisible" :nodeId="node.id" :tomcatId="temp.id" />
     </a-drawer>
+    <!-- 项目文件组件 -->
+    <a-drawer :title="drawerTitle" placement="right" width="85vw"
+      :visible="drawerFileVisible" @close="onFileClose">
+      <tomcat-project-file v-if="drawerFileVisible" :nodeId="node.id" :tomcatId="temp.id" :path="temp.projectPath" />
+    </a-drawer>
   </div>
 </template>
 <script>
-import { getTomcatList, editTomcat, deleteTomcat, getTomcatProjectList, getTomcatStatus, startTomcat, stopTomcat, restartTomcat } from '../../../../api/node-other';
+import { getTomcatList, editTomcat, deleteTomcat, getTomcatProjectList, getTomcatStatus, startTomcat, stopTomcat, restartTomcat, doTomcatProjectCommand } from '../../../../api/node-other';
 import TomcatLog from './tomcat-log';
+import TomcatProjectFile from './tomcat-project-file';
 export default {
   components: {
-    TomcatLog
+    TomcatLog,
+    TomcatProjectFile
   },
   props: {
     node: {
@@ -83,6 +91,7 @@ export default {
       editTomcatVisible: false,
       drawerTitle: '',
       drawerLogVisible: false,
+      drawerFileVisible: false,
       columns: [
         {title: 'Tomcat 名称', dataIndex: 'name', width: 150, ellipsis: true, scopedSlots: {customRender: 'name'}},
         {title: 'Tomcat 路径', dataIndex: 'path', width: 150, ellipsis: true, scopedSlots: {customRender: 'path'}},
@@ -207,19 +216,23 @@ export default {
     // 展开行
     expand(expanded, record) {
       if (expanded) {
-        // 请求节点状态数据
-        this.childLoading = true;
-        const params = {
-          nodeId: this.node.id,
-          id: record.id
-        }
-        getTomcatProjectList(params).then(res => {
-          if (res.code === 200) {
-            record.children = res.data;
-          }
-          this.childLoading = false;
-        })
+        this.loadTomcatProjectList(record);
       }
+    },
+    // 加载 Tomcat 项目列表
+    loadTomcatProjectList(record) {
+      // 请求节点状态数据
+      this.childLoading = true;
+      const params = {
+        nodeId: this.node.id,
+        id: record.id
+      }
+      getTomcatProjectList(params).then(res => {
+        if (res.code === 200) {
+          record.children = res.data;
+        }
+        this.childLoading = false;
+      })
     },
     // 查看日志
     handleLog(record) {
@@ -305,6 +318,50 @@ export default {
           })
         }
       });
+    },
+    // 执行 Tomcat 项目命令
+    handleProjectCommand(record, tomcatRecord, op) {
+      const map = {
+        'start': '启动',
+        'stop': '停止',
+        'reload': '重启',
+        'undeploy': '删除'
+      }
+      this.$confirm({
+        title: '系统提示',
+        content: `确认执行【${map[op]}】命令么？`,
+        okText: '确认',
+        cancelText: '取消',
+        onOk: () => {
+          const params = {
+            nodeId: this.node.id,
+            id: tomcatRecord.id,
+            path: record.path,
+            op: op,
+          }
+          doTomcatProjectCommand(params).then(res => {
+            if (res.code === 200) {
+              this.$notification.success({
+                message: res.msg,
+                duration: 2
+              });
+              // 刷新 Tomcat 项目数据
+              this.loadTomcatProjectList(tomcatRecord);
+            }
+          })
+        }
+      });
+    },
+    // 管理 Tomcat 项目
+    handleProjectFile(record, tomcatRecord) {
+      this.temp = Object.assign(tomcatRecord);
+      this.temp.projectPath = record.path;
+      this.drawerTitle = `Tomcat 文件管理(${this.temp.name})`
+      this.drawerFileVisible = true;
+    },
+    // 关闭文件对话框
+    onFileClose() {
+      this.drawerFileVisible = false;
     }
   }
 }

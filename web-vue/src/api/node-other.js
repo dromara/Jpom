@@ -94,7 +94,7 @@ export function getTomcatLogList(params) {
  * params.filename 日志名称
  * params.id 编辑修改时判断 ID
  */
-export function deleteTomcatLog(params) {
+export function deleteTomcatFile(params) {
   return axios({
     url: '/node/tomcat/deleteFile',
     method: 'post',
@@ -163,3 +163,59 @@ export function restartTomcat(params) {
     data: params
   })
 }
+
+/**
+ * Tomcat 项目命令操作
+ * @param {
+ *  nodeId: 节点 ID
+ *  id: Tomcat ID
+ *  path: 项目目录
+ *  op: 操作符
+ * } params
+ */
+export function doTomcatProjectCommand(params) {
+  return axios({
+    url: '/node/tomcat/tomcatProjectManage',
+    method: 'post',
+    data: params
+  })
+}
+
+/**
+ * Tomcat 项目文件列表
+ * @param {
+  *  nodeId: 节点 ID
+  *  id: 项目 ID 
+  *  path: Tomcat 项目目录
+  *  except: dir 固定值
+  * } params 
+  */
+ export function getTomcatFileList(params) {
+   return axios({
+     url: '/node/tomcat/getFileList',
+     method: 'post',
+     data: params
+   })
+ }
+
+ /**
+ * 上传 Tomcat 项目文件
+ * @param {
+  *  file: 文件 multipart/form-data
+  *  nodeId: 节点 ID
+  *  id: 项目 ID
+  *  path: 目录地址
+  * } formData 
+  */
+ export function uploadTomcatProjectFile(formData) {
+   return axios({
+     url: '/node/tomcat/upload',
+     headers: {
+       'Content-Type': 'multipart/form-data;charset=UTF-8'
+     },
+     method: 'post',
+     // 0 表示无超时时间
+     timeout: 0,
+     data: formData
+   })
+ }
