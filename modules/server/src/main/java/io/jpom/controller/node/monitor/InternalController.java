@@ -47,7 +47,7 @@ public class InternalController extends BaseServerController {
     @ResponseBody
     public String getInternalData() {
         JSONObject data = NodeForward.requestData(getNode(), NodeUrl.Manage_internal_data, getRequest(), JSONObject.class);
-        DefaultSystemLog.getLog().info("data: {}", data.toString());
+        DefaultSystemLog.getLog().info("data: {}", data == null ? "" : data.toString());
         return JsonMessage.getString(200, "success", data);
     }
 
