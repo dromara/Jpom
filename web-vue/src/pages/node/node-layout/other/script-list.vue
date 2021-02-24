@@ -3,6 +3,7 @@
     <div ref="filter" class="filter">
       <a-button type="primary" @click="handleFilter">刷新</a-button>
       <a-button type="primary" @click="handleAdd">新增</a-button>
+      <a-button type="primary" @click="handleUpload">上传文件</a-button>
     </div>
     <!-- 数据表格 -->
     <a-table :data-source="list" :loading="loading" :columns="columns" :pagination="false" bordered rowKey="id" class="node-table">
@@ -34,10 +35,18 @@
       :visible="drawerConsoleVisible" @close="onConsoleClose">
       <script-console v-if="drawerConsoleVisible" :nodeId="node.id" :scriptId="temp.id" />
     </a-drawer>
+    <!-- 上传文件 -->
+    <a-modal v-model="uploadFileVisible" width="300px" title="上传 bat|bash 文件" :footer="null" :maskClosable="true">
+      <a-upload :file-list="uploadFileList" :remove="handleRemove" :before-upload="beforeUpload" :accept="'.bat,.sh'">
+        <a-button><a-icon type="upload" />选择 bat|bash 文件</a-button>
+      </a-upload>
+      <br/>
+      <a-button type="primary" :disabled="uploadFileList.length === 0" @click="startUpload">开始上传</a-button>
+    </a-modal>
   </div>
 </template>
 <script>
-import { getScriptList, editScript, deleteScript } from '../../../../api/node-other';
+import { getScriptList, editScript, deleteScript, uploadScriptFile } from '../../../../api/node-other';
 import ScriptConsole from './script-console';
 export default {
   components: {
@@ -56,6 +65,10 @@ export default {
       editScriptVisible: false,
       drawerTitle: '',
       drawerConsoleVisible: false,
+      // 上传脚本文件相关属性
+      fileList: [],
+      uploadFileList: [],
+      uploadFileVisible: false,
       columns: [
         {title: 'Script ID', dataIndex: 'id', width: 200, ellipsis: true, scopedSlots: {customRender: 'id'}},
         {title: 'Script 名称', dataIndex: 'name', width: 150, ellipsis: true, scopedSlots: {customRender: 'name'}},
@@ -161,6 +174,42 @@ export default {
     // 关闭 console
     onConsoleClose() {
       this.drawerConsoleVisible = false;
+    },
+    // 准备上传文件
+    handleUpload(record) {
+      this.temp = Object.assign(record);
+      this.uploadFileVisible = true;
+    },
+    handleRemove(file) {
+      const index = this.uploadFileList.indexOf(file);
+      const newFileList = this.uploadFileList.slice();
+      newFileList.splice(index, 1);
+      this.uploadFileList = newFileList;
+    },
+    beforeUpload(file) {
+      this.uploadFileList = [...this.uploadFileList, file];
+      return false;
+    },
+    // 开始上传文件
+    startUpload() {
+      this.uploadFileList.forEach(file => {
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('nodeId', this.node.id);
+        // 上传文件
+        uploadScriptFile(formData).then(res => {
+          if (res.code === 200) {
+            this.$notification.success({
+              message: res.msg,
+              duration: 2
+            });
+          }
+        })
+      })
+      setTimeout(() => {
+        this.loadData();
+      }, 2000)
+      this.uploadFileList = [];
     }
   }
 }

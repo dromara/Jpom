@@ -45,6 +45,27 @@ export function deleteTomcat(params) {
 }
 
 /**
+ * 上传 Tomcat WAR 项目文件
+ * @param {
+  *  file: 文件 multipart/form-data
+  *  nodeId: 节点 ID
+  *  id: Tomcat ID
+  * } formData 
+  */
+ export function uploadTomcatWarFile(formData) {
+   return axios({
+     url: '/node/tomcat/uploadWar',
+     headers: {
+       'Content-Type': 'multipart/form-data;charset=UTF-8'
+     },
+     method: 'post',
+     // 0 表示无超时时间
+     timeout: 0,
+     data: formData
+   })
+ }
+
+/**
  * 查询项目列表
  * @param {nodeId, id} params 
  * params.nodeId 节点 ID 
@@ -199,8 +220,8 @@ export function doTomcatProjectCommand(params) {
  }
 
  /**
- * 上传 Tomcat 项目文件
- * @param {
+  * 上传 Tomcat 项目文件
+  * @param {
   *  file: 文件 multipart/form-data
   *  nodeId: 节点 ID
   *  id: 项目 ID
@@ -219,6 +240,8 @@ export function doTomcatProjectCommand(params) {
      data: formData
    })
  }
+ 
+ /************************** */
 
 /**
  * script 列表
@@ -260,5 +283,25 @@ export function deleteScript(params) {
     url: '/node/script/del.json',
     method: 'post',
     data: params
+  })
+}
+
+/**
+ * 上传 Script 文件
+ * @param {
+ *  file: 文件 multipart/form-data
+ *  nodeId: 节点 ID
+ * } formData 
+*/
+export function uploadScriptFile(formData) {
+  return axios({
+    url: '/node/script/upload',
+    headers: {
+      'Content-Type': 'multipart/form-data;charset=UTF-8'
+    },
+    method: 'post',
+    // 0 表示无超时时间
+    timeout: 0,
+    data: formData
   })
 }

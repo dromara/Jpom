@@ -15,7 +15,7 @@
       <template slot="operation" slot-scope="text, record">
         <a-button type="primary" @click="handleLog(record)">日志</a-button>
         <a-button type="primary" @click="handleEdit(record)">编辑</a-button>
-        <a-button type="primary" @click="handleConsole(record)">上传 WAR 文件</a-button>
+        <a-button type="primary" @click="handleUploadWar(record)">上传 WAR 文件</a-button>
         <a-button :disabled="record.tomcatStatus !== 0" type="primary" @click="handleStart(record)">启动</a-button>
         <a-button :disabled="record.tomcatStatus === 0" type="danger" @click="handleStop(record)">停止</a-button>
         <a-button :disabled="record.tomcatStatus === 0" type="danger" @click="handleRestart(record)">重启</a-button>
@@ -66,10 +66,18 @@
       :visible="drawerFileVisible" @close="onFileClose">
       <tomcat-project-file v-if="drawerFileVisible" :nodeId="node.id" :tomcatId="temp.id" :path="temp.projectPath" />
     </a-drawer>
+    <!-- 上传文件 -->
+    <a-modal v-model="uploadFileVisible" width="300px" title="上传 WAR 文件" :footer="null" :maskClosable="true">
+      <a-upload :file-list="uploadFileList" :remove="handleRemove" :before-upload="beforeUpload" :accept="'.war'" multiple>
+        <a-button><a-icon type="upload" />选择 WAR 文件</a-button>
+      </a-upload>
+      <br/>
+      <a-button type="primary" :disabled="uploadFileList.length === 0" @click="startUpload">开始上传</a-button>
+    </a-modal>
   </div>
 </template>
 <script>
-import { getTomcatList, editTomcat, deleteTomcat, getTomcatProjectList, getTomcatStatus, startTomcat, stopTomcat, restartTomcat, doTomcatProjectCommand } from '../../../../api/node-other';
+import { getTomcatList, editTomcat, deleteTomcat, getTomcatProjectList, getTomcatStatus, startTomcat, stopTomcat, restartTomcat, doTomcatProjectCommand, uploadTomcatWarFile } from '../../../../api/node-other';
 import TomcatLog from './tomcat-log';
 import TomcatProjectFile from './tomcat-project-file';
 export default {
@@ -92,6 +100,10 @@ export default {
       drawerTitle: '',
       drawerLogVisible: false,
       drawerFileVisible: false,
+      // 上传 war 文件相关属性
+      fileList: [],
+      uploadFileList: [],
+      uploadFileVisible: false,
       columns: [
         {title: 'Tomcat 名称', dataIndex: 'name', width: 150, ellipsis: true, scopedSlots: {customRender: 'name'}},
         {title: 'Tomcat 路径', dataIndex: 'path', width: 150, ellipsis: true, scopedSlots: {customRender: 'path'}},
@@ -131,22 +143,24 @@ export default {
       this.loading = true;
       getTomcatList(this.node.id).then(res => {
         if (res.code === 200) {
-          res.data.forEach(element => {
-            // 默认 tomcat 状态未运行
-            element.tomcatStatus = 0;
-            const params = {
-              nodeId: this.node.id,
-              id: element.id
-            }
-            getTomcatStatus(params).then(rsp => {
-              if (rsp.code === 200) {
-                // rsp.data === 0 表示 Tomcat 未运行
-                element.tomcatStatus = rsp.data;
-                this.list = [...this.list];
+          if (res.data) {
+            res.data.forEach(element => {
+              // 默认 tomcat 状态未运行
+              element.tomcatStatus = 0;
+              const params = {
+                nodeId: this.node.id,
+                id: element.id
               }
-            })
-          });
-          this.list = res.data;
+              getTomcatStatus(params).then(rsp => {
+                if (rsp.code === 200) {
+                  // rsp.data === 0 表示 Tomcat 未运行
+                  element.tomcatStatus = rsp.data;
+                  this.list = [...this.list];
+                }
+              })
+            });
+            this.list = res.data;
+          }
         }
         this.loading = false;
       })
@@ -362,6 +376,40 @@ export default {
     // 关闭文件对话框
     onFileClose() {
       this.drawerFileVisible = false;
+    },
+    // 上传 WAR 文件
+    handleUploadWar(record) {
+      this.temp = Object.assign(record);
+      this.uploadFileVisible = true;
+    },
+    handleRemove(file) {
+      const index = this.uploadFileList.indexOf(file);
+      const newFileList = this.uploadFileList.slice();
+      newFileList.splice(index, 1);
+      this.uploadFileList = newFileList;
+    },
+    beforeUpload(file) {
+      this.uploadFileList = [...this.uploadFileList, file];
+      return false;
+    },
+    // 开始上传文件
+    startUpload() {
+      this.uploadFileList.forEach(file => {
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('nodeId', this.node.id);
+        formData.append('id', this.temp.id);
+        // 上传文件
+        uploadTomcatWarFile(formData).then(res => {
+          if (res.code === 200) {
+            this.$notification.success({
+              message: res.msg,
+              duration: 2
+            });
+          }
+        })
+      })
+      this.uploadFileList = [];
     }
   }
 }
