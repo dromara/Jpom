@@ -16,9 +16,9 @@
         <a-button type="primary" @click="handleLog(record)">日志</a-button>
         <a-button type="primary" @click="handleEdit(record)">编辑</a-button>
         <a-button type="primary" @click="handleConsole(record)">上传 WAR 文件</a-button>
-        <a-button :disabled="record.tomcatStatus !== 0" type="primary" @click="handleMonitor(record)">启动</a-button>
-        <a-button :disabled="record.tomcatStatus === 0" type="danger" @click="handleMonitor(record)">停止</a-button>
-        <a-button :disabled="record.tomcatStatus === 0" type="danger" @click="handleReplica(record)">重启</a-button>
+        <a-button :disabled="record.tomcatStatus !== 0" type="primary" @click="handleStart(record)">启动</a-button>
+        <a-button :disabled="record.tomcatStatus === 0" type="danger" @click="handleStop(record)">停止</a-button>
+        <a-button :disabled="record.tomcatStatus === 0" type="danger" @click="handleRestart(record)">重启</a-button>
         <a-button type="danger" @click="handleDelete(record)">删除</a-button>
       </template>
       <!-- 嵌套表格 -->
@@ -63,7 +63,7 @@
   </div>
 </template>
 <script>
-import { getTomcatList, editTomcat, deleteTomcat, getTomcatProjectList, getTomcatStatus } from '../../../../api/node-other';
+import { getTomcatList, editTomcat, deleteTomcat, getTomcatProjectList, getTomcatStatus, startTomcat, stopTomcat, restartTomcat } from '../../../../api/node-other';
 import TomcatLog from './tomcat-log';
 export default {
   components: {
@@ -231,6 +231,81 @@ export default {
     onLogClose() {
       this.drawerLogVisible = false;
     },
+    // 启动 Tomcat
+    handleStart(record) {
+      this.$confirm({
+        title: '系统提示',
+        content: '确认启动 Tomcat 么？',
+        okText: '确认',
+        cancelText: '取消',
+        onOk: () => {
+          // 组装参数
+          const params = {
+            nodeId: this.node.id,
+            id: record.id
+          }
+          startTomcat(params).then((res) => {
+            if (res.code === 200) {
+              this.$notification.success({
+                message: res.msg,
+                duration: 2
+              });
+              this.loadData();
+            }
+          })
+        }
+      });
+    },
+    // 停止 Tomcat
+    handleStop(record) {
+      this.$confirm({
+        title: '系统提示',
+        content: '确认停止 Tomcat 么？',
+        okText: '确认',
+        cancelText: '取消',
+        onOk: () => {
+          // 组装参数
+          const params = {
+            nodeId: this.node.id,
+            id: record.id
+          }
+          stopTomcat(params).then((res) => {
+            if (res.code === 200) {
+              this.$notification.success({
+                message: res.msg,
+                duration: 2
+              });
+              this.loadData();
+            }
+          })
+        }
+      });
+    },
+    // 重启 Tomcat
+    handleRestart(record) {
+      this.$confirm({
+        title: '系统提示',
+        content: '确认重启 Tomcat 么？',
+        okText: '确认',
+        cancelText: '取消',
+        onOk: () => {
+          // 组装参数
+          const params = {
+            nodeId: this.node.id,
+            id: record.id
+          }
+          restartTomcat(params).then((res) => {
+            if (res.code === 200) {
+              this.$notification.success({
+                message: res.msg,
+                duration: 2
+              });
+              this.loadData();
+            }
+          })
+        }
+      });
+    }
   }
 }
 </script>

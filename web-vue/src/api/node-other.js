@@ -118,3 +118,48 @@ export function downloadTomcatFile(params) {
     params
   })
 }
+
+/**
+ * 启动 Tomcat
+ * @param {
+ *  nodeId: 节点 ID
+ *  id: Tomcat ID
+ * } params 
+ */
+export function startTomcat(params) {
+  return axios({
+    url: '/node/tomcat/start',
+    method: 'post',
+    data: params
+  })
+}
+
+/**
+ * 停止 Tomcat
+ * @param {
+ *  nodeId: 节点 ID
+ *  id: Tomcat ID
+ * } params 
+*/
+export function stopTomcat(params) {
+  return axios({
+    url: '/node/tomcat/stop',
+    method: 'post',
+    data: params
+  })
+}
+
+/**
+ * 重启 Tomcat
+ * @param {
+ *  nodeId: 节点 ID
+ *  id: Tomcat ID
+ * } params 
+*/
+export function restartTomcat(params) {
+  return axios({
+    url: '/node/tomcat/restart',
+    method: 'post',
+    data: params
+  })
+}
