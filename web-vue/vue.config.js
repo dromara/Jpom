@@ -25,6 +25,12 @@ module.exports = {
         ws: false,
         secure: false,
       },
+      '/script_run': {
+        target: 'ws://localhost:2122',
+        //  true/false: if you want to proxy websockets
+        ws: false,
+        secure: false,
+      },
       // http
       '/*': {
         target: 'http://localhost:2122',

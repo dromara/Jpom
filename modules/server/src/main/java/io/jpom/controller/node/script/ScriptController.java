@@ -1,6 +1,7 @@
 package io.jpom.controller.node.script;
 
 import cn.hutool.core.util.StrUtil;
+import cn.jiangzeyin.common.JsonMessage;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.common.BaseServerController;
@@ -40,6 +41,18 @@ public class ScriptController extends BaseServerController {
         JSONArray jsonArray = scriptServer.listToArray(getNode());
         setAttribute("array", jsonArray);
         return "node/script/list";
+    }
+
+    /**
+     * @Hotstrip
+     * get script list
+     * @return
+     */
+    @RequestMapping(value = "list", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public String scriptList() {
+        JSONArray jsonArray = scriptServer.listToArray(getNode());
+        return JsonMessage.getString(200, "success", jsonArray);
     }
 
     @RequestMapping(value = "item.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)

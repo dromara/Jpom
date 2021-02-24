@@ -219,3 +219,46 @@ export function doTomcatProjectCommand(params) {
      data: formData
    })
  }
+
+/**
+ * script 列表
+ * @param {String} nodeId 节点 ID
+ */
+export function getScriptList(nodeId) {
+  return axios({
+    url: '/node/script/list',
+    method: 'post',
+    data: {nodeId}
+  })
+}
+
+/**
+ * Script 编辑
+ * @param {nodeId, id, name, path, port, appBase} params
+ * params.type: add 表示添加
+ * params.nodeId 节点 ID 
+ * params.id 编辑修改时判断 ID
+ * params.name 名称
+ * params.context 内容
+ */
+export function editScript(params) {
+  return axios({
+    url: '/node/script/save.json',
+    method: 'post',
+    data: params
+  })
+}
+
+/**
+ * 删除 Script
+ * @param {nodeId, id} params 
+ * params.nodeId 节点 ID 
+ * params.id 编辑修改时判断 ID
+ */
+export function deleteScript(params) {
+  return axios({
+    url: '/node/script/del.json',
+    method: 'post',
+    data: params
+  })
+}
