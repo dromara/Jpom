@@ -1,5 +1,6 @@
 package io.jpom.controller.node.system.ssl;
 
+import cn.jiangzeyin.common.JsonMessage;
 import io.jpom.common.BaseServerController;
 import io.jpom.common.forward.NodeForward;
 import io.jpom.common.forward.NodeUrl;
@@ -40,6 +41,17 @@ public class CertificateController extends BaseServerController {
         return "node/system/certificate";
     }
 
+    /**
+     * @author Hotstrip
+     * load Cert white list data
+     * @return
+     */
+    @RequestMapping(value = "white-list", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @ResponseBody
+    public String loadWhiteList() {
+        List<String> list = whitelistDirectoryService.getCertificateDirectory(getNode());
+        return JsonMessage.getString(200, "success", list);
+    }
 
     /**
      * 保存证书

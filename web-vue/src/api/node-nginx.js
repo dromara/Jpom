@@ -137,3 +137,73 @@ export function editNginxServerName(params) {
     data: params
   })
 }
+
+/***************************** */
+
+/**
+ * cert 白名单列表
+ * @param {
+ *  nodeId: 节点 ID 
+ * } params 
+ */
+export function getCertWhiteList(params) {
+  return axios({
+    url: '/node/system/certificate/white-list',
+    method: 'post',
+    data: params
+  })
+}
+
+/**
+ * cert 列表
+ * @param {
+ *  nodeId: 节点 ID 
+ * } params 
+ */
+export function getCertList(params) {
+  return axios({
+    url: '/node/system/certificate/getCertList',
+    method: 'post',
+    data: params
+  })
+}
+
+/**
+ * 编辑 cert
+ * @param {
+ *  file: 文件 multipart/form-data
+ *  nodeId: 节点 ID
+ *  ...
+ * } formData 
+ */
+export function editCert(formData) {
+  return axios({
+    url: '/node/system/certificate/saveCertificate',
+    headers: {
+      'Content-Type': 'multipart/form-data;charset=UTF-8'
+    },
+    method: 'post',
+    timeout: 0,
+    data: formData
+  })
+}
+
+// 删除 cert
+export function deleteCert(params) {
+  return axios({
+    url: '/node/system/certificate/delete',
+    method: 'post',
+    data: params
+  })
+}
+
+// 导出 cert
+export function downloadCert(params) {
+  return axios({
+    url: '/node/system/certificate/export',
+    method: 'get',
+    responseType: 'blob',
+    timeout: 0,
+    params
+  })
+}
