@@ -173,7 +173,7 @@ export function getCertList(params) {
  * @param {
  *  file: 文件 multipart/form-data
  *  nodeId: 节点 ID
- *  ...
+ *  data: 证书相关数据
  * } formData 
  */
 export function editCert(formData) {
@@ -188,7 +188,13 @@ export function editCert(formData) {
   })
 }
 
-// 删除 cert
+/**
+ * 删除 cert
+ * @param {
+ *  nodeId: 节点 ID
+ *  id: 证书 ID
+ * } params 
+ */
 export function deleteCert(params) {
   return axios({
     url: '/node/system/certificate/delete',
@@ -197,7 +203,13 @@ export function deleteCert(params) {
   })
 }
 
-// 导出 cert
+/**
+ * 导出 cert
+ * @param {
+ *  nodeId: 节点 ID
+ *  id: 证书 ID
+ * } params 
+ */
 export function downloadCert(params) {
   return axios({
     url: '/node/system/certificate/export',

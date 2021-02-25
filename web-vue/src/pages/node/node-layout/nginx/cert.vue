@@ -6,6 +6,9 @@
     </div>
     <!-- 数据表格 -->
     <a-table :data-source="list" :loading="loading" :columns="columns" :scroll="{x: '80vw', y: 500}" :pagination="false" bordered :rowKey="(record, index) => index">
+      <a-tooltip slot="id" slot-scope="text" placement="topLeft" :title="text">
+        <span>{{ text }}</span>
+      </a-tooltip>
       <a-tooltip slot="name" slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>
@@ -14,28 +17,52 @@
       </a-tooltip>
       <template slot="operation" slot-scope="text, record">
         <a-button type="primary" @click="handleEdit(record)">编辑</a-button>
-        <a-button type="primary" @click="handleEdit(record)">导出</a-button>
+        <a-button type="primary" @click="handleDownload(record)">导出</a-button>
+        <a-button type="primary" @click="handleTemplate(record)">模板</a-button>
         <a-button type="danger" @click="handleDelete(record)">删除</a-button>
       </template>
     </a-table>
     <!-- 编辑区 -->
-    <a-modal v-model="editCertVisible" title="编辑 Cert" @ok="handleEditJdkOk" :maskClosable="false">
+    <a-modal v-model="editCertVisible" title="编辑 Cert" @ok="handleEditCertOk" :maskClosable="false">
       <a-form-model ref="editCertForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
         <a-form-model-item label="证书 ID" prop="id">
-          <a-input v-model="temp.name" placeholder="证书 ID"/>
+          <a-input v-model="temp.id" :disabled="temp.type === 'edit'" placeholder="证书 ID"/>
         </a-form-model-item>
         <a-form-model-item label="证书名称" prop="name">
           <a-input v-model="temp.name" placeholder="证书名称"/>
         </a-form-model-item>
         <a-form-model-item label="证书路径" prop="path">
-          <a-input v-model="temp.path" placeholder="证书路径"/>
+          <a-select v-model="temp.path" :disabled="temp.type === 'edit'" placeholder="请选择证书路径">
+            <a-select-option v-for="element in whiteList" :key="element">{{ element }}</a-select-option>
+          </a-select>
+        </a-form-model-item>
+        <a-form-model-item v-if="temp.type === 'add'" label="证书文件" prop="file">
+          <a-upload :file-list="uploadFileList" :remove="handleRemove" :before-upload="beforeUpload" :accept="'.zip'">
+            <a-button><a-icon type="upload" />选择文件</a-button>
+          </a-upload>
         </a-form-model-item>
       </a-form-model>
+    </a-modal>
+    <!-- 模板 -->
+    <a-modal v-model="templateVisible" title="Cert 配置模板" :footer="null" :maskClosable="true">
+      <pre class="config">
+      ssl	on;
+      listen	443 ssl;
+      server_name	{{temp.domain}};
+      ssl_certificate	{{temp.cert}};
+      ssl_certificate_key	{{temp.key}};
+      ssl_session_cache	shared:SSL:1m;
+      ssl_session_timeout	5m;
+      ssl_ciphers	ECDHE-RSA-AES128-GCM-SHA256:ECDHE:ECDH:AES:HIGH:!NULL:!aNULL:!MD5:!ADH:!RC4;
+      ssl_protocols	TLSv1 TLSv1.1 TLSv1.2;
+      ssl_prefer_server_ciphers	on;
+      </pre>
     </a-modal>
   </div>
 </template>
 <script>
-import { getCertWhiteList, getCertList } from '../../../../api/node-nginx';
+import { getCertWhiteList, getCertList, editCert, deleteCert, downloadCert } from '../../../../api/node-nginx';
+import { parseTime } from '../../../../utils/time';
 export default {
   props: {
     node: {
@@ -47,16 +74,39 @@ export default {
       loading: false,
       whiteList: [],
       list: [],
+      uploadFileList: [],
       temp: {},
       editCertVisible: false,
+      templateVisible: false,
       columns: [
         {title: 'ID', dataIndex: 'id', width: 150, ellipsis: true, scopedSlots: {customRender: 'id'}},
         {title: '名称', dataIndex: 'name', width: 150, ellipsis: true, scopedSlots: {customRender: 'name'}},
         {title: '域名', dataIndex: 'domain', width: 170, ellipsis: true, scopedSlots: {customRender: 'domain'}},
-        {title: '生效时间', dataIndex: 'effectiveTime', width: 180, ellipsis: true, scopedSlots: {customRender: 'effectiveTime'}},
-        {title: '到期时间', dataIndex: 'expirationTime', width: 180, ellipsis: true, scopedSlots: {customRender: 'expirationTime'}},
-        {title: '操作', dataIndex: 'operation', scopedSlots: {customRender: 'operation'}, width: 300}
+        {title: '生效时间', dataIndex: 'effectiveTime', customRender: (text) => {
+          if (!text) {
+            return '';
+          }
+          return parseTime(text);
+        }, width: 180},
+        {title: '到期时间', dataIndex: 'expirationTime', customRender: (text) => {
+          if (!text) {
+            return '';
+          }
+          return parseTime(text);
+        }, width: 180},
+        {title: '操作', dataIndex: 'operation', scopedSlots: {customRender: 'operation'}, width: 360}
       ],
+      rules: {
+        id: [
+          { required: true, message: 'Please input ID', trigger: 'blur' }
+        ],
+        name: [
+          { required: true, message: 'Please input name', trigger: 'blur' }
+        ],
+        path: [
+          { required: true, message: 'Please select path', trigger: 'blur' }
+        ]
+      }
     }
   },
   created() {
@@ -90,9 +140,113 @@ export default {
     },
     // 添加
     handleAdd() {
-      this.temp = {};
+      this.temp = {
+        type: 'add'
+      };
       this.editCertVisible = true;
     },
+    // 修改
+    handleEdit(record) {
+      this.temp = Object.assign(record);
+      this.temp.type = 'edit';
+      this.temp.path = this.temp.whitePath;
+      this.editCertVisible = true;
+    },
+    handleRemove(file) {
+      const index = this.uploadFileList.indexOf(file);
+      const newFileList = this.uploadFileList.slice();
+      newFileList.splice(index, 1);
+      this.uploadFileList = newFileList;
+    },
+    beforeUpload(file) {
+      this.uploadFileList = [...this.uploadFileList, file];
+      return false;
+    },
+    // 提交 Cert 数据
+    handleEditCertOk() {
+       // 检验表单
+      this.$refs['editCertForm'].validate((valid) => {
+        if (!valid) {
+          return false;
+        }
+        if (this.temp.type === 'add' && this.uploadFileList.length === 0) {
+          this.$notification.error({
+            message: '请选择证书文件',
+            duration: 2
+          });
+          return false;
+        }
+        const formData = new FormData();
+        formData.append('file', this.uploadFileList[0]);
+        formData.append('nodeId', this.node.id);
+        formData.append('data', JSON.stringify(this.temp));
+        // 提交数据
+        editCert(formData).then(res => {
+          if (res.code === 200) {
+            // 成功
+            this.$notification.success({
+              message: res.msg,
+              duration: 2
+            });
+            this.$refs['editCertForm'].resetFields();
+            this.editCertVisible = false;
+            this.loadData();
+          }
+        })
+      })
+    },
+    // 删除
+    handleDelete(record) {
+      this.$confirm({
+        title: '系统提示',
+        content: '真的要删除该记录么？',
+        okText: '确认',
+        cancelText: '取消',
+        onOk: () => {
+          // 组装参数
+          const params = {
+            nodeId: this.node.id,
+            id: record.id
+          }
+          deleteCert(params).then((res) => {
+            if (res.code === 200) {
+              this.$notification.success({
+                message: res.msg,
+                duration: 2
+              });
+              this.loadData();
+            }
+          })
+        }
+      });
+    },
+    // 下载证书文件
+    handleDownload(record) {
+      this.$notification.info({
+        message: '正在下载，请稍等...',
+        duration: 5
+      });
+      // 请求参数
+      const params = {
+        nodeId: this.node.id,
+        id: record.id
+      }
+      // 请求接口拿到 blob
+      downloadCert(params).then(blob => {
+        const url = window.URL.createObjectURL(blob);
+        let link = document.createElement('a');
+        link.style.display = 'none';
+        link.href = url;
+        link.setAttribute('download', record.domain + '.zip');
+        document.body.appendChild(link);
+        link.click();
+      })
+    },
+    // 显示模板
+    handleTemplate(record) {
+      this.temp = Object.assign(record);
+      this.templateVisible = true;
+    }
   }
 }
 </script>
@@ -102,5 +256,9 @@ export default {
 }
 .ant-btn {
   margin-right: 10px;
+}
+.config {
+  background-color: black;
+  color: #fff;
 }
 </style>
