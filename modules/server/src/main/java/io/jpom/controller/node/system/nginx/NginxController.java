@@ -1,5 +1,6 @@
 package io.jpom.controller.node.system.nginx;
 
+import cn.jiangzeyin.common.JsonMessage;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.common.BaseServerController;
 import io.jpom.common.forward.NodeForward;
@@ -75,6 +76,29 @@ public class NginxController extends BaseServerController {
         return "node/system/nginxSetting";
     }
 
+    /**
+     * @author Hotstrip
+     * load Nginx white list data
+     * @return
+     */
+    @RequestMapping(value = "white-list", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @ResponseBody
+    public String loadWhiteList() {
+        List<String> list = whitelistDirectoryService.getNgxDirectory(getNode());
+        return JsonMessage.getString(200, "success", list);
+    }
+
+    /**
+     * @author Hotstrip
+     * load Nginx config data
+     * @return
+     */
+    @RequestMapping(value = "load-config", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @ResponseBody
+    public String loadConfig() {
+        JSONObject data = NodeForward.requestData(getNode(), NodeUrl.System_Nginx_item_data, getRequest(), JSONObject.class);
+        return JsonMessage.getString(200, "success", data);
+    }
 
     @RequestMapping(value = "updateNgx", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
