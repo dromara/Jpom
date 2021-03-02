@@ -223,6 +223,13 @@ export default {
     // 展开行
     expand(expanded, record) {
       if (expanded) {
+        if (!record.openStatus) {
+          this.$notification.error({
+            message: '节点未启用',
+            duration: 2
+          });
+          return false;
+        }
         // 请求节点状态数据
         this.childLoading = true;
         getNodeStatus(record.id).then(res => {

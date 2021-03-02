@@ -145,11 +145,25 @@ export default {
                 this.project.status = true;
               }
             }
+            // 如果是 status
+            if (res.op === 'status') {
+              if (this.copyId) {
+                this.replica.status = true;
+              } else {
+                this.project.status = true;
+              }
+            }
           } else {
             this.$notification.error({
               message: res.msg,
               duration: 5
             });
+            // 设置未启动
+            if (this.copyId) {
+              this.replica.status = false;
+            } else {
+              this.project.status = false;
+            }
           }
         }
         this.logContext += `${msg.data}\r\n`;
@@ -197,7 +211,7 @@ export default {
     stop() {
       this.$confirm({
         title: '系统提示',
-        content: '真的要重启项目么？',
+        content: '真的要停止项目么？',
         okText: '确认',
         cancelText: '取消',
         onOk: () => {
