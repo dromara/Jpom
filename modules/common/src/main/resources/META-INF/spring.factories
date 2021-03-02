@@ -1,1 +1,3 @@
 org.springframework.boot.env.EnvironmentPostProcessor=io.jpom.system.ExtConfigEnvironmentPostProcessor
+org.springframework.context.ApplicationListener=\
+io.jpom.JpomLogo
