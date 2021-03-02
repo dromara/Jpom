@@ -10,25 +10,25 @@ module.exports = {
     proxy: {
       // websocket
       '/ssh': {
-        target: 'ws://localhost:2122',
+        target: 'wss://localhost:2122',
         //  true/false: if you want to proxy websockets
         ws: false,
         secure: false,
       },
       '/tomcat_log': {
-        target: 'ws://localhost:2122',
+        target: 'wss://localhost:2122',
         //  true/false: if you want to proxy websockets
         ws: false,
         secure: false,
       },
       '/console': {
-        target: 'ws://localhost:2122',
+        target: 'wss://localhost:2122',
         //  true/false: if you want to proxy websockets
         ws: false,
         secure: false,
       },
       '/script_run': {
-        target: 'ws://localhost:2122',
+        target: 'wss://localhost:2122',
         //  true/false: if you want to proxy websockets
         ws: false,
         secure: false,

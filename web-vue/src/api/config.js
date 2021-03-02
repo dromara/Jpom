@@ -17,7 +17,6 @@ const request = axios.create({
 
 // 请求拦截器
 request.interceptors.request.use(config => {
-  console.log(domain)
   // 处理数据
   if (domain) {
     // 防止 url 出现 //
