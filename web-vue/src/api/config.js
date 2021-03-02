@@ -5,6 +5,7 @@ import store from '../store';
 import { notification } from 'ant-design-vue';
 
 // axios.defaults.baseURL = 'http://localhost:2122'
+const domain = document.getElementById('domainPath').value;
 
 const request = axios.create({
   timeout: 10000,
@@ -16,7 +17,12 @@ const request = axios.create({
 
 // 请求拦截器
 request.interceptors.request.use(config => {
+  console.log(domain)
   // 处理数据
+  if (domain) {
+    // 防止 url 出现 //
+    config.url = (domain + config.url).replaceAll('//', '/');
+  }
   if (config.headers['Content-Type'].indexOf('application/x-www-form-urlencoded') !== -1) {
     config.data = Qs.stringify(config.data); 
   }

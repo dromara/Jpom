@@ -5,6 +5,7 @@ import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.io.resource.ResourceUtil;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.extra.servlet.ServletUtil;
 import cn.jiangzeyin.common.JsonMessage;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -20,6 +21,7 @@ import io.jpom.service.user.RoleService;
 import io.jpom.service.user.UserService;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -83,7 +85,9 @@ public class IndexControl extends BaseServerController {
      */
     @GetMapping(value = {"welcome", "welcome.html"})
     @NotLogin
-    public String welcome() {
+    public String welcome(final Model model) {
+        // get proxy property Jpom-ProxyPath
+        model.addAttribute("domain", getHeader(BaseJpomInterceptor.PROXY_PATH));
         return "../dist/index.html";
     }
 
