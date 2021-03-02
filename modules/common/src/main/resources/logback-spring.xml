@@ -130,7 +130,7 @@
             <appender-ref ref="warnFileAppender"/>
             <appender-ref ref="consoleWarn"/>
             <appender-ref ref="consoleError"/>
-            <appender-ref ref="consoleInfo"/>
+            <!--            <appender-ref ref="consoleInfo"/>-->
         </root>
     </springProfile>
 </configuration>
