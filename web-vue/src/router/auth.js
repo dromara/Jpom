@@ -19,11 +19,13 @@ router.beforeEach((to, from, next) => {
   }
   // 判断 token 是否存在
   if (!store.getters.getToken) {
-    notification.error({
-      message: '未登录，无法访问！',
-      description: `from: ${from.path} ==> to: ${to.path}`,
-      duration: 2
-    });
+    if (from.path !== '/') {
+      notification.error({
+        message: '未登录，无法访问！',
+        description: `from: ${from.path} ==> to: ${to.path}`,
+        duration: 2
+      });
+    }
     next('/login');
     return;
   }

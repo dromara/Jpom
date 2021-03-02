@@ -37,7 +37,9 @@ export default {
     ]),
     socketUrl() {
       const protocol = location.protocol === 'https' ? 'wss://' : 'ws://';
-      return `${protocol}${location.host}/script_run?userId=${this.getToken}&scriptId=${this.scriptId}&nodeId=${this.nodeId}&type=script`;
+      const domain = document.getElementById('domainPath').value;
+      const url =  (domain + '/script_run').replaceAll('//', '/')
+      return `${protocol}${location.host}${url}?userId=${this.getToken}&scriptId=${this.scriptId}&nodeId=${this.nodeId}&type=script`;
     }
   },
   mounted() {

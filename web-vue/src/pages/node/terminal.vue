@@ -35,7 +35,9 @@ export default {
     ]),
     socketUrl() {
       const protocol = location.protocol === 'https' ? 'wss://' : 'ws://';
-      return `${protocol}${location.host}/ssh?userId=${this.getToken}&sshId=${this.sshId}&nodeId=${this.nodeId}&type=ssh&tail=${this.tail}`;
+      const domain = document.getElementById('domainPath').value;
+      const url =  (domain + '/ssh').replaceAll('//', '/')
+      return `${protocol}${location.host}${url}?userId=${this.getToken}&sshId=${this.sshId}&nodeId=${this.nodeId}&type=ssh&tail=${this.tail}`;
     }
   },
   mounted() {
