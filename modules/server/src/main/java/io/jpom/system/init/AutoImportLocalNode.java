@@ -2,6 +2,7 @@ package io.jpom.system.init;
 
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.lang.Console;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
@@ -99,6 +100,6 @@ public class AutoImportLocalNode {
         //
         nodeModel.setOpenStatus(true);
         nodeService.addItem(nodeModel);
-        DefaultSystemLog.getLog().info("自动添加本机节点成功：" + nodeModel.getId());
+        Console.log("自动添加本机节点成功：" + nodeModel.getId());
     }
 }

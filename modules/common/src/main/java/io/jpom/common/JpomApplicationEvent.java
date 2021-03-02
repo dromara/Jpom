@@ -2,6 +2,7 @@ package io.jpom.common;
 
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
+import cn.hutool.core.lang.Console;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
@@ -67,7 +68,7 @@ public class JpomApplicationEvent implements ApplicationEventClient {
                 ApplicationEventLoad eventLoad = (ApplicationEventLoad) SpringUtil.getBean(JpomApplication.getAppClass());
                 eventLoad.applicationLoad();
             }
-            DefaultSystemLog.getLog().info("Jpom 启动成功");
+            Console.log("Jpom Successful start preparation. start loading module");
         } else if (event instanceof ContextClosedEvent) {
             // 应用关闭
             this.unLockFile();
@@ -134,7 +135,8 @@ public class JpomApplicationEvent implements ApplicationEventClient {
             System.exit(-1);
         }
         FileUtil.del(file);
-        DefaultSystemLog.getLog().info("Jpom[{}]外部配置文件路径：{}", JpomManifest.getInstance().getVersion(), extConfigPath);
+    //        Console.log("", path);
+        Console.log("Jpom[{}] 当前数据路径：{} 外部配置文件路径：{}", JpomManifest.getInstance().getVersion(), path, extConfigPath);
     }
 
     private static void checkUpdate() {

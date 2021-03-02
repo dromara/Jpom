@@ -3,7 +3,6 @@ package io.jpom.system;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
-import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.spring.SpringUtil;
 import io.jpom.JpomApplication;
 import io.jpom.common.JpomManifest;
@@ -141,7 +140,6 @@ public class ExtConfigBean {
                 }
                 path = file.getParentFile().getParentFile().getAbsolutePath();
             }
-            DefaultSystemLog.getLog().info("当前数据路径：{}", path);
         }
         return path;
     }

@@ -1,6 +1,6 @@
 package io.jpom.system.init;
 
-import cn.jiangzeyin.common.DefaultSystemLog;
+import cn.hutool.core.lang.Console;
 import cn.jiangzeyin.common.PreLoadClass;
 import cn.jiangzeyin.common.PreLoadMethod;
 import cn.jiangzeyin.common.spring.SpringUtil;
@@ -19,13 +19,13 @@ public class CheckMonitor {
         MonitorService monitorService = SpringUtil.getBean(MonitorService.class);
         boolean status = monitorService.checkCronStatus();
         if (status) {
-            DefaultSystemLog.getLog().info("已经开启监听调度：监控");
+            Console.log("已经开启监听调度：监控");
         }
         //
         NodeService nodeService = SpringUtil.getBean(NodeService.class);
         status = nodeService.checkCronStatus();
         if (status) {
-            DefaultSystemLog.getLog().info("已经开启监听调度：节点信息采集");
+            Console.log("已经开启监听调度：节点信息采集");
         }
     }
 }

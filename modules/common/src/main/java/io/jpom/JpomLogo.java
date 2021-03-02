@@ -1,11 +1,10 @@
 package io.jpom;
 
-import cn.jiangzeyin.common.DefaultSystemLog;
+import cn.hutool.core.io.FileUtil;
+import io.jpom.common.JpomManifest;
 import io.jpom.util.VersionUtils;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
-import org.springframework.boot.context.logging.LoggingApplicationListener;
 import org.springframework.context.ApplicationListener;
-import org.springframework.core.annotation.Order;
 
 /**
  * @author Hotstrip
@@ -29,13 +28,17 @@ public class JpomLogo implements ApplicationListener<ApplicationReadyEvent> {
             "        | |                    \n" +
             "        |_|                    \n";
 
+    /**
+     * @return jpom logo banner
+     * @see JpomManifest#getVersion()
+     */
     private String buildBannerText() {
-        String LINE_SEPARATOR = System.getProperty("line.separator");
-        return LINE_SEPARATOR
+        String lineSeparator = FileUtil.getLineSeparator();
+        return lineSeparator
                 + JPOM_LOGO
-                + LINE_SEPARATOR
-                + " :: Jpom :: (v"+ VersionUtils.getVersion(getClass(), "2.4.8") +")"
-                + LINE_SEPARATOR;
+                + lineSeparator
+                + " :: Jpom :: (v" + VersionUtils.getVersion(getClass(), JpomManifest.getInstance().getVersion()) + ")"
+                + lineSeparator;
     }
 
 }
