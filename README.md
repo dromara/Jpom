@@ -148,10 +148,14 @@ yum install -y wget && wget -O install.sh https://keepbx.gitee.io/jpom/install.s
 ### 编译运行
 
 1. 访问[Jpom](https://gitee.com/keepbx/Jpom)的码云主页,拉取最新完整代码(建议使用master分支、如果想体验新功能请使用dev分支)
-2. 运行插件端   
+2. 构建vue页面 切换到`web-vue`目录（前提需要本地开发环境有node、yarn环境）
+3. 安装项目vue依赖 控制台执行 `yarn install`
+4. 启动开发模式 控制台执行 `yarn serve`
+5. 根据控制台输出的地址访问前端页面 例如`http://localhost:3000/`   
+6. 运行插件端   
     1. 运行`io.jpom.JpomAgentApplication`
     2. 注意控制台打印的默认账号密码信息
-3. 运行服务端
+7. 运行服务端
     1. 运行`io.jpom.JpomServerApplication`
     2. 浏览器访问（如：http://127.0.0.1:2122）
 
@@ -210,10 +214,14 @@ Agent.sh status    查看Jpom插件端运行状态
 
 ### 交流讨论 、提供bug反馈或建议
 
-  1. QQ群：[136715345](https://shang.qq.com/wpa/qunwpa?idkey=93ff8d8a37a436b752fe38d32075bb1b32a8e0b3d3ff19d0b541ca840433f561)
+  1. 微信群二维码（添加小助手：备注Jpom 进群）
+     
+   ![Alt text](./docs/wx_qrcode.jpg) 
   
-  2. 微信公众号：[CodeGzh](http://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/docs/images/CodeGzh-QrCode.jpg)
+  2. QQ群：[136715345](https://shang.qq.com/wpa/qunwpa?idkey=93ff8d8a37a436b752fe38d32075bb1b32a8e0b3d3ff19d0b541ca840433f561)  消息回复可能不及时
   
-  3. 码云： [issues](https://gitee.com/keepbx/Jpom/issues)
+  3. 微信公众号：[CodeGzh](http://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/docs/images/CodeGzh-QrCode.jpg) 查看一些基础教程
   
-  4. [捐赠、打赏 在码云仓库项目首页下方捐赠即可](https://gitee.com/keepbx/Jpom)
+  4. 码云： [issues](https://gitee.com/keepbx/Jpom/issues)
+  
+  5. [捐赠、打赏 在码云仓库项目首页下方捐赠即可](https://gitee.com/keepbx/Jpom)
