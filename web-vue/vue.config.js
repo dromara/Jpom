@@ -2,6 +2,8 @@
 module.exports = {
   // 输出目录
   outputDir: '../modules/server/src/main/resources/dist',
+  // 控制静态资源使用相对路径
+  publicPath: './',
   // 代理设置
   devServer: {
     port: 3000,
