@@ -10,7 +10,7 @@
       <a-button type="primary" @click="loadData">刷新</a-button>
     </div>
     <!-- 表格 -->
-    <a-table :loading="loading" :columns="columns" :data-source="list" :scroll="{x: '80vw'}" bordered rowKey="id" :pagination="false">
+    <a-table :loading="loading" :columns="columns" :data-source="list" :scroll="{x: '80vw', y: tableHeight }" bordered rowKey="id" :pagination="false">
       <a-tooltip slot="name" slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>
@@ -185,6 +185,7 @@ export default {
     return {
       loading: false,
       listQuery: {},
+      tableHeight: '70vh',
       groupList: [],
       list: [],
       branchList: [],
@@ -233,10 +234,17 @@ export default {
     }
   },
   created() {
+    this.calcTableHeight();
     this.loadGroupList();
     this.handleFilter();
   },
   methods: {
+    // 计算表格高度
+    calcTableHeight() {
+      this.$nextTick(() => {
+        this.tableHeight = window.innerHeight - this.$refs['filter'].clientHeight - 185;
+      })
+    },
     // 分组列表
     loadGroupList() {
       getBuildGroupList().then(res => {
