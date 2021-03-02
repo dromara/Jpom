@@ -19,6 +19,7 @@ import io.jpom.system.ConfigBean;
 import io.jpom.system.JpomRuntimeException;
 import io.jpom.util.CommandUtil;
 import io.jpom.util.JsonFileUtil;
+import io.jpom.util.VersionUtils;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -72,6 +73,7 @@ public class JpomManifest {
         File jarFile = getRunPath();
         if (jarFile.isFile()) {
             try (JarFile jarFile1 = new JarFile(jarFile)) {
+                // @see VersionUtils#getVersion()
                 Manifest manifest = jarFile1.getManifest();
                 Attributes attributes = manifest.getMainAttributes();
                 String version = attributes.getValue(Attributes.Name.IMPLEMENTATION_VERSION);
@@ -111,6 +113,12 @@ public class JpomManifest {
         this.pid = pid;
     }
 
+    /**
+     * 获取当前运行的版本号
+     *
+     * @return 返回当前版本号
+     * @see VersionUtils#getVersion()
+     */
     public String getVersion() {
         return version;
     }
