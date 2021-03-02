@@ -31,6 +31,7 @@
 </template>
 <script>
 import { login } from '../../api/user';
+import { checkSystem } from '../../api/install';
 import sha1 from 'sha1';
 export default {
   data() {
@@ -40,8 +41,21 @@ export default {
     }
   },
   created() {
+    this.checkSystem();
   },
   methods: {
+    // 检查是否需要初始化
+    checkSystem() {
+      checkSystem().then(res => {
+        if (res.code !== 200) {
+          this.$notification.warn({
+            message: res.msg,
+            duration: 2
+          });
+          this.$router.push('/install');
+        }
+      })
+    },
     // change Code
     changeCode() {
       this.randCode = 'randCode.png?r=' + new Date().getTime()
