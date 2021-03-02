@@ -5,7 +5,6 @@ import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.io.resource.ResourceUtil;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
-import cn.hutool.extra.servlet.ServletUtil;
 import cn.jiangzeyin.common.JsonMessage;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -28,6 +27,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
 import java.io.InputStream;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -78,24 +78,24 @@ public class IndexControl extends BaseServerController {
     }
 
     /**
+     * @return
      * @author Hotstrip
      * new version login page for vue
      * 新版本的登录页面
-     * @return
      */
     @GetMapping(value = {"welcome", "welcome.html"})
     @NotLogin
-    public String welcome(final Model model) {
+    public String welcome(final Model model, HttpServletRequest request) {
         // get proxy property Jpom-ProxyPath
-        model.addAttribute("domain", getHeader(BaseJpomInterceptor.PROXY_PATH));
+        model.addAttribute("domain", BaseJpomInterceptor.getHeaderProxyPath(request));
         return "../dist/index.html";
     }
 
     /**
+     * @return
      * @author Hotstrip
      * 检查是否需要初始化系统
      * check if need to init system
-     * @return
      */
     @RequestMapping(value = "check-system", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
