@@ -2,6 +2,7 @@ package io.jpom.system.init;
 
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.io.resource.ResourceUtil;
+import cn.hutool.core.lang.Console;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.db.Db;
 import cn.hutool.db.ds.DSFactory;
@@ -42,7 +43,7 @@ public class InitDb {
             setting.set("sqlLevel", "DEBUG");
             setting.set("showParams", "true");
         }
-        DefaultSystemLog.getLog().warn("load h2 db");
+        Console.log("start load h2 db");
         try {
             // 创建连接
             DSFactory dsFactory = DSFactory.create(setting);
@@ -56,6 +57,6 @@ public class InitDb {
             return;
         }
         instance.initOk();
-        DefaultSystemLog.getLog().warn("h2 db inited");
+        Console.log("h2 db inited");
     }
 }

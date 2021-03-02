@@ -37,7 +37,7 @@ public class JpomLogo implements ApplicationListener<ApplicationReadyEvent> {
         return lineSeparator
                 + JPOM_LOGO
                 + lineSeparator
-                + " :: Jpom :: (v" + VersionUtils.getVersion(getClass(), "2.4.8") + ")"
+                + " :: Jpom :: (v" + VersionUtils.getVersion(getClass(), JpomManifest.getInstance().getVersion()) + ")"
                 + lineSeparator;
     }
 
