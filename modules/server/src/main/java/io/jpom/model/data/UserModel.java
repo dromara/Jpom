@@ -209,7 +209,7 @@ public class UserModel extends BaseModel {
     public void setPassword(String password) {
         this.password = password;
         // 记录修改时间，如果在线用户线退出
-        this.setModifyTime(DateUtil.current(false));
+        this.setModifyTime(DateUtil.current());
     }
 
     public String getUserMd5Key() {

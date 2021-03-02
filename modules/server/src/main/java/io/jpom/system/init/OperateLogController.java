@@ -138,7 +138,7 @@ public class OperateLogController implements AopLogInterface {
             } catch (Exception ignored) {
             }
         }
-        userOperateLogV1.setOptTime(DateUtil.current(false));
+        userOperateLogV1.setOptTime(DateUtil.current());
         userOperateLogV1.setOptType(optType.getCode());
         //
         if (nodeModel != null) {
