@@ -8,6 +8,15 @@ export function getDishPatchList() {
   })
 }
 
+// 分发节点项目状态
+export function getDispatchProject(id) {
+  return axios({
+    url: '/outgiving/getItemData.json',
+    method: 'post',
+    data: {id}
+  })
+}
+
 // reqId
 export function getReqId() {
   return axios({
