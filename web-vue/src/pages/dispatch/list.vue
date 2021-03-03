@@ -469,6 +469,10 @@ export default {
             }
             // 添加 nodeIdList
             this.temp.nodeIdList.push(ele.nodeId);
+            // 添加 jvm token args
+            this.temp[`${ele.nodeId}_jvm`] = res.data.jvm || '';
+            this.temp[`${ele.nodeId}_token`] = res.data.token || '';
+            this.temp[`${ele.nodeId}_args`] = res.data.args || '';
             // 添加 javaCopyItemList
             this.temp[`${ele.nodeId}_javaCopyItemList`] = res.data.javaCopyItemList || [];
           }
