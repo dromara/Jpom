@@ -37,7 +37,6 @@
 	<a href="https://jpom.io/">https://jpom.io/</a> | <a href="https://jpom-site.keepbx.cn/">https://jpom-site.keepbx.cn/</a> | <a href="https://jpom.keepbx.cn/">https://jpom.keepbx.cn/</a>
 </p>
 
- 
 #### 你为什么需要[Jpom](https://gitee.com/keepbx/Jpom)
 
 > Java 项目在实际部署运维，通用的方法是登录服务器上传新的项目包，执行相应命令管理，如果管理多个项目则重复操作上述步骤
@@ -113,7 +112,8 @@ yum install -y wget && wget -O install.sh https://keepbx.gitee.io/jpom/install.s
 
 ```
 
->特别提醒：一键安装的时候注意执行命令不可在同一目录下，即Server端和Agent端不可安装在同一目录下
+> 特别提醒：一键安装的时候注意执行命令不可在同一目录下，即Server端和Agent端不可安装在同一目录下
+
 ### 下载安装
 
 > [帮助文档](https://jpom-site.keepbx.cn/docs/#/安装使用/开始安装)
@@ -148,19 +148,22 @@ yum install -y wget && wget -O install.sh https://keepbx.gitee.io/jpom/install.s
 ### 编译运行
 
 1. 访问[Jpom](https://gitee.com/keepbx/Jpom)的码云主页,拉取最新完整代码(建议使用master分支、如果想体验新功能请使用dev分支)
-2. 构建vue页面 切换到`web-vue`目录（前提需要本地开发环境有node、yarn环境）
-3. 安装项目vue依赖 控制台执行 `yarn install`
-4. 启动开发模式 控制台执行 `yarn serve`
-5. 根据控制台输出的地址访问前端页面 例如`http://localhost:3000/`   
-6. 运行插件端   
+2. 运行插件端
     1. 运行`io.jpom.JpomAgentApplication`
     2. 注意控制台打印的默认账号密码信息
-7. 运行服务端
+    3. 默认运行端口：`2123`
+3. 运行服务端
     1. 运行`io.jpom.JpomServerApplication`
-    2. 浏览器访问（如：http://127.0.0.1:2122）
+    2. 默认运行端口：`2122`
+4. 构建vue页面 切换到`web-vue`目录（前提需要本地开发环境有node、yarn环境）
+5. 安装项目vue依赖 控制台执行 `yarn install`
+6. 启动开发模式 控制台执行 `yarn serve`
+7. 根据控制台输出的地址访问前端页面 例如`http://localhost:3000/`
 
 ### 管理命令
+
 1. windows中Agent.bat 、Server.bat
+
 ```
 # 服务端
 Server.bat     启动管理面板(按照面板提示输入操作)
@@ -168,7 +171,9 @@ Server.bat     启动管理面板(按照面板提示输入操作)
 # 插件端
 Agent.bat     启动管理面板(按照面板提示输入操作)
 ```
+
 2. linux中Agent.sh 、Server.sh
+
 ```
 # 服务端
 Server.sh start     启动Jpom服务端
@@ -185,28 +190,31 @@ Agent.sh status    查看Jpom插件端运行状态
 
 ### Jpom 的参数配置
 
-   在项目运行的根路径下的`extConfig.yml`文件
-   1. 插件端示例：[`extConfig.yml`](https://gitee.com/keepbx/Jpom/blob/master/modules/agent/src/main/resources/bin/extConfig.yml) 
-   2. 服务端示例：[`extConfig.yml`](https://gitee.com/keepbx/Jpom/blob/master/modules/server/src/main/resources/bin/extConfig.yml)
+在项目运行的根路径下的`extConfig.yml`文件
+
+1. 插件端示例：[`extConfig.yml`](https://gitee.com/keepbx/Jpom/blob/master/modules/agent/src/main/resources/bin/extConfig.yml)
+2. 服务端示例：[`extConfig.yml`](https://gitee.com/keepbx/Jpom/blob/master/modules/server/src/main/resources/bin/extConfig.yml)
 
 ### 演示项目
 
-   [https://jpom.keepbx.cn](https://jpom.keepbx.cn)
+[https://jpom.keepbx.cn](https://jpom.keepbx.cn)
+
 ```   
 账号：demo
 密码：demo123
 ```    
-   > 演示系统有部分功能做了限制，完整功能请自行部署体验
-   
-   > 如果出现登录不上，请联系我们，联系方式在最底部
-    
-   1. [Jboot案例代码](https://gitee.com/keepbx/Jpom-demo-case/tree/master/jboot-test)
-   2. [SpringBoot案例代码(ClassPath)](https://gitee.com/keepbx/Jpom-demo-case/tree/master/springboot-test)
-   3. [SpringBoot案例代码(Jar)](https://gitee.com/keepbx/Jpom-demo-case/tree/master/springboot-test-jar)
+
+> 演示系统有部分功能做了限制，完整功能请自行部署体验
+
+> 如果出现登录不上，请联系我们，联系方式在最底部
+
+1. [Jboot案例代码](https://gitee.com/keepbx/Jpom-demo-case/tree/master/jboot-test)
+2. [SpringBoot案例代码(ClassPath)](https://gitee.com/keepbx/Jpom-demo-case/tree/master/springboot-test)
+3. [SpringBoot案例代码(Jar)](https://gitee.com/keepbx/Jpom-demo-case/tree/master/springboot-test-jar)
 
 ### 常见问题、操作说明
 
-[https://jpom-site.keepbx.cn/docs/](https://jpom-site.keepbx.cn/docs/) 
+[https://jpom-site.keepbx.cn/docs/](https://jpom-site.keepbx.cn/docs/)
 
 [https://jpom-site.keepbx.cn/docs/#/FQA/FQA](https://jpom-site.keepbx.cn/docs/#/FQA/FQA)
 
@@ -214,14 +222,14 @@ Agent.sh status    查看Jpom插件端运行状态
 
 ### 交流讨论 、提供bug反馈或建议
 
-  1. 微信群二维码（添加小助手：备注Jpom 进群）
-     
-   ![Alt text](./docs/wx_qrcode.jpg) 
-  
-  2. QQ群：[136715345](https://shang.qq.com/wpa/qunwpa?idkey=93ff8d8a37a436b752fe38d32075bb1b32a8e0b3d3ff19d0b541ca840433f561)  消息回复可能不及时
-  
-  3. 微信公众号：[CodeGzh](http://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/docs/images/CodeGzh-QrCode.jpg) 查看一些基础教程
-  
-  4. 码云： [issues](https://gitee.com/keepbx/Jpom/issues)
-  
-  5. [捐赠、打赏 在码云仓库项目首页下方捐赠即可](https://gitee.com/keepbx/Jpom)
+1. 微信群二维码（添加小助手：备注Jpom 进群）
+
+![Alt text](./docs/wx_qrcode.jpg)
+
+2. QQ群：[136715345](https://shang.qq.com/wpa/qunwpa?idkey=93ff8d8a37a436b752fe38d32075bb1b32a8e0b3d3ff19d0b541ca840433f561)  消息回复可能不及时
+
+3. 微信公众号：[CodeGzh](http://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/docs/images/CodeGzh-QrCode.jpg) 查看一些基础教程
+
+4. 码云： [issues](https://gitee.com/keepbx/Jpom/issues)
+
+5. [捐赠、打赏 在码云仓库项目首页下方捐赠即可](https://gitee.com/keepbx/Jpom)
