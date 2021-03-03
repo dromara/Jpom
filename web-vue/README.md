@@ -25,19 +25,19 @@ yarn serve
 ```
 
 ### Project modules
---web-vue
-----public => public files
-----src
-------api => there are api directory
-------assets => static files
-------pages => UI pages
-------router => vue router
-------store => vue store
-------utils => utils file
-------App.vue
-------main.js
-------vue.config.js => some config
-------package.json
+++web-vue
+++++public => public files
+++++src
+++++++api => there are api directory
+++++++assets => static files
+++++++pages => UI pages
+++++++router => vue router
+++++++store => vue store
+++++++utils => utils file
+++++++App.vue
+++++++main.js
+++++++vue.config.js => some config
+++++++package.json
 
 ## 中文
 
