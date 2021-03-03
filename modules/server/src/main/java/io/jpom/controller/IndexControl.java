@@ -97,6 +97,7 @@ public class IndexControl extends BaseServerController {
      * 检查是否需要初始化系统
      * check if need to init system
      */
+    @NotLogin
     @RequestMapping(value = "check-system", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     public String checkSystem() {
