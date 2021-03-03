@@ -25,6 +25,7 @@ yarn serve
 ```
 
 ### Project modules
+```
 ++web-vue
 ++++public => public files
 ++++src
@@ -38,6 +39,7 @@ yarn serve
 ++++++main.js
 ++++++vue.config.js => some config
 ++++++package.json
+```
 
 ## 中文
 
