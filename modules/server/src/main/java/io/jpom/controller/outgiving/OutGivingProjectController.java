@@ -86,11 +86,11 @@ public class OutGivingProjectController extends BaseServerController {
             }
 
             // set projectStatus property
-            NodeModel node = nodeService.getItem(outGivingNodeProject.getNodeId());
+            //NodeModel node = nodeService.getItem(outGivingNodeProject.getNodeId());
             // Project Status: data.pid > 0 means running
             JSONObject projectStatus = JsonMessage.toJson(200, "success");
-            if (node.isOpenStatus()) {
-                projectStatus = NodeForward.request(node, getRequest(), NodeUrl.Manage_GetProjectStatus).toJson();
+            if (nodeModel.isOpenStatus()) {
+                projectStatus = NodeForward.requestBySys(nodeModel, NodeUrl.Manage_GetProjectStatus, "id", outGivingNodeProject.getProjectId()).toJson();
             }
             if (projectStatus.getJSONObject("data") != null && projectStatus.getJSONObject("data").getInteger("pId") != null) {
                 jsonObject.put("projectStatus", projectStatus.getJSONObject("data").getIntValue("pId") > 0);
