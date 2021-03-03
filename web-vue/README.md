@@ -57,6 +57,3 @@ yarn install
 ```
 yarn serve
 ```
-```
-yarn install
-```
