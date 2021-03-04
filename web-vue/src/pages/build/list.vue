@@ -162,14 +162,14 @@
       </a-form-model>
     </a-modal>
     <!-- 构建日志 -->
-    <a-modal v-model="buildLogVisible" title="构建日志" :footer="null" :maskClosable="false" @cancel="closeBuildLogModel">
+    <a-modal :width="900" min-width="70%" v-model="buildLogVisible" title="构建日志" :footer="null" :maskClosable="false" @cancel="closeBuildLogModel">
       <build-log v-if="buildLogVisible" :temp="temp" />
     </a-modal>
   </div>
 </template>
 <script>
 import BuildLog from './log';
-import { 
+import {
   getBuildGroupList, getBuildList, getBranchList, editBuild, deleteBuild,
   getTriggerUrl, resetTrigger, clearBuid, startBuild, stopBuild
 } from '../../api/build';
@@ -476,6 +476,11 @@ export default {
             duration: 2
           });
           this.handleFilter();
+          // 自动打开构建日志
+          this.handleBuildLog({
+            id: this.temp.id,
+            buildId: res.data
+          })
         }
       })
     },

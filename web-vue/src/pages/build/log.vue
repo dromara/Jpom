@@ -1,6 +1,6 @@
 <template>
   <div>
-    <a-input v-model="logText" type="textarea" class="console" readOnly :rows="15" style="resize: none;"/>
+    <a-input id="build-log-textarea" v-model="logText" type="textarea" class="console" readOnly :rows="35" style="resize: none;"/>
   </div>
 </template>
 <script>
@@ -45,6 +45,13 @@ export default {
             this.logText = '';
             res.data.dataLines.forEach(element => {
               this.logText += `${element}\r\n`;
+            });
+            // 自动滚动到底部
+            this.$nextTick(() => {
+              setTimeout(() => {
+                const textarea = document.getElementById('build-log-textarea');
+                textarea.scrollTop = textarea.scrollHeight;
+              });
             });
           }
         })
