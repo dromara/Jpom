@@ -116,9 +116,9 @@ export function getProjectAccessList(nodeId) {
 
 /**
  * 编辑项目
- * @param {
+ * @param {JSON} params {
  *  nodeId: 节点 ID
- *  id: 项目 ID 
+ *  id: 项目 ID
  *  name: 项目名称
  *  runMode: 运行方式
  *  whitelistDirectory: 项目白名单路径
@@ -126,12 +126,12 @@ export function getProjectAccessList(nodeId) {
  *  group: 分组名称
  *  jdkId: JDK
  *  ...
- * } params 
- * @param {
+ * }
+ * @param {JSON} replicaParams {
  *  javaCopyIds: 副本 xx1,xx2
  *  jvm_xxn: 副本 n JVM 参数
  *  args_xxn: 副本 n args 参数
- * } replicaParams
+ * }
  */
 export function editProject(params, replicaParams) {
   const data = {
