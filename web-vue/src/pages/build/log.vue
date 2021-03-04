@@ -51,7 +51,7 @@ export default {
               setTimeout(() => {
                 const textarea = document.getElementById('build-log-textarea');
                 textarea.scrollTop = textarea.scrollHeight;
-              });
+              },100);
             });
           }
         })
