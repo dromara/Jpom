@@ -339,7 +339,10 @@ export default {
     // 关联分发
     handleLink() {
       this.temp = {
-        type: 'add'
+        type: 'add',
+        id: '',
+        name: '',
+        projectId: ''
       };
       this.loadReqId();
       this.linkDispatchVisible = true;
@@ -429,6 +432,14 @@ export default {
     handleAdd() {
       this.temp = {
         type: 'add',
+        id: '',
+        name: '',
+        afterOpt: '',
+        runMode: '',
+        mainClass: '',
+        javaExtDirsCp: '',
+        whitelistDirectory: '',
+        lib: '',
         nodeIdList: []
       };
       // 添加 javaCopyItemList
