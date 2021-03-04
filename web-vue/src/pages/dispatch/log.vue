@@ -36,10 +36,10 @@
       </a-tooltip>
       <template slot="status" slot-scope="text">
         <span v-if="text === 0">未分发</span>
-        <span v-if="text === 1">未分发</span>
-        <span v-if="text === 2">未分发</span>
-        <span v-if="text === 3">未分发</span>
-        <span v-if="text === 4">未分发</span>
+        <span v-if="text === 1">分发中</span>
+        <span v-if="text === 2">分发成功</span>
+        <span v-if="text === 3">分发失败</span>
+        <span v-if="text === 4">取消分发</span>
       </template>
       <template slot="operation" slot-scope="text, record">
         <a-button type="primary" @click="handleDetail(record)">详情</a-button>
