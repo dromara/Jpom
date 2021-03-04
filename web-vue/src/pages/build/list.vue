@@ -207,7 +207,7 @@ export default {
         {title: '名称', dataIndex: 'name', width: 150, ellipsis: true, scopedSlots: {customRender: 'name'}},
         {title: '分支', dataIndex: 'branchName', width: 100, ellipsis: true, scopedSlots: {customRender: 'branchName'}},
         {title: '状态', dataIndex: 'status', width: 100, ellipsis: true, scopedSlots: {customRender: 'status'}},
-        {title: '构建 ID', dataIndex: 'buildIdStr', width: 120, ellipsis: true, scopedSlots: {customRender: 'buildIdStr'}},
+        {title: '构建 ID', dataIndex: 'buildIdStr', width: 80, ellipsis: true, scopedSlots: {customRender: 'buildIdStr'}},
         {title: '修改人', dataIndex: 'modifyUser', width: 150, ellipsis: true, scopedSlots: {customRender: 'modifyUser'}},
         {title: '修改时间', dataIndex: 'modifyTime', customRender: (text) => {
           if (!text) {

@@ -19,7 +19,7 @@
         <span v-else>关联</span>
       </template>
       <template slot="operation" slot-scope="text, record">
-        <a-button type="primary" @click="handleReload(record)">刷新</a-button>
+        <a-button type="primary" v-if="list_expanded[record.id]" @click="handleReload(record)">刷新</a-button>
         <a-button type="primary" @click="handleDispatch(record)">分发文件</a-button>
         <a-button type="primary" v-if="record.outGivingProject" @click="handleEditDispatchProject(record)">编辑</a-button>
         <a-button type="primary" v-else @click="handleEditDispatch(record)">编辑</a-button>
@@ -209,6 +209,7 @@ export default {
         'JavaExtDirsCp',
         // 'File'
       ],
+      list_expanded: {},
       linkDispatchVisible: false,
       editDispatchVisible: false,
       dispatchVisible: false,
@@ -327,6 +328,8 @@ export default {
     },
     // 展开行
     expand(expanded, record) {
+      this.list_expanded[record.id] = expanded;
+      this.list_expanded= {...this.list_expanded};
       if (expanded) {
         this.handleReload(record);
       }
