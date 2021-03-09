@@ -35,6 +35,7 @@
       </a-tooltip>
       <template slot="operation" slot-scope="text, record">
         <a-button type="primary" @click="handleDownload(record)">下载日志</a-button>
+        <a-button :disabled="!record.hashFile || record.releaseMethod === 0" type="danger" @click="handleRollback(record)">回滚</a-button>
         <a-button type="danger" @click="handleDelete(record)">删除</a-button>
       </template>
     </a-table>
@@ -46,7 +47,7 @@
 </template>
 <script>
 import BuildLog from './log';
-import { geteBuildHistory, getBuildList, downloadBuildLog, deleteBuildHistory } from '../../api/build';
+import { geteBuildHistory, getBuildList, downloadBuildLog, rollback, deleteBuildHistory } from '../../api/build';
 import { parseTime } from '../../utils/time';
 export default {
   components: {
@@ -78,7 +79,7 @@ export default {
         }, width: 180},
         {title: '发布方式', dataIndex: 'releaseMethod', width: 100, ellipsis: true, scopedSlots: {customRender: 'releaseMethod'}},
         {title: '构建人', dataIndex: 'buildUser', width: 150, ellipsis: true, scopedSlots: {customRender: 'buildUser'}},
-        {title: '操作', dataIndex: 'operation', scopedSlots: {customRender: 'operation'}, width: 230, fixed: 'right'}
+        {title: '操作', dataIndex: 'operation', scopedSlots: {customRender: 'operation'}, width: 300, fixed: 'right'}
       ],
       statusMap: {
         1: '构建中',
@@ -174,6 +175,28 @@ export default {
         document.body.appendChild(link);
         link.click();
       })
+    },
+    // 回滚
+    handleRollback(record) {
+      console.log(record);
+      this.$confirm({
+        title: '系统提示',
+        content: '真的要回滚该构建历史记录么？',
+        okText: '确认',
+        cancelText: '取消',
+        onOk: () => {
+          // 重新发布
+          rollback(record.id).then((res) => {
+            if (res.code === 200) {
+              this.$notification.success({
+                message: res.msg,
+                duration: 2
+              });
+              this.handleFilter();
+            }
+          })
+        }
+      });
     },
     // 删除
     handleDelete(record) {
