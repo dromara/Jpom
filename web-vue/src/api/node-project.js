@@ -215,6 +215,8 @@ export function downloadProjectFile(params) {
  *  nodeId: 节点 ID
  *  id: 项目 ID
  *  levelName: 目录地址
+ *  type: unzip 表示压缩文件 *上传压缩文件时需要
+ *  clearType: {clear: 清空文件夹, noClear: 不清空} *上传压缩文件时需要
  * } formData 
  */
 export function uploadProjectFile(formData) {

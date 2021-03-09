@@ -10,7 +10,8 @@
     <!-- 表格 -->
     <a-layout-content class="file-content">
       <div ref="filter" class="filter">
-        <a-button type="primary" @click="handleUpload">上传文件</a-button>
+        <a-button type="primary" @click="handleUpload">批量上传文件</a-button>
+        <a-button type="primary" @click="handleZipUpload">上传压缩文件（自动解压）</a-button>
         <a-button type="primary" @click="loadFileList">刷新</a-button>
         <a-button type="danger" @click="clearFile">清空项目目录</a-button>
       </div>
@@ -29,13 +30,23 @@
           <a-button type="danger" @click="handleDelete(record)">删除</a-button>
         </template>
       </a-table>
-      <!-- 上传文件 -->
+      <!-- 批量上传文件 -->
       <a-modal v-model="uploadFileVisible" width="300px" title="上传项目文件" :footer="null" :maskClosable="true">
         <a-upload :file-list="uploadFileList" :remove="handleRemove" :before-upload="beforeUpload" multiple>
           <a-button><a-icon type="upload" />选择文件</a-button>
         </a-upload>
         <br/>
         <a-button type="primary" :disabled="uploadFileList.length === 0" @click="startUpload">开始上传</a-button>
+      </a-modal>
+      <!-- 上传压缩文件 -->
+      <a-modal v-model="uploadZipFileVisible" width="300px" title="上传压缩文件" :footer="null" :maskClosable="true">
+        <a-upload :file-list="uploadFileList" :remove="handleZipRemove" :before-upload="beforeZipUpload" accept=".tar,.bz2,.gz,.zip,.tar.bz2,.tar.gz">
+          <a-button><a-icon type="upload" />选择压缩文件</a-button>
+        </a-upload>
+        <br/>
+        <a-switch v-model="checkBox" checked-children="清空覆盖" un-checked-children="不清空" style="margin-bottom: 10px;"/>
+        <br/>
+        <a-button type="primary" :disabled="uploadFileList.length === 0" @click="startZipUpload">开始上传</a-button>
       </a-modal>
     </a-layout-content>
   </a-layout>
@@ -60,6 +71,8 @@ export default {
       tempNode: {},
       temp: {},
       uploadFileVisible: false,
+      uploadZipFileVisible: false,
+      checkBox: false,
       tableHeight: '80vh',
       replaceFields: {
         children: 'children',
@@ -117,6 +130,10 @@ export default {
     },
     // 开始上传文件
     startUpload() {
+      this.$notification.info({
+        message: '正在上传文件，请稍后...',
+        duration: 2
+      });
       this.uploadFileList.forEach(file => {
         const formData = new FormData();
         formData.append('file', file);
@@ -137,6 +154,52 @@ export default {
         this.loadFileList();
       }, 1000 * 3);
       this.uploadFileList = [];
+    },
+    // 上传压缩文件
+    handleZipUpload() {
+      if (Object.keys(this.tempNode).length === 0) {
+        this.$notification.error({
+          message: '请选择一个节点',
+          duration: 2
+        });
+        return;
+      }
+      this.checkBox = false;
+      this.uploadZipFileVisible = true;
+    },
+    handleZipRemove() {
+      this.uploadFileList = [];
+    },
+    beforeZipUpload(file) {
+      this.uploadFileList = [file];
+      return false;
+    },
+    // 开始上传压缩文件
+    startZipUpload() {
+      this.$notification.info({
+        message: '正在上传文件，请稍后...',
+        duration: 2
+      });
+      const file = this.uploadFileList[0];
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('nodeId', this.nodeId);
+      formData.append('id', this.projectId);
+      formData.append('levelName', this.tempNode.path);
+      formData.append('type', 'unzip');
+      formData.append('clearType', this.checkBox ? 'clear' : 'noClear');
+      // 上传文件
+      uploadProjectFile(formData).then(res => {
+        if (res.code === 200) {
+          this.$notification.success({
+            message: res.msg,
+            duration: 2
+          });
+          this.checkBox = false;
+          this.uploadFileList = [];
+          this.loadFileList();
+        }
+      })
     },
     // 选中目录
     onSelect(selectedKeys, {node}) {
