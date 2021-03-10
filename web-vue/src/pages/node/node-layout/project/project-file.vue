@@ -3,17 +3,21 @@
   <a-layout class="file-layout">
     <!-- 目录树 -->
     <a-layout-sider theme="light" class="sider" width="25%">
+      <div class="dir-container">
+        <a-button type="primary" @click="loadData">刷新目录</a-button>
+      </div> 
       <a-empty v-if="treeList.length === 0" />
-      <a-directory-tree :treeData="treeList" :replaceFields="replaceFields" @select="onSelect">
-      </a-directory-tree>
+      <el-tree :data="treeList" :props="defaultProps" :load="loadNode" :expand-on-click-node="false"
+      highlight-current default-expand-all lazy @node-click="nodeClick"></el-tree>
     </a-layout-sider>
     <!-- 表格 -->
     <a-layout-content class="file-content">
       <div ref="filter" class="filter">
         <a-button type="primary" @click="handleUpload">批量上传文件</a-button>
         <a-button type="primary" @click="handleZipUpload">上传压缩文件（自动解压）</a-button>
-        <a-button type="primary" @click="loadFileList">刷新</a-button>
+        <a-button type="primary" @click="loadFileList">刷新表格</a-button>
         <a-button type="danger" @click="clearFile">清空项目目录</a-button>
+        <a-tag color="#2db7f5">当前目录: {{ uploadPath }}</a-tag>
       </div>
       <a-table :data-source="fileList" :loading="loading" :columns="columns" :scroll="{y: tableHeight}" :pagination="false" bordered :rowKey="(record, index) => index">
         <a-tooltip slot="filename" slot-scope="text" placement="topLeft" :title="text">
@@ -36,7 +40,9 @@
           <a-button><a-icon type="upload" />选择文件</a-button>
         </a-upload>
         <br/>
-        <a-button type="primary" :disabled="uploadFileList.length === 0" @click="startUpload">开始上传</a-button>
+        <el-progress :text-inside="true" :stroke-width="18" :percentage="percentage" status="success"></el-progress>
+        <br/>
+        <a-button type="primary" :disabled="fileUploadDisabled" @click="startUpload">开始上传</a-button>
       </a-modal>
       <!-- 上传压缩文件 -->
       <a-modal v-model="uploadZipFileVisible" width="300px" title="上传压缩文件" :footer="null" :maskClosable="true">
@@ -46,7 +52,9 @@
         <br/>
         <a-switch v-model="checkBox" checked-children="清空覆盖" un-checked-children="不清空" style="margin-bottom: 10px;"/>
         <br/>
-        <a-button type="primary" :disabled="uploadFileList.length === 0" @click="startZipUpload">开始上传</a-button>
+        <el-progress :text-inside="true" :stroke-width="18" :percentage="percentage" status="success"></el-progress>
+        <br/>
+        <a-button type="primary" :disabled="fileUploadDisabled" @click="startZipUpload">开始上传</a-button>
       </a-modal>
     </a-layout-content>
   </a-layout>
@@ -72,12 +80,14 @@ export default {
       temp: {},
       uploadFileVisible: false,
       uploadZipFileVisible: false,
+      // 是否是上传状态
+      uploading: false,
+      percentage: 0,
       checkBox: false,
       tableHeight: '80vh',
-      replaceFields: {
+      defaultProps: {
         children: 'children',
-        title: 'title',
-        key: 'key'
+        label: 'filename'
       },
       columns: [
         {title: '文件名称', dataIndex: 'filename', width: 100, ellipsis: true, scopedSlots: {customRender: 'filename'}},
@@ -88,8 +98,23 @@ export default {
       ]
     }
   },
+  computed: {
+    fileUploadDisabled() {
+      return this.uploadFileList.length === 0 || this.uploading;
+    },
+    uploadPath() {
+      if (!this.tempNode.data) {
+        return ''
+      }
+      if (this.tempNode.level === 1) {
+        return '';
+      } else {
+        return this.tempNode.data.levelName || '' + '/' + this.tempNode.data.filename;
+      }
+    }
+  },
   mounted() {
-    this.calcTableHeight()
+    this.calcTableHeight();
     this.loadData();
   },
   methods: {
@@ -99,13 +124,46 @@ export default {
     },
     // 加载数据
     loadData() {
-      this.loading = true;
+      this.treeList = [];
       this.treeList.push({
-        key: '1',
-        title: '项目根目录',
-        path: ''
+        filename: '项目根目录',
+        isDirectory: true,
+        isLeaf: false
       })
-      this.loading = false;
+    },
+    // 加载子节点
+    loadNode(node, resolve) {
+      const data = node.data;
+      // 如果是目录
+      if (data.isDirectory) {
+        setTimeout(() => {
+          // 请求参数
+          const params = {
+            nodeId: this.nodeId,
+            id: this.projectId
+          }
+          if (node.level === 1) {
+            params.path = ''
+          } else {
+            params.path = data.levelName || '' + '/' + data.filename
+          }
+          // 加载文件
+          getFileList(params).then(res => {
+            if (res.code === 200) {
+              resolve(res.data);
+            }
+          })
+        }, 500);
+      } else {
+        resolve([])
+      }
+    },
+    // 点击树节点
+    nodeClick(data, node) {
+      if (data.isDirectory) {
+        this.tempNode = node;
+        this.loadFileList();
+      }
     },
     // 上传文件
     handleUpload() {
@@ -134,12 +192,21 @@ export default {
         message: '正在上传文件，请稍后...',
         duration: 2
       });
-      this.uploadFileList.forEach(file => {
+      // 设置上传状态
+      this.uploading = true;
+      const timer = setInterval(() => {
+        this.percentage = this.percentage > 99 ? 99 : (this.percentage + 1);
+      }, 1000);
+
+      // 遍历上传文件
+      this.uploadFileList.forEach((file, index) => {
         const formData = new FormData();
         formData.append('file', file);
         formData.append('nodeId', this.nodeId);
         formData.append('id', this.projectId);
-        formData.append('levelName', this.tempNode.path);
+        // 计算属性 uploadPath
+        formData.append('levelName', this.uploadPath);
+
         // 上传文件
         uploadProjectFile(formData).then(res => {
           if (res.code === 200) {
@@ -148,12 +215,19 @@ export default {
               duration: 2
             });
           }
+          // 判断是否全部上传完成
+          if (index === this.uploadFileList.length - 1) {
+            this.percentage = 100;
+            setTimeout(() => {
+              this.percentage = 0;
+              this.uploading = false;
+              clearInterval(timer);
+              this.loadFileList();
+              this.uploadFileList = [];
+            }, 1000);
+          }
         })
       })
-      setTimeout(() => {
-        this.loadFileList();
-      }, 1000 * 3);
-      this.uploadFileList = [];
     },
     // 上传压缩文件
     handleZipUpload() {
@@ -180,12 +254,20 @@ export default {
         message: '正在上传文件，请稍后...',
         duration: 2
       });
+      // 设置上传状态
+      this.uploading = true;
+      const timer = setInterval(() => {
+        this.percentage = this.percentage > 99 ? 99 : this.percentage + 1;
+      }, 1000);
+
+      // 上传文件
       const file = this.uploadFileList[0];
       const formData = new FormData();
       formData.append('file', file);
       formData.append('nodeId', this.nodeId);
       formData.append('id', this.projectId);
-      formData.append('levelName', this.tempNode.path);
+      // 计算属性 uploadPath
+      formData.append('levelName', this.uploadPath);
       formData.append('type', 'unzip');
       formData.append('clearType', this.checkBox ? 'clear' : 'noClear');
       // 上传文件
@@ -195,56 +277,17 @@ export default {
             message: res.msg,
             duration: 2
           });
-          this.checkBox = false;
-          this.uploadFileList = [];
-          this.loadFileList();
+          this.percentage = 100;
+          setTimeout(() => {
+            this.percentage = 0;
+            this.uploading = false;
+            clearInterval(timer);
+            this.checkBox = false;
+            this.uploadFileList = [];
+            this.loadFileList();
+          }, 1000);
         }
       })
-    },
-    // 选中目录
-    onSelect(selectedKeys, {node}) {
-      return new Promise(resolve => {
-        this.tempNode = node.dataRef;
-        if (node.dataRef.disabled) {
-          resolve();
-          return;
-        }
-        // 请求参数
-        const params = {
-          nodeId: this.nodeId,
-          id: this.projectId,
-          path: node.dataRef.path
-        }
-        this.fileList = [];
-        this.loading = true;
-        // 加载文件
-        getFileList(params).then(res => {
-          if (res.code === 200) {
-            let children = [];
-            // 区分目录和文件
-            res.data.forEach(element => {
-              if (element.isDirectory) {
-                children.push({
-                  key: element.id,
-                  title: element.filename,
-                  path: `${node.dataRef.path}/${element.filename}`,
-                  isLeaf: element.isDirectory ? false : true
-                })
-              } else {
-                // 设置文件表格
-                this.fileList.push({
-                  ...element
-                });
-              }
-            })
-            // 设置目录树
-            node.dataRef.children = children;
-            this.treeList = [...this.treeList];
-          }
-          this.loading = false;
-        })
-        resolve();
-      });
     },
     // 加载文件列表
     loadFileList() {
@@ -259,7 +302,7 @@ export default {
       const params = {
         nodeId: this.nodeId,
         id: this.projectId,
-        path: this.tempNode.path
+        path: this.uploadPath
       }
       this.fileList = [];
       this.loading = true;
@@ -352,6 +395,7 @@ export default {
                 message: res.msg,
                 duration: 2
               });
+              this.loadData();
               this.loadFileList();
             }
           })
@@ -369,6 +413,10 @@ export default {
   border: 1px solid #e2e2e2;
   height: calc(100vh - 80px);
   overflow-y: auto;
+}
+.dir-container {
+  padding: 10px;
+  border-bottom: 1px solid #eee;
 }
 .file-content {
   height: calc(100vh - 100px);
