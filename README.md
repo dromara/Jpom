@@ -40,6 +40,8 @@
  
 #### 你为什么需要[Jpom](https://gitee.com/keepbx/Jpom)
 
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/c11716932621424fa4eeec8a8e615e53)](https://app.codacy.com/gh/jiangzeyin/Jpom?utm_source=github.com&utm_medium=referral&utm_content=jiangzeyin/Jpom&utm_campaign=Badge_Grade_Settings)
+
 > Java 项目在实际部署运维，通用的方法是登录服务器上传新的项目包，执行相应命令管理，如果管理多个项目则重复操作上述步骤
 
 > 此方法不足的是：
