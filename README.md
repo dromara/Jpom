@@ -120,11 +120,11 @@ yum install -y wget && wget -O install.sh https://keepbx.gitee.io/jpom/install.s
 
 1. 下载安装包 [https://gitee.com/keepbx/Jpom/attach_files](https://gitee.com/keepbx/Jpom/attach_files)
 2. 解压文件
-3. 安装插件端（[流程说明](https://jpom-site.keepbx.cn/docs/#/安装使用/开始安装?id=安装插件端)）
+3. 安装插件端（ [流程说明](https://jpom-site.keepbx.cn/docs/#/安装使用/开始安装?id=安装插件端) ）
     1. agent-x.x.x-release 目录为插件端的全部安装文件
     2. 上传到对应服务器
     3. 命令运行（Agent.sh、Agent.bat）
-4. 安装服务端（[流程说明](https://jpom-site.keepbx.cn/docs/#/安装使用/开始安装?id=安装服务端)）
+4. 安装服务端（ [流程说明](https://jpom-site.keepbx.cn/docs/#/安装使用/开始安装?id=安装服务端) ）
     1. server-x.x.x-release 目录为服务端的全部安装文件
     2. 上传到对应服务器
     3. 命令运行（Server.sh、Server.bat）
@@ -133,21 +133,21 @@ yum install -y wget && wget -O install.sh https://keepbx.gitee.io/jpom/install.s
 
 > [帮助文档](https://jpom-site.keepbx.cn/docs/#/安装使用/开始安装)
 
-1. 访问[Jpom](https://gitee.com/keepbx/Jpom)的码云主页,拉取最新完整代码(建议使用master分支)
+1. 访问 [Jpom](https://gitee.com/keepbx/Jpom) 的码云主页,拉取最新完整代码(建议使用master分支)
 2. 切换到`web-vue`目录 执行`yarn build`进行vue项目打包(vue环境需要提前搭建和安装依赖包详情可以查看web-vue目录下README.md)
 3. 进入项目目录执行:`mvn clean package`
-4. 安装插件端（[流程说明](https://jpom-site.keepbx.cn/docs/#/安装使用/开始安装?id=安装插件端)）
+4. 安装插件端（ [流程说明](https://jpom-site.keepbx.cn/docs/#/安装使用/开始安装?id=安装插件端) ）
     1. 查看插件端安装包 modules/agent/target/agent-x.x.x-release
     2. 打包上传服务器运行
     3. 命令运行（Agent.sh、Agent.bat）
-5. 安装服务端（[流程说明](https://jpom-site.keepbx.cn/docs/#/安装使用/开始安装?id=安装服务端)）
+5. 安装服务端（ [流程说明](https://jpom-site.keepbx.cn/docs/#/安装使用/开始安装?id=安装服务端) ）
     1. 查看插件端安装包 modules/server/target/server-x.x.x-release
     2. 打包上传服务器运行
     3. 命令运行（Server.sh、Server.bat）
 
 ### 编译运行
 
-1. 访问[Jpom](https://gitee.com/keepbx/Jpom)的码云主页,拉取最新完整代码(建议使用master分支、如果想体验新功能请使用dev分支)
+1. 访问 [Jpom](https://gitee.com/keepbx/Jpom) 的码云主页,拉取最新完整代码(建议使用master分支、如果想体验新功能请使用dev分支)
 2. 运行插件端
     1. 运行`io.jpom.JpomAgentApplication`
     2. 注意控制台打印的默认账号密码信息
