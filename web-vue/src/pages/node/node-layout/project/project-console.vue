@@ -19,7 +19,7 @@
     </div>
     <!-- console -->
     <div>
-      <a-input class="console" v-model="logContext" readOnly type="textarea" style="resize: none;"/>
+      <a-input class="console" id="project-console" v-model="logContext" readOnly type="textarea" style="resize: none;"/>
     </div>
     <!-- 日志备份 -->
     <a-modal v-model="lobbackVisible" title="日志备份列表" width="850px" :footer="null" :maskClosable="false">
@@ -167,6 +167,14 @@ export default {
           }
         }
         this.logContext += `${msg.data}\r\n`;
+
+        // 自动滚动到底部
+        this.$nextTick(() => {
+          setTimeout(() => {
+            const projectConsole = document.getElementById('project-console');
+            projectConsole.scrollTop = projectConsole.scrollHeight;
+          },100);
+        });
       }
     },
     // 发送消息
