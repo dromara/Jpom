@@ -111,7 +111,7 @@ export default {
       if (this.tempNode.level === 1) {
         return '';
       } else {
-        return this.tempNode.data.levelName || '' + '/' + this.tempNode.data.filename;
+        return (this.tempNode.data.levelName || '') + '/' + this.tempNode.data.filename;
       }
     }
   },
@@ -139,7 +139,8 @@ export default {
         const node = this.$refs['tree'].getNode(1);
         this.tempNode = node;
         this.expandKeys = [1];
-      }, 2000)
+        this.loadFileList();
+      }, 1000)
     },
     // 加载子节点
     loadNode(node, resolve) {
