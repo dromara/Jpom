@@ -7,8 +7,8 @@
         <a-button type="primary" @click="loadData">刷新目录</a-button>
       </div> 
       <a-empty v-if="treeList.length === 0" />
-      <el-tree :data="treeList" :props="defaultProps" :load="loadNode" :expand-on-click-node="false"
-      highlight-current default-expand-all lazy @node-click="nodeClick"></el-tree>
+      <el-tree ref="tree" :data="treeList" :props="defaultProps" :load="loadNode" :default-expanded-keys="expandKeys" :expand-on-click-node="false"
+       node-key="$treeNodeId" highlight-current lazy @node-click="nodeClick"></el-tree>
     </a-layout-sider>
     <!-- 表格 -->
     <a-layout-content class="file-content">
@@ -76,6 +76,7 @@ export default {
       treeList: [],
       fileList: [],
       uploadFileList: [],
+      expandKeys: [],
       tempNode: {},
       temp: {},
       uploadFileVisible: false,
@@ -87,7 +88,8 @@ export default {
       tableHeight: '80vh',
       defaultProps: {
         children: 'children',
-        label: 'filename'
+        label: 'filename',
+        isLeaf: 'isLeaf'
       },
       columns: [
         {title: '文件名称', dataIndex: 'filename', width: 100, ellipsis: true, scopedSlots: {customRender: 'filename'}},
@@ -125,11 +127,19 @@ export default {
     // 加载数据
     loadData() {
       this.treeList = [];
-      this.treeList.push({
+      const data = {
+        '$treeNodeId': 1,
         filename: '项目根目录',
         isDirectory: true,
         isLeaf: false
-      })
+      };
+      this.treeList.push(data);
+      // 设置默认展开第一个
+      setTimeout(() => {
+        const node = this.$refs['tree'].getNode(1);
+        this.tempNode = node;
+        this.expandKeys = [1];
+      }, 2000)
     },
     // 加载子节点
     loadNode(node, resolve) {
@@ -150,6 +160,10 @@ export default {
           // 加载文件
           getFileList(params).then(res => {
             if (res.code === 200) {
+              const treeData = res.data;
+              treeData.forEach(ele => {
+                ele.isLeaf = !ele.isDirectory;
+              })
               resolve(res.data);
             }
           })
