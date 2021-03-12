@@ -1,9 +1,11 @@
 package io.jpom.common.commander.impl;
 
+import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.text.StrSpliter;
 import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import io.jpom.common.commander.AbstractProjectCommander;
+import io.jpom.common.commander.AbstractSystemCommander;
 import io.jpom.model.data.ProjectInfoModel;
 import io.jpom.model.system.NetstatModel;
 import io.jpom.util.CommandUtil;
@@ -12,6 +14,11 @@ import io.jpom.util.JvmUtil;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * MacOSProjectCommander
+ * @author Hotstrip
+ * @Description some commands cannot execute success on Mac OS
+ */
 public class MacOSProjectCommander extends AbstractProjectCommander {
     @Override
     public String buildCommand(ProjectInfoModel projectInfoModel, ProjectInfoModel.JavaCopyItem javaCopyItem) {
@@ -67,5 +74,22 @@ public class MacOSProjectCommander extends AbstractProjectCommander {
             array.add(netstatModel);
         }
         return array;
+    }
+
+    @Override
+    public String stop(ProjectInfoModel projectInfoModel, ProjectInfoModel.JavaCopyItem javaCopyItem) throws Exception {
+        String result = super.stop(projectInfoModel, javaCopyItem);
+        int pid = parsePid(result);
+        if (pid > 0) {
+            AbstractSystemCommander.getInstance().kill(FileUtil.file(projectInfoModel.allLib()), pid);
+            if (loopCheckRun(projectInfoModel.getId(), false)) {
+                // 强制杀进程
+                String cmd = String.format("kill -9 %s", pid);
+                CommandUtil.asyncExeLocalCommand(FileUtil.file(projectInfoModel.allLib()), cmd);
+            }
+            String tag = javaCopyItem == null ? projectInfoModel.getId() : javaCopyItem.getTagId();
+            result = status(tag);
+        }
+        return result;
     }
 }

@@ -1,6 +1,6 @@
 jpom:
   # jpom 数据存储路径, 如果调试模式运行默认路径为【/jpom/】,安装运行默认为jar包文件的父级
-  path:
+  path: /Users/zhangxin/Documents/jpom/server
   authorize:
     # agent 端管理账号，必填。
     agentName: jpomAgent
