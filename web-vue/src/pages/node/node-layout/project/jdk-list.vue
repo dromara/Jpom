@@ -89,7 +89,7 @@ export default {
     },
     // 提交 JDK 数据
     handleEditJdkOk() {
-       // 检验表单
+      // 检验表单
       this.$refs['editJdkForm'].validate((valid) => {
         if (!valid) {
           return false;
