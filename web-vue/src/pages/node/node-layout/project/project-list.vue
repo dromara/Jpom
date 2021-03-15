@@ -20,9 +20,9 @@
       <template slot="operation" slot-scope="text, record">
         <a-button type="primary" @click="handleEdit(record)">编辑</a-button>
         <a-button type="primary" @click="handleFile(record)">文件</a-button>
-        <a-button type="primary" @click="handleConsole(record)">控制台</a-button>
-        <a-button type="primary" @click="handleMonitor(record)">监控</a-button>
-        <a-button type="primary" @click="handleReplica(record)">副本集</a-button>
+        <a-button type="primary" @click="handleConsole(record)" v-show="record.runMode!=='File'">控制台</a-button>
+        <a-button type="primary" @click="handleMonitor(record)" v-show="record.runMode!=='File'">监控</a-button>
+        <a-button type="primary" @click="handleReplica(record)" v-show="record.runMode!=='File'">副本集</a-button>
         <a-button type="danger" @click="handleDelete(record)">删除</a-button>
       </template>
     </a-table>
@@ -46,7 +46,8 @@
           </a-select>
         </a-form-model-item>
         <a-form-model-item label="项目文件夹" prop="lib">
-          <a-input v-model="temp.lib" placeholder="项目存储的文件夹，jar 包存放的文件夹"/>
+          <a-input v-model="temp.lib" placeholder="项目存储的文件夹" @blur="checkLibIndexExist" />
+            <span class="lib-exist" v-show="libExist">当前文件夹已存在!</span>
         </a-form-model-item>
         <a-form-model-item label="分组名称" prop="group">
           <a-row>
@@ -72,25 +73,25 @@
             </a-col>
           </a-row>
         </a-form-model-item>
-        <a-form-model-item label="JDK" prop="jdkId">
+        <a-form-model-item label="JDK" prop="jdkId" v-show="temp.runMode !== 'File'">
           <a-select v-model="temp.jdkId" placeholder="请选择 JDK">
             <a-select-option v-for="jdk in jdkList" :key="jdk.id">{{ jdk.name }}</a-select-option>
           </a-select>
         </a-form-model-item>
-        <a-form-model-item label="Main Class" prop="mainClass" v-show="temp.runMode !== 'Jar'">
+        <a-form-model-item label="Main Class" prop="mainClass" v-show="temp.runMode !== 'Jar' && temp.runMode !== 'File'">
           <a-input v-model="temp.mainClass" placeholder="程序运行的 main 类(jar 模式运行可以不填)"/>
         </a-form-model-item>
-        <a-form-model-item label="JavaExtDirsCp" prop="javaExtDirsCp" v-show="temp.runMode === 'JavaExtDirsCp'">
+        <a-form-model-item label="JavaExtDirsCp" prop="javaExtDirsCp" v-show="temp.runMode === 'JavaExtDirsCp' && temp.runMode !== 'File'">
           <a-input v-model="temp.javaExtDirsCp" placeholder="-Dext.dirs=xxx: -cp xx  填写【xxx:xx】"/>
         </a-form-model-item>
-        <a-form-model-item label="JVM 参数" prop="jvm">
+        <a-form-model-item label="JVM 参数" prop="jvm" v-show="temp.runMode !== 'File'">
           <a-textarea v-model="temp.jvm" :auto-size="{ minRows: 3, maxRows: 3 }" placeholder="jvm参数,非必填.如：-Xmin=512m -Xmax=512m"/>
         </a-form-model-item>
-        <a-form-model-item label="args 参数" prop="args">
+        <a-form-model-item label="args 参数" prop="args"  v-show="temp.runMode !== 'File'">
           <a-textarea v-model="temp.args" :auto-size="{ minRows: 3, maxRows: 3 }" placeholder="Main 函数 args 参数，非必填. 如：--service.port=8080"/>
         </a-form-model-item>
         <!-- 副本信息 -->
-        <a-row v-for="replica in temp.javaCopyItemList" :key="replica.id">
+        <a-row v-for="replica in temp.javaCopyItemList" :key="replica.id" >
           <a-form-model-item :label="`副本 ${replica.id} JVM 参数`" prop="jvm">
             <a-textarea v-model="replica.jvm" :auto-size="{ minRows: 3, maxRows: 3 }" class="replica-area" placeholder="jvm参数,非必填.如：-Xmin=512m -Xmax=512m"/>
           </a-form-model-item>
@@ -102,16 +103,16 @@
           </a-tooltip>
         </a-row>
         <!-- 添加副本 -->
-        <a-form-model-item label="操作" >
+        <a-form-model-item label="操作"   v-show="temp.runMode !== 'File'">
           <a-button type="primary" @click="handleAddReplica">添加副本</a-button>
         </a-form-model-item>
-        <a-form-model-item label="WebHooks" prop="token">
+        <a-form-model-item label="WebHooks" prop="token"  v-show="temp.runMode !== 'File'">
           <a-input v-model="temp.token" placeholder="关闭程序时自动请求,非必填，GET请求"/>
         </a-form-model-item>
-        <a-form-model-item v-show="temp.type === 'edit'" label="日志路径" prop="log">
+        <a-form-model-item v-show="temp.type === 'edit'&&temp.runMode !== 'File'" label="日志路径" prop="log">
           <a-alert :message="temp.log" type="success" />
         </a-form-model-item>
-        <a-form-model-item v-show="temp.type === 'edit'" label="运行命令" prop="runCommand">
+        <a-form-model-item v-show="temp.type === 'edit'&&temp.runMode !== 'File'" label="运行命令" prop="runCommand">
           <a-alert :message="temp.runCommand || '无'" type="success" />
         </a-form-model-item>
       </a-form-model>
@@ -119,12 +120,12 @@
     <!-- 项目文件组件 -->
     <a-drawer :title="drawerTitle" placement="right" width="85vw"
       :visible="drawerFileVisible" @close="onFileClose">
-      <file v-if="drawerFileVisible" :nodeId="node.id" :projectId="temp.id" />
+      <file v-if="drawerFileVisible" :nodeId="node.id" :projectId="temp.id" :runMode="temp.runMode" @goConsole="goConsole" />
     </a-drawer>
     <!-- 项目控制台组件 -->
     <a-drawer :title="drawerTitle" placement="right" width="85vw"
       :visible="drawerConsoleVisible" @close="onConsoleClose">
-      <console v-if="drawerConsoleVisible" :nodeId="node.id" :projectId="temp.id" />
+      <console v-if="drawerConsoleVisible" :nodeId="node.id" :projectId="temp.id" @goFile="goFile" />
     </a-drawer>
     <!-- 项目监控组件 -->
     <a-drawer :title="drawerTitle" placement="right" width="85vw"
@@ -143,7 +144,7 @@ import File from './project-file';
 import Console from './project-console';
 import Monitor from './project-monitor';
 import Replica from  './project-replica';
-import { getJdkList, getRuningProjectInfo, getProjectData, deleteProject, getProjectList, getPorjectGroupList, getProjectAccessList, editProject } from '../../../../api/node-project';
+import { getJdkList, getRuningProjectInfo, getProjectData, deleteProject, getProjectList, getPorjectGroupList, getProjectAccessList, editProject, nodeJudgeLibExist } from '../../../../api/node-project';
 export default {
   props: {
     node: {
@@ -168,7 +169,7 @@ export default {
         'Jar',
         'JarWar',
         'JavaExtDirsCp',
-        // 'File'
+       'File'
       ],
       list: [],
       temp: {},
@@ -179,6 +180,8 @@ export default {
       drawerMonitorVisible: false,
       drawerReplicaVisible: false,
       addGroupvisible: false,
+      libExist:false,
+      checkRecord:'',
       columns: [
         {title: '项目名称', dataIndex: 'name', width: 150, ellipsis: true, scopedSlots: {customRender: 'name'}},
         {title: '创建时间', dataIndex: 'createTime', width: 180, ellipsis: true, scopedSlots: {customRender: 'createTime'}},
@@ -366,6 +369,7 @@ export default {
     },
     // 文件管理
     handleFile(record) {
+      this.checkRecord=record;
       this.temp = Object.assign(record);
       this.drawerTitle = `文件管理(${this.temp.name})`
       this.drawerFileVisible = true;
@@ -376,6 +380,7 @@ export default {
     },
     // 控制台
     handleConsole(record) {
+      this.checkRecord=record;
       this.temp = Object.assign(record);
       this.drawerTitle = `控制台(${this.temp.name})`;
       this.drawerConsoleVisible = true;
@@ -442,8 +447,33 @@ export default {
         duration: 2
       });
       this.addGroupvisible = false;
-    }
-  }
+    },
+      //检查节点是否存在
+    checkLibIndexExist(){
+      // 检查是否输入完整
+      if(this.temp.lib.length!==0&&this.temp.whitelistDirectory.length!==0){
+        const params = {
+            nodeId: this.node.id,
+            newLib: this.temp.whitelistDirectory+this.temp.lib
+          }
+        nodeJudgeLibExist(params).then((res) => {
+          this.libExist=res.code===401;  
+        })
+      }
+   },
+     //前往控制台
+    goConsole(){
+       //关闭文件
+       this.onFileClose();
+       this.handleConsole(this.checkRecord);
+    },
+      //前往文件
+    goFile(){
+     // 关闭控制台
+     this.onConsoleClose();
+     this.handleFile(this.checkRecord);
+    },
+  },
 }
 </script>
 <style scoped>
@@ -468,5 +498,8 @@ export default {
   position: absolute;
   right: 120px;
   top: 74px;
+}
+.lib-exist {
+ color: #faad14;
 }
 </style>

@@ -5,6 +5,7 @@
     <a-layout-sider theme="light" class="sider" width="25%">
       <div class="dir-container">
         <a-button type="primary" @click="loadData">刷新目录</a-button>
+        <a-button type="primary" @click="goConsole" v-show="runMode!=='File'">控制台</a-button>
       </div>
       <a-empty v-if="treeList.length === 0" />
       <el-tree ref="tree" :data="treeList" :props="defaultProps" :load="loadNode" :default-expanded-keys="expandKeys"
@@ -79,6 +80,9 @@ export default {
       type: String
     },
     projectId: {
+      type: String
+    },
+     runMode: {
       type: String
     }
   },
@@ -435,6 +439,9 @@ export default {
           })
         }
       });
+    },
+    goConsole(){
+      this.$emit("goConsole");
     }
   }
 }
