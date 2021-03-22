@@ -39,6 +39,10 @@ request.interceptors.response.use(response => {
   }
   // 判断返回值，权限等...
   const res = response.data;
+  // 如果 headers 里面配置了 tip: no 就不用弹出提示信息
+  if (response.config.headers['tip']) {
+    return res;
+  }
   if (res.code !== 200) {
     notification.error({
       message: res.msg,

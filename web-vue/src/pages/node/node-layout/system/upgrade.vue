@@ -31,7 +31,8 @@ export default {
     return {
       temp: {},
       spinning: false,
-      fileList: []
+      fileList: [],
+      timer: null
     }
   },
   mounted() {
@@ -72,10 +73,27 @@ export default {
             message: res.msg,
             duration: 2
           });
+          this.checkVersion();
         }
         this.spinning = false;
       })
       this.fileList = [];
+    },
+    // 定时查询版本号
+    checkVersion() {
+      this.timer = setInterval(() => {
+        systemInfo().then(res => {
+          if (res.code === 200 && res.data.version !== this.temp.version) {
+            clearInterval(this.timer);
+            this.$notification.success({
+              message: '升级成功',
+              duration: 2
+            });
+          }
+        }).catch(error => {
+          console.log(error);
+        })
+      }, 2000);
     }
   }
 }

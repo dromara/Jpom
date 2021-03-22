@@ -355,6 +355,12 @@ export default {
     },
     // 获取仓库分支
     loadBranchList() {
+      const loading = this.$loading.service({
+        lock: true,
+        text: '正在加载项目分支',
+        spinner: 'el-icon-loading',
+        background: 'rgba(0, 0, 0, 0.7)'
+      });
       this.branchList = [];
       const params = {
         url: this.temp.gitUrl,
@@ -365,6 +371,7 @@ export default {
         if (res.code === 200) {
           this.branchList = res.data;
         }
+        loading.close();
       })
     },
     // 提交节点数据

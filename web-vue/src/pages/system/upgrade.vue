@@ -11,7 +11,7 @@
         <span class="layui-elem-quote">已经运行时间：{{temp.upTime}}</span>
       </a-timeline-item>
     </a-timeline>
-    <a-spin :spinning="spinning">
+    <a-spin v-show="!temp.debug" :spinning="spinning">
       <a-upload :file-list="fileList" :remove="handleRemove" :before-upload="beforeUpload" accept=".jar">
         <a-button><a-icon type="upload" />选择升级文件</a-button>
       </a-upload>
@@ -26,7 +26,8 @@ export default {
     return {
       temp: {},
       spinning: false,
-      fileList: []
+      fileList: [],
+      timer: null
     }
   },
   mounted() {
@@ -66,10 +67,27 @@ export default {
             message: res.msg,
             duration: 2
           });
+          this.checkVersion();
         }
         this.spinning = false;
       })
       this.fileList = [];
+    },
+    // 定时查询版本号
+    checkVersion() {
+      this.timer = setInterval(() => {
+        systemInfo().then(res => {
+          if (res.code === 200 && res.data.version !== this.temp.version) {
+            clearInterval(this.timer);
+            this.$notification.success({
+              message: '升级成功',
+              duration: 2
+            });
+          }
+        }).catch(error => {
+          console.log(error);
+        })
+      }, 2000);
     }
   }
 }

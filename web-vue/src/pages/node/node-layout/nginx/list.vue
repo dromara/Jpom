@@ -118,7 +118,9 @@ export default {
         nodeId: this.node.id
       }
       loadNginxData(params).then(res => {
-        this.nginxData = res.data;
+        if (res.code === 200) {
+          this.nginxData = res.data;
+        }
       })
     },
     // 加载目录数据

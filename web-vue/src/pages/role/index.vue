@@ -229,7 +229,12 @@ export default {
     },
     // 分配权限
     async handlePermission(record) {
-      this.$message.info('加载中，请勿重新点击');
+      const loading = this.$loading.service({
+        lock: true,
+        text: '加载中，请勿重新点击',
+        spinner: 'el-icon-loading',
+        background: 'rgba(0, 0, 0, 0.7)'
+      });
       this.checkedDynamicKeys = [];
       this.temp = Object.assign({}, record);
       const res = await getDynamicList();
@@ -238,6 +243,7 @@ export default {
         this.dynamicList = [...this.dynamicList];
         this.loadDynamicData().then(() => {
           this.editDynamicVisible = true;
+          loading.close();
         })
       }
     },
