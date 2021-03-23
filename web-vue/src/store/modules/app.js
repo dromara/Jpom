@@ -85,11 +85,13 @@ const app = {
       })
     },
     // 清除 tabs
-    clearTabs({commit}) {
-      commit('setTabList', []);
-      commit('setActiveTabKey', '');
-      localStorage.setItem(ACTIVE_TAB_KEY, '');
-      localStorage.setItem(TAB_LIST_KEY, JSON.stringify([]));
+    clearTabs({commit, state}) {
+      let tabList = state.tabList;
+      const index = tabList.findIndex(ele => ele.key === state.activeTabKey);
+      const currentTab = tabList[index];
+      tabList = [currentTab];
+      commit('setTabList', tabList);
+      localStorage.setItem(TAB_LIST_KEY, JSON.stringify(tabList));
     },
     // 选中当前菜单
     activeMenu({commit}, activeMenuKey) {

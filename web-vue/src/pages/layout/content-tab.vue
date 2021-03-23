@@ -46,7 +46,6 @@ export default {
     },
     // 改变 Tab
     changeTab(activekey) {
-      console.log(activekey);
       const index = this.getTabList.findIndex(ele => ele.key === activekey);
       const currentTab = this.getTabList[index];
       this.$store.dispatch('activeMenu', currentTab.id);

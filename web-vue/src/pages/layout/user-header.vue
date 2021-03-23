@@ -1,5 +1,8 @@
 <template>
   <div class="user-header">
+    <a-tooltip placement="left" title="只保留当前的 Tab">
+      <a-button :disabled="getTabList.length <= 1" class="close-all" @click="closeTabs">关闭 Tab</a-button>
+    </a-tooltip>
     <a-dropdown>
       <a-avatar
         shape="square"
@@ -99,7 +102,8 @@ export default {
   computed: {
     ...mapGetters([
       'getToken',
-      'getUserInfo'
+      'getUserInfo',
+      'getTabList'
     ]),
     // 处理展示的名称 中文 3 个字 其他 4 个字符
     avatarName() {
@@ -223,13 +227,27 @@ export default {
           }
         })
       })
+    },
+    // 关闭 tabs
+    closeTabs() {
+      this.$notification.success({
+        message: '操作成功',
+        top: '100px',
+        duration: 1
+      });
+      this.$store.dispatch('clearTabs');
     }
   }
 }
 </script>
 <style scoped>
 .user-header {
+  width: 150px;
+  text-align: right;
   margin-right: 20px;
   cursor: pointer;
+}
+.close-all {
+  margin-right: 10px;
 }
 </style>
