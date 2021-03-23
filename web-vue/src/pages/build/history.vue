@@ -178,7 +178,6 @@ export default {
     },
     // 回滚
     handleRollback(record) {
-      console.log(record);
       this.$confirm({
         title: '系统提示',
         content: '真的要回滚该构建历史记录么？',
