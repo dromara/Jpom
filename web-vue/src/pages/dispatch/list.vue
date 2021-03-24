@@ -146,7 +146,7 @@
       </a-form-model>
     </a-modal>
     <!-- 分发项目 -->
-    <a-modal v-model="dispatchVisible" width="600px" :title="'分发项目----'+temp.name" @ok="handleDispatchOk" :maskClosable="false">
+    <a-modal v-model="dispatchVisible" width="600px" :title="'分发项目----'+temp.name" @ok="handleDispatchOk" :maskClosable="false" >
       <a-form-model ref="dispatchForm" :rules="rules" :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 18 }">
         <a-form-model-item label="选择分发文件" prop="clearOld">
           <a-upload :file-list="fileList" :remove="handleRemove" :before-upload="beforeUpload" accept=".zip,.tar,.gz,.bz2">
@@ -615,7 +615,7 @@ export default {
         // 上传文件
         const key='upload';
         const formData = new FormData();
-        this.$message.loading({content:'正在上传文件...',key});
+        this.$message.loading({content:'正在上传文件...',key,duration: 0});
         formData.append('file', this.fileList[0]);
         formData.append('id', this.temp.id);
         formData.append('afterOpt', this.temp.afterOpt);
