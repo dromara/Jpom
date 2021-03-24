@@ -98,6 +98,7 @@ export default {
   left: 50%;
   transform: translate(-50%,-50%);
   text-align: center;
+  border-radius: 10px;
 }
 .rand-code {
   height: 38px;
