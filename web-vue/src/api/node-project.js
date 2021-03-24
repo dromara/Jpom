@@ -389,6 +389,7 @@ export function getThreadInfo(params) {
   return axios({
     url: '/node/manage/threadInfos',
     method: 'post',
+    timeout: 0,
     data: params
   })
 }

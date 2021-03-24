@@ -21,8 +21,8 @@
         <a-button type="primary" @click="handleEdit(record)">编辑</a-button>
         <a-button type="primary" @click="handleFile(record)">文件</a-button>
         <a-button type="primary" @click="handleConsole(record)" v-show="record.runMode!=='File'">控制台</a-button>
-        <a-button type="primary" @click="handleMonitor(record)" v-show="record.runMode!=='File'">监控</a-button>
-        <a-button type="primary" @click="handleReplica(record)" v-show="record.runMode!=='File'">副本集</a-button>
+        <a-button type="primary" @click="handleMonitor(record)" v-show="record.runMode!=='File'" :disabled="!record.status">监控</a-button>
+        <a-button type="primary" @click="handleReplica(record)" v-show="record.runMode!=='File'" :disabled="!record.javaCopyItemList">副本集</a-button>
         <a-button type="danger" @click="handleDelete(record)">删除</a-button>
       </template>
     </a-table>
