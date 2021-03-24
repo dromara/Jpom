@@ -46,8 +46,14 @@
           </a-select>
         </a-form-model-item>
         <a-form-model-item label="项目文件夹" prop="lib">
-          <a-input v-model="temp.lib" placeholder="项目存储的文件夹" @blur="checkLibIndexExist" />
-            <span class="lib-exist" v-show="libExist">当前文件夹已存在!</span>
+          <a-input v-model="temp.lib" placeholder="项目存储的文件夹" @blur.native="checkLibIndexExist" />
+          <span class="lib-exist" v-show="temp.libExist">当前文件夹已存在,创建成功后会自动同步文件.</span>
+        </a-form-model-item>
+        <a-form-model-item v-show="filePath !== ''" label="项目完整目录">
+          <a-alert :message="filePath" type="success" />
+        </a-form-model-item>
+        <a-form-model-item v-show="temp.type === 'edit'" label="日志目录">
+          <a-input v-model="temp.logPath" placeholder="日志目录" />
         </a-form-model-item>
         <a-form-model-item label="分组名称" prop="group">
           <a-row>
@@ -209,6 +215,11 @@ export default {
           { required: true, message: 'Please input project lib', trigger: 'blur' }
         ]
       }
+    }
+  },
+  computed: {
+    filePath() {
+      return (this.temp.whitelistDirectory || '') + (this.temp.lib || '');
     }
   },
   mounted() {
@@ -451,13 +462,16 @@ export default {
       //检查节点是否存在
     checkLibIndexExist(){
       // 检查是否输入完整
-      if(this.temp.lib.length!==0&&this.temp.whitelistDirectory.length!==0){
+      if (this.temp.lib.length !== 0 && this.temp.whitelistDirectory.length !== 0){
         const params = {
-            nodeId: this.node.id,
-            newLib: this.temp.whitelistDirectory+this.temp.lib
-          }
+          nodeId: this.node.id,
+          newLib: this.temp.whitelistDirectory+this.temp.lib
+        }
         nodeJudgeLibExist(params).then((res) => {
-          this.libExist=res.code===401;  
+          if (res.code === 401) {
+            this.temp.libExist = true;
+            this.temp = {...this.temp};
+          }
         })
       }
    },
