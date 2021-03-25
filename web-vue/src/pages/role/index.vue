@@ -7,7 +7,7 @@
     <!-- 数据表格 -->
     <a-table :data-source="list" :loading="loading" :columns="columns" :pagination="false" bordered :rowKey="(record, index) => index">
       <template slot="operation" slot-scope="text, record">
-        <a-button type="primary" @click="handlePermission(record)">动态</a-button>
+        <a-button :disabled="fullscreeLoading" type="primary" @click="handlePermission(record)">动态</a-button>
         <a-button type="primary" @click="handleEdit(record)">编辑</a-button>
         <a-button type="danger" @click="handleDelete(record)">删除</a-button>
       </template>
@@ -56,6 +56,7 @@ export default {
       dynamicList: [],
       dynamicData: {},
       editDynamicVisible: false,
+      fullscreeLoading: false,
       temp: {},
       // tree 选中的值
       checkedKeys: {},
@@ -229,11 +230,10 @@ export default {
     },
     // 分配权限
     async handlePermission(record) {
-      const loading = this.$loading.service({
-        lock: true,
-        text: '加载中，请勿重新点击',
-        spinner: 'el-icon-loading',
-        background: 'rgba(0, 0, 0, 0.7)'
+      this.fullscreeLoading = true;
+      this.$notification.success({
+        message: '加载数据中，请稍候...',
+        duration: 3
       });
       this.checkedDynamicKeys = [];
       this.temp = Object.assign({}, record);
@@ -243,7 +243,7 @@ export default {
         this.dynamicList = [...this.dynamicList];
         this.loadDynamicData().then(() => {
           this.editDynamicVisible = true;
-          loading.close();
+          this.fullscreeLoading = false;
         })
       }
     },

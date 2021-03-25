@@ -1,3 +1,4 @@
+import Vue from 'vue';
 import axios from 'axios';
 import Qs from 'qs';
 import store from '../store';
@@ -6,6 +7,7 @@ import { notification } from 'ant-design-vue';
 
 // axios.defaults.baseURL = 'http://localhost:2122'
 const domain = document.getElementById('domainPath').value;
+let $global_loading;
 
 const request = axios.create({
   timeout: 10000,
@@ -17,6 +19,12 @@ const request = axios.create({
 
 // 请求拦截器
 request.interceptors.request.use(config => {
+  $global_loading = Vue.prototype.$loading.service({
+    lock: true,
+    text: '加载数据中，请稍候...',
+    spinner: 'el-icon-loading',
+    background: 'rgba(0, 0, 0, 0.7)'
+  });
   // 处理数据
   if (domain) {
     // 防止 url 出现 //
@@ -33,6 +41,7 @@ request.interceptors.request.use(config => {
 
 // 响应拦截器
 request.interceptors.response.use(response => {
+  $global_loading.close();
   // 如果 responseType 是 blob 表示是下载文件
   if (response.request.responseType === 'blob') {
     return response.data;
@@ -58,6 +67,7 @@ request.interceptors.response.use(response => {
   }
   return res;
 }, error => {
+  $global_loading.close();
   const { status, statusText } = error;
   if (!status) {
     notification.error({
