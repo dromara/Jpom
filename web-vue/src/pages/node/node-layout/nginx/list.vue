@@ -31,7 +31,7 @@
         </template>
       </a-table>
       <!-- 编辑区 -->
-      <a-modal v-model="editNginxVisible" title="编辑 Nginx 配置文件" @ok="handleEditNginxOk" :maskClosable="false" width="700px">
+      <a-modal v-model="editNginxVisible" title="编辑 Nginx 配置文件" @ok="handleEditNginxOk" :maskClosable="false" width="50vw"  >
         <a-form-model ref="editNginxForm" :rules="rules" :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 16 }">
           <a-form-model-item label="白名单路径" prop="whitePath">
             <a-select v-model="temp.whitePath" placeholder="请选择白名单路径">
@@ -42,7 +42,7 @@
             <a-input v-model="temp.name" placeholder="需要以 .conf 结尾"/>
           </a-form-model-item>
           <a-form-model-item label="配置内容" prop="context">
-            <a-input v-model="temp.context" type="textarea" :rows="10" style="resize: none" placeholder="配置内容"/>
+            <a-input v-model="temp.context" type="textarea" :rows="10" style="resize: none;height: 40vh;" placeholder="配置内容"/>
           </a-form-model-item>
         </a-form-model>
       </a-modal>
