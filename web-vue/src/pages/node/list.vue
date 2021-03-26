@@ -10,7 +10,7 @@
       <a-button type="primary" @click="loadData">刷新</a-button>
     </div>
     <!-- 表格 -->
-    <a-table :loading="loading" :columns="columns" :data-source="list" bordered rowKey="id" class="node-table"
+    <a-table :loading="loading" :columns="columns" :data-source="list" :scroll="{ y: tableHeight }" bordered rowKey="id" class="node-table"
       @expand="expand" :pagination="false">
       <a-tooltip slot="group" slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
@@ -25,7 +25,7 @@
         <a-button type="danger" @click="handleDelete(record)">删除</a-button>
       </template>
       <!-- 嵌套表格 -->
-      <a-table slot="expandedRowRender" slot-scope="text" :scroll="{x: '80vw'}" :loading="childLoading" :columns="childColumns" :data-source="text.children"
+      <a-table slot="expandedRowRender" slot-scope="text" :loading="childLoading" :scroll="{ x: '80vw' }" :columns="childColumns" :data-source="text.children"
         :pagination="false" :rowKey="(record, index) => record.id + index">
         <a-tooltip slot="osName" slot-scope="text" placement="topLeft" :title="text">
           <span>{{ text }}</span>
@@ -137,6 +137,7 @@ export default {
       loading: false,
       childLoading: false,
       listQuery: {},
+      tableHeight: '70vh',
       groupList: [],
       sshList: [],
       list: [],
@@ -189,10 +190,17 @@ export default {
     }
   },
   created() {
+    this.calcTableHeight();
     this.loadGroupList();
     this.handleFilter();
   },
   methods: {
+    // 计算表格高度
+    calcTableHeight() {
+      this.$nextTick(() => {
+        this.tableHeight = window.innerHeight - this.$refs['filter'].clientHeight - 185;
+      })
+    },
     // 分组列表
     loadGroupList() {
       getNodeGroupList().then(res => {
