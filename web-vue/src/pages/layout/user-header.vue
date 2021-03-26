@@ -242,6 +242,7 @@ export default {
 </script>
 <style scoped>
 .user-header {
+  display: inline-table;
   width: 150px;
   text-align: right;
   margin-right: 20px;

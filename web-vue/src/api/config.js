@@ -8,6 +8,7 @@ import { notification } from 'ant-design-vue';
 // axios.defaults.baseURL = 'http://localhost:2122'
 const domain = document.getElementById('domainPath').value;
 let $global_loading;
+let startTime;
 
 const request = axios.create({
   timeout: 10000,
@@ -25,6 +26,7 @@ request.interceptors.request.use(config => {
     spinner: 'el-icon-loading',
     background: 'rgba(0, 0, 0, 0.7)'
   });
+  startTime = new Date().getTime();
   // 处理数据
   if (domain) {
     // 防止 url 出现 //
@@ -41,7 +43,14 @@ request.interceptors.request.use(config => {
 
 // 响应拦截器
 request.interceptors.response.use(response => {
-  $global_loading.close();
+  const endTime = new Date().getTime();
+  if (endTime - startTime < 1000) {
+    setTimeout(() => {
+      $global_loading.close();
+    }, 300);
+  } else {
+    $global_loading.close();
+  }
   // 如果 responseType 是 blob 表示是下载文件
   if (response.request.responseType === 'blob') {
     return response.data;
