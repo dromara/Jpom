@@ -8,6 +8,12 @@
 export default {
   name: 'App',
   components: {
+  },
+  created() {
+    this.$notification.config({
+      top: '100px',
+      duration: 2,
+    });
   }
 }
 </script>

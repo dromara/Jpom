@@ -77,13 +77,27 @@ public class OutGivingProjectController extends BaseServerController {
             } catch (Exception e) {
                 jsonObject.put("errorMsg", "error " + e.getMessage());
             }
+
             jsonObject.put("nodeId", outGivingNodeProject.getNodeId());
             jsonObject.put("projectId", outGivingNodeProject.getProjectId());
             jsonObject.put("nodeName", nodeModel.getName());
             if (projectInfo != null) {
                 jsonObject.put("projectName", projectInfo.getString("name"));
             }
-            jsonObject.put("projectStatus", false);
+
+            // set projectStatus property
+            //NodeModel node = nodeService.getItem(outGivingNodeProject.getNodeId());
+            // Project Status: data.pid > 0 means running
+            JSONObject projectStatus = JsonMessage.toJson(200, "success");
+            if (nodeModel.isOpenStatus()) {
+                projectStatus = NodeForward.requestBySys(nodeModel, NodeUrl.Manage_GetProjectStatus, "id", outGivingNodeProject.getProjectId()).toJson();
+            }
+            if (projectStatus.getJSONObject("data") != null && projectStatus.getJSONObject("data").getInteger("pId") != null) {
+                jsonObject.put("projectStatus", projectStatus.getJSONObject("data").getIntValue("pId") > 0);
+            } else {
+                jsonObject.put("projectStatus", false);
+            }
+
             jsonObject.put("outGivingStatus", outGivingNodeProject.getStatusMsg());
             jsonObject.put("outGivingResult", outGivingNodeProject.getResult());
             jsonObject.put("lastTime", outGivingNodeProject.getLastOutGivingTime());

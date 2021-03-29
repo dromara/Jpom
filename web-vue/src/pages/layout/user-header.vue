@@ -1,14 +1,19 @@
 <template>
   <div class="user-header">
+    <a-tooltip placement="left" >
+      <a-button title="只保留当前的 Tab" :disabled="getTabList.length <= 1" class="close-all" @click="closeTabs">关闭 Tab</a-button>
+      <a-button title="回到旧版 UI" class="close-all" @click="toOldIndex">旧版</a-button>
+    </a-tooltip>
     <a-dropdown>
-      <a-avatar
-        shape="square"
-        size="large"
-        :style="{ backgroundColor: '#f56a00', verticalAlign: 'middle' }">
-        <a-tooltip placement="left" :title="getUserInfo.name">
-          {{ avatarName }}
-        </a-tooltip>
-      </a-avatar>
+<!--      <a-avatar-->
+<!--        shape="square"-->
+<!--        size="large"-->
+<!--        :style="{ backgroundColor: '#f56a00', verticalAlign: 'middle' ,fontSize:'40px'}">-->
+<!--        -->
+<!--      </a-avatar>-->
+      <a-button class="ant-dropdown-link" :style="{ backgroundColor: '#f56a00', verticalAlign: 'middle'}" @click="e => e.preventDefault()"  :title="getUserInfo.name">
+        {{ avatarName }} <a-icon type="down" />
+      </a-button>
       <a-menu slot="overlay">
         <a-menu-item>
           <a href="javascript:;" @click="handleUpdatePwd">修改密码</a>
@@ -99,7 +104,8 @@ export default {
   computed: {
     ...mapGetters([
       'getToken',
-      'getUserInfo'
+      'getUserInfo',
+      'getTabList'
     ]),
     // 处理展示的名称 中文 3 个字 其他 4 个字符
     avatarName() {
@@ -223,13 +229,31 @@ export default {
           }
         })
       })
+    },
+    // 关闭 tabs
+    closeTabs() {
+      this.$notification.success({
+        message: '操作成功',
+        top: '100px',
+        duration: 1
+      });
+      this.$store.dispatch('clearTabs');
+    },
+    toOldIndex() {
+      location.href = "./old.html";
     }
   }
 }
 </script>
 <style scoped>
 .user-header {
+  display: inline-table;
+  width: 350px;
+  text-align: right;
   margin-right: 20px;
   cursor: pointer;
+}
+.close-all {
+  margin-right: 10px;
 }
 </style>

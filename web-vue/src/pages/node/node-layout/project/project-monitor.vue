@@ -20,6 +20,11 @@
     <a-table :data-source="list1" :loading="loading" :columns="columns1" :scroll="{x: '80vh'}" :pagination="false" bordered :rowKey="(record, index) => index">
     </a-table>
     <br/>
+    <!-- jvm 内存 -->
+    <a-divider>JVM 内存</a-divider>
+    <a-table :data-source="list3" :loading="loading" :columns="columns3" :scroll="{x: '80vh'}" :pagination="false" bordered :rowKey="(record, index) => index">
+    </a-table>
+    <br/>
     <!-- 端口信息 -->
     <a-divider>端口信息</a-divider>
     <a-table :data-source="list2" :loading="loading" :columns="columns2" :scroll="{x: '80vh'}" :pagination="false" bordered :rowKey="(record, index) => index">
@@ -47,6 +52,7 @@ export default {
       list0: [],
       list1: [],
       list2: [],
+      list3: [],
       columns0: [
         {title: '线程 ID', dataIndex: 'id', width: 150, ellipsis: true, scopedSlots: {customRender: 'id'}},
         {title: '线程名称', dataIndex: 'name', width: 180, ellipsis: true, scopedSlots: {customRender: 'name'}},
@@ -81,6 +87,15 @@ export default {
         {title: '接收队列', dataIndex: 'receive', width: 100, ellipsis: true, scopedSlots: {customRender: 'receive'}},
         {title: '发送队列', dataIndex: 'send', width: 100, ellipsis: true, scopedSlots: {customRender: 'send'}}
       ],
+      columns3: [
+        {title: '已使用堆内存', dataIndex: 'heapUsed', width: 150, ellipsis: true, scopedSlots: {customRender: 'heapUsed'}},
+        {title: '占用堆内存', dataIndex: 'heapProportion', width: 150, ellipsis: true, scopedSlots: {customRender: 'heapProportion'}},
+        {title: '已分配堆内存', dataIndex: 'heapCommitted', width: 150, ellipsis: true, scopedSlots: {customRender: 'heapCommitted'}},
+        {title: '已使用非堆内存', dataIndex: 'nonHeapUsed', width: 150, ellipsis: true, scopedSlots: {customRender: 'nonHeapUsed'}},
+        {title: '占用非堆内存', dataIndex: 'nonHeapProportion', width: 150, ellipsis: true, scopedSlots: {customRender: 'nonHeapProportion'}},
+        {title: '已分配非堆内存', dataIndex: 'nonHeapCommitted', width: 150, ellipsis: true, scopedSlots: {customRender: 'nonHeapCommitted'}},
+        {title: '挂起的对象', dataIndex: 'mount', width: 150, ellipsis: true, scopedSlots: {customRender: 'mount'}}
+      ]
     }
   },
   mounted() {
@@ -100,6 +115,7 @@ export default {
         if (res.code === 200) {
           this.list1.push(res.data.process);
           this.list2 = res.data.netstat;
+          this.list3.push(res.data.beanMem);
         }
         this.loading = false;
       })

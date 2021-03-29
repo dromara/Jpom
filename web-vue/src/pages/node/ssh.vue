@@ -8,7 +8,9 @@
     <a-table :data-source="list" :loading="loading" :columns="columns" :scroll="{x: '80vw'}" :pagination="false" bordered :rowKey="(record, index) => index">
       <template slot="nodeId" slot-scope="text, record">
         <a-button v-if="!record.nodeModel" type="primary" @click="install(record)">安装节点</a-button>
-        <a-tag color="#2db7f5" v-else @click="toNode(record.nodeModel)">前往节点: {{ `${record.nodeModel.id} ( ${record.nodeModel.name} )` }}</a-tag>
+        <a-tooltip v-else placement="topLeft" :title="`${record.nodeModel.id} ( ${record.nodeModel.name} )`">
+          <a-button type="primary" @click="toNode(record.nodeModel)">前往节点: {{ `${record.nodeModel.id} ( ${record.nodeModel.name} )` }}</a-button>
+        </a-tooltip>
       </template>
       <template slot="operation" slot-scope="text, record">
         <a-button type="primary" @click="handleEdit(record)">编辑</a-button>
@@ -125,7 +127,7 @@ export default {
       terminalVisible: false,
       columns: [
         {title: '名称', dataIndex: 'name', width: 150},
-        {title: '关联节点', dataIndex: 'nodeId', scopedSlots: {customRender: 'nodeId'}, width: 160},
+        {title: '关联节点', dataIndex: 'nodeId', scopedSlots: {customRender: 'nodeId'}, width: 160, ellipsis: true},
         {title: 'Host', dataIndex: 'host', width: 150},
         {title: 'Port', dataIndex: 'port', width: 80},
         {title: 'User', dataIndex: 'user', width: 120},
@@ -200,7 +202,7 @@ export default {
     // 修改
     handleEdit(record) {
       this.temp = Object.assign({}, record);
-      this.temp.fileDirs = record.fileDirs.join('\r\n');
+      this.temp.fileDirs = record.fileDirs ? record.fileDirs.join('\r\n') : '';
       this.temp.type = 'edit';
       this.editSshVisible = true;
     },

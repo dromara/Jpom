@@ -17,21 +17,19 @@
     <a target="_blank" href="https://travis-ci.org/jiangzeyin/Jpom">
         <img src='https://travis-ci.org/jiangzeyin/Jpom.svg?branch=master' alt='travis'/>
     </a>
-    <a target="_blank" href="https://www.codacy.com/app/jiangzeyin/Jpom?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=jiangzeyin/Jpom&amp;utm_campaign=Badge_Grade">
-        <img src="https://api.codacy.com/project/badge/Grade/9c97dc9925c84404b63e15fefbacc984" alt="codacy"/>
+    <a target="_blank" href="https://www.codacy.com/gh/jiangzeyin/Jpom/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=jiangzeyin/Jpom&amp;utm_campaign=Badge_Grade">
+      <img src="https://app.codacy.com/project/badge/Grade/cec3495486954a23b23bf82fa48682fa" alt="codacy"/>
     </a>
     <a target="_blank" href="https://shang.qq.com/wpa/qunwpa?idkey=7be1882a2e2f07cd4af28bbb1f13362af270ba4615f2a6c7aaf9605fc0563d1b">
-        <img src='https://img.shields.io/badge/QQ%E7%BE%A4-136715345-yellowgreen.svg' alt='136715345'/>
-    </a>
-    <a target="_blank" href="https://gitee.com/keepbx/Jpom">
-        <img src='https://img.shields.io/badge/Gitee-%E7%A0%81%E4%BA%91-yellow.svg' alt='gitee'/>
-    </a>
-    <a target="_blank" href="https://github.com/jiangzeyin/Jpom">
-        <img src='https://img.shields.io/badge/Github-Github-red.svg' alt='github'/>
+        <img src='https://img.shields.io/badge/%E5%BE%AE%E4%BF%A1%E7%BE%A4(%E8%AF%B7%E5%A4%87%E6%B3%A8%3AJpom)-jpom66-yellowgreen.svg' alt='jpom66 请备注jpom'/>
     </a>
     <a target="_blank" href="https://gitee.com/keepbx/Jpom">
         <img src='https://gitee.com/keepbx/Jpom/badge/star.svg?theme=gvp' alt='gitee star'/>
     </a>
+    <a target="_blank" href="https://github.com/jiangzeyin/Jpom">
+        <img src='https://img.shields.io/badge/Github-Github-red.svg' alt='github'/>
+    </a>
+
 </p>
 <p align="center">
 	<a href="https://jpom.io/">https://jpom.io/</a> | <a href="https://jpom-site.keepbx.cn/">https://jpom-site.keepbx.cn/</a> | <a href="https://jpom.keepbx.cn/">https://jpom.keepbx.cn/</a>
@@ -120,11 +118,11 @@ yum install -y wget && wget -O install.sh https://keepbx.gitee.io/jpom/install.s
 
 1. 下载安装包 [https://gitee.com/keepbx/Jpom/attach_files](https://gitee.com/keepbx/Jpom/attach_files)
 2. 解压文件
-3. 安装插件端（[流程说明](https://jpom-site.keepbx.cn/docs/#/安装使用/开始安装?id=安装插件端)）
+3. 安装插件端（ [流程说明](https://jpom-site.keepbx.cn/docs/#/安装使用/开始安装?id=安装插件端) ）
     1. agent-x.x.x-release 目录为插件端的全部安装文件
     2. 上传到对应服务器
     3. 命令运行（Agent.sh、Agent.bat）
-4. 安装服务端（[流程说明](https://jpom-site.keepbx.cn/docs/#/安装使用/开始安装?id=安装服务端)）
+4. 安装服务端（ [流程说明](https://jpom-site.keepbx.cn/docs/#/安装使用/开始安装?id=安装服务端) ）
     1. server-x.x.x-release 目录为服务端的全部安装文件
     2. 上传到对应服务器
     3. 命令运行（Server.sh、Server.bat）
@@ -133,21 +131,21 @@ yum install -y wget && wget -O install.sh https://keepbx.gitee.io/jpom/install.s
 
 > [帮助文档](https://jpom-site.keepbx.cn/docs/#/安装使用/开始安装)
 
-1. 访问[Jpom](https://gitee.com/keepbx/Jpom)的码云主页,拉取最新完整代码(建议使用master分支)
+1. 访问 [Jpom](https://gitee.com/keepbx/Jpom) 的码云主页,拉取最新完整代码(建议使用master分支)
 2. 切换到`web-vue`目录 执行`yarn build`进行vue项目打包(vue环境需要提前搭建和安装依赖包详情可以查看web-vue目录下README.md)
 3. 进入项目目录执行:`mvn clean package`
-4. 安装插件端（[流程说明](https://jpom-site.keepbx.cn/docs/#/安装使用/开始安装?id=安装插件端)）
+4. 安装插件端（ [流程说明](https://jpom-site.keepbx.cn/docs/#/安装使用/开始安装?id=安装插件端) ）
     1. 查看插件端安装包 modules/agent/target/agent-x.x.x-release
     2. 打包上传服务器运行
     3. 命令运行（Agent.sh、Agent.bat）
-5. 安装服务端（[流程说明](https://jpom-site.keepbx.cn/docs/#/安装使用/开始安装?id=安装服务端)）
+5. 安装服务端（ [流程说明](https://jpom-site.keepbx.cn/docs/#/安装使用/开始安装?id=安装服务端) ）
     1. 查看插件端安装包 modules/server/target/server-x.x.x-release
     2. 打包上传服务器运行
     3. 命令运行（Server.sh、Server.bat）
 
 ### 编译运行
 
-1. 访问[Jpom](https://gitee.com/keepbx/Jpom)的码云主页,拉取最新完整代码(建议使用master分支、如果想体验新功能请使用dev分支)
+1. 访问 [Jpom](https://gitee.com/keepbx/Jpom) 的码云主页,拉取最新完整代码(建议使用master分支、如果想体验新功能请使用dev分支)
 2. 运行插件端
     1. 运行`io.jpom.JpomAgentApplication`
     2. 注意控制台打印的默认账号密码信息
@@ -226,10 +224,8 @@ Agent.sh status    查看Jpom插件端运行状态
 
 ![Alt text](./docs/wx_qrcode.jpg)
 
-2. QQ群：[136715345](https://shang.qq.com/wpa/qunwpa?idkey=93ff8d8a37a436b752fe38d32075bb1b32a8e0b3d3ff19d0b541ca840433f561)  消息回复可能不及时
+2. 微信公众号：[CodeGzh](http://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/docs/images/CodeGzh-QrCode.jpg) 查看一些基础教程
 
-3. 微信公众号：[CodeGzh](http://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/docs/images/CodeGzh-QrCode.jpg) 查看一些基础教程
+3. 码云： [issues](https://gitee.com/keepbx/Jpom/issues)
 
-4. 码云： [issues](https://gitee.com/keepbx/Jpom/issues)
-
-5. [捐赠、打赏 在码云仓库项目首页下方捐赠即可](https://gitee.com/keepbx/Jpom)
+4. [捐赠、打赏 在码云仓库项目首页下方捐赠即可](https://gitee.com/keepbx/Jpom)

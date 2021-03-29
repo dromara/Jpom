@@ -46,16 +46,9 @@ export default {
     },
     // 改变 Tab
     changeTab(activekey) {
-      console.log(activekey);
-      // 如果跳转路由跟当前一致
-      // if (to.path === from.path) {
-      //   notification.warn({
-      //     message: '已经在当前页面了',
-      //     duration: 2
-      //   });
-      //   return;
-      // }
-      // this.$router.push('/node/list');
+      const index = this.getTabList.findIndex(ele => ele.key === activekey);
+      const currentTab = this.getTabList[index];
+      this.$store.dispatch('activeMenu', currentTab.id);
     }
   }
 }

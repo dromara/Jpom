@@ -12,3 +12,5 @@ export const TOKEN_HEADER_KEY = 'JPOM-USER-TOKEN';
 export const ACTIVE_TAB_KEY = 'Jpom-ActiveTab';
 
 export const TAB_LIST_KEY = 'Jpom-TabList';
+
+export const ACTIVE_MENU_KEY = 'Jpom-ActiveMenu';

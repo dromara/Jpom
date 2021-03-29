@@ -139,15 +139,16 @@ export default {
           return false;
         }
         // 加密密码
-        if (this.temp.password) {
-          this.temp.password = sha1(this.temp.password);
+        const paramsTemp =  Object.assign({},this.temp);
+        if (paramsTemp.password) {
+          paramsTemp.password = sha1(this.temp.password);
         }
         // 设置选择的角色
-        this.temp.roles = JSON.stringify(this.targetKeys);
+        paramsTemp.roles = JSON.stringify(this.targetKeys);
         // 需要判断当前操作是【新增】还是【修改】
         if (this.createOption) {
           // 新增
-          addUser(this.temp).then(res => {
+          addUser(paramsTemp).then(res => {
             if (res.code === 200) {
               this.$notification.success({
                 message: res.msg,
@@ -160,7 +161,7 @@ export default {
           })
         } else {
           // 修改
-          updateUser(this.temp).then(res => {
+          updateUser(paramsTemp).then(res => {
             if (res.code === 200) {
               this.$notification.success({
                 message: res.msg,

@@ -4,8 +4,8 @@
     <!-- 目录树 -->
     <a-layout-sider theme="light" class="sider" width="25%">
       <a-empty v-if="treeList.length === 0" />
-      <a-directory-tree :treeData="treeList" :replaceFields="replaceFields" @select="onSelect">
-      </a-directory-tree>
+      <el-tree ref="tree" :data="treeList" :props="defaultProps" :expand-on-click-node="false"
+       node-key="$treeNodeId" highlight-current default-expand-all @node-click="nodeClick"></el-tree>
     </a-layout-sider>
     <!-- 表格 -->
     <a-layout-content class="file-content">
@@ -31,7 +31,7 @@
         </template>
       </a-table>
       <!-- 编辑区 -->
-      <a-modal v-model="editNginxVisible" title="编辑 Nginx 配置文件" @ok="handleEditNginxOk" :maskClosable="false" width="700px">
+      <a-modal v-model="editNginxVisible" title="编辑 Nginx 配置文件" @ok="handleEditNginxOk" :maskClosable="false" width="50vw"  >
         <a-form-model ref="editNginxForm" :rules="rules" :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 16 }">
           <a-form-model-item label="白名单路径" prop="whitePath">
             <a-select v-model="temp.whitePath" placeholder="请选择白名单路径">
@@ -42,7 +42,7 @@
             <a-input v-model="temp.name" placeholder="需要以 .conf 结尾"/>
           </a-form-model-item>
           <a-form-model-item label="配置内容" prop="context">
-            <a-input v-model="temp.context" type="textarea" :rows="10" style="resize: none" placeholder="配置内容"/>
+            <a-input v-model="temp.context" type="textarea" :rows="10" style="resize: none;height: 40vh;" placeholder="配置内容"/>
           </a-form-model-item>
         </a-form-model>
       </a-modal>
@@ -77,10 +77,9 @@ export default {
       tableHeight: '80vh',
       editNginxVisible: false,
       editNginxNameVisible: false,
-      replaceFields: {
+      defaultProps: {
         children: 'children',
-        title: 'title',
-        key: 'key'
+        label: 'title'
       },
       columns: [
         {title: '文件名称', dataIndex: 'name', width: 100, ellipsis: true, scopedSlots: {customRender: 'name'}},
@@ -119,7 +118,9 @@ export default {
         nodeId: this.node.id
       }
       loadNginxData(params).then(res => {
-        this.nginxData = res.data;
+        if (res.code === 200) {
+          this.nginxData = res.data;
+        }
       })
     },
     // 加载目录数据
@@ -132,66 +133,30 @@ export default {
       }
       getNginxDirectoryList(params).then(res => {
         if (res.code === 200) {
-          res.data.forEach(ele => {
-            this.treeList.push({
-              key: ele.path,
-              title: ele.title,
-              whitePath: ele.whitePath,
-              path: ele.path,
-              isLeaf: false
-            })
-          })
+          this.treeList = res.data;
+          (this.treeList[0])['$treeNodeId'] = 1;
         }
+        // 取出第一个默认选中
+        this.$nextTick(() => {
+          const node = this.$refs['tree'].getNode(1);
+          this.tempNode = node;
+          this.loadFileList();
+        });
         this.loading = false;
       })
+    },
+    // 点击树节点
+    nodeClick(data, node) {
+      if (data.children) {
+        this.tempNode = node;
+        this.loadFileList();
+      }
     },
     // 刷新
     handleFilter() {
       this.loadDirectoryList();
       this.loadNginxData();
       this.loadNginxWhiteList();
-    },
-    // 选中目录
-    onSelect(selectedKeys, {node}) {
-      return new Promise(resolve => {
-        this.tempNode = node.dataRef;
-        // 请求参数
-        const params = {
-          nodeId: this.node.id,
-          whitePath: node.dataRef.whitePath,
-          name: node.dataRef.path
-        }
-        this.fileList = [];
-        this.loading = true;
-        // 加载文件
-        getNginxFileList(params).then(res => {
-          if (res.code === 200) {
-            let children = [];
-            // 区分目录和文件
-            res.data.forEach(element => {
-              if (element.isDirectory) {
-                children.push({
-                  key: element.relativePath,
-                  title: element.name,
-                  whitePath: node.dataRef.whitePath,
-                  path: element.relativePath,
-                  isLeaf: element.isDirectory ? false : true
-                })
-              } else {
-                // 设置文件表格
-                this.fileList.push({
-                  ...element
-                });
-              }
-            })
-            // 设置目录树
-            node.dataRef.children = children;
-            this.treeList = [...this.treeList];
-          }
-          this.loading = false;
-        })
-        resolve();
-      });
     },
     // 加载文件列表
     loadFileList() {
@@ -200,24 +165,15 @@ export default {
       // 请求参数
       const params = {
         nodeId: this.node.id,
-        whitePath: this.tempNode.whitePath,
-        name: this.tempNode.path
+        whitePath: this.tempNode.data.whitePath,
+        name: this.tempNode.data.path
       }
       // 加载文件
       getNginxFileList(params).then(res => {
         if (res.code === 200) {
-          let children = [];
           // 区分目录和文件
           res.data.forEach(element => {
-            if (element.isDirectory) {
-              children.push({
-                key: element.relativePath,
-                title: element.name,
-                whitePath: this.tempNode.whitePath,
-                path: element.relativePath,
-                isLeaf: element.isDirectory ? false : true
-              })
-            } else {
+            if (!element.isDirectory) {
               // 设置文件表格
               this.fileList.push({
                 ...element
@@ -302,6 +258,7 @@ export default {
                 message: res.msg,
                 duration: 2
               });
+              this.loadDirectoryList();
               this.loadFileList();
             }
           })

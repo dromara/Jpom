@@ -30,7 +30,8 @@ export function getNodeStatus(nodeId) {
 export function getNodeProjectList() {
   return axios({
     url: '/node/node_project_list',
-    method: 'post'
+    method: 'post',
+    timeout: 0
   })
 }
 

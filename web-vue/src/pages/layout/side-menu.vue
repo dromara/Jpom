@@ -16,15 +16,23 @@ import { mapGetters } from 'vuex';
 export default {
   data() {
     return {
-      selectedKeys: []
+      selectedKeys: [],
+      timer: null
     }
   },
   computed: {
     ...mapGetters([
-      'getMenus'
+      'getMenus',
+      'getActiveMenuKey'
     ])
   },
   created() {
+    this.activeMenu();
+  },
+  beforeDestroy() {
+    if (this.timer) {
+      clearInterval(this.timer);
+    }
   },
   methods: {
     // 点击菜单
@@ -47,6 +55,14 @@ export default {
       }
       // 跳转路由
       this.$router.push(menu.path)
+    },
+    // 自动激活当前菜单
+    activeMenu() {
+      this.timer = setInterval(() => {
+        if (this.getActiveMenuKey) {
+          this.selectedKeys = [this.getActiveMenuKey];
+        }
+      }, 1000);
     }
   }
 }

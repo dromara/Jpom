@@ -5,13 +5,15 @@
  */
 import {
   ACTIVE_TAB_KEY,
-  TAB_LIST_KEY
+  TAB_LIST_KEY,
+  ACTIVE_MENU_KEY
 } from '../../utils/const'
 
 const app = {
   state: {
     activeTabKey: localStorage.getItem(ACTIVE_TAB_KEY),
-    tabList: JSON.parse(localStorage.getItem(TAB_LIST_KEY))
+    tabList: JSON.parse(localStorage.getItem(TAB_LIST_KEY)),
+    activeMenuKey: localStorage.getItem(ACTIVE_MENU_KEY)
   },
   mutations: {
     setActiveTabKey(state, activeKey) {
@@ -19,6 +21,9 @@ const app = {
     },
     setTabList(state, tabList) {
       state.tabList = tabList;
+    },
+    setActiveMenuKey(state, activeMenuKey) {
+      state.activeMenuKey = activeMenuKey;
     }
   },
   actions: {
@@ -36,6 +41,7 @@ const app = {
           })
         });
         tab.title = currentMenu.title;
+        tab.id = currentMenu.id;
         let tabList = state.tabList || [];
         // 获取下标 -1 表示可以添加 否则就是已经存在
         const index = tabList.findIndex(ele => ele.key === tab.key);
@@ -51,6 +57,9 @@ const app = {
           localStorage.setItem(ACTIVE_TAB_KEY, tab.key);
           localStorage.setItem(TAB_LIST_KEY, JSON.stringify(tabList));
         }
+        // 设置当前选择的菜单
+        commit('setActiveMenuKey', tab.id);
+        localStorage.setItem(ACTIVE_MENU_KEY, tab.id);
         resolve()
       })
     },
@@ -76,11 +85,18 @@ const app = {
       })
     },
     // 清除 tabs
-    clearTabs({commit}) {
-      commit('setTabList', []);
-      commit('setActiveTabKey', '');
-      localStorage.setItem(ACTIVE_TAB_KEY, '');
-      localStorage.setItem(TAB_LIST_KEY, JSON.stringify([]));
+    clearTabs({commit, state}) {
+      let tabList = state.tabList;
+      const index = tabList.findIndex(ele => ele.key === state.activeTabKey);
+      const currentTab = tabList[index];
+      tabList = [currentTab];
+      commit('setTabList', tabList);
+      localStorage.setItem(TAB_LIST_KEY, JSON.stringify(tabList));
+    },
+    // 选中当前菜单
+    activeMenu({commit}, activeMenuKey) {
+      commit('setActiveMenuKey', activeMenuKey);
+      localStorage.setItem(ACTIVE_MENU_KEY, activeMenuKey);
     }
   },
   getters: {
@@ -89,6 +105,9 @@ const app = {
     },
     getActiveTabKey(state) {
       return state.activeTabKey;
+    },
+    getActiveMenuKey(state) {
+      return state.activeMenuKey;
     }
   }
 }

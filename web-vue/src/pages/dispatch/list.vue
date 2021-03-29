@@ -7,7 +7,7 @@
     </div>
     <!-- 表格 -->
     <a-table :loading="loading" :columns="columns" :data-source="list" bordered rowKey="id" class="node-table"
-     :pagination="false">
+     @expand="expand" :pagination="false">
       <a-tooltip slot="id" slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>
@@ -19,27 +19,25 @@
         <span v-else>关联</span>
       </template>
       <template slot="operation" slot-scope="text, record">
+        <a-button type="primary" v-if="list_expanded[record.id]" @click="handleReload(record)">刷新</a-button>
         <a-button type="primary" @click="handleDispatch(record)">分发文件</a-button>
         <a-button type="primary" v-if="record.outGivingProject" @click="handleEditDispatchProject(record)">编辑</a-button>
         <a-button type="primary" v-else @click="handleEditDispatch(record)">编辑</a-button>
         <a-button type="danger" @click="handleDelete(record)">删除</a-button>
       </template>
       <!-- 嵌套表格 -->
-      <a-table slot="expandedRowRender" slot-scope="text" :scroll="{x: '80vw'}" :loading="childLoading" :columns="childColumns" :data-source="text.outGivingNodeProjectList"
+      <a-table slot="expandedRowRender" slot-scope="text" :scroll="{x: '80vw'}" :loading="childLoading" :columns="childColumns" :data-source="text.children"
         :pagination="false" :rowKey="(record, index) => record.nodeId + record.projectId + index">
         <a-tooltip slot="nodeId" slot-scope="text" placement="topLeft" :title="text">
           <span>{{ text }}</span>
         </a-tooltip>
-        <a-tooltip slot="projectId" slot-scope="text" placement="topLeft" :title="text">
+        <a-tooltip slot="projectName" slot-scope="text" placement="topLeft" :title="text">
           <span>{{ text }}</span>
         </a-tooltip>
-        <a-switch slot="status" slot-scope="text" :checked="text === 1" checked-children="运行中" un-checked-children="未运行"/>
-        <a-tooltip slot="lastOutGivingTime" slot-scope="text" placement="topLeft" :title="text">
-          <span>{{ text }}</span>
-        </a-tooltip>
+        <a-switch slot="projectStatus" slot-scope="text" :checked="text" checked-children="运行中" un-checked-children="未运行"/>
         <template slot="child-operation" slot-scope="text, record">
-          <a-button type="primary" @click="handleFile(record)">文件</a-button>
-          <a-button type="primary" @click="handleConsole(record)">控制台</a-button>
+          <a-button :disabled="!record.projectName" type="primary" @click="handleFile(record)">文件</a-button>
+          <a-button :disabled="!record.projectName" type="primary" @click="handleConsole(record)">控制台</a-button>
         </template>
       </a-table>
     </a-table>
@@ -148,7 +146,7 @@
       </a-form-model>
     </a-modal>
     <!-- 分发项目 -->
-    <a-modal v-model="dispatchVisible" width="600px" title="分发项目" @ok="handleDispatchOk" :maskClosable="false">
+    <a-modal v-model="dispatchVisible" width="600px" :title="'分发项目----'+temp.name" @ok="handleDispatchOk" :maskClosable="false" >
       <a-form-model ref="dispatchForm" :rules="rules" :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 18 }">
         <a-form-model-item label="选择分发文件" prop="clearOld">
           <a-upload :file-list="fileList" :remove="handleRemove" :before-upload="beforeUpload" accept=".zip,.tar,.gz,.bz2">
@@ -183,7 +181,7 @@
 <script>
 import File from '../node/node-layout/project/project-file';
 import Console from '../node/node-layout/project/project-console';
-import { getDishPatchList, getReqId, editDispatch, editDispatchProject, uploadDispatchFile, getDispatchWhiteList, deleteDisPatch } from '../../api/dispatch';
+import { getDishPatchList, getDispatchProject, getReqId, editDispatch, editDispatchProject, uploadDispatchFile, getDispatchWhiteList, deleteDisPatch } from '../../api/dispatch';
 import { getNodeProjectList } from '../../api/node';
 import { getProjectData } from '../../api/node-project';
 export default {
@@ -211,6 +209,7 @@ export default {
         'JavaExtDirsCp',
         // 'File'
       ],
+      list_expanded: {},
       linkDispatchVisible: false,
       editDispatchVisible: false,
       dispatchVisible: false,
@@ -221,14 +220,14 @@ export default {
         {title: '分发 ID', dataIndex: 'id', width: 100, ellipsis: true, scopedSlots: {customRender: 'id'}},
         {title: '分发名称', dataIndex: 'name', width: 150, ellipsis: true, scopedSlots: {customRender: 'name'}},
         {title: '类型', dataIndex: 'outGivingProject', width: 100, ellipsis: true, scopedSlots: {customRender: 'outGivingProject'}},
-        {title: '操作', dataIndex: 'operation', scopedSlots: {customRender: 'operation'}, width: 300, align: 'left'}
+        {title: '操作', dataIndex: 'operation', scopedSlots: {customRender: 'operation'}, width: 380, align: 'left'}
       ],
       childColumns: [
         {title: '节点名称', dataIndex: 'nodeId', width: 100, ellipsis: true, scopedSlots: {customRender: 'nodeId'}},
-        {title: '项目名称', dataIndex: 'projectId', width: 120, ellipsis: true, scopedSlots: {customRender: 'projectId'}},
-        {title: '项目状态', dataIndex: 'status', width: 150, ellipsis: true, scopedSlots: {customRender: 'status'}},
-        {title: '分发状态', dataIndex: 'statusMsg', width: 180},
-        {title: '最后分发时间', dataIndex: 'lastOutGivingTime', width: 180, ellipsis: true, scopedSlots: {customRender: 'lastOutGivingTime'}},
+        {title: '项目名称', dataIndex: 'projectName', width: 120, ellipsis: true, scopedSlots: {customRender: 'projectName'}},
+        {title: '项目状态', dataIndex: 'projectStatus', width: 150, ellipsis: true, scopedSlots: {customRender: 'projectStatus'}},
+        {title: '分发状态', dataIndex: 'outGivingStatus', width: 180},
+        {title: '最后分发时间', dataIndex: 'lastTime', width: 180, ellipsis: true, scopedSlots: {customRender: 'lastTime'}},
         {title: '操作', dataIndex: 'child-operation', scopedSlots: {customRender: 'child-operation'}, width: 200, align: 'left'}
       ],
       rules: {
@@ -259,7 +258,9 @@ export default {
   methods: {
     // 加载数据
     loadData() {
+      this.list = [];
       this.loading = true;
+      this.childLoading = false;
       getDishPatchList().then(res => {
         if (res.code === 200) {
           this.list = res.data;
@@ -325,6 +326,14 @@ export default {
         }
       })
     },
+    // 展开行
+    expand(expanded, record) {
+      this.list_expanded[record.id] = expanded;
+      this.list_expanded= {...this.list_expanded};
+      if (expanded) {
+        this.handleReload(record);
+      }
+    },
     // 筛选
     handleFilter() {
       this.loadData();
@@ -333,7 +342,10 @@ export default {
     // 关联分发
     handleLink() {
       this.temp = {
-        type: 'add'
+        type: 'add',
+        id: '',
+        name: '',
+        projectId: ''
       };
       this.loadReqId();
       this.linkDispatchVisible = true;
@@ -423,6 +435,14 @@ export default {
     handleAdd() {
       this.temp = {
         type: 'add',
+        id: '',
+        name: '',
+        afterOpt: '',
+        runMode: '',
+        mainClass: '',
+        javaExtDirsCp: '',
+        whitelistDirectory: '',
+        lib: '',
         nodeIdList: []
       };
       // 添加 javaCopyItemList
@@ -463,6 +483,10 @@ export default {
             }
             // 添加 nodeIdList
             this.temp.nodeIdList.push(ele.nodeId);
+            // 添加 jvm token args
+            this.temp[`${ele.nodeId}_jvm`] = res.data.jvm || '';
+            this.temp[`${ele.nodeId}_token`] = res.data.token || '';
+            this.temp[`${ele.nodeId}_args`] = res.data.args || '';
             // 添加 javaCopyItemList
             this.temp[`${ele.nodeId}_javaCopyItemList`] = res.data.javaCopyItemList || [];
           }
@@ -545,6 +569,16 @@ export default {
         })
       })
     },
+    // 刷新
+    handleReload(record) {
+      this.childLoading = true;
+      getDispatchProject(record.id).then(res => {
+        if (res.code === 200) {
+          record.children = res.data;
+        }
+        this.childLoading = false;
+      })
+    },
     // 处理分发
     handleDispatch(record) {
       this.temp = Object.assign({}, record);
@@ -578,9 +612,10 @@ export default {
           });
           return false;
         }
-        this.$message.loading('正在上传文件...', 2);
         // 上传文件
+        const key='upload';
         const formData = new FormData();
+        this.$message.loading({content:'正在上传文件...',key,duration: 0});
         formData.append('file', this.fileList[0]);
         formData.append('id', this.temp.id);
         formData.append('afterOpt', this.temp.afterOpt);
@@ -591,6 +626,7 @@ export default {
               message: res.msg,
               duration: 2
             });
+            this.$message.success({content:'上传成功,开始分发!',key,duration: 2 });
             this.$refs['dispatchForm'].resetFields();
             this.fileList = [];
             this.loadData();
@@ -639,7 +675,6 @@ export default {
     // 关闭控制台
     onConsoleClose() {
       this.drawerConsoleVisible = false;
-      this.handleFilter();
     }
   }
 }

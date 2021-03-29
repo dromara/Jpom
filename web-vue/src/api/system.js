@@ -141,6 +141,9 @@ export function systemInfo(nodeId) {
   return axios({
     url: '/system/info',
     method: 'post',
+    headers: {
+      tip: 'no'
+    },
     data: {nodeId}
   })
 }

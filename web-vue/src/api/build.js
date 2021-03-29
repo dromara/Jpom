@@ -203,6 +203,19 @@ export function downloadBuildLog(logId) {
 }
 
 /**
+ * 回滚（重新发布）
+ * @param {*} logId 
+ * @returns 
+ */
+export function rollback(logId) {
+  return axios({
+    url: '/build/reRelease.json',
+    method: 'post',
+    data: {logId}
+  })
+}
+
+/**
  * 删除构建历史记录
  * @param {*} logId 
  */

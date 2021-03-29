@@ -162,14 +162,14 @@
       </a-form-model>
     </a-modal>
     <!-- 构建日志 -->
-    <a-modal v-model="buildLogVisible" title="构建日志" :footer="null" :maskClosable="false" @cancel="closeBuildLogModel">
+    <a-modal :width="'80vw'" v-model="buildLogVisible" title="构建日志" :footer="null" :maskClosable="false" @cancel="closeBuildLogModel">
       <build-log v-if="buildLogVisible" :temp="temp" />
     </a-modal>
   </div>
 </template>
 <script>
 import BuildLog from './log';
-import { 
+import {
   getBuildGroupList, getBuildList, getBranchList, editBuild, deleteBuild,
   getTriggerUrl, resetTrigger, clearBuid, startBuild, stopBuild
 } from '../../api/build';
@@ -207,7 +207,7 @@ export default {
         {title: '名称', dataIndex: 'name', width: 150, ellipsis: true, scopedSlots: {customRender: 'name'}},
         {title: '分支', dataIndex: 'branchName', width: 100, ellipsis: true, scopedSlots: {customRender: 'branchName'}},
         {title: '状态', dataIndex: 'status', width: 100, ellipsis: true, scopedSlots: {customRender: 'status'}},
-        {title: '构建 ID', dataIndex: 'buildIdStr', width: 120, ellipsis: true, scopedSlots: {customRender: 'buildIdStr'}},
+        {title: '构建 ID', dataIndex: 'buildIdStr', width: 80, ellipsis: true, scopedSlots: {customRender: 'buildIdStr'}},
         {title: '修改人', dataIndex: 'modifyUser', width: 150, ellipsis: true, scopedSlots: {customRender: 'modifyUser'}},
         {title: '修改时间', dataIndex: 'modifyTime', customRender: (text) => {
           if (!text) {
@@ -355,6 +355,12 @@ export default {
     },
     // 获取仓库分支
     loadBranchList() {
+      const loading = this.$loading.service({
+        lock: true,
+        text: '正在加载项目分支',
+        spinner: 'el-icon-loading',
+        background: 'rgba(0, 0, 0, 0.7)'
+      });
       this.branchList = [];
       const params = {
         url: this.temp.gitUrl,
@@ -365,6 +371,7 @@ export default {
         if (res.code === 200) {
           this.branchList = res.data;
         }
+        loading.close();
       })
     },
     // 提交节点数据
@@ -476,6 +483,11 @@ export default {
             duration: 2
           });
           this.handleFilter();
+          // 自动打开构建日志
+          this.handleBuildLog({
+            id: this.temp.id,
+            buildId: res.data
+          })
         }
       })
     },

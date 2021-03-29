@@ -14,12 +14,13 @@
         <a-button :disabled="!project.status" type="danger" @click="stop">停止</a-button>
         <a-button type="primary" @click="handleDownload">导出日志</a-button>
         <a-button type="primary" @click="handleLogBack">备份列表</a-button>
+        <a-button type="primary" @click="goFile">文件管理</a-button>
         <a-tag color="#87d068">文件大小: {{project.logSize}}</a-tag>
       </template>
     </div>
     <!-- console -->
     <div>
-      <a-input class="console" v-model="logContext" readOnly type="textarea" style="resize: none;"/>
+      <a-input class="console" id="project-console" v-model="logContext" readOnly type="textarea" style="resize: none;"/>
     </div>
     <!-- 日志备份 -->
     <a-modal v-model="lobbackVisible" title="日志备份列表" width="850px" :footer="null" :maskClosable="false">
@@ -145,14 +146,36 @@ export default {
                 this.project.status = true;
               }
             }
+            // 如果是 status
+            if (res.op === 'status') {
+              if (this.copyId) {
+                this.replica.status = true;
+              } else {
+                this.project.status = true;
+              }
+            }
           } else {
             this.$notification.error({
               message: res.msg,
               duration: 5
             });
+            // 设置未启动
+            if (this.copyId) {
+              this.replica.status = false;
+            } else {
+              this.project.status = false;
+            }
           }
         }
         this.logContext += `${msg.data}\r\n`;
+
+        // 自动滚动到底部
+        this.$nextTick(() => {
+          setTimeout(() => {
+            const projectConsole = document.getElementById('project-console');
+            projectConsole.scrollTop = projectConsole.scrollHeight;
+          },100);
+        });
       }
     },
     // 发送消息
@@ -197,7 +220,7 @@ export default {
     stop() {
       this.$confirm({
         title: '系统提示',
-        content: '真的要重启项目么？',
+        content: '真的要停止项目么？',
         okText: '确认',
         cancelText: '取消',
         onOk: () => {
@@ -300,6 +323,9 @@ export default {
           })
         }
       });
+    },
+    goFile(){
+      this.$emit("goFile");
     }
   }
 }

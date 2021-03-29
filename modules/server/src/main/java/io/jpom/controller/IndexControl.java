@@ -66,7 +66,25 @@ public class IndexControl extends BaseServerController {
      * @return page
      */
     @RequestMapping(value = {"index", "", "index.html", "/"}, method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
-    public String index() {
+    public String index(final Model model, HttpServletRequest request) {
+//        if (userService.userListEmpty()) {
+//            getSession().invalidate();
+//            return BaseJpomInterceptor.getRedirect(getRequest(), "/install.html");
+//        }
+//
+//        // 版本号
+//        setAttribute("jpomManifest", JpomManifest.getInstance());
+//        return "index";
+        return this.welcome(model, request);
+    }
+
+    /**
+     * 旧版本首页
+     *
+     * @return page
+     */
+    @RequestMapping(value = {"old", "", "old.html"}, method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
+    public String oldIndex() {
         if (userService.userListEmpty()) {
             getSession().invalidate();
             return BaseJpomInterceptor.getRedirect(getRequest(), "/install.html");
@@ -97,6 +115,7 @@ public class IndexControl extends BaseServerController {
      * 检查是否需要初始化系统
      * check if need to init system
      */
+    @NotLogin
     @RequestMapping(value = "check-system", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     public String checkSystem() {
