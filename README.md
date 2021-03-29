@@ -9,15 +9,15 @@
 
 <p align="center">
     <a target="_blank" href="https://gitee.com/dromara/Jpom">
-        <img src='https://img.shields.io/github/license/jiangzeyin/jpom.svg?style=flat' alt='license'/>
+        <img src='https://img.shields.io/github/license/dromara/Jpom.svg?style=flat' alt='license'/>
     </a>
     <a target="_blank" href="https://gitee.com/dromara/Jpom">
         <img src='https://img.shields.io/badge/JDK-1.8.0_40+-green.svg' alt='jdk'/>
     </a>
-    <a target="_blank" href="https://travis-ci.org/jiangzeyin/Jpom">
-        <img src='https://travis-ci.org/jiangzeyin/Jpom.svg?branch=master' alt='travis'/>
+    <a target="_blank" href="https://travis-ci.org/dromara/Jpom">
+        <img src='https://travis-ci.org/dromara/Jpom.svg?branch=master' alt='travis'/>
     </a>
-    <a target="_blank" href="https://www.codacy.com/gh/jiangzeyin/Jpom/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=jiangzeyin/Jpom&amp;utm_campaign=Badge_Grade">
+    <a target="_blank" href="https://www.codacy.com/gh/dromara/Jpom/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=jiangzeyin/Jpom&amp;utm_campaign=Badge_Grade">
       <img src="https://app.codacy.com/project/badge/Grade/cec3495486954a23b23bf82fa48682fa" alt="codacy"/>
     </a>
     <a target="_blank" href="https://shang.qq.com/wpa/qunwpa?idkey=7be1882a2e2f07cd4af28bbb1f13362af270ba4615f2a6c7aaf9605fc0563d1b">
@@ -26,7 +26,7 @@
     <a target="_blank" href="https://gitee.com/dromara/Jpom">
         <img src='https://gitee.com/dromara/Jpom/badge/star.svg?theme=gvp' alt='gitee star'/>
     </a>
-    <a target="_blank" href="https://github.com/jiangzeyin/Jpom">
+    <a target="_blank" href="https://github.com/dromara/Jpom">
         <img src='https://img.shields.io/badge/Github-Github-red.svg' alt='github'/>
     </a>
 
@@ -82,7 +82,7 @@ yum install -y wget && wget -O install.sh https://keepbx.gitee.io/jpom/install.s
 
 备用地址
 
-yum install -y wget && wget -O install.sh https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom/docs/install.sh && bash install.sh Agent
+yum install -y wget && wget -O install.sh https://cdn.jsdelivr.net/gh/dromara/Jpom/docs/install.sh && bash install.sh Agent
 
 支持自动安装jdk环境
 
@@ -97,7 +97,7 @@ yum install -y wget && wget -O install.sh https://keepbx.gitee.io/jpom/install.s
 
 备用地址
 
-yum install -y wget && wget -O install.sh https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom/docs/install.sh && bash install.sh Server
+yum install -y wget && wget -O install.sh https://cdn.jsdelivr.net/gh/dromara/Jpom/docs/install.sh && bash install.sh Server
 
 
 支持自动安装jdk环境

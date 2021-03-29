@@ -18,7 +18,7 @@ def ossDownload(environ, start_response):
 # 使用GitHub
 def githubOssDownload(environ, start_response):
     # 查询版本
-    result = requests.get('https://api.github.com/repos/jiangzeyin/Jpom/releases/latest')
+    result = requests.get('https://api.github.com/repos/dromara/Jpom/releases/latest')
     json = result.json()
     return doJson(environ, start_response, json)
 
@@ -26,7 +26,7 @@ def githubOssDownload(environ, start_response):
 # 查询版本号
 def showVersion(environ, start_response):
     # 查询版本
-    result = requests.get('https://api.github.com/repos/jiangzeyin/Jpom/releases/latest')
+    result = requests.get('https://api.github.com/repos/dromara/Jpom/releases/latest')
     json = result.json()
     tag_name = getVersion(json)
     if tag_name == '':

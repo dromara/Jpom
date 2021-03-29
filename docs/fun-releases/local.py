@@ -11,7 +11,7 @@ class MainHandler(tornado.web.RequestHandler):
     def get(self):
         """get请求"""
         type = self.get_argument('type')
-        result = requests.get('https://api.github.com/repos/jiangzeyin/Jpom/releases/latest')
+        result = requests.get('https://api.github.com/repos/dromara/Jpom/releases/latest')
         json = result.json()
         tag_name = json['tag_name']
         if tag_name.strip() == '':
