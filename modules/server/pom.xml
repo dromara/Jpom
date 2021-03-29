@@ -87,7 +87,7 @@
                             <!-- 打包时间 -->
                             <Jpom-Timestamp>${maven.build.timestamp}</Jpom-Timestamp>
                             <Jpom-Type>${project.artifactId}</Jpom-Type>
-                            <Implementation-URL>https://gitee.com/keepbx/Jpom</Implementation-URL>
+                            <Implementation-URL>https://gitee.com/dromara/Jpom</Implementation-URL>
                         </manifestEntries>
                     </archive>
                 </configuration>
