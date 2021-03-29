@@ -14,7 +14,8 @@ export default {
       type: String
     },
     nodeId: {
-      type: String
+      type: String,
+      default: 'system'
     },
     tail: {
       type: String
