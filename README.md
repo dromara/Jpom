@@ -229,3 +229,7 @@ Agent.sh status    查看Jpom插件端运行状态
 3. 码云： [issues](https://gitee.com/dromara/Jpom/issues)
 
 4. [捐赠、打赏 在码云仓库项目首页下方捐赠即可](https://gitee.com/dromara/Jpom)
+
+### giteye
+
+[![Giteye chart](https://chart.giteye.net/gitee/dromara/Jpom/N4VGB7ZB.png)](https://giteye.net/chart/N4VGB7ZB)
