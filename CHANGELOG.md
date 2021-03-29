@@ -4,7 +4,8 @@
 
 ### 新增功能
 
-1. 【server】 接入全局 loading 控件
+1. 【server】接入全局 loading 控件
+2. 【server】默认进行新版UI
 
 ### 解决BUG、优化功能
 
