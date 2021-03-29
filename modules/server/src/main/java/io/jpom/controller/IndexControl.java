@@ -66,6 +66,7 @@ public class IndexControl extends BaseServerController {
      * @return page
      */
     @RequestMapping(value = {"index", "", "index.html", "/"}, method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
+    @NotLogin
     public String index(final Model model, HttpServletRequest request) {
 //        if (userService.userListEmpty()) {
 //            getSession().invalidate();
@@ -83,7 +84,7 @@ public class IndexControl extends BaseServerController {
      *
      * @return page
      */
-    @RequestMapping(value = {"old", "", "old.html"}, method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
+    @RequestMapping(value = {"old", "old.html"}, method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
     public String oldIndex() {
         if (userService.userListEmpty()) {
             getSession().invalidate();
