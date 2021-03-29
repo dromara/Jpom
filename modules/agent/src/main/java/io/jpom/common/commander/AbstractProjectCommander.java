@@ -9,6 +9,7 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.lang.JarClassLoader;
 import cn.hutool.core.text.StrSpliter;
 import cn.hutool.core.thread.ThreadUtil;
+import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.http.HttpRequest;
 import cn.hutool.http.HttpUtil;
@@ -501,7 +502,8 @@ public abstract class AbstractProjectCommander {
      */
     public static int parsePid(String result) {
         if (result.startsWith(AbstractProjectCommander.RUNNING_TAG)) {
-            return Convert.toInt(result.split(":")[1]);
+            String[] split = result.split(":");
+            return Convert.toInt(ArrayUtil.get(split, 1), 0);
         }
         return 0;
     }
