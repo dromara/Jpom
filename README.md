@@ -17,7 +17,7 @@
     <a target="_blank" href="https://travis-ci.org/dromara/Jpom">
         <img src='https://travis-ci.org/dromara/Jpom.svg?branch=master' alt='travis'/>
     </a>
-    <a target="_blank" href="https://www.codacy.com/gh/dromara/Jpom/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=jiangzeyin/Jpom&amp;utm_campaign=Badge_Grade">
+    <a target="_blank" href="https://www.codacy.com/gh/dromara/Jpom/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=dromara/Jpom&amp;utm_campaign=Badge_Grade">
       <img src="https://app.codacy.com/project/badge/Grade/843b953f1446449c9a075e44ea778336" alt="codacy"/>
     </a>
     <a target="_blank" href="https://shang.qq.com/wpa/qunwpa?idkey=7be1882a2e2f07cd4af28bbb1f13362af270ba4615f2a6c7aaf9605fc0563d1b">
