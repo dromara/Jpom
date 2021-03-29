@@ -135,17 +135,20 @@ export function clearBuid(id) {
 
 /**
  * 查看构建日志
- * @param {
+ * @param {JSON} params {
  *  id: 构建 ID
  *  buildId: 构建任务 ID
  *  line: 需要获取的行号 1 开始
- * } params 
+ * }
  */
 export function loadBuildLog(params) {
   return axios({
     url: '/build/getNowLog.json',
     method: 'post',
-    data: params
+    data: params,
+    headers: {
+      tip: 'no'
+    },
   })
 }
 
