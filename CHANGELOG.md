@@ -13,6 +13,7 @@
 4. 【Server】在线升级状态判断修复
 5. 【Server】修复项目获取进程信息失败（感谢@onlyonezhongjinhui GitHub issues#7）
 6. 【Server】项目文件管理中显示项目文件存放真实目录
+7. 【Server】项目文件管理中文件夹不存在时，loading不消失（感谢@onlyonezhongjinhui GitHub issues#6）
 
 -----------------------------------------------------------
 

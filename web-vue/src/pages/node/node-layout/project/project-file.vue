@@ -187,6 +187,8 @@ export default {
                 ele.isLeaf = !ele.isDirectory;
               })
               resolve(res.data);
+            }else{
+              resolve([])
             }
           })
         }, 500);
