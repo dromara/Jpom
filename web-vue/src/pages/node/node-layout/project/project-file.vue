@@ -14,11 +14,12 @@
     <!-- 表格 -->
     <a-layout-content class="file-content">
       <div ref="filter" class="filter">
+        <a-tag color="#2db7f5">项目目录: {{ absPath }}</a-tag>
         <a-button type="primary" @click="handleUpload">批量上传文件</a-button>
         <a-button type="primary" @click="handleZipUpload">上传压缩文件（自动解压）</a-button>
         <a-button type="primary" @click="loadFileList">刷新表格</a-button>
         <a-button type="danger" @click="clearFile">清空项目目录</a-button>
-        <a-tag color="#2db7f5">当前目录: {{ uploadPath }}</a-tag>
+        <a-tag color="#2db7f5" v-if="uploadPath">当前目录: {{ uploadPath }}</a-tag>
       </div>
       <a-table :data-source="fileList" :loading="loading" :columns="columns" :scroll="{y: tableHeight}"
         :pagination="false" bordered :rowKey="(record, index) => index">
@@ -83,6 +84,9 @@ export default {
       type: String
     },
      runMode: {
+      type: String
+    },
+    absPath: {
       type: String
     }
   },

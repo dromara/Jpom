@@ -126,7 +126,7 @@
     <!-- 项目文件组件 -->
     <a-drawer :title="drawerTitle" placement="right" width="85vw"
       :visible="drawerFileVisible" @close="onFileClose">
-      <file v-if="drawerFileVisible" :nodeId="node.id" :projectId="temp.id" :runMode="temp.runMode" @goConsole="goConsole" />
+      <file v-if="drawerFileVisible" :nodeId="node.id" :projectId="temp.id" :runMode="temp.runMode" :absPath="(temp.whitelistDirectory || '') + (temp.lib || '')"  @goConsole="goConsole" />
     </a-drawer>
     <!-- 项目控制台组件 -->
     <a-drawer :title="drawerTitle" placement="right" width="85vw"
