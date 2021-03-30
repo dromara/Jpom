@@ -64,6 +64,11 @@ public class LinuxSystemCommander extends AbstractSystemCommander {
     }
 
 
+    @Override
+    public String emptyLogFile(File file) {
+        return CommandUtil.execSystemCommand("cp /dev/null " + file.getAbsolutePath());
+    }
+
     /**
      * 将linux的top信息转为集合
      *

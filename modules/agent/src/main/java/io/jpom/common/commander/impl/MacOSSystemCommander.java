@@ -48,6 +48,7 @@ public class MacOSSystemCommander extends AbstractSystemCommander {
      * 返回内存占比信息
      * 这里返回的数据跟 Mac OS 自带活动监视器显示的内存压力不是同一种东西
      * 内存使用占比高，不代表内存压力就大
+     *
      * @param info
      * @return 已使用的 / 总内存 * 100%
      */
@@ -75,6 +76,7 @@ public class MacOSSystemCommander extends AbstractSystemCommander {
 
     /**
      * 返回 Mac OS cpu 占用信息
+     *
      * @param info
      * @return 100 - idle (100 - 空闲的 cpu)
      */
@@ -102,8 +104,14 @@ public class MacOSSystemCommander extends AbstractSystemCommander {
         return formatLinuxTop(s, false);
     }
 
+    @Override
+    public String emptyLogFile(File file) {
+        return CommandUtil.execSystemCommand("cp /dev/null " + file.getAbsolutePath());
+    }
+
     /**
      * 把 top 返回的数据组装成集合
+     *
      * @param top
      * @param header 是否有 header
      * @return

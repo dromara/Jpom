@@ -10,6 +10,7 @@ import io.jpom.model.system.ProcessModel;
 import io.jpom.util.CommandUtil;
 import io.jpom.util.JvmUtil;
 
+import java.io.File;
 import java.lang.management.ManagementFactory;
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -80,6 +81,10 @@ public class WindowsSystemCommander extends AbstractSystemCommander {
         return array.get(0);
     }
 
+    @Override
+    public String emptyLogFile(File file) {
+        return CommandUtil.execSystemCommand("echo  \"\" > " + file.getAbsolutePath());
+    }
 
     /**
      * 将windows的tasklist转为集合

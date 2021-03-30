@@ -63,6 +63,14 @@ public abstract class AbstractSystemCommander {
     public abstract ProcessModel getPidInfo(int pid);
 
     /**
+     * 清空文件内容
+     *
+     * @param file 文件
+     * @return 执行结果
+     */
+    public abstract String emptyLogFile(File file);
+
+    /**
      * 磁盘占用
      *
      * @return 磁盘占用

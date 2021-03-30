@@ -299,14 +299,10 @@ public abstract class AbstractProjectCommander {
             backPath = new File(backPath, DateTime.now().toString(DatePattern.PURE_DATETIME_FORMAT) + ".log");
             FileUtil.copy(file, backPath, true);
         }
-        if (SystemUtil.getOsInfo().isLinux()) {
-            CommandUtil.execSystemCommand("cp /dev/null " + file.getAbsolutePath());
-        } else if (SystemUtil.getOsInfo().isWindows()) {
-            // 清空日志
-            String r = CommandUtil.execSystemCommand("echo  \"\" > " + file.getAbsolutePath());
-            if (StrUtil.isEmpty(r)) {
-                DefaultSystemLog.getLog().info(r);
-            }
+        // 清空日志
+        String r = AbstractSystemCommander.getInstance().emptyLogFile(file);
+        if (StrUtil.isNotEmpty(r)) {
+            DefaultSystemLog.getLog().info(r);
         }
         return "ok";
     }
