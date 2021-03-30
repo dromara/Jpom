@@ -14,6 +14,7 @@
 5. 【Server】修复项目获取进程信息失败（感谢@onlyonezhongjinhui GitHub issues#7）
 6. 【Server】项目文件管理中显示项目文件存放真实目录
 7. 【Server】项目文件管理中文件夹不存在时，loading不消失（感谢@onlyonezhongjinhui GitHub issues#6）
+8. 【Server】文件管理列表不能正常加载二级以上的目录
 
 -----------------------------------------------------------
 

@@ -32,7 +32,7 @@
         <a-tooltip slot="fileSize" slot-scope="text" placement="topLeft" :title="text">
             <span>{{ text }}</span>
         </a-tooltip>
-        <template slot="operation" slot-scope="text, record">
+        <template slot="operation"  v-if="!record.isDirectory" slot-scope="text, record">
             <a-button type="primary" @click="handleDownload(record)">下载</a-button>
             <a-button type="danger" @click="handleDelete(record)">删除</a-button>
         </template>
@@ -166,19 +166,21 @@ export default {
     // 加载子节点
     loadNode(node, resolve) {
       const data = node.data;
+      this.tempNode = node;
       // 如果是目录
       if (data.isDirectory) {
         setTimeout(() => {
           // 请求参数
           const params = {
             nodeId: this.nodeId,
-            id: this.projectId
+            id: this.projectId,
+            path: this.uploadPath
           }
-          if (node.level === 1) {
-            params.path = ''
-          } else {
-            params.path = data.levelName || '' + '/' + data.filename
-          }
+          // if (node.level === 1) {
+          //   params.path = ''
+          // } else {
+          //   params.path = data.levelName || '' + '/' + data.filename
+          // }
           // 加载文件
           getFileList(params).then(res => {
             if (res.code === 200) {
@@ -355,12 +357,12 @@ export default {
         if (res.code === 200) {
           // 区分目录和文件
           res.data.forEach(element => {
-            if (!element.isDirectory) {
+            // if (!element.isDirectory) {
               // 设置文件表格
               this.fileList.push({
                 ...element
               });
-            }
+            // }
           })
         }
         this.loading = false;
