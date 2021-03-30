@@ -14,7 +14,7 @@
     <!-- 表格 -->
     <a-layout-content class="file-content">
       <div ref="filter" class="filter">
-        <a-tag color="#2db7f5">项目目录: {{ absPath }}</a-tag>
+<!--        <a-tag color="#2db7f5">项目目录: {{ absPath }}</a-tag>-->
         <a-button type="primary" @click="handleUpload">批量上传文件</a-button>
         <a-button type="primary" @click="handleZipUpload">上传压缩文件（自动解压）</a-button>
         <a-button type="primary" @click="loadFileList">刷新表格</a-button>
@@ -150,7 +150,7 @@ export default {
       this.treeList = [];
       const data = {
         '$treeNodeId': 1,
-        filename: '项目根目录',
+        filename: '目录：'+this.absPath,
         isDirectory: true,
         isLeaf: false
       };
