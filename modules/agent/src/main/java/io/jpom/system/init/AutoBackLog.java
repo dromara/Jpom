@@ -41,8 +41,9 @@ public class AutoBackLog {
         // 获取cron 表达式
         String cron = StrUtil.emptyToDefault(AgentExtConfigBean.getInstance().autoBackConsoleCron, "none");
         if ("none".equalsIgnoreCase(cron.trim())) {
-            DefaultSystemLog.getLog().info("没有配置自动备份控制台日志表达式");
-            return;
+            //DefaultSystemLog.getLog().info("没有配置自动备份控制台日志表达式");
+            //return;
+            cron = "0 0/10 * * * ?";
         }
         String size = StrUtil.emptyToDefault(AgentExtConfigBean.getInstance().autoBackSize, "50MB");
         MAX_SIZE = FileSize.valueOf(size.trim());
