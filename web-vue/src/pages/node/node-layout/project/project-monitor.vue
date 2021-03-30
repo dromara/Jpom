@@ -124,7 +124,9 @@ export default {
     loadThreadData() {
       this.loading0 = true;
       const params = {
-        nodeId: this.node.id
+        nodeId: this.node.id,
+        tag: this.project.id,
+        copyId: this.copyId
       }
       getThreadInfo(params).then(res => {
         if (res.code === 200) {
