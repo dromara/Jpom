@@ -77,7 +77,7 @@ export default {
     checkVersion() {
       this.timer = setInterval(() => {
         systemInfo().then(res => {
-          if (res.code === 200 && res.data.version !== this.temp.version) {
+          if (res.code === 200 && res.data.timeStamp !== this.temp.timeStamp) {
             clearInterval(this.timer);
             this.$notification.success({
               message: '升级成功',
