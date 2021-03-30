@@ -147,7 +147,8 @@ export function loadBuildLog(params) {
     method: 'post',
     data: params,
     headers: {
-      tip: 'no'
+        tip: 'no',
+        loading: 'no'
     },
   })
 }
