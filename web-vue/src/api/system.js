@@ -142,7 +142,8 @@ export function systemInfo(nodeId) {
     url: '/system/info',
     method: 'post',
     headers: {
-      tip: 'no'
+      tip: 'no',
+      loading: 'no'
     },
     data: {nodeId}
   })
