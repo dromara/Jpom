@@ -89,6 +89,7 @@ export default {
               message: '升级成功',
               duration: 2
             });
+            this.temp = res.data;
           }
         }).catch(error => {
           console.log(error);
