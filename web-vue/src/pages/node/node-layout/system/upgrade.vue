@@ -10,6 +10,15 @@
       <a-timeline-item>
         <span class="layui-elem-quote">已经运行时间：{{temp.upTime}}</span>
       </a-timeline-item>
+      <a-timeline-item>
+        <span class="layui-elem-quote">端口号：{{temp.port}}</span>
+      </a-timeline-item>
+      <a-timeline-item>
+        <span class="layui-elem-quote">进程号：{{temp.pid}}</span>
+      </a-timeline-item>
+      <a-timeline-item>
+        <span class="layui-elem-quote">数据存储目录：{{temp.dataPath}}</span>
+      </a-timeline-item>
     </a-timeline>
     <a-spin :spinning="spinning">
       <a-upload :file-list="fileList" :remove="handleRemove" :before-upload="beforeUpload" accept=".jar">
@@ -90,6 +99,9 @@ export default {
               duration: 2
             });
             this.temp = res.data;
+            setTimeout(()=>{
+              location.reload();
+            },1000);
           }
         }).catch(error => {
           console.log(error);
