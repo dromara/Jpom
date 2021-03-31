@@ -4,29 +4,29 @@
 	</a>
 </p>
 <p align="center">
-	<strong>一款简而轻的低侵入式在线构建、自动部署、日常运维、项目监控软件</strong>
+	<strong>简而轻的低侵入式在线构建、自动部署、日常运维、项目监控软件</strong>
 </p>
 
 <p align="center">
-    <a target="_blank" href="https://gitee.com/keepbx/Jpom">
-        <img src='https://img.shields.io/github/license/jiangzeyin/jpom.svg?style=flat' alt='license'/>
+    <a target="_blank" href="https://gitee.com/dromara/Jpom">
+        <img src='https://img.shields.io/github/license/dromara/Jpom.svg?style=flat' alt='license'/>
     </a>
-    <a target="_blank" href="https://gitee.com/keepbx/Jpom">
+    <a target="_blank" href="https://gitee.com/dromara/Jpom">
         <img src='https://img.shields.io/badge/JDK-1.8.0_40+-green.svg' alt='jdk'/>
     </a>
-    <a target="_blank" href="https://travis-ci.org/jiangzeyin/Jpom">
-        <img src='https://travis-ci.org/jiangzeyin/Jpom.svg?branch=master' alt='travis'/>
+    <a target="_blank" href="https://travis-ci.org/dromara/Jpom">
+        <img src='https://travis-ci.org/dromara/Jpom.svg?branch=master' alt='travis'/>
     </a>
-    <a target="_blank" href="https://www.codacy.com/gh/jiangzeyin/Jpom/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=jiangzeyin/Jpom&amp;utm_campaign=Badge_Grade">
-      <img src="https://app.codacy.com/project/badge/Grade/cec3495486954a23b23bf82fa48682fa" alt="codacy"/>
+    <a target="_blank" href="https://www.codacy.com/gh/dromara/Jpom/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=dromara/Jpom&amp;utm_campaign=Badge_Grade">
+      <img src="https://app.codacy.com/project/badge/Grade/843b953f1446449c9a075e44ea778336" alt="codacy"/>
     </a>
     <a target="_blank" href="https://shang.qq.com/wpa/qunwpa?idkey=7be1882a2e2f07cd4af28bbb1f13362af270ba4615f2a6c7aaf9605fc0563d1b">
         <img src='https://img.shields.io/badge/%E5%BE%AE%E4%BF%A1%E7%BE%A4(%E8%AF%B7%E5%A4%87%E6%B3%A8%3AJpom)-jpom66-yellowgreen.svg' alt='jpom66 请备注jpom'/>
     </a>
-    <a target="_blank" href="https://gitee.com/keepbx/Jpom">
-        <img src='https://gitee.com/keepbx/Jpom/badge/star.svg?theme=gvp' alt='gitee star'/>
+    <a target="_blank" href="https://gitee.com/dromara/Jpom">
+        <img src='https://gitee.com/dromara/Jpom/badge/star.svg?theme=gvp' alt='gitee star'/>
     </a>
-    <a target="_blank" href="https://github.com/jiangzeyin/Jpom">
+    <a target="_blank" href="https://github.com/dromara/Jpom">
         <img src='https://img.shields.io/badge/Github-Github-red.svg' alt='github'/>
     </a>
 
@@ -35,7 +35,7 @@
 	<a href="https://jpom.io/">https://jpom.io/</a> | <a href="https://jpom-site.keepbx.cn/">https://jpom-site.keepbx.cn/</a> | <a href="https://jpom.keepbx.cn/">https://jpom.keepbx.cn/</a>
 </p>
 
-#### 你为什么需要[Jpom](https://gitee.com/keepbx/Jpom)
+#### 你为什么需要[Jpom](https://gitee.com/dromara/Jpom)
 
 > Java 项目在实际部署运维，通用的方法是登录服务器上传新的项目包，执行相应命令管理，如果管理多个项目则重复操作上述步骤
 
@@ -82,7 +82,7 @@ yum install -y wget && wget -O install.sh https://keepbx.gitee.io/jpom/install.s
 
 备用地址
 
-yum install -y wget && wget -O install.sh https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom/docs/install.sh && bash install.sh Agent
+yum install -y wget && wget -O install.sh https://cdn.jsdelivr.net/gh/dromara/Jpom/docs/install.sh && bash install.sh Agent
 
 支持自动安装jdk环境
 
@@ -97,7 +97,7 @@ yum install -y wget && wget -O install.sh https://keepbx.gitee.io/jpom/install.s
 
 备用地址
 
-yum install -y wget && wget -O install.sh https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom/docs/install.sh && bash install.sh Server
+yum install -y wget && wget -O install.sh https://cdn.jsdelivr.net/gh/dromara/Jpom/docs/install.sh && bash install.sh Server
 
 
 支持自动安装jdk环境
@@ -116,43 +116,43 @@ yum install -y wget && wget -O install.sh https://keepbx.gitee.io/jpom/install.s
 
 > [帮助文档](https://jpom-site.keepbx.cn/docs/#/安装使用/开始安装)
 
-1. 下载安装包 [https://gitee.com/keepbx/Jpom/attach_files](https://gitee.com/keepbx/Jpom/attach_files)
+1. 下载安装包 [https://gitee.com/dromara/Jpom/attach_files](https://gitee.com/dromara/Jpom/attach_files)
 2. 解压文件
 3. 安装插件端（ [流程说明](https://jpom-site.keepbx.cn/docs/#/安装使用/开始安装?id=安装插件端) ）
-    1. agent-x.x.x-release 目录为插件端的全部安装文件
-    2. 上传到对应服务器
-    3. 命令运行（Agent.sh、Agent.bat）
+   1. agent-x.x.x-release 目录为插件端的全部安装文件
+   2. 上传到对应服务器
+   3. 命令运行（Agent.sh、Agent.bat）
 4. 安装服务端（ [流程说明](https://jpom-site.keepbx.cn/docs/#/安装使用/开始安装?id=安装服务端) ）
-    1. server-x.x.x-release 目录为服务端的全部安装文件
-    2. 上传到对应服务器
-    3. 命令运行（Server.sh、Server.bat）
+   1. server-x.x.x-release 目录为服务端的全部安装文件
+   2. 上传到对应服务器
+   3. 命令运行（Server.sh、Server.bat）
 
 ### 编译安装
 
 > [帮助文档](https://jpom-site.keepbx.cn/docs/#/安装使用/开始安装)
 
-1. 访问 [Jpom](https://gitee.com/keepbx/Jpom) 的码云主页,拉取最新完整代码(建议使用master分支)
+1. 访问 [Jpom](https://gitee.com/dromara/Jpom) 的码云主页,拉取最新完整代码(建议使用master分支)
 2. 切换到`web-vue`目录 执行`yarn build`进行vue项目打包(vue环境需要提前搭建和安装依赖包详情可以查看web-vue目录下README.md)
 3. 进入项目目录执行:`mvn clean package`
 4. 安装插件端（ [流程说明](https://jpom-site.keepbx.cn/docs/#/安装使用/开始安装?id=安装插件端) ）
-    1. 查看插件端安装包 modules/agent/target/agent-x.x.x-release
-    2. 打包上传服务器运行
-    3. 命令运行（Agent.sh、Agent.bat）
+   1. 查看插件端安装包 modules/agent/target/agent-x.x.x-release
+   2. 打包上传服务器运行
+   3. 命令运行（Agent.sh、Agent.bat）
 5. 安装服务端（ [流程说明](https://jpom-site.keepbx.cn/docs/#/安装使用/开始安装?id=安装服务端) ）
-    1. 查看插件端安装包 modules/server/target/server-x.x.x-release
-    2. 打包上传服务器运行
-    3. 命令运行（Server.sh、Server.bat）
+   1. 查看插件端安装包 modules/server/target/server-x.x.x-release
+   2. 打包上传服务器运行
+   3. 命令运行（Server.sh、Server.bat）
 
 ### 编译运行
 
-1. 访问 [Jpom](https://gitee.com/keepbx/Jpom) 的码云主页,拉取最新完整代码(建议使用master分支、如果想体验新功能请使用dev分支)
+1. 访问 [Jpom](https://gitee.com/dromara/Jpom) 的码云主页,拉取最新完整代码(建议使用master分支、如果想体验新功能请使用dev分支)
 2. 运行插件端
-    1. 运行`io.jpom.JpomAgentApplication`
-    2. 注意控制台打印的默认账号密码信息
-    3. 默认运行端口：`2123`
+   1. 运行`io.jpom.JpomAgentApplication`
+   2. 注意控制台打印的默认账号密码信息
+   3. 默认运行端口：`2123`
 3. 运行服务端
-    1. 运行`io.jpom.JpomServerApplication`
-    2. 默认运行端口：`2122`
+   1. 运行`io.jpom.JpomServerApplication`
+   2. 默认运行端口：`2122`
 4. 构建vue页面 切换到`web-vue`目录（前提需要本地开发环境有node、yarn环境）
 5. 安装项目vue依赖 控制台执行 `yarn install`
 6. 启动开发模式 控制台执行 `yarn serve`
@@ -190,8 +190,8 @@ Agent.sh status    查看Jpom插件端运行状态
 
 在项目运行的根路径下的`extConfig.yml`文件
 
-1. 插件端示例：[`extConfig.yml`](https://gitee.com/keepbx/Jpom/blob/master/modules/agent/src/main/resources/bin/extConfig.yml)
-2. 服务端示例：[`extConfig.yml`](https://gitee.com/keepbx/Jpom/blob/master/modules/server/src/main/resources/bin/extConfig.yml)
+1. 插件端示例：[`extConfig.yml`](https://gitee.com/dromara/Jpom/blob/master/modules/agent/src/main/resources/bin/extConfig.yml)
+2. 服务端示例：[`extConfig.yml`](https://gitee.com/dromara/Jpom/blob/master/modules/server/src/main/resources/bin/extConfig.yml)
 
 ### 演示项目
 
@@ -226,6 +226,10 @@ Agent.sh status    查看Jpom插件端运行状态
 
 2. 微信公众号：[CodeGzh](http://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/docs/images/CodeGzh-QrCode.jpg) 查看一些基础教程
 
-3. 码云： [issues](https://gitee.com/keepbx/Jpom/issues)
+3. 码云： [issues](https://gitee.com/dromara/Jpom/issues)
 
-4. [捐赠、打赏 在码云仓库项目首页下方捐赠即可](https://gitee.com/keepbx/Jpom)
+4. [捐赠、打赏 在码云仓库项目首页下方捐赠即可](https://gitee.com/dromara/Jpom)
+
+### giteye
+
+[![Giteye chart](https://chart.giteye.net/gitee/dromara/Jpom/N4VGB7ZB.png)](https://giteye.net/chart/N4VGB7ZB)
