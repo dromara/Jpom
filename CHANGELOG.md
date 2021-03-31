@@ -4,6 +4,7 @@
 
 ### 新增功能
 
+1. 【Server】保存邮箱信息时候验证邮箱配置是否正确（感谢@maybe）
 
 ### 解决BUG、优化功能
 
@@ -103,7 +104,8 @@
 
 ### 新增功能
 
-1. [支持maven快速编辑节点项目](https://gitee.com/keepbx/Jpom-Plugin/tree/master/jpom-maven-plugin) （配合`jpom-maven-plugin`使用）(感谢@夜空中最亮的星)
+1. [支持maven快速编辑节点项目](https://gitee.com/keepbx/Jpom-Plugin/tree/master/jpom-maven-plugin) （配合`jpom-maven-plugin`使用）(
+   感谢@夜空中最亮的星)
 2. 【Agent】 新增jdk 管理，不同项目选择不同的jdk （GITEE@IV8ZZ）
 3. 【Server】构建新增分组属性，方便快速选择
 4. 【Agent】 新增[JavaExtDirsCp] 运行模式 (感谢@TXpcmgr（Geiger）)
@@ -152,7 +154,8 @@
 
 ### 升级注意
 
-1. 此版本更新控制台日志级别有调整，如果使用管理命令方式运行日志级别将不再打印info级别，如果需要打印info级别的请调整管理命令中的`--spring.profiles.active=pro` 为 `--spring.profiles.active=dev`
+1. 此版本更新控制台日志级别有调整，如果使用管理命令方式运行日志级别将不再打印info级别，如果需要打印info级别的请调整管理命令中的`--spring.profiles.active=pro`
+   为 `--spring.profiles.active=dev`
 2. 使用Nginx 二级路径代理请一定使用Jpom 推荐nginx配置[查看配置](https://jpom-site.keepbx.cn/docs/index.html#/辅助配置/nginx-config)
 
 -----------------------------------------------------------

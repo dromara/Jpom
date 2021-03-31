@@ -49,13 +49,22 @@ public class EmailUtil implements INotify {
         MailUtil.send(mailAccount, CollUtil.newArrayList(StrUtil.split(notify.getValue(), StrUtil.COMMA)), title, context, false);
     }
 
-    private static MailAccount getAccount() {
+    public static MailAccount getAccountNew() {
+        MailAccountModel config = systemMailConfigService.getConfig();
+        return getAccount(config);
+    }
+
+    public static MailAccount getAccount() {
         if (config == null) {
             if (systemMailConfigService == null) {
                 systemMailConfigService = SpringUtil.getBean(SystemMailConfigService.class);
             }
             config = systemMailConfigService.getConfig();
         }
+        return getAccount(config);
+    }
+
+    public static MailAccount getAccount(MailAccountModel config) {
         Objects.requireNonNull(config, "获取邮箱信息失败");
         MailAccount mailAccount = new MailAccount();
         mailAccount.setUser(config.getUser());
