@@ -78,7 +78,7 @@
 #### 插件端
 
 ```
-yum install -y wget && wget -O install.sh https://keepbx.gitee.io/jpom/install.sh && bash install.sh Agent
+yum install -y wget && wget -O install.sh https://dromara.gitee.io/jpom/docs/install.sh && bash install.sh Agent
 
 备用地址
 
@@ -86,14 +86,14 @@ yum install -y wget && wget -O install.sh https://cdn.jsdelivr.net/gh/dromara/Jp
 
 支持自动安装jdk环境
 
-yum install -y wget && wget -O install.sh https://keepbx.gitee.io/jpom/install.sh && bash install.sh Agent jdk
+yum install -y wget && wget -O install.sh https://dromara.gitee.io/jpom/docs/install.sh && bash install.sh Agent jdk
 
 ```
 
 #### 服务端
 
 ```
-yum install -y wget && wget -O install.sh https://keepbx.gitee.io/jpom/install.sh && bash install.sh Server
+yum install -y wget && wget -O install.sh https://dromara.gitee.io/jpom/docs/install.sh && bash install.sh Server
 
 备用地址
 
@@ -102,11 +102,11 @@ yum install -y wget && wget -O install.sh https://cdn.jsdelivr.net/gh/dromara/Jp
 
 支持自动安装jdk环境
 
-yum install -y wget && wget -O install.sh https://keepbx.gitee.io/jpom/install.sh && bash install.sh Server jdk
+yum install -y wget && wget -O install.sh https://dromara.gitee.io/jpom/docs/install.sh && bash install.sh Server jdk
 
 支持自动安装jdk和maven环境
 
-yum install -y wget && wget -O install.sh https://keepbx.gitee.io/jpom/install.sh && bash install.sh Server jdk+mvn
+yum install -y wget && wget -O install.sh https://dromara.gitee.io/jpom/docs/install.sh && bash install.sh Server jdk+mvn
 
 ```
 
