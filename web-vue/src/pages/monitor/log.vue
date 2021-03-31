@@ -150,6 +150,7 @@ export default {
       this.detailData.push({title: '标题', description: this.temp.title});
       this.detailData.push({title: '内容', description: this.temp.content});
       this.detailData.push({title: '通知对象', description: this.temp.notifyObject});
+      this.detailData.push({title: '通知异常', description: this.temp.notifyError});
     }
   }
 }
