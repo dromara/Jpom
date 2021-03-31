@@ -1,6 +1,6 @@
 <p align="center">
 	<a href="https://jpom.io/"  target="_blank">
-	    <img src="https://images.gitee.com/uploads/images/2020/0506/122643_601ae3bf_804942.jpeg" width="400" alt="logo">
+	    <img src="https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/images/jpom_logo.png" width="400" alt="logo">
 	</a>
 </p>
 <p align="center">
