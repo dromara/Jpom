@@ -1,6 +1,9 @@
 package io.jpom.controller.user;
 
+import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.JsonMessage;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import io.jpom.common.BaseServerController;
 import io.jpom.model.data.RoleModel;
 import io.jpom.model.data.UserModel;
@@ -70,16 +73,26 @@ public class UserListController extends BaseServerController {
     }
 
     /**
+     * @return
      * @author Hotstrip
      * get all admin user list
      * 获取所有管理员信息
-     * @return
      */
     @RequestMapping(value = "get-admin-user-list", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     @Feature(method = MethodFeature.LIST)
     public String getAdminUserList() {
         List<UserModel> list = userService.list(false);
-        return JsonMessage.getString(200, "success", list);
+        JSONArray jsonArray = new JSONArray();
+        list.forEach(userModel -> {
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.put("title", userModel.getName());
+            jsonObject.put("value", userModel.getId());
+            if (StrUtil.isAllEmpty(userModel.getEmail(), userModel.getDingDing(), userModel.getWorkWx())) {
+                jsonObject.put("disabled", true);
+            }
+            jsonArray.add(jsonObject);
+        });
+        return JsonMessage.getString(200, "success", jsonArray);
     }
 }

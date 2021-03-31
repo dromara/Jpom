@@ -130,7 +130,7 @@ export default {
       getAdminUserList().then(res => {
         if (res.code === 200) {
           res.data.forEach(element => {
-            this.userList.push({key: element.id, title: element.name});
+            this.userList.push({key: element.value, title: element.title,disabled:element.disabled});
           });
         }
       })
