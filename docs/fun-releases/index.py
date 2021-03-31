@@ -10,7 +10,7 @@ TAB_NAME = 'tag_name'
 # 使用码云资源
 def ossDownload(environ, start_response):
     # 查询版本
-    result = requests.get('https://keepbx.gitee.io/jpom/versions.json')
+    result = requests.get('https://dromara.gitee.io/jpom/docs/versions.json')
     json = result.json()
     return doJson(environ, start_response, json)
 
