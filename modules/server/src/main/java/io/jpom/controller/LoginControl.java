@@ -3,7 +3,9 @@ package io.jpom.controller;
 import cn.hutool.cache.impl.LFUCache;
 import cn.hutool.captcha.CaptchaUtil;
 import cn.hutool.captcha.CircleCaptcha;
-import cn.hutool.core.date.BetweenFormater;
+import cn.hutool.core.date.BetweenFormatter;
+import cn.hutool.core.date.DateTime;
+import cn.hutool.core.date.DateUnit;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.JsonMessage;
@@ -11,6 +13,7 @@ import cn.jiangzeyin.common.validator.ValidatorConfig;
 import cn.jiangzeyin.common.validator.ValidatorItem;
 import cn.jiangzeyin.common.validator.ValidatorRule;
 import io.jpom.common.BaseServerController;
+import io.jpom.common.ServerOpenApi;
 import io.jpom.common.interceptor.BaseJpomInterceptor;
 import io.jpom.common.interceptor.LoginInterceptor;
 import io.jpom.common.interceptor.NotLogin;
@@ -21,6 +24,7 @@ import io.jpom.model.log.UserOperateLogV1;
 import io.jpom.service.user.UserService;
 import io.jpom.system.ServerExtConfigBean;
 import io.jpom.util.JwtUtil;
+import io.jsonwebtoken.Claims;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -171,7 +175,7 @@ public class LoginControl extends BaseServerController {
             try {
                 long lockTime = userModel.overLockTime();
                 if (lockTime > 0) {
-                    String msg = DateUtil.formatBetween(lockTime * 1000, BetweenFormater.Level.MINUTE);
+                    String msg = DateUtil.formatBetween(lockTime * 1000, BetweenFormatter.Level.MINUTE);
                     userModel.errorLock();
                     this.ipError();
                     return JsonMessage.getString(400, "该账户登录失败次数过多，已被锁定" + msg + ",请不要再次尝试");
@@ -207,8 +211,32 @@ public class LoginControl extends BaseServerController {
      * @return page
      */
     @RequestMapping(value = "logout", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
-    public String logout() throws IOException {
+    public String logout() {
         getSession().invalidate();
         return BaseJpomInterceptor.getRedirect(getRequest(), "/index.html");
+    }
+
+    /**
+     * 刷新token
+     */
+    @RequestMapping(value = "renewal", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @ResponseBody
+    @NotLogin
+    public String renewalToken() {
+        String token = getRequest().getHeader(ServerOpenApi.USER_TOKEN_HEAD);
+        if (StrUtil.isEmpty(token)) {
+            return JsonMessage.getString(400, "刷新token失败");
+        }
+        Claims claims = JwtUtil.readBody(token);
+        if (JwtUtil.expired(claims)) {
+            int renewal = ServerExtConfigBean.getInstance().getAuthorizeRenewal();
+            if (renewal <= 0 || DateUtil.between(claims.getExpiration(), DateTime.now(), DateUnit.MINUTE) > renewal) {
+                return JsonMessage.getString(400, "刷新token超时");
+            }
+        }
+        UserModel userModel = userService.checkUser(claims.getId());
+        UserLoginDto userLoginDto = new UserLoginDto();
+        userLoginDto.setToken(JwtUtil.builder(userModel));
+        return JsonMessage.getString(200, "", userLoginDto);
     }
 }
