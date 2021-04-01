@@ -20,6 +20,7 @@ import io.jpom.model.dto.UserLoginDto;
 import io.jpom.model.log.UserOperateLogV1;
 import io.jpom.service.user.UserService;
 import io.jpom.system.ServerExtConfigBean;
+import io.jpom.util.JwtUtil;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -181,9 +182,8 @@ public class LoginControl extends BaseServerController {
                     setSessionAttribute(LoginInterceptor.SESSION_NAME, userModel);
                     removeSessionAttribute(SHOW_CODE);
                     this.ipSuccess();
-                    String userMd5Key = userModel.getUserMd5Key();
                     UserLoginDto userLoginDto = new UserLoginDto();
-                    userLoginDto.setToken(userMd5Key);
+                    userLoginDto.setToken(JwtUtil.builder(userModel));
                     return JsonMessage.getString(200, "登录成功", userLoginDto);
                 } else {
                     userModel.errorLock();

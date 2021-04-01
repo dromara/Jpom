@@ -76,6 +76,11 @@ public class ServerConfigBean {
      */
     public static final String ROLE = "user_role.json";
 
+    /**
+     * token自动续签状态码
+     */
+    public static final int RENEWAL_AUTHORIZE_CODE = 701;
+
     private static ServerConfigBean serverConfigBean;
 
     /**

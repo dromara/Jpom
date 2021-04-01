@@ -1,5 +1,7 @@
 package io.jpom.common.interceptor;
 
+import cn.hutool.core.date.DateTime;
+import cn.hutool.core.date.DateUnit;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.net.URLEncoder;
@@ -16,6 +18,10 @@ import io.jpom.common.UrlRedirectUtil;
 import io.jpom.model.data.UserModel;
 import io.jpom.service.user.UserService;
 import io.jpom.system.ExtConfigBean;
+import io.jpom.system.ServerConfigBean;
+import io.jpom.system.ServerExtConfigBean;
+import io.jpom.util.JwtUtil;
+import io.jsonwebtoken.Claims;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.web.method.HandlerMethod;
@@ -52,25 +58,8 @@ public class LoginInterceptor extends BaseJpomInterceptor {
             notLogin = handlerMethod.getBeanType().getAnnotation(NotLogin.class);
         }
         if (notLogin == null) {
-            UserModel user = (UserModel) session.getAttribute(SESSION_NAME);
-            if (user == null) {
-                // 信息登录
-                if (tryGetHeaderUser(request, session)) {
-                    return true;
-                }
-                this.responseLogin(request, response, handlerMethod);
-                return false;
-            }
-            // 用户信息
-            UserService userService = SpringUtil.getBean(UserService.class);
-            UserModel newUser = userService.getItem(user.getId());
-            if (newUser == null) {
-                // 用户被删除
-                this.responseLogin(request, response, handlerMethod);
-                return false;
-            }
-            if (user.getModifyTime() != newUser.getModifyTime()) {
-                // 被修改过
+            //
+            if (!this.checkHeaderUser(request, response, session)) {
                 this.responseLogin(request, response, handlerMethod);
                 return false;
             }
@@ -83,21 +72,32 @@ public class LoginInterceptor extends BaseJpomInterceptor {
     /**
      * 尝试获取 header 中的信息
      *
-     * @param session ses
+     * @param session  ses
+     * @param request  req
+     * @param response resp
      * @return true 获取成功
-     * @am request req
      */
-    private boolean tryGetHeaderUser(HttpServletRequest request, HttpSession session) {
-        String header = request.getHeader(ServerOpenApi.USER_TOKEN_HEAD);
-        if (StrUtil.isEmpty(header)) {
+    private boolean checkHeaderUser(HttpServletRequest request, HttpServletResponse response, HttpSession session) {
+        String token = request.getHeader(ServerOpenApi.USER_TOKEN_HEAD);
+        if (StrUtil.isEmpty(token)) {
             return false;
         }
+        Claims claims = JwtUtil.readBody(token);
+        if (JwtUtil.expired(claims)) {
+            int renewal = ServerExtConfigBean.getInstance().getAuthorizeRenewal();
+            if (renewal <= 0 || DateUtil.between(claims.getExpiration(), DateTime.now(), DateUnit.MINUTE) > renewal) {
+                return false;
+            }
+            response.setStatus(ServerConfigBean.RENEWAL_AUTHORIZE_CODE);
+        }
+        UserModel user = (UserModel) session.getAttribute(SESSION_NAME);
         UserService userService = SpringUtil.getBean(UserService.class);
-        UserModel userModel = userService.checkUser(header);
-        if (userModel == null) {
-            return false;
+        UserModel newUser = userService.checkUser(claims.getId());
+        if (null != user) {
+            return user.getId().equals(JwtUtil.readUserId(claims)) && user.getUserMd5Key().equals(claims.getId())
+                    && user.getModifyTime() == newUser.getModifyTime();
         }
-        session.setAttribute(LoginInterceptor.SESSION_NAME, userModel);
+        session.setAttribute(LoginInterceptor.SESSION_NAME, newUser);
         return true;
     }
 

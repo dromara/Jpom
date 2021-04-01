@@ -48,6 +48,18 @@ public class ServerExtConfigBean {
     private String authorizeToken;
 
     /**
+     * 登录token失效时间(单位：小时),默认为1
+     */
+    @Value("${jpom.authorize.expired:1}")
+    private int authorizeExpired;
+
+    /**
+     * 登录token失效后自动续签时间（单位：分钟），默认为0，不自动续签
+     */
+    @Value("${jpom.authorize.renewal:0}")
+    private int authorizeRenewal;
+
+    /**
      * 构建最多保存多少份历史记录
      */
     @Value("${build.maxHistoryCount:1000}")
@@ -80,6 +92,14 @@ public class ServerExtConfigBean {
 
     public int getBuildItemMaxHistoryCount() {
         return buildItemMaxHistoryCount;
+    }
+
+    public int getAuthorizeExpired() {
+        return authorizeExpired;
+    }
+
+    public int getAuthorizeRenewal() {
+        return authorizeRenewal;
     }
 
     /**

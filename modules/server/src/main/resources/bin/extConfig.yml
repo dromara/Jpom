@@ -4,6 +4,10 @@ jpom:
   authorize:
     # api接口请求token 长度要求大于等于6位，字母数字符号组合
     token:
+    #登录token失效时间(单位：小时),默认为1
+    expired: 1
+    #登录token失效后自动续签时间（单位：分钟），默认为0，不自动续签
+    renewal: 0
 user:
   # 最多能创建多少个用户
   maxCount: 10
