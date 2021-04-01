@@ -93,6 +93,7 @@ export default {
     },
     // 加载角色数据
     loadRoleList() {
+      this.roleList = [];
       getRoleList().then(res => {
         if (res.code === 200) {
           res.data.forEach(element => {
@@ -113,6 +114,7 @@ export default {
     handleAdd() {
       this.createOption = true;
       this.temp = {};
+      this.loadRoleList();
       this.editUserVisible = true;
     },
     // 修改用户
@@ -121,6 +123,7 @@ export default {
       this.temp = Object.assign(record);
       // 设置选中 key
       this.targetKeys = record.roles;
+      this.loadRoleList();
       this.editUserVisible = true;
     },
     // 提交用户数据
