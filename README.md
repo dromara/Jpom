@@ -82,7 +82,7 @@ yum install -y wget && wget -O install.sh https://dromara.gitee.io/jpom/docs/ins
 
 备用地址
 
-yum install -y wget && wget -O install.sh https://cdn.jsdelivr.net/gh/dromara/Jpom/docs/install.sh && bash install.sh Agent
+yum install -y wget && wget -O install.sh https://cdn.jsdelivr.net/gh/dromara/Jpom@master/docs/install.sh && bash install.sh Agent
 
 支持自动安装jdk环境
 
@@ -97,7 +97,7 @@ yum install -y wget && wget -O install.sh https://dromara.gitee.io/jpom/docs/ins
 
 备用地址
 
-yum install -y wget && wget -O install.sh https://cdn.jsdelivr.net/gh/dromara/Jpom/docs/install.sh && bash install.sh Server
+yum install -y wget && wget -O install.sh https://cdn.jsdelivr.net/gh/dromara/Jpom@master/docs/install.sh && bash install.sh Server
 
 
 支持自动安装jdk环境
