@@ -79,7 +79,12 @@ public class ServerConfigBean {
     /**
      * token自动续签状态码
      */
-    public static final int RENEWAL_AUTHORIZE_CODE = 701;
+    public static final int RENEWAL_AUTHORIZE_CODE = 801;
+
+    /**
+     * token 失效
+     */
+    public static final int AUTHORIZE_TIME_OUT_CODE = 800;
 
     private static ServerConfigBean serverConfigBean;
 

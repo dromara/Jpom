@@ -59,8 +59,9 @@ public class LoginInterceptor extends BaseJpomInterceptor {
         }
         if (notLogin == null) {
             //
-            if (!this.checkHeaderUser(request, response, session)) {
-                this.responseLogin(request, response, handlerMethod);
+            int code = this.checkHeaderUser(request, session);
+            if (code > 0) {
+                this.responseLogin(request, response, handlerMethod, code);
                 return false;
             }
         }
@@ -72,33 +73,39 @@ public class LoginInterceptor extends BaseJpomInterceptor {
     /**
      * 尝试获取 header 中的信息
      *
-     * @param session  ses
-     * @param request  req
-     * @param response resp
+     * @param session ses
+     * @param request req
      * @return true 获取成功
      */
-    private boolean checkHeaderUser(HttpServletRequest request, HttpServletResponse response, HttpSession session) {
+    private int checkHeaderUser(HttpServletRequest request, HttpSession session) {
         String token = request.getHeader(ServerOpenApi.USER_TOKEN_HEAD);
         if (StrUtil.isEmpty(token)) {
-            return false;
+            return ServerConfigBean.AUTHORIZE_TIME_OUT_CODE;
         }
         Claims claims = JwtUtil.readBody(token);
         if (JwtUtil.expired(claims)) {
             int renewal = ServerExtConfigBean.getInstance().getAuthorizeRenewal();
             if (renewal <= 0 || DateUtil.between(claims.getExpiration(), DateTime.now(), DateUnit.MINUTE) > renewal) {
-                return false;
+                return ServerConfigBean.AUTHORIZE_TIME_OUT_CODE;
             }
-            response.setStatus(ServerConfigBean.RENEWAL_AUTHORIZE_CODE);
+            return ServerConfigBean.RENEWAL_AUTHORIZE_CODE;
         }
         UserModel user = (UserModel) session.getAttribute(SESSION_NAME);
         UserService userService = SpringUtil.getBean(UserService.class);
         UserModel newUser = userService.checkUser(claims.getId());
+        if (newUser == null) {
+            return ServerConfigBean.AUTHORIZE_TIME_OUT_CODE;
+        }
         if (null != user) {
-            return user.getId().equals(JwtUtil.readUserId(claims)) && user.getUserMd5Key().equals(claims.getId())
+            String tokenUserId = JwtUtil.readUserId(claims);
+            boolean b = user.getId().equals(tokenUserId) && user.getUserMd5Key().equals(claims.getId())
                     && user.getModifyTime() == newUser.getModifyTime();
+            if (!b) {
+                return ServerConfigBean.AUTHORIZE_TIME_OUT_CODE;
+            }
         }
         session.setAttribute(LoginInterceptor.SESSION_NAME, newUser);
-        return true;
+        return 0;
     }
 
     /**
@@ -109,7 +116,7 @@ public class LoginInterceptor extends BaseJpomInterceptor {
      * @param handlerMethod 方法
      * @throws IOException 异常
      */
-    private void responseLogin(HttpServletRequest request, HttpServletResponse response, HandlerMethod handlerMethod) throws IOException {
+    private void responseLogin(HttpServletRequest request, HttpServletResponse response, HandlerMethod handlerMethod, int code) throws IOException {
         if (isPage(handlerMethod)) {
             String url = "/login.html?";
             String uri = request.getRequestURI();
@@ -130,7 +137,7 @@ public class LoginInterceptor extends BaseJpomInterceptor {
             sendRedirects(request, response, url);
             return;
         }
-        ServletUtil.write(response, JsonMessage.getString(800, "登录信息已失效,重新登录"), MediaType.APPLICATION_JSON_UTF8_VALUE);
+        ServletUtil.write(response, JsonMessage.getString(code, "登录信息已失效,重新登录"), MediaType.APPLICATION_JSON_UTF8_VALUE);
     }
 
 
