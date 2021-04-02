@@ -96,7 +96,6 @@ const user = {
       return state.token;
     },
     getLongTermToken(state) {
-        console.log(state);
       return state.longTermToken;
     },
     getUserInfo(state) {
