@@ -67,7 +67,7 @@ request.interceptors.response.use(response => {
 
   if (res.code !== 200) {
     // 如果 headers 里面配置了 tip: no 就不用弹出提示信息
-    if (response.config.headers[NO_NOTIFY_KEY]!=='no') {
+    if (!response.config.headers[NO_NOTIFY_KEY]) {
       notification.error({
         message: res.msg,
         description: response.config.url,
