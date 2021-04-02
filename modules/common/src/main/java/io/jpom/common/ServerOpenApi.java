@@ -15,6 +15,11 @@ public class ServerOpenApi {
      */
     public static final String USER_TOKEN_HEAD = "JPOM-USER-TOKEN";
 
+    /**
+     * 存放token的http head
+     */
+    public static final String HTTP_HEAD_AUTHORIZATION = "Authorization";
+
     public static final String API = "/api/";
 
     public static final String UPDATE_NODE_INFO = API + "node/update";

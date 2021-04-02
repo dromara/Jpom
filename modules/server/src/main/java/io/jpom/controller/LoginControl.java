@@ -22,6 +22,7 @@ import io.jpom.model.data.UserModel;
 import io.jpom.model.dto.UserLoginDto;
 import io.jpom.model.log.UserOperateLogV1;
 import io.jpom.service.user.UserService;
+import io.jpom.system.ServerConfigBean;
 import io.jpom.system.ServerExtConfigBean;
 import io.jpom.util.JwtUtil;
 import io.jsonwebtoken.Claims;
@@ -225,13 +226,13 @@ public class LoginControl extends BaseServerController {
     public String renewalToken() {
         String token = getRequest().getHeader(ServerOpenApi.USER_TOKEN_HEAD);
         if (StrUtil.isEmpty(token)) {
-            return JsonMessage.getString(400, "刷新token失败");
+            return JsonMessage.getString(ServerConfigBean.AUTHORIZE_TIME_OUT_CODE, "刷新token失败");
         }
         Claims claims = JwtUtil.readBody(token);
         if (JwtUtil.expired(claims)) {
             int renewal = ServerExtConfigBean.getInstance().getAuthorizeRenewal();
-            if (renewal <= 0 || DateUtil.between(claims.getExpiration(), DateTime.now(), DateUnit.MINUTE) > renewal) {
-                return JsonMessage.getString(400, "刷新token超时");
+            if (claims == null || renewal <= 0 || DateUtil.between(claims.getExpiration(), DateTime.now(), DateUnit.MINUTE) > renewal) {
+                return JsonMessage.getString(ServerConfigBean.AUTHORIZE_TIME_OUT_CODE, "刷新token超时");
             }
         }
         UserModel userModel = userService.checkUser(claims.getId());

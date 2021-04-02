@@ -61,8 +61,10 @@ public class LoginInterceptor extends BaseJpomInterceptor {
             //
             int code = this.checkHeaderUser(request, session);
             if (code > 0) {
-                this.responseLogin(request, response, handlerMethod, code);
-                return false;
+                if (!this.tryGetHeaderUser(request, session)) {
+                    this.responseLogin(request, response, handlerMethod, code);
+                    return false;
+                }
             }
         }
         reload();
@@ -78,14 +80,14 @@ public class LoginInterceptor extends BaseJpomInterceptor {
      * @return true 获取成功
      */
     private int checkHeaderUser(HttpServletRequest request, HttpSession session) {
-        String token = request.getHeader(ServerOpenApi.USER_TOKEN_HEAD);
+        String token = request.getHeader(ServerOpenApi.HTTP_HEAD_AUTHORIZATION);
         if (StrUtil.isEmpty(token)) {
             return ServerConfigBean.AUTHORIZE_TIME_OUT_CODE;
         }
         Claims claims = JwtUtil.readBody(token);
         if (JwtUtil.expired(claims)) {
             int renewal = ServerExtConfigBean.getInstance().getAuthorizeRenewal();
-            if (renewal <= 0 || DateUtil.between(claims.getExpiration(), DateTime.now(), DateUnit.MINUTE) > renewal) {
+            if (claims == null || renewal <= 0 || DateUtil.between(claims.getExpiration(), DateTime.now(), DateUnit.MINUTE) > renewal) {
                 return ServerConfigBean.AUTHORIZE_TIME_OUT_CODE;
             }
             return ServerConfigBean.RENEWAL_AUTHORIZE_CODE;
@@ -106,6 +108,28 @@ public class LoginInterceptor extends BaseJpomInterceptor {
         }
         session.setAttribute(LoginInterceptor.SESSION_NAME, newUser);
         return 0;
+    }
+
+
+    /**
+     * 尝试获取 header 中的信息
+     *
+     * @param session ses
+     * @param request req
+     * @return true 获取成功
+     */
+    private boolean tryGetHeaderUser(HttpServletRequest request, HttpSession session) {
+        String header = request.getHeader(ServerOpenApi.USER_TOKEN_HEAD);
+        if (StrUtil.isEmpty(header)) {
+            return false;
+        }
+        UserService userService = SpringUtil.getBean(UserService.class);
+        UserModel userModel = userService.checkUser(header);
+        if (userModel == null) {
+            return false;
+        }
+        session.setAttribute(LoginInterceptor.SESSION_NAME, userModel);
+        return true;
     }
 
     /**

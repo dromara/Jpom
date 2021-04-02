@@ -2,7 +2,7 @@ import Vue from 'vue';
 import axios from 'axios';
 import Qs from 'qs';
 import store from '../store';
-import { NO_NOTIFY_KEY, NO_LOADING_KEY} from '../utils/const';
+import { NO_NOTIFY_KEY, NO_LOADING_KEY,TOKEN_HEADER_KEY} from '../utils/const';
 
 import { notification } from 'ant-design-vue';
 
@@ -39,7 +39,7 @@ request.interceptors.request.use(config => {
   if (config.headers['Content-Type'].indexOf('application/x-www-form-urlencoded') !== -1) {
     config.data = Qs.stringify(config.data); 
   }
-  config.headers['JPOM-USER-TOKEN'] = store.getters.getToken;
+  config.headers[TOKEN_HEADER_KEY] = store.getters.getToken;
   return config;
 }, error => {
   return Promise.reject(error);

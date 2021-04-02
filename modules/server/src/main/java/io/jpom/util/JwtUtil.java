@@ -4,6 +4,7 @@ import cn.hutool.core.date.DateField;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.RandomUtil;
+import cn.jiangzeyin.common.DefaultSystemLog;
 import io.jpom.model.data.UserModel;
 import io.jpom.system.ServerExtConfigBean;
 import io.jsonwebtoken.*;
@@ -53,6 +54,9 @@ public class JwtUtil {
             return parseBody(token);
         } catch (ExpiredJwtException e) {
             return e.getClaims();
+        } catch (Exception e) {
+            DefaultSystemLog.getLog().warn("token 解析失败：" + token, e);
+            return null;
         }
     }
 
@@ -73,6 +77,9 @@ public class JwtUtil {
      * @return 是否过期
      */
     public static boolean expired(Claims claims) {
+        if (claims == null) {
+            return true;
+        }
         Date expiration = claims.getExpiration();
         if (ObjectUtil.isNotNull(expiration)) {
             return expiration.before(DateTime.now());
