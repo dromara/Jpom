@@ -48,15 +48,15 @@ public class ServerExtConfigBean {
     private String authorizeToken;
 
     /**
-     * 登录token失效时间(单位：小时),默认为1
+     * 登录token失效时间(单位：小时),默认为24
      */
-    @Value("${jpom.authorize.expired:1}")
+    @Value("${jpom.authorize.expired:24}")
     private int authorizeExpired;
 
     /**
-     * 登录token失效后自动续签时间（单位：分钟），默认为0，不自动续签
+     * 登录token失效后自动续签时间（单位：分钟），默认为60，
      */
-    @Value("${jpom.authorize.renewal:0}")
+    @Value("${jpom.authorize.renewal:60}")
     private int authorizeRenewal;
 
     /**
