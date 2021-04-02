@@ -4,6 +4,8 @@
 
 这是一个 Jpom 的前端项目，主要内容是重写了一套 UI 页面。使用了 Vue 和 AntDesign Vue.
 
+[https://www.antdv.com/docs/vue/introduce-cn/](https://www.antdv.com/docs/vue/introduce-cn/)
+
 ### 目录结构
 
 ```

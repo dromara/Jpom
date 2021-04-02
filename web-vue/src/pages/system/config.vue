@@ -9,6 +9,17 @@
         <a-button type="primary" class="btn" :disabled="submitAble" @click="onSubmit(true)">保存并重启</a-button>
       </a-form-model-item>
     </a-form-model>
+<!--    <a-form-model ref="editForm" :model="temp" :label-col="{ span: 2 }" :wrapper-col="{ span: 20 }">-->
+<!--      <a-form-model-item label="IP白名单" prop="content">-->
+<!--        <a-input v-model="temp.content" type="textarea" :rows="5" style="resize: none" placeholder="请输入配置内容，参考项目的配置文件"/>-->
+<!--      </a-form-model-item>-->
+<!--      <a-form-model-item label="IP黑名单" prop="content">-->
+<!--        <a-input v-model="temp.content" type="textarea" :rows="5" style="resize: none" placeholder="请输入配置内容，参考项目的配置文件"/>-->
+<!--      </a-form-model-item>-->
+<!--      <a-form-model-item :wrapper-col="{ span: 14, offset: 2 }">-->
+<!--        <a-button type="primary" class="btn" :disabled="submitAble" @click="onSubmit(false)">保存</a-button>-->
+<!--      </a-form-model-item>-->
+<!--    </a-form-model>-->
   </div>
 </template>
 <script>
