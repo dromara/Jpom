@@ -95,6 +95,7 @@ export function sendEmailCode(email) {
   return axios({
     url: '/user/sendCode.json',
     method: 'post',
+    timeout: 0,
     data: {email}
   })
 }
