@@ -34,6 +34,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
+import java.awt.*;
 import java.io.IOException;
 
 /**
@@ -89,7 +90,10 @@ public class LoginControl extends BaseServerController {
     @ResponseBody
     @NotLogin
     public void randCode() throws IOException {
-        CircleCaptcha circleCaptcha = CaptchaUtil.createCircleCaptcha(100, 50, 4, 8);
+        int height = 50;
+        CircleCaptcha circleCaptcha = new CircleCaptcha(100, height, 4, 8);
+        // 设置为默认字体
+        circleCaptcha.setFont(new Font(null, Font.PLAIN, (int) (height * 0.75)));
         circleCaptcha.createCode();
         HttpServletResponse response = getResponse();
         circleCaptcha.write(response.getOutputStream());
