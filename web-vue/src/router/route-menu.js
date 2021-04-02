@@ -11,6 +11,7 @@ const routeMenuMap = {
   'outgivingWhitelistDirectory': '/dispatch/white-list',
   'monitor': '/monitor/list',
   'monitorLog': '/monitor/log',
+  'userOptLog': '/monitor/operate-log',
   'buildList': '/build/list',
   'buildHistory': '/build/history',
   'user': '/user/list',

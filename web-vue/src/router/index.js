@@ -20,11 +20,6 @@ const children = [
     component: () => import('../pages/node/ssh')
   },
   {
-    path: '/monitor/list',
-    name: 'monitor-list',
-    component: () => import('../pages/monitor/list')
-  },
-  {
     path: '/dispatch/list',
     name: 'dispatch-list',
     component: () => import('../pages/dispatch/list')
@@ -40,9 +35,19 @@ const children = [
     component: () => import('../pages/dispatch/white-list')
   },
   {
+    path: '/monitor/list',
+    name: 'monitor-list',
+    component: () => import('../pages/monitor/list')
+  },
+  {
     path: '/monitor/log',
     name: 'monitor-log',
     component: () => import('../pages/monitor/log')
+  },
+  {
+    path: '/monitor/operate-log',
+    name: 'monitor-operate-log',
+    component: () => import('../pages/monitor/operate-log')
   },
   {
     path: '/build/list',

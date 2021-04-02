@@ -73,3 +73,13 @@ export function getMonitorLogList(params) {
     data: params
   })
 }
+
+/**
+ * 操作监控日志列表
+ */
+export function getMonitorOperateLogList() {
+  return axios({
+    url: '/monitor_user_opt/list_data',
+    method: 'post'
+  })
+}
