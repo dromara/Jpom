@@ -64,16 +64,16 @@ request.interceptors.response.use(response => {
   }
   // 判断返回值，权限等...
   const res = response.data;
-  // 如果 headers 里面配置了 tip: no 就不用弹出提示信息
-  if (response.config.headers[NO_NOTIFY_KEY]) {
-    return res;
-  }
+
   if (res.code !== 200) {
-    notification.error({
-      message: res.msg,
-      description: response.config.url,
-      duration: 2
-    });
+    // 如果 headers 里面配置了 tip: no 就不用弹出提示信息
+    if (response.config.headers[NO_NOTIFY_KEY]!=='no') {
+      notification.error({
+        message: res.msg,
+        description: response.config.url,
+        duration: 2
+      });
+    }
   }
   // 如果是登录信息失效
   if (res.code === 800) {
