@@ -80,11 +80,6 @@ export default {
       checkedKeys: {},
       temp: {},
       editMonitorVisible: false,
-      replaceFields: {
-        children: 'projects',
-        key: 'id',
-        title: 'name'
-      },
       columns: [
         {title: '名称', dataIndex: 'name', scopedSlots: {customRender: 'name'}, width: 150},
         {title: '开启状态', dataIndex: 'status', scopedSlots: {customRender: 'status'}, width: 150},
