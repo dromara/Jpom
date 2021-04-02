@@ -27,8 +27,8 @@ public class JwtUtil {
     /**
      * token的的加密key
      */
-    private static Key KEY = null;
     private static final SignatureAlgorithm ALGORITHM = SignatureAlgorithm.HS256;
+    private static final Key KEY = new SecretKeySpec("KZQfFBJTW2v6obS1".getBytes(), SignatureAlgorithm.HS256.getJcaName());
 
     public static final String KEY_USER_ID = "userId";
 
@@ -36,16 +36,10 @@ public class JwtUtil {
         if (StrUtil.isEmpty(token)) {
             return null;
         }
-        Jws<Claims> claimsJws = Jwts.parser().setSigningKey(getKey()).parseClaimsJws(token);
+        Jws<Claims> claimsJws = Jwts.parser().setSigningKey(KEY).parseClaimsJws(token);
         return claimsJws.getBody();
     }
 
-    private static Key getKey() {
-        if (null == KEY) {
-            KEY = new SecretKeySpec(RandomUtil.randomString(10).getBytes(), ALGORITHM.getJcaName());
-        }
-        return KEY;
-    }
 
     /**
      * 读取token 信息 过期也能读取
@@ -108,7 +102,7 @@ public class JwtUtil {
         builder.setIssuer("Jpom");
         int authorizeExpired = ServerExtConfigBean.getInstance().getAuthorizeExpired();
         builder.setExpiration(DateTime.now().offset(DateField.HOUR, authorizeExpired));
-        builder.signWith(ALGORITHM, getKey());
+        builder.signWith(ALGORITHM, KEY);
         return builder.compact();
     }
 
