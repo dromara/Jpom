@@ -8,7 +8,8 @@
 import {
   TOKEN_KEY,
   USER_INFO_KEY,
-  MENU_KEY
+  MENU_KEY,
+  LONG_TERM_TOKEN
 } from '../../utils/const'
 
 import { getUserInfo } from '../../api/user';
@@ -18,12 +19,24 @@ import routeMenuMap from '../../router/route-menu';
 const user = {
   state: {
     token: localStorage.getItem(TOKEN_KEY),
+    longTermToken: localStorage.getItem(LONG_TERM_TOKEN),
     userInfo: JSON.parse(localStorage.getItem(USER_INFO_KEY)),
     menus: JSON.parse(localStorage.getItem(MENU_KEY))
   },
   mutations: {
-    setToken(state, token) {
-      state.token = token
+    setToken(state, data) {
+      state.token = data.token || '';
+      state.longTermToken = data.longTermToken || '';
+      if(state.token){
+          localStorage.setItem(TOKEN_KEY, data.token);
+      }else{
+          localStorage.removeItem(TOKEN_KEY);
+      }
+     if(state.longTermToken){
+         localStorage.setItem(LONG_TERM_TOKEN, data.longTermToken);
+     }else{
+         localStorage.removeItem(LONG_TERM_TOKEN);
+     }
     },
     setUserInfo(state, userInfo) {
       state.userInfo = userInfo
@@ -36,9 +49,8 @@ const user = {
     // 登录 data = {token: 'xxx', userName: 'name'}
     login({commit}, data) {
       return new Promise((resolve, reject) => {
-        commit('setToken', data.token);
-        commit('setUserName', data.userName);
-        localStorage.setItem(TOKEN_KEY, data.token);
+        commit('setToken', data);
+        //commit('setUserName', data.userName);
         // 加载用户信息
         getUserInfo().then(res => {
           if (res.code === 200) {
@@ -70,9 +82,8 @@ const user = {
     // 退出登录 移除对应的 store
     logOut({dispatch, commit}) {
       return new Promise((resolve) => {
-        commit('setToken', '');
+        commit('setToken', {});
         commit('setMenus', '');
-        localStorage.removeItem(TOKEN_KEY);
         localStorage.removeItem(MENU_KEY);
         // 调用其他 action
         dispatch('clearTabs');
@@ -83,6 +94,10 @@ const user = {
   getters: {
     getToken(state) {
       return state.token;
+    },
+    getLongTermToken(state) {
+        console.log(state);
+      return state.longTermToken;
     },
     getUserInfo(state) {
       return state.userInfo;

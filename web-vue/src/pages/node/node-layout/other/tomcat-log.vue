@@ -55,11 +55,11 @@ export default {
   },
   computed: {
     ...mapGetters([
-      'getToken'
+      'getLongTermToken'
     ]),
     socketUrl() {
       const protocol = location.protocol === 'https' ? 'wss://' : 'ws://';
-      return `${protocol}${location.host}/tomcat_log?userId=${this.getToken}&tomcatId=${this.tomcatId}&nodeId=${this.nodeId}&type=tomcat`;
+      return `${protocol}${location.host}/tomcat_log?userId=${this.getLongTermToken}&tomcatId=${this.tomcatId}&nodeId=${this.nodeId}&type=tomcat`;
     }
   },
   created() {

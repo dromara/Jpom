@@ -79,7 +79,7 @@ export default {
                 duration: 2
               });
               // 调用 store action 存储当前登录的用户名和 token
-              this.$store.dispatch('login', {token: res.data.token}).then(() => {
+              this.$store.dispatch('login', {token: res.data.token,longTermToken: res.data.longTermToken}).then(() => {
                 // 跳转主页面
                 this.$router.push({ path: '/' });
               })

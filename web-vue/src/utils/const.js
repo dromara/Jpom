@@ -3,6 +3,8 @@ export const USER_NAME_KEY = 'Jpom-UserName';
 
 export const TOKEN_KEY = 'Jpom-Token';
 
+export const LONG_TERM_TOKEN = 'Jpom-Long-Term-Token';
+
 export const USER_INFO_KEY = 'Jpom-User';
 
 export const MENU_KEY = 'Jpom-Menus';

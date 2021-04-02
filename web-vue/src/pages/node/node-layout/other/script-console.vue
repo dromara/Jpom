@@ -33,13 +33,13 @@ export default {
   },
   computed: {
     ...mapGetters([
-      'getToken'
+      'getLongTermToken'
     ]),
     socketUrl() {
       const protocol = location.protocol === 'https' ? 'wss://' : 'ws://';
       const domain = document.getElementById('domainPath').value;
       const url =  (domain + '/script_run').replaceAll('//', '/')
-      return `${protocol}${location.host}${url}?userId=${this.getToken}&scriptId=${this.scriptId}&nodeId=${this.nodeId}&type=script`;
+      return `${protocol}${location.host}${url}?userId=${this.getLongTermToken}&scriptId=${this.scriptId}&nodeId=${this.nodeId}&type=script`;
     }
   },
   mounted() {

@@ -32,13 +32,13 @@ export default {
   },
   computed: {
     ...mapGetters([
-      'getToken'
+      'getLongTermToken'
     ]),
     socketUrl() {
       const protocol = location.protocol === 'https' ? 'wss://' : 'ws://';
       const domain = document.getElementById('domainPath').value;
       const url =  (domain + '/ssh').replaceAll('//', '/')
-      return `${protocol}${location.host}${url}?userId=${this.getToken}&sshId=${this.sshId}&nodeId=${this.nodeId}&type=ssh&tail=${this.tail}`;
+      return `${protocol}${location.host}${url}?userId=${this.getLongTermToken}&sshId=${this.sshId}&nodeId=${this.nodeId}&type=ssh&tail=${this.tail}`;
     }
   },
   mounted() {

@@ -187,8 +187,7 @@ public class LoginControl extends BaseServerController {
                     setSessionAttribute(LoginInterceptor.SESSION_NAME, userModel);
                     removeSessionAttribute(SHOW_CODE);
                     this.ipSuccess();
-                    UserLoginDto userLoginDto = new UserLoginDto();
-                    userLoginDto.setToken(JwtUtil.builder(userModel));
+                    UserLoginDto userLoginDto = new UserLoginDto(userModel, JwtUtil.builder(userModel));
                     return JsonMessage.getString(200, "登录成功", userLoginDto);
                 } else {
                     userModel.errorLock();
@@ -236,8 +235,7 @@ public class LoginControl extends BaseServerController {
             }
         }
         UserModel userModel = userService.checkUser(claims.getId());
-        UserLoginDto userLoginDto = new UserLoginDto();
-        userLoginDto.setToken(JwtUtil.builder(userModel));
+        UserLoginDto userLoginDto = new UserLoginDto(userModel, JwtUtil.builder(userModel));
         return JsonMessage.getString(200, "", userLoginDto);
     }
 }

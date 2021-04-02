@@ -4,6 +4,7 @@ import cn.hutool.core.date.DateField;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.RandomUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import io.jpom.model.data.UserModel;
 import io.jpom.system.ServerExtConfigBean;
@@ -32,6 +33,9 @@ public class JwtUtil {
     public static final String KEY_USER_ID = "userId";
 
     public static Claims parseBody(String token) {
+        if (StrUtil.isEmpty(token)) {
+            return null;
+        }
         Jws<Claims> claimsJws = Jwts.parser().setSigningKey(getKey()).parseClaimsJws(token);
         return claimsJws.getBody();
     }

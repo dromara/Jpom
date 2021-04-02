@@ -11,7 +11,9 @@ import io.jpom.common.interceptor.BaseJpomInterceptor;
 import io.jpom.common.interceptor.LoginInterceptor;
 import io.jpom.common.interceptor.NotLogin;
 import io.jpom.model.data.UserModel;
+import io.jpom.model.dto.UserLoginDto;
 import io.jpom.service.user.UserService;
+import io.jpom.util.JwtUtil;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -80,6 +82,7 @@ public class InstallController extends BaseServerController {
         }
         // 自动登录
         setSessionAttribute(LoginInterceptor.SESSION_NAME, userModel);
-        return JsonMessage.getString(200, "初始化成功");
+        UserLoginDto userLoginDto = new UserLoginDto(userModel, JwtUtil.builder(userModel));
+        return JsonMessage.getString(200, "初始化成功", userLoginDto);
     }
 }

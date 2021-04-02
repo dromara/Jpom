@@ -81,13 +81,13 @@ export default {
   },
   computed: {
     ...mapGetters([
-      'getToken'
+      'getLongTermToken'
     ]),
     socketUrl() {
       const protocol = location.protocol === 'https' ? 'wss://' : 'ws://';
       const domain = document.getElementById('domainPath').value;
       const url =  (domain + '/console').replaceAll('//', '/')
-      return `${protocol}${location.host}${url}?userId=${this.getToken}&projectId=${this.projectId}&nodeId=${this.nodeId}&type=console&copyId=${this.copyId}`;
+      return `${protocol}${location.host}${url}?userId=${this.getLongTermToken}&projectId=${this.projectId}&nodeId=${this.nodeId}&type=console&copyId=${this.copyId}`;
     }
   },
   mounted() {
