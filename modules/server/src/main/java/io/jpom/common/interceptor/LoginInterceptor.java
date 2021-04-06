@@ -121,6 +121,11 @@ public class LoginInterceptor extends BaseJpomInterceptor {
     private boolean tryGetHeaderUser(HttpServletRequest request, HttpSession session) {
         String header = request.getHeader(ServerOpenApi.USER_TOKEN_HEAD);
         if (StrUtil.isEmpty(header)) {
+            // 兼容就版本 登录状态
+            UserModel user = (UserModel) session.getAttribute(SESSION_NAME);
+            if (user != null) {
+                return true;
+            }
             return false;
         }
         UserService userService = SpringUtil.getBean(UserService.class);
