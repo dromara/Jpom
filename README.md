@@ -222,9 +222,9 @@ Agent.sh status    查看Jpom插件端运行状态
 
 1. 微信群二维码（添加小助手：备注Jpom 进群）
 
-![Alt text](http://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/images/wx_qrcode.jpg)
+![Alt text](https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/images/wx_qrcode.jpg)
 
-2. 微信公众号：[CodeGzh](http://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/docs/images/CodeGzh-QrCode.jpg) 查看一些基础教程
+2. 微信公众号：[CodeGzh](https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/docs/images/CodeGzh-QrCode.jpg) 查看一些基础教程
 
 3. 码云： [issues](https://gitee.com/dromara/Jpom/issues)
 
