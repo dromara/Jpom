@@ -35,7 +35,7 @@ export default {
       'getLongTermToken'
     ]),
     socketUrl() {
-      const protocol = location.protocol === 'https' ? 'wss://' : 'ws://';
+      const protocol = location.protocol === 'https:' ? 'wss://' : 'ws://';
       const domain = document.getElementById('domainPath').value;
       const url =  (domain + '/ssh').replaceAll('//', '/')
       return `${protocol}${location.host}${url}?userId=${this.getLongTermToken}&sshId=${this.sshId}&nodeId=${this.nodeId}&type=ssh&tail=${this.tail}`;

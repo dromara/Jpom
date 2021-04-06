@@ -240,7 +240,7 @@ export default {
       this.$store.dispatch('clearTabs');
     },
     toOldIndex() {
-      location.href = "./old.html";
+      window.location.href = '/old.html'
     }
   }
 }
