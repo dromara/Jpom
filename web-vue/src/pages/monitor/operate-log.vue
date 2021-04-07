@@ -64,7 +64,7 @@
   </div>
 </template>
 <script>
-import { getMonitorOperateLogList, getMonitorOperateTypeList, editMonitorOperate } from '../../api/monitor';
+import { getMonitorOperateLogList, getMonitorOperateTypeList, editMonitorOperate, deleteMonitorOperate } from '../../api/monitor';
 import { getAdminUserList } from '../../api/user';
 import { parseTime } from '../../utils/time';
 export default {
@@ -231,6 +231,27 @@ export default {
           }
         })
       })
+    },
+    // 删除
+    handleDelete(record) {
+      this.$confirm({
+        title: '系统提示',
+        content: '真的要删除操作监控么？',
+        okText: '确认',
+        cancelText: '取消',
+        onOk: () => {
+          // 删除
+          deleteMonitorOperate(record.id).then((res) => {
+            if (res.code === 200) {
+              this.$notification.success({
+                message: res.msg,
+                duration: 2
+              });
+              this.loadData();
+            }
+          })
+        }
+      });
     }
   }
 }

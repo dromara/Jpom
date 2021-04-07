@@ -114,3 +114,16 @@ export function editMonitorOperate(params) {
     data: params
   })
 }
+
+/**
+ * 删除操作监控
+ * @param {*} id 
+ * @returns 
+ */
+export function deleteMonitorOperate(id) {
+  return axios({
+    url: '/monitor_user_opt/delete',
+    method: 'post',
+    data: {id}
+  })
+}
