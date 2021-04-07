@@ -71,7 +71,10 @@ export function getRuningProjectInfo(params) {
   return axios({
     url: '/node/manage/getProjectPort',
     method: 'post',
-    data: params
+    data: params,
+    headers: {
+      loading: 'no'
+    },
   })
 }
 
