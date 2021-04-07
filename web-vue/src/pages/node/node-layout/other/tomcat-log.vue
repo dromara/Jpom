@@ -58,7 +58,7 @@ export default {
       'getLongTermToken'
     ]),
     socketUrl() {
-      const protocol = location.protocol === 'https' ? 'wss://' : 'ws://';
+      const protocol = location.protocol === 'https:' ? 'wss://' : 'ws://';
       return `${protocol}${location.host}/tomcat_log?userId=${this.getLongTermToken}&tomcatId=${this.tomcatId}&nodeId=${this.nodeId}&type=tomcat`;
     }
   },

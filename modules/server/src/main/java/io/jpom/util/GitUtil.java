@@ -6,17 +6,11 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SecureUtil;
 import io.jpom.system.ConfigBean;
 import io.jpom.system.JpomRuntimeException;
-import org.eclipse.jgit.api.CreateBranchCommand;
-import org.eclipse.jgit.api.Git;
-import org.eclipse.jgit.api.ListBranchCommand;
-import org.eclipse.jgit.api.RemoteListCommand;
+import org.eclipse.jgit.api.*;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.api.errors.TransportException;
 import org.eclipse.jgit.internal.JGitText;
-import org.eclipse.jgit.lib.AnyObjectId;
-import org.eclipse.jgit.lib.Constants;
-import org.eclipse.jgit.lib.PersonIdent;
-import org.eclipse.jgit.lib.Ref;
+import org.eclipse.jgit.lib.*;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.transport.CredentialsProvider;
@@ -26,6 +20,7 @@ import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -75,30 +70,38 @@ public class GitUtil {
      * @throws GitAPIException api
      * @throws IOException     删除文件失败
      */
-    private static Git reClone(String url, File file, CredentialsProvider credentialsProvider) throws GitAPIException, IOException {
+    private static Git reClone(String url, File file, CredentialsProvider credentialsProvider, PrintWriter printWriter) throws GitAPIException, IOException {
         if (!FileUtil.clean(file)) {
             FileUtil.del(file.toPath());
             //throw new IOException("del error:" + file.getPath());
         }
-        return Git.cloneRepository()
-                .setURI(url)
+        CloneCommand cloneCommand = Git.cloneRepository();
+        if (printWriter != null) {
+            cloneCommand
+                    .setProgressMonitor(new TextProgressMonitor(printWriter));
+        }
+        return cloneCommand.setURI(url)
                 .setDirectory(file)
                 .setCredentialsProvider(credentialsProvider)
                 .call();
     }
 
-    private static Git initGit(String url, File file, CredentialsProvider credentialsProvider) throws IOException, GitAPIException {
+    private static Git initGit(String url, File file, CredentialsProvider credentialsProvider, PrintWriter printWriter) throws IOException, GitAPIException {
         Git git;
         if (FileUtil.file(file, Constants.DOT_GIT).exists()) {
             if (checkRemoteUrl(url, file)) {
                 git = Git.open(file);
                 //
-                git.pull().setCredentialsProvider(credentialsProvider).call();
+                PullCommand pull = git.pull();
+                if (printWriter != null) {
+                    pull.setProgressMonitor(new TextProgressMonitor(printWriter));
+                }
+                pull.setCredentialsProvider(credentialsProvider).call();
             } else {
-                git = reClone(url, file, credentialsProvider);
+                git = reClone(url, file, credentialsProvider, printWriter);
             }
         } else {
-            git = reClone(url, file, credentialsProvider);
+            git = reClone(url, file, credentialsProvider, printWriter);
         }
         return git;
     }
@@ -113,8 +116,8 @@ public class GitUtil {
      * @throws GitAPIException api
      * @throws IOException     IO
      */
-    private static List<String> branchList(String url, File file, CredentialsProvider credentialsProvider) throws GitAPIException, IOException {
-        try (Git git = initGit(url, file, credentialsProvider)) {
+    private static List<String> branchList(String url, File file, CredentialsProvider credentialsProvider, PrintWriter printWriter) throws GitAPIException, IOException {
+        try (Git git = initGit(url, file, credentialsProvider, printWriter)) {
             //
             List<Ref> list = git.branchList().setListMode(ListBranchCommand.ListMode.REMOTE).call();
             List<String> all = new ArrayList<>(list.size());
@@ -131,13 +134,13 @@ public class GitUtil {
         }
     }
 
-    public static List<String> getBranchList(String url, String userName, String userPwd) throws GitAPIException, IOException {
+    public static List<String> getBranchList(String url, String userName, String userPwd, PrintWriter printWriter) throws GitAPIException, IOException {
         //  生成临时路径
         String tempId = SecureUtil.md5(url);
         File file = ConfigBean.getInstance().getTempPath();
         File gitFile = FileUtil.file(file, "gitTemp", tempId);
         try {
-            List<String> list = branchList(url, gitFile, new UsernamePasswordCredentialsProvider(userName, userPwd));
+            List<String> list = branchList(url, gitFile, new UsernamePasswordCredentialsProvider(userName, userPwd), printWriter);
             if (list.isEmpty()) {
                 throw new JpomRuntimeException("该仓库还没有任何分支");
             }
@@ -158,8 +161,8 @@ public class GitUtil {
      * @throws IOException     IO
      * @throws GitAPIException api
      */
-    public static void checkoutPull(String url, File file, String branchName, CredentialsProvider credentialsProvider) throws IOException, GitAPIException {
-        try (Git git = initGit(url, file, credentialsProvider)) {
+    public static void checkoutPull(String url, File file, String branchName, CredentialsProvider credentialsProvider, PrintWriter printWriter) throws IOException, GitAPIException {
+        try (Git git = initGit(url, file, credentialsProvider, printWriter)) {
             // 判断本地是否存在对应分支
             List<Ref> list = git.branchList().setListMode(ListBranchCommand.ListMode.ALL).call();
             boolean createBranch = true;

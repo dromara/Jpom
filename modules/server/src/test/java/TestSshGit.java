@@ -4,6 +4,7 @@ import com.jcraft.jsch.Session;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.TransportConfigCallback;
 import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.lib.TextProgressMonitor;
 import org.eclipse.jgit.transport.JschConfigSessionFactory;
 import org.eclipse.jgit.transport.OpenSshConfig;
 import org.eclipse.jgit.transport.SshTransport;
@@ -11,15 +12,17 @@ import org.eclipse.jgit.transport.Transport;
 import org.eclipse.jgit.util.FS;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.PrintWriter;
 
 /**
  * @author bwcx_jzy
  * @date 2019/7/10
  **/
 public class TestSshGit {
-    public static void main(String[] args) throws GitAPIException {
+    public static void main(String[] args) throws GitAPIException, IOException {
         Git.cloneRepository()
-                .setURI("git@gitee.com:jiangzeyin/test.git")
+                .setURI("git@gitee.com:jiangzeyin/test.git").setProgressMonitor(new TextProgressMonitor(new PrintWriter(System.out)))
                 .setDirectory(new File("D:\\test\\gitssh"))
                 .setTransportConfigCallback(new TransportConfigCallback() {
                     @Override
@@ -29,14 +32,14 @@ public class TestSshGit {
                             @Override
                             protected void configure(OpenSshConfig.Host hc, Session session) {
                                 session.setConfig("StrictHostKeyChecking", "no");
-                                session.setPassword("");
+                                //session.setPassword("");
                             }
 
                             @Override
                             protected JSch createDefaultJSch(FS fs) throws JSchException {
                                 JSch defaultJSch = super.createDefaultJSch(fs);
 
-                                defaultJSch.addIdentity("C:\\Users\\Colorful\\.ssh\\id_rsa.pub");
+                                defaultJSch.addIdentity("C:\\Users\\User\\.ssh\\id_rsa");
                                 return defaultJSch;
                             }
 

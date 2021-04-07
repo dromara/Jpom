@@ -3,6 +3,7 @@ package io.jpom.build;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.exceptions.ExceptionUtil;
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.io.file.FileWriter;
 import cn.hutool.core.util.CharsetUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.spring.SpringUtil;
@@ -10,6 +11,7 @@ import io.jpom.model.data.BuildModel;
 import io.jpom.service.build.BuildService;
 
 import java.io.File;
+import java.io.PrintWriter;
 
 /**
  * 构建的基础类
@@ -37,6 +39,10 @@ public abstract class BaseBuild {
 
     protected void log(String info) {
         FileUtil.appendLines(CollectionUtil.toList(info), this.logFile, CharsetUtil.CHARSET_UTF_8);
+    }
+
+    protected PrintWriter getPrintWriter() {
+        return FileWriter.create(this.logFile, CharsetUtil.CHARSET_UTF_8).getPrintWriter(true);
     }
 
     protected boolean updateStatus(BuildModel.Status status) {

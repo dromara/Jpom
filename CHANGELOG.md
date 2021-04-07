@@ -6,6 +6,8 @@
 
 1. 【Server】保存邮箱信息时候验证邮箱配置是否正确（感谢@maybe）
 2. 【Server】Token 机制采用 jwt 
+3. 【Server】git 构建新增进度日志输出
+4. 【Server】添加操作监控相关 api 和页面功能
 
 ### 解决BUG、优化功能
 
@@ -21,6 +23,8 @@
 10. 【Server】初始化安装不能自动登录
 11. 【Server】页面组件采用国际化采用 zh_cn
 12. 【Server】服务器中验证码无法加载（感谢@何好听 Gitee issues#I3E7XQ）
+13. 【Agent】解决控制台输出 `Failed to check connection: java.net.ConnectException: Connection refused: connect`,因为没有关闭对应的 jmx
+14. 【Agent】解决首页控制台 java 进程列表慢的问题（采用定时拉取并缓存）
 
 -----------------------------------------------------------
 

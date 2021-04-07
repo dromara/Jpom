@@ -3,6 +3,10 @@ package io.jpom.common.commander.impl;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.text.StrSpliter;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.cron.CronUtil;
+import cn.hutool.cron.Scheduler;
+import cn.hutool.cron.task.Task;
+import cn.jiangzeyin.common.DefaultSystemLog;
 import com.alibaba.fastjson.JSONObject;
 import com.sun.management.OperatingSystemMXBean;
 import io.jpom.common.commander.AbstractSystemCommander;
@@ -15,7 +19,6 @@ import java.lang.management.ManagementFactory;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * windows 系统查询命令
@@ -25,11 +28,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public class WindowsSystemCommander extends AbstractSystemCommander {
 
-    /**
-     * 锁定查看进程信息
-     */
-    private static final AtomicBoolean ATOMIC_BOOLEAN = new AtomicBoolean(false);
-    private static List<ProcessModel> lastResult;
+    private static String lastResult;
+
+    private static final String ID = "windows_system_process_list";
 
     /**
      * 获取windows 监控
@@ -56,18 +57,22 @@ public class WindowsSystemCommander extends AbstractSystemCommander {
 
     @Override
     public List<ProcessModel> getProcessList() {
-        if (ATOMIC_BOOLEAN.get()) {
+        Scheduler scheduler = CronUtil.getScheduler();
+        Task task = scheduler.getTask(ID);
+        if (task == null) {
+            CronUtil.schedule(ID, "0 0/1 * * * ?", () -> {
+                try {
+                    lastResult = CommandUtil.execSystemCommand("tasklist /V | findstr java");
+                } catch (Exception e) {
+                    DefaultSystemLog.getLog().error("执行控制台进程统计错误", e);
+                }
+            });
+        }
+        if (lastResult == null) {
             // 返回上一次结果
-            return lastResult;
+            lastResult = CommandUtil.execSystemCommand("tasklist /V | findstr java");
         }
-        try {
-            ATOMIC_BOOLEAN.set(true);
-            String s = CommandUtil.execSystemCommand("tasklist /V | findstr java");
-            lastResult = formatWindowsProcess(s, false);
-            return lastResult;
-        } finally {
-            ATOMIC_BOOLEAN.set(false);
-        }
+        return formatWindowsProcess(lastResult, false);
     }
 
     @Override
@@ -99,11 +104,10 @@ public class WindowsSystemCommander extends AbstractSystemCommander {
             return null;
         }
         List<ProcessModel> processModels = new ArrayList<>();
-        ProcessModel processModel;
         for (int i = header ? 2 : 0, len = list.size(); i < len; i++) {
             String param = list.get(i);
             List<String> memList = StrSpliter.splitTrim(param, StrUtil.SPACE, true);
-            processModel = new ProcessModel();
+            ProcessModel processModel = new ProcessModel();
             int pid = Convert.toInt(memList.get(1), 0);
             processModel.setPid(pid);
             //
@@ -121,21 +125,23 @@ public class WindowsSystemCommander extends AbstractSystemCommander {
             processModel.setTime(memList.get(8));
 
             try {
-                OperatingSystemMXBean operatingSystemMXBean = JvmUtil.getOperatingSystemMXBean(memList.get(1));
-                if (operatingSystemMXBean != null) {
-                    //最近jvm cpu使用率
-                    double processCpuLoad = operatingSystemMXBean.getProcessCpuLoad() * 100;
-                    if (processCpuLoad <= 0) {
-                        processCpuLoad = 0;
+                JvmUtil.getOperatingSystemMXBean(memList.get(1), operatingSystemMXBean -> {
+                    if (operatingSystemMXBean != null) {
+                        //最近jvm cpu使用率
+                        double processCpuLoad = operatingSystemMXBean.getProcessCpuLoad() * 100;
+                        if (processCpuLoad <= 0) {
+                            processCpuLoad = 0;
+                        }
+                        processModel.setCpu(String.format("%.2f", processCpuLoad) + "%");
+                        //服务器总内存
+                        long totalMemorySize = operatingSystemMXBean.getTotalPhysicalMemorySize();
+                        BigDecimal total = new BigDecimal(totalMemorySize / 1024);
+                        // 进程
+                        double v = new BigDecimal(aLong).divide(total, 4, BigDecimal.ROUND_HALF_UP).doubleValue() * 100;
+                        processModel.setMem(String.format("%.2f", v) + "%");
                     }
-                    processModel.setCpu(String.format("%.2f", processCpuLoad) + "%");
-                    //服务器总内存
-                    long totalMemorySize = operatingSystemMXBean.getTotalPhysicalMemorySize();
-                    BigDecimal total = new BigDecimal(totalMemorySize / 1024);
-                    // 进程
-                    double v = new BigDecimal(aLong).divide(total, 4, BigDecimal.ROUND_HALF_UP).doubleValue() * 100;
-                    processModel.setMem(String.format("%.2f", v) + "%");
-                }
+                });
+
             } catch (Exception ignored) {
 
             }
