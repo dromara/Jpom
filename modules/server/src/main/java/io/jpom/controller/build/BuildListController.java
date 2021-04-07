@@ -73,10 +73,10 @@ public class BuildListController extends BaseServerController {
     }
 
     /**
+     * @return
      * @author Hotstrip
      * get build group list
      * 获取构建分组列表
-     * @return
      */
     @RequestMapping(value = "group-list", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
@@ -123,7 +123,7 @@ public class BuildListController extends BaseServerController {
             if (StrUtil.isEmpty(branchName)) {
                 return JsonMessage.getString(405, "请选择分支");
             }
-            List<String> list = GitUtil.getBranchList(gitUrl, userName, password);
+            List<String> list = GitUtil.getBranchList(gitUrl, userName, password, null);
             if (!list.contains(branchName)) {
                 return JsonMessage.getString(405, "没有找到对应分支：" + branchName);
             }
@@ -304,7 +304,7 @@ public class BuildListController extends BaseServerController {
             @ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "仓库地址不正确")) String url,
             @ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "登录账号")) String userName,
             @ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "登录密码")) String userPwd) throws GitAPIException, IOException {
-        List<String> list = GitUtil.getBranchList(url, userName, userPwd);
+        List<String> list = GitUtil.getBranchList(url, userName, userPwd, null);
         return JsonMessage.getString(200, "ok", list);
     }
 

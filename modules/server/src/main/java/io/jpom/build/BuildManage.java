@@ -172,7 +172,8 @@ public class BuildManage extends BaseBuild implements Runnable {
                 String msg = "error";
                 if (buildModel.getRepoType() == BuildModel.RepoType.Git.getCode()) {
                     // git
-                    GitUtil.checkoutPull(buildModel.getGitUrl(), gitFile, buildModel.getBranchName(), new UsernamePasswordCredentialsProvider(buildModel.getUserName(), buildModel.getPassword()));
+                    GitUtil.checkoutPull(buildModel.getGitUrl(), gitFile, buildModel.getBranchName(), new UsernamePasswordCredentialsProvider(buildModel.getUserName(), buildModel.getPassword())
+                            , this.getPrintWriter());
                     // 记录最后一次提交记录
                     msg = GitUtil.getLastCommitMsg(gitFile, buildModel.getBranchName());
                 } else if (buildModel.getRepoType() == BuildModel.RepoType.Svn.getCode()) {

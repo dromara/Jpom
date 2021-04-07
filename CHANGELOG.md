@@ -6,6 +6,7 @@
 
 1. 【Server】保存邮箱信息时候验证邮箱配置是否正确（感谢@maybe）
 2. 【Server】Token 机制采用 jwt 
+3. 【Server】git 构建新增进度日志输出 
 
 ### 解决BUG、优化功能
 
