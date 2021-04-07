@@ -3,6 +3,7 @@ package io.jpom.util;
 import cn.hutool.cache.impl.TimedCache;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.util.ReflectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.system.SystemUtil;
@@ -25,6 +26,7 @@ import java.lang.reflect.Method;
 import java.net.URISyntaxException;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 import java.util.jar.Attributes;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
@@ -115,18 +117,26 @@ public class JvmUtil {
      * @throws Exception 异常
      * @see OperatingSystemMXBean
      */
-    public static OperatingSystemMXBean getOperatingSystemMXBean(String pId) throws Exception {
+    public static void getOperatingSystemMXBean(String pId, Consumer<OperatingSystemMXBean> consumer) throws Exception {
         VirtualMachine virtualMachine = getVirtualMachine(Integer.parseInt(pId));
         try {
+            if (virtualMachine == null) {
+                return;
+            }
             JMXServiceURL url = getJMXServiceURL(virtualMachine);
             if (url == null) {
-                return null;
+                return;
             }
             JMXConnector jmxConnector = JMXConnectorFactory.connect(url, null);
             MBeanServerConnection mBeanServerConnection = jmxConnector.getMBeanServerConnection();
-            return ManagementFactory.newPlatformMXBeanProxy(mBeanServerConnection, ManagementFactory.OPERATING_SYSTEM_MXBEAN_NAME, OperatingSystemMXBean.class);
+            OperatingSystemMXBean operatingSystemMXBean = ManagementFactory.newPlatformMXBeanProxy(mBeanServerConnection, ManagementFactory.OPERATING_SYSTEM_MXBEAN_NAME, OperatingSystemMXBean.class);
+            consumer.accept(operatingSystemMXBean);
+            IoUtil.close(jmxConnector);
+//            return operatingSystemMXBean;
         } finally {
-            virtualMachine.detach();
+            if (virtualMachine != null) {
+                virtualMachine.detach();
+            }
         }
     }
 
