@@ -47,10 +47,10 @@ export function deleteJdk(params) {
 
 /**
  * 项目列表
- * @param {
+ * @param {JSON} params {
  *  nodeId: 节点 ID
  *  group: 分组名称
- * } params 
+ * }
  */
 export function getProjectList(params) {
   return axios({
@@ -62,10 +62,10 @@ export function getProjectList(params) {
 
 /**
  * 项目运行信息，返回项目占用端口和 pid
- * @param {
+ * @param {JSON} params {
  *  nodeId: 节点 ID
  *  ids: 项目 ID 数组字符串格式 ["id1", "id2"]
- * } params 
+ * }
  */
 export function getRuningProjectInfo(params) {
   return axios({
