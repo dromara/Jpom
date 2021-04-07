@@ -83,3 +83,34 @@ export function getMonitorOperateLogList() {
     method: 'post'
   })
 }
+
+/**
+ * 操作类型列表
+ * @returns 
+ */
+export function getMonitorOperateTypeList() {
+  return axios({
+    url: '/monitor_user_opt/type_data',
+    method: 'post'
+  })
+}
+
+/**
+ * 编辑操作监控
+ * @param {
+ *  id: ID
+ *  name: 名称
+ *  status: 状态 => on 表示开启
+ *  notifyUser: 通知用户 json 字符串
+ *  monitorUser： 监控用户 json 字符串
+ *  monitorOpt: 监控操作 json 字符串
+ * } params 
+ * @returns 
+ */
+export function editMonitorOperate(params) {
+  return axios({
+    url: '/monitor_user_opt/update',
+    method: 'post',
+    data: params
+  })
+}

@@ -96,17 +96,31 @@ public class MonitorUserOptListController extends BaseServerController {
         return "monitor/edit-user-opt";
     }
 
-    /**
-     * 展示监控列表
-     *
-     * @return json
-     */
     @RequestMapping(value = "list_data", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     @Feature(method = MethodFeature.LIST)
     public String getMonitorList() {
         List<MonitorUserOptModel> list = monitorUserOptService.list();
         return JsonMessage.getString(200, "", list);
+    }
+
+    /**
+     * 操作监控类型列表
+     * @return json
+     */
+    @RequestMapping(value = "type_data", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @ResponseBody
+    @Feature(method = MethodFeature.LIST)
+    public String getOperateTypeList() {
+        UserOperateLogV1.OptType[] values = UserOperateLogV1.OptType.values();
+        JSONArray jsonArrayOpt = new JSONArray();
+        for (UserOperateLogV1.OptType value : values) {
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.put("title", value.getDesc());
+            jsonObject.put("value", value.name());
+            jsonArrayOpt.add(jsonObject);
+        }
+        return JsonMessage.getString(200, "success", jsonArrayOpt);
     }
 
     /**

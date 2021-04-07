@@ -27,7 +27,7 @@
           <a-input v-model="temp.name" placeholder="监控名称"/>
         </a-form-model-item>
         <a-form-model-item label="开启状态" prop="status">
-          <a-switch v-model="temp.status" checked-children="开" un-checked-children="关"/>
+          <a-switch v-model="temp.start" checked-children="开" un-checked-children="关"/>
         </a-form-model-item>
         <a-form-model-item label="监控用户" prop="monitorUser">
           <a-transfer
@@ -37,6 +37,16 @@
             :target-keys="monitorUserKeys"
             :render="item => item.title"
             @change="handleMonitorUserChange"
+          />
+        </a-form-model-item>
+        <a-form-model-item label="监控操作" prop="monitorOpt">
+          <a-transfer
+            :data-source="optTypeList"
+            show-search
+            :filter-option="filterOption"
+            :target-keys="monitorOptKeys"
+            :render="item => item.title"
+            @change="handleMonitorOptChange"
           />
         </a-form-model-item>
         <a-form-model-item label="报警联系人" prop="notifyUser">
@@ -54,7 +64,7 @@
   </div>
 </template>
 <script>
-import { getMonitorOperateLogList } from '../../api/monitor';
+import { getMonitorOperateLogList, getMonitorOperateTypeList, editMonitorOperate } from '../../api/monitor';
 import { getAdminUserList } from '../../api/user';
 import { parseTime } from '../../utils/time';
 export default {
@@ -62,10 +72,12 @@ export default {
     return {
       loading: false,
       list: [],
+      optTypeList: [],
       userList: [],
       temp: {},
       notifyUserKeys: [],
       monitorUserKeys: [],
+      monitorOptKeys: [],
       editOperateMonitorVisible: false,
       columns: [
         {title: '名称', dataIndex: 'name', scopedSlots: {customRender: 'name'}, width: 150},
@@ -98,7 +110,7 @@ export default {
   },
   created() {
     this.loadData();
-    this.loadUserList();
+    this.loadOptTypeData();
   },
   methods: {
     // 加载数据
@@ -111,19 +123,36 @@ export default {
         this.loading = false;
       })
     },
+    // 加载操作类型数据
+    loadOptTypeData() {
+      this.optTypeList = [];
+      getMonitorOperateTypeList().then(res => {
+        if (res.code === 200) {
+          res.data.forEach(element => {
+            this.optTypeList.push({key: element.value, title: element.title, disabled: false});
+          });
+        }
+      })
+    },
     // 加载用户列表
     loadUserList() {
       this.userList = [];
       getAdminUserList().then(res => {
         if (res.code === 200) {
           res.data.forEach(element => {
-            this.userList.push({key: element.value, title: element.title, disabled:element.disabled});
+            this.userList.push({key: element.value, title: element.title, disabled: element.disabled || false});
           });
         }
       })
     },
     // 新增
     handleAdd() {
+      this.temp = {
+        start: false
+      };
+      this.notifyUserKeys = [];
+      this.monitorOptKeys = [];
+      this.monitorUserKeys = [];
       this.loadUserList();
       this.editOperateMonitorVisible = true;
     },
@@ -131,6 +160,13 @@ export default {
     handleEdit(record) {
       this.loadUserList();
       this.temp = Object.assign(record);
+      this.temp = {
+        ...this.temp,
+        start: this.temp.status
+      };
+      this.notifyUserKeys = this.temp.notifyUser;
+      this.monitorOptKeys = this.temp.monitorOpt;
+      this.monitorUserKeys = this.temp.monitorUser;
       this.editOperateMonitorVisible = true;
     },
     // 穿梭框筛选
@@ -142,12 +178,59 @@ export default {
       this.notifyUserKeys = targetKeys;
     },
     // 穿梭框 change
+    handleMonitorOptChange(targetKeys) {
+      this.monitorOptKeys = targetKeys;
+    },
+    // 穿梭框 change
     handleMonitorUserChange(targetKeys) {
       this.monitorUserKeys = targetKeys;
     },
     // 提交
     handleEditOperateMonitorOk() {
-
+      // 检验表单
+      this.$refs['editMonitorForm'].validate((valid) => {
+        if (!valid) {
+          return false;
+        }
+        if (this.monitorUserKeys.length === 0) {
+          this.$notification.error({
+            message: '请选择监控用户',
+            duration: 2
+          });
+          return false;
+        }
+        if (this.monitorOptKeys.length === 0) {
+          this.$notification.error({
+            message: '请选择监控操作',
+            duration: 2
+          });
+          return false;
+        }
+        if (this.notifyUserKeys.length === 0) {
+          this.$notification.error({
+            message: '请选择报警联系人',
+            duration: 2
+          });
+          return false;
+        }
+        // 设置参数
+        this.temp.monitorUser = JSON.stringify(this.monitorUserKeys);
+        this.temp.monitorOpt = JSON.stringify(this.monitorOptKeys);
+        this.temp.notifyUser = JSON.stringify(this.notifyUserKeys);
+        this.temp.start ? this.temp.status = 'on' : this.temp.status = 'no';
+        editMonitorOperate(this.temp).then(res => {
+          if (res.code === 200) {
+            // 成功
+            this.$notification.success({
+              message: res.msg,
+              duration: 2
+            });
+            this.$refs['editMonitorForm'].resetFields();
+            this.editOperateMonitorVisible = false;
+            this.loadData();
+          }
+        })
+      })
     }
   }
 }
