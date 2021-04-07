@@ -39,6 +39,8 @@ export function editSsh(params) {
   return axios({
     url: '/node/ssh/save.json',
     method: 'post',
+    // 0 表示无超时时间
+    timeout: 0,
     data
   })
 }
