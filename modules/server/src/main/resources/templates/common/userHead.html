@@ -103,6 +103,11 @@
                             key: "loginOut",
                             value: true
                         });
+                        try {
+                            localStorage.removeItem('Jpom-Token');
+                            localStorage.removeItem('Jpom-Long-Term-Token');
+                        }catch (e) {
+                        }
                         window.location.href = inNode ? "../logout" : "./logout";
                     })
                 }
