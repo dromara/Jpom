@@ -10,7 +10,7 @@
       <a-button type="primary" @click="loadData">刷新</a-button>
     </div>
     <!-- 表格 -->
-    <a-table :loading="loading" :columns="columns" :data-source="list" :scroll="{ y: tableHeight }" bordered rowKey="id" class="node-table"
+    <a-table :loading="loading" :columns="columns" :data-source="list" :style="{'height': tableHeight + 'px', 'overflow-y': 'scroll' }" bordered rowKey="id" class="node-table"
       @expand="expand" :pagination="false">
       <a-tooltip slot="group" slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
@@ -26,7 +26,7 @@
       </template>
       <!-- 嵌套表格 -->
       <a-table slot="expandedRowRender" slot-scope="text" :loading="childLoading" :scroll="{ x: '80vw' }" :columns="childColumns" :data-source="text.children"
-        :pagination="false" :rowKey="(record, index) => record.id + index">
+        :pagination="false" :rowKey="(record, index) => text.id + index">
         <a-tooltip slot="osName" slot-scope="text" placement="topLeft" :title="text">
           <span>{{ text }}</span>
         </a-tooltip>
