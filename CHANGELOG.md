@@ -8,6 +8,7 @@
 2. 【Server】Token 机制采用 jwt 
 3. 【Server】git 构建新增进度日志输出
 4. 【Server】添加操作监控相关 api 和页面功能
+5. 【Server】完善 JWT token 过期自动续签功能
 
 ### 解决BUG、优化功能
 
