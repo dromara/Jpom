@@ -60,7 +60,7 @@ public class LoginInterceptor extends BaseJpomInterceptor {
         if (notLogin == null) {
             // 这里需要判断请求头里是否有 Authorization 属性
             String authorization = request.getHeader(ServerOpenApi.HTTP_HEAD_AUTHORIZATION);
-            if (!StrUtil.isEmpty(authorization)) {
+            if (StrUtil.isNotEmpty(authorization)) {
                 // jwt token 检测机制
                 int code = this.checkHeaderUser(request, session);
                 if (code > 0) {
@@ -99,21 +99,21 @@ public class LoginInterceptor extends BaseJpomInterceptor {
             }
             return ServerConfigBean.RENEWAL_AUTHORIZE_CODE;
         }
-//        UserModel user = (UserModel) session.getAttribute(SESSION_NAME);
-//        UserService userService = SpringUtil.getBean(UserService.class);
-//        UserModel newUser = userService.checkUser(claims.getId());
-//        if (newUser == null) {
-//            return ServerConfigBean.AUTHORIZE_TIME_OUT_CODE;
-//        }
-//        if (null != user) {
-//            String tokenUserId = JwtUtil.readUserId(claims);
-//            boolean b = user.getId().equals(tokenUserId) && user.getUserMd5Key().equals(claims.getId())
-//                    && user.getModifyTime() == newUser.getModifyTime();
-//            if (!b) {
-//                return ServerConfigBean.AUTHORIZE_TIME_OUT_CODE;
-//            }
-//        }
-//        session.setAttribute(LoginInterceptor.SESSION_NAME, newUser);
+        UserModel user = (UserModel) session.getAttribute(SESSION_NAME);
+        UserService userService = SpringUtil.getBean(UserService.class);
+        UserModel newUser = userService.checkUser(claims.getId());
+        if (newUser == null) {
+            return ServerConfigBean.AUTHORIZE_TIME_OUT_CODE;
+        }
+        if (null != user) {
+            String tokenUserId = JwtUtil.readUserId(claims);
+            boolean b = user.getId().equals(tokenUserId) && user.getUserMd5Key().equals(claims.getId())
+                    && user.getModifyTime() == newUser.getModifyTime();
+            if (!b) {
+                return ServerConfigBean.AUTHORIZE_TIME_OUT_CODE;
+            }
+        }
+        session.setAttribute(LoginInterceptor.SESSION_NAME, newUser);
         return 0;
     }
 
