@@ -27,16 +27,16 @@ const user = {
     setToken(state, data) {
       state.token = data.token || '';
       state.longTermToken = data.longTermToken || '';
-      if(state.token){
-          localStorage.setItem(TOKEN_KEY, data.token);
-      }else{
-          localStorage.removeItem(TOKEN_KEY);
+      if (state.token) {
+        localStorage.setItem(TOKEN_KEY, data.token);
+      } else {
+        localStorage.removeItem(TOKEN_KEY);
       }
-     if(state.longTermToken){
-         localStorage.setItem(LONG_TERM_TOKEN, data.longTermToken);
-     }else{
-         localStorage.removeItem(LONG_TERM_TOKEN);
-     }
+      if (state.longTermToken) {
+        localStorage.setItem(LONG_TERM_TOKEN, data.longTermToken);
+      } else {
+        localStorage.removeItem(LONG_TERM_TOKEN);
+      }
     },
     setUserInfo(state, userInfo) {
       state.userInfo = userInfo

@@ -227,7 +227,7 @@ public class LoginControl extends BaseServerController {
     @ResponseBody
     @NotLogin
     public String renewalToken() {
-        String token = getRequest().getHeader(ServerOpenApi.USER_TOKEN_HEAD);
+        String token = getRequest().getHeader(ServerOpenApi.HTTP_HEAD_AUTHORIZATION);
         if (StrUtil.isEmpty(token)) {
             return JsonMessage.getString(ServerConfigBean.AUTHORIZE_TIME_OUT_CODE, "刷新token失败");
         }

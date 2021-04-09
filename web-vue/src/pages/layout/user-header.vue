@@ -248,7 +248,7 @@ export default {
 <style scoped>
 .user-header {
   display: inline-table;
-  width: 350px;
+  width: 300px;
   text-align: right;
   margin-right: 20px;
   cursor: pointer;

@@ -58,13 +58,20 @@ public class LoginInterceptor extends BaseJpomInterceptor {
             notLogin = handlerMethod.getBeanType().getAnnotation(NotLogin.class);
         }
         if (notLogin == null) {
-            //
-            int code = this.checkHeaderUser(request, session);
-            if (code > 0) {
-                if (!this.tryGetHeaderUser(request, session)) {
+            // 这里需要判断请求头里是否有 Authorization 属性
+            String authorization = request.getHeader(ServerOpenApi.HTTP_HEAD_AUTHORIZATION);
+            if (!StrUtil.isEmpty(authorization)) {
+                // jwt token 检测机制
+                int code = this.checkHeaderUser(request, session);
+                if (code > 0) {
                     this.responseLogin(request, response, handlerMethod, code);
                     return false;
                 }
+            }
+            // 老版本登录拦截
+            if (!this.tryGetHeaderUser(request, session)) {
+                this.responseLogin(request, response, handlerMethod, ServerConfigBean.AUTHORIZE_TIME_OUT_CODE);
+                return false;
             }
         }
         reload();
@@ -92,21 +99,21 @@ public class LoginInterceptor extends BaseJpomInterceptor {
             }
             return ServerConfigBean.RENEWAL_AUTHORIZE_CODE;
         }
-        UserModel user = (UserModel) session.getAttribute(SESSION_NAME);
-        UserService userService = SpringUtil.getBean(UserService.class);
-        UserModel newUser = userService.checkUser(claims.getId());
-        if (newUser == null) {
-            return ServerConfigBean.AUTHORIZE_TIME_OUT_CODE;
-        }
-        if (null != user) {
-            String tokenUserId = JwtUtil.readUserId(claims);
-            boolean b = user.getId().equals(tokenUserId) && user.getUserMd5Key().equals(claims.getId())
-                    && user.getModifyTime() == newUser.getModifyTime();
-            if (!b) {
-                return ServerConfigBean.AUTHORIZE_TIME_OUT_CODE;
-            }
-        }
-        session.setAttribute(LoginInterceptor.SESSION_NAME, newUser);
+//        UserModel user = (UserModel) session.getAttribute(SESSION_NAME);
+//        UserService userService = SpringUtil.getBean(UserService.class);
+//        UserModel newUser = userService.checkUser(claims.getId());
+//        if (newUser == null) {
+//            return ServerConfigBean.AUTHORIZE_TIME_OUT_CODE;
+//        }
+//        if (null != user) {
+//            String tokenUserId = JwtUtil.readUserId(claims);
+//            boolean b = user.getId().equals(tokenUserId) && user.getUserMd5Key().equals(claims.getId())
+//                    && user.getModifyTime() == newUser.getModifyTime();
+//            if (!b) {
+//                return ServerConfigBean.AUTHORIZE_TIME_OUT_CODE;
+//            }
+//        }
+//        session.setAttribute(LoginInterceptor.SESSION_NAME, newUser);
         return 0;
     }
 

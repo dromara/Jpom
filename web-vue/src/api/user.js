@@ -9,6 +9,14 @@ export function login(params) {
   })
 }
 
+// refresh token
+export function refreshToken() {
+  return axios({
+    url: '/renewal',
+    method: 'post'
+  })
+}
+
 // 获取用户信息
 export function getUserInfo() {
   return axios({

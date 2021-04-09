@@ -2,7 +2,9 @@ import Vue from 'vue';
 import axios from 'axios';
 import Qs from 'qs';
 import store from '../store';
+import router from '../router';
 import { NO_NOTIFY_KEY, NO_LOADING_KEY,TOKEN_HEADER_KEY} from '../utils/const';
+import { refreshToken } from './user';
 
 import { notification } from 'ant-design-vue';
 
@@ -65,6 +67,12 @@ request.interceptors.response.use(response => {
   // 判断返回值，权限等...
   const res = response.data;
 
+  // 先判断 jwt token 状态
+  if (res.code === 800 || res.code === 801) {
+    return checkJWTToken(res, response);
+  }
+  
+  // 其他情况
   if (res.code !== 200) {
     // 如果 headers 里面配置了 tip: no 就不用弹出提示信息
     if (!response.config.headers[NO_NOTIFY_KEY]) {
@@ -75,12 +83,7 @@ request.interceptors.response.use(response => {
       });
     }
   }
-  // 如果是登录信息失效
-  if (res.code === 800) {
-    store.dispatch('logOut').then(() => {
-      location.reload();
-    })
-  }
+  
   return res;
 }, error => {
   // 如果 headers 里面配置了 loading: no 就不用 loading
@@ -106,5 +109,48 @@ request.interceptors.response.use(response => {
   }
   return Promise.reject(error);
 });
+
+// 判断 jwt token 状态
+function checkJWTToken(res, response) {
+  // 如果是登录信息失效
+  if (res.code === 800) {
+    notification.warn({
+      message: res.msg,
+      description: response.config.url,
+      duration: 3
+    });
+    store.dispatch('logOut').then(() => {
+      router.push('/login');
+    });
+    return false;
+  }
+  // 如果 jwt token 还可以续签
+  if (res.code === 801) {
+    notification.close();
+    notification.info({
+      message: '登录信息过期，尝试自动续签...',
+      description: '如果不需要自动续签，请修改配置文件。该续签将不会影响页面。',
+      duration: 3
+    });
+    // 续签且重试请求
+    return redoRequest(response.config);
+  }
+}
+
+// 刷新 jwt token 并且重试上次请求
+function redoRequest(config) {
+  return new Promise(resolve => {
+    Promise.resolve(refreshToken()).then(result => {
+      if (result.code === 200) {
+        // 调用 store action 存储当前登录的用户名和 token
+        store.dispatch('login', result.data);
+        resolve();
+      }
+    });
+  }).then(() => {
+    // 重试原来的请求
+    return request(config);
+  });
+}
 
 export default request
