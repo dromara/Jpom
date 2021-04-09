@@ -1,7 +1,6 @@
 package io.jpom.controller;
 
 import cn.hutool.cache.impl.LFUCache;
-import cn.hutool.captcha.CaptchaUtil;
 import cn.hutool.captcha.CircleCaptcha;
 import cn.hutool.core.date.BetweenFormatter;
 import cn.hutool.core.date.DateTime;
@@ -215,9 +214,21 @@ public class LoginControl extends BaseServerController {
      * @return page
      */
     @RequestMapping(value = "logout", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
+    public String logoutPage() {
+        getSession().invalidate();
+        return BaseJpomInterceptor.getRedirect(getRequest(), "/old.html");
+    }
+
+    /**
+     * 退出登录
+     *
+     * @return json
+     */
+    @RequestMapping(value = "logout2", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @ResponseBody
     public String logout() {
         getSession().invalidate();
-        return BaseJpomInterceptor.getRedirect(getRequest(), "/index.html");
+        return JsonMessage.getString(200, "退出成功");
     }
 
     /**
