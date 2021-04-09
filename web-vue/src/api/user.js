@@ -25,6 +25,15 @@ export function getUserInfo() {
   })
 }
 
+// 退出登录
+export function loginOut(params) {
+  return axios({
+    url: '/logout2',
+    method: 'get',
+    data: params
+  })
+}
+
 // 修改密码
 export function updatePwd(params) {
   return axios({

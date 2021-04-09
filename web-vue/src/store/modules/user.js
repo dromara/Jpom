@@ -12,7 +12,7 @@ import {
   LONG_TERM_TOKEN
 } from '../../utils/const'
 
-import { getUserInfo } from '../../api/user';
+import {getUserInfo, loginOut,} from '../../api/user';
 import { getSystemMenu } from '../../api/menu';
 import routeMenuMap from '../../router/route-menu';
 
@@ -87,7 +87,9 @@ const user = {
         localStorage.removeItem(MENU_KEY);
         // 调用其他 action
         dispatch('clearTabs');
-        resolve();
+        loginOut({}).then(()=>{
+          resolve();
+        });
       })
     }
   },
