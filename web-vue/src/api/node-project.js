@@ -72,6 +72,7 @@ export function getRuningProjectInfo(params) {
     url: '/node/manage/getProjectPort',
     method: 'post',
     data: params,
+    timeout: 0,
     headers: {
       loading: 'no'
     },
