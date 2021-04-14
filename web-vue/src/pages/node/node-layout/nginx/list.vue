@@ -110,7 +110,7 @@ export default {
   methods: {
     // 计算表格高度
     calcTableHeight() {
-      this.tableHeight = window.innerHeight - this.$refs['filter'].clientHeight - 185;
+      this.tableHeight = window.innerHeight - this.$refs['filter'].clientHeight - 250;
     },
     // 加载 Nginx 数据
     loadNginxData() {
@@ -323,7 +323,7 @@ export default {
 }
 .file-content {
   height: calc(100vh - 150px);
-  overflow-y: auto;
+  overflow-y: hidden;
   margin: 10px 10px 0;
   padding: 10px;
   background-color: #fff;
