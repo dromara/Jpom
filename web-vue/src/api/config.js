@@ -121,6 +121,7 @@ function checkJWTToken(res, response) {
     });
     store.dispatch('logOut').then(() => {
       router.push('/login');
+      location.reload();
     });
     return false;
   }
