@@ -216,8 +216,6 @@ export default {
             intro: '节点的账号密码可以通过 agent_authorize.json 文件查看'
           }]
         }).start();
-      } else {
-        this.$introJs().exit();
       }
     },
     // 计算表格高度

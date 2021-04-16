@@ -1,7 +1,7 @@
 <template>
   <a-layout class="node-layout">
     <!-- 侧边栏 节点管理菜单 -->
-    <a-layout-sider theme="light" class="sider">
+    <a-layout-sider theme="light" class="sider jpom-node-sider">
       <a-menu theme="light" mode="inline" :default-selected-keys="selectedKeys">
         <template v-for="menu in nodeMenuList">
           <a-sub-menu v-if="menu.childs" :key="menu.id">
@@ -21,7 +21,7 @@
       </a-menu>
     </a-layout-sider>
     <!-- 节点管理的各个组件 -->
-    <a-layout-content class="layout-content">
+    <a-layout-content class="layout-content jpom-node-content">
       <welcome v-if="currentId === 'welcome'" :node="node" />
       <project-list v-if="currentId === 'manageList'" :node="node" />
       <jdk-list v-if="currentId === 'jdkList'" :node="node" />
@@ -39,6 +39,7 @@
   </a-layout>
 </template>
 <script>
+import { mapGetters } from 'vuex';
 import { getNodeMenu } from '../../../api/menu';
 import Welcome from './welcome';
 import ProjectList from './project/project-list';
@@ -81,14 +82,42 @@ export default {
     }
   },
   computed: {
+    ...mapGetters([
+      'getGuideFlag'
+    ]),
     currentId() {
       return this.selectedKeys[0];
     }
   },
+  watch: {
+    getGuideFlag() {
+      this.introGuide();
+    }
+  },
   created() {
-    this.loadNodeMenu()
+    this.loadNodeMenu();
+    setTimeout(() => {
+      this.introGuide();
+    }, 1000);
   },
   methods: {
+    // 页面引导
+    introGuide() {
+      if (this.getGuideFlag) {
+        this.$introJs().setOptions({
+          steps: [{
+            element: document.querySelector('.ant-drawer-title'),
+            intro: '这里是这个节点的名称和节点地址'
+          }, {
+            element: document.querySelector('.jpom-node-sider'),
+            intro: '这里是这个节点的侧边栏菜单'
+          }, {
+            element: document.querySelector('.jpom-node-content'),
+            intro: '这里是这个节点的主要内容展示区'
+          }]
+        }).start();
+      }
+    },
     // 加载菜单
     loadNodeMenu() {
       getNodeMenu(this.node.id).then(res => {

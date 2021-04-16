@@ -80,8 +80,6 @@ export default {
             intro: '这里是主要的内容展示区域'
           }]
         }).start();
-      } else {
-        this.$introJs().exit();
       }
     },
     // 切换引导

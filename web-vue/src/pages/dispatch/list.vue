@@ -276,8 +276,6 @@ export default {
             intro: '项目白名单需要在侧边栏菜单<b>分发白名单</b>组件里面去设置'
           }]
         }).start();
-      } else {
-        this.$introJs().exit();
       }
     },
     // 加载数据
