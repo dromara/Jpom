@@ -15,8 +15,8 @@
         <a-switch v-model="nginxData.status" checked-children="运行中" un-checked-children="未运行" disabled />
         <a-button type="primary" @click="handleEditNginx">编辑 Nginx 服务</a-button>
         <a-button :disabled="nginxData.status" type="primary" @click="handleNginxCommand('open')">启动 Nginx</a-button>
-        <a-button :disabled="!nginxData.status" type="danger" @click="handleNginxCommand('reload')">重启 Nginx</a-button>
-        <a-button :disabled="!nginxData.status" type="danger" @click="handleNginxCommand('stop')">停止 Nginx</a-button>
+        <a-button :disabled="!nginxData.status" type="danger" @click="handleNginxCommand('reload')">重新加载 Nginx</a-button>
+        <a-button :disabled="!nginxData.status" type="danger" @click="handleNginxCommand('close')">停止 Nginx</a-button>
       </div>
       <a-table :data-source="fileList" :loading="loading" :columns="columns" :scroll="{x: '80vw', y: tableHeight}" :pagination="false" bordered :rowKey="(record, index) => index">
         <a-tooltip slot="name" slot-scope="text" placement="topLeft" :title="text">
