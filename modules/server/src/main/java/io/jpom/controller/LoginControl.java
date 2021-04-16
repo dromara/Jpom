@@ -226,6 +226,7 @@ public class LoginControl extends BaseServerController {
      */
     @RequestMapping(value = "logout2", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
+    @NotLogin
     public String logout() {
         getSession().invalidate();
         return JsonMessage.getString(200, "退出成功");
