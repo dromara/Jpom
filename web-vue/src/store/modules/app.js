@@ -6,14 +6,16 @@
 import {
   ACTIVE_TAB_KEY,
   TAB_LIST_KEY,
-  ACTIVE_MENU_KEY
+  ACTIVE_MENU_KEY,
+  GUIDE_FLAG_KEY
 } from '../../utils/const'
 
 const app = {
   state: {
     activeTabKey: localStorage.getItem(ACTIVE_TAB_KEY),
     tabList: JSON.parse(localStorage.getItem(TAB_LIST_KEY)),
-    activeMenuKey: localStorage.getItem(ACTIVE_MENU_KEY)
+    activeMenuKey: localStorage.getItem(ACTIVE_MENU_KEY),
+    guideFlag: localStorage.getItem(GUIDE_FLAG_KEY) === 'true' ? true : false || false
   },
   mutations: {
     setActiveTabKey(state, activeKey) {
@@ -24,6 +26,9 @@ const app = {
     },
     setActiveMenuKey(state, activeMenuKey) {
       state.activeMenuKey = activeMenuKey;
+    },
+    setGuideFlag(state, guideFlag) {
+      state.guideFlag = guideFlag;
     }
   },
   actions: {
@@ -97,6 +102,12 @@ const app = {
     activeMenu({commit}, activeMenuKey) {
       commit('setActiveMenuKey', activeMenuKey);
       localStorage.setItem(ACTIVE_MENU_KEY, activeMenuKey);
+    },
+    // 切换引导开关
+    toggleGuideFlag({commit, state}) {
+      const flag = state.guideFlag;
+      commit('setGuideFlag', !flag);
+      localStorage.setItem(GUIDE_FLAG_KEY, !flag);
     }
   },
   getters: {
@@ -108,6 +119,9 @@ const app = {
     },
     getActiveMenuKey(state) {
       return state.activeMenuKey;
+    },
+    getGuideFlag(state) {
+      return state.guideFlag;
     }
   }
 }

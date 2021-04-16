@@ -1,10 +1,10 @@
 <template>
   <a-layout id="app-layout">
     <a-layout-sider v-model="collapsed" :trigger="null" collapsible class="sider">
-      <div class="logo">
+      <div class="logo" @click="toggleGuide()">
         <img src="../../assets/images/jpom.jpeg"/>
       </div>
-      <side-menu />
+      <side-menu class="side-menu" />
     </a-layout-sider>
     <a-layout>
       <a-layout-header class="app-header">
@@ -25,6 +25,7 @@
   </a-layout>
 </template>
 <script>
+import { mapGetters } from 'vuex';
 import SideMenu from './side-menu';
 import UserHeader from './user-header';
 import ContentTab from './content-tab';
@@ -37,15 +38,69 @@ export default {
   },
   data() {
     return {
-      collapsed: false
+      collapsed: false,
     }
   },
   computed: {
+    ...mapGetters([
+      'getGuideFlag'
+    ])
+  },
+  watch: {
+    getGuideFlag(val) {
+      console.log(val)
+      this.introGuide();
+    }
   },
   mounted() {
     this.checkSystem();
+    this.introGuide();
+    this.$introJs().start();
   },
   methods: {
+    // 页面引导
+    introGuide() {
+      if (this.getGuideFlag) {
+        this.$introJs().setOptions({
+          steps: [{
+            title: '页面导航系统',
+            intro: '不要慌，这是新版本的页面导航系统，如果你不想看到，可以点击关闭'
+          },{
+            element: document.querySelector('.logo'),
+            intro: '点击这里可以切换是否开启导航'
+          },
+          {
+            element: document.querySelector('.side-menu'),
+            intro: '这里是侧边栏菜单区域'
+          },
+          {
+            element: document.querySelector('.app-header'),
+            intro: '这是页面头部，会出现多个 Tab 标签页，以及个人信息等操作按钮'
+          },{
+            element: document.querySelector('.layout-content'),
+            intro: '这里是主要的内容展示区域'
+          }]
+        }).start();
+      } else {
+        this.$introJs().exit();
+      }
+    },
+    // 切换引导
+    toggleGuide() {
+      console.log(this.getGuideFlag)
+      if (!this.getGuideFlag) {
+        this.$notification.success({
+          message: '开启页面导航',
+          duration: 2
+        });
+      } else {
+        this.$notification.success({
+          message: '关闭页面导航',
+          duration: 2
+        });
+      }
+      this.$store.dispatch('toggleGuideFlag');
+    },
     // 检查是否需要初始化
     checkSystem() {
       checkSystem().then(res => {
@@ -79,6 +134,7 @@ export default {
 }
 
 #app-layout .logo {
+  cursor: pointer;
   width: 70px;
   height: 32px;
   background: rgba(255, 255, 255, 0.2);
