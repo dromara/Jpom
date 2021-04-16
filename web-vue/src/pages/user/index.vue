@@ -23,7 +23,7 @@
         <a-form-model-item label="昵称" prop="name">
           <a-input v-model="temp.name" placeholder="昵称"/>
         </a-form-model-item>
-        <a-form-model-item label="勾选角色" prop="feature" class="feature">
+        <a-form-model-item label="勾选角色" prop="feature" class="feature jpom-role">
           <a-transfer
             :data-source="roleList"
             show-search
@@ -38,6 +38,7 @@
   </div>
 </template>
 <script>
+import { mapGetters } from 'vuex';
 import { getUserList, addUser, updateUser, deleteUser } from '../../api/user';
 import { getRoleList } from '../../api/role';
 import { parseTime } from '../../utils/time';
@@ -76,11 +77,34 @@ export default {
       }
     }
   },
+  computed: {
+    ...mapGetters([
+      'getGuideFlag'
+    ])
+  },
+  watch: {
+    getGuideFlag() {
+      this.introGuide();
+    }
+  },
   created() {
     this.loadData();
     this.loadRoleList();
   },
   methods: {
+    // 页面引导
+    introGuide() {
+      if (this.getGuideFlag) {
+        this.$introJs().setOptions({
+          steps: [{
+            element: document.querySelector('.jpom-role'),
+            intro: '如果这里面没有你想要的角色信息，你需要先去添加一个角色。'
+          }]
+        }).start();
+      } else {
+        this.$introJs().exit();
+      }
+    },
     // 加载数据
     loadData() {
       this.loading = true;
@@ -116,6 +140,11 @@ export default {
       this.temp = {};
       this.loadRoleList();
       this.editUserVisible = true;
+      this.$nextTick(() => {
+        setTimeout(() => {
+          this.introGuide();
+        }, 500);
+      })
     },
     // 修改用户
     handleEdit(record) {

@@ -48,7 +48,7 @@
             </a-select-opt-group>
           </a-select>
         </a-form-model-item>
-        <a-form-model-item label="报警联系人" prop="notifyUser">
+        <a-form-model-item label="报警联系人" prop="notifyUser" class="jpom-notify">
           <a-transfer
             :data-source="userList"
             show-search
@@ -63,6 +63,7 @@
   </div>
 </template>
 <script>
+import { mapGetters } from 'vuex';
 import { getMonitorList, editMonitor,  deleteMonitor } from '../../api/monitor';
 import { getAdminUserList } from '../../api/user';
 import { getNodeProjectList } from '../../api/node';
@@ -101,12 +102,35 @@ export default {
       }
     }
   },
+  computed: {
+    ...mapGetters([
+      'getGuideFlag'
+    ])
+  },
+  watch: {
+    getGuideFlag() {
+      this.introGuide();
+    }
+  },
   created() {
     this.loadData();
     this.loadUserList();
     this.loadNodeProjectList();
   },
   methods: {
+    // 页面引导
+    introGuide() {
+      if (this.getGuideFlag) {
+        this.$introJs().setOptions({
+          steps: [{
+            element: document.querySelector('.jpom-notify'),
+            intro: '如果这里的报警联系人无法选择，说明这里面的管理员没有设置邮箱，在右上角下拉菜单里面的用户资料里可以设置。'
+          }]
+        }).start();
+      } else {
+        this.$introJs().exit();
+      }
+    },
     // 加载数据
     loadData() {
       this.loading = true;
@@ -171,6 +195,11 @@ export default {
     // 新增
     handleAdd() {
       this.editMonitorVisible = true;
+      this.$nextTick(() => {
+        setTimeout(() => {
+          this.introGuide();
+        }, 500);
+      })
     },
     // 修改
     handleEdit(record) {

@@ -92,7 +92,7 @@
         <a-form-model-item label="Main Class" prop="mainClass" v-show="temp.runMode !== 'Jar'">
           <a-input v-model="temp.mainClass" placeholder="程序运行的 main 类(jar 模式运行可以不填)"/>
         </a-form-model-item>
-        <a-form-model-item label="项目白名单路径" prop="whitelistDirectory">
+        <a-form-model-item label="项目白名单路径" prop="whitelistDirectory" class="jpom-project-whitelist">
           <a-select v-model="temp.whitelistDirectory" placeholder="请选择项目白名单路径">
             <a-select-option v-for="access in accessList" :key="access">{{ access }}</a-select-option>
           </a-select>
@@ -179,6 +179,7 @@
   </div>
 </template>
 <script>
+import { mapGetters } from 'vuex';
 import File from '../node/node-layout/project/project-file';
 import Console from '../node/node-layout/project/project-console';
 import { getDishPatchList, getDispatchProject, getReqId, editDispatch, editDispatchProject, uploadDispatchFile, getDispatchWhiteList, deleteDisPatch } from '../../api/dispatch';
@@ -252,10 +253,33 @@ export default {
       }
     }
   },
+  computed: {
+    ...mapGetters([
+      'getGuideFlag'
+    ])
+  },
+  watch: {
+    getGuideFlag() {
+      this.introGuide();
+    }
+  },
   created() {
     this.handleFilter();
   },
   methods: {
+    // 页面引导
+    introGuide() {
+      if (this.getGuideFlag) {
+        this.$introJs().setOptions({
+          steps: [{
+            element: document.querySelector('.jpom-project-whitelist'),
+            intro: '项目白名单需要在侧边栏菜单<b>分发白名单</b>组件里面去设置'
+          }]
+        }).start();
+      } else {
+        this.$introJs().exit();
+      }
+    },
     // 加载数据
     loadData() {
       this.list = [];
@@ -454,6 +478,9 @@ export default {
       this.editDispatchVisible = true;
       this.$nextTick(() => {
         this.$refs['editDispatchForm'].resetFields();
+        setTimeout(() => {
+          this.introGuide();
+        }, 500);
       })
     },
     // 编辑分发项目
