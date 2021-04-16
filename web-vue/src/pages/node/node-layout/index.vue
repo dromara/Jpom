@@ -2,14 +2,14 @@
   <a-layout class="node-layout">
     <!-- 侧边栏 节点管理菜单 -->
     <a-layout-sider theme="light" class="sider jpom-node-sider">
-      <a-menu theme="light" mode="inline" :default-selected-keys="selectedKeys">
+      <a-menu theme="light" mode="inline" :default-selected-keys="selectedKeys" :default-open-keys="['systemConfig']">
         <template v-for="menu in nodeMenuList">
-          <a-sub-menu v-if="menu.childs" :key="menu.id">
+          <a-sub-menu v-if="menu.childs" :key="menu.id" :class="menu.id">
             <span slot="title">
               <a-icon :type="menu.icon_v3" />
               <span>{{menu.title}}</span>
             </span>
-            <a-menu-item v-for="subMenu in menu.childs" :key="subMenu.id" @click="handleMenuClick(subMenu.id)">
+            <a-menu-item v-for="subMenu in menu.childs" :key="subMenu.id" @click="handleMenuClick(subMenu.id)" :class="subMenu.id">
               <span>{{subMenu.title}}</span>
             </a-menu-item>
           </a-sub-menu>
@@ -78,7 +78,7 @@ export default {
   data() {
     return {
       nodeMenuList: [],
-      selectedKeys: ['welcome']
+      selectedKeys: ['welcome', 'whitelistDirectory']
     }
   },
   computed: {
@@ -114,6 +114,9 @@ export default {
           }, {
             element: document.querySelector('.jpom-node-content'),
             intro: '这里是这个节点的主要内容展示区'
+          }, {
+            element: document.querySelector('.whitelistDirectory'),
+            intro: '白名单目录是一个配置型菜单，里面配置的内容将会在</p><p><b>项目列表</b></br><b>Nginx 列表</b></br><b>证书管理</b></p>菜单里面作为选择项出现。'
           }]
         }).start();
       }

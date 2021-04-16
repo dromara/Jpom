@@ -40,7 +40,7 @@
             <a-select-option v-for="runMode in runModeList" :key="runMode">{{ runMode }}</a-select-option>
           </a-select>
         </a-form-model-item>
-        <a-form-model-item label="项目白名单路径" prop="whitelistDirectory">
+        <a-form-model-item label="项目白名单路径" prop="whitelistDirectory" class="jpom-node-project-whitelist">
           <a-select v-model="temp.whitelistDirectory" placeholder="请选择项目白名单路径">
             <a-select-option v-for="access in accessList" :key="access">{{ access }}</a-select-option>
           </a-select>
@@ -79,7 +79,7 @@
             </a-col>
           </a-row>
         </a-form-model-item>
-        <a-form-model-item label="JDK" prop="jdkId" v-show="temp.runMode !== 'File'">
+        <a-form-model-item label="JDK" prop="jdkId" v-show="temp.runMode !== 'File'" class="jpom-node-project-jdk">
           <a-select v-model="temp.jdkId" placeholder="请选择 JDK">
             <a-select-option v-for="jdk in jdkList" :key="jdk.id">{{ jdk.name }}</a-select-option>
           </a-select>
@@ -112,7 +112,7 @@
         <a-form-model-item label="操作"   v-show="temp.runMode !== 'File'">
           <a-button type="primary" @click="handleAddReplica">添加副本</a-button>
         </a-form-model-item>
-        <a-form-model-item label="WebHooks" prop="token"  v-show="temp.runMode !== 'File'">
+        <a-form-model-item label="WebHooks" prop="token"  v-show="temp.runMode !== 'File'" class="jpom-node-project-token">
           <a-input v-model="temp.token" placeholder="关闭程序时自动请求,非必填，GET请求"/>
         </a-form-model-item>
         <a-form-model-item v-show="temp.type === 'edit'&&temp.runMode !== 'File'" label="日志路径" prop="log">
@@ -146,6 +146,7 @@
   </div>
 </template>
 <script>
+import { mapGetters } from 'vuex';
 import File from './project-file';
 import Console from './project-console';
 import Monitor from './project-monitor';
@@ -218,8 +219,16 @@ export default {
     }
   },
   computed: {
+    ...mapGetters([
+      'getGuideFlag'
+    ]),
     filePath() {
       return (this.temp.whitelistDirectory || '') + (this.temp.lib || '');
+    }
+  },
+  watch: {
+    getGuideFlag() {
+      this.introGuide();
     }
   },
   mounted() {
@@ -229,6 +238,23 @@ export default {
     this.handleFilter();
   },
   methods: {
+    // 页面引导
+    introGuide() {
+      if (this.getGuideFlag) {
+        this.$introJs().setOptions({
+          steps: [{
+            element: document.querySelector('.jpom-node-project-whitelist'),
+            intro: '这里是选择节点设置的白名单目录，白名单的设置在侧边栏菜单<b>系统管理</b>里面。'
+          }, {
+            element: document.querySelector('.jpom-node-project-jdk'),
+            intro: '这里选择 JDK，JDK 需要在侧边栏菜单里手动添加，并非直接读取节点服务器里面的 JDK。'
+          }, {
+            element: document.querySelector('.jpom-node-project-token'),
+            intro: '这里可以理解为当程序停止时会给这个地址发送一个 HTTP GET 请求。'
+          }]
+        }).start();
+      }
+    },
     // 加载分组列表
     loadGroupList() {
       getPorjectGroupList(this.node.id).then(res => {
@@ -299,6 +325,11 @@ export default {
         javaCopyItemList: []
       };
       this.editProjectVisible = true;
+      this.$nextTick(() => {
+        setTimeout(() => {
+          this.introGuide();
+        }, 500);
+      })
     },
     // 编辑
     handleEdit(record) {
@@ -469,7 +500,7 @@ export default {
       //检查节点是否存在
     checkLibIndexExist(){
       // 检查是否输入完整
-      if (this.temp.lib.length !== 0 && this.temp.whitelistDirectory.length !== 0){
+      if (this.temp.lib && this.temp.lib.length !== 0 && this.temp.whitelistDirectory && this.temp.whitelistDirectory.length !== 0){
         const params = {
           nodeId: this.node.id,
           newLib: this.temp.whitelistDirectory+this.temp.lib
