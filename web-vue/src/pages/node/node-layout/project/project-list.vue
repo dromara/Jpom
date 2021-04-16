@@ -448,6 +448,13 @@ export default {
     },
     // 添加分组
     handleAddGroup() {
+      if (!this.temp.tempGroup || this.temp.tempGroup.length === 0) {
+        this.$notification.warning({
+          message: '分组名称不能为空',
+          duration: 2
+        });
+        return false;
+      }
       // 添加到分组列表
       if (this.groupList.indexOf(this.temp.tempGroup) === -1) {
         this.groupList.push(this.temp.tempGroup);

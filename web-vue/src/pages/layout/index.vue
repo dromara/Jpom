@@ -47,8 +47,7 @@ export default {
     ])
   },
   watch: {
-    getGuideFlag(val) {
-      console.log(val)
+    getGuideFlag() {
       this.introGuide();
     }
   },

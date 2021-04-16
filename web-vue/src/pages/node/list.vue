@@ -122,7 +122,7 @@
   </div>
 </template>
 <script>
-/* eslint-disable no-unused-vars */
+import { mapGetters } from 'vuex';
 import { getNodeGroupList, getNodeList, getNodeStatus, editNode, deleteNode } from '../../api/node';
 import { getSshListByNodeId } from '../../api/ssh';
 import NodeLayout from './node-layout';
@@ -189,12 +189,49 @@ export default {
       }
     }
   },
+  computed: {
+    ...mapGetters([
+      'getGuideFlag'
+    ])
+  },
+  watch: {
+    getGuideFlag() {
+      this.introGuide();
+    }
+  },
   created() {
     this.calcTableHeight();
     this.loadGroupList();
     this.handleFilter();
   },
   methods: {
+    // 页面引导
+    introGuide() {
+      if (this.getGuideFlag) {
+        this.$introJs().setOptions({
+          steps: [{
+            title: '页面导航系统',
+            intro: '不要慌，这是新版本的页面导航系统，如果你不想看到，可以点击关闭'
+          },{
+            element: document.querySelector('.logo'),
+            intro: '点击这里可以切换是否开启导航'
+          },
+          {
+            element: document.querySelector('.side-menu'),
+            intro: '这里是侧边栏菜单区域'
+          },
+          {
+            element: document.querySelector('.app-header'),
+            intro: '这是页面头部，会出现多个 Tab 标签页，以及个人信息等操作按钮'
+          },{
+            element: document.querySelector('.layout-content'),
+            intro: '这里是主要的内容展示区域'
+          }]
+        }).start();
+      } else {
+        this.$introJs().exit();
+      }
+    },
     // 计算表格高度
     calcTableHeight() {
       this.$nextTick(() => {
@@ -331,6 +368,13 @@ export default {
     },
     // 添加分组
     handleAddGroup() {
+      if (!this.temp.tempGroup || this.temp.tempGroup.length === 0) {
+        this.$notification.warning({
+          message: '分组名称不能为空',
+          duration: 2
+        });
+        return false;
+      }
       // 添加到分组列表
       if (this.groupList.indexOf(this.temp.tempGroup) === -1) {
         this.groupList.push(this.temp.tempGroup);
