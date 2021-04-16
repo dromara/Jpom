@@ -104,7 +104,7 @@
         <a-form-model-item label="构建命令" prop="script">
           <a-input v-model="temp.script" type="textarea" :rows="3" style="resize: none;" placeholder="构建执行的命令，如：mvn clean package"/>
         </a-form-model-item>
-        <a-form-model-item label="产物目录" prop="resultDirFile">
+        <a-form-model-item label="产物目录" prop="resultDirFile" class="jpom-target-dir">
           <a-input v-model="temp.resultDirFile" placeholder="构建产物目录，相对路径"/>
         </a-form-model-item>
         <a-form-model-item label="发布操作" prop="releaseMethod">
@@ -168,6 +168,7 @@
   </div>
 </template>
 <script>
+import { mapGetters } from 'vuex';
 import BuildLog from './log';
 import {
   getBuildGroupList, getBuildList, getBranchList, editBuild, deleteBuild,
@@ -233,12 +234,35 @@ export default {
       }
     }
   },
+  computed: {
+    ...mapGetters([
+      'getGuideFlag'
+    ])
+  },
+  watch: {
+    getGuideFlag() {
+      this.introGuide();
+    }
+  },
   created() {
     this.calcTableHeight();
     this.loadGroupList();
     this.handleFilter();
   },
   methods: {
+    // 页面引导
+    introGuide() {
+      if (this.getGuideFlag) {
+        this.$introJs().setOptions({
+          steps: [{
+            element: document.querySelector('.jpom-target-dir'),
+            intro: '可以理解为项目打包的目录。如 Jpom 项目执行 <b>mvn clean package</b> 构建命令，构建产物相对路径为：<b>modules/server/target/server-2.4.2-release</b>'
+          }]
+        }).start();
+      } else {
+        this.$introJs().exit();
+      }
+    },
     // 计算表格高度
     calcTableHeight() {
       this.$nextTick(() => {
@@ -317,6 +341,11 @@ export default {
       this.loadNodeProjectList();
       this.loadSshList();
       this.editBuildVisible = true;
+      this.$nextTick(() => {
+        setTimeout(() => {
+          this.introGuide();
+        }, 500);
+      })
     },
     // 修改
     handleEdit(record) {

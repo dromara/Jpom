@@ -98,12 +98,14 @@
         <a-form-model-item label="节点地址" prop="url">
           <a-input v-model="temp.url" placeholder="节点地址 (127.0.0.1:2123)"/>
         </a-form-model-item>
-        <a-form-model-item label="节点账号" prop="loginName">
-          <a-input v-model="temp.loginName" placeholder="节点账号"/>
-        </a-form-model-item>
-        <a-form-model-item label="节点密码" prop="loginPwd">
-          <a-input-password v-model="temp.loginPwd" placeholder="节点密码"/>
-        </a-form-model-item>
+        <div class="node-config">
+          <a-form-model-item label="节点账号" prop="loginName">
+            <a-input v-model="temp.loginName" placeholder="节点账号"/>
+          </a-form-model-item>
+          <a-form-model-item label="节点密码" prop="loginPwd">
+            <a-input-password v-model="temp.loginPwd" placeholder="节点密码"/>
+          </a-form-model-item>
+        </div>
         <a-form-model-item label="超时时间" prop="timeOut">
           <a-input-number v-model="temp.timeOut" :min="0" placeholder="毫秒 (值太小可能会取不到节点状态)" style="width: 100%"/>
         </a-form-model-item>
@@ -210,22 +212,8 @@ export default {
       if (this.getGuideFlag) {
         this.$introJs().setOptions({
           steps: [{
-            title: '页面导航系统',
-            intro: '不要慌，这是新版本的页面导航系统，如果你不想看到，可以点击关闭'
-          },{
-            element: document.querySelector('.logo'),
-            intro: '点击这里可以切换是否开启导航'
-          },
-          {
-            element: document.querySelector('.side-menu'),
-            intro: '这里是侧边栏菜单区域'
-          },
-          {
-            element: document.querySelector('.app-header'),
-            intro: '这是页面头部，会出现多个 Tab 标签页，以及个人信息等操作按钮'
-          },{
-            element: document.querySelector('.layout-content'),
-            intro: '这里是主要的内容展示区域'
+            element: document.querySelector('.node-config'),
+            intro: '节点的账号密码可以通过 agent_authorize.json 文件查看'
           }]
         }).start();
       } else {
@@ -300,6 +288,11 @@ export default {
         openStatus: true
       };
       this.editNodeVisible = true;
+      this.$nextTick(() => {
+        setTimeout(() => {
+          this.introGuide();
+        }, 500);
+      })
     },
     // 进入终端
     handleTerminal(record) {
