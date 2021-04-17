@@ -4,7 +4,7 @@
     <a-layout-sider theme="light" class="sider" width="20%">
       <a-empty v-if="list.length === 0" />
       <a-directory-tree :treeData="list" :replaceFields="replaceFields" @select="select"
-        @rightClick="rightClick" default-expand-all>
+        @rightClick="rightClick" default-expand-all class="jpom-node-log-tree">
       </a-directory-tree>
     </a-layout-sider>
     <!-- 单个文件内容 -->
@@ -53,7 +53,8 @@ export default {
   },
   computed: {
     ...mapGetters([
-      'getLongTermToken'
+      'getLongTermToken',
+      'getGuideFlag'
     ]),
     socketUrl() {
       const protocol = location.protocol === 'https:' ? 'wss://' : 'ws://';
@@ -62,10 +63,34 @@ export default {
       return `${protocol}${location.host}${url}?userId=${this.getLongTermToken}&tomcatId=${this.tomcatId}&nodeId=${this.node.id}&type=tomcat`;
     }
   },
+  watch: {
+    getGuideFlag() {
+      this.introGuide();
+    }
+  },
   created() {
     this.loadData();
+    this.$nextTick(() => {
+      setTimeout(() => {
+        this.introGuide();
+      }, 500);
+    })
   },
   methods: {
+    // 页面引导
+    introGuide() {
+      if (this.getGuideFlag) {
+        this.$introJs().setOptions({
+          steps: [{
+            element: document.querySelector('.jpom-node-log-tree'),
+            intro: '这里是 Jpom Agent 节点里面的日志文件，点击具体的文件可以在右边的区域查看日志内容。'
+          }, {
+            element: document.querySelector('.ant-tree-node-content-wrapper'),
+            intro: '你还可以用右键点击，会弹出一个操作选项的窗口（嗯，入口隐藏的比较深，所以有必要提示一下）。'
+          }]
+        }).start();
+      }
+    },
     // 加载数据
     loadData() {
       this.list = [];

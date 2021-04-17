@@ -1,8 +1,8 @@
 <template>
-  <div>
-    <a-form-model ref="editForm" :model="temp" :label-col="{ span: 2 }" :wrapper-col="{ span: 20 }">
+  <div class="node-system-config">
+    <a-form-model ref="editForm" :model="temp" :label-col="{ span: 3 }" :wrapper-col="{ span: 20 }">
       <a-form-model-item label="配置内容" prop="content">
-        <a-input v-model="temp.content" type="textarea" :rows="25" style="resize: none" placeholder="请输入配置内容，参考项目的配置文件"/>
+        <a-input v-model="temp.content" type="textarea" :rows="25" style="resize: none" class="node-content-config" placeholder="请输入配置内容，参考项目的配置文件"/>
       </a-form-model-item>
       <a-form-model-item :wrapper-col="{ span: 14, offset: 2 }">
         <a-button type="primary" class="btn" :disabled="submitAble" @click="onSubmit(false)">保存</a-button>
@@ -61,6 +61,13 @@ export default {
 }
 </script>
 <style scoped>
+.node-system-config {
+  height: calc(100vh - 130px);
+  overflow-y: scroll;
+}
+.node-content-config {
+  max-height: calc(100vh - 240px);
+}
 .btn {
   margin-left: 20px;
 }
