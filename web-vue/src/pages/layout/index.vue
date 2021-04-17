@@ -84,7 +84,6 @@ export default {
     },
     // 切换引导
     toggleGuide() {
-      console.log(this.getGuideFlag)
       if (!this.getGuideFlag) {
         this.$notification.success({
           message: '开启页面导航',
