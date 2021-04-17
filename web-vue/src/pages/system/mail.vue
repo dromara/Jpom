@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="mail-config">
     <a-form-model ref="editForm" :model="temp" :rules="rules" :label-col="{ span: 4 }" :wrapper-col="{ span: 16 }">
       <a-form-model-item label="SMTP 服务器" prop="host">
         <a-input v-model="temp.host" type="text" placeholder="SMTP 服务器域名"/>
@@ -107,6 +107,10 @@ export default {
 }
 </script>
 <style scoped>
+.mail-config {
+  height: calc(100vh - 115px);
+  overflow-y: scroll;
+}
 .btn {
   margin-left: 20px;
 }

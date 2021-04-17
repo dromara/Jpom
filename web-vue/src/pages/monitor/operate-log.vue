@@ -49,7 +49,7 @@
             @change="handleMonitorOptChange"
           />
         </a-form-model-item>
-        <a-form-model-item label="报警联系人" prop="notifyUser">
+        <a-form-model-item label="报警联系人" prop="notifyUser" class="jpom-monitor-notify">
           <a-transfer
             :data-source="userList"
             show-search
@@ -64,6 +64,7 @@
   </div>
 </template>
 <script>
+import { mapGetters } from 'vuex';
 import { getMonitorOperateLogList, getMonitorOperateTypeList, editMonitorOperate, deleteMonitorOperate } from '../../api/monitor';
 import { getAdminUserList } from '../../api/user';
 import { parseTime } from '../../utils/time';
@@ -99,6 +100,9 @@ export default {
     }
   },
   computed: {
+    ...mapGetters([
+      'getGuideFlag'
+    ]),
     monitorUserList() {
       // 深拷贝数组对象，修改属性
       const list = JSON.parse(JSON.stringify(this.userList));
@@ -108,11 +112,27 @@ export default {
       return list;
     }
   },
+  watch: {
+    getGuideFlag() {
+      this.introGuide();
+    }
+  },
   created() {
     this.loadData();
     this.loadOptTypeData();
   },
   methods: {
+    // 页面引导
+    introGuide() {
+      if (this.getGuideFlag) {
+        this.$introJs().setOptions({
+          steps: [{
+            element: document.querySelector('.jpom-monitor-notify'),
+            intro: '这里面的报警联系人如果无法选择，你需要设置管理员的邮箱地址。'
+          }]
+        }).start();
+      }
+    },
     // 加载数据
     loadData() {
       this.loading = true;
@@ -155,6 +175,11 @@ export default {
       this.monitorUserKeys = [];
       this.loadUserList();
       this.editOperateMonitorVisible = true;
+      this.$nextTick(() => {
+        setTimeout(() => {
+          this.introGuide();
+        }, 500);
+      })
     },
     // 修改
     handleEdit(record) {
