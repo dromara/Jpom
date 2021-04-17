@@ -1,8 +1,8 @@
 <template>
   <div class="user-header">
     <a-tooltip placement="left" >
-      <a-button title="只保留当前的 Tab" :disabled="getTabList.length <= 1" class="close-all" @click="closeTabs">关闭 Tab</a-button>
-      <a-button title="回到旧版 UI" class="close-all" @click="toOldIndex">旧版</a-button>
+      <a-button title="只保留当前的 Tab" :disabled="getTabList.length <= 1" class="close-all jpom-close-tabs" @click="closeTabs">关闭 Tab</a-button>
+      <a-button title="回到旧版 UI" class="close-all jpom-old-version" @click="toOldIndex">旧版</a-button>
     </a-tooltip>
     <a-dropdown>
 <!--      <a-avatar-->
@@ -11,7 +11,7 @@
 <!--        :style="{ backgroundColor: '#f56a00', verticalAlign: 'middle' ,fontSize:'40px'}">-->
 <!--        -->
 <!--      </a-avatar>-->
-      <a-button class="ant-dropdown-link" :style="{ backgroundColor: '#f56a00', verticalAlign: 'middle'}" @click="e => e.preventDefault()"  :title="getUserInfo.name">
+      <a-button class="ant-dropdown-link jpom-user-operation" :style="{ backgroundColor: '#f56a00', verticalAlign: 'middle'}" @click="e => e.preventDefault()"  :title="getUserInfo.name">
         {{ avatarName }} <a-icon type="down" />
       </a-button>
       <a-menu slot="overlay">
