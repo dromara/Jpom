@@ -81,9 +81,11 @@ export default {
       if (this.getGuideFlag) {
         this.$introJs().setOptions({
           steps: [{
+            title: 'Jpom 导航助手',
             element: document.querySelector('.jpom-log-tree'),
             intro: '这里是 Jpom Server 端里面的日志文件，点击具体的文件可以在右边的区域查看日志内容。'
           }, {
+            title: 'Jpom 导航助手',
             element: document.querySelector('.ant-tree-node-content-wrapper'),
             intro: '你还可以用右键点击，会弹出一个操作选项的窗口（嗯，入口隐藏的比较深，所以有必要提示一下）。'
           }]

@@ -255,6 +255,7 @@ export default {
       if (this.getGuideFlag) {
         this.$introJs().setOptions({
           steps: [{
+            title: 'Jpom 导航助手',
             element: document.querySelector('.jpom-target-dir'),
             intro: '可以理解为项目打包的目录。如 Jpom 项目执行 <b>mvn clean package</b> 构建命令，构建产物相对路径为：<b>modules/server/target/server-2.4.2-release</b>'
           }]

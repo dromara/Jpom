@@ -106,15 +106,19 @@ export default {
       if (this.getGuideFlag) {
         this.$introJs().setOptions({
           steps: [{
+            title: 'Jpom 导航助手',
             element: document.querySelector('.ant-drawer-title'),
             intro: '这里是这个节点的名称和节点地址'
           }, {
+            title: 'Jpom 导航助手',
             element: document.querySelector('.jpom-node-sider'),
             intro: '这里是这个节点的侧边栏菜单'
           }, {
+            title: 'Jpom 导航助手',
             element: document.querySelector('.jpom-node-content'),
             intro: '这里是这个节点的主要内容展示区'
           }, {
+            title: 'Jpom 导航助手',
             element: document.querySelector('.whitelistDirectory'),
             intro: '白名单目录是一个配置型菜单，里面配置的内容将会在</p><p><b>项目列表</b></br><b>Nginx 列表</b></br><b>证书管理</b></p>菜单里面作为选择项出现。'
           }]

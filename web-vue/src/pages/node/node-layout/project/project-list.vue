@@ -243,12 +243,15 @@ export default {
       if (this.getGuideFlag) {
         this.$introJs().setOptions({
           steps: [{
+            title: 'Jpom 导航助手',
             element: document.querySelector('.jpom-node-project-whitelist'),
             intro: '这里是选择节点设置的白名单目录，白名单的设置在侧边栏菜单<b>系统管理</b>里面。'
           }, {
+            title: 'Jpom 导航助手',
             element: document.querySelector('.jpom-node-project-jdk'),
             intro: '这里选择 JDK，JDK 需要在侧边栏菜单里手动添加，并非直接读取节点服务器里面的 JDK。'
           }, {
+            title: 'Jpom 导航助手',
             element: document.querySelector('.jpom-node-project-token'),
             intro: '这里可以理解为当程序停止时会给这个地址发送一个 HTTP GET 请求。'
           }]

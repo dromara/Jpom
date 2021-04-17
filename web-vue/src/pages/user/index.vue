@@ -97,6 +97,7 @@ export default {
       if (this.getGuideFlag) {
         this.$introJs().setOptions({
           steps: [{
+            title: 'Jpom 导航助手',
             element: document.querySelector('.jpom-role'),
             intro: '如果这里面没有你想要的角色信息，你需要先去添加一个角色。'
           }]

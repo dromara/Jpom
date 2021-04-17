@@ -212,6 +212,7 @@ export default {
       if (this.getGuideFlag) {
         this.$introJs().setOptions({
           steps: [{
+            title: 'Jpom 导航助手',
             element: document.querySelector('.node-config'),
             intro: '节点的账号密码可以通过 agent_authorize.json 文件查看'
           }]

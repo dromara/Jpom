@@ -62,27 +62,34 @@ export default {
       if (this.getGuideFlag) {
         this.$introJs().setOptions({
           steps: [{
-            title: '页面导航系统',
+            title: 'Jpom 导航助手',
             intro: '<p>不要慌，这是新版本的页面导航系统，如果你不想看到，可以点击<b>空白处</b>直接关闭。</p><p>另外，可以使用键盘<b>左右方向键</b>切换上一步或者下一步哦</p>'
           },{
+            title: 'Jpom 导航助手',
             element: document.querySelector('.logo'),
             intro: '点击这里可以切换是否开启导航'
           }, {
+            title: 'Jpom 导航助手',
             element: document.querySelector('.side-menu'),
             intro: '这里是侧边栏菜单区域'
           }, {
+            title: 'Jpom 导航助手',
             element: document.querySelector('.app-header'),
             intro: '这是页面头部，会出现多个 Tab 标签页，以及个人信息等操作按钮'
           }, {
+            title: 'Jpom 导航助手',
             element: document.querySelector('.jpom-close-tabs'),
             intro: '这里的关闭 Tab 按钮只会保留当前激活的 Tab'
           }, {
+            title: 'Jpom 导航助手',
             element: document.querySelector('.jpom-old-version'),
             intro: '点击这里可以返回旧版本，之所以保留这个按钮，是因为新版本在 IE 等浏览器上兼容性不太好'
           }, {
+            title: 'Jpom 导航助手',
             element: document.querySelector('.jpom-user-operation'),
             intro: '这里可以设置当前管理员的邮箱或者其他信息，当然还有退出登录'
           }, {
+            title: 'Jpom 导航助手',
             element: document.querySelector('.layout-content'),
             intro: '这里是主要的内容展示区域'
           }]

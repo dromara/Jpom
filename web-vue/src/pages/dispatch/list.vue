@@ -272,6 +272,7 @@ export default {
       if (this.getGuideFlag) {
         this.$introJs().setOptions({
           steps: [{
+            title: 'Jpom 导航助手',
             element: document.querySelector('.jpom-project-whitelist'),
             intro: '项目白名单需要在侧边栏菜单<b>分发白名单</b>组件里面去设置'
           }]
