@@ -130,10 +130,7 @@ public class LoginInterceptor extends BaseJpomInterceptor {
         if (StrUtil.isEmpty(header)) {
             // 兼容就版本 登录状态
             UserModel user = (UserModel) session.getAttribute(SESSION_NAME);
-            if (user != null) {
-                return true;
-            }
-            return false;
+            return user != null;
         }
         UserService userService = SpringUtil.getBean(UserService.class);
         UserModel userModel = userService.checkUser(header);

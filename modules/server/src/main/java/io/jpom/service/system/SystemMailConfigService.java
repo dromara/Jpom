@@ -29,7 +29,7 @@ public class SystemMailConfigService extends BaseDataService {
     }
 
     /**
-     * 报错配置
+     * 保存配置
      *
      * @param mailAccountModel config
      */

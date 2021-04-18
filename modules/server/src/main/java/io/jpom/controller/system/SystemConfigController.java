@@ -15,8 +15,10 @@ import io.jpom.common.JpomManifest;
 import io.jpom.common.forward.NodeForward;
 import io.jpom.common.forward.NodeUrl;
 import io.jpom.common.interceptor.OptLog;
+import io.jpom.model.data.SystemIpConfigModel;
 import io.jpom.model.log.UserOperateLogV1;
 import io.jpom.permission.SystemPermission;
+import io.jpom.service.system.SystemIpConfigService;
 import io.jpom.system.ExtConfigBean;
 import org.springframework.boot.env.YamlPropertySourceLoader;
 import org.springframework.core.io.ByteArrayResource;
@@ -40,6 +42,13 @@ import java.nio.charset.StandardCharsets;
 @RequestMapping(value = "system")
 public class SystemConfigController extends BaseServerController {
 
+    private final SystemIpConfigService systemIpConfigService;
+
+    public SystemConfigController(SystemIpConfigService systemIpConfigService) {
+        this.systemIpConfigService = systemIpConfigService;
+    }
+
+
     @RequestMapping(value = "config.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
     @SystemPermission
     public String config(String nodeId) throws IOException {
@@ -55,12 +64,12 @@ public class SystemConfigController extends BaseServerController {
     }
 
     /**
-     * @author Hotstrip
-     * get server's config or node's config
-     * 加载服务端或者节点端配置
      * @param nodeId
      * @return
      * @throws IOException
+     * @author Hotstrip
+     * get server's config or node's config
+     * 加载服务端或者节点端配置
      */
     @RequestMapping(value = "config-data", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @SystemPermission
@@ -111,6 +120,33 @@ public class SystemConfigController extends BaseServerController {
                 JpomApplication.restart();
             });
         }
+        return JsonMessage.getString(200, "修改成功");
+    }
+
+
+    /**
+     * 加载服务端的 ip 白名单配置
+     *
+     * @return json
+     */
+    @RequestMapping(value = "ip-config-data", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @SystemPermission
+    @ResponseBody
+    public String ipConfigData() {
+        SystemIpConfigModel config = systemIpConfigService.getConfig();
+        return JsonMessage.getString(200, "加载成功", config);
+    }
+
+    @RequestMapping(value = "save_ip_config.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @ResponseBody
+    @OptLog(UserOperateLogV1.OptType.EditSysConfig)
+    @SystemPermission
+    public String saveIpConfig(String allowed, String prohibited) {
+        SystemIpConfigModel systemIpConfigModel = new SystemIpConfigModel();
+        systemIpConfigModel.setAllowed(StrUtil.emptyToDefault(allowed, StrUtil.EMPTY));
+        systemIpConfigModel.setProhibited(StrUtil.emptyToDefault(prohibited, StrUtil.EMPTY));
+        systemIpConfigService.save(systemIpConfigModel);
+        //
         return JsonMessage.getString(200, "修改成功");
     }
 }

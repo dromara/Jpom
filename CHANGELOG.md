@@ -10,6 +10,7 @@
 4. 【Server】添加操作监控相关 api 和页面功能
 5. 【Server】完善 JWT token 过期自动续签功能
 6. 【Server】添加前端页面引导系统（使用 introJs）
+7. 【Server】访问 ip 限制，支持配置白名单和黑名单来控制 ip 访问权限
 
 ### 解决BUG、优化功能
 

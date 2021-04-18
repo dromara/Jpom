@@ -125,6 +125,11 @@ const router = new Router({
       path: '*',
       name: '404',
       component: () => import('../pages/404')
+    },
+    {
+      path: '/system/ipAccess',
+      name: 'ipAccess',
+      component: () => import('../pages/system/ipAccess')
     }
   ]
 })

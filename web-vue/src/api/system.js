@@ -88,6 +88,33 @@ export function getConfigData(nodeId) {
 }
 
 /**
+ * 加载ip配置数据
+ */
+export function getIpConfigData() {
+  return axios({
+    url: '/system/ip-config-data',
+    method: 'post',
+    data: {}
+  })
+}
+
+/**
+ * 编辑配置
+ * @param {JSON} params {
+ *  allowed: 允许访问，白名单ip,
+ *  prohibited: 禁止访问，黑名单ip
+ * }
+ */
+export function editIpConfig(params) {
+  return axios({
+    url: '/system/save_ip_config.json',
+    method: 'post',
+    data: params
+  })
+}
+
+
+/**
  * 编辑配置
  * @param {
  *  nodeId: 节点 ID,

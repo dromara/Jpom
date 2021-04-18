@@ -8,7 +8,7 @@ import store from '../store/index';
 
 // 不需要鉴权的名单
 const whiteList = [
-  '/login', '/install'
+  '/login', '/install','/system/ipAccess'
 ]
 
 router.beforeEach((to, from, next) => {

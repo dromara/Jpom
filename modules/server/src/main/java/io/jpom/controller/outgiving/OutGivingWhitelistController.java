@@ -53,16 +53,16 @@ public class OutGivingWhitelistController extends BaseServerController {
     }
 
     /**
+     * @return
      * @author Hotstrip
      * get whiteList data
      * 白名单数据接口
-     * @return
      */
     @RequestMapping(value = "white-list", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @SystemPermission
     @ResponseBody
     public String whiteList() {
-        Map<String, String> map = new HashMap();
+        Map<String, String> map = new HashMap<>();
         UserModel userModel = getUser();
         ServerWhitelist serverWhitelist = serverWhitelistServer.getWhitelist();
         if (serverWhitelist != null && userModel.isSystemUser()) {

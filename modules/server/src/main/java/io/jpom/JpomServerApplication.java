@@ -3,6 +3,7 @@ package io.jpom;
 import cn.jiangzeyin.common.EnableCommonBoot;
 import cn.jiangzeyin.common.spring.event.ApplicationEventLoad;
 import io.jpom.common.Type;
+import io.jpom.common.interceptor.IpInterceptor;
 import io.jpom.common.interceptor.LoginInterceptor;
 import io.jpom.common.interceptor.OpenApiInterceptor;
 import io.jpom.common.interceptor.PermissionInterceptor;
@@ -32,6 +33,7 @@ public class JpomServerApplication implements ApplicationEventLoad {
         JpomApplication jpomApplication = new JpomApplication(Type.Server, JpomServerApplication.class, args);
         jpomApplication
                 // 拦截器
+                .addInterceptor(IpInterceptor.class)
                 .addInterceptor(LoginInterceptor.class)
                 .addInterceptor(OpenApiInterceptor.class)
                 .addInterceptor(PermissionInterceptor.class)

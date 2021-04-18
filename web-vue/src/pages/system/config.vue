@@ -1,5 +1,5 @@
 <template>
-  <a-tabs default-active-key="1" @change="callback">
+  <a-tabs default-active-key="1">
     <a-tab-pane key="1" tab="系统配置">
       <a-form-model ref="editForm" :model="temp" :label-col="{ span: 2 }" :wrapper-col="{ span: 20 }">
         <a-form-model-item label="配置内容" prop="content">
@@ -14,20 +14,20 @@
     <a-tab-pane key="2" tab="IP白名单配置">
         <a-form-model ref="editForm" :model="temp" :label-col="{ span: 2 }" :wrapper-col="{ span: 20 }">
           <a-form-model-item label="IP白名单" prop="content">
-            <a-input v-model="ipTemp.allowed" type="textarea" :rows="10" class="ip-list-config" placeholder="请输入IP白名单,多个使用换行"/>
+            <a-input v-model="ipTemp.allowed" type="textarea" :rows="10" class="ip-list-config" placeholder="请输入IP白名单,多个使用换行,0.0.0.0 是开发所有IP,支持配置IP段 192.168.1.1/192.168.1.254"/>
           </a-form-model-item>
           <a-form-model-item label="IP黑名单" prop="content">
-            <a-input v-model="ipTemp.prohibited" type="textarea" :rows="10" class="ip-list-config" placeholder="请输入IP黑名单,多个使用换行"/>
+            <a-input v-model="ipTemp.prohibited" type="textarea" :rows="10" class="ip-list-config" placeholder="请输入IP黑名单,多个使用换行,支持配置IP段 192.168.1.1/192.168.1.254"/>
           </a-form-model-item>
           <a-form-model-item :wrapper-col="{ span: 14, offset: 2 }">
-            <a-button type="primary" class="btn" :disabled="submitAble">保存</a-button>
+            <a-button type="primary" class="btn" :disabled="submitIpAble" @click="onSubmitIp()">保存</a-button>
           </a-form-model-item>
         </a-form-model>
     </a-tab-pane>
   </a-tabs>
 </template>
 <script>
-import { getConfigData, editConfig } from '../../api/system';
+import { getConfigData, editConfig , getIpConfigData, editIpConfig} from '../../api/system';
 export default {
   data() {
     return {
@@ -38,7 +38,8 @@ export default {
         allowed: '',
         prohibited: ''
       },
-      submitAble: false
+      submitAble: false,
+      submitIpAble: false
     }
   },
   mounted() {
@@ -52,6 +53,13 @@ export default {
           this.temp.content = res.data;
         }
       })
+      getIpConfigData().then(res=>{
+        if (res.code === 200) {
+          if(res.data){
+            this.ipTemp = res.data;
+          }
+        }
+      });
     },
     // submit
     onSubmit(restart) {
@@ -68,6 +76,22 @@ export default {
         }
         // button recover
         this.submitAble = false;
+      })
+    },
+    // submit ip config
+    onSubmitIp() {
+      // disabled submit button
+      this.submitIpAble = true;
+      editIpConfig(this.ipTemp).then(res => {
+        if (res.code === 200) {
+          // 成功
+          this.$notification.success({
+            message: res.msg,
+            duration: 2
+          });
+        }
+        // button recover
+        this.submitIpAble = false;
       })
     }
   }
