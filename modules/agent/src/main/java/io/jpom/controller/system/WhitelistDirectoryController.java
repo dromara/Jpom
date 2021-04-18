@@ -52,59 +52,59 @@ public class WhitelistDirectoryController extends BaseJpomController {
         return save(project, certificateList, nList).toString();
     }
 
-    private JsonMessage save(String project, List<String> certificate, List<String> nginx) {
+    private JsonMessage<String> save(String project, List<String> certificate, List<String> nginx) {
         if (StrUtil.isEmpty(project)) {
-            return new JsonMessage(401, "项目路径白名单不能为空");
+            return new JsonMessage<>(401, "项目路径白名单不能为空");
         }
         List<String> list = StrSpliter.splitTrim(project, StrUtil.LF, true);
         if (list == null || list.size() <= 0) {
-            return new JsonMessage(401, "项目路径白名单不能为空");
+            return new JsonMessage<>(401, "项目路径白名单不能为空");
         }
         return save(list, certificate, nginx);
     }
 
 
-    private JsonMessage save(List<String> projects, List<String> certificate, List<String> nginx) {
+    private JsonMessage<String> save(List<String> projects, List<String> certificate, List<String> nginx) {
         List<String> projectArray;
         {
             projectArray = AgentWhitelist.covertToArray(projects);
             if (projectArray == null) {
-                return new JsonMessage(401, "项目路径白名单不能位于Jpom目录下");
+                return new JsonMessage<>(401, "项目路径白名单不能位于Jpom目录下");
             }
             if (projectArray.isEmpty()) {
-                return new JsonMessage(401, "项目路径白名单不能为空");
+                return new JsonMessage<>(401, "项目路径白名单不能为空");
             }
             String error = findStartsWith(projectArray, 0);
             if (error != null) {
-                return new JsonMessage(401, "白名单目录中不能存在包含关系：" + error);
+                return new JsonMessage<>(401, "白名单目录中不能存在包含关系：" + error);
             }
         }
         List<String> certificateArray = null;
         if (certificate != null && !certificate.isEmpty()) {
             certificateArray = AgentWhitelist.covertToArray(certificate);
             if (certificateArray == null) {
-                return new JsonMessage(401, "证书路径白名单不能位于Jpom目录下");
+                return new JsonMessage<>(401, "证书路径白名单不能位于Jpom目录下");
             }
             if (certificateArray.isEmpty()) {
-                return new JsonMessage(401, "证书路径白名单不能为空");
+                return new JsonMessage<>(401, "证书路径白名单不能为空");
             }
             String error = findStartsWith(certificateArray, 0);
             if (error != null) {
-                return new JsonMessage(401, "证书目录中不能存在包含关系：" + error);
+                return new JsonMessage<>(401, "证书目录中不能存在包含关系：" + error);
             }
         }
         List<String> nginxArray = null;
         if (nginx != null && !nginx.isEmpty()) {
             nginxArray = AgentWhitelist.covertToArray(nginx);
             if (nginxArray == null) {
-                return new JsonMessage(401, "nginx路径白名单不能位于Jpom目录下");
+                return new JsonMessage<>(401, "nginx路径白名单不能位于Jpom目录下");
             }
             if (nginxArray.isEmpty()) {
-                return new JsonMessage(401, "nginx路径白名单不能为空");
+                return new JsonMessage<>(401, "nginx路径白名单不能为空");
             }
             String error = findStartsWith(nginxArray, 0);
             if (error != null) {
-                return new JsonMessage(401, "nginx目录中不能存在包含关系：" + error);
+                return new JsonMessage<>(401, "nginx目录中不能存在包含关系：" + error);
             }
         }
         AgentWhitelist agentWhitelist = whitelistDirectoryService.getWhitelist();
@@ -115,7 +115,7 @@ public class WhitelistDirectoryController extends BaseJpomController {
         agentWhitelist.setCertificate(certificateArray);
         agentWhitelist.setNginx(nginxArray);
         whitelistDirectoryService.saveWhitelistDirectory(agentWhitelist);
-        return new JsonMessage(200, "保存成功");
+        return new JsonMessage<>(200, "保存成功");
     }
 
     /**
