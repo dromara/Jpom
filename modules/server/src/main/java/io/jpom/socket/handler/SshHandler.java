@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -115,43 +116,45 @@ public class SshHandler extends BaseHandler {
         JSONObject first = new JSONObject();
         first.put("data", msg);
         // 触发消息
-        this.handleTextMessage(session, new TextMessage(first.toJSONString()));
+        //this.handleTextMessage(session, new TextMessage(first.toJSONString()));
     }
 
     @Override
     protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
-        JSONObject jsonObject = JSONObject.parseObject(message.getPayload());
-        if (jsonObject.containsKey("resize")) {
-            return;
-        }
-        String data = jsonObject.getString("data");
-        if (StrUtil.isEmpty(data)) {
-            return;
-        }
         HandlerItem handlerItem = HANDLER_ITEM_CONCURRENT_HASH_MAP.get(session.getId());
-        // 判断权限
-        if (this.checkCommand(handlerItem, data)) {
-            return;
-        }
-        if ("\t".equals(data)) {
-            this.sendCommand(handlerItem, data);
-            return;
-        }
-        if (StrUtil.CR.equals(data)) {
-            if (handlerItem.dataToDst.length() > 0) {
-                data = StrUtil.CRLF;
-            }
-        } else {
-            handlerItem.dataToDst.append(data);
-            // 判断权限
-            if (this.checkCommand(handlerItem, null)) {
-                return;
-            }
-        }
-        this.sendCommand(handlerItem, data);
-        if (!StrUtil.CRLF.equals(data) && !StrUtil.CR.equals(data)) {
-            sendBinary(handlerItem.session, data);
-        }
+        this.sendCommand(handlerItem, message.getPayload());
+//        JSONObject jsonObject = JSONObject.parseObject(message.getPayload());
+//        if (jsonObject.containsKey("resize")) {
+//            return;
+//        }
+//        String data = jsonObject.getString("data");
+//        if (StrUtil.isEmpty(data)) {
+//            return;
+//        }
+//        HandlerItem handlerItem = HANDLER_ITEM_CONCURRENT_HASH_MAP.get(session.getId());
+//        // 判断权限
+//        if (this.checkCommand(handlerItem, data)) {
+//            return;
+//        }
+//        if ("\t".equals(data)) {
+//            this.sendCommand(handlerItem, data);
+//            return;
+//        }
+//        if (StrUtil.CR.equals(data)) {
+//            if (handlerItem.dataToDst.length() > 0) {
+//                data = StrUtil.CRLF;
+//            }
+//        } else {
+//            handlerItem.dataToDst.append(data);
+//            // 判断权限
+//            if (this.checkCommand(handlerItem, null)) {
+//                return;
+//            }
+//        }
+//        this.sendCommand(handlerItem, data);
+//        if (!StrUtil.CRLF.equals(data) && !StrUtil.CR.equals(data)) {
+//            sendBinary(handlerItem.session, data);
+//        }
     }
 
     private void sendCommand(HandlerItem handlerItem, String data) throws IOException {
@@ -210,25 +213,31 @@ public class SshHandler extends BaseHandler {
 
         @Override
         public void run() {
-            final String[] preMsg = {""};
+//            final String[] preMsg = {""};
             try {
-                IoUtil.readLines(inputStream, charset, (LineHandler) msg -> {
-                    msg = StrUtil.CRLF + msg;
-                    if (preMsg[0].equals(msg)) {
-                        sendBinary(session, msg);
-                        return;
-                    }
-                    //
-                    if (msg.equals(preMsg[0] + dataToDst.toString())) {
-                        return;
-                    }
-                    if (StrUtil.isEmpty(msg) || StrUtil.CRLF.equals(msg)) {
-                        return;
-                    }
-                    preMsg[0] = msg;
-                    sendBinary(session, msg);
-                    dataToDst.setLength(0);
-                });
+//                IoUtil.readLines(inputStream, charset, (LineHandler) msg -> {
+//                    msg = StrUtil.CRLF + msg;
+//                    if (preMsg[0].equals(msg)) {
+//                        sendBinary(session, msg);
+//                        return;
+//                    }
+//                    //
+//                    if (msg.equals(preMsg[0] + dataToDst.toString())) {
+//                        return;
+//                    }
+//                    if (StrUtil.isEmpty(msg) || StrUtil.CRLF.equals(msg)) {
+//                        return;
+//                    }
+//                    preMsg[0] = msg;
+//                    sendBinary(session, msg);
+//                    dataToDst.setLength(0);
+//                });
+                byte[] buffer = new byte[1024];
+                int i;
+                //如果没有数据来，线程会一直阻塞在这个地方等待数据。
+                while ((i = inputStream.read(buffer)) != -1) {
+                    sendBinary(session, new String(Arrays.copyOfRange(buffer, 0, i)));
+                }
             } catch (Exception e) {
                 if (!this.openSession.isConnected()) {
                     return;
@@ -256,10 +265,10 @@ public class SshHandler extends BaseHandler {
 
     private static void sendBinary(WebSocketSession session, String msg) {
         // 判断退格键
-        char[] chars = msg.toCharArray();
-        if (chars.length == 1 && chars[0] == 127) {
-            return;
-        }
+//        char[] chars = msg.toCharArray();
+//        if (chars.length == 1 && chars[0] == 127) {
+//            return;
+//        }
         synchronized (session.getId()) {
             BinaryMessage byteBuffer = new BinaryMessage(msg.getBytes());
             try {
