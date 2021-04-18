@@ -54,7 +54,6 @@ export default {
   mounted() {
     this.checkSystem();
     this.introGuide();
-    this.$introJs().start();
   },
   methods: {
     // 页面引导

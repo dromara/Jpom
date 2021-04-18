@@ -73,7 +73,9 @@ export default {
     })
   },
   beforeDestroy() {
-    this.socket.close();
+    if (this.socket) {
+      this.socket.close();
+    }
   },
   methods: {
     // 页面引导

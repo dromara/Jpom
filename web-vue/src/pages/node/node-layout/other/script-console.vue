@@ -46,7 +46,9 @@ export default {
     this.initWebSocket();
   },
   beforeDestroy() {
-    this.socket.close();
+    if (this.socket) {
+      this.socket.close();
+    }
   },
   methods: {
     // 初始化

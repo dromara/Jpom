@@ -15,7 +15,7 @@ const app = {
     activeTabKey: localStorage.getItem(ACTIVE_TAB_KEY),
     tabList: JSON.parse(localStorage.getItem(TAB_LIST_KEY)),
     activeMenuKey: localStorage.getItem(ACTIVE_MENU_KEY),
-    guideFlag: localStorage.getItem(GUIDE_FLAG_KEY) === 'true' ? true : false || false
+    guideFlag: localStorage.getItem(GUIDE_FLAG_KEY) === 'true' ? true : false || true
   },
   mutations: {
     setActiveTabKey(state, activeKey) {
