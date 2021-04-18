@@ -132,7 +132,9 @@ export default {
             intro: '这里面的报警联系人如果无法选择，你需要设置管理员的邮箱地址。'
           }]
         }).start();
+        return false;
       }
+      this.$introJs().exit();
     },
     // 加载数据
     loadData() {

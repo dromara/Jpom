@@ -91,7 +91,9 @@ export default {
             intro: '你还可以用右键点击，会弹出一个操作选项的窗口（嗯，入口隐藏的比较深，所以有必要提示一下）。'
           }]
         }).start();
+        return false;
       }
+      this.$introJs().exit();
     },
     // 加载数据
     loadData() {

@@ -15,7 +15,7 @@ const app = {
     activeTabKey: localStorage.getItem(ACTIVE_TAB_KEY),
     tabList: JSON.parse(localStorage.getItem(TAB_LIST_KEY)),
     activeMenuKey: localStorage.getItem(ACTIVE_MENU_KEY),
-    guideFlag: localStorage.getItem(GUIDE_FLAG_KEY) === 'true' ? true : false || true
+    guideFlag: localStorage.getItem(GUIDE_FLAG_KEY) === 'true' ? true : false
   },
   mutations: {
     setActiveTabKey(state, activeKey) {
@@ -105,9 +105,12 @@ const app = {
     },
     // 切换引导开关
     toggleGuideFlag({commit, state}) {
-      const flag = state.guideFlag;
-      commit('setGuideFlag', !flag);
-      localStorage.setItem(GUIDE_FLAG_KEY, !flag);
+      return new Promise((resolve) => {
+        const flag = state.guideFlag;
+        commit('setGuideFlag', !flag);
+        localStorage.setItem(GUIDE_FLAG_KEY, !flag);
+        resolve();
+      })
     }
   },
   getters: {

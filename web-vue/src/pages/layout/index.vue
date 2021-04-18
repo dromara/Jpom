@@ -38,7 +38,7 @@ export default {
   },
   data() {
     return {
-      collapsed: false,
+      collapsed: false
     }
   },
   computed: {
@@ -60,6 +60,7 @@ export default {
     introGuide() {
       if (this.getGuideFlag) {
         this.$introJs().setOptions({
+          hidePrev: true,
           steps: [{
             title: 'Jpom 导航助手',
             intro: '<p>不要慌，这是新版本的页面导航系统，如果你不想看到，可以点击<b>空白处</b>直接关闭。</p><p>另外，可以使用键盘<b>左右方向键</b>切换上一步或者下一步哦</p>'
@@ -93,7 +94,9 @@ export default {
             intro: '这里是主要的内容展示区域'
           }]
         }).start();
+        return false;
       }
+      this.$introJs().exit();
     },
     // 切换引导
     toggleGuide() {

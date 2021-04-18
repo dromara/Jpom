@@ -256,7 +256,9 @@ export default {
             intro: '这里可以理解为当程序停止时会给这个地址发送一个 HTTP GET 请求。'
           }]
         }).start();
+        return false;
       }
+      this.$introJs().exit();
     },
     // 加载分组列表
     loadGroupList() {

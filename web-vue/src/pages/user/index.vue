@@ -102,7 +102,9 @@ export default {
             intro: '如果这里面没有你想要的角色信息，你需要先去添加一个角色。'
           }]
         }).start();
+        return false;
       }
+      this.$introJs().exit();
     },
     // 加载数据
     loadData() {

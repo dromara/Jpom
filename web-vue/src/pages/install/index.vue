@@ -65,7 +65,9 @@ export default {
             intro: '系统管理员密码的强度有要求数字+字母+符号'
           }]
         }).start();
+        return false;
       }
+      this.$introJs().exit();
     },
     // login
     handleLogin(e) {

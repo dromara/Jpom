@@ -123,7 +123,9 @@ export default {
             intro: '白名单目录是一个配置型菜单，里面配置的内容将会在</p><p><b>项目列表</b></br><b>Nginx 列表</b></br><b>证书管理</b></p>菜单里面作为选择项出现。'
           }]
         }).start();
+        return false;
       }
+      this.$introJs().exit();
     },
     // 加载菜单
     loadNodeMenu() {
