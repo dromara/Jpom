@@ -38,4 +38,8 @@ public class SystemIpConfigService extends BaseDataService {
         String path = getDataFilePath(ServerConfigBean.IP_CONFIG);
         JsonFileUtil.saveJson(path, configModel.toJson());
     }
+
+    public String filePath() {
+        return getDataFilePath(ServerConfigBean.IP_CONFIG);
+    }
 }

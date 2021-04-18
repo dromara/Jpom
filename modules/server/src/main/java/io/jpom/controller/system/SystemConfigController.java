@@ -134,7 +134,14 @@ public class SystemConfigController extends BaseServerController {
     @ResponseBody
     public String ipConfigData() {
         SystemIpConfigModel config = systemIpConfigService.getConfig();
-        return JsonMessage.getString(200, "加载成功", config);
+        JSONObject jsonObject = new JSONObject();
+        if (config != null) {
+            jsonObject.put("allowed", config.getAllowed());
+            jsonObject.put("prohibited", config.getProhibited());
+        }
+        jsonObject.put("path", FileUtil.getAbsolutePath(systemIpConfigService.filePath()));
+        jsonObject.put("ip", getIp());
+        return JsonMessage.getString(200, "加载成功", jsonObject);
     }
 
     @RequestMapping(value = "save_ip_config.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)

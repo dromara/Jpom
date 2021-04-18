@@ -40,7 +40,6 @@ public class IpInterceptor extends BaseJpomInterceptor {
         String prohibited = config.getProhibited();
         if (this.checkIp(prohibited, clientIp, false)) {
             ServletUtil.write(response, JsonMessage.getString(900, "Prohibition of access"), MediaType.APPLICATION_JSON_VALUE);
-
             return false;
         }
         String allowed = config.getAllowed();

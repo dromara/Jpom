@@ -40,6 +40,12 @@ export default {
       randCode: 'randCode.png'
     }
   },
+  beforeCreate() {
+    document.querySelector('body').setAttribute('style', 'background-color: #fbefdf')
+  }, //
+  beforeDestroy() {
+    document.querySelector('body').removeAttribute('style')
+  },
   created() {
     this.checkSystem();
   },
@@ -109,11 +115,12 @@ export default {
 .btn-login {
   width: 120px;
 }
-body {
-  background-color: #fbefdf;
-}
+/*body {*/
+/*  background-color: #fbefdf;*/
+/*}*/
 </style>
 <style>
+
 .ant-card-meta-title {
   font-size: 30px;
 }
