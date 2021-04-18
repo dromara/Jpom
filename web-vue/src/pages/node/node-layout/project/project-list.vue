@@ -242,6 +242,7 @@ export default {
     introGuide() {
       if (this.getGuideFlag) {
         this.$introJs().setOptions({
+          hidePrev: true,
           steps: [{
             title: 'Jpom 导航助手',
             element: document.querySelector('.jpom-node-project-whitelist'),

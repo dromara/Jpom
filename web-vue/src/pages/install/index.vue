@@ -49,6 +49,7 @@ export default {
     introGuide() {
       if (this.getGuideFlag) {
         this.$introJs().setOptions({
+          hidePrev: true,
           steps: [ {
             title: 'Jpom 导航助手',
             intro: '不要慌，出现这个页面表示你没有设置系统管理员信息，或者需要重置管理员信息'
