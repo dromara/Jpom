@@ -88,7 +88,10 @@ export function getNodeTop(nodeId) {
   return axios({
     url: '/node/getTop',
     method: 'post',
-    data: {nodeId}
+    data: {nodeId},
+    headers: {
+      loading: 'no'
+    }
   })
 }
 
@@ -97,7 +100,10 @@ export function getProcessList(nodeId) {
   return axios({
     url: '/node/processList',
     method: 'post',
-    data: {nodeId}
+    data: {nodeId},
+    headers: {
+      loading: 'no'
+    }
   })
 }
 
