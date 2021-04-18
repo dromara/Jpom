@@ -109,11 +109,11 @@ export default {
 .btn-login {
   width: 120px;
 }
-</style>
-<style>
 body {
   background-color: #fbefdf;
 }
+</style>
+<style>
 .ant-card-meta-title {
   font-size: 30px;
 }
