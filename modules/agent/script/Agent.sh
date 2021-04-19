@@ -26,7 +26,7 @@ fi
 if [ -f /etc/profile ]; then
     . /etc/profile
 fi
-if [-f /etc/bashrc ]; then
+if [ -f /etc/bashrc ]; then
     . /etc/bashrc
 fi
 Tag="KeepBx-Agent-System-JpomAgentApplication"
