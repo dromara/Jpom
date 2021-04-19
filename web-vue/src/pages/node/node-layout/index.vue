@@ -54,6 +54,7 @@ import Cache from './system/cache';
 import Log from './system/log.vue';
 import Upgrade from './system/upgrade.vue';
 import ConfigFile from './system/config-file.vue';
+import { GUIDE_NODE_USED_KEY } from '../../../utils/const';
 export default {
   components: {
     Welcome,
@@ -103,7 +104,9 @@ export default {
   methods: {
     // 页面引导
     introGuide() {
-      if (this.getGuideFlag) {
+      const used = localStorage.getItem(GUIDE_NODE_USED_KEY) === 'true';
+      // 如果要显示引导并且没有使用过
+      if (this.getGuideFlag && !used) {
         this.$introJs().setOptions({
           hidePrev: true,
           steps: [{
@@ -123,7 +126,9 @@ export default {
             element: document.querySelector('.whitelistDirectory'),
             intro: '白名单目录是一个配置型菜单，里面配置的内容将会在</p><p><b>项目列表</b></br><b>Nginx 列表</b></br><b>证书管理</b></p>菜单里面作为选择项出现。'
           }]
-        }).start();
+        }).start().onexit(() => {
+          localStorage.setItem(GUIDE_NODE_USED_KEY, 'true');
+        });
         return false;
       }
       this.$introJs().exit();

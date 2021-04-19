@@ -30,6 +30,7 @@ import SideMenu from './side-menu';
 import UserHeader from './user-header';
 import ContentTab from './content-tab';
 import { checkSystem } from '../../api/install';
+import { GUIDE_HOME_USED_KEY } from '../../utils/const';
 export default {
   components: {
     SideMenu,
@@ -58,7 +59,9 @@ export default {
   methods: {
     // 页面引导
     introGuide() {
-      if (this.getGuideFlag) {
+      const used = localStorage.getItem(GUIDE_HOME_USED_KEY) === 'true';
+      // 如果要显示引导并且没有使用过
+      if (this.getGuideFlag && !used) {
         this.$introJs().setOptions({
           hidePrev: true,
           steps: [{
@@ -93,7 +96,9 @@ export default {
             element: document.querySelector('.layout-content'),
             intro: '这里是主要的内容展示区域'
           }]
-        }).start();
+        }).start().onexit(() => {
+          localStorage.setItem(GUIDE_HOME_USED_KEY, 'true');
+        });
         return false;
       }
       this.$introJs().exit();
@@ -105,6 +110,8 @@ export default {
           message: '开启页面导航',
           duration: 2
         });
+        // 重置 GUIDE_HOME_USED_KEY
+        localStorage.setItem(GUIDE_HOME_USED_KEY, 'false');
       } else {
         this.$notification.success({
           message: '关闭页面导航',
