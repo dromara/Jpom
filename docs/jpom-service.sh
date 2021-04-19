@@ -33,18 +33,18 @@ source /etc/profile' >> $FILE_NAME
 
 echo "# 启动程序
 function start() {
-    $ROOT_PATH/Server.sh start
+    ${ROOT_PATH}Server.sh start
 }" >> $FILE_NAME
 
 echo "# 停止程序
 function stop() {
-    $ROOT_PATH/Server.sh stop
+    ${ROOT_PATH}Server.sh stop
     status
 }" >> $FILE_NAME
 
 echo "# 获取程序状态
 function status() {
-    $ROOT_PATH/Server.sh status
+    ${ROOT_PATH}Server.sh status
 }" >> $FILE_NAME
 
 echo '# 提示使用语法
@@ -76,4 +76,4 @@ esac
 
 exit $RETVAL' >> $FILE_NAME
 
-rm -f jpom-server.sh
+rm -f jpom-service.sh
