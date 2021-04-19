@@ -25,7 +25,7 @@
 
 source /etc/profile
 
-RUN_PATH="$RUN_PATH"
+RUN_PATH="JPOM_RUN_PATH"
 
 # 启动程序
 function start() {
