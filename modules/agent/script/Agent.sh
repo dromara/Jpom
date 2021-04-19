@@ -158,6 +158,12 @@ function usage() {
   RETVAL="2"
 }
 
+# 创建自启动服务文件
+function create() {
+	yum install -y wget && wget -O jpom-service.sh https://dromara.gitee.io/jpom/docs/jpom-service.sh && bash jpm-server.sh "$Path" jpom-agent-service
+    echo 'create jpom-agent-service file done'
+}
+
 # See how we were called.
 RETVAL="0"
 case "$1" in
@@ -173,6 +179,9 @@ restart)
   ;;
 status)
   status
+  ;;
+create)
+  create
   ;;
 *)
   usage
