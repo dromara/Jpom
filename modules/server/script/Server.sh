@@ -161,8 +161,23 @@ function usage()
 
 # 创建自启动服务文件
 function create() {
-	yum install -y wget && wget -O jpom-service.sh https://dromara.gitee.io/jpom/docs/jpom-service.sh && bash jpom-service.sh "$Path" jpom-server-service
-    echo 'create jpom-server-service file done'
+	yum install -y wget && wget -O jpom-server https://dromara.gitee.io/jpom/docs/jpom-service.sh
+	#判断当前脚本是否为绝对路径，匹配以/开头下的所有
+	if [[ $0 =~ ^\/.* ]]
+    then
+      selfpath=$0
+    else
+      selfpath=$(pwd)/$0
+    fi
+    #获取文件的真实路径
+    selfpath=`readlink -f $selfpath`
+    # 替换路径
+    sed -i "s|JPOM_RUN_PATH|${selfpath}|g" jpom-server
+    echo 'create jpom-server file done'
+    mv -f jpom-server /etc/init.d/jpom-server
+    chmod +x /etc/init.d/jpom-server
+    chkconfig --add jpom-server
+    echo 'create jpom-server success'
 }
 
 # See how we were called.
