@@ -209,7 +209,7 @@ function status() {
 
 	echo '# 提示使用语法
 function usage() {
-    echo "Usage: $0 {start|stop|restart|status}"
+    echo "Usage: $0 {start|stop|restart|status|create}"
     RETVAL="2"
 }' >> jpomserverd
 
