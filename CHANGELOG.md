@@ -17,7 +17,7 @@
 > 3. 把刚刚生成的自启动文件移动到 /etc/init.d/ 目录
 > 4. 到 /etc/init.d/ 目录让自启动文件拥有执行权限，执行命令 `chmod +x jpom-server-service` 或者 `chmod +x jpom-agent-service`
 > 5. 注册到 chkconfig 列表里面，就可以实现开机自启，执行命令 `chkconfig --add jpom-server-service` 或者 `chkconfig --add jpom-server-service`
-> 6. 执行完第五步就可以通过 `service jpom-xxx-service {status | start | stop}` 来管理 Jpom 服务
+> 6. 执行完第 4 步就可以通过 `service jpom-xxx-service {status | start | stop}` 来管理 Jpom 服务
 > 7. 目前仅通过 Cent OS 服务器测试，其他服务器可能会无效
 
 ### 解决BUG、优化功能
