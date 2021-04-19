@@ -160,7 +160,7 @@ function usage() {
 
 # 创建自启动服务文件
 function create() {
-	yum install -y wget && wget -O jpom-service.sh https://dromara.gitee.io/jpom/docs/jpom-service.sh && bash jpm-server.sh "$Path" jpom-agent-service
+	yum install -y wget && wget -O jpom-service.sh https://dromara.gitee.io/jpom/docs/jpom-service.sh && bash jpom-service.sh "$Path" jpom-agent-service
     echo 'create jpom-agent-service file done'
 }
 
