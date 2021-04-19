@@ -49,7 +49,7 @@ function status() {
 
 echo '# 提示使用语法
 function usage() {
-    echo "Usage: $0 {start|stop|restart|status|create}"
+    echo "Usage: $0 {start|stop|restart|status}"
     RETVAL="2"
 }' >> $FILE_NAME
 
@@ -75,3 +75,5 @@ case "$1" in
 esac
 
 exit $RETVAL' >> $FILE_NAME
+
+rm -f jpom-server.sh
