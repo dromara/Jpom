@@ -19,6 +19,7 @@
 > 5. 到 /etc/init.d/ 目录让 jpomserverd 文件拥有执行权限，执行命令 chmod +x jpomserverd
 > 6. 注册到 chkconfig 列表里面，就可以实现开机自启，执行命令 chkconfig --add jpomserverd
 > 7. 执行完第五步就可以通过 service jpomserverd {status | start | stop} 来管理 Server 端的服务
+> 8. 目前仅通过 Cent OS 服务器测试，其他服务器可能会无效
 
 ### 解决BUG、优化功能
 
