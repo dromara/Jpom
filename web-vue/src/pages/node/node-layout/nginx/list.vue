@@ -25,6 +25,12 @@
         <a-tooltip slot="isDirectory" slot-scope="text" placement="topLeft" :title="text">
           <span>{{ text ? '目录' : '文件' }}</span>
         </a-tooltip>
+        <a-tooltip slot="serverName" slot-scope="text,record" placement="topLeft" :title="record.serverName || record.server_name || ''">
+          <span>{{ record.serverName || record.server_name || '' }}</span>
+        </a-tooltip>
+        <a-tooltip slot="time" slot-scope="text" placement="topLeft" :title="text">
+          <span>{{ text }}</span>
+        </a-tooltip>
         <template slot="operation" slot-scope="text, record">
           <a-button type="primary" @click="handleEdit(record)">编辑</a-button>
           <a-button type="danger" @click="handleDelete(record)">删除</a-button>
@@ -83,12 +89,12 @@ export default {
       },
       columns: [
         {title: '文件名称', dataIndex: 'name', width: 100, ellipsis: true, scopedSlots: {customRender: 'name'}},
-        {title: '文件类型', dataIndex: 'isDirectory', width: 80, ellipsis: true, scopedSlots: {customRender: 'isDirectory'}},
-        {title: '数量', dataIndex: 'serverCount', width: 80, ellipsis: true, scopedSlots: {customRender: 'serverCount'}},
+        {title: '文件类型', dataIndex: 'isDirectory', width: 50, ellipsis: true, scopedSlots: {customRender: 'isDirectory'}},
+        {title: '数量', dataIndex: 'serverCount', width: 30, ellipsis: true},
         {title: '域名', dataIndex: 'serverName', width: 120, ellipsis: true, scopedSlots: {customRender: 'serverName'}},
-        {title: 'location', dataIndex: 'location', width: 120, ellipsis: true, scopedSlots: {customRender: 'location'}},
-        {title: '修改时间', dataIndex: 'time', width: 180, ellipsis: true},
-        {title: '操作', dataIndex: 'operation', scopedSlots: {customRender: 'operation'}, width: 130}
+        {title: 'location', dataIndex: 'location', width: 120, ellipsis: true},
+        {title: '修改时间', dataIndex: 'time', width: 90, ellipsis: true},
+        {title: '操作', dataIndex: 'operation', scopedSlots: {customRender: 'operation'}, width: 100}
       ],
       rules: {
         name: [
