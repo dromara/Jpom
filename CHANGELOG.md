@@ -11,6 +11,14 @@
 5. 【Server】完善 JWT token 过期自动续签功能
 6. 【Server】添加前端页面引导系统（使用 introJs）
 7. 【Server】访问 ip 限制，支持配置白名单和黑名单来控制 ip 访问权限
+8. 【Server】添加服务自启动脚本创建方案，下面贴一下 Server 端自启动方式：
+> 1. 在 Server 端找到 Server.sh 文件
+> 2. 执行命令 ./Server.sh create
+> 3. 会在当前目录下生成 jpomserverd 文件，这个文件就是自启动的文件
+> 4. 把刚刚生成的 jpomserverd 文件移动到 /etc/init.d/ 目录
+> 5. 到 /etc/init.d/ 目录让 jpomserverd 文件拥有执行权限，执行命令 chmod +x jpomserverd
+> 6. 注册到 chkconfig 列表里面，就可以实现开机自启，执行命令 chkconfig --add jpomserverd
+> 7. 执行完第五步就可以通过 service jpomserverd {status | start | stop} 来管理 Server 端的服务
 
 ### 解决BUG、优化功能
 
