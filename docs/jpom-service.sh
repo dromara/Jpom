@@ -1,9 +1,4 @@
 #!/bin/bash
-
-ROOT_PATH="$1"
-FILE_NAME="$2"
-
-echo '#!/bin/bash
 # chkconfig: 356 10 90
 # description: Jpom-Server service
 # processname: jpom-server
@@ -28,32 +23,32 @@ echo '#!/bin/bash
 # IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.' > $FILE_NAME
 
-echo '# make sure sh could load enviroment variables, in particular, in the init.d directory
-source /etc/profile' >> $FILE_NAME
+source /etc/profile
 
-echo "# 启动程序
+RUN_PATH="$RUN_PATH"
+
+# 启动程序
 function start() {
-    ${ROOT_PATH}Server.sh start
-}" >> $FILE_NAME
+    ${RUN_PATH} start
+}
 
-echo "# 停止程序
+# 停止程序
 function stop() {
-    ${ROOT_PATH}Server.sh stop
-    status
-}" >> $FILE_NAME
+    ${RUN_PATH} stop
+}
 
-echo "# 获取程序状态
+# 获取程序状态
 function status() {
-    ${ROOT_PATH}Server.sh status
-}" >> $FILE_NAME
+    ${RUN_PATH} status
+}
 
-echo '# 提示使用语法
+# 提示使用语法
 function usage() {
     echo "Usage: $0 {start|stop|restart|status}"
     RETVAL="2"
-}' >> $FILE_NAME
+}
 
-echo '# See how we were called.
+# See how we were called.
 RETVAL="0"
 case "$1" in
     start)
@@ -74,6 +69,4 @@ case "$1" in
       ;;
 esac
 
-exit $RETVAL' >> $FILE_NAME
-
-rm -f jpom-service.sh
+exit $RETVAL
