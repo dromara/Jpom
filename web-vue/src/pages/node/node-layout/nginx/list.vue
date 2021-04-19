@@ -19,8 +19,8 @@
         <a-button :disabled="!nginxData.status" type="danger" @click="handleNginxCommand('close')">停止 Nginx</a-button>
       </div>
       <a-table :data-source="fileList" :loading="loading" :columns="columns" :scroll="{x: '80vw', y: tableHeight}" :pagination="false" bordered :rowKey="(record, index) => index">
-        <a-tooltip slot="name" slot-scope="text" placement="topLeft" :title="text">
-          <span>{{ text }}</span>
+        <a-tooltip slot="name" slot-scope="text,record" placement="topLeft" :title="text">
+          <span style="color: blue;" @click="handleEdit(record)">{{ text }}</span>
         </a-tooltip>
         <a-tooltip slot="isDirectory" slot-scope="text" placement="topLeft" :title="text">
           <span>{{ text ? '目录' : '文件' }}</span>
@@ -37,8 +37,8 @@
         </template>
       </a-table>
       <!-- 编辑区 -->
-      <a-modal v-model="editNginxVisible" title="编辑 Nginx 配置文件" @ok="handleEditNginxOk" :maskClosable="false" width="50vw"  >
-        <a-form-model ref="editNginxForm" :rules="rules" :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 16 }">
+      <a-modal v-model="editNginxVisible" title="编辑 Nginx 配置文件" @ok="handleEditNginxOk" :maskClosable="false" width="70vw"  >
+        <a-form-model ref="editNginxForm" :rules="rules" :model="temp" :label-col="{ span: 3 }" :wrapper-col="{ span: 18 }">
           <a-form-model-item label="白名单路径" prop="whitePath">
             <a-select v-model="temp.whitePath" placeholder="请选择白名单路径">
               <a-select-option v-for="element in whiteList" :key="element">{{ element }}</a-select-option>
