@@ -29,17 +29,17 @@ RUN_PATH="JPOM_RUN_PATH"
 
 # 启动程序
 function start() {
-    ${RUN_PATH} start
+   sh ${RUN_PATH} start
 }
 
 # 停止程序
 function stop() {
-    ${RUN_PATH} stop
+   sh ${RUN_PATH} stop
 }
 
 # 获取程序状态
 function status() {
-    ${RUN_PATH} status
+   sh ${RUN_PATH} status
 }
 
 # 提示使用语法
