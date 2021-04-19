@@ -12,13 +12,6 @@
 6. 【Server】添加前端页面引导系统（使用 introJs）
 7. 【Server】访问 ip 限制，支持配置白名单和黑名单来控制 ip 访问权限
 8. 【Server】添加服务自启动脚本创建方案，下面贴一下 Server 端自启动方式：
-> 1. 在 Server 端找到 Server.sh 文件，执行命令 `./Server.sh create`，会在当前目录下生成 jpom-server-service 文件，这个文件就是 Server 端的自启动的文件
-> 2. 在 Agent 端找到 Agent.sh 文件，执行命令 `./Agent.sh create`，会在当前目录下生成 jpom-agent-service 文件，这个文件就是 Agent 端的自启动的文件
-> 3. 把刚刚生成的自启动文件移动到 /etc/init.d/ 目录
-> 4. 到 /etc/init.d/ 目录让自启动文件拥有执行权限，执行命令 `chmod +x jpom-server-service` 或者 `chmod +x jpom-agent-service`
-> 5. 注册到 chkconfig 列表里面，就可以实现开机自启，执行命令 `chkconfig --add jpom-server-service` 或者 `chkconfig --add jpom-server-service`
-> 6. 执行完第 4 步就可以通过 `service jpom-xxx-service {status | start | stop}` 来管理 Jpom 服务
-> 7. 目前仅通过 Cent OS 服务器测试，其他服务器可能会无效
 
 ### 解决BUG、优化功能
 
@@ -43,6 +36,17 @@
 19. 【server】ssh 终端命令交互优化（改优化取消之前版本快捷解压功能，删除命令检查）
 
 > 注意：ssh 终端的删除命令检查临时取消（后面版本会重新优化）
+> 
+
+> 开机自启动：
+> 
+> > 1. 在 Server 端找到 Server.sh 文件，执行命令 `./Server.sh create`，会在当前目录下生成 jpom-server 文件，这个文件就是 Server 端的自启动的文件
+> > 2. 在 Agent 端找到 Agent.sh 文件，执行命令 `./Agent.sh create`，会在当前目录下生成 jpom-agent 文件，这个文件就是 Agent 端的自启动的文件
+> > 3. 把刚刚生成的自启动文件移动到 /etc/init.d/ 目录
+> > 4. 到 /etc/init.d/ 目录让自启动文件拥有执行权限，执行命令 `chmod +x jpom-server` 或者 `chmod +x jpom-agent`
+> > 5. 注册到 chkconfig 列表里面，就可以实现开机自启，执行命令 `chkconfig --add jpom-server` 或者 `chkconfig --add jpom-agent`
+> > 6. 执行完第 4 步就可以通过 `service jpom-xxx-service {status | start | stop}` 来管理 Jpom 服务
+> > 7. 目前仅通过 Cent OS 服务器测试，其他服务器可能会无效
 
 -----------------------------------------------------------
 

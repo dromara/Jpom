@@ -178,13 +178,23 @@ Server.sh start     启动Jpom服务端
 Server.sh stop      停止Jpom服务端
 Server.sh restart   重启Jpom服务端
 Server.sh status    查看Jpom服务端运行状态
+Server.sh create    创建Jpom服务端的应用服务（jpom-server）
 
 # 插件端
 Agent.sh start     启动Jpom插件端
 Agent.sh stop      停止Jpom插件端
 Agent.sh restart   重启Jpom插件端
 Agent.sh status    查看Jpom插件端运行状态
+Agent.sh create    创建Jpom插件端的应用服务（jpom-agent）
 ```
+
+### linux 服务方式管理
+
+> 在使用 `Server.sh create`/`Agent.sh create` 成功后
+> 
+> service jpom-server {status | start | stop}
+> 
+> service jpom-agent {status | start | stop}
 
 ### Jpom 的参数配置
 
