@@ -5,7 +5,8 @@
       <a-button type="primary" @click="handleFilter">刷新</a-button>
     </div>
     <!-- 数据表格 -->
-    <a-table :data-source="list" :loading="loading" :columns="columns" :pagination="false" bordered rowKey="id" class="node-table" @expand="expand">
+    <a-table :data-source="list" :loading="loading" :columns="columns" :pagination="false" bordered rowKey="id"
+      :style="{'max-height': tableHeight + 'px' }" :scroll="{y: tableHeight - 60}" @expand="expand">
       <a-tooltip slot="name" slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>
@@ -22,7 +23,7 @@
         <a-button type="danger" @click="handleDelete(record)">删除</a-button>
       </template>
       <!-- 嵌套表格 -->
-      <a-table slot="expandedRowRender" slot-scope="text" :scroll="{x: '80vw'}" :loading="childLoading" :columns="childColumns" :data-source="text.children"
+      <a-table slot="expandedRowRender" slot-scope="text" :scroll="{x: 1380}" :loading="childLoading" :columns="childColumns" :data-source="text.children"
         :pagination="false" :rowKey="(record, index) => record.path + index">
         <a-tooltip slot="path" slot-scope="text" placement="topLeft" :title="text">
           <span>{{ text }}</span>
@@ -94,6 +95,7 @@ export default {
     return {
       childLoading: false,
       loading: false,
+      tableHeight: '70vh',
       list: [],
       temp: {},
       editTomcatVisible: false,
@@ -134,9 +136,16 @@ export default {
     }
   },
   mounted() {
+    this.calcTableHeight();
     this.handleFilter();
   },
   methods: {
+    // 计算表格高度
+    calcTableHeight() {
+      this.$nextTick(() => {
+        this.tableHeight = window.innerHeight - this.$refs['filter'].clientHeight - 155;
+      })
+    },
     // 加载数据
     loadData() {
       this.list = [];
@@ -420,8 +429,5 @@ export default {
 }
 .ant-btn {
   margin-right: 10px;
-}
-.node-table {
-  overflow-x: auto;
 }
 </style>

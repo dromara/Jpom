@@ -21,8 +21,8 @@
         <a-button type="danger" @click="clearFile">清空项目目录</a-button>
         <a-tag color="#2db7f5" v-if="uploadPath">当前目录: {{ uploadPath }}</a-tag>
       </div>
-      <a-table :data-source="fileList" :loading="loading" :columns="columns" :scroll="{y: tableHeight}"
-        :pagination="false" bordered :rowKey="(record, index) => index">
+      <a-table :data-source="fileList" :loading="loading" :columns="columns" :scroll="{x: 730, y: tableHeight - 60}"
+        :style="{'max-height': tableHeight + 'px' }" :pagination="false" bordered :rowKey="(record, index) => index">
         <a-tooltip slot="filename" slot-scope="text" placement="topLeft" :title="text">
             <span>{{ text }}</span>
         </a-tooltip>
@@ -143,7 +143,7 @@ export default {
   methods: {
     // 计算表格高度
     calcTableHeight() {
-      this.tableHeight = window.innerHeight - this.$refs['filter'].clientHeight - 185;
+      this.tableHeight = window.innerHeight - this.$refs['filter'].clientHeight - 135;
     },
     // 加载数据
     loadData() {

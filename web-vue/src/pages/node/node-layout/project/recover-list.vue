@@ -1,7 +1,8 @@
 <template>
   <div>
     <!-- 数据表格 -->
-    <a-table :data-source="list" :loading="loading" :columns="columns" :scroll="{y: '100%'}" :pagination="false" bordered :rowKey="(record, index) => index">
+    <a-table :data-source="list" :loading="loading" :columns="columns" :style="{'max-height': tableHeight + 'px' }"
+      :scroll="{x: 1040, y: tableHeight - 60}" :pagination="false" bordered :rowKey="(record, index) => index">
       <a-tooltip slot="name" slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>
@@ -44,6 +45,7 @@ export default {
   data() {
     return {
       loading: false,
+      tableHeight: '70vh',
       list: [],
       temp: {},
       detailData: [],
@@ -60,9 +62,16 @@ export default {
     }
   },
   mounted() {
+    this.calcTableHeight();
     this.loadRecoverList();
   },
   methods: {
+    // 计算表格高度
+    calcTableHeight() {
+      this.$nextTick(() => {
+        this.tableHeight = window.innerHeight - 120;
+      })
+    },
     // 加载数据
     loadRecoverList() {
       this.loading = true;

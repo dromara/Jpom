@@ -18,7 +18,8 @@
         <a-button :disabled="!nginxData.status" type="danger" @click="handleNginxCommand('reload')">重新加载 Nginx</a-button>
         <a-button :disabled="!nginxData.status" type="danger" @click="handleNginxCommand('close')">停止 Nginx</a-button>
       </div>
-      <a-table :data-source="fileList" :loading="loading" :columns="columns" :scroll="{x: '80vw', y: tableHeight}" :pagination="false" bordered :rowKey="(record, index) => index">
+      <a-table :data-source="fileList" :loading="loading" :columns="columns" :pagination="false" bordered
+        :style="{'max-height': tableHeight + 'px' }" :scroll="{x: 620, y: tableHeight - 60}" :rowKey="(record, index) => index">
         <a-tooltip slot="name" slot-scope="text,record" placement="topLeft" :title="text">
           <span style="color: blue;" @click="handleEdit(record)">{{ text }}</span>
         </a-tooltip>
@@ -116,7 +117,7 @@ export default {
   methods: {
     // 计算表格高度
     calcTableHeight() {
-      this.tableHeight = window.innerHeight - this.$refs['filter'].clientHeight - 250;
+      this.tableHeight = window.innerHeight - this.$refs['filter'].clientHeight - 175;
     },
     // 加载 Nginx 数据
     loadNginxData() {

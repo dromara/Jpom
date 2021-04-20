@@ -6,7 +6,8 @@
       <a-button type="primary" @click="handleUpload">上传文件</a-button>
     </div>
     <!-- 数据表格 -->
-    <a-table :data-source="list" :loading="loading" :columns="columns" :pagination="false" bordered rowKey="id" class="node-table">
+    <a-table :data-source="list" :loading="loading" :columns="columns" :pagination="false" bordered rowKey="id"
+      :style="{'max-height': tableHeight + 'px' }" :scroll="{x: 930, y: tableHeight - 60}">
       <a-tooltip slot="id" slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>
@@ -60,6 +61,7 @@ export default {
   data() {
     return {
       loading: false,
+      tableHeight: '70vh',
       list: [],
       temp: {},
       editScriptVisible: false,
@@ -87,9 +89,16 @@ export default {
     }
   },
   mounted() {
+    this.calcTableHeight();
     this.handleFilter();
   },
   methods: {
+    // 计算表格高度
+    calcTableHeight() {
+      this.$nextTick(() => {
+        this.tableHeight = window.innerHeight - this.$refs['filter'].clientHeight - 155;
+      })
+    },
     // 加载数据
     loadData() {
       this.list = [];

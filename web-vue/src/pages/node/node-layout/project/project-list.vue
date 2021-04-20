@@ -9,7 +9,8 @@
       <a-button type="primary" @click="handleFilter">刷新</a-button>
     </div>
     <!-- 数据表格 -->
-    <a-table :data-source="list" :loading="loading" :columns="columns" :pagination="false" bordered :rowKey="(record, index) => index" :style="{'max-height': tableHeight + 'px' }">
+    <a-table :data-source="list" :loading="loading" :columns="columns" :pagination="false" bordered :rowKey="(record, index) => index"
+      :style="{'max-height': tableHeight + 'px' }" :scroll="{x: 1330, y: tableHeight - 60}">
       <a-tooltip slot="name" slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>
