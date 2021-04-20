@@ -111,7 +111,7 @@ export default {
       }
     }
   },
-  created() {
+  mounted() {
     this.calcTableHeight();
     this.loadData();
     this.loadCertWhiteList();
