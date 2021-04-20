@@ -1,11 +1,11 @@
 <template>
   <div>
-    <div class="filter">
+    <div ref="filter" class="filter">
       <a-button type="primary" @click="handleAdd">新增</a-button>
       <a-button type="primary" @click="loadData">刷新</a-button>
     </div>
     <!-- 数据表格 -->
-    <a-table :data-source="list" :loading="loading" :columns="columns" :pagination="false" bordered :rowKey="(record, index) => index">
+    <a-table :data-source="list" :loading="loading" :columns="columns" :style="{'max-height': tableHeight + 'px' }" :scroll="{y: tableHeight - 60}" :pagination="false" bordered :rowKey="(record, index) => index">
       <template slot="operation" slot-scope="text, record">
         <a-button :disabled="fullscreeLoading" type="primary" @click="handlePermission(record)">动态</a-button>
         <a-button type="primary" @click="handleEdit(record)">编辑</a-button>
@@ -49,6 +49,7 @@ export default {
   data() {
     return {
       loading: false,
+      tableHeight: '70vh',
       list: [],
       // 权限列表
       featureList: [],
@@ -67,9 +68,9 @@ export default {
         title: 'title'
       },
       columns: [
-        {title: '角色名称', dataIndex: 'name'},
-        {title: '授权人数', dataIndex: 'bindCount'},
-        {title: '修改时间', dataIndex: 'updateTime'},
+        {title: '角色名称', dataIndex: 'name', ellipsis: true, width: 150},
+        {title: '授权人数', dataIndex: 'bindCount', ellipsis: true, width: 150},
+        {title: '修改时间', dataIndex: 'updateTime', ellipsis: true, width: 150},
         {title: '操作', dataIndex: 'operation', scopedSlots: {customRender: 'operation'}, width: '300px'}
       ],
       // 表单校验规则
@@ -81,6 +82,7 @@ export default {
     }
   },
   created() {
+    this.calcTableHeight();
     this.loadData();
     this.loadRoleFeature();
   },
@@ -93,6 +95,12 @@ export default {
           this.list = res.data;
         }
         this.loading = false;
+      })
+    },
+    // 计算表格高度
+    calcTableHeight() {
+      this.$nextTick(() => {
+        this.tableHeight = window.innerHeight - this.$refs['filter'].clientHeight - 135;
       })
     },
     // 加载角色权限

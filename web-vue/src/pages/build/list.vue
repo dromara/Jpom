@@ -10,7 +10,7 @@
       <a-button type="primary" @click="loadData">刷新</a-button>
     </div>
     <!-- 表格 -->
-    <a-table :loading="loading" :columns="columns" :data-source="list" :scroll="{x: '80vw', y: tableHeight }" bordered rowKey="id" :pagination="false">
+    <a-table :loading="loading" :columns="columns" :data-source="list" :style="{'max-height': tableHeight + 'px' }" :scroll="{y: tableHeight - 60}" bordered rowKey="id" :pagination="false">
       <a-tooltip slot="name" slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>
@@ -268,7 +268,7 @@ export default {
     // 计算表格高度
     calcTableHeight() {
       this.$nextTick(() => {
-        this.tableHeight = window.innerHeight - this.$refs['filter'].clientHeight - 185;
+        this.tableHeight = window.innerHeight - this.$refs['filter'].clientHeight - 135;
       })
     },
     // 分组列表

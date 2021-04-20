@@ -5,7 +5,7 @@
       <a-button type="primary" @click="loadData">刷新</a-button>
     </div>
     <!-- 数据表格 -->
-    <a-table :data-source="list" :loading="loading" :columns="columns" :scroll="{x: '80vw'}" :pagination="false" bordered :rowKey="(record, index) => index">
+    <a-table :data-source="list" :loading="loading" :columns="columns" :style="{'max-height': tableHeight + 'px' }" :pagination="false" bordered :rowKey="(record, index) => index">
       <a-tooltip slot="name" slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>
@@ -72,6 +72,7 @@ export default {
   data() {
     return {
       loading: false,
+      tableHeight: '70vh',
       list: [],
       userList: [],
       nodeProjectList: [],
@@ -82,18 +83,18 @@ export default {
       temp: {},
       editMonitorVisible: false,
       columns: [
-        {title: '名称', dataIndex: 'name', scopedSlots: {customRender: 'name'}, width: 150},
-        {title: '开启状态', dataIndex: 'status', scopedSlots: {customRender: 'status'}, width: 150},
-        {title: '自动重启', dataIndex: 'autoRestart', scopedSlots: {customRender: 'autoRestart'}, width: 150},
-        {title: '报警状态', dataIndex: 'alarm', scopedSlots: {customRender: 'alarm'}, width: 150},
-        {title: '创建人', dataIndex: 'parent', scopedSlots: {customRender: 'parent'}, width: 120},
+        {title: '名称', dataIndex: 'name', ellipsis: true, scopedSlots: {customRender: 'name'}, width: 150},
+        {title: '开启状态', dataIndex: 'status', ellipsis: true, scopedSlots: {customRender: 'status'}, width: 150},
+        {title: '自动重启', dataIndex: 'autoRestart', ellipsis: true, scopedSlots: {customRender: 'autoRestart'}, width: 150},
+        {title: '报警状态', dataIndex: 'alarm', ellipsis: true, scopedSlots: {customRender: 'alarm'}, width: 150},
+        {title: '创建人', dataIndex: 'parent', ellipsis: true, scopedSlots: {customRender: 'parent'}, width: 120},
         {title: '修改时间', dataIndex: 'modifyTime', customRender: (text) => {
           if (!text || text === '0') {
             return '';
           }
           return parseTime(text);
         }, width: 180},
-        {title: '操作', dataIndex: 'operation', scopedSlots: {customRender: 'operation'}, width: 200}
+        {title: '操作', dataIndex: 'operation', ellipsis: true, scopedSlots: {customRender: 'operation'}, width: 200}
       ],
       rules: {
         name: [
@@ -113,6 +114,7 @@ export default {
     }
   },
   created() {
+    this.calcTableHeight();
     this.loadData();
     this.loadUserList();
     this.loadNodeProjectList();
@@ -132,6 +134,12 @@ export default {
         return false;
       }
       this.$introJs().exit();
+    },
+    // 计算表格高度
+    calcTableHeight() {
+      this.$nextTick(() => {
+        this.tableHeight = window.innerHeight - this.$refs['filter'].clientHeight - 135;
+      })
     },
     // 加载数据
     loadData() {

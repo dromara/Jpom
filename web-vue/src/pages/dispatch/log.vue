@@ -23,7 +23,7 @@
     </div>
     <!-- 数据表格 -->
     <a-table :data-source="list" :loading="loading" :columns="columns"
-      :pagination="pagination" :scroll="{x: '80vw', y: tableHeight }" bordered
+      :pagination="pagination" :style="{'max-height': tableHeight + 'px' }" :scroll="{y: tableHeight - 120}" bordered
       :rowKey="(record, index) => index">
       <a-tooltip slot="outGivingId" slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
@@ -44,7 +44,9 @@
       <template slot="operation" slot-scope="text, record">
         <a-button type="primary" @click="handleDetail(record)">详情</a-button>
       </template>
-    </a-table><!-- 详情区 -->
+    </a-table>
+    <a-pagination />
+    <!-- 详情区 -->
     <a-modal v-model="detailVisible" width="600px" title="详情信息" :footer="null">
       <a-list item-layout="horizontal" :data-source="detailData">
         <a-list-item slot="renderItem" slot-scope="item">
@@ -114,7 +116,7 @@ export default {
     // 计算表格高度
     calcTableHeight() {
       this.$nextTick(() => {
-        this.tableHeight = window.innerHeight - this.$refs['filter'].clientHeight - 220;
+        this.tableHeight = window.innerHeight - this.$refs['filter'].clientHeight - 135;
       })
     },
     // 搜索

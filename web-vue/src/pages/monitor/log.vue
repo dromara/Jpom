@@ -16,7 +16,7 @@
     </div>
     <!-- 数据表格 -->
     <a-table :data-source="list" :loading="loading" :columns="columns"
-      :pagination="pagination" :scroll="{x: '80vw', y: tableHeight }" bordered
+      :pagination="pagination" :style="{'max-height': tableHeight + 'px' }" :scroll="{y: tableHeight - 120}" bordered
       :rowKey="(record, index) => index" @change="change">
       <a-tooltip slot="nodeId" slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
@@ -105,7 +105,7 @@ export default {
     // 计算表格高度
     calcTableHeight() {
       this.$nextTick(() => {
-        this.tableHeight = window.innerHeight - this.$refs['filter'].clientHeight - 220;
+        this.tableHeight = window.innerHeight - this.$refs['filter'].clientHeight - 135;
       })
     },
     // 加载 node

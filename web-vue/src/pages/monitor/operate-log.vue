@@ -5,7 +5,7 @@
       <a-button type="primary" @click="loadData">刷新</a-button>
     </div>
     <!-- 数据表格 -->
-    <a-table :data-source="list" :loading="loading" :columns="columns" :scroll="{x: '80vw'}" :pagination="false" bordered :rowKey="(record, index) => index">
+    <a-table :data-source="list" :loading="loading" :columns="columns" :style="{'max-height': tableHeight + 'px' }" :pagination="false" bordered :rowKey="(record, index) => index">
       <a-tooltip slot="name" slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>
@@ -72,6 +72,7 @@ export default {
   data() {
     return {
       loading: false,
+      tableHeight: '70vh',
       list: [],
       optTypeList: [],
       userList: [],
@@ -118,6 +119,7 @@ export default {
     }
   },
   created() {
+    this.calcTableHeight();
     this.loadData();
     this.loadOptTypeData();
   },
@@ -136,6 +138,12 @@ export default {
         return false;
       }
       this.$introJs().exit();
+    },
+    // 计算表格高度
+    calcTableHeight() {
+      this.$nextTick(() => {
+        this.tableHeight = window.innerHeight - this.$refs['filter'].clientHeight - 135;
+      })
     },
     // 加载数据
     loadData() {

@@ -1,11 +1,11 @@
 <template>
   <div>
-    <div class="filter">
+    <div ref="filter" class="filter">
       <a-button type="primary" @click="handleAdd">新增</a-button>
       <a-button type="primary" @click="loadData">刷新</a-button>
     </div>
     <!-- 数据表格 -->
-    <a-table :data-source="list" :loading="loading" :columns="columns" :pagination="false" bordered :rowKey="(record, index) => index">
+    <a-table :data-source="list" :loading="loading" :columns="columns" :style="{'max-height': tableHeight + 'px' }" :scroll="{y: tableHeight - 60}" :pagination="false" bordered :rowKey="(record, index) => index">
       <template slot="operation" slot-scope="text, record">
         <a-button type="primary" @click="handleEdit(record)">编辑</a-button>
         <a-button type="danger" @click="handleDelete(record)">删除</a-button>
@@ -47,6 +47,7 @@ export default {
   data() {
     return {
       loading: false,
+      tableHeight: '70vh',
       list: [],
       roleList: [],
       targetKeys: [],
@@ -54,14 +55,14 @@ export default {
       createOption: true,
       editUserVisible: false,
       columns: [
-        {title: 'ID', dataIndex: 'id'},
-        {title: '昵称', dataIndex: 'name'},
-        {title: '邮箱', dataIndex: 'email'},
-        {title: '创建人', dataIndex: 'parent'},
-        {title: '修改时间', dataIndex: 'modifyTime', customRender: (text) => {
+        {title: 'ID', dataIndex: 'id', ellipsis: true, width: 150},
+        {title: '昵称', dataIndex: 'name', ellipsis: true, width: 150},
+        {title: '邮箱', dataIndex: 'email', ellipsis: true, width: 150},
+        {title: '创建人', dataIndex: 'parent', ellipsis: true, width: 150},
+        {title: '修改时间', dataIndex: 'modifyTime', ellipsis: true, customRender: (text) => {
           return parseTime(text);
-        }},
-        {title: '操作', dataIndex: 'operation', scopedSlots: {customRender: 'operation'}, width: '200px'}
+        }, width: 150},
+        {title: '操作', dataIndex: 'operation', scopedSlots: {customRender: 'operation'}, width: 200}
       ],
       // 表单校验规则
       rules: {
@@ -88,6 +89,7 @@ export default {
     }
   },
   created() {
+    this.calcTableHeight();
     this.loadData();
     this.loadRoleList();
   },
@@ -106,6 +108,12 @@ export default {
         return false;
       }
       this.$introJs().exit();
+    },
+    // 计算表格高度
+    calcTableHeight() {
+      this.$nextTick(() => {
+        this.tableHeight = window.innerHeight - this.$refs['filter'].clientHeight - 135;
+      })
     },
     // 加载数据
     loadData() {

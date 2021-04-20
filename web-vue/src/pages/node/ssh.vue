@@ -1,11 +1,11 @@
 <template>
   <div>
-    <div class="filter">
+    <div ref="filter" class="filter">
       <a-button type="primary" @click="handleAdd">新增</a-button>
       <a-button type="primary" @click="loadData">刷新</a-button>
     </div>
     <!-- 数据表格 -->
-    <a-table :data-source="list" :loading="loading" :columns="columns" :scroll="{x: '80vw'}" :pagination="false" bordered :rowKey="(record, index) => index">
+    <a-table :data-source="list" :loading="loading" :columns="columns" :pagination="false" bordered :rowKey="(record, index) => index" :style="{'max-height': tableHeight + 'px' }">
       <template slot="nodeId" slot-scope="text, record">
         <a-button v-if="!record.nodeModel" type="primary" @click="install(record)">安装节点</a-button>
         <a-tooltip v-else placement="topLeft" :title="`${record.nodeModel.id} ( ${record.nodeModel.name} )`">
@@ -115,6 +115,7 @@ export default {
   data() {
     return{
       loading: false,
+      tableHeight: '70vh',
       list: [],
       temp: {},
       editSshVisible: false,
@@ -176,9 +177,16 @@ export default {
     }
   },
   created() {
-    this.loadData()
+    this.calcTableHeight();
+    this.loadData();
   },
   methods: {
+    // 计算表格高度
+    calcTableHeight() {
+      this.$nextTick(() => {
+        this.tableHeight = window.innerHeight - this.$refs['filter'].clientHeight - 135;
+      })
+    },
     // 加载数据
     loadData() {
       this.loading = true;

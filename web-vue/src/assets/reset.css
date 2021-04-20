@@ -10,3 +10,8 @@ html, body {
 .ant-drawer-body {
   padding: 10px;
 }
+
+.ant-table-wrapper {
+  overflow-y: auto;
+  overflow-x: auto;
+}

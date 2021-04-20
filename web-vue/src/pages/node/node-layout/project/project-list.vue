@@ -9,7 +9,7 @@
       <a-button type="primary" @click="handleFilter">刷新</a-button>
     </div>
     <!-- 数据表格 -->
-    <a-table :data-source="list" :loading="loading" :columns="columns" :scroll="{x: '80vw', y: 500}" :pagination="false" bordered :rowKey="(record, index) => index">
+    <a-table :data-source="list" :loading="loading" :columns="columns" :pagination="false" bordered :rowKey="(record, index) => index" :style="{'max-height': tableHeight + 'px' }">
       <a-tooltip slot="name" slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>
@@ -168,6 +168,7 @@ export default {
     return {
       loading: false,
       listQuery: {},
+      tableHeight: '70vh',
       groupList: [],
       accessList: [],
       jdkList: [],
@@ -195,7 +196,6 @@ export default {
         {title: '修改时间', dataIndex: 'modifyTime', width: 160, ellipsis: true, scopedSlots: {customRender: 'modifyTime'}},
         {title: '最后操作人', dataIndex: 'modifyUser', width: 150, ellipsis: true, scopedSlots: {customRender: 'modifyUser'}},
         {title: '运行状态', dataIndex: 'status', width: 100, ellipsis: true, scopedSlots: {customRender: 'status'}},
-        // {title: 'PID', dataIndex: 'pid', width: 100, ellipsis: true, scopedSlots: {customRender: 'pid'}},
         {title: 'PID/端口', dataIndex: 'port', width: 100, ellipsis: true, scopedSlots: {customRender: 'port'}},
         {title: '操作', dataIndex: 'operation', scopedSlots: {customRender: 'operation'}, width: 500}
       ],
@@ -232,6 +232,7 @@ export default {
     }
   },
   mounted() {
+    this.calcTableHeight();
     this.loadGroupList();
     this.loadAccesList();
     this.loadJdkList();
@@ -260,6 +261,12 @@ export default {
         return false;
       }
       this.$introJs().exit();
+    },
+    // 计算表格高度
+    calcTableHeight() {
+      this.$nextTick(() => {
+        this.tableHeight = window.innerHeight - this.$refs['filter'].clientHeight - 155;
+      })
     },
     // 加载分组列表
     loadGroupList() {

@@ -6,7 +6,7 @@
       <a-button type="primary" @click="handleFilter">刷新</a-button>
     </div>
     <!-- 表格 -->
-    <a-table :loading="loading" :columns="columns" :data-source="list" bordered rowKey="id" class="node-table"
+    <a-table :loading="loading" :columns="columns" :data-source="list" bordered rowKey="id" :style="{'max-height': tableHeight + 'px' }"
      @expand="expand" :pagination="false">
       <a-tooltip slot="id" slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
@@ -194,6 +194,7 @@ export default {
     return {
       loading: false,
       childLoading: false,
+      tableHeight: '70vh',
       list: [],
       accessList: [],
       nodeList: [],
@@ -264,6 +265,7 @@ export default {
     }
   },
   created() {
+    this.calcTableHeight();
     this.handleFilter();
   },
   methods: {
@@ -281,6 +283,12 @@ export default {
         return false;
       }
       this.$introJs().exit();
+    },
+    // 计算表格高度
+    calcTableHeight() {
+      this.$nextTick(() => {
+        this.tableHeight = window.innerHeight - this.$refs['filter'].clientHeight - 135;
+      })
     },
     // 加载数据
     loadData() {
