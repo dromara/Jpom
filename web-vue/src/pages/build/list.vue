@@ -10,7 +10,7 @@
       <a-button type="primary" @click="loadData">刷新</a-button>
     </div>
     <!-- 表格 -->
-    <a-table :loading="loading" :columns="columns" :data-source="list" :style="{'max-height': tableHeight + 'px' }" :scroll="{y: tableHeight - 60}" bordered rowKey="id" :pagination="false">
+    <a-table :loading="loading" :columns="columns" :data-source="list" :style="{'max-height': tableHeight + 'px' }" :scroll="{x: 1210, y: tableHeight - 60}" bordered rowKey="id" :pagination="false">
       <a-tooltip slot="name" slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>

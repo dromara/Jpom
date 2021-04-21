@@ -5,7 +5,7 @@
       <a-button type="primary" @click="loadData">刷新</a-button>
     </div>
     <!-- 数据表格 -->
-    <a-table :data-source="list" :loading="loading" :columns="columns" :style="{'max-height': tableHeight + 'px' }" :scroll="{y: tableHeight - 60}" :pagination="false" bordered :rowKey="(record, index) => index">
+    <a-table :data-source="list" :loading="loading" :columns="columns" :style="{'max-height': tableHeight + 'px' }" :scroll="{x: 960, y: tableHeight - 60}" :pagination="false" bordered :rowKey="(record, index) => index">
       <template slot="operation" slot-scope="text, record">
         <a-button type="primary" @click="handleEdit(record)">编辑</a-button>
         <a-button type="danger" @click="handleDelete(record)">删除</a-button>

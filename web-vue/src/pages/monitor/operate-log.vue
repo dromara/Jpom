@@ -5,7 +5,8 @@
       <a-button type="primary" @click="loadData">刷新</a-button>
     </div>
     <!-- 数据表格 -->
-    <a-table :data-source="list" :loading="loading" :columns="columns" :style="{'max-height': tableHeight + 'px' }" :pagination="false" bordered :rowKey="(record, index) => index">
+    <a-table :data-source="list" :loading="loading" :columns="columns" :style="{'max-height': tableHeight + 'px' }"
+      :scroll="{x: 810, y: tableHeight - 60}" :pagination="false" bordered :rowKey="(record, index) => index">
       <a-tooltip slot="name" slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>

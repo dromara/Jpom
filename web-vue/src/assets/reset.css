@@ -15,3 +15,7 @@ html, body {
   overflow-y: auto;
   overflow-x: auto;
 }
+
+.ant-table-body {
+  overflow-x: auto !important;
+}

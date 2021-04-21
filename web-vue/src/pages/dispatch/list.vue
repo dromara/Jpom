@@ -7,7 +7,7 @@
     </div>
     <!-- 表格 -->
     <a-table :loading="loading" :columns="columns" :data-source="list" bordered rowKey="id" :style="{'max-height': tableHeight + 'px' }"
-     @expand="expand" :pagination="false">
+      :scroll="{x: 740, y: tableHeight - 60}" @expand="expand" :pagination="false">
       <a-tooltip slot="id" slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>
@@ -26,7 +26,7 @@
         <a-button type="danger" @click="handleDelete(record)">删除</a-button>
       </template>
       <!-- 嵌套表格 -->
-      <a-table slot="expandedRowRender" slot-scope="text" :scroll="{x: '80vw'}" :loading="childLoading" :columns="childColumns" :data-source="text.children"
+      <a-table slot="expandedRowRender" slot-scope="text" :loading="childLoading" :columns="childColumns" :data-source="text.children"
         :pagination="false" :rowKey="(record, index) => record.nodeId + record.projectId + index">
         <a-tooltip slot="nodeId" slot-scope="text" placement="topLeft" :title="text">
           <span>{{ text }}</span>

@@ -10,7 +10,7 @@
       <a-button type="primary" @click="loadData">刷新</a-button>
     </div>
     <!-- 表格 -->
-    <a-table :loading="loading" :columns="columns" :data-source="list" :style="{'max-height': tableHeight + 'px' }" bordered rowKey="id"
+    <a-table :loading="loading" :columns="columns" :data-source="list" :style="{'max-height': tableHeight + 'px' }" :scroll="{ x: 1070, y: tableHeight -60 }" bordered rowKey="id"
       @expand="expand" :pagination="false">
       <a-tooltip slot="group" slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
@@ -25,7 +25,7 @@
         <a-button type="danger" @click="handleDelete(record)">删除</a-button>
       </template>
       <!-- 嵌套表格 -->
-      <a-table slot="expandedRowRender" slot-scope="text" :loading="childLoading" :scroll="{ x: '80vw' }" :columns="childColumns" :data-source="text.children"
+      <a-table slot="expandedRowRender" slot-scope="text" :loading="childLoading" :columns="childColumns" :data-source="text.children"
         :pagination="false" :rowKey="(record, index) => text.id + index">
         <a-tooltip slot="osName" slot-scope="text" placement="topLeft" :title="text">
           <span>{{ text }}</span>

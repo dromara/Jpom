@@ -16,7 +16,7 @@
     </div>
     <!-- 数据表格 -->
     <a-table :data-source="list" :loading="loading" :columns="columns"
-      :pagination="pagination" :style="{'max-height': tableHeight + 'px' }" :scroll="{y: tableHeight - 120}" bordered
+      :pagination="pagination" :style="{'max-height': tableHeight + 'px' }" :scroll="{x: 790, y: tableHeight - 120}" bordered
       :rowKey="(record, index) => index" @change="change">
       <a-tooltip slot="nodeId" slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>

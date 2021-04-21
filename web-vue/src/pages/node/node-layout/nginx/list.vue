@@ -19,7 +19,7 @@
         <a-button :disabled="!nginxData.status" type="danger" @click="handleNginxCommand('close')">停止 Nginx</a-button>
       </div>
       <a-table :data-source="fileList" :loading="loading" :columns="columns" :pagination="false" bordered
-        :style="{'max-height': tableHeight + 'px' }" :scroll="{x: 620, y: tableHeight - 60}" :rowKey="(record, index) => index">
+        :style="{'max-height': tableHeight + 'px' }" :scroll="{x: 720, y: tableHeight - 60}" :rowKey="(record, index) => index">
         <a-tooltip slot="name" slot-scope="text,record" placement="topLeft" :title="text">
           <span style="color: blue;" @click="handleEdit(record)">{{ text }}</span>
         </a-tooltip>
@@ -90,8 +90,8 @@ export default {
       },
       columns: [
         {title: '文件名称', dataIndex: 'name', width: 100, ellipsis: true, scopedSlots: {customRender: 'name'}},
-        {title: '文件类型', dataIndex: 'isDirectory', width: 50, ellipsis: true, scopedSlots: {customRender: 'isDirectory'}},
-        {title: '数量', dataIndex: 'serverCount', width: 30, ellipsis: true},
+        {title: '文件类型', dataIndex: 'isDirectory', width: 100, ellipsis: true, scopedSlots: {customRender: 'isDirectory'}},
+        {title: '数量', dataIndex: 'serverCount', width: 80, ellipsis: true},
         {title: '域名', dataIndex: 'serverName', width: 120, ellipsis: true, scopedSlots: {customRender: 'serverName'}},
         {title: 'location', dataIndex: 'location', width: 120, ellipsis: true},
         {title: '修改时间', dataIndex: 'time', width: 90, ellipsis: true},

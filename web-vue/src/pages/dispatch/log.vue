@@ -23,7 +23,7 @@
     </div>
     <!-- 数据表格 -->
     <a-table :data-source="list" :loading="loading" :columns="columns"
-      :pagination="pagination" :style="{'max-height': tableHeight + 'px' }" :scroll="{y: tableHeight - 120}" bordered
+      :pagination="pagination" :style="{'max-height': tableHeight + 'px' }" :scroll="{x: 870, y: tableHeight - 120}" bordered
       :rowKey="(record, index) => index">
       <a-tooltip slot="outGivingId" slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
@@ -45,7 +45,6 @@
         <a-button type="primary" @click="handleDetail(record)">详情</a-button>
       </template>
     </a-table>
-    <a-pagination />
     <!-- 详情区 -->
     <a-modal v-model="detailVisible" width="600px" title="详情信息" :footer="null">
       <a-list item-layout="horizontal" :data-source="detailData">

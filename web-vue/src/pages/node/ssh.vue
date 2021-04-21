@@ -5,7 +5,8 @@
       <a-button type="primary" @click="loadData">刷新</a-button>
     </div>
     <!-- 数据表格 -->
-    <a-table :data-source="list" :loading="loading" :columns="columns" :pagination="false" bordered :rowKey="(record, index) => index" :style="{'max-height': tableHeight + 'px' }">
+    <a-table :data-source="list" :loading="loading" :columns="columns" :pagination="false" bordered :rowKey="(record, index) => index"
+      :style="{'max-height': tableHeight + 'px' }" :scroll="{x: 1040, y: tableHeight - 60}">
       <template slot="nodeId" slot-scope="text, record">
         <a-button v-if="!record.nodeModel" type="primary" @click="install(record)">安装节点</a-button>
         <a-tooltip v-else placement="topLeft" :title="`${record.nodeModel.id} ( ${record.nodeModel.name} )`">
@@ -127,12 +128,12 @@ export default {
       drawerVisible: false,
       terminalVisible: false,
       columns: [
-        {title: '名称', dataIndex: 'name', width: 150},
-        {title: '关联节点', dataIndex: 'nodeId', scopedSlots: {customRender: 'nodeId'}, width: 160, ellipsis: true},
-        {title: 'Host', dataIndex: 'host', width: 150},
-        {title: 'Port', dataIndex: 'port', width: 80},
-        {title: 'User', dataIndex: 'user', width: 120},
-        {title: '操作', dataIndex: 'operation', scopedSlots: {customRender: 'operation'}, width: 330}
+        {title: '名称', dataIndex: 'name', width: 150, ellipsis: true},
+        {title: '关联节点', dataIndex: 'nodeId', scopedSlots: {customRender: 'nodeId'}, width: 200, ellipsis: true},
+        {title: 'Host', dataIndex: 'host', width: 150, ellipsis: true},
+        {title: 'Port', dataIndex: 'port', width: 80, ellipsis: true},
+        {title: 'User', dataIndex: 'user', width: 120, ellipsis: true},
+        {title: '操作', dataIndex: 'operation', scopedSlots: {customRender: 'operation'}, width: 330, ellipsis: true}
       ],
       options: [
         { label: 'Password', value: 'PASS' },
