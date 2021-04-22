@@ -1,10 +1,10 @@
 <template>
   <a-layout class="log-layout">
     <!-- 侧边栏 文件树 -->
-    <a-layout-sider theme="light" class="sider" width="20%">
+    <a-layout-sider theme="light" class="sider jpom-node-log-tree" width="20%">
       <a-empty v-if="list.length === 0" />
       <a-directory-tree :treeData="list" :replaceFields="replaceFields" @select="select"
-        @rightClick="rightClick" default-expand-all class="jpom-node-log-tree">
+        @rightClick="rightClick" default-expand-all>
       </a-directory-tree>
     </a-layout-sider>
     <!-- 单个文件内容 -->
