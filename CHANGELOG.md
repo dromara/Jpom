@@ -34,6 +34,7 @@
 17. 【server】fix bug: 节点管理里面的 Nginx 管理，关闭服务的接口参数传递错了。[点击这里查看对应 issue](https://gitee.com/dromara/Jpom/issues/I3IFZY)
 18. 【server】优化系统配置页面的样式，在小屏幕设备上会出现多个竖方向上的滚动条，甚至有时候会遮住底部的操作按钮
 19. 【server】ssh 终端命令交互优化（改优化取消之前版本快捷解压功能，删除命令检查）
+20. 【server】优化表格的排版和高度等样式，适配页面。详情见 [issue](https://gitee.com/dromara/Jpom/issues/I3EE2R)
 
 > 注意：ssh 终端的删除命令检查临时取消（后面版本会重新优化）
 > 
@@ -45,7 +46,7 @@
 > > 3. 把刚刚生成的自启动文件移动到 /etc/init.d/ 目录
 > > 4. 到 /etc/init.d/ 目录让自启动文件拥有执行权限，执行命令 `chmod +x jpom-server` 或者 `chmod +x jpom-agent`
 > > 5. 注册到 chkconfig 列表里面，就可以实现开机自启，执行命令 `chkconfig --add jpom-server` 或者 `chkconfig --add jpom-agent`
-> > 6. 执行完第 4 步就可以通过 `service jpom-xxx-service {status | start | stop}` 来管理 Jpom 服务
+> > 6. 执行完第 4 步就可以通过 `service jpom-xxx {status | start | stop}` 来管理 Jpom 服务
 > > 7. 目前仅通过 Cent OS 服务器测试，其他服务器可能会无效
 
 -----------------------------------------------------------
