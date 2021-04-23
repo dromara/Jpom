@@ -16,6 +16,14 @@ export function getNodeList(params) {
     params: params
   })
 }
+// 节点和版本信息
+export function getNodeListWithVersion(params) {
+  return axios({
+    url: '/node/list_data_with_version',
+    method: 'get',
+    params: params
+  })
+}
 
 // node 状态
 export function getNodeStatus(nodeId) {
@@ -131,5 +139,27 @@ export function nodeMonitorData(params) {
     url: '/node/nodeMonitor_data.json',
     method: 'post',
     data: params
+  })
+}
+
+
+
+/**
+ * 上传升级文件
+ * @param {
+ *  file: 文件 multipart/form-data,
+ *  nodeId: 节点 ID
+ * } formData
+ */
+export function uploadAgentFile(formData) {
+  return axios({
+    url: '/node/upload_agent',
+    headers: {
+      'Content-Type': 'multipart/form-data;charset=UTF-8'
+    },
+    method: 'post',
+    // 0 表示无超时时间
+    timeout: 0,
+    data: formData
   })
 }

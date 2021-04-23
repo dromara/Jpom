@@ -20,5 +20,9 @@ public enum HandlerType {
     /**
      * ssh
      */
-    ssh
+    ssh,
+    /**
+     * 节点升级
+     */
+    nodeUpdate
 }

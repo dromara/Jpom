@@ -11,6 +11,11 @@
         "url": "./node/list.html"
       },
       {
+        "title": "节点升级",
+        "id": "nodeUpdate",
+        "url": ""
+      },
+      {
         "title": "SSH管理",
         "id": "sshList",
         "url": "./node/ssh/list.html"

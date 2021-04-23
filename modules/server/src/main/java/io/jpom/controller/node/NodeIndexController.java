@@ -1,21 +1,33 @@
 package io.jpom.controller.node;
 
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.http.HttpStatus;
 import cn.jiangzeyin.common.JsonMessage;
+import cn.jiangzeyin.controller.multipart.MultipartFileBuilder;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.sun.tools.javac.code.Attribute;
+import io.jpom.JpomApplication;
+import io.jpom.JpomServerApplication;
 import io.jpom.common.BaseServerController;
 import io.jpom.common.JpomManifest;
 import io.jpom.common.forward.NodeForward;
 import io.jpom.common.forward.NodeUrl;
+import io.jpom.common.interceptor.OptLog;
+import io.jpom.model.AgentFileModel;
 import io.jpom.model.data.NodeModel;
 import io.jpom.model.data.SshModel;
 import io.jpom.model.data.UserModel;
+import io.jpom.model.log.UserOperateLogV1;
+import io.jpom.permission.SystemPermission;
 import io.jpom.plugin.ClassFeature;
 import io.jpom.plugin.Feature;
 import io.jpom.plugin.MethodFeature;
+import io.jpom.service.node.AgentFileService;
 import io.jpom.service.node.ssh.SshService;
+import io.jpom.system.ServerConfigBean;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -23,8 +35,11 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.annotation.Resource;
+import java.io.File;
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -40,6 +55,8 @@ public class NodeIndexController extends BaseServerController {
 
     @Resource
     private SshService sshService;
+    @Resource
+    private AgentFileService agentFileService;
 
     @RequestMapping(value = "list.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
     @Feature(method = MethodFeature.LIST)
@@ -138,5 +155,45 @@ public class NodeIndexController extends BaseServerController {
     public String nodeProjectList() {
         List<NodeModel> nodeModels = nodeService.listAndProject();
         return JsonMessage.getString(200, "success", nodeModels);
+    }
+
+    @RequestMapping(value = "upload_agent", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @ResponseBody
+    @OptLog(UserOperateLogV1.OptType.UpdateSys)
+    @SystemPermission
+    public String uploadAgent() throws IOException {
+        String saveDir = ServerConfigBean.getInstance().getAgentPath().getAbsolutePath();
+        MultipartFileBuilder multipartFileBuilder = createMultipart();
+        multipartFileBuilder
+                .setFileExt("jar")
+                .addFieldName("file")
+                .setUseOriginalFilename(true)
+                .setSavePath(saveDir);
+        String path = multipartFileBuilder.save();
+        // 基础检查
+        JsonMessage error = JpomManifest.checkJpomJar(path, "io.jpom.JpomAgentApplication");
+        if (error.getCode() != HttpStatus.HTTP_OK) {
+            FileUtil.del(path);
+            return error.toString();
+        }
+
+        // 保存Agent文件
+        String id = "agent";
+
+        File file = new File(path);
+        AgentFileModel agentFileModel = agentFileService.getItem(id);
+        if (agentFileModel == null) {
+            agentFileModel = new AgentFileModel();
+            agentFileModel.setId(id);
+            agentFileService.addItem(agentFileModel);
+        }
+        agentFileModel.setName(file.getName());
+        agentFileModel.setSize(file.length());
+        agentFileModel.setSavePath(path);
+        agentFileModel.setVersion(error.getMsg());
+        agentFileService.updateItem(agentFileModel);
+
+
+        return JsonMessage.getString(200, "上传成功");
     }
 }

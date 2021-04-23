@@ -101,6 +101,8 @@ public class ServerWebSocketInterceptor implements HandshakeInterceptor {
                     attributes.put("parameterMap", parameterMap);
                     attributes.put("sshItem", sshModel);
                     break;
+                case nodeUpdate:
+                    break;
                 default:
                     return false;
             }

@@ -34,6 +34,11 @@ public enum NodeUrl {
      */
     Tomcat_Socket("/tomcat_log/{}/{}"),
 
+    /**
+     * 节点升级
+     */
+    NodeUpdate("/node_update"),
+
     WhitelistDirectory_Submit("/system/whitelistDirectory_submit"),
 
     WhitelistDirectory_data("/system/whitelistDirectory_data"),

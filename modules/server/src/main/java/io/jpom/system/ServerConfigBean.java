@@ -27,6 +27,11 @@ public class ServerConfigBean {
     public static final String NODE = "node.json";
 
     /**
+     * Agent信息文件
+     */
+    public static final String AGENT_FILE = "agent_file.json";
+
+    /**
      * 分发数据文件
      */
     public static final String OUTGIVING = "outgiving.json";
@@ -124,6 +129,12 @@ public class ServerConfigBean {
     public File getTempPath() {
         File file = new File(ConfigBean.getInstance().getDataPath());
         file = new File(file.getPath() + "/temp/");
+        FileUtil.mkdir(file);
+        return file;
+    }
+    public File getAgentPath() {
+        File file = new File(ConfigBean.getInstance().getDataPath());
+        file = new File(file.getPath() + "/agent/");
         FileUtil.mkdir(file);
         return file;
     }

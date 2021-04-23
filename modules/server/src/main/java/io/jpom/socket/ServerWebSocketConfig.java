@@ -1,9 +1,6 @@
 package io.jpom.socket;
 
-import io.jpom.socket.handler.ConsoleHandler;
-import io.jpom.socket.handler.ScriptHandler;
-import io.jpom.socket.handler.SshHandler;
-import io.jpom.socket.handler.TomcatHandler;
+import io.jpom.socket.handler.*;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.socket.config.annotation.EnableWebSocket;
 import org.springframework.web.socket.config.annotation.WebSocketConfigurer;
@@ -18,6 +15,7 @@ import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry
 @EnableWebSocket
 public class ServerWebSocketConfig implements WebSocketConfigurer {
     private final ServerWebSocketInterceptor serverWebSocketInterceptor = new ServerWebSocketInterceptor();
+    private final ServerNodeUpdateWebSocketInterceptor serverNodeUpdateWebSocketInterceptor = new ServerNodeUpdateWebSocketInterceptor();
 
     @Override
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
@@ -33,5 +31,8 @@ public class ServerWebSocketConfig implements WebSocketConfigurer {
         // ssh
         registry.addHandler(new SshHandler(), "/ssh")
                 .addInterceptors(serverWebSocketInterceptor).setAllowedOrigins("*");
+        // 节点升级
+        registry.addHandler(new NodeUpdateHandler(), "/node_update")
+                .addInterceptors(serverNodeUpdateWebSocketInterceptor).setAllowedOrigins("*");
     }
 }

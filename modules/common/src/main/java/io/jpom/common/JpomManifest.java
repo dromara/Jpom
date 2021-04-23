@@ -232,6 +232,16 @@ public class JpomManifest {
      * @return 结果消息
      */
     public static JsonMessage<String> checkJpomJar(String path, Class<?> clsName) {
+        return checkJpomJar(path, clsName.getName());
+    }
+
+    /**
+     * 检查是否为jpom包
+     * @param path 路径
+     * @param name 类名称
+     * @return 结果消息
+     */
+    public static JsonMessage<String> checkJpomJar(String path, String name) {
         String version;
         File jarFile = new File(path);
         try (JarFile jarFile1 = new JarFile(jarFile)) {
@@ -248,7 +258,7 @@ public class JpomManifest {
                 return new JsonMessage<>(405, "中没有找到对应的MainClass:" + mainClass);
             }
             ZipEntry entry = jarFile1.getEntry(StrUtil.format("BOOT-INF/classes/{}.class",
-                    StrUtil.replace(clsName.getName(), ".", "/")));
+                    StrUtil.replace(name, ".", "/")));
             if (entry == null) {
                 return new JsonMessage<>(405, "此包不是Jpom【" + JpomApplication.getAppType().name() + "】包");
             }
@@ -279,6 +289,9 @@ public class JpomManifest {
      * @param version 新版本号
      */
     public static void releaseJar(String path, String version) {
+        releaseJar(path, version, false);
+    }
+    public static void releaseJar(String path, String version, boolean override) {
         File runFile = getRunPath();
         File runPath = runFile.getParentFile();
         if (!runPath.isDirectory()) {
@@ -300,7 +313,7 @@ public class JpomManifest {
         }
         String newFile = JpomApplication.getAppType().name() + "-" + version + FileUtil.JAR_FILE_EXT;
         File to = FileUtil.file(runPath, newFile);
-        if (to.exists()) {
+        if (to.exists() && !override) {
             throw new JpomRuntimeException(newFile + " 已经存在啦");
         }
         FileUtil.move(new File(path), to, true);

@@ -32,6 +32,8 @@
     "babel-plugin-import": "^1.13.1",
     "eslint": "^6.7.2",
     "eslint-plugin-vue": "^6.2.2",
+    "stylus": "^0.54.8",
+    "stylus-loader": "^3.0.2",
     "vue-template-compiler": "^2.6.11"
   },
   "eslintConfig": {
