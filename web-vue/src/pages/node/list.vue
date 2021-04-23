@@ -9,8 +9,8 @@
       <a-button type="primary" @click="handleAdd">新增</a-button>
       <a-button type="primary" @click="loadData">刷新</a-button>
     </div>
-    <!-- 表格 -->
-    <a-table :loading="loading" :columns="columns" :data-source="list" :style="{'max-height': tableHeight + 'px' }" :scroll="{ x: 1070, y: tableHeight -60 }" bordered rowKey="id"
+    <!-- 表格 :scroll="{ x: 1070, y: tableHeight -60 }" scroll 跟 expandedRowRender 不兼容，没法同时使用不然会多出一行数据-->
+    <a-table :loading="loading" :columns="columns" :data-source="list" :style="{'max-height': tableHeight + 'px' }" bordered rowKey="id"
       @expand="expand" :pagination="false">
       <a-tooltip slot="group" slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
@@ -150,24 +150,24 @@ export default {
       addGroupvisible: false,
       drawerTitle: '',
       columns: [
-        {title: '节点 ID', dataIndex: 'id', width: 100, ellipsis: true, scopedSlots: {customRender: 'id'}},
-        {title: '节点名称', dataIndex: 'name', width: 150, ellipsis: true, scopedSlots: {customRender: 'name'}},
-        {title: '分组', dataIndex: 'group', width: 100, ellipsis: true, scopedSlots: {customRender: 'group'}},
-        {title: '节点协议', dataIndex: 'protocol', width: 100, ellipsis: true, scopedSlots: {customRender: 'protocol'}},
-        {title: '节点地址', dataIndex: 'url', width: 150, ellipsis: true, scopedSlots: {customRender: 'url'}},
-        {title: '超时时间', dataIndex: 'timeOut', width: 100, ellipsis: true},
-        {title: '操作', dataIndex: 'operation', scopedSlots: {customRender: 'operation'}, width: '360px', align: 'left'}
+        {title: '节点 ID', dataIndex: 'id', key: 'id', width: 100, ellipsis: true, scopedSlots: {customRender: 'id'}},
+        {title: '节点名称', dataIndex: 'name', key: 'name', width: 150, ellipsis: true, scopedSlots: {customRender: 'name'}},
+        {title: '分组', dataIndex: 'group', key: 'group', width: 100, ellipsis: true, scopedSlots: {customRender: 'group'}},
+        {title: '节点协议', dataIndex: 'protocol', key: 'protocol', width: 100, ellipsis: true, scopedSlots: {customRender: 'protocol'}},
+        {title: '节点地址', dataIndex: 'url', key: 'url', width: 150, ellipsis: true, scopedSlots: {customRender: 'url'}},
+        {title: '超时时间', dataIndex: 'timeOut', key: 'timeOut', width: 100, ellipsis: true},
+        {title: '操作', dataIndex: 'operation', key: 'operation', scopedSlots: {customRender: 'operation'}, width: '360px', align: 'left'}
       ],
       childColumns: [
-        {title: '系统名', dataIndex: 'osName', width: 100, ellipsis: true, scopedSlots: {customRender: 'osName'}},
-        {title: 'JDK 版本', dataIndex: 'javaVersion', width: 120, ellipsis: true, scopedSlots: {customRender: 'javaVersion'}},
-        {title: 'JVM 总内存', dataIndex: 'totalMemory', width: 150},
-        {title: 'JVM 剩余内存', dataIndex: 'freeMemory', width: 180},
-        {title: 'Jpom 版本', dataIndex: 'jpomVersion', width: 140},
-        {title: 'Java 程序数', dataIndex: 'javaVirtualCount', width: 150},
-        {title: '项目数', dataIndex: 'count', width: 100},
-        {title: '响应时间', dataIndex: 'timeOut', width: 120},
-        {title: '已运行时间', dataIndex: 'runTime', width: 150, ellipsis: true, scopedSlots: {customRender: 'runTime'}}
+        {title: '系统名', dataIndex: 'osName', key: 'osName', width: 100, ellipsis: true, scopedSlots: {customRender: 'osName'}},
+        {title: 'JDK 版本', dataIndex: 'javaVersion', key: 'javaVersion', width: 120, ellipsis: true, scopedSlots: {customRender: 'javaVersion'}},
+        {title: 'JVM 总内存', dataIndex: 'totalMemory', key: 'totalMemory', width: 150},
+        {title: 'JVM 剩余内存', dataIndex: 'freeMemory', key: 'freeMemory', width: 180},
+        {title: 'Jpom 版本', dataIndex: 'jpomVersion', key: 'jpomVersion', width: 140},
+        {title: 'Java 程序数', dataIndex: 'javaVirtualCount', key: 'javaVirtualCount', width: 150},
+        {title: '项目数', dataIndex: 'count', key: 'count', width: 100},
+        {title: '响应时间', dataIndex: 'timeOut', key: 'timeOut', width: 120},
+        {title: '已运行时间', dataIndex: 'runTime', key: 'runTime', width: 150, ellipsis: true, scopedSlots: {customRender: 'runTime'}}
       ],
       rules: {
         id: [
