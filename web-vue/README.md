@@ -1,12 +1,12 @@
-# Jpom 前端VUE项目（server）
+# Jpom 前端 VUE 项目（server）
 
-### 介绍
+## 介绍
 
 这是一个 Jpom 的前端项目，主要内容是重写了一套 UI 页面。使用了 Vue 和 AntDesign Vue.
 
 [https://www.antdv.com/docs/vue/introduce-cn/](https://www.antdv.com/docs/vue/introduce-cn/)
 
-### 目录结构
+## 目录结构
 
 ```
 web-vue
@@ -25,7 +25,7 @@ web-vue
 ```
 
 
-### 开始
+## 开始
 
 如果你是第一次运行这个项目，你需要保证你的电脑里已经装好了 Node 环境。然后像其他 Vue 项目一样，使用下面的命令去执行就可以使用浏览器看到效果了。
 
