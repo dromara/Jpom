@@ -1,5 +1,5 @@
 <template>
-  <div id="xterm" class="xterm" style="height: 75vh" />
+  <div id="xterm" class="xterm" style="height: 70vh" />
 </template>
 <script>
 import 'xterm/css/xterm.css';
@@ -42,7 +42,11 @@ export default {
     }
   },
   mounted() {
-    this.initSocket();
+    this.$nextTick(() => {
+      setTimeout(() => {
+        this.initSocket();
+      }, 200);
+    })
   },
   beforeDestroy() {
     this.socket.close()
@@ -72,8 +76,8 @@ export default {
       this.terminal.loadAddon(attachAddon);
       this.terminal.loadAddon(fitAddon);
       this.terminal.open(document.getElementById('xterm'));
-      fitAddon.fit();
       this.terminal.focus();
+      fitAddon.fit();
 
       // this.terminal.onKey(data => {
       //   this.keyCode = data.domEvent.keyCode;
