@@ -13,7 +13,8 @@
         <a-button type="primary" @click="handleUpload">上传文件</a-button>
         <a-button type="primary" @click="loadFileList()">刷新</a-button>
       </div>
-      <a-table :data-source="fileList" :loading="loading" :columns="columns" :scroll="{x: '80vw', y: tableHeight}" :pagination="false" bordered :rowKey="(record, index) => index">
+      <a-table :data-source="fileList" :loading="loading" :columns="columns" :pagination="false" bordered
+        :style="{'max-height': tableHeight + 'px' }" :scroll="{x: 790, y: tableHeight - 60}" :rowKey="(record, index) => index">
         <a-tooltip slot="name" slot-scope="text" placement="topLeft" :title="text">
           <span>{{ text }}</span>
         </a-tooltip>
@@ -88,7 +89,7 @@ export default {
   methods: {
     // 计算表格高度
     calcTableHeight() {
-      this.tableHeight = window.innerHeight - this.$refs['filter'].clientHeight - 185;
+      this.tableHeight = window.innerHeight - this.$refs['filter'].clientHeight - 135;
     },
     // 加载数据
     loadData() {
