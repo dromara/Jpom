@@ -29,7 +29,7 @@
 12. 【Server】服务器中验证码无法加载（感谢@何好听 Gitee issues#I3E7XQ）
 13. 【Agent】解决控制台输出 `Failed to check connection: java.net.ConnectException: Connection refused: connect`,因为没有关闭对应的 jmx
 14. 【Agent】解决首页控制台 java 进程列表慢的问题（采用定时拉取并缓存）
-15. 【server】fix bug: 节点列表页面，展开某个节点之后点击操作按钮会出现新的一行无效数据
+15. 【server】fix bug: 节点列表页面，展开某个节点之后点击操作按钮会出现新的一行无效数据。 [点击查看提交记录](https://gitee.com/dromara/Jpom/commit/b9ecdfa649d27c46bca696e6df088a0908056ff6)
 16. 【server】fix bug: 节点列表页面，在没有安装节点的情况下，点击终端按钮会在控制台报错。[点击这里查看对应 issue](https://gitee.com/dromara/Jpom/issues/I3J4UI)
 17. 【server】fix bug: 节点管理里面的 Nginx 管理，关闭服务的接口参数传递错了。[点击这里查看对应 issue](https://gitee.com/dromara/Jpom/issues/I3IFZY)
 18. 【server】优化系统配置页面的样式，在小屏幕设备上会出现多个竖方向上的滚动条，甚至有时候会遮住底部的操作按钮
