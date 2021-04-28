@@ -86,7 +86,7 @@ export default {
     socketUrl() {
       const protocol = location.protocol === 'https:' ? 'wss://' : 'ws://';
       const domain = document.getElementById('domainPath').value;
-      const url =  (domain + '/console').replaceAll('//', '/')
+      const url =  (domain + '/console').replace(new RegExp('//','gm'), '/');
       return `${protocol}${location.host}${url}?userId=${this.getLongTermToken}&projectId=${this.projectId}&nodeId=${this.nodeId}&type=console&copyId=${this.copyId}`;
     }
   },

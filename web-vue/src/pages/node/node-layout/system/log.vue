@@ -59,7 +59,7 @@ export default {
     socketUrl() {
       const protocol = location.protocol === 'https:' ? 'wss://' : 'ws://';
       const domain = document.getElementById('domainPath').value;
-      const url =  (domain + '/tomcat_log').replaceAll('//', '/')
+      const url =  (domain + '/tomcat_log').replace(new RegExp('//','gm'), '/');
       return `${protocol}${location.host}${url}?userId=${this.getLongTermToken}&tomcatId=${this.tomcatId}&nodeId=${this.node.id}&type=tomcat`;
     }
   },

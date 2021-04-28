@@ -36,7 +36,7 @@ request.interceptors.request.use(config => {
   // 处理数据
   if (domain) {
     // 防止 url 出现 //
-    config.url = (domain + config.url).replaceAll('//', '/');
+    config.url = (domain + config.url).replace(new RegExp('//','gm'), '/');
   }
   if (config.headers['Content-Type'].indexOf('application/x-www-form-urlencoded') !== -1) {
     config.data = Qs.stringify(config.data); 
