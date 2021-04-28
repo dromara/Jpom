@@ -750,6 +750,12 @@ export default {
       for (let node in this.nodeNameList){
           this.nodeNameList[node].openStatus=true;
       }
+       this.temp = {
+        type: 'add',
+        id: '',
+        name: '',
+        projectId: ''
+      };
      }
   }
 }
