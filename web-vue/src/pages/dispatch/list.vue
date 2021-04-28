@@ -373,6 +373,7 @@ export default {
     },
     // 关联分发
     handleLink() {
+      this.$refs['linkDispatchForm'].resetFields()
       this.temp = {
         type: 'add',
         id: '',
@@ -381,9 +382,6 @@ export default {
       };
       this.loadReqId();
       this.linkDispatchVisible = true;
-      this.$nextTick(() => {
-       // this.$refs['linkDispatchForm'].resetFields();
-      })
     },
     // 编辑分发
     handleEditDispatch(record) {
@@ -409,7 +407,7 @@ export default {
       this.loadReqId();
       this.linkDispatchVisible = true;
       this.$nextTick(() => {
-       // this.$refs['linkDispatchForm'].resetFields();
+       this.$refs['linkDispatchForm'].resetFields();
       })
     },
     // 选择项目
@@ -452,7 +450,7 @@ export default {
               duration: 2
             });
             this.targetKeys = [];
-            //this.$refs['linkDispatchForm'].resetFields();
+            this.$refs['linkDispatchForm'].resetFields();
             this.linkDispatchVisible = false;
             this.clearDispatchList();
             this.handleFilter();
