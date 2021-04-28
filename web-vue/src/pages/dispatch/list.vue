@@ -5,9 +5,9 @@
       <a-button type="primary" @click="handleAdd">创建分发项目</a-button>
       <a-button type="primary" @click="handleFilter">刷新</a-button>
     </div>
-    <!-- 表格 -->
+    <!-- 表格 :scroll="{x: 740, y: tableHeight - 60}" scroll 跟 expandedRowRender 不兼容，没法同时使用不然会多出一行数据-->
     <a-table :loading="loading" :columns="columns" :data-source="list" bordered rowKey="id" :style="{'max-height': tableHeight + 'px' }"
-      :scroll="{x: 740, y: tableHeight - 60}" @expand="expand" :pagination="false">
+      @expand="expand" :pagination="false">
       <a-tooltip slot="id" slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>
