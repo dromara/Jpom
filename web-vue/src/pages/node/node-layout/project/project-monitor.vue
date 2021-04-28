@@ -56,11 +56,11 @@ export default {
       columns0: [
         {title: '线程 ID', dataIndex: 'id', width: 150, ellipsis: true, scopedSlots: {customRender: 'id'}},
         {title: '线程名称', dataIndex: 'name', width: 180, ellipsis: true, scopedSlots: {customRender: 'name'}},
-        {title: '线程状态', dataIndex: 'status', width: 100, ellipsis: true, scopedSlots: {customRender: 'status'}},
+        {title: '线程状态', dataIndex: 'status', width: 120, ellipsis: true, scopedSlots: {customRender: 'status'}},
         {title: '唤醒次数', dataIndex: 'blockedCount', width: 100, ellipsis: true, scopedSlots: {customRender: 'blockedCount'}},
         {title: '运行总时间(毫秒)', dataIndex: 'blockedTime', width: 150, ellipsis: true, scopedSlots: {customRender: 'blockedTime'}},
         {title: '阻塞次数', dataIndex: 'waitedCount', width: 100, ellipsis: true, scopedSlots: {customRender: 'waitedCount'}},
-        {title: '阻塞总时间(毫秒)', dataIndex: 'waitedTime', width: 100, ellipsis: true, scopedSlots: {customRender: 'waitedTime'}},
+        {title: '阻塞总时间(毫秒)', dataIndex: 'waitedTime', width: 150, ellipsis: true, scopedSlots: {customRender: 'waitedTime'}},
         {title: '本地线程', dataIndex: 'isInNative', width: 100, ellipsis: true, scopedSlots: {customRender: 'isInNative'}},
         {title: '是否挂起', dataIndex: 'isSuspended', width: 150, ellipsis: true, scopedSlots: {customRender: 'isSuspended'}}
       ],
@@ -130,7 +130,7 @@ export default {
       }
       getThreadInfo(params).then(res => {
         if (res.code === 200) {
-          this.list0 = res.data;
+          this.list0 = res.data.data;
         }
         this.loading0 = false;
       })
