@@ -189,6 +189,9 @@ export function getFileList(params) {
   return axios({
     url: '/node/manage/file/getFileList',
     method: 'post',
+    headers: {
+      loading: 'no'
+    },
     data: params
   })
 }
