@@ -1,5 +1,18 @@
 # 版本日志
 
+# 2.5.2
+
+### 新增功能
+
+### 解决BUG、优化功能
+1. 【server】fix bug: 分发列表页面，展开某个节点之后点击操作按钮会出现新的一行无效数据。[点击查看提交记录](https://gitee.com/dromara/Jpom/commit/e28b14bcf3dce402ce170a40f9bb93c4d25d0935) [@Hotstrip](https://gitee.com/hotstrip)
+2. 【server】fix bug: 项目监控页面，线程数据加载失败问题 [点击查看提交记录](https://gitee.com/dromara/Jpom/commit/b11c5443db6468a2bf7f6a9fa933f8d965899624) [@Hotstrip](https://gitee.com/hotstrip)
+3. 【server】fix bug: 修复低版本浏览器不支持 `.replaceAll()` 方法 [点击查看提交记录](https://gitee.com/dromara/Jpom/commit/0fb475963153b76546409ac3065a0efe9e647541) [@杨巍](https://gitee.com/fat_magpie_beijing_tony)
+4. 【server】update: 更新分发列表 -- 关联分发项目页面操作逻辑（跟老版本操作逻辑一致）[点击查看提交记录](https://gitee.com/dromara/Jpom/commit/cd6e4ae89f833e5e7ef11bd12c324a487de27b1a) [@李道甫](https://gitee.com/koushare_dfli)
+5. 【server】update: 优化项目文件管理页面，加载目录树时会多次显示 loading 层 [点击查看提交记录](https://gitee.com/dromara/Jpom/commit/71b3779bffb36259e0980ce25d4e4082a9d7c2e6) [@Hotstrip](https://gitee.com/hotstrip)
+
+------
+
 # 2.5.1
 
 ### 新增功能
