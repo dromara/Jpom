@@ -396,14 +396,14 @@ export default {
              item.openStatus=false;
            }
         })
-        this.temp["node_"+ele.nodeId]=ele.projectId;
+        this.temp["node_"+ele.nodeId] = ele.projectId;
         this.dispatchList.push({nodeId:ele.nodeId,projectId:ele.projectId,index:index,project:projects,status:true});
       })
       this.temp.type = 'edit';
-      this.temp.projectId=record.projectId;
-      this.temp.name=record.name;
-      this.temp.afterOpt=record.afterOpt;
-      this.temp.id=record.id;
+      this.temp.projectId = record.projectId;
+      this.temp.name = record.name;
+      this.temp.afterOpt = record.afterOpt;
+      this.temp.id = record.id;
       this.loadReqId();
       this.linkDispatchVisible = true;
       this.$nextTick(() => {
@@ -712,49 +712,43 @@ export default {
     loadNodeList() {
       getNodeProjectList().then(res => {
         if (res.code === 200) {
-         this.nodeNameList=res.data;
+         this.nodeNameList = res.data;
         }
       })
-     },
-     //选择节点
-     handleNodeListChange(value,index){
-       //this.projectNameList=this.nodeNameList[value].projects;
-       this.nodeNameList[value].openStatus=false;
-       this.dispatchList[index].project=this.nodeNameList[value].projects;
-       this.dispatchList[index].nodeId=this.nodeNameList[value].id;
-       this.dispatchList[index].index=value;
-     },
-     //选择项目
-     handleProjectChange(value,index){
-      this.dispatchList[index].projectId=value;
-      this.temp["node_"+this.dispatchList[index].nodeId]=value;
-     },
-     //添加分发
-     addDispachList(){
-       this.dispatchList.push({nodeId:"",projectId:"",index:"",project:[],status:true});
-     },
-     //删除分发
-     delDispachList(value){
-       if( this.dispatchList[value].index!==''){
-         this.nodeNameList[this.dispatchList[value].index].openStatus=true;
-       }
-      //this.dispatchList.splice(value,1);
-      delete this.temp["node_"+this.dispatchList[value].nodeId]
-      this.dispatchList[value].status=false;
-     },
-     //清理缓存
-     clearDispatchList(){
-       this.dispatchList=[]
-      for (let node in this.nodeNameList){
-          this.nodeNameList[node].openStatus=true;
+    },
+    //选择节点
+    handleNodeListChange(value,index){
+      //this.projectNameList = this.nodeNameList[value].projects;
+      this.nodeNameList[value].openStatus = false;
+      this.dispatchList[index].project = this.nodeNameList[value].projects;
+      this.dispatchList[index].nodeId = this.nodeNameList[value].id;
+      this.dispatchList[index].index = value;
+    },
+    //选择项目
+    handleProjectChange(value,index){
+      this.dispatchList[index].projectId = value;
+      this.temp["node_"+this.dispatchList[index].nodeId] = value;
+    },
+    //添加分发
+    addDispachList(){
+      this.dispatchList.push({nodeId: "", projectId: "", index: "", project: [], status: true});
+    },
+    //删除分发
+    delDispachList(value){
+      if (this.dispatchList[value].index !== '') {
+        this.nodeNameList[this.dispatchList[value].index].openStatus = true;
       }
-       this.temp = {
-        type: 'add',
-        id: '',
-        name: '',
-        projectId: ''
-      };
-     }
+      //this.dispatchList.splice(value,1);
+      delete this.temp["node_" + this.dispatchList[value].nodeId];
+      this.dispatchList[value].status = false;
+    },
+    //清理缓存
+    clearDispatchList(){
+      this.dispatchList = [];
+      for (let node in this.nodeNameList) {
+        this.nodeNameList[node].openStatus = true;
+      }
+    }
   }
 }
 </script>
