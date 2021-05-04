@@ -116,3 +116,16 @@ export function sendEmailCode(email) {
     data: {email}
   })
 }
+
+/**
+ * 解锁管理员
+ * @param {String} id 管理员 ID 
+ * @returns 
+ */
+export function unlockUser(id) {
+  return axios({
+    url: '/user/unlock',
+    method: 'post',
+    data: {id}
+  })
+}
