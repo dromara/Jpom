@@ -9,6 +9,7 @@
       <template slot="operation" slot-scope="text, record">
         <a-button type="primary" @click="handleEdit(record)">编辑</a-button>
         <a-button type="danger" @click="handleDelete(record)">删除</a-button>
+        <a-button type="danger" :disabled="record.pwdErrorCount === 0" @click="handleUnlock(record)">解锁</a-button>
       </template>
     </a-table>
     <!-- 编辑区 -->
@@ -39,7 +40,7 @@
 </template>
 <script>
 import { mapGetters } from 'vuex';
-import { getUserList, addUser, updateUser, deleteUser } from '../../api/user';
+import { getUserList, addUser, updateUser, deleteUser, unlockUser } from '../../api/user';
 import { getRoleList } from '../../api/role';
 import { parseTime } from '../../utils/time';
 import sha1 from 'sha1';
@@ -227,6 +228,27 @@ export default {
         onOk: () => {
           // 删除
           deleteUser(record.id).then((res) => {
+            if (res.code === 200) {
+              this.$notification.success({
+                message: res.msg,
+                duration: 2
+              });
+              this.loadData();
+            }
+          })
+        }
+      });
+    },
+    // 解锁
+    handleUnlock(record) {
+      this.$confirm({
+        title: '系统提示',
+        content: '真的要解锁用户么？',
+        okText: '确认',
+        cancelText: '取消',
+        onOk: () => {
+          // 解锁用户
+          unlockUser(record.id).then(res => {
             if (res.code === 200) {
               this.$notification.success({
                 message: res.msg,
