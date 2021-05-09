@@ -158,7 +158,7 @@
               <a-input v-model="temp[`${nodeId}_token`]" placeholder="关闭程序时自动请求,非必填，GET请求"/>
             </a-form-model-item>
             <a-form-model-item label="JVM 参数" prop="jvm">
-              <a-textarea v-model="temp[`${nodeId}_jvm`]" :auto-size="{ minRows: 3, maxRows: 3 }" placeholder="jvm参数,非必填.如：-Xmin=512m -Xmax=512m"/>
+              <a-textarea v-model="temp[`${nodeId}_jvm`]" :auto-size="{ minRows: 3, maxRows: 3 }" placeholder="jvm参数,非必填.如：-Xms512m -Xmx512m"/>
             </a-form-model-item>
             <a-form-model-item label="args 参数" prop="args">
               <a-textarea v-model="temp[`${nodeId}_args`]" :auto-size="{ minRows: 3, maxRows: 3 }" placeholder="Main 函数 args 参数，非必填. 如：--service.port=8080"/>
@@ -166,7 +166,7 @@
             <!-- 副本信息 -->
             <a-row v-for="replica in temp[`${nodeId}_javaCopyItemList`]" :key="replica.id">
               <a-form-model-item :label="`副本 ${replica.id} JVM 参数`" prop="jvm">
-                <a-textarea v-model="replica.jvm" :auto-size="{ minRows: 3, maxRows: 3 }" class="replica-area" placeholder="jvm参数,非必填.如：-Xmin=512m -Xmax=512m"/>
+                <a-textarea v-model="replica.jvm" :auto-size="{ minRows: 3, maxRows: 3 }" class="replica-area" placeholder="jvm参数,非必填.如：-Xms512m -Xmx512m"/>
               </a-form-model-item>
               <a-form-model-item :label="`副本 ${replica.id} args 参数`" prop="args">
                 <a-textarea v-model="replica.args" :auto-size="{ minRows: 3, maxRows: 3 }" class="replica-area" placeholder="Main 函数 args 参数，非必填. 如：--service.port=8080"/>

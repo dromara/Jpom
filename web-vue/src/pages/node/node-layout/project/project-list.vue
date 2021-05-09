@@ -92,7 +92,7 @@
           <a-input v-model="temp.javaExtDirsCp" placeholder="-Dext.dirs=xxx: -cp xx  填写【xxx:xx】"/>
         </a-form-model-item>
         <a-form-model-item label="JVM 参数" prop="jvm" v-show="temp.runMode !== 'File'">
-          <a-textarea v-model="temp.jvm" :auto-size="{ minRows: 3, maxRows: 3 }" placeholder="jvm参数,非必填.如：-Xmin=512m -Xmax=512m"/>
+          <a-textarea v-model="temp.jvm" :auto-size="{ minRows: 3, maxRows: 3 }" placeholder="jvm参数,非必填.如：-Xms512m -Xmx512m"/>
         </a-form-model-item>
         <a-form-model-item label="args 参数" prop="args"  v-show="temp.runMode !== 'File'">
           <a-textarea v-model="temp.args" :auto-size="{ minRows: 3, maxRows: 3 }" placeholder="Main 函数 args 参数，非必填. 如：--service.port=8080"/>
@@ -100,7 +100,7 @@
         <!-- 副本信息 -->
         <a-row v-for="replica in temp.javaCopyItemList" :key="replica.id" >
           <a-form-model-item :label="`副本 ${replica.id} JVM 参数`" prop="jvm">
-            <a-textarea v-model="replica.jvm" :auto-size="{ minRows: 3, maxRows: 3 }" class="replica-area" placeholder="jvm参数,非必填.如：-Xmin=512m -Xmax=512m"/>
+            <a-textarea v-model="replica.jvm" :auto-size="{ minRows: 3, maxRows: 3 }" class="replica-area" placeholder="jvm参数,非必填.如：-Xms512m -Xmx512m"/>
           </a-form-model-item>
           <a-form-model-item :label="`副本 ${replica.id} args 参数`" prop="args">
             <a-textarea v-model="replica.args" :auto-size="{ minRows: 3, maxRows: 3 }" class="replica-area" placeholder="Main 函数 args 参数，非必填. 如：--service.port=8080"/>
