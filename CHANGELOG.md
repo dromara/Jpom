@@ -10,6 +10,7 @@
 3. 【server】fix bug: 修复低版本浏览器不支持 `.replaceAll()` 方法 [点击查看提交记录](https://gitee.com/dromara/Jpom/commit/0fb475963153b76546409ac3065a0efe9e647541) [@杨巍](https://gitee.com/fat_magpie_beijing_tony)
 4. 【server】update: 更新分发列表 -- 关联分发项目页面操作逻辑（跟老版本操作逻辑一致）[点击查看提交记录](https://gitee.com/dromara/Jpom/commit/cd6e4ae89f833e5e7ef11bd12c324a487de27b1a) [@李道甫](https://gitee.com/koushare_dfli)
 5. 【server】update: 优化项目文件管理页面，加载目录树时会多次显示 loading 层 [点击查看提交记录](https://gitee.com/dromara/Jpom/commit/71b3779bffb36259e0980ce25d4e4082a9d7c2e6) [@Hotstrip](https://gitee.com/hotstrip)
+6. 【server】fix bug: 修复节点请求超时可能导致节点项目列表为空 bug [点击查看提交记录](https://gitee.com/dromara/Jpom/commit/e3182dfa04c27e63a29d67b292a7bfef834f875e) [@Hotstrip](https://gitee.com/hotstrip)
 
 ------
 
