@@ -136,12 +136,10 @@ public class NodeForward {
         } catch (Exception e) {
             /**
              * @author Hotstrip
-             * there is no need to throw exception, just return error response is ok
-             * or else, very much exception log well be write into the log file
+             * revert version and add log print
              */
             DefaultSystemLog.getLog().error("node [{}] connect failed, caused by [{}]", nodeModel.getName(), e.getMessage());
-            // throw new AgentException(nodeModel.getName() + "节点异常：" + e.getMessage());
-            return toJsonMessage(JsonMessage.getString(500, "node connect failed"));
+            throw new AgentException(nodeModel.getName() + "节点异常：" + e.getMessage());
         }
         //
         return parseBody(response);
@@ -191,12 +189,10 @@ public class NodeForward {
         } catch (Exception e) {
             /**
              * @author Hotstrip
-             * there is no need to throw exception, just return null is ok
-             * or else, very much exception log well be write into the log file
+             * revert version and add log print
              */
             DefaultSystemLog.getLog().error("node [{}] connect failed, caused by [{}]", nodeModel.getName(), e.getMessage());
-            // throw new AgentException(nodeModel.getName() + "节点异常：" + e.getMessage());
-            return null;
+            throw new AgentException(nodeModel.getName() + "节点异常：" + e.getMessage());
         }
         //
         JsonMessage<T> jsonMessage = parseBody(response);
