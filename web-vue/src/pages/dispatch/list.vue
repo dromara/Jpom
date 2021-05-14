@@ -385,19 +385,25 @@ export default {
     },
     // 编辑分发
     handleEditDispatch(record) {
-       //分发节点重新渲染
+      //分发节点重新渲染
       record.outGivingNodeProjectList.forEach(ele => {
-        let index='';
-        let projects=[];
+        let index = '';
+        let projects = [];
         this.nodeNameList.forEach((item,idx) =>{
-           if(item.id==ele.nodeId){
-             index=idx;
-             projects=item.projects;
-             item.openStatus=false;
-           }
+          if (item.id === ele.nodeId){
+            index = idx;
+            projects = item.projects;
+            item.openStatus = false;
+          }
         })
-        this.temp["node_"+ele.nodeId] = ele.projectId;
-        this.dispatchList.push({nodeId:ele.nodeId,projectId:ele.projectId,index:index,project:projects,status:true});
+        this.temp[`node_${ele.nodeId}`] = ele.projectId;
+        this.dispatchList.push({
+          nodeId: ele.nodeId,
+          projectId: ele.projectId,
+          index: index,
+          project: projects,
+          status: true
+        });
       })
       this.temp.type = 'edit';
       this.temp.projectId = record.projectId;
@@ -739,7 +745,7 @@ export default {
         this.nodeNameList[this.dispatchList[value].index].openStatus = true;
       }
       //this.dispatchList.splice(value,1);
-      delete this.temp["node_" + this.dispatchList[value].nodeId];
+      delete this.temp[`node_${this.dispatchList[value].nodeId}`];
       this.dispatchList[value].status = false;
     },
     //清理缓存
