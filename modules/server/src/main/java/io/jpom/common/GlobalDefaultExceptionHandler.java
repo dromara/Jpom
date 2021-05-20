@@ -41,14 +41,20 @@ public class GlobalDefaultExceptionHandler {
      */
     @ExceptionHandler({AgentException.class, AuthorizeException.class, RuntimeException.class, Exception.class})
     public void paramExceptionHandler(HttpServletRequest request, HttpServletResponse response, Exception e) {
-        DefaultSystemLog.getLog().error("controller " + request.getRequestURI(), e);
+        DefaultSystemLog.getLog().error("controller " + request.getRequestURI(), e.getMessage());
+        DefaultSystemLog.getLog().error("global handle exception: {}, caused by: {}, and message: {}", e.getClass().getName(), e.getCause(), e.getMessage());
         if (BaseJpomInterceptor.isPage(request)) {
             try {
                 String id = IdUtil.fastUUID();
                 TIMED_CACHE.put(id, getErrorMsg(e));
                 BaseJpomInterceptor.sendRedirects(request, response, "/error.html?id=" + id);
             } catch (IOException ex) {
-                ex.printStackTrace();
+                /**
+                 * @author Hotstrip
+                 * don't print stach trace into console
+                 */
+                // ex.printStackTrace();
+                DefaultSystemLog.getLog().error("catch exception: {}, and message: {}", ex.getCause(), ex.getMessage());
             }
         } else {
             if (e instanceof AuthorizeException) {
