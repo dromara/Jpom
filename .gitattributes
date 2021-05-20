@@ -1,4 +1,4 @@
 *       text=auto
 *.jar   binary
 *.sh    text working-tree-encoding=UTF-8 eol=lf
-*.bat   text working-tree-encoding=GB2312 eol=crlf
+*.bat   text working-tree-encoding=GBK   eol=crlf
