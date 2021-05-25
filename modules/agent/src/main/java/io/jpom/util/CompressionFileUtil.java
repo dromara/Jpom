@@ -50,7 +50,7 @@ public class CompressionFileUtil {
                     //是文件
                     File tmpFile = new File(destDir, entry.getName());
                     //创建输出目录
-                    FileUtil.mkParentDirs(destDir);
+                    FileUtil.mkParentDirs(tmpFile);
                     OutputStream out = null;
                     try {
                         out = new FileOutputStream(tmpFile);
