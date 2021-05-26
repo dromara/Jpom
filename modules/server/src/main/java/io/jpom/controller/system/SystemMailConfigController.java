@@ -92,7 +92,7 @@ public class SystemMailConfigController extends BaseServerController {
         systemMailConfigService.save(mailAccountModel);
         // 验证是否正确
         try {
-            MailAccount account = EmailUtil.getAccountNew();
+            MailAccount account = EmailUtil.getAccount();
             Session session = MailUtil.getSession(account, false);
             Transport transport = session.getTransport("smtp");
             transport.connect();
