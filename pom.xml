@@ -21,7 +21,7 @@
         一款简而轻的低侵入式在线构建、自动部署、日常运维、项目监控软件
     </description>
     <inceptionYear>2017</inceptionYear>
-    <version>2.5.1</version>
+    <version>2.5.2</version>
     <url>https://gitee.com/dromara/Jpom</url>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
