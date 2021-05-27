@@ -4,6 +4,8 @@
 
 ### 新增功能
 
+1. 【agent+server】 新增节点批量升级功能（注意，之前的节点版本不支持该功能需要升级当前版本后才能使用该功能）
+
 ### 解决BUG、优化功能
 1. 【server】fix bug: 分发列表页面，展开某个节点之后点击操作按钮会出现新的一行无效数据。[点击查看提交记录](https://gitee.com/dromara/Jpom/commit/e28b14bcf3dce402ce170a40f9bb93c4d25d0935) [@Hotstrip](https://gitee.com/hotstrip)
 2. 【server】fix bug: 项目监控页面，线程数据加载失败问题 [点击查看提交记录](https://gitee.com/dromara/Jpom/commit/b11c5443db6468a2bf7f6a9fa933f8d965899624) [@Hotstrip](https://gitee.com/hotstrip)
