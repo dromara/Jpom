@@ -287,7 +287,7 @@ public class NodeForward {
         //
         if (nodeUrl.getTimeOut() != -1 && nodeModel.getTimeOut() > 0) {
             //
-            httpRequest.timeout(nodeModel.getTimeOut());
+            httpRequest.timeout(nodeModel.getTimeOut() * 1000);
         }
     }
 
