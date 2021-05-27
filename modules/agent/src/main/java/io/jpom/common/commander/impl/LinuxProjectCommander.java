@@ -1,5 +1,6 @@
 package io.jpom.common.commander.impl;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.text.StrSpliter;
 import cn.hutool.core.util.StrUtil;
@@ -81,11 +82,11 @@ public class LinuxProjectCommander extends AbstractProjectCommander {
             netstatModel.setLocal(list.get(3));
             netstatModel.setForeign(list.get(4));
             if ("tcp".equalsIgnoreCase(netstatModel.getProtocol())) {
-                netstatModel.setStatus(list.get(5));
-                netstatModel.setName(list.get(6));
+                netstatModel.setStatus(CollUtil.get(list, 5));
+                netstatModel.setName(CollUtil.get(list, 6));
             } else {
                 netstatModel.setStatus(StrUtil.DASHED);
-                netstatModel.setName(list.get(5));
+                netstatModel.setName(CollUtil.get(list, 5));
             }
             array.add(netstatModel);
         }

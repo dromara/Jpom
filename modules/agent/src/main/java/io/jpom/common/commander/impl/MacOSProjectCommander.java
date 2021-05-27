@@ -1,5 +1,6 @@
 package io.jpom.common.commander.impl;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.text.StrSpliter;
 import cn.hutool.core.util.StrUtil;
@@ -16,10 +17,12 @@ import java.util.List;
 
 /**
  * MacOSProjectCommander
+ *
  * @author Hotstrip
  * @Description some commands cannot execute success on Mac OS
  */
 public class MacOSProjectCommander extends AbstractProjectCommander {
+
     @Override
     public String buildCommand(ProjectInfoModel projectInfoModel, ProjectInfoModel.JavaCopyItem javaCopyItem) {
         String path = ProjectInfoModel.getClassPathLib(projectInfoModel);
@@ -42,12 +45,12 @@ public class MacOSProjectCommander extends AbstractProjectCommander {
     public List<NetstatModel> listNetstat(int pId, boolean listening) {
         String cmd;
         if (listening) {
-            cmd = "lsof -n -P -iTCP -sTCP:LISTEN |grep "+ pId +" | head -20";
+            cmd = "lsof -n -P -iTCP -sTCP:LISTEN |grep " + pId + " | head -20";
         } else {
             cmd = "lsof -n -P -iTCP -sTCP:CLOSE_WAIT |grep " + pId + " | head -20";
         }
         String result = CommandUtil.execSystemCommand(cmd);
-        DefaultSystemLog.getLog().debug("Mac OS lsof data: {}", result);
+        //DefaultSystemLog.getLog().debug("Mac OS lsof data: {}", result);
         List<String> netList = StrSpliter.splitTrim(result, "\n", true);
         if (netList == null || netList.size() <= 0) {
             return null;
@@ -65,11 +68,11 @@ public class MacOSProjectCommander extends AbstractProjectCommander {
             netstatModel.setLocal(list.get(3));
             netstatModel.setForeign(list.get(4));
             if ("tcp".equalsIgnoreCase(netstatModel.getProtocol())) {
-                netstatModel.setStatus(list.get(5));
-                netstatModel.setName(list.get(6));
+                netstatModel.setStatus(CollUtil.get(list, 5));
+                netstatModel.setName(CollUtil.get(list, 6));
             } else {
                 netstatModel.setStatus(StrUtil.DASHED);
-                netstatModel.setName(list.get(5));
+                netstatModel.setName(CollUtil.get(list, 5));
             }
             array.add(netstatModel);
         }
