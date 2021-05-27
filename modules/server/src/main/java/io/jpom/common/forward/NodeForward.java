@@ -285,9 +285,11 @@ public class NodeForward {
         }
         httpRequest.header(ConfigBean.JPOM_AGENT_AUTHORIZE, nodeModel.getAuthorize(true));
         //
-        if (nodeUrl.getTimeOut() != -1 && nodeModel.getTimeOut() > 0) {
+        int timeOut = nodeModel.getTimeOut();
+        if (nodeUrl.getTimeOut() != -1 && timeOut > 0) {
             //
-            httpRequest.timeout(nodeModel.getTimeOut() * 1000);
+            timeOut = Math.max(timeOut, 2);
+            httpRequest.timeout(timeOut * 1000);
         }
     }
 

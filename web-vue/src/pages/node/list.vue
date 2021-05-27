@@ -107,7 +107,7 @@
           </a-form-model-item>
         </div>
         <a-form-model-item label="超时时间(s)" prop="timeOut">
-          <a-input-number v-model="temp.timeOut" :min="2" placeholder="秒 (值太小可能会取不到节点状态)" style="width: 100%"/>
+          <a-input-number v-model="temp.timeOut" :min="0" placeholder="秒 (值太小可能会取不到节点状态)" style="width: 100%"/>
         </a-form-model-item>
       </a-form-model>
     </a-modal>
@@ -143,7 +143,9 @@ export default {
       groupList: [],
       sshList: [],
       list: [],
-      temp: {},
+      temp: {
+        timeOut: 0
+      },
       editNodeVisible: false,
       drawerVisible: false,
       terminalVisible: false,
@@ -287,7 +289,8 @@ export default {
         type: 'add',
         cycle: 0,
         protocol: 'http',
-        openStatus: true
+        openStatus: true,
+        timeOut: 0
       };
       this.editNodeVisible = true;
       this.$nextTick(() => {
