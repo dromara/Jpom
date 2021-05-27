@@ -15,6 +15,7 @@
 5. 【server】update: 优化项目文件管理页面，加载目录树时会多次显示 loading 层 [点击查看提交记录](https://gitee.com/dromara/Jpom/commit/71b3779bffb36259e0980ce25d4e4082a9d7c2e6) [@Hotstrip](https://gitee.com/hotstrip)
 6. 【server】fix bug: 修复节点请求超时可能导致节点项目列表为空 bug [点击查看提交记录](https://gitee.com/dromara/Jpom/commit/e3182dfa04c27e63a29d67b292a7bfef834f875e) [@Hotstrip](https://gitee.com/hotstrip)
 7. 【agent】 fix bug: index 获取进程列表 NPE (感谢@夏末秋初)
+8. 【server】fix bug: 修复上传项目压缩文件创建项目目录异常[点击这里查看对应 issue](https://gitee.com/dromara/Jpom/issues/I29FRJ)
 
 ------
 
