@@ -50,15 +50,20 @@ public class EmailUtil implements INotify {
     }
 
     public static MailAccount getAccountNew() {
+        init();
         MailAccountModel config = systemMailConfigService.getConfig();
         return getAccount(config);
     }
 
+    private static void init() {
+        if (systemMailConfigService == null) {
+            systemMailConfigService = SpringUtil.getBean(SystemMailConfigService.class);
+        }
+    }
+
     public static MailAccount getAccount() {
         if (config == null) {
-            if (systemMailConfigService == null) {
-                systemMailConfigService = SpringUtil.getBean(SystemMailConfigService.class);
-            }
+            init();
             config = systemMailConfigService.getConfig();
         }
         return getAccount(config);
