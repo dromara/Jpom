@@ -16,6 +16,7 @@
 6. 【server】fix bug: 修复节点请求超时可能导致节点项目列表为空 bug [点击查看提交记录](https://gitee.com/dromara/Jpom/commit/e3182dfa04c27e63a29d67b292a7bfef834f875e) [@Hotstrip](https://gitee.com/hotstrip)
 7. 【agent】 fix bug: index 获取进程列表 NPE (感谢@夏末秋初)
 8. 【server】fix bug: 修复上传项目压缩文件创建项目目录异常[点击这里查看对应 issue](https://gitee.com/dromara/Jpom/issues/I29FRJ)
+9. 【server】fix bug：创建构建时，如果选择 svn，隐藏掉分支选项。[点击这里查看对应 issue](https://gitee.com/dromara/Jpom/issues/I3TA6S) [感谢 Alexa 提出 issue](https://gitee.com/alexa1989) [@Hotstrip](https://gitee.com/dromara/Jpom/compare/180914f4ddda4dc34fa2df9b169bac7b593dedb0...aa6bb065b6f507ad0bf42225a2aad40e2d25597f)
 
 ------
 
