@@ -89,7 +89,7 @@
         <a-form-model-item label="登录密码" prop="password">
           <a-input-password v-model="temp.password" placeholder="登录密码"/>
         </a-form-model-item>
-        <a-form-model-item label="分支" prop="branchName">
+        <a-form-model-item v-show="temp.repoType === 0" label="分支" prop="branchName">
           <a-row>
             <a-col :span="18">
               <a-select v-model="temp.branchName" placeholder="请先填写仓库地址和账号信息">
