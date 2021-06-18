@@ -131,7 +131,7 @@ public class ExtConfigBean {
         if (StrUtil.isEmpty(path)) {
             if (JpomManifest.getInstance().isDebug()) {
                 // 调试模式 为根路径的 jpom文件
-                path = ("/jpom/" + JpomApplication.getAppType().name() + "/").toLowerCase();
+                path = ((SystemUtil.getOsInfo().isMac() ? "~" : "") + "/jpom/" + JpomApplication.getAppType().name() + "/").toLowerCase();
             } else {
                 // 获取当前项目运行路径的父级
                 File file = JpomManifest.getRunPath();
