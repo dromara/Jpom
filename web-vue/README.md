@@ -1,46 +1,86 @@
-# Jpom 前端 VUE 项目（server）
+# JPOM 前端 VUE 项目（server）
 
 ## 介绍
 
-这是一个 Jpom 的前端项目，主要内容是重写了一套 UI 页面。使用了 Vue 和 AntDesign Vue.
+这是 Jpom项目的前端部分，基于[Vue](https://cn.vuejs.org/)构建，UI框架则是基于[Ant Design Vue](https://www.antdv.com/docs/vue/introduce-cn/).
 
-[https://www.antdv.com/docs/vue/introduce-cn/](https://www.antdv.com/docs/vue/introduce-cn/)
+
+
+## 快速开始
+
+如果你是第一次运行这个项目，你需要保证你的电脑里已经装好了 [Node](http://nodejs.cn/) 环境，Node默认携带`npm`管理器， 无需额外安装。 可通过`npm -v` 查看当前环境是否OK。
+
+然后进入当前目录 `web-vue`
+
+**运行命令**
+
+1. 打包和运行都需要安装依赖
+
+```
+npm install
+```
+
+2. 本地开发测试？
+
+```
+npm run serve
+```
+
+3. 项目开发好了，需要打包发布？
+
+```
+npm run build
+```
+
+
 
 ## 目录结构
 
 ```
-web-vue
-    public => public files
-    src
-        api => there are api directory
-        assets => static files
-        pages => UI pages
-        router => vue router
-        store => vue store
-        utils => utils file
-        App.vue
-        main.js
-        vue.config.js => some config
-    package.json
+.
+├── package.json
+├── vue.config.js
+├── babel.config.js
+├── dist
+├── public
+└── src
+    ├── api => 接口管理
+    ├── assets => 静态资源
+    ├── pages  => 路由级页面
+    ├── router => 路由配置
+    ├── store => 状态管理
+    ├── utils => 共用方法
+    ├── App.vue 
+    └── main.js => 入口文件
 ```
 
+### package.json
 
-## 开始
+管理项目所依赖的各种包，运行脚本等配置
 
-如果你是第一次运行这个项目，你需要保证你的电脑里已经装好了 Node 环境。然后像其他 Vue 项目一样，使用下面的命令去执行就可以使用浏览器看到效果了。
+### vue.config.js
+
+项目配置文件，可以配置运行端口、代理、项目输出目录......
+
+### babel.config.js
+
+babel配置文件， 关于项目编译期间的一些配置
+
+### dist
+
+项目打包后的输出目录
+
+### public
+
+项目共用文件，此目录中的文件不会被webpack编译
+
+### src
+
+项目主目录
 
 
-### 安装项目依赖
-```
-yarn install
-```
 
-### 本地启动（调试模式）
-```
-yarn serve
-```
 
-### 项目打包
-```
-yarn build
-```
+
+
+

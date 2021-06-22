@@ -1,60 +1,58 @@
 <template>
-  <!-- <div class="wrapper"> -->
-    <a-card class="login-card" hoverable style="width: 450px">
-      <a-card-meta title="Jpom Dashboard" description=""/>
+  <div class="wrapper" :style="{backgroundImage: `url(${bg})`}">
+    <div class="switch" @click="handleToggleBg">{{dynamicBg ? '关闭动态背景': '开启动态背景'}}</div>
+    <a-card class="login-card" hoverable>
+      <a-card-meta title="登录JPOM" description=""/>
       <br/>
       <a-form :form="loginForm" :label-col="{ span: 0 }" @submit="handleLogin">
         <a-form-item :wrapper-col="{span: 24}">
-          <a-input v-decorator="['userName', { rules: [{ required: true, message: 'Please input your name!' }] }]" placeholder="User Name"/>
+          <a-input v-decorator="['userName', { rules: [{ required: true, message: '请输入用户名' }] }]" placeholder="用户名"/>
         </a-form-item>
         <a-form-item :wrapper-col="{span: 24}">
-          <a-input-password v-decorator="['userPwd', { rules: [{ required: true, message: 'Please input your password!' }] }]" placeholder="Password"/>
+          <a-input-password v-decorator="['userPwd', { rules: [{ required: true, message: '请输入密码' }] }]" placeholder="密码"/>
         </a-form-item>
         <a-form-item :wrapper-col="{span: 24}">
           <a-row>
             <a-col :span="14">
-              <a-input v-decorator="['code', { rules: [{ required: true, message: 'Please input your code!' }] }]" placeholder="Code"/>
+              <a-input v-decorator="['code', { rules: [{ required: true, message: '请输入验证码' }] }]" placeholder="验证码"/>
             </a-col>
-            <a-col :span="10">
-              <img :src="randCode" @click="changeCode" class="rand-code"/>
+            <a-col :offset="2" :span="8">
+              <div class="rand-code">
+                <img :src="randCode" @click="changeCode" />
+              </div>
             </a-col>
           </a-row>
         </a-form-item>
-        <a-form-item :wrapper-col="{ span: 24 }">
           <a-button type="primary" html-type="submit" class="btn-login">
             登录
           </a-button>
-        </a-form-item>
       </a-form>
     </a-card>
-  <!-- </div> -->
+  </div>
 </template>
 <script>
 import { login } from '../../api/user';
 import { checkSystem } from '../../api/install';
 import sha1 from 'sha1';
+import defaultBg from '../../assets/images/bg.jpeg';
 export default {
   data() {
     return {
       loginForm: this.$form.createForm(this, { name: 'login-form' }),
-      randCode: 'randCode.png'
+      randCode: 'randCode.png',
+      bg: defaultBg,
+      dynamicBg: localStorage.getItem('dynamicBg') === 'false' ? false : true,
     }
-  },
-  beforeCreate() {
-    document.querySelector('body').setAttribute('style', 'background-color: #fbefdf')
-  }, //
-  beforeDestroy() {
-    document.querySelector('body').removeAttribute('style')
   },
   created() {
     this.checkSystem();
+    this.getBg();
   },
   methods: {
     // 检查是否需要初始化
     checkSystem() {
       checkSystem().then(res => {
         if(res.code === 900){
-          //
           this.$router.push('/system/ipAccess');
         }else if (res.code !== 200) {
           this.$notification.warn({
@@ -64,6 +62,20 @@ export default {
           this.$router.push('/install');
         }
       })
+    },
+    // Controls the background display or hiding
+    handleToggleBg() {
+      this.dynamicBg = !this.dynamicBg;
+      localStorage.setItem('dynamicBg', this.dynamicBg);
+      this.getBg();
+    },
+    // Get background pic
+    getBg() {
+      if (this.dynamicBg) {
+        this.bg = `https://picsum.photos/${screen.width}/${screen.height}/?random`;
+      } else {
+        this.bg = defaultBg;
+      }
     },
     // change Code
     changeCode() {
@@ -101,27 +113,73 @@ export default {
 }
 </script>
 <style scoped>
-.login-card {
+.wrapper {
+  width: 100vw;
+  height: 100vh;
+  background-color: #fbefdf;
+  background-size: cover;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+}
+.switch {
+  width: 128px;
+  height: 38px;
   position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%,-50%);
+  top: 49%;
+  right: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fff;
+  padding: 0 10px 0 18px;
+  cursor: pointer;
+  transform: translateX(105px);
+  transition: all 0.3s ease-in-out;
+  border-top-left-radius: 6px;
+  border-bottom-left-radius: 6px;
+}
+.switch:hover {
+  transform: translateX(0);
+}
+.switch::before {
+  content: '';
+  position: absolute;
+  left: 10px;
+  top: 13px;
+  width: 10px;
+  height: 10px;
+  border-right: 1px solid #333;
+  border-bottom: 1px solid #333;
+  transform: rotate(135deg);
+}
+
+.login-card {
+  min-width: 380px;
   text-align: center;
-  border-radius: 10px;
+  border-radius: 8px;
 }
 .rand-code {
-  height: 38px;
+  width: 100%;
+  height: 36px;
+}
+.rand-code img{
+  width: 100%;
+  height: 100%;
+  display: inherit;
 }
 .btn-login {
-  width: 120px;
+  width: 100%;
+  margin: 10px 0;
 }
-/*body {*/
-/*  background-color: #fbefdf;*/
-/*}*/
 </style>
 <style>
 
 .ant-card-meta-title {
   font-size: 30px;
+}
+.ant-card-body {
+  padding: 30px;
 }
 </style>
