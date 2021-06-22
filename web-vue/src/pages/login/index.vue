@@ -122,6 +122,7 @@ export default {
   justify-content: center;
   align-items: center;
   position: relative;
+  overflow: hidden;
 }
 .switch {
   width: 128px;
