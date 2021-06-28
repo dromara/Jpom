@@ -140,14 +140,20 @@ export default {
       }
       getNginxDirectoryList(params).then(res => {
         if (res.code === 200) {
-          this.treeList = res.data;
-          (this.treeList[0])['$treeNodeId'] = 1;
+          // 添加一个唯一标识
+          const list = res.data.map((item, i) => {
+            item['$treeNodeId'] = 1 + i
+            return item
+          })
+          this.treeList = list;
         }
         // 取出第一个默认选中
         this.$nextTick(() => {
           const node = this.$refs['tree'].getNode(1);
-          this.tempNode = node;
-          this.loadFileList();
+          if (node) {
+            this.tempNode = node;
+            this.loadFileList();
+          }
         });
         this.loading = false;
       })
