@@ -2,7 +2,7 @@
   <div class="wrapper" :style="{backgroundImage: `url(${bg})`}">
     <div class="switch" @click="handleToggleBg">{{dynamicBg ? '关闭动态背景': '开启动态背景'}}</div>
     <a-card class="login-card" hoverable>
-      <a-card-meta title="登录JPOM" description=""/>
+      <a-card-meta  title="登录JPOM" style="text-align: center" description=""/>
       <br/>
       <a-form :form="loginForm" :label-col="{ span: 0 }" @submit="handleLogin">
         <a-form-item :wrapper-col="{span: 24}">
@@ -158,7 +158,6 @@ export default {
 
 .login-card {
   min-width: 380px;
-  text-align: center;
   border-radius: 8px;
 }
 .rand-code {
