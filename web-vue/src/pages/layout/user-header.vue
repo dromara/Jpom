@@ -11,7 +11,7 @@
 <!--        :style="{ backgroundColor: '#f56a00', verticalAlign: 'middle' ,fontSize:'40px'}">-->
 <!--        -->
 <!--      </a-avatar>-->
-      <a-button class="ant-dropdown-link jpom-user-operation" :style="{ backgroundColor: '#f56a00', verticalAlign: 'middle'}" @click="e => e.preventDefault()"  :title="getUserInfo.name">
+      <a-button class="ant-dropdown-link jpom-user-operation" :style="{ backgroundColor: '#f56a00', color: '#fff', verticalAlign: 'middle'}" @click="e => e.preventDefault()"  :title="getUserInfo.name">
         {{ avatarName }} <a-icon type="down" />
       </a-button>
       <a-menu slot="overlay">
