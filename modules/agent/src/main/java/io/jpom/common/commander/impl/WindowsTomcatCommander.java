@@ -2,6 +2,7 @@ package io.jpom.common.commander.impl;
 
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.text.StrSpliter;
+import cn.hutool.core.util.NumberUtil;
 import cn.hutool.core.util.StrUtil;
 import io.jpom.common.commander.AbstractTomcatCommander;
 import io.jpom.model.data.TomcatInfoModel;
@@ -29,7 +30,7 @@ public class WindowsTomcatCommander extends AbstractTomcatCommander {
         //截取盘符
         String dcPath = null;
         if (tomcatPath != null && tomcatPath.indexOf("/") > 1) {
-            dcPath = tomcatPath.substring(0,tomcatPath.indexOf("/"));
+            dcPath = tomcatPath.substring(0, tomcatPath.indexOf("/"));
         }
         String command = null;
         if (StrUtil.isBlank(tomcatPath)) {
@@ -39,18 +40,18 @@ public class WindowsTomcatCommander extends AbstractTomcatCommander {
         if (cmd.equals("stop")) {
             String setPidCmd = CommandUtil.execSystemCommand("jps -mv");
             List<String> list = StrSpliter.splitTrim(setPidCmd, StrUtil.LF, true);
-            for (String item : list){
+            for (String item : list) {
                 //window下路径格式转换
                 String msg = FileUtil.normalize(item + "/");
                 //判断集合中元素是否包含指定Tomcat路径
                 boolean w = msg.contains(tomcatInfoModel.getPath());
-                if (w){
+                if (w) {
                     //截取TomcatPid
-                    if (msg.indexOf(" ") > 1){
-                        String tmPid = msg.substring(0,msg.indexOf(" "));
+                    if (msg.indexOf(" ") > 1) {
+                        String tmPid = msg.substring(0, msg.indexOf(" "));
                         //判断截取的PID是否为纯数字
-                        if (isInteger(tmPid)){
-                            command = String.format("taskkill /F /PID %s",tmPid);
+                        if (NumberUtil.isInteger(tmPid)) {
+                            command = String.format("taskkill /F /PID %s", tmPid);
                             exec(command, true);
                         }
                     }
