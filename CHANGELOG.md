@@ -17,6 +17,7 @@
 7. 【agent】 fix bug: index 获取进程列表 NPE (感谢@夏末秋初)
 8. 【server】fix bug: 修复上传项目压缩文件创建项目目录异常[点击这里查看对应 issue](https://gitee.com/dromara/Jpom/issues/I29FRJ)
 9. 【server】fix bug：创建构建时，如果选择 svn，隐藏掉分支选项。[点击这里查看对应 issue](https://gitee.com/dromara/Jpom/issues/I3TA6S) [感谢 Alexa 提出 issue](https://gitee.com/alexa1989) [@Hotstrip](https://gitee.com/dromara/Jpom/compare/180914f4ddda4dc34fa2df9b169bac7b593dedb0...aa6bb065b6f507ad0bf42225a2aad40e2d25597f)
+10. 【server】 fix bug: ssh 构建发布清空历史文件失败（感谢@金晨曦）
 
 ------
 

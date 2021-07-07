@@ -129,7 +129,11 @@ public class ReleaseManage extends BaseBuild {
         Session session = SshService.getSession(item);
         try (Sftp sftp = new Sftp(session, item.getCharsetT())) {
             if (this.baseBuildModule.isClearOld() && StrUtil.isNotEmpty(this.baseBuildModule.getReleasePath())) {
-                sftp.delDir(this.baseBuildModule.getReleasePath());
+                try {
+                    sftp.delDir(this.baseBuildModule.getReleasePath());
+                } catch (Exception e) {
+                    this.pubLog("清楚构建产物失败", e);
+                }
             }
             String prefix = "";
             if (!StrUtil.startWith(this.baseBuildModule.getReleasePath(), StrUtil.SLASH)) {
