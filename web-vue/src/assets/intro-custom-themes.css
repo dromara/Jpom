@@ -1,0 +1,38 @@
+.introjs-helperNumberLayer {
+  font-size: 14px;
+  text-shadow: none;
+  width: 22px;
+  height: 22px;
+  line-height: 22px;
+  border: 2px solid #ecf0f1;
+  border-radius: 50%;
+  background: #e74c3c;
+}
+.introjs-tooltip {
+  color: #333;
+  border-radius: 2px;
+}
+.introjs-button {
+  padding: 0.6em 0.8em;
+  text-shadow: none;
+  font-weight: bold;
+  color: #1890ff;
+  background: #ecf0f1;
+  background-image: none;
+  border-radius: 0.2em;
+  transition: background 0.3s, border 0.3s;
+}
+.introjs-prevbutton {
+  border-radius: 0.2em 0 0 0.2em;
+}
+.introjs-nextbutton {
+  border-radius: 0 0.2em 0.2em 0;
+}
+.introjs-button:hover,
+.introjs-button:focus {
+  background: #1890ff;
+  color: #fff;
+  box-shadow: none;
+  border-color: #1890ff;
+  text-decoration: none;
+}

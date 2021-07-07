@@ -59,5 +59,6 @@ export default {
   margin-right: 20px;
   align-self: center;
   height: 40px;
+  max-width: calc(100vw - 600px);
 }
 </style>

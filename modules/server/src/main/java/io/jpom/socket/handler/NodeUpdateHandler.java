@@ -159,7 +159,7 @@ public class NodeUpdateHandler extends BaseHandler {
             Attributes attributes = manifest.getMainAttributes();
             version = attributes.getValue(Attributes.Name.IMPLEMENTATION_VERSION);
         } catch (Exception e) {
-            DefaultSystemLog.getLog().error("解析jar", e);
+            DefaultSystemLog.getLog().error("解析 jar 异常，caused: {}, message: {}", e.getCause(), e.getMessage());
         }
         return version;
     }

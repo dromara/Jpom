@@ -2,7 +2,8 @@
   <a-layout id="app-layout">
     <a-layout-sider v-model="collapsed" :trigger="null" collapsible class="sider">
       <div class="logo" @click="toggleGuide()">
-        <img src="../../assets/images/jpom.jpeg"/>
+        <img src="../../assets/images/jpom.png" />
+        项目管理
       </div>
       <side-menu class="side-menu" />
     </a-layout-sider>
@@ -39,7 +40,7 @@ export default {
   },
   data() {
     return {
-      collapsed: false
+      collapsed: false,
     }
   },
   computed: {
@@ -156,14 +157,20 @@ export default {
 }
 
 #app-layout .logo {
+  width: 100%;
   cursor: pointer;
-  width: 70px;
   height: 32px;
-  background: rgba(255, 255, 255, 0.2);
-  margin: 16px auto;
+  margin: 20px 0 12px;
+  font-size: 20px;
+  color: #fff;
+  font-weight: bold;
+  overflow: hidden;
+  padding: 0 16px;
 }
 #app-layout .logo img {
-  height: 32px;
+  height: 26px;
+  vertical-align: sub;
+  margin-right: 6px;
 }
 .app-header {
   display: flex;

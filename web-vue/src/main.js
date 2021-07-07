@@ -8,7 +8,8 @@ import { Tree, Progress, Loading } from 'element-ui'
 import 'element-ui/lib/theme-chalk/index.css'
 const introJs = require("intro.js");
 import 'intro.js/introjs.css';
-import 'intro.js/themes/introjs-flattener.css';
+// import 'intro.js/themes/introjs-flattener.css';
+import '@/assets/intro-custom-themes.css';
 
 import router from './router';
 import store from './store';
