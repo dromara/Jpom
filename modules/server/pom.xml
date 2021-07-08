@@ -16,10 +16,7 @@
         <start-class>io.jpom.JpomServerApplication</start-class>
     </properties>
     <dependencies>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-thymeleaf</artifactId>
-        </dependency>
+
 
         <dependency>
             <groupId>io.jpom</groupId>
