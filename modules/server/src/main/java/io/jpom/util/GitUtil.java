@@ -21,9 +21,7 @@ import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 /**
  * git工具
@@ -72,7 +70,7 @@ public class GitUtil {
      * @throws GitAPIException api
      * @throws IOException     删除文件失败
      */
-    private static Git reClone(String url, File file, CredentialsProvider credentialsProvider, PrintWriter printWriter) throws GitAPIException, IOException {
+    private static Git reClone(String url, String branchName, File file, CredentialsProvider credentialsProvider, PrintWriter printWriter) throws GitAPIException, IOException {
         if (!FileUtil.clean(file)) {
             FileUtil.del(file.toPath());
             //throw new IOException("del error:" + file.getPath());
@@ -82,13 +80,17 @@ public class GitUtil {
             cloneCommand
                     .setProgressMonitor(new TextProgressMonitor(printWriter));
         }
+        if (branchName != null) {
+            cloneCommand.setBranch(Constants.R_HEADS + branchName);
+            cloneCommand.setBranchesToClone(Collections.singletonList(Constants.R_HEADS + branchName));
+        }
         return cloneCommand.setURI(url)
                 .setDirectory(file)
                 .setCredentialsProvider(credentialsProvider)
                 .call();
     }
 
-    private static Git initGit(String url, File file, CredentialsProvider credentialsProvider, PrintWriter printWriter) throws IOException, GitAPIException {
+    private static Git initGit(String url, String branchName, File file, CredentialsProvider credentialsProvider, PrintWriter printWriter) throws IOException, GitAPIException {
         Git git;
         if (FileUtil.file(file, Constants.DOT_GIT).exists()) {
             if (checkRemoteUrl(url, file)) {
@@ -100,10 +102,10 @@ public class GitUtil {
                 }
                 pull.setCredentialsProvider(credentialsProvider).call();
             } else {
-                git = reClone(url, file, credentialsProvider, printWriter);
+                git = reClone(url, branchName, file, credentialsProvider, printWriter);
             }
         } else {
-            git = reClone(url, file, credentialsProvider, printWriter);
+            git = reClone(url, branchName, file, credentialsProvider, printWriter);
         }
         return git;
     }
@@ -119,7 +121,7 @@ public class GitUtil {
      * @throws IOException     IO
      */
     private static List<String> branchList(String url, File file, CredentialsProvider credentialsProvider, PrintWriter printWriter) throws GitAPIException, IOException {
-        try (Git git = initGit(url, file, credentialsProvider, printWriter)) {
+        try (Git git = initGit(url, null, file, credentialsProvider, printWriter)) {
             //
             List<Ref> list = git.branchList().setListMode(ListBranchCommand.ListMode.REMOTE).call();
             List<String> all = new ArrayList<>(list.size());
@@ -164,7 +166,7 @@ public class GitUtil {
      * @throws GitAPIException api
      */
     public static void checkoutPull(String url, File file, String branchName, CredentialsProvider credentialsProvider, PrintWriter printWriter) throws IOException, GitAPIException {
-        try (Git git = initGit(url, file, credentialsProvider, printWriter)) {
+        try (Git git = initGit(url, branchName, file, credentialsProvider, printWriter)) {
             // 判断本地是否存在对应分支
             List<Ref> list = git.branchList().setListMode(ListBranchCommand.ListMode.ALL).call();
             boolean createBranch = true;
