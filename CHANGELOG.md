@@ -21,7 +21,8 @@
 10. 【server】 fix bug: ssh 构建发布清空历史文件失败（感谢@金晨曦）
 11. 【server】update 构建初始化仓库拉取指定分支，不先拉取主分支再切换到指定分支（感谢@大灰灰）
 12. 【server】程序关闭时候自动关闭 h2 数据连接池，避免数据库文件被损坏
-
+10.【server】style: 优化logo，登录页面，初始化页面 [点击查看对应提交记录](https://gitee.com/dromara/Jpom/commit/5d4783f0be7d44bb04275b059ccd1509620c5828) [@长得丑活得久i](https://gitee.com/zsf_008)
+11.【server】fix bug: 修复在没有配置nginx白名单时访问nginx列表数据一直加载中问题[点击这里查看对应 issue](https://github.com/dromara/Jpom/issues/5) [@长得丑活得久i](https://gitee.com/zsf_008)
 ------
 
 # 2.5.1
