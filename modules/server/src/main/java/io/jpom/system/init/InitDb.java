@@ -6,13 +6,18 @@ import cn.hutool.core.lang.Console;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.db.Db;
 import cn.hutool.db.ds.DSFactory;
+import cn.hutool.db.ds.GlobalDSFactory;
 import cn.hutool.setting.Setting;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.PreLoadClass;
 import cn.jiangzeyin.common.PreLoadMethod;
 import io.jpom.common.JpomManifest;
 import io.jpom.system.db.DbConfig;
+import org.springframework.beans.factory.DisposableBean;
+import org.springframework.beans.factory.InitializingBean;
+import org.springframework.context.annotation.Configuration;
 
+import javax.sql.DataSource;
 import java.io.InputStream;
 
 /**
@@ -22,7 +27,8 @@ import java.io.InputStream;
  * @date 2019/4/19
  */
 @PreLoadClass(-1)
-public class InitDb {
+@Configuration
+public class InitDb implements DisposableBean, InitializingBean {
 
     @PreLoadMethod
     private static void init() {
@@ -58,5 +64,17 @@ public class InitDb {
         }
         instance.initOk();
         Console.log("h2 db inited");
+    }
+
+    @Override
+    public void afterPropertiesSet() throws Exception {
+
+    }
+
+    @Override
+    public void destroy() throws Exception {
+        DSFactory dsFactory = GlobalDSFactory.get();
+        dsFactory.close();
+        Console.log("h2 db destroy");
     }
 }
