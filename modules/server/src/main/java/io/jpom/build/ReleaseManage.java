@@ -1,6 +1,8 @@
 package io.jpom.build;
 
+import cn.hutool.core.date.BetweenFormatter;
 import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.date.SystemClock;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.ssh.Sftp;
@@ -87,6 +89,8 @@ public class ReleaseManage extends BaseBuild {
             updateStatus(BuildModel.Status.PubError);
             return;
         }
+        long time = SystemClock.now();
+        this.log("release method:" + BaseEnum.getDescByCode(BuildModel.ReleaseMethod.class, this.baseBuildModule.getReleaseMethod()));
         try {
             if (this.baseBuildModule.getReleaseMethod() == BuildModel.ReleaseMethod.Outgiving.getCode()) {
                 //
@@ -106,7 +110,7 @@ public class ReleaseManage extends BaseBuild {
             this.pubLog("发布异常", e);
             return;
         }
-        this.log("release end");
+        this.log("release complete : " + DateUtil.formatBetween(SystemClock.now() - time, BetweenFormatter.Level.MILLISECOND));
         updateStatus(BuildModel.Status.PubSuccess);
     }
 

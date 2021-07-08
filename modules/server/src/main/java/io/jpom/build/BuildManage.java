@@ -5,6 +5,7 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.io.LineHandler;
 import cn.hutool.core.io.file.FileCopier;
+import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
@@ -186,7 +187,7 @@ public class BuildManage extends BaseBuild implements Runnable {
                 this.log("拉取代码失败", e);
                 return;
             }
-            String[] commands = StrUtil.split(buildModel.getScript(), StrUtil.LF);
+            String[] commands = CharSequenceUtil.splitToArray(buildModel.getScript(), StrUtil.LF);
             if (commands == null || commands.length <= 0) {
                 this.log("没有需要执行的命令");
                 this.updateStatus(BuildModel.Status.Error);

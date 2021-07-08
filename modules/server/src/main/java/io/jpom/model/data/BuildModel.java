@@ -206,8 +206,8 @@ public class BuildModel extends BaseBuildModule {
         Project(2, "项目"),
         Ssh(3, "SSH"),
         ;
-        private int code;
-        private String desc;
+        private final int code;
+        private final String desc;
 
         ReleaseMethod(int code, String desc) {
             this.code = code;
