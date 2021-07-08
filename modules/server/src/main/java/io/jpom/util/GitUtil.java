@@ -27,6 +27,8 @@ import java.util.Objects;
 
 /**
  * git工具
+ * <p>
+ * https://developer.aliyun.com/ask/275691
  *
  * @author bwcx_jzy
  * @date 2019/7/15
