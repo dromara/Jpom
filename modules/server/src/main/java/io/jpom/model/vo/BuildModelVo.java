@@ -20,7 +20,8 @@ public class BuildModelVo extends BuildModel {
 
     public boolean isSourceExist() {
         File source = BuildUtil.getSource(this);
-        return source.exists();
+        sourceExist = source.exists();
+        return sourceExist;
     }
 
     public void setSourceExist(boolean sourceExist) {

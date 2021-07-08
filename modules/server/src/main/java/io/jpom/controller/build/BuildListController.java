@@ -321,10 +321,10 @@ public class BuildListController extends BaseServerController {
         File file = BuildUtil.getBuildDataFile(buildModel.getId());
         if (!FileUtil.del(file)) {
             FileUtil.del(file.toPath());
-            return JsonMessage.getString(500, "清理历史构建产物失败,已经重新测试");
+            return JsonMessage.getString(500, "清理历史构建产物失败,已经重新尝试");
         }
         buildService.deleteItem(buildModel.getId());
-        return JsonMessage.getString(200, "清理成功");
+        return JsonMessage.getString(200, "清理历史构建产物成功");
     }
 
 
@@ -336,10 +336,11 @@ public class BuildListController extends BaseServerController {
         BuildModel buildModel = buildService.getItem(id);
         Objects.requireNonNull(buildModel, "没有对应数据");
         File source = BuildUtil.getSource(buildModel);
-        if (!FileUtil.del(source)) {
-            FileUtil.del(source.toPath());
+        boolean del = FileUtil.del(source);
+        if (!del) {
+            del = FileUtil.del(source.toPath());
         }
-        return JsonMessage.getString(200, "清理成功");
+        return JsonMessage.getString(200, "清理成功", del);
     }
 
 }

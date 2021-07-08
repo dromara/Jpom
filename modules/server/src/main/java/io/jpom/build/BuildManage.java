@@ -168,14 +168,15 @@ public class BuildManage extends BaseBuild implements Runnable {
             try {
                 this.log("start build in file : " + FileUtil.getAbsolutePath(this.gitFile));
                 //
-                this.log("repository clone pull from " + this.buildModel.getBranchName());
+                String branchName = buildModel.getBranchName();
+                this.log("repository clone pull from " + branchName);
                 String msg = "error";
                 if (buildModel.getRepoType() == BuildModel.RepoType.Git.getCode()) {
                     // git
-                    GitUtil.checkoutPull(buildModel.getGitUrl(), gitFile, buildModel.getBranchName(), new UsernamePasswordCredentialsProvider(buildModel.getUserName(), buildModel.getPassword())
-                            , this.getPrintWriter());
+                    UsernamePasswordCredentialsProvider credentialsProvider = new UsernamePasswordCredentialsProvider(buildModel.getUserName(), buildModel.getPassword());
+                    GitUtil.checkoutPull(buildModel.getGitUrl(), gitFile, branchName, credentialsProvider, this.getPrintWriter());
                     // 记录最后一次提交记录
-                    msg = GitUtil.getLastCommitMsg(gitFile, buildModel.getBranchName());
+                    msg = GitUtil.getLastCommitMsg(gitFile, branchName);
                 } else if (buildModel.getRepoType() == BuildModel.RepoType.Svn.getCode()) {
                     // svn
                     msg = SvnKitUtil.checkOut(buildModel.getGitUrl(), buildModel.getUserName(), buildModel.getPassword(), gitFile);

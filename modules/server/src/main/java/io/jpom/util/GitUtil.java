@@ -175,11 +175,13 @@ public class GitUtil {
             }
             // 切换分支
             if (!StrUtil.equals(git.getRepository().getBranch(), branchName)) {
+                printWriter.println(StrUtil.format("start switch branch from {} to {}", git.getRepository().getBranch(), branchName));
                 git.checkout().
                         setCreateBranch(createBranch).
                         setName(branchName).
                         setForceRefUpdate(true).
                         setUpstreamMode(CreateBranchCommand.SetupUpstreamMode.SET_UPSTREAM).
+                        setProgressMonitor(new TextProgressMonitor(printWriter)).
                         call();
             }
             git.pull().setCredentialsProvider(credentialsProvider).call();
