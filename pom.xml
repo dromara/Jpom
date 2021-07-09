@@ -29,7 +29,7 @@
 
         <spring-boot.version>2.4.8</spring-boot.version>
 
-        <common-boot.version>[2.0.0,2.0.99]</common-boot.version>
+        <common-boot.version>[2.1.0,2.1.99]</common-boot.version>
         <docker.registryUrl>registry.cn-beijing.aliyuncs.com</docker.registryUrl>
         <docker.registry.name>fengshunli</docker.registry.name>
         <docker.workdir>/tmp/</docker.workdir>
