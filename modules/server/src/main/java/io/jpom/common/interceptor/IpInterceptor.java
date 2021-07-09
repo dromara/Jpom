@@ -53,7 +53,7 @@ public class IpInterceptor extends BaseJpomInterceptor {
 
     private boolean checkIp(String value, String ip, boolean checkAll) {
         long ipNum = NetUtil.ipv4ToLong(ip);
-        String[] split = StrUtil.split(value, StrUtil.LF);
+        String[] split = StrUtil.splitToArray(value, StrUtil.LF);
         boolean check;
         for (String itemIp : split) {
             itemIp = itemIp.trim();
@@ -66,7 +66,7 @@ public class IpInterceptor extends BaseJpomInterceptor {
             }
             if (StrUtil.contains(itemIp, CharUtil.SLASH)) {
                 // ip段
-                String[] itemIps = StrUtil.split(itemIp, StrUtil.SLASH);
+                String[] itemIps = StrUtil.splitToArray(itemIp, StrUtil.SLASH);
                 long aBegin = NetUtil.ipv4ToLong(itemIps[0]);
                 long aEnd = NetUtil.ipv4ToLong(itemIps[1]);
                 check = (ipNum >= aBegin) && (ipNum <= aEnd);

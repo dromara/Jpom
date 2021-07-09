@@ -1,7 +1,7 @@
 package io.jpom.common.commander.impl;
 
 import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.text.StrSpliter;
+import cn.hutool.core.text.StrSplitter;
 import cn.hutool.core.util.NumberUtil;
 import cn.hutool.core.util.StrUtil;
 import io.jpom.common.commander.AbstractTomcatCommander;
@@ -39,7 +39,7 @@ public class WindowsTomcatCommander extends AbstractTomcatCommander {
 
         if (cmd.equals("stop")) {
             String setPidCmd = CommandUtil.execSystemCommand("jps -mv");
-            List<String> list = StrSpliter.splitTrim(setPidCmd, StrUtil.LF, true);
+            List<String> list = StrSplitter.splitTrim(setPidCmd, StrUtil.LF, true);
             for (String item : list) {
                 //window下路径格式转换
                 String msg = FileUtil.normalize(item + "/");

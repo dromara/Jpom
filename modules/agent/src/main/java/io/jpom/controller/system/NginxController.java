@@ -1,7 +1,7 @@
 package io.jpom.controller.system;
 
 import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.text.StrSpliter;
+import cn.hutool.core.text.StrSplitter;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.system.SystemUtil;
@@ -323,7 +323,7 @@ public class NginxController extends BaseAgentController {
             }
         } else if (SystemUtil.getOsInfo().isWindows()) {
             String result = CommandUtil.execSystemCommand("sc qc " + name);
-            List<String> strings = StrSpliter.splitTrim(result, "\n", true);
+            List<String> strings = StrSplitter.splitTrim(result, "\n", true);
             //服务路径
             File file = null;
             for (String str : strings) {

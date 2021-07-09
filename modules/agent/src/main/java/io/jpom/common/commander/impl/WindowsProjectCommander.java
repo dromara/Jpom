@@ -1,7 +1,7 @@
 package io.jpom.common.commander.impl;
 
 import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.text.StrSpliter;
+import cn.hutool.core.text.StrSplitter;
 import cn.hutool.core.util.StrUtil;
 import io.jpom.common.commander.AbstractProjectCommander;
 import io.jpom.common.commander.AbstractSystemCommander;
@@ -61,13 +61,13 @@ public class WindowsProjectCommander extends AbstractProjectCommander {
             cmd = "netstat -nao -p tcp | findstr /V \"CLOSE_WAIT\" | findstr " + pId;
         }
         String result = CommandUtil.execSystemCommand(cmd);
-        List<String> netList = StrSpliter.splitTrim(result, StrUtil.LF, true);
+        List<String> netList = StrSplitter.splitTrim(result, StrUtil.LF, true);
         if (netList == null || netList.size() <= 0) {
             return null;
         }
         List<NetstatModel> array = new ArrayList<>();
         for (String str : netList) {
-            List<String> list = StrSpliter.splitTrim(str, " ", true);
+            List<String> list = StrSplitter.splitTrim(str, " ", true);
             if (list.size() < 5) {
                 continue;
             }

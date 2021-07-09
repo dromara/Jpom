@@ -2,7 +2,7 @@ package io.jpom.common.commander.impl;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.text.StrSpliter;
+import cn.hutool.core.text.StrSplitter;
 import cn.hutool.core.util.StrUtil;
 import io.jpom.common.commander.AbstractProjectCommander;
 import io.jpom.common.commander.AbstractSystemCommander;
@@ -65,13 +65,13 @@ public class LinuxProjectCommander extends AbstractProjectCommander {
             cmd = "netstat -antup | grep " + pId + " |grep -v \"CLOSE_WAIT\" | head -20";
         }
         String result = CommandUtil.execSystemCommand(cmd);
-        List<String> netList = StrSpliter.splitTrim(result, "\n", true);
+        List<String> netList = StrSplitter.splitTrim(result, "\n", true);
         if (netList == null || netList.size() <= 0) {
             return null;
         }
         List<NetstatModel> array = new ArrayList<>();
         for (String str : netList) {
-            List<String> list = StrSpliter.splitTrim(str, " ", true);
+            List<String> list = StrSplitter.splitTrim(str, " ", true);
             if (list.size() < 5) {
                 continue;
             }

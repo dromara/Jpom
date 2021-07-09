@@ -112,11 +112,11 @@ public class FileUtils {
             newPath = String.format("\"%s\"", newPath);
         }
         String command = CommandUtil.execSystemCommand(newPath + "  -version");
-        String[] split = StrUtil.split(command, StrUtil.LF);
+        String[] split = StrUtil.splitToArray(command, StrUtil.LF);
         if (split == null || split.length <= 0) {
             return null;
         }
-        String[] strings = StrUtil.split(split[0], "\"");
+        String[] strings = StrUtil.splitToArray(split[0], "\"");
         if (strings == null || strings.length <= 1) {
             return null;
         }

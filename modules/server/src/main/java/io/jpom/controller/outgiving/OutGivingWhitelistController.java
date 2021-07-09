@@ -1,6 +1,6 @@
 package io.jpom.controller.outgiving;
 
-import cn.hutool.core.text.StrSpliter;
+import cn.hutool.core.text.StrSplitter;
 import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.JsonMessage;
 import io.jpom.common.BaseServerController;
@@ -84,7 +84,7 @@ public class OutGivingWhitelistController extends BaseServerController {
     @OptLog(UserOperateLogV1.OptType.SaveOutgivingWhitelist)
     @SystemPermission
     public String whitelistDirectorySubmit(String data) {
-        List<String> list = StrSpliter.splitTrim(data, StrUtil.LF, true);
+        List<String> list = StrSplitter.splitTrim(data, StrUtil.LF, true);
         if (list == null || list.size() <= 0) {
             return JsonMessage.getString(401, "白名单不能为空");
         }

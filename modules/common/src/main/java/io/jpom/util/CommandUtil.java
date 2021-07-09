@@ -137,7 +137,7 @@ public class CommandUtil {
      */
     public static boolean checkContainsDel(String script) {
         // 判断删除
-        String[] split = StrUtil.split(script, StrUtil.SPACE);
+        String[] split = StrUtil.splitToArray(script, StrUtil.SPACE);
         if (SystemUtil.getOsInfo().isWindows()) {
             for (String s : split) {
                 if (StrUtil.startWithAny(s, "rd", "del")) {
