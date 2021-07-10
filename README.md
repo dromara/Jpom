@@ -237,7 +237,11 @@ Agent.sh create    创建Jpom插件端的应用服务（jpom-agent）
 
 3. 码云： [issues](https://gitee.com/dromara/Jpom/issues)
 
-4. [捐赠、打赏 在码云仓库项目首页下方捐赠即可](https://gitee.com/dromara/Jpom)
+4. [码云赞赏： 在码云仓库项目首页下方捐赠、打赏](https://gitee.com/dromara/Jpom)
+
+5. 微信赞赏
+
+![微信赞赏](https://jpom-site.keepbx.cn/images/wx_praise.png)
 
 ### giteye
 
