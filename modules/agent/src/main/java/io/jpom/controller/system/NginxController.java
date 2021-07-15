@@ -316,14 +316,12 @@ public class NginxController extends BaseAgentController {
     @RequestMapping(value = "reload", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public String reload() {
         String name = nginxService.getServiceName();
+        String checkResult = StrUtil.EMPTY;
         if (SystemUtil.getOsInfo().isLinux()) {
-            String result = CommandUtil.execSystemCommand(StrUtil.format("{} -t", name));
-            if (StrUtil.isNotEmpty(result)) {
-                return JsonMessage.getString(400, result);
-            }
+            checkResult = CommandUtil.execSystemCommand(StrUtil.format("{} -t", name));
         } else if (SystemUtil.getOsInfo().isWindows()) {
-            String result = CommandUtil.execSystemCommand("sc qc " + name);
-            List<String> strings = StrSpliter.splitTrim(result, "\n", true);
+            checkResult = CommandUtil.execSystemCommand("sc qc " + name);
+            List<String> strings = StrSpliter.splitTrim(checkResult, "\n", true);
             //服务路径
             File file = null;
             for (String str : strings) {
@@ -334,12 +332,12 @@ public class NginxController extends BaseAgentController {
                     break;
                 }
             }
-            result = CommandUtil.execSystemCommand("nginx -t", file);
-            if (StrUtil.isNotEmpty(result)) {
-                return JsonMessage.getString(400, result);
-            }
+            checkResult = CommandUtil.execSystemCommand("nginx -t", file);
         }
-        this.reloadNginx();
-        return JsonMessage.getString(200, "重新加载成功");
+        if (StrUtil.isNotEmpty(checkResult) && !StrUtil.containsIgnoreCase(checkResult, "successful")) {
+            return JsonMessage.getString(400, checkResult);
+        }
+        String reloadMsg = this.reloadNginx();
+        return JsonMessage.getString(200, "重新加载成功:" + reloadMsg, checkResult);
     }
 }
