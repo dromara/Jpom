@@ -20,9 +20,7 @@
     <a target="_blank" href="https://www.codacy.com/gh/dromara/Jpom/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=dromara/Jpom&amp;utm_campaign=Badge_Grade">
       <img src="https://app.codacy.com/project/badge/Grade/843b953f1446449c9a075e44ea778336" alt="codacy"/>
     </a>
-    <a target="_blank" href="https://shang.qq.com/wpa/qunwpa?idkey=7be1882a2e2f07cd4af28bbb1f13362af270ba4615f2a6c7aaf9605fc0563d1b">
-        <img src='https://img.shields.io/badge/%E5%BE%AE%E4%BF%A1%E7%BE%A4(%E8%AF%B7%E5%A4%87%E6%B3%A8%3AJpom)-jpom66-yellowgreen.svg' alt='jpom66 请备注jpom'/>
-    </a>
+     <img src='https://img.shields.io/badge/%E5%BE%AE%E4%BF%A1%E7%BE%A4(%E8%AF%B7%E5%A4%87%E6%B3%A8%3AJpom)-jpom66-yellowgreen.svg' alt='jpom66 请备注jpom'/>
     <a target="_blank" href="https://gitee.com/dromara/Jpom">
         <img src='https://gitee.com/dromara/Jpom/badge/star.svg?theme=gvp' alt='gitee star'/>
     </a>
@@ -239,7 +237,11 @@ Agent.sh create    创建Jpom插件端的应用服务（jpom-agent）
 
 3. 码云： [issues](https://gitee.com/dromara/Jpom/issues)
 
-4. [捐赠、打赏 在码云仓库项目首页下方捐赠即可](https://gitee.com/dromara/Jpom)
+4. [码云赞赏： 在码云仓库项目首页下方捐赠、打赏](https://gitee.com/dromara/Jpom)
+
+5. 微信赞赏
+
+![微信赞赏](https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/images/wx_praise_small.png)
 
 ### giteye
 
