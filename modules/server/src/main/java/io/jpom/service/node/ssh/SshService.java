@@ -235,11 +235,11 @@ public class SshService extends BaseOperService<SshModel> implements BaseDynamic
 //            channel.mkdir(remotePath);
 //        } catch (SftpException ignored) {
 //        }
-//        try {
-//            channel.cd(remotePath);
-//        } catch (SftpException e) {
-//            throw new RuntimeException("切换目录失败：" + remotePath, e);
-//        }
+        try {
+            channel.cd(remotePath);
+        } catch (SftpException e) {
+            throw new RuntimeException("切换目录失败：" + remotePath, e);
+        }
     }
 
     /**
