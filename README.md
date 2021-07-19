@@ -241,7 +241,7 @@ Agent.sh create    创建Jpom插件端的应用服务（jpom-agent）
 
 5. 微信赞赏
 
-![微信赞赏](https://jpom-site.keepbx.cn/images/wx_praise_small.png)
+![微信赞赏](https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/images/wx_praise_small.png)
 
 ### giteye
 
