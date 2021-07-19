@@ -8,6 +8,7 @@ import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.ssh.ChannelType;
 import cn.hutool.extra.ssh.JschUtil;
+import cn.hutool.extra.ssh.Sftp;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.jcraft.jsch.*;
@@ -199,14 +200,14 @@ public class SshService extends BaseOperService<SshModel> implements BaseDynamic
         try {
             session = getSession(sshModel);
             channel = (ChannelSftp) JschUtil.openChannel(session, ChannelType.SFTP);
-            uploadDir(channel, remotePath, desc);
+            uploadDir(channel, remotePath, desc, sshModel.getCharsetT());
         } finally {
             JschUtil.close(channel);
             JschUtil.close(session);
         }
     }
 
-    private void uploadDir(ChannelSftp channel, String remotePath, File file) throws FileNotFoundException, SftpException {
+    private void uploadDir(ChannelSftp channel, String remotePath, File file, Charset charset) throws FileNotFoundException, SftpException {
         if (file.isDirectory()) {
             File[] files = file.listFiles();
             if (files == null || files.length <= 0) {
@@ -215,28 +216,30 @@ public class SshService extends BaseOperService<SshModel> implements BaseDynamic
             for (File f : files) {
                 if (f.isDirectory()) {
                     String mkdir = FileUtil.normalize(remotePath + "/" + f.getName());
-                    this.uploadDir(channel, mkdir, f);
+                    this.uploadDir(channel, mkdir, f, charset);
                 } else {
-                    this.uploadDir(channel, remotePath, f);
+                    this.uploadDir(channel, remotePath, f, charset);
                 }
             }
         } else {
-            mkdir(channel, remotePath);
+            mkdir(channel, remotePath, charset);
             String name = file.getName();
             channel.put(new FileInputStream(file), name);
         }
     }
 
-    private void mkdir(ChannelSftp channel, String remotePath) {
-        try {
-            channel.mkdir(remotePath);
-        } catch (SftpException ignored) {
-        }
-        try {
-            channel.cd(remotePath);
-        } catch (SftpException e) {
-            throw new RuntimeException("切换目录失败：" + remotePath, e);
-        }
+    private void mkdir(ChannelSftp channel, String remotePath, Charset charset) {
+        Sftp sftp = new Sftp(channel, charset);
+        sftp.mkDirs(remotePath);
+//        try {
+//            channel.mkdir(remotePath);
+//        } catch (SftpException ignored) {
+//        }
+//        try {
+//            channel.cd(remotePath);
+//        } catch (SftpException e) {
+//            throw new RuntimeException("切换目录失败：" + remotePath, e);
+//        }
     }
 
     /**
