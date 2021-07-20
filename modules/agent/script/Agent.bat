@@ -1,6 +1,6 @@
 @REM The MIT License (MIT)
 @REM
-@REM Copyright (c) 2019 ÂëÖ®¿Æ¼¼¹¤×÷ÊÒ
+@REM Copyright (c) 2019 ç ä¹‹ç§‘æŠ€å·¥ä½œå®¤
 @REM
 @REM Permission is hereby granted, free of charge, to any person obtaining a copy of
 @REM this software and associated documentation files (the "Software"), to deal in
@@ -23,38 +23,41 @@
 @echo off
 setlocal enabledelayedexpansion
 
+@REM è®¾ç½®ç¯å¢ƒå˜é‡ï¼Œé¿å…éƒ¨åˆ†æœåŠ¡å™¨æ²¡æœ‰ taskkill
+set PATH = %PATH%;C:\Windows\system32;C:\Windows;C:\Windows\system32\Wbem
+
 set Tag=KeepBx-Agent-System-JpomAgentApplication
 set MainClass=org.springframework.boot.loader.JarLauncher
 set basePath=%~dp0
 set Lib=%basePath%lib\
-@REM ÇëÎğĞŞ¸Ä----------------------------------¡ı
+@REM è¯·å‹¿ä¿®æ”¹----------------------------------â†“
 set LogName=agent.log
-@REM ÔÚÏßÉı¼¶»á×Ô¶¯ĞŞ¸Ä´ËÊôĞÔ
+@REM åœ¨çº¿å‡çº§ä¼šè‡ªåŠ¨ä¿®æ”¹æ­¤å±æ€§
 set RUNJAR=
-@REM ÇëÎğĞŞ¸Ä----------------------------------¡ü
-@REM ÊÇ·ñ¿ªÆô¿ØÖÆÌ¨ÈÕÖ¾ÎÄ¼ş±¸·İ
+@REM è¯·å‹¿ä¿®æ”¹----------------------------------â†‘
+@REM æ˜¯å¦å¼€å¯æ§åˆ¶å°æ—¥å¿—æ–‡ä»¶å¤‡ä»½
 set LogBack=true
 set JVM=-server
 set ARGS= --jpom.applicationTag=%Tag% --jpom.log=%basePath%log --spring.profiles.active=pro --server.port=2123
 
-@REM ¶ÁÈ¡jar
+@REM è¯»å–jar
 call:listDir
 
 if "%1"=="" (
     color 0a
-    TITLE Jpom¹ÜÀíÏµÍ³BAT¿ØÖÆÌ¨
-    echo. ***** Jpom¹ÜÀíÏµÍ³BAT¿ØÖÆÌ¨ *****
+    TITLE Jpomç®¡ç†ç³»ç»ŸBATæ§åˆ¶å°
+    echo. ***** Jpomç®¡ç†ç³»ç»ŸBATæ§åˆ¶å° *****
     ::*************************************************************************************************************
     echo.
-        echo.  [1] Æô¶¯ start
-        echo.  [2] ¹Ø±Õ stop
-        echo.  [3] ²é¿´ÔËĞĞ×´Ì¬ status
-        echo.  [4] ÖØÆô restart
-        echo.  [5] °ïÖú use
-        echo.  [0] ÍË ³ö 0
+        echo.  [1] å¯åŠ¨ start
+        echo.  [2] å…³é—­ stop
+        echo.  [3] æŸ¥çœ‹è¿è¡ŒçŠ¶æ€ status
+        echo.  [4] é‡å¯ restart
+        echo.  [5] å¸®åŠ© use
+        echo.  [0] é€€ å‡º 0
     echo.
-    @REM ÊäÈë
-    echo.ÇëÊäÈëÑ¡ÔñµÄĞòºÅ:
+    @REM è¾“å…¥
+    echo.è¯·è¾“å…¥é€‰æ‹©çš„åºå·:
     set /p ID=
     IF "!ID!"=="1" call:start
     IF "!ID!"=="2" call:stop
@@ -72,25 +75,25 @@ if "%1"=="" (
 if "%2" NEQ "upgrade" (
     PAUSE
 )else (
- @REM Éı¼¶Ö±½Ó½áÊø
+ @REM å‡çº§ç›´æ¥ç»“æŸ
 )
 EXIT 0
 
-@REM Æô¶¯
+@REM å¯åŠ¨
 :start
     if "%JAVA_HOME%"=="" (
-        echo ÇëÅäÖÃ¡¾JAVA_HOME¡¿»·¾³±äÁ¿
+        echo è¯·é…ç½®ã€JAVA_HOMEã€‘ç¯å¢ƒå˜é‡
         PAUSE
         EXIT 2
     )
 
-	echo Æô¶¯ÖĞ.....¹Ø±Õ´°¿Ú²»Ó°ÏìÔËĞĞ
+	echo å¯åŠ¨ä¸­.....å…³é—­çª—å£ä¸å½±å“è¿è¡Œ
 	javaw %JVM% -Djava.class.path="%JAVA_HOME%/lib/tools.jar;%RUNJAR%" -Dapplication=%Tag% -Dbasedir=%basePath%  %MainClass% %ARGS% >> %basePath%%LogName%
 	timeout 3
 goto:eof
 
 
-@REM »ñÈ¡jar
+@REM è·å–jar
 :listDir
 	if "%RUNJAR%"=="" (
 		for /f "delims=" %%I in ('dir /B %Lib%') do (
@@ -105,31 +108,31 @@ goto:eof
 	)else (
 		set RUNJAR=%Lib%%RUNJAR%
 	)
-	echo ÔËĞĞ£º%RUNJAR%
+	echo è¿è¡Œï¼š%RUNJAR%
 goto:eof
 
-@REM ¹Ø±ÕJpom
+@REM å…³é—­Jpom
 :stop
 	java -Djava.class.path="%JAVA_HOME%/lib/tools.jar;%RUNJAR%" %MainClass% %ARGS% --event=stop
 goto:eof
 
-@REM ²é¿´JpomÔËĞĞ×´Ì¬
+@REM æŸ¥çœ‹Jpomè¿è¡ŒçŠ¶æ€
 :status
 	java -Djava.class.path="%JAVA_HOME%/lib/tools.jar;%RUNJAR%" %MainClass% %ARGS% --event=status
 goto:eof
 
-@REM ÖØÆôJpom
+@REM é‡å¯Jpom
 :restart
-	echo Í£Ö¹ÖĞ....
+	echo åœæ­¢ä¸­....
 	call:stop
 	timeout 3
-	echo Æô¶¯ÖĞ....
+	echo å¯åŠ¨ä¸­....
 	call:start
 goto:eof
 
-@REM ÌáÊ¾ÓÃ·¨
+@REM æç¤ºç”¨æ³•
 :use
-	echo please use (start¡¢stop¡¢restart¡¢status)
+	echo please use (startã€stopã€restartã€status)
 goto:eof
 
 

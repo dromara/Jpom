@@ -10,6 +10,7 @@
 2. 【server】修护 ssh 上传文件时候不会自动创建多级文件夹（@大灰灰大）
 3. 【server】角色动态权限显示分组
 4. 【agent】 新增 stop 项目等待进程关闭时间配置 `project.stopWaitTime`、停止项目输错 kill 执行结果
+5. bat 管理命令更新环境变量，避免部分服务器出现无法找到 taskkill 命令（感谢@Sunny°晴天、[@zt0330](https://gitee.com/zt0330)）
 
 ------
 
