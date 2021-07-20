@@ -3,10 +3,9 @@ package io.jpom.controller;
 import cn.hutool.cache.impl.LFUCache;
 import cn.hutool.captcha.CircleCaptcha;
 import cn.hutool.core.date.BetweenFormatter;
-import cn.hutool.core.date.DateTime;
-import cn.hutool.core.date.DateUnit;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.jwt.JWT;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.validator.ValidatorConfig;
 import cn.jiangzeyin.common.validator.ValidatorItem;
@@ -23,7 +22,6 @@ import io.jpom.service.user.UserService;
 import io.jpom.system.ServerConfigBean;
 import io.jpom.system.ServerExtConfigBean;
 import io.jpom.util.JwtUtil;
-import io.jsonwebtoken.Claims;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -34,6 +32,7 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
 import java.awt.*;
 import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 登录控制
@@ -242,14 +241,14 @@ public class LoginControl extends BaseServerController {
         if (StrUtil.isEmpty(token)) {
             return JsonMessage.getString(ServerConfigBean.AUTHORIZE_TIME_OUT_CODE, "刷新token失败");
         }
-        Claims claims = JwtUtil.readBody(token);
-        if (JwtUtil.expired(claims)) {
+        JWT jwt = JwtUtil.readBody(token);
+        if (JwtUtil.expired(jwt, 0)) {
             int renewal = ServerExtConfigBean.getInstance().getAuthorizeRenewal();
-            if (claims == null || renewal <= 0 || DateUtil.between(claims.getExpiration(), DateTime.now(), DateUnit.MINUTE) > renewal) {
+            if (jwt == null || renewal <= 0 || JwtUtil.expired(jwt, TimeUnit.MINUTES.toSeconds(renewal))) {
                 return JsonMessage.getString(ServerConfigBean.AUTHORIZE_TIME_OUT_CODE, "刷新token超时");
             }
         }
-        UserModel userModel = userService.checkUser(claims.getId());
+        UserModel userModel = userService.checkUser(JwtUtil.getId(jwt));
         UserLoginDto userLoginDto = new UserLoginDto(userModel, JwtUtil.builder(userModel));
         return JsonMessage.getString(200, "", userLoginDto);
     }
