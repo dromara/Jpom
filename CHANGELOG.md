@@ -8,6 +8,7 @@
 
 1. 【agent】 修护nginx记载判断问题（@大灰灰大 码云 issue [I40UE7](https://gitee.com/dromara/Jpom/issues/I40UE7) ）
 2. 【server】修护 ssh 上传文件时候不会自动创建多级文件夹（@大灰灰大）
+3. 【server】角色动态权限显示分组
 
 ------
 

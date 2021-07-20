@@ -1,5 +1,6 @@
 package io.jpom.permission;
 
+import cn.hutool.core.comparator.PropertyComparator;
 import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.spring.SpringUtil;
@@ -133,7 +134,13 @@ public interface BaseDynamicService {
             JSONObject data = (JSONObject) obj;
             String name = data.getString("name");
             String id = data.getString("id");
-            jsonObject.put("title", name);
+            String group = StrUtil.emptyToDefault(data.getString("group"), StrUtil.EMPTY);
+            jsonObject.put("group", group);
+            //
+            if (StrUtil.isNotEmpty(group)) {
+                group = "【" + group + "】 -> ";
+            }
+            jsonObject.put("title", group + name);
             jsonObject.put("id", StrUtil.emptyToDefault(dataId, "") + StrUtil.COLON + classFeature.name() + StrUtil.COLON + id);
             boolean doChildren = this.doChildren(classFeature, roleId, id, jsonObject);
             if (!doChildren) {
@@ -146,6 +153,8 @@ public interface BaseDynamicService {
             }
             jsonArray.add(jsonObject);
         });
+        // 分组排序
+        jsonArray.sort(new PropertyComparator<>("group"));
         return jsonArray;
     }
 
