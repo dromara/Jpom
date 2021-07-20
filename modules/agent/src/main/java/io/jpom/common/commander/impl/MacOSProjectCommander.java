@@ -84,14 +84,14 @@ public class MacOSProjectCommander extends AbstractProjectCommander {
         String result = super.stop(projectInfoModel, javaCopyItem);
         int pid = parsePid(result);
         if (pid > 0) {
-            AbstractSystemCommander.getInstance().kill(FileUtil.file(projectInfoModel.allLib()), pid);
+            String kill = AbstractSystemCommander.getInstance().kill(FileUtil.file(projectInfoModel.allLib()), pid);
             if (loopCheckRun(projectInfoModel.getId(), false)) {
                 // 强制杀进程
                 String cmd = String.format("kill -9 %s", pid);
                 CommandUtil.asyncExeLocalCommand(FileUtil.file(projectInfoModel.allLib()), cmd);
             }
             String tag = javaCopyItem == null ? projectInfoModel.getId() : javaCopyItem.getTagId();
-            result = status(tag);
+            result = status(tag) + StrUtil.SPACE + kill;
         }
         return result;
     }
