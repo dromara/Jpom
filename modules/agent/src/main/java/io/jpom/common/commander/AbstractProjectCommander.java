@@ -524,6 +524,9 @@ public abstract class AbstractProjectCommander {
      * @return 和参数status相反
      */
     protected boolean loopCheckRun(String tag, boolean status) throws Exception {
+        int stopWaitTime = AgentExtConfigBean.getInstance().getStopWaitTime();
+        stopWaitTime = Math.max(stopWaitTime, 1);
+        int loopCount = (int) (TimeUnit.SECONDS.toMillis(stopWaitTime) / 500);
         int count = 0;
         do {
             if (isRun(tag) == status) {
@@ -533,7 +536,7 @@ public abstract class AbstractProjectCommander {
                 Thread.sleep(500);
             } catch (InterruptedException ignored) {
             }
-        } while (count++ < 20);
+        } while (count++ < loopCount);
         return !status;
     }
 }

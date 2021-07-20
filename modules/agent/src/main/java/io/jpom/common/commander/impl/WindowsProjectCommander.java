@@ -45,9 +45,9 @@ public class WindowsProjectCommander extends AbstractProjectCommander {
         // 查询状态，如果正在运行，则执行杀进程命令
         int pid = parsePid(result);
         if (pid > 0) {
-            AbstractSystemCommander.getInstance().kill(FileUtil.file(projectInfoModel.allLib()), pid);
+            String kill = AbstractSystemCommander.getInstance().kill(FileUtil.file(projectInfoModel.allLib()), pid);
             loopCheckRun(projectInfoModel.getId(), false);
-            result = status(tag);
+            result = status(tag) + StrUtil.SPACE + kill;
         }
         return result;
     }
