@@ -85,7 +85,7 @@ public abstract class BaseServerController extends BaseJpomController {
         page.addOrder(new Order(colName, Direction.DESC));
         // 时间
         if (StrUtil.isNotEmpty(time)) {
-            String[] val = StrUtil.split(time, "~");
+            String[] val = StrUtil.splitToArray(time, "~");
             if (val.length == 2) {
                 DateTime startDateTime = DateUtil.parse(val[0], DatePattern.NORM_DATETIME_FORMAT);
                 entity.set(colName, ">= " + startDateTime.getTime());

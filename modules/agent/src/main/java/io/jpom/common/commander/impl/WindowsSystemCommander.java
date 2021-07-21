@@ -1,7 +1,7 @@
 package io.jpom.common.commander.impl;
 
 import cn.hutool.core.convert.Convert;
-import cn.hutool.core.text.StrSpliter;
+import cn.hutool.core.text.StrSplitter;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.cron.CronUtil;
 import cn.hutool.cron.Scheduler;
@@ -99,14 +99,14 @@ public class WindowsSystemCommander extends AbstractSystemCommander {
      * @return jsonArray
      */
     private static List<ProcessModel> formatWindowsProcess(String result, boolean header) {
-        List<String> list = StrSpliter.splitTrim(result, StrUtil.LF, true);
+        List<String> list = StrSplitter.splitTrim(result, StrUtil.LF, true);
         if (list.isEmpty()) {
             return null;
         }
         List<ProcessModel> processModels = new ArrayList<>();
         for (int i = header ? 2 : 0, len = list.size(); i < len; i++) {
             String param = list.get(i);
-            List<String> memList = StrSpliter.splitTrim(param, StrUtil.SPACE, true);
+            List<String> memList = StrSplitter.splitTrim(param, StrUtil.SPACE, true);
             ProcessModel processModel = new ProcessModel();
             int pid = Convert.toInt(memList.get(1), 0);
             processModel.setPid(pid);

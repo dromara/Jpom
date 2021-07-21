@@ -10,7 +10,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.common.BaseServerController;
 import io.jpom.common.GlobalDefaultExceptionHandler;
-import io.jpom.common.JpomManifest;
+import io.jpom.common.UrlRedirectUtil;
 import io.jpom.common.interceptor.BaseJpomInterceptor;
 import io.jpom.common.interceptor.NotLogin;
 import io.jpom.model.data.NodeModel;
@@ -28,6 +28,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -65,9 +67,9 @@ public class IndexControl extends BaseServerController {
      *
      * @return page
      */
-    @RequestMapping(value = {"index", "", "index.html", "/"}, method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
+    @RequestMapping(value = {"index", "", "/"}, method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
     @NotLogin
-    public String index(final Model model, HttpServletRequest request) {
+    public void index(final Model model, HttpServletRequest request, HttpServletResponse response) throws IOException {
 //        if (userService.userListEmpty()) {
 //            getSession().invalidate();
 //            return BaseJpomInterceptor.getRedirect(getRequest(), "/install.html");
@@ -76,39 +78,39 @@ public class IndexControl extends BaseServerController {
 //        // 版本号
 //        setAttribute("jpomManifest", JpomManifest.getInstance());
 //        return "index";
-        return this.welcome(model, request);
+        UrlRedirectUtil.sendRedirect(request, response, "index.html");
     }
+//
+//    /**
+//     * 旧版本首页
+//     *
+//     * @return page
+//     */
+//    @RequestMapping(value = {"old", "old.html"}, method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
+//    public String oldIndex() {
+//        if (userService.userListEmpty()) {
+//            getSession().invalidate();
+//            return BaseJpomInterceptor.getRedirect(getRequest(), "/install.html");
+//        }
+//
+//        // 版本号
+//        setAttribute("jpomManifest", JpomManifest.getInstance());
+//        return "index";
+//    }
 
-    /**
-     * 旧版本首页
-     *
-     * @return page
-     */
-    @RequestMapping(value = {"old", "old.html"}, method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
-    public String oldIndex() {
-        if (userService.userListEmpty()) {
-            getSession().invalidate();
-            return BaseJpomInterceptor.getRedirect(getRequest(), "/install.html");
-        }
-
-        // 版本号
-        setAttribute("jpomManifest", JpomManifest.getInstance());
-        return "index";
-    }
-
-    /**
-     * @return
-     * @author Hotstrip
-     * new version login page for vue
-     * 新版本的登录页面
-     */
-    @GetMapping(value = {"welcome", "welcome.html"})
-    @NotLogin
-    public String welcome(final Model model, HttpServletRequest request) {
-        // get proxy property Jpom-ProxyPath
-        model.addAttribute("domain", BaseJpomInterceptor.getHeaderProxyPath(request));
-        return "../dist/index.html";
-    }
+//    /**
+//     * @return
+//     * @author Hotstrip
+//     * new version login page for vue
+//     * 新版本的登录页面
+//     */
+//    @GetMapping(value = {"welcome", "welcome.html"})
+//    @NotLogin
+//    public String welcome(final Model model, HttpServletRequest request) {
+//        // get proxy property Jpom-ProxyPath
+//        model.addAttribute("domain", BaseJpomInterceptor.getHeaderProxyPath(request));
+//        return "../dist/index.html";
+//    }
 
     /**
      * @return

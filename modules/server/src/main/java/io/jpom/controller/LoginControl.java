@@ -3,17 +3,15 @@ package io.jpom.controller;
 import cn.hutool.cache.impl.LFUCache;
 import cn.hutool.captcha.CircleCaptcha;
 import cn.hutool.core.date.BetweenFormatter;
-import cn.hutool.core.date.DateTime;
-import cn.hutool.core.date.DateUnit;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.jwt.JWT;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.validator.ValidatorConfig;
 import cn.jiangzeyin.common.validator.ValidatorItem;
 import cn.jiangzeyin.common.validator.ValidatorRule;
 import io.jpom.common.BaseServerController;
 import io.jpom.common.ServerOpenApi;
-import io.jpom.common.interceptor.BaseJpomInterceptor;
 import io.jpom.common.interceptor.LoginInterceptor;
 import io.jpom.common.interceptor.NotLogin;
 import io.jpom.common.interceptor.OptLog;
@@ -24,7 +22,6 @@ import io.jpom.service.user.UserService;
 import io.jpom.system.ServerConfigBean;
 import io.jpom.system.ServerExtConfigBean;
 import io.jpom.util.JwtUtil;
-import io.jsonwebtoken.Claims;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -35,6 +32,7 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
 import java.awt.*;
 import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 登录控制
@@ -58,22 +56,22 @@ public class LoginControl extends BaseServerController {
     @Resource
     private UserService userService;
 
-    /**
-     * 登录页面
-     *
-     * @return login
-     */
-    @RequestMapping(value = "login.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
-    @NotLogin
-    public String login() {
-        if (userService.userListEmpty()) {
-            // 调整到初始化也
-            return BaseJpomInterceptor.getRedirect(getRequest(), "/install.html");
-        }
-        // 是否显示验证码
-        setAttribute("showCode", showCode());
-        return "login";
-    }
+//    /**
+//     * 登录页面
+//     *
+//     * @return login
+//     */
+//    @RequestMapping(value = "login.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
+//    @NotLogin
+//    public String login() {
+//        if (userService.userListEmpty()) {
+//            // 调整到初始化也
+//            return BaseJpomInterceptor.getRedirect(getRequest(), "/install.html");
+//        }
+//        // 是否显示验证码
+//        setAttribute("showCode", showCode());
+//        return "login";
+//    }
 
     private boolean showCode() {
         String showCode = getSessionAttribute(SHOW_CODE);
@@ -208,16 +206,16 @@ public class LoginControl extends BaseServerController {
         }
     }
 
-    /**
-     * 退出登录
-     *
-     * @return page
-     */
-    @RequestMapping(value = "logout", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
-    public String logoutPage() {
-        getSession().invalidate();
-        return BaseJpomInterceptor.getRedirect(getRequest(), "/old.html");
-    }
+//    /**
+//     * 退出登录
+//     *
+//     * @return page
+//     */
+//    @RequestMapping(value = "logout", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
+//    public String logoutPage() {
+//        getSession().invalidate();
+//        return BaseJpomInterceptor.getRedirect(getRequest(), "/old.html");
+//    }
 
     /**
      * 退出登录
@@ -243,14 +241,14 @@ public class LoginControl extends BaseServerController {
         if (StrUtil.isEmpty(token)) {
             return JsonMessage.getString(ServerConfigBean.AUTHORIZE_TIME_OUT_CODE, "刷新token失败");
         }
-        Claims claims = JwtUtil.readBody(token);
-        if (JwtUtil.expired(claims)) {
+        JWT jwt = JwtUtil.readBody(token);
+        if (JwtUtil.expired(jwt, 0)) {
             int renewal = ServerExtConfigBean.getInstance().getAuthorizeRenewal();
-            if (claims == null || renewal <= 0 || DateUtil.between(claims.getExpiration(), DateTime.now(), DateUnit.MINUTE) > renewal) {
+            if (jwt == null || renewal <= 0 || JwtUtil.expired(jwt, TimeUnit.MINUTES.toSeconds(renewal))) {
                 return JsonMessage.getString(ServerConfigBean.AUTHORIZE_TIME_OUT_CODE, "刷新token超时");
             }
         }
-        UserModel userModel = userService.checkUser(claims.getId());
+        UserModel userModel = userService.checkUser(JwtUtil.getId(jwt));
         UserLoginDto userLoginDto = new UserLoginDto(userModel, JwtUtil.builder(userModel));
         return JsonMessage.getString(200, "", userLoginDto);
     }

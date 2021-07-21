@@ -11,13 +11,7 @@ spring:
     name: jpomServer
   profiles:
     active: dev
-  #thymeleaf start
-  thymeleaf:
-    mode: HTML
-    encoding: UTF-8
-    servlet:
-      content-type: text/html
-    prefix: classpath:/templates/
+
   servlet:
     multipart:
       max-request-size: 2GB

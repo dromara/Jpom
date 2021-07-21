@@ -2,6 +2,7 @@ package io.jpom.common;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.model.BaseModel;
@@ -87,7 +88,7 @@ public abstract class BaseDataService {
         JSONObject allData = getJSONObject(filename);
         JSONObject data = allData.getJSONObject(key);
         // 判断是否存在数据
-        if (CollUtil.isEmpty(data)) {
+        if (MapUtil.isEmpty(data)) {
             throw new JpomRuntimeException("项目名称存不在！");
         } else {
             allData.remove(key);

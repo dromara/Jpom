@@ -176,7 +176,7 @@ public class ReleaseManage extends BaseBuild {
         this.log("");
         this.log(DateUtil.now() + " start exec");
         // 执行命令
-        String[] commands = StrUtil.split(this.baseBuildModule.getReleaseCommand(), StrUtil.LF);
+        String[] commands = StrUtil.splitToArray(this.baseBuildModule.getReleaseCommand(), StrUtil.LF);
         if (commands == null || commands.length <= 0) {
             this.log("没有需要执行的ssh命令");
             return;
@@ -199,7 +199,7 @@ public class ReleaseManage extends BaseBuild {
      */
     private void doProject(AfterOpt afterOpt, boolean clearOld) {
         String releaseMethodDataId = this.baseBuildModule.getReleaseMethodDataId();
-        String[] strings = StrUtil.split(releaseMethodDataId, ":");
+        String[] strings = StrUtil.splitToArray(releaseMethodDataId, ":");
         if (strings == null || strings.length != 2) {
             throw new JpomRuntimeException(releaseMethodDataId + " error");
         }

@@ -1,20 +1,18 @@
 package io.jpom.util;
 
+import cn.hutool.core.convert.Convert;
 import cn.hutool.core.date.DateField;
 import cn.hutool.core.date.DateTime;
-import cn.hutool.core.util.ObjectUtil;
-import cn.hutool.core.util.RandomUtil;
+import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.jwt.JWT;
+import cn.hutool.jwt.JWTHeader;
+import cn.hutool.jwt.JWTValidator;
+import cn.hutool.jwt.signers.JWTSigner;
+import cn.hutool.jwt.signers.JWTSignerUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import io.jpom.model.data.UserModel;
 import io.jpom.system.ServerExtConfigBean;
-import io.jsonwebtoken.*;
-
-import javax.crypto.spec.SecretKeySpec;
-import java.security.Key;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * jwt 工具类
@@ -25,19 +23,25 @@ import java.util.Map;
 public class JwtUtil {
 
     /**
+     * 加密算法
+     */
+    private static final String ALGORITHM = "HS256";
+    /**
      * token的的加密key
      */
-    private static final SignatureAlgorithm ALGORITHM = SignatureAlgorithm.HS256;
-    private static final Key KEY = new SecretKeySpec("KZQfFBJTW2v6obS1".getBytes(), SignatureAlgorithm.HS256.getJcaName());
-
+    private static final byte[] KEY = "KZQfFBJTW2v6obS1".getBytes();
     public static final String KEY_USER_ID = "userId";
+    private static final JWTSigner JWT_SIGNER = JWTSignerUtil.hs256(KEY);
 
-    public static Claims parseBody(String token) {
+    public static JWT parseBody(String token) {
         if (StrUtil.isEmpty(token)) {
             return null;
         }
-        Jws<Claims> claimsJws = Jwts.parser().setSigningKey(KEY).parseClaimsJws(token);
-        return claimsJws.getBody();
+        JWT jwt = JWT.of(token).setSigner(JWT_SIGNER);
+        if (jwt.verify()) {
+            return jwt;
+        }
+        return null;
     }
 
 
@@ -47,11 +51,9 @@ public class JwtUtil {
      * @param token token
      * @return claims
      */
-    public static Claims readBody(String token) {
+    public static JWT readBody(String token) {
         try {
             return parseBody(token);
-        } catch (ExpiredJwtException e) {
-            return e.getClaims();
         } catch (Exception e) {
             DefaultSystemLog.getLog().warn("token 解析失败：" + token, e);
             return null;
@@ -61,26 +63,42 @@ public class JwtUtil {
     /**
      * 读取用户id
      *
-     * @param claims claims
+     * @param jwt jwt
      * @return 用户id
      */
-    public static String readUserId(Claims claims) {
-        return claims.get(KEY_USER_ID, String.class);
+    public static String readUserId(JWT jwt) {
+        return Convert.toStr(jwt.getPayload(KEY_USER_ID));
+    }
+
+    /**
+     * 获取jwt的唯一身份标识
+     *
+     * @param jwt jwt
+     * @return id
+     */
+    public static String getId(JWT jwt) {
+        if (null == jwt) {
+            return null;
+        }
+        return Convert.toStr(jwt.getPayload("jti"));
     }
 
     /**
      * 判断是否过期
      *
-     * @param claims claims
+     * @param jwt    claims
+     * @param leeway 容忍空间，单位：秒。当不能晚于当前时间时，向后容忍；不能早于向前容忍。
      * @return 是否过期
      */
-    public static boolean expired(Claims claims) {
-        if (claims == null) {
+    public static boolean expired(JWT jwt, long leeway) {
+        if (jwt == null) {
             return true;
         }
-        Date expiration = claims.getExpiration();
-        if (ObjectUtil.isNotNull(expiration)) {
-            return expiration.before(DateTime.now());
+        try {
+            JWTValidator of = JWTValidator.of(jwt);
+            of.validateDate(DateUtil.date(), leeway);
+        } catch (Exception e) {
+            return true;
         }
         return false;
     }
@@ -92,18 +110,16 @@ public class JwtUtil {
      * @return token
      */
     public static String builder(UserModel userModel) {
-        JwtBuilder builder = Jwts.builder();
-        Map<String, Object> header = new HashMap<>();
-        header.put("alg", ALGORITHM.name());
-        header.put("typ", "JWT");
-        builder.setHeader(header);
-        builder.claim(KEY_USER_ID, userModel.getId());
-        builder.setId(userModel.getUserMd5Key());
-        builder.setIssuer("Jpom");
         int authorizeExpired = ServerExtConfigBean.getInstance().getAuthorizeExpired();
-        builder.setExpiration(DateTime.now().offset(DateField.HOUR, authorizeExpired));
-        builder.signWith(ALGORITHM, KEY);
-        return builder.compact();
+        DateTime now = DateTime.now();
+        JWT jwt = JWT.create();
+        jwt.setHeader(JWTHeader.ALGORITHM, ALGORITHM);
+        jwt.setPayload(KEY_USER_ID, userModel.getId())
+                .setJWTId(userModel.getUserMd5Key())
+                .setIssuer("Jpom")
+                .setIssuedAt(now)
+                .setExpiresAt(now.offsetNew(DateField.HOUR, authorizeExpired));
+        return jwt.sign(JWT_SIGNER);
     }
 
 

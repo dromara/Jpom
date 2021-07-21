@@ -1,7 +1,7 @@
 package io.jpom.common.commander.impl;
 
 import cn.hutool.core.convert.Convert;
-import cn.hutool.core.text.StrSpliter;
+import cn.hutool.core.text.StrSplitter;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.system.SystemUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
@@ -117,7 +117,7 @@ public class MacOSSystemCommander extends AbstractSystemCommander {
      * @return
      */
     private List<ProcessModel> formatLinuxTop(final String top, final boolean header) {
-        List<String> list = StrSpliter.splitTrim(top, StrUtil.LF, true);
+        List<String> list = StrSplitter.splitTrim(top, StrUtil.LF, true);
         if (list.size() <= 0) {
             return null;
         }
@@ -126,7 +126,7 @@ public class MacOSSystemCommander extends AbstractSystemCommander {
         for (String item : list) {
             processModel = new ProcessModel();
             DefaultSystemLog.getLog().debug("process item: {}", item);
-            List<String> values = StrSpliter.splitTrim(item, StrUtil.SPACE, true);
+            List<String> values = StrSplitter.splitTrim(item, StrUtil.SPACE, true);
             DefaultSystemLog.getLog().debug(JSON.toJSONString(values));
             processModel.setPid(Integer.parseInt(values.get(0)));
             processModel.setPort(values.get(6));

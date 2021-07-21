@@ -1,6 +1,6 @@
 package io.jpom.controller.node.ssh;
 
-import cn.hutool.core.text.StrSpliter;
+import cn.hutool.core.text.StrSplitter;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.ssh.JschUtil;
 import cn.jiangzeyin.common.JsonMessage;
@@ -126,7 +126,7 @@ public class SshController extends BaseServerController {
         if (StrUtil.isEmpty(fileDirs)) {
             sshModel.setFileDirs(null);
         } else {
-            List<String> list = StrSpliter.splitTrim(fileDirs, StrUtil.LF, true);
+            List<String> list = StrSplitter.splitTrim(fileDirs, StrUtil.LF, true);
             sshModel.setFileDirs(list);
         }
         sshModel.setHost(host);

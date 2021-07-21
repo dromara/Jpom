@@ -7,7 +7,7 @@ import cn.hutool.core.date.DatePattern;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.lang.JarClassLoader;
-import cn.hutool.core.text.StrSpliter;
+import cn.hutool.core.text.StrSplitter;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.StrUtil;
@@ -32,7 +32,6 @@ import io.jpom.util.CommandUtil;
 import io.jpom.util.FileUtils;
 import io.jpom.util.JvmUtil;
 
-import javax.crypto.Mac;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -347,10 +346,10 @@ public abstract class AbstractProjectCommander {
      */
     private String getJpsStatus(String tag) {
         String execSystemCommand = CommandUtil.execSystemCommand("jps -mv");
-        List<String> list = StrSpliter.splitTrim(execSystemCommand, StrUtil.LF, true);
+        List<String> list = StrSplitter.splitTrim(execSystemCommand, StrUtil.LF, true);
         for (String item : list) {
             if (JvmUtil.checkCommandLineIsJpom(item, tag)) {
-                String[] split = StrUtil.split(item, StrUtil.SPACE);
+                String[] split = StrUtil.splitToArray(item, StrUtil.SPACE);
                 return StrUtil.format("{}:{}", AbstractProjectCommander.RUNNING_TAG, split[0]);
             }
         }
@@ -366,10 +365,10 @@ public abstract class AbstractProjectCommander {
      */
     private String getLinuxPsStatus(String tag) {
         String execSystemCommand = CommandUtil.execSystemCommand("ps -ef | grep " + tag);
-        List<String> list = StrSpliter.splitTrim(execSystemCommand, StrUtil.LF, true);
+        List<String> list = StrSplitter.splitTrim(execSystemCommand, StrUtil.LF, true);
         for (String item : list) {
             if (JvmUtil.checkCommandLineIsJpom(item, tag)) {
-                String[] split = StrUtil.split(item, StrUtil.SPACE);
+                String[] split = StrUtil.splitToArray(item, StrUtil.SPACE);
                 return StrUtil.format("{}:{}", AbstractProjectCommander.RUNNING_TAG, split[1]);
             }
         }
@@ -426,7 +425,7 @@ public abstract class AbstractProjectCommander {
         if (StrUtil.isEmpty(local)) {
             return null;
         }
-        List<String> ipPort = StrSpliter.splitTrim(local, StrUtil.COLON, true);
+        List<String> ipPort = StrSplitter.splitTrim(local, StrUtil.COLON, true);
         if (ipPort.isEmpty()) {
             return null;
         }

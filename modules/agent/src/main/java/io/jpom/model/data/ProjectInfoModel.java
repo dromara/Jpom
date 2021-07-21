@@ -323,7 +323,7 @@ public class ProjectInfoModel extends BaseModel {
         } else if (runMode == RunMode.JavaExtDirsCp) {
             classPath.append("-Djava.ext.dirs=");
             String javaExtDirsCp = projectInfoModel.getJavaExtDirsCp();
-            String[] split = StrUtil.split(javaExtDirsCp, StrUtil.COLON);
+            String[] split = StrUtil.splitToArray(javaExtDirsCp, StrUtil.COLON);
             if (ArrayUtil.isEmpty(split)) {
                 classPath.append(". -cp ");
             } else {

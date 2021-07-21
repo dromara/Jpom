@@ -301,7 +301,7 @@ public class JvmUtil {
         if (StrUtil.isEmpty(commandLine)) {
             return false;
         }
-        String[] split = StrUtil.split(commandLine, StrUtil.SPACE);
+        String[] split = StrUtil.splitToArray(commandLine, StrUtil.SPACE);
         String appTag = String.format("-%s=%s", JvmUtil.POM_PID_TAG, tag);
         String appTag2 = String.format("-%s=%s", JvmUtil.OLD_JPOM_PID_TAG, tag);
         String appTag3 = String.format("-%s=%s", JvmUtil.OLD2_JPOM_PID_TAG, tag);

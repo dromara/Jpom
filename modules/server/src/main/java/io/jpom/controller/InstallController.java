@@ -7,7 +7,6 @@ import cn.jiangzeyin.common.validator.ValidatorItem;
 import cn.jiangzeyin.common.validator.ValidatorRule;
 import io.jpom.JpomApplication;
 import io.jpom.common.BaseServerController;
-import io.jpom.common.interceptor.BaseJpomInterceptor;
 import io.jpom.common.interceptor.LoginInterceptor;
 import io.jpom.common.interceptor.NotLogin;
 import io.jpom.model.data.UserModel;
@@ -33,15 +32,15 @@ public class InstallController extends BaseServerController {
     @Resource
     private UserService userService;
 
-    @RequestMapping(value = "install.html", produces = MediaType.TEXT_HTML_VALUE)
-    @NotLogin
-    public String install() {
-        if (userService.userListEmpty()) {
-            return "install";
-        }
-        // 已存在用户跳转到首页
-        return BaseJpomInterceptor.getRedirect(getRequest(), "/index.html");
-    }
+//    @RequestMapping(value = "install.html", produces = MediaType.TEXT_HTML_VALUE)
+//    @NotLogin
+//    public String install() {
+//        if (userService.userListEmpty()) {
+//            return "install";
+//        }
+//        // 已存在用户跳转到首页
+//        return BaseJpomInterceptor.getRedirect(getRequest(), "/index.html");
+//    }
 
     /**
      * 初始化提交

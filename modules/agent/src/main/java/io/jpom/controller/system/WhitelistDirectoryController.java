@@ -1,6 +1,6 @@
 package io.jpom.controller.system;
 
-import cn.hutool.core.text.StrSpliter;
+import cn.hutool.core.text.StrSplitter;
 import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.JsonMessage;
 import io.jpom.common.BaseJpomController;
@@ -37,14 +37,14 @@ public class WhitelistDirectoryController extends BaseJpomController {
         //
         List<String> certificateList = null;
         if (StrUtil.isNotEmpty(certificate)) {
-            certificateList = StrSpliter.splitTrim(certificate, StrUtil.LF, true);
+            certificateList = StrSplitter.splitTrim(certificate, StrUtil.LF, true);
             if (certificateList == null || certificateList.size() <= 0) {
                 return JsonMessage.getString(401, "证书路径白名单不能为空");
             }
         }
         List<String> nList = null;
         if (StrUtil.isNotEmpty(nginx)) {
-            nList = StrSpliter.splitTrim(nginx, StrUtil.LF, true);
+            nList = StrSplitter.splitTrim(nginx, StrUtil.LF, true);
             if (nList == null || nList.size() <= 0) {
                 return JsonMessage.getString(401, "nginx路径白名单不能为空");
             }
@@ -56,7 +56,7 @@ public class WhitelistDirectoryController extends BaseJpomController {
         if (StrUtil.isEmpty(project)) {
             return new JsonMessage<>(401, "项目路径白名单不能为空");
         }
-        List<String> list = StrSpliter.splitTrim(project, StrUtil.LF, true);
+        List<String> list = StrSplitter.splitTrim(project, StrUtil.LF, true);
         if (list == null || list.size() <= 0) {
             return new JsonMessage<>(401, "项目路径白名单不能为空");
         }

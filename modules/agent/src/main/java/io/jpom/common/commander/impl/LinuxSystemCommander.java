@@ -1,7 +1,7 @@
 package io.jpom.common.commander.impl;
 
 import cn.hutool.core.convert.Convert;
-import cn.hutool.core.text.StrSpliter;
+import cn.hutool.core.text.StrSplitter;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.system.SystemUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
@@ -75,7 +75,7 @@ public class LinuxSystemCommander extends AbstractSystemCommander {
      * @param top top
      */
     private static List<ProcessModel> formatLinuxTop(String top, boolean header) {
-        List<String> list = StrSpliter.splitTrim(top, StrUtil.LF, true);
+        List<String> list = StrSplitter.splitTrim(top, StrUtil.LF, true);
         if (list.size() <= 0) {
             return null;
         }
@@ -84,7 +84,7 @@ public class LinuxSystemCommander extends AbstractSystemCommander {
         for (int i = header ? 6 : 0, len = list.size(); i < len; i++) {
             processModel = new ProcessModel();
             String item = list.get(i);
-            List<String> values = StrSpliter.splitTrim(item, StrUtil.SPACE, true);
+            List<String> values = StrSplitter.splitTrim(item, StrUtil.SPACE, true);
             processModel.setPid(Integer.parseInt(values.get(0)));
             processModel.setUser(values.get(1));
             processModel.setPr(values.get(2));

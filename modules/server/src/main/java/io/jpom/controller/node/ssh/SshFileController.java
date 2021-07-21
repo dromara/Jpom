@@ -32,6 +32,7 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Vector;
 
@@ -156,12 +157,12 @@ public class SshFileController extends BaseServerController {
     private void downloadFile(SshModel sshModel, String path, String name, HttpServletResponse response) throws IOException, SftpException {
         final String charset = ObjectUtil.defaultIfNull(response.getCharacterEncoding(), CharsetUtil.UTF_8);
         String fileName = FileUtil.getName(name);
-        response.setHeader("Content-Disposition", StrUtil.format("attachment;filename={}", URLUtil.encode(fileName, charset)));
+        response.setHeader("Content-Disposition", StrUtil.format("attachment;filename={}", URLUtil.encode(fileName, Charset.forName(charset))));
         response.setContentType(MediaType.APPLICATION_OCTET_STREAM_VALUE);
         Session session = null;
         ChannelSftp channel = null;
         try {
-            session = sshService.getSession(sshModel);
+            session = SshService.getSession(sshModel);
             channel = (ChannelSftp) JschUtil.openChannel(session, ChannelType.SFTP);
             String normalize = FileUtil.normalize(path + "/" + name);
             channel.get(normalize, response.getOutputStream());
@@ -184,7 +185,7 @@ public class SshFileController extends BaseServerController {
         Session session = null;
         ChannelSftp channel = null;
         try {
-            session = sshService.getSession(sshModel);
+            session = SshService.getSession(sshModel);
             channel = (ChannelSftp) JschUtil.openChannel(session, ChannelType.SFTP);
             Vector<ChannelSftp.LsEntry> vector;
             if (StrUtil.isNotEmpty(children)) {

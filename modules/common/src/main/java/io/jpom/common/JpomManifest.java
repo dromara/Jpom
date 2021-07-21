@@ -1,12 +1,13 @@
 package io.jpom.common;
 
 import cn.hutool.core.convert.Convert;
-import cn.hutool.core.date.BetweenFormater;
+import cn.hutool.core.date.BetweenFormatter;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.LineHandler;
 import cn.hutool.core.lang.JarClassLoader;
+import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.core.util.ClassUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.system.SystemUtil;
@@ -55,7 +56,7 @@ public class JpomManifest {
     /**
      * 当前运行类型
      */
-    private Type type = JpomApplication.getAppType();
+    private final Type type = JpomApplication.getAppType();
     /**
      * 端口号
      */
@@ -185,7 +186,7 @@ public class JpomManifest {
 
     public String getUpTime() {
         long uptime = SystemUtil.getRuntimeMXBean().getUptime();
-        return DateUtil.formatBetween(uptime, BetweenFormater.Level.SECOND);
+        return DateUtil.formatBetween(uptime, BetweenFormatter.Level.SECOND);
     }
 
     @Override
@@ -237,6 +238,7 @@ public class JpomManifest {
 
     /**
      * 检查是否为jpom包
+     *
      * @param path 路径
      * @param name 类名称
      * @return 结果消息
@@ -291,6 +293,7 @@ public class JpomManifest {
     public static void releaseJar(String path, String version) {
         releaseJar(path, version, false);
     }
+
     public static void releaseJar(String path, String version, boolean override) {
         File runFile = getRunPath();
         File runPath = runFile.getParentFile();
@@ -341,11 +344,11 @@ public class JpomManifest {
                     // windows 控制台文件相关
                     if (StrUtil.containsAny(line, "set LogName=")) {
                         //
-                        oldName[0] = StrUtil.split(line, "=")[1];
+                        oldName[0] = CharSequenceUtil.splitToArray(line, "=")[0];
                         newData.add(StrUtil.format("set LogName={}_{}.log", typeName, System.currentTimeMillis()));
                     } else if (StrUtil.containsAny(line, "set LogBack=")) {
                         // 记忆logBack
-                        logBack[0] = Convert.toBool(StrUtil.split(line, "=")[1], true);
+                        logBack[0] = Convert.toBool(CharSequenceUtil.splitToArray(line, "=")[1], true);
                         newData.add(line);
                     } else {
                         newData.add(line);

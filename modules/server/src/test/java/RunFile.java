@@ -1,4 +1,4 @@
-import cn.hutool.core.text.StrSpliter;
+import cn.hutool.core.text.StrSplitter;
 import cn.hutool.core.util.StrUtil;
 
 import java.util.List;
@@ -18,7 +18,7 @@ public class RunFile {
 //        System.out.println(list);
 //        String msg = exec("/test.sh");
 //        System.out.println(msg);
-        List<String> list = StrSpliter.splitTrim(":::18000", StrUtil.COLON, true);
+        List<String> list = StrSplitter.splitTrim(":::18000", StrUtil.COLON, true);
         System.out.println(list);
     }
 }

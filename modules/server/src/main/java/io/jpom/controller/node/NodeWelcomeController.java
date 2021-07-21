@@ -3,7 +3,7 @@ package io.jpom.controller.node;
 import cn.hutool.core.date.DatePattern;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
-import cn.hutool.core.text.StrSpliter;
+import cn.hutool.core.text.StrSplitter;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.db.Entity;
@@ -95,7 +95,7 @@ public class NodeWelcomeController extends BaseServerController {
         long startTime = endTime - TimeUnit.MINUTES.toMillis(30);
         if (StrUtil.isNotEmpty(time)) {
             //  处理时间
-            List<String> list = StrSpliter.splitTrim(time, "~", true);
+            List<String> list = StrSplitter.splitTrim(time, "~", true);
             DateTime startDate = DateUtil.parseDateTime(list.get(0));
             startTime = startDate.getTime();
             DateTime endDate = DateUtil.parseDateTime(list.get(1));

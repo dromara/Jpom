@@ -1,7 +1,5 @@
 package io.jpom.common.interceptor;
 
-import cn.hutool.core.date.DateTime;
-import cn.hutool.core.date.DateUnit;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.net.URLEncoder;
@@ -9,6 +7,7 @@ import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.core.util.URLUtil;
 import cn.hutool.extra.servlet.ServletUtil;
+import cn.hutool.jwt.JWT;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.interceptor.InterceptorPattens;
 import cn.jiangzeyin.common.spring.SpringUtil;
@@ -21,7 +20,6 @@ import io.jpom.system.ExtConfigBean;
 import io.jpom.system.ServerConfigBean;
 import io.jpom.system.ServerExtConfigBean;
 import io.jpom.util.JwtUtil;
-import io.jsonwebtoken.Claims;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.web.method.HandlerMethod;
@@ -32,6 +30,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.File;
 import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 登录拦截器
@@ -91,23 +90,24 @@ public class LoginInterceptor extends BaseJpomInterceptor {
         if (StrUtil.isEmpty(token)) {
             return ServerConfigBean.AUTHORIZE_TIME_OUT_CODE;
         }
-        Claims claims = JwtUtil.readBody(token);
-        if (JwtUtil.expired(claims)) {
+        JWT jwt = JwtUtil.readBody(token);
+        if (JwtUtil.expired(jwt, 0)) {
             int renewal = ServerExtConfigBean.getInstance().getAuthorizeRenewal();
-            if (claims == null || renewal <= 0 || DateUtil.between(claims.getExpiration(), DateTime.now(), DateUnit.MINUTE) > renewal) {
+            if (jwt == null || renewal <= 0 || JwtUtil.expired(jwt, TimeUnit.MINUTES.toSeconds(renewal))) {
                 return ServerConfigBean.AUTHORIZE_TIME_OUT_CODE;
             }
             return ServerConfigBean.RENEWAL_AUTHORIZE_CODE;
         }
         UserModel user = (UserModel) session.getAttribute(SESSION_NAME);
         UserService userService = SpringUtil.getBean(UserService.class);
-        UserModel newUser = userService.checkUser(claims.getId());
+        String id = JwtUtil.getId(jwt);
+        UserModel newUser = userService.checkUser(id);
         if (newUser == null) {
             return ServerConfigBean.AUTHORIZE_TIME_OUT_CODE;
         }
         if (null != user) {
-            String tokenUserId = JwtUtil.readUserId(claims);
-            boolean b = user.getId().equals(tokenUserId) && user.getUserMd5Key().equals(claims.getId())
+            String tokenUserId = JwtUtil.readUserId(jwt);
+            boolean b = user.getId().equals(tokenUserId) && user.getUserMd5Key().equals(id)
                     && user.getModifyTime() == newUser.getModifyTime();
             if (!b) {
                 return ServerConfigBean.AUTHORIZE_TIME_OUT_CODE;

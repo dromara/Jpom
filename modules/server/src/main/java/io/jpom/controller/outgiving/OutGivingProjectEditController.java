@@ -372,7 +372,7 @@ public class OutGivingProjectEditController extends BaseServerController {
             String javaCopyIds = getParameter(StrUtil.format("{}_javaCopyIds", nodeModel.getId()));
             allData.put("javaCopyIds", javaCopyIds);
             if (StrUtil.isNotEmpty(javaCopyIds)) {
-                String[] split = StrUtil.split(javaCopyIds, StrUtil.COMMA);
+                String[] split = StrUtil.splitToArray(javaCopyIds, StrUtil.COMMA);
                 for (String copyId : split) {
                     String copyJvm = getParameter(StrUtil.format("{}_jvm_{}", nodeModel.getId(), copyId));
                     String copyArgs = getParameter(StrUtil.format("{}_args_{}", nodeModel.getId(), copyId));

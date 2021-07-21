@@ -46,7 +46,7 @@ public class EmailUtil implements INotify {
     @Override
     public void send(MonitorModel.Notify notify, String title, String context) {
         MailAccount mailAccount = getAccount();
-        MailUtil.send(mailAccount, CollUtil.newArrayList(StrUtil.split(notify.getValue(), StrUtil.COMMA)), title, context, false);
+        MailUtil.send(mailAccount, StrUtil.split(notify.getValue(), StrUtil.COMMA), title, context, false);
     }
 
     public static MailAccount getAccountNew() {

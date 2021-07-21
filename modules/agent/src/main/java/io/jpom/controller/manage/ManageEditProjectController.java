@@ -118,7 +118,7 @@ public class ManageEditProjectController extends BaseAgentController {
             if (StrUtil.isEmpty(javaCopyIds)) {
                 projectInfo.setJavaCopyItemList(null);
             } else {
-                String[] split = StrUtil.split(javaCopyIds, StrUtil.COMMA);
+                String[] split = StrUtil.splitToArray(javaCopyIds, StrUtil.COMMA);
                 List<ProjectInfoModel.JavaCopyItem> javaCopyItemList = new ArrayList<>(split.length);
                 for (String copyId : split) {
                     String jvm = getParameter("jvm_" + copyId);
