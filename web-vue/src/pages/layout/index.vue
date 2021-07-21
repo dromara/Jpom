@@ -124,6 +124,10 @@ export default {
     // 检查是否需要初始化
     checkSystem() {
       checkSystem().then(res => {
+        if(res.data){
+          window.routerBase = res.data.routerBase || '';
+        }
+
         if(res.code === 900){
           //
           this.$router.push('/system/ipAccess');

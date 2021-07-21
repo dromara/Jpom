@@ -9,7 +9,7 @@ import { refreshToken } from './user';
 import { notification } from 'ant-design-vue';
 
 // axios.defaults.baseURL = 'http://localhost:2122'
-const domain = document.getElementById('domainPath').value;
+const domain = window.routerBase;
 let $global_loading;
 let startTime;
 

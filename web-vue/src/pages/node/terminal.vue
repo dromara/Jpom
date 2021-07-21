@@ -36,7 +36,7 @@ export default {
     ]),
     socketUrl() {
       const protocol = location.protocol === 'https:' ? 'wss://' : 'ws://';
-      const domain = document.getElementById('domainPath').value;
+      const domain =window.routerBase;
       const url =  (domain + '/ssh').replace(new RegExp('//','gm'), '/');
       return `${protocol}${location.host}${url}?userId=${this.getLongTermToken}&sshId=${this.sshId}&nodeId=${this.nodeId}&type=ssh&tail=${this.tail}`;
     }

@@ -122,10 +122,12 @@ public class IndexControl extends BaseServerController {
     @RequestMapping(value = "check-system", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     public String checkSystem() {
+        JSONObject data = new JSONObject();
+        data.put("routerBase", BaseJpomInterceptor.getHeaderProxyPath(getRequest()));
         if (userService.userListEmpty()) {
-            return JsonMessage.getString(500, "need init system");
+            return JsonMessage.getString(500, "need init system", data);
         }
-        return JsonMessage.getString(200, "success");
+        return JsonMessage.getString(200, "success", data);
     }
 
     @RequestMapping(value = "menus_data.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
