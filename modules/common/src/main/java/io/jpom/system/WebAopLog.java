@@ -3,6 +3,7 @@ package io.jpom.system;
 import ch.qos.logback.core.PropertyDefinerBase;
 import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
+import cn.jiangzeyin.common.interceptor.BaseCallbackController;
 import io.jpom.JpomApplication;
 import io.jpom.common.JpomManifest;
 import io.jpom.util.StringUtil;
@@ -75,7 +76,7 @@ public class WebAopLog extends PropertyDefinerBase {
             if (isLog != null && !isLog) {
                 return;
             }
-            DefaultSystemLog.getLog().info(" :" + ret.toString());
+            DefaultSystemLog.getLog().info(BaseCallbackController.getRequestAttributes().getRequest().getRequestURI() + " :" + ret.toString());
         } finally {
             IS_LOG.remove();
         }

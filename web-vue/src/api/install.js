@@ -4,7 +4,10 @@ import axios from './config';
 export function checkSystem() {
   return axios({
     url: '/check-system',
-    method: 'post'
+    method: 'post',
+    headers: {
+      loading: 'no'
+    }
   })
 }
 
