@@ -1,6 +1,6 @@
 # 版本日志
 
-# 2.5.3
+# 2.6.0-bate
 
 ### 新增功能
 
@@ -11,6 +11,8 @@
 3. 【server】角色动态权限显示分组
 4. 【agent】 新增 stop 项目等待进程关闭时间配置 `project.stopWaitTime`、停止项目输出 kill 执行结果
 5. bat 管理命令更新环境变量，避免部分服务器出现无法找到 taskkill 命令（ 感谢@Sunny°晴天、[@zt0330](https://gitee.com/zt0330) ）
+6. 升级SpringBoot、Hutool 依赖版本
+7. 去掉旧版本 ui (thymeleaf)
 
 ------
 
