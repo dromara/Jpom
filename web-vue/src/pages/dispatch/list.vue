@@ -74,10 +74,10 @@
               notFoundContent="暂无节点信息"
               style="width: 130px"
               :defaultValue="item.index"
-              @change="value => handleNodeListChange(value, index)"   
+              @change="value => handleNodeListChange(value, index)"
               :disabled="item.index===''?false:!nodeNameList[item.index].openStatus"
             >
-              <a-select-option :value="index" 
+              <a-select-option :value="index"
                 v-for="(nodeList,index) in nodeNameList"
                 :key="nodeList.id"     :disabled="!nodeList.openStatus"
               >
@@ -85,7 +85,7 @@
               </a-select-option>
             </a-select>
              <span>项目: </span>
-            <a-select  style="width: 130px" 
+            <a-select  style="width: 130px"
              placeholder="请选择项目"
              :defaultValue="item.projectId"
              notFoundContent="暂无项目信息,重新其他项目"
@@ -137,6 +137,11 @@
         </a-form-model-item>
         <a-form-model-item label="项目文件夹" prop="lib">
           <a-input v-model="temp.lib" placeholder="项目存储的文件夹，jar 包存放的文件夹"/>
+        </a-form-model-item>
+        <a-form-model-item label="日志目录">
+            <a-select v-model="temp.logPath" placeholder="请选择项目白名单路径">
+                <a-select-option v-for="access in accessList" :key="access">{{ access }}</a-select-option>
+            </a-select>
         </a-form-model-item>
         <a-form-model-item label="分发后操作" prop="afterOpt">
           <a-select v-model="temp.afterOpt" placeholder="请选择发布后操作">
@@ -373,7 +378,7 @@ export default {
     },
     // 关联分发
     handleLink() {
-      this.$refs['linkDispatchForm'].resetFields()
+      this.$refs['linkDispatchForm'] && this.$refs['linkDispatchForm'].resetFields()
       this.temp = {
         type: 'add',
         id: '',

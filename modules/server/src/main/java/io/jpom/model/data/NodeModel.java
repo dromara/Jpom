@@ -99,34 +99,34 @@ public class NodeModel extends BaseModel {
     public JSONArray getProjects() {
         return projects;
     }
-
-    /**
-     * 返回按照项目分组 排列的数组
-     *
-     * @return array
-     */
-    public JSONArray getGroupProjects() {
-        JSONArray array = getProjects();
-        if (array == null) {
-            return null;
-        }
-        JSONArray newArray = new JSONArray();
-        Map<String, JSONObject> map = new HashMap<>(array.size());
-        array.forEach(o -> {
-            JSONObject pItem = (JSONObject) o;
-            String group = pItem.getString("group");
-            JSONObject jsonObject = map.computeIfAbsent(group, s -> {
-                JSONObject jsonObject1 = new JSONObject();
-                jsonObject1.put("group", s);
-                jsonObject1.put("projects", new JSONArray());
-                return jsonObject1;
-            });
-            JSONArray jsonArray = jsonObject.getJSONArray("projects");
-            jsonArray.add(pItem);
-        });
-        newArray.addAll(map.values());
-        return newArray;
-    }
+//
+//    /**
+//     * 返回按照项目分组 排列的数组
+//     *
+//     * @return array
+//     */
+//    public JSONArray getGroupProjects() {
+//        JSONArray array = getProjects();
+//        if (array == null) {
+//            return null;
+//        }
+//        JSONArray newArray = new JSONArray();
+//        Map<String, JSONObject> map = new HashMap<>(array.size());
+//        array.forEach(o -> {
+//            JSONObject pItem = (JSONObject) o;
+//            String group = pItem.getString("group");
+//            JSONObject jsonObject = map.computeIfAbsent(group, s -> {
+//                JSONObject jsonObject1 = new JSONObject();
+//                jsonObject1.put("group", s);
+//                jsonObject1.put("projects", new JSONArray());
+//                return jsonObject1;
+//            });
+//            JSONArray jsonArray = jsonObject.getJSONArray("projects");
+//            jsonArray.add(pItem);
+//        });
+//        newArray.addAll(map.values());
+//        return newArray;
+//    }
 
     public void setProjects(JSONArray projects) {
         this.projects = projects;

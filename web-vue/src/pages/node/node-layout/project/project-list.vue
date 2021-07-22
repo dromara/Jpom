@@ -57,7 +57,6 @@
             <a-select v-model="temp.logPath" placeholder="请选择项目白名单路径">
                 <a-select-option v-for="access in accessList" :key="access">{{ access }}</a-select-option>
             </a-select>
-<!--          <a-input v-model="temp.logPath" placeholder="日志目录" />-->
         </a-form-model-item>
         <a-form-model-item label="分组名称" prop="group">
           <a-row>
