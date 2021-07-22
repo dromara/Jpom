@@ -8,7 +8,6 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.jwt.JWT;
 import cn.hutool.jwt.JWTHeader;
 import cn.hutool.jwt.JWTValidator;
-import cn.hutool.jwt.signers.JWTSigner;
 import cn.hutool.jwt.signers.JWTSignerUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import io.jpom.model.data.UserModel;
@@ -31,14 +30,13 @@ public class JwtUtil {
      */
     private static final byte[] KEY = "KZQfFBJTW2v6obS1".getBytes();
     public static final String KEY_USER_ID = "userId";
-    private static final JWTSigner JWT_SIGNER = JWTSignerUtil.hs256(KEY);
 
     public static JWT parseBody(String token) {
         if (StrUtil.isEmpty(token)) {
             return null;
         }
-        JWT jwt = JWT.of(token).setSigner(JWT_SIGNER);
-        if (jwt.verify()) {
+        JWT jwt = JWT.of(token);
+        if (jwt.verify(JWTSignerUtil.hs256(KEY))) {
             return jwt;
         }
         return null;
@@ -119,7 +117,7 @@ public class JwtUtil {
                 .setIssuer("Jpom")
                 .setIssuedAt(now)
                 .setExpiresAt(now.offsetNew(DateField.HOUR, authorizeExpired));
-        return jwt.sign(JWT_SIGNER);
+        return jwt.sign(JWTSignerUtil.hs256(KEY));
     }
 
 
