@@ -171,7 +171,8 @@ public class SshService extends BaseOperService<SshModel> implements BaseDynamic
         ChannelExec channel = null;
         try {
             channel = (ChannelExec) JschUtil.createChannel(session, ChannelType.EXEC);
-            channel.setCommand(command);
+            // 添加环境变量
+            channel.setCommand("source /etc/profile && source ~/.bash_profile && source ~/.bashrc && " + command);
             InputStream inputStream = channel.getInputStream();
             InputStream errStream = channel.getErrStream();
             channel.connect();

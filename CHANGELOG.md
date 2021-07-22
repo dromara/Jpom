@@ -11,8 +11,10 @@
 3. 【server】角色动态权限显示分组
 4. 【agent】 新增 stop 项目等待进程关闭时间配置 `project.stopWaitTime`、停止项目输出 kill 执行结果
 5. bat 管理命令更新环境变量，避免部分服务器出现无法找到 taskkill 命令（ 感谢@Sunny°晴天、[@zt0330](https://gitee.com/zt0330) ）
-6. 升级SpringBoot、Hutool 依赖版本
+6. 升级SpringBoot、Hutool等 第三方依赖版本
 7. 去掉旧版本 ui (thymeleaf)
+8. 【server】fix： ssh 分发执行命令找不到环境变量问题
+9. 在线升级显示打包时间、并发执行分发 jar 包、部分逻辑优化
 
 ------
 

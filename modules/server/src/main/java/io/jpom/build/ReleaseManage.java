@@ -148,7 +148,8 @@ public class ReleaseManage extends BaseBuild {
                 String normalizePath = FileUtil.normalize(prefix + "/" + this.baseBuildModule.getReleasePath());
                 try {
                     sftp.mkDirs(normalizePath);
-                } catch (Exception ignored) {
+                } catch (Exception e) {
+                    this.pubLog(" 切换目录失败：" + normalizePath, e);
                 }
                 sftp.cd(normalizePath);
                 sftp.put(this.resultFile.getAbsolutePath(), this.resultFile.getName());
@@ -164,7 +165,8 @@ public class ReleaseManage extends BaseBuild {
                     String parent = StrUtil.subBefore(remoteItemAbsPath, StrUtil.SLASH, true);
                     try {
                         sftp.mkDirs(parent);
-                    } catch (Exception ignored) {
+                    } catch (Exception e) {
+                        this.pubLog(" 切换目录失败：" + parent, e);
                     }
                     sftp.cd(parent);
                     sftp.put(itemAbsPath, file.getName());
@@ -183,6 +185,7 @@ public class ReleaseManage extends BaseBuild {
         }
         for (String commandItem : commands) {
             try {
+                this.log(commandItem);
                 String s = sshService.exec(item, commandItem);
                 this.log(s);
             } catch (Exception e) {

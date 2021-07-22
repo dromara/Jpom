@@ -139,10 +139,10 @@ public class NodeIndexController extends BaseServerController {
     }
 
     /**
+     * @return
      * @author Hotstrip
      * load node project list
      * 加载节点项目列表
-     * @return
      */
     @RequestMapping(value = "node_project_list", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
@@ -165,7 +165,7 @@ public class NodeIndexController extends BaseServerController {
                 .setSavePath(saveDir);
         String path = multipartFileBuilder.save();
         // 基础检查
-        JsonMessage error = JpomManifest.checkJpomJar(path, "io.jpom.JpomAgentApplication");
+        JsonMessage<String> error = JpomManifest.checkJpomJar(path, "io.jpom.JpomAgentApplication", false);
         if (error.getCode() != HttpStatus.HTTP_OK) {
             FileUtil.del(path);
             return error.toString();

@@ -1,5 +1,6 @@
 package io.jpom.model.data;
 
+import cn.hutool.core.io.FileUtil;
 import io.jpom.model.BaseModel;
 
 import java.io.File;
@@ -49,10 +50,8 @@ public class UploadFileModel extends BaseModel {
 
     public void save(byte[] data) {
         this.completeSize += data.length;
-        File file = new File(savePath + "/" + getName());
-        if (!file.getParentFile().exists()) {
-            file.getParentFile().mkdirs();
-        }
+        File file = new File(this.getFilePath());
+        FileUtil.mkParentDirs(file);
         try {
             FileOutputStream fileOutputStream = new FileOutputStream(file, true);
             fileOutputStream.write(data);
@@ -68,9 +67,6 @@ public class UploadFileModel extends BaseModel {
     }
 
     public void remove() {
-        File file = new File(savePath + "/" + getName());
-        if (file.exists()) {
-            file.delete();
-        }
+        FileUtil.del(this.getFilePath());
     }
 }

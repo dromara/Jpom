@@ -38,7 +38,7 @@ public class SystemUpdateController extends BaseAgentController {
                 .setSavePath(AgentConfigBean.getInstance().getTempPath().getAbsolutePath());
         String path = multipartFileBuilder.save();
         // 基础检查
-        JsonMessage error = JpomManifest.checkJpomJar(path, JpomAgentApplication.class);
+        JsonMessage<String> error = JpomManifest.checkJpomJar(path, JpomAgentApplication.class);
         if (error.getCode() != HttpStatus.HTTP_OK) {
             return error.toString();
         }

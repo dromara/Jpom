@@ -12,6 +12,8 @@ public class NodeVersionModel extends BaseModel {
      */
     private String group;
 
+
+
     public String getVersion() {
         return version;
     }

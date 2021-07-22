@@ -40,7 +40,7 @@
           </div>
           <div class="uploading" v-if="text && text.type === 'uploading'">
             <div class="text">{{ text.percent === 100 ? '上传成功' : '正在上传文件' }}</div>
-            <a-progress :percent="text.percent" />
+            <a-progress :percent="text.percent"/>
           </div>
         </template>
         <template slot="operation" slot-scope="text, record">
@@ -77,6 +77,7 @@ export default {
         {title: '节点名称', dataIndex: 'name', ellipsis: true, scopedSlots: {customRender: 'name'}},
         {title: '分组', dataIndex: 'group', ellipsis: true, scopedSlots: {customRender: 'group'}},
         {title: 'Agent版本号', dataIndex: 'version', ellipsis: true, scopedSlots: {customRender: 'version'}},
+        {title: '打包时间', dataIndex: 'timeStamp', ellipsis: true, scopedSlots: {customRender: 'timeStamp'}},
         {title: '状态', dataIndex: 'status', ellipsis: true, scopedSlots: {customRender: 'status'}},
         // {title: '自动更新', dataIndex: 'autoUpdate', ellipsis: true, scopedSlots: {customRender: 'autoUpdate'}},
         {title: '操作', dataIndex: 'operation', width: '250px', scopedSlots: {customRender: 'operation'}, align: 'left'}
@@ -94,8 +95,18 @@ export default {
       const data = []
       this.list.forEach(item => {
         if (item.group === this.groupFilter || this.groupFilter === undefined) {
-          item.version = this.nodeVersion[item.id]
-          item.status = this.nodeStatus [item.id]
+          let itemData = this.nodeVersion[item.id];
+          if (itemData) {
+            try {
+              itemData = JSON.parse(itemData);
+              item.version = itemData.version;
+              item.timeStamp = itemData.timeStamp;
+            } catch (e) {
+              item.version = itemData;
+            }
+          }
+
+          item.status = this.nodeStatus[item.id]
           data.push(item)
         }
       })

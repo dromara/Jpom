@@ -236,14 +236,19 @@ public class JpomManifest {
         return checkJpomJar(path, clsName.getName());
     }
 
+    public static JsonMessage<String> checkJpomJar(String path, String name) {
+        return checkJpomJar(path, name, true);
+    }
+
     /**
      * 检查是否为jpom包
      *
-     * @param path 路径
-     * @param name 类名称
+     * @param path        路径
+     * @param name        类名称
+     * @param checkRepeat 是否检查版本重复
      * @return 结果消息
      */
-    public static JsonMessage<String> checkJpomJar(String path, String name) {
+    public static JsonMessage<String> checkJpomJar(String path, String name, boolean checkRepeat) {
         String version;
         File jarFile = new File(path);
         try (JarFile jarFile1 = new JarFile(jarFile)) {
@@ -273,7 +278,7 @@ public class JpomManifest {
                 return new JsonMessage<>(405, "此包没有版本号");
             }
             timeStamp = parseJpomTime(timeStamp);
-            if (StrUtil.equals(version, JpomManifest.getInstance().getVersion()) &&
+            if (checkRepeat && StrUtil.equals(version, JpomManifest.getInstance().getVersion()) &&
                     StrUtil.equals(timeStamp, JpomManifest.getInstance().getTimeStamp())) {
                 return new JsonMessage<>(405, "新包和正在运行的包一致");
             }

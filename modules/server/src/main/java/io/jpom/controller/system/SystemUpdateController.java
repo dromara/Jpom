@@ -69,7 +69,7 @@ public class SystemUpdateController extends BaseServerController {
                 .setSavePath(ServerConfigBean.getInstance().getUserTempPath().getAbsolutePath());
         String path = multipartFileBuilder.save();
         // 基础检查
-        JsonMessage error = JpomManifest.checkJpomJar(path, JpomServerApplication.class);
+        JsonMessage<String> error = JpomManifest.checkJpomJar(path, JpomServerApplication.class);
         if (error.getCode() != HttpStatus.HTTP_OK) {
             return error.toString();
         }

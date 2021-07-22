@@ -18,8 +18,8 @@ import java.util.Set;
  */
 public abstract class BaseOperService<T extends BaseModel> extends BaseDataService {
 
-    private String fileName;
-    private Class<?> typeArgument;
+    private final String fileName;
+    private final Class<?> typeArgument;
 
     public BaseOperService(String fileName) {
         this.fileName = fileName;

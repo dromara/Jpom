@@ -18,12 +18,13 @@ import java.net.URISyntaxException;
 
 /**
  * 节点Client
+ *
  * @author lf
  */
-public class NodeClient extends WebSocketClient{
-    private WebSocketSession session;
-    private OperateLogController logController;
-    private NodeModel nodeModel;
+public class NodeClient extends WebSocketClient {
+    private final WebSocketSession session;
+    private final OperateLogController logController;
+    private final NodeModel nodeModel;
 
 
     public NodeClient(String uri, NodeModel nodeModel, WebSocketSession session) throws URISyntaxException {
@@ -79,6 +80,6 @@ public class NodeClient extends WebSocketClient{
 
     @Override
     public void onError(Exception e) {
-
+        DefaultSystemLog.getLog().error("发生异常", e);
     }
 }

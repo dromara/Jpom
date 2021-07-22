@@ -1,5 +1,7 @@
 package io.jpom.socket.handler;
 
+import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.spring.SpringUtil;
@@ -35,7 +37,16 @@ import java.util.jar.Manifest;
  * @author lf
  */
 public class NodeUpdateHandler extends BaseHandler {
-    Map<String, NodeClient> clientMap = new HashMap<>();
+
+    private final Map<String, NodeClient> clientMap = new HashMap<>();
+
+    private AgentFileService agentFileService;
+    private NodeService nodeService;
+
+    private void init() {
+        agentFileService = SpringUtil.getBean(AgentFileService.class);
+        nodeService = SpringUtil.getBean(NodeService.class);
+    }
 
     @Override
     public void afterConnectionEstablished(WebSocketSession session) {
@@ -65,6 +76,7 @@ public class NodeUpdateHandler extends BaseHandler {
     @Override
     protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
         WebSocketMessageModel model = WebSocketMessageModel.getInstance(message);
+        this.init();
         switch (model.getCommand()) {
             case "getNodeList":
                 model.setData(getNodeList());
@@ -97,9 +109,10 @@ public class NodeUpdateHandler extends BaseHandler {
     private void updateNode(WebSocketMessageModel model, WebSocketSession session) {
         JSONObject params = (JSONObject) model.getParams();
         JSONArray ids = params.getJSONArray("ids");
-
+        if (CollUtil.isEmpty(ids)) {
+            return;
+        }
         try {
-            AgentFileService agentFileService = SpringUtil.getBean(AgentFileService.class);
             AgentFileModel agentFileModel = agentFileService.getItem("agent");
 
             if (agentFileModel == null) {
@@ -109,37 +122,47 @@ public class NodeUpdateHandler extends BaseHandler {
                 return;
             }
 
-            if (ids != null) {
-                FileInputStream fis = new FileInputStream(agentFileModel.getSavePath());
-                NodeService nodeService = SpringUtil.getBean(NodeService.class);
-                for (int i = 0; i < ids.size(); i++) {
-                    String id = ids.getString(i);
-
-                    NodeModel node = nodeService.getItem(id);
-                    NodeClient client = clientMap.get(node.getId());
-                    if (client.isOpen()) {
-                        // 发送文件信息
-                        WebSocketMessageModel webSocketMessageModel = new WebSocketMessageModel("upload", id);
-                        webSocketMessageModel.setNodeId(id);
-                        webSocketMessageModel.setParams(agentFileModel);
-                        client.send(webSocketMessageModel.toString());
-
-                        // 发送文件内容
-                        int len;
-                        byte[] buffer = new byte[1024 * 1024];
-                        while ((len = fis.read(buffer)) > 0) {
-                            client.send(ByteBuffer.wrap(buffer, 0, len));
+            for (int i = 0; i < ids.size(); i++) {
+                int finalI = i;
+                ThreadUtil.execute(() -> {
+                    try {
+                        String id = ids.getString(finalI);
+                        NodeModel node = nodeService.getItem(id);
+                        NodeClient client = clientMap.get(node.getId());
+                        if (client.isOpen()) {
+                            // 发送文件信息
+                            WebSocketMessageModel webSocketMessageModel = new WebSocketMessageModel("upload", id);
+                            webSocketMessageModel.setNodeId(id);
+                            webSocketMessageModel.setParams(agentFileModel);
+                            client.send(webSocketMessageModel.toString());
+                            //
+                            try (FileInputStream fis = new FileInputStream(agentFileModel.getSavePath())) {
+                                // 发送文件内容
+                                int len;
+                                byte[] buffer = new byte[1024 * 1024];
+                                while ((len = fis.read(buffer)) > 0) {
+                                    client.send(ByteBuffer.wrap(buffer, 0, len));
+                                }
+                            }
+                            WebSocketMessageModel restartMessage = new WebSocketMessageModel("restart", id);
+                            client.send(restartMessage.toString());
+                        } else {
+                            model.setData("节点连接丢失");
+                            session.sendMessage(new TextMessage(model.toString()));
                         }
-
-                        WebSocketMessageModel restartMessage = new WebSocketMessageModel("restart", id);
-                        client.send(restartMessage.toString());
+                    } catch (Exception e) {
+                        DefaultSystemLog.getLog().error("升级失败:" + model, e);
+                        model.setData("节点升级失败：" + e.getMessage());
+                        try {
+                            session.sendMessage(new TextMessage(model.toString()));
+                        } catch (IOException ignored) {
+                        }
                     }
-                }
+                });
 
-                fis.close();
             }
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (Exception e) {
+            DefaultSystemLog.getLog().error("升级失败", e);
         }
     }
 
@@ -149,7 +172,6 @@ public class NodeUpdateHandler extends BaseHandler {
      * @return
      */
     private String getAgentVersion() {
-        AgentFileService agentFileService = new AgentFileService();
         AgentFileModel agentFileModel = agentFileService.getItem("agent");
         String version = "";
         try (JarFile jarFile = new JarFile(agentFileModel.getSavePath())) {
@@ -157,7 +179,7 @@ public class NodeUpdateHandler extends BaseHandler {
             Attributes attributes = manifest.getMainAttributes();
             version = attributes.getValue(Attributes.Name.IMPLEMENTATION_VERSION);
         } catch (Exception e) {
-            DefaultSystemLog.getLog().error("解析 jar 异常，caused: {}, message: {}", e.getCause(), e.getMessage());
+            DefaultSystemLog.getLog().error("解析 jar 异常", e);
         }
         return version;
     }

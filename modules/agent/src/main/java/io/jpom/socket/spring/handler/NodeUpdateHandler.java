@@ -1,15 +1,13 @@
 package io.jpom.socket.spring.handler;
 
+import cn.jiangzeyin.common.DefaultSystemLog;
 import com.alibaba.fastjson.JSONObject;
-import io.jpom.JpomAgentApplication;
 import io.jpom.JpomApplication;
 import io.jpom.common.JpomManifest;
-import io.jpom.model.WebSocketMessageModel;
 import io.jpom.model.AgentFileModel;
+import io.jpom.model.WebSocketMessageModel;
 import io.jpom.model.data.UploadFileModel;
 import io.jpom.system.AgentConfigBean;
-import io.jpom.system.ConfigBean;
-import io.jpom.util.VersionUtils;
 import org.springframework.web.socket.BinaryMessage;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
@@ -24,7 +22,7 @@ import java.util.Map;
  * @author lf
  */
 public class NodeUpdateHandler extends AbstractWebSocketHandler {
-    private static final Map<String, UploadFileModel> uploadFileInfo = new HashMap<>();
+    private static final Map<String, UploadFileModel> UPLOAD_FILE_INFO = new HashMap<>();
 
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
@@ -37,7 +35,7 @@ public class NodeUpdateHandler extends AbstractWebSocketHandler {
         WebSocketMessageModel model = WebSocketMessageModel.getInstance(message);
         switch (model.getCommand()) {
             case "getVersion":
-                model.setData(VersionUtils.getVersion(JpomAgentApplication.class, JpomManifest.getInstance().getVersion()));
+                model.setData(JSONObject.toJSONString(JpomManifest.getInstance()));
                 break;
             case "upload":
                 AgentFileModel agentFileModel = ((JSONObject) model.getParams()).toJavaObject(AgentFileModel.class);
@@ -48,7 +46,7 @@ public class NodeUpdateHandler extends AbstractWebSocketHandler {
                 uploadFileModel.setVersion(agentFileModel.getVersion());
                 uploadFileModel.setSavePath(AgentConfigBean.getInstance().getTempPath().getAbsolutePath());
                 uploadFileModel.remove();
-                uploadFileInfo.put(session.getId(), uploadFileModel);
+                UPLOAD_FILE_INFO.put(session.getId(), uploadFileModel);
                 break;
             case "restart":
                 model.setData(restart(session));
@@ -62,7 +60,7 @@ public class NodeUpdateHandler extends AbstractWebSocketHandler {
 
     @Override
     protected void handleBinaryMessage(WebSocketSession session, BinaryMessage message) throws Exception {
-        UploadFileModel uploadFileModel = uploadFileInfo.get(session.getId());
+        UploadFileModel uploadFileModel = UPLOAD_FILE_INFO.get(session.getId());
         uploadFileModel.save(message.getPayload().array());
         // 更新进度
         WebSocketMessageModel model = new WebSocketMessageModel("updateNode", uploadFileModel.getId());
@@ -72,17 +70,19 @@ public class NodeUpdateHandler extends AbstractWebSocketHandler {
 
     /**
      * 重启
+     *
      * @param session
      * @return
      */
     public String restart(WebSocketSession session) {
         String result = "重启中";
         try {
-            UploadFileModel uploadFile = uploadFileInfo.get(session.getId());
+            UploadFileModel uploadFile = UPLOAD_FILE_INFO.get(session.getId());
             JpomManifest.releaseJar(uploadFile.getFilePath(), uploadFile.getVersion(), true);
             JpomApplication.restart();
         } catch (RuntimeException e) {
             result = e.getMessage();
+            DefaultSystemLog.getLog().error("重启失败", e);
         }
         return result;
     }
