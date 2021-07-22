@@ -42,10 +42,10 @@ public class UserBasicInfoController extends BaseServerController {
     @Resource
     private UserService userService;
 
-    @RequestMapping(value = "userInfo.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
-    public String userInfo() {
-        return "user/userInfo";
-    }
+//    @RequestMapping(value = "userInfo.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
+//    public String userInfo() {
+//        return "user/userInfo";
+//    }
 
     /**
      * @author Hotstrip

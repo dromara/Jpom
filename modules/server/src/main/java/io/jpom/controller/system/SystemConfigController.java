@@ -49,19 +49,19 @@ public class SystemConfigController extends BaseServerController {
     }
 
 
-    @RequestMapping(value = "config.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
-    @SystemPermission
-    public String config(String nodeId) throws IOException {
-        String content;
-        if (StrUtil.isNotEmpty(nodeId)) {
-            JSONObject jsonObject = NodeForward.requestData(getNode(), NodeUrl.SystemGetConfig, getRequest(), JSONObject.class);
-            content = jsonObject.getString("content");
-        } else {
-            content = IoUtil.read(ExtConfigBean.getResource().getInputStream(), CharsetUtil.CHARSET_UTF_8);
-        }
-        setAttribute("content", content);
-        return "system/config";
-    }
+//    @RequestMapping(value = "config.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
+//    @SystemPermission
+//    public String config(String nodeId) throws IOException {
+//        String content;
+//        if (StrUtil.isNotEmpty(nodeId)) {
+//            JSONObject jsonObject = NodeForward.requestData(getNode(), NodeUrl.SystemGetConfig, getRequest(), JSONObject.class);
+//            content = jsonObject.getString("content");
+//        } else {
+//            content = IoUtil.read(ExtConfigBean.getResource().getInputStream(), CharsetUtil.CHARSET_UTF_8);
+//        }
+//        setAttribute("content", content);
+//        return "system/config";
+//    }
 
     /**
      * @param nodeId

@@ -35,21 +35,21 @@ public class SystemMailConfigController extends BaseServerController {
     @Resource
     private SystemMailConfigService systemMailConfigService;
 
-    /**
-     * 展示监控页面
-     *
-     * @return page
-     */
-    @RequestMapping(value = "mailConfig.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
-    @SystemPermission
-    public String mailConfig() {
-        UserModel userModel = getUser();
-        if (userModel.isSystemUser()) {
-            MailAccountModel item = systemMailConfigService.getConfig();
-            setAttribute("item", item);
-        }
-        return "monitor/mailConfig";
-    }
+//    /**
+//     * 展示监控页面
+//     *
+//     * @return page
+//     */
+//    @RequestMapping(value = "mailConfig.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
+//    @SystemPermission
+//    public String mailConfig() {
+//        UserModel userModel = getUser();
+//        if (userModel.isSystemUser()) {
+//            MailAccountModel item = systemMailConfigService.getConfig();
+//            setAttribute("item", item);
+//        }
+//        return "monitor/mailConfig";
+//    }
 
     /**
      * @return

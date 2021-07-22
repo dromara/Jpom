@@ -42,22 +42,22 @@ public class UserOptLogController extends BaseServerController {
     @Resource
     private DbUserOperateLogService dbUserOperateLogService;
 
-    /**
-     * 展示用户列表
-     *
-     * @return page
-     */
-    @RequestMapping(value = "list.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
-    @Feature(method = MethodFeature.LOG)
-    public String projectInfo() {
-        // 所有节点
-        List<NodeModel> nodeModels = nodeService.list();
-        setAttribute("nodeArray", nodeModels);
-        // 用户
-        List<UserModel> userModels = userService.list();
-        setAttribute("userArray", userModels);
-        return "user/log/list";
-    }
+//    /**
+//     * 展示用户列表
+//     *
+//     * @return page
+//     */
+//    @RequestMapping(value = "list.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
+//    @Feature(method = MethodFeature.LOG)
+//    public String projectInfo() {
+//        // 所有节点
+//        List<NodeModel> nodeModels = nodeService.list();
+//        setAttribute("nodeArray", nodeModels);
+//        // 用户
+//        List<UserModel> userModels = userService.list();
+//        setAttribute("userArray", userModels);
+//        return "user/log/list";
+//    }
 
 
     /**

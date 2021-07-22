@@ -40,15 +40,15 @@ public class LogBackController extends BaseServerController {
         NodeForward.requestDownload(getNode(), getRequest(), getResponse(), NodeUrl.Manage_Log_export);
     }
 
-    @RequestMapping(value = "logBack", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
-    @Feature(method = MethodFeature.LOG)
-    public String console(String id, String copyId) {
-        JSONObject jsonObject = NodeForward.requestData(getNode(), NodeUrl.Manage_Log_logBack, getRequest(), JSONObject.class);
-        setAttribute("data", jsonObject);
-        //
-        setAttribute("copyId", copyId);
-        return "node/manage/logBack";
-    }
+//    @RequestMapping(value = "logBack", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
+//    @Feature(method = MethodFeature.LOG)
+//    public String console(String id, String copyId) {
+//        JSONObject jsonObject = NodeForward.requestData(getNode(), NodeUrl.Manage_Log_logBack, getRequest(), JSONObject.class);
+//        setAttribute("data", jsonObject);
+//        //
+//        setAttribute("copyId", copyId);
+//        return "node/manage/logBack";
+//    }
 
     /**
      * @author Hotstrip

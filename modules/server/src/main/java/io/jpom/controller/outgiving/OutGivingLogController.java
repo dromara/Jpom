@@ -46,20 +46,20 @@ public class OutGivingLogController extends BaseServerController {
     @Resource
     private DbOutGivingLogService dbOutGivingLogService;
 
-    @RequestMapping(value = "log.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
-    @Feature(method = MethodFeature.LOG)
-    public String list() throws IOException {
-        // 所有节点
-        List<NodeModel> nodeModels = nodeService.list();
-        setAttribute("nodeArray", nodeModels);
-        //
-        List<OutGivingModel> outGivingModels = outGivingServer.list();
-        setAttribute("outGivingModels", outGivingModels);
-        //
-        JSONArray status = BaseEnum.toJSONArray(OutGivingNodeProject.Status.class);
-        setAttribute("status", status);
-        return "outgiving/loglist";
-    }
+//    @RequestMapping(value = "log.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
+//    @Feature(method = MethodFeature.LOG)
+//    public String list() throws IOException {
+//        // 所有节点
+//        List<NodeModel> nodeModels = nodeService.list();
+//        setAttribute("nodeArray", nodeModels);
+//        //
+//        List<OutGivingModel> outGivingModels = outGivingServer.list();
+//        setAttribute("outGivingModels", outGivingModels);
+//        //
+//        JSONArray status = BaseEnum.toJSONArray(OutGivingNodeProject.Status.class);
+//        setAttribute("status", status);
+//        return "outgiving/loglist";
+//    }
 
     @RequestMapping(value = "log_list_data.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody

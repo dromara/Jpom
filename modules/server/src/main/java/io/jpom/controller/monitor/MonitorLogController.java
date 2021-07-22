@@ -43,23 +43,23 @@ public class MonitorLogController extends BaseServerController {
     @Resource
     private DbMonitorNotifyLogService dbMonitorNotifyLogService;
 
-    /**
-     * 展示监控页面
-     *
-     * @return page
-     */
-    @RequestMapping(value = "log.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
-    @Feature(method = MethodFeature.LOG)
-    public String list() {
-        // 所有节点
-        List<NodeModel> nodeModels = nodeService.list();
-        setAttribute("nodeArray", nodeModels);
-
-        //通知方式
-        JSONArray notifyTypeArray = BaseEnum.toJSONArray(MonitorModel.NotifyType.class);
-        setAttribute("notifyTypeArray", notifyTypeArray);
-        return "monitor/loglist";
-    }
+//    /**
+//     * 展示监控页面
+//     *
+//     * @return page
+//     */
+//    @RequestMapping(value = "log.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
+//    @Feature(method = MethodFeature.LOG)
+//    public String list() {
+//        // 所有节点
+//        List<NodeModel> nodeModels = nodeService.list();
+//        setAttribute("nodeArray", nodeModels);
+//
+//        //通知方式
+//        JSONArray notifyTypeArray = BaseEnum.toJSONArray(MonitorModel.NotifyType.class);
+//        setAttribute("notifyTypeArray", notifyTypeArray);
+//        return "monitor/loglist";
+//    }
 
     /**
      * 展示用户列表

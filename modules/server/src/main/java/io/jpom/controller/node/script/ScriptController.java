@@ -35,13 +35,13 @@ public class ScriptController extends BaseServerController {
     @Resource
     private ScriptServer scriptServer;
 
-    @RequestMapping(value = "list.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
-    @Feature(method = MethodFeature.LIST)
-    public String list() {
-        JSONArray jsonArray = scriptServer.listToArray(getNode());
-        setAttribute("array", jsonArray);
-        return "node/script/list";
-    }
+//    @RequestMapping(value = "list.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
+//    @Feature(method = MethodFeature.LIST)
+//    public String list() {
+//        JSONArray jsonArray = scriptServer.listToArray(getNode());
+//        setAttribute("array", jsonArray);
+//        return "node/script/list";
+//    }
 
     /**
      * @Hotstrip
@@ -55,19 +55,19 @@ public class ScriptController extends BaseServerController {
         return JsonMessage.getString(200, "success", jsonArray);
     }
 
-    @RequestMapping(value = "item.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
-    @Feature(method = MethodFeature.EDIT)
-    public String item(String id) {
-        setAttribute("type", "add");
-        if (StrUtil.isNotEmpty(id)) {
-            JSONObject jsonObject = NodeForward.requestData(getNode(), NodeUrl.Script_Item, getRequest(), JSONObject.class);
-            if (jsonObject != null) {
-                setAttribute("type", "edit");
-                setAttribute("item", jsonObject);
-            }
-        }
-        return "node/script/edit";
-    }
+//    @RequestMapping(value = "item.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
+//    @Feature(method = MethodFeature.EDIT)
+//    public String item(String id) {
+//        setAttribute("type", "add");
+//        if (StrUtil.isNotEmpty(id)) {
+//            JSONObject jsonObject = NodeForward.requestData(getNode(), NodeUrl.Script_Item, getRequest(), JSONObject.class);
+//            if (jsonObject != null) {
+//                setAttribute("type", "edit");
+//                setAttribute("item", jsonObject);
+//            }
+//        }
+//        return "node/script/edit";
+//    }
 
     /**
      * 保存脚本
@@ -102,10 +102,10 @@ public class ScriptController extends BaseServerController {
     public String upload() {
         return NodeForward.requestMultipart(getNode(), getMultiRequest(), NodeUrl.Script_Upload).toString();
     }
-
-    @RequestMapping(value = "console.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
-    @Feature(method = MethodFeature.EXECUTE)
-    public String console(String id) {
-        return "node/script/console";
-    }
+//
+//    @RequestMapping(value = "console.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
+//    @Feature(method = MethodFeature.EXECUTE)
+//    public String console(String id) {
+//        return "node/script/console";
+//    }
 }

@@ -61,16 +61,16 @@ public class BuildListController extends BaseServerController {
     @Resource
     private SshService sshService;
 
-    @RequestMapping(value = "list.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
-    @Feature(method = MethodFeature.LIST)
-    public String list() {
-        //通知方式
-        JSONArray jsonArray = BaseEnum.toJSONArray(BuildModel.Status.class);
-        setAttribute("statusArray", jsonArray);
-        Set<String> set = buildService.listGroup();
-        setAttribute("groupArray", set);
-        return "build/list";
-    }
+//    @RequestMapping(value = "list.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
+//    @Feature(method = MethodFeature.LIST)
+//    public String list() {
+//        //通知方式
+//        JSONArray jsonArray = BaseEnum.toJSONArray(BuildModel.Status.class);
+//        setAttribute("statusArray", jsonArray);
+//        Set<String> set = buildService.listGroup();
+//        setAttribute("groupArray", set);
+//        return "build/list";
+//    }
 
     /**
      * @return
@@ -251,52 +251,52 @@ public class BuildListController extends BaseServerController {
         return null;
     }
 
-    @RequestMapping(value = "edit.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
-    @Feature(method = MethodFeature.EDIT)
-    public String edit(String id) {
-        BuildModel buildModel = null;
-        if (StrUtil.isNotEmpty(id)) {
-            buildModel = buildService.getItem(id);
-        }
-        setAttribute("model", buildModel);
-        //
-        JSONArray releaseMethods = BaseEnum.toJSONArray(BuildModel.ReleaseMethod.class);
-        // 获取ssh 相关信息
-        List<SshModel> list = sshService.list();
-        if (list == null || list.isEmpty()) {
-            releaseMethods = releaseMethods.stream().filter(o -> {
-                JSONObject jsonObject = (JSONObject) o;
-                return jsonObject.getIntValue("code") != BuildModel.ReleaseMethod.Ssh.getCode();
-            }).collect(Collectors.toCollection(JSONArray::new));
-
-        } else {
-            //
-            setAttribute("sshArray", list);
-        }
-        setAttribute("releaseMethods", releaseMethods);
-        Set<String> set = buildService.listGroup();
-        if (set.isEmpty()) {
-            set.add("默认");
-        }
-        setAttribute("groupArray", set);
-        //
-        List<OutGivingModel> outGivingModels = outGivingServer.list();
-        setAttribute("outGivingModels", outGivingModels);
-
-        //
-        List<NodeModel> nodeModels = nodeService.listAndProject();
-        setAttribute("nodeModels", nodeModels);
-        //
-        JSONArray jsonArray = BaseEnum.toJSONArray(AfterOpt.class);
-        setAttribute("afterOpt", jsonArray);
-        //
-        JSONArray outAfterOpt = BaseEnum.toJSONArray(AfterOpt.class);
-        setAttribute("outAfterOpt", outAfterOpt);
-        //
-        JSONArray repoTypes = BaseEnum.toJSONArray(BuildModel.RepoType.class);
-        setAttribute("repoTypes", repoTypes);
-        return "build/edit";
-    }
+//    @RequestMapping(value = "edit.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
+//    @Feature(method = MethodFeature.EDIT)
+//    public String edit(String id) {
+//        BuildModel buildModel = null;
+//        if (StrUtil.isNotEmpty(id)) {
+//            buildModel = buildService.getItem(id);
+//        }
+//        setAttribute("model", buildModel);
+//        //
+//        JSONArray releaseMethods = BaseEnum.toJSONArray(BuildModel.ReleaseMethod.class);
+//        // 获取ssh 相关信息
+//        List<SshModel> list = sshService.list();
+//        if (list == null || list.isEmpty()) {
+//            releaseMethods = releaseMethods.stream().filter(o -> {
+//                JSONObject jsonObject = (JSONObject) o;
+//                return jsonObject.getIntValue("code") != BuildModel.ReleaseMethod.Ssh.getCode();
+//            }).collect(Collectors.toCollection(JSONArray::new));
+//
+//        } else {
+//            //
+//            setAttribute("sshArray", list);
+//        }
+//        setAttribute("releaseMethods", releaseMethods);
+//        Set<String> set = buildService.listGroup();
+//        if (set.isEmpty()) {
+//            set.add("默认");
+//        }
+//        setAttribute("groupArray", set);
+//        //
+//        List<OutGivingModel> outGivingModels = outGivingServer.list();
+//        setAttribute("outGivingModels", outGivingModels);
+//
+//        //
+//        List<NodeModel> nodeModels = nodeService.listAndProject();
+//        setAttribute("nodeModels", nodeModels);
+//        //
+//        JSONArray jsonArray = BaseEnum.toJSONArray(AfterOpt.class);
+//        setAttribute("afterOpt", jsonArray);
+//        //
+//        JSONArray outAfterOpt = BaseEnum.toJSONArray(AfterOpt.class);
+//        setAttribute("outAfterOpt", outAfterOpt);
+//        //
+//        JSONArray repoTypes = BaseEnum.toJSONArray(BuildModel.RepoType.class);
+//        setAttribute("repoTypes", repoTypes);
+//        return "build/edit";
+//    }
 
     @RequestMapping(value = "branchList.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody

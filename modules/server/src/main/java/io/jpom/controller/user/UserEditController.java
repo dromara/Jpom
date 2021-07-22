@@ -41,25 +41,25 @@ public class UserEditController extends BaseServerController {
     @Resource
     private RoleService roleService;
 
-    @RequestMapping(value = "edit", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
-    @Feature(method = MethodFeature.EDIT)
-    public String edit(String id) {
-        UserModel item = userService.getItem(id);
-        if (item != null) {
-            item.setPassword(null);
-            setAttribute("userItem", item);
-        }
-        List<RoleModel> list = roleService.list();
-        JSONArray roles = new JSONArray();
-        list.forEach(userModel -> {
-            JSONObject jsonObject = new JSONObject();
-            jsonObject.put("title", userModel.getName());
-            jsonObject.put("value", userModel.getId());
-            roles.add(jsonObject);
-        });
-        setAttribute("roles", roles);
-        return "user/edit";
-    }
+//    @RequestMapping(value = "edit", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
+//    @Feature(method = MethodFeature.EDIT)
+//    public String edit(String id) {
+//        UserModel item = userService.getItem(id);
+//        if (item != null) {
+//            item.setPassword(null);
+//            setAttribute("userItem", item);
+//        }
+//        List<RoleModel> list = roleService.list();
+//        JSONArray roles = new JSONArray();
+//        list.forEach(userModel -> {
+//            JSONObject jsonObject = new JSONObject();
+//            jsonObject.put("title", userModel.getName());
+//            jsonObject.put("value", userModel.getId());
+//            roles.add(jsonObject);
+//        });
+//        setAttribute("roles", roles);
+//        return "user/edit";
+//    }
 
     /**
      * 新增用户

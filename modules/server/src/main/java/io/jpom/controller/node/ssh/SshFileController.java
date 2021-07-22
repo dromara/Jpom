@@ -50,23 +50,23 @@ public class SshFileController extends BaseServerController {
     @Resource
     private SshService sshService;
 
-    @RequestMapping(value = "file.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
-    @Feature(method = MethodFeature.FILE)
-    public String file(String id) {
-        SshModel sshModel = sshService.getItem(id);
-        if (sshModel != null) {
-            List<String> fileDirs = sshModel.getFileDirs();
-            if (fileDirs != null && !fileDirs.isEmpty()) {
-                try {
-                    JSONArray jsonArray = listDir(sshModel, fileDirs);
-                    setAttribute("dirs", jsonArray);
-                } catch (Exception e) {
-                    DefaultSystemLog.getLog().error("sftp错误", e);
-                }
-            }
-        }
-        return "node/ssh/file";
-    }
+//    @RequestMapping(value = "file.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
+//    @Feature(method = MethodFeature.FILE)
+//    public String file(String id) {
+//        SshModel sshModel = sshService.getItem(id);
+//        if (sshModel != null) {
+//            List<String> fileDirs = sshModel.getFileDirs();
+//            if (fileDirs != null && !fileDirs.isEmpty()) {
+//                try {
+//                    JSONArray jsonArray = listDir(sshModel, fileDirs);
+//                    setAttribute("dirs", jsonArray);
+//                } catch (Exception e) {
+//                    DefaultSystemLog.getLog().error("sftp错误", e);
+//                }
+//            }
+//        }
+//        return "node/ssh/file";
+//    }
 
 
     @RequestMapping(value = "download.html", method = RequestMethod.GET)

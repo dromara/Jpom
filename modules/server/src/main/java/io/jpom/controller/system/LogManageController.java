@@ -39,11 +39,11 @@ import java.util.concurrent.TimeUnit;
 @Feature(cls = ClassFeature.SYSTEM)
 public class LogManageController extends BaseServerController {
 
-    @RequestMapping(value = "log.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
-    @Feature(method = MethodFeature.LOG)
-    public String log() {
-        return "system/log";
-    }
+//    @RequestMapping(value = "log.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
+//    @Feature(method = MethodFeature.LOG)
+//    public String log() {
+//        return "system/log";
+//    }
 
     @RequestMapping(value = "log_data.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody

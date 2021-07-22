@@ -33,13 +33,13 @@ public class CertificateController extends BaseServerController {
     @Resource
     private WhitelistDirectoryService whitelistDirectoryService;
 
-    @RequestMapping(value = "/list.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
-    @Feature(method = MethodFeature.LIST)
-    public String certificate() {
-        List<String> jsonArray = whitelistDirectoryService.getCertificateDirectory(getNode());
-        setAttribute("certificate", jsonArray);
-        return "node/system/certificate";
-    }
+//    @RequestMapping(value = "/list.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
+//    @Feature(method = MethodFeature.LIST)
+//    public String certificate() {
+//        List<String> jsonArray = whitelistDirectoryService.getCertificateDirectory(getNode());
+//        setAttribute("certificate", jsonArray);
+//        return "node/system/certificate";
+//    }
 
     /**
      * @author Hotstrip

@@ -38,19 +38,19 @@ public class TomcatManageController extends BaseServerController {
     @Resource
     private TomcatService tomcatService;
 
-    /**
-     * 查询tomcat列表
-     *
-     * @return tomcat列表
-     */
-    @RequestMapping(value = "tomcatManage", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
-    @Feature(method = MethodFeature.LIST)
-    public String tomcatManage() {
-        // 查询tomcat列表
-        JSONArray tomcatInfos = tomcatService.getTomcatList(getNode());
-        setAttribute("array", tomcatInfos);
-        return "node/tomcat/list";
-    }
+//    /**
+//     * 查询tomcat列表
+//     *
+//     * @return tomcat列表
+//     */
+//    @RequestMapping(value = "tomcatManage", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
+//    @Feature(method = MethodFeature.LIST)
+//    public String tomcatManage() {
+//        // 查询tomcat列表
+//        JSONArray tomcatInfos = tomcatService.getTomcatList(getNode());
+//        setAttribute("array", tomcatInfos);
+//        return "node/tomcat/list";
+//    }
 
     /**
      * @Hotstrip
@@ -70,7 +70,7 @@ public class TomcatManageController extends BaseServerController {
      * @param id id
      * @return tomcat的项目信息
      */
-    @RequestMapping(value = "getTomcatProject", method = RequestMethod.POST, produces = MediaType.TEXT_HTML_VALUE)
+    @RequestMapping(value = "getTomcatProject", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     @Feature(method = MethodFeature.LIST)
     public String getTomcatProject(String id) {
@@ -84,58 +84,58 @@ public class TomcatManageController extends BaseServerController {
      *
      * @return tomcat运行状态
      */
-    @RequestMapping(value = "getTomcatStatus", method = RequestMethod.POST, produces = MediaType.TEXT_HTML_VALUE)
+    @RequestMapping(value = "getTomcatStatus", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     @Feature(method = MethodFeature.LIST)
     public String getStatus() {
         return tomcatService.getTomcatStatus(getNode(), getRequest());
     }
 
-    /**
-     * 获取编辑omcat页面
-     *
-     * @param id tomcat的id
-     * @return 编辑tomcat信息页面
-     */
-    @RequestMapping(value = "edit.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
-    @Feature(method = MethodFeature.EDIT)
-    public String edit(String id) {
-        if (StrUtil.isNotEmpty(id)) {
-            JSONObject tomcatInfo = tomcatService.getTomcatInfo(getNode(), id);
-            setAttribute("item", tomcatInfo);
-        }
-        return "node/tomcat/edit";
-    }
+//    /**
+//     * 获取编辑omcat页面
+//     *
+//     * @param id tomcat的id
+//     * @return 编辑tomcat信息页面
+//     */
+//    @RequestMapping(value = "edit.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
+//    @Feature(method = MethodFeature.EDIT)
+//    public String edit(String id) {
+//        if (StrUtil.isNotEmpty(id)) {
+//            JSONObject tomcatInfo = tomcatService.getTomcatInfo(getNode(), id);
+//            setAttribute("item", tomcatInfo);
+//        }
+//        return "node/tomcat/edit";
+//    }
 
-    /**
-     * 新增项目
-     *
-     * @param id tomcat id
-     * @return 操作结果
-     */
-    @RequestMapping(value = "addProject.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
-    @Deprecated
-    public String addProject(String id) {
-        if (StrUtil.isNotEmpty(id)) {
-            JSONObject tomcatInfo = tomcatService.getTomcatInfo(getNode(), id);
-            setAttribute("item", tomcatInfo);
-        }
-        return "node/tomcat/addProject";
-    }
+//    /**
+//     * 新增项目
+//     *
+//     * @param id tomcat id
+//     * @return 操作结果
+//     */
+//    @RequestMapping(value = "addProject.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
+//    @Deprecated
+//    public String addProject(String id) {
+//        if (StrUtil.isNotEmpty(id)) {
+//            JSONObject tomcatInfo = tomcatService.getTomcatInfo(getNode(), id);
+//            setAttribute("item", tomcatInfo);
+//        }
+//        return "node/tomcat/addProject";
+//    }
 
-    /**
-     * tomcat项目管理
-     *
-     * @param id   tomcat id
-     * @param path 项目路径
-     * @return 项目管理面
-     */
-    @RequestMapping(value = "manage", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
-    public String manage(String id, String path) {
-        setAttribute("id", id);
-        setAttribute("project", path);
-        return "node/tomcat/manage";
-    }
+//    /**
+//     * tomcat项目管理
+//     *
+//     * @param id   tomcat id
+//     * @param path 项目路径
+//     * @return 项目管理面
+//     */
+//    @RequestMapping(value = "manage", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
+//    public String manage(String id, String path) {
+//        setAttribute("id", id);
+//        setAttribute("project", path);
+//        return "node/tomcat/manage";
+//    }
 
     /**
      * 保存Tomcat信息

@@ -21,18 +21,18 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @Feature(cls = ClassFeature.TOMCAT)
 public class TomcatLogController extends BaseServerController {
 
-    /**
-     * tomcat 日志管理
-     *
-     * @param id tomcat id
-     * @return 项目管理面
-     */
-    @RequestMapping(value = "console", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
-    @Feature(method = MethodFeature.LOG)
-    public String console(String id) {
-        setAttribute("id", id);
-        return "node/tomcat/console";
-    }
+//    /**
+//     * tomcat 日志管理
+//     *
+//     * @param id tomcat id
+//     * @return 项目管理面
+//     */
+//    @RequestMapping(value = "console", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
+//    @Feature(method = MethodFeature.LOG)
+//    public String console(String id) {
+//        setAttribute("id", id);
+//        return "node/tomcat/console";
+//    }
 
     @RequestMapping(value = "getLogList", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody

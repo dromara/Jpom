@@ -43,21 +43,21 @@ public class UserRoleListController extends BaseServerController {
     @Resource
     private UserService userService;
 
-    @RequestMapping(value = "list.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
-    @Feature(method = MethodFeature.LIST)
-    public String list() {
-        return "user/role/list";
-    }
+//    @RequestMapping(value = "list.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
+//    @Feature(method = MethodFeature.LIST)
+//    public String list() {
+//        return "user/role/list";
+//    }
 
-    @RequestMapping(value = "edit.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
-    @Feature(method = MethodFeature.EDIT)
-    public String edit(String id) {
-        if (StrUtil.isNotEmpty(id)) {
-            RoleModel item = roleService.getItem(id);
-            setAttribute("item", item);
-        }
-        return "user/role/edit";
-    }
+//    @RequestMapping(value = "edit.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
+//    @Feature(method = MethodFeature.EDIT)
+//    public String edit(String id) {
+//        if (StrUtil.isNotEmpty(id)) {
+//            RoleModel item = roleService.getItem(id);
+//            setAttribute("item", item);
+//        }
+//        return "user/role/edit";
+//    }
 
 
     /**

@@ -58,23 +58,23 @@ public class NodeIndexController extends BaseServerController {
     @Resource
     private AgentFileService agentFileService;
 
-    @RequestMapping(value = "list.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
-    @Feature(method = MethodFeature.LIST)
-    public String list(String group) {
-        List<NodeModel> nodeModels = this.listByGroup(group);
-        setAttribute("array", nodeModels);
-        // 获取所有的ssh 名称
-        JSONObject sshName = new JSONObject();
-        List<SshModel> sshModels = sshService.list();
-        if (sshModels != null) {
-            sshModels.forEach(sshModel -> sshName.put(sshModel.getId(), sshModel.getName()));
-        }
-        setAttribute("sshName", sshName);
-        // group
-        HashSet<String> allGroup = nodeService.getAllGroup();
-        setAttribute("groups", allGroup);
-        return "node/list";
-    }
+//    @RequestMapping(value = "list.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
+//    @Feature(method = MethodFeature.LIST)
+//    public String list(String group) {
+//        List<NodeModel> nodeModels = this.listByGroup(group);
+//        setAttribute("array", nodeModels);
+//        // 获取所有的ssh 名称
+//        JSONObject sshName = new JSONObject();
+//        List<SshModel> sshModels = sshService.list();
+//        if (sshModels != null) {
+//            sshModels.forEach(sshModel -> sshName.put(sshModel.getId(), sshModel.getName()));
+//        }
+//        setAttribute("sshName", sshName);
+//        // group
+//        HashSet<String> allGroup = nodeService.getAllGroup();
+//        setAttribute("groups", allGroup);
+//        return "node/list";
+//    }
 
     private List<NodeModel> listByGroup(String group) {
         List<NodeModel> nodeModels = nodeService.list();
@@ -109,25 +109,25 @@ public class NodeIndexController extends BaseServerController {
     }
 
 
-    @RequestMapping(value = "index.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
-    public String index() {
-        List<NodeModel> nodeModels = nodeService.list();
-        setAttribute("array", nodeModels);
-        //
-        JsonMessage<JpomManifest> jsonMessage = NodeForward.request(getNode(), getRequest(), NodeUrl.Info);
-        JpomManifest jpomManifest = jsonMessage.getData(JpomManifest.class);
-        setAttribute("jpomManifest", jpomManifest);
-        setAttribute("installed", jsonMessage.getCode() == 200);
-        UserModel userModel = getUser();
-        // 版本提示
-        if (!JpomManifest.getInstance().isDebug() && jpomManifest != null && userModel.isSystemUser()) {
-            JpomManifest thisInfo = JpomManifest.getInstance();
-            if (!StrUtil.equals(jpomManifest.getVersion(), thisInfo.getVersion())) {
-                setAttribute("tipUpdate", true);
-            }
-        }
-        return "node/index";
-    }
+//    @RequestMapping(value = "index.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
+//    public String index() {
+//        List<NodeModel> nodeModels = nodeService.list();
+//        setAttribute("array", nodeModels);
+//        //
+//        JsonMessage<JpomManifest> jsonMessage = NodeForward.request(getNode(), getRequest(), NodeUrl.Info);
+//        JpomManifest jpomManifest = jsonMessage.getData(JpomManifest.class);
+//        setAttribute("jpomManifest", jpomManifest);
+//        setAttribute("installed", jsonMessage.getCode() == 200);
+//        UserModel userModel = getUser();
+//        // 版本提示
+//        if (!JpomManifest.getInstance().isDebug() && jpomManifest != null && userModel.isSystemUser()) {
+//            JpomManifest thisInfo = JpomManifest.getInstance();
+//            if (!StrUtil.equals(jpomManifest.getVersion(), thisInfo.getVersion())) {
+//                setAttribute("tipUpdate", true);
+//            }
+//        }
+//        return "node/index";
+//    }
 
     @RequestMapping(value = "node_status", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody

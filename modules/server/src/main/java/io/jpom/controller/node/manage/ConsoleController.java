@@ -27,22 +27,22 @@ public class ConsoleController extends BaseServerController {
     @Resource
     private ProjectInfoService projectInfoService;
 
-    /**
-     * 管理项目
-     *
-     * @param id id
-     * @return page
-     */
-    @RequestMapping(value = "console", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
-    @Feature(method = MethodFeature.EDIT)
-    public String console(String id, String copyId) {
-        JSONObject projectInfoModel = projectInfoService.getItem(getNode(), id);
-        if (projectInfoModel != null) {
-            setAttribute("projectInfo", projectInfoModel);
-            JSONObject logSize = projectInfoService.getLogSize(getNode(), id, copyId);
-            setAttribute("logSize", logSize);
-            setAttribute("manager", true);
-        }
-        return "node/manage/console";
-    }
+//    /**
+//     * 管理项目
+//     *
+//     * @param id id
+//     * @return page
+//     */
+//    @RequestMapping(value = "console", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
+//    @Feature(method = MethodFeature.EDIT)
+//    public String console(String id, String copyId) {
+//        JSONObject projectInfoModel = projectInfoService.getItem(getNode(), id);
+//        if (projectInfoModel != null) {
+//            setAttribute("projectInfo", projectInfoModel);
+//            JSONObject logSize = projectInfoService.getLogSize(getNode(), id, copyId);
+//            setAttribute("logSize", logSize);
+//            setAttribute("manager", true);
+//        }
+//        return "node/manage/console";
+//    }
 }

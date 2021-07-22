@@ -38,19 +38,19 @@ public class OutGivingWhitelistController extends BaseServerController {
     private ServerWhitelistServer serverWhitelistServer;
 
 
-    @RequestMapping(value = "whitelistDirectory.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
-    @SystemPermission
-    public String whitelistDirectory() {
-        //
-        UserModel userModel = getUser();
-        ServerWhitelist serverWhitelist = serverWhitelistServer.getWhitelist();
-        if (serverWhitelist != null && userModel.isSystemUser()) {
-            List<String> whiteList = serverWhitelist.getOutGiving();
-            String strWhiteList = AgentWhitelist.convertToLine(whiteList);
-            setAttribute("whiteList", strWhiteList);
-        }
-        return "outgiving/whitelistDirectory";
-    }
+//    @RequestMapping(value = "whitelistDirectory.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
+//    @SystemPermission
+//    public String whitelistDirectory() {
+//        //
+//        UserModel userModel = getUser();
+//        ServerWhitelist serverWhitelist = serverWhitelistServer.getWhitelist();
+//        if (serverWhitelist != null && userModel.isSystemUser()) {
+//            List<String> whiteList = serverWhitelist.getOutGiving();
+//            String strWhiteList = AgentWhitelist.convertToLine(whiteList);
+//            setAttribute("whiteList", strWhiteList);
+//        }
+//        return "outgiving/whitelistDirectory";
+//    }
 
     /**
      * @return

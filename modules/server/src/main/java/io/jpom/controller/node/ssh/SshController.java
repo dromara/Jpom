@@ -45,11 +45,11 @@ public class SshController extends BaseServerController {
     @Resource
     private SshService sshService;
 
-    @RequestMapping(value = "list.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
-    @Feature(method = MethodFeature.LIST)
-    public String list() {
-        return "node/ssh/list";
-    }
+//    @RequestMapping(value = "list.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
+//    @Feature(method = MethodFeature.LIST)
+//    public String list() {
+//        return "node/ssh/list";
+//    }
 
     @RequestMapping(value = "list_data.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
@@ -155,34 +155,34 @@ public class SshController extends BaseServerController {
         return JsonMessage.getString(200, "操作成功");
     }
 
-    @RequestMapping(value = "edit.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
-    @Feature(method = MethodFeature.EDIT)
-    public String edit(String id) {
-        if (StrUtil.isNotEmpty(id)) {
-            SshModel sshModel = sshService.getItem(id);
-            if (sshModel != null) {
-                setAttribute("item", sshModel);
-                //
-                String fileDirs = AgentWhitelist.convertToLine(sshModel.getFileDirs());
-                setAttribute("fileDirs", fileDirs);
-            }
-        }
-        Collection<Charset> charsets = Charset.availableCharsets().values();
-        Collection<Charset> collect = charsets.stream().filter(charset -> !StrUtil.startWithAny(charset.name(), "x", "w", "IBM")).collect(Collectors.toList());
-        setAttribute("charsets", collect);
-        //
-        SshModel.ConnectType[] values = SshModel.ConnectType.values();
-        setAttribute("connectTypes", values);
-        return "node/ssh/edit";
-    }
+//    @RequestMapping(value = "edit.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
+//    @Feature(method = MethodFeature.EDIT)
+//    public String edit(String id) {
+//        if (StrUtil.isNotEmpty(id)) {
+//            SshModel sshModel = sshService.getItem(id);
+//            if (sshModel != null) {
+//                setAttribute("item", sshModel);
+//                //
+//                String fileDirs = AgentWhitelist.convertToLine(sshModel.getFileDirs());
+//                setAttribute("fileDirs", fileDirs);
+//            }
+//        }
+//        Collection<Charset> charsets = Charset.availableCharsets().values();
+//        Collection<Charset> collect = charsets.stream().filter(charset -> !StrUtil.startWithAny(charset.name(), "x", "w", "IBM")).collect(Collectors.toList());
+//        setAttribute("charsets", collect);
+//        //
+//        SshModel.ConnectType[] values = SshModel.ConnectType.values();
+//        setAttribute("connectTypes", values);
+//        return "node/ssh/edit";
+//    }
 
-    @RequestMapping(value = "terminal.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
-    @Feature(method = MethodFeature.TERMINAL)
-    public String terminal(String id) {
-        SshModel sshModel = sshService.getItem(id);
-        setAttribute("item", sshModel);
-        return "node/ssh/terminal";
-    }
+//    @RequestMapping(value = "terminal.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
+//    @Feature(method = MethodFeature.TERMINAL)
+//    public String terminal(String id) {
+//        SshModel sshModel = sshService.getItem(id);
+//        setAttribute("item", sshModel);
+//        return "node/ssh/terminal";
+//    }
 
     /**
      * 根据 nodeId 查询 SSH 列表

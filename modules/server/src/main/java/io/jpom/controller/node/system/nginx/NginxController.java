@@ -34,11 +34,11 @@ public class NginxController extends BaseServerController {
     private WhitelistDirectoryService whitelistDirectoryService;
 
 
-    @RequestMapping(value = "list.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
-    @Feature(method = MethodFeature.LIST)
-    public String ngx() {
-        return "node/system/nginx";
-    }
+//    @RequestMapping(value = "list.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
+//    @Feature(method = MethodFeature.LIST)
+//    public String ngx() {
+//        return "node/system/nginx";
+//    }
 
     /**
      * 配置列表
@@ -65,16 +65,16 @@ public class NginxController extends BaseServerController {
     }
 
 
-    @RequestMapping(value = "item.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
-    @Feature(method = MethodFeature.EDIT)
-    public String setting(String type) {
-        List<String> ngxDirectory = whitelistDirectoryService.getNgxDirectory(getNode());
-        setAttribute("nginx", ngxDirectory);
-        setAttribute("type", type);
-        JSONObject data = NodeForward.requestData(getNode(), NodeUrl.System_Nginx_item_data, getRequest(), JSONObject.class);
-        setAttribute("data", data);
-        return "node/system/nginxSetting";
-    }
+//    @RequestMapping(value = "item.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
+//    @Feature(method = MethodFeature.EDIT)
+//    public String setting(String type) {
+//        List<String> ngxDirectory = whitelistDirectoryService.getNgxDirectory(getNode());
+//        setAttribute("nginx", ngxDirectory);
+//        setAttribute("type", type);
+//        JSONObject data = NodeForward.requestData(getNode(), NodeUrl.System_Nginx_item_data, getRequest(), JSONObject.class);
+//        setAttribute("data", data);
+//        return "node/system/nginxSetting";
+//    }
 
     /**
      * @author Hotstrip

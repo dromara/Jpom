@@ -35,23 +35,23 @@ public class ProjectFileControl extends BaseServerController {
 
     @Value("${fileFormat}")
     private String fileFormat;
-    /**
-     * 文件管理页面
-     *
-     * @param id 项目id
-     * @return page
-     */
-    @RequestMapping(value = "list.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
-    @Feature(method = MethodFeature.FILE)
-    public String fileManage(String id) {
-        setAttribute("id", id);
-        JSONObject projectInfo = projectInfoService.getItem(getNode(), id);
-        String lib = projectInfo.getString("lib");
-        String whitelistDirectory = projectInfo.getString("whitelistDirectory");
-        lib = FileUtil.getAbsolutePath(FileUtil.file(whitelistDirectory, lib));
-        setAttribute("absLib", lib);
-        return "node/manage/filemanage";
-    }
+//    /**
+//     * 文件管理页面
+//     *
+//     * @param id 项目id
+//     * @return page
+//     */
+//    @RequestMapping(value = "list.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
+//    @Feature(method = MethodFeature.FILE)
+//    public String fileManage(String id) {
+//        setAttribute("id", id);
+//        JSONObject projectInfo = projectInfoService.getItem(getNode(), id);
+//        String lib = projectInfo.getString("lib");
+//        String whitelistDirectory = projectInfo.getString("whitelistDirectory");
+//        lib = FileUtil.getAbsolutePath(FileUtil.file(whitelistDirectory, lib));
+//        setAttribute("absLib", lib);
+//        return "node/manage/filemanage";
+//    }
 
     /**
      * 列出目录下的文件

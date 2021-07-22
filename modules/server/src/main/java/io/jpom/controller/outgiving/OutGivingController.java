@@ -48,17 +48,17 @@ public class OutGivingController extends BaseServerController {
     @Resource
     private BuildService buildService;
 
-    @RequestMapping(value = "list.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
-    @Feature(method = MethodFeature.LIST)
-    public String list() {
-        List<OutGivingModel> outGivingModels = outGivingServer.list();
-        setAttribute("array", outGivingModels);
-        // 节点数是否大于二
-        List<NodeModel> list = nodeService.list();
-        boolean trueNode = list != null && list.size() > 1;
-        setAttribute("trueNode", trueNode);
-        return "outgiving/list";
-    }
+//    @RequestMapping(value = "list.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
+//    @Feature(method = MethodFeature.LIST)
+//    public String list() {
+//        List<OutGivingModel> outGivingModels = outGivingServer.list();
+//        setAttribute("array", outGivingModels);
+//        // 节点数是否大于二
+//        List<NodeModel> list = nodeService.list();
+//        boolean trueNode = list != null && list.size() > 1;
+//        setAttribute("trueNode", trueNode);
+//        return "outgiving/list";
+//    }
 
     /**
      * @author Hotstrip
@@ -74,30 +74,30 @@ public class OutGivingController extends BaseServerController {
         return JsonMessage.getString(200, "success", list);
     }
 
-    @RequestMapping(value = "edit.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
-    @Feature(method = MethodFeature.EDIT)
-    public String edit(String id) {
-        setAttribute("type", "add");
-        if (StrUtil.isNotEmpty(id)) {
-            OutGivingModel outGivingModel = outGivingServer.getItem(id);
-            if (outGivingModel != null) {
-                setAttribute("item", outGivingModel);
-                setAttribute("type", "edit");
-            }
-        }
-        UserModel userModel = getUser();
-
-        List<NodeModel> nodeModels = nodeService.listAndProject();
-        setAttribute("nodeModels", nodeModels);
-
-        //
-        String reqId = nodeService.cacheNodeList(nodeModels);
-        setAttribute("reqId", reqId);
-
-        JSONArray afterOpt = BaseEnum.toJSONArray(AfterOpt.class);
-        setAttribute("afterOpt", afterOpt);
-        return "outgiving/edit";
-    }
+//    @RequestMapping(value = "edit.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
+//    @Feature(method = MethodFeature.EDIT)
+//    public String edit(String id) {
+//        setAttribute("type", "add");
+//        if (StrUtil.isNotEmpty(id)) {
+//            OutGivingModel outGivingModel = outGivingServer.getItem(id);
+//            if (outGivingModel != null) {
+//                setAttribute("item", outGivingModel);
+//                setAttribute("type", "edit");
+//            }
+//        }
+//        UserModel userModel = getUser();
+//
+//        List<NodeModel> nodeModels = nodeService.listAndProject();
+//        setAttribute("nodeModels", nodeModels);
+//
+//        //
+//        String reqId = nodeService.cacheNodeList(nodeModels);
+//        setAttribute("reqId", reqId);
+//
+//        JSONArray afterOpt = BaseEnum.toJSONArray(AfterOpt.class);
+//        setAttribute("afterOpt", afterOpt);
+//        return "outgiving/edit";
+//    }
 
     /**
      * @author Hotstrip

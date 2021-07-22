@@ -48,27 +48,27 @@ public class NodeEditController extends BaseServerController {
     @Resource
     private SshService sshService;
 
-    @RequestMapping(value = "edit.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
-    @Feature(method = MethodFeature.EDIT)
-    public String edit(String id) {
-        setAttribute("type", "add");
-        if (StrUtil.isNotEmpty(id)) {
-            NodeModel nodeModel = nodeService.getItem(id);
-            if (nodeModel != null) {
-                setAttribute("item", nodeModel);
-                setAttribute("type", "edit");
-            }
-        }
-        // group
-        HashSet<String> allGroup = nodeService.getAllGroup();
-        setAttribute("groups", allGroup);
-        JSONArray sshList = sshService.listSelect(id);
-        setAttribute("sshList", sshList);
-        //监控周期
-        JSONArray cycleArray = Cycle.getAllJSONArray();
-        setAttribute("cycleArray", cycleArray);
-        return "node/edit";
-    }
+//    @RequestMapping(value = "edit.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
+//    @Feature(method = MethodFeature.EDIT)
+//    public String edit(String id) {
+//        setAttribute("type", "add");
+//        if (StrUtil.isNotEmpty(id)) {
+//            NodeModel nodeModel = nodeService.getItem(id);
+//            if (nodeModel != null) {
+//                setAttribute("item", nodeModel);
+//                setAttribute("type", "edit");
+//            }
+//        }
+//        // group
+//        HashSet<String> allGroup = nodeService.getAllGroup();
+//        setAttribute("groups", allGroup);
+//        JSONArray sshList = sshService.listSelect(id);
+//        setAttribute("sshList", sshList);
+//        //监控周期
+//        JSONArray cycleArray = Cycle.getAllJSONArray();
+//        setAttribute("cycleArray", cycleArray);
+//        return "node/edit";
+//    }
 
     @RequestMapping(value = "save.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @OptLog(UserOperateLogV1.OptType.EditNode)

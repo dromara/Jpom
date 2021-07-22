@@ -106,18 +106,18 @@ public class OutGivingProjectController extends BaseServerController {
         return JsonMessage.getString(200, "", jsonArray);
     }
 
-
-    @RequestMapping(value = "addOutgiving", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
-    @Feature(method = MethodFeature.UPLOAD)
-    public String addOutgiving(String id) {
-
-        JSONArray jsonArray = BaseEnum.toJSONArray(AfterOpt.class);
-        setAttribute("afterOpt", jsonArray);
-        //
-        OutGivingModel outGivingModel = outGivingServer.getItem(id);
-        setAttribute("outGivingModel", outGivingModel);
-        return "outgiving/addOutgiving";
-    }
+//
+//    @RequestMapping(value = "addOutgiving", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
+//    @Feature(method = MethodFeature.UPLOAD)
+//    public String addOutgiving(String id) {
+//
+//        JSONArray jsonArray = BaseEnum.toJSONArray(AfterOpt.class);
+//        setAttribute("afterOpt", jsonArray);
+//        //
+//        OutGivingModel outGivingModel = outGivingServer.getItem(id);
+//        setAttribute("outGivingModel", outGivingModel);
+//        return "outgiving/addOutgiving";
+//    }
 
     /**
      * 节点分发文件

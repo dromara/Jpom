@@ -38,18 +38,18 @@ public class UserListController extends BaseServerController {
     @Resource
     private RoleService roleService;
 
-    /**
-     * 展示用户列表
-     *
-     * @return page
-     */
-    @RequestMapping(value = "list", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
-    @Feature(method = MethodFeature.LIST)
-    public String list() {
-        List<RoleModel> roleModels = roleService.list();
-        setAttribute("roleEmpty", roleModels == null || roleModels.isEmpty());
-        return "user/list";
-    }
+//    /**
+//     * 展示用户列表
+//     *
+//     * @return page
+//     */
+//    @RequestMapping(value = "list", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
+//    @Feature(method = MethodFeature.LIST)
+//    public String list() {
+//        List<RoleModel> roleModels = roleService.list();
+//        setAttribute("roleEmpty", roleModels == null || roleModels.isEmpty());
+//        return "user/list";
+//    }
 
 
     /**

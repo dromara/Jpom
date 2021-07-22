@@ -47,38 +47,38 @@ public class OutGivingProjectEditController extends BaseServerController {
     @Resource
     private OutGivingServer outGivingServer;
 
-    @RequestMapping(value = "editProject", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
-    @Feature(method = MethodFeature.EDIT)
-    public String editProject(String id) {
-        setAttribute("type", "add");
-        OutGivingModel outGivingModel;
-        if (StrUtil.isNotEmpty(id)) {
-            outGivingModel = outGivingServer.getItem(id);
-            if (outGivingModel != null) {
-                setAttribute("item", outGivingModel);
-                setAttribute("type", "edit");
-            }
-        }
-        // 运行模式
-        JSONArray runModes = (JSONArray) JSONArray.toJSON(RunMode.values());
-        runModes.remove(RunMode.File.name());
-        //
-        setAttribute("runModes", runModes);
-        //
-        JSONArray afterOpt = BaseEnum.toJSONArray(AfterOpt.class);
-        setAttribute("afterOpt", afterOpt);
-        // 权限
-        List<NodeModel> nodeModels = nodeService.list();
-        setAttribute("nodeModels", nodeModels);
-        //
-        String reqId = nodeService.cacheNodeList(nodeModels);
-        setAttribute("reqId", reqId);
-
-        // 白名单
-        List<String> jsonArray = serverWhitelistServer.getOutGiving();
-        setAttribute("whitelistDirectory", jsonArray);
-        return "outgiving/editProject";
-    }
+//    @RequestMapping(value = "editProject", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
+//    @Feature(method = MethodFeature.EDIT)
+//    public String editProject(String id) {
+//        setAttribute("type", "add");
+//        OutGivingModel outGivingModel;
+//        if (StrUtil.isNotEmpty(id)) {
+//            outGivingModel = outGivingServer.getItem(id);
+//            if (outGivingModel != null) {
+//                setAttribute("item", outGivingModel);
+//                setAttribute("type", "edit");
+//            }
+//        }
+//        // 运行模式
+//        JSONArray runModes = (JSONArray) JSONArray.toJSON(RunMode.values());
+//        runModes.remove(RunMode.File.name());
+//        //
+//        setAttribute("runModes", runModes);
+//        //
+//        JSONArray afterOpt = BaseEnum.toJSONArray(AfterOpt.class);
+//        setAttribute("afterOpt", afterOpt);
+//        // 权限
+//        List<NodeModel> nodeModels = nodeService.list();
+//        setAttribute("nodeModels", nodeModels);
+//        //
+//        String reqId = nodeService.cacheNodeList(nodeModels);
+//        setAttribute("reqId", reqId);
+//
+//        // 白名单
+//        List<String> jsonArray = serverWhitelistServer.getOutGiving();
+//        setAttribute("whitelistDirectory", jsonArray);
+//        return "outgiving/editProject";
+//    }
 
     /**
      * 保存节点分发项目

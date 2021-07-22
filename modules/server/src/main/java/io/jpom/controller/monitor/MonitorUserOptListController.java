@@ -46,55 +46,55 @@ public class MonitorUserOptListController extends BaseServerController {
     @Resource
     private UserService userService;
 
-    /**
-     * 展示监控页面
-     *
-     * @return page
-     */
-    @RequestMapping(value = "userOpt.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
-    @Feature(method = MethodFeature.LIST)
-    public String list() {
-        return "monitor/userOpt";
-    }
+//    /**
+//     * 展示监控页面
+//     *
+//     * @return page
+//     */
+//    @RequestMapping(value = "userOpt.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
+//    @Feature(method = MethodFeature.LIST)
+//    public String list() {
+//        return "monitor/userOpt";
+//    }
 
-    /**
-     * 修改监控
-     *
-     * @param id id
-     * @return json
-     */
-    @RequestMapping(value = "edit.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
-    @Feature(method = MethodFeature.EDIT)
-    public String edit(String id) {
-        MonitorUserOptModel monitorModel = null;
-        if (StrUtil.isNotEmpty(id)) {
-            monitorModel = monitorUserOptService.getItem(id);
-        }
-        setAttribute("model", monitorModel);
-        //
-        List<UserModel> list = userService.list(false);
-        JSONArray jsonArray = new JSONArray();
-        list.forEach(userModel -> {
-            JSONObject jsonObject = new JSONObject();
-            jsonObject.put("title", userModel.getName());
-            jsonObject.put("value", userModel.getId());
-            if (StrUtil.isEmpty(userModel.getEmail()) && StrUtil.isEmpty(userModel.getDingDing())) {
-                jsonObject.put("disabled", true);
-            }
-            jsonArray.add(jsonObject);
-        });
-        UserOperateLogV1.OptType[] values = UserOperateLogV1.OptType.values();
-        JSONArray jsonArrayOpt = new JSONArray();
-        for (UserOperateLogV1.OptType value : values) {
-            JSONObject jsonObject = new JSONObject();
-            jsonObject.put("title", value.getDesc());
-            jsonObject.put("value", value.name());
-            jsonArrayOpt.add(jsonObject);
-        }
-        setAttribute("opts", jsonArrayOpt);
-        setAttribute("userLists", jsonArray);
-        return "monitor/edit-user-opt";
-    }
+//    /**
+//     * 修改监控
+//     *
+//     * @param id id
+//     * @return json
+//     */
+//    @RequestMapping(value = "edit.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
+//    @Feature(method = MethodFeature.EDIT)
+//    public String edit(String id) {
+//        MonitorUserOptModel monitorModel = null;
+//        if (StrUtil.isNotEmpty(id)) {
+//            monitorModel = monitorUserOptService.getItem(id);
+//        }
+//        setAttribute("model", monitorModel);
+//        //
+//        List<UserModel> list = userService.list(false);
+//        JSONArray jsonArray = new JSONArray();
+//        list.forEach(userModel -> {
+//            JSONObject jsonObject = new JSONObject();
+//            jsonObject.put("title", userModel.getName());
+//            jsonObject.put("value", userModel.getId());
+//            if (StrUtil.isEmpty(userModel.getEmail()) && StrUtil.isEmpty(userModel.getDingDing())) {
+//                jsonObject.put("disabled", true);
+//            }
+//            jsonArray.add(jsonObject);
+//        });
+//        UserOperateLogV1.OptType[] values = UserOperateLogV1.OptType.values();
+//        JSONArray jsonArrayOpt = new JSONArray();
+//        for (UserOperateLogV1.OptType value : values) {
+//            JSONObject jsonObject = new JSONObject();
+//            jsonObject.put("title", value.getDesc());
+//            jsonObject.put("value", value.name());
+//            jsonArrayOpt.add(jsonObject);
+//        }
+//        setAttribute("opts", jsonArrayOpt);
+//        setAttribute("userLists", jsonArray);
+//        return "monitor/edit-user-opt";
+//    }
 
     @RequestMapping(value = "list_data", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody

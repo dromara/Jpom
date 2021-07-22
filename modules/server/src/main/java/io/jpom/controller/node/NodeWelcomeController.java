@@ -66,22 +66,22 @@ public class NodeWelcomeController extends BaseServerController {
         return millis;
     }
 
-    @RequestMapping(value = "welcome", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
-    public String welcome() {
-        Cycle cycle = getCycle();
-        long millis = getCycleMillis();
-        if (cycle != null && cycle != Cycle.none) {
-            //
-            setAttribute("monitorCycle", true);
-        }
-        setAttribute("cycleTime", millis);
-        return "node/welcome";
-    }
+//    @RequestMapping(value = "welcome", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
+//    public String welcome() {
+//        Cycle cycle = getCycle();
+//        long millis = getCycleMillis();
+//        if (cycle != null && cycle != Cycle.none) {
+//            //
+//            setAttribute("monitorCycle", true);
+//        }
+//        setAttribute("cycleTime", millis);
+//        return "node/welcome";
+//    }
 
-    @RequestMapping(value = "nodeMonitor.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
-    public String nodeMonitor() {
-        return "node/nodeMonitor";
-    }
+//    @RequestMapping(value = "nodeMonitor.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
+//    public String nodeMonitor() {
+//        return "node/nodeMonitor";
+//    }
 
     @RequestMapping(value = "nodeMonitor_data.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody

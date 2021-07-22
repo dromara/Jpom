@@ -58,27 +58,27 @@ public class BuildHistoryController extends BaseServerController {
     @Resource
     private DbBuildHistoryLogService dbBuildHistoryLogService;
 
-    @RequestMapping(value = "logPage.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
-    @Feature(method = MethodFeature.LOG)
-    public String logPage(String id) {
-        BuildModel item = buildService.getItem(id);
-        setAttribute("item", item);
-        return "build/logPage";
-    }
+//    @RequestMapping(value = "logPage.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
+//    @Feature(method = MethodFeature.LOG)
+//    public String logPage(String id) {
+//        BuildModel item = buildService.getItem(id);
+//        setAttribute("item", item);
+//        return "build/logPage";
+//    }
 
-    @RequestMapping(value = "history.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
-    @Feature(method = MethodFeature.LOG)
-    public String logList() {
-        JSONArray jsonArray = BaseEnum.toJSONArray(BuildModel.Status.class);
-        setAttribute("status", jsonArray);
-        //
-        List<BuildModel> list = buildService.list();
-        setAttribute("buildS", list);
-        //
-        JSONArray releaseMethods = BaseEnum.toJSONArray(BuildModel.ReleaseMethod.class);
-        setAttribute("releaseMethods", releaseMethods);
-        return "build/history";
-    }
+//    @RequestMapping(value = "history.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
+//    @Feature(method = MethodFeature.LOG)
+//    public String logList() {
+//        JSONArray jsonArray = BaseEnum.toJSONArray(BuildModel.Status.class);
+//        setAttribute("status", jsonArray);
+//        //
+//        List<BuildModel> list = buildService.list();
+//        setAttribute("buildS", list);
+//        //
+//        JSONArray releaseMethods = BaseEnum.toJSONArray(BuildModel.ReleaseMethod.class);
+//        setAttribute("releaseMethods", releaseMethods);
+//        return "build/history";
+//    }
 
     /**
      * 下载构建物

@@ -38,13 +38,13 @@ public class UserRoleDynamicController extends BaseServerController {
     @Resource
     private RoleService roleService;
 
-    @RequestMapping(value = "dynamicData.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
-    @Feature(method = MethodFeature.EDIT)
-    public String list() {
-        Map<ClassFeature, DynamicData> dynamicDataMap = DynamicData.getDynamicDataMap();
-        setAttribute("dynamicDataMap", dynamicDataMap);
-        return "user/role/dynamicData";
-    }
+//    @RequestMapping(value = "dynamicData.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
+//    @Feature(method = MethodFeature.EDIT)
+//    public String list() {
+//        Map<ClassFeature, DynamicData> dynamicDataMap = DynamicData.getDynamicDataMap();
+//        setAttribute("dynamicDataMap", dynamicDataMap);
+//        return "user/role/dynamicData";
+//    }
 
     /**
      * @author Hotstrip

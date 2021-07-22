@@ -48,47 +48,47 @@ public class EditProjectController extends BaseServerController {
         return JsonMessage.getString(200, "", projectInfo);
     }
 
-    /**
-     * 修改项目页面
-     *
-     * @param id 项目Id
-     * @return json
-     */
-    @RequestMapping(value = "editProject", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
-    @Feature(method = MethodFeature.EDIT)
-    public String editProject(String id) {
-        JSONObject projectInfo = projectInfoService.getItem(getNode(), id);
-
-        // 白名单
-        List<String> jsonArray = whitelistDirectoryService.getProjectDirectory(getNode());
-        setAttribute("whitelistDirectory", jsonArray);
-
-        setAttribute("item", projectInfo);
-        // 运行模式
-        JSONArray runModes = (JSONArray) JSONArray.toJSON(RunMode.values());
-        if (projectInfo != null) {
-            try {
-                String runMode = projectInfo.getString("runMode");
-                RunMode mode = RunMode.valueOf(runMode);
-                if (mode != RunMode.File) {
-                    // java 项目不能转换为file，可能有未结束的进程
-                    runModes.remove(RunMode.File.name());
-                }
-            } catch (Exception ignored) {
-            }
-        }
-        setAttribute("runModes", runModes);
-        //
-        List<String> hashSet = projectInfoService.getAllGroup(getNode());
-        if (hashSet.isEmpty()) {
-            hashSet.add("默认");
-        }
-        setAttribute("groups", hashSet);
-        //jdk
-        JSONArray array = projectInfoService.getJdkList(getNode(), getRequest());
-        setAttribute("jdkArray", array);
-        return "node/manage/editProject";
-    }
+//    /**
+//     * 修改项目页面
+//     *
+//     * @param id 项目Id
+//     * @return json
+//     */
+//    @RequestMapping(value = "editProject", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
+//    @Feature(method = MethodFeature.EDIT)
+//    public String editProject(String id) {
+//        JSONObject projectInfo = projectInfoService.getItem(getNode(), id);
+//
+//        // 白名单
+//        List<String> jsonArray = whitelistDirectoryService.getProjectDirectory(getNode());
+//        setAttribute("whitelistDirectory", jsonArray);
+//
+//        setAttribute("item", projectInfo);
+//        // 运行模式
+//        JSONArray runModes = (JSONArray) JSONArray.toJSON(RunMode.values());
+//        if (projectInfo != null) {
+//            try {
+//                String runMode = projectInfo.getString("runMode");
+//                RunMode mode = RunMode.valueOf(runMode);
+//                if (mode != RunMode.File) {
+//                    // java 项目不能转换为file，可能有未结束的进程
+//                    runModes.remove(RunMode.File.name());
+//                }
+//            } catch (Exception ignored) {
+//            }
+//        }
+//        setAttribute("runModes", runModes);
+//        //
+//        List<String> hashSet = projectInfoService.getAllGroup(getNode());
+//        if (hashSet.isEmpty()) {
+//            hashSet.add("默认");
+//        }
+//        setAttribute("groups", hashSet);
+//        //jdk
+//        JSONArray array = projectInfoService.getJdkList(getNode(), getRequest());
+//        setAttribute("jdkArray", array);
+//        return "node/manage/editProject";
+//    }
 
     /**
      * @author Hotstrip

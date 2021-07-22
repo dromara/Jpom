@@ -56,11 +56,11 @@ public class IndexControl extends BaseServerController {
         return "error";
     }
 
-    @RequestMapping(value = "authorize.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
-    @NotLogin
-    public String authorize() {
-        return "authorize";
-    }
+//    @RequestMapping(value = "authorize.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
+//    @NotLogin
+//    public String authorize() {
+//        return "authorize";
+//    }
 
     /**
      * 加载首页

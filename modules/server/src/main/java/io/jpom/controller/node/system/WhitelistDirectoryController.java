@@ -31,22 +31,22 @@ public class WhitelistDirectoryController extends BaseServerController {
     @Resource
     private WhitelistDirectoryService whitelistDirectoryService;
 
-    /**
-     * 页面
-     */
-    @RequestMapping(value = "whitelistDirectory", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
-    @SystemPermission
-    public String whitelistDirectory() {
-        AgentWhitelist agentWhitelist = whitelistDirectoryService.getData(getNode());
-        if (agentWhitelist != null) {
-            setAttribute("project", AgentWhitelist.convertToLine(agentWhitelist.getProject()));
-            //
-            setAttribute("certificate", AgentWhitelist.convertToLine(agentWhitelist.getCertificate()));
-            //
-            setAttribute("nginx", AgentWhitelist.convertToLine(agentWhitelist.getNginx()));
-        }
-        return "node/system/whitelistDirectory";
-    }
+//    /**
+//     * 页面
+//     */
+//    @RequestMapping(value = "whitelistDirectory", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
+//    @SystemPermission
+//    public String whitelistDirectory() {
+//        AgentWhitelist agentWhitelist = whitelistDirectoryService.getData(getNode());
+//        if (agentWhitelist != null) {
+//            setAttribute("project", AgentWhitelist.convertToLine(agentWhitelist.getProject()));
+//            //
+//            setAttribute("certificate", AgentWhitelist.convertToLine(agentWhitelist.getCertificate()));
+//            //
+//            setAttribute("nginx", AgentWhitelist.convertToLine(agentWhitelist.getNginx()));
+//        }
+//        return "node/system/whitelistDirectory";
+//    }
 
 
     /**

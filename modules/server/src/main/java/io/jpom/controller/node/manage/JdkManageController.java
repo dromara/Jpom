@@ -17,15 +17,15 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @Feature(cls = ClassFeature.PROJECT)
 public class JdkManageController extends BaseServerController {
 
-    /**
-     * jdk管理
-     *
-     * @return page
-     */
-    @RequestMapping(value = "jdkList.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
-    public String listHtml() {
-        return "node/manage/JdkList";
-    }
+//    /**
+//     * jdk管理
+//     *
+//     * @return page
+//     */
+//    @RequestMapping(value = "jdkList.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
+//    public String listHtml() {
+//        return "node/manage/JdkList";
+//    }
 
     @RequestMapping(value = "jdk/list", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody

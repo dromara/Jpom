@@ -34,26 +34,26 @@ public class BuildTriggerController extends BaseServerController {
 
     @Resource
     private BuildService buildService;
-
-    @RequestMapping(value = "trigger.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
-    @Feature(method = MethodFeature.EDIT)
-    public String trigger(String id) {
-        BuildModel item = buildService.getItem(id);
-        //
-        if (StrUtil.isEmpty(item.getTriggerToken())) {
-            item.setTriggerToken(RandomUtil.randomString(10));
-            buildService.updateItem(item);
-        }
-        setAttribute("item", item);
-        //
-        String contextPath = getRequest().getContextPath();
-        String url = ServerOpenApi.BUILD_TRIGGER_BUILD.
-                replace("{id}", item.getId()).
-                replace("{token}", item.getTriggerToken());
-        String triggerBuildUrl = String.format("/%s/%s", contextPath, url);
-        setAttribute("triggerBuildUrl", FileUtil.normalize(triggerBuildUrl));
-        return "build/trigger";
-    }
+//
+//    @RequestMapping(value = "trigger.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
+//    @Feature(method = MethodFeature.EDIT)
+//    public String trigger(String id) {
+//        BuildModel item = buildService.getItem(id);
+//        //
+//        if (StrUtil.isEmpty(item.getTriggerToken())) {
+//            item.setTriggerToken(RandomUtil.randomString(10));
+//            buildService.updateItem(item);
+//        }
+//        setAttribute("item", item);
+//        //
+//        String contextPath = getRequest().getContextPath();
+//        String url = ServerOpenApi.BUILD_TRIGGER_BUILD.
+//                replace("{id}", item.getId()).
+//                replace("{token}", item.getTriggerToken());
+//        String triggerBuildUrl = String.format("/%s/%s", contextPath, url);
+//        setAttribute("triggerBuildUrl", FileUtil.normalize(triggerBuildUrl));
+//        return "build/trigger";
+//    }
 
     /**
      * @author Hotstrip

@@ -49,25 +49,25 @@ public class ProjectManageControl extends BaseServerController {
     @Resource
     private BuildService buildService;
 
-    /**
-     * 展示项目页面
-     *
-     * @return page
-     */
-    @RequestMapping(value = "projectInfo", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
-    @Feature(method = MethodFeature.LIST)
-    public String projectInfo() {
-        List<String> hashSet = projectInfoService.getAllGroup(getNode());
-        setAttribute("groups", hashSet);
-        return "node/manage/projectInfo";
-    }
+//    /**
+//     * 展示项目页面
+//     *
+//     * @return page
+//     */
+//    @RequestMapping(value = "projectInfo", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
+//    @Feature(method = MethodFeature.LIST)
+//    public String projectInfo() {
+//        List<String> hashSet = projectInfoService.getAllGroup(getNode());
+//        setAttribute("groups", hashSet);
+//        return "node/manage/projectInfo";
+//    }
 
 
-    @RequestMapping(value = "projectCopyLList.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
-    @Feature(method = MethodFeature.LIST)
-    public String projectInfoPage() {
-        return "node/manage/javaCopyList";
-    }
+//    @RequestMapping(value = "projectCopyLList.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
+//    @Feature(method = MethodFeature.LIST)
+//    public String projectInfoPage() {
+//        return "node/manage/javaCopyList";
+//    }
 
 
     /**

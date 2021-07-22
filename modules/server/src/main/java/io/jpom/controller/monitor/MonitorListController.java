@@ -54,51 +54,51 @@ public class MonitorListController extends BaseServerController {
     @Resource
     private UserService userService;
 
-    /**
-     * 展示监控页面
-     *
-     * @return page
-     */
-    @RequestMapping(value = "list.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
-    @Feature(method = MethodFeature.LIST)
-    public String list() {
-        return "monitor/list";
-    }
+//    /**
+//     * 展示监控页面
+//     *
+//     * @return page
+//     */
+//    @RequestMapping(value = "list.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
+//    @Feature(method = MethodFeature.LIST)
+//    public String list() {
+//        return "monitor/list";
+//    }
 
-    /**
-     * 修改监控
-     *
-     * @param id id
-     * @return json
-     */
-    @RequestMapping(value = "edit.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
-    @Feature(method = MethodFeature.EDIT)
-    public String edit(String id) {
-        MonitorModel monitorModel = null;
-        if (StrUtil.isNotEmpty(id)) {
-            monitorModel = monitorService.getItem(id);
-        }
-        setAttribute("model", monitorModel);
-        //监控周期
-        JSONArray cycleArray = Cycle.getJSONArray();
-        setAttribute("cycleArray", cycleArray);
-        List<NodeModel> nodeModels = nodeService.listAndProject();
-        setAttribute("nodeModels", nodeModels);
-        //
-        List<UserModel> list = userService.list(false);
-        JSONArray jsonArray = new JSONArray();
-        list.forEach(userModel -> {
-            JSONObject jsonObject = new JSONObject();
-            jsonObject.put("title", userModel.getName());
-            jsonObject.put("value", userModel.getId());
-            if (StrUtil.isEmpty(userModel.getEmail()) && StrUtil.isEmpty(userModel.getDingDing())) {
-                jsonObject.put("disabled", true);
-            }
-            jsonArray.add(jsonObject);
-        });
-        setAttribute("userLists", jsonArray);
-        return "monitor/edit";
-    }
+//    /**
+//     * 修改监控
+//     *
+//     * @param id id
+//     * @return json
+//     */
+//    @RequestMapping(value = "edit.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
+//    @Feature(method = MethodFeature.EDIT)
+//    public String edit(String id) {
+//        MonitorModel monitorModel = null;
+//        if (StrUtil.isNotEmpty(id)) {
+//            monitorModel = monitorService.getItem(id);
+//        }
+//        setAttribute("model", monitorModel);
+//        //监控周期
+//        JSONArray cycleArray = Cycle.getJSONArray();
+//        setAttribute("cycleArray", cycleArray);
+//        List<NodeModel> nodeModels = nodeService.listAndProject();
+//        setAttribute("nodeModels", nodeModels);
+//        //
+//        List<UserModel> list = userService.list(false);
+//        JSONArray jsonArray = new JSONArray();
+//        list.forEach(userModel -> {
+//            JSONObject jsonObject = new JSONObject();
+//            jsonObject.put("title", userModel.getName());
+//            jsonObject.put("value", userModel.getId());
+//            if (StrUtil.isEmpty(userModel.getEmail()) && StrUtil.isEmpty(userModel.getDingDing())) {
+//                jsonObject.put("disabled", true);
+//            }
+//            jsonArray.add(jsonObject);
+//        });
+//        setAttribute("userLists", jsonArray);
+//        return "monitor/edit";
+//    }
 
     /**
      * 展示监控列表
