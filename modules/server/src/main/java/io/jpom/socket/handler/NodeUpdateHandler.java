@@ -48,11 +48,12 @@ public class NodeUpdateHandler extends BaseHandler {
         nodeService = SpringUtil.getBean(NodeService.class);
     }
 
-    @Override
-    public void afterConnectionEstablished(WebSocketSession session) {
-        NodeService nodeService = SpringUtil.getBean(NodeService.class);
+    private void pullNodeList(WebSocketSession session) {
         List<NodeModel> nodeModelList = nodeService.list();
         for (NodeModel model : nodeModelList) {
+            if (clientMap.containsKey(model.getId())) {
+                continue;
+            }
             String url = StrUtil.format("{}?name={}&password={}", NodeForward.getSocketUrl(model, NodeUrl.NodeUpdate), model.getLoginName(), model.getLoginPwd());
             // 连接节点
             try {
@@ -71,15 +72,18 @@ public class NodeUpdateHandler extends BaseHandler {
                 client.close();
             }
         }
+        clientMap.clear();
     }
 
     @Override
     protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
         WebSocketMessageModel model = WebSocketMessageModel.getInstance(message);
         this.init();
+        boolean pull = false;
         switch (model.getCommand()) {
             case "getNodeList":
                 model.setData(getNodeList());
+                pull = true;
                 break;
             case "getAgentVersion":
                 model.setData(getAgentVersion());
@@ -94,11 +98,14 @@ public class NodeUpdateHandler extends BaseHandler {
         if (model.getData() != null) {
             session.sendMessage(new TextMessage(model.toString()));
         }
+        if (pull) {
+            pullNodeList(session);
+        }
     }
 
     @Override
     public void handleTransportError(WebSocketSession session, Throwable exception) {
-
+        DefaultSystemLog.getLog().error("发生异常", exception);
     }
 
     /**
