@@ -5,7 +5,6 @@ import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.JsonMessage;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.common.ServerOpenApi;
-import io.jpom.common.interceptor.NotLogin;
 import io.jpom.system.ConfigBean;
 import io.jpom.system.ServerConfigBean;
 import io.jpom.util.JsonFileUtil;

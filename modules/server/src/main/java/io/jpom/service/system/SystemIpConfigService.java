@@ -2,7 +2,6 @@ package io.jpom.service.system;
 
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.common.BaseDataService;
-import io.jpom.model.data.MailAccountModel;
 import io.jpom.model.data.SystemIpConfigModel;
 import io.jpom.system.ServerConfigBean;
 import io.jpom.util.JsonFileUtil;

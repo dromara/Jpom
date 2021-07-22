@@ -1,15 +1,11 @@
 package io.jpom.controller.node.manage;
 
-import com.alibaba.fastjson.JSONObject;
 import io.jpom.common.BaseServerController;
 import io.jpom.plugin.ClassFeature;
 import io.jpom.plugin.Feature;
-import io.jpom.plugin.MethodFeature;
 import io.jpom.service.node.manage.ProjectInfoService;
-import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 
 import javax.annotation.Resource;
 

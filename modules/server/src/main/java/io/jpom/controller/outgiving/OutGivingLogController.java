@@ -8,13 +8,8 @@ import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.validator.ValidatorConfig;
 import cn.jiangzeyin.common.validator.ValidatorItem;
 import cn.jiangzeyin.common.validator.ValidatorRule;
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.common.BaseServerController;
-import io.jpom.model.BaseEnum;
-import io.jpom.model.data.NodeModel;
-import io.jpom.model.data.OutGivingModel;
-import io.jpom.model.data.OutGivingNodeProject;
 import io.jpom.model.log.OutGivingLog;
 import io.jpom.plugin.ClassFeature;
 import io.jpom.plugin.Feature;
@@ -28,8 +23,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.annotation.Resource;
-import java.io.IOException;
-import java.util.List;
 
 /**
  * 分发日志

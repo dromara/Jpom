@@ -8,9 +8,6 @@ import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.controller.multipart.MultipartFileBuilder;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.sun.tools.javac.code.Attribute;
-import io.jpom.JpomApplication;
-import io.jpom.JpomServerApplication;
 import io.jpom.common.BaseServerController;
 import io.jpom.common.JpomManifest;
 import io.jpom.common.forward.NodeForward;
@@ -18,8 +15,6 @@ import io.jpom.common.forward.NodeUrl;
 import io.jpom.common.interceptor.OptLog;
 import io.jpom.model.AgentFileModel;
 import io.jpom.model.data.NodeModel;
-import io.jpom.model.data.SshModel;
-import io.jpom.model.data.UserModel;
 import io.jpom.model.log.UserOperateLogV1;
 import io.jpom.permission.SystemPermission;
 import io.jpom.plugin.ClassFeature;
@@ -39,7 +34,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**

@@ -14,7 +14,6 @@ import io.jpom.common.BaseServerController;
 import io.jpom.common.interceptor.OptLog;
 import io.jpom.model.Cycle;
 import io.jpom.model.data.MonitorModel;
-import io.jpom.model.data.NodeModel;
 import io.jpom.model.data.UserModel;
 import io.jpom.model.log.UserOperateLogV1;
 import io.jpom.plugin.ClassFeature;

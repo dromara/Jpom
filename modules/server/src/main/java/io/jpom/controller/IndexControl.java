@@ -5,6 +5,8 @@ import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.io.resource.ResourceUtil;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.extra.servlet.ServletUtil;
+import cn.hutool.http.ContentType;
 import cn.jiangzeyin.common.JsonMessage;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -67,8 +69,9 @@ public class IndexControl extends BaseServerController {
      *
      * @return page
      */
-    @RequestMapping(value = {"index", "", "/"}, method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
+    @GetMapping(value = {"index", "", "/"}, produces = MediaType.TEXT_HTML_VALUE)
     @NotLogin
+    @ResponseBody
     public void index(final Model model, HttpServletRequest request, HttpServletResponse response) throws IOException {
 //        if (userService.userListEmpty()) {
 //            getSession().invalidate();
@@ -78,7 +81,9 @@ public class IndexControl extends BaseServerController {
 //        // 版本号
 //        setAttribute("jpomManifest", JpomManifest.getInstance());
 //        return "index";
-        UrlRedirectUtil.sendRedirect(request, response, "index.html");
+        InputStream inputStream = ResourceUtil.getStream("classpath:/dist/index.html");
+        String html = IoUtil.read(inputStream, CharsetUtil.CHARSET_UTF_8);
+        ServletUtil.write(response, html, ContentType.TEXT_HTML.getValue());
     }
 //
 //    /**
