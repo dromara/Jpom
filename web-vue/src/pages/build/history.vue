@@ -35,6 +35,7 @@
       </a-tooltip>
       <template slot="operation" slot-scope="text, record">
         <a-button type="primary" @click="handleDownload(record)">下载日志</a-button>
+        <a-button type="primary" :disabled="!record.hashFile"  @click="handleFile(record)">下载产物</a-button>
         <a-button :disabled="!record.hashFile || record.releaseMethod === 0" type="danger" @click="handleRollback(record)">回滚</a-button>
         <a-button type="danger" @click="handleDelete(record)">删除</a-button>
       </template>
@@ -47,7 +48,13 @@
 </template>
 <script>
 import BuildLog from './log';
-import { geteBuildHistory, getBuildList, downloadBuildLog, rollback, deleteBuildHistory } from '../../api/build';
+import {
+  geteBuildHistory,
+  getBuildList,
+  downloadBuildLog,
+  rollback,
+  deleteBuildHistory
+} from '../../api/build';
 import { parseTime } from '../../utils/time';
 export default {
   components: {
@@ -175,6 +182,18 @@ export default {
         document.body.appendChild(link);
         link.click();
       })
+    },
+    handleFile(record){
+      window.open("./build/download_file.html?logId="+record.id);
+      // downloadBuildFile(record.id).then(blob => {
+      //   const url = window.URL.createObjectURL(blob);
+      //   let link = document.createElement('a');
+      //   link.style.display = 'none';
+      //   link.href = url;
+      //   link.setAttribute('download', `${record.name}.log`);
+      //   document.body.appendChild(link);
+      //   link.click();
+      // })
     },
     // 回滚
     handleRollback(record) {
