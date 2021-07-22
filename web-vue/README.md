@@ -2,7 +2,7 @@
 
 ## 介绍
 
-这是 Jpom项目的前端部分，基于[Vue](https://cn.vuejs.org/)构建，UI框架则是基于[Ant Design Vue](https://www.antdv.com/docs/vue/introduce-cn/).
+这是 Jpom项目的前端部分，基于 [Vue](https://cn.vuejs.org/) 构建，UI框架则是基于 [Ant Design Vue](https://www.antdv.com/docs/vue/introduce-cn/).
 
 
 

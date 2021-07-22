@@ -17,6 +17,9 @@
       <a-tooltip slot="branchName" slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>
+      <template slot="releaseMethod" slot-scope="text" placement="topleft" :title="text">
+        <span>{{ releaseMethodMap[text] }}</span>
+      </template>
       <template slot="status" slot-scope="text">
         <span v-if="text === 0">未构建</span>
         <span v-else-if="text === 1">构建中</span>
@@ -37,11 +40,24 @@
       </a-tooltip>
       <template slot="operation" slot-scope="text, record">
         <a-button type="primary" @click="handleEdit(record)">编辑</a-button>
-        <a-button type="primary" @click="handleTrigger(record)">触发器</a-button>
         <a-button type="danger" v-if="record.status === 1 || record.status === 4" @click="handleStopBuild(record)">停止</a-button>
         <a-button type="primary" v-else @click="handleStartBuild(record)">构建</a-button>
-        <a-button type="danger" @click="handleDelete(record)">删除</a-button>
-        <a-button type="danger" :disabled="!record.sourceExist" @click="handleClear(record)">清除构建</a-button>
+        <a-dropdown>
+          <a class="ant-dropdown-link" @click="e => e.preventDefault()">
+            更多<a-icon type="down" />
+          </a>
+          <a-menu slot="overlay">
+            <a-menu-item>
+              <a-button type="primary" @click="handleTrigger(record)">触发器</a-button>
+            </a-menu-item>
+            <a-menu-item>
+              <a-button type="danger" @click="handleDelete(record)">删除</a-button>
+            </a-menu-item>
+            <a-menu-item>
+              <a-button type="danger" :disabled="!record.sourceExist" @click="handleClear(record)">清除构建</a-button>
+            </a-menu-item>
+          </a-menu>
+        </a-dropdown>
       </template>
     </a-table>
     <!-- 编辑区 -->
@@ -172,7 +188,7 @@ import { mapGetters } from 'vuex';
 import BuildLog from './log';
 import {
   getBuildGroupList, getBuildList, getBranchList, editBuild, deleteBuild,
-  getTriggerUrl, resetTrigger, clearBuid, startBuild, stopBuild
+  getTriggerUrl, resetTrigger, clearBuid, startBuild, stopBuild,releaseMethodMap
 } from '../../api/build';
 import { getDishPatchList } from '../../api/dispatch';
 import { getNodeProjectList } from '../../api/node'
@@ -184,6 +200,7 @@ export default {
   },
   data() {
     return {
+      releaseMethodMap:releaseMethodMap,
       loading: false,
       listQuery: {},
       tableHeight: '70vh',
@@ -206,6 +223,7 @@ export default {
       ],
       columns: [
         {title: '名称', dataIndex: 'name', width: 150, ellipsis: true, scopedSlots: {customRender: 'name'}},
+        {title: '分组', dataIndex: 'group', width: 150, ellipsis: true, scopedSlots: {customRender: 'group'}},
         {title: '分支', dataIndex: 'branchName', width: 100, ellipsis: true, scopedSlots: {customRender: 'branchName'}},
         {title: '状态', dataIndex: 'status', width: 100, ellipsis: true, scopedSlots: {customRender: 'status'}},
         {title: '构建 ID', dataIndex: 'buildIdStr', width: 80, ellipsis: true, scopedSlots: {customRender: 'buildIdStr'}},
@@ -216,7 +234,10 @@ export default {
           }
           return parseTime(text);
         }, width: 180},
-        {title: '操作', dataIndex: 'operation', scopedSlots: {customRender: 'operation'}, width: 440, align: 'left'}
+        {title: '发布方式', dataIndex: 'releaseMethod', width: 100, ellipsis: true, scopedSlots: {customRender: 'releaseMethod'}},
+        {title: '产物目录', dataIndex: 'resultDirFile',  ellipsis: true, scopedSlots: {customRender: 'resultDirFile'}},
+        {title: '构建命令', dataIndex: 'script',  ellipsis: true, scopedSlots: {customRender: 'script'}},
+        {title: '操作', dataIndex: 'operation', width: 240, scopedSlots: {customRender: 'operation'}, align: 'left', fixed: 'right'}
       ],
       rules: {
         name: [

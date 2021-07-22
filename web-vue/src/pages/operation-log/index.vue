@@ -87,7 +87,10 @@ export default {
         pageSizeOptions: ['10', '20', '50', '100'],
         showSizeChanger: true,
         showTotal: (total) => {
-          return `Total ${total} items`;
+          if(total<=this.listQuery.limit){
+            return '';
+          }
+          return `总计 ${total} 条`;
         }
       }
     }

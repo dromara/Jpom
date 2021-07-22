@@ -36,8 +36,22 @@
       <template slot="operation" slot-scope="text, record">
         <a-button type="primary" @click="handleDownload(record)">下载日志</a-button>
         <a-button type="primary" :disabled="!record.hashFile"  @click="handleFile(record)">下载产物</a-button>
-        <a-button :disabled="!record.hashFile || record.releaseMethod === 0" type="danger" @click="handleRollback(record)">回滚</a-button>
-        <a-button type="danger" @click="handleDelete(record)">删除</a-button>
+        <a-dropdown>
+          <a class="ant-dropdown-link" @click="e => e.preventDefault()">
+            更多
+            <a-icon type="down"/>
+          </a>
+          <a-menu slot="overlay">
+            <a-menu-item>
+              <a-button :disabled="!record.hashFile || record.releaseMethod === 0" type="danger"
+                        @click="handleRollback(record)">回滚
+              </a-button>
+            </a-menu-item>
+            <a-menu-item>
+              <a-button type="danger" @click="handleDelete(record)">删除</a-button>
+            </a-menu-item>
+          </a-menu>
+        </a-dropdown>
       </template>
     </a-table>
     <!-- 构建日志 -->
@@ -53,7 +67,8 @@ import {
   getBuildList,
   downloadBuildLog,
   rollback,
-  deleteBuildHistory
+  deleteBuildHistory,
+  releaseMethodMap
 } from '../../api/build';
 import { parseTime } from '../../utils/time';
 export default {
@@ -62,6 +77,7 @@ export default {
   },
   data() {
     return {
+      releaseMethodMap:releaseMethodMap,
       loading: false,
       list: [],
       buildList: [],
@@ -96,12 +112,6 @@ export default {
         5: '发布成功',
         6: '发布失败',
         7: '取消构建',
-      },
-      releaseMethodMap: {
-        0: '不发布',
-        1: '节点分发',
-        2: '项目',
-        3: 'SSH'
       }
     }
   },
@@ -114,7 +124,10 @@ export default {
         pageSizeOptions: ['10', '20', '50', '100'],
         showSizeChanger: true,
         showTotal: (total) => {
-          return `Total ${total} items`;
+          if(total<=this.listQuery.limit){
+            return '';
+          }
+          return `总计 ${total} 条`;
         }
       }
     }
