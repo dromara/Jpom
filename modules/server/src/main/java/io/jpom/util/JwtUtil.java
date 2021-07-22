@@ -78,7 +78,7 @@ public class JwtUtil {
         if (null == jwt) {
             return null;
         }
-        return Convert.toStr(jwt.getPayload("jti"));
+        return Convert.toStr(jwt.getPayload(JWT.JWT_ID));
     }
 
     /**

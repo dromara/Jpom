@@ -181,6 +181,9 @@ public class NodeUpdateHandler extends BaseHandler {
     private String getAgentVersion() {
         AgentFileModel agentFileModel = agentFileService.getItem("agent");
         String version = "";
+        if (agentFileModel == null) {
+            return version;
+        }
         try (JarFile jarFile = new JarFile(agentFileModel.getSavePath())) {
             Manifest manifest = jarFile.getManifest();
             Attributes attributes = manifest.getMainAttributes();
