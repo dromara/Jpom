@@ -18,7 +18,7 @@ export function getJdkList(nodeId) {
 /**
  * jdk 编辑
  * @param {nodeId, id, name, path} params
- * params.nodeId 节点 ID 
+ * params.nodeId 节点 ID
  * params.id 编辑修改时判断 ID
  * params.name 名称
  * params.path jdk 路径
@@ -33,8 +33,8 @@ export function editJdk(params) {
 
 /**
  * 删除 JDK
- * @param {nodeId, id} params 
- * params.nodeId 节点 ID 
+ * @param {nodeId, id} params
+ * params.nodeId 节点 ID
  * params.id 编辑修改时判断 ID
  */
 export function deleteJdk(params) {
@@ -83,8 +83,8 @@ export function getRuningProjectInfo(params) {
  * 获取单个项目信息
  * @param {
  *  nodeId: 节点 ID
- *  id: 项目 ID 
- * } params 
+ *  id: 项目 ID
+ * } params
  */
 export function getProjectData(params) {
   return axios({
@@ -153,6 +153,7 @@ export function editProject(params, replicaParams) {
     args: params.args,
     javaCopyIds: params.javaCopyIds,
     token: params.token,
+    logPath: params.logPath,
     ...replicaParams
   }
   return axios({
@@ -166,9 +167,9 @@ export function editProject(params, replicaParams) {
  * 删除项目
  * @param {
  *  nodeId: 节点 ID
- *  id: 项目 ID 
+ *  id: 项目 ID
  *  copyId: copyId
- * } params 
+ * } params
  */
 export function deleteProject(params) {
   return axios({
@@ -182,8 +183,8 @@ export function deleteProject(params) {
  * 项目文件列表
  * @param {
  *  nodeId: 节点 ID
- *  id: 项目 ID 
- * } params 
+ *  id: 项目 ID
+ * } params
  */
 export function getFileList(params) {
   return axios({
@@ -203,7 +204,7 @@ export function getFileList(params) {
  *  id: 项目 ID
  *  levelName: 文件 levelName
  *  filename: 文件名称
- * } params 
+ * } params
  */
 export function downloadProjectFile(params) {
   return axios({
@@ -224,7 +225,7 @@ export function downloadProjectFile(params) {
  *  levelName: 目录地址
  *  type: unzip 表示压缩文件 *上传压缩文件时需要
  *  clearType: {clear: 清空文件夹, noClear: 不清空} *上传压缩文件时需要
- * } formData 
+ * } formData
  */
 export function uploadProjectFile(formData) {
   return axios({
@@ -290,7 +291,7 @@ export function getRecoverData(params) {
  *  nodeId: 节点 ID
  *  id: 项目 ID
  *  copyId: copyId
- * } params 
+ * } params
  */
 export function getProjectLogSize(params) {
   return axios({
@@ -306,7 +307,7 @@ export function getProjectLogSize(params) {
  *  nodeId: 节点 ID
  *  id: 项目 ID
  *  copyId: copyId
- * } params 
+ * } params
  */
 export function downloadProjectLogFile(params) {
   return axios({
@@ -323,7 +324,7 @@ export function downloadProjectLogFile(params) {
  * @param {
  *  nodeId: 节点 ID
  *  id: 项目 ID
- * } params 
+ * } params
  */
 export function getLogBackList(params) {
   return axios({
@@ -340,7 +341,7 @@ export function getLogBackList(params) {
  *  id: 项目 ID
  *  copyId: copyId
  *  key: 文件名
- * } params 
+ * } params
  */
 export function downloadProjectLogBackFile(params) {
   return axios({
@@ -359,7 +360,7 @@ export function downloadProjectLogBackFile(params) {
  *  id: 项目 ID
  *  copyId: copyId
  *  name: 文件名
- * } params 
+ * } params
  */
 export function deleteProjectLogBackFile(params) {
   return axios({
@@ -390,7 +391,7 @@ export function getInternalData(params) {
  * 查看线程
  * @param {
  *  nodeId: 节点 ID
- * } params 
+ * } params
  */
 export function getThreadInfo(params) {
   return axios({
@@ -442,7 +443,7 @@ export function exportRam(params) {
  * @param {
  *  nodeId: 节点 ID
  *  id: 项目 ID
- * } params 
+ * } params
  */
 export function getProjectReplicaList(params) {
   return axios({
@@ -457,7 +458,7 @@ export function getProjectReplicaList(params) {
  * @param {
  *  nodeId: 节点 ID,
  *  newLib: 新目录地址
- * } params 
+ * } params
  */
 export function nodeJudgeLibExist(params) {
 return axios({

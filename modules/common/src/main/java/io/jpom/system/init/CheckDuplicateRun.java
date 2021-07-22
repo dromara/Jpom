@@ -17,7 +17,7 @@ class CheckDuplicateRun {
 
     static void check() {
         try {
-            Class appClass = JpomApplication.getAppClass();
+            Class<?> appClass = JpomApplication.getAppClass();
             String pid = String.valueOf(JpomManifest.getInstance().getPid());
             List<MonitoredVm> monitoredVms = JvmUtil.listMainClass(appClass.getName());
             monitoredVms.forEach(monitoredVm -> {
