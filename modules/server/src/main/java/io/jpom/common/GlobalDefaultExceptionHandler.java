@@ -41,38 +41,38 @@ public class GlobalDefaultExceptionHandler {
      */
     @ExceptionHandler({AgentException.class, AuthorizeException.class, RuntimeException.class, Exception.class})
     public void paramExceptionHandler(HttpServletRequest request, HttpServletResponse response, Exception e) {
-        DefaultSystemLog.getLog().error("controller " + request.getRequestURI(), e.getMessage());
-        DefaultSystemLog.getLog().error("global handle exception: {}, caused by: {}, and message: {}", e.getClass().getName(), e.getCause(), e.getMessage());
-        if (BaseJpomInterceptor.isPage(request)) {
-            try {
-                String id = IdUtil.fastUUID();
-                TIMED_CACHE.put(id, getErrorMsg(e));
-                BaseJpomInterceptor.sendRedirects(request, response, "/error.html?id=" + id);
-            } catch (IOException ex) {
-                /**
-                 * @author Hotstrip
-                 * don't print stach trace into console
-                 */
-                // ex.printStackTrace();
-                DefaultSystemLog.getLog().error("catch exception: {}, and message: {}", ex.getCause(), ex.getMessage());
-            }
+        //DefaultSystemLog.getLog().error("controller " + request.getRequestURI(), e.getMessage());
+        DefaultSystemLog.getLog().error("global handle exception: {}", request.getRequestURI(), e);
+//        if (BaseJpomInterceptor.isPage(request)) {
+//            try {
+//                String id = IdUtil.fastUUID();
+//                TIMED_CACHE.put(id, getErrorMsg(e));
+//                BaseJpomInterceptor.sendRedirects(request, response, "/error.html?id=" + id);
+//            } catch (IOException ex) {
+//                /**
+//                 * @author Hotstrip
+//                 * don't print stach trace into console
+//                 */
+//                // ex.printStackTrace();
+//                DefaultSystemLog.getLog().error("catch exception: {}, and message: {}", ex.getCause(), ex.getMessage());
+//            }
+//        } else {
+        if (e instanceof AuthorizeException) {
+            AuthorizeException authorizeException = (AuthorizeException) e;
+            ServletUtil.write(response, authorizeException.getJsonMessage().toString(), MediaType.APPLICATION_JSON_UTF8_VALUE);
+        } else if (e instanceof AgentException || e instanceof JpomRuntimeException) {
+            ServletUtil.write(response, JsonMessage.getString(500, e.getMessage()), MediaType.APPLICATION_JSON_UTF8_VALUE);
         } else {
-            if (e instanceof AuthorizeException) {
-                AuthorizeException authorizeException = (AuthorizeException) e;
-                ServletUtil.write(response, authorizeException.getJsonMessage().toString(), MediaType.APPLICATION_JSON_UTF8_VALUE);
-            } else if (e instanceof AgentException || e instanceof JpomRuntimeException) {
-                ServletUtil.write(response, JsonMessage.getString(500, e.getMessage()), MediaType.APPLICATION_JSON_UTF8_VALUE);
-            } else {
-                ServletUtil.write(response, JsonMessage.getString(500, "服务异常：" + e.getMessage()), MediaType.APPLICATION_JSON_UTF8_VALUE);
-            }
+            ServletUtil.write(response, JsonMessage.getString(500, "服务异常：" + e.getMessage()), MediaType.APPLICATION_JSON_UTF8_VALUE);
         }
+//        }
     }
 
-    private String getErrorMsg(Exception e) {
-        if (e instanceof JpomRuntimeException || e instanceof AgentException || e instanceof AuthorizeException) {
-            return e.getMessage();
-        } else {
-            return "服务异常：" + e.getMessage();
-        }
-    }
+//    private String getErrorMsg(Exception e) {
+//        if (e instanceof JpomRuntimeException || e instanceof AgentException || e instanceof AuthorizeException) {
+//            return e.getMessage();
+//        } else {
+//            return "服务异常：" + e.getMessage();
+//        }
+//    }
 }

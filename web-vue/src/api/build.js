@@ -207,6 +207,20 @@ export function downloadBuildLog(logId) {
 }
 
 /**
+ * 下载构建产物
+ * @param {*} logId
+ */
+export function downloadBuildFile(logId) {
+  return axios({
+    url: '/build/download_file.html',
+    method: 'get',
+    responseType: 'blob',
+    timeout: 0,
+    params: {logId}
+  })
+}
+
+/**
  * 回滚（重新发布）
  * @param {*} logId 
  * @returns 

@@ -113,11 +113,8 @@ public class PermissionInterceptor extends BaseJpomInterceptor {
     }
 
     private void errorMsg(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        if (BaseJpomInterceptor.isPage(request)) {
-            sendRedirects(request, response, "/authorize.html");
-        } else {
-            JsonMessage jsonMessage = new JsonMessage(302, "你没有权限:-2");
-            ServletUtil.write(response, jsonMessage.toString(), MediaType.APPLICATION_JSON_UTF8_VALUE);
-        }
+
+        JsonMessage<String> jsonMessage = new JsonMessage<>(302, "你没有权限:-2");
+        ServletUtil.write(response, jsonMessage.toString(), MediaType.APPLICATION_JSON_UTF8_VALUE);
     }
 }

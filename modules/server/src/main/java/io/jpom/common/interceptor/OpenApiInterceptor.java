@@ -23,8 +23,7 @@ public class OpenApiInterceptor extends BaseInterceptor {
 
     @Override
     protected boolean preHandle(HttpServletRequest request, HttpServletResponse response, HandlerMethod handlerMethod) throws Exception {
-        // 记录请求类型
-        request.setAttribute("Page_Req", false);
+
         NotLogin methodAnnotation = handlerMethod.getMethodAnnotation(NotLogin.class);
         if (methodAnnotation == null) {
             if (handlerMethod.getBeanType().isAnnotationPresent(NotLogin.class)) {
