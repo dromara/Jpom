@@ -363,14 +363,12 @@ public class ProjectInfoModel extends BaseModel {
 			return StrUtil.EMPTY;
 		}
 		if (StrUtil.isNotEmpty(this.getLogPath())) {
-			return String.format("%s/%s/%s.log", this.getLogPath(), this.getId(), this.getId());
+			return FileUtil.normalize(String.format("%s/%s/%s.log", this.getLogPath(), this.getId(), this.getId()));
 		}
-		if (StrUtil.isEmpty(this.getLogPath()) && StrUtil.isNotEmpty(this.log)) {
-			return this.log;
+		if (StrUtil.isEmpty(this.log)) {
+			String log = new File(this.allLib()).getParent();
+			this.log = FileUtil.normalize(String.format("%s/%s.log", log, this.getId()));
 		}
-		String log = new File(this.allLib()).getParent();
-		this.log = String.format("%s/%s.log", log, this.getId());
-
 		return StrUtil.emptyToDefault(this.log, StrUtil.EMPTY);
 	}
 
