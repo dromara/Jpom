@@ -4,6 +4,7 @@ import cn.hutool.cache.impl.LFUCache;
 import cn.hutool.captcha.CircleCaptcha;
 import cn.hutool.core.date.BetweenFormatter;
 import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.jwt.JWT;
 import cn.jiangzeyin.common.JsonMessage;
@@ -50,8 +51,8 @@ public class LoginControl extends BaseServerController {
 
     private static final String SHOW_CODE = "show_code";
 
-    public static final int INPUT_CODE = 600;
-    private static final int INPUT_CODE_ERROR_COUNT = 3;
+//    public static final int INPUT_CODE = 600;
+//    private static final int INPUT_CODE_ERROR_COUNT = 3;
 
     @Resource
     private UserService userService;
@@ -73,10 +74,10 @@ public class LoginControl extends BaseServerController {
 //        return "login";
 //    }
 
-    private boolean showCode() {
-        String showCode = getSessionAttribute(SHOW_CODE);
-        return StrUtil.isNotEmpty(showCode);
-    }
+//    private boolean showCode() {
+//        String showCode = getSessionAttribute(SHOW_CODE);
+//        return StrUtil.isNotEmpty(showCode);
+//    }
 
     /**
      * 验证码
@@ -105,11 +106,7 @@ public class LoginControl extends BaseServerController {
             return 0;
         }
         String ip = getIp();
-        Integer count = LFU_CACHE.get(ip);
-        if (count == null) {
-            count = 0;
-        }
-        count++;
+        int count = ObjectUtil.defaultIfNull(LFU_CACHE.get(ip), 0) + 1;
         LFU_CACHE.put(ip, count, ServerExtConfigBean.getInstance().getIpErrorLockTime());
         return count;
     }
@@ -163,17 +160,16 @@ public class LoginControl extends BaseServerController {
         synchronized (UserModel.class) {
             UserModel userModel = userService.getItem(userName);
             if (userModel == null) {
-                int error = this.ipError();
-                return JsonMessage.getString(error >= INPUT_CODE_ERROR_COUNT ? INPUT_CODE : 400, "登录失败，请输入正确的密码和账号,多次失败将锁定账号");
+                this.ipError();
+                return JsonMessage.getString(400, "登录失败，请输入正确的密码和账号,多次失败将锁定账号");
             }
-            if (showCode() || userModel.getPwdErrorCount() >= INPUT_CODE_ERROR_COUNT) {
-                // 获取验证码
-                String sCode = getSessionAttribute(LOGIN_CODE);
-                if (StrUtil.isEmpty(code) || !sCode.equalsIgnoreCase(code)) {
-                    return JsonMessage.getString(INPUT_CODE, "请输入正确的验证码");
-                }
-                removeSessionAttribute(LOGIN_CODE);
+            // 获取验证码
+            String sCode = getSessionAttribute(LOGIN_CODE);
+            if (StrUtil.isEmpty(code) || !sCode.equalsIgnoreCase(code)) {
+                return JsonMessage.getString(400, "请输入正确的验证码");
             }
+            removeSessionAttribute(LOGIN_CODE);
+
             try {
                 long lockTime = userModel.overLockTime();
                 if (lockTime > 0) {
@@ -192,13 +188,8 @@ public class LoginControl extends BaseServerController {
                     return JsonMessage.getString(200, "登录成功", userLoginDto);
                 } else {
                     userModel.errorLock();
-                    int rCode = 501;
-                    if (userModel.getPwdErrorCount() > INPUT_CODE_ERROR_COUNT) {
-                        // 启用验证码
-                        rCode = INPUT_CODE;
-                    }
                     this.ipError();
-                    return JsonMessage.getString(rCode, "登录失败，请输入正确的密码和账号,多次失败将锁定账号");
+                    return JsonMessage.getString(501, "登录失败，请输入正确的密码和账号,多次失败将锁定账号");
                 }
             } finally {
                 userService.updateItem(userModel);

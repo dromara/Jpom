@@ -23,18 +23,14 @@ public abstract class BaseJpomInterceptor extends BaseInterceptor {
 
     public static final String PROXY_PATH = "Jpom-ProxyPath";
 
-    static boolean isPage(HandlerMethod handlerMethod) {
-        ResponseBody responseBody = handlerMethod.getMethodAnnotation(ResponseBody.class);
-        if (responseBody == null) {
-            RestController restController = handlerMethod.getBeanType().getAnnotation(RestController.class);
-            return restController == null;
-        }
-        return false;
-    }
-
-    public static boolean isPage(HttpServletRequest request) {
-        return Convert.toBool(request.getAttribute("Page_Req"), true);
-    }
+//    static boolean isPage(HandlerMethod handlerMethod) {
+//        ResponseBody responseBody = handlerMethod.getMethodAnnotation(ResponseBody.class);
+//        if (responseBody == null) {
+//            RestController restController = handlerMethod.getBeanType().getAnnotation(RestController.class);
+//            return restController == null;
+//        }
+//        return false;
+//    }
 
     public static void sendRedirects(HttpServletRequest request, HttpServletResponse response, String url) throws IOException {
         String newUrl = UrlRedirectUtil.getHeaderProxyPath(request, PROXY_PATH) + url;

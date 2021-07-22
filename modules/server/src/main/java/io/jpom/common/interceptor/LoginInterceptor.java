@@ -48,9 +48,6 @@ public class LoginInterceptor extends BaseJpomInterceptor {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, HandlerMethod handlerMethod) throws Exception {
         HttpSession session = getSession();
-        // 记录请求类型
-        boolean isPage = isPage(handlerMethod);
-        request.setAttribute("Page_Req", isPage);
         //
         NotLogin notLogin = handlerMethod.getMethodAnnotation(NotLogin.class);
         if (notLogin == null) {
@@ -150,26 +147,26 @@ public class LoginInterceptor extends BaseJpomInterceptor {
      * @throws IOException 异常
      */
     private void responseLogin(HttpServletRequest request, HttpServletResponse response, HandlerMethod handlerMethod, int code) throws IOException {
-        if (isPage(handlerMethod)) {
-            String url = "/login.html?";
-            String uri = request.getRequestURI();
-            if (StrUtil.isNotEmpty(uri) && !StrUtil.SLASH.equals(uri)) {
-                String queryString = request.getQueryString();
-                if (queryString != null) {
-                    uri += "?" + queryString;
-                }
-                // 补全
-                String newUri = BaseJpomInterceptor.getHeaderProxyPath(request) + uri;
-                newUri = UrlRedirectUtil.getRedirect(request, newUri);
-                url += "&url=" + URLUtil.encodeAll(newUri);
-            }
-            String header = request.getHeader(HttpHeaders.REFERER);
-            if (header != null) {
-                url += "&r=" + header;
-            }
-            sendRedirects(request, response, url);
-            return;
-        }
+//        if (isPage(handlerMethod)) {
+//            String url = "/login.html?";
+//            String uri = request.getRequestURI();
+//            if (StrUtil.isNotEmpty(uri) && !StrUtil.SLASH.equals(uri)) {
+//                String queryString = request.getQueryString();
+//                if (queryString != null) {
+//                    uri += "?" + queryString;
+//                }
+//                // 补全
+//                String newUri = BaseJpomInterceptor.getHeaderProxyPath(request) + uri;
+//                newUri = UrlRedirectUtil.getRedirect(request, newUri);
+//                url += "&url=" + URLUtil.encodeAll(newUri);
+//            }
+//            String header = request.getHeader(HttpHeaders.REFERER);
+//            if (header != null) {
+//                url += "&r=" + header;
+//            }
+//            sendRedirects(request, response, url);
+//            return;
+//        }
         ServletUtil.write(response, JsonMessage.getString(code, "登录信息已失效,重新登录"), MediaType.APPLICATION_JSON_UTF8_VALUE);
     }
 
