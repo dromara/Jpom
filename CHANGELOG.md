@@ -4,6 +4,8 @@
 
 ### 新增功能
 
+1. 【server】新增配置 h2 数据账号密码参数（注意之前已经存在的数据不能直接配置、会出现登录不成功情况）
+
 ### 解决BUG、优化功能
 
 1. 【agent】 修护 nginx 重载判断问题（@大灰灰大 码云 issue [I40UE7](https://gitee.com/dromara/Jpom/issues/I40UE7) ）
