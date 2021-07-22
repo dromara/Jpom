@@ -129,11 +129,11 @@ public class OperateLogController implements AopLogInterface {
             String json = value.toString();
             userOperateLogV1.setResultMsg(json);
             try {
-                JsonMessage jsonMessage = JSONObject.parseObject(json, JsonMessage.class);
+                JsonMessage<String> jsonMessage = JSONObject.parseObject(json, JsonMessage.class);
                 // 没有输入验证码不记录日志
-                if (optType == UserOperateLogV1.OptType.Login && jsonMessage.getCode() == LoginControl.INPUT_CODE) {
-                    return;
-                }
+//                if (optType == UserOperateLogV1.OptType.Login && jsonMessage.getCode() == LoginControl.INPUT_CODE) {
+//                    return;
+//                }
                 userOperateLogV1.setOptStatus(jsonMessage.getCode());
             } catch (Exception ignored) {
             }
