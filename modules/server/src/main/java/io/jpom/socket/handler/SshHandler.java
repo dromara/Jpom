@@ -1,6 +1,5 @@
 package io.jpom.socket.handler;
 
-import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.StrUtil;
@@ -22,10 +21,8 @@ import org.springframework.web.socket.WebSocketSession;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -41,7 +38,7 @@ public class SshHandler extends BaseHandler {
 	@Override
 	public void afterConnectionEstablished(WebSocketSession session) throws Exception {
 		SshModel sshItem = (SshModel) session.getAttributes().get("sshItem");
-		Map<String, String[]> parameterMap = (Map<String, String[]>) session.getAttributes().get("parameterMap");
+		//Map<String, String[]> parameterMap = (Map<String, String[]>) session.getAttributes().get("parameterMap");
 //		String[] fileDirAlls;
 //		//判断url是何操作请求
 //		if (parameterMap.containsKey("tail")) {
@@ -73,13 +70,8 @@ public class SshHandler extends BaseHandler {
 //				return;
 //			}
 //		}
-		Session openSession = SshService.getSession(sshItem);
-		//JschUtil.openSession(sshItem.getHost(), sshItem.getPort(), sshItem.getUser(), sshItem.getPassword());
-		Channel channel = JschUtil.createChannel(openSession, ChannelType.SHELL);
-		InputStream inputStream = channel.getInputStream();
-		OutputStream outputStream = channel.getOutputStream();
 		//
-		HandlerItem handlerItem = new HandlerItem(session, inputStream, outputStream, openSession, channel, sshItem);
+		HandlerItem handlerItem = new HandlerItem(session, sshItem);
 		handlerItem.startRead();
 		HANDLER_ITEM_CONCURRENT_HASH_MAP.put(session.getId(), handlerItem);
 		//
@@ -119,6 +111,11 @@ public class SshHandler extends BaseHandler {
 	@Override
 	protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
 		HandlerItem handlerItem = HANDLER_ITEM_CONCURRENT_HASH_MAP.get(session.getId());
+		if (handlerItem == null) {
+			sendBinary(session, "已经离线啦");
+			IoUtil.close(session);
+			return;
+		}
 		String payload = message.getPayload();
 		if (JSONValidator.from(payload).getType() == JSONValidator.Type.Object) {
 			JSONObject jsonObject = JSONObject.parseObject(payload);
@@ -131,11 +128,13 @@ public class SshHandler extends BaseHandler {
 		this.sendCommand(handlerItem, payload);
 	}
 
-	private void sendCommand(HandlerItem handlerItem, String data) throws IOException {
-		if (handlerItem.addMsg(data)) {
+	private void sendCommand(HandlerItem handlerItem, String data) throws Exception {
+		if (handlerItem.checkInput(data)) {
 			handlerItem.outputStream.write(data.getBytes());
 		} else {
 			handlerItem.outputStream.write("没有执行相关命令权限".getBytes());
+			handlerItem.outputStream.flush();
+			handlerItem.outputStream.write(new byte[]{3});
 		}
 		handlerItem.outputStream.flush();
 	}
@@ -148,20 +147,15 @@ public class SshHandler extends BaseHandler {
 		private final Session openSession;
 		private final Channel channel;
 		private final SshModel sshItem;
-		private final List<String> nowLineInput = new ArrayList<>();
+		private final StringBuilder nowLineInput = new StringBuilder();
 
-		HandlerItem(WebSocketSession session,
-					InputStream inputStream,
-					OutputStream outputStream,
-					Session openSession,
-					Channel channel,
-					SshModel sshItem) {
+		HandlerItem(WebSocketSession session, SshModel sshItem) throws IOException {
 			this.session = session;
-			this.inputStream = inputStream;
-			this.outputStream = outputStream;
-			this.openSession = openSession;
-			this.channel = channel;
 			this.sshItem = sshItem;
+			this.openSession = SshService.getSession(sshItem);
+			this.channel = JschUtil.createChannel(openSession, ChannelType.SHELL);
+			this.inputStream = channel.getInputStream();
+			this.outputStream = channel.getOutputStream();
 		}
 
 		void startRead() throws JSchException {
@@ -169,21 +163,27 @@ public class SshHandler extends BaseHandler {
 			ThreadUtil.execute(this);
 		}
 
-		public boolean addMsg(String msg) {
-			nowLineInput.add(msg);
-			if (StrUtil.equals(msg, StrUtil.CR)) {
-				String join = CollUtil.join(nowLineInput, "");
-				nowLineInput.clear();
-				// 检查禁止执行的命令
-				String notAllowedCommand = sshItem.getNotAllowedCommand();
-				if (StrUtil.isNotEmpty(notAllowedCommand)) {
-					List<String> split = StrUtil.split(notAllowedCommand, StrUtil.COMMA);
-					for (String s : split) {
-						s = s.toLowerCase();
-						if (StrUtil.startWithAny(join.toLowerCase(), s + StrUtil.SPACE, ("&" + s + StrUtil.SPACE), StrUtil.SPACE + s + StrUtil.SPACE)) {
-							return false;
-						}
-					}
+		public boolean checkInput(String msg) {
+			nowLineInput.append(msg);
+			if (StrUtil.equalsAny(msg, StrUtil.CR, StrUtil.TAB)) {
+				String join = nowLineInput.toString();
+				if (StrUtil.equals(msg, StrUtil.CR)) {
+					nowLineInput.setLength(0);
+				}
+				return checkInputItem(join);
+			}
+			// 复制输出
+			return checkInputItem(msg);
+		}
+
+		private boolean checkInputItem(String inputItem) {
+			// 检查禁止执行的命令
+			String notAllowedCommand = sshItem.getNotAllowedCommand();
+			List<String> split = StrUtil.split(notAllowedCommand, StrUtil.COMMA);
+			for (String s : split) {
+				s = s.toLowerCase();
+				if (StrUtil.startWithAny(inputItem.toLowerCase(), s + StrUtil.SPACE, ("&" + s + StrUtil.SPACE), StrUtil.SPACE + s + StrUtil.SPACE)) {
+					return false;
 				}
 			}
 			return true;
@@ -210,17 +210,13 @@ public class SshHandler extends BaseHandler {
 
 	@Override
 	public void destroy(WebSocketSession session) {
-		try {
-			if (session.isOpen()) {
-				session.close();
-			}
-		} catch (IOException ignored) {
-		}
 		HandlerItem handlerItem = HANDLER_ITEM_CONCURRENT_HASH_MAP.get(session.getId());
 		IoUtil.close(handlerItem.inputStream);
 		IoUtil.close(handlerItem.outputStream);
 		JschUtil.close(handlerItem.channel);
 		JschUtil.close(handlerItem.openSession);
+		IoUtil.close(session);
+		HANDLER_ITEM_CONCURRENT_HASH_MAP.remove(session.getId());
 	}
 
 	private static void sendBinary(WebSocketSession session, String msg) {
