@@ -72,6 +72,12 @@ public class ServerExtConfigBean {
 	private int authorizeRenewal;
 
 	/**
+	 * 登录token 加密的key 长度建议控制到 16位
+	 */
+	@Value("${jpom.authorize.key:}")
+	private String authorizeKey;
+
+	/**
 	 * 构建最多保存多少份历史记录
 	 */
 	@Value("${build.maxHistoryCount:1000}")
@@ -120,6 +126,10 @@ public class ServerExtConfigBean {
 
 	public String getDbUserPwd() {
 		return StrUtil.emptyToDefault(this.dbUserPwd, "jpom");
+	}
+
+	public byte[] getAuthorizeKey() {
+		return StrUtil.emptyToDefault(this.authorizeKey, "KZQfFBJTW2v6obS1").getBytes();
 	}
 
 	/**

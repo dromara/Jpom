@@ -6,6 +6,7 @@
 
 1. 【server】新增配置 h2 数据账号密码参数（注意之前已经存在的数据不能直接配置、会出现登录不成功情况）
 2. 【agent】项目新增配置控制台日志输出目录
+3. 【server】新增配置 jwt token 签名 key 参数
 
 ### 解决BUG、优化功能
 
@@ -41,23 +42,19 @@
    项目监控页面，线程数据加载失败问题 [点击查看提交记录](https://gitee.com/dromara/Jpom/commit/b11c5443db6468a2bf7f6a9fa933f8d965899624) [@Hotstrip](https://gitee.com/hotstrip)
 3. 【server】fix bug: 修复低版本浏览器不支持 `.replaceAll()`
    方法 [点击查看提交记录](https://gitee.com/dromara/Jpom/commit/0fb475963153b76546409ac3065a0efe9e647541) [@杨巍](https://gitee.com/fat_magpie_beijing_tony)
-4. 【server】update: 更新分发列表 --
-   关联分发项目页面操作逻辑（跟老版本操作逻辑一致）[点击查看提交记录](https://gitee.com/dromara/Jpom/commit/cd6e4ae89f833e5e7ef11bd12c324a487de27b1a) [@李道甫](https://gitee.com/koushare_dfli)
-5. 【server】update: 优化项目文件管理页面，加载目录树时会多次显示 loading
-   层 [点击查看提交记录](https://gitee.com/dromara/Jpom/commit/71b3779bffb36259e0980ce25d4e4082a9d7c2e6) [@Hotstrip](https://gitee.com/hotstrip)
-6. 【server】fix bug: 修复节点请求超时可能导致节点项目列表为空
-   bug [点击查看提交记录](https://gitee.com/dromara/Jpom/commit/e3182dfa04c27e63a29d67b292a7bfef834f875e) [@Hotstrip](https://gitee.com/hotstrip)
+4. 【server】update: 更新分发列表 -- 关联分发项目页面操作逻辑（跟老版本操作逻辑一致）[点击查看提交记录](https://gitee.com/dromara/Jpom/commit/cd6e4ae89f833e5e7ef11bd12c324a487de27b1a) [@李道甫](https://gitee.com/koushare_dfli)
+5. 【server】update: 优化项目文件管理页面，加载目录树时会多次显示 loading 层 [点击查看提交记录](https://gitee.com/dromara/Jpom/commit/71b3779bffb36259e0980ce25d4e4082a9d7c2e6) [@Hotstrip](https://gitee.com/hotstrip)
+6. 【server】fix bug: 修复节点请求超时可能导致节点项目列表为空 bug [点击查看提交记录](https://gitee.com/dromara/Jpom/commit/e3182dfa04c27e63a29d67b292a7bfef834f875e) [@Hotstrip](https://gitee.com/hotstrip)
 7. 【agent】 fix bug: index 获取进程列表 NPE (感谢@夏末秋初)
 8. 【server】fix bug: 修复上传项目压缩文件创建项目目录异常[点击这里查看对应 issue](https://gitee.com/dromara/Jpom/issues/I29FRJ)
-9. 【server】fix bug：创建构建时，如果选择
-   svn，隐藏掉分支选项。[点击这里查看对应 issue](https://gitee.com/dromara/Jpom/issues/I3TA6S) [感谢 Alexa 提出 issue](https://gitee.com/alexa1989) [@Hotstrip](https://gitee.com/dromara/Jpom/compare/180914f4ddda4dc34fa2df9b169bac7b593dedb0...aa6bb065b6f507ad0bf42225a2aad40e2d25597f)
+9. 【server】fix bug：创建构建时，如果选择 svn，隐藏掉分支选项。[点击这里查看对应 issue](https://gitee.com/dromara/Jpom/issues/I3TA6S) [感谢 Alexa 提出 issue](https://gitee.com/alexa1989) [@Hotstrip](https://gitee.com/dromara/Jpom/compare/180914f4ddda4dc34fa2df9b169bac7b593dedb0...aa6bb065b6f507ad0bf42225a2aad40e2d25597f)
 10. 【server】 fix bug: ssh 构建发布清空历史文件失败（感谢@金晨曦）
 11. 【server】update 构建初始化仓库拉取指定分支，不先拉取主分支再切换到指定分支（感谢@大灰灰）
 12. 【server】程序关闭时候自动关闭 h2 数据连接池，避免数据库文件被损坏
 13. 【server】style:
-    优化logo，登录页面，初始化页面 [点击查看对应提交记录](https://gitee.com/dromara/Jpom/commit/5d4783f0be7d44bb04275b059ccd1509620c5828) [@长得丑活得久i](https://gitee.com/zsf_008)
+	优化logo，登录页面，初始化页面 [点击查看对应提交记录](https://gitee.com/dromara/Jpom/commit/5d4783f0be7d44bb04275b059ccd1509620c5828) [@长得丑活得久i](https://gitee.com/zsf_008)
 14. 【server】fix bug:
-    修复在没有配置nginx白名单时访问nginx列表数据一直加载中问题[点击这里查看对应 issue](https://github.com/dromara/Jpom/issues/5) [@长得丑活得久i](https://gitee.com/zsf_008)
+	修复在没有配置nginx白名单时访问nginx列表数据一直加载中问题[点击这里查看对应 issue](https://github.com/dromara/Jpom/issues/5) [@长得丑活得久i](https://gitee.com/zsf_008)
 15. 新增 .gitattributes 文件控制命令文件的编码格式以及换行符（感谢@ℳ๓₯㎕斌）
 
 ------
@@ -92,7 +89,7 @@
 13. 【Agent】解决控制台输出 `Failed to check connection: java.net.ConnectException: Connection refused: connect`,因为没有关闭对应的 jmx
 14. 【Agent】解决首页控制台 java 进程列表慢的问题（采用定时拉取并缓存）
 15. 【server】fix bug:
-    节点列表页面，展开某个节点之后点击操作按钮会出现新的一行无效数据。 [点击查看提交记录](https://gitee.com/dromara/Jpom/commit/b9ecdfa649d27c46bca696e6df088a0908056ff6)
+	节点列表页面，展开某个节点之后点击操作按钮会出现新的一行无效数据。 [点击查看提交记录](https://gitee.com/dromara/Jpom/commit/b9ecdfa649d27c46bca696e6df088a0908056ff6)
 16. 【server】fix bug: 节点列表页面，在没有安装节点的情况下，点击终端按钮会在控制台报错。[点击这里查看对应 issue](https://gitee.com/dromara/Jpom/issues/I3J4UI)
 17. 【server】fix bug: 节点管理里面的 Nginx 管理，关闭服务的接口参数传递错了。[点击这里查看对应 issue](https://gitee.com/dromara/Jpom/issues/I3IFZY)
 18. 【server】优化系统配置页面的样式，在小屏幕设备上会出现多个竖方向上的滚动条，甚至有时候会遮住底部的操作按钮

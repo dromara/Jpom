@@ -8,6 +8,8 @@ jpom:
     expired: 24
     #登录token失效后自动续签时间（单位：分钟），默认为60，不自动续签
     renewal: 60
+    # jwt 签名(加密)的key 长度建议控制到 16位
+    key:
 user:
   # 最多能创建多少个用户
   maxCount: 10
