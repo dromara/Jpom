@@ -62,72 +62,68 @@ public class CacheManageController extends BaseServerController {
 //        return "system/cache";
 //    }
 
-    /**
-     * @author Hotstrip
-     * get server's cache data
-     * 获取 Server 的缓存数据
-     * @return
-     */
-    @RequestMapping(value = "server-cache", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    @ResponseBody
-    public String serverCache() {
-        Map<String, Object> map = new HashMap<>();
-        File file = ConfigBean.getInstance().getTempPath();
-        String fileSize = FileUtil.readableFileSize(FileUtil.size(file));
-        map.put("cacheFileSize", fileSize);
+	/**
+	 * @return
+	 * @author Hotstrip
+	 * get server's cache data
+	 * 获取 Server 的缓存数据
+	 */
+	@RequestMapping(value = "server-cache", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	@ResponseBody
+	public String serverCache() {
+		Map<String, Object> map = new HashMap<>();
+		String fileSize = FileUtil.readableFileSize(BuildUtil.tempFileCacheSize);
+		map.put("cacheFileSize", fileSize);
 
-        int size = LoginControl.LFU_CACHE.size();
-        map.put("ipSize", size);
-        int oneLineCount = ServiceFileTailWatcher.getOneLineCount();
-        map.put("readFileOnLineCount", oneLineCount);
+		int size = LoginControl.LFU_CACHE.size();
+		map.put("ipSize", size);
+		int oneLineCount = ServiceFileTailWatcher.getOneLineCount();
+		map.put("readFileOnLineCount", oneLineCount);
 
-        File buildDataDir = BuildUtil.getBuildDataDir();
-        if (buildDataDir.exists()) {
-            fileSize = FileUtil.readableFileSize(FileUtil.size(buildDataDir));
-            map.put("cacheBuildFileSize", fileSize);
-        } else {
-            map.put("cacheBuildFileSize", 0);
-        }
-        return JsonMessage.getString(200, "ok", map);
-    }
 
-    /**
-     * 获取节点中的缓存
-     *
-     * @return json
-     */
-    @RequestMapping(value = "node_cache.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    @ResponseBody
-    @Feature(method = MethodFeature.CACHE)
-    public String nodeCache() {
-        return NodeForward.request(getNode(), getRequest(), NodeUrl.Cache).toString();
-    }
+		fileSize = FileUtil.readableFileSize(BuildUtil.buildCacheSize);
+		map.put("cacheBuildFileSize", fileSize);
 
-    /**
-     * 清空缓存
-     *
-     * @param type 类型
-     * @return json
-     */
-    @RequestMapping(value = "clearCache.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    @ResponseBody
-    @OptLog(UserOperateLogV1.OptType.ClearCache)
-    @Feature(method = MethodFeature.CACHE)
-    public String clearCache(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "类型错误") String type) {
-        switch (type) {
-            case "serviceCacheFileSize":
-                boolean clean = FileUtil.clean(ConfigBean.getInstance().getTempPath());
-                if (!clean) {
-                    return JsonMessage.getString(504, "清空文件缓存失败");
-                }
-                break;
-            case "serviceIpSize":
-                LoginControl.LFU_CACHE.clear();
-                break;
-            default:
-                return NodeForward.request(getNode(), getRequest(), NodeUrl.ClearCache).toString();
+		return JsonMessage.getString(200, "ok", map);
+	}
 
-        }
-        return JsonMessage.getString(200, "清空成功");
-    }
+	/**
+	 * 获取节点中的缓存
+	 *
+	 * @return json
+	 */
+	@RequestMapping(value = "node_cache.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	@ResponseBody
+	@Feature(method = MethodFeature.CACHE)
+	public String nodeCache() {
+		return NodeForward.request(getNode(), getRequest(), NodeUrl.Cache).toString();
+	}
+
+	/**
+	 * 清空缓存
+	 *
+	 * @param type 类型
+	 * @return json
+	 */
+	@RequestMapping(value = "clearCache.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	@ResponseBody
+	@OptLog(UserOperateLogV1.OptType.ClearCache)
+	@Feature(method = MethodFeature.CACHE)
+	public String clearCache(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "类型错误") String type) {
+		switch (type) {
+			case "serviceCacheFileSize":
+				boolean clean = FileUtil.clean(ConfigBean.getInstance().getTempPath());
+				if (!clean) {
+					return JsonMessage.getString(504, "清空文件缓存失败");
+				}
+				break;
+			case "serviceIpSize":
+				LoginControl.LFU_CACHE.clear();
+				break;
+			default:
+				return NodeForward.request(getNode(), getRequest(), NodeUrl.ClearCache).toString();
+
+		}
+		return JsonMessage.getString(200, "清空成功");
+	}
 }
