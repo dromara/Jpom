@@ -390,36 +390,36 @@ export default {
     },
     // 编辑分发
     handleEditDispatch(record) {
-      //分发节点重新渲染
-      record.outGivingNodeProjectList.forEach(ele => {
-        let index = '';
-        let projects = [];
-        this.nodeNameList.forEach((item,idx) =>{
-          if (item.id === ele.nodeId){
-            index = idx;
-            projects = item.projects;
-            item.openStatus = false;
-          }
-        })
-        this.temp[`node_${ele.nodeId}`] = ele.projectId;
-        this.dispatchList.push({
-          nodeId: ele.nodeId,
-          projectId: ele.projectId,
-          index: index,
-          project: projects,
-          status: true
-        });
-      })
-      this.temp.type = 'edit';
-      this.temp.projectId = record.projectId;
-      this.temp.name = record.name;
-      this.temp.afterOpt = record.afterOpt;
-      this.temp.id = record.id;
-      this.loadReqId();
-      this.linkDispatchVisible = true;
-      this.$nextTick(() => {
-       this.$refs['linkDispatchForm'].resetFields();
-      })
+			this.$nextTick(() => {
+				this.$refs['linkDispatchForm'] && this.$refs['linkDispatchForm'].resetFields();
+				//分发节点重新渲染
+				record.outGivingNodeProjectList.forEach(ele => {
+					let index = '';
+					let projects = [];
+					this.nodeNameList.forEach((item,idx) =>{
+						if (item.id === ele.nodeId){
+							index = idx;
+							projects = item.projects;
+							item.openStatus = false;
+						}
+					})
+					this.temp[`node_${ele.nodeId}`] = ele.projectId;
+					this.dispatchList.push({
+						nodeId: ele.nodeId,
+						projectId: ele.projectId,
+						index: index,
+						project: projects,
+						status: true
+					});
+				})
+				this.temp.type = 'edit';
+				this.temp.projectId = record.projectId;
+				this.temp.name = record.name;
+				this.temp.afterOpt = record.afterOpt;
+				this.temp.id = record.id;
+				this.loadReqId();
+				this.linkDispatchVisible = true;
+			})
     },
     // 选择项目
     selectProject(value) {
@@ -501,47 +501,48 @@ export default {
     },
     // 编辑分发项目
     handleEditDispatchProject(record) {
-      this.temp = {};
-      record.outGivingNodeProjectList.forEach(ele => {
-        const params = {
-          id: ele.projectId,
-          nodeId: ele.nodeId
-        }
-        getProjectData(params).then(res => {
-          if (res.code === 200) {
-            // 如果 temp.id 不存在
-            if (!this.temp.id) {
-              this.temp = {
-                id: res.data.id,
-                name: res.data.name,
-                type: 'edit',
-                afterOpt: res.data.afterOpt,
-                runMode: res.data.runMode,
-                mainClass: res.data.mainClass,
-                javaExtDirsCp: res.data.javaExtDirsCp,
-                whitelistDirectory: res.data.whitelistDirectory,
-                lib: res.data.lib,
-                nodeIdList: []
-              }
-            }
-            // 添加 nodeIdList
-            this.temp.nodeIdList.push(ele.nodeId);
-            // 添加 jvm token args
-            this.temp[`${ele.nodeId}_jvm`] = res.data.jvm || '';
-            this.temp[`${ele.nodeId}_token`] = res.data.token || '';
-            this.temp[`${ele.nodeId}_args`] = res.data.args || '';
-            // 添加 javaCopyItemList
-            this.temp[`${ele.nodeId}_javaCopyItemList`] = res.data.javaCopyItemList || [];
-          }
-        })
-      })
-      // 加载其他数据
-      this.loadAccesList();
-      this.loadReqId();
-      this.editDispatchVisible = true;
-      this.$nextTick(() => {
-        this.$refs['editDispatchForm'].resetFields();
-      })
+			this.$nextTick(() => {
+				this.$refs['editDispatchForm'] &&	this.$refs['editDispatchForm'].resetFields();
+				//
+				this.temp = {};
+				record.outGivingNodeProjectList.forEach(ele => {
+					const params = {
+						id: ele.projectId,
+						nodeId: ele.nodeId
+					}
+					getProjectData(params).then(res => {
+						if (res.code === 200) {
+							// 如果 temp.id 不存在
+							if (!this.temp.id) {
+								this.temp = {
+									id: res.data.id,
+									name: res.data.name,
+									type: 'edit',
+									afterOpt: res.data.afterOpt,
+									runMode: res.data.runMode,
+									mainClass: res.data.mainClass,
+									javaExtDirsCp: res.data.javaExtDirsCp,
+									whitelistDirectory: res.data.whitelistDirectory,
+									lib: res.data.lib,
+									nodeIdList: []
+								}
+							}
+							// 添加 nodeIdList
+							this.temp.nodeIdList.push(ele.nodeId);
+							// 添加 jvm token args
+							this.temp[`${ele.nodeId}_jvm`] = res.data.jvm || '';
+							this.temp[`${ele.nodeId}_token`] = res.data.token || '';
+							this.temp[`${ele.nodeId}_args`] = res.data.args || '';
+							// 添加 javaCopyItemList
+							this.temp[`${ele.nodeId}_javaCopyItemList`] = res.data.javaCopyItemList || [];
+						}
+					})
+				})
+				// 加载其他数据
+				this.loadAccesList();
+				this.loadReqId();
+				this.editDispatchVisible = true;
+			})
     },
     // 添加副本
     handleAddReplica(nodeId) {
