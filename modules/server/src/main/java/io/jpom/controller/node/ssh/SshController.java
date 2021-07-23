@@ -65,8 +65,8 @@ public class SshController extends BaseServerController {
 			});
 			list.forEach(sshModel -> {
 				// 不返回密码
-				//sshModel.setPassword(null);
-				//sshModel.setPrivateKey(null);
+				sshModel.setPassword(null);
+//				sshModel.setPrivateKey(null);
 				// 节点信息
 				BaseModel nodeModel = map.get(sshModel.getId());
 				sshModel.setNodeModel(nodeModel);

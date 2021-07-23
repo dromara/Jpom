@@ -20,8 +20,7 @@
 		</div>
 		<!-- console -->
 		<div>
-			<a-input class="console" id="project-console" v-model="logContext" readOnly type="textarea"
-							 style="resize: none;"/>
+			<a-input class="console" id="project-console" v-model="logContext" readOnly type="textarea" style="resize: none;"/>
 		</div>
 		<!-- 日志备份 -->
 		<a-modal v-model="lobbackVisible" title="日志备份列表" width="850px" :footer="null" :maskClosable="false">
@@ -30,8 +29,7 @@
 				<a-tag color="orange">控制台日志备份路径: {{ project.logBack }}</a-tag>
 			</div>
 			<!-- 数据表格 -->
-			<a-table :data-source="logBackList" :loading="loading" :columns="columns" :scroll="{y: 400}" :pagination="false"
-							 bordered :rowKey="(record, index) => index">
+			<a-table :data-source="logBackList" :loading="loading" :columns="columns" :scroll="{y: 400}" :pagination="false" bordered :rowKey="(record, index) => index">
 				<a-tooltip slot="filename" slot-scope="text" placement="topLeft" :title="text">
 					<span>{{ text }}</span>
 				</a-tooltip>

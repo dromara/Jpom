@@ -9,6 +9,8 @@ import {FitAddon} from 'xterm-addon-fit';
 import {AttachAddon} from 'xterm-addon-attach';
 import {mapGetters} from 'vuex';
 
+// https://blog.csdn.net/qq_41840688/article/details/108636267
+
 export default {
 	props: {
 		sshId: {

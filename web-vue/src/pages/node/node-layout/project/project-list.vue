@@ -9,15 +9,12 @@
 			<a-button type="primary" @click="handleFilter">刷新</a-button>
 		</div>
 		<!-- 数据表格 -->
-		<a-table :data-source="list" :loading="loading" :columns="columns" :pagination="false" bordered
-						 :rowKey="(record, index) => index"
-						 :style="{'max-height': tableHeight + 'px' }" :scroll="{x: 1330, y: tableHeight - 60}">
+		<a-table :data-source="list" :loading="loading" :columns="columns" :pagination="false" bordered :rowKey="(record, index) => index" :style="{'max-height': tableHeight + 'px' }" :scroll="{x: 1330, y: tableHeight - 60}">
 			<a-tooltip slot="name" slot-scope="text" placement="topLeft" :title="text">
 				<span>{{ text }}</span>
 			</a-tooltip>
 			<a-switch slot="status" slot-scope="text" :checked="text" disabled checked-children="开" un-checked-children="关"/>
-			<a-tooltip slot="port" slot-scope="text, record" placement="topLeft"
-								 :title="`进程号：${record.pid},  端口号：${record.port}`">
+			<a-tooltip slot="port" slot-scope="text, record" placement="topLeft" :title="`进程号：${record.pid},  端口号：${record.port}`">
 				<span v-if="record.pid">{{ record.port }}/{{ record.pid }}</span>
 			</a-tooltip>
 			<template slot="operation" slot-scope="text, record">
@@ -107,12 +104,10 @@
 						<a-select-option v-for="jdk in jdkList" :key="jdk.id">{{ jdk.name }}</a-select-option>
 					</a-select>
 				</a-form-model-item>
-				<a-form-model-item label="Main Class" prop="mainClass"
-													 v-show="temp.runMode !== 'Jar' && temp.runMode !== 'File'">
+				<a-form-model-item label="Main Class" prop="mainClass" v-show="temp.runMode !== 'Jar' && temp.runMode !== 'File'">
 					<a-input v-model="temp.mainClass" placeholder="程序运行的 main 类(jar 模式运行可以不填)"/>
 				</a-form-model-item>
-				<a-form-model-item label="JavaExtDirsCp" prop="javaExtDirsCp"
-													 v-show="temp.runMode === 'JavaExtDirsCp' && temp.runMode !== 'File'">
+				<a-form-model-item label="JavaExtDirsCp" prop="javaExtDirsCp" v-show="temp.runMode === 'JavaExtDirsCp' && temp.runMode !== 'File'">
 					<a-input v-model="temp.javaExtDirsCp" placeholder="-Dext.dirs=xxx: -cp xx  填写【xxx:xx】"/>
 				</a-form-model-item>
 				<a-form-model-item label="JVM 参数" prop="jvm" v-show="temp.runMode !== 'File'">
@@ -141,8 +136,7 @@
 				<a-form-model-item label="操作" v-show="temp.runMode !== 'File'">
 					<a-button type="primary" @click="handleAddReplica">添加副本</a-button>
 				</a-form-model-item>
-				<a-form-model-item label="WebHooks" prop="token" v-show="temp.runMode !== 'File'"
-													 class="jpom-node-project-token">
+				<a-form-model-item label="WebHooks" prop="token" v-show="temp.runMode !== 'File'" class="jpom-node-project-token">
 					<a-input v-model="temp.token" placeholder="关闭程序时自动请求,非必填，GET请求"/>
 				</a-form-model-item>
 				<a-form-model-item v-show="temp.type === 'edit'&&temp.runMode !== 'File'" label="日志路径" prop="log">
