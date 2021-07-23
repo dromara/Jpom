@@ -251,6 +251,7 @@ Agent.sh create    创建Jpom插件端的应用服务（jpom-agent）
 | SpringBoot_v2      | [https://gitee.com/bdj/SpringBoot_v2](https://gitee.com/bdj/SpringBoot_v2) | 基于springboot的一款纯净脚手架|
 | TLog GVP 项目 | [https://gitee.com/dromara/TLog](https://gitee.com/dromara/TLog) | 一个轻量级的分布式日志标记追踪神器，10分钟即可接入，自动对日志打标签完成微服务的链路追踪 |
 | Sa-Token | [https://gitee.com/dromara/sa-token](https://gitee.com/dromara/sa-token) | 这可能是史上功能最全的 Java 权限认证框架！ |
+| Erupt | [https://gitee.com/erupt/erupt](https://gitee.com/erupt/erupt) | 零前端代码，纯注解开发 admin 管理后台 |
 
 ### giteye
 
