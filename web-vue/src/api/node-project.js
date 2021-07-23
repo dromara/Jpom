@@ -8,11 +8,11 @@ import axios from './config';
  * @param {String} nodeId 节点 ID
  */
 export function getJdkList(nodeId) {
-  return axios({
-    url: '/node/manage/jdk/list',
-    method: 'post',
-    data: {nodeId}
-  })
+	return axios({
+		url: '/node/manage/jdk/list',
+		method: 'post',
+		data: {nodeId}
+	})
 }
 
 /**
@@ -24,11 +24,11 @@ export function getJdkList(nodeId) {
  * params.path jdk 路径
  */
 export function editJdk(params) {
-  return axios({
-    url: '/node/manage/jdk/update',
-    method: 'post',
-    data: params
-  })
+	return axios({
+		url: '/node/manage/jdk/update',
+		method: 'post',
+		data: params
+	})
 }
 
 /**
@@ -38,11 +38,11 @@ export function editJdk(params) {
  * params.id 编辑修改时判断 ID
  */
 export function deleteJdk(params) {
-  return axios({
-    url: '/node/manage/jdk/delete',
-    method: 'post',
-    data: params
-  })
+	return axios({
+		url: '/node/manage/jdk/delete',
+		method: 'post',
+		data: params
+	})
 }
 
 /**
@@ -53,11 +53,11 @@ export function deleteJdk(params) {
  * }
  */
 export function getProjectList(params) {
-  return axios({
-    url: '/node/manage/getProjectInfo',
-    method: 'post',
-    data: params
-  })
+	return axios({
+		url: '/node/manage/getProjectInfo',
+		method: 'post',
+		data: params
+	})
 }
 
 /**
@@ -68,15 +68,15 @@ export function getProjectList(params) {
  * }
  */
 export function getRuningProjectInfo(params) {
-  return axios({
-    url: '/node/manage/getProjectPort',
-    method: 'post',
-    data: params,
-    timeout: 0,
-    headers: {
-      loading: 'no'
-    },
-  })
+	return axios({
+		url: '/node/manage/getProjectPort',
+		method: 'post',
+		data: params,
+		timeout: 0,
+		headers: {
+			loading: 'no'
+		},
+	})
 }
 
 /**
@@ -87,11 +87,11 @@ export function getRuningProjectInfo(params) {
  * } params
  */
 export function getProjectData(params) {
-  return axios({
-    url: '/node/manage/getProjectData.json',
-    method: 'post',
-    data: params
-  })
+	return axios({
+		url: '/node/manage/getProjectData.json',
+		method: 'post',
+		data: params
+	})
 }
 
 /**
@@ -99,11 +99,11 @@ export function getProjectData(params) {
  * @param {String} nodeId 节点 ID
  */
 export function getPorjectGroupList(nodeId) {
-  return axios({
-    url: '/node/manage/project-group-list',
-    method: 'post',
-    data: {nodeId}
-  })
+	return axios({
+		url: '/node/manage/project-group-list',
+		method: 'post',
+		data: {nodeId}
+	})
 }
 
 /**
@@ -111,11 +111,11 @@ export function getPorjectGroupList(nodeId) {
  * @param {String} nodeId 节点 ID
  */
 export function getProjectAccessList(nodeId) {
-  return axios({
-    url: '/node/manage/project-access-list',
-    method: 'post',
-    data: {nodeId}
-  })
+	return axios({
+		url: '/node/manage/project-access-list',
+		method: 'post',
+		data: {nodeId}
+	})
 }
 
 /**
@@ -138,29 +138,29 @@ export function getProjectAccessList(nodeId) {
  * }
  */
 export function editProject(params, replicaParams) {
-  const data = {
-    nodeId: params.nodeId,
-    id: params.id,
-    name: params.name,
-    group: params.group,
-    jdkId: params.jdkId,
-    runMode: params.runMode,
-    whitelistDirectory: params.whitelistDirectory,
-    lib: params.lib,
-    mainClass: params.mainClass,
-    javaExtDirsCp: params.javaExtDirsCp,
-    jvm: params.jvm,
-    args: params.args,
-    javaCopyIds: params.javaCopyIds,
-    token: params.token,
-    logPath: params.logPath,
-    ...replicaParams
-  }
-  return axios({
-    url: '/node/manage/saveProject',
-    method: 'post',
-    data
-  })
+	const data = {
+		nodeId: params.nodeId,
+		id: params.id,
+		name: params.name,
+		group: params.group,
+		jdkId: params.jdkId,
+		runMode: params.runMode,
+		whitelistDirectory: params.whitelistDirectory,
+		lib: params.lib,
+		mainClass: params.mainClass,
+		javaExtDirsCp: params.javaExtDirsCp,
+		jvm: params.jvm,
+		args: params.args,
+		javaCopyIds: params.javaCopyIds,
+		token: params.token,
+		logPath: params.logPath,
+		...replicaParams
+	}
+	return axios({
+		url: '/node/manage/saveProject',
+		method: 'post',
+		data
+	})
 }
 
 /**
@@ -172,11 +172,11 @@ export function editProject(params, replicaParams) {
  * } params
  */
 export function deleteProject(params) {
-  return axios({
-    url: '/node/manage/deleteProject',
-    method: 'post',
-    data: params
-  })
+	return axios({
+		url: '/node/manage/deleteProject',
+		method: 'post',
+		data: params
+	})
 }
 
 /**
@@ -187,14 +187,14 @@ export function deleteProject(params) {
  * } params
  */
 export function getFileList(params) {
-  return axios({
-    url: '/node/manage/file/getFileList',
-    method: 'post',
-    headers: {
-      loading: 'no'
-    },
-    data: params
-  })
+	return axios({
+		url: '/node/manage/file/getFileList',
+		method: 'post',
+		headers: {
+			loading: 'no'
+		},
+		data: params
+	})
 }
 
 /**
@@ -207,13 +207,13 @@ export function getFileList(params) {
  * } params
  */
 export function downloadProjectFile(params) {
-  return axios({
-    url: '/node/manage/file/download',
-    method: 'get',
-    responseType: 'blob',
-    timeout: 0,
-    params
-  })
+	return axios({
+		url: '/node/manage/file/download',
+		method: 'get',
+		responseType: 'blob',
+		timeout: 0,
+		params
+	})
 }
 
 /**
@@ -228,16 +228,16 @@ export function downloadProjectFile(params) {
  * } formData
  */
 export function uploadProjectFile(formData) {
-  return axios({
-    url: '/node/manage/file/upload',
-    headers: {
-      'Content-Type': 'multipart/form-data;charset=UTF-8'
-    },
-    method: 'post',
-    // 0 表示无超时时间
-    timeout: 0,
-    data: formData
-  })
+	return axios({
+		url: '/node/manage/file/upload',
+		headers: {
+			'Content-Type': 'multipart/form-data;charset=UTF-8'
+		},
+		method: 'post',
+		// 0 表示无超时时间
+		timeout: 0,
+		data: formData
+	})
 }
 
 /**
@@ -251,11 +251,11 @@ export function uploadProjectFile(formData) {
  * } params
  */
 export function deleteProjectFile(params) {
-  return axios({
-    url: '/node/manage/file/deleteFile',
-    method: 'post',
-    data: params
-  })
+	return axios({
+		url: '/node/manage/file/deleteFile',
+		method: 'post',
+		data: params
+	})
 }
 
 /**
@@ -263,11 +263,11 @@ export function deleteProjectFile(params) {
  * @param {String} nodeId 节点 ID
  */
 export function getRecoverList(nodeId) {
-  return axios({
-    url: '/node/manage/recover/recover-list',
-    method: 'post',
-    data: {nodeId}
-  })
+	return axios({
+		url: '/node/manage/recover/recover-list',
+		method: 'post',
+		data: {nodeId}
+	})
 }
 
 /**
@@ -278,11 +278,11 @@ export function getRecoverList(nodeId) {
  * } params
  */
 export function getRecoverData(params) {
-  return axios({
-    url: '/node/manage/recover/data.json',
-    method: 'post',
-    data: params
-  })
+	return axios({
+		url: '/node/manage/recover/data.json',
+		method: 'post',
+		data: params
+	})
 }
 
 /**
@@ -294,11 +294,14 @@ export function getRecoverData(params) {
  * } params
  */
 export function getProjectLogSize(params) {
-  return axios({
-    url: '/node/manage/log/logSize',
-    method: 'post',
-    data: params
-  })
+	return axios({
+		url: '/node/manage/log/logSize',
+		method: 'post',
+		data: params,
+		headers: {
+			loading: 'no'
+		},
+	})
 }
 
 /**
@@ -310,13 +313,13 @@ export function getProjectLogSize(params) {
  * } params
  */
 export function downloadProjectLogFile(params) {
-  return axios({
-    url: '/node/manage/log/export.html',
-    method: 'get',
-    responseType: 'blob',
-    timeout: 0,
-    params
-  })
+	return axios({
+		url: '/node/manage/log/export.html',
+		method: 'get',
+		responseType: 'blob',
+		timeout: 0,
+		params
+	})
 }
 
 /**
@@ -327,11 +330,11 @@ export function downloadProjectLogFile(params) {
  * } params
  */
 export function getLogBackList(params) {
-  return axios({
-    url: '/node/manage/log/log-back-list',
-    method: 'post',
-    data: params
-  })
+	return axios({
+		url: '/node/manage/log/log-back-list',
+		method: 'post',
+		data: params
+	})
 }
 
 /**
@@ -344,13 +347,13 @@ export function getLogBackList(params) {
  * } params
  */
 export function downloadProjectLogBackFile(params) {
-  return axios({
-    url: '/node/manage/log/logBack_download',
-    method: 'get',
-    responseType: 'blob',
-    timeout: 0,
-    params
-  })
+	return axios({
+		url: '/node/manage/log/logBack_download',
+		method: 'get',
+		responseType: 'blob',
+		timeout: 0,
+		params
+	})
 }
 
 /**
@@ -363,11 +366,11 @@ export function downloadProjectLogBackFile(params) {
  * } params
  */
 export function deleteProjectLogBackFile(params) {
-  return axios({
-    url: '/node/manage/log/logBack_delete',
-    method: 'post',
-    data: params
-  })
+	return axios({
+		url: '/node/manage/log/logBack_delete',
+		method: 'post',
+		data: params
+	})
 }
 
 /**
@@ -379,12 +382,12 @@ export function deleteProjectLogBackFile(params) {
  * } params
  */
 export function getInternalData(params) {
-  return axios({
-    url: '/node/manage/getInternalData',
-    method: 'post',
-    timeout: 0,
-    data: params
-  })
+	return axios({
+		url: '/node/manage/getInternalData',
+		method: 'post',
+		timeout: 0,
+		data: params
+	})
 }
 
 /**
@@ -394,12 +397,12 @@ export function getInternalData(params) {
  * } params
  */
 export function getThreadInfo(params) {
-  return axios({
-    url: '/node/manage/threadInfos',
-    method: 'post',
-    timeout: 0,
-    data: params
-  })
+	return axios({
+		url: '/node/manage/threadInfos',
+		method: 'post',
+		timeout: 0,
+		data: params
+	})
 }
 
 /**
@@ -411,13 +414,13 @@ export function getThreadInfo(params) {
  * } params
  */
 export function exportStack(params) {
-  return axios({
-    url: '/node/manage/stack',
-    method: 'get',
-    responseType: 'blob',
-    timeout: 0,
-    params
-  })
+	return axios({
+		url: '/node/manage/stack',
+		method: 'get',
+		responseType: 'blob',
+		timeout: 0,
+		params
+	})
 }
 
 /**
@@ -429,13 +432,13 @@ export function exportStack(params) {
  * } params
  */
 export function exportRam(params) {
-  return axios({
-    url: '/node/manage/ram',
-    method: 'get',
-    responseType: 'blob',
-    timeout: 0,
-    params
-  })
+	return axios({
+		url: '/node/manage/ram',
+		method: 'get',
+		responseType: 'blob',
+		timeout: 0,
+		params
+	})
 }
 
 /**
@@ -446,14 +449,14 @@ export function exportRam(params) {
  * } params
  */
 export function getProjectReplicaList(params) {
-  return axios({
-    url: '/node/manage/project_copy_list',
-    method: 'post',
-    data: params
-  })
+	return axios({
+		url: '/node/manage/project_copy_list',
+		method: 'post',
+		data: params
+	})
 }
 
-  /**
+/**
  * 查询节点目录是否存在
  * @param {
  *  nodeId: 节点 ID,
@@ -461,9 +464,9 @@ export function getProjectReplicaList(params) {
  * } params
  */
 export function nodeJudgeLibExist(params) {
-return axios({
-  url: '/node/manage/judge_lib.json',
-  method: 'post',
-  data: params
-})
+	return axios({
+		url: '/node/manage/judge_lib.json',
+		method: 'post',
+		data: params
+	})
 }

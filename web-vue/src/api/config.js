@@ -9,7 +9,6 @@ import { refreshToken } from './user';
 import { notification } from 'ant-design-vue';
 
 // axios.defaults.baseURL = 'http://localhost:2122'
-const domain = window.routerBase;
 let $global_loading;
 let startTime;
 
@@ -34,12 +33,12 @@ request.interceptors.request.use(config => {
     startTime = new Date().getTime();
   }
   // 处理数据
-  if (domain) {
+  if (window.routerBase) {
     // 防止 url 出现 //
-    config.url = (domain + config.url).replace(new RegExp('//','gm'), '/');
+    config.url = (window.routerBase + config.url).replace(new RegExp('//','gm'), '/');
   }
   if (config.headers['Content-Type'].indexOf('application/x-www-form-urlencoded') !== -1) {
-    config.data = Qs.stringify(config.data); 
+    config.data = Qs.stringify(config.data);
   }
   config.headers[TOKEN_HEADER_KEY] = store.getters.getToken;
   return config;
@@ -71,7 +70,7 @@ request.interceptors.response.use(response => {
   if (res.code === 800 || res.code === 801) {
     return checkJWTToken(res, response);
   }
-  
+
   // 其他情况
   if (res.code !== 200) {
     // 如果 headers 里面配置了 tip: no 就不用弹出提示信息
@@ -83,7 +82,7 @@ request.interceptors.response.use(response => {
       });
     }
   }
-  
+
   return res;
 }, error => {
   // 如果 headers 里面配置了 loading: no 就不用 loading
