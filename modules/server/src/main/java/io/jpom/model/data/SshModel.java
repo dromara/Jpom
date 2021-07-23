@@ -14,144 +14,157 @@ import java.util.List;
  * @date 2019/8/9
  */
 public class SshModel extends BaseModel {
-    private String host;
-    private int port;
-    private String user;
-    private String password;
-    /**
-     * 编码格式
-     */
-    private String charset;
+	private String host;
+	private int port;
+	private String user;
+	private String password;
+	/**
+	 * 编码格式
+	 */
+	private String charset;
 
-    /**
-     * 文件目录
-     */
-    private List<String> fileDirs;
+	/**
+	 * 文件目录
+	 */
+	private List<String> fileDirs;
 
-    /**
-     * ssh 私钥
-     */
-    private String privateKey;
+	/**
+	 * ssh 私钥
+	 */
+	private String privateKey;
 
-    private ConnectType connectType;
+	private ConnectType connectType;
 
-    /**
-     * 临时缓存model
-     */
-    private BaseModel nodeModel;
+	/**
+	 * 临时缓存model
+	 */
+	private BaseModel nodeModel;
 
-    public ConnectType getConnectType() {
-        if (connectType == null) {
-            return ConnectType.PASS;
-        }
-        return connectType;
-    }
+	/**
+	 * 不允许执行的命令
+	 */
+	private String notAllowedCommand;
 
-    public void setConnectType(ConnectType connectType) {
-        this.connectType = connectType;
-    }
+	public String getNotAllowedCommand() {
+		return notAllowedCommand;
+	}
 
-    public String getPrivateKey() {
-        return privateKey;
-    }
+	public void setNotAllowedCommand(String notAllowedCommand) {
+		this.notAllowedCommand = notAllowedCommand;
+	}
 
-    public void setPrivateKey(String privateKey) {
-        this.privateKey = privateKey;
-    }
+	public ConnectType getConnectType() {
+		if (connectType == null) {
+			return ConnectType.PASS;
+		}
+		return connectType;
+	}
 
-    public BaseModel getNodeModel() {
-        return nodeModel;
-    }
+	public void setConnectType(ConnectType connectType) {
+		this.connectType = connectType;
+	}
 
-    public void setNodeModel(BaseModel nodeModel) {
-        if (nodeModel == null) {
-            return;
-        }
-        this.nodeModel = new BaseModel() {
-            @Override
-            public String getName() {
-                return nodeModel.getName();
-            }
+	public String getPrivateKey() {
+		return privateKey;
+	}
 
-            @Override
-            public String getId() {
-                return nodeModel.getId();
-            }
-        };
-    }
+	public void setPrivateKey(String privateKey) {
+		this.privateKey = privateKey;
+	}
 
-    public List<String> getFileDirs() {
-        return fileDirs;
-    }
+	public BaseModel getNodeModel() {
+		return nodeModel;
+	}
 
-    public void setFileDirs(List<String> fileDirs) {
-        if (fileDirs != null) {
-            for (int i = fileDirs.size() - 1; i >= 0; i--) {
-                String s = fileDirs.get(i);
-                fileDirs.set(i, FileUtil.normalize(s));
-            }
-        }
-        this.fileDirs = fileDirs;
-    }
+	public void setNodeModel(BaseModel nodeModel) {
+		if (nodeModel == null) {
+			return;
+		}
+		this.nodeModel = new BaseModel() {
+			@Override
+			public String getName() {
+				return nodeModel.getName();
+			}
 
-    public String getHost() {
-        return host;
-    }
+			@Override
+			public String getId() {
+				return nodeModel.getId();
+			}
+		};
+	}
 
-    public void setHost(String host) {
-        this.host = host;
-    }
+	public List<String> getFileDirs() {
+		return fileDirs;
+	}
 
-    public int getPort() {
-        return port;
-    }
+	public void setFileDirs(List<String> fileDirs) {
+		if (fileDirs != null) {
+			for (int i = fileDirs.size() - 1; i >= 0; i--) {
+				String s = fileDirs.get(i);
+				fileDirs.set(i, FileUtil.normalize(s));
+			}
+		}
+		this.fileDirs = fileDirs;
+	}
 
-    public void setPort(int port) {
-        this.port = port;
-    }
+	public String getHost() {
+		return host;
+	}
 
-    public String getUser() {
-        return user;
-    }
+	public void setHost(String host) {
+		this.host = host;
+	}
 
-    public void setUser(String user) {
-        this.user = user;
-    }
+	public int getPort() {
+		return port;
+	}
 
-    public String getPassword() {
-        return password;
-    }
+	public void setPort(int port) {
+		this.port = port;
+	}
 
-    public void setPassword(String password) {
-        this.password = password;
-    }
+	public String getUser() {
+		return user;
+	}
 
-    public String getCharset() {
-        return charset;
-    }
+	public void setUser(String user) {
+		this.user = user;
+	}
 
-    public void setCharset(String charset) {
-        this.charset = charset;
-    }
+	public String getPassword() {
+		return password;
+	}
 
-    public Charset getCharsetT() {
-        Charset charset;
-        try {
-            charset = Charset.forName(this.getCharset());
-        } catch (Exception e) {
-            charset = CharsetUtil.CHARSET_UTF_8;
-        }
-        return charset;
-    }
+	public void setPassword(String password) {
+		this.password = password;
+	}
 
-    public enum ConnectType {
-        /**
-         * 账号密码
-         */
-        PASS,
-        /**
-         * 密钥
-         */
-        PUBKEY
-    }
+	public String getCharset() {
+		return charset;
+	}
+
+	public void setCharset(String charset) {
+		this.charset = charset;
+	}
+
+	public Charset getCharsetT() {
+		Charset charset;
+		try {
+			charset = Charset.forName(this.getCharset());
+		} catch (Exception e) {
+			charset = CharsetUtil.CHARSET_UTF_8;
+		}
+		return charset;
+	}
+
+	public enum ConnectType {
+		/**
+		 * 账号密码
+		 */
+		PASS,
+		/**
+		 * 密钥
+		 */
+		PUBKEY
+	}
 }

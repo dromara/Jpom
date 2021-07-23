@@ -101,7 +101,7 @@ public class SshController extends BaseServerController {
 					   String privateKey,
 					   @ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "port错误") int port,
 					   String charset, String fileDirs,
-					   String id, String type) {
+					   String id, String type, String notAllowedCommand) {
 		// 优先判断参数 如果是 password 在修改时可以不填写
 		if (connectType == SshModel.ConnectType.PASS && StrUtil.isEmpty(password) && "add".equals(type)) {
 			return JsonMessage.getString(405, "请填写登录密码");
@@ -133,10 +133,15 @@ public class SshController extends BaseServerController {
 		sshModel.setPort(port);
 		sshModel.setUser(user);
 		sshModel.setName(name);
+		sshModel.setNotAllowedCommand(notAllowedCommand);
 		sshModel.setConnectType(connectType);
 		sshModel.setPrivateKey(privateKey);
-		Charset.forName(charset);
-		sshModel.setCharset(charset);
+		try {
+			Charset.forName(charset);
+			sshModel.setCharset(charset);
+		} catch (Exception e) {
+			return JsonMessage.getString(405, "请填写正确的编码格式");
+		}
 		try {
 			Session session = SshService.getSession(sshModel);
 			JschUtil.close(session);

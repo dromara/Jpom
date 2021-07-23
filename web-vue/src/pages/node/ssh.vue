@@ -54,6 +54,9 @@
 				<a-form-model-item label="文件目录" prop="fileDirs">
 					<a-textarea v-model="temp.fileDirs" :auto-size="{ minRows: 3, maxRows: 5 }" placeholder="授权可以直接访问的目录，多个回车换行即可"/>
 				</a-form-model-item>
+				<a-form-model-item label="禁止命令" prop="notAllowedCommand">
+					<a-textarea v-model="temp.notAllowedCommand" :auto-size="{ minRows: 3, maxRows: 5 }" placeholder="禁止命令是不允许在终端执行的名，多个逗号隔开"/>
+				</a-form-model-item>
 			</a-form-model>
 		</a-modal>
 		<!-- 安装节点 -->
