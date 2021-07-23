@@ -243,6 +243,13 @@ Agent.sh create    创建Jpom插件端的应用服务（jpom-agent）
 
 ![微信赞赏](https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/images/wx_praise_small.png)
 
+
+### 精品项目推荐
+
+|项目名称 | 项目地址 | 项目介绍 |
+|---|---|---|
+| SpringBoot_v2      | [https://gitee.com/bdj/SpringBoot_v2](https://gitee.com/bdj/SpringBoot_v2) | 基于springboot的一款纯净脚手架|
+
 ### giteye
 
 [![Giteye chart](https://chart.giteye.net/gitee/dromara/Jpom/N4VGB7ZB.png)](https://giteye.net/chart/N4VGB7ZB)
