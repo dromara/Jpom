@@ -26,10 +26,10 @@
 					<a-input v-model="temp.name" placeholder="SSH 名称"/>
 				</a-form-model-item>
 				<a-form-model-item label="Host" prop="host">
-					<a-input v-model="temp.host" placeholder="主机 Host"/>
-				</a-form-model-item>
-				<a-form-model-item label="Port" prop="port">
-					<a-input-number v-model="temp.port" :min="1" placeholder="端口号"/>
+					<a-input-group compact prop="host">
+						<a-input style="width: 70%" v-model="temp.host" placeholder="主机 Host"/>
+						<a-input-number style="width: 30%" v-model="temp.port" :min="1" placeholder="端口号"/>
+					</a-input-group>
 				</a-form-model-item>
 				<a-form-model-item label="认证方式" prop="connectType">
 					<a-radio-group v-model="temp.connectType" :options="options"/>

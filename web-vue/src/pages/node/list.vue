@@ -84,24 +84,38 @@
 						<a-select-option :key="30">30 分钟</a-select-option>
 					</a-select>
 				</a-form-model-item>
-				<a-form-model-item label="节点协议" prop="protocol">
-					<a-select v-model="temp.protocol" defaultValue="http" placeholder="节点协议">
-						<a-select-option key="http">HTTP</a-select-option>
-						<a-select-option key="htts">HTTPS</a-select-option>
-					</a-select>
-				</a-form-model-item>
+
 				<a-form-model-item label="节点状态" prop="openStatus">
 					<a-switch v-model="temp.openStatus" checked-children="启用" un-checked-children="停用" default-checked/>
 				</a-form-model-item>
 				<a-form-model-item label="节点地址" prop="url">
-					<a-input v-model="temp.url" placeholder="节点地址 (127.0.0.1:2123)"/>
+					<a-input v-model="temp.url" placeholder="节点地址 (127.0.0.1:2123)">
+						<a-select slot="addonBefore" v-model="temp.protocol" default-value="Http://" style="width: 80px">
+							<a-select-option value="Http">
+								Http://
+							</a-select-option>
+							<a-select-option value="Https">
+								Https://
+							</a-select-option>
+						</a-select>
+						<!--						<a-input v-model="temp.url" placeholder="节点地址 (127.0.0.1:2123)"/>-->
+					</a-input>
 				</a-form-model-item>
+				<!--				<a-form-model-item label="节点协议" prop="protocol">-->
+				<!--					<a-select v-model="temp.protocol" defaultValue="http" placeholder="节点协议">-->
+				<!--						<a-select-option key="http">HTTP</a-select-option>-->
+				<!--						<a-select-option key="htts">HTTPS</a-select-option>-->
+				<!--					</a-select>-->
+				<!--				</a-form-model-item>-->
+				<!--				<a-form-model-item label="节点地址" prop="url">-->
+				<!--					<a-input v-model="temp.url" placeholder="节点地址 (127.0.0.1:2123)"/>-->
+				<!--				</a-form-model-item>-->
 				<div class="node-config">
 					<a-form-model-item label="节点账号" prop="loginName">
-						<a-input v-model="temp.loginName" placeholder="节点账号"/>
+						<a-input v-model="temp.loginName" placeholder="节点账号,请查看节点启动输出的信息"/>
 					</a-form-model-item>
 					<a-form-model-item label="节点密码" prop="loginPwd">
-						<a-input-password v-model="temp.loginPwd" placeholder="节点密码"/>
+						<a-input-password v-model="temp.loginPwd" placeholder="节点密码,请查看节点启动输出的信息"/>
 					</a-form-model-item>
 				</div>
 				<a-form-model-item label="超时时间(s)" prop="timeOut">
@@ -295,7 +309,8 @@ export default {
 				cycle: 0,
 				protocol: 'http',
 				openStatus: true,
-				timeOut: 0
+				timeOut: 0,
+				loginName: 'jpomAgent'
 			};
 			this.editNodeVisible = true;
 			this.$nextTick(() => {
