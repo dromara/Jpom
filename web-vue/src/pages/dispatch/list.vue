@@ -152,7 +152,7 @@
           </a-select>
         </a-form-model-item>
         <!-- 节点 -->
-        <a-form-model-item label="分发节点节点" prop="nodeId">
+        <a-form-model-item label="分发节点" prop="nodeId">
           <a-select v-model="temp.nodeIdList" mode="multiple" placeholder="请选择分发节点">
             <a-select-option v-for="node in nodeList" :key="node.key">{{ `${node.title} ( ${node.key} )` }}</a-select-option>
           </a-select>
