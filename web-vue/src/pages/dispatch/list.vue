@@ -312,7 +312,6 @@ export default {
   created() {
     this.calcTableHeight();
     this.handleFilter();
-    this.loadNodeList();
   },
   methods: {
     // 页面引导
@@ -375,6 +374,7 @@ export default {
     // 筛选
     handleFilter() {
       this.loadData();
+      this.loadNodeList();
     },
     // 关联分发
     handleLink() {
@@ -722,9 +722,42 @@ export default {
     },
     //加载节点以及项目
     loadNodeList() {
+      this.nodeList = [];
       getNodeProjectList().then(res => {
         if (res.code === 200) {
-         this.nodeNameList = res.data;
+          this.nodeNameList = res.data;
+          // 新增或者编辑分发项目时需要
+          res.data.forEach(node => {
+            const nodeItem = {
+              title: node.name,
+              key: node.id,
+              disabled: true
+            }
+            node.projects.forEach(project => {
+              // 如果项目 ID 存在就不用继续添加
+              const index = this.projectList.findIndex(p => p.id === project.id);
+              if (index === -1) {
+                const projectItem = {
+                  name: `${project.name} ( ${project.id} )`,
+                  id: project.id
+                }
+                this.projectList.push(projectItem);
+              }
+              // 判断对象是否存在
+              if (!this.nodeProjectMap[`${project.id}`]) {
+                this.nodeProjectMap[`${project.id}`] = [
+                  ...this.nodeProjectMap[`${project.id}`] || [],
+                  node.id
+                ];
+              } else {
+                const tempIndex = this.nodeProjectMap[`${project.id}`].findIndex(nodeId => node.id === nodeId);
+                if (tempIndex === -1) {
+                  this.nodeProjectMap[`${project.id}`].push(node.id);
+                }
+              }
+            })
+            this.nodeList.push(nodeItem);
+          }) 
         }
       })
     },
