@@ -9,6 +9,7 @@
 3. 【server】新增配置 jwt token 签名 key 参数
 4. 【server】ssh 新增配置禁止执行的命令,避免执行高风险命令
 5. 【server】构建发布方式为 ssh 检查发布命令是否包含禁止执行的命令
+6. 【server】新增 ssh 执行命令初始化环境变量配置 `ssh.initEnv` 
 
 ### 解决BUG、优化功能
 

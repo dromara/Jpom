@@ -40,3 +40,6 @@ build:
   maxHistoryCount: 1000
   # 单个最多保存多少份历史记录
   itemMaxHistoryCount: 50
+ssh:
+  # ssh 执行命令的 默认加载的环境变量
+  initEnv:

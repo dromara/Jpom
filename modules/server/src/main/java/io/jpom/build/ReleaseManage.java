@@ -178,13 +178,13 @@ public class ReleaseManage extends BaseBuild {
 			this.pubLog("执行ssh发布异常", e);
 		}
 		this.log("");
-		this.log(DateUtil.now() + " start exec");
 		// 执行命令
 		String[] commands = StrUtil.splitToArray(this.baseBuildModule.getReleaseCommand(), StrUtil.LF);
 		if (commands == null || commands.length <= 0) {
 			this.log("没有需要执行的ssh命令");
 			return;
 		}
+		this.log(DateUtil.now() + " start exec");
 		for (String commandItem : commands) {
 			try {
 				this.log(commandItem);

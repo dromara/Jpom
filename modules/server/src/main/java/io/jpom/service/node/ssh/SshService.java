@@ -20,6 +20,7 @@ import io.jpom.plugin.ClassFeature;
 import io.jpom.service.node.NodeService;
 import io.jpom.system.JpomRuntimeException;
 import io.jpom.system.ServerConfigBean;
+import io.jpom.system.ServerExtConfigBean;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -182,7 +183,7 @@ public class SshService extends BaseOperService<SshModel> implements BaseDynamic
 		try {
 			channel = (ChannelExec) JschUtil.createChannel(session, ChannelType.EXEC);
 			// 添加环境变量
-			channel.setCommand("source /etc/profile && source ~/.bash_profile && source ~/.bashrc && " + command);
+			channel.setCommand(ServerExtConfigBean.getInstance().getSshInitEnv() + " && " + command);
 			InputStream inputStream = channel.getInputStream();
 			InputStream errStream = channel.getErrStream();
 			channel.connect();
