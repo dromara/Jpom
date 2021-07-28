@@ -42,4 +42,4 @@ build:
   itemMaxHistoryCount: 50
 ssh:
   # ssh 执行命令的 默认加载的环境变量
-  initEnv:
+  initEnv: source /etc/profile && source ~/.bash_profile && source ~/.bashrc
