@@ -118,7 +118,7 @@
           </a-row>
         </a-form-model-item>
         <a-form-model-item label="构建命令" prop="script">
-          <a-input v-model="temp.script" type="textarea" :rows="3" style="resize: none;" placeholder="构建执行的命令，如：mvn clean package"/>
+          <a-input v-model="temp.script" type="textarea" :rows="3"  placeholder="构建执行的命令，如：mvn clean package"/>
         </a-form-model-item>
         <a-form-model-item label="产物目录" prop="resultDirFile" class="jpom-target-dir">
           <a-input v-model="temp.resultDirFile" placeholder="构建产物目录，相对路径"/>
@@ -156,7 +156,7 @@
           <a-input v-model="temp.releasePath" placeholder="发布目录"/>
         </a-form-model-item>
         <a-form-model-item v-if="temp.releaseMethod === 3" label="发布命令" prop="releaseCommand">
-          <a-input v-model="temp.releaseCommand" type="textarea" :rows="3" style="resize: none;" placeholder="发布执行的命令，如：mvn clean package"/>
+          <a-input v-model="temp.releaseCommand" type="textarea" :rows="3"  placeholder="发布执行的命令,一般是启动项目命令"/>
         </a-form-model-item>
         <a-form-model-item v-if="temp.releaseMethod === 2 || temp.releaseMethod === 3" label="清空发布" prop="clearOld">
           <a-switch v-model="temp.clearOld" checked-children="是" un-checked-children="否"/>

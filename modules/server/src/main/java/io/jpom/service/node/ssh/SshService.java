@@ -20,6 +20,7 @@ import io.jpom.plugin.ClassFeature;
 import io.jpom.service.node.NodeService;
 import io.jpom.system.JpomRuntimeException;
 import io.jpom.system.ServerConfigBean;
+import io.jpom.system.ServerExtConfigBean;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -182,7 +183,7 @@ public class SshService extends BaseOperService<SshModel> implements BaseDynamic
 		try {
 			channel = (ChannelExec) JschUtil.createChannel(session, ChannelType.EXEC);
 			// 添加环境变量
-			channel.setCommand("source /etc/profile && source ~/.bash_profile && source ~/.bashrc && " + command);
+			channel.setCommand(ServerExtConfigBean.getInstance().getSshInitEnv() + " && " + command);
 			InputStream inputStream = channel.getInputStream();
 			InputStream errStream = channel.getErrStream();
 			channel.connect();
@@ -202,56 +203,56 @@ public class SshService extends BaseOperService<SshModel> implements BaseDynamic
 	 * @param sshModel   ssh
 	 * @param remotePath 远程路径
 	 * @param desc       文件夹或者文件
-	 * @throws FileNotFoundException 文件异常
-	 * @throws SftpException         ftp
 	 */
-	public void uploadDir(SshModel sshModel, String remotePath, File desc) throws FileNotFoundException, SftpException {
+	public void uploadDir(SshModel sshModel, String remotePath, File desc) {
 		Session session = null;
 		ChannelSftp channel = null;
 		try {
 			session = getSession(sshModel);
 			channel = (ChannelSftp) JschUtil.openChannel(session, ChannelType.SFTP);
-			uploadDir(channel, remotePath, desc, sshModel.getCharsetT());
+			Sftp sftp = new Sftp(channel, sshModel.getCharsetT());
+			sftp.syncUpload(desc, remotePath);
+			//uploadDir(channel, remotePath, desc, sshModel.getCharsetT());
 		} finally {
 			JschUtil.close(channel);
 			JschUtil.close(session);
 		}
 	}
 
-	private void uploadDir(ChannelSftp channel, String remotePath, File file, Charset charset) throws FileNotFoundException, SftpException {
-		if (file.isDirectory()) {
-			File[] files = file.listFiles();
-			if (files == null || files.length <= 0) {
-				return;
-			}
-			for (File f : files) {
-				if (f.isDirectory()) {
-					String mkdir = FileUtil.normalize(remotePath + "/" + f.getName());
-					this.uploadDir(channel, mkdir, f, charset);
-				} else {
-					this.uploadDir(channel, remotePath, f, charset);
-				}
-			}
-		} else {
-			mkdir(channel, remotePath, charset);
-			String name = file.getName();
-			channel.put(new FileInputStream(file), name);
-		}
-	}
-
-	private void mkdir(ChannelSftp channel, String remotePath, Charset charset) {
-		Sftp sftp = new Sftp(channel, charset);
-		sftp.mkDirs(remotePath);
-//        try {
-//            channel.mkdir(remotePath);
-//        } catch (SftpException ignored) {
-//        }
-		try {
-			channel.cd(remotePath);
-		} catch (SftpException e) {
-			throw new RuntimeException("切换目录失败：" + remotePath, e);
-		}
-	}
+//	private void uploadDir(ChannelSftp channel, String remotePath, File file, Charset charset) throws FileNotFoundException, SftpException {
+//		if (file.isDirectory()) {
+//			File[] files = file.listFiles();
+//			if (files == null || files.length <= 0) {
+//				return;
+//			}
+//			for (File f : files) {
+//				if (f.isDirectory()) {
+//					String mkdir = FileUtil.normalize(remotePath + "/" + f.getName());
+//					this.uploadDir(channel, mkdir, f, charset);
+//				} else {
+//					this.uploadDir(channel, remotePath, f, charset);
+//				}
+//			}
+//		} else {
+//			mkdir(channel, remotePath, charset);
+//			String name = file.getName();
+//			channel.put(new FileInputStream(file), name);
+//		}
+//	}
+//
+//	private void mkdir(ChannelSftp channel, String remotePath, Charset charset) {
+//		Sftp sftp = new Sftp(channel, charset);
+//		sftp.mkDirs(remotePath);
+////        try {
+////            channel.mkdir(remotePath);
+////        } catch (SftpException ignored) {
+////        }
+//		try {
+//			channel.cd(remotePath);
+//		} catch (SftpException e) {
+//			throw new RuntimeException("切换目录失败：" + remotePath, e);
+//		}
+//	}
 
 	/**
 	 * 下载文件

@@ -2,6 +2,7 @@ package io.jpom.model.data;
 
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.CharsetUtil;
+import cn.hutool.core.util.StrUtil;
 import io.jpom.model.BaseModel;
 
 import java.nio.charset.Charset;
@@ -155,6 +156,26 @@ public class SshModel extends BaseModel {
 			charset = CharsetUtil.CHARSET_UTF_8;
 		}
 		return charset;
+	}
+
+	/**
+	 * 检查是否包含禁止命令
+	 *
+	 * @param sshItem   实体
+	 * @param inputItem 输入的命令
+	 * @return false 存在禁止输入的命令
+	 */
+	public static boolean checkInputItem(SshModel sshItem, String inputItem) {
+		// 检查禁止执行的命令
+		String notAllowedCommand = sshItem.getNotAllowedCommand();
+		List<String> split = StrUtil.split(notAllowedCommand, StrUtil.COMMA);
+		for (String s : split) {
+			s = s.toLowerCase();
+			if (StrUtil.startWithAny(inputItem.toLowerCase(), s + StrUtil.SPACE, ("&" + s + StrUtil.SPACE), StrUtil.SPACE + s + StrUtil.SPACE)) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 	public enum ConnectType {

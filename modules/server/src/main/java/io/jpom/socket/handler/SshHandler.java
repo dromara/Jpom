@@ -170,24 +170,12 @@ public class SshHandler extends BaseHandler {
 				if (StrUtil.equals(msg, StrUtil.CR)) {
 					nowLineInput.setLength(0);
 				}
-				return checkInputItem(join);
+				return SshModel.checkInputItem(sshItem, join);
 			}
 			// 复制输出
-			return checkInputItem(msg);
+			return SshModel.checkInputItem(sshItem, msg);
 		}
 
-		private boolean checkInputItem(String inputItem) {
-			// 检查禁止执行的命令
-			String notAllowedCommand = sshItem.getNotAllowedCommand();
-			List<String> split = StrUtil.split(notAllowedCommand, StrUtil.COMMA);
-			for (String s : split) {
-				s = s.toLowerCase();
-				if (StrUtil.startWithAny(inputItem.toLowerCase(), s + StrUtil.SPACE, ("&" + s + StrUtil.SPACE), StrUtil.SPACE + s + StrUtil.SPACE)) {
-					return false;
-				}
-			}
-			return true;
-		}
 
 		@Override
 		public void run() {

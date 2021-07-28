@@ -87,6 +87,15 @@ public class ServerExtConfigBean {
 	@Value("${build.itemMaxHistoryCount:50}")
 	private int buildItemMaxHistoryCount;
 
+	/**
+	 * ssh 中执行命令 初始化的环境变量
+	 */
+	@Value("${ssh.initEnv:}")
+	private String sshInitEnv;
+
+	public String getSshInitEnv() {
+		return StrUtil.emptyToDefault(this.sshInitEnv, "source /etc/profile && source ~/.bash_profile && source ~/.bashrc");
+	}
 
 	public String getAuthorizeToken() {
 		return authorizeToken;
