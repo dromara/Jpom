@@ -8,6 +8,8 @@
 2. 【agent】项目新增配置控制台日志输出目录
 3. 【server】新增配置 jwt token 签名 key 参数
 4. 【server】ssh 新增配置禁止执行的命令,避免执行高风险命令
+5. 【server】构建发布方式为 ssh 检查发布命令是否包含禁止执行的命令
+6. 【server】新增 ssh 执行命令初始化环境变量配置 `ssh.initEnv` 
 
 ### 解决BUG、优化功能
 
@@ -24,7 +26,7 @@
 11. 【server】项目控制台新增心跳消息，避免超过一定时间后无法操作的情况
 12. 【server】ssh 新增心跳消息，避免超过一定时间后无法操作的情况
 13. 【server】系统缓存中的文件占用空间大小调整为定时更新（10分钟）
-14. 【server】修复 bug：分发列表页面点击【创建分发项目】按钮之后不能正常显示【分发节点】[点击查看提交记录](https://gitee.com/dromara/Jpom/commit/bd38528fbd3067d220b7569f08449d7796e07c74) [@Hotstrip](https://gitee.com/hotstrip)
+14. 【server】修复 bug：分发列表页面点击【创建分发项目】按钮之后不能正常显示【分发节点】感谢 @xingenhi [点击查看提交记录](https://gitee.com/dromara/Jpom/commit/bd38528fbd3067d220b7569f08449d7796e07c74) [@Hotstrip](https://gitee.com/hotstrip)
 
 ------
 

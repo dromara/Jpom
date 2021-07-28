@@ -24,6 +24,7 @@ import io.jpom.plugin.Feature;
 import io.jpom.plugin.MethodFeature;
 import io.jpom.service.node.ssh.SshService;
 import io.jpom.system.ConfigBean;
+import io.jpom.system.ExtConfigBean;
 import io.jpom.system.ServerConfigBean;
 import org.springframework.boot.env.YmlUtil;
 import org.springframework.http.MediaType;
@@ -107,7 +108,7 @@ public class SshInstallAgentController extends BaseServerController {
                 return JsonMessage.getString(405, "管理命令中不存在tag");
             }
             //  读取授权信息
-            File configFile = FileUtil.file(outFle, "extConfig.yml");
+            File configFile = FileUtil.file(outFle, ExtConfigBean.FILE_NAME);
             if (configFile.exists()) {
                 List<Map<String, Object>> load = YmlUtil.load(configFile);
                 Map<String, Object> map = load.get(0);
