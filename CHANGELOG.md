@@ -25,7 +25,7 @@
 11. 【server】项目控制台新增心跳消息，避免超过一定时间后无法操作的情况
 12. 【server】ssh 新增心跳消息，避免超过一定时间后无法操作的情况
 13. 【server】系统缓存中的文件占用空间大小调整为定时更新（10分钟）
-14. 【server】修复 bug：分发列表页面点击【创建分发项目】按钮之后不能正常显示【分发节点】[点击查看提交记录](https://gitee.com/dromara/Jpom/commit/bd38528fbd3067d220b7569f08449d7796e07c74) [@Hotstrip](https://gitee.com/hotstrip)
+14. 【server】修复 bug：分发列表页面点击【创建分发项目】按钮之后不能正常显示【分发节点】感谢 @xingenhi [点击查看提交记录](https://gitee.com/dromara/Jpom/commit/bd38528fbd3067d220b7569f08449d7796e07c74) [@Hotstrip](https://gitee.com/hotstrip)
 
 ------
 
