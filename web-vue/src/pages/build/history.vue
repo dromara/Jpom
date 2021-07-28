@@ -101,7 +101,7 @@ export default {
           return parseTime(text);
         }, width: 180},
         {title: '发布方式', dataIndex: 'releaseMethod', width: 100, ellipsis: true, scopedSlots: {customRender: 'releaseMethod'}},
-        {title: '构建人', dataIndex: 'buildUser', width: 150, ellipsis: true, scopedSlots: {customRender: 'buildUser'}},
+        {title: '构建人', dataIndex: 'buildUser', /*width: 150,*/ ellipsis: true, scopedSlots: {customRender: 'buildUser'}},
         {title: '操作', dataIndex: 'operation', scopedSlots: {customRender: 'operation'}, width: 300, fixed: 'right'}
       ],
       statusMap: {
