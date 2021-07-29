@@ -25,7 +25,7 @@ if [[ $module = *$installJdk* ]]; then
             fi
             mkdir /usr/java/
             #
-            tar -zxvf jdk-8u251-linux-x64.tar.gz  -C /usr/java/
+            tar -zxf jdk-8u251-linux-x64.tar.gz  -C /usr/java/
             #
             #PATH=$PATH:/usr/java/jdk1.8.0_251/bin
             #export PATH
@@ -61,7 +61,7 @@ if [[ $module = *$installMvn* ]]; then
             fi
             mkdir /usr/maven/
             #
-            tar -zxvf apache-maven-3.6.3-bin.tar.gz  -C /usr/maven/
+            tar -zxf apache-maven-3.6.3-bin.tar.gz  -C /usr/maven/
             #
             echo '安装maven,路径/usr/maven/apache-maven-3.6.3/'
             # 修改环境变量
