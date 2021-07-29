@@ -91,7 +91,7 @@ export default {
       temp: {},
       buildLogVisible: false,
       columns: [
-        {title: '构建名称', dataIndex: 'buildName', width: 120, ellipsis: true, scopedSlots: {customRender: 'buildName'}},
+        {title: '构建名称', dataIndex: 'buildName', /*width: 120,*/ ellipsis: true, scopedSlots: {customRender: 'buildName'}},
         {title: '构建 ID', dataIndex: 'buildIdStr', width: 100, ellipsis: true, scopedSlots: {customRender: 'buildIdStr'}},
         {title: '状态', dataIndex: 'status', width: 120, ellipsis: true, scopedSlots: {customRender: 'status'}},
         {title: '开始时间', dataIndex: 'startTime', customRender: (text) => {
@@ -101,8 +101,8 @@ export default {
           return parseTime(text);
         }, width: 180},
         {title: '发布方式', dataIndex: 'releaseMethod', width: 100, ellipsis: true, scopedSlots: {customRender: 'releaseMethod'}},
-        {title: '构建人', dataIndex: 'buildUser', width: 150, ellipsis: true, scopedSlots: {customRender: 'buildUser'}},
-        {title: '操作', dataIndex: 'operation', scopedSlots: {customRender: 'operation'}, width: 300, fixed: 'right'}
+        {title: '构建人', dataIndex: 'buildUser', /*width: 150,*/ ellipsis: true, scopedSlots: {customRender: 'buildUser'}},
+        {title: '操作', dataIndex: 'operation', scopedSlots: {customRender: 'operation'}, width: 320, fixed: 'right'}
       ],
       statusMap: {
         1: '构建中',
