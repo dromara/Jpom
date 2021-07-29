@@ -1,10 +1,10 @@
-:: ÉèÖÃ»·¾³±äÁ¿
+:: è®¾ç½®ç¯å¢ƒå˜é‡
 
-:: ¹Ø±ÕÖÕ¶Ë»ØÏÔ
+:: å…³é—­ç»ˆç«¯å›æ˜¾
 @echo off
 
 set ENV_PATH=%LESSCHARSET%
-@echo ====current environment£º
+@echo ====current environmentï¼š
 @echo %ENV_PATH%
 
 pause
