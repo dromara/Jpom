@@ -23,7 +23,6 @@ import io.jpom.service.node.ssh.SshService;
 import io.jpom.system.JpomRuntimeException;
 
 import java.io.File;
-import java.util.List;
 import java.util.Objects;
 
 /**
@@ -185,15 +184,11 @@ public class ReleaseManage extends BaseBuild {
 			return;
 		}
 		this.log(DateUtil.now() + " start exec");
-		for (String commandItem : commands) {
-			try {
-				this.log(commandItem);
-				String s = sshService.exec(item, commandItem);
-				this.log(s);
-			} catch (Exception e) {
-				this.pubLog(item + " 执行异常", e);
-				return;
-			}
+		try {
+			String s = sshService.exec(item, commands);
+			this.log(s);
+		} catch (Exception e) {
+			this.pubLog("执行异常", e);
 		}
 	}
 
