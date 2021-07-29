@@ -1,5 +1,6 @@
 package io.jpom.system.init;
 
+import cn.hutool.core.exceptions.ExceptionUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.ClassUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
@@ -12,6 +13,7 @@ import org.springframework.http.HttpMethod;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.File;
+import java.nio.file.AccessDeniedException;
 import java.util.Arrays;
 import java.util.Map;
 
@@ -97,7 +99,17 @@ public class CheckPath {
 			FileUtil.del(file);
 		} catch (Exception e) {
 			// Try again
-			FileUtil.del(file.toPath());
+			try {
+				FileUtil.del(file.toPath());
+			} catch (Exception e1) {
+				e1.addSuppressed(e);
+				boolean causedBy = ExceptionUtil.isCausedBy(e1, AccessDeniedException.class);
+				if (causedBy) {
+					DefaultSystemLog.getLog().error("清除临时文件失败,请手动清理：" + FileUtil.getAbsolutePath(file), e);
+					return;
+				}
+				DefaultSystemLog.getLog().error("清除临时文件失败,请检查目录：" + FileUtil.getAbsolutePath(file), e);
+			}
 		}
 	}
 }
