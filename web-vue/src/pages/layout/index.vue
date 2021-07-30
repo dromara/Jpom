@@ -84,11 +84,7 @@ export default {
             title: 'Jpom 导航助手',
             element: document.querySelector('.jpom-close-tabs'),
             intro: '这里的关闭 Tab 按钮只会保留当前激活的 Tab'
-          }, {
-            title: 'Jpom 导航助手',
-            element: document.querySelector('.jpom-old-version'),
-            intro: '点击这里可以返回旧版本，之所以保留这个按钮，是因为新版本在 IE 等浏览器上兼容性不太好'
-          }, {
+          },  {
             title: 'Jpom 导航助手',
             element: document.querySelector('.jpom-user-operation'),
             intro: '这里可以设置当前管理员的邮箱或者其他信息，当然还有退出登录'
