@@ -5,6 +5,7 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.thread.ThreadUtil;
+import cn.hutool.core.util.BooleanUtil;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.servlet.ServletUtil;
@@ -358,10 +359,11 @@ public class ProjectFileControl extends BaseAgentController {
 	 * @param id        项目id
 	 * @param url       远程 url 地址
 	 * @param levelName 保存的文件夹
+	 * @param unzip     是否为压缩包、true 将自动解压
 	 * @return json
 	 */
 	@GetMapping(value = "remote_download", produces = MediaType.APPLICATION_JSON_VALUE)
-	public String remoteDownload(String id, String url, String levelName) {
+	public String remoteDownload(String id, String url, String levelName, String unzip) {
 		if (StrUtil.isEmpty(url)) {
 			return JsonMessage.getString(405, "请输入正确的远程地址");
 		}
@@ -373,7 +375,18 @@ public class ProjectFileControl extends BaseAgentController {
 		try {
 			ProjectInfoModel pim = projectInfoService.getItem(id);
 			File file = FileUtil.file(pim.allLib(), StrUtil.emptyToDefault(levelName, FileUtil.FILE_SEPARATOR));
-			long downloadFile = HttpUtil.downloadFile(url, file);
+			File downloadFile = HttpUtil.downloadFileFromUrl(url, file);
+			if (BooleanUtil.toBoolean(unzip)) {
+				// 需要解压文件
+				try {
+					List<String> names = CompressionFileUtil.unCompress(file, downloadFile);
+					Assert.notEmpty(names, "没有解压出任何文件");
+				} finally {
+					if (!FileUtil.del(downloadFile)) {
+						DefaultSystemLog.getLog().error("删除文件失败：" + file.getPath());
+					}
+				}
+			}
 			return JsonMessage.getString(200, "下次成功文件大小：" + FileUtil.readableFileSize(downloadFile));
 		} catch (Exception e) {
 			DefaultSystemLog.getLog().error("下载远程文件异常", e);
