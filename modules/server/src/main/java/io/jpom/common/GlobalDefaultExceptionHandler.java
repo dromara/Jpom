@@ -38,7 +38,7 @@ public class GlobalDefaultExceptionHandler {
 	 * @param response 响应
 	 * @param e        异常
 	 */
-	@ExceptionHandler({AgentException.class, AuthorizeException.class, RuntimeException.class, Exception.class})
+	@ExceptionHandler({AuthorizeException.class, RuntimeException.class, Exception.class})
 	public void delExceptionHandler(HttpServletRequest request, HttpServletResponse response, Exception e) {
 		//DefaultSystemLog.getLog().error("controller " + request.getRequestURI(), e.getMessage());
 		DefaultSystemLog.getLog().error("global handle exception: {}", request.getRequestURI(), e);
@@ -59,7 +59,7 @@ public class GlobalDefaultExceptionHandler {
 		if (e instanceof AuthorizeException) {
 			AuthorizeException authorizeException = (AuthorizeException) e;
 			ServletUtil.write(response, authorizeException.getJsonMessage().toString(), MediaType.APPLICATION_JSON_VALUE);
-		} else if (e instanceof AgentException || e instanceof JpomRuntimeException) {
+		} else if (e instanceof JpomRuntimeException) {
 			ServletUtil.write(response, JsonMessage.getString(500, e.getMessage()), MediaType.APPLICATION_JSON_VALUE);
 		} else {
 			boolean causedBy = ExceptionUtil.isCausedBy(e, AccessDeniedException.class);
@@ -72,13 +72,25 @@ public class GlobalDefaultExceptionHandler {
 //        }
 	}
 
-//    private String getErrorMsg(Exception e) {
-//        if (e instanceof JpomRuntimeException || e instanceof AgentException || e instanceof AuthorizeException) {
-//            return e.getMessage();
-//        } else {
-//            return "服务异常：" + e.getMessage();
-//        }
-//    }
+	/**
+	 * 插件端异常
+	 * <p>
+	 * 避免重复记录堆栈
+	 *
+	 * @param request  请求
+	 * @param response 响应
+	 * @param e        异常
+	 * @author jzy
+	 * @since 2021-08-01
+	 */
+	@ExceptionHandler({AgentException.class})
+	public void agentExceptionHandler(HttpServletRequest request, HttpServletResponse response, AgentException e) {
+		Throwable cause = e.getCause();
+		if (cause != null) {
+			DefaultSystemLog.getLog().error("controller " + request.getRequestURI(), cause);
+		}
+		ServletUtil.write(response, JsonMessage.getString(405, e.getMessage()), MediaType.APPLICATION_JSON_VALUE);
+	}
 
 	/**
 	 * 声明要捕获的异常 (参数或者状态异常)

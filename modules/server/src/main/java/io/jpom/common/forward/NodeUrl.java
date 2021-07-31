@@ -1,5 +1,7 @@
 package io.jpom.common.forward;
 
+import io.jpom.system.ServerExtConfigBean;
+
 /**
  * agent 端的请求地址枚举
  *
@@ -73,8 +75,10 @@ public enum NodeUrl {
 
 
 	Manage_File_GetFileList("/manage/file/getFileList"),
-
-	Manage_File_Upload("/manage/file/upload"),
+	/**
+	 * jzy add  timeout
+	 */
+	Manage_File_Upload("/manage/file/upload", ServerExtConfigBean.getInstance().getUploadFileTimeOut()),
 
 	Manage_File_DeleteFile("/manage/file/deleteFile"),
 

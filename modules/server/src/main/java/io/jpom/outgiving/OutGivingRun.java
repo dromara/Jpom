@@ -149,13 +149,11 @@ public class OutGivingRun implements Callable<OutGivingNodeProject.Status> {
 					this.nodeModel, this.userModel, this.clearOld);
 			if (jsonMessage.getCode() == HttpStatus.HTTP_OK) {
 				result = OutGivingNodeProject.Status.Ok;
-				updateStatus(this.logId, this.outGivingId, this.outGivingNodeProject,
-						result, jsonMessage.toString());
 			} else {
 				result = OutGivingNodeProject.Status.Fail;
-				updateStatus(this.logId, this.outGivingId, this.outGivingNodeProject,
-						result, jsonMessage.toString());
 			}
+			updateStatus(this.logId, this.outGivingId, this.outGivingNodeProject,
+					result, jsonMessage.toString());
 		} catch (Exception e) {
 			DefaultSystemLog.getLog().error(this.outGivingNodeProject.getNodeId() + " " + this.outGivingNodeProject.getProjectId() + " " + "分发异常保存", e);
 			result = OutGivingNodeProject.Status.Fail;

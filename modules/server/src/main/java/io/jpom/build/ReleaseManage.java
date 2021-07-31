@@ -219,9 +219,9 @@ public class ReleaseManage extends BaseBuild {
 				afterOpt,
 				nodeModel, this.userModel, clearOld);
 		if (jsonMessage.getCode() == HttpStatus.HTTP_OK) {
-			this.log("发布项目包成功：" + jsonMessage.toString());
+			this.log("发布项目包成功：" + jsonMessage);
 		} else {
-			throw new JpomRuntimeException("发布项目包失败：" + jsonMessage.toString());
+			throw new JpomRuntimeException("发布项目包失败：" + jsonMessage);
 		}
 	}
 

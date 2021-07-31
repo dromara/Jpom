@@ -21,6 +21,7 @@
 9. 【agent】fix: 在线升级页面在没有配置白名单时候无法显示节点信息
 10. 【server】update: 刷新整个页面的时候重新加载菜单
 11. 【server】ssh 快捷安装插件端检查配置文件不在使用 SpringBoot 非 public 工具类
+12. 【server】请求节点发生异常打印具体堆栈、接口异常拦截器里面默认不打印堆栈 （根据 Gitee  [issues I3O8YE](https://gitee.com/dromara/Jpom/issues/I3O8YE) ）
 
 ------
 

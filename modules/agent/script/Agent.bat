@@ -87,7 +87,8 @@ EXIT 0
         EXIT 2
     )
 
-	echo 启动中.....关闭窗口不影响运行
+	echo 启动中.....启动成功后关闭窗口不影响运行
+	echo 启动详情请查看：%LogName%
 	javaw %JVM% -Djava.class.path="%JAVA_HOME%/lib/tools.jar;%RUNJAR%" -Dapplication=%Tag% -Dbasedir=%basePath%  %MainClass% %ARGS% >> %basePath%%LogName%
 	timeout 3
 goto:eof
