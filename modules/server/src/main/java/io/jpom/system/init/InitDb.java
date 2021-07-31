@@ -53,9 +53,22 @@ public class InitDb implements DisposableBean, InitializingBean {
 		try {
 			// 创建连接
 			DSFactory dsFactory = DSFactory.create(setting);
-			InputStream inputStream = ResourceUtil.getStream("classpath:/bin/h2-db-v1.sql");
-			String sql = IoUtil.read(inputStream, CharsetUtil.CHARSET_UTF_8);
-			Db.use(dsFactory.getDataSource()).execute(sql);
+			/**
+			 * @author Hotstrip
+			 * add another sql init file, if there are more sql file,
+			 * please add it with same way
+			 */
+			String[] files = new String[] {
+					"classpath:/bin/h2-db-v1.sql",
+					"classpath:/bin/h2-db-v2.sql"
+			};
+			for (String sqlFile : files) {
+				InputStream inputStream = ResourceUtil.getStream(sqlFile);
+				String sql = IoUtil.read(inputStream, CharsetUtil.CHARSET_UTF_8);
+				int rows = Db.use(dsFactory.getDataSource()).execute(sql);
+				DefaultSystemLog.getLog().info("exec init SQL file: {} complete, and affected rows is: {}",
+						sqlFile, rows);
+			}
 			DSFactory.setCurrentDSFactory(dsFactory);
 		} catch (Exception e) {
 			DefaultSystemLog.getLog().error("初始化数据库失败", e);

@@ -34,6 +34,8 @@ db:
   userName:
   # 数据库密码
   userPwd:
+  # 是否开启 web 访问数据库（url: http://${ip}:${port}/h2-console）
+  h2-console-enabled: true
 # 构建相关配置
 build:
   # 最多保存多少份历史记录
