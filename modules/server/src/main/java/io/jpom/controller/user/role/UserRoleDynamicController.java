@@ -52,7 +52,7 @@ public class UserRoleDynamicController extends BaseServerController {
      * 加载角色的动态资源数据
      * @return
      */
-    @RequestMapping(value = "dynamic-list", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "dynamic-list", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public String roleDynamicData() {
         Map<ClassFeature, DynamicData> dynamicDataMap = DynamicData.getDynamicDataMap();
@@ -69,7 +69,7 @@ public class UserRoleDynamicController extends BaseServerController {
         return JsonMessage.getString(200, "success", list);
     }
 
-    @RequestMapping(value = "getDynamic.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "getDynamic.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     @Feature(method = MethodFeature.EDIT)
     public String getDynamic(String id, String dynamic) {
@@ -78,7 +78,7 @@ public class UserRoleDynamicController extends BaseServerController {
         return JsonMessage.getString(200, "", jsonArray);
     }
 
-    @RequestMapping(value = "saveDynamic.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "saveDynamic.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     @Feature(method = MethodFeature.EDIT)
     @OptLog(value = UserOperateLogV1.OptType.EditRole)

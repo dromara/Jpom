@@ -123,7 +123,7 @@ public class NodeIndexController extends BaseServerController {
 //        return "node/index";
 //    }
 
-    @RequestMapping(value = "node_status", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "node_status", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     @Feature(method = MethodFeature.LIST)
     public String nodeStatus() {
@@ -144,14 +144,14 @@ public class NodeIndexController extends BaseServerController {
      * load node project list
      * 加载节点项目列表
      */
-    @RequestMapping(value = "node_project_list", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "node_project_list", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public String nodeProjectList() {
         List<NodeModel> nodeModels = nodeService.listAndProject();
         return JsonMessage.getString(200, "success", nodeModels);
     }
 
-    @RequestMapping(value = "upload_agent", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "upload_agent", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     @OptLog(UserOperateLogV1.OptType.UpdateSys)
     @SystemPermission

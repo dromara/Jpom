@@ -49,7 +49,7 @@ public class CertificateController extends BaseAgentController {
      *
      * @return json
      */
-    @RequestMapping(value = "/saveCertificate", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "/saveCertificate", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public String saveCertificate() {
         String data = getParameter("data");
         JSONObject jsonObject = JSONObject.parseObject(data);
@@ -236,7 +236,7 @@ public class CertificateController extends BaseAgentController {
      *
      * @return json
      */
-    @RequestMapping(value = "/getCertList", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "/getCertList", produces = MediaType.APPLICATION_JSON_VALUE)
     public String getCertList() {
         List<CertModel> array = certService.list();
         return JsonMessage.getString(200, "", array);
@@ -248,7 +248,7 @@ public class CertificateController extends BaseAgentController {
      * @param id id
      * @return json
      */
-    @RequestMapping(value = "/delete", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "/delete", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public String delete(String id) {
         if (StrUtil.isEmpty(id)) {
             return JsonMessage.getString(400, "删除失败");
@@ -264,7 +264,7 @@ public class CertificateController extends BaseAgentController {
      * @param id 项目id
      * @return 结果
      */
-    @RequestMapping(value = "/export", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "/export", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public String export(String id) {
         CertModel item = certService.getItem(id);
         if (null == item) {

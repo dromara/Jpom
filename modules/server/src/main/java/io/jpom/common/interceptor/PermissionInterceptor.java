@@ -115,6 +115,6 @@ public class PermissionInterceptor extends BaseJpomInterceptor {
     private void errorMsg(HttpServletRequest request, HttpServletResponse response) throws IOException {
 
         JsonMessage<String> jsonMessage = new JsonMessage<>(302, "你没有权限:-2");
-        ServletUtil.write(response, jsonMessage.toString(), MediaType.APPLICATION_JSON_UTF8_VALUE);
+        ServletUtil.write(response, jsonMessage.toString(), MediaType.APPLICATION_JSON_VALUE);
     }
 }

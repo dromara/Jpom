@@ -28,7 +28,7 @@ import java.util.List;
 @RestController
 public class WelcomeController extends AbstractController {
 
-    @RequestMapping(value = "getDirectTop", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "getDirectTop", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public String getDirectTop() {
         JSONObject topInfo = AbstractSystemCommander.getInstance().getAllMonitor();
         //
@@ -36,7 +36,7 @@ public class WelcomeController extends AbstractController {
         return JsonMessage.getString(200, "ok", topInfo);
     }
 
-    @RequestMapping(value = "getTop", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "getTop", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public String getTop(Long millis) {
         Iterator<CacheObj<String, JSONObject>> cacheObjIterator = TopManager.get();
         List<JSONObject> series = new ArrayList<>();
@@ -70,7 +70,7 @@ public class WelcomeController extends AbstractController {
     }
 
 
-    @RequestMapping(value = "processList", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "processList", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public String getProcessList() {
         List<ProcessModel> array = AbstractSystemCommander.getInstance().getProcessList();
@@ -82,7 +82,7 @@ public class WelcomeController extends AbstractController {
     }
 
 
-    @RequestMapping(value = "kill.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "kill.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public String kill(int pid) {
         String result = AbstractSystemCommander.getInstance().kill(null, pid);

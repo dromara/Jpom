@@ -56,7 +56,7 @@ public class LogBackController extends BaseServerController {
      * 日志备份列表接口
      * @return
      */
-    @RequestMapping(value = "log-back-list", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "log-back-list", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     @Feature(method = MethodFeature.LOG)
     public String logBackList() {
@@ -72,7 +72,7 @@ public class LogBackController extends BaseServerController {
         NodeForward.requestDownload(getNode(), getRequest(), getResponse(), NodeUrl.Manage_Log_logBack_download);
     }
 
-    @RequestMapping(value = "logBack_delete", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "logBack_delete", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     @OptLog(UserOperateLogV1.OptType.DelProjectLogBack)
     @Feature(method = MethodFeature.DEL_FILE)
@@ -80,7 +80,7 @@ public class LogBackController extends BaseServerController {
         return NodeForward.request(getNode(), getRequest(), NodeUrl.Manage_Log_logBack_delete).toString();
     }
 
-    @RequestMapping(value = "logSize", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "logSize", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public String logSize(String id, String copyId) {
         JSONObject info = projectInfoService.getLogSize(getNode(), id, copyId);
@@ -92,7 +92,7 @@ public class LogBackController extends BaseServerController {
      *
      * @return json
      */
-    @RequestMapping(value = "resetLog", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "resetLog", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     @OptLog(UserOperateLogV1.OptType.RestProjectLog)
     @Feature(method = MethodFeature.EDIT)

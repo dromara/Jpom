@@ -43,7 +43,7 @@ public class InternalController extends BaseServerController {
      * 获取内存信息接口
      * @return
      */
-    @RequestMapping(value = "getInternalData", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "getInternalData", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public String getInternalData() {
         JSONObject data = NodeForward.requestData(getNode(), NodeUrl.Manage_internal_data, getRequest(), JSONObject.class);
@@ -56,7 +56,7 @@ public class InternalController extends BaseServerController {
      *
      * @return json
      */
-    @RequestMapping(value = "threadInfos", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "threadInfos", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public String threadInfos() {
         return NodeForward.request(getNode(), getRequest(), NodeUrl.Manage_internal_threadInfos).toString();

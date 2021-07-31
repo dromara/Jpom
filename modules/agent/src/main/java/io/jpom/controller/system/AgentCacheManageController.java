@@ -32,7 +32,7 @@ public class AgentCacheManageController extends BaseAgentController {
      *
      * @return json
      */
-    @RequestMapping(value = "cache", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "cache", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public String cache() {
         JSONObject jsonObject = new JSONObject();
         //
@@ -56,7 +56,7 @@ public class AgentCacheManageController extends BaseAgentController {
      * @param type 缓存类型
      * @return json
      */
-    @RequestMapping(value = "clearCache", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "clearCache", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public String clearCache(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "类型错误") String type) {
         switch (type) {
             case "pidPort":

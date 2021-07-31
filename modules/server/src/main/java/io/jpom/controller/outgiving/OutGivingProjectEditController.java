@@ -86,7 +86,7 @@ public class OutGivingProjectEditController extends BaseServerController {
      * @param type 类型
      * @return json
      */
-    @RequestMapping(value = "save_project", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "save_project", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     @OptLog(UserOperateLogV1.OptType.SaveOutgivingProject)
     @Feature(method = MethodFeature.EDIT)
@@ -107,7 +107,7 @@ public class OutGivingProjectEditController extends BaseServerController {
      * @param id 项目id
      * @return json
      */
-    @RequestMapping(value = "delete_project", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "delete_project", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     @OptLog(UserOperateLogV1.OptType.DeleteOutgivingProject)
     @Feature(method = MethodFeature.DEL)

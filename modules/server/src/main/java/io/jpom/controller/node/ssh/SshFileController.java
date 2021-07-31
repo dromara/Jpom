@@ -104,7 +104,7 @@ public class SshFileController extends BaseServerController {
      * @param id
      * @return
      */
-    @RequestMapping(value = "root_file_data.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "root_file_data.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     @Feature(method = MethodFeature.FILE)
     public String rootFileList(String id) {
@@ -120,7 +120,7 @@ public class SshFileController extends BaseServerController {
         return JsonMessage.getString(200, "ok", jsonArray);
     }
 
-    @RequestMapping(value = "list_file_data.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "list_file_data.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     @Feature(method = MethodFeature.FILE)
     public String listData(String id, String path, String children) throws SftpException {
@@ -262,7 +262,7 @@ public class SshFileController extends BaseServerController {
     }
 
 
-    @RequestMapping(value = "delete.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "delete.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     @Feature(method = MethodFeature.DEL)
     public String delete(String id, String path, String name) {
@@ -328,7 +328,7 @@ public class SshFileController extends BaseServerController {
         }
     }
 
-    @RequestMapping(value = "upload", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "upload", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     @Feature(method = MethodFeature.UPLOAD)
     public String upload(String id, String path, String name) {

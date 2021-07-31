@@ -64,7 +64,7 @@ public class MonitorLogController extends BaseServerController {
      * @param notifyStatus 状态
      * @return json
      */
-    @RequestMapping(value = "list_data.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "list_data.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     @Feature(method = MethodFeature.LOG)
     public String listData(String selectNode, String notifyStatus,

@@ -89,7 +89,7 @@ public class BuildListController extends BaseServerController {
 		return JsonMessage.getString(200, "success", set);
 	}
 
-	@RequestMapping(value = "list_data.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	@RequestMapping(value = "list_data.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
 	@Feature(method = MethodFeature.LIST)
 	public String getMonitorList(String group) {
@@ -106,7 +106,7 @@ public class BuildListController extends BaseServerController {
 		return JsonMessage.getString(200, "", list);
 	}
 
-	@RequestMapping(value = "updateBuild", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	@RequestMapping(value = "updateBuild", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
 	@OptLog(UserOperateLogV1.OptType.EditBuild)
 	@Feature(method = MethodFeature.EDIT)
@@ -312,7 +312,7 @@ public class BuildListController extends BaseServerController {
 //        return "build/edit";
 //    }
 
-	@RequestMapping(value = "branchList.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	@RequestMapping(value = "branchList.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public String branchList(
 			@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "仓库地址不正确")) String url,
@@ -323,7 +323,7 @@ public class BuildListController extends BaseServerController {
 	}
 
 
-	@RequestMapping(value = "delete.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	@RequestMapping(value = "delete.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
 	@OptLog(UserOperateLogV1.OptType.DelBuild)
 	@Feature(method = MethodFeature.DEL)
@@ -342,7 +342,7 @@ public class BuildListController extends BaseServerController {
 	}
 
 
-	@RequestMapping(value = "cleanSource.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	@RequestMapping(value = "cleanSource.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
 	@OptLog(UserOperateLogV1.OptType.BuildCleanSource)
 	@Feature(method = MethodFeature.EXECUTE)

@@ -65,7 +65,7 @@ public class UserRoleListController extends BaseServerController {
      *
      * @return json
      */
-    @RequestMapping(value = "list_data.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "list_data.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     @Feature(method = MethodFeature.LIST)
     public String listData() {
@@ -97,7 +97,7 @@ public class UserRoleListController extends BaseServerController {
         return JsonMessage.getString(200, "", list);
     }
 
-    @RequestMapping(value = "getFeature.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "getFeature.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     @Feature(method = MethodFeature.EDIT)
     public String getFeature(String id) {
@@ -134,7 +134,7 @@ public class UserRoleListController extends BaseServerController {
         return JsonMessage.getString(200, "", jsonArray);
     }
 
-    @RequestMapping(value = "save.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "save.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     @Feature(method = MethodFeature.EDIT)
     @OptLog(value = UserOperateLogV1.OptType.EditRole)
@@ -181,7 +181,7 @@ public class UserRoleListController extends BaseServerController {
         return JsonMessage.getString(200, "操作成功");
     }
 
-    @RequestMapping(value = "del.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "del.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     @Feature(method = MethodFeature.DEL)
     @OptLog(value = UserOperateLogV1.OptType.DelRole)

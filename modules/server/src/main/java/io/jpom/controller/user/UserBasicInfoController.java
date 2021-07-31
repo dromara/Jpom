@@ -53,7 +53,7 @@ public class UserBasicInfoController extends BaseServerController {
      * 获取管理员基本信息接口
      * @return
      */
-    @RequestMapping(value = "user-basic-info", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "user-basic-info", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public String getUserBasicInfo() {
         UserModel userModel = getUser();
@@ -69,7 +69,7 @@ public class UserBasicInfoController extends BaseServerController {
         return JsonMessage.getString(200, "success", map);
     }
 
-    @RequestMapping(value = "save_basicInfo.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "save_basicInfo.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public String saveBasicInfo(@ValidatorItem(value = ValidatorRule.EMAIL, msg = "邮箱格式不正确") String email,
                                 String dingDing, String workWx, String code) {
@@ -103,7 +103,7 @@ public class UserBasicInfoController extends BaseServerController {
      * @param email 邮箱
      * @return msg
      */
-    @RequestMapping(value = "sendCode.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "sendCode.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public String sendCode(@ValidatorItem(value = ValidatorRule.EMAIL, msg = "邮箱格式不正确") String email) {
         MailAccountModel config = systemMailConfigService.getConfig();

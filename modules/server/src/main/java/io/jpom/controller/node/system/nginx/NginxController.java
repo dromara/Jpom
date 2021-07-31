@@ -45,7 +45,7 @@ public class NginxController extends BaseServerController {
      *
      * @return json
      */
-    @RequestMapping(value = "list_data.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "list_data.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     @Feature(method = MethodFeature.LIST)
     public String list() {
@@ -57,7 +57,7 @@ public class NginxController extends BaseServerController {
      *
      * @return json
      */
-    @RequestMapping(value = "tree.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "tree.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     @Feature(method = MethodFeature.LIST)
     public String tree() {
@@ -81,7 +81,7 @@ public class NginxController extends BaseServerController {
      * load Nginx white list data
      * @return
      */
-    @RequestMapping(value = "white-list", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "white-list", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public String loadWhiteList() {
         List<String> list = whitelistDirectoryService.getNgxDirectory(getNode());
@@ -93,14 +93,14 @@ public class NginxController extends BaseServerController {
      * load Nginx config data
      * @return
      */
-    @RequestMapping(value = "load-config", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "load-config", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public String loadConfig() {
         JSONObject data = NodeForward.requestData(getNode(), NodeUrl.System_Nginx_item_data, getRequest(), JSONObject.class);
         return JsonMessage.getString(200, "success", data);
     }
 
-    @RequestMapping(value = "updateNgx", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "updateNgx", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     @OptLog(UserOperateLogV1.OptType.SaveNginx)
     @Feature(method = MethodFeature.EDIT)
@@ -109,7 +109,7 @@ public class NginxController extends BaseServerController {
     }
 
 
-    @RequestMapping(value = "delete", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "delete", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     @OptLog(UserOperateLogV1.OptType.DelNginx)
     @Feature(method = MethodFeature.DEL)
@@ -122,7 +122,7 @@ public class NginxController extends BaseServerController {
      *
      * @return json
      */
-    @RequestMapping(value = "status", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "status", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     @Feature(method = MethodFeature.LIST)
     public String status() {
@@ -134,7 +134,7 @@ public class NginxController extends BaseServerController {
      *
      * @return json
      */
-    @RequestMapping(value = "config", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "config", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     @Feature(method = MethodFeature.CONFIG)
     public String config() {
@@ -146,7 +146,7 @@ public class NginxController extends BaseServerController {
      *
      * @return json
      */
-    @RequestMapping(value = "open", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "open", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     @Feature(method = MethodFeature.EXECUTE)
     public String open() {
@@ -158,7 +158,7 @@ public class NginxController extends BaseServerController {
      *
      * @return json
      */
-    @RequestMapping(value = "close", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "close", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     @Feature(method = MethodFeature.EXECUTE)
     public String close() {
@@ -171,14 +171,14 @@ public class NginxController extends BaseServerController {
      *
      * @return json
      */
-    @RequestMapping(value = "updateConf", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "updateConf", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     @Feature(method = MethodFeature.CONFIG)
     public String updateConf() {
         return NodeForward.request(getNode(), getRequest(), NodeUrl.System_Nginx_updateConf).toString();
     }
 
-    @RequestMapping(value = "reload", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "reload", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     @Feature(method = MethodFeature.EXECUTE)
     public String reload() {

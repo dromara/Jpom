@@ -47,7 +47,7 @@ public class TomcatManageController extends BaseAgentController {
      * @param id 项目id
      * @return Tomcat下的项目列表
      */
-    @RequestMapping(value = "getTomcatProjectList", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "getTomcatProjectList", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public String getTomcatProjectList(String id) {
         JSONArray array = tomcatManageService.getTomcatProjectList(id);
         return JsonMessage.getString(200, "查询成功", array);
@@ -59,7 +59,7 @@ public class TomcatManageController extends BaseAgentController {
      * @param id tomcat的id
      * @return tomcat运行状态
      */
-    @RequestMapping(value = "getTomcatStatus", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "getTomcatStatus", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public String getStatus(String id) {
         return JsonMessage.getString(200, "查询成功", tomcatManageService.getTomcatStatus(id));
     }
@@ -71,7 +71,7 @@ public class TomcatManageController extends BaseAgentController {
      * @param id tomcat id
      * @return 操作结果
      */
-    @RequestMapping(value = "start", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "start", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public String start(String id) {
         // 查询tomcat信息
         TomcatInfoModel tomcatInfoModel = tomcatEditService.getItem(id);
@@ -91,7 +91,7 @@ public class TomcatManageController extends BaseAgentController {
      * @param id tomcat id
      * @return 操作结果
      */
-    @RequestMapping(value = "stop", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "stop", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public String stop(String id) {
         // 查询tomcat信息
         TomcatInfoModel tomcatInfoModel = tomcatEditService.getItem(id);
@@ -110,7 +110,7 @@ public class TomcatManageController extends BaseAgentController {
      * @param id tomcat id
      * @return 操作结果
      */
-    @RequestMapping(value = "restart", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "restart", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public String restart(String id) {
         // 查询tomcat信息
         TomcatInfoModel tomcatInfoModel = tomcatEditService.getItem(id);
@@ -128,7 +128,7 @@ public class TomcatManageController extends BaseAgentController {
      * @param op   执行的操作
      * @return 操作结果
      */
-    @RequestMapping(value = "tomcatProjectManage", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "tomcatProjectManage", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public String tomcatProjectManage(String id, String path,
                                       @ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "操作项不对") String op) {
 
@@ -143,7 +143,7 @@ public class TomcatManageController extends BaseAgentController {
      * @param path 项目路径
      * @return 文件列表
      */
-    @RequestMapping(value = "getFileList", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "getFileList", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public String getFileList(String id, String path) {
         // 查询项目路径
         TomcatInfoModel tomcatInfoModel = tomcatEditService.getItem(id);
@@ -200,7 +200,7 @@ public class TomcatManageController extends BaseAgentController {
      * @param path 文件路径
      * @return 操作结果
      */
-    @RequestMapping(value = "upload", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "upload", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public String upload(String id, String path) {
         TomcatInfoModel tomcatInfoModel = tomcatEditService.getItem(id);
 
@@ -227,7 +227,7 @@ public class TomcatManageController extends BaseAgentController {
      * @param id tomcat id
      * @return 操作结果
      */
-    @RequestMapping(value = "uploadWar", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "uploadWar", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public String uploadWar(String id) {
         TomcatInfoModel tomcatInfoModel = tomcatEditService.getItem(id);
 
@@ -257,7 +257,7 @@ public class TomcatManageController extends BaseAgentController {
      * @param path     tomcat路径
      * @return 操作结果
      */
-    @RequestMapping(value = "deleteFile", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "deleteFile", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public String deleteFile(String id, String path, String filename) {
         TomcatInfoModel tomcatInfoModel = tomcatEditService.getItem(id);
         if (tomcatInfoModel == null) {
@@ -325,7 +325,7 @@ public class TomcatManageController extends BaseAgentController {
      * @param id tomcat id
      * @return json
      */
-    @RequestMapping(value = "logList", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "logList", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public String logList(String id) {
         TomcatInfoModel item = tomcatEditService.getItem(id);
         if (item == null) {

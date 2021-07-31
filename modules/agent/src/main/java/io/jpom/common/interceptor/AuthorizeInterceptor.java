@@ -44,6 +44,6 @@ public class AuthorizeInterceptor extends BaseInterceptor {
     }
 
     private void error(HttpServletResponse response) {
-        ServletUtil.write(response, JsonMessage.getString(ConfigBean.AUTHORIZE_ERROR, "授权信息错误"), MediaType.APPLICATION_JSON_UTF8_VALUE);
+        ServletUtil.write(response, JsonMessage.getString(ConfigBean.AUTHORIZE_ERROR, "授权信息错误"), MediaType.APPLICATION_JSON_VALUE);
     }
 }

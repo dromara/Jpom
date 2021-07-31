@@ -33,7 +33,7 @@ import java.io.IOException;
 @RequestMapping(value = "system")
 public class SystemConfigController extends BaseAgentController {
 
-    @RequestMapping(value = "getConfig.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "getConfig.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public String config() throws IOException {
         String content = IoUtil.read(ExtConfigBean.getResource().getInputStream(), CharsetUtil.CHARSET_UTF_8);
         JSONObject json = new JSONObject();
@@ -41,7 +41,7 @@ public class SystemConfigController extends BaseAgentController {
         return JsonMessage.getString(200, "ok", json);
     }
 
-    @RequestMapping(value = "save_config.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "save_config.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public String saveConfig(String content, String restart) {
         if (StrUtil.isEmpty(content)) {
             return JsonMessage.getString(405, "内容不能为空");

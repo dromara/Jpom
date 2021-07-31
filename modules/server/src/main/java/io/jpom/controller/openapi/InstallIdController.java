@@ -25,7 +25,7 @@ import java.io.FileNotFoundException;
 @RestController
 public class InstallIdController {
 
-    @RequestMapping(value = ServerOpenApi.INSTALL_ID, method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = ServerOpenApi.INSTALL_ID, method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public String install() throws FileNotFoundException {
         File file = FileUtil.file(ConfigBean.getInstance().getDataPath(), ServerConfigBean.INSTALL);
         if (!file.exists()) {

@@ -58,7 +58,7 @@ public class OutGivingWhitelistController extends BaseServerController {
      * get whiteList data
      * 白名单数据接口
      */
-    @RequestMapping(value = "white-list", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "white-list", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @SystemPermission
     @ResponseBody
     public String whiteList() {
@@ -79,7 +79,7 @@ public class OutGivingWhitelistController extends BaseServerController {
      * @param data 数据
      * @return json
      */
-    @RequestMapping(value = "whitelistDirectory_submit", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "whitelistDirectory_submit", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     @OptLog(UserOperateLogV1.OptType.SaveOutgivingWhitelist)
     @SystemPermission

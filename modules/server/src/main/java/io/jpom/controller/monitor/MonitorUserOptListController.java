@@ -96,7 +96,7 @@ public class MonitorUserOptListController extends BaseServerController {
 //        return "monitor/edit-user-opt";
 //    }
 
-    @RequestMapping(value = "list_data", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "list_data", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     @Feature(method = MethodFeature.LIST)
     public String getMonitorList() {
@@ -108,7 +108,7 @@ public class MonitorUserOptListController extends BaseServerController {
      * 操作监控类型列表
      * @return json
      */
-    @RequestMapping(value = "type_data", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "type_data", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     @Feature(method = MethodFeature.LIST)
     public String getOperateTypeList() {
@@ -129,7 +129,7 @@ public class MonitorUserOptListController extends BaseServerController {
      * @param id id
      * @return json
      */
-    @RequestMapping(value = "delete", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "delete", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     @OptLog(UserOperateLogV1.OptType.DelMonitor)
     @Feature(method = MethodFeature.DEL)
@@ -148,7 +148,7 @@ public class MonitorUserOptListController extends BaseServerController {
      * @param notifyUser user
      * @return json
      */
-    @RequestMapping(value = "update", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "update", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     @OptLog(UserOperateLogV1.OptType.EditMonitor)
     @Feature(method = MethodFeature.EDIT)
@@ -210,7 +210,7 @@ public class MonitorUserOptListController extends BaseServerController {
      * @param status 状态
      * @return json
      */
-    @RequestMapping(value = "changeStatus", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "changeStatus", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     @OptLog(UserOperateLogV1.OptType.ChangeStatusMonitor)
     @Feature(method = MethodFeature.EDIT)

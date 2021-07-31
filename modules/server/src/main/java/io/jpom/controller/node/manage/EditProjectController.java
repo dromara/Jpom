@@ -39,7 +39,7 @@ public class EditProjectController extends BaseServerController {
     @Resource
     private WhitelistDirectoryService whitelistDirectoryService;
 
-    @RequestMapping(value = "getProjectData.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "getProjectData.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public String getProjectData(@ValidatorItem String id) {
         JSONObject projectInfo = projectInfoService.getItem(getNode(), id);
@@ -107,7 +107,7 @@ public class EditProjectController extends BaseServerController {
      * @param id id
      * @return json
      */
-    @RequestMapping(value = "saveProject", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "saveProject", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     @OptLog(UserOperateLogV1.OptType.SaveProject)
     @Feature(method = MethodFeature.EDIT)
@@ -125,7 +125,7 @@ public class EditProjectController extends BaseServerController {
      *
      * @return json
      */
-    @RequestMapping(value = "judge_lib.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "judge_lib.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public String saveProject() {
         return NodeForward.request(getNode(), getRequest(), NodeUrl.Manage_Jude_Lib).toString();

@@ -58,16 +58,16 @@ public class GlobalDefaultExceptionHandler {
 //        } else {
 		if (e instanceof AuthorizeException) {
 			AuthorizeException authorizeException = (AuthorizeException) e;
-			ServletUtil.write(response, authorizeException.getJsonMessage().toString(), MediaType.APPLICATION_JSON_UTF8_VALUE);
+			ServletUtil.write(response, authorizeException.getJsonMessage().toString(), MediaType.APPLICATION_JSON_VALUE);
 		} else if (e instanceof AgentException || e instanceof JpomRuntimeException) {
-			ServletUtil.write(response, JsonMessage.getString(500, e.getMessage()), MediaType.APPLICATION_JSON_UTF8_VALUE);
+			ServletUtil.write(response, JsonMessage.getString(500, e.getMessage()), MediaType.APPLICATION_JSON_VALUE);
 		} else {
 			boolean causedBy = ExceptionUtil.isCausedBy(e, AccessDeniedException.class);
 			if (causedBy) {
 				ServletUtil.write(response, JsonMessage.getString(500, "操作文件权限异常,请手动处理：" + e.getMessage()), MediaType.APPLICATION_JSON_VALUE);
 				return;
 			}
-			ServletUtil.write(response, JsonMessage.getString(500, "服务异常：" + e.getMessage()), MediaType.APPLICATION_JSON_UTF8_VALUE);
+			ServletUtil.write(response, JsonMessage.getString(500, "服务异常：" + e.getMessage()), MediaType.APPLICATION_JSON_VALUE);
 		}
 //        }
 	}

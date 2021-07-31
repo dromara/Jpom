@@ -72,7 +72,7 @@ public class ScriptController extends BaseServerController {
      *
      * @return json
      */
-    @RequestMapping(value = "save.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "save.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     @OptLog(UserOperateLogV1.OptType.Save_Script)
     @Feature(method = MethodFeature.EDIT)
@@ -80,7 +80,7 @@ public class ScriptController extends BaseServerController {
         return NodeForward.request(getNode(), getRequest(), NodeUrl.Script_Save).toString();
     }
 
-    @RequestMapping(value = "del.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "del.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     @OptLog(UserOperateLogV1.OptType.Save_Del)
     @Feature(method = MethodFeature.DEL)
@@ -93,7 +93,7 @@ public class ScriptController extends BaseServerController {
      *
      * @return json
      */
-    @RequestMapping(value = "upload", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "upload", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     @OptLog(UserOperateLogV1.OptType.Save_Upload)
     @Feature(method = MethodFeature.UPLOAD)

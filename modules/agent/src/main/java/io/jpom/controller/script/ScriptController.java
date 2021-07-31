@@ -32,17 +32,17 @@ public class ScriptController extends BaseAgentController {
     @Resource
     private ScriptServer scriptServer;
 
-    @RequestMapping(value = "list.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "list.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public String list() {
         return JsonMessage.getString(200, "", scriptServer.list());
     }
 
-    @RequestMapping(value = "item.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "item.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public String item(String id) {
         return JsonMessage.getString(200, "", scriptServer.getItem(id));
     }
 
-    @RequestMapping(value = "save.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "save.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public String save(ScriptModel scriptModel, String type) {
         if (scriptModel == null) {
             return JsonMessage.getString(405, "没有数据");
@@ -74,13 +74,13 @@ public class ScriptController extends BaseAgentController {
         return JsonMessage.getString(200, "修改成功");
     }
 
-    @RequestMapping(value = "del.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "del.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public String del(String id) {
         scriptServer.deleteItem(id);
         return JsonMessage.getString(200, "删除成功");
     }
 
-    @RequestMapping(value = "upload.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "upload.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public String upload() throws IOException {
         MultipartFileBuilder multipartFileBuilder = createMultipart()
                 .addFieldName("file").setFileExt("bat", "sh");

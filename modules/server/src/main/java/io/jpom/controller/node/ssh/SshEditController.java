@@ -28,7 +28,7 @@ public class SshEditController extends BaseServerController {
     @Resource
     private SshService sshService;
 
-    @RequestMapping(value = "del.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "del.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     @Feature(method = MethodFeature.DEL)
     public String del(@ValidatorItem(value = ValidatorRule.NOT_BLANK) String id) {

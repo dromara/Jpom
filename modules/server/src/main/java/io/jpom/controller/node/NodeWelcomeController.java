@@ -83,7 +83,7 @@ public class NodeWelcomeController extends BaseServerController {
 //        return "node/nodeMonitor";
 //    }
 
-    @RequestMapping(value = "nodeMonitor_data.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "nodeMonitor_data.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public String nodeMonitorJson(String time) {
         JSONObject object = getData(time);
@@ -152,7 +152,7 @@ public class NodeWelcomeController extends BaseServerController {
         return object;
     }
 
-    @RequestMapping(value = "getTop", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "getTop", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public String getTop() {
         Cycle cycle = getCycle();
@@ -189,13 +189,13 @@ public class NodeWelcomeController extends BaseServerController {
         }
     }
 
-    @RequestMapping(value = "processList", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "processList", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public String getProcessList() {
         return NodeForward.request(getNode(), getRequest(), NodeUrl.ProcessList).toString();
     }
 
-    @RequestMapping(value = "kill.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "kill.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public String kill() {
         UserModel user = getUser();

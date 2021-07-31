@@ -15,7 +15,7 @@
 //@RequestMapping(value = ServerOpenApi.API + "project")
 //public class ProjectInfoController {
 //
-//    @RequestMapping(value = "sync", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+//    @RequestMapping(value = "sync", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 //    public JsonMessage sync() {
 //
 //    }

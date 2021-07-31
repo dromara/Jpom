@@ -30,7 +30,7 @@ public class NodeInfoController extends AbstractController {
      * @param type  操作类型
      * @return json
      */
-    @RequestMapping(value = ServerOpenApi.UPDATE_NODE_INFO, method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = ServerOpenApi.UPDATE_NODE_INFO, method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public String update(NodeModel model, String type) {
         if ("add".equalsIgnoreCase(type)) {
             return nodeService.addNode(model, getRequest());

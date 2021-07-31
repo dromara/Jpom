@@ -26,13 +26,13 @@ public class ProjectRecoverControl extends BaseJpomController {
     @Resource
     private ProjectRecoverService projectRecoverService;
 
-    @RequestMapping(value = "list_data", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "list_data", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public String projectInfo() {
         List<ProjectRecoverModel> projectInfoModels = projectRecoverService.list();
         return JsonMessage.getString(200, "", projectInfoModels);
     }
 
-    @RequestMapping(value = "item_data", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "item_data", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public String project(String id) throws IOException {
         if (StrUtil.isEmpty(id)) {
             return JsonMessage.getString(400, "项目id错误");

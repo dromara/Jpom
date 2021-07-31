@@ -61,7 +61,7 @@ public class SshInstallAgentController extends BaseServerController {
 //        return "node/ssh/installAgent";
 //    }
 
-    @RequestMapping(value = "installAgentSubmit.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "installAgentSubmit.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     @Feature(method = MethodFeature.INSTALL)
     @OptLog(UserOperateLogV1.OptType.SshInstallAgent)

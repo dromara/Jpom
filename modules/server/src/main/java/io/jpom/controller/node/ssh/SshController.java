@@ -48,7 +48,7 @@ public class SshController extends BaseServerController {
 //        return "node/ssh/list";
 //    }
 
-	@RequestMapping(value = "list_data.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	@RequestMapping(value = "list_data.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
 	@Feature(method = MethodFeature.LIST)
 	public JsonMessage<List<SshModel>> listData() {
@@ -89,7 +89,7 @@ public class SshController extends BaseServerController {
 	 * @param type        {'add': 新增, 'edit': 修改}
 	 * @return
 	 */
-	@RequestMapping(value = "save.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	@RequestMapping(value = "save.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	@OptLog(UserOperateLogV1.OptType.EditSsh)
 	@ResponseBody
 	@Feature(method = MethodFeature.EDIT)
@@ -193,7 +193,7 @@ public class SshController extends BaseServerController {
 	 * @description for dev 3.x
 	 * @author Hotstrip
 	 */
-	@RequestMapping(value = "list_by_node_id", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	@RequestMapping(value = "list_by_node_id", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
 	@Feature(method = MethodFeature.LIST)
 	public String listByNodeId(String nodeId) {

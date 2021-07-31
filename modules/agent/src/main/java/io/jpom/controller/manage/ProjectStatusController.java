@@ -44,7 +44,7 @@ public class ProjectStatusController extends BaseAgentController {
      * @param id 项目id
      * @return json
      */
-    @RequestMapping(value = "getProjectStatus", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "getProjectStatus", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public String getProjectStatus(@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "项目id 不正确")) String id, String getCopy) {
         ProjectInfoModel projectInfoModel = tryGetProjectInfoModel();
         if (projectInfoModel == null) {
@@ -81,7 +81,7 @@ public class ProjectStatusController extends BaseAgentController {
      * @param ids ids
      * @return obj
      */
-    @RequestMapping(value = "getProjectPort", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "getProjectPort", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public String getProjectPort(String ids) {
         if (StrUtil.isEmpty(ids)) {
             return JsonMessage.getString(400, "");
@@ -118,7 +118,7 @@ public class ProjectStatusController extends BaseAgentController {
      * @param copyIds 副本 ids ["aa","ss"]
      * @return obj
      */
-    @RequestMapping(value = "getProjectCopyPort", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "getProjectCopyPort", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public String getProjectPort(String id, String copyIds) {
         if (StrUtil.isEmpty(copyIds) || StrUtil.isEmpty(id)) {
             return JsonMessage.getString(400, "");
@@ -150,7 +150,7 @@ public class ProjectStatusController extends BaseAgentController {
         return JsonMessage.getString(200, "", jsonObject);
     }
 
-    @RequestMapping(value = "restart", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "restart", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public String restart(@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "项目id 不正确")) String id, String copyId) {
         ProjectInfoModel item = projectInfoService.getItem(id);
         if (item == null) {
