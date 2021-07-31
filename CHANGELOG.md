@@ -8,6 +8,7 @@
 
 1. 【server】添加节点时候限制超时时间，避免配置错误一直等待情况
 2. 【server】优化限制 IP 白名单相关判断，避免手动修改错误后一直限制访问
+3. 【server】添加 QQ 邮箱配置参照说明 [QQ邮箱官方文档](https://service.mail.qq.com/cgi-bin/help?subtype=1&&no=369&&id=28)
 
 ------
 
