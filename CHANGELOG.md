@@ -18,6 +18,7 @@
 7. 【server】 jpom-service.sh 文件加载环境变量修改为 判断模式
 8. 【agent】fix: windows 环境保存配置文件错误问题
 9. 【agent】fix: 在线升级页面在没有配置白名单时候无法显示节点信息
+10.【server】update: 刷新整个页面的时候重新加载菜单
 
 ------
 
