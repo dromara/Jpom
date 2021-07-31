@@ -216,6 +216,22 @@ export function downloadProjectFile(params) {
 	})
 }
 
+export function readFile(formData) {
+	return axios({
+		url: '/node/manage/file/read_file',
+		method: 'get',
+		params: formData
+	})
+}
+
+export function updateFile(formData) {
+	return axios({
+		url: '/node/manage/file/update_config_file',
+		method: 'post',
+		data: formData
+	})
+}
+
 /**
  * 上传项目文件
  * @param {

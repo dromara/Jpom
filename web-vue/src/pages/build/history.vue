@@ -68,7 +68,8 @@ import {
   downloadBuildLog,
   rollback,
   deleteBuildHistory,
-  releaseMethodMap
+  releaseMethodMap,
+  downloadBuildFile
 } from '../../api/build';
 import { parseTime } from '../../utils/time';
 export default {
@@ -183,31 +184,17 @@ export default {
       this.listQuery.page = 1;
       this.loadData();
     },
+
     // 下载构建日志
     handleDownload(record) {
-      // 请求接口拿到 blob
-      downloadBuildLog(record.id).then(blob => {
-        const url = window.URL.createObjectURL(blob);
-        let link = document.createElement('a');
-        link.style.display = 'none';
-        link.href = url;
-        link.setAttribute('download', `${record.name}.log`);
-        document.body.appendChild(link);
-        link.click();
-      })
+      window.open(downloadBuildLog(record.id), '_self');
     },
+
+    // 下载构建产物
     handleFile(record){
-      window.open("./build/download_file.html?logId="+record.id);
-      // downloadBuildFile(record.id).then(blob => {
-      //   const url = window.URL.createObjectURL(blob);
-      //   let link = document.createElement('a');
-      //   link.style.display = 'none';
-      //   link.href = url;
-      //   link.setAttribute('download', `${record.name}.log`);
-      //   document.body.appendChild(link);
-      //   link.click();
-      // })
+      window.open(downloadBuildFile(record.id), '_self');
     },
+
     // 回滚
     handleRollback(record) {
       this.$confirm({

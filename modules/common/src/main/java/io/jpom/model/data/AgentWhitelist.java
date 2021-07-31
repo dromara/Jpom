@@ -12,6 +12,7 @@ import io.jpom.system.ExtConfigBean;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 /**
  * 白名单
@@ -37,6 +38,19 @@ public class AgentWhitelist extends BaseJsonModel {
 	 * 运行编辑的后缀文件
 	 */
 	private List<String> allowEditSuffix;
+
+	/**
+	 * 运行远程下载的 host
+	 */
+	private Set<String> allowRemoteDownloadHost;
+
+	public Set<String> getAllowRemoteDownloadHost() {
+		return allowRemoteDownloadHost;
+	}
+
+	public void setAllowRemoteDownloadHost(Set<String> allowRemoteDownloadHost) {
+		this.allowRemoteDownloadHost = allowRemoteDownloadHost;
+	}
 
 	public List<String> getAllowEditSuffix() {
 		return allowEditSuffix;
