@@ -14,9 +14,9 @@ import java.util.Map;
  */
 public class YmlUtil {
 
-    public static List<Map<String, Object>> load(File file) {
-        FileSystemResource fileSystemResource = new FileSystemResource(file);
-        OriginTrackedYamlLoader originTrackedYamlLoader = new OriginTrackedYamlLoader(fileSystemResource);
-        return originTrackedYamlLoader.load();
-    }
+	public static List<Map<String, Object>> load(File file) {
+		FileSystemResource fileSystemResource = new FileSystemResource(file);
+		OriginTrackedYamlLoader originTrackedYamlLoader = new OriginTrackedYamlLoader(fileSystemResource);
+		return originTrackedYamlLoader.load();
+	}
 }

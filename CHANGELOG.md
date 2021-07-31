@@ -15,6 +15,9 @@
 4. 【server】fix: 删除临时文件出现 `AccessDeniedException` 更新文件权限为可读（取消只读权限）
 5. 【server】拉取 GIT 代码根据仓库路径添加 `synchronized`
 6. 【server】节点管理页面支持刷新当前节点页面（刷新不再回到首页）
+7. 【server】 jpom-service.sh 文件加载环境变量修改为 判断模式
+8. 【agent】fix: windows 环境保存配置文件错误问题
+9. 【agent】fix: 在线升级页面在没有配置白名单时候无法显示节点信息
 
 ------
 
