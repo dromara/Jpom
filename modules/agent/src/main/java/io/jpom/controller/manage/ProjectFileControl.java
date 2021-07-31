@@ -296,7 +296,7 @@ public class ProjectFileControl extends BaseAgentController {
 	 * @param filename 读取的文件名
 	 * @return json
 	 */
-	@GetMapping(value = "read_file", produces = MediaType.APPLICATION_JSON_VALUE)
+	@PostMapping(value = "read_file", produces = MediaType.APPLICATION_JSON_VALUE)
 	public String readFile(String filePath, String filename) {
 		ProjectInfoModel pim = getProjectInfoModel();
 		filePath = StrUtil.emptyToDefault(filePath, File.separator);
@@ -304,7 +304,7 @@ public class ProjectFileControl extends BaseAgentController {
 		Charset charset = this.checkFileSuffix(filename);
 		File file = FileUtil.file(pim.allLib(), filePath, filename);
 		String ymlString = FileUtil.readString(file, charset);
-		return JsonMessage.getString(200, ymlString);
+		return JsonMessage.getString(200, "", ymlString);
 	}
 
 	/**
@@ -362,7 +362,7 @@ public class ProjectFileControl extends BaseAgentController {
 	 * @param unzip     是否为压缩包、true 将自动解压
 	 * @return json
 	 */
-	@GetMapping(value = "remote_download", produces = MediaType.APPLICATION_JSON_VALUE)
+	@PostMapping(value = "remote_download", produces = MediaType.APPLICATION_JSON_VALUE)
 	public String remoteDownload(String id, String url, String levelName, String unzip) {
 		if (StrUtil.isEmpty(url)) {
 			return JsonMessage.getString(405, "请输入正确的远程地址");

@@ -1,5 +1,6 @@
 package io.jpom.controller.node.system;
 
+import cn.hutool.core.util.ReflectUtil;
 import cn.jiangzeyin.common.JsonMessage;
 import io.jpom.common.BaseServerController;
 import io.jpom.common.forward.NodeForward;
@@ -16,7 +17,9 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.annotation.Resource;
+import java.lang.reflect.Field;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -28,62 +31,51 @@ import java.util.Map;
 @Controller
 @RequestMapping(value = "/node/system")
 public class WhitelistDirectoryController extends BaseServerController {
-    @Resource
-    private WhitelistDirectoryService whitelistDirectoryService;
-
-//    /**
-//     * 页面
-//     */
-//    @RequestMapping(value = "whitelistDirectory", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
-//    @SystemPermission
-//    public String whitelistDirectory() {
-//        AgentWhitelist agentWhitelist = whitelistDirectoryService.getData(getNode());
-//        if (agentWhitelist != null) {
-//            setAttribute("project", AgentWhitelist.convertToLine(agentWhitelist.getProject()));
-//            //
-//            setAttribute("certificate", AgentWhitelist.convertToLine(agentWhitelist.getCertificate()));
-//            //
-//            setAttribute("nginx", AgentWhitelist.convertToLine(agentWhitelist.getNginx()));
-//        }
-//        return "node/system/whitelistDirectory";
-//    }
+	@Resource
+	private WhitelistDirectoryService whitelistDirectoryService;
 
 
-    /**
-     * @author Hotstrip
-     * get whiteList data
-     * 白名单数据接口
-     * @return
-     */
-    @RequestMapping(value = "white-list", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    @SystemPermission
-    @ResponseBody
-    public String whiteList() {
-        AgentWhitelist agentWhitelist = whitelistDirectoryService.getData(getNode());
-        Map<String, String> map = new HashMap();
-        if (agentWhitelist != null) {
-            /**
-             * put key and value into map
-             * 赋值给 map 对象返回
-             */
-            map.put("project", AgentWhitelist.convertToLine(agentWhitelist.getProject()));
-            map.put("certificate", AgentWhitelist.convertToLine(agentWhitelist.getCertificate()));
-            map.put("nginx", AgentWhitelist.convertToLine(agentWhitelist.getNginx()));
-        }
-        return JsonMessage.getString(200, "ok", map);
-    }
+	/**
+	 * get whiteList data
+	 * 白名单数据接口
+	 *
+	 * @return json
+	 * @author Hotstrip
+	 */
+	@RequestMapping(value = "white-list", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+	@SystemPermission
+	@ResponseBody
+	public String whiteList() {
+		AgentWhitelist agentWhitelist = whitelistDirectoryService.getData(getNode());
+		Map<String, String> map = new HashMap<>(8);
+		if (agentWhitelist != null) {
+			/**
+			 * put key and value into map
+			 * 赋值给 map 对象返回
+			 */
+			Field[] fields = ReflectUtil.getFields(AgentWhitelist.class);
+			for (Field field : fields) {
+				List<String> fieldValue = (List<String>) ReflectUtil.getFieldValue(agentWhitelist, field);
+				map.put(field.getName(), AgentWhitelist.convertToLine(fieldValue));
+			}
+//			map.put("project", AgentWhitelist.convertToLine(agentWhitelist.getProject()));
+//			map.put("certificate", AgentWhitelist.convertToLine(agentWhitelist.getCertificate()));
+//			map.put("nginx", AgentWhitelist.convertToLine(agentWhitelist.getNginx()));
+		}
+		return JsonMessage.getString(200, "ok", map);
+	}
 
 
-    /**
-     * 保存接口
-     *
-     * @return json
-     */
-    @RequestMapping(value = "whitelistDirectory_submit", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    @ResponseBody
-    @OptLog(UserOperateLogV1.OptType.EditWhitelist)
-    @SystemPermission
-    public String whitelistDirectorySubmit() {
-        return NodeForward.request(getNode(), getRequest(), NodeUrl.WhitelistDirectory_Submit).toString();
-    }
+	/**
+	 * 保存接口
+	 *
+	 * @return json
+	 */
+	@RequestMapping(value = "whitelistDirectory_submit", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody
+	@OptLog(UserOperateLogV1.OptType.EditWhitelist)
+	@SystemPermission
+	public String whitelistDirectorySubmit() {
+		return NodeForward.request(getNode(), getRequest(), NodeUrl.WhitelistDirectory_Submit).toString();
+	}
 }

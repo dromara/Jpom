@@ -10,10 +10,7 @@ import io.jpom.plugin.Feature;
 import io.jpom.plugin.MethodFeature;
 import io.jpom.service.node.manage.ProjectInfoService;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 
@@ -106,7 +103,7 @@ public class ProjectFileControl extends BaseServerController {
 	 *
 	 * @return json
 	 */
-	@RequestMapping(value = "update_config_file", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	@PostMapping(value = "update_config_file", produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
 	@Feature(method = MethodFeature.UPDATE_CONFIG_FILE)
 	public String updateConfigFile() {
@@ -118,7 +115,7 @@ public class ProjectFileControl extends BaseServerController {
 	 *
 	 * @return json
 	 */
-	@RequestMapping(value = "read_file", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	@GetMapping(value = "read_file", produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
 	@Feature(method = MethodFeature.READ_FILE)
 	public String readFile() {
@@ -130,7 +127,7 @@ public class ProjectFileControl extends BaseServerController {
 	 *
 	 * @return json
 	 */
-	@RequestMapping(value = "remote_download", method = RequestMethod.GET)
+	@GetMapping(value = "remote_download", produces = MediaType.APPLICATION_JSON_VALUE)
 	@Feature(method = MethodFeature.REMOTE_DOWNLOAD)
 	public String remoteDownload() {
 		return NodeForward.request(getNode(), getRequest(), NodeUrl.Manage_File_Remote_Download).toString();
