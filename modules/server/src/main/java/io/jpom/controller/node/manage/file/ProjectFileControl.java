@@ -29,11 +29,11 @@ import javax.annotation.Resource;
 @RequestMapping(value = "/node/manage/file/")
 @Feature(cls = ClassFeature.PROJECT)
 public class ProjectFileControl extends BaseServerController {
-    @Resource
-    private ProjectInfoService projectInfoService;
+	@Resource
+	private ProjectInfoService projectInfoService;
 
-    @Value("${fileFormat}")
-    private String fileFormat;
+	@Value("${fileFormat}")
+	private String fileFormat;
 //    /**
 //     * 文件管理页面
 //     *
@@ -52,94 +52,94 @@ public class ProjectFileControl extends BaseServerController {
 //        return "node/manage/filemanage";
 //    }
 
-    /**
-     * 列出目录下的文件
-     *
-     * @return json
-     */
-    @RequestMapping(value = "getFileList", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    @ResponseBody
-    // @ProjectPermission()
-    @Feature(method = MethodFeature.FILE)
-    public String getFileList() {
-        return NodeForward.request(getNode(), getRequest(), NodeUrl.Manage_File_GetFileList).toString();
-    }
+	/**
+	 * 列出目录下的文件
+	 *
+	 * @return json
+	 */
+	@RequestMapping(value = "getFileList", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	@ResponseBody
+	// @ProjectPermission()
+	@Feature(method = MethodFeature.FILE)
+	public String getFileList() {
+		return NodeForward.request(getNode(), getRequest(), NodeUrl.Manage_File_GetFileList).toString();
+	}
 
 
-    /**
-     * 上传文件
-     *
-     * @return json
-     */
-    @RequestMapping(value = "upload", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    @ResponseBody
-    @OptLog(UserOperateLogV1.OptType.UploadProjectFile)
-    @Feature(method = MethodFeature.UPLOAD)
-    public String upload() {
-        return NodeForward.requestMultipart(getNode(), getMultiRequest(), NodeUrl.Manage_File_Upload).toString();
-    }
+	/**
+	 * 上传文件
+	 *
+	 * @return json
+	 */
+	@RequestMapping(value = "upload", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	@ResponseBody
+	@OptLog(UserOperateLogV1.OptType.UploadProjectFile)
+	@Feature(method = MethodFeature.UPLOAD)
+	public String upload() {
+		return NodeForward.requestMultipart(getNode(), getMultiRequest(), NodeUrl.Manage_File_Upload).toString();
+	}
 
-    /**
-     * 下载文件
-     */
-    @RequestMapping(value = "download", method = RequestMethod.GET)
-    @ResponseBody
-    @OptLog(UserOperateLogV1.OptType.DownloadProjectFile)
-    @Feature(method = MethodFeature.DOWNLOAD)
-    public void download() {
-        NodeForward.requestDownload(getNode(), getRequest(), getResponse(), NodeUrl.Manage_File_Download);
-    }
+	/**
+	 * 下载文件
+	 */
+	@RequestMapping(value = "download", method = RequestMethod.GET)
+	@ResponseBody
+	@OptLog(UserOperateLogV1.OptType.DownloadProjectFile)
+	@Feature(method = MethodFeature.DOWNLOAD)
+	public void download() {
+		NodeForward.requestDownload(getNode(), getRequest(), getResponse(), NodeUrl.Manage_File_Download);
+	}
 
-    /**
-     * 删除文件
-     *
-     * @return json
-     */
-    @RequestMapping(value = "deleteFile", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    @ResponseBody
-    @Feature(method = MethodFeature.DEL_FILE)
-    @OptLog(UserOperateLogV1.OptType.DelProjectFile)
-    public String deleteFile() {
-        return NodeForward.request(getNode(), getRequest(), NodeUrl.Manage_File_DeleteFile).toString();
-    }
+	/**
+	 * 删除文件
+	 *
+	 * @return json
+	 */
+	@RequestMapping(value = "deleteFile", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	@ResponseBody
+	@Feature(method = MethodFeature.DEL_FILE)
+	@OptLog(UserOperateLogV1.OptType.DelProjectFile)
+	public String deleteFile() {
+		return NodeForward.request(getNode(), getRequest(), NodeUrl.Manage_File_DeleteFile).toString();
+	}
 
 
-    /**
-     * 更新配置文件
-     *
-     * @return json
-     */
-    @RequestMapping(value = "updateConfigFile", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    @ResponseBody
-    @Feature(method = MethodFeature.UPDATE_CONFIG_FILE)
-    public String updateConfigFile() {
-        return NodeForward.request(getNode(), getRequest(), NodeUrl.Manage_File_UpdateConfigFile).toString();
-    }
+	/**
+	 * 更新配置文件
+	 *
+	 * @return json
+	 */
+	@RequestMapping(value = "update_config_file", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	@ResponseBody
+	@Feature(method = MethodFeature.UPDATE_CONFIG_FILE)
+	public String updateConfigFile() {
+		return NodeForward.request(getNode(), getRequest(), NodeUrl.Manage_File_UpdateConfigFile).toString();
+	}
 
-    /**
-     * 删除文件
-     *
-     * @return json
-     */
-    @RequestMapping(value = "readFile", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    @ResponseBody
-    @Feature(method = MethodFeature.READ_FILE)
-    public String readFile() {
-        return NodeForward.request(getNode(), getRequest(), NodeUrl.Manage_File_ReadFile).toString();
-    }
+	/**
+	 * 删除文件
+	 *
+	 * @return json
+	 */
+	@RequestMapping(value = "read_file", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	@ResponseBody
+	@Feature(method = MethodFeature.READ_FILE)
+	public String readFile() {
+		return NodeForward.request(getNode(), getRequest(), NodeUrl.Manage_File_ReadFile).toString();
+	}
 
-    /**
-     * 获取可编辑文件格式
-     *
-     * @return json
-     */
-    @RequestMapping(value = "geFileFormat", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    @ResponseBody
-    @Feature(method = MethodFeature.GET_FILE_FOMAT)
-    public String geFileFormat() {
-        String[] file = fileFormat.split("\\|");
-        JSONObject jsonObject = new JSONObject();
-        jsonObject.put("fileFormat",file);
-        return JsonMessage.getString(200,"获取成功",jsonObject);
-    }
+	/**
+	 * 获取可编辑文件格式
+	 *
+	 * @return json
+	 */
+	@RequestMapping(value = "geFileFormat", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	@ResponseBody
+	@Feature(method = MethodFeature.GET_FILE_FOMAT)
+	public String geFileFormat() {
+		String[] file = fileFormat.split("\\|");
+		JSONObject jsonObject = new JSONObject();
+		jsonObject.put("fileFormat", file);
+		return JsonMessage.getString(200, "获取成功", jsonObject);
+	}
 }

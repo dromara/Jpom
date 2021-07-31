@@ -1,6 +1,8 @@
 package io.jpom.controller.system;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.text.StrSplitter;
+import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.JsonMessage;
 import io.jpom.common.BaseJpomController;
@@ -103,6 +105,20 @@ public class WhitelistDirectoryController extends BaseJpomController {
 			String error = findStartsWith(nginxArray, 0);
 			if (error != null) {
 				return new JsonMessage<>(401, "nginx目录中不能存在包含关系：" + error);
+			}
+		}
+		//
+		if (CollUtil.isNotEmpty(allowEditSuffixList)) {
+			for (String s : allowEditSuffixList) {
+				List<String> split = StrUtil.split(s, StrUtil.AT);
+				if (split.size() > 1) {
+					String last = CollUtil.getLast(split);
+					try {
+						CharsetUtil.charset(last);
+					} catch (Exception e) {
+						throw new IllegalArgumentException("配置的字符编码格式不合法：" + s);
+					}
+				}
 			}
 		}
 		AgentWhitelist agentWhitelist = whitelistDirectoryService.getWhitelist();
