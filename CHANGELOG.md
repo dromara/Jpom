@@ -9,6 +9,7 @@
 3. 程序启动输出默认 IP 地址和当前运行端口信息
 4. bat 管理命令（windows）启动后输出日志文件,方便排查当前启动情况
 5. 【server】上传文件到插件端（节点）超时配置独立,采用 server 端全局配置,配置参数 `node.uploadFileTimeOut`
+   （感谢 @LW 根据 Gitee  [issues I3O8YE](https://gitee.com/dromara/Jpom/issues/I3O8YE) ）
 
 ### 解决BUG、优化功能
 
