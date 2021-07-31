@@ -14,6 +14,7 @@
 3. 【server】添加 QQ 邮箱配置参照说明 [QQ邮箱官方文档](https://service.mail.qq.com/cgi-bin/help?subtype=1&&no=369&&id=28)
 4. 【server】fix: 删除临时文件出现 `AccessDeniedException` 更新文件权限为可读（取消只读权限）
 5. 【server】拉取 GIT 代码根据仓库路径添加 `synchronized`
+6. 【server】节点管理页面支持刷新当前节点页面（刷新不再回到首页）
 
 ------
 
