@@ -15,6 +15,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.io.File;
 import java.nio.file.AccessDeniedException;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -99,6 +100,11 @@ public class CheckPath {
 			FileUtil.del(file);
 		} catch (Exception e) {
 			// Try again
+			DefaultSystemLog.getLog().warn("尝试删除临时文件夹失败,尝试处理只读权限");
+			List<File> files = FileUtil.loopFiles(file);
+			for (File file1 : files) {
+				file1.setWritable(true);
+			}
 			try {
 				FileUtil.del(file.toPath());
 			} catch (Exception e1) {

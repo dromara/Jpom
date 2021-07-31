@@ -98,11 +98,11 @@
                 </a-form-model-item>
                 <a-form-model-item label="仓库地址" prop="gitUrl">
                     <a-input-group compact>
-                        <a-select v-model="temp.repoType" name="repoType">
+                        <a-select style="width: 20%" v-model="temp.repoType" name="repoType" placeholder="仓库类型">
                             <a-select-option :value="0">GIT</a-select-option>
                             <a-select-option :value="1">SVN</a-select-option>
                         </a-select>
-                        <a-input style="width: 88%" v-model="temp.gitUrl" placeholder="仓库地址"/>
+                        <a-input style="width: 80%" v-model="temp.gitUrl" placeholder="仓库地址"/>
                     </a-input-group>
                 </a-form-model-item>
                 <!--        <a-form-model-item label="仓库类型" prop="repoType">-->
