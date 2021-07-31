@@ -91,9 +91,10 @@ export default {
     },
     defaultOpenKey() {
       let keyList = [];
+      // 引导开启且没指定打开某一项菜单时打开系统配置
       if (this.getGuideFlag && !this.$route.query.pId) {
         keyList = ['systemConfig']
-      } else {
+      } else if (this.$route.query.pId){ // 打开对应的父级菜单
         keyList = [this.$route.query.pId]
       }
       return keyList
