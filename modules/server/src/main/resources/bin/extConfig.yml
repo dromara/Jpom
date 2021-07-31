@@ -43,3 +43,6 @@ build:
 ssh:
   # ssh 执行命令的 默认加载的环境变量
   initEnv: source /etc/profile && source ~/.bash_profile && source ~/.bashrc
+node:
+  # 上传文件的超时时间 单位秒,最短5秒中
+  uploadFileTimeOut: 300

@@ -93,6 +93,21 @@ public class ServerExtConfigBean {
 	@Value("${ssh.initEnv:}")
 	private String sshInitEnv;
 
+	/**
+	 * 上传文件的超时时间 单位秒,最短5秒中
+	 */
+	@Value("${node.uploadFileTimeOut:300}")
+	private int uploadFileTimeOut;
+
+	/**
+	 * 获取上传文件超时时间
+	 *
+	 * @return 返回毫秒
+	 */
+	public int getUploadFileTimeOut() {
+		return Math.max(this.uploadFileTimeOut, 5) * 1000;
+	}
+
 	public String getSshInitEnv() {
 		return StrUtil.emptyToDefault(this.sshInitEnv, "source /etc/profile && source ~/.bash_profile && source ~/.bashrc");
 	}

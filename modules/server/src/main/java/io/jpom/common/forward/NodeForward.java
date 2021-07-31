@@ -14,10 +14,7 @@ import com.alibaba.fastjson.TypeReference;
 import io.jpom.common.BaseServerController;
 import io.jpom.model.data.NodeModel;
 import io.jpom.model.data.UserModel;
-import io.jpom.system.AgentException;
-import io.jpom.system.AuthorizeException;
-import io.jpom.system.ConfigBean;
-import io.jpom.system.JpomRuntimeException;
+import io.jpom.system.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
@@ -210,7 +207,7 @@ public class NodeForward {
 	 * @param nodeUrl   节点的url
 	 * @return json
 	 */
-	public static JsonMessage requestMultipart(NodeModel nodeModel, MultipartHttpServletRequest request, NodeUrl nodeUrl) {
+	public static JsonMessage<String> requestMultipart(NodeModel nodeModel, MultipartHttpServletRequest request, NodeUrl nodeUrl) {
 		String url = nodeModel.getRealUrl(nodeUrl);
 		HttpRequest httpRequest = HttpUtil.createPost(url);
 		addUser(httpRequest, nodeModel, nodeUrl);
@@ -228,6 +225,8 @@ public class NodeForward {
 		});
 		HttpResponse response;
 		try {
+			// @author jzy add  timeout
+			httpRequest.timeout(ServerExtConfigBean.getInstance().getUploadFileTimeOut());
 			response = httpRequest.execute();
 		} catch (Exception e) {
 			throw new AgentException(nodeModel.getName() + "节点异常：" + e.getMessage(), e);
@@ -253,6 +252,8 @@ public class NodeForward {
 		//
 		HttpResponse response1;
 		try {
+			// @author jzy add  timeout
+			httpRequest.timeout(ServerExtConfigBean.getInstance().getUploadFileTimeOut());
 			response1 = httpRequest.execute();
 		} catch (Exception e) {
 			throw new AgentException(nodeModel.getName() + "节点异常：" + e.getMessage(), e);
