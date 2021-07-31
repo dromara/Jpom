@@ -21,11 +21,11 @@ public class BuildInfoModel extends BaseModel {
 	 */
 	private String branchName;
 	/**
-	 * '构建命令'
+	 * 构建命令
 	 */
 	private String script;
 	/**
-	 * '构建产物目录'
+	 * 构建产物目录
 	 */
 	private String resultDirFile;
 	/**

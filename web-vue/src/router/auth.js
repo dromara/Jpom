@@ -29,6 +29,10 @@ router.beforeEach((to, from, next) => {
     next('/login');
     return;
   }
+  // 如果存在 token (已经登录) 且是访问 / 路由，需要重新请求菜单接口（使用 action 实现）
+  if (store.getters.getToken && from.path === '/') {
+    store.dispatch('loadSystemMenus');
+  }
   // 存储 store
   store.dispatch('addTab', {key: to.name, path: to.path}).then(() => {
     next();

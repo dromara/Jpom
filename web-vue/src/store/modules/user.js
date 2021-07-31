@@ -47,8 +47,8 @@ const user = {
   },
   actions: {
     // 登录 data = {token: 'xxx', userName: 'name'}
-    login({commit}, data) {
-      return new Promise((resolve, reject) => {
+    login({dispatch, commit}, data) {
+      return new Promise((resolve) => {
         commit('setToken', data);
         //commit('setUserName', data.userName);
         // 加载用户信息
@@ -58,6 +58,15 @@ const user = {
             localStorage.setItem(USER_INFO_KEY, JSON.stringify(res.data));
           }
         })
+        // 加载系统菜单 这里需要等待 action 执行完毕返回 promise, 否则第一次登录可能会从 store 里面获取不到 menus 数据而报错
+        dispatch('loadSystemMenus').then(() => {
+          resolve();
+        });
+      })
+    },
+    // 加载系统菜单 action
+    loadSystemMenus({commit}) {
+      return new Promise((resolve, reject) => {
         // 加载系统菜单
         getSystemMenu().then(res => {
           res.data.forEach(element => {

@@ -23,6 +23,10 @@
     "icon_v3": "apartment",
     "childs": [
       {
+        "id": "repository",
+        "title": "仓库信息"
+      },
+      {
         "id": "outgiving",
         "title": "分发列表"
       },

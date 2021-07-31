@@ -13,6 +13,7 @@ const routeMenuMap = {
   'monitor': '/monitor/list',
   'monitorLog': '/monitor/log',
   'userOptLog': '/monitor/operate-log',
+  'repository': '/repository/list',
   'buildList': '/build/list',
   'buildHistory': '/build/history',
   'user': '/user/list',
