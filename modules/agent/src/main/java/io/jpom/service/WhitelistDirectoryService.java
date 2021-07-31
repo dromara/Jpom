@@ -20,17 +20,22 @@ import java.util.List;
 @Service
 public class WhitelistDirectoryService extends BaseDataService {
 
+	/**
+	 * 获取白名单信息配置、如何没有配置或者配置错误将返回新对象
+	 *
+	 * @return AgentWhitelist
+	 */
 	public AgentWhitelist getWhitelist() {
 		try {
 			JSONObject jsonObject = getJSONObject(AgentConfigBean.WHITELIST_DIRECTORY);
 			if (jsonObject == null) {
-				return null;
+				return new AgentWhitelist();
 			}
 			return jsonObject.toJavaObject(AgentWhitelist.class);
 		} catch (Exception e) {
 			DefaultSystemLog.getLog().error(e.getMessage(), e);
 		}
-		return null;
+		return new AgentWhitelist();
 	}
 
 	/**
@@ -40,9 +45,6 @@ public class WhitelistDirectoryService extends BaseDataService {
 	 */
 	public void addProjectWhiteList(String item) {
 		AgentWhitelist agentWhitelist = getWhitelist();
-		if (agentWhitelist == null) {
-			agentWhitelist = new AgentWhitelist();
-		}
 		List<String> project = agentWhitelist.getProject();
 		if (project == null) {
 			project = new ArrayList<>();
@@ -53,26 +55,18 @@ public class WhitelistDirectoryService extends BaseDataService {
 
 	public boolean isInstalled() {
 		AgentWhitelist agentWhitelist = getWhitelist();
-		if (agentWhitelist == null) {
-			return false;
-		}
 		List<String> project = agentWhitelist.getProject();
 		return project != null && !project.isEmpty();
 	}
 
 	private List<String> getNgxDirectory() {
 		AgentWhitelist agentWhitelist = getWhitelist();
-		if (agentWhitelist == null) {
-			return null;
-		}
 		return agentWhitelist.getNginx();
 	}
 
 	public boolean checkProjectDirectory(String path) {
 		AgentWhitelist agentWhitelist = getWhitelist();
-		if (agentWhitelist == null) {
-			return false;
-		}
+
 		List<String> list = agentWhitelist.getProject();
 		return AgentWhitelist.checkPath(list, path);
 	}
@@ -84,9 +78,7 @@ public class WhitelistDirectoryService extends BaseDataService {
 
 	private List<String> getCertificateDirectory() {
 		AgentWhitelist agentWhitelist = getWhitelist();
-		if (agentWhitelist == null) {
-			return null;
-		}
+
 		return agentWhitelist.getCertificate();
 	}
 

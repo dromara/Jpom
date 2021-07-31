@@ -1,6 +1,5 @@
 package io.jpom.system.init;
 
-import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.lang.Console;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.cron.CronUtil;
@@ -11,8 +10,6 @@ import io.jpom.build.BuildUtil;
 import io.jpom.service.monitor.MonitorService;
 import io.jpom.service.node.NodeService;
 import io.jpom.util.CronUtils;
-
-import java.io.File;
 
 /**
  * @author bwcx_jzy

@@ -32,4 +32,4 @@ request:
   trimAll: true
   parameterXss: false
 #在线编辑格式
-fileFormat: txt|yml|conf|properties|ini
+#fileFormat: txt|yml|conf|properties|ini
