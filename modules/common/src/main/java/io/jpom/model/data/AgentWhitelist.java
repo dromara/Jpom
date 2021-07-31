@@ -20,9 +20,31 @@ import java.util.List;
  * @date 2019/4/16
  */
 public class AgentWhitelist extends BaseJsonModel {
+	/**
+	 * 项目目录白名单、日志文件白名单
+	 */
 	private List<String> project;
+	/**
+	 * ssl 证书文件白名单
+	 */
 	private List<String> certificate;
+	/**
+	 * nginx 配置文件 白名单
+	 */
 	private List<String> nginx;
+
+	/**
+	 * 运行编辑的后缀文件
+	 */
+	private List<String> allowEditSuffix;
+
+	public List<String> getAllowEditSuffix() {
+		return allowEditSuffix;
+	}
+
+	public void setAllowEditSuffix(List<String> allowEditSuffix) {
+		this.allowEditSuffix = allowEditSuffix;
+	}
 
 	public List<String> getProject() {
 		return project;

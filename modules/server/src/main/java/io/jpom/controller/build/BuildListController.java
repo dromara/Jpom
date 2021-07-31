@@ -3,6 +3,7 @@ package io.jpom.controller.build;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.lang.Validator;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.JsonMessage;
@@ -31,6 +32,7 @@ import io.jpom.util.GitUtil;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -223,18 +225,21 @@ public class BuildListController extends BaseServerController {
 		}
 		//
 		String releaseCommand = getParameter("releaseCommand");
+		if (StrUtil.isNotEmpty(releaseCommand)) {
+			int length = releaseCommand.length();
+			Assert.state(length <= 4000, "发布命令长度限制在4000字符");
+			//return JsonMessage.getString(405, "请输入发布命令");
+			String[] commands = StrUtil.splitToArray(releaseCommand, StrUtil.LF);
 
-		//return JsonMessage.getString(405, "请输入发布命令");
-		String[] commands = StrUtil.splitToArray(releaseCommand, StrUtil.LF);
-
-		for (String commandItem : commands) {
-			if (!SshModel.checkInputItem(sshServiceItem, commandItem)) {
-				return JsonMessage.getString(405, "发布命令中包含禁止执行的命令");
+			for (String commandItem : commands) {
+				if (!SshModel.checkInputItem(sshServiceItem, commandItem)) {
+					return JsonMessage.getString(405, "发布命令中包含禁止执行的命令");
+				}
 			}
+			buildModel.setReleaseCommand(releaseCommand);
 		}
-
 		buildModel.setReleasePath(releasePath);
-		buildModel.setReleaseCommand(releaseCommand);
+
 		buildModel.setReleaseMethodDataId(releaseMethodDataId);
 		String clearOld = getParameter("clearOld");
 		buildModel.setClearOld(Convert.toBool(clearOld, false));

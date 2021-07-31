@@ -8,43 +8,43 @@ package io.jpom.util;
  */
 public class CheckPassword {
 
-    /**
-     * 密码强度
-     * Z = 字母 S = 数字 T = 特殊字符
-     *
-     * @param passwordStr 密码字符串
-     * @return 0 弱  1 中  2强
-     */
-    public static int checkPassword(String passwordStr) {
-        String regexZ = "\\d*";
-        String regexS = "[a-zA-Z]+";
-        String regexT = "\\W+$";
-        String regexZT = "\\D*";
-        String regexST = "[\\d\\W]*";
-        String regexZS = "\\w*";
-        String regexZST = "[\\w\\W]*";
+	private static final String REGEX_Z = "\\d*";
+	private static final String REGEX_S = "[a-zA-Z]+";
+	private static final String REGEX_T = "\\W+$";
+	private static final String REGEX_ZT = "\\D*";
+	private static final String REGEX_ST = "[\\d\\W]*";
+	private static final String REGEX_ZS = "\\w*";
+	private static final String REGEX_ZST = "[\\w\\W]*";
 
-        if (passwordStr.matches(regexZ)) {
-            return 0;
-        }
-        if (passwordStr.matches(regexS)) {
-            return 0;
-        }
-        if (passwordStr.matches(regexT)) {
-            return 0;
-        }
-        if (passwordStr.matches(regexZT)) {
-            return 1;
-        }
-        if (passwordStr.matches(regexST)) {
-            return 1;
-        }
-        if (passwordStr.matches(regexZS)) {
-            return 1;
-        }
-        if (passwordStr.matches(regexZST)) {
-            return 2;
-        }
-        return -1;
-    }
+	/**
+	 * 密码强度
+	 * Z = 字母 S = 数字 T = 特殊字符
+	 *
+	 * @param passwordStr 密码字符串
+	 * @return 0 弱  1 中  2强
+	 */
+	public static int checkPassword(String passwordStr) {
+		if (passwordStr.matches(REGEX_Z)) {
+			return 0;
+		}
+		if (passwordStr.matches(REGEX_S)) {
+			return 0;
+		}
+		if (passwordStr.matches(REGEX_T)) {
+			return 0;
+		}
+		if (passwordStr.matches(REGEX_ZT)) {
+			return 1;
+		}
+		if (passwordStr.matches(REGEX_ST)) {
+			return 1;
+		}
+		if (passwordStr.matches(REGEX_ZS)) {
+			return 1;
+		}
+		if (passwordStr.matches(REGEX_ZST)) {
+			return 2;
+		}
+		return -1;
+	}
 }

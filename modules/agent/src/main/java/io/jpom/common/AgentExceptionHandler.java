@@ -20,20 +20,33 @@ import javax.servlet.http.HttpServletResponse;
 @ControllerAdvice
 public class AgentExceptionHandler {
 
-    /**
-     * 声明要捕获的异常
-     *
-     * @param request  请求
-     * @param response 响应
-     * @param e        异常
-     */
-    @ExceptionHandler({JpomRuntimeException.class, RuntimeException.class, Exception.class})
-    public void paramExceptionHandler(HttpServletRequest request, HttpServletResponse response, Exception e) {
-        DefaultSystemLog.getLog().error("controller " + request.getRequestURI(), e);
-        if (e instanceof JpomRuntimeException) {
-            ServletUtil.write(response, JsonMessage.getString(500, e.getMessage()), MediaType.APPLICATION_JSON_UTF8_VALUE);
-        } else {
-            ServletUtil.write(response, JsonMessage.getString(500, "服务异常：" + e.getMessage()), MediaType.APPLICATION_JSON_UTF8_VALUE);
-        }
-    }
+	/**
+	 * 声明要捕获的异常
+	 *
+	 * @param request  请求
+	 * @param response 响应
+	 * @param e        异常
+	 */
+	@ExceptionHandler({JpomRuntimeException.class, RuntimeException.class, Exception.class})
+	public void defExceptionHandler(HttpServletRequest request, HttpServletResponse response, Exception e) {
+		DefaultSystemLog.getLog().error("controller " + request.getRequestURI(), e);
+		if (e instanceof JpomRuntimeException) {
+			ServletUtil.write(response, JsonMessage.getString(500, e.getMessage()), MediaType.APPLICATION_JSON_VALUE);
+		} else {
+			ServletUtil.write(response, JsonMessage.getString(500, "服务异常：" + e.getMessage()), MediaType.APPLICATION_JSON_VALUE);
+		}
+	}
+
+	/**
+	 * 声明要捕获的异常 (参数或者状态异常)
+	 *
+	 * @param request  请求
+	 * @param response 响应
+	 * @param e        异常
+	 */
+	@ExceptionHandler({IllegalArgumentException.class, IllegalStateException.class})
+	public void paramExceptionHandler(HttpServletRequest request, HttpServletResponse response, Exception e) {
+		DefaultSystemLog.getLog().error("controller " + request.getRequestURI(), e);
+		ServletUtil.write(response, JsonMessage.getString(405, e.getMessage()), MediaType.APPLICATION_JSON_VALUE);
+	}
 }

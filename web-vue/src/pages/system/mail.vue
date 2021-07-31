@@ -17,7 +17,7 @@
         <a-input v-model="temp.from" type="text" placeholder="发送方邮箱账号"/>
       </a-form-model-item>
       <a-form-model-item label="SSL 连接" prop="sslEnable">
-        <a-switch v-model="temp.sslEnable" checked-children="启用" un-checked-children="停用" />
+        <a-switch v-model="temp.sslEnable" checked-children="启用" un-checked-children="停用"/>
         <a-input v-show="temp.sslEnable" v-model="temp.socketFactoryPort" type="text" placeholder="SSL 端口"/>
       </a-form-model-item>
       <a-form-model-item :wrapper-col="{ span: 14, offset: 4 }">
@@ -32,8 +32,8 @@
     <br/>
     <a-alert
       message="QQ 邮箱配置"
-      description="待完善"
       type="info"
+      description="SMTP 地址：【smtp.qq.com】，用户名一般是QQ号码，密码是邮箱授权码，端口默认 587/465"
       show-icon/>
     <br/>
     <a-alert
@@ -50,7 +50,8 @@
   </div>
 </template>
 <script>
-import { getMailConfigData, editMailConfig } from '../../api/system';
+import {getMailConfigData, editMailConfig} from '../../api/system';
+
 export default {
   data() {
     return {
@@ -58,16 +59,16 @@ export default {
       submitAble: false,
       rules: {
         host: [
-          { required: true, message: 'Please input SMTP host', trigger: 'blur' }
+          {required: true, message: 'Please input SMTP host', trigger: 'blur'}
         ],
         pass: [
-          { required: true, message: 'Please input password', trigger: 'blur' }
+          {required: true, message: 'Please input password', trigger: 'blur'}
         ],
         user: [
-          { required: true, message: 'Please input user name', trigger: 'blur' }
+          {required: true, message: 'Please input user name', trigger: 'blur'}
         ],
         from: [
-          { required: true, message: 'Please input email account', trigger: 'blur' }
+          {required: true, message: 'Please input email account', trigger: 'blur'}
         ]
       }
     }
@@ -111,6 +112,7 @@ export default {
   height: calc(100vh - 115px);
   overflow-y: scroll;
 }
+
 .btn {
   margin-left: 20px;
 }
