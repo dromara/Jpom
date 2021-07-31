@@ -3,13 +3,11 @@
     "id": "welcome",
     "title": "首页",
     "url": "./welcome",
-    "icon": "layui-icon-console",
     "icon_v3": "dashboard"
   },
   {
     "id": "manage",
     "title": "项目管理",
-    "icon": "layui-icon-templeate-1",
     "icon_v3": "project",
     "childs": [
       {
@@ -32,7 +30,6 @@
   {
     "id": "otherM",
     "title": "其他功能",
-    "icon": "layui-icon-circle-dot",
     "icon_v3": "more",
     "childs": [
       {
@@ -50,7 +47,6 @@
   {
     "id": "nginx",
     "title": "nginx管理",
-    "icon": "layui-icon-layer",
     "icon_v3": "gateway",
     "childs": [
       {
@@ -68,7 +64,6 @@
   {
     "id": "systemConfig",
     "title": "系统管理",
-    "icon": "layui-icon-set-fill",
     "icon_v3": "setting",
     "childs": [
       {
