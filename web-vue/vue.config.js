@@ -1,4 +1,5 @@
 // vue.config.js
+const IP = 'localhost'
 module.exports = {
   // 输出目录
   outputDir: '../modules/server/src/main/resources/dist',
@@ -10,32 +11,32 @@ module.exports = {
     proxy: {
       // websocket
       '/ssh': {
-        target: 'wss://localhost:2122',
+        target: `wss://${IP}:2122`,
         //  true/false: if you want to proxy websockets
         ws: false,
         secure: false,
       },
       '/tomcat_log': {
-        target: 'wss://localhost:2122',
+        target: `wss://${IP}:2122`,
         //  true/false: if you want to proxy websockets
         ws: false,
         secure: false,
       },
       '/console': {
-        target: 'wss://localhost:2122',
+        target: `wss://${IP}:2122`,
         //  true/false: if you want to proxy websockets
         ws: false,
         secure: false,
       },
       '/script_run': {
-        target: 'wss://localhost:2122',
+        target: `wss://${IP}:2122`,
         //  true/false: if you want to proxy websockets
         ws: false,
         secure: false,
       },
       // http
       '/*': {
-        target: 'http://localhost:2122',
+        target: `http://${IP}:2122`,
         timeout: 10 * 60 * 1000
       }
     },

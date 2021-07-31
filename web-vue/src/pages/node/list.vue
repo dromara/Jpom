@@ -124,7 +124,7 @@
 			</a-form-model>
 		</a-modal>
 		<!-- 管理节点 -->
-		<a-drawer :title="drawerTitle" placement="right" width="90vw"
+		<a-drawer :title="drawerTitle" placement="right" width="calc(100vw - 200px)"
 							:visible="drawerVisible" @close="onClose">
 			<!-- 节点管理组件 -->
 			<node-layout v-if="drawerVisible" :node="temp"/>

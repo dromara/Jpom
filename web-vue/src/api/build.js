@@ -197,13 +197,7 @@ export function geteBuildHistory(params) {
  * @param {*} logId
  */
 export function downloadBuildLog(logId) {
-    return axios({
-        url: '/build/download_log.html',
-        method: 'get',
-        responseType: 'blob',
-        timeout: 0,
-        params: {logId}
-    })
+    return `/build/download_log.html?logId=${logId}`
 }
 
 /**
@@ -211,13 +205,7 @@ export function downloadBuildLog(logId) {
  * @param {*} logId
  */
 export function downloadBuildFile(logId) {
-    return axios({
-        url: '/build/download_file.html',
-        method: 'get',
-        responseType: 'blob',
-        timeout: 0,
-        params: {logId}
-    })
+    return `/build/download_file.html?logId=${logId}`
 }
 
 /**

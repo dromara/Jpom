@@ -14,7 +14,7 @@
     <!-- 表格 -->
     <a-layout-content class="file-content">
       <div ref="filter" class="filter">
-<!--        <a-tag color="#2db7f5">项目目录: {{ absPath }}</a-tag>-->
+        <!-- <a-tag color="#2db7f5">项目目录: {{ absPath }}</a-tag>-->
         <a-button type="primary" @click="handleUpload">批量上传文件</a-button>
         <a-button type="primary" @click="handleZipUpload">上传压缩文件（自动解压）</a-button>
         <a-button type="primary" @click="loadFileList">刷新表格</a-button>
@@ -33,6 +33,7 @@
             <span>{{ text }}</span>
         </a-tooltip>
         <template slot="operation"  v-if="!record.isDirectory" slot-scope="text, record">
+            <a-button type="primary" @click="handleEditFile(record)">编辑</a-button>
             <a-button type="primary" @click="handleDownload(record)">下载</a-button>
             <a-button type="danger" @click="handleDelete(record)">删除</a-button>
         </template>
@@ -65,6 +66,13 @@
           上传成功: {{ successSize }} 个文件!
         </a-tag>
       </a-modal>
+
+      <a-modal v-model="editFileVisible" width="800px" title="编辑文件" cancelText="关闭"  :maskClosable="true" @ok="updateFileData">
+        <div>
+           <a-textarea v-model="fileContent" autosize :rows="6" />
+        </div>
+      </a-modal>
+
     </a-layout-content>
   </a-layout>
 </template>
@@ -73,7 +81,9 @@ import {
   getFileList,
   downloadProjectFile,
   deleteProjectFile,
-  uploadProjectFile
+  uploadProjectFile,
+  readFile,
+  updateFile,
 } from '../../../../api/node-project';
 export default {
   props: {
@@ -99,9 +109,12 @@ export default {
       expandKeys: [],
       tempNode: {},
       temp: {},
+      filename: '',
       uploadFileVisible: false,
       uploadZipFileVisible: false,
+      editFileVisible: false,
       successSize: 0,
+      fileContent: '',
       // 是否是上传状态
       uploading: false,
       percentage: 0,
@@ -145,6 +158,14 @@ export default {
     calcTableHeight() {
       this.tableHeight = window.innerHeight - this.$refs['filter'].clientHeight - 135;
     },
+
+    handleEditFile(record) {
+      console.log(record, 123)
+      this.editFileVisible = true
+      this.loadFileData(record.filename)
+      this.filename = record.filename
+    },
+
     // 加载数据
     loadData() {
       this.treeList = [];
@@ -198,6 +219,37 @@ export default {
         resolve([])
       }
     },
+
+    // 读取文件数据
+    loadFileData(filename) {
+      const params = {
+        nodeId: this.nodeId,
+        id: this.projectId,
+        filePath: this.uploadPath,
+        filename
+      }
+
+      readFile(params).then(res => {
+        if (res.code === 200) {
+          this.fileContent = res.data
+        }
+      })
+    },
+
+    updateFileData() {
+      const params = {
+        nodeId: this.nodeId,
+        id: this.projectId,
+        filePath: this.uploadPath,
+        filename: this.filename,
+        fileText: this.fileContent
+      }
+
+      updateFile(params).then(res => {
+        console.log(res, 2312)
+      })
+    },
+    
     // 点击树节点
     nodeClick(data, node) {
       if (data.isDirectory) {

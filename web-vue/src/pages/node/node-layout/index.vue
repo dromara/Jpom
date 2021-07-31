@@ -2,14 +2,14 @@
   <a-layout class="node-layout">
     <!-- 侧边栏 节点管理菜单 -->
     <a-layout-sider theme="light" class="sider jpom-node-sider">
-      <a-menu theme="light" mode="inline" :default-selected-keys="selectedKeys" :default-open-keys="['systemConfig']">
+      <a-menu theme="light" mode="inline" :default-selected-keys="selectedKeys" :default-open-keys="defaultOpenKey">
         <template v-for="menu in nodeMenuList">
           <a-sub-menu v-if="menu.childs" :key="menu.id" :class="menu.id">
             <span slot="title">
               <a-icon :type="menu.icon_v3" />
               <span>{{menu.title}}</span>
             </span>
-            <a-menu-item v-for="subMenu in menu.childs" :key="subMenu.id" @click="handleMenuClick(subMenu.id)" :class="subMenu.id">
+            <a-menu-item v-for="subMenu in menu.childs" :key="subMenu.id" @click="handleMenuClick(subMenu.id, subMenu.pId)" :class="subMenu.id">
               <span>{{subMenu.title}}</span>
             </a-menu-item>
           </a-sub-menu>
@@ -79,7 +79,7 @@ export default {
   data() {
     return {
       nodeMenuList: [],
-      selectedKeys: ['welcome', 'whitelistDirectory']
+      selectedKeys: [this.$route.query.id || 'welcome']
     }
   },
   computed: {
@@ -88,12 +88,21 @@ export default {
     ]),
     currentId() {
       return this.selectedKeys[0];
+    },
+    defaultOpenKey() {
+      let keyList = [];
+      if (this.getGuideFlag && !this.$route.query.pId) {
+        keyList = ['systemConfig']
+      } else {
+        keyList = [this.$route.query.pId]
+      }
+      return keyList
     }
   },
   watch: {
     getGuideFlag() {
       this.introGuide();
-    }
+    },
   },
   created() {
     this.loadNodeMenu();
@@ -137,13 +146,26 @@ export default {
     loadNodeMenu() {
       getNodeMenu(this.node.id).then(res => {
         if (res.code === 200) {
-          this.nodeMenuList = res.data;
+          const data = res.data.map(item => {
+            const childs = item.childs && item.childs.map(sub => {
+              return {...sub, pId: item.id}
+            })
+            return {...item, childs}
+          })
+          this.nodeMenuList = data;
         }
       })
     },
     // 点击菜单
-    handleMenuClick(id) {
+    handleMenuClick(id, pId) {
       this.selectedKeys = [id];
+      this.$router.push({
+        query: {
+          ...this.$route.query,
+          pId: pId,
+          id: id
+        }
+      })
     }
   }
 }
