@@ -387,7 +387,7 @@ public class ProjectFileControl extends BaseAgentController {
 					}
 				}
 			}
-			return JsonMessage.getString(200, "下次成功文件大小：" + FileUtil.readableFileSize(downloadFile));
+			return JsonMessage.getString(200, "下载成功文件大小：" + FileUtil.readableFileSize(downloadFile));
 		} catch (Exception e) {
 			DefaultSystemLog.getLog().error("下载远程文件异常", e);
 			return JsonMessage.getString(500, "下载远程文件失败:" + e.getMessage());
