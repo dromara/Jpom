@@ -46,7 +46,7 @@ public class ProjectRecoverControl extends BaseServerController {
      * @return
      * @throws IOException
      */
-    @RequestMapping(value = "recover-list", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "recover-list", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     @Feature(method = MethodFeature.LIST)
     public String recoverList() throws IOException {
@@ -54,7 +54,7 @@ public class ProjectRecoverControl extends BaseServerController {
         return JsonMessage.getString(200, "success", list);
     }
 
-    @RequestMapping(value = "data.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "data.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     @Feature(method = MethodFeature.LIST)
     public String project() throws IOException {

@@ -54,14 +54,14 @@ public class OutGivingProjectController extends BaseServerController {
     @Resource
     private ProjectInfoService projectInfoService;
 
-    @RequestMapping(value = "getProjectStatus", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "getProjectStatus", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public String getProjectStatus() {
         return NodeForward.request(getNode(), getRequest(), NodeUrl.Manage_GetProjectStatus).toString();
     }
 
 
-    @RequestMapping(value = "getItemData.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "getItemData.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public String getItemData(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "id error") String id) throws IOException {
         OutGivingModel outGivingServerItem = outGivingServer.getItem(id);
@@ -127,7 +127,7 @@ public class OutGivingProjectController extends BaseServerController {
      * @return json
      * @throws IOException IO
      */
-    @RequestMapping(value = "upload", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "upload", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     @OptLog(UserOperateLogV1.OptType.UploadOutGiving)
     @Feature(method = MethodFeature.UPLOAD)

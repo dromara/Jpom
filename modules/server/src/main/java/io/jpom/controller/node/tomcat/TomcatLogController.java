@@ -34,7 +34,7 @@ public class TomcatLogController extends BaseServerController {
 //        return "node/tomcat/console";
 //    }
 
-    @RequestMapping(value = "getLogList", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "getLogList", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     @Feature(method = MethodFeature.LOG)
     public String getLogList() {

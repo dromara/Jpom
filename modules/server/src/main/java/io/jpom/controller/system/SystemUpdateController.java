@@ -39,7 +39,7 @@ public class SystemUpdateController extends BaseServerController {
 //        return "system/update";
 //    }
 
-    @RequestMapping(value = "info", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "info", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     @SystemPermission
     public String info() {
@@ -50,7 +50,7 @@ public class SystemUpdateController extends BaseServerController {
         return JsonMessage.getString(200, "", JpomManifest.getInstance());
     }
 
-    @RequestMapping(value = "uploadJar.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "uploadJar.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     @OptLog(UserOperateLogV1.OptType.UpdateSys)
     @SystemPermission

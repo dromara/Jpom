@@ -26,7 +26,7 @@ import java.util.Objects;
 @RequestMapping(value = "system")
 public class SystemUpdateController extends BaseAgentController {
 
-    @RequestMapping(value = "uploadJar.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "uploadJar.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public String uploadJar() throws IOException {
         //
         Objects.requireNonNull(JpomManifest.getScriptFile());

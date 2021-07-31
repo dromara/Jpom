@@ -127,7 +127,7 @@ public class BuildHistoryController extends BaseServerController {
         }
     }
 
-    @RequestMapping(value = "history_list.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "history_list.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     @Feature(method = MethodFeature.LOG)
     public String historyList(String status,
@@ -202,7 +202,7 @@ public class BuildHistoryController extends BaseServerController {
      * @param logId id
      * @return json
      */
-    @RequestMapping(value = "delete_log.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "delete_log.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @OptLog(UserOperateLogV1.OptType.DelBuildLog)
     @ResponseBody
     @Feature(method = MethodFeature.DEL_LOG)

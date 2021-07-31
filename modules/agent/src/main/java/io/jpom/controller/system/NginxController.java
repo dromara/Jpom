@@ -53,7 +53,7 @@ public class NginxController extends BaseAgentController {
      *
      * @return json
      */
-    @RequestMapping(value = "list_data.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "list_data.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public String list(String whitePath, String name) {
         if (whitelistDirectoryService.checkNgxDirectory(whitePath)) {
             if (StrUtil.isEmpty(name)) {
@@ -69,7 +69,7 @@ public class NginxController extends BaseAgentController {
     /**
      * nginx列表
      */
-    @RequestMapping(value = "tree.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "tree.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public String tree() {
         JSONArray array = nginxService.tree();
         return JsonMessage.getString(200, "", array);
@@ -82,7 +82,7 @@ public class NginxController extends BaseAgentController {
      * @param name 名称
      * @return 页面
      */
-    @RequestMapping(value = "item_data", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "item_data", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public String itemData(String path, String name) {
         String newName = pathSafe(name);
         if (whitelistDirectoryService.checkNgxDirectory(path)) {
@@ -108,7 +108,7 @@ public class NginxController extends BaseAgentController {
      * @param genre     操作类型
      * @return json
      */
-    @RequestMapping(value = "updateNgx", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "updateNgx", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public String updateNgx(String name, String whitePath, String genre) {
         if (StrUtil.isEmpty(name)) {
             return JsonMessage.getString(400, "请填写文件名");
@@ -220,7 +220,7 @@ public class NginxController extends BaseAgentController {
      * @param name 文件名
      * @return json
      */
-    @RequestMapping(value = "delete", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "delete", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public String delete(String path, String name) {
         if (!whitelistDirectoryService.checkNgxDirectory(path)) {
             return JsonMessage.getString(400, "非法操作");
@@ -246,7 +246,7 @@ public class NginxController extends BaseAgentController {
      *
      * @return json
      */
-    @RequestMapping(value = "status", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "status", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public String status() {
         String name = nginxService.getServiceName();
         if (StrUtil.isEmpty(name)) {
@@ -265,7 +265,7 @@ public class NginxController extends BaseAgentController {
      * @param name 服务名
      * @return json
      */
-    @RequestMapping(value = "updateConf", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "updateConf", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public String updateConf(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "服务名称错误") String name) {
         JSONObject ngxConf = nginxService.getNgxConf();
         ngxConf.put("name", name);
@@ -278,7 +278,7 @@ public class NginxController extends BaseAgentController {
      *
      * @return json
      */
-    @RequestMapping(value = "config", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "config", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public String config() {
         JSONObject ngxConf = nginxService.getNgxConf();
         return JsonMessage.getString(200, "", ngxConf);
@@ -289,7 +289,7 @@ public class NginxController extends BaseAgentController {
      *
      * @return json
      */
-    @RequestMapping(value = "open", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "open", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public String open() {
         String name = nginxService.getServiceName();
         String result = AbstractSystemCommander.getInstance().startService(name);
@@ -301,7 +301,7 @@ public class NginxController extends BaseAgentController {
      *
      * @return json
      */
-    @RequestMapping(value = "close", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "close", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public String close() {
         String name = nginxService.getServiceName();
         String result = AbstractSystemCommander.getInstance().stopService(name);
@@ -313,7 +313,7 @@ public class NginxController extends BaseAgentController {
      *
      * @return json
      */
-    @RequestMapping(value = "reload", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "reload", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public String reload() {
         String name = nginxService.getServiceName();
         String checkResult = StrUtil.EMPTY;

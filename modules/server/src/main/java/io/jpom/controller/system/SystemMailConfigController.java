@@ -57,7 +57,7 @@ public class SystemMailConfigController extends BaseServerController {
      * load mail config data
      * 加载邮件配置
      */
-    @RequestMapping(value = "mail-config-data", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "mail-config-data", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @SystemPermission
     @ResponseBody
     public String mailConfigData() {
@@ -69,7 +69,7 @@ public class SystemMailConfigController extends BaseServerController {
         return JsonMessage.getString(200, "success", item);
     }
 
-    @RequestMapping(value = "mailConfig_save.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "mailConfig_save.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     @OptLog(UserOperateLogV1.OptType.EditMailConfig)
     @SystemPermission

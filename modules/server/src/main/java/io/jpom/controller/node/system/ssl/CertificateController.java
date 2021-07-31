@@ -46,7 +46,7 @@ public class CertificateController extends BaseServerController {
      * load Cert white list data
      * @return
      */
-    @RequestMapping(value = "white-list", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "white-list", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public String loadWhiteList() {
         List<String> list = whitelistDirectoryService.getCertificateDirectory(getNode());
@@ -58,7 +58,7 @@ public class CertificateController extends BaseServerController {
      *
      * @return json
      */
-    @RequestMapping(value = "/saveCertificate", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "/saveCertificate", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     @OptLog(UserOperateLogV1.OptType.SaveCert)
     @Feature(method = MethodFeature.EDIT)
@@ -75,7 +75,7 @@ public class CertificateController extends BaseServerController {
      *
      * @return json
      */
-    @RequestMapping(value = "/getCertList", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "/getCertList", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     @Feature(method = MethodFeature.LIST)
     public String getCertList() {
@@ -87,7 +87,7 @@ public class CertificateController extends BaseServerController {
      *
      * @return json
      */
-    @RequestMapping(value = "/delete", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "/delete", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     @OptLog(UserOperateLogV1.OptType.DelCert)
     @Feature(method = MethodFeature.DEL)
@@ -99,7 +99,7 @@ public class CertificateController extends BaseServerController {
     /**
      * 导出证书
      */
-    @RequestMapping(value = "/export", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "/export", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     @OptLog(UserOperateLogV1.OptType.ExportCert)
     @Feature(method = MethodFeature.DOWNLOAD)

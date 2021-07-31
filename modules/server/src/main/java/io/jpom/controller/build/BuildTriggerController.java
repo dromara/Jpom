@@ -62,7 +62,7 @@ public class BuildTriggerController extends BaseServerController {
      * @param id
      * @return
      */
-    @RequestMapping(value = "trigger-url", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "trigger-url", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public String getTriggerUrl(String id) {
         BuildModel item = buildService.getItem(id);
@@ -81,7 +81,7 @@ public class BuildTriggerController extends BaseServerController {
     }
 
 
-    @RequestMapping(value = "trigger_rest.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "trigger_rest.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     @Feature(method = MethodFeature.EDIT)
     public String triggerRest(String id) {

@@ -30,7 +30,7 @@ public class WebHookUtil implements INotify {
         param.put("text", text);
         HttpRequest request = HttpUtil.
                 createPost(notify.getValue()).
-                contentType(MediaType.APPLICATION_JSON_UTF8_VALUE).
+                contentType(MediaType.APPLICATION_JSON_VALUE).
                 body(param.toJSONString());
         request.execute();
     }

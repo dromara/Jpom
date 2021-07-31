@@ -41,7 +41,7 @@ public class UserInfoController extends BaseServerController {
      * @param newPwd 新密码
      * @return json
      */
-    @RequestMapping(value = "updatePwd", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "updatePwd", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public String updatePwd(
             @ValidatorConfig(value = {
                     @ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "密码不能为空")
@@ -78,7 +78,7 @@ public class UserInfoController extends BaseServerController {
      * @param name 新昵称
      * @return json
      */
-    @RequestMapping(value = "updateName", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "updateName", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public String updateName(@ValidatorConfig(value = {
             @ValidatorItem(value = ValidatorRule.NOT_BLANK, range = "2:10", msg = "昵称长度只能是2-10")
     }) String name) {
@@ -96,7 +96,7 @@ public class UserInfoController extends BaseServerController {
      * @param id 用户id
      * @return String
      */
-    @RequestMapping(value = "deleteUser", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "deleteUser", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @OptLog(UserOperateLogV1.OptType.DelUer)
     @Feature(method = MethodFeature.DEL)
     public String deleteUser(String id) {
@@ -125,7 +125,7 @@ public class UserInfoController extends BaseServerController {
      * @param id id
      * @return json
      */
-    @RequestMapping(value = "unlock", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "unlock", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @OptLog(UserOperateLogV1.OptType.UnlockUer)
     @Feature(method = MethodFeature.EDIT)
     public String unlock(String id) {

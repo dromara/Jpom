@@ -45,7 +45,7 @@ public class LogManageController extends BaseServerController {
 //        return "system/log";
 //    }
 
-    @RequestMapping(value = "log_data.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "log_data.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     @Feature(method = MethodFeature.LOG)
     public String logData(String nodeId) {
@@ -64,7 +64,7 @@ public class LogManageController extends BaseServerController {
      * @param path   路径
      * @return json
      */
-    @RequestMapping(value = "log_del.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "log_del.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     @OptLog(UserOperateLogV1.OptType.DelSysLog)
     @Feature(method = MethodFeature.DEL_LOG)
@@ -89,7 +89,7 @@ public class LogManageController extends BaseServerController {
     }
 
 
-    @RequestMapping(value = "log_download", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "log_download", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     @Feature(method = MethodFeature.DOWNLOAD)
     public void logDownload(String nodeId,

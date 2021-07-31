@@ -1,5 +1,6 @@
 package io.jpom.system.init;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.exceptions.ExceptionUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.ClassUtil;
@@ -15,6 +16,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.io.File;
 import java.nio.file.AccessDeniedException;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -98,7 +100,11 @@ public class CheckPath {
 		try {
 			FileUtil.del(file);
 		} catch (Exception e) {
-			// Try again
+			// Try again  jzy 2021-07-31
+			DefaultSystemLog.getLog().warn("尝试删除临时文件夹失败,尝试处理只读权限：{}", e.getMessage());
+			List<File> files = FileUtil.loopFiles(file);
+			long count = files.stream().map(file12 -> file12.setWritable(true)).filter(aBoolean -> aBoolean).count();
+			DefaultSystemLog.getLog().warn("临时文件夹累计文件数：{},处理成功数：{}", CollUtil.size(files), count);
 			try {
 				FileUtil.del(file.toPath());
 			} catch (Exception e1) {

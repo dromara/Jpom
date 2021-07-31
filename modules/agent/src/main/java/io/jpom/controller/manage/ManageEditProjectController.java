@@ -147,7 +147,7 @@ public class ManageEditProjectController extends BaseAgentController {
 	}
 
 
-	@RequestMapping(value = "saveProject", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	@RequestMapping(value = "saveProject", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	public String saveProject(ProjectInfoModel projectInfo) {
 		// 预检查数据
 		String strPreviewData = getParameter("previewData");
@@ -333,7 +333,7 @@ public class ManageEditProjectController extends BaseAgentController {
 	 *
 	 * @return json
 	 */
-	@RequestMapping(value = "deleteProject", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	@RequestMapping(value = "deleteProject", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	public String deleteProject(String copyId) {
 		ProjectInfoModel projectInfoModel = tryGetProjectInfoModel();
 		if (projectInfoModel == null) {
@@ -364,7 +364,7 @@ public class ManageEditProjectController extends BaseAgentController {
 		}
 	}
 
-	@RequestMapping(value = "releaseOutGiving", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	@RequestMapping(value = "releaseOutGiving", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	public String releaseOutGiving() {
 		ProjectInfoModel projectInfoModel = tryGetProjectInfoModel();
 		if (projectInfoModel != null) {
@@ -381,7 +381,7 @@ public class ManageEditProjectController extends BaseAgentController {
 	 * @param newLib 新路径
 	 * @return 状态码，400是一定不能操作的，401 是提醒
 	 */
-	@RequestMapping(value = "judge_lib.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	@RequestMapping(value = "judge_lib.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	public String saveProject(String id, String newLib) {
 		File file = new File(newLib);
 		//  填写的jar路径是一个存在的文件

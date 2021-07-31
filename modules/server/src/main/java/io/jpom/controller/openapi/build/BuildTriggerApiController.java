@@ -31,7 +31,7 @@ public class BuildTriggerApiController {
     @Resource
     private UserService userService;
 
-    @RequestMapping(value = ServerOpenApi.BUILD_TRIGGER_BUILD, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = ServerOpenApi.BUILD_TRIGGER_BUILD, produces = MediaType.APPLICATION_JSON_VALUE)
     public String install(@PathVariable String id, @PathVariable String token) {
         BuildModel item = buildService.getItem(id);
         if (item == null) {

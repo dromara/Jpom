@@ -124,7 +124,7 @@ public class IndexControl extends BaseServerController {
      * check if need to init system
      */
     @NotLogin
-    @RequestMapping(value = "check-system", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "check-system", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public String checkSystem() {
         JSONObject data = new JSONObject();
@@ -135,7 +135,7 @@ public class IndexControl extends BaseServerController {
         return JsonMessage.getString(200, "success", data);
     }
 
-    @RequestMapping(value = "menus_data.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "menus_data.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public String menusData() {
         NodeModel nodeModel = tryGetNode();

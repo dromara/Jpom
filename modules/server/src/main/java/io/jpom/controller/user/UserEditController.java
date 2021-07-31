@@ -65,7 +65,7 @@ public class UserEditController extends BaseServerController {
      * @param id 登录名
      * @return String
      */
-    @RequestMapping(value = "addUser", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "addUser", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @OptLog(UserOperateLogV1.OptType.AddUer)
     @Feature(method = MethodFeature.EDIT)
     @ResponseBody
@@ -151,7 +151,7 @@ public class UserEditController extends BaseServerController {
      * @param id 登录名
      * @return String
      */
-    @RequestMapping(value = "updateUser", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "updateUser", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @OptLog(UserOperateLogV1.OptType.EditUer)
     @Feature(method = MethodFeature.EDIT)
     @ResponseBody

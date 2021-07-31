@@ -28,7 +28,7 @@ import java.io.File;
 @RequestMapping(value = "manage/log")
 public class LogBackController extends BaseAgentController {
 
-    @RequestMapping(value = "logSize", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "logSize", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public String logSize(String id, String copyId) {
         ProjectInfoModel projectInfoModel = getProjectInfoModel();
         JSONObject jsonObject = new JSONObject();
@@ -43,7 +43,7 @@ public class LogBackController extends BaseAgentController {
         return JsonMessage.getString(200, "", jsonObject);
     }
 
-    @RequestMapping(value = "resetLog", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "resetLog", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public String resetLog(String copyId) {
         ProjectInfoModel pim = getProjectInfoModel();
         ProjectInfoModel.JavaCopyItem copyItem = pim.findCopyItem(copyId);
@@ -59,7 +59,7 @@ public class LogBackController extends BaseAgentController {
         }
     }
 
-    @RequestMapping(value = "logBack_delete", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "logBack_delete", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public String clear(String name, String copyId) {
         name = pathSafe(name);
         if (StrUtil.isEmpty(name)) {
@@ -102,7 +102,7 @@ public class LogBackController extends BaseAgentController {
         return "下载失败。请刷新页面后重试";
     }
 
-    @RequestMapping(value = "logBack", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "logBack", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public String console(String copyId) {
         // 查询项目路径
         ProjectInfoModel pim = getProjectInfoModel();

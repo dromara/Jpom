@@ -57,7 +57,7 @@ public class ProjectFileControl extends BaseAgentController {
 	@Resource
 	private WhitelistDirectoryService whitelistDirectoryService;
 
-	@RequestMapping(value = "getFileList", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	@RequestMapping(value = "getFileList", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	public String getFileList(String id, String path) {
 		// 查询项目路径
 		ProjectInfoModel pim = projectInfoService.getItem(id);
@@ -87,7 +87,7 @@ public class ProjectFileControl extends BaseAgentController {
 	}
 
 
-	@RequestMapping(value = "upload", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	@RequestMapping(value = "upload", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	public String upload() throws Exception {
 		ProjectInfoModel pim = getProjectInfoModel();
 		MultipartFileBuilder multipartFileBuilder = createMultipart()
@@ -196,7 +196,7 @@ public class ProjectFileControl extends BaseAgentController {
 		}
 	}
 
-	@RequestMapping(value = "deleteFile", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	@RequestMapping(value = "deleteFile", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	public String deleteFile(String filename, String type, String levelName) {
 		ProjectInfoModel pim = getProjectInfoModel();
 		if ("clear".equalsIgnoreCase(type)) {

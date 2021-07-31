@@ -34,7 +34,7 @@ public class ProjectListController extends BaseAgentController {
      * @return item
      * @see ProjectInfoModel
      */
-    @RequestMapping(value = "getProjectItem", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "getProjectItem", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public String getProjectItem(String id) {
         ProjectInfoModel projectInfoModel = projectInfoService.getItem(id);
         if (projectInfoModel != null) {
@@ -50,7 +50,7 @@ public class ProjectListController extends BaseAgentController {
      *
      * @return array
      */
-    @RequestMapping(value = "getProjectGroup", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "getProjectGroup", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public String getProjectGroup() {
         HashSet<String> strings = projectInfoService.getAllGroup();
         return JsonMessage.getString(200, "", strings);
@@ -63,7 +63,7 @@ public class ProjectListController extends BaseAgentController {
      * @param notStatus 不包含运行状态
      * @return json
      */
-    @RequestMapping(value = "getProjectInfo", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "getProjectInfo", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public String getProjectInfo(String group, String notStatus) {
         try {
             boolean status = StrUtil.isEmpty(notStatus);
@@ -101,7 +101,7 @@ public class ProjectListController extends BaseAgentController {
     /**
      * 展示项目页面
      */
-    @RequestMapping(value = "project_copy_list", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "project_copy_list", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public String projectCopyList(String id) {
         ProjectInfoModel projectInfoModel = projectInfoService.getItem(id);
         if (projectInfoModel == null) {

@@ -26,19 +26,19 @@ public class JdkManageController extends BaseServerController {
 //        return "node/manage/JdkList";
 //    }
 
-    @RequestMapping(value = "jdk/list", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "jdk/list", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public String list() {
         return NodeForward.request(getNode(), getRequest(), NodeUrl.Manage_jdk_list).toString();
     }
 
-    @RequestMapping(value = "jdk/delete", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "jdk/delete", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public String delete() {
         return NodeForward.request(getNode(), getRequest(), NodeUrl.Manage_jdk_delete).toString();
     }
 
-    @RequestMapping(value = "jdk/update", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "jdk/update", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public String update() {
         return NodeForward.request(getNode(), getRequest(), NodeUrl.Manage_jdk_update).toString();

@@ -54,7 +54,7 @@ public class OutGivingLogController extends BaseServerController {
 //        return "outgiving/loglist";
 //    }
 
-    @RequestMapping(value = "log_list_data.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "log_list_data.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     @Feature(method = MethodFeature.LOG)
     public String listData(String nodeId,

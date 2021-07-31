@@ -31,7 +31,7 @@ public class WhitelistDirectoryController extends BaseJpomController {
 	@Resource
 	private WhitelistDirectoryService whitelistDirectoryService;
 
-	@RequestMapping(value = "whitelistDirectory_data", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	@RequestMapping(value = "whitelistDirectory_data", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	public String whiteListDirectoryData() {
 		AgentWhitelist agentWhitelist = whitelistDirectoryService.getWhitelist();
 		return JsonMessage.getString(200, "", agentWhitelist);
@@ -47,7 +47,7 @@ public class WhitelistDirectoryController extends BaseJpomController {
 	}
 
 
-	@RequestMapping(value = "whitelistDirectory_submit", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	@RequestMapping(value = "whitelistDirectory_submit", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	public String whitelistDirectorySubmit(String project, String certificate, String nginx, String allowEditSuffix, String allowRemoteDownloadHost) {
 		if (StrUtil.isEmpty(project)) {
 			return JsonMessage.getString(401, "项目路径白名单不能为空");

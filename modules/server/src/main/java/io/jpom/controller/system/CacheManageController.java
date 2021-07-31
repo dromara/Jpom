@@ -68,7 +68,7 @@ public class CacheManageController extends BaseServerController {
 	 * get server's cache data
 	 * 获取 Server 的缓存数据
 	 */
-	@RequestMapping(value = "server-cache", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	@RequestMapping(value = "server-cache", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public String serverCache() {
 		Map<String, Object> map = new HashMap<>();
@@ -92,7 +92,7 @@ public class CacheManageController extends BaseServerController {
 	 *
 	 * @return json
 	 */
-	@RequestMapping(value = "node_cache.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	@RequestMapping(value = "node_cache.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
 	@Feature(method = MethodFeature.CACHE)
 	public String nodeCache() {
@@ -105,7 +105,7 @@ public class CacheManageController extends BaseServerController {
 	 * @param type 类型
 	 * @return json
 	 */
-	@RequestMapping(value = "clearCache.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	@RequestMapping(value = "clearCache.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
 	@OptLog(UserOperateLogV1.OptType.ClearCache)
 	@Feature(method = MethodFeature.CACHE)

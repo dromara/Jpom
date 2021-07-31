@@ -28,13 +28,13 @@ public class JdkListController extends BaseAgentController {
     @Resource
     private JdkInfoService jdkInfoService;
 
-    @RequestMapping(value = "list", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "list", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public String list() {
         List<JdkInfoModel> list = jdkInfoService.list();
         return JsonMessage.getString(200, "", list);
     }
 
-    @RequestMapping(value = "update", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "update", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public String update(JdkInfoModel model) {
         String path = model.getPath();
         if (StrUtil.isEmpty(path)) {
@@ -66,7 +66,7 @@ public class JdkListController extends BaseAgentController {
         return JsonMessage.getString(200, "修改成功");
     }
 
-    @RequestMapping(value = "delete", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "delete", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public String delete(String id) {
         if (StrUtil.isEmpty(id)) {
             return JsonMessage.getString(400, "删除失败");

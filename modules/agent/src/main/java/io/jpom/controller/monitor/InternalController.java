@@ -47,7 +47,7 @@ public class InternalController extends BaseAgentController {
      * @return json
      * @throws Exception 异常
      */
-    @RequestMapping(value = "internal_data", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "internal_data", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public String getInternal(String tag, String copyId) throws Exception {
         String tagId = ProjectInfoModel.JavaCopyItem.getTagId(tag, copyId);
         int pid = AbstractProjectCommander.getInstance().getPid(tagId);
@@ -72,7 +72,7 @@ public class InternalController extends BaseAgentController {
      * @return json
      * @throws Exception 异常
      */
-    @RequestMapping(value = "threadInfos", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "threadInfos", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public String getThreadInfos(String tag, String copyId) throws Exception {
         int limit = getParameterInt("limit", 10);
         int page = getParameterInt("page", 1);

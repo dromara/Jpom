@@ -6,6 +6,7 @@ import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.LineHandler;
+import cn.hutool.core.io.ManifestUtil;
 import cn.hutool.core.lang.JarClassLoader;
 import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.core.util.ClassUtil;
@@ -26,7 +27,6 @@ import io.jpom.util.VersionUtils;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.net.URL;
 import java.util.LinkedList;
 import java.util.List;
@@ -67,6 +67,10 @@ public class JpomManifest {
 	 * Jpom 的数据目录
 	 */
 	private String dataPath;
+	/**
+	 * 系统名称
+	 */
+	private final String osName = SystemUtil.getOsInfo().getName();
 
 	private static void init() {
 		if (JPOM_MANIFEST == null) {
@@ -74,26 +78,23 @@ public class JpomManifest {
 				if (JPOM_MANIFEST == null) {
 					JPOM_MANIFEST = new JpomManifest();
 					File jarFile = getRunPath();
-					if (jarFile.isFile()) {
-						try (JarFile jarFile1 = new JarFile(jarFile)) {
+					Manifest manifest = ManifestUtil.getManifest(jarFile);
+					if (manifest != null) {
+						Attributes attributes = manifest.getMainAttributes();
+						String version = attributes.getValue(Attributes.Name.IMPLEMENTATION_VERSION);
+						if (version != null) {
 							// @see VersionUtils#getVersion()
-							Manifest manifest = jarFile1.getManifest();
-							Attributes attributes = manifest.getMainAttributes();
-							String version = attributes.getValue(Attributes.Name.IMPLEMENTATION_VERSION);
-							if (version != null) {
-								JPOM_MANIFEST.setVersion(version);
-								String timeStamp = attributes.getValue("Jpom-Timestamp");
-								JPOM_MANIFEST.setTimeStamp(timeStamp);
-							}
-						} catch (IOException e) {
-							e.printStackTrace();
+							JPOM_MANIFEST.setVersion(version);
+							String timeStamp = attributes.getValue("Jpom-Timestamp");
+							JPOM_MANIFEST.setTimeStamp(timeStamp);
 						}
 					}
-					GlobalHeaders.INSTANCE.header(Header.USER_AGENT, "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.142 Safari/537.36 Jpom " + JPOM_MANIFEST.getType(), true);
 				}
+				GlobalHeaders.INSTANCE.header(Header.USER_AGENT, "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.142 Safari/537.36 Jpom " + JPOM_MANIFEST.getType(), true);
 			}
 		}
 	}
+
 
 	private JpomManifest() {
 	}
@@ -193,6 +194,10 @@ public class JpomManifest {
 	public String getUpTime() {
 		long uptime = SystemUtil.getRuntimeMXBean().getUptime();
 		return DateUtil.formatBetween(uptime, BetweenFormatter.Level.SECOND);
+	}
+
+	public String getOsName() {
+		return osName;
 	}
 
 	@Override

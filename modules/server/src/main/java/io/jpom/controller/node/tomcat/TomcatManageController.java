@@ -240,7 +240,7 @@ public class TomcatManageController extends BaseServerController {
      *
      * @return 操作结果
      */
-    @RequestMapping(value = "upload", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "upload", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     @OptLog(UserOperateLogV1.OptType.Upload_File_Tomcat)
     @Feature(method = MethodFeature.UPLOAD)
@@ -253,7 +253,7 @@ public class TomcatManageController extends BaseServerController {
      *
      * @return 操作结果
      */
-    @RequestMapping(value = "uploadWar", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "uploadWar", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     @OptLog(UserOperateLogV1.OptType.Upload_File_War_Tomcat)
     @Feature(method = MethodFeature.UPLOAD)
@@ -277,7 +277,7 @@ public class TomcatManageController extends BaseServerController {
      *
      * @return 操作结果
      */
-    @RequestMapping(value = "deleteFile", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "deleteFile", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     @OptLog(UserOperateLogV1.OptType.Del_File_Tomcat)
     @Feature(method = MethodFeature.DEL_FILE)

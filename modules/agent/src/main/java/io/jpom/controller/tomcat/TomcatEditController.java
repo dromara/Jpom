@@ -34,7 +34,7 @@ public class TomcatEditController extends BaseAgentController {
      *
      * @return Tomcat列表
      */
-    @RequestMapping(value = "list", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "list", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public String list() {
         // 查询tomcat列表
         List<TomcatInfoModel> tomcatInfoModels = tomcatEditService.list();
@@ -47,7 +47,7 @@ public class TomcatEditController extends BaseAgentController {
      * @param id Tomcat的主键
      * @return 操作结果
      */
-    @RequestMapping(value = "getItem", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "getItem", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public String getItem(String id) {
         // 查询tomcat列表
         return JsonMessage.getString(200, "查询成功", tomcatEditService.getItem(id));
@@ -60,7 +60,7 @@ public class TomcatEditController extends BaseAgentController {
      * @param tomcatInfoModel Tomcat信息
      * @return 操作结果
      */
-    @RequestMapping(value = "add", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "add", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public String add(TomcatInfoModel tomcatInfoModel) {
         // 根据Tomcat名称查询tomcat是否已经存在
         String name = tomcatInfoModel.getName();
@@ -86,7 +86,7 @@ public class TomcatEditController extends BaseAgentController {
      * @param tomcatInfoModel Tomcat信息
      * @return 操作结果
      */
-    @RequestMapping(value = "update", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "update", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public String update(TomcatInfoModel tomcatInfoModel) {
         // 根据Tomcat名称查询tomcat是否已经存在
         String name = tomcatInfoModel.getName();
@@ -112,7 +112,7 @@ public class TomcatEditController extends BaseAgentController {
      * @param id tomcat id
      * @return 操作结果
      */
-    @RequestMapping(value = "delete", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "delete", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public String delete(String id) {
         tomcatEditService.deleteItem(id);
         return JsonMessage.getString(200, "删除成功");

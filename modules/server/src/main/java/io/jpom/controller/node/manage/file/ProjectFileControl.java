@@ -51,7 +51,7 @@ public class ProjectFileControl extends BaseServerController {
 	 *
 	 * @return json
 	 */
-	@RequestMapping(value = "getFileList", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	@RequestMapping(value = "getFileList", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
 	// @ProjectPermission()
 	@Feature(method = MethodFeature.FILE)
@@ -65,7 +65,7 @@ public class ProjectFileControl extends BaseServerController {
 	 *
 	 * @return json
 	 */
-	@RequestMapping(value = "upload", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	@RequestMapping(value = "upload", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
 	@OptLog(UserOperateLogV1.OptType.UploadProjectFile)
 	@Feature(method = MethodFeature.UPLOAD)
@@ -89,7 +89,7 @@ public class ProjectFileControl extends BaseServerController {
 	 *
 	 * @return json
 	 */
-	@RequestMapping(value = "deleteFile", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	@RequestMapping(value = "deleteFile", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
 	@Feature(method = MethodFeature.DEL_FILE)
 	@OptLog(UserOperateLogV1.OptType.DelProjectFile)
@@ -140,7 +140,7 @@ public class ProjectFileControl extends BaseServerController {
 //	 *
 //	 * @return json
 //	 */
-//	@RequestMapping(value = "geFileFormat", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+//	@RequestMapping(value = "geFileFormat", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
 //	@ResponseBody
 //	@Feature(method = MethodFeature.GET_FILE_FOMAT)
 //	public String geFileFormat() {

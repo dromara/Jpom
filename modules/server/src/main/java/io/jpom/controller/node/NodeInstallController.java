@@ -29,7 +29,7 @@ public class NodeInstallController extends BaseServerController {
     @Resource
     private WhitelistDirectoryService whitelistDirectoryService;
 
-    @RequestMapping(value = "install_node.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "install_node.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @OptLog(UserOperateLogV1.OptType.InstallNode)
     @SystemPermission
     public String installNode() {

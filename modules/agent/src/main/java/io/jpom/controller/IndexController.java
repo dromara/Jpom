@@ -27,54 +27,54 @@ import java.util.List;
  */
 @RestController
 public class IndexController extends BaseAgentController {
-    @Resource
-    private WhitelistDirectoryService whitelistDirectoryService;
-    @Resource
-    private ProjectInfoService projectInfoService;
+	@Resource
+	private WhitelistDirectoryService whitelistDirectoryService;
+	@Resource
+	private ProjectInfoService projectInfoService;
 
-    @RequestMapping(value = {"index", "", "index.html", "/"}, produces = MediaType.TEXT_PLAIN_VALUE)
-    @NotAuthorize
-    public String index() {
-        return "Jpom-Agent,Can't access directly,Please configure it to JPOM server";
-    }
+	@RequestMapping(value = {"index", "", "index.html", "/"}, produces = MediaType.TEXT_PLAIN_VALUE)
+	@NotAuthorize
+	public String index() {
+		return "Jpom-Agent,Can't access directly,Please configure it to JPOM server";
+	}
 
-    @RequestMapping(value = "info", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public String info() {
-        int code;
-        if (whitelistDirectoryService.isInstalled()) {
-            code = 200;
-        } else {
-            code = 201;
-        }
-        return JsonMessage.getString(code, "", JpomManifest.getInstance());
-    }
+	@RequestMapping(value = "info", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+	public String info() {
+		int code;
+		if (whitelistDirectoryService.isInstalled()) {
+			code = 200;
+		} else {
+			code = 201;
+		}
+		return JsonMessage.getString(code, "", JpomManifest.getInstance());
+	}
 
-    /**
-     * 返回节点项目状态信息
-     *
-     * @return array
-     */
-    @RequestMapping(value = "status", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public String status() {
-        List<ProjectInfoModel> projectInfoModels = projectInfoService.list();
-        JSONObject jsonObject = new JSONObject();
-        jsonObject.put("javaVirtualCount", JvmUtil.getJavaVirtualCount());
-        jsonObject.put("osName", SystemUtil.getOsInfo().getName());
-        jsonObject.put("jpomVersion", JpomManifest.getInstance().getVersion());
-        jsonObject.put("javaVersion", SystemUtil.getJavaRuntimeInfo().getVersion());
-        //  获取JVM中内存总大小
-        long totalMemory = SystemUtil.getTotalMemory();
-        jsonObject.put("totalMemory", FileUtil.readableFileSize(totalMemory));
-        //
-        long freeMemory = SystemUtil.getFreeMemory();
-        jsonObject.put("freeMemory", FileUtil.readableFileSize(freeMemory));
-        int count = 0;
-        if (projectInfoModels != null) {
-            count = projectInfoModels.size();
-        }
-        jsonObject.put("count", count);
-        // 运行时间
-        jsonObject.put("runTime", JpomManifest.getInstance().getUpTime());
-        return JsonMessage.getString(200, "", jsonObject);
-    }
+	/**
+	 * 返回节点项目状态信息
+	 *
+	 * @return array
+	 */
+	@RequestMapping(value = "status", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+	public String status() {
+		List<ProjectInfoModel> projectInfoModels = projectInfoService.list();
+		JSONObject jsonObject = new JSONObject();
+		jsonObject.put("javaVirtualCount", JvmUtil.getJavaVirtualCount());
+		jsonObject.put("osName", JpomManifest.getInstance().getOsName());
+		jsonObject.put("jpomVersion", JpomManifest.getInstance().getVersion());
+		jsonObject.put("javaVersion", SystemUtil.getJavaRuntimeInfo().getVersion());
+		//  获取JVM中内存总大小
+		long totalMemory = SystemUtil.getTotalMemory();
+		jsonObject.put("totalMemory", FileUtil.readableFileSize(totalMemory));
+		//
+		long freeMemory = SystemUtil.getFreeMemory();
+		jsonObject.put("freeMemory", FileUtil.readableFileSize(freeMemory));
+		int count = 0;
+		if (projectInfoModels != null) {
+			count = projectInfoModels.size();
+		}
+		jsonObject.put("count", count);
+		// 运行时间
+		jsonObject.put("runTime", JpomManifest.getInstance().getUpTime());
+		return JsonMessage.getString(200, "", jsonObject);
+	}
 }

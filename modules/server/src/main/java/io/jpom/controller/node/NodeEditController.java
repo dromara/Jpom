@@ -66,7 +66,7 @@ public class NodeEditController extends BaseServerController {
 //        return "node/edit";
 //    }
 
-    @RequestMapping(value = "save.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "save.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @OptLog(UserOperateLogV1.OptType.EditNode)
     @ResponseBody
     @Feature(method = MethodFeature.EDIT)
@@ -86,7 +86,7 @@ public class NodeEditController extends BaseServerController {
      * @param id 节点id
      * @return json
      */
-    @RequestMapping(value = "del.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "del.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @OptLog(UserOperateLogV1.OptType.DelNode)
     @ResponseBody
     @Feature(method = MethodFeature.DEL)

@@ -71,7 +71,7 @@ public class ProjectManageControl extends BaseServerController {
     /**
      * 展示项目页面
      */
-    @RequestMapping(value = "project_copy_list", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "project_copy_list", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
     @ResponseBody
     public String projectCopyList() {
@@ -83,7 +83,7 @@ public class ProjectManageControl extends BaseServerController {
      *
      * @return json
      */
-    @RequestMapping(value = "getProjectPort", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "getProjectPort", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public String getProjectPort() {
         return NodeForward.request(getNode(), getRequest(), NodeUrl.Manage_GetProjectPort).toString();
@@ -94,7 +94,7 @@ public class ProjectManageControl extends BaseServerController {
      *
      * @return json
      */
-    @RequestMapping(value = "getProjectCopyPort", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "getProjectCopyPort", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public String getProjectCopyPort() {
         return NodeForward.request(getNode(), getRequest(), NodeUrl.Manage_GetProjectCopyPort).toString();
@@ -118,7 +118,7 @@ public class ProjectManageControl extends BaseServerController {
      *
      * @return json
      */
-    @RequestMapping(value = "getProjectInfo", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "getProjectInfo", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     @Feature(method = MethodFeature.LIST)
     public String getProjectInfo() {
@@ -133,7 +133,7 @@ public class ProjectManageControl extends BaseServerController {
      * @param id id
      * @return json
      */
-    @RequestMapping(value = "deleteProject", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "deleteProject", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     @OptLog(value = UserOperateLogV1.OptType.DelProject)
     @Feature(method = MethodFeature.DEL)

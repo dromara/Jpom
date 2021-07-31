@@ -1,141 +1,116 @@
 [
   {
     "title": "节点管理",
-    "icon": "layui-icon-star-fill",
     "icon_v3": "block",
     "id": "nodeManager",
     "childs": [
       {
         "title": "节点列表",
-        "id": "nodeList",
-        "url": "./node/list.html"
+        "id": "nodeList"
       },
       {
         "title": "节点升级",
-        "id": "nodeUpdate",
-        "url": ""
+        "id": "nodeUpdate"
       },
       {
         "title": "SSH管理",
-        "id": "sshList",
-        "url": "./node/ssh/list.html"
+        "id": "sshList"
       }
     ]
   },
   {
     "title": "节点分发",
-    "icon": "layui-icon-release",
     "icon_v3": "apartment",
     "childs": [
       {
         "id": "outgiving",
-        "title": "分发列表",
-        "url": "./outgiving/list.html"
+        "title": "分发列表"
       },
       {
         "id": "outgivingLog",
         "title": "分发日志",
-        "url": "./outgiving/log.html",
         "dynamic": "showOutGiving"
       },
       {
         "id": "outgivingWhitelistDirectory",
         "title": "分发白名单",
-        "url": "./outgiving/whitelistDirectory.html",
         "dynamic": "showOutGiving"
       }
     ]
   },
   {
     "title": "监控管理",
-    "icon": "layui-icon-chart-screen",
     "icon_v3": "monitor",
     "childs": [
       {
         "id": "monitor",
-        "title": "监控列表",
-        "url": "./monitor/list.html"
+        "title": "监控列表"
       },
       {
         "id": "monitorLog",
-        "title": "监控日志",
-        "url": "./monitor/log.html"
+        "title": "监控日志"
       },
       {
         "id": "userOptLog",
-        "title": "操作监控",
-        "url": "./monitor_user_opt/userOpt.html"
+        "title": "操作监控"
       }
     ]
   },
   {
     "title": "在线构建",
-    "icon": "layui-icon-tree",
     "icon_v3": "build",
     "childs": [
       {
         "id": "buildList",
-        "title": "构建列表",
-        "url": "./build/list.html"
+        "title": "构建列表"
       },
       {
         "id": "buildHistory",
-        "title": "构建历史",
-        "url": "./build/history.html"
+        "title": "构建历史"
       }
     ]
   },
   {
     "title": "用户管理",
-    "icon": "layui-icon-friends",
     "icon_v3": "user",
     "childs": [
       {
         "id": "user",
-        "title": "用户列表",
-        "url": "./user/list"
+        "title": "用户列表"
       },
       {
         "id": "roleList",
-        "title": "角色管理",
-        "url": "./user/role/list.html"
+        "title": "角色管理"
       },
       {
         "id": "user_log",
-        "title": "操作日志",
-        "url": "./user/log/list.html"
+        "title": "操作日志"
       }
     ]
   },
   {
     "title": "系统管理",
-    "icon": "layui-icon-set-fill",
     "icon_v3": "setting",
     "childs": [
       {
         "id": "monitorConfigEmail",
-        "title": "邮箱配置",
-        "url": "./system/mailConfig.html"
+        "title": "邮箱配置"
       },
       {
         "id": "cacheManage",
-        "title": "缓存管理",
-        "url": "./system/cache.html"
+        "title": "缓存管理"
       },
       {
         "id": "logManage",
-        "title": "系统日志",
-        "url": "./system/log.html"
+        "title": "系统日志"
       },
       {
         "id": "update",
-        "title": "在线升级",
-        "url": "./system/update.html"
+        "title": "在线升级"
       },
       {
         "id": "sysConfig",
-        "title": "系统配置",
-        "url": "./system/config.html"
+        "title": "系统配置"
       }
     ]
   }

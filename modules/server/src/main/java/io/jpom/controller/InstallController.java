@@ -49,7 +49,7 @@ public class InstallController extends BaseServerController {
      * @param userPwd  系统管理员的登录密码
      * @return json
      */
-    @RequestMapping(value = "install_submit.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "install_submit.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @NotLogin
     @ResponseBody
     public String installSubmit(

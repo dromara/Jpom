@@ -66,7 +66,7 @@ public class OutGivingController extends BaseServerController {
      * 加载分发列表
      * @return
      */
-    @RequestMapping(value = "dispatch-list", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "dispatch-list", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     @Feature(method = MethodFeature.LIST)
     public String dispatchList() {
@@ -105,7 +105,7 @@ public class OutGivingController extends BaseServerController {
      * 获取编辑时需要的 reqId
      * @return
      */
-    @RequestMapping(value = "get-reqId", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "get-reqId", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public String getReqId() {
         List<NodeModel> nodeModels = nodeService.listAndProject();
@@ -113,7 +113,7 @@ public class OutGivingController extends BaseServerController {
         return JsonMessage.getString(200, "success", reqId);
     }
 
-    @RequestMapping(value = "save", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "save", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     @OptLog(UserOperateLogV1.OptType.SaveOutGiving)
     @Feature(method = MethodFeature.EDIT)
@@ -228,7 +228,7 @@ public class OutGivingController extends BaseServerController {
      * @param id 分发id
      * @return json
      */
-    @RequestMapping(value = "del.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "del.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     @OptLog(UserOperateLogV1.OptType.DelOutGiving)
     @Feature(method = MethodFeature.DEL)

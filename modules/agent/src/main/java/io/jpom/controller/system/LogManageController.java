@@ -30,7 +30,7 @@ import java.util.concurrent.TimeUnit;
 public class LogManageController extends BaseAgentController {
 
 
-    @RequestMapping(value = "log_data.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "log_data.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public String logData() {
         WebAopLog webAopLog = SpringUtil.getBean(WebAopLog.class);
         JSONArray data = LayuiTreeUtil.getTreeData(webAopLog.getPropertyValue());
@@ -38,7 +38,7 @@ public class LogManageController extends BaseAgentController {
     }
 
 
-    @RequestMapping(value = "log_del.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "log_del.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public String logData(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "path错误") String path) {
         WebAopLog webAopLog = SpringUtil.getBean(WebAopLog.class);
@@ -55,7 +55,7 @@ public class LogManageController extends BaseAgentController {
     }
 
 
-    @RequestMapping(value = "log_download", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "log_download", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public void logDownload(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "path错误") String path) {
         WebAopLog webAopLog = SpringUtil.getBean(WebAopLog.class);

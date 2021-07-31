@@ -142,7 +142,7 @@ public class LoginControl extends BaseServerController {
      * @param code     验证码
      * @return json
      */
-    @RequestMapping(value = "userLogin", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "userLogin", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     @NotLogin
     @OptLog(UserOperateLogV1.OptType.Login)
@@ -213,7 +213,7 @@ public class LoginControl extends BaseServerController {
      *
      * @return json
      */
-    @RequestMapping(value = "logout2", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "logout2", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     @NotLogin
     public String logout() {
@@ -224,7 +224,7 @@ public class LoginControl extends BaseServerController {
     /**
      * 刷新token
      */
-    @RequestMapping(value = "renewal", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "renewal", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     @NotLogin
     public String renewalToken() {

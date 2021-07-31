@@ -104,7 +104,7 @@ public class MonitorListController extends BaseServerController {
      *
      * @return json
      */
-    @RequestMapping(value = "getMonitorList", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "getMonitorList", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     @Feature(method = MethodFeature.LIST)
     public String getMonitorList() {
@@ -118,7 +118,7 @@ public class MonitorListController extends BaseServerController {
      * @param id id
      * @return json
      */
-    @RequestMapping(value = "deleteMonitor", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "deleteMonitor", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     @OptLog(UserOperateLogV1.OptType.DelMonitor)
     @Feature(method = MethodFeature.DEL)
@@ -141,7 +141,7 @@ public class MonitorListController extends BaseServerController {
      * @param notifyUser user
      * @return json
      */
-    @RequestMapping(value = "updateMonitor", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "updateMonitor", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     @OptLog(UserOperateLogV1.OptType.EditMonitor)
     @Feature(method = MethodFeature.EDIT)
@@ -201,7 +201,7 @@ public class MonitorListController extends BaseServerController {
      * @param type   类型
      * @return json
      */
-    @RequestMapping(value = "changeStatus", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "changeStatus", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     @OptLog(UserOperateLogV1.OptType.ChangeStatusMonitor)
     @Feature(method = MethodFeature.EDIT)

@@ -1,5 +1,6 @@
 package io.jpom.util;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
@@ -124,22 +125,24 @@ public class GitUtil {
 	 * @throws IOException     IO
 	 */
 	private static List<String> branchList(String url, File file, CredentialsProvider credentialsProvider, PrintWriter printWriter) throws GitAPIException, IOException {
-		try (Git git = initGit(url, null, file, credentialsProvider, printWriter)) {
-			//
-			List<Ref> list = git.branchList().setListMode(ListBranchCommand.ListMode.REMOTE).call();
-			List<String> all = new ArrayList<>(list.size());
-			list.forEach(ref -> {
-				String name = ref.getName();
-				if (name.startsWith(Constants.R_REMOTES + Constants.DEFAULT_REMOTE_NAME)) {
-					all.add(name.substring((Constants.R_REMOTES + Constants.DEFAULT_REMOTE_NAME).length() + 1));
-				} else if (name.startsWith(Constants.R_TAGS)) {
-					//
-				}
-			});
-			return all;
-		} catch (TransportException t) {
-			checkTransportException(t);
-			throw t;
+		synchronized (url.getBytes()) {
+			try (Git git = initGit(url, null, file, credentialsProvider, printWriter)) {
+				//
+				List<Ref> list = git.branchList().setListMode(ListBranchCommand.ListMode.REMOTE).call();
+				List<String> all = new ArrayList<>(list.size());
+				list.forEach(ref -> {
+					String name = ref.getName();
+					if (name.startsWith(Constants.R_REMOTES + Constants.DEFAULT_REMOTE_NAME)) {
+						all.add(name.substring((Constants.R_REMOTES + Constants.DEFAULT_REMOTE_NAME).length() + 1));
+					} else if (name.startsWith(Constants.R_TAGS)) {
+						//
+					}
+				});
+				return all;
+			} catch (TransportException t) {
+				checkTransportException(t);
+				return null;
+			}
 		}
 	}
 
@@ -150,7 +153,7 @@ public class GitUtil {
 		File gitFile = FileUtil.file(file, "gitTemp", tempId);
 		try {
 			List<String> list = branchList(url, gitFile, new UsernamePasswordCredentialsProvider(userName, userPwd), printWriter);
-			if (list.isEmpty()) {
+			if (CollUtil.isEmpty(list)) {
 				throw new JpomRuntimeException("该仓库还没有任何分支");
 			}
 			return list;
@@ -171,40 +174,48 @@ public class GitUtil {
 	 * @throws GitAPIException api
 	 */
 	public static void checkoutPull(String url, File file, String branchName, CredentialsProvider credentialsProvider, PrintWriter printWriter) throws IOException, GitAPIException {
-		try (Git git = initGit(url, branchName, file, credentialsProvider, printWriter)) {
-			// 判断本地是否存在对应分支
-			List<Ref> list = git.branchList().setListMode(ListBranchCommand.ListMode.ALL).call();
-			boolean createBranch = true;
-			for (Ref ref : list) {
-				String name = ref.getName();
-				if (name.startsWith(Constants.R_HEADS + branchName)) {
-					createBranch = false;
-					break;
+		synchronized (url.getBytes()) {
+			try (Git git = initGit(url, branchName, file, credentialsProvider, printWriter)) {
+				// 判断本地是否存在对应分支
+				List<Ref> list = git.branchList().setListMode(ListBranchCommand.ListMode.ALL).call();
+				boolean createBranch = true;
+				for (Ref ref : list) {
+					String name = ref.getName();
+					if (name.startsWith(Constants.R_HEADS + branchName)) {
+						createBranch = false;
+						break;
+					}
 				}
+				// 切换分支
+				if (!StrUtil.equals(git.getRepository().getBranch(), branchName)) {
+					printWriter.println(StrUtil.format("start switch branch from {} to {}", git.getRepository().getBranch(), branchName));
+					git.checkout().
+							setCreateBranch(createBranch).
+							setName(branchName).
+							setForceRefUpdate(true).
+							setUpstreamMode(CreateBranchCommand.SetupUpstreamMode.SET_UPSTREAM).
+							setProgressMonitor(new TextProgressMonitor(printWriter)).
+							call();
+				}
+				git.pull().setCredentialsProvider(credentialsProvider).call();
+			} catch (TransportException t) {
+				checkTransportException(t);
 			}
-			// 切换分支
-			if (!StrUtil.equals(git.getRepository().getBranch(), branchName)) {
-				printWriter.println(StrUtil.format("start switch branch from {} to {}", git.getRepository().getBranch(), branchName));
-				git.checkout().
-						setCreateBranch(createBranch).
-						setName(branchName).
-						setForceRefUpdate(true).
-						setUpstreamMode(CreateBranchCommand.SetupUpstreamMode.SET_UPSTREAM).
-						setProgressMonitor(new TextProgressMonitor(printWriter)).
-						call();
-			}
-			git.pull().setCredentialsProvider(credentialsProvider).call();
-		} catch (TransportException t) {
-			checkTransportException(t);
-			throw t;
 		}
 	}
 
-	private static void checkTransportException(TransportException ex) {
+	/**
+	 * 检查异常信息
+	 *
+	 * @param ex 异常信息
+	 * @throws TransportException 非账号密码异常
+	 */
+	private static void checkTransportException(TransportException ex) throws TransportException {
 		String msg = ex.getMessage();
 		if (msg.contains(JGitText.get().notAuthorized) || msg.contains(JGitText.get().authenticationNotSupported)) {
 			throw new JpomRuntimeException("git账号密码不正常", ex);
 		}
+		throw ex;
 	}
 
 	private static AnyObjectId getAnyObjectId(Git git, String branchName) throws GitAPIException {

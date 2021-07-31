@@ -38,18 +38,18 @@ public class OpenApiInterceptor extends BaseInterceptor {
     private boolean checkOpenApi(HttpServletRequest request, HttpServletResponse response) {
         String header = request.getHeader(ServerOpenApi.HEAD);
         if (StrUtil.isEmpty(header)) {
-            ServletUtil.write(response, JsonMessage.getString(300, "token empty"), MediaType.APPLICATION_JSON_UTF8_VALUE);
+            ServletUtil.write(response, JsonMessage.getString(300, "token empty"), MediaType.APPLICATION_JSON_VALUE);
             return false;
         }
         String authorizeToken = ServerExtConfigBean.getInstance().getAuthorizeToken();
         if (StrUtil.isEmpty(authorizeToken)) {
-            ServletUtil.write(response, JsonMessage.getString(300, "not config token"), MediaType.APPLICATION_JSON_UTF8_VALUE);
+            ServletUtil.write(response, JsonMessage.getString(300, "not config token"), MediaType.APPLICATION_JSON_VALUE);
             return false;
         }
         String md5 = SecureUtil.md5(authorizeToken);
         md5 = SecureUtil.sha1(md5 + ServerOpenApi.HEAD);
         if (!StrUtil.equals(header, md5)) {
-            ServletUtil.write(response, JsonMessage.getString(300, "not config token"), MediaType.APPLICATION_JSON_UTF8_VALUE);
+            ServletUtil.write(response, JsonMessage.getString(300, "not config token"), MediaType.APPLICATION_JSON_VALUE);
             return false;
         }
         return true;

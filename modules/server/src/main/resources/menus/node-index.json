@@ -2,65 +2,53 @@
   {
     "id": "welcome",
     "title": "首页",
-    "url": "./welcome",
-    "icon": "layui-icon-console",
     "icon_v3": "dashboard"
   },
   {
     "id": "manage",
     "title": "项目管理",
-    "icon": "layui-icon-templeate-1",
     "icon_v3": "project",
     "childs": [
       {
         "id": "manageList",
-        "title": "项目列表",
-        "url": "./manage/projectInfo"
+        "title": "项目列表"
       },
       {
         "id": "jdkList",
-        "title": "JDK管理",
-        "url": "./manage/jdkList.html"
+        "title": "JDK管理"
       },
       {
         "id": "projectRecover",
-        "title": "项目回收",
-        "url": "./manage/recover/list.html"
+        "title": "项目回收"
       }
     ]
   },
   {
     "id": "otherM",
     "title": "其他功能",
-    "icon": "layui-icon-circle-dot",
     "icon_v3": "more",
     "childs": [
       {
         "id": "tomcatManage",
-        "title": "Tomcat管理",
-        "url": "./tomcat/tomcatManage"
+        "title": "Tomcat管理"
       },
       {
         "id": "script",
-        "title": "脚本模板",
-        "url": "./script/list.html"
+        "title": "脚本模板"
       }
     ]
   },
   {
     "id": "nginx",
     "title": "nginx管理",
-    "icon": "layui-icon-layer",
     "icon_v3": "gateway",
     "childs": [
       {
         "id": "nginxList",
-        "title": "nginx列表",
-        "url": "./system/nginx/list.html"
+        "title": "nginx列表"
       },
       {
         "id": "certificate",
-        "url": "./system/certificate/list.html",
         "title": "证书管理"
       }
     ]
@@ -68,33 +56,27 @@
   {
     "id": "systemConfig",
     "title": "系统管理",
-    "icon": "layui-icon-set-fill",
     "icon_v3": "setting",
     "childs": [
       {
         "id": "whitelistDirectory",
-        "title": "白名单目录",
-        "url": "./system/whitelistDirectory"
+        "title": "白名单目录"
       },
       {
         "id": "cacheManage",
-        "title": "缓存管理",
-        "url": "../system/cache.html"
+        "title": "缓存管理"
       },
       {
         "id": "logManage",
-        "title": "系统日志",
-        "url": "../system/log.html"
+        "title": "系统日志"
       },
       {
         "id": "update",
-        "title": "在线升级",
-        "url": "../system/update.html"
+        "title": "在线升级"
       },
       {
         "id": "sysConfig",
-        "title": "系统配置",
-        "url": "../system/config.html"
+        "title": "系统配置"
       }
     ]
   }

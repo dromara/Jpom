@@ -71,7 +71,7 @@ public class SystemConfigController extends BaseServerController {
      * get server's config or node's config
      * 加载服务端或者节点端配置
      */
-    @RequestMapping(value = "config-data", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "config-data", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @SystemPermission
     @ResponseBody
     public String configData(String nodeId) throws IOException {
@@ -85,7 +85,7 @@ public class SystemConfigController extends BaseServerController {
         return JsonMessage.getString(200, "加载成功", content);
     }
 
-    @RequestMapping(value = "save_config.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "save_config.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     @OptLog(UserOperateLogV1.OptType.EditSysConfig)
     @SystemPermission
@@ -129,7 +129,7 @@ public class SystemConfigController extends BaseServerController {
      *
      * @return json
      */
-    @RequestMapping(value = "ip-config-data", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "ip-config-data", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @SystemPermission
     @ResponseBody
     public String ipConfigData() {
@@ -144,7 +144,7 @@ public class SystemConfigController extends BaseServerController {
         return JsonMessage.getString(200, "加载成功", jsonObject);
     }
 
-    @RequestMapping(value = "save_ip_config.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "save_ip_config.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     @OptLog(UserOperateLogV1.OptType.EditSysConfig)
     @SystemPermission
