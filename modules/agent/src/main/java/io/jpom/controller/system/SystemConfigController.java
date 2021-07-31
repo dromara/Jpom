@@ -50,7 +50,6 @@ public class SystemConfigController extends BaseAgentController {
 		}
 		try {
 			YamlPropertySourceLoader yamlPropertySourceLoader = new YamlPropertySourceLoader();
-			System.out.println(StringUtil.deleteComment(content));
 			ByteArrayResource resource = new ByteArrayResource(StringUtil.deleteComment(content).getBytes(StandardCharsets.UTF_8));
 			yamlPropertySourceLoader.load("test", resource);
 		} catch (Exception e) {
