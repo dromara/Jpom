@@ -8,6 +8,7 @@ import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.servlet.ServletUtil;
+import cn.hutool.http.HttpUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.controller.multipart.MultipartFileBuilder;
@@ -28,9 +29,7 @@ import io.jpom.util.FileUtils;
 import io.jpom.util.StringUtil;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import java.io.File;
@@ -39,6 +38,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 /**
  * 项目文件管理
@@ -295,7 +295,7 @@ public class ProjectFileControl extends BaseAgentController {
 	 * @param filename 读取的文件名
 	 * @return json
 	 */
-	@RequestMapping(value = "read_file", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	@GetMapping(value = "read_file", produces = MediaType.APPLICATION_JSON_VALUE)
 	public String readFile(String filePath, String filename) {
 		ProjectInfoModel pim = getProjectInfoModel();
 		filePath = StrUtil.emptyToDefault(filePath, File.separator);
@@ -314,7 +314,7 @@ public class ProjectFileControl extends BaseAgentController {
 	 * @param fileText 文件内容
 	 * @return json
 	 */
-	@RequestMapping(value = "update_config_file", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	@PostMapping(value = "update_config_file", produces = MediaType.APPLICATION_JSON_VALUE)
 	public String updateConfigFile(String filePath, String filename, String fileText) {
 		ProjectInfoModel pim = getProjectInfoModel();
 		filePath = StrUtil.emptyToDefault(filePath, File.separator);
@@ -325,7 +325,15 @@ public class ProjectFileControl extends BaseAgentController {
 	}
 
 
-	@RequestMapping(value = "download", method = RequestMethod.GET)
+	/**
+	 * 将执行文件下载到客户端 本地
+	 *
+	 * @param id        项目id
+	 * @param filename  文件名
+	 * @param levelName 文件夹名
+	 * @return 正常情况返回文件流，非正在返回 text plan
+	 */
+	@GetMapping(value = "download", produces = MediaType.APPLICATION_JSON_VALUE)
 	public String download(String id, String filename, String levelName) {
 		String safeFileName = pathSafe(filename);
 		if (StrUtil.isEmpty(safeFileName)) {
@@ -333,12 +341,7 @@ public class ProjectFileControl extends BaseAgentController {
 		}
 		try {
 			ProjectInfoModel pim = projectInfoService.getItem(id);
-			File file;
-			if (StrUtil.isEmpty(levelName)) {
-				file = FileUtil.file(pim.allLib(), filename);
-			} else {
-				file = FileUtil.file(pim.allLib(), levelName, filename);
-			}
+			File file = FileUtil.file(pim.allLib(), StrUtil.emptyToDefault(levelName, FileUtil.FILE_SEPARATOR), filename);
 			if (file.isDirectory()) {
 				return "暂不支持下载文件夹";
 			}
@@ -347,6 +350,35 @@ public class ProjectFileControl extends BaseAgentController {
 			DefaultSystemLog.getLog().error("下载文件异常", e);
 		}
 		return "下载失败。请刷新页面后重试";
+	}
+
+	/**
+	 * 下载远程文件
+	 *
+	 * @param id        项目id
+	 * @param url       远程 url 地址
+	 * @param levelName 保存的文件夹
+	 * @return json
+	 */
+	@GetMapping(value = "remote_download", produces = MediaType.APPLICATION_JSON_VALUE)
+	public String remoteDownload(String id, String url, String levelName) {
+		if (StrUtil.isEmpty(url)) {
+			return JsonMessage.getString(405, "请输入正确的远程地址");
+		}
+		AgentWhitelist whitelist = whitelistDirectoryService.getWhitelist();
+		Set<String> allowRemoteDownloadHost = whitelist.getAllowRemoteDownloadHost();
+		Assert.state(CollUtil.isNotEmpty(allowRemoteDownloadHost), "还没有配置运行的远程地址");
+		List<String> collect = allowRemoteDownloadHost.stream().filter(s -> StrUtil.startWith(url, s)).collect(Collectors.toList());
+		Assert.state(CollUtil.isNotEmpty(collect), "不允许下载当前地址的文件");
+		try {
+			ProjectInfoModel pim = projectInfoService.getItem(id);
+			File file = FileUtil.file(pim.allLib(), StrUtil.emptyToDefault(levelName, FileUtil.FILE_SEPARATOR));
+			long downloadFile = HttpUtil.downloadFile(url, file);
+			return JsonMessage.getString(200, "下次成功文件大小：" + FileUtil.readableFileSize(downloadFile));
+		} catch (Exception e) {
+			DefaultSystemLog.getLog().error("下载远程文件异常", e);
+			return JsonMessage.getString(500, "下载远程文件失败:" + e.getMessage());
+		}
 	}
 
 }

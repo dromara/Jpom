@@ -35,7 +35,7 @@ public class IndexController extends BaseAgentController {
     @RequestMapping(value = {"index", "", "index.html", "/"}, produces = MediaType.TEXT_PLAIN_VALUE)
     @NotAuthorize
     public String index() {
-        return "Jpom-Agent";
+        return "Jpom-Agent,Can't access directly,Please configure it to JPOM server";
     }
 
     @RequestMapping(value = "info", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)

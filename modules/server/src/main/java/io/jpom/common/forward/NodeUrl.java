@@ -82,7 +82,7 @@ public enum NodeUrl {
 
 	Manage_File_ReadFile("/manage/file/read_file"),
 
-	Get_File_Format("/manage/file/getFileFormat"),
+	Manage_File_Remote_Download("/manage/file/remote_download"),
 
 	Manage_File_Download("/manage/file/download"),
 
@@ -185,7 +185,7 @@ public enum NodeUrl {
 	/**
 	 * 相对请求地址
 	 */
-	private String url;
+	private final String url;
 	private int timeOut;
 
 	public String getUrl() {

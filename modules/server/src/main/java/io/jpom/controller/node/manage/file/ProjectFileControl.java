@@ -1,7 +1,5 @@
 package io.jpom.controller.node.manage.file;
 
-import cn.jiangzeyin.common.JsonMessage;
-import com.alibaba.fastjson.JSONObject;
 import io.jpom.common.BaseServerController;
 import io.jpom.common.forward.NodeForward;
 import io.jpom.common.forward.NodeUrl;
@@ -11,12 +9,11 @@ import io.jpom.plugin.ClassFeature;
 import io.jpom.plugin.Feature;
 import io.jpom.plugin.MethodFeature;
 import io.jpom.service.node.manage.ProjectInfoService;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
 
@@ -25,15 +22,15 @@ import javax.annotation.Resource;
  *
  * @author Administrator
  */
-@Controller
+@RestController
 @RequestMapping(value = "/node/manage/file/")
 @Feature(cls = ClassFeature.PROJECT)
 public class ProjectFileControl extends BaseServerController {
 	@Resource
 	private ProjectInfoService projectInfoService;
 
-	@Value("${fileFormat}")
-	private String fileFormat;
+//	@Value("${fileFormat}")
+//	private String fileFormat;
 //    /**
 //     * 文件管理页面
 //     *
@@ -129,17 +126,30 @@ public class ProjectFileControl extends BaseServerController {
 	}
 
 	/**
-	 * 获取可编辑文件格式
+	 * 下载远程文件
 	 *
 	 * @return json
 	 */
-	@RequestMapping(value = "geFileFormat", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-	@ResponseBody
-	@Feature(method = MethodFeature.GET_FILE_FOMAT)
-	public String geFileFormat() {
-		String[] file = fileFormat.split("\\|");
-		JSONObject jsonObject = new JSONObject();
-		jsonObject.put("fileFormat", file);
-		return JsonMessage.getString(200, "获取成功", jsonObject);
+	@RequestMapping(value = "remote_download", method = RequestMethod.GET)
+	@Feature(method = MethodFeature.REMOTE_DOWNLOAD)
+	public String remoteDownload() {
+		return NodeForward.request(getNode(), getRequest(), NodeUrl.Manage_File_Remote_Download).toString();
+
 	}
+
+
+//	/**
+//	 * 获取可编辑文件格式
+//	 *
+//	 * @return json
+//	 */
+//	@RequestMapping(value = "geFileFormat", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+//	@ResponseBody
+//	@Feature(method = MethodFeature.GET_FILE_FOMAT)
+//	public String geFileFormat() {
+//		String[] file = fileFormat.split("\\|");
+//		JSONObject jsonObject = new JSONObject();
+//		jsonObject.put("fileFormat", file);
+//		return JsonMessage.getString(200, "获取成功", jsonObject);
+//	}
 }

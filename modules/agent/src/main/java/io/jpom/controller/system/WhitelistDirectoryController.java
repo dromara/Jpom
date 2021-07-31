@@ -1,8 +1,10 @@
 package io.jpom.controller.system;
 
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.lang.RegexPool;
 import cn.hutool.core.text.StrSplitter;
 import cn.hutool.core.util.CharsetUtil;
+import cn.hutool.core.util.ReUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.JsonMessage;
 import io.jpom.common.BaseJpomController;
@@ -46,7 +48,7 @@ public class WhitelistDirectoryController extends BaseJpomController {
 
 
 	@RequestMapping(value = "whitelistDirectory_submit", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-	public String whitelistDirectorySubmit(String project, String certificate, String nginx, String allowEditSuffix) {
+	public String whitelistDirectorySubmit(String project, String certificate, String nginx, String allowEditSuffix, String allowRemoteDownloadHost) {
 		if (StrUtil.isEmpty(project)) {
 			return JsonMessage.getString(401, "项目路径白名单不能为空");
 		}
@@ -55,7 +57,8 @@ public class WhitelistDirectoryController extends BaseJpomController {
 		List<String> certificateList = this.parseToList(certificate, "证书路径白名单不能为空");
 		List<String> nList = this.parseToList(nginx, "nginx路径白名单不能为空");
 		List<String> allowEditSuffixList = this.parseToList(allowEditSuffix, "运行编辑的文件后缀不能为空");
-		return save(list, certificateList, nList, allowEditSuffixList).toString();
+		List<String> allowRemoteDownloadHostList = this.parseToList(allowRemoteDownloadHost, "运行远程下载的 host 不能配置为空");
+		return save(list, certificateList, nList, allowEditSuffixList, allowRemoteDownloadHostList).toString();
 	}
 //
 //	private JsonMessage<String> save(String project, List<String> certificate, List<String> nginx, List<String> allowEditSuffixList) {
@@ -64,7 +67,11 @@ public class WhitelistDirectoryController extends BaseJpomController {
 //	}
 
 
-	private JsonMessage<String> save(List<String> projects, List<String> certificate, List<String> nginx, List<String> allowEditSuffixList) {
+	private JsonMessage<String> save(List<String> projects,
+									 List<String> certificate,
+									 List<String> nginx,
+									 List<String> allowEditSuffixList,
+									 List<String> allowRemoteDownloadHostList) {
 		List<String> projectArray;
 		{
 			projectArray = AgentWhitelist.covertToArray(projects);
@@ -121,10 +128,14 @@ public class WhitelistDirectoryController extends BaseJpomController {
 				}
 			}
 		}
-		AgentWhitelist agentWhitelist = whitelistDirectoryService.getWhitelist();
-		if (agentWhitelist == null) {
-			agentWhitelist = new AgentWhitelist();
+		if (CollUtil.isNotEmpty(allowRemoteDownloadHostList)) {
+			for (String s : allowRemoteDownloadHostList) {
+				Assert.state(ReUtil.isMatch(RegexPool.URL_HTTP, s), "配置的远程地址不规范,请重新填写：" + s);
+			}
 		}
+
+		AgentWhitelist agentWhitelist = whitelistDirectoryService.getWhitelist();
+
 		agentWhitelist.setProject(projectArray);
 		agentWhitelist.setCertificate(certificateArray);
 		agentWhitelist.setNginx(nginxArray);
