@@ -7,6 +7,7 @@ import io.jpom.model.BaseModel;
  * 仓库地址实体类
  */
 public class RepositoryModel extends BaseModel {
+	public static final String TABLE_NAME = "REPOSITORY";
 	/**
 	 * 仓库地址
 	 */
