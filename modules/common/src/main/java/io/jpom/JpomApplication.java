@@ -131,8 +131,14 @@ public class JpomApplication extends ApplicationBuilder {
 		return charset;
 	}
 
+	/**
+	 * 获取当前程序的类型
+	 *
+	 * @return Agent 或者 Server
+	 */
 	public static Type getAppType() {
 		if (appType == null) {
+			// 从配置文件中获取
 			Environment environment = JpomApplication.getEnvironment();
 			String property = environment.getProperty(Const.APPLICATION_NAME);
 			property = StrUtil.removeAll(property, "jpom");
