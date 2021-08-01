@@ -125,7 +125,7 @@ public class GitUtil {
 	 * @throws IOException     IO
 	 */
 	private static List<String> branchList(String url, File file, CredentialsProvider credentialsProvider, PrintWriter printWriter) throws GitAPIException, IOException {
-		synchronized (url.getBytes()) {
+		synchronized (url.intern()) {
 			try (Git git = initGit(url, null, file, credentialsProvider, printWriter)) {
 				//
 				List<Ref> list = git.branchList().setListMode(ListBranchCommand.ListMode.REMOTE).call();
@@ -174,7 +174,7 @@ public class GitUtil {
 	 * @throws GitAPIException api
 	 */
 	public static void checkoutPull(String url, File file, String branchName, CredentialsProvider credentialsProvider, PrintWriter printWriter) throws IOException, GitAPIException {
-		synchronized (url.getBytes()) {
+		synchronized (url.intern()) {
 			try (Git git = initGit(url, branchName, file, credentialsProvider, printWriter)) {
 				// 判断本地是否存在对应分支
 				List<Ref> list = git.branchList().setListMode(ListBranchCommand.ListMode.ALL).call();
