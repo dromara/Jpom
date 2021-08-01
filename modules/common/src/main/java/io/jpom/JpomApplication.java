@@ -161,6 +161,7 @@ public class JpomApplication extends ApplicationBuilder {
 	public static void restart() {
 		File scriptFile = JpomManifest.getScriptFile();
 		ThreadUtil.execute(() -> {
+			// Waiting for method caller,For example, the interface response
 			try {
 				Thread.sleep(2000);
 			} catch (InterruptedException ignored) {
