@@ -9,4 +9,9 @@ public class Const {
 	 * String const
 	 */
 	public static final String ID_STR = "id";
+
+	/**
+	 * 应用程序类型的配置 key
+	 */
+	public static final String APPLICATION_NAME = "spring.application.name";
 }
