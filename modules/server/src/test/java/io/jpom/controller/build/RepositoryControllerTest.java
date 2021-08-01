@@ -13,6 +13,10 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
  */
 public class RepositoryControllerTest extends ApplicationStartTest {
 
+	/**
+	 * 测试加载仓库信息列表
+	 * @throws Exception
+	 */
 	@Test
 	public void testLoadRepositoryList() throws Exception {
 		mockMvc.perform(MockMvcRequestBuilders.post("/build/repository/list")

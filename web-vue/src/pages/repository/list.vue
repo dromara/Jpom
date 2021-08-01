@@ -1,5 +1,6 @@
 <template>
   <div>
+    <!-- 搜索区 -->
     <div ref="filter" class="filter">
       <a-select v-model="listQuery.group" allowClear placeholder="请选择分组"
         class="filter-item" @change="handleFilter">
@@ -9,6 +10,62 @@
       <a-button type="primary" @click="handleAdd">新增</a-button>
       <a-button type="primary" @click="loadData">刷新</a-button>
     </div>
+    <!-- 表格 -->
+    <a-table :loading="loading" :columns="columns" :data-source="list" :style="{'max-height': tableHeight + 'px' }"
+      :scroll="{x: 1210, y: tableHeight - 60}" bordered rowKey="id" :pagination="false">
+      <a-tooltip slot="name" slot-scope="text" placement="topLeft" :title="text">
+        <span>{{ text }}</span>
+      </a-tooltip>
+      <a-tooltip slot="branchName" slot-scope="text" placement="topLeft" :title="text">
+        <span>{{ text }}</span>
+      </a-tooltip>
+      <template slot="releaseMethod" slot-scope="text" placement="topleft" :title="text">
+        <span>{{ releaseMethodMap[text] }}</span>
+      </template>
+      <template slot="status" slot-scope="text">
+        <span v-if="text === 0">未构建</span>
+        <span v-else-if="text === 1">构建中</span>
+        <span v-else-if="text === 2">构建成功</span>
+        <span v-else-if="text === 3">构建失败</span>
+        <span v-else-if="text === 4">发布中</span>
+        <span v-else-if="text === 5">发布成功</span>
+        <span v-else-if="text === 6">发布失败</span>
+        <span v-else-if="text === 7">取消构建</span>
+        <span v-else>未知状态</span>
+      </template>
+      <a-tooltip slot="buildIdStr" slot-scope="text, record" placement="topLeft" :title="text + ' ( 点击查看日志 ) '">
+        <span v-if="record.buildId <= 0"></span>
+        <a-tag v-else color="#108ee9" @click="handleBuildLog(record)">{{ text }}</a-tag>
+      </a-tooltip>
+      <a-tooltip slot="modifyUser" slot-scope="text" placement="topLeft" :title="text">
+        <span>{{ text }}</span>
+      </a-tooltip>
+      <template slot="operation" slot-scope="text, record">
+        <a-button type="primary" @click="handleEdit(record)">编辑</a-button>
+        <a-button type="danger" v-if="record.status === 1 || record.status === 4"
+          @click="handleStopBuild(record)">停止
+        </a-button>
+        <a-button type="primary" v-else @click="handleStartBuild(record)">构建</a-button>
+        <a-dropdown>
+          <a class="ant-dropdown-link" @click="e => e.preventDefault()">
+            更多
+            <a-icon type="down"/>
+          </a>
+          <a-menu slot="overlay">
+            <a-menu-item>
+              <a-button type="primary" @click="handleTrigger(record)">触发器</a-button>
+            </a-menu-item>
+            <a-menu-item>
+              <a-button type="danger" @click="handleDelete(record)">删除</a-button>
+            </a-menu-item>
+            <a-menu-item>
+              <a-button type="danger" :disabled="!record.sourceExist" @click="handleClear(record)">清除构建
+              </a-button>
+            </a-menu-item>
+          </a-menu>
+        </a-dropdown>
+      </template>
+    </a-table>
   </div>
 </template>
 <script>
