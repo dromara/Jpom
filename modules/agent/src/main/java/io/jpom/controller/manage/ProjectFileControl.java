@@ -118,10 +118,7 @@ public class ProjectFileControl extends BaseAgentController {
 			// 解压
 			File file = new File(path);
 			try {
-				List<String> names = CompressionFileUtil.unCompress(file, lib);
-				if (names == null || names.isEmpty()) {
-					return JsonMessage.getString(500, "没有解压出任何文件");
-				}
+				CompressionFileUtil.unCompress(file, lib);
 			} finally {
 				if (!file.delete()) {
 					DefaultSystemLog.getLog().error("删除文件失败：" + file.getPath());
@@ -379,8 +376,7 @@ public class ProjectFileControl extends BaseAgentController {
 			if (BooleanUtil.toBoolean(unzip)) {
 				// 需要解压文件
 				try {
-					List<String> names = CompressionFileUtil.unCompress(file, downloadFile);
-					Assert.notEmpty(names, "没有解压出任何文件");
+					CompressionFileUtil.unCompress(file, downloadFile);
 				} finally {
 					if (!FileUtil.del(downloadFile)) {
 						DefaultSystemLog.getLog().error("删除文件失败：" + file.getPath());

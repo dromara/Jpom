@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.annotation.Resource;
 import java.lang.reflect.Field;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -55,7 +56,7 @@ public class WhitelistDirectoryController extends BaseServerController {
 			 */
 			Field[] fields = ReflectUtil.getFields(AgentWhitelist.class);
 			for (Field field : fields) {
-				List<String> fieldValue = (List<String>) ReflectUtil.getFieldValue(agentWhitelist, field);
+				Collection<String> fieldValue = (Collection<String>) ReflectUtil.getFieldValue(agentWhitelist, field);
 				map.put(field.getName(), AgentWhitelist.convertToLine(fieldValue));
 			}
 //			map.put("project", AgentWhitelist.convertToLine(agentWhitelist.getProject()));

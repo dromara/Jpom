@@ -10,6 +10,9 @@
       <a-form-model-item label="Nginx 路径" prop="name">
         <a-input v-model="temp.nginx" type="textarea" :rows="5" style="resize: none" placeholder="请输入 nginx 存放路径白名单，回车支持输入多个路径，系统会自动过滤 ../ 路径、不允许输入根路径"/>
       </a-form-model-item>
+      <a-form-model-item label="远程下载安全HOST" prop="name">
+        <a-input v-model="temp.allowRemoteDownloadHost" type="textarea" :rows="5" style="resize: none" placeholder="请输入远程下载安全HOST，回车支持输入多个路径，示例 https://www.test.com 等"/>
+      </a-form-model-item>
       <a-form-model-item label="文件后缀" prop="suffix">
         <a-input v-model="temp.allowEditSuffix" type="textarea" :rows="5" style="resize: none" placeholder="请输入允许编辑文件的后缀及文件编码，不设置编码则默认取系统编码，示例：设置编码：txt@utf-8， 不设置编码：txt"/>
       </a-form-model-item>

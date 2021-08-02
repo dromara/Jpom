@@ -27,7 +27,9 @@ import io.jpom.util.VersionUtils;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.net.JarURLConnection;
 import java.net.URL;
+import java.net.URLConnection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.jar.Attributes;
@@ -212,9 +214,16 @@ public class JpomManifest {
 	 */
 	public static File getRunPath() {
 		URL location = ClassUtil.getLocation(JpomApplication.getAppClass());
-		String file = location.getFile();
-		String before = StrUtil.subBefore(file, "!", false);
-		return FileUtil.file(before);
+		try {
+			URLConnection urlConnection = location.openConnection();
+			if (urlConnection instanceof JarURLConnection) {
+				JarURLConnection jarURLConnection = (JarURLConnection) urlConnection;
+				return FileUtil.file(jarURLConnection.getJarFile().getName());
+			}
+			return FileUtil.file(location.getFile());
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	/**
