@@ -92,7 +92,7 @@ public class WebAopLog extends PropertyDefinerBase {
 				file = file.getParentFile().getParentFile();
 			} else {
 				// 本地调试模式 @author jzy 2021-08-02 程序运行时候不影响打包
-				file = FileUtil.file(FileUtil.getTmpDir(), "jpom", "log");
+				file = FileUtil.file(FileUtil.getParent(file, 2), "log");
 				Console.log("当前日志文件存储路径：" + FileUtil.getAbsolutePath(file));
 			}
 			path = FileUtil.getAbsolutePath(file);

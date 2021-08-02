@@ -34,134 +34,134 @@ import java.nio.charset.Charset;
  */
 public class JpomApplication extends ApplicationBuilder {
 
-    /**
-     *
-     */
-    public static final String SYSTEM_ID = "system";
+	/**
+	 *
+	 */
+	public static final String SYSTEM_ID = "system";
 
-    protected static String[] args;
-    /**
-     * 应用类型
-     */
-    private static Type appType;
-    private static Charset charset;
+	protected static String[] args;
+	/**
+	 * 应用类型
+	 */
+	private static Type appType;
+	private static Charset charset;
 
-    private static Class<?> appClass;
+	private static Class<?> appClass;
 
-    /**
-     * 获取程序命令行参数
-     *
-     * @return 数组
-     */
-    public static String[] getArgs() {
-        return args;
-    }
+	/**
+	 * 获取程序命令行参数
+	 *
+	 * @return 数组
+	 */
+	public static String[] getArgs() {
+		return args;
+	}
 
-    public JpomApplication(Type appType, Class<?> appClass, String[] args) throws Exception {
-        super(appClass);
-        //
-        checkEvent(args);
-        JpomApplication.appType = appType;
-        JpomApplication.appClass = appClass;
-        JpomApplication.args = args;
+	public JpomApplication(Type appType, Class<?> appClass, String[] args) throws Exception {
+		super(appClass);
+		//
+		checkEvent(args);
+		JpomApplication.appType = appType;
+		JpomApplication.appClass = appClass;
+		JpomApplication.args = args;
 
-        addHttpMessageConverter(new StringHttpMessageConverter(CharsetUtil.CHARSET_UTF_8));
+		addHttpMessageConverter(new StringHttpMessageConverter(CharsetUtil.CHARSET_UTF_8));
 
-        //
-        ObjectMapper build = createJackson();
-        addHttpMessageConverter(new MappingJackson2HttpMessageConverter(build));
+		//
+		ObjectMapper build = createJackson();
+		addHttpMessageConverter(new MappingJackson2HttpMessageConverter(build));
 
-        // 参数拦截器
-        addInterceptor(ParameterInterceptor.class);
-        addInterceptor(PluginFeatureInterceptor.class);
-        //
-        addApplicationEventClient(new JpomApplicationEvent());
-        // 添加初始化监听
-        this.application().addInitializers(new PluginFactory());
-    }
+		// 参数拦截器
+		addInterceptor(ParameterInterceptor.class);
+		addInterceptor(PluginFeatureInterceptor.class);
+		//
+		addApplicationEventClient(new JpomApplicationEvent());
+		// 添加初始化监听
+		this.application().addInitializers(new PluginFactory());
+	}
 
-    /**
-     * jackson 配置
-     *
-     * @return mapper
-     */
-    private static ObjectMapper createJackson() {
-        Jackson2ObjectMapperBuilder jackson2ObjectMapperBuilder = Jackson2ObjectMapperBuilder.json();
-        jackson2ObjectMapperBuilder.simpleDateFormat(DatePattern.NORM_DATETIME_PATTERN);
-        ObjectMapper build = jackson2ObjectMapperBuilder.build();
-        // 忽略空
-        build.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-        // 驼峰转下划线
-        //        build.setPropertyNamingStrategy(new PropertyNamingStrategy.SnakeCaseStrategy());
-        // long to String
-        SimpleModule simpleModule = new SimpleModule();
-        simpleModule.addSerializer(Long.class, ToStringSerializer.instance);
-        simpleModule.addSerializer(Long.TYPE, ToStringSerializer.instance);
-        build.registerModule(simpleModule);
-        //
-        build.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.ANY);
-//        build.activateDefaultTyping(objectMapper.getPolymorphicTypeValidator(), ObjectMapper.DefaultTyping.NON_FINAL, JsonTypeInfo.As.WRAPPER_ARRAY);
+	/**
+	 * jackson 配置
+	 *
+	 * @return mapper
+	 */
+	private static ObjectMapper createJackson() {
+		Jackson2ObjectMapperBuilder jackson2ObjectMapperBuilder = Jackson2ObjectMapperBuilder.json();
+		jackson2ObjectMapperBuilder.simpleDateFormat(DatePattern.NORM_DATETIME_PATTERN);
+		ObjectMapper build = jackson2ObjectMapperBuilder.build();
+		// 忽略空
+		build.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+		// 驼峰转下划线
+		//        build.setPropertyNamingStrategy(new PropertyNamingStrategy.SnakeCaseStrategy());
+		// long to String
+		SimpleModule simpleModule = new SimpleModule();
+		simpleModule.addSerializer(Long.class, ToStringSerializer.instance);
+		simpleModule.addSerializer(Long.TYPE, ToStringSerializer.instance);
+		build.registerModule(simpleModule);
+		//
+		build.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.ANY);
+		//        build.activateDefaultTyping(objectMapper.getPolymorphicTypeValidator(), ObjectMapper.DefaultTyping.NON_FINAL, JsonTypeInfo.As.WRAPPER_ARRAY);
 
-        return build;
-    }
+		return build;
+	}
 
-    private void checkEvent(String[] args) throws Exception {
-        new JpomClose().main(args);
-    }
+	private void checkEvent(String[] args) throws Exception {
+		new JpomClose().main(args);
+	}
 
-    /**
-     * 获取当前系统编码
-     *
-     * @return charset
-     */
-    public static Charset getCharset() {
-        if (charset == null) {
-            if (SystemUtil.getOsInfo().isLinux()) {
-                charset = CharsetUtil.CHARSET_UTF_8;
-            } else if (SystemUtil.getOsInfo().isMac()) {
-                charset = CharsetUtil.CHARSET_UTF_8;
-            } else {
-                charset = CharsetUtil.CHARSET_GBK;
-            }
-        }
-        return charset;
-    }
+	/**
+	 * 获取当前系统编码
+	 *
+	 * @return charset
+	 */
+	public static Charset getCharset() {
+		if (charset == null) {
+			if (SystemUtil.getOsInfo().isLinux()) {
+				charset = CharsetUtil.CHARSET_UTF_8;
+			} else if (SystemUtil.getOsInfo().isMac()) {
+				charset = CharsetUtil.CHARSET_UTF_8;
+			} else {
+				charset = CharsetUtil.CHARSET_GBK;
+			}
+		}
+		return charset;
+	}
 
-    public static Type getAppType() {
-        return appType;
-    }
+	public static Type getAppType() {
+		return appType;
+	}
 
-    public static Class<?> getAppClass() {
-        if (appClass == null) {
-            return JpomApplication.class;
-        }
-        return appClass;
-    }
+	public static Class<?> getAppClass() {
+		if (appClass == null) {
+			return JpomApplication.class;
+		}
+		return appClass;
+	}
 
-    /**
-     * 重启自身
-     */
-    public static void restart() {
-        File scriptFile = JpomManifest.getScriptFile();
-        ThreadUtil.execute(() -> {
-            try {
-                Thread.sleep(2000);
-            } catch (InterruptedException ignored) {
-            }
-            try {
-                String command = "";
-                if (SystemUtil.getOsInfo().isLinux()) {
-                    command = CommandUtil.SUFFIX;
-                }
-                command += " " + FileUtil.getAbsolutePath(scriptFile) + " restart upgrade";
-                if (SystemUtil.getOsInfo().isWindows()) {
-                    CommandUtil.execSystemCommand(command, scriptFile.getParentFile());
-                } else {
-                    CommandUtil.asyncExeLocalCommand(scriptFile.getParentFile(), command);
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        });
-    }
+	/**
+	 * 重启自身
+	 */
+	public static void restart() {
+		File scriptFile = JpomManifest.getScriptFile();
+		ThreadUtil.execute(() -> {
+			try {
+				Thread.sleep(2000);
+			} catch (InterruptedException ignored) {
+			}
+			try {
+				String command = "";
+				if (SystemUtil.getOsInfo().isLinux()) {
+					command = CommandUtil.SUFFIX;
+				}
+				command += " " + FileUtil.getAbsolutePath(scriptFile) + " restart upgrade";
+				if (SystemUtil.getOsInfo().isWindows()) {
+					CommandUtil.execSystemCommand(command, scriptFile.getParentFile());
+				} else {
+					CommandUtil.asyncExeLocalCommand(scriptFile.getParentFile(), command);
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		});
+	}
 }
