@@ -134,19 +134,21 @@ public class ExtConfigBean {
 			if (JpomManifest.getInstance().isDebug()) {
 				// 调试模式 为根路径的 jpom文件
 				path = ((SystemUtil.getOsInfo().isMac() ? "~" : "") + "/jpom/" + JpomApplication.getAppType().name() + "/").toLowerCase();
+				path = FileUtil.getAbsolutePath(path);
 			} else {
 				// 获取当前项目运行路径的父级
 				File file = JpomManifest.getRunPath();
 				if (!file.exists() && !file.isFile()) {
 					throw new JpomRuntimeException("请配置运行路径属性【jpom.path】");
 				}
-				path = file.getParentFile().getParentFile().getAbsolutePath();
+				File parentFile = file.getParentFile().getParentFile();
+				path = FileUtil.getAbsolutePath(parentFile);
 			}
 		}
 		return path;
 	}
 
-	public String getAbsolutePath() {
-		return FileUtil.getAbsolutePath(FileUtil.file(getPath()));
-	}
+//	public String getAbsolutePath() {
+//		return FileUtil.getAbsolutePath(FileUtil.file(getPath()));
+//	}
 }

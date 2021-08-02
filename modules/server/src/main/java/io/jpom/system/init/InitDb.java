@@ -73,8 +73,11 @@ public class InitDb implements DisposableBean, InitializingBean {
 
 	@Override
 	public void destroy() throws Exception {
-		DSFactory dsFactory = GlobalDSFactory.get();
-		dsFactory.close();
-		Console.log("h2 db destroy");
+		try {
+			DSFactory dsFactory = GlobalDSFactory.get();
+			dsFactory.destroy();
+			Console.log("h2 db destroy");
+		} catch (Exception ignored) {
+		}
 	}
 }
