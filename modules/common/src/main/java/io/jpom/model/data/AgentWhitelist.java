@@ -11,6 +11,7 @@ import io.jpom.system.ExtConfigBean;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
@@ -116,7 +117,7 @@ public class AgentWhitelist extends BaseJsonModel {
 	 * @param jsonArray jsonArray
 	 * @return str
 	 */
-	public static String convertToLine(List<String> jsonArray) {
+	public static String convertToLine(Collection<String> jsonArray) {
 		try {
 			return CollUtil.join(jsonArray, StrUtil.CRLF);
 		} catch (Exception e) {
