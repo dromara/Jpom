@@ -1,5 +1,7 @@
 # http://editorconfig.org
 
+# 和父级配置一致，避免使用新的工作空间打开当前项目，无法获取到配置问题
+
 root = true
 
 [*]
