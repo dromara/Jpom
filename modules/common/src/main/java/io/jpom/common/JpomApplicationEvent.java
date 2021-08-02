@@ -3,7 +3,6 @@ package io.jpom.common;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.lang.Console;
-import cn.hutool.core.net.NetUtil;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
@@ -138,7 +137,6 @@ public class JpomApplicationEvent implements ApplicationEventClient {
 		FileUtil.del(file);
 		//        Console.log("", path);
 		Console.log("Jpom[{}] 当前数据路径：{} 外部配置文件路径：{}", JpomManifest.getInstance().getVersion(), path, extConfigPath);
-		Console.log("当前服务=> {}:{}", NetUtil.getLocalhostStr(), ConfigBean.getInstance().getPort());
 	}
 
 	private static void checkUpdate() {
