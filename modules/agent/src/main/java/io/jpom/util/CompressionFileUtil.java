@@ -1,12 +1,11 @@
 package io.jpom.util;
 
-import cn.hutool.core.io.CharsetDetector;
+import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.extra.compress.CompressUtil;
 import cn.hutool.extra.compress.extractor.Extractor;
 import org.apache.commons.compress.compressors.CompressorInputStream;
-import org.apache.commons.compress.utils.IOUtils;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -19,8 +18,14 @@ import java.nio.charset.Charset;
  */
 public class CompressionFileUtil {
 
+	/**
+	 * 解压文件
+	 *
+	 * @param compressFile 压缩文件
+	 * @param destDir      解压到的文件夹
+	 */
 	public static void unCompress(File compressFile, File destDir) {
-		Charset charset = CharsetDetector.detect(compressFile);
+		Charset charset = CharsetUtil.CHARSET_GBK;
 		charset = ObjectUtil.defaultIfNull(charset, CharsetUtil.defaultCharset());
 		try {
 			try (Extractor extractor = CompressUtil.createExtractor(charset, compressFile)) {
@@ -28,8 +33,10 @@ public class CompressionFileUtil {
 			}
 		} catch (Exception e) {
 			CompressorInputStream compressUtilIn = null;
+			FileInputStream fileInputStream = null;
 			try {
-				compressUtilIn = CompressUtil.getIn(null, new FileInputStream(compressFile));
+				fileInputStream = new FileInputStream(compressFile);
+				compressUtilIn = CompressUtil.getIn(null, fileInputStream);
 				try (Extractor extractor = CompressUtil.createExtractor(charset, compressUtilIn)) {
 					extractor.extract(destDir);
 				}
@@ -37,9 +44,10 @@ public class CompressionFileUtil {
 				//
 				e2.addSuppressed(e);
 				//
-				e2.printStackTrace();
+				throw new RuntimeException(e2);
 			} finally {
-				IOUtils.closeQuietly(compressUtilIn);
+				IoUtil.close(fileInputStream);
+				IoUtil.close(compressUtilIn);
 			}
 		}
 	}
