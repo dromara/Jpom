@@ -224,6 +224,15 @@ export function readFile(formData) {
 	})
 }
 
+
+export function remoteDownload(formData) {
+	return axios({
+		url: '/node/manage/file/remote_download',
+		method: 'get',
+		params: formData
+	})
+}
+
 export function updateFile(formData) {
 	return axios({
 		url: '/node/manage/file/update_config_file',

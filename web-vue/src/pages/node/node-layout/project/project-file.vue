@@ -17,6 +17,7 @@
         <!-- <a-tag color="#2db7f5">项目目录: {{ absPath }}</a-tag>-->
         <a-button type="primary" @click="handleUpload">批量上传文件</a-button>
         <a-button type="primary" @click="handleZipUpload">上传压缩文件（自动解压）</a-button>
+        <a-button type="primary" @click="openRemoteUpload">远程上传</a-button>
         <a-button type="primary" @click="loadFileList">刷新表格</a-button>
         <a-button type="danger" @click="clearFile">清空项目目录</a-button>
         <a-tag color="#2db7f5" v-if="uploadPath">当前目录: {{ uploadPath }}</a-tag>
@@ -72,7 +73,18 @@
            <a-textarea v-model="fileContent" autosize :rows="6" />
         </div>
       </a-modal>
-
+     <!--远程下载  -->
+     <a-modal
+       v-model="uploadRemoteFileVisible" title="远程下载文件"   @ok="handleRemoteUpload" @cancel="openRemoteUpload" :maskClosable="false" >
+       <a-form-model :model="remoteDownloadData" :label-col="{ span: 5 }"  :wrapper-col="{ span: 24 }"    :rules="rules" ref="ruleForm">
+          <a-form-model-item label="远程下载URL" prop="url">
+            <a-input v-model="remoteDownloadData.url" placeholder="远程下载地址" />
+          </a-form-model-item>
+          <a-form-model-item label="是否为压缩包">
+            <a-switch v-model="remoteDownloadData.unzip"   checked-children="是" un-checked-children="否"  v-decorator="['unzip', { valuePropName: 'checked' }]" />
+          </a-form-model-item>
+       </a-form-model>
+    </a-modal>
     </a-layout-content>
   </a-layout>
 </template>
@@ -84,6 +96,7 @@ import {
   uploadProjectFile,
   readFile,
   updateFile,
+  remoteDownload,
 } from '../../../../api/node-project';
 export default {
   props: {
@@ -112,6 +125,7 @@ export default {
       filename: '',
       uploadFileVisible: false,
       uploadZipFileVisible: false,
+      uploadRemoteFileVisible: false,
       editFileVisible: false,
       successSize: 0,
       fileContent: '',
@@ -125,13 +139,21 @@ export default {
         label: 'filename',
         isLeaf: 'isLeaf'
       },
+       remoteDownloadData: {
+        id: '',
+        url: '',
+        unzip:false
+      },
       columns: [
         {title: '文件名称', dataIndex: 'filename', width: 100, ellipsis: true, scopedSlots: {customRender: 'filename'}},
         {title: '文件类型', dataIndex: 'isDirectory', width: 100, ellipsis: true, scopedSlots: {customRender: 'isDirectory'}},
         {title: '文件大小', dataIndex: 'fileSize', width: 120, ellipsis: true, scopedSlots: {customRender: 'fileSize'}},
         {title: '修改时间', dataIndex: 'modifyTime', width: 180, ellipsis: true},
         {title: '操作',dataIndex: 'operation',scopedSlots: {customRender: 'operation'}, width: 120}
-      ]
+      ],
+      rules: {
+        url: [{ required: true, message: '远程下载Url不为空', trigger: 'change' }],
+      }
     }
   },
   computed: {
@@ -386,6 +408,44 @@ export default {
           }, 1000);
         }
       })
+    },
+    //打开远程上传
+    openRemoteUpload(){
+       // this.$refs.ruleForm.resetFields();
+      this.uploadRemoteFileVisible=true;
+    },
+    //关闭远程上传
+    closeRemoteUpload(){
+     //   this.$refs.ruleForm.resetFields();
+      this.uploadRemoteFileVisible=false;
+    },
+    //处理上传文件
+    handleRemoteUpload(){
+      this.$refs.ruleForm.validate(valid => {
+        if (valid) {
+        const params = {
+        id: this.projectId,
+        nodeId: this.nodeId,
+        url: this.remoteDownloadData.url,
+        levelName: this.uploadPath,
+        unzip: this.remoteDownloadData.unzip
+      }
+      remoteDownload(params).then((res) => {
+            if(res.code==200){
+              this.$notification.success({
+                message: res.msg,
+                duration: 2
+              });
+               this.remoteDownloadData={};
+               this.uploadRemoteFileVisible=false;
+               this.loadFileList();
+            }
+          });
+        } else {
+          return false;
+        }
+      });
+       
     },
     // 加载文件列表
     loadFileList() {
