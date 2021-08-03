@@ -23,8 +23,8 @@
         </a-form-model-item>
         <a-form-model-item label="权限" prop="feature" class="feature">
           <a-tree v-model="checkedKeys"
-            checkStrictly checkable defaultExpandAll :selectable="false" :tree-data="featureList"
-            :replaceFields="replaceFields" @check="checkNode"/>
+                  checkStrictly checkable defaultExpandAll :selectable="false" :tree-data="featureList"
+                  :replaceFields="replaceFields" @check="checkNode"/>
         </a-form-model-item>
       </a-form-model>
     </a-modal>
@@ -33,21 +33,24 @@
       <div v-for="(val, key, index) in dynamicData" :key="index">
         <h3>{{ getDynamicNameById(key) }}</h3>
         <div v-for="item in val" :key="item.id">
-          <a-checkbox :value="item.id" :disabled="item.disabled" :checked="item.checked" class="box-1" @change="changeCheckBox(item.id)">{{ item.title }}</a-checkbox><br/>
+          <a-checkbox :value="item.id" :disabled="item.disabled" :checked="item.checked" class="box-1" @change="changeCheckBox(item.id)">{{ item.title }}</a-checkbox>
+          <br/>
           <div v-for="child in item.children" :key="child.id">
-            <a-checkbox :value="child.id" :disabled="child.disabled" :checked="child.checked" class="box-2" @change="changeCheckBox(child.id)">{{ child.title }}</a-checkbox><br/>
+            <a-checkbox :value="child.id" :disabled="child.disabled" :checked="child.checked" class="box-2" @change="changeCheckBox(child.id)">{{ child.title }}</a-checkbox>
+            <br/>
             <div v-for="ele in child.children" :key="ele.id">
               <a-checkbox :value="ele.id" :checked="ele.checked" class="box-3" @change="changeCheckBox(ele.id)">{{ ele.title }}</a-checkbox>
             </div>
           </div>
         </div>
-        <a-divider />
+        <a-divider/>
       </div>
     </a-modal>
   </div>
 </template>
 <script>
-import { getRoleList, getRoleFeature, editRole, deleteRole, getDynamicList, getRoleDynamicList, editRoleDynamic } from '../../api/role';
+import {getRoleList, getRoleFeature, editRole, deleteRole, getDynamicList, getRoleDynamicList, editRoleDynamic} from '../../api/role';
+
 export default {
   data() {
     return {
@@ -79,7 +82,7 @@ export default {
       // 表单校验规则
       rules: {
         name: [
-          { required: true, message: 'Please input role name', trigger: 'blur' }
+          {required: true, message: 'Please input role name', trigger: 'blur'}
         ],
       }
     }
@@ -116,13 +119,19 @@ export default {
     },
     // 添加角色
     handleAdd() {
-      this.temp = {};
+      this.temp = {
+        canAdd: false
+      };
       this.checkedKeys = {};
       this.editRoleVisible = true;
     },
     // 编辑角色
     async handleEdit(record) {
-      this.temp = {};
+      this.temp = {
+        id: record.id,
+        name: record.name,
+        canAdd: record.canAdd
+      };
       // 请求数据
       const res = await getRoleFeature(record.id);
       // 设置选中的 key
@@ -133,7 +142,7 @@ export default {
           feature.children.forEach(child => {
             if (child.checked) {
               this.checkedKeys.checked.push(child.id);
-              countChecked ++;
+              countChecked++;
             }
           })
           // 判断是全选还是半选
@@ -146,9 +155,6 @@ export default {
           }
         }
       });
-      this.temp.id = record.id;
-      this.temp.name = record.name;
-      this.temp.canAdd = record.canAdd;
       // 显示对话框
       this.editRoleVisible = true;
     },
@@ -272,7 +278,7 @@ export default {
             if (res.code === 200) {
               ele.dynamicList = res.data;
               this.dynamicList = [...this.dynamicList];
-              if (res.data){
+              if (res.data) {
                 this.doDynamicListParam(this.dynamicList);
               }
               count++;
@@ -289,7 +295,7 @@ export default {
       let dynamic = JSON.parse(JSON.stringify(this.dynamicData));
       Object.keys(dynamic).forEach((key) => {
         let index = dynamic[key].findIndex(p => !p.disabled && !p.checked);
-        while(index > -1) {
+        while (index > -1) {
           dynamic[key].splice(index, 1);
           index = dynamic[key].findIndex(p => !p.disabled && !p.checked);
         }
@@ -297,7 +303,7 @@ export default {
           if (ele.children) {
             ele.children.forEach(child => {
               index = child.children.findIndex(p => !p.disabled && !p.checked);
-              while(index > -1) {
+              while (index > -1) {
                 child.children.splice(index, 1);
                 index = child.children.findIndex(p => !p.disabled && !p.checked);
               }
@@ -404,19 +410,24 @@ export default {
 .filter {
   margin-bottom: 10px;
 }
+
 .feature {
   max-height: 400px;
   overflow-y: auto;
 }
+
 .ant-btn {
   margin-right: 10px;
 }
+
 .box-1 {
   margin-left: 10px;
 }
+
 .box-2 {
   margin-left: 40px;
 }
+
 .box-3 {
   margin-left: 70px;
 }
