@@ -27,7 +27,8 @@
 10. 【server】ssh 快捷安装插件端检查配置文件不在使用 SpringBoot 非 public 工具类
 11. 【server】请求节点发生异常打印具体堆栈、接口异常拦截器里面默认不打印堆栈 （根据 Gitee  [issues I3O8YE](https://gitee.com/dromara/Jpom/issues/I3O8YE) ）
 12. 【server】节点升级中偶尔出现无法获取到对应的版本信息问题（感谢@misaka Gitee issues [I41TDY](https://gitee.com/dromara/Jpom/issues/I41TDY)）
-13. 本地运行数据目录位置改为`${user.home}/jpom/xxxx`
+13. 本地运行数据目录位置改为`${user.home}/jpom/xxxx`、日志路径改为项目模块下
+14. 【agent】升级 `commons-compress` 依赖
 
 ------
 
