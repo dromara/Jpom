@@ -35,6 +35,16 @@ public class PermissionInterceptor extends BaseJpomInterceptor {
     private NodeService nodeService;
     private RoleService roleService;
 
+	/**
+	 * 操作类型参数
+	 */
+    private static final String TYPE = "type";
+
+	/**
+	 * 新增操作
+	 */
+    private static final String TYPE_ADD = "add";
+
     private void init() {
         if (nodeService == null) {
             nodeService = SpringUtil.getBean(NodeService.class);
@@ -90,6 +100,13 @@ public class PermissionInterceptor extends BaseJpomInterceptor {
             // 动态参数
             String parameterName = dynamicData.getParameterName();
             String parameter = request.getParameter(parameterName);
+
+            //新增操作不需要校验是否有动态权限
+            String type = request.getParameter(TYPE);
+            if (TYPE_ADD.equalsIgnoreCase(type)) {
+            	return true;
+			}
+
             //
             if (StrUtil.isNotEmpty(parameter) && roleService.errorDynamicPermission(userModel, classFeature, parameter)) {
                 this.errorMsg(request, response);
