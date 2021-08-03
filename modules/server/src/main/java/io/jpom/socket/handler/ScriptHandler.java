@@ -20,35 +20,40 @@ import java.util.Map;
  */
 public class ScriptHandler extends BaseProxyHandler {
 
-    public ScriptHandler() {
-        super(NodeUrl.Script_Run, "scriptId");
-    }
+	public ScriptHandler() {
+		super(NodeUrl.Script_Run);
+	}
 
-    @Override
-    protected void handleTextMessage(Map<String, Object> attributes, ProxySession proxySession, JSONObject json, ConsoleCommandOp consoleCommandOp) {
-        UserOperateLogV1.OptType type = null;
-        switch (consoleCommandOp) {
-            case stop:
-                type = UserOperateLogV1.OptType.Script_Stop;
-                break;
-            case start:
-                type = UserOperateLogV1.OptType.Script_Start;
-                break;
-            default:
-                break;
-        }
-        if (type != null) {
-            // 记录操作日志
-            UserModel userInfo = (UserModel) attributes.get("userInfo");
-            //
-            String scriptId = (String) attributes.get("scriptId");
-            OperateLogController.CacheInfo cacheInfo = cacheInfo(attributes, json, type, scriptId);
-            try {
-                operateLogController.log(userInfo, "脚本模板执行...", cacheInfo);
-            } catch (Exception e) {
-                DefaultSystemLog.getLog().error("记录操作日志异常", e);
-            }
-        }
-        proxySession.send(json.toString());
-    }
+	@Override
+	protected Object[] getParameters(Map<String, Object> attributes) {
+		return new Object[]{"id", attributes.get("scriptId")};
+	}
+
+	@Override
+	protected void handleTextMessage(Map<String, Object> attributes, ProxySession proxySession, JSONObject json, ConsoleCommandOp consoleCommandOp) {
+		UserOperateLogV1.OptType type = null;
+		switch (consoleCommandOp) {
+			case stop:
+				type = UserOperateLogV1.OptType.Script_Stop;
+				break;
+			case start:
+				type = UserOperateLogV1.OptType.Script_Start;
+				break;
+			default:
+				break;
+		}
+		if (type != null) {
+			// 记录操作日志
+			UserModel userInfo = (UserModel) attributes.get("userInfo");
+			//
+			String scriptId = (String) attributes.get("scriptId");
+			OperateLogController.CacheInfo cacheInfo = cacheInfo(attributes, json, type, scriptId);
+			try {
+				operateLogController.log(userInfo, "脚本模板执行...", cacheInfo);
+			} catch (Exception e) {
+				DefaultSystemLog.getLog().error("记录操作日志异常", e);
+			}
+		}
+		proxySession.send(json.toString());
+	}
 }

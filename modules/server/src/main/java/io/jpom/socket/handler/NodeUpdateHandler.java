@@ -3,7 +3,6 @@ package io.jpom.socket.handler;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.thread.ThreadUtil;
-import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.spring.SpringUtil;
 import com.alibaba.fastjson.JSONArray;
@@ -14,17 +13,21 @@ import io.jpom.model.AgentFileModel;
 import io.jpom.model.WebSocketMessageModel;
 import io.jpom.model.data.NodeModel;
 import io.jpom.model.data.NodeVersionModel;
+import io.jpom.model.data.UserModel;
 import io.jpom.service.node.AgentFileService;
 import io.jpom.service.node.NodeService;
-import io.jpom.socket.BaseHandler;
+import io.jpom.socket.BaseProxyHandler;
+import io.jpom.socket.ConsoleCommandOp;
 import io.jpom.socket.client.NodeClient;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.jar.Attributes;
@@ -36,16 +39,25 @@ import java.util.jar.Manifest;
  *
  * @author lf
  */
-public class NodeUpdateHandler extends BaseHandler {
+public class NodeUpdateHandler extends BaseProxyHandler {
 
 	private final ConcurrentMap<String, NodeClient> clientMap = new ConcurrentHashMap<>();
 
 	private AgentFileService agentFileService;
 	private NodeService nodeService;
 
+	public NodeUpdateHandler() {
+		super(null);
+	}
+
 	private void init() {
 		agentFileService = SpringUtil.getBean(AgentFileService.class);
 		nodeService = SpringUtil.getBean(NodeService.class);
+	}
+
+	@Override
+	protected Object[] getParameters(Map<String, Object> attributes) {
+		return new Object[]{};
 	}
 
 	private void pullNodeList(WebSocketSession session) {
@@ -54,7 +66,8 @@ public class NodeUpdateHandler extends BaseHandler {
 			if (clientMap.containsKey(model.getId())) {
 				continue;
 			}
-			String url = StrUtil.format("{}?name={}&password={}", NodeForward.getSocketUrl(model, NodeUrl.NodeUpdate), model.getLoginName(), model.getLoginPwd());
+			Map<String, Object> attributes = session.getAttributes();
+			String url = NodeForward.getSocketUrl(model, NodeUrl.NodeUpdate, (UserModel) attributes.get("userInfo"));
 			// 连接节点
 			try {
 				NodeClient client = new NodeClient(url, model, session);
@@ -74,11 +87,13 @@ public class NodeUpdateHandler extends BaseHandler {
 			}
 		}
 		clientMap.clear();
+		//
+		super.destroy(session);
 	}
 
 	@Override
-	protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
-		WebSocketMessageModel model = WebSocketMessageModel.getInstance(message);
+	protected void handleTextMessage(Map<String, Object> attributes, WebSocketSession session, JSONObject json, ConsoleCommandOp consoleCommandOp) throws IOException {
+		WebSocketMessageModel model = WebSocketMessageModel.getInstance(json.toString());
 		this.init();
 		boolean pull = false;
 		switch (model.getCommand()) {
@@ -102,11 +117,6 @@ public class NodeUpdateHandler extends BaseHandler {
 		if (pull) {
 			pullNodeList(session);
 		}
-	}
-
-	@Override
-	public void handleTransportError(WebSocketSession session, Throwable exception) {
-		DefaultSystemLog.getLog().error("发生异常", exception);
 	}
 
 	/**

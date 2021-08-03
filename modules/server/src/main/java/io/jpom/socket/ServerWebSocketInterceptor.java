@@ -72,6 +72,7 @@ public class ServerWebSocketInterceptor implements HandshakeInterceptor {
 					if (roleService.errorDynamicPermission(userModel, ClassFeature.PROJECT, projectId)) {
 						return false;
 					}
+					attributes.put("copyId", httpServletRequest.getParameter("copyId"));
 					attributes.put("projectId", projectId);
 					break;
 				case script:

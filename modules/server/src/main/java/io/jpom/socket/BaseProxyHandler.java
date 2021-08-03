@@ -1,7 +1,6 @@
 package io.jpom.socket;
 
 import cn.hutool.core.util.StrUtil;
-import cn.hutool.core.util.URLUtil;
 import cn.jiangzeyin.common.spring.SpringUtil;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.common.forward.NodeForward;
@@ -27,24 +26,29 @@ public abstract class BaseProxyHandler extends BaseHandler {
 	protected OperateLogController operateLogController;
 
 	private final NodeUrl nodeUrl;
-	private final String dataParName;
 
-	public BaseProxyHandler(NodeUrl nodeUrl, String dataParName) {
+	public BaseProxyHandler(NodeUrl nodeUrl) {
 		this.nodeUrl = nodeUrl;
-		this.dataParName = dataParName;
 	}
+
+	/**
+	 * 连接参数
+	 *
+	 * @param attributes 属性
+	 * @return key, value, key, value.....
+	 */
+	protected abstract Object[] getParameters(Map<String, Object> attributes);
 
 	@Override
 	public void afterConnectionEstablished(WebSocketSession session) throws Exception {
 		Map<String, Object> attributes = session.getAttributes();
 		NodeModel nodeModel = (NodeModel) attributes.get("nodeInfo");
 		UserModel userInfo = (UserModel) attributes.get("userInfo");
-		String dataValue = (String) attributes.get(dataParName);
-		String userName = UserModel.getOptUserName(userInfo);
-		userName = URLUtil.encode(userName);
+
+
 		if (nodeModel != null) {
-			String url = NodeForward.getSocketUrl(nodeModel, nodeUrl);
-			url = StrUtil.format(url, dataValue, userName);
+			Object[] parameters = this.getParameters(attributes);
+			String url = NodeForward.getSocketUrl(nodeModel, nodeUrl, userInfo, parameters);
 			// 连接节点
 			ProxySession proxySession = new ProxySession(url, session);
 			session.getAttributes().put("proxySession", proxySession);
@@ -62,7 +66,7 @@ public abstract class BaseProxyHandler extends BaseHandler {
 		ProxySession proxySession = (ProxySession) attributes.get("proxySession");
 		JSONObject json = JSONObject.parseObject(msg);
 		String op = json.getString("op");
-		ConsoleCommandOp consoleCommandOp = ConsoleCommandOp.valueOf(op);
+		ConsoleCommandOp consoleCommandOp = StrUtil.isNotEmpty(op) ? ConsoleCommandOp.valueOf(op) : null;
 		if (proxySession != null) {
 			this.handleTextMessage(attributes, proxySession, json, consoleCommandOp);
 		} else {
@@ -70,11 +74,18 @@ public abstract class BaseProxyHandler extends BaseHandler {
 		}
 	}
 
+	/**
+	 * 消息处理方法
+	 *
+	 * @param attributes       属性
+	 * @param session          当前回话
+	 * @param json             数据
+	 * @param consoleCommandOp 操作类型
+	 */
 	protected void handleTextMessage(Map<String, Object> attributes,
 									 WebSocketSession session,
 									 JSONObject json,
 									 ConsoleCommandOp consoleCommandOp) throws IOException {
-
 	}
 
 	/**
@@ -85,10 +96,11 @@ public abstract class BaseProxyHandler extends BaseHandler {
 	 * @param json             数据
 	 * @param consoleCommandOp 操作类型
 	 */
-	protected abstract void handleTextMessage(Map<String, Object> attributes,
-											  ProxySession proxySession,
-											  JSONObject json,
-											  ConsoleCommandOp consoleCommandOp);
+	protected void handleTextMessage(Map<String, Object> attributes,
+									 ProxySession proxySession,
+									 JSONObject json,
+									 ConsoleCommandOp consoleCommandOp) {
+	}
 
 	protected OperateLogController.CacheInfo cacheInfo(Map<String, Object> attributes, JSONObject json, UserOperateLogV1.OptType optType, String dataId) {
 		String ip = (String) attributes.get("ip");

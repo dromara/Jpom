@@ -1,8 +1,11 @@
 package io.jpom.common.forward;
 
 import cn.hutool.core.net.URLEncoder;
+import cn.hutool.core.net.url.UrlQuery;
+import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.core.util.URLUtil;
 import cn.hutool.extra.servlet.ServletUtil;
 import cn.hutool.http.*;
 import cn.jiangzeyin.common.DefaultSystemLog;
@@ -286,7 +289,7 @@ public class NodeForward {
 			httpRequest.header(ConfigBean.JPOM_SERVER_USER_NAME, URLEncoder.DEFAULT.encode(UserModel.getOptUserName(userModel), CharsetUtil.CHARSET_UTF_8));
 //            httpRequest.header(ConfigBean.JPOM_SERVER_SYSTEM_USER_ROLE, userModel.getUserRole(nodeModel).name());
 		}
-		httpRequest.header(ConfigBean.JPOM_AGENT_AUTHORIZE, nodeModel.getAuthorize(true));
+		httpRequest.header(ConfigBean.JPOM_AGENT_AUTHORIZE, nodeModel.toAuthorize());
 		//
 		int timeOut = nodeModel.getTimeOut();
 		if (nodeUrl.getTimeOut() != -1 && timeOut > 0) {
@@ -303,14 +306,24 @@ public class NodeForward {
 	 * @param nodeUrl   url
 	 * @return url
 	 */
-	public static String getSocketUrl(NodeModel nodeModel, NodeUrl nodeUrl) {
+	public static String getSocketUrl(NodeModel nodeModel, NodeUrl nodeUrl, UserModel userInfo, Object... parameters) {
 		String ws;
 		if ("https".equalsIgnoreCase(nodeModel.getProtocol())) {
 			ws = "wss";
 		} else {
 			ws = "ws";
 		}
-		return StrUtil.format("{}://{}{}", ws, nodeModel.getUrl(), nodeUrl.getUrl());
+		UrlQuery urlQuery = new UrlQuery();
+		urlQuery.add(ConfigBean.JPOM_AGENT_AUTHORIZE, nodeModel.toAuthorize());
+		String optUser = UserModel.getOptUserName(userInfo);
+		optUser = URLUtil.encode(optUser);
+		urlQuery.add("optUser", optUser);
+		if (ArrayUtil.isNotEmpty(parameters)) {
+			for (int i = 0; i < parameters.length; i += 2) {
+				urlQuery.add(parameters[i].toString(), parameters[i + 1]);
+			}
+		}
+		return StrUtil.format("{}://{}?{}", ws, nodeModel.getUrl(), nodeUrl.getUrl(), urlQuery.toString());
 	}
 
 	/**

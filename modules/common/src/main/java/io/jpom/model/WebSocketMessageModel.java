@@ -1,7 +1,6 @@
 package io.jpom.model;
 
 import com.alibaba.fastjson.JSONObject;
-import org.springframework.web.socket.TextMessage;
 
 /**
  * websocket发送和接收消息Model
@@ -21,8 +20,8 @@ public class WebSocketMessageModel {
 		this.data = "";
 	}
 
-	public static WebSocketMessageModel getInstance(TextMessage message) {
-		JSONObject commandObj = JSONObject.parseObject(message.getPayload());
+	public static WebSocketMessageModel getInstance(String message) {
+		JSONObject commandObj = JSONObject.parseObject(message);
 		String command = commandObj.getString("command");
 		String nodeId = commandObj.getString("nodeId");
 		WebSocketMessageModel model = new WebSocketMessageModel(command, nodeId);
