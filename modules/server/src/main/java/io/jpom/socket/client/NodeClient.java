@@ -60,7 +60,9 @@ public class NodeClient extends WebSocketClient {
 	@Override
 	public void onMessage(String message) {
 		try {
-			session.sendMessage(new TextMessage(message));
+			synchronized (NodeClient.class) {
+				session.sendMessage(new TextMessage(message));
+			}
 		} catch (IOException e) {
 			DefaultSystemLog.getLog().error("发送消息失败", e);
 		}
@@ -80,12 +82,12 @@ public class NodeClient extends WebSocketClient {
 	}
 
 	@Override
-	public synchronized void send(String text) {
+	public void send(String text) {
 		super.send(text);
 	}
 
 	@Override
-	public synchronized void send(ByteBuffer bytes) {
+	public void send(ByteBuffer bytes) {
 		super.send(bytes);
 	}
 
