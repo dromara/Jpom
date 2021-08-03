@@ -188,7 +188,7 @@ public class NodeIndexController extends BaseServerController {
 		agentFileModel.setVersion(error.getMsg());
 		agentFileService.updateItem(agentFileModel);
 		// 删除历史包  @author jzy 2021-08-03
-		List<File> files = FileUtil.loopFiles(path, pathname -> !FileUtil.equals(pathname, file));
+		List<File> files = FileUtil.loopFiles(saveDir, pathname -> !FileUtil.equals(pathname, file));
 		for (File file1 : files) {
 			FileUtil.del(file1);
 		}
