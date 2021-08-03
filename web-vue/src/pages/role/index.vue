@@ -148,6 +148,7 @@ export default {
       });
       this.temp.id = record.id;
       this.temp.name = record.name;
+      this.temp.canAdd = record.canAdd;
       // 显示对话框
       this.editRoleVisible = true;
     },
