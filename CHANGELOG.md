@@ -13,6 +13,7 @@
 6. 【server】角色新增添加权限配置 （感谢@misaka [Gitee pr](https://gitee.com/dromara/Jpom/pulls/141) ）
 7. 【server】节点升级上传新包成功后删除历史包
 8. 【server】新版本 UI 菜单系统管理、节点升级只有系统管理员可见
+9. 【server】新版本 UI 脚本模板同步添加执行参数（感谢@轻描淡写 [Gitee issues I43G4B](https://gitee.com/dromara/Jpom/issues/I43G4B) ）
 
 ### 解决BUG、优化功能
 

@@ -1,17 +1,29 @@
 <template>
-  <div>
-    <div ref="filter" class="filter">
-      <a-button :disabled="scriptStatus !== 0" type="primary" @click="start">执行</a-button>
-      <a-button :disabled="scriptStatus !== 1" type="primary" @click="stop">停止</a-button>
-    </div>
-    <!-- console -->
+  <a-layout class="script-console-layout">
     <div>
-      <a-input class="console" v-model="logContext" readOnly type="textarea" style="resize: none;"/>
+      <div ref="filter" class="filter">
+        <a-button :disabled="scriptStatus !== 0" type="primary" @click="start">执行</a-button>
+        <a-button :disabled="scriptStatus !== 1" type="primary" @click="stop">停止</a-button>
+      </div>
+      <!-- console -->
+      <div>
+        <a-input class="console" v-model="logContext" readOnly type="textarea" style="resize: none;"/>
+      </div>
     </div>
-  </div>
+    <!--远程下载  -->
+    <a-modal
+      v-model="editArgs" title="添加运行参数" @ok="startExecution" @cancel="this.editArgs=false" :maskClosable="false">
+      <a-form-model :model="temp" :label-col="{ span: 5 }" :wrapper-col="{ span: 24 }" :rules="rules" ref="ruleForm">
+        <a-form-model-item label="执行参数" prop="url">
+          <a-input v-model="temp.args" placeholder="执行参数"/>
+        </a-form-model-item>
+      </a-form-model>
+    </a-modal>
+  </a-layout>
 </template>
 <script>
-import { mapGetters } from 'vuex';
+import {mapGetters} from 'vuex';
+
 export default {
   props: {
     nodeId: {
@@ -27,6 +39,10 @@ export default {
       socket: null,
       // script 状态 {0: 未运行, 1: 运行中}
       scriptStatus: 0,
+      editArgs: false,
+      temp: {
+        args: ''
+      },
       // 日志内容
       logContext: 'choose file loading context...'
     }
@@ -38,7 +54,7 @@ export default {
     socketUrl() {
       const protocol = location.protocol === 'https:' ? 'wss://' : 'ws://';
       const domain = window.routerBase;
-      const url =  (domain + '/script_run').replace(new RegExp('//','gm'), '/');
+      const url = (domain + '/script_run').replace(new RegExp('//', 'gm'), '/');
       return `${protocol}${location.host}${url}?userId=${this.getLongTermToken}&scriptId=${this.scriptId}&nodeId=${this.nodeId}&type=script`;
     }
   },
@@ -87,18 +103,22 @@ export default {
         this.logContext += `${msg.data}\r\n`;
       }
     },
+    startExecution() {
+      this.editArgs = false;
+      this.sendMsg('start');
+    },
     // 发送消息
     sendMsg(op) {
       const data = {
         op: op,
         scriptId: this.scriptId,
-        args: this.args
+        args: this.temp.args
       }
       this.socket.send(JSON.stringify(data));
     },
     // 启动
     start() {
-      this.sendMsg('start');
+      this.editArgs = true;
     },
     // 停止
     stop() {
@@ -108,12 +128,20 @@ export default {
 }
 </script>
 <style scoped>
+
+.script-console-layout {
+  padding: 0;
+  margin: 0;
+}
+
 .filter {
   margin: 0 0 10px;
 }
+
 .ant-btn {
   margin-right: 10px;
 }
+
 .console {
   padding: 5px;
   color: #fff;
