@@ -38,7 +38,7 @@ public class LoadBuildJsonToDB {
 	 * 静态内部类实现单例模式
 	 */
 	public static class LoadBuildJsonToDBHolder {
-		private static LoadBuildJsonToDB INSTANCE = new LoadBuildJsonToDB();
+		private static final LoadBuildJsonToDB INSTANCE = new LoadBuildJsonToDB();
 	}
 
 	public static LoadBuildJsonToDB getInstance() {
@@ -51,13 +51,18 @@ public class LoadBuildJsonToDB {
 	public void doJsonToSql() {
 		// 读取 build.json 文件内容
 		List<Object> list = readBuildJsonFileToList();
+		// 判断 list 是否为空
+		if (null == list) {
+			DefaultSystemLog.getLog().warn("There is no any data, the build.json file maybe no content or file is not exist...");
+			return;
+		}
 		// 转换成 SQL 执行
 		initSql(list);
 	}
 
 	/**
 	 * exec insert SQL to DB
-	 * @param sql
+	 * @param sql SQL for insert
 	 */
 	private void insertToDB(String sql) {
 		DSFactory dsFactory = GlobalDSFactory.get();
@@ -74,7 +79,7 @@ public class LoadBuildJsonToDB {
 
 	/**
 	 * list data to SQL
-	 * @param list
+	 * @param list data from build.json
 	 */
 	private void initSql(List<Object> list) {
 		// 加载类里面的属性，用反射获取
@@ -101,8 +106,8 @@ public class LoadBuildJsonToDB {
 
 			// 构造 insert SQL 语句
 			StringBuffer sqlBuffer = new StringBuffer("insert into {} ( ");
-			StringBuffer sqlFieldNameBuffer = new StringBuffer();
-			StringBuffer sqlFieldValueBuffer = new StringBuffer();
+			StringBuilder sqlFieldNameBuffer = new StringBuilder();
+			StringBuilder sqlFieldValueBuffer = new StringBuilder();
 			for (int i = 0; i < paramMap.size(); i++) {
 				sqlFieldNameBuffer.append("`{}`,");
 				sqlFieldValueBuffer.append("'{}',");
@@ -127,7 +132,7 @@ public class LoadBuildJsonToDB {
 
 	/**
 	 * read build.json file to list
-	 * @return
+	 * @return List<Object>
 	 */
 	private List<Object> readBuildJsonFileToList() {
 		File file = FileUtil.file(ConfigBean.getInstance().getDataPath(), ServerConfigBean.BUILD);
@@ -139,7 +144,7 @@ public class LoadBuildJsonToDB {
 			// 读取 build.json 文件里面的内容，转换成实体对象集合
 			JSONObject jsonObject = (JSONObject) JsonFileUtil.readJson(file.getAbsolutePath());
 			return jsonObject.keySet().stream()
-					.map(key -> jsonObject.get(key))
+					.map(jsonObject::get)
 					.collect(Collectors.toList());
 		} catch (FileNotFoundException e) {
 			DefaultSystemLog.getLog().error("read build.json file failed...caused: {}...message: {}", e.getCause(), e.getMessage());
@@ -149,7 +154,7 @@ public class LoadBuildJsonToDB {
 
 	/**
 	 * 获取类里面的属性，转换成集合返回
-	 * @return
+	 * @return List<String>
 	 */
 	private List<String> getFieldList() {
 		final Field[] fields = ReflectUtil.getFieldsDirectly(RepositoryModel.class, true);
