@@ -23,7 +23,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.Map;
 
 /**
- * socket 拦截器
+ * socket 拦截器、鉴权
  *
  * @author jiangzeyin
  * @date 2019/4/19

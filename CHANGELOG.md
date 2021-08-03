@@ -30,6 +30,9 @@
 12. 【server】节点升级中偶尔出现无法获取到对应的版本信息问题（感谢@misaka Gitee issues [I41TDY](https://gitee.com/dromara/Jpom/issues/I41TDY)）
 13. 本地运行数据目录位置改为`${user.home}/jpom/xxxx`、日志路径改为项目模块下
 14. 【agent】升级 `commons-compress` 依赖
+15. agent 和 server 间的 websocket 鉴权调整
+
+> 注意：升级到改版本需要保证 agent、server 都保持同步，如果只升级 server 会出现项目控制台等功能无法正常使用
 
 ------
 

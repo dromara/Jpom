@@ -58,7 +58,6 @@ public abstract class BaseProxyHandler extends BaseHandler {
 		if (nodeModel != null) {
 			Object[] parameters = this.getParameters(attributes);
 			String url = NodeForward.getSocketUrl(nodeModel, nodeUrl, userInfo, parameters);
-			System.out.println(url);
 			// 连接节点
 			ProxySession proxySession = new ProxySession(url, session);
 			session.getAttributes().put("proxySession", proxySession);
