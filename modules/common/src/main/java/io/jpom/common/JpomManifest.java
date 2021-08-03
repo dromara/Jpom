@@ -214,16 +214,9 @@ public class JpomManifest {
 	 */
 	public static File getRunPath() {
 		URL location = ClassUtil.getLocation(JpomApplication.getAppClass());
-		try {
-			URLConnection urlConnection = location.openConnection();
-			if (urlConnection instanceof JarURLConnection) {
-				JarURLConnection jarURLConnection = (JarURLConnection) urlConnection;
-				return FileUtil.file(jarURLConnection.getJarFile().getName());
-			}
-			return FileUtil.file(location.getFile());
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
+		String file = location.getFile();
+		String before = StrUtil.subBefore(file, "!", false);
+		return FileUtil.file(before);
 	}
 
 	/**
