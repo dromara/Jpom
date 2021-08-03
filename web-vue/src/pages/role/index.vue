@@ -18,9 +18,12 @@
         <a-form-model-item label="角色名称" prop="name">
           <a-input v-model="temp.name" placeholder="角色名称"/>
         </a-form-model-item>
+        <a-form-model-item label="添加权限" prop="canAdd">
+          <a-switch v-model="temp.canAdd"/>
+        </a-form-model-item>
         <a-form-model-item label="权限" prop="feature" class="feature">
-          <a-tree v-model="checkedKeys" 
-            checkStrictly checkable defaultExpandAll :selectable="false" :tree-data="featureList" 
+          <a-tree v-model="checkedKeys"
+            checkStrictly checkable defaultExpandAll :selectable="false" :tree-data="featureList"
             :replaceFields="replaceFields" @check="checkNode"/>
         </a-form-model-item>
       </a-form-model>

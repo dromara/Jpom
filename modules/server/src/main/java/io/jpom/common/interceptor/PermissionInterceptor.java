@@ -32,106 +32,107 @@ import java.io.IOException;
 @InterceptorPattens(sort = 1)
 public class PermissionInterceptor extends BaseJpomInterceptor {
 
-    private NodeService nodeService;
-    private RoleService roleService;
+	private NodeService nodeService;
+	private RoleService roleService;
 
 	/**
 	 * 操作类型参数
 	 */
-    private static final String TYPE = "type";
+	private static final String TYPE = "type";
 
 	/**
 	 * 新增操作
 	 */
-    private static final String TYPE_ADD = "add";
+	private static final String TYPE_ADD = "add";
 
-    private void init() {
-        if (nodeService == null) {
-            nodeService = SpringUtil.getBean(NodeService.class);
-        }
-        if (roleService == null) {
-            roleService = SpringUtil.getBean(RoleService.class);
-        }
-    }
+	private void init() {
+		if (nodeService == null) {
+			nodeService = SpringUtil.getBean(NodeService.class);
+		}
+		if (roleService == null) {
+			roleService = SpringUtil.getBean(RoleService.class);
+		}
+	}
 
-    @Override
-    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, HandlerMethod handlerMethod) throws Exception {
-        this.init();
-        this.addNode(request);
-        UserModel userModel = BaseServerController.getUserModel();
-        if (userModel == null || userModel.isSystemUser()) {
-            return true;
-        }
-        SystemPermission systemPermission = handlerMethod.getMethodAnnotation(SystemPermission.class);
-        if (systemPermission != null && !userModel.isSystemUser()) {
-            // 系统管理员权限
-            this.errorMsg(request, response);
-            return false;
-        }
-        //
-        Feature feature = handlerMethod.getBeanType().getAnnotation(Feature.class);
-        if (feature == null || feature.cls() == ClassFeature.NULL) {
-            return true;
-        }
-        ClassFeature classFeature = feature.cls();
-        feature = handlerMethod.getMethodAnnotation(Feature.class);
-        if (feature == null || feature.method() == MethodFeature.NULL) {
-            return true;
-        }
-        MethodFeature method = feature.method();
-        // 判断方法
-        if (roleService.errorMethodPermission(userModel, classFeature, method)) {
-            this.errorMsg(request, response);
-            return false;
-        }
-        // 判断动态权限
-        DynamicData dynamicData = DynamicData.getDynamicData(classFeature);
-        if (dynamicData != null) {
-            // 排除的方法
-            MethodFeature[] excludeMethod = dynamicData.getExcludeMethod();
-            if (excludeMethod != null) {
-                for (MethodFeature methodFeature : excludeMethod) {
-                    if (methodFeature == method) {
-                        // 排除方法
-                        return true;
-                    }
-                }
-            }
-            // 动态参数
-            String parameterName = dynamicData.getParameterName();
-            String parameter = request.getParameter(parameterName);
+	@Override
+	public boolean preHandle(HttpServletRequest request, HttpServletResponse response, HandlerMethod handlerMethod) throws Exception {
+		this.init();
+		this.addNode(request);
+		UserModel userModel = BaseServerController.getUserModel();
+		if (userModel == null || userModel.isSystemUser()) {
+			// 没有登录、或者超级管理自己放过
+			return true;
+		}
+		SystemPermission systemPermission = handlerMethod.getMethodAnnotation(SystemPermission.class);
+		if (systemPermission != null && !userModel.isSystemUser()) {
+			// 系统管理员权限
+			this.errorMsg(request, response);
+			return false;
+		}
+		//
+		Feature feature = handlerMethod.getBeanType().getAnnotation(Feature.class);
+		if (feature == null || feature.cls() == ClassFeature.NULL) {
+			return true;
+		}
+		ClassFeature classFeature = feature.cls();
+		feature = handlerMethod.getMethodAnnotation(Feature.class);
+		if (feature == null || feature.method() == MethodFeature.NULL) {
+			return true;
+		}
+		MethodFeature method = feature.method();
+		// 判断方法
+		if (roleService.errorMethodPermission(userModel, classFeature, method)) {
+			this.errorMsg(request, response);
+			return false;
+		}
+		// 判断动态权限
+		DynamicData dynamicData = DynamicData.getDynamicData(classFeature);
+		if (dynamicData != null) {
+			// 排除的方法
+			MethodFeature[] excludeMethod = dynamicData.getExcludeMethod();
+			if (excludeMethod != null) {
+				for (MethodFeature methodFeature : excludeMethod) {
+					if (methodFeature == method) {
+						// 排除方法
+						return true;
+					}
+				}
+			}
+			// 动态参数
+			String parameterName = dynamicData.getParameterName();
+			String parameter = request.getParameter(parameterName);
 
-            //新增操作不需要校验是否有动态权限
-            String type = request.getParameter(TYPE);
-            if (TYPE_ADD.equalsIgnoreCase(type)) {
-            	return true;
+			//新增操作不需要校验是否有动态权限
+			String type = request.getParameter(TYPE);
+			if (TYPE_ADD.equalsIgnoreCase(type) && roleService.canAdd(userModel)) {
+				return true;
 			}
 
-            //
-            if (StrUtil.isNotEmpty(parameter) && roleService.errorDynamicPermission(userModel, classFeature, parameter)) {
-                this.errorMsg(request, response);
-                return false;
-            }
-        }
+			//
+			if (StrUtil.isNotEmpty(parameter) && roleService.errorDynamicPermission(userModel, classFeature, parameter)) {
+				this.errorMsg(request, response);
+				return false;
+			}
+		}
 
-        return true;
-    }
+		return true;
+	}
 
-    private void addNode(HttpServletRequest request) {
-        String nodeId = request.getParameter("nodeId");
-        if (!StrUtil.isBlankOrUndefined(nodeId)) {
-            // 节点信息
-            NodeModel nodeModel = nodeService.getItem(nodeId);
-            if (nodeModel != null && !nodeModel.isOpenStatus()) {
-                throw new AgentException(nodeModel.getName() + "节点未启用");
-            }
-            request.setAttribute("node", nodeModel);
-        }
-    }
+	private void addNode(HttpServletRequest request) {
+		String nodeId = request.getParameter("nodeId");
+		if (!StrUtil.isBlankOrUndefined(nodeId)) {
+			// 节点信息
+			NodeModel nodeModel = nodeService.getItem(nodeId);
+			if (nodeModel != null && !nodeModel.isOpenStatus()) {
+				throw new AgentException(nodeModel.getName() + "节点未启用");
+			}
+			request.setAttribute("node", nodeModel);
+		}
+	}
 
-    private void errorMsg(HttpServletRequest request, HttpServletResponse response) throws IOException {
+	private void errorMsg(HttpServletRequest request, HttpServletResponse response) throws IOException {
 
-        JsonMessage<String> jsonMessage = new JsonMessage<>(302, "你没有权限:-2");
-        ServletUtil.write(response, jsonMessage.toString(), MediaType.APPLICATION_JSON_VALUE);
-    }
+		JsonMessage<String> jsonMessage = new JsonMessage<>(302, "你没有权限:-2");
+		ServletUtil.write(response, jsonMessage.toString(), MediaType.APPLICATION_JSON_VALUE);
+	}
 }
