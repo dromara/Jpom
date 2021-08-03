@@ -70,6 +70,12 @@ public class InitDb implements DisposableBean, InitializingBean {
 						sqlFile, rows);
 			}
 			DSFactory.setCurrentDSFactory(dsFactory);
+			/**
+			 * @author Hotstrip
+			 * @date 2021-08-03
+			 * load build.js data to DB
+			 */
+			LoadBuildJsonToDB.getInstance().doJsonToSql();
 		} catch (Exception e) {
 			DefaultSystemLog.getLog().error("初始化数据库失败", e);
 			System.exit(0);
