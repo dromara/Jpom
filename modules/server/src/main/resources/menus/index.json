@@ -10,7 +10,8 @@
       },
       {
         "title": "节点升级",
-        "id": "nodeUpdate"
+        "id": "nodeUpdate",
+        "role": "sys"
       },
       {
         "title": "SSH管理",
@@ -91,6 +92,7 @@
   {
     "title": "系统管理",
     "icon_v3": "setting",
+    "role": "sys",
     "childs": [
       {
         "id": "monitorConfigEmail",

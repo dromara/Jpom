@@ -34,6 +34,7 @@ public class NodeClient extends WebSocketClient {
 		this.session = session;
 		this.nodeModel = nodeModel;
 		this.connect();
+		this.loopOpen();
 		logController = SpringUtil.getBean(OperateLogController.class);
 	}
 

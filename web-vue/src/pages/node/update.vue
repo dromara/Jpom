@@ -119,7 +119,7 @@ export default {
     },
     socketUrl() {
       const protocol = location.protocol === 'https:' ? 'wss://' : 'ws://';
-      return `${protocol}${location.host}/node_update?userId=${this.getLongTermToken}`;
+      return `${protocol}${location.host}/node_update?userId=${this.getLongTermToken}&nodeId=system&type=nodeUpdate`;
     }
   },
   mounted() {

@@ -12,6 +12,7 @@
    （感谢 @LW 根据 Gitee  [issues I3O8YE](https://gitee.com/dromara/Jpom/issues/I3O8YE) ）
 6. 【server】角色新增添加权限配置 （感谢@misaka [Gitee pr](https://gitee.com/dromara/Jpom/pulls/141) ）
 7. 【server】节点升级上传新包成功后删除历史包
+8. 【server】新版本 UI 菜单系统管理、节点升级只有系统管理员可见
 
 ### 解决BUG、优化功能
 
