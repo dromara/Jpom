@@ -96,7 +96,7 @@ export default {
 			const protocol = location.protocol === 'https:' ? 'wss://' : 'ws://';
 			const domain = window.routerBase;
 			const url = (domain + '/console').replace(new RegExp('//', 'gm'), '/');
-			return `${protocol}${location.host}${url}?userId=${this.getLongTermToken}&projectId=${this.projectId}&nodeId=${this.nodeId}&type=console&copyId=${this.copyId}`;
+			return `${protocol}${location.host}${url}?userId=${this.getLongTermToken}&projectId=${this.projectId}&nodeId=${this.nodeId}&type=console&copyId=${this.copyId || ''}`;
 		}
 	},
 	mounted() {

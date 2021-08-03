@@ -56,6 +56,11 @@ public class NodeUpdateHandler extends BaseProxyHandler {
 	}
 
 	@Override
+	protected boolean showHelloMsg() {
+		return false;
+	}
+
+	@Override
 	protected Object[] getParameters(Map<String, Object> attributes) {
 		return new Object[]{};
 	}

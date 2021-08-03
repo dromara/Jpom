@@ -39,6 +39,15 @@ public abstract class BaseProxyHandler extends BaseHandler {
 	 */
 	protected abstract Object[] getParameters(Map<String, Object> attributes);
 
+	/**
+	 * 是否输出连接成功 消息
+	 *
+	 * @return true 输出
+	 */
+	protected boolean showHelloMsg() {
+		return true;
+	}
+
 	@Override
 	public void afterConnectionEstablished(WebSocketSession session) throws Exception {
 		Map<String, Object> attributes = session.getAttributes();
@@ -49,11 +58,14 @@ public abstract class BaseProxyHandler extends BaseHandler {
 		if (nodeModel != null) {
 			Object[] parameters = this.getParameters(attributes);
 			String url = NodeForward.getSocketUrl(nodeModel, nodeUrl, userInfo, parameters);
+			System.out.println(url);
 			// 连接节点
 			ProxySession proxySession = new ProxySession(url, session);
 			session.getAttributes().put("proxySession", proxySession);
 		}
-		session.sendMessage(new TextMessage(StrUtil.format("欢迎加入:{} 会话id:{} ", userInfo.getName(), session.getId())));
+		if (this.showHelloMsg()) {
+			session.sendMessage(new TextMessage(StrUtil.format("欢迎加入:{} 会话id:{} ", userInfo.getName(), session.getId())));
+		}
 	}
 
 	@Override

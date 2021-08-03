@@ -315,6 +315,10 @@ public class NodeForward {
 		}
 		UrlQuery urlQuery = new UrlQuery();
 		urlQuery.add(ConfigBean.JPOM_AGENT_AUTHORIZE, nodeModel.toAuthorize());
+		// 兼容旧版本-节点升级 @author jzy
+		urlQuery.add("name", nodeModel.getLoginName());
+		urlQuery.add("password", nodeModel.getLoginPwd());
+		//
 		String optUser = UserModel.getOptUserName(userInfo);
 		optUser = URLUtil.encode(optUser);
 		urlQuery.add("optUser", optUser);
@@ -323,7 +327,7 @@ public class NodeForward {
 				urlQuery.add(parameters[i].toString(), parameters[i + 1]);
 			}
 		}
-		return StrUtil.format("{}://{}?{}", ws, nodeModel.getUrl(), nodeUrl.getUrl(), urlQuery.toString());
+		return StrUtil.format("{}://{}{}?{}", ws, nodeModel.getUrl(), nodeUrl.getUrl(), urlQuery.toString());
 	}
 
 	/**

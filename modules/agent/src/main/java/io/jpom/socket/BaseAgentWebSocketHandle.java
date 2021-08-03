@@ -49,10 +49,10 @@ public abstract class BaseAgentWebSocketHandle {
 			} catch (Exception e) {
 				DefaultSystemLog.getLog().error("socket 错误", e);
 			}
-			return false;
+			return true;
 		}
 		this.addUser(session, this.getParameters(session, "optUser"));
-		return true;
+		return false;
 	}
 
 	/**

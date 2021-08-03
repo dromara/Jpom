@@ -62,7 +62,7 @@ public class AgentWebSocketUpdateHandle extends BaseAgentWebSocketHandle {
 			default:
 				break;
 		}
-		SocketSessionUtil.send(session, message.toString());
+		SocketSessionUtil.send(session, model.toString());
 		//session.sendMessage(new TextMessage(model.toString()));
 	}
 

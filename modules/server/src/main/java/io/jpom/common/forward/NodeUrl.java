@@ -26,16 +26,15 @@ public enum NodeUrl {
 	/**
 	 * socket 连接  ，第一节项目id 第二节用户信息
 	 */
-	TopSocket("/console/{}/{}"),
+	TopSocket("/console"),
 	/**
 	 * 脚本模板  模板id
 	 */
-	Script_Run("/script_run/{}/{}"),
+	Script_Run("/script_run"),
 	/**
 	 * Tomcat
 	 */
-	Tomcat_Socket("/tomcat_log/{}/{}"),
-
+	Tomcat_Socket("/tomcat_log"),
 	/**
 	 * 节点升级
 	 */
