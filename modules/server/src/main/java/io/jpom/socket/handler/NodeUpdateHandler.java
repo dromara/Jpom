@@ -1,6 +1,7 @@
 package io.jpom.socket.handler;
 
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
@@ -61,7 +62,8 @@ public class NodeUpdateHandler extends BaseHandler {
 			try {
 				NodeClient client = new NodeClient(url, model, session);
 				clientMap.put(model.getId(), client);
-			} catch (Exception ignore) {
+			} catch (Exception e) {
+				DefaultSystemLog.getLog().error("创建插件端连接失败", e);
 			}
 		}
 	}
@@ -98,7 +100,7 @@ public class NodeUpdateHandler extends BaseHandler {
 		}
 
 		if (model.getData() != null) {
-			session.sendMessage(new TextMessage(model.toString()));
+			this.sendMsg(model, session);
 		}
 		if (pull) {
 			pullNodeList(session);
@@ -123,8 +125,8 @@ public class NodeUpdateHandler extends BaseHandler {
 		}
 		try {
 			AgentFileModel agentFileModel = agentFileService.getItem("agent");
-
-			if (agentFileModel == null) {
+			//
+			if (agentFileModel == null || !FileUtil.exist(agentFileModel.getSavePath())) {
 				WebSocketMessageModel error = new WebSocketMessageModel("onError", "");
 				error.setData("Agent JAR包不存在");
 				session.sendMessage(new TextMessage(error.toString()));
@@ -137,7 +139,15 @@ public class NodeUpdateHandler extends BaseHandler {
 					try {
 						String id = ids.getString(finalI);
 						NodeModel node = nodeService.getItem(id);
+						if (node == null) {
+							this.sendMsg(model.setData("没有对应的节点：" + id), session);
+							return;
+						}
 						NodeClient client = clientMap.get(node.getId());
+						if (client == null) {
+							this.sendMsg(model.setData("对应的插件端还没有被初始化：" + id), session);
+							return;
+						}
 						if (client.isOpen()) {
 							// 发送文件信息
 							WebSocketMessageModel webSocketMessageModel = new WebSocketMessageModel("upload", id);
@@ -156,22 +166,26 @@ public class NodeUpdateHandler extends BaseHandler {
 							WebSocketMessageModel restartMessage = new WebSocketMessageModel("restart", id);
 							client.send(restartMessage.toString());
 						} else {
-							model.setData("节点连接丢失");
-							session.sendMessage(new TextMessage(model.toString()));
+							this.sendMsg(model.setData("节点连接丢失"), session);
 						}
 					} catch (Exception e) {
 						DefaultSystemLog.getLog().error("升级失败:" + model, e);
-						model.setData("节点升级失败：" + e.getMessage());
-						try {
-							session.sendMessage(new TextMessage(model.toString()));
-						} catch (IOException ignored) {
-						}
+						this.sendMsg(model.setData("节点升级失败：" + e.getMessage()), session);
 					}
 				});
-
 			}
 		} catch (Exception e) {
 			DefaultSystemLog.getLog().error("升级失败", e);
+		}
+	}
+
+	private void sendMsg(WebSocketMessageModel model, WebSocketSession session) {
+		try {
+			synchronized (NodeUpdateHandler.class) {
+				session.sendMessage(new TextMessage(model.toString()));
+			}
+		} catch (Exception e) {
+			DefaultSystemLog.getLog().error("发送消息失败", e);
 		}
 	}
 

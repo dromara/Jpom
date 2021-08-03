@@ -6,6 +6,7 @@ import cn.jiangzeyin.common.spring.SpringUtil;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.model.WebSocketMessageModel;
 import io.jpom.model.data.NodeModel;
+import io.jpom.socket.handler.NodeUpdateHandler;
 import io.jpom.system.init.OperateLogController;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
@@ -61,7 +62,7 @@ public class NodeClient extends WebSocketClient {
 	public void onMessage(String message) {
 		try {
 			// 不能并发向同一个客户端发送消息 @author jzy 2021-08-03
-			synchronized (NodeClient.class) {
+			synchronized (NodeUpdateHandler.class) {
 				session.sendMessage(new TextMessage(message));
 			}
 		} catch (IOException e) {
