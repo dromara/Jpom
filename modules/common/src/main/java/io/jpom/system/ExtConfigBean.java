@@ -1,6 +1,7 @@
 package io.jpom.system;
 
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.lang.Console;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.system.SystemUtil;
@@ -133,8 +134,15 @@ public class ExtConfigBean {
 		if (StrUtil.isEmpty(path)) {
 			if (JpomManifest.getInstance().isDebug()) {
 				// 调试模式 为根路径的 jpom文件
-				path = ((SystemUtil.getOsInfo().isMac() ? "~" : "") + "/jpom/" + JpomApplication.getAppType().name() + "/").toLowerCase();
-				path = FileUtil.getAbsolutePath(path);
+				String oldPath = ((SystemUtil.getOsInfo().isMac() ? "~" : "") + "/jpom/" + JpomApplication.getAppType().name() + "/").toLowerCase();
+				File newFile = FileUtil.file(FileUtil.getUserHomeDir(), "jpom", JpomApplication.getAppType().name().toLowerCase());
+				String absolutePath = FileUtil.getAbsolutePath(newFile);
+				if (FileUtil.exist(oldPath)) {
+					FileUtil.move(FileUtil.file(oldPath), newFile, true);
+					Console.log("数据目录位置发生变化：{} => {}", oldPath, absolutePath);
+				}
+				//Console.log("本地运行存储的数据：{}", absolutePath);
+				path = absolutePath;
 			} else {
 				// 获取当前项目运行路径的父级
 				File file = JpomManifest.getRunPath();

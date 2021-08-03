@@ -27,9 +27,7 @@ import io.jpom.util.VersionUtils;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.net.JarURLConnection;
 import java.net.URL;
-import java.net.URLConnection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.jar.Attributes;
