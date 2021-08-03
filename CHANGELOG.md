@@ -11,6 +11,7 @@
 5. 【server】上传文件到插件端（节点）超时配置独立,采用 server 端全局配置,配置参数 `node.uploadFileTimeOut`
    （感谢 @LW 根据 Gitee  [issues I3O8YE](https://gitee.com/dromara/Jpom/issues/I3O8YE) ）
 6. 【server】角色新增添加权限配置 （感谢@misaka [Gitee pr](https://gitee.com/dromara/Jpom/pulls/141) ）
+7. 【server】节点升级上传新包成功后删除历史包
 
 ### 解决BUG、优化功能
 
