@@ -16,6 +16,14 @@
       <a-tooltip slot="name" slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>
+      <a-tooltip slot="gitUrl" slot-scope="text" placement="topLeft" :title="text">
+        <span>{{ text }}</span>
+      </a-tooltip>
+      <template slot="repoType" slot-scope="text">
+          <span v-if="text === 0">GIT</span>
+          <span v-else-if="text === 1">SVN</span>
+          <span v-else>未知</span>
+      </template>
       <template slot="operation" slot-scope="text, record">
         <a-button type="primary" @click="handleEdit(record)">编辑</a-button>
         <a-button type="danger" @click="handleDelete(record)">删除</a-button>

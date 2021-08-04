@@ -32,6 +32,10 @@ public class RepositoryModel extends BaseModel {
 	 * SSH RSA 公钥
 	 */
 	private String rsaPub;
+	/**
+	 * @return
+	 */
+	private String modifyTime;
 
 	public String getGitUrl() {
 		return gitUrl;
@@ -79,5 +83,13 @@ public class RepositoryModel extends BaseModel {
 
 	public void setRsaPub(String rsaPub) {
 		this.rsaPub = rsaPub;
+	}
+
+	public String getModifyTime() {
+		return modifyTime;
+	}
+
+	public void setModifyTime(String modifyTime) {
+		this.modifyTime = modifyTime;
 	}
 }
