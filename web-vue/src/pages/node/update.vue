@@ -13,12 +13,12 @@
         <div class="version">{{ agentVersion | version }}</div>
         <div class="action">
           <a-upload
-              name="file"
-              accept=".jar"
-              action=""
-              :showUploadList="false"
-              :multiple="false"
-              :before-upload="beforeUpload"
+            name="file"
+            accept=".jar"
+            action=""
+            :showUploadList="false"
+            :multiple="false"
+            :before-upload="beforeUpload"
           >
             <a-button type="primary">
               <a-icon type="upload"/>
@@ -114,7 +114,8 @@ export default {
     },
     rowSelection() {
       return {
-        onChange: this.tableSelectionChange
+        onChange: this.tableSelectionChange,
+        selectedRowKeys: this.tableSelections
       }
     },
     socketUrl() {
@@ -200,6 +201,11 @@ export default {
     getVersionResult(data, nodeId) {
       this.nodeVersion = Object.assign({}, this.nodeVersion, {
         [nodeId]: data
+      })
+    },
+    onErrorResult(data) {
+      this.$notification.warning({
+        message: data
       })
     },
     updateNode() {

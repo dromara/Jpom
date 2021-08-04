@@ -140,7 +140,7 @@ public class WhitelistDirectoryController extends BaseJpomController {
 		agentWhitelist.setCertificate(certificateArray);
 		agentWhitelist.setNginx(nginxArray);
 		agentWhitelist.setAllowEditSuffix(allowEditSuffixList);
-		agentWhitelist.setAllowRemoteDownloadHost(CollUtil.newHashSet(allowRemoteDownloadHostList));
+		agentWhitelist.setAllowRemoteDownloadHost(allowRemoteDownloadHostList == null ? null : CollUtil.newHashSet(allowRemoteDownloadHostList));
 		whitelistDirectoryService.saveWhitelistDirectory(agentWhitelist);
 		return new JsonMessage<>(200, "保存成功");
 	}
