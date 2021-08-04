@@ -2,21 +2,28 @@ package io.jpom.controller.node.ssh;
 
 import cn.hutool.core.text.StrSplitter;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.db.Entity;
+import cn.hutool.db.Page;
+import cn.hutool.db.PageResult;
 import cn.hutool.extra.ssh.JschUtil;
 import cn.jiangzeyin.common.JsonMessage;
+import cn.jiangzeyin.common.validator.ValidatorConfig;
 import cn.jiangzeyin.common.validator.ValidatorItem;
 import cn.jiangzeyin.common.validator.ValidatorRule;
 import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.jcraft.jsch.Session;
 import io.jpom.common.BaseServerController;
 import io.jpom.common.interceptor.OptLog;
 import io.jpom.model.BaseModel;
 import io.jpom.model.data.NodeModel;
 import io.jpom.model.data.SshModel;
+import io.jpom.model.log.SshTerminalExecuteLog;
 import io.jpom.model.log.UserOperateLogV1;
 import io.jpom.plugin.ClassFeature;
 import io.jpom.plugin.Feature;
 import io.jpom.plugin.MethodFeature;
+import io.jpom.service.dblog.SshTerminalExecuteLogService;
 import io.jpom.service.node.ssh.SshService;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
@@ -41,6 +48,9 @@ public class SshController extends BaseServerController {
 
 	@Resource
 	private SshService sshService;
+
+	@Resource
+	private SshTerminalExecuteLogService sshTerminalExecuteLogService;
 
 //    @RequestMapping(value = "list.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
 //    @Feature(method = MethodFeature.LIST)
@@ -207,4 +217,43 @@ public class SshController extends BaseServerController {
 		JSONArray sshList = sshService.listSelect(nodeId);
 		return JsonMessage.getString(200, "success", sshList);
 	}
+
+	/**
+	 * 执行记录
+	 *
+	 * @param limit 大小
+	 * @param page  page
+	 * @return json
+	 */
+	@RequestMapping(value = "log_list_data.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody
+	@Feature(method = MethodFeature.LOG)
+	public String listData(
+			@ValidatorConfig(value = {
+					@ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "limit error")
+			}, defaultVal = "10") int limit,
+			@ValidatorConfig(value = {
+					@ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "page error")
+			}, defaultVal = "1") int page) {
+
+		Page pageObj = new Page(page, limit);
+		Entity entity = Entity.create();
+		this.doPage(pageObj, entity, "optTime");
+
+		String sshId = getParameter("sshId");
+		if (StrUtil.isNotEmpty(sshId)) {
+			entity.set("sshId".toUpperCase(), sshId);
+		}
+
+		String userId = getParameter("userId");
+		if (StrUtil.isNotEmpty(userId)) {
+			entity.set("userId".toUpperCase(), userId);
+		}
+
+		PageResult<SshTerminalExecuteLog> pageResult = sshTerminalExecuteLogService.listPage(entity, pageObj);
+		JSONObject jsonObject = JsonMessage.toJson(200, "获取成功", pageResult);
+		jsonObject.put("total", pageResult.getTotal());
+		return jsonObject.toString();
+	}
+
 }
