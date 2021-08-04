@@ -68,9 +68,15 @@
         </a-tag>
       </a-modal>
 
-      <a-modal v-model="editFileVisible" width="800px" title="编辑文件" cancelText="关闭"  :maskClosable="true" @ok="updateFileData">
-        <div>
-           <a-textarea v-model="fileContent" autosize :rows="6" />
+      <a-modal v-model="editFileVisible" width="80vw" title="编辑文件" cancelText="关闭"  :maskClosable="true" @ok="updateFileData">
+        <div style="height: 60vh">
+           <!-- <a-textarea v-model="fileContent" autosize :rows="6" /> -->
+         <codemirror
+          style="height: 100%"
+          ref="myCm"
+          v-model="fileContent"
+          :options="cmOptions"
+        ></codemirror>
         </div>
       </a-modal>
      <!--远程下载  -->
@@ -98,7 +104,14 @@ import {
   updateFile,
   remoteDownload,
 } from '../../../../api/node-project';
+
+import { codemirror } from "vue-codemirror";
+import 'codemirror/lib/codemirror.css'
+
 export default {
+  components: {
+    codemirror
+  },
   props: {
     nodeId: {
       type: String
@@ -129,6 +142,13 @@ export default {
       editFileVisible: false,
       successSize: 0,
       fileContent: '',
+
+      cmOptions: {
+        tabSize: 2,
+        lineNumbers: true,
+        line: true,
+        mode: 'json',
+      },
       // 是否是上传状态
       uploading: false,
       percentage: 0,
@@ -182,7 +202,6 @@ export default {
     },
 
     handleEditFile(record) {
-      console.log(record, 123)
       this.editFileVisible = true
       this.loadFileData(record.filename)
       this.filename = record.filename
@@ -566,6 +585,12 @@ export default {
   }
 }
 </script>
+
+<style>
+.CodeMirror {
+  height: 100%;
+}
+</style>
 <style scoped>
 .file-layout {
   padding: 0;
