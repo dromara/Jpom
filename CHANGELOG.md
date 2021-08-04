@@ -35,7 +35,7 @@
 14. 【agent】升级 `commons-compress` 依赖
 15. agent 和 server 间的 websocket 鉴权调整
 
-> 注意：升级到改版本需要保证 agent、server 都保持同步，如果只升级 server 会出现项目控制台等功能无法正常使用
+> 注意：升级到该版本需要保证 agent、server 都保持同步，如果只升级 server 会出现项目控制台等功能无法正常使用
 
 ------
 
