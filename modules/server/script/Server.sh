@@ -19,7 +19,19 @@
 # COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
 # IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
+# 支持读取环境变量
+if [ -f /etc/profile ]; then
+    . /etc/profile
+fi
+if [ -f /etc/bashrc ]; then
+    . /etc/bashrc
+fi
+if [ -f ~/.bash_profile ]; then
+    . ~/.bash_profile
+fi
+if [ -f ~/.bashrc ]; then
+    . ~/.bashrc
+fi
 Tag="KeepBx-System-JpomServerApplication"
 # 自动获取当前路径
 Path=$(cd `dirname $0`; pwd)"/"
