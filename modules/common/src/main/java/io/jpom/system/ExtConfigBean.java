@@ -137,7 +137,7 @@ public class ExtConfigBean {
 				String oldPath = ((SystemUtil.getOsInfo().isMac() ? "~" : "") + "/jpom/" + JpomApplication.getAppType().name() + "/").toLowerCase();
 				File newFile = FileUtil.file(FileUtil.getUserHomeDir(), "jpom", JpomApplication.getAppType().name().toLowerCase());
 				String absolutePath = FileUtil.getAbsolutePath(newFile);
-				if (FileUtil.exist(oldPath)) {
+				if (FileUtil.exist(oldPath) && !FileUtil.equals(newFile,FileUtil.file(oldPath))) {
 					FileUtil.move(FileUtil.file(oldPath), newFile, true);
 					Console.log("数据目录位置发生变化：{} => {}", oldPath, absolutePath);
 				}

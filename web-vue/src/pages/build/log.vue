@@ -1,6 +1,6 @@
 <template>
   <div>
-    <a-input id="build-log-textarea" v-model="logText" type="textarea" class="console" readOnly :rows="35" style="resize: none;"/>
+    <a-input id="build-log-textarea" v-model="logText" type="textarea" class="console" readOnly  style="resize: none; height: 70vh"/>
   </div>
 </template>
 <script>

@@ -67,7 +67,7 @@
         </a-table>
         <!-- 编辑区 -->
         <a-modal v-model="editBuildVisible" title="编辑构建" @ok="handleEditBuildOk" width="40%" :maskClosable="false">
-            <a-form-model ref="editBuildForm" :rules="rules" :model="temp" :label-col="{ span: 3 }"
+            <a-form-model ref="editBuildForm" :rules="rules" :model="temp" :label-col="{ span: 4 }"
                           :wrapper-col="{ span: 20 }">
                 <a-form-model-item label="名称" prop="name">
                     <a-input v-model="temp.name" placeholder="名称"/>
@@ -216,7 +216,7 @@
             </a-form-model>
         </a-modal>
         <!-- 构建日志 -->
-        <a-modal :width="'80vw'" v-model="buildLogVisible" title="构建日志" :footer="null" :maskClosable="false"
+        <a-modal width="80vw" v-model="buildLogVisible" title="构建日志" :footer="null" :maskClosable="false"
                  @cancel="closeBuildLogModel">
             <build-log v-if="buildLogVisible" :temp="temp"/>
         </a-modal>
@@ -445,7 +445,9 @@ export default {
         },
         // 添加
         handleAdd() {
-            this.temp = {};
+            this.temp = {
+                repoType: 0
+            };
             this.branchList = [];
             this.loadDispatchList();
             this.loadNodeProjectList();
