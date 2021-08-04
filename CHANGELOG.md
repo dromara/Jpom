@@ -15,6 +15,7 @@
 8. 【server】新版本 UI 菜单系统管理、节点升级只有系统管理员可见
 9. 【server】新版本 UI 脚本模板同步添加执行参数（感谢@轻描淡写 [Gitee issues I43G4B](https://gitee.com/dromara/Jpom/issues/I43G4B) ）
 10. 【server】新版本 UI 同步添加 common.js
+11. 【agent】项目文件管理新增下载远程文件功能
 
 ### 解决BUG、优化功能
 
