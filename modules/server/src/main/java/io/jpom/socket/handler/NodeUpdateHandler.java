@@ -30,9 +30,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.jar.Attributes;
-import java.util.jar.JarFile;
-import java.util.jar.Manifest;
 
 /**
  * 节点管理控制器
@@ -204,22 +201,14 @@ public class NodeUpdateHandler extends BaseProxyHandler {
 	/**
 	 * 获取当前系统缓存的Agent
 	 *
-	 * @return
+	 * @return json
 	 */
 	private String getAgentVersion() {
 		AgentFileModel agentFileModel = agentFileService.getItem("agent");
-		String version = "";
 		if (agentFileModel == null) {
-			return version;
+			return null;
 		}
-		try (JarFile jarFile = new JarFile(agentFileModel.getSavePath())) {
-			Manifest manifest = jarFile.getManifest();
-			Attributes attributes = manifest.getMainAttributes();
-			version = attributes.getValue(Attributes.Name.IMPLEMENTATION_VERSION);
-		} catch (Exception e) {
-			DefaultSystemLog.getLog().error("解析 jar 异常", e);
-		}
-		return version;
+		return JSONObject.toJSONString(agentFileModel);
 	}
 
 	/**

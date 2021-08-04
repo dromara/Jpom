@@ -2,6 +2,7 @@ package io.jpom.controller.node;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.lang.Tuple;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.http.HttpStatus;
 import cn.jiangzeyin.common.JsonMessage;
@@ -31,7 +32,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.annotation.Resource;
 import java.io.File;
-import java.io.FileFilter;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
@@ -166,7 +166,7 @@ public class NodeIndexController extends BaseServerController {
 				.setSavePath(saveDir);
 		String path = multipartFileBuilder.save();
 		// 基础检查
-		JsonMessage<String> error = JpomManifest.checkJpomJar(path, "io.jpom.JpomAgentApplication", false);
+		JsonMessage<Tuple> error = JpomManifest.checkJpomJar(path, "io.jpom.JpomAgentApplication", false);
 		if (error.getCode() != HttpStatus.HTTP_OK) {
 			FileUtil.del(path);
 			return error.toString();
@@ -185,7 +185,10 @@ public class NodeIndexController extends BaseServerController {
 		agentFileModel.setName(file.getName());
 		agentFileModel.setSize(file.length());
 		agentFileModel.setSavePath(path);
-		agentFileModel.setVersion(error.getMsg());
+		//
+		Tuple data = error.getData();
+		agentFileModel.setVersion(data.get(0));
+		agentFileModel.setTimeStamp(data.get(1));
 		agentFileService.updateItem(agentFileModel);
 		// 删除历史包  @author jzy 2021-08-03
 		List<File> files = FileUtil.loopFiles(saveDir, pathname -> !FileUtil.equals(pathname, file));

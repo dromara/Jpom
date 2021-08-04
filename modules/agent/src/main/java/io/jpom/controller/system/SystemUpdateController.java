@@ -1,5 +1,6 @@
 package io.jpom.controller.system;
 
+import cn.hutool.core.lang.Tuple;
 import cn.hutool.http.HttpStatus;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.controller.multipart.MultipartFileBuilder;
@@ -38,7 +39,7 @@ public class SystemUpdateController extends BaseAgentController {
                 .setSavePath(AgentConfigBean.getInstance().getTempPath().getAbsolutePath());
         String path = multipartFileBuilder.save();
         // 基础检查
-        JsonMessage<String> error = JpomManifest.checkJpomJar(path, JpomAgentApplication.class);
+        JsonMessage<Tuple> error = JpomManifest.checkJpomJar(path, JpomAgentApplication.class);
         if (error.getCode() != HttpStatus.HTTP_OK) {
             return error.toString();
         }

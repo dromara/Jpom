@@ -8,6 +8,7 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.LineHandler;
 import cn.hutool.core.io.ManifestUtil;
 import cn.hutool.core.lang.JarClassLoader;
+import cn.hutool.core.lang.Tuple;
 import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.core.util.ClassUtil;
 import cn.hutool.core.util.StrUtil;
@@ -78,21 +79,37 @@ public class JpomManifest {
 				if (JPOM_MANIFEST == null) {
 					JPOM_MANIFEST = new JpomManifest();
 					File jarFile = getRunPath();
-					Manifest manifest = ManifestUtil.getManifest(jarFile);
-					if (manifest != null) {
-						Attributes attributes = manifest.getMainAttributes();
-						String version = attributes.getValue(Attributes.Name.IMPLEMENTATION_VERSION);
-						if (version != null) {
-							// @see VersionUtils#getVersion()
-							JPOM_MANIFEST.setVersion(version);
-							String timeStamp = attributes.getValue("Jpom-Timestamp");
-							JPOM_MANIFEST.setTimeStamp(timeStamp);
-						}
+					Tuple jarVersion = getJarVersion(jarFile);
+					if (jarVersion != null) {
+						JPOM_MANIFEST.setVersion(jarVersion.get(0));
+						JPOM_MANIFEST.setTimeStamp(jarVersion.get(1));
 					}
 				}
 				GlobalHeaders.INSTANCE.header(Header.USER_AGENT, "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.142 Safari/537.36 Jpom " + JPOM_MANIFEST.getType(), true);
 			}
 		}
+	}
+
+	/**
+	 * 根据 jar 文件解析 jpom 版本信息
+	 *
+	 * @param jarFile 文件
+	 * @return 版本 和 打包时间
+	 */
+	private static Tuple getJarVersion(File jarFile) {
+		Manifest manifest = ManifestUtil.getManifest(jarFile);
+		if (manifest != null) {
+			Attributes attributes = manifest.getMainAttributes();
+			String version = attributes.getValue(Attributes.Name.IMPLEMENTATION_VERSION);
+			if (version != null) {
+				// @see VersionUtils#getVersion()
+				String timeStamp = attributes.getValue("Jpom-Timestamp");
+				timeStamp = parseJpomTime(timeStamp);
+				String mainClass = attributes.getValue(Attributes.Name.MAIN_CLASS);
+				return new Tuple(version, timeStamp, mainClass);
+			}
+		}
+		return null;
 	}
 
 
@@ -161,7 +178,7 @@ public class JpomManifest {
 	 * @param timeStamp utc时间
 	 */
 	public void setTimeStamp(String timeStamp) {
-		this.timeStamp = parseJpomTime(timeStamp);
+		this.timeStamp = timeStamp;
 	}
 
 	public void setPort(int port) {
@@ -223,7 +240,7 @@ public class JpomManifest {
 	 * @param timeStamp time
 	 * @return 默认使用utc
 	 */
-	public static String parseJpomTime(String timeStamp) {
+	private static String parseJpomTime(String timeStamp) {
 		if (StrUtil.isNotEmpty(timeStamp)) {
 			try {
 				DateTime dateTime = DateUtil.parseUTC(timeStamp);
@@ -243,11 +260,11 @@ public class JpomManifest {
 	 * @param clsName 类名
 	 * @return 结果消息
 	 */
-	public static JsonMessage<String> checkJpomJar(String path, Class<?> clsName) {
+	public static JsonMessage<Tuple> checkJpomJar(String path, Class<?> clsName) {
 		return checkJpomJar(path, clsName.getName());
 	}
 
-	public static JsonMessage<String> checkJpomJar(String path, String name) {
+	public static JsonMessage<Tuple> checkJpomJar(String path, String name) {
 		return checkJpomJar(path, name, true);
 	}
 
@@ -259,13 +276,17 @@ public class JpomManifest {
 	 * @param checkRepeat 是否检查版本重复
 	 * @return 结果消息
 	 */
-	public static JsonMessage<String> checkJpomJar(String path, String name, boolean checkRepeat) {
+	public static JsonMessage<Tuple> checkJpomJar(String path, String name, boolean checkRepeat) {
 		String version;
 		File jarFile = new File(path);
+		Tuple jarVersion = getJarVersion(jarFile);
+		if (jarVersion == null) {
+			return new JsonMessage<>(405, "jar 包文件不合法");
+		}
 		try (JarFile jarFile1 = new JarFile(jarFile)) {
-			Manifest manifest = jarFile1.getManifest();
-			Attributes attributes = manifest.getMainAttributes();
-			String mainClass = attributes.getValue(Attributes.Name.MAIN_CLASS);
+			//Manifest manifest = jarFile1.getManifest();
+			//Attributes attributes = manifest.getMainAttributes();
+			String mainClass = jarVersion.get(2);
 			if (mainClass == null) {
 				return new JsonMessage<>(405, "清单文件中没有找到对应的MainClass属性");
 			}
@@ -280,15 +301,15 @@ public class JpomManifest {
 			if (entry == null) {
 				return new JsonMessage<>(405, "此包不是Jpom【" + JpomApplication.getAppType().name() + "】包");
 			}
-			version = attributes.getValue(Attributes.Name.IMPLEMENTATION_VERSION);
+			version = jarVersion.get(0);
 			if (StrUtil.isEmpty(version)) {
 				return new JsonMessage<>(405, "此包没有版本号");
 			}
-			String timeStamp = attributes.getValue("Jpom-Timestamp");
+			String timeStamp = jarVersion.get(1);
 			if (StrUtil.isEmpty(timeStamp)) {
 				return new JsonMessage<>(405, "此包没有版本号");
 			}
-			timeStamp = parseJpomTime(timeStamp);
+
 			if (checkRepeat && StrUtil.equals(version, JpomManifest.getInstance().getVersion()) &&
 					StrUtil.equals(timeStamp, JpomManifest.getInstance().getTimeStamp())) {
 				return new JsonMessage<>(405, "新包和正在运行的包一致");
@@ -297,7 +318,7 @@ public class JpomManifest {
 			DefaultSystemLog.getLog().error("解析jar", e);
 			return new JsonMessage<>(500, " 解析错误:" + e.getMessage());
 		}
-		return new JsonMessage<>(200, version);
+		return new JsonMessage<>(200, "", jarVersion);
 	}
 
 	/**

@@ -9,8 +9,8 @@
         <a-button type="primary" @click="batchUpdate">批量更新</a-button>
       </div>
       <div class="right">
-        <div class="title">Agent最新版本：</div>
-        <div class="version">{{ agentVersion | version }}</div>
+        <div class="title">Agent最新版本：{{ agentVersion | version }}</div>
+        <div class="version">打包时间：{{ agentTimeStamp | version }}</div>
         <div class="action">
           <a-upload
             name="file"
@@ -68,6 +68,7 @@ export default {
   data() {
     return {
       agentVersion: '',
+      agentTimeStamp: '',
       websocket: null,
       groupFilter: undefined,
       groupList: [],
@@ -196,7 +197,13 @@ export default {
       this.sendMsg('getAgentVersion')
     },
     getAgentVersionResult(data) {
-      this.agentVersion = data
+      try{
+         let newData= JSON.parse(data);
+         this.agentVersion = newData.version;
+         this.agentTimeStamp = newData.timeStamp;
+      }catch(e){
+        this.agentVersion = data
+      }
     },
     getVersionResult(data, nodeId) {
       this.nodeVersion = Object.assign({}, this.nodeVersion, {
