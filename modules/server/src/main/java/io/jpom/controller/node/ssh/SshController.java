@@ -140,12 +140,12 @@ public class SshController extends BaseServerController {
 		if (StrUtil.isNotEmpty(password)) {
 			sshModel.setPassword(password);
 		} else {
-			sshModel.setPassword(null);
+			//sshModel.setPassword(sshModel == null ? null : sshModel.getPassword());
 		}
 		if (StrUtil.isNotEmpty(privateKey)) {
 			sshModel.setPrivateKey(privateKey);
 		} else {
-			sshModel.setPrivateKey(null);
+			//sshModel.setPrivateKey(sshModel == null ? null : sshModel.getPrivateKey());
 		}
 		sshModel.setPort(port);
 		sshModel.setUser(user);
