@@ -89,6 +89,7 @@ public class NodeForward {
 	 * @param <T>       泛型
 	 * @return JSON
 	 */
+	@SuppressWarnings({"unchecked", "rawtypes"})
 	private static <T> JsonMessage<T> request(NodeModel nodeModel,
 											  HttpServletRequest request,
 											  NodeUrl nodeUrl,
@@ -210,6 +211,7 @@ public class NodeForward {
 	 * @param nodeUrl   节点的url
 	 * @return json
 	 */
+	@SuppressWarnings({"unchecked", "rawtypes"})
 	public static JsonMessage<String> requestMultipart(NodeModel nodeModel, MultipartHttpServletRequest request, NodeUrl nodeUrl) {
 		String url = nodeModel.getRealUrl(nodeUrl);
 		HttpRequest httpRequest = HttpUtil.createPost(url);
@@ -245,6 +247,7 @@ public class NodeForward {
 	 * @param response  响应
 	 * @param nodeUrl   节点的url
 	 */
+	@SuppressWarnings({"unchecked", "rawtypes"})
 	public static void requestDownload(NodeModel nodeModel, HttpServletRequest request, HttpServletResponse response, NodeUrl nodeUrl) {
 		String url = nodeModel.getRealUrl(nodeUrl);
 		HttpRequest httpRequest = HttpUtil.createGet(url);
