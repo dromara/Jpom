@@ -213,6 +213,8 @@ export default {
 				connectType: 'PASS'
 			};
 			this.editSshVisible = true;
+			// @author jzy 08-04
+      this.$refs['editSshForm'] && this.$refs['editSshForm'].resetFields();
 		},
 		// 修改
 		handleEdit(record) {
@@ -220,6 +222,8 @@ export default {
 			this.temp.fileDirs = record.fileDirs ? record.fileDirs.join('\r\n') : '';
 			this.temp.type = 'edit';
 			this.editSshVisible = true;
+      // @author jzy 08-04
+      this.$refs['editSshForm'] && this.$refs['editSshForm'].resetFields();
 		},
 		// 提交 SSH 数据
 		handleEditSshOk() {
@@ -235,7 +239,7 @@ export default {
 							message: res.msg,
 							duration: 2
 						});
-						this.$refs['editSshForm'].resetFields();
+						//this.$refs['editSshForm'].resetFields();
 						this.fileList = [];
 						this.editSshVisible = false;
 						this.loadData();
@@ -293,6 +297,7 @@ export default {
 			}
 			this.nodeVisible = true;
 			this.formLoading = false;
+      this.$refs['nodeForm'] && this.$refs['nodeForm'].resetFields();
 		},
 		// 处理文件移除
 		handleRemove(file) {
@@ -335,7 +340,7 @@ export default {
 							message: '操作成功',
 							duration: 2
 						});
-						this.$refs['nodeForm'].resetFields();
+						//this.$refs['nodeForm'].resetFields();
 						this.nodeVisible = false;
 						this.loadData();
 					}
