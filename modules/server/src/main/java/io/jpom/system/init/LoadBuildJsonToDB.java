@@ -47,7 +47,8 @@ public class LoadBuildJsonToDB {
 	}
 
 	/**
-	 * 把 build.json 文件内容写入到数据库
+	 * read build.json file to list
+	 * and then use list transfer SQL and execute it
 	 */
 	public void doJsonToSql() {
 		// 读取 build.json 文件内容
@@ -63,6 +64,17 @@ public class LoadBuildJsonToDB {
 
 	/**
 	 * list data to SQL
+	 * this method is core logic
+	 * 1. load fields will be insert into database from class with reflection
+	 * 2. iterate list data, and transfer each element to SQL (element's properties mapping to SQL param name and value)
+	 * 3. use param map generate SQL
+	 * 4. exec SQL
+	 * ---------------------
+	 * 这个方法是核心逻辑
+	 * 1.通过反射加载字段，将其插入到数据库中
+	 * 2. 迭代列表数据，并将每个元素转移到参数集合（元素的属性映射到SQL参数名称和值）
+	 * 3. 使用参数集合对象生成SQL
+	 * 4. 执行SQL
 	 * @param list data from build.json
 	 */
 	private void initSql(List<Object> list) {
