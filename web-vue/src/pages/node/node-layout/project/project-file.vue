@@ -34,7 +34,7 @@
             <span>{{ text }}</span>
         </a-tooltip>
         <template slot="operation"  v-if="!record.isDirectory" slot-scope="text, record">
-            <a-button type="primary" @click="handleEditFile(record)">编辑</a-button>
+            <a-button type="primary" v-if="record.textFileEdit" @click="handleEditFile(record)">编辑</a-button>
             <a-button type="primary" @click="handleDownload(record)">下载</a-button>
             <a-button type="danger" @click="handleDelete(record)">删除</a-button>
         </template>
