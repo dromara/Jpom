@@ -171,41 +171,41 @@ public class LoginInterceptor extends BaseJpomInterceptor {
     }
 
 
-    @Override
-    public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler, ModelAndView modelAndView) throws Exception {
-        super.postHandle(request, response, handler, modelAndView);
-        HttpSession session;
-        try {
-            session = getSession();
-        } catch (Exception ignored) {
-            return;
-        }
-        try {
-            // 静态资源地址参数
-            session.setAttribute("staticCacheTime", DateUtil.currentSeconds());
-            // 代理二级路径
-            Object jpomProxyPath = session.getAttribute("jpomProxyPath");
-            if (jpomProxyPath == null) {
-                String path = getHeaderProxyPath(request);
-                session.setAttribute("jpomProxyPath", path);
-            }
-        } catch (Exception ignored) {
-        }
-        try {
-            // 统一的js 注入
-            String jsCommonContext = (String) session.getAttribute("jsCommonContext");
-            if (jsCommonContext == null) {
-                String path = ExtConfigBean.getInstance().getPath();
-                File file = FileUtil.file(String.format("%s/script/common.js", path));
-                if (file.exists()) {
-                    jsCommonContext = FileUtil.readString(file, CharsetUtil.CHARSET_UTF_8);
-                    jsCommonContext = URLEncoder.DEFAULT.encode(jsCommonContext, CharsetUtil.CHARSET_UTF_8);
-                }
-                session.setAttribute("jsCommonContext", jsCommonContext);
-            }
-        } catch (IllegalStateException ignored) {
-        }
-    }
+//    @Override
+//    public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler, ModelAndView modelAndView) throws Exception {
+//        super.postHandle(request, response, handler, modelAndView);
+//        HttpSession session;
+//        try {
+//            session = getSession();
+//        } catch (Exception ignored) {
+//            return;
+//        }
+//        try {
+//            // 静态资源地址参数
+//            session.setAttribute("staticCacheTime", DateUtil.currentSeconds());
+//            // 代理二级路径
+//            Object jpomProxyPath = session.getAttribute("jpomProxyPath");
+//            if (jpomProxyPath == null) {
+//                String path = getHeaderProxyPath(request);
+//                session.setAttribute("jpomProxyPath", path);
+//            }
+//        } catch (Exception ignored) {
+//        }
+//        try {
+//            // 统一的js 注入
+//            String jsCommonContext = (String) session.getAttribute("jsCommonContext");
+//            if (jsCommonContext == null) {
+//                String path = ExtConfigBean.getInstance().getPath();
+//                File file = FileUtil.file(String.format("%s/script/common.js", path));
+//                if (file.exists()) {
+//                    jsCommonContext = FileUtil.readString(file, CharsetUtil.CHARSET_UTF_8);
+//                    jsCommonContext = URLEncoder.DEFAULT.encode(jsCommonContext, CharsetUtil.CHARSET_UTF_8);
+//                }
+//                session.setAttribute("jsCommonContext", jsCommonContext);
+//            }
+//        } catch (IllegalStateException ignored) {
+//        }
+//    }
 
     @Override
     public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {

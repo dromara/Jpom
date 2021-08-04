@@ -3,6 +3,7 @@ package io.jpom.controller;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.io.resource.ResourceUtil;
+import cn.hutool.core.net.URLEncoder;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.servlet.ServletUtil;
@@ -18,6 +19,7 @@ import io.jpom.model.data.UserModel;
 import io.jpom.permission.CacheControllerFeature;
 import io.jpom.service.user.RoleService;
 import io.jpom.service.user.UserService;
+import io.jpom.system.ExtConfigBean;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -27,6 +29,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
@@ -50,8 +53,6 @@ public class IndexControl extends BaseServerController {
 
 	/**
 	 * 加载首页
-	 *
-	 * @return page
 	 */
 	@GetMapping(value = {"index", "", "/"}, produces = MediaType.TEXT_HTML_VALUE)
 	@NotLogin
@@ -59,12 +60,20 @@ public class IndexControl extends BaseServerController {
 	public void index(HttpServletResponse response) throws IOException {
 		InputStream inputStream = ResourceUtil.getStream("classpath:/dist/index.html");
 		String html = IoUtil.read(inputStream, CharsetUtil.CHARSET_UTF_8);
+		//<div id="jpomCommonJs"></div>
+		String path = ExtConfigBean.getInstance().getPath();
+		File file = FileUtil.file(String.format("%s/script/common.js", path));
+		String jsCommonContext = StrUtil.EMPTY;
+		if (file.exists()) {
+			jsCommonContext = FileUtil.readString(file, CharsetUtil.CHARSET_UTF_8);
+		}
+		html = StrUtil.replace(html, "<div id=\"jpomCommonJs\"></div>", jsCommonContext);
 		ServletUtil.write(response, html, ContentType.TEXT_HTML.getValue());
 	}
 
 
 	/**
-	 * @return
+	 * @return json
 	 * @author Hotstrip
 	 * 检查是否需要初始化系统
 	 * check if need to init system

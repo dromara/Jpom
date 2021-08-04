@@ -28,16 +28,16 @@ public abstract class BaseJpomInterceptor extends BaseInterceptor {
 //        return false;
 //    }
 
-    public static void sendRedirects(HttpServletRequest request, HttpServletResponse response, String url) throws IOException {
-        String newUrl = UrlRedirectUtil.getHeaderProxyPath(request, PROXY_PATH) + url;
-        UrlRedirectUtil.sendRedirect(request, response, newUrl);
-    }
-
-    public static String getRedirect(HttpServletRequest request, String url) {
-        String newUrl = UrlRedirectUtil.getHeaderProxyPath(request, PROXY_PATH) + url;
-        String redirect = UrlRedirectUtil.getRedirect(request, newUrl);
-        return String.format("redirect:%s", redirect);
-    }
+//    public static void sendRedirects(HttpServletRequest request, HttpServletResponse response, String url) throws IOException {
+//        String newUrl = UrlRedirectUtil.getHeaderProxyPath(request, PROXY_PATH) + url;
+//        UrlRedirectUtil.sendRedirect(request, response, newUrl);
+//    }
+//
+//    public static String getRedirect(HttpServletRequest request, String url) {
+//        String newUrl = UrlRedirectUtil.getHeaderProxyPath(request, PROXY_PATH) + url;
+//        String redirect = UrlRedirectUtil.getRedirect(request, newUrl);
+//        return String.format("redirect:%s", redirect);
+//    }
 
     public static String getHeaderProxyPath(HttpServletRequest request) {
         String proxyPath = ServletUtil.getHeaderIgnoreCase(request, PROXY_PATH);
