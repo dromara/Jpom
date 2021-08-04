@@ -376,6 +376,8 @@ public class JpomManifest {
 				newData.add(line);
 			}
 		});
+		// 新增升级次数 @author jzy 2021-08-04
+		jsonObject.put("upgradeCount", jsonObject.getIntValue("upgradeCount"));
 		jsonObject.put("oldLogName", oldName[0]);
 		jsonObject.put("logBack", logBack[0]);
 		//

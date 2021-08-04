@@ -40,7 +40,7 @@
 		<a-modal v-model="editNodeVisible" title="编辑节点" @ok="handleEditNodeOk" :maskClosable="false">
 			<a-form-model ref="editNodeForm" :rules="rules" :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 14 }">
 				<a-form-model-item label="节点 ID" prop="id">
-					<a-input v-model="temp.id" placeholder="创建之后不能修改"/>
+					<a-input v-model="temp.id" :disabled="temp.id" placeholder="创建之后不能修改"/>
 				</a-form-model-item>
 				<a-form-model-item label="节点名称" prop="name">
 					<a-input v-model="temp.name" placeholder="节点名称"/>
@@ -313,6 +313,8 @@ export default {
 				loginName: 'jpomAgent'
 			};
 			this.editNodeVisible = true;
+      // @author jzy 08-04
+      this.$refs['editNodeForm'] && this.$refs['editNodeForm'].resetFields();
 			this.$nextTick(() => {
 				setTimeout(() => {
 					this.introGuide();
@@ -330,6 +332,8 @@ export default {
 			this.loadSshList();
 			this.temp.tempGroup = '';
 			this.editNodeVisible = true;
+      // @author jzy 08-04
+      this.$refs['editNodeForm'] && this.$refs['editNodeForm'].resetFields();
 		},
 		// 提交节点数据
 		handleEditNodeOk() {
@@ -346,7 +350,6 @@ export default {
 							message: res.msg,
 							duration: 2
 						});
-						this.$refs['editNodeForm'].resetFields();
 						this.editNodeVisible = false;
 						this.loadData();
 						this.loadGroupList();
