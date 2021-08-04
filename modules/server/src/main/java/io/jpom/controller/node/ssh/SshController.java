@@ -66,7 +66,7 @@ public class SshController extends BaseServerController {
 			list.forEach(sshModel -> {
 				// 不返回密码
 				sshModel.setPassword(null);
-//				sshModel.setPrivateKey(null);
+				sshModel.setPrivateKey(null);
 				// 节点信息
 				BaseModel nodeModel = map.get(sshModel.getId());
 				sshModel.setNodeModel(nodeModel);
@@ -127,15 +127,22 @@ public class SshController extends BaseServerController {
 		}
 		sshModel.setHost(host);
 		// 如果密码传递不为空就设置值 因为上面已经判断了只有修改的情况下 password 才可能为空
-		if (!StrUtil.isEmpty(password)) {
+		if (StrUtil.isNotEmpty(password)) {
 			sshModel.setPassword(password);
+		} else {
+			sshModel.setPassword(null);
+		}
+		if (StrUtil.isNotEmpty(privateKey)) {
+			sshModel.setPrivateKey(privateKey);
+		} else {
+			sshModel.setPrivateKey(null);
 		}
 		sshModel.setPort(port);
 		sshModel.setUser(user);
 		sshModel.setName(name);
 		sshModel.setNotAllowedCommand(notAllowedCommand);
 		sshModel.setConnectType(connectType);
-		sshModel.setPrivateKey(privateKey);
+
 		try {
 			Charset.forName(charset);
 			sshModel.setCharset(charset);

@@ -38,14 +38,14 @@
 					<a-input v-model="temp.user" placeholder="用户"/>
 				</a-form-model-item>
 				<!-- 新增时需要填写 -->
-				<a-form-model-item v-if="temp.type === 'add'" label="Password" prop="password">
-					<a-input-password v-model="temp.password" placeholder="密码"/>
-				</a-form-model-item>
+<!--				<a-form-model-item v-if="temp.type === 'add'" label="Password" prop="password">-->
+<!--					<a-input-password v-model="temp.password" placeholder="密码"/>-->
+<!--				</a-form-model-item>-->
 				<!-- 修改时可以不填写 -->
-				<a-form-model-item v-if="temp.type === 'edit'" label="Password" prop="password-update">
-					<a-input-password v-model="temp.password" placeholder="密码若没修改可以不用填写"/>
+				<a-form-model-item  label="Password" :prop="`${temp.type === 'add'&& temp.connectType === 'PASS' ?'password':'password-update'}`">
+					<a-input-password v-model="temp.password" :placeholder="`${temp.type === 'add'?'密码':'密码若没修改可以不用填写'}`"/>
 				</a-form-model-item>
-				<a-form-model-item v-if="temp.connectType === 'PUBKEY'" label="私钥内容" prop="privateKey">
+				<a-form-model-item v-if="temp.connectType === 'PUBKEY'" label="私钥内容"  :prop="`${temp.type === 'add'?'privateKey':''}`">
 					<a-textarea v-model="temp.privateKey" :auto-size="{ minRows: 3, maxRows: 5 }" placeholder="私钥内容"/>
 				</a-form-model-item>
 				<a-form-model-item label="编码格式" prop="charset">

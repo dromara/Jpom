@@ -34,7 +34,8 @@ public class InitDb implements DisposableBean, InitializingBean {
 	private static void init() {
 		Setting setting = new Setting();
 		DbConfig instance = DbConfig.getInstance();
-		setting.set("url", instance.getDbUrl());
+		String dbUrl = instance.getDbUrl();
+		setting.set("url", dbUrl);
 		setting.set("user", ServerExtConfigBean.getInstance().getDbUserName());
 		setting.set("pass", ServerExtConfigBean.getInstance().getDbUserPwd());
 		// 调试模式显示sql 信息
@@ -63,7 +64,11 @@ public class InitDb implements DisposableBean, InitializingBean {
 			return;
 		}
 		instance.initOk();
-		Console.log("h2 db inited");
+		if (JpomManifest.getInstance().isDebug()) {
+			Console.log("h2 db inited:" + dbUrl);
+		} else {
+			Console.log("h2 db inited");
+		}
 	}
 
 	@Override

@@ -167,11 +167,14 @@ public class SshModel extends BaseModel {
 	 */
 	public static boolean checkInputItem(SshModel sshItem, String inputItem) {
 		// 检查禁止执行的命令
-		String notAllowedCommand = sshItem.getNotAllowedCommand();
+		String notAllowedCommand = StrUtil.emptyToDefault(sshItem.getNotAllowedCommand(), StrUtil.EMPTY).toLowerCase();
 		List<String> split = StrUtil.split(notAllowedCommand, StrUtil.COMMA);
+		inputItem = inputItem.toLowerCase();
+		List<String> commands = StrUtil.split(inputItem, StrUtil.CR);
+		commands.addAll(StrUtil.split(inputItem, "&"));
 		for (String s : split) {
-			s = s.toLowerCase();
-			if (StrUtil.startWithAny(inputItem.toLowerCase(), s + StrUtil.SPACE, ("&" + s + StrUtil.SPACE), StrUtil.SPACE + s + StrUtil.SPACE)) {
+			boolean anyMatch = commands.stream().anyMatch(item -> StrUtil.startWithAny(item, s + StrUtil.SPACE, ("&" + s + StrUtil.SPACE), StrUtil.SPACE + s + StrUtil.SPACE));
+			if (anyMatch) {
 				return false;
 			}
 		}

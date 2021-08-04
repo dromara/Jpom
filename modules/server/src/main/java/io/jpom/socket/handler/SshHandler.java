@@ -1,19 +1,24 @@
 package io.jpom.socket.handler;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.ssh.ChannelType;
 import cn.hutool.extra.ssh.JschUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
+import cn.jiangzeyin.common.spring.SpringUtil;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.JSONValidator;
 import com.jcraft.jsch.Channel;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
 import io.jpom.model.data.SshModel;
+import io.jpom.model.data.UserModel;
+import io.jpom.service.dblog.SshTerminalExecuteLogService;
 import io.jpom.service.node.ssh.SshService;
 import io.jpom.socket.BaseHandler;
+import org.springframework.http.HttpHeaders;
 import org.springframework.web.socket.BinaryMessage;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
@@ -22,6 +27,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -33,6 +40,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class SshHandler extends BaseHandler {
 
 	private static final ConcurrentHashMap<String, HandlerItem> HANDLER_ITEM_CONCURRENT_HASH_MAP = new ConcurrentHashMap<>();
+	private SshTerminalExecuteLogService sshTerminalExecuteLogService;
 
 	@Override
 	public void afterConnectionEstablished(WebSocketSession session) throws Exception {
@@ -70,8 +78,17 @@ public class SshHandler extends BaseHandler {
 //			}
 //		}
 		//
-		HandlerItem handlerItem = new HandlerItem(session, sshItem);
-		handlerItem.startRead();
+		HandlerItem handlerItem;
+		try {
+			handlerItem = new HandlerItem(session, sshItem);
+			handlerItem.startRead();
+		} catch (Exception e) {
+			// 输出超时日志 @author jzy
+			DefaultSystemLog.getLog().error("ssh 控制台连接超时", e);
+			sendBinary(session, "ssh 控制台连接超时");
+			this.destroy(session);
+			return;
+		}
 		HANDLER_ITEM_CONCURRENT_HASH_MAP.put(session.getId(), handlerItem);
 		//
 		Thread.sleep(1000);
@@ -124,7 +141,12 @@ public class SshHandler extends BaseHandler {
 				return;
 			}
 		}
-		this.sendCommand(handlerItem, payload);
+		try {
+			this.sendCommand(handlerItem, payload);
+		} catch (Exception e) {
+			sendBinary(session, "Failure:" + e.getMessage());
+			DefaultSystemLog.getLog().error("执行命令异常", e);
+		}
 	}
 
 	private void sendCommand(HandlerItem handlerItem, String data) throws Exception {
@@ -138,6 +160,34 @@ public class SshHandler extends BaseHandler {
 		handlerItem.outputStream.flush();
 	}
 
+	/**
+	 * 记录终端执行记录
+	 *
+	 * @param session 回话
+	 * @param command 命令行
+	 * @param refuse  是否拒绝
+	 */
+	private void logCommands(WebSocketSession session, String command, boolean refuse) {
+		if (sshTerminalExecuteLogService == null) {
+			sshTerminalExecuteLogService = SpringUtil.getBean(SshTerminalExecuteLogService.class);
+		}
+		List<String> split = StrUtil.split(command, StrUtil.CR);
+		// 最后一个是否为回车
+		boolean all = StrUtil.endWith(command, StrUtil.CR);
+		int size = split.size();
+		split = CollUtil.sub(split, 0, all ? size : size - 1);
+		if (CollUtil.isEmpty(split)) {
+			return;
+		}
+		// 获取基础信息
+		Map<String, Object> attributes = session.getAttributes();
+		UserModel userInfo = (UserModel) attributes.get("userInfo");
+		String ip = (String) attributes.get("ip");
+		String userAgent = (String) attributes.get(HttpHeaders.USER_AGENT);
+		SshModel sshItem = (SshModel) attributes.get("sshItem");
+		//
+		sshTerminalExecuteLogService.batch(userInfo, sshItem, ip, userAgent, refuse, split);
+	}
 
 	private class HandlerItem implements Runnable {
 		private final WebSocketSession session;
@@ -163,16 +213,21 @@ public class SshHandler extends BaseHandler {
 		}
 
 		public boolean checkInput(String msg) {
-			nowLineInput.append(msg);
+			String allCommand = nowLineInput.append(msg).toString();
+			boolean refuse;
 			if (StrUtil.equalsAny(msg, StrUtil.CR, StrUtil.TAB)) {
 				String join = nowLineInput.toString();
 				if (StrUtil.equals(msg, StrUtil.CR)) {
 					nowLineInput.setLength(0);
 				}
-				return SshModel.checkInputItem(sshItem, join);
+				refuse = SshModel.checkInputItem(sshItem, join);
+			} else {
+				// 复制输出
+				refuse = SshModel.checkInputItem(sshItem, msg);
 			}
-			// 复制输出
-			return SshModel.checkInputItem(sshItem, msg);
+			// 执行命令行记录
+			logCommands(session, allCommand, refuse);
+			return refuse;
 		}
 
 
@@ -198,15 +253,22 @@ public class SshHandler extends BaseHandler {
 	@Override
 	public void destroy(WebSocketSession session) {
 		HandlerItem handlerItem = HANDLER_ITEM_CONCURRENT_HASH_MAP.get(session.getId());
-		IoUtil.close(handlerItem.inputStream);
-		IoUtil.close(handlerItem.outputStream);
-		JschUtil.close(handlerItem.channel);
-		JschUtil.close(handlerItem.openSession);
+		if (handlerItem != null) {
+			IoUtil.close(handlerItem.inputStream);
+			IoUtil.close(handlerItem.outputStream);
+			JschUtil.close(handlerItem.channel);
+			JschUtil.close(handlerItem.openSession);
+		}
 		IoUtil.close(session);
 		HANDLER_ITEM_CONCURRENT_HASH_MAP.remove(session.getId());
 	}
 
 	private static void sendBinary(WebSocketSession session, String msg) {
+		if (!session.isOpen()) {
+			// 会话关闭不能发送消息 @author jzy 21-08-04
+			DefaultSystemLog.getLog().warn("回话已经关闭啦，不能发送消息：{}", msg);
+			return;
+		}
 		synchronized (session.getId()) {
 			BinaryMessage byteBuffer = new BinaryMessage(msg.getBytes());
 			try {
