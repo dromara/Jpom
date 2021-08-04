@@ -7,7 +7,7 @@
     <div id="top-chart">loading...</div>
     <a-divider>进程监控表格</a-divider>
     <!-- 进程表格数据 -->
-    <a-table :loading="loading" :columns="columns" :data-source="processList" :scroll="{x: '80vw'}"  bordered rowKey="pid" class="node-table" :pagination="false">
+    <a-table :loading="loading" :columns="columns" :data-source="processList" :scroll="{x: '80vw'}" bordered rowKey="pid" class="node-table" :pagination="false">
       <a-tooltip slot="port" slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>
@@ -32,8 +32,9 @@
   </div>
 </template>
 <script>
-import { getNodeTop, getProcessList, killPid, nodeMonitorData } from '../../../api/node';
+import {getNodeTop, getProcessList, killPid, nodeMonitorData} from '../../../api/node';
 import echarts from 'echarts';
+
 export default {
   props: {
     node: {
@@ -94,38 +95,53 @@ export default {
         this.drawTopChart();
       })
     },
-    // 绘制 top 图表
-    drawTopChart() {
+    generateChart(data) {
       let cpuItem = {
-          name: 'cpu占用',
-          type: 'line',
-          data: [],
-          showSymbol: false,
-          // 设置折线为曲线
-          smooth: true
+        name: 'cpu占用',
+        type: 'line',
+        data: [],
+        showSymbol: false,
+        // 设置折线为曲线
+        smooth: true
       };
       let diskItem = {
-          name: '磁盘占用',
-          type: 'line',
-          data: [],
-          showSymbol: false,
-          smooth: true
+        name: '磁盘占用',
+        type: 'line',
+        data: [],
+        showSymbol: false,
+        smooth: true
       };
       let memoryItem = {
-          name: '内存占用',
-          type: 'line',
-          data: [],
-          showSymbol: false,
-          smooth: true
+        name: '内存占用(累计)',
+        type: 'line',
+        data: [],
+        showSymbol: false,
+        smooth: true
       };
-      this.topData.series.forEach(item => {
+      let memoryUsedItem = {
+        name: '内存占用',
+        type: 'line',
+        data: [],
+        showSymbol: false,
+        smooth: true
+      };
+      data.series.forEach(item => {
         cpuItem.data.push(parseFloat(item.cpu));
         diskItem.data.push(parseFloat(item.disk));
         memoryItem.data.push(parseFloat(item.memory));
+        if (item.memoryUsed) {
+          memoryUsedItem.data.push(parseFloat(item.memoryUsed));
+        }
       })
       let series = [cpuItem, memoryItem, diskItem];
+      if (memoryUsedItem.data.length > 0) {
+        series.push(memoryUsedItem);
+      }
+      let legends = series.map((data) => {
+        return data.name;
+      })
       // 指定图表的配置项和数据
-      let option = {
+      return {
         title: {
           text: "系统 Top 监控"
         },
@@ -133,7 +149,7 @@ export default {
           trigger: 'axis'
         },
         legend: {
-          data: ['cpu占用', '内存占用', '磁盘占用']
+          data: legends
         },
         grid: {
           left: '1%',
@@ -144,7 +160,7 @@ export default {
         xAxis: {
           type: 'category',
           boundaryGap: false,
-          data: this.topData.scales
+          data: data.scales
         },
         calculable: true,
         yAxis: {
@@ -156,10 +172,14 @@ export default {
           max: 100
         },
         dataZoom: [
-          { type: 'inside' }, { type: 'slider' }
+          {type: 'inside'}, {type: 'slider'}
         ],
         series: series
       };
+    },
+    // 绘制 top 图表
+    drawTopChart() {
+      let option = this.generateChart(this.topData);
       // 绘制图表
       const topChart = echarts.init(document.getElementById('top-chart'));
       topChart.setOption(option);
@@ -187,7 +207,7 @@ export default {
             nodeId: this.node.id,
             pid: record.pid
           }
-          killPid(params).then(res =>  {
+          killPid(params).then(res => {
             if (res.code === 200) {
               this.$notification.success({
                 message: res.msg,
@@ -226,70 +246,7 @@ export default {
     },
     // 画历史图表
     drawHistoryChart() {
-      let cpuItem = {
-          name: 'cpu占用',
-          type: 'line',
-          data: [],
-          showSymbol: false,
-          // 设置折线为曲线
-          smooth: true
-      };
-      let diskItem = {
-          name: '磁盘占用',
-          type: 'line',
-          data: [],
-          showSymbol: false,
-          smooth: true
-      };
-      let memoryItem = {
-          name: '内存占用',
-          type: 'line',
-          data: [],
-          showSymbol: false,
-          smooth: true
-      };
-      this.historyData.series.forEach(item => {
-        cpuItem.data.push(parseFloat(item.cpu));
-        diskItem.data.push(parseFloat(item.disk));
-        memoryItem.data.push(parseFloat(item.memory));
-      })
-      let series = [cpuItem, memoryItem, diskItem];
-      // 指定图表的配置项和数据
-      let option = {
-        title: {
-          text: "系统历史监控"
-        },
-        tooltip: {
-          trigger: 'axis'
-        },
-        legend: {
-          data: ['cpu占用', '内存占用', '磁盘占用']
-        },
-        grid: {
-          left: '1%',
-          right: '2%',
-          bottom: '1%',
-          containLabel: true
-        },
-        xAxis: {
-          type: 'category',
-          boundaryGap: false,
-          data: this.historyData.scales
-        },
-        calculable: true,
-        yAxis: {
-          type: 'value',
-          axisLabel: {
-            // 设置y轴数值为%
-            formatter: '{value} %'
-          },
-          max: 100
-        },
-        dataZoom: [
-          { type: 'inside' }, { type: 'slider' }
-        ],
-        series: series
-      };
+      let option = this.generateChart(this.historyData);
       // 绘制图表
       const historyChart = echarts.init(document.getElementById('history-chart'));
       historyChart.setOption(option);
@@ -299,15 +256,18 @@ export default {
 </script>
 <style scoped>
 #top-chart {
-  height: calc((100vh - 70px) / 2) ;
+  height: calc((100vh - 70px) / 2);
 }
+
 .filter {
   margin-bottom: 10px;
 }
+
 .filter-item {
   width: 150px;
   margin-right: 10px;
 }
+
 #history-chart {
   height: 60vh;
 }

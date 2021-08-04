@@ -3,7 +3,6 @@ package io.jpom.controller.build;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.lang.Validator;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.JsonMessage;
@@ -64,17 +63,6 @@ public class BuildListController extends BaseServerController {
 	private DbBuildHistoryLogService dbBuildHistoryLogService;
 	@Resource
 	private SshService sshService;
-
-//    @RequestMapping(value = "list.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
-//    @Feature(method = MethodFeature.LIST)
-//    public String list() {
-//        //通知方式
-//        JSONArray jsonArray = BaseEnum.toJSONArray(BuildModel.Status.class);
-//        setAttribute("statusArray", jsonArray);
-//        Set<String> set = buildService.listGroup();
-//        setAttribute("groupArray", set);
-//        return "build/list";
-//    }
 
 	/**
 	 * @return
