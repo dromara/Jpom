@@ -8,6 +8,7 @@ import io.jpom.model.BaseModel;
  * @see BuildModel
  */
 public class BuildInfoModel extends BaseModel {
+	public static final String TABLE_NAME = "BUILD_INFO";
 	/**
 	 * 构建 ID
 	 */

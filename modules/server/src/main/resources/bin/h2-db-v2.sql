@@ -25,7 +25,7 @@ CREATE TABLE IF NOT EXISTS PUBLIC.BUILD_INFO
     `NAME`       VARCHAR(50) comment '构建名称',
     BUILD_ID     int comment '构建 ID',
     `GROUP`      VARCHAR(50) comment '分组名称',
-    BRANCH_NANME VARCHAR(50) comment '分支',
+    BRANCH_NAME VARCHAR(50) comment '分支',
     SCRIPT       VARCHAR(200) comment '构建命令',
     RESULT_DIR_FILE VARCHAR(50) comment '构建产物目录',
     RELEASE_METHOD int comment '发布方法{0: 不发布, 1: 节点分发, 2: 分发项目, 3: SSH}',

@@ -10,6 +10,7 @@ import cn.jiangzeyin.common.DefaultSystemLog;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.common.Const;
+import io.jpom.model.data.BuildInfoModel;
 import io.jpom.model.data.RepositoryModel;
 import io.jpom.model.vo.BuildModelVo;
 import io.jpom.system.ConfigBean;
@@ -61,6 +62,34 @@ public class LoadBuildJsonToDB {
 	}
 
 	/**
+	 * list data to SQL
+	 * @param list data from build.json
+	 */
+	private void initSql(List<Object> list) {
+		// 加载类里面的属性，用反射获取
+		final List<String> repositoryFieldList = getRepositoryFieldList();
+		final List<String> buildInfoFieldList = getBuildInfoFieldList();
+
+		// 遍历对象集合
+		list.forEach(item -> {
+			BuildModelVo buildModelVo = JSON.parseObject(item.toString(), BuildModelVo.class);
+			DefaultSystemLog.getLog().info("buildModelVo: {}", JSON.toJSONString(buildModelVo));
+
+			// 拿到构造 SQL 的参数
+			Map<String, Object> repositoryParamMap = initSqlParamMap(repositoryFieldList, buildModelVo);
+			Map<String, Object> buildInfoParamMap = initSqlParamMap(buildInfoFieldList, buildModelVo);
+
+			// 构造 insert SQL 语句
+			String insertRepositorySql = initInsertSql(repositoryParamMap, RepositoryModel.TABLE_NAME);
+			String insertBuildInfoSql = initInsertSql(buildInfoParamMap, BuildInfoModel.TABLE_NAME);
+
+			// 插入数据库
+			insertToDB(insertRepositorySql);
+			insertToDB(insertBuildInfoSql);
+		});
+	}
+
+	/**
 	 * exec insert SQL to DB
 	 * @param sql SQL for insert
 	 */
@@ -78,56 +107,55 @@ public class LoadBuildJsonToDB {
 	}
 
 	/**
-	 * list data to SQL
-	 * @param list data from build.json
+	 * init insert SQL with param map and table name
+	 * @param paramMap
+	 * @param tableName
+	 * @return
 	 */
-	private void initSql(List<Object> list) {
-		// 加载类里面的属性，用反射获取
-		final List<String> fieldList = getFieldList();
+	private String initInsertSql(Map<String, Object> paramMap, String tableName) {
+		// 构造 insert SQL 语句
+		StringBuffer sqlBuffer = new StringBuffer("insert into {} ( ");
+		StringBuilder sqlFieldNameBuffer = new StringBuilder();
+		StringBuilder sqlFieldValueBuffer = new StringBuilder();
+		for (int i = 0; i < paramMap.size(); i++) {
+			sqlFieldNameBuffer.append("`{}`,");
+			sqlFieldValueBuffer.append("'{}',");
+		}
+		sqlBuffer.append(sqlFieldNameBuffer.substring(0, sqlFieldNameBuffer.length() - 1))
+				.append(" )")
+				.append(" values ( ")
+				.append(sqlFieldValueBuffer.substring(0, sqlFieldValueBuffer.length() - 1))
+				.append(" )");
 
-		// 遍历对象集合
-		list.forEach(item -> {
-			BuildModelVo buildModelVo = JSON.parseObject(item.toString(), BuildModelVo.class);
-			DefaultSystemLog.getLog().info("buildModelVo: {}", JSON.toJSONString(buildModelVo));
+		// 构造 SQL 参数
+		List<Object> params = new ArrayList<>();
+		params.add(tableName);
+		params.addAll(paramMap.keySet());
+		params.addAll(paramMap.values());
+		return StrUtil.format(sqlBuffer, params.toArray());
+	}
 
-			Map<String, Object> paramMap = new HashMap<>();
-			// 遍历类的属性集合，通过反射获取属性对应的值
-			fieldList.forEach(fieldName -> {
-				// 判断类里面是否有这个属性
-				if (ReflectUtil.hasField(BuildModelVo.class, fieldName)) {
-					final String getMethodName = StrUtil.upperFirstAndAddPre(StrUtil.toCamelCase(fieldName), Const.GET_STR);
-					Object filedValue = ReflectUtil.invoke(buildModelVo, getMethodName);
+	/**
+	 * init param map for create insert SQL
+	 * @param fieldList
+	 * @param buildModelVo
+	 * @return
+	 */
+	private Map<String, Object> initSqlParamMap(List<String> fieldList, BuildModelVo buildModelVo) {
+		Map<String, Object> map = new HashMap<>();
 
-					// 添加到参数对象中
-					String sqlFiledName = StrUtil.toUnderlineCase(fieldName).toUpperCase();
-					paramMap.put(sqlFiledName, filedValue);
-				}
-			});
+		fieldList.forEach(fieldName -> {
+			// 判断类里面是否有这个属性
+			if (ReflectUtil.hasField(BuildModelVo.class, fieldName)) {
+				final String getMethodName = StrUtil.upperFirstAndAddPre(StrUtil.toCamelCase(fieldName), Const.GET_STR);
+				Object filedValue = ReflectUtil.invoke(buildModelVo, getMethodName);
 
-			// 构造 insert SQL 语句
-			StringBuffer sqlBuffer = new StringBuffer("insert into {} ( ");
-			StringBuilder sqlFieldNameBuffer = new StringBuilder();
-			StringBuilder sqlFieldValueBuffer = new StringBuilder();
-			for (int i = 0; i < paramMap.size(); i++) {
-				sqlFieldNameBuffer.append("`{}`,");
-				sqlFieldValueBuffer.append("'{}',");
+				// 添加到参数对象中
+				String sqlFiledName = StrUtil.toUnderlineCase(fieldName).toUpperCase();
+				map.put(sqlFiledName, filedValue);
 			}
-			sqlBuffer.append(sqlFieldNameBuffer.substring(0, sqlFieldNameBuffer.length() - 1))
-					.append(" )")
-					.append(" values ( ")
-					.append(sqlFieldValueBuffer.substring(0, sqlFieldValueBuffer.length() - 1))
-					.append(" )");
-
-			// 构造 SQL 参数
-			List<Object> params = new ArrayList<>();
-			params.add(RepositoryModel.TABLE_NAME);
-			params.addAll(paramMap.keySet());
-			params.addAll(paramMap.values());
-			String sql = StrUtil.format(sqlBuffer, params.toArray());
-
-			// 插入数据库
-			insertToDB(sql);
 		});
+		return map;
 	}
 
 	/**
@@ -153,11 +181,23 @@ public class LoadBuildJsonToDB {
 	}
 
 	/**
-	 * 获取类里面的属性，转换成集合返回
+	 * 获取 RepositoryModel 类里面的属性，转换成集合返回
 	 * @return List<String>
 	 */
-	private List<String> getFieldList() {
+	private List<String> getRepositoryFieldList() {
 		final Field[] fields = ReflectUtil.getFieldsDirectly(RepositoryModel.class, true);
+		return Arrays.stream(fields)
+				.filter(field -> Modifier.isPrivate(field.getModifiers()))
+				.flatMap(field -> Arrays.stream(new String[]{field.getName()}))
+				.collect(Collectors.toList());
+	}
+
+	/**
+	 * 获取 BuildInfoModel 类里面的属性，转换成集合返回
+	 * @return List<String>
+	 */
+	private List<String> getBuildInfoFieldList() {
+		final Field[] fields = ReflectUtil.getFieldsDirectly(BuildInfoModel.class, true);
 		return Arrays.stream(fields)
 				.filter(field -> Modifier.isPrivate(field.getModifiers()))
 				.flatMap(field -> Arrays.stream(new String[]{field.getName()}))
