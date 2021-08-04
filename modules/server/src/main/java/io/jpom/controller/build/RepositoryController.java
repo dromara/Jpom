@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
+import java.util.stream.Collectors;
 
 /**
  * @author Hotstrip
@@ -33,14 +34,20 @@ public class RepositoryController {
 	 * load repository list
 	 * @param limit
 	 * @param page
+	 * @param repoType 仓库类型 0: GIT 1: SVN
 	 * @return
 	 */
 	@PostMapping(value = "/build/repository/list")
 	@Feature(method = MethodFeature.LOG)
 	public Object loadRepositoryList(@ValidatorConfig(value = {@ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "limit error")}, defaultVal = "10") int limit,
-									 @ValidatorConfig(value = {@ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "page error")}, defaultVal = "1") int page) {
+									 @ValidatorConfig(value = {@ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "page error")}, defaultVal = "1") int page,
+									 Integer repoType) {
 		Page pageObj = new Page(page, limit);
 		Entity entity = Entity.create();
+		//  add param
+		if (null != repoType) {
+			entity.set("repo_type", repoType);
+		}
 		PageResult<RepositoryModel> pageResult = repositoryService.listPage(entity, pageObj);
 		JSONObject jsonObject = JsonMessage.toJson(200, "获取成功", pageResult);
 		jsonObject.put("total", pageResult.getTotal());

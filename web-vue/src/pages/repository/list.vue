@@ -2,9 +2,10 @@
   <div>
     <!-- 搜索区 -->
     <div ref="filter" class="filter">
-      <a-select v-model="listQuery.group" allowClear placeholder="请选择分组"
+      <a-select v-model="listQuery.repoType" allowClear placeholder="请选择仓库类型"
         class="filter-item" @change="handleFilter">
-        <a-select-option v-for="group in groupList" :key="group">{{ group }}</a-select-option>
+        <a-select-option :value="'0'">GIT</a-select-option>
+        <a-select-option :value="'1'">SVN</a-select-option>
       </a-select>
       <a-button type="primary" @click="handleFilter">搜索</a-button>
       <a-button type="primary" @click="handleAdd">新增</a-button>
@@ -12,7 +13,7 @@
     </div>
     <!-- 表格 -->
     <a-table :loading="loading" :columns="columns" :data-source="list" :style="{'max-height': tableHeight + 'px' }"
-      :scroll="{x: 1210, y: tableHeight - 60}" bordered rowKey="id" :pagination="false">
+      :scroll="{x: 970, y: tableHeight - 120}" bordered rowKey="id" :pagination="pagination">
       <a-tooltip slot="name" slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>
@@ -42,9 +43,13 @@ export default {
   data() {
     return {
       loading: false,
-      listQuery: {},
+      listQuery: {
+        page: 1,
+        limit: 20
+      },
       tableHeight: '70vh',
       list: [],
+      total: 0,
       temp: {},
       editBuildVisible: false,
       columns: [
@@ -59,7 +64,7 @@ export default {
         {
             title: '仓库类型',
             dataIndex: 'repoType',
-            width: 80,
+            width: 100,
             ellipsis: true,
             scopedSlots: {customRender: 'repoType'}
         },
@@ -76,8 +81,7 @@ export default {
             dataIndex: 'operation',
             width: 240,
             scopedSlots: {customRender: 'operation'},
-            align: 'left',
-            fixed: 'right'
+            align: 'left'
         }
       ],
       rules: {
@@ -99,7 +103,23 @@ export default {
   computed: {
     ...mapGetters([
       'getGuideFlag'
-    ])
+    ]),
+    // 分页
+    pagination() {
+      return {
+        total: this.total,
+        current: this.listQuery.page || 1,
+        pageSize: this.listQuery.limit || 10,
+        pageSizeOptions: ['10', '20', '50', '100'],
+        showSizeChanger: true,
+        showTotal: (total) => {
+          if(total<=this.listQuery.limit){
+            return '';
+          }
+          return `总计 ${total} 条`;
+        }
+      }
+    }
   },
   watch: {
     getGuideFlag() {
