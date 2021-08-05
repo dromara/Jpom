@@ -2,9 +2,9 @@
 	<div>
 		<div ref="filter" class="filter">
 			<template v-if="copyId">
-				<a-button :disabled="replica.status" type="primary" @click="start">启动</a-button>
-				<a-button :disabled="!replica.status" type="danger" @click="restart">重启</a-button>
-				<a-button :disabled="!replica.status" type="danger" @click="stop">停止</a-button>
+				<a-button :disabled="replicaStatus" type="primary" @click="start">启动</a-button>
+				<a-button :disabled="!replicaStatus" type="danger" @click="restart">重启</a-button>
+				<a-button :disabled="!replicaStatus" type="danger" @click="stop">停止</a-button>
 				<a-button type="primary" @click="handleDownload">导出日志</a-button>
 				<a-tag color="#87d068">文件大小: {{ project.logSize }}</a-tag>
 			</template>
@@ -72,6 +72,7 @@ export default {
 	},
 	data() {
 		return {
+			replicaStatus: this.replica.status,
 			project: {},
 			loading: false,
 			socket: null,
@@ -146,14 +147,14 @@ export default {
 						// 如果操作是启动或者停止
 						if (res.op === 'stop') {
 							if (this.copyId) {
-								this.replica.status = false;
+								this.replicaStatus = false;
 							} else {
 								this.project.status = false;
 							}
 						}
 						if (res.op === 'start') {
 							if (this.copyId) {
-								this.replica.status = true;
+								this.replicaStatus = true;
 							} else {
 								this.project.status = true;
 							}
@@ -161,7 +162,7 @@ export default {
 						// 如果是 status
 						if (res.op === 'status') {
 							if (this.copyId) {
-								this.replica.status = true;
+								this.replicaStatus = true;
 							} else {
 								this.project.status = true;
 							}
@@ -173,7 +174,7 @@ export default {
 						});
 						// 设置未启动
 						if (this.copyId) {
-							this.replica.status = false;
+							this.replicaStatus = false;
 						} else {
 							this.project.status = false;
 						}
