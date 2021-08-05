@@ -25,7 +25,7 @@ import java.util.Map;
  * @author jiangzeyin
  * @date 2019/3/26
  */
-@PreLoadClass
+@PreLoadClass(value = Integer.MIN_VALUE)
 public class CheckPath {
 	/**
 	 * 待检查的类
