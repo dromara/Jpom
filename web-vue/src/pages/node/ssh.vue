@@ -16,17 +16,8 @@
       :scroll="{ x: 1040, y: tableHeight - 60 }"
     >
       <template slot="nodeId" slot-scope="text, record">
-        <a-button
-          v-if="!record.nodeModel"
-          type="primary"
-          @click="install(record)"
-          >安装节点</a-button
-        >
-        <a-tooltip
-          v-else
-          placement="topLeft"
-          :title="`${record.nodeModel.id} ( ${record.nodeModel.name} )`"
-        >
+        <a-button v-if="!record.nodeModel" type="primary" @click="install(record)">安装节点</a-button>
+        <a-tooltip v-else placement="topLeft" :title="`${record.nodeModel.id} ( ${record.nodeModel.name} )`">
           <a-button type="primary" @click="toNode(record.nodeModel)"
             >前往节点:
             {{ `${record.nodeModel.id} ( ${record.nodeModel.name} )` }}
@@ -36,49 +27,21 @@
       <template slot="operation" slot-scope="text, record">
         <a-button type="primary" @click="handleEdit(record)">编辑</a-button>
         <a-button type="primary" @click="handleTerminal(record)">终端</a-button>
-        <a-button type="primary" @click="handleViewLog(record)"
-          >操作日志</a-button
-        >
-        <a-button
-          type="primary"
-          :disabled="!record.fileDirs"
-          @click="handleFile(record)"
-          >文件</a-button
-        >
+        <a-button type="primary" @click="handleViewLog(record)">操作日志</a-button>
+        <a-button type="primary" :disabled="!record.fileDirs" @click="handleFile(record)">文件</a-button>
         <a-button type="danger" @click="handleDelete(record)">删除</a-button>
       </template>
     </a-table>
     <!-- 编辑区 -->
-    <a-modal
-      v-model="editSshVisible"
-      width="600px"
-      title="编辑 SSH"
-      @ok="handleEditSshOk"
-      :maskClosable="false"
-    >
-      <a-form-model
-        ref="editSshForm"
-        :rules="rules"
-        :model="temp"
-        :label-col="{ span: 4 }"
-        :wrapper-col="{ span: 18 }"
-      >
+    <a-modal v-model="editSshVisible" width="600px" title="编辑 SSH" @ok="handleEditSshOk" :maskClosable="false">
+      <a-form-model ref="editSshForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
         <a-form-model-item label="SSH 名称" prop="name">
           <a-input v-model="temp.name" placeholder="SSH 名称" />
         </a-form-model-item>
         <a-form-model-item label="Host" prop="host">
           <a-input-group compact prop="host">
-            <a-input
-              style="width: 70%"
-              v-model="temp.host"
-              placeholder="主机 Host"
-            />
-            <a-input-number
-              style="width: 30%"
-              v-model="temp.port"
-              :min="1"
-              placeholder="端口号"
-            />
+            <a-input style="width: 70%" v-model="temp.host" placeholder="主机 Host" />
+            <a-input-number style="width: 30%" v-model="temp.port" :min="1" placeholder="端口号" />
           </a-input-group>
         </a-form-model-item>
         <a-form-model-item label="认证方式" prop="connectType">
@@ -92,70 +55,27 @@
         <!--					<a-input-password v-model="temp.password" placeholder="密码"/>-->
         <!--				</a-form-model-item>-->
         <!-- 修改时可以不填写 -->
-        <a-form-model-item
-          label="Password"
-          :prop="`${
-            temp.type === 'add' && temp.connectType === 'PASS'
-              ? 'password'
-              : 'password-update'
-          }`"
-        >
-          <a-input-password
-            v-model="temp.password"
-            :placeholder="`${
-              temp.type === 'add' ? '密码' : '密码若没修改可以不用填写'
-            }`"
-          />
+        <a-form-model-item label="Password" :prop="`${temp.type === 'add' && temp.connectType === 'PASS' ? 'password' : 'password-update'}`">
+          <a-input-password v-model="temp.password" :placeholder="`${temp.type === 'add' ? '密码' : '密码若没修改可以不用填写'}`" />
         </a-form-model-item>
-        <a-form-model-item
-          v-if="temp.connectType === 'PUBKEY'"
-          label="私钥内容"
-          :prop="`${temp.type === 'add' ? 'privateKey' : ''}`"
-        >
-          <a-textarea
-            v-model="temp.privateKey"
-            :auto-size="{ minRows: 3, maxRows: 5 }"
-            placeholder="私钥内容"
-          />
+        <a-form-model-item v-if="temp.connectType === 'PUBKEY'" label="私钥内容" :prop="`${temp.type === 'add' ? 'privateKey' : ''}`">
+          <a-textarea v-model="temp.privateKey" :auto-size="{ minRows: 3, maxRows: 5 }" placeholder="私钥内容" />
         </a-form-model-item>
         <a-form-model-item label="编码格式" prop="charset">
           <a-input v-model="temp.charset" placeholder="编码格式" />
         </a-form-model-item>
         <a-form-model-item label="文件目录" prop="fileDirs">
-          <a-textarea
-            v-model="temp.fileDirs"
-            :auto-size="{ minRows: 3, maxRows: 5 }"
-            placeholder="授权可以直接访问的目录，多个回车换行即可"
-          />
+          <a-textarea v-model="temp.fileDirs" :auto-size="{ minRows: 3, maxRows: 5 }" placeholder="授权可以直接访问的目录，多个回车换行即可" />
         </a-form-model-item>
         <a-form-model-item label="禁止命令" prop="notAllowedCommand">
-          <a-textarea
-            v-model="temp.notAllowedCommand"
-            :auto-size="{ minRows: 3, maxRows: 5 }"
-            placeholder="禁止命令是不允许在终端执行的名，多个逗号隔开"
-          />
+          <a-textarea v-model="temp.notAllowedCommand" :auto-size="{ minRows: 3, maxRows: 5 }" placeholder="禁止命令是不允许在终端执行的名，多个逗号隔开" />
         </a-form-model-item>
       </a-form-model>
     </a-modal>
     <!-- 安装节点 -->
-    <a-modal
-      v-model="nodeVisible"
-      width="600px"
-      title="安装节点"
-      @ok="handleEditNodeOk"
-      :maskClosable="false"
-    >
-      <a-spin
-        :spinning="formLoading"
-        tip="这可能会花费一些时间，请勿关闭该页面"
-      >
-        <a-form-model
-          ref="nodeForm"
-          :rules="rules"
-          :model="tempNode"
-          :label-col="{ span: 4 }"
-          :wrapper-col="{ span: 18 }"
-        >
+    <a-modal v-model="nodeVisible" width="600px" title="安装节点" @ok="handleEditNodeOk" :maskClosable="false">
+      <a-spin :spinning="formLoading" tip="这可能会花费一些时间，请勿关闭该页面">
+        <a-form-model ref="nodeForm" :rules="rules" :model="tempNode" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
           <a-form-model-item label="节点 ID" prop="id">
             <a-input v-model="tempNode.id" placeholder="节点 ID" />
           </a-form-model-item>
@@ -163,32 +83,20 @@
             <a-input v-model="tempNode.name" placeholder="节点名称" />
           </a-form-model-item>
           <a-form-model-item label="节点协议" prop="protocol">
-            <a-select
-              v-model="tempNode.protocol"
-              defaultValue="http"
-              placeholder="节点协议"
-            >
+            <a-select v-model="tempNode.protocol" defaultValue="http" placeholder="节点协议">
               <a-select-option key="http">HTTP</a-select-option>
               <a-select-option key="https">HTTPS</a-select-option>
             </a-select>
           </a-form-model-item>
           <a-form-model-item label="节点地址" prop="url">
-            <a-input
-              v-model="tempNode.url"
-              placeholder="节点地址 (127.0.0.1:2123)"
-            />
+            <a-input v-model="tempNode.url" placeholder="节点地址 (127.0.0.1:2123)" />
           </a-form-model-item>
           <a-form-model-item label="安装路径" prop="path">
             <a-input v-model="tempNode.path" placeholder="安装路径" />
           </a-form-model-item>
           <a-form-model-item label="安装文件">
             <div class="clearfix">
-              <a-upload
-                :file-list="fileList"
-                :remove="handleRemove"
-                :before-upload="beforeUpload"
-                accept=".zip"
-              >
+              <a-upload :file-list="fileList" :remove="handleRemove" :before-upload="beforeUpload" accept=".zip">
                 <a-button>
                   <a-icon type="upload" />
                   选择文件
@@ -198,52 +106,23 @@
           </a-form-model-item>
           <template slot="footer">
             <a-button key="back" @click="nodeVisible = false">Cancel</a-button>
-            <a-button
-              key="submit"
-              type="primary"
-              :loadingg="formLoading"
-              @click="handleEditNodeOk"
-              >Ok</a-button
-            >
+            <a-button key="submit" type="primary" :loadingg="formLoading" @click="handleEditNodeOk">Ok</a-button>
           </template>
         </a-form-model>
       </a-spin>
     </a-modal>
     <!-- 文件管理 -->
-    <a-drawer
-      :title="drawerTitle"
-      placement="right"
-      width="90vw"
-      :visible="drawerVisible"
-      @close="onClose"
-    >
+    <a-drawer :title="drawerTitle" placement="right" width="90vw" :visible="drawerVisible" @close="onClose">
       <ssh-file v-if="drawerVisible" :ssh="temp" />
     </a-drawer>
     <!-- Terminal -->
-    <a-modal
-      v-model="terminalVisible"
-      width="80%"
-      :title="temp.name"
-      :footer="null"
-      :maskClosable="false"
-    >
+    <a-modal v-model="terminalVisible" width="80%" :title="temp.name" :footer="null" :maskClosable="false">
       <terminal v-if="terminalVisible" :sshId="temp.id" />
     </a-modal>
     <!-- 操作日志 -->
-    <a-modal
-      v-model="viewOperationLog"
-      title="操作日志"
-      width="60vw"
-      :footer="null"
-      :maskClosable="false"
-    >
+    <a-modal v-model="viewOperationLog" title="操作日志" width="60vw" :footer="null" :maskClosable="false">
       <div ref="filter" class="filter">
-        <a-range-picker
-          class="filter-item"
-          :show-time="{ format: 'HH:mm:ss' }"
-          format="YYYY-MM-DD HH:mm:ss"
-          @change="onchangeListLogTime"
-        />
+        <a-range-picker class="filter-item" :show-time="{ format: 'HH:mm:ss' }" format="YYYY-MM-DD HH:mm:ss" @change="onchangeListLogTime" />
         <a-button type="primary" @click="handleListLog">搜索</a-button>
         <a-button type="primary" @click="handleListLog">刷新</a-button>
       </div>
@@ -257,28 +136,13 @@
         bordered
         :rowKey="(record, index) => index"
       >
-        <a-tooltip
-          slot="commands"
-          slot-scope="text"
-          placement="topLeft"
-          :title="text"
-        >
+        <a-tooltip slot="commands" slot-scope="text" placement="topLeft" :title="text">
           <span>{{ text }}</span>
         </a-tooltip>
-        <a-tooltip
-          slot="userAgent"
-          slot-scope="text"
-          placement="topLeft"
-          :title="text"
-        >
+        <a-tooltip slot="userAgent" slot-scope="text" placement="topLeft" :title="text">
           <span>{{ text }}</span>
         </a-tooltip>
-        <a-tooltip
-          slot="refuse"
-          slot-scope="text"
-          placement="topLeft"
-          :title="text"
-        >
+        <a-tooltip slot="refuse" slot-scope="text" placement="topLeft" :title="text">
           <span>{{ text ? "成功" : "拒绝" }}</span>
         </a-tooltip>
       </a-table>
@@ -286,13 +150,7 @@
   </div>
 </template>
 <script>
-import {
-  deleteSsh,
-  editSsh,
-  getSshList,
-  getSshOperationLogList,
-  installAgentNode,
-} from "../../api/ssh";
+import { deleteSsh, editSsh, getSshList, getSshOperationLogList, installAgentNode } from "../../api/ssh";
 import SshFile from "./ssh-file";
 import Terminal from "./terminal";
 import { parseTime } from "../../utils/time";
@@ -389,18 +247,10 @@ export default {
       // 表单校验规则
       rules: {
         id: [{ required: true, message: "Please input id", trigger: "blur" }],
-        name: [
-          { required: true, message: "Please input name", trigger: "blur" },
-        ],
-        host: [
-          { required: true, message: "Please input host", trigger: "blur" },
-        ],
-        port: [
-          { required: true, message: "Please input port", trigger: "blur" },
-        ],
-        protocol: [
-          { required: true, message: "Please input protocol", trigger: "blur" },
-        ],
+        name: [{ required: true, message: "Please input name", trigger: "blur" }],
+        host: [{ required: true, message: "Please input host", trigger: "blur" }],
+        port: [{ required: true, message: "Please input port", trigger: "blur" }],
+        protocol: [{ required: true, message: "Please input protocol", trigger: "blur" }],
         connectType: [
           {
             required: true,
@@ -408,19 +258,11 @@ export default {
             trigger: "blur",
           },
         ],
-        user: [
-          { required: true, message: "Please input user", trigger: "blur" },
-        ],
-        password: [
-          { required: true, message: "Please input password", trigger: "blur" },
-        ],
-        privateKey: [
-          { required: true, message: "Please input key", trigger: "blur" },
-        ],
+        user: [{ required: true, message: "Please input user", trigger: "blur" }],
+        password: [{ required: true, message: "Please input password", trigger: "blur" }],
+        privateKey: [{ required: true, message: "Please input key", trigger: "blur" }],
         url: [{ required: true, message: "Please input url", trigger: "blur" }],
-        path: [
-          { required: true, message: "Please input path", trigger: "blur" },
-        ],
+        path: [{ required: true, message: "Please input path", trigger: "blur" }],
       },
     };
   },
@@ -449,8 +291,7 @@ export default {
     // 计算表格高度
     calcTableHeight() {
       this.$nextTick(() => {
-        this.tableHeight =
-          window.innerHeight - this.$refs["filter"].clientHeight - 135;
+        this.tableHeight = window.innerHeight - this.$refs["filter"].clientHeight - 135;
       });
     },
     // 加载数据

@@ -1,14 +1,15 @@
 <template>
   <a-config-provider :locale="locale">
-  <div id="app">
-    <router-view />
-  </div>
+    <div id="app">
+      <router-view/>
+    </div>
   </a-config-provider>
 </template>
 
 <script>
 
 import zhCN from 'ant-design-vue/lib/locale-provider/zh_CN';
+
 export default {
   name: 'App',
   data() {
@@ -16,8 +17,7 @@ export default {
       locale: zhCN,
     };
   },
-  components: {
-  },
+  components: {},
   created() {
     this.$notification.config({
       top: '100px',

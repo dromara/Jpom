@@ -80,7 +80,11 @@ babel配置文件， 关于项目编译期间的一些配置
 
 
 
+## 开发工具建议
 
+> 使用 Visual Studio Code (VS)
 
+> 需要插件：
+> 1. prettier (代码格式化)
 
 
