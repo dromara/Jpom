@@ -23,10 +23,6 @@
     "icon_v3": "apartment",
     "childs": [
       {
-        "id": "repository",
-        "title": "仓库信息"
-      },
-      {
         "id": "outgiving",
         "title": "分发列表"
       },
@@ -64,6 +60,10 @@
     "title": "在线构建",
     "icon_v3": "build",
     "childs": [
+      {
+        "id": "repository",
+        "title": "仓库信息"
+      },
       {
         "id": "buildList",
         "title": "构建列表"

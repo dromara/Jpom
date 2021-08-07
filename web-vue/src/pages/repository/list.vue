@@ -30,10 +30,26 @@
         <a-button type="danger" @click="handleDelete(record)">删除</a-button>
       </template>
     </a-table>
+    <!-- 编辑区 -->
+    <a-modal v-model="editVisible" title="编辑仓库" @ok="handleEditOk" :maskClosable="false">
+      <a-form-model ref="editRoleForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }">
+        <a-form-model-item label="仓库名称" prop="name">
+          <a-input v-model="temp.name" placeholder="仓库名称"/>
+        </a-form-model-item>
+        <a-form-model-item label="仓库地址" prop="gitUrl">
+          <a-input-group compact>
+            <a-select style="width: 20%" v-model="temp.repoType" name="repoType" placeholder="仓库类型">
+              <a-select-option :value="0">GIT</a-select-option>
+              <a-select-option :value="1">SVN</a-select-option>
+            </a-select>
+            <a-input style="width: 80%" v-model="temp.gitUrl" placeholder="仓库地址"/>
+          </a-input-group>
+        </a-form-model-item>
+      </a-form-model>
+    </a-modal>
   </div>
 </template>
 <script>
-import {mapGetters} from 'vuex';
 import { getRepositoryList } from '../../api/repository';
 import {parseTime} from '../../utils/time';
 
@@ -51,9 +67,9 @@ export default {
       list: [],
       total: 0,
       temp: {},
-      editBuildVisible: false,
+      editVisible: false,
       columns: [
-        {title: '名称', dataIndex: 'name', width: 150, ellipsis: true, scopedSlots: {customRender: 'name'}},
+        {title: '仓库名称', dataIndex: 'name', width: 150, ellipsis: true, scopedSlots: {customRender: 'name'}},
         {
           title: '仓库地址',
           dataIndex: 'gitUrl',
@@ -62,11 +78,11 @@ export default {
           scopedSlots: {customRender: 'gitUrl'}
         },
         {
-            title: '仓库类型',
-            dataIndex: 'repoType',
-            width: 100,
-            ellipsis: true,
-            scopedSlots: {customRender: 'repoType'}
+          title: '仓库类型',
+          dataIndex: 'repoType',
+          width: 100,
+          ellipsis: true,
+          scopedSlots: {customRender: 'repoType'}
         },
         {
           title: '修改时间', dataIndex: 'modifyTime', customRender: (text) => {
@@ -88,69 +104,45 @@ export default {
           name: [
               {required: true, message: 'Please input build name', trigger: 'blur'}
           ],
-          script: [
-              {required: true, message: 'Please input build script', trigger: 'blur'}
-          ],
-          resultDirFile: [
-              {required: true, message: 'Please input build target path', trigger: 'blur'}
-          ],
-          releasePath: [
-              {required: true, message: 'Please input release path', trigger: 'blur'}
+          gitUrl: [
+              {required: true, message: 'Please input git url', trigger: 'blur'}
           ]
-      }
-    }
-  },
-  computed: {
-    ...mapGetters([
-      'getGuideFlag'
-    ]),
-    // 分页
-    pagination() {
-      return {
-        total: this.total,
-        current: this.listQuery.page || 1,
-        pageSize: this.listQuery.limit || 10,
-        pageSizeOptions: ['10', '20', '50', '100'],
-        showSizeChanger: true,
-        showTotal: (total) => {
-          if(total<=this.listQuery.limit){
-            return '';
-          }
-          return `总计 ${total} 条`;
         }
       }
-    }
-  },
-  watch: {
-    getGuideFlag() {
-      this.introGuide();
-    }
-  },
-  created() {
-    this.calcTableHeight();
-    this.handleFilter();
-  },
-  methods: {
-      // 页面引导
-      introGuide() {
-          if (this.getGuideFlag) {
-              this.$introJs().setOptions({
-                  hidePrev: true,
-                  steps: [{
-                    title: 'Jpom 导航助手',
-                    element: document.querySelector('.jpom-target-dir'),
-                    intro: '可以理解为项目打包的目录。如 Jpom 项目执行 <b>mvn clean package</b> 构建命令，构建产物相对路径为：<b>modules/server/target/server-2.4.2-release</b>'
-                  }]
-              }).start();
-              return false;
+    },
+    computed: {
+      // 分页
+      pagination() {
+        return {
+          total: this.total,
+          current: this.listQuery.page || 1,
+          pageSize: this.listQuery.limit || 10,
+          pageSizeOptions: ['10', '20', '50', '100'],
+          showSizeChanger: true,
+          showTotal: (total) => {
+            if(total<=this.listQuery.limit){
+              return '';
+            }
+            return `总计 ${total} 条`;
           }
-          this.$introJs().exit();
-      },
+        }
+      }
+    },
+    watch: {
+      getGuideFlag() {
+        this.introGuide();
+      }
+    },
+    created() {
+      this.calcTableHeight();
+      this.handleFilter();
+    },
+    methods: {
       // 计算表格高度
       calcTableHeight() {
-          this.$nextTick(() => {
-              this.tableHeight = window.innerHeight - this.$refs['filter'].clientHeight - 135;
-          })
+        this.$nextTick(() => {
+          this.tableHeight = window.innerHeight - this.$refs['filter'].clientHeight - 135;
+        })
       },
       // 加载数据
       loadData() {
@@ -169,71 +161,61 @@ export default {
       },
       // 添加
       handleAdd() {
-        this.temp = {};
-        this.editBuildVisible = true;
-        this.$nextTick(() => {
-          setTimeout(() => {
-            this.introGuide();
-          }, 500);
-        })
+        this.temp = {
+          repoType: 0
+        };
+        this.editVisible = true;
       },
       // 修改
       handleEdit(record) {
           this.temp = Object.assign(record);
           this.editBuildVisible = true;
       },
-      // 添加分组
-      handleAddGroup() {
-          this.$notification.success({
-            message: '添加成功',
-            duration: 2
-          });
-          this.addGroupvisible = false;
-      },
       // 提交节点数据
-      handleEditBuildOk() {
-          // 检验表单
-          this.$refs['editBuildForm'].validate((valid) => {
-              if (!valid) {
-                  return false;
-              }
-              // 提交数据
-              // editBuild(this.temp).then(res => {
-              //     if (res.code === 200) {
-              //         // 成功
-              //         this.$notification.success({
-              //             message: res.msg,
-              //             duration: 2
-              //         });
-              //         this.$refs['editBuildForm'].resetFields();
-              //         this.editBuildVisible = false;
-              //         this.handleFilter();
-              //     }
-              // })
-          })
-      },
-      // 删除
-      handleDelete(record) {
-        console.log(record);
-        this.$confirm({
-          title: '系统提示',
-          content: '真的要删除构建信息么？',
-          okText: '确认',
-          cancelText: '取消',
-          onOk: () => {
-            // 删除
-            // deleteBuild(record.id).then((res) => {
-            //   if (res.code === 200) {
-            //     this.$notification.success({
-            //       message: res.msg,
-            //       duration: 2
-            //     });
-            //     this.loadData();
-            //   }
-            // })
+      handleEditOk() {
+        // 检验表单
+        this.$refs['editBuildForm'].validate((valid) => {
+          if (!valid) {
+              return false;
           }
-        });
-      }
+          // 提交数据
+          // editBuild(this.temp).then(res => {
+          //     if (res.code === 200) {
+          //         // 成功
+          //         this.$notification.success({
+          //             message: res.msg,
+          //             duration: 2
+          //         });
+          //         this.$refs['editBuildForm'].resetFields();
+          //         this.editBuildVisible = false;
+          //         this.handleFilter();
+          //     }
+          // })
+        })
+    },
+    // 删除
+    handleDelete(record) {
+      console.log(record)
+      this.$confirm({
+        title: '系统提示',
+        content: '真的要删除构建信息么？',
+        okText: '确认',
+        cancelText: '取消',
+        onOk: () => {
+          // 删除
+          // deleteBuild(record.id).then((res) => {
+          //   if (res.code === 200) {
+          //     this.$notification.success({
+          //       message: res.msg,
+          //       duration: 2
+          //     });
+          //     this.loadData();
+          //   }
+          // })
+          }
+        }
+      );
+    }
   }
 }
 </script>
