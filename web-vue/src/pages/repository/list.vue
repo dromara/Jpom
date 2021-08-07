@@ -32,7 +32,7 @@
     </a-table>
     <!-- 编辑区 -->
     <a-modal v-model="editVisible" title="编辑仓库" @ok="handleEditOk" :maskClosable="false">
-      <a-form-model ref="editRoleForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }">
+      <a-form-model ref="editForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }">
         <a-form-model-item label="仓库名称" prop="name">
           <a-input v-model="temp.name" placeholder="仓库名称"/>
         </a-form-model-item>
@@ -93,129 +93,126 @@ export default {
           }, width: 180
         },
         {
-            title: '操作',
-            dataIndex: 'operation',
-            width: 240,
-            scopedSlots: {customRender: 'operation'},
-            align: 'left'
+          title: '操作',
+          dataIndex: 'operation',
+          width: 240,
+          scopedSlots: {customRender: 'operation'},
+          align: 'left'
         }
       ],
       rules: {
-          name: [
-              {required: true, message: 'Please input build name', trigger: 'blur'}
-          ],
-          gitUrl: [
-              {required: true, message: 'Please input git url', trigger: 'blur'}
-          ]
+        name: [
+          {required: true, message: 'Please input build name', trigger: 'blur'}
+        ],
+        gitUrl: [
+          {required: true, message: 'Please input git url', trigger: 'blur'}
+        ]
         }
       }
-    },
-    computed: {
-      // 分页
-      pagination() {
-        return {
-          total: this.total,
-          current: this.listQuery.page || 1,
-          pageSize: this.listQuery.limit || 10,
-          pageSizeOptions: ['10', '20', '50', '100'],
-          showSizeChanger: true,
-          showTotal: (total) => {
-            if(total<=this.listQuery.limit){
-              return '';
-            }
-            return `总计 ${total} 条`;
+  },
+  computed: {
+    // 分页
+    pagination() {
+      return {
+        total: this.total,
+        current: this.listQuery.page || 1,
+        pageSize: this.listQuery.limit || 10,
+        pageSizeOptions: ['10', '20', '50', '100'],
+        showSizeChanger: true,
+        showTotal: (total) => {
+          if(total<=this.listQuery.limit){
+            return '';
           }
+          return `总计 ${total} 条`;
         }
       }
-    },
-    watch: {
-      getGuideFlag() {
-        this.introGuide();
-      }
-    },
-    created() {
-      this.calcTableHeight();
-      this.handleFilter();
-    },
-    methods: {
-      // 计算表格高度
-      calcTableHeight() {
-        this.$nextTick(() => {
-          this.tableHeight = window.innerHeight - this.$refs['filter'].clientHeight - 135;
-        })
-      },
-      // 加载数据
-      loadData() {
-        this.list = [];
-        this.loading = true;
-        getRepositoryList(this.listQuery).then(res => {
-          if (res.code === 200) {
-            this.list = res.data;
-          }
-          this.loading = false;
-        })
-      },
-      // 筛选
-      handleFilter() {
-        this.loadData();
-      },
-      // 添加
-      handleAdd() {
-        this.temp = {
-          repoType: 0
-        };
-        this.editVisible = true;
-      },
-      // 修改
-      handleEdit(record) {
-          this.temp = Object.assign(record);
-          this.editBuildVisible = true;
-      },
-      // 提交节点数据
-      handleEditOk() {
-        // 检验表单
-        this.$refs['editBuildForm'].validate((valid) => {
-          if (!valid) {
-              return false;
-          }
-          // 提交数据
-          // editBuild(this.temp).then(res => {
-          //     if (res.code === 200) {
-          //         // 成功
-          //         this.$notification.success({
-          //             message: res.msg,
-          //             duration: 2
-          //         });
-          //         this.$refs['editBuildForm'].resetFields();
-          //         this.editBuildVisible = false;
-          //         this.handleFilter();
-          //     }
-          // })
-        })
-    },
-    // 删除
-    handleDelete(record) {
-      console.log(record)
-      this.$confirm({
-        title: '系统提示',
-        content: '真的要删除构建信息么？',
-        okText: '确认',
-        cancelText: '取消',
-        onOk: () => {
-          // 删除
-          // deleteBuild(record.id).then((res) => {
-          //   if (res.code === 200) {
-          //     this.$notification.success({
-          //       message: res.msg,
-          //       duration: 2
-          //     });
-          //     this.loadData();
-          //   }
-          // })
-          }
-        }
-      );
     }
+  },
+  watch: {
+  },
+  created() {
+    this.calcTableHeight();
+    this.handleFilter();
+  },
+  methods: {
+    // 计算表格高度
+    calcTableHeight() {
+      this.$nextTick(() => {
+        this.tableHeight = window.innerHeight - this.$refs['filter'].clientHeight - 135;
+      })
+    },
+    // 加载数据
+    loadData() {
+      this.list = [];
+      this.loading = true;
+      getRepositoryList(this.listQuery).then(res => {
+        if (res.code === 200) {
+          this.list = res.data;
+        }
+        this.loading = false;
+      })
+    },
+    // 筛选
+    handleFilter() {
+      this.loadData();
+    },
+    // 添加
+    handleAdd() {
+      this.temp = {
+        repoType: 0
+      };
+      this.editVisible = true;
+    },
+    // 修改
+    handleEdit(record) {
+      this.temp = Object.assign(record);
+      this.editVisible = true;
+    },
+    // 提交节点数据
+    handleEditOk() {
+      // 检验表单
+      this.$refs['editForm'].validate((valid) => {
+        if (!valid) {
+          return false;
+        }
+        // 提交数据
+        // editBuild(this.temp).then(res => {
+        //     if (res.code === 200) {
+        //         // 成功
+        //         this.$notification.success({
+        //             message: res.msg,
+        //             duration: 2
+        //         });
+        //         this.$refs['editForm'].resetFields();
+        //         this.editBuildVisible = false;
+        //         this.handleFilter();
+        //     }
+        // })
+      })
+  },
+  // 删除
+  handleDelete(record) {
+    console.log(record)
+    this.$confirm({
+      title: '系统提示',
+      content: '真的要删除构建信息么？',
+      okText: '确认',
+      cancelText: '取消',
+      onOk: () => {
+        // 删除
+        // deleteBuild(record.id).then((res) => {
+        //   if (res.code === 200) {
+        //     this.$notification.success({
+        //       message: res.msg,
+        //       duration: 2
+        //     });
+        //     this.loadData();
+        //   }
+        // })
+        }
+      }
+    );
+  }
   }
 }
 </script>
