@@ -5,6 +5,8 @@ import cn.hutool.core.util.IdUtil;
 import cn.hutool.db.Entity;
 import cn.hutool.db.Page;
 import cn.hutool.db.PageResult;
+import cn.hutool.db.sql.Direction;
+import cn.hutool.db.sql.Order;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.validator.ValidatorConfig;
 import cn.jiangzeyin.common.validator.ValidatorItem;
@@ -46,10 +48,11 @@ public class RepositoryController {
 									 @ValidatorConfig(value = {@ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "page error")}, defaultVal = "1") int page,
 									 Integer repoType) {
 		Page pageObj = new Page(page, limit);
+		pageObj.addOrder(new Order("modifyTime", Direction.DESC));
 		Entity entity = Entity.create();
 		//  add param
 		if (null != repoType) {
-			entity.set("repo_type", repoType);
+			entity.set("repoType", repoType);
 		}
 		PageResult<RepositoryModel> pageResult = repositoryService.listPage(entity, pageObj);
 		JSONObject jsonObject = JsonMessage.toJson(200, "获取成功", pageResult);
