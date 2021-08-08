@@ -20,10 +20,16 @@
       <a-tooltip slot="gitUrl" slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>
-      <template slot="repoType" slot-scope="text">
-          <span v-if="text === 0">GIT</span>
-          <span v-else-if="text === 1">SVN</span>
-          <span v-else>未知</span>
+    <template slot="repoType" slot-scope="text">
+        <span v-if="text === 0">GIT</span>
+        <span v-else-if="text === 1">SVN</span>
+        <span v-else>未知</span>
+      </template>
+      <template slot="protocol" slot-scope="text, record">
+        <span v-if="text === 0">HTTP(S)</span>
+        <span v-else-if="text === 1">SSH</span>
+        <!-- if no protocol value, get a default value from gitUrl -->
+        <span v-else>{{record.gitUrl.indexOf('http') > -1 ? 'HTTP(S)' : 'SSH'}}</span>
       </template>
       <template slot="operation" slot-scope="text, record">
         <a-button type="primary" @click="handleEdit(record)">编辑</a-button>
@@ -45,12 +51,18 @@
             <a-input style="width: 80%" v-model="temp.gitUrl" placeholder="仓库地址"/>
           </a-input-group>
         </a-form-model-item>
+        <a-form-model-item label="协议" prop="protocol">
+          <a-radio-group v-model="temp.protocol" name="protocol">
+            <a-radio :value="0">HTTP(S)</a-radio>
+            <a-radio :value="1">SSH</a-radio>
+          </a-radio-group>
+        </a-form-model-item>
       </a-form-model>
     </a-modal>
   </div>
 </template>
 <script>
-import { getRepositoryList } from '../../api/repository';
+import { getRepositoryList, editRepository, deleteRepository } from '../../api/repository';
 import {parseTime} from '../../utils/time';
 
 export default {
@@ -83,6 +95,13 @@ export default {
           width: 100,
           ellipsis: true,
           scopedSlots: {customRender: 'repoType'}
+        },
+        {
+          title: '协议',
+          dataIndex: 'protocol',
+          width: 100,
+          ellipsis: true,
+          scopedSlots: {customRender: 'protocol'}
         },
         {
           title: '修改时间', dataIndex: 'modifyTime', customRender: (text) => {
@@ -159,13 +178,18 @@ export default {
     // 添加
     handleAdd() {
       this.temp = {
-        repoType: 0
+        repoType: 0,
+        protocol: 0
       };
       this.editVisible = true;
     },
     // 修改
     handleEdit(record) {
       this.temp = Object.assign(record);
+      if (!this.temp.protocol) {
+        this.temp.protocol = this.temp.gitUrl.indexOf('http') > -1 ? 0 : 1;
+      }
+      this.temp = {...this.temp};
       this.editVisible = true;
     },
     // 提交节点数据
@@ -176,43 +200,43 @@ export default {
           return false;
         }
         // 提交数据
-        // editBuild(this.temp).then(res => {
-        //     if (res.code === 200) {
-        //         // 成功
-        //         this.$notification.success({
-        //             message: res.msg,
-        //             duration: 2
-        //         });
-        //         this.$refs['editForm'].resetFields();
-        //         this.editBuildVisible = false;
-        //         this.handleFilter();
-        //     }
-        // })
+        editRepository(this.temp).then(res => {
+          if (res.code === 200) {
+            // 成功
+            this.$notification.success({
+              message: res.msg,
+              duration: 2
+            });
+            this.$refs['editForm'].resetFields();
+            this.editVisible = false;
+            this.handleFilter();
+          }
+        })
       })
-  },
-  // 删除
-  handleDelete(record) {
-    console.log(record)
-    this.$confirm({
-      title: '系统提示',
-      content: '真的要删除构建信息么？',
-      okText: '确认',
-      cancelText: '取消',
-      onOk: () => {
-        // 删除
-        // deleteBuild(record.id).then((res) => {
-        //   if (res.code === 200) {
-        //     this.$notification.success({
-        //       message: res.msg,
-        //       duration: 2
-        //     });
-        //     this.loadData();
-        //   }
-        // })
+    },
+    // 删除
+    handleDelete(record) {
+      console.log(record)
+      this.$confirm({
+        title: '系统提示',
+        content: '真的要删除仓库信息么？',
+        okText: '确认',
+        cancelText: '取消',
+        onOk: () => {
+          // 删除
+          deleteRepository(record.id).then((res) => {
+            if (res.code === 200) {
+              this.$notification.success({
+                message: res.msg,
+                duration: 2
+              });
+              this.loadData();
+            }
+          })
+          }
         }
-      }
-    );
-  }
+      );
+    }
   }
 }
 </script>

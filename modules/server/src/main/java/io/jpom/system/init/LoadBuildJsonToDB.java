@@ -163,7 +163,7 @@ public class LoadBuildJsonToDB {
 				Object filedValue = ReflectUtil.invoke(buildModelVo, getMethodName);
 
 				// 添加到参数对象中
-				String sqlFiledName = StrUtil.toUnderlineCase(fieldName).toUpperCase();
+				String sqlFiledName = fieldName.toUpperCase();
 				map.put(sqlFiledName, filedValue);
 			}
 		});
