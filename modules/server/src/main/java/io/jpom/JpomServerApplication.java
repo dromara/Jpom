@@ -23,26 +23,26 @@ import org.springframework.boot.web.servlet.ServletComponentScan;
 public class JpomServerApplication implements ApplicationEventLoad {
 
 
-    /**
-     * 启动执行
-     *
-     * @param args 参数
-     * @throws Exception 异常
-     */
-    public static void main(String[] args) throws Exception {
-        JpomApplication jpomApplication = new JpomApplication(Type.Server, JpomServerApplication.class, args);
-        jpomApplication
-                // 拦截器
-                .addInterceptor(IpInterceptor.class)
-                .addInterceptor(LoginInterceptor.class)
-                .addInterceptor(OpenApiInterceptor.class)
-                .addInterceptor(PermissionInterceptor.class)
-                .run(args);
-    }
+	/**
+	 * 启动执行
+	 *
+	 * @param args 参数
+	 * @throws Exception 异常
+	 */
+	public static void main(String[] args) throws Exception {
+		JpomApplication jpomApplication = new JpomApplication(Type.Server, JpomServerApplication.class, args);
+		jpomApplication
+				// 拦截器
+				.addInterceptor(IpInterceptor.class)
+				.addInterceptor(LoginInterceptor.class)
+				.addInterceptor(OpenApiInterceptor.class)
+				.addInterceptor(PermissionInterceptor.class)
+				.run(args);
+	}
 
 
-    @Override
-    public void applicationLoad() {
-        CacheControllerFeature.init();
-    }
+	@Override
+	public void applicationLoad() {
+		CacheControllerFeature.init();
+	}
 }

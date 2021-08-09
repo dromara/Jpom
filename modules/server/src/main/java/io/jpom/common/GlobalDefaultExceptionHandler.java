@@ -1,6 +1,5 @@
 package io.jpom.common;
 
-import cn.hutool.cache.impl.TimedCache;
 import cn.hutool.core.exceptions.ExceptionUtil;
 import cn.hutool.extra.servlet.ServletUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
@@ -15,7 +14,6 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.nio.file.AccessDeniedException;
-import java.util.concurrent.TimeUnit;
 
 /**
  * 全局异常处理
@@ -25,11 +23,11 @@ import java.util.concurrent.TimeUnit;
  */
 @ControllerAdvice
 public class GlobalDefaultExceptionHandler {
-	private static final TimedCache<String, String> TIMED_CACHE = new TimedCache<>(TimeUnit.MINUTES.toMillis(1));
-
-	public static String getErrorMsg(String id) {
-		return TIMED_CACHE.get(id);
-	}
+//	private static final TimedCache<String, String> TIMED_CACHE = new TimedCache<>(TimeUnit.MINUTES.toMillis(1));
+//
+//	public static String getErrorMsg(String id) {
+//		return TIMED_CACHE.get(id);
+//	}
 
 	/**
 	 * 声明要捕获的异常

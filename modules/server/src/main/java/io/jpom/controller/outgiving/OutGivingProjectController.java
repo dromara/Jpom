@@ -49,62 +49,62 @@ import java.util.Objects;
 @RequestMapping(value = "/outgiving")
 @Feature(cls = ClassFeature.OUTGIVING)
 public class OutGivingProjectController extends BaseServerController {
-    @Resource
-    private OutGivingServer outGivingServer;
-    @Resource
-    private ProjectInfoService projectInfoService;
+	@Resource
+	private OutGivingServer outGivingServer;
+	@Resource
+	private ProjectInfoService projectInfoService;
 
-    @RequestMapping(value = "getProjectStatus", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseBody
-    public String getProjectStatus() {
-        return NodeForward.request(getNode(), getRequest(), NodeUrl.Manage_GetProjectStatus).toString();
-    }
+	@RequestMapping(value = "getProjectStatus", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody
+	public String getProjectStatus() {
+		return NodeForward.request(getNode(), getRequest(), NodeUrl.Manage_GetProjectStatus).toString();
+	}
 
 
-    @RequestMapping(value = "getItemData.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseBody
-    public String getItemData(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "id error") String id) throws IOException {
-        OutGivingModel outGivingServerItem = outGivingServer.getItem(id);
-        Objects.requireNonNull(outGivingServerItem, "没有数据");
-        List<OutGivingNodeProject> outGivingNodeProjectList = outGivingServerItem.getOutGivingNodeProjectList();
-        JSONArray jsonArray = new JSONArray();
-        outGivingNodeProjectList.forEach(outGivingNodeProject -> {
-            NodeModel nodeModel = nodeService.getItem(outGivingNodeProject.getNodeId());
-            JSONObject jsonObject = new JSONObject();
-            JSONObject projectInfo = null;
-            try {
-                projectInfo = projectInfoService.getItem(nodeModel, outGivingNodeProject.getProjectId());
-            } catch (Exception e) {
-                jsonObject.put("errorMsg", "error " + e.getMessage());
-            }
+	@RequestMapping(value = "getItemData.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody
+	public String getItemData(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "id error") String id) throws IOException {
+		OutGivingModel outGivingServerItem = outGivingServer.getItem(id);
+		Objects.requireNonNull(outGivingServerItem, "没有数据");
+		List<OutGivingNodeProject> outGivingNodeProjectList = outGivingServerItem.getOutGivingNodeProjectList();
+		JSONArray jsonArray = new JSONArray();
+		outGivingNodeProjectList.forEach(outGivingNodeProject -> {
+			NodeModel nodeModel = nodeService.getItem(outGivingNodeProject.getNodeId());
+			JSONObject jsonObject = new JSONObject();
+			JSONObject projectInfo = null;
+			try {
+				projectInfo = projectInfoService.getItem(nodeModel, outGivingNodeProject.getProjectId());
+			} catch (Exception e) {
+				jsonObject.put("errorMsg", "error " + e.getMessage());
+			}
 
-            jsonObject.put("nodeId", outGivingNodeProject.getNodeId());
-            jsonObject.put("projectId", outGivingNodeProject.getProjectId());
-            jsonObject.put("nodeName", nodeModel.getName());
-            if (projectInfo != null) {
-                jsonObject.put("projectName", projectInfo.getString("name"));
-            }
+			jsonObject.put("nodeId", outGivingNodeProject.getNodeId());
+			jsonObject.put("projectId", outGivingNodeProject.getProjectId());
+			jsonObject.put("nodeName", nodeModel.getName());
+			if (projectInfo != null) {
+				jsonObject.put("projectName", projectInfo.getString("name"));
+			}
 
-            // set projectStatus property
-            //NodeModel node = nodeService.getItem(outGivingNodeProject.getNodeId());
-            // Project Status: data.pid > 0 means running
-            JSONObject projectStatus = JsonMessage.toJson(200, "success");
-            if (nodeModel.isOpenStatus()) {
-                projectStatus = NodeForward.requestBySys(nodeModel, NodeUrl.Manage_GetProjectStatus, "id", outGivingNodeProject.getProjectId()).toJson();
-            }
-            if (projectStatus.getJSONObject("data") != null && projectStatus.getJSONObject("data").getInteger("pId") != null) {
-                jsonObject.put("projectStatus", projectStatus.getJSONObject("data").getIntValue("pId") > 0);
-            } else {
-                jsonObject.put("projectStatus", false);
-            }
+			// set projectStatus property
+			//NodeModel node = nodeService.getItem(outGivingNodeProject.getNodeId());
+			// Project Status: data.pid > 0 means running
+			JSONObject projectStatus = JsonMessage.toJson(200, "success");
+			if (nodeModel.isOpenStatus()) {
+				projectStatus = NodeForward.requestBySys(nodeModel, NodeUrl.Manage_GetProjectStatus, "id", outGivingNodeProject.getProjectId()).toJson();
+			}
+			if (projectStatus.getJSONObject("data") != null && projectStatus.getJSONObject("data").getInteger("pId") != null) {
+				jsonObject.put("projectStatus", projectStatus.getJSONObject("data").getIntValue("pId") > 0);
+			} else {
+				jsonObject.put("projectStatus", false);
+			}
 
-            jsonObject.put("outGivingStatus", outGivingNodeProject.getStatusMsg());
-            jsonObject.put("outGivingResult", outGivingNodeProject.getResult());
-            jsonObject.put("lastTime", outGivingNodeProject.getLastOutGivingTime());
-            jsonArray.add(jsonObject);
-        });
-        return JsonMessage.getString(200, "", jsonArray);
-    }
+			jsonObject.put("outGivingStatus", outGivingNodeProject.getStatusMsg());
+			jsonObject.put("outGivingResult", outGivingNodeProject.getResult());
+			jsonObject.put("lastTime", outGivingNodeProject.getLastOutGivingTime());
+			jsonArray.add(jsonObject);
+		});
+		return JsonMessage.getString(200, "", jsonArray);
+	}
 
 //
 //    @RequestMapping(value = "addOutgiving", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
@@ -119,59 +119,59 @@ public class OutGivingProjectController extends BaseServerController {
 //        return "outgiving/addOutgiving";
 //    }
 
-    /**
-     * 节点分发文件
-     *
-     * @param id       分发id
-     * @param afterOpt 之后的操作
-     * @return json
-     * @throws IOException IO
-     */
-    @RequestMapping(value = "upload", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseBody
-    @OptLog(UserOperateLogV1.OptType.UploadOutGiving)
-    @Feature(method = MethodFeature.UPLOAD)
-    public String upload(String id, String afterOpt, String clearOld) throws IOException {
-        OutGivingModel outGivingModel = outGivingServer.getItem(id);
-        if (outGivingModel == null) {
-            return JsonMessage.getString(400, "上传失败,没有找到对应的分发项目");
-        }
-        // 检查状态
-        List<OutGivingNodeProject> outGivingNodeProjectList = outGivingModel.getOutGivingNodeProjectList();
-        Objects.requireNonNull(outGivingNodeProjectList);
-        for (OutGivingNodeProject outGivingNodeProject : outGivingNodeProjectList) {
-            if (outGivingNodeProject.getStatus() == OutGivingNodeProject.Status.Ing.getCode()) {
-                return JsonMessage.getString(400, "当前还在分发中,请等待分发结束");
-            }
-        }
-        AfterOpt afterOpt1 = BaseEnum.getEnum(AfterOpt.class, Convert.toInt(afterOpt, 0));
-        if (afterOpt1 == null) {
-            return JsonMessage.getString(400, "请选择分发后的操作");
-        }
-        MultipartFileBuilder multipartFileBuilder = createMultipart();
-        multipartFileBuilder
-                .setFileExt(StringUtil.PACKAGE_EXT)
-                .addFieldName("file")
-                .setSavePath(ServerConfigBean.getInstance().getUserTempPath().getAbsolutePath());
-        String path = multipartFileBuilder.save();
-        //
-        File src = FileUtil.file(path);
-        File dest = null;
-        for (String i : StringUtil.PACKAGE_EXT) {
-            if (FileUtil.pathEndsWith(src, i)) {
-                dest = FileUtil.file(ConfigBean.getInstance().getDataPath(), ServerConfigBean.OUTGIVING_FILE, id + "." + i);
-                break;
-            }
-        }
-        FileUtil.move(src, dest, true);
-        //
-        outGivingModel = outGivingServer.getItem(id);
-        outGivingModel.setClearOld(Convert.toBool(clearOld, false));
-        outGivingModel.setAfterOpt(afterOpt1.getCode());
+	/**
+	 * 节点分发文件
+	 *
+	 * @param id       分发id
+	 * @param afterOpt 之后的操作
+	 * @return json
+	 * @throws IOException IO
+	 */
+	@RequestMapping(value = "upload", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody
+	@OptLog(UserOperateLogV1.OptType.UploadOutGiving)
+	@Feature(method = MethodFeature.UPLOAD)
+	public String upload(String id, String afterOpt, String clearOld) throws IOException {
+		OutGivingModel outGivingModel = outGivingServer.getItem(id);
+		if (outGivingModel == null) {
+			return JsonMessage.getString(400, "上传失败,没有找到对应的分发项目");
+		}
+		// 检查状态
+		List<OutGivingNodeProject> outGivingNodeProjectList = outGivingModel.getOutGivingNodeProjectList();
+		Objects.requireNonNull(outGivingNodeProjectList);
+		for (OutGivingNodeProject outGivingNodeProject : outGivingNodeProjectList) {
+			if (outGivingNodeProject.getStatus() == OutGivingNodeProject.Status.Ing.getCode()) {
+				return JsonMessage.getString(400, "当前还在分发中,请等待分发结束");
+			}
+		}
+		AfterOpt afterOpt1 = BaseEnum.getEnum(AfterOpt.class, Convert.toInt(afterOpt, 0));
+		if (afterOpt1 == null) {
+			return JsonMessage.getString(400, "请选择分发后的操作");
+		}
+		MultipartFileBuilder multipartFileBuilder = createMultipart();
+		multipartFileBuilder
+				.setFileExt(StringUtil.PACKAGE_EXT)
+				.addFieldName("file")
+				.setSavePath(ServerConfigBean.getInstance().getUserTempPath().getAbsolutePath());
+		String path = multipartFileBuilder.save();
+		//
+		File src = FileUtil.file(path);
+		File dest = null;
+		for (String i : StringUtil.PACKAGE_EXT) {
+			if (FileUtil.pathEndsWith(src, i)) {
+				dest = FileUtil.file(ConfigBean.getInstance().getDataPath(), ServerConfigBean.OUTGIVING_FILE, id + "." + i);
+				break;
+			}
+		}
+		FileUtil.move(src, dest, true);
+		//
+		outGivingModel = outGivingServer.getItem(id);
+		outGivingModel.setClearOld(Convert.toBool(clearOld, false));
+		outGivingModel.setAfterOpt(afterOpt1.getCode());
 
-        outGivingServer.updateItem(outGivingModel);
-        // 开启
-        OutGivingRun.startRun(outGivingModel.getId(), dest, getUser(), true);
-        return JsonMessage.getString(200, "分发成功");
-    }
+		outGivingServer.updateItem(outGivingModel);
+		// 开启
+		OutGivingRun.startRun(outGivingModel.getId(), dest, getUser(), true);
+		return JsonMessage.getString(200, "分发成功");
+	}
 }
