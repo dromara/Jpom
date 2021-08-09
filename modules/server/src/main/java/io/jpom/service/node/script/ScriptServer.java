@@ -18,20 +18,20 @@ import javax.annotation.Resource;
 @Service
 public class ScriptServer implements BaseDynamicService {
 
-    @Resource
-    private NodeService nodeService;
+	@Resource
+	private NodeService nodeService;
 
-    @Override
-    public JSONArray listToArray(String dataId) {
-        NodeModel item = nodeService.getItem(dataId);
-        if (!item.isOpenStatus()) {
-            return null;
-        }
-        return listToArray(item);
-    }
+	@Override
+	public JSONArray listToArray(String dataId) {
+		NodeModel item = nodeService.getItem(dataId);
+		if (item == null || !item.isOpenStatus()) {
+			return null;
+		}
+		return listToArray(item);
+	}
 
-    public JSONArray listToArray(NodeModel nodeModel) {
-        JSONArray jsonArray = NodeForward.requestData(nodeModel, NodeUrl.Script_List, null, JSONArray.class);
-        return filter(jsonArray, ClassFeature.SCRIPT);
-    }
+	public JSONArray listToArray(NodeModel nodeModel) {
+		JSONArray jsonArray = NodeForward.requestData(nodeModel, NodeUrl.Script_List, null, JSONArray.class);
+		return filter(jsonArray, ClassFeature.SCRIPT);
+	}
 }

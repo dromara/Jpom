@@ -40,44 +40,45 @@ public class SystemUpdateController extends BaseServerController {
 //        return "system/update";
 //    }
 
-    @RequestMapping(value = "info", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseBody
-    @SystemPermission
-    public String info() {
-        NodeModel nodeModel = tryGetNode();
-        if (nodeModel != null) {
-            return NodeForward.request(getNode(), getRequest(), NodeUrl.Info).toString();
-        }
-        return JsonMessage.getString(200, "", JpomManifest.getInstance());
-    }
+	@RequestMapping(value = "info", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody
+	@SystemPermission
+	public String info() {
+		NodeModel nodeModel = tryGetNode();
+		if (nodeModel != null) {
+			return NodeForward.request(getNode(), getRequest(), NodeUrl.Info).toString();
+		}
+		return JsonMessage.getString(200, "", JpomManifest.getInstance());
+	}
 
-    @RequestMapping(value = "uploadJar.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseBody
-    @OptLog(UserOperateLogV1.OptType.UpdateSys)
-    @SystemPermission
-    public String uploadJar() throws IOException {
-        NodeModel nodeModel = tryGetNode();
-        if (nodeModel != null) {
-            return NodeForward.requestMultipart(getNode(), getMultiRequest(), NodeUrl.SystemUploadJar).toString();
-        }
-        //
-        Objects.requireNonNull(JpomManifest.getScriptFile());
-        MultipartFileBuilder multipartFileBuilder = createMultipart();
-        multipartFileBuilder
-                .setFileExt("jar")
-                .addFieldName("file")
-                .setUseOriginalFilename(true)
-                .setSavePath(ServerConfigBean.getInstance().getUserTempPath().getAbsolutePath());
-        String path = multipartFileBuilder.save();
-        // 基础检查
-        JsonMessage<Tuple> error = JpomManifest.checkJpomJar(path, JpomServerApplication.class);
-        if (error.getCode() != HttpStatus.HTTP_OK) {
-            return error.toString();
-        }
-        String version = error.getMsg();
-        JpomManifest.releaseJar(path, version);
-        //
-        JpomApplication.restart();
-        return JsonMessage.getString(200, "升级中大约需要30秒");
-    }
+	@RequestMapping(value = "uploadJar.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody
+	@OptLog(UserOperateLogV1.OptType.UpdateSys)
+	@SystemPermission
+	public String uploadJar() throws IOException {
+		NodeModel nodeModel = tryGetNode();
+		if (nodeModel != null) {
+			return NodeForward.requestMultipart(getNode(), getMultiRequest(), NodeUrl.SystemUploadJar).toString();
+		}
+		//
+		Objects.requireNonNull(JpomManifest.getScriptFile());
+		MultipartFileBuilder multipartFileBuilder = createMultipart();
+		multipartFileBuilder
+				.setFileExt("jar")
+				.addFieldName("file")
+				.setUseOriginalFilename(true)
+				.setSavePath(ServerConfigBean.getInstance().getUserTempPath().getAbsolutePath());
+		String path = multipartFileBuilder.save();
+		// 基础检查
+		JsonMessage<Tuple> error = JpomManifest.checkJpomJar(path, JpomServerApplication.class);
+		if (error.getCode() != HttpStatus.HTTP_OK) {
+			return error.toString();
+		}
+		Tuple data = error.getData();
+		String version = data.get(0);
+		JpomManifest.releaseJar(path, version);
+		//
+		JpomApplication.restart();
+		return JsonMessage.getString(200, "升级中大约需要30秒");
+	}
 }

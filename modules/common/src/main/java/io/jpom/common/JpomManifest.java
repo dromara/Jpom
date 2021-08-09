@@ -94,7 +94,7 @@ public class JpomManifest {
 	 * 根据 jar 文件解析 jpom 版本信息
 	 *
 	 * @param jarFile 文件
-	 * @return 版本 和 打包时间
+	 * @return 版本,打包时间, mainClass
 	 */
 	private static Tuple getJarVersion(File jarFile) {
 		Manifest manifest = ManifestUtil.getManifest(jarFile);
