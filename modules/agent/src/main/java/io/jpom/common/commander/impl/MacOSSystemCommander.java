@@ -132,7 +132,7 @@ public class MacOSSystemCommander extends AbstractSystemCommander {
 			DefaultSystemLog.getLog().debug("process item: {}", item);
 			List<String> values = StrSplitter.splitTrim(item, StrUtil.SPACE, true);
 			DefaultSystemLog.getLog().debug(JSON.toJSONString(values));
-			processModel.setPid(Integer.parseInt(values.get(0)));
+			processModel.setPid(Convert.toInt(values.get(0),0));
 			processModel.setPort(values.get(6));
 			processModel.setCommand(values.get(1));
 			processModel.setCpu(values.get(2) + "%");
