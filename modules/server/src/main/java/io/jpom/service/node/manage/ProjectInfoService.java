@@ -34,7 +34,7 @@ public class ProjectInfoService implements BaseDynamicService {
 
 
 	public JSONArray listAll(NodeModel nodeModel, HttpServletRequest request) {
-		if (!nodeModel.isOpenStatus()) {
+		if (nodeModel == null || !nodeModel.isOpenStatus()) {
 			return null;
 		}
 		JSONArray jsonArray;
