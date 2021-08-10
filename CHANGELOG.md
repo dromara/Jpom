@@ -34,8 +34,9 @@
 11. 【server】请求节点发生异常打印具体堆栈、接口异常拦截器里面默认不打印堆栈 （根据 Gitee  [issues I3O8YE](https://gitee.com/dromara/Jpom/issues/I3O8YE) ）
 12. 【server】节点升级中偶尔出现无法获取到对应的版本信息问题（感谢@misaka Gitee issues [I41TDY](https://gitee.com/dromara/Jpom/issues/I41TDY) ）
 13. 本地运行数据目录位置改为`${user.home}/jpom/xxxx`、日志路径改为项目模块下
-14. 【agent】升级 `commons-compress` 依赖
+14. 【agent】升级 `commons-compress` 依赖 （来自 GitHub [advisories](https://github.com/advisories) ）
 15. agent 和 server 间的 websocket 鉴权调整
+16. 【server】update: 刷新整个页面的时候重新加载菜单
 
 > 注意：升级到该版本需要保证 agent、server 都保持同步，如果只升级 server 会出现项目控制台等功能无法正常使用
 
