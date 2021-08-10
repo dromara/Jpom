@@ -54,6 +54,14 @@ public class ServerExtConfigBean {
 	private String dbUserPwd;
 
 	/**
+	 * @author Hotstrip
+	 * 是否开启 web 访问数据库
+	 * @see （url: http://${ip}:${port}/h2-console）
+	 */
+	@Value("${db.h2-console-enabled:false}")
+	private boolean h2ConsoleEnabled;
+
+	/**
 	 * 服务端api token,长度要求大于等于6位，字母数字符号组合
 	 */
 	@Value("${jpom.authorize.token:}")
@@ -150,6 +158,10 @@ public class ServerExtConfigBean {
 
 	public String getDbUserPwd() {
 		return StrUtil.emptyToDefault(this.dbUserPwd, "jpom");
+	}
+
+	public boolean isH2ConsoleEnabled() {
+		return h2ConsoleEnabled;
 	}
 
 	public byte[] getAuthorizeKey() {

@@ -4,6 +4,7 @@ import cn.hutool.core.date.DatePattern;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.CharsetUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.system.SystemUtil;
 import cn.jiangzeyin.common.ApplicationBuilder;
 import cn.jiangzeyin.common.validator.ParameterInterceptor;
@@ -13,15 +14,18 @@ import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
+import io.jpom.common.Const;
 import io.jpom.common.JpomApplicationEvent;
 import io.jpom.common.JpomManifest;
 import io.jpom.common.Type;
 import io.jpom.common.interceptor.PluginFeatureInterceptor;
 import io.jpom.plugin.PluginFactory;
 import io.jpom.util.CommandUtil;
+import org.springframework.core.env.Environment;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.util.Assert;
 
 import java.io.File;
 import java.nio.charset.Charset;
@@ -100,7 +104,7 @@ public class JpomApplication extends ApplicationBuilder {
 		build.registerModule(simpleModule);
 		//
 		build.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.ANY);
-		//        build.activateDefaultTyping(objectMapper.getPolymorphicTypeValidator(), ObjectMapper.DefaultTyping.NON_FINAL, JsonTypeInfo.As.WRAPPER_ARRAY);
+//        build.activateDefaultTyping(objectMapper.getPolymorphicTypeValidator(), ObjectMapper.DefaultTyping.NON_FINAL, JsonTypeInfo.As.WRAPPER_ARRAY);
 
 		return build;
 	}
@@ -127,7 +131,20 @@ public class JpomApplication extends ApplicationBuilder {
 		return charset;
 	}
 
+	/**
+	 * 获取当前程序的类型
+	 *
+	 * @return Agent 或者 Server
+	 */
 	public static Type getAppType() {
+		if (appType == null) {
+			// 从配置文件中获取
+			Environment environment = JpomApplication.getEnvironment();
+			String property = environment.getProperty(Const.APPLICATION_NAME);
+			property = StrUtil.removeAll(property, "jpom");
+			Assert.hasLength(property, "请配置程序类型：" + Const.APPLICATION_NAME);
+			appType = Type.valueOf(property);
+		}
 		return appType;
 	}
 
@@ -144,6 +161,7 @@ public class JpomApplication extends ApplicationBuilder {
 	public static void restart() {
 		File scriptFile = JpomManifest.getScriptFile();
 		ThreadUtil.execute(() -> {
+			// Waiting for method caller,For example, the interface response
 			try {
 				Thread.sleep(2000);
 			} catch (InterruptedException ignored) {

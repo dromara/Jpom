@@ -35,6 +35,7 @@ import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
 import java.io.File;
@@ -45,29 +46,22 @@ import java.util.Objects;
 import java.util.Set;
 
 /**
- * 构建列表
- *
- * @author bwcx_jzy
- * @date 2019/7/16
- *
+ * 构建列表，新版本，数据存放到数据库，不再是文件了
+ * 以前的数据会在程序启动时插入到数据库中
  * @author Hotstrip
- * @date 2021-08-09 更新构建信息到数据库，暂时废弃这个类
- * @see BuildInfoController
+ * @date 2021-08-09
  */
-@Controller
-@RequestMapping(value = "/build")
+@RestController
 @Feature(cls = ClassFeature.BUILD)
-@Deprecated
-public class BuildListController extends BaseServerController {
+public class BuildInfoController extends BaseServerController {
 
 	@Resource
 	private BuildService buildService;
 	@Resource
-	private OutGivingServer outGivingServer;
-	@Resource
 	private DbBuildHistoryLogService dbBuildHistoryLogService;
 	@Resource
 	private SshService sshService;
+
 
 	/**
 	 * @return
@@ -75,14 +69,14 @@ public class BuildListController extends BaseServerController {
 	 * get build group list
 	 * 获取构建分组列表
 	 */
-	@RequestMapping(value = "group-list", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+	@RequestMapping(value = "/build/group-list", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public String groupList() {
 		Set<String> set = buildService.listGroup();
 		return JsonMessage.getString(200, "success", set);
 	}
 
-	@RequestMapping(value = "list_data.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+	@RequestMapping(value = "/build/list_data.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
 	@Feature(method = MethodFeature.LIST)
 	public String getMonitorList(String group) {
@@ -99,7 +93,7 @@ public class BuildListController extends BaseServerController {
 		return JsonMessage.getString(200, "", list);
 	}
 
-	@RequestMapping(value = "updateBuild", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+	@RequestMapping(value = "/build/updateBuild", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
 	@OptLog(UserOperateLogV1.OptType.EditBuild)
 	@Feature(method = MethodFeature.EDIT)
@@ -258,54 +252,7 @@ public class BuildListController extends BaseServerController {
 		return null;
 	}
 
-//    @RequestMapping(value = "edit.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
-//    @Feature(method = MethodFeature.EDIT)
-//    public String edit(String id) {
-//        BuildModel buildModel = null;
-//        if (StrUtil.isNotEmpty(id)) {
-//            buildModel = buildService.getItem(id);
-//        }
-//        setAttribute("model", buildModel);
-//        //
-//        JSONArray releaseMethods = BaseEnum.toJSONArray(BuildModel.ReleaseMethod.class);
-//        // 获取ssh 相关信息
-//        List<SshModel> list = sshService.list();
-//        if (list == null || list.isEmpty()) {
-//            releaseMethods = releaseMethods.stream().filter(o -> {
-//                JSONObject jsonObject = (JSONObject) o;
-//                return jsonObject.getIntValue("code") != BuildModel.ReleaseMethod.Ssh.getCode();
-//            }).collect(Collectors.toCollection(JSONArray::new));
-//
-//        } else {
-//            //
-//            setAttribute("sshArray", list);
-//        }
-//        setAttribute("releaseMethods", releaseMethods);
-//        Set<String> set = buildService.listGroup();
-//        if (set.isEmpty()) {
-//            set.add("默认");
-//        }
-//        setAttribute("groupArray", set);
-//        //
-//        List<OutGivingModel> outGivingModels = outGivingServer.list();
-//        setAttribute("outGivingModels", outGivingModels);
-//
-//        //
-//        List<NodeModel> nodeModels = nodeService.listAndProject();
-//        setAttribute("nodeModels", nodeModels);
-//        //
-//        JSONArray jsonArray = BaseEnum.toJSONArray(AfterOpt.class);
-//        setAttribute("afterOpt", jsonArray);
-//        //
-//        JSONArray outAfterOpt = BaseEnum.toJSONArray(AfterOpt.class);
-//        setAttribute("outAfterOpt", outAfterOpt);
-//        //
-//        JSONArray repoTypes = BaseEnum.toJSONArray(BuildModel.RepoType.class);
-//        setAttribute("repoTypes", repoTypes);
-//        return "build/edit";
-//    }
-
-	@RequestMapping(value = "branchList.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+	@RequestMapping(value = "/build/branchList.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public String branchList(
 			@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "仓库地址不正确")) String url,
@@ -316,7 +263,7 @@ public class BuildListController extends BaseServerController {
 	}
 
 
-	@RequestMapping(value = "delete.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+	@RequestMapping(value = "/build/delete.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
 	@OptLog(UserOperateLogV1.OptType.DelBuild)
 	@Feature(method = MethodFeature.DEL)
@@ -335,7 +282,7 @@ public class BuildListController extends BaseServerController {
 	}
 
 
-	@RequestMapping(value = "cleanSource.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+	@RequestMapping(value = "/build/cleanSource.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
 	@OptLog(UserOperateLogV1.OptType.BuildCleanSource)
 	@Feature(method = MethodFeature.EXECUTE)

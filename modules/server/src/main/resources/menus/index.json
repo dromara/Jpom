@@ -62,6 +62,10 @@
     "icon_v3": "build",
     "childs": [
       {
+        "id": "repository",
+        "title": "仓库信息"
+      },
+      {
         "id": "buildList",
         "title": "构建列表"
       },

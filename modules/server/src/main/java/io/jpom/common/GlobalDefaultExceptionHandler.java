@@ -85,7 +85,12 @@ public class GlobalDefaultExceptionHandler {
 	public void agentExceptionHandler(HttpServletRequest request, HttpServletResponse response, AgentException e) {
 		Throwable cause = e.getCause();
 		if (cause != null) {
-			DefaultSystemLog.getLog().error("controller " + request.getRequestURI(), cause);
+			/**
+			 * @author Hotstrip
+			 * @date 2021-08-01
+			 * only show exception message rather than exception object
+			 */
+			DefaultSystemLog.getLog().error("controller " + request.getRequestURI(), cause.getMessage());
 		}
 		ServletUtil.write(response, JsonMessage.getString(405, e.getMessage()), MediaType.APPLICATION_JSON_VALUE);
 	}

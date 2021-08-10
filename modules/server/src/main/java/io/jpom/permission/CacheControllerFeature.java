@@ -86,7 +86,7 @@ public class CacheControllerFeature {
 			if (classFeature == ClassFeature.NULL) {
 				return;
 			}
-			RequestMapping requestMapping = aClass.getAnnotation(RequestMapping.class);
+			String clsUrl = getClassUrl(aClass);
 			//
 			Set<MethodFeature> methodFeatures1 = FEATURE_MAP.computeIfAbsent(classFeature, classFeature1 -> new HashSet<>());
 			Method[] publicMethods = ReflectUtil.getPublicMethods(aClass);
@@ -101,29 +101,55 @@ public class CacheControllerFeature {
 				if (methodFeature == MethodFeature.NULL) {
 					continue;
 				}
-				String val = StrUtil.EMPTY;
-				RequestMapping methodAnnotation = publicMethod.getAnnotation(RequestMapping.class);
-				if (methodAnnotation == null) {
-					GetMapping getMapping = publicMethod.getAnnotation(GetMapping.class);
-					if (getMapping == null) {
-						PostMapping postMapping = publicMethod.getAnnotation(PostMapping.class);
-						if (postMapping != null) {
-							val = postMapping.value()[0];
-						}
-					} else {
-						val = getMapping.value()[0];
-					}
-				} else {
-					val = methodAnnotation.value()[0];
-				}
+				//
+				String methodUrl = getMethodUrl(publicMethod);
 				methodFeatures.add(methodFeature);
 				//
-				String format = String.format("/%s/%s", requestMapping.value()[0], val);
+				String format = String.format("/%s/%s", clsUrl, methodUrl);
 				format = FileUtil.normalize(format);
 				URL_FEATURE_MAP.put(format, new UrlFeature(format, classFeature, methodFeature));
 			}
 			methodFeatures1.addAll(methodFeatures);
 		});
+	}
+
+	/**
+	 * 获取类上的url
+	 *
+	 * @param aClass class
+	 * @return url
+	 */
+	private static String getClassUrl(Class<?> aClass) {
+		RequestMapping requestMapping = aClass.getAnnotation(RequestMapping.class);
+		if (requestMapping == null) {
+			return StrUtil.SLASH;
+		}
+		return requestMapping.value()[0];
+	}
+
+	/**
+	 * 获取方法名上的url
+	 *
+	 * @param publicMethod 方法对象
+	 * @return url
+	 */
+	private static String getMethodUrl(Method publicMethod) {
+		String val = StrUtil.EMPTY;
+		RequestMapping methodAnnotation = publicMethod.getAnnotation(RequestMapping.class);
+		if (methodAnnotation == null) {
+			GetMapping getMapping = publicMethod.getAnnotation(GetMapping.class);
+			if (getMapping == null) {
+				PostMapping postMapping = publicMethod.getAnnotation(PostMapping.class);
+				if (postMapping != null) {
+					val = postMapping.value()[0];
+				}
+			} else {
+				val = getMapping.value()[0];
+			}
+		} else {
+			val = methodAnnotation.value()[0];
+		}
+		return val;
 	}
 
 	public static class UrlFeature {

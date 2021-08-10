@@ -140,7 +140,7 @@ public class NodeForward {
 			 * revert version and add log print
 			 * @author jzy 2021-08-01 add exception
 			 */
-			DefaultSystemLog.getLog().error("node [{}] connect failed", nodeModel.getName(), e);
+			DefaultSystemLog.getLog().error("node [{}] connect failed...message: [{}]", nodeModel.getName(), e.getMessage());
 			throw new AgentException(nodeModel.getName() + "节点异常：" + e.getMessage());
 		}
 		//

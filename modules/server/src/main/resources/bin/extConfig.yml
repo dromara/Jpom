@@ -34,6 +34,12 @@ db:
   userName:
   # 数据库密码
   userPwd:
+# spring 相关配置
+spring:
+  h2:
+    console:
+      # 是否开启 web 访问数据库（url: http://${ip}:${port}/h2-console）
+      enabled: true
 # 构建相关配置
 build:
   # 最多保存多少份历史记录

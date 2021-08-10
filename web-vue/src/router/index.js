@@ -55,6 +55,11 @@ const children = [
     component: () => import('../pages/monitor/operate-log')
   },
   {
+    path: '/repository/list',
+    name: 'repository-list',
+    component: () => import('../pages/repository/list')
+  },
+  {
     path: '/build/list',
     name: 'build-list',
     component: () => import('../pages/build/list')
