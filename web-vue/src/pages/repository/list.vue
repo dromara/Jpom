@@ -57,6 +57,26 @@
             <a-radio :value="1">SSH</a-radio>
           </a-radio-group>
         </a-form-model-item>
+        <!-- HTTP(S) protocol use password -->
+        <template v-if="temp.protocol === 0">
+          <a-form-model-item label="账号" prop="userName">
+            <a-input v-model="temp.userName" placeholder="登录用户">
+              <a-icon slot="prefix" type="user" />
+            </a-input>
+          </a-form-model-item>
+          <a-form-model-item label="密码" prop="password">
+            <a-input-password v-model="temp.password" placeholder="登录密码">
+              <a-icon slot="prefix" type="lock" />
+            </a-input-password>
+          </a-form-model-item>
+        </template>
+        <!-- SSH protocol use rsa public key -->
+        <template v-if="temp.protocol === 1">
+          <a-form-model-item label="公钥" prop="rsaPub">
+            <a-textarea :auto-size="{ minRows: 3, maxRows: 3 }" v-model="temp.rsaPub" placeholder="公钥">
+            </a-textarea>
+          </a-form-model-item>
+        </template>
       </a-form-model>
     </a-modal>
   </div>
