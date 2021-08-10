@@ -63,18 +63,18 @@ public class BuildInfoController extends BaseServerController {
 	private SshService sshService;
 
 
-	/**
-	 * @return
-	 * @author Hotstrip
-	 * get build group list
-	 * 获取构建分组列表
-	 */
-	@RequestMapping(value = "/build/group-list", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody
-	public String groupList() {
-		Set<String> set = buildService.listGroup();
-		return JsonMessage.getString(200, "success", set);
-	}
+//	/**
+//	 * @return
+//	 * @author Hotstrip
+//	 * get build group list
+//	 * 获取构建分组列表
+//	 */
+//	@RequestMapping(value = "/build/group-list", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+//	@ResponseBody
+//	public String groupList() {
+//		Set<String> set = buildService.listGroup();
+//		return JsonMessage.getString(200, "success", set);
+//	}
 
 	@RequestMapping(value = "/build/list_data.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
