@@ -18,6 +18,8 @@
 11. 【agent】项目文件管理新增下载远程文件功能
 12. 【agent】节点首页监控新增实际使用内存占比（linux系统） （感谢@大灰灰）
 13. 【server】ssh 新增操作记录（方便查看执行历史回溯操作）
+14. 【server】新增 h2 控制台配置属性,基于 SpringBoot,配置参数`spring.h2.console.enabled`
+15. 历史监控图表查询报时间格式化错误(字符串工具类) （感谢@misaka [Gitee pr](https://gitee.com/dromara/Jpom/pulls/142) ）
 
 ### 解决BUG、优化功能
 
