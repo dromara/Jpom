@@ -101,7 +101,7 @@ public class StringUtil {
 	 * @return String
 	 */
 	public static String getNextScaleTime(String time, Long millis) {
-		DateTime dateTime = DateUtil.parseTime(time);
+		DateTime dateTime = DateUtil.parse(time);
 		if (millis == null) {
 			millis = 30 * 1000L;
 		}
