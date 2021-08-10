@@ -65,6 +65,11 @@ const children = [
     component: () => import('../pages/build/list')
   },
   {
+    path: '/build/list-info',
+    name: 'build-list-info',
+    component: () => import('../pages/build/list-info')
+  },
+  {
     path: '/build/history',
     name: 'build-history',
     component: () => import('../pages/build/history')

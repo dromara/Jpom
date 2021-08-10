@@ -12,6 +12,7 @@ import io.jpom.model.data.BuildModel;
 import io.jpom.model.data.UserModel;
 import io.jpom.permission.BaseDynamicService;
 import io.jpom.plugin.ClassFeature;
+import io.jpom.service.dblog.BuildInfoService;
 import io.jpom.system.ServerConfigBean;
 import org.springframework.stereotype.Service;
 
@@ -25,7 +26,12 @@ import java.util.Set;
  *
  * @author bwcx_jzy
  * @date 2019/7/16
+ *
+ * @author Hotstrip
+ * @date 2021-08-10 更新构建信息到数据库，暂时废弃这个类
+ * @see BuildInfoService
  **/
+@Deprecated
 @Service
 public class BuildService extends BaseOperService<BuildModel> implements BaseDynamicService {
 

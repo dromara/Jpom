@@ -1,5 +1,5 @@
-/** 
- * 该页面是老版本的构建信息页面，之后可能会删除，新版本的页面请参考 ./list-info.vue
+/**
+ * 这是新版本的构建列表页面，主要是分离了部分数据到【仓库管理】，以及数据会存储到数据库
  */
 <template>
   <div>
@@ -225,7 +225,7 @@
 <script>
 import { mapGetters } from "vuex";
 import BuildLog from "./log";
-import { clearBuid, deleteBuild, editBuild, getBranchList, getBuildGroupList, getBuildList, getTriggerUrl, releaseMethodMap, resetTrigger, startBuild, stopBuild } from "../../api/build";
+import { clearBuid, deleteBuild, editBuild, getBranchList, getBuildGroupList, getBuildList, getTriggerUrl, releaseMethodMap, resetTrigger, startBuild, stopBuild } from "../../api/build-info";
 import { getDishPatchList } from "../../api/dispatch";
 import { getNodeProjectList } from "../../api/node";
 import { getSshList } from "../../api/ssh";

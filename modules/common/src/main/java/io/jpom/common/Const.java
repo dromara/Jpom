@@ -9,6 +9,8 @@ public class Const {
 	 * String const
 	 */
 	public static final String ID_STR = "id";
+	public static final String GROUP_STR = "group";
+
 
 	/**
 	 * 应用程序类型的配置 key

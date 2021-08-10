@@ -23,6 +23,7 @@ import io.jpom.plugin.ClassFeature;
 import io.jpom.plugin.Feature;
 import io.jpom.plugin.MethodFeature;
 import io.jpom.service.build.BuildService;
+import io.jpom.service.dblog.BuildInfoService;
 import io.jpom.service.dblog.DbBuildHistoryLogService;
 import io.jpom.service.node.OutGivingServer;
 import io.jpom.service.node.ssh.SshService;
@@ -62,6 +63,9 @@ public class BuildInfoController extends BaseServerController {
 	@Resource
 	private SshService sshService;
 
+	@Resource
+	private BuildInfoService buildInfoService;
+
 
 	/**
 	 * @return
@@ -70,10 +74,9 @@ public class BuildInfoController extends BaseServerController {
 	 * 获取构建分组列表
 	 */
 	@RequestMapping(value = "/build/group/list", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody
 	public String groupList() {
-		Set<String> set = buildService.listGroup();
-		return JsonMessage.getString(200, "success", set);
+		List<String> groupList = buildInfoService.listGroup();
+		return JsonMessage.getString(200, "success", groupList);
 	}
 
 	@RequestMapping(value = "/build/list", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)

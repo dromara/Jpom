@@ -17,12 +17,10 @@ import io.jpom.plugin.ClassFeature;
 import io.jpom.plugin.Feature;
 import io.jpom.plugin.MethodFeature;
 import io.jpom.service.dblog.RepositoryService;
-import io.jpom.util.StringUtil;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
-import java.util.stream.Collectors;
 
 /**
  * @author Hotstrip
