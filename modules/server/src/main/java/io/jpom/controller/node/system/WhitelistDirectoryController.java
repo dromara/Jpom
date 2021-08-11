@@ -59,9 +59,6 @@ public class WhitelistDirectoryController extends BaseServerController {
 				Collection<String> fieldValue = (Collection<String>) ReflectUtil.getFieldValue(agentWhitelist, field);
 				map.put(field.getName(), AgentWhitelist.convertToLine(fieldValue));
 			}
-//			map.put("project", AgentWhitelist.convertToLine(agentWhitelist.getProject()));
-//			map.put("certificate", AgentWhitelist.convertToLine(agentWhitelist.getCertificate()));
-//			map.put("nginx", AgentWhitelist.convertToLine(agentWhitelist.getNginx()));
 		}
 		return JsonMessage.getString(200, "ok", map);
 	}

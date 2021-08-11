@@ -2,12 +2,14 @@ package io.jpom.model.data;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.text.StrSplitter;
 import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.common.BaseJpomController;
 import io.jpom.model.BaseJsonModel;
 import io.jpom.system.ExtConfigBean;
+import org.springframework.util.Assert;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -91,7 +93,10 @@ public class AgentWhitelist extends BaseJsonModel {
 	 * @param list list
 	 * @return null 是有冲突的
 	 */
-	public static List<String> covertToArray(List<String> list) {
+	public static List<String> covertToArray(List<String> list, String errorMsg) {
+		if (list == null) {
+			return null;
+		}
 		List<String> array = new ArrayList<>();
 		for (String s : list) {
 			String val = String.format("/%s/", s);
@@ -104,7 +109,7 @@ public class AgentWhitelist extends BaseJsonModel {
 			}
 			// 判断是否保护jpom 路径
 			if (val == null || val.startsWith(ExtConfigBean.getInstance().getPath())) {
-				return null;
+				throw new IllegalArgumentException(errorMsg);
 			}
 			array.add(val);
 		}
@@ -167,5 +172,37 @@ public class AgentWhitelist extends BaseJsonModel {
 			return itemWhitelistDirectory;
 		}
 		return null;
+	}
+
+	/**
+	 * 将字符串转为 list
+	 *
+	 * @param value    字符串
+	 * @param errorMsg 错误消息
+	 * @return list
+	 */
+	public static List<String> parseToList(String value, String errorMsg) {
+		return parseToList(value, false, errorMsg);
+	}
+
+	/**
+	 * 将字符串转为 list
+	 *
+	 * @param value    字符串
+	 * @param required 是否为必填
+	 * @param errorMsg 错误消息
+	 * @return list
+	 */
+	public static List<String> parseToList(String value, boolean required, String errorMsg) {
+		if (required) {
+			Assert.hasLength(value, errorMsg);
+		} else {
+			if (StrUtil.isEmpty(value)) {
+				return null;
+			}
+		}
+		List<String> list = StrSplitter.splitTrim(value, StrUtil.LF, true);
+		Assert.notEmpty(list, errorMsg);
+		return list;
 	}
 }

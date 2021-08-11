@@ -37,27 +37,18 @@ public class WhitelistDirectoryController extends BaseJpomController {
 		return JsonMessage.getString(200, "", agentWhitelist);
 	}
 
-	private List<String> parseToList(String value, String errorMsg) {
-		if (StrUtil.isEmpty(value)) {
-			return null;
-		}
-		List<String> list = StrSplitter.splitTrim(value, StrUtil.LF, true);
-		Assert.notEmpty(list, errorMsg);
-		return list;
-	}
-
 
 	@RequestMapping(value = "whitelistDirectory_submit", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	public String whitelistDirectorySubmit(String project, String certificate, String nginx, String allowEditSuffix, String allowRemoteDownloadHost) {
 		if (StrUtil.isEmpty(project)) {
 			return JsonMessage.getString(401, "项目路径白名单不能为空");
 		}
-		List<String> list = this.parseToList(project, "项目路径白名单不能为空");
+		List<String> list = AgentWhitelist.parseToList(project, true, "项目路径白名单不能为空");
 		//
-		List<String> certificateList = this.parseToList(certificate, "证书路径白名单不能为空");
-		List<String> nList = this.parseToList(nginx, "nginx路径白名单不能为空");
-		List<String> allowEditSuffixList = this.parseToList(allowEditSuffix, "运行编辑的文件后缀不能为空");
-		List<String> allowRemoteDownloadHostList = this.parseToList(allowRemoteDownloadHost, "运行远程下载的 host 不能配置为空");
+		List<String> certificateList = AgentWhitelist.parseToList(certificate, "证书路径白名单不能为空");
+		List<String> nList = AgentWhitelist.parseToList(nginx, "nginx路径白名单不能为空");
+		List<String> allowEditSuffixList = AgentWhitelist.parseToList(allowEditSuffix, "运行编辑的文件后缀不能为空");
+		List<String> allowRemoteDownloadHostList = AgentWhitelist.parseToList(allowRemoteDownloadHost, "运行远程下载的 host 不能配置为空");
 		return save(list, certificateList, nList, allowEditSuffixList, allowRemoteDownloadHostList).toString();
 	}
 //
@@ -74,13 +65,8 @@ public class WhitelistDirectoryController extends BaseJpomController {
 									 List<String> allowRemoteDownloadHostList) {
 		List<String> projectArray;
 		{
-			projectArray = AgentWhitelist.covertToArray(projects);
-			if (projectArray == null) {
-				return new JsonMessage<>(401, "项目路径白名单不能位于Jpom目录下");
-			}
-			if (projectArray.isEmpty()) {
-				return new JsonMessage<>(401, "项目路径白名单不能为空");
-			}
+			projectArray = AgentWhitelist.covertToArray(projects, "项目路径白名单不能位于Jpom目录下");
+
 			String error = findStartsWith(projectArray, 0);
 			if (error != null) {
 				return new JsonMessage<>(401, "白名单目录中不能存在包含关系：" + error);
@@ -88,13 +74,8 @@ public class WhitelistDirectoryController extends BaseJpomController {
 		}
 		List<String> certificateArray = null;
 		if (certificate != null && !certificate.isEmpty()) {
-			certificateArray = AgentWhitelist.covertToArray(certificate);
-			if (certificateArray == null) {
-				return new JsonMessage<>(401, "证书路径白名单不能位于Jpom目录下");
-			}
-			if (certificateArray.isEmpty()) {
-				return new JsonMessage<>(401, "证书路径白名单不能为空");
-			}
+			certificateArray = AgentWhitelist.covertToArray(certificate, "证书路径白名单不能位于Jpom目录下");
+
 			String error = findStartsWith(certificateArray, 0);
 			if (error != null) {
 				return new JsonMessage<>(401, "证书目录中不能存在包含关系：" + error);
@@ -102,13 +83,8 @@ public class WhitelistDirectoryController extends BaseJpomController {
 		}
 		List<String> nginxArray = null;
 		if (nginx != null && !nginx.isEmpty()) {
-			nginxArray = AgentWhitelist.covertToArray(nginx);
-			if (nginxArray == null) {
-				return new JsonMessage<>(401, "nginx路径白名单不能位于Jpom目录下");
-			}
-			if (nginxArray.isEmpty()) {
-				return new JsonMessage<>(401, "nginx路径白名单不能为空");
-			}
+			nginxArray = AgentWhitelist.covertToArray(nginx, "nginx路径白名单不能位于Jpom目录下");
+
 			String error = findStartsWith(nginxArray, 0);
 			if (error != null) {
 				return new JsonMessage<>(401, "nginx目录中不能存在包含关系：" + error);
@@ -153,7 +129,7 @@ public class WhitelistDirectoryController extends BaseJpomController {
 	 * @return null 正常
 	 */
 	private String findStartsWith(List<String> jsonArray, int start) {
-		if (!AgentExtConfigBean.getInstance().whitelistDirectoryCheckStartsWith) {
+		if (jsonArray == null || !AgentExtConfigBean.getInstance().whitelistDirectoryCheckStartsWith) {
 			return null;
 		}
 		String str = jsonArray.get(start);

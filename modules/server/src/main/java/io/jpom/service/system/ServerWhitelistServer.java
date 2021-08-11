@@ -21,13 +21,13 @@ public class ServerWhitelistServer extends BaseDataService {
         try {
             JSONObject jsonObject = getJSONObject(ServerConfigBean.OUTGIVING_WHITELIST);
             if (jsonObject == null) {
-                return null;
+                return new ServerWhitelist();
             }
             return jsonObject.toJavaObject(ServerWhitelist.class);
         } catch (Exception e) {
             DefaultSystemLog.getLog().error(e.getMessage(), e);
         }
-        return null;
+        return new ServerWhitelist();
     }
 
     public void saveWhitelistDirectory(ServerWhitelist serverWhitelist) {
