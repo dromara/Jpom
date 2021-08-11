@@ -22,7 +22,7 @@
         <span>{{ text }}</span>
       </a-tooltip>
       <template slot="time" slot-scope="text, record" placement="topLeft">
-        <a-tooltip :title="`创建时间：${record.createTime}，${record.modifyTime?('修改时间：'+record.modifyTime):''}`">
+        <a-tooltip :title="`创建时间：${record.createTime}，${record.modifyTime ? '修改时间：' + record.modifyTime : ''}`">
           <span>{{ record.modifyTime }}</span
           ><br />
           <span>{{ record.createTime }}</span>
