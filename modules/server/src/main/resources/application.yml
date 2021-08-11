@@ -24,6 +24,7 @@ banner:
 interceptor:
   resourceHandler: /**,/static/**,/favicon.ico
   resourceLocation: classpath:/dist/,classpath:/static/,classpath:/static/favicon.ico
+  initPackageName: io.jpom.common.interceptor
 # 启动完成自动初始化指定包
 preload:
   packageName: io.jpom.system.init

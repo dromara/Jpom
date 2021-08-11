@@ -13,101 +13,101 @@ import io.jpom.service.node.NodeService;
  * @date 2019/4/22
  */
 public class OutGivingNodeProject extends BaseJsonModel {
-    private static NodeService nodeService;
+	private static NodeService nodeService;
 
-    private String nodeId;
-    private String projectId;
-    private String lastOutGivingTime;
-    private int status = Status.No.getCode();
-    private String result;
+	private String nodeId;
+	private String projectId;
+	private String lastOutGivingTime;
+	private int status = Status.No.getCode();
+	private String result;
 
 
-    public String getResult() {
-        return result;
-    }
+	public String getResult() {
+		return result;
+	}
 
-    public void setResult(String result) {
-        this.result = result;
-    }
+	public void setResult(String result) {
+		this.result = result;
+	}
 
-    public int getStatus() {
-        return status;
-    }
+	public int getStatus() {
+		return status;
+	}
 
-    public String getStatusMsg() {
-        return BaseEnum.getDescByCode(Status.class, getStatus());
-    }
+	public String getStatusMsg() {
+		return BaseEnum.getDescByCode(Status.class, getStatus());
+	}
 
-    public void setStatus(int status) {
-        this.status = status;
-    }
+	public void setStatus(int status) {
+		this.status = status;
+	}
 
-    public String getLastOutGivingTime() {
-        return StrUtil.emptyToDefault(lastOutGivingTime, StrUtil.DASHED);
-    }
+	public String getLastOutGivingTime() {
+		return StrUtil.emptyToDefault(lastOutGivingTime, StrUtil.DASHED);
+	}
 
-    public void setLastOutGivingTime(String lastOutGivingTime) {
-        this.lastOutGivingTime = lastOutGivingTime;
-    }
+	public void setLastOutGivingTime(String lastOutGivingTime) {
+		this.lastOutGivingTime = lastOutGivingTime;
+	}
 
-    public String getNodeId() {
-        return nodeId;
-    }
+	public String getNodeId() {
+		return nodeId;
+	}
 
-    public void setNodeId(String nodeId) {
-        this.nodeId = nodeId;
-    }
+	public void setNodeId(String nodeId) {
+		this.nodeId = nodeId;
+	}
 
-    public String getProjectId() {
-        return projectId;
-    }
+	public String getProjectId() {
+		return projectId;
+	}
 
-    public void setProjectId(String projectId) {
-        this.projectId = projectId;
-    }
+	public void setProjectId(String projectId) {
+		this.projectId = projectId;
+	}
 
-    /**
-     * 获取节点的数据
-     *
-     * @param get 防止自动读取
-     * @return 实体
-     */
-    public NodeModel getNodeData(boolean get) {
-        if (nodeService == null) {
-            nodeService = SpringUtil.getBean(NodeService.class);
-        }
-        return nodeService.getItem(this.nodeId);
-    }
+	/**
+	 * 获取节点的数据
+	 *
+	 * @param get 防止自动读取
+	 * @return 实体
+	 */
+	public NodeModel getNodeData(boolean get) {
+		if (nodeService == null) {
+			nodeService = SpringUtil.getBean(NodeService.class);
+		}
+		return nodeService.getItem(this.nodeId);
+	}
 
-    /**
-     * 状态
-     */
-    public enum Status implements BaseEnum {
-        /**
-         *
-         */
-        No(0, "未分发"),
-        Ing(1, "分发中"),
-        Ok(2, "分发成功"),
-        Fail(3, "分发失败"),
-        Cancel(4, "取消分发"),
-        ;
-        private int code;
-        private String desc;
+	/**
+	 * 状态
+	 */
+	public enum Status implements BaseEnum {
+		/**
+		 *
+		 */
+		No(0, "未分发"),
+		Ing(1, "分发中"),
+		Ok(2, "分发成功"),
+		Fail(3, "分发失败"),
+		Cancel(4, "取消分发"),
+		;
+		private final int code;
+		private final String desc;
 
-        Status(int code, String desc) {
-            this.code = code;
-            this.desc = desc;
-        }
+		Status(int code, String desc) {
+			this.code = code;
+			this.desc = desc;
+		}
 
-        @Override
-        public int getCode() {
-            return code;
-        }
+		@Override
+		public int getCode() {
+			return code;
+		}
 
-        @Override
-        public String getDesc() {
-            return desc;
-        }
-    }
+		@Override
+		public String getDesc() {
+			return desc;
+		}
+	}
 }
