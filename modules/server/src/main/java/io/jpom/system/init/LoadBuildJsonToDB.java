@@ -91,8 +91,7 @@ public class LoadBuildJsonToDB {
 		final List<String> buildInfoFieldList = getClassFieldList(BuildInfoModel.class);
 
 		// 遍历对象集合
-		list.forEach(item -> {
-			BuildModelVo buildModelVo = JSON.parseObject(item.toString(), BuildModelVo.class);
+		list.forEach(buildModelVo -> {
 			DefaultSystemLog.getLog().info("buildModelVo: {}", JSON.toJSONString(buildModelVo));
 
 			// 拿到构造 SQL 的参数
