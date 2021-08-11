@@ -27,7 +27,7 @@ import javax.annotation.Resource;
  * Repository controller
  */
 @RestController
-@Feature(cls = ClassFeature.BUILD)
+@Feature(cls = ClassFeature.BUILD_REPOSITORY)
 public class RepositoryController {
 
 	@Resource
@@ -35,10 +35,11 @@ public class RepositoryController {
 
 	/**
 	 * load repository list
-	 * @param limit
-	 * @param page
+	 *
+	 * @param limit    每页条数
+	 * @param page     页码
 	 * @param repoType 仓库类型 0: GIT 1: SVN
-	 * @return
+	 * @return json
 	 */
 	@PostMapping(value = "/build/repository/list")
 	@Feature(method = MethodFeature.LOG)
@@ -60,10 +61,12 @@ public class RepositoryController {
 
 	/**
 	 * edit
+	 *
 	 * @param repositoryModelReq
 	 * @return
 	 */
 	@PostMapping(value = "/build/repository/edit")
+	@Feature(method = MethodFeature.EDIT)
 	public Object editRepository(RepositoryModel repositoryModelReq) {
 		if (null == repositoryModelReq.getId()) {
 			// insert data
@@ -77,17 +80,19 @@ public class RepositoryController {
 			repositoryModelReq.setModifyTime(LocalDateTimeUtil.format(LocalDateTimeUtil.now(), "YYYY-MM-dd HH:mm:ss"));
 			repositoryService.updateById(repositoryModelReq);
 		}
-		return JsonMessage.toJson(200, "edit success");
+		return JsonMessage.toJson(200, "操作成功");
 	}
 
 	/**
 	 * delete
+	 *
 	 * @param id
 	 * @return
 	 */
 	@PostMapping(value = "/build/repository/delete")
+	@Feature(method = MethodFeature.DEL)
 	public Object delRepository(String id) {
 		repositoryService.deleteById(id);
-		return JsonMessage.getString(200, "delete repository success");
+		return JsonMessage.getString(200, "删除成功");
 	}
 }

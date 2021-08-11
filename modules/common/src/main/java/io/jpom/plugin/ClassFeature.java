@@ -19,6 +19,7 @@ public enum ClassFeature {
     OUTGIVING("分发管理"),
     MONITOR("监控管理"),
     BUILD("在线构建"),
+	BUILD_REPOSITORY("仓库信息"),
     USER("用户管理"),
     SYSTEM("系统管理"),
     USER_ROLE("用户角色"),
