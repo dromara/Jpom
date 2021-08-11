@@ -19,7 +19,7 @@
 12. 【agent】节点首页监控新增实际使用内存占比（linux系统） （感谢@大灰灰）
 13. 【server】ssh 新增操作记录（方便查看执行历史回溯操作）
 14. 【server】新增 h2 控制台配置属性,基于 SpringBoot,配置参数`spring.h2.console.enabled`
-15. 历史监控图表查询报时间格式化错误(字符串工具类) （感谢@misaka [Gitee pr](https://gitee.com/dromara/Jpom/pulls/142) ）
+15. 【server】节点分发支持下载远程文件 （感谢@落泪归枫 [Gitee issues I1LM27](https://gitee.com/dromara/Jpom/issues/I1LM27) ）
 
 ### 解决BUG、优化功能
 
@@ -39,6 +39,7 @@
 14. 【agent】升级 `commons-compress` 依赖 （来自 GitHub [advisories](https://github.com/advisories) ）
 15. agent 和 server 间的 websocket 鉴权调整
 16. 【server】update: 刷新整个页面的时候重新加载菜单
+17. 历史监控图表查询报时间格式化错误(字符串工具类) （感谢@misaka [Gitee pr](https://gitee.com/dromara/Jpom/pulls/142) ）
 
 > 注意：升级到该版本需要保证 agent、server 都保持同步，如果只升级 server 会出现项目控制台等功能无法正常使用
 

@@ -116,24 +116,12 @@ public class ServerConfigBean {
 	 * @return file
 	 */
 	public File getUserTempPath() {
-		File file = getTempPath();
+		File file = ConfigBean.getInstance().getTempPath();
 		UserModel userModel = BaseServerController.getUserModel();
 		if (userModel == null) {
 			throw new JpomRuntimeException("没有登录");
 		}
 		file = FileUtil.file(file, userModel.getId());
-		FileUtil.mkdir(file);
-		return file;
-	}
-
-	/**
-	 * 获取系统临时文件存储路径
-	 *
-	 * @return 数据目录下的 temp 目录
-	 */
-	public File getTempPath() {
-		File file = new File(ConfigBean.getInstance().getDataPath());
-		file = new File(file.getPath() + "/temp/");
 		FileUtil.mkdir(file);
 		return file;
 	}

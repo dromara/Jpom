@@ -96,7 +96,7 @@ public class SshService extends BaseOperService<SshModel> implements BaseDynamic
 			session = JschUtil.openSession(sshModel.getHost(), sshModel.getPort(), sshModel.getUser(), sshModel.getPassword());
 
 		} else if (sshModel.getConnectType() == SshModel.ConnectType.PUBKEY) {
-			File tempPath = ServerConfigBean.getInstance().getTempPath();
+			File tempPath = ConfigBean.getInstance().getTempPath();
 			String sshFile = StrUtil.emptyToDefault(sshModel.getId(), IdUtil.fastSimpleUUID());
 			File ssh = FileUtil.file(tempPath, "ssh", sshFile);
 			FileUtil.writeString(sshModel.getPrivateKey(), ssh, CharsetUtil.UTF_8);

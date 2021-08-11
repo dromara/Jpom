@@ -189,10 +189,22 @@
     <!-- 分发项目 -->
     <a-modal v-model="dispatchVisible" width="600px" :title="'分发项目----' + temp.name" @ok="handleDispatchOk" :maskClosable="false">
       <a-form-model ref="dispatchForm" :rules="rules" :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 18 }">
-        <a-form-model-item label="选择分发文件" prop="clearOld">
+        <a-form-model-item label="方式" prop="type">
+          <a-radio-group v-model="temp.type" name="type">
+            <a-radio :value="'upload'">上传压缩包</a-radio>
+            <a-radio :value="'download'">远程下载</a-radio>
+          </a-radio-group>
+        </a-form-model-item>
+        <a-form-model-item label="选择分发文件" prop="clearOld" v-if="temp.type == 'upload'">
           <a-upload :file-list="fileList" :remove="handleRemove" :before-upload="beforeUpload" accept=".zip,.tar,.gz,.bz2">
             <a-button type="primary"><a-icon type="upload" />选择文件上传</a-button>
           </a-upload>
+        </a-form-model-item>
+        <a-form-model-item label="远程下载URL" prop="url" v-if="temp.type == 'download'">
+          <a-input v-model="temp.url" placeholder="远程下载地址" />
+        </a-form-model-item>
+        <a-form-model-item label="是否为压缩包" v-if="temp.type == 'download'">
+          <a-switch v-model="temp.unzip" checked-children="是" un-checked-children="否" v-decorator="['unzip', { valuePropName: 'checked' }]" />
         </a-form-model-item>
         <a-form-model-item label="清空发布" prop="clearOld">
           <a-switch v-model="temp.clearOld" checked-children="是" un-checked-children="否" />
@@ -221,7 +233,7 @@
 import { mapGetters } from "vuex";
 import File from "../node/node-layout/project/project-file";
 import Console from "../node/node-layout/project/project-console";
-import { getDishPatchList, getDispatchProject, getReqId, editDispatch, editDispatchProject, uploadDispatchFile, getDispatchWhiteList, deleteDisPatch } from "../../api/dispatch";
+import { getDishPatchList, getDispatchProject, getReqId, editDispatch, editDispatchProject, uploadDispatchFile, getDispatchWhiteList, deleteDisPatch, remoteDownload } from "../../api/dispatch";
 import { getNodeProjectList } from "../../api/node";
 import { getProjectData } from "../../api/node-project";
 export default {
@@ -612,8 +624,9 @@ export default {
     },
     // 处理分发
     handleDispatch(record) {
-      this.temp = Object.assign({}, record);
+      this.temp = Object.assign({ type: "upload" }, record);
       this.dispatchVisible = true;
+      this.$refs["dispatchForm"] && this.$refs["dispatchForm"].resetFields();
     },
     // 处理文件移除
     handleRemove(file) {
@@ -635,35 +648,62 @@ export default {
         if (!valid) {
           return false;
         }
-        // 判断文件
-        if (this.fileList.length === 0) {
-          this.$notification.error({
-            message: "请选择文件",
-            duration: 2,
-          });
-          return false;
-        }
-        // 上传文件
-        const key = "upload";
-        const formData = new FormData();
-        this.$message.loading({ content: "正在上传文件...", key, duration: 0 });
-        formData.append("file", this.fileList[0]);
-        formData.append("id", this.temp.id);
-        formData.append("afterOpt", this.temp.afterOpt);
-        formData.append("clearOld", this.temp.clearOld);
-        uploadDispatchFile(formData).then((res) => {
-          if (res.code === 200) {
-            this.$notification.success({
-              message: res.msg,
+        const key = this.temp.type;
+        if (this.temp.type == "upload") {
+          // 判断文件
+          if (this.fileList.length === 0) {
+            this.$notification.error({
+              message: "请选择文件",
               duration: 2,
             });
-            this.$message.success({ content: "上传成功,开始分发!", key, duration: 2 });
-            this.$refs["dispatchForm"].resetFields();
-            this.fileList = [];
-            this.loadData();
-            this.dispatchVisible = false;
+            return false;
           }
-        });
+          // 上传文件
+          const formData = new FormData();
+          this.$message.loading({ content: "正在上传文件...", key, duration: 0 });
+          formData.append("file", this.fileList[0]);
+          formData.append("id", this.temp.id);
+          formData.append("afterOpt", this.temp.afterOpt);
+          formData.append("clearOld", this.temp.clearOld);
+          uploadDispatchFile(formData).then((res) => {
+            if (res.code === 200) {
+              this.$notification.success({
+                message: res.msg,
+                duration: 2,
+              });
+              this.$message.success({ content: "上传成功,开始分发!", key, duration: 2 });
+              this.$refs["dispatchForm"].resetFields();
+              this.fileList = [];
+              this.loadData();
+              this.dispatchVisible = false;
+            }
+          });
+          return true;
+        }
+        if (this.temp.type == "download") {
+          if (!this.temp.url) {
+            this.$notification.error({
+              message: "请填写远程URL",
+              duration: 2,
+            });
+            return false;
+          }
+          // 远程下载
+          this.$message.loading({ content: "正在下载文件...", key, duration: 0 });
+          remoteDownload(this.temp).then((res) => {
+            if (res.code === 200) {
+              this.$notification.success({
+                message: res.msg,
+                duration: 2,
+              });
+              this.$message.success({ content: "下载成功,开始分发!", key, duration: 2 });
+              //this.$refs["dispatchForm"].resetFields();
+              this.loadData();
+              this.dispatchVisible = false;
+            }
+          });
+          return true;
+        }
       });
     },
     // 删除

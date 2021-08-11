@@ -212,7 +212,7 @@ export default {
       this.treeList = [];
       const data = {
         '$treeNodeId': 1,
-        filename: '目录：'+this.absPath,
+        filename: '目录：'+(this.absPath || ''),
         isDirectory: true,
         isLeaf: false
       };
