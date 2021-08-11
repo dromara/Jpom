@@ -10,6 +10,7 @@ import cn.jiangzeyin.common.DefaultSystemLog;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.common.Const;
+import io.jpom.model.BaseModel;
 import io.jpom.model.data.BuildInfoModel;
 import io.jpom.model.data.RepositoryModel;
 import io.jpom.model.vo.BuildModelVo;
@@ -24,6 +25,7 @@ import java.lang.reflect.Modifier;
 import java.sql.SQLException;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * @author Hotstrip
@@ -52,12 +54,18 @@ public class LoadBuildJsonToDB {
 	 */
 	public void doJsonToSql() {
 		// 读取 build.json 文件内容
-		List<Object> list = readBuildJsonFileToList();
+		List<BuildModelVo> list = readBuildJsonFileToList();
 		// 判断 list 是否为空
 		if (null == list) {
 			DefaultSystemLog.getLog().warn("There is no any data, the build.json file maybe no content or file is not exist...");
 			return;
 		}
+		// 根据 gitUrl 去重
+		list = list.stream()
+				.collect(Collectors.collectingAndThen(
+						Collectors.toCollection(() -> new TreeSet<>(Comparator.comparing(BuildModelVo::getGitUrl))),
+						ArrayList::new)
+				);
 		// 转换成 SQL 执行
 		initSql(list);
 	}
@@ -77,10 +85,10 @@ public class LoadBuildJsonToDB {
 	 * 4. 执行SQL
 	 * @param list data from build.json
 	 */
-	private void initSql(List<Object> list) {
+	private void initSql(List<BuildModelVo> list) {
 		// 加载类里面的属性，用反射获取
-		final List<String> repositoryFieldList = getRepositoryFieldList();
-		final List<String> buildInfoFieldList = getBuildInfoFieldList();
+		final List<String> repositoryFieldList = getClassFieldList(RepositoryModel.class);
+		final List<String> buildInfoFieldList = getClassFieldList(BuildInfoModel.class);
 
 		// 遍历对象集合
 		list.forEach(item -> {
@@ -172,9 +180,9 @@ public class LoadBuildJsonToDB {
 
 	/**
 	 * read build.json file to list
-	 * @return List<Object>
+	 * @return List<BuildModelVo>
 	 */
-	private List<Object> readBuildJsonFileToList() {
+	private List<BuildModelVo> readBuildJsonFileToList() {
 		File file = FileUtil.file(ConfigBean.getInstance().getDataPath(), ServerConfigBean.BUILD);
 		if (!file.exists()) {
 			DefaultSystemLog.getLog().error("there is no build.json file...");
@@ -185,6 +193,10 @@ public class LoadBuildJsonToDB {
 			JSONObject jsonObject = (JSONObject) JsonFileUtil.readJson(file.getAbsolutePath());
 			return jsonObject.keySet().stream()
 					.map(jsonObject::get)
+					.flatMap(o -> {
+						BuildModelVo buildModel = JSON.parseObject(JSON.toJSONString(o), BuildModelVo.class);
+						return Stream.of(buildModel);
+					})
 					.collect(Collectors.toList());
 		} catch (FileNotFoundException e) {
 			DefaultSystemLog.getLog().error("read build.json file failed...caused: {}...message: {}", e.getCause(), e.getMessage());
@@ -193,27 +205,15 @@ public class LoadBuildJsonToDB {
 	}
 
 	/**
-	 * 获取 RepositoryModel 类里面的属性，转换成集合返回
+	 * 获取 clazz 类里面的属性，转换成集合返回
+	 * @param clazz
 	 * @return List<String>
 	 */
-	private List<String> getRepositoryFieldList() {
-		final Field[] fields = ReflectUtil.getFieldsDirectly(RepositoryModel.class, true);
+	private List<String> getClassFieldList(Class<? extends BaseModel> clazz) {
+		final Field[] fields = ReflectUtil.getFieldsDirectly(clazz, true);
 		return Arrays.stream(fields)
 				.filter(field -> Modifier.isPrivate(field.getModifiers()))
 				.flatMap(field -> Arrays.stream(new String[]{field.getName()}))
 				.collect(Collectors.toList());
 	}
-
-	/**
-	 * 获取 BuildInfoModel 类里面的属性，转换成集合返回
-	 * @return List<String>
-	 */
-	private List<String> getBuildInfoFieldList() {
-		final Field[] fields = ReflectUtil.getFieldsDirectly(BuildInfoModel.class, true);
-		return Arrays.stream(fields)
-				.filter(field -> Modifier.isPrivate(field.getModifiers()))
-				.flatMap(field -> Arrays.stream(new String[]{field.getName()}))
-				.collect(Collectors.toList());
-	}
-
 }
