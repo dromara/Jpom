@@ -9,14 +9,14 @@ import cn.jiangzeyin.common.JsonMessage;
  * @date 2019/4/17
  */
 public class AuthorizeException extends RuntimeException {
-    private JsonMessage jsonMessage;
+	private final JsonMessage<?> jsonMessage;
 
-    public AuthorizeException(JsonMessage jsonMessage, String msg) {
-        super(msg);
-        this.jsonMessage = jsonMessage;
-    }
+	public AuthorizeException(JsonMessage<?> jsonMessage, String msg) {
+		super(msg);
+		this.jsonMessage = jsonMessage;
+	}
 
-    public JsonMessage getJsonMessage() {
-        return jsonMessage;
-    }
+	public JsonMessage<?> getJsonMessage() {
+		return jsonMessage;
+	}
 }

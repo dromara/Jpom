@@ -29,6 +29,11 @@ public class DbConfig {
 
 	private static final String DB = "db";
 
+	/**
+	 * 默认的账号或者密码
+	 */
+	public static final String DEFAULT_USER_OR_PWD = "jpom";
+
 	private static DbConfig dbConfig;
 
 	/**

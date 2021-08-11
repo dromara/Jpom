@@ -4,6 +4,7 @@ import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.io.resource.ResourceUtil;
 import cn.hutool.core.lang.Console;
 import cn.hutool.core.util.CharsetUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.db.Db;
 import cn.hutool.db.ds.DSFactory;
 import cn.hutool.db.ds.GlobalDSFactory;
@@ -32,12 +33,15 @@ public class InitDb implements DisposableBean, InitializingBean {
 
 	@PreLoadMethod
 	private static void init() {
-		Setting setting = new Setting();
+		//
 		DbConfig instance = DbConfig.getInstance();
+		ServerExtConfigBean serverExtConfigBean = ServerExtConfigBean.getInstance();
+		//
+		Setting setting = new Setting();
 		String dbUrl = instance.getDbUrl();
 		setting.set("url", dbUrl);
-		setting.set("user", ServerExtConfigBean.getInstance().getDbUserName());
-		setting.set("pass", ServerExtConfigBean.getInstance().getDbUserPwd());
+		setting.set("user", serverExtConfigBean.getDbUserName());
+		setting.set("pass", serverExtConfigBean.getDbUserPwd());
 		// 调试模式显示sql 信息
 		if (JpomManifest.getInstance().isDebug()) {
 			setting.set("showSql", "true");
@@ -59,7 +63,7 @@ public class InitDb implements DisposableBean, InitializingBean {
 			 * add another sql init file, if there are more sql file,
 			 * please add it with same way
 			 */
-			String[] files = new String[] {
+			String[] files = new String[]{
 					"classpath:/bin/h2-db-v1.sql",
 					"classpath:/bin/h2-db-v2.sql"
 			};
@@ -87,6 +91,11 @@ public class InitDb implements DisposableBean, InitializingBean {
 			Console.log("h2 db inited:" + dbUrl);
 		} else {
 			Console.log("h2 db inited");
+			if (serverExtConfigBean.isH2ConsoleEnabled()
+					&& StrUtil.equals(serverExtConfigBean.getDbUserName(), DbConfig.DEFAULT_USER_OR_PWD)
+					&& StrUtil.equals(serverExtConfigBean.getDbUserPwd(), DbConfig.DEFAULT_USER_OR_PWD)) {
+				Console.error("【安全警告】数据库账号密码使用默认的情况下不建议开启 h2 数据 web 控制台");
+			}
 		}
 	}
 

@@ -4,6 +4,7 @@ import cn.hutool.core.convert.Convert;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.script.ScriptUtil;
 import cn.jiangzeyin.common.spring.SpringUtil;
+import io.jpom.system.db.DbConfig;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 
@@ -54,11 +55,12 @@ public class ServerExtConfigBean {
 	private String dbUserPwd;
 
 	/**
-	 * @author Hotstrip
+	 * author Hotstrip
 	 * 是否开启 web 访问数据库
-	 * @see （url: http://${ip}:${port}/h2-console）
+	 *
+	 * @see <a href=http://${ip}:${port}/h2-console>http://${ip}:${port}/h2-console</a>
 	 */
-	@Value("${db.h2-console-enabled:false}")
+	@Value("${spring.h2.console.enabled:false}")
 	private boolean h2ConsoleEnabled;
 
 	/**
@@ -153,11 +155,11 @@ public class ServerExtConfigBean {
 	}
 
 	public String getDbUserName() {
-		return StrUtil.emptyToDefault(this.dbUserName, "jpom");
+		return StrUtil.emptyToDefault(this.dbUserName, DbConfig.DEFAULT_USER_OR_PWD);
 	}
 
 	public String getDbUserPwd() {
-		return StrUtil.emptyToDefault(this.dbUserPwd, "jpom");
+		return StrUtil.emptyToDefault(this.dbUserPwd, DbConfig.DEFAULT_USER_OR_PWD);
 	}
 
 	public boolean isH2ConsoleEnabled() {
