@@ -140,13 +140,14 @@ yum install -y wget && wget -O install.sh https://dromara.gitee.io/jpom/docs/ins
 > [帮助文档](https://jpom-site.keepbx.cn/docs/#/安装使用/开始安装)
 
 1. 访问 [Jpom](https://gitee.com/dromara/Jpom) 的码云主页,拉取最新完整代码(建议使用master分支)
-2. 切换到`web-vue`目录 执行`yarn build`进行vue项目打包(vue环境需要提前搭建和安装依赖包详情可以查看web-vue目录下README.md)
-3. 进入项目目录执行:`mvn clean package`
-4. 安装插件端（ [流程说明](https://jpom-site.keepbx.cn/docs/#/安装使用/开始安装?id=安装插件端) ）
+2. 切换到`web-vue`目录 执行`npm install` (vue环境需要提前搭建和安装依赖包详情可以查看web-vue目录下README.md)
+3. 执行`npm build`进行vue项目打包(vue环境需要提前搭建和安装依赖包详情可以查看web-vue目录下README.md)
+4. 切换到项目根目录执行:`mvn clean package`
+5. 安装插件端（ [流程说明](https://jpom-site.keepbx.cn/docs/#/安装使用/开始安装?id=安装插件端) ）
     1. 查看插件端安装包 modules/agent/target/agent-x.x.x-release
     2. 打包上传服务器运行
     3. 命令运行（Agent.sh、Agent.bat）
-5. 安装服务端（ [流程说明](https://jpom-site.keepbx.cn/docs/#/安装使用/开始安装?id=安装服务端) ）
+6. 安装服务端（ [流程说明](https://jpom-site.keepbx.cn/docs/#/安装使用/开始安装?id=安装服务端) ）
     1. 查看插件端安装包 modules/server/target/server-x.x.x-release
     2. 打包上传服务器运行
     3. 命令运行（Server.sh、Server.bat）
@@ -161,9 +162,9 @@ yum install -y wget && wget -O install.sh https://dromara.gitee.io/jpom/docs/ins
 3. 运行服务端
     1. 运行`io.jpom.JpomServerApplication`
     2. 默认运行端口：`2122`
-4. 构建vue页面 切换到`web-vue`目录（前提需要本地开发环境有node、yarn环境）
-5. 安装项目vue依赖 控制台执行 `yarn install`
-6. 启动开发模式 控制台执行 `yarn serve`
+4. 构建vue页面 切换到`web-vue`目录（前提需要本地开发环境有node、npm环境）
+5. 安装项目vue依赖 控制台执行 `npm install`
+6. 启动开发模式 控制台执行 `npm serve`
 7. 根据控制台输出的地址访问前端页面 例如`http://localhost:3000/`
 
 ### 管理命令
