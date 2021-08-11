@@ -125,7 +125,7 @@
             <a-select-option v-for="runMode in runModeList" :key="runMode">{{ runMode }}</a-select-option>
           </a-select>
         </a-form-model-item>
-        <a-form-model-item label="Main Class" prop="mainClass" v-show="temp.runMode !== 'Jar'">
+        <a-form-model-item label="Main Class" prop="mainClass" v-show="temp.runMode !== 'Jar' && temp.runMode !== 'File'">
           <a-input v-model="temp.mainClass" placeholder="程序运行的 main 类(jar 模式运行可以不填)" />
         </a-form-model-item>
         <a-form-model-item label="项目白名单路径" prop="whitelistDirectory" class="jpom-project-whitelist">
@@ -136,7 +136,7 @@
         <a-form-model-item label="项目文件夹" prop="lib">
           <a-input v-model="temp.lib" placeholder="项目存储的文件夹，jar 包存放的文件夹" />
         </a-form-model-item>
-        <a-form-model-item label="日志目录">
+        <a-form-model-item label="日志目录" v-show="temp.runMode !== 'File'">
           <a-select v-model="temp.logPath" placeholder="请选择项目白名单路径">
             <a-select-option v-for="access in accessList" :key="access">{{ access }}</a-select-option>
           </a-select>
@@ -155,7 +155,7 @@
             <a-select-option v-for="node in nodeList" :key="node.key">{{ `${node.title} ( ${node.key} )` }}</a-select-option>
           </a-select>
         </a-form-model-item>
-        <a-collapse>
+        <a-collapse v-show="temp.runMode !== 'File'">
           <a-collapse-panel v-for="nodeId in temp.nodeIdList" :key="nodeId" :header="nodeId">
             <a-form-model-item label="WebHooks" prop="token">
               <a-input v-model="temp[`${nodeId}_token`]" placeholder="关闭程序时自动请求,非必填，GET请求" />
@@ -255,13 +255,7 @@ export default {
       reqId: "",
       temp: {},
       fileList: [],
-      runModeList: [
-        "ClassPath",
-        "Jar",
-        "JarWar",
-        "JavaExtDirsCp",
-        // 'File'
-      ],
+      runModeList: ["ClassPath", "Jar", "JarWar", "JavaExtDirsCp", "File"],
       list_expanded: {},
       linkDispatchVisible: false,
       editDispatchVisible: false,

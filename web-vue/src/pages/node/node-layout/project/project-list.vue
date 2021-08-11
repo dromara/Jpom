@@ -84,7 +84,7 @@
         <a-form-model-item v-show="filePath !== ''" label="项目完整目录">
           <a-alert :message="filePath" type="success" />
         </a-form-model-item>
-        <a-form-model-item label="日志目录">
+        <a-form-model-item label="日志目录" v-show="temp.runMode !== 'File'">
           <a-select v-model="temp.logPath" placeholder="请选择项目白名单路径">
             <a-select-option v-for="access in accessList" :key="access">{{ access }}</a-select-option>
           </a-select>

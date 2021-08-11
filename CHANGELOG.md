@@ -20,6 +20,7 @@
 13. 【server】ssh 新增操作记录（方便查看执行历史回溯操作）
 14. 【server】新增 h2 控制台配置属性,基于 SpringBoot,配置参数`spring.h2.console.enabled`
 15. 【server】节点分发支持下载远程文件 （感谢@落泪归枫 [Gitee issues I1LM27](https://gitee.com/dromara/Jpom/issues/I1LM27) ）
+16. 【server】节点分发支持 file 类型项目
 
 ### 解决BUG、优化功能
 
