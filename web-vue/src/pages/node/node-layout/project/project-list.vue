@@ -22,7 +22,7 @@
         <span>{{ text }}</span>
       </a-tooltip>
       <template slot="time" slot-scope="text, record" placement="topLeft">
-        <a-tooltip :title="`${record.createTime}`">
+        <a-tooltip :title="`创建时间：${record.createTime}，${record.modifyTime?('修改时间：'+record.modifyTime):''}`">
           <span>{{ record.modifyTime }}</span
           ><br />
           <span>{{ record.createTime }}</span>
@@ -427,6 +427,13 @@ export default {
     },
     // 提交
     handleEditProjectOk() {
+      if (this.temp.outGivingProject) {
+        this.$notification.warning({
+          message: "独立的项目分发请到分发管理中去修改",
+          duration: 2,
+        });
+        return;
+      }
       // 检验表单
       this.$refs["editProjectForm"].validate((valid) => {
         if (!valid) {
