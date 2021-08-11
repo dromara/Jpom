@@ -169,7 +169,7 @@ export default {
         {title: '文件类型', dataIndex: 'isDirectory', width: 100, ellipsis: true, scopedSlots: {customRender: 'isDirectory'}},
         {title: '文件大小', dataIndex: 'fileSize', width: 120, ellipsis: true, scopedSlots: {customRender: 'fileSize'}},
         {title: '修改时间', dataIndex: 'modifyTime', width: 180, ellipsis: true},
-        {title: '操作',dataIndex: 'operation',scopedSlots: {customRender: 'operation'}, width: 120}
+        {title: '操作',dataIndex: 'operation',scopedSlots: {customRender: 'operation'}}
       ],
       rules: {
         url: [{ required: true, message: '远程下载Url不为空', trigger: 'change' }],
