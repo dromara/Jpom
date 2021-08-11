@@ -20,7 +20,6 @@ import io.jpom.model.log.UserOperateLogV1;
 import io.jpom.permission.SystemPermission;
 import io.jpom.service.system.SystemIpConfigService;
 import io.jpom.system.ExtConfigBean;
-import io.jpom.util.StringUtil;
 import org.springframework.boot.env.YamlPropertySourceLoader;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.MediaType;
@@ -99,7 +98,7 @@ public class SystemConfigController extends BaseServerController {
 		}
 		try {
 			YamlPropertySourceLoader yamlPropertySourceLoader = new YamlPropertySourceLoader();
-			ByteArrayResource resource = new ByteArrayResource(StringUtil.deleteComment(content).getBytes(StandardCharsets.UTF_8));
+			ByteArrayResource resource = new ByteArrayResource(content.getBytes(StandardCharsets.UTF_8));
 			yamlPropertySourceLoader.load("test", resource);
 		} catch (Exception e) {
 			DefaultSystemLog.getLog().warn("内容格式错误，请检查修正", e);

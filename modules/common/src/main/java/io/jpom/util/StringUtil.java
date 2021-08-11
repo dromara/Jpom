@@ -109,21 +109,21 @@ public class StringUtil {
 		return DateUtil.formatTime(newTime);
 	}
 
-	/**
-	 * 删除 yml 文件内容注释
-	 *
-	 * @param content 配置内容
-	 * @return 移除后的内容
-	 */
-	public static String deleteComment(String content) {
-		List<String> split = StrUtil.split(content, StrUtil.LF);
-		split = split.stream().filter(s -> {
-			if (StrUtil.isEmpty(s)) {
-				return false;
-			}
-			s = StrUtil.trim(s);
-			return !StrUtil.startWith(s, "#");
-		}).collect(Collectors.toList());
-		return CollUtil.join(split, StrUtil.LF);
-	}
+//	/**
+//	 * 删除 yml 文件内容注释
+//	 *
+//	 * @param content 配置内容
+//	 * @return 移除后的内容
+//	 */
+//	public static String deleteComment(String content) {
+//		List<String> split = StrUtil.split(content, StrUtil.LF);
+//		split = split.stream().filter(s -> {
+//			if (StrUtil.isEmpty(s)) {
+//				return false;
+//			}
+//			s = StrUtil.trim(s);
+//			return !StrUtil.startWith(s, "#");
+//		}).collect(Collectors.toList());
+//		return CollUtil.join(split, StrUtil.LF);
+//	}
 }
