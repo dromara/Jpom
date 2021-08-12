@@ -30,7 +30,7 @@ public class FileTailWatcherRun implements Runnable {
      */
     private boolean start = false;
     private final Charset charset;
-    private LineHandler lineHandler;
+    private final LineHandler lineHandler;
 
     public LimitQueue<String> getLimitQueue() {
         return limitQueue;
