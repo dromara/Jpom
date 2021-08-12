@@ -50,7 +50,6 @@ public class OutGivingWhitelistController extends BaseServerController {
 	 * @author Hotstrip
 	 */
 	@RequestMapping(value = "white-list", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	@SystemPermission
 	@ResponseBody
 	public String whiteList() {
 		ServerWhitelist serverWhitelist = serverWhitelistServer.getWhitelist();
