@@ -47,7 +47,7 @@ public class ScriptProcessBuilder implements Runnable {
         processBuilder = new ProcessBuilder();
         List<String> command = StrUtil.splitTrim(args, StrUtil.SPACE);
         command.add(0, script);
-        if (SystemUtil.getOsInfo().isLinux()) {
+        if (SystemUtil.getOsInfo().isLinux() || SystemUtil.getOsInfo().isMac()) {
             command.add(0, CommandUtil.SUFFIX);
         }
         DefaultSystemLog.getLog().info(CollUtil.join(command, StrUtil.SPACE));
