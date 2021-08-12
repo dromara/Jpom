@@ -1,6 +1,5 @@
 package io.jpom.controller.build;
 
-import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.IdUtil;
@@ -22,21 +21,17 @@ import io.jpom.model.data.BuildModel;
 import io.jpom.model.data.SshModel;
 import io.jpom.model.data.UserModel;
 import io.jpom.model.log.UserOperateLogV1;
-import io.jpom.model.vo.BuildModelVo;
 import io.jpom.plugin.ClassFeature;
 import io.jpom.plugin.Feature;
 import io.jpom.plugin.MethodFeature;
 import io.jpom.service.build.BuildService;
 import io.jpom.service.dblog.BuildInfoService;
 import io.jpom.service.dblog.DbBuildHistoryLogService;
-import io.jpom.service.node.OutGivingServer;
 import io.jpom.service.node.ssh.SshService;
 import io.jpom.util.CommandUtil;
 import io.jpom.util.GitUtil;
-import io.jpom.util.StringUtil;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.springframework.http.MediaType;
-import org.springframework.stereotype.Controller;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -46,10 +41,8 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.annotation.Resource;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 
 /**
  * 构建列表，新版本，数据存放到数据库，不再是文件了
@@ -107,6 +100,22 @@ public class BuildInfoController extends BaseServerController {
 		return JsonMessage.getString(200, "success", list);
 	}
 
+	/**
+	 * edit build info
+	 * @param id
+	 * @param name
+	 * @param gitUrl
+	 * @param userName
+	 * @param password
+	 * @param resultDirFile
+	 * @param script
+	 * @param releaseMethod
+	 * @param branchName
+	 * @param group
+	 * @param repoType
+	 * @return
+	 * @throws Exception
+	 */
 	@RequestMapping(value = "/build/edit", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	@OptLog(UserOperateLogV1.OptType.EditBuild)
 	@Feature(method = MethodFeature.EDIT)
