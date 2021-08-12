@@ -5,15 +5,19 @@ import cn.hutool.core.convert.Convert;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.db.Entity;
+import cn.hutool.db.Page;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.validator.ValidatorConfig;
 import cn.jiangzeyin.common.validator.ValidatorItem;
 import cn.jiangzeyin.common.validator.ValidatorRule;
 import io.jpom.build.BuildUtil;
 import io.jpom.common.BaseServerController;
+import io.jpom.common.Const;
 import io.jpom.common.interceptor.OptLog;
 import io.jpom.model.AfterOpt;
 import io.jpom.model.BaseEnum;
+import io.jpom.model.data.BuildInfoModel;
 import io.jpom.model.data.BuildModel;
 import io.jpom.model.data.SshModel;
 import io.jpom.model.data.UserModel;
@@ -29,6 +33,7 @@ import io.jpom.service.node.OutGivingServer;
 import io.jpom.service.node.ssh.SshService;
 import io.jpom.util.CommandUtil;
 import io.jpom.util.GitUtil;
+import io.jpom.util.StringUtil;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
@@ -79,20 +84,27 @@ public class BuildInfoController extends BaseServerController {
 		return JsonMessage.getString(200, "success", groupList);
 	}
 
+	/**
+	 * load build list with params
+	 * @param group
+	 * @return
+	 */
 	@RequestMapping(value = "/build/list", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	@Feature(method = MethodFeature.LIST)
-	public String getMonitorList(String group) {
-		List<BuildModelVo> list = buildService.list(BuildModelVo.class);
-		if (StrUtil.isNotEmpty(group) && CollUtil.isNotEmpty(list)) {
-			List<BuildModelVo> array = new ArrayList<>();
-			for (BuildModelVo buildModelVo : list) {
-				if (group.equals(buildModelVo.getGroup())) {
-					array.add(buildModelVo);
-				}
-			}
-			list = array;
-		}
-		return JsonMessage.getString(200, "", list);
+	public String getBuildList(String group,
+							   @ValidatorConfig(value = {
+									   @ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "limit error")
+							   }, defaultVal = "10") int limit,
+							   @ValidatorConfig(value = {
+									   @ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "page error")
+							   }, defaultVal = "1") int page) {
+		// if group is empty string, dont set into entity property
+		Entity where = Entity.create(BuildInfoModel.TABLE_NAME)
+				.setIgnoreNull(Const.GROUP_COLUMN_STR, StrUtil.isEmpty(group) ? null : group);
+		Page pageReq = new Page(page, limit);
+		// load list with page
+		List<BuildInfoModel> list = buildInfoService.listPage(where, pageReq);
+		return JsonMessage.getString(200, "success", list);
 	}
 
 	@RequestMapping(value = "/build/edit", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)

@@ -16,7 +16,7 @@ export function getBuildGroupList() {
  */
 export function getBuildList(params) {
     return axios({
-        url: '/build/list_data.json',
+        url: '/build/list',
         method: 'post',
         data: params
     })
