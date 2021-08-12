@@ -352,7 +352,7 @@ export default {
     loadAccesList() {
       getDispatchWhiteList().then((res) => {
         if (res.code === 200) {
-          this.accessList = res.data;
+          this.accessList = res.data.outGivingArray || [];
         }
       });
     },

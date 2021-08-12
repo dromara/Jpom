@@ -55,10 +55,11 @@ public class OutGivingWhitelistController extends BaseServerController {
 	public String whiteList() {
 		ServerWhitelist serverWhitelist = serverWhitelistServer.getWhitelist();
 		Field[] fields = ReflectUtil.getFields(ServerWhitelist.class);
-		Map<String, String> map = new HashMap<>(8);
+		Map<String, Object> map = new HashMap<>(8);
 		for (Field field : fields) {
 			Collection<String> fieldValue = (Collection<String>) ReflectUtil.getFieldValue(serverWhitelist, field);
 			map.put(field.getName(), AgentWhitelist.convertToLine(fieldValue));
+			map.put(field.getName() + "Array", fieldValue);
 		}
 		return JsonMessage.getString(200, "ok", map);
 	}
