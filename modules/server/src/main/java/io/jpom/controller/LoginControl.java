@@ -57,28 +57,6 @@ public class LoginControl extends BaseServerController {
 	@Resource
 	private UserService userService;
 
-//    /**
-//     * 登录页面
-//     *
-//     * @return login
-//     */
-//    @RequestMapping(value = "login.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
-//    @NotLogin
-//    public String login() {
-//        if (userService.userListEmpty()) {
-//            // 调整到初始化也
-//            return BaseJpomInterceptor.getRedirect(getRequest(), "/install.html");
-//        }
-//        // 是否显示验证码
-//        setAttribute("showCode", showCode());
-//        return "login";
-//    }
-
-//    private boolean showCode() {
-//        String showCode = getSessionAttribute(SHOW_CODE);
-//        return StrUtil.isNotEmpty(showCode);
-//    }
-
 	/**
 	 * 验证码
 	 *
@@ -196,17 +174,6 @@ public class LoginControl extends BaseServerController {
 			}
 		}
 	}
-
-//    /**
-//     * 退出登录
-//     *
-//     * @return page
-//     */
-//    @RequestMapping(value = "logout", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
-//    public String logoutPage() {
-//        getSession().invalidate();
-//        return BaseJpomInterceptor.getRedirect(getRequest(), "/old.html");
-//    }
 
 	/**
 	 * 退出登录

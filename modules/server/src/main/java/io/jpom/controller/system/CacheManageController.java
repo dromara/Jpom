@@ -37,31 +37,6 @@ import java.util.Map;
 @Feature(cls = ClassFeature.SYSTEM)
 public class CacheManageController extends BaseServerController {
 
-//    @RequestMapping(value = "cache.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
-//    @Feature(method = MethodFeature.CACHE)
-//    public String cache() {
-//        if (tryGetNode() == null) {
-//            //
-//            File file = ConfigBean.getInstance().getTempPath();
-//            String fileSize = FileUtil.readableFileSize(FileUtil.size(file));
-//            setAttribute("cacheFileSize", fileSize);
-//
-//            int size = LoginControl.LFU_CACHE.size();
-//            setAttribute("ipSize", size);
-//            int oneLineCount = ServiceFileTailWatcher.getOneLineCount();
-//            setAttribute("readFileOnLineCount", oneLineCount);
-//
-//            File buildDataDir = BuildUtil.getBuildDataDir();
-//            if (buildDataDir.exists()) {
-//                fileSize = FileUtil.readableFileSize(FileUtil.size(buildDataDir));
-//                setAttribute("cacheBuildFileSize", fileSize);
-//            } else {
-//                setAttribute("cacheBuildFileSize", 0);
-//            }
-//        }
-//        return "system/cache";
-//    }
-
 	/**
 	 * @return
 	 * @author Hotstrip

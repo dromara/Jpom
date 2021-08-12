@@ -34,12 +34,6 @@ import java.util.Objects;
 @RequestMapping(value = "system")
 public class SystemUpdateController extends BaseServerController {
 
-//    @RequestMapping(value = "update.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
-//    @SystemPermission
-//    public String update() {
-//        return "system/update";
-//    }
-
 	@RequestMapping(value = "info", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
 	@SystemPermission
