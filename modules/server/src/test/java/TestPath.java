@@ -3,8 +3,19 @@ import cn.hutool.core.util.StrUtil;
 import org.junit.Test;
 import org.springframework.util.AntPathMatcher;
 
+import java.io.File;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.file.FileVisitResult;
+import java.nio.file.Path;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 /**
  * @author bwcx_jzy
@@ -12,20 +23,63 @@ import java.net.URL;
  */
 public class TestPath {
 
-    public static void main(String[] args) {
-        AntPathMatcher antPathMatcher = new AntPathMatcher();
-        System.out.println(antPathMatcher.match("/s/**/sss.html", "//s/s/s/sss.html"));
-    }
+	public static void main(String[] args) {
+		AntPathMatcher antPathMatcher = new AntPathMatcher();
+		System.out.println(antPathMatcher.match("/s/**/sss.html", "//s/s/s/sss.html"));
+		System.out.println(antPathMatcher.match("/s/*.html", "/s/sss.html"));
+		System.out.println(antPathMatcher.match("2.*", "2.5"));
+	}
 
-    @Test
-    public void test() throws MalformedURLException {
-        URL url = new URL("jar:file:/home/jpom/server/lib/server-2.4.8.jar!/BOOT-INF/classes!/");
-        String file = url.getFile();
-        String x = StrUtil.subBefore(file, "!", false);
-        System.out.println(x);
-        System.out.println(FileUtil.file(x));
+	@Test
+	public void testFilePath() {
+//		List<File> strings = FileUtil.loopFiles("~/jpom");
+//		for (File string : strings) {
+//			System.out.println(string);
+//		}
+		AntPathMatcher antPathMatcher = new AntPathMatcher();
+		List<String> paths = new ArrayList<>();
+		File rootFile = FileUtil.file("~/jpom");
+		String matchStr = "/agent/**/log";
+		matchStr = FileUtil.normalize(StrUtil.SLASH + matchStr);
+		String finalMatchStr = matchStr;
+		FileUtil.walkFiles(rootFile.toPath(), new SimpleFileVisitor<Path>() {
+			@Override
+			public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+				return this.test(file);
+			}
 
-        System.out.println(StrUtil.subBefore("sssddsf", "!", false));
+			@Override
+			public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes exc) throws IOException {
+				return this.test(dir);
+			}
 
-    }
+			private FileVisitResult test(Path path) {
+				String subPath = FileUtil.subPath(FileUtil.getAbsolutePath(rootFile), path.toFile());
+				subPath = FileUtil.normalize(StrUtil.SLASH + subPath);
+				if (antPathMatcher.match(finalMatchStr, subPath)) {
+					paths.add(subPath);
+					return FileVisitResult.TERMINATE;
+				}
+				return FileVisitResult.CONTINUE;
+			}
+		});
+		paths.forEach(System.out::println);
+
+		//
+		//System.out.println(antPathMatcher.isPattern("sdfsadf"));
+		//Optional<String> first = paths.stream().filter(s -> antPathMatcher.match("agent/**/log", s)).findFirst();
+		//System.out.println(first.get());
+	}
+
+	@Test
+	public void test() throws MalformedURLException {
+		URL url = new URL("jar:file:/home/jpom/server/lib/server-2.4.8.jar!/BOOT-INF/classes!/");
+		String file = url.getFile();
+		String x = StrUtil.subBefore(file, "!", false);
+		System.out.println(x);
+		System.out.println(FileUtil.file(x));
+
+		System.out.println(StrUtil.subBefore("sssddsf", "!", false));
+
+	}
 }

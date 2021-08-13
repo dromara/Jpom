@@ -22,6 +22,7 @@
 15. 【server】节点分发支持下载远程文件 （感谢@落泪归枫 [Gitee issues I1LM27](https://gitee.com/dromara/Jpom/issues/I1LM27) ）
 16. 【server】节点分发支持 file 类型项目
 17. 【agent】项目新增配置日志文件输出到指定目录
+18. 【server】构建产物目录支持通配符`AntPathMatcher`模式 （感谢@saysay [Gitee issues I455FM](https://gitee.com/dromara/Jpom/issues/I455FM) ）
 
 ### 解决BUG、优化功能
 

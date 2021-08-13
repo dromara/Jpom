@@ -1,6 +1,4 @@
-/** 
- * 该页面是老版本的构建信息页面，之后可能会删除，新版本的页面请参考 ./list-info.vue
- */
+/** * 该页面是老版本的构建信息页面，之后可能会删除，新版本的页面请参考 ./list-info.vue */
 <template>
   <div>
     <div ref="filter" class="filter">
@@ -150,7 +148,23 @@
           <a-input v-model="temp.script" type="textarea" :auto-size="{ minRows: 2, maxRows: 6 }" allow-clear placeholder="构建执行的命令(非阻塞命令)，如：mvn clean package" />
         </a-form-model-item>
         <a-form-model-item label="产物目录" prop="resultDirFile" class="jpom-target-dir">
-          <a-input v-model="temp.resultDirFile" placeholder="构建产物目录，相对路径" />
+          <a-input v-model="temp.resultDirFile" placeholder="构建产物目录，相对路径">
+            <a-tooltip slot="suffix">
+              <template slot="title">
+                <div>可以理解为项目打包的目录。 如 Jpom 项目执行（构建命令） <b>mvn clean package</b> 构建命令，构建产物相对路径为：<b>modules/server/target/server-2.4.2-release</b></div>
+                <div><br /></div>
+                <div>
+                  支持通配符(AntPathMatcher)
+                  <ul>
+                    <li>? 匹配一个字符</li>
+                    <li>* 匹配零个或多个字符</li>
+                    <li>** 匹配路径中的零个或多个目录</li>
+                  </ul>
+                </div>
+              </template>
+              <a-icon type="question-circle" theme="filled" />
+            </a-tooltip>
+          </a-input>
         </a-form-model-item>
         <a-form-model-item label="发布操作" prop="releaseMethod">
           <a-radio-group v-model="temp.releaseMethod" name="releaseMethod">
