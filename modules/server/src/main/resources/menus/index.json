@@ -35,7 +35,7 @@
       },
       {
         "id": "outgivingWhitelistDirectory",
-        "title": "分发白名单",
+        "title": "分发白名单配置",
         "dynamic": "showOutGiving"
       }
     ]

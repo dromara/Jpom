@@ -61,7 +61,7 @@
     "childs": [
       {
         "id": "whitelistDirectory",
-        "title": "白名单目录"
+        "title": "白名单配置"
       },
       {
         "id": "cacheManage",

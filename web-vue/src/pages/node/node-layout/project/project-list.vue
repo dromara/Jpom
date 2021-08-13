@@ -67,24 +67,76 @@
         <a-form-model-item label="项目名称" prop="name">
           <a-input v-model="temp.name" placeholder="项目名称" />
         </a-form-model-item>
-        <a-form-model-item label="运行方式" prop="runMode">
+        <a-form-model-item prop="runMode">
+          <template slot="label">
+            运行方式
+            <a-tooltip v-show="temp.type !== 'edit'">
+              <template slot="title">
+                <ul>
+                  <li><b>ClassPath</b> java -classpath xxx 运行项目</li>
+                  <li><b>Jar</b> java -jar xxx 运行项目</li>
+                  <li><b>JarWar</b> java -jar Springboot war 运行项目</li>
+                  <li><b>JavaExtDirsCp</b> java -Djava.ext.dirs=lib -cp conf:run.jar $MAIN_CLASS 运行项目</li>
+                  <li><b>File</b> 项目为静态文件夹,没有项目状态以及控制等功能</li>
+                </ul>
+              </template>
+              <a-icon type="question-circle" theme="filled" />
+            </a-tooltip>
+          </template>
           <a-select v-model="temp.runMode" placeholder="请选择运行方式">
             <a-select-option v-for="runMode in runModeList" :key="runMode">{{ runMode }}</a-select-option>
           </a-select>
         </a-form-model-item>
-        <a-form-model-item label="项目白名单路径" prop="whitelistDirectory" class="jpom-node-project-whitelist">
+        <a-form-model-item prop="whitelistDirectory" class="jpom-node-project-whitelist">
+          <template slot="label">
+            项目白名单路径
+            <a-tooltip v-show="temp.type !== 'edit'">
+              <template slot="title">
+                <ul>
+                  <li>白名单路径是指项目文件存放到服务中的文件夹</li>
+                  <li>可以到节点管理中的【系统管理】=>【白名单配置】修改</li>
+                </ul>
+              </template>
+              <a-icon type="question-circle" theme="filled" />
+            </a-tooltip>
+          </template>
           <a-select v-model="temp.whitelistDirectory" placeholder="请选择项目白名单路径">
             <a-select-option v-for="access in accessList" :key="access">{{ access }}</a-select-option>
           </a-select>
         </a-form-model-item>
-        <a-form-model-item label="项目文件夹" prop="lib">
+        <a-form-model-item prop="lib">
+          <template slot="label">
+            项目文件夹
+            <a-tooltip v-show="temp.type !== 'edit'">
+              <template slot="title">
+                <ul>
+                  <li>项目文件夹是项目实际存放的目录名称</li>
+                  <li>项目文件会存放到 <br />&nbsp;&nbsp;<b>项目白名单路径+项目文件夹</b></li>
+                </ul>
+              </template>
+              <a-icon type="question-circle" theme="filled" />
+            </a-tooltip>
+          </template>
           <a-input v-model="temp.lib" placeholder="项目存储的文件夹" @blur.native="checkLibIndexExist" />
           <span class="lib-exist" v-show="temp.libExist">当前文件夹已存在,创建成功后会自动同步文件.</span>
         </a-form-model-item>
         <a-form-model-item v-show="filePath !== ''" label="项目完整目录">
           <a-alert :message="filePath" type="success" />
         </a-form-model-item>
-        <a-form-model-item label="日志目录" v-show="temp.runMode !== 'File'">
+        <a-form-model-item v-show="temp.runMode && temp.runMode !== 'File'">
+          <template slot="label">
+            日志目录
+            <a-tooltip v-show="temp.type !== 'edit'">
+              <template slot="title">
+                <ul>
+                  <li>日志目录是指控制台日志存储目录</li>
+                  <li>默认是和项目文件夹父级</li>
+                  <li>可选择的列表和项目白名单目录是一致的，即相同配置</li>
+                </ul>
+              </template>
+              <a-icon type="question-circle" theme="filled" />
+            </a-tooltip>
+          </template>
           <a-select v-model="temp.logPath" placeholder="请选择项目白名单路径">
             <a-select-option v-for="access in accessList" :key="access">{{ access }}</a-select-option>
           </a-select>
@@ -113,21 +165,21 @@
             </a-col>
           </a-row>
         </a-form-model-item>
-        <a-form-model-item label="JDK" prop="jdkId" v-show="temp.runMode !== 'File'" class="jpom-node-project-jdk">
+        <a-form-model-item label="JDK" prop="jdkId" v-show="temp.runMode && temp.runMode !== 'File'" class="jpom-node-project-jdk">
           <a-select v-model="temp.jdkId" placeholder="请选择 JDK">
             <a-select-option v-for="jdk in jdkList" :key="jdk.id">{{ jdk.name }}</a-select-option>
           </a-select>
         </a-form-model-item>
-        <a-form-model-item label="Main Class" prop="mainClass" v-show="temp.runMode !== 'Jar' && temp.runMode !== 'File'">
+        <a-form-model-item label="Main Class" prop="mainClass" v-show="temp.runMode && temp.runMode !== 'Jar' && temp.runMode !== 'File'">
           <a-input v-model="temp.mainClass" placeholder="程序运行的 main 类(jar 模式运行可以不填)" />
         </a-form-model-item>
         <a-form-model-item label="JavaExtDirsCp" prop="javaExtDirsCp" v-show="temp.runMode === 'JavaExtDirsCp' && temp.runMode !== 'File'">
           <a-input v-model="temp.javaExtDirsCp" placeholder="-Dext.dirs=xxx: -cp xx  填写【xxx:xx】" />
         </a-form-model-item>
-        <a-form-model-item label="JVM 参数" prop="jvm" v-show="temp.runMode !== 'File'">
+        <a-form-model-item label="JVM 参数" prop="jvm" v-show="temp.runMode && temp.runMode !== 'File'">
           <a-textarea v-model="temp.jvm" :auto-size="{ minRows: 3, maxRows: 3 }" placeholder="jvm参数,非必填.如：-Xms512m -Xmx512m" />
         </a-form-model-item>
-        <a-form-model-item label="args 参数" prop="args" v-show="temp.runMode !== 'File'">
+        <a-form-model-item label="args 参数" prop="args" v-show="temp.runMode && temp.runMode !== 'File'">
           <a-textarea v-model="temp.args" :auto-size="{ minRows: 3, maxRows: 3 }" placeholder="Main 函数 args 参数，非必填. 如：--service.port=8080" />
         </a-form-model-item>
         <!-- 副本信息 -->
@@ -143,10 +195,21 @@
           </a-tooltip>
         </a-row>
         <!-- 添加副本 -->
-        <a-form-model-item label="操作" v-show="temp.runMode !== 'File'">
+        <a-form-model-item v-show="temp.runMode && temp.runMode !== 'File'">
+          <template slot="label">
+            副本操作
+            <a-tooltip v-show="temp.type !== 'edit'">
+              <template slot="title">
+                <ul>
+                  <li>副本是指同一个项目在一个节点（服务器）中运行多份</li>
+                </ul>
+              </template>
+              <a-icon type="question-circle" theme="filled" />
+            </a-tooltip>
+          </template>
           <a-button type="primary" @click="handleAddReplica">添加副本</a-button>
         </a-form-model-item>
-        <a-form-model-item label="WebHooks" prop="token" v-show="temp.runMode !== 'File'" class="jpom-node-project-token">
+        <a-form-model-item label="WebHooks" prop="token" v-show="temp.runMode && temp.runMode !== 'File'" class="jpom-node-project-token">
           <a-input v-model="temp.token" placeholder="关闭程序时自动请求,非必填，GET请求" />
         </a-form-model-item>
         <a-form-model-item v-show="temp.type === 'edit' && temp.runMode !== 'File'" label="日志路径" prop="log">

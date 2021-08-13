@@ -55,6 +55,8 @@ public abstract class BaseDbService<T extends BaseDbModel> extends BaseDbCommonS
 	 * @return 影响的行数
 	 */
 	public int updateById(T info) {
+		// check id
+		Assert.hasText(info.getId(), "不能执行：error");
 		// def modify time
 		info.setModifyTimeMillis(ObjectUtil.defaultIfNull(info.getModifyTimeMillis(), SystemClock.now()));
 		// remove create time
