@@ -2,8 +2,9 @@ package io.jpom.model.log;
 
 import cn.hutool.core.util.StrUtil;
 import io.jpom.JpomApplication;
-import io.jpom.model.BaseJsonModel;
+import io.jpom.model.BaseDbModel;
 import io.jpom.model.data.UserModel;
+import io.jpom.service.h2db.TableName;
 
 /**
  * ssh 终端执行日志
@@ -11,16 +12,8 @@ import io.jpom.model.data.UserModel;
  * @author jiangzeyin
  * @date 2021/08/04
  */
-public class SshTerminalExecuteLog extends BaseJsonModel {
-	/**
-	 * 表名
-	 */
-	public static final String TABLE_NAME = SshTerminalExecuteLog.class.getSimpleName().toUpperCase();
-
-	/**
-	 * 数据id
-	 */
-	private String id;
+@TableName("SSHTERMINALEXECUTELOG")
+public class SshTerminalExecuteLog extends BaseDbModel {
 	/**
 	 * 操作ip
 	 */
@@ -123,13 +116,6 @@ public class SshTerminalExecuteLog extends BaseJsonModel {
 		this.commands = commands;
 	}
 
-	public String getId() {
-		return id;
-	}
-
-	public void setId(String id) {
-		this.id = id;
-	}
 
 	public String getSshName() {
 		return sshName;

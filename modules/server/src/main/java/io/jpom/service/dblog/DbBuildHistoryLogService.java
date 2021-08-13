@@ -38,8 +38,7 @@ public class DbBuildHistoryLogService extends BaseDbCommonService<BuildHistoryLo
 	private BuildService buildService;
 
 	public DbBuildHistoryLogService() {
-		super(BuildHistoryLog.TABLE_NAME, BuildHistoryLog.class);
-		setKey("id");
+		super(BuildHistoryLog.TABLE_NAME, "id", BuildHistoryLog.class);
 	}
 
 	/**

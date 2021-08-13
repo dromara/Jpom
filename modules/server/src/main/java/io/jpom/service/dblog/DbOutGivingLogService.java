@@ -15,30 +15,29 @@ import org.springframework.stereotype.Service;
 @Service
 public class DbOutGivingLogService extends BaseDbCommonService<OutGivingLog> {
 
-    public DbOutGivingLogService() {
-        super(OutGivingLog.TABLE_NAME, OutGivingLog.class);
-        setKey("id");
-    }
+	public DbOutGivingLogService() {
+		super(OutGivingLog.TABLE_NAME, "id", OutGivingLog.class);
+	}
 
-    @Override
-    public void insert(OutGivingLog outGivingLog) {
-        outGivingLog.setStartTime(System.currentTimeMillis());
-        if (outGivingLog.getStatus() == OutGivingNodeProject.Status.Cancel.getCode()) {
-            outGivingLog.setEndTime(System.currentTimeMillis());
-        }
-        super.insert(outGivingLog);
-    }
+	@Override
+	public void insert(OutGivingLog outGivingLog) {
+		outGivingLog.setStartTime(System.currentTimeMillis());
+		if (outGivingLog.getStatus() == OutGivingNodeProject.Status.Cancel.getCode()) {
+			outGivingLog.setEndTime(System.currentTimeMillis());
+		}
+		super.insert(outGivingLog);
+	}
 
-    @Override
-    public int update(OutGivingLog outGivingLog) {
-        Entity entity = new Entity();
-        entity.set("status", outGivingLog.getStatus());
-        // 结束
-        entity.set("endTime", System.currentTimeMillis());
-        entity.set("result", outGivingLog.getResult());
-        //
-        Entity where = new Entity();
-        where.set("id", outGivingLog.getId());
-        return super.update(entity, where);
-    }
+	@Override
+	public int update(OutGivingLog outGivingLog) {
+		Entity entity = new Entity();
+		entity.set("status", outGivingLog.getStatus());
+		// 结束
+		entity.set("endTime", System.currentTimeMillis());
+		entity.set("result", outGivingLog.getResult());
+		//
+		Entity where = new Entity();
+		where.set("id", outGivingLog.getId());
+		return super.update(entity, where);
+	}
 }

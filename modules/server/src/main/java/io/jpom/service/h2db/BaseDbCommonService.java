@@ -38,17 +38,19 @@ public abstract class BaseDbCommonService<T> {
 	/**
 	 * 主键
 	 */
-	private String key;
+	private final String key;
 
-	public BaseDbCommonService(String tableName, Class<T> tClass) {
+	public BaseDbCommonService(String tableName, String key, Class<T> tClass) {
 		this.tableName = this.covetTableName(tableName, tClass);
 		this.tClass = tClass;
+		this.key = key;
 	}
 
 	@SuppressWarnings("unchecked")
-	public BaseDbCommonService(String tableName) {
+	public BaseDbCommonService(String tableName, String key) {
 		this.tClass = (Class<T>) TypeUtil.getTypeArgument(this.getClass());
 		this.tableName = this.covetTableName(tableName, this.tClass);
+		this.key = key;
 
 	}
 
@@ -60,8 +62,8 @@ public abstract class BaseDbCommonService<T> {
 		return tableName;
 	}
 
-	protected void setKey(String key) {
-		this.key = key;
+	protected String getKey() {
+		return key;
 	}
 
 	/**
@@ -213,6 +215,29 @@ public abstract class BaseDbCommonService<T> {
 		} catch (SQLException e) {
 			throw new JpomRuntimeException("数据库异常", e);
 		}
+	}
+
+	/**
+	 * 判断是否存在
+	 *
+	 * @param where 条件
+	 * @return true 存在
+	 */
+	public boolean exists(Entity where) {
+		if (!DbConfig.getInstance().isInit()) {
+			// ignore
+			return false;
+		}
+		where.setTableName(getTableName());
+		Db db = Db.use();
+		db.setWrapper((Character) null);
+		long count;
+		try {
+			count = db.count(where);
+		} catch (SQLException e) {
+			throw new JpomRuntimeException("数据库异常", e);
+		}
+		return count > 0;
 	}
 
 	/**

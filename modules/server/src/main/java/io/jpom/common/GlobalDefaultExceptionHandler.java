@@ -1,6 +1,7 @@
 package io.jpom.common;
 
 import cn.hutool.core.exceptions.ExceptionUtil;
+import cn.hutool.core.exceptions.ValidateException;
 import cn.hutool.extra.servlet.ServletUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
@@ -96,13 +97,13 @@ public class GlobalDefaultExceptionHandler {
 	}
 
 	/**
-	 * 声明要捕获的异常 (参数或者状态异常)
+	 * 声明要捕获的异常 (参数，状态，验证异常)
 	 *
 	 * @param request  请求
 	 * @param response 响应
 	 * @param e        异常
 	 */
-	@ExceptionHandler({IllegalArgumentException.class, IllegalStateException.class})
+	@ExceptionHandler({IllegalArgumentException.class, IllegalStateException.class, ValidateException.class})
 	public void paramExceptionHandler(HttpServletRequest request, HttpServletResponse response, Exception e) {
 		DefaultSystemLog.getLog().error("controller " + request.getRequestURI(), e);
 		ServletUtil.write(response, JsonMessage.getString(405, e.getMessage()), MediaType.APPLICATION_JSON_VALUE);

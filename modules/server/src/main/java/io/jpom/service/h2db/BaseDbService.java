@@ -1,6 +1,7 @@
 package io.jpom.service.h2db;
 
 import cn.hutool.core.date.SystemClock;
+import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.db.Entity;
 import io.jpom.common.Const;
@@ -18,8 +19,7 @@ import java.util.Collection;
 public abstract class BaseDbService<T extends BaseDbModel> extends BaseDbCommonService<T> {
 
 	public BaseDbService() {
-		super(null);
-		setKey(Const.ID_STR);
+		super(null, Const.ID_STR);
 	}
 
 	@Override
@@ -33,6 +33,7 @@ public abstract class BaseDbService<T extends BaseDbModel> extends BaseDbCommonS
 	public void insert(T t) {
 		// def create time
 		t.setCreateTimeMillis(ObjectUtil.defaultIfNull(t.getCreateTimeMillis(), SystemClock.now()));
+		t.setId(ObjectUtil.defaultIfNull(t.getId(), IdUtil.fastSimpleUUID()));
 		super.insert(t);
 	}
 
@@ -40,7 +41,10 @@ public abstract class BaseDbService<T extends BaseDbModel> extends BaseDbCommonS
 	@Override
 	public void insert(Collection<T> t) {
 		// def create time
-		t.forEach(t1 -> t1.setCreateTimeMillis(ObjectUtil.defaultIfNull(t1.getCreateTimeMillis(), SystemClock.now())));
+		t.forEach(t1 -> {
+			t1.setCreateTimeMillis(ObjectUtil.defaultIfNull(t1.getCreateTimeMillis(), SystemClock.now()));
+			t1.setId(ObjectUtil.defaultIfNull(t1.getId(), IdUtil.fastSimpleUUID()));
+		});
 		super.insert(t);
 	}
 
@@ -58,17 +62,5 @@ public abstract class BaseDbService<T extends BaseDbModel> extends BaseDbCommonS
 		Entity where = new Entity();
 		where.set(Const.ID_STR, info.getId());
 		super.update(entity, where);
-	}
-
-
-	/**
-	 * delete by id
-	 *
-	 * @param id 主键
-	 */
-	public void deleteById(String id) {
-		Entity where = new Entity(getTableName());
-		where.set(Const.ID_STR, id);
-		del(where);
 	}
 }

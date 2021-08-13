@@ -1,12 +1,11 @@
 package io.jpom.service.dblog;
 
 import cn.hutool.core.date.SystemClock;
-import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
 import io.jpom.model.data.SshModel;
 import io.jpom.model.data.UserModel;
 import io.jpom.model.log.SshTerminalExecuteLog;
-import io.jpom.service.h2db.BaseDbCommonService;
+import io.jpom.service.h2db.BaseDbService;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -20,12 +19,7 @@ import java.util.stream.Collectors;
  * @date 2021/08/04
  */
 @Service
-public class SshTerminalExecuteLogService extends BaseDbCommonService<SshTerminalExecuteLog> {
-
-	public SshTerminalExecuteLogService() {
-		super(SshTerminalExecuteLog.TABLE_NAME, SshTerminalExecuteLog.class);
-		setKey("id");
-	}
+public class SshTerminalExecuteLogService extends BaseDbService<SshTerminalExecuteLog> {
 
 	/**
 	 * 批量记录日志
@@ -41,7 +35,7 @@ public class SshTerminalExecuteLogService extends BaseDbCommonService<SshTermina
 		long optTime = SystemClock.now();
 		List<SshTerminalExecuteLog> executeLogs = commands.stream().filter(StrUtil::isNotEmpty).map(s -> {
 			SshTerminalExecuteLog sshTerminalExecuteLog = new SshTerminalExecuteLog();
-			sshTerminalExecuteLog.setId(IdUtil.fastSimpleUUID());
+			//sshTerminalExecuteLog.setId(IdUtil.fastSimpleUUID());
 			if (sshItem != null) {
 				sshTerminalExecuteLog.setSshId(sshItem.getId());
 				sshTerminalExecuteLog.setSshName(sshItem.getName());

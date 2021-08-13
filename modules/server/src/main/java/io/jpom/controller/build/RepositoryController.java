@@ -1,7 +1,6 @@
 package io.jpom.controller.build;
 
-import cn.hutool.core.date.LocalDateTimeUtil;
-import cn.hutool.core.util.IdUtil;
+import cn.hutool.core.lang.Validator;
 import cn.hutool.db.Entity;
 import cn.hutool.db.Page;
 import cn.hutool.db.PageResult;
@@ -17,6 +16,7 @@ import io.jpom.plugin.ClassFeature;
 import io.jpom.plugin.Feature;
 import io.jpom.plugin.MethodFeature;
 import io.jpom.service.dblog.RepositoryService;
+import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -68,19 +68,35 @@ public class RepositoryController {
 	@PostMapping(value = "/build/repository/edit")
 	@Feature(method = MethodFeature.EDIT)
 	public Object editRepository(RepositoryModel repositoryModelReq) {
+		this.checkInfo(repositoryModelReq);
 		if (null == repositoryModelReq.getId()) {
 			// insert data
-			if (null == repositoryModelReq.getModifyTime()) {
-				repositoryModelReq.setModifyTime(LocalDateTimeUtil.format(LocalDateTimeUtil.now(), "YYYY-MM-dd HH:mm:ss"));
-			}
-			repositoryModelReq.setId(IdUtil.fastSimpleUUID());
 			repositoryService.insert(repositoryModelReq);
 		} else {
 			// update data
-			repositoryModelReq.setModifyTime(LocalDateTimeUtil.format(LocalDateTimeUtil.now(), "YYYY-MM-dd HH:mm:ss"));
 			repositoryService.updateById(repositoryModelReq);
 		}
 		return JsonMessage.toJson(200, "操作成功");
+	}
+
+	/**
+	 * 检查信息
+	 *
+	 * @param repositoryModelReq 仓库信息
+	 */
+	private void checkInfo(RepositoryModel repositoryModelReq) {
+		Assert.hasText(repositoryModelReq.getName(), "请填写仓库名称");
+		Integer repoType = repositoryModelReq.getRepoType();
+		Assert.state(repoType != null && (repoType == 1 || repoType == 0), "请选择仓库类型");
+		Assert.hasText(repositoryModelReq.getGitUrl(), "请填写仓库地址");
+		// 判断仓库是否重复
+		Entity entity = Entity.create();
+		if (repositoryModelReq.getId() != null) {
+			Validator.validateGeneral(repositoryModelReq.getId(), "错误的ID");
+			entity.set("id", "<> " + repositoryModelReq.getId());
+		}
+		entity.set("gitUrl", repositoryModelReq.getGitUrl());
+		Assert.state(!repositoryService.exists(entity), "已经存在对应的仓库信息啦");
 	}
 
 	/**
@@ -92,7 +108,7 @@ public class RepositoryController {
 	@PostMapping(value = "/build/repository/delete")
 	@Feature(method = MethodFeature.DEL)
 	public Object delRepository(String id) {
-		repositoryService.deleteById(id);
+		repositoryService.delByKey(id);
 		return JsonMessage.getString(200, "删除成功");
 	}
 }
