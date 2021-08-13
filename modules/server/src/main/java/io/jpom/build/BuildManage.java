@@ -153,6 +153,7 @@ public class BuildManage extends BaseBuild implements Runnable {
 		Thread.sleep(2000);
 		String resultDirFile = buildModel.getResultDirFile();
 		File rootFile = this.gitFile;
+		boolean updateDirFile = false;
 		if (ANT_PATH_MATCHER.isPattern(resultDirFile)) {
 			// 通配模式
 			String matchStr = FileUtil.normalize(StrUtil.SLASH + resultDirFile);
@@ -187,6 +188,7 @@ public class BuildManage extends BaseBuild implements Runnable {
 			// 切换到匹配到到文件
 			this.log(StrUtil.format("match {} {}", resultDirFile, first));
 			resultDirFile = first;
+			updateDirFile = true;
 		}
 		File file = FileUtil.file(this.gitFile, resultDirFile);
 		if (!file.exists()) {
@@ -201,6 +203,13 @@ public class BuildManage extends BaseBuild implements Runnable {
 				.setCopyFilter(file1 -> !file1.isHidden())
 				.copy();
 		this.log(StrUtil.format("mv {} {}", resultDirFile, buildModel.getBuildIdStr()));
+		// 修改构建产物目录
+		if (updateDirFile) {
+			DbBuildHistoryLogService dbBuildHistoryLogService = SpringUtil.getBean(DbBuildHistoryLogService.class);
+			dbBuildHistoryLogService.updateResultDirFile(this.logId, resultDirFile);
+			//
+			this.buildModel.setResultDirFile(resultDirFile);
+		}
 		return true;
 	}
 

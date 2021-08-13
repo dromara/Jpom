@@ -42,8 +42,6 @@ public class BuildHistoryLog extends BaseBuildModule {
      * 结束时间
      */
     private long endTime;
-
-
     /**
      * 构建人
      *

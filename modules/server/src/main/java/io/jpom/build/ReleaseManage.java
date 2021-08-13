@@ -36,7 +36,7 @@ public class ReleaseManage extends BaseBuild {
 	private final UserModel userModel;
 	private final int buildId;
 	private final BaseBuildModule baseBuildModule;
-	private File resultFile;
+	private final File resultFile;
 	private BaseBuild baseBuild;
 
 	ReleaseManage(BuildModel buildModel, UserModel userModel, BaseBuild baseBuild) {
@@ -46,7 +46,7 @@ public class ReleaseManage extends BaseBuild {
 		this.buildId = buildModel.getBuildId();
 		this.userModel = userModel;
 		this.baseBuild = baseBuild;
-		this.init();
+		this.resultFile = BuildUtil.getHistoryPackageFile(this.buildModelId, this.buildId, buildModel.getResultDirFile());
 	}
 
 	/**
@@ -61,7 +61,7 @@ public class ReleaseManage extends BaseBuild {
 		this.baseBuildModule = buildHistoryLog;
 		this.buildId = buildHistoryLog.getBuildNumberId();
 		this.userModel = userModel;
-		this.init();
+		this.resultFile = BuildUtil.getHistoryPackageFile(this.buildModelId, this.buildId, buildHistoryLog.getResultDirFile());
 	}
 
 
@@ -72,10 +72,6 @@ public class ReleaseManage extends BaseBuild {
 		} else {
 			return baseBuild.updateStatus(status);
 		}
-	}
-
-	private void init() {
-		this.resultFile = BuildUtil.getHistoryPackageFile(this.buildModelId, this.buildId, this.baseBuildModule.getResultDirFile());
 	}
 
 	/**
