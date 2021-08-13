@@ -13,7 +13,6 @@ import io.jpom.system.JpomRuntimeException;
 import io.jpom.system.db.DbConfig;
 
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -27,18 +26,19 @@ import java.util.stream.Collectors;
 public abstract class BaseDbCommonService<T> {
 
 	static {
+		// 配置页码是从 1 开始
 		PageUtil.setFirstPageNo(1);
 	}
 
 	/**
 	 * 表名
 	 */
-	private final String tableName;
-	private final Class<T> tClass;
+	protected final String tableName;
+	protected final Class<T> tClass;
 	/**
 	 * 主键
 	 */
-	private final String key;
+	protected final String key;
 
 	public BaseDbCommonService(String tableName, String key, Class<T> tClass) {
 		this.tableName = this.covetTableName(tableName, tClass);
@@ -51,9 +51,15 @@ public abstract class BaseDbCommonService<T> {
 		this.tClass = (Class<T>) TypeUtil.getTypeArgument(this.getClass());
 		this.tableName = this.covetTableName(tableName, this.tClass);
 		this.key = key;
-
 	}
 
+	/**
+	 * 转换表面
+	 *
+	 * @param tableName 表面
+	 * @param tClass    类
+	 * @return 转换后的表名
+	 */
 	protected String covetTableName(String tableName, Class<T> tClass) {
 		return tableName;
 	}
@@ -168,13 +174,25 @@ public abstract class BaseDbCommonService<T> {
 		} catch (SQLException e) {
 			throw new JpomRuntimeException("数据库异常", e);
 		}
+		return this.entityToBean(entity, this.tClass);
+	}
+
+	/**
+	 * entity 转 实体
+	 *
+	 * @param entity Entity
+	 * @param rClass 实体类
+	 * @param <R>    乏型
+	 * @return data
+	 */
+	private <R> R entityToBean(Entity entity, Class<R> rClass) {
 		if (entity == null) {
 			return null;
 		}
 		CopyOptions copyOptions = new CopyOptions();
 		copyOptions.setIgnoreError(true);
 		copyOptions.setIgnoreCase(true);
-		return BeanUtil.mapToBean(entity, this.tClass, copyOptions);
+		return BeanUtil.toBean(entity, rClass, copyOptions);
 	}
 
 	/**
@@ -261,16 +279,41 @@ public abstract class BaseDbCommonService<T> {
 		} catch (SQLException e) {
 			throw new JpomRuntimeException("数据库异常", e);
 		}
-		CopyOptions copyOptions = new CopyOptions();
-		copyOptions.setIgnoreError(true);
-		copyOptions.setIgnoreCase(true);
-		List<T> list = new ArrayList<>();
-		pageResult.forEach(entity1 -> {
-			T v1 = BeanUtil.mapToBean(entity1, this.tClass, copyOptions);
-			list.add(v1);
-		});
+		//
+		List<T> list = pageResult.stream().map(entity -> this.entityToBean(entity, this.tClass)).collect(Collectors.toList());
 		PageResult<T> pageResult1 = new PageResult<>(pageResult.getPage(), pageResult.getPageSize(), pageResult.getTotal());
 		pageResult1.addAll(list);
 		return pageResult1;
+	}
+
+	/**
+	 * sql 查询
+	 *
+	 * @param sql    sql 语句
+	 * @param params 参数
+	 * @return list
+	 */
+	public List<Entity> query(String sql, Object... params) {
+		try {
+			return Db.use().query(sql, params);
+		} catch (SQLException e) {
+			throw new JpomRuntimeException("数据库异常", e);
+		}
+	}
+
+
+	/**
+	 * sql 查询 list
+	 *
+	 * @param sql    sql 语句
+	 * @param params 参数
+	 * @return list
+	 */
+	public List<T> queryList(String sql, Object... params) {
+		List<Entity> query = this.query(sql, params);
+		if (query == null) {
+			return null;
+		}
+		return query.stream().map((entity -> this.entityToBean(entity, this.tClass))).collect(Collectors.toList());
 	}
 }

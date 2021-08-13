@@ -21,8 +21,8 @@ public class RepositoryService extends BaseDbService<RepositoryModel> {
 	}
 
 	@Override
-	public void updateById(RepositoryModel info) {
+	public int updateById(RepositoryModel info) {
 		info.setModifyTime(LocalDateTimeUtil.format(LocalDateTimeUtil.now(), "YYYY-MM-dd HH:mm:ss"));
-		super.updateById(info);
+		return super.updateById(info);
 	}
 }

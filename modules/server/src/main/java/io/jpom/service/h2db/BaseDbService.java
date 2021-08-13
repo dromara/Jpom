@@ -52,8 +52,9 @@ public abstract class BaseDbService<T extends BaseDbModel> extends BaseDbCommonS
 	 * update by id with data
 	 *
 	 * @param info data
+	 * @return 影响的行数
 	 */
-	public void updateById(T info) {
+	public int updateById(T info) {
 		// def modify time
 		info.setModifyTimeMillis(ObjectUtil.defaultIfNull(info.getModifyTimeMillis(), SystemClock.now()));
 		Entity entity = new Entity(getTableName());
@@ -61,6 +62,11 @@ public abstract class BaseDbService<T extends BaseDbModel> extends BaseDbCommonS
 
 		Entity where = new Entity();
 		where.set(Const.ID_STR, info.getId());
-		super.update(entity, where);
+		return super.update(entity, where);
+	}
+
+	@Override
+	public int update(T t) {
+		return this.updateById(t);
 	}
 }
