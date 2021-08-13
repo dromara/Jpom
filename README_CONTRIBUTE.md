@@ -30,6 +30,22 @@
 
 > 注：由于旧代码存在很多不规范问题，会逐步调整为新规范。在新写的代码都需要需要遵循上面说明
 > 
+> 
+### 类的文档注释规范（Javadoc）
+
+```
+/**
+ * xxxxxxxx
+ * @author xxxx
+ * @since ${DATE}
+ */
+```
+
+> 这里采用 `@since` 声明创建日期是因为 `Javadoc` 规范里面并没有 `@date` 标记所以采用 `@since` 代替
+
+### Java 代码规范
+
+> 推荐安装 `alibaba-java-coding-guidelines`（`p3c`） 插件
 
 ## changelog 更新规范
 
