@@ -57,6 +57,8 @@ public abstract class BaseDbService<T extends BaseDbModel> extends BaseDbCommonS
 	public int updateById(T info) {
 		// def modify time
 		info.setModifyTimeMillis(ObjectUtil.defaultIfNull(info.getModifyTimeMillis(), SystemClock.now()));
+		// remove create time
+		info.setCreateTimeMillis(null);
 		Entity entity = new Entity(getTableName());
 		entity.parseBean(info, false, true);
 
