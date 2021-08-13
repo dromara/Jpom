@@ -89,6 +89,9 @@ public class RepositoryController {
 		Integer repoType = repositoryModelReq.getRepoType();
 		Assert.state(repoType != null && (repoType == 1 || repoType == 0), "请选择仓库类型");
 		Assert.hasText(repositoryModelReq.getGitUrl(), "请填写仓库地址");
+		//
+		Integer protocol = repositoryModelReq.getProtocol();
+		Assert.state(protocol != null && (protocol == 1 || protocol == 0), "请选择拉取代码的协议");
 		// 判断仓库是否重复
 		Entity entity = Entity.create();
 		if (repositoryModelReq.getId() != null) {
