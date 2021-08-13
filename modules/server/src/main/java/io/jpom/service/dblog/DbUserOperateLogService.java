@@ -11,6 +11,7 @@ import io.jpom.model.data.UserModel;
 import io.jpom.model.log.UserOperateLogV1;
 import io.jpom.monitor.NotifyUtil;
 import io.jpom.service.build.BuildService;
+import io.jpom.service.h2db.BaseDbCommonService;
 import io.jpom.service.monitor.MonitorUserOptService;
 import io.jpom.service.user.UserService;
 import io.jpom.system.db.DbConfig;
@@ -25,7 +26,7 @@ import java.util.List;
  * @date 2019/7/20
  */
 @Service
-public class DbUserOperateLogService extends BaseDbLogService<UserOperateLogV1> {
+public class DbUserOperateLogService extends BaseDbCommonService<UserOperateLogV1> {
 
     private final MonitorUserOptService monitorUserOptService;
     private final UserService userService;

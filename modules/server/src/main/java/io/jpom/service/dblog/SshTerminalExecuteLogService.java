@@ -6,11 +6,10 @@ import cn.hutool.core.util.StrUtil;
 import io.jpom.model.data.SshModel;
 import io.jpom.model.data.UserModel;
 import io.jpom.model.log.SshTerminalExecuteLog;
+import io.jpom.service.h2db.BaseDbCommonService;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.function.Function;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 
@@ -21,7 +20,7 @@ import java.util.stream.Collectors;
  * @date 2021/08/04
  */
 @Service
-public class SshTerminalExecuteLogService extends BaseDbLogService<SshTerminalExecuteLog> {
+public class SshTerminalExecuteLogService extends BaseDbCommonService<SshTerminalExecuteLog> {
 
 	public SshTerminalExecuteLogService() {
 		super(SshTerminalExecuteLog.TABLE_NAME, SshTerminalExecuteLog.class);

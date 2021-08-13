@@ -1,13 +1,18 @@
 package io.jpom.model.data;
 
-import io.jpom.model.BaseModel;
+import io.jpom.model.BaseDbModel;
+import io.jpom.service.h2db.TableName;
 
 /**
  * @author Hotstrip
  * 仓库地址实体类
  */
-public class RepositoryModel extends BaseModel {
-	public static final String TABLE_NAME = "REPOSITORY";
+@TableName("REPOSITORY")
+public class RepositoryModel extends BaseDbModel {
+	/**
+	 * 名称
+	 */
+	private String name;
 	/**
 	 * 仓库地址
 	 */
@@ -36,6 +41,14 @@ public class RepositoryModel extends BaseModel {
 	 * @return
 	 */
 	private String modifyTime;
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
 
 	public String getGitUrl() {
 		return gitUrl;

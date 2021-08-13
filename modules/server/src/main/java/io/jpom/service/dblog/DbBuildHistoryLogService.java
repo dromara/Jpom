@@ -17,6 +17,7 @@ import io.jpom.build.BuildUtil;
 import io.jpom.model.data.BuildModel;
 import io.jpom.model.log.BuildHistoryLog;
 import io.jpom.service.build.BuildService;
+import io.jpom.service.h2db.BaseDbCommonService;
 import io.jpom.system.ServerExtConfigBean;
 import io.jpom.system.db.DbConfig;
 import org.springframework.stereotype.Service;
@@ -32,7 +33,7 @@ import java.sql.SQLException;
  * @date 2019/7/20
  */
 @Service
-public class DbBuildHistoryLogService extends BaseDbLogService<BuildHistoryLog> {
+public class DbBuildHistoryLogService extends BaseDbCommonService<BuildHistoryLog> {
 	@Resource
 	private BuildService buildService;
 

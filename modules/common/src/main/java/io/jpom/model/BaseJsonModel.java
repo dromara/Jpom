@@ -12,12 +12,13 @@ import java.io.Serializable;
  * @date 2019/4/10
  */
 public abstract class BaseJsonModel implements Serializable {
-    @Override
-    public String toString() {
-        return JSON.toJSONString(this);
-    }
 
-    public JSONObject toJson() {
-        return (JSONObject) JSONObject.toJSON(this);
-    }
+	@Override
+	public String toString() {
+		return JSON.toJSONString(this);
+	}
+
+	public JSONObject toJson() {
+		return (JSONObject) JSONObject.toJSON(this);
+	}
 }

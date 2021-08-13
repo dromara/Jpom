@@ -10,13 +10,14 @@ import cn.jiangzeyin.common.DefaultSystemLog;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.common.Const;
-import io.jpom.model.BaseModel;
 import io.jpom.model.data.BuildInfoModel;
 import io.jpom.model.data.RepositoryModel;
 import io.jpom.model.vo.BuildModelVo;
+import io.jpom.service.h2db.TableName;
 import io.jpom.system.ConfigBean;
 import io.jpom.system.ServerConfigBean;
 import io.jpom.util.JsonFileUtil;
+import org.springframework.util.Assert;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -28,9 +29,10 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
+ * Auto import build.json data to DB
+ *
  * @author Hotstrip
  * @date 2021-08-02
- * Auto import build.json data to DB
  */
 public class LoadBuildJsonToDB {
 	private LoadBuildJsonToDB() {
@@ -83,6 +85,7 @@ public class LoadBuildJsonToDB {
 	 * 2. 迭代列表数据，并将每个元素转移到参数集合（元素的属性映射到SQL参数名称和值）
 	 * 3. 使用参数集合对象生成SQL
 	 * 4. 执行SQL
+	 *
 	 * @param list data from build.json
 	 */
 	private void initSql(List<BuildModelVo> list) {
@@ -99,8 +102,8 @@ public class LoadBuildJsonToDB {
 			Map<String, Object> buildInfoParamMap = initSqlParamMap(buildInfoFieldList, buildModelVo);
 
 			// 构造 insert SQL 语句
-			String insertRepositorySql = initInsertSql(repositoryParamMap, RepositoryModel.TABLE_NAME);
-			String insertBuildInfoSql = initInsertSql(buildInfoParamMap, BuildInfoModel.TABLE_NAME);
+			String insertRepositorySql = initInsertSql(repositoryParamMap, RepositoryModel.class);
+			String insertBuildInfoSql = initInsertSql(buildInfoParamMap, BuildInfoModel.class);
 
 			// 插入数据库
 			insertToDB(insertRepositorySql);
@@ -110,6 +113,7 @@ public class LoadBuildJsonToDB {
 
 	/**
 	 * exec insert SQL to DB
+	 *
 	 * @param sql SQL for insert
 	 */
 	private void insertToDB(String sql) {
@@ -127,11 +131,14 @@ public class LoadBuildJsonToDB {
 
 	/**
 	 * init insert SQL with param map and table name
+	 *
 	 * @param paramMap
-	 * @param tableName
+	 * @param clazz    实体类
 	 * @return
 	 */
-	private String initInsertSql(Map<String, Object> paramMap, String tableName) {
+	private String initInsertSql(Map<String, Object> paramMap, Class<?> clazz) {
+		TableName tableName = clazz.getAnnotation(TableName.class);
+		Assert.notNull(tableName, "not find table name");
 		// 构造 insert SQL 语句
 		StringBuffer sqlBuffer = new StringBuffer("insert into {} ( ");
 		StringBuilder sqlFieldNameBuffer = new StringBuilder();
@@ -148,7 +155,7 @@ public class LoadBuildJsonToDB {
 
 		// 构造 SQL 参数
 		List<Object> params = new ArrayList<>();
-		params.add(tableName);
+		params.add(tableName.value());
 		params.addAll(paramMap.keySet());
 		params.addAll(paramMap.values());
 		return StrUtil.format(sqlBuffer, params.toArray());
@@ -156,6 +163,7 @@ public class LoadBuildJsonToDB {
 
 	/**
 	 * init param map for create insert SQL
+	 *
 	 * @param fieldList
 	 * @param buildModelVo
 	 * @return
@@ -179,6 +187,7 @@ public class LoadBuildJsonToDB {
 
 	/**
 	 * read build.json file to list
+	 *
 	 * @return List<BuildModelVo>
 	 */
 	private List<BuildModelVo> readBuildJsonFileToList() {
@@ -205,10 +214,11 @@ public class LoadBuildJsonToDB {
 
 	/**
 	 * 获取 clazz 类里面的属性，转换成集合返回
-	 * @param clazz
+	 *
+	 * @param clazz 实体类
 	 * @return List<String>
 	 */
-	private List<String> getClassFieldList(Class<? extends BaseModel> clazz) {
+	private List<String> getClassFieldList(Class<?> clazz) {
 		final Field[] fields = ReflectUtil.getFieldsDirectly(clazz, true);
 		return Arrays.stream(fields)
 				.filter(field -> Modifier.isPrivate(field.getModifiers()))

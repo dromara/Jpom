@@ -92,7 +92,7 @@ public class BuildInfoController extends BaseServerController {
 									   @ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "page error")
 							   }, defaultVal = "1") int page) {
 		// if group is empty string, dont set into entity property
-		Entity where = Entity.create(BuildInfoModel.TABLE_NAME)
+		Entity where = Entity.create()
 				.setIgnoreNull(Const.GROUP_COLUMN_STR, StrUtil.isEmpty(group) ? null : group);
 		Page pageReq = new Page(page, limit);
 		// load list with page

@@ -1,9 +1,10 @@
-package io.jpom.service.dblog;
+package io.jpom.service.h2db;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.bean.copier.CopyOptions;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.PageUtil;
+import cn.hutool.core.util.TypeUtil;
 import cn.hutool.db.Db;
 import cn.hutool.db.Entity;
 import cn.hutool.db.Page;
@@ -23,7 +24,12 @@ import java.util.stream.Collectors;
  * @author bwcx_jzy
  * @date 2019/7/20
  */
-public abstract class BaseDbLogService<T> {
+public abstract class BaseDbCommonService<T> {
+
+	static {
+		PageUtil.setFirstPageNo(1);
+	}
+
 	/**
 	 * 表名
 	 */
@@ -34,17 +40,24 @@ public abstract class BaseDbLogService<T> {
 	 */
 	private String key;
 
-	String getTableName() {
+	public BaseDbCommonService(String tableName, Class<T> tClass) {
+		this.tableName = this.covetTableName(tableName, tClass);
+		this.tClass = tClass;
+	}
+
+	@SuppressWarnings("unchecked")
+	public BaseDbCommonService(String tableName) {
+		this.tClass = (Class<T>) TypeUtil.getTypeArgument(this.getClass());
+		this.tableName = this.covetTableName(tableName, this.tClass);
+
+	}
+
+	protected String covetTableName(String tableName, Class<T> tClass) {
 		return tableName;
 	}
 
-	static {
-		PageUtil.setFirstPageNo(1);
-	}
-
-	public BaseDbLogService(String tableName, Class<T> tClass) {
-		this.tableName = tableName;
-		this.tClass = tClass;
+	protected String getTableName() {
+		return tableName;
 	}
 
 	protected void setKey(String key) {

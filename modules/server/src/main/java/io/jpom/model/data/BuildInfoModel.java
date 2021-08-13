@@ -1,14 +1,16 @@
 package io.jpom.model.data;
 
-import io.jpom.model.BaseModel;
+import io.jpom.model.BaseDbModel;
+import io.jpom.service.h2db.TableName;
 
 /**
  * @author Hotstrip
  * new BuildModel class, for replace old BuildModel
  * @see BuildModel
  */
-public class BuildInfoModel extends BaseModel {
-	public static final String TABLE_NAME = "BUILD_INFO";
+@TableName("BUILD_INFO")
+public class BuildInfoModel extends BaseDbModel {
+
 	/**
 	 * 构建 ID
 	 */
