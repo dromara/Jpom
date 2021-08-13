@@ -47,12 +47,10 @@ public class RepositoryController {
 									 @ValidatorConfig(value = {@ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "page error")}, defaultVal = "1") int page,
 									 Integer repoType) {
 		Page pageObj = new Page(page, limit);
-		pageObj.addOrder(new Order("modifyTime", Direction.DESC));
-		Entity entity = Entity.create();
-		//  add param
-		if (null != repoType) {
-			entity.set("repoType", repoType);
-		}
+		pageObj.addOrder(new Order("modifyTimeMillis", Direction.DESC));
+		Entity entity = Entity.create()
+				.setIgnoreNull("repoType", repoType);
+
 		PageResult<RepositoryModel> pageResult = repositoryService.listPage(entity, pageObj);
 		JSONObject jsonObject = JsonMessage.toJson(200, "获取成功", pageResult);
 		jsonObject.put("total", pageResult.getTotal());

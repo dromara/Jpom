@@ -124,7 +124,7 @@ export default {
           scopedSlots: {customRender: 'protocol'}
         },
         {
-          title: '修改时间', dataIndex: 'modifyTime', customRender: (text) => {
+          title: '修改时间', dataIndex: 'modifyTimeMillis', customRender: (text) => {
             if (!text) {
               return '';
             }

@@ -15,7 +15,6 @@ CREATE TABLE IF NOT EXISTS PUBLIC.REPOSITORY
 	USERNAME         VARCHAR(50) comment '登录用户',
 	PASSWORD         VARCHAR(50) comment '登录密码',
 	RSAPUB           VARCHAR(2048) comment 'SSH RSA 公钥',
-	MODIFYTIME       datetime comment '修改时间',
 	CONSTRAINT REPOSITORY_PK PRIMARY KEY (ID)
 );
 comment on table REPOSITORY is '仓库信息';

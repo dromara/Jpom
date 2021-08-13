@@ -37,10 +37,6 @@ public class RepositoryModel extends BaseDbModel {
 	 * SSH RSA 公钥
 	 */
 	private String rsaPub;
-	/**
-	 * @return
-	 */
-	private String modifyTime;
 
 	public String getName() {
 		return name;
@@ -98,11 +94,4 @@ public class RepositoryModel extends BaseDbModel {
 		this.rsaPub = rsaPub;
 	}
 
-	public String getModifyTime() {
-		return modifyTime;
-	}
-
-	public void setModifyTime(String modifyTime) {
-		this.modifyTime = modifyTime;
-	}
 }
