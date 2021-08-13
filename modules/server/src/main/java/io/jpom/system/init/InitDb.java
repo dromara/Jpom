@@ -8,6 +8,7 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.db.Db;
 import cn.hutool.db.ds.DSFactory;
 import cn.hutool.db.ds.GlobalDSFactory;
+import cn.hutool.db.sql.SqlLog;
 import cn.hutool.setting.Setting;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.PreLoadClass;
@@ -44,15 +45,16 @@ public class InitDb implements DisposableBean, InitializingBean {
 		setting.set("pass", serverExtConfigBean.getDbUserPwd());
 		// 调试模式显示sql 信息
 		if (JpomManifest.getInstance().isDebug()) {
-			setting.set("showSql", "true");
+
+			setting.set(SqlLog.KEY_SHOW_SQL, "true");
 			/**
 			 * @author Hotstrip
 			 * sql log only show when it's needed,
 			 * if you want to check init sql,
 			 * set the [sqlLevel] from [DEBUG] to [INFO]
 			 */
-			setting.set("sqlLevel", "DEBUG");
-			setting.set("showParams", "true");
+			setting.set(SqlLog.KEY_SQL_LEVEL, "DEBUG");
+			setting.set(SqlLog.KEY_SHOW_PARAMS, "true");
 		}
 		Console.log("start load h2 db");
 		try {

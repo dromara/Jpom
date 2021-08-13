@@ -122,6 +122,9 @@
         <logger name="cn.jiangzeyin" level="debug" additivity="true">
             <appender-ref ref="consoleDebug"/>
         </logger>
+		<logger name="cn.hutool.db.sql" level="debug" additivity="true">
+			<appender-ref ref="consoleDebug"/>
+		</logger>
     </springProfile>
 
     <springProfile name="pro">
