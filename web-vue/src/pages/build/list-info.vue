@@ -73,7 +73,7 @@
       </template>
     </a-table>
     <!-- 编辑区 -->
-    <a-modal v-model="editBuildVisible" title="编辑构建" @ok="handleEditBuildOk" width="40%" :maskClosable="false">
+    <a-modal v-model="editBuildVisible" title="编辑构建" @ok="handleEditBuildOk" width="50%" :maskClosable="false">
       <a-form-model ref="editBuildForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }">
         <a-form-model-item label="名称" prop="name">
           <a-input v-model="temp.name" placeholder="名称" />
@@ -102,38 +102,11 @@
             </a-col>
           </a-row>
         </a-form-model-item>
-        <a-form-model-item label="仓库地址" prop="gitUrl">
-          <a-input-group compact>
-            <a-select style="width: 20%" v-model="temp.repoType" name="repoType" placeholder="仓库类型">
-              <a-select-option :value="0">GIT</a-select-option>
-              <a-select-option :value="1">SVN</a-select-option>
-            </a-select>
-            <a-input style="width: 80%" v-model="temp.gitUrl" placeholder="仓库地址" />
-          </a-input-group>
+        <a-form-model-item label="仓库地址" prop="repositoryId">
+          <a-select v-model="temp.repositoryId">
+            <a-select-option v-for="item in repositoryList" :key="item.id" :value="item.id">{{ item.name }}[{{ item.gitUrl }}]</a-select-option>
+          </a-select>
         </a-form-model-item>
-        <!--        <a-form-model-item label="仓库类型" prop="repoType">-->
-
-        <!--        </a-form-model-item>-->
-
-        <a-form-model-item label="账号信息" prop="userName">
-          <a-input-group size="large">
-            <a-row :gutter="12">
-              <a-col :span="12">
-                <a-input v-model="temp.userName" placeholder="登录用户">
-                  <a-icon slot="prefix" type="user" />
-                </a-input>
-              </a-col>
-              <a-col :span="12">
-                <a-input-password v-model="temp.password" placeholder="登录密码">
-                  <a-icon slot="prefix" type="lock" />
-                </a-input-password>
-              </a-col>
-            </a-row>
-          </a-input-group>
-        </a-form-model-item>
-        <!--                <a-form-model-item label="登录密码" prop="password">-->
-
-        <!--                </a-form-model-item>-->
         <a-form-model-item v-show="temp.repoType === 0" label="分支" prop="branchName">
           <a-row>
             <a-col :span="18">
@@ -184,9 +157,6 @@
             <a-input style="width: 70%" v-model="temp.releasePath" placeholder="发布目录,构建产物上传到对应目录" />
           </a-input-group>
         </a-form-model-item>
-        <!--                <a-form-model-item v-if="temp.releaseMethod === 3" label="发布目录" prop="releasePath">-->
-
-        <!--                </a-form-model-item>-->
         <a-form-model-item v-if="temp.releaseMethod === 3" label="发布命令" prop="releaseCommand">
           <a-input
             v-model="temp.releaseCommand"
@@ -225,6 +195,7 @@
 <script>
 import { mapGetters } from "vuex";
 import BuildLog from "./log";
+import { getRepositoryList } from '../../api/repository';
 import { clearBuid, deleteBuild, editBuild, getBranchList, getBuildGroupList, getBuildList, getTriggerUrl, releaseMethodMap, resetTrigger, startBuild, stopBuild } from "../../api/build-info";
 import { getDishPatchList } from "../../api/dispatch";
 import { getNodeProjectList } from "../../api/node";
@@ -243,6 +214,7 @@ export default {
       tableHeight: "70vh",
       groupList: [],
       list: [],
+      repositoryList: [],
       branchList: [],
       dispatchList: [],
       cascaderList: [],
@@ -383,6 +355,18 @@ export default {
         this.loading = false;
       });
     },
+    // 加载仓库列表
+    loadRepositoryList() {
+      const query = {
+        page: 1,
+        limit: 1000
+      }
+      getRepositoryList(query).then(res => {
+        if (res.code === 200) {
+          this.repositoryList = res.data;
+        }
+      })
+    },
     // 加载节点分发列表
     loadDispatchList() {
       this.dispatchList = [];
@@ -427,11 +411,12 @@ export default {
     // 筛选
     handleFilter() {
       this.loadData();
+      this.loadRepositoryList();
     },
     // 添加
     handleAdd() {
       this.temp = {
-        repoType: 0,
+        repoType: 0
       };
       this.branchList = [];
       this.loadDispatchList();

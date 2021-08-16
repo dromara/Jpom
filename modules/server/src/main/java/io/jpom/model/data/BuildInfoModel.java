@@ -12,6 +12,10 @@ import io.jpom.service.h2db.TableName;
 public class BuildInfoModel extends BaseDbModel {
 
 	/**
+	 * 仓库 ID
+	 */
+	private String repositoryId;
+	/**
 	 * 名称
 	 */
 	private String name;
@@ -43,6 +47,14 @@ public class BuildInfoModel extends BaseDbModel {
 	 * 额外信息，JSON 字符串格式
 	 */
 	private String extraData;
+
+	public String getRepositoryId() {
+		return repositoryId;
+	}
+
+	public void setRepositoryId(String repositoryId) {
+		this.repositoryId = repositoryId;
+	}
 
 	public String getName() {
 		return name;
