@@ -153,7 +153,7 @@ public class LoadBuildJsonToDB {
 		TableName tableName = clazz.getAnnotation(TableName.class);
 		Assert.notNull(tableName, "not find table name");
 		// 构造 insert SQL 语句
-		StringBuffer sqlBuffer = new StringBuffer("insert into {} ( ");
+		StringBuffer sqlBuffer = new StringBuffer("merge into {} ( ");
 		StringBuilder sqlFieldNameBuffer = new StringBuilder();
 		StringBuilder sqlFieldValueBuffer = new StringBuilder();
 		for (int i = 0; i < paramMap.size(); i++) {

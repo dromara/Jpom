@@ -33,7 +33,7 @@ CREATE TABLE IF NOT EXISTS PUBLIC.BUILD_INFO
 	SCRIPT           VARCHAR(200) comment '构建命令',
 	RESULTDIRFILE    VARCHAR(50) comment '构建产物目录',
 	RELEASEMETHOD    int comment '发布方法{0: 不发布, 1: 节点分发, 2: 分发项目, 3: SSH}',
-	EXTRADATA        VARCHAR(200) comment '额外信息，JSON 字符串格式',
+	EXTRADATA        JSON comment '额外信息，JSON 字符串格式',
 	CONSTRAINT BUILD_INFO_PK PRIMARY KEY (ID)
 );
 comment on table BUILD_INFO is '构建信息';
