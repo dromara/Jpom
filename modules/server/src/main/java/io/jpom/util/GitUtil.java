@@ -3,6 +3,7 @@ package io.jpom.util;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.lang.Tuple;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SecureUtil;
 import io.jpom.system.ConfigBean;
@@ -26,6 +27,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * git工具
@@ -120,25 +122,33 @@ public class GitUtil {
 	 * @param url                 远程url
 	 * @param file                仓库clone到本地的文件夹
 	 * @param credentialsProvider 凭证
-	 * @return list
+	 * @return Tuple
 	 * @throws GitAPIException api
 	 * @throws IOException     IO
 	 */
-	private static List<String> branchList(String url, File file, CredentialsProvider credentialsProvider, PrintWriter printWriter) throws GitAPIException, IOException {
+	private static Tuple getBranchAndTagList(String url, File file, CredentialsProvider credentialsProvider, PrintWriter printWriter) throws GitAPIException, IOException {
 		synchronized (url.intern()) {
 			try (Git git = initGit(url, null, file, credentialsProvider, printWriter)) {
-				//
-				List<Ref> list = git.branchList().setListMode(ListBranchCommand.ListMode.REMOTE).call();
-				List<String> all = new ArrayList<>(list.size());
-				list.forEach(ref -> {
+				// branch list
+				List<Ref> branchListRef = git.branchList().setListMode(ListBranchCommand.ListMode.REMOTE).call();
+				List<String> branchList = branchListRef.stream().map(ref -> {
 					String name = ref.getName();
 					if (name.startsWith(Constants.R_REMOTES + Constants.DEFAULT_REMOTE_NAME)) {
-						all.add(name.substring((Constants.R_REMOTES + Constants.DEFAULT_REMOTE_NAME).length() + 1));
-					} else if (name.startsWith(Constants.R_TAGS)) {
-						//
+						return name.substring((Constants.R_REMOTES + Constants.DEFAULT_REMOTE_NAME).length() + 1);
 					}
-				});
-				return all;
+					return null;
+				}).filter(Objects::nonNull).collect(Collectors.toList());
+
+				// list tag
+				List<Ref> tagListRef = git.tagList().call();
+				List<String> tagList = tagListRef.stream().map(ref -> {
+					String name = ref.getName();
+					if (name.startsWith(Constants.R_TAGS)) {
+						return name.substring((Constants.R_TAGS).length() + 1);
+					}
+					return null;
+				}).filter(Objects::nonNull).collect(Collectors.toList());
+				return new Tuple(branchList, tagList);
 			} catch (TransportException t) {
 				checkTransportException(t);
 				return null;
@@ -147,20 +157,40 @@ public class GitUtil {
 	}
 
 	public static List<String> getBranchList(String url, String userName, String userPwd, PrintWriter printWriter) throws GitAPIException, IOException {
+		Tuple branchAndTagList = getBranchAndTagList(url, userName, userPwd, printWriter);
+		if (branchAndTagList == null) {
+			return new ArrayList<>();
+		}
+		return branchAndTagList.get(0);
+	}
+
+	/**
+	 * 获取 仓库的分支和 tag （缓存到临时目录）
+	 *
+	 * @param url         仓库地址
+	 * @param userName    登陆名
+	 * @param userPwd     用户密码
+	 * @param printWriter 日志流
+	 * @return 分支 和 tag
+	 * @throws GitAPIException API 异常
+	 * @throws IOException     IO 异常
+	 */
+	public static Tuple getBranchAndTagList(String url, String userName, String userPwd, PrintWriter printWriter) throws GitAPIException, IOException {
 		//  生成临时路径
 		String tempId = SecureUtil.md5(url);
 		File file = ConfigBean.getInstance().getTempPath();
 		File gitFile = FileUtil.file(file, "gitTemp", tempId);
 		try {
-			List<String> list = branchList(url, gitFile, new UsernamePasswordCredentialsProvider(userName, userPwd), printWriter);
-			if (CollUtil.isEmpty(list)) {
+			Tuple tuple = getBranchAndTagList(url, gitFile, new UsernamePasswordCredentialsProvider(userName, userPwd), printWriter);
+			List<String> tag = tuple == null ? null : tuple.get(0);
+			if (CollUtil.isEmpty(tag)) {
 				throw new JpomRuntimeException("该仓库还没有任何分支");
 			}
-			return list;
+			return tuple;
 		} catch (org.eclipse.jgit.errors.RepositoryNotFoundException ignored) {
 			FileUtil.del(gitFile);
 		}
-		return new ArrayList<>();
+		throw new IllegalStateException("获取分支异常");
 	}
 
 	/**
