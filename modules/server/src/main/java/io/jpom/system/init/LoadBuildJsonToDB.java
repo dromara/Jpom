@@ -57,7 +57,8 @@ public class LoadBuildJsonToDB {
 	 */
 	public void doJsonToSql() {
 		// 读取 build.json 文件内容
-		List<BuildModelVo> list = readBuildJsonFileToList();
+		File file = FileUtil.file(ConfigBean.getInstance().getDataPath(), ServerConfigBean.BUILD);
+		List<BuildModelVo> list = readBuildJsonFileToList(file);
 		// 判断 list 是否为空
 		if (null == list) {
 			DefaultSystemLog.getLog().warn("There is no any data, the build.json file maybe no content or file is not exist...");
@@ -65,6 +66,11 @@ public class LoadBuildJsonToDB {
 		}
 		// 转换成 SQL 执行
 		initSql(list);
+		// 将 json 文件转移到备份目录
+		//File backupOldData = FileUtil.file(ConfigBean.getInstance().getDataPath(), "backup_old_data");
+		//FileUtil.move(file, FileUtil.mkdir(backupOldData), true);
+
+		//DefaultSystemLog.getLog().info("{} mv to {}", FileUtil.getAbsolutePath(file), FileUtil.getAbsolutePath(backupOldData));
 	}
 
 	/**
@@ -208,8 +214,7 @@ public class LoadBuildJsonToDB {
 	 *
 	 * @return List<BuildModelVo>
 	 */
-	private List<BuildModelVo> readBuildJsonFileToList() {
-		File file = FileUtil.file(ConfigBean.getInstance().getDataPath(), ServerConfigBean.BUILD);
+	private List<BuildModelVo> readBuildJsonFileToList(File file) {
 		if (!file.exists()) {
 			DefaultSystemLog.getLog().error("there is no build.json file...");
 			return null;
