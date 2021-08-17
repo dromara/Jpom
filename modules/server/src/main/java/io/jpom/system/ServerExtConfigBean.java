@@ -7,6 +7,7 @@ import cn.jiangzeyin.common.spring.SpringUtil;
 import io.jpom.system.db.DbConfig;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.util.unit.DataSize;
 
 import java.util.concurrent.TimeUnit;
 
@@ -53,6 +54,14 @@ public class ServerExtConfigBean {
 	 */
 	@Value("${db.userPwd:}")
 	private String dbUserPwd;
+
+	/**
+	 * 缓存大小
+	 * <p>
+	 * http://www.h2database.com/html/features.html#cache_settings
+	 */
+	@Value("${db.cacheSize:}")
+	private DataSize cacheSize;
 
 	/**
 	 * author Hotstrip
@@ -168,6 +177,20 @@ public class ServerExtConfigBean {
 
 	public byte[] getAuthorizeKey() {
 		return StrUtil.emptyToDefault(this.authorizeKey, "KZQfFBJTW2v6obS1").getBytes();
+	}
+
+	/**
+	 * 数据缓存大小，默认10m,
+	 * <p>
+	 * SELECT * FROM INFORMATION_SCHEMA.SETTINGS WHERE NAME = 'info.CACHE_MAX_SIZE'
+	 *
+	 * @return dataSize
+	 */
+	public DataSize getCacheSize() {
+		if (cacheSize == null) {
+			cacheSize = DataSize.ofMegabytes(10);
+		}
+		return cacheSize;
 	}
 
 	/**

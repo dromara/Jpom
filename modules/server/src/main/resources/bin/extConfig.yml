@@ -34,6 +34,8 @@ db:
   userName:
   # 数据库密码
   userPwd:
+  # h2 数据库缓存大小  kilobyte 1KB 1,024 megabyte 1MB 1,048,576
+  cacheSize:
 # spring 相关配置
 spring:
   h2:

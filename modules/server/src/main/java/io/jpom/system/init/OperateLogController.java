@@ -167,7 +167,7 @@ public class OperateLogController implements AopLogInterface {
         Entity entity = new Entity();
         entity.set("resultMsg", val);
         try {
-            JsonMessage jsonMessage = JSONObject.parseObject(val, JsonMessage.class);
+            JsonMessage<?> jsonMessage = JSONObject.parseObject(val, JsonMessage.class);
             entity.set("optStatus", jsonMessage.getCode());
         } catch (Exception ignored) {
         }

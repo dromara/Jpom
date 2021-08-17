@@ -69,7 +69,7 @@ public class DbConfig {
 	public String getDbUrl() {
 		File file = FileUtil.file(ExtConfigBean.getInstance().getPath(), DB, JpomApplication.getAppType().name());
 		String path = FileUtil.getAbsolutePath(file);
-		return StrUtil.format("jdbc:h2:{}", path);
+		return StrUtil.format("jdbc:h2:{};CACHE_SIZE={}", path, ServerExtConfigBean.getInstance().getCacheSize().toKilobytes());
 	}
 
 	/**
