@@ -1,5 +1,6 @@
 package io.jpom.system.init;
 
+import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.ReflectUtil;
 import cn.hutool.core.util.StrUtil;
@@ -62,12 +63,6 @@ public class LoadBuildJsonToDB {
 			DefaultSystemLog.getLog().warn("There is no any data, the build.json file maybe no content or file is not exist...");
 			return;
 		}
-		// 根据 gitUrl 去重
-		list = list.stream()
-				.collect(Collectors.collectingAndThen(
-						Collectors.toCollection(() -> new TreeSet<>(Comparator.comparing(BuildModelVo::getGitUrl))),
-						ArrayList::new)
-				);
 		// 转换成 SQL 执行
 		initSql(list);
 	}
@@ -92,21 +87,33 @@ public class LoadBuildJsonToDB {
 		// 加载类里面的属性，用反射获取
 		final List<String> repositoryFieldList = getClassFieldList(RepositoryModel.class);
 		final List<String> buildInfoFieldList = getClassFieldList(BuildInfoModel.class);
+		final Map<String, String> repositoryCache = new HashMap<>(list.size());
 
 		// 遍历对象集合
 		list.forEach(buildModelVo -> {
 			DefaultSystemLog.getLog().info("buildModelVo: {}", JSON.toJSONString(buildModelVo));
 
 			// 拿到构造 SQL 的参数
-			Map<String, Object> repositoryParamMap = initSqlParamMap(repositoryFieldList, buildModelVo);
-			Map<String, Object> buildInfoParamMap = initSqlParamMap(buildInfoFieldList, buildModelVo);
+			String gitUrl = buildModelVo.getGitUrl();
+			String repositoryId = repositoryCache.get(gitUrl);
+			if (StrUtil.isEmpty(repositoryId)) {
+				// 先存储仓库信息
+				Map<String, Object> repositoryParamMap = initSqlParamMap(repositoryFieldList, buildModelVo);
+				// 构造 insert SQL 语句
+				String insertRepositorySql = initInsertSql(repositoryParamMap, RepositoryModel.class);
+				// 插入数据库
+				insertToDB(insertRepositorySql);
+				repositoryId = (String) repositoryParamMap.get("ID");
+				// cache
+				repositoryCache.put(gitUrl, repositoryId);
+			}
 
-			// 构造 insert SQL 语句
-			String insertRepositorySql = initInsertSql(repositoryParamMap, RepositoryModel.class);
+			Map<String, Object> buildInfoParamMap = initSqlParamMap(buildInfoFieldList, buildModelVo);
+			// 绑定仓库ID
+			buildInfoParamMap.put("REPOSITORYID", repositoryId);
+
 			String insertBuildInfoSql = initInsertSql(buildInfoParamMap, BuildInfoModel.class);
 
-			// 插入数据库
-			insertToDB(insertRepositorySql);
 			insertToDB(insertBuildInfoSql);
 		});
 	}
@@ -124,8 +131,7 @@ public class LoadBuildJsonToDB {
 		} catch (SQLException e) {
 			DefaultSystemLog.getLog().warn("exec SQL: {} failed", sql, e);
 		}
-		DefaultSystemLog.getLog().info("exec SQL: {} complete, and affected rows is: {}",
-				sql, rows);
+		DefaultSystemLog.getLog().info("exec SQL: {} complete, and affected rows is: {}", sql, rows);
 	}
 
 	/**
@@ -168,7 +174,7 @@ public class LoadBuildJsonToDB {
 	 * @return
 	 */
 	private Map<String, Object> initSqlParamMap(List<String> fieldList, BuildModelVo buildModelVo) {
-		Map<String, Object> map = new HashMap<>();
+		Map<String, Object> map = new HashMap<>(fieldList.size());
 
 		fieldList.forEach(fieldName -> {
 			// 判断类里面是否有这个属性
@@ -181,6 +187,11 @@ public class LoadBuildJsonToDB {
 				map.put(sqlFiledName, filedValue);
 			}
 		});
+		// 同步数据创建时间
+		String modifyTime = buildModelVo.getModifyTime();
+		if (StrUtil.isNotEmpty(modifyTime)) {
+			map.put("CREATETIMEMILLIS", DateUtil.parse(modifyTime).getTime());
+		}
 		return map;
 	}
 
