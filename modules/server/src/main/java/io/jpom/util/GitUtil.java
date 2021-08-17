@@ -144,7 +144,7 @@ public class GitUtil {
 				List<String> tagList = tagListRef.stream().map(ref -> {
 					String name = ref.getName();
 					if (name.startsWith(Constants.R_TAGS)) {
-						return name.substring((Constants.R_TAGS).length() + 1);
+						return name.substring((Constants.R_TAGS).length());
 					}
 					return null;
 				}).filter(Objects::nonNull).collect(Collectors.toList());
