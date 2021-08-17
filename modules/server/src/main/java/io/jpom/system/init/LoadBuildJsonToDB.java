@@ -111,7 +111,15 @@ public class LoadBuildJsonToDB {
 			Map<String, Object> buildInfoParamMap = initSqlParamMap(buildInfoFieldList, buildModelVo);
 			// 绑定仓库ID
 			buildInfoParamMap.put("REPOSITORYID", repositoryId);
-
+			// 构建发布操作信息
+			JSONObject jsonObject = new JSONObject();
+			jsonObject.put("releaseMethodDataId", buildModelVo.getReleaseMethodDataId());
+			jsonObject.put("afterOpt", buildModelVo.getAfterOpt());
+			jsonObject.put("clearOld", buildModelVo.isClearOld());
+			jsonObject.put("releaseCommand", buildModelVo.getReleaseCommand());
+			jsonObject.put("releasePath", buildModelVo.getReleasePath());
+			// 保存信息
+			buildInfoParamMap.put("EXTRADATA", jsonObject.toJSONString());
 			String insertBuildInfoSql = initInsertSql(buildInfoParamMap, BuildInfoModel.class);
 
 			insertToDB(insertBuildInfoSql);
