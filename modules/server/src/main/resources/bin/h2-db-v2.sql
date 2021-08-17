@@ -57,3 +57,8 @@ ALTER TABLE BUILD_INFO
 -- @author jzy 字段类型修改为 json
 ALTER TABLE BUILD_INFO
 	ALTER COLUMN EXTRADATA JSON COMMENT '额外信息，JSON 字符串格式';
+
+-- @author jzy 增加构建产物字段长度
+ALTER TABLE BUILD_INFO
+	ALTER COLUMN RESULTDIRFILE VARCHAR(200) comment '构建产物目录';
+

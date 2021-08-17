@@ -47,6 +47,7 @@ import java.util.Objects;
 /**
  * 构建列表，新版本，数据存放到数据库，不再是文件了
  * 以前的数据会在程序启动时插入到数据库中
+ *
  * @author Hotstrip
  * @date 2021-08-09
  */
@@ -79,6 +80,7 @@ public class BuildInfoController extends BaseServerController {
 
 	/**
 	 * load build list with params
+	 *
 	 * @param group
 	 * @return
 	 */
@@ -102,6 +104,7 @@ public class BuildInfoController extends BaseServerController {
 
 	/**
 	 * edit build info
+	 *
 	 * @param id
 	 * @param name
 	 * @param gitUrl
@@ -124,7 +127,7 @@ public class BuildInfoController extends BaseServerController {
 								@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "仓库地址不正确")) String gitUrl,
 								@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "登录账号")) String userName,
 								@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "登录密码")) String password,
-								@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "构建产物目录不能为空")) String resultDirFile,
+								@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "构建产物目录不能为空,长度1-200", range = "1:200")) String resultDirFile,
 								@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "构建命令不能为空")) String script,
 								@ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "发布方法不正确") int releaseMethod,
 								String branchName, String group, int repoType) throws Exception {

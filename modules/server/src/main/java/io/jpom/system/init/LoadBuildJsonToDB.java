@@ -122,8 +122,7 @@ public class LoadBuildJsonToDB {
 		try {
 			rows = Db.use(dsFactory.getDataSource()).execute(sql);
 		} catch (SQLException e) {
-			DefaultSystemLog.getLog().warn("exec SQL: {} failed, caused: {}...message: {}",
-					sql, e.getCause(), e.getMessage());
+			DefaultSystemLog.getLog().warn("exec SQL: {} failed", sql, e);
 		}
 		DefaultSystemLog.getLog().info("exec SQL: {} complete, and affected rows is: {}",
 				sql, rows);
