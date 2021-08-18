@@ -93,7 +93,7 @@ public class TestGit {
 
 		String uri = "https://gitee.com/dromara/Jpom.git";
 		File file = FileUtil.file("~/test/jpomgit");
-		String tagName = "v2.5.1";
+		String tagName = "v2.5.2";
 		String branchName = "stand-alone";
 		UsernamePasswordCredentialsProvider credentialsProvider = new UsernamePasswordCredentialsProvider("a", "a");
 //		Git call = Git.cloneRepository()
@@ -103,9 +103,26 @@ public class TestGit {
 //				.call();
 
 		PrintWriter printWriter = new PrintWriter(System.out);
-		GitUtil.checkoutPullTag(uri, file, tagName, credentialsProvider, printWriter);
+		GitUtil.checkoutPullTag(uri, file, branchName, tagName, credentialsProvider, printWriter);
 
-		GitUtil.checkoutPull(uri, file, branchName, credentialsProvider, printWriter);
+		//GitUtil.checkoutPull(uri, file, branchName, credentialsProvider, printWriter);
+
+
+	}
+
+
+	@Test
+	public void testTag2() throws Exception {
+		String uri = "https://gitee.com/keepbx/Jpom-demo-case.git";
+		File file = FileUtil.file("~/test/jpomgit2");
+		String tagName = "1.2";
+		String branchName = "master";
+		UsernamePasswordCredentialsProvider credentialsProvider = new UsernamePasswordCredentialsProvider("a", "a");
+
+		PrintWriter printWriter = new PrintWriter(System.out);
+		String msg = GitUtil.checkoutPullTag(uri, file, branchName, tagName, credentialsProvider, printWriter);
+		System.out.println(msg);
+		//GitUtil.checkoutPull(uri, file, branchName, credentialsProvider, printWriter);
 
 
 	}

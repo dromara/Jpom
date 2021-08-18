@@ -8,6 +8,7 @@ import cn.jiangzeyin.common.JsonMessage;
 import io.jpom.system.AgentException;
 import io.jpom.system.AuthorizeException;
 import io.jpom.system.JpomRuntimeException;
+import org.eclipse.jgit.api.errors.GitAPIException;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -24,11 +25,6 @@ import java.nio.file.AccessDeniedException;
  */
 @ControllerAdvice
 public class GlobalDefaultExceptionHandler {
-//	private static final TimedCache<String, String> TIMED_CACHE = new TimedCache<>(TimeUnit.MINUTES.toMillis(1));
-//
-//	public static String getErrorMsg(String id) {
-//		return TIMED_CACHE.get(id);
-//	}
 
 	/**
 	 * 声明要捕获的异常
@@ -39,22 +35,7 @@ public class GlobalDefaultExceptionHandler {
 	 */
 	@ExceptionHandler({AuthorizeException.class, RuntimeException.class, Exception.class})
 	public void delExceptionHandler(HttpServletRequest request, HttpServletResponse response, Exception e) {
-		//DefaultSystemLog.getLog().error("controller " + request.getRequestURI(), e.getMessage());
 		DefaultSystemLog.getLog().error("global handle exception: {}", request.getRequestURI(), e);
-//        if (BaseJpomInterceptor.isPage(request)) {
-//            try {
-//                String id = IdUtil.fastUUID();
-//                TIMED_CACHE.put(id, getErrorMsg(e));
-//                BaseJpomInterceptor.sendRedirects(request, response, "/error.html?id=" + id);
-//            } catch (IOException ex) {
-//                /**
-//                 * @author Hotstrip
-//                 * don't print stach trace into console
-//                 */
-//                // ex.printStackTrace();
-//                DefaultSystemLog.getLog().error("catch exception: {}, and message: {}", ex.getCause(), ex.getMessage());
-//            }
-//        } else {
 		if (e instanceof AuthorizeException) {
 			AuthorizeException authorizeException = (AuthorizeException) e;
 			ServletUtil.write(response, authorizeException.getJsonMessage().toString(), MediaType.APPLICATION_JSON_VALUE);
@@ -68,7 +49,6 @@ public class GlobalDefaultExceptionHandler {
 			}
 			ServletUtil.write(response, JsonMessage.getString(500, "服务异常：" + e.getMessage()), MediaType.APPLICATION_JSON_VALUE);
 		}
-//        }
 	}
 
 	/**
@@ -86,14 +66,22 @@ public class GlobalDefaultExceptionHandler {
 	public void agentExceptionHandler(HttpServletRequest request, HttpServletResponse response, AgentException e) {
 		Throwable cause = e.getCause();
 		if (cause != null) {
-			/**
-			 * @author Hotstrip
-			 * @date 2021-08-01
-			 * only show exception message rather than exception object
-			 */
-			DefaultSystemLog.getLog().error("controller " + request.getRequestURI(), cause.getMessage());
+			DefaultSystemLog.getLog().error("controller " + request.getRequestURI(), cause);
 		}
 		ServletUtil.write(response, JsonMessage.getString(405, e.getMessage()), MediaType.APPLICATION_JSON_VALUE);
+	}
+
+	/**
+	 * git 仓库操作相关异常
+	 *
+	 * @param request  请求
+	 * @param response 响应
+	 * @param e        异常
+	 */
+	@ExceptionHandler({GitAPIException.class})
+	public void gitExceptionHandler(HttpServletRequest request, HttpServletResponse response, GitAPIException e) {
+		DefaultSystemLog.getLog().warn("GitAPIException: " + request.getRequestURI(), e);
+		ServletUtil.write(response, JsonMessage.getString(405, "git 仓库操作异常:" + e.getMessage()), MediaType.APPLICATION_JSON_VALUE);
 	}
 
 	/**

@@ -229,9 +229,7 @@ public class BuildManage extends BaseBuild implements Runnable {
 				if (buildModel.getRepoType() == BuildModel.RepoType.Git.getCode()) {
 					// git
 					UsernamePasswordCredentialsProvider credentialsProvider = new UsernamePasswordCredentialsProvider(buildModel.getUserName(), buildModel.getPassword());
-					GitUtil.checkoutPull(buildModel.getGitUrl(), gitFile, branchName, credentialsProvider, this.getPrintWriter());
-					// 记录最后一次提交记录
-					msg = GitUtil.getLastCommitMsg(gitFile, branchName);
+					msg = GitUtil.checkoutPull(buildModel.getGitUrl(), gitFile, branchName, credentialsProvider, this.getPrintWriter());
 				} else if (buildModel.getRepoType() == BuildModel.RepoType.Svn.getCode()) {
 					// svn
 					msg = SvnKitUtil.checkOut(buildModel.getGitUrl(), buildModel.getUserName(), buildModel.getPassword(), gitFile);
