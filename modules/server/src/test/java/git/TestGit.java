@@ -1,11 +1,18 @@
+package git;
+
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.lang.Tuple;
+import io.jpom.util.GitUtil;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.ListBranchCommand;
+import org.eclipse.jgit.api.LsRemoteCommand;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.transport.RemoteConfig;
+import org.eclipse.jgit.transport.TagOpt;
 import org.eclipse.jgit.transport.URIish;
+import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 import org.junit.Test;
 
 import java.io.File;
@@ -15,6 +22,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -78,5 +86,21 @@ public class TestGit {
 		System.out.println(all);
 	}
 
+
+	@Test
+	public void testTag() throws GitAPIException, IOException {
+		UsernamePasswordCredentialsProvider credentialsProvider = new UsernamePasswordCredentialsProvider("jpom", "jpom");
+		Tuple branchAndTagList = GitUtil.getBranchAndTagList("https://gitee.com/dromara/Jpom.git", credentialsProvider);
+		System.out.println(branchAndTagList);
+
+		//
+//		Git.cloneRepository().setTagOption(TagOpt.FETCH_TAGS)
+
+		LsRemoteCommand lsRemoteCommand = Git.lsRemoteRepository();
+		Collection<Ref> call = lsRemoteCommand.setRemote("https://gitee.com/dromara/Jpom.git").setHeads(true).setTags(true).call();
+		for (Ref ref : call) {
+			System.out.println(ref.getName());
+		}
+	}
 
 }

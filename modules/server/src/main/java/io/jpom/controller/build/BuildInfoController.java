@@ -139,7 +139,7 @@ public class BuildInfoController extends BaseServerController {
 			if (StrUtil.isEmpty(branchName)) {
 				return JsonMessage.getString(405, "请选择分支");
 			}
-			List<String> list = GitUtil.getBranchList(gitUrl, userName, password, null);
+			List<String> list = GitUtil.getBranchList(gitUrl, userName, password);
 			if (!list.contains(branchName)) {
 				return JsonMessage.getString(405, "没有找到对应分支：" + branchName);
 			}
@@ -282,7 +282,7 @@ public class BuildInfoController extends BaseServerController {
 			@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "仓库地址不正确")) String url,
 			@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "登录账号")) String userName,
 			@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "登录密码")) String userPwd) throws GitAPIException, IOException {
-		List<String> list = GitUtil.getBranchList(url, userName, userPwd, null);
+		List<String> list = GitUtil.getBranchList(url, userName, userPwd);
 		return JsonMessage.getString(200, "ok", list);
 	}
 

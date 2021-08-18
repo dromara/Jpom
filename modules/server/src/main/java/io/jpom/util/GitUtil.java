@@ -1,5 +1,6 @@
 package io.jpom.util;
 
+import cn.hutool.core.collection.CollStreamUtil;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.io.FileUtil;
@@ -23,10 +24,8 @@ import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -120,27 +119,44 @@ public class GitUtil {
 	 * 获取仓库远程的所有分支
 	 *
 	 * @param url                 远程url
-	 * @param file                仓库clone到本地的文件夹
 	 * @param credentialsProvider 凭证
 	 * @return Tuple
 	 * @throws GitAPIException api
-	 * @throws IOException     IO
 	 */
-	private static Tuple getBranchAndTagList(String url, File file, CredentialsProvider credentialsProvider, PrintWriter printWriter) throws GitAPIException, IOException {
+	public static Tuple getBranchAndTagList(String url, CredentialsProvider credentialsProvider) throws GitAPIException {
 		synchronized (url.intern()) {
-			try (Git git = initGit(url, null, file, credentialsProvider, printWriter)) {
+			try {
+				Collection<Ref> call = Git.lsRemoteRepository()
+						.setRemote(url)
+						.setCredentialsProvider(credentialsProvider)
+						.setHeads(true)
+						.setTags(true)
+						.call();
+				if (CollUtil.isEmpty(call)) {
+					return null;
+				}
+				Map<String, List<Ref>> refMap = CollStreamUtil.groupByKey(call, ref -> {
+					String name = ref.getName();
+					if (name.startsWith(Constants.R_TAGS)) {
+						return Constants.R_TAGS;
+					} else if (name.startsWith(Constants.R_HEADS)) {
+						return Constants.R_HEADS;
+					}
+					return null;
+				});
+
 				// branch list
-				List<Ref> branchListRef = git.branchList().setListMode(ListBranchCommand.ListMode.REMOTE).call();
+				List<Ref> branchListRef = refMap.get(Constants.R_HEADS);
 				List<String> branchList = branchListRef.stream().map(ref -> {
 					String name = ref.getName();
-					if (name.startsWith(Constants.R_REMOTES + Constants.DEFAULT_REMOTE_NAME)) {
-						return name.substring((Constants.R_REMOTES + Constants.DEFAULT_REMOTE_NAME).length() + 1);
+					if (name.startsWith(Constants.R_HEADS)) {
+						return name.substring((Constants.R_HEADS).length());
 					}
 					return null;
 				}).filter(Objects::nonNull).collect(Collectors.toList());
 
 				// list tag
-				List<Ref> tagListRef = git.tagList().call();
+				List<Ref> tagListRef = refMap.get(Constants.R_TAGS);
 				List<String> tagList = tagListRef.stream().map(ref -> {
 					String name = ref.getName();
 					if (name.startsWith(Constants.R_TAGS)) {
@@ -156,42 +172,15 @@ public class GitUtil {
 		}
 	}
 
-	public static List<String> getBranchList(String url, String userName, String userPwd, PrintWriter printWriter) throws GitAPIException, IOException {
-		Tuple branchAndTagList = getBranchAndTagList(url, userName, userPwd, printWriter);
-		if (branchAndTagList == null) {
-			return new ArrayList<>();
+	public static List<String> getBranchList(String url, String userName, String userPwd) throws GitAPIException {
+		Tuple tuple = getBranchAndTagList(url, new UsernamePasswordCredentialsProvider(userName, userPwd));
+		List<String> tag = tuple == null ? null : tuple.get(0);
+		if (CollUtil.isEmpty(tag)) {
+			throw new JpomRuntimeException("该仓库还没有任何分支");
 		}
-		return branchAndTagList.get(0);
+		return tuple.get(0);
 	}
 
-	/**
-	 * 获取 仓库的分支和 tag （缓存到临时目录）
-	 *
-	 * @param url         仓库地址
-	 * @param userName    登陆名
-	 * @param userPwd     用户密码
-	 * @param printWriter 日志流
-	 * @return 分支 和 tag
-	 * @throws GitAPIException API 异常
-	 * @throws IOException     IO 异常
-	 */
-	public static Tuple getBranchAndTagList(String url, String userName, String userPwd, PrintWriter printWriter) throws GitAPIException, IOException {
-		//  生成临时路径
-		String tempId = SecureUtil.md5(url);
-		File file = ConfigBean.getInstance().getTempPath();
-		File gitFile = FileUtil.file(file, "gitTemp", tempId);
-		try {
-			Tuple tuple = getBranchAndTagList(url, gitFile, new UsernamePasswordCredentialsProvider(userName, userPwd), printWriter);
-			List<String> tag = tuple == null ? null : tuple.get(0);
-			if (CollUtil.isEmpty(tag)) {
-				throw new JpomRuntimeException("该仓库还没有任何分支");
-			}
-			return tuple;
-		} catch (org.eclipse.jgit.errors.RepositoryNotFoundException ignored) {
-			FileUtil.del(gitFile);
-		}
-		throw new IllegalStateException("获取分支异常");
-	}
 
 	/**
 	 * 拉取对应分支最新代码
