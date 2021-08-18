@@ -165,11 +165,59 @@ public class ProjectStatusController extends BaseAgentController {
             if (status) {
                 return JsonMessage.getString(200, result);
             }
-            return JsonMessage.getString(201, "重启失败：" + result);
+            return JsonMessage.getString(201, "重启项目失败：" + result);
         } catch (Exception e) {
             DefaultSystemLog.getLog().error("获取项目pid 失败", e);
             result = "error:" + e.getMessage();
-            return JsonMessage.getString(500, "重启异常：" + result);
+            return JsonMessage.getString(500, "重启项目异常：" + result);
         }
     }
+
+
+	@RequestMapping(value = "stop", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+	public String stop(@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "项目id 不正确")) String id, String copyId) {
+		ProjectInfoModel item = projectInfoService.getItem(id);
+		if (item == null) {
+			return JsonMessage.getString(405, "没有找到对应的项目");
+		}
+		ProjectInfoModel.JavaCopyItem copyItem = item.findCopyItem(copyId);
+		String tagId = copyItem == null ? item.getId() : copyItem.getTagId();
+		String result;
+		try {
+			result = consoleService.execCommand(ConsoleCommandOp.stop, item, copyItem);
+			boolean status = AbstractProjectCommander.getInstance().isRun(tagId);
+			if (!status) {
+				return JsonMessage.getString(200, result);
+			}
+			return JsonMessage.getString(201, "关闭项目失败：" + result);
+		} catch (Exception e) {
+			DefaultSystemLog.getLog().error("获取项目pid 失败", e);
+			result = "error:" + e.getMessage();
+			return JsonMessage.getString(500, "关闭项目异常：" + result);
+		}
+	}
+
+
+	@RequestMapping(value = "start", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+	public String start(@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "项目id 不正确")) String id, String copyId) {
+		ProjectInfoModel item = projectInfoService.getItem(id);
+		if (item == null) {
+			return JsonMessage.getString(405, "没有找到对应的项目");
+		}
+		ProjectInfoModel.JavaCopyItem copyItem = item.findCopyItem(copyId);
+		String tagId = copyItem == null ? item.getId() : copyItem.getTagId();
+		String result;
+		try {
+			result = consoleService.execCommand(ConsoleCommandOp.start, item, copyItem);
+			boolean status = AbstractProjectCommander.getInstance().isRun(tagId);
+			if (status) {
+				return JsonMessage.getString(200, result);
+			}
+			return JsonMessage.getString(201, "启动项目失败：" + result);
+		} catch (Exception e) {
+			DefaultSystemLog.getLog().error("获取项目pid 失败", e);
+			result = "error:" + e.getMessage();
+			return JsonMessage.getString(500, "启动项目异常：" + result);
+		}
+	}
 }

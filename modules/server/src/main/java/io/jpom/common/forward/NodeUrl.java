@@ -62,6 +62,10 @@ public enum NodeUrl {
 
 	Manage_Restart("/manage/restart"),
 
+	Manage_Start("/manage/start"),
+
+	Manage_Stop("/manage/stop"),
+
 	Manage_GetProjectPort("/manage/getProjectPort"),
 
 	Manage_GetProjectCopyPort("/manage/getProjectCopyPort"),

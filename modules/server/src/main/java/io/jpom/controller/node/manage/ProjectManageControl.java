@@ -154,4 +154,36 @@ public class ProjectManageControl extends BaseServerController {
 		NodeModel nodeModel = getNode();
 		return NodeForward.request(nodeModel, getRequest(), NodeUrl.Manage_Restart).toString();
 	}
+
+
+	/**
+	 * 启动项目
+	 * <p>
+	 * nodeId,id,copyId
+	 *
+	 * @return json
+	 */
+	@RequestMapping(value = "start", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody
+	@Feature(method = MethodFeature.EXECUTE)
+	public String start() {
+		NodeModel nodeModel = getNode();
+		return NodeForward.request(nodeModel, getRequest(), NodeUrl.Manage_Start).toString();
+	}
+
+
+	/**
+	 * 关闭项目项目
+	 * <p>
+	 * nodeId,id,copyId
+	 *
+	 * @return json
+	 */
+	@RequestMapping(value = "stop", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody
+	@Feature(method = MethodFeature.EXECUTE)
+	public String stop() {
+		NodeModel nodeModel = getNode();
+		return NodeForward.request(nodeModel, getRequest(), NodeUrl.Manage_Stop).toString();
+	}
 }

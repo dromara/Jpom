@@ -6,6 +6,10 @@
       </a-select>
       <a-button type="primary" @click="handleAdd">新增</a-button>
       <a-button type="primary" @click="handleFilter">刷新</a-button>
+      <span>|   </span>
+      <a-button type="primary" @click="batchStart">批量启动</a-button>
+      <a-button type="primary" @click="batchRestart">批量重启</a-button>
+      <a-button type="danger" @click="batchStop">批量关闭</a-button>
     </div>
     <!-- 数据表格 -->
     <a-table
@@ -13,6 +17,7 @@
       :loading="loading"
       :columns="columns"
       :pagination="false"
+       :row-selection="{ selectedRowKeys: selectedRowKeys, onChange: onSelectChange }"
       bordered
       :rowKey="(record, index) => index"
       :style="{ 'max-height': tableHeight + 'px' }"
@@ -254,6 +259,9 @@ import {
   getProjectAccessList,
   editProject,
   nodeJudgeLibExist,
+  restartProject,
+  startProject,
+  stopProject
 } from "../../../../api/node-project";
 
 export default {
@@ -287,6 +295,7 @@ export default {
       drawerReplicaVisible: false,
       addGroupvisible: false,
       libExist: false,
+      selectedRowKeys: [], 
       checkRecord: "",
       columns: [
         { title: "项目名称", dataIndex: "name", width: 60, ellipsis: true, scopedSlots: { customRender: "name" } },
@@ -644,6 +653,71 @@ export default {
       this.onConsoleClose();
       this.handleFile(this.checkRecord);
     },
+    //选中项目
+    onSelectChange(selectedRowKeys) {
+      this.selectedRowKeys = selectedRowKeys;
+    },
+    //批量开始
+    batchStart(){
+      if(this.selectedRowKeys.length==0){
+         this.$notification.warning({
+          message: "请选中要启动的项目",
+          duration: 2,
+        });
+      }
+      this.selectedRowKeys.forEach((value)=>{
+        if(this.list[value].status==false&&this.list[value].runMode!="File"){
+         const params = {
+            nodeId: this.node.id,
+            id: this.list[value].id,
+         };
+         console.log(this.list[value])
+         startProject(params).then(()=>{
+            this.handleFilter();
+          });
+         }
+      });
+    },
+    //批量重启
+    batchRestart(){
+      if(this.selectedRowKeys.length==0){
+         this.$notification.warning({
+          message: "请选中要重启的项目",
+          duration: 2,
+        });
+      }
+      this.selectedRowKeys.forEach((value)=>{
+        if(this.list[value].runMode!="File"){
+          const params = {
+            nodeId: this.node.id,
+            id: this.list[value].id,
+          };
+          restartProject(params).then(()=>{
+            this.handleFilter();
+          });
+       }
+      });
+    },
+    //批量关闭
+    batchStop(){
+      if(this.selectedRowKeys.length==0){
+         this.$notification.warning({
+          message: "请选中要关闭的项目",
+          duration: 2,
+        });
+      }
+      this.selectedRowKeys.forEach((value)=>{
+       if(this.list[value].status==true&&this.list[value].runMode!="File"){
+          const params = {
+           nodeId: this.node.id,
+           id: this.list[value].id,
+          };
+          stopProject(params).then(()=>{
+            this.handleFilter();
+          });
+       }
+      });
+    }
   },
 };
 </script>

@@ -495,3 +495,52 @@ export function nodeJudgeLibExist(params) {
 		data: params
 	})
 }
+
+/**
+ * 重启项目
+ * @param {
+ *  nodeId: 节点 ID,
+ *  id: 项目id
+ *  copyId: 副本id
+ * } params
+ */
+export function restartProject(params) {
+	return axios({
+		url: '/node/manage/restart',
+		method: 'post',
+		data: params
+	})
+}
+
+/**
+ * 启动项目
+ * @param {
+ *  nodeId: 节点 ID,
+ *  id: 项目id
+ *  copyId: 副本id
+ * } params
+ */
+export function startProject(params) {
+	return axios({
+		url: '/node/manage/start',
+		method: 'post',
+		data: params
+	})
+}
+
+
+/**
+ * 关闭项目
+ * @param {
+ *  nodeId: 节点 ID,
+ *  id: 项目id
+ *  copyId: 副本id
+ * } params
+ */
+export function stopProject(params) {
+	return axios({
+		url: '/node/manage/stop',
+		method: 'post',
+		data: params
+	})
+}

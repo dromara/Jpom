@@ -72,7 +72,7 @@ export default {
 	},
 	data() {
 		return {
-			replicaStatus: this.replica.status,
+			replicaStatus: this.replace?.status,
 			project: {},
 			loading: false,
 			socket: null,
