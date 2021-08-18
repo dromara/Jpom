@@ -1,10 +1,13 @@
 package io.jpom.system;
 
 import cn.hutool.core.convert.Convert;
+import cn.hutool.core.lang.Console;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.script.ScriptUtil;
 import cn.jiangzeyin.common.spring.SpringUtil;
 import io.jpom.system.db.DbConfig;
+import org.eclipse.jgit.api.Git;
+import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.util.unit.DataSize;
@@ -18,7 +21,7 @@ import java.util.concurrent.TimeUnit;
  * @date 2019/3/04
  */
 @Configuration
-public class ServerExtConfigBean {
+public class ServerExtConfigBean implements DisposableBean {
 
 	/**
 	 * 系统最多能创建多少用户
@@ -200,5 +203,14 @@ public class ServerExtConfigBean {
 	 */
 	public static ServerExtConfigBean getInstance() {
 		return SpringUtil.getBean(ServerExtConfigBean.class);
+	}
+
+	@Override
+	public void destroy() throws Exception {
+		try {
+			Git.shutdown();
+		} catch (Exception e) {
+			Console.error(e.getMessage());
+		}
 	}
 }

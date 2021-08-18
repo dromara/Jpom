@@ -281,7 +281,7 @@ public class BuildInfoController extends BaseServerController {
 	public String branchList(
 			@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "仓库地址不正确")) String url,
 			@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "登录账号")) String userName,
-			@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "登录密码")) String userPwd) throws GitAPIException, IOException {
+			@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "登录密码")) String userPwd) throws Exception {
 		List<String> list = GitUtil.getBranchList(url, userName, userPwd);
 		return JsonMessage.getString(200, "ok", list);
 	}

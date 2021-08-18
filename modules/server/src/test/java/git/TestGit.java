@@ -1,28 +1,25 @@
 package git;
 
 import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.lang.Tuple;
 import io.jpom.util.GitUtil;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.ListBranchCommand;
-import org.eclipse.jgit.api.LsRemoteCommand;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.transport.RemoteConfig;
-import org.eclipse.jgit.transport.TagOpt;
 import org.eclipse.jgit.transport.URIish;
 import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 /**
@@ -88,19 +85,29 @@ public class TestGit {
 
 
 	@Test
-	public void testTag() throws GitAPIException, IOException {
-		UsernamePasswordCredentialsProvider credentialsProvider = new UsernamePasswordCredentialsProvider("jpom", "jpom");
-		Tuple branchAndTagList = GitUtil.getBranchAndTagList("https://gitee.com/dromara/Jpom.git", credentialsProvider);
-		System.out.println(branchAndTagList);
+	public void testTag() throws Exception {
+
 
 		//
 //		Git.cloneRepository().setTagOption(TagOpt.FETCH_TAGS)
 
-		LsRemoteCommand lsRemoteCommand = Git.lsRemoteRepository();
-		Collection<Ref> call = lsRemoteCommand.setRemote("https://gitee.com/dromara/Jpom.git").setHeads(true).setTags(true).call();
-		for (Ref ref : call) {
-			System.out.println(ref.getName());
-		}
+		String uri = "https://gitee.com/dromara/Jpom.git";
+		File file = FileUtil.file("~/test/jpomgit");
+		String tagName = "v2.5.1";
+		String branchName = "stand-alone";
+		UsernamePasswordCredentialsProvider credentialsProvider = new UsernamePasswordCredentialsProvider("a", "a");
+//		Git call = Git.cloneRepository()
+//				.setURI(uri)
+//				.setDirectory(file)
+//				.setCredentialsProvider(credentialsProvider)
+//				.call();
+
+		PrintWriter printWriter = new PrintWriter(System.out);
+		GitUtil.checkoutPullTag(uri, file, tagName, credentialsProvider, printWriter);
+
+		GitUtil.checkoutPull(uri, file, branchName, credentialsProvider, printWriter);
+
+
 	}
 
 }

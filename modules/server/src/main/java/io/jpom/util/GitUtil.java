@@ -4,13 +4,14 @@ import cn.hutool.core.collection.CollStreamUtil;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.lang.Tuple;
 import cn.hutool.core.util.StrUtil;
-import cn.hutool.crypto.SecureUtil;
-import io.jpom.system.ConfigBean;
 import io.jpom.system.JpomRuntimeException;
 import org.eclipse.jgit.api.*;
+import org.eclipse.jgit.api.errors.CheckoutConflictException;
 import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.api.errors.NoHeadException;
 import org.eclipse.jgit.api.errors.TransportException;
 import org.eclipse.jgit.internal.JGitText;
 import org.eclipse.jgit.lib.*;
@@ -25,13 +26,14 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.*;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
  * git工具
  * <p>
  * https://developer.aliyun.com/ask/275691
+ * <p>
+ * https://github.com/centic9/jgit-cookbook
  *
  * @author bwcx_jzy
  * @date 2019/7/15
@@ -101,11 +103,14 @@ public class GitUtil {
 			if (checkRemoteUrl(url, file)) {
 				git = Git.open(file);
 				//
-				PullCommand pull = git.pull();
-				if (printWriter != null) {
-					pull.setProgressMonitor(new TextProgressMonitor(printWriter));
+				if (branchName != null) {
+					PullCommand pull = git.pull();
+					if (printWriter != null) {
+						pull.setProgressMonitor(new TextProgressMonitor(printWriter));
+					}
+					pull.setRemoteBranchName(branchName);
+					pull.setCredentialsProvider(credentialsProvider).call();
 				}
-				pull.setCredentialsProvider(credentialsProvider).call();
 			} else {
 				git = reClone(url, branchName, file, credentialsProvider, printWriter);
 			}
@@ -123,7 +128,7 @@ public class GitUtil {
 	 * @return Tuple
 	 * @throws GitAPIException api
 	 */
-	public static Tuple getBranchAndTagList(String url, CredentialsProvider credentialsProvider) throws GitAPIException {
+	public static Tuple getBranchAndTagList(String url, CredentialsProvider credentialsProvider) throws Exception {
 		synchronized (url.intern()) {
 			try {
 				Collection<Ref> call = Git.lsRemoteRepository()
@@ -147,6 +152,9 @@ public class GitUtil {
 
 				// branch list
 				List<Ref> branchListRef = refMap.get(Constants.R_HEADS);
+				if (branchListRef == null) {
+					return null;
+				}
 				List<String> branchList = branchListRef.stream().map(ref -> {
 					String name = ref.getName();
 					if (name.startsWith(Constants.R_HEADS)) {
@@ -157,7 +165,7 @@ public class GitUtil {
 
 				// list tag
 				List<Ref> tagListRef = refMap.get(Constants.R_TAGS);
-				List<String> tagList = tagListRef.stream().map(ref -> {
+				List<String> tagList = tagListRef == null ? new ArrayList<>() : tagListRef.stream().map(ref -> {
 					String name = ref.getName();
 					if (name.startsWith(Constants.R_TAGS)) {
 						return name.substring((Constants.R_TAGS).length());
@@ -165,14 +173,14 @@ public class GitUtil {
 					return null;
 				}).filter(Objects::nonNull).collect(Collectors.toList());
 				return new Tuple(branchList, tagList);
-			} catch (TransportException t) {
-				checkTransportException(t);
+			} catch (Exception t) {
+				checkTransportException(t, null, null);
 				return null;
 			}
 		}
 	}
 
-	public static List<String> getBranchList(String url, String userName, String userPwd) throws GitAPIException {
+	public static List<String> getBranchList(String url, String userName, String userPwd) throws Exception {
 		Tuple tuple = getBranchAndTagList(url, new UsernamePasswordCredentialsProvider(userName, userPwd));
 		List<String> tag = tuple == null ? null : tuple.get(0);
 		if (CollUtil.isEmpty(tag)) {
@@ -192,7 +200,7 @@ public class GitUtil {
 	 * @throws IOException     IO
 	 * @throws GitAPIException api
 	 */
-	public static void checkoutPull(String url, File file, String branchName, CredentialsProvider credentialsProvider, PrintWriter printWriter) throws IOException, GitAPIException {
+	public static void checkoutPull(String url, File file, String branchName, CredentialsProvider credentialsProvider, PrintWriter printWriter) throws Exception {
 		synchronized (url.intern()) {
 			try (Git git = initGit(url, branchName, file, credentialsProvider, printWriter)) {
 				// 判断本地是否存在对应分支
@@ -207,7 +215,7 @@ public class GitUtil {
 				}
 				// 切换分支
 				if (!StrUtil.equals(git.getRepository().getBranch(), branchName)) {
-					printWriter.println(StrUtil.format("start switch branch from {} to {}", git.getRepository().getBranch(), branchName));
+					println(printWriter, "start switch branch from {} to {}", git.getRepository().getBranch(), branchName);
 					git.checkout().
 							setCreateBranch(createBranch).
 							setName(branchName).
@@ -217,8 +225,34 @@ public class GitUtil {
 							call();
 				}
 				git.pull().setCredentialsProvider(credentialsProvider).call();
-			} catch (TransportException t) {
-				checkTransportException(t);
+			} catch (Exception t) {
+				checkTransportException(t, file, printWriter);
+			}
+		}
+	}
+
+	/**
+	 * 拉取对应分支最新代码
+	 *
+	 * @param url                 远程url
+	 * @param file                仓库路径
+	 * @param tagName             标签名
+	 * @param credentialsProvider 凭证
+	 * @throws IOException     IO
+	 * @throws GitAPIException api
+	 */
+	public static void checkoutPullTag(String url, File file, String tagName, CredentialsProvider credentialsProvider, PrintWriter printWriter) throws Exception {
+		synchronized (url.intern()) {
+			try (Git git = initGit(url, null, file, credentialsProvider, printWriter)) {
+				git.checkout()
+						.setUpstreamMode(CreateBranchCommand.SetupUpstreamMode.SET_UPSTREAM)
+						.setForceRefUpdate(true)
+						.setName(tagName)
+						.setCreateBranch(true)
+						.setForced(true)
+						.call();
+			} catch (Exception t) {
+				checkTransportException(t, file, printWriter);
 			}
 		}
 	}
@@ -229,12 +263,34 @@ public class GitUtil {
 	 * @param ex 异常信息
 	 * @throws TransportException 非账号密码异常
 	 */
-	private static void checkTransportException(TransportException ex) throws TransportException {
-		String msg = ex.getMessage();
-		if (msg.contains(JGitText.get().notAuthorized) || msg.contains(JGitText.get().authenticationNotSupported)) {
-			throw new JpomRuntimeException("git账号密码不正常", ex);
+	private static void checkTransportException(Exception ex, File gitFile, PrintWriter printWriter) throws Exception {
+		if (ex instanceof TransportException) {
+			String msg = ex.getMessage();
+			if (msg.contains(JGitText.get().notAuthorized) || msg.contains(JGitText.get().authenticationNotSupported)) {
+				throw new JpomRuntimeException("git账号密码不正常", ex);
+			}
+			throw ex;
+		} else if (ex instanceof NoHeadException) {
+			println(printWriter, "拉取代码异常,已经主动清理本地仓库缓存内容,请手动重试。" + ex.getMessage());
+			if (gitFile == null) {
+				throw ex;
+			} else {
+				FileUtil.del(gitFile);
+			}
+		} else if (ex instanceof CheckoutConflictException) {
+			println(printWriter, "拉取代码发生冲突,可以尝试清除构建或者解决仓库里面的冲突后重新操作。：" + ex.getMessage());
+			throw ex;
+		} else {
+			println(printWriter, "拉取代码发生未知异常建议清除构建重新操作：" + ex.getMessage());
 		}
-		throw ex;
+	}
+
+	private static void println(PrintWriter printWriter, CharSequence template, Object... params) {
+		if (printWriter == null) {
+			return;
+		}
+		printWriter.println(StrUtil.format(template, params));
+		IoUtil.flush(printWriter);
 	}
 
 	private static AnyObjectId getAnyObjectId(Git git, String branchName) throws GitAPIException {
