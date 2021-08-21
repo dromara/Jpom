@@ -10,6 +10,8 @@ import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.validator.ValidatorConfig;
 import cn.jiangzeyin.common.validator.ValidatorItem;
 import cn.jiangzeyin.common.validator.ValidatorRule;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import io.jpom.build.BuildUtil;
 import io.jpom.common.BaseServerController;
 import io.jpom.common.Const;
@@ -164,48 +166,56 @@ public class BuildInfoController extends BaseServerController {
 		buildInfoModel.setScript(script);
 		// 设置修改人
 		buildInfoModel.setModifyUser(UserModel.getOptUserName(getUser()));
+
 		// 发布方式
 		BuildModel.ReleaseMethod releaseMethod1 = BaseEnum.getEnum(BuildModel.ReleaseMethod.class, releaseMethod);
 		if (releaseMethod1 == null) {
 			return JsonMessage.getString(405, "发布方法不正确");
 		}
-		buildInfoModel.setReleaseMethod(releaseMethod1.getCode());
 
-//		if (releaseMethod1 == BuildModel.ReleaseMethod.Outgiving) {
-//			String releaseMethodDataId = getParameter("releaseMethodDataId_1");
-//			if (StrUtil.isEmpty(releaseMethodDataId)) {
-//				return JsonMessage.getString(405, "请选择分发项目");
-//			}
-//			buildInfoModel.setReleaseMethodDataId(releaseMethodDataId);
-//		} else if (releaseMethod1 == BuildModel.ReleaseMethod.Project) {
-//			String formatProject = formatProject(buildModel);
-//			if (formatProject != null) {
-//				return formatProject;
-//			}
-//		} else if (releaseMethod1 == BuildModel.ReleaseMethod.Ssh) {
-//			String formatSsh = formatSsh(buildModel);
-//			if (formatSsh != null) {
-//				return formatSsh;
-//			}
-//		} else {
-//			buildModel.setReleaseMethodDataId(null);
-//		}
-//		if (StrUtil.isEmpty(id)) {
-//			buildService.addItem(buildModel);
-//			return JsonMessage.getString(200, "添加成功");
-//		}
+		// 把 extraData 信息转换成 JSON 字符串
+		JSONObject jsonObject = JSON.parseObject(extraData);
+
+		// 验证发布方式 和 extraData 信息
+		if (releaseMethod1 == BuildModel.ReleaseMethod.Project) {
+			String formatProject = formatProject(jsonObject);
+			if (formatProject != null) {
+				return formatProject;
+			}
+		} else if (releaseMethod1 == BuildModel.ReleaseMethod.Ssh) {
+			String formatSsh = formatSsh(jsonObject);
+			if (formatSsh != null) {
+				return formatSsh;
+			}
+		}
+
+		// 设置属性
+		buildInfoModel.setReleaseMethod(releaseMethod1.getCode());
+		buildInfoModel.setExtraData(extraData);
+
+		// 新增构建信息
+		if (StrUtil.isEmpty(id)) {
+			buildInfoService.add(buildInfoModel);
+			return JsonMessage.getString(200, "添加成功");
+		}
 
 		buildInfoService.update(buildInfoModel);
 		return JsonMessage.getString(200, "修改成功");
 	}
 
-	private String formatSsh(BuildModel buildModel) {
-		//
-		String releaseMethodDataId = getParameter("releaseMethodDataId_3");
+	/**
+	 * 验证构建信息
+	 * 当发布方式为【SSH】的时候
+	 * @param jsonObject
+	 * @return
+	 */
+	private String formatSsh(JSONObject jsonObject) {
+		// 发布方式
+		String releaseMethodDataId = jsonObject.getString("releaseMethodDataId_3");
 		if (StrUtil.isEmpty(releaseMethodDataId)) {
 			return JsonMessage.getString(405, "请选择分发SSH项");
 		}
-		String releasePath = getParameter("releasePath");
+		String releasePath = jsonObject.getString("releasePath");
 		if (StrUtil.isEmpty(releasePath)) {
 			return JsonMessage.getString(405, "请输入发布到ssh中的目录");
 		}
@@ -216,7 +226,6 @@ public class BuildInfoController extends BaseServerController {
 		}
 		if (releasePath.startsWith(StrUtil.SLASH)) {
 			// 以根路径开始
-
 			List<String> fileDirs = sshServiceItem.getFileDirs();
 			if (fileDirs == null || fileDirs.isEmpty()) {
 				return JsonMessage.getString(405, "此ssh未授权操作此目录");
@@ -231,8 +240,8 @@ public class BuildInfoController extends BaseServerController {
 				return JsonMessage.getString(405, "此ssh未授权操作此目录");
 			}
 		}
-		//
-		String releaseCommand = getParameter("releaseCommand");
+		// 发布命令
+		String releaseCommand = jsonObject.getString("releaseCommand");
 		if (StrUtil.isNotEmpty(releaseCommand)) {
 			int length = releaseCommand.length();
 			Assert.state(length <= 4000, "发布命令长度限制在4000字符");
@@ -244,35 +253,33 @@ public class BuildInfoController extends BaseServerController {
 					return JsonMessage.getString(405, "发布命令中包含禁止执行的命令");
 				}
 			}
-			buildModel.setReleaseCommand(releaseCommand);
 		}
-		buildModel.setReleasePath(releasePath);
-
-		buildModel.setReleaseMethodDataId(releaseMethodDataId);
-		String clearOld = getParameter("clearOld");
-		buildModel.setClearOld(Convert.toBool(clearOld, false));
 		return null;
 	}
 
-	private String formatProject(BuildModel buildModel) {
-		String releaseMethodDataId2Node = getParameter("releaseMethodDataId_2_node");
-		String releaseMethodDataId2Project = getParameter("releaseMethodDataId_2_project");
-		if (StrUtil.isEmpty(releaseMethodDataId2Node) || StrUtil.isEmpty(releaseMethodDataId2Project)) {
-			return JsonMessage.getString(405, "请选择节点和项目");
-		}
-		buildModel.setReleaseMethodDataId(String.format("%s:%s", releaseMethodDataId2Node, releaseMethodDataId2Project));
-		//
-		String afterOpt = getParameter("afterOpt");
+	/**
+	 * 验证构建信息
+	 * 当发布方式为【项目】的时候
+	 * @param jsonObject
+	 * @return
+	 */
+	private String formatProject(JSONObject jsonObject) {
+		String afterOpt = jsonObject.getString("afterOpt");
 		AfterOpt afterOpt1 = BaseEnum.getEnum(AfterOpt.class, Convert.toInt(afterOpt, 0));
 		if (afterOpt1 == null) {
 			return JsonMessage.getString(400, "请选择打包后的操作");
 		}
-		String clearOld = getParameter("clearOld");
-		buildModel.setAfterOpt(afterOpt1.getCode());
-		buildModel.setClearOld(Convert.toBool(clearOld, false));
 		return null;
 	}
 
+	/**
+	 * 获取分支信息
+	 * @param url
+	 * @param userName
+	 * @param userPwd
+	 * @return
+	 * @throws Exception
+	 */
 	@RequestMapping(value = "/build/branch-list", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	public String branchList(
 			@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "仓库地址不正确")) String url,
@@ -283,33 +290,49 @@ public class BuildInfoController extends BaseServerController {
 	}
 
 
+	/**
+	 * 删除构建信息
+	 * @param id
+	 * @return
+	 */
 	@RequestMapping(value = "/build/delete", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
 	@OptLog(UserOperateLogV1.OptType.DelBuild)
 	@Feature(method = MethodFeature.DEL)
 	public String delete(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据id") String id) {
-		BuildModel buildModel = buildService.getItem(id);
-		Objects.requireNonNull(buildModel, "没有对应数据");
-		dbBuildHistoryLogService.delByBuildId(buildModel.getId());
-		//
-		File file = BuildUtil.getBuildDataFile(buildModel.getId());
+		// 查询构建信息
+		BuildInfoModel buildInfoModel = buildInfoService.getByKey(id);
+		Objects.requireNonNull(buildInfoModel, "没有对应数据");
+		dbBuildHistoryLogService.delByBuildId(buildInfoModel.getId());
+
+		// 删除构建信息文件
+		File file = BuildUtil.getBuildDataFile(buildInfoModel.getId());
 		if (!FileUtil.del(file)) {
 			FileUtil.del(file.toPath());
 			return JsonMessage.getString(500, "清理历史构建产物失败,已经重新尝试");
 		}
-		buildService.deleteItem(buildModel.getId());
+
+		// 删除构建信息数据
+		buildInfoService.delByKey(buildInfoModel.getId());
 		return JsonMessage.getString(200, "清理历史构建产物成功");
 	}
 
 
+	/**
+	 * 清除构建信息
+	 * @param id
+	 * @return
+	 */
 	@RequestMapping(value = "/build/clean-source", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
 	@OptLog(UserOperateLogV1.OptType.BuildCleanSource)
 	@Feature(method = MethodFeature.EXECUTE)
 	public String cleanSource(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据id") String id) {
-		BuildModel buildModel = buildService.getItem(id);
-		Objects.requireNonNull(buildModel, "没有对应数据");
-		File source = BuildUtil.getSource(buildModel);
+		// 查询构建信息
+		BuildInfoModel buildInfoModel = buildInfoService.getByKey(id);
+		Objects.requireNonNull(buildInfoModel, "没有对应数据");
+
+		File source = BuildUtil.getSourceById(buildInfoModel.getId());
 		boolean del = FileUtil.del(source);
 		if (!del) {
 			del = FileUtil.del(source.toPath());

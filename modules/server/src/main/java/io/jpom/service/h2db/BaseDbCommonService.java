@@ -118,6 +118,27 @@ public abstract class BaseDbCommonService<T> {
 	}
 
 	/**
+	 * 插入数据
+	 *
+	 * @param entity 要修改的数据
+	 * @return 影响行数
+	 */
+	public int insert(Entity entity) {
+		if (!DbConfig.getInstance().isInit()) {
+			// ignore
+			return 0;
+		}
+		Db db = Db.use();
+		db.setWrapper((Character) null);
+		entity.setTableName(tableName);
+		try {
+			return db.insert(entity);
+		} catch (SQLException e) {
+			throw new JpomRuntimeException("数据库异常", e);
+		}
+	}
+
+	/**
 	 * 修改数据，需要自行实现
 	 *
 	 * @param t 数据

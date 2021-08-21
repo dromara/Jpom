@@ -3,6 +3,7 @@ package io.jpom.build;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.core.util.ZipUtil;
+import io.jpom.model.data.BuildInfoModel;
 import io.jpom.model.data.BuildModel;
 import io.jpom.system.ConfigBean;
 
@@ -39,9 +40,22 @@ public class BuildUtil {
 	 *
 	 * @param buildModel 实体
 	 * @return file
+	 * @see BuildUtil#getSourceById
 	 */
+	@Deprecated
 	public static File getSource(BuildModel buildModel) {
 		return FileUtil.file(BuildUtil.getBuildDataFile(buildModel.getId()), "source");
+	}
+
+	/**
+	 * @author Hotstrip
+	 * 新版本获取代码路径
+	 * @param id
+	 * @return file
+	 * @since 2021-08-22
+	 */
+	public static File getSourceById(String id) {
+		return FileUtil.file(BuildUtil.getBuildDataFile(id), "source");
 	}
 
 	public static File getBuildDataDir() {

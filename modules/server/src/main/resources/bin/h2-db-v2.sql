@@ -35,7 +35,7 @@ CREATE TABLE IF NOT EXISTS PUBLIC.BUILD_INFO
 	RELEASEMETHOD    int comment '发布方法{0: 不发布, 1: 节点分发, 2: 分发项目, 3: SSH}',
 	MODIFYUSER       VARCHAR(50) comment '修改人',
 	`STATUS`         int comment '状态',
-	EXTRADATA        JSON comment '额外信息，JSON 字符串格式',
+	EXTRADATA        CLOB comment '额外信息，JSON 字符串格式',
 	CONSTRAINT BUILD_INFO_PK PRIMARY KEY (ID)
 );
 comment on table BUILD_INFO is '构建信息';
@@ -57,8 +57,9 @@ ALTER TABLE BUILD_INFO
 	ADD IF NOT EXISTS REPOSITORYID VARCHAR(50) COMMENT '仓库 ID';
 
 -- @author jzy 字段类型修改为 json
+-- @author Hotstrip 字段类型修改为 CLOB
 ALTER TABLE BUILD_INFO
-	ALTER COLUMN EXTRADATA JSON COMMENT '额外信息，JSON 字符串格式';
+	ALTER COLUMN EXTRADATA CLOB COMMENT '额外信息，JSON 字符串格式';
 
 -- @author jzy 增加构建产物字段长度
 ALTER TABLE BUILD_INFO

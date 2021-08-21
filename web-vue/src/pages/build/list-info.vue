@@ -135,7 +135,7 @@
         </a-form-model-item>
         <!-- 节点分发 -->
         <a-form-model-item v-if="temp.releaseMethod === 1" label="分发项目" prop="releaseMethodDataId">
-          <a-select v-model="temp.releaseMethodDataId_1" placeholder="请选择分发项目">
+          <a-select v-model="tempExtraData.releaseMethodDataId_1" placeholder="请选择分发项目">
             <a-select-option v-for="dispatch in dispatchList" :key="dispatch.id">{{ dispatch.name }} </a-select-option>
           </a-select>
         </a-form-model-item>
@@ -144,22 +144,22 @@
           <a-cascader v-model="temp.releaseMethodDataIdList" :options="cascaderList" placeholder="Please select" />
         </a-form-model-item>
         <a-form-model-item v-if="temp.releaseMethod === 2" label="发布后操作" prop="afterOpt">
-          <a-select v-model="temp.afterOpt" placeholder="请选择发布后操作">
+          <a-select v-model="tempExtraData.afterOpt" placeholder="请选择发布后操作">
             <a-select-option v-for="opt in afterOptList" :key="opt.value">{{ opt.title }}</a-select-option>
           </a-select>
         </a-form-model-item>
         <!-- SSH -->
         <a-form-model-item v-if="temp.releaseMethod === 3" label="SSH/目录：" prop="releaseMethodDataId">
           <a-input-group compact>
-            <a-select style="width: 30%" v-model="temp.releaseMethodDataId_3" placeholder="请先填写仓库地址和账号信息">
+            <a-select style="width: 30%" v-model="tempExtraData.releaseMethodDataId_3" placeholder="请先填写仓库地址和账号信息">
               <a-select-option v-for="ssh in sshList" :key="ssh.id">{{ ssh.name }}</a-select-option>
             </a-select>
-            <a-input style="width: 70%" v-model="temp.releasePath" placeholder="发布目录,构建产物上传到对应目录" />
+            <a-input style="width: 70%" v-model="tempExtraData.releasePath" placeholder="发布目录,构建产物上传到对应目录" />
           </a-input-group>
         </a-form-model-item>
         <a-form-model-item v-if="temp.releaseMethod === 3" label="发布命令" prop="releaseCommand">
           <a-input
-            v-model="temp.releaseCommand"
+            v-model="tempExtraData.releaseCommand"
             allow-clear
             :auto-size="{ minRows: 2, maxRows: 10 }"
             type="textarea"
@@ -168,7 +168,7 @@
           />
         </a-form-model-item>
         <a-form-model-item v-if="temp.releaseMethod === 2 || temp.releaseMethod === 3" label="清空发布" prop="clearOld">
-          <a-switch v-model="temp.clearOld" checked-children="是" un-checked-children="否" />
+          <a-switch v-model="tempExtraData.clearOld" checked-children="是" un-checked-children="否" />
         </a-form-model-item>
       </a-form-model>
     </a-modal>
@@ -212,15 +212,20 @@ export default {
       loading: false,
       listQuery: {},
       tableHeight: "70vh",
+      // 动态列表参数
       groupList: [],
       list: [],
       repositoryList: [],
+      // 当前仓库信息
       tempRepository: {},
+      // 当前构建信息的 extraData 属性
+      tempExtraData: {},
       branchList: [],
       dispatchList: [],
       cascaderList: [],
       sshList: [],
       temp: {},
+      // 页面控制变量
       editBuildVisible: false,
       addGroupvisible: false,
       triggerVisible: false,
@@ -258,7 +263,7 @@ export default {
         },
         {
           title: "修改时间",
-          dataIndex: "modifyTime",
+          dataIndex: "modifyTimeMillis",
           customRender: (text) => {
             if (!text) {
               return "";
@@ -434,17 +439,14 @@ export default {
     handleEdit(record) {
       this.temp = Object.assign(record);
       this.temp.tempGroup = "";
+      // 设置当前临时的 额外构建信息
+      this.tempExtraData = JSON.parse(record.extraData) || {};
       // 设置发布方式的数据
-      if (record.releaseMethodDataId) {
-        if (record.releaseMethod === 1) {
-          this.temp.releaseMethodDataId_1 = record.releaseMethodDataId;
-        }
-        if (record.releaseMethod === 2) {
-          this.temp.releaseMethodDataIdList = record.releaseMethodDataId.split(":");
-        }
-        if (record.releaseMethod === 3) {
-          this.temp.releaseMethodDataId_3 = record.releaseMethodDataId;
-        }
+      if (record.releaseMethod === 2) {
+        this.temp.releaseMethodDataIdList =   [
+          this.tempExtraData.releaseMethodDataId_2_node,
+          this.tempExtraData.releaseMethodDataId_2_project
+        ];
       }
       // 从仓库列表里匹配对应的仓库信息
       this.tempRepository = this.repositoryList.filter(element => this.temp.repositoryId === element.id)[0];
@@ -512,8 +514,12 @@ export default {
             });
             return false;
           }
-          this.temp.releaseMethodDataId_2_node = this.temp.releaseMethodDataIdList[0];
-          this.temp.releaseMethodDataId_2_project = this.temp.releaseMethodDataIdList[1];
+          this.tempExtraData.releaseMethodDataId_2_node = this.temp.releaseMethodDataIdList[0];
+          this.tempExtraData.releaseMethodDataId_2_project = this.temp.releaseMethodDataIdList[1];
+        }
+        this.temp = {
+          ...this.temp,
+          extraData: JSON.stringify(this.tempExtraData)
         }
         // 提交数据
         editBuild(this.temp).then((res) => {

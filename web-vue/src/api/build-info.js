@@ -32,7 +32,7 @@ export function getBuildList(params) {
  */
 export function getBranchList(params) {
     return axios({
-        url: '/build/branchList.json',
+        url: '/build/branch-list',
         method: 'post',
         timeout: 0,
         data: params
@@ -66,14 +66,6 @@ export function editBuild(params) {
         repoType: params.repoType,
         // 其他参数
         extraData: params.extraData,
-        // releaseMethodDataId_1: params.releaseMethodDataId_1,
-        // releaseMethodDataId_2_node: params.releaseMethodDataId_2_node,
-        // releaseMethodDataId_2_project: params.releaseMethodDataId_2_project,
-        // afterOpt: params.afterOpt,
-        // releaseMethodDataId_3: params.releaseMethodDataId_3,
-        // releasePath: params.releasePath,
-        // releaseCommand: params.releaseCommand,
-        // clearOld: params.clearOld,
     }
     return axios({
         url: '/build/edit',
@@ -88,7 +80,7 @@ export function editBuild(params) {
  */
 export function deleteBuild(id) {
     return axios({
-        url: '/build/delete.json',
+        url: '/build/delete',
         method: 'post',
         data: {id}
     })
@@ -124,7 +116,7 @@ export function resetTrigger(id) {
  */
 export function clearBuid(id) {
     return axios({
-        url: '/build/cleanSource.json',
+        url: '/build/clean-source',
         method: 'post',
         data: {id}
     })

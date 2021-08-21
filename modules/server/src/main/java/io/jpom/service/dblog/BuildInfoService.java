@@ -1,6 +1,7 @@
 package io.jpom.service.dblog;
 
 import cn.hutool.core.date.SystemClock;
+import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.db.Entity;
 import io.jpom.common.Const;
@@ -10,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -40,8 +42,39 @@ public class BuildInfoService extends BaseDbService<BuildInfoModel> {
 	}
 
 
+	/**
+	 * 插入数据库
+	 * @param info
+	 * @return
+	 */
+	public int add(BuildInfoModel info) {
+		// check id
+		Assert.hasText(info.getId(), "不能执行：error");
+		// def create time
+		info.setCreateTimeMillis(ObjectUtil.defaultIfNull(info.getModifyTimeMillis(), SystemClock.now()));
+
+		Entity entity = new Entity(getTableName());
+		entity.parseBean(info, false, true);
+
+		/**
+		 * reset group field name
+		 * group is key words
+		 */
+		if (null != info.getGroup()) {
+			entity.remove(Const.GROUP_STR);
+			entity.put(Const.GROUP_COLUMN_STR, info.getGroup());
+		}
+
+		return super.insert(entity);
+	}
+
+	/**
+	 * update build info
+	 * @param info data
+	 * @return
+	 */
 	@Override
-	public int updateById(BuildInfoModel info) {
+	public int update(BuildInfoModel info) {
 		// check id
 		Assert.hasText(info.getId(), "不能执行：error");
 		// def modify time
