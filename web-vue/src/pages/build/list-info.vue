@@ -9,7 +9,7 @@
       </a-select>
       <a-button type="primary" @click="handleFilter">搜索</a-button>
       <a-button type="primary" @click="handleAdd">新增</a-button>
-      <a-button type="primary" @click="loadData">刷新</a-button>
+      <a-button type="primary" @click="handleFilter">刷新</a-button>
     </div>
     <!-- 表格 -->
     <a-table
@@ -103,7 +103,7 @@
           </a-row>
         </a-form-model-item>
         <a-form-model-item label="仓库地址" prop="repositoryId">
-          <a-select v-model="temp.repositoryId">
+          <a-select v-model="temp.repositoryId" @select="changeRepositpry">
             <a-select-option v-for="item in repositoryList" :key="item.id" :value="item.id">{{ item.name }}[{{ item.gitUrl }}]</a-select-option>
           </a-select>
         </a-form-model-item>
@@ -418,6 +418,14 @@ export default {
     handleFilter() {
       this.loadData();
       this.loadRepositoryList();
+    },
+    // 选择仓库
+    changeRepositpry(value) {
+      this.repositoryList.forEach(element => {
+        if (element.id === value) {
+          this.tempRepository = element;
+        }
+      })
     },
     // 添加
     handleAdd() {

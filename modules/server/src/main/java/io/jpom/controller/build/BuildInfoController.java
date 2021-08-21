@@ -55,8 +55,6 @@ import java.util.Objects;
 public class BuildInfoController extends BaseServerController {
 
 	@Resource
-	private BuildService buildService;
-	@Resource
 	private DbBuildHistoryLogService dbBuildHistoryLogService;
 	@Resource
 	private SshService sshService;
@@ -155,12 +153,17 @@ public class BuildInfoController extends BaseServerController {
 			buildInfoModel = new BuildInfoModel();
 			buildInfoModel.setId(IdUtil.fastSimpleUUID());
 		}
-		buildInfoModel.setGroup(group);
-		buildInfoModel.setName(name);
+		// 判断 group 是否为空
+		if (StrUtil.isNotEmpty(group)) {
+			buildInfoModel.setGroup(group);
+		}
 		// 如果是 SVN
 		if (BuildModel.RepoType.Svn.getCode() == repositoryModel.getRepoType()) {
 			branchName = "trunk";
 		}
+		// 设置参数
+		buildInfoModel.setRepositoryId(repositoryId);
+		buildInfoModel.setName(name);
 		buildInfoModel.setBranchName(branchName);
 		buildInfoModel.setResultDirFile(resultDirFile);
 		buildInfoModel.setScript(script);
