@@ -16,10 +16,7 @@ import io.jpom.common.Const;
 import io.jpom.common.interceptor.OptLog;
 import io.jpom.model.AfterOpt;
 import io.jpom.model.BaseEnum;
-import io.jpom.model.data.BuildInfoModel;
-import io.jpom.model.data.BuildModel;
-import io.jpom.model.data.SshModel;
-import io.jpom.model.data.UserModel;
+import io.jpom.model.data.*;
 import io.jpom.model.log.UserOperateLogV1;
 import io.jpom.plugin.ClassFeature;
 import io.jpom.plugin.Feature;
@@ -27,6 +24,7 @@ import io.jpom.plugin.MethodFeature;
 import io.jpom.service.build.BuildService;
 import io.jpom.service.dblog.BuildInfoService;
 import io.jpom.service.dblog.DbBuildHistoryLogService;
+import io.jpom.service.dblog.RepositoryService;
 import io.jpom.service.node.ssh.SshService;
 import io.jpom.util.CommandUtil;
 import io.jpom.util.GitUtil;
@@ -40,7 +38,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
 import java.io.File;
-import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
 
@@ -64,6 +61,8 @@ public class BuildInfoController extends BaseServerController {
 
 	@Resource
 	private BuildInfoService buildInfoService;
+	@Resource
+	private RepositoryService repositoryService;
 
 
 	/**
@@ -107,15 +106,13 @@ public class BuildInfoController extends BaseServerController {
 	 *
 	 * @param id
 	 * @param name
-	 * @param gitUrl
-	 * @param userName
-	 * @param password
+	 * @param repositoryId
 	 * @param resultDirFile
 	 * @param script
 	 * @param releaseMethod
 	 * @param branchName
 	 * @param group
-	 * @param repoType
+	 * @param extraData
 	 * @return
 	 * @throws Exception
 	 */
@@ -124,22 +121,23 @@ public class BuildInfoController extends BaseServerController {
 	@Feature(method = MethodFeature.EDIT)
 	public String updateMonitor(String id,
 								@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "构建名称不能为空")) String name,
-								@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "仓库地址不正确")) String gitUrl,
-								@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "登录账号")) String userName,
-								@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "登录密码")) String password,
+								@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "仓库信息不能为空")) String repositoryId,
 								@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "构建产物目录不能为空,长度1-200", range = "1:200")) String resultDirFile,
 								@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "构建命令不能为空")) String script,
 								@ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "发布方法不正确") int releaseMethod,
-								String branchName, String group, int repoType) throws Exception {
-		BaseEnum anEnum = BaseEnum.getEnum(BuildModel.RepoType.class, repoType);
-		if (anEnum == null) {
-			return JsonMessage.getString(405, "仓库类型选择错误");
+								String branchName, String group,
+								String extraData) throws Exception {
+		// 根据 repositoryId 查询仓库信息
+		RepositoryModel repositoryModel = repositoryService.getByKey(repositoryId);
+		if (null == repositoryModel) {
+			return JsonMessage.getString(405, "无效的仓库信息");
 		}
-		if (BuildModel.RepoType.Git.getCode() == repoType) {
+		// 如果是 GIT 需要检测分支是否存在
+		if (BuildModel.RepoType.Git.getCode() == repositoryModel.getRepoType()) {
 			if (StrUtil.isEmpty(branchName)) {
 				return JsonMessage.getString(405, "请选择分支");
 			}
-			List<String> list = GitUtil.getBranchList(gitUrl, userName, password);
+			List<String> list = GitUtil.getBranchList(repositoryModel.getGitUrl(), repositoryModel.getUserName(), repositoryModel.getPassword());
 			if (!list.contains(branchName)) {
 				return JsonMessage.getString(405, "没有找到对应分支：" + branchName);
 			}
@@ -148,58 +146,56 @@ public class BuildInfoController extends BaseServerController {
 		if (CommandUtil.checkContainsDel(script)) {
 			return JsonMessage.getString(405, "不能包含删除命令");
 		}
-		if (StrUtil.isEmpty("group")) {
-			return JsonMessage.getString(405, "请选择分组");
+
+		// 查询构建信息
+		BuildInfoModel buildInfoModel = buildInfoService.getByKey(id);
+		if (null == buildInfoModel) {
+			buildInfoModel = new BuildInfoModel();
+			buildInfoModel.setId(IdUtil.fastSimpleUUID());
 		}
-		BuildModel buildModel = buildService.getItem(id);
-		if (buildModel == null) {
-			buildModel = new BuildModel();
-			buildModel.setId(IdUtil.fastSimpleUUID());
-		}
-		buildModel.setGroup(group);
-		buildModel.setName(name);
-		buildModel.setRepoType(repoType);
-		buildModel.setGitUrl(gitUrl);
-		if (BuildModel.RepoType.Svn.getCode() == repoType) {
+		buildInfoModel.setGroup(group);
+		buildInfoModel.setName(name);
+		// 如果是 SVN
+		if (BuildModel.RepoType.Svn.getCode() == repositoryModel.getRepoType()) {
 			branchName = "trunk";
 		}
-		buildModel.setBranchName(branchName);
-		buildModel.setPassword(password);
-		buildModel.setUserName(userName);
-		buildModel.setResultDirFile(resultDirFile);
-		buildModel.setScript(script);
-		//
-		buildModel.setModifyUser(UserModel.getOptUserName(getUser()));
-		//
+		buildInfoModel.setBranchName(branchName);
+		buildInfoModel.setResultDirFile(resultDirFile);
+		buildInfoModel.setScript(script);
+		// 设置修改人
+		buildInfoModel.setModifyUser(UserModel.getOptUserName(getUser()));
+		// 发布方式
 		BuildModel.ReleaseMethod releaseMethod1 = BaseEnum.getEnum(BuildModel.ReleaseMethod.class, releaseMethod);
 		if (releaseMethod1 == null) {
 			return JsonMessage.getString(405, "发布方法不正确");
 		}
-		buildModel.setReleaseMethod(releaseMethod1.getCode());
-		if (releaseMethod1 == BuildModel.ReleaseMethod.Outgiving) {
-			String releaseMethodDataId = getParameter("releaseMethodDataId_1");
-			if (StrUtil.isEmpty(releaseMethodDataId)) {
-				return JsonMessage.getString(405, "请选择分发项目");
-			}
-			buildModel.setReleaseMethodDataId(releaseMethodDataId);
-		} else if (releaseMethod1 == BuildModel.ReleaseMethod.Project) {
-			String formatProject = formatProject(buildModel);
-			if (formatProject != null) {
-				return formatProject;
-			}
-		} else if (releaseMethod1 == BuildModel.ReleaseMethod.Ssh) {
-			String formatSsh = formatSsh(buildModel);
-			if (formatSsh != null) {
-				return formatSsh;
-			}
-		} else {
-			buildModel.setReleaseMethodDataId(null);
-		}
-		if (StrUtil.isEmpty(id)) {
-			buildService.addItem(buildModel);
-			return JsonMessage.getString(200, "添加成功");
-		}
-		buildService.updateItem(buildModel);
+		buildInfoModel.setReleaseMethod(releaseMethod1.getCode());
+
+//		if (releaseMethod1 == BuildModel.ReleaseMethod.Outgiving) {
+//			String releaseMethodDataId = getParameter("releaseMethodDataId_1");
+//			if (StrUtil.isEmpty(releaseMethodDataId)) {
+//				return JsonMessage.getString(405, "请选择分发项目");
+//			}
+//			buildInfoModel.setReleaseMethodDataId(releaseMethodDataId);
+//		} else if (releaseMethod1 == BuildModel.ReleaseMethod.Project) {
+//			String formatProject = formatProject(buildModel);
+//			if (formatProject != null) {
+//				return formatProject;
+//			}
+//		} else if (releaseMethod1 == BuildModel.ReleaseMethod.Ssh) {
+//			String formatSsh = formatSsh(buildModel);
+//			if (formatSsh != null) {
+//				return formatSsh;
+//			}
+//		} else {
+//			buildModel.setReleaseMethodDataId(null);
+//		}
+//		if (StrUtil.isEmpty(id)) {
+//			buildService.addItem(buildModel);
+//			return JsonMessage.getString(200, "添加成功");
+//		}
+
+		buildInfoService.update(buildInfoModel);
 		return JsonMessage.getString(200, "修改成功");
 	}
 

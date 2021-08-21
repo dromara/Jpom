@@ -44,24 +44,20 @@ export function getBranchList(params) {
  * @param {
  *  id: 构建 ID
  *  name: 构建名称
- *  gitUrl: 仓库地址
- *  userName: 登录用户
- *  password: 登录密码
- *  resultDirFile: 构建产物目录
- *  script: 构建命令
- *  releaseMethod: 发布方法
- *  branchName: 分支名称
  *  group: 分组名称
- *  repoType: 仓库类型 0: GIT | 1: SVN
+ *  branchName: 分支名称
+ *  script: 构建命令
+ *  resultDirFile: 构建产物目录
+ *  releaseMethod: 发布方法
+ *  extraData: 额外信息 JSON 字符串
+ *  repostitoryId: 仓库信息 
  * } params
  */
 export function editBuild(params) {
     const data = {
         id: params.id,
         name: params.name,
-        gitUrl: params.gitUrl,
-        userName: params.userName,
-        password: params.password,
+        repositoryId: params.repositoryId,
         resultDirFile: params.resultDirFile,
         script: params.script,
         releaseMethod: params.releaseMethod,
@@ -69,17 +65,18 @@ export function editBuild(params) {
         group: params.group,
         repoType: params.repoType,
         // 其他参数
-        releaseMethodDataId_1: params.releaseMethodDataId_1,
-        releaseMethodDataId_2_node: params.releaseMethodDataId_2_node,
-        releaseMethodDataId_2_project: params.releaseMethodDataId_2_project,
-        afterOpt: params.afterOpt,
-        releaseMethodDataId_3: params.releaseMethodDataId_3,
-        releasePath: params.releasePath,
-        releaseCommand: params.releaseCommand,
-        clearOld: params.clearOld,
+        extraData: params.extraData,
+        // releaseMethodDataId_1: params.releaseMethodDataId_1,
+        // releaseMethodDataId_2_node: params.releaseMethodDataId_2_node,
+        // releaseMethodDataId_2_project: params.releaseMethodDataId_2_project,
+        // afterOpt: params.afterOpt,
+        // releaseMethodDataId_3: params.releaseMethodDataId_3,
+        // releasePath: params.releasePath,
+        // releaseCommand: params.releaseCommand,
+        // clearOld: params.clearOld,
     }
     return axios({
-        url: '/build/updateBuild',
+        url: '/build/edit',
         method: 'post',
         data
     })

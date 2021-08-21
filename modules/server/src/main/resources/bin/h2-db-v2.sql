@@ -33,6 +33,8 @@ CREATE TABLE IF NOT EXISTS PUBLIC.BUILD_INFO
 	SCRIPT           VARCHAR(200) comment '构建命令',
 	RESULTDIRFILE    VARCHAR(50) comment '构建产物目录',
 	RELEASEMETHOD    int comment '发布方法{0: 不发布, 1: 节点分发, 2: 分发项目, 3: SSH}',
+	MODIFYUSER       VARCHAR(50) comment '修改人',
+	`STATUS`         int comment '状态',
 	EXTRADATA        JSON comment '额外信息，JSON 字符串格式',
 	CONSTRAINT BUILD_INFO_PK PRIMARY KEY (ID)
 );
@@ -61,4 +63,13 @@ ALTER TABLE BUILD_INFO
 -- @author jzy 增加构建产物字段长度
 ALTER TABLE BUILD_INFO
 	ALTER COLUMN RESULTDIRFILE VARCHAR(200) comment '构建产物目录';
+
+-- @author Hotstrip 增加 MODIFYUSER
+ALTER TABLE BUILD_INFO
+	ADD IF NOT EXISTS MODIFYUSER VARCHAR(50) comment '修改人';
+
+-- @author Hotstrip 增加 STATUS
+ALTER TABLE BUILD_INFO
+	ADD IF NOT EXISTS `STATUS` int comment '状态';
+
 

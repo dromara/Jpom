@@ -42,7 +42,7 @@
         <span v-else-if="text === 7">取消构建</span>
         <span v-else>未知状态</span>
       </template>
-      <a-tooltip slot="buildIdStr" slot-scope="text, record" placement="topLeft" :title="text + ' ( 点击查看日志 ) '">
+      <a-tooltip slot="buildId" slot-scope="text, record" placement="topLeft" :title="text + ' ( 点击查看日志 ) '">
         <span v-if="record.buildId <= 0"></span>
         <a-tag v-else color="#108ee9" @click="handleBuildLog(record)">{{ text }}</a-tag>
       </a-tooltip>
@@ -107,7 +107,7 @@
             <a-select-option v-for="item in repositoryList" :key="item.id" :value="item.id">{{ item.name }}[{{ item.gitUrl }}]</a-select-option>
           </a-select>
         </a-form-model-item>
-        <a-form-model-item v-show="temp.repoType === 0" label="分支" prop="branchName">
+        <a-form-model-item v-show="tempRepository.repoType === 0" label="分支" prop="branchName">
           <a-row>
             <a-col :span="18">
               <a-select v-model="temp.branchName" placeholder="请先填写仓库地址和账号信息">
@@ -215,6 +215,7 @@ export default {
       groupList: [],
       list: [],
       repositoryList: [],
+      tempRepository: {},
       branchList: [],
       dispatchList: [],
       cascaderList: [],
@@ -243,10 +244,10 @@ export default {
         { title: "状态", dataIndex: "status", width: 100, ellipsis: true, scopedSlots: { customRender: "status" } },
         {
           title: "构建 ID",
-          dataIndex: "buildIdStr",
+          dataIndex: "buildId",
           width: 80,
           ellipsis: true,
-          scopedSlots: { customRender: "buildIdStr" },
+          scopedSlots: { customRender: "buildId" },
         },
         {
           title: "修改人",
@@ -445,6 +446,9 @@ export default {
           this.temp.releaseMethodDataId_3 = record.releaseMethodDataId;
         }
       }
+      // 从仓库列表里匹配对应的仓库信息
+      this.tempRepository = this.repositoryList.filter(element => this.temp.repositoryId === element.id)[0];
+
       this.loadBranchList();
       this.loadDispatchList();
       this.loadNodeProjectList();
@@ -481,9 +485,9 @@ export default {
       });
       this.branchList = [];
       const params = {
-        url: this.temp.gitUrl,
-        userName: this.temp.userName,
-        userPwd: this.temp.password,
+        url: this.tempRepository?.gitUrl,
+        userName: this.tempRepository?.userName,
+        userPwd: this.tempRepository?.password,
       };
       getBranchList(params).then((res) => {
         if (res.code === 200) {

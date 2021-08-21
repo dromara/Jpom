@@ -44,6 +44,14 @@ public class BuildInfoModel extends BaseDbModel {
 	 */
 	private Integer releaseMethod;
 	/**
+	 * 修改人
+	 */
+	private String modifyUser;
+	/**
+	 * 状态
+	 */
+	private Integer status;
+	/**
 	 * 额外信息，JSON 字符串格式
 	 */
 	private String extraData;
@@ -112,6 +120,22 @@ public class BuildInfoModel extends BaseDbModel {
 		this.releaseMethod = releaseMethod;
 	}
 
+	public void setModifyUser(String modifyUser) {
+		this.modifyUser = modifyUser;
+	}
+
+	public String getModifyUser() {
+		return modifyUser;
+	}
+
+	public Integer getStatus() {
+		return status;
+	}
+
+	public void setStatus(Integer status) {
+		this.status = status;
+	}
+
 	public String getExtraData() {
 		return extraData;
 	}
@@ -119,4 +143,5 @@ public class BuildInfoModel extends BaseDbModel {
 	public void setExtraData(String extraData) {
 		this.extraData = extraData;
 	}
+
 }
