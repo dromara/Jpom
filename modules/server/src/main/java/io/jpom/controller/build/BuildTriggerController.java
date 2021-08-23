@@ -26,7 +26,12 @@ import java.util.Map;
  *
  * @author bwcx_jzy
  * @date 2019/9/4
+ *
+ * @author Hotstrip
+ * @since 2021-08-23
+ * @see BuildInfoTriggerController
  */
+@Deprecated
 @Controller
 @RequestMapping(value = "/build")
 @Feature(cls = ClassFeature.BUILD)

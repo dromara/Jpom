@@ -92,7 +92,7 @@ export function deleteBuild(id) {
  */
 export function getTriggerUrl(id) {
     return axios({
-        url: '/build/trigger-url',
+        url: '/build/trigger/url',
         method: 'post',
         data: {id}
     })
@@ -104,7 +104,7 @@ export function getTriggerUrl(id) {
  */
 export function resetTrigger(id) {
     return axios({
-        url: '/build/trigger_rest.json',
+        url: '/build/trigger/rest',
         method: 'post',
         data: {id}
     })
@@ -148,7 +148,7 @@ export function loadBuildLog(params) {
  */
 export function startBuild(id) {
     return axios({
-        url: '/build/start.json',
+        url: '/build/start',
         method: 'post',
         data: {id}
     })
@@ -160,7 +160,7 @@ export function startBuild(id) {
  */
 export function stopBuild(id) {
     return axios({
-        url: '/build/cancel.json',
+        url: '/build/cancel',
         method: 'post',
         data: {id}
     })

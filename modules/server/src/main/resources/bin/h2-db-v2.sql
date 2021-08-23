@@ -35,6 +35,7 @@ CREATE TABLE IF NOT EXISTS PUBLIC.BUILD_INFO
 	RELEASEMETHOD    int comment '发布方法{0: 不发布, 1: 节点分发, 2: 分发项目, 3: SSH}',
 	MODIFYUSER       VARCHAR(50) comment '修改人',
 	`STATUS`         int comment '状态',
+	TRIGGERTOKEN     VARCHAR(20) comment '触发器token',
 	EXTRADATA        CLOB comment '额外信息，JSON 字符串格式',
 	CONSTRAINT BUILD_INFO_PK PRIMARY KEY (ID)
 );
@@ -72,5 +73,10 @@ ALTER TABLE BUILD_INFO
 -- @author Hotstrip 增加 STATUS
 ALTER TABLE BUILD_INFO
 	ADD IF NOT EXISTS `STATUS` int comment '状态';
+
+-- @author Hotstrip 增加 TRIGGERTOKEN
+ALTER TABLE BUILD_INFO
+	ADD IF NOT EXISTS TRIGGERTOKEN VARCHAR(20) comment '触发器token';
+
 
 

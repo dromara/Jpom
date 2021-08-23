@@ -52,6 +52,10 @@ public class BuildInfoModel extends BaseDbModel {
 	 */
 	private Integer status;
 	/**
+	 * 触发器token
+	 */
+	private String triggerToken;
+	/**
 	 * 额外信息，JSON 字符串格式
 	 */
 	private String extraData;
@@ -134,6 +138,14 @@ public class BuildInfoModel extends BaseDbModel {
 
 	public void setStatus(Integer status) {
 		this.status = status;
+	}
+
+	public String getTriggerToken() {
+		return triggerToken;
+	}
+
+	public void setTriggerToken(String triggerToken) {
+		this.triggerToken = triggerToken;
 	}
 
 	public String getExtraData() {
