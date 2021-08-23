@@ -1,12 +1,10 @@
 package io.jpom.service.dblog;
 
 import cn.hutool.core.date.SystemClock;
-import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.db.Entity;
 import cn.jiangzeyin.common.JsonMessage;
 import io.jpom.build.BuildInfoManage;
-import io.jpom.build.BuildManage;
 import io.jpom.common.Const;
 import io.jpom.model.BaseEnum;
 import io.jpom.model.data.BuildInfoModel;
@@ -18,7 +16,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -52,6 +49,7 @@ public class BuildInfoService extends BaseDbService<BuildInfoModel> {
 
 	/**
 	 * 插入数据库
+	 *
 	 * @param info
 	 * @return
 	 */
@@ -78,6 +76,7 @@ public class BuildInfoService extends BaseDbService<BuildInfoModel> {
 
 	/**
 	 * update build info
+	 *
 	 * @param info data
 	 * @return
 	 */
@@ -109,6 +108,7 @@ public class BuildInfoService extends BaseDbService<BuildInfoModel> {
 
 	/**
 	 * start build
+	 *
 	 * @param buildInfoModel
 	 * @param repositoryModel
 	 * @param userModel
@@ -121,10 +121,14 @@ public class BuildInfoService extends BaseDbService<BuildInfoModel> {
 
 	/**
 	 * check status
+	 *
 	 * @param status
 	 * @return
 	 */
 	public String checkStatus(Integer status) {
+		if (status == null) {
+			return null;
+		}
 		BuildModel.Status nowStatus = BaseEnum.getEnum(BuildModel.Status.class, status);
 		Objects.requireNonNull(nowStatus);
 		if (BuildModel.Status.Ing == nowStatus ||
