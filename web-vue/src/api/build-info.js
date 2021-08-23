@@ -132,7 +132,7 @@ export function clearBuid(id) {
  */
 export function loadBuildLog(params) {
     return axios({
-        url: '/build/getNowLog.json',
+        url: '/build/manage/get-now-log.json',
         method: 'post',
         data: params,
         headers: {
@@ -148,7 +148,7 @@ export function loadBuildLog(params) {
  */
 export function startBuild(id) {
     return axios({
-        url: '/build/start',
+        url: '/build/manage/start',
         method: 'post',
         data: {id}
     })
@@ -160,7 +160,7 @@ export function startBuild(id) {
  */
 export function stopBuild(id) {
     return axios({
-        url: '/build/cancel',
+        url: '/build/manage/cancel',
         method: 'post',
         data: {id}
     })
@@ -204,7 +204,7 @@ export function downloadBuildFile(logId) {
  */
 export function rollback(logId) {
     return axios({
-        url: '/build/reRelease.json',
+        url: '/build/manage/reRelease',
         method: 'post',
         data: {logId}
     })

@@ -16,15 +16,18 @@ import io.jpom.build.ReleaseManage;
 import io.jpom.common.BaseServerController;
 import io.jpom.common.interceptor.OptLog;
 import io.jpom.model.BaseEnum;
+import io.jpom.model.data.BuildInfoModel;
 import io.jpom.model.data.BuildModel;
+import io.jpom.model.data.RepositoryModel;
 import io.jpom.model.data.UserModel;
 import io.jpom.model.log.BuildHistoryLog;
 import io.jpom.model.log.UserOperateLogV1;
 import io.jpom.plugin.ClassFeature;
 import io.jpom.plugin.Feature;
 import io.jpom.plugin.MethodFeature;
-import io.jpom.service.build.BuildService;
+import io.jpom.service.dblog.BuildInfoService;
 import io.jpom.service.dblog.DbBuildHistoryLogService;
+import io.jpom.service.dblog.RepositoryService;
 import io.jpom.util.LimitQueue;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -36,20 +39,18 @@ import java.io.File;
 import java.util.Objects;
 
 /**
- * @author bwcx_jzy
- * @date 2019/7/16
- *
+ * new build info manage controller
  * @author Hotstrip
  * @since 2021-08-23
- * @see BuildInfoManageController
  */
 @RestController
-@RequestMapping(value = "/build")
 @Feature(cls = ClassFeature.BUILD)
-public class BuildManageController extends BaseServerController {
+public class BuildInfoManageController extends BaseServerController {
 
 	@Resource
-	private BuildService buildService;
+	private BuildInfoService buildInfoService;
+	@Resource
+	private RepositoryService repositoryService;
 	@Resource
 	private DbBuildHistoryLogService dbBuildHistoryLogService;
 
@@ -59,11 +60,35 @@ public class BuildManageController extends BaseServerController {
 	 * @param id id
 	 * @return json
 	 */
-	@RequestMapping(value = "start.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+	@RequestMapping(value = "/build/manage/start", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	@OptLog(UserOperateLogV1.OptType.StartBuild)
 	@Feature(method = MethodFeature.EXECUTE)
 	public String start(@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据")) String id) {
-		return buildService.start(getUser(), id);
+		BuildInfoModel item = buildInfoService.getByKey(id);
+		if (item == null) {
+			return JsonMessage.getString(404, "没有对应数据");
+		}
+		String e = buildInfoService.checkStatus(item.getStatus());
+		if (e != null) {
+			return e;
+		}
+		// set buildId field
+		item.setBuildId(item.getBuildId() + 1);
+
+		// userModel
+		UserModel userModel = getUser();
+		String optUserName = userModel == null ? "openApi" : UserModel.getOptUserName(userModel);
+		item.setModifyUser(optUserName);
+		buildInfoService.update(item);
+
+		// load repository
+		RepositoryModel repositoryModel = repositoryService.getByKey(item.getRepositoryId());
+		if (null == repositoryModel) {
+			return JsonMessage.getString(404, "仓库信息不存在");
+		}
+
+		// 执行构建
+		return buildInfoService.start(item, repositoryModel, userModel);
 	}
 
 	/**
@@ -72,11 +97,11 @@ public class BuildManageController extends BaseServerController {
 	 * @param id id
 	 * @return json
 	 */
-	@RequestMapping(value = "cancel.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+	@RequestMapping(value = "/build/manage/cancel", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	@OptLog(UserOperateLogV1.OptType.CancelBuild)
 	@Feature(method = MethodFeature.EXECUTE)
 	public String cancel(@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据")) String id) {
-		BuildModel item = buildService.getItem(id);
+		BuildInfoModel item = buildInfoService.getByKey(id);
 		Objects.requireNonNull(item, "没有对应数据");
 		BuildModel.Status nowStatus = BaseEnum.getEnum(BuildModel.Status.class, item.getStatus());
 		Objects.requireNonNull(nowStatus);
@@ -86,7 +111,7 @@ public class BuildManageController extends BaseServerController {
 		boolean status = BuildManage.cancel(item.getId());
 		if (!status) {
 			item.setStatus(BuildModel.Status.Cancel.getCode());
-			buildService.updateItem(item);
+			buildInfoService.update(item);
 		}
 		return JsonMessage.getString(200, "取消成功");
 	}
@@ -97,15 +122,15 @@ public class BuildManageController extends BaseServerController {
 	 * @param logId logId
 	 * @return json
 	 */
-	@RequestMapping(value = "reRelease.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+	@RequestMapping(value = "/build/manage/reRelease", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	@OptLog(UserOperateLogV1.OptType.ReReleaseBuild)
 	@Feature(method = MethodFeature.EXECUTE)
 	public String reRelease(@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据")) String logId) {
 		BuildHistoryLog buildHistoryLog = dbBuildHistoryLogService.getByKey(logId);
 		Objects.requireNonNull(buildHistoryLog, "没有对应构建记录.");
-		BuildModel item = buildService.getItem(buildHistoryLog.getBuildDataId());
+		BuildInfoModel item = buildInfoService.getByKey(buildHistoryLog.getBuildDataId());
 		Objects.requireNonNull(item, "没有对应数据");
-		String e = buildService.checkStatus(item.getStatus());
+		String e = buildInfoService.checkStatus(item.getStatus());
 		if (e != null) {
 			return e;
 		}
@@ -125,12 +150,12 @@ public class BuildManageController extends BaseServerController {
 	 * @param line    需要获取的行号
 	 * @return json
 	 */
-	@RequestMapping(value = "getNowLog.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+	@RequestMapping(value = "/build/manage/get-now-log", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	@Feature(method = MethodFeature.EXECUTE)
 	public String getNowLog(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据") String id,
 							@ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "没有buildId") int buildId,
 							@ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "line") int line) {
-		BuildModel item = buildService.getItem(id);
+		BuildInfoModel item = buildInfoService.getByKey(id);
 		if (item == null) {
 			return JsonMessage.getString(404, "没有对应数据");
 		}

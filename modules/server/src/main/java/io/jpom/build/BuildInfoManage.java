@@ -6,14 +6,18 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.io.LineHandler;
 import cn.hutool.core.io.file.FileCopier;
+import cn.hutool.core.lang.Assert;
 import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.spring.SpringUtil;
+import com.alibaba.fastjson.JSON;
 import io.jpom.JpomApplication;
+import io.jpom.model.data.BuildInfoModel;
 import io.jpom.model.data.BuildModel;
+import io.jpom.model.data.RepositoryModel;
 import io.jpom.model.data.UserModel;
 import io.jpom.model.log.BuildHistoryLog;
 import io.jpom.service.dblog.DbBuildHistoryLogService;
@@ -35,34 +39,31 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * 构建管理
- *
- * @author bwcx_jzy
- * @date 2019/7/16
- *
+ * new build info manage runnable
  * @author Hotstrip
- * @since 2021-08-23
- * @see BuildInfoManage
+ * @since 20210-08-23
  */
-public class BuildManage extends BaseBuild implements Runnable {
+public class BuildInfoManage extends BaseBuild implements Runnable {
 	/**
 	 * 缓存构建中
 	 */
-	private static final Map<String, BuildManage> BUILD_MANAGE_MAP = new ConcurrentHashMap<>();
+	private static final Map<String, BuildInfoManage> BUILD_MANAGE_MAP = new ConcurrentHashMap<>();
 	private static final AntPathMatcher ANT_PATH_MATCHER = new AntPathMatcher();
 
-	private final BuildModel buildModel;
+	private final BuildInfoModel buildInfoModel;
+	private final RepositoryModel repositoryModel;
 	private final File gitFile;
 	private Process process;
 	private String logId;
 	private final String optUserName;
 	private final UserModel userModel;
 
-	private BuildManage(final BuildModel buildModel, final UserModel userModel) {
-		super(BuildUtil.getLogFile(buildModel.getId(), buildModel.getBuildId()),
-				buildModel.getId());
-		this.buildModel = buildModel;
-		this.gitFile = BuildUtil.getSource(buildModel);
+	private BuildInfoManage(final BuildInfoModel buildInfoModel, final RepositoryModel repositoryModel, final UserModel userModel) {
+		super(BuildUtil.getLogFile(buildInfoModel.getId(), buildInfoModel.getBuildId()),
+				buildInfoModel.getId());
+		this.buildInfoModel = buildInfoModel;
+		this.repositoryModel = repositoryModel;
+		this.gitFile = BuildUtil.getSourceById(buildInfoModel.getId());
 		this.optUserName = UserModel.getOptUserName(userModel);
 		this.userModel = userModel;
 	}
@@ -74,17 +75,17 @@ public class BuildManage extends BaseBuild implements Runnable {
 	 * @return bool
 	 */
 	public static boolean cancel(String id) {
-		BuildManage buildManage = BUILD_MANAGE_MAP.get(id);
-		if (buildManage == null) {
+		BuildInfoManage buildInfoManage = BUILD_MANAGE_MAP.get(id);
+		if (buildInfoManage == null) {
 			return false;
 		}
-		if (buildManage.process != null) {
+		if (buildInfoManage.process != null) {
 			try {
-				buildManage.process.destroy();
+				buildInfoManage.process.destroy();
 			} catch (Exception ignored) {
 			}
 		}
-		buildManage.updateStatus(BuildModel.Status.Cancel);
+		buildInfoManage.updateStatus(BuildModel.Status.Cancel);
 		BUILD_MANAGE_MAP.remove(id);
 		return true;
 	}
@@ -92,19 +93,19 @@ public class BuildManage extends BaseBuild implements Runnable {
 	/**
 	 * 创建构建
 	 *
-	 * @param buildModel 构建项
+	 * @param buildInfoModel 构建项
 	 * @param userModel  操作人
 	 * @return this
 	 */
-	public static BuildManage create(BuildModel buildModel, UserModel userModel) {
-		if (BUILD_MANAGE_MAP.containsKey(buildModel.getId())) {
+	public static BuildInfoManage create(BuildInfoModel buildInfoModel, RepositoryModel repositoryModel, UserModel userModel) {
+		if (BUILD_MANAGE_MAP.containsKey(buildInfoModel.getId())) {
 			throw new JpomRuntimeException("当前构建还在进行中");
 		}
-		BuildManage buildManage = new BuildManage(buildModel, userModel);
-		BUILD_MANAGE_MAP.put(buildModel.getId(), buildManage);
+		BuildInfoManage manage = new BuildInfoManage(buildInfoModel, repositoryModel, userModel);
+		BUILD_MANAGE_MAP.put(buildInfoModel.getId(), manage);
 		//
-		ThreadUtil.execute(buildManage);
-		return buildManage;
+		ThreadUtil.execute(manage);
+		return manage;
 	}
 
 	@Override
@@ -137,13 +138,13 @@ public class BuildManage extends BaseBuild implements Runnable {
 //        buildHistoryLog.setReleaseMethodDataId(this.buildModel.getReleaseMethodDataId());
 //        buildHistoryLog.setAfterOpt(this.buildModel.getAfterOpt());
 //        buildHistoryLog.setReleaseCommand(this.buildModel.getReleaseCommand());
-		BeanUtil.copyProperties(this.buildModel, buildHistoryLog);
+		BeanUtil.copyProperties(this.buildInfoModel, buildHistoryLog);
 
 		buildHistoryLog.setId(this.logId);
-		buildHistoryLog.setBuildDataId(buildModel.getId());
+		buildHistoryLog.setBuildDataId(buildInfoModel.getId());
 		buildHistoryLog.setStatus(BuildModel.Status.Ing.getCode());
 		buildHistoryLog.setStartTime(System.currentTimeMillis());
-		buildHistoryLog.setBuildNumberId(buildModel.getBuildId());
+		buildHistoryLog.setBuildNumberId(buildInfoModel.getBuildId());
 		buildHistoryLog.setBuildUser(optUserName);
 
 		DbBuildHistoryLogService dbBuildHistoryLogService = SpringUtil.getBean(DbBuildHistoryLogService.class);
@@ -155,7 +156,7 @@ public class BuildManage extends BaseBuild implements Runnable {
 	 */
 	private boolean packageFile() throws InterruptedException {
 		Thread.sleep(2000);
-		String resultDirFile = buildModel.getResultDirFile();
+		String resultDirFile = buildInfoModel.getResultDirFile();
 		File rootFile = this.gitFile;
 		boolean updateDirFile = false;
 		if (ANT_PATH_MATCHER.isPattern(resultDirFile)) {
@@ -199,20 +200,20 @@ public class BuildManage extends BaseBuild implements Runnable {
 			this.log(resultDirFile + "不存在，处理构建产物失败");
 			return false;
 		}
-		File toFile = BuildUtil.getHistoryPackageFile(buildModel.getId(), buildModel.getBuildId(), resultDirFile);
+		File toFile = BuildUtil.getHistoryPackageFile(buildInfoModel.getId(), buildInfoModel.getBuildId(), resultDirFile);
 		FileCopier.create(file, toFile)
 				.setCopyContentIfDir(true)
 				.setOverride(true)
 				.setCopyAttributes(true)
 				.setCopyFilter(file1 -> !file1.isHidden())
 				.copy();
-		this.log(StrUtil.format("mv {} {}", resultDirFile, buildModel.getBuildIdStr()));
+		this.log(StrUtil.format("mv {} {}", resultDirFile, buildInfoModel.getBuildId()));
 		// 修改构建产物目录
 		if (updateDirFile) {
 			DbBuildHistoryLogService dbBuildHistoryLogService = SpringUtil.getBean(DbBuildHistoryLogService.class);
 			dbBuildHistoryLogService.updateResultDirFile(this.logId, resultDirFile);
 			//
-			this.buildModel.setResultDirFile(resultDirFile);
+			this.buildInfoModel.setResultDirFile(resultDirFile);
 		}
 		return true;
 	}
@@ -227,23 +228,23 @@ public class BuildManage extends BaseBuild implements Runnable {
 			try {
 				this.log("start build in file : " + FileUtil.getAbsolutePath(this.gitFile));
 				//
-				String branchName = buildModel.getBranchName();
+				String branchName = buildInfoModel.getBranchName();
 				this.log("repository clone pull from " + branchName);
 				String msg = "error";
-				if (buildModel.getRepoType() == BuildModel.RepoType.Git.getCode()) {
+				if (repositoryModel.getRepoType() == BuildModel.RepoType.Git.getCode()) {
 					// git
-					UsernamePasswordCredentialsProvider credentialsProvider = new UsernamePasswordCredentialsProvider(buildModel.getUserName(), buildModel.getPassword());
-					msg = GitUtil.checkoutPull(buildModel.getGitUrl(), gitFile, branchName, credentialsProvider, this.getPrintWriter());
-				} else if (buildModel.getRepoType() == BuildModel.RepoType.Svn.getCode()) {
+					UsernamePasswordCredentialsProvider credentialsProvider = new UsernamePasswordCredentialsProvider(repositoryModel.getUserName(), repositoryModel.getPassword());
+					msg = GitUtil.checkoutPull(repositoryModel.getGitUrl(), gitFile, branchName, credentialsProvider, this.getPrintWriter());
+				} else if (repositoryModel.getRepoType() == BuildModel.RepoType.Svn.getCode()) {
 					// svn
-					msg = SvnKitUtil.checkOut(buildModel.getGitUrl(), buildModel.getUserName(), buildModel.getPassword(), gitFile);
+					msg = SvnKitUtil.checkOut(repositoryModel.getGitUrl(), repositoryModel.getUserName(), repositoryModel.getPassword(), gitFile);
 				}
 				this.log(msg);
 			} catch (Exception e) {
 				this.log("拉取代码失败", e);
 				return;
 			}
-			String[] commands = CharSequenceUtil.splitToArray(buildModel.getScript(), StrUtil.LF);
+			String[] commands = CharSequenceUtil.splitToArray(buildInfoModel.getScript(), StrUtil.LF);
 			if (commands == null || commands.length <= 0) {
 				this.log("没有需要执行的命令");
 				this.updateStatus(BuildModel.Status.Error);
@@ -261,9 +262,11 @@ public class BuildManage extends BaseBuild implements Runnable {
 				}
 			}
 			boolean status = packageFile();
-			if (status && buildModel.getReleaseMethod() != BuildModel.ReleaseMethod.No.getCode()) {
+			if (status && buildInfoModel.getReleaseMethod() != BuildModel.ReleaseMethod.No.getCode()) {
 				// 发布文件
-				new ReleaseManage(this.buildModel, this.userModel, this).start();
+				BaseBuildModule baseBuildModule = JSON.parseObject(this.buildInfoModel.getExtraData(), BaseBuildModule.class);
+				Assert.notNull(baseBuildModule);
+				new ReleaseManage(baseBuildModule, this.userModel, this, buildInfoModel.getBuildId()).start();
 			} else {
 				//
 				updateStatus(BuildModel.Status.Success);
@@ -271,7 +274,7 @@ public class BuildManage extends BaseBuild implements Runnable {
 		} catch (Exception e) {
 			this.log("构建失败", e);
 		} finally {
-			BUILD_MANAGE_MAP.remove(buildModel.getId());
+			BUILD_MANAGE_MAP.remove(buildInfoModel.getId());
 		}
 	}
 

@@ -4,8 +4,15 @@ import cn.hutool.core.date.SystemClock;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.db.Entity;
+import cn.jiangzeyin.common.JsonMessage;
+import io.jpom.build.BuildInfoManage;
+import io.jpom.build.BuildManage;
 import io.jpom.common.Const;
+import io.jpom.model.BaseEnum;
 import io.jpom.model.data.BuildInfoModel;
+import io.jpom.model.data.BuildModel;
+import io.jpom.model.data.RepositoryModel;
+import io.jpom.model.data.UserModel;
 import io.jpom.service.h2db.BaseDbService;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
@@ -13,6 +20,7 @@ import org.springframework.util.StringUtils;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -97,5 +105,32 @@ public class BuildInfoService extends BaseDbService<BuildInfoModel> {
 		Entity where = new Entity();
 		where.set(Const.ID_STR, info.getId());
 		return super.update(entity, where);
+	}
+
+	/**
+	 * start build
+	 * @param buildInfoModel
+	 * @param repositoryModel
+	 * @param userModel
+	 * @return
+	 */
+	public String start(BuildInfoModel buildInfoModel, RepositoryModel repositoryModel, UserModel userModel) {
+		BuildInfoManage.create(buildInfoModel, repositoryModel, userModel);
+		return JsonMessage.getString(200, "开始构建中", buildInfoModel.getBuildId());
+	}
+
+	/**
+	 * check status
+	 * @param status
+	 * @return
+	 */
+	public String checkStatus(Integer status) {
+		BuildModel.Status nowStatus = BaseEnum.getEnum(BuildModel.Status.class, status);
+		Objects.requireNonNull(nowStatus);
+		if (BuildModel.Status.Ing == nowStatus ||
+				BuildModel.Status.PubIng == nowStatus) {
+			return JsonMessage.getString(501, "当前还在：" + nowStatus.getDesc());
+		}
+		return null;
 	}
 }

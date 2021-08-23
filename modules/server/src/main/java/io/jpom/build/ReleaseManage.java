@@ -50,6 +50,23 @@ public class ReleaseManage extends BaseBuild {
 	}
 
 	/**
+	 * new ReleaseManage constructor
+	 * @param buildModel
+	 * @param userModel
+	 * @param baseBuild
+	 * @param buildId
+	 */
+	ReleaseManage(BaseBuildModule buildModel, UserModel userModel, BaseBuild baseBuild, int buildId) {
+		super(BuildUtil.getLogFile(buildModel.getId(), buildId),
+				buildModel.getId());
+		this.baseBuildModule = buildModel;
+		this.buildId = buildId;
+		this.userModel = userModel;
+		this.baseBuild = baseBuild;
+		this.resultFile = BuildUtil.getHistoryPackageFile(this.buildModelId, this.buildId, buildModel.getResultDirFile());
+	}
+
+	/**
 	 * 重新发布
 	 *
 	 * @param buildHistoryLog 构建历史
