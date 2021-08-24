@@ -527,7 +527,7 @@ export default {
       // 设置发布方式的数据
       if (this.tempExtraData.releaseMethodDataId) {
         if (record.releaseMethod === 1) {
-          this.temp.releaseMethodDataId_1 = this.tempExtraData.releaseMethodDataId;
+          this.tempExtraData.releaseMethodDataId_1 = this.tempExtraData.releaseMethodDataId;
         }
         if (record.releaseMethod === 2) {
           this.temp = {
@@ -536,7 +536,7 @@ export default {
           };
         }
         if (record.releaseMethod === 3) {
-          this.temp.releaseMethodDataId_3 = this.tempExtraData.releaseMethodDataId;
+          this.tempExtraData.releaseMethodDataId_3 = this.tempExtraData.releaseMethodDataId;
         }
       }
       // 从仓库列表里匹配对应的仓库信息
@@ -581,9 +581,7 @@ export default {
       });
       this.branchList = [];
       const params = {
-        url: this.tempRepository?.gitUrl,
-        userName: this.tempRepository?.userName,
-        userPwd: this.tempRepository?.password,
+        repositoryId: this.tempRepository?.id,
       };
       getBranchList(params).then((res) => {
         if (res.code === 200) {

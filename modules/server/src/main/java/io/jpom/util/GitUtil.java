@@ -7,6 +7,7 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.lang.Tuple;
 import cn.hutool.core.util.StrUtil;
+import io.jpom.model.data.RepositoryModel;
 import io.jpom.system.JpomRuntimeException;
 import org.eclipse.jgit.api.*;
 import org.eclipse.jgit.api.errors.CheckoutConflictException;
@@ -185,7 +186,17 @@ public class GitUtil {
 		return tuple.get(0);
 	}
 
-	public static Tuple getBranchAndTagList(String url, String userName, String userPwd) throws Exception {
+	/**
+	 * 根据仓库获取分支信息
+	 *
+	 * @param repositoryModel 仓库信息
+	 * @return 分支+tag
+	 * @throws Exception 异常
+	 */
+	public static Tuple getBranchAndTagList(RepositoryModel repositoryModel) throws Exception {
+		String url = repositoryModel.getGitUrl();
+		String userName = repositoryModel.getUserName();
+		String userPwd = repositoryModel.getPassword();
 		Tuple tuple = getBranchAndTagList(url, new UsernamePasswordCredentialsProvider(userName, userPwd));
 		List<String> branch = tuple == null ? null : tuple.get(0);
 		if (CollUtil.isEmpty(branch)) {

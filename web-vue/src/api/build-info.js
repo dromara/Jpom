@@ -25,9 +25,7 @@ export function getBuildList(params) {
 /**
  * 获取仓库分支信息
  * @param {
- *  url: 仓库地址
- *  userName: 用户名
- *  userPwd: 密码
+ *  repositoryId: 仓库id
  * } params
  */
 export function getBranchList(params) {

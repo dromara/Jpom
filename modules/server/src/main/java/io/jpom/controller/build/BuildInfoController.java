@@ -292,18 +292,19 @@ public class BuildInfoController extends BaseServerController {
 	/**
 	 * 获取分支信息
 	 *
-	 * @param url      仓库地址
-	 * @param userName 用户名
-	 * @param userPwd  密码
+	 * @param repositoryId 仓库id
 	 * @return json
 	 * @throws Exception 异常
 	 */
 	@RequestMapping(value = "/build/branch-list", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	public String branchList(
-			@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "仓库地址不正确")) String url,
-			@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "登录账号")) String userName,
-			@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "登录密码")) String userPwd) throws Exception {
-		Tuple branchAndTagList = GitUtil.getBranchAndTagList(url, userName, userPwd);
+			@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "仓库ID不能为空")) String repositoryId) throws Exception {
+		// 根据 repositoryId 查询仓库信息
+		RepositoryModel repositoryModel = repositoryService.getByKey(repositoryId);
+		Assert.notNull(repositoryModel, "无效的仓库信息");
+		//
+		Assert.state(repositoryModel.getRepoType() == 0, "只有 GIT 仓库才有分支信息");
+		Tuple branchAndTagList = GitUtil.getBranchAndTagList(repositoryModel);
 		Object[] members = branchAndTagList.getMembers();
 		return JsonMessage.getString(200, "ok", members);
 	}
@@ -322,6 +323,11 @@ public class BuildInfoController extends BaseServerController {
 		// 查询构建信息
 		BuildInfoModel buildInfoModel = buildInfoService.getByKey(id);
 		Objects.requireNonNull(buildInfoModel, "没有对应数据");
+		//
+		String e = buildInfoService.checkStatus(buildInfoModel.getStatus());
+		if (e != null) {
+			return e;
+		}
 		dbBuildHistoryLogService.delByBuildId(buildInfoModel.getId());
 
 		// 删除构建信息文件
