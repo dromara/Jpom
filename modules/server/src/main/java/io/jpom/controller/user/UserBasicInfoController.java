@@ -62,6 +62,7 @@ public class UserBasicInfoController extends BaseServerController {
 		map.put("email", userModel.getEmail());
 		map.put("dingDing", userModel.getDingDing());
 		map.put("workWx", userModel.getWorkWx());
+		map.put("md5Token", userModel.getUserMd5Key());
 		return JsonMessage.getString(200, "success", map);
 	}
 
