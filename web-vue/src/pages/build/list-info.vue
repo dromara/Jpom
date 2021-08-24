@@ -657,7 +657,7 @@ export default {
       this.temp = Object.assign(record);
       getTriggerUrl(record.id).then((res) => {
         if (res.code === 200) {
-          this.temp.triggerBuildUrl = `${location.protocol}${location.host}${res.data.triggerBuildUrl}`;
+          this.temp.triggerBuildUrl = `${location.protocol}//${location.host}${res.data.triggerBuildUrl}`;
           this.triggerVisible = true;
         }
       });
