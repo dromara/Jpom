@@ -17,7 +17,7 @@
       :loading="loading"
       :columns="columns"
       :pagination="false"
-       :row-selection="{ selectedRowKeys: selectedRowKeys, onChange: onSelectChange }"
+       :row-selection="{ selectedRowKeys: selectedRowKeys, onChange: onSelectChange,columnWidth:'25px' }"
       bordered
       :rowKey="(record, index) => index"
       :style="{ 'max-height': tableHeight + 'px' }"
@@ -298,6 +298,7 @@ export default {
       selectedRowKeys: [], 
       checkRecord: "",
       columns: [
+
         { title: "项目名称", dataIndex: "name", width: 60, ellipsis: true, scopedSlots: { customRender: "name" } },
         { title: "创建/修改时间", dataIndex: "createTime", width: 100, ellipsis: true, scopedSlots: { customRender: "time" } },
         // { title: "修改时间", dataIndex: "modifyTime", width: 160, ellipsis: true, scopedSlots: { customRender: "modifyTime" } },
