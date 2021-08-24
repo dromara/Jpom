@@ -39,14 +39,14 @@ public abstract class BaseJpomInterceptor extends BaseInterceptor {
 //        return String.format("redirect:%s", redirect);
 //    }
 
-    public static String getHeaderProxyPath(HttpServletRequest request) {
-        String proxyPath = ServletUtil.getHeaderIgnoreCase(request, PROXY_PATH);
-        if (StrUtil.isEmpty(proxyPath)) {
-            return StrUtil.EMPTY;
-        }
-        if (proxyPath.endsWith(StrUtil.SLASH)) {
-            proxyPath = proxyPath.substring(0, proxyPath.length() - 1);
-        }
-        return proxyPath;
-    }
+//    public static String getHeaderProxyPath(HttpServletRequest request) {
+//        String proxyPath = ServletUtil.getHeaderIgnoreCase(request, PROXY_PATH);
+//        if (StrUtil.isEmpty(proxyPath)) {
+//            return StrUtil.EMPTY;
+//        }
+//        if (proxyPath.endsWith(StrUtil.SLASH)) {
+//            proxyPath = proxyPath.substring(0, proxyPath.length() - 1);
+//        }
+//        return proxyPath;
+//    }
 }

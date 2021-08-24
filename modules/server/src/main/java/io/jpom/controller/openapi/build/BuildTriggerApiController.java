@@ -4,11 +4,14 @@ import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.JsonMessage;
 import io.jpom.common.ServerOpenApi;
 import io.jpom.common.interceptor.NotLogin;
+import io.jpom.model.data.BuildInfoModel;
 import io.jpom.model.data.BuildModel;
 import io.jpom.model.data.UserModel;
 import io.jpom.service.build.BuildService;
+import io.jpom.service.dblog.BuildInfoService;
 import io.jpom.service.user.UserService;
 import org.springframework.http.MediaType;
+import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -25,27 +28,45 @@ import java.util.Optional;
 @NotLogin
 public class BuildTriggerApiController {
 
-    @Resource
-    private BuildService buildService;
+	@Resource
+	private BuildService buildService;
 
-    @Resource
-    private UserService userService;
+	@Resource
+	private BuildInfoService buildInfoService;
 
-    @RequestMapping(value = ServerOpenApi.BUILD_TRIGGER_BUILD, produces = MediaType.APPLICATION_JSON_VALUE)
-    public String install(@PathVariable String id, @PathVariable String token) {
-        BuildModel item = buildService.getItem(id);
-        if (item == null) {
-            return JsonMessage.getString(404, "没有对应数据");
-        }
-        List<UserModel> list = userService.list(false);
-        Optional<UserModel> first = list.stream().filter(UserModel::isSystemUser).findFirst();
-        if (!first.isPresent()) {
-            return JsonMessage.getString(404, "没有对应数据");
-        }
-        UserModel userModel = first.get();
-        if (!StrUtil.equals(token, item.getTriggerToken())) {
-            return JsonMessage.getString(404, "触发token错误");
-        }
-        return buildService.start(userModel, id);
-    }
+	@Resource
+	private UserService userService;
+
+	@RequestMapping(value = ServerOpenApi.BUILD_TRIGGER_BUILD, produces = MediaType.APPLICATION_JSON_VALUE)
+	public String trigger(@PathVariable String id, @PathVariable String token) {
+		BuildModel item = buildService.getItem(id);
+		if (item == null) {
+			return JsonMessage.getString(404, "没有对应数据");
+		}
+		List<UserModel> list = userService.list(false);
+		Optional<UserModel> first = list.stream().filter(UserModel::isSystemUser).findFirst();
+		if (!first.isPresent()) {
+			return JsonMessage.getString(404, "没有对应数据");
+		}
+		UserModel userModel = first.get();
+		if (!StrUtil.equals(token, item.getTriggerToken())) {
+			return JsonMessage.getString(404, "触发token错误");
+		}
+		return buildService.start(userModel, id);
+	}
+
+
+	@RequestMapping(value = ServerOpenApi.BUILD_TRIGGER_BUILD2, produces = MediaType.APPLICATION_JSON_VALUE)
+	public String trigger2(@PathVariable String id, @PathVariable String token) {
+		BuildInfoModel item = buildInfoService.getByKey(id);
+		Assert.notNull(item, "没有对应数据");
+		List<UserModel> list = userService.list(false);
+		//
+		Optional<UserModel> first = list.stream().filter(UserModel::isSystemUser).findFirst();
+		Assert.state(first.isPresent(), "没有对应数据:-1");
+
+		Assert.state(StrUtil.equals(token, item.getTriggerToken()), "触发token错误");
+
+		return buildInfoService.start(item, first.get());
+	}
 }

@@ -33,4 +33,9 @@ public class ServerOpenApi {
      * 触发构建, 第一级构建id,第二级token
      */
     public static final String BUILD_TRIGGER_BUILD = API + "/build/{id}/{token}";
+
+	/**
+	 * 触发构建(新), 第一级构建id,第二级token
+	 */
+	public static final String BUILD_TRIGGER_BUILD2 = API + "/build2/{id}/{token}";
 }

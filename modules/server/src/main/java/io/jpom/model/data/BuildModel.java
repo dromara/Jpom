@@ -9,6 +9,7 @@ import io.jpom.model.BaseEnum;
  * @author bwcx_jzy
  * @date 2019/7/10
  **/
+@Deprecated
 public class BuildModel extends BaseBuildModule {
 
 	/**

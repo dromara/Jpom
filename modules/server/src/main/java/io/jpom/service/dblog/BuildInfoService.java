@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
+import javax.annotation.Resource;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -29,6 +30,9 @@ import java.util.stream.Stream;
  **/
 @Service
 public class BuildInfoService extends BaseDbService<BuildInfoModel> {
+
+	@Resource
+	private RepositoryService repositoryService;
 
 	/**
 	 * load date group by group name
@@ -109,12 +113,16 @@ public class BuildInfoService extends BaseDbService<BuildInfoModel> {
 	/**
 	 * start build
 	 *
-	 * @param buildInfoModel
-	 * @param repositoryModel
-	 * @param userModel
-	 * @return
+	 * @param buildInfoModel 构建信息
+	 * @param userModel      用户信息
+	 * @return json
 	 */
-	public String start(BuildInfoModel buildInfoModel, RepositoryModel repositoryModel, UserModel userModel) {
+	public String start(BuildInfoModel buildInfoModel, UserModel userModel) {
+		// load repository
+		RepositoryModel repositoryModel = repositoryService.getByKey(buildInfoModel.getRepositoryId());
+		if (null == repositoryModel) {
+			return JsonMessage.getString(404, "仓库信息不存在");
+		}
 		BuildInfoManage.create(buildInfoModel, repositoryModel, userModel);
 		return JsonMessage.getString(200, "开始构建中", buildInfoModel.getBuildId());
 	}

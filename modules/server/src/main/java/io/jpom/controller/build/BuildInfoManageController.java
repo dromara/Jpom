@@ -40,7 +40,8 @@ import java.util.Objects;
 
 /**
  * new build info manage controller
-` *
+ * ` *
+ *
  * @author Hotstrip
  * @since 2021-08-23
  */
@@ -82,14 +83,8 @@ public class BuildInfoManageController extends BaseServerController {
 		item.setModifyUser(optUserName);
 		buildInfoService.update(item);
 
-		// load repository
-		RepositoryModel repositoryModel = repositoryService.getByKey(item.getRepositoryId());
-		if (null == repositoryModel) {
-			return JsonMessage.getString(404, "仓库信息不存在");
-		}
-
 		// 执行构建
-		return buildInfoService.start(item, repositoryModel, userModel);
+		return buildInfoService.start(item, userModel);
 	}
 
 	/**

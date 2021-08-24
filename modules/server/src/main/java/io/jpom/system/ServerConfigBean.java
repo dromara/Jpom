@@ -64,6 +64,7 @@ public class ServerConfigBean {
 	/**
 	 * 构建数据
 	 */
+	@Deprecated
 	public static final String BUILD = "build.json";
 
 	/**

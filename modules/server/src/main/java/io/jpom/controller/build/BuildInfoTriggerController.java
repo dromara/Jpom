@@ -6,6 +6,8 @@ import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.JsonMessage;
 import io.jpom.common.BaseServerController;
 import io.jpom.common.ServerOpenApi;
+import io.jpom.common.UrlRedirectUtil;
+import io.jpom.common.interceptor.BaseJpomInterceptor;
 import io.jpom.model.data.BuildInfoModel;
 import io.jpom.plugin.ClassFeature;
 import io.jpom.plugin.Feature;
@@ -23,6 +25,7 @@ import java.util.Map;
 
 /**
  * new trigger controller for build
+ *
  * @author Hotstrip
  * @since 2021-08-23
  */
@@ -35,6 +38,7 @@ public class BuildInfoTriggerController extends BaseServerController {
 
 	/**
 	 * get a trigger url
+	 *
 	 * @param id
 	 * @return
 	 */
@@ -45,8 +49,8 @@ public class BuildInfoTriggerController extends BaseServerController {
 			item.setTriggerToken(RandomUtil.randomString(10));
 			buildInfoService.update(item);
 		}
-		String contextPath = getRequest().getContextPath();
-		String url = ServerOpenApi.BUILD_TRIGGER_BUILD.
+		String contextPath = UrlRedirectUtil.getHeaderProxyPath(getRequest(), BaseJpomInterceptor.PROXY_PATH);
+		String url = ServerOpenApi.BUILD_TRIGGER_BUILD2.
 				replace("{id}", item.getId()).
 				replace("{token}", item.getTriggerToken());
 		String triggerBuildUrl = String.format("/%s/%s", contextPath, url);
@@ -58,6 +62,7 @@ public class BuildInfoTriggerController extends BaseServerController {
 
 	/**
 	 * reset new trigger url
+	 *
 	 * @param id
 	 * @return
 	 */

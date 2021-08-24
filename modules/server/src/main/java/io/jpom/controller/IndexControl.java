@@ -12,6 +12,7 @@ import cn.jiangzeyin.common.JsonMessage;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.common.BaseServerController;
+import io.jpom.common.UrlRedirectUtil;
 import io.jpom.common.interceptor.BaseJpomInterceptor;
 import io.jpom.common.interceptor.NotLogin;
 import io.jpom.model.data.NodeModel;
@@ -83,7 +84,7 @@ public class IndexControl extends BaseServerController {
 	@ResponseBody
 	public String checkSystem() {
 		JSONObject data = new JSONObject();
-		data.put("routerBase", BaseJpomInterceptor.getHeaderProxyPath(getRequest()));
+		data.put("routerBase", UrlRedirectUtil.getHeaderProxyPath(getRequest(), BaseJpomInterceptor.PROXY_PATH));
 		if (userService.userListEmpty()) {
 			return JsonMessage.getString(500, "need init system", data);
 		}
