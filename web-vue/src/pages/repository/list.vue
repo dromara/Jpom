@@ -84,8 +84,11 @@
               <a-icon slot="prefix" type="lock" />
             </a-input-password>
           </a-form-model-item>
-          <a-form-model-item label="公钥" prop="rsaPub">
-            <a-textarea :auto-size="{ minRows: 3, maxRows: 3 }" v-model="temp.rsaPub" placeholder="公钥,不填将使用默认的 .ssh 目录中的配置。支持配置文件目录:file:"> </a-textarea>
+          <a-form-model-item label="私钥" prop="rsaPrv">
+            <a-textarea :auto-size="{ minRows: 3, maxRows: 3 }" v-model="temp.rsaPub" placeholder="私钥,不填将使用默认的 $HOME/.ssh 目录中的配置。支持配置文件目录:file:"> </a-textarea>
+          </a-form-model-item>
+          <a-form-model-item label="公钥" prop="rsaPub" v-if="false">
+            <a-textarea :auto-size="{ minRows: 3, maxRows: 3 }" v-model="temp.rsaPub" placeholder="公钥,不填将使用默认的 $HOME/.ssh 目录中的配置。支持配置文件目录:file:"> </a-textarea>
           </a-form-model-item>
         </template>
       </a-form-model>

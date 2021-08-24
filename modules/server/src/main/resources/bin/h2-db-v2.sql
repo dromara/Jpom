@@ -15,6 +15,7 @@ CREATE TABLE IF NOT EXISTS PUBLIC.REPOSITORY
 	USERNAME         VARCHAR(50) comment '登录用户',
 	PASSWORD         VARCHAR(50) comment '登录密码',
 	RSAPUB           VARCHAR(2048) comment 'SSH RSA 公钥',
+	RSAPRV           VARCHAR(2048) comment 'SSH RSA 私钥',
 	CONSTRAINT REPOSITORY_PK PRIMARY KEY (ID)
 );
 comment on table REPOSITORY is '仓库信息';
@@ -77,6 +78,11 @@ ALTER TABLE BUILD_INFO
 -- @author Hotstrip 增加 TRIGGERTOKEN
 ALTER TABLE BUILD_INFO
 	ADD IF NOT EXISTS TRIGGERTOKEN VARCHAR(20) comment '触发器token';
+
+
+-- @author jzy 增加 RSAPRV
+ALTER TABLE BUILD_INFO
+	ADD IF NOT EXISTS RSAPRV VARCHAR(2048) comment 'SSH RSA 私钥';
 
 
 

@@ -47,7 +47,6 @@ public class TestSshGit {
                                 JSch jSch = super.createDefaultJSch(fs);
                                 //添加私钥文件
                                 jSch.addIdentity("ss");
-
                                 return jSch;
                             }
                         });

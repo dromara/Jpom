@@ -37,6 +37,10 @@ public class RepositoryModel extends BaseDbModel {
 	 * SSH RSA 公钥
 	 */
 	private String rsaPub;
+	/**
+	 * SSH RSA 私钥
+	 */
+	private String rsaPrv;
 
 	public String getName() {
 		return name;
@@ -94,4 +98,11 @@ public class RepositoryModel extends BaseDbModel {
 		this.rsaPub = rsaPub;
 	}
 
+	public String getRsaPrv() {
+		return rsaPrv;
+	}
+
+	public void setRsaPrv(String rsaPrv) {
+		this.rsaPrv = rsaPrv;
+	}
 }
