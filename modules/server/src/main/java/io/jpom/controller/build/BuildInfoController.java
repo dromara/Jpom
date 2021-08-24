@@ -188,11 +188,17 @@ public class BuildInfoController extends BaseServerController {
 			if (formatSsh != null) {
 				return formatSsh;
 			}
+		} else if (releaseMethod1 == BuildModel.ReleaseMethod.Outgiving) {
+			String releaseMethodDataId = jsonObject.getString("releaseMethodDataId_1");
+			if (StrUtil.isEmpty(releaseMethodDataId)) {
+				return JsonMessage.getString(405, "请选择分发项目");
+			}
+			jsonObject.put("releaseMethodDataId", releaseMethodDataId);
 		}
 
 		// 设置属性
 		buildInfoModel.setReleaseMethod(releaseMethod1.getCode());
-		buildInfoModel.setExtraData(extraData);
+		buildInfoModel.setExtraData(jsonObject.toJSONString());
 
 		// 新增构建信息
 		if (StrUtil.isEmpty(id)) {
@@ -208,8 +214,8 @@ public class BuildInfoController extends BaseServerController {
 	 * 验证构建信息
 	 * 当发布方式为【SSH】的时候
 	 *
-	 * @param jsonObject
-	 * @return
+	 * @param jsonObject 配置信息
+	 * @return 非 null 错误信息
 	 */
 	private String formatSsh(JSONObject jsonObject) {
 		// 发布方式
@@ -223,9 +229,8 @@ public class BuildInfoController extends BaseServerController {
 		}
 		releasePath = FileUtil.normalize(releasePath);
 		SshModel sshServiceItem = sshService.getItem(releaseMethodDataId);
-		if (sshServiceItem == null) {
-			return JsonMessage.getString(405, "没有对应的ssh项");
-		}
+		Assert.notNull(sshServiceItem, "没有对应的ssh项");
+		//
 		if (releasePath.startsWith(StrUtil.SLASH)) {
 			// 以根路径开始
 			List<String> fileDirs = sshServiceItem.getFileDirs();
@@ -263,15 +268,24 @@ public class BuildInfoController extends BaseServerController {
 	 * 验证构建信息
 	 * 当发布方式为【项目】的时候
 	 *
-	 * @param jsonObject
-	 * @return
+	 * @param jsonObject 配置信息
+	 * @return null 没有错误信息
 	 */
 	private String formatProject(JSONObject jsonObject) {
+		String releaseMethodDataId2Node = jsonObject.getString("releaseMethodDataId_2_node");
+		String releaseMethodDataId2Project = jsonObject.getString("releaseMethodDataId_2_project");
+		if (StrUtil.isEmpty(releaseMethodDataId2Node) || StrUtil.isEmpty(releaseMethodDataId2Project)) {
+			return JsonMessage.getString(405, "请选择节点和项目");
+		}
+		jsonObject.put("releaseMethodDataId", String.format("%s:%s", releaseMethodDataId2Node, releaseMethodDataId2Project));
+		//
 		String afterOpt = jsonObject.getString("afterOpt");
 		AfterOpt afterOpt1 = BaseEnum.getEnum(AfterOpt.class, Convert.toInt(afterOpt, 0));
-		if (afterOpt1 == null) {
-			return JsonMessage.getString(400, "请选择打包后的操作");
-		}
+		Assert.notNull(afterOpt1, "请选择打包后的操作");
+		//
+		String clearOld = jsonObject.getString("clearOld");
+		jsonObject.put("afterOpt", afterOpt1.getCode());
+		jsonObject.put("clearOld", Convert.toBool(clearOld, false));
 		return null;
 	}
 

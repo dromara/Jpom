@@ -109,14 +109,14 @@
           <a-row>
             <a-col :span="18">
               <a-select v-model="temp.branchName" placeholder="请先填写仓库地址和账号信息">
-                <a-icon slot="suffixIcon" type="reload" />
+                <a-icon slot="suffixIcon" type="reload" @click="loadBranchList" />
                 <div slot="dropdownRender" slot-scope="menu">
                   <v-nodes :vnodes="menu" />
                   <a-divider style="margin: 4px 0" />
                   <!-- <div style="padding: 4px 8px; cursor: pointer" @mousedown="(e) => e.preventDefault()" @click="addItem"><a-icon type="plus" />自定义分支</div> 
                   -->
                   <div style="padding: 4px 8px; cursor: pointer" @mousedown="(e) => e.preventDefault()">
-                    <a-input-search placeholder="自定义分支通配表达式" size="small" @search="onSearch">
+                    <a-input-search placeholder="自定义分支通配表达式" @mousedown="(e) => e.stopPropagation()" size="small">
                       <a-button slot="enterButton"> 添加 </a-button>
                       <a-tooltip slot="suffix">
                         <template slot="title">
@@ -179,7 +179,7 @@
           </a-select>
         </a-form-model-item>
         <!-- 项目 -->
-        <a-form-model-item v-if="temp.releaseMethod === 2" label="发布项目" prop="releaseMethodDataId">
+        <a-form-model-item v-if="temp.releaseMethod === 2" label="发布项目" prop="releaseMethodDataIdList">
           <a-cascader v-model="temp.releaseMethodDataIdList" :options="cascaderList" placeholder="Please select" />
         </a-form-model-item>
         <a-form-model-item v-if="temp.releaseMethod === 2" label="发布后操作" prop="afterOpt">
@@ -190,7 +190,7 @@
         <!-- SSH -->
         <a-form-model-item v-if="temp.releaseMethod === 3" label="SSH/目录：" prop="releaseMethodDataId">
           <a-input-group compact>
-            <a-select style="width: 30%" v-model="tempExtraData.releaseMethodDataId_3" placeholder="请先填写仓库地址和账号信息">
+            <a-select style="width: 30%" v-model="tempExtraData.releaseMethodDataId_3" placeholder="请选择SSH">
               <a-select-option v-for="ssh in sshList" :key="ssh.id">{{ ssh.name }}</a-select-option>
             </a-select>
             <a-input style="width: 70%" v-model="tempExtraData.releasePath" placeholder="发布目录,构建产物上传到对应目录" />
@@ -482,6 +482,7 @@ export default {
       this.loadNodeProjectList();
       this.loadSshList();
       this.editBuildVisible = true;
+      this.tempExtraData = {};
       this.$nextTick(() => {
         setTimeout(() => {
           this.introGuide();
@@ -494,9 +495,23 @@ export default {
       this.temp.tempGroup = "";
       // 设置当前临时的 额外构建信息
       this.tempExtraData = JSON.parse(record.extraData) || {};
+      if (typeof this.tempExtraData === "string") {
+        this.tempExtraData = JSON.parse(this.tempExtraData);
+      }
       // 设置发布方式的数据
-      if (record.releaseMethod === 2) {
-        this.temp.releaseMethodDataIdList = [this.tempExtraData.releaseMethodDataId_2_node, this.tempExtraData.releaseMethodDataId_2_project];
+      if (this.tempExtraData.releaseMethodDataId) {
+        if (record.releaseMethod === 1) {
+          this.temp.releaseMethodDataId_1 = this.tempExtraData.releaseMethodDataId;
+        }
+        if (record.releaseMethod === 2) {
+          this.temp = {
+            ...this.temp,
+            releaseMethodDataIdList: this.tempExtraData.releaseMethodDataId.split(":"),
+          };
+        }
+        if (record.releaseMethod === 3) {
+          this.temp.releaseMethodDataId_3 = this.tempExtraData.releaseMethodDataId;
+        }
       }
       // 从仓库列表里匹配对应的仓库信息
       this.tempRepository = this.repositoryList.filter((element) => this.temp.repositoryId === element.id)[0];
@@ -567,6 +582,7 @@ export default {
           this.tempExtraData.releaseMethodDataId_2_node = this.temp.releaseMethodDataIdList[0];
           this.tempExtraData.releaseMethodDataId_2_project = this.temp.releaseMethodDataIdList[1];
         }
+
         this.temp = {
           ...this.temp,
           extraData: JSON.stringify(this.tempExtraData),
