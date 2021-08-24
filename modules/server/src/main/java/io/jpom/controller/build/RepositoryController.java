@@ -87,19 +87,19 @@ public class RepositoryController {
 		Assert.hasText(repositoryModelReq.getName(), "请填写仓库名称");
 		Integer repoType = repositoryModelReq.getRepoType();
 		Assert.state(repoType != null && (repoType == 1 || repoType == 0), "请选择仓库类型");
-		// 修正字段
-		if (repoType == 0) {
-			//  http
-			repositoryModelReq.setRsaPub(StrUtil.EMPTY);
-		} else if (repoType == 1) {
-			// ssh
-			repositoryModelReq.setUserName(StrUtil.EMPTY);
-			repositoryModelReq.setPassword(StrUtil.emptyToDefault(repositoryModelReq.getPassword(), StrUtil.EMPTY));
-		}
 		Assert.hasText(repositoryModelReq.getGitUrl(), "请填写仓库地址");
 		//
 		Integer protocol = repositoryModelReq.getProtocol();
 		Assert.state(protocol != null && (protocol == 1 || protocol == 0), "请选择拉取代码的协议");
+		// 修正字段
+		if (protocol == 0) {
+			//  http
+			repositoryModelReq.setRsaPub(StrUtil.EMPTY);
+		} else if (protocol == 1) {
+			// ssh
+			repositoryModelReq.setUserName(StrUtil.EMPTY);
+			repositoryModelReq.setPassword(StrUtil.emptyToDefault(repositoryModelReq.getPassword(), StrUtil.EMPTY));
+		}
 		// 判断仓库是否重复
 		Entity entity = Entity.create();
 		if (repositoryModelReq.getId() != null) {

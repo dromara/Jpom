@@ -101,21 +101,51 @@
           </a-row>
         </a-form-model-item>
         <a-form-model-item label="仓库地址" prop="repositoryId">
-          <a-select v-model="temp.repositoryId" @select="changeRepositpry" @change="changeRepositpry">
+          <a-select v-model="temp.repositoryId" @select="changeRepositpry" @change="changeRepositpry" placeholder="请选择仓库">
             <a-select-option v-for="item in repositoryList" :key="item.id" :value="item.id">{{ item.name }}[{{ item.gitUrl }}]</a-select-option>
           </a-select>
         </a-form-model-item>
+
         <a-form-model-item v-show="tempRepository.repoType === 0" label="分支" prop="branchName">
           <a-row>
-            <a-col :span="18">
-              <a-select v-model="temp.branchName" placeholder="请先填写仓库地址和账号信息">
+            <a-col :span="10">
+              <a-select v-model="temp.branchName" placeholder="请选择构建对应的分支">
+                <a-icon slot="suffixIcon" type="reload" @click="loadBranchList" />
+                <div slot="dropdownRender" slot-scope="menu">
+                  <!-- <div style="padding: 4px 8px; cursor: pointer" @mousedown="(e) => e.preventDefault()" @click="addItem"><a-icon type="plus" />自定义分支</div> 
+                  -->
+                  <div style="padding: 8px 8px; cursor: pointer; display: flex" @mousedown="(e) => e.preventDefault()">
+                    <a-input-search @click="(e) => e.target.focus()" placeholder="自定义分支通配表达式" @mousedown="(e) => e.stopPropagation()" size="small">
+                      <a-button slot="enterButton"> 添加 </a-button>
+                      <a-tooltip slot="suffix">
+                        <template slot="title">
+                          <div>
+                            支持通配符(AntPathMatcher)
+                            <ul>
+                              <li>? 匹配一个字符</li>
+                              <li>* 匹配零个或多个字符</li>
+                              <li>** 匹配路径中的零个或多个目录</li>
+                            </ul>
+                          </div>
+                        </template>
+                        <a-icon type="question-circle" theme="filled" />
+                      </a-tooltip>
+                    </a-input-search>
+                  </div>
+                  <a-divider style="margin: 4px 0" />
+                  <v-nodes :vnodes="menu" />
+                </div>
+                <a-select-option v-for="branch in branchList" :key="branch">{{ branch }} </a-select-option>
+              </a-select>
+            </a-col>
+            <a-col :span="4" style="text-align: right"> 标签(TAG):</a-col>
+            <a-col :span="10">
+              <a-select v-model="temp.branchTagName" placeholder="请选择构建对应标签,可以不选择">
                 <a-icon slot="suffixIcon" type="reload" @click="loadBranchList" />
                 <div slot="dropdownRender" slot-scope="menu">
                   <v-nodes :vnodes="menu" />
                   <a-divider style="margin: 4px 0" />
-                  <!-- <div style="padding: 4px 8px; cursor: pointer" @mousedown="(e) => e.preventDefault()" @click="addItem"><a-icon type="plus" />自定义分支</div> 
-                  -->
-                  <div style="padding: 4px 8px; cursor: pointer" @mousedown="(e) => e.preventDefault()">
+                  <div style="padding: 8px 8px; cursor: pointer" @mousedown="(e) => e.preventDefault()">
                     <a-input-search placeholder="自定义分支通配表达式" @mousedown="(e) => e.stopPropagation()" size="small">
                       <a-button slot="enterButton"> 添加 </a-button>
                       <a-tooltip slot="suffix">
@@ -134,11 +164,8 @@
                     </a-input-search>
                   </div>
                 </div>
-                <a-select-option v-for="branch in branchList" :key="branch">{{ branch }} </a-select-option>
+                <a-select-option v-for="tag in branchTagList" :key="tag">{{ tag }} </a-select-option>
               </a-select>
-            </a-col>
-            <a-col :span="6">
-              <a-button type="primary" class="btn-add" @click="loadBranchList">获取分支</a-button>
             </a-col>
           </a-row>
         </a-form-model-item>
@@ -264,6 +291,7 @@ export default {
       // 当前构建信息的 extraData 属性
       tempExtraData: {},
       branchList: [],
+      branchTagList: [],
       dispatchList: [],
       cascaderList: [],
       sshList: [],
@@ -474,9 +502,7 @@ export default {
     },
     // 添加
     handleAdd() {
-      this.temp = {
-        repoType: 0,
-      };
+      this.temp = {};
       this.branchList = [];
       this.loadDispatchList();
       this.loadNodeProjectList();
@@ -544,6 +570,9 @@ export default {
     },
     // 获取仓库分支
     loadBranchList() {
+      if (this.tempRepository.repoType !== 0) {
+        return;
+      }
       const loading = this.$loading.service({
         lock: true,
         text: "正在加载项目分支",
@@ -559,6 +588,7 @@ export default {
       getBranchList(params).then((res) => {
         if (res.code === 200) {
           this.branchList = res.data[0];
+          this.branchTagList = res.data[1];
         }
         loading.close();
       });

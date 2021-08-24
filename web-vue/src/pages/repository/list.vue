@@ -214,7 +214,7 @@ export default {
     // 修改
     handleEdit(record) {
       this.temp = Object.assign(record);
-      if (!this.temp.protocol) {
+      if (this.temp.protocol === undefined) {
         this.temp.protocol = this.temp.gitUrl.indexOf("http") > -1 ? 0 : 1;
       }
       this.temp = { ...this.temp };
