@@ -10,7 +10,7 @@ import cn.jiangzeyin.common.validator.ValidatorConfig;
 import cn.jiangzeyin.common.validator.ValidatorItem;
 import cn.jiangzeyin.common.validator.ValidatorRule;
 import com.alibaba.fastjson.JSONObject;
-import io.jpom.build.BuildManage;
+import io.jpom.build.BuildInfoManage;
 import io.jpom.build.BuildUtil;
 import io.jpom.build.ReleaseManage;
 import io.jpom.common.BaseServerController;
@@ -108,7 +108,7 @@ public class BuildInfoManageController extends BaseServerController {
 		if (BuildModel.Status.Ing != nowStatus && BuildModel.Status.PubIng != nowStatus) {
 			return JsonMessage.getString(501, "当前状态不在进行中");
 		}
-		boolean status = BuildManage.cancel(item.getId());
+		boolean status = BuildInfoManage.cancel(item.getId());
 		if (!status) {
 			item.setStatus(BuildModel.Status.Cancel.getCode());
 			buildInfoService.update(item);

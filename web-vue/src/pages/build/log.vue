@@ -1,21 +1,22 @@
 <template>
   <div>
-    <a-input id="build-log-textarea" v-model="logText" type="textarea" class="console" readOnly  style="resize: none; height: 70vh"/>
+    <a-input id="build-log-textarea" v-model="logText" type="textarea" class="console" readOnly style="resize: none; height: 70vh" />
   </div>
 </template>
 <script>
-import { loadBuildLog } from '../../api/build';
+// import { loadBuildLog } from '../../api/build';
+import { loadBuildLog } from "../../api/build-info";
 export default {
   props: {
     temp: {
-      type: Object
-    }
+      type: Object,
+    },
   },
   data() {
     return {
       logTimer: null,
-      logText: 'loading...'
-    }
+      logText: "loading...",
+    };
   },
   beforeDestroy() {
     if (this.logTimer) {
@@ -33,32 +34,32 @@ export default {
         const params = {
           id: this.temp.id,
           buildId: this.temp.buildId,
-          line: 1
-        }
-        loadBuildLog(params).then(res => {
+          line: 1,
+        };
+        loadBuildLog(params).then((res) => {
           if (res.code === 200) {
             // 停止请求
             if (res.data.run === false) {
               clearInterval(this.logTimer);
             }
             // 更新日志
-            this.logText = '';
-            res.data.dataLines.forEach(element => {
+            this.logText = "";
+            res.data.dataLines.forEach((element) => {
               this.logText += `${element}\r\n`;
             });
             // 自动滚动到底部
             this.$nextTick(() => {
               setTimeout(() => {
-                const textarea = document.getElementById('build-log-textarea');
+                const textarea = document.getElementById("build-log-textarea");
                 textarea.scrollTop = textarea.scrollHeight;
-              },100);
+              }, 100);
             });
           }
-        })
+        });
       }, 2000);
-    }
-  }
-}
+    },
+  },
+};
 </script>
 <style scoped>
 .console {

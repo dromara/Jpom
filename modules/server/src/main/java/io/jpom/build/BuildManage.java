@@ -36,14 +36,16 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 构建管理
- *
- * @author bwcx_jzy
- * @date 2019/7/16
+ * <p>
+ * -- @author bwcx_jzy
+ * <p>
+ * -- @date 2019/7/16
  *
  * @author Hotstrip
- * @since 2021-08-23
  * @see BuildInfoManage
+ * @since 2021-08-23
  */
+@Deprecated
 public class BuildManage extends BaseBuild implements Runnable {
 	/**
 	 * 缓存构建中

@@ -39,6 +39,7 @@ public class ReleaseManage extends BaseBuild {
 	private final File resultFile;
 	private BaseBuild baseBuild;
 
+	@Deprecated
 	ReleaseManage(BuildModel buildModel, UserModel userModel, BaseBuild baseBuild) {
 		super(BuildUtil.getLogFile(buildModel.getId(), buildModel.getBuildId()),
 				buildModel.getId());
@@ -51,6 +52,7 @@ public class ReleaseManage extends BaseBuild {
 
 	/**
 	 * new ReleaseManage constructor
+	 *
 	 * @param buildModel
 	 * @param userModel
 	 * @param baseBuild

@@ -1,6 +1,5 @@
 package io.jpom.util;
 
-import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.DateField;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
@@ -8,10 +7,9 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.lang.Validator;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.system.SystemUtil;
+import com.alibaba.fastjson.JSON;
 
 import java.io.File;
-import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * main 方法运行参数工具
@@ -126,4 +124,20 @@ public class StringUtil {
 //		}).collect(Collectors.toList());
 //		return CollUtil.join(split, StrUtil.LF);
 //	}
+
+	/**
+	 * json 字符串转 bean，兼容普通json和字符串包裹情况
+	 *
+	 * @param jsonStr json 字符串
+	 * @param cls     要转为bean的类
+	 * @param <T>     泛型
+	 * @return data
+	 */
+	public static <T> T jsonConvert(String jsonStr, Class<T> cls) {
+		try {
+			return JSON.parseObject(jsonStr, cls);
+		} catch (Exception e) {
+			return JSON.parseObject(JSON.parse(jsonStr).toString(), cls);
+		}
+	}
 }

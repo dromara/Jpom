@@ -13,17 +13,18 @@ import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.spring.SpringUtil;
-import com.alibaba.fastjson.JSON;
 import io.jpom.JpomApplication;
 import io.jpom.model.data.BuildInfoModel;
 import io.jpom.model.data.BuildModel;
 import io.jpom.model.data.RepositoryModel;
 import io.jpom.model.data.UserModel;
 import io.jpom.model.log.BuildHistoryLog;
+import io.jpom.service.dblog.BuildInfoService;
 import io.jpom.service.dblog.DbBuildHistoryLogService;
 import io.jpom.system.JpomRuntimeException;
 import io.jpom.util.CommandUtil;
 import io.jpom.util.GitUtil;
+import io.jpom.util.StringUtil;
 import io.jpom.util.SvnKitUtil;
 import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 import org.springframework.util.AntPathMatcher;
@@ -40,6 +41,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * new build info manage runnable
+ *
  * @author Hotstrip
  * @since 20210-08-23
  */
@@ -94,7 +96,7 @@ public class BuildInfoManage extends BaseBuild implements Runnable {
 	 * 创建构建
 	 *
 	 * @param buildInfoModel 构建项
-	 * @param userModel  操作人
+	 * @param userModel      操作人
 	 * @return this
 	 */
 	public static BuildInfoManage create(BuildInfoModel buildInfoModel, RepositoryModel repositoryModel, UserModel userModel) {
@@ -111,7 +113,12 @@ public class BuildInfoManage extends BaseBuild implements Runnable {
 	@Override
 	protected boolean updateStatus(BuildModel.Status status) {
 		try {
-			super.updateStatus(status);
+			//super.updateStatus(status);
+			BuildInfoService buildService = SpringUtil.getBean(BuildInfoService.class);
+			BuildInfoModel item = buildService.getByKey(this.buildModelId);
+			item.setStatus(status.getCode());
+			buildService.update(item);
+			//
 			if (status == BuildModel.Status.Ing) {
 				this.insertLog();
 			} else {
@@ -264,8 +271,11 @@ public class BuildInfoManage extends BaseBuild implements Runnable {
 			boolean status = packageFile();
 			if (status && buildInfoModel.getReleaseMethod() != BuildModel.ReleaseMethod.No.getCode()) {
 				// 发布文件
-				BaseBuildModule baseBuildModule = JSON.parseObject(this.buildInfoModel.getExtraData(), BaseBuildModule.class);
+				BaseBuildModule baseBuildModule = StringUtil.jsonConvert(this.buildInfoModel.getExtraData(), BaseBuildModule.class);
 				Assert.notNull(baseBuildModule);
+				// update value
+				baseBuildModule.updateValue(this.buildInfoModel);
+				//
 				new ReleaseManage(baseBuildModule, this.userModel, this, buildInfoModel.getBuildId()).start();
 			} else {
 				//

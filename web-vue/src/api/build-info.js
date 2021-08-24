@@ -132,7 +132,7 @@ export function clearBuid(id) {
  */
 export function loadBuildLog(params) {
     return axios({
-        url: '/build/manage/get-now-log.json',
+        url: '/build/manage/get-now-log',
         method: 'post',
         data: params,
         headers: {

@@ -1,29 +1,31 @@
 # 版本日志
 
-# 2.6.2
+# 2.6.2 (beta)
 
 ### 新增功能
 
-1. 【agent】新增文件管理中允许编辑的文件后缀，以及对应后缀的文件编码
-2. 项目文件管理中新增编辑按钮，支持编辑文本文件（ 新版本 UI 同步新增该功能）
-3. 程序启动输出默认 IP 地址和当前运行端口信息
-4. bat 管理命令（windows）启动后输出日志文件,方便排查当前启动情况
-5. 【server】上传文件到插件端（节点）超时配置独立,采用 server 端全局配置,配置参数 `node.uploadFileTimeOut`
+1. **【server】构建中的仓库独立管理**
+2. **【server】构建信息存储方式调整为 h2 数据库，不再存储到 json 文件中**
+3. 【agent】新增文件管理中允许编辑的文件后缀，以及对应后缀的文件编码
+4. 项目文件管理中新增编辑按钮，支持编辑文本文件（ 新版本 UI 同步新增该功能）
+5. 程序启动输出默认 IP 地址和当前运行端口信息
+6. bat 管理命令（windows）启动后输出日志文件,方便排查当前启动情况
+7. 【server】上传文件到插件端（节点）超时配置独立,采用 server 端全局配置,配置参数 `node.uploadFileTimeOut`
    （感谢 @LW 根据 Gitee  [issues I3O8YE](https://gitee.com/dromara/Jpom/issues/I3O8YE) ）
-6. 【server】角色新增添加权限配置 （感谢@misaka [Gitee pr](https://gitee.com/dromara/Jpom/pulls/141) ）
-7. 【server】节点升级上传新包成功后删除历史包
-8. 【server】新版本 UI 菜单系统管理、节点升级只有系统管理员可见
-9. 【server】新版本 UI 脚本模板同步添加执行参数（感谢@轻描淡写 [Gitee issues I43G4B](https://gitee.com/dromara/Jpom/issues/I43G4B) ）
-10. 【server】新版本 UI 同步添加 common.js
-11. 【agent】项目文件管理新增下载远程文件功能
-12. 【agent】节点首页监控新增实际使用内存占比（linux系统） （感谢@大灰灰）
-13. 【server】ssh 新增操作记录（方便查看执行历史回溯操作）
-14. 【server】新增 h2 控制台配置属性,基于 SpringBoot,配置参数`spring.h2.console.enabled`
-15. 【server】节点分发支持下载远程文件 （感谢@落泪归枫 [Gitee issues I1LM27](https://gitee.com/dromara/Jpom/issues/I1LM27) ）
-16. 【server】节点分发支持 file 类型项目
-17. 【agent】项目新增配置日志文件输出到指定目录
-18. 【server】构建产物目录支持通配符`AntPathMatcher`模式 （感谢@saysay [Gitee issues I455FM](https://gitee.com/dromara/Jpom/issues/I455FM) ）
-19. 【server】新增 h2 数据库缓存大小配置 [CACHE_SIZE](http://www.h2database.com/html/features.html#cache_settings) `db.cacheSize`
+8. 【server】角色新增添加权限配置 （感谢@misaka [Gitee pr](https://gitee.com/dromara/Jpom/pulls/141) ）
+9. 【server】节点升级上传新包成功后删除历史包
+10. 【server】新版本 UI 菜单系统管理、节点升级只有系统管理员可见
+11. 【server】新版本 UI 脚本模板同步添加执行参数（感谢@轻描淡写 [Gitee issues I43G4B](https://gitee.com/dromara/Jpom/issues/I43G4B) ）
+12. 【server】新版本 UI 同步添加 common.js
+13. 【agent】项目文件管理新增下载远程文件功能
+14. 【agent】节点首页监控新增实际使用内存占比（linux系统） （感谢@大灰灰）
+15. 【server】ssh 新增操作记录（方便查看执行历史回溯操作）
+16. 【server】新增 h2 控制台配置属性,基于 SpringBoot,配置参数`spring.h2.console.enabled`
+17. 【server】节点分发支持下载远程文件 （感谢@落泪归枫 [Gitee issues I1LM27](https://gitee.com/dromara/Jpom/issues/I1LM27) ）
+18. 【server】节点分发支持 file 类型项目
+19. 【agent】项目新增配置日志文件输出到指定目录
+20. 【server】构建产物目录支持通配符`AntPathMatcher`模式 （感谢@saysay [Gitee issues I455FM](https://gitee.com/dromara/Jpom/issues/I455FM) ）
+21. 【server】新增 h2 数据库缓存大小配置 [CACHE_SIZE](http://www.h2database.com/html/features.html#cache_settings) `db.cacheSize
 
 ### 解决BUG、优化功能
 
@@ -45,7 +47,9 @@
 16. 【server】update: 刷新整个页面的时候重新加载菜单
 17. 历史监控图表查询报时间格式化错误(字符串工具类) （感谢@misaka [Gitee pr](https://gitee.com/dromara/Jpom/pulls/142) ）
 
-> 注意：升级到该版本需要保证 agent、server 都保持同步，如果只升级 server 会出现项目控制台等功能无法正常使用
+> 注意1：由于构建信息全部存储到 h2 数据库中，之前到构建信息会自动同步，在升级后到第一次启动需观察控制台信息，启动成功后请检查构建信息，仓库信息是否同步正确
+> 
+> 注意2：升级到该版本需要保证 agent、server 都保持同步，如果只升级 server 会出现项目控制台等功能无法正常使用
 
 ------
 
