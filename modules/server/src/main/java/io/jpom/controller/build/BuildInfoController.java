@@ -2,6 +2,7 @@ package io.jpom.controller.build;
 
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.lang.Tuple;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.db.Entity;
@@ -33,10 +34,7 @@ import io.jpom.util.GitUtil;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import java.io.File;
@@ -209,6 +207,7 @@ public class BuildInfoController extends BaseServerController {
 	/**
 	 * 验证构建信息
 	 * 当发布方式为【SSH】的时候
+	 *
 	 * @param jsonObject
 	 * @return
 	 */
@@ -263,6 +262,7 @@ public class BuildInfoController extends BaseServerController {
 	/**
 	 * 验证构建信息
 	 * 当发布方式为【项目】的时候
+	 *
 	 * @param jsonObject
 	 * @return
 	 */
@@ -277,29 +277,31 @@ public class BuildInfoController extends BaseServerController {
 
 	/**
 	 * 获取分支信息
-	 * @param url
-	 * @param userName
-	 * @param userPwd
-	 * @return
-	 * @throws Exception
+	 *
+	 * @param url      仓库地址
+	 * @param userName 用户名
+	 * @param userPwd  密码
+	 * @return json
+	 * @throws Exception 异常
 	 */
 	@RequestMapping(value = "/build/branch-list", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	public String branchList(
 			@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "仓库地址不正确")) String url,
 			@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "登录账号")) String userName,
 			@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "登录密码")) String userPwd) throws Exception {
-		List<String> list = GitUtil.getBranchList(url, userName, userPwd);
-		return JsonMessage.getString(200, "ok", list);
+		Tuple branchAndTagList = GitUtil.getBranchAndTagList(url, userName, userPwd);
+		Object[] members = branchAndTagList.getMembers();
+		return JsonMessage.getString(200, "ok", members);
 	}
 
 
 	/**
 	 * 删除构建信息
-	 * @param id
-	 * @return
+	 *
+	 * @param id 构建ID
+	 * @return json
 	 */
-	@RequestMapping(value = "/build/delete", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody
+	@PostMapping(value = "/build/delete", produces = MediaType.APPLICATION_JSON_VALUE)
 	@OptLog(UserOperateLogV1.OptType.DelBuild)
 	@Feature(method = MethodFeature.DEL)
 	public String delete(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据id") String id) {
@@ -323,11 +325,11 @@ public class BuildInfoController extends BaseServerController {
 
 	/**
 	 * 清除构建信息
-	 * @param id
-	 * @return
+	 *
+	 * @param id 构建ID
+	 * @return json
 	 */
-	@RequestMapping(value = "/build/clean-source", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody
+	@PostMapping(value = "/build/clean-source", produces = MediaType.APPLICATION_JSON_VALUE)
 	@OptLog(UserOperateLogV1.OptType.BuildCleanSource)
 	@Feature(method = MethodFeature.EXECUTE)
 	public String cleanSource(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据id") String id) {

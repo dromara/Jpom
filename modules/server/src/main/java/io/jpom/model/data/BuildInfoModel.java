@@ -1,6 +1,6 @@
 package io.jpom.model.data;
 
-import io.jpom.model.BaseDbModel;
+import io.jpom.model.BaseUserModifyDbModel;
 import io.jpom.service.h2db.TableName;
 
 /**
@@ -9,7 +9,7 @@ import io.jpom.service.h2db.TableName;
  * @see BuildModel
  */
 @TableName("BUILD_INFO")
-public class BuildInfoModel extends BaseDbModel {
+public class BuildInfoModel extends BaseUserModifyDbModel {
 
 	/**
 	 * 仓库 ID
@@ -43,10 +43,7 @@ public class BuildInfoModel extends BaseDbModel {
 	 * 发布方法{0: 不发布, 1: 节点分发, 2: 分发项目, 3: SSH}
 	 */
 	private Integer releaseMethod;
-	/**
-	 * 修改人
-	 */
-	private String modifyUser;
+
 	/**
 	 * 状态
 	 */
@@ -122,14 +119,6 @@ public class BuildInfoModel extends BaseDbModel {
 
 	public void setReleaseMethod(Integer releaseMethod) {
 		this.releaseMethod = releaseMethod;
-	}
-
-	public void setModifyUser(String modifyUser) {
-		this.modifyUser = modifyUser;
-	}
-
-	public String getModifyUser() {
-		return modifyUser;
 	}
 
 	public Integer getStatus() {

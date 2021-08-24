@@ -59,6 +59,7 @@ public class BuildInfoManage extends BaseBuild implements Runnable {
 	private String logId;
 	private final String optUserName;
 	private final UserModel userModel;
+	private final BaseBuildModule baseBuildModule;
 
 	private BuildInfoManage(final BuildInfoModel buildInfoModel, final RepositoryModel repositoryModel, final UserModel userModel) {
 		super(BuildUtil.getLogFile(buildInfoModel.getId(), buildInfoModel.getBuildId()),
@@ -68,6 +69,12 @@ public class BuildInfoManage extends BaseBuild implements Runnable {
 		this.gitFile = BuildUtil.getSourceById(buildInfoModel.getId());
 		this.optUserName = UserModel.getOptUserName(userModel);
 		this.userModel = userModel;
+		// 解析 其他配置信息
+		BaseBuildModule baseBuildModule = StringUtil.jsonConvert(this.buildInfoModel.getExtraData(), BaseBuildModule.class);
+		Assert.notNull(baseBuildModule);
+		// update value
+		baseBuildModule.updateValue(this.buildInfoModel);
+		this.baseBuildModule = baseBuildModule;
 	}
 
 	/**
@@ -139,12 +146,12 @@ public class BuildInfoManage extends BaseBuild implements Runnable {
 	private void insertLog() {
 		this.logId = IdUtil.fastSimpleUUID();
 		BuildHistoryLog buildHistoryLog = new BuildHistoryLog();
-
-//        buildHistoryLog.setResultDirFile(buildModel.getResultDirFile());
-//        buildHistoryLog.setReleaseMethod(this.buildModel.getReleaseMethod());
-//        buildHistoryLog.setReleaseMethodDataId(this.buildModel.getReleaseMethodDataId());
-//        buildHistoryLog.setAfterOpt(this.buildModel.getAfterOpt());
-//        buildHistoryLog.setReleaseCommand(this.buildModel.getReleaseCommand());
+		// 更新其他配置字段
+		buildHistoryLog.setResultDirFile(baseBuildModule.getResultDirFile());
+		buildHistoryLog.setReleaseMethod(baseBuildModule.getReleaseMethod());
+		buildHistoryLog.setReleaseMethodDataId(baseBuildModule.getReleaseMethodDataId());
+		buildHistoryLog.setAfterOpt(baseBuildModule.getAfterOpt());
+		buildHistoryLog.setReleaseCommand(baseBuildModule.getReleaseCommand());
 		BeanUtil.copyProperties(this.buildInfoModel, buildHistoryLog);
 
 		buildHistoryLog.setId(this.logId);
@@ -271,11 +278,6 @@ public class BuildInfoManage extends BaseBuild implements Runnable {
 			boolean status = packageFile();
 			if (status && buildInfoModel.getReleaseMethod() != BuildModel.ReleaseMethod.No.getCode()) {
 				// 发布文件
-				BaseBuildModule baseBuildModule = StringUtil.jsonConvert(this.buildInfoModel.getExtraData(), BaseBuildModule.class);
-				Assert.notNull(baseBuildModule);
-				// update value
-				baseBuildModule.updateValue(this.buildInfoModel);
-				//
 				new ReleaseManage(baseBuildModule, this.userModel, this, buildInfoModel.getBuildId()).start();
 			} else {
 				//

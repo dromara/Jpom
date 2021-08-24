@@ -178,11 +178,20 @@ public class GitUtil {
 
 	public static List<String> getBranchList(String url, String userName, String userPwd) throws Exception {
 		Tuple tuple = getBranchAndTagList(url, new UsernamePasswordCredentialsProvider(userName, userPwd));
-		List<String> tag = tuple == null ? null : tuple.get(0);
-		if (CollUtil.isEmpty(tag)) {
+		List<String> branch = tuple == null ? null : tuple.get(0);
+		if (CollUtil.isEmpty(branch)) {
 			throw new JpomRuntimeException("该仓库还没有任何分支");
 		}
 		return tuple.get(0);
+	}
+
+	public static Tuple getBranchAndTagList(String url, String userName, String userPwd) throws Exception {
+		Tuple tuple = getBranchAndTagList(url, new UsernamePasswordCredentialsProvider(userName, userPwd));
+		List<String> branch = tuple == null ? null : tuple.get(0);
+		if (CollUtil.isEmpty(branch)) {
+			throw new JpomRuntimeException("该仓库还没有任何分支");
+		}
+		return tuple;
 	}
 
 

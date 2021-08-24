@@ -40,6 +40,7 @@ import java.util.Objects;
 
 /**
  * new build info manage controller
+` *
  * @author Hotstrip
  * @since 2021-08-23
  */

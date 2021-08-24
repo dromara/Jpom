@@ -2,8 +2,7 @@
   <div>
     <!-- 搜索区 -->
     <div ref="filter" class="filter">
-      <a-select v-model="listQuery.repoType" allowClear placeholder="请选择仓库类型"
-        class="filter-item" @change="handleFilter">
+      <a-select v-model="listQuery.repoType" allowClear placeholder="请选择仓库类型" class="filter-item" @change="handleFilter">
         <a-select-option :value="'0'">GIT</a-select-option>
         <a-select-option :value="'1'">SVN</a-select-option>
       </a-select>
@@ -12,15 +11,23 @@
       <a-button type="primary" @click="loadData">刷新</a-button>
     </div>
     <!-- 表格 -->
-    <a-table :loading="loading" :columns="columns" :data-source="list" :style="{'max-height': tableHeight + 'px' }"
-      :scroll="{x: 970, y: tableHeight - 120}" bordered rowKey="id" :pagination="pagination">
+    <a-table
+      :loading="loading"
+      :columns="columns"
+      :data-source="list"
+      :style="{ 'max-height': tableHeight + 'px' }"
+      :scroll="{ x: 970, y: tableHeight - 120 }"
+      bordered
+      rowKey="id"
+      :pagination="pagination"
+    >
       <a-tooltip slot="name" slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>
       <a-tooltip slot="gitUrl" slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>
-    <template slot="repoType" slot-scope="text">
+      <template slot="repoType" slot-scope="text">
         <span v-if="text === 0">GIT</span>
         <span v-else-if="text === 1">SVN</span>
         <span v-else>未知</span>
@@ -29,7 +36,7 @@
         <span v-if="text === 0">HTTP(S)</span>
         <span v-else-if="text === 1">SSH</span>
         <!-- if no protocol value, get a default value from gitUrl -->
-        <span v-else>{{record.gitUrl.indexOf('http') > -1 ? 'HTTP(S)' : 'SSH'}}</span>
+        <span v-else>{{ record.gitUrl.indexOf("http") > -1 ? "HTTP(S)" : "SSH" }}</span>
       </template>
       <template slot="operation" slot-scope="text, record">
         <a-button type="primary" @click="handleEdit(record)">编辑</a-button>
@@ -40,7 +47,7 @@
     <a-modal v-model="editVisible" title="编辑仓库" @ok="handleEditOk" :maskClosable="false">
       <a-form-model ref="editForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }">
         <a-form-model-item label="仓库名称" prop="name">
-          <a-input v-model="temp.name" placeholder="仓库名称"/>
+          <a-input v-model="temp.name" placeholder="仓库名称" />
         </a-form-model-item>
         <a-form-model-item label="仓库地址" prop="gitUrl">
           <a-input-group compact>
@@ -48,7 +55,7 @@
               <a-select-option :value="0">GIT</a-select-option>
               <a-select-option :value="1">SVN</a-select-option>
             </a-select>
-            <a-input style="width: 80%" v-model="temp.gitUrl" placeholder="仓库地址"/>
+            <a-input style="width: 80%" v-model="temp.gitUrl" placeholder="仓库地址" />
           </a-input-group>
         </a-form-model-item>
         <a-form-model-item label="协议" prop="protocol">
@@ -72,9 +79,13 @@
         </template>
         <!-- SSH protocol use rsa public key -->
         <template v-if="temp.protocol === 1">
+          <a-form-model-item label="密码" prop="password">
+            <a-input-password v-model="temp.password" placeholder="登录密码">
+              <a-icon slot="prefix" type="lock" />
+            </a-input-password>
+          </a-form-model-item>
           <a-form-model-item label="公钥" prop="rsaPub">
-            <a-textarea :auto-size="{ minRows: 3, maxRows: 3 }" v-model="temp.rsaPub" placeholder="公钥">
-            </a-textarea>
+            <a-textarea :auto-size="{ minRows: 3, maxRows: 3 }" v-model="temp.rsaPub" placeholder="公钥,不填将使用默认的 .ssh 目录中的配置。支持配置文件目录:file:"> </a-textarea>
           </a-form-model-item>
         </template>
       </a-form-model>
@@ -82,72 +93,70 @@
   </div>
 </template>
 <script>
-import { getRepositoryList, editRepository, deleteRepository } from '../../api/repository';
-import {parseTime} from '../../utils/time';
+import { getRepositoryList, editRepository, deleteRepository } from "../../api/repository";
+import { parseTime } from "../../utils/time";
 
 export default {
-  components: {
-  },
+  components: {},
   data() {
     return {
       loading: false,
       listQuery: {
         page: 1,
-        limit: 20
+        limit: 20,
       },
-      tableHeight: '70vh',
+      tableHeight: "70vh",
       list: [],
       total: 0,
       temp: {},
       editVisible: false,
       columns: [
-        {title: '仓库名称', dataIndex: 'name', width: 150, ellipsis: true, scopedSlots: {customRender: 'name'}},
+        { title: "仓库名称", dataIndex: "name", width: 150, ellipsis: true, scopedSlots: { customRender: "name" } },
         {
-          title: '仓库地址',
-          dataIndex: 'gitUrl',
+          title: "仓库地址",
+          dataIndex: "gitUrl",
           width: 300,
           ellipsis: true,
-          scopedSlots: {customRender: 'gitUrl'}
+          scopedSlots: { customRender: "gitUrl" },
         },
         {
-          title: '仓库类型',
-          dataIndex: 'repoType',
+          title: "仓库类型",
+          dataIndex: "repoType",
           width: 100,
           ellipsis: true,
-          scopedSlots: {customRender: 'repoType'}
+          scopedSlots: { customRender: "repoType" },
         },
         {
-          title: '协议',
-          dataIndex: 'protocol',
+          title: "协议",
+          dataIndex: "protocol",
           width: 100,
           ellipsis: true,
-          scopedSlots: {customRender: 'protocol'}
+          scopedSlots: { customRender: "protocol" },
         },
         {
-          title: '修改时间', dataIndex: 'modifyTimeMillis', customRender: (text) => {
+          title: "修改时间",
+          dataIndex: "modifyTimeMillis",
+          customRender: (text) => {
             if (!text) {
-              return '';
+              return "";
             }
             return parseTime(text);
-          }, width: 180
+          },
+          width: 180,
         },
         {
-          title: '操作',
-          dataIndex: 'operation',
+          title: "操作",
+          dataIndex: "operation",
           width: 240,
-          scopedSlots: {customRender: 'operation'},
-          align: 'left'
-        }
+          scopedSlots: { customRender: "operation" },
+          align: "left",
+        },
       ],
       rules: {
-        name: [
-          {required: true, message: 'Please input build name', trigger: 'blur'}
-        ],
-        gitUrl: [
-          {required: true, message: 'Please input git url', trigger: 'blur'}
-        ]
-        }
-      }
+        name: [{ required: true, message: "Please input build name", trigger: "blur" }],
+        gitUrl: [{ required: true, message: "Please input git url", trigger: "blur" }],
+      },
+    };
   },
   computed: {
     // 分页
@@ -156,19 +165,18 @@ export default {
         total: this.total,
         current: this.listQuery.page || 1,
         pageSize: this.listQuery.limit || 10,
-        pageSizeOptions: ['10', '20', '50', '100'],
+        pageSizeOptions: ["10", "20", "50", "100"],
         showSizeChanger: true,
         showTotal: (total) => {
-          if(total<=this.listQuery.limit){
-            return '';
+          if (total <= this.listQuery.limit) {
+            return "";
           }
           return `总计 ${total} 条`;
-        }
-      }
-    }
+        },
+      };
+    },
   },
-  watch: {
-  },
+  watch: {},
   created() {
     this.calcTableHeight();
     this.handleFilter();
@@ -177,19 +185,19 @@ export default {
     // 计算表格高度
     calcTableHeight() {
       this.$nextTick(() => {
-        this.tableHeight = window.innerHeight - this.$refs['filter'].clientHeight - 135;
-      })
+        this.tableHeight = window.innerHeight - this.$refs["filter"].clientHeight - 135;
+      });
     },
     // 加载数据
     loadData() {
       this.list = [];
       this.loading = true;
-      getRepositoryList(this.listQuery).then(res => {
+      getRepositoryList(this.listQuery).then((res) => {
         if (res.code === 200) {
           this.list = res.data;
         }
         this.loading = false;
-      })
+      });
     },
     // 筛选
     handleFilter() {
@@ -199,7 +207,7 @@ export default {
     handleAdd() {
       this.temp = {
         repoType: 0,
-        protocol: 0
+        protocol: 0,
       };
       this.editVisible = true;
     },
@@ -207,75 +215,74 @@ export default {
     handleEdit(record) {
       this.temp = Object.assign(record);
       if (!this.temp.protocol) {
-        this.temp.protocol = this.temp.gitUrl.indexOf('http') > -1 ? 0 : 1;
+        this.temp.protocol = this.temp.gitUrl.indexOf("http") > -1 ? 0 : 1;
       }
-      this.temp = {...this.temp};
+      this.temp = { ...this.temp };
       this.editVisible = true;
     },
     // 提交节点数据
     handleEditOk() {
       // 检验表单
-      this.$refs['editForm'].validate((valid) => {
+      this.$refs["editForm"].validate((valid) => {
         if (!valid) {
           return false;
         }
         // 提交数据
-        editRepository(this.temp).then(res => {
+        editRepository(this.temp).then((res) => {
           if (res.code === 200) {
             // 成功
             this.$notification.success({
               message: res.msg,
-              duration: 2
+              duration: 2,
             });
-            this.$refs['editForm'].resetFields();
+            this.$refs["editForm"].resetFields();
             this.editVisible = false;
             this.handleFilter();
           }
-        })
-      })
+        });
+      });
     },
     // 删除
     handleDelete(record) {
-      console.log(record)
+      console.log(record);
       this.$confirm({
-        title: '系统提示',
-        content: '真的要删除仓库信息么？',
-        okText: '确认',
-        cancelText: '取消',
+        title: "系统提示",
+        content: "真的要删除仓库信息么？",
+        okText: "确认",
+        cancelText: "取消",
         onOk: () => {
           // 删除
           deleteRepository(record.id).then((res) => {
             if (res.code === 200) {
               this.$notification.success({
                 message: res.msg,
-                duration: 2
+                duration: 2,
               });
               this.loadData();
             }
-          })
-          }
-        }
-      );
-    }
-  }
-}
+          });
+        },
+      });
+    },
+  },
+};
 </script>
 <style scoped>
 .filter {
-    margin-bottom: 10px;
+  margin-bottom: 10px;
 }
 
 .ant-btn {
-    margin-right: 10px;
+  margin-right: 10px;
 }
 
 .filter-item {
-    width: 150px;
-    margin-right: 10px;
+  width: 150px;
+  margin-right: 10px;
 }
 
 .btn-add {
-    margin-left: 10px;
-    margin-right: 0;
+  margin-left: 10px;
+  margin-right: 0;
 }
 </style>

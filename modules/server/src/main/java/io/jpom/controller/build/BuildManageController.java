@@ -36,16 +36,17 @@ import java.io.File;
 import java.util.Objects;
 
 /**
- * @author bwcx_jzy
- * @date 2019/7/16
+ * -- @author bwcx_jzy
+ * -- @date 2019/7/16
  *
  * @author Hotstrip
- * @since 2021-08-23
  * @see BuildInfoManageController
+ * @since 2021-08-23
  */
 @RestController
 @RequestMapping(value = "/build")
 @Feature(cls = ClassFeature.BUILD)
+@Deprecated
 public class BuildManageController extends BaseServerController {
 
 	@Resource

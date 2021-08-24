@@ -1,6 +1,7 @@
 package io.jpom.controller.build;
 
 import cn.hutool.core.lang.Validator;
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.db.Entity;
 import cn.hutool.db.Page;
 import cn.hutool.db.PageResult;
@@ -86,6 +87,15 @@ public class RepositoryController {
 		Assert.hasText(repositoryModelReq.getName(), "请填写仓库名称");
 		Integer repoType = repositoryModelReq.getRepoType();
 		Assert.state(repoType != null && (repoType == 1 || repoType == 0), "请选择仓库类型");
+		// 修正字段
+		if (repoType == 0) {
+			//  http
+			repositoryModelReq.setRsaPub(StrUtil.EMPTY);
+		} else if (repoType == 1) {
+			// ssh
+			repositoryModelReq.setUserName(StrUtil.EMPTY);
+			repositoryModelReq.setPassword(StrUtil.emptyToDefault(repositoryModelReq.getPassword(), StrUtil.EMPTY));
+		}
 		Assert.hasText(repositoryModelReq.getGitUrl(), "请填写仓库地址");
 		//
 		Integer protocol = repositoryModelReq.getProtocol();

@@ -122,8 +122,8 @@ public class BuildInfoService extends BaseDbService<BuildInfoModel> {
 	/**
 	 * check status
 	 *
-	 * @param status
-	 * @return
+	 * @param status 状态吗
+	 * @return 错误消息
 	 */
 	public String checkStatus(Integer status) {
 		if (status == null) {

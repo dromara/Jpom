@@ -1,6 +1,4 @@
-/**
- * 这是新版本的构建列表页面，主要是分离了部分数据到【仓库管理】，以及数据会存储到数据库
- */
+/** * 这是新版本的构建列表页面，主要是分离了部分数据到【仓库管理】，以及数据会存储到数据库 */
 <template>
   <div>
     <div ref="filter" class="filter">
@@ -103,7 +101,7 @@
           </a-row>
         </a-form-model-item>
         <a-form-model-item label="仓库地址" prop="repositoryId">
-          <a-select v-model="temp.repositoryId" @select="changeRepositpry">
+          <a-select v-model="temp.repositoryId" @select="changeRepositpry" @change="changeRepositpry">
             <a-select-option v-for="item in repositoryList" :key="item.id" :value="item.id">{{ item.name }}[{{ item.gitUrl }}]</a-select-option>
           </a-select>
         </a-form-model-item>
@@ -111,6 +109,31 @@
           <a-row>
             <a-col :span="18">
               <a-select v-model="temp.branchName" placeholder="请先填写仓库地址和账号信息">
+                <a-icon slot="suffixIcon" type="reload" />
+                <div slot="dropdownRender" slot-scope="menu">
+                  <v-nodes :vnodes="menu" />
+                  <a-divider style="margin: 4px 0" />
+                  <!-- <div style="padding: 4px 8px; cursor: pointer" @mousedown="(e) => e.preventDefault()" @click="addItem"><a-icon type="plus" />自定义分支</div> 
+                  -->
+                  <div style="padding: 4px 8px; cursor: pointer" @mousedown="(e) => e.preventDefault()">
+                    <a-input-search placeholder="自定义分支通配表达式" size="small" @search="onSearch">
+                      <a-button slot="enterButton"> 添加 </a-button>
+                      <a-tooltip slot="suffix">
+                        <template slot="title">
+                          <div>
+                            支持通配符(AntPathMatcher)
+                            <ul>
+                              <li>? 匹配一个字符</li>
+                              <li>* 匹配零个或多个字符</li>
+                              <li>** 匹配路径中的零个或多个目录</li>
+                            </ul>
+                          </div>
+                        </template>
+                        <a-icon type="question-circle" theme="filled" />
+                      </a-tooltip>
+                    </a-input-search>
+                  </div>
+                </div>
                 <a-select-option v-for="branch in branchList" :key="branch">{{ branch }} </a-select-option>
               </a-select>
             </a-col>
@@ -123,7 +146,23 @@
           <a-input v-model="temp.script" type="textarea" :auto-size="{ minRows: 2, maxRows: 6 }" allow-clear placeholder="构建执行的命令(非阻塞命令)，如：mvn clean package" />
         </a-form-model-item>
         <a-form-model-item label="产物目录" prop="resultDirFile" class="jpom-target-dir">
-          <a-input v-model="temp.resultDirFile" placeholder="构建产物目录，相对路径" />
+          <a-input v-model="temp.resultDirFile" placeholder="构建产物目录，相对路径">
+            <a-tooltip slot="suffix">
+              <template slot="title">
+                <div>可以理解为项目打包的目录。 如 Jpom 项目执行（构建命令） <b>mvn clean package</b> 构建命令，构建产物相对路径为：<b>modules/server/target/server-2.4.2-release</b></div>
+                <div><br /></div>
+                <div>
+                  支持通配符(AntPathMatcher)
+                  <ul>
+                    <li>? 匹配一个字符</li>
+                    <li>* 匹配零个或多个字符</li>
+                    <li>** 匹配路径中的零个或多个目录</li>
+                  </ul>
+                </div>
+              </template>
+              <a-icon type="question-circle" theme="filled" />
+            </a-tooltip>
+          </a-input>
         </a-form-model-item>
         <a-form-model-item label="发布操作" prop="releaseMethod">
           <a-radio-group v-model="temp.releaseMethod" name="releaseMethod">
@@ -195,7 +234,7 @@
 <script>
 import { mapGetters } from "vuex";
 import BuildLog from "./log";
-import { getRepositoryList } from '../../api/repository';
+import { getRepositoryList } from "../../api/repository";
 import { clearBuid, deleteBuild, editBuild, getBranchList, getBuildGroupList, getBuildList, getTriggerUrl, releaseMethodMap, resetTrigger, startBuild, stopBuild } from "../../api/build-info";
 import { getDishPatchList } from "../../api/dispatch";
 import { getNodeProjectList } from "../../api/node";
@@ -205,6 +244,10 @@ import { parseTime } from "../../utils/time";
 export default {
   components: {
     BuildLog,
+    VNodes: {
+      functional: true,
+      render: (h, ctx) => ctx.props.vnodes,
+    },
   },
   data() {
     return {
@@ -365,13 +408,13 @@ export default {
     loadRepositoryList() {
       const query = {
         page: 1,
-        limit: 1000
-      }
-      getRepositoryList(query).then(res => {
+        limit: 1000,
+      };
+      getRepositoryList(query).then((res) => {
         if (res.code === 200) {
           this.repositoryList = res.data;
         }
-      })
+      });
     },
     // 加载节点分发列表
     loadDispatchList() {
@@ -421,16 +464,18 @@ export default {
     },
     // 选择仓库
     changeRepositpry(value) {
-      this.repositoryList.forEach(element => {
+      this.repositoryList.forEach((element) => {
         if (element.id === value) {
           this.tempRepository = element;
+          // 刷新分支
+          this.loadBranchList();
         }
-      })
+      });
     },
     // 添加
     handleAdd() {
       this.temp = {
-        repoType: 0
+        repoType: 0,
       };
       this.branchList = [];
       this.loadDispatchList();
@@ -451,13 +496,10 @@ export default {
       this.tempExtraData = JSON.parse(record.extraData) || {};
       // 设置发布方式的数据
       if (record.releaseMethod === 2) {
-        this.temp.releaseMethodDataIdList =   [
-          this.tempExtraData.releaseMethodDataId_2_node,
-          this.tempExtraData.releaseMethodDataId_2_project
-        ];
+        this.temp.releaseMethodDataIdList = [this.tempExtraData.releaseMethodDataId_2_node, this.tempExtraData.releaseMethodDataId_2_project];
       }
       // 从仓库列表里匹配对应的仓库信息
-      this.tempRepository = this.repositoryList.filter(element => this.temp.repositoryId === element.id)[0];
+      this.tempRepository = this.repositoryList.filter((element) => this.temp.repositoryId === element.id)[0];
 
       this.loadBranchList();
       this.loadDispatchList();
@@ -501,7 +543,7 @@ export default {
       };
       getBranchList(params).then((res) => {
         if (res.code === 200) {
-          this.branchList = res.data;
+          this.branchList = res.data[0];
         }
         loading.close();
       });
@@ -527,8 +569,8 @@ export default {
         }
         this.temp = {
           ...this.temp,
-          extraData: JSON.stringify(this.tempExtraData)
-        }
+          extraData: JSON.stringify(this.tempExtraData),
+        };
         // 提交数据
         editBuild(this.temp).then((res) => {
           if (res.code === 200) {
