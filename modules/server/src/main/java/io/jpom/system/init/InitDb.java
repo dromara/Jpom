@@ -43,6 +43,11 @@ public class InitDb implements DisposableBean, InitializingBean {
 		setting.set("url", dbUrl);
 		setting.set("user", serverExtConfigBean.getDbUserName());
 		setting.set("pass", serverExtConfigBean.getDbUserPwd());
+		// 配置连接池大小
+		setting.set("maxActive", "50");
+		setting.set("initialSize", "1");
+		setting.set("maxWait", "10");
+		setting.set("minIdle", "1");
 		// 调试模式显示sql 信息
 		if (JpomManifest.getInstance().isDebug()) {
 
