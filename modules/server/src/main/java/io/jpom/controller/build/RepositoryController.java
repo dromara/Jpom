@@ -132,7 +132,10 @@ public class RepositoryController {
 			// if rsa key is not empty
 			if (StrUtil.isNotEmpty(repositoryModelReq.getRsaPrv())) {
 				File rsaFile = BuildUtil.getRepositoryRsaFile(repositoryModelReq.getId() + Const.ID_RSA);
-				// if rsa key is start with "file:" move this file
+				/**
+				 * if rsa key is start with "file:"
+				 * copy this file
+				 */
 				if (StrUtil.startWith(repositoryModelReq.getRsaPrv(), Const.FILE_PREFIX)) {
 					String rsaPath = StrUtil.removePrefix(repositoryModelReq.getRsaPrv(), Const.FILE_PREFIX);
 					if (!FileUtil.file(rsaPath).exists()) {
