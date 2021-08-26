@@ -1,27 +1,35 @@
 package io.jpom.controller.build;
 
+import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.lang.Validator;
+import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.db.Entity;
 import cn.hutool.db.Page;
 import cn.hutool.db.PageResult;
 import cn.hutool.db.sql.Direction;
 import cn.hutool.db.sql.Order;
+import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.validator.ValidatorConfig;
 import cn.jiangzeyin.common.validator.ValidatorItem;
 import cn.jiangzeyin.common.validator.ValidatorRule;
 import com.alibaba.fastjson.JSONObject;
+import io.jpom.build.BuildUtil;
+import io.jpom.common.Const;
+import io.jpom.model.GitProtocolEnum;
 import io.jpom.model.data.RepositoryModel;
 import io.jpom.plugin.ClassFeature;
 import io.jpom.plugin.Feature;
 import io.jpom.plugin.MethodFeature;
 import io.jpom.service.dblog.RepositoryService;
+import io.jpom.util.StringUtil;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
+import java.io.File;
 
 /**
  * @author Hotstrip
@@ -70,10 +78,15 @@ public class RepositoryController {
 		this.checkInfo(repositoryModelReq);
 		if (null == repositoryModelReq.getId()) {
 			// insert data
+			repositoryModelReq.setId(IdUtil.fastSimpleUUID());
 			repositoryService.insert(repositoryModelReq);
 		} else {
 			// update data
 			repositoryService.updateById(repositoryModelReq);
+		}
+		// 检查 rsa 私钥
+		if (!checkAndUpdateSshKey(repositoryModelReq)) {
+			return JsonMessage.toJson(500, "rsa 私钥文件不存在或者有误");
 		}
 		return JsonMessage.toJson(200, "操作成功");
 	}
@@ -90,12 +103,12 @@ public class RepositoryController {
 		Assert.hasText(repositoryModelReq.getGitUrl(), "请填写仓库地址");
 		//
 		Integer protocol = repositoryModelReq.getProtocol();
-		Assert.state(protocol != null && (protocol == 1 || protocol == 0), "请选择拉取代码的协议");
+		Assert.state(protocol != null && (protocol == GitProtocolEnum.HTTP.getCode() || protocol == GitProtocolEnum.SSH.getCode()), "请选择拉取代码的协议");
 		// 修正字段
-		if (protocol == 0) {
+		if (protocol == GitProtocolEnum.HTTP.getCode()) {
 			//  http
 			repositoryModelReq.setRsaPub(StrUtil.EMPTY);
-		} else if (protocol == 1) {
+		} else if (protocol == GitProtocolEnum.SSH.getCode()) {
 			// ssh
 			repositoryModelReq.setUserName(StrUtil.EMPTY);
 			repositoryModelReq.setPassword(StrUtil.emptyToDefault(repositoryModelReq.getPassword(), StrUtil.EMPTY));
@@ -108,6 +121,32 @@ public class RepositoryController {
 		}
 		entity.set("gitUrl", repositoryModelReq.getGitUrl());
 		Assert.state(!repositoryService.exists(entity), "已经存在对应的仓库信息啦");
+	}
+
+	/**
+	 * check and update ssh key
+	 * @param repositoryModelReq
+	 */
+	private boolean checkAndUpdateSshKey(RepositoryModel repositoryModelReq) {
+		if (repositoryModelReq.getProtocol() == GitProtocolEnum.SSH.getCode()) {
+			// if rsa key is not empty
+			if (StrUtil.isNotEmpty(repositoryModelReq.getRsaPrv())) {
+				File rsaFile = BuildUtil.getRepositoryRsaFile(repositoryModelReq.getId() + Const.ID_RSA);
+				// if rsa key is start with "file:" move this file
+				if (StrUtil.startWith(repositoryModelReq.getRsaPrv(), Const.FILE_PREFIX)) {
+					String rsaPath = StrUtil.removePrefix(repositoryModelReq.getRsaPrv(), Const.FILE_PREFIX);
+					if (!FileUtil.file(rsaPath).exists()) {
+						DefaultSystemLog.getLog().error("there is no rsa file...");
+						return false;
+					}
+					FileUtil.copy(FileUtil.file(rsaPath), rsaFile, true);
+				} else {
+					//  or else put into file
+					FileUtil.writeUtf8String(repositoryModelReq.getRsaPrv(), rsaFile);
+				}
+			}
+		}
+		return true;
 	}
 
 	/**

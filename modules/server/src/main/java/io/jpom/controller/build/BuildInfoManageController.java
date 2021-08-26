@@ -75,6 +75,8 @@ public class BuildInfoManageController extends BaseServerController {
 			return e;
 		}
 		// set buildId field
+		if (item.getBuildId() == null)
+			item.setBuildId(0);
 		item.setBuildId(item.getBuildId() + 1);
 
 		// userModel

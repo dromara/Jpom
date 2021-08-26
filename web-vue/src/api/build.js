@@ -1,5 +1,9 @@
 import axios from './config';
 
+/**
+ * 这个文件里面的 api 已废弃
+ */
+
 // 分组列表
 export function getBuildGroupList() {
     return axios({

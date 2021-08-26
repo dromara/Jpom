@@ -70,7 +70,7 @@ import {
   deleteBuildHistory,
   releaseMethodMap,
   downloadBuildFile
-} from '../../api/build';
+} from '../../api/build-info';
 import { parseTime } from '../../utils/time';
 export default {
   components: {

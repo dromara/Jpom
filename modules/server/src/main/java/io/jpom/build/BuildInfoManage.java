@@ -14,6 +14,8 @@ import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.spring.SpringUtil;
 import io.jpom.JpomApplication;
+import io.jpom.common.Const;
+import io.jpom.model.GitProtocolEnum;
 import io.jpom.model.data.BuildInfoModel;
 import io.jpom.model.data.BuildModel;
 import io.jpom.model.data.RepositoryModel;
@@ -246,9 +248,17 @@ public class BuildInfoManage extends BaseBuild implements Runnable {
 				this.log("repository clone pull from " + branchName);
 				String msg = "error";
 				if (repositoryModel.getRepoType() == BuildModel.RepoType.Git.getCode()) {
-					// git
-					UsernamePasswordCredentialsProvider credentialsProvider = new UsernamePasswordCredentialsProvider(repositoryModel.getUserName(), repositoryModel.getPassword());
-					msg = GitUtil.checkoutPull(repositoryModel.getGitUrl(), gitFile, branchName, credentialsProvider, this.getPrintWriter());
+					// git with password
+					if (repositoryModel.getProtocol().equals(GitProtocolEnum.HTTP.getCode())) {
+						UsernamePasswordCredentialsProvider credentialsProvider = new UsernamePasswordCredentialsProvider(repositoryModel.getUserName(), repositoryModel.getPassword());
+						msg = GitUtil.checkoutPull(repositoryModel.getGitUrl(), gitFile, branchName, credentialsProvider, this.getPrintWriter());
+					} else if (repositoryModel.getProtocol().equals(GitProtocolEnum.SSH.getCode())) {
+						// load rsa file
+						File rsaFile = BuildUtil.getRepositoryRsaFile(repositoryModel.getId() + Const.ID_RSA);
+						// git with ssh
+						msg = GitUtil.gitCloneWithSSH(repositoryModel.getGitUrl(), gitFile, branchName,
+								rsaFile, repositoryModel.getPassword(), this.getPrintWriter());
+					}
 				} else if (repositoryModel.getRepoType() == BuildModel.RepoType.Svn.getCode()) {
 					// svn
 					msg = SvnKitUtil.checkOut(repositoryModel.getGitUrl(), repositoryModel.getUserName(), repositoryModel.getPassword(), gitFile);

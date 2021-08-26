@@ -7,6 +7,11 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.lang.Tuple;
 import cn.hutool.core.util.StrUtil;
+import com.jcraft.jsch.JSch;
+import com.jcraft.jsch.JSchException;
+import io.jpom.build.BuildUtil;
+import io.jpom.common.Const;
+import io.jpom.model.GitProtocolEnum;
 import io.jpom.model.data.RepositoryModel;
 import io.jpom.system.JpomRuntimeException;
 import org.eclipse.jgit.api.*;
@@ -19,6 +24,7 @@ import org.eclipse.jgit.lib.*;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.transport.*;
+import org.eclipse.jgit.util.FS;
 
 import java.io.File;
 import java.io.IOException;
@@ -35,6 +41,9 @@ import java.util.stream.Collectors;
  *
  * @author bwcx_jzy
  * @date 2019/7/15
+ *
+ * @author Hotstrip
+ * add git with ssh key to visit repository
  **/
 public class GitUtil {
 
@@ -177,8 +186,33 @@ public class GitUtil {
 		}
 	}
 
+	/**
+	 * old version for load branch list
+	 * @see GitUtil#getBranchList
+	 * @param url
+	 * @param userName
+	 * @param userPwd
+	 * @return
+	 * @throws Exception
+	 */
+	@Deprecated
 	public static List<String> getBranchList(String url, String userName, String userPwd) throws Exception {
 		Tuple tuple = getBranchAndTagList(url, new UsernamePasswordCredentialsProvider(userName, userPwd));
+		List<String> branch = tuple == null ? null : tuple.get(0);
+		if (CollUtil.isEmpty(branch)) {
+			throw new JpomRuntimeException("该仓库还没有任何分支");
+		}
+		return tuple.get(0);
+	}
+
+	/**
+	 * load repository branch list by git
+	 * @return
+	 * @throws Exception
+	 */
+	public static List<String> getBranchList(RepositoryModel repositoryModel) throws Exception {
+		Tuple tuple = getBranchAndTagList(repositoryModel);
+
 		List<String> branch = tuple == null ? null : tuple.get(0);
 		if (CollUtil.isEmpty(branch)) {
 			throw new JpomRuntimeException("该仓库还没有任何分支");
@@ -195,14 +229,99 @@ public class GitUtil {
 	 */
 	public static Tuple getBranchAndTagList(RepositoryModel repositoryModel) throws Exception {
 		String url = repositoryModel.getGitUrl();
-		String userName = repositoryModel.getUserName();
-		String userPwd = repositoryModel.getPassword();
-		Tuple tuple = getBranchAndTagList(url, new UsernamePasswordCredentialsProvider(userName, userPwd));
+
+		// result
+		Tuple tuple = null;
+
+		// git branch with http
+		if (repositoryModel.getProtocol() == GitProtocolEnum.HTTP.getCode()) {
+			String userName = repositoryModel.getUserName();
+			String userPwd = repositoryModel.getPassword();
+			tuple = getBranchAndTagList(url, new UsernamePasswordCredentialsProvider(userName, userPwd));
+		}
+
+		// git branch with ssh
+		if (repositoryModel.getProtocol() == GitProtocolEnum.SSH.getCode()) {
+			File rsaFile = BuildUtil.getRepositoryRsaFile(repositoryModel.getId() + Const.ID_RSA);
+			tuple = getBranchAndTagListWithSSH(url, rsaFile, repositoryModel.getPassword());
+		}
+
 		List<String> branch = tuple == null ? null : tuple.get(0);
 		if (CollUtil.isEmpty(branch)) {
 			throw new JpomRuntimeException("该仓库还没有任何分支");
 		}
 		return tuple;
+	}
+
+	/**
+	 *
+	 * @param url
+	 * @param rsaFile
+	 * @param rsaPass
+	 * @return
+	 */
+	private static Tuple getBranchAndTagListWithSSH(String url, File rsaFile, String rsaPass) throws Exception {
+		synchronized (url.intern()) {
+			try {
+				Collection<Ref> call = Git.lsRemoteRepository()
+						.setRemote(url)
+						.setTransportConfigCallback(transport -> {
+							SshTransport sshTransport = (SshTransport) transport;
+							sshTransport.setSshSessionFactory( new JschConfigSessionFactory() {
+
+								@Override
+								protected JSch createDefaultJSch(FS fs) throws JSchException {
+									JSch jSch = super.createDefaultJSch(fs);
+									// 添加私钥文件
+									jSch.addIdentity(rsaFile.getPath(), rsaPass);
+									return jSch;
+								}
+							});
+						})
+						.setHeads(true)
+						.setTags(true)
+						.call();
+				if (CollUtil.isEmpty(call)) {
+					return null;
+				}
+				Map<String, List<Ref>> refMap = CollStreamUtil.groupByKey(call, ref -> {
+					String name = ref.getName();
+					if (name.startsWith(Constants.R_TAGS)) {
+						return Constants.R_TAGS;
+					} else if (name.startsWith(Constants.R_HEADS)) {
+						return Constants.R_HEADS;
+					}
+					return null;
+				});
+
+				// branch list
+				List<Ref> branchListRef = refMap.get(Constants.R_HEADS);
+				if (branchListRef == null) {
+					return null;
+				}
+				List<String> branchList = branchListRef.stream().map(ref -> {
+					String name = ref.getName();
+					if (name.startsWith(Constants.R_HEADS)) {
+						return name.substring((Constants.R_HEADS).length());
+					}
+					return null;
+				}).filter(Objects::nonNull).collect(Collectors.toList());
+
+				// list tag
+				List<Ref> tagListRef = refMap.get(Constants.R_TAGS);
+				List<String> tagList = tagListRef == null ? new ArrayList<>() : tagListRef.stream().map(ref -> {
+					String name = ref.getName();
+					if (name.startsWith(Constants.R_TAGS)) {
+						return name.substring((Constants.R_TAGS).length());
+					}
+					return null;
+				}).filter(Objects::nonNull).collect(Collectors.toList());
+				return new Tuple(branchList, tagList);
+			} catch (Exception t) {
+				checkTransportException(t, null, null);
+				return null;
+			}
+		}
 	}
 
 
@@ -434,5 +553,44 @@ public class GitUtil {
 					time,
 					revCommit.getParentCount());
 		}
+	}
+
+	/**
+	 * git clone with ssh way
+	 * @param url 远程仓库地址
+	 * @param file 本地存档的文件地址
+	 * @param branchName 分支名称
+	 * @param rsaFile 私钥文件
+	 * @param rsaPass 私钥密码
+	 * @param printWriter
+	 */
+	public static String gitCloneWithSSH(String url, File file, String branchName,
+									   File rsaFile, String rsaPass, PrintWriter printWriter) throws GitAPIException {
+		// if file exists，delete first
+		if (FileUtil.exist(file)) {
+			FileUtil.del(file);
+		}
+
+		// git clone
+		Git.cloneRepository()
+				.setProgressMonitor(new TextProgressMonitor(printWriter))
+				.setURI(url)
+				.setDirectory(file)
+				.setBranch(branchName)
+				.setTransportConfigCallback(transport -> {
+					SshTransport sshTransport = (SshTransport) transport;
+					sshTransport.setSshSessionFactory( new JschConfigSessionFactory() {
+
+						@Override
+						protected JSch createDefaultJSch(FS fs) throws JSchException {
+							JSch jSch = super.createDefaultJSch(fs);
+							// 添加私钥文件
+							jSch.addIdentity(rsaFile.getPath(), rsaPass);
+							return jSch;
+						}
+					});
+				})
+				.call();
+		return StrUtil.EMPTY;
 	}
 }

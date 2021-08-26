@@ -56,6 +56,31 @@ public class TestSshGit {
     }
 
     @Test
+	public void test1() throws GitAPIException {
+//    	String url = "https://gitee.com/dromara/Jpom.git";
+//    	String url = "git@gitee.com:dromara/Jpom.git";
+//    	String rsaFile = "/Users/zhangxin/.ssh/jpom_key/id_rsa";
+//    	String passphrase = "12345";
+//    	Git.cloneRepository()
+//				.setURI(url)
+//				.setDirectory(new File("/Users/zhangxin/Documents/jpom/server/test-jpom"))
+//				.setTransportConfigCallback(transport -> {
+//					SshTransport sshTransport = (SshTransport) transport;
+//					sshTransport.setSshSessionFactory( new JschConfigSessionFactory() {
+//
+//						@Override
+//						protected JSch createDefaultJSch(FS fs) throws JSchException {
+//							JSch jSch = super.createDefaultJSch(fs);
+//							//添加私钥文件
+//							jSch.addIdentity(rsaFile, passphrase);
+//							return jSch;
+//						}
+//					});
+//				})
+//				.call();
+	}
+
+    @Test
     public void test2() {
 //        SshSessionFactory sshSessionFactory = new SshSessionFactory() {
 //            @Override

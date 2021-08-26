@@ -173,7 +173,7 @@ export function stopBuild(id) {
  */
 export function geteBuildHistory(params) {
     return axios({
-        url: '/build/history_list.json',
+        url: '/build/history/history_list.json',
         method: 'post',
         data: params
     })
@@ -184,7 +184,7 @@ export function geteBuildHistory(params) {
  * @param {*} logId
  */
 export function downloadBuildLog(logId) {
-    return `/build/download_log.html?logId=${logId}`
+    return `/build/history/download_log.html?logId=${logId}`
 }
 
 /**
@@ -192,7 +192,7 @@ export function downloadBuildLog(logId) {
  * @param {*} logId
  */
 export function downloadBuildFile(logId) {
-    return `/build/download_file.html?logId=${logId}`
+    return `/build/history/download_file.html?logId=${logId}`
 }
 
 /**
@@ -214,7 +214,7 @@ export function rollback(logId) {
  */
 export function deleteBuildHistory(logId) {
     return axios({
-        url: '/build/delete_log.json',
+        url: '/build/history/delete_log.json',
         method: 'post',
         data: {logId}
     })

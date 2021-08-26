@@ -22,4 +22,15 @@ public class Const {
 	 * String get
 	 */
 	public static final String GET_STR = "get";
+
+
+	/**
+	 * id_rsa
+	 */
+	public static final String ID_RSA = "_id_rsa";
+	/**
+	 * sshkey
+	 */
+	public static final String SSH_KEY = "sshkey";
+	public static final String FILE_PREFIX = "file:";
 }

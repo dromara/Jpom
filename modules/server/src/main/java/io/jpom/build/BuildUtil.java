@@ -3,6 +3,7 @@ package io.jpom.build;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.core.util.ZipUtil;
+import io.jpom.common.Const;
 import io.jpom.model.data.BuildInfoModel;
 import io.jpom.model.data.BuildModel;
 import io.jpom.system.ConfigBean;
@@ -111,5 +112,15 @@ public class BuildUtil {
 				"history",
 				BuildModel.getBuildIdStr(buildId),
 				"info.log");
+	}
+
+	/**
+	 * get rsa file
+	 * @param path
+	 * @return
+	 */
+	public static File getRepositoryRsaFile(String path) {
+		File sshDir = FileUtil.file(ConfigBean.getInstance().getDataPath(), Const.SSH_KEY);
+		return FileUtil.touch(sshDir, path);
 	}
 }

@@ -17,23 +17,22 @@ import io.jpom.build.BuildUtil;
 import io.jpom.common.BaseServerController;
 import io.jpom.common.interceptor.OptLog;
 import io.jpom.model.BaseEnum;
-import io.jpom.model.BaseModel;
+import io.jpom.model.data.BuildInfoModel;
 import io.jpom.model.data.BuildModel;
 import io.jpom.model.data.UserModel;
 import io.jpom.model.log.BuildHistoryLog;
 import io.jpom.model.log.UserOperateLogV1;
 import io.jpom.model.vo.BuildHistoryLogVo;
-import io.jpom.model.vo.BuildModelVo;
 import io.jpom.plugin.ClassFeature;
 import io.jpom.plugin.Feature;
 import io.jpom.plugin.MethodFeature;
-import io.jpom.service.build.BuildService;
+import io.jpom.service.dblog.BuildInfoService;
 import io.jpom.service.dblog.DbBuildHistoryLogService;
 import org.springframework.http.MediaType;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
 import java.io.File;
@@ -42,22 +41,16 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- * 构建历史
- *
- * @author bwcx_jzy
- * @date 2019/7/17
- *
+ * new version for build info history controller
+ * @author Hotstrip
  * @since 2021-08-26
- * @see BuildInfoHistoryController
- **/
-@Deprecated
-@Controller
-@RequestMapping(value = "/build")
+ */
+@RestController
 @Feature(cls = ClassFeature.BUILD)
-public class BuildHistoryController extends BaseServerController {
+public class BuildInfoHistoryController extends BaseServerController {
 
 	@Resource
-	private BuildService buildService;
+	private BuildInfoService buildInfoService;
 	@Resource
 	private DbBuildHistoryLogService dbBuildHistoryLogService;
 
@@ -66,15 +59,14 @@ public class BuildHistoryController extends BaseServerController {
 	 *
 	 * @param logId 日志id
 	 */
-	@RequestMapping(value = "download_file.html", method = RequestMethod.GET)
-	@ResponseBody
+	@RequestMapping(value = "/build/history/download_file.html", method = RequestMethod.GET)
 	@Feature(method = MethodFeature.DOWNLOAD)
 	public void downloadFile(@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据")) String logId) {
 		BuildHistoryLog buildHistoryLog = dbBuildHistoryLogService.getByKey(logId);
 		if (buildHistoryLog == null) {
 			return;
 		}
-		BuildModel item = buildService.getItem(buildHistoryLog.getBuildDataId());
+		BuildInfoModel item = buildInfoService.getByKey(buildHistoryLog.getBuildDataId());
 		if (item == null) {
 			return;
 		}
@@ -92,13 +84,13 @@ public class BuildHistoryController extends BaseServerController {
 	}
 
 
-	@RequestMapping(value = "download_log.html", method = RequestMethod.GET)
+	@RequestMapping(value = "/build/history/download_log.html", method = RequestMethod.GET)
 	@ResponseBody
 	@Feature(method = MethodFeature.DOWNLOAD)
 	public void downloadLog(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据") String logId) throws IOException {
 		BuildHistoryLog buildHistoryLog = dbBuildHistoryLogService.getByKey(logId);
 		Objects.requireNonNull(buildHistoryLog);
-		BuildModel item = buildService.getItem(buildHistoryLog.getBuildDataId());
+		BuildInfoModel item = buildInfoService.getByKey(buildHistoryLog.getBuildDataId());
 		Objects.requireNonNull(item);
 		File logFile = BuildUtil.getLogFile(item.getId(), buildHistoryLog.getBuildNumberId());
 		if (!logFile.exists()) {
@@ -109,7 +101,7 @@ public class BuildHistoryController extends BaseServerController {
 		}
 	}
 
-	@RequestMapping(value = "history_list.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+	@RequestMapping(value = "/build/history/history_list.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
 	@Feature(method = MethodFeature.LOG)
 	public String historyList(String status,
@@ -158,7 +150,7 @@ public class BuildHistoryController extends BaseServerController {
 			BuildHistoryLogVo historyLogVo = new BuildHistoryLogVo();
 			BeanUtil.copyProperties(buildHistoryLog, historyLogVo);
 			String dataId = buildHistoryLog.getBuildDataId();
-			BuildModel item = buildService.getItem(dataId);
+			BuildInfoModel item = buildInfoService.getByKey(dataId);
 			if (item != null) {
 				historyLogVo.setBuildName(item.getName());
 			}
@@ -170,11 +162,13 @@ public class BuildHistoryController extends BaseServerController {
 	}
 
 	private Set<String> getDataIds() {
-		List<BuildModelVo> list = buildService.list(BuildModelVo.class);
+		Entity where = Entity.create();
+		Page pageReq = new Page();
+		List<BuildInfoModel> list = buildInfoService.listPage(where, pageReq);
 		if (CollUtil.isEmpty(list)) {
 			return new HashSet<>();
 		} else {
-			return list.stream().map(BaseModel::getId).collect(Collectors.toSet());
+			return list.stream().map(BuildInfoModel::getId).collect(Collectors.toSet());
 		}
 	}
 
@@ -184,7 +178,7 @@ public class BuildHistoryController extends BaseServerController {
 	 * @param logId id
 	 * @return json
 	 */
-	@RequestMapping(value = "delete_log.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+	@RequestMapping(value = "/build/history/delete_log.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	@OptLog(UserOperateLogV1.OptType.DelBuildLog)
 	@ResponseBody
 	@Feature(method = MethodFeature.DEL_LOG)

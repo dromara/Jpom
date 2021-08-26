@@ -135,7 +135,7 @@ public class BuildInfoController extends BaseServerController {
 			if (StrUtil.isEmpty(branchName)) {
 				return JsonMessage.getString(405, "请选择分支");
 			}
-			List<String> list = GitUtil.getBranchList(repositoryModel.getGitUrl(), repositoryModel.getUserName(), repositoryModel.getPassword());
+			List<String> list = GitUtil.getBranchList(repositoryModel);
 			if (!list.contains(branchName)) {
 				return JsonMessage.getString(405, "没有找到对应分支：" + branchName);
 			}
@@ -202,6 +202,8 @@ public class BuildInfoController extends BaseServerController {
 
 		// 新增构建信息
 		if (StrUtil.isEmpty(id)) {
+			// set default buildId
+			buildInfoModel.setBuildId(0);
 			buildInfoService.add(buildInfoModel);
 			return JsonMessage.getString(200, "添加成功");
 		}
