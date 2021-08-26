@@ -1,6 +1,8 @@
 package io.jpom.model.data;
 
+import cn.hutool.http.HttpUtil;
 import io.jpom.model.BaseDbModel;
+import io.jpom.model.GitProtocolEnum;
 import io.jpom.service.h2db.TableName;
 
 /**
@@ -23,6 +25,8 @@ public class RepositoryModel extends BaseDbModel {
 	private Integer repoType;
 	/**
 	 * 拉取代码的协议{0: http, 1: ssh}
+	 *
+	 * @see GitProtocolEnum
 	 */
 	private Integer protocol;
 	/**
@@ -66,8 +70,21 @@ public class RepositoryModel extends BaseDbModel {
 		this.repoType = repoType;
 	}
 
+	/**
+	 * 返回协议类型，如果为 null 会尝试识别 http
+	 *
+	 * @return 枚举的值（1/0）
+	 * @see GitProtocolEnum
+	 */
 	public Integer getProtocol() {
-		return protocol;
+		if (protocol != null) {
+			return protocol;
+		}
+		String gitUrl = this.getGitUrl();
+		if (HttpUtil.isHttps(gitUrl) || HttpUtil.isHttp(gitUrl)) {
+			return GitProtocolEnum.HTTP.getCode();
+		}
+		return null;
 	}
 
 	public void setProtocol(Integer protocol) {

@@ -4,6 +4,7 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.lang.Validator;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.core.util.URLUtil;
 import cn.hutool.db.Entity;
 import cn.hutool.db.Page;
 import cn.hutool.db.PageResult;
@@ -22,8 +23,8 @@ import io.jpom.model.data.RepositoryModel;
 import io.jpom.plugin.ClassFeature;
 import io.jpom.plugin.Feature;
 import io.jpom.plugin.MethodFeature;
+import io.jpom.service.dblog.BuildInfoService;
 import io.jpom.service.dblog.RepositoryService;
-import io.jpom.util.StringUtil;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -41,6 +42,9 @@ public class RepositoryController {
 
 	@Resource
 	private RepositoryService repositoryService;
+
+	@Resource
+	private BuildInfoService buildInfoService;
 
 	/**
 	 * load repository list
@@ -125,7 +129,8 @@ public class RepositoryController {
 
 	/**
 	 * check and update ssh key
-	 * @param repositoryModelReq
+	 *
+	 * @param repositoryModelReq 仓库
 	 */
 	private boolean checkAndUpdateSshKey(RepositoryModel repositoryModelReq) {
 		if (repositoryModelReq.getProtocol() == GitProtocolEnum.SSH.getCode()) {
@@ -136,10 +141,10 @@ public class RepositoryController {
 				 * if rsa key is start with "file:"
 				 * copy this file
 				 */
-				if (StrUtil.startWith(repositoryModelReq.getRsaPrv(), Const.FILE_PREFIX)) {
-					String rsaPath = StrUtil.removePrefix(repositoryModelReq.getRsaPrv(), Const.FILE_PREFIX);
+				if (StrUtil.startWith(repositoryModelReq.getRsaPrv(), URLUtil.FILE_URL_PREFIX)) {
+					String rsaPath = StrUtil.removePrefix(repositoryModelReq.getRsaPrv(), URLUtil.FILE_URL_PREFIX);
 					if (!FileUtil.file(rsaPath).exists()) {
-						DefaultSystemLog.getLog().error("there is no rsa file...");
+						DefaultSystemLog.getLog().warn("there is no rsa file... {}", rsaPath);
 						return false;
 					}
 					FileUtil.copy(FileUtil.file(rsaPath), rsaFile, true);
@@ -155,12 +160,18 @@ public class RepositoryController {
 	/**
 	 * delete
 	 *
-	 * @param id
-	 * @return
+	 * @param id 仓库ID
+	 * @return json
 	 */
 	@PostMapping(value = "/build/repository/delete")
 	@Feature(method = MethodFeature.DEL)
 	public Object delRepository(String id) {
+		// 判断仓库是否被关联
+		Entity entity = Entity.create();
+		entity.set("repositoryId", id);
+		boolean exists = buildInfoService.exists(entity);
+		Assert.state(!exists, "当前仓库被构建关联，不能直接删除");
+		//
 		repositoryService.delByKey(id);
 		return JsonMessage.getString(200, "删除成功");
 	}

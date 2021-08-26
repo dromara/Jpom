@@ -47,6 +47,10 @@
 
 > 推荐安装 `alibaba-java-coding-guidelines`（`p3c`） 插件
 
+##### 代码级别的多行注释
+
+[https://www.e-learn.cn/topic/3680721](https://www.e-learn.cn/topic/3680721)
+
 ## changelog 更新规范
 
 > 在新加功能、修护bug、优化功能在完成时候都需要在 [CAHNGELOG.md](./CHANGELOG.md) 记录

@@ -4,6 +4,7 @@ import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.bean.copier.CopyOptions;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.PageUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.core.util.TypeUtil;
 import cn.hutool.db.Db;
 import cn.hutool.db.Entity;
@@ -223,6 +224,9 @@ public abstract class BaseDbCommonService<T> {
 	 * @return 影响行数
 	 */
 	public int delByKey(String keyValue) {
+		if (StrUtil.isEmpty(keyValue)) {
+			return 0;
+		}
 		if (!DbConfig.getInstance().isInit()) {
 			// ignore
 			return 0;

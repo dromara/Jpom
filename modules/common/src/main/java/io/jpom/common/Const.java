@@ -32,5 +32,4 @@ public class Const {
 	 * sshkey
 	 */
 	public static final String SSH_KEY = "sshkey";
-	public static final String FILE_PREFIX = "file:";
 }

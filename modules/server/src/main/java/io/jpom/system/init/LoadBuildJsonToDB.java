@@ -11,6 +11,7 @@ import cn.jiangzeyin.common.DefaultSystemLog;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.common.Const;
+import io.jpom.model.GitProtocolEnum;
 import io.jpom.model.data.BuildInfoModel;
 import io.jpom.model.data.RepositoryModel;
 import io.jpom.model.vo.BuildModelVo;
@@ -105,6 +106,8 @@ public class LoadBuildJsonToDB {
 			if (StrUtil.isEmpty(repositoryId)) {
 				// 先存储仓库信息
 				Map<String, Object> repositoryParamMap = initSqlParamMap(repositoryFieldList, buildModelVo);
+				// add def protocol
+				repositoryParamMap.put("PROTOCOL", GitProtocolEnum.HTTP.getCode());
 				// 构造 insert SQL 语句
 				String insertRepositorySql = initInsertSql(repositoryParamMap, RepositoryModel.class);
 				// 插入数据库
