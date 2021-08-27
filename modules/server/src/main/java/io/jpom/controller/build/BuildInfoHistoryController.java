@@ -18,8 +18,8 @@ import io.jpom.common.BaseServerController;
 import io.jpom.common.interceptor.OptLog;
 import io.jpom.model.BaseEnum;
 import io.jpom.model.data.BuildInfoModel;
-import io.jpom.model.data.BuildModel;
 import io.jpom.model.data.UserModel;
+import io.jpom.model.enums.BuildStatus;
 import io.jpom.model.log.BuildHistoryLog;
 import io.jpom.model.log.UserOperateLogV1;
 import io.jpom.model.vo.BuildHistoryLogVo;
@@ -42,6 +42,7 @@ import java.util.stream.Collectors;
 
 /**
  * new version for build info history controller
+ *
  * @author Hotstrip
  * @since 2021-08-26
  */
@@ -120,7 +121,7 @@ public class BuildInfoHistoryController extends BaseServerController {
 		if (StrUtil.isNotEmpty(status)) {
 			Integer integer = Convert.toInt(status);
 			if (integer != null) {
-				anEnum = BaseEnum.getEnum(BuildModel.Status.class, integer);
+				anEnum = BaseEnum.getEnum(BuildStatus.class, integer);
 			}
 		}
 

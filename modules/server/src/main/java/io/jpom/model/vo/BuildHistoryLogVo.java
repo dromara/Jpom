@@ -5,6 +5,7 @@ import io.jpom.build.BuildUtil;
 import io.jpom.model.BaseEnum;
 import io.jpom.model.data.BuildModel;
 import io.jpom.model.data.OutGivingModel;
+import io.jpom.model.enums.BuildReleaseMethod;
 import io.jpom.model.log.BuildHistoryLog;
 import io.jpom.service.node.OutGivingServer;
 
@@ -72,9 +73,9 @@ public class BuildHistoryLogVo extends BuildHistoryLog {
     public String getReleaseDesc() {
         if (releaseDesc == null) {
             int releaseMethod = getReleaseMethod();
-            BuildModel.ReleaseMethod releaseMethod1 = BaseEnum.getEnum(BuildModel.ReleaseMethod.class, releaseMethod);
+            BuildReleaseMethod releaseMethod1 = BaseEnum.getEnum(BuildReleaseMethod.class, releaseMethod);
             if (releaseMethod1 == null) {
-                return BuildModel.ReleaseMethod.No.getDesc();
+                return BuildReleaseMethod.No.getDesc();
             }
             String releaseMethodDataId = getReleaseMethodDataId();
             switch (releaseMethod1) {

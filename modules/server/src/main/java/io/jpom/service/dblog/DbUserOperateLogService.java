@@ -4,13 +4,12 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.StrUtil;
 import io.jpom.model.BaseEnum;
-import io.jpom.model.data.BuildModel;
+import io.jpom.model.data.BuildInfoModel;
 import io.jpom.model.data.MonitorModel;
 import io.jpom.model.data.MonitorUserOptModel;
 import io.jpom.model.data.UserModel;
 import io.jpom.model.log.UserOperateLogV1;
 import io.jpom.monitor.NotifyUtil;
-import io.jpom.service.build.BuildService;
 import io.jpom.service.h2db.BaseDbCommonService;
 import io.jpom.service.monitor.MonitorUserOptService;
 import io.jpom.service.user.UserService;
@@ -30,11 +29,11 @@ public class DbUserOperateLogService extends BaseDbCommonService<UserOperateLogV
 
 	private final MonitorUserOptService monitorUserOptService;
 	private final UserService userService;
-	private final BuildService buildService;
+	private final BuildInfoService buildService;
 
 	public DbUserOperateLogService(MonitorUserOptService monitorUserOptService,
 								   UserService userService,
-								   BuildService buildService) {
+								   BuildInfoService buildService) {
 		super(UserOperateLogV1.TABLE_NAME, "reqId", UserOperateLogV1.class);
 		this.monitorUserOptService = monitorUserOptService;
 		this.userService = userService;
@@ -56,7 +55,7 @@ public class DbUserOperateLogService extends BaseDbCommonService<UserOperateLogV
 			}
 			String otherMsg = "";
 			if (optType == UserOperateLogV1.OptType.StartBuild || optType == UserOperateLogV1.OptType.EditBuild) {
-				BuildModel item = buildService.getItem(userOperateLogV1.getDataId());
+				BuildInfoModel item = buildService.getByKey(userOperateLogV1.getDataId());
 				if (item != null) {
 					otherMsg = StrUtil.format("操作的构建名称：{}\n", item.getName());
 				}

@@ -15,7 +15,7 @@ import io.jpom.model.log.UserOperateLogV1;
 import io.jpom.plugin.ClassFeature;
 import io.jpom.plugin.Feature;
 import io.jpom.plugin.MethodFeature;
-import io.jpom.service.build.BuildService;
+import io.jpom.service.dblog.BuildInfoService;
 import io.jpom.service.monitor.MonitorService;
 import io.jpom.service.node.OutGivingServer;
 import io.jpom.service.node.manage.ProjectInfoService;
@@ -45,7 +45,7 @@ public class ProjectManageControl extends BaseServerController {
 	@Resource
 	private MonitorService monitorService;
 	@Resource
-	private BuildService buildService;
+	private BuildInfoService buildService;
 
 
 	/**

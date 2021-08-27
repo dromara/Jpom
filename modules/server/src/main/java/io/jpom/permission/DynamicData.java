@@ -3,7 +3,6 @@ package io.jpom.permission;
 import io.jpom.common.BaseServerController;
 import io.jpom.plugin.ClassFeature;
 import io.jpom.plugin.MethodFeature;
-import io.jpom.service.build.BuildService;
 import io.jpom.service.node.NodeService;
 import io.jpom.service.node.OutGivingServer;
 import io.jpom.service.node.manage.ProjectInfoService;
@@ -43,7 +42,7 @@ public class DynamicData {
         //
         put(ClassFeature.TOMCAT, new DynamicData(TomcatService.class, MethodFeature.LIST));
         //
-        put(ClassFeature.BUILD, new DynamicData(BuildService.class, MethodFeature.LIST));
+//        put(ClassFeature.BUILD, new DynamicData(BuildInfoService.class, MethodFeature.LIST));
     }
 
     private static void put(ClassFeature feature, DynamicData dynamicData) {

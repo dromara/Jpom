@@ -20,21 +20,23 @@ import io.jpom.common.interceptor.OptLog;
 import io.jpom.model.AfterOpt;
 import io.jpom.model.BaseEnum;
 import io.jpom.model.data.*;
+import io.jpom.model.enums.BuildReleaseMethod;
 import io.jpom.model.log.UserOperateLogV1;
 import io.jpom.plugin.ClassFeature;
 import io.jpom.plugin.Feature;
 import io.jpom.plugin.MethodFeature;
-import io.jpom.service.build.BuildService;
 import io.jpom.service.dblog.BuildInfoService;
 import io.jpom.service.dblog.DbBuildHistoryLogService;
 import io.jpom.service.dblog.RepositoryService;
 import io.jpom.service.node.ssh.SshService;
 import io.jpom.util.CommandUtil;
 import io.jpom.util.GitUtil;
-import org.eclipse.jgit.api.errors.GitAPIException;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
 import java.io.File;
@@ -131,7 +133,7 @@ public class BuildInfoController extends BaseServerController {
 			return JsonMessage.getString(405, "无效的仓库信息");
 		}
 		// 如果是 GIT 需要检测分支是否存在
-		if (BuildModel.RepoType.Git.getCode() == repositoryModel.getRepoType()) {
+		if (RepositoryModel.RepoType.Git.getCode() == repositoryModel.getRepoType()) {
 			if (StrUtil.isEmpty(branchName)) {
 				return JsonMessage.getString(405, "请选择分支");
 			}
@@ -156,7 +158,7 @@ public class BuildInfoController extends BaseServerController {
 			buildInfoModel.setGroup(group);
 		}
 		// 如果是 SVN
-		if (BuildModel.RepoType.Svn.getCode() == repositoryModel.getRepoType()) {
+		if (RepositoryModel.RepoType.Svn.getCode() == repositoryModel.getRepoType()) {
 			branchName = "trunk";
 		}
 		// 设置参数
@@ -169,7 +171,7 @@ public class BuildInfoController extends BaseServerController {
 		buildInfoModel.setModifyUser(UserModel.getOptUserName(getUser()));
 
 		// 发布方式
-		BuildModel.ReleaseMethod releaseMethod1 = BaseEnum.getEnum(BuildModel.ReleaseMethod.class, releaseMethod);
+		BuildReleaseMethod releaseMethod1 = BaseEnum.getEnum(BuildReleaseMethod.class, releaseMethod);
 		if (releaseMethod1 == null) {
 			return JsonMessage.getString(405, "发布方法不正确");
 		}
@@ -178,22 +180,27 @@ public class BuildInfoController extends BaseServerController {
 		JSONObject jsonObject = JSON.parseObject(extraData);
 
 		// 验证发布方式 和 extraData 信息
-		if (releaseMethod1 == BuildModel.ReleaseMethod.Project) {
+		if (releaseMethod1 == BuildReleaseMethod.Project) {
 			String formatProject = formatProject(jsonObject);
 			if (formatProject != null) {
 				return formatProject;
 			}
-		} else if (releaseMethod1 == BuildModel.ReleaseMethod.Ssh) {
+		} else if (releaseMethod1 == BuildReleaseMethod.Ssh) {
 			String formatSsh = formatSsh(jsonObject);
 			if (formatSsh != null) {
 				return formatSsh;
 			}
-		} else if (releaseMethod1 == BuildModel.ReleaseMethod.Outgiving) {
+		} else if (releaseMethod1 == BuildReleaseMethod.Outgiving) {
 			String releaseMethodDataId = jsonObject.getString("releaseMethodDataId_1");
 			if (StrUtil.isEmpty(releaseMethodDataId)) {
 				return JsonMessage.getString(405, "请选择分发项目");
 			}
 			jsonObject.put("releaseMethodDataId", releaseMethodDataId);
+		}
+		// 检查关联数据ID
+		buildInfoModel.setReleaseMethodDataId(jsonObject.getString("releaseMethodDataId"));
+		if (buildInfoModel.getReleaseMethod() != BuildReleaseMethod.No.getCode()) {
+			Assert.hasText(buildInfoModel.getReleaseMethodDataId(), "没有发布分发对应关联数据ID");
 		}
 
 		// 设置属性
@@ -204,7 +211,7 @@ public class BuildInfoController extends BaseServerController {
 		if (StrUtil.isEmpty(id)) {
 			// set default buildId
 			buildInfoModel.setBuildId(0);
-			buildInfoService.add(buildInfoModel);
+			buildInfoService.insert(buildInfoModel);
 			return JsonMessage.getString(200, "添加成功");
 		}
 
@@ -307,6 +314,7 @@ public class BuildInfoController extends BaseServerController {
 		//
 		Assert.state(repositoryModel.getRepoType() == 0, "只有 GIT 仓库才有分支信息");
 		Tuple branchAndTagList = GitUtil.getBranchAndTagList(repositoryModel);
+		Assert.notNull(branchAndTagList, "没有任何分支");
 		Object[] members = branchAndTagList.getMembers();
 		return JsonMessage.getString(200, "ok", members);
 	}

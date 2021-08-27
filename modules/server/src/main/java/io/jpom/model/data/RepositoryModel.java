@@ -2,7 +2,8 @@ package io.jpom.model.data;
 
 import cn.hutool.http.HttpUtil;
 import io.jpom.model.BaseDbModel;
-import io.jpom.model.GitProtocolEnum;
+import io.jpom.model.BaseEnum;
+import io.jpom.model.enums.GitProtocolEnum;
 import io.jpom.service.h2db.TableName;
 
 /**
@@ -121,5 +122,34 @@ public class RepositoryModel extends BaseDbModel {
 
 	public void setRsaPrv(String rsaPrv) {
 		this.rsaPrv = rsaPrv;
+	}
+
+	/**
+	 * 仓库类型
+	 */
+	public enum RepoType implements BaseEnum {
+		/**
+		 * git
+		 */
+		Git(0, "Git"),
+		Svn(1, "Svn"),
+		;
+		private int code;
+		private String desc;
+
+		RepoType(int code, String desc) {
+			this.code = code;
+			this.desc = desc;
+		}
+
+		@Override
+		public int getCode() {
+			return code;
+		}
+
+		@Override
+		public String getDesc() {
+			return desc;
+		}
 	}
 }

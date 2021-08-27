@@ -15,7 +15,7 @@ public class BaseBuildModule extends BaseModel {
 	/**
 	 * 发布方式
 	 *
-	 * @see BuildModel.ReleaseMethod
+	 * @see BuildReleaseMethod
 	 * @see BuildModel#getReleaseMethod()
 	 */
 	private int releaseMethod;

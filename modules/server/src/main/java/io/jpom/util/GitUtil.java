@@ -11,7 +11,7 @@ import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import io.jpom.build.BuildUtil;
 import io.jpom.common.Const;
-import io.jpom.model.GitProtocolEnum;
+import io.jpom.model.enums.GitProtocolEnum;
 import io.jpom.model.data.RepositoryModel;
 import io.jpom.system.JpomRuntimeException;
 import org.eclipse.jgit.api.*;
@@ -25,6 +25,7 @@ import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.transport.*;
 import org.eclipse.jgit.util.FS;
+import org.springframework.util.Assert;
 
 import java.io.File;
 import java.io.IOException;
@@ -40,10 +41,9 @@ import java.util.stream.Collectors;
  * https://github.com/centic9/jgit-cookbook
  *
  * @author bwcx_jzy
- * @date 2019/7/15
- *
  * @author Hotstrip
  * add git with ssh key to visit repository
+ * @date 2019/7/15
  **/
 public class GitUtil {
 
@@ -77,14 +77,13 @@ public class GitUtil {
 	/**
 	 * 删除重新clone
 	 *
-	 * @param url                 url
-	 * @param file                文件
-	 * @param credentialsProvider 凭证
+	 * @param repositoryModel 仓库
+	 * @param file            文件
 	 * @return git
 	 * @throws GitAPIException api
 	 * @throws IOException     删除文件失败
 	 */
-	private static Git reClone(String url, String branchName, File file, CredentialsProvider credentialsProvider, PrintWriter printWriter) throws GitAPIException, IOException {
+	private static Git reClone(RepositoryModel repositoryModel, String branchName, File file, PrintWriter printWriter) throws GitAPIException, IOException {
 		if (!FileUtil.clean(file)) {
 			FileUtil.del(file.toPath());
 			//throw new IOException("del error:" + file.getPath());
@@ -97,16 +96,56 @@ public class GitUtil {
 			cloneCommand.setBranch(Constants.R_HEADS + branchName);
 			cloneCommand.setBranchesToClone(Collections.singletonList(Constants.R_HEADS + branchName));
 		}
-		return cloneCommand.setURI(url)
-				.setDirectory(file)
-				.setCredentialsProvider(credentialsProvider)
-				.call();
+		CloneCommand command = cloneCommand.setURI(repositoryModel.getGitUrl())
+				.setDirectory(file);
+		// 设置凭证
+		setCredentials(command, repositoryModel);
+		return command.call();
 	}
 
-	private static Git initGit(String url, String branchName, File file, CredentialsProvider credentialsProvider, PrintWriter printWriter) throws IOException, GitAPIException {
+	/**
+	 * 设置仓库凭证
+	 *
+	 * @param transportCommand git 相关操作
+	 * @param repositoryModel  仓库实体
+	 */
+	private static void setCredentials(TransportCommand<?, ?> transportCommand, RepositoryModel repositoryModel) {
+		Integer protocol = repositoryModel.getProtocol();
+		if (protocol == GitProtocolEnum.HTTP.getCode()) {
+			// http
+			UsernamePasswordCredentialsProvider credentialsProvider = new UsernamePasswordCredentialsProvider(repositoryModel.getUserName(), repositoryModel.getPassword());
+			transportCommand.setCredentialsProvider(credentialsProvider);
+		} else if (protocol == GitProtocolEnum.SSH.getCode()) {
+			// ssh
+			File rsaFile = BuildUtil.getRepositoryRsaFile(repositoryModel.getId() + Const.ID_RSA);
+			Assert.state(FileUtil.isFile(rsaFile), "仓库密钥文件不存在或者异常,请检查后操作");
+			transportCommand.setTransportConfigCallback(transport -> {
+				SshTransport sshTransport = (SshTransport) transport;
+				sshTransport.setSshSessionFactory(new JschConfigSessionFactory() {
+
+					@Override
+					protected JSch createDefaultJSch(FS fs) throws JSchException {
+						JSch jSch = super.createDefaultJSch(fs);
+						// 添加私钥文件
+						String rsaPass = repositoryModel.getPassword();
+						if (StrUtil.isEmpty(rsaPass)) {
+							jSch.addIdentity(rsaFile.getPath());
+						} else {
+							jSch.addIdentity(rsaFile.getPath(), rsaPass);
+						}
+						return jSch;
+					}
+				});
+			});
+		} else {
+			throw new IllegalStateException("不支持到协议类型");
+		}
+	}
+
+	private static Git initGit(RepositoryModel repositoryModel, String branchName, File file, PrintWriter printWriter) throws IOException, GitAPIException {
 		Git git;
 		if (FileUtil.file(file, Constants.DOT_GIT).exists()) {
-			if (checkRemoteUrl(url, file)) {
+			if (checkRemoteUrl(repositoryModel.getGitUrl(), file)) {
 				git = Git.open(file);
 				//
 				if (branchName != null) {
@@ -115,13 +154,15 @@ public class GitUtil {
 						pull.setProgressMonitor(new TextProgressMonitor(printWriter));
 					}
 					pull.setRemoteBranchName(branchName);
-					pull.setCredentialsProvider(credentialsProvider).call();
+					// 更新凭证
+					setCredentials(pull, repositoryModel);
+					pull.call();
 				}
 			} else {
-				git = reClone(url, branchName, file, credentialsProvider, printWriter);
+				git = reClone(repositoryModel, branchName, file, printWriter);
 			}
 		} else {
-			git = reClone(url, branchName, file, credentialsProvider, printWriter);
+			git = reClone(repositoryModel, branchName, file, printWriter);
 		}
 		return git;
 	}
@@ -129,17 +170,20 @@ public class GitUtil {
 	/**
 	 * 获取仓库远程的所有分支
 	 *
-	 * @param url                 远程url
-	 * @param credentialsProvider 凭证
+	 * @param repositoryModel 仓库
 	 * @return Tuple
 	 * @throws GitAPIException api
 	 */
-	public static Tuple getBranchAndTagList(String url, CredentialsProvider credentialsProvider) throws Exception {
+	public static Tuple getBranchAndTagList(RepositoryModel repositoryModel) throws Exception {
+		String url = repositoryModel.getGitUrl();
 		synchronized (url.intern()) {
 			try {
-				Collection<Ref> call = Git.lsRemoteRepository()
-						.setRemote(url)
-						.setCredentialsProvider(credentialsProvider)
+				LsRemoteCommand lsRemoteCommand = Git.lsRemoteRepository()
+						.setRemote(url);
+				// 更新凭证
+				setCredentials(lsRemoteCommand, repositoryModel);
+				//
+				Collection<Ref> call = lsRemoteCommand
 						.setHeads(true)
 						.setTags(true)
 						.call();
@@ -187,28 +231,10 @@ public class GitUtil {
 	}
 
 	/**
-	 * old version for load branch list
-	 * @see GitUtil#getBranchList
-	 * @param url
-	 * @param userName
-	 * @param userPwd
-	 * @return
-	 * @throws Exception
-	 */
-	@Deprecated
-	public static List<String> getBranchList(String url, String userName, String userPwd) throws Exception {
-		Tuple tuple = getBranchAndTagList(url, new UsernamePasswordCredentialsProvider(userName, userPwd));
-		List<String> branch = tuple == null ? null : tuple.get(0);
-		if (CollUtil.isEmpty(branch)) {
-			throw new JpomRuntimeException("该仓库还没有任何分支");
-		}
-		return tuple.get(0);
-	}
-
-	/**
 	 * load repository branch list by git
-	 * @return
-	 * @throws Exception
+	 *
+	 * @return list
+	 * @throws Exception 异常
 	 */
 	public static List<String> getBranchList(RepositoryModel repositoryModel) throws Exception {
 		Tuple tuple = getBranchAndTagList(repositoryModel);
@@ -221,126 +247,20 @@ public class GitUtil {
 	}
 
 	/**
-	 * 根据仓库获取分支信息
-	 *
-	 * @param repositoryModel 仓库信息
-	 * @return 分支+tag
-	 * @throws Exception 异常
-	 */
-	public static Tuple getBranchAndTagList(RepositoryModel repositoryModel) throws Exception {
-		String url = repositoryModel.getGitUrl();
-
-		// result
-		Tuple tuple = null;
-
-		// git branch with http
-		if (repositoryModel.getProtocol() == GitProtocolEnum.HTTP.getCode()) {
-			String userName = repositoryModel.getUserName();
-			String userPwd = repositoryModel.getPassword();
-			tuple = getBranchAndTagList(url, new UsernamePasswordCredentialsProvider(userName, userPwd));
-		}
-
-		// git branch with ssh
-		if (repositoryModel.getProtocol() == GitProtocolEnum.SSH.getCode()) {
-			File rsaFile = BuildUtil.getRepositoryRsaFile(repositoryModel.getId() + Const.ID_RSA);
-			tuple = getBranchAndTagListWithSSH(url, rsaFile, repositoryModel.getPassword());
-		}
-
-		List<String> branch = tuple == null ? null : tuple.get(0);
-		if (CollUtil.isEmpty(branch)) {
-			throw new JpomRuntimeException("该仓库还没有任何分支");
-		}
-		return tuple;
-	}
-
-	/**
-	 *
-	 * @param url
-	 * @param rsaFile
-	 * @param rsaPass
-	 * @return
-	 */
-	private static Tuple getBranchAndTagListWithSSH(String url, File rsaFile, String rsaPass) throws Exception {
-		synchronized (url.intern()) {
-			try {
-				Collection<Ref> call = Git.lsRemoteRepository()
-						.setRemote(url)
-						.setTransportConfigCallback(transport -> {
-							SshTransport sshTransport = (SshTransport) transport;
-							sshTransport.setSshSessionFactory( new JschConfigSessionFactory() {
-
-								@Override
-								protected JSch createDefaultJSch(FS fs) throws JSchException {
-									JSch jSch = super.createDefaultJSch(fs);
-									// 添加私钥文件
-									jSch.addIdentity(rsaFile.getPath(), rsaPass);
-									return jSch;
-								}
-							});
-						})
-						.setHeads(true)
-						.setTags(true)
-						.call();
-				if (CollUtil.isEmpty(call)) {
-					return null;
-				}
-				Map<String, List<Ref>> refMap = CollStreamUtil.groupByKey(call, ref -> {
-					String name = ref.getName();
-					if (name.startsWith(Constants.R_TAGS)) {
-						return Constants.R_TAGS;
-					} else if (name.startsWith(Constants.R_HEADS)) {
-						return Constants.R_HEADS;
-					}
-					return null;
-				});
-
-				// branch list
-				List<Ref> branchListRef = refMap.get(Constants.R_HEADS);
-				if (branchListRef == null) {
-					return null;
-				}
-				List<String> branchList = branchListRef.stream().map(ref -> {
-					String name = ref.getName();
-					if (name.startsWith(Constants.R_HEADS)) {
-						return name.substring((Constants.R_HEADS).length());
-					}
-					return null;
-				}).filter(Objects::nonNull).collect(Collectors.toList());
-
-				// list tag
-				List<Ref> tagListRef = refMap.get(Constants.R_TAGS);
-				List<String> tagList = tagListRef == null ? new ArrayList<>() : tagListRef.stream().map(ref -> {
-					String name = ref.getName();
-					if (name.startsWith(Constants.R_TAGS)) {
-						return name.substring((Constants.R_TAGS).length());
-					}
-					return null;
-				}).filter(Objects::nonNull).collect(Collectors.toList());
-				return new Tuple(branchList, tagList);
-			} catch (Exception t) {
-				checkTransportException(t, null, null);
-				return null;
-			}
-		}
-	}
-
-
-	/**
 	 * 拉取对应分支最新代码
 	 *
-	 * @param url                 远程url
-	 * @param file                仓库路径
-	 * @param branchName          分支名
-	 * @param credentialsProvider 凭证
+	 * @param repositoryModel 仓库
+	 * @param file            仓库路径
+	 * @param branchName      分支名
 	 * @return 返回最新一次提交信息
 	 * @throws IOException     IO
 	 * @throws GitAPIException api
 	 */
-	public static String checkoutPull(String url, File file, String branchName, CredentialsProvider credentialsProvider, PrintWriter printWriter) throws Exception {
-		synchronized (url.intern()) {
-			try (Git git = initGit(url, branchName, file, credentialsProvider, printWriter)) {
+	public static String checkoutPull(RepositoryModel repositoryModel, File file, String branchName, PrintWriter printWriter) throws Exception {
+		synchronized (repositoryModel.getGitUrl().intern()) {
+			try (Git git = initGit(repositoryModel, branchName, file, printWriter)) {
 				// 拉取代码
-				PullResult pull = pull(git, branchName, credentialsProvider, null, printWriter);
+				PullResult pull = pull(git, repositoryModel, branchName, null, printWriter);
 				// 最后一次提交记录
 				return getLastCommitMsg(file, branchName);
 			} catch (Exception t) {
@@ -353,15 +273,15 @@ public class GitUtil {
 	/**
 	 * 拉取远程最新代码
 	 *
-	 * @param git                 仓库对象
-	 * @param branchName          分支
-	 * @param credentialsProvider 认证信息
-	 * @param tagOpt              tag 操作
-	 * @param printWriter         日志流
+	 * @param git             仓库对象
+	 * @param branchName      分支
+	 * @param repositoryModel 仓库
+	 * @param tagOpt          tag 操作
+	 * @param printWriter     日志流
 	 * @return pull result
 	 * @throws Exception 异常
 	 */
-	private static PullResult pull(Git git, String branchName, CredentialsProvider credentialsProvider, TagOpt tagOpt, PrintWriter printWriter) throws Exception {
+	private static PullResult pull(Git git, RepositoryModel repositoryModel, String branchName, TagOpt tagOpt, PrintWriter printWriter) throws Exception {
 		// 判断本地是否存在对应分支
 		List<Ref> list = git.branchList().call();
 		boolean createBranch = true;
@@ -387,7 +307,10 @@ public class GitUtil {
 		if (tagOpt != null) {
 			pull.setTagOpt(tagOpt);
 		}
-		PullResult call = pull.setCredentialsProvider(credentialsProvider).call();
+		//
+		setCredentials(pull, repositoryModel);
+		//
+		PullResult call = pull.call();
 		// 输出拉取结果
 		if (call != null) {
 			String fetchedFrom = call.getFetchedFrom();
@@ -413,18 +336,20 @@ public class GitUtil {
 	/**
 	 * 拉取对应分支最新代码
 	 *
-	 * @param url                 远程url
-	 * @param file                仓库路径
-	 * @param tagName             标签名
-	 * @param credentialsProvider 凭证
+	 * @param branchName      分支名
+	 * @param printWriter     日志输出留
+	 * @param repositoryModel 仓库
+	 * @param file            仓库路径
+	 * @param tagName         标签名
 	 * @throws IOException     IO
 	 * @throws GitAPIException api
 	 */
-	public static String checkoutPullTag(String url, File file, String branchName, String tagName, CredentialsProvider credentialsProvider, PrintWriter printWriter) throws Exception {
+	public static String checkoutPullTag(RepositoryModel repositoryModel, File file, String branchName, String tagName, PrintWriter printWriter) throws Exception {
+		String url = repositoryModel.getGitUrl();
 		synchronized (url.intern()) {
-			try (Git git = initGit(url, null, file, credentialsProvider, printWriter)) {
+			try (Git git = initGit(repositoryModel, null, file, printWriter)) {
 				// 拉取最新代码
-				PullResult pull = pull(git, branchName, credentialsProvider, null, printWriter);
+				PullResult pull = pull(git, repositoryModel, branchName, null, printWriter);
 				// 切换到对应的 tag
 				git.checkout()
 						.setUpstreamMode(CreateBranchCommand.SetupUpstreamMode.SET_UPSTREAM)
@@ -555,42 +480,43 @@ public class GitUtil {
 		}
 	}
 
-	/**
-	 * git clone with ssh way
-	 * @param url 远程仓库地址
-	 * @param file 本地存档的文件地址
-	 * @param branchName 分支名称
-	 * @param rsaFile 私钥文件
-	 * @param rsaPass 私钥密码
-	 * @param printWriter
-	 */
-	public static String gitCloneWithSSH(String url, File file, String branchName,
-									   File rsaFile, String rsaPass, PrintWriter printWriter) throws GitAPIException {
-		// if file exists，delete first
-		if (FileUtil.exist(file)) {
-			FileUtil.del(file);
-		}
-
-		// git clone
-		Git.cloneRepository()
-				.setProgressMonitor(new TextProgressMonitor(printWriter))
-				.setURI(url)
-				.setDirectory(file)
-				.setBranch(branchName)
-				.setTransportConfigCallback(transport -> {
-					SshTransport sshTransport = (SshTransport) transport;
-					sshTransport.setSshSessionFactory( new JschConfigSessionFactory() {
-
-						@Override
-						protected JSch createDefaultJSch(FS fs) throws JSchException {
-							JSch jSch = super.createDefaultJSch(fs);
-							// 添加私钥文件
-							jSch.addIdentity(rsaFile.getPath(), rsaPass);
-							return jSch;
-						}
-					});
-				})
-				.call();
-		return StrUtil.EMPTY;
-	}
+//	/**
+//	 * git clone with ssh way
+//	 *
+//	 * @param url         远程仓库地址
+//	 * @param file        本地存档的文件地址
+//	 * @param branchName  分支名称
+//	 * @param rsaFile     私钥文件
+//	 * @param rsaPass     私钥密码
+//	 * @param printWriter
+//	 */
+//	public static String gitCloneWithSSH(String url, File file, String branchName,
+//										 File rsaFile, String rsaPass, PrintWriter printWriter) throws GitAPIException {
+//		// if file exists，delete first
+//		if (FileUtil.exist(file)) {
+//			FileUtil.del(file);
+//		}
+//
+//		// git clone
+//		Git.cloneRepository()
+//				.setProgressMonitor(new TextProgressMonitor(printWriter))
+//				.setURI(url)
+//				.setDirectory(file)
+//				.setBranch(branchName)
+//				.setTransportConfigCallback(transport -> {
+//					SshTransport sshTransport = (SshTransport) transport;
+//					sshTransport.setSshSessionFactory(new JschConfigSessionFactory() {
+//
+//						@Override
+//						protected JSch createDefaultJSch(FS fs) throws JSchException {
+//							JSch jSch = super.createDefaultJSch(fs);
+//							// 添加私钥文件
+//							jSch.addIdentity(rsaFile.getPath(), rsaPass);
+//							return jSch;
+//						}
+//					});
+//				})
+//				.call();
+//		return StrUtil.EMPTY;
+//	}
 }

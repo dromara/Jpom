@@ -15,7 +15,9 @@ import io.jpom.system.db.DbConfig;
 
 import java.sql.SQLException;
 import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -86,8 +88,7 @@ public abstract class BaseDbCommonService<T> {
 		Db db = Db.use();
 		db.setWrapper((Character) null);
 		try {
-			Entity entity = new Entity(tableName);
-			entity.parseBean(t);
+			Entity entity = this.dataBeanToEntity(t);
 			db.insert(entity);
 		} catch (SQLException e) {
 			throw new JpomRuntimeException("数据库异常", e);
@@ -107,15 +108,25 @@ public abstract class BaseDbCommonService<T> {
 		Db db = Db.use();
 		db.setWrapper((Character) null);
 		try {
-			List<Entity> entities = t.stream().map(t1 -> {
-				Entity entity = new Entity(tableName);
-				entity.parseBean(t1);
-				return entity;
-			}).collect(Collectors.toList());
+			List<Entity> entities = t.stream().map(this::dataBeanToEntity).collect(Collectors.toList());
 			db.insert(entities);
 		} catch (SQLException e) {
 			throw new JpomRuntimeException("数据库异常", e);
 		}
+	}
+
+	/**
+	 * 实体转 entity
+	 *
+	 * @param data 实体对象
+	 * @return entity
+	 */
+	protected Entity dataBeanToEntity(T data) {
+		Entity entity = new Entity(tableName);
+		// 转换为 map
+		Map<String, Object> beanToMap = BeanUtil.beanToMap(data, new LinkedHashMap<>(), true, s -> StrUtil.format("`{}`", s));
+		entity.putAll(beanToMap);
+		return entity;
 	}
 
 	/**
@@ -182,6 +193,9 @@ public abstract class BaseDbCommonService<T> {
 	 * @return 数据
 	 */
 	public T getByKey(String keyValue) {
+		if (StrUtil.isEmpty(keyValue)) {
+			return null;
+		}
 		if (!DbConfig.getInstance().isInit()) {
 			// ignore
 			return null;
@@ -258,6 +272,17 @@ public abstract class BaseDbCommonService<T> {
 		} catch (SQLException e) {
 			throw new JpomRuntimeException("数据库异常", e);
 		}
+	}
+
+	/**
+	 * 判断是否存在
+	 *
+	 * @param data 实体
+	 * @return true 存在
+	 */
+	public boolean exists(T data) {
+		Entity entity = this.dataBeanToEntity(data);
+		return this.exists(entity);
 	}
 
 	/**

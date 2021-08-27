@@ -1,6 +1,8 @@
 package git;
 
 import cn.hutool.core.io.FileUtil;
+import io.jpom.model.enums.GitProtocolEnum;
+import io.jpom.model.data.RepositoryModel;
 import io.jpom.util.GitUtil;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.ListBranchCommand;
@@ -95,7 +97,7 @@ public class TestGit {
 		File file = FileUtil.file("~/test/jpomgit");
 		String tagName = "v2.5.2";
 		String branchName = "stand-alone";
-		UsernamePasswordCredentialsProvider credentialsProvider = new UsernamePasswordCredentialsProvider("a", "a");
+
 //		Git call = Git.cloneRepository()
 //				.setURI(uri)
 //				.setDirectory(file)
@@ -103,7 +105,15 @@ public class TestGit {
 //				.call();
 
 		PrintWriter printWriter = new PrintWriter(System.out);
-		GitUtil.checkoutPullTag(uri, file, branchName, tagName, credentialsProvider, printWriter);
+		RepositoryModel repositoryModel = new RepositoryModel();
+		repositoryModel.setGitUrl(uri);
+		repositoryModel.setRepoType(0);
+		repositoryModel.setUserName("a");
+		repositoryModel.setPassword("a");
+		repositoryModel.setProtocol(GitProtocolEnum.HTTP.getCode());
+
+
+		GitUtil.checkoutPullTag(repositoryModel, file, branchName, tagName, printWriter);
 
 		//GitUtil.checkoutPull(uri, file, branchName, credentialsProvider, printWriter);
 
@@ -120,7 +130,13 @@ public class TestGit {
 		UsernamePasswordCredentialsProvider credentialsProvider = new UsernamePasswordCredentialsProvider("a", "a");
 
 		PrintWriter printWriter = new PrintWriter(System.out);
-		String msg = GitUtil.checkoutPullTag(uri, file, branchName, tagName, credentialsProvider, printWriter);
+
+		RepositoryModel repositoryModel = new RepositoryModel();
+		repositoryModel.setGitUrl(uri);
+		repositoryModel.setRepoType(0);
+		repositoryModel.setUserName("a");
+		repositoryModel.setPassword("a");
+		String msg = GitUtil.checkoutPullTag(repositoryModel, file, branchName, tagName, printWriter);
 		System.out.println(msg);
 		//GitUtil.checkoutPull(uri, file, branchName, credentialsProvider, printWriter);
 

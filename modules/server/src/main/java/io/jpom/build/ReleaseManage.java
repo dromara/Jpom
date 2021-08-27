@@ -16,6 +16,8 @@ import io.jpom.model.data.BuildModel;
 import io.jpom.model.data.NodeModel;
 import io.jpom.model.data.SshModel;
 import io.jpom.model.data.UserModel;
+import io.jpom.model.enums.BuildReleaseMethod;
+import io.jpom.model.enums.BuildStatus;
 import io.jpom.model.log.BuildHistoryLog;
 import io.jpom.outgiving.OutGivingRun;
 import io.jpom.service.node.NodeService;
@@ -39,16 +41,16 @@ public class ReleaseManage extends BaseBuild {
 	private final File resultFile;
 	private BaseBuild baseBuild;
 
-	@Deprecated
-	ReleaseManage(BuildModel buildModel, UserModel userModel, BaseBuild baseBuild) {
-		super(BuildUtil.getLogFile(buildModel.getId(), buildModel.getBuildId()),
-				buildModel.getId());
-		this.baseBuildModule = buildModel;
-		this.buildId = buildModel.getBuildId();
-		this.userModel = userModel;
-		this.baseBuild = baseBuild;
-		this.resultFile = BuildUtil.getHistoryPackageFile(this.buildModelId, this.buildId, buildModel.getResultDirFile());
-	}
+//	@Deprecated
+//	ReleaseManage(BuildModel buildModel, UserModel userModel, BaseBuild baseBuild) {
+//		super(BuildUtil.getLogFile(buildModel.getId(), buildModel.getBuildId()),
+//				buildModel.getId());
+//		this.baseBuildModule = buildModel;
+//		this.buildId = buildModel.getBuildId();
+//		this.userModel = userModel;
+//		this.baseBuild = baseBuild;
+//		this.resultFile = BuildUtil.getHistoryPackageFile(this.buildModelId, this.buildId, buildModel.getResultDirFile());
+//	}
 
 	/**
 	 * new ReleaseManage constructor
@@ -85,7 +87,7 @@ public class ReleaseManage extends BaseBuild {
 
 
 	@Override
-	public boolean updateStatus(BuildModel.Status status) {
+	public boolean updateStatus(BuildStatus status) {
 		if (baseBuild == null) {
 			return super.updateStatus(status);
 		} else {
@@ -100,22 +102,22 @@ public class ReleaseManage extends BaseBuild {
 		this.log("start release：" + FileUtil.readableFileSize(FileUtil.size(this.resultFile)));
 		if (!this.resultFile.exists()) {
 			this.log("不存在构建产物");
-			updateStatus(BuildModel.Status.PubError);
+			updateStatus(BuildStatus.PubError);
 			return;
 		}
 		long time = SystemClock.now();
-		this.log("release method:" + BaseEnum.getDescByCode(BuildModel.ReleaseMethod.class, this.baseBuildModule.getReleaseMethod()));
+		this.log("release method:" + BaseEnum.getDescByCode(BuildReleaseMethod.class, this.baseBuildModule.getReleaseMethod()));
 		try {
-			if (this.baseBuildModule.getReleaseMethod() == BuildModel.ReleaseMethod.Outgiving.getCode()) {
+			if (this.baseBuildModule.getReleaseMethod() == BuildReleaseMethod.Outgiving.getCode()) {
 				//
 				this.doOutGiving();
-			} else if (this.baseBuildModule.getReleaseMethod() == BuildModel.ReleaseMethod.Project.getCode()) {
+			} else if (this.baseBuildModule.getReleaseMethod() == BuildReleaseMethod.Project.getCode()) {
 				AfterOpt afterOpt = BaseEnum.getEnum(AfterOpt.class, this.baseBuildModule.getAfterOpt());
 				if (afterOpt == null) {
 					afterOpt = AfterOpt.No;
 				}
 				this.doProject(afterOpt, this.baseBuildModule.isClearOld());
-			} else if (this.baseBuildModule.getReleaseMethod() == BuildModel.ReleaseMethod.Ssh.getCode()) {
+			} else if (this.baseBuildModule.getReleaseMethod() == BuildReleaseMethod.Ssh.getCode()) {
 				this.doSsh();
 			} else {
 				this.log(" 没有实现的发布分发");
@@ -125,14 +127,14 @@ public class ReleaseManage extends BaseBuild {
 			return;
 		}
 		this.log("release complete : " + DateUtil.formatBetween(SystemClock.now() - time, BetweenFormatter.Level.MILLISECOND));
-		updateStatus(BuildModel.Status.PubSuccess);
+		updateStatus(BuildStatus.PubSuccess);
 	}
 
 	/**
 	 * 修改为发布中状态
 	 */
 	public void start() {
-		updateStatus(BuildModel.Status.PubIng);
+		updateStatus(BuildStatus.PubIng);
 		this.start2();
 	}
 
@@ -263,6 +265,6 @@ public class ReleaseManage extends BaseBuild {
 	 * @param throwable 异常
 	 */
 	private void pubLog(String title, Throwable throwable) {
-		log(title, throwable, BuildModel.Status.PubError);
+		log(title, throwable, BuildStatus.PubError);
 	}
 }

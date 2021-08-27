@@ -1,7 +1,6 @@
 package io.jpom.model.data;
 
 import io.jpom.build.BaseBuildModule;
-import io.jpom.model.BaseEnum;
 
 /**
  * 在线构建
@@ -43,7 +42,7 @@ public class BuildModel extends BaseBuildModule {
 	/**
 	 * 构建状态
 	 */
-	private int status = Status.No.getCode();
+	private int status;
 	/**
 	 * 构建命令
 	 */
@@ -164,94 +163,5 @@ public class BuildModel extends BaseBuildModule {
 
 	public void setGroup(String group) {
 		this.group = group;
-	}
-
-	public enum Status implements BaseEnum {
-		/**
-		 *
-		 */
-		No(0, "未构建"),
-		Ing(1, "构建中"),
-		Success(2, "构建成功"),
-		Error(3, "构建失败"),
-		PubIng(4, "发布中"),
-		PubSuccess(5, "发布成功"),
-		PubError(6, "发布失败"),
-		Cancel(7, "取消构建"),
-		;
-		private final int code;
-		private final String desc;
-
-		Status(int code, String desc) {
-			this.code = code;
-			this.desc = desc;
-		}
-
-		@Override
-		public int getCode() {
-			return code;
-		}
-
-		@Override
-		public String getDesc() {
-			return desc;
-		}
-	}
-
-	public enum ReleaseMethod implements BaseEnum {
-		/**
-		 * 发布
-		 */
-		No(0, "不发布"),
-		Outgiving(1, "节点分发"),
-		Project(2, "项目"),
-		Ssh(3, "SSH"),
-		;
-		private final int code;
-		private final String desc;
-
-		ReleaseMethod(int code, String desc) {
-			this.code = code;
-			this.desc = desc;
-		}
-
-		@Override
-		public int getCode() {
-			return code;
-		}
-
-		@Override
-		public String getDesc() {
-			return desc;
-		}
-	}
-
-	/**
-	 * 仓库类型
-	 */
-	public enum RepoType implements BaseEnum {
-		/**
-		 * git
-		 */
-		Git(0, "Git"),
-		Svn(1, "Svn"),
-		;
-		private int code;
-		private String desc;
-
-		RepoType(int code, String desc) {
-			this.code = code;
-			this.desc = desc;
-		}
-
-		@Override
-		public int getCode() {
-			return code;
-		}
-
-		@Override
-		public String getDesc() {
-			return desc;
-		}
 	}
 }

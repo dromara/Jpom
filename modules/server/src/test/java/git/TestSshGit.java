@@ -1,5 +1,8 @@
 package git;
 
+import cn.hutool.core.io.FileUtil;
+import cn.hutool.crypto.KeyUtil;
+import cn.hutool.crypto.PemUtil;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
@@ -14,46 +17,52 @@ import org.eclipse.jgit.transport.Transport;
 import org.eclipse.jgit.util.FS;
 import org.junit.Test;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.*;
+import java.security.KeyStore;
+import java.security.PrivateKey;
+import java.security.PublicKey;
 
 /**
  * https://qa.1r1g.com/sf/ask/875171671/
- *
+ * <p>
  * https://www.jianshu.com/p/036072b45a2d
  *
  * @author bwcx_jzy
  * @date 2019/7/10
  **/
 public class TestSshGit {
-    public static void main(String[] args) throws GitAPIException, IOException {
-        Git.cloneRepository()
-                .setURI("git@gitee.com:jiangzeyin/test.git").setProgressMonitor(new TextProgressMonitor(new PrintWriter(System.out)))
-                .setDirectory(new File("D:\\test\\gitssh"))
-                .setTransportConfigCallback(new TransportConfigCallback() {
-                    @Override
-                    public void configure(Transport transport) {
-                        System.out.println("ssssssssssssssssssssssss");
-                        SshTransport sshTransport = (SshTransport) transport;
-                        sshTransport.setSshSessionFactory(new JschConfigSessionFactory() {
-                            @Override
-                            protected void configure(OpenSshConfig.Host hc, Session session) {
-                                session.setConfig("StrictHostKeyChecking", "no");
-                            }
+	public static void main(String[] args) throws GitAPIException, IOException {
+		File directory = new File("～/test/gitssh");
+		FileUtil.del(directory);
+		Git.cloneRepository()
+				.setURI("git@gitee.com:keepbx/Jpom-demo-case.git").setProgressMonitor(new TextProgressMonitor(new PrintWriter(System.out)))
+				.setDirectory(directory)
+				.setTransportConfigCallback(new TransportConfigCallback() {
+					@Override
+					public void configure(Transport transport) {
+						// System.out.println("ssssssssssssssssssssssss");
+						SshTransport sshTransport = (SshTransport) transport;
+						sshTransport.setSshSessionFactory(new JschConfigSessionFactory() {
+							@Override
+							protected void configure(OpenSshConfig.Host hc, Session session) {
+								session.setConfig("StrictHostKeyChecking", "no");
+							}
 
-                            @Override
-                            protected JSch createDefaultJSch(FS fs) throws JSchException {
-                                JSch jSch = super.createDefaultJSch(fs);
-                                //添加私钥文件
-                                jSch.addIdentity("ss");
-                                return jSch;
-                            }
-                        });
-                    }
-                })
-                .call();
-    }
+							@Override
+							protected JSch createDefaultJSch(FS fs) throws JSchException {
+								JSch jSch = super.createDefaultJSch(fs);
+								//JSch.setConfig();
+								//添加私钥文件
+								//jSch.addIdentity("~/.ssh/test/id_rsa", "~/.ssh/test/id_rsa.pub", null);
+
+								//jSch.addIdentity("~/.ssh/id_rsa");
+								return jSch;
+							}
+						});
+					}
+				})
+				.call();
+	}
 
     @Test
 	public void test1() throws GitAPIException {
@@ -80,8 +89,8 @@ public class TestSshGit {
 //				.call();
 	}
 
-    @Test
-    public void test2() {
+	@Test
+	public void test2() {
 //        SshSessionFactory sshSessionFactory = new SshSessionFactory() {
 //            @Override
 //            public RemoteSession getSession(URIish uri, CredentialsProvider credentialsProvider, FS fs, int tms) throws TransportException {
@@ -120,5 +129,13 @@ public class TestSshGit {
 //                session.setUserInfo(userInfo);
 //            }
 //        };
-    }
+	}
+
+	@Test
+	public void test() throws FileNotFoundException {
+		File keyFile = new File("/Users/user/.ssh/id_rsa");
+		PrivateKey privateKey = PemUtil.readPemPrivateKey(new FileInputStream(keyFile));
+
+//		PublicKey rsaPublicKey = KeyUtil.("~/.ssh/id_rsa");
+	}
 }

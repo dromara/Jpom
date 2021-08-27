@@ -11,7 +11,7 @@ import cn.jiangzeyin.common.DefaultSystemLog;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.common.Const;
-import io.jpom.model.GitProtocolEnum;
+import io.jpom.model.enums.GitProtocolEnum;
 import io.jpom.model.data.BuildInfoModel;
 import io.jpom.model.data.RepositoryModel;
 import io.jpom.model.vo.BuildModelVo;

@@ -14,12 +14,12 @@ import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.spring.SpringUtil;
 import io.jpom.JpomApplication;
-import io.jpom.common.Const;
-import io.jpom.model.GitProtocolEnum;
 import io.jpom.model.data.BuildInfoModel;
 import io.jpom.model.data.BuildModel;
 import io.jpom.model.data.RepositoryModel;
 import io.jpom.model.data.UserModel;
+import io.jpom.model.enums.BuildReleaseMethod;
+import io.jpom.model.enums.BuildStatus;
 import io.jpom.model.log.BuildHistoryLog;
 import io.jpom.service.dblog.BuildInfoService;
 import io.jpom.service.dblog.DbBuildHistoryLogService;
@@ -28,7 +28,6 @@ import io.jpom.util.CommandUtil;
 import io.jpom.util.GitUtil;
 import io.jpom.util.StringUtil;
 import io.jpom.util.SvnKitUtil;
-import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 import org.springframework.util.AntPathMatcher;
 
 import java.io.*;
@@ -96,7 +95,7 @@ public class BuildInfoManage extends BaseBuild implements Runnable {
 			} catch (Exception ignored) {
 			}
 		}
-		buildInfoManage.updateStatus(BuildModel.Status.Cancel);
+		buildInfoManage.updateStatus(BuildStatus.Cancel);
 		BUILD_MANAGE_MAP.remove(id);
 		return true;
 	}
@@ -120,7 +119,7 @@ public class BuildInfoManage extends BaseBuild implements Runnable {
 	}
 
 	@Override
-	protected boolean updateStatus(BuildModel.Status status) {
+	protected boolean updateStatus(BuildStatus status) {
 		try {
 			//super.updateStatus(status);
 			BuildInfoService buildService = SpringUtil.getBean(BuildInfoService.class);
@@ -128,7 +127,7 @@ public class BuildInfoManage extends BaseBuild implements Runnable {
 			item.setStatus(status.getCode());
 			buildService.update(item);
 			//
-			if (status == BuildModel.Status.Ing) {
+			if (status == BuildStatus.Ing) {
 				this.insertLog();
 			} else {
 				DbBuildHistoryLogService dbBuildHistoryLogService = SpringUtil.getBean(DbBuildHistoryLogService.class);
@@ -158,7 +157,7 @@ public class BuildInfoManage extends BaseBuild implements Runnable {
 
 		buildHistoryLog.setId(this.logId);
 		buildHistoryLog.setBuildDataId(buildInfoModel.getId());
-		buildHistoryLog.setStatus(BuildModel.Status.Ing.getCode());
+		buildHistoryLog.setStatus(BuildStatus.Ing.getCode());
 		buildHistoryLog.setStartTime(System.currentTimeMillis());
 		buildHistoryLog.setBuildNumberId(buildInfoModel.getBuildId());
 		buildHistoryLog.setBuildUser(optUserName);
@@ -237,7 +236,7 @@ public class BuildInfoManage extends BaseBuild implements Runnable {
 	@Override
 	public void run() {
 		try {
-			if (!updateStatus(BuildModel.Status.Ing)) {
+			if (!updateStatus(BuildStatus.Ing)) {
 				this.log("初始化构建记录失败,异常结束");
 				return;
 			}
@@ -247,19 +246,10 @@ public class BuildInfoManage extends BaseBuild implements Runnable {
 				String branchName = buildInfoModel.getBranchName();
 				this.log("repository clone pull from " + branchName);
 				String msg = "error";
-				if (repositoryModel.getRepoType() == BuildModel.RepoType.Git.getCode()) {
+				if (repositoryModel.getRepoType() == RepositoryModel.RepoType.Git.getCode()) {
 					// git with password
-					if (repositoryModel.getProtocol().equals(GitProtocolEnum.HTTP.getCode())) {
-						UsernamePasswordCredentialsProvider credentialsProvider = new UsernamePasswordCredentialsProvider(repositoryModel.getUserName(), repositoryModel.getPassword());
-						msg = GitUtil.checkoutPull(repositoryModel.getGitUrl(), gitFile, branchName, credentialsProvider, this.getPrintWriter());
-					} else if (repositoryModel.getProtocol().equals(GitProtocolEnum.SSH.getCode())) {
-						// load rsa file
-						File rsaFile = BuildUtil.getRepositoryRsaFile(repositoryModel.getId() + Const.ID_RSA);
-						// git with ssh
-						msg = GitUtil.gitCloneWithSSH(repositoryModel.getGitUrl(), gitFile, branchName,
-								rsaFile, repositoryModel.getPassword(), this.getPrintWriter());
-					}
-				} else if (repositoryModel.getRepoType() == BuildModel.RepoType.Svn.getCode()) {
+					msg = GitUtil.checkoutPull(repositoryModel, gitFile, branchName, this.getPrintWriter());
+				} else if (repositoryModel.getRepoType() == RepositoryModel.RepoType.Svn.getCode()) {
 					// svn
 					msg = SvnKitUtil.checkOut(repositoryModel.getGitUrl(), repositoryModel.getUserName(), repositoryModel.getPassword(), gitFile);
 				}
@@ -271,7 +261,7 @@ public class BuildInfoManage extends BaseBuild implements Runnable {
 			String[] commands = CharSequenceUtil.splitToArray(buildInfoModel.getScript(), StrUtil.LF);
 			if (commands == null || commands.length <= 0) {
 				this.log("没有需要执行的命令");
-				this.updateStatus(BuildModel.Status.Error);
+				this.updateStatus(BuildStatus.Error);
 				return;
 			}
 			for (String item : commands) {
@@ -286,12 +276,12 @@ public class BuildInfoManage extends BaseBuild implements Runnable {
 				}
 			}
 			boolean status = packageFile();
-			if (status && buildInfoModel.getReleaseMethod() != BuildModel.ReleaseMethod.No.getCode()) {
+			if (status && buildInfoModel.getReleaseMethod() != BuildReleaseMethod.No.getCode()) {
 				// 发布文件
 				new ReleaseManage(baseBuildModule, this.userModel, this, buildInfoModel.getBuildId()).start();
 			} else {
 				//
-				updateStatus(BuildModel.Status.Success);
+				updateStatus(BuildStatus.Success);
 			}
 		} catch (Exception e) {
 			this.log("构建失败", e);
@@ -301,7 +291,7 @@ public class BuildInfoManage extends BaseBuild implements Runnable {
 	}
 
 	private void log(String title, Throwable throwable) {
-		log(title, throwable, BuildModel.Status.Error);
+		log(title, throwable, BuildStatus.Error);
 	}
 
 	/**

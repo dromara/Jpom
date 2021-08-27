@@ -19,7 +19,7 @@ import io.jpom.model.log.UserOperateLogV1;
 import io.jpom.plugin.ClassFeature;
 import io.jpom.plugin.Feature;
 import io.jpom.plugin.MethodFeature;
-import io.jpom.service.build.BuildService;
+import io.jpom.service.dblog.BuildInfoService;
 import io.jpom.service.node.OutGivingServer;
 import io.jpom.util.StringUtil;
 import org.springframework.http.MediaType;
@@ -46,7 +46,7 @@ public class OutGivingController extends BaseServerController {
 	@Resource
 	private OutGivingServer outGivingServer;
 	@Resource
-	private BuildService buildService;
+	private BuildInfoService buildService;
 
 	/**
 	 * @return

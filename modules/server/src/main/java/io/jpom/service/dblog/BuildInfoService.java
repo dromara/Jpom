@@ -1,7 +1,6 @@
 package io.jpom.service.dblog;
 
-import cn.hutool.core.date.SystemClock;
-import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.db.Entity;
 import cn.jiangzeyin.common.JsonMessage;
 import io.jpom.build.BuildInfoManage;
@@ -11,9 +10,10 @@ import io.jpom.model.data.BuildInfoModel;
 import io.jpom.model.data.BuildModel;
 import io.jpom.model.data.RepositoryModel;
 import io.jpom.model.data.UserModel;
+import io.jpom.model.enums.BuildReleaseMethod;
+import io.jpom.model.enums.BuildStatus;
 import io.jpom.service.h2db.BaseDbService;
 import org.springframework.stereotype.Service;
-import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 import javax.annotation.Resource;
@@ -50,66 +50,6 @@ public class BuildInfoService extends BaseDbService<BuildInfoModel> {
 				.collect(Collectors.toList());
 	}
 
-
-	/**
-	 * 插入数据库
-	 *
-	 * @param info
-	 * @return
-	 */
-	public int add(BuildInfoModel info) {
-		// check id
-		Assert.hasText(info.getId(), "不能执行：error");
-		// def create time
-		info.setCreateTimeMillis(ObjectUtil.defaultIfNull(info.getModifyTimeMillis(), SystemClock.now()));
-
-		Entity entity = new Entity(getTableName());
-		entity.parseBean(info, false, true);
-
-		/**
-		 * reset group field name
-		 * group is key words
-		 */
-		if (null != info.getGroup()) {
-			entity.remove(Const.GROUP_STR);
-			entity.put(Const.GROUP_COLUMN_STR, info.getGroup());
-		}
-
-		return super.insert(entity);
-	}
-
-	/**
-	 * update build info
-	 *
-	 * @param info data
-	 * @return
-	 */
-	@Override
-	public int update(BuildInfoModel info) {
-		// check id
-		Assert.hasText(info.getId(), "不能执行：error");
-		// def modify time
-		info.setModifyTimeMillis(ObjectUtil.defaultIfNull(info.getModifyTimeMillis(), SystemClock.now()));
-		// remove create time
-		info.setCreateTimeMillis(null);
-
-		Entity entity = new Entity(getTableName());
-		entity.parseBean(info, false, true);
-
-		/**
-		 * reset group field name
-		 * group is key words
-		 */
-		if (null != info.getGroup()) {
-			entity.remove(Const.GROUP_STR);
-			entity.put(Const.GROUP_COLUMN_STR, info.getGroup());
-		}
-
-		Entity where = new Entity();
-		where.set(Const.ID_STR, info.getId());
-		return super.update(entity, where);
-	}
-
 	/**
 	 * start build
 	 *
@@ -137,12 +77,52 @@ public class BuildInfoService extends BaseDbService<BuildInfoModel> {
 		if (status == null) {
 			return null;
 		}
-		BuildModel.Status nowStatus = BaseEnum.getEnum(BuildModel.Status.class, status);
+		BuildStatus nowStatus = BaseEnum.getEnum(BuildStatus.class, status);
 		Objects.requireNonNull(nowStatus);
-		if (BuildModel.Status.Ing == nowStatus ||
-				BuildModel.Status.PubIng == nowStatus) {
+		if (BuildStatus.Ing == nowStatus ||
+				BuildStatus.PubIng == nowStatus) {
 			return JsonMessage.getString(501, "当前还在：" + nowStatus.getDesc());
 		}
 		return null;
+	}
+
+	/**
+	 * 判断是否存在 节点和项目关联
+	 *
+	 * @param nodeId    节点ID
+	 * @param projectId 项目ID
+	 * @return true 关联
+	 */
+	public boolean checkNodeProjectId(String nodeId, String projectId) {
+		BuildInfoModel buildInfoModel = new BuildInfoModel();
+		buildInfoModel.setReleaseMethodDataId(nodeId + ":" + projectId);
+		buildInfoModel.setReleaseMethod(BuildReleaseMethod.Project.getCode());
+		return super.exists(buildInfoModel);
+	}
+
+	/**
+	 * 判断是否存在 节点关联
+	 *
+	 * @param nodeId 节点ID
+	 * @return true 关联
+	 */
+	public boolean checkNode(String nodeId) {
+		Entity entity = new Entity();
+		entity.set("releaseMethod", BuildReleaseMethod.Project.getCode());
+		entity.set("releaseMethodDataId", StrUtil.format(" like '{}:%'", nodeId));
+		return super.exists(entity);
+	}
+
+	/**
+	 * 判断是否存在 分发关联
+	 *
+	 * @param outGivingId 分发ID
+	 * @return true 关联
+	 */
+	public boolean checkOutGiving(String outGivingId) {
+		BuildInfoModel buildInfoModel = new BuildInfoModel();
+		buildInfoModel.setReleaseMethodDataId(outGivingId);
+		buildInfoModel.setReleaseMethod(BuildReleaseMethod.Outgiving.getCode());
+		return super.exists(buildInfoModel);
 	}
 }

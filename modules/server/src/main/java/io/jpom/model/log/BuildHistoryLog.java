@@ -31,7 +31,7 @@ public class BuildHistoryLog extends BaseBuildModule {
     /**
      * 状态
      *
-     * @see BuildModel.Status
+     * @see BuildStatus
      */
     private int status;
     /**

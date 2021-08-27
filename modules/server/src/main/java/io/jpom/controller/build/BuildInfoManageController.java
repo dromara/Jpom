@@ -20,6 +20,7 @@ import io.jpom.model.data.BuildInfoModel;
 import io.jpom.model.data.BuildModel;
 import io.jpom.model.data.RepositoryModel;
 import io.jpom.model.data.UserModel;
+import io.jpom.model.enums.BuildStatus;
 import io.jpom.model.log.BuildHistoryLog;
 import io.jpom.model.log.UserOperateLogV1;
 import io.jpom.plugin.ClassFeature;
@@ -101,14 +102,14 @@ public class BuildInfoManageController extends BaseServerController {
 	public String cancel(@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据")) String id) {
 		BuildInfoModel item = buildInfoService.getByKey(id);
 		Objects.requireNonNull(item, "没有对应数据");
-		BuildModel.Status nowStatus = BaseEnum.getEnum(BuildModel.Status.class, item.getStatus());
+		BuildStatus nowStatus = BaseEnum.getEnum(BuildStatus.class, item.getStatus());
 		Objects.requireNonNull(nowStatus);
-		if (BuildModel.Status.Ing != nowStatus && BuildModel.Status.PubIng != nowStatus) {
+		if (BuildStatus.Ing != nowStatus && BuildStatus.PubIng != nowStatus) {
 			return JsonMessage.getString(501, "当前状态不在进行中");
 		}
 		boolean status = BuildInfoManage.cancel(item.getId());
 		if (!status) {
-			item.setStatus(BuildModel.Status.Cancel.getCode());
+			item.setStatus(BuildStatus.Cancel.getCode());
 			buildInfoService.update(item);
 		}
 		return JsonMessage.getString(200, "取消成功");
@@ -135,7 +136,7 @@ public class BuildInfoManageController extends BaseServerController {
 		UserModel userModel = getUser();
 		ReleaseManage releaseManage = new ReleaseManage(buildHistoryLog, userModel);
 		// 标记发布中
-		releaseManage.updateStatus(BuildModel.Status.PubIng);
+		releaseManage.updateStatus(BuildStatus.PubIng);
 		ThreadUtil.execute(releaseManage::start2);
 		return JsonMessage.getString(200, "重新发布中");
 	}
@@ -172,9 +173,9 @@ public class BuildInfoManageController extends BaseServerController {
 		}
 		JSONObject data = new JSONObject();
 		// 运行中
-		data.put("run", item.getStatus() == BuildModel.Status.Ing.getCode() || item.getStatus() == BuildModel.Status.PubIng.getCode());
+		data.put("run", item.getStatus() == BuildStatus.Ing.getCode() || item.getStatus() == BuildStatus.PubIng.getCode());
 		// 构建中
-		data.put("buildRun", item.getStatus() == BuildModel.Status.Ing.getCode());
+		data.put("buildRun", item.getStatus() == BuildStatus.Ing.getCode());
 		// 读取文件
 		int linesInt = Convert.toInt(line, 1);
 		LimitQueue<String> lines = new LimitQueue<>(500);

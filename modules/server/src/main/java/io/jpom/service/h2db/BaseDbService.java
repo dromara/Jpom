@@ -1,14 +1,19 @@
 package io.jpom.service.h2db;
 
+import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.date.SystemClock;
+import cn.hutool.core.lang.Editor;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.db.Entity;
 import io.jpom.common.Const;
 import io.jpom.model.BaseDbModel;
 import org.springframework.util.Assert;
 
 import java.util.Collection;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
  * 数据库操作 通用 serve
@@ -61,9 +66,9 @@ public abstract class BaseDbService<T extends BaseDbModel> extends BaseDbCommonS
 		info.setModifyTimeMillis(ObjectUtil.defaultIfNull(info.getModifyTimeMillis(), SystemClock.now()));
 		// remove create time
 		info.setCreateTimeMillis(null);
-		Entity entity = new Entity(getTableName());
-		entity.parseBean(info, false, true);
-
+		//
+		Entity entity = this.dataBeanToEntity(info);
+		//
 		Entity where = new Entity();
 		where.set(Const.ID_STR, info.getId());
 		return super.update(entity, where);

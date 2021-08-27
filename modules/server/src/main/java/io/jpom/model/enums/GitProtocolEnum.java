@@ -1,11 +1,17 @@
-package io.jpom.model;
+package io.jpom.model.enums;
+
+import io.jpom.model.BaseEnum;
 
 /**
  * Git protocol
+ *
  * @author Hotstrip
  * @since 2021-08-26
  */
-public enum  GitProtocolEnum {
+public enum GitProtocolEnum implements BaseEnum {
+	/**
+	 * http
+	 */
 	HTTP(0, "HTTP(s)"),
 	SSH(1, "SSH"),
 	;
@@ -18,19 +24,14 @@ public enum  GitProtocolEnum {
 	int code;
 	String desc;
 
+	@Override
 	public int getCode() {
 		return code;
 	}
 
-	public void setCode(int code) {
-		this.code = code;
-	}
-
+	@Override
 	public String getDesc() {
 		return desc;
 	}
 
-	public void setDesc(String desc) {
-		this.desc = desc;
-	}
 }

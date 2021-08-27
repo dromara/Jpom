@@ -18,7 +18,7 @@ import cn.jiangzeyin.common.validator.ValidatorRule;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.build.BuildUtil;
 import io.jpom.common.Const;
-import io.jpom.model.GitProtocolEnum;
+import io.jpom.model.enums.GitProtocolEnum;
 import io.jpom.model.data.RepositoryModel;
 import io.jpom.plugin.ClassFeature;
 import io.jpom.plugin.Feature;

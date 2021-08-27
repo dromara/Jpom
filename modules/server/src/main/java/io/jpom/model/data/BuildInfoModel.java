@@ -43,7 +43,10 @@ public class BuildInfoModel extends BaseUserModifyDbModel {
 	 * 发布方法{0: 不发布, 1: 节点分发, 2: 分发项目, 3: SSH}
 	 */
 	private Integer releaseMethod;
-
+	/**
+	 * 发布方法执行数据关联字段
+	 */
+	private String releaseMethodDataId;
 	/**
 	 * 状态
 	 */
@@ -145,4 +148,11 @@ public class BuildInfoModel extends BaseUserModifyDbModel {
 		this.extraData = extraData;
 	}
 
+	public String getReleaseMethodDataId() {
+		return releaseMethodDataId;
+	}
+
+	public void setReleaseMethodDataId(String releaseMethodDataId) {
+		this.releaseMethodDataId = releaseMethodDataId;
+	}
 }

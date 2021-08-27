@@ -14,9 +14,9 @@ import cn.hutool.http.HttpStatus;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
 import io.jpom.build.BuildUtil;
-import io.jpom.model.data.BuildModel;
+import io.jpom.model.data.BuildInfoModel;
+import io.jpom.model.enums.BuildStatus;
 import io.jpom.model.log.BuildHistoryLog;
-import io.jpom.service.build.BuildService;
 import io.jpom.service.h2db.BaseDbCommonService;
 import io.jpom.system.ServerExtConfigBean;
 import io.jpom.system.db.DbConfig;
@@ -35,7 +35,7 @@ import java.sql.SQLException;
 @Service
 public class DbBuildHistoryLogService extends BaseDbCommonService<BuildHistoryLog> {
 	@Resource
-	private BuildService buildService;
+	private BuildInfoService buildService;
 
 	public DbBuildHistoryLogService() {
 		super(BuildHistoryLog.TABLE_NAME, "id", BuildHistoryLog.class);
@@ -58,14 +58,14 @@ public class DbBuildHistoryLogService extends BaseDbCommonService<BuildHistoryLo
 	 * @param logId  记录id
 	 * @param status 状态
 	 */
-	public void updateLog(String logId, BuildModel.Status status) {
+	public void updateLog(String logId, BuildStatus status) {
 		if (logId == null) {
 			return;
 		}
 
 		Entity entity = new Entity();
 		entity.set("status", status.getCode());
-		if (status != BuildModel.Status.PubIng) {
+		if (status != BuildStatus.PubIng) {
 			// 结束
 			entity.set("endTime", System.currentTimeMillis());
 		}
@@ -105,7 +105,7 @@ public class DbBuildHistoryLogService extends BaseDbCommonService<BuildHistoryLo
 		if (buildHistoryLog == null) {
 			return new JsonMessage<>(405, "没有对应构建记录");
 		}
-		BuildModel item = buildService.getItem(buildHistoryLog.getBuildDataId());
+		BuildInfoModel item = buildService.getByKey(buildHistoryLog.getBuildDataId());
 		if (item != null) {
 			File logFile = BuildUtil.getLogFile(item.getId(), buildHistoryLog.getBuildNumberId());
 			File dataFile = logFile.getParentFile();
