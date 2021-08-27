@@ -15,6 +15,8 @@ import java.io.File;
 
 /**
  * svn 工具
+ * <p>
+ * https://www.cnblogs.com/lekko/p/6005382.html
  *
  * @author bwcx_jzy
  * @date 2019/8/6
@@ -38,6 +40,21 @@ public class SvnKitUtil {
 		FSRepositoryFactory.setup();
 	}
 
+	private static final DefaultSVNOptions OPTIONS = SVNWCUtil.createDefaultOptions(true);
+
+	/**
+	 * 对SVNKit连接进行认证，并获取连接
+	 *
+	 * @param username    用户名
+	 * @param pwd         密码
+	 * @param sshFilePath OpenSSH密钥
+	 */
+	public SVNClientManager getAuthClient(String username, String pwd, String sshFilePath) {
+		File dir = SVNWCUtil.getDefaultConfigurationDirectory();
+		ISVNAuthenticationManager AUTH = SVNWCUtil.createDefaultAuthenticationManager(dir, username, pwd.toCharArray(), new File(sshFilePath), new char[]{}, true);
+		return SVNClientManager.newInstance(OPTIONS, AUTH);
+	}
+
 	/**
 	 * 判断当前仓库url是否匹配
 	 *
@@ -50,9 +67,8 @@ public class SvnKitUtil {
 	 */
 	private static Boolean checkUrl(File wcDir, String url, String userName, String userPwd) throws SVNException {
 		ISVNAuthenticationManager authManager = SVNWCUtil.createDefaultAuthenticationManager(userName, userPwd.toCharArray());
-		DefaultSVNOptions options = SVNWCUtil.createDefaultOptions(true);
 		// 实例化客户端管理类
-		SVNClientManager clientManager = SVNClientManager.newInstance(options, authManager);
+		SVNClientManager clientManager = SVNClientManager.newInstance(OPTIONS, authManager);
 		try {
 			// 通过客户端管理类获得updateClient类的实例。
 			SVNWCClient wcClient = clientManager.getWCClient();

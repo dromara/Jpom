@@ -70,11 +70,6 @@
         "id": "buildList",
         "title": "构建列表"
       },
-
-      {
-        "id": "buildListOld",
-        "title": "构建列表old"
-      },
       {
         "id": "buildHistory",
         "title": "构建历史"

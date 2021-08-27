@@ -116,7 +116,7 @@ request.interceptors.response.use(
       } else {
         notification.error({
           message: status,
-          description: statusText,
+          description: (statusText || "") + (data || ""),
           duration: 2,
         });
       }
