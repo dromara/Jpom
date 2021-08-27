@@ -85,10 +85,22 @@
             </a-input-password>
           </a-form-model-item>
           <a-form-model-item label="私钥" prop="rsaPrv">
-            <a-textarea :auto-size="{ minRows: 3, maxRows: 3 }" v-model="temp.rsaPrv" placeholder="私钥,不填将使用默认的 $HOME/.ssh 目录中的配置。支持配置文件目录:file:"> </a-textarea>
+            <a-tooltip placement="topLeft">
+              <template slot="title">
+                <div>
+                  <p style="color: #faa">注意：目前对 SSH key 访问 git 仓库地址不支持使用 ssh-keygen -t rsa -C  "邮箱" 方式生成的 SSH key <br/>需要使用 ssh-keygen -m PEM -t rsa -b 4096 -C "邮箱" 方式生成公私钥<br/></p>
+                  <p>如果在生成私钥的过程中有加密，那么需要把加密密码填充到上面的密码框中</p>
+                  <p>支持两种方式填充：</p>
+                  <p>1. 完整的私钥内容 如: <br/>-----BEGIN RSA PRIVATE KEY----- <br/> ..... <br/> -----END RSA PRIVATE KEY-----</p>
+                  <p>2. 私钥文件绝对路径（绝对路径前面添加 file: 前缀) 如: <br/>file:/Users/Hotstrip/.ssh/id_rsa</p>
+                </div>
+              </template>
+              <a-textarea :auto-size="{ minRows: 3, maxRows: 3 }" v-model="temp.rsaPrv" placeholder="私钥,不填将使用默认的 $HOME/.ssh 目录中的配置。支持配置文件目录:file:"></a-textarea>
+            </a-tooltip>
           </a-form-model-item>
+          <!-- 公钥暂时没用用到 -->
           <a-form-model-item label="公钥" prop="rsaPub" v-if="false">
-            <a-textarea :auto-size="{ minRows: 3, maxRows: 3 }" v-model="temp.rsaPub" placeholder="公钥,不填将使用默认的 $HOME/.ssh 目录中的配置。支持配置文件目录:file:"> </a-textarea>
+            <a-textarea :auto-size="{ minRows: 3, maxRows: 3 }" v-model="temp.rsaPub" placeholder="公钥,不填将使用默认的 $HOME/.ssh 目录中的配置。支持配置文件目录:file:"></a-textarea>
           </a-form-model-item>
         </template>
       </a-form-model>
