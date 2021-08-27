@@ -15,6 +15,7 @@ import io.jpom.model.data.NodeModel;
 import io.jpom.model.data.OutGivingModel;
 import io.jpom.model.data.OutGivingNodeProject;
 import io.jpom.model.data.UserModel;
+import io.jpom.model.enums.BuildReleaseMethod;
 import io.jpom.model.log.UserOperateLogV1;
 import io.jpom.plugin.ClassFeature;
 import io.jpom.plugin.Feature;
@@ -24,6 +25,7 @@ import io.jpom.service.node.OutGivingServer;
 import io.jpom.util.StringUtil;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -197,9 +199,8 @@ public class OutGivingController extends BaseServerController {
 	@Feature(method = MethodFeature.DEL)
 	public String del(String id) throws IOException {
 		// 判断构建
-		if (buildService.checkOutGiving(id)) {
-			return JsonMessage.getString(400, "当前分发存在构建项，不能删除");
-		}
+		boolean releaseMethod = buildService.checkReleaseMethod(id, BuildReleaseMethod.Outgiving);
+		Assert.state(!releaseMethod, "当前分发存在构建项，不能删除");
 		OutGivingModel outGivingServerItem = outGivingServer.getItem(id);
 		if (outGivingServerItem.isOutGivingProject()) {
 			UserModel userModel = getUser();

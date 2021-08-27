@@ -11,6 +11,7 @@ import io.jpom.common.forward.NodeUrl;
 import io.jpom.common.interceptor.OptLog;
 import io.jpom.model.data.NodeModel;
 import io.jpom.model.data.OutGivingModel;
+import io.jpom.model.enums.BuildReleaseMethod;
 import io.jpom.model.log.UserOperateLogV1;
 import io.jpom.plugin.ClassFeature;
 import io.jpom.plugin.Feature;
@@ -21,6 +22,7 @@ import io.jpom.service.node.OutGivingServer;
 import io.jpom.service.node.manage.ProjectInfoService;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -133,9 +135,8 @@ public class ProjectManageControl extends BaseServerController {
 			if (monitorService.checkProject(nodeModel.getId(), id)) {
 				return JsonMessage.getString(405, "当前项目存在监控项，不能直接删除");
 			}
-			if (buildService.checkNodeProjectId(nodeModel.getId(), id)) {
-				return JsonMessage.getString(405, "当前项目存在构建项，不能直接删除");
-			}
+			boolean releaseMethod = buildService.checkReleaseMethod(nodeModel.getId() + StrUtil.COLON + id, BuildReleaseMethod.Project);
+			Assert.state(!releaseMethod, "当前项目存在构建项，不能直接删除");
 		}
 		return NodeForward.request(nodeModel, getRequest(), NodeUrl.Manage_DeleteProject).toString();
 	}

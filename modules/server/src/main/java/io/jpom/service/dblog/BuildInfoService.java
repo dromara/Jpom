@@ -86,20 +86,6 @@ public class BuildInfoService extends BaseDbService<BuildInfoModel> {
 	}
 
 	/**
-	 * 判断是否存在 节点和项目关联
-	 *
-	 * @param nodeId    节点ID
-	 * @param projectId 项目ID
-	 * @return true 关联
-	 */
-	public boolean checkNodeProjectId(String nodeId, String projectId) {
-		BuildInfoModel buildInfoModel = new BuildInfoModel();
-		buildInfoModel.setReleaseMethodDataId(nodeId + ":" + projectId);
-		buildInfoModel.setReleaseMethod(BuildReleaseMethod.Project.getCode());
-		return super.exists(buildInfoModel);
-	}
-
-	/**
 	 * 判断是否存在 节点关联
 	 *
 	 * @param nodeId 节点ID
@@ -113,15 +99,15 @@ public class BuildInfoService extends BaseDbService<BuildInfoModel> {
 	}
 
 	/**
-	 * 判断是否存在 分发关联
+	 * 判断是否存在 发布关联
 	 *
-	 * @param outGivingId 分发ID
+	 * @param dataId 数据ID
 	 * @return true 关联
 	 */
-	public boolean checkOutGiving(String outGivingId) {
+	public boolean checkReleaseMethod(String dataId, BuildReleaseMethod releaseMethod) {
 		BuildInfoModel buildInfoModel = new BuildInfoModel();
-		buildInfoModel.setReleaseMethodDataId(outGivingId);
-		buildInfoModel.setReleaseMethod(BuildReleaseMethod.Outgiving.getCode());
+		buildInfoModel.setReleaseMethodDataId(dataId);
+		buildInfoModel.setReleaseMethod(releaseMethod.getCode());
 		return super.exists(buildInfoModel);
 	}
 }
