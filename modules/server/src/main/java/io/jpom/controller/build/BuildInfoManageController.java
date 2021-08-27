@@ -17,8 +17,6 @@ import io.jpom.common.BaseServerController;
 import io.jpom.common.interceptor.OptLog;
 import io.jpom.model.BaseEnum;
 import io.jpom.model.data.BuildInfoModel;
-import io.jpom.model.data.BuildModel;
-import io.jpom.model.data.RepositoryModel;
 import io.jpom.model.data.UserModel;
 import io.jpom.model.enums.BuildStatus;
 import io.jpom.model.log.BuildHistoryLog;
@@ -76,8 +74,9 @@ public class BuildInfoManageController extends BaseServerController {
 			return e;
 		}
 		// set buildId field
-		if (item.getBuildId() == null)
+		if (item.getBuildId() == null) {
 			item.setBuildId(0);
+		}
 		item.setBuildId(item.getBuildId() + 1);
 
 		// userModel

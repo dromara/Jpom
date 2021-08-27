@@ -15,7 +15,6 @@ import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.spring.SpringUtil;
 import io.jpom.JpomApplication;
 import io.jpom.model.data.BuildInfoModel;
-import io.jpom.model.data.BuildModel;
 import io.jpom.model.data.RepositoryModel;
 import io.jpom.model.data.UserModel;
 import io.jpom.model.enums.BuildReleaseMethod;

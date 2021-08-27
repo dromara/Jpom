@@ -7,7 +7,6 @@ import io.jpom.build.BuildInfoManage;
 import io.jpom.common.Const;
 import io.jpom.model.BaseEnum;
 import io.jpom.model.data.BuildInfoModel;
-import io.jpom.model.data.BuildModel;
 import io.jpom.model.data.RepositoryModel;
 import io.jpom.model.data.UserModel;
 import io.jpom.model.enums.BuildReleaseMethod;

@@ -3,7 +3,7 @@ package io.jpom.build;
 import cn.hutool.core.io.FileUtil;
 import io.jpom.model.BaseModel;
 import io.jpom.model.data.BuildInfoModel;
-import io.jpom.model.data.BuildModel;
+import io.jpom.model.enums.BuildReleaseMethod;
 
 /**
  * 构建物基类
@@ -16,13 +16,13 @@ public class BaseBuildModule extends BaseModel {
 	 * 发布方式
 	 *
 	 * @see BuildReleaseMethod
-	 * @see BuildModel#getReleaseMethod()
+	 * @see BuildInfoModel#getReleaseMethod()
 	 */
 	private int releaseMethod;
 	/**
 	 * 发布方法的数据id
 	 *
-	 * @see BuildModel#getReleaseMethodDataId()
+	 * @see BuildInfoModel#getReleaseMethodDataId()
 	 */
 	private String releaseMethodDataId;
 	/**
@@ -30,7 +30,7 @@ public class BaseBuildModule extends BaseModel {
 	 * 仅在项目发布类型生效
 	 *
 	 * @see io.jpom.model.AfterOpt
-	 * @see BuildModel#getAfterOpt()
+	 * @see BuildInfoModel#getExtraData()
 	 */
 	private int afterOpt;
 	/**

@@ -3,7 +3,7 @@ package io.jpom.model.vo;
 import cn.jiangzeyin.common.spring.SpringUtil;
 import io.jpom.build.BuildUtil;
 import io.jpom.model.BaseEnum;
-import io.jpom.model.data.BuildModel;
+import io.jpom.model.data.BuildInfoModel;
 import io.jpom.model.data.OutGivingModel;
 import io.jpom.model.enums.BuildReleaseMethod;
 import io.jpom.model.log.BuildHistoryLog;
@@ -58,7 +58,7 @@ public class BuildHistoryLogVo extends BuildHistoryLog {
     }
 
     public String getBuildIdStr() {
-        return BuildModel.getBuildIdStr(getBuildNumberId());
+        return BuildInfoModel.getBuildIdStr(getBuildNumberId());
     }
 
     public void setReleaseDesc(String releaseDesc) {

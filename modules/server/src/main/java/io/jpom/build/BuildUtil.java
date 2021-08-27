@@ -5,7 +5,6 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.core.util.ZipUtil;
 import io.jpom.common.Const;
 import io.jpom.model.data.BuildInfoModel;
-import io.jpom.model.data.BuildModel;
 import io.jpom.system.ConfigBean;
 
 import java.io.File;
@@ -36,23 +35,23 @@ public class BuildUtil {
 		return FileUtil.file(getBuildDataDir(), id);
 	}
 
-	/**
-	 * 获取代码路径
-	 *
-	 * @param buildModel 实体
-	 * @return file
-	 * @see BuildUtil#getSourceById
-	 */
-	@Deprecated
-	public static File getSource(BuildModel buildModel) {
-		return FileUtil.file(BuildUtil.getBuildDataFile(buildModel.getId()), "source");
-	}
+//	/**
+//	 * 获取代码路径
+//	 *
+//	 * @param buildModel 实体
+//	 * @return file
+//	 * @see BuildUtil#getSourceById
+//	 */
+//	@Deprecated
+//	public static File getSource(BuildModel buildModel) {
+//		return FileUtil.file(BuildUtil.getBuildDataFile(buildModel.getId()), "source");
+//	}
 
 	/**
+	 * @param id 构建ID
+	 * @return file
 	 * @author Hotstrip
 	 * 新版本获取代码路径
-	 * @param id
-	 * @return file
 	 * @since 2021-08-22
 	 */
 	public static File getSourceById(String id) {
@@ -74,7 +73,7 @@ public class BuildUtil {
 	public static File getHistoryPackageFile(String buildModelId, int buildId, String resultFile) {
 		return FileUtil.file(getBuildDataFile(buildModelId),
 				"history",
-				BuildModel.getBuildIdStr(buildId),
+				BuildInfoModel.getBuildIdStr(buildId),
 				"result", resultFile);
 	}
 
@@ -110,12 +109,13 @@ public class BuildUtil {
 	public static File getLogFile(String buildModelId, int buildId) {
 		return FileUtil.file(getBuildDataFile(buildModelId),
 				"history",
-				BuildModel.getBuildIdStr(buildId),
+				BuildInfoModel.getBuildIdStr(buildId),
 				"info.log");
 	}
 
 	/**
 	 * get rsa file
+	 *
 	 * @param path
 	 * @return
 	 */

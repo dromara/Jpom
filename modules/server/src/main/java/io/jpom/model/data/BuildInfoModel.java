@@ -6,7 +6,6 @@ import io.jpom.service.h2db.TableName;
 /**
  * @author Hotstrip
  * new BuildModel class, for replace old BuildModel
- * @see BuildModel
  */
 @TableName("BUILD_INFO")
 public class BuildInfoModel extends BaseUserModifyDbModel {
@@ -154,5 +153,9 @@ public class BuildInfoModel extends BaseUserModifyDbModel {
 
 	public void setReleaseMethodDataId(String releaseMethodDataId) {
 		this.releaseMethodDataId = releaseMethodDataId;
+	}
+
+	public static String getBuildIdStr(int buildId) {
+		return String.format("#%s", buildId);
 	}
 }

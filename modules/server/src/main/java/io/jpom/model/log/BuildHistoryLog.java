@@ -1,8 +1,9 @@
 package io.jpom.model.log;
 
 import io.jpom.build.BaseBuildModule;
-import io.jpom.model.data.BuildModel;
+import io.jpom.model.data.BuildInfoModel;
 import io.jpom.model.data.UserModel;
+import io.jpom.model.enums.BuildStatus;
 
 /**
  * 构建历史记录
@@ -19,13 +20,13 @@ public class BuildHistoryLog extends BaseBuildModule {
     /**
      * 关联的构建id
      *
-     * @see BuildModel#getId()
+     * @see BuildInfoModel#getId()
      */
     private String buildDataId;
     /**
      * 构建编号
      *
-     * @see BuildModel#getBuildId()
+     * @see BuildInfoModel#getBuildId()
      */
     private int buildNumberId;
     /**

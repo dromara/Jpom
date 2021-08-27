@@ -12,7 +12,6 @@ import cn.jiangzeyin.common.spring.SpringUtil;
 import com.jcraft.jsch.Session;
 import io.jpom.model.AfterOpt;
 import io.jpom.model.BaseEnum;
-import io.jpom.model.data.BuildModel;
 import io.jpom.model.data.NodeModel;
 import io.jpom.model.data.SshModel;
 import io.jpom.model.data.UserModel;

@@ -10,11 +10,9 @@ import cn.hutool.db.ds.GlobalDSFactory;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import io.jpom.common.Const;
-import io.jpom.model.enums.GitProtocolEnum;
 import io.jpom.model.data.BuildInfoModel;
 import io.jpom.model.data.RepositoryModel;
-import io.jpom.model.vo.BuildModelVo;
+import io.jpom.model.enums.GitProtocolEnum;
 import io.jpom.service.h2db.TableName;
 import io.jpom.system.ConfigBean;
 import io.jpom.system.ServerConfigBean;
@@ -27,6 +25,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.sql.SQLException;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -59,7 +58,7 @@ public class LoadBuildJsonToDB {
 	public void doJsonToSql() {
 		// 读取 build.json 文件内容
 		File file = FileUtil.file(ConfigBean.getInstance().getDataPath(), ServerConfigBean.BUILD);
-		List<BuildModelVo> list = readBuildJsonFileToList(file);
+		List<JSONObject> list = readBuildJsonFileToList(file);
 		// 判断 list 是否为空
 		if (null == list) {
 			DefaultSystemLog.getLog().warn("There is no any data, the build.json file maybe no content or file is not exist...");
@@ -90,7 +89,7 @@ public class LoadBuildJsonToDB {
 	 *
 	 * @param list data from build.json
 	 */
-	private void initSql(List<BuildModelVo> list) {
+	private void initSql(List<JSONObject> list) {
 		// 加载类里面的属性，用反射获取
 		final List<String> repositoryFieldList = getClassFieldList(RepositoryModel.class);
 		final List<String> buildInfoFieldList = getClassFieldList(BuildInfoModel.class);
@@ -101,7 +100,8 @@ public class LoadBuildJsonToDB {
 			DefaultSystemLog.getLog().info("buildModelVo: {}", JSON.toJSONString(buildModelVo));
 
 			// 拿到构造 SQL 的参数
-			String gitUrl = buildModelVo.getGitUrl();
+			String gitUrl = buildModelVo.getString("gitUrl");
+			//buildModelVo.getGitUrl();
 			String repositoryId = repositoryCache.get(gitUrl);
 			if (StrUtil.isEmpty(repositoryId)) {
 				// 先存储仓库信息
@@ -122,11 +122,11 @@ public class LoadBuildJsonToDB {
 			buildInfoParamMap.put("REPOSITORYID", repositoryId);
 			// 构建发布操作信息
 			JSONObject jsonObject = new JSONObject();
-			jsonObject.put("releaseMethodDataId", buildModelVo.getReleaseMethodDataId());
-			jsonObject.put("afterOpt", buildModelVo.getAfterOpt());
-			jsonObject.put("clearOld", buildModelVo.isClearOld());
-			jsonObject.put("releaseCommand", buildModelVo.getReleaseCommand());
-			jsonObject.put("releasePath", buildModelVo.getReleasePath());
+			jsonObject.put("releaseMethodDataId", buildModelVo.getString("releaseMethodDataId"));
+			jsonObject.put("afterOpt", buildModelVo.getInteger("afterOpt"));
+			jsonObject.put("clearOld", buildModelVo.getBoolean("clearOld"));
+			jsonObject.put("releaseCommand", buildModelVo.getString("releaseCommand"));
+			jsonObject.put("releasePath", buildModelVo.getString("releasePath"));
 			// 保存信息
 			buildInfoParamMap.put("EXTRADATA", jsonObject.toJSONString());
 			String insertBuildInfoSql = initInsertSql(buildInfoParamMap, BuildInfoModel.class);
@@ -186,26 +186,25 @@ public class LoadBuildJsonToDB {
 	/**
 	 * init param map for create insert SQL
 	 *
-	 * @param fieldList
-	 * @param buildModelVo
-	 * @return
+	 * @param fieldList  字段名 list
+	 * @param jsonObject json
+	 * @return map key value
 	 */
-	private Map<String, Object> initSqlParamMap(List<String> fieldList, BuildModelVo buildModelVo) {
+	private Map<String, Object> initSqlParamMap(List<String> fieldList, JSONObject jsonObject) {
 		Map<String, Object> map = new HashMap<>(fieldList.size());
 
 		fieldList.forEach(fieldName -> {
 			// 判断类里面是否有这个属性
-			if (ReflectUtil.hasField(BuildModelVo.class, fieldName)) {
-				final String getMethodName = StrUtil.upperFirstAndAddPre(StrUtil.toCamelCase(fieldName), Const.GET_STR);
-				Object filedValue = ReflectUtil.invoke(buildModelVo, getMethodName);
-
-				// 添加到参数对象中
-				String sqlFiledName = fieldName.toUpperCase();
-				map.put(sqlFiledName, filedValue);
+			Object filedValue = jsonObject.get(fieldName);
+			if (filedValue == null) {
+				return;
 			}
+			// 添加到参数对象中
+			String sqlFiledName = fieldName.toUpperCase();
+			map.put(sqlFiledName, filedValue);
 		});
 		// 同步数据创建时间
-		String modifyTime = buildModelVo.getModifyTime();
+		String modifyTime = jsonObject.getString("modifyTime");
 		if (StrUtil.isNotEmpty(modifyTime)) {
 			map.put("CREATETIMEMILLIS", DateUtil.parse(modifyTime).getTime());
 		}
@@ -217,7 +216,7 @@ public class LoadBuildJsonToDB {
 	 *
 	 * @return List<BuildModelVo>
 	 */
-	private List<BuildModelVo> readBuildJsonFileToList(File file) {
+	private List<JSONObject> readBuildJsonFileToList(File file) {
 		if (!file.exists()) {
 			DefaultSystemLog.getLog().error("there is no build.json file...");
 			return null;
@@ -227,10 +226,7 @@ public class LoadBuildJsonToDB {
 			JSONObject jsonObject = (JSONObject) JsonFileUtil.readJson(file.getAbsolutePath());
 			return jsonObject.keySet().stream()
 					.map(jsonObject::get)
-					.flatMap(o -> {
-						BuildModelVo buildModel = JSON.parseObject(JSON.toJSONString(o), BuildModelVo.class);
-						return Stream.of(buildModel);
-					})
+					.flatMap((Function<Object, Stream<JSONObject>>) o -> Stream.of((JSONObject) o))
 					.collect(Collectors.toList());
 		} catch (FileNotFoundException e) {
 			DefaultSystemLog.getLog().error("read build.json file failed...caused: {}...message: {}", e.getCause(), e.getMessage());
