@@ -106,11 +106,11 @@ request.interceptors.response.use(
     }
     // 如果 headers 里面配置了 tip: no 就不用弹出提示信息
     if (!error.response.config.headers[NO_NOTIFY_KEY]) {
-      const { status, statusText } = error;
+      const { status, statusText, data } = error.response;
       if (!status) {
         notification.error({
           message: "Network Error",
-          description: "网络开了小差！请重试...",
+          description: "网络开了小差！请重试...:" + error,
           duration: 2,
         });
       } else {
