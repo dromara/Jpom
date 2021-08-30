@@ -120,6 +120,11 @@ const router = new Router({
   mode: "hash",
   routes: [
     {
+      path: "/test",
+      name: "test",
+      component: () => import("../pages/test"),
+    },
+    {
       path: "/login",
       name: "login",
       component: () => import("../pages/login"),

@@ -108,15 +108,14 @@
 
         <a-form-model-item v-show="tempRepository.repoType === 0" label="分支" prop="branchName">
           <a-row>
-            <a-col :span="10">
-              <a-select v-model="temp.branchName" placeholder="请选择构建对应的分支">
+            <a-col :span="10" @mousedown="setSelectOpen(true)">
+              <a-select v-model="temp.branchName" :open="selectOpen" @blur="setSelectOpen(false)" @focus="setSelectOpen(true)" placeholder="请选择构建对应的分支">
                 <a-icon slot="suffixIcon" type="reload" @click="loadBranchList" />
                 <div slot="dropdownRender" slot-scope="menu">
                   <!-- <div style="padding: 4px 8px; cursor: pointer" @mousedown="(e) => e.preventDefault()" @click="addItem"><a-icon type="plus" />自定义分支</div> 
                   -->
                   <div style="padding: 8px 8px; cursor: pointer; display: flex" @mousedown="(e) => e.preventDefault()">
-                    <a-input-search @click="(e) => e.target.focus()" placeholder="自定义分支通配表达式" @mousedown="(e) => e.stopPropagation()" size="small">
-                      <a-button slot="enterButton"> 添加 </a-button>
+                    <a-input @blur="visibleInput(false)" @focus="visibleInput(true)" @click="(e) => e.target.focus()" placeholder="自定义分支通配表达式" size="small">
                       <a-tooltip slot="suffix">
                         <template slot="title">
                           <div>
@@ -130,7 +129,8 @@
                         </template>
                         <a-icon type="question-circle" theme="filled" />
                       </a-tooltip>
-                    </a-input-search>
+                    </a-input>
+                    <a-button slot="enterButton"> 添加 </a-button>
                   </div>
                   <a-divider style="margin: 4px 0" />
                   <v-nodes :vnodes="menu" />
@@ -278,6 +278,9 @@ export default {
   },
   data() {
     return {
+      selectOpen: false,
+      selectFocus: false,
+      inputFocus: false,
       releaseMethodMap: releaseMethodMap,
       loading: false,
       listQuery: {},
@@ -388,6 +391,24 @@ export default {
     this.handleFilter();
   },
   methods: {
+    setSelectOpen(v) {
+      // console.log(this.$refs.input && this.$refs.input, document.activeElement, 2312);
+      // console.log(1, a);
+      this.selectFocus = v;
+      if (this.inputFocus || this.selectFocus) {
+        this.selectOpen = true;
+        return;
+      }
+      this.selectOpen = false;
+    },
+    visibleInput(v) {
+      this.inputFocus = v;
+      if (this.inputFocus || this.selectFocus) {
+        this.selectOpen = true;
+        return;
+      }
+      this.selectOpen = false;
+    },
     // 页面引导
     introGuide() {
       if (this.getGuideFlag) {
