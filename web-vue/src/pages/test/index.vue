@@ -1,5 +1,5 @@
 <template>
-  <code-editor v-model="code" showTool @checkJson="checkJson" :options="{ mode: 'javascript' }"> </code-editor>
+  <code-editor v-model="code" showTool @checkJson="checkJson" :options="{ mode: 'application/json' }"> </code-editor>
 </template>
 
 <script>
@@ -10,7 +10,7 @@ export default {
   },
   data() {
     return {
-      code: "hello world",
+      code: "",
     };
   },
   methods: {

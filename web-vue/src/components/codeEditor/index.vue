@@ -3,16 +3,22 @@
     <div class="tool-bar" ref="toolBar" v-if="showTool">
       <slot name="tool_before" />
       皮肤：
-      <a-select v-model="cmOptions.theme" placeholder="请选择" style="width: 150px">
+      <a-select v-model="cmOptions.theme" @select="handleSelectTheme" show-search option-filter-prop="children" :filter-option="filterOption" placeholder="请选择" style="width: 150px">
         <a-select-option v-for="item in cmThemeOptions" :key="item">{{ item }}</a-select-option>
       </a-select>
+      <div style="margin-left: 30px">
+        语言：
+        <a-select v-model="cmOptions.mode" @select="handleSelectMode" show-search option-filter-prop="children" :filter-option="filterOption" placeholder="请选择" style="width: 150px">
+          <a-select-option v-for="item in cmEditorModeOptions" :key="item">{{ item }}</a-select-option>
+        </a-select>
+      </div>
       <slot name="tool_after" />
     </div>
     <div :style="{ height: codeMirrorHeight }">
       <codemirror
         ref="myCm"
         :value="editorValue"
-        :options="{ ...cmOptions, ...userOption }"
+        :options="cmOptions"
         @input="$emit('input', $event)"
         @changes="onCmCodeChanges"
         @blur="onCmBlur"
@@ -30,14 +36,29 @@ import "codemirror/lib/codemirror.css";
 
 import "codemirror/theme/blackboard.css";
 import "codemirror/theme/eclipse.css";
-import "codemirror/mode/javascript/javascript.js";
-import "codemirror/mode/xml/xml.js";
-import "codemirror/mode/htmlmixed/htmlmixed.js";
-import "codemirror/mode/css/css.js";
-import "codemirror/mode/yaml/yaml.js";
-import "codemirror/mode/sql/sql.js";
-import "codemirror/mode/python/python.js";
-import "codemirror/mode/markdown/markdown.js";
+
+// import "codemirror/mode/vue/vue.js";
+// import "codemirror/mode/javascript/javascript.js";
+// import "codemirror/mode/xml/xml.js";
+// import "codemirror/mode/htmlmixed/htmlmixed.js";
+// import "codemirror/mode/css/css.js";
+// import "codemirror/mode/yaml/yaml.js";
+// import "codemirror/mode/sql/sql.js";
+// import "codemirror/mode/python/python.js";
+// import "codemirror/mode/markdown/markdown.js";
+// import "codemirror/mode/django/django.js";
+// import "codemirror/mode/dockerfile/dockerfile.js";
+// import "codemirror/mode/go/go.js";
+// import "codemirror/mode/groovy/groovy.js";
+// import "codemirror/mode/jsx/jsx.js";
+// import "codemirror/mode/http/http.js";
+// import "codemirror/mode/lua/lua.js";
+// import "codemirror/mode/nginx/nginx.js";
+// import "codemirror/mode/php/php.js";
+// import "codemirror/mode/scheme/scheme.js";
+// import "codemirror/mode/properties/properties.js";
+// import "codemirror/mode/swift/swift.js";
+
 import "codemirror/addon/hint/show-hint.css";
 import "codemirror/addon/hint/show-hint.js";
 import "codemirror/addon/hint/javascript-hint.js";
@@ -49,8 +70,8 @@ import "codemirror/addon/hint/anyword-hint.js";
 import "codemirror/addon/lint/lint.css";
 import "codemirror/addon/lint/lint.js";
 import "codemirror/addon/lint/json-lint";
-// require("script-loader!jsonlint");
 import "codemirror/addon/lint/javascript-lint.js";
+
 import "codemirror/addon/fold/foldcode.js";
 import "codemirror/addon/fold/foldgutter.js";
 import "codemirror/addon/fold/foldgutter.css";
@@ -59,10 +80,12 @@ import "codemirror/addon/fold/xml-fold.js";
 import "codemirror/addon/fold/comment-fold.js";
 import "codemirror/addon/fold/markdown-fold.js";
 import "codemirror/addon/fold/indent-fold.js";
+
 import "codemirror/addon/edit/closebrackets.js";
 import "codemirror/addon/edit/closetag.js";
 import "codemirror/addon/edit/matchtags.js";
 import "codemirror/addon/edit/matchbrackets.js";
+
 import "codemirror/addon/selection/active-line.js";
 import "codemirror/addon/search/jump-to-line.js";
 import "codemirror/addon/dialog/dialog.js";
@@ -76,6 +99,30 @@ import { JSHINT } from "jshint";
 
 window.JSHINT = JSHINT;
 
+const requireAll = (requireContext) => requireContext.keys().map(requireContext);
+
+// 引入支持的语法
+const reqMode = require.context("codemirror/mode/", true, /\.js$/);
+requireAll(reqMode);
+const modeList = reqMode.keys().map((item) => {
+  return item.split("/")[1];
+});
+modeList.unshift("json");
+
+// 引入支持的皮肤
+const reqTheme = require.context("codemirror/theme/", false, /\.css$/);
+requireAll(reqTheme);
+const themeList = reqTheme.keys().map((item) => {
+  return item.substring(2, item.length - 4);
+});
+
+// 文件后缀与语言对应表
+const fileSuffixToModeMap = {
+  html: "htmlmixed",
+  css: "css",
+  yml: "yaml",
+};
+
 export default {
   name: "CodeEditor",
   components: {
@@ -85,80 +132,41 @@ export default {
     prop: "code",
     event: "input",
   },
+  props: {
+    cmHintOptions: {
+      type: Object,
+      default() {
+        return {};
+      },
+    },
+    code: {
+      type: String,
+      default: "",
+    },
+    options: {
+      type: Object,
+      default() {
+        return {};
+      },
+    },
+    fileSuffix: {
+      type: String,
+    },
+    showTool: {
+      type: Boolean,
+      default: false,
+    },
+  },
+
   data() {
     return {
       codeMirrorHeight: "100%",
       editorValue: this.code,
-      userOption: {},
-      cmThemeOptions: [
-        "default",
-        "3024-day",
-        "3024-night",
-        "abcdef",
-        "ambiance",
-        "ayu-dark",
-        "ayu-mirage",
-        "base16-dark",
-        "base16-light",
-        "bespin",
-        "blackboard",
-        "cobalt",
-        "colorforth",
-        "darcula",
-        "dracula",
-        "duotone-dark",
-        "duotone-light",
-        "eclipse",
-        "elegant",
-        "erlang-dark",
-        "gruvbox-dark",
-        "hopscotch",
-        "icecoder",
-        "idea",
-        "isotope",
-        "lesser-dark",
-        "liquibyte",
-        "lucario",
-        "material",
-        "material-darker",
-        "material-palenight",
-        "material-ocean",
-        "mbo",
-        "mdn-like",
-        "midnight",
-        "monokai",
-        "moxer",
-        "neat",
-        "neo",
-        "night",
-        "nord",
-        "oceanic-next",
-        "panda-syntax",
-        "paraiso-dark",
-        "paraiso-light",
-        "pastel-on-dark",
-        "railscasts",
-        "rubyblue",
-        "seti",
-        "shadowfox",
-        "solarized dark",
-        "solarized light",
-        "the-matrix",
-        "tomorrow-night-bright",
-        "tomorrow-night-eighties",
-        "ttcn",
-        "twilight",
-        "vibrant-ink",
-        "xq-dark",
-        "xq-light",
-        "yeti",
-        "yonce",
-        "zenburn",
-      ],
-      cmEditorModeOptions: ["default", "json", "sql", "javascript", "xml", "html", "yaml", "markdown", "python"],
+      cmThemeOptions: themeList,
+      cmEditorModeOptions: modeList,
       cmOptions: {
-        theme: "idea",
-        mode: "application/json",
+        theme: localStorage.getItem("editorTheme") || "idea",
+        mode: "json",
         lineWrapping: true,
         lineNumbers: true,
         autofocus: true,
@@ -170,7 +178,7 @@ export default {
           "Alt-Q": "autocomplete",
           "Ctrl-Alt-L": () => {
             try {
-              if (this.cmOptions.mode == "application/json" && this.editorValue) {
+              if (this.cmOptions.mode == "json" && this.editorValue) {
                 this.editorValue = this.formatStrInJson(this.editorValue);
               }
             } catch (e) {
@@ -194,34 +202,13 @@ export default {
         },
         styleSelectedText: true,
         enableAutoFormatJson: true,
-        defaultJsonIndentation: 2,
+        // defaultJsonIndentation: 2,
       },
       enableAutoFormatJson: true,
       defaultJsonIndentation: 2,
     };
   },
-  props: {
-    cmHintOptions: {
-      type: Object,
-      default() {
-        return {};
-      },
-    },
-    code: {
-      type: String,
-      default: "",
-    },
-    options: {
-      type: Object,
-      default() {
-        return {};
-      },
-    },
-    showTool: {
-      type: Boolean,
-      default: false,
-    },
-  },
+
   computed: {
     myCodemirror() {
       return this.$refs.mirror.codemirror;
@@ -234,20 +221,26 @@ export default {
     },
   },
   watch: {
-    "cmOptions.theme": function (newValue) {
-      try {
-        let theme = this.cmOptions.theme == "default" ? "blackboard" : newValue;
-        require("codemirror/theme/" + theme + ".css");
-        this.cmOptions.theme = theme;
-        this.resetLint();
-      } catch (e) {
-        this.$message.error("切换编辑器主题出错：" + e.toString());
-      }
+    fileSuffix: {
+      handler(v) {
+        if (!v) {
+          return;
+        }
+        const textArr = v.split(".");
+        const suffix = textArr.length ? textArr[textArr.length - 1] : v;
+        const newMode = fileSuffixToModeMap[suffix];
+        if (newMode) {
+          this.cmOptions = { ...this.cmOptions, mode: newMode };
+        }
+      },
+      deep: false,
+      immediate: true,
     },
     options: {
       handler(n) {
         if (Object.keys(n).length) {
-          this.userOption = JSON.parse(JSON.stringify(n));
+          const options = JSON.parse(JSON.stringify(n));
+          this.cmOptions = { ...this.cmOptions, ...options };
         }
       },
       deep: true,
@@ -273,7 +266,7 @@ export default {
         this.cmOptions.lint = false;
         return;
       }
-      if (this.cmOptions.mode == "application/json") {
+      if (this.cmOptions.mode == "json") {
         if (!this.enableAutoFormatJson) {
           return;
         }
@@ -285,53 +278,20 @@ export default {
     }
   },
   methods: {
-    resetLint() {
-      if (!this.$refs.myCm.codemirror.getValue()) {
-        this.$nextTick(() => {
-          this.$refs.myCm.codemirror.setOption("lint", false);
-        });
-        return;
-      }
-      this.$refs.myCm.codemirror.setOption("lint", false);
-      this.$nextTick(() => {
-        this.$refs.myCm.codemirror.setOption("lint", { esversion: "8" });
-      });
+    // 选择语言
+    handleSelectMode(v) {
+      this.cmOptions.mode = v;
     },
-    resetFoldGutter() {
-      this.$refs.myCm.codemirror.setOption("foldGutter", false);
-      this.$nextTick(() => {
-        this.$refs.myCm.codemirror.setOption("foldGutter", true);
-      });
+
+    // 选择皮肤
+    handleSelectTheme(v) {
+      this.cmOptions.theme = v;
+      localStorage.setItem("editorTheme", v);
     },
-    // 获取值
-    getValue() {
-      try {
-        return this.$refs.myCm.codemirror.getValue();
-      } catch (e) {
-        let errorInfo = e.toString();
-        this.$message.error("获取编辑框内容失败：" + errorInfo);
-        return errorInfo;
-      }
-    },
-    // 修改值
-    setValue(value) {
-      try {
-        if (typeof value != typeof "") {
-          this.$message.error("修改编辑框内容失败：编辑宽内容只能为字符串");
-          return;
-        }
-        if (this.cmOptions.mode == "application/json") {
-          this.editorValue = this.formatStrInJson(value);
-        } else {
-          this.editorValue = value;
-        }
-      } catch (e) {
-        this.$message.error("修改编辑框内容失败：" + e.toString());
-      }
-    },
+
     // 黏贴事件处理函数
     OnPaste() {
-      if (this.cmOptions.mode == "application/json") {
+      if (this.cmOptions.mode == "json") {
         try {
           this.editorValue = this.formatStrInJson(this.editorValue);
         } catch (e) {
@@ -339,21 +299,12 @@ export default {
         }
       }
     },
+
     // 失去焦点时处理函数
     onCmBlur(cm) {
       this.$emit("onCmBlur", cm.getValue());
-      try {
-        let editorValue = cm.getValue();
-        if (this.cmOptions.mode == "application/json" && editorValue) {
-          if (!this.enableAutoFormatJson) {
-            return;
-          }
-          this.editorValue = this.formatStrInJson(editorValue);
-        }
-      } catch (e) {
-        // 啥也不做
-      }
     },
+
     // 按下键盘事件处理函数
     onKeyDown(event) {
       const keyCode = event.keyCode || event.which || event.charCode;
@@ -363,36 +314,48 @@ export default {
         this.$refs.myCm.codemirror.showHint({ completeSingle: false });
       }
     },
+
     // 按下鼠标时事件处理函数
     onMouseDown() {
       //取消代码提示
       this.$refs.myCm.codemirror.closeHint();
     },
+
     onCmCodeChanges(cm) {
       this.editorValue = cm.getValue();
-      this.resetLint();
     },
+
     // 格式化字符串为json格式字符串
     formatStrInJson(strValue) {
       this.$emit("checkJson", strValue);
-      return JSON.stringify(
-        // JSON.parse(strValue.replace(/\s/g, '')),
-        JSON.parse(strValue),
-        null,
-        this.defaultJsonIndentation
-      );
+      return JSON.stringify(JSON.parse(strValue), null, this.defaultJsonIndentation);
+    },
+
+    // 过滤选项
+    filterOption(input, option) {
+      return option.componentOptions.children[0].text.toLowerCase().indexOf(input.toLowerCase()) >= 0;
     },
   },
 };
 </script>
+<style>
+.CodeMirror {
+  height: 100%;
+  min-height: 200px;
+}
+</style>
 <style scoped>
 .CodeMirror-hints {
   z-index: 3330 !important;
 }
 .code-mirror-div {
   height: 100%;
+  line-height: 24px;
 }
 .tool-bar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
   margin: 10px 0;
 }
 .CodeMirror {

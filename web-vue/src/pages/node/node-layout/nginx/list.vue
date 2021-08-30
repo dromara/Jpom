@@ -72,7 +72,8 @@
             <a-input v-model="temp.name" placeholder="需要以 .conf 结尾" />
           </a-form-model-item>
           <a-form-model-item label="配置内容" prop="context">
-            <a-input v-model="temp.context" type="textarea" :rows="10" style="resize: none; height: 40vh" placeholder="配置内容" />
+            <code-editor v-model="temp.context" :options="{ mode: 'nginx' }" style="resize: none; height: 40vh"></code-editor>
+            <!-- <a-input v-model="temp.context" type="textarea" :rows="10" style="resize: none; height: 40vh" placeholder="配置内容" /> -->
           </a-form-model-item>
         </a-form-model>
       </a-modal>
@@ -99,7 +100,13 @@ import {
   doNginxCommand,
   editNginxServerName,
 } from "../../../../api/node-nginx";
+
+import codeEditor from "@/components/codeEditor";
+
 export default {
+  components: {
+    codeEditor,
+  },
   props: {
     node: {
       type: Object,

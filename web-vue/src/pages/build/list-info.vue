@@ -115,7 +115,16 @@
                   <!-- <div style="padding: 4px 8px; cursor: pointer" @mousedown="(e) => e.preventDefault()" @click="addItem"><a-icon type="plus" />自定义分支</div> 
                   -->
                   <div style="padding: 8px 8px; cursor: pointer; display: flex" @mousedown="(e) => e.preventDefault()">
-                    <a-input @blur="visibleInput(false)" @focus="visibleInput(true)" @click="(e) => e.target.focus()" placeholder="自定义分支通配表达式" size="small">
+                    <a-input-search
+                      enter-button="添加"
+                      v-model="selectInput"
+                      @search="onSearch"
+                      @blur="visibleInput(false)"
+                      @focus="visibleInput(true)"
+                      @click="(e) => e.target.focus()"
+                      placeholder="自定义分支通配表达式"
+                      size="small"
+                    >
                       <a-tooltip slot="suffix">
                         <template slot="title">
                           <div>
@@ -129,8 +138,7 @@
                         </template>
                         <a-icon type="question-circle" theme="filled" />
                       </a-tooltip>
-                    </a-input>
-                    <a-button slot="enterButton"> 添加 </a-button>
+                    </a-input-search>
                   </div>
                   <a-divider style="margin: 4px 0" />
                   <v-nodes :vnodes="menu" />
@@ -278,6 +286,7 @@ export default {
   },
   data() {
     return {
+      selectInput: "",
       selectOpen: false,
       selectFocus: false,
       inputFocus: false,
@@ -391,6 +400,13 @@ export default {
     this.handleFilter();
   },
   methods: {
+    onSearch(v) {
+      if (!v) {
+        return;
+      }
+      this.branchList = [...this.branchList, v];
+      this.selectInput = "";
+    },
     setSelectOpen(v) {
       // console.log(this.$refs.input && this.$refs.input, document.activeElement, 2312);
       // console.log(1, a);
