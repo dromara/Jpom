@@ -474,6 +474,7 @@ export default {
       const query = {
         page: 1,
         limit: 1000,
+        strike: 0,
       };
       getRepositoryList(query).then((res) => {
         if (res.code === 200) {

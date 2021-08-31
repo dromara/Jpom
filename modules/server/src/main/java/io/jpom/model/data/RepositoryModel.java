@@ -47,6 +47,11 @@ public class RepositoryModel extends BaseDbModel {
 	 */
 	private String rsaPrv;
 
+	/**
+	 * 逻辑删除
+	 */
+	private Integer strike;
+
 	public String getName() {
 		return name;
 	}
@@ -122,6 +127,14 @@ public class RepositoryModel extends BaseDbModel {
 
 	public void setRsaPrv(String rsaPrv) {
 		this.rsaPrv = rsaPrv;
+	}
+
+	public Integer getStrike() {
+		return strike;
+	}
+
+	public void setStrike(Integer strike) {
+		this.strike = strike;
 	}
 
 	/**

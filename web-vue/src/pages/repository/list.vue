@@ -6,6 +6,10 @@
         <a-select-option :value="'0'">GIT</a-select-option>
         <a-select-option :value="'1'">SVN</a-select-option>
       </a-select>
+      <a-select v-if="isSystem"  default-value="0"  v-model="listQuery.strike" allowClear placeholder="选择删除情况" class="filter-item" @change="handleFilter">
+        <a-select-option  :value="0">未删除</a-select-option>
+        <a-select-option :value="1">已删除</a-select-option>
+      </a-select>
       <a-button type="primary" @click="handleFilter">搜索</a-button>
       <a-button type="primary" @click="handleAdd">新增</a-button>
       <a-button type="primary" @click="loadData">刷新</a-button>
@@ -41,6 +45,7 @@
       <template slot="operation" slot-scope="text, record">
         <a-button type="primary" @click="handleEdit(record)">编辑</a-button>
         <a-button type="danger" @click="handleDelete(record)">删除</a-button>
+        <a-button v-if="isSystem && record.strike===1" type="primary" @click="handlerecovery(record)">恢复</a-button>
       </template>
     </a-table>
     <!-- 编辑区 -->
@@ -72,7 +77,10 @@
             </a-input>
           </a-form-model-item>
           <a-form-model-item label="密码" prop="password">
-            <a-input-password v-model="temp.password" placeholder="登录密码">
+            <a-input-password  v-if="temp.id === undefined" v-model="temp.password" placeholder="登录密码">
+              <a-icon slot="prefix" type="lock" />
+            </a-input-password>
+            <a-input-password  v-if="temp.id !== undefined" v-model="temp.password" placeholder="此处不填不会修改密码">
               <a-icon slot="prefix" type="lock" />
             </a-input-password>
           </a-form-model-item>
@@ -108,7 +116,7 @@
   </div>
 </template>
 <script>
-import { getRepositoryList, editRepository, deleteRepository } from "../../api/repository";
+import { getRepositoryList, editRepository, deleteRepository,recoveryRepository } from "../../api/repository";
 import { parseTime } from "../../utils/time";
 
 export default {
@@ -119,11 +127,13 @@ export default {
       listQuery: {
         page: 1,
         limit: 20,
+        strike: 0,
       },
       tableHeight: "70vh",
       list: [],
       total: 0,
       temp: {},
+      isSystem:false,
       editVisible: false,
       columns: [
         { title: "仓库名称", dataIndex: "name", width: 150, ellipsis: true, scopedSlots: { customRender: "name" } },
@@ -195,6 +205,7 @@ export default {
   created() {
     this.calcTableHeight();
     this.handleFilter();
+    this.isSystem=this.$store.getters.getUserInfo.systemUser;
   },
   methods: {
     // 计算表格高度
@@ -259,15 +270,18 @@ export default {
     },
     // 删除
     handleDelete(record) {
-      console.log(record);
       this.$confirm({
         title: "系统提示",
         content: "真的要删除仓库信息么？",
         okText: "确认",
         cancelText: "取消",
         onOk: () => {
+           const params = {
+            id: record.id,
+            isRealDel: this.isSystem
+           };
           // 删除
-          deleteRepository(record.id).then((res) => {
+          deleteRepository(params).then((res) => {
             if (res.code === 200) {
               this.$notification.success({
                 message: res.msg,
@@ -279,6 +293,26 @@ export default {
         },
       });
     },
+    handlerecovery(record){
+      this.$confirm({
+        title: "系统提示",
+        content: "真的要恢复仓库信息么？",
+        okText: "确认",
+        cancelText: "取消",
+        onOk: () => {
+          // 恢复
+          recoveryRepository(record.id).then((res) => {
+            if (res.code === 200) {
+              this.$notification.success({
+                message: res.msg,
+                duration: 2,
+              });
+              this.loadData();
+            }
+          });
+        },
+      });
+    }
   },
 };
 </script>

@@ -1,6 +1,7 @@
 package io.jpom.controller.build;
 
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.lang.Tuple;
 import cn.hutool.core.lang.Validator;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
@@ -17,16 +18,20 @@ import cn.jiangzeyin.common.validator.ValidatorItem;
 import cn.jiangzeyin.common.validator.ValidatorRule;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.build.BuildUtil;
+import io.jpom.common.BaseServerController;
 import io.jpom.common.Const;
-import io.jpom.model.enums.GitProtocolEnum;
 import io.jpom.model.data.RepositoryModel;
+import io.jpom.model.data.UserModel;
+import io.jpom.model.enums.GitProtocolEnum;
 import io.jpom.plugin.ClassFeature;
 import io.jpom.plugin.Feature;
 import io.jpom.plugin.MethodFeature;
 import io.jpom.service.dblog.BuildInfoService;
 import io.jpom.service.dblog.RepositoryService;
+import io.jpom.util.GitUtil;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
@@ -38,7 +43,7 @@ import java.io.File;
  */
 @RestController
 @Feature(cls = ClassFeature.BUILD_REPOSITORY)
-public class RepositoryController {
+public class RepositoryController extends BaseServerController {
 
 	@Resource
 	private RepositoryService repositoryService;
@@ -52,18 +57,28 @@ public class RepositoryController {
 	 * @param limit    每页条数
 	 * @param page     页码
 	 * @param repoType 仓库类型 0: GIT 1: SVN
+	 * @param strike   逻辑删除  1 删除  0 未删除
 	 * @return json
 	 */
 	@PostMapping(value = "/build/repository/list")
 	@Feature(method = MethodFeature.LOG)
 	public Object loadRepositoryList(@ValidatorConfig(value = {@ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "limit error")}, defaultVal = "10") int limit,
 									 @ValidatorConfig(value = {@ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "page error")}, defaultVal = "1") int page,
-									 Integer repoType) {
+									 Integer repoType, @RequestParam(value = "strike",defaultValue = "0") Integer strike) {
 		Page pageObj = new Page(page, limit);
 		pageObj.addOrder(new Order("modifyTimeMillis", Direction.DESC));
-		Entity entity = Entity.create()
-				.setIgnoreNull("repoType", repoType);
-
+		UserModel userModel = getUser();
+		Entity entity = Entity.create();
+		entity.setIgnoreNull("repoType", repoType);
+		//管理员可以获取删除或者没删除的
+		if (userModel.isSystemUser()) {
+			entity.setIgnoreNull("strike", strike);
+		}else {
+			//默认查询未删除
+			entity.setIgnoreNull("strike", 0);
+		}
+		entity.addFieldNames("ID", "NAME",
+			"CREATETIMEMILLIS", "MODIFYTIMEMILLIS", "GITURL", "REPOTYPE", "PROTOCOL", "USERNAME", "RSAPUB", "STRIKE");
 		PageResult<RepositoryModel> pageResult = repositoryService.listPage(entity, pageObj);
 		JSONObject jsonObject = JsonMessage.toJson(200, "获取成功", pageResult);
 		jsonObject.put("total", pageResult.getTotal());
@@ -80,6 +95,11 @@ public class RepositoryController {
 	@Feature(method = MethodFeature.EDIT)
 	public Object editRepository(RepositoryModel repositoryModelReq) {
 		this.checkInfo(repositoryModelReq);
+		try {
+			Tuple branchAndTagList = GitUtil.getBranchAndTagList(repositoryModelReq);
+		} catch (Exception e) {
+			return JsonMessage.toJson(500, "无法连接此仓库！");
+		}
 		if (null == repositoryModelReq.getId()) {
 			// insert data
 			repositoryModelReq.setId(IdUtil.fastSimpleUUID());
@@ -160,19 +180,56 @@ public class RepositoryController {
 	/**
 	 * delete
 	 *
-	 * @param id 仓库ID
+	 * @param id        仓库ID
+	 * @param isRealDel 是否真删
 	 * @return json
 	 */
 	@PostMapping(value = "/build/repository/delete")
 	@Feature(method = MethodFeature.DEL)
-	public Object delRepository(String id) {
+	public Object delRepository(String id, Boolean isRealDel) {
 		// 判断仓库是否被关联
 		Entity entity = Entity.create();
 		entity.set("repositoryId", id);
 		boolean exists = buildInfoService.exists(entity);
 		Assert.state(!exists, "当前仓库被构建关联，不能直接删除");
-		//
-		repositoryService.delByKey(id);
+		UserModel user = getUser();
+		if (user.isSystemUser() && isRealDel) {
+			repositoryService.delByKey(id);
+		} else {
+			Entity updateEntity = Entity.create();
+			updateEntity.set("strike", 1);
+			Entity whereEntity = Entity.create();
+			whereEntity.set("id", id);
+			repositoryService.update(updateEntity, whereEntity);
+		}
 		return JsonMessage.getString(200, "删除成功");
+	}
+
+
+	/**
+	 * 恢复仓库
+	 *
+	 * @param id        仓库ID
+	 * @return json
+	 */
+	@PostMapping(value = "/build/repository/recovery")
+	@Feature(method = MethodFeature.EXECUTE)
+	public Object recoveryRepository(String id) {
+		RepositoryModel repositoryModelReq = repositoryService.getByKey(id);
+		// 判断仓库是否重复
+		Entity entity = Entity.create();
+		if (repositoryModelReq.getId() != null) {
+			Validator.validateGeneral(repositoryModelReq.getId(), "错误的ID");
+			entity.set("id", "<> " + repositoryModelReq.getId());
+		}
+		entity.set("gitUrl", repositoryModelReq.getGitUrl());
+		Assert.state(!repositoryService.exists(entity), "已经存在对应的仓库信息啦");
+		// 判断仓库是否被关联
+		Entity whereEntity = Entity.create();
+		whereEntity.set("id", id);
+		Entity updateEntity = Entity.create();
+		updateEntity.set("strike", 0);
+		repositoryService.update(updateEntity, whereEntity);
+		return JsonMessage.getString(200, "恢复成功");
 	}
 }

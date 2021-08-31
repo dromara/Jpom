@@ -38,12 +38,27 @@ export function editRepository(params) {
 
 /**
  * delete by id
+@param {
+  *  id: id
+  *  isRealDel: 是否真删
+  * } params 
+ * @returns 
+ */
+export function deleteRepository(params) {
+  return axios({
+    url: '/build/repository/delete',
+    method: 'post',
+    data: params
+  })
+}
+/**
+ * delete by id
  * @param {String} id 
  * @returns 
  */
-export function deleteRepository(id) {
+export function recoveryRepository(id) {
   return axios({
-    url: '/build/repository/delete',
+    url: '/build/repository/recovery',
     method: 'post',
     data: {id}
   })

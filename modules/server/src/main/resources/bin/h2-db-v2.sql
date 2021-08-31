@@ -16,6 +16,7 @@ CREATE TABLE IF NOT EXISTS PUBLIC.REPOSITORY
 	PASSWORD         VARCHAR(50) comment '登录密码',
 	RSAPUB           VARCHAR(2048) comment 'SSH RSA 公钥',
 	RSAPRV           VARCHAR(4096) comment 'SSH RSA 私钥',
+	STRIKE           int DEFAULT 0 comment '逻辑删除{1，删除，0 未删除(默认)}',
 	CONSTRAINT REPOSITORY_PK PRIMARY KEY (ID)
 );
 comment on table REPOSITORY is '仓库信息';
@@ -91,6 +92,11 @@ ALTER TABLE REPOSITORY
 -- @author bwcx_jzy 增加 RELEASEMETHODDATAID
 ALTER TABLE BUILD_INFO
 	ADD IF NOT EXISTS RELEASEMETHODDATAID VARCHAR(200) comment '构建关联的数据ID';
+
+-- @author lidaofu 增加 STRIKE
+ALTER TABLE REPOSITORY
+	ADD IF NOT EXISTS STRIKE int DEFAULT 0 comment '逻辑删除';
+
 
 
 
