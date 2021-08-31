@@ -64,7 +64,7 @@ public class RepositoryController extends BaseServerController {
 	@Feature(method = MethodFeature.LOG)
 	public Object loadRepositoryList(@ValidatorConfig(value = {@ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "limit error")}, defaultVal = "10") int limit,
 									 @ValidatorConfig(value = {@ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "page error")}, defaultVal = "1") int page,
-									 Integer repoType, @RequestParam(value = "strike",defaultValue = "0") Integer strike) {
+									 Integer repoType, @RequestParam(value = "strike", defaultValue = "0") Integer strike) {
 		Page pageObj = new Page(page, limit);
 		pageObj.addOrder(new Order("modifyTimeMillis", Direction.DESC));
 		UserModel userModel = getUser();
@@ -73,7 +73,7 @@ public class RepositoryController extends BaseServerController {
 		//管理员可以获取删除或者没删除的
 		if (userModel.isSystemUser()) {
 			entity.setIgnoreNull("strike", strike);
-		}else {
+		} else {
 			//默认查询未删除
 			entity.setIgnoreNull("strike", 0);
 		}
@@ -209,7 +209,7 @@ public class RepositoryController extends BaseServerController {
 	/**
 	 * 恢复仓库
 	 *
-	 * @param id        仓库ID
+	 * @param id 仓库ID
 	 * @return json
 	 */
 	@PostMapping(value = "/build/repository/recovery")

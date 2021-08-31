@@ -51,8 +51,8 @@ public class BuildInfoTriggerController extends BaseServerController {
 		}
 		String contextPath = UrlRedirectUtil.getHeaderProxyPath(getRequest(), BaseJpomInterceptor.PROXY_PATH);
 		String url = ServerOpenApi.BUILD_TRIGGER_BUILD2.
-				replace("{id}", item.getId()).
-				replace("{token}", item.getTriggerToken());
+			replace("{id}", item.getId()).
+			replace("{token}", item.getTriggerToken());
 		String triggerBuildUrl = String.format("/%s/%s", contextPath, url);
 		Map<String, String> map = new HashMap<>();
 		map.put("triggerBuildUrl", FileUtil.normalize(triggerBuildUrl));
