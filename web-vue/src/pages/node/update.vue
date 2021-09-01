@@ -114,7 +114,8 @@ export default {
     },
     rowSelection() {
       return {
-        onChange: this.tableSelectionChange
+        onChange: this.tableSelectionChange,
+        selectedRowKeys: this.tableSelections
       }
     },
     socketUrl() {
@@ -200,6 +201,11 @@ export default {
     getVersionResult(data, nodeId) {
       this.nodeVersion = Object.assign({}, this.nodeVersion, {
         [nodeId]: data
+      })
+    },
+    onErrorResult(data) {
+      this.$notification.warning({
+        message: data
       })
     },
     updateNode() {
