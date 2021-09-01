@@ -250,7 +250,7 @@ Agent.sh create    创建Jpom插件端的应用服务（jpom-agent）
 
 4. [码云赞赏： 在码云仓库项目首页下方捐赠、打赏](https://gitee.com/dromara/Jpom)
 
-5. 微信赞赏
+5. 微信赞赏 [赞赏记录](./docs/praise/praise.md)
 
 ![微信赞赏](https://cdn.jsdelivr.net/gh/jiangzeyin/Jpom-site/images/wx_praise_small.png)
 
