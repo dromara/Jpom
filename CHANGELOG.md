@@ -11,7 +11,10 @@
 ### 解决BUG、优化功能
 
 1. 【server】清除构建目录失败（感谢@大灰灰）
-
+2. 【server】fix: 在线升级页面在没有配置白名单时候无法显示节点信息
+3. 【agent】fix: windows 环境保存配置文件错误问题
+4. 【agent】升级 commons-compress 依赖 （来自 GitHub advisories ）
+5. 【server】优化限制 IP 白名单相关判断，避免手动修改错误后一直限制访问
 
 
 ------

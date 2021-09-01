@@ -38,12 +38,12 @@ public class IpInterceptor extends BaseJpomInterceptor {
         }
         // 判断不允许访问
         String prohibited = config.getProhibited();
-        if (this.checkIp(prohibited, clientIp, false)) {
+        if (StrUtil.isNotEmpty(prohibited) && this.checkIp(prohibited, clientIp, false)) {
             ServletUtil.write(response, JsonMessage.getString(900, "Prohibition of access"), MediaType.APPLICATION_JSON_VALUE);
             return false;
         }
         String allowed = config.getAllowed();
-        if (this.checkIp(allowed, clientIp, true)) {
+        if (StrUtil.isEmpty(allowed) || this.checkIp(allowed, clientIp, true)) {
             return true;
         }
         ServletUtil.write(response, JsonMessage.getString(900, "Prohibition of access"), MediaType.APPLICATION_JSON_VALUE);

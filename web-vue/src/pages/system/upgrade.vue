@@ -46,7 +46,7 @@ export default {
     // 加载数据
     loadData() {
       systemInfo().then(res => {
-        if (res.code === 200) {
+        if (res.data === 200) {
           this.temp = res.data;
         }
       })
