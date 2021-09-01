@@ -71,12 +71,7 @@ public class RepositoryController extends BaseServerController {
 		Entity entity = Entity.create();
 		entity.setIgnoreNull("repoType", repoType);
 		//管理员可以获取删除或者没删除的
-		if (userModel.isSystemUser()) {
-			entity.setIgnoreNull("strike", strike);
-		} else {
-			//默认查询未删除
-			entity.setIgnoreNull("strike", 0);
-		}
+		entity.setIgnoreNull("strike", userModel.isSystemUser()?strike:0);
 		entity.addFieldNames("ID", "NAME",
 			"CREATETIMEMILLIS", "MODIFYTIMEMILLIS", "GITURL", "REPOTYPE", "PROTOCOL", "USERNAME", "RSAPUB", "STRIKE");
 		PageResult<RepositoryModel> pageResult = repositoryService.listPage(entity, pageObj);
@@ -96,7 +91,7 @@ public class RepositoryController extends BaseServerController {
 	public Object editRepository(RepositoryModel repositoryModelReq) {
 		this.checkInfo(repositoryModelReq);
 		try {
-			Tuple branchAndTagList = GitUtil.getBranchAndTagList(repositoryModelReq);
+			Tuple tuple = GitUtil.getBranchAndTagList(repositoryModelReq);
 		} catch (Exception e) {
 			return JsonMessage.toJson(500, "无法连接此仓库！");
 		}
@@ -142,6 +137,7 @@ public class RepositoryController extends BaseServerController {
 		if (repositoryModelReq.getId() != null) {
 			Validator.validateGeneral(repositoryModelReq.getId(), "错误的ID");
 			entity.set("id", "<> " + repositoryModelReq.getId());
+			entity.set("strike",0);
 		}
 		entity.set("gitUrl", repositoryModelReq.getGitUrl());
 		Assert.state(!repositoryService.exists(entity), "已经存在对应的仓库信息啦");
@@ -221,9 +217,10 @@ public class RepositoryController extends BaseServerController {
 		if (repositoryModelReq.getId() != null) {
 			Validator.validateGeneral(repositoryModelReq.getId(), "错误的ID");
 			entity.set("id", "<> " + repositoryModelReq.getId());
+			entity.set("strike",0);
 		}
 		entity.set("gitUrl", repositoryModelReq.getGitUrl());
-		Assert.state(!repositoryService.exists(entity), "已经存在对应的仓库信息啦");
+		Assert.state(!repositoryService.exists(entity), "已经存在对应的仓库信息啦!");
 		// 判断仓库是否被关联
 		Entity whereEntity = Entity.create();
 		whereEntity.set("id", id);
