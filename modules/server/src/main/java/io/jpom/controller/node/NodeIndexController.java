@@ -28,6 +28,7 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.annotation.Resource;
@@ -140,6 +141,7 @@ public class NodeIndexController extends BaseServerController {
 	}
 
 	/**
+	 * @param status 节点状态获取
 	 * @return
 	 * @author Hotstrip
 	 * load node project list
@@ -147,8 +149,14 @@ public class NodeIndexController extends BaseServerController {
 	 */
 	@RequestMapping(value = "node_project_list", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
-	public String nodeProjectList() {
-		List<NodeModel> nodeModels = nodeService.listAndProject();
+	public String nodeProjectList(@RequestParam(value = "status", defaultValue = "false") Boolean status) {
+		List<NodeModel> nodeModels = null;
+		if (status) {
+			nodeModels = nodeService.listAndProjectAndStatus();
+		} else {
+			nodeModels = nodeService.listAndProject();
+		}
+
 		return JsonMessage.getString(200, "success", nodeModels);
 	}
 
@@ -160,10 +168,10 @@ public class NodeIndexController extends BaseServerController {
 		String saveDir = ServerConfigBean.getInstance().getAgentPath().getAbsolutePath();
 		MultipartFileBuilder multipartFileBuilder = createMultipart();
 		multipartFileBuilder
-				.setFileExt("jar")
-				.addFieldName("file")
-				.setUseOriginalFilename(true)
-				.setSavePath(saveDir);
+			.setFileExt("jar")
+			.addFieldName("file")
+			.setUseOriginalFilename(true)
+			.setSavePath(saveDir);
 		String path = multipartFileBuilder.save();
 		// 基础检查
 		JsonMessage<Tuple> error = JpomManifest.checkJpomJar(path, "io.jpom.JpomAgentApplication", false);

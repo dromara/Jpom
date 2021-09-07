@@ -35,13 +35,15 @@ export function getNodeStatus(nodeId) {
 }
 
 // 节点 + 项目列表
-export function getNodeProjectList() {
+export function getNodeProjectList(params) {
   return axios({
     url: '/node/node_project_list',
     method: 'post',
+    params: params,
     timeout: 0
   })
 }
+
 
 /**
  * 编辑 node

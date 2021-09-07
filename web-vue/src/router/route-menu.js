@@ -27,7 +27,8 @@ const routeMenuMap = {
   'cacheManage': '/system/cache',
   'logManage': '/system/log',
   'update': '/system/upgrade',
-  'sysConfig': '/system/config'
+  'sysConfig': '/system/config',
+  'projectSearch': '/node/search'
 }
 
 export default routeMenuMap

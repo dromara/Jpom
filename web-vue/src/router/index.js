@@ -114,6 +114,11 @@ const children = [
     name: "system-config",
     component: () => import("../pages/system/config"),
   },
+  {
+    path: "/node/search",
+    name: "node-search",
+    component: () => import("../pages/node/search"),
+  },
 ];
 
 const router = new Router({
