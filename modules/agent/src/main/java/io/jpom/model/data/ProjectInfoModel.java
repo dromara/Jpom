@@ -385,6 +385,8 @@ public class ProjectInfoModel extends BaseModel {
 
 	public String getAbsoluteLog(JavaCopyItem javaCopyItem) {
 		File file = javaCopyItem == null ? new File(getLog()) : getLog(javaCopyItem);
+		// auto create dir
+		FileUtil.mkParentDirs(file);
 		return file.getAbsolutePath();
 	}
 
