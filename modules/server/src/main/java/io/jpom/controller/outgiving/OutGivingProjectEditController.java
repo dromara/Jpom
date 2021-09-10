@@ -253,6 +253,13 @@ public class OutGivingProjectEditController extends BaseServerController {
 			return JsonMessage.getString(401, "请选择正确的项目路径,或者还没有配置白名单");
 		}
 		defData.put("whitelistDirectory", whitelistDirectory);
+		String logPath = getParameter("logPath");
+		if (StrUtil.isNotEmpty(logPath)) {
+			if (!AgentWhitelist.checkPath(whitelistServerOutGiving, logPath)) {
+				return JsonMessage.getString(401, "请选择正确的日志路径,或者还没有配置白名单");
+			}
+			defData.put("logPath", logPath);
+		}
 		String lib = getParameter("lib");
 		defData.put("lib", lib);
 		defData.put("group", "节点分发");

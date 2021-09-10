@@ -587,8 +587,7 @@ export default {
                   javaExtDirsCp: res.data.javaExtDirsCp,
                   whitelistDirectory: res.data.whitelistDirectory,
                   lib: res.data.lib,
-                  logPath: res.data.log,
-
+                  logPath: res.data.logPath,
                   nodeIdList: [],
                 };
               }
