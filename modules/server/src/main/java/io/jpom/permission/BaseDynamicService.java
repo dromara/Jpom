@@ -215,9 +215,6 @@ public interface BaseDynamicService {
 			if (children != null && !children.isEmpty()) {
 				treeLevel.setChildren(parserChildren(classFeature, children));
 			}
-			if (CollUtil.isEmpty(treeLevel.getChildren())) {
-				return;
-			}
 			String id = jsonObject.getString("id");
 			if (id.contains(StrUtil.COLON)) {
 				id = id.split(StrUtil.COLON)[2];
@@ -226,6 +223,10 @@ public interface BaseDynamicService {
 			treeLevel.setClassFeature(classFeature.name());
 			list.add(treeLevel);
 		});
+		// 过滤没有子级的数据
+		if (classFeature.getParent() != null) {
+			return list.stream().filter(treeLevel -> CollUtil.isNotEmpty(treeLevel.getChildren())).collect(Collectors.toList());
+		}
 		return list;
 	}
 
