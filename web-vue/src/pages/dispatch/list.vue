@@ -581,12 +581,14 @@ export default {
                   id: res.data.id,
                   name: res.data.name,
                   type: "edit",
-                  afterOpt: res.data.afterOpt,
+                  afterOpt: record.afterOpt,
                   runMode: res.data.runMode,
                   mainClass: res.data.mainClass,
                   javaExtDirsCp: res.data.javaExtDirsCp,
                   whitelistDirectory: res.data.whitelistDirectory,
                   lib: res.data.lib,
+                  logPath: res.data.log,
+
                   nodeIdList: [],
                 };
               }
