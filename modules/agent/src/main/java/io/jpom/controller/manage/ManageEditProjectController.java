@@ -106,7 +106,11 @@ public class ManageEditProjectController extends BaseAgentController {
 			String logPath = projectInfo.getLogPath();
 			if (StrUtil.isNotEmpty(logPath)) {
 				if (!whitelistDirectoryService.checkProjectDirectory(logPath)) {
-					return JsonMessage.getString(401, "请填写的项目日志存储路径,或者还没有配置白名单");
+					if (outGivingProject) {
+						whitelistDirectoryService.addProjectWhiteList(logPath);
+					} else {
+						return JsonMessage.getString(401, "请填写的项目日志存储路径,或者还没有配置白名单");
+					}
 				}
 			}
 		}
