@@ -26,6 +26,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 /**
  * @author bwcx_jzy
@@ -105,9 +107,13 @@ public class UserRoleDynamicController extends BaseServerController {
 			Class<? extends BaseDynamicService> baseOperService = dynamicData.getBaseOperService();
 			BaseDynamicService bean = SpringUtil.getBean(baseOperService);
 			List<RoleModel.TreeLevel> list = bean.parserValue(classFeature, value);
-			if (CollUtil.isNotEmpty(list)) {
-				dynamicData1.put(classFeature, list);
+			if (CollUtil.isEmpty(list)) {
+				continue;
 			}
+			if (classFeature.getParent() != null) {
+				list = list.stream().filter(treeLevel -> CollUtil.isNotEmpty(treeLevel.getChildren())).collect(Collectors.toList());
+			}
+			dynamicData1.put(classFeature, list);
 		}
 		item.setDynamicData2(dynamicData1);
 		roleService.updateItem(item);
