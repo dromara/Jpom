@@ -508,6 +508,7 @@ export default {
 									whitelistDirectory: res.data.whitelistDirectory,
 									lib: res.data.lib,
 									nodeIdList: [],
+                  logPath: res.data.logPath,
 								};
 							}
 							// 添加 nodeIdList
