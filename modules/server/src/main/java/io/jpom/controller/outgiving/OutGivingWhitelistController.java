@@ -34,75 +34,59 @@ import java.util.Map;
 @RequestMapping(value = "/outgiving")
 @Feature(cls = ClassFeature.OUTGIVING)
 public class OutGivingWhitelistController extends BaseServerController {
-    @Resource
-    private ServerWhitelistServer serverWhitelistServer;
+	@Resource
+	private ServerWhitelistServer serverWhitelistServer;
 
+	/**
+	 * @return
+	 * @author Hotstrip
+	 * get whiteList data
+	 * 白名单数据接口
+	 */
+	@RequestMapping(value = "white-list", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	@ResponseBody
+	public String whiteList() {
+		Map<String, Object> map = new HashMap<>(2);
+		ServerWhitelist serverWhitelist = serverWhitelistServer.getWhitelist();
+		if (serverWhitelist != null) {
+			List<String> whiteList = serverWhitelist.getOutGiving();
+			String strWhiteList = AgentWhitelist.convertToLine(whiteList);
+			map.put("whiteList", strWhiteList);
+			map.put("whiteListArray", whiteList);
+		}
+		return JsonMessage.getString(200, "ok", map);
+	}
 
-//    @RequestMapping(value = "whitelistDirectory.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
-//    @SystemPermission
-//    public String whitelistDirectory() {
-//        //
-//        UserModel userModel = getUser();
-//        ServerWhitelist serverWhitelist = serverWhitelistServer.getWhitelist();
-//        if (serverWhitelist != null && userModel.isSystemUser()) {
-//            List<String> whiteList = serverWhitelist.getOutGiving();
-//            String strWhiteList = AgentWhitelist.convertToLine(whiteList);
-//            setAttribute("whiteList", strWhiteList);
-//        }
-//        return "outgiving/whitelistDirectory";
-//    }
+	/**
+	 * 保存节点白名单
+	 *
+	 * @param data 数据
+	 * @return json
+	 */
+	@RequestMapping(value = "whitelistDirectory_submit", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	@ResponseBody
+	@OptLog(UserOperateLogV1.OptType.SaveOutgivingWhitelist)
+	@SystemPermission
+	public String whitelistDirectorySubmit(String data) {
+		List<String> list = StrSplitter.splitTrim(data, StrUtil.LF, true);
+		if (list == null || list.size() <= 0) {
+			return JsonMessage.getString(401, "白名单不能为空");
+		}
+		list = AgentWhitelist.covertToArray(list);
+		if (list == null) {
+			return JsonMessage.getString(401, "项目路径白名单不能位于Jpom目录下");
+		}
+		if (list.isEmpty()) {
+			return JsonMessage.getString(401, "项目路径白名单不能为空");
+		}
+		ServerWhitelist serverWhitelist = serverWhitelistServer.getWhitelist();
+		if (serverWhitelist == null) {
+			serverWhitelist = new ServerWhitelist();
+		}
+		serverWhitelist.setOutGiving(list);
+		serverWhitelistServer.saveWhitelistDirectory(serverWhitelist);
 
-    /**
-     * @return
-     * @author Hotstrip
-     * get whiteList data
-     * 白名单数据接口
-     */
-    @RequestMapping(value = "white-list", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    @SystemPermission
-    @ResponseBody
-    public String whiteList() {
-        Map<String, String> map = new HashMap<>();
-        UserModel userModel = getUser();
-        ServerWhitelist serverWhitelist = serverWhitelistServer.getWhitelist();
-        if (serverWhitelist != null && userModel.isSystemUser()) {
-            List<String> whiteList = serverWhitelist.getOutGiving();
-            String strWhiteList = AgentWhitelist.convertToLine(whiteList);
-            map.put("whiteList", strWhiteList);
-        }
-        return JsonMessage.getString(200, "ok", map);
-    }
-
-    /**
-     * 保存节点白名单
-     *
-     * @param data 数据
-     * @return json
-     */
-    @RequestMapping(value = "whitelistDirectory_submit", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    @ResponseBody
-    @OptLog(UserOperateLogV1.OptType.SaveOutgivingWhitelist)
-    @SystemPermission
-    public String whitelistDirectorySubmit(String data) {
-        List<String> list = StrSplitter.splitTrim(data, StrUtil.LF, true);
-        if (list == null || list.size() <= 0) {
-            return JsonMessage.getString(401, "白名单不能为空");
-        }
-        list = AgentWhitelist.covertToArray(list);
-        if (list == null) {
-            return JsonMessage.getString(401, "项目路径白名单不能位于Jpom目录下");
-        }
-        if (list.isEmpty()) {
-            return JsonMessage.getString(401, "项目路径白名单不能为空");
-        }
-        ServerWhitelist serverWhitelist = serverWhitelistServer.getWhitelist();
-        if (serverWhitelist == null) {
-            serverWhitelist = new ServerWhitelist();
-        }
-        serverWhitelist.setOutGiving(list);
-        serverWhitelistServer.saveWhitelistDirectory(serverWhitelist);
-
-        String resultData = AgentWhitelist.convertToLine(list);
-        return JsonMessage.getString(200, "保存成功", resultData);
-    }
+		String resultData = AgentWhitelist.convertToLine(list);
+		return JsonMessage.getString(200, "保存成功", resultData);
+	}
 }
