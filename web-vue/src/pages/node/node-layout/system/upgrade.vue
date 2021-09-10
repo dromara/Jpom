@@ -51,7 +51,7 @@ export default {
     // 加载数据
     loadData() {
       systemInfo(this.node.id).then(res => {
-        if (res.code === 200) {
+        if (res.data) {
           this.temp = res.data;
         }
       })
