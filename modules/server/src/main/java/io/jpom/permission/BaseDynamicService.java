@@ -1,5 +1,6 @@
 package io.jpom.permission;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.comparator.PropertyComparator;
 import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
@@ -214,7 +215,9 @@ public interface BaseDynamicService {
 			if (children != null && !children.isEmpty()) {
 				treeLevel.setChildren(parserChildren(classFeature, children));
 			}
-
+			if (CollUtil.isEmpty(treeLevel.getChildren())) {
+				return;
+			}
 			String id = jsonObject.getString("id");
 			if (id.contains(StrUtil.COLON)) {
 				id = id.split(StrUtil.COLON)[2];
