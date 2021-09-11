@@ -101,6 +101,17 @@
                 </configuration>
             </plugin>
         </plugins>
+		<resources>
+			<!--版权文件,更新日志-->
+			<resource>
+				<filtering>false</filtering>
+				<directory>../../</directory>
+				<includes>
+					<include>CHANGELOG.md</include>
+					<include>LICENSE</include>
+				</includes>
+			</resource>
+		</resources>
     </build>
 
     <profiles>
