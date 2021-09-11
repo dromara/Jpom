@@ -47,6 +47,7 @@
 15. agent 和 server 间的 websocket 鉴权调整
 16. 【server】update: 刷新整个页面的时候重新加载菜单
 17. 历史监控图表查询报时间格式化错误(字符串工具类) （感谢@misaka [Gitee pr](https://gitee.com/dromara/Jpom/pulls/142) ）
+18. 【agent】取消强制检测 server 节点
 
 > 【特别声明】当前版本 仓库和构建并没有接入动态数据权限，如果对权限敏感的用户建议等待下一个版本优化权限后再升级（如有疑问可以微信群沟通）
 
