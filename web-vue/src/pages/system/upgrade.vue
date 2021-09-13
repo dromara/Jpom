@@ -2,22 +2,22 @@
   <div>
     <a-timeline>
       <a-timeline-item>
-        <span class="layui-elem-quote">当前程序打包时间：{{temp.timeStamp}}</span>
+        <span class="layui-elem-quote">当前程序打包时间：{{ temp.timeStamp }}</span>
       </a-timeline-item>
       <a-timeline-item>
-        <span class="layui-elem-quote">当前版本号：{{temp.version}}</span>
+        <span class="layui-elem-quote">当前版本号：{{ temp.version }}</span>
       </a-timeline-item>
       <a-timeline-item>
-        <span class="layui-elem-quote">已经运行时间：{{temp.upTime}}</span>
+        <span class="layui-elem-quote">已经运行时间：{{ temp.upTime }}</span>
       </a-timeline-item>
       <a-timeline-item>
-        <span class="layui-elem-quote">端口号：{{temp.port}}</span>
+        <span class="layui-elem-quote">端口号：{{ temp.port }}</span>
       </a-timeline-item>
       <a-timeline-item>
-        <span class="layui-elem-quote">进程号：{{temp.pid}}</span>
+        <span class="layui-elem-quote">进程号：{{ temp.pid }}</span>
       </a-timeline-item>
       <a-timeline-item>
-        <span class="layui-elem-quote">数据存储目录：{{temp.dataPath}}</span>
+        <span class="layui-elem-quote">数据存储目录：{{ temp.dataPath }}</span>
       </a-timeline-item>
     </a-timeline>
     <a-spin v-show="!temp.debug" :spinning="spinning">
@@ -26,18 +26,38 @@
       </a-upload>
       <a-button type="primary" class="upload-btn" :disabled="fileList.length === 0" @click="startUpload">上传升级文件</a-button>
     </a-spin>
+    <div>
+      <markdown-it-vue class="md-body" :content="changelog" :options="markdownOptions" />
+    </div>
   </div>
 </template>
 <script>
-import { systemInfo, uploadUpgradeFile } from '../../api/system';
+import { systemInfo, uploadUpgradeFile, changelog } from "@/api/system";
+import MarkdownItVue from "markdown-it-vue";
+import "markdown-it-vue/dist/markdown-it-vue.css";
 export default {
+  components: {
+    MarkdownItVue,
+  },
   data() {
     return {
       temp: {},
       spinning: false,
       fileList: [],
-      timer: null
-    }
+      timer: null,
+      changelog: "",
+      markdownOptions: {
+        markdownIt: {
+          linkify: true,
+        },
+        linkAttributes: {
+          attrs: {
+            target: "_blank",
+            rel: "noopener",
+          },
+        },
+      },
+    };
   },
   mounted() {
     this.loadData();
@@ -45,11 +65,15 @@ export default {
   methods: {
     // 加载数据
     loadData() {
-      systemInfo().then(res => {
+      systemInfo().then((res) => {
         if (res.code === 200) {
           this.temp = res.data;
         }
-      })
+      });
+      changelog().then((res) => {
+        console.log(res);
+        this.changelog = res.data;
+      });
     },
     // 处理文件移除
     handleRemove(file) {
@@ -68,42 +92,44 @@ export default {
     startUpload() {
       this.spinning = true;
       const formData = new FormData();
-      formData.append('file', this.fileList[0]);
+      formData.append("file", this.fileList[0]);
       // 上传文件
-      uploadUpgradeFile(formData).then(res => {
+      uploadUpgradeFile(formData).then((res) => {
         if (res.code === 200) {
           this.$notification.success({
             message: res.msg,
-            duration: 2
+            duration: 2,
           });
           this.checkVersion();
         }
         this.spinning = false;
-      })
+      });
       this.fileList = [];
     },
     // 定时查询版本号
     checkVersion() {
       this.timer = setInterval(() => {
-        systemInfo().then(res => {
-          if (res.code === 200 && res.data.timeStamp !== this.temp.timeStamp) {
-            clearInterval(this.timer);
-            this.$notification.success({
-              message: '升级成功',
-              duration: 2
-            });
-            this.temp = res.data;
-            setTimeout(()=>{
-              location.reload();
-            },1000);
-          }
-        }).catch(error => {
-          console.log(error);
-        })
+        systemInfo()
+          .then((res) => {
+            if (res.code === 200 && res.data.timeStamp !== this.temp.timeStamp) {
+              clearInterval(this.timer);
+              this.$notification.success({
+                message: "升级成功",
+                duration: 2,
+              });
+              this.temp = res.data;
+              setTimeout(() => {
+                location.reload();
+              }, 1000);
+            }
+          })
+          .catch((error) => {
+            console.log(error);
+          });
       }, 2000);
-    }
-  }
-}
+    },
+  },
+};
 </script>
 <style scoped>
 .upload-btn {

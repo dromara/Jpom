@@ -1,41 +1,41 @@
-import axios from './config';
+import axios from "./config";
 
 /**
  * 日志列表
- * @param {nodeId} params 
+ * @param {nodeId} params
  */
 export function getLogList(params) {
   return axios({
-    url: '/system/log_data.json',
-    method: 'post',
-    data: params
-  })
+    url: "/system/log_data.json",
+    method: "post",
+    data: params,
+  });
 }
 
 /**
  * 下载日志
  * 下载文件的返回是 blob 类型，把 blob 用浏览器下载下来
- * @param {nodeId, path} params 
+ * @param {nodeId, path} params
  */
 export function downloadFile(params) {
   return axios({
-    url: '/system/log_download',
-    method: 'get',
-    responseType: 'blob',
-    params
-  })
+    url: "/system/log_download",
+    method: "get",
+    responseType: "blob",
+    params,
+  });
 }
 
 /**
  * 删除日志
- * @param {nodeId, path} params 
+ * @param {nodeId, path} params
  */
 export function deleteLog(params) {
   return axios({
-    url: '/system/log_del.json',
-    method: 'post',
-    data: params
-  })
+    url: "/system/log_del.json",
+    method: "post",
+    data: params,
+  });
 }
 
 /**
@@ -43,21 +43,21 @@ export function deleteLog(params) {
  */
 export function getServerCache() {
   return axios({
-    url: '/system/server-cache',
-    method: 'post'
-  })
+    url: "/system/server-cache",
+    method: "post",
+  });
 }
 
 /**
  * 节点缓存数据
- * @param {String} nodeId 
+ * @param {String} nodeId
  */
 export function getNodeCache(nodeId) {
   return axios({
-    url: '/system/node_cache.json',
-    method: 'post',
-    data: {nodeId}
-  })
+    url: "/system/node_cache.json",
+    method: "post",
+    data: { nodeId },
+  });
 }
 
 /**
@@ -65,26 +65,26 @@ export function getNodeCache(nodeId) {
  * @param {
  *  type: 类型
  *  nodeId: 节点 ID
- * } params 
+ * } params
  */
 export function clearCache(params) {
   return axios({
-    url: '/system/clearCache.json',
-    method: 'post',
-    data: params
-  })
+    url: "/system/clearCache.json",
+    method: "post",
+    data: params,
+  });
 }
 
 /**
  * 加载配置数据
- * @param {String} nodeId 节点 ID，若为空表示加载 Server 端配置 
+ * @param {String} nodeId 节点 ID，若为空表示加载 Server 端配置
  */
 export function getConfigData(nodeId) {
   return axios({
-    url: '/system/config-data',
-    method: 'post',
-    data: {nodeId}
-  })
+    url: "/system/config-data",
+    method: "post",
+    data: { nodeId },
+  });
 }
 
 /**
@@ -92,10 +92,10 @@ export function getConfigData(nodeId) {
  */
 export function getIpConfigData() {
   return axios({
-    url: '/system/ip-config-data',
-    method: 'post',
-    data: {}
-  })
+    url: "/system/ip-config-data",
+    method: "post",
+    data: {},
+  });
 }
 
 /**
@@ -107,12 +107,11 @@ export function getIpConfigData() {
  */
 export function editIpConfig(params) {
   return axios({
-    url: '/system/save_ip_config.json',
-    method: 'post',
-    data: params
-  })
+    url: "/system/save_ip_config.json",
+    method: "post",
+    data: params,
+  });
 }
-
 
 /**
  * 编辑配置
@@ -120,14 +119,14 @@ export function editIpConfig(params) {
  *  nodeId: 节点 ID,
  *  content: 配置内容,
  *  restart: 是否重启
- * } params 
+ * } params
  */
 export function editConfig(params) {
   return axios({
-    url: '/system/save_config.json',
-    method: 'post',
-    data: params
-  })
+    url: "/system/save_config.json",
+    method: "post",
+    data: params,
+  });
 }
 
 /**
@@ -135,9 +134,9 @@ export function editConfig(params) {
  */
 export function getMailConfigData() {
   return axios({
-    url: '/system/mail-config-data',
-    method: 'post'
-  })
+    url: "/system/mail-config-data",
+    method: "post",
+  });
 }
 
 /**
@@ -150,14 +149,14 @@ export function getMailConfigData() {
  *  from: 发送方，遵循RFC-822标准,
  *  sslEnable: 是否 SSL 安全连接,
  *  socketFactoryPort: SSL 加密端口
- * } params 
+ * } params
  */
 export function editMailConfig(params) {
   return axios({
-    url: '/system/mailConfig_save.json',
-    method: 'post',
-    data: params
-  })
+    url: "/system/mailConfig_save.json",
+    method: "post",
+    data: params,
+  });
 }
 
 /**
@@ -166,14 +165,14 @@ export function editMailConfig(params) {
  */
 export function systemInfo(nodeId) {
   return axios({
-    url: '/system/info',
-    method: 'post',
+    url: "/system/info",
+    method: "post",
     headers: {
-      tip: 'no',
-      loading: 'no'
+      tip: "no",
+      loading: "no",
     },
-    data: {nodeId}
-  })
+    data: { nodeId },
+  });
 }
 
 /**
@@ -181,17 +180,30 @@ export function systemInfo(nodeId) {
  * @param {
  *  file: 文件 multipart/form-data,
  *  nodeId: 节点 ID
- * } formData 
+ * } formData
  */
 export function uploadUpgradeFile(formData) {
   return axios({
-    url: '/system/uploadJar.json',
+    url: "/system/uploadJar.json",
     headers: {
-      'Content-Type': 'multipart/form-data;charset=UTF-8'
+      "Content-Type": "multipart/form-data;charset=UTF-8",
     },
-    method: 'post',
+    method: "post",
     // 0 表示无超时时间
-    timeout: 0, 
-    data: formData
-  })
+    timeout: 0,
+    data: formData,
+  });
+}
+
+/**
+ * 获取更新日志
+ *
+ */
+export function changelog() {
+  return axios({
+    url: "/system/change_log",
+    method: "post",
+    headers: {},
+    data: {},
+  });
 }
