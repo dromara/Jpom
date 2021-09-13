@@ -7,6 +7,7 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.lang.Tuple;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.core.util.URLUtil;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import io.jpom.build.BuildUtil;
@@ -117,7 +118,13 @@ public class GitUtil {
 			transportCommand.setCredentialsProvider(credentialsProvider);
 		} else if (protocol == GitProtocolEnum.SSH.getCode()) {
 			// ssh
-			File rsaFile = BuildUtil.getRepositoryRsaFile(repositoryModel.getId() + Const.ID_RSA);
+			File rsaFile;
+			if (StrUtil.startWith(repositoryModel.getRsaPrv(), URLUtil.FILE_URL_PREFIX)) {
+				String rsaPath = StrUtil.removePrefix(repositoryModel.getRsaPrv(), URLUtil.FILE_URL_PREFIX);
+				rsaFile = FileUtil.file(rsaPath);
+			} else {
+				rsaFile = BuildUtil.getRepositoryRsaFile(repositoryModel.getId() + Const.ID_RSA);
+			}
 			Assert.state(FileUtil.isFile(rsaFile), "仓库密钥文件不存在或者异常,请检查后操作");
 			transportCommand.setTransportConfigCallback(transport -> {
 				SshTransport sshTransport = (SshTransport) transport;

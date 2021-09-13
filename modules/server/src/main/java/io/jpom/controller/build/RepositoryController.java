@@ -28,6 +28,7 @@ import io.jpom.plugin.Feature;
 import io.jpom.plugin.MethodFeature;
 import io.jpom.service.dblog.BuildInfoService;
 import io.jpom.service.dblog.RepositoryService;
+import io.jpom.system.JpomRuntimeException;
 import io.jpom.util.GitUtil;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -71,10 +72,12 @@ public class RepositoryController extends BaseServerController {
 		Entity entity = Entity.create();
 		entity.setIgnoreNull("repoType", repoType);
 		//管理员可以获取删除或者没删除的
-		entity.setIgnoreNull("strike", userModel.isSystemUser()?strike:0);
-		entity.addFieldNames("ID", "NAME",
-			"CREATETIMEMILLIS", "MODIFYTIMEMILLIS", "GITURL", "REPOTYPE", "PROTOCOL", "USERNAME", "RSAPUB", "STRIKE");
+		entity.setIgnoreNull("strike", userModel.isSystemUser() ? strike : 0);
 		PageResult<RepositoryModel> pageResult = repositoryService.listPage(entity, pageObj);
+		pageResult.forEach(repositoryModel -> {
+			// 隐藏密码字段
+			repositoryModel.setPassword(null);
+		});
 		JSONObject jsonObject = JsonMessage.toJson(200, "获取成功", pageResult);
 		jsonObject.put("total", pageResult.getTotal());
 		return jsonObject;
@@ -83,17 +86,23 @@ public class RepositoryController extends BaseServerController {
 	/**
 	 * edit
 	 *
-	 * @param repositoryModelReq
-	 * @return
+	 * @param repositoryModelReq 仓库实体
+	 * @return json
 	 */
 	@PostMapping(value = "/build/repository/edit")
 	@Feature(method = MethodFeature.EDIT)
 	public Object editRepository(RepositoryModel repositoryModelReq) {
 		this.checkInfo(repositoryModelReq);
-		try {
-			Tuple tuple = GitUtil.getBranchAndTagList(repositoryModelReq);
-		} catch (Exception e) {
-			return JsonMessage.toJson(500, "无法连接此仓库！");
+		if (repositoryModelReq.getRepoType() == RepositoryModel.RepoType.Git.getCode()) {
+			// 验证 git 仓库信息
+			try {
+				Tuple tuple = GitUtil.getBranchAndTagList(repositoryModelReq);
+			} catch (JpomRuntimeException jpomRuntimeException) {
+				throw jpomRuntimeException;
+			} catch (Exception e) {
+				DefaultSystemLog.getLog().warn("获取仓库分支失败", e);
+				return JsonMessage.toJson(500, "无法连接此仓库，" + e.getMessage());
+			}
 		}
 		if (null == repositoryModelReq.getId()) {
 			// insert data
@@ -137,7 +146,7 @@ public class RepositoryController extends BaseServerController {
 		if (repositoryModelReq.getId() != null) {
 			Validator.validateGeneral(repositoryModelReq.getId(), "错误的ID");
 			entity.set("id", "<> " + repositoryModelReq.getId());
-			entity.set("strike",0);
+			entity.set("strike", 0);
 		}
 		entity.set("gitUrl", repositoryModelReq.getGitUrl());
 		Assert.state(!repositoryService.exists(entity), "已经存在对应的仓库信息啦");
@@ -163,7 +172,6 @@ public class RepositoryController extends BaseServerController {
 						DefaultSystemLog.getLog().warn("there is no rsa file... {}", rsaPath);
 						return false;
 					}
-					FileUtil.copy(FileUtil.file(rsaPath), rsaFile, true);
 				} else {
 					//  or else put into file
 					FileUtil.writeUtf8String(repositoryModelReq.getRsaPrv(), rsaFile);
@@ -217,7 +225,7 @@ public class RepositoryController extends BaseServerController {
 		if (repositoryModelReq.getId() != null) {
 			Validator.validateGeneral(repositoryModelReq.getId(), "错误的ID");
 			entity.set("id", "<> " + repositoryModelReq.getId());
-			entity.set("strike",0);
+			entity.set("strike", 0);
 		}
 		entity.set("gitUrl", repositoryModelReq.getGitUrl());
 		Assert.state(!repositoryService.exists(entity), "已经存在对应的仓库信息啦!");
