@@ -54,16 +54,18 @@ public class BuildInfoService extends BaseDbService<BuildInfoModel> {
 	 *
 	 * @param buildInfoModel 构建信息
 	 * @param userModel      用户信息
+	 * @param delay          延迟的时间
 	 * @return json
 	 */
-	public String start(BuildInfoModel buildInfoModel, UserModel userModel) {
+	public String start(BuildInfoModel buildInfoModel, UserModel userModel, Integer delay) {
 		// load repository
 		RepositoryModel repositoryModel = repositoryService.getByKey(buildInfoModel.getRepositoryId());
 		if (null == repositoryModel) {
 			return JsonMessage.getString(404, "仓库信息不存在");
 		}
-		BuildInfoManage.create(buildInfoModel, repositoryModel, userModel);
-		return JsonMessage.getString(200, "开始构建中", buildInfoModel.getBuildId());
+		BuildInfoManage.create(buildInfoModel, repositoryModel, userModel, delay);
+		String msg = (delay == null || delay <= 0) ? "开始构建中" : "延迟" + delay + "秒后开始构建";
+		return JsonMessage.getString(200, msg, buildInfoModel.getBuildId());
 	}
 
 	/**

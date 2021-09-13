@@ -38,6 +38,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 
 /**
  * new build info manage runnable
@@ -60,6 +61,10 @@ public class BuildInfoManage extends BaseBuild implements Runnable {
 	private final String optUserName;
 	private final UserModel userModel;
 	private final BaseBuildModule baseBuildModule;
+	/**
+	 * 延迟执行的时间（单位秒）
+	 */
+	private Integer delay;
 
 	private BuildInfoManage(final BuildInfoModel buildInfoModel, final RepositoryModel repositoryModel, final UserModel userModel) {
 		super(BuildUtil.getLogFile(buildInfoModel.getId(), buildInfoModel.getBuildId()),
@@ -102,16 +107,22 @@ public class BuildInfoManage extends BaseBuild implements Runnable {
 	/**
 	 * 创建构建
 	 *
-	 * @param buildInfoModel 构建项
-	 * @param userModel      操作人
+	 * @param buildInfoModel  构建项
+	 * @param userModel       操作人
+	 * @param repositoryModel 仓库信息
+	 * @param delay           延迟执行的时间 单位秒
 	 * @return this
 	 */
-	public static BuildInfoManage create(BuildInfoModel buildInfoModel, RepositoryModel repositoryModel, UserModel userModel) {
+	public static BuildInfoManage create(BuildInfoModel buildInfoModel,
+										 RepositoryModel repositoryModel,
+										 UserModel userModel,
+										 Integer delay) {
 		if (BUILD_MANAGE_MAP.containsKey(buildInfoModel.getId())) {
 			throw new JpomRuntimeException("当前构建还在进行中");
 		}
 		BuildInfoManage manage = new BuildInfoManage(buildInfoModel, repositoryModel, userModel);
 		BUILD_MANAGE_MAP.put(buildInfoModel.getId(), manage);
+		manage.delay = delay;
 		//
 		ThreadUtil.execute(manage);
 		return manage;
@@ -234,6 +245,10 @@ public class BuildInfoManage extends BaseBuild implements Runnable {
 
 	@Override
 	public void run() {
+		if (delay != null && delay > 0) {
+			// 延迟执行
+			ThreadUtil.sleep(delay, TimeUnit.SECONDS);
+		}
 		try {
 			if (!updateStatus(BuildStatus.Ing)) {
 				this.log("初始化构建记录失败,异常结束");

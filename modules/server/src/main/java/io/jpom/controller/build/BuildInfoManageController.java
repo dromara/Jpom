@@ -86,7 +86,7 @@ public class BuildInfoManageController extends BaseServerController {
 		buildInfoService.update(item);
 
 		// 执行构建
-		return buildInfoService.start(item, userModel);
+		return buildInfoService.start(item, userModel, null);
 	}
 
 	/**

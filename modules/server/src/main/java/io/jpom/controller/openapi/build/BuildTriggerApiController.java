@@ -1,5 +1,6 @@
 package io.jpom.controller.openapi.build;
 
+import cn.hutool.core.convert.Convert;
 import cn.hutool.core.util.StrUtil;
 import io.jpom.common.ServerOpenApi;
 import io.jpom.common.interceptor.NotLogin;
@@ -53,8 +54,16 @@ public class BuildTriggerApiController {
 //	}
 
 
+	/**
+	 * 构建触发器
+	 *
+	 * @param id    构建ID
+	 * @param token 构建的token
+	 * @param delay 延迟时间（单位秒）
+	 * @return json
+	 */
 	@RequestMapping(value = ServerOpenApi.BUILD_TRIGGER_BUILD2, produces = MediaType.APPLICATION_JSON_VALUE)
-	public String trigger2(@PathVariable String id, @PathVariable String token) {
+	public String trigger2(@PathVariable String id, @PathVariable String token, String delay) {
 		BuildInfoModel item = buildInfoService.getByKey(id);
 		Assert.notNull(item, "没有对应数据");
 		List<UserModel> list = userService.list(false);
@@ -64,6 +73,6 @@ public class BuildTriggerApiController {
 
 		Assert.state(StrUtil.equals(token, item.getTriggerToken()), "触发token错误");
 
-		return buildInfoService.start(item, first.get());
+		return buildInfoService.start(item, first.get(), Convert.toInt(delay, 0));
 	}
 }

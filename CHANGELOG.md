@@ -27,6 +27,7 @@
 20. 【agent】项目新增配置日志文件输出到指定目录
 21. 【server】构建产物目录支持通配符`AntPathMatcher`模式 （感谢@saysay [Gitee issues I455FM](https://gitee.com/dromara/Jpom/issues/I455FM) ）
 22. 【server】新增 h2 数据库缓存大小配置 [CACHE_SIZE](http://www.h2database.com/html/features.html#cache_settings) `db.cacheSize
+23. 【server】构建触发器新增延迟执行参数（感谢@Steve.Liu）
 
 ### 解决BUG、优化功能
 
