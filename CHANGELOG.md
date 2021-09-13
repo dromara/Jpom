@@ -10,8 +10,8 @@
 
 ### 解决BUG、优化功能
 
-1. 【server】构建触发器新增延迟执行参数
-2. 【server】数据库字段类型超大的 varchar 改为 CLOB
+1. 【server】构建触发器新增延迟执行参数（感谢@Steve.Liu）
+2. 【server】数据库字段类型超大的 varchar 改为 CLOB（感谢@Alex）
 
 ------
 
