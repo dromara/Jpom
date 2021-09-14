@@ -147,8 +147,8 @@ public class RepositoryModel extends BaseDbModel {
 		Git(0, "Git"),
 		Svn(1, "Svn"),
 		;
-		private int code;
-		private String desc;
+		private final int code;
+		private final String desc;
 
 		RepoType(int code, String desc) {
 			this.code = code;

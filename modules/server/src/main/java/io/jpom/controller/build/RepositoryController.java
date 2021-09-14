@@ -77,6 +77,7 @@ public class RepositoryController extends BaseServerController {
 		pageResult.forEach(repositoryModel -> {
 			// 隐藏密码字段
 			repositoryModel.setPassword(null);
+			repositoryModel.setRsaPrv(null);
 		});
 		JSONObject jsonObject = JsonMessage.toJson(200, "获取成功", pageResult);
 		jsonObject.put("total", pageResult.getTotal());

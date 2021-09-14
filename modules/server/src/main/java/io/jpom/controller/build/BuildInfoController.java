@@ -180,12 +180,11 @@ public class BuildInfoController extends BaseServerController {
 		}
 		// 检查关联数据ID
 		buildInfoModel.setReleaseMethodDataId(jsonObject.getString("releaseMethodDataId"));
+		// 设置属性
+		buildInfoModel.setReleaseMethod(releaseMethod1.getCode());
 		if (buildInfoModel.getReleaseMethod() != BuildReleaseMethod.No.getCode()) {
 			Assert.hasText(buildInfoModel.getReleaseMethodDataId(), "没有发布分发对应关联数据ID");
 		}
-
-		// 设置属性
-		buildInfoModel.setReleaseMethod(releaseMethod1.getCode());
 		buildInfoModel.setExtraData(jsonObject.toJSONString());
 
 		// 新增构建信息
