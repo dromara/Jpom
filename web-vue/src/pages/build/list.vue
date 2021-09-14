@@ -445,7 +445,9 @@ export default {
         },
         // 添加
         handleAdd() {
-            this.temp = {};
+            this.temp = {
+							repoType: 0
+						};
             this.branchList = [];
             this.loadDispatchList();
             this.loadNodeProjectList();

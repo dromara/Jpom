@@ -169,10 +169,6 @@ public class BuildManage extends BaseBuild implements Runnable {
 
 	@Override
 	public void run() {
-		if (delay != null && delay > 0) {
-			// 延迟执行
-			ThreadUtil.sleep(delay, TimeUnit.SECONDS);
-		}
 		try {
 			if (!updateStatus(BuildModel.Status.Ing)) {
 				this.log("初始化构建记录失败,异常结束");
@@ -180,6 +176,11 @@ public class BuildManage extends BaseBuild implements Runnable {
 			}
 			try {
 				this.log("start build in file : " + FileUtil.getAbsolutePath(this.gitFile));
+				if (delay != null && delay > 0) {
+					// 延迟执行
+					this.log("Execution delayed by " + delay + " seconds");
+					ThreadUtil.sleep(delay, TimeUnit.SECONDS);
+				}
 				//
 				String branchName = buildModel.getBranchName();
 				this.log("repository clone pull from " + branchName);

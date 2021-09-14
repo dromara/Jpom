@@ -70,7 +70,7 @@
 					</a-row>
 				</a-form-model-item>
 				<a-form-model-item label="绑定 SSH " prop="sshId">
-					<a-select v-model="temp.sshId" placeholder="节点协议">
+					<a-select v-model="temp.sshId" placeholder="请选择SSH">
 						<a-select-option v-for="ssh in sshList" :key="ssh.id" :disabled="ssh.disabled">{{ ssh.name }}</a-select-option>
 					</a-select>
 				</a-form-model-item>

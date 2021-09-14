@@ -191,7 +191,11 @@ public class GitUtil {
                         setProgressMonitor(new TextProgressMonitor(printWriter)).
                         call();
             }
-            git.pull().setCredentialsProvider(credentialsProvider).call();
+            // 拉取新代码 pull
+            git.pull()
+					.setRemoteBranchName(branchName)
+					.setProgressMonitor(new TextProgressMonitor(printWriter))
+					.setCredentialsProvider(credentialsProvider).call();
         } catch (TransportException t) {
             checkTransportException(t);
             throw t;
