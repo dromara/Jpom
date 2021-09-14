@@ -254,10 +254,6 @@ export default {
   },
   data() {
     return {
-      selectInput: "",
-      selectOpen: false,
-      selectFocus: false,
-      inputFocus: false,
       releaseMethodMap: releaseMethodMap,
       loading: false,
       listQuery: {},
@@ -368,31 +364,7 @@ export default {
     this.handleFilter();
   },
   methods: {
-    onSearch(v) {
-      if (!v) {
-        return;
-      }
-      this.branchList = [...this.branchList, v];
-      this.selectInput = "";
-    },
-    setSelectOpen(v) {
-      // console.log(this.$refs.input && this.$refs.input, document.activeElement, 2312);
-      // console.log(1, a);
-      this.selectFocus = v;
-      if (this.inputFocus || this.selectFocus) {
-        this.selectOpen = true;
-        return;
-      }
-      this.selectOpen = false;
-    },
-    visibleInput(v) {
-      this.inputFocus = v;
-      if (this.inputFocus || this.selectFocus) {
-        this.selectOpen = true;
-        return;
-      }
-      this.selectOpen = false;
-    },
+    
     // 页面引导
     introGuide() {
       if (this.getGuideFlag) {
