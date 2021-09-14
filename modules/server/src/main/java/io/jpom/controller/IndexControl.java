@@ -98,27 +98,24 @@ public class IndexControl extends BaseServerController {
 		UserModel userModel = getUserModel();
 		// 菜单
 		InputStream inputStream;
-		String secondary;
 		if (nodeModel == null) {
 			inputStream = ResourceUtil.getStream("classpath:/menus/index.json");
-			secondary = "";
 		} else {
 			inputStream = ResourceUtil.getStream("classpath:/menus/node-index.json");
-			secondary = "node/";
 		}
 
 		String json = IoUtil.read(inputStream, CharsetUtil.CHARSET_UTF_8);
 		JSONArray jsonArray = JSONArray.parseArray(json);
 		List<Object> collect1 = jsonArray.stream().filter(o -> {
 			JSONObject jsonObject = (JSONObject) o;
-			if (!testMenus(jsonObject, userModel, secondary)) {
+			if (!testMenus(jsonObject, userModel)) {
 				return false;
 			}
 			JSONArray childs = jsonObject.getJSONArray("childs");
 			if (childs != null) {
 				List<Object> collect = childs.stream().filter(o1 -> {
 					JSONObject jsonObject1 = (JSONObject) o1;
-					return testMenus(jsonObject1, userModel, secondary);
+					return testMenus(jsonObject1, userModel);
 				}).collect(Collectors.toList());
 				if (collect.isEmpty()) {
 					return false;
@@ -130,25 +127,21 @@ public class IndexControl extends BaseServerController {
 		return JsonMessage.getString(200, "", collect1);
 	}
 
-	private boolean testMenus(JSONObject jsonObject, UserModel userModel, String secondary) {
-		String url = jsonObject.getString("url");
-		if (StrUtil.isNotEmpty(url)) {
-			url = FileUtil.normalize(secondary + url);
-			url = StrUtil.SLASH + url;
-			String role = jsonObject.getString("role");
-			if (StrUtil.equals(role, UserModel.SYSTEM_ADMIN) && !userModel.isSystemUser()) {
-				// 系统管理员权限
-				return false;
-			}
-			CacheControllerFeature.UrlFeature urlFeature = CacheControllerFeature.getUrlFeature(url);
-			if (urlFeature != null) {
-				// 功能权限
-				boolean b = roleService.errorMethodPermission(userModel, urlFeature.getClassFeature(), urlFeature.getMethodFeature());
-				if (b) {
-					return false;
-				}
-			}
+	private boolean testMenus(JSONObject jsonObject, UserModel userModel) {
+		String role = jsonObject.getString("role");
+		if (StrUtil.equals(role, UserModel.SYSTEM_ADMIN) && !userModel.isSystemUser()) {
+			// 系统管理员权限
+			return false;
 		}
+		//			CacheControllerFeature.UrlFeature urlFeature = CacheControllerFeature.getUrlFeature(url);
+		//			if (urlFeature != null) {
+		//				// 功能权限
+		//				boolean b = roleService.errorMethodPermission(userModel, urlFeature.getClassFeature(), urlFeature.getMethodFeature());
+		//				if (b) {
+		//					return false;
+		//				}
+		//			}
+
 		//
 		String dynamic = jsonObject.getString("dynamic");
 		if (StrUtil.isNotEmpty(dynamic)) {
