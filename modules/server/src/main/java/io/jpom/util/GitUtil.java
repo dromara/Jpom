@@ -300,6 +300,7 @@ public class GitUtil {
 			}
 		}
 		// 切换分支
+		TextProgressMonitor progressMonitor = new TextProgressMonitor(printWriter);
 		if (!StrUtil.equals(git.getRepository().getBranch(), branchName)) {
 			println(printWriter, "start switch branch from {} to {}", git.getRepository().getBranch(), branchName);
 			git.checkout().
@@ -307,7 +308,7 @@ public class GitUtil {
 					setName(branchName).
 					setForceRefUpdate(true).
 					setUpstreamMode(CreateBranchCommand.SetupUpstreamMode.SET_UPSTREAM).
-					setProgressMonitor(new TextProgressMonitor(printWriter)).
+					setProgressMonitor(progressMonitor).
 					call();
 		}
 		PullCommand pull = git.pull();
@@ -317,7 +318,10 @@ public class GitUtil {
 		//
 		setCredentials(pull, repositoryModel);
 		//
-		PullResult call = pull.call();
+		PullResult call = pull
+				.setRemoteBranchName(branchName)
+				.setProgressMonitor(progressMonitor)
+				.call();
 		// 输出拉取结果
 		if (call != null) {
 			String fetchedFrom = call.getFetchedFrom();
