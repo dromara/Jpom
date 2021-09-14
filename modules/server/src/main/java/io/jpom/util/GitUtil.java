@@ -1,5 +1,7 @@
 package io.jpom.util;
 
+import cn.hutool.core.collection.CollStreamUtil;
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
@@ -21,10 +23,8 @@ import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * git工具
@@ -124,17 +124,39 @@ public class GitUtil {
      * @throws IOException     IO
      */
     private static List<String> branchList(String url, File file, CredentialsProvider credentialsProvider, PrintWriter printWriter) throws GitAPIException, IOException {
-        try (Git git = initGit(url, null, file, credentialsProvider, printWriter)) {
-            //
-            List<Ref> list = git.branchList().setListMode(ListBranchCommand.ListMode.REMOTE).call();
-            List<String> all = new ArrayList<>(list.size());
-            list.forEach(ref -> {
-                String name = ref.getName();
-                if (name.startsWith(Constants.R_REMOTES + Constants.DEFAULT_REMOTE_NAME)) {
-                    all.add(name.substring((Constants.R_REMOTES + Constants.DEFAULT_REMOTE_NAME).length() + 1));
-                }
-            });
-            return all;
+        try  {
+			LsRemoteCommand lsRemoteCommand = Git.lsRemoteRepository()
+					.setRemote(url).setCredentialsProvider(credentialsProvider);
+			//
+			Collection<Ref> call = lsRemoteCommand
+					.setHeads(true)
+					.setTags(true)
+					.call();
+			if (CollUtil.isEmpty(call)) {
+				return null;
+			}
+			Map<String, List<Ref>> refMap = CollStreamUtil.groupByKey(call, ref -> {
+				String name = ref.getName();
+				if (name.startsWith(Constants.R_TAGS)) {
+					return Constants.R_TAGS;
+				} else if (name.startsWith(Constants.R_HEADS)) {
+					return Constants.R_HEADS;
+				}
+				return null;
+			});
+
+			// branch list
+			List<Ref> branchListRef = refMap.get(Constants.R_HEADS);
+			if (branchListRef == null) {
+				return null;
+			}
+			return branchListRef.stream().map(ref -> {
+				String name = ref.getName();
+				if (name.startsWith(Constants.R_HEADS)) {
+					return name.substring((Constants.R_HEADS).length());
+				}
+				return null;
+			}).filter(Objects::nonNull).collect(Collectors.toList());
         } catch (TransportException t) {
             checkTransportException(t);
             throw t;
@@ -148,7 +170,7 @@ public class GitUtil {
         File gitFile = FileUtil.file(file, "gitTemp", tempId);
         try {
             List<String> list = branchList(url, gitFile, new UsernamePasswordCredentialsProvider(userName, userPwd), printWriter);
-            if (list.isEmpty()) {
+            if (CollUtil.isEmpty(list)) {
                 throw new JpomRuntimeException("该仓库还没有任何分支");
             }
             return list;
