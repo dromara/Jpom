@@ -82,7 +82,7 @@
         <a-tag color="green" :visible="successSize !== 0" :closable="true" class="successTag"> 上传成功: {{ successSize }} 个文件! </a-tag>
       </a-modal>
 
-      <a-modal v-model="editFileVisible" width="80vw" title="编辑文件" cancelText="关闭" :maskClosable="true" @ok="updateFileData">
+      <a-modal v-model="editFileVisible" width="80vw" title="编辑文件" cancelText="关闭" :maskClosable="true" @ok="updateFileData" @cancel="handleCloseModal">
         <div style="height: 60vh">
           <code-editor showTool v-model="fileContent" :fileSuffix="filename"></code-editor>
         </div>
@@ -139,7 +139,7 @@ export default {
       uploadRemoteFileVisible: false,
       editFileVisible: false,
       successSize: 0,
-      fileContent: "",
+      fileContent: '',
 
       cmOptions: {
         mode: "application/json",
@@ -200,6 +200,11 @@ export default {
       this.editFileVisible = true;
       this.loadFileData(record.filename);
       this.filename = record.filename;
+    },
+
+    // 关闭编辑器弹窗
+    handleCloseModal() {
+      this.fileContent = ''
     },
 
     // 加载数据
@@ -267,7 +272,9 @@ export default {
 
       readFile(params).then((res) => {
         if (res.code === 200) {
-          this.fileContent = res.data;
+          setTimeout(()=> {
+            this.fileContent = res.data;
+          }, 300)
         }
       });
     },

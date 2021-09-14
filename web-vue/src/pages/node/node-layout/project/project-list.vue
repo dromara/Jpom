@@ -311,7 +311,7 @@ export default {
         },
         { title: "运行状态", dataIndex: "status", width: 50, ellipsis: true, scopedSlots: { customRender: "status" } },
         { title: "端口/PID", dataIndex: "port", width: 50, ellipsis: true, scopedSlots: { customRender: "port" } },
-        { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, width: 240 },
+        { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, width: 80 },
       ],
       rules: {
         id: [{ required: true, message: "Please input project id", trigger: "blur" }],

@@ -108,43 +108,22 @@
 
         <a-form-model-item v-show="tempRepository.repoType === 0" label="分支" prop="branchName">
           <a-row>
-            <a-col :span="10" @mousedown="setSelectOpen(true)">
-              <a-select v-model="temp.branchName" :open="selectOpen" @blur="setSelectOpen(false)" @focus="setSelectOpen(true)" placeholder="请选择构建对应的分支">
-                <a-icon slot="suffixIcon" type="reload" @click="loadBranchList" />
-                <div slot="dropdownRender" slot-scope="menu">
-                  <!-- <div style="padding: 4px 8px; cursor: pointer" @mousedown="(e) => e.preventDefault()" @click="addItem"><a-icon type="plus" />自定义分支</div> 
-                  -->
-                  <div style="padding: 8px 8px; cursor: pointer; display: flex" @mousedown="(e) => e.preventDefault()">
-                    <a-input-search
-                      enter-button="添加"
-                      v-model="selectInput"
-                      @search="onSearch"
-                      @blur="visibleInput(false)"
-                      @focus="visibleInput(true)"
-                      @click="(e) => e.target.focus()"
-                      placeholder="自定义分支通配表达式"
-                      size="small"
-                    >
-                      <a-tooltip slot="suffix">
-                        <template slot="title">
-                          <div>
-                            支持通配符(AntPathMatcher)
-                            <ul>
-                              <li>? 匹配一个字符</li>
-                              <li>* 匹配零个或多个字符</li>
-                              <li>** 匹配路径中的零个或多个目录</li>
-                            </ul>
-                          </div>
-                        </template>
-                        <a-icon type="question-circle" theme="filled" />
-                      </a-tooltip>
-                    </a-input-search>
-                  </div>
-                  <a-divider style="margin: 4px 0" />
-                  <v-nodes :vnodes="menu" />
-                </div>
-                <a-select-option v-for="branch in branchList" :key="branch">{{ branch }} </a-select-option>
-              </a-select>
+            <a-col :span="10">
+              <custom-select  v-model="temp.branchName" 
+                :data="branchList" 
+                @onRefreshSelect="loadBranchList" 
+                inputPlaceholder="自定义分支通配表达式"
+                selectPlaceholder="请选择构建对应的分支"
+              >
+                <div slot="inputTips">
+                  支持通配符(AntPathMatcher)
+                  <ul>
+                    <li>? 匹配一个字符</li>
+                    <li>* 匹配零个或多个字符</li>
+                    <li>** 匹配路径中的零个或多个目录</li>
+                  </ul>
+              </div>
+              </custom-select>
             </a-col>
             <a-col :span="4" style="text-align: right"> 标签(TAG):</a-col>
             <a-col :span="10">
@@ -268,6 +247,7 @@
 </template>
 <script>
 import { mapGetters } from "vuex";
+import CustomSelect from "@/components/customSelect";
 import BuildLog from "./log";
 import { getRepositoryList } from "../../api/repository";
 import { clearBuid, deleteBuild, editBuild, getBranchList, getBuildGroupList, getBuildList, getTriggerUrl, releaseMethodMap, resetTrigger, startBuild, stopBuild } from "../../api/build-info";
@@ -279,6 +259,7 @@ import { parseTime } from "../../utils/time";
 export default {
   components: {
     BuildLog,
+    CustomSelect,
     VNodes: {
       functional: true,
       render: (h, ctx) => ctx.props.vnodes,
