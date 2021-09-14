@@ -339,12 +339,13 @@ public class BuildInfoManage extends BaseBuild implements Runnable {
 
 	@Override
 	public void run() {
+		// 初始化构建流程 准备->拉取代码->执行构建命令->打包发布
 		Map<String, Supplier<Boolean>> suppliers = new LinkedHashMap<>(10);
 		suppliers.put("startReady", BuildInfoManage.this::startReady);
 		suppliers.put("pull", BuildInfoManage.this::pull);
 		suppliers.put("executeCommand", BuildInfoManage.this::executeCommand);
 		suppliers.put("release", BuildInfoManage.this::packageRelease);
-		//
+		// 依次执行流程，发生异常结束整个流程
 		String processName = StrUtil.EMPTY;
 		try {
 			for (Map.Entry<String, Supplier<Boolean>> stringSupplierEntry : suppliers.entrySet()) {
@@ -352,6 +353,7 @@ public class BuildInfoManage extends BaseBuild implements Runnable {
 				Supplier<Boolean> value = stringSupplierEntry.getValue();
 				Boolean aBoolean = value.get();
 				if (!aBoolean) {
+					// 有条件结束构建流程
 					break;
 				}
 			}
