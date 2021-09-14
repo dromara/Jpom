@@ -121,13 +121,15 @@ public class LoadBuildJsonToDB {
 			buildInfoParamMap.put("REPOSITORYID", repositoryId);
 			// 构建发布操作信息
 			JSONObject jsonObject = new JSONObject();
-			jsonObject.put("releaseMethodDataId", buildModelVo.getString("releaseMethodDataId"));
+			String releaseMethodDataId = buildModelVo.getString("releaseMethodDataId");
+			jsonObject.put("releaseMethodDataId", releaseMethodDataId);
 			jsonObject.put("afterOpt", buildModelVo.getInteger("afterOpt"));
 			jsonObject.put("clearOld", buildModelVo.getBoolean("clearOld"));
 			jsonObject.put("releaseCommand", buildModelVo.getString("releaseCommand"));
 			jsonObject.put("releasePath", buildModelVo.getString("releasePath"));
 			// 保存信息
 			buildInfoParamMap.put("EXTRADATA", jsonObject.toJSONString());
+			buildInfoParamMap.put("RELEASEMETHODDATAID", releaseMethodDataId);
 			String insertBuildInfoSql = initInsertSql(buildInfoParamMap, BuildInfoModel.class);
 
 			insertToDB(insertBuildInfoSql);
