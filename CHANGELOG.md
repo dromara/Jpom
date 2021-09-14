@@ -28,7 +28,8 @@
 21. 【server】构建产物目录支持通配符`AntPathMatcher`模式 （感谢@saysay [Gitee issues I455FM](https://gitee.com/dromara/Jpom/issues/I455FM) ）
 22. 【server】新增 h2 数据库缓存大小配置 [CACHE_SIZE](http://www.h2database.com/html/features.html#cache_settings) `db.cacheSize
 23. 【server】构建触发器新增延迟执行参数（感谢@Steve.Liu）
-
+24. 【server】增加全局项目搜索功能
+25. 【agent】项目增加批量启动关闭重启
 ### 解决BUG、优化功能
 
 1. 【server】添加节点时候限制超时时间，避免配置错误一直等待情况
@@ -49,6 +50,7 @@
 16. 【server】update: 刷新整个页面的时候重新加载菜单
 17. 历史监控图表查询报时间格式化错误(字符串工具类) （感谢@misaka [Gitee pr](https://gitee.com/dromara/Jpom/pulls/142) ）
 18. 【agent】取消强制检测 server 节点
+19. 【server】仓库密码改为隐藏
 
 > 【特别声明】当前版本 仓库和构建并没有接入动态数据权限，如果对权限敏感的用户建议等待下一个版本优化权限后再升级（如有疑问可以微信群沟通）
 
