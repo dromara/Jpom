@@ -2,6 +2,7 @@ package io.jpom.util;
 
 import cn.hutool.core.collection.CollStreamUtil;
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.comparator.VersionComparator;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
@@ -12,8 +13,8 @@ import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import io.jpom.build.BuildUtil;
 import io.jpom.common.Const;
-import io.jpom.model.enums.GitProtocolEnum;
 import io.jpom.model.data.RepositoryModel;
+import io.jpom.model.enums.GitProtocolEnum;
 import io.jpom.system.JpomRuntimeException;
 import org.eclipse.jgit.api.*;
 import org.eclipse.jgit.api.errors.CheckoutConflictException;
@@ -26,6 +27,7 @@ import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.transport.*;
 import org.eclipse.jgit.util.FS;
+import org.springframework.util.AntPathMatcher;
 import org.springframework.util.Assert;
 
 import java.io.File;
@@ -47,6 +49,8 @@ import java.util.stream.Collectors;
  * @date 2019/7/15
  **/
 public class GitUtil {
+
+	private static final AntPathMatcher ANT_PATH_MATCHER = new AntPathMatcher();
 
 	/**
 	 * 检查本地的remote是否存在对应的url
@@ -218,7 +222,7 @@ public class GitUtil {
 						return name.substring((Constants.R_HEADS).length());
 					}
 					return null;
-				}).filter(Objects::nonNull).collect(Collectors.toList());
+				}).filter(Objects::nonNull).sorted((o1, o2) -> VersionComparator.INSTANCE.compare(o2, o1)).collect(Collectors.toList());
 
 				// list tag
 				List<Ref> tagListRef = refMap.get(Constants.R_TAGS);
@@ -228,7 +232,7 @@ public class GitUtil {
 						return name.substring((Constants.R_TAGS).length());
 					}
 					return null;
-				}).filter(Objects::nonNull).collect(Collectors.toList());
+				}).filter(Objects::nonNull).sorted((o1, o2) -> VersionComparator.INSTANCE.compare(o2, o1)).collect(Collectors.toList());
 				return new Tuple(branchList, tagList);
 			} catch (Exception t) {
 				checkTransportException(t, null, null);
@@ -237,20 +241,40 @@ public class GitUtil {
 		}
 	}
 
+//	/**
+//	 * load repository branch list by git
+//	 *
+//	 * @return list
+//	 * @throws Exception 异常
+//	 */
+//	public static List<String> getBranchList(RepositoryModel repositoryModel) throws Exception {
+//		Tuple tuple = getBranchAndTagList(repositoryModel);
+//
+//		List<String> branch = tuple == null ? null : tuple.get(0);
+//		if (CollUtil.isEmpty(branch)) {
+//			throw new JpomRuntimeException("该仓库还没有任何分支");
+//		}
+//		return tuple.get(0);
+//	}
+
 	/**
-	 * load repository branch list by git
+	 * 模糊匹配分支
 	 *
-	 * @return list
+	 * @param repositoryModel 仓库
+	 * @param branchName      迷糊的分支名
+	 * @return 匹配到到分支
 	 * @throws Exception 异常
 	 */
-	public static List<String> getBranchList(RepositoryModel repositoryModel) throws Exception {
-		Tuple tuple = getBranchAndTagList(repositoryModel);
-
-		List<String> branch = tuple == null ? null : tuple.get(0);
-		if (CollUtil.isEmpty(branch)) {
-			throw new JpomRuntimeException("该仓库还没有任何分支");
+	public static String fuzzyMatchBranchName(RepositoryModel repositoryModel, String branchName) throws Exception {
+		Tuple branchAndTagList = getBranchAndTagList(repositoryModel);
+		Assert.notNull(branchAndTagList, "获取仓库分支失败");
+		List<String> branch = branchAndTagList.get(0);
+		Assert.notEmpty(branch, "仓库没有任何分支");
+		if (ANT_PATH_MATCHER.isPattern(branchName)) {
+			List<String> collect = branch.stream().filter(s -> ANT_PATH_MATCHER.match(branchName, s)).collect(Collectors.toList());
+			return CollUtil.getFirst(collect);
 		}
-		return tuple.get(0);
+		return branchName;
 	}
 
 	/**
