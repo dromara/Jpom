@@ -67,10 +67,9 @@ public class LoadBuildJsonToDB {
 		// 转换成 SQL 执行
 		initSql(list);
 		// 将 json 文件转移到备份目录
-		//File backupOldData = FileUtil.file(ConfigBean.getInstance().getDataPath(), "backup_old_data");
-		//FileUtil.move(file, FileUtil.mkdir(backupOldData), true);
-
-		//DefaultSystemLog.getLog().info("{} mv to {}", FileUtil.getAbsolutePath(file), FileUtil.getAbsolutePath(backupOldData));
+		File backupOldData = FileUtil.file(ConfigBean.getInstance().getDataPath(), "backup_old_data");
+		FileUtil.move(file, FileUtil.mkdir(backupOldData), true);
+		DefaultSystemLog.getLog().info("{} mv to {}", FileUtil.getAbsolutePath(file), FileUtil.getAbsolutePath(backupOldData));
 	}
 
 	/**
@@ -97,7 +96,7 @@ public class LoadBuildJsonToDB {
 
 		// 遍历对象集合
 		list.forEach(buildModelVo -> {
-			DefaultSystemLog.getLog().info("buildModelVo: {}", JSON.toJSONString(buildModelVo));
+			DefaultSystemLog.getLog().debug("buildModelVo: {}", JSON.toJSONString(buildModelVo));
 
 			// 拿到构造 SQL 的参数
 			String gitUrl = buildModelVo.getString("gitUrl");
@@ -218,7 +217,7 @@ public class LoadBuildJsonToDB {
 	 */
 	private List<JSONObject> readBuildJsonFileToList(File file) {
 		if (!file.exists()) {
-			DefaultSystemLog.getLog().error("there is no build.json file...");
+			DefaultSystemLog.getLog().debug("there is no build.json file...");
 			return null;
 		}
 		try {
