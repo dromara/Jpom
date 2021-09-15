@@ -91,6 +91,7 @@
       },
       selectChange(v) {
         this.$emit("input", v);
+        this.selectOpen = false;
       },
       onSearch(v) {
         if (!v) {

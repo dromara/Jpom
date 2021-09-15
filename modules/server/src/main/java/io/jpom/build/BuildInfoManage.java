@@ -7,7 +7,7 @@ import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.io.LineHandler;
 import cn.hutool.core.io.file.FileCopier;
 import cn.hutool.core.lang.Assert;
-import cn.hutool.core.lang.func.Func;
+import cn.hutool.core.lang.Tuple;
 import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.IdUtil;
@@ -35,10 +35,12 @@ import java.nio.file.FileVisitResult;
 import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Function;
 import java.util.function.Supplier;
 
 /**
@@ -270,19 +272,35 @@ public class BuildInfoManage extends BaseBuild implements Runnable {
 	 */
 	private boolean pull() {
 		try {
-			String branchName = buildInfoModel.getBranchName();
-			// 模糊匹配分支
-			String newBranchName = GitUtil.fuzzyMatchBranchName(repositoryModel, branchName);
-			if (StrUtil.isEmpty(newBranchName)) {
-				BuildInfoManage.this.log(branchName + " Did not match the corresponding branch");
-				BuildInfoManage.this.updateStatus(BuildStatus.Error);
-				return false;
-			}
-			BuildInfoManage.this.log("repository [" + branchName + "] clone pull from " + newBranchName);
 			String msg = "error";
 			if (repositoryModel.getRepoType() == RepositoryModel.RepoType.Git.getCode()) {
 				// git with password
-				msg = GitUtil.checkoutPull(repositoryModel, gitFile, newBranchName, BuildInfoManage.this.getPrintWriter());
+				Tuple tuple = GitUtil.getBranchAndTagListChek(repositoryModel);
+				String branchName = buildInfoModel.getBranchName();
+				// 模糊匹配分支
+				String newBranchName = GitUtil.fuzzyMatch(tuple.get(0), branchName);
+				if (StrUtil.isEmpty(newBranchName)) {
+					BuildInfoManage.this.log(branchName + " Did not match the corresponding branch");
+					BuildInfoManage.this.updateStatus(BuildStatus.Error);
+					return false;
+				}
+				// 模糊匹配 标签
+				String branchTagName = buildInfoModel.getBranchTagName();
+				if (StrUtil.isNotEmpty(branchTagName)) {
+					String newBranchTagName = GitUtil.fuzzyMatch(tuple.get(1), branchTagName);
+					if (StrUtil.isEmpty(newBranchTagName)) {
+						BuildInfoManage.this.log(branchTagName + " Did not match the corresponding tag");
+						BuildInfoManage.this.updateStatus(BuildStatus.Error);
+						return false;
+					}
+					// 标签拉取模式
+					BuildInfoManage.this.log("repository [" + branchName + "] [" + branchTagName + "] clone pull from " + newBranchName + "  " + newBranchTagName);
+					msg = GitUtil.checkoutPullTag(repositoryModel, gitFile, newBranchName, newBranchTagName, BuildInfoManage.this.getPrintWriter());
+				} else {
+					// 分支模式
+					BuildInfoManage.this.log("repository [" + branchName + "] clone pull from " + newBranchName);
+					msg = GitUtil.checkoutPull(repositoryModel, gitFile, newBranchName, BuildInfoManage.this.getPrintWriter());
+				}
 			} else if (repositoryModel.getRepoType() == RepositoryModel.RepoType.Svn.getCode()) {
 				// svn
 				msg = SvnKitUtil.checkOut(repositoryModel.getGitUrl(), repositoryModel.getUserName(), repositoryModel.getPassword(), gitFile);

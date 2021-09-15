@@ -257,24 +257,26 @@ public class GitUtil {
 //		return tuple.get(0);
 //	}
 
-	/**
-	 * 模糊匹配分支
-	 *
-	 * @param repositoryModel 仓库
-	 * @param branchName      迷糊的分支名
-	 * @return 匹配到到分支
-	 * @throws Exception 异常
-	 */
-	public static String fuzzyMatchBranchName(RepositoryModel repositoryModel, String branchName) throws Exception {
+	public static Tuple getBranchAndTagListChek(RepositoryModel repositoryModel) throws Exception {
 		Tuple branchAndTagList = getBranchAndTagList(repositoryModel);
 		Assert.notNull(branchAndTagList, "获取仓库分支失败");
-		List<String> branch = branchAndTagList.get(0);
-		Assert.notEmpty(branch, "仓库没有任何分支");
-		if (ANT_PATH_MATCHER.isPattern(branchName)) {
-			List<String> collect = branch.stream().filter(s -> ANT_PATH_MATCHER.match(branchName, s)).collect(Collectors.toList());
+		return branchAndTagList;
+	}
+
+	/**
+	 * 模糊匹配
+	 *
+	 * @param list    待匹配待列表
+	 * @param pattern 迷糊的表达式
+	 * @return 匹配到到值
+	 */
+	public static String fuzzyMatch(List<String> list, String pattern) {
+		Assert.notEmpty(list, "仓库没有任何分支或者标签");
+		if (ANT_PATH_MATCHER.isPattern(pattern)) {
+			List<String> collect = list.stream().filter(s -> ANT_PATH_MATCHER.match(pattern, s)).collect(Collectors.toList());
 			return CollUtil.getFirst(collect);
 		}
-		return branchName;
+		return pattern;
 	}
 
 	/**
@@ -325,7 +327,7 @@ public class GitUtil {
 		}
 		// 切换分支
 		TextProgressMonitor progressMonitor = new TextProgressMonitor(printWriter);
-		if (!StrUtil.equals(git.getRepository().getBranch(), branchName)) {
+		if (tagOpt == null && !StrUtil.equals(git.getRepository().getBranch(), branchName)) {
 			println(printWriter, "start switch branch from {} to {}", git.getRepository().getBranch(), branchName);
 			git.checkout().
 					setCreateBranch(createBranch).
@@ -384,7 +386,7 @@ public class GitUtil {
 		synchronized (url.intern()) {
 			try (Git git = initGit(repositoryModel, null, file, printWriter)) {
 				// 拉取最新代码
-				PullResult pull = pull(git, repositoryModel, branchName, null, printWriter);
+				PullResult pull = pull(git, repositoryModel, branchName, TagOpt.FETCH_TAGS, printWriter);
 				// 切换到对应的 tag
 				git.checkout()
 						.setUpstreamMode(CreateBranchCommand.SetupUpstreamMode.SET_UPSTREAM)
