@@ -88,7 +88,7 @@ public class BuildInfoController extends BaseServerController {
 	public String getBuildList(String group,
 							   @ValidatorConfig(value = {
 									   @ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "limit error")
-							   }, defaultVal = "100") int limit,
+							   }, defaultVal = "10") int limit,
 							   @ValidatorConfig(value = {
 									   @ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "page error")
 							   }, defaultVal = "1") int page) {
