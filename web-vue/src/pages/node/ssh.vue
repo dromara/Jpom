@@ -25,11 +25,26 @@
         </a-tooltip>
       </template>
       <template slot="operation" slot-scope="text, record">
-        <a-button type="primary" @click="handleEdit(record)">编辑</a-button>
         <a-button type="primary" @click="handleTerminal(record)">终端</a-button>
-        <a-button type="primary" @click="handleViewLog(record)">操作日志</a-button>
+
         <a-button type="primary" :disabled="!record.fileDirs" @click="handleFile(record)">文件</a-button>
-        <a-button type="danger" @click="handleDelete(record)">删除</a-button>
+        <a-dropdown>
+          <a class="ant-dropdown-link" @click="(e) => e.preventDefault()">
+            更多
+            <a-icon type="down" />
+          </a>
+          <a-menu slot="overlay">
+            <a-menu-item>
+              <a-button type="primary" @click="handleEdit(record)">编辑</a-button>
+            </a-menu-item>
+            <a-menu-item>
+              <a-button type="danger" @click="handleDelete(record)">删除</a-button>
+            </a-menu-item>
+            <a-menu-item>
+              <a-button type="primary" @click="handleViewLog(record)">操作日志</a-button>
+            </a-menu-item>
+          </a-menu>
+        </a-dropdown>
       </template>
     </a-table>
     <!-- 编辑区 -->
@@ -221,7 +236,7 @@ export default {
         limit: 10,
       },
       columns: [
-        { title: "名称", dataIndex: "name", width: 150, ellipsis: true },
+        { title: "名称", dataIndex: "name", ellipsis: true },
         {
           title: "关联节点",
           dataIndex: "nodeId",
@@ -229,15 +244,16 @@ export default {
           width: 200,
           ellipsis: true,
         },
-        { title: "Host", dataIndex: "host", width: 150, ellipsis: true },
+        { title: "Host", dataIndex: "host", ellipsis: true },
         { title: "Port", dataIndex: "port", width: 80, ellipsis: true },
         { title: "User", dataIndex: "user", width: 120, ellipsis: true },
         {
           title: "操作",
           dataIndex: "operation",
           scopedSlots: { customRender: "operation" },
-          width: 330,
-          ellipsis: true,
+          width: 240,
+          fixed: "right",
+          // ellipsis: true,
         },
       ],
       options: [
