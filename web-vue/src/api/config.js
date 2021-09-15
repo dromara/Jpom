@@ -86,7 +86,7 @@ request.interceptors.response.use(response => {
   return res;
 }, error => {
   // 如果 headers 里面配置了 loading: no 就不用 loading
-  if (!error.response.config.headers[NO_LOADING_KEY]) {
+  if (!error.response  || !error.response.config || !error.response.config.headers[NO_LOADING_KEY]) {
     $global_loading.close();
   }
   // 如果 headers 里面配置了 tip: no 就不用弹出提示信息
