@@ -44,6 +44,7 @@ export function getBranchList(params) {
  *  name: 构建名称
  *  group: 分组名称
  *  branchName: 分支名称
+ *  branchTagName: 标签
  *  script: 构建命令
  *  resultDirFile: 构建产物目录
  *  releaseMethod: 发布方法
@@ -60,6 +61,7 @@ export function editBuild(params) {
         script: params.script,
         releaseMethod: params.releaseMethod,
         branchName: params.branchName,
+        branchTagName: params.branchTagName,
         group: params.group,
         repoType: params.repoType,
         // 其他参数

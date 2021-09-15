@@ -37,27 +37,6 @@ import "codemirror/lib/codemirror.css";
 import "codemirror/theme/blackboard.css";
 import "codemirror/theme/eclipse.css";
 
-// import "codemirror/mode/vue/vue.js";
-// import "codemirror/mode/javascript/javascript.js";
-// import "codemirror/mode/xml/xml.js";
-// import "codemirror/mode/htmlmixed/htmlmixed.js";
-// import "codemirror/mode/css/css.js";
-// import "codemirror/mode/yaml/yaml.js";
-// import "codemirror/mode/sql/sql.js";
-// import "codemirror/mode/python/python.js";
-// import "codemirror/mode/markdown/markdown.js";
-// import "codemirror/mode/django/django.js";
-// import "codemirror/mode/dockerfile/dockerfile.js";
-// import "codemirror/mode/go/go.js";
-// import "codemirror/mode/groovy/groovy.js";
-// import "codemirror/mode/jsx/jsx.js";
-// import "codemirror/mode/http/http.js";
-// import "codemirror/mode/lua/lua.js";
-// import "codemirror/mode/nginx/nginx.js";
-// import "codemirror/mode/php/php.js";
-// import "codemirror/mode/scheme/scheme.js";
-// import "codemirror/mode/properties/properties.js";
-// import "codemirror/mode/swift/swift.js";
 
 import "codemirror/addon/hint/show-hint.css";
 import "codemirror/addon/hint/show-hint.js";
@@ -121,6 +100,7 @@ const fileSuffixToModeMap = {
   html: "htmlmixed",
   css: "css",
   yml: "yaml",
+  json: 'json'
 };
 
 export default {

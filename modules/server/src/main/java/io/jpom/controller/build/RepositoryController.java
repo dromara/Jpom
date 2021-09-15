@@ -77,6 +77,7 @@ public class RepositoryController extends BaseServerController {
 		pageResult.forEach(repositoryModel -> {
 			// 隐藏密码字段
 			repositoryModel.setPassword(null);
+			repositoryModel.setRsaPrv(null);
 		});
 		JSONObject jsonObject = JsonMessage.toJson(200, "获取成功", pageResult);
 		jsonObject.put("total", pageResult.getTotal());
@@ -93,17 +94,7 @@ public class RepositoryController extends BaseServerController {
 	@Feature(method = MethodFeature.EDIT)
 	public Object editRepository(RepositoryModel repositoryModelReq) {
 		this.checkInfo(repositoryModelReq);
-		if (repositoryModelReq.getRepoType() == RepositoryModel.RepoType.Git.getCode()) {
-			// 验证 git 仓库信息
-			try {
-				Tuple tuple = GitUtil.getBranchAndTagList(repositoryModelReq);
-			} catch (JpomRuntimeException jpomRuntimeException) {
-				throw jpomRuntimeException;
-			} catch (Exception e) {
-				DefaultSystemLog.getLog().warn("获取仓库分支失败", e);
-				return JsonMessage.toJson(500, "无法连接此仓库，" + e.getMessage());
-			}
-		}
+
 		if (null == repositoryModelReq.getId()) {
 			// insert data
 			repositoryModelReq.setId(IdUtil.fastSimpleUUID());
@@ -115,6 +106,18 @@ public class RepositoryController extends BaseServerController {
 		// 检查 rsa 私钥
 		if (!checkAndUpdateSshKey(repositoryModelReq)) {
 			return JsonMessage.toJson(500, "rsa 私钥文件不存在或者有误");
+		}
+		if (repositoryModelReq.getRepoType() == RepositoryModel.RepoType.Git.getCode()) {
+			RepositoryModel repositoryModel = repositoryService.getByKey(repositoryModelReq.getId());
+			// 验证 git 仓库信息
+			try {
+				Tuple tuple = GitUtil.getBranchAndTagList(repositoryModel);
+			} catch (JpomRuntimeException jpomRuntimeException) {
+				throw jpomRuntimeException;
+			} catch (Exception e) {
+				DefaultSystemLog.getLog().warn("获取仓库分支失败", e);
+				return JsonMessage.toJson(500, "无法连接此仓库，" + e.getMessage());
+			}
 		}
 		return JsonMessage.toJson(200, "操作成功");
 	}

@@ -31,6 +31,10 @@ public class BuildInfoModel extends BaseUserModifyDbModel {
 	 */
 	private String branchName;
 	/**
+	 * 标签
+	 */
+	private String branchTagName;
+	/**
 	 * 构建命令
 	 */
 	private String script;
@@ -157,5 +161,13 @@ public class BuildInfoModel extends BaseUserModifyDbModel {
 
 	public static String getBuildIdStr(int buildId) {
 		return String.format("#%s", buildId);
+	}
+
+	public String getBranchTagName() {
+		return branchTagName;
+	}
+
+	public void setBranchTagName(String branchTagName) {
+		this.branchTagName = branchTagName;
 	}
 }

@@ -7,6 +7,7 @@ import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.io.LineHandler;
 import cn.hutool.core.io.file.FileCopier;
 import cn.hutool.core.lang.Assert;
+import cn.hutool.core.lang.Tuple;
 import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.IdUtil;
@@ -35,10 +36,12 @@ import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Supplier;
 
 /**
  * new build info manage runnable
@@ -179,8 +182,8 @@ public class BuildInfoManage extends BaseBuild implements Runnable {
 	/**
 	 * 打包构建产物
 	 */
-	private boolean packageFile() throws InterruptedException {
-		Thread.sleep(2000);
+	private boolean packageFile() {
+		ThreadUtil.sleep(2, TimeUnit.SECONDS);
 		String resultDirFile = buildInfoModel.getResultDirFile();
 		File rootFile = this.gitFile;
 		boolean updateDirFile = false;
@@ -243,63 +246,140 @@ public class BuildInfoManage extends BaseBuild implements Runnable {
 		return true;
 	}
 
+	/**
+	 * 准备构建
+	 *
+	 * @return false 执行异常需要结束
+	 */
+	private boolean startReady() {
+		if (!updateStatus(BuildStatus.Ing)) {
+			BuildInfoManage.this.log("初始化构建记录失败,异常结束");
+			return false;
+		}
+		this.log("start build in file : " + FileUtil.getAbsolutePath(this.gitFile));
+		if (delay != null && delay > 0) {
+			// 延迟执行
+			this.log("Execution delayed by " + delay + " seconds");
+			ThreadUtil.sleep(delay, TimeUnit.SECONDS);
+		}
+		return true;
+	}
+
+	/**
+	 * 拉取代码
+	 *
+	 * @return false 执行异常需要结束
+	 */
+	private boolean pull() {
+		try {
+			String msg = "error";
+			if (repositoryModel.getRepoType() == RepositoryModel.RepoType.Git.getCode()) {
+				// git with password
+				Tuple tuple = GitUtil.getBranchAndTagListChek(repositoryModel);
+				String branchName = buildInfoModel.getBranchName();
+				// 模糊匹配分支
+				String newBranchName = GitUtil.fuzzyMatch(tuple.get(0), branchName);
+				if (StrUtil.isEmpty(newBranchName)) {
+					BuildInfoManage.this.log(branchName + " Did not match the corresponding branch");
+					BuildInfoManage.this.updateStatus(BuildStatus.Error);
+					return false;
+				}
+				// 模糊匹配 标签
+				String branchTagName = buildInfoModel.getBranchTagName();
+				if (StrUtil.isNotEmpty(branchTagName)) {
+					String newBranchTagName = GitUtil.fuzzyMatch(tuple.get(1), branchTagName);
+					if (StrUtil.isEmpty(newBranchTagName)) {
+						BuildInfoManage.this.log(branchTagName + " Did not match the corresponding tag");
+						BuildInfoManage.this.updateStatus(BuildStatus.Error);
+						return false;
+					}
+					// 标签拉取模式
+					BuildInfoManage.this.log("repository [" + branchName + "] [" + branchTagName + "] clone pull from " + newBranchName + "  " + newBranchTagName);
+					msg = GitUtil.checkoutPullTag(repositoryModel, gitFile, newBranchName, newBranchTagName, BuildInfoManage.this.getPrintWriter());
+				} else {
+					// 分支模式
+					BuildInfoManage.this.log("repository [" + branchName + "] clone pull from " + newBranchName);
+					msg = GitUtil.checkoutPull(repositoryModel, gitFile, newBranchName, BuildInfoManage.this.getPrintWriter());
+				}
+			} else if (repositoryModel.getRepoType() == RepositoryModel.RepoType.Svn.getCode()) {
+				// svn
+				msg = SvnKitUtil.checkOut(repositoryModel.getGitUrl(), repositoryModel.getUserName(), repositoryModel.getPassword(), gitFile);
+			}
+			BuildInfoManage.this.log(msg);
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+		return true;
+	}
+
+	/**
+	 * 执行构建命令
+	 *
+	 * @return false 执行异常需要结束
+	 */
+	private boolean executeCommand() {
+		String[] commands = CharSequenceUtil.splitToArray(buildInfoModel.getScript(), StrUtil.LF);
+		if (commands == null || commands.length <= 0) {
+			this.log("没有需要执行的命令");
+			this.updateStatus(BuildStatus.Error);
+			return false;
+		}
+		for (String item : commands) {
+			try {
+				boolean s = runCommand(item);
+				if (!s) {
+					this.log("命令执行存在error");
+				}
+			} catch (IOException e) {
+				this.log(item + " 执行异常", e);
+				return false;
+			}
+		}
+		return true;
+	}
+
+	/**
+	 * 打包发布
+	 *
+	 * @return false 执行需要结束
+	 */
+	private boolean packageRelease() {
+		boolean status = packageFile();
+		if (status && buildInfoModel.getReleaseMethod() != BuildReleaseMethod.No.getCode()) {
+			// 发布文件
+			new ReleaseManage(baseBuildModule, this.userModel, this, buildInfoModel.getBuildId()).start();
+		} else {
+			//
+			updateStatus(BuildStatus.Success);
+		}
+		return true;
+	}
+
 	@Override
 	public void run() {
+		// 初始化构建流程 准备->拉取代码->执行构建命令->打包发布
+		Map<String, Supplier<Boolean>> suppliers = new LinkedHashMap<>(10);
+		suppliers.put("startReady", BuildInfoManage.this::startReady);
+		suppliers.put("pull", BuildInfoManage.this::pull);
+		suppliers.put("executeCommand", BuildInfoManage.this::executeCommand);
+		suppliers.put("release", BuildInfoManage.this::packageRelease);
+		// 依次执行流程，发生异常结束整个流程
+		String processName = StrUtil.EMPTY;
 		try {
-			if (!updateStatus(BuildStatus.Ing)) {
-				this.log("初始化构建记录失败,异常结束");
-				return;
-			}
-			try {
-				this.log("start build in file : " + FileUtil.getAbsolutePath(this.gitFile));
-				if (delay != null && delay > 0) {
-					// 延迟执行
-					this.log("Execution delayed by " + delay + " seconds");
-					ThreadUtil.sleep(delay, TimeUnit.SECONDS);
-				}
-				//
-				String branchName = buildInfoModel.getBranchName();
-				this.log("repository clone pull from " + branchName);
-				String msg = "error";
-				if (repositoryModel.getRepoType() == RepositoryModel.RepoType.Git.getCode()) {
-					// git with password
-					msg = GitUtil.checkoutPull(repositoryModel, gitFile, branchName, this.getPrintWriter());
-				} else if (repositoryModel.getRepoType() == RepositoryModel.RepoType.Svn.getCode()) {
-					// svn
-					msg = SvnKitUtil.checkOut(repositoryModel.getGitUrl(), repositoryModel.getUserName(), repositoryModel.getPassword(), gitFile);
-				}
-				this.log(msg);
-			} catch (Exception e) {
-				this.log("拉取代码失败", e);
-				return;
-			}
-			String[] commands = CharSequenceUtil.splitToArray(buildInfoModel.getScript(), StrUtil.LF);
-			if (commands == null || commands.length <= 0) {
-				this.log("没有需要执行的命令");
-				this.updateStatus(BuildStatus.Error);
-				return;
-			}
-			for (String item : commands) {
-				try {
-					boolean s = runCommand(item);
-					if (!s) {
-						this.log("命令执行存在error");
-					}
-				} catch (IOException e) {
-					this.log(item + " 执行异常", e);
-					return;
+			for (Map.Entry<String, Supplier<Boolean>> stringSupplierEntry : suppliers.entrySet()) {
+				processName = stringSupplierEntry.getKey();
+				Supplier<Boolean> value = stringSupplierEntry.getValue();
+				Boolean aBoolean = value.get();
+				if (!aBoolean) {
+					// 有条件结束构建流程
+					break;
 				}
 			}
-			boolean status = packageFile();
-			if (status && buildInfoModel.getReleaseMethod() != BuildReleaseMethod.No.getCode()) {
-				// 发布文件
-				new ReleaseManage(baseBuildModule, this.userModel, this, buildInfoModel.getBuildId()).start();
-			} else {
-				//
-				updateStatus(BuildStatus.Success);
-			}
+		} catch (RuntimeException runtimeException) {
+			Throwable cause = runtimeException.getCause();
+			this.log("构建失败:" + processName, cause == null ? runtimeException : cause);
 		} catch (Exception e) {
-			this.log("构建失败", e);
+			this.log("构建失败:" + processName, e);
 		} finally {
 			BUILD_MANAGE_MAP.remove(buildInfoModel.getId());
 		}

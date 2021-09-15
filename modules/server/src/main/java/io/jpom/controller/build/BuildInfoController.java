@@ -113,8 +113,7 @@ public class BuildInfoController extends BaseServerController {
 	 * @param branchName
 	 * @param group
 	 * @param extraData
-	 * @return
-	 * @throws Exception
+	 * @return json
 	 */
 	@RequestMapping(value = "/build/edit", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	@OptLog(UserOperateLogV1.OptType.EditBuild)
@@ -125,57 +124,40 @@ public class BuildInfoController extends BaseServerController {
 								@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "构建产物目录不能为空,长度1-200", range = "1:200")) String resultDirFile,
 								@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "构建命令不能为空")) String script,
 								@ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "发布方法不正确") int releaseMethod,
-								String branchName, String group,
-								String extraData) throws Exception {
+								String branchName, String branchTagName, String group,
+								String extraData) {
 		// 根据 repositoryId 查询仓库信息
 		RepositoryModel repositoryModel = repositoryService.getByKey(repositoryId);
-		if (null == repositoryModel) {
-			return JsonMessage.getString(405, "无效的仓库信息");
-		}
+		Assert.notNull(repositoryModel, "无效的仓库信息");
 		// 如果是 GIT 需要检测分支是否存在
 		if (RepositoryModel.RepoType.Git.getCode() == repositoryModel.getRepoType()) {
-			if (StrUtil.isEmpty(branchName)) {
-				return JsonMessage.getString(405, "请选择分支");
-			}
-			List<String> list = GitUtil.getBranchList(repositoryModel);
-			if (!list.contains(branchName)) {
-				return JsonMessage.getString(405, "没有找到对应分支：" + branchName);
-			}
+			Assert.hasText(branchName, "请选择分支");
+		} else if (RepositoryModel.RepoType.Svn.getCode() == repositoryModel.getRepoType()) {
+			// 如果是 SVN
+			branchName = "trunk";
 		}
-		// 判断删除
-		if (CommandUtil.checkContainsDel(script)) {
-			return JsonMessage.getString(405, "不能包含删除命令");
-		}
-
+		// 判断删除命令
+		Assert.state(!CommandUtil.checkContainsDel(script), "不能包含删除命令");
 		// 查询构建信息
 		BuildInfoModel buildInfoModel = buildInfoService.getByKey(id);
 		if (null == buildInfoModel) {
 			buildInfoModel = new BuildInfoModel();
 			buildInfoModel.setId(IdUtil.fastSimpleUUID());
 		}
-		// 判断 group 是否为空
-		if (StrUtil.isNotEmpty(group)) {
-			buildInfoModel.setGroup(group);
-		}
-		// 如果是 SVN
-		if (RepositoryModel.RepoType.Svn.getCode() == repositoryModel.getRepoType()) {
-			branchName = "trunk";
-		}
 		// 设置参数
+		buildInfoModel.setGroup(group);
 		buildInfoModel.setRepositoryId(repositoryId);
 		buildInfoModel.setName(name);
 		buildInfoModel.setBranchName(branchName);
+		buildInfoModel.setBranchTagName(branchTagName);
 		buildInfoModel.setResultDirFile(resultDirFile);
 		buildInfoModel.setScript(script);
 		// 设置修改人
 		buildInfoModel.setModifyUser(UserModel.getOptUserName(getUser()));
-
 		// 发布方式
 		BuildReleaseMethod releaseMethod1 = BaseEnum.getEnum(BuildReleaseMethod.class, releaseMethod);
-		if (releaseMethod1 == null) {
-			return JsonMessage.getString(405, "发布方法不正确");
-		}
-
+		Assert.notNull(releaseMethod1, "发布方法不正确");
+		buildInfoModel.setReleaseMethod(releaseMethod1.getCode());
 		// 把 extraData 信息转换成 JSON 字符串
 		JSONObject jsonObject = JSON.parseObject(extraData);
 
@@ -202,9 +184,6 @@ public class BuildInfoController extends BaseServerController {
 		if (buildInfoModel.getReleaseMethod() != BuildReleaseMethod.No.getCode()) {
 			Assert.hasText(buildInfoModel.getReleaseMethodDataId(), "没有发布分发对应关联数据ID");
 		}
-
-		// 设置属性
-		buildInfoModel.setReleaseMethod(releaseMethod1.getCode());
 		buildInfoModel.setExtraData(jsonObject.toJSONString());
 
 		// 新增构建信息

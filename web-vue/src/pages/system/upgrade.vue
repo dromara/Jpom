@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="main">
     <a-timeline>
       <a-timeline-item>
         <span class="layui-elem-quote">当前程序打包时间：{{ temp.timeStamp }}</span>
@@ -132,6 +132,11 @@ export default {
 };
 </script>
 <style scoped>
+.main {
+  background-color: #fff;
+  margin: -15px -30px 0 -15px;
+  padding: 15px;
+}
 .upload-btn {
   margin-top: 20px;
 }

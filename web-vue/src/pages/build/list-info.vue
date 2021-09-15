@@ -64,7 +64,7 @@
               <a-button type="danger" @click="handleDelete(record)">删除</a-button>
             </a-menu-item>
             <a-menu-item>
-              <a-button type="danger" :disabled="!record.sourceExist" @click="handleClear(record)">清除构建 </a-button>
+              <a-button type="danger" @click="handleClear(record)">清除构建 </a-button>
             </a-menu-item>
           </a-menu>
         </a-dropdown>
@@ -108,72 +108,42 @@
 
         <a-form-model-item v-show="tempRepository.repoType === 0" label="分支" prop="branchName">
           <a-row>
-            <a-col :span="10" @mousedown="setSelectOpen(true)">
-              <a-select v-model="temp.branchName" :open="selectOpen" @blur="setSelectOpen(false)" @focus="setSelectOpen(true)" placeholder="请选择构建对应的分支">
-                <a-icon slot="suffixIcon" type="reload" @click="loadBranchList" />
-                <div slot="dropdownRender" slot-scope="menu">
-                  <!-- <div style="padding: 4px 8px; cursor: pointer" @mousedown="(e) => e.preventDefault()" @click="addItem"><a-icon type="plus" />自定义分支</div> 
-                  -->
-                  <div style="padding: 8px 8px; cursor: pointer; display: flex" @mousedown="(e) => e.preventDefault()">
-                    <a-input-search
-                      enter-button="添加"
-                      v-model="selectInput"
-                      @search="onSearch"
-                      @blur="visibleInput(false)"
-                      @focus="visibleInput(true)"
-                      @click="(e) => e.target.focus()"
-                      placeholder="自定义分支通配表达式"
-                      size="small"
-                    >
-                      <a-tooltip slot="suffix">
-                        <template slot="title">
-                          <div>
-                            支持通配符(AntPathMatcher)
-                            <ul>
-                              <li>? 匹配一个字符</li>
-                              <li>* 匹配零个或多个字符</li>
-                              <li>** 匹配路径中的零个或多个目录</li>
-                            </ul>
-                          </div>
-                        </template>
-                        <a-icon type="question-circle" theme="filled" />
-                      </a-tooltip>
-                    </a-input-search>
-                  </div>
-                  <a-divider style="margin: 4px 0" />
-                  <v-nodes :vnodes="menu" />
+            <a-col :span="10">
+              <custom-select
+                v-model="temp.branchName"
+                :data="branchList"
+                @onRefreshSelect="loadBranchList"
+                inputPlaceholder="自定义分支通配表达式"
+                selectPlaceholder="请选择构建对应的分支,必选"
+              >
+                <div slot="inputTips">
+                  支持通配符(AntPathMatcher)
+                  <ul>
+                    <li>? 匹配一个字符</li>
+                    <li>* 匹配零个或多个字符</li>
+                    <li>** 匹配路径中的零个或多个目录</li>
+                  </ul>
                 </div>
-                <a-select-option v-for="branch in branchList" :key="branch">{{ branch }} </a-select-option>
-              </a-select>
+              </custom-select>
             </a-col>
             <a-col :span="4" style="text-align: right"> 标签(TAG):</a-col>
             <a-col :span="10">
-              <a-select v-model="temp.branchTagName" placeholder="请选择构建对应标签,可以不选择">
-                <a-icon slot="suffixIcon" type="reload" @click="loadBranchList" />
-                <div slot="dropdownRender" slot-scope="menu">
-                  <v-nodes :vnodes="menu" />
-                  <a-divider style="margin: 4px 0" />
-                  <div style="padding: 8px 8px; cursor: pointer" @mousedown="(e) => e.preventDefault()">
-                    <a-input-search placeholder="自定义分支通配表达式" @mousedown="(e) => e.stopPropagation()" size="small">
-                      <a-button slot="enterButton"> 添加 </a-button>
-                      <a-tooltip slot="suffix">
-                        <template slot="title">
-                          <div>
-                            支持通配符(AntPathMatcher)
-                            <ul>
-                              <li>? 匹配一个字符</li>
-                              <li>* 匹配零个或多个字符</li>
-                              <li>** 匹配路径中的零个或多个目录</li>
-                            </ul>
-                          </div>
-                        </template>
-                        <a-icon type="question-circle" theme="filled" />
-                      </a-tooltip>
-                    </a-input-search>
-                  </div>
+              <custom-select
+                v-model="temp.branchTagName"
+                :data="branchTagList"
+                @onRefreshSelect="loadBranchList"
+                inputPlaceholder="自定义标签通配表达式"
+                selectPlaceholder="请选择构建对应标签,可以不选择"
+              >
+                <div slot="inputTips">
+                  支持通配符(AntPathMatcher)
+                  <ul>
+                    <li>? 匹配一个字符</li>
+                    <li>* 匹配零个或多个字符</li>
+                    <li>** 匹配路径中的零个或多个目录</li>
+                  </ul>
                 </div>
-                <a-select-option v-for="tag in branchTagList" :key="tag">{{ tag }} </a-select-option>
-              </a-select>
+              </custom-select>
             </a-col>
           </a-row>
         </a-form-model-item>
@@ -268,6 +238,7 @@
 </template>
 <script>
 import { mapGetters } from "vuex";
+import CustomSelect from "@/components/customSelect";
 import BuildLog from "./log";
 import { getRepositoryList } from "../../api/repository";
 import { clearBuid, deleteBuild, editBuild, getBranchList, getBuildGroupList, getBuildList, getTriggerUrl, releaseMethodMap, resetTrigger, startBuild, stopBuild } from "../../api/build-info";
@@ -279,17 +250,10 @@ import { parseTime } from "../../utils/time";
 export default {
   components: {
     BuildLog,
-    VNodes: {
-      functional: true,
-      render: (h, ctx) => ctx.props.vnodes,
-    },
+    CustomSelect,
   },
   data() {
     return {
-      selectInput: "",
-      selectOpen: false,
-      selectFocus: false,
-      inputFocus: false,
       releaseMethodMap: releaseMethodMap,
       loading: false,
       listQuery: {},
@@ -400,31 +364,7 @@ export default {
     this.handleFilter();
   },
   methods: {
-    onSearch(v) {
-      if (!v) {
-        return;
-      }
-      this.branchList = [...this.branchList, v];
-      this.selectInput = "";
-    },
-    setSelectOpen(v) {
-      // console.log(this.$refs.input && this.$refs.input, document.activeElement, 2312);
-      // console.log(1, a);
-      this.selectFocus = v;
-      if (this.inputFocus || this.selectFocus) {
-        this.selectOpen = true;
-        return;
-      }
-      this.selectOpen = false;
-    },
-    visibleInput(v) {
-      this.inputFocus = v;
-      if (this.inputFocus || this.selectFocus) {
-        this.selectOpen = true;
-        return;
-      }
-      this.selectOpen = false;
-    },
+    
     // 页面引导
     introGuide() {
       if (this.getGuideFlag) {

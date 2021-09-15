@@ -1,72 +1,72 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <parent>
-        <artifactId>jpom-parent</artifactId>
-        <groupId>io.jpom</groupId>
-        <version>2.6.2</version>
-        <relativePath>../../pom.xml</relativePath>
-    </parent>
-    <modelVersion>4.0.0</modelVersion>
-    <name>Jpom 服务端</name>
-    <artifactId>server</artifactId>
-    <version>2.6.2</version>
-    <properties>
-        <start-class>io.jpom.JpomServerApplication</start-class>
-    </properties>
-    <dependencies>
+		 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<parent>
+		<artifactId>jpom-parent</artifactId>
+		<groupId>io.jpom</groupId>
+		<version>2.7.0</version>
+		<relativePath>../../pom.xml</relativePath>
+	</parent>
+	<modelVersion>4.0.0</modelVersion>
+	<name>Jpom 服务端</name>
+	<artifactId>server</artifactId>
+	<version>2.7.0</version>
+	<properties>
+		<start-class>io.jpom.JpomServerApplication</start-class>
+	</properties>
+	<dependencies>
 
 
-        <dependency>
-            <groupId>io.jpom</groupId>
-            <artifactId>common</artifactId>
-            <version>${pom.version}</version>
-        </dependency>
+		<dependency>
+			<groupId>io.jpom</groupId>
+			<artifactId>common</artifactId>
+			<version>${pom.version}</version>
+		</dependency>
 
-        <!--websocket作为客户端-->
-        <dependency>
-            <groupId>org.java-websocket</groupId>
-            <artifactId>Java-WebSocket</artifactId>
-            <version>1.5.2</version>
-        </dependency>
+		<!--websocket作为客户端-->
+		<dependency>
+			<groupId>org.java-websocket</groupId>
+			<artifactId>Java-WebSocket</artifactId>
+			<version>1.5.2</version>
+		</dependency>
 
-        <!--   数据库-->
-        <dependency>
-            <groupId>com.h2database</groupId>
-            <artifactId>h2</artifactId>
-        </dependency>
+		<!--   数据库-->
+		<dependency>
+			<groupId>com.h2database</groupId>
+			<artifactId>h2</artifactId>
+		</dependency>
 
-        <dependency>
-            <groupId>org.eclipse.jgit</groupId>
-            <artifactId>org.eclipse.jgit.ssh.jsch</artifactId>
-            <version>5.12.0.202106070339-r</version>
-        </dependency>
+		<dependency>
+			<groupId>org.eclipse.jgit</groupId>
+			<artifactId>org.eclipse.jgit.ssh.jsch</artifactId>
+			<version>5.12.0.202106070339-r</version>
+		</dependency>
 
-        <dependency>
-            <groupId>com.jcraft</groupId>
-            <artifactId>jsch</artifactId>
-            <version>0.1.55</version>
-        </dependency>
+		<dependency>
+			<groupId>com.jcraft</groupId>
+			<artifactId>jsch</artifactId>
+			<version>0.1.55</version>
+		</dependency>
 
-        <dependency>
-            <groupId>org.tmatesoft.svnkit</groupId>
-            <artifactId>svnkit</artifactId>
-            <version>1.10.3</version>
-        </dependency>
+		<dependency>
+			<groupId>org.tmatesoft.svnkit</groupId>
+			<artifactId>svnkit</artifactId>
+			<version>1.10.3</version>
+		</dependency>
 
-        <!--邮件-->
-        <dependency>
-            <groupId>com.sun.mail</groupId>
-            <artifactId>javax.mail</artifactId>
-            <version>1.6.2</version>
-        </dependency>
+		<!--邮件-->
+		<dependency>
+			<groupId>com.sun.mail</groupId>
+			<artifactId>javax.mail</artifactId>
+			<version>1.6.2</version>
+		</dependency>
 
-        <dependency>
-            <groupId>javax.xml.bind</groupId>
-            <artifactId>jaxb-api</artifactId>
-            <version>2.4.0-b180830.0359</version>
-        </dependency>
+		<dependency>
+			<groupId>javax.xml.bind</groupId>
+			<artifactId>jaxb-api</artifactId>
+			<version>2.4.0-b180830.0359</version>
+		</dependency>
 		<!--Spring Junit Test-->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -74,33 +74,33 @@
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jar-plugin</artifactId>
-                <version>3.1.1</version>
-                <configuration>
-                    <archive>
-                        <manifest>
-                            <mainClass>${start-class}</mainClass>
-                            <!-- 是否指定项目classpath下的依赖 -->
-                            <addClasspath>true</addClasspath>
-                            <!-- 指定依赖的时候声明前缀 -->
-                            <classpathPrefix>./</classpathPrefix>
-                        </manifest>
-                        <manifestEntries>
-                            <!-- 项目版本号 -->
-                            <Jpom-Project-Version>${project.version}</Jpom-Project-Version>
-                            <!-- 打包时间 -->
-                            <Jpom-Timestamp>${maven.build.timestamp}</Jpom-Timestamp>
-                            <Jpom-Type>${project.artifactId}</Jpom-Type>
-                            <Implementation-URL>https://gitee.com/dromara/Jpom</Implementation-URL>
-                        </manifestEntries>
-                    </archive>
-                </configuration>
-            </plugin>
-        </plugins>
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jar-plugin</artifactId>
+				<version>3.1.1</version>
+				<configuration>
+					<archive>
+						<manifest>
+							<mainClass>${start-class}</mainClass>
+							<!-- 是否指定项目classpath下的依赖 -->
+							<addClasspath>true</addClasspath>
+							<!-- 指定依赖的时候声明前缀 -->
+							<classpathPrefix>./</classpathPrefix>
+						</manifest>
+						<manifestEntries>
+							<!-- 项目版本号 -->
+							<Jpom-Project-Version>${project.version}</Jpom-Project-Version>
+							<!-- 打包时间 -->
+							<Jpom-Timestamp>${maven.build.timestamp}</Jpom-Timestamp>
+							<Jpom-Type>${project.artifactId}</Jpom-Type>
+							<Implementation-URL>https://gitee.com/dromara/Jpom</Implementation-URL>
+						</manifestEntries>
+					</archive>
+				</configuration>
+			</plugin>
+		</plugins>
 		<resources>
 			<!--版权文件,更新日志-->
 			<resource>
@@ -111,75 +111,79 @@
 					<include>LICENSE</include>
 				</includes>
 			</resource>
+			<resource>
+				<directory>src/main/resources</directory>
+				<filtering>false</filtering>
+			</resource>
 		</resources>
-    </build>
+	</build>
 
-    <profiles>
-        <profile>
-            <id>server-default-profile</id>
-            <activation>
-                <activeByDefault>true</activeByDefault>
-            </activation>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.springframework.boot</groupId>
-                        <artifactId>spring-boot-maven-plugin</artifactId>
-                        <configuration>
-                            <fork>true</fork>
-                            <mainClass>${start-class}</mainClass>
-                            <jvmArguments>-Dfile.encoding=UTF-8</jvmArguments>
-                        </configuration>
-                        <executions>
-                            <execution>
-                                <goals>
-                                    <goal>repackage</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-assembly-plugin</artifactId>
-                        <version>3.1.1</version>
-                        <configuration>
-                            <encoding>${project.build.sourceEncoding}</encoding>
-                            <descriptors>
-                                <descriptor>script/release.xml</descriptor>
-                            </descriptors>
-                            <outputDirectory>target</outputDirectory>
-                        </configuration>
-                        <executions>
-                            <execution>
-                                <id>make-assembly</id>
-                                <phase>package</phase>
-                                <goals>
-                                    <goal>single</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-        <!--  安装插件引人-->
-        <profile>
-            <id>install-plugin-profile</id>
-        </profile>
-        <profile>
-            <id>release-plugin-profile</id>
-        </profile>
+	<profiles>
+		<profile>
+			<id>server-default-profile</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.springframework.boot</groupId>
+						<artifactId>spring-boot-maven-plugin</artifactId>
+						<configuration>
+							<fork>true</fork>
+							<mainClass>${start-class}</mainClass>
+							<jvmArguments>-Dfile.encoding=UTF-8</jvmArguments>
+						</configuration>
+						<executions>
+							<execution>
+								<goals>
+									<goal>repackage</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-assembly-plugin</artifactId>
+						<version>3.1.1</version>
+						<configuration>
+							<encoding>${project.build.sourceEncoding}</encoding>
+							<descriptors>
+								<descriptor>script/release.xml</descriptor>
+							</descriptors>
+							<outputDirectory>target</outputDirectory>
+						</configuration>
+						<executions>
+							<execution>
+								<id>make-assembly</id>
+								<phase>package</phase>
+								<goals>
+									<goal>single</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+		<!--  安装插件引人-->
+		<profile>
+			<id>install-plugin-profile</id>
+		</profile>
+		<profile>
+			<id>release-plugin-profile</id>
+		</profile>
 
-        <!--  插件开发-->
-        <profile>
-            <id>develop-plugin-profile</id>
-            <dependencies>
-                <dependency>
-                    <groupId>io.jpom.jpom-plugin</groupId>
-                    <artifactId>netty</artifactId>
-                    <version>LATEST</version>
-                </dependency>
-            </dependencies>
-        </profile>
-    </profiles>
+		<!--  插件开发-->
+		<profile>
+			<id>develop-plugin-profile</id>
+			<dependencies>
+				<dependency>
+					<groupId>io.jpom.jpom-plugin</groupId>
+					<artifactId>netty</artifactId>
+					<version>LATEST</version>
+				</dependency>
+			</dependencies>
+		</profile>
+	</profiles>
 </project>

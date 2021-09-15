@@ -85,10 +85,10 @@
             </a-input-password>
           </a-form-model-item>
         </template>
-        <!-- SSH protocol use rsa public key -->
+        <!-- SSH protocol use rsa private key -->
         <template v-if="temp.protocol === 1">
           <a-form-model-item label="密码" prop="password">
-            <a-input-password v-model="temp.password" placeholder="登录密码">
+            <a-input-password v-model="temp.password" placeholder="证书密码">
               <a-icon slot="prefix" type="lock" />
             </a-input-password>
           </a-form-model-item>

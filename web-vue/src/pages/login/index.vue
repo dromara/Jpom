@@ -47,6 +47,7 @@ export default {
   created() {
     this.checkSystem();
     this.getBg();
+    this.changeCode();
   },
   methods: {
     // 检查是否需要初始化
