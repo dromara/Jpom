@@ -7,6 +7,7 @@ import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.db.Entity;
 import cn.hutool.db.Page;
+import cn.hutool.db.PageResult;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.validator.ValidatorConfig;
 import cn.jiangzeyin.common.validator.ValidatorItem;
@@ -88,7 +89,7 @@ public class BuildInfoController extends BaseServerController {
 	public String getBuildList(String group,
 							   @ValidatorConfig(value = {
 									   @ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "limit error")
-							   }, defaultVal = "1000") int limit,
+							   }, defaultVal = "10") int limit,
 							   @ValidatorConfig(value = {
 									   @ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "page error")
 							   }, defaultVal = "1") int page) {
@@ -97,8 +98,10 @@ public class BuildInfoController extends BaseServerController {
 				.setIgnoreNull(Const.GROUP_COLUMN_STR, StrUtil.isEmpty(group) ? null : group);
 		Page pageReq = new Page(page, limit);
 		// load list with page
-		List<BuildInfoModel> list = buildInfoService.listPage(where, pageReq);
-		return JsonMessage.getString(200, "success", list);
+		PageResult<BuildInfoModel> list = buildInfoService.listPage(where, pageReq);
+		JSONObject jsonObject = JsonMessage.toJson(200, "获取成功", list);
+		jsonObject.put("total", list.getTotal());
+		return jsonObject.toString();
 	}
 
 	/**

@@ -18,7 +18,8 @@
       :scroll="{ x: 1210, y: tableHeight - 60 }"
       bordered
       rowKey="id"
-      :pagination="false"
+      :pagination="pagination"
+      @change="changePage"
     >
       <a-tooltip slot="name" slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
@@ -250,7 +251,10 @@ export default {
     return {
       releaseMethodMap: releaseMethodMap,
       loading: false,
-      listQuery: { },
+      listQuery: {
+        page: 1,
+        limit: 10,
+      },
       tableHeight: "70vh",
       // 动态列表参数
       groupList: [],
@@ -726,12 +730,12 @@ export default {
     closeBuildLogModel() {
       this.handleFilter();
     },
-  },
-  // 分页、排序、筛选变化时触发
-  changePage(pagination) {
-    this.listQuery.page = pagination.current;
-    this.listQuery.limit = pagination.pageSize;
-    this.loadData();
+    // 分页、排序、筛选变化时触发
+    changePage(pagination) {
+      this.listQuery.page = pagination.current;
+      this.listQuery.limit = pagination.pageSize;
+      this.loadData();
+    },
   },
 };
 </script>
