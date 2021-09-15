@@ -1,6 +1,6 @@
 <template>
   <div @mousedown="setSelectOpen(true)">
-    <Select :open="selectOpen" @blur="setSelectOpen(false)" @focus="setSelectOpen(true)" @change="selectChange" :placeholder="selectPlaceholder">
+    <Select v-model="selected" :open="selectOpen" @blur="setSelectOpen(false)" @focus="setSelectOpen(true)" @change="selectChange" :placeholder="selectPlaceholder">
       <a-icon slot="suffixIcon" type="reload" @click="refreshSelect" />
       <div slot="dropdownRender" slot-scope="menu">
         <div style="padding: 8px 8px; cursor: pointer; display: flex" @mousedown="(e) => e.preventDefault()">
@@ -42,13 +42,15 @@
         render: (h, ctx) => ctx.props.vnodes,
       },
     },
+    
     data() {
       return {
         selectInput: "",
         selectOpen: false,
         selectFocus: false,
         inputFocus: false,
-        optionList: ['master']
+        optionList: [],
+        selected: ''
       }
     },
     props: {
@@ -68,6 +70,12 @@
       }
     },
     watch: {
+      value: {
+        handler(v) {
+          this.selected = v
+        },
+        immediate: true,
+      },
       data: {
         handler(v) {
           this.optionList = v;
