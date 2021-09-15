@@ -109,13 +109,7 @@
         <a-form-model-item v-show="tempRepository.repoType === 0" label="分支" prop="branchName">
           <a-row>
             <a-col :span="10">
-              <custom-select
-                v-model="temp.branchName"
-                :data="branchList"
-                @onRefreshSelect="loadBranchList"
-                inputPlaceholder="自定义分支通配表达式"
-                selectPlaceholder="请选择构建对应的分支,必选"
-              >
+              <custom-select v-model="temp.branchName" :data="branchList" @onRefreshSelect="loadBranchList" inputPlaceholder="自定义分支通配表达式" selectPlaceholder="请选择构建对应的分支,必选">
                 <div slot="inputTips">
                   支持通配符(AntPathMatcher)
                   <ul>
@@ -256,11 +250,12 @@ export default {
     return {
       releaseMethodMap: releaseMethodMap,
       loading: false,
-      listQuery: {},
+      listQuery: { },
       tableHeight: "70vh",
       // 动态列表参数
       groupList: [],
       list: [],
+      total: 0,
       repositoryList: [],
       // 当前仓库信息
       tempRepository: {},
@@ -351,6 +346,21 @@ export default {
     };
   },
   computed: {
+    pagination() {
+      return {
+        total: this.total,
+        current: this.listQuery.page || 1,
+        pageSize: this.listQuery.limit || 10,
+        pageSizeOptions: ["10", "20", "50", "100"],
+        showSizeChanger: true,
+        showTotal: (total) => {
+          if (total <= this.listQuery.limit) {
+            return "";
+          }
+          return `总计 ${total} 条`;
+        },
+      };
+    },
     ...mapGetters(["getGuideFlag"]),
   },
   watch: {
@@ -364,7 +374,6 @@ export default {
     this.handleFilter();
   },
   methods: {
-    
     // 页面引导
     introGuide() {
       if (this.getGuideFlag) {
@@ -405,6 +414,7 @@ export default {
       getBuildList(this.listQuery).then((res) => {
         if (res.code === 200) {
           this.list = res.data;
+          this.total = res.total;
         }
         this.loading = false;
       });
@@ -716,6 +726,12 @@ export default {
     closeBuildLogModel() {
       this.handleFilter();
     },
+  },
+  // 分页、排序、筛选变化时触发
+  changePage(pagination) {
+    this.listQuery.page = pagination.current;
+    this.listQuery.limit = pagination.pageSize;
+    this.loadData();
   },
 };
 </script>
