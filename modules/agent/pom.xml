@@ -9,7 +9,7 @@
 		<relativePath>../../pom.xml</relativePath>
 	</parent>
 	<modelVersion>4.0.0</modelVersion>
-	<artifactId>agent</artifactId>
+	<artifactId>Agent</artifactId>
 	<version>2.7.0</version>
 	<name>Jpom 插件端</name>
 	<properties>
@@ -75,6 +75,10 @@
 					<include>CHANGELOG.md</include>
 					<include>LICENSE</include>
 				</includes>
+			</resource>
+			<resource>
+				<directory>src/main/resources</directory>
+				<filtering>false</filtering>
 			</resource>
 		</resources>
 	</build>
