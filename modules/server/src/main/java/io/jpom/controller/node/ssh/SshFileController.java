@@ -26,6 +26,7 @@ import io.jpom.plugin.MethodFeature;
 import io.jpom.service.node.ssh.SshService;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -270,33 +271,44 @@ public class SshFileController extends BaseServerController {
 	@Feature(method = MethodFeature.DEL)
 	public String delete(String id, String path, String name) {
 		SshModel sshModel = sshService.getItem(id);
-		if (sshModel == null) {
-			return JsonMessage.getString(400, "ssh error");
-		}
+		Assert.notNull(sshModel, "ssh error");
 		List<String> fileDirs = sshModel.getFileDirs();
 		//
 		if (StrUtil.isEmpty(path) || !fileDirs.contains(path)) {
 			return JsonMessage.getString(405, "没有配置此文件夹");
 		}
-		if (StrUtil.isEmpty(name)) {
-			return JsonMessage.getString(400, "name error");
-		}
+		Assert.hasText(name, "name error");
 		Session session = null;
 		Sftp sftp = null;
 		try {
 			String normalize = FileUtil.normalize(path + "/" + name);
 			session = SshService.getSession(sshModel);
 			sftp = new Sftp(session, sshModel.getCharsetT());
-			sftp.delDir(normalize);
-			//删除文件或者文件夹
-			//deleteFile(channel, normalize);
+			// 尝试删除
+			this.tryDelDirOrFile(sftp, normalize);
 			return JsonMessage.getString(200, "删除成功");
 		} catch (Exception e) {
 			DefaultSystemLog.getLog().error("ssh删除文件异常", e);
-			return JsonMessage.getString(400, "删除失败");
+			return JsonMessage.getString(400, "删除失败:" + e.getMessage());
 		} finally {
 			IoUtil.close(sftp);
 			JschUtil.close(session);
+		}
+	}
+
+	/**
+	 * 删除文件 或者 文件夹
+	 *
+	 * @param sftp ftp
+	 * @param path 路径
+	 */
+	private void tryDelDirOrFile(Sftp sftp, String path) {
+		try {
+			// 先尝试删除文件夹
+			sftp.delDir(path);
+		} catch (Exception e) {
+			// 删除文件
+			sftp.delFile(path);
 		}
 	}
 
