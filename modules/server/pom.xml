@@ -10,7 +10,7 @@
 	</parent>
 	<modelVersion>4.0.0</modelVersion>
 	<name>Jpom 服务端</name>
-	<artifactId>Server</artifactId>
+	<artifactId>server</artifactId>
 	<version>2.7.0</version>
 	<properties>
 		<start-class>io.jpom.JpomServerApplication</start-class>
