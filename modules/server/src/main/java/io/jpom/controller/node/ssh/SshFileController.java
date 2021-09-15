@@ -212,7 +212,7 @@ public class SshFileController extends BaseServerController {
 				jsonObject.put("modifyTime", format);
 				if (lsEntry.getAttrs().isDir()) {
 					jsonObject.put("dir", true);
-					jsonObject.put("title", lsEntry.getFilename() + "【文件夹】");
+					jsonObject.put("title", lsEntry.getFilename());
 				} else {
 					jsonObject.put("title", lsEntry.getFilename());
 					long fileSize = lsEntry.getAttrs().getSize();
@@ -222,7 +222,7 @@ public class SshFileController extends BaseServerController {
 				if (StrUtil.isEmpty(children)) {
 					jsonObject.put("parentDir", lsEntry.getFilename());
 				} else {
-					jsonObject.put("parentDir", StrUtil.format("{}/{}", children, lsEntry.getFilename()));
+					jsonObject.put("parentDir", FileUtil.normalize(StrUtil.format("{}/{}", children, lsEntry.getFilename())));
 				}
 				jsonArray.add(jsonObject);
 			}
@@ -278,14 +278,23 @@ public class SshFileController extends BaseServerController {
 			return JsonMessage.getString(405, "没有配置此文件夹");
 		}
 		Assert.hasText(name, "name error");
+		name = FileUtil.normalize(name);
+		Assert.state(!StrUtil.equals(name, StrUtil.SLASH), "不能删除根目录");
 		Session session = null;
 		Sftp sftp = null;
 		try {
+			// 验证合法性，防止越权
+			FileUtil.file(path, name);
+			//
 			String normalize = FileUtil.normalize(path + "/" + name);
 			session = SshService.getSession(sshModel);
 			sftp = new Sftp(session, sshModel.getCharsetT());
 			// 尝试删除
-			this.tryDelDirOrFile(sftp, normalize);
+			boolean dirOrFile = this.tryDelDirOrFile(sftp, normalize);
+			if (dirOrFile) {
+				String parent = FileUtil.getParent(name, 1);
+				return JsonMessage.getString(200, "删除成功", parent);
+			}
 			return JsonMessage.getString(200, "删除成功");
 		} catch (Exception e) {
 			DefaultSystemLog.getLog().error("ssh删除文件异常", e);
@@ -301,15 +310,18 @@ public class SshFileController extends BaseServerController {
 	 *
 	 * @param sftp ftp
 	 * @param path 路径
+	 * @return true 删除的是 文件夹
 	 */
-	private void tryDelDirOrFile(Sftp sftp, String path) {
+	private boolean tryDelDirOrFile(Sftp sftp, String path) {
 		try {
 			// 先尝试删除文件夹
 			sftp.delDir(path);
+			return true;
 		} catch (Exception e) {
 			// 删除文件
 			sftp.delFile(path);
 		}
+		return false;
 	}
 
 //	/**
