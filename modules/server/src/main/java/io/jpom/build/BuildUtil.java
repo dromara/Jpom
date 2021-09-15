@@ -2,10 +2,13 @@ package io.jpom.build;
 
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.core.util.URLUtil;
 import cn.hutool.core.util.ZipUtil;
 import io.jpom.common.Const;
 import io.jpom.model.data.BuildInfoModel;
+import io.jpom.model.data.RepositoryModel;
 import io.jpom.system.ConfigBean;
+import org.springframework.util.Assert;
 
 import java.io.File;
 
@@ -116,11 +119,33 @@ public class BuildUtil {
 	/**
 	 * get rsa file
 	 *
-	 * @param path
-	 * @return
+	 * @param path 文件名
+	 * @return file
 	 */
 	public static File getRepositoryRsaFile(String path) {
 		File sshDir = FileUtil.file(ConfigBean.getInstance().getDataPath(), Const.SSH_KEY);
-		return FileUtil.touch(sshDir, path);
+		return FileUtil.file(sshDir, path);
+	}
+
+	/**
+	 * get rsa file
+	 *
+	 * @param repositoryModel 仓库
+	 * @return 文件
+	 */
+	public static File getRepositoryRsaFile(RepositoryModel repositoryModel) {
+		if (StrUtil.isEmpty(repositoryModel.getRsaPrv())) {
+			return null;
+		}
+		// ssh
+		File rsaFile;
+		if (StrUtil.startWith(repositoryModel.getRsaPrv(), URLUtil.FILE_URL_PREFIX)) {
+			String rsaPath = StrUtil.removePrefix(repositoryModel.getRsaPrv(), URLUtil.FILE_URL_PREFIX);
+			rsaFile = FileUtil.file(rsaPath);
+		} else {
+			rsaFile = BuildUtil.getRepositoryRsaFile(repositoryModel.getId() + Const.ID_RSA);
+		}
+		Assert.state(FileUtil.isFile(rsaFile), "仓库密钥文件不存在或者异常,请检查后操作");
+		return rsaFile;
 	}
 }

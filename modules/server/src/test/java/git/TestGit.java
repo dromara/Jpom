@@ -107,7 +107,7 @@ public class TestGit {
 		PrintWriter printWriter = new PrintWriter(System.out);
 		RepositoryModel repositoryModel = new RepositoryModel();
 		repositoryModel.setGitUrl(uri);
-		repositoryModel.setRepoType(0);
+		repositoryModel.setRepoType(RepositoryModel.RepoType.Git.getCode());
 		repositoryModel.setUserName("a");
 		repositoryModel.setPassword("a");
 		repositoryModel.setProtocol(GitProtocolEnum.HTTP.getCode());

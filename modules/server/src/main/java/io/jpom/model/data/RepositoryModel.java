@@ -1,5 +1,6 @@
 package io.jpom.model.data;
 
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.http.HttpUtil;
 import io.jpom.model.BaseDbModel;
 import io.jpom.model.BaseEnum;
@@ -87,6 +88,9 @@ public class RepositoryModel extends BaseDbModel {
 			return protocol;
 		}
 		String gitUrl = this.getGitUrl();
+		if (StrUtil.isEmpty(gitUrl)) {
+			return null;
+		}
 		if (HttpUtil.isHttps(gitUrl) || HttpUtil.isHttp(gitUrl)) {
 			return GitProtocolEnum.HTTP.getCode();
 		}

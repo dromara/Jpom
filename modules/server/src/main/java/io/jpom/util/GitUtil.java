@@ -11,6 +11,7 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.core.util.URLUtil;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
+import com.jcraft.jsch.Session;
 import io.jpom.build.BuildUtil;
 import io.jpom.common.Const;
 import io.jpom.model.data.RepositoryModel;
@@ -122,21 +123,21 @@ public class GitUtil {
 			transportCommand.setCredentialsProvider(credentialsProvider);
 		} else if (protocol == GitProtocolEnum.SSH.getCode()) {
 			// ssh
-			File rsaFile;
-			if (StrUtil.startWith(repositoryModel.getRsaPrv(), URLUtil.FILE_URL_PREFIX)) {
-				String rsaPath = StrUtil.removePrefix(repositoryModel.getRsaPrv(), URLUtil.FILE_URL_PREFIX);
-				rsaFile = FileUtil.file(rsaPath);
-			} else {
-				rsaFile = BuildUtil.getRepositoryRsaFile(repositoryModel.getId() + Const.ID_RSA);
-			}
-			Assert.state(FileUtil.isFile(rsaFile), "仓库密钥文件不存在或者异常,请检查后操作");
+			File rsaFile = BuildUtil.getRepositoryRsaFile(repositoryModel);
 			transportCommand.setTransportConfigCallback(transport -> {
 				SshTransport sshTransport = (SshTransport) transport;
 				sshTransport.setSshSessionFactory(new JschConfigSessionFactory() {
+					@Override
+					protected void configure(OpenSshConfig.Host hc, Session session) {
+						session.setConfig("StrictHostKeyChecking", "no");
+					}
 
 					@Override
 					protected JSch createDefaultJSch(FS fs) throws JSchException {
 						JSch jSch = super.createDefaultJSch(fs);
+						if (rsaFile == null) {
+							return jSch;
+						}
 						// 添加私钥文件
 						String rsaPass = repositoryModel.getPassword();
 						if (StrUtil.isEmpty(rsaPass)) {

@@ -1,4 +1,4 @@
-import axios from './config';
+import axios from "./config";
 
 /**
  * 仓库列表
@@ -8,10 +8,10 @@ import axios from './config';
  */
 export function getRepositoryList(params) {
   return axios({
-    url: '/build/repository/list',
-    method: 'post',
-    data: params
-  })
+    url: "/build/repository/list",
+    method: "post",
+    data: params,
+  });
 }
 
 /**
@@ -25,15 +25,15 @@ export function getRepositoryList(params) {
  *  userName: 用户名
  *  password: 密码
  *  rsaPub: 公钥信息
- * } params 
- * @returns 
+ * } params
+ * @returns
  */
 export function editRepository(params) {
   return axios({
-    url: '/build/repository/edit',
-    method: 'post',
-    data: params
-  })
+    url: "/build/repository/edit",
+    method: "post",
+    data: params,
+  });
 }
 
 /**
@@ -46,20 +46,33 @@ export function editRepository(params) {
  */
 export function deleteRepository(params) {
   return axios({
-    url: '/build/repository/delete',
-    method: 'post',
-    data: params
-  })
+    url: "/build/repository/delete",
+    method: "post",
+    data: params,
+  });
 }
 /**
  * delete by id
- * @param {String} id 
- * @returns 
+ * @param {String} id
+ * @returns
  */
 export function recoveryRepository(id) {
   return axios({
-    url: '/build/repository/recovery',
-    method: 'post',
-    data: {id}
-  })
+    url: "/build/repository/recovery",
+    method: "post",
+    data: { id },
+  });
+}
+
+/**
+ * restHideField by id
+ * @param {String} id
+ * @returns
+ */
+export function restHideField(id) {
+  return axios({
+    url: "/build/repository/rest_hide_field",
+    method: "post",
+    data: { id },
+  });
 }

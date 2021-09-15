@@ -61,16 +61,18 @@ public abstract class BaseDbService<T extends BaseDbModel> extends BaseDbCommonS
 	 */
 	public int updateById(T info) {
 		// check id
-		Assert.hasText(info.getId(), "不能执行：error");
+		String id = info.getId();
+		Assert.hasText(id, "不能执行：error");
 		// def modify time
 		info.setModifyTimeMillis(ObjectUtil.defaultIfNull(info.getModifyTimeMillis(), SystemClock.now()));
 		// remove create time
 		info.setCreateTimeMillis(null);
+		info.setId(null);
 		//
 		Entity entity = this.dataBeanToEntity(info);
 		//
 		Entity where = new Entity();
-		where.set(Const.ID_STR, info.getId());
+		where.set(Const.ID_STR, id);
 		return super.update(entity, where);
 	}
 

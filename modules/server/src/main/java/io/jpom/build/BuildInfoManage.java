@@ -303,7 +303,7 @@ public class BuildInfoManage extends BaseBuild implements Runnable {
 				}
 			} else if (repositoryModel.getRepoType() == RepositoryModel.RepoType.Svn.getCode()) {
 				// svn
-				msg = SvnKitUtil.checkOut(repositoryModel.getGitUrl(), repositoryModel.getUserName(), repositoryModel.getPassword(), gitFile);
+				msg = SvnKitUtil.checkOut(repositoryModel, gitFile);
 			}
 			BuildInfoManage.this.log(msg);
 		} catch (Exception e) {

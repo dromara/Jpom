@@ -101,6 +101,12 @@ public class RepositoryController extends BaseServerController {
 			repositoryService.insert(repositoryModelReq);
 		} else {
 			// update data
+			if (StrUtil.isEmpty(repositoryModelReq.getRsaPrv())) {
+				repositoryModelReq.setRsaPrv(null);
+			}
+			if (StrUtil.isEmpty(repositoryModelReq.getPassword())) {
+				repositoryModelReq.setPassword(null);
+			}
 			repositoryService.updateById(repositoryModelReq);
 		}
 		// 检查 rsa 私钥
@@ -123,6 +129,23 @@ public class RepositoryController extends BaseServerController {
 	}
 
 	/**
+	 * edit
+	 *
+	 * @param id 仓库信息
+	 * @return json
+	 */
+	@PostMapping(value = "/build/repository/rest_hide_field")
+	@Feature(method = MethodFeature.EDIT)
+	public Object restHideField(@ValidatorItem String id) {
+		RepositoryModel repositoryModel = new RepositoryModel();
+		repositoryModel.setId(id);
+		repositoryModel.setPassword(StrUtil.EMPTY);
+		repositoryModel.setRsaPrv(StrUtil.EMPTY);
+		repositoryService.updateById(repositoryModel);
+		return JsonMessage.toJson(200, "操作成功");
+	}
+
+	/**
 	 * 检查信息
 	 *
 	 * @param repositoryModelReq 仓库信息
@@ -141,7 +164,6 @@ public class RepositoryController extends BaseServerController {
 			repositoryModelReq.setRsaPub(StrUtil.EMPTY);
 		} else if (protocol == GitProtocolEnum.SSH.getCode()) {
 			// ssh
-			repositoryModelReq.setUserName(StrUtil.EMPTY);
 			repositoryModelReq.setPassword(StrUtil.emptyToDefault(repositoryModelReq.getPassword(), StrUtil.EMPTY));
 		}
 		// 判断仓库是否重复

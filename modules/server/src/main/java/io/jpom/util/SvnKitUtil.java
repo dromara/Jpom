@@ -1,6 +1,10 @@
 package io.jpom.util;
 
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.util.StrUtil;
+import io.jpom.build.BuildUtil;
+import io.jpom.model.data.RepositoryModel;
+import io.jpom.model.enums.GitProtocolEnum;
 import io.jpom.system.JpomRuntimeException;
 import org.tmatesoft.svn.core.*;
 import org.tmatesoft.svn.core.auth.ISVNAuthenticationManager;
@@ -45,30 +49,50 @@ public class SvnKitUtil {
 	/**
 	 * 对SVNKit连接进行认证，并获取连接
 	 *
-	 * @param username    用户名
-	 * @param pwd         密码
-	 * @param sshFilePath OpenSSH密钥
+	 * @param repositoryModel 仓库
 	 */
-	public SVNClientManager getAuthClient(String username, String pwd, String sshFilePath) {
-		File dir = SVNWCUtil.getDefaultConfigurationDirectory();
-		ISVNAuthenticationManager AUTH = SVNWCUtil.createDefaultAuthenticationManager(dir, username, pwd.toCharArray(), new File(sshFilePath), new char[]{}, true);
-		return SVNClientManager.newInstance(OPTIONS, AUTH);
+	public static SVNClientManager getAuthClient(RepositoryModel repositoryModel) {
+		Integer protocol = repositoryModel.getProtocol();
+		String userName = repositoryModel.getUserName();
+		String password = StrUtil.emptyToDefault(repositoryModel.getPassword(), StrUtil.EMPTY);
+		//
+		ISVNAuthenticationManager authManager;
+		//
+		if (protocol == GitProtocolEnum.HTTP.getCode()) {
+			authManager = SVNWCUtil.createDefaultAuthenticationManager(userName, password.toCharArray());
+		} else if (protocol == GitProtocolEnum.SSH.getCode()) {
+			File dir = SVNWCUtil.getDefaultConfigurationDirectory();
+			// ssh
+			File rsaFile = BuildUtil.getRepositoryRsaFile(repositoryModel);
+			char[] pwdEmpty = StrUtil.EMPTY.toCharArray();
+			if (rsaFile == null) {
+				authManager = SVNWCUtil.createDefaultAuthenticationManager(dir, userName, pwdEmpty, null, pwdEmpty, true);
+			} else {
+				if (StrUtil.isEmpty(password)) {
+					authManager = SVNWCUtil.createDefaultAuthenticationManager(dir, userName, pwdEmpty, rsaFile, pwdEmpty, true);
+				} else {
+					authManager = SVNWCUtil.createDefaultAuthenticationManager(dir, userName, pwdEmpty, rsaFile, password.toCharArray(), true);
+				}
+			}
+		} else {
+			throw new IllegalStateException("不支持到协议类型");
+		}
+		// 实例化客户端管理类
+		return SVNClientManager.newInstance(OPTIONS, authManager);
 	}
 
 	/**
 	 * 判断当前仓库url是否匹配
 	 *
-	 * @param wcDir    仓库路径
-	 * @param url      url
-	 * @param userName 用户名
-	 * @param userPwd  密码
+	 * @param wcDir           仓库路径
+	 * @param repositoryModel 仓库
 	 * @return true 匹配
 	 * @throws SVNException 异常
 	 */
-	private static Boolean checkUrl(File wcDir, String url, String userName, String userPwd) throws SVNException {
-		ISVNAuthenticationManager authManager = SVNWCUtil.createDefaultAuthenticationManager(userName, userPwd.toCharArray());
+	private static Boolean checkUrl(File wcDir, RepositoryModel repositoryModel) throws SVNException {
+		String url = repositoryModel.getGitUrl();
 		// 实例化客户端管理类
-		SVNClientManager clientManager = SVNClientManager.newInstance(OPTIONS, authManager);
+		SVNClientManager clientManager = getAuthClient(repositoryModel);
 		try {
 			// 通过客户端管理类获得updateClient类的实例。
 			SVNWCClient wcClient = clientManager.getWCClient();
@@ -94,17 +118,14 @@ public class SvnKitUtil {
 	/**
 	 * SVN检出
 	 *
-	 * @param userName   用户名
-	 * @param userPwd    密码
-	 * @param svnPath    仓库路径
-	 * @param targetPath 目录
+	 * @param repositoryModel 仓库
+	 * @param targetPath      目录
 	 * @return Boolean
 	 * @throws SVNException svn
 	 */
-	public static String checkOut(String svnPath, String userName, String userPwd, File targetPath) throws SVNException {
-		DefaultSVNOptions options = SVNWCUtil.createDefaultOptions(true);
+	public static String checkOut(RepositoryModel repositoryModel, File targetPath) throws SVNException {
 		// 实例化客户端管理类
-		SVNClientManager ourClientManager = SVNClientManager.newInstance(options, userName, userPwd);
+		SVNClientManager ourClientManager = getAuthClient(repositoryModel);
 		try {
 			if (targetPath.exists()) {
 				if (!FileUtil.file(targetPath, SVNFileUtil.getAdminDirectoryName()).exists()) {
@@ -113,7 +134,7 @@ public class SvnKitUtil {
 					}
 				} else {
 					// 判断url是否变更
-					if (!checkUrl(targetPath, svnPath, userName, userPwd)) {
+					if (!checkUrl(targetPath, repositoryModel)) {
 						if (!FileUtil.del(targetPath)) {
 							FileUtil.del(targetPath.toPath());
 						}
@@ -122,7 +143,7 @@ public class SvnKitUtil {
 					}
 				}
 			}
-			return checkOut(ourClientManager, svnPath, targetPath);
+			return checkOut(ourClientManager, repositoryModel.getGitUrl(), targetPath);
 		} finally {
 			ourClientManager.dispose();
 		}

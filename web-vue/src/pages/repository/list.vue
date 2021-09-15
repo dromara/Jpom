@@ -6,8 +6,8 @@
         <a-select-option :value="'0'">GIT</a-select-option>
         <a-select-option :value="'1'">SVN</a-select-option>
       </a-select>
-      <a-select v-if="isSystem"  default-value="0"  v-model="listQuery.strike" allowClear placeholder="选择删除情况" class="filter-item" @change="handleFilter">
-        <a-select-option  :value="0">未删除</a-select-option>
+      <a-select v-if="isSystem" default-value="0" v-model="listQuery.strike" allowClear placeholder="选择删除情况" class="filter-item" @change="handleFilter">
+        <a-select-option :value="0">未删除</a-select-option>
         <a-select-option :value="1">已删除</a-select-option>
       </a-select>
       <a-button type="primary" @click="handleFilter">搜索</a-button>
@@ -45,7 +45,7 @@
       <template slot="operation" slot-scope="text, record">
         <a-button type="primary" @click="handleEdit(record)">编辑</a-button>
         <a-button type="danger" @click="handleDelete(record)">删除</a-button>
-        <a-button v-if="isSystem && record.strike===1" type="primary" @click="handlerecovery(record)">恢复</a-button>
+        <a-button v-if="isSystem && record.strike === 1" type="primary" @click="handlerecovery(record)">恢复</a-button>
       </template>
     </a-table>
     <!-- 编辑区 -->
@@ -77,14 +77,19 @@
             </a-input>
           </a-form-model-item>
           <a-form-model-item label="密码" prop="password">
-            <a-input-password  v-if="temp.id === undefined" v-model="temp.password" placeholder="登录密码">
+            <a-input-password v-if="temp.id === undefined" v-model="temp.password" placeholder="登录密码">
               <a-icon slot="prefix" type="lock" />
             </a-input-password>
-            <a-input-password  v-if="temp.id !== undefined" v-model="temp.password" placeholder="此处不填不会修改密码">
+            <a-input-password v-if="temp.id !== undefined" v-model="temp.password" placeholder="此处不填不会修改密码">
               <a-icon slot="prefix" type="lock" />
             </a-input-password>
           </a-form-model-item>
         </template>
+        <a-form-model-item v-if="temp.repoType === 1 && temp.protocol === 1" label="账号" prop="userName">
+          <a-input v-model="temp.userName" placeholder="svn ssh 必填登录用户">
+            <a-icon slot="prefix" type="user" />
+          </a-input>
+        </a-form-model-item>
         <!-- SSH protocol use rsa private key -->
         <template v-if="temp.protocol === 1">
           <a-form-model-item label="密码" prop="password">
@@ -96,15 +101,24 @@
             <a-tooltip placement="topLeft">
               <template slot="title">
                 <div>
-                  <p style="color: #faa">注意：目前对 SSH key 访问 git 仓库地址不支持使用 ssh-keygen -t rsa -C  "邮箱" 方式生成的 SSH key <br/>需要使用 ssh-keygen -m PEM -t rsa -b 4096 -C "邮箱" 方式生成公私钥<br/></p>
+                  <p style="color: #faa">
+                    注意：目前对 SSH key 访问 git 仓库地址不支持使用 ssh-keygen -t rsa -C "邮箱" 方式生成的 SSH key <br />需要使用 ssh-keygen -m PEM -t rsa -b 4096 -C "邮箱" 方式生成公私钥<br />
+                  </p>
                   <p>如果在生成私钥的过程中有加密，那么需要把加密密码填充到上面的密码框中</p>
                   <p>支持两种方式填充：</p>
-                  <p>1. 完整的私钥内容 如: <br/>-----BEGIN RSA PRIVATE KEY----- <br/> ..... <br/> -----END RSA PRIVATE KEY-----</p>
-                  <p>2. 私钥文件绝对路径（绝对路径前面添加 file: 前缀) 如: <br/>file:/Users/Hotstrip/.ssh/id_rsa</p>
+                  <p>
+                    1. 完整的私钥内容 如: <br />-----BEGIN RSA PRIVATE KEY----- <br />
+                    ..... <br />
+                    -----END RSA PRIVATE KEY-----
+                  </p>
+                  <p>2. 私钥文件绝对路径（绝对路径前面添加 file: 前缀) 如: <br />file:/Users/Hotstrip/.ssh/id_rsa</p>
                 </div>
               </template>
               <a-textarea :auto-size="{ minRows: 3, maxRows: 3 }" v-model="temp.rsaPrv" placeholder="私钥,不填将使用默认的 $HOME/.ssh 目录中的配置。支持配置文件目录:file:"></a-textarea>
             </a-tooltip>
+          </a-form-model-item>
+          <a-form-model-item  v-if="temp.id" label="隐藏字段">
+            <a-button type="danger" @click="restHideField(temp)">清除</a-button>
           </a-form-model-item>
           <!-- 公钥暂时没用用到 -->
           <a-form-model-item label="公钥" prop="rsaPub" v-if="false">
@@ -116,7 +130,7 @@
   </div>
 </template>
 <script>
-import { getRepositoryList, editRepository, deleteRepository,recoveryRepository } from "../../api/repository";
+import { getRepositoryList, editRepository, deleteRepository, recoveryRepository, restHideField } from "../../api/repository";
 import { parseTime } from "../../utils/time";
 
 export default {
@@ -133,7 +147,7 @@ export default {
       list: [],
       total: 0,
       temp: {},
-      isSystem:false,
+      isSystem: false,
       editVisible: false,
       columns: [
         { title: "仓库名称", dataIndex: "name", width: 150, ellipsis: true, scopedSlots: { customRender: "name" } },
@@ -205,7 +219,7 @@ export default {
   created() {
     this.calcTableHeight();
     this.handleFilter();
-    this.isSystem=this.$store.getters.getUserInfo.systemUser;
+    this.isSystem = this.$store.getters.getUserInfo.systemUser;
   },
   methods: {
     // 计算表格高度
@@ -276,10 +290,10 @@ export default {
         okText: "确认",
         cancelText: "取消",
         onOk: () => {
-           const params = {
+          const params = {
             id: record.id,
-            isRealDel: this.isSystem
-           };
+            isRealDel: this.isSystem,
+          };
           // 删除
           deleteRepository(params).then((res) => {
             if (res.code === 200) {
@@ -293,7 +307,7 @@ export default {
         },
       });
     },
-    handlerecovery(record){
+    handlerecovery(record) {
       this.$confirm({
         title: "系统提示",
         content: "真的要恢复仓库信息么？",
@@ -312,7 +326,28 @@ export default {
           });
         },
       });
-    }
+    },
+    // 清除隐藏字段
+    restHideField(record) {
+      this.$confirm({
+        title: "系统提示",
+        content: "真的要清除仓库隐藏字段信息么？（密码，私钥）",
+        okText: "确认",
+        cancelText: "取消",
+        onOk: () => {
+          // 恢复
+          restHideField(record.id).then((res) => {
+            if (res.code === 200) {
+              this.$notification.success({
+                message: res.msg,
+                duration: 2,
+              });
+              this.loadData();
+            }
+          });
+        },
+      });
+    },
   },
 };
 </script>
