@@ -69,6 +69,9 @@ public class IndexControl extends BaseServerController {
 			jsCommonContext = FileUtil.readString(file, CharsetUtil.CHARSET_UTF_8);
 		}
 		html = StrUtil.replace(html, "<div id=\"jpomCommonJs\"></div>", jsCommonContext);
+		// <routerBase>
+		String proxyPath = UrlRedirectUtil.getHeaderProxyPath(getRequest(), BaseJpomInterceptor.PROXY_PATH);
+		html = StrUtil.replace(html, "<routerBase>", proxyPath);
 		ServletUtil.write(response, html, ContentType.TEXT_HTML.getValue());
 	}
 
