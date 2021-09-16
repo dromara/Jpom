@@ -241,7 +241,7 @@ export default {
           title: "关联节点",
           dataIndex: "nodeId",
           scopedSlots: { customRender: "nodeId" },
-          width: 200,
+          // width: 200,
           ellipsis: true,
         },
         { title: "Host", dataIndex: "host", ellipsis: true },

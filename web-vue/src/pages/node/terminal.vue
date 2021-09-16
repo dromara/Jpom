@@ -32,6 +32,8 @@ export default {
       text: "",
       keyCode: -1,
       heart: null,
+      rows: 40,
+      cols: 100,
     };
   },
   computed: {
@@ -66,12 +68,25 @@ export default {
     },
     // 初始化 Terminal
     initTerminal() {
+      // 获取容器宽高/字号大小，定义行数和列数
+      this.rows = document.querySelector("#xterm").offsetHeight / 16 - 6;
+      this.cols = document.querySelector("#xterm").offsetWidth / 14;
+      //
       this.terminal = new Terminal({
         fontSize: 14,
+        rows: parseInt(this.rows), //行数
+        cols: parseInt(this.cols), // 不指定行数，自动回车后光标从下一行开始
+        convertEol: true, //启用时，光标将设置为下一行的开头
         cursorBlink: true,
         // Whether input should be disabled.
         disableStdin: false,
         rendererType: "canvas",
+        theme: {
+          foreground: "#7e9192", //字体
+          background: "#002833", //背景色
+          cursor: "help", //设置光标
+          lineHeight: 16,
+        },
       });
       // const attachAddon = new AttachAddon(this.socket, { bidirectional: false });
       const attachAddon = new AttachAddon(this.socket);
@@ -81,6 +96,20 @@ export default {
       this.terminal.open(document.getElementById("xterm"));
       this.terminal.focus();
       fitAddon.fit();
+      //
+      window.addEventListener("resize", () => {
+        try {
+          // 窗口大小改变时，触发xterm的resize方法使自适应
+          fitAddon.fit();
+          // 窗口大小改变时触发xterm的resize方法，向后端发送行列数，格式由后端决定
+          // this.terminal.onResize((size) => {
+          //   this.socket.onSend({ Op: "resize", Cols: size.cols, Rows: size.rows });
+          // });
+        } catch (e) {
+          console.log("e", e.message);
+        }
+      });
+      //this.socket.send({ Op: "resize", Cols: this.cols, Rows: this.rows });
       // 创建心跳，防止掉线
       this.heart = setInterval(() => {
         let op = {

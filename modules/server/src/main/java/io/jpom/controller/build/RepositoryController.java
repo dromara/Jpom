@@ -151,6 +151,7 @@ public class RepositoryController extends BaseServerController {
 	 * @param repositoryModelReq 仓库信息
 	 */
 	private void checkInfo(RepositoryModel repositoryModelReq) {
+		Assert.notNull(repositoryModelReq, "请传人正确的信息");
 		Assert.hasText(repositoryModelReq.getName(), "请填写仓库名称");
 		Integer repoType = repositoryModelReq.getRepoType();
 		Assert.state(repoType != null && (repoType == 1 || repoType == 0), "请选择仓库类型");

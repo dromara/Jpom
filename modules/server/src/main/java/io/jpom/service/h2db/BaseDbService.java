@@ -3,6 +3,7 @@ package io.jpom.service.h2db;
 import cn.hutool.core.date.SystemClock;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.db.Entity;
 import io.jpom.common.Const;
 import io.jpom.model.BaseDbModel;
@@ -62,14 +63,13 @@ public abstract class BaseDbService<T extends BaseDbModel> extends BaseDbCommonS
 		info.setModifyTimeMillis(ObjectUtil.defaultIfNull(info.getModifyTimeMillis(), SystemClock.now()));
 		// remove create time
 		info.setCreateTimeMillis(null);
-		info.setId(null);
 		//
 		Entity entity = this.dataBeanToEntity(info);
 		//
+		entity.remove(StrUtil.format("`{}`", Const.ID_STR));
+		//
 		Entity where = new Entity();
 		where.set(Const.ID_STR, id);
-		//
-		info.setId(id);
 		return super.update(entity, where);
 	}
 
