@@ -2,7 +2,7 @@
   <div>
     <div ref="filter" class="filter">
       <a-input-search placeholder="搜索项目" enter-button @search="searchProject" class="projSearch" />
-      <a-button type="primary" @click="getNodeProjectList">刷新</a-button>
+      <a-button type="primary" @click="getNodeProjectData">刷新</a-button>
       <span>| </span>
       <a-button type="primary" @click="batchStart">批量启动</a-button>
       <a-button type="primary" @click="batchRestart">批量重启</a-button>
@@ -144,7 +144,7 @@ export default {
     // 文件管理
     handleFile(record) {
       this.temp = Object.assign(record);
-      this.drawerTitle = `文件管理(${this.temp.projectId})`;
+      this.drawerTitle = `文件管理(${this.temp.name})`;
       this.drawerFileVisible = true;
     },
     // 关闭文件管理对话框
@@ -155,7 +155,7 @@ export default {
     // 控制台
     handleConsole(record) {
       this.temp = Object.assign(record);
-      this.drawerTitle = `控制台(${this.temp.projectId})`;
+      this.drawerTitle = `控制台(${this.temp.name})`;
       this.drawerConsoleVisible = true;
     },
     // 关闭控制台

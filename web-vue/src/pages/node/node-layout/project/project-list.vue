@@ -6,7 +6,6 @@
       </a-select>
       <a-button type="primary" @click="handleAdd">新增</a-button>
       <a-button type="primary" @click="handleFilter">刷新</a-button>
-      <span>|   </span>
       <a-button type="primary" @click="batchStart">批量启动</a-button>
       <a-button type="primary" @click="batchRestart">批量重启</a-button>
       <a-button type="danger" @click="batchStop">批量关闭</a-button>
