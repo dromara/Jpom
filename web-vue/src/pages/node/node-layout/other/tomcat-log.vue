@@ -59,7 +59,9 @@ export default {
     ]),
     socketUrl() {
       const protocol = location.protocol === 'https:' ? 'wss://' : 'ws://';
-      return `${protocol}${location.host}/tomcat_log?userId=${this.getLongTermToken}&tomcatId=${this.tomcatId}&nodeId=${this.nodeId}&type=tomcat`;
+      const domain = window.routerBase;
+      const url = (domain + '/tomcat_log').replace(new RegExp('//', 'gm'), '/');
+      return `${protocol}${location.host}${url}?userId=${this.getLongTermToken}&tomcatId=${this.tomcatId}&nodeId=${this.nodeId}&type=tomcat`;
     }
   },
   created() {
