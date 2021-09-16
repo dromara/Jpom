@@ -16,11 +16,11 @@
       :loading="loading"
       :columns="columns"
       :pagination="false"
-       :row-selection="{ selectedRowKeys: selectedRowKeys, onChange: onSelectChange,columnWidth:'25px' }"
+      :row-selection="{ selectedRowKeys: selectedRowKeys, onChange: onSelectChange, columnWidth: '25px' }"
       bordered
       :rowKey="(record, index) => index"
       :style="{ 'max-height': tableHeight + 'px' }"
-      :scroll="{ x: 1330, y: tableHeight - 60 }"
+      :scroll="{ y: tableHeight - 60 }"
     >
       <a-tooltip slot="name" slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
@@ -40,7 +40,6 @@
         <span v-if="record.pid">{{ record.port }}/{{ record.pid }}</span>
       </a-tooltip>
       <template slot="operation" slot-scope="text, record">
-        <a-button type="primary" @click="handleEdit(record)">编辑</a-button>
         <a-button type="primary" @click="handleFile(record)">文件</a-button>
         <a-button type="primary" @click="handleConsole(record)" v-show="record.runMode !== 'File'">控制台</a-button>
         <a-dropdown>
@@ -49,6 +48,9 @@
             <a-icon type="down" />
           </a>
           <a-menu slot="overlay">
+            <a-menu-item>
+              <a-button type="primary" @click="handleEdit(record)">编辑</a-button>
+            </a-menu-item>
             <a-menu-item>
               <a-button type="primary" @click="handleMonitor(record)" v-show="record.runMode !== 'File'" :disabled="!record.status">监控 </a-button>
             </a-menu-item>
@@ -260,7 +262,7 @@ import {
   nodeJudgeLibExist,
   restartProject,
   startProject,
-  stopProject
+  stopProject,
 } from "../../../../api/node-project";
 
 export default {
@@ -294,12 +296,11 @@ export default {
       drawerReplicaVisible: false,
       addGroupvisible: false,
       libExist: false,
-      selectedRowKeys: [], 
+      selectedRowKeys: [],
       checkRecord: "",
       columns: [
-
         { title: "项目名称", dataIndex: "name", width: 60, ellipsis: true, scopedSlots: { customRender: "name" } },
-        { title: "创建/修改时间", dataIndex: "createTime", width: 100, ellipsis: true, scopedSlots: { customRender: "time" } },
+        { title: "创建/修改时间", dataIndex: "createTime", width: 90, ellipsis: true, scopedSlots: { customRender: "time" } },
         // { title: "修改时间", dataIndex: "modifyTime", width: 160, ellipsis: true, scopedSlots: { customRender: "modifyTime" } },
         {
           title: "最后操作人",
@@ -310,7 +311,7 @@ export default {
         },
         { title: "运行状态", dataIndex: "status", width: 50, ellipsis: true, scopedSlots: { customRender: "status" } },
         { title: "端口/PID", dataIndex: "port", width: 50, ellipsis: true, scopedSlots: { customRender: "port" } },
-        { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, width: 80 },
+        { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, width: 120 },
       ],
       rules: {
         id: [{ required: true, message: "Please input project id", trigger: "blur" }],
@@ -658,66 +659,66 @@ export default {
       this.selectedRowKeys = selectedRowKeys;
     },
     //批量开始
-    batchStart(){
-      if(this.selectedRowKeys.length==0){
-         this.$notification.warning({
+    batchStart() {
+      if (this.selectedRowKeys.length == 0) {
+        this.$notification.warning({
           message: "请选中要启动的项目",
           duration: 2,
         });
       }
-      this.selectedRowKeys.forEach((value)=>{
-        if(this.list[value].status==false&&this.list[value].runMode!="File"){
-         const params = {
+      this.selectedRowKeys.forEach((value) => {
+        if (this.list[value].status == false && this.list[value].runMode != "File") {
+          const params = {
             nodeId: this.node.id,
             id: this.list[value].id,
-         };
-         console.log(this.list[value])
-         startProject(params).then(()=>{
+          };
+          //console.log(this.list[value]);
+          startProject(params).then(() => {
             this.handleFilter();
           });
-         }
+        }
       });
     },
     //批量重启
-    batchRestart(){
-      if(this.selectedRowKeys.length==0){
-         this.$notification.warning({
+    batchRestart() {
+      if (this.selectedRowKeys.length == 0) {
+        this.$notification.warning({
           message: "请选中要重启的项目",
           duration: 2,
         });
       }
-      this.selectedRowKeys.forEach((value)=>{
-        if(this.list[value].runMode!="File"){
+      this.selectedRowKeys.forEach((value) => {
+        if (this.list[value].runMode != "File") {
           const params = {
             nodeId: this.node.id,
             id: this.list[value].id,
           };
-          restartProject(params).then(()=>{
+          restartProject(params).then(() => {
             this.handleFilter();
           });
-       }
+        }
       });
     },
     //批量关闭
-    batchStop(){
-      if(this.selectedRowKeys.length==0){
-         this.$notification.warning({
+    batchStop() {
+      if (this.selectedRowKeys.length == 0) {
+        this.$notification.warning({
           message: "请选中要关闭的项目",
           duration: 2,
         });
       }
-      this.selectedRowKeys.forEach((value)=>{
-       if(this.list[value].status==true&&this.list[value].runMode!="File"){
+      this.selectedRowKeys.forEach((value) => {
+        if (this.list[value].status == true && this.list[value].runMode != "File") {
           const params = {
-           nodeId: this.node.id,
-           id: this.list[value].id,
+            nodeId: this.node.id,
+            id: this.list[value].id,
           };
-          stopProject(params).then(()=>{
+          stopProject(params).then(() => {
             this.handleFilter();
           });
-       }
+        }
       });
-    }
+    },
   },
 };
 </script>
