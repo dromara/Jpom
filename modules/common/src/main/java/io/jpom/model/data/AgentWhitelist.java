@@ -1,8 +1,10 @@
 package io.jpom.model.data;
 
+import cn.hutool.core.collection.CollStreamUtil;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.text.StrSplitter;
+import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import com.alibaba.fastjson.JSONObject;
@@ -12,10 +14,8 @@ import io.jpom.system.ExtConfigBean;
 import org.springframework.util.Assert;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
+import java.nio.charset.Charset;
+import java.util.*;
 
 /**
  * 白名单
@@ -204,5 +204,61 @@ public class AgentWhitelist extends BaseJsonModel {
 		List<String> list = StrSplitter.splitTrim(value, StrUtil.LF, true);
 		Assert.notEmpty(list, errorMsg);
 		return list;
+	}
+
+	/**
+	 * 获取文件可以编辑的 文件编码格式
+	 *
+	 * @param filename 文件名
+	 * @return charset 不能编辑情况会抛出异常
+	 */
+	public static Charset checkFileSuffix(List<String> allowEditSuffix, String filename) {
+		Assert.notEmpty(allowEditSuffix, "没有配置可允许编辑的后缀");
+		Charset charset = AgentWhitelist.parserFileSuffixMap(allowEditSuffix, filename);
+		Assert.notNull(charset, "不允许编辑的文件后缀");
+		return charset;
+	}
+
+	/**
+	 * 静默判断是否可以编辑对应的文件
+	 *
+	 * @param filename 文件名
+	 * @return true 可以编辑
+	 */
+	public static boolean checkSilentFileSuffix(List<String> allowEditSuffix, String filename) {
+		if (CollUtil.isEmpty(allowEditSuffix)) {
+			return false;
+		}
+		Charset charset = AgentWhitelist.parserFileSuffixMap(allowEditSuffix, filename);
+		return charset != null;
+	}
+
+	/**
+	 * 根据文件名 和 可以配置列表 获取编码格式
+	 *
+	 * @param allowEditSuffix 允许编辑的配置
+	 * @param filename        文件名
+	 * @return 没有匹配到 返回 null，没有配置编码格式即使用系统默认编码格式
+	 */
+	public static Charset parserFileSuffixMap(List<String> allowEditSuffix, String filename) {
+		Map<String, Charset> map = CollStreamUtil.toMap(allowEditSuffix, s -> {
+			List<String> split = StrUtil.split(s, StrUtil.AT);
+			return CollUtil.getFirst(split);
+		}, s -> {
+			List<String> split = StrUtil.split(s, StrUtil.AT);
+			if (split.size() > 1) {
+				String last = CollUtil.getLast(split);
+				return CharsetUtil.charset(last);
+			} else {
+				return CharsetUtil.defaultCharset();
+			}
+		});
+		Set<Map.Entry<String, Charset>> entries = map.entrySet();
+		for (Map.Entry<String, Charset> entry : entries) {
+			if (StrUtil.endWithIgnoreCase(filename, StrUtil.DOT + entry.getKey())) {
+				return entry.getValue();
+			}
+		}
+		return null;
 	}
 }

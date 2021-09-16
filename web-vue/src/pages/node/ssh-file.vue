@@ -34,7 +34,7 @@
           <span>{{ text }}</span>
         </a-tooltip>
         <template slot="operation" slot-scope="text, record">
-          <a-button type="primary" @click="handlePreview(record)">查看</a-button>
+          <a-button type="primary" :disabled="!record.textFileEdit"  @click="handlePreview(record)">编辑</a-button>
           <a-button type="primary" @click="handleDownload(record)">下载</a-button>
           <a-button type="danger" @click="handleDelete(record)">删除</a-button>
         </template>

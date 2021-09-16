@@ -1,12 +1,10 @@
 package io.jpom.controller.manage;
 
-import cn.hutool.core.collection.CollStreamUtil;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.BooleanUtil;
-import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.servlet.ServletUtil;
 import cn.hutool.http.HttpUtil;
@@ -36,7 +34,6 @@ import javax.annotation.Resource;
 import java.io.File;
 import java.nio.charset.Charset;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -61,28 +58,21 @@ public class ProjectFileControl extends BaseAgentController {
 	public String getFileList(String id, String path) {
 		// 查询项目路径
 		ProjectInfoModel pim = projectInfoService.getItem(id);
-		if (pim == null) {
-			return JsonMessage.getString(500, "查询失败：项目不存在");
-		}
+		Assert.notNull(pim, "查询失败：项目不存在");
 		String lib = pim.allLib();
 		File fileDir = FileUtil.file(lib, StrUtil.emptyToDefault(path, FileUtil.FILE_SEPARATOR));
-		if (!fileDir.exists()) {
-			return JsonMessage.getString(500, "目录不存在");
-		}
+		Assert.state(FileUtil.exist(fileDir), "目录不存在");
+		//
 		File[] filesAll = fileDir.listFiles();
-		if (filesAll == null) {
-			return JsonMessage.getString(500, "目录是空");
-		}
+		Assert.notEmpty(filesAll, "目录是空");
 		JSONArray arrayFile = FileUtils.parseInfo(filesAll, false, lib);
 		AgentWhitelist whitelist = whitelistDirectoryService.getWhitelist();
-		List<String> allowEditSuffix = whitelist.getAllowEditSuffix();
-		if (CollUtil.isNotEmpty(allowEditSuffix)) {
-			for (Object o : arrayFile) {
-				JSONObject jsonObject = (JSONObject) o;
-				String filename = jsonObject.getString("filename");
-				jsonObject.put("textFileEdit", this.checkSilentFileSuffix(filename));
-			}
+		for (Object o : arrayFile) {
+			JSONObject jsonObject = (JSONObject) o;
+			String filename = jsonObject.getString("filename");
+			jsonObject.put("textFileEdit", AgentWhitelist.checkSilentFileSuffix(whitelist.getAllowEditSuffix(), filename));
 		}
+
 		return JsonMessage.getString(200, "查询成功", arrayFile);
 	}
 
@@ -119,7 +109,7 @@ public class ProjectFileControl extends BaseAgentController {
 			try {
 				CompressionFileUtil.unCompress(file, lib);
 			} finally {
-				if (!file.delete()) {
+				if (!FileUtil.del(file)) {
 					DefaultSystemLog.getLog().error("删除文件失败：" + file.getPath());
 				}
 			}
@@ -229,63 +219,6 @@ public class ProjectFileControl extends BaseAgentController {
 	}
 
 	/**
-	 * 静默判断是否可以编辑对应的文件
-	 *
-	 * @param filename 文件名
-	 * @return true 可以编辑
-	 */
-	private boolean checkSilentFileSuffix(String filename) {
-		AgentWhitelist whitelist = whitelistDirectoryService.getWhitelist();
-		if (whitelist == null) {
-			return false;
-		}
-		List<String> allowEditSuffix = whitelist.getAllowEditSuffix();
-		if (CollUtil.isEmpty(allowEditSuffix)) {
-			return false;
-		}
-		Charset charset = this.parserFileSuffixMap(allowEditSuffix, filename);
-		return charset != null;
-	}
-
-	private Charset parserFileSuffixMap(List<String> allowEditSuffix, String filename) {
-		Map<String, Charset> map = CollStreamUtil.toMap(allowEditSuffix, s -> {
-			List<String> split = StrUtil.split(s, StrUtil.AT);
-			return CollUtil.getFirst(split);
-		}, s -> {
-			List<String> split = StrUtil.split(s, StrUtil.AT);
-			if (split.size() > 1) {
-				String last = CollUtil.getLast(split);
-				return CharsetUtil.charset(last);
-			} else {
-				return CharsetUtil.defaultCharset();
-			}
-		});
-		Set<Map.Entry<String, Charset>> entries = map.entrySet();
-		for (Map.Entry<String, Charset> entry : entries) {
-			if (StrUtil.endWithIgnoreCase(filename, StrUtil.DOT + entry.getKey())) {
-				return entry.getValue();
-			}
-		}
-		return null;
-	}
-
-	/**
-	 * 获取文件可以编辑的 文件编码格式
-	 *
-	 * @param filename 文件名
-	 * @return charset 不能编辑情况会抛出异常
-	 */
-	private Charset checkFileSuffix(String filename) {
-		AgentWhitelist whitelist = whitelistDirectoryService.getWhitelist();
-		List<String> allowEditSuffix = whitelist.getAllowEditSuffix();
-		Assert.notEmpty(allowEditSuffix, "没有配置可允许编辑的后缀");
-		Charset charset = this.parserFileSuffixMap(allowEditSuffix, filename);
-		Assert.notNull(charset, "不允许编辑的文件后缀");
-		return charset;
-	}
-
-
-	/**
 	 * 读取文件内容 （只能处理文本文件）
 	 *
 	 * @param filePath 相对项目文件的文件夹
@@ -297,7 +230,8 @@ public class ProjectFileControl extends BaseAgentController {
 		ProjectInfoModel pim = getProjectInfoModel();
 		filePath = StrUtil.emptyToDefault(filePath, File.separator);
 		// 判断文件后缀
-		Charset charset = this.checkFileSuffix(filename);
+		AgentWhitelist whitelist = whitelistDirectoryService.getWhitelist();
+		Charset charset = AgentWhitelist.checkFileSuffix(whitelist.getAllowEditSuffix(), filename);
 		File file = FileUtil.file(pim.allLib(), filePath, filename);
 		String ymlString = FileUtil.readString(file, charset);
 		return JsonMessage.getString(200, "", ymlString);
@@ -316,7 +250,8 @@ public class ProjectFileControl extends BaseAgentController {
 		ProjectInfoModel pim = getProjectInfoModel();
 		filePath = StrUtil.emptyToDefault(filePath, File.separator);
 		// 判断文件后缀
-		Charset charset = this.checkFileSuffix(filename);
+		AgentWhitelist whitelist = whitelistDirectoryService.getWhitelist();
+		Charset charset = AgentWhitelist.checkFileSuffix(whitelist.getAllowEditSuffix(), filename);
 		FileUtil.writeString(fileText, FileUtil.file(pim.allLib(), filePath, filename), charset);
 		return JsonMessage.getString(200, "文件写入成功");
 	}

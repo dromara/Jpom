@@ -47,8 +47,8 @@ public class WhitelistDirectoryController extends BaseJpomController {
 		//
 		List<String> certificateList = AgentWhitelist.parseToList(certificate, "证书路径白名单不能为空");
 		List<String> nList = AgentWhitelist.parseToList(nginx, "nginx路径白名单不能为空");
-		List<String> allowEditSuffixList = AgentWhitelist.parseToList(allowEditSuffix, "运行编辑的文件后缀不能为空");
-		List<String> allowRemoteDownloadHostList = AgentWhitelist.parseToList(allowRemoteDownloadHost, "运行远程下载的 host 不能配置为空");
+		List<String> allowEditSuffixList = AgentWhitelist.parseToList(allowEditSuffix, "允许编辑的文件后缀不能为空");
+		List<String> allowRemoteDownloadHostList = AgentWhitelist.parseToList(allowRemoteDownloadHost, "允许远程下载的 host 不能配置为空");
 		return save(list, certificateList, nList, allowEditSuffixList, allowRemoteDownloadHostList).toString();
 	}
 //

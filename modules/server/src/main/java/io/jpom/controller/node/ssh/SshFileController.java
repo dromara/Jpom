@@ -19,6 +19,7 @@ import com.jcraft.jsch.ChannelSftp;
 import com.jcraft.jsch.Session;
 import com.jcraft.jsch.SftpException;
 import io.jpom.common.BaseServerController;
+import io.jpom.model.data.AgentWhitelist;
 import io.jpom.model.data.SshModel;
 import io.jpom.plugin.ClassFeature;
 import io.jpom.plugin.Feature;
@@ -188,6 +189,7 @@ public class SshFileController extends BaseServerController {
 	private JSONArray listDir(SshModel sshModel, String path, String children) throws SftpException {
 		Session session = null;
 		ChannelSftp channel = null;
+		List<String> allowEditSuffix = sshModel.getAllowEditSuffix();
 		try {
 			session = SshService.getSession(sshModel);
 			channel = (ChannelSftp) JschUtil.openChannel(session, ChannelType.SFTP);
@@ -201,28 +203,31 @@ public class SshFileController extends BaseServerController {
 			}
 			JSONArray jsonArray = new JSONArray();
 			for (ChannelSftp.LsEntry lsEntry : vector) {
-				if (StrUtil.DOT.equals(lsEntry.getFilename()) || StrUtil.DOUBLE_DOT.equals(lsEntry.getFilename())) {
+				String filename = lsEntry.getFilename();
+				if (StrUtil.DOT.equals(filename) || StrUtil.DOUBLE_DOT.equals(filename)) {
 					continue;
 				}
 				JSONObject jsonObject = new JSONObject();
-				jsonObject.put("name", lsEntry.getFilename());
+				jsonObject.put("name", filename);
 				jsonObject.put("id", IdUtil.fastSimpleUUID());
 				int mTime = lsEntry.getAttrs().getMTime();
 				String format = DateUtil.format(DateUtil.date(mTime * 1000L), DatePattern.NORM_DATETIME_MINUTE_PATTERN);
 				jsonObject.put("modifyTime", format);
 				if (lsEntry.getAttrs().isDir()) {
 					jsonObject.put("dir", true);
-					jsonObject.put("title", lsEntry.getFilename());
+					jsonObject.put("title", filename);
 				} else {
-					jsonObject.put("title", lsEntry.getFilename());
+					jsonObject.put("title", filename);
 					long fileSize = lsEntry.getAttrs().getSize();
 					jsonObject.put("size", FileUtil.readableFileSize(fileSize));
+					// 允许编辑
+					jsonObject.put("textFileEdit", AgentWhitelist.checkSilentFileSuffix(allowEditSuffix, filename));
 				}
 				//
 				if (StrUtil.isEmpty(children)) {
-					jsonObject.put("parentDir", lsEntry.getFilename());
+					jsonObject.put("parentDir", filename);
 				} else {
-					jsonObject.put("parentDir", FileUtil.normalize(StrUtil.format("{}/{}", children, lsEntry.getFilename())));
+					jsonObject.put("parentDir", FileUtil.normalize(StrUtil.format("{}/{}", children, filename)));
 				}
 				jsonArray.add(jsonObject);
 			}

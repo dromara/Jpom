@@ -16,6 +16,7 @@ import com.jcraft.jsch.Session;
 import io.jpom.common.BaseServerController;
 import io.jpom.common.interceptor.OptLog;
 import io.jpom.model.BaseModel;
+import io.jpom.model.data.AgentWhitelist;
 import io.jpom.model.data.NodeModel;
 import io.jpom.model.data.SshModel;
 import io.jpom.model.log.SshTerminalExecuteLog;
@@ -27,6 +28,7 @@ import io.jpom.service.dblog.SshTerminalExecuteLogService;
 import io.jpom.service.node.ssh.SshService;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -112,21 +114,20 @@ public class SshController extends BaseServerController {
 					   @ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "port错误") int port,
 					   String charset, String fileDirs,
 					   String id, String type, String notAllowedCommand) {
-		// 优先判断参数 如果是 password 在修改时可以不填写
-		if (connectType == SshModel.ConnectType.PASS && StrUtil.isEmpty(password) && "add".equals(type)) {
-			return JsonMessage.getString(405, "请填写登录密码");
-		}
-		if (connectType == SshModel.ConnectType.PUBKEY && StrUtil.isEmpty(privateKey)) {
-			return JsonMessage.getString(405, "请填写证书内容");
-		}
 		SshModel sshModel;
-		if ("edit".equals(type)) {
-			sshModel = sshService.getItem(id);
-			if (sshModel == null) {
-				return JsonMessage.getString(500, "不存在对应ssh");
+		// 优先判断参数 如果是 password 在修改时可以不填写
+		boolean add = "add".equals(type);
+		if (add) {
+			if (connectType == SshModel.ConnectType.PASS && StrUtil.isEmpty(password)) {
+				return JsonMessage.getString(405, "请填写登录密码");
 			}
-		} else {
+			if (connectType == SshModel.ConnectType.PUBKEY && StrUtil.isEmpty(privateKey)) {
+				return JsonMessage.getString(405, "请填写证书内容");
+			}
 			sshModel = new SshModel();
+		} else {
+			sshModel = sshService.getItem(id);
+			Assert.notNull(sshModel, "不存在对应ssh");
 		}
 		// 目录
 		if (StrUtil.isEmpty(fileDirs)) {
@@ -152,7 +153,10 @@ public class SshController extends BaseServerController {
 		sshModel.setName(name);
 		sshModel.setNotAllowedCommand(notAllowedCommand);
 		sshModel.setConnectType(connectType);
-
+		// 获取允许编辑的后缀
+		String allowEditSuffix = getParameter("allowEditSuffix");
+		List<String> allowEditSuffixList = AgentWhitelist.parseToList(allowEditSuffix, "允许编辑的文件后缀不能为空");
+		sshModel.setAllowEditSuffix(allowEditSuffixList);
 		try {
 			Charset.forName(charset);
 			sshModel.setCharset(charset);

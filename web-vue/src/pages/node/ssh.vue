@@ -85,6 +85,15 @@
         <a-form-model-item label="禁止命令" prop="notAllowedCommand">
           <a-textarea v-model="temp.notAllowedCommand" :auto-size="{ minRows: 3, maxRows: 5 }" placeholder="禁止命令是不允许在终端执行的名，多个逗号隔开" />
         </a-form-model-item>
+        <a-form-model-item label="文件后缀" prop="suffix">
+          <a-input
+            v-model="temp.allowEditSuffix"
+            type="textarea"
+            :rows="5"
+            style="resize: none"
+            placeholder="请输入允许编辑文件的后缀及文件编码，不设置编码则默认取系统编码，示例：设置编码：txt@utf-8， 不设置编码：txt"
+          />
+        </a-form-model-item>
       </a-form-model>
     </a-modal>
     <!-- 安装节点 -->

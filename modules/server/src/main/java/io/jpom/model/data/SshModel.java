@@ -46,6 +46,11 @@ public class SshModel extends BaseModel {
 	 */
 	private String notAllowedCommand;
 
+	/**
+	 * 运行编辑的后缀文件
+	 */
+	private List<String> allowEditSuffix;
+
 	public String getNotAllowedCommand() {
 		return notAllowedCommand;
 	}
@@ -156,6 +161,14 @@ public class SshModel extends BaseModel {
 			charset = CharsetUtil.CHARSET_UTF_8;
 		}
 		return charset;
+	}
+
+	public List<String> getAllowEditSuffix() {
+		return allowEditSuffix;
+	}
+
+	public void setAllowEditSuffix(List<String> allowEditSuffix) {
+		this.allowEditSuffix = allowEditSuffix;
 	}
 
 	/**

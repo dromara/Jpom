@@ -45,7 +45,8 @@ export function editSsh(params) {
 		privateKey: params.privateKey,
 		charset: params.charset,
 		fileDirs: params.fileDirs,
-		notAllowedCommand: params.notAllowedCommand
+		notAllowedCommand: params.notAllowedCommand,
+		allowEditSuffix: params.allowEditSuffix,
 	}
 	return axios({
 		url: '/node/ssh/save.json',
