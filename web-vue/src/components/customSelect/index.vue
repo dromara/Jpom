@@ -25,6 +25,7 @@
         <a-divider style="margin: 4px 0" />
         <v-nodes :vnodes="menu" />
       </div>
+      <a-select-option value="">{{selectPlaceholder}}</a-select-option>
       <a-select-option v-for="item in optionList" :key="item">{{ item }} </a-select-option>
     </Select>
   </div>

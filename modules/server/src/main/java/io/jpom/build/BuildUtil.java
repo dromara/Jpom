@@ -74,6 +74,9 @@ public class BuildUtil {
 	 * @return file
 	 */
 	public static File getHistoryPackageFile(String buildModelId, int buildId, String resultFile) {
+		if (StrUtil.isEmpty(buildModelId) || StrUtil.isEmpty(resultFile)) {
+			return null;
+		}
 		return FileUtil.file(getBuildDataFile(buildModelId),
 				"history",
 				BuildInfoModel.getBuildIdStr(buildId),
@@ -110,6 +113,9 @@ public class BuildUtil {
 	 * @return file
 	 */
 	public static File getLogFile(String buildModelId, int buildId) {
+		if (StrUtil.isEmpty(buildModelId)) {
+			return null;
+		}
 		return FileUtil.file(getBuildDataFile(buildModelId),
 				"history",
 				BuildInfoModel.getBuildIdStr(buildId),

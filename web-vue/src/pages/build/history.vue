@@ -20,9 +20,8 @@
       <a-tooltip slot="buildName" slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>
-      <a-tooltip slot="buildIdStr" slot-scope="text, record" placement="topLeft" :title="text + ' ( 点击查看日志 ) '">
-        <span v-if="record.buildId <= 0"></span>
-        <a-tag v-else color="#108ee9" @click="handleBuildLog(record)">{{ text }}</a-tag>
+      <a-tooltip slot="buildNumberId" slot-scope="text, record" placement="topLeft" :title="text + ' ( 点击查看日志 ) '">
+        <a-tag color="#108ee9" @click="handleBuildLog(record)">#{{ text }}</a-tag>
       </a-tooltip>
       <template slot="status" slot-scope="text" placement="topleft" :title="text">
         <span>{{ statusMap[text] }}</span>
@@ -34,7 +33,7 @@
         <span>{{ text }}</span>
       </a-tooltip>
       <template slot="operation" slot-scope="text, record">
-        <a-button type="primary" @click="handleDownload(record)">下载日志</a-button>
+        <a-button type="primary" :disabled="!record.hasLog" @click="handleDownload(record)">下载日志</a-button>
         <a-button type="primary" :disabled="!record.hashFile"  @click="handleFile(record)">下载产物</a-button>
         <a-dropdown>
           <a class="ant-dropdown-link" @click="e => e.preventDefault()">
@@ -93,7 +92,7 @@ export default {
       buildLogVisible: false,
       columns: [
         {title: '构建名称', dataIndex: 'buildName', /*width: 120,*/ ellipsis: true, scopedSlots: {customRender: 'buildName'}},
-        {title: '构建 ID', dataIndex: 'buildIdStr', width: 100, ellipsis: true, scopedSlots: {customRender: 'buildIdStr'}},
+        {title: '构建 ID', dataIndex: 'buildNumberId', width: 100, ellipsis: true, scopedSlots: {customRender: 'buildNumberId'}},
         {title: '状态', dataIndex: 'status', width: 120, ellipsis: true, scopedSlots: {customRender: 'status'}},
         {title: '开始时间', dataIndex: 'startTime', customRender: (text) => {
           return parseTime(text);

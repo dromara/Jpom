@@ -173,6 +173,7 @@ public class BuildInfoManage extends BaseBuild implements Runnable {
 		buildHistoryLog.setStatus(BuildStatus.Ing.getCode());
 		buildHistoryLog.setStartTime(System.currentTimeMillis());
 		buildHistoryLog.setBuildNumberId(buildInfoModel.getBuildId());
+		buildHistoryLog.setBuildName(buildInfoModel.getName());
 		buildHistoryLog.setBuildUser(optUserName);
 
 		DbBuildHistoryLogService dbBuildHistoryLogService = SpringUtil.getBean(DbBuildHistoryLogService.class);

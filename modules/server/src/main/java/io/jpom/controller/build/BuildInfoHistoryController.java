@@ -3,6 +3,7 @@ package io.jpom.controller.build;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.convert.Convert;
+import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.db.Entity;
 import cn.hutool.db.Page;
@@ -38,6 +39,8 @@ import javax.annotation.Resource;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
+import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -72,7 +75,7 @@ public class BuildInfoHistoryController extends BaseServerController {
 			return;
 		}
 		File logFile = BuildUtil.getHistoryPackageFile(item.getId(), buildHistoryLog.getBuildNumberId(), buildHistoryLog.getResultDirFile());
-		if (!logFile.exists()) {
+		if (!FileUtil.exist(logFile)) {
 			return;
 		}
 		if (logFile.isFile()) {
@@ -94,7 +97,7 @@ public class BuildInfoHistoryController extends BaseServerController {
 		BuildInfoModel item = buildInfoService.getByKey(buildHistoryLog.getBuildDataId());
 		Objects.requireNonNull(item);
 		File logFile = BuildUtil.getLogFile(item.getId(), buildHistoryLog.getBuildNumberId());
-		if (!logFile.exists()) {
+		if (!FileUtil.exist(logFile)) {
 			return;
 		}
 		if (logFile.isFile()) {
@@ -146,18 +149,20 @@ public class BuildInfoHistoryController extends BaseServerController {
 			}
 		}
 		PageResult<BuildHistoryLog> pageResult = dbBuildHistoryLogService.listPage(entity, pageObj);
-		List<BuildHistoryLogVo> buildHistoryLogVos = new ArrayList<>();
-		pageResult.forEach(buildHistoryLog -> {
-			BuildHistoryLogVo historyLogVo = new BuildHistoryLogVo();
-			BeanUtil.copyProperties(buildHistoryLog, historyLogVo);
-			String dataId = buildHistoryLog.getBuildDataId();
-			BuildInfoModel item = buildInfoService.getByKey(dataId);
-			if (item != null) {
-				historyLogVo.setBuildName(item.getName());
+		List<BuildHistoryLogVo> collect = pageResult.stream().map(buildHistoryLog -> {
+			BuildHistoryLogVo buildHistoryLogVo = new BuildHistoryLogVo();
+			BeanUtil.copyProperties(buildHistoryLog, buildHistoryLogVo);
+			//
+			if (StrUtil.isEmpty(buildHistoryLog.getBuildName())) {
+				String dataId = buildHistoryLog.getBuildDataId();
+				BuildInfoModel item = buildInfoService.getByKey(dataId);
+				if (item != null) {
+					buildHistoryLogVo.setBuildName(item.getName());
+				}
 			}
-			buildHistoryLogVos.add(historyLogVo);
-		});
-		JSONObject jsonObject = JsonMessage.toJson(200, "获取成功", buildHistoryLogVos);
+			return buildHistoryLogVo;
+		}).collect(Collectors.toList());
+		JSONObject jsonObject = JsonMessage.toJson(200, "获取成功", collect);
 		jsonObject.put("total", pageResult.getTotal());
 		return jsonObject.toString();
 	}

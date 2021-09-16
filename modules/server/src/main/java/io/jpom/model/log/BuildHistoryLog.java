@@ -23,6 +23,10 @@ public class BuildHistoryLog extends BaseBuildModule {
      * @see BuildInfoModel#getId()
      */
     private String buildDataId;
+	/**
+	 * 构建名称
+	 */
+	private String buildName;
     /**
      * 构建编号
      *
@@ -97,4 +101,12 @@ public class BuildHistoryLog extends BaseBuildModule {
     public void setEndTime(long endTime) {
         this.endTime = endTime;
     }
+
+	public String getBuildName() {
+		return buildName;
+	}
+
+	public void setBuildName(String buildName) {
+		this.buildName = buildName;
+	}
 }

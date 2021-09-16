@@ -43,7 +43,7 @@
       </template>
       <a-tooltip slot="buildId" slot-scope="text, record" placement="topLeft" :title="text + ' ( 点击查看日志 ) '">
         <span v-if="record.buildId <= 0"></span>
-        <a-tag v-else color="#108ee9" @click="handleBuildLog(record)">{{ text }}</a-tag>
+        <a-tag v-else color="#108ee9" @click="handleBuildLog(record)">#{{ text }}</a-tag>
       </a-tooltip>
       <a-tooltip slot="modifyUser" slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
@@ -268,7 +268,7 @@ export default {
       ],
       columns: [
         { title: "名称", dataIndex: "name", width: 150, ellipsis: true, scopedSlots: { customRender: "name" } },
-        { title: "分组", dataIndex: "group", width: 150, ellipsis: true, scopedSlots: { customRender: "group" } },
+        { title: "分组", dataIndex: "group", width: 100, ellipsis: true, scopedSlots: { customRender: "group" } },
         {
           title: "分支",
           dataIndex: "branchName",
@@ -313,9 +313,10 @@ export default {
           title: "产物目录",
           dataIndex: "resultDirFile",
           ellipsis: true,
+          width: 100,
           scopedSlots: { customRender: "resultDirFile" },
         },
-        { title: "构建命令", dataIndex: "script", ellipsis: true, scopedSlots: { customRender: "script" } },
+        { title: "构建命令", width: 100, dataIndex: "script", ellipsis: true, scopedSlots: { customRender: "script" } },
         {
           title: "操作",
           dataIndex: "operation",
@@ -543,6 +544,8 @@ export default {
         if (res.code === 200) {
           this.branchList = res.data[0];
           this.branchTagList = res.data[1];
+          this.temp.branchName = "";
+          this.temp.branchTagName = "";
         }
         loading.close();
       });
