@@ -75,32 +75,17 @@
     <a-modal v-model="editBuildVisible" title="编辑构建" @ok="handleEditBuildOk" width="50%" :maskClosable="false">
       <a-form-model ref="editBuildForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }">
         <a-form-model-item label="名称" prop="name">
-          <a-input v-model="temp.name" placeholder="名称" />
-        </a-form-model-item>
-        <a-form-model-item label="分组名称" prop="group">
           <a-row>
-            <a-col :span="18">
-              <a-select v-model="temp.group" placeholder="可手动输入">
-                <a-select-option v-for="group in groupList" :key="group">{{ group }}</a-select-option>
-              </a-select>
+            <a-col :span="10">
+              <a-input v-model="temp.name" placeholder="名称" />
             </a-col>
-            <a-col :span="6">
-              <a-popover v-model="addGroupvisible" title="添加分组" trigger="click">
-                <template slot="content">
-                  <a-row>
-                    <a-col :span="18">
-                      <a-input v-model="temp.tempGroup" placeholder="分组名称" />
-                    </a-col>
-                    <a-col :span="6">
-                      <a-button type="primary" @click="handleAddGroup">确认</a-button>
-                    </a-col>
-                  </a-row>
-                </template>
-                <a-button type="primary" class="btn-add">添加分组</a-button>
-              </a-popover>
+            <a-col :span="4" style="text-align: right">分组名称：</a-col>
+            <a-col :span="10">
+              <custom-select v-model="temp.group" :data="groupList" inputPlaceholder="添加分组" selectPlaceholder="分组名称,可以不选择"> </custom-select>
             </a-col>
           </a-row>
         </a-form-model-item>
+
         <a-form-model-item label="仓库地址" prop="repositoryId">
           <a-select v-model="temp.repositoryId" @select="changeRepositpry" @change="changeRepositpry" placeholder="请选择仓库">
             <a-select-option v-for="item in repositoryList" :key="item.id" :value="item.id">{{ item.name }}[{{ item.gitUrl }}]</a-select-option>
@@ -121,7 +106,7 @@
                 </div>
               </custom-select>
             </a-col>
-            <a-col :span="4" style="text-align: right"> 标签(TAG):</a-col>
+            <a-col :span="4" style="text-align: right"> 标签(TAG)：</a-col>
             <a-col :span="10">
               <custom-select
                 v-model="temp.branchTagName"
@@ -273,7 +258,6 @@ export default {
       temp: {},
       // 页面控制变量
       editBuildVisible: false,
-      addGroupvisible: false,
       triggerVisible: false,
       buildLogVisible: false,
       afterOptList: [
@@ -539,26 +523,6 @@ export default {
       this.loadNodeProjectList();
       this.loadSshList();
       this.editBuildVisible = true;
-    },
-    // 添加分组
-    handleAddGroup() {
-      if (!this.temp.tempGroup || this.temp.tempGroup.length === 0) {
-        this.$notification.warning({
-          message: "分组名称不能为空",
-          duration: 2,
-        });
-        return false;
-      }
-      // 添加到分组列表
-      if (this.groupList.indexOf(this.temp.tempGroup) === -1) {
-        this.groupList.push(this.temp.tempGroup);
-      }
-      this.temp.tempGroup = "";
-      this.$notification.success({
-        message: "添加成功",
-        duration: 2,
-      });
-      this.addGroupvisible = false;
     },
     // 获取仓库分支
     loadBranchList() {

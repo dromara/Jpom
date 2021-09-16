@@ -5,7 +5,7 @@
     <a-layout-sider theme="light" class="sider" width="25%">
       <div class="dir-container">
         <a-button type="primary" @click="loadData">刷新目录</a-button>
-        <a-button type="primary" @click="goConsole" v-show="runMode !== 'File'">控制台</a-button>
+        <a-button type="primary" v-if="showConsole" @click="goConsole" v-show="runMode !== 'File'">控制台</a-button>
       </div>
       <a-empty v-if="treeList.length === 0" />
       <el-tree
@@ -123,6 +123,10 @@ export default {
     absPath: {
       type: String,
     },
+    showConsole: {
+      type: Boolean,
+      default: true,
+    },
   },
   data() {
     return {
@@ -139,7 +143,7 @@ export default {
       uploadRemoteFileVisible: false,
       editFileVisible: false,
       successSize: 0,
-      fileContent: '',
+      fileContent: "",
 
       cmOptions: {
         mode: "application/json",
@@ -204,7 +208,7 @@ export default {
 
     // 关闭编辑器弹窗
     handleCloseModal() {
-      this.fileContent = ''
+      this.fileContent = "";
     },
 
     // 加载数据
@@ -272,9 +276,9 @@ export default {
 
       readFile(params).then((res) => {
         if (res.code === 200) {
-          setTimeout(()=> {
+          setTimeout(() => {
             this.fileContent = res.data;
-          }, 300)
+          }, 300);
         }
       });
     },

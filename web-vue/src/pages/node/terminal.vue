@@ -82,8 +82,8 @@ export default {
         disableStdin: false,
         rendererType: "canvas",
         theme: {
-          foreground: "#7e9192", //字体
-          background: "#002833", //背景色
+          // foreground: "#7e9192", //字体
+          // background: "#002833", //背景色
           cursor: "help", //设置光标
           lineHeight: 16,
         },
