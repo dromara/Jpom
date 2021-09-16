@@ -68,6 +68,8 @@ public abstract class BaseDbService<T extends BaseDbModel> extends BaseDbCommonS
 		//
 		Entity where = new Entity();
 		where.set(Const.ID_STR, id);
+		//
+		info.setId(id);
 		return super.update(entity, where);
 	}
 
