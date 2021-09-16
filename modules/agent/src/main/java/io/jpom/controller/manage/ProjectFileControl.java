@@ -103,18 +103,17 @@ public class ProjectFileControl extends BaseAgentController {
 		} else {
 			lib = FileUtil.file(pim.allLib(), levelName);
 		}
-
+		// 判断是否需要清空
+		if ("clear".equalsIgnoreCase(clearType)) {
+			if (!FileUtil.clean(lib)) {
+				FileUtil.del(lib.toPath());
+				//return JsonMessage.getString(500, "清除旧lib失败");
+			}
+		}
 		if ("unzip".equals(type)) {
 			multipartFileBuilder.setFileExt(StringUtil.PACKAGE_EXT);
 			multipartFileBuilder.setSavePath(AgentConfigBean.getInstance().getTempPathName());
 			String path = multipartFileBuilder.save();
-			// 判断是否需要清空
-			if ("clear".equalsIgnoreCase(clearType)) {
-				if (!FileUtil.clean(lib)) {
-					FileUtil.del(lib.toPath());
-					//return JsonMessage.getString(500, "清除旧lib失败");
-				}
-			}
 			// 解压
 			File file = new File(path);
 			try {

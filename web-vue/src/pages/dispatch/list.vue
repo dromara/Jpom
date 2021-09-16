@@ -258,23 +258,27 @@
       <a-form-model ref="dispatchForm" :rules="rules" :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 18 }">
         <a-form-model-item label="方式" prop="type">
           <a-radio-group v-model="temp.type" name="type">
-            <a-radio :value="'upload'">上传压缩包</a-radio>
+            <a-radio :value="'upload'">上传文件</a-radio>
             <a-radio :value="'download'">远程下载</a-radio>
           </a-radio-group>
         </a-form-model-item>
         <a-form-model-item label="选择分发文件" prop="clearOld" v-if="temp.type == 'upload'">
-          <a-upload :file-list="fileList" :remove="handleRemove" :before-upload="beforeUpload" accept=".zip,.tar,.gz,.bz2">
+          <!-- accept=".zip,.tar,.gz,.bz2" -->
+          <a-upload :file-list="fileList" :remove="handleRemove" :before-upload="beforeUpload">
             <a-button type="primary"><a-icon type="upload" />选择文件上传</a-button>
           </a-upload>
         </a-form-model-item>
         <a-form-model-item label="远程下载URL" prop="url" v-if="temp.type == 'download'">
           <a-input v-model="temp.url" placeholder="远程下载地址" />
         </a-form-model-item>
-        <a-form-model-item label="是否为压缩包" v-if="temp.type == 'download'">
+        <!-- <a-form-model-item label="是否为压缩包" v-if="temp.type == 'download'">
           <a-switch v-model="temp.unzip" checked-children="是" un-checked-children="否" v-decorator="['unzip', { valuePropName: 'checked' }]" />
-        </a-form-model-item>
+        </a-form-model-item> -->
         <a-form-model-item label="清空发布" prop="clearOld">
           <a-switch v-model="temp.clearOld" checked-children="是" un-checked-children="否" />
+        </a-form-model-item>
+        <a-form-model-item label="是否解压" prop="unzip">
+          <a-switch v-model="temp.autoUnzip" checked-children="是" un-checked-children="否" />
         </a-form-model-item>
         <a-form-model-item label="分发后操作" prop="afterOpt">
           <a-select v-model="temp.afterOpt" placeholder="请选择发布后操作">
@@ -730,6 +734,7 @@ export default {
           formData.append("id", this.temp.id);
           formData.append("afterOpt", this.temp.afterOpt);
           formData.append("clearOld", this.temp.clearOld);
+          formData.append("autoUnzip", this.temp.autoUnzip);
           uploadDispatchFile(formData).then((res) => {
             if (res.code === 200) {
               this.$notification.success({

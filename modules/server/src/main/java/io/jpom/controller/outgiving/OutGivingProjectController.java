@@ -120,11 +120,32 @@ public class OutGivingProjectController extends BaseServerController {
 		return JsonMessage.getString(200, "", jsonArray);
 	}
 
+	private File checkZip(String path, boolean unzip) {
+		File file = FileUtil.file(path);
+		return this.checkZip(file, unzip);
+	}
+
+	private File checkZip(File path, boolean unzip) {
+		if (unzip) {
+			boolean zip = false;
+			for (String i : StringUtil.PACKAGE_EXT) {
+				if (FileUtil.pathEndsWith(path, i)) {
+					zip = true;
+					break;
+				}
+			}
+			Assert.state(zip, "不支持的文件类型:" + path.getName());
+		}
+		return path;
+	}
+
 	/**
 	 * 节点分发文件
 	 *
-	 * @param id       分发id
-	 * @param afterOpt 之后的操作
+	 * @param id        分发id
+	 * @param afterOpt  之后的操作
+	 * @param autoUnzip 是否自动解压
+	 * @param clearOld  清空发布
 	 * @return json
 	 * @throws IOException IO
 	 */
@@ -132,35 +153,30 @@ public class OutGivingProjectController extends BaseServerController {
 	@ResponseBody
 	@OptLog(UserOperateLogV1.OptType.UploadOutGiving)
 	@Feature(method = MethodFeature.UPLOAD)
-	public String upload(String id, String afterOpt, String clearOld) throws IOException {
+	public String upload(String id, String afterOpt, String clearOld, String autoUnzip) throws IOException {
 		OutGivingModel outGivingModel = this.check(id);
 		AfterOpt afterOpt1 = BaseEnum.getEnum(AfterOpt.class, Convert.toInt(afterOpt, 0));
 		Assert.notNull(afterOpt1, "请选择分发后的操作");
+		//
+		boolean unzip = Convert.toBool(autoUnzip, false);
+		File file = FileUtil.file(ConfigBean.getInstance().getDataPath(), ServerConfigBean.OUTGIVING_FILE, id);
 		MultipartFileBuilder multipartFileBuilder = createMultipart();
 		multipartFileBuilder
-				.setFileExt(StringUtil.PACKAGE_EXT)
+				.setUseOriginalFilename(true)
+				//				.setFileExt(StringUtil.PACKAGE_EXT)
 				.addFieldName("file")
-				.setSavePath(ServerConfigBean.getInstance().getUserTempPath().getAbsolutePath());
+				.setSavePath(FileUtil.getAbsolutePath(file));
 		String path = multipartFileBuilder.save();
 		//
-		File src = FileUtil.file(path);
-		File dest = null;
-		for (String i : StringUtil.PACKAGE_EXT) {
-			if (FileUtil.pathEndsWith(src, i)) {
-				dest = FileUtil.file(ConfigBean.getInstance().getDataPath(), ServerConfigBean.OUTGIVING_FILE, id + "." + i);
-				break;
-			}
-		}
-		Assert.notNull(dest, "不支持的文件类型");
-		FileUtil.move(src, dest, true);
+		File dest = this.checkZip(path, unzip);
 		//
-		outGivingModel = outGivingServer.getItem(id);
+		//outGivingModel = outGivingServer.getItem(id);
 		outGivingModel.setClearOld(Convert.toBool(clearOld, false));
 		outGivingModel.setAfterOpt(afterOpt1.getCode());
 
 		outGivingServer.updateItem(outGivingModel);
 		// 开启
-		OutGivingRun.startRun(outGivingModel.getId(), dest, getUser(), true);
+		OutGivingRun.startRun(outGivingModel.getId(), dest, getUser(), unzip);
 		return JsonMessage.getString(200, "分发成功");
 	}
 
@@ -187,7 +203,7 @@ public class OutGivingProjectController extends BaseServerController {
 	@ResponseBody
 	@OptLog(UserOperateLogV1.OptType.UploadOutGiving)
 	@Feature(method = MethodFeature.REMOTE_DOWNLOAD)
-	public String remoteDownload(String id, String afterOpt, String clearOld, String url, String unzip) {
+	public String remoteDownload(String id, String afterOpt, String clearOld, String url, String autoUnzip) {
 		OutGivingModel outGivingModel = this.check(id);
 		AfterOpt afterOpt1 = BaseEnum.getEnum(AfterOpt.class, Convert.toInt(afterOpt, 0));
 		Assert.notNull(afterOpt1, "请选择分发后的操作");
@@ -198,7 +214,7 @@ public class OutGivingProjectController extends BaseServerController {
 		List<String> collect = allowRemoteDownloadHost.stream().filter(s -> StrUtil.startWith(url, s)).collect(Collectors.toList());
 		Assert.state(CollUtil.isNotEmpty(collect), "不允许下载当前地址的文件");
 		try {
-			outGivingModel = outGivingServer.getItem(id);
+			//outGivingModel = outGivingServer.getItem(id);
 			outGivingModel.setClearOld(Convert.toBool(clearOld, false));
 			outGivingModel.setAfterOpt(afterOpt1.getCode());
 			outGivingServer.updateItem(outGivingModel);
@@ -206,8 +222,11 @@ public class OutGivingProjectController extends BaseServerController {
 			File file = FileUtil.file(ServerConfigBean.getInstance().getUserTempPath(), ServerConfigBean.OUTGIVING_FILE, id);
 			FileUtil.mkdir(file);
 			File downloadFile = HttpUtil.downloadFileFromUrl(url, file);
+			boolean unzip = BooleanUtil.toBoolean(autoUnzip);
+			//
+			this.checkZip(downloadFile, unzip);
 			// 开启
-			OutGivingRun.startRun(outGivingModel.getId(), downloadFile, getUser(), BooleanUtil.toBoolean(unzip));
+			OutGivingRun.startRun(outGivingModel.getId(), downloadFile, getUser(), unzip);
 			return JsonMessage.getString(200, "分发成功");
 		} catch (Exception e) {
 			DefaultSystemLog.getLog().error("下载远程文件异常", e);

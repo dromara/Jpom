@@ -186,10 +186,10 @@ public class OutGivingRun implements Callable<OutGivingNodeProject.Status> {
 		if (unzip) {
 			// 解压
 			data.put("type", "unzip");
-			if (clearOld) {
-				// 清空
-				data.put("clearType", "clear");
-			}
+		}
+		if (clearOld) {
+			// 清空
+			data.put("clearType", "clear");
 		}
 		// 操作
 		if (afterOpt != AfterOpt.No) {
