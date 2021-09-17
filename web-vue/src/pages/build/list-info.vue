@@ -472,6 +472,8 @@ export default {
       this.repositoryList.forEach((element) => {
         if (element.id === value) {
           this.tempRepository = element;
+          this.temp.branchName = "";
+          this.temp.branchTagName = "";
           // 刷新分支
           this.loadBranchList();
         }
@@ -544,8 +546,6 @@ export default {
         if (res.code === 200) {
           this.branchList = res.data[0];
           this.branchTagList = res.data[1];
-          this.temp.branchName = "";
-          this.temp.branchTagName = "";
         }
         loading.close();
       });
