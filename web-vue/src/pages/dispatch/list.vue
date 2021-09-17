@@ -658,7 +658,7 @@ export default {
           this.temp[`add_${key}`] = key;
           // 设置副本
           this.temp[`${key}_javaCopyIds`] = "";
-          this.temp[`${key}_javaCopyItemList`].forEach((element) => {
+          this.temp[`${key}_javaCopyItemList`]?.forEach((element) => {
             this.temp[`${key}_javaCopyIds`] += `${element.id},`;
             this.temp[`${key}_jvm_${element.id}`] = element.jvm;
             this.temp[`${key}_args_${element.id}`] = element.args;
