@@ -79,7 +79,16 @@
         <a-form-model-item label="编码格式" prop="charset">
           <a-input v-model="temp.charset" placeholder="编码格式" />
         </a-form-model-item>
-        <a-form-model-item label="文件目录" prop="fileDirs">
+        <a-form-model-item prop="fileDirs">
+          <template slot="label">
+            文件目录
+            <a-tooltip v-show="temp.type !== 'edit'">
+              <template slot="title">
+               绑定指定目录可以在线管理，同时构建 ssh 发布目录也需要在此配置
+              </template>
+              <a-icon type="question-circle" theme="filled" />
+            </a-tooltip>
+          </template>
           <a-textarea v-model="temp.fileDirs" :auto-size="{ minRows: 3, maxRows: 5 }" placeholder="授权可以直接访问的目录，多个回车换行即可" />
         </a-form-model-item>
         <a-form-model-item label="禁止命令" prop="notAllowedCommand">

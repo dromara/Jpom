@@ -1,17 +1,21 @@
 package io.jpom.common;
 
+import cn.hutool.core.compress.ZipReader;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.date.BetweenFormatter;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.io.LineHandler;
 import cn.hutool.core.io.ManifestUtil;
 import cn.hutool.core.lang.JarClassLoader;
 import cn.hutool.core.lang.Tuple;
 import cn.hutool.core.text.CharSequenceUtil;
+import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.ClassUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.core.util.ZipUtil;
 import cn.hutool.http.GlobalHeaders;
 import cn.hutool.http.Header;
 import cn.hutool.system.SystemUtil;
@@ -25,16 +29,22 @@ import io.jpom.system.JpomRuntimeException;
 import io.jpom.util.CommandUtil;
 import io.jpom.util.JsonFileUtil;
 import io.jpom.util.VersionUtils;
+import org.springframework.util.Assert;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
+import java.util.function.Predicate;
 import java.util.jar.Attributes;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
 import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 
 /**
  * Jpom 的运行信息
@@ -94,7 +104,7 @@ public class JpomManifest {
 	 * 根据 jar 文件解析 jpom 版本信息
 	 *
 	 * @param jarFile 文件
-	 * @return 版本,打包时间, mainClass
+	 * @return 版本, 打包时间, mainClass
 	 */
 	private static Tuple getJarVersion(File jarFile) {
 		Manifest manifest = ManifestUtil.getManifest(jarFile);
@@ -419,5 +429,35 @@ public class JpomManifest {
 			throw new JpomRuntimeException("当前服务中没有命令脚本：" + StrUtil.format("{}.{}", type, CommandUtil.SUFFIX));
 		}
 		return scriptFile;
+	}
+
+	/**
+	 * 解析 jpom 安装包
+	 *
+	 * @param path     文件路径
+	 * @param type     查找类型
+	 * @param savePath 保存对文件夹
+	 * @return 结果文件
+	 */
+	public static File zipFileFind(String path, Type type, String savePath) throws IOException {
+		String extName = FileUtil.extName(path);
+		if (StrUtil.endWithIgnoreCase(extName, "zip")) {
+			try (ZipFile zipFile = ZipUtil.toZipFile(FileUtil.file(path), CharsetUtil.CHARSET_UTF_8)) {
+				Optional<? extends ZipEntry> first = zipFile.stream().filter((Predicate<ZipEntry>) zipEntry -> {
+					String name = zipEntry.getName().toLowerCase();
+					String typeName = type.name().toLowerCase();
+					return StrUtil.startWith(name, "lib/" + typeName) && StrUtil.endWith(name, ".jar");
+				}).findFirst();
+				Assert.state(first.isPresent(), "上传的压缩包不是 Jpom [" + type + "] 包");
+				//
+				ZipEntry zipEntry = first.get();
+				InputStream stream = ZipUtil.getStream(zipFile, zipEntry);
+				String name = FileUtil.getName(zipEntry.getName());
+				return FileUtil.writeFromStream(stream, FileUtil.file(savePath, name));
+			}
+		} else if (StrUtil.endWithIgnoreCase(extName, "jar")) {
+			return FileUtil.file(path);
+		}
+		throw new IllegalArgumentException("此文件不是 jpom 安装包");
 	}
 }

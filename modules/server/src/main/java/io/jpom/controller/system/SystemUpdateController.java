@@ -74,7 +74,7 @@ public class SystemUpdateController extends BaseServerController {
 		Objects.requireNonNull(JpomManifest.getScriptFile());
 		MultipartFileBuilder multipartFileBuilder = createMultipart();
 		multipartFileBuilder
-				.setFileExt("jar")
+				.setFileExt("jar", "zip")
 				.addFieldName("file")
 				.setUseOriginalFilename(true)
 				.setSavePath(ServerConfigBean.getInstance().getUserTempPath().getAbsolutePath());

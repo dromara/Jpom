@@ -13,6 +13,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.common.BaseServerController;
 import io.jpom.common.JpomManifest;
+import io.jpom.common.Type;
 import io.jpom.common.forward.NodeForward;
 import io.jpom.common.forward.NodeUrl;
 import io.jpom.common.interceptor.OptLog;
@@ -28,6 +29,7 @@ import io.jpom.service.node.ssh.SshService;
 import io.jpom.system.ServerConfigBean;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -38,7 +40,10 @@ import java.io.File;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 
 /**
  * 节点管理
@@ -55,24 +60,6 @@ public class NodeIndexController extends BaseServerController {
 	private SshService sshService;
 	@Resource
 	private AgentFileService agentFileService;
-
-//    @RequestMapping(value = "list.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
-//    @Feature(method = MethodFeature.LIST)
-//    public String list(String group) {
-//        List<NodeModel> nodeModels = this.listByGroup(group);
-//        setAttribute("array", nodeModels);
-//        // 获取所有的ssh 名称
-//        JSONObject sshName = new JSONObject();
-//        List<SshModel> sshModels = sshService.list();
-//        if (sshModels != null) {
-//            sshModels.forEach(sshModel -> sshName.put(sshModel.getId(), sshModel.getName()));
-//        }
-//        setAttribute("sshName", sshName);
-//        // group
-//        HashSet<String> allGroup = nodeService.getAllGroup();
-//        setAttribute("groups", allGroup);
-//        return "node/list";
-//    }
 
 	private List<NodeModel> listByGroup(String group) {
 		List<NodeModel> nodeModels = nodeService.list();
@@ -105,27 +92,6 @@ public class NodeIndexController extends BaseServerController {
 		HashSet<String> allGroup = nodeService.getAllGroup();
 		return JsonMessage.getString(200, "", allGroup);
 	}
-
-
-//    @RequestMapping(value = "index.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
-//    public String index() {
-//        List<NodeModel> nodeModels = nodeService.list();
-//        setAttribute("array", nodeModels);
-//        //
-//        JsonMessage<JpomManifest> jsonMessage = NodeForward.request(getNode(), getRequest(), NodeUrl.Info);
-//        JpomManifest jpomManifest = jsonMessage.getData(JpomManifest.class);
-//        setAttribute("jpomManifest", jpomManifest);
-//        setAttribute("installed", jsonMessage.getCode() == 200);
-//        UserModel userModel = getUser();
-//        // 版本提示
-//        if (!JpomManifest.getInstance().isDebug() && jpomManifest != null && userModel.isSystemUser()) {
-//            JpomManifest thisInfo = JpomManifest.getInstance();
-//            if (!StrUtil.equals(jpomManifest.getVersion(), thisInfo.getVersion())) {
-//                setAttribute("tipUpdate", true);
-//            }
-//        }
-//        return "node/index";
-//    }
 
 	@RequestMapping(value = "node_status", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
@@ -170,59 +136,23 @@ public class NodeIndexController extends BaseServerController {
 		String saveDir = ServerConfigBean.getInstance().getAgentPath().getAbsolutePath();
 		MultipartFileBuilder multipartFileBuilder = createMultipart();
 		multipartFileBuilder
-			.setFileExt("jar", "zip")
-			.addFieldName("file")
-			.setUseOriginalFilename(true)
-			.setSavePath(saveDir);
+				.setFileExt("jar", "zip")
+				.addFieldName("file")
+				.setUseOriginalFilename(true)
+				.setSavePath(saveDir);
 		String path = multipartFileBuilder.save();
-
-		/**
-		 * 从.zip文件中提取.jar文件更新
-		 * @author hjk
-		 * @date 2021-9-17 12:36:07
-		 */
-		// 如果是.zip文件，需要先把.jar文件先从.zip文件中提取出来
-		if (path.toLowerCase().endsWith(".zip")) {
-			// 生成一个临时目录，用于存放解压出来的文件
-			File tempPath = new File(new File(saveDir).getPath() + "/temp_" + System.currentTimeMillis());
-			if (!tempPath.exists()) {
-				tempPath.mkdirs();
-			}
-			// 解压.zip文件到临时目录
-			// Windows平台下默认压缩格式GBK，需要指定GBK编码，解决文件解压时的中文乱码问题
-			File unzipFile = ZipUtil.unzip(path, tempPath.getCanonicalPath(), CharsetUtil.charset("GBK"));
-			// 找到.zip里的.jar文件，移动到上一层目录，把path重新指定到当前.jar所在的位置
-			List<File> files = FileUtil.loopFiles(unzipFile);
-			boolean isFoundJarFile = false; // 是否找到.jar文件
-			for (File file : files) {
-				if (file.getName().toLowerCase().endsWith(".jar")) {
-					// 把当前jar文件复制到原来zip上传的位置
-					File moveToFile = new File(new File(path).getParent() + "/" + file.getName());
-					file.renameTo(moveToFile);
-					path = moveToFile.toString();
-					isFoundJarFile = true;
-					break;
-				}
-			}
-			// 删除解压出来的临时文件
-			FileUtil.del(tempPath);
-			// 找不到.jar文件
-			if (!isFoundJarFile) {
-				throw new IllegalArgumentException(new File(path).getName() + "中找不到.jar文件");
-			}
-		}
-
+		// 解析压缩包
+		File file = JpomManifest.zipFileFind(path, Type.Agent, saveDir);
+		path = FileUtil.getAbsolutePath(file);
 		// 基础检查
 		JsonMessage<Tuple> error = JpomManifest.checkJpomJar(path, "io.jpom.JpomAgentApplication", false);
 		if (error.getCode() != HttpStatus.HTTP_OK) {
 			FileUtil.del(path);
 			return error.toString();
 		}
-
 		// 保存Agent文件
-		String id = "agent";
+		String id = Type.Agent.name().toLowerCase();
 
-		File file = new File(path);
 		AgentFileModel agentFileModel = agentFileService.getItem(id);
 		if (agentFileModel == null) {
 			agentFileModel = new AgentFileModel();
