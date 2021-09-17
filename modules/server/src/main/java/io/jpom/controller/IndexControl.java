@@ -21,6 +21,7 @@ import io.jpom.permission.CacheControllerFeature;
 import io.jpom.service.user.RoleService;
 import io.jpom.service.user.UserService;
 import io.jpom.system.ExtConfigBean;
+import io.jpom.system.ServerExtConfigBean;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -34,6 +35,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
@@ -72,6 +74,9 @@ public class IndexControl extends BaseServerController {
 		// <routerBase>
 		String proxyPath = UrlRedirectUtil.getHeaderProxyPath(getRequest(), BaseJpomInterceptor.PROXY_PATH);
 		html = StrUtil.replace(html, "<routerBase>", proxyPath);
+		// <apiTimeOut>
+		int webApiTimeout = ServerExtConfigBean.getInstance().getWebApiTimeout();
+		html = StrUtil.replace(html, "<apiTimeout>", TimeUnit.SECONDS.toMillis(webApiTimeout) + "");
 		ServletUtil.write(response, html, ContentType.TEXT_HTML.getValue());
 	}
 

@@ -122,6 +122,12 @@ public class ServerExtConfigBean implements DisposableBean {
 	private int uploadFileTimeOut;
 
 	/**
+	 * 前端接口 超时时间 单位秒
+	 */
+	@Value("${jpom.webApiTimeout:20}")
+	private int webApiTimeout;
+
+	/**
 	 * 获取上传文件超时时间
 	 *
 	 * @return 返回毫秒
@@ -194,6 +200,15 @@ public class ServerExtConfigBean implements DisposableBean {
 			cacheSize = DataSize.ofMegabytes(10);
 		}
 		return cacheSize;
+	}
+
+	/**
+	 * 最小值 10秒
+	 *
+	 * @return 超时时间（单位秒）
+	 */
+	public int getWebApiTimeout() {
+		return Math.max(this.webApiTimeout, 10);
 	}
 
 	/**

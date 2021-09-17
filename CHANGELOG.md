@@ -34,6 +34,8 @@
 27. 【server】nginx 二级代理无法访问（感谢@hu丶向...🤡）
 28. 【server】ssh文件管理新增在线编辑（感谢@嗳啨 [Gitee issues I4ADTA](https://gitee.com/dromara/Jpom/issues/I4ADTA) ）
 29. 在线升级支持上传 zip 包自动解析（感谢@Sam）
+30. 【server】ssh 安装插件端新增等待次数配置（感谢@hu丶向...🤡）
+31. 【server】新增前端接口请求超时配置 `jpom.webApiTimeOut`（感谢@hu丶向...🤡）
 
 ### 解决BUG、优化功能
 

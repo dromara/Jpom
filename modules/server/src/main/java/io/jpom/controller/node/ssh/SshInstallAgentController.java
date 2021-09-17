@@ -140,19 +140,21 @@ public class SshInstallAgentController extends BaseServerController {
                     return error;
                 }
             }*/
-			// 休眠 5 秒, 尝试 3 次
-			int time = 3;
-			while (--time >= 0) {
-				DefaultSystemLog.getLog().debug("there is left {} / 3 times try to get authorize info", time);
+			// 休眠 5 秒, 尝试 5 次
+			int waitCount = getParameterInt("waitCount", 5);
+			waitCount = Math.max(waitCount, 5);
+			//int time = 3;
+			while (--waitCount >= 0) {
+				//DefaultSystemLog.getLog().debug("there is left {} / 3 times try to get authorize info", waitCount);
 				Thread.sleep(5 * 1000);
 				if (StrUtil.isEmpty(nodeModel.getLoginName()) || StrUtil.isEmpty(nodeModel.getLoginPwd())) {
 					String error = this.getAuthorize(sshModel, nodeModel, path);
 					// 获取授权成功就不需要继续循环了
 					if (error == null) {
-						time = -1;
+						waitCount = -1;
 					}
 					// 获取授权失败且尝试次数用完
-					if (error != null && time == 0) {
+					if (error != null && waitCount == 0) {
 						return error;
 					}
 				}

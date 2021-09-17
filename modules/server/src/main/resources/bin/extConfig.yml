@@ -10,6 +10,8 @@ jpom:
     renewal: 60
     # jwt 签名(加密)的key 长度建议控制到 16位
     key:
+  # 前端接口 超时时间 单位秒
+  webApiTimeout: 20
 user:
   # 最多能创建多少个用户
   maxCount: 10

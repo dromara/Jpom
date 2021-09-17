@@ -11,9 +11,13 @@ import { notification } from "ant-design-vue";
 // axios.defaults.baseURL = 'http://localhost:2122'
 let $global_loading;
 let startTime;
+//
+var delTimeout = 20 * 1000;
+//
+var apiTimeout = window.apiTimeout === "<apiTimeout>" ? delTimeout : window.apiTimeout;
 
 const request = axios.create({
-  timeout: 10000,
+  timeout: apiTimeout || delTimeout,
   headers: {
     "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
   },
