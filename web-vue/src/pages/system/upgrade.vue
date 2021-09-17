@@ -21,7 +21,7 @@
       </a-timeline-item>
     </a-timeline>
     <a-spin v-show="!temp.debug" :spinning="spinning">
-      <a-upload :file-list="fileList" :remove="handleRemove" :before-upload="beforeUpload" accept=".jar">
+      <a-upload :file-list="fileList" :remove="handleRemove" :before-upload="beforeUpload" accept=".jar,.zip">
         <a-button><a-icon type="upload" />选择升级文件</a-button>
       </a-upload>
       <a-button type="primary" class="upload-btn" :disabled="fileList.length === 0" @click="startUpload">上传升级文件</a-button>

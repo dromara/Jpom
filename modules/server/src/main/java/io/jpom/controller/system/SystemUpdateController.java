@@ -1,5 +1,6 @@
 package io.jpom.controller.system;
 
+import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.io.resource.ResourceUtil;
 import cn.hutool.core.lang.Tuple;
@@ -12,6 +13,7 @@ import io.jpom.JpomApplication;
 import io.jpom.JpomServerApplication;
 import io.jpom.common.BaseServerController;
 import io.jpom.common.JpomManifest;
+import io.jpom.common.Type;
 import io.jpom.common.forward.NodeForward;
 import io.jpom.common.forward.NodeUrl;
 import io.jpom.common.interceptor.OptLog;
@@ -23,6 +25,7 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -73,12 +76,16 @@ public class SystemUpdateController extends BaseServerController {
 		//
 		Objects.requireNonNull(JpomManifest.getScriptFile());
 		MultipartFileBuilder multipartFileBuilder = createMultipart();
+		String absolutePath = ServerConfigBean.getInstance().getUserTempPath().getAbsolutePath();
 		multipartFileBuilder
 				.setFileExt("jar", "zip")
 				.addFieldName("file")
 				.setUseOriginalFilename(true)
-				.setSavePath(ServerConfigBean.getInstance().getUserTempPath().getAbsolutePath());
+				.setSavePath(absolutePath);
 		String path = multipartFileBuilder.save();
+		// 解析压缩包
+		File file = JpomManifest.zipFileFind(path, Type.Server, absolutePath);
+		path = FileUtil.getAbsolutePath(file);
 		// 基础检查
 		JsonMessage<Tuple> error = JpomManifest.checkJpomJar(path, JpomServerApplication.class);
 		if (error.getCode() != HttpStatus.HTTP_OK) {
