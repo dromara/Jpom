@@ -3,7 +3,9 @@ package io.jpom.controller.node;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.lang.Tuple;
+import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.core.util.ZipUtil;
 import cn.hutool.http.HttpStatus;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.controller.multipart.MultipartFileBuilder;
@@ -168,11 +170,48 @@ public class NodeIndexController extends BaseServerController {
 		String saveDir = ServerConfigBean.getInstance().getAgentPath().getAbsolutePath();
 		MultipartFileBuilder multipartFileBuilder = createMultipart();
 		multipartFileBuilder
-			.setFileExt("jar")
+			.setFileExt("jar", "zip")
 			.addFieldName("file")
 			.setUseOriginalFilename(true)
 			.setSavePath(saveDir);
 		String path = multipartFileBuilder.save();
+
+		/**
+		 * 从.zip文件中提取.jar文件更新
+		 * @author hjk
+		 * @date 2021-9-17 12:36:07
+		 */
+		// 如果是.zip文件，需要先把.jar文件先从.zip文件中提取出来
+		if (path.toLowerCase().endsWith(".zip")) {
+			// 生成一个临时目录，用于存放解压出来的文件
+			File tempPath = new File(new File(saveDir).getPath() + "/temp_" + System.currentTimeMillis());
+			if (!tempPath.exists()) {
+				tempPath.mkdirs();
+			}
+			// 解压.zip文件到临时目录
+			// Windows平台下默认压缩格式GBK，需要指定GBK编码，解决文件解压时的中文乱码问题
+			File unzipFile = ZipUtil.unzip(path, tempPath.getCanonicalPath(), CharsetUtil.charset("GBK"));
+			// 找到.zip里的.jar文件，移动到上一层目录，把path重新指定到当前.jar所在的位置
+			List<File> files = FileUtil.loopFiles(unzipFile);
+			boolean isFoundJarFile = false; // 是否找到.jar文件
+			for (File file : files) {
+				if (file.getName().toLowerCase().endsWith(".jar")) {
+					// 把当前jar文件复制到原来zip上传的位置
+					File moveToFile = new File(new File(path).getParent() + "/" + file.getName());
+					file.renameTo(moveToFile);
+					path = moveToFile.toString();
+					isFoundJarFile = true;
+					break;
+				}
+			}
+			// 删除解压出来的临时文件
+			FileUtil.del(tempPath);
+			// 找不到.jar文件
+			if (!isFoundJarFile) {
+				throw new IllegalArgumentException(new File(path).getName() + "中找不到.jar文件");
+			}
+		}
+
 		// 基础检查
 		JsonMessage<Tuple> error = JpomManifest.checkJpomJar(path, "io.jpom.JpomAgentApplication", false);
 		if (error.getCode() != HttpStatus.HTTP_OK) {
