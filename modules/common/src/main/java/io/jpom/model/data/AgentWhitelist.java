@@ -240,7 +240,7 @@ public class AgentWhitelist extends BaseJsonModel {
 	 * @param filename        文件名
 	 * @return 没有匹配到 返回 null，没有配置编码格式即使用系统默认编码格式
 	 */
-	public static Charset parserFileSuffixMap(List<String> allowEditSuffix, String filename) {
+	private static Charset parserFileSuffixMap(List<String> allowEditSuffix, String filename) {
 		Map<String, Charset> map = CollStreamUtil.toMap(allowEditSuffix, s -> {
 			List<String> split = StrUtil.split(s, StrUtil.AT);
 			return CollUtil.getFirst(split);

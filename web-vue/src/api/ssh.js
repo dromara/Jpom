@@ -1,31 +1,30 @@
-import axios from './config';
+import axios from "./config";
 
 // ssh 列表
 export function getSshList() {
-	return axios({
-		url: '/node/ssh/list_data.json',
-		method: 'post'
-	})
+  return axios({
+    url: "/node/ssh/list_data.json",
+    method: "post",
+  });
 }
 
 // 根据 nodeId 查询列表
 export function getSshListByNodeId(nodeId) {
-	return axios({
-		url: '/node/ssh/list_by_node_id',
-		method: 'post',
-		data: {nodeId}
-	})
+  return axios({
+    url: "/node/ssh/list_by_node_id",
+    method: "post",
+    data: { nodeId },
+  });
 }
 
 // ssh 操作日志列表
 export function getSshOperationLogList(params) {
-	return axios({
-		url: '/node/ssh/log_list_data.json',
-		method: 'post',
-		data: params
-	})
+  return axios({
+    url: "/node/ssh/log_list_data.json",
+    method: "post",
+    data: params,
+  });
 }
-
 
 /**
  * 编辑 SSH
@@ -33,37 +32,37 @@ export function getSshOperationLogList(params) {
  * params.type = {'add': 表示新增, 'edit': 表示修改}
  */
 export function editSsh(params) {
-	const data = {
-		type: params.type,
-		id: params.id,
-		name: params.name,
-		host: params.host,
-		port: params.port,
-		user: params.user,
-		password: params.password,
-		connectType: params.connectType,
-		privateKey: params.privateKey,
-		charset: params.charset,
-		fileDirs: params.fileDirs,
-		notAllowedCommand: params.notAllowedCommand,
-		allowEditSuffix: params.allowEditSuffix,
-	}
-	return axios({
-		url: '/node/ssh/save.json',
-		method: 'post',
-		// 0 表示无超时时间
-		timeout: 0,
-		data
-	})
+  const data = {
+    type: params.type,
+    id: params.id,
+    name: params.name,
+    host: params.host,
+    port: params.port,
+    user: params.user,
+    password: params.password,
+    connectType: params.connectType,
+    privateKey: params.privateKey,
+    charset: params.charset,
+    fileDirs: params.fileDirs,
+    notAllowedCommand: params.notAllowedCommand,
+    allowEditSuffix: params.allowEditSuffix,
+  };
+  return axios({
+    url: "/node/ssh/save.json",
+    method: "post",
+    // 0 表示无超时时间
+    timeout: 0,
+    data,
+  });
 }
 
 // 删除 SSH
 export function deleteSsh(id) {
-	return axios({
-		url: '/node/ssh/del.json',
-		method: 'post',
-		data: {id}
-	})
+  return axios({
+    url: "/node/ssh/del.json",
+    method: "post",
+    data: { id },
+  });
 }
 
 /**
@@ -76,16 +75,16 @@ export function deleteSsh(id) {
  * } formData
  */
 export function installAgentNode(formData) {
-	return axios({
-		url: '/node/ssh/installAgentSubmit.json',
-		headers: {
-			'Content-Type': 'multipart/form-data;charset=UTF-8'
-		},
-		method: 'post',
-		// 0 表示无超时时间
-		timeout: 0,
-		data: formData
-	})
+  return axios({
+    url: "/node/ssh/installAgentSubmit.json",
+    headers: {
+      "Content-Type": "multipart/form-data;charset=UTF-8",
+    },
+    method: "post",
+    // 0 表示无超时时间
+    timeout: 0,
+    data: formData,
+  });
 }
 
 /**
@@ -98,16 +97,16 @@ export function installAgentNode(formData) {
  * } formData
  */
 export function uploadFile(formData) {
-	return axios({
-		url: '/node/ssh/upload',
-		headers: {
-			'Content-Type': 'multipart/form-data;charset=UTF-8'
-		},
-		method: 'post',
-		// 0 表示无超时时间
-		timeout: 0,
-		data: formData
-	})
+  return axios({
+    url: "/node/ssh/upload",
+    headers: {
+      "Content-Type": "multipart/form-data;charset=UTF-8",
+    },
+    method: "post",
+    // 0 表示无超时时间
+    timeout: 0,
+    data: formData,
+  });
 }
 
 /**
@@ -115,11 +114,11 @@ export function uploadFile(formData) {
  * @param {String} id
  */
 export function getRootFileList(id) {
-	return axios({
-		url: '/node/ssh/root_file_data.json',
-		method: 'post',
-		data: {id}
-	})
+  return axios({
+    url: "/node/ssh/root_file_data.json",
+    method: "post",
+    data: { id },
+  });
 }
 
 /**
@@ -127,11 +126,11 @@ export function getRootFileList(id) {
  * @param {id, path, children} params
  */
 export function getFileList(params) {
-	return axios({
-		url: '/node/ssh/list_file_data.json',
-		method: 'post',
-		data: params
-	})
+  return axios({
+    url: "/node/ssh/list_file_data.json",
+    method: "post",
+    data: params,
+  });
 }
 
 /**
@@ -140,13 +139,13 @@ export function getFileList(params) {
  * @param {id, path, name} params
  */
 export function downloadFile(params) {
-	return axios({
-		url: '/node/ssh/download.html',
-		method: 'get',
-		responseType: 'blob',
-		timeout: 0,
-		params
-	})
+  return axios({
+    url: "/node/ssh/download.html",
+    method: "get",
+    responseType: "blob",
+    timeout: 0,
+    params,
+  });
 }
 
 /**
@@ -154,9 +153,33 @@ export function downloadFile(params) {
  * @param {id, path, name} params x
  */
 export function deleteFile(params) {
-	return axios({
-		url: '/node/ssh/delete.json',
-		method: 'post',
-		data: params
-	})
+  return axios({
+    url: "/node/ssh/delete.json",
+    method: "post",
+    data: params,
+  });
+}
+
+/**
+ * 读取文件
+ * @param {id, path, name} params x
+ */
+export function readFile(params) {
+  return axios({
+    url: "/node/ssh/read_file_data.json",
+    method: "post",
+    data: params,
+  });
+}
+
+/**
+ * 保存文件
+ * @param {id, path, name,content} params x
+ */
+export function updateFileData(params) {
+  return axios({
+    url: "/node/ssh/update_file_data.json",
+    method: "post",
+    data: params,
+  });
 }

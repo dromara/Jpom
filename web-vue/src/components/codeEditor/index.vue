@@ -37,7 +37,6 @@ import "codemirror/lib/codemirror.css";
 import "codemirror/theme/blackboard.css";
 import "codemirror/theme/eclipse.css";
 
-
 import "codemirror/addon/hint/show-hint.css";
 import "codemirror/addon/hint/show-hint.js";
 import "codemirror/addon/hint/javascript-hint.js";
@@ -100,7 +99,16 @@ const fileSuffixToModeMap = {
   html: "htmlmixed",
   css: "css",
   yml: "yaml",
-  json: 'json'
+  yaml: "yaml",
+  json: "json",
+  sh: "shell",
+  bat: "powershell",
+  vue: "vue",
+  xml: "xml",
+  sql: "sql",
+  py: "python",
+  php: "php",
+  md: "markdown",
 };
 
 export default {
@@ -336,7 +344,9 @@ export default {
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  margin: 10px 0;
+  margin-top: -10px;
+  margin-bottom: 10px;
+  /* 20px 0 0; */
 }
 .CodeMirror {
   height: 100%;

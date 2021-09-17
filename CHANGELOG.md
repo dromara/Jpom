@@ -30,6 +30,9 @@
 23. 【server】构建触发器新增延迟执行参数（感谢@Steve.Liu）
 24. 【server】增加全局项目搜索功能
 25. 【agent】项目增加批量启动关闭重启
+26. 【server】节点分发文件支持上传非压缩包（感谢@Sam）
+27. 【server】nginx 二级代理无法访问（感谢@hu丶向...🤡）
+28. 【server】ssh文件管理新增在线编辑（感谢@嗳啨 [Gitee issues I4ADTA](https://gitee.com/dromara/Jpom/issues/I4ADTA) ）
 
 ### 解决BUG、优化功能
 
@@ -53,6 +56,7 @@
 18. 【agent】取消强制检测 server 节点
 19. 【server】仓库密码改为隐藏
 20. 解决退出登录验证码没有刷新问题 （感谢群友：Steve.Liu）
+26. 【agent】节点分发清空发布无效（感谢@Sam）
 
 > 【特别声明】当前版本 仓库和构建并没有接入动态数据权限，如果对权限敏感的用户建议等待下一个版本优化权限后再升级（如有疑问可以微信群沟通）
 

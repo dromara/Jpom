@@ -9,10 +9,11 @@
     <!-- 表格 -->
     <a-layout-content class="file-content">
       <div ref="filter" class="filter">
-        <a-button type="primary" @click="handleUpload">上传文件</a-button>
-        <a-button type="primary" @click="loadFileList()">刷新</a-button>
+        <a-button :disabled="!this.tempNode.parentDir" type="primary" @click="handleUpload">上传文件</a-button>
+        <a-button :disabled="!this.tempNode.parentDir" type="primary" @click="loadFileList()">刷新</a-button>
         <a-button :disabled="!this.tempNode.parentDir" type="danger" @click="handleDeletePath()">删除</a-button>
-        <span v-if="this.tempNode.parentDir">当前目录:</span><span v-if="this.tempNode.parentDir">{{ this.tempNode.parentDir }}</span>
+        <span v-if="this.tempNode.parentDir">当前目录:{{ this.tempNode.path }}</span
+        ><span v-if="this.tempNode.parentDir">{{ this.tempNode.parentDir }}</span>
       </div>
       <a-table
         :data-source="fileList"
@@ -34,7 +35,8 @@
           <span>{{ text }}</span>
         </a-tooltip>
         <template slot="operation" slot-scope="text, record">
-          <a-button type="primary" :disabled="!record.textFileEdit"  @click="handlePreview(record)">编辑</a-button>
+          <a-button type="primary" :disabled="!record.textFileEdit" @click="handleEdit(record)">编辑</a-button>
+          <!-- <a-button type="primary" :disabled="!record.textFileEdit" @click="handlePreview(record)">跟踪</a-button> -->
           <a-button type="primary" @click="handleDownload(record)">下载</a-button>
           <a-button type="danger" @click="handleDelete(record)">删除</a-button>
         </template>
@@ -51,12 +53,18 @@
       <a-modal v-model="terminalVisible" width="50%" title="Terminal" :footer="null" :maskClosable="false">
         <terminal v-if="terminalVisible" :sshId="ssh.id" :nodeId="ssh.nodeModel.id" :tail="temp.path + temp.parentDir" />
       </a-modal>
+      <a-modal v-model="editFileVisible" width="80vw" title="编辑文件" cancelText="关闭" :maskClosable="true" @ok="updateFileData">
+        <div style="height: 60vh">
+          <code-editor showTool v-model="temp.fileContent" :fileSuffix="temp.name"></code-editor>
+        </div>
+      </a-modal>
     </a-layout-content>
   </a-layout>
 </template>
 <script>
-import { getRootFileList, getFileList, downloadFile, deleteFile, uploadFile } from "../../api/ssh";
+import { getRootFileList, getFileList, downloadFile, deleteFile, uploadFile, readFile, updateFileData } from "@/api/ssh";
 import Terminal from "./terminal";
+import codeEditor from "@/components/codeEditor";
 export default {
   props: {
     ssh: {
@@ -65,6 +73,7 @@ export default {
   },
   components: {
     Terminal,
+    codeEditor,
   },
   data() {
     return {
@@ -89,6 +98,7 @@ export default {
         { title: "修改时间", dataIndex: "modifyTime", width: 180, ellipsis: true },
         { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, width: 280 },
       ],
+      editFileVisible: false,
     };
   },
   mounted() {
@@ -157,13 +167,14 @@ export default {
               message: res.msg,
               duration: 2,
             });
+
+            this.loadFileList();
+
+            this.uploadFileList = [];
+            this.uploadFileVisible = false;
           }
         });
       });
-      setTimeout(() => {
-        this.loadFileList();
-      }, 1000 * 3);
-      this.uploadFileList = [];
     },
     // 选中目录
     onSelect(selectedKeys, { node }) {
@@ -246,6 +257,39 @@ export default {
           });
         }
         this.loading = false;
+      });
+    },
+    // 编辑
+    handleEdit(record) {
+      this.temp = Object.assign(record);
+      const params = {
+        id: this.ssh.id,
+        path: record.path,
+        children: record.parentDir,
+      };
+      readFile(params).then((res) => {
+        if (res.code == 200) {
+          this.temp.fileContent = res.data;
+          this.editFileVisible = true;
+        }
+      });
+      //
+    },
+    updateFileData() {
+      const params = {
+        id: this.ssh.id,
+        path: this.temp.path,
+        children: this.temp.parentDir,
+        content: this.temp.fileContent,
+      };
+      updateFileData(params).then((res) => {
+        this.$notification.success({
+          message: res.msg,
+          duration: 2,
+        });
+        if (res.code == 200) {
+          this.editFileVisible = false;
+        }
       });
     },
     // 查看

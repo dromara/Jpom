@@ -174,7 +174,7 @@
   </div>
 </template>
 <script>
-import { deleteSsh, editSsh, getSshList, getSshOperationLogList, installAgentNode } from "../../api/ssh";
+import { deleteSsh, editSsh, getSshList, getSshOperationLogList, installAgentNode } from "@/api/ssh";
 import SshFile from "./ssh-file";
 import Terminal from "./terminal";
 import { parseTime } from "../../utils/time";
@@ -345,6 +345,7 @@ export default {
     handleEdit(record) {
       this.temp = Object.assign({}, record);
       this.temp.fileDirs = record.fileDirs ? record.fileDirs.join("\r\n") : "";
+      this.temp.allowEditSuffix = record.allowEditSuffix ? record.allowEditSuffix.join("\r\n") : "";
       this.temp.type = "edit";
       this.editSshVisible = true;
       // @author jzy 08-04

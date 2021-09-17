@@ -25,15 +25,17 @@ import io.jpom.plugin.ClassFeature;
 import io.jpom.plugin.Feature;
 import io.jpom.plugin.MethodFeature;
 import io.jpom.service.node.ssh.SshService;
+import io.jpom.system.ServerConfigBean;
 import org.springframework.http.MediaType;
-import org.springframework.stereotype.Controller;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -46,32 +48,13 @@ import java.util.Vector;
  * @author bwcx_jzy
  * @date 2019/8/10
  */
-@Controller()
+@RestController
 @RequestMapping("node/ssh")
 @Feature(cls = ClassFeature.SSH)
 public class SshFileController extends BaseServerController {
 
 	@Resource
 	private SshService sshService;
-
-//    @RequestMapping(value = "file.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
-//    @Feature(method = MethodFeature.FILE)
-//    public String file(String id) {
-//        SshModel sshModel = sshService.getItem(id);
-//        if (sshModel != null) {
-//            List<String> fileDirs = sshModel.getFileDirs();
-//            if (fileDirs != null && !fileDirs.isEmpty()) {
-//                try {
-//                    JSONArray jsonArray = listDir(sshModel, fileDirs);
-//                    setAttribute("dirs", jsonArray);
-//                } catch (Exception e) {
-//                    DefaultSystemLog.getLog().error("sftp错误", e);
-//                }
-//            }
-//        }
-//        return "node/ssh/file";
-//    }
-
 
 	@RequestMapping(value = "download.html", method = RequestMethod.GET)
 	@ResponseBody
@@ -104,10 +87,10 @@ public class SshFileController extends BaseServerController {
 	/**
 	 * 根据 id 获取 fileDirs 目录集合
 	 *
-	 * @param id
-	 * @return
-	 * @description for dev 3.x
+	 * @param id ssh id
+	 * @return json
 	 * @author Hotstrip
+	 * @since for dev 3.x
 	 */
 	@RequestMapping(value = "root_file_data.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
@@ -125,28 +108,103 @@ public class SshFileController extends BaseServerController {
 		return JsonMessage.getString(200, "ok", jsonArray);
 	}
 
-	@RequestMapping(value = "list_file_data.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody
-	@Feature(method = MethodFeature.FILE)
-	public String listData(String id, String path, String children) throws SftpException {
+	private SshModel check(String id, String path, String children) {
 		SshModel sshModel = sshService.getItem(id);
-		if (sshModel == null) {
-			return JsonMessage.getString(404, "不存在对应ssh");
-		}
-		if (StrUtil.isEmpty(path)) {
-			return JsonMessage.getString(405, "请选择文件夹");
-		}
+		Assert.notNull(sshModel, "不存在对应ssh");
+		Assert.hasText(path, "请选择文件夹");
+		List<String> fileDirs = sshModel.getFileDirs();
+		Assert.state(CollUtil.contains(fileDirs, path), "没有配置此文件夹");
+		//
 		if (StrUtil.isNotEmpty(children)) {
 			// 判断是否合法
 			children = FileUtil.normalize(children);
 			FileUtil.file(path, children);
 		}
-		List<String> fileDirs = sshModel.getFileDirs();
-		if (!fileDirs.contains(path)) {
-			return JsonMessage.getString(405, "没有配置此文件夹");
-		}
+		return sshModel;
+	}
+
+	@RequestMapping(value = "list_file_data.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody
+	@Feature(method = MethodFeature.FILE)
+	public String listData(String id, String path, String children) throws SftpException {
+		SshModel sshModel = this.check(id, path, children);
+		//
 		JSONArray jsonArray = listDir(sshModel, path, children);
 		return JsonMessage.getString(200, "ok", jsonArray);
+	}
+
+	@RequestMapping(value = "read_file_data.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody
+	@Feature(method = MethodFeature.READ_FILE)
+	public String readFileData(String id, String path, String children) {
+		SshModel sshModel = this.check(id, path, children);
+		//
+		List<String> allowEditSuffix = sshModel.getAllowEditSuffix();
+		Charset charset = AgentWhitelist.checkFileSuffix(allowEditSuffix, children);
+		//
+		String content = this.readFile(sshModel, path, children, charset);
+		return JsonMessage.getString(200, "ok", content);
+	}
+
+	@RequestMapping(value = "update_file_data.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody
+	@Feature(method = MethodFeature.UPDATE_CONFIG_FILE)
+	public String updateFileData(String id, String path, String children, String content) {
+		SshModel sshModel = this.check(id, path, children);
+		//
+		List<String> allowEditSuffix = sshModel.getAllowEditSuffix();
+		Charset charset = AgentWhitelist.checkFileSuffix(allowEditSuffix, children);
+		// 缓存到本地
+		File file = FileUtil.file(ServerConfigBean.getInstance().getUserTempPath(), sshModel.getId(), children);
+		FileUtil.writeString(content, file, charset);
+		// 上传
+		this.syncFile(sshModel, path, children, file);
+		//
+		FileUtil.del(file);
+		return JsonMessage.getString(200, "修改成功");
+	}
+
+	/**
+	 * 读取文件
+	 *
+	 * @param sshModel ssh
+	 * @param path     路径
+	 * @param name     文件
+	 * @param charset  编码格式
+	 */
+	private String readFile(SshModel sshModel, String path, String name, Charset charset) {
+		Sftp sftp = null;
+		try {
+			Session session = SshService.getSession(sshModel);
+			sftp = new Sftp(session, sshModel.getCharsetT());
+			String normalize = FileUtil.normalize(path + "/" + name);
+			ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+			sftp.download(normalize, byteArrayOutputStream);
+			byte[] bytes = byteArrayOutputStream.toByteArray();
+			return new String(bytes, charset);
+		} finally {
+			IoUtil.close(sftp);
+		}
+	}
+
+	/**
+	 * 上传文件
+	 *
+	 * @param sshModel ssh
+	 * @param path     路径
+	 * @param name     文件
+	 * @param file     同步上传文件
+	 */
+	private void syncFile(SshModel sshModel, String path, String name, File file) {
+		Sftp sftp = null;
+		try {
+			Session session = SshService.getSession(sshModel);
+			sftp = new Sftp(session, sshModel.getCharsetT());
+			String normalize = FileUtil.normalize(path + "/" + name);
+			sftp.upload(normalize, file);
+		} finally {
+			IoUtil.close(sftp);
+		}
 	}
 
 	/**
@@ -186,6 +244,7 @@ public class SshFileController extends BaseServerController {
 	 * @return array
 	 * @throws SftpException sftp
 	 */
+	@SuppressWarnings("unchecked")
 	private JSONArray listDir(SshModel sshModel, String path, String children) throws SftpException {
 		Session session = null;
 		ChannelSftp channel = null;

@@ -53,7 +53,7 @@ request.interceptors.request.use(
 request.interceptors.response.use(
   (response) => {
     // 如果 headers 里面配置了 loading: no 就不用 loading
-    if (!response.config.headers[NO_LOADING_KEY]) {
+    if (!response.config?.headers[NO_LOADING_KEY]) {
       const endTime = new Date().getTime();
       if (endTime - startTime < 1000) {
         setTimeout(() => {
@@ -100,6 +100,16 @@ request.interceptors.response.use(
     return res;
   },
   (error) => {
+    if (!error.response) {
+      // 网络异常
+      $global_loading.close();
+      notification.error({
+        message: "Network Error",
+        description: "网络开了小差！请重试...:" + error,
+        duration: 2,
+      });
+      return Promise.reject(error);
+    }
     // 如果 headers 里面配置了 loading: no 就不用 loading
     if (!error.response.config.headers[NO_LOADING_KEY]) {
       $global_loading.close();
