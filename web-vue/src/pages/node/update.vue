@@ -14,7 +14,7 @@
         <div class="action">
           <a-upload
             name="file"
-            accept=".jar"
+            accept=".jar,.zip"
             action=""
             :showUploadList="false"
             :multiple="false"
