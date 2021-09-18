@@ -24,7 +24,7 @@ public class LinuxTomcatCommander extends AbstractTomcatCommander {
             return "tomcat path blank";
         }
         String command = null;
-        if (cmd.equals("stop")) {
+        if ("stop".equals(cmd)) {
             String setPidCmd = CommandUtil.execSystemCommand("jps -mv");
             List<String> list = StrSplitter.splitTrim(setPidCmd, StrUtil.LF, true);
             for (String item : list) {
