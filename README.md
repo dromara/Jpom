@@ -75,10 +75,11 @@
 
 [CHANGELOG.md](https://gitee.com/dromara/Jpom/blob/master/CHANGELOG.md)
 
-### 一键安装（linux）
+### 一键安装（Linux）（推荐）
 
 #### 插件端
-
+> 如果服务端也需要被管理，在服务端上也需要安装插件端
+> 
 > 安装的路径位于执行命令目录（数据、日志存放目录默认位于安装路径,如需要修改参考配置文件：[`extConfig.yml`](https://gitee.com/dromara/Jpom/blob/master/modules/agent/src/main/resources/bin/extConfig.yml) ）
 
 ```
@@ -123,6 +124,9 @@ yum install -y wget && wget -O install.sh https://dromara.gitee.io/jpom/docs/ins
 启动成功后,服务端的端口为 `2122` 访问管理页面 例如`http://localhost:2122/`
 
 > 特别提醒：一键安装的时候注意执行命令不可在同一目录下，即Server端和Agent端不可安装在同一目录下
+> 
+> 如无法访问，检查下是否开启了防火墙`systemctl status firewalld`，如状态显示为绿色`Active: active (running)`可临时关闭防火墙`systemctl stop firewalld`，然后重启防火墙`firewall-cmd --reload`（建议仅测试环境下使用，生产环境下慎用）
+> 如关闭防火墙后仍无法访问，并且使用的是云服务器，还需要到云服务器管理后台中关闭防火墙
 
 ### 下载安装
 

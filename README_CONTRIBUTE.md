@@ -10,7 +10,7 @@
    ├── agent 		=> 插件端代码
    ├── commone 		=> 这个项目的公共模块（插件端、服务端都依赖该模块）
    ├── server 		=> 服务端代码
-├── seript    		=> 一些通用脚本
+├── script    		=> 一些通用脚本
 ├── web-vue   		=> 前端 vue 目录
    ├── .editorconfig 	=> 前端（vue）代码格式配置
 ├── .editorconfig   	=> 全局代码格式配置
@@ -45,7 +45,7 @@
 
 ### Java 代码规范
 
-> 推荐安装 `alibaba-java-coding-guidelines`（`p3c`） 插件
+> 推荐安装 `Alibaba Java Coding Guidelines`（`p3c`） 插件
 
 ##### 代码级别的多行注释
 
