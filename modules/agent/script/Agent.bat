@@ -37,7 +37,7 @@ set RUNJAR=
 @REM 请勿修改----------------------------------↑
 @REM 是否开启控制台日志文件备份
 set LogBack=true
-set JVM=-server
+set JVM=-server -Xms200m -Xmx400m
 set ARGS= --jpom.applicationTag=%Tag% --jpom.log=%basePath%log --spring.profiles.active=pro --server.port=2123
 
 @REM 读取jar
