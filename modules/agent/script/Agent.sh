@@ -32,6 +32,7 @@ fi
 if [ -f ~/.bashrc ]; then
     . ~/.bashrc
 fi
+# 请不要修改 tag 属性的值，修改后会影响程序的停止、查看状态
 Tag="KeepBx-Agent-System-JpomAgentApplication"
 # 自动获取当前路径
 Path=$(
@@ -42,7 +43,7 @@ Lib="${Path}lib/"
 RUNJAR=""
 Log="${Path}agent.log"
 LogBack="${Path}log/"
-JVM="-server "
+JVM="-server -Xms200m -Xmx400m"
 # 修改项目端口号 日志路径
 ARGS="--jpom.applicationTag=${Tag} --spring.profiles.active=pro --server.port=2123  --jpom.log=${Path}log"
 
