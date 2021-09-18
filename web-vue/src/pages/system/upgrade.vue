@@ -26,7 +26,7 @@
       </a-upload>
       <a-button type="primary" class="upload-btn" :disabled="fileList.length === 0" @click="startUpload">上传升级文件</a-button>
     </a-spin>
-    <div>
+    <div style="margin-top: 20px">
       <markdown-it-vue class="md-body" :content="changelog" :options="markdownOptions" />
     </div>
   </div>

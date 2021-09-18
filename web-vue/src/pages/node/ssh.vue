@@ -41,7 +41,7 @@
               <a-button type="danger" @click="handleDelete(record)">删除</a-button>
             </a-menu-item>
             <a-menu-item>
-              <a-button type="primary" @click="handleViewLog(record)">操作日志</a-button>
+              <a-button type="primary" @click="handleViewLog(record)">终端日志</a-button>
             </a-menu-item>
           </a-menu>
         </a-dropdown>
@@ -83,15 +83,20 @@
           <template slot="label">
             文件目录
             <a-tooltip v-show="temp.type !== 'edit'">
-              <template slot="title">
-               绑定指定目录可以在线管理，同时构建 ssh 发布目录也需要在此配置
-              </template>
+              <template slot="title"> 绑定指定目录可以在线管理，同时构建 ssh 发布目录也需要在此配置 </template>
               <a-icon type="question-circle" theme="filled" />
             </a-tooltip>
           </template>
           <a-textarea v-model="temp.fileDirs" :auto-size="{ minRows: 3, maxRows: 5 }" placeholder="授权可以直接访问的目录，多个回车换行即可" />
         </a-form-model-item>
-        <a-form-model-item label="禁止命令" prop="notAllowedCommand">
+        <a-form-model-item prop="notAllowedCommand">
+          <template slot="label">
+            禁止命令
+            <a-tooltip v-show="temp.type !== 'edit'">
+              <template slot="title"> 限制禁止在在线终端执行的命令 </template>
+              <a-icon type="question-circle" theme="filled" />
+            </a-tooltip>
+          </template>
           <a-textarea v-model="temp.notAllowedCommand" :auto-size="{ minRows: 3, maxRows: 5 }" placeholder="禁止命令是不允许在终端执行的名，多个逗号隔开" />
         </a-form-model-item>
         <a-form-model-item label="文件后缀" prop="suffix">
@@ -127,7 +132,7 @@
           <a-form-model-item label="安装路径" prop="path">
             <a-input v-model="tempNode.path" placeholder="安装路径" />
           </a-form-model-item>
-           <a-form-model-item label="等待次数" prop="waitCount">
+          <a-form-model-item label="等待次数" prop="waitCount">
             <a-input v-model="tempNode.waitCount" placeholder="上传插件端后,等待插件端启动成功次数，1次5秒。默认5次" />
           </a-form-model-item>
           <a-form-model-item label="安装文件">
@@ -156,7 +161,7 @@
       <terminal v-if="terminalVisible" :sshId="temp.id" />
     </a-modal>
     <!-- 操作日志 -->
-    <a-modal v-model="viewOperationLog" title="操作日志" width="60vw" :footer="null" :maskClosable="false">
+    <a-modal v-model="viewOperationLog" title="操作日志" width="80vw" :footer="null" :maskClosable="false">
       <div ref="filter" class="filter">
         <a-range-picker class="filter-item" :show-time="{ format: 'HH:mm:ss' }" format="YYYY-MM-DD HH:mm:ss" @change="onchangeListLogTime" />
         <a-button type="primary" @click="handleListLog">搜索</a-button>
@@ -501,7 +506,7 @@ export default {
         formData.append("id", this.temp.id);
         formData.append("nodeData", JSON.stringify({ ...this.tempNode }));
         formData.append("path", this.tempNode.path);
-        formData.append("waitCount",this.tempNode.waitCount);
+        formData.append("waitCount", this.tempNode.waitCount);
         // 提交数据
         installAgentNode(formData).then((res) => {
           if (res.code === 200) {

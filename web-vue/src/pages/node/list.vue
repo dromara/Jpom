@@ -17,9 +17,11 @@
         <span>{{ text }}</span>
       </a-tooltip>
       <template slot="operation" slot-scope="text, record">
-        <a-button type="primary" @click="handleTerminal(record)" :disabled="!record.sshId">终端</a-button>
         <a-button type="primary" @click="handleNode(record)" :disabled="record.openStatus === false">节点管理</a-button>
         <a-button type="primary" @click="handleEdit(record)">编辑</a-button>
+         <a-tooltip title="需要到编辑中去为一个节点绑定一个 ssh信息才能启用该功能">
+          <a-button type="primary" @click="handleTerminal(record)" :disabled="!record.sshId">终端</a-button>
+        </a-tooltip>
         <a-button type="danger" @click="handleDelete(record)">删除</a-button>
       </template>
       <!-- 嵌套表格 -->

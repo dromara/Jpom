@@ -52,7 +52,9 @@
           <span>{{ text }}</span>
         </a-tooltip>
         <template slot="operation" v-if="!record.isDirectory" slot-scope="text, record">
-          <a-button type="primary" v-if="record.textFileEdit" @click="handleEditFile(record)">编辑</a-button>
+          <a-tooltip title="需要到 节点管理中的系统管理的白名单配置中配置允许编辑的文件后缀">
+            <a-button type="primary" :disabled="!record.textFileEdit" @click="handleEditFile(record)">编辑</a-button>
+          </a-tooltip>
           <a-button type="primary" @click="handleDownload(record)">下载</a-button>
           <a-button type="danger" @click="handleDelete(record)">删除</a-button>
         </template>
@@ -164,11 +166,11 @@ export default {
         unzip: false,
       },
       columns: [
-        { title: "文件名称", dataIndex: "filename", width: 100, ellipsis: true, scopedSlots: { customRender: "filename" } },
+        { title: "文件名称", dataIndex: "filename", ellipsis: true, scopedSlots: { customRender: "filename" } },
         { title: "文件类型", dataIndex: "isDirectory", width: 100, ellipsis: true, scopedSlots: { customRender: "isDirectory" } },
         { title: "文件大小", dataIndex: "fileSize", width: 120, ellipsis: true, scopedSlots: { customRender: "fileSize" } },
         { title: "修改时间", dataIndex: "modifyTime", width: 180, ellipsis: true },
-        { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" } },
+        { title: "操作", dataIndex: "operation", width: 260, scopedSlots: { customRender: "operation" } },
       ],
       rules: {
         url: [{ required: true, message: "远程下载Url不为空", trigger: "change" }],

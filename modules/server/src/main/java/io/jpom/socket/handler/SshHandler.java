@@ -212,8 +212,28 @@ public class SshHandler extends BaseHandler {
 			ThreadUtil.execute(this);
 		}
 
+		/**
+		 * 添加到命令队列
+		 *
+		 * @param msg 输入
+		 * @return 当前待确认待所有命令
+		 */
+		private String append(String msg) {
+			char[] x = msg.toCharArray();
+			if (x.length == 1 && x[0] == 127) {
+				// 退格键
+				int length = nowLineInput.length();
+				if (length > 0) {
+					nowLineInput.delete(length - 1, length);
+				}
+			} else {
+				nowLineInput.append(msg);
+			}
+			return nowLineInput.toString();
+		}
+
 		public boolean checkInput(String msg) {
-			String allCommand = nowLineInput.append(msg).toString();
+			String allCommand = this.append(msg);
 			boolean refuse;
 			if (StrUtil.equalsAny(msg, StrUtil.CR, StrUtil.TAB)) {
 				String join = nowLineInput.toString();

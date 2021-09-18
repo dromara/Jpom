@@ -35,7 +35,9 @@
           <span>{{ text }}</span>
         </a-tooltip>
         <template slot="operation" slot-scope="text, record">
-          <a-button type="primary" :disabled="!record.textFileEdit" @click="handleEdit(record)">编辑</a-button>
+          <a-tooltip title="需要到 ssh 信息中配置允许编辑的文件后缀">
+            <a-button type="primary" :disabled="!record.textFileEdit" @click="handleEdit(record)">编辑 </a-button>
+          </a-tooltip>
           <!-- <a-button type="primary" :disabled="!record.textFileEdit" @click="handlePreview(record)">跟踪</a-button> -->
           <a-button type="primary" @click="handleDownload(record)">下载</a-button>
           <a-button type="danger" @click="handleDelete(record)">删除</a-button>
@@ -92,11 +94,11 @@ export default {
         key: "key",
       },
       columns: [
-        { title: "文件名称", dataIndex: "title", width: 100, ellipsis: true, scopedSlots: { customRender: "name" } },
+        { title: "文件名称", dataIndex: "title", ellipsis: true, scopedSlots: { customRender: "name" } },
         { title: "文件类型", dataIndex: "dir", width: 100, ellipsis: true, scopedSlots: { customRender: "dir" } },
         { title: "文件大小", dataIndex: "size", width: 120, ellipsis: true, scopedSlots: { customRender: "size" } },
         { title: "修改时间", dataIndex: "modifyTime", width: 180, ellipsis: true },
-        { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, width: 280 },
+        { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, width: 270 },
       ],
       editFileVisible: false,
     };

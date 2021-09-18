@@ -186,7 +186,13 @@ public class SshModel extends BaseModel {
 		List<String> commands = StrUtil.split(inputItem, StrUtil.CR);
 		commands.addAll(StrUtil.split(inputItem, "&"));
 		for (String s : split) {
+			//
 			boolean anyMatch = commands.stream().anyMatch(item -> StrUtil.startWithAny(item, s + StrUtil.SPACE, ("&" + s + StrUtil.SPACE), StrUtil.SPACE + s + StrUtil.SPACE));
+			if (anyMatch) {
+				return false;
+			}
+			//
+			anyMatch = commands.stream().anyMatch(item -> StrUtil.equals(item, s));
 			if (anyMatch) {
 				return false;
 			}

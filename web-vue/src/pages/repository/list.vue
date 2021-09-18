@@ -15,16 +15,7 @@
       <a-button type="primary" @click="loadData">刷新</a-button>
     </div>
     <!-- 表格 -->
-    <a-table
-      :loading="loading"
-      :columns="columns"
-      :data-source="list"
-      :style="{ 'max-height': tableHeight + 'px' }"
-      :scroll="{ x: 970, y: tableHeight - 120 }"
-      bordered
-      rowKey="id"
-      :pagination="pagination"
-    >
+    <a-table :loading="loading" :columns="columns" :data-source="list" :style="{ 'max-height': tableHeight + 'px' }" :scroll="{ y: tableHeight - 120 }" bordered rowKey="id" :pagination="pagination">
       <a-tooltip slot="name" slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>
@@ -117,14 +108,21 @@
               <a-textarea :auto-size="{ minRows: 3, maxRows: 3 }" v-model="temp.rsaPrv" placeholder="私钥,不填将使用默认的 $HOME/.ssh 目录中的配置。支持配置文件目录:file:"></a-textarea>
             </a-tooltip>
           </a-form-model-item>
-          <a-form-model-item  v-if="temp.id" label="隐藏字段">
-            <a-button type="danger" @click="restHideField(temp)">清除</a-button>
-          </a-form-model-item>
           <!-- 公钥暂时没用用到 -->
           <a-form-model-item label="公钥" prop="rsaPub" v-if="false">
             <a-textarea :auto-size="{ minRows: 3, maxRows: 3 }" v-model="temp.rsaPub" placeholder="公钥,不填将使用默认的 $HOME/.ssh 目录中的配置。支持配置文件目录:file:"></a-textarea>
           </a-form-model-item>
         </template>
+        <a-form-model-item v-if="temp.id">
+            <template slot="label">
+              隐藏字段
+              <a-tooltip>
+                <template slot="title"> 密码字段和私钥字段在编辑的时候不会返回，如果需要重置或者清空就请点我 </template>
+                <a-icon type="question-circle" theme="filled" />
+              </a-tooltip>
+            </template>
+            <a-button style="margin-left: 10px" type="danger" @click="restHideField(temp)">清除</a-button>
+          </a-form-model-item>
       </a-form-model>
     </a-modal>
   </div>
@@ -186,7 +184,7 @@ export default {
         {
           title: "操作",
           dataIndex: "operation",
-          width: 240,
+          width: 160,
           scopedSlots: { customRender: "operation" },
           align: "left",
         },
