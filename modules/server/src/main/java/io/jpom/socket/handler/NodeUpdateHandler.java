@@ -71,12 +71,14 @@ public class NodeUpdateHandler extends BaseProxyHandler {
 			Map<String, Object> attributes = session.getAttributes();
 			String url = NodeForward.getSocketUrl(model, NodeUrl.NodeUpdate, (UserModel) attributes.get("userInfo"));
 			// 连接节点
-			try {
-				NodeClient client = new NodeClient(url, model, session);
-				clientMap.put(model.getId(), client);
-			} catch (Exception e) {
-				DefaultSystemLog.getLog().error("创建插件端连接失败", e);
-			}
+			ThreadUtil.execute(() -> {
+				try {
+					NodeClient client = new NodeClient(url, model, session);
+					clientMap.put(model.getId(), client);
+				} catch (Exception e) {
+					DefaultSystemLog.getLog().error("创建插件端连接失败", e);
+				}
+			});
 		}
 	}
 
@@ -190,7 +192,7 @@ public class NodeUpdateHandler extends BaseProxyHandler {
 
 	private void sendMsg(WebSocketMessageModel model, WebSocketSession session) {
 		try {
-			synchronized (NodeUpdateHandler.class) {
+			synchronized (session.getId()) {
 				session.sendMessage(new TextMessage(model.toString()));
 			}
 		} catch (Exception e) {

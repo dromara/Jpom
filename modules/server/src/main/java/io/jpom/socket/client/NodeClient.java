@@ -63,7 +63,7 @@ public class NodeClient extends WebSocketClient {
 	public void onMessage(String message) {
 		try {
 			// 不能并发向同一个客户端发送消息 @author jzy 2021-08-03
-			synchronized (NodeUpdateHandler.class) {
+			synchronized (session.getId()) {
 				session.sendMessage(new TextMessage(message));
 			}
 		} catch (IOException e) {
