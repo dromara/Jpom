@@ -25,7 +25,7 @@
         <a-divider style="margin: 4px 0" />
         <v-nodes :vnodes="menu" />
       </div>
-      <a-select-option value="">{{selectPlaceholder}}</a-select-option>
+      <a-select-option value="">{{ selectPlaceholder }}</a-select-option>
       <a-select-option v-for="item in optionList" :key="item">{{ item }} </a-select-option>
     </Select>
   </div>
@@ -103,6 +103,8 @@ export default {
       }
       this.selectInput = "";
       this.selected = v;
+      //
+      this.selectChange(v);
     },
     setSelectOpen(v) {
       this.selectFocus = v;

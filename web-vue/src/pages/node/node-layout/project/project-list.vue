@@ -35,7 +35,11 @@
       <a-tooltip slot="modifyUser" slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>
-      <a-switch slot="status" slot-scope="text" :checked="text" disabled checked-children="开" un-checked-children="关" />
+      <template slot="status" slot-scope="text, record">
+        <a-switch v-if="record.runMode !== 'File'" :checked="text" disabled checked-children="开" un-checked-children="关" />
+        <span v-else>-</span>
+      </template>
+
       <a-tooltip slot="port" slot-scope="text, record" placement="topLeft" :title="`进程号：${record.pid},  端口号：${record.port}`">
         <span v-if="record.pid">{{ record.port }}/{{ record.pid }}</span>
       </a-tooltip>
@@ -148,7 +152,8 @@
           </a-select>
         </a-form-model-item>
         <a-form-model-item label="分组名称" prop="group">
-          <a-row>
+          <custom-select v-model="temp.group" :data="groupList" inputPlaceholder="添加分组" selectPlaceholder="分组名称,可以不选择"> </custom-select>
+          <!-- <a-row>
             <a-col :span="18">
               <a-select v-model="temp.group" placeholder="可手动输入">
                 <a-select-option v-for="group in groupList" :key="group">{{ group }}</a-select-option>
@@ -169,7 +174,7 @@
                 <a-button type="primary" class="btn-add">添加分组</a-button>
               </a-popover>
             </a-col>
-          </a-row>
+          </a-row> -->
         </a-form-model-item>
         <a-form-model-item label="JDK" prop="jdkId" v-show="temp.runMode && temp.runMode !== 'File'" class="jpom-node-project-jdk">
           <a-select v-model="temp.jdkId" placeholder="请选择 JDK">
@@ -250,6 +255,7 @@ import File from "./project-file";
 import Console from "./project-console";
 import Monitor from "./project-monitor";
 import Replica from "./project-replica";
+import CustomSelect from "@/components/customSelect";
 import {
   getJdkList,
   getRuningProjectInfo,
@@ -276,6 +282,7 @@ export default {
     Console,
     Monitor,
     Replica,
+    CustomSelect,
   },
   data() {
     return {
@@ -294,7 +301,7 @@ export default {
       drawerConsoleVisible: false,
       drawerMonitorVisible: false,
       drawerReplicaVisible: false,
-      addGroupvisible: false,
+      // addGroupvisible: false,
       libExist: false,
       selectedRowKeys: [],
       checkRecord: "",
@@ -606,26 +613,26 @@ export default {
         },
       });
     },
-    // 添加分组
-    handleAddGroup() {
-      if (!this.temp.tempGroup || this.temp.tempGroup.length === 0) {
-        this.$notification.warning({
-          message: "分组名称不能为空",
-          duration: 2,
-        });
-        return false;
-      }
-      // 添加到分组列表
-      if (this.groupList.indexOf(this.temp.tempGroup) === -1) {
-        this.groupList.push(this.temp.tempGroup);
-      }
-      this.temp.tempGroup = "";
-      this.$notification.success({
-        message: "添加成功",
-        duration: 2,
-      });
-      this.addGroupvisible = false;
-    },
+    // // 添加分组
+    // handleAddGroup() {
+    //   if (!this.temp.tempGroup || this.temp.tempGroup.length === 0) {
+    //     this.$notification.warning({
+    //       message: "分组名称不能为空",
+    //       duration: 2,
+    //     });
+    //     return false;
+    //   }
+    //   // 添加到分组列表
+    //   if (this.groupList.indexOf(this.temp.tempGroup) === -1) {
+    //     this.groupList.push(this.temp.tempGroup);
+    //   }
+    //   this.temp.tempGroup = "";
+    //   this.$notification.success({
+    //     message: "添加成功",
+    //     duration: 2,
+    //   });
+    //   this.addGroupvisible = false;
+    // },
     //检查节点是否存在
     checkLibIndexExist() {
       // 检查是否输入完整
