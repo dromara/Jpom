@@ -53,7 +53,7 @@
 
 ## changelog 更新规范
 
-> 在新加功能、修护bug、优化功能在完成时候都需要在 [CAHNGELOG.md](./CHANGELOG.md) 记录
+> 在新加功能、修护bug、优化功能在完成时候都需要在 [CHANGELOG.md](./CHANGELOG.md) 记录
 
 1. 如果是使用者反馈的bug，在修护后需要备注反馈人的昵称
 2. 如果是 issue 需要备注 issue 地址以及平台（Gitee、GitHub）
