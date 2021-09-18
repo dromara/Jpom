@@ -1,5 +1,5 @@
 jpom:
-  # jpom 数据存储路径, 如果调试模式运行默认路径为【/jpom/】,安装运行默认为jar包文件的父级
+  # jpom 数据存储路径, 如果调试模式运行默认路径为【${user.home}/jpom/】,安装运行默认为jar包文件的父级
   path:
   authorize:
     # api接口请求token 长度要求大于等于6位，字母数字符号组合
