@@ -56,7 +56,7 @@
 15. agent 和 server 间的 websocket 鉴权调整
 16. 【server】update: 刷新整个页面的时候重新加载菜单
 17. 历史监控图表查询报时间格式化错误(字符串工具类) （感谢@misaka [Gitee pr](https://gitee.com/dromara/Jpom/pulls/142) ）
-18. 【agent】取消强制检测 server 节点
+18. 【agent】nginx 配置文件取消强制检测 server 节点
 19. 【server】仓库密码改为隐藏
 20. 解决退出登录验证码没有刷新问题 （感谢群友：Steve.Liu）
 26. 【agent】节点分发清空发布无效（感谢@Sam）
