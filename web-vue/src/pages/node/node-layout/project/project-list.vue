@@ -16,13 +16,13 @@
       :loading="loading"
       :columns="columns"
       :pagination="false"
-      :row-selection="{ selectedRowKeys: selectedRowKeys, onChange: onSelectChange, columnWidth: '25px' }"
+      :row-selection="{ onChange: onSelectChange, columnWidth: '25px', getCheckboxProps: getCheckboxProps, hideDefaultSelections: true }"
       bordered
       :rowKey="(record, index) => index"
       :style="{ 'max-height': tableHeight + 'px' }"
       :scroll="{ y: tableHeight - 60 }"
     >
-      <a-tooltip slot="name" slot-scope="text" placement="topLeft" :title="text">
+      <a-tooltip slot="name" slot-scope="text, record" placement="topLeft" :title="`名称：${text} 分组：${record.group || ''}`">
         <span>{{ text }}</span>
       </a-tooltip>
       <template slot="time" slot-scope="text, record" placement="topLeft">
@@ -36,8 +36,10 @@
         <span>{{ text }}</span>
       </a-tooltip>
       <template slot="status" slot-scope="text, record">
-        <a-switch v-if="record.runMode !== 'File'" :checked="text" disabled checked-children="开" un-checked-children="关" />
-        <span v-else>-</span>
+        <a-tooltip v-if="record.runMode !== 'File'" title="状态操作请到控制台中控制">
+          <a-switch :checked="text" disabled checked-children="开" un-checked-children="关" />
+        </a-tooltip>
+        <span v-if="record.runMode === 'File'">-</span>
       </template>
 
       <a-tooltip slot="port" slot-scope="text, record" placement="topLeft" :title="`进程号：${record.pid},  端口号：${record.port}`">
@@ -45,7 +47,9 @@
       </a-tooltip>
       <template slot="operation" slot-scope="text, record">
         <a-button type="primary" @click="handleFile(record)">文件</a-button>
-        <a-button type="primary" @click="handleConsole(record)" v-show="record.runMode !== 'File'">控制台</a-button>
+        <a-tooltip :title="`${record.runMode === 'File' ? 'File 类型项目不能使用控制台功能' : '到控制台去管理项目状态'}`">
+          <a-button type="primary" @click="handleConsole(record)" :disabled="record.runMode === 'File'">控制台</a-button>
+        </a-tooltip>
         <a-dropdown>
           <a class="ant-dropdown-link" @click="(e) => e.preventDefault()">
             更多
@@ -303,7 +307,7 @@ export default {
       drawerReplicaVisible: false,
       // addGroupvisible: false,
       libExist: false,
-      selectedRowKeys: [],
+      selectedRows: [],
       checkRecord: "",
       columns: [
         { title: "项目名称", dataIndex: "name", width: 60, ellipsis: true, scopedSlots: { customRender: "name" } },
@@ -661,23 +665,36 @@ export default {
       this.onConsoleClose();
       this.handleFile(this.checkRecord);
     },
-    //选中项目
-    onSelectChange(selectedRowKeys) {
-      this.selectedRowKeys = selectedRowKeys;
+    // 获取复选框属性 判断是否可以勾选
+    getCheckboxProps(record) {
+      return {
+        props: {
+          disabled: record.runMode === "File",
+          name: record.name,
+        },
+      };
     },
+    //选中项目
+    onSelectChange(selectedRowKeys, selectedRows) {
+      this.selectedRows = selectedRows;
+      //console.log(selectedRowKeys, selectedRows);
+    },
+    // onSelectAll() {
+
+    // },
     //批量开始
     batchStart() {
-      if (this.selectedRowKeys.length == 0) {
+      if (this.selectedRows.length == 0) {
         this.$notification.warning({
           message: "请选中要启动的项目",
           duration: 2,
         });
       }
-      this.selectedRowKeys.forEach((value) => {
-        if (this.list[value].status == false && this.list[value].runMode != "File") {
+      this.selectedRows.forEach((value) => {
+        if (value.status == false && value.runMode !== "File") {
           const params = {
             nodeId: this.node.id,
-            id: this.list[value].id,
+            id: value.id,
           };
           //console.log(this.list[value]);
           startProject(params).then(() => {
@@ -688,17 +705,17 @@ export default {
     },
     //批量重启
     batchRestart() {
-      if (this.selectedRowKeys.length == 0) {
+      if (this.selectedRows.length == 0) {
         this.$notification.warning({
           message: "请选中要重启的项目",
           duration: 2,
         });
       }
-      this.selectedRowKeys.forEach((value) => {
-        if (this.list[value].runMode != "File") {
+      this.selectedRows.forEach((value) => {
+        if (value.runMode != "File") {
           const params = {
             nodeId: this.node.id,
-            id: this.list[value].id,
+            id: value.id,
           };
           restartProject(params).then(() => {
             this.handleFilter();
@@ -708,17 +725,17 @@ export default {
     },
     //批量关闭
     batchStop() {
-      if (this.selectedRowKeys.length == 0) {
+      if (this.selectedRows.length == 0) {
         this.$notification.warning({
           message: "请选中要关闭的项目",
           duration: 2,
         });
       }
-      this.selectedRowKeys.forEach((value) => {
-        if (this.list[value].status == true && this.list[value].runMode != "File") {
+      this.selectedRows.forEach((value) => {
+        if (value.status == true && value.runMode != "File") {
           const params = {
             nodeId: this.node.id,
-            id: this.list[value].id,
+            id: value.id,
           };
           stopProject(params).then(() => {
             this.handleFilter();

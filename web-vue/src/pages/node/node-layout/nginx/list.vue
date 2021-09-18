@@ -9,7 +9,7 @@
     <!-- 表格 -->
     <a-layout-content class="file-content">
       <div ref="filter" class="filter">
-        <a-button type="primary" @click="handleAdd">新增 Nginx 配置</a-button>
+        <a-button type="primary" @click="handleAdd">新增配置</a-button>
         <a-button type="primary" @click="handleFilter">刷新</a-button>
         <a-switch v-model="nginxData.status" checked-children="运行中" un-checked-children="未运行" disabled />
         <a-dropdown>
@@ -40,23 +40,29 @@
         :pagination="false"
         bordered
         :style="{ 'max-height': tableHeight + 'px' }"
-        :scroll="{ x: 720, y: tableHeight - 60 }"
+        :scroll="{ y: tableHeight - 60 }"
         :rowKey="(record, index) => index"
       >
-        <a-tooltip slot="name" slot-scope="text, record" placement="topLeft" :title="text">
-          <span style="color: blue" @click="handleEdit(record)">{{ text }}</span>
+        <a-tooltip slot="name" slot-scope="text, record" placement="topLeft" :title="`名称：${text}  server 节点数 ${record.serverCount}`">
+          <div @click="handleEdit(record)" style="color: blue">
+            <span>{{ text }}</span>
+            <a-icon type="edit" />
+          </div>
         </a-tooltip>
-        <a-tooltip slot="isDirectory" slot-scope="text" placement="topLeft" :title="text">
+        <!-- <a-tooltip slot="isDirectory" slot-scope="text" placement="topLeft" :title="text">
           <span>{{ text ? "目录" : "文件" }}</span>
-        </a-tooltip>
+        </a-tooltip> -->
         <a-tooltip slot="serverName" slot-scope="text, record" placement="topLeft" :title="record.serverName || record.server_name || ''">
           <span>{{ record.serverName || record.server_name || "" }}</span>
+        </a-tooltip>
+        <a-tooltip slot="location" slot-scope="text, record" placement="topLeft" :title="record.location">
+          <span>{{ record.location }}</span>
         </a-tooltip>
         <a-tooltip slot="time" slot-scope="text" placement="topLeft" :title="text">
           <span>{{ text }}</span>
         </a-tooltip>
         <template slot="operation" slot-scope="text, record">
-          <a-button type="primary" @click="handleEdit(record)">编辑</a-button>
+          <!-- <a-button type="primary" @click="handleEdit(record)">编辑</a-button> -->
           <a-button type="danger" @click="handleDelete(record)">删除</a-button>
         </template>
       </a-table>
@@ -129,13 +135,13 @@ export default {
         label: "title",
       },
       columns: [
-        { title: "文件名称", dataIndex: "name", width: 100, ellipsis: true, scopedSlots: { customRender: "name" } },
-        { title: "文件类型", dataIndex: "isDirectory", width: 100, ellipsis: true, scopedSlots: { customRender: "isDirectory" } },
-        { title: "数量", dataIndex: "serverCount", width: 80, ellipsis: true },
-        { title: "域名", dataIndex: "serverName", width: 120, ellipsis: true, scopedSlots: { customRender: "serverName" } },
-        { title: "location", dataIndex: "location", width: 120, ellipsis: true },
-        { title: "修改时间", dataIndex: "time", width: 90, ellipsis: true },
-        { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, width: 100 },
+        { title: "文件名称", dataIndex: "name", ellipsis: true, scopedSlots: { customRender: "name" } },
+        // { title: "文件类型", dataIndex: "isDirectory", width: 100, ellipsis: true, scopedSlots: { customRender: "isDirectory" } },
+        // { title: "数量", dataIndex: "serverCount", width: 80, ellipsis: true },
+        { title: "域名", dataIndex: "serverName", width: 140, ellipsis: true, scopedSlots: { customRender: "serverName" } },
+        { title: "location", dataIndex: "location", width: 140, ellipsis: true, scopedSlots: { customRender: "location" } },
+        { title: "修改时间", dataIndex: "time", width: 140, ellipsis: true, scopedSlots: { customRender: "time" } },
+        { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, width: 90 },
       ],
       rules: {
         name: [{ required: true, message: "Please input name", trigger: "blur" }],
