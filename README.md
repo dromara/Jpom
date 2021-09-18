@@ -94,6 +94,8 @@ yum install -y wget && wget -O install.sh https://dromara.gitee.io/jpom/docs/ins
 
 ```
 
+启动成功后,插件端的端口为 `2123`
+
 #### 服务端
 
 > 安装的路径位于执行命令目录（数据、日志存放目录默认位于安装路径,如需要修改参考配置文件：[`extConfig.yml`](https://gitee.com/dromara/Jpom/blob/master/modules/server/src/main/resources/bin/extConfig.yml) ）
@@ -118,6 +120,8 @@ yum install -y wget && wget -O install.sh https://dromara.gitee.io/jpom/docs/ins
 
 ```
 
+启动成功后,服务端的端口为 `2122` 访问管理页面 例如`http://localhost:2122/`
+
 > 特别提醒：一键安装的时候注意执行命令不可在同一目录下，即Server端和Agent端不可安装在同一目录下
 
 ### 下载安装
@@ -130,10 +134,12 @@ yum install -y wget && wget -O install.sh https://dromara.gitee.io/jpom/docs/ins
     1. agent-x.x.x-release 目录为插件端的全部安装文件
     2. 上传到对应服务器
     3. 命令运行（Agent.sh、Agent.bat）
+    4. 默认运行端口：`2123`
 4. 安装服务端（ [流程说明](https://jpom-site.keepbx.cn/docs/#/安装使用/开始安装?id=安装服务端) ）
     1. server-x.x.x-release 目录为服务端的全部安装文件
     2. 上传到对应服务器
     3. 命令运行（Server.sh、Server.bat）
+    4. 默认运行端口：`2122` 访问管理页面 例如`http://localhost:2122/`
 
 ### 编译安装
 
@@ -147,10 +153,12 @@ yum install -y wget && wget -O install.sh https://dromara.gitee.io/jpom/docs/ins
     1. 查看插件端安装包 modules/agent/target/agent-x.x.x-release
     2. 打包上传服务器运行
     3. 命令运行（Agent.sh、Agent.bat）
+    4. 默认运行端口：`2123`
 6. 安装服务端（ [流程说明](https://jpom-site.keepbx.cn/docs/#/安装使用/开始安装?id=安装服务端) ）
     1. 查看插件端安装包 modules/server/target/server-x.x.x-release
     2. 打包上传服务器运行
     3. 命令运行（Server.sh、Server.bat）
+    4. 默认运行端口：`2122` 访问管理页面 例如`http://localhost:2122/`
 
 ### 编译运行
 
