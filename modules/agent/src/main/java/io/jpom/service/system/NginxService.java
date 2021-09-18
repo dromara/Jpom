@@ -58,11 +58,12 @@ public class NginxService extends BaseDataService {
 			jsonObject.put("name", name);
 			jsonObject.put("relativePath", FileUtil.normalize(fileName + "/" + name));
 			if (file.isDirectory()) {
-				if (FileUtil.isEmpty(file)) {
-					continue;
-				}
-				jsonObject.put("name", name + "【文件夹】");
-				jsonObject.put("isDirectory", true);
+				continue;
+//				if (FileUtil.isEmpty(file)) {
+//					continue;
+//				}
+//				jsonObject.put("name", name + "【文件夹】");
+//				jsonObject.put("isDirectory", true);
 			} else {
 				if (!name.endsWith(".conf")) {
 					continue;
@@ -102,7 +103,7 @@ public class NginxService extends BaseDataService {
 			JSONObject object = addChild(str, "");
 			if (object != null) {
 				object.put("title", str);
-				object.put("spread", true);
+				//object.put("spread", true);
 				treeArray.add(object);
 			}
 		}
@@ -116,8 +117,7 @@ public class NginxService extends BaseDataService {
 	 * @param fileName  文件路径
 	 */
 	private JSONObject addChild(String whitePath, String fileName) {
-		String normalize = FileUtil.normalize(whitePath + "/" + fileName);
-		File parentFile = FileUtil.file(normalize);
+		File parentFile = StrUtil.isNotEmpty(fileName) ? FileUtil.file(whitePath, fileName) : FileUtil.file(whitePath);
 		if (!FileUtil.isDirectory(parentFile)) {
 			return null;
 		}
@@ -139,16 +139,18 @@ public class NginxService extends BaseDataService {
 					continue;
 				}
 				JSONObject child = addChild(whitePath, name);
-				array.add(child);
-			} else {
-				String fName = file.getName();
-				if (fName.endsWith(".conf")) {
-					JSONObject child = new JSONObject();
-					child.put("title", fName);
-					child.put("whitePath", whitePath);
-					child.put("path", name);
+				if (child != null) {
 					array.add(child);
 				}
+			} else {
+//				String fName = file.getName();
+//				if (fName.endsWith(".conf")) {
+//					JSONObject child = new JSONObject();
+//					child.put("title", fName);
+//					child.put("whitePath", whitePath);
+//					child.put("path", name);
+//					array.add(child);
+//				}
 			}
 		}
 		object.put("children", array);

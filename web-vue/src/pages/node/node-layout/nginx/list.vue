@@ -285,7 +285,8 @@ export default {
             });
             this.$refs["editNginxForm"].resetFields();
             this.editNginxVisible = false;
-            this.loadDirectoryList();
+            //this.loadDirectoryList();
+            this.loadFileList();
           }
         });
       });
@@ -311,7 +312,7 @@ export default {
                 message: res.msg,
                 duration: 2,
               });
-              this.loadDirectoryList();
+              //this.loadDirectoryList();
               this.loadFileList();
             }
           });

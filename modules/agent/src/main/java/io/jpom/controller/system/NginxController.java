@@ -22,6 +22,7 @@ import io.jpom.service.system.NginxService;
 import io.jpom.util.CommandUtil;
 import io.jpom.util.StringUtil;
 import org.springframework.http.MediaType;
+import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
@@ -55,15 +56,14 @@ public class NginxController extends BaseAgentController {
 	 */
 	@RequestMapping(value = "list_data.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	public String list(String whitePath, String name) {
-		if (whitelistDirectoryService.checkNgxDirectory(whitePath)) {
-			if (StrUtil.isEmpty(name)) {
-				name = "/";
-			}
-			String newName = pathSafe(name);
-			JSONArray array = nginxService.list(whitePath, newName);
-			return JsonMessage.getString(200, "", array);
+		boolean checkNgxDirectory = whitelistDirectoryService.checkNgxDirectory(whitePath);
+		Assert.state(checkNgxDirectory, "文件路径错误,非白名单路径");
+		if (StrUtil.isEmpty(name)) {
+			name = "/";
 		}
-		return JsonMessage.getString(400, "文件路径错误");
+		String newName = pathSafe(name);
+		JSONArray array = nginxService.list(whitePath, newName);
+		return JsonMessage.getString(200, "", array);
 	}
 
 	/**
@@ -84,20 +84,20 @@ public class NginxController extends BaseAgentController {
 	 */
 	@RequestMapping(value = "item_data", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	public String itemData(String path, String name) {
-		String newName = pathSafe(name);
-		if (whitelistDirectoryService.checkNgxDirectory(path)) {
-			File file = FileUtil.file(path, newName);
-			JSONObject jsonObject = new JSONObject();
-			String string = FileUtil.readUtf8String(file);
-			jsonObject.put("context", string);
-			String rName = StringUtil.delStartPath(file, path, true);
-			// nginxService.paresName(path, file.getAbsolutePath())
-			jsonObject.put("name", rName);
-			jsonObject.put("whitePath", path);
-			return JsonMessage.getString(200, "", jsonObject);
+		boolean ngxDirectory = whitelistDirectoryService.checkNgxDirectory(path);
+		Assert.state(ngxDirectory, "文件路径错误,非白名单路径");
+
+		File file = FileUtil.file(path, name);
+		Assert.state(FileUtil.isFile(file), "对应对配置文件不存在");
+		JSONObject jsonObject = new JSONObject();
+		String string = FileUtil.readUtf8String(file);
+		jsonObject.put("context", string);
+		String rName = StringUtil.delStartPath(file, path, true);
+		// nginxService.paresName(path, file.getAbsolutePath())
+		jsonObject.put("name", rName);
+		jsonObject.put("whitePath", path);
+		return JsonMessage.getString(200, "", jsonObject);
 //            setAttribute("data", jsonObject);
-		}
-		return JsonMessage.getString(400, "错误");
 	}
 
 	/**
@@ -110,18 +110,11 @@ public class NginxController extends BaseAgentController {
 	 */
 	@RequestMapping(value = "updateNgx", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	public String updateNgx(String name, String whitePath, String genre) {
-		if (StrUtil.isEmpty(name)) {
-			return JsonMessage.getString(400, "请填写文件名");
-		}
-		if (!name.endsWith(".conf")) {
-			return JsonMessage.getString(400, "文件后缀必须为\".conf\"");
-		}
-		if (!checkPathSafe(name)) {
-			return JsonMessage.getString(400, "文件名存在非法字符");
-		}
-		if (!whitelistDirectoryService.checkNgxDirectory(whitePath)) {
-			return JsonMessage.getString(400, "请选择正确的白名单");
-		}
+		Assert.hasText(name, "请填写文件名");
+		Assert.state(name.endsWith(".conf"), "文件后缀必须为\".conf\"");
+		//
+		boolean ngxDirectory = whitelistDirectoryService.checkNgxDirectory(whitePath);
+		Assert.state(ngxDirectory, "请选择正确的白名单");
 		//nginx文件
 		File file = FileUtil.file(whitePath, name);
 		if ("add".equals(genre) && file.exists()) {

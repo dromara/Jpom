@@ -75,7 +75,8 @@ public class StringUtil {
 		String itemAbsPath = FileUtil.getAbsolutePath(new File(startPath));
 		itemAbsPath = FileUtil.normalize(itemAbsPath);
 		newWhitePath = FileUtil.normalize(newWhitePath);
-		String path = newWhitePath.substring(newWhitePath.indexOf(itemAbsPath) + itemAbsPath.length());
+		String path = StrUtil.removePrefix(newWhitePath, itemAbsPath);
+		//newWhitePath.substring(newWhitePath.indexOf(itemAbsPath) + itemAbsPath.length());
 		path = FileUtil.normalize(path);
 		if (path.startsWith(StrUtil.SLASH)) {
 			path = path.substring(1);

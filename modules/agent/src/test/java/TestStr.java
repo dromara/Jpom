@@ -12,4 +12,10 @@ public class TestStr {
 	public void test() {
 		System.out.println(ReUtil.get(RegexPool.NUMBERS, "7499.1 total", 0));
 	}
+
+
+	@Test
+	public void testFile(){
+//		String path = "/www/server/panel/"
+	}
 }
