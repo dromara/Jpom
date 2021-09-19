@@ -111,7 +111,7 @@
         </a-form-model-item>
       </a-form-model>
     </a-modal>
-    <!-- 创建分发项目 -->
+    <!-- 创建/编辑分发项目 -->
     <a-modal v-model="editDispatchVisible" width="600px" :title="editDispatchDialogTitle" @ok="handleEditDispatchOk" :maskClosable="false">
       <a-form-model ref="editDispatchForm" :rules="rules" :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 18 }">
         <a-form-model-item label="项目 ID" prop="id">
