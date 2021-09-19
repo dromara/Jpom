@@ -112,7 +112,7 @@
       </a-form-model>
     </a-modal>
     <!-- 创建分发项目 -->
-    <a-modal v-model="editDispatchVisible" width="600px" title="创建分发项目" @ok="handleEditDispatchOk" :maskClosable="false">
+    <a-modal v-model="editDispatchVisible" width="600px" :title="editDispatchDialogTitle" @ok="handleEditDispatchOk" :maskClosable="false">
       <a-form-model ref="editDispatchForm" :rules="rules" :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 18 }">
         <a-form-model-item label="项目 ID" prop="id">
           <a-input v-model="temp.id" :disabled="temp.type === 'edit'" placeholder="创建之后不能修改" />
@@ -330,6 +330,7 @@ export default {
       list_expanded: {},
       linkDispatchVisible: false,
       editDispatchVisible: false,
+      editDispatchDialogTitle: '',
       dispatchVisible: false,
       drawerTitle: "",
       drawerFileVisible: false,
@@ -559,6 +560,7 @@ export default {
       this.loadAccesList();
       this.loadReqId();
       this.editDispatchVisible = true;
+      this.editDispatchDialogTitle = '创建分发项目';
       this.$nextTick(() => {
         this.$refs["editDispatchForm"].resetFields();
         setTimeout(() => {
@@ -610,6 +612,7 @@ export default {
         this.loadAccesList();
         this.loadReqId();
         this.editDispatchVisible = true;
+        this.editDispatchDialogTitle = '编辑分发项目';
       });
     },
     // 添加副本
