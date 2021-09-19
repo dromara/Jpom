@@ -1,9 +1,9 @@
 @echo off
 
-@REM å¿«é€Ÿæ‰“åŒ…é¡¹ç›®è„šæœ¬
+@REM ¿ìËÙ´ò°üÏîÄ¿½Å±¾
 
-@REM æ„å»ºå‰ç«¯
+@REM ¹¹½¨Ç°¶Ë
 call cd ../ && cd web-vue && npm i && npm run build
 
-@REM æ„å»º Java
+@REM ¹¹½¨ Java
 call cd ../ && mvn clean package
