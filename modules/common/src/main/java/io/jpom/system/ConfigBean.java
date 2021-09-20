@@ -49,6 +49,10 @@ public class ConfigBean {
 	 */
 	public static final String UPGRADE = "upgrade.json";
 	/**
+	 * 远程版本信息
+	 */
+	public static final String REMOTE_VERSION = "remote_version.json";
+	/**
 	 * Jpom 程序运行的 application 标识
 	 */
 	@Value("${jpom.applicationTag:}")
@@ -59,7 +63,7 @@ public class ConfigBean {
 	@Value("${server.port}")
 	private int port;
 
-	private static ConfigBean configBean;
+	private volatile static ConfigBean configBean;
 
 	/**
 	 * 单利模式
@@ -68,7 +72,11 @@ public class ConfigBean {
 	 */
 	public static ConfigBean getInstance() {
 		if (configBean == null) {
-			configBean = SpringUtil.getBean(ConfigBean.class);
+			synchronized (ConfigBean.class) {
+				if (configBean == null) {
+					configBean = SpringUtil.getBean(ConfigBean.class);
+				}
+			}
 		}
 		return configBean;
 	}

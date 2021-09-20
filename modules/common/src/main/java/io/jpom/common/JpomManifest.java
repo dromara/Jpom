@@ -1,12 +1,10 @@
 package io.jpom.common;
 
-import cn.hutool.core.compress.ZipReader;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.date.BetweenFormatter;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.io.LineHandler;
 import cn.hutool.core.io.ManifestUtil;
 import cn.hutool.core.lang.JarClassLoader;
@@ -53,7 +51,8 @@ import java.util.zip.ZipFile;
  * @date 2019/4/7
  */
 public class JpomManifest {
-	private static JpomManifest JPOM_MANIFEST;
+
+	private volatile static JpomManifest JPOM_MANIFEST;
 	/**
 	 * 当前版本
 	 */
@@ -271,12 +270,12 @@ public class JpomManifest {
 	 * @return 结果消息
 	 */
 	public static JsonMessage<Tuple> checkJpomJar(String path, Class<?> clsName) {
-		return checkJpomJar(path, clsName.getName());
+		return checkJpomJar(path, clsName.getName(), true);
 	}
 
-	public static JsonMessage<Tuple> checkJpomJar(String path, String name) {
-		return checkJpomJar(path, name, true);
-	}
+//	public static JsonMessage<Tuple> checkJpomJar(String path, String name) {
+//		return checkJpomJar(path, name, true);
+//	}
 
 	/**
 	 * 检查是否为jpom包
