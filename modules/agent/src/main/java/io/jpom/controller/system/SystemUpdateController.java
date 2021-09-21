@@ -9,11 +9,12 @@ import io.jpom.JpomAgentApplication;
 import io.jpom.JpomApplication;
 import io.jpom.common.BaseAgentController;
 import io.jpom.common.JpomManifest;
+import io.jpom.common.RemoteVersion;
 import io.jpom.common.Type;
 import io.jpom.system.AgentConfigBean;
 import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.io.File;
@@ -30,7 +31,7 @@ import java.util.Objects;
 @RequestMapping(value = "system")
 public class SystemUpdateController extends BaseAgentController {
 
-	@RequestMapping(value = "uploadJar.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+	@PostMapping(value = "uploadJar.json", produces = MediaType.APPLICATION_JSON_VALUE)
 	public String uploadJar() throws IOException {
 		//
 		Objects.requireNonNull(JpomManifest.getScriptFile());
@@ -55,5 +56,17 @@ public class SystemUpdateController extends BaseAgentController {
 		//
 		JpomApplication.restart();
 		return JsonMessage.getString(200, "升级中大约需要30秒");
+	}
+
+	/**
+	 * 检查是否存在新版本
+	 *
+	 * @return json
+	 * @see RemoteVersion
+	 */
+	@PostMapping(value = "check_version.json", produces = MediaType.APPLICATION_JSON_VALUE)
+	public String checkVersion() {
+		RemoteVersion remoteVersion = RemoteVersion.loadRemoteInfo();
+		return JsonMessage.getString(200, "", remoteVersion);
 	}
 }

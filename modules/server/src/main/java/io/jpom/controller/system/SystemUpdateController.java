@@ -13,6 +13,7 @@ import io.jpom.JpomApplication;
 import io.jpom.JpomServerApplication;
 import io.jpom.common.BaseServerController;
 import io.jpom.common.JpomManifest;
+import io.jpom.common.RemoteVersion;
 import io.jpom.common.Type;
 import io.jpom.common.forward.NodeForward;
 import io.jpom.common.forward.NodeUrl;
@@ -22,7 +23,6 @@ import io.jpom.model.log.UserOperateLogV1;
 import io.jpom.permission.SystemPermission;
 import io.jpom.system.ServerConfigBean;
 import org.springframework.http.MediaType;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.File;
@@ -97,5 +97,21 @@ public class SystemUpdateController extends BaseServerController {
 		//
 		JpomApplication.restart();
 		return JsonMessage.getString(200, "升级中大约需要30秒");
+	}
+
+	/**
+	 * 检查是否存在新版本
+	 *
+	 * @return json
+	 * @see RemoteVersion
+	 */
+	@PostMapping(value = "check_version.json", produces = MediaType.APPLICATION_JSON_VALUE)
+	public String checkVersion() {
+		NodeModel nodeModel = tryGetNode();
+		if (nodeModel != null) {
+			return NodeForward.request(getNode(), getRequest(), NodeUrl.CHECK_VERSION).toString();
+		}
+		RemoteVersion remoteVersion = RemoteVersion.loadRemoteInfo();
+		return JsonMessage.getString(200, "", remoteVersion);
 	}
 }

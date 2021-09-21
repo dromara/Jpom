@@ -182,6 +182,10 @@ public enum NodeUrl {
 	 * 更新系统jar包
 	 */
 	SystemUploadJar("/system/uploadJar.json"),
+	/**
+	 * 更新系统jar包
+	 */
+	CHECK_VERSION("/system/check_version.json"),
 
 	/**
 	 *

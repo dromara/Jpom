@@ -63,6 +63,19 @@ public class RemoteVersion {
 	 */
 	private Long lastTime;
 
+	/**
+	 * 是否有新版本
+	 */
+	private Boolean upgrade;
+
+	public Boolean getUpgrade() {
+		return upgrade;
+	}
+
+	public void setUpgrade(Boolean upgrade) {
+		this.upgrade = upgrade;
+	}
+
 	public String getTagName() {
 		return tagName;
 	}
@@ -159,11 +172,32 @@ public class RemoteVersion {
 	private static void cacheLoadTime(RemoteVersion remoteVersion) {
 		remoteVersion = ObjectUtil.defaultIfNull(remoteVersion, new RemoteVersion());
 		remoteVersion.setLastTime(SystemClock.now());
+		// 判断是否可以升级
+		JpomManifest instance = JpomManifest.getInstance();
+		if (!instance.isDebug()) {
+			String version = instance.getVersion();
+			String tagName = remoteVersion.getTagName();
+			tagName = StrUtil.removePrefixIgnoreCase(tagName, "v");
+			remoteVersion.setUpgrade(StrUtil.compareVersion(version, tagName) < 0);
+		} else {
+			remoteVersion.setUpgrade(false);
+		}
+		// 检查是否存在下载地址
+		Type type = instance.getType();
+		String remoteUrl = type.getRemoteUrl(remoteVersion);
+		if (StrUtil.isEmpty(remoteUrl)) {
+			remoteVersion.setUpgrade(false);
+		}
 		//
 		FileUtil.writeUtf8String(remoteVersion.toString(), getFile());
 	}
 
-	private static RemoteVersion cacheInfo() {
+	/**
+	 * 当前缓存中的 远程版本信息
+	 *
+	 * @return RemoteVersion
+	 */
+	public static RemoteVersion cacheInfo() {
 		if (!FileUtil.isFile(getFile())) {
 			return null;
 		}
