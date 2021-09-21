@@ -325,11 +325,11 @@ export default {
         { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, width: 120 },
       ],
       rules: {
-        id: [{ required: true, message: "Please input project id", trigger: "blur" }],
-        name: [{ required: true, message: "Please input project name", trigger: "blur" }],
-        runMode: [{ required: true, message: "Please select project runMode", trigger: "blur" }],
-        whitelistDirectory: [{ required: true, message: "Please select project access path", trigger: "blur" }],
-        lib: [{ required: true, message: "Please input project lib", trigger: "blur" }],
+        id: [{ required: true, message: "请输入项目ID", trigger: "blur" }],
+        name: [{ required: true, message: "请输入项目名称", trigger: "blur" }],
+        runMode: [{ required: true, message: "请选择项目运行方式", trigger: "blur" }],
+        whitelistDirectory: [{ required: true, message: "请选择项目白名单路径", trigger: "blur" }],
+        lib: [{ required: true, message: "请输入项目文件夹", trigger: "blur" }],
       },
     };
   },
