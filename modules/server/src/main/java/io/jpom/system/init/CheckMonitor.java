@@ -36,7 +36,7 @@ public class CheckMonitor {
 		CronUtil.schedule("cache_manger_schedule", "0 0/10 * * * ?", BuildUtil::reloadCacheSize);
 		ThreadUtil.execute(BuildUtil::reloadCacheSize);
 		// 开启版本检测调度
-		CronUtil.schedule(RemoteVersion.CHECK_VERSION_ID, "0 0 0/1 * * ?", RemoteVersion::loadRemoteInfo);
+		CronUtil.schedule(RemoteVersion.CHECK_VERSION_ID, "0 0 0,12 * * ?", RemoteVersion::loadRemoteInfo);
 		// 开启调度
 		CronUtils.start();
 	}

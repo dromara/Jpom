@@ -183,11 +183,11 @@ export default {
     },
     // 加载修改用户资料对话框
     handleUpdateUser() {
-      this.temp = { ...this.getUserInfo };
-      this.temp.token = this.getToken;
       getUserInfo().then((res) => {
-        if (res.code == 200) {
-          this.temp.md5Token = res.data.md5Token;
+        if (res.code === 200) {
+          this.temp = res.data;
+          this.temp.token = this.getToken;
+          //this.temp.md5Token = res.data.md5Token;
           this.updateUserVisible = true;
         }
       });

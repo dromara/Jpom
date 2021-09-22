@@ -42,9 +42,7 @@ import java.util.Objects;
 @RequestMapping(value = "system")
 public class SystemUpdateController extends BaseServerController {
 
-	@RequestMapping(value = "info", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody
-	@SystemPermission
+	@PostMapping(value = "info", produces = MediaType.APPLICATION_JSON_VALUE)
 	public String info() {
 		NodeModel nodeModel = tryGetNode();
 		if (nodeModel != null) {
@@ -75,8 +73,7 @@ public class SystemUpdateController extends BaseServerController {
 		return JsonMessage.getString(200, "", log);
 	}
 
-	@RequestMapping(value = "uploadJar.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody
+	@PostMapping(value = "uploadJar.json", produces = MediaType.APPLICATION_JSON_VALUE)
 	@OptLog(UserOperateLogV1.OptType.UpdateSys)
 	@SystemPermission
 	public String uploadJar() throws IOException {

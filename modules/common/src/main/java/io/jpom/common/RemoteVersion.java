@@ -116,6 +116,11 @@ public class RemoteVersion {
 		this.lastTime = lastTime;
 	}
 
+	@Override
+	public String toString() {
+		return JSONObject.toJSONString(this);
+	}
+
 	/**
 	 * 获取远程最新版本
 	 *
@@ -201,8 +206,18 @@ public class RemoteVersion {
 		if (!FileUtil.isFile(getFile())) {
 			return null;
 		}
-		String string = FileUtil.readUtf8String(getFile());
-		RemoteVersion remoteVersion = JSONObject.parseObject(string, RemoteVersion.class);
+		RemoteVersion remoteVersion;
+		String fileStr = StrUtil.EMPTY;
+		try {
+			fileStr = FileUtil.readUtf8String(getFile());
+			if (StrUtil.isEmpty(fileStr)) {
+				return null;
+			}
+			remoteVersion = JSONObject.parseObject(fileStr, RemoteVersion.class);
+		} catch (Exception e) {
+			DefaultSystemLog.getLog().warn("解析远程版本信息失败:{} {}", e.getMessage(), fileStr);
+			return null;
+		}
 		// 判断上次获取时间
 		Long lastTime = remoteVersion.getLastTime();
 		lastTime = ObjectUtil.defaultIfNull(lastTime, 0L);

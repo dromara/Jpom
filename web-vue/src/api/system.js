@@ -197,13 +197,26 @@ export function uploadUpgradeFile(formData) {
 
 /**
  * 获取更新日志
- *
+ *@param {String} nodeId 节点 ID
  */
-export function changelog() {
+export function changelog(nodeId) {
   return axios({
     url: "/system/change_log",
     method: "post",
     headers: {},
-    data: {},
+    data: { nodeId },
+  });
+}
+
+/**
+ * 检查新版本
+ *@param {String} nodeId 节点 ID
+ */
+export function checkVersion(nodeId) {
+  return axios({
+    url: "/system/check_version.json",
+    method: "post",
+    headers: {},
+    data: { nodeId },
   });
 }
