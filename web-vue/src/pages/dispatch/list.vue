@@ -50,8 +50,8 @@
         </template>
       </a-table>
     </a-table>
-    <!-- 添加关联项目 -->
-    <a-modal v-model="linkDispatchVisible" width="600px" title="编辑关联项目" @ok="handleLinkDispatchOk" :maskClosable="false" @cancel="clearDispatchList">
+    <!-- 添加/编辑关联项目 -->
+    <a-modal v-model="linkDispatchVisible" width="600px" :title="temp.type === 'edit' ? '编辑关联项目' : '添加关联项目'" @ok="handleLinkDispatchOk" :maskClosable="false" @cancel="clearDispatchList">
       <a-form-model ref="linkDispatchForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
         <a-form-model-item label="分发 ID" prop="id">
           <a-input v-model="temp.id" :disabled="temp.type === 'edit'" placeholder="创建之后不能修改" />
@@ -74,15 +74,15 @@
             @change="handleChange"
           />
         </a-form-model-item> -->
-        <a-form-model-item label="分发节点" prop="name">
+        <a-form-model-item label="分发节点" required>
           <a-list item-layout="horizontal" :data-source="dispatchList">
             <a-list-item slot="renderItem" slot-scope="item, index" v-if="item.status">
               <span>节点: </span>
               <a-select
                 placeholder="请选择节点"
                 notFoundContent="暂无节点信息"
-                style="width: 130px"
-                :defaultValue="item.index"
+                style="width: 140px"
+                :defaultValue="item.index === '' ? undefined : item.index"
                 @change="(value) => handleNodeListChange(value, index)"
                 :disabled="item.index === '' ? false : !nodeNameList[item.index].openStatus"
               >
@@ -91,7 +91,14 @@
                 </a-select-option>
               </a-select>
               <span>项目: </span>
-              <a-select style="width: 130px" placeholder="请选择项目" :defaultValue="item.projectId" notFoundContent="暂无项目信息,重新其他项目" @change="(value) => handleProjectChange(value, index)">
+              <a-select
+                style="width: 150px"
+                :placeholder="dispatchList[index].placeholder"
+                :defaultValue="item.projectId === '' ? undefined : item.projectId"
+                notFoundContent="此节点暂无项目"
+                @change="(value) => handleProjectChange(value, index)"
+                :disabled="dispatchList[index].disabled"
+              >
                 <a-select-option :value="project.id" v-for="project in item.project" :key="project.id">
                   {{ project.name }}
                 </a-select-option>
@@ -111,8 +118,8 @@
         </a-form-model-item>
       </a-form-model>
     </a-modal>
-    <!-- 创建分发项目 -->
-    <a-modal v-model="editDispatchVisible" width="600px" title="创建分发项目" @ok="handleEditDispatchOk" :maskClosable="false">
+    <!-- 创建/编辑分发项目 -->
+    <a-modal v-model="editDispatchVisible" width="600px" :title="temp.type === 'edit' ? '编辑分发项目' : '创建分发项目'" @ok="handleEditDispatchOk" :maskClosable="false">
       <a-form-model ref="editDispatchForm" :rules="rules" :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 18 }">
         <a-form-model-item label="项目 ID" prop="id">
           <a-input v-model="temp.id" :disabled="temp.type === 'edit'" placeholder="创建之后不能修改" />
@@ -336,6 +343,7 @@ export default {
       drawerConsoleVisible: false,
       nodeNameList: [],
       dispatchList: [],
+      totalProjectNum: 0,
       columns: [
         { title: "分发 ID", dataIndex: "id", width: 100, ellipsis: true, scopedSlots: { customRender: "id" } },
         { title: "分发名称", dataIndex: "name", width: 150, ellipsis: true, scopedSlots: { customRender: "name" } },
@@ -352,12 +360,13 @@ export default {
         { title: "操作", dataIndex: "child-operation", scopedSlots: { customRender: "child-operation" }, width: 200, align: "left" },
       ],
       rules: {
-        id: [{ required: true, message: "Please input dispatch id", trigger: "blur" }],
-        name: [{ required: true, message: "Please input dispatch name", trigger: "blur" }],
-        projectId: [{ required: true, message: "Please select project", trigger: "blur" }],
-        runMode: [{ required: true, message: "Please select project runMode", trigger: "blur" }],
-        whitelistDirectory: [{ required: true, message: "Please select project access path", trigger: "blur" }],
-        lib: [{ required: true, message: "Please input project lib", trigger: "blur" }],
+        id: [{ required: true, message: "请输入项目ID", trigger: "blur" }],
+        name: [{ required: true, message: "请输入项目名称", trigger: "blur" }],
+        projectId: [{ required: true, message: "请选择项目", trigger: "blur" }],
+        runMode: [{ required: true, message: "请选择项目运行方式", trigger: "blur" }],
+        whitelistDirectory: [{ required: true, message: "请选择项目白名单路径", trigger: "blur" }],
+        lib: [{ required: true, message: "请输入项目文件夹", trigger: "blur" }],
+		afterOpt: [{ required: true, message: "请选择发布后操作", trigger: "blur" }],
       },
     };
   },
@@ -517,6 +526,12 @@ export default {
         if (!valid) {
           return false;
         }
+		// 校验分发节点数据
+		if (this.dispatchList.length === 0) {
+			return this.$message.error('请添加分发节点!');
+		} else if (this.dispatchList.length < 2) {
+			return this.$message.error('至少选择2个节点项目');
+		}
         // 设置 reqId
         this.temp.reqId = this.reqId;
         // 提交
@@ -544,11 +559,11 @@ export default {
         type: "add",
         id: "",
         name: "",
-        afterOpt: "",
-        runMode: "",
+        afterOpt: undefined,
+        runMode: undefined,
         mainClass: "",
         javaExtDirsCp: "",
-        whitelistDirectory: "",
+        whitelistDirectory: undefined,
         lib: "",
         nodeIdList: [],
       };
@@ -817,7 +832,7 @@ export default {
     onConsoleClose() {
       this.drawerConsoleVisible = false;
     },
-    //加载节点以及项目
+    // 加载节点以及项目
     loadNodeList() {
       this.nodeList = [];
       getNodeProjectList().then((res) => {
@@ -829,8 +844,11 @@ export default {
               title: node.name,
               key: node.id,
               disabled: true,
+			  projectPlaceholder: '请选择项目',
+			  projectDisabled: true,
             };
             node.projects.forEach((project) => {
+			  ++this.totalProjectNum;
               // 如果项目 ID 存在就不用继续添加
               const index = this.projectList.findIndex((p) => p.id === project.id);
               if (index === -1) {
@@ -855,33 +873,42 @@ export default {
         }
       });
     },
-    //选择节点
+    // 选择节点
     handleNodeListChange(value, index) {
+	  if (this.nodeNameList[value].projects.length === 0) {
+		  this.dispatchList[index].placeholder = '此节点暂无项目';
+		  this.dispatchList[index].disabled = true;
+	  } else {
+		  this.dispatchList[index].placeholder = '请选择项目';
+		  this.dispatchList[index].disabled = false;
+	  }
       //this.projectNameList = this.nodeNameList[value].projects;
       this.nodeNameList[value].openStatus = false;
       this.dispatchList[index].project = this.nodeNameList[value].projects;
       this.dispatchList[index].nodeId = this.nodeNameList[value].id;
       this.dispatchList[index].index = value;
     },
-    //选择项目
+    // 选择项目
     handleProjectChange(value, index) {
       this.dispatchList[index].projectId = value;
       this.temp["node_" + this.dispatchList[index].nodeId] = value;
     },
-    //添加分发
+    // 添加分发
     addDispachList() {
-      this.dispatchList.push({ nodeId: "", projectId: "", index: "", project: [], status: true });
+	  if (this.dispatchList.length >= this.totalProjectNum)
+		return this.$message.error('已无更多节点项目，请先创建项目')
+      this.dispatchList.push({ nodeId: "", projectId: "", index: "", project: [], status: true, placeholder: '请先选择节点', disabled: true });
     },
-    //删除分发
+    // 删除分发
     delDispachList(value) {
       if (this.dispatchList[value].index !== "") {
         this.nodeNameList[this.dispatchList[value].index].openStatus = true;
       }
-      //this.dispatchList.splice(value,1);
       delete this.temp[`node_${this.dispatchList[value].nodeId}`];
       this.dispatchList[value].status = false;
+	  this.dispatchList.splice(value, 1);
     },
-    //清理缓存
+    // 清理缓存
     clearDispatchList() {
       this.dispatchList = [];
       for (let node in this.nodeNameList) {
