@@ -67,11 +67,10 @@ export default {
     loadData() {
       systemInfo().then((res) => {
         if (res.code === 200) {
-          this.temp = res.data;
+          this.temp = res.data?.manifest;
         }
       });
       changelog().then((res) => {
-        console.log(res);
         this.changelog = res.data;
       });
     },
@@ -111,13 +110,14 @@ export default {
       this.timer = setInterval(() => {
         systemInfo()
           .then((res) => {
-            if (res.code === 200 && res.data.timeStamp !== this.temp.timeStamp) {
+            let manifest = res.data?.manifest;
+            if (res.code === 200 && manifest?.timeStamp !== this.temp.timeStamp) {
               clearInterval(this.timer);
               this.$notification.success({
                 message: "升级成功",
                 duration: 2,
               });
-              this.temp = res.data;
+              this.temp = manifest;
               setTimeout(() => {
                 location.reload();
               }, 1000);

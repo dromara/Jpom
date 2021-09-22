@@ -186,6 +186,7 @@ public enum NodeUrl {
 	 * 更新系统jar包
 	 */
 	CHECK_VERSION("/system/check_version.json"),
+	CHANGE_LOG("/system/change_log"),
 
 	/**
 	 *

@@ -366,7 +366,7 @@ export default {
         runMode: [{ required: true, message: "请选择项目运行方式", trigger: "blur" }],
         whitelistDirectory: [{ required: true, message: "请选择项目白名单路径", trigger: "blur" }],
         lib: [{ required: true, message: "请输入项目文件夹", trigger: "blur" }],
-		afterOpt: [{ required: true, message: "请选择发布后操作", trigger: "blur" }],
+        afterOpt: [{ required: true, message: "请选择发布后操作", trigger: "blur" }],
       },
     };
   },
@@ -526,12 +526,12 @@ export default {
         if (!valid) {
           return false;
         }
-		// 校验分发节点数据
-		if (this.dispatchList.length === 0) {
-			return this.$message.error('请添加分发节点!');
-		} else if (this.dispatchList.length < 2) {
-			return this.$message.error('至少选择2个节点项目');
-		}
+        // 校验分发节点数据
+        if (this.dispatchList.length === 0) {
+          return this.$message.error("请添加分发节点!");
+        } else if (this.dispatchList.length < 2) {
+          return this.$message.error("至少选择2个节点项目");
+        }
         // 设置 reqId
         this.temp.reqId = this.reqId;
         // 提交
@@ -844,11 +844,11 @@ export default {
               title: node.name,
               key: node.id,
               disabled: true,
-			  projectPlaceholder: '请选择项目',
-			  projectDisabled: true,
+              projectPlaceholder: "请选择项目",
+              projectDisabled: true,
             };
             node.projects.forEach((project) => {
-			  ++this.totalProjectNum;
+              ++this.totalProjectNum;
               // 如果项目 ID 存在就不用继续添加
               const index = this.projectList.findIndex((p) => p.id === project.id);
               if (index === -1) {
@@ -875,13 +875,13 @@ export default {
     },
     // 选择节点
     handleNodeListChange(value, index) {
-	  if (this.nodeNameList[value].projects.length === 0) {
-		  this.dispatchList[index].placeholder = '此节点暂无项目';
-		  this.dispatchList[index].disabled = true;
-	  } else {
-		  this.dispatchList[index].placeholder = '请选择项目';
-		  this.dispatchList[index].disabled = false;
-	  }
+      if (this.nodeNameList[value].projects.length === 0) {
+        this.dispatchList[index].placeholder = "此节点暂无项目";
+        this.dispatchList[index].disabled = true;
+      } else {
+        this.dispatchList[index].placeholder = "请选择项目";
+        this.dispatchList[index].disabled = false;
+      }
       //this.projectNameList = this.nodeNameList[value].projects;
       this.nodeNameList[value].openStatus = false;
       this.dispatchList[index].project = this.nodeNameList[value].projects;
@@ -895,9 +895,8 @@ export default {
     },
     // 添加分发
     addDispachList() {
-	  if (this.dispatchList.length >= this.totalProjectNum)
-		return this.$message.error('已无更多节点项目，请先创建项目')
-      this.dispatchList.push({ nodeId: "", projectId: "", index: "", project: [], status: true, placeholder: '请先选择节点', disabled: true });
+      if (this.dispatchList.length >= this.totalProjectNum) return this.$message.error("已无更多节点项目，请先创建项目");
+      this.dispatchList.push({ nodeId: "", projectId: "", index: "", project: [], status: true, placeholder: "请先选择节点", disabled: true });
     },
     // 删除分发
     delDispachList(value) {
@@ -906,7 +905,7 @@ export default {
       }
       delete this.temp[`node_${this.dispatchList[value].nodeId}`];
       this.dispatchList[value].status = false;
-	  this.dispatchList.splice(value, 1);
+      this.dispatchList.splice(value, 1);
     },
     // 清理缓存
     clearDispatchList() {

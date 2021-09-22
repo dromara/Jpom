@@ -9,6 +9,7 @@ import cn.hutool.core.util.URLUtil;
 import cn.hutool.http.HttpStatus;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.controller.multipart.MultipartFileBuilder;
+import com.alibaba.fastjson.JSONObject;
 import io.jpom.JpomApplication;
 import io.jpom.JpomServerApplication;
 import io.jpom.common.BaseServerController;
@@ -49,11 +50,21 @@ public class SystemUpdateController extends BaseServerController {
 		if (nodeModel != null) {
 			return NodeForward.request(getNode(), getRequest(), NodeUrl.Info).toString();
 		}
-		return JsonMessage.getString(200, "", JpomManifest.getInstance());
+		JpomManifest instance = JpomManifest.getInstance();
+		RemoteVersion remoteVersion = RemoteVersion.cacheInfo();
+		//
+		JSONObject jsonObject = new JSONObject();
+		jsonObject.put("manifest", instance);
+		jsonObject.put("remoteVersion", remoteVersion);
+		return JsonMessage.getString(200, "", jsonObject);
 	}
 
 	@PostMapping(value = "change_log", produces = MediaType.APPLICATION_JSON_VALUE)
 	public String changeLog() {
+		NodeModel nodeModel = tryGetNode();
+		if (nodeModel != null) {
+			return NodeForward.request(getNode(), getRequest(), NodeUrl.CHANGE_LOG).toString();
+		}
 		//
 		URL resource = ResourceUtil.getResource("CHANGELOG.md");
 		String log = StrUtil.EMPTY;

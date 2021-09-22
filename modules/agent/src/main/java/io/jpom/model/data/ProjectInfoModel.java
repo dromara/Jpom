@@ -329,7 +329,7 @@ public class ProjectInfoModel extends BaseModel {
 			} else {
 				classPath.append(split[0]).append(" -cp ");
 				if (split.length > 1) {
-					classPath.append(split[1]).append(FileUtils.getJarSeparator());
+					classPath.append(split[1]).append(FileUtil.PATH_SEPARATOR);
 				}
 			}
 		} else {
@@ -339,7 +339,7 @@ public class ProjectInfoModel extends BaseModel {
 			File file = files.get(i);
 			classPath.append(file.getAbsolutePath());
 			if (i != len - 1) {
-				classPath.append(FileUtils.getJarSeparator());
+				classPath.append(FileUtil.PATH_SEPARATOR);
 			}
 		}
 		return classPath.toString();

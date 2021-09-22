@@ -6,6 +6,7 @@ import cn.jiangzeyin.common.JsonMessage;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.common.BaseAgentController;
 import io.jpom.common.JpomManifest;
+import io.jpom.common.RemoteVersion;
 import io.jpom.common.interceptor.NotAuthorize;
 import io.jpom.model.data.ProjectInfoModel;
 import io.jpom.service.WhitelistDirectoryService;
@@ -46,7 +47,13 @@ public class IndexController extends BaseAgentController {
 		} else {
 			code = 201;
 		}
-		return JsonMessage.getString(code, "", JpomManifest.getInstance());
+		JpomManifest instance = JpomManifest.getInstance();
+		RemoteVersion remoteVersion = RemoteVersion.cacheInfo();
+		//
+		JSONObject jsonObject = new JSONObject();
+		jsonObject.put("manifest", instance);
+		jsonObject.put("remoteVersion", remoteVersion);
+		return JsonMessage.getString(code, "", jsonObject);
 	}
 
 	/**

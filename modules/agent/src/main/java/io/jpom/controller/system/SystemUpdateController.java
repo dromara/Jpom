@@ -1,7 +1,11 @@
 package io.jpom.controller.system;
 
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.io.IoUtil;
+import cn.hutool.core.io.resource.ResourceUtil;
 import cn.hutool.core.lang.Tuple;
+import cn.hutool.core.util.StrUtil;
+import cn.hutool.core.util.URLUtil;
 import cn.hutool.http.HttpStatus;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.controller.multipart.MultipartFileBuilder;
@@ -19,6 +23,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
 import java.util.Objects;
 
 /**
@@ -56,6 +62,18 @@ public class SystemUpdateController extends BaseAgentController {
 		//
 		JpomApplication.restart();
 		return JsonMessage.getString(200, "升级中大约需要30秒");
+	}
+
+	@PostMapping(value = "change_log", produces = MediaType.APPLICATION_JSON_VALUE)
+	public String changeLog() {
+		//
+		URL resource = ResourceUtil.getResource("CHANGELOG.md");
+		String log = StrUtil.EMPTY;
+		if (resource != null) {
+			InputStream stream = URLUtil.getStream(resource);
+			log = IoUtil.readUtf8(stream);
+		}
+		return JsonMessage.getString(200, "", log);
 	}
 
 	/**
