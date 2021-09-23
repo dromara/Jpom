@@ -421,6 +421,14 @@ export default {
       const res1 = await getProjectList(params);
       if (res1.code === 200) {
         this.list = res1.data;
+
+		// TODO: 由于Ant Design Vue的bug，当表格中首行为disabled时，表格的全选按钮也无法选择。
+		// 目前的解决方案是：把需要disabled的元素放到最后。
+		// 如果运行模式是文件，则无需批量启动/重启/关闭
+		let tempList = this.list.filter(item => item.runMode !== 'File');
+		tempList = tempList.concat(this.list.filter(item => item.runMode === 'File'));
+		this.list = tempList;
+
         const ids = [];
         if (res1.data) {
           res1.data.forEach((element) => {
