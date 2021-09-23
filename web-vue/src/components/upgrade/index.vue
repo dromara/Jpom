@@ -26,7 +26,7 @@
         <span class="layui-elem-quote">数据存储目录：{{ temp.dataPath }}</span>
       </a-timeline-item>
     </a-timeline>
-    <a-spin v-show="!temp.debug" :spinning="spinning">
+    <a-spin v-if="!temp.debug" :spinning="spinning">
       <a-upload :file-list="fileList" :remove="handleRemove" :before-upload="beforeUpload" accept=".jar,.zip">
         <a-button><a-icon type="upload" />选择升级文件</a-button>
       </a-upload>
