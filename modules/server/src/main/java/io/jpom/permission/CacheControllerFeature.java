@@ -63,15 +63,15 @@ public class CacheControllerFeature {
 		// 扫描系统管理员
 		Set<Class<?>> classes = ClassUtil.scanPackage("io.jpom.controller");
 		classes.forEach(aClass -> {
-			RequestMapping requestMapping = aClass.getAnnotation(RequestMapping.class);
+			String classUrl = getClassUrl(aClass);
 			Method[] publicMethods = ReflectUtil.getPublicMethods(aClass);
 			for (Method publicMethod : publicMethods) {
 				SystemPermission systemPermission = publicMethod.getAnnotation(SystemPermission.class);
 				if (systemPermission == null) {
 					continue;
 				}
-				RequestMapping methodAnnotation = publicMethod.getAnnotation(RequestMapping.class);
-				String format = String.format("/%s/%s", requestMapping.value()[0], methodAnnotation.value()[0]);
+				String methodUrl = getMethodUrl(publicMethod);
+				String format = String.format("/%s/%s", classUrl, methodUrl);
 				format = FileUtil.normalize(format);
 				SYSTEM_URL.add(format);
 			}
