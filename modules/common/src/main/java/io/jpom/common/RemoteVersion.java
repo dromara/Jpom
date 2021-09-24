@@ -2,15 +2,21 @@ package io.jpom.common;
 
 import cn.hutool.core.date.SystemClock;
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.lang.Tuple;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.http.HttpRequest;
+import cn.hutool.http.HttpStatus;
 import cn.hutool.http.HttpUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
+import cn.jiangzeyin.common.JsonMessage;
 import com.alibaba.fastjson.JSONObject;
+import io.jpom.JpomApplication;
 import io.jpom.system.ConfigBean;
+import org.springframework.util.Assert;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -174,6 +180,11 @@ public class RemoteVersion {
 		}
 	}
 
+	/**
+	 * 缓存信息
+	 *
+	 * @param remoteVersion 远程版本信息
+	 */
 	private static void cacheLoadTime(RemoteVersion remoteVersion) {
 		remoteVersion = ObjectUtil.defaultIfNull(remoteVersion, new RemoteVersion());
 		remoteVersion.setLastTime(SystemClock.now());
@@ -227,6 +238,36 @@ public class RemoteVersion {
 			return null;
 		}
 		return remoteVersion;
+	}
+
+	/**
+	 * 升级
+	 *
+	 * @param savePath 下载文件保存路径
+	 * @throws IOException 异常
+	 */
+	public static void upgrade(String savePath) throws IOException {
+		RemoteVersion remoteVersion = loadRemoteInfo();
+		Assert.notNull(remoteVersion, "没有可用的新版本升级:-1");
+		Assert.state(remoteVersion.getUpgrade() != null && remoteVersion.getUpgrade(), "没有可用的新版本升级");
+		// 检查是否存在下载地址
+		Type type = JpomManifest.getInstance().getType();
+		String remoteUrl = type.getRemoteUrl(remoteVersion);
+		Assert.hasText(remoteUrl, "存在新版本,下载地址不可用");
+		// 下载
+		File versionFile = HttpUtil.downloadFileFromUrl(remoteUrl, savePath);
+		// 解析压缩包
+		File file = JpomManifest.zipFileFind(FileUtil.getAbsolutePath(versionFile), type, savePath);
+		// 基础检查
+		String path = FileUtil.getAbsolutePath(file);
+		JsonMessage<Tuple> error = JpomManifest.checkJpomJar(path, type.getApplicationClass());
+		Assert.state(error.getCode() == HttpStatus.HTTP_OK, error.getMsg());
+		//
+		Tuple data = error.getData();
+		String version = data.get(0);
+		JpomManifest.releaseJar(path, version);
+		//
+		JpomApplication.restart();
 	}
 
 	/**

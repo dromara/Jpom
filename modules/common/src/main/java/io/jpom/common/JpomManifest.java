@@ -273,9 +273,17 @@ public class JpomManifest {
 		return checkJpomJar(path, clsName.getName(), true);
 	}
 
-//	public static JsonMessage<Tuple> checkJpomJar(String path, String name) {
-//		return checkJpomJar(path, name, true);
-//	}
+	/**
+	 * 检查是否为jpom包
+	 *
+	 * @param path 路径
+	 * @param name 类名
+	 * @return 结果消息
+	 * @see Type#getApplicationClass()
+	 */
+	public static JsonMessage<Tuple> checkJpomJar(String path, String name) {
+		return checkJpomJar(path, name, true);
+	}
 
 	/**
 	 * 检查是否为jpom包
@@ -284,6 +292,7 @@ public class JpomManifest {
 	 * @param name        类名称
 	 * @param checkRepeat 是否检查版本重复
 	 * @return 结果消息
+	 * @see Type#getApplicationClass()
 	 */
 	public static JsonMessage<Tuple> checkJpomJar(String path, String name, boolean checkRepeat) {
 		String version;

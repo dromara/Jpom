@@ -68,6 +68,9 @@ public class JpomApplication extends ApplicationBuilder {
 		JpomApplication.appType = appType;
 		JpomApplication.appClass = appClass;
 		JpomApplication.args = args;
+		// 检查 type 中的 applicationClass 配置是否正确
+		String applicationClass = appType.getApplicationClass();
+		Assert.state(StrUtil.equals(applicationClass, appClass.getName()), "当前允许的类和配置的类名不一致：io.jpom.common.Type#getApplicationClass()");
 
 		addHttpMessageConverter(new StringHttpMessageConverter(CharsetUtil.CHARSET_UTF_8));
 
@@ -157,6 +160,7 @@ public class JpomApplication extends ApplicationBuilder {
 
 	/**
 	 * 重启自身
+	 * 分发会延迟2秒执行正式升级 重启命令
 	 */
 	public static void restart() {
 		File scriptFile = JpomManifest.getScriptFile();

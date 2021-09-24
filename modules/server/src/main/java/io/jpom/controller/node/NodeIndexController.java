@@ -145,7 +145,7 @@ public class NodeIndexController extends BaseServerController {
 		File file = JpomManifest.zipFileFind(path, Type.Agent, saveDir);
 		path = FileUtil.getAbsolutePath(file);
 		// 基础检查
-		JsonMessage<Tuple> error = JpomManifest.checkJpomJar(path, "io.jpom.JpomAgentApplication", false);
+		JsonMessage<Tuple> error = JpomManifest.checkJpomJar(path, Type.Agent.getApplicationClass(), false);
 		if (error.getCode() != HttpStatus.HTTP_OK) {
 			FileUtil.del(path);
 			return error.toString();

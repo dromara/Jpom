@@ -12,20 +12,26 @@ public enum Type {
 	/**
 	 * 插件端
 	 */
-	Agent(RemoteVersion::getAgentUrl),
+	Agent("io.jpom.JpomAgentApplication", RemoteVersion::getAgentUrl),
 	/**
 	 * 中心服务端
 	 */
-	Server(RemoteVersion::getServerUrl),
+	Server("io.jpom.JpomServerApplication", RemoteVersion::getServerUrl),
 	;
 
 	private final Function<RemoteVersion, String> remoteUrl;
+	private final String applicationClass;
 
-	Type(Function<RemoteVersion, String> remoteUrl) {
+	Type(String applicationClass, Function<RemoteVersion, String> remoteUrl) {
+		this.applicationClass = applicationClass;
 		this.remoteUrl = remoteUrl;
 	}
 
 	public String getRemoteUrl(RemoteVersion remoteVersion) {
 		return remoteUrl.apply(remoteVersion);
+	}
+
+	public String getApplicationClass() {
+		return applicationClass;
 	}
 }

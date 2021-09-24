@@ -33,7 +33,6 @@ import java.util.List;
 @PreLoadClass
 public class AutoImportLocalNode {
 
-	private static final String AGENT_MAIN_CLASS = "io.jpom.JpomAgentApplication";
 	private static NodeService nodeService;
 
 	@PreLoadMethod
@@ -58,7 +57,7 @@ public class AutoImportLocalNode {
 		}
 		//
 		try {
-			List<sun.jvmstat.monitor.MonitoredVm> monitoredVms = JvmUtil.listMainClass(AGENT_MAIN_CLASS);
+			List<sun.jvmstat.monitor.MonitoredVm> monitoredVms = JvmUtil.listMainClass(Type.Agent.getApplicationClass());
 			monitoredVms.forEach(monitoredVm -> {
 				sun.jvmstat.monitor.VmIdentifier vmIdentifier = monitoredVm.getVmIdentifier();
 				findPid(vmIdentifier.getUserInfo());
