@@ -185,11 +185,10 @@
 					<header>LICENSE</header>
 					<!--排除文件-->
 					<excludes>
-						<exclude>**/*.properties</exclude>
-						<exclude>*.sh</exclude>
-						<exclude>*.bat</exclude>
+						<exclude>script/**</exclude>
+						<exclude>docs/**</exclude>
 						<exclude>web-vue/**</exclude>
-						<exclude>*.yml</exclude>
+						<exclude>**/*.yml</exclude>
 						<exclude>.editorconfig</exclude>
 						<exclude>.gitignore</exclude>
 						<exclude>**/*.md</exclude>
