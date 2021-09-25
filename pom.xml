@@ -189,10 +189,11 @@
 						<exclude>docs/**</exclude>
 						<exclude>web-vue/**</exclude>
 						<exclude>**/*.yml</exclude>
-						<exclude>.editorconfig</exclude>
-						<exclude>.gitignore</exclude>
 						<exclude>**/*.md</exclude>
 						<exclude>**/*.xml</exclude>
+						<exclude>**/*.sql</exclude>
+						<exclude>.editorconfig</exclude>
+						<exclude>.gitignore</exclude>
 					</excludes>
 					<!--严格检查-->
 					<strictCheck>true</strictCheck>
