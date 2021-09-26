@@ -3,7 +3,7 @@ import axios from "axios";
 import Qs from "qs";
 import store from "../store";
 import router from "../router";
-import { NO_NOTIFY_KEY, NO_LOADING_KEY, TOKEN_HEADER_KEY } from "../utils/const";
+import { NO_NOTIFY_KEY, NO_LOADING_KEY, TOKEN_HEADER_KEY } from "@/utils/const";
 import { refreshToken } from "./user";
 
 import { notification } from "ant-design-vue";
@@ -12,9 +12,9 @@ import { notification } from "ant-design-vue";
 let $global_loading;
 let startTime;
 //
-var delTimeout = 20 * 1000;
+const delTimeout = 20 * 1000;
 //
-var apiTimeout = window.apiTimeout === "<apiTimeout>" ? delTimeout : window.apiTimeout;
+const apiTimeout = window.apiTimeout === "<apiTimeout>" ? delTimeout : window.apiTimeout;
 
 const request = axios.create({
   timeout: apiTimeout || delTimeout,
