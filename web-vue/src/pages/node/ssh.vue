@@ -132,6 +132,25 @@
           <a-form-model-item label="安装路径" prop="path">
             <a-input v-model="tempNode.path" placeholder="安装路径" />
           </a-form-model-item>
+          <a-form-model-item label="脚本权限" prop="chmod">
+            <a-input v-model="tempNode.chmod" placeholder="非 root 状态下，需要给脚本文件添加权限的命令">
+              <a-tooltip slot="suffix">
+                <template slot="title">
+                  <div>非 root 状态下，需要给脚本文件添加权限的命令</div>
+                  <div><br /></div>
+                  <div>
+                    例如
+                    <ul>
+                      <li>chmod 755</li>
+                      <li>chmod u=rwx</li>
+                      <li>chmod u+x</li>
+                    </ul>
+                  </div>
+                </template>
+                <a-icon type="question-circle" theme="filled" />
+              </a-tooltip>
+            </a-input>
+          </a-form-model-item>
           <a-form-model-item label="等待次数" prop="waitCount">
             <a-input v-model="tempNode.waitCount" placeholder="上传插件端后,等待插件端启动成功次数，1次5秒。默认5次" />
           </a-form-model-item>
@@ -507,6 +526,7 @@ export default {
         formData.append("nodeData", JSON.stringify({ ...this.tempNode }));
         formData.append("path", this.tempNode.path);
         formData.append("waitCount", this.tempNode.waitCount);
+        formData.append("chmod", this.tempNode.chmod);
         // 提交数据
         installAgentNode(formData).then((res) => {
           if (res.code === 200) {
