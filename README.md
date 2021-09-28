@@ -33,7 +33,7 @@
 	<a href="https://jpom.io/">https://jpom.io/</a> | <a href="https://jpom-site.keepbx.cn/">https://jpom-site.keepbx.cn/</a> | <a href="https://jpom.keepbx.cn/">https://jpom.keepbx.cn/</a>
 </p>
 
-#### 你为什么需要[Jpom](https://gitee.com/dromara/Jpom)
+#### 你为什么需要 [Jpom](https://gitee.com/dromara/Jpom)
 
 > Java 项目在实际部署运维，通用的方法是登录服务器上传新的项目包，执行相应命令管理，如果管理多个项目则重复操作上述步骤
 
@@ -185,7 +185,7 @@ yum install -y wget && wget -O install.sh https://dromara.gitee.io/jpom/docs/ins
 
 ### 管理命令
 
-1. windows中Agent.bat 、Server.bat
+1. windows 中 Agent.bat 、Server.bat
 
 ```
 # 服务端
@@ -195,7 +195,9 @@ Server.bat     启动管理面板(按照面板提示输入操作)
 Agent.bat     启动管理面板(按照面板提示输入操作)
 ```
 
-2. linux中Agent.sh 、Server.sh
+> windows 中执行启动后需要根据日志取跟进启动的状态
+
+2. linux 中 Agent.sh 、Server.sh
 
 ```
 # 服务端
@@ -229,7 +231,6 @@ Agent.sh create    创建Jpom插件端的应用服务（jpom-agent）
 2. 服务端示例：[`extConfig.yml`](https://gitee.com/dromara/Jpom/blob/master/modules/server/src/main/resources/bin/extConfig.yml)
 
 ### 演示项目
-
 
 [https://jpom.keepbx.cn](https://jpom.keepbx.cn)
 

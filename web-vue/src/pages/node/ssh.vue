@@ -133,7 +133,7 @@
             <a-input v-model="tempNode.path" placeholder="安装路径" />
           </a-form-model-item>
           <a-form-model-item label="脚本权限" prop="chmod">
-            <a-input v-model="tempNode.chmod" placeholder="非 root 状态下，需要给脚本文件添加权限的命令">
+            <a-input v-model="tempNode.chmod" placeholder="非 root 状态下，需要给脚本文件添加权限的命令(非阻塞的命令)">
               <a-tooltip slot="suffix">
                 <template slot="title">
                   <div>非 root 状态下，需要给脚本文件添加权限的命令</div>
