@@ -169,6 +169,8 @@ yum install -y wget && wget -O install.sh https://dromara.gitee.io/jpom/docs/ins
     3. 命令运行（Server.sh、Server.bat）
     4. 默认运行端口：`2122` 访问管理页面 例如`http://localhost:2122/`
 
+> 也可以使用 `script/release.bat` `script/release.sh` 快速打包
+
 ### 编译运行
 
 1. 访问 [Jpom](https://gitee.com/dromara/Jpom) 的码云主页,拉取最新完整代码(建议使用master分支、如果想体验新功能请使用dev分支)
