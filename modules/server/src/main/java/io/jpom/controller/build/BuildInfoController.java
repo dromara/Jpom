@@ -243,6 +243,7 @@ public class BuildInfoController extends BaseServerController {
 		releasePath = FileUtil.normalize(releasePath);
 		SshModel sshServiceItem = sshService.getItem(releaseMethodDataId);
 		Assert.notNull(sshServiceItem, "没有对应的ssh项");
+		jsonObject.put("releaseMethodDataId", releaseMethodDataId);
 		//
 		if (releasePath.startsWith(StrUtil.SLASH)) {
 			// 以根路径开始

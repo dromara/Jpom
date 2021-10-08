@@ -1,5 +1,16 @@
 # 版本日志
 
+# 2.7.1
+
+### 新增功能
+
+1. 【server】fix 编辑构建选择 ssh 发布无法保存 （感谢 @Peision [Gitee issues I4CQWA](https://gitee.com/dromara/Jpom/issues/I4CQWA) ）
+
+
+### 解决BUG、优化功能
+
+------
+
 # 2.7.0 (beta)
 
 ### 新增功能
