@@ -5,7 +5,7 @@
 ### 新增功能
 
 1. 【server】fix 编辑构建选择 ssh 发布无法保存 （感谢 @Peision [Gitee issues I4CQWA](https://gitee.com/dromara/Jpom/issues/I4CQWA) ）
-
+2. 【server】ssh 安装插件端新增修改执行脚本权限参数配置 （感谢 @知识就是力量）
 
 ### 解决BUG、优化功能
 
