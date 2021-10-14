@@ -16,7 +16,7 @@
       :scroll="{ x: 1040, y: tableHeight - 60 }"
     >
       <template slot="nodeId" slot-scope="text, record">
-        <a-button v-if="!record.nodeModel" type="primary" @click="install(record)">安装节点</a-button>
+        <a-button v-if="!record.nodeModel" type="primary" @click="install(record)" :disabled="record.installed">安装节点</a-button>
         <a-tooltip v-else placement="topLeft" :title="`${record.nodeModel.id} ( ${record.nodeModel.name} )`">
           <a-button type="primary" @click="toNode(record.nodeModel)"
             >前往节点:
@@ -211,6 +211,7 @@
 </template>
 <script>
 import { deleteSsh, editSsh, getSshList, getSshOperationLogList, installAgentNode } from "@/api/ssh";
+import { getNodeList } from "../../api/node";
 import SshFile from "./ssh-file";
 import Terminal from "./terminal";
 import { parseTime } from "../../utils/time";
@@ -363,7 +364,24 @@ export default {
           this.list = res.data;
         }
         this.loading = false;
-      });
+      })
+      // 如果在节点列表中存在，则标记为已安装节点
+      .then(getNodeList().then((res) => {
+        let nodeList = res.data;
+        let tempList = [];
+        this.list.forEach(element => {
+          let flag = false;
+          nodeList.forEach(node => {
+            if (element.host === node.url.substring(0, node.url.indexOf(':'))) {
+              flag = true;
+              return;
+            }
+          })
+          element.installed = flag;
+          tempList.push(element);
+        });
+        this.list = tempList;
+      }));
     },
     // 新增 SSH
     handleAdd() {
