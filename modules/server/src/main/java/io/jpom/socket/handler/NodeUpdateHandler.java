@@ -198,6 +198,29 @@ public class NodeUpdateHandler extends BaseProxyHandler {
 							}
 							WebSocketMessageModel restartMessage = new WebSocketMessageModel("restart", id);
 							client.send(restartMessage.toString());
+							// 重启后尝试访问插件端，能够连接说明重启完毕
+							ThreadUtil.execute(() -> {
+								WebSocketMessageModel callbackRestartMessage = new WebSocketMessageModel("restart", id);
+								int retryCount = 0;
+								try {
+									// 先等待一会，太快可能还没重启
+									Thread.sleep(10000L);
+									while (retryCount <= 30) {
+										++retryCount;
+										try {
+											Thread.sleep(1000L);
+											if (client.reconnectBlocking()) {
+												this.sendMsg(callbackRestartMessage.setData("重启完成"), session);
+												return;
+											}
+										} catch (Exception e) {}
+									}
+									this.sendMsg(callbackRestartMessage.setData("重连失败"), session);
+								} catch (Exception e) {
+									DefaultSystemLog.getLog().error("升级后重连插件端失败:" + model, e);
+									this.sendMsg(callbackRestartMessage.setData("重连插件端失败"), session);
+								}
+							});
 						} else {
 							this.sendMsg(model.setData("节点连接丢失"), session);
 						}
