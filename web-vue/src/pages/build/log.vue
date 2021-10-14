@@ -16,6 +16,7 @@ export default {
     return {
       logTimer: null,
       logText: "loading...",
+      line: 1,
     };
   },
   beforeDestroy() {
@@ -34,7 +35,7 @@ export default {
         const params = {
           id: this.temp.id,
           buildId: this.temp.buildId,
-          line: 1,
+          line: this.line,
         };
         loadBuildLog(params).then((res) => {
           if (res.code === 200) {
@@ -43,10 +44,13 @@ export default {
               clearInterval(this.logTimer);
             }
             // 更新日志
-            this.logText = "";
+            if (this.logText === "loading...") {
+              this.logText = "";
+            }
             res.data.dataLines.forEach((element) => {
               this.logText += `${element}\r\n`;
             });
+            this.line = res.data.line;
             // 自动滚动到底部
             this.$nextTick(() => {
               setTimeout(() => {

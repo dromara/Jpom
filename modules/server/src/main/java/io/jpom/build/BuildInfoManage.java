@@ -138,9 +138,9 @@ public class BuildInfoManage extends BaseBuild implements Runnable {
 	 * @param delay           延迟执行的时间 单位秒
 	 * @return this
 	 */
-	public static BuildInfoManage create(BuildInfoModel buildInfoModel,
-										 RepositoryModel repositoryModel,
-										 UserModel userModel,
+	public static BuildInfoManage create(final BuildInfoModel buildInfoModel,
+										 final RepositoryModel repositoryModel,
+										 final UserModel userModel,
 										 Integer delay) {
 		if (BUILD_MANAGE_MAP.containsKey(buildInfoModel.getId())) {
 			throw new JpomRuntimeException("当前构建还在进行中");
@@ -279,7 +279,7 @@ public class BuildInfoManage extends BaseBuild implements Runnable {
 			BuildInfoManage.this.log("初始化构建记录失败,异常结束");
 			return false;
 		}
-		this.log("start build in file : " + FileUtil.getAbsolutePath(this.gitFile));
+		this.log("#" + this.buildInfoModel.getBuildId() + " start build in file : " + FileUtil.getAbsolutePath(this.gitFile));
 		if (delay != null && delay > 0) {
 			// 延迟执行
 			this.log("Execution delayed by " + delay + " seconds");
