@@ -79,7 +79,7 @@ public class BuildInfoService extends BaseDbService<BuildInfoModel> {
 	 * @param delay          延迟的时间
 	 * @return json
 	 */
-	public String start(BuildInfoModel buildInfoModel, UserModel userModel, Integer delay) {
+	public String start(final BuildInfoModel buildInfoModel, final UserModel userModel, Integer delay) {
 		// load repository
 		RepositoryModel repositoryModel = repositoryService.getByKey(buildInfoModel.getRepositoryId());
 		if (null == repositoryModel) {
@@ -104,7 +104,7 @@ public class BuildInfoService extends BaseDbService<BuildInfoModel> {
 		Objects.requireNonNull(nowStatus);
 		if (BuildStatus.Ing == nowStatus ||
 				BuildStatus.PubIng == nowStatus) {
-			return JsonMessage.getString(501, "当前还在：" + nowStatus.getDesc());
+			return "当前还在：" + nowStatus.getDesc();
 		}
 		return null;
 	}
