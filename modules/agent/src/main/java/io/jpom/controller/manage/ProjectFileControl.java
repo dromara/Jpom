@@ -4,6 +4,7 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.thread.ThreadUtil;
+import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.BooleanUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.servlet.ServletUtil;
@@ -61,10 +62,15 @@ public class ProjectFileControl extends BaseAgentController {
 		Assert.notNull(pim, "查询失败：项目不存在");
 		String lib = pim.allLib();
 		File fileDir = FileUtil.file(lib, StrUtil.emptyToDefault(path, FileUtil.FILE_SEPARATOR));
-		Assert.state(FileUtil.exist(fileDir), "目录不存在");
+		boolean exist = FileUtil.exist(fileDir);
+		if (!exist) {
+			return JsonMessage.getString(200, "查询成功", new JSONArray());
+		}
 		//
 		File[] filesAll = fileDir.listFiles();
-		Assert.notEmpty(filesAll, "目录是空");
+		if (ArrayUtil.isEmpty(filesAll)) {
+			return JsonMessage.getString(200, "查询成功", new JSONArray());
+		}
 		JSONArray arrayFile = FileUtils.parseInfo(filesAll, false, lib);
 		AgentWhitelist whitelist = whitelistDirectoryService.getWhitelist();
 		for (Object o : arrayFile) {
