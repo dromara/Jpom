@@ -112,15 +112,14 @@ public class NodeForward {
 		Map params = null;
 		if (request != null) {
 			params = request.getParameterMap();
-			if (XssFilter.isXSS() && params != null) {
-				for (Map.Entry<String, String[]> entry : (Iterable<Map.Entry<String, String[]>>) params.entrySet()) {
-					String[] values = entry.getValue();
-					if (values != null) {
-						for (int i = 0, len = values.length; i < len; i++) {
-							values[i] = HtmlUtil.unescape(values[i]);
-						}
-						entry.setValue(values);
+			for (Map.Entry<String, String[]> entry : (Iterable<Map.Entry<String, String[]>>) params.entrySet()) {
+				String[] values = entry.getValue();
+				if (values != null) {
+					for (int i = 0, len = values.length; i < len; i++) {
+						// 参数 URL 编码，避免 特殊符号 不生效
+						values[i] = URLUtil.encodeAll(values[i]);
 					}
+					entry.setValue(values);
 				}
 			}
 		}
