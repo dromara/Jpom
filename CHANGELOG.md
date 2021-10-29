@@ -9,6 +9,7 @@
 1. 解决插件端请求参数 url 编码无法解析问题（感谢@知识就是力量）
 2. 【agent】项目文件夹为空不再提示错误信息
 3. 【server】fix 编辑构建选择 ssh 发布无法保存 （感谢 @Peision [Gitee issues I4CQWA](https://gitee.com/dromara/Jpom/issues/I4CQWA) ）
+4. 【server】fix ssh 终端未配置禁用命令不能输入空格问题
 
 ------
 
