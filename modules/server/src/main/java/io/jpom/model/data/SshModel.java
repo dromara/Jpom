@@ -203,6 +203,9 @@ public class SshModel extends BaseModel {
 	public static boolean checkInputItem(SshModel sshItem, String inputItem) {
 		// 检查禁止执行的命令
 		String notAllowedCommand = StrUtil.emptyToDefault(sshItem.getNotAllowedCommand(), StrUtil.EMPTY).toLowerCase();
+		if (StrUtil.isEmpty(notAllowedCommand)) {
+			return true;
+		}
 		List<String> split = StrUtil.split(notAllowedCommand, StrUtil.COMMA);
 		inputItem = inputItem.toLowerCase();
 		List<String> commands = StrUtil.split(inputItem, StrUtil.CR);
