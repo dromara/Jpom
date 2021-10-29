@@ -1,5 +1,5 @@
 {
-  "tag_name": "v2.7.0",
+  "tag_name": "v2.7.1",
   "agentUrl": "https://jpom-releases.oss-cn-hangzhou.aliyuncs.com/agent-2.7.0-release.zip",
   "serverUrl": "https://jpom-releases.oss-cn-hangzhou.aliyuncs.com/server-2.7.0-release.zip",
   "changelog": "https://gitee.com/dromara/Jpom/raw/master/CHANGELOG.md"
