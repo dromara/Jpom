@@ -105,14 +105,15 @@ public class SystemConfigController extends BaseServerController {
 		}
 		try {
 			YamlPropertySourceLoader yamlPropertySourceLoader = new YamlPropertySourceLoader();
-			ByteArrayResource resource = new ByteArrayResource(content.getBytes(StandardCharsets.UTF_8));
+			// @author hjk 前端编辑器允许使用tab键，并设定为2个空格，再转换为yml时要把tab键换成2个空格
+			ByteArrayResource resource = new ByteArrayResource(content.replace("\t", "  ").getBytes(StandardCharsets.UTF_8));
 			yamlPropertySourceLoader.load("test", resource);
 		} catch (Exception e) {
 			DefaultSystemLog.getLog().warn("内容格式错误，请检查修正", e);
 			return JsonMessage.getString(500, "内容格式错误，请检查修正:" + e.getMessage());
 		}
 		if (JpomManifest.getInstance().isDebug()) {
-			return JsonMessage.getString(405, "调试模式不支持在线修改,请到resource目录下");
+			return JsonMessage.getString(405, "调试模式下不支持在线修改,请到resources目录下的bin目录修改extConfig.yml");
 		}
 		File resourceFile = ExtConfigBean.getResourceFile();
 		FileUtil.writeString(content, resourceFile, CharsetUtil.CHARSET_UTF_8);
