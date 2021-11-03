@@ -84,8 +84,11 @@ public class H2ToolTest extends ApplicationStartTest {
 	 */
 	@Test
 	public void testH2RunScriptWithBackupSQL() throws SQLException, FileNotFoundException {
-		RunScript runScript = new RunScript();
-//		runScript.runTool();
+		// 备份 SQL
+		testH2ShellForBackupSQL();
+
+		// 恢复之前先删除数据库数据，以免冲突
+		testH2DropAllObjects();
 
 		// 备份 SQL 的目录
 		File file = FileUtil.file(ExtConfigBean.getInstance().getPath(), "db", JpomApplication.getAppType().name());
@@ -98,6 +101,37 @@ public class H2ToolTest extends ApplicationStartTest {
 		Connection connection = dataSource.getConnection();
 
 		RunScript.execute(connection, fileReader);
+	}
+
+	/**
+	 * H2 drop all objects
+	 * 删除 H2 数据库所有数据
+	 * @throws SQLException
+	 */
+	@Test
+	public void testH2DropAllObjects() throws SQLException {
+		// 数据源参数
+		String url = DbConfig.getInstance().getDbUrl();
+
+		ServerExtConfigBean serverExtConfigBean = ServerExtConfigBean.getInstance();
+		String user = serverExtConfigBean.getDbUserName();
+		String pass = serverExtConfigBean.getDbUserPwd();
+
+		// 加载数据源
+		DataSource dataSource = DSFactory.get();
+		Connection connection = dataSource.getConnection();
+
+		// 执行 SQL 备份脚本
+		Shell shell = new Shell();
+
+		String[] params = new String[] {
+				"-url", url,
+				"-user", user,
+				"-password", pass,
+				"-driver", "org.h2.Driver",
+				"-sql", "drop all objects"
+		};
+		shell.runTool(connection, params);
 	}
 
 	/**
