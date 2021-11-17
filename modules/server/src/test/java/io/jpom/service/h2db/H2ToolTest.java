@@ -75,8 +75,8 @@ public class H2ToolTest extends ApplicationStartTest {
 		 * password 表示登录密码
 		 * driver 是 jdbc 驱动
 		 * sql 是备份的 sql 语句
-		 * - 案例：script to ${fileName1} table ${tableName1},${tableName2}...
-		 * - script to 表示备份数据库
+		 * - 案例：script drop to ${fileName1} table ${tableName1},${tableName2}...
+		 * - script drop to 表示备份数据库，drop 表示建表之前会先删除表
 		 * - ${fileName1} 表示备份之后的文件名
 		 * - table 表示需要备份的表名称，后面跟多个表名，用英文逗号分割
 		 */
@@ -85,7 +85,7 @@ public class H2ToolTest extends ApplicationStartTest {
 				"-user", user,
 				"-password", pass,
 				"-driver", "org.h2.Driver",
-				"-sql", "script to '"+ path +"/backup.sql' table BUILD_INFO,USEROPERATELOGV1"
+				"-sql", "script DROP to '"+ path +"/backup.sql' table BUILD_INFO,USEROPERATELOGV1"
 		};
 		shell.runTool(connection, params);
 	}
