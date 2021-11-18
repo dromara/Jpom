@@ -9,7 +9,6 @@ import io.jpom.common.BaseAgentController;
 import io.jpom.common.commander.AbstractProjectCommander;
 import io.jpom.socket.AgentFileTailWatcher;
 import io.jpom.system.ConfigBean;
-import io.jpom.util.JvmUtil;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -46,7 +45,6 @@ public class AgentCacheManageController extends BaseAgentController {
         int oneLineCount = AgentFileTailWatcher.getOneLineCount();
         jsonObject.put("readFileOnLineCount", oneLineCount);
         //
-        jsonObject.put("pidError", JvmUtil.PID_ERROR.size());
         return JsonMessage.getString(200, "ok", jsonObject);
     }
 
@@ -70,9 +68,6 @@ public class AgentCacheManageController extends BaseAgentController {
                 if (!clean) {
                     return JsonMessage.getString(504, "清空文件缓存失败");
                 }
-                break;
-            case "pidError":
-                JvmUtil.PID_ERROR.clear();
                 break;
             default:
                 return JsonMessage.getString(405, "没有对应类型：" + type);

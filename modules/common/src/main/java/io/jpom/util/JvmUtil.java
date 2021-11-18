@@ -33,15 +33,11 @@ public class JvmUtil {
 	 */
 	private static final String OLD2_JPOM_PID_TAG = "Jpom.application";
 	private static final String POM_PID_TAG = "DJpom.application";
-	/**
-	 * 记录错误的进程信息，避免重复获取
-	 */
-	public static final TimedCache<String, Boolean> PID_ERROR = new TimedCache<>(TimeUnit.DAYS.toMillis(1));
 
 	/**
 	 * 获取进程标识
 	 *
-	 * @param id   id
+	 * @param id   i
 	 * @param path 路径
 	 * @return str
 	 */
