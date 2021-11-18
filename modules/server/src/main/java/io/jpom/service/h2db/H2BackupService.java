@@ -3,12 +3,15 @@ package io.jpom.service.h2db;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.db.ds.DSFactory;
 import cn.jiangzeyin.common.DefaultSystemLog;
+import org.h2.tools.RunScript;
 import org.h2.tools.Shell;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 
 import javax.sql.DataSource;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
@@ -70,5 +73,22 @@ public class H2BackupService {
 		shell.runTool(connection, params);
 	}
 
-	// 还原备份 SQL
+	/**
+	 * 还原备份 SQL
+	 * @param backupSqlPath backup SQL file path, absolute path
+	 * @throws SQLException
+	 * @throws FileNotFoundException
+	 */
+	public void restoreBackupSql(String backupSqlPath) throws SQLException, FileNotFoundException {
+		// 读取数据库备份文件
+		FileReader fileReader = new FileReader(backupSqlPath);
+
+		// 加载数据源
+		DataSource dataSource = DSFactory.get();
+		Assert.notNull(dataSource, "Restore Backup sql error...H2 DataSource not null");
+		Connection connection = dataSource.getConnection();
+
+		// 执行还原
+		RunScript.execute(connection, fileReader);
+	}
 }
