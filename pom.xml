@@ -26,13 +26,8 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <java.version>1.8</java.version>
-
         <spring-boot.version>2.4.8</spring-boot.version>
-
         <common-boot.version>[2.1.0,2.1.99]</common-boot.version>
-        <docker.registryUrl>registry.cn-beijing.aliyuncs.com</docker.registryUrl>
-        <docker.registry.name>fengshunli</docker.registry.name>
-        <docker.workdir>/tmp/</docker.workdir>
         <!-- 跳过测试 -->
         <skipTests>true</skipTests>
         <maven.test.skip>true</maven.test.skip>
@@ -67,15 +62,6 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-aop</artifactId>
-        </dependency>
-
-        <!-- tools-->
-        <dependency>
-            <groupId>com.sun</groupId>
-            <artifactId>tools</artifactId>
-            <version>${java.version}</version>
-            <scope>system</scope>
-            <systemPath>${toolsJar}</systemPath>
         </dependency>
 
         <dependency>
@@ -142,57 +128,10 @@
                     </execution>
                 </executions>
             </plugin>
-            <plugin>
-                <groupId>com.spotify</groupId>
-                <artifactId>docker-maven-plugin</artifactId>
-                <version>0.4.13</version>
-                <configuration>
-                    <pushImage>true</pushImage>
-                    <!--                    <dockerHost>http://39.105.190.109:2375</dockerHost>-->
-                    <imageName>${docker.registryUrl}/${docker.registry.name}/${project.artifactId}:${pom.version}
-                    </imageName>
-                    <baseImage>adoptopenjdk/openjdk8:jdk8u212-b03</baseImage>
-                    <maintainer>fsl 1171313930@qq.com</maintainer>
-                    <cmd>["java","-Xbootclasspath/a:/opt/java/openjdk/lib/tools.jar", "-Xms256m","-Xmx512m", "-jar",
-                        "${docker.workdir}${project.build.finalName}.jar", "--jpom.path=/opt/jpom/server"]
-                    </cmd>
-                    <resources>
-                        <resource>
-                            <targetPath>${docker.workdir}</targetPath>
-                            <directory>${project.build.directory}</directory>
-                            <include>${project.build.finalName}.jar</include>
-                        </resource>
-                    </resources>
-                </configuration>
-            </plugin>
         </plugins>
     </build>
 
     <profiles>
-        <profile>
-            <id>default-profile</id>
-            <activation>
-                <activeByDefault>true</activeByDefault>
-                <file>
-                    <exists>${env.JAVA_HOME}/lib/tools.jar</exists>
-                </file>
-            </activation>
-            <properties>
-                <toolsJar>${env.JAVA_HOME}/lib/tools.jar</toolsJar>
-            </properties>
-        </profile>
-        <profile>
-            <id>mac-profile</id>
-            <activation>
-                <activeByDefault>false</activeByDefault>
-                <file>
-                    <exists>${java.home}/../lib/tools.jar</exists>
-                </file>
-            </activation>
-            <properties>
-                <toolsJar>${java.home}/../lib/tools.jar</toolsJar>
-            </properties>
-        </profile>
         <profile>
             <id>install-plugin-profile</id>
         </profile>
