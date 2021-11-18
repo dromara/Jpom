@@ -1,5 +1,17 @@
 # 版本日志
 
+# 2.7.2 (fix)
+
+### 新增功能
+
+### 解决BUG、优化功能
+
+1. 【agent】解决 nginx 编辑配置文件 url 编码问题
+3. 【server】新增配置构建命令支持不检测删除命令 `build.checkDeleteCommand` (感谢@Dream)
+
+------
+
+
 # 2.7.1 (fix)
 
 ### 新增功能

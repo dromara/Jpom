@@ -30,6 +30,7 @@ import io.jpom.service.dblog.BuildInfoService;
 import io.jpom.service.dblog.DbBuildHistoryLogService;
 import io.jpom.service.dblog.RepositoryService;
 import io.jpom.service.node.ssh.SshService;
+import io.jpom.system.ServerExtConfigBean;
 import io.jpom.util.CommandUtil;
 import io.jpom.util.GitUtil;
 import org.springframework.http.MediaType;
@@ -139,8 +140,10 @@ public class BuildInfoController extends BaseServerController {
 			// 如果是 SVN
 			branchName = "trunk";
 		}
-		// 判断删除命令
-		Assert.state(!CommandUtil.checkContainsDel(script), "不能包含删除命令");
+		if (ServerExtConfigBean.getInstance().getBuildCheckDeleteCommand()) {
+			// 判断删除命令
+			Assert.state(!CommandUtil.checkContainsDel(script), "不能包含删除命令");
+		}
 		// 查询构建信息
 		BuildInfoModel buildInfoModel = buildInfoService.getByKey(id);
 		if (null == buildInfoModel) {
