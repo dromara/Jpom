@@ -105,4 +105,17 @@ ALTER TABLE BUILD_INFO
 ALTER TABLE BUILD_INFO
     ALTER COLUMN SCRIPT VARCHAR(500) comment '构建命令';
 
-
+-- 备份数据库信息表 @author Hotstrip
+CREATE TABLE IF NOT EXISTS PUBLIC.BACKUP_INFO
+(
+	ID               VARCHAR(50) not null comment 'id',
+	CREATETIMEMILLIS BIGINT COMMENT '数据创建时间',
+	MODIFYTIMEMILLIS BIGINT COMMENT '数据修改时间',
+	`NAME`           VARCHAR(50) comment '备份名称',
+	FILEPATH         VARCHAR(200) comment '文件地址',
+	BACKUPTYPE       int comment '备份类型{0: 全量, 1: 部分}',
+	FILESIZE         BIGINT comment '文件大小',
+	SHA1SUM          VARCHAR(50) comment 'SHA1 信息',
+	CONSTRAINT BACKUP_INFO_PK PRIMARY KEY (ID)
+);
+comment on table BACKUP_INFO is '备份数据库信息';
