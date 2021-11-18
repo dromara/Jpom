@@ -1,15 +1,16 @@
 # 版本日志
 
-# 2.7.2
+# 2.7.2 (fix)
 
 ### 新增功能
 
-1. 【server】fix 编辑构建选择 ssh 发布无法保存 （感谢 @Peision [Gitee issues I4CQWA](https://gitee.com/dromara/Jpom/issues/I4CQWA) ）
-2. 【server】ssh 安装插件端新增修改执行脚本权限参数配置 （感谢 @知识就是力量）
-
 ### 解决BUG、优化功能
 
+1. 【agent】解决 nginx 编辑配置文件 url 编码问题
+3. 【server】新增配置构建命令支持不检测删除命令 `build.checkDeleteCommand` (感谢@Dream)
+
 ------
+
 
 # 2.7.1 (fix)
 

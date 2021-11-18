@@ -127,9 +127,14 @@ public class ServerExtConfigBean implements DisposableBean {
 	@Value("${build.maxHistoryCount:1000}")
 	private int buildMaxHistoryCount;
 
-
+	/**
+	 * 每一项构建最多保存的历史份数
+	 */
 	@Value("${build.itemMaxHistoryCount:50}")
 	private int buildItemMaxHistoryCount;
+
+	@Value("${build.checkDeleteCommand:true}")
+	private Boolean buildCheckDeleteCommand;
 
 	/**
 	 * ssh 中执行命令 初始化的环境变量
@@ -222,6 +227,10 @@ public class ServerExtConfigBean implements DisposableBean {
 			cacheSize = DataSize.ofMegabytes(10);
 		}
 		return cacheSize;
+	}
+
+	public boolean getBuildCheckDeleteCommand() {
+		return buildCheckDeleteCommand != null && buildCheckDeleteCommand;
 	}
 
 	/**

@@ -131,7 +131,7 @@ public class NginxController extends BaseAgentController {
 	 * @return json
 	 */
 	@RequestMapping(value = "updateNgx", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	public String updateNgx(String name, String whitePath, String genre) {
+	public String updateNgx(String name, String whitePath, String genre, String context) {
 		Assert.hasText(name, "请填写文件名");
 		Assert.state(name.endsWith(".conf"), "文件后缀必须为\".conf\"");
 		//
@@ -142,7 +142,7 @@ public class NginxController extends BaseAgentController {
 		if ("add".equals(genre) && file.exists()) {
 			return JsonMessage.getString(400, "该文件已存在");
 		}
-		String context = getUnescapeParameter("context");
+		//String context = getUnescapeParameter("context");
 		if (StrUtil.isEmpty(context)) {
 			return JsonMessage.getString(400, "请填写配置信息");
 		}
