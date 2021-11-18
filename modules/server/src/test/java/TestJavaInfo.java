@@ -38,7 +38,7 @@ public class TestJavaInfo {
 //        String agent = StrUtil.format("{}{}lib{}management-agent.jar", SystemUtil.getJavaRuntimeInfo().getHomeDir(), File.separator, File.separator);
 //        virtualMachine.loadAgent(agent);
 //        virtualMachine.loadAgent(agent);
-        JvmUtil.importFrom(7292);
-        System.out.println(JvmUtil.importFrom(7292));
+        //JvmUtil.importFrom(7292);
+        //System.out.println(JvmUtil.importFrom(7292));
     }
 }

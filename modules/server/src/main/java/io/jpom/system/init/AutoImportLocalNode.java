@@ -33,7 +33,6 @@ import java.util.List;
 @PreLoadClass
 public class AutoImportLocalNode {
 
-	private static final String AGENT_MAIN_CLASS = "io.jpom.JpomAgentApplication";
 	private static NodeService nodeService;
 
 	@PreLoadMethod
@@ -58,7 +57,7 @@ public class AutoImportLocalNode {
 		}
 		//
 		try {
-			Integer mainClassPid = JvmUtil.findMainClassPid(AGENT_MAIN_CLASS);
+			Integer mainClassPid = JvmUtil.findMainClassPid(Type.Agent.getApplicationClass());
 			if (mainClassPid == null) {
 				return;
 			}
