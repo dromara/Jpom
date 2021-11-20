@@ -83,12 +83,13 @@ public class BackupInfoController extends BaseServerController {
 	 * 分页加载备份列表数据
 	 * @param limit    每页条数
 	 * @param page     页码
-	 * @param backupType 仓库类型 0: GIT 1: SVN
+	 * @param name     备份名称
+	 * @param backupType 备份类型{0: 全量, 1: 部分}
 	 * @return json
 	 */
 	@PostMapping(value = "/system/backup/list")
 	@Feature(method = MethodFeature.LOG)
-	public Object loadRepositoryList(@ValidatorConfig(value = {@ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "limit error")}, defaultVal = "10") int limit,
+	public Object loadBackupList(@ValidatorConfig(value = {@ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "limit error")}, defaultVal = "10") int limit,
 									 @ValidatorConfig(value = {@ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "page error")}, defaultVal = "1") int page,
 									 String name, Integer backupType) {
 		Page pageObj = new Page(page, limit);
@@ -109,7 +110,25 @@ public class BackupInfoController extends BaseServerController {
 
 	// 导入备份数据
 
-	// 删除备份数据
+	/**
+	 * 删除备份数据
+	 * @param id id
+	 * @return
+	 */
+	@PostMapping(value = "/system/backup/delete")
+	@Feature(method = MethodFeature.DEL)
+	public Object deleteBackup(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "数据 id 不能为空") String id) {
+		// 根据 id 查询备份信息
+		BackupInfoModel backupInfoModel = backupInfoService.getByKey(id);
+		Objects.requireNonNull(backupInfoModel, "备份数据不存在");
+
+		// 删除对应的文件
+		FileUtil.del(backupInfoModel.getFilePath());
+
+		// 删除备份信息
+		backupInfoService.delByKey(id);
+		return JsonMessage.toJson(200, "获取成功");
+	}
 
 	// 还原备份数据
 
