@@ -1,12 +1,11 @@
-/** * 该页面是老版本的构建信息页面，之后可能会删除，新版本的页面请参考 ./list-info.vue */
 <template>
   <div>
     <div ref="filter" class="filter">
-      <a-select v-model="listQuery.group" allowClear placeholder="请选择分组" class="filter-item" @change="handleFilter">
-        <a-select-option v-for="group in groupList" :key="group">{{ group }}</a-select-option>
+      <a-select v-model="listQuery.backupType" allowClear placeholder="请选择备份类型" class="filter-item" @change="handleFilter">
+        <a-select-option v-for="backupType in backupTypeList" :key="backupType.key">{{ backupType.value }}</a-select-option>
       </a-select>
       <a-button type="primary" @click="handleFilter">搜索</a-button>
-      <a-button type="primary" @click="handleAdd">新增</a-button>
+      <a-button type="primary" @click="handleAdd">导入备份</a-button>
       <a-button type="primary" @click="loadData">刷新</a-button>
     </div>
     <!-- 表格 -->
@@ -184,11 +183,6 @@
         <a-form-model-item v-if="temp.releaseMethod === 2" label="发布项目" prop="releaseMethodDataId">
           <a-cascader v-model="temp.releaseMethodDataIdList" :options="cascaderList" placeholder="Please select" />
         </a-form-model-item>
-        <a-form-model-item v-if="temp.releaseMethod === 2" label="发布后操作" prop="afterOpt">
-          <a-select v-model="temp.afterOpt" placeholder="请选择发布后操作">
-            <a-select-option v-for="opt in afterOptList" :key="opt.value">{{ opt.title }}</a-select-option>
-          </a-select>
-        </a-form-model-item>
         <!-- SSH -->
         <a-form-model-item v-if="temp.releaseMethod === 3" label="SSH/目录：" prop="releaseMethodDataId">
           <a-input-group compact>
@@ -239,7 +233,8 @@
 <script>
 import { mapGetters } from "vuex";
 import BuildLog from "./log";
-import { clearBuid, deleteBuild, editBuild, getBranchList, getBuildGroupList, getBuildList, getTriggerUrl, releaseMethodMap, resetTrigger, startBuild, stopBuild } from "../../api/build";
+import { getBackupList } from "../../api/backup-info";
+import { clearBuid, deleteBuild, editBuild, getBranchList, getTriggerUrl, releaseMethodMap, resetTrigger, startBuild, stopBuild } from "../../api/build";
 import { getDishPatchList } from "../../api/dispatch";
 import { getNodeProjectList } from "../../api/node";
 import { getSshList } from "../../api/ssh";
@@ -255,7 +250,10 @@ export default {
       loading: false,
       listQuery: {},
       tableHeight: "70vh",
-      groupList: [],
+      backupTypeList: [
+        {key: 0, value: '全量'},
+        {key: 1, value: '部分'}
+      ],
       list: [],
       branchList: [],
       dispatchList: [],
@@ -266,12 +264,6 @@ export default {
       addGroupvisible: false,
       triggerVisible: false,
       buildLogVisible: false,
-      afterOptList: [
-        { title: "不做任何操作", value: 0 },
-        { title: "并发重启", value: 1 },
-        { title: "完整顺序重启(有重启失败将结束本次)", value: 2 },
-        { title: "顺序重启(有重启失败将继续)", value: 3 },
-      ],
       columns: [
         { title: "名称", dataIndex: "name", width: 150, ellipsis: true, scopedSlots: { customRender: "name" } },
         { title: "分组", dataIndex: "group", width: 150, ellipsis: true, scopedSlots: { customRender: "group" } },
@@ -342,55 +334,23 @@ export default {
   computed: {
     ...mapGetters(["getGuideFlag"]),
   },
-  watch: {
-    getGuideFlag() {
-      this.introGuide();
-    },
-  },
   created() {
     this.calcTableHeight();
     this.loadGroupList();
     this.handleFilter();
   },
   methods: {
-    // 页面引导
-    introGuide() {
-      if (this.getGuideFlag) {
-        this.$introJs()
-          .setOptions({
-            hidePrev: true,
-            steps: [
-              {
-                title: "Jpom 导航助手",
-                element: document.querySelector(".jpom-target-dir"),
-                intro: "可以理解为项目打包的目录。如 Jpom 项目执行 <b>mvn clean package</b> 构建命令，构建产物相对路径为：<b>modules/server/target/server-2.4.2-release</b>",
-              },
-            ],
-          })
-          .start();
-        return false;
-      }
-      this.$introJs().exit();
-    },
     // 计算表格高度
     calcTableHeight() {
       this.$nextTick(() => {
         this.tableHeight = window.innerHeight - this.$refs["filter"].clientHeight - 135;
       });
     },
-    // 分组列表
-    loadGroupList() {
-      getBuildGroupList().then((res) => {
-        if (res.code === 200) {
-          this.groupList = res.data;
-        }
-      });
-    },
     // 加载数据
     loadData() {
       this.list = [];
       this.loading = true;
-      getBuildList(this.listQuery).then((res) => {
+      getBackupList(this.listQuery).then((res) => {
         if (res.code === 200) {
           this.list = res.data;
         }
