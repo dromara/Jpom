@@ -109,7 +109,9 @@ export default {
     },
     socketUrl() {
       const protocol = location.protocol === "https:" ? "wss://" : "ws://";
-      return `${protocol}${location.host}/node_update?userId=${this.getLongTermToken}&nodeId=system&type=nodeUpdate`;
+      const domain = window.routerBase;
+      const url = (domain + "/node_update").replace(new RegExp("//", "gm"), "/");
+      return `${protocol}${location.host}${url}?userId=${this.getLongTermToken}&nodeId=system&type=nodeUpdate`;
     },
   },
   mounted() {
