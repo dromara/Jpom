@@ -265,6 +265,7 @@ public class BuildInfoManage extends BaseBuild implements Runnable {
 			dbBuildHistoryLogService.updateResultDirFile(this.logId, resultDirFile);
 			//
 			this.buildInfoModel.setResultDirFile(resultDirFile);
+			this.baseBuildModule.setResultDirFile(resultDirFile);
 		}
 		return true;
 	}
