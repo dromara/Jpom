@@ -54,6 +54,12 @@ public class BackupInfoModel extends BaseDbModel {
 	 */
 	private String sha1Sum;
 
+	/**
+	 * 状态{0: 默认; 1: 成功; 2: 失败}
+	 * @return
+	 */
+	private Integer status;
+
 	public String getName() {
 		return name;
 	}
@@ -92,5 +98,13 @@ public class BackupInfoModel extends BaseDbModel {
 
 	public void setSha1Sum(String sha1Sum) {
 		this.sha1Sum = sha1Sum;
+	}
+
+	public Integer getStatus() {
+		return status;
+	}
+
+	public void setStatus(Integer status) {
+		this.status = status;
 	}
 }

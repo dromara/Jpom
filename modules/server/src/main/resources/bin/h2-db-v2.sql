@@ -116,6 +116,7 @@ CREATE TABLE IF NOT EXISTS PUBLIC.BACKUP_INFO
 	BACKUPTYPE       int comment '备份类型{0: 全量, 1: 部分}',
 	FILESIZE         BIGINT comment '文件大小',
 	SHA1SUM          VARCHAR(50) comment 'SHA1 信息',
+	`STATUS`         int default '0' comment '状态{0: 默认; 1: 成功; 2: 失败}',
 	CONSTRAINT BACKUP_INFO_PK PRIMARY KEY (ID)
 );
 comment on table BACKUP_INFO is '备份数据库信息';

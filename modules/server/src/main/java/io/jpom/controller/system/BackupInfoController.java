@@ -22,11 +22,7 @@
  */
 package io.jpom.controller.system;
 
-import cn.hutool.core.convert.Convert;
 import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.lang.Tuple;
-import cn.hutool.core.util.IdUtil;
-import cn.hutool.core.util.StrUtil;
 import cn.hutool.db.Entity;
 import cn.hutool.db.Page;
 import cn.hutool.db.PageResult;
@@ -36,34 +32,20 @@ import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.validator.ValidatorConfig;
 import cn.jiangzeyin.common.validator.ValidatorItem;
 import cn.jiangzeyin.common.validator.ValidatorRule;
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import io.jpom.build.BuildUtil;
+import io.jpom.JpomApplication;
 import io.jpom.common.BaseServerController;
 import io.jpom.common.Const;
-import io.jpom.common.interceptor.OptLog;
-import io.jpom.model.AfterOpt;
-import io.jpom.model.BaseEnum;
-import io.jpom.model.data.*;
-import io.jpom.model.enums.BuildReleaseMethod;
-import io.jpom.model.log.UserOperateLogV1;
+import io.jpom.model.data.BackupInfoModel;
 import io.jpom.plugin.ClassFeature;
 import io.jpom.plugin.Feature;
 import io.jpom.plugin.MethodFeature;
 import io.jpom.service.dblog.BackupInfoService;
-import io.jpom.service.dblog.BuildInfoService;
-import io.jpom.service.dblog.DbBuildHistoryLogService;
-import io.jpom.service.dblog.RepositoryService;
-import io.jpom.service.node.ssh.SshService;
-import io.jpom.system.ServerExtConfigBean;
-import io.jpom.util.CommandUtil;
-import io.jpom.util.GitUtil;
-import org.springframework.http.MediaType;
-import org.springframework.util.Assert;
-import org.springframework.web.bind.annotation.*;
+import io.jpom.system.ExtConfigBean;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
-import java.io.File;
 import java.util.List;
 import java.util.Objects;
 
@@ -130,8 +112,36 @@ public class BackupInfoController extends BaseServerController {
 		return JsonMessage.toJson(200, "获取成功");
 	}
 
-	// 还原备份数据
+	/**
+	 * 还原备份数据
+	 * @param id
+	 * @return
+	 */
+	@PostMapping(value = "/system/backup/restore")
+	@Feature(method = MethodFeature.EDIT)
+	public Object restoreBackup(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "数据 id 不能为空") String id) {
+		// 根据 id 查询备份信息
+		BackupInfoModel backupInfoModel = backupInfoService.getByKey(id);
+		Objects.requireNonNull(backupInfoModel, "备份数据不存在");
 
-	// 创建备份任务
+		// 还原备份文件
+		boolean flag = backupInfoService.restoreWithSql(backupInfoModel.getFilePath());
+		if (flag)
+			return JsonMessage.toJson(200, "还原备份数据成功");
+		return JsonMessage.toJson(400, "还原备份数据失败");
+	}
+
+	/**
+	 * 创建备份任务
+	 * @param tableNameList
+	 * @return
+	 */
+	@PostMapping(value = "/system/backup/create")
+	@Feature(method = MethodFeature.EXECUTE)
+	public Object backup(List<String> tableNameList) {
+		String backupSqlPath = FileUtil.file(ExtConfigBean.getInstance().getPath(), "db", Const.BACKUP_DIRECTORY_NAME).getAbsolutePath();
+		backupInfoService.backupToSql(backupSqlPath, tableNameList);
+		return JsonMessage.toJson(200, "操作成功，请稍后刷新查看备份状态");
+	}
 
 }

@@ -20,44 +20,41 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package io.jpom.common;
+package io.jpom.model.enums;
+
+import io.jpom.model.BaseEnum;
 
 /**
+ * backup type
+ *
  * @author Hotstrip
- * Const class
+ * @since 2021-11-27
  */
-public class Const {
+public enum BackupStatusEnum implements BaseEnum {
 	/**
-	 * String const
+	 * 状态{0: 默认; 1: 成功; 2: 失败}
 	 */
-	public static final String ID_STR = "id";
-	public static final String GROUP_STR = "group";
-	public static final String GROUP_COLUMN_STR = "`group`";
+	DEFAULT(0, "默认"),
+	SUCCESS(1, "备份成功"),
+	FAILED(1, "备份失败"),
+	;
 
+	BackupStatusEnum(int code, String desc) {
+		this.code = code;
+		this.desc = desc;
+	}
 
-	/**
-	 * 应用程序类型的配置 key
-	 */
-	public static final String APPLICATION_NAME = "spring.application.name";
+	int code;
+	String desc;
 
-	/**
-	 * String get
-	 */
-	public static final String GET_STR = "get";
+	@Override
+	public int getCode() {
+		return code;
+	}
 
+	@Override
+	public String getDesc() {
+		return desc;
+	}
 
-	/**
-	 * id_rsa
-	 */
-	public static final String ID_RSA = "_id_rsa";
-	/**
-	 * sshkey
-	 */
-	public static final String SSH_KEY = "sshkey";
-
-	/**
-	 * SQL backup default directory name
-	 * 数据库备份默认目录名称
-	 */
-	public static final String BACKUP_DIRECTORY_NAME = "backup";
 }
