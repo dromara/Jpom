@@ -28,6 +28,7 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SecureUtil;
+import cn.hutool.db.Entity;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import io.jpom.JpomApplication;
 import io.jpom.common.Const;
@@ -41,14 +42,18 @@ import io.jpom.system.ServerExtConfigBean;
 import io.jpom.system.db.DbConfig;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 
 import javax.annotation.Resource;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * 备份数据库 service
@@ -137,5 +142,21 @@ public class BackupInfoService extends BaseDbService<BackupInfoModel> {
 					e.getMessage(), e.getCause());
 			return false;
 		}
+	}
+
+	/**
+	 * load table name list from h2 database
+	 *
+	 * @return list
+	 */
+	public List<String> h2TableNameList() {
+		String sql = "show tables;";
+		List<Entity> list = super.query(sql);
+		// 筛选字段
+		return list.stream()
+				.filter(entity -> StringUtils.hasLength(String.valueOf(entity.get(Const.TABLE_NAME))))
+				.flatMap(entity -> Stream.of(String.valueOf(entity.get(Const.TABLE_NAME))))
+				.distinct()
+				.collect(Collectors.toList());
 	}
 }

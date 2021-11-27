@@ -60,4 +60,8 @@ public class Const {
 	 * 数据库备份默认目录名称
 	 */
 	public static final String BACKUP_DIRECTORY_NAME = "backup";
+	/**
+	 * h2 数据库表名字段
+	 */
+	public static final String TABLE_NAME = "TABLE_NAME";
 }

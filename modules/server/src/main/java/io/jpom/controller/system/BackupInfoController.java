@@ -33,7 +33,6 @@ import cn.jiangzeyin.common.validator.ValidatorConfig;
 import cn.jiangzeyin.common.validator.ValidatorItem;
 import cn.jiangzeyin.common.validator.ValidatorRule;
 import com.alibaba.fastjson.JSONObject;
-import io.jpom.JpomApplication;
 import io.jpom.common.BaseServerController;
 import io.jpom.common.Const;
 import io.jpom.model.data.BackupInfoModel;
@@ -90,11 +89,9 @@ public class BackupInfoController extends BaseServerController {
 		return jsonObject;
 	}
 
-	// 导入备份数据
-
 	/**
 	 * 删除备份数据
-	 * @param id id
+	 * @param id 备份 ID
 	 * @return
 	 */
 	@PostMapping(value = "/system/backup/delete")
@@ -114,7 +111,7 @@ public class BackupInfoController extends BaseServerController {
 
 	/**
 	 * 还原备份数据
-	 * @param id
+	 * @param id 备份 ID
 	 * @return
 	 */
 	@PostMapping(value = "/system/backup/restore")
@@ -133,7 +130,7 @@ public class BackupInfoController extends BaseServerController {
 
 	/**
 	 * 创建备份任务
-	 * @param tableNameList
+	 * @param tableNameList 选中备份的表名称
 	 * @return
 	 */
 	@PostMapping(value = "/system/backup/create")
@@ -142,6 +139,19 @@ public class BackupInfoController extends BaseServerController {
 		String backupSqlPath = FileUtil.file(ExtConfigBean.getInstance().getPath(), "db", Const.BACKUP_DIRECTORY_NAME).getAbsolutePath();
 		backupInfoService.backupToSql(backupSqlPath, tableNameList);
 		return JsonMessage.toJson(200, "操作成功，请稍后刷新查看备份状态");
+	}
+
+	// 导入备份数据
+
+	/**
+	 * 读取数据库表名称列表
+	 * @return
+	 */
+	@PostMapping(value = "/system/backup/table-name-list")
+	@Feature(method = MethodFeature.LIST)
+	public Object loadTableNameList() {
+		List<String> tableNameList = backupInfoService.h2TableNameList();
+		return JsonMessage.toJson(200, "获取成功", tableNameList);
 	}
 
 }
