@@ -52,7 +52,7 @@ public class JpomAgentApplication {
 				// 拦截器
 				.addInterceptor(AuthorizeInterceptor.class)
 				// 添加 参数 url 解码
-				.addHandlerMethodArgumentResolver(UrlDecodeHandlerMethodArgumentResolver.class)
+				//				.addHandlerMethodArgumentResolver(UrlDecodeHandlerMethodArgumentResolver.class)
 				.run(args);
 	}
 

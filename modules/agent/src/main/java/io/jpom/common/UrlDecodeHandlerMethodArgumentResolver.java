@@ -41,24 +41,24 @@ import java.lang.reflect.Field;
  */
 public class UrlDecodeHandlerMethodArgumentResolver extends DefaultHandlerMethodArgumentResolver {
 
-	@Override
-	public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer, NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws Exception {
-		Object argument = super.resolveArgument(parameter, mavContainer, webRequest, binderFactory);
-		if (argument instanceof String) {
-			// 解码
-			return URLUtil.decode(argument.toString());
-		} else if (argument instanceof BaseJsonModel) {
-			//	解码对象属性
-			Field[] fields = ReflectUtil.getFields(argument.getClass());
-			for (Field field : fields) {
-				Class<?> type = field.getType();
-				if (type == String.class) {
-					String fieldValue = (String) ReflectUtil.getFieldValue(argument, field);
-					fieldValue = URLUtil.decode(fieldValue);
-					ReflectUtil.setFieldValue(argument, field, fieldValue);
-				}
-			}
-		}
-		return argument;
-	}
+//	@Override
+//	public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer, NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws Exception {
+//		Object argument = super.resolveArgument(parameter, mavContainer, webRequest, binderFactory);
+//		if (argument instanceof String) {
+//			// 解码
+//			return URLUtil.decode(argument.toString());
+//		} else if (argument instanceof BaseJsonModel) {
+//			//	解码对象属性
+//			Field[] fields = ReflectUtil.getFields(argument.getClass());
+//			for (Field field : fields) {
+//				Class<?> type = field.getType();
+//				if (type == String.class) {
+//					String fieldValue = (String) ReflectUtil.getFieldValue(argument, field);
+//					fieldValue = URLUtil.decode(fieldValue);
+//					ReflectUtil.setFieldValue(argument, field, fieldValue);
+//				}
+//			}
+//		}
+//		return argument;
+//	}
 }
