@@ -82,10 +82,13 @@ public class RemoteVersion {
 	 */
 	private String serverUrl;
 	/**
+	 * 更新日志 (远程url)
+	 */
+	private String changelogUrl;
+	/**
 	 * 更新日志
 	 */
 	private String changelog;
-
 	/**
 	 * 上次获取时间
 	 */
@@ -142,6 +145,14 @@ public class RemoteVersion {
 
 	public void setLastTime(Long lastTime) {
 		this.lastTime = lastTime;
+	}
+
+	public String getChangelogUrl() {
+		return changelogUrl;
+	}
+
+	public void setChangelogUrl(String changelogUrl) {
+		this.changelogUrl = changelogUrl;
 	}
 
 	@Override
@@ -218,13 +229,19 @@ public class RemoteVersion {
 			tagName = StrUtil.removePrefixIgnoreCase(tagName, "v");
 			remoteVersion.setUpgrade(StrUtil.compareVersion(version, tagName) < 0);
 		} else {
-			remoteVersion.setUpgrade(false);
+			remoteVersion.setUpgrade(true);
 		}
 		// 检查是否存在下载地址
 		Type type = instance.getType();
 		String remoteUrl = type.getRemoteUrl(remoteVersion);
 		if (StrUtil.isEmpty(remoteUrl)) {
 			remoteVersion.setUpgrade(false);
+		}
+		// 获取 changelog
+		String changelogUrl = remoteVersion.getChangelogUrl();
+		if (StrUtil.isNotEmpty(changelogUrl)) {
+			String body = HttpUtil.createGet(changelogUrl).execute().body();
+			remoteVersion.setChangelog(body);
 		}
 		//
 		FileUtil.writeUtf8String(remoteVersion.toString(), getFile());
@@ -263,29 +280,43 @@ public class RemoteVersion {
 	}
 
 	/**
+	 * 下载
+	 *
+	 * @param savePath 下载文件保存路径
+	 * @param type     类型
+	 * @return 保存的全路径
+	 * @throws IOException 异常
+	 */
+	public static Tuple download(String savePath, Type type) throws IOException {
+		RemoteVersion remoteVersion = loadRemoteInfo();
+		Assert.notNull(remoteVersion, "没有可用的新版本升级:-1");
+		Assert.state(remoteVersion.getUpgrade() != null && remoteVersion.getUpgrade(), "没有可用的新版本升级");
+		// 检查是否存在下载地址
+		String remoteUrl = type.getRemoteUrl(remoteVersion);
+		Assert.hasText(remoteUrl, "存在新版本,下载地址不可用");
+		// 下载
+		File downloadFileFromUrl = HttpUtil.downloadFileFromUrl(remoteUrl, savePath);
+		// 解析压缩包
+		File file = JpomManifest.zipFileFind(FileUtil.getAbsolutePath(downloadFileFromUrl), type, savePath);
+		// 检查
+		JsonMessage<Tuple> error = JpomManifest.checkJpomJar(FileUtil.getAbsolutePath(file), type.getApplicationClass());
+		Assert.state(error.getCode() == HttpStatus.HTTP_OK, error.getMsg());
+		return error.getData();
+	}
+
+	/**
 	 * 升级
 	 *
 	 * @param savePath 下载文件保存路径
 	 * @throws IOException 异常
 	 */
 	public static void upgrade(String savePath) throws IOException {
-		RemoteVersion remoteVersion = loadRemoteInfo();
-		Assert.notNull(remoteVersion, "没有可用的新版本升级:-1");
-		Assert.state(remoteVersion.getUpgrade() != null && remoteVersion.getUpgrade(), "没有可用的新版本升级");
-		// 检查是否存在下载地址
 		Type type = JpomManifest.getInstance().getType();
-		String remoteUrl = type.getRemoteUrl(remoteVersion);
-		Assert.hasText(remoteUrl, "存在新版本,下载地址不可用");
 		// 下载
-		File versionFile = HttpUtil.downloadFileFromUrl(remoteUrl, savePath);
-		// 解析压缩包
-		File file = JpomManifest.zipFileFind(FileUtil.getAbsolutePath(versionFile), type, savePath);
+		Tuple data = download(savePath, type);
+		File file = data.get(3);
 		// 基础检查
 		String path = FileUtil.getAbsolutePath(file);
-		JsonMessage<Tuple> error = JpomManifest.checkJpomJar(path, type.getApplicationClass());
-		Assert.state(error.getCode() == HttpStatus.HTTP_OK, error.getMsg());
-		//
-		Tuple data = error.getData();
 		String version = data.get(0);
 		JpomManifest.releaseJar(path, version);
 		//

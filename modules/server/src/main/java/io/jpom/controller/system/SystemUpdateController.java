@@ -44,6 +44,7 @@ import io.jpom.common.interceptor.OptLog;
 import io.jpom.model.data.NodeModel;
 import io.jpom.model.log.UserOperateLogV1;
 import io.jpom.permission.SystemPermission;
+import io.jpom.system.ConfigBean;
 import io.jpom.system.ServerConfigBean;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
@@ -79,6 +80,11 @@ public class SystemUpdateController extends BaseServerController {
 		return JsonMessage.getString(200, "", jsonObject);
 	}
 
+	/**
+	 * 更新日志
+	 *
+	 * @return changelog md
+	 */
 	@PostMapping(value = "change_log", produces = MediaType.APPLICATION_JSON_VALUE)
 	public String changeLog() {
 		NodeModel nodeModel = tryGetNode();
@@ -143,5 +149,21 @@ public class SystemUpdateController extends BaseServerController {
 		}
 		RemoteVersion remoteVersion = RemoteVersion.loadRemoteInfo();
 		return JsonMessage.getString(200, "", remoteVersion);
+	}
+
+	/**
+	 * 远程下载升级
+	 *
+	 * @return json
+	 * @see RemoteVersion
+	 */
+	@GetMapping(value = "remote_upgrade.json", produces = MediaType.APPLICATION_JSON_VALUE)
+	public String upgrade() throws IOException {
+		NodeModel nodeModel = tryGetNode();
+		if (nodeModel != null) {
+			return NodeForward.request(getNode(), getRequest(), NodeUrl.REMOTE_UPGRADE).toString();
+		}
+		RemoteVersion.upgrade(ConfigBean.getInstance().getTempPath().getAbsolutePath());
+		return JsonMessage.getString(200, "升级中大约需要30秒");
 	}
 }

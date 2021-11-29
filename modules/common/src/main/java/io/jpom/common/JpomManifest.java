@@ -137,7 +137,7 @@ public class JpomManifest {
 				String timeStamp = attributes.getValue("Jpom-Timestamp");
 				timeStamp = parseJpomTime(timeStamp);
 				String mainClass = attributes.getValue(Attributes.Name.MAIN_CLASS);
-				return new Tuple(version, timeStamp, mainClass);
+				return new Tuple(version, timeStamp, mainClass, jarFile);
 			}
 		}
 		return null;

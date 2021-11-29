@@ -74,11 +74,9 @@ public class UploadFileModel extends BaseModel {
         this.completeSize += data.length;
         File file = new File(this.getFilePath());
         FileUtil.mkParentDirs(file);
-        try {
-            FileOutputStream fileOutputStream = new FileOutputStream(file, true);
+        try(FileOutputStream fileOutputStream = new FileOutputStream(file, true)) {
             fileOutputStream.write(data);
             fileOutputStream.flush();
-            fileOutputStream.close();
         } catch (IOException e) {
             e.printStackTrace();
         }

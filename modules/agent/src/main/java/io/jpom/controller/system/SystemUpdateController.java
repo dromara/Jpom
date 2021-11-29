@@ -38,6 +38,7 @@ import io.jpom.common.JpomManifest;
 import io.jpom.common.RemoteVersion;
 import io.jpom.common.Type;
 import io.jpom.system.AgentConfigBean;
+import io.jpom.system.ConfigBean;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -108,5 +109,17 @@ public class SystemUpdateController extends BaseAgentController {
 	public String checkVersion() {
 		RemoteVersion remoteVersion = RemoteVersion.loadRemoteInfo();
 		return JsonMessage.getString(200, "", remoteVersion);
+	}
+
+	/**
+	 * 远程下载升级
+	 *
+	 * @return json
+	 * @see RemoteVersion
+	 */
+	@PostMapping(value = "remote_upgrade.json", produces = MediaType.APPLICATION_JSON_VALUE)
+	public String upgrade() throws IOException {
+		RemoteVersion.upgrade(ConfigBean.getInstance().getTempPath().getAbsolutePath());
+		return JsonMessage.getString(200, "升级中大约需要30秒");
 	}
 }

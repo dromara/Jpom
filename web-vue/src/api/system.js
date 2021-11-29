@@ -220,3 +220,16 @@ export function checkVersion(nodeId) {
     data: { nodeId },
   });
 }
+
+/**
+ * 远程升级
+ *@param {String} nodeId 节点 ID
+ */
+export function remoteUpgrade(nodeId) {
+  return axios({
+    url: "/system/remote_upgrade.json",
+    method: "get",
+    headers: {},
+    data: { nodeId },
+  });
+}
