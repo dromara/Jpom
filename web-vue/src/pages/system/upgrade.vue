@@ -1,4 +1,5 @@
 <template>
+  <!-- 已经独立出公共组件 -->
   <upgrade></upgrade>
 </template>
 <script>

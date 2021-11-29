@@ -7,7 +7,7 @@
       <a-timeline-item>
         <span class="layui-elem-quote">当前版本号：{{ temp.version }} </span>
         <template v-if="temp.upgrade !== undefined">
-          <a-tag v-if="temp.upgrade" color="pink">新版本：{{ temp.newVersion }} </a-tag>
+          <a-tag v-if="temp.upgrade" color="pink" @click="upgrageVerion">新版本：{{ temp.newVersion }} </a-tag>
           <a-tag v-else color="orange" @click="checkVersion">
             <a-icon type="rocket" />
           </a-tag>
@@ -37,7 +37,7 @@
   </div>
 </template>
 <script>
-import { systemInfo, uploadUpgradeFile, changelog, checkVersion } from "@/api/system";
+import { systemInfo, uploadUpgradeFile, changelog, checkVersion, remoteUpgrade } from "@/api/system";
 import MarkdownItVue from "markdown-it-vue";
 import "markdown-it-vue/dist/markdown-it-vue.css";
 export default {
@@ -81,12 +81,14 @@ export default {
         if (res.code === 200) {
           this.temp = res.data?.manifest;
           //
-          // res.data.
-          this.showVersion(false, res.data?.remoteVersion);
+
+          changelog(this.nodeId).then((resLog) => {
+            this.changelog = resLog.data;
+            //
+            // res.data.
+            this.showVersion(false, res.data?.remoteVersion);
+          });
         }
-      });
-      changelog(this.nodeId).then((res) => {
-        this.changelog = res.data;
       });
     },
     // 处理文件移除
@@ -165,12 +167,36 @@ export default {
       }
       this.temp.upgrade = data.upgrade;
       this.temp.newVersion = data.tagName;
+      this.changelog = data.changelog;
       if (tip) {
         this.$notification.success({
           message: this.temp.upgrade ? "检测到新版本 " + data.tagName : "没有检查到最新版",
           duration: 2,
         });
       }
+    },
+    // 升级
+    upgrageVerion() {
+      this.$confirm({
+        title: "系统提示",
+        content: "启动要升级到最新版本吗？",
+        okText: "确认",
+        cancelText: "取消",
+        onOk: () => {
+          // 重新发布
+          this.spinning = true;
+          remoteUpgrade(this.nodeId).then((res) => {
+            if (res.code === 200) {
+              this.$notification.success({
+                message: res.msg,
+                duration: 2,
+              });
+              this.checkUpgradeVersion();
+              this.spinning = false;
+            }
+          });
+        },
+      });
     },
   },
 };

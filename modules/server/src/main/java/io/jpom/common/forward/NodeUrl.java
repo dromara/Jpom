@@ -208,6 +208,10 @@ public enum NodeUrl {
 	 * 更新系统jar包
 	 */
 	CHECK_VERSION("/system/check_version.json"),
+	/**
+	 * 远程升级
+	 */
+	REMOTE_UPGRADE("/system/remote_upgrade.json"),
 	CHANGE_LOG("/system/change_log"),
 
 	/**
