@@ -23,6 +23,7 @@
 package io.jpom.controller.system;
 
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.db.Entity;
 import cn.hutool.db.Page;
 import cn.hutool.db.PageResult;
@@ -71,14 +72,14 @@ public class BackupInfoController extends BaseServerController {
 	@PostMapping(value = "/system/backup/list")
 	@Feature(method = MethodFeature.LOG)
 	public Object loadBackupList(@ValidatorConfig(value = {@ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "limit error")}, defaultVal = "10") int limit,
-									 @ValidatorConfig(value = {@ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "page error")}, defaultVal = "1") int page,
-									 String name, Integer backupType) {
+								 @ValidatorConfig(value = {@ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "page error")}, defaultVal = "1") int page,
+								 String name, Integer backupType) {
 		Page pageObj = new Page(page, limit);
 		pageObj.addOrder(new Order("modifyTimeMillis", Direction.DESC));
 
 		// 设置查询参数
 		Entity entity = Entity.create();
-		entity.setIgnoreNull("name", name);
+		entity.setIgnoreNull("name", StrUtil.isBlank(name) ? null : name);
 		entity.setIgnoreNull("backupType", backupType);
 
 		// 查询数据库
@@ -106,11 +107,12 @@ public class BackupInfoController extends BaseServerController {
 
 		// 删除备份信息
 		backupInfoService.delByKey(id);
-		return JsonMessage.toJson(200, "获取成功");
+		return JsonMessage.toJson(200, "删除成功");
 	}
 
 	/**
 	 * 还原备份数据
+	 * 还原的时候不能异步了，只能等待备份还原成功或者失败
 	 * @param id 备份 ID
 	 * @return
 	 */
