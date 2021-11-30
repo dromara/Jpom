@@ -64,4 +64,8 @@ public class Const {
 	 * h2 数据库表名字段
 	 */
 	public static final String TABLE_NAME = "TABLE_NAME";
+	/**
+	 * 备份 SQL 文件 后缀
+	 */
+	public static final String SQL_FILE_SUFFIX = ".sql";
 }
