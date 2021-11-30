@@ -22,15 +22,14 @@
  */
 package io.jpom.service.dblog;
 
+import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.date.DatePattern;
 import cn.hutool.core.date.LocalDateTimeUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.IdUtil;
-import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SecureUtil;
 import cn.hutool.db.Entity;
 import cn.jiangzeyin.common.DefaultSystemLog;
-import io.jpom.JpomApplication;
 import io.jpom.common.Const;
 import io.jpom.model.data.BackupInfoModel;
 import io.jpom.model.enums.BackupStatusEnum;
@@ -46,10 +45,8 @@ import org.springframework.util.StringUtils;
 
 import javax.annotation.Resource;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.sql.SQLException;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
@@ -68,16 +65,15 @@ public class BackupInfoService extends BaseDbService<BackupInfoModel> {
 
 	/**
 	 * 备份数据库 SQL 文件
-	 * @param backupSqlPath 备份 SQL 文件路径，默认为数据库文件的同级 backup 目录
 	 * @param tableNameList 需要备份的表名称列表，如果是全库备份，则不需要
 	 */
-	public void backupToSql(String backupSqlPath, final List<String> tableNameList) {
-		// 判断备份文件路径是否为空
-		if (StrUtil.isBlank(backupSqlPath)) {
-			// 设置默认备份 SQL 的目录
-			File file = FileUtil.file(ExtConfigBean.getInstance().getPath(), "db", Const.BACKUP_DIRECTORY_NAME);
-			backupSqlPath = FileUtil.getAbsolutePath(file);
-		}
+	public void backupToSql(final List<String> tableNameList) {
+		final String fileName = LocalDateTimeUtil.format(LocalDateTimeUtil.now(), DatePattern.PURE_DATETIME_PATTERN);
+
+		// 设置默认备份 SQL 的文件地址
+		File file = FileUtil.file(ExtConfigBean.getInstance().getPath(), "db", Const.BACKUP_DIRECTORY_NAME, fileName + Const.SQL_FILE_SUFFIX);
+		final String backupSqlPath = FileUtil.getAbsolutePath(file);
+
 		// 数据源参数
 		final String url = DbConfig.getInstance().getDbUrl();
 
@@ -88,7 +84,7 @@ public class BackupInfoService extends BaseDbService<BackupInfoModel> {
 		// 先构造备份信息插入数据库
 		BackupInfoModel backupInfoModel = new BackupInfoModel();
 		backupInfoModel.setId(IdUtil.fastSimpleUUID());
-		backupInfoModel.setName(LocalDateTimeUtil.format(LocalDateTimeUtil.now(), DatePattern.PURE_DATETIME_PATTERN));
+		backupInfoModel.setName(fileName);
 		// 判断备份类型
 		int backupType = BackupTypeEnum.ALL.getCode();
 		if (!CollectionUtils.isEmpty(tableNameList)) {
@@ -100,24 +96,25 @@ public class BackupInfoService extends BaseDbService<BackupInfoModel> {
 
 		// 开启一个子线程去执行任务，任务完成之后修改对应的数据库备份信息
 		ExecutorService service =  Executors.newSingleThreadExecutor();
-		final String finalBackupSqlPath = backupSqlPath;
 		service.submit(() -> {
+			// 修改用的实体类
+			BackupInfoModel backupInfo = new BackupInfoModel();
+			BeanUtil.copyProperties(backupInfoModel, backupInfo);
 			try {
 				DefaultSystemLog.getLog().info("start a new Thread to execute H2 Database backup...start");
-				h2BackupService.backupSql(url, user, pass, finalBackupSqlPath, tableNameList);
+				h2BackupService.backupSql(url, user, pass, backupSqlPath, tableNameList);
 				// 修改备份任务执行完成
-				File file = new File(finalBackupSqlPath);
-				backupInfoModel.setFileSize(FileUtil.size(file));
-				backupInfoModel.setSha1Sum(SecureUtil.sha1(file));
-				backupInfoModel.setStatus(BackupStatusEnum.SUCCESS.getCode());
-				update(backupInfoModel);
+				backupInfo.setFileSize(FileUtil.size(file));
+				backupInfo.setSha1Sum(SecureUtil.sha1(file));
+				backupInfo.setStatus(BackupStatusEnum.SUCCESS.getCode());
+				update(backupInfo);
 				DefaultSystemLog.getLog().info("start a new Thread to execute H2 Database backup...success");
 			} catch (SQLException e) {
 				// 记录错误日志信息，修改备份任务执行失败
 				DefaultSystemLog.getLog().info("start a new Thread to execute H2 Database backup...catch exception...message: {}, cause: {}",
 						e.getMessage(), e.getCause());
-				backupInfoModel.setStatus(BackupStatusEnum.FAILED.getCode());
-				update(backupInfoModel);
+				backupInfo.setStatus(BackupStatusEnum.FAILED.getCode());
+				update(backupInfo);
 			}
 		});
 		service.shutdown();

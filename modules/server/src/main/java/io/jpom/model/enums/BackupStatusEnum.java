@@ -36,7 +36,7 @@ public enum BackupStatusEnum implements BaseEnum {
 	 */
 	DEFAULT(0, "默认"),
 	SUCCESS(1, "备份成功"),
-	FAILED(1, "备份失败"),
+	FAILED(2, "备份失败"),
 	;
 
 	BackupStatusEnum(int code, String desc) {

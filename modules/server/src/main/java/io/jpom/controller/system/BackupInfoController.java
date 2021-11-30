@@ -33,6 +33,7 @@ import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.validator.ValidatorConfig;
 import cn.jiangzeyin.common.validator.ValidatorItem;
 import cn.jiangzeyin.common.validator.ValidatorRule;
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.common.BaseServerController;
 import io.jpom.common.Const;
@@ -43,10 +44,12 @@ import io.jpom.plugin.MethodFeature;
 import io.jpom.service.dblog.BackupInfoService;
 import io.jpom.system.ExtConfigBean;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -132,14 +135,15 @@ public class BackupInfoController extends BaseServerController {
 
 	/**
 	 * 创建备份任务
-	 * @param tableNameList 选中备份的表名称
+	 * @param map 参数
+	 * map.tableNameList 选中备份的表名称
 	 * @return
 	 */
 	@PostMapping(value = "/system/backup/create")
 	@Feature(method = MethodFeature.EXECUTE)
-	public Object backup(List<String> tableNameList) {
-		String backupSqlPath = FileUtil.file(ExtConfigBean.getInstance().getPath(), "db", Const.BACKUP_DIRECTORY_NAME).getAbsolutePath();
-		backupInfoService.backupToSql(backupSqlPath, tableNameList);
+	public Object backup(@RequestBody Map<String, Object> map) {
+		List<String> tableNameList = JSON.parseArray(JSON.toJSONString(map.get("tableNameList")), String.class);
+		backupInfoService.backupToSql(tableNameList);
 		return JsonMessage.toJson(200, "操作成功，请稍后刷新查看备份状态");
 	}
 

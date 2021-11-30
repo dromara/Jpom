@@ -57,9 +57,9 @@ public class H2BackupService {
 	public void backupSql(String url, String user, String password,
 						  String backupSqlPath, List<String> tableNameList) throws SQLException {
 		// 加载数据源
-		DataSource dataSource = DSFactory.get();
-		Assert.notNull(dataSource, "Backup sql error...H2 DataSource not null");
-		Connection connection = dataSource.getConnection();
+//		DataSource dataSource = DSFactory.get();
+//		Assert.notNull(dataSource, "Backup sql error...H2 DataSource not null");
+//		Connection connection = dataSource.getConnection();
 
 		// 备份 SQL
 		String sql = StrUtil.format("SCRIPT DROP to '{}'", backupSqlPath);
@@ -92,7 +92,7 @@ public class H2BackupService {
 				"-driver", "org.h2.Driver",
 				"-sql", sql
 		};
-		shell.runTool(connection, params);
+		shell.runTool(params);
 	}
 
 	/**

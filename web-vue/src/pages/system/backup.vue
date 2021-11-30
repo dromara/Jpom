@@ -39,20 +39,18 @@
       <a-tooltip slot="sha1Sum" slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>
+      <a-tooltip slot="filePath" slot-scope="text" placement="topLeft" :title="text">
+        <span>{{ text }}</span>
+      </a-tooltip>
       <template slot="operation" slot-scope="text, record">
         <a-button type="primary" @click="handleEdit(record)">编辑</a-button>
         <a-button type="danger" @click="handleDelete(record)">删除</a-button>
-        <a-button type="danger" :disabled="!record.sourceExist" @click="handleClear(record)">还原备份</a-button>
+        <a-button type="default" @click="handleClear(record)">还原备份</a-button>
       </template>
     </a-table>
     <!-- 创建备份信息区 -->
-    <a-modal v-model="createBackupVisible" title="创建备份信息" @ok="handleCreateBackupOk" width="500px" :maskClosable="false">
+    <a-modal v-model="createBackupVisible" title="创建备份信息" @ok="handleCreateBackupOk" width="600px" :maskClosable="false">
       <a-form-model ref="editBackupForm" :rules="rules" :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 18 }">
-        <a-form-model-item label="选择备份表" prop="tableName">
-          <a-select name="tableName" placeholder="数据库表">
-            <a-select-option v-for="tableName in tableNameList" :key="tableName" :value="tableName">{{ tableName }}</a-select-option>
-          </a-select>
-        </a-form-model-item>
         <a-form-model-item label="备份类型" prop="backupType">
           <a-radio-group v-model="temp.backupType" name="backupType">
             <a-radio :value="0">全量备份</a-radio>
@@ -60,10 +58,15 @@
           </a-radio-group>
         </a-form-model-item>
         <!-- 部分备份 -->
-        <a-form-model-item v-if="temp.releaseMethod === 1" label="分发项目" prop="releaseMethodDataId">
-          <a-select v-model="temp.releaseMethodDataId_1" placeholder="请选择分发项目">
-            <a-select-option v-for="dispatch in dispatchList" :key="dispatch.id">{{ dispatch.name }} </a-select-option>
-          </a-select>
+        <a-form-model-item v-if="temp.backupType === 1" label="勾选数据表" prop="tableNameList" class="feature jpom-role">
+          <a-transfer
+            :data-source="tableNameList"
+            show-search
+            :filter-option="filterOption"
+            :target-keys="targetKeys"
+            :render="item => item.title"
+            @change="handleChange"
+          />
         </a-form-model-item>
       </a-form-model>
     </a-modal>
@@ -73,12 +76,6 @@
         <a-form-model-item label="触发器地址" prop="triggerBuildUrl">
           <a-input v-model="temp.triggerBuildUrl" type="textarea" readOnly :rows="3" style="resize: none" placeholder="触发器地址" />
         </a-form-model-item>
-        <a-row>
-          <a-col :span="6"></a-col>
-          <a-col :span="16">
-            <a-button type="primary" class="btn-add" @click="resetTrigger">重置</a-button>
-          </a-col>
-        </a-row>
       </a-form-model>
     </a-modal>
   </div>
@@ -103,17 +100,9 @@ export default {
       ],
       list: [],
       tableNameList: [],
+      targetKeys: [],
       temp: {},
       createBackupVisible: false,
-
-      branchList: [],
-      dispatchList: [],
-      cascaderList: [],
-      sshList: [],
-      editBuildVisible: false,
-      addGroupvisible: false,
-      triggerVisible: false,
-      buildLogVisible: false,
       columns: [
         { title: "备份名称", dataIndex: "name", width: 150, ellipsis: true, scopedSlots: { customRender: "name" } },
         { title: "备份类型", dataIndex: "backupType", width: 150, ellipsis: true, scopedSlots: { customRender: "backupType" } },
@@ -153,7 +142,7 @@ export default {
         {
           title: "操作",
           dataIndex: "operation",
-          width: 240,
+          width: 280,
           scopedSlots: { customRender: "operation" },
           align: "left",
           fixed: "right",
@@ -197,7 +186,9 @@ export default {
       this.tableNameList = [];
       getTableNameList().then((res) => {
         if (res.code === 200) {
-          this.tableNameList = res.data;
+          res.data.forEach(element => {
+            this.tableNameList.push({key: element, title: element});
+          });
         }
       });
     },
@@ -205,8 +196,17 @@ export default {
     handleFilter() {
       this.loadData();
     },
+    // 穿梭框筛选
+    filterOption(inputValue, option) {
+      return option.title.indexOf(inputValue) > -1;
+    },
+    // 穿梭框 change
+    handleChange(targetKeys) {
+      this.targetKeys = targetKeys;
+    },
     // 创建备份
     handleAdd() {
+      this.targetKeys = [];
       this.temp = {
         backupType: 0,
       }
@@ -239,7 +239,7 @@ export default {
           return false;
         }
         // 提交数据
-        createBackup(this.temp).then((res) => {
+        createBackup(this.targetKeys).then((res) => {
           if (res.code === 200) {
             // 成功
             this.$notification.success({

@@ -27,17 +27,18 @@ export function getTableNameList() {
 
 /**
  * 创建备份信息
- * @param {
- *  tableNameList: 需要备份的表名称列表，没有默认表示全量备份
- * } params
+ * @param tableNameList 需要备份的表名称列表，没有默认表示全量备份
  */
-export function createBackup(params) {
+export function createBackup(tableNameList) {
   const data = {
-    tableNameList: params.tableNameList,
+    tableNameList,
   }
   return axios({
     url: '/system/backup/create',
     method: 'post',
+    headers: {
+      'Content-Type': 'application/json',
+    },
     data
   })
 }

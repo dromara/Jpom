@@ -120,3 +120,7 @@ CREATE TABLE IF NOT EXISTS PUBLIC.BACKUP_INFO
 	CONSTRAINT BACKUP_INFO_PK PRIMARY KEY (ID)
 );
 comment on table BACKUP_INFO is '备份数据库信息';
+
+-- @author Hotstrip 增加字段 status
+ALTER TABLE BACKUP_INFO
+    ADD IF NOT EXISTS `STATUS` int default '0' comment '状态{0: 默认; 1: 成功; 2: 失败}';
