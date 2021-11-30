@@ -73,3 +73,9 @@ export const backupTypeMap = {
   0: '全量备份',
   1: '部分备份'
 }
+
+export const backupStatusMap = {
+  0: '备份中',
+  1: '备份成功',
+  2: '备份失败'
+}

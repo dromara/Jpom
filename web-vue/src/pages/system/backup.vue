@@ -31,10 +31,8 @@
         <a-tag v-if="text" color="#108ee9">{{ text }}</a-tag>
         <a-tag v-else color="#108ee9"> 0 </a-tag>
       </a-tooltip>
-      <a-tooltip slot="status" slot-scope="text" placement="topLeft" :title="text">
-        <span v-if="text === 0">备份中</span>
-        <span v-if="text === 1">备份成功</span>
-        <span v-if="text === 2">备份失败</span>
+      <a-tooltip slot="status" slot-scope="text" placement="topLeft" :title="backupStatusMap[text]">
+        <span>{{ backupStatusMap[text] }}</span>
       </a-tooltip>
       <a-tooltip slot="sha1Sum" slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
@@ -45,7 +43,7 @@
       <template slot="operation" slot-scope="text, record">
         <a-button type="primary" @click="handleEdit(record)">编辑</a-button>
         <a-button type="danger" @click="handleDelete(record)">删除</a-button>
-        <a-button type="warning" :disabled="temp.status !== 1" @click="handleRestore(record)">还原备份</a-button>
+        <a-button type="warning" :disabled="record.status !== 1" @click="handleRestore(record)">还原备份</a-button>
       </template>
     </a-table>
     <!-- 创建备份信息区 -->
@@ -82,7 +80,7 @@
 </template>
 <script>
 import { mapGetters } from "vuex";
-import { getBackupList, getTableNameList, createBackup, deleteBackup, restoreBackup, backupTypeMap } from "../../api/backup-info";
+import { getBackupList, getTableNameList, createBackup, deleteBackup, restoreBackup, backupTypeMap, backupStatusMap } from "../../api/backup-info";
 import { parseTime } from "../../utils/time";
 
 export default {
@@ -91,6 +89,7 @@ export default {
   data() {
     return {
       backupTypeMap: backupTypeMap,
+      backupStatusMap: backupStatusMap,
       loading: false,
       listQuery: {},
       tableHeight: "70vh",
