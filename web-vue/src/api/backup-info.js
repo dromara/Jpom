@@ -55,6 +55,20 @@ export function deleteBackup(id) {
   })
 }
 
+/**
+ * 还原备份信息
+ * @param {*} id 
+ * @returns 
+ */
+export function restoreBackup(id) {
+  return axios({
+    url: '/system/backup/restore',
+    method: 'post',
+    timeout: 0,
+    data: {id}
+  })
+}
+
 export const backupTypeMap = {
   0: '全量备份',
   1: '部分备份'

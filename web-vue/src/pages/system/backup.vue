@@ -45,7 +45,7 @@
       <template slot="operation" slot-scope="text, record">
         <a-button type="primary" @click="handleEdit(record)">编辑</a-button>
         <a-button type="danger" @click="handleDelete(record)">删除</a-button>
-        <a-button type="default" @click="handleClear(record)">还原备份</a-button>
+        <a-button type="warning" :disabled="temp.status !== 1" @click="handleRestore(record)">还原备份</a-button>
       </template>
     </a-table>
     <!-- 创建备份信息区 -->
@@ -82,7 +82,7 @@
 </template>
 <script>
 import { mapGetters } from "vuex";
-import { getBackupList, getTableNameList, createBackup, deleteBackup, backupTypeMap } from "../../api/backup-info";
+import { getBackupList, getTableNameList, createBackup, deleteBackup, restoreBackup, backupTypeMap } from "../../api/backup-info";
 import { parseTime } from "../../utils/time";
 
 export default {
@@ -274,6 +274,27 @@ export default {
         },
       });
     },
+    // 还原备份
+    handleRestore(record) {
+      this.$confirm({
+        title: "系统提示",
+        content: "真的要还原备份信息么？还原过程中不能操作哦...",
+        okText: "确认",
+        cancelText: "取消",
+        onOk: () => {
+          // 还原
+          restoreBackup(record.id).then((res) => {
+            if (res.code === 200) {
+              this.$notification.success({
+                message: res.msg,
+                duration: 2,
+              });
+              this.loadData();
+            }
+          });
+        },
+      });
+    }
   },
 };
 </script>
