@@ -36,7 +36,6 @@ import io.jpom.model.enums.BackupStatusEnum;
 import io.jpom.model.enums.BackupTypeEnum;
 import io.jpom.service.h2db.BaseDbService;
 import io.jpom.service.h2db.H2BackupService;
-import io.jpom.system.ExtConfigBean;
 import io.jpom.system.ServerExtConfigBean;
 import io.jpom.system.db.DbConfig;
 import org.springframework.stereotype.Service;
@@ -71,7 +70,7 @@ public class BackupInfoService extends BaseDbService<BackupInfoModel> {
 		final String fileName = LocalDateTimeUtil.format(LocalDateTimeUtil.now(), DatePattern.PURE_DATETIME_PATTERN);
 
 		// 设置默认备份 SQL 的文件地址
-		File file = FileUtil.file(ExtConfigBean.getInstance().getPath(), "db", Const.BACKUP_DIRECTORY_NAME, fileName + Const.SQL_FILE_SUFFIX);
+		File file = FileUtil.file(DbConfig.getInstance().dbLocalPath(), Const.BACKUP_DIRECTORY_NAME, fileName + Const.SQL_FILE_SUFFIX);
 		final String backupSqlPath = FileUtil.getAbsolutePath(file);
 
 		// 数据源参数

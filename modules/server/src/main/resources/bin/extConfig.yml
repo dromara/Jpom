@@ -12,6 +12,14 @@ jpom:
     key:
   # 前端接口 超时时间 单位秒
   webApiTimeout: 20
+  # 系统名称
+  name:
+  # 副标题
+  subTitle:
+  # 登录页名称
+  loginTitle:
+  # logo 文件路径（绝对路径） jpg、png、gif
+  logoFile:
 user:
   # 最多能创建多少个用户
   maxCount: 10

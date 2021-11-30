@@ -155,6 +155,30 @@ public class ServerExtConfigBean implements DisposableBean {
 	private int webApiTimeout;
 
 	/**
+	 * 系统名称
+	 */
+	@Value("${jpom.name:Jpom项目管理系统}")
+	private String name;
+
+	/**
+	 * 系统副名称（标题） 建议4个汉字以内
+	 */
+	@Value("${jpom.subName:项目管理}")
+	private String subName;
+
+	/**
+	 * 登录页标题
+	 */
+	@Value("${jpom.loginTitle:登录JPOM}")
+	private String loginTitle;
+
+	/**
+	 * logo 文件路径
+	 */
+	@Value("${jpom.logoFile:}")
+	private String logoFile;
+
+	/**
 	 * 获取上传文件超时时间
 	 *
 	 * @return 返回毫秒
@@ -240,6 +264,22 @@ public class ServerExtConfigBean implements DisposableBean {
 	 */
 	public int getWebApiTimeout() {
 		return Math.max(this.webApiTimeout, 10);
+	}
+
+	public String getName() {
+		return StrUtil.emptyToDefault(name, "Jpom项目管理系统");
+	}
+
+	public String getSubName() {
+		return StrUtil.emptyToDefault(subName, "项目管理");
+	}
+
+	public String getLoginTitle() {
+		return StrUtil.emptyToDefault(loginTitle, "登录JPOM");
+	}
+
+	public String getLogoFile() {
+		return logoFile;
 	}
 
 	/**
