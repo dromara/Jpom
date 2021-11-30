@@ -331,7 +331,7 @@ public class BuildInfoManage extends BaseBuild implements Runnable {
 				if (!s) {
 					this.log("命令执行存在error");
 				}
-			} catch (IOException e) {
+			} catch (Exception e) {
 				this.log(item + " 执行异常", e);
 				return false;
 			}
@@ -397,7 +397,7 @@ public class BuildInfoManage extends BaseBuild implements Runnable {
 	 * @return 是否存在错误
 	 * @throws IOException IO
 	 */
-	private boolean runCommand(String command) throws IOException {
+	private boolean runCommand(String command) throws IOException, InterruptedException {
 		this.log(command);
 		//
 		ProcessBuilder processBuilder = new ProcessBuilder();
@@ -406,23 +406,16 @@ public class BuildInfoManage extends BaseBuild implements Runnable {
 		commands.add(command);
 		processBuilder.command(commands);
 		final boolean[] status = new boolean[1];
+		processBuilder.redirectErrorStream(true);
 		process = processBuilder.start();
 		//
 		InputStream inputStream = process.getInputStream();
-		InputStreamReader inputStreamReader = new InputStreamReader(inputStream, JpomApplication.getCharset());
-		BufferedReader results = new BufferedReader(inputStreamReader);
-		IoUtil.readLines(results, (LineHandler) line -> {
+		IoUtil.readLines(inputStream, JpomApplication.getCharset(), (LineHandler) line -> {
 			log(line);
 			status[0] = true;
 		});
-		//
-		InputStream errorInputStream = process.getErrorStream();
-		InputStreamReader errorInputStreamReader = new InputStreamReader(errorInputStream, JpomApplication.getCharset());
-		BufferedReader errorResults = new BufferedReader(errorInputStreamReader);
-		IoUtil.readLines(errorResults, (LineHandler) line -> {
-			log(line);
-			status[0] = false;
-		});
+		int waitFor = process.waitFor();
+		log("process result " + waitFor);
 		return status[0];
 	}
 }
