@@ -117,10 +117,12 @@ public class IndexControl extends BaseServerController {
 		String logoFile = instance.getLogoFile();
 		if (StrUtil.isNotEmpty(logoFile)) {
 			File file = FileUtil.file(logoFile);
-			String type = FileTypeUtil.getType(file);
-			if (StrUtil.equalsAnyIgnoreCase(type, "jpg", "png", "gif")) {
-				ServletUtil.write(response, file);
-				return;
+			if (FileUtil.isFile(file)) {
+				String type = FileTypeUtil.getType(file);
+				if (StrUtil.equalsAnyIgnoreCase(type, "jpg", "png", "gif")) {
+					ServletUtil.write(response, file);
+					return;
+				}
 			}
 		}
 		// 默认logo

@@ -44,9 +44,9 @@ public class ConsoleStartSuccess {
 	private static void success() {
 		Type type = JpomManifest.getInstance().getType();
 		if (type == Type.Server) {
-			Console.log(type + "启动成功,Can use happily => http://{}:{}", NetUtil.getLocalhostStr(), ConfigBean.getInstance().getPort());
+			Console.log(type + "启动成功,Can use happily => http://{}:{} 【The current address is for reference only】", NetUtil.getLocalhostStr(), ConfigBean.getInstance().getPort());
 		} else if (type == Type.Agent) {
-			Console.log(type + "启动成功,请到服务端配置使用,当前节点地址 => http://{}:{}", NetUtil.getLocalhostStr(), ConfigBean.getInstance().getPort());
+			Console.log(type + "启动成功,请到服务端配置使用,当前节点地址 => http://{}:{} 【The current address is for reference only】", NetUtil.getLocalhostStr(), ConfigBean.getInstance().getPort());
 		}
 	}
 }
