@@ -5,6 +5,9 @@
         <span class="layui-elem-quote">当前程序打包时间：{{ temp.timeStamp }}</span>
       </a-timeline-item>
       <a-timeline-item>
+        <span class="layui-elem-quote">当前前端打包时间：{{ temp.vueTimeStamp }}</span>
+      </a-timeline-item>
+      <a-timeline-item>
         <span class="layui-elem-quote">当前版本号：{{ temp.version }} </span>
         <template v-if="temp.upgrade !== undefined">
           <a-tag v-if="temp.upgrade" color="pink" @click="upgrageVerion">新版本：{{ temp.newVersion }} </a-tag>
@@ -38,6 +41,7 @@
 </template>
 <script>
 import { systemInfo, uploadUpgradeFile, changelog, checkVersion, remoteUpgrade } from "@/api/system";
+import { parseTime } from "@/utils/time";
 import MarkdownItVue from "markdown-it-vue";
 import "markdown-it-vue/dist/markdown-it-vue.css";
 export default {
@@ -81,7 +85,9 @@ export default {
         if (res.code === 200) {
           this.temp = res.data?.manifest;
           //
-
+          // vueTimeStamp
+          this.temp.vueTimeStamp = parseTime(this.getMeta("build-time"));
+          //
           changelog(this.nodeId).then((resLog) => {
             this.changelog = resLog.data;
             //
@@ -90,6 +96,15 @@ export default {
           });
         }
       });
+    },
+    getMeta(metaName) {
+      const metas = document.getElementsByTagName("meta");
+      for (let i = 0; i < metas.length; i++) {
+        if (metas[i].getAttribute("name") === metaName) {
+          return metas[i].getAttribute("content");
+        }
+      }
+      return "";
     },
     // 处理文件移除
     handleRemove(file) {

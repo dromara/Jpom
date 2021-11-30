@@ -1,20 +1,20 @@
 <template>
-  <div class="wrapper" :style="{backgroundImage: `url(${bg})`}">
-    <div class="switch" @click="handleToggleBg">{{dynamicBg ? '关闭动态背景': '开启动态背景'}}</div>
+  <div class="wrapper" :style="{ backgroundImage: `url(${bg})` }">
+    <div class="switch" @click="handleToggleBg">{{ dynamicBg ? "关闭动态背景" : "开启动态背景" }}</div>
     <a-card class="login-card" hoverable>
-      <a-card-meta  title="登录JPOM" style="text-align: center" description=""/>
-      <br/>
+      <a-card-meta :title="`${loginTitle}`" style="text-align: center" description="" />
+      <br />
       <a-form :form="loginForm" :label-col="{ span: 0 }" @submit="handleLogin">
-        <a-form-item :wrapper-col="{span: 24}">
-          <a-input v-decorator="['userName', { rules: [{ required: true, message: '请输入用户名' }] }]" placeholder="用户名"/>
+        <a-form-item :wrapper-col="{ span: 24 }">
+          <a-input v-decorator="['userName', { rules: [{ required: true, message: '请输入用户名' }] }]" placeholder="用户名" />
         </a-form-item>
-        <a-form-item :wrapper-col="{span: 24}">
-          <a-input-password v-decorator="['userPwd', { rules: [{ required: true, message: '请输入密码' }] }]" placeholder="密码"/>
+        <a-form-item :wrapper-col="{ span: 24 }">
+          <a-input-password v-decorator="['userPwd', { rules: [{ required: true, message: '请输入密码' }] }]" placeholder="密码" />
         </a-form-item>
-        <a-form-item :wrapper-col="{span: 24}">
+        <a-form-item :wrapper-col="{ span: 24 }">
           <a-row>
             <a-col :span="14">
-              <a-input v-decorator="['code', { rules: [{ required: true, message: '请输入验证码' }] }]" placeholder="验证码"/>
+              <a-input v-decorator="['code', { rules: [{ required: true, message: '请输入验证码' }] }]" placeholder="验证码" />
             </a-col>
             <a-col :offset="2" :span="8">
               <div class="rand-code">
@@ -23,26 +23,25 @@
             </a-col>
           </a-row>
         </a-form-item>
-          <a-button type="primary" html-type="submit" class="btn-login">
-            登录
-          </a-button>
+        <a-button type="primary" html-type="submit" class="btn-login"> 登录 </a-button>
       </a-form>
     </a-card>
   </div>
 </template>
 <script>
-import { login } from '../../api/user';
-import { checkSystem } from '../../api/install';
-import sha1 from 'sha1';
-import defaultBg from '../../assets/images/bg.jpeg';
+import { login } from "../../api/user";
+import { checkSystem } from "../../api/install";
+import sha1 from "sha1";
+import defaultBg from "../../assets/images/bg.jpeg";
 export default {
   data() {
     return {
-      loginForm: this.$form.createForm(this, { name: 'login-form' }),
-      randCode: 'randCode.png',
+      loginForm: this.$form.createForm(this, { name: "login-form" }),
+      randCode: "randCode.png",
       bg: defaultBg,
-      dynamicBg: localStorage.getItem('dynamicBg') === 'false' ? false : true,
-    }
+      dynamicBg: localStorage.getItem("dynamicBg") === "false" ? false : true,
+      loginTitle: "登录JPOM",
+    };
   },
   created() {
     this.checkSystem();
@@ -52,22 +51,25 @@ export default {
   methods: {
     // 检查是否需要初始化
     checkSystem() {
-      checkSystem().then(res => {
-        if(res.code === 900){
-          this.$router.push('/system/ipAccess');
-        }else if (res.code !== 200) {
+      checkSystem().then((res) => {
+        if (res.code === 900) {
+          this.$router.push("/system/ipAccess");
+        } else if (res.code !== 200) {
           this.$notification.warn({
             message: res.msg,
-            duration: 2
+            duration: 2,
           });
-          this.$router.push('/install');
+          this.$router.push("/install");
         }
-      })
+        if (res.data?.loginTitle) {
+          this.loginTitle = res.data.loginTitle;
+        }
+      });
     },
     // Controls the background display or hiding
     handleToggleBg() {
       this.dynamicBg = !this.dynamicBg;
-      localStorage.setItem('dynamicBg', this.dynamicBg);
+      localStorage.setItem("dynamicBg", this.dynamicBg);
       this.getBg();
     },
     // Get background pic
@@ -80,7 +82,7 @@ export default {
     },
     // change Code
     changeCode() {
-      this.randCode = 'randCode.png?r=' + new Date().getTime()
+      this.randCode = "randCode.png?r=" + new Date().getTime();
     },
     // login
     handleLogin(e) {
@@ -89,29 +91,29 @@ export default {
         if (!err) {
           const params = {
             ...values,
-            userPwd: sha1(values.userPwd)
-          }
-          login(params).then(res => {
+            userPwd: sha1(values.userPwd),
+          };
+          login(params).then((res) => {
             // 登录不成功，更新验证码
-            if(res.code !== 200) {
+            if (res.code !== 200) {
               this.changeCode();
             } else {
               this.$notification.success({
                 message: res.msg,
-                duration: 2
+                duration: 2,
               });
               // 调用 store action 存储当前登录的用户名和 token
-              this.$store.dispatch('login', {token: res.data.token,longTermToken: res.data.longTermToken}).then(() => {
+              this.$store.dispatch("login", { token: res.data.token, longTermToken: res.data.longTermToken }).then(() => {
                 // 跳转主页面
-                this.$router.push({ path: '/' });
-              })
+                this.$router.push({ path: "/" });
+              });
             }
-          })
+          });
         }
       });
-    }
-  }
-}
+    },
+  },
+};
 </script>
 <style scoped>
 .wrapper {
@@ -146,7 +148,7 @@ export default {
   transform: translateX(0);
 }
 .switch::before {
-  content: '';
+  content: "";
   position: absolute;
   left: 10px;
   top: 13px;
@@ -165,7 +167,7 @@ export default {
   width: 100%;
   height: 36px;
 }
-.rand-code img{
+.rand-code img {
   width: 100%;
   height: 100%;
   display: inherit;
@@ -176,7 +178,6 @@ export default {
 }
 </style>
 <style>
-
 .ant-card-meta-title {
   font-size: 30px;
 }
