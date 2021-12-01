@@ -173,15 +173,14 @@ public class RemoteVersion {
 			if (remoteVersion == null) {
 				// 远程获取
 				String transitUrl = RemoteVersion.loadTransitUrl();
-				if (StrUtil.isEmpty(transitUrl)) {
-					return null;
+				if (StrUtil.isNotEmpty(transitUrl)) {
+					HttpRequest request = HttpUtil.createGet(transitUrl);
+					body = request.execute().body();
+					//
+					remoteVersion = JSONObject.parseObject(body, RemoteVersion.class);
 				}
-				HttpRequest request = HttpUtil.createGet(transitUrl);
-				body = request.execute().body();
-				//
-				remoteVersion = JSONObject.parseObject(body, RemoteVersion.class);
 			}
-			if (StrUtil.isEmpty(remoteVersion.getTagName())) {
+			if (remoteVersion == null || StrUtil.isEmpty(remoteVersion.getTagName())) {
 				// 没有版本信息
 				return null;
 			}
@@ -256,7 +255,7 @@ public class RemoteVersion {
 		if (!FileUtil.isFile(getFile())) {
 			return null;
 		}
-		RemoteVersion remoteVersion;
+		RemoteVersion remoteVersion = null;
 		String fileStr = StrUtil.EMPTY;
 		try {
 			fileStr = FileUtil.readUtf8String(getFile());
@@ -266,17 +265,12 @@ public class RemoteVersion {
 			remoteVersion = JSONObject.parseObject(fileStr, RemoteVersion.class);
 		} catch (Exception e) {
 			DefaultSystemLog.getLog().warn("解析远程版本信息失败:{} {}", e.getMessage(), fileStr);
-			return null;
 		}
 		// 判断上次获取时间
-		Long lastTime = remoteVersion.getLastTime();
+		Long lastTime = remoteVersion == null ? 0 : remoteVersion.getLastTime();
 		lastTime = ObjectUtil.defaultIfNull(lastTime, 0L);
 		long interval = SystemClock.now() - lastTime;
-		if (interval >= TimeUnit.HOURS.toMillis(CHECK_INTERVAL)) {
-			// 缓存失效
-			return null;
-		}
-		return remoteVersion;
+		return interval >= TimeUnit.HOURS.toMillis(CHECK_INTERVAL) ? null : remoteVersion;
 	}
 
 	/**

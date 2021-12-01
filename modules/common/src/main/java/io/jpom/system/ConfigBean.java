@@ -145,7 +145,7 @@ public class ConfigBean {
 	 * @return file
 	 */
 	public String getAgentAutoAuthorizeFile(String dataPath) {
-		return FileUtil.normalize(dataPath + "/" + ConfigBean.AUTHORIZE);
+		return FileUtil.normalize(dataPath + StrUtil.SLASH + ConfigBean.AUTHORIZE);
 	}
 
 

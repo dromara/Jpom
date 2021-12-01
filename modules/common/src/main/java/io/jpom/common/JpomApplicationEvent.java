@@ -25,6 +25,7 @@ package io.jpom.common;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.lang.Console;
+import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
@@ -109,8 +110,7 @@ public class JpomApplicationEvent implements ApplicationEventClient {
 		if (lock != null) {
 			try {
 				lock.release();
-			} catch (IOException e) {
-				e.printStackTrace();
+			} catch (IOException ignored) {
 			}
 		}
 		IoUtil.close(lock);
@@ -133,11 +133,7 @@ public class JpomApplicationEvent implements ApplicationEventClient {
 			} catch (OverlappingFileLockException | IOException e) {
 				DefaultSystemLog.getLog().warn("获取进程文件锁失败：" + e.getMessage());
 			}
-			try {
-				Thread.sleep(100);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
+			ThreadUtil.sleep(100);
 		}
 	}
 

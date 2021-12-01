@@ -22,6 +22,7 @@
  */
 package io.jpom.system;
 
+import cn.hutool.core.lang.Console;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.env.EnvironmentPostProcessor;
 import org.springframework.boot.env.YamlPropertySourceLoader;
@@ -29,7 +30,6 @@ import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.PropertySource;
 import org.springframework.core.io.Resource;
 
-import java.io.IOException;
 import java.util.List;
 
 /**
@@ -40,15 +40,15 @@ import java.util.List;
  */
 public class ExtConfigEnvironmentPostProcessor implements EnvironmentPostProcessor {
 
-    @Override
-    public void postProcessEnvironment(ConfigurableEnvironment environment, SpringApplication application) {
-        YamlPropertySourceLoader yamlPropertySourceLoader = new YamlPropertySourceLoader();
-        Resource resource = ExtConfigBean.getResource();
-        try {
-            List<PropertySource<?>> propertySources = yamlPropertySourceLoader.load(ExtConfigBean.FILE_NAME, resource);
-            propertySources.forEach(propertySource -> environment.getPropertySources().addLast(propertySource));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
+	@Override
+	public void postProcessEnvironment(ConfigurableEnvironment environment, SpringApplication application) {
+		YamlPropertySourceLoader yamlPropertySourceLoader = new YamlPropertySourceLoader();
+		Resource resource = ExtConfigBean.getResource();
+		try {
+			List<PropertySource<?>> propertySources = yamlPropertySourceLoader.load(ExtConfigBean.FILE_NAME, resource);
+			propertySources.forEach(propertySource -> environment.getPropertySources().addLast(propertySource));
+		} catch (Exception e) {
+			Console.error(e.getMessage());
+		}
+	}
 }

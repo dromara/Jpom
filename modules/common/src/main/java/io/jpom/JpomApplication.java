@@ -29,6 +29,7 @@ import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.system.SystemUtil;
 import cn.jiangzeyin.common.ApplicationBuilder;
+import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.validator.ParameterInterceptor;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -51,6 +52,7 @@ import org.springframework.util.Assert;
 
 import java.io.File;
 import java.nio.charset.Charset;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Jpom
@@ -188,10 +190,7 @@ public class JpomApplication extends ApplicationBuilder {
 		File scriptFile = JpomManifest.getScriptFile();
 		ThreadUtil.execute(() -> {
 			// Waiting for method caller,For example, the interface response
-			try {
-				Thread.sleep(2000);
-			} catch (InterruptedException ignored) {
-			}
+			ThreadUtil.sleep(2, TimeUnit.SECONDS);
 			try {
 				String command = "";
 				if (SystemUtil.getOsInfo().isLinux()) {
@@ -204,7 +203,7 @@ public class JpomApplication extends ApplicationBuilder {
 					CommandUtil.asyncExeLocalCommand(scriptFile.getParentFile(), command);
 				}
 			} catch (Exception e) {
-				e.printStackTrace();
+				DefaultSystemLog.getLog().error("重启自身异常", e);
 			}
 		});
 	}
