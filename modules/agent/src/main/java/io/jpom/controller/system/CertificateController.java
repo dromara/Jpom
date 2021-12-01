@@ -223,7 +223,7 @@ public class CertificateController extends BaseAgentController {
                 }
             }
             // 移动位置
-            String temporary = certModel.getWhitePath() + "/" + certModel.getId() + "/";
+            String temporary = certModel.getWhitePath() + StrUtil.SLASH + certModel.getId() + StrUtil.SLASH;
             File pemFile = FileUtil.file(temporary + certModel.getId() + "." + certModel.getType().name());
             File keyFile = FileUtil.file(temporary + certModel.getId() + ".key");
             if (add) {

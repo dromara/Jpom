@@ -113,7 +113,7 @@ public class ConfigBean {
 	 * @return 文件夹路径
 	 */
 	public String getDataPath() {
-		String dataPath = FileUtil.normalize(ExtConfigBean.getInstance().getPath() + "/" + DATA);
+		String dataPath = FileUtil.normalize(ExtConfigBean.getInstance().getPath() + StrUtil.SLASH + DATA);
 		FileUtil.mkdir(dataPath);
 		return dataPath;
 	}

@@ -92,7 +92,7 @@ public class TomcatManageService {
                 continue;
             }
 
-            jsonObject.put("path", "/".equals(strs[0]) ? "/ROOT" : strs[0]);
+            jsonObject.put("path", StrUtil.SLASH.equals(strs[0]) ? "/ROOT" : strs[0]);
             jsonObject.put("status", strs[1]);
             jsonObject.put("session", strs[2]);
 

@@ -51,8 +51,8 @@ public class WindowsTomcatCommander extends AbstractTomcatCommander {
         String tomcatPath = tomcatInfoModel.pathAndCheck();
         //截取盘符
         String dcPath = null;
-        if (tomcatPath != null && tomcatPath.indexOf("/") > 1) {
-            dcPath = tomcatPath.substring(0, tomcatPath.indexOf("/"));
+        if (tomcatPath != null && tomcatPath.indexOf(StrUtil.SLASH) > 1) {
+            dcPath = tomcatPath.substring(0, tomcatPath.indexOf(StrUtil.SLASH));
         }
         String command = null;
         if (StrUtil.isBlank(tomcatPath)) {
@@ -64,7 +64,7 @@ public class WindowsTomcatCommander extends AbstractTomcatCommander {
             List<String> list = StrSplitter.splitTrim(setPidCmd, StrUtil.LF, true);
             for (String item : list) {
                 //window下路径格式转换
-                String msg = FileUtil.normalize(item + "/");
+                String msg = FileUtil.normalize(item + StrUtil.SLASH);
                 //判断集合中元素是否包含指定Tomcat路径
                 boolean w = msg.contains(tomcatInfoModel.getPath());
                 if (w) {

@@ -129,7 +129,7 @@ public class SshInstallAgentController extends BaseServerController {
 			// 上传文件到服务器
 			sshService.uploadDir(sshModel, path, outFle);
 			//
-			String shPtah = FileUtil.normalize(path + "/" + Type.Agent.name() + ".sh");
+			String shPtah = FileUtil.normalize(path + StrUtil.SLASH + Type.Agent.name() + ".sh");
 			String chmod = getParameter("chmod");
 			if (StrUtil.isEmpty(chmod)) {
 				chmod = StrUtil.EMPTY;

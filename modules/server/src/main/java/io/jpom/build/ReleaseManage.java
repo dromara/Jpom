@@ -180,7 +180,7 @@ public class ReleaseManage extends BaseBuild {
 			if (!StrUtil.startWith(this.baseBuildModule.getReleasePath(), StrUtil.SLASH)) {
 				prefix = sftp.pwd();
 			}
-			String normalizePath = FileUtil.normalize(prefix + "/" + this.baseBuildModule.getReleasePath());
+			String normalizePath = FileUtil.normalize(prefix + StrUtil.SLASH + this.baseBuildModule.getReleasePath());
 			sftp.syncUpload(this.resultFile, normalizePath);
 //            if (this.resultFile.isFile()) {
 //                // 文件

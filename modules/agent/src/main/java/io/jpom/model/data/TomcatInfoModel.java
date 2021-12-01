@@ -53,7 +53,7 @@ public class TomcatInfoModel extends BaseModel {
         if (path == null) {
             return null;
         }
-        return FileUtil.normalize(path + "/");
+        return FileUtil.normalize(path + StrUtil.SLASH);
     }
 
     /**
@@ -96,7 +96,7 @@ public class TomcatInfoModel extends BaseModel {
         if (StrUtil.isEmpty(appBase)) {
             return FileUtil.normalize(path + "/webapps/");
         }
-        return FileUtil.normalize(appBase + "/");
+        return FileUtil.normalize(appBase + StrUtil.SLASH);
     }
 
     public void setAppBase(String appBase) {

@@ -23,6 +23,7 @@
 package io.jpom.controller.monitor;
 
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.servlet.ServletUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
@@ -185,7 +186,7 @@ public class InternalController extends BaseAgentController {
 	public String stack(String tag, String copyId) {
 		tag = ProjectInfoModel.JavaCopyItem.getTagId(tag, copyId);
 		//
-		String fileName = AgentConfigBean.getInstance().getTempPathName() + "/" + tag + "_java_cpu.txt";
+		String fileName = AgentConfigBean.getInstance().getTempPathName() + StrUtil.SLASH + tag + "_java_cpu.txt";
 		fileName = FileUtil.normalize(fileName);
 		try {
 			int pid = AbstractProjectCommander.getInstance().getPid(tag);
@@ -213,7 +214,7 @@ public class InternalController extends BaseAgentController {
 	public String ram(String tag, String copyId) {
 		tag = ProjectInfoModel.JavaCopyItem.getTagId(tag, copyId);
 		//
-		String fileName = AgentConfigBean.getInstance().getTempPathName() + "/" + tag + "_java_ram.txt";
+		String fileName = AgentConfigBean.getInstance().getTempPathName() + StrUtil.SLASH + tag + "_java_ram.txt";
 		fileName = FileUtil.normalize(fileName);
 		try {
 			int pid = AbstractProjectCommander.getInstance().getPid(tag);

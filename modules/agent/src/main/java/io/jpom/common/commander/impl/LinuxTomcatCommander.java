@@ -51,7 +51,7 @@ public class LinuxTomcatCommander extends AbstractTomcatCommander {
             List<String> list = StrSplitter.splitTrim(setPidCmd, StrUtil.LF, true);
             for (String item : list) {
                 //路径格式转换
-                String msg = FileUtil.normalize(item + "/");
+                String msg = FileUtil.normalize(item + StrUtil.SLASH);
                 //判断集合中元素是否包含指定Tomcat路径
                 boolean w = msg.contains(tomcatInfoModel.getPath());
                 if (w) {

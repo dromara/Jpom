@@ -177,7 +177,7 @@ public class SshFileController extends BaseServerController {
 		try {
 			Session session = SshService.getSession(sshModel);
 			sftp = new Sftp(session, sshModel.getCharsetT());
-			String normalize = FileUtil.normalize(path + "/" + name);
+			String normalize = FileUtil.normalize(path + StrUtil.SLASH + name);
 			ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 			sftp.download(normalize, byteArrayOutputStream);
 			byte[] bytes = byteArrayOutputStream.toByteArray();
@@ -200,7 +200,7 @@ public class SshFileController extends BaseServerController {
 		try {
 			Session session = SshService.getSession(sshModel);
 			sftp = new Sftp(session, sshModel.getCharsetT());
-			String normalize = FileUtil.normalize(path + "/" + name);
+			String normalize = FileUtil.normalize(path + StrUtil.SLASH + name);
 			sftp.upload(normalize, file);
 		} finally {
 			IoUtil.close(sftp);
@@ -227,7 +227,7 @@ public class SshFileController extends BaseServerController {
 		try {
 			session = SshService.getSession(sshModel);
 			channel = (ChannelSftp) JschUtil.openChannel(session, ChannelType.SFTP);
-			String normalize = FileUtil.normalize(path + "/" + name);
+			String normalize = FileUtil.normalize(path + StrUtil.SLASH + name);
 			channel.get(normalize, response.getOutputStream());
 		} finally {
 			JschUtil.close(channel);
@@ -350,7 +350,7 @@ public class SshFileController extends BaseServerController {
 			// 验证合法性，防止越权
 			FileUtil.file(path, name);
 			//
-			String normalize = FileUtil.normalize(path + "/" + name);
+			String normalize = FileUtil.normalize(path + StrUtil.SLASH + name);
 			session = SshService.getSession(sshModel);
 			sftp = new Sftp(session, sshModel.getCharsetT());
 			// 尝试删除
@@ -441,7 +441,7 @@ public class SshFileController extends BaseServerController {
 			MultipartFileBuilder multipartFileBuilder = createMultipart().addFieldName("file").setUseOriginalFilename(true);
 			localPath = multipartFileBuilder.save();
 			File file = FileUtil.file(localPath);
-			String normalize = FileUtil.normalize(path + "/" + name);
+			String normalize = FileUtil.normalize(path + StrUtil.SLASH + name);
 			channel.cd(normalize);
 			channel.put(IoUtil.toStream(file), file.getName());
 		} catch (Exception e) {

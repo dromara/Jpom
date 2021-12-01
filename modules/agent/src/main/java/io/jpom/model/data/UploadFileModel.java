@@ -23,6 +23,7 @@
 package io.jpom.model.data;
 
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.util.StrUtil;
 import io.jpom.model.BaseModel;
 
 import java.io.File;
@@ -83,7 +84,7 @@ public class UploadFileModel extends BaseModel {
     }
 
     public String getFilePath() {
-        return savePath + "/" + getName();
+        return savePath + StrUtil.SLASH + getName();
     }
 
     public void remove() {

@@ -337,7 +337,7 @@ public class JpomManifest {
 				return new JsonMessage<>(405, "中没有找到对应的MainClass:" + mainClass);
 			}
 			ZipEntry entry = jarFile1.getEntry(StrUtil.format("BOOT-INF/classes/{}.class",
-					StrUtil.replace(name, ".", "/")));
+					StrUtil.replace(name, ".", StrUtil.SLASH)));
 			if (entry == null) {
 				return new JsonMessage<>(405, "此包不是Jpom【" + JpomApplication.getAppType().name() + "】包");
 			}

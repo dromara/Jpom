@@ -81,7 +81,7 @@ public class NginxController extends BaseAgentController {
 		boolean checkNgxDirectory = whitelistDirectoryService.checkNgxDirectory(whitePath);
 		Assert.state(checkNgxDirectory, "文件路径错误,非白名单路径");
 		if (StrUtil.isEmpty(name)) {
-			name = "/";
+			name = StrUtil.SLASH;
 		}
 		String newName = pathSafe(name);
 		JSONArray array = nginxService.list(whitePath, newName);
