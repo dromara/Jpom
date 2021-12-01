@@ -131,8 +131,8 @@ public class InitDb implements DisposableBean, InitializingBean {
 			//
 		} else {
 			if (serverExtConfigBean.isH2ConsoleEnabled()
-					&& StrUtil.equals(serverExtConfigBean.getDbUserName(), DbConfig.DEFAULT_USER_OR_PWD)
-					&& StrUtil.equals(serverExtConfigBean.getDbUserPwd(), DbConfig.DEFAULT_USER_OR_PWD)) {
+					&& StrUtil.equals(serverExtConfigBean.getDbUserName(), DbConfig.DEFAULT_USER_OR_AUTHORIZATION)
+					&& StrUtil.equals(serverExtConfigBean.getDbUserPwd(), DbConfig.DEFAULT_USER_OR_AUTHORIZATION)) {
 				Console.error("【安全警告】数据库账号密码使用默认的情况下不建议开启 h2 数据 web 控制台");
 				System.exit(-2);
 			}

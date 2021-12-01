@@ -58,7 +58,7 @@ public class DbConfig {
 	/**
 	 * 默认的账号或者密码
 	 */
-	public static final String DEFAULT_USER_OR_PWD = "jpom";
+	public static final String DEFAULT_USER_OR_AUTHORIZATION = "jpom";
 
 	private static DbConfig dbConfig;
 

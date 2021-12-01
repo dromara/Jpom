@@ -224,11 +224,11 @@ public class ServerExtConfigBean implements DisposableBean {
 	}
 
 	public String getDbUserName() {
-		return StrUtil.emptyToDefault(this.dbUserName, DbConfig.DEFAULT_USER_OR_PWD);
+		return StrUtil.emptyToDefault(this.dbUserName, DbConfig.DEFAULT_USER_OR_AUTHORIZATION);
 	}
 
 	public String getDbUserPwd() {
-		return StrUtil.emptyToDefault(this.dbUserPwd, DbConfig.DEFAULT_USER_OR_PWD);
+		return StrUtil.emptyToDefault(this.dbUserPwd, DbConfig.DEFAULT_USER_OR_AUTHORIZATION);
 	}
 
 	public boolean isH2ConsoleEnabled() {
