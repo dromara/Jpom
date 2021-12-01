@@ -9,6 +9,7 @@
 3. 【server】新增自定义系统登录页面标题配置`jpom.loginTitle`
 4. 【server】新增自定义系统 logo 文字标题配置`jpom.subTitle`
 5. 新增在线下载最新版本更新包功能（在线检测最新版本）
+6. 【server】新增菜单`系统管理-数据库备份`，支持 Jpom 使用的 H2 数据库备份、还原
 
 ### 解决BUG、优化功能
 

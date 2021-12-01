@@ -122,7 +122,7 @@ public class BackupInfoService extends BaseDbService<BackupInfoModel> {
 	/**
 	 * 根据 SQL 文件还原数据库
 	 * 还原数据库时只能同步，防止该过程中修改数据造成数据不一致
-	 * @param backupSqlPath
+	 * @param backupSqlPath 备份 sql 文件地址
 	 */
 	public boolean restoreWithSql(String backupSqlPath) {
 		try {

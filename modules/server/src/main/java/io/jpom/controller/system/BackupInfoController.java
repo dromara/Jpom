@@ -22,11 +22,7 @@
  */
 package io.jpom.controller.system;
 
-import cn.hutool.core.convert.Convert;
-import cn.hutool.core.date.DatePattern;
-import cn.hutool.core.date.LocalDateTimeUtil;
 import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SecureUtil;
@@ -46,11 +42,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.common.BaseServerController;
 import io.jpom.common.Const;
-import io.jpom.common.forward.NodeForward;
-import io.jpom.common.forward.NodeUrl;
 import io.jpom.common.interceptor.OptLog;
-import io.jpom.model.AfterOpt;
-import io.jpom.model.BaseEnum;
 import io.jpom.model.data.BackupInfoModel;
 import io.jpom.model.enums.BackupStatusEnum;
 import io.jpom.model.log.UserOperateLogV1;
@@ -58,9 +50,7 @@ import io.jpom.plugin.ClassFeature;
 import io.jpom.plugin.Feature;
 import io.jpom.plugin.MethodFeature;
 import io.jpom.service.dblog.BackupInfoService;
-import io.jpom.socket.ConsoleCommandOp;
 import io.jpom.system.db.DbConfig;
-import io.jpom.util.StringUtil;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -72,7 +62,6 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.TimeUnit;
 
 /**
  * 数据库备份 controller
@@ -104,7 +93,7 @@ public class BackupInfoController extends BaseServerController {
 
 		// 设置查询参数
 		Entity entity = Entity.create();
-		entity.setIgnoreNull("name", StrUtil.isBlank(name) ? null : name);
+		entity.setIgnoreNull("name", StrUtil.format(" like '{}%'", name));
 		entity.setIgnoreNull("backupType", backupType);
 
 		// 查询数据库
