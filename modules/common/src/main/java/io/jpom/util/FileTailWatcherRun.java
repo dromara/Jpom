@@ -170,10 +170,7 @@ public class FileTailWatcherRun implements Runnable {
 				lineHandler.handle("读取文件发生异常：" + e.getMessage());
 				break;
 			}
-			try {
-				Thread.sleep(500);
-			} catch (InterruptedException ignored) {
-			}
+			ThreadUtil.sleep(500);
 		}
 		this.close();
 	}

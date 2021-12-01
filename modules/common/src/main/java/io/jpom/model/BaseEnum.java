@@ -42,8 +42,10 @@ public interface BaseEnum {
 	/**
 	 * 缓存
 	 */
-	Map<Class<? extends BaseEnum>, Map<Integer, BaseEnum>> CLASS_MAP_MAP = new HashMap<>();
-	Map<Class<? extends Enum>, JSONArray> JSON_ARRAY_MAP = new HashMap<>();
+	class Cache {
+		private static final Map<Class<? extends BaseEnum>, Map<Integer, BaseEnum>> CLASS_MAP_MAP = new HashMap<>();
+		private static final Map<Class<? extends Enum>, JSONArray> JSON_ARRAY_MAP = new HashMap<>();
+	}
 
 	/**
 	 * 枚举的code
@@ -66,7 +68,7 @@ public interface BaseEnum {
 	 * @return mao
 	 */
 	static Map<Integer, BaseEnum> getMap(Class<? extends BaseEnum> t) {
-		return CLASS_MAP_MAP.computeIfAbsent(t, aClass -> {
+		return Cache.CLASS_MAP_MAP.computeIfAbsent(t, aClass -> {
 			Map<Integer, BaseEnum> map1 = new HashMap<>(20);
 			try {
 				Method method = t.getMethod("values");
@@ -153,7 +155,7 @@ public interface BaseEnum {
 		if (!cls.isEnum()) {
 			throw new IllegalArgumentException("不是枚举");
 		}
-		JSONArray getJsonArray = JSON_ARRAY_MAP.computeIfAbsent(cls, aClass -> {
+		JSONArray getJsonArray = Cache.JSON_ARRAY_MAP.computeIfAbsent(cls, aClass -> {
 			JSONArray jsonArray = new JSONArray();
 			try {
 				Method values = aClass.getMethod("values");

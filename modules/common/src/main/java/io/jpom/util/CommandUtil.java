@@ -168,7 +168,7 @@ public class CommandUtil {
 		return false;
 	}
 
-	public static boolean checkContainsDelItem(String script) {
+	private static boolean checkContainsDelItem(String script) {
 		String[] split = StrUtil.splitToArray(script, StrUtil.SPACE);
 		if (SystemUtil.getOsInfo().isWindows()) {
 			for (String s : split) {
