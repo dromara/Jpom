@@ -21,6 +21,7 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 import cn.hutool.core.lang.RegexPool;
+import cn.hutool.core.util.NumberUtil;
 import cn.hutool.core.util.ReUtil;
 import org.junit.Test;
 
@@ -39,5 +40,11 @@ public class TestStr {
 	@Test
 	public void testFile(){
 //		String path = "/www/server/panel/"
+	}
+
+	@Test
+	public void test2(){
+		System.out.println(String.format("%.2f", (float)1 / (float)2 * 100));
+		System.out.println(NumberUtil.div(1,2));
 	}
 }
