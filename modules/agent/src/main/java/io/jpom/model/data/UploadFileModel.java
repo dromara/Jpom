@@ -24,6 +24,7 @@ package io.jpom.model.data;
 
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.jiangzeyin.common.DefaultSystemLog;
 import io.jpom.model.BaseModel;
 
 import java.io.File;
@@ -34,60 +35,60 @@ import java.io.IOException;
  * @author lf
  */
 public class UploadFileModel extends BaseModel {
-    private long size = 0;
-    private long completeSize = 0;
-    private String savePath;
-    private String version;
+	private long size = 0;
+	private long completeSize = 0;
+	private String savePath;
+	private String version;
 
-    public long getSize() {
-        return size;
-    }
+	public long getSize() {
+		return size;
+	}
 
-    public void setSize(long size) {
-        this.size = size;
-    }
+	public void setSize(long size) {
+		this.size = size;
+	}
 
-    public long getCompleteSize() {
-        return completeSize;
-    }
+	public long getCompleteSize() {
+		return completeSize;
+	}
 
-    public void setCompleteSize(long completeSize) {
-        this.completeSize = completeSize;
-    }
+	public void setCompleteSize(long completeSize) {
+		this.completeSize = completeSize;
+	}
 
-    public String getSavePath() {
-        return savePath;
-    }
+	public String getSavePath() {
+		return savePath;
+	}
 
-    public void setSavePath(String savePath) {
-        this.savePath = savePath;
-    }
+	public void setSavePath(String savePath) {
+		this.savePath = savePath;
+	}
 
-    public String getVersion() {
-        return version;
-    }
+	public String getVersion() {
+		return version;
+	}
 
-    public void setVersion(String version) {
-        this.version = version;
-    }
+	public void setVersion(String version) {
+		this.version = version;
+	}
 
-    public void save(byte[] data) {
-        this.completeSize += data.length;
-        File file = new File(this.getFilePath());
-        FileUtil.mkParentDirs(file);
-        try(FileOutputStream fileOutputStream = new FileOutputStream(file, true)) {
-            fileOutputStream.write(data);
-            fileOutputStream.flush();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
+	public void save(byte[] data) {
+		this.completeSize += data.length;
+		File file = new File(this.getFilePath());
+		FileUtil.mkParentDirs(file);
+		try (FileOutputStream fileOutputStream = new FileOutputStream(file, true)) {
+			fileOutputStream.write(data);
+			fileOutputStream.flush();
+		} catch (IOException e) {
+			DefaultSystemLog.getLog().error(e.getMessage(), e);
+		}
+	}
 
-    public String getFilePath() {
-        return savePath + StrUtil.SLASH + getName();
-    }
+	public String getFilePath() {
+		return savePath + StrUtil.SLASH + getName();
+	}
 
-    public void remove() {
-        FileUtil.del(this.getFilePath());
-    }
+	public void remove() {
+		FileUtil.del(this.getFilePath());
+	}
 }

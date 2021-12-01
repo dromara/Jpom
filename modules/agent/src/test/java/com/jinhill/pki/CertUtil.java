@@ -26,7 +26,6 @@ import cn.hutool.core.io.resource.ResourceUtil;
 
 import java.io.InputStream;
 import java.security.Security;
-import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 
@@ -51,12 +50,10 @@ public class CertUtil {
                     .generateCertificate(bIn);
             dn = cert.getSubjectDN().getName();
             bIn.close();
-        } catch (CertificateException e) {
-            e.printStackTrace();
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return dn;
+		return dn;
     }
 
     public static String parseCertDN(String dn, String type) {
