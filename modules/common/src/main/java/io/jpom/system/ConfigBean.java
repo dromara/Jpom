@@ -65,7 +65,7 @@ public class ConfigBean {
 	/**
 	 *
 	 */
-	public static final String AUTHORIZE_PWD_KEY = "jpom.authorize.agentPwd";
+	public static final String AUTHORIZE_AUTHORIZE_KEY = "jpom.authorize.agentPwd";
 	/**
 	 * 程序升级信息文件
 	 */

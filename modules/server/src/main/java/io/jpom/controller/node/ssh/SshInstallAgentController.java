@@ -119,7 +119,7 @@ public class SshInstallAgentController extends BaseServerController {
 				Object user = propertySource.getProperty(ConfigBean.AUTHORIZE_USER_KEY);
 				nodeModel.setLoginName(Convert.toStr(user, ""));
 				//
-				Object pwd = propertySource.getProperty(ConfigBean.AUTHORIZE_PWD_KEY);
+				Object pwd = propertySource.getProperty(ConfigBean.AUTHORIZE_AUTHORIZE_KEY);
 				nodeModel.setLoginPwd(Convert.toStr(pwd, ""));
 			}
 			// 查询远程是否运行

@@ -53,7 +53,7 @@ public class AgentAuthorize {
 	/**
 	 * 密码
 	 */
-	@Value("${" + ConfigBean.AUTHORIZE_PWD_KEY + ":}")
+	@Value("${" + ConfigBean.AUTHORIZE_AUTHORIZE_KEY + ":}")
 	private String agentPwd;
 	/**
 	 * 授权加密字符串
