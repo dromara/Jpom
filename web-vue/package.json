@@ -13,7 +13,7 @@
     "axios": "^0.21.1",
     "core-js": "^3.16.0",
     "echarts": "^4.9.0",
-    "element-ui": "^2.15.1",
+    "element-ui": "^2.15.7",
     "intro.js": "^3.4.0",
     "jshint": "^2.13.1",
     "markdown-it-vue": "^1.1.6",

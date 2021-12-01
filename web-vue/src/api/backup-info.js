@@ -69,6 +69,35 @@ export function restoreBackup(id) {
   })
 }
 
+/**
+ * 下载备份文件
+ * @param {*} id 
+ * @returns 
+ */
+export function downloadBackupFile(id) {
+  return `/system/backup/download?id=${id}`
+}
+
+/**
+ * 上传 SQL 备份文件
+ * @param {
+ *  file: 文件 multipart/form-data
+ *  bakcupType: 0 全量备份 1 部分备份
+ * } formData
+ */
+export function uploadBackupFile(formData) {
+	return axios({
+		url: '/system/backup/upload',
+		headers: {
+			'Content-Type': 'multipart/form-data;charset=UTF-8'
+		},
+		method: 'post',
+		// 0 表示无超时时间
+		timeout: 0,
+		data: formData
+	})
+}
+
 export const backupTypeMap = {
   0: '全量备份',
   1: '部分备份'

@@ -22,35 +22,57 @@
  */
 package io.jpom.controller.system;
 
+import cn.hutool.core.convert.Convert;
+import cn.hutool.core.date.DatePattern;
+import cn.hutool.core.date.LocalDateTimeUtil;
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.thread.ThreadUtil;
+import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.crypto.SecureUtil;
 import cn.hutool.db.Entity;
 import cn.hutool.db.Page;
 import cn.hutool.db.PageResult;
 import cn.hutool.db.sql.Direction;
 import cn.hutool.db.sql.Order;
+import cn.hutool.extra.servlet.ServletUtil;
+import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.validator.ValidatorConfig;
 import cn.jiangzeyin.common.validator.ValidatorItem;
 import cn.jiangzeyin.common.validator.ValidatorRule;
+import cn.jiangzeyin.controller.multipart.MultipartFileBuilder;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.common.BaseServerController;
 import io.jpom.common.Const;
+import io.jpom.common.forward.NodeForward;
+import io.jpom.common.forward.NodeUrl;
+import io.jpom.common.interceptor.OptLog;
+import io.jpom.model.AfterOpt;
+import io.jpom.model.BaseEnum;
 import io.jpom.model.data.BackupInfoModel;
+import io.jpom.model.enums.BackupStatusEnum;
+import io.jpom.model.log.UserOperateLogV1;
 import io.jpom.plugin.ClassFeature;
 import io.jpom.plugin.Feature;
 import io.jpom.plugin.MethodFeature;
 import io.jpom.service.dblog.BackupInfoService;
-import io.jpom.system.ExtConfigBean;
+import io.jpom.socket.ConsoleCommandOp;
+import io.jpom.system.db.DbConfig;
+import io.jpom.util.StringUtil;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
+import java.io.File;
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 数据库备份 controller
@@ -78,7 +100,7 @@ public class BackupInfoController extends BaseServerController {
 								 @ValidatorConfig(value = {@ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "page error")}, defaultVal = "1") int page,
 								 String name, Integer backupType) {
 		Page pageObj = new Page(page, limit);
-		pageObj.addOrder(new Order("modifyTimeMillis", Direction.DESC));
+		pageObj.addOrder(new Order("createTimeMillis", Direction.DESC));
 
 		// 设置查询参数
 		Entity entity = Entity.create();
@@ -126,10 +148,22 @@ public class BackupInfoController extends BaseServerController {
 		BackupInfoModel backupInfoModel = backupInfoService.getByKey(id);
 		Objects.requireNonNull(backupInfoModel, "备份数据不存在");
 
+		// 检查备份文件是否存在
+		File file = new File(backupInfoModel.getFilePath());
+		if (!FileUtil.exist(file)) {
+			return JsonMessage.toJson(400, "备份文件不存在");
+		}
+
 		// 还原备份文件
 		boolean flag = backupInfoService.restoreWithSql(backupInfoModel.getFilePath());
-		if (flag)
+		if (flag) {
+			// 还原备份数据成功之后需要修改当前备份信息的状态（因为备份的时候该备份信息状态是备份中）
+			backupInfoModel.setFileSize(FileUtil.size(file));
+			backupInfoModel.setSha1Sum(SecureUtil.sha1(file));
+			backupInfoModel.setStatus(BackupStatusEnum.SUCCESS.getCode());
+			backupInfoService.update(backupInfoModel);
 			return JsonMessage.toJson(200, "还原备份数据成功");
+		}
 		return JsonMessage.toJson(400, "还原备份数据失败");
 	}
 
@@ -147,7 +181,64 @@ public class BackupInfoController extends BaseServerController {
 		return JsonMessage.toJson(200, "操作成功，请稍后刷新查看备份状态");
 	}
 
-	// 导入备份数据
+	/**
+	 * 导入备份数据
+	 * @return
+	 */
+	@PostMapping(value = "/system/backup/upload")
+	@OptLog(UserOperateLogV1.OptType.UploadProjectFile)
+	@Feature(method = MethodFeature.UPLOAD)
+	public Object uploadBackupFile() throws IOException {
+		MultipartFileBuilder multipartFileBuilder = createMultipart()
+				.addFieldName("file");
+		// 备份类型
+		int backupType = Integer.parseInt(getParameter("backupType"));
+		// 存储目录
+		File directory = FileUtil.file(DbConfig.getInstance().dbLocalPath(), Const.BACKUP_DIRECTORY_NAME);
+
+		// 保存文件
+		multipartFileBuilder.setSavePath(FileUtil.getAbsolutePath(directory))
+				.setUseOriginalFilename(true);
+		String backupSqlPath = multipartFileBuilder.save();
+
+		// 记录到数据库
+		final File file = new File(backupSqlPath);
+		BackupInfoModel backupInfoModel = new BackupInfoModel();
+		backupInfoModel.setId(IdUtil.fastSimpleUUID());
+		backupInfoModel.setName(file.getName());
+		backupInfoModel.setBackupType(backupType);
+		backupInfoModel.setStatus(BackupStatusEnum.SUCCESS.getCode());
+		backupInfoModel.setFileSize(FileUtil.size(file));
+		backupInfoModel.setSha1Sum(SecureUtil.sha1(file));
+		backupInfoModel.setFilePath(backupSqlPath);
+
+		backupInfoService.insert(backupInfoModel);
+
+		return JsonMessage.toJson(200, "操作成功，请稍后刷新查看备份状态");
+	}
+
+	/**
+	 * 下载备份数据
+	 * @param id 备份 ID
+	 * @return
+	 */
+	@GetMapping(value = "/system/backup/download")
+	@Feature(method = MethodFeature.DOWNLOAD)
+	public void downloadBackup(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "数据 id 不能为空") String id) {
+		// 根据 id 查询备份信息
+		BackupInfoModel backupInfoModel = backupInfoService.getByKey(id);
+		Objects.requireNonNull(backupInfoModel, "备份数据不存在");
+
+		// 检查备份文件是否存在
+		File file = new File(backupInfoModel.getFilePath());
+		if (!FileUtil.exist(file)) {
+			DefaultSystemLog.getLog().error("文件不存在，无法下载...backupId: {}", id);
+			return;
+		}
+
+		// 下载文件
+		ServletUtil.write(getResponse(), file);
+	}
 
 	/**
 	 * 读取数据库表名称列表

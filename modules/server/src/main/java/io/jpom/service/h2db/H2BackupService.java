@@ -34,6 +34,7 @@ import org.springframework.util.CollectionUtils;
 import javax.sql.DataSource;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
@@ -101,16 +102,15 @@ public class H2BackupService {
 	 * @throws SQLException
 	 * @throws FileNotFoundException
 	 */
-	public void restoreBackupSql(String backupSqlPath) throws SQLException, FileNotFoundException {
-		// 读取数据库备份文件
-		FileReader fileReader = new FileReader(backupSqlPath);
-
+	public void restoreBackupSql(String backupSqlPath) throws SQLException, IOException {
 		// 加载数据源
 		DataSource dataSource = DSFactory.get();
 		Assert.notNull(dataSource, "Restore Backup sql error...H2 DataSource not null");
 		Connection connection = dataSource.getConnection();
 
-		// 执行还原
-		RunScript.execute(connection, fileReader);
+		// 读取数据库备份文件，执行还原
+		try (FileReader fileReader = new FileReader(backupSqlPath)) {
+			RunScript.execute(connection, fileReader);
+		}
 	}
 }
