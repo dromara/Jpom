@@ -52,7 +52,7 @@ export default {
     // 检查是否需要初始化
     checkSystem() {
       checkSystem().then((res) => {
-        if (res.code === 900) {
+        if (res.code === 999) {
           this.$router.push("/system/ipAccess");
         } else if (res.code !== 200) {
           this.$notification.warn({

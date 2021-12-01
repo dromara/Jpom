@@ -80,7 +80,7 @@ request.interceptors.response.use(
     }
 
     // 禁止访问
-    if (res.code === 900) {
+    if (res.code === 999) {
       notification.error({
         message: "禁止访问",
         duration: 2,

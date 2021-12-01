@@ -47,6 +47,8 @@ import javax.servlet.http.HttpServletResponse;
 @InterceptorPattens(sort = -2, exclude = ServerOpenApi.API + "**")
 public class IpInterceptor extends BaseJpomInterceptor {
 
+	private static final int IP_ACCESS_CODE = 999;
+
 	@Override
 	protected boolean preHandle(HttpServletRequest request, HttpServletResponse response, HandlerMethod handlerMethod) throws Exception {
 		String clientIp = ServletUtil.getClientIP(request);
@@ -61,14 +63,14 @@ public class IpInterceptor extends BaseJpomInterceptor {
 		// 判断不允许访问
 		String prohibited = config.getProhibited();
 		if (StrUtil.isNotEmpty(prohibited) && this.checkIp(prohibited, clientIp, false)) {
-			ServletUtil.write(response, JsonMessage.getString(900, "Prohibition of access"), MediaType.APPLICATION_JSON_VALUE);
+			ServletUtil.write(response, JsonMessage.getString(IP_ACCESS_CODE, "Prohibition of access"), MediaType.APPLICATION_JSON_VALUE);
 			return false;
 		}
 		String allowed = config.getAllowed();
 		if (StrUtil.isEmpty(allowed) || this.checkIp(allowed, clientIp, true)) {
 			return true;
 		}
-		ServletUtil.write(response, JsonMessage.getString(900, "Prohibition of access"), MediaType.APPLICATION_JSON_VALUE);
+		ServletUtil.write(response, JsonMessage.getString(IP_ACCESS_CODE, "Prohibition of access"), MediaType.APPLICATION_JSON_VALUE);
 		return false;
 	}
 

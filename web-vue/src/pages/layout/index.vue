@@ -133,7 +133,7 @@ export default {
           }
         }
 
-        if (res.code === 900) {
+        if (res.code === 999) {
           //
           this.$router.push("/system/ipAccess");
         } else if (res.code !== 200) {
