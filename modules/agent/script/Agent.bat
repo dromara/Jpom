@@ -21,6 +21,7 @@
 @REM
 
 @echo off
+CHCP 65001
 setlocal enabledelayedexpansion
 
 @REM 设置环境变量，避免部分服务器没有 taskkill
@@ -89,7 +90,7 @@ EXIT 0
 
 	echo 启动中.....启动成功后关闭窗口不影响运行
 	echo 启动详情请查看：%LogName%
-	javaw %JVM% -Djava.class.path="%JAVA_HOME%/lib/tools.jar;%RUNJAR%" -Dapplication=%Tag% -Dbasedir=%basePath%  %MainClass% %ARGS% >> %basePath%%LogName%
+	javaw %JVM% -Djava.class.path="%RUNJAR%" -Dapplication=%Tag% -Dbasedir=%basePath%  %MainClass% %ARGS% >> %basePath%%LogName%
 	timeout 3
 goto:eof
 
