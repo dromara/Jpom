@@ -343,7 +343,7 @@ public abstract class AbstractProjectCommander {
 			}
 			return jpsStatus;
 		} else {
-			Integer pid = JvmUtil.getVirtualMachine(tag);
+			Integer pid = JvmUtil.getPidByTag(tag);
 			if (pid == null) {
 				String jpsStatus = getJpsStatus(tag);
 				if (StrUtil.equals(AbstractProjectCommander.STOP_TAG, jpsStatus) && SystemUtil.getOsInfo().isLinux()) {

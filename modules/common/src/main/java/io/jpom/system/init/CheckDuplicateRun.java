@@ -39,7 +39,7 @@ class CheckDuplicateRun {
 			Class<?> appClass = JpomApplication.getAppClass();
 			String pid = String.valueOf(JpomManifest.getInstance().getPid());
 			Integer mainClassPid = JvmUtil.findMainClassPid(appClass.getName());
-			if (pid.equals(ObjectUtil.toString(mainClassPid))) {
+			if (mainClassPid == null || pid.equals(ObjectUtil.toString(mainClassPid))) {
 				return;
 			}
 			DefaultSystemLog.getLog().warn("Jpom 程序建议一个机器上只运行一个对应的程序：" + JpomApplication.getAppType() + "  pid:" + mainClassPid);

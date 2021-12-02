@@ -83,16 +83,16 @@ public class JpomClose {
 
 
 	public String stop(String tag) throws IOException {
-		Integer pid = JvmUtil.getVirtualMachine(tag);
+		Integer pid = JvmUtil.getPidByTag(tag);
 		return ObjectUtil.toString(pid);
 	}
 
 	public String status(String tag) throws IOException {
-		Integer virtualMachine = JvmUtil.getVirtualMachine(tag);
-		if (virtualMachine == null) {
+		Integer pid = JvmUtil.getPidByTag(tag);
+		if (pid == null) {
 			return "Jpom并没有运行";
 		}
-		return "Jpom运行中:" + virtualMachine;
+		return "Jpom运行中:" + pid;
 	}
 
 

@@ -22,7 +22,6 @@
  */
 package io.jpom.util;
 
-import cn.hutool.cache.impl.TimedCache;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.io.FileUtil;
@@ -33,7 +32,6 @@ import cn.hutool.core.util.StrUtil;
 import java.io.File;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.TimeUnit;
 import java.util.jar.Attributes;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
@@ -83,7 +81,7 @@ public class JvmUtil {
 	 * 根据pid 获取jvm
 	 *
 	 * @param pid 进程id
-	 * @return VirtualMachine
+	 * @return command line info
 	 */
 	public static String getVirtualMachineInfo(int pid) {
 		String execSystemCommand = CommandUtil.execSystemCommand("jps -mv");
@@ -96,12 +94,12 @@ public class JvmUtil {
 	}
 
 	/**
-	 * 工具Jpom运行项目的id 获取virtualMachine
+	 * 工具Jpom运行项目的id 获取进程ID
 	 *
 	 * @param tag 项目id
-	 * @return VirtualMachine
+	 * @return 进程ID
 	 */
-	public static Integer getVirtualMachine(String tag) {
+	public static Integer getPidByTag(String tag) {
 		String execSystemCommand = CommandUtil.execSystemCommand("jps -mv");
 		List<String> list = StrSplitter.splitTrim(execSystemCommand, StrUtil.LF, true);
 		Optional<String> any = list.stream().filter(s -> checkCommandLineIsJpom(s, tag)).map(s -> {
@@ -146,7 +144,10 @@ public class JvmUtil {
 		Optional<Tuple> any = list.stream().map(s -> {
 			List<String> split = StrUtil.split(s, StrUtil.SPACE);
 			return new Tuple(CollUtil.getFirst(split), CollUtil.getLast(split));
-		}).filter(tuple -> StrUtil.equals(mainClass, tuple.get(1))).findAny();
+		}).filter(tuple -> {
+			String fileName = tuple.get(1);
+			return StrUtil.equals(mainClass, fileName) || checkFile(fileName, mainClass);
+		}).findAny();
 		return any.map(tuple -> Convert.toInt(tuple.get(0))).orElse(null);
 	}
 
