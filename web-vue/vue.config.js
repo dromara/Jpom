@@ -1,5 +1,5 @@
 // vue.config.js
-const IP = 'localhost'
+const IP = '127.0.0.1'
 module.exports = {
   // 输出目录
   outputDir: '../modules/server/src/main/resources/dist',
