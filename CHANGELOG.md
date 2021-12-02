@@ -5,7 +5,7 @@
 ### 新增功能
 
 1. 【server】新增自定义系统网页标题配置`jpom.name`
-2. 【server】新增自定义系统网页 Logo 配置`jpom.logoFile`
+2. 【server】新增自定义系统网页 logo 配置`jpom.logoFile`
 3. 【server】新增自定义系统登录页面标题配置`jpom.loginTitle`
 4. 【server】新增自定义系统 logo 文字标题配置`jpom.subTitle`
 5. 新增在线下载最新版本更新包功能（在线检测最新版本）
