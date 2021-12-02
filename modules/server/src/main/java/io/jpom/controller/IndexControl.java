@@ -101,7 +101,7 @@ public class IndexControl extends BaseServerController {
 		// 修改网页标题
 		String title = ReUtil.get("<title>.*?</title>", html, 0);
 		if (StrUtil.isNotEmpty(title)) {
-			html = StrUtil.replace(html, title, ServerExtConfigBean.getInstance().getName());
+			html = StrUtil.replace(html, title, "<title>" + ServerExtConfigBean.getInstance().getName() + "</title>");
 		}
 		ServletUtil.write(response, html, ContentType.TEXT_HTML.getValue());
 	}
