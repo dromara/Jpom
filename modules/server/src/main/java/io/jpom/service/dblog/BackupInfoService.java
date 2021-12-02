@@ -26,6 +26,7 @@ import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.date.DatePattern;
 import cn.hutool.core.date.LocalDateTimeUtil;
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.crypto.SecureUtil;
 import cn.hutool.db.Entity;
@@ -46,13 +47,12 @@ import javax.annotation.Resource;
 import java.io.File;
 import java.sql.SQLException;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
  * 备份数据库 service
+ *
  * @author Hotstrip
  * @date 2021-11-18
  **/
@@ -64,6 +64,7 @@ public class BackupInfoService extends BaseDbService<BackupInfoModel> {
 
 	/**
 	 * 备份数据库 SQL 文件
+	 *
 	 * @param tableNameList 需要备份的表名称列表，如果是全库备份，则不需要
 	 */
 	public void backupToSql(final List<String> tableNameList) {
@@ -94,8 +95,7 @@ public class BackupInfoService extends BaseDbService<BackupInfoModel> {
 		insert(backupInfoModel);
 
 		// 开启一个子线程去执行任务，任务完成之后修改对应的数据库备份信息
-		ExecutorService service =  Executors.newSingleThreadExecutor();
-		service.submit(() -> {
+		ThreadUtil.execute(() -> {
 			// 修改用的实体类
 			BackupInfoModel backupInfo = new BackupInfoModel();
 			BeanUtil.copyProperties(backupInfoModel, backupInfo);
@@ -110,18 +110,17 @@ public class BackupInfoService extends BaseDbService<BackupInfoModel> {
 				DefaultSystemLog.getLog().info("start a new Thread to execute H2 Database backup...success");
 			} catch (SQLException e) {
 				// 记录错误日志信息，修改备份任务执行失败
-				DefaultSystemLog.getLog().info("start a new Thread to execute H2 Database backup...catch exception...message: {}, cause: {}",
-						e.getMessage(), e.getCause());
+				DefaultSystemLog.getLog().error("start a new Thread to execute H2 Database backup...catch exception...message: {}, cause: {}", e.getMessage(), e.getCause());
 				backupInfo.setStatus(BackupStatusEnum.FAILED.getCode());
 				update(backupInfo);
 			}
 		});
-		service.shutdown();
 	}
 
 	/**
 	 * 根据 SQL 文件还原数据库
 	 * 还原数据库时只能同步，防止该过程中修改数据造成数据不一致
+	 *
 	 * @param backupSqlPath 备份 sql 文件地址
 	 */
 	public boolean restoreWithSql(String backupSqlPath) {
@@ -129,13 +128,11 @@ public class BackupInfoService extends BaseDbService<BackupInfoModel> {
 			long startTs = System.currentTimeMillis();
 			h2BackupService.restoreBackupSql(backupSqlPath);
 			long endTs = System.currentTimeMillis();
-			DefaultSystemLog.getLog().info("restore H2 Database backup...success...cast {} ms",
-					endTs - startTs);
+			DefaultSystemLog.getLog().info("restore H2 Database backup...success...cast {} ms", endTs - startTs);
 			return true;
 		} catch (Exception e) {
 			// 记录错误日志信息，返回数据库备份还原执行失败
-			DefaultSystemLog.getLog().info("restore H2 Database backup...catch exception...message: {}, cause: {}",
-					e.getMessage(), e.getCause());
+			DefaultSystemLog.getLog().error("restore H2 Database backup...catch exception...message: {}, cause: {}", e.getMessage(), e.getCause());
 			return false;
 		}
 	}
@@ -149,10 +146,6 @@ public class BackupInfoService extends BaseDbService<BackupInfoModel> {
 		String sql = "show tables;";
 		List<Entity> list = super.query(sql);
 		// 筛选字段
-		return list.stream()
-				.filter(entity -> StringUtils.hasLength(String.valueOf(entity.get(Const.TABLE_NAME))))
-				.flatMap(entity -> Stream.of(String.valueOf(entity.get(Const.TABLE_NAME))))
-				.distinct()
-				.collect(Collectors.toList());
+		return list.stream().filter(entity -> StringUtils.hasLength(String.valueOf(entity.get(Const.TABLE_NAME)))).flatMap(entity -> Stream.of(String.valueOf(entity.get(Const.TABLE_NAME)))).distinct().collect(Collectors.toList());
 	}
 }
