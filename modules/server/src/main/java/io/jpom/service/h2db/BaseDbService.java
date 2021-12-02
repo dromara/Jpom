@@ -27,8 +27,11 @@ import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.db.Entity;
+import io.jpom.common.BaseServerController;
 import io.jpom.common.Const;
 import io.jpom.model.BaseDbModel;
+import io.jpom.model.BaseUserModifyDbModel;
+import io.jpom.model.data.UserModel;
 import org.springframework.util.Assert;
 
 import java.util.Collection;
@@ -54,9 +57,7 @@ public abstract class BaseDbService<T extends BaseDbModel> extends BaseDbCommonS
 
 	@Override
 	public void insert(T t) {
-		// def create time
-		t.setCreateTimeMillis(ObjectUtil.defaultIfNull(t.getCreateTimeMillis(), SystemClock.now()));
-		t.setId(ObjectUtil.defaultIfNull(t.getId(), IdUtil.fastSimpleUUID()));
+		this.fillInsert(t);
 		super.insert(t);
 	}
 
@@ -64,11 +65,21 @@ public abstract class BaseDbService<T extends BaseDbModel> extends BaseDbCommonS
 	@Override
 	public void insert(Collection<T> t) {
 		// def create time
-		t.forEach(t1 -> {
-			t1.setCreateTimeMillis(ObjectUtil.defaultIfNull(t1.getCreateTimeMillis(), SystemClock.now()));
-			t1.setId(ObjectUtil.defaultIfNull(t1.getId(), IdUtil.fastSimpleUUID()));
-		});
+		t.forEach(this::fillInsert);
 		super.insert(t);
+	}
+
+	private void fillInsert(T t) {
+		// def create time
+		t.setCreateTimeMillis(ObjectUtil.defaultIfNull(t.getCreateTimeMillis(), SystemClock.now()));
+		t.setId(ObjectUtil.defaultIfNull(t.getId(), IdUtil.fastSimpleUUID()));
+		if (t instanceof BaseUserModifyDbModel) {
+			BaseUserModifyDbModel modifyDbModel = (BaseUserModifyDbModel) t;
+			UserModel userModel = BaseServerController.getUserModel();
+			if (userModel != null) {
+				modifyDbModel.setModifyUser(ObjectUtil.defaultIfNull(modifyDbModel.getModifyUser(), userModel.getId()));
+			}
+		}
 	}
 
 	/**
@@ -85,6 +96,14 @@ public abstract class BaseDbService<T extends BaseDbModel> extends BaseDbCommonS
 		info.setModifyTimeMillis(ObjectUtil.defaultIfNull(info.getModifyTimeMillis(), SystemClock.now()));
 		// remove create time
 		info.setCreateTimeMillis(null);
+		// fill modify user
+		if (info instanceof BaseUserModifyDbModel) {
+			BaseUserModifyDbModel modifyDbModel = (BaseUserModifyDbModel) info;
+			UserModel userModel = BaseServerController.getUserModel();
+			if (userModel != null) {
+				modifyDbModel.setModifyUser(ObjectUtil.defaultIfNull(modifyDbModel.getModifyUser(), userModel.getId()));
+			}
+		}
 		//
 		Entity entity = this.dataBeanToEntity(info);
 		//

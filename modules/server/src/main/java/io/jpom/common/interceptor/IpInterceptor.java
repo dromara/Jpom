@@ -31,7 +31,7 @@ import cn.jiangzeyin.common.interceptor.InterceptorPattens;
 import cn.jiangzeyin.common.spring.SpringUtil;
 import io.jpom.common.ServerOpenApi;
 import io.jpom.model.data.SystemIpConfigModel;
-import io.jpom.service.system.SystemIpConfigService;
+import io.jpom.service.system.SystemParametersServer;
 import org.springframework.http.MediaType;
 import org.springframework.web.method.HandlerMethod;
 
@@ -55,8 +55,8 @@ public class IpInterceptor extends BaseJpomInterceptor {
 		if (StrUtil.equals(NetUtil.LOCAL_IP, clientIp)) {
 			return true;
 		}
-		SystemIpConfigService bean = SpringUtil.getBean(SystemIpConfigService.class);
-		SystemIpConfigModel config = bean.getConfig();
+		SystemParametersServer bean = SpringUtil.getBean(SystemParametersServer.class);
+		SystemIpConfigModel config = bean.getConfig(SystemIpConfigModel.ID, SystemIpConfigModel.class);
 		if (config == null) {
 			return true;
 		}

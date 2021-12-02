@@ -40,7 +40,7 @@ import io.jpom.common.interceptor.OptLog;
 import io.jpom.model.data.SystemIpConfigModel;
 import io.jpom.model.log.UserOperateLogV1;
 import io.jpom.permission.SystemPermission;
-import io.jpom.service.system.SystemIpConfigService;
+import io.jpom.service.system.SystemParametersServer;
 import io.jpom.system.ExtConfigBean;
 import org.springframework.boot.env.YamlPropertySourceLoader;
 import org.springframework.core.io.ByteArrayResource;
@@ -64,10 +64,10 @@ import java.nio.charset.StandardCharsets;
 @RequestMapping(value = "system")
 public class SystemConfigController extends BaseServerController {
 
-	private final SystemIpConfigService systemIpConfigService;
+	private final SystemParametersServer systemParametersServer;
 
-	public SystemConfigController(SystemIpConfigService systemIpConfigService) {
-		this.systemIpConfigService = systemIpConfigService;
+	public SystemConfigController(SystemParametersServer systemParametersServer) {
+		this.systemParametersServer = systemParametersServer;
 	}
 
 	/**
@@ -141,13 +141,13 @@ public class SystemConfigController extends BaseServerController {
 	@SystemPermission
 	@ResponseBody
 	public String ipConfigData() {
-		SystemIpConfigModel config = systemIpConfigService.getConfig();
+		SystemIpConfigModel config = systemParametersServer.getConfig(SystemIpConfigModel.ID, SystemIpConfigModel.class);
 		JSONObject jsonObject = new JSONObject();
 		if (config != null) {
 			jsonObject.put("allowed", config.getAllowed());
 			jsonObject.put("prohibited", config.getProhibited());
 		}
-		jsonObject.put("path", FileUtil.getAbsolutePath(systemIpConfigService.filePath()));
+		//jsonObject.put("path", FileUtil.getAbsolutePath(systemIpConfigService.filePath()));
 		jsonObject.put("ip", getIp());
 		return JsonMessage.getString(200, "加载成功", jsonObject);
 	}
@@ -160,7 +160,7 @@ public class SystemConfigController extends BaseServerController {
 		SystemIpConfigModel systemIpConfigModel = new SystemIpConfigModel();
 		systemIpConfigModel.setAllowed(StrUtil.emptyToDefault(allowed, StrUtil.EMPTY));
 		systemIpConfigModel.setProhibited(StrUtil.emptyToDefault(prohibited, StrUtil.EMPTY));
-		systemIpConfigService.save(systemIpConfigModel);
+		systemParametersServer.upsert(SystemIpConfigModel.ID, systemIpConfigModel, SystemIpConfigModel.ID);
 		//
 		return JsonMessage.getString(200, "修改成功");
 	}

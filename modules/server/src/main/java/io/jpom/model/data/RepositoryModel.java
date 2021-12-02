@@ -24,8 +24,8 @@ package io.jpom.model.data;
 
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.http.HttpUtil;
-import io.jpom.model.BaseDbModel;
 import io.jpom.model.BaseEnum;
+import io.jpom.model.BaseStrikeDbModel;
 import io.jpom.model.enums.GitProtocolEnum;
 import io.jpom.service.h2db.TableName;
 
@@ -34,7 +34,7 @@ import io.jpom.service.h2db.TableName;
  * 仓库地址实体类
  */
 @TableName("REPOSITORY")
-public class RepositoryModel extends BaseDbModel {
+public class RepositoryModel extends BaseStrikeDbModel {
 	/**
 	 * 名称
 	 */
@@ -69,11 +69,6 @@ public class RepositoryModel extends BaseDbModel {
 	 * SSH RSA 私钥
 	 */
 	private String rsaPrv;
-
-	/**
-	 * 逻辑删除
-	 */
-	private Integer strike;
 
 	public String getName() {
 		return name;
@@ -153,14 +148,6 @@ public class RepositoryModel extends BaseDbModel {
 
 	public void setRsaPrv(String rsaPrv) {
 		this.rsaPrv = rsaPrv;
-	}
-
-	public Integer getStrike() {
-		return strike;
-	}
-
-	public void setStrike(Integer strike) {
-		this.strike = strike;
 	}
 
 	/**

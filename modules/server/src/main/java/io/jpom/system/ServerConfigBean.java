@@ -107,6 +107,7 @@ public class ServerConfigBean {
 	/**
 	 * ip配置
 	 */
+	@Deprecated
 	public static final String IP_CONFIG = "ip_config.json";
 
 	/**

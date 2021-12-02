@@ -96,7 +96,8 @@ public class InitDb implements DisposableBean, InitializingBean {
 			 */
 			String[] files = new String[]{
 					"classpath:/bin/h2-db-v1.sql",
-					"classpath:/bin/h2-db-v2.sql"
+					"classpath:/bin/h2-db-v2.sql",
+					"classpath:/bin/h2-db-v3.sql",
 			};
 			// 加载 sql 变更记录，避免重复执行
 			Set<String> executeSqlLog = DbConfig.loadExecuteSqlLog();
@@ -114,18 +115,15 @@ public class InitDb implements DisposableBean, InitializingBean {
 			}
 			DbConfig.saveExecuteSqlLog(executeSqlLog);
 			DSFactory.setCurrentDSFactory(dsFactory);
-			/**
-			 * @author Hotstrip
-			 * @date 2021-08-03
-			 * load build.js data to DB
-			 */
-			LoadBuildJsonToDB.getInstance().doJsonToSql();
+			//
 		} catch (Exception e) {
 			DefaultSystemLog.getLog().error("初始化数据库失败", e);
 			System.exit(0);
 			return;
 		}
 		instance.initOk();
+		// json load to db
+		InitDb.loadJsonToDb();
 		Console.log("h2 db Successfully loaded, url is 【{}】", dbUrl);
 		if (JpomManifest.getInstance().isDebug()) {
 			//
@@ -137,6 +135,17 @@ public class InitDb implements DisposableBean, InitializingBean {
 				System.exit(-2);
 			}
 		}
+	}
+
+	private static void loadJsonToDb() {
+		/**
+		 * @author Hotstrip
+		 * @date 2021-08-03
+		 * load build.js data to DB
+		 */
+		LoadBuildJsonToDB.getInstance().doJsonToSql();
+		// @author bwcx_jzy @date 2021-12-02
+		LoadIpConfigToDb.getInstance().load();
 	}
 
 	@Override

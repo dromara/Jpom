@@ -158,6 +158,9 @@ public class StringUtil {
 	 */
 	public static <T> T jsonConvert(String jsonStr, Class<T> cls) {
 		try {
+			if (StrUtil.isEmpty(jsonStr)) {
+				return null;
+			}
 			return JSON.parseObject(jsonStr, cls);
 		} catch (Exception e) {
 			return JSON.parseObject(JSON.parse(jsonStr).toString(), cls);
