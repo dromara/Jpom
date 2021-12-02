@@ -1,7 +1,7 @@
 <template>
   <div>
     <div ref="filter" class="filter">
-      <a-input v-model="listQuery.name" placeholder="请输入备份名称" class="filter-item"/>
+      <a-input v-model="listQuery.name" placeholder="请输入备份名称" class="filter-item" />
       <a-select v-model="listQuery.backupType" allowClear placeholder="请选择备份类型" class="filter-item" @change="handleFilter">
         <a-select-option v-for="backupType in backupTypeList" :key="backupType.key">{{ backupType.value }}</a-select-option>
       </a-select>
@@ -27,9 +27,8 @@
       <template slot="backupType" slot-scope="text" placement="topleft" :title="text">
         <span>{{ backupTypeMap[text] }}</span>
       </template>
-      <a-tooltip slot="fileSize" slot-scope="text" placement="topLeft" :title="text">
-        <a-tag v-if="text" color="#108ee9">{{ text }}</a-tag>
-        <a-tag v-else color="#108ee9"> 0 </a-tag>
+      <a-tooltip slot="fileSize" slot-scope="text" placement="topLeft" :title="`${renderSizeFormat(text)}`">
+        <a-tag color="#108ee9">{{ renderSizeFormat(text) }}</a-tag>
       </a-tooltip>
       <a-tooltip slot="status" slot-scope="text" placement="topLeft" :title="backupStatusMap[text]">
         <span>{{ backupStatusMap[text] }}</span>
@@ -57,14 +56,7 @@
         </a-form-model-item>
         <!-- 部分备份 -->
         <a-form-model-item v-if="temp.backupType === 1" label="勾选数据表" prop="tableNameList" class="feature jpom-role">
-          <a-transfer
-            :data-source="tableNameList"
-            show-search
-            :filter-option="filterOption"
-            :target-keys="targetKeys"
-            :render="item => item.title"
-            @change="handleChange"
-          />
+          <a-transfer :data-source="tableNameList" show-search :filter-option="filterOption" :target-keys="targetKeys" :render="(item) => item.title" @change="handleChange" />
         </a-form-model-item>
       </a-form-model>
     </a-modal>
@@ -90,11 +82,10 @@
 <script>
 import { mapGetters } from "vuex";
 import { getBackupList, getTableNameList, createBackup, downloadBackupFile, deleteBackup, restoreBackup, uploadBackupFile, backupTypeMap, backupStatusMap } from "../../api/backup-info";
-import { parseTime } from "../../utils/time";
+import { parseTime, renderSize } from "@/utils/time";
 
 export default {
-  components: {
-  },
+  components: {},
   data() {
     return {
       backupTypeMap: backupTypeMap,
@@ -103,8 +94,8 @@ export default {
       listQuery: {},
       tableHeight: "70vh",
       backupTypeList: [
-        {key: 0, value: '全量'},
-        {key: 1, value: '部分'}
+        { key: 0, value: "全量" },
+        { key: 1, value: "部分" },
       ],
       list: [],
       tableNameList: [],
@@ -119,12 +110,12 @@ export default {
       backupType: 0,
       columns: [
         { title: "备份名称", dataIndex: "name", width: 150, ellipsis: true, scopedSlots: { customRender: "name" } },
-        { title: "备份类型", dataIndex: "backupType", width: 150, ellipsis: true, scopedSlots: { customRender: "backupType" } },
+        { title: "备份类型", dataIndex: "backupType", width: 100, ellipsis: true, scopedSlots: { customRender: "backupType" } },
         {
           title: "文件大小",
           dataIndex: "fileSize",
           width: 100,
-          ellipsis: true,
+          // ellipsis: true,
           scopedSlots: { customRender: "fileSize" },
         },
         { title: "状态", dataIndex: "status", width: 100, ellipsis: true, scopedSlots: { customRender: "status" } },
@@ -138,7 +129,7 @@ export default {
         {
           title: "文件地址",
           dataIndex: "filePath",
-          width: 150,
+          // width: 150,
           ellipsis: true,
           scopedSlots: { customRender: "filePath" },
         },
@@ -182,6 +173,10 @@ export default {
     this.handleFilter();
   },
   methods: {
+    // 格式化文件大小
+    renderSizeFormat(value) {
+      return renderSize(value);
+    },
     // 计算表格高度
     calcTableHeight() {
       this.$nextTick(() => {
@@ -204,8 +199,8 @@ export default {
       this.tableNameList = [];
       getTableNameList().then((res) => {
         if (res.code === 200) {
-          res.data.forEach(element => {
-            this.tableNameList.push({key: element, title: element});
+          res.data.forEach((element) => {
+            this.tableNameList.push({ key: element, title: element });
           });
         }
       });
@@ -227,7 +222,7 @@ export default {
       this.targetKeys = [];
       this.temp = {
         backupType: 0,
-      }
+      };
       this.loadTableNameList();
       this.createBackupVisible = true;
     },
@@ -255,7 +250,7 @@ export default {
     },
     // 下载
     handleDownload(record) {
-      window.open(downloadBackupFile(record.id), '_self');
+      window.open(downloadBackupFile(record.id), "_self");
     },
     // 删除
     handleDelete(record) {
@@ -346,8 +341,8 @@ export default {
           }, 1000);
         }
       });
-    }
-  }
+    },
+  },
 };
 </script>
 <style scoped>
