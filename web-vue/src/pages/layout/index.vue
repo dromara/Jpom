@@ -2,7 +2,7 @@
   <a-layout id="app-layout">
     <a-layout-sider v-model="collapsed" :trigger="null" collapsible class="sider">
       <div class="logo" @click="toggleGuide()">
-        <img src="/logo_image" />
+        <img :src="logoUrl" />
         {{ this.subName }}
       </div>
       <side-menu class="side-menu" />
@@ -38,6 +38,7 @@ export default {
     return {
       collapsed: false,
       subName: "项目管理",
+      logoUrl: "",
     };
   },
   computed: {
@@ -131,6 +132,7 @@ export default {
           if (res.data.subName) {
             this.subName = res.data.subName;
           }
+          this.logoUrl = ((res.data.routerBase || "") + "/logo_image").replace(new RegExp("//", "gm"), "/");
         }
 
         if (res.code === 999) {
