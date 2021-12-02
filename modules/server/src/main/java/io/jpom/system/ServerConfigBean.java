@@ -81,6 +81,7 @@ public class ServerConfigBean {
 	/**
 	 * 邮箱配置
 	 */
+	@Deprecated
 	public static final String MAIL_CONFIG = "mail_config.json";
 
 	/**

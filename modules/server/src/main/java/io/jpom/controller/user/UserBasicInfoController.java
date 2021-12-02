@@ -35,10 +35,11 @@ import io.jpom.common.interceptor.LoginInterceptor;
 import io.jpom.model.data.MailAccountModel;
 import io.jpom.model.data.UserModel;
 import io.jpom.monitor.EmailUtil;
-import io.jpom.service.system.SystemMailConfigService;
+import io.jpom.service.system.SystemParametersServer;
 import io.jpom.service.user.UserService;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -60,7 +61,7 @@ public class UserBasicInfoController extends BaseServerController {
 	private static final TimedCache<String, Integer> CACHE = new TimedCache<>(TimeUnit.MINUTES.toMillis(30));
 
 	@Resource
-	private SystemMailConfigService systemMailConfigService;
+	private SystemParametersServer systemParametersServer;
 	@Resource
 	private UserService userService;
 
@@ -125,10 +126,8 @@ public class UserBasicInfoController extends BaseServerController {
 	@RequestMapping(value = "sendCode.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public String sendCode(@ValidatorItem(value = ValidatorRule.EMAIL, msg = "邮箱格式不正确") String email) {
-		MailAccountModel config = systemMailConfigService.getConfig();
-		if (config == null) {
-			return JsonMessage.getString(405, "管理员还没有配置系统邮箱");
-		}
+		MailAccountModel config = systemParametersServer.getConfig(MailAccountModel.ID, MailAccountModel.class);
+		Assert.notNull(config, "管理员还没有配置系统邮箱,请联系管理配置发件信息");
 		int randomInt = RandomUtil.randomInt(1000, 9999);
 		try {
 			EmailUtil.send(email, "Jpom 验证码", "验证码是：" + randomInt);

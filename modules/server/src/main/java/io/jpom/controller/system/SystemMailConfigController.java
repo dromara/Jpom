@@ -22,7 +22,6 @@
  */
 package io.jpom.controller.system;
 
-import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.mail.MailAccount;
 import cn.hutool.extra.mail.MailUtil;
 import cn.jiangzeyin.common.JsonMessage;
@@ -33,9 +32,10 @@ import io.jpom.model.data.UserModel;
 import io.jpom.model.log.UserOperateLogV1;
 import io.jpom.monitor.EmailUtil;
 import io.jpom.permission.SystemPermission;
-import io.jpom.service.system.SystemMailConfigService;
+import io.jpom.service.system.SystemParametersServer;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -55,7 +55,7 @@ import javax.mail.Transport;
 public class SystemMailConfigController extends BaseServerController {
 
 	@Resource
-	private SystemMailConfigService systemMailConfigService;
+	private SystemParametersServer systemParametersServer;
 
 	/**
 	 * @return
@@ -70,7 +70,7 @@ public class SystemMailConfigController extends BaseServerController {
 		UserModel userModel = getUser();
 		MailAccountModel item = null;
 		if (userModel.isSystemUser()) {
-			item = systemMailConfigService.getConfig();
+			item = systemParametersServer.getConfig(MailAccountModel.ID, MailAccountModel.class);
 		}
 		return JsonMessage.getString(200, "success", item);
 	}
@@ -80,25 +80,14 @@ public class SystemMailConfigController extends BaseServerController {
 	@OptLog(UserOperateLogV1.OptType.EditMailConfig)
 	@SystemPermission
 	public String listData(MailAccountModel mailAccountModel) {
-		if (mailAccountModel == null) {
-			return JsonMessage.getString(405, "请填写信息,并检查是否填写合法");
-		}
-		if (StrUtil.isBlank(mailAccountModel.getHost())) {
-			return JsonMessage.getString(405, "请填写host");
-		}
-		if (StrUtil.isBlank(mailAccountModel.getUser())) {
-			return JsonMessage.getString(405, "请填写user");
-		}
-		if (StrUtil.isBlank(mailAccountModel.getPass())) {
-			return JsonMessage.getString(405, "请填写pass");
-		}
-		if (StrUtil.isBlank(mailAccountModel.getFrom())) {
-			return JsonMessage.getString(405, "请填写from");
-		}
-		systemMailConfigService.save(mailAccountModel);
+		Assert.notNull(mailAccountModel, "请填写信息,并检查是否填写合法");
+		Assert.hasText(mailAccountModel.getHost(), "请填写host");
+		Assert.hasText(mailAccountModel.getUser(), "请填写user");
+		Assert.hasText(mailAccountModel.getPass(), "请填写pass");
+		Assert.hasText(mailAccountModel.getFrom(), "请填写from");
 		// 验证是否正确
 		try {
-			MailAccount account = EmailUtil.getAccountNew();
+			MailAccount account = EmailUtil.getAccount(mailAccountModel);
 			Session session = MailUtil.getSession(account, false);
 			Transport transport = session.getTransport("smtp");
 			transport.connect();
@@ -106,6 +95,9 @@ public class SystemMailConfigController extends BaseServerController {
 		} catch (Exception e) {
 			return JsonMessage.getString(406, "验证邮箱信息失败，请检查配置的邮箱信息。端口号、授权码等。" + e.getMessage());
 		}
+		systemParametersServer.upsert(MailAccountModel.ID, mailAccountModel, MailAccountModel.ID);
+		//
+		EmailUtil.refreshConfig();
 		return JsonMessage.getString(200, "保存成功");
 	}
 }

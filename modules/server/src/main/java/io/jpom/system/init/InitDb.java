@@ -145,7 +145,9 @@ public class InitDb implements DisposableBean, InitializingBean {
 		 */
 		LoadBuildJsonToDB.getInstance().doJsonToSql();
 		// @author bwcx_jzy @date 2021-12-02
-		LoadIpConfigToDb.getInstance().load();
+		LoadJsonConfigToDb instance = LoadJsonConfigToDb.getInstance();
+		instance.loadIpConfig();
+		instance.loadMailConfig();
 	}
 
 	@Override
