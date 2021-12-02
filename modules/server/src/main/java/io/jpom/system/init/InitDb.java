@@ -148,6 +148,7 @@ public class InitDb implements DisposableBean, InitializingBean {
 		LoadJsonConfigToDb instance = LoadJsonConfigToDb.getInstance();
 		instance.loadIpConfig();
 		instance.loadMailConfig();
+		instance.loadOutGivingWhitelistConfig();
 	}
 
 	@Override

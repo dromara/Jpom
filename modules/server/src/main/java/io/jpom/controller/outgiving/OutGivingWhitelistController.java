@@ -35,7 +35,7 @@ import io.jpom.model.log.UserOperateLogV1;
 import io.jpom.permission.SystemPermission;
 import io.jpom.plugin.ClassFeature;
 import io.jpom.plugin.Feature;
-import io.jpom.service.system.ServerWhitelistServer;
+import io.jpom.service.system.SystemParametersServer;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.Assert;
@@ -43,7 +43,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import javax.annotation.Resource;
 import java.lang.reflect.Field;
 import java.util.Collection;
 import java.util.HashMap;
@@ -60,8 +59,12 @@ import java.util.Map;
 @RequestMapping(value = "/outgiving")
 @Feature(cls = ClassFeature.OUTGIVING)
 public class OutGivingWhitelistController extends BaseServerController {
-	@Resource
-	private ServerWhitelistServer serverWhitelistServer;
+
+	private final SystemParametersServer systemParametersServer;
+
+	public OutGivingWhitelistController(SystemParametersServer systemParametersServer) {
+		this.systemParametersServer = systemParametersServer;
+	}
 
 
 	/**
@@ -74,7 +77,7 @@ public class OutGivingWhitelistController extends BaseServerController {
 	@RequestMapping(value = "white-list", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public String whiteList() {
-		ServerWhitelist serverWhitelist = serverWhitelistServer.getWhitelist();
+		ServerWhitelist serverWhitelist = systemParametersServer.getConfig(ServerWhitelist.ID, ServerWhitelist.class);
 		Field[] fields = ReflectUtil.getFields(ServerWhitelist.class);
 		Map<String, Object> map = new HashMap<>(8);
 		for (Field field : fields) {
@@ -99,7 +102,7 @@ public class OutGivingWhitelistController extends BaseServerController {
 		List<String> list = AgentWhitelist.parseToList(outGiving, true, "项目路径白名单不能为空");
 		list = AgentWhitelist.covertToArray(list, "项目路径白名单不能位于Jpom目录下");
 
-		ServerWhitelist serverWhitelist = serverWhitelistServer.getWhitelist();
+		ServerWhitelist serverWhitelist = systemParametersServer.getConfigDeNewInstance(ServerWhitelist.ID, ServerWhitelist.class);
 		serverWhitelist.setOutGiving(list);
 		//
 		List<String> allowRemoteDownloadHostList = AgentWhitelist.parseToList(allowRemoteDownloadHost, "运行远程下载的 host 不能配置为空");
@@ -110,7 +113,7 @@ public class OutGivingWhitelistController extends BaseServerController {
 			}
 		}
 		serverWhitelist.setAllowRemoteDownloadHost(allowRemoteDownloadHostList == null ? null : CollUtil.newHashSet(allowRemoteDownloadHostList));
-		serverWhitelistServer.saveWhitelistDirectory(serverWhitelist);
+		systemParametersServer.upsert(ServerWhitelist.ID, serverWhitelist, ServerWhitelist.ID);
 
 		String resultData = AgentWhitelist.convertToLine(list);
 		return JsonMessage.getString(200, "保存成功", resultData);

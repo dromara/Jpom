@@ -5,6 +5,7 @@ import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.spring.SpringUtil;
 import com.alibaba.fastjson.JSON;
 import io.jpom.model.data.MailAccountModel;
+import io.jpom.model.data.ServerWhitelist;
 import io.jpom.model.data.SystemIpConfigModel;
 import io.jpom.service.system.SystemParametersServer;
 import io.jpom.system.ConfigBean;
@@ -73,6 +74,29 @@ public class LoadJsonConfigToDb {
 			}
 			SystemParametersServer parametersServer = SpringUtil.getBean(SystemParametersServer.class);
 			parametersServer.upsert(MailAccountModel.ID, mailAccountModel, MailAccountModel.ID);
+			// 将 json 文件转移到备份目录
+			FileUtil.move(file, FileUtil.mkdir(backupOldData), true);
+			DefaultSystemLog.getLog().info("{} mv to {}", FileUtil.getAbsolutePath(file), FileUtil.getAbsolutePath(backupOldData));
+		} catch (Exception e) {
+			DefaultSystemLog.getLog().error("load mail config error ", e);
+		}
+	}
+
+	public void loadOutGivingWhitelistConfig() {
+		File backupOldData = FileUtil.file(ConfigBean.getInstance().getDataPath(), "backup_old_data");
+		// 读取 OUTGIVING_WHITELIST 文件内容
+		File file = FileUtil.file(ConfigBean.getInstance().getDataPath(), ServerConfigBean.OUTGIVING_WHITELIST);
+		if (!FileUtil.exist(file)) {
+			return;
+		}
+		try {
+			JSON json = JsonFileUtil.readJson(file.getAbsolutePath());
+			ServerWhitelist serverWhitelist = json.toJavaObject(ServerWhitelist.class);
+			if (serverWhitelist == null) {
+				return;
+			}
+			SystemParametersServer parametersServer = SpringUtil.getBean(SystemParametersServer.class);
+			parametersServer.upsert(ServerWhitelist.ID, serverWhitelist, ServerWhitelist.ID);
 			// 将 json 文件转移到备份目录
 			FileUtil.move(file, FileUtil.mkdir(backupOldData), true);
 			DefaultSystemLog.getLog().info("{} mv to {}", FileUtil.getAbsolutePath(file), FileUtil.getAbsolutePath(backupOldData));

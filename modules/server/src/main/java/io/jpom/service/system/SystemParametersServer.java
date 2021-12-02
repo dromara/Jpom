@@ -1,5 +1,6 @@
 package io.jpom.service.system;
 
+import cn.hutool.core.util.ReflectUtil;
 import io.jpom.model.BaseJsonModel;
 import io.jpom.model.data.SystemParametersModel;
 import io.jpom.service.h2db.BaseDbService;
@@ -45,5 +46,18 @@ public class SystemParametersServer extends BaseDbService<SystemParametersModel>
 			return null;
 		}
 		return parametersModel.jsonToBean(cls);
+	}
+
+	/**
+	 * 查询 系统参数 值
+	 *
+	 * @param name 参数名称
+	 * @param cls  类
+	 * @param <T>  泛型
+	 * @return data
+	 */
+	public <T> T getConfigDeNewInstance(String name, Class<T> cls) {
+		T config = this.getConfig(name, cls);
+		return config == null ? ReflectUtil.newInstance(cls) : config;
 	}
 }

@@ -35,13 +35,15 @@ import java.util.Set;
  */
 public class ServerWhitelist extends BaseJsonModel {
 
+	public static final String ID = "OUTGIVING_WHITELIST";
+
 	/**
 	 * 项目的白名单
 	 */
 	private List<String> outGiving;
 
 	/**
-	 * 运行远程下载的 host
+	 * 允许远程下载的 host
 	 */
 	private Set<String> allowRemoteDownloadHost;
 

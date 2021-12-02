@@ -41,7 +41,7 @@ import io.jpom.plugin.ClassFeature;
 import io.jpom.plugin.Feature;
 import io.jpom.plugin.MethodFeature;
 import io.jpom.service.node.OutGivingServer;
-import io.jpom.service.system.ServerWhitelistServer;
+import io.jpom.service.system.SystemParametersServer;
 import io.jpom.util.StringUtil;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
@@ -62,11 +62,15 @@ import java.util.*;
 @RequestMapping(value = "/outgiving")
 @Feature(cls = ClassFeature.OUTGIVING)
 public class OutGivingProjectEditController extends BaseServerController {
-	@Resource
-	private ServerWhitelistServer serverWhitelistServer;
+
+	private final SystemParametersServer systemParametersServer;
 
 	@Resource
 	private OutGivingServer outGivingServer;
+
+	public OutGivingProjectEditController(SystemParametersServer systemParametersServer) {
+		this.systemParametersServer = systemParametersServer;
+	}
 
 	/**
 	 * 保存节点分发项目
@@ -270,7 +274,8 @@ public class OutGivingProjectEditController extends BaseServerController {
 			defData.put("javaExtDirsCp", getParameter("javaExtDirsCp"));
 		}
 		String whitelistDirectory = getParameter("whitelistDirectory");
-		List<String> whitelistServerOutGiving = serverWhitelistServer.getOutGiving();
+		ServerWhitelist configDeNewInstance = systemParametersServer.getConfigDeNewInstance(ServerWhitelist.ID, ServerWhitelist.class);
+		List<String> whitelistServerOutGiving = configDeNewInstance.getOutGiving();
 		if (!AgentWhitelist.checkPath(whitelistServerOutGiving, whitelistDirectory)) {
 			return JsonMessage.getString(401, "请选择正确的项目路径,或者还没有配置白名单");
 		}

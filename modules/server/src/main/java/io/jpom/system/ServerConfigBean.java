@@ -61,6 +61,7 @@ public class ServerConfigBean {
 	/**
 	 * 白名单数据
 	 */
+	@Deprecated
 	public static final String OUTGIVING_WHITELIST = "outgiving_whitelist.json";
 
 	/**

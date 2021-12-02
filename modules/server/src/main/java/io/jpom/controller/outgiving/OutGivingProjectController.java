@@ -52,12 +52,11 @@ import io.jpom.plugin.Feature;
 import io.jpom.plugin.MethodFeature;
 import io.jpom.service.node.OutGivingServer;
 import io.jpom.service.node.manage.ProjectInfoService;
-import io.jpom.service.system.ServerWhitelistServer;
+import io.jpom.service.system.SystemParametersServer;
 import io.jpom.system.ConfigBean;
 import io.jpom.system.ServerConfigBean;
 import io.jpom.util.StringUtil;
 import org.springframework.http.MediaType;
-import org.springframework.stereotype.Controller;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -87,8 +86,11 @@ public class OutGivingProjectController extends BaseServerController {
 	private OutGivingServer outGivingServer;
 	@Resource
 	private ProjectInfoService projectInfoService;
-	@Resource
-	private ServerWhitelistServer serverWhitelistServer;
+	private final SystemParametersServer systemParametersServer;
+
+	public OutGivingProjectController(SystemParametersServer systemParametersServer) {
+		this.systemParametersServer = systemParametersServer;
+	}
 
 	@RequestMapping(value = "getProjectStatus", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
@@ -230,7 +232,7 @@ public class OutGivingProjectController extends BaseServerController {
 		AfterOpt afterOpt1 = BaseEnum.getEnum(AfterOpt.class, Convert.toInt(afterOpt, 0));
 		Assert.notNull(afterOpt1, "请选择分发后的操作");
 		// 验证远程 地址
-		ServerWhitelist whitelist = serverWhitelistServer.getWhitelist();
+		ServerWhitelist whitelist = systemParametersServer.getConfigDeNewInstance(ServerWhitelist.ID, ServerWhitelist.class);
 		Set<String> allowRemoteDownloadHost = whitelist.getAllowRemoteDownloadHost();
 		Assert.state(CollUtil.isNotEmpty(allowRemoteDownloadHost), "还没有配置运行的远程地址");
 		List<String> collect = allowRemoteDownloadHost.stream().filter(s -> StrUtil.startWith(url, s)).collect(Collectors.toList());
