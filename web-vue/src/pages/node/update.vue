@@ -45,8 +45,7 @@
 </template>
 
 <script>
-import { getNodeGroupList, uploadAgentFile, downloadRemote } from "@/api/node";
-import { systemInfo } from "@/api/system";
+import { getNodeGroupList, uploadAgentFile, downloadRemote, checkVersion } from "@/api/node";
 import { mapGetters } from "vuex";
 
 export default {
@@ -144,13 +143,13 @@ export default {
       this.getNodeList();
       this.getAgentVersion();
       // 获取是否有新版本
-      systemInfo().then((res) => {
+      checkVersion().then((res) => {
         if (res.code === 200) {
-          let remoteVersion = res.data?.remoteVersion;
-          if (remoteVersion) {
+          let upgrade = res.data?.upgrade;
+          if (upgrade) {
             //
-            this.temp.upgrade = remoteVersion.upgrade;
-            this.temp.newVersion = remoteVersion.tagName;
+            this.temp.upgrade = upgrade;
+            this.temp.newVersion = res.data.tagName;
           }
         }
       });

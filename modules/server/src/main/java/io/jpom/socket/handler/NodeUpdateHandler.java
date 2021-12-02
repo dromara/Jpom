@@ -204,16 +204,17 @@ public class NodeUpdateHandler extends BaseProxyHandler {
 								int retryCount = 0;
 								try {
 									// 先等待一会，太快可能还没重启
-									Thread.sleep(10000L);
+									ThreadUtil.sleep(10000L);
 									while (retryCount <= 30) {
 										++retryCount;
 										try {
-											Thread.sleep(1000L);
+											ThreadUtil.sleep(1000L);
 											if (client.reconnectBlocking()) {
 												this.sendMsg(callbackRestartMessage.setData("重启完成"), session);
 												return;
 											}
-										} catch (Exception e) {}
+										} catch (Exception ignored) {
+										}
 									}
 									this.sendMsg(callbackRestartMessage.setData("重连失败"), session);
 								} catch (Exception e) {
@@ -251,7 +252,7 @@ public class NodeUpdateHandler extends BaseProxyHandler {
 	 * @return json
 	 */
 	private String getAgentVersion() {
-		AgentFileModel agentFileModel = agentFileService.getItem("agent");
+		AgentFileModel agentFileModel = agentFileService.getItem(AgentFileService.ID);
 		if (agentFileModel == null) {
 			return null;
 		}

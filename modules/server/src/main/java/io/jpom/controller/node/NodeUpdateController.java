@@ -2,9 +2,11 @@ package io.jpom.controller.node;
 
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.lang.Tuple;
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.http.HttpStatus;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.controller.multipart.MultipartFileBuilder;
+import com.alibaba.fastjson.JSONObject;
 import io.jpom.common.BaseServerController;
 import io.jpom.common.JpomManifest;
 import io.jpom.common.RemoteVersion;
@@ -51,6 +53,33 @@ public class NodeUpdateController extends BaseServerController {
 		return JsonMessage.getString(200, "下载成功");
 	}
 
+	/**
+	 * 检查版本更新
+	 *
+	 * @return json
+	 * @see RemoteVersion
+	 * @see AgentFileModel
+	 */
+	@GetMapping(value = "check_version.json", produces = MediaType.APPLICATION_JSON_VALUE)
+	public String checkVersion() {
+		RemoteVersion remoteVersion = RemoteVersion.cacheInfo();
+		AgentFileModel agentFileModel = agentFileService.getItem(AgentFileService.ID);
+		JSONObject jsonObject = new JSONObject();
+		if (remoteVersion == null) {
+			jsonObject.put("upgrade", false);
+		} else {
+			if (agentFileModel == null) {
+				jsonObject.put("upgrade", true);
+			} else {
+				String tagName = StrUtil.removePrefixIgnoreCase(remoteVersion.getTagName(), "v");
+				String version = StrUtil.removePrefixIgnoreCase(agentFileModel.getVersion(), "v");
+				jsonObject.put("upgrade", StrUtil.compareVersion(version, tagName) < 0);
+				jsonObject.put("tagName", tagName);
+			}
+		}
+		return JsonMessage.getString(200, "", jsonObject);
+	}
+
 	@RequestMapping(value = "upload_agent", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
 	@OptLog(UserOperateLogV1.OptType.UpdateSys)
@@ -80,13 +109,10 @@ public class NodeUpdateController extends BaseServerController {
 
 	private void saveAgentFile(Tuple data) {
 		File file = data.get(3);
-		// 保存Agent文件
-		String id = Type.Agent.name().toLowerCase();
-
-		AgentFileModel agentFileModel = agentFileService.getItem(id);
+		AgentFileModel agentFileModel = agentFileService.getItem(AgentFileService.ID);
 		if (agentFileModel == null) {
 			agentFileModel = new AgentFileModel();
-			agentFileModel.setId(id);
+			agentFileModel.setId(AgentFileService.ID);
 			agentFileService.addItem(agentFileModel);
 		}
 		agentFileModel.setName(file.getName());

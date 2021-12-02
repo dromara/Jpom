@@ -34,10 +34,7 @@ import cn.jiangzeyin.controller.multipart.MultipartFileBuilder;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.JpomApplication;
 import io.jpom.JpomServerApplication;
-import io.jpom.common.BaseServerController;
-import io.jpom.common.JpomManifest;
-import io.jpom.common.RemoteVersion;
-import io.jpom.common.Type;
+import io.jpom.common.*;
 import io.jpom.common.forward.NodeForward;
 import io.jpom.common.forward.NodeUrl;
 import io.jpom.common.interceptor.OptLog;
@@ -132,7 +129,7 @@ public class SystemUpdateController extends BaseServerController {
 		JpomManifest.releaseJar(path, version);
 		//
 		JpomApplication.restart();
-		return JsonMessage.getString(200, "升级中大约需要30秒");
+		return JsonMessage.getString(200, Const.UPGRADE_MSG);
 	}
 
 	/**
@@ -164,6 +161,6 @@ public class SystemUpdateController extends BaseServerController {
 			return NodeForward.request(getNode(), getRequest(), NodeUrl.REMOTE_UPGRADE).toString();
 		}
 		RemoteVersion.upgrade(ConfigBean.getInstance().getTempPath().getAbsolutePath());
-		return JsonMessage.getString(200, "升级中大约需要30秒");
+		return JsonMessage.getString(200, Const.UPGRADE_MSG);
 	}
 }

@@ -163,6 +163,22 @@ export function uploadAgentFile(formData) {
   });
 }
 
+/**
+ *  检查远程最新
+ * @returns json
+ */
+export function checkVersion() {
+  return axios({
+    url: "/node/check_version.json",
+    method: "get",
+    data: {},
+  });
+}
+
+/**
+ * 下载远程文件
+ * @returns json
+ */
 export function downloadRemote() {
   return axios({
     url: "/node/download_remote.json",

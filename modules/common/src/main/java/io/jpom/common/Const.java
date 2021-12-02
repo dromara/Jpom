@@ -68,4 +68,8 @@ public class Const {
 	 * 备份 SQL 文件 后缀
 	 */
 	public static final String SQL_FILE_SUFFIX = ".sql";
+	/**
+	 * 升级提示语
+	 */
+	public static final String UPGRADE_MSG = "升级中大约需要30秒";
 }
