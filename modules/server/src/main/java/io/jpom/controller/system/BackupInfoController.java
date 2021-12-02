@@ -46,6 +46,7 @@ import io.jpom.common.interceptor.OptLog;
 import io.jpom.model.data.BackupInfoModel;
 import io.jpom.model.enums.BackupStatusEnum;
 import io.jpom.model.log.UserOperateLogV1;
+import io.jpom.permission.SystemPermission;
 import io.jpom.plugin.ClassFeature;
 import io.jpom.plugin.Feature;
 import io.jpom.plugin.MethodFeature;
@@ -65,6 +66,7 @@ import java.util.Objects;
 
 /**
  * 数据库备份 controller
+ *
  * @author Hotstrip
  * @date 2021-11-18
  */
@@ -77,9 +79,10 @@ public class BackupInfoController extends BaseServerController {
 
 	/**
 	 * 分页加载备份列表数据
-	 * @param limit    每页条数
-	 * @param page     页码
-	 * @param name     备份名称
+	 *
+	 * @param limit      每页条数
+	 * @param page       页码
+	 * @param name       备份名称
 	 * @param backupType 备份类型{0: 全量, 1: 部分}
 	 * @return json
 	 */
@@ -106,11 +109,13 @@ public class BackupInfoController extends BaseServerController {
 
 	/**
 	 * 删除备份数据
+	 *
 	 * @param id 备份 ID
 	 * @return
 	 */
 	@PostMapping(value = "/system/backup/delete")
 	@Feature(method = MethodFeature.DEL)
+	@SystemPermission
 	public Object deleteBackup(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "数据 id 不能为空") String id) {
 		// 根据 id 查询备份信息
 		BackupInfoModel backupInfoModel = backupInfoService.getByKey(id);
@@ -127,11 +132,13 @@ public class BackupInfoController extends BaseServerController {
 	/**
 	 * 还原备份数据
 	 * 还原的时候不能异步了，只能等待备份还原成功或者失败
+	 *
 	 * @param id 备份 ID
 	 * @return
 	 */
 	@PostMapping(value = "/system/backup/restore")
 	@Feature(method = MethodFeature.EDIT)
+	@SystemPermission
 	public Object restoreBackup(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "数据 id 不能为空") String id) {
 		// 根据 id 查询备份信息
 		BackupInfoModel backupInfoModel = backupInfoService.getByKey(id);
@@ -158,8 +165,8 @@ public class BackupInfoController extends BaseServerController {
 
 	/**
 	 * 创建备份任务
-	 * @param map 参数
-	 * map.tableNameList 选中备份的表名称
+	 *
+	 * @param map 参数 map.tableNameList 选中备份的表名称
 	 * @return
 	 */
 	@PostMapping(value = "/system/backup/create")
@@ -172,11 +179,13 @@ public class BackupInfoController extends BaseServerController {
 
 	/**
 	 * 导入备份数据
+	 *
 	 * @return
 	 */
 	@PostMapping(value = "/system/backup/upload")
 	@OptLog(UserOperateLogV1.OptType.UploadProjectFile)
 	@Feature(method = MethodFeature.UPLOAD)
+	@SystemPermission
 	public Object uploadBackupFile() throws IOException {
 		MultipartFileBuilder multipartFileBuilder = createMultipart()
 				.addFieldName("file");
@@ -208,11 +217,13 @@ public class BackupInfoController extends BaseServerController {
 
 	/**
 	 * 下载备份数据
+	 *
 	 * @param id 备份 ID
 	 * @return
 	 */
 	@GetMapping(value = "/system/backup/download")
 	@Feature(method = MethodFeature.DOWNLOAD)
+	@SystemPermission
 	public void downloadBackup(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "数据 id 不能为空") String id) {
 		// 根据 id 查询备份信息
 		BackupInfoModel backupInfoModel = backupInfoService.getByKey(id);
@@ -231,6 +242,7 @@ public class BackupInfoController extends BaseServerController {
 
 	/**
 	 * 读取数据库表名称列表
+	 *
 	 * @return
 	 */
 	@PostMapping(value = "/system/backup/table-name-list")
