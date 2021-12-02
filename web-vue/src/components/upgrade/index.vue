@@ -182,7 +182,9 @@ export default {
       }
       this.temp.upgrade = data.upgrade;
       this.temp.newVersion = data.tagName;
-      this.changelog = data.changelog;
+      if (this.temp.upgrade && data.changelog) {
+        this.changelog = data.changelog;
+      }
       if (tip) {
         this.$notification.success({
           message: this.temp.upgrade ? "检测到新版本 " + data.tagName : "没有检查到最新版",
@@ -194,7 +196,7 @@ export default {
     upgrageVerion() {
       this.$confirm({
         title: "系统提示",
-        content: "启动要升级到最新版本吗？",
+        content: "确认要升级到最新版本吗？,升级前请阅读更新日志里面的说明和注意事项并且请注意备份数据防止数据丢失！！",
         okText: "确认",
         cancelText: "取消",
         onOk: () => {
