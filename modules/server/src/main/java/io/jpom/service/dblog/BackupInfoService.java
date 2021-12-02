@@ -110,7 +110,8 @@ public class BackupInfoService extends BaseDbService<BackupInfoModel> {
 				DefaultSystemLog.getLog().info("start a new Thread to execute H2 Database backup...success");
 			} catch (SQLException e) {
 				// 记录错误日志信息，修改备份任务执行失败
-				DefaultSystemLog.getLog().error("start a new Thread to execute H2 Database backup...catch exception...message: {}, cause: {}", e.getMessage(), e.getCause());
+				DefaultSystemLog.getLog().error("start a new Thread to execute H2 Database backup...catch exception...message: {}, cause: {}",
+						e.getMessage(), e.getCause());
 				backupInfo.setStatus(BackupStatusEnum.FAILED.getCode());
 				update(backupInfo);
 			}
@@ -128,11 +129,13 @@ public class BackupInfoService extends BaseDbService<BackupInfoModel> {
 			long startTs = System.currentTimeMillis();
 			h2BackupService.restoreBackupSql(backupSqlPath);
 			long endTs = System.currentTimeMillis();
-			DefaultSystemLog.getLog().info("restore H2 Database backup...success...cast {} ms", endTs - startTs);
+			DefaultSystemLog.getLog().info("restore H2 Database backup...success...cast {} ms",
+					endTs - startTs);
 			return true;
 		} catch (Exception e) {
 			// 记录错误日志信息，返回数据库备份还原执行失败
-			DefaultSystemLog.getLog().error("restore H2 Database backup...catch exception...message: {}, cause: {}", e.getMessage(), e.getCause());
+			DefaultSystemLog.getLog().error("restore H2 Database backup...catch exception...message: {}, cause: {}",
+					e.getMessage(), e.getCause());
 			return false;
 		}
 	}
@@ -146,6 +149,10 @@ public class BackupInfoService extends BaseDbService<BackupInfoModel> {
 		String sql = "show tables;";
 		List<Entity> list = super.query(sql);
 		// 筛选字段
-		return list.stream().filter(entity -> StringUtils.hasLength(String.valueOf(entity.get(Const.TABLE_NAME)))).flatMap(entity -> Stream.of(String.valueOf(entity.get(Const.TABLE_NAME)))).distinct().collect(Collectors.toList());
+		return list.stream()
+				.filter(entity -> StringUtils.hasLength(String.valueOf(entity.get(Const.TABLE_NAME))))
+				.flatMap(entity -> Stream.of(String.valueOf(entity.get(Const.TABLE_NAME))))
+				.distinct()
+				.collect(Collectors.toList());
 	}
 }
