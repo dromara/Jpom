@@ -32,6 +32,7 @@ npm run serve
 npm run build
 ```
 
+> 也可以使用 `script/release.bat` `script/release.sh` 快速打包
 
 
 ## 目录结构

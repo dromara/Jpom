@@ -1,3 +1,25 @@
+/*
+ * The MIT License (MIT)
+ *
+ * Copyright (c) 2019 码之科技工作室
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+ * the Software, and to permit persons to whom the Software is furnished to do so,
+ * subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+ * FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+ * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+ * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+ * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
 package io.jpom.common;
 
 import cn.hutool.core.convert.Convert;
@@ -115,7 +137,7 @@ public class JpomManifest {
 				String timeStamp = attributes.getValue("Jpom-Timestamp");
 				timeStamp = parseJpomTime(timeStamp);
 				String mainClass = attributes.getValue(Attributes.Name.MAIN_CLASS);
-				return new Tuple(version, timeStamp, mainClass);
+				return new Tuple(version, timeStamp, mainClass, jarFile);
 			}
 		}
 		return null;
@@ -273,9 +295,17 @@ public class JpomManifest {
 		return checkJpomJar(path, clsName.getName(), true);
 	}
 
-//	public static JsonMessage<Tuple> checkJpomJar(String path, String name) {
-//		return checkJpomJar(path, name, true);
-//	}
+	/**
+	 * 检查是否为jpom包
+	 *
+	 * @param path 路径
+	 * @param name 类名
+	 * @return 结果消息
+	 * @see Type#getApplicationClass()
+	 */
+	public static JsonMessage<Tuple> checkJpomJar(String path, String name) {
+		return checkJpomJar(path, name, true);
+	}
 
 	/**
 	 * 检查是否为jpom包
@@ -284,6 +314,7 @@ public class JpomManifest {
 	 * @param name        类名称
 	 * @param checkRepeat 是否检查版本重复
 	 * @return 结果消息
+	 * @see Type#getApplicationClass()
 	 */
 	public static JsonMessage<Tuple> checkJpomJar(String path, String name, boolean checkRepeat) {
 		String version;
@@ -306,7 +337,7 @@ public class JpomManifest {
 				return new JsonMessage<>(405, "中没有找到对应的MainClass:" + mainClass);
 			}
 			ZipEntry entry = jarFile1.getEntry(StrUtil.format("BOOT-INF/classes/{}.class",
-					StrUtil.replace(name, ".", "/")));
+					StrUtil.replace(name, ".", StrUtil.SLASH)));
 			if (entry == null) {
 				return new JsonMessage<>(405, "此包不是Jpom【" + JpomApplication.getAppType().name() + "】包");
 			}

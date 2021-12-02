@@ -28,7 +28,9 @@ const routeMenuMap = {
   'logManage': '/system/log',
   'update': '/system/upgrade',
   'sysConfig': '/system/config',
-  'projectSearch': '/node/search'
+  'projectSearch': '/node/search',
+  // 数据库备份
+  'backup': '/system/backup'
 }
 
 export default routeMenuMap

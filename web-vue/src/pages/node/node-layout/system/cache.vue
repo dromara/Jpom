@@ -13,10 +13,10 @@
         <span class="layui-elem-quote">进程端口缓存：{{temp.pidPort}}</span>
         <a-button type="primary" class="btn" @click="clear('pidPort')">清空</a-button>
       </a-timeline-item>
-      <a-timeline-item>
+      <!-- <a-timeline-item>
         <span class="layui-elem-quote">错误进程缓存：{{temp.pidError}}</span>
         <a-button type="primary" class="btn" @click="clear('pidError')">清空</a-button>
-      </a-timeline-item>
+      </a-timeline-item> -->
       <a-timeline-item>
         <span class="layui-elem-quote">在读取的日志文件数：{{temp.readFileOnLineCount}}</span>
       </a-timeline-item>

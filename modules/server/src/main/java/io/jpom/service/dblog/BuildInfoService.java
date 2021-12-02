@@ -1,3 +1,25 @@
+/*
+ * The MIT License (MIT)
+ *
+ * Copyright (c) 2019 码之科技工作室
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+ * the Software, and to permit persons to whom the Software is furnished to do so,
+ * subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+ * FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+ * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+ * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+ * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
 package io.jpom.service.dblog;
 
 import cn.hutool.core.util.StrUtil;
@@ -57,7 +79,7 @@ public class BuildInfoService extends BaseDbService<BuildInfoModel> {
 	 * @param delay          延迟的时间
 	 * @return json
 	 */
-	public String start(BuildInfoModel buildInfoModel, UserModel userModel, Integer delay) {
+	public String start(final BuildInfoModel buildInfoModel, final UserModel userModel, Integer delay) {
 		// load repository
 		RepositoryModel repositoryModel = repositoryService.getByKey(buildInfoModel.getRepositoryId());
 		if (null == repositoryModel) {
@@ -82,7 +104,7 @@ public class BuildInfoService extends BaseDbService<BuildInfoModel> {
 		Objects.requireNonNull(nowStatus);
 		if (BuildStatus.Ing == nowStatus ||
 				BuildStatus.PubIng == nowStatus) {
-			return JsonMessage.getString(501, "当前还在：" + nowStatus.getDesc());
+			return "当前还在：" + nowStatus.getDesc();
 		}
 		return null;
 	}

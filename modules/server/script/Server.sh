@@ -94,10 +94,8 @@ function start() {
         echo "没有找到jar"
         exit 2
 	fi
-	if [[ -z "${NOW_JAVA_HOME}/lib/tools.jar" ]]; then
-		echo "JDK 中没有 ${NOW_JAVA_HOME}/lib/tools.jar"
-	fi
-    nohup ${JAVA}  ${JVM} -Xbootclasspath/a:${NOW_JAVA_HOME}/lib/tools.jar -jar ${Lib}${RUNJAR} -Dapplication=${Tag} -Dbasedir=${Path} ${ARGS}  >> ${Log} 2>&1 &
+
+    nohup ${JAVA}  ${JVM} -jar ${Lib}${RUNJAR} -Dapplication=${Tag} -Dbasedir=${Path} ${ARGS}  >> ${Log} 2>&1 &
     # 升级不执行查看日志
     if [[ ${upgrade} == "upgrade" ]] ; then
         exit 0

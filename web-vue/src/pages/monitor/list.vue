@@ -212,6 +212,7 @@ export default {
     },
     // 新增
     handleAdd() {
+      this.temp = {};
       this.editMonitorVisible = true;
       this.$nextTick(() => {
         setTimeout(() => {

@@ -1,3 +1,25 @@
+/*
+ * The MIT License (MIT)
+ *
+ * Copyright (c) 2019 码之科技工作室
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+ * the Software, and to permit persons to whom the Software is furnished to do so,
+ * subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+ * FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+ * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+ * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+ * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
 package io.jpom;
 
 import cn.hutool.core.date.DatePattern;
@@ -7,6 +29,7 @@ import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.system.SystemUtil;
 import cn.jiangzeyin.common.ApplicationBuilder;
+import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.validator.ParameterInterceptor;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -29,6 +52,7 @@ import org.springframework.util.Assert;
 
 import java.io.File;
 import java.nio.charset.Charset;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Jpom
@@ -68,6 +92,9 @@ public class JpomApplication extends ApplicationBuilder {
 		JpomApplication.appType = appType;
 		JpomApplication.appClass = appClass;
 		JpomApplication.args = args;
+		// 检查 type 中的 applicationClass 配置是否正确
+		String applicationClass = appType.getApplicationClass();
+		Assert.state(StrUtil.equals(applicationClass, appClass.getName()), "当前允许的类和配置的类名不一致：io.jpom.common.Type#getApplicationClass()");
 
 		addHttpMessageConverter(new StringHttpMessageConverter(CharsetUtil.CHARSET_UTF_8));
 
@@ -157,15 +184,13 @@ public class JpomApplication extends ApplicationBuilder {
 
 	/**
 	 * 重启自身
+	 * 分发会延迟2秒执行正式升级 重启命令
 	 */
 	public static void restart() {
 		File scriptFile = JpomManifest.getScriptFile();
 		ThreadUtil.execute(() -> {
 			// Waiting for method caller,For example, the interface response
-			try {
-				Thread.sleep(2000);
-			} catch (InterruptedException ignored) {
-			}
+			ThreadUtil.sleep(2, TimeUnit.SECONDS);
 			try {
 				String command = "";
 				if (SystemUtil.getOsInfo().isLinux()) {
@@ -178,7 +203,7 @@ public class JpomApplication extends ApplicationBuilder {
 					CommandUtil.asyncExeLocalCommand(scriptFile.getParentFile(), command);
 				}
 			} catch (Exception e) {
-				e.printStackTrace();
+				DefaultSystemLog.getLog().error("重启自身异常", e);
 			}
 		});
 	}

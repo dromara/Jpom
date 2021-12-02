@@ -1,15 +1,35 @@
+/*
+ * The MIT License (MIT)
+ *
+ * Copyright (c) 2019 码之科技工作室
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+ * the Software, and to permit persons to whom the Software is furnished to do so,
+ * subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+ * FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+ * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+ * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+ * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
 package io.jpom.system.init;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.exceptions.ExceptionUtil;
 import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.util.ClassUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.PreLoadClass;
 import cn.jiangzeyin.common.PreLoadMethod;
 import io.jpom.system.ConfigBean;
 import io.jpom.system.ExtConfigBean;
-import io.jpom.util.StringUtil;
 import org.springframework.http.HttpMethod;
 
 import javax.servlet.http.HttpServletRequest;
@@ -27,28 +47,28 @@ import java.util.Map;
  */
 @PreLoadClass(value = Integer.MIN_VALUE)
 public class CheckPath {
-	/**
-	 * 待检查的类
-	 */
-	private static final String[] CLASS_NAME = new String[]{"sun.jvmstat.monitor.MonitorException", "com.sun.tools.attach.VirtualMachine"};
-
-
-	@PreLoadMethod(1)
-	private static void checkToolsJar() {
-		try {
-			for (String item : CLASS_NAME) {
-				ClassUtil.loadClass(item, false);
-			}
-		} catch (Exception e) {
-			File file = StringUtil.getToolsJar();
-			if (file.exists() && file.isFile()) {
-				DefaultSystemLog.getLog().error("Jpom未能正常加载tools.jar,请检查当前系统环境变量是否配置：JAVA_HOME，或者检查Jpom管理命令是否正确", e);
-			} else {
-				DefaultSystemLog.getLog().error("当前JDK中没有找到tools.jar,请检查当前JDK是否安装完整，文件完整路径是：" + file.getAbsolutePath(), e);
-			}
-			System.exit(-1);
-		}
-	}
+//	/**
+//	 * 待检查的类
+//	 */
+//	private static final String[] CLASS_NAME = new String[]{"sun.jvmstat.monitor.MonitorException", "com.sun.tools.attach.VirtualMachine"};
+//
+//
+//	@PreLoadMethod(1)
+//	private static void checkToolsJar() {
+//		try {
+//			for (String item : CLASS_NAME) {
+//				ClassUtil.loadClass(item, false);
+//			}
+//		} catch (Exception e) {
+//			File file = StringUtil.getToolsJar();
+//			if (file.exists() && file.isFile()) {
+//				DefaultSystemLog.getLog().error("Jpom未能正常加载tools.jar,请检查当前系统环境变量是否配置：JAVA_HOME，或者检查Jpom管理命令是否正确", e);
+//			} else {
+//				DefaultSystemLog.getLog().error("当前JDK中没有找到tools.jar,请检查当前JDK是否安装完整，文件完整路径是：" + file.getAbsolutePath(), e);
+//			}
+//			System.exit(-1);
+//		}
+//	}
 
 	/**
 	 * 判断是否重复运行

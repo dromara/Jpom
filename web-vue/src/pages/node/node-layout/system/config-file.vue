@@ -2,7 +2,7 @@
   <div class="node-system-config">
     <a-form-model ref="editForm" :model="temp" :label-col="{ span: 3 }" :wrapper-col="{ span: 20 }">
       <a-form-model-item>
-        <code-editor v-model="temp.content" :options="{ mode: 'yaml' }"></code-editor>
+        <code-editor v-model="temp.content" :options="{ mode: 'yaml', tabSize: 2 }"></code-editor>
         <!-- <a-input v-model="temp.content" type="textarea" :rows="25" style="resize: none" class="node-content-config" placeholder="请输入配置内容，参考项目的配置文件"/> -->
       </a-form-model-item>
       <a-form-model-item :wrapper-col="{ span: 14, offset: 2 }">

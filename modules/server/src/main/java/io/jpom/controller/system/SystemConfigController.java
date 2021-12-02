@@ -1,3 +1,25 @@
+/*
+ * The MIT License (MIT)
+ *
+ * Copyright (c) 2019 码之科技工作室
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+ * the Software, and to permit persons to whom the Software is furnished to do so,
+ * subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+ * FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+ * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+ * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+ * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
 package io.jpom.controller.system;
 
 import cn.hutool.core.convert.Convert;
@@ -83,14 +105,15 @@ public class SystemConfigController extends BaseServerController {
 		}
 		try {
 			YamlPropertySourceLoader yamlPropertySourceLoader = new YamlPropertySourceLoader();
-			ByteArrayResource resource = new ByteArrayResource(content.getBytes(StandardCharsets.UTF_8));
+			// @author hjk 前端编辑器允许使用tab键，并设定为2个空格，再转换为yml时要把tab键换成2个空格
+			ByteArrayResource resource = new ByteArrayResource(content.replace("\t", "  ").getBytes(StandardCharsets.UTF_8));
 			yamlPropertySourceLoader.load("test", resource);
 		} catch (Exception e) {
 			DefaultSystemLog.getLog().warn("内容格式错误，请检查修正", e);
 			return JsonMessage.getString(500, "内容格式错误，请检查修正:" + e.getMessage());
 		}
 		if (JpomManifest.getInstance().isDebug()) {
-			return JsonMessage.getString(405, "调试模式不支持在线修改,请到resource目录下");
+			return JsonMessage.getString(405, "调试模式下不支持在线修改,请到resources目录下的bin目录修改extConfig.yml");
 		}
 		File resourceFile = ExtConfigBean.getResourceFile();
 		FileUtil.writeString(content, resourceFile, CharsetUtil.CHARSET_UTF_8);

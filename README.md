@@ -33,7 +33,7 @@
 	<a href="https://jpom.io/">https://jpom.io/</a> | <a href="https://jpom-site.keepbx.cn/">https://jpom-site.keepbx.cn/</a> | <a href="https://jpom.keepbx.cn/">https://jpom.keepbx.cn/</a>
 </p>
 
-#### 你为什么需要[Jpom](https://gitee.com/dromara/Jpom)
+#### 你为什么需要 [Jpom](https://gitee.com/dromara/Jpom)
 
 > Java 项目在实际部署运维，通用的方法是登录服务器上传新的项目包，执行相应命令管理，如果管理多个项目则重复操作上述步骤
 
@@ -56,20 +56,21 @@
 
 1. 创建、修改、删除项目、Jar包管理
 2. 实时查看控制台日志、备份日志、删除日志、导出日志
-3. cpu、ram 监控、导出堆栈信息、查看项目进程端口、服务器状态监控
+3. 在线构建项目发布项目一键搞定
 4. 多节点管理、多节点自动分发
-5. 实时监控项目状态异常自动报警
-6. 在线构建项目发布项目一键搞定
-7. 多用户管理，用户项目权限独立(上传、删除权限可控制),完善的操作日志
-8. 系统路径白名单模式，杜绝用户误操作系统文件
-9. 在线管理Nginx配置、ssl证书文件
-10. Tomcat状态、文件、war包在线实时管理
+5. 在线  SSH 终端，并且有终端日志和禁用命令
+6. 实时监控项目状态异常自动报警
+7. cpu、ram 监控、导出堆栈信息、查看项目进程端口、服务器状态监控
+8. 多用户管理，用户项目权限独立(上传、删除权限可控制),完善的操作日志
+9. 系统路径白名单模式，杜绝用户误操作系统文件
+10. 在线管理 Nginx 配置文件、ssl 证书文件
+11. ~~Tomcat状态、文件、war包在线实时管理 (不再长期维护)~~
 
 > 特别提醒：
-> 1. 在Windows服务器中可能有部分功能因为系统特性造成兼容性问题，建议在实际使用中充分测试。Linux目前兼容良好
+> 1. 在 Windows 服务器中可能有部分功能因为系统特性造成兼容性问题，建议在实际使用中充分测试。Linux 目前兼容良好
 > 2. 服务端和插件端请安装到不同目录中，切勿安装到同一目录中
-> 3. 卸载Jpom插件端或者服务端，先停止对应服务，删除对应的程序文件、日志文件夹、数据目录文件夹即可
-> 4. 构建依赖的是系统环境，如果需要maven或者node需要服务端所在的服务器中有对应插件，如果已经启动服务端再安装的对应环境需要通过命令行重启服务端后才生效。
+> 3. 卸载 Jpom 插件端或者服务端，先停止对应服务，删除对应的程序文件、日志文件夹、数据目录文件夹即可
+> 4. 构建依赖的是系统环境，如果需要 maven 或者 node 需要服务端所在的服务器中有对应插件，如果已经启动服务端再安装的对应环境需要通过命令行重启服务端后才生效。
 
 > 升级 2.7.x 后不建议降级操作,会涉及到数据不兼容到情况
 > 
@@ -168,6 +169,8 @@ yum install -y wget && wget -O install.sh https://dromara.gitee.io/jpom/docs/ins
     3. 命令运行（Server.sh、Server.bat）
     4. 默认运行端口：`2122` 访问管理页面 例如`http://localhost:2122/`
 
+> 也可以使用 `script/release.bat` `script/release.sh` 快速打包
+
 ### 编译运行
 
 1. 访问 [Jpom](https://gitee.com/dromara/Jpom) 的码云主页,拉取最新完整代码(建议使用master分支、如果想体验新功能请使用dev分支)
@@ -185,7 +188,7 @@ yum install -y wget && wget -O install.sh https://dromara.gitee.io/jpom/docs/ins
 
 ### 管理命令
 
-1. windows中Agent.bat 、Server.bat
+1. windows 中 Agent.bat 、Server.bat
 
 ```
 # 服务端
@@ -195,7 +198,9 @@ Server.bat     启动管理面板(按照面板提示输入操作)
 Agent.bat     启动管理面板(按照面板提示输入操作)
 ```
 
-2. linux中Agent.sh 、Server.sh
+> windows 中执行启动后需要根据日志取跟进启动的状态
+
+2. linux 中 Agent.sh 、Server.sh
 
 ```
 # 服务端
@@ -229,7 +234,6 @@ Agent.sh create    创建Jpom插件端的应用服务（jpom-agent）
 2. 服务端示例：[`extConfig.yml`](https://gitee.com/dromara/Jpom/blob/master/modules/server/src/main/resources/bin/extConfig.yml)
 
 ### 演示项目
-
 
 [https://jpom.keepbx.cn](https://jpom.keepbx.cn)
 

@@ -25,6 +25,11 @@ const children = [
     component: () => import("../pages/node/update"),
   },
   {
+    path: "/node/search",
+    name: "node-search",
+    component: () => import("../pages/node/search"),
+  },
+  {
     path: "/dispatch/list",
     name: "dispatch-list",
     component: () => import("../pages/dispatch/list"),
@@ -114,10 +119,11 @@ const children = [
     name: "system-config",
     component: () => import("../pages/system/config"),
   },
+  // 数据库备份
   {
-    path: "/node/search",
-    name: "node-search",
-    component: () => import("../pages/node/search"),
+    path: "/system/backup",
+    name: "system-backup",
+    component: () => import("../pages/system/backup"),
   },
 ];
 

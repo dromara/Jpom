@@ -9,7 +9,10 @@
         <a-button type="primary" @click="batchUpdate">批量更新</a-button>
       </div>
       <div class="right">
-        <div class="title">Agent最新版本：{{ agentVersion | version }}</div>
+        <div class="title">
+          Agent版本：{{ agentVersion | version }}
+          <a-tag v-if="temp.upgrade" color="pink" @click="downloadRemoteEvent">新版本：{{ temp.newVersion }} </a-tag>
+        </div>
         <div class="version">打包时间：{{ agentTimeStamp | version }}</div>
         <div class="action">
           <a-upload name="file" accept=".jar,.zip" action="" :showUploadList="false" :multiple="false" :before-upload="beforeUpload">
@@ -27,7 +30,7 @@
           {{ text | version }}
         </template>
         <template slot="status" slot-scope="text">
-          <div class="restarting" v-if="text && text.type === 'restarting'">重启中，大约需要30秒</div>
+          <div class="restarting" v-if="text && text.type === 'restarting'">{{ text.data }}</div>
           <div class="uploading" v-if="text && text.type === 'uploading'">
             <div class="text">{{ text.percent === 100 ? "上传成功" : "正在上传文件" }}</div>
             <a-progress :percent="text.percent" />
@@ -42,7 +45,8 @@
 </template>
 
 <script>
-import { getNodeGroupList, uploadAgentFile } from "@/api/node";
+import { getNodeGroupList, uploadAgentFile, downloadRemote } from "@/api/node";
+import { systemInfo } from "@/api/system";
 import { mapGetters } from "vuex";
 
 export default {
@@ -76,6 +80,7 @@ export default {
       nodeVersion: {},
       nodeStatus: {},
       tableSelections: [],
+      temp: {},
     };
   },
   computed: {
@@ -109,7 +114,9 @@ export default {
     },
     socketUrl() {
       const protocol = location.protocol === "https:" ? "wss://" : "ws://";
-      return `${protocol}${location.host}/node_update?userId=${this.getLongTermToken}&nodeId=system&type=nodeUpdate`;
+      const domain = window.routerBase;
+      const url = (domain + "/node_update").replace(new RegExp("//", "gm"), "/");
+      return `${protocol}${location.host}${url}?userId=${this.getLongTermToken}&nodeId=system&type=nodeUpdate`;
     },
   },
   mounted() {
@@ -136,6 +143,17 @@ export default {
     init() {
       this.getNodeList();
       this.getAgentVersion();
+      // 获取是否有新版本
+      systemInfo().then((res) => {
+        if (res.code === 200) {
+          let remoteVersion = res.data?.remoteVersion;
+          if (remoteVersion) {
+            //
+            this.temp.upgrade = remoteVersion.upgrade;
+            this.temp.newVersion = remoteVersion.tagName;
+          }
+        }
+      });
     },
     loadGroupList() {
       getNodeGroupList().then(({ code, data }) => {
@@ -225,6 +243,7 @@ export default {
       this.nodeStatus = Object.assign({}, this.nodeStatus, {
         [nodeId]: {
           type: "restarting",
+          data: data,
         },
       });
     },
@@ -241,6 +260,17 @@ export default {
       });
       return false;
     },
+    // 下载远程最新文件
+    downloadRemoteEvent() {
+      downloadRemote().then((res) => {
+        if (res.code === 200) {
+          this.$notification.success({ message: res.msg });
+          this.getAgentVersion();
+        } else {
+          this.$notification.error({ message: res.msg });
+        }
+      });
+    },
   },
 };
 </script>
@@ -255,12 +285,12 @@ export default {
 
 
   .header {
-    height 60px
-    display flex
-    align-items center
+    height 60px;
+    display flex;
+    align-items center;
 
     > div {
-      width 50%
+      //  width 50%;
     }
 
     .left {
@@ -273,7 +303,8 @@ export default {
     .right {
       display flex
       justify-content flex-end
-      align-items center
+      align-items center;
+      flex: 1;
 
       > div {
         padding: 0 10px

@@ -1,3 +1,25 @@
+/*
+ * The MIT License (MIT)
+ *
+ * Copyright (c) 2019 码之科技工作室
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+ * the Software, and to permit persons to whom the Software is furnished to do so,
+ * subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+ * FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+ * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+ * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+ * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
 package io.jpom.build;
 
 import cn.hutool.core.bean.BeanUtil;
@@ -116,9 +138,9 @@ public class BuildInfoManage extends BaseBuild implements Runnable {
 	 * @param delay           延迟执行的时间 单位秒
 	 * @return this
 	 */
-	public static BuildInfoManage create(BuildInfoModel buildInfoModel,
-										 RepositoryModel repositoryModel,
-										 UserModel userModel,
+	public static BuildInfoManage create(final BuildInfoModel buildInfoModel,
+										 final RepositoryModel repositoryModel,
+										 final UserModel userModel,
 										 Integer delay) {
 		if (BUILD_MANAGE_MAP.containsKey(buildInfoModel.getId())) {
 			throw new JpomRuntimeException("当前构建还在进行中");
@@ -243,6 +265,7 @@ public class BuildInfoManage extends BaseBuild implements Runnable {
 			dbBuildHistoryLogService.updateResultDirFile(this.logId, resultDirFile);
 			//
 			this.buildInfoModel.setResultDirFile(resultDirFile);
+			this.baseBuildModule.setResultDirFile(resultDirFile);
 		}
 		return true;
 	}
@@ -257,7 +280,7 @@ public class BuildInfoManage extends BaseBuild implements Runnable {
 			BuildInfoManage.this.log("初始化构建记录失败,异常结束");
 			return false;
 		}
-		this.log("start build in file : " + FileUtil.getAbsolutePath(this.gitFile));
+		this.log("#" + this.buildInfoModel.getBuildId() + " start build in file : " + FileUtil.getAbsolutePath(this.gitFile));
 		if (delay != null && delay > 0) {
 			// 延迟执行
 			this.log("Execution delayed by " + delay + " seconds");

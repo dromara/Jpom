@@ -16,7 +16,7 @@
       :scroll="{ x: 1040, y: tableHeight - 60 }"
     >
       <template slot="nodeId" slot-scope="text, record">
-        <a-button v-if="!record.nodeModel" type="primary" @click="install(record)">安装节点</a-button>
+        <a-button v-if="!record.nodeModel" type="primary" @click="install(record)" :disabled="record.installed">安装节点</a-button>
         <a-tooltip v-else placement="topLeft" :title="`${record.nodeModel.id} ( ${record.nodeModel.name} )`">
           <a-button type="primary" @click="toNode(record.nodeModel)"
             >前往节点:
@@ -132,6 +132,25 @@
           <a-form-model-item label="安装路径" prop="path">
             <a-input v-model="tempNode.path" placeholder="安装路径" />
           </a-form-model-item>
+          <a-form-model-item label="脚本权限" prop="chmod">
+            <a-input v-model="tempNode.chmod" placeholder="非 root 状态下，需要给脚本文件添加权限的命令(非阻塞的命令)">
+              <a-tooltip slot="suffix">
+                <template slot="title">
+                  <div>非 root 状态下，需要给脚本文件添加权限的命令</div>
+                  <div><br /></div>
+                  <div>
+                    例如
+                    <ul>
+                      <li>chmod 755</li>
+                      <li>chmod u=rwx</li>
+                      <li>chmod u+x</li>
+                    </ul>
+                  </div>
+                </template>
+                <a-icon type="question-circle" theme="filled" />
+              </a-tooltip>
+            </a-input>
+          </a-form-model-item>
           <a-form-model-item label="等待次数" prop="waitCount">
             <a-input v-model="tempNode.waitCount" placeholder="上传插件端后,等待插件端启动成功次数，1次5秒。默认5次" />
           </a-form-model-item>
@@ -192,6 +211,7 @@
 </template>
 <script>
 import { deleteSsh, editSsh, getSshList, getSshOperationLogList, installAgentNode } from "@/api/ssh";
+import { getNodeList } from "../../api/node";
 import SshFile from "./ssh-file";
 import Terminal from "./terminal";
 import { parseTime } from "../../utils/time";
@@ -344,7 +364,24 @@ export default {
           this.list = res.data;
         }
         this.loading = false;
-      });
+      })
+      // 如果在节点列表中存在，则标记为已安装节点
+      .then(getNodeList().then((res) => {
+        let nodeList = res.data;
+        let tempList = [];
+        this.list.forEach(element => {
+          let flag = false;
+          nodeList.forEach(node => {
+            if (element.host === node.url.substring(0, node.url.indexOf(':'))) {
+              flag = true;
+              return;
+            }
+          })
+          element.installed = flag;
+          tempList.push(element);
+        });
+        this.list = tempList;
+      }));
     },
     // 新增 SSH
     handleAdd() {
@@ -507,6 +544,7 @@ export default {
         formData.append("nodeData", JSON.stringify({ ...this.tempNode }));
         formData.append("path", this.tempNode.path);
         formData.append("waitCount", this.tempNode.waitCount);
+        formData.append("chmod", this.tempNode.chmod);
         // 提交数据
         installAgentNode(formData).then((res) => {
           if (res.code === 200) {

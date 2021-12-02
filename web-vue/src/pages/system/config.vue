@@ -2,8 +2,8 @@
   <a-tabs default-active-key="1">
     <a-tab-pane key="1" tab="系统配置">
       <a-form-model ref="editForm" :model="temp" :label-col="{ span: 2 }" :wrapper-col="{ span: 20 }">
-        <a-form-model-item>
-          <code-editor v-model="temp.content" :options="{ mode: 'yaml' }"></code-editor>
+        <a-form-model-item class="config-editor">
+          <code-editor v-model="temp.content" :options="{ mode: 'yaml', tabSize: 2 }"></code-editor>
           <!-- <a-input v-model="temp.content" type="textarea" :rows="25" class="content-config" placeholder="请输入配置内容，参考项目的配置文件" /> -->
         </a-form-model-item>
         <a-form-model-item :wrapper-col="{ span: 14, offset: 2 }">
@@ -12,7 +12,7 @@
         </a-form-model-item>
       </a-form-model>
     </a-tab-pane>
-    <a-tab-pane key="2" tab="IP白名单配置">
+    <a-tab-pane key="2" tab="IP白名单配置" class="ip-config-panel">
       <a-alert :message="`当前访问IP：${ipTemp.ip}`" type="success" />
       <a-alert message="请仔细确认后配置，ip配置后立即生效。配置时需要保证当前ip能访问！127.0.0.1 该IP不受访问限制" style="margin-top: 10px" banner />
       <a-alert :message="`如果配置错误需要到服务端的服务器里面去修改对应的配置文件，配置文件路径：${ipTemp.path}`" style="margin-top: 10px" banner />
@@ -23,7 +23,7 @@
         <a-form-model-item label="IP黑名单" prop="content">
           <a-input v-model="ipTemp.prohibited" type="textarea" :rows="10" class="ip-list-config" placeholder="请输入IP黑名单,多个使用换行,支持配置IP段 192.168.1.1/192.168.1.254" />
         </a-form-model-item>
-        <a-form-model-item :wrapper-col="{ span: 14, offset: 2 }">
+        <a-form-model-item :wrapper-col="{ span: 14, offset: 2 }" class="ip-config-button">
           <a-button type="primary" class="btn" :disabled="submitIpAble" @click="onSubmitIp()">保存</a-button>
         </a-form-model-item>
       </a-form-model>
@@ -108,7 +108,7 @@ export default {
 </script>
 <style scoped>
 .ant-tabs-tabpane-active {
-  height: calc(100vh - 200px);
+  height: calc(100vh - 150px);
   overflow-y: scroll;
 }
 .content-config {
@@ -122,5 +122,17 @@ textarea {
 }
 .btn {
   margin-left: 20px;
+}
+.config-editor {
+  height: calc(100vh - 240px);
+  overflow-y: scroll;
+}
+.ip-config-panel {
+  height: calc(100vh - 240px);
+  overflow-y: scroll;
+}
+.ip-config-button {
+  position: fixed;
+  bottom: 10px;
 }
 </style>

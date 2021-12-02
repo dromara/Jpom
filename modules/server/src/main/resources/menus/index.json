@@ -123,6 +123,10 @@
       {
         "id": "sysConfig",
         "title": "系统配置"
+      },
+      {
+        "id": "backup",
+        "title": "数据库备份"
       }
     ]
   }

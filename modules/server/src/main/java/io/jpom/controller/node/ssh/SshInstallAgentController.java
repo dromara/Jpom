@@ -119,7 +119,7 @@ public class SshInstallAgentController extends BaseServerController {
 				Object user = propertySource.getProperty(ConfigBean.AUTHORIZE_USER_KEY);
 				nodeModel.setLoginName(Convert.toStr(user, ""));
 				//
-				Object pwd = propertySource.getProperty(ConfigBean.AUTHORIZE_PWD_KEY);
+				Object pwd = propertySource.getProperty(ConfigBean.AUTHORIZE_AUTHORIZE_KEY);
 				nodeModel.setLoginPwd(Convert.toStr(pwd, ""));
 			}
 			// 查询远程是否运行
@@ -129,17 +129,15 @@ public class SshInstallAgentController extends BaseServerController {
 			// 上传文件到服务器
 			sshService.uploadDir(sshModel, path, outFle);
 			//
-			String shPtah = FileUtil.normalize(path + "/" + Type.Agent.name() + ".sh");
-			String command = StrUtil.format("sh {} start upgrade", shPtah);
+			String shPtah = FileUtil.normalize(path + StrUtil.SLASH + Type.Agent.name() + ".sh");
+			String chmod = getParameter("chmod");
+			if (StrUtil.isEmpty(chmod)) {
+				chmod = StrUtil.EMPTY;
+			} else {
+				chmod = StrUtil.format("{} {} && ", chmod, shPtah);
+			}
+			String command = StrUtil.format("{}sh {} start upgrade", chmod, shPtah);
 			String result = sshService.exec(sshModel, command);
-			// 休眠10秒
-            /*Thread.sleep(15 * 1000);
-            if (StrUtil.isEmpty(nodeModel.getLoginName()) || StrUtil.isEmpty(nodeModel.getLoginPwd())) {
-                String error = this.getAuthorize(sshModel, nodeModel, path);
-                if (error != null) {
-                    return error;
-                }
-            }*/
 			// 休眠 5 秒, 尝试 5 次
 			int waitCount = getParameterInt("waitCount", 5);
 			waitCount = Math.max(waitCount, 5);

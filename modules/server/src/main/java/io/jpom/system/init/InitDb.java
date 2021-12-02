@@ -1,3 +1,25 @@
+/*
+ * The MIT License (MIT)
+ *
+ * Copyright (c) 2019 码之科技工作室
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+ * the Software, and to permit persons to whom the Software is furnished to do so,
+ * subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+ * FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+ * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+ * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+ * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
 package io.jpom.system.init;
 
 import cn.hutool.core.io.IoUtil;
@@ -5,6 +27,7 @@ import cn.hutool.core.io.resource.ResourceUtil;
 import cn.hutool.core.lang.Console;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.crypto.SecureUtil;
 import cn.hutool.db.Db;
 import cn.hutool.db.ds.DSFactory;
 import cn.hutool.db.ds.GlobalDSFactory;
@@ -21,6 +44,7 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.annotation.Configuration;
 
 import java.io.InputStream;
+import java.util.Set;
 
 /**
  * 初始化数据库
@@ -74,13 +98,21 @@ public class InitDb implements DisposableBean, InitializingBean {
 					"classpath:/bin/h2-db-v1.sql",
 					"classpath:/bin/h2-db-v2.sql"
 			};
+			// 加载 sql 变更记录，避免重复执行
+			Set<String> executeSqlLog = DbConfig.loadExecuteSqlLog();
 			for (String sqlFile : files) {
 				InputStream inputStream = ResourceUtil.getStream(sqlFile);
 				String sql = IoUtil.read(inputStream, CharsetUtil.CHARSET_UTF_8);
+				String sha1 = SecureUtil.sha1(sql);
+				if (executeSqlLog.contains(sha1)) {
+					// 已经执行过啦，不再执行
+					continue;
+				}
 				int rows = Db.use(dsFactory.getDataSource()).execute(sql);
-				DefaultSystemLog.getLog().info("exec init SQL file: {} complete, and affected rows is: {}",
-						sqlFile, rows);
+				DefaultSystemLog.getLog().info("exec init SQL file: {} complete, and affected rows is: {}", sqlFile, rows);
+				executeSqlLog.add(sha1);
 			}
+			DbConfig.saveExecuteSqlLog(executeSqlLog);
 			DSFactory.setCurrentDSFactory(dsFactory);
 			/**
 			 * @author Hotstrip
@@ -94,14 +126,15 @@ public class InitDb implements DisposableBean, InitializingBean {
 			return;
 		}
 		instance.initOk();
+		Console.log("h2 db Successfully loaded, url is 【{}】", dbUrl);
 		if (JpomManifest.getInstance().isDebug()) {
-			Console.log("h2 db inited:" + dbUrl);
+			//
 		} else {
-			Console.log("h2 db inited");
 			if (serverExtConfigBean.isH2ConsoleEnabled()
-					&& StrUtil.equals(serverExtConfigBean.getDbUserName(), DbConfig.DEFAULT_USER_OR_PWD)
-					&& StrUtil.equals(serverExtConfigBean.getDbUserPwd(), DbConfig.DEFAULT_USER_OR_PWD)) {
+					&& StrUtil.equals(serverExtConfigBean.getDbUserName(), DbConfig.DEFAULT_USER_OR_AUTHORIZATION)
+					&& StrUtil.equals(serverExtConfigBean.getDbUserPwd(), DbConfig.DEFAULT_USER_OR_AUTHORIZATION)) {
 				Console.error("【安全警告】数据库账号密码使用默认的情况下不建议开启 h2 数据 web 控制台");
+				System.exit(-2);
 			}
 		}
 	}

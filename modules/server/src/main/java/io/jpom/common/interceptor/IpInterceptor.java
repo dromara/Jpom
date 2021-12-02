@@ -1,3 +1,25 @@
+/*
+ * The MIT License (MIT)
+ *
+ * Copyright (c) 2019 码之科技工作室
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+ * the Software, and to permit persons to whom the Software is furnished to do so,
+ * subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+ * FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+ * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+ * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+ * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
 package io.jpom.common.interceptor;
 
 import cn.hutool.core.net.NetUtil;
@@ -25,6 +47,8 @@ import javax.servlet.http.HttpServletResponse;
 @InterceptorPattens(sort = -2, exclude = ServerOpenApi.API + "**")
 public class IpInterceptor extends BaseJpomInterceptor {
 
+	private static final int IP_ACCESS_CODE = 999;
+
 	@Override
 	protected boolean preHandle(HttpServletRequest request, HttpServletResponse response, HandlerMethod handlerMethod) throws Exception {
 		String clientIp = ServletUtil.getClientIP(request);
@@ -39,14 +63,14 @@ public class IpInterceptor extends BaseJpomInterceptor {
 		// 判断不允许访问
 		String prohibited = config.getProhibited();
 		if (StrUtil.isNotEmpty(prohibited) && this.checkIp(prohibited, clientIp, false)) {
-			ServletUtil.write(response, JsonMessage.getString(900, "Prohibition of access"), MediaType.APPLICATION_JSON_VALUE);
+			ServletUtil.write(response, JsonMessage.getString(IP_ACCESS_CODE, "Prohibition of access"), MediaType.APPLICATION_JSON_VALUE);
 			return false;
 		}
 		String allowed = config.getAllowed();
 		if (StrUtil.isEmpty(allowed) || this.checkIp(allowed, clientIp, true)) {
 			return true;
 		}
-		ServletUtil.write(response, JsonMessage.getString(900, "Prohibition of access"), MediaType.APPLICATION_JSON_VALUE);
+		ServletUtil.write(response, JsonMessage.getString(IP_ACCESS_CODE, "Prohibition of access"), MediaType.APPLICATION_JSON_VALUE);
 		return false;
 	}
 

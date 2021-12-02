@@ -1,3 +1,25 @@
+/*
+ * The MIT License (MIT)
+ *
+ * Copyright (c) 2019 码之科技工作室
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+ * the Software, and to permit persons to whom the Software is furnished to do so,
+ * subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+ * FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+ * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+ * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+ * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
 package io.jpom.system;
 
 import cn.hutool.core.convert.Convert;
@@ -133,6 +155,30 @@ public class ServerExtConfigBean implements DisposableBean {
 	private int webApiTimeout;
 
 	/**
+	 * 系统名称
+	 */
+	@Value("${jpom.name:Jpom项目管理系统}")
+	private String name;
+
+	/**
+	 * 系统副名称（标题） 建议4个汉字以内
+	 */
+	@Value("${jpom.subName:项目管理}")
+	private String subName;
+
+	/**
+	 * 登录页标题
+	 */
+	@Value("${jpom.loginTitle:登录JPOM}")
+	private String loginTitle;
+
+	/**
+	 * logo 文件路径
+	 */
+	@Value("${jpom.logoFile:}")
+	private String logoFile;
+
+	/**
 	 * 获取上传文件超时时间
 	 *
 	 * @return 返回毫秒
@@ -178,11 +224,11 @@ public class ServerExtConfigBean implements DisposableBean {
 	}
 
 	public String getDbUserName() {
-		return StrUtil.emptyToDefault(this.dbUserName, DbConfig.DEFAULT_USER_OR_PWD);
+		return StrUtil.emptyToDefault(this.dbUserName, DbConfig.DEFAULT_USER_OR_AUTHORIZATION);
 	}
 
 	public String getDbUserPwd() {
-		return StrUtil.emptyToDefault(this.dbUserPwd, DbConfig.DEFAULT_USER_OR_PWD);
+		return StrUtil.emptyToDefault(this.dbUserPwd, DbConfig.DEFAULT_USER_OR_AUTHORIZATION);
 	}
 
 	public boolean isH2ConsoleEnabled() {
@@ -218,6 +264,22 @@ public class ServerExtConfigBean implements DisposableBean {
 	 */
 	public int getWebApiTimeout() {
 		return Math.max(this.webApiTimeout, 10);
+	}
+
+	public String getName() {
+		return StrUtil.emptyToDefault(name, "Jpom项目管理系统");
+	}
+
+	public String getSubName() {
+		return StrUtil.emptyToDefault(subName, "项目管理");
+	}
+
+	public String getLoginTitle() {
+		return StrUtil.emptyToDefault(loginTitle, "登录JPOM");
+	}
+
+	public String getLogoFile() {
+		return logoFile;
 	}
 
 	/**

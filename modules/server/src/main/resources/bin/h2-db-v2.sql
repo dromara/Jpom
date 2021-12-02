@@ -101,6 +101,26 @@ ALTER TABLE REPOSITORY
 ALTER TABLE BUILD_INFO
 	ADD IF NOT EXISTS BRANCHTAGNAME  VARCHAR(50) comment '标签';
 
+-- @author hjk 增加字段长度，200->500
+ALTER TABLE BUILD_INFO
+    ALTER COLUMN SCRIPT VARCHAR(500) comment '构建命令';
 
+-- 备份数据库信息表 @author Hotstrip
+CREATE TABLE IF NOT EXISTS PUBLIC.BACKUP_INFO
+(
+	ID               VARCHAR(50) not null comment 'id',
+	CREATETIMEMILLIS BIGINT COMMENT '数据创建时间',
+	MODIFYTIMEMILLIS BIGINT COMMENT '数据修改时间',
+	`NAME`           VARCHAR(50) comment '备份名称',
+	FILEPATH         VARCHAR(200) comment '文件地址',
+	BACKUPTYPE       int comment '备份类型{0: 全量, 1: 部分}',
+	FILESIZE         BIGINT comment '文件大小',
+	SHA1SUM          VARCHAR(50) comment 'SHA1 信息',
+	`STATUS`         int default '0' comment '状态{0: 默认; 1: 成功; 2: 失败}',
+	CONSTRAINT BACKUP_INFO_PK PRIMARY KEY (ID)
+);
+comment on table BACKUP_INFO is '备份数据库信息';
 
-
+-- @author Hotstrip 增加字段 status
+ALTER TABLE BACKUP_INFO
+    ADD IF NOT EXISTS `STATUS` int default '0' comment '状态{0: 默认; 1: 成功; 2: 失败}';

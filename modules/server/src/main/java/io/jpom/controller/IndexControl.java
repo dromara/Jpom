@@ -1,10 +1,33 @@
+/*
+ * The MIT License (MIT)
+ *
+ * Copyright (c) 2019 码之科技工作室
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+ * the Software, and to permit persons to whom the Software is furnished to do so,
+ * subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+ * FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+ * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+ * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+ * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
 package io.jpom.controller;
 
+import cn.hutool.core.io.FileTypeUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.io.resource.ResourceUtil;
-import cn.hutool.core.net.URLEncoder;
 import cn.hutool.core.util.CharsetUtil;
+import cn.hutool.core.util.ReUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.servlet.ServletUtil;
 import cn.hutool.http.ContentType;
@@ -17,7 +40,6 @@ import io.jpom.common.interceptor.BaseJpomInterceptor;
 import io.jpom.common.interceptor.NotLogin;
 import io.jpom.model.data.NodeModel;
 import io.jpom.model.data.UserModel;
-import io.jpom.permission.CacheControllerFeature;
 import io.jpom.service.user.RoleService;
 import io.jpom.service.user.UserService;
 import io.jpom.system.ExtConfigBean;
@@ -32,7 +54,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -60,7 +81,7 @@ public class IndexControl extends BaseServerController {
 	@GetMapping(value = {"index", "", "/"}, produces = MediaType.TEXT_HTML_VALUE)
 	@NotLogin
 	@ResponseBody
-	public void index(HttpServletResponse response) throws IOException {
+	public void index(HttpServletResponse response) {
 		InputStream inputStream = ResourceUtil.getStream("classpath:/dist/index.html");
 		String html = IoUtil.read(inputStream, CharsetUtil.CHARSET_UTF_8);
 		//<div id="jpomCommonJs"></div>
@@ -77,7 +98,36 @@ public class IndexControl extends BaseServerController {
 		// <apiTimeOut>
 		int webApiTimeout = ServerExtConfigBean.getInstance().getWebApiTimeout();
 		html = StrUtil.replace(html, "<apiTimeout>", TimeUnit.SECONDS.toMillis(webApiTimeout) + "");
+		// 修改网页标题
+		String title = ReUtil.get("<title>.*?</title>", html, 0);
+		if (StrUtil.isNotEmpty(title)) {
+			html = StrUtil.replace(html, title, "<title>" + ServerExtConfigBean.getInstance().getName() + "</title>");
+		}
 		ServletUtil.write(response, html, ContentType.TEXT_HTML.getValue());
+	}
+
+	/**
+	 * logo 图片
+	 */
+	@RequestMapping(value = "logo_image", method = RequestMethod.GET, produces = MediaType.IMAGE_PNG_VALUE)
+	@ResponseBody
+	@NotLogin
+	public void logoImage(HttpServletResponse response) {
+		ServerExtConfigBean instance = ServerExtConfigBean.getInstance();
+		String logoFile = instance.getLogoFile();
+		if (StrUtil.isNotEmpty(logoFile)) {
+			File file = FileUtil.file(logoFile);
+			if (FileUtil.isFile(file)) {
+				String type = FileTypeUtil.getType(file);
+				if (StrUtil.equalsAnyIgnoreCase(type, "jpg", "png", "gif")) {
+					ServletUtil.write(response, file);
+					return;
+				}
+			}
+		}
+		// 默认logo
+		InputStream inputStream = ResourceUtil.getStream("classpath:/logo/jpom.png");
+		ServletUtil.write(response, inputStream, MediaType.IMAGE_PNG_VALUE);
 	}
 
 
@@ -93,6 +143,10 @@ public class IndexControl extends BaseServerController {
 	public String checkSystem() {
 		JSONObject data = new JSONObject();
 		data.put("routerBase", UrlRedirectUtil.getHeaderProxyPath(getRequest(), BaseJpomInterceptor.PROXY_PATH));
+		//
+		data.put("name", ServerExtConfigBean.getInstance().getName());
+		data.put("subName", ServerExtConfigBean.getInstance().getSubName());
+		data.put("loginTitle", ServerExtConfigBean.getInstance().getLoginTitle());
 		if (userService.userListEmpty()) {
 			return JsonMessage.getString(500, "need init system", data);
 		}

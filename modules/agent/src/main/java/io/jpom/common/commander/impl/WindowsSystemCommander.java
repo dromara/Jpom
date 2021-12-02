@@ -1,3 +1,25 @@
+/*
+ * The MIT License (MIT)
+ *
+ * Copyright (c) 2019 码之科技工作室
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+ * the Software, and to permit persons to whom the Software is furnished to do so,
+ * subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+ * FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+ * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+ * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+ * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
 package io.jpom.common.commander.impl;
 
 import cn.hutool.core.convert.Convert;
@@ -12,11 +34,9 @@ import com.sun.management.OperatingSystemMXBean;
 import io.jpom.common.commander.AbstractSystemCommander;
 import io.jpom.model.system.ProcessModel;
 import io.jpom.util.CommandUtil;
-import io.jpom.util.JvmUtil;
 
 import java.io.File;
 import java.lang.management.ManagementFactory;
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -125,22 +145,22 @@ public class WindowsSystemCommander extends AbstractSystemCommander {
             processModel.setTime(memList.get(8));
 
             try {
-                JvmUtil.getOperatingSystemMXBean(memList.get(1), operatingSystemMXBean -> {
-                    if (operatingSystemMXBean != null) {
-                        //最近jvm cpu使用率
-                        double processCpuLoad = operatingSystemMXBean.getProcessCpuLoad() * 100;
-                        if (processCpuLoad <= 0) {
-                            processCpuLoad = 0;
-                        }
-                        processModel.setCpu(String.format("%.2f", processCpuLoad) + "%");
-                        //服务器总内存
-                        long totalMemorySize = operatingSystemMXBean.getTotalPhysicalMemorySize();
-                        BigDecimal total = new BigDecimal(totalMemorySize / 1024);
-                        // 进程
-                        double v = new BigDecimal(aLong).divide(total, 4, BigDecimal.ROUND_HALF_UP).doubleValue() * 100;
-                        processModel.setMem(String.format("%.2f", v) + "%");
-                    }
-                });
+//                JvmUtil.getOperatingSystemMXBean(memList.get(1), operatingSystemMXBean -> {
+//                    if (operatingSystemMXBean != null) {
+//                        //最近jvm cpu使用率
+//                        double processCpuLoad = operatingSystemMXBean.getProcessCpuLoad() * 100;
+//                        if (processCpuLoad <= 0) {
+//                            processCpuLoad = 0;
+//                        }
+//                        processModel.setCpu(String.format("%.2f", processCpuLoad) + "%");
+//                        //服务器总内存
+//                        long totalMemorySize = operatingSystemMXBean.getTotalPhysicalMemorySize();
+//                        BigDecimal total = new BigDecimal(totalMemorySize / 1024);
+//                        // 进程
+//                        double v = new BigDecimal(aLong).divide(total, 4, BigDecimal.ROUND_HALF_UP).doubleValue() * 100;
+//                        processModel.setMem(String.format("%.2f", v) + "%");
+//                    }
+//                });
 
             } catch (Exception ignored) {
 
