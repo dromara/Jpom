@@ -19,7 +19,7 @@
       :scroll="{ x: 1210, y: tableHeight - 60 }"
       bordered
       rowKey="id"
-      :pagination="false"
+      :pagination="pagination"
     >
       <a-tooltip slot="name" slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
@@ -91,13 +91,17 @@ export default {
       backupTypeMap: backupTypeMap,
       backupStatusMap: backupStatusMap,
       loading: false,
-      listQuery: {},
+      listQuery: {
+        page: 1,
+        limit: 20,
+      },
       tableHeight: "70vh",
       backupTypeList: [
         { key: 0, value: "全量" },
         { key: 1, value: "部分" },
       ],
       list: [],
+      total: 0,
       tableNameList: [],
       targetKeys: [],
       uploadFileList: [],
@@ -108,6 +112,7 @@ export default {
       uploading: false,
       percentage: 0,
       backupType: 0,
+      successSize: 0,
       columns: [
         { title: "备份名称", dataIndex: "name", width: 150, ellipsis: true, scopedSlots: { customRender: "name" } },
         { title: "备份类型", dataIndex: "backupType", width: 100, ellipsis: true, scopedSlots: { customRender: "backupType" } },
@@ -167,6 +172,22 @@ export default {
     fileUploadDisabled() {
       return this.uploadFileList.length === 0 || this.uploading;
     },
+    // 分页
+    pagination() {
+      return {
+        total: this.total,
+        current: this.listQuery.page || 1,
+        pageSize: this.listQuery.limit || 10,
+        pageSizeOptions: ["10", "20", "50", "100"],
+        showSizeChanger: true,
+        showTotal: (total) => {
+          if (total <= this.listQuery.limit) {
+            return "";
+          }
+          return `总计 ${total} 条`;
+        },
+      };
+    },
   },
   created() {
     this.calcTableHeight();
@@ -193,6 +214,7 @@ export default {
       getBackupList(this.listQuery).then((res) => {
         if (res.code === 200) {
           this.list = res.data.result;
+          this.total = res.data.total;
         }
         this.loading = false;
       });
