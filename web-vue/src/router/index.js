@@ -120,6 +120,12 @@ const children = [
     name: "system-backup",
     component: () => import("../pages/system/backup"),
   },
+  // 工作空间
+  {
+    path: "/system/workspace",
+    name: "system-workspace",
+    component: () => import("../pages/system/workspace"),
+  },
 ];
 
 const router = new Router({

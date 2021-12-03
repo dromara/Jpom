@@ -24,16 +24,10 @@ package io.jpom.controller.system;
 
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.IdUtil;
-import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SecureUtil;
-import cn.hutool.db.Entity;
-import cn.hutool.db.Page;
-import cn.hutool.db.sql.Direction;
-import cn.hutool.db.sql.Order;
 import cn.hutool.extra.servlet.ServletUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
-import cn.jiangzeyin.common.validator.ValidatorConfig;
 import cn.jiangzeyin.common.validator.ValidatorItem;
 import cn.jiangzeyin.common.validator.ValidatorRule;
 import cn.jiangzeyin.controller.multipart.MultipartFileBuilder;
@@ -79,27 +73,13 @@ public class BackupInfoController extends BaseServerController {
 	/**
 	 * 分页加载备份列表数据
 	 *
-	 * @param limit      每页条数
-	 * @param page       页码
-	 * @param name       备份名称
-	 * @param backupType 备份类型{0: 全量, 1: 部分}
 	 * @return json
 	 */
 	@PostMapping(value = "/system/backup/list")
 	@Feature(method = MethodFeature.LOG)
-	public Object loadBackupList(@ValidatorConfig(value = {@ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "limit error")}, defaultVal = "10") int limit,
-								 @ValidatorConfig(value = {@ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "page error")}, defaultVal = "1") int page,
-								 String name, Integer backupType) {
-		Page pageObj = new Page(page, limit);
-		pageObj.addOrder(new Order("createTimeMillis", Direction.DESC));
-
-		// 设置查询参数
-		Entity entity = Entity.create();
-		entity.setIgnoreNull("name", StrUtil.format(" like '{}%'", name));
-		entity.setIgnoreNull("backupType", backupType);
-
+	public Object loadBackupList() {
 		// 查询数据库
-		PageResultDto<BackupInfoModel> pageResult = backupInfoService.listPage(entity, pageObj);
+		PageResultDto<BackupInfoModel> pageResult = backupInfoService.listPage(getRequest());
 
 		return JsonMessage.getString(200, "获取成功", pageResult);
 	}

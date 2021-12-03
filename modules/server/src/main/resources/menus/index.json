@@ -127,6 +127,10 @@
       {
         "id": "backup",
         "title": "数据库备份"
+      },
+      {
+        "id": "workspace",
+        "title": "工作空间"
       }
     ]
   }

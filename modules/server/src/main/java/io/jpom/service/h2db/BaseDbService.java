@@ -25,10 +25,7 @@ package io.jpom.service.h2db;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.date.SystemClock;
 import cn.hutool.core.map.MapUtil;
-import cn.hutool.core.util.IdUtil;
-import cn.hutool.core.util.ObjectUtil;
-import cn.hutool.core.util.ReflectUtil;
-import cn.hutool.core.util.StrUtil;
+import cn.hutool.core.util.*;
 import cn.hutool.db.Entity;
 import cn.hutool.db.Page;
 import cn.hutool.db.sql.Direction;
@@ -161,15 +158,34 @@ public abstract class BaseDbService<T extends BaseDbModel> extends BaseDbCommonS
 		//
 		Page pageReq = new Page(page, limit);
 		Entity where = Entity.create();
-		//
+		// 查询条件
 		for (Map.Entry<String, String> stringStringEntry : paramMap.entrySet()) {
 			String key = stringStringEntry.getKey();
 			String value = stringStringEntry.getValue();
-			where.setIgnoreNull(StrUtil.format("`{}`", key), value);
+			key = StrUtil.removeAll(key, "%");
+			if (StrUtil.startWith(stringStringEntry.getKey(), "%") && StrUtil.endWith(stringStringEntry.getKey(), "%")) {
+				where.setIgnoreNull(StrUtil.format("`{}`", key), StrUtil.format(" like '%{}%'", value));
+			} else if (StrUtil.endWith(stringStringEntry.getKey(), "%")) {
+				where.setIgnoreNull(StrUtil.format("`{}`", key), StrUtil.format(" like '{}%'", value));
+			} else if (StrUtil.startWith(stringStringEntry.getKey(), "%")) {
+				where.setIgnoreNull(StrUtil.format("`{}`", key), StrUtil.format(" like '%{}'", value));
+			} else {
+				where.setIgnoreNull(StrUtil.format("`{}`", key), value);
+			}
 		}
+		// 排序
 		if (StrUtil.isNotEmpty(orderField)) {
+			orderField = StrUtil.removeAll(orderField, "%");
 			pageReq.addOrder(new Order(orderField, StrUtil.equalsIgnoreCase(order, "ascend") ? Direction.ASC : Direction.DESC));
 		}
-		return super.listPage(where, pageReq);
+		return this.listPage(where, pageReq);
+	}
+
+	@Override
+	public PageResultDto<T> listPage(Entity where, Page page) {
+		if (ArrayUtil.isEmpty(page.getOrders())) {
+			page.addOrder(new Order("createTimeMillis", Direction.DESC));
+		}
+		return super.listPage(where, page);
 	}
 }

@@ -39,3 +39,17 @@ CREATE TABLE IF NOT EXISTS PUBLIC.USER_INFO
 );
 comment on table USER_INFO is '用户信息表';
 
+-- 工作空间表
+CREATE TABLE IF NOT EXISTS PUBLIC.WORKSPACE
+(
+	ID               VARCHAR(50) not null comment 'id',
+	CREATETIMEMILLIS BIGINT COMMENT '数据创建时间',
+	MODIFYTIMEMILLIS BIGINT COMMENT '数据修改时间',
+	MODIFYUSER       VARCHAR(50) comment '修改人',
+	STRIKE           int DEFAULT 0 comment '逻辑删除{1，删除，0 未删除(默认)}',
+	`NAME`           VARCHAR(50) comment '名称',
+	DESCRIPTION      varchar(255) comment '参数描述',
+	CONSTRAINT WORKSPACE_PK PRIMARY KEY (ID)
+);
+comment on table USER_INFO is '用户信息表';
+

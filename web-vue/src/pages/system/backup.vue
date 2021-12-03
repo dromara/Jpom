@@ -122,7 +122,7 @@ export default {
         {
           title: "SHA1",
           dataIndex: "sha1Sum",
-          width: 80,
+          // width: 80,
           ellipsis: true,
           scopedSlots: { customRender: "sha1Sum" },
         },
@@ -187,9 +187,12 @@ export default {
     loadData() {
       this.list = [];
       this.loading = true;
+
+      this.listQuery["name%"] = this.listQuery.name;
+      delete this.listQuery.name;
       getBackupList(this.listQuery).then((res) => {
         if (res.code === 200) {
-          this.list = res.data;
+          this.list = res.data.result;
         }
         this.loading = false;
       });

@@ -268,7 +268,7 @@ export default {
       ],
       columns: [
         { title: "名称", dataIndex: "name", width: 150, sorter: true, ellipsis: true, scopedSlots: { customRender: "name" } },
-        { title: "分组", dataIndex: "group", width: 100, ellipsis: true, scopedSlots: { customRender: "group" } },
+        { title: "分组", dataIndex: "group", key: "group%", sorter: true, width: 100, ellipsis: true, scopedSlots: { customRender: "group" } },
         {
           title: "分支",
           dataIndex: "branchName",
