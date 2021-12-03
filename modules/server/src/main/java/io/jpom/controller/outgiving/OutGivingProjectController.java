@@ -232,7 +232,7 @@ public class OutGivingProjectController extends BaseServerController {
 		AfterOpt afterOpt1 = BaseEnum.getEnum(AfterOpt.class, Convert.toInt(afterOpt, 0));
 		Assert.notNull(afterOpt1, "请选择分发后的操作");
 		// 验证远程 地址
-		ServerWhitelist whitelist = systemParametersServer.getConfigDeNewInstance(ServerWhitelist.ID, ServerWhitelist.class);
+		ServerWhitelist whitelist = systemParametersServer.getConfigDefNewInstance(ServerWhitelist.ID, ServerWhitelist.class);
 		Set<String> allowRemoteDownloadHost = whitelist.getAllowRemoteDownloadHost();
 		Assert.state(CollUtil.isNotEmpty(allowRemoteDownloadHost), "还没有配置运行的远程地址");
 		List<String> collect = allowRemoteDownloadHost.stream().filter(s -> StrUtil.startWith(url, s)).collect(Collectors.toList());

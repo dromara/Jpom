@@ -105,7 +105,7 @@ public class OutGivingWhitelistController extends BaseServerController {
 		List<String> list = AgentWhitelist.parseToList(outGiving, true, "项目路径白名单不能为空");
 		list = AgentWhitelist.covertToArray(list, "项目路径白名单不能位于Jpom目录下");
 
-		ServerWhitelist serverWhitelist = systemParametersServer.getConfigDeNewInstance(ServerWhitelist.ID, ServerWhitelist.class);
+		ServerWhitelist serverWhitelist = systemParametersServer.getConfigDefNewInstance(ServerWhitelist.ID, ServerWhitelist.class);
 		serverWhitelist.setOutGiving(list);
 		//
 		List<String> allowRemoteDownloadHostList = AgentWhitelist.parseToList(allowRemoteDownloadHost, "运行远程下载的 host 不能配置为空");

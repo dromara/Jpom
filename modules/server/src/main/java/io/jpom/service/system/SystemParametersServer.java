@@ -49,14 +49,14 @@ public class SystemParametersServer extends BaseDbService<SystemParametersModel>
 	}
 
 	/**
-	 * 查询 系统参数 值
+	 * 查询系统参数值,没有数据创建一个空对象
 	 *
 	 * @param name 参数名称
 	 * @param cls  类
 	 * @param <T>  泛型
 	 * @return data
 	 */
-	public <T> T getConfigDeNewInstance(String name, Class<T> cls) {
+	public <T> T getConfigDefNewInstance(String name, Class<T> cls) {
 		T config = this.getConfig(name, cls);
 		return config == null ? ReflectUtil.newInstance(cls) : config;
 	}
