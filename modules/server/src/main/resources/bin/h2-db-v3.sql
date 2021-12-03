@@ -51,5 +51,5 @@ CREATE TABLE IF NOT EXISTS PUBLIC.WORKSPACE
 	DESCRIPTION      varchar(255) comment '参数描述',
 	CONSTRAINT WORKSPACE_PK PRIMARY KEY (ID)
 );
-comment on table USER_INFO is '用户信息表';
+comment on table WORKSPACE is '用户信息表';
 
