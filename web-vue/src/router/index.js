@@ -65,11 +65,6 @@ const children = [
     component: () => import("../pages/repository/list"),
   },
   {
-    path: "/build/list",
-    name: "build-list",
-    component: () => import("../pages/build/list"),
-  },
-  {
     path: "/build/list-info",
     name: "build-list-info",
     component: () => import("../pages/build/list-info"),

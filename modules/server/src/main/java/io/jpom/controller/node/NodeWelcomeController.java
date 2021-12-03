@@ -8,7 +8,6 @@ import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.db.Entity;
 import cn.hutool.db.Page;
-import cn.hutool.db.PageResult;
 import cn.hutool.db.sql.Direction;
 import cn.hutool.db.sql.Order;
 import cn.hutool.extra.servlet.ServletUtil;
@@ -19,6 +18,7 @@ import io.jpom.common.forward.NodeForward;
 import io.jpom.common.forward.NodeUrl;
 import io.jpom.model.BaseEnum;
 import io.jpom.model.Cycle;
+import io.jpom.model.PageResultDto;
 import io.jpom.model.data.NodeModel;
 import io.jpom.model.data.UserModel;
 import io.jpom.model.log.SystemMonitorLog;
@@ -90,7 +90,7 @@ public class NodeWelcomeController extends BaseServerController {
 		return JsonMessage.getString(200, "ok", object);
 	}
 
-	private PageResult<SystemMonitorLog> getList(String time, long millis) {
+	private PageResultDto<SystemMonitorLog> getList(String time, long millis) {
 		long endTime = System.currentTimeMillis();
 		long startTime = endTime - TimeUnit.MINUTES.toMillis(30);
 		if (StrUtil.isNotEmpty(time)) {
@@ -119,10 +119,10 @@ public class NodeWelcomeController extends BaseServerController {
 
 	private JSONObject getData(String selTime) {
 		long millis = getCycleMillis();
-		PageResult<SystemMonitorLog> pageResult = getList(selTime, millis);
+		PageResultDto<SystemMonitorLog> pageResult = getList(selTime, millis);
 		List<JSONObject> series = new ArrayList<>();
 		List<String> scale = new ArrayList<>();
-		for (int i = pageResult.size() - 1; i >= 0; i--) {
+		for (int i = pageResult.getTotal() - 1; i >= 0; i--) {
 			SystemMonitorLog systemMonitorLog = pageResult.get(i);
 			if (StrUtil.isEmpty(selTime)) {
 				scale.add(DateUtil.formatTime(new Date(systemMonitorLog.getMonitorTime())));
@@ -168,14 +168,15 @@ public class NodeWelcomeController extends BaseServerController {
 
 	@RequestMapping(value = "exportTop")
 	public void exportTop(String time) throws UnsupportedEncodingException {
-		PageResult<SystemMonitorLog> monitorData = getList(time, getCycleMillis());
+		PageResultDto<SystemMonitorLog> monitorData = getList(time, getCycleMillis());
 		if (monitorData.getTotal() <= 0) {
 			//            NodeForward.requestDownload(node, getRequest(), getResponse(), NodeUrl.exportTop);
 		} else {
 			NodeModel node = getNode();
 			StringBuilder buf = new StringBuilder();
 			buf.append("监控时间").append(",占用cpu").append(",占用内存").append(",占用磁盘").append("\r\n");
-			for (SystemMonitorLog log : monitorData) {
+			List<SystemMonitorLog> result = monitorData.getResult();
+			for (SystemMonitorLog log : result) {
 				long monitorTime = log.getMonitorTime();
 				buf.append(DateUtil.date(monitorTime).toString()).append(",")
 						.append(log.getOccupyCpu()).append("%").append(",")

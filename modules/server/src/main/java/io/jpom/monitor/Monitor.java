@@ -31,7 +31,6 @@ import cn.hutool.cron.CronUtil;
 import cn.hutool.cron.task.Task;
 import cn.hutool.db.Entity;
 import cn.hutool.db.Page;
-import cn.hutool.db.PageResult;
 import cn.hutool.db.sql.Direction;
 import cn.hutool.db.sql.Order;
 import cn.hutool.http.HttpStatus;
@@ -43,6 +42,7 @@ import com.alibaba.fastjson.JSONObject;
 import io.jpom.common.forward.NodeForward;
 import io.jpom.common.forward.NodeUrl;
 import io.jpom.model.Cycle;
+import io.jpom.model.PageResultDto;
 import io.jpom.model.data.MonitorModel;
 import io.jpom.model.data.NodeModel;
 import io.jpom.model.data.UserModel;
@@ -280,7 +280,7 @@ public class Monitor implements Task {
 		page.addOrder(new Order("createTime", Direction.DESC));
 
 
-		PageResult<MonitorNotifyLog> pageResult = dbMonitorNotifyLogService.listPage(entity, page);
+		PageResultDto<MonitorNotifyLog> pageResult = dbMonitorNotifyLogService.listPage(entity, page);
 		if (pageResult.isEmpty()) {
 			return true;
 		}

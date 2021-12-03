@@ -33,4 +33,13 @@ import org.springframework.stereotype.Service;
 @Service
 public class RepositoryService extends BaseDbService<RepositoryModel> {
 
+	@Override
+	protected void fillSelectResult(RepositoryModel repositoryModel) {
+		if (repositoryModel == null) {
+			return;
+		}
+		// 隐藏密码字段
+		repositoryModel.setPassword(null);
+		repositoryModel.setRsaPrv(null);
+	}
 }

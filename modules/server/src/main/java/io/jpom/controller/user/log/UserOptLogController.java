@@ -25,13 +25,12 @@ package io.jpom.controller.user.log;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.db.Entity;
 import cn.hutool.db.Page;
-import cn.hutool.db.PageResult;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.validator.ValidatorConfig;
 import cn.jiangzeyin.common.validator.ValidatorItem;
 import cn.jiangzeyin.common.validator.ValidatorRule;
-import com.alibaba.fastjson.JSONObject;
 import io.jpom.common.BaseServerController;
+import io.jpom.model.PageResultDto;
 import io.jpom.model.log.UserOperateLogV1;
 import io.jpom.plugin.ClassFeature;
 import io.jpom.plugin.Feature;
@@ -91,9 +90,7 @@ public class UserOptLogController extends BaseServerController {
 			entity.set("userId".toUpperCase(), selectUser);
 		}
 
-		PageResult<UserOperateLogV1> pageResult = dbUserOperateLogService.listPage(entity, pageObj);
-		JSONObject jsonObject = JsonMessage.toJson(200, "获取成功", pageResult);
-		jsonObject.put("total", pageResult.getTotal());
-		return jsonObject.toString();
+		PageResultDto<UserOperateLogV1> pageResult = dbUserOperateLogService.listPage(entity, pageObj);
+		return JsonMessage.getString(200, "获取成功", pageResult);
 	}
 }

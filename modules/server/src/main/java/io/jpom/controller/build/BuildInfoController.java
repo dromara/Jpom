@@ -27,9 +27,6 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.lang.Tuple;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
-import cn.hutool.db.Entity;
-import cn.hutool.db.Page;
-import cn.hutool.db.PageResult;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.validator.ValidatorConfig;
 import cn.jiangzeyin.common.validator.ValidatorItem;
@@ -38,11 +35,14 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.build.BuildUtil;
 import io.jpom.common.BaseServerController;
-import io.jpom.common.Const;
 import io.jpom.common.interceptor.OptLog;
 import io.jpom.model.AfterOpt;
 import io.jpom.model.BaseEnum;
-import io.jpom.model.data.*;
+import io.jpom.model.PageResultDto;
+import io.jpom.model.data.BuildInfoModel;
+import io.jpom.model.data.RepositoryModel;
+import io.jpom.model.data.SshModel;
+import io.jpom.model.data.UserModel;
 import io.jpom.model.enums.BuildReleaseMethod;
 import io.jpom.model.log.UserOperateLogV1;
 import io.jpom.plugin.ClassFeature;
@@ -104,27 +104,14 @@ public class BuildInfoController extends BaseServerController {
 	/**
 	 * load build list with params
 	 *
-	 * @param group
-	 * @return
+	 * @return json
 	 */
 	@RequestMapping(value = "/build/list", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	@Feature(method = MethodFeature.LIST)
-	public String getBuildList(String group,
-							   @ValidatorConfig(value = {
-									   @ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "limit error")
-							   }, defaultVal = "10") int limit,
-							   @ValidatorConfig(value = {
-									   @ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "page error")
-							   }, defaultVal = "1") int page) {
-		// if group is empty string, dont set into entity property
-		Entity where = Entity.create()
-				.setIgnoreNull(Const.GROUP_COLUMN_STR, StrUtil.isEmpty(group) ? null : group);
-		Page pageReq = new Page(page, limit);
+	public String getBuildList() {
 		// load list with page
-		PageResult<BuildInfoModel> list = buildInfoService.listPage(where, pageReq);
-		JSONObject jsonObject = JsonMessage.toJson(200, "获取成功", list);
-		jsonObject.put("total", list.getTotal());
-		return jsonObject.toString();
+		PageResultDto<BuildInfoModel> list = buildInfoService.listPage(getRequest());
+		return JsonMessage.getString(200, "获取成功", list);
 	}
 
 	/**
@@ -317,7 +304,7 @@ public class BuildInfoController extends BaseServerController {
 	public String branchList(
 			@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "仓库ID不能为空")) String repositoryId) throws Exception {
 		// 根据 repositoryId 查询仓库信息
-		RepositoryModel repositoryModel = repositoryService.getByKey(repositoryId);
+		RepositoryModel repositoryModel = repositoryService.getByKey(repositoryId, false);
 		Assert.notNull(repositoryModel, "无效的仓库信息");
 		//
 		Assert.state(repositoryModel.getRepoType() == 0, "只有 GIT 仓库才有分支信息");

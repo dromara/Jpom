@@ -181,7 +181,7 @@ public class LoginControl extends BaseServerController {
 					return JsonMessage.getString(400, "该账户登录失败次数过多，已被锁定" + msg + ",请不要再次尝试");
 				}
 				// 验证
-				if (userPwd.equals(userModel.getPassword())) {
+				if (userService.simpleLogin(userName, userPwd) != null) {
 					userModel.unLock();
 					setSessionAttribute(LoginInterceptor.SESSION_NAME, userModel);
 					removeSessionAttribute(SHOW_CODE);

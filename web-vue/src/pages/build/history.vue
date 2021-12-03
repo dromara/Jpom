@@ -158,7 +158,7 @@ export default {
       this.listQuery.time = this.timeRange;
       geteBuildHistory(this.listQuery).then(res => {
         if (res.code === 200) {
-          this.list = res.data;
+          this.list = res.data.result;
           this.total = res.total;
         }
         this.loading = false;

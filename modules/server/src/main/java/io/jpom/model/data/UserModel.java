@@ -76,15 +76,15 @@ public class UserModel extends BaseStrikeDbModel {
 	/**
 	 * 连续登录失败次数
 	 */
-	private int pwdErrorCount;
+	private Integer pwdErrorCount;
 	/**
 	 * 最后失败时间
 	 */
-	private long lastPwdErrorTime;
+	private Long lastPwdErrorTime;
 	/**
 	 * 账号被锁定的时长
 	 */
-	private long lockTime;
+	private Long lockTime;
 //	/**
 //	 * 记录最后修改时间
 //	 */
@@ -131,15 +131,15 @@ public class UserModel extends BaseStrikeDbModel {
 		this.systemUser = systemUser;
 	}
 
-	public long getLockTime() {
+	public Long getLockTime() {
 		return lockTime;
 	}
 
-	public long getLastPwdErrorTime() {
+	public Long getLastPwdErrorTime() {
 		return lastPwdErrorTime;
 	}
 
-	public void setLastPwdErrorTime(long lastPwdErrorTime) {
+	public void setLastPwdErrorTime(Long lastPwdErrorTime) {
 		this.lastPwdErrorTime = lastPwdErrorTime;
 	}
 
@@ -147,7 +147,7 @@ public class UserModel extends BaseStrikeDbModel {
 		this.lockTime = lockTime;
 	}
 
-	public int getPwdErrorCount() {
+	public Integer getPwdErrorCount() {
 		return pwdErrorCount;
 	}
 
@@ -185,7 +185,7 @@ public class UserModel extends BaseStrikeDbModel {
 	public void unLock() {
 		setPwdErrorCount(0);
 		setLockTime(0);
-		setLastPwdErrorTime(0);
+		setLastPwdErrorTime(0L);
 	}
 
 	/**
@@ -202,13 +202,13 @@ public class UserModel extends BaseStrikeDbModel {
 			return 0;
 		}
 		// 最后一次失败时间
-		long lastTime = getLastPwdErrorTime();
-		if (lastTime <= 0) {
+		Long lastTime = getLastPwdErrorTime();
+		if (lastTime == null || lastTime <= 0) {
 			return 0;
 		}
 		// 当前锁定时间
-		long lockTime = getLockTime();
-		if (lockTime <= 0) {
+		Long lockTime = getLockTime();
+		if (lockTime == null || lockTime <= 0) {
 			return 0;
 		}
 		// 解锁时间

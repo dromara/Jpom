@@ -28,7 +28,6 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SecureUtil;
 import cn.hutool.db.Entity;
 import cn.hutool.db.Page;
-import cn.hutool.db.PageResult;
 import cn.hutool.db.sql.Direction;
 import cn.hutool.db.sql.Order;
 import cn.hutool.extra.servlet.ServletUtil;
@@ -39,10 +38,10 @@ import cn.jiangzeyin.common.validator.ValidatorItem;
 import cn.jiangzeyin.common.validator.ValidatorRule;
 import cn.jiangzeyin.controller.multipart.MultipartFileBuilder;
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
 import io.jpom.common.BaseServerController;
 import io.jpom.common.Const;
 import io.jpom.common.interceptor.OptLog;
+import io.jpom.model.PageResultDto;
 import io.jpom.model.data.BackupInfoModel;
 import io.jpom.model.enums.BackupStatusEnum;
 import io.jpom.model.log.UserOperateLogV1;
@@ -100,11 +99,9 @@ public class BackupInfoController extends BaseServerController {
 		entity.setIgnoreNull("backupType", backupType);
 
 		// 查询数据库
-		PageResult<BackupInfoModel> pageResult = backupInfoService.listPage(entity, pageObj);
+		PageResultDto<BackupInfoModel> pageResult = backupInfoService.listPage(entity, pageObj);
 
-		JSONObject jsonObject = JsonMessage.toJson(200, "获取成功", pageResult);
-		jsonObject.put("total", pageResult.getTotal());
-		return jsonObject;
+		return JsonMessage.getString(200, "获取成功", pageResult);
 	}
 
 	/**

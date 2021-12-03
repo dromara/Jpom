@@ -4,18 +4,17 @@ import cn.hutool.core.text.StrSplitter;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.db.Entity;
 import cn.hutool.db.Page;
-import cn.hutool.db.PageResult;
 import cn.hutool.extra.ssh.JschUtil;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.validator.ValidatorConfig;
 import cn.jiangzeyin.common.validator.ValidatorItem;
 import cn.jiangzeyin.common.validator.ValidatorRule;
 import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
 import com.jcraft.jsch.Session;
 import io.jpom.common.BaseServerController;
 import io.jpom.common.interceptor.OptLog;
 import io.jpom.model.BaseModel;
+import io.jpom.model.PageResultDto;
 import io.jpom.model.data.AgentWhitelist;
 import io.jpom.model.data.NodeModel;
 import io.jpom.model.data.SshModel;
@@ -254,10 +253,8 @@ public class SshController extends BaseServerController {
 			entity.set("userId".toUpperCase(), userId);
 		}
 
-		PageResult<SshTerminalExecuteLog> pageResult = sshTerminalExecuteLogService.listPage(entity, pageObj);
-		JSONObject jsonObject = JsonMessage.toJson(200, "获取成功", pageResult);
-		jsonObject.put("total", pageResult.getTotal());
-		return jsonObject.toString();
+		PageResultDto<SshTerminalExecuteLog> pageResult = sshTerminalExecuteLogService.listPage(entity, pageObj);
+		return JsonMessage.getString(200, "获取成功", pageResult);
 	}
 
 }

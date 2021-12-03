@@ -30,7 +30,6 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.core.util.URLUtil;
 import cn.hutool.db.Entity;
 import cn.hutool.db.Page;
-import cn.hutool.db.PageResult;
 import cn.hutool.db.sql.Direction;
 import cn.hutool.db.sql.Order;
 import cn.jiangzeyin.common.DefaultSystemLog;
@@ -38,10 +37,10 @@ import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.validator.ValidatorConfig;
 import cn.jiangzeyin.common.validator.ValidatorItem;
 import cn.jiangzeyin.common.validator.ValidatorRule;
-import com.alibaba.fastjson.JSONObject;
 import io.jpom.build.BuildUtil;
 import io.jpom.common.BaseServerController;
 import io.jpom.common.Const;
+import io.jpom.model.PageResultDto;
 import io.jpom.model.data.RepositoryModel;
 import io.jpom.model.data.UserModel;
 import io.jpom.model.enums.GitProtocolEnum;
@@ -95,15 +94,8 @@ public class RepositoryController extends BaseServerController {
 		entity.setIgnoreNull("repoType", repoType);
 		//管理员可以获取删除或者没删除的
 		entity.setIgnoreNull("strike", userModel.isSystemUser() ? strike : 0);
-		PageResult<RepositoryModel> pageResult = repositoryService.listPage(entity, pageObj);
-		pageResult.forEach(repositoryModel -> {
-			// 隐藏密码字段
-			repositoryModel.setPassword(null);
-			repositoryModel.setRsaPrv(null);
-		});
-		JSONObject jsonObject = JsonMessage.toJson(200, "获取成功", pageResult);
-		jsonObject.put("total", pageResult.getTotal());
-		return jsonObject;
+		PageResultDto<RepositoryModel> pageResult = repositoryService.listPage(entity, pageObj);
+		return JsonMessage.getString(200, "获取成功", pageResult);
 	}
 
 	/**

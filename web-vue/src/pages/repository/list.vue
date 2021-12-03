@@ -232,7 +232,8 @@ export default {
       this.loading = true;
       getRepositoryList(this.listQuery).then((res) => {
         if (res.code === 200) {
-          this.list = res.data;
+          this.list = res.data.result;
+          this.total = res.data.total;
         }
         this.loading = false;
       });

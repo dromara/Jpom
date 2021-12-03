@@ -29,17 +29,16 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.db.Entity;
 import cn.hutool.db.Page;
-import cn.hutool.db.PageResult;
 import cn.hutool.extra.servlet.ServletUtil;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.validator.ValidatorConfig;
 import cn.jiangzeyin.common.validator.ValidatorItem;
 import cn.jiangzeyin.common.validator.ValidatorRule;
-import com.alibaba.fastjson.JSONObject;
 import io.jpom.build.BuildUtil;
 import io.jpom.common.BaseServerController;
 import io.jpom.common.interceptor.OptLog;
 import io.jpom.model.BaseEnum;
+import io.jpom.model.PageResultDto;
 import io.jpom.model.data.BuildInfoModel;
 import io.jpom.model.data.UserModel;
 import io.jpom.model.enums.BuildStatus;
@@ -60,9 +59,10 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.annotation.Resource;
 import java.io.File;
 import java.io.IOException;
-import java.util.*;
-import java.util.function.Consumer;
-import java.util.function.Function;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -170,29 +170,33 @@ public class BuildInfoHistoryController extends BaseServerController {
 				entity.set("buildDataId", dataIds);
 			}
 		}
-		PageResult<BuildHistoryLog> pageResult = dbBuildHistoryLogService.listPage(entity, pageObj);
-		List<BuildHistoryLogVo> collect = pageResult.stream().map(buildHistoryLog -> {
-			BuildHistoryLogVo buildHistoryLogVo = new BuildHistoryLogVo();
-			BeanUtil.copyProperties(buildHistoryLog, buildHistoryLogVo);
-			//
-			if (StrUtil.isEmpty(buildHistoryLog.getBuildName())) {
-				String dataId = buildHistoryLog.getBuildDataId();
-				BuildInfoModel item = buildInfoService.getByKey(dataId);
-				if (item != null) {
-					buildHistoryLogVo.setBuildName(item.getName());
+		PageResultDto<BuildHistoryLog> pageResultTemp = dbBuildHistoryLogService.listPage(entity, pageObj);
+		//
+		PageResultDto<BuildHistoryLogVo> pageResult = new PageResultDto<>(pageResultTemp);
+		List<BuildHistoryLogVo> result = pageResult.getResult();
+		if (result != null) {
+			List<BuildHistoryLogVo> collect = result.stream().map(buildHistoryLog -> {
+				BuildHistoryLogVo buildHistoryLogVo = new BuildHistoryLogVo();
+				BeanUtil.copyProperties(buildHistoryLog, buildHistoryLogVo);
+				//
+				if (StrUtil.isEmpty(buildHistoryLog.getBuildName())) {
+					String dataId = buildHistoryLog.getBuildDataId();
+					BuildInfoModel item = buildInfoService.getByKey(dataId);
+					if (item != null) {
+						buildHistoryLogVo.setBuildName(item.getName());
+					}
 				}
-			}
-			return buildHistoryLogVo;
-		}).collect(Collectors.toList());
-		JSONObject jsonObject = JsonMessage.toJson(200, "获取成功", collect);
-		jsonObject.put("total", pageResult.getTotal());
-		return jsonObject.toString();
+				return buildHistoryLogVo;
+			}).collect(Collectors.toList());
+			pageResult.setResult(collect);
+		}
+		return JsonMessage.getString(200, "获取成功", pageResult);
 	}
 
 	private Set<String> getDataIds() {
 		Entity where = Entity.create();
 		Page pageReq = new Page();
-		List<BuildInfoModel> list = buildInfoService.listPage(where, pageReq);
+		List<BuildInfoModel> list = buildInfoService.listPageOnlyResult(where, pageReq);
 		if (CollUtil.isEmpty(list)) {
 			return new HashSet<>();
 		} else {

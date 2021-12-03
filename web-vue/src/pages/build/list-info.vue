@@ -267,7 +267,7 @@ export default {
         { title: "顺序重启(有重启失败将继续)", value: 3 },
       ],
       columns: [
-        { title: "名称", dataIndex: "name", width: 150, ellipsis: true, scopedSlots: { customRender: "name" } },
+        { title: "名称", dataIndex: "name", width: 150, sorter: true, ellipsis: true, scopedSlots: { customRender: "name" } },
         { title: "分组", dataIndex: "group", width: 100, ellipsis: true, scopedSlots: { customRender: "group" } },
         {
           title: "分支",
@@ -402,8 +402,8 @@ export default {
       this.loading = true;
       getBuildList(this.listQuery).then((res) => {
         if (res.code === 200) {
-          this.list = res.data;
-          this.total = res.total;
+          this.list = res.data.result;
+          this.total = res.data.total;
         }
         this.loading = false;
       });
@@ -417,7 +417,7 @@ export default {
       };
       getRepositoryList(query).then((res) => {
         if (res.code === 200) {
-          this.repositoryList = res.data;
+          this.repositoryList = res.data.result;
         }
       });
     },
@@ -698,9 +698,14 @@ export default {
       this.handleFilter();
     },
     // 分页、排序、筛选变化时触发
-    changePage(pagination) {
+    changePage(pagination, filters, sorter) {
+      console.log(pagination, filters, sorter);
       this.listQuery.page = pagination.current;
       this.listQuery.limit = pagination.pageSize;
+      if (sorter) {
+        this.listQuery.order = sorter.order;
+        this.listQuery.order_field = sorter.field;
+      }
       this.loadData();
     },
   },

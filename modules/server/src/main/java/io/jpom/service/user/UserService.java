@@ -28,6 +28,9 @@ public class UserService extends BaseDbService<UserModel> {
 
 	@Override
 	protected void fillSelectResult(UserModel data) {
+		if (data == null) {
+			return;
+		}
 		data.setSalt(null);
 	}
 

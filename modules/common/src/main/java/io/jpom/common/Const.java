@@ -32,8 +32,6 @@ public class Const {
 	 */
 	public static final String ID_STR = "id";
 	public static final String GROUP_STR = "group";
-	public static final String GROUP_COLUMN_STR = "`group`";
-
 
 	/**
 	 * 应用程序类型的配置 key

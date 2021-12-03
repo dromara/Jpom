@@ -22,21 +22,30 @@
  */
 package io.jpom.service.h2db;
 
+import cn.hutool.core.convert.Convert;
 import cn.hutool.core.date.SystemClock;
+import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.ReflectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.db.Entity;
+import cn.hutool.db.Page;
+import cn.hutool.db.sql.Direction;
+import cn.hutool.db.sql.Order;
+import cn.hutool.extra.servlet.ServletUtil;
 import io.jpom.common.BaseServerController;
 import io.jpom.common.Const;
 import io.jpom.model.BaseDbModel;
 import io.jpom.model.BaseUserModifyDbModel;
+import io.jpom.model.PageResultDto;
 import io.jpom.model.data.UserModel;
 import org.springframework.util.Assert;
 
+import javax.servlet.ServletRequest;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 数据库操作 通用 serve
@@ -128,5 +137,39 @@ public abstract class BaseDbService<T extends BaseDbModel> extends BaseDbCommonS
 
 	public long count() {
 		return super.count(Entity.create());
+	}
+
+
+	/**
+	 * 通用的分页查询
+	 * <p>
+	 * page=1&limit=10&order=ascend&order_field=name
+	 *
+	 * @param request 请求对象
+	 * @return page
+	 */
+	public PageResultDto<T> listPage(ServletRequest request) {
+		Map<String, String> paramMap = ServletUtil.getParamMap(request);
+		int page = Convert.toInt(paramMap.get("page"), 1);
+		int limit = Convert.toInt(paramMap.get("limit"), 10);
+		Assert.state(page > 0, "page value error");
+		Assert.state(limit > 0 && limit < 200, "limit value error");
+		String orderField = paramMap.get("order_field");
+		String order = paramMap.get("order");
+		// 移除 默认字段
+		MapUtil.removeAny(paramMap, "page", "limit", "order_field", "order");
+		//
+		Page pageReq = new Page(page, limit);
+		Entity where = Entity.create();
+		//
+		for (Map.Entry<String, String> stringStringEntry : paramMap.entrySet()) {
+			String key = stringStringEntry.getKey();
+			String value = stringStringEntry.getValue();
+			where.setIgnoreNull(StrUtil.format("`{}`", key), value);
+		}
+		if (StrUtil.isNotEmpty(orderField)) {
+			pageReq.addOrder(new Order(orderField, StrUtil.equalsIgnoreCase(order, "ascend") ? Direction.ASC : Direction.DESC));
+		}
+		return super.listPage(where, pageReq);
 	}
 }

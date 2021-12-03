@@ -33,6 +33,7 @@ import cn.hutool.db.Entity;
 import cn.hutool.db.Page;
 import cn.hutool.db.PageResult;
 import cn.jiangzeyin.common.DefaultSystemLog;
+import io.jpom.model.PageResultDto;
 import io.jpom.system.JpomRuntimeException;
 import io.jpom.system.db.DbConfig;
 
@@ -402,11 +403,12 @@ public abstract class BaseDbCommonService<T> {
 	 * @param page  分页
 	 * @return 结果
 	 */
-	public PageResult<T> listPage(Entity where, Page page) {
+	@SuppressWarnings({"unchecked", "rawtypes"})
+	public PageResultDto<T> listPage(Entity where, Page page) {
 		if (!DbConfig.getInstance().isInit()) {
 			// ignore
 			DefaultSystemLog.getLog().error("The database is not initialized, this execution will be ignored");
-			return new PageResult<>(page.getPageNumber(), page.getPageSize(), 0);
+			return PageResultDto.EMPTY;
 		}
 		where.setTableName(getTableName());
 		PageResult<Entity> pageResult;
@@ -423,9 +425,20 @@ public abstract class BaseDbCommonService<T> {
 			this.fillSelectResult(entityToBean);
 			return entityToBean;
 		}).collect(Collectors.toList());
-		PageResult<T> pageResult1 = new PageResult<>(pageResult.getPage(), pageResult.getPageSize(), pageResult.getTotal());
-		pageResult1.addAll(list);
-		return pageResult1;
+		PageResultDto<T> pageResultDto = new PageResultDto(pageResult);
+		pageResultDto.setResult(list);
+		return pageResultDto;
+	}
+	/**
+	 * 分页查询
+	 *
+	 * @param where 条件
+	 * @param page  分页
+	 * @return 结果
+	 */
+	public List<T> listPageOnlyResult(Entity where, Page page) {
+		PageResultDto<T> pageResultDto = this.listPage(where, page);
+		return pageResultDto.getResult();
 	}
 
 	/**
