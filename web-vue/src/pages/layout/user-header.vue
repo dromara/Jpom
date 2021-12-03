@@ -1,7 +1,9 @@
 <template>
   <div class="user-header">
-    <a-tooltip placement="left">
-      <a-button title="只保留当前的 Tab" :disabled="getTabList.length <= 1" class="close-all jpom-close-tabs" @click="closeTabs">关闭 Tab</a-button>
+    <a-tooltip placement="left" title="只保留当前的 Tab">
+      <a-button :disabled="getTabList.length <= 1" class="close-all jpom-close-tabs" @click="closeTabs">
+        <a-icon type="close-circle" />
+      </a-button>
       <!--      <a-button title="回到旧版 UI" class="close-all jpom-old-version" @click="toOldIndex">旧版</a-button>-->
     </a-tooltip>
     <a-dropdown>

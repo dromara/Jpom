@@ -22,7 +22,6 @@
  */
 package io.jpom.controller.user;
 
-import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.JsonMessage;
 import com.alibaba.fastjson.JSONArray;
@@ -34,16 +33,15 @@ import io.jpom.model.log.UserOperateLogV1;
 import io.jpom.plugin.ClassFeature;
 import io.jpom.plugin.Feature;
 import io.jpom.plugin.MethodFeature;
-import io.jpom.service.user.RoleService;
 import io.jpom.service.user.UserService;
 import io.jpom.system.ServerExtConfigBean;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import javax.annotation.Resource;
 import java.util.List;
 
 /**
@@ -55,8 +53,11 @@ import java.util.List;
 @Feature(cls = ClassFeature.USER)
 public class UserEditController extends BaseServerController {
 
-	@Resource
-	private UserService userService;
+	private final UserService userService;
+
+	public UserEditController(UserService userService) {
+		this.userService = userService;
+	}
 
 	/**
 	 * 新增用户
@@ -74,15 +75,13 @@ public class UserEditController extends BaseServerController {
 		}
 		UserModel userName = getUser();
 		//
-		int size = userService.userSize();
+		long size = userService.count();
 		if (size >= ServerExtConfigBean.getInstance().userMaxCount) {
 			return JsonMessage.getString(500, "当前用户个数超过系统上限");
 		}
 
-		UserModel userModel = userService.getItem(id);
-		if (userModel != null) {
-			return JsonMessage.getString(401, "登录名已经存在");
-		}
+		UserModel userModel = userService.getByKey(id);
+		Assert.isNull(userModel, "登录名已经存在");
 		userModel = new UserModel();
 		// 隐藏系统管理员登录名
 		if (userName.isSystemUser()) {
@@ -94,7 +93,7 @@ public class UserEditController extends BaseServerController {
 		if (msg != null) {
 			return msg;
 		}
-		userService.addItem(userModel);
+		userService.insert(userModel);
 		return JsonMessage.getString(200, "添加成功");
 	}
 
@@ -155,10 +154,8 @@ public class UserEditController extends BaseServerController {
 	@Feature(method = MethodFeature.EDIT)
 	@ResponseBody
 	public String updateUser(String id) {
-		UserModel userModel = userService.getItem(id);
-		if (userModel == null) {
-			return JsonMessage.getString(400, "修改失败:-1");
-		}
+		UserModel userModel = userService.getByKey(id);
+		Assert.notNull(userModel, "修改失败:-1");
 		// 禁止修改系统管理员信息
 		if (userModel.isSystemUser()) {
 			return JsonMessage.getString(401, "WEB端不能修改系统管理员信息");
@@ -176,8 +173,8 @@ public class UserEditController extends BaseServerController {
 			return msg;
 		}
 		// 记录修改时间，如果在线用户线退出
-		userModel.setModifyTime(DateUtil.currentSeconds());
-		userService.updateItem(userModel);
+		//userModel.setModifyTime(DateUtil.currentSeconds());
+		userService.update(userModel);
 		return JsonMessage.getString(200, "修改成功");
 	}
 }

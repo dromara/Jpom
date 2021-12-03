@@ -62,8 +62,12 @@ public class UserBasicInfoController extends BaseServerController {
 
 	@Resource
 	private SystemParametersServer systemParametersServer;
-	@Resource
-	private UserService userService;
+
+	private final UserService userService;
+
+	public UserBasicInfoController(UserService userService) {
+		this.userService = userService;
+	}
 
 
 	/**
@@ -76,7 +80,7 @@ public class UserBasicInfoController extends BaseServerController {
 	@ResponseBody
 	public String getUserBasicInfo() {
 		UserModel userModel = getUser();
-		userModel = userService.getItem(userModel.getId());
+		userModel = userService.getByKey(userModel.getId());
 		// return basic info
 		Map<String, Object> map = new HashMap<>();
 		map.put("id", userModel.getId());
@@ -94,7 +98,7 @@ public class UserBasicInfoController extends BaseServerController {
 	public String saveBasicInfo(@ValidatorItem(value = ValidatorRule.EMAIL, msg = "邮箱格式不正确") String email,
 								String dingDing, String workWx, String code) {
 		UserModel userModel = getUser();
-		userModel = userService.getItem(userModel.getId());
+		userModel = userService.getByKey(userModel.getId());
 		// 判断是否一样
 		if (!StrUtil.equals(email, userModel.getEmail())) {
 			Integer cacheCode = CACHE.get(email);
@@ -112,7 +116,7 @@ public class UserBasicInfoController extends BaseServerController {
 			return JsonMessage.getString(405, "请输入正确企业微信地址");
 		}
 		userModel.setWorkWx(workWx);
-		userService.updateItem(userModel);
+		userService.update(userModel);
 		setSessionAttribute(LoginInterceptor.SESSION_NAME, userModel);
 		return JsonMessage.getString(200, "修改成功");
 	}

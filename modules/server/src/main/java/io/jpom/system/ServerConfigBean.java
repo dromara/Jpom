@@ -41,6 +41,7 @@ public class ServerConfigBean {
 	/**
 	 * 用户数据文件
 	 */
+	@Deprecated
 	public static final String USER = "user.json";
 
 	/**

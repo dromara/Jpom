@@ -43,7 +43,6 @@ import io.jpom.plugin.Feature;
 import io.jpom.plugin.MethodFeature;
 import io.jpom.service.dblog.DbMonitorNotifyLogService;
 import io.jpom.service.monitor.MonitorService;
-import io.jpom.service.user.UserService;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -66,14 +65,11 @@ import java.util.List;
 @Feature(cls = ClassFeature.MONITOR)
 public class MonitorListController extends BaseServerController {
 
-    @Resource
-    private MonitorService monitorService;
+	@Resource
+	private MonitorService monitorService;
 
-    @Resource
-    private DbMonitorNotifyLogService dbMonitorNotifyLogService;
-
-    @Resource
-    private UserService userService;
+	@Resource
+	private DbMonitorNotifyLogService dbMonitorNotifyLogService;
 
 //    /**
 //     * 展示监控页面
@@ -121,129 +117,129 @@ public class MonitorListController extends BaseServerController {
 //        return "monitor/edit";
 //    }
 
-    /**
-     * 展示监控列表
-     *
-     * @return json
-     */
-    @RequestMapping(value = "getMonitorList", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseBody
-    @Feature(method = MethodFeature.LIST)
-    public String getMonitorList() {
-        List<MonitorModel> list = monitorService.list();
-        return JsonMessage.getString(200, "", list);
-    }
+	/**
+	 * 展示监控列表
+	 *
+	 * @return json
+	 */
+	@RequestMapping(value = "getMonitorList", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody
+	@Feature(method = MethodFeature.LIST)
+	public String getMonitorList() {
+		List<MonitorModel> list = monitorService.list();
+		return JsonMessage.getString(200, "", list);
+	}
 
-    /**
-     * 删除列表
-     *
-     * @param id id
-     * @return json
-     */
-    @RequestMapping(value = "deleteMonitor", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseBody
-    @OptLog(UserOperateLogV1.OptType.DelMonitor)
-    @Feature(method = MethodFeature.DEL)
-    public String deleteMonitor(@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "删除失败")) String id) throws SQLException {
-        // 删除日志
-        Entity where = new Entity();
-        where.set("monitorId", id);
-        dbMonitorNotifyLogService.del(where);
-        //
-        monitorService.deleteItem(id);
-        return JsonMessage.getString(200, "删除成功");
-    }
+	/**
+	 * 删除列表
+	 *
+	 * @param id id
+	 * @return json
+	 */
+	@RequestMapping(value = "deleteMonitor", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody
+	@OptLog(UserOperateLogV1.OptType.DelMonitor)
+	@Feature(method = MethodFeature.DEL)
+	public String deleteMonitor(@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "删除失败")) String id) throws SQLException {
+		// 删除日志
+		Entity where = new Entity();
+		where.set("monitorId", id);
+		dbMonitorNotifyLogService.del(where);
+		//
+		monitorService.deleteItem(id);
+		return JsonMessage.getString(200, "删除成功");
+	}
 
 
-    /**
-     * 增加或修改监控
-     *
-     * @param id         id
-     * @param name       name
-     * @param notifyUser user
-     * @return json
-     */
-    @RequestMapping(value = "updateMonitor", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseBody
-    @OptLog(UserOperateLogV1.OptType.EditMonitor)
-    @Feature(method = MethodFeature.EDIT)
-    public String updateMonitor(String id,
-                                @ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "监控名称不能为空")) String name,
-                                String notifyUser) {
-        int cycle = getParameterInt("cycle", Cycle.five.getCode());
-        String status = getParameter("status");
-        String autoRestart = getParameter("autoRestart");
+	/**
+	 * 增加或修改监控
+	 *
+	 * @param id         id
+	 * @param name       name
+	 * @param notifyUser user
+	 * @return json
+	 */
+	@RequestMapping(value = "updateMonitor", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody
+	@OptLog(UserOperateLogV1.OptType.EditMonitor)
+	@Feature(method = MethodFeature.EDIT)
+	public String updateMonitor(String id,
+								@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "监控名称不能为空")) String name,
+								String notifyUser) {
+		int cycle = getParameterInt("cycle", Cycle.five.getCode());
+		String status = getParameter("status");
+		String autoRestart = getParameter("autoRestart");
 
-        JSONArray jsonArray = JSONArray.parseArray(notifyUser);
-        List<String> notifyUsers = jsonArray.toJavaList(String.class);
-        if (notifyUsers == null || notifyUsers.isEmpty()) {
-            return JsonMessage.getString(405, "请选择报警联系人");
-        }
-        String projects = getParameter("projects");
-        JSONArray projectsArray = JSONArray.parseArray(projects);
-        if (projectsArray == null || projectsArray.size() <= 0) {
-            return JsonMessage.getString(400, "请至少选择一个项目");
-        }
-        boolean start = "on".equalsIgnoreCase(status);
-        MonitorModel monitorModel = monitorService.getItem(id);
-        if (monitorModel == null) {
-            monitorModel = new MonitorModel();
-        }
-        //
-        List<MonitorModel.NodeProject> nodeProjects = new ArrayList<>();
-        projectsArray.forEach(o -> {
-            JSONObject jsonObject = (JSONObject) o;
-            nodeProjects.add(jsonObject.toJavaObject(MonitorModel.NodeProject.class));
-        });
-        monitorModel.setAutoRestart("on".equalsIgnoreCase(autoRestart));
-        monitorModel.setCycle(cycle);
-        monitorModel.setProjects(nodeProjects);
-        monitorModel.setStatus(start);
-        monitorModel.setNotifyUser(notifyUsers);
-        monitorModel.setName(name);
+		JSONArray jsonArray = JSONArray.parseArray(notifyUser);
+		List<String> notifyUsers = jsonArray.toJavaList(String.class);
+		if (notifyUsers == null || notifyUsers.isEmpty()) {
+			return JsonMessage.getString(405, "请选择报警联系人");
+		}
+		String projects = getParameter("projects");
+		JSONArray projectsArray = JSONArray.parseArray(projects);
+		if (projectsArray == null || projectsArray.size() <= 0) {
+			return JsonMessage.getString(400, "请至少选择一个项目");
+		}
+		boolean start = "on".equalsIgnoreCase(status);
+		MonitorModel monitorModel = monitorService.getItem(id);
+		if (monitorModel == null) {
+			monitorModel = new MonitorModel();
+		}
+		//
+		List<MonitorModel.NodeProject> nodeProjects = new ArrayList<>();
+		projectsArray.forEach(o -> {
+			JSONObject jsonObject = (JSONObject) o;
+			nodeProjects.add(jsonObject.toJavaObject(MonitorModel.NodeProject.class));
+		});
+		monitorModel.setAutoRestart("on".equalsIgnoreCase(autoRestart));
+		monitorModel.setCycle(cycle);
+		monitorModel.setProjects(nodeProjects);
+		monitorModel.setStatus(start);
+		monitorModel.setNotifyUser(notifyUsers);
+		monitorModel.setName(name);
 
-        if (StrUtil.isEmpty(id)) {
-            //添加监控
-            id = IdUtil.objectId();
-            UserModel user = getUser();
-            monitorModel.setId(id);
-            monitorModel.setParent(UserModel.getOptUserName(user));
-            monitorService.addItem(monitorModel);
-            return JsonMessage.getString(200, "添加成功");
-        }
-        monitorService.updateItem(monitorModel);
-        return JsonMessage.getString(200, "修改成功");
-    }
+		if (StrUtil.isEmpty(id)) {
+			//添加监控
+			id = IdUtil.objectId();
+			UserModel user = getUser();
+			monitorModel.setId(id);
+			monitorModel.setParent(UserModel.getOptUserName(user));
+			monitorService.addItem(monitorModel);
+			return JsonMessage.getString(200, "添加成功");
+		}
+		monitorService.updateItem(monitorModel);
+		return JsonMessage.getString(200, "修改成功");
+	}
 
-    /**
-     * 开启或关闭监控
-     *
-     * @param id     id
-     * @param status 状态
-     * @param type   类型
-     * @return json
-     */
-    @RequestMapping(value = "changeStatus", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseBody
-    @OptLog(UserOperateLogV1.OptType.ChangeStatusMonitor)
-    @Feature(method = MethodFeature.EDIT)
-    public String changeStatus(@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "id不能为空")) String id,
-                               String status, String type) {
-        MonitorModel monitorModel = monitorService.getItem(id);
-        if (monitorModel == null) {
-            return JsonMessage.getString(405, "不存在监控项啦");
-        }
-        boolean bStatus = Convert.toBool(status, false);
-        if ("status".equalsIgnoreCase(type)) {
-            monitorModel.setStatus(bStatus);
-        } else if ("restart".equalsIgnoreCase(type)) {
-            monitorModel.setAutoRestart(bStatus);
-        } else {
-            return JsonMessage.getString(405, "type不正确");
-        }
-        monitorService.updateItem(monitorModel);
-        return JsonMessage.getString(200, "修改成功");
-    }
+	/**
+	 * 开启或关闭监控
+	 *
+	 * @param id     id
+	 * @param status 状态
+	 * @param type   类型
+	 * @return json
+	 */
+	@RequestMapping(value = "changeStatus", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody
+	@OptLog(UserOperateLogV1.OptType.ChangeStatusMonitor)
+	@Feature(method = MethodFeature.EDIT)
+	public String changeStatus(@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "id不能为空")) String id,
+							   String status, String type) {
+		MonitorModel monitorModel = monitorService.getItem(id);
+		if (monitorModel == null) {
+			return JsonMessage.getString(405, "不存在监控项啦");
+		}
+		boolean bStatus = Convert.toBool(status, false);
+		if ("status".equalsIgnoreCase(type)) {
+			monitorModel.setStatus(bStatus);
+		} else if ("restart".equalsIgnoreCase(type)) {
+			monitorModel.setAutoRestart(bStatus);
+		} else {
+			return JsonMessage.getString(405, "type不正确");
+		}
+		monitorService.updateItem(monitorModel);
+		return JsonMessage.getString(200, "修改成功");
+	}
 
 
 }

@@ -220,6 +220,16 @@ public abstract class BaseDbCommonService<T> {
 	 * @return 数据
 	 */
 	public T getByKey(String keyValue) {
+		return this.getByKey(keyValue, true);
+	}
+
+	/**
+	 * 根据主键查询实体
+	 *
+	 * @param keyValue 主键值
+	 * @return 数据
+	 */
+	public T getByKey(String keyValue, boolean fill) {
 		if (StrUtil.isEmpty(keyValue)) {
 			return null;
 		}
@@ -238,7 +248,11 @@ public abstract class BaseDbCommonService<T> {
 		} catch (SQLException e) {
 			throw new JpomRuntimeException("数据库异常", e);
 		}
-		return this.entityToBean(entity, this.tClass);
+		T entityToBean = this.entityToBean(entity, this.tClass);
+		if (fill) {
+			this.fillSelectResult(entityToBean);
+		}
+		return entityToBean;
 	}
 
 	/**
@@ -322,21 +336,63 @@ public abstract class BaseDbCommonService<T> {
 	 * @return true 存在
 	 */
 	public boolean exists(Entity where) {
+		long count = this.count(where);
+		return count > 0;
+	}
+
+	/**
+	 * 查询记录条数
+	 *
+	 * @param where 条件
+	 * @return count
+	 */
+	public long count(Entity where) {
 		if (!DbConfig.getInstance().isInit()) {
 			// ignore
 			DefaultSystemLog.getLog().error("The database is not initialized, this execution will be ignored");
-			return false;
+			return 0;
 		}
 		where.setTableName(getTableName());
 		Db db = Db.use();
 		db.setWrapper((Character) null);
-		long count;
 		try {
-			count = db.count(where);
+			return db.count(where);
 		} catch (SQLException e) {
 			throw new JpomRuntimeException("数据库异常", e);
 		}
-		return count > 0;
+	}
+
+	/**
+	 * 查询一个
+	 *
+	 * @param where 条件
+	 * @return Entity
+	 */
+	public Entity query(Entity where) {
+		List<Entity> entities = this.queryList(where);
+		return CollUtil.getFirst(entities);
+	}
+
+	/**
+	 * 查询列表
+	 *
+	 * @param where 条件
+	 * @return List
+	 */
+	public List<Entity> queryList(Entity where) {
+		if (!DbConfig.getInstance().isInit()) {
+			// ignore
+			DefaultSystemLog.getLog().error("The database is not initialized, this execution will be ignored");
+			return null;
+		}
+		where.setTableName(getTableName());
+		Db db = Db.use();
+		db.setWrapper((Character) null);
+		try {
+			return db.find(where);
+		} catch (SQLException e) {
+			throw new JpomRuntimeException("数据库异常", e);
+		}
 	}
 
 	/**
@@ -362,7 +418,11 @@ public abstract class BaseDbCommonService<T> {
 			throw new JpomRuntimeException("数据库异常", e);
 		}
 		//
-		List<T> list = pageResult.stream().map(entity -> this.entityToBean(entity, this.tClass)).collect(Collectors.toList());
+		List<T> list = pageResult.stream().map(entity -> {
+			T entityToBean = this.entityToBean(entity, this.tClass);
+			this.fillSelectResult(entityToBean);
+			return entityToBean;
+		}).collect(Collectors.toList());
 		PageResult<T> pageResult1 = new PageResult<>(pageResult.getPage(), pageResult.getPageSize(), pageResult.getTotal());
 		pageResult1.addAll(list);
 		return pageResult1;
@@ -396,6 +456,48 @@ public abstract class BaseDbCommonService<T> {
 		if (query == null) {
 			return null;
 		}
-		return query.stream().map((entity -> this.entityToBean(entity, this.tClass))).collect(Collectors.toList());
+		return query.stream().map((entity -> {
+			T entityToBean = this.entityToBean(entity, this.tClass);
+			this.fillSelectResult(entityToBean);
+			return entityToBean;
+		})).collect(Collectors.toList());
+	}
+
+	/**
+	 * 查询实体对象
+	 *
+	 * @param data 实体
+	 * @return data
+	 */
+	public List<T> listByBean(T data) {
+		Entity where = this.dataBeanToEntity(data);
+		List<Entity> entitys = this.queryList(where);
+		return entitys.stream().map((entity -> {
+			T entityToBean = this.entityToBean(entity, this.tClass);
+			this.fillSelectResult(entityToBean);
+			return entityToBean;
+		})).collect(Collectors.toList());
+	}
+
+	/**
+	 * 查询实体对象
+	 *
+	 * @param data 实体
+	 * @return data
+	 */
+	public T queryByBean(T data) {
+		Entity where = this.dataBeanToEntity(data);
+		Entity entity = this.query(where);
+		T entityToBean = this.entityToBean(entity, this.tClass);
+		this.fillSelectResult(entityToBean);
+		return entityToBean;
+	}
+
+	/**
+	 * 查询结果 填充
+	 *
+	 * @param data 数据
+	 */
+	protected void fillSelectResult(T data) {
 	}
 }

@@ -40,7 +40,6 @@ import io.jpom.common.interceptor.BaseJpomInterceptor;
 import io.jpom.common.interceptor.NotLogin;
 import io.jpom.model.data.NodeModel;
 import io.jpom.model.data.UserModel;
-import io.jpom.service.user.RoleService;
 import io.jpom.service.user.UserService;
 import io.jpom.system.ExtConfigBean;
 import io.jpom.system.ServerExtConfigBean;
@@ -51,7 +50,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.InputStream;
@@ -68,11 +66,11 @@ import java.util.stream.Collectors;
 @RequestMapping(value = "/")
 public class IndexControl extends BaseServerController {
 
-	@Resource
-	private UserService userService;
+	private final UserService userService;
 
-	@Resource
-	private RoleService roleService;
+	public IndexControl(UserService userService) {
+		this.userService = userService;
+	}
 
 
 	/**
@@ -147,10 +145,10 @@ public class IndexControl extends BaseServerController {
 		data.put("name", ServerExtConfigBean.getInstance().getName());
 		data.put("subName", ServerExtConfigBean.getInstance().getSubName());
 		data.put("loginTitle", ServerExtConfigBean.getInstance().getLoginTitle());
-		if (userService.userListEmpty()) {
-			return JsonMessage.getString(500, "need init system", data);
+		if (userService.canUse()) {
+			return JsonMessage.getString(200, "success", data);
 		}
-		return JsonMessage.getString(200, "success", data);
+		return JsonMessage.getString(500, "need init system", data);
 	}
 
 	@RequestMapping(value = "menus_data.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)

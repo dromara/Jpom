@@ -63,8 +63,11 @@ public class UserRoleListController extends BaseServerController {
 
 	@Resource
 	private RoleService roleService;
-	@Resource
-	private UserService userService;
+	private final UserService userService;
+
+	public UserRoleListController(UserService userService) {
+		this.userService = userService;
+	}
 
 //    @RequestMapping(value = "list.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
 //    @Feature(method = MethodFeature.LIST)

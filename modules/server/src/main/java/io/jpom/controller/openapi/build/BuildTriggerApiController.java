@@ -54,8 +54,11 @@ public class BuildTriggerApiController {
 	@Resource
 	private BuildInfoService buildInfoService;
 
-	@Resource
-	private UserService userService;
+	private final UserService userService;
+
+	public BuildTriggerApiController(UserService userService) {
+		this.userService = userService;
+	}
 //
 //	@RequestMapping(value = ServerOpenApi.BUILD_TRIGGER_BUILD, produces = MediaType.APPLICATION_JSON_VALUE)
 //	public String trigger(@PathVariable String id, @PathVariable String token) {

@@ -1,18 +1,27 @@
 package io.jpom.system.init;
 
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.util.RandomUtil;
+import cn.hutool.crypto.SecureUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.spring.SpringUtil;
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import io.jpom.model.data.MailAccountModel;
 import io.jpom.model.data.ServerWhitelist;
 import io.jpom.model.data.SystemIpConfigModel;
+import io.jpom.model.data.UserModel;
 import io.jpom.service.system.SystemParametersServer;
+import io.jpom.service.user.UserService;
 import io.jpom.system.ConfigBean;
 import io.jpom.system.ServerConfigBean;
 import io.jpom.util.JsonFileUtil;
 
 import java.io.File;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * json 配置转存 h2
@@ -102,6 +111,39 @@ public class LoadJsonConfigToDb {
 			DefaultSystemLog.getLog().info("{} mv to {}", FileUtil.getAbsolutePath(file), FileUtil.getAbsolutePath(backupOldData));
 		} catch (Exception e) {
 			DefaultSystemLog.getLog().error("load mail config error ", e);
+		}
+	}
+
+
+	public void loadUserInfo() {
+		File backupOldData = FileUtil.file(ConfigBean.getInstance().getDataPath(), "backup_old_data");
+		// 读取 USER 文件内容
+		File file = FileUtil.file(ConfigBean.getInstance().getDataPath(), ServerConfigBean.USER);
+		if (!FileUtil.exist(file)) {
+			return;
+		}
+		try {
+			JSON json = JsonFileUtil.readJson(file.getAbsolutePath());
+			JSONArray jsonArray = JsonFileUtil.formatToArray((JSONObject) json);
+			List<UserModel> userModels = jsonArray.toJavaList(UserModel.class);
+			if (userModels == null) {
+				return;
+			}
+			userModels = userModels.stream().peek(userModel -> {
+				userModel.setRoles((Set<String>) null);
+				userModel.setSystemUser(UserModel.SYSTEM_ADMIN.equals(userModel.getParent()) ? 1 : 0);
+				//
+				String salt = RandomUtil.randomString(UserModel.SALT_LEN);
+				userModel.setSalt(salt);
+				userModel.setPassword(SecureUtil.sha1(userModel.getPassword() + salt));
+			}).collect(Collectors.toList());
+			UserService userService = SpringUtil.getBean(UserService.class);
+			userService.insert(userModels);
+			// 将 json 文件转移到备份目录
+			FileUtil.move(file, FileUtil.mkdir(backupOldData), true);
+			DefaultSystemLog.getLog().info("{} mv to {}", FileUtil.getAbsolutePath(file), FileUtil.getAbsolutePath(backupOldData));
+		} catch (Exception e) {
+			DefaultSystemLog.getLog().error("load user info error ", e);
 		}
 	}
 }

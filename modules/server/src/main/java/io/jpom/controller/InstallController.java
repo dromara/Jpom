@@ -22,6 +22,8 @@
  */
 package io.jpom.controller;
 
+import cn.hutool.core.util.RandomUtil;
+import cn.hutool.crypto.SecureUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.validator.ValidatorConfig;
@@ -37,11 +39,10 @@ import io.jpom.service.user.UserService;
 import io.jpom.util.JwtUtil;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
-
-import javax.annotation.Resource;
 
 /**
  * 初始化程序
@@ -52,8 +53,12 @@ import javax.annotation.Resource;
 @Controller
 public class InstallController extends BaseServerController {
 
-	@Resource
-	private UserService userService;
+
+	private final UserService userService;
+
+	public InstallController(UserService userService) {
+		this.userService = userService;
+	}
 
 	/**
 	 * 初始化提交
@@ -74,9 +79,8 @@ public class InstallController extends BaseServerController {
 			@ValidatorConfig(value = {
 					@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "密码不能为空")
 			}) String userPwd) {
-		if (!userService.userListEmpty()) {
-			return JsonMessage.getString(100, "系统已经初始化过啦，请勿重复初始化");
-		}
+		Assert.state(!userService.canUse(), "系统已经初始化过啦，请勿重复初始化");
+
 		if (JpomApplication.SYSTEM_ID.equalsIgnoreCase(userName) || UserModel.SYSTEM_ADMIN.equals(userName)) {
 			return JsonMessage.getString(400, "当前登录名已经被系统占用啦");
 		}
@@ -84,10 +88,12 @@ public class InstallController extends BaseServerController {
 		UserModel userModel = new UserModel();
 		userModel.setName(UserModel.SYSTEM_OCCUPY_NAME);
 		userModel.setId(userName);
-		userModel.setPassword(userPwd);
+		userModel.setSalt(RandomUtil.randomString(UserModel.SALT_LEN));
+		userModel.setPassword(SecureUtil.sha1(userPwd + userModel.getPassword()));
+		userModel.setSystemUser(1);
 		userModel.setParent(UserModel.SYSTEM_ADMIN);
 		try {
-			userService.addItem(userModel);
+			userService.insert(userModel);
 		} catch (Exception e) {
 			DefaultSystemLog.getLog().error("初始化用户失败", e);
 			return JsonMessage.getString(400, "初始化失败");

@@ -149,6 +149,7 @@ public class InitDb implements DisposableBean, InitializingBean {
 		instance.loadIpConfig();
 		instance.loadMailConfig();
 		instance.loadOutGivingWhitelistConfig();
+		instance.loadUserInfo();
 	}
 
 	@Override

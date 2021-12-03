@@ -31,7 +31,6 @@ import io.jpom.model.data.UserModel;
 import io.jpom.plugin.ClassFeature;
 import io.jpom.plugin.Feature;
 import io.jpom.plugin.MethodFeature;
-import io.jpom.service.user.RoleService;
 import io.jpom.service.user.UserService;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
@@ -39,7 +38,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import javax.annotation.Resource;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -53,8 +51,11 @@ import java.util.stream.Collectors;
 @Feature(cls = ClassFeature.USER)
 public class UserListController extends BaseServerController {
 
-	@Resource
-	private UserService userService;
+	private final UserService userService;
+
+	public UserListController(UserService userService) {
+		this.userService = userService;
+	}
 
 
 	/**

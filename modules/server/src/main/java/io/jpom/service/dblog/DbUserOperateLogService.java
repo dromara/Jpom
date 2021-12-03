@@ -71,7 +71,7 @@ public class DbUserOperateLogService extends BaseDbCommonService<UserOperateLogV
 			if (optType == null) {
 				return;
 			}
-			UserModel optUserItem = userService.getItem(userOperateLogV1.getUserId());
+			UserModel optUserItem = userService.getByKey(userOperateLogV1.getUserId());
 			if (optUserItem == null) {
 				return;
 			}
@@ -92,7 +92,7 @@ public class DbUserOperateLogService extends BaseDbCommonService<UserOperateLogV
 					continue;
 				}
 				for (String userId : notifyUser) {
-					UserModel item = userService.getItem(userId);
+					UserModel item = userService.getByKey(userId);
 					if (item == null) {
 						continue;
 					}

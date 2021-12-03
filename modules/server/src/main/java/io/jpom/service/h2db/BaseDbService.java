@@ -25,6 +25,7 @@ package io.jpom.service.h2db;
 import cn.hutool.core.date.SystemClock;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.core.util.ReflectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.db.Entity;
 import io.jpom.common.BaseServerController;
@@ -35,6 +36,7 @@ import io.jpom.model.data.UserModel;
 import org.springframework.util.Assert;
 
 import java.util.Collection;
+import java.util.List;
 
 /**
  * 数据库操作 通用 serve
@@ -117,5 +119,14 @@ public abstract class BaseDbService<T extends BaseDbModel> extends BaseDbCommonS
 	@Override
 	public int update(T t) {
 		return this.updateById(t);
+	}
+
+
+	public List<T> list() {
+		return super.listByBean(ReflectUtil.newInstance(this.tClass));
+	}
+
+	public long count() {
+		return super.count(Entity.create());
 	}
 }

@@ -51,7 +51,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
 import java.awt.*;
 import java.io.IOException;
@@ -76,8 +75,11 @@ public class LoginControl extends BaseServerController {
 //    public static final int INPUT_CODE = 600;
 //    private static final int INPUT_CODE_ERROR_COUNT = 3;
 
-	@Resource
-	private UserService userService;
+	private final UserService userService;
+
+	public LoginControl(UserService userService) {
+		this.userService = userService;
+	}
 
 	/**
 	 * 验证码
@@ -158,7 +160,7 @@ public class LoginControl extends BaseServerController {
 			return JsonMessage.getString(400, "尝试次数太多，请稍后再来");
 		}
 		synchronized (UserModel.class) {
-			UserModel userModel = userService.getItem(userName);
+			UserModel userModel = userService.getByKey(userName);
 			if (userModel == null) {
 				this.ipError();
 				return JsonMessage.getString(400, "登录失败，请输入正确的密码和账号,多次失败将锁定账号");
@@ -192,7 +194,7 @@ public class LoginControl extends BaseServerController {
 					return JsonMessage.getString(501, "登录失败，请输入正确的密码和账号,多次失败将锁定账号");
 				}
 			} finally {
-				userService.updateItem(userModel);
+				userService.update(userModel);
 			}
 		}
 	}

@@ -12,8 +12,6 @@ import io.jpom.plugin.MethodFeature;
 import io.jpom.service.dblog.BuildInfoService;
 import io.jpom.service.monitor.MonitorService;
 import io.jpom.service.node.OutGivingServer;
-import io.jpom.service.node.ssh.SshService;
-import io.jpom.service.user.UserService;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -33,16 +31,13 @@ import javax.annotation.Resource;
 @Feature(cls = ClassFeature.NODE)
 public class NodeEditController extends BaseServerController {
 
-    @Resource
-    private UserService userService;
-    @Resource
-    private OutGivingServer outGivingServer;
-    @Resource
-    private MonitorService monitorService;
-    @Resource
-    private BuildInfoService buildService;
-    @Resource
-    private SshService sshService;
+	@Resource
+	private OutGivingServer outGivingServer;
+	@Resource
+	private MonitorService monitorService;
+	@Resource
+	private BuildInfoService buildService;
+
 
 //    @RequestMapping(value = "edit.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
 //    @Feature(method = MethodFeature.EDIT)
@@ -66,50 +61,50 @@ public class NodeEditController extends BaseServerController {
 //        return "node/edit";
 //    }
 
-    @RequestMapping(value = "save.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    @OptLog(UserOperateLogV1.OptType.EditNode)
-    @ResponseBody
-    @Feature(method = MethodFeature.EDIT)
-    public String save(String type) {
-        NodeModel model = ServletUtil.toBean(getRequest(), NodeModel.class, true);
-        if ("add".equalsIgnoreCase(type)) {
-            return nodeService.addNode(model, getRequest());
-        } else {
-            return nodeService.updateNode(model);
-        }
-    }
+	@RequestMapping(value = "save.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+	@OptLog(UserOperateLogV1.OptType.EditNode)
+	@ResponseBody
+	@Feature(method = MethodFeature.EDIT)
+	public String save(String type) {
+		NodeModel model = ServletUtil.toBean(getRequest(), NodeModel.class, true);
+		if ("add".equalsIgnoreCase(type)) {
+			return nodeService.addNode(model, getRequest());
+		} else {
+			return nodeService.updateNode(model);
+		}
+	}
 
 
-    /**
-     * 删除节点
-     *
-     * @param id 节点id
-     * @return json
-     */
-    @RequestMapping(value = "del.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    @OptLog(UserOperateLogV1.OptType.DelNode)
-    @ResponseBody
-    @Feature(method = MethodFeature.DEL)
-    public String del(String id) {
-        //  判断分发
-        if (outGivingServer.checkNode(id)) {
-            return JsonMessage.getString(400, "该节点存在分发项目，不能删除");
-        }
-        // 监控
-        if (monitorService.checkNode(id)) {
-            return JsonMessage.getString(400, "该节点存在监控项，不能删除");
-        }
-        if (buildService.checkNode(id)) {
-            return JsonMessage.getString(400, "该节点存在构建项，不能删除");
-        }
-        nodeService.deleteItem(id);
-        // 删除授权
-        //        List<UserModel> list = userService.list();
-        //        if (list != null) {
-        //            list.forEach(userModel -> {
-        //                userService.updateItem(userModel);
-        //            });
-        //        }
-        return JsonMessage.getString(200, "操作成功");
-    }
+	/**
+	 * 删除节点
+	 *
+	 * @param id 节点id
+	 * @return json
+	 */
+	@RequestMapping(value = "del.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+	@OptLog(UserOperateLogV1.OptType.DelNode)
+	@ResponseBody
+	@Feature(method = MethodFeature.DEL)
+	public String del(String id) {
+		//  判断分发
+		if (outGivingServer.checkNode(id)) {
+			return JsonMessage.getString(400, "该节点存在分发项目，不能删除");
+		}
+		// 监控
+		if (monitorService.checkNode(id)) {
+			return JsonMessage.getString(400, "该节点存在监控项，不能删除");
+		}
+		if (buildService.checkNode(id)) {
+			return JsonMessage.getString(400, "该节点存在构建项，不能删除");
+		}
+		nodeService.deleteItem(id);
+		// 删除授权
+		//        List<UserModel> list = userService.list();
+		//        if (list != null) {
+		//            list.forEach(userModel -> {
+		//                userService.updateItem(userModel);
+		//            });
+		//        }
+		return JsonMessage.getString(200, "操作成功");
+	}
 }
