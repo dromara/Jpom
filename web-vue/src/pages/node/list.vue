@@ -9,7 +9,7 @@
       <a-button type="primary" @click="loadData">刷新</a-button>
     </div>
     <!-- 表格 :scroll="{ x: 1070, y: tableHeight -60 }" scroll 跟 expandedRowRender 不兼容，没法同时使用不然会多出一行数据-->
-    <a-table :loading="loading" :columns="columns" :data-source="list" bordered rowKey="id" @expand="expand" :pagination="this.pagination" @change="changePage">
+    <a-table :loading="loading" :columns="columns" :data-source="list" bordered rowKey="id" @expand="expand" :pagination="(this, pagination)" @change="changePage">
       <a-tooltip slot="group" slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>
@@ -120,7 +120,7 @@
 </template>
 <script>
 import { mapGetters } from "vuex";
-import { getNodeList, getNodeStatus, editNode, deleteNode } from "../../api/node";
+import { getNodeList, getNodeStatus, editNode, deleteNode } from "@/api/node";
 import { getSshListByNodeId } from "../../api/ssh";
 import NodeLayout from "./node-layout";
 import Terminal from "./terminal";
@@ -135,7 +135,7 @@ export default {
     return {
       loading: false,
       childLoading: false,
-      listQuery: { page: 1, limit: PAGE_DEFAULT_LIMIT },
+      listQuery: { page: 1, limit: PAGE_DEFAULT_LIMIT, total: 0 },
       sshList: [],
       list: [],
       temp: {
@@ -180,7 +180,7 @@ export default {
     ...mapGetters(["getGuideFlag"]),
     pagination() {
       return {
-        total: this.total,
+        total: this.listQuery.total || 0,
         current: this.listQuery.page || 1,
         pageSize: this.listQuery.limit || PAGE_DEFAULT_LIMIT,
         pageSizeOptions: PAGE_DEFAULT_SIZW_OPTIONS,
@@ -235,6 +235,7 @@ export default {
       getNodeList(this.listQuery).then((res) => {
         if (res.code === 200) {
           this.list = res.data.result;
+          this.listQuery.total = res.data.total;
           let nodeId = this.$route.query.nodeId;
           this.list.map((item) => {
             if (nodeId === item.id) {
@@ -372,26 +373,6 @@ export default {
       }
       this.loadData();
     },
-    // // 添加分组
-    // handleAddGroup() {
-    //   if (!this.temp.tempGroup || this.temp.tempGroup.length === 0) {
-    //     this.$notification.warning({
-    //       message: "分组名称不能为空",
-    //       duration: 2,
-    //     });
-    //     return false;
-    //   }
-    //   // 添加到分组列表
-    //   if (this.groupList.indexOf(this.temp.tempGroup) === -1) {
-    //     this.groupList.push(this.temp.tempGroup);
-    //   }
-    //   this.temp.tempGroup = "";
-    //   this.$notification.success({
-    //     message: "添加成功",
-    //     duration: 2,
-    //   });
-    //   this.addGroupvisible = false;
-    // },
   },
 };
 </script>

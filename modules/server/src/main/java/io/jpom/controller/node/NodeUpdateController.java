@@ -15,7 +15,7 @@ import io.jpom.common.interceptor.OptLog;
 import io.jpom.model.AgentFileModel;
 import io.jpom.model.log.UserOperateLogV1;
 import io.jpom.permission.SystemPermission;
-import io.jpom.service.node.AgentFileService;
+import io.jpom.service.system.SystemParametersServer;
 import io.jpom.system.ConfigBean;
 import io.jpom.system.ServerConfigBean;
 import org.springframework.http.MediaType;
@@ -33,10 +33,10 @@ import java.util.List;
 @RequestMapping(value = "/node")
 public class NodeUpdateController extends BaseServerController {
 
-	private final AgentFileService agentFileService;
+	private final SystemParametersServer systemParametersServer;
 
-	public NodeUpdateController(AgentFileService agentFileService) {
-		this.agentFileService = agentFileService;
+	public NodeUpdateController(SystemParametersServer systemParametersServer) {
+		this.systemParametersServer = systemParametersServer;
 	}
 
 	/**
@@ -63,18 +63,17 @@ public class NodeUpdateController extends BaseServerController {
 	@GetMapping(value = "check_version.json", produces = MediaType.APPLICATION_JSON_VALUE)
 	public String checkVersion() {
 		RemoteVersion remoteVersion = RemoteVersion.cacheInfo();
-		AgentFileModel agentFileModel = agentFileService.getItem(AgentFileService.ID);
+		AgentFileModel agentFileModel = systemParametersServer.getConfig(AgentFileModel.ID, AgentFileModel.class);
 		JSONObject jsonObject = new JSONObject();
 		if (remoteVersion == null) {
 			jsonObject.put("upgrade", false);
 		} else {
+			String tagName = StrUtil.removePrefixIgnoreCase(remoteVersion.getTagName(), "v");
 			if (agentFileModel == null) {
 				jsonObject.put("upgrade", true);
 			} else {
-				String tagName = StrUtil.removePrefixIgnoreCase(remoteVersion.getTagName(), "v");
 				String version = StrUtil.removePrefixIgnoreCase(agentFileModel.getVersion(), "v");
 				jsonObject.put("upgrade", StrUtil.compareVersion(version, tagName) < 0);
-				jsonObject.put("tagName", tagName);
 			}
 		}
 		return JsonMessage.getString(200, "", jsonObject);
@@ -109,19 +108,14 @@ public class NodeUpdateController extends BaseServerController {
 
 	private void saveAgentFile(Tuple data) {
 		File file = data.get(3);
-		AgentFileModel agentFileModel = agentFileService.getItem(AgentFileService.ID);
-		if (agentFileModel == null) {
-			agentFileModel = new AgentFileModel();
-			agentFileModel.setId(AgentFileService.ID);
-			agentFileService.addItem(agentFileModel);
-		}
+		AgentFileModel agentFileModel = new AgentFileModel();
 		agentFileModel.setName(file.getName());
 		agentFileModel.setSize(file.length());
 		agentFileModel.setSavePath(FileUtil.getAbsolutePath(file));
 		//
 		agentFileModel.setVersion(data.get(0));
 		agentFileModel.setTimeStamp(data.get(1));
-		agentFileService.updateItem(agentFileModel);
+		systemParametersServer.upsert(AgentFileModel.ID, agentFileModel, AgentFileModel.ID);
 		// 删除历史包  @author jzy 2021-08-03
 		String saveDir = ServerConfigBean.getInstance().getAgentPath().getAbsolutePath();
 		List<File> files = FileUtil.loopFiles(saveDir, pathname -> !FileUtil.equals(pathname, file));

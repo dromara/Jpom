@@ -26,6 +26,12 @@ package io.jpom.model;
  * @author lf
  */
 public class AgentFileModel extends BaseModel {
+
+	/**
+	 * 保存Agent文件
+	 */
+	public static final String ID = "AGENT_FILE";
+
 	/**
 	 * 文件大小
 	 */

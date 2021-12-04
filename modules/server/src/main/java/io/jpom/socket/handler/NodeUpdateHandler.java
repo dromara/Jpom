@@ -25,6 +25,8 @@ package io.jpom.socket.handler;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.thread.ThreadUtil;
+import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.spring.SpringUtil;
 import com.alibaba.fastjson.JSONArray;
@@ -34,10 +36,11 @@ import io.jpom.common.forward.NodeUrl;
 import io.jpom.model.AgentFileModel;
 import io.jpom.model.WebSocketMessageModel;
 import io.jpom.model.data.NodeModel;
-import io.jpom.model.data.NodeVersionModel;
+import io.jpom.model.data.UserBindWorkspaceModel;
 import io.jpom.model.data.UserModel;
-import io.jpom.service.node.AgentFileService;
-import io.jpom.service.node.NodeOld1Service;
+import io.jpom.service.node.NodeService;
+import io.jpom.service.system.SystemParametersServer;
+import io.jpom.service.user.UserBindWorkspaceService;
 import io.jpom.socket.BaseProxyHandler;
 import io.jpom.socket.ConsoleCommandOp;
 import io.jpom.socket.client.NodeClient;
@@ -47,11 +50,13 @@ import org.springframework.web.socket.WebSocketSession;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.stream.Collectors;
 
 /**
  * 节点管理控制器
@@ -62,16 +67,20 @@ public class NodeUpdateHandler extends BaseProxyHandler {
 
 	private final ConcurrentMap<String, NodeClient> clientMap = new ConcurrentHashMap<>();
 
-	private AgentFileService agentFileService;
-	private NodeOld1Service nodeService;
+	private SystemParametersServer systemParametersServer;
+	private NodeService nodeService;
+	private UserModel userInfo;
+	private UserBindWorkspaceService userBindWorkspaceService;
 
 	public NodeUpdateHandler() {
 		super(null);
 	}
 
-	private void init() {
-		agentFileService = SpringUtil.getBean(AgentFileService.class);
-		nodeService = SpringUtil.getBean(NodeOld1Service.class);
+	private void init(Map<String, Object> attributes) {
+		systemParametersServer = SpringUtil.getBean(SystemParametersServer.class);
+		nodeService = SpringUtil.getBean(NodeService.class);
+		userInfo = (UserModel) attributes.get("userInfo");
+		userBindWorkspaceService = SpringUtil.getBean(UserBindWorkspaceService.class);
 	}
 
 	@Override
@@ -84,8 +93,21 @@ public class NodeUpdateHandler extends BaseProxyHandler {
 		return new Object[]{};
 	}
 
-	private void pullNodeList(WebSocketSession session) {
-		List<NodeModel> nodeModelList = nodeService.list();
+	private void pullNodeList(WebSocketSession session, String ids) {
+		List<String> split = StrUtil.split(ids, StrUtil.COMMA);
+		String id = userInfo.getId();
+		List<NodeModel> nodeModelList = nodeService.listById(split);
+		if (nodeModelList == null) {
+			return;
+		}
+		// 过滤权限数据
+		List<UserBindWorkspaceModel> list = ObjectUtil.defaultIfNull(userBindWorkspaceService.listUserWorkspace(id), Collections.emptyList());
+		Set<String> workspace = list.stream()
+				.map(UserBindWorkspaceModel::getWorkspaceId)
+				.collect(Collectors.toSet());
+		nodeModelList = nodeModelList.stream()
+				.filter(nodeModel -> workspace.contains(nodeModel.getWorkspaceId()))
+				.collect(Collectors.toList());
 		for (NodeModel model : nodeModelList) {
 			if (clientMap.containsKey(model.getId())) {
 				continue;
@@ -120,28 +142,33 @@ public class NodeUpdateHandler extends BaseProxyHandler {
 	@Override
 	protected void handleTextMessage(Map<String, Object> attributes, WebSocketSession session, JSONObject json, ConsoleCommandOp consoleCommandOp) throws IOException {
 		WebSocketMessageModel model = WebSocketMessageModel.getInstance(json.toString());
-		this.init();
-		boolean pull = false;
-		switch (model.getCommand()) {
-			case "getNodeList":
-				model.setData(getNodeList());
-				pull = true;
-				break;
+		this.init(attributes);
+		String ids = null;
+		String command = model.getCommand();
+		switch (command) {
 			case "getAgentVersion":
 				model.setData(getAgentVersion());
 				break;
 			case "updateNode":
 				updateNode(model, session);
 				break;
-			default:
-				break;
+			default: {
+//				case "getNodeList":
+////				model.setData(getNodeList());
+//					pull = true;
+//					break;
+				if (StrUtil.startWith(command, "getNodeList:")) {
+					ids = StrUtil.removePrefix(command, "getNodeList:");
+				}
+			}
+			break;
 		}
 
 		if (model.getData() != null) {
 			this.sendMsg(model, session);
 		}
-		if (pull) {
-			pullNodeList(session);
+		if (StrUtil.isNotEmpty(ids)) {
+			pullNodeList(session, ids);
 		}
 	}
 
@@ -157,7 +184,7 @@ public class NodeUpdateHandler extends BaseProxyHandler {
 			return;
 		}
 		try {
-			AgentFileModel agentFileModel = agentFileService.getItem("agent");
+			AgentFileModel agentFileModel = systemParametersServer.getConfig(AgentFileModel.ID, AgentFileModel.class);
 			//
 			if (agentFileModel == null || !FileUtil.exist(agentFileModel.getSavePath())) {
 				WebSocketMessageModel error = new WebSocketMessageModel("onError", "");
@@ -171,7 +198,7 @@ public class NodeUpdateHandler extends BaseProxyHandler {
 				ThreadUtil.execute(() -> {
 					try {
 						String id = ids.getString(finalI);
-						NodeModel node = nodeService.getItem(id);
+						NodeModel node = nodeService.getByKey(id);
 						if (node == null) {
 							this.sendMsg(model.setData("没有对应的节点：" + id), session);
 							return;
@@ -252,29 +279,29 @@ public class NodeUpdateHandler extends BaseProxyHandler {
 	 * @return json
 	 */
 	private String getAgentVersion() {
-		AgentFileModel agentFileModel = agentFileService.getItem(AgentFileService.ID);
+		AgentFileModel agentFileModel = systemParametersServer.getConfig(AgentFileModel.ID, AgentFileModel.class);
 		if (agentFileModel == null) {
 			return null;
 		}
 		return JSONObject.toJSONString(agentFileModel);
 	}
 
-	/**
-	 * 获取节点列表
-	 *
-	 * @return 节点列表
-	 */
-	private List<NodeVersionModel> getNodeList() {
-		NodeOld1Service nodeService = SpringUtil.getBean(NodeOld1Service.class);
-		List<NodeModel> nodeModels = nodeService.list();
-		List<NodeVersionModel> result = new ArrayList<>();
-		for (NodeModel node : nodeModels) {
-			NodeVersionModel model = new NodeVersionModel();
-			model.setId(node.getId());
-			model.setName(node.getName());
-//			model.setGroup(node.getGroup());
-			result.add(model);
-		}
-		return result;
-	}
+//	/**
+//	 * 获取节点列表
+//	 *
+//	 * @return 节点列表
+//	 */
+//	private List<NodeVersionModel> getNodeList() {
+//		NodeOld1Service nodeService = SpringUtil.getBean(NodeOld1Service.class);
+//		List<NodeModel> nodeModels = nodeService.list();
+//		List<NodeVersionModel> result = new ArrayList<>();
+//		for (NodeModel node : nodeModels) {
+//			NodeVersionModel model = new NodeVersionModel();
+//			model.setId(node.getId());
+//			model.setName(node.getName());
+////			model.setGroup(node.getGroup());
+//			result.add(model);
+//		}
+//		return result;
+//	}
 }

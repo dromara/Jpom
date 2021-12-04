@@ -53,6 +53,7 @@ public class ServerConfigBean {
 	/**
 	 * Agent信息文件
 	 */
+	@Deprecated
 	public static final String AGENT_FILE = "agent_file.json";
 
 	/**
