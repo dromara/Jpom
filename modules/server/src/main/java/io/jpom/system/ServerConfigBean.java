@@ -102,6 +102,7 @@ public class ServerConfigBean {
 	/**
 	 * ssh信息
 	 */
+	@Deprecated
 	public static final String SSH_LIST = "ssh_list.json";
 
 	/**

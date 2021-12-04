@@ -8,9 +8,11 @@ import io.jpom.common.forward.NodeForward;
 import io.jpom.common.forward.NodeUrl;
 import io.jpom.model.Cycle;
 import io.jpom.model.data.NodeModel;
+import io.jpom.model.data.SshModel;
 import io.jpom.model.data.WorkspaceModel;
 import io.jpom.monitor.NodeMonitor;
 import io.jpom.service.h2db.BaseWorkspaceService;
+import io.jpom.service.node.ssh.SshService;
 import io.jpom.util.StringUtil;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
@@ -26,6 +28,12 @@ import java.util.List;
 @Service
 public class NodeService extends BaseWorkspaceService<NodeModel> {
 
+	private final SshService sshService;
+
+	public NodeService(SshService sshService) {
+		this.sshService = sshService;
+	}
+
 	/**
 	 * 修改 节点
 	 *
@@ -37,8 +45,10 @@ public class NodeService extends BaseWorkspaceService<NodeModel> {
 		// 创建对象
 		NodeModel nodeModel = ServletUtil.toBean(request, NodeModel.class, true);
 		String id = nodeModel.getId();
-		boolean general = StringUtil.isGeneral(id, 2, 20);
-		Assert.state(general, "节点id不能为空并且2-20（英文字母 、数字和下划线）");
+		if (StrUtil.isNotEmpty(id)) {
+			boolean general = StringUtil.isGeneral(id, 2, 20);
+			Assert.state(general, "节点id不能为空并且2-20（英文字母 、数字和下划线）");
+		}
 		Assert.hasText(nodeModel.getName(), "节点名称 不能为空");
 		// 节点地址 重复
 		String workspaceId = getCheckUserWorkspace(request);
@@ -50,7 +60,12 @@ public class NodeService extends BaseWorkspaceService<NodeModel> {
 		}
 		boolean exists = super.exists(entity);
 		Assert.state(!exists, "对应的节点已经存在啦");
-
+		// 判断 ssh
+		String sshId = nodeModel.getSshId();
+		if (StrUtil.isNotEmpty(sshId)) {
+			SshModel byKey = sshService.getByKey(sshId, request);
+			Assert.notNull(byKey, "对应的 SSH 不存在");
+		}
 		if (nodeModel.isOpenStatus()) {
 			int timeOut = nodeModel.getTimeOut();
 			// 检查是否可用默认为5秒，避免太长时间无法连接一直等待

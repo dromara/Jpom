@@ -68,7 +68,6 @@ CREATE TABLE IF NOT EXISTS PUBLIC.USER_BIND_WORKSPACE
 );
 comment on table USER_BIND_WORKSPACE is '用户工作空间绑定表';
 
-
 -- 节点列表
 CREATE TABLE IF NOT EXISTS PUBLIC.NODE_INFO
 (
@@ -88,5 +87,32 @@ CREATE TABLE IF NOT EXISTS PUBLIC.NODE_INFO
 	cycle            int comment '监控周期',
 	CONSTRAINT NODE_INFO_PK PRIMARY KEY (ID)
 );
-comment on table NODE_INFO is '用户工作空间绑定表';
+comment on table NODE_INFO is '节点信息表';
+
+ALTER TABLE NODE_INFO
+	ADD IF NOT EXISTS sshId VARCHAR(50) comment '关联的sshid';
+
+-- ssh 信息
+CREATE TABLE IF NOT EXISTS PUBLIC.SSH_INFO
+(
+	ID                VARCHAR(50)  not null comment 'id',
+	CREATETIMEMILLIS  BIGINT COMMENT '数据创建时间',
+	MODIFYTIMEMILLIS  BIGINT COMMENT '数据修改时间',
+	MODIFYUSER        VARCHAR(50) comment '修改人',
+	STRIKE            int DEFAULT 0 comment '逻辑删除{1，删除，0 未删除(默认)}',
+	workspaceId       varchar(50)  not null comment '所属工作空间',
+	`NAME`            VARCHAR(50) comment '名称',
+	host              varchar(100) not null comment 'ssh host IP',
+	port              int          not null comment '端口',
+	user              varchar(100) not null comment '用户',
+	password          varchar(100) comment '密码',
+	charset           varchar(100) comment '编码格式',
+	fileDirs          CLOB comment '文件目录',
+	privateKey        CLOB comment '私钥',
+	connectType       varchar(10) comment '连接方式',
+	notAllowedCommand CLOB comment '不允许执行的命令',
+	allowEditSuffix   CLOB comment '允许编辑的后缀文件',
+	CONSTRAINT SSH_INFO_PK PRIMARY KEY (ID)
+);
+comment on table SSH_INFO is 'ssh信息表';
 

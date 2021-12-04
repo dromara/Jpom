@@ -48,18 +48,43 @@ import java.util.Map;
  */
 public abstract class BaseWorkspaceService<T extends BaseWorkspaceModel> extends BaseDbService<T> {
 
-
 	/**
 	 * 根据工作空间查询
 	 *
-	 * @param workspaceId 工作空间 ID
+	 * @param request 请求
 	 * @return list
 	 */
-	public List<T> list(String workspaceId) {
+	public List<T> listByWorkspace(HttpServletRequest request) {
+		String workspaceId = this.getCheckUserWorkspace(request);
 		Entity entity = Entity.create();
 		entity.set("workspaceId", workspaceId);
 		List<Entity> entities = super.queryList(entity);
 		return super.entityToBeanList(entities);
+	}
+
+	/**
+	 * 根据主键ID + 请信息查询
+	 *
+	 * @param keyValue ID
+	 * @param request  请求
+	 * @return data
+	 */
+	public T getByKey(String keyValue, HttpServletRequest request) {
+		String workspace = this.getCheckUserWorkspace(request);
+		return super.getByKey(keyValue, true, entity -> entity.set("workspaceId", workspace));
+	}
+
+	/**
+	 * 根据主键ID + 用户ID
+	 *
+	 * @param keyValue ID
+	 * @param userId   用户ID
+	 * @return data
+	 */
+	public T getByKey(String keyValue, String userId) {
+		T byKey = super.getByKey(keyValue);
+		this.checkUserWorkspace(byKey.getWorkspaceId(), userId);
+		return byKey;
 	}
 
 	@Override
@@ -86,6 +111,18 @@ public abstract class BaseWorkspaceService<T extends BaseWorkspaceModel> extends
 	}
 
 	/**
+	 * 删除
+	 *
+	 * @param keyValue 主键
+	 * @param request  请求信息
+	 * @return 影响行数
+	 */
+	public int delByKey(String keyValue, HttpServletRequest request) {
+		String workspace = this.getCheckUserWorkspace(request);
+		return super.delByKey(keyValue, entity -> entity.set("workspaceId", workspace));
+	}
+
+	/**
 	 * 获取 工作空间ID 并判断是否有权限
 	 *
 	 * @param request 请求对象
@@ -109,6 +146,21 @@ public abstract class BaseWorkspaceService<T extends BaseWorkspaceModel> extends
 		UserModel userModel = BaseServerController.getUserByThreadLocal();
 		UserBindWorkspaceModel workspaceModel = new UserBindWorkspaceModel();
 		workspaceModel.setId(UserBindWorkspaceModel.getId(userModel.getId(), workspaceId));
+		UserBindWorkspaceService userBindWorkspaceService = SpringUtil.getBean(UserBindWorkspaceService.class);
+		boolean exists = userBindWorkspaceService.exists(workspaceModel);
+		Assert.state(exists, "没有对应的工作空间权限");
+	}
+
+	/**
+	 * 判断用户是否有对呀工作空间权限
+	 *
+	 * @param workspaceId 工作空间ID
+	 * @param userId      用户ID
+	 */
+	private void checkUserWorkspace(String workspaceId, String userId) {
+		// 查询绑定的权限
+		UserBindWorkspaceModel workspaceModel = new UserBindWorkspaceModel();
+		workspaceModel.setId(UserBindWorkspaceModel.getId(userId, workspaceId));
 		UserBindWorkspaceService userBindWorkspaceService = SpringUtil.getBean(UserBindWorkspaceService.class);
 		boolean exists = userBindWorkspaceService.exists(workspaceModel);
 		Assert.state(exists, "没有对应的工作空间权限");

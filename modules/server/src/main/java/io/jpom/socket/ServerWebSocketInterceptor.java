@@ -114,11 +114,9 @@ public class ServerWebSocketInterceptor implements HandshakeInterceptor {
 					break;
 				case ssh:
 					String sshId = httpServletRequest.getParameter("sshId");
-					if (roleService.errorDynamicPermission(userModel, ClassFeature.SSH, sshId)) {
-						return false;
-					}
+
 					SshService bean = SpringUtil.getBean(SshService.class);
-					SshModel sshModel = bean.getItem(sshId);
+					SshModel sshModel = bean.getByKey(sshId, userId);
 					if (sshModel == null) {
 						return false;
 					}

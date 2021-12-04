@@ -9,6 +9,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.model.data.*;
 import io.jpom.service.node.NodeService;
+import io.jpom.service.node.ssh.SshService;
 import io.jpom.service.system.SystemParametersServer;
 import io.jpom.service.user.UserService;
 import io.jpom.system.ConfigBean;
@@ -165,6 +166,30 @@ public class LoadJsonConfigToDb {
 			DefaultSystemLog.getLog().info("{} mv to {}", FileUtil.getAbsolutePath(file), FileUtil.getAbsolutePath(backupOldData));
 		} catch (Exception e) {
 			DefaultSystemLog.getLog().error("load node error ", e);
+		}
+	}
+
+	public void loadSshInfo() {
+		File backupOldData = FileUtil.file(ConfigBean.getInstance().getDataPath(), "backup_old_data");
+		// 读取 ssh 文件内容
+		File file = FileUtil.file(ConfigBean.getInstance().getDataPath(), ServerConfigBean.SSH_LIST);
+		if (!FileUtil.exist(file)) {
+			return;
+		}
+		try {
+			JSON json = JsonFileUtil.readJson(file.getAbsolutePath());
+			JSONArray jsonArray = JsonFileUtil.formatToArray((JSONObject) json);
+			List<SshModel> sshModels = jsonArray.toJavaList(SshModel.class);
+			if (sshModels == null) {
+				return;
+			}
+			SshService sshService = SpringUtil.getBean(SshService.class);
+			sshService.insert(sshModels);
+			// 将 json 文件转移到备份目录
+			FileUtil.move(file, FileUtil.mkdir(backupOldData), true);
+			DefaultSystemLog.getLog().info("{} mv to {}", FileUtil.getAbsolutePath(file), FileUtil.getAbsolutePath(backupOldData));
+		} catch (Exception e) {
+			DefaultSystemLog.getLog().error("load ssh error ", e);
 		}
 	}
 }

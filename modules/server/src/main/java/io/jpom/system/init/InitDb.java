@@ -157,6 +157,7 @@ public class InitDb implements DisposableBean, InitializingBean {
 		workspaceService.checkInitDefault();
 		//
 		instance.loadNodeInfo();
+		instance.loadSshInfo();
 	}
 
 	@Override

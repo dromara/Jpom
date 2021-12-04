@@ -162,7 +162,7 @@ public class ReleaseManage extends BaseBuild {
 	private void doSsh() {
 		String releaseMethodDataId = this.baseBuildModule.getReleaseMethodDataId();
 		SshService sshService = SpringUtil.getBean(SshService.class);
-		SshModel item = sshService.getItem(releaseMethodDataId);
+		SshModel item = sshService.getByKey(releaseMethodDataId);
 		if (item == null) {
 			this.log("没有找到对应的ssh项：" + releaseMethodDataId);
 			return;

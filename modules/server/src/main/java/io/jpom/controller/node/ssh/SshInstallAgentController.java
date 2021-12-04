@@ -36,7 +36,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import javax.annotation.Resource;
 import java.io.File;
 import java.util.List;
 import java.util.Objects;
@@ -54,8 +53,12 @@ import java.util.zip.ZipFile;
 @Feature(cls = ClassFeature.SSH)
 public class SshInstallAgentController extends BaseServerController {
 
-	@Resource
-	private SshService sshService;
+
+	private final SshService sshService;
+
+	public SshInstallAgentController(SshService sshService) {
+		this.sshService = sshService;
+	}
 
 //    @RequestMapping(value = "installAgent.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
 //    @Feature(method = MethodFeature.INSTALL)
@@ -77,7 +80,7 @@ public class SshInstallAgentController extends BaseServerController {
 		}
 		NodeModel nodeModel = (NodeModel) object;
 		//
-		SshModel sshModel = sshService.getItem(id);
+		SshModel sshModel = sshService.getByKey(id);
 		Objects.requireNonNull(sshModel, "没有找到对应ssh");
 		//
 		String tempFilePath = ServerConfigBean.getInstance().getUserTempPath().getAbsolutePath();
@@ -194,15 +197,12 @@ public class SshInstallAgentController extends BaseServerController {
 
 	private Object getNodeModel(String data) {
 		NodeModel nodeModel = JSONObject.toJavaObject(JSONObject.parseObject(data), NodeModel.class);
-		if (StrUtil.isEmpty(nodeModel.getId())) {
-			return new JsonMessage<>(405, "节点id错误");
-		}
-		if (StrUtil.isEmpty(nodeModel.getName())) {
-			return new JsonMessage<>(405, "输入节点名称");
-		}
-		if (StrUtil.isEmpty(nodeModel.getUrl())) {
-			return new JsonMessage<>(405, "请输入节点地址");
-		}
+		Assert.hasText(nodeModel.getId(), "节点id错误");
+
+		Assert.hasText(nodeModel.getName(), "输入节点名称");
+
+		Assert.hasText(nodeModel.getUrl(), "请输入节点地址");
+
 		return nodeModel;
 	}
 

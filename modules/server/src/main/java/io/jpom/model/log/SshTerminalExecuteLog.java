@@ -52,10 +52,10 @@ public class SshTerminalExecuteLog extends BaseDbModel {
 	 * 名称
 	 */
 	private String sshName;
-	/**
-	 * 操作时间
-	 */
-	private long optTime;
+//	/**
+//	 * 操作时间
+//	 */
+//	private long optTime;
 	/**
 	 * 执行的命令
 	 */
@@ -114,13 +114,13 @@ public class SshTerminalExecuteLog extends BaseDbModel {
 		}
 	}
 
-	public long getOptTime() {
-		return optTime;
-	}
-
-	public void setOptTime(long optTime) {
-		this.optTime = optTime;
-	}
+//	public long getOptTime() {
+//		return optTime;
+//	}
+//
+//	public void setOptTime(long optTime) {
+//		this.optTime = optTime;
+//	}
 
 	public String getSshId() {
 		return sshId;

@@ -60,10 +60,10 @@ public class NodeModel extends BaseWorkspaceModel {
 	 * 节点超时时间
 	 */
 	private Integer timeOut;
-//	/**
-//	 * 绑定的sshId
-//	 */
-//	private String sshId;
+	/**
+	 * 绑定的sshId
+	 */
+	private String sshId;
 
 //	/**
 //	 * 节点分组
@@ -99,13 +99,13 @@ public class NodeModel extends BaseWorkspaceModel {
 //		this.group = group;
 //	}
 
-//	public String getSshId() {
-//		return sshId;
-//	}
-//
-//	public void setSshId(String sshId) {
-//		this.sshId = sshId;
-//	}
+	public String getSshId() {
+		return sshId;
+	}
+
+	public void setSshId(String sshId) {
+		this.sshId = sshId;
+	}
 
 	public Integer getTimeOut() {
 		return timeOut;

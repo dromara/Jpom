@@ -64,7 +64,7 @@ public class SshTerminalExecuteLogService extends BaseDbService<SshTerminalExecu
 			}
 			sshTerminalExecuteLog.setCommands(s);
 			sshTerminalExecuteLog.setRefuse(refuse);
-			sshTerminalExecuteLog.setOptTime(optTime);
+			sshTerminalExecuteLog.setCreateTimeMillis(optTime);
 			sshTerminalExecuteLog.setIp(ip);
 			sshTerminalExecuteLog.setUserAgent(userAgent);
 			sshTerminalExecuteLog.setUserId(UserModel.getOptUserName(userInfo));

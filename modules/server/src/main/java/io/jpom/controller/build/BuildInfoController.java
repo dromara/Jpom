@@ -80,13 +80,16 @@ public class BuildInfoController extends BaseServerController {
 
 	@Resource
 	private DbBuildHistoryLogService dbBuildHistoryLogService;
-	@Resource
-	private SshService sshService;
+	private final SshService sshService;
 
 	@Resource
 	private BuildInfoService buildInfoService;
 	@Resource
 	private RepositoryService repositoryService;
+
+	public BuildInfoController(SshService sshService) {
+		this.sshService = sshService;
+	}
 
 
 	/**
@@ -231,16 +234,15 @@ public class BuildInfoController extends BaseServerController {
 			return JsonMessage.getString(405, "请输入发布到ssh中的目录");
 		}
 		releasePath = FileUtil.normalize(releasePath);
-		SshModel sshServiceItem = sshService.getItem(releaseMethodDataId);
+		SshModel sshServiceItem = sshService.getByKey(releaseMethodDataId, getRequest());
 		Assert.notNull(sshServiceItem, "没有对应的ssh项");
 		jsonObject.put("releaseMethodDataId", releaseMethodDataId);
 		//
 		if (releasePath.startsWith(StrUtil.SLASH)) {
 			// 以根路径开始
-			List<String> fileDirs = sshServiceItem.getFileDirs();
-			if (fileDirs == null || fileDirs.isEmpty()) {
-				return JsonMessage.getString(405, "此ssh未授权操作此目录");
-			}
+			List<String> fileDirs = sshServiceItem.fileDirs();
+			Assert.notEmpty(fileDirs, "此ssh未授权操作此目录");
+
 			boolean find = false;
 			for (String fileDir : fileDirs) {
 				if (FileUtil.isSub(new File(fileDir), new File(releasePath))) {

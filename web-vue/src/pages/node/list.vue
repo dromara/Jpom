@@ -47,7 +47,7 @@
           <a-input v-model="temp.name" placeholder="节点名称" />
         </a-form-model-item>
         <a-form-model-item label="绑定 SSH " prop="sshId">
-          <a-select v-model="temp.sshId" placeholder="请选择SSH">
+          <a-select show-search option-filter-prop="children" v-model="temp.sshId" placeholder="请选择SSH">
             <a-select-option value="">不绑定</a-select-option>
             <a-select-option v-for="ssh in sshList" :key="ssh.id" :disabled="ssh.disabled">{{ ssh.name }}</a-select-option>
           </a-select>
@@ -121,9 +121,10 @@
 <script>
 import { mapGetters } from "vuex";
 import { getNodeList, getNodeStatus, editNode, deleteNode } from "@/api/node";
-import { getSshListByNodeId } from "../../api/ssh";
+import { getSshListAll } from "@/api/ssh";
 import NodeLayout from "./node-layout";
 import Terminal from "./terminal";
+import { parseTime } from "@/utils/time";
 import { PAGE_DEFAULT_LIMIT, PAGE_DEFAULT_SIZW_OPTIONS, PAGE_DEFAULT_SHOW_TOTAL } from "@/utils/const";
 
 export default {
@@ -153,6 +154,16 @@ export default {
         { title: "节点协议", dataIndex: "protocol", sorter: true, key: "protocol", width: 100, ellipsis: true, scopedSlots: { customRender: "protocol" } },
         { title: "节点地址", dataIndex: "url", sorter: true, key: "url", ellipsis: true, scopedSlots: { customRender: "url" } },
         { title: "超时时间", dataIndex: "timeOut", sorter: true, key: "timeOut", width: 100, ellipsis: true },
+        {
+          title: "修改时间",
+          dataIndex: "modifyTimeMillis",
+          ellipsis: true,
+          sorter: true,
+          customRender: (text) => {
+            return parseTime(text);
+          },
+          width: 170,
+        },
         { title: "操作", dataIndex: "operation", key: "operation", width: 360, scopedSlots: { customRender: "operation" }, align: "left" },
       ],
       childColumns: [
@@ -222,7 +233,7 @@ export default {
 
     // 加载 SSH 列表
     loadSshList() {
-      getSshListByNodeId(this.temp.id).then((res) => {
+      getSshListAll().then((res) => {
         if (res.code === 200) {
           this.sshList = res.data;
         }

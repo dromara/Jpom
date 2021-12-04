@@ -11,91 +11,34 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.ssh.ChannelType;
 import cn.hutool.extra.ssh.JschUtil;
 import cn.hutool.extra.ssh.Sftp;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
 import com.jcraft.jsch.*;
-import io.jpom.common.BaseOperService;
-import io.jpom.model.data.NodeModel;
 import io.jpom.model.data.SshModel;
-import io.jpom.permission.BaseDynamicService;
-import io.jpom.plugin.ClassFeature;
-import io.jpom.service.node.NodeOld1Service;
+import io.jpom.service.h2db.BaseWorkspaceService;
 import io.jpom.system.ConfigBean;
 import io.jpom.system.JpomRuntimeException;
-import io.jpom.system.ServerConfigBean;
 import io.jpom.system.ServerExtConfigBean;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
 import java.io.*;
 import java.nio.charset.Charset;
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * @author bwcx_jzy
- * @date 2019/8/9
+ * @since 2021/12/4
  */
 @Service
-public class SshService extends BaseOperService<SshModel> implements BaseDynamicService {
-
-	@Resource
-	private NodeOld1Service nodeServiceOld;
-
-	public SshService() {
-		super(ServerConfigBean.SSH_LIST);
-	}
-
-	@Override
-	public void addItem(SshModel sshModel) {
-		sshModel.setId(IdUtil.fastSimpleUUID());
-		super.addItem(sshModel);
-	}
-
-	@Override
-	public JSONArray listToArray(String dataId) {
-		return (JSONArray) JSONArray.toJSON(this.list());
-	}
-
-	@Override
-	public List<SshModel> list() {
-		return (List<SshModel>) filter(super.list(), ClassFeature.SSH);
-	}
-
-	public JSONArray listSelect(String nodeId) {
-		// 查询ssh
-		List<SshModel> sshModels = list();
-		List<NodeModel> list = nodeServiceOld.list();
-		JSONArray sshList = new JSONArray();
-		if (sshModels == null) {
-			return sshList;
-		}
-		sshModels.forEach(sshModel -> {
-			String sshModelId = sshModel.getId();
-			JSONObject jsonObject = new JSONObject();
-			jsonObject.put("id", sshModelId);
-			jsonObject.put("name", sshModel.getName());
-			if (list != null) {
-				for (NodeModel nodeModel : list) {
-//					if (!StrUtil.equals(nodeId, nodeModel.getId()) && StrUtil.equals(sshModelId, nodeModel.getSshId())) {
-//						jsonObject.put("disabled", true);
-//						break;
-//					}
-				}
-			}
-			sshList.add(jsonObject);
-		});
-		return sshList;
-	}
+public class SshService extends BaseWorkspaceService<SshModel> {
 
 	public static Session getSession(SshModel sshModel) {
 		Session session;
-		if (sshModel.getConnectType() == SshModel.ConnectType.PASS) {
+		SshModel.ConnectType connectType = sshModel.connectType();
+		if (connectType == SshModel.ConnectType.PASS) {
 			session = JschUtil.openSession(sshModel.getHost(), sshModel.getPort(), sshModel.getUser(), sshModel.getPassword());
 
-		} else if (sshModel.getConnectType() == SshModel.ConnectType.PUBKEY) {
+		} else if (connectType == SshModel.ConnectType.PUBKEY) {
 			File tempPath = ConfigBean.getInstance().getTempPath();
 			String sshFile = StrUtil.emptyToDefault(sshModel.getId(), IdUtil.fastSimpleUUID());
 			File ssh = FileUtil.file(tempPath, "ssh", sshFile);
@@ -114,8 +57,8 @@ public class SshService extends BaseOperService<SshModel> implements BaseDynamic
 		} catch (JSchException ignored) {
 		}
 		return session;
-
 	}
+
 
 	/**
 	 * 检查是否存在正在运行的进程

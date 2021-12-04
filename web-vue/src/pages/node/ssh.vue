@@ -1,20 +1,13 @@
 <template>
-  <div>
+  <div class="full-content">
     <div ref="filter" class="filter">
+      <a-input class="search-input-item" v-model="listQuery['%name%']" placeholder="节点名称" />
+      <a-input class="search-input-item" v-model="listQuery['%host%']" placeholder="节点地址" />
+      <a-button type="primary" @click="loadData">搜索</a-button>
       <a-button type="primary" @click="handleAdd">新增</a-button>
-      <a-button type="primary" @click="loadData">刷新</a-button>
     </div>
     <!-- 数据表格 -->
-    <a-table
-      :data-source="list"
-      :loading="loading"
-      :columns="columns"
-      :pagination="false"
-      bordered
-      :rowKey="(record, index) => index"
-      :style="{ 'max-height': tableHeight + 'px' }"
-      :scroll="{ x: 1040, y: tableHeight - 60 }"
-    >
+    <a-table :data-source="list" :loading="loading" :columns="columns" :pagination="this.pagination" bordered :rowKey="(record, index) => index">
       <template slot="nodeId" slot-scope="text, record">
         <a-button v-if="!record.nodeModel" type="primary" @click="install(record)" :disabled="record.installed">安装节点</a-button>
         <a-tooltip v-else placement="topLeft" :title="`${record.nodeModel.id} ( ${record.nodeModel.name} )`">
@@ -105,7 +98,7 @@
             type="textarea"
             :rows="5"
             style="resize: none"
-            placeholder="请输入允许编辑文件的后缀及文件编码，不设置编码则默认取系统编码，示例：设置编码：txt@utf-8， 不设置编码：txt"
+            placeholder="请输入允许编辑文件的后缀及文件编码，不设置编码则默认取系统编码，多个使用换行。示例：设置编码：txt@utf-8， 不设置编码：txt"
           />
         </a-form-model-item>
       </a-form-model>
@@ -211,10 +204,10 @@
 </template>
 <script>
 import { deleteSsh, editSsh, getSshList, getSshOperationLogList, installAgentNode } from "@/api/ssh";
-import { getNodeList } from "../../api/node";
 import SshFile from "./ssh-file";
 import Terminal from "./terminal";
-import { parseTime } from "../../utils/time";
+import { parseTime } from "@/utils/time";
+import { PAGE_DEFAULT_LIMIT, PAGE_DEFAULT_SIZW_OPTIONS, PAGE_DEFAULT_SHOW_TOTAL } from "@/utils/const";
 
 export default {
   components: {
@@ -224,9 +217,9 @@ export default {
   data() {
     return {
       loading: false,
-      tableHeight: "70vh",
       list: [],
       temp: {},
+      listQuery: { page: 1, limit: PAGE_DEFAULT_LIMIT, total: 0 },
       editSshVisible: false,
       nodeVisible: false,
       tempNode: {},
@@ -271,6 +264,7 @@ export default {
         {
           title: "操作时间",
           dataIndex: "optTime",
+          sorter: true,
           customRender: (text) => {
             return parseTime(text);
           } /*width: 180*/,
@@ -282,17 +276,29 @@ export default {
         limit: 10,
       },
       columns: [
-        { title: "名称", dataIndex: "name", ellipsis: true },
+        { title: "名称", dataIndex: "name", sorter: true, ellipsis: true },
+
+        { title: "Host", dataIndex: "host", sorter: true, ellipsis: true },
+        { title: "Port", dataIndex: "port", sorter: true, width: 80, ellipsis: true },
+        { title: "User", dataIndex: "user", sorter: true, width: 120, ellipsis: true },
+        { title: "编码格式", dataIndex: "charset", sorter: true, width: 120, ellipsis: true },
         {
           title: "关联节点",
           dataIndex: "nodeId",
           scopedSlots: { customRender: "nodeId" },
-          // width: 200,
+          // width: 120,
           ellipsis: true,
         },
-        { title: "Host", dataIndex: "host", ellipsis: true },
-        { title: "Port", dataIndex: "port", width: 80, ellipsis: true },
-        { title: "User", dataIndex: "user", width: 120, ellipsis: true },
+        {
+          title: "修改时间",
+          dataIndex: "modifyTimeMillis",
+          sorter: true,
+          ellipsis: true,
+          customRender: (text) => {
+            return parseTime(text);
+          },
+          width: 170,
+        },
         {
           title: "操作",
           dataIndex: "operation",
@@ -331,57 +337,61 @@ export default {
   computed: {
     viewOperationLogPagination() {
       return {
-        total: this.viewOperationLogTotal,
+        total: this.viewOperationLogListQuery.total || 0,
         current: this.viewOperationLogListQuery.page || 1,
-        pageSize: this.viewOperationLogListQuery.limit || 10,
-        pageSizeOptions: ["10", "20", "50", "100"],
+        pageSize: this.viewOperationLogListQuery.limit || PAGE_DEFAULT_LIMIT,
+        pageSizeOptions: PAGE_DEFAULT_SIZW_OPTIONS,
         showSizeChanger: true,
         showTotal: (total) => {
-          if (total <= this.viewOperationLogListQuery.limit) {
-            return "";
-          }
-          return `总计 ${total} 条`;
+          return PAGE_DEFAULT_SHOW_TOTAL(total, this.viewOperationLogListQuery);
+        },
+      };
+    },
+    pagination() {
+      return {
+        total: this.listQuery.total || 0,
+        current: this.listQuery.page || 1,
+        pageSize: this.listQuery.limit || PAGE_DEFAULT_LIMIT,
+        pageSizeOptions: PAGE_DEFAULT_SIZW_OPTIONS,
+        showSizeChanger: true,
+        showTotal: (total) => {
+          return PAGE_DEFAULT_SHOW_TOTAL(total, this.listQuery);
         },
       };
     },
   },
   created() {
-    this.calcTableHeight();
     this.loadData();
   },
   methods: {
-    // 计算表格高度
-    calcTableHeight() {
-      this.$nextTick(() => {
-        this.tableHeight = window.innerHeight - this.$refs["filter"].clientHeight - 135;
-      });
-    },
     // 加载数据
     loadData() {
       this.loading = true;
-      getSshList().then((res) => {
+      getSshList(this.listQuery).then((res) => {
         if (res.code === 200) {
-          this.list = res.data;
+          this.list = res.data.result;
         }
         this.loading = false;
-      })
-      // 如果在节点列表中存在，则标记为已安装节点
-      .then(getNodeList().then((res) => {
-        let nodeList = res.data;
-        let tempList = [];
-        this.list.forEach(element => {
-          let flag = false;
-          nodeList.forEach(node => {
-            if (element.host === node.url.substring(0, node.url.indexOf(':'))) {
-              flag = true;
-              return;
-            }
-          })
-          element.installed = flag;
-          tempList.push(element);
-        });
-        this.list = tempList;
-      }));
+      });
+      // // 如果在节点列表中存在，则标记为已安装节点
+      // .then(
+      //   getNodeList().then((res) => {
+      //     let nodeList = res.data.result;
+      //     let tempList = [];
+      //     this.list.forEach((element) => {
+      //       let flag = false;
+      //       nodeList.forEach((node) => {
+      //         if (element.host === node.url.substring(0, node.url.indexOf(":"))) {
+      //           flag = true;
+      //           return;
+      //         }
+      //       });
+      //       element.installed = flag;
+      //       tempList.push(element);
+      //     });
+      //     this.list = tempList;
+      //   })
+      // );
     },
     // 新增 SSH
     handleAdd() {
@@ -398,8 +408,8 @@ export default {
     // 修改
     handleEdit(record) {
       this.temp = Object.assign({}, record);
-      this.temp.fileDirs = record.fileDirs ? record.fileDirs.join("\r\n") : "";
-      this.temp.allowEditSuffix = record.allowEditSuffix ? record.allowEditSuffix.join("\r\n") : "";
+      this.temp.fileDirs = record.fileDirs ? JSON.parse(record.fileDirs).join("\r\n") : "";
+      this.temp.allowEditSuffix = record.allowEditSuffix ? JSON.parse(record.allowEditSuffix).join("\r\n") : "";
       this.temp.type = "edit";
       this.editSshVisible = true;
       // @author jzy 08-04
@@ -443,8 +453,8 @@ export default {
       this.viewOperationLoading = true;
       getSshOperationLogList(this.viewOperationLogListQuery).then((res) => {
         if (res.code === 200) {
-          this.viewOperationLogList = res.data;
-          this.viewOperationLogTotal = res.total;
+          this.viewOperationLogList = res.data.result;
+          this.viewOperationLogListQuery.total = res.data.total;
         }
         this.viewOperationLoading = false;
       });

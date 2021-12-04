@@ -16,6 +16,7 @@ export function getNodeList(params) {
     params: params,
   });
 }
+
 // 节点和版本信息
 export function getNodeListWithVersion(params) {
   return axios({

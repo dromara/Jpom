@@ -2,106 +2,86 @@ package io.jpom.controller.node.ssh;
 
 import cn.hutool.core.text.StrSplitter;
 import cn.hutool.core.util.StrUtil;
-import cn.hutool.db.Entity;
-import cn.hutool.db.Page;
 import cn.hutool.extra.ssh.JschUtil;
 import cn.jiangzeyin.common.JsonMessage;
-import cn.jiangzeyin.common.validator.ValidatorConfig;
 import cn.jiangzeyin.common.validator.ValidatorItem;
 import cn.jiangzeyin.common.validator.ValidatorRule;
-import com.alibaba.fastjson.JSONArray;
 import com.jcraft.jsch.Session;
 import io.jpom.common.BaseServerController;
-import io.jpom.common.interceptor.OptLog;
 import io.jpom.model.PageResultDto;
 import io.jpom.model.data.AgentWhitelist;
-import io.jpom.model.data.NodeModel;
 import io.jpom.model.data.SshModel;
+import io.jpom.model.enums.BuildReleaseMethod;
 import io.jpom.model.log.SshTerminalExecuteLog;
-import io.jpom.model.log.UserOperateLogV1;
 import io.jpom.plugin.ClassFeature;
 import io.jpom.plugin.Feature;
 import io.jpom.plugin.MethodFeature;
+import io.jpom.service.dblog.BuildInfoService;
 import io.jpom.service.dblog.SshTerminalExecuteLogService;
 import io.jpom.service.node.ssh.SshService;
 import org.springframework.http.MediaType;
-import org.springframework.stereotype.Controller;
 import org.springframework.util.Assert;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 
-import javax.annotation.Resource;
 import java.nio.charset.Charset;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * @author bwcx_jzy
  * @date 2019/8/9
  */
-@Controller
+@RestController
 @RequestMapping(value = "node/ssh")
 @Feature(cls = ClassFeature.SSH)
 public class SshController extends BaseServerController {
 
-	@Resource
-	private SshService sshService;
+	private final SshService sshService;
+	private final SshTerminalExecuteLogService sshTerminalExecuteLogService;
+	private final BuildInfoService buildInfoService;
 
-	@Resource
-	private SshTerminalExecuteLogService sshTerminalExecuteLogService;
+	public SshController(SshService sshService,
+						 SshTerminalExecuteLogService sshTerminalExecuteLogService,
+						 BuildInfoService buildInfoService) {
+		this.sshService = sshService;
+		this.sshTerminalExecuteLogService = sshTerminalExecuteLogService;
+		this.buildInfoService = buildInfoService;
+	}
 
-//    @RequestMapping(value = "list.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
-//    @Feature(method = MethodFeature.LIST)
-//    public String list() {
-//        return "node/ssh/list";
-//    }
 
-	@RequestMapping(value = "list_data.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody
+	@PostMapping(value = "list_data.json", produces = MediaType.APPLICATION_JSON_VALUE)
 	@Feature(method = MethodFeature.LIST)
-	public JsonMessage<List<SshModel>> listData() {
-		List<SshModel> list = sshService.list();
-		if (list != null) {
-			// 读取节点信息
-			List<NodeModel> list1 = nodeService.list();
-			Map<String, NodeModel> map = new HashMap<>(10);
-			list1.forEach(nodeModel -> {
-//				String sshId = nodeModel.getSshId();
-//				if (StrUtil.isNotEmpty(sshId)) {
-//					map.put(sshId, nodeModel);
-//				}
-			});
-			list.forEach(sshModel -> {
-				// 不返回密码
-				sshModel.setPassword(null);
-				sshModel.setPrivateKey(null);
-				// 节点信息
-				//BaseModel nodeModel = map.get(sshModel.getId());
-				//sshModel.setNodeModel(nodeModel);
-			});
-		}
+	public JsonMessage<PageResultDto<SshModel>> listData() {
+		PageResultDto<SshModel> pageResultDto = sshService.listPage(getRequest());
+		return new JsonMessage<>(200, "", pageResultDto);
+	}
+
+	@GetMapping(value = "list_data_all.json", produces = MediaType.APPLICATION_JSON_VALUE)
+	@Feature(method = MethodFeature.LIST)
+	public JsonMessage<List<SshModel>> listDataAll() {
+		List<SshModel> list = sshService.listByWorkspace(getRequest());
 		return new JsonMessage<>(200, "", list);
 	}
 
 	/**
-	 * @param name
-	 * @param host
-	 * @param user
-	 * @param password
-	 * @param connectType
-	 * @param privateKey
-	 * @param port
-	 * @param charset
-	 * @param fileDirs
-	 * @param id
-	 * @param type        {'add': 新增, 'edit': 修改}
-	 * @return
+	 * 编辑
+	 *
+	 * @param name              名称
+	 * @param host              端口
+	 * @param user              用户名
+	 * @param password          密码
+	 * @param connectType       连接方式
+	 * @param privateKey        私钥
+	 * @param port              端口
+	 * @param charset           编码格式
+	 * @param fileDirs          文件夹
+	 * @param id                ID
+	 * @param notAllowedCommand 禁止输入的命令
+	 * @return json
 	 */
-	@RequestMapping(value = "save.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	@OptLog(UserOperateLogV1.OptType.EditSsh)
-	@ResponseBody
+	@PostMapping(value = "save.json", produces = MediaType.APPLICATION_JSON_VALUE)
 	@Feature(method = MethodFeature.EDIT)
 	public String save(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "ssh名称不能为空") String name,
 					   @ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "host不能为空") String host,
@@ -111,25 +91,24 @@ public class SshController extends BaseServerController {
 					   String privateKey,
 					   @ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "port错误") int port,
 					   String charset, String fileDirs,
-					   String id, String type, String notAllowedCommand) {
+					   String id, String notAllowedCommand) {
 		SshModel sshModel;
-		// 优先判断参数 如果是 password 在修改时可以不填写
-		boolean add = "add".equals(type);
+		boolean add = StrUtil.isEmpty(getParameter("id"));
 		if (add) {
-			if (connectType == SshModel.ConnectType.PASS && StrUtil.isEmpty(password)) {
-				return JsonMessage.getString(405, "请填写登录密码");
-			}
-			if (connectType == SshModel.ConnectType.PUBKEY && StrUtil.isEmpty(privateKey)) {
-				return JsonMessage.getString(405, "请填写证书内容");
+			// 优先判断参数 如果是 password 在修改时可以不填写
+			if (connectType == SshModel.ConnectType.PASS) {
+				Assert.hasText(password, "请填写登录密码");
+			} else if (connectType == SshModel.ConnectType.PUBKEY) {
+				Assert.hasText(privateKey, "请填写证书内容");
 			}
 			sshModel = new SshModel();
 		} else {
-			sshModel = sshService.getItem(id);
+			sshModel = sshService.getByKey(id);
 			Assert.notNull(sshModel, "不存在对应ssh");
 		}
 		// 目录
 		if (StrUtil.isEmpty(fileDirs)) {
-			sshModel.setFileDirs(null);
+			sshModel.setFileDirs((String) null);
 		} else {
 			List<String> list = StrSplitter.splitTrim(fileDirs, StrUtil.LF, true);
 			sshModel.setFileDirs(list);
@@ -138,19 +117,17 @@ public class SshController extends BaseServerController {
 		// 如果密码传递不为空就设置值 因为上面已经判断了只有修改的情况下 password 才可能为空
 		if (StrUtil.isNotEmpty(password)) {
 			sshModel.setPassword(password);
-		} else {
-			//sshModel.setPassword(sshModel == null ? null : sshModel.getPassword());
 		}
+
 		if (StrUtil.isNotEmpty(privateKey)) {
 			sshModel.setPrivateKey(privateKey);
-		} else {
-			//sshModel.setPrivateKey(sshModel == null ? null : sshModel.getPrivateKey());
 		}
+
 		sshModel.setPort(port);
 		sshModel.setUser(user);
 		sshModel.setName(name);
 		sshModel.setNotAllowedCommand(notAllowedCommand);
-		sshModel.setConnectType(connectType);
+		sshModel.setConnectType(connectType.name());
 		// 获取允许编辑的后缀
 		String allowEditSuffix = getParameter("allowEditSuffix");
 		List<String> allowEditSuffixList = AgentWhitelist.parseToList(allowEditSuffix, "允许编辑的文件后缀不能为空");
@@ -167,92 +144,32 @@ public class SshController extends BaseServerController {
 		} catch (Exception e) {
 			return JsonMessage.getString(505, "ssh连接失败：" + e.getMessage());
 		}
-		if ("add".equalsIgnoreCase(type)) {
-			sshService.addItem(sshModel);
+		if (add) {
+			sshService.insert(sshModel);
 		} else {
-			sshService.updateItem(sshModel);
+			sshService.update(sshModel);
 		}
 		return JsonMessage.getString(200, "操作成功");
 	}
 
-//    @RequestMapping(value = "edit.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
-//    @Feature(method = MethodFeature.EDIT)
-//    public String edit(String id) {
-//        if (StrUtil.isNotEmpty(id)) {
-//            SshModel sshModel = sshService.getItem(id);
-//            if (sshModel != null) {
-//                setAttribute("item", sshModel);
-//                //
-//                String fileDirs = AgentWhitelist.convertToLine(sshModel.getFileDirs());
-//                setAttribute("fileDirs", fileDirs);
-//            }
-//        }
-//        Collection<Charset> charsets = Charset.availableCharsets().values();
-//        Collection<Charset> collect = charsets.stream().filter(charset -> !StrUtil.startWithAny(charset.name(), "x", "w", "IBM")).collect(Collectors.toList());
-//        setAttribute("charsets", collect);
-//        //
-//        SshModel.ConnectType[] values = SshModel.ConnectType.values();
-//        setAttribute("connectTypes", values);
-//        return "node/ssh/edit";
-//    }
-
-//    @RequestMapping(value = "terminal.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
-//    @Feature(method = MethodFeature.TERMINAL)
-//    public String terminal(String id) {
-//        SshModel sshModel = sshService.getItem(id);
-//        setAttribute("item", sshModel);
-//        return "node/ssh/terminal";
-//    }
-
-	/**
-	 * 根据 nodeId 查询 SSH 列表
-	 *
-	 * @param nodeId
-	 * @return
-	 * @description for dev 3.x
-	 * @author Hotstrip
-	 */
-	@RequestMapping(value = "list_by_node_id", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody
-	@Feature(method = MethodFeature.LIST)
-	public String listByNodeId(String nodeId) {
-		JSONArray sshList = sshService.listSelect(nodeId);
-		return JsonMessage.getString(200, "success", sshList);
+	@PostMapping(value = "del.json", produces = MediaType.APPLICATION_JSON_VALUE)
+	@Feature(method = MethodFeature.DEL)
+	public String del(@ValidatorItem(value = ValidatorRule.NOT_BLANK) String id) {
+		boolean checkSsh = buildInfoService.checkReleaseMethod(id, BuildReleaseMethod.Ssh);
+		Assert.state(!checkSsh, "当前ssh存在构建项，不能删除");
+		sshService.delByKey(id, getRequest());
+		return JsonMessage.getString(200, "操作成功");
 	}
 
 	/**
 	 * 执行记录
 	 *
-	 * @param limit 大小
-	 * @param page  page
 	 * @return json
 	 */
-	@RequestMapping(value = "log_list_data.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody
+	@PostMapping(value = "log_list_data.json", produces = MediaType.APPLICATION_JSON_VALUE)
 	@Feature(method = MethodFeature.LOG)
-	public String listData(
-			@ValidatorConfig(value = {
-					@ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "limit error")
-			}, defaultVal = "10") int limit,
-			@ValidatorConfig(value = {
-					@ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "page error")
-			}, defaultVal = "1") int page) {
-
-		Page pageObj = new Page(page, limit);
-		Entity entity = Entity.create();
-		this.doPage(pageObj, entity, "optTime");
-
-		String sshId = getParameter("sshId");
-		if (StrUtil.isNotEmpty(sshId)) {
-			entity.set("sshId".toUpperCase(), sshId);
-		}
-
-		String userId = getParameter("userId");
-		if (StrUtil.isNotEmpty(userId)) {
-			entity.set("userId".toUpperCase(), userId);
-		}
-
-		PageResultDto<SshTerminalExecuteLog> pageResult = sshTerminalExecuteLogService.listPage(entity, pageObj);
+	public String logListData() {
+		PageResultDto<SshTerminalExecuteLog> pageResult = sshTerminalExecuteLogService.listPage(getRequest());
 		return JsonMessage.getString(200, "获取成功", pageResult);
 	}
 

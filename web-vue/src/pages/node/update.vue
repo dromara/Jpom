@@ -2,7 +2,6 @@
   <div class="node-update full-content">
     <div class="header">
       <div class="left">
-        <!-- <a-input class="search-input-item" v-model="listQuery['%id%']" placeholder="节点ID" /> -->
         <a-input class="search-input-item" v-model="listQuery['%name%']" placeholder="节点名称" />
         <a-input class="search-input-item" v-model="listQuery['%url%']" placeholder="节点地址" />
         <a-button type="primary" @click="refresh">搜索</a-button>

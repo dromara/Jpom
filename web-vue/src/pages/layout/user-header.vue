@@ -1,7 +1,7 @@
 <template>
   <div class="user-header">
     <a-tooltip placement="left" title="切换工作空间">
-      <a-select v-model="selectWorkspace" class="workspace" show-search placeholder="工作空间" @change="handleChange">
+      <a-select v-model="selectWorkspace" class="workspace" option-filter-prop="children" show-search placeholder="工作空间" @change="handleChange">
         <a-select-option v-for="item in myWorkspaceList" :key="item.id">{{ item.name }}</a-select-option>
       </a-select>
     </a-tooltip>

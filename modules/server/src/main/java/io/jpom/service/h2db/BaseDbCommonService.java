@@ -42,6 +42,7 @@ import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 /**
@@ -231,6 +232,16 @@ public abstract class BaseDbCommonService<T> {
 	 * @return 数据
 	 */
 	public T getByKey(String keyValue, boolean fill) {
+		return this.getByKey(keyValue, fill, null);
+	}
+
+	/**
+	 * 根据主键查询实体
+	 *
+	 * @param keyValue 主键值
+	 * @return 数据
+	 */
+	public T getByKey(String keyValue, boolean fill, Consumer<Entity> consumer) {
 		if (StrUtil.isEmpty(keyValue)) {
 			return null;
 		}
@@ -243,6 +254,9 @@ public abstract class BaseDbCommonService<T> {
 		where.set(key, keyValue);
 		Db db = Db.use();
 		db.setWrapper((Character) null);
+		if (consumer != null) {
+			consumer.accept(where);
+		}
 		Entity entity;
 		try {
 			entity = db.get(where);
@@ -281,6 +295,17 @@ public abstract class BaseDbCommonService<T> {
 	 * @return 影响行数
 	 */
 	public int delByKey(String keyValue) {
+		return this.delByKey(keyValue, null);
+	}
+
+	/**
+	 * 根据主键生成
+	 *
+	 * @param keyValue 主键值
+	 * @param consumer 回调
+	 * @return 影响行数
+	 */
+	public int delByKey(String keyValue, Consumer<Entity> consumer) {
 		if (StrUtil.isEmpty(keyValue)) {
 			return 0;
 		}
@@ -291,6 +316,9 @@ public abstract class BaseDbCommonService<T> {
 		}
 		Entity where = new Entity(tableName);
 		where.set(key, keyValue);
+		if (consumer != null) {
+			consumer.accept(where);
+		}
 		return del(where);
 	}
 

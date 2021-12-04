@@ -29,7 +29,6 @@ import io.jpom.service.node.NodeOld1Service;
 import io.jpom.service.node.OutGivingServer;
 import io.jpom.service.node.manage.ProjectInfoService;
 import io.jpom.service.node.script.ScriptServer;
-import io.jpom.service.node.ssh.SshService;
 import io.jpom.service.node.tomcat.TomcatService;
 
 import java.util.*;
@@ -60,7 +59,7 @@ public class DynamicData {
         // 脚本
         put(ClassFeature.SCRIPT, new DynamicData(ScriptServer.class, MethodFeature.LIST));
         //
-        put(ClassFeature.SSH, new DynamicData(SshService.class, MethodFeature.LIST));
+//        put(ClassFeature.SSH, new DynamicData(SshServiceOld.class, MethodFeature.LIST));
         //
         put(ClassFeature.TOMCAT, new DynamicData(TomcatService.class, MethodFeature.LIST));
         //
