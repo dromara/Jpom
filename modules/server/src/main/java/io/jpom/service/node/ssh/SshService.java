@@ -19,7 +19,7 @@ import io.jpom.model.data.NodeModel;
 import io.jpom.model.data.SshModel;
 import io.jpom.permission.BaseDynamicService;
 import io.jpom.plugin.ClassFeature;
-import io.jpom.service.node.NodeService;
+import io.jpom.service.node.NodeOld1Service;
 import io.jpom.system.ConfigBean;
 import io.jpom.system.JpomRuntimeException;
 import io.jpom.system.ServerConfigBean;
@@ -42,7 +42,7 @@ import java.util.concurrent.atomic.AtomicReference;
 public class SshService extends BaseOperService<SshModel> implements BaseDynamicService {
 
 	@Resource
-	private NodeService nodeService;
+	private NodeOld1Service nodeServiceOld;
 
 	public SshService() {
 		super(ServerConfigBean.SSH_LIST);
@@ -67,7 +67,7 @@ public class SshService extends BaseOperService<SshModel> implements BaseDynamic
 	public JSONArray listSelect(String nodeId) {
 		// 查询ssh
 		List<SshModel> sshModels = list();
-		List<NodeModel> list = nodeService.list();
+		List<NodeModel> list = nodeServiceOld.list();
 		JSONArray sshList = new JSONArray();
 		if (sshModels == null) {
 			return sshList;
@@ -79,10 +79,10 @@ public class SshService extends BaseOperService<SshModel> implements BaseDynamic
 			jsonObject.put("name", sshModel.getName());
 			if (list != null) {
 				for (NodeModel nodeModel : list) {
-					if (!StrUtil.equals(nodeId, nodeModel.getId()) && StrUtil.equals(sshModelId, nodeModel.getSshId())) {
-						jsonObject.put("disabled", true);
-						break;
-					}
+//					if (!StrUtil.equals(nodeId, nodeModel.getId()) && StrUtil.equals(sshModelId, nodeModel.getSshId())) {
+//						jsonObject.put("disabled", true);
+//						break;
+//					}
 				}
 			}
 			sshList.add(jsonObject);

@@ -311,7 +311,8 @@ public class OutGivingProjectEditController extends BaseServerController {
 			return JsonMessage.getString(405, "分发名称不能为空");
 		}
 		String reqId = getParameter("reqId");
-		List<NodeModel> nodeModelList = nodeService.getNodeModel(reqId);
+		List<NodeModel> nodeModelList = null;
+		// nodeService.getNodeModel(reqId);
 		if (nodeModelList == null) {
 			return JsonMessage.getString(401, "当前页面请求超时");
 		}

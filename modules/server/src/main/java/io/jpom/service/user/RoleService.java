@@ -109,7 +109,7 @@ public class RoleService extends BaseOperService<RoleModel> {
 		if (userModel.isSystemUser()) {
 			return false;
 		}
-		Set<String> roles = userModel.getRoles();
+		Set<String> roles = null;
 		if (roles == null || roles.isEmpty()) {
 			return true;
 		}
@@ -136,7 +136,7 @@ public class RoleService extends BaseOperService<RoleModel> {
 		if (userModel.isSystemUser()) {
 			return true;
 		}
-		Set<String> roles = userModel.getRoles();
+		Set<String> roles = null;
 		if (CollUtil.isEmpty(roles)) {
 			return false;
 		}
@@ -164,7 +164,7 @@ public class RoleService extends BaseOperService<RoleModel> {
 		if (userModel.isSystemUser()) {
 			return false;
 		}
-		Set<String> roles = userModel.getRoles();
+		Set<String> roles = null;
 		if (roles == null || roles.isEmpty()) {
 			return true;
 		}
@@ -185,7 +185,7 @@ public class RoleService extends BaseOperService<RoleModel> {
 	}
 
 	public Set<String> getDynamicList(UserModel userModel, ClassFeature classFeature, String parentId) {
-		Set<String> roles = userModel.getRoles();
+		Set<String> roles = null;
 		if (roles == null || roles.isEmpty()) {
 			return null;
 		}

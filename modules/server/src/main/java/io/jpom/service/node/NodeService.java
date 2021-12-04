@@ -1,238 +1,124 @@
 package io.jpom.service.node;
 
-import cn.hutool.cache.impl.TimedCache;
-import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
-import cn.jiangzeyin.common.JsonMessage;
-import com.alibaba.fastjson.JSONArray;
-import io.jpom.common.BaseOperService;
+import cn.hutool.db.Entity;
+import cn.hutool.extra.servlet.ServletUtil;
 import io.jpom.common.JpomManifest;
 import io.jpom.common.forward.NodeForward;
 import io.jpom.common.forward.NodeUrl;
 import io.jpom.model.Cycle;
 import io.jpom.model.data.NodeModel;
+import io.jpom.model.data.WorkspaceModel;
 import io.jpom.monitor.NodeMonitor;
-import io.jpom.permission.BaseDynamicService;
-import io.jpom.plugin.ClassFeature;
-import io.jpom.system.ServerConfigBean;
+import io.jpom.service.h2db.BaseWorkspaceService;
 import io.jpom.util.StringUtil;
 import org.springframework.stereotype.Service;
+import org.springframework.util.Assert;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 /**
- * 节点管理
- *
- * @author jiangzeyin
- * @date 2019/4/16
+ * @author bwcx_jzy
+ * @since 2021/12/4
  */
 @Service
-public class NodeService extends BaseOperService<NodeModel> implements BaseDynamicService {
-
-	private static final TimedCache<String, List<NodeModel>> TIMED_CACHE = new TimedCache<>(TimeUnit.MINUTES.toMillis(5));
-
-
-	public NodeService() {
-		super(ServerConfigBean.NODE);
-	}
-
-	public HashSet<String> getAllGroup() {
-		//获取所有分组
-		List<NodeModel> nodeModels = list();
-		HashSet<String> hashSet = new HashSet<>();
-		if (nodeModels == null) {
-			return hashSet;
-		}
-		for (NodeModel nodeModel : nodeModels) {
-			hashSet.add(nodeModel.getGroup());
-		}
-		return hashSet;
-	}
+public class NodeService extends BaseWorkspaceService<NodeModel> {
 
 	/**
-	 * 获取所有节点 和节点下面的项目
+	 * 修改 节点
 	 *
-	 * @return list
+	 * @param request 请求对象
 	 */
-	public List<NodeModel> listAndProject() {
-		List<NodeModel> nodeModels = this.list();
-		Iterator<NodeModel> iterator = nodeModels.iterator();
-		while (iterator.hasNext()) {
-			NodeModel nodeModel = iterator.next();
-			if (!nodeModel.isOpenStatus()) {
-				iterator.remove();
-				continue;
-			}
-			try {
-				// 获取项目信息不需要状态
-				JSONArray jsonArray = NodeForward.requestData(nodeModel, NodeUrl.Manage_GetProjectInfo, JSONArray.class, "notStatus", "true");
-				if (jsonArray != null) {
-					nodeModel.setProjects(jsonArray);
-				} else {
-					iterator.remove();
-				}
-			} catch (Exception e) {
-				iterator.remove();
-			}
+	public void update(HttpServletRequest request) {
+		String type = request.getParameter("type");
+		boolean create = "add".equalsIgnoreCase(type);
+		// 创建对象
+		NodeModel nodeModel = ServletUtil.toBean(request, NodeModel.class, true);
+		String id = nodeModel.getId();
+		boolean general = StringUtil.isGeneral(id, 2, 20);
+		Assert.state(general, "节点id不能为空并且2-20（英文字母 、数字和下划线）");
+		Assert.hasText(nodeModel.getName(), "节点名称 不能为空");
+		// 节点地址 重复
+		String workspaceId = getCheckUserWorkspace(request);
+		Entity entity = Entity.create();
+		entity.set("url", nodeModel.getUrl());
+		entity.set("workspaceId", workspaceId);
+		if (StrUtil.isNotEmpty(id)) {
+			entity.set("id", StrUtil.format(" <> {}", id));
 		}
-		return nodeModels;
-	}
+		boolean exists = super.exists(entity);
+		Assert.state(!exists, "对应的节点已经存在啦");
 
-	/**
-	 * 获取所有节点 和节点下面的项目和状态
-	 *
-	 * @return list
-	 */
-	public List<NodeModel> listAndProjectAndStatus() {
-		List<NodeModel> nodeModels = this.list();
-		Iterator<NodeModel> iterator = nodeModels.iterator();
-		while (iterator.hasNext()) {
-			NodeModel nodeModel = iterator.next();
-			if (!nodeModel.isOpenStatus()) {
-				iterator.remove();
-				continue;
-			}
-			try {
-				// 获取项目信息不需要状态
-				JSONArray jsonArray = NodeForward.requestData(nodeModel, NodeUrl.Manage_GetProjectInfo, JSONArray.class, null, "true");
-				if (jsonArray != null) {
-					nodeModel.setProjects(jsonArray);
-				} else {
-					iterator.remove();
-				}
-			} catch (Exception e) {
-				iterator.remove();
-			}
+		if (nodeModel.isOpenStatus()) {
+			int timeOut = nodeModel.getTimeOut();
+			// 检查是否可用默认为5秒，避免太长时间无法连接一直等待
+			nodeModel.setTimeOut(5);
+			JpomManifest jpomManifest = NodeForward.requestData(nodeModel, NodeUrl.Info, request, JpomManifest.class);
+			Assert.notNull(jpomManifest, "节点连接失败，请检查节点是否在线");
+			nodeModel.setTimeOut(timeOut);
 		}
-		return nodeModels;
-
-	}
-
-
-	public String cacheNodeList(List<NodeModel> list) {
-		String reqId = IdUtil.fastUUID();
-		TIMED_CACHE.put(reqId, list);
-		return reqId;
-	}
-
-	/**
-	 * 获取页面编辑的节点信息
-	 *
-	 * @param id id
-	 * @return list
-	 */
-	public List<NodeModel> getNodeModel(String id) {
-		return TIMED_CACHE.get(id);
-	}
-
-	public String addNode(NodeModel nodeModel, HttpServletRequest request) {
-		if (!StringUtil.isGeneral(nodeModel.getId(), 2, 20)) {
-			return JsonMessage.getString(405, "节点id不能为空并且2-20（英文字母 、数字和下划线）");
+		if (create) {
+			this.insert(nodeModel);
+		} else {
+			this.update(nodeModel);
 		}
-		if (getItem(nodeModel.getId()) != null) {
-			return JsonMessage.getString(405, "节点id已经存在啦");
-		}
-		String error = checkData(nodeModel);
-		if (error != null) {
-			return error;
-		}
-		int timeOut = nodeModel.getTimeOut();
-		// 检查是否可用默认为5秒，避免太长时间无法连接一直等待
-		nodeModel.setTimeOut(5);
-		JpomManifest jpomManifest = NodeForward.requestData(nodeModel, NodeUrl.Info, request, JpomManifest.class);
-		if (jpomManifest == null) {
-			return JsonMessage.getString(204, "节点连接失败，请检查节点是否在线");
-		}
-		nodeModel.setTimeOut(timeOut);
-		addItem(nodeModel);
-		return JsonMessage.getString(200, "操作成功");
-	}
-
-	public String updateNode(NodeModel nodeModel) {
-		NodeModel exit = getItem(nodeModel.getId());
-		if (exit == null) {
-			return JsonMessage.getString(405, "节点不存在");
-		}
-		String error = checkData(nodeModel);
-		if (error != null) {
-			return error;
-		}
-		updateItem(nodeModel);
-		return JsonMessage.getString(200, "操作成功");
-	}
-
-	private String checkData(NodeModel nodeModel) {
-		if (StrUtil.isEmpty(nodeModel.getName())) {
-			return JsonMessage.getString(405, "节点名称 不能为空");
-		}
-		List<NodeModel> list = list();
-		if (list != null) {
-			for (NodeModel model : list) {
-				if (model.getUrl().equalsIgnoreCase(nodeModel.getUrl()) && !model.getId().equalsIgnoreCase(nodeModel.getId())) {
-					return JsonMessage.getString(405, "已经存在相同的节点地址啦");
-				}
-			}
-		}
-		return null;
 	}
 
 	@Override
-	public JSONArray listToArray(String dataId) {
-		return (JSONArray) JSONArray.toJSON(this.list());
-	}
-
-	@Override
-	public List<NodeModel> list() {
-		return (List<NodeModel>) filter(super.list(), ClassFeature.NODE);
-	}
-
-	@Override
-	public void addItem(NodeModel nodeModel) {
-		super.addItem(nodeModel);
+	public void insert(NodeModel nodeModel) {
+		super.insert(nodeModel);
 		if (nodeModel.isOpenStatus() && nodeModel.getCycle() != Cycle.none.getCode()) {
 			NodeMonitor.start();
 		}
 	}
 
 	@Override
-	public void deleteItem(String id) {
-		super.deleteItem(id);
-		this.checkCronStatus();
+	public void insertNotFill(NodeModel nodeModel) {
+		nodeModel.setWorkspaceId(WorkspaceModel.DEFAULT_ID);
+		super.insertNotFill(nodeModel);
+		if (nodeModel.isOpenStatus() && nodeModel.getCycle() != Cycle.none.getCode()) {
+			NodeMonitor.start();
+		}
 	}
 
 	@Override
-	public void updateItem(NodeModel nodeModel) {
-		super.updateItem(nodeModel);
+	public int delByKey(String keyValue) {
+		return super.delByKey(keyValue);
+	}
+
+	@Override
+	public int del(Entity where) {
+		return super.del(where);
+	}
+
+	@Override
+	public int update(NodeModel nodeModel) {
+		int update = super.update(nodeModel);
 		this.checkCronStatus();
+		return update;
+	}
+
+	@Override
+	public int updateById(NodeModel info) {
+		int updateById = super.updateById(info);
+		this.checkCronStatus();
+		return updateById;
 	}
 
 	public boolean checkCronStatus() {
 		// 关闭监听
-		List<NodeModel> list = list();
-		if (list == null || list.isEmpty()) {
+		Entity entity = Entity.create();
+		entity.set("openStatus", 1);
+		entity.set("cycle", StrUtil.format(" <> {}", Cycle.none.getCode()));
+		long count = super.count(entity);
+		if (count <= 0) {
 			NodeMonitor.stop();
 			return false;
-		} else {
-			boolean stop = true;
-			for (NodeModel nodeModel : list) {
-				if (nodeModel.isOpenStatus() && nodeModel.getCycle() != Cycle.none.getCode()) {
-					NodeMonitor.start();
-					stop = false;
-					break;
-				}
-			}
-			if (stop) {
-				NodeMonitor.stop();
-				return false;
-			}
-			return true;
 		}
+		NodeMonitor.start();
+		return true;
 	}
 
 	/**
@@ -242,14 +128,13 @@ public class NodeService extends BaseOperService<NodeModel> implements BaseDynam
 	 * @return list
 	 */
 	public List<NodeModel> listByCycle(Cycle cycle) {
-		List<NodeModel> list = this.list();
+		NodeModel nodeModel = new NodeModel();
+		nodeModel.setCycle(cycle.getCode());
+		nodeModel.setOpenStatus(1);
+		List<NodeModel> list = this.listByBean(nodeModel);
 		if (list == null) {
 			return new ArrayList<>();
 		}
-		return list.stream()
-				.filter(nodeModel -> nodeModel.getCycle() == cycle.getCode() && nodeModel.isOpenStatus())
-				.collect(Collectors.toList());
+		return list;
 	}
-
-
 }

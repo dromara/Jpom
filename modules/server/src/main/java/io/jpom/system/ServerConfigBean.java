@@ -47,6 +47,7 @@ public class ServerConfigBean {
 	/**
 	 * 节点数据文件
 	 */
+	@Deprecated
 	public static final String NODE = "node.json";
 
 	/**

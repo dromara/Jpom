@@ -1,5 +1,6 @@
 package io.jpom.model.data;
 
+import cn.hutool.crypto.SecureUtil;
 import io.jpom.model.BaseDbModel;
 import io.jpom.service.h2db.TableName;
 
@@ -28,5 +29,16 @@ public class UserBindWorkspaceModel extends BaseDbModel {
 
 	public void setWorkspaceId(String workspaceId) {
 		this.workspaceId = workspaceId;
+	}
+
+	/**
+	 * 生产绑定关系表 主键 ID
+	 *
+	 * @param userId      用户ID
+	 * @param workspaceId 工作空间ID
+	 * @return id
+	 */
+	public static String getId(String userId, String workspaceId) {
+		return SecureUtil.sha1(userId + workspaceId);
 	}
 }

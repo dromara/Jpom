@@ -47,3 +47,8 @@ export function PAGE_DEFAULT_SHOW_TOTAL(total, listQuery) {
   }
   return `总计 ${total} 条`;
 }
+
+/**
+ * 缓存当前的工作空间 ID
+ */
+export const CACHE_WORKSPACE_ID = "workspaceId";

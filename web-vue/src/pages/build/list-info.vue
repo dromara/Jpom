@@ -10,15 +10,7 @@
       <a-button type="primary" @click="handleFilter">刷新</a-button>
     </div>
     <!-- 表格 -->
-    <a-table
-      :loading="loading"
-      :columns="columns"
-      :data-source="list"
-      bordered
-      rowKey="id"
-      :pagination="pagination"
-      @change="changePage"
-    >
+    <a-table :loading="loading" :columns="columns" :data-source="list" bordered rowKey="id" :pagination="pagination" @change="changePage">
       <a-tooltip slot="name" slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>
@@ -223,7 +215,8 @@ import { clearBuid, deleteBuild, editBuild, getBranchList, getBuildGroupList, ge
 import { getDishPatchList } from "../../api/dispatch";
 import { getNodeProjectList } from "../../api/node";
 import { getSshList } from "../../api/ssh";
-import { parseTime } from "../../utils/time";
+import { parseTime } from "@/utils/time";
+import { PAGE_DEFAULT_LIMIT, PAGE_DEFAULT_SIZW_OPTIONS, PAGE_DEFAULT_SHOW_TOTAL } from "@/utils/const";
 
 export default {
   components: {
@@ -236,7 +229,7 @@ export default {
       loading: false,
       listQuery: {
         page: 1,
-        limit: 10,
+        limit: PAGE_DEFAULT_LIMIT,
       },
       // 动态列表参数
       groupList: [],
@@ -336,14 +329,11 @@ export default {
       return {
         total: this.total,
         current: this.listQuery.page || 1,
-        pageSize: this.listQuery.limit || 10,
-        pageSizeOptions: ["10", "20", "50", "100"],
+        pageSize: this.listQuery.limit || PAGE_DEFAULT_LIMIT,
+        pageSizeOptions: PAGE_DEFAULT_SIZW_OPTIONS,
         showSizeChanger: true,
         showTotal: (total) => {
-          if (total <= this.listQuery.limit) {
-            return "";
-          }
-          return `总计 ${total} 条`;
+          return PAGE_DEFAULT_SHOW_TOTAL(total, this.listQuery);
         },
       };
     },

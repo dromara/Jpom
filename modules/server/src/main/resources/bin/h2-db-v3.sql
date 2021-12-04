@@ -68,3 +68,25 @@ CREATE TABLE IF NOT EXISTS PUBLIC.USER_BIND_WORKSPACE
 );
 comment on table USER_BIND_WORKSPACE is '用户工作空间绑定表';
 
+
+-- 节点列表
+CREATE TABLE IF NOT EXISTS PUBLIC.NODE_INFO
+(
+	ID               VARCHAR(50)  not null comment 'id',
+	CREATETIMEMILLIS BIGINT COMMENT '数据创建时间',
+	MODIFYTIMEMILLIS BIGINT COMMENT '数据修改时间',
+	MODIFYUSER       VARCHAR(50) comment '修改人',
+	STRIKE           int DEFAULT 0 comment '逻辑删除{1，删除，0 未删除(默认)}',
+	workspaceId      varchar(50)  not null comment '所属工作空间',
+	`NAME`           VARCHAR(50) comment '名称',
+	url              varchar(100) not null comment '节点 url IP:PORT',
+	loginName        varchar(100) not null comment '节点登录名',
+	loginPwd         varchar(100) not null comment '节点密码',
+	protocol         varchar(10)  not null comment '协议 http https',
+	openStatus       int DEFAULT 0 comment '启用状态{1，启用，0 未启用)}',
+	timeOut          int default 0 comment '节点超时时间',
+	cycle            int comment '监控周期',
+	CONSTRAINT NODE_INFO_PK PRIMARY KEY (ID)
+);
+comment on table NODE_INFO is '用户工作空间绑定表';
+

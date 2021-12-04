@@ -42,7 +42,7 @@ import io.jpom.model.data.OutGivingNodeProject;
 import io.jpom.model.data.UserModel;
 import io.jpom.model.log.OutGivingLog;
 import io.jpom.service.dblog.DbOutGivingLogService;
-import io.jpom.service.node.NodeService;
+import io.jpom.service.node.NodeOld1Service;
 import io.jpom.service.node.OutGivingServer;
 
 import java.io.File;
@@ -150,7 +150,7 @@ public class OutGivingRun implements Callable<OutGivingNodeProject.Status> {
 		}
 		this.afterOpt = afterOpt;
 		//
-		NodeService nodeService = SpringUtil.getBean(NodeService.class);
+		NodeOld1Service nodeService = SpringUtil.getBean(NodeOld1Service.class);
 		this.nodeModel = nodeService.getItem(outGivingNodeProject.getNodeId());
 		//
 		this.userModel = userModel;

@@ -37,7 +37,7 @@ import io.jpom.model.data.NodeModel;
 import io.jpom.model.data.NodeVersionModel;
 import io.jpom.model.data.UserModel;
 import io.jpom.service.node.AgentFileService;
-import io.jpom.service.node.NodeService;
+import io.jpom.service.node.NodeOld1Service;
 import io.jpom.socket.BaseProxyHandler;
 import io.jpom.socket.ConsoleCommandOp;
 import io.jpom.socket.client.NodeClient;
@@ -63,7 +63,7 @@ public class NodeUpdateHandler extends BaseProxyHandler {
 	private final ConcurrentMap<String, NodeClient> clientMap = new ConcurrentHashMap<>();
 
 	private AgentFileService agentFileService;
-	private NodeService nodeService;
+	private NodeOld1Service nodeService;
 
 	public NodeUpdateHandler() {
 		super(null);
@@ -71,7 +71,7 @@ public class NodeUpdateHandler extends BaseProxyHandler {
 
 	private void init() {
 		agentFileService = SpringUtil.getBean(AgentFileService.class);
-		nodeService = SpringUtil.getBean(NodeService.class);
+		nodeService = SpringUtil.getBean(NodeOld1Service.class);
 	}
 
 	@Override
@@ -265,14 +265,14 @@ public class NodeUpdateHandler extends BaseProxyHandler {
 	 * @return 节点列表
 	 */
 	private List<NodeVersionModel> getNodeList() {
-		NodeService nodeService = SpringUtil.getBean(NodeService.class);
+		NodeOld1Service nodeService = SpringUtil.getBean(NodeOld1Service.class);
 		List<NodeModel> nodeModels = nodeService.list();
 		List<NodeVersionModel> result = new ArrayList<>();
 		for (NodeModel node : nodeModels) {
 			NodeVersionModel model = new NodeVersionModel();
 			model.setId(node.getId());
 			model.setName(node.getName());
-			model.setGroup(node.getGroup());
+//			model.setGroup(node.getGroup());
 			result.add(model);
 		}
 		return result;

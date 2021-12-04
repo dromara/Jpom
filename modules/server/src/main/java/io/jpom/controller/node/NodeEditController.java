@@ -1,9 +1,13 @@
 package io.jpom.controller.node;
 
-import cn.hutool.extra.servlet.ServletUtil;
 import cn.jiangzeyin.common.JsonMessage;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import io.jpom.common.BaseServerController;
+import io.jpom.common.forward.NodeForward;
+import io.jpom.common.forward.NodeUrl;
 import io.jpom.common.interceptor.OptLog;
+import io.jpom.model.PageResultDto;
 import io.jpom.model.data.NodeModel;
 import io.jpom.model.log.UserOperateLogV1;
 import io.jpom.plugin.ClassFeature;
@@ -13,12 +17,11 @@ import io.jpom.service.dblog.BuildInfoService;
 import io.jpom.service.monitor.MonitorService;
 import io.jpom.service.node.OutGivingServer;
 import org.springframework.http.MediaType;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.util.Assert;
+import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import java.util.List;
 
 /**
  * 节点管理
@@ -26,7 +29,7 @@ import javax.annotation.Resource;
  * @author jiangzeyin
  * @date 2019/4/16
  */
-@Controller
+@RestController
 @RequestMapping(value = "/node")
 @Feature(cls = ClassFeature.NODE)
 public class NodeEditController extends BaseServerController {
@@ -39,39 +42,51 @@ public class NodeEditController extends BaseServerController {
 	private BuildInfoService buildService;
 
 
-//    @RequestMapping(value = "edit.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
-//    @Feature(method = MethodFeature.EDIT)
-//    public String edit(String id) {
-//        setAttribute("type", "add");
-//        if (StrUtil.isNotEmpty(id)) {
-//            NodeModel nodeModel = nodeService.getItem(id);
-//            if (nodeModel != null) {
-//                setAttribute("item", nodeModel);
-//                setAttribute("type", "edit");
-//            }
-//        }
-//        // group
-//        HashSet<String> allGroup = nodeService.getAllGroup();
-//        setAttribute("groups", allGroup);
-//        JSONArray sshList = sshService.listSelect(id);
-//        setAttribute("sshList", sshList);
-//        //监控周期
-//        JSONArray cycleArray = Cycle.getAllJSONArray();
-//        setAttribute("cycleArray", cycleArray);
-//        return "node/edit";
-//    }
+	@PostMapping(value = "list_data.json", produces = MediaType.APPLICATION_JSON_VALUE)
+	@Feature(method = MethodFeature.LIST)
+	public String listJson() {
+		PageResultDto<NodeModel> nodeModelPageResultDto = nodeService.listPage(getRequest());
+		return JsonMessage.getString(200, "", nodeModelPageResultDto);
+	}
 
-	@RequestMapping(value = "save.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	@OptLog(UserOperateLogV1.OptType.EditNode)
+	@RequestMapping(value = "node_status", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
+	@Feature(method = MethodFeature.LIST)
+	public String nodeStatus() {
+		long timeMillis = System.currentTimeMillis();
+		JSONObject jsonObject = NodeForward.requestData(getNode(), NodeUrl.Status, getRequest(), JSONObject.class);
+		Assert.notNull(jsonObject, "获取信息失败");
+		JSONArray jsonArray = new JSONArray();
+		jsonObject.put("timeOut", System.currentTimeMillis() - timeMillis);
+		jsonArray.add(jsonObject);
+		return JsonMessage.getString(200, "", jsonArray);
+	}
+
+	/**
+	 * @param status 节点状态获取
+	 * @return json
+	 * @author Hotstrip
+	 * load node project list
+	 * 加载节点项目列表
+	 */
+	@RequestMapping(value = "node_project_list", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody
+	public String nodeProjectList(@RequestParam(value = "status", defaultValue = "false") Boolean status) {
+		List<NodeModel> nodeModels = null;
+//		if (status) {
+//			nodeModels = nodeService.listAndProjectAndStatus();
+//		} else {
+//			nodeModels = nodeService.listAndProject();
+//		}
+
+		return JsonMessage.getString(200, "success", nodeModels);
+	}
+
+	@PostMapping(value = "save.json", produces = MediaType.APPLICATION_JSON_VALUE)
 	@Feature(method = MethodFeature.EDIT)
-	public String save(String type) {
-		NodeModel model = ServletUtil.toBean(getRequest(), NodeModel.class, true);
-		if ("add".equalsIgnoreCase(type)) {
-			return nodeService.addNode(model, getRequest());
-		} else {
-			return nodeService.updateNode(model);
-		}
+	public String save() {
+		nodeService.update(getRequest());
+		return JsonMessage.getString(200, "操作成功");
 	}
 
 
@@ -97,7 +112,7 @@ public class NodeEditController extends BaseServerController {
 		if (buildService.checkNode(id)) {
 			return JsonMessage.getString(400, "该节点存在构建项，不能删除");
 		}
-		nodeService.deleteItem(id);
+		nodeService.delByKey(id);
 		// 删除授权
 		//        List<UserModel> list = userService.list();
 		//        if (list != null) {

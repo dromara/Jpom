@@ -35,11 +35,12 @@ import io.jpom.model.data.NodeModel;
 import io.jpom.model.data.UserModel;
 import io.jpom.service.node.NodeService;
 import io.jpom.system.JpomRuntimeException;
+import io.jpom.system.ServerConfigBean;
+import org.springframework.util.Assert;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.annotation.Resource;
-import java.util.Objects;
 
 /**
  * Jpom server 端
@@ -68,7 +69,7 @@ public abstract class BaseServerController extends BaseJpomController {
 		if (StrUtil.isEmpty(nodeId)) {
 			return null;
 		}
-		return nodeService.getItem(nodeId);
+		return nodeService.getByKey(nodeId);
 	}
 
 	@Override
@@ -77,8 +78,17 @@ public abstract class BaseServerController extends BaseJpomController {
 	}
 
 	protected UserModel getUser() {
+		return getUserByThreadLocal();
+	}
+
+	/**
+	 * 从线程 缓存中获取 用户信息
+	 *
+	 * @return 用户
+	 */
+	public static UserModel getUserByThreadLocal() {
 		UserModel userModel = USER_MODEL_THREAD_LOCAL.get();
-		Objects.requireNonNull(userModel);
+		Assert.notNull(userModel, ServerConfigBean.AUTHORIZE_TIME_OUT_CODE + StrUtil.EMPTY);
 		return userModel;
 	}
 

@@ -157,10 +157,10 @@ public class SshInstallAgentController extends BaseServerController {
 					}
 				}
 			}
-			nodeModel.setOpenStatus(true);
+			nodeModel.setOpenStatus(1);
 			// 绑定关系
-			nodeModel.setSshId(sshModel.getId());
-			nodeService.addItem(nodeModel);
+			//nodeModel.setSshId(sshModel.getId());
+			nodeService.insert(nodeModel);
 			//
 			return JsonMessage.getString(200, "操作成功:" + result);
 		} finally {

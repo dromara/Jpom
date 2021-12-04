@@ -35,11 +35,13 @@ import io.jpom.common.BaseServerController;
 import io.jpom.common.Const;
 import io.jpom.model.BaseDbModel;
 import io.jpom.model.BaseUserModifyDbModel;
+import io.jpom.model.BaseWorkspaceModel;
 import io.jpom.model.PageResultDto;
 import io.jpom.model.data.UserModel;
+import io.jpom.model.data.WorkspaceModel;
 import org.springframework.util.Assert;
 
-import javax.servlet.ServletRequest;
+import javax.servlet.http.HttpServletRequest;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -69,6 +71,17 @@ public abstract class BaseDbService<T extends BaseDbModel> extends BaseDbCommonS
 		super.insert(t);
 	}
 
+	/**
+	 * 不填充 插入
+	 *
+	 * @param t 数据
+	 */
+	public void insertNotFill(T t) {
+		// def create time
+		t.setCreateTimeMillis(ObjectUtil.defaultIfNull(t.getCreateTimeMillis(), SystemClock.now()));
+		t.setId(ObjectUtil.defaultIfNull(t.getId(), IdUtil.fastSimpleUUID()));
+		super.insert(t);
+	}
 
 	@Override
 	public void insert(Collection<T> t) {
@@ -77,16 +90,27 @@ public abstract class BaseDbService<T extends BaseDbModel> extends BaseDbCommonS
 		super.insert(t);
 	}
 
-	private void fillInsert(T t) {
+	/**
+	 * 插入数据填充
+	 *
+	 * @param t 数据
+	 */
+	protected void fillInsert(T t) {
 		// def create time
 		t.setCreateTimeMillis(ObjectUtil.defaultIfNull(t.getCreateTimeMillis(), SystemClock.now()));
 		t.setId(ObjectUtil.defaultIfNull(t.getId(), IdUtil.fastSimpleUUID()));
 		if (t instanceof BaseUserModifyDbModel) {
+			// 获取数据修改人
 			BaseUserModifyDbModel modifyDbModel = (BaseUserModifyDbModel) t;
 			UserModel userModel = BaseServerController.getUserModel();
 			if (userModel != null) {
 				modifyDbModel.setModifyUser(ObjectUtil.defaultIfNull(modifyDbModel.getModifyUser(), userModel.getId()));
 			}
+		}
+		if (t instanceof BaseWorkspaceModel) {
+			// 数据都将绑定一个默认的工作空间
+			BaseWorkspaceModel baseWorkspaceModel = (BaseWorkspaceModel) t;
+			baseWorkspaceModel.setWorkspaceId(ObjectUtil.defaultIfNull(baseWorkspaceModel.getWorkspaceId(), WorkspaceModel.DEFAULT_ID));
 		}
 	}
 
@@ -145,8 +169,20 @@ public abstract class BaseDbService<T extends BaseDbModel> extends BaseDbCommonS
 	 * @param request 请求对象
 	 * @return page
 	 */
-	public PageResultDto<T> listPage(ServletRequest request) {
+	public PageResultDto<T> listPage(HttpServletRequest request) {
 		Map<String, String> paramMap = ServletUtil.getParamMap(request);
+		return this.listPage(paramMap);
+	}
+
+	/**
+	 * 通用的分页查询, 使用该方法查询，数据库表字段不能保护 "page", "limit", "order_field", "order", "total"
+	 * <p>
+	 * page=1&limit=10&order=ascend&order_field=name
+	 *
+	 * @param paramMap 请求参数
+	 * @return page
+	 */
+	public PageResultDto<T> listPage(Map<String, String> paramMap) {
 		int page = Convert.toInt(paramMap.get("page"), 1);
 		int limit = Convert.toInt(paramMap.get("limit"), 10);
 		Assert.state(page > 0, "page value error");

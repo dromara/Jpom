@@ -6,10 +6,8 @@ import io.jpom.common.forward.NodeUrl;
 import io.jpom.model.data.NodeModel;
 import io.jpom.permission.BaseDynamicService;
 import io.jpom.plugin.ClassFeature;
-import io.jpom.service.node.NodeService;
+import io.jpom.service.node.NodeOld1Service;
 import org.springframework.stereotype.Service;
-
-import javax.annotation.Resource;
 
 /**
  * @author bwcx_jzy
@@ -18,8 +16,12 @@ import javax.annotation.Resource;
 @Service
 public class ScriptServer implements BaseDynamicService {
 
-	@Resource
-	private NodeService nodeService;
+
+	private final NodeOld1Service nodeService;
+
+	public ScriptServer(NodeOld1Service nodeService) {
+		this.nodeService = nodeService;
+	}
 
 	@Override
 	public JSONArray listToArray(String dataId) {

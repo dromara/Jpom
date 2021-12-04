@@ -36,7 +36,9 @@ import cn.hutool.setting.Setting;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.PreLoadClass;
 import cn.jiangzeyin.common.PreLoadMethod;
+import cn.jiangzeyin.common.spring.SpringUtil;
 import io.jpom.common.JpomManifest;
+import io.jpom.service.system.WorkspaceService;
 import io.jpom.system.ServerExtConfigBean;
 import io.jpom.system.db.DbConfig;
 import org.springframework.beans.factory.DisposableBean;
@@ -150,6 +152,11 @@ public class InitDb implements DisposableBean, InitializingBean {
 		instance.loadMailConfig();
 		instance.loadOutGivingWhitelistConfig();
 		instance.loadUserInfo();
+		// init workspace
+		WorkspaceService workspaceService = SpringUtil.getBean(WorkspaceService.class);
+		workspaceService.checkInitDefault();
+		//
+		instance.loadNodeInfo();
 	}
 
 	@Override
@@ -163,7 +170,7 @@ public class InitDb implements DisposableBean, InitializingBean {
 			DSFactory dsFactory = GlobalDSFactory.get();
 			dsFactory.destroy();
 			Console.log("h2 db destroy");
-		} catch (Exception ignored) {
+		} catch (Throwable ignored) {
 		}
 	}
 }

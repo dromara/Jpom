@@ -24,12 +24,10 @@ package io.jpom.model.data;
 
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SecureUtil;
-import com.alibaba.fastjson.JSONArray;
 import io.jpom.common.forward.NodeUrl;
-import io.jpom.model.BaseModel;
+import io.jpom.model.BaseWorkspaceModel;
 import io.jpom.model.Cycle;
-
-import java.util.Objects;
+import io.jpom.service.h2db.TableName;
 
 /**
  * 节点实体
@@ -37,87 +35,108 @@ import java.util.Objects;
  * @author jiangzeyin
  * @date 2019/4/16
  */
-public class NodeModel extends BaseModel {
+@TableName("NODE_INFO")
+public class NodeModel extends BaseWorkspaceModel {
 
 	private String url;
 	private String loginName;
 	private String loginPwd;
+	private String name;
+
 	/**
 	 * 节点协议
 	 */
 	private String protocol = "http";
 
-	private String authorize;
-	/**
-	 * 项目信息  临时信息
-	 */
-	private JSONArray projects;
+//	/**
+//	 * 项目信息  临时信息
+//	 */
+//	private JSONArray projects;
 	/**
 	 * 开启状态，如果关闭状态就暂停使用节点
 	 */
-	private boolean openStatus;
+	private Integer openStatus;
 	/**
 	 * 节点超时时间
 	 */
-	private int timeOut;
-	/**
-	 * 绑定的sshId
-	 */
-	private String sshId;
+	private Integer timeOut;
+//	/**
+//	 * 绑定的sshId
+//	 */
+//	private String sshId;
 
-	/**
-	 * 节点分组
-	 */
-	private String group;
+//	/**
+//	 * 节点分组
+//	 */
+//	private String group;
 
 	/**
 	 * 监控周期
 	 */
-	private int cycle = Cycle.none.getCode();
+	private Integer cycle = Cycle.none.getCode();
 
-	public int getCycle() {
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public Integer getCycle() {
 		return cycle;
 	}
 
-	public void setCycle(int cycle) {
+	public void setCycle(Integer cycle) {
 		this.cycle = cycle;
 	}
 
-	public String getGroup() {
-		return StrUtil.emptyToDefault(group, "默认");
-	}
+//	public String getGroup() {
+//		return StrUtil.emptyToDefault(group, "默认");
+//	}
+//
+//	public void setGroup(String group) {
+//		this.group = group;
+//	}
 
-	public void setGroup(String group) {
-		this.group = group;
-	}
+//	public String getSshId() {
+//		return sshId;
+//	}
+//
+//	public void setSshId(String sshId) {
+//		this.sshId = sshId;
+//	}
 
-	public String getSshId() {
-		return sshId;
-	}
-
-	public void setSshId(String sshId) {
-		this.sshId = sshId;
-	}
-
-	public int getTimeOut() {
+	public Integer getTimeOut() {
 		return timeOut;
 	}
 
-	public void setTimeOut(int timeOut) {
+	public void setTimeOut(Integer timeOut) {
 		this.timeOut = timeOut;
 	}
 
-	public boolean isOpenStatus() {
+	public Integer getOpenStatus() {
 		return openStatus;
 	}
 
-	public void setOpenStatus(boolean openStatus) {
+	public void setOpenStatus(Integer openStatus) {
 		this.openStatus = openStatus;
 	}
 
-	public JSONArray getProjects() {
-		return projects;
+	public boolean isOpenStatus() {
+		return openStatus != null && openStatus == 1;
 	}
+
+	public NodeModel() {
+	}
+
+	public NodeModel(String id) {
+		this.setId(id);
+	}
+	//
+//	public JSONArray getProjects() {
+//		return projects;
+//	}
 //
 //    /**
 //     * 返回按照项目分组 排列的数组
@@ -146,10 +165,10 @@ public class NodeModel extends BaseModel {
 //        newArray.addAll(map.values());
 //        return newArray;
 //    }
-
-	public void setProjects(JSONArray projects) {
-		this.projects = projects;
-	}
+//
+//	public void setProjects(JSONArray projects) {
+//		this.projects = projects;
+//	}
 
 	public String getProtocol() {
 		return protocol;
@@ -189,37 +208,11 @@ public class NodeModel extends BaseModel {
 	 * @return sha1
 	 */
 	public String toAuthorize() {
-		if (authorize == null) {
-			authorize = SecureUtil.sha1(loginName + "@" + loginPwd);
-		}
-		return authorize;
+		return SecureUtil.sha1(loginName + "@" + loginPwd);
 	}
 
 	public String getRealUrl(NodeUrl nodeUrl) {
 		return StrUtil.format("{}://{}{}", getProtocol(), getUrl(), nodeUrl.getUrl());
 	}
 
-	@Override
-	public boolean equals(Object o) {
-		if (this == o) {
-			return true;
-		}
-		if (o == null || getClass() != o.getClass()) {
-			return false;
-		}
-		NodeModel nodeModel = (NodeModel) o;
-		return openStatus == nodeModel.openStatus &&
-				timeOut == nodeModel.timeOut &&
-				Objects.equals(url, nodeModel.url) &&
-				Objects.equals(loginName, nodeModel.loginName) &&
-				Objects.equals(loginPwd, nodeModel.loginPwd) &&
-				Objects.equals(protocol, nodeModel.protocol) &&
-				Objects.equals(authorize, nodeModel.authorize) &&
-				Objects.equals(projects, nodeModel.projects);
-	}
-
-	@Override
-	public int hashCode() {
-		return Objects.hash(url, loginName, loginPwd, protocol, authorize, projects, openStatus, timeOut);
-	}
 }

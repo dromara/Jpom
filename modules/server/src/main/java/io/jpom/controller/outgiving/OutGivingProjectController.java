@@ -107,7 +107,7 @@ public class OutGivingProjectController extends BaseServerController {
 		List<OutGivingNodeProject> outGivingNodeProjectList = outGivingServerItem.getOutGivingNodeProjectList();
 		JSONArray jsonArray = new JSONArray();
 		outGivingNodeProjectList.forEach(outGivingNodeProject -> {
-			NodeModel nodeModel = nodeService.getItem(outGivingNodeProject.getNodeId());
+			NodeModel nodeModel = nodeService.getByKey(outGivingNodeProject.getNodeId());
 			JSONObject jsonObject = new JSONObject();
 			JSONObject projectInfo = null;
 			try {

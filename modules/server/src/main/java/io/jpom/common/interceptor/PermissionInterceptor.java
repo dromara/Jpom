@@ -35,7 +35,7 @@ import io.jpom.permission.SystemPermission;
 import io.jpom.plugin.ClassFeature;
 import io.jpom.plugin.Feature;
 import io.jpom.plugin.MethodFeature;
-import io.jpom.service.node.NodeService;
+import io.jpom.service.node.NodeOld1Service;
 import io.jpom.service.user.RoleService;
 import io.jpom.system.AgentException;
 import org.springframework.http.MediaType;
@@ -54,7 +54,7 @@ import java.io.IOException;
 @InterceptorPattens(sort = 1)
 public class PermissionInterceptor extends BaseJpomInterceptor {
 
-	private NodeService nodeService;
+	private NodeOld1Service nodeService;
 	private RoleService roleService;
 
 	/**
@@ -69,7 +69,7 @@ public class PermissionInterceptor extends BaseJpomInterceptor {
 
 	private void init() {
 		if (nodeService == null) {
-			nodeService = SpringUtil.getBean(NodeService.class);
+			nodeService = SpringUtil.getBean(NodeOld1Service.class);
 		}
 		if (roleService == null) {
 			roleService = SpringUtil.getBean(RoleService.class);

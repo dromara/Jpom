@@ -1,6 +1,5 @@
 package io.jpom.service.user;
 
-import cn.hutool.crypto.SecureUtil;
 import io.jpom.model.data.UserBindWorkspaceModel;
 import io.jpom.model.data.WorkspaceModel;
 import io.jpom.service.h2db.BaseDbService;
@@ -41,7 +40,7 @@ public class UserBindWorkspaceService extends BaseDbService<UserBindWorkspaceMod
 					UserBindWorkspaceModel userBindWorkspaceModel = new UserBindWorkspaceModel();
 					userBindWorkspaceModel.setWorkspaceId(s);
 					userBindWorkspaceModel.setUserId(userId);
-					userBindWorkspaceModel.setId(SecureUtil.sha1(userId + s));
+					userBindWorkspaceModel.setId(UserBindWorkspaceModel.getId(userId, s));
 					return userBindWorkspaceModel;
 				})
 				.collect(Collectors.toList());

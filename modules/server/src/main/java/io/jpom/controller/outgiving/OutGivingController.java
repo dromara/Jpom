@@ -25,7 +25,6 @@ package io.jpom.controller.outgiving;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.JsonMessage;
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.common.BaseServerController;
 import io.jpom.common.forward.NodeForward;
@@ -95,9 +94,9 @@ public class OutGivingController extends BaseServerController {
 	@RequestMapping(value = "get-reqId", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public String getReqId() {
-		List<NodeModel> nodeModels = nodeService.listAndProject();
-		String reqId = nodeService.cacheNodeList(nodeModels);
-		return JsonMessage.getString(200, "success", reqId);
+//		List<NodeModel> nodeModels = nodeService.listAndProject();
+//		String reqId = nodeService.cacheNodeList(nodeModels);
+		return JsonMessage.getString(200, "success", null);
 	}
 
 	@RequestMapping(value = "save", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -150,7 +149,7 @@ public class OutGivingController extends BaseServerController {
 			return JsonMessage.getString(405, "分发名称不能为空");
 		}
 		String reqId = getParameter("reqId");
-		List<NodeModel> list = nodeService.getNodeModel(reqId);
+		List<NodeModel> list = null;//nodeService.getNodeModel(reqId);
 		if (list == null) {
 			return JsonMessage.getString(401, "页面请求超时");
 		}
@@ -164,15 +163,15 @@ public class OutGivingController extends BaseServerController {
 				continue;
 			}
 			String trueProjectId = null;
-			JSONArray jsonArray = nodeModel.getProjects();
-			for (Object o : jsonArray) {
-				JSONObject data = (JSONObject) o;
-				String id1 = data.getString("id");
-				if (id1.equals(nodeIdProject)) {
-					trueProjectId = nodeIdProject;
-					break;
-				}
-			}
+//			JSONArray jsonArray = nodeModel.getProjects();
+//			for (Object o : jsonArray) {
+//				JSONObject data = (JSONObject) o;
+//				String id1 = data.getString("id");
+//				if (id1.equals(nodeIdProject)) {
+//					trueProjectId = nodeIdProject;
+//					break;
+//				}
+//			}
 			if (trueProjectId == null) {
 				return JsonMessage.getString(405, "没有找到对应的项目id:" + nodeIdProject);
 			}
@@ -230,7 +229,7 @@ public class OutGivingController extends BaseServerController {
 			List<OutGivingNodeProject> outGivingNodeProjectList = outGivingServerItem.getOutGivingNodeProjectList();
 			if (outGivingNodeProjectList != null) {
 				outGivingNodeProjectList.forEach(outGivingNodeProject -> {
-					NodeModel item = nodeService.getItem(outGivingNodeProject.getNodeId());
+					NodeModel item = nodeService.getByKey(outGivingNodeProject.getNodeId());
 					JSONObject jsonObject = new JSONObject();
 					jsonObject.put("id", outGivingNodeProject.getProjectId());
 					NodeForward.request(item, NodeUrl.Manage_ReleaseOutGiving, userModel, jsonObject);

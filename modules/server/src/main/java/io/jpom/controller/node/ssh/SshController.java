@@ -13,7 +13,6 @@ import com.alibaba.fastjson.JSONArray;
 import com.jcraft.jsch.Session;
 import io.jpom.common.BaseServerController;
 import io.jpom.common.interceptor.OptLog;
-import io.jpom.model.BaseModel;
 import io.jpom.model.PageResultDto;
 import io.jpom.model.data.AgentWhitelist;
 import io.jpom.model.data.NodeModel;
@@ -69,18 +68,18 @@ public class SshController extends BaseServerController {
 			List<NodeModel> list1 = nodeService.list();
 			Map<String, NodeModel> map = new HashMap<>(10);
 			list1.forEach(nodeModel -> {
-				String sshId = nodeModel.getSshId();
-				if (StrUtil.isNotEmpty(sshId)) {
-					map.put(sshId, nodeModel);
-				}
+//				String sshId = nodeModel.getSshId();
+//				if (StrUtil.isNotEmpty(sshId)) {
+//					map.put(sshId, nodeModel);
+//				}
 			});
 			list.forEach(sshModel -> {
 				// 不返回密码
 				sshModel.setPassword(null);
 				sshModel.setPrivateKey(null);
 				// 节点信息
-				BaseModel nodeModel = map.get(sshModel.getId());
-				sshModel.setNodeModel(nodeModel);
+				//BaseModel nodeModel = map.get(sshModel.getId());
+				//sshModel.setNodeModel(nodeModel);
 			});
 		}
 		return new JsonMessage<>(200, "", list);

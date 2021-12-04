@@ -12,7 +12,7 @@ export function getNodeGroupList() {
 export function getNodeList(params) {
   return axios({
     url: "/node/list_data.json",
-    method: "get",
+    method: "post",
     params: params,
   });
 }

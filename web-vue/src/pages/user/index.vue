@@ -41,8 +41,8 @@
           />
         </a-form-model-item>
 
-        <a-form-model-item label="工作空间" prop="feature" class="feature jpom-role">
-          <a-transfer :data-source="workSpaceList" show-search :filter-option="filterOption" :target-keys="targetKeys" :render="(item) => item.title" @change="handleChange" />
+        <a-form-model-item label="工作空间" prop="feature" class="feature jpom-userWorkspace">
+          <a-transfer :data-source="workspaceList" show-search :filter-option="filterOption" :target-keys="targetKeys" :render="(item) => item.title" @change="handleChange" />
         </a-form-model-item>
       </a-form-model>
     </a-modal>
@@ -60,7 +60,7 @@ export default {
     return {
       loading: false,
       list: [],
-      workSpaceList: [],
+      workspaceList: [],
       targetKeys: [],
       temp: {},
       createOption: true,
@@ -133,8 +133,8 @@ export default {
             steps: [
               {
                 title: "Jpom 导航助手",
-                element: document.querySelector(".jpom-role"),
-                intro: "如果这里面没有你想要的角色信息，你需要先去添加一个角色。",
+                element: document.querySelector(".jpom-userWorkspace"),
+                intro: "如果这里面没有你想要的工作空间信息，你需要先去添加一个工作空间。",
               },
             ],
           })
@@ -155,11 +155,11 @@ export default {
     },
     // 加载角色数据
     loadWorkSpaceListAll() {
-      this.workSpaceList = [];
+      this.workspaceList = [];
       getWorkSpaceListAll().then((res) => {
         if (res.code === 200) {
           res.data.forEach((element) => {
-            this.workSpaceList.push({ key: element.id, title: element.name });
+            this.workspaceList.push({ key: element.id, title: element.name });
           });
         }
       });

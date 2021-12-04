@@ -29,14 +29,9 @@ import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.core.util.URLUtil;
 import cn.hutool.db.Entity;
-import cn.hutool.db.Page;
-import cn.hutool.db.sql.Direction;
-import cn.hutool.db.sql.Order;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
-import cn.jiangzeyin.common.validator.ValidatorConfig;
 import cn.jiangzeyin.common.validator.ValidatorItem;
-import cn.jiangzeyin.common.validator.ValidatorRule;
 import io.jpom.build.BuildUtil;
 import io.jpom.common.BaseServerController;
 import io.jpom.common.Const;
@@ -53,7 +48,6 @@ import io.jpom.system.JpomRuntimeException;
 import io.jpom.util.GitUtil;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
@@ -76,25 +70,12 @@ public class RepositoryController extends BaseServerController {
 	/**
 	 * load repository list
 	 *
-	 * @param limit    每页条数
-	 * @param page     页码
-	 * @param repoType 仓库类型 0: GIT 1: SVN
-	 * @param strike   逻辑删除  1 删除  0 未删除
 	 * @return json
 	 */
 	@PostMapping(value = "/build/repository/list")
 	@Feature(method = MethodFeature.LOG)
-	public Object loadRepositoryList(@ValidatorConfig(value = {@ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "limit error")}, defaultVal = "10") int limit,
-									 @ValidatorConfig(value = {@ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "page error")}, defaultVal = "1") int page,
-									 Integer repoType, @RequestParam(value = "strike", defaultValue = "0") Integer strike) {
-		Page pageObj = new Page(page, limit);
-		pageObj.addOrder(new Order("modifyTimeMillis", Direction.DESC));
-		UserModel userModel = getUser();
-		Entity entity = Entity.create();
-		entity.setIgnoreNull("repoType", repoType);
-		//管理员可以获取删除或者没删除的
-		entity.setIgnoreNull("strike", userModel.isSystemUser() ? strike : 0);
-		PageResultDto<RepositoryModel> pageResult = repositoryService.listPage(entity, pageObj);
+	public Object loadRepositoryList() {
+		PageResultDto<RepositoryModel> pageResult = repositoryService.listPage(getRequest());
 		return JsonMessage.getString(200, "获取成功", pageResult);
 	}
 

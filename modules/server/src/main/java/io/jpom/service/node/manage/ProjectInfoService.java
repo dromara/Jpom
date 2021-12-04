@@ -7,10 +7,9 @@ import io.jpom.common.forward.NodeUrl;
 import io.jpom.model.data.NodeModel;
 import io.jpom.permission.BaseDynamicService;
 import io.jpom.plugin.ClassFeature;
-import io.jpom.service.node.NodeService;
+import io.jpom.service.node.NodeOld1Service;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
@@ -23,8 +22,12 @@ import java.util.List;
 @Service
 public class ProjectInfoService implements BaseDynamicService {
 
-	@Resource
-	private NodeService nodeService;
+
+	private final NodeOld1Service nodeService;
+
+	public ProjectInfoService(NodeOld1Service nodeService) {
+		this.nodeService = nodeService;
+	}
 
 	@Override
 	public JSONArray listToArray(String dataId) {

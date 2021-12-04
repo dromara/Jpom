@@ -26,6 +26,7 @@ import io.jpom.service.dblog.DbSystemMonitorLogService;
 import io.jpom.util.StringUtil;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -201,9 +202,8 @@ public class NodeWelcomeController extends BaseServerController {
 	@ResponseBody
 	public String kill() {
 		UserModel user = getUser();
-		if (!user.isSystemUser()) {
-			return JsonMessage.getString(405, "没有权限");
-		}
+		Assert.state(user.isSystemUser(), "没有权限");
+
 		return NodeForward.request(getNode(), getRequest(), NodeUrl.Kill).toString();
 	}
 }

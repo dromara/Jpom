@@ -25,7 +25,7 @@ package io.jpom.permission;
 import io.jpom.common.BaseServerController;
 import io.jpom.plugin.ClassFeature;
 import io.jpom.plugin.MethodFeature;
-import io.jpom.service.node.NodeService;
+import io.jpom.service.node.NodeOld1Service;
 import io.jpom.service.node.OutGivingServer;
 import io.jpom.service.node.manage.ProjectInfoService;
 import io.jpom.service.node.script.ScriptServer;
@@ -52,7 +52,7 @@ public class DynamicData {
 
     static {
         // 节点
-        put(ClassFeature.NODE, new DynamicData(NodeService.class, "id", BaseServerController.NODE_ID, MethodFeature.LIST));
+        put(ClassFeature.NODE, new DynamicData(NodeOld1Service.class, "id", BaseServerController.NODE_ID, MethodFeature.LIST));
         // 分发
         put(ClassFeature.OUTGIVING, new DynamicData(OutGivingServer.class, MethodFeature.LIST));
         // 项目

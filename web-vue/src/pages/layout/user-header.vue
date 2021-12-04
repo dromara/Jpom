@@ -1,8 +1,10 @@
 <template>
   <div class="user-header">
-    <a-select class="workspace" show-search placeholder="工作空间" option-filter-prop="children" @change="handleChange">
-      <a-select-option v-for="item in myWorkspaceList" :key="item.id">{{ item.name }}</a-select-option>
-    </a-select>
+    <a-tooltip placement="left" title="切换工作空间">
+      <a-select v-model="selectWorkspace" class="workspace" show-search placeholder="工作空间" @change="handleChange">
+        <a-select-option v-for="item in myWorkspaceList" :key="item.id">{{ item.name }}</a-select-option>
+      </a-select>
+    </a-tooltip>
     <a-dropdown>
       <!--      <a-avatar-->
       <!--        shape="square"-->
@@ -94,6 +96,7 @@ export default {
       updateUserVisible: false,
       temp: {},
       myWorkspaceList: [],
+      selectWorkspace: "",
       // 表单校验规则
       rules: {
         oldPwd: [
@@ -116,7 +119,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(["getToken", "getUserInfo"]),
+    ...mapGetters(["getToken", "getUserInfo", "getWorkspaceId"]),
     // 处理展示的名称 中文 3 个字 其他 4 个字符
     avatarName() {
       const reg = new RegExp("[\u4E00-\u9FA5]+");
@@ -137,6 +140,7 @@ export default {
     init() {
       myWorkspace().then((res) => {
         this.myWorkspaceList = res.data;
+        this.selectWorkspace = this.getWorkspaceId;
       });
     },
     // 退出登录
@@ -253,7 +257,10 @@ export default {
         });
       });
     },
-
+    handleChange(vlaue) {
+      this.$store.dispatch("changeWorkspace", vlaue);
+      location.reload();
+    },
     // toOldIndex() {
     //   window.location.href = '/old.html'
     // }

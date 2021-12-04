@@ -3,7 +3,7 @@ import axios from "axios";
 import Qs from "qs";
 import store from "../store";
 import router from "../router";
-import { NO_NOTIFY_KEY, NO_LOADING_KEY, TOKEN_HEADER_KEY } from "@/utils/const";
+import { NO_NOTIFY_KEY, NO_LOADING_KEY, TOKEN_HEADER_KEY,CACHE_WORKSPACE_ID } from "@/utils/const";
 import { refreshToken } from "./user";
 
 import { notification } from "ant-design-vue";
@@ -46,6 +46,7 @@ request.interceptors.request.use(
       config.data = Qs.stringify(config.data);
     }
     config.headers[TOKEN_HEADER_KEY] = store.getters.getToken;
+    config.headers[CACHE_WORKSPACE_ID] = store.getters.getWorkspaceId;
     return config;
   },
   (error) => {

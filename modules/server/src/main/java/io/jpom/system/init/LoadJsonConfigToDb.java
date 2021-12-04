@@ -7,10 +7,8 @@ import cn.jiangzeyin.common.spring.SpringUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import io.jpom.model.data.MailAccountModel;
-import io.jpom.model.data.ServerWhitelist;
-import io.jpom.model.data.SystemIpConfigModel;
-import io.jpom.model.data.UserModel;
+import io.jpom.model.data.*;
+import io.jpom.service.node.NodeService;
 import io.jpom.service.system.SystemParametersServer;
 import io.jpom.service.user.UserService;
 import io.jpom.system.ConfigBean;
@@ -19,7 +17,6 @@ import io.jpom.util.JsonFileUtil;
 
 import java.io.File;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -130,7 +127,7 @@ public class LoadJsonConfigToDb {
 			}
 			UserService userService = SpringUtil.getBean(UserService.class);
 			userModels = userModels.stream().peek(userModel -> {
-				userModel.setRoles((Set<String>) null);
+				//userModel.setRoles((Set<String>) null);
 				userModel.setSystemUser(UserModel.SYSTEM_ADMIN.equals(userModel.getParent()) ? 1 : 0);
 				//
 				String salt = userService.generateSalt();
@@ -144,6 +141,30 @@ public class LoadJsonConfigToDb {
 			DefaultSystemLog.getLog().info("{} mv to {}", FileUtil.getAbsolutePath(file), FileUtil.getAbsolutePath(backupOldData));
 		} catch (Exception e) {
 			DefaultSystemLog.getLog().error("load user info error ", e);
+		}
+	}
+
+	public void loadNodeInfo() {
+		File backupOldData = FileUtil.file(ConfigBean.getInstance().getDataPath(), "backup_old_data");
+		// 读取 node 文件内容
+		File file = FileUtil.file(ConfigBean.getInstance().getDataPath(), ServerConfigBean.NODE);
+		if (!FileUtil.exist(file)) {
+			return;
+		}
+		try {
+			JSON json = JsonFileUtil.readJson(file.getAbsolutePath());
+			JSONArray jsonArray = JsonFileUtil.formatToArray((JSONObject) json);
+			List<NodeModel> nodeModels = jsonArray.toJavaList(NodeModel.class);
+			if (nodeModels == null) {
+				return;
+			}
+			NodeService nodeService = SpringUtil.getBean(NodeService.class);
+			nodeService.insert(nodeModels);
+			// 将 json 文件转移到备份目录
+			FileUtil.move(file, FileUtil.mkdir(backupOldData), true);
+			DefaultSystemLog.getLog().info("{} mv to {}", FileUtil.getAbsolutePath(file), FileUtil.getAbsolutePath(backupOldData));
+		} catch (Exception e) {
+			DefaultSystemLog.getLog().error("load node error ", e);
 		}
 	}
 }

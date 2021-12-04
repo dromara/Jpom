@@ -46,7 +46,6 @@ import io.jpom.util.JsonFileUtil;
 import io.jpom.util.JvmUtil;
 
 import java.io.File;
-import java.util.List;
 
 /**
  * 自动导入本机节点
@@ -77,8 +76,8 @@ public class AutoImportLocalNode {
 	@PreLoadMethod
 	private static void loadAgent() {
 		nodeService = SpringUtil.getBean(NodeService.class);
-		List<NodeModel> list = nodeService.list();
-		if (list != null && !list.isEmpty()) {
+		long count = nodeService.count();
+		if (count > 0) {
 			return;
 		}
 		//
@@ -116,13 +115,12 @@ public class AutoImportLocalNode {
 		NodeModel nodeModel = new NodeModel();
 		nodeModel.setUrl(StrUtil.format("127.0.0.1:{}", jpomManifest.getPort()));
 		nodeModel.setName("本机");
-		nodeModel.setId("localhost");
 		//
 		nodeModel.setLoginPwd(autoUser.getAgentPwd());
 		nodeModel.setLoginName(autoUser.getAgentName());
 		//
-		nodeModel.setOpenStatus(true);
-		nodeService.addItem(nodeModel);
+		nodeModel.setOpenStatus(1);
+		nodeService.insertNotFill(nodeModel);
 		Console.log("自动添加本机节点成功：" + nodeModel.getId());
 	}
 }

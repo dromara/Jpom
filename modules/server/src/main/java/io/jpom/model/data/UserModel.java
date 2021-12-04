@@ -28,9 +28,6 @@ import io.jpom.model.BaseStrikeDbModel;
 import io.jpom.service.h2db.TableName;
 import io.jpom.system.ServerExtConfigBean;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -86,15 +83,6 @@ public class UserModel extends BaseStrikeDbModel {
 	 * 账号被锁定的时长
 	 */
 	private Long lockTime;
-//	/**
-//	 * 记录最后修改时间
-//	 */
-//	private long modifyTime;
-	/**
-	 * 角色
-	 */
-	@Deprecated
-	private Set<String> roles;
 	/**
 	 * 邮箱
 	 */
@@ -294,14 +282,6 @@ public class UserModel extends BaseStrikeDbModel {
 		return "demo".equals(getId());
 	}
 
-//	public long getModifyTime() {
-//		return modifyTime;
-//	}
-//
-//	public void setModifyTime(long modifyTime) {
-//		this.modifyTime = modifyTime;
-//	}
-
 	/**
 	 * 隐藏系统管理的真实id
 	 *
@@ -316,19 +296,5 @@ public class UserModel extends BaseStrikeDbModel {
 			userId = userModel.getId();
 		}
 		return userId;
-	}
-
-	@Deprecated
-	public Set<String> getRoles() {
-		return roles;
-	}
-
-	@Deprecated
-	public void setRoles(Set<String> roles) {
-		this.roles = roles;
-	}
-
-	public void setRoles(List<String> roles) {
-		this.roles = new HashSet<>(roles);
 	}
 }
