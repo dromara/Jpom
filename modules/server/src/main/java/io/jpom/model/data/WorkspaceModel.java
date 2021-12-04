@@ -22,6 +22,13 @@ public class WorkspaceModel extends BaseStrikeDbModel {
 	 */
 	private String description;
 
+	public WorkspaceModel() {
+	}
+
+	public WorkspaceModel(String id) {
+		this.setId(id);
+	}
+
 	public String getName() {
 		return name;
 	}

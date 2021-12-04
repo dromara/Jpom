@@ -12,9 +12,12 @@ import io.jpom.plugin.Feature;
 import io.jpom.plugin.MethodFeature;
 import io.jpom.service.system.WorkspaceService;
 import org.springframework.util.Assert;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 /**
  * @author bwcx_jzy
@@ -67,7 +70,7 @@ public class WorkspaceController extends BaseServerController {
 	}
 
 	/**
-	 * 工作空间列表
+	 * 工作空间分页列表
 	 *
 	 * @return json
 	 */
@@ -76,5 +79,17 @@ public class WorkspaceController extends BaseServerController {
 	public String list() {
 		PageResultDto<WorkspaceModel> listPage = workspaceService.listPage(getRequest());
 		return JsonMessage.getString(200, "", listPage);
+	}
+
+	/**
+	 * 查询工作空间列表
+	 *
+	 * @return json
+	 */
+	@GetMapping(value = "/list_all")
+	@Feature(method = MethodFeature.LIST)
+	public String listAll() {
+		List<WorkspaceModel> list = workspaceService.list();
+		return JsonMessage.getString(200, "", list);
 	}
 }

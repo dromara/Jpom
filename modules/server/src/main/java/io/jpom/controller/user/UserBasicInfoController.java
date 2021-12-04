@@ -23,6 +23,7 @@
 package io.jpom.controller.user;
 
 import cn.hutool.cache.impl.TimedCache;
+import cn.hutool.core.lang.RegexPool;
 import cn.hutool.core.lang.Validator;
 import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
@@ -34,18 +35,18 @@ import io.jpom.common.BaseServerController;
 import io.jpom.common.interceptor.LoginInterceptor;
 import io.jpom.model.data.MailAccountModel;
 import io.jpom.model.data.UserModel;
+import io.jpom.model.data.WorkspaceModel;
 import io.jpom.monitor.EmailUtil;
 import io.jpom.service.system.SystemParametersServer;
+import io.jpom.service.system.WorkspaceService;
+import io.jpom.service.user.UserBindWorkspaceService;
 import io.jpom.service.user.UserService;
 import org.springframework.http.MediaType;
-import org.springframework.stereotype.Controller;
 import org.springframework.util.Assert;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
-import javax.annotation.Resource;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
@@ -54,33 +55,40 @@ import java.util.concurrent.TimeUnit;
  * @author bwcx_jzy
  * @date 2019/8/10
  */
-@Controller
+@RestController
 @RequestMapping(value = "/user")
 public class UserBasicInfoController extends BaseServerController {
 
 	private static final TimedCache<String, Integer> CACHE = new TimedCache<>(TimeUnit.MINUTES.toMillis(30));
 
-	@Resource
-	private SystemParametersServer systemParametersServer;
-
+	private final SystemParametersServer systemParametersServer;
+	private final UserBindWorkspaceService userBindWorkspaceService;
 	private final UserService userService;
+	private final WorkspaceService workspaceService;
 
-	public UserBasicInfoController(UserService userService) {
+	public UserBasicInfoController(SystemParametersServer systemParametersServer,
+								   UserBindWorkspaceService userBindWorkspaceService,
+								   UserService userService,
+								   WorkspaceService workspaceService) {
+		this.systemParametersServer = systemParametersServer;
+		this.userBindWorkspaceService = userBindWorkspaceService;
 		this.userService = userService;
+		this.workspaceService = workspaceService;
 	}
 
 
 	/**
-	 * @return
-	 * @author Hotstrip
 	 * get user basic info
 	 * 获取管理员基本信息接口
+	 *
+	 * @return json
+	 * @author Hotstrip
 	 */
 	@RequestMapping(value = "user-basic-info", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public String getUserBasicInfo() {
 		UserModel userModel = getUser();
-		userModel = userService.getByKey(userModel.getId());
+		userModel = userService.getByKey(userModel.getId(), false);
 		// return basic info
 		Map<String, Object> map = new HashMap<>();
 		map.put("id", userModel.getId());
@@ -89,7 +97,7 @@ public class UserBasicInfoController extends BaseServerController {
 		map.put("email", userModel.getEmail());
 		map.put("dingDing", userModel.getDingDing());
 		map.put("workWx", userModel.getWorkWx());
-		map.put("md5Token", userModel.getUserMd5Key());
+		map.put("md5Token", userModel.getPassword());
 		return JsonMessage.getString(200, "success", map);
 	}
 
@@ -109,11 +117,11 @@ public class UserBasicInfoController extends BaseServerController {
 		userModel.setEmail(email);
 		//
 		if (StrUtil.isNotEmpty(dingDing) && !Validator.isUrl(dingDing)) {
-			return JsonMessage.getString(405, "请输入正确钉钉地址");
+			Validator.validateMatchRegex(RegexPool.URL_HTTP, dingDing, "请输入正确钉钉地址");
 		}
 		userModel.setDingDing(dingDing);
-		if (StrUtil.isNotEmpty(workWx) && !Validator.isUrl(workWx)) {
-			return JsonMessage.getString(405, "请输入正确企业微信地址");
+		if (StrUtil.isNotEmpty(workWx)) {
+			Validator.validateMatchRegex(RegexPool.URL_HTTP, workWx, "请输入正确企业微信地址");
 		}
 		userModel.setWorkWx(workWx);
 		userService.update(userModel);
@@ -141,5 +149,17 @@ public class UserBasicInfoController extends BaseServerController {
 		}
 		CACHE.put(email, randomInt);
 		return JsonMessage.getString(200, "发送成功");
+	}
+
+	/**
+	 * 查询用户自己的工作空间
+	 *
+	 * @return msg
+	 */
+	@GetMapping(value = "my_workspace", produces = MediaType.APPLICATION_JSON_VALUE)
+	public String myWorkspace() {
+		UserModel user = getUser();
+		List<WorkspaceModel> models = userBindWorkspaceService.listUserWorkspaceInfo(user.getId());
+		return JsonMessage.getString(200, "", models);
 	}
 }

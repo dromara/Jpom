@@ -22,6 +22,8 @@
  */
 package io.jpom.controller.user;
 
+import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.validator.ValidatorConfig;
@@ -67,27 +69,17 @@ public class UserInfoController extends BaseServerController {
 	 * @return json
 	 */
 	@RequestMapping(value = "updatePwd", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	public String updatePwd(
-			@ValidatorConfig(value = {
-					@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "密码不能为空")
-			}) String oldPwd,
-			@ValidatorConfig(value = {
-					@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "密码不能为空")
-			}) String newPwd) {
-		if (oldPwd.equals(newPwd)) {
-			return JsonMessage.getString(400, "新旧密码一致");
-		}
+	public String updatePwd(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "密码不能为空") String oldPwd,
+							@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "密码不能为空") String newPwd) {
+		Assert.state(!StrUtil.equals(oldPwd, newPwd), "新旧密码一致");
 		UserModel userName = getUser();
-		if (userName.isDemoUser()) {
-			return JsonMessage.getString(402, "当前账户为演示账号，不支持修改密码");
-		}
+		Assert.state(!userName.isDemoUser(), "当前账户为演示账号，不支持修改密码");
 		try {
 			UserModel userModel = userService.simpleLogin(userName.getId(), oldPwd);
-			if (userModel == null || userModel.getPwdErrorCount() > 0) {
-				return JsonMessage.getString(500, "旧密码不正确！");
-			}
-			userModel.setPassword(newPwd);
-			userService.update(userModel);
+			Assert.notNull(userModel, "旧密码不正确！");
+			Assert.state(ObjectUtil.defaultIfNull(userModel.getPwdErrorCount(), 0) <= 0, "当前账号被锁定中，不能修改密码");
+
+			userService.updatePwd(userName.getId(), newPwd);
 			// 如果修改成功，则销毁会话
 			getSession().invalidate();
 			return JsonMessage.getString(200, "修改密码成功！");
@@ -126,19 +118,16 @@ public class UserInfoController extends BaseServerController {
 	@Feature(method = MethodFeature.DEL)
 	public String deleteUser(String id) {
 		UserModel userName = getUser();
-		if (userName.getId().equals(id)) {
-			return JsonMessage.getString(400, "不能删除自己");
-		}
+		Assert.state(!StrUtil.equals(userName.getId(), id), "不能删除自己");
+
 		UserModel userModel = userService.getByKey(id);
-		if (userModel == null) {
-			return JsonMessage.getString(501, "非法访问");
-		}
-		// 非系统管理员不支持删除演示账号
-		if (!userName.isSystemUser() && userModel.isDemoUser()) {
-			return JsonMessage.getString(402, "演示账号不支持删除");
-		}
+		Assert.notNull(userModel, "非法访问");
 		if (userModel.isSystemUser()) {
-			return JsonMessage.getString(400, "非法访问:-5");
+			// 如果是系统管理员，判断个数
+			Assert.state(userService.systemUserCount() > 1, "系统中的系统管理员账号数量必须存在一个以上");
+		} else {
+			// 非系统管理员不支持删除演示账号
+			Assert.state(userModel.isDemoUser(), "演示账号不支持删除");
 		}
 		userService.delByKey(id);
 		return JsonMessage.getString(200, "删除成功");

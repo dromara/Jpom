@@ -116,7 +116,7 @@ public class LoginInterceptor extends BaseJpomInterceptor {
 		}
 		if (null != user) {
 			String tokenUserId = JwtUtil.readUserId(jwt);
-			boolean b = user.getId().equals(tokenUserId) && user.getUserMd5Key().equals(id);
+			boolean b = user.getId().equals(tokenUserId);
 			if (!b) {
 				return ServerConfigBean.AUTHORIZE_TIME_OUT_CODE;
 			}

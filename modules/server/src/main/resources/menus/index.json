@@ -90,10 +90,6 @@
         "title": "用户列表"
       },
       {
-        "id": "roleList",
-        "title": "角色管理"
-      },
-      {
         "id": "user_log",
         "title": "操作日志"
       }

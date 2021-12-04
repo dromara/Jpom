@@ -188,4 +188,17 @@ public abstract class BaseDbService<T extends BaseDbModel> extends BaseDbCommonS
 		}
 		return super.listPage(where, page);
 	}
+
+	/**
+	 * 多个 id 查询数据
+	 *
+	 * @param ids ids
+	 * @return list
+	 */
+	public List<T> listById(Collection<String> ids) {
+		Entity entity = Entity.create();
+		entity.set(Const.ID_STR, ids);
+		List<Entity> entities = super.queryList(entity);
+		return this.entityToBeanList(entities);
+	}
 }

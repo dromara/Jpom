@@ -22,7 +22,6 @@
  */
 package io.jpom.controller;
 
-import cn.hutool.core.util.RandomUtil;
 import cn.hutool.crypto.SecureUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.JsonMessage;
@@ -88,8 +87,8 @@ public class InstallController extends BaseServerController {
 		UserModel userModel = new UserModel();
 		userModel.setName(UserModel.SYSTEM_OCCUPY_NAME);
 		userModel.setId(userName);
-		userModel.setSalt(RandomUtil.randomString(UserModel.SALT_LEN));
-		userModel.setPassword(SecureUtil.sha1(userPwd + userModel.getPassword()));
+		userModel.setSalt(userService.generateSalt());
+		userModel.setPassword(SecureUtil.sha1(userPwd + userModel.getSalt()));
 		userModel.setSystemUser(1);
 		userModel.setParent(UserModel.SYSTEM_ADMIN);
 		try {
@@ -100,7 +99,8 @@ public class InstallController extends BaseServerController {
 		}
 		// 自动登录
 		setSessionAttribute(LoginInterceptor.SESSION_NAME, userModel);
-		UserLoginDto userLoginDto = new UserLoginDto(userModel, JwtUtil.builder(userModel));
+		String jwtId = userService.getUserJwtId(userName);
+		UserLoginDto userLoginDto = new UserLoginDto(JwtUtil.builder(userModel, jwtId), jwtId);
 		return JsonMessage.getString(200, "初始化成功", userLoginDto);
 	}
 }

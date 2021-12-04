@@ -1,7 +1,6 @@
 package io.jpom.system.init;
 
 import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.util.RandomUtil;
 import cn.hutool.crypto.SecureUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import cn.jiangzeyin.common.spring.SpringUtil;
@@ -129,15 +128,16 @@ public class LoadJsonConfigToDb {
 			if (userModels == null) {
 				return;
 			}
+			UserService userService = SpringUtil.getBean(UserService.class);
 			userModels = userModels.stream().peek(userModel -> {
 				userModel.setRoles((Set<String>) null);
 				userModel.setSystemUser(UserModel.SYSTEM_ADMIN.equals(userModel.getParent()) ? 1 : 0);
 				//
-				String salt = RandomUtil.randomString(UserModel.SALT_LEN);
+				String salt = userService.generateSalt();
 				userModel.setSalt(salt);
 				userModel.setPassword(SecureUtil.sha1(userModel.getPassword() + salt));
 			}).collect(Collectors.toList());
-			UserService userService = SpringUtil.getBean(UserService.class);
+
 			userService.insert(userModels);
 			// 将 json 文件转移到备份目录
 			FileUtil.move(file, FileUtil.mkdir(backupOldData), true);

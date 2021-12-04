@@ -147,7 +147,7 @@ public abstract class BaseDbCommonService<T> {
 	 * @param data 实体对象
 	 * @return entity
 	 */
-	protected Entity dataBeanToEntity(T data) {
+	public Entity dataBeanToEntity(T data) {
 		Entity entity = new Entity(tableName);
 		// 转换为 map
 		Map<String, Object> beanToMap = BeanUtil.beanToMap(data, new LinkedHashMap<>(), true, s -> StrUtil.format("`{}`", s));
@@ -429,6 +429,7 @@ public abstract class BaseDbCommonService<T> {
 		pageResultDto.setResult(list);
 		return pageResultDto;
 	}
+
 	/**
 	 * 分页查询
 	 *
@@ -485,6 +486,10 @@ public abstract class BaseDbCommonService<T> {
 	public List<T> listByBean(T data) {
 		Entity where = this.dataBeanToEntity(data);
 		List<Entity> entitys = this.queryList(where);
+		return this.entityToBeanList(entitys);
+	}
+
+	public List<T> entityToBeanList(List<Entity> entitys) {
 		return entitys.stream().map((entity -> {
 			T entityToBean = this.entityToBean(entity, this.tClass);
 			this.fillSelectResult(entityToBean);

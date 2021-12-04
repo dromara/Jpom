@@ -23,6 +23,7 @@
 package io.jpom.model.data;
 
 import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.util.ObjectUtil;
 import io.jpom.model.BaseStrikeDbModel;
 import io.jpom.service.h2db.TableName;
 import io.jpom.system.ServerExtConfigBean;
@@ -107,6 +108,13 @@ public class UserModel extends BaseStrikeDbModel {
 	 */
 	private String workWx;
 
+	public UserModel(String id) {
+		this.setId(id);
+	}
+
+	public UserModel() {
+	}
+
 	public String getName() {
 		return name;
 	}
@@ -128,7 +136,7 @@ public class UserModel extends BaseStrikeDbModel {
 	}
 
 	public void setSystemUser(Integer systemUser) {
-		this.systemUser = systemUser;
+		this.systemUser = ObjectUtil.defaultIfNull(systemUser, 0) == 1 ? systemUser : 0;
 	}
 
 	public Long getLockTime() {
@@ -273,12 +281,8 @@ public class UserModel extends BaseStrikeDbModel {
 		//this.setModifyTime(DateUtil.current());
 	}
 
-	public String getUserMd5Key() {
-		return password;
-	}
-
 	public boolean isSystemUser() {
-		return UserModel.SYSTEM_ADMIN.equals(getParent());
+		return systemUser != null && systemUser == 1;
 	}
 
 	/**

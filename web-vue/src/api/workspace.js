@@ -24,3 +24,16 @@ export function getWorkSpaceList(params) {
     data: params,
   });
 }
+
+/*
+ * 工作空间列表（查询所有)
+ * @param {*}
+ * } params
+ */
+export function getWorkSpaceListAll() {
+  return axios({
+    url: "/system/workspace/list_all",
+    method: "get",
+    data: {},
+  });
+}

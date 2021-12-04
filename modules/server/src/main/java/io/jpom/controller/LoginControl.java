@@ -186,7 +186,8 @@ public class LoginControl extends BaseServerController {
 					setSessionAttribute(LoginInterceptor.SESSION_NAME, userModel);
 					removeSessionAttribute(SHOW_CODE);
 					this.ipSuccess();
-					UserLoginDto userLoginDto = new UserLoginDto(userModel, JwtUtil.builder(userModel));
+					String jwtId = userService.getUserJwtId(userName);
+					UserLoginDto userLoginDto = new UserLoginDto(JwtUtil.builder(userModel, jwtId), jwtId);
 					return JsonMessage.getString(200, "登录成功", userLoginDto);
 				} else {
 					userModel.errorLock();
@@ -234,7 +235,8 @@ public class LoginControl extends BaseServerController {
 		if (userModel == null) {
 			return JsonMessage.getString(ServerConfigBean.AUTHORIZE_TIME_OUT_CODE, "没有对应的用户");
 		}
-		UserLoginDto userLoginDto = new UserLoginDto(userModel, JwtUtil.builder(userModel));
+		String jwtId = userService.getUserJwtId(userModel.getId());
+		UserLoginDto userLoginDto = new UserLoginDto(JwtUtil.builder(userModel, jwtId), jwtId);
 		return JsonMessage.getString(200, "", userLoginDto);
 	}
 }
