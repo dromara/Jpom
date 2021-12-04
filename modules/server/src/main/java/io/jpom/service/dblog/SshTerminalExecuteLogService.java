@@ -27,7 +27,7 @@ import cn.hutool.core.util.StrUtil;
 import io.jpom.model.data.SshModel;
 import io.jpom.model.data.UserModel;
 import io.jpom.model.log.SshTerminalExecuteLog;
-import io.jpom.service.h2db.BaseDbService;
+import io.jpom.service.h2db.BaseWorkspaceService;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -41,7 +41,7 @@ import java.util.stream.Collectors;
  * @date 2021/08/04
  */
 @Service
-public class SshTerminalExecuteLogService extends BaseDbService<SshTerminalExecuteLog> {
+public class SshTerminalExecuteLogService extends BaseWorkspaceService<SshTerminalExecuteLog> {
 
 	/**
 	 * 批量记录日志
@@ -61,6 +61,7 @@ public class SshTerminalExecuteLogService extends BaseDbService<SshTerminalExecu
 			if (sshItem != null) {
 				sshTerminalExecuteLog.setSshId(sshItem.getId());
 				sshTerminalExecuteLog.setSshName(sshItem.getName());
+				sshTerminalExecuteLog.setWorkspaceId(sshItem.getWorkspaceId());
 			}
 			sshTerminalExecuteLog.setCommands(s);
 			sshTerminalExecuteLog.setRefuse(refuse);

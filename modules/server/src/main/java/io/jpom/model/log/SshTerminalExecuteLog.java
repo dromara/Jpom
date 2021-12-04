@@ -24,7 +24,7 @@ package io.jpom.model.log;
 
 import cn.hutool.core.util.StrUtil;
 import io.jpom.JpomApplication;
-import io.jpom.model.BaseDbModel;
+import io.jpom.model.BaseWorkspaceModel;
 import io.jpom.model.data.UserModel;
 import io.jpom.service.h2db.TableName;
 
@@ -35,7 +35,7 @@ import io.jpom.service.h2db.TableName;
  * @date 2021/08/04
  */
 @TableName("SSHTERMINALEXECUTELOG")
-public class SshTerminalExecuteLog extends BaseDbModel {
+public class SshTerminalExecuteLog extends BaseWorkspaceModel {
 	/**
 	 * 操作ip
 	 */

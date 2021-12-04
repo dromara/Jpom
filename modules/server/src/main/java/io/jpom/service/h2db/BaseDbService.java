@@ -23,6 +23,9 @@
 package io.jpom.service.h2db;
 
 import cn.hutool.core.convert.Convert;
+import cn.hutool.core.date.DatePattern;
+import cn.hutool.core.date.DateTime;
+import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.date.SystemClock;
 import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.*;
@@ -205,6 +208,19 @@ public abstract class BaseDbService<T extends BaseDbModel> extends BaseDbCommonS
 				where.setIgnoreNull(StrUtil.format("`{}`", key), StrUtil.format(" like '{}%'", value));
 			} else if (StrUtil.startWith(stringStringEntry.getKey(), "%")) {
 				where.setIgnoreNull(StrUtil.format("`{}`", key), StrUtil.format(" like '%{}'", value));
+			} else if (StrUtil.containsIgnoreCase(key, "time") && StrUtil.contains(value, "~")) {
+				String[] val = StrUtil.splitToArray(value, "~");
+				if (val.length == 2) {
+					DateTime startDateTime = DateUtil.parse(val[0], DatePattern.NORM_DATETIME_FORMAT);
+					where.set(key, ">= " + startDateTime.getTime());
+
+					DateTime endDateTime = DateUtil.parse(val[1], DatePattern.NORM_DATETIME_FORMAT);
+					if (startDateTime.equals(endDateTime)) {
+						endDateTime = DateUtil.endOfDay(endDateTime);
+					}
+					// 防止字段重复
+					where.set(key + " ", "<= " + endDateTime.getTime());
+				}
 			} else {
 				where.setIgnoreNull(StrUtil.format("`{}`", key), value);
 			}

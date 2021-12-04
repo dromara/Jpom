@@ -158,6 +158,8 @@ public class InitDb implements DisposableBean, InitializingBean {
 		//
 		instance.loadNodeInfo();
 		instance.loadSshInfo();
+		//
+		workspaceService.convertNullWorkspaceId();
 	}
 
 	@Override

@@ -478,8 +478,33 @@ public abstract class BaseDbCommonService<T> {
 	 * @return list
 	 */
 	public List<Entity> query(String sql, Object... params) {
+		if (!DbConfig.getInstance().isInit()) {
+			// ignore
+			DefaultSystemLog.getLog().error("The database is not initialized, this execution will be ignored");
+			return null;
+		}
 		try {
 			return Db.use().query(sql, params);
+		} catch (SQLException e) {
+			throw new JpomRuntimeException("数据库异常", e);
+		}
+	}
+
+	/**
+	 * sql 执行
+	 *
+	 * @param sql    sql 语句
+	 * @param params 参数
+	 * @return list
+	 */
+	public int execute(String sql, Object... params) {
+		if (!DbConfig.getInstance().isInit()) {
+			// ignore
+			DefaultSystemLog.getLog().error("The database is not initialized, this execution will be ignored");
+			return 0;
+		}
+		try {
+			return Db.use().execute(sql, params);
 		} catch (SQLException e) {
 			throw new JpomRuntimeException("数据库异常", e);
 		}

@@ -7,7 +7,7 @@
       <a-button type="primary" @click="handleAdd">新增</a-button>
     </div>
     <!-- 数据表格 -->
-    <a-table :data-source="list" :loading="loading" :columns="columns" :pagination="this.pagination" bordered :rowKey="(record, index) => index">
+    <a-table :data-source="list" :loading="loading" :columns="columns" :pagination="this.pagination" @change="changePage" bordered :rowKey="(record, index) => index">
       <template slot="nodeId" slot-scope="text, record">
         <a-button v-if="!record.nodeModel" type="primary" @click="install(record)" :disabled="record.installed">安装节点</a-button>
         <a-tooltip v-else placement="topLeft" :title="`${record.nodeModel.id} ( ${record.nodeModel.name} )`">
@@ -175,9 +175,12 @@
     <!-- 操作日志 -->
     <a-modal v-model="viewOperationLog" title="操作日志" width="80vw" :footer="null" :maskClosable="false">
       <div ref="filter" class="filter">
-        <a-range-picker class="filter-item" :show-time="{ format: 'HH:mm:ss' }" format="YYYY-MM-DD HH:mm:ss" @change="onchangeListLogTime" />
+        <a-input class="search-input-item" v-model="viewOperationLogListQuery['userId']" placeholder="操作人" />
+        <a-input class="search-input-item" v-model="viewOperationLogListQuery['name']" placeholder="ssh name" />
+        <a-input class="search-input-item" v-model="viewOperationLogListQuery['ip']" placeholder="ip" />
+        <a-input class="search-input-item" v-model="viewOperationLogListQuery['%commands%']" placeholder="执行命令" />
+        <a-range-picker class="filter-item search-input-item" :show-time="{ format: 'HH:mm:ss' }" format="YYYY-MM-DD HH:mm:ss" @change="onchangeListLogTime" />
         <a-button type="primary" @click="handleListLog">搜索</a-button>
-        <a-button type="primary" @click="handleListLog">刷新</a-button>
       </div>
       <!-- 数据表格 -->
       <a-table
@@ -263,7 +266,7 @@ export default {
 
         {
           title: "操作时间",
-          dataIndex: "optTime",
+          dataIndex: "createTimeMillis",
           sorter: true,
           customRender: (text) => {
             return parseTime(text);
@@ -274,6 +277,7 @@ export default {
       viewOperationLogListQuery: {
         page: 1,
         limit: 10,
+        total: 0,
       },
       columns: [
         { title: "名称", dataIndex: "name", sorter: true, ellipsis: true },
@@ -459,17 +463,21 @@ export default {
         this.viewOperationLoading = false;
       });
     },
-    changeListLog(page) {
+    changeListLog(page, f, sorter) {
       this.viewOperationLogListQuery.page = page.current;
       this.viewOperationLogListQuery.limit = page.pageSize;
+      if (sorter) {
+        this.viewOperationLogListQuery.order = sorter.order;
+        this.viewOperationLogListQuery.order_field = sorter.field;
+      }
       this.handleListLog();
     },
     // 选择时间
     onchangeListLogTime(value, dateString) {
       if (dateString[0]) {
-        this.viewOperationLogListQuery.time = `${dateString[0]} ~ ${dateString[1]}`;
+        this.viewOperationLogListQuery.createTimeMillis = `${dateString[0]} ~ ${dateString[1]}`;
       } else {
-        this.viewOperationLogListQuery.time = "";
+        this.viewOperationLogListQuery.createTimeMillis = "";
       }
     },
     // 文件管理
@@ -569,6 +577,16 @@ export default {
           this.formLoading = false;
         });
       });
+    },
+    // 分页、排序、筛选变化时触发
+    changePage(pagination, filters, sorter) {
+      this.listQuery.page = pagination.current;
+      this.listQuery.limit = pagination.pageSize;
+      if (sorter) {
+        this.listQuery.order = sorter.order;
+        this.listQuery.order_field = sorter.field;
+      }
+      this.loadData();
     },
     // 关闭抽屉层
     onClose() {
