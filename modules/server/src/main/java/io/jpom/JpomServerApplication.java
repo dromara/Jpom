@@ -22,14 +22,19 @@
  */
 package io.jpom;
 
+import cn.hutool.core.lang.Console;
+import cn.hutool.core.util.ArrayUtil;
 import cn.jiangzeyin.common.EnableCommonBoot;
+import cn.jiangzeyin.common.spring.SpringUtil;
 import cn.jiangzeyin.common.spring.event.ApplicationEventLoad;
 import io.jpom.common.Type;
 import io.jpom.common.interceptor.IpInterceptor;
 import io.jpom.common.interceptor.LoginInterceptor;
 import io.jpom.common.interceptor.OpenApiInterceptor;
 import io.jpom.common.interceptor.PermissionInterceptor;
+import io.jpom.model.data.SystemIpConfigModel;
 import io.jpom.permission.CacheControllerFeature;
+import io.jpom.service.system.SystemParametersServer;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.web.servlet.ServletComponentScan;
 
@@ -47,6 +52,7 @@ public class JpomServerApplication implements ApplicationEventLoad {
 
 	/**
 	 * 启动执行
+	 * --rest:ip_config
 	 *
 	 * @param args 参数
 	 * @throws Exception 异常
@@ -60,6 +66,13 @@ public class JpomServerApplication implements ApplicationEventLoad {
 				.addInterceptor(OpenApiInterceptor.class)
 				.addInterceptor(PermissionInterceptor.class)
 				.run(args);
+		//
+		if (ArrayUtil.containsIgnoreCase(args, "--rest:ip_config")) {
+			// 重置 ip 白名单配置
+			SystemParametersServer parametersServer = SpringUtil.getBean(SystemParametersServer.class);
+			parametersServer.delByKey(SystemIpConfigModel.ID);
+			Console.log("清除 IP 白名单配置成功");
+		}
 	}
 
 
