@@ -5,20 +5,12 @@
       <a-select v-model="listQuery.backupType" allowClear placeholder="请选择备份类型" class="filter-item" @change="handleFilter">
         <a-select-option v-for="backupType in backupTypeList" :key="backupType.key">{{ backupType.value }}</a-select-option>
       </a-select>
-      <a-button type="primary" @click="handleFilter">搜索</a-button>
+      <a-button type="primary" @click="loadData">搜索</a-button>
       <a-button type="primary" @click="handleAdd">创建备份</a-button>
       <a-button type="primary" @click="handleSqlUpload">导入备份</a-button>
-      <a-button type="primary" @click="loadData">刷新</a-button>
     </div>
     <!-- 表格 -->
-    <a-table
-      :loading="loading"
-      :columns="columns"
-      :data-source="list"
-      bordered
-      rowKey="id"
-      :pagination="pagination"
-    >
+    <a-table :loading="loading" :columns="columns" :data-source="list" bordered rowKey="id" @change="changePage" :pagination="pagination">
       <a-tooltip slot="name" slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>
@@ -81,6 +73,7 @@
 import { mapGetters } from "vuex";
 import { getBackupList, getTableNameList, createBackup, downloadBackupFile, deleteBackup, restoreBackup, uploadBackupFile, backupTypeMap, backupStatusMap } from "../../api/backup-info";
 import { parseTime, renderSize } from "@/utils/time";
+import { PAGE_DEFAULT_LIMIT, PAGE_DEFAULT_SIZW_OPTIONS, PAGE_DEFAULT_SHOW_TOTAL } from "@/utils/const";
 
 export default {
   components: {},
@@ -89,10 +82,7 @@ export default {
       backupTypeMap: backupTypeMap,
       backupStatusMap: backupStatusMap,
       loading: false,
-      listQuery: {
-        page: 1,
-        limit: 20,
-      },
+      listQuery: { page: 1, limit: PAGE_DEFAULT_LIMIT, total: 0 },
       backupTypeList: [
         { key: 0, value: "全量" },
         { key: 1, value: "部分" },
@@ -172,22 +162,19 @@ export default {
     // 分页
     pagination() {
       return {
-        total: this.total,
+        total: this.listQuery.total || 0,
         current: this.listQuery.page || 1,
-        pageSize: this.listQuery.limit || 10,
-        pageSizeOptions: ["10", "20", "50", "100"],
+        pageSize: this.listQuery.limit || PAGE_DEFAULT_LIMIT,
+        pageSizeOptions: PAGE_DEFAULT_SIZW_OPTIONS,
         showSizeChanger: true,
         showTotal: (total) => {
-          if (total <= this.listQuery.limit) {
-            return "";
-          }
-          return `总计 ${total} 条`;
+          return PAGE_DEFAULT_SHOW_TOTAL(total, this.listQuery);
         },
       };
     },
   },
   created() {
-    this.handleFilter();
+    this.loadData();
   },
   methods: {
     // 格式化文件大小
@@ -220,10 +207,7 @@ export default {
         }
       });
     },
-    // 筛选
-    handleFilter() {
-      this.loadData();
-    },
+
     // 穿梭框筛选
     filterOption(inputValue, option) {
       return option.title.indexOf(inputValue) > -1;
@@ -356,6 +340,16 @@ export default {
           }, 1000);
         }
       });
+    },
+    // 分页、排序、筛选变化时触发
+    changePage(pagination, filters, sorter) {
+      this.listQuery.page = pagination.current;
+      this.listQuery.limit = pagination.pageSize;
+      if (sorter) {
+        this.listQuery.order = sorter.order;
+        this.listQuery.order_field = sorter.field;
+      }
+      this.loadData();
     },
   },
 };
