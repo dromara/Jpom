@@ -1,6 +1,6 @@
 /** * 这是新版本的构建列表页面，主要是分离了部分数据到【仓库管理】，以及数据会存储到数据库 */
 <template>
-  <div>
+  <div class="full-content">
     <div ref="filter" class="filter">
       <a-select v-model="listQuery.group" allowClear placeholder="请选择分组" class="filter-item" @change="handleFilter">
         <a-select-option v-for="group in groupList" :key="group">{{ group }}</a-select-option>
@@ -14,8 +14,6 @@
       :loading="loading"
       :columns="columns"
       :data-source="list"
-      :style="{ 'max-height': tableHeight + 'px' }"
-      :scroll="{ x: 1210, y: tableHeight - 60 }"
       bordered
       rowKey="id"
       :pagination="pagination"
@@ -240,7 +238,6 @@ export default {
         page: 1,
         limit: 10,
       },
-      tableHeight: "70vh",
       // 动态列表参数
       groupList: [],
       list: [],
@@ -358,7 +355,6 @@ export default {
     },
   },
   created() {
-    this.calcTableHeight();
     this.loadGroupList();
     this.handleFilter();
   },
@@ -381,12 +377,6 @@ export default {
         return false;
       }
       this.$introJs().exit();
-    },
-    // 计算表格高度
-    calcTableHeight() {
-      this.$nextTick(() => {
-        this.tableHeight = window.innerHeight - this.$refs["filter"].clientHeight - 135;
-      });
     },
     // 分组列表
     loadGroupList() {
@@ -699,7 +689,6 @@ export default {
     },
     // 分页、排序、筛选变化时触发
     changePage(pagination, filters, sorter) {
-      console.log(pagination, filters, sorter);
       this.listQuery.page = pagination.current;
       this.listQuery.limit = pagination.pageSize;
       if (sorter) {

@@ -19,3 +19,7 @@ html, body {
 .ant-table-body {
   overflow-x: auto !important;
 }
+
+.full-content {
+  min-height: 100vh;
+}

@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="full-content">
     <!-- 搜索区 -->
     <div ref="filter" class="filter">
       <a-select v-model="listQuery.repoType" allowClear placeholder="请选择仓库类型" class="filter-item" @change="handleFilter">
@@ -141,7 +141,6 @@ export default {
         limit: 20,
         strike: 0,
       },
-      tableHeight: "70vh",
       list: [],
       total: 0,
       temp: {},
@@ -215,17 +214,10 @@ export default {
   },
   watch: {},
   created() {
-    this.calcTableHeight();
     this.handleFilter();
     this.isSystem = this.$store.getters.getUserInfo.systemUser;
   },
   methods: {
-    // 计算表格高度
-    calcTableHeight() {
-      this.$nextTick(() => {
-        this.tableHeight = window.innerHeight - this.$refs["filter"].clientHeight - 135;
-      });
-    },
     // 加载数据
     loadData() {
       this.list = [];

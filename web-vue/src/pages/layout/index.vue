@@ -152,7 +152,7 @@ export default {
 </script>
 <style>
 #app-layout {
-  height: 100vh;
+  min-height: 100vh;
 }
 #app-layout .trigger {
   float: left;
@@ -189,7 +189,7 @@ export default {
   padding: 0;
 }
 .sider {
-  max-height: 100vh;
+  min-height: 100vh;
   overflow-y: auto;
 }
 .layout-content {

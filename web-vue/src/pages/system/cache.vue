@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="full-content">
     <a-timeline>
       <a-timeline-item>
         <span class="layui-elem-quote">服务端文件缓存：{{temp.cacheFileSize}} (10分钟刷新一次)</span>
@@ -59,6 +59,7 @@ export default {
 }
 </script>
 <style scoped>
+
 .btn {
   margin-left: 20px;
 }

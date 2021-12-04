@@ -1,20 +1,13 @@
 <template>
-  <div>
+  <div class="full-content">
     <div ref="filter" class="filter">
+      <a-input-search placeholder="搜索工作空间" enter-button @search="search" class="search" />
+
       <a-button type="primary" @click="handleAdd">新增</a-button>
       <!-- <a-button type="primary" @click="loadData">刷新</a-button> -->
     </div>
     <!-- 数据表格 -->
-    <a-table
-      :data-source="list"
-      :loading="loading"
-      :columns="columns"
-      :style="{ 'max-height': tableHeight + 'px' }"
-      :scroll="{ x: 760, y: tableHeight - 60 }"
-      :pagination="this.pagination"
-      bordered
-      :rowKey="(record, index) => index"
-    >
+    <a-table :data-source="list" :loading="loading" :columns="columns" :pagination="this.pagination" bordered @change="changePage" :rowKey="(record, index) => index">
       <template slot="operation" slot-scope="text, record">
         <a-button type="primary" @click="handleEdit(record)">编辑</a-button>
         <!-- <a-button type="danger" @click="handleDelete(record)">删除</a-button> -->
@@ -37,18 +30,21 @@
 <script>
 import { getWorkSpaceList, editWorkSpace } from "@/api/workspace";
 import { parseTime } from "@/utils/time";
+import { PAGE_DEFAULT_LIMIT, PAGE_DEFAULT_SIZW_OPTIONS, PAGE_DEFAULT_SHOW_TOTAL } from "@/utils/const";
 
 export default {
   data() {
     return {
       loading: false,
-      tableHeight: "70vh",
       list: [],
-      total: 0,
-      listQuery: {},
+
+      listQuery: {
+        page: 1,
+        limit: PAGE_DEFAULT_LIMIT,
+        total: 0,
+      },
       editVisible: false,
       temp: {},
-
       columns: [
         { title: "名称", dataIndex: "name", ellipsis: true },
         { title: "描述", dataIndex: "description", ellipsis: true },
@@ -75,39 +71,30 @@ export default {
   computed: {
     pagination() {
       return {
-        total: this.total,
+        total: this.listQuery.total,
         current: this.listQuery.page || 1,
-        pageSize: this.listQuery.limit || 10,
-        pageSizeOptions: ["10", "20", "50", "100"],
+        pageSize: this.listQuery.limit || PAGE_DEFAULT_LIMIT,
+        pageSizeOptions: PAGE_DEFAULT_SIZW_OPTIONS,
         showSizeChanger: true,
         showTotal: (total) => {
-          if (total <= this.listQuery.limit) {
-            return "";
-          }
-          return `总计 ${total} 条`;
+          return PAGE_DEFAULT_SHOW_TOTAL(total, this.listQuery);
         },
       };
     },
   },
   created() {
-    this.calcTableHeight();
     this.loadData();
   },
   methods: {
     // 加载数据
     loadData() {
       this.loading = true;
-      getWorkSpaceList().then((res) => {
+      getWorkSpaceList(this.listQuery).then((res) => {
         if (res.code === 200) {
           this.list = res.data.result;
+          this.listQuery.total = res.data.total;
         }
         this.loading = false;
-      });
-    },
-    // 计算表格高度
-    calcTableHeight() {
-      this.$nextTick(() => {
-        this.tableHeight = window.innerHeight - this.$refs["filter"].clientHeight - 135;
       });
     },
     handleAdd() {
@@ -133,9 +120,23 @@ export default {
             this.$refs["editForm"].resetFields();
             this.editVisible = false;
             this.loadData();
-          } 
+          }
         });
       });
+    },
+    search(value) {
+      this.listQuery["%name%"] = value;
+      this.loadData();
+    },
+    // 分页、排序、筛选变化时触发
+    changePage(pagination, filters, sorter) {
+      this.listQuery.page = pagination.current;
+      this.listQuery.limit = pagination.pageSize;
+      if (sorter) {
+        this.listQuery.order = sorter.order;
+        this.listQuery.order_field = sorter.field;
+      }
+      this.loadData();
     },
   },
 };
@@ -145,24 +146,11 @@ export default {
   margin-bottom: 10px;
 }
 
-.feature {
-  max-height: 400px;
-  overflow-y: auto;
-}
-
 .ant-btn {
-  margin-right: 10px;
-}
-
-.box-1 {
   margin-left: 10px;
 }
 
-.box-2 {
-  margin-left: 40px;
-}
-
-.box-3 {
-  margin-left: 70px;
+.search {
+  width: 200px;
 }
 </style>

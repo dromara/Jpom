@@ -63,7 +63,7 @@ public class WorkspaceController extends BaseServerController {
 			entity.set("id", StrUtil.format(" <> {}", id));
 		}
 		boolean exists = workspaceService.exists(entity);
-		Assert.state(!exists, "对呀对工作空间名称已经存在啦");
+		Assert.state(!exists, "对应的工作空间名称已经存在啦");
 	}
 
 	/**
@@ -75,6 +75,6 @@ public class WorkspaceController extends BaseServerController {
 	@Feature(method = MethodFeature.LIST)
 	public String list() {
 		PageResultDto<WorkspaceModel> listPage = workspaceService.listPage(getRequest());
-		return JsonMessage.getString(200, "操作成功", listPage);
+		return JsonMessage.getString(200, "", listPage);
 	}
 }

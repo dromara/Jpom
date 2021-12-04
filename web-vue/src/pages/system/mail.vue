@@ -109,8 +109,9 @@ export default {
 </script>
 <style scoped>
 .mail-config {
-  height: calc(100vh - 115px);
-  overflow-y: scroll;
+  /* height: calc(100vh - 115px); */
+  /* overflow-y: scroll; */
+  min-height: 100vh;
 }
 
 .btn {

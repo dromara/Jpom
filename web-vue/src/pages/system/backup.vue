@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="full-content">
     <div ref="filter" class="filter">
       <a-input v-model="listQuery.name" placeholder="请输入备份名称" class="filter-item" />
       <a-select v-model="listQuery.backupType" allowClear placeholder="请选择备份类型" class="filter-item" @change="handleFilter">
@@ -15,8 +15,6 @@
       :loading="loading"
       :columns="columns"
       :data-source="list"
-      :style="{ 'max-height': tableHeight + 'px' }"
-      :scroll="{ x: 1210, y: tableHeight - 60 }"
       bordered
       rowKey="id"
       :pagination="pagination"
@@ -95,7 +93,6 @@ export default {
         page: 1,
         limit: 20,
       },
-      tableHeight: "70vh",
       backupTypeList: [
         { key: 0, value: "全量" },
         { key: 1, value: "部分" },
@@ -190,19 +187,12 @@ export default {
     },
   },
   created() {
-    this.calcTableHeight();
     this.handleFilter();
   },
   methods: {
     // 格式化文件大小
     renderSizeFormat(value) {
       return renderSize(value);
-    },
-    // 计算表格高度
-    calcTableHeight() {
-      this.$nextTick(() => {
-        this.tableHeight = window.innerHeight - this.$refs["filter"].clientHeight - 135;
-      });
     },
     // 加载数据
     loadData() {

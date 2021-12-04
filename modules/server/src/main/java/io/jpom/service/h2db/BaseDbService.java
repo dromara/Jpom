@@ -138,7 +138,7 @@ public abstract class BaseDbService<T extends BaseDbModel> extends BaseDbCommonS
 
 
 	/**
-	 * 通用的分页查询
+	 * 通用的分页查询, 使用该方法查询，数据库表字段不能保护 "page", "limit", "order_field", "order", "total"
 	 * <p>
 	 * page=1&limit=10&order=ascend&order_field=name
 	 *
@@ -154,7 +154,7 @@ public abstract class BaseDbService<T extends BaseDbModel> extends BaseDbCommonS
 		String orderField = paramMap.get("order_field");
 		String order = paramMap.get("order");
 		// 移除 默认字段
-		MapUtil.removeAny(paramMap, "page", "limit", "order_field", "order");
+		MapUtil.removeAny(paramMap, "page", "limit", "order_field", "order", "total");
 		//
 		Page pageReq = new Page(page, limit);
 		Entity where = Entity.create();
