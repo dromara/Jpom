@@ -49,7 +49,7 @@ import io.jpom.model.data.UserModel;
 import io.jpom.model.log.MonitorNotifyLog;
 import io.jpom.service.dblog.DbMonitorNotifyLogService;
 import io.jpom.service.monitor.MonitorService;
-import io.jpom.service.node.NodeOld1Service;
+import io.jpom.service.node.NodeService;
 import io.jpom.service.user.UserService;
 import io.jpom.util.CronUtils;
 
@@ -127,10 +127,10 @@ public class Monitor implements Task {
 
 	private void checkNode(MonitorModel monitorModel) {
 		List<MonitorModel.NodeProject> nodeProjects = monitorModel.getProjects();
-		NodeOld1Service nodeService = SpringUtil.getBean(NodeOld1Service.class);
+		NodeService nodeService = SpringUtil.getBean(NodeService.class);
 		nodeProjects.forEach(nodeProject -> {
 			String nodeId = nodeProject.getNode();
-			NodeModel nodeModel = nodeService.getItem(nodeId);
+			NodeModel nodeModel = nodeService.getByKey(nodeId);
 			if (nodeModel == null) {
 				return;
 			}

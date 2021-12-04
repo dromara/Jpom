@@ -7,7 +7,7 @@ import io.jpom.common.forward.NodeUrl;
 import io.jpom.model.data.NodeModel;
 import io.jpom.permission.BaseDynamicService;
 import io.jpom.plugin.ClassFeature;
-import io.jpom.service.node.NodeOld1Service;
+import io.jpom.service.node.NodeService;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletRequest;
@@ -23,15 +23,15 @@ import java.util.List;
 public class ProjectInfoService implements BaseDynamicService {
 
 
-	private final NodeOld1Service nodeService;
+	private final NodeService nodeService;
 
-	public ProjectInfoService(NodeOld1Service nodeService) {
+	public ProjectInfoService(NodeService nodeService) {
 		this.nodeService = nodeService;
 	}
 
 	@Override
 	public JSONArray listToArray(String dataId) {
-		NodeModel item = nodeService.getItem(dataId);
+		NodeModel item = nodeService.getByKey(dataId);
 		return listAll(item, null);
 	}
 
@@ -62,7 +62,7 @@ public class ProjectInfoService implements BaseDynamicService {
 	}
 
 	public JSONObject getItem(String nodeId, String id) {
-		NodeModel item = nodeService.getItem(id);
+		NodeModel item = nodeService.getByKey(id);
 		return NodeForward.requestData(item, NodeUrl.Manage_GetProjectItem, JSONObject.class, "id", id);
 	}
 

@@ -30,7 +30,7 @@ import io.jpom.model.data.NodeModel;
 import io.jpom.model.data.SshModel;
 import io.jpom.model.data.UserModel;
 import io.jpom.plugin.ClassFeature;
-import io.jpom.service.node.NodeOld1Service;
+import io.jpom.service.node.NodeService;
 import io.jpom.service.node.ssh.SshService;
 import io.jpom.service.user.RoleService;
 import io.jpom.service.user.UserService;
@@ -68,8 +68,8 @@ public class ServerWebSocketInterceptor implements HandshakeInterceptor {
 			// 验证 node 权限
 			String nodeId = httpServletRequest.getParameter("nodeId");
 			if (!JpomApplication.SYSTEM_ID.equals(nodeId)) {
-				NodeOld1Service nodeService = SpringUtil.getBean(NodeOld1Service.class);
-				NodeModel nodeModel = nodeService.getItem(nodeId);
+				NodeService nodeService = SpringUtil.getBean(NodeService.class);
+				NodeModel nodeModel = nodeService.getByKey(nodeId, userId);
 				if (nodeModel == null || roleService.errorDynamicPermission(userModel, ClassFeature.NODE, nodeId)) {
 					return false;
 				}

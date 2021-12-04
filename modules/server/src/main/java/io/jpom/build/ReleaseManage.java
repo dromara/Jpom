@@ -41,7 +41,7 @@ import io.jpom.model.enums.BuildReleaseMethod;
 import io.jpom.model.enums.BuildStatus;
 import io.jpom.model.log.BuildHistoryLog;
 import io.jpom.outgiving.OutGivingRun;
-import io.jpom.service.node.NodeOld1Service;
+import io.jpom.service.node.NodeService;
 import io.jpom.service.node.ssh.SshService;
 import io.jpom.system.JpomRuntimeException;
 
@@ -241,8 +241,8 @@ public class ReleaseManage extends BaseBuild {
 		if (strings == null || strings.length != 2) {
 			throw new JpomRuntimeException(releaseMethodDataId + " error");
 		}
-		NodeOld1Service nodeService = SpringUtil.getBean(NodeOld1Service.class);
-		NodeModel nodeModel = nodeService.getItem(strings[0]);
+		NodeService nodeService = SpringUtil.getBean(NodeService.class);
+		NodeModel nodeModel = nodeService.getByKey(strings[0]);
 		Objects.requireNonNull(nodeModel, "节点不存在");
 
 		File zipFile = BuildUtil.isDirPackage(this.resultFile);

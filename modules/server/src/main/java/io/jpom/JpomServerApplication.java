@@ -31,7 +31,6 @@ import io.jpom.common.Type;
 import io.jpom.common.interceptor.IpInterceptor;
 import io.jpom.common.interceptor.LoginInterceptor;
 import io.jpom.common.interceptor.OpenApiInterceptor;
-import io.jpom.common.interceptor.PermissionInterceptor;
 import io.jpom.model.data.SystemIpConfigModel;
 import io.jpom.permission.CacheControllerFeature;
 import io.jpom.service.system.SystemParametersServer;
@@ -64,7 +63,7 @@ public class JpomServerApplication implements ApplicationEventLoad {
 				.addInterceptor(IpInterceptor.class)
 				.addInterceptor(LoginInterceptor.class)
 				.addInterceptor(OpenApiInterceptor.class)
-				.addInterceptor(PermissionInterceptor.class)
+//				.addInterceptor(PermissionInterceptor.class)
 				.run(args);
 		//
 		if (ArrayUtil.containsIgnoreCase(args, "--rest:ip_config")) {

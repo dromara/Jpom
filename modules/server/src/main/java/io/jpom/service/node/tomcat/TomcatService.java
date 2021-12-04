@@ -7,7 +7,7 @@ import io.jpom.common.forward.NodeUrl;
 import io.jpom.model.data.NodeModel;
 import io.jpom.permission.BaseDynamicService;
 import io.jpom.plugin.ClassFeature;
-import io.jpom.service.node.NodeOld1Service;
+import io.jpom.service.node.NodeService;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
@@ -23,9 +23,9 @@ import javax.servlet.http.HttpServletResponse;
 public class TomcatService implements BaseDynamicService {
 
 
-	private final NodeOld1Service nodeService;
+	private final NodeService nodeService;
 
-	public TomcatService(NodeOld1Service nodeService) {
+	public TomcatService(NodeService nodeService) {
 		this.nodeService = nodeService;
 	}
 
@@ -204,7 +204,7 @@ public class TomcatService implements BaseDynamicService {
 
 	@Override
 	public JSONArray listToArray(String dataId) {
-		NodeModel item = nodeService.getItem(dataId);
+		NodeModel item = nodeService.getByKey(dataId);
 		if (item == null) {
 			return null;
 		}

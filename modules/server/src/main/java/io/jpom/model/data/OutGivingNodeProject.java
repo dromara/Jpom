@@ -26,7 +26,7 @@ import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.spring.SpringUtil;
 import io.jpom.model.BaseEnum;
 import io.jpom.model.BaseJsonModel;
-import io.jpom.service.node.NodeOld1Service;
+import io.jpom.service.node.NodeService;
 
 /**
  * 节点项目
@@ -35,7 +35,7 @@ import io.jpom.service.node.NodeOld1Service;
  * @date 2019/4/22
  */
 public class OutGivingNodeProject extends BaseJsonModel {
-	private static NodeOld1Service nodeService;
+	private static NodeService nodeService;
 
 	private String nodeId;
 	private String projectId;
@@ -96,9 +96,9 @@ public class OutGivingNodeProject extends BaseJsonModel {
 	 */
 	public NodeModel getNodeData(boolean get) {
 		if (nodeService == null) {
-			nodeService = SpringUtil.getBean(NodeOld1Service.class);
+			nodeService = SpringUtil.getBean(NodeService.class);
 		}
-		return nodeService.getItem(this.nodeId);
+		return nodeService.getByKey(this.nodeId);
 	}
 
 	/**
