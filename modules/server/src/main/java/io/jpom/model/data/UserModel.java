@@ -43,6 +43,10 @@ public class UserModel extends BaseStrikeDbModel {
 	 */
 	public static String SYSTEM_ADMIN = "sys";
 	/**
+	 *
+	 */
+	public static final UserModel EMPTY = new UserModel(UserModel.SYSTEM_ADMIN);
+	/**
 	 * 系统占用名
 	 */
 	public static String SYSTEM_OCCUPY_NAME = "系统管理员";

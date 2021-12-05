@@ -25,7 +25,6 @@ package io.jpom.permission;
 import io.jpom.plugin.ClassFeature;
 import io.jpom.plugin.MethodFeature;
 import io.jpom.service.node.OutGivingServer;
-import io.jpom.service.node.manage.ProjectInfoService;
 import io.jpom.service.node.script.ScriptServer;
 import io.jpom.service.node.tomcat.TomcatService;
 
@@ -53,7 +52,7 @@ public class DynamicData {
         // 分发
         put(ClassFeature.OUTGIVING, new DynamicData(OutGivingServer.class, MethodFeature.LIST));
         // 项目
-        put(ClassFeature.PROJECT, new DynamicData(ProjectInfoService.class, MethodFeature.LIST));
+//        put(ClassFeature.PROJECT, new DynamicData(ProjectInfoService.class, MethodFeature.LIST));
         // 脚本
         put(ClassFeature.SCRIPT, new DynamicData(ScriptServer.class, MethodFeature.LIST));
         //

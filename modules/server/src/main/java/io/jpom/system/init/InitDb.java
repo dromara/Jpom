@@ -38,6 +38,7 @@ import cn.jiangzeyin.common.PreLoadClass;
 import cn.jiangzeyin.common.PreLoadMethod;
 import cn.jiangzeyin.common.spring.SpringUtil;
 import io.jpom.common.JpomManifest;
+import io.jpom.service.node.ProjectInfoCacheService;
 import io.jpom.service.system.WorkspaceService;
 import io.jpom.system.ServerExtConfigBean;
 import io.jpom.system.db.DbConfig;
@@ -160,6 +161,9 @@ public class InitDb implements DisposableBean, InitializingBean {
 		instance.loadSshInfo();
 		//
 		workspaceService.convertNullWorkspaceId();
+		//  同步项目
+		ProjectInfoCacheService projectInfoCacheService = SpringUtil.getBean(ProjectInfoCacheService.class);
+		projectInfoCacheService.syncAllNode();
 	}
 
 	@Override

@@ -37,3 +37,16 @@ export function getWorkSpaceListAll() {
     data: {},
   });
 }
+
+/*
+ * 删除工作空间
+ * @param {String} id
+ * } params
+ */
+export function deleteWorkspace(id) {
+  return axios({
+    url: "/system/workspace/delete",
+    method: "get",
+    params: { id: id },
+  });
+}

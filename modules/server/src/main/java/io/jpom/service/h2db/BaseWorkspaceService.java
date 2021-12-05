@@ -28,11 +28,11 @@ import cn.hutool.db.Entity;
 import cn.hutool.extra.servlet.ServletUtil;
 import cn.jiangzeyin.common.spring.SpringUtil;
 import io.jpom.common.BaseServerController;
+import io.jpom.common.Const;
 import io.jpom.model.BaseWorkspaceModel;
 import io.jpom.model.PageResultDto;
 import io.jpom.model.data.UserBindWorkspaceModel;
 import io.jpom.model.data.UserModel;
-import io.jpom.model.data.WorkspaceModel;
 import io.jpom.service.user.UserBindWorkspaceService;
 import org.springframework.util.Assert;
 
@@ -82,7 +82,7 @@ public abstract class BaseWorkspaceService<T extends BaseWorkspaceModel> extends
 	 * @return data
 	 */
 	public T getByKey(String keyValue, String userId) {
-		T byKey = super.getByKey(keyValue);
+		T byKey = super.getByKey(keyValue, false);
 		this.checkUserWorkspace(byKey.getWorkspaceId(), userId);
 		return byKey;
 	}
@@ -129,7 +129,7 @@ public abstract class BaseWorkspaceService<T extends BaseWorkspaceModel> extends
 	 * @return 工作空间ID
 	 */
 	public String getCheckUserWorkspace(HttpServletRequest request) {
-		String workspaceId = ServletUtil.getHeader(request, WorkspaceModel.REQ_HEADER, CharsetUtil.CHARSET_UTF_8);
+		String workspaceId = ServletUtil.getHeader(request, Const.WORKSPACEID_REQ_HEADER, CharsetUtil.CHARSET_UTF_8);
 		Assert.hasText(workspaceId, "请选择工作空间");
 		//
 		this.checkUserWorkspace(workspaceId);
@@ -144,6 +144,10 @@ public abstract class BaseWorkspaceService<T extends BaseWorkspaceModel> extends
 	private void checkUserWorkspace(String workspaceId) {
 		// 查询绑定的权限
 		UserModel userModel = BaseServerController.getUserByThreadLocal();
+		if (StrUtil.equals(userModel.getId(), UserModel.SYSTEM_ADMIN)) {
+			// 系统执行，发行检查
+			return;
+		}
 		UserBindWorkspaceModel workspaceModel = new UserBindWorkspaceModel();
 		workspaceModel.setId(UserBindWorkspaceModel.getId(userModel.getId(), workspaceId));
 		UserBindWorkspaceService userBindWorkspaceService = SpringUtil.getBean(UserBindWorkspaceService.class);

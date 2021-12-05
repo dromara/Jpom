@@ -70,4 +70,9 @@ public class Const {
 	 * 升级提示语
 	 */
 	public static final String UPGRADE_MSG = "升级中大约需要30秒";
+
+	/**
+	 * 请求 header
+	 */
+	public static final String WORKSPACEID_REQ_HEADER = "workspaceId";
 }

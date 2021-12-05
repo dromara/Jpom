@@ -75,6 +75,18 @@ public abstract class BaseDbService<T extends BaseDbModel> extends BaseDbCommonS
 	}
 
 	/**
+	 * 先尝试 更新，更新失败插入
+	 *
+	 * @param t 数据
+	 */
+	public void upsert(T t) {
+		int update = this.update(t);
+		if (update <= 0) {
+			this.insert(t);
+		}
+	}
+
+	/**
 	 * 不填充 插入
 	 *
 	 * @param t 数据

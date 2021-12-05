@@ -48,6 +48,8 @@ export function PAGE_DEFAULT_SHOW_TOTAL(total, listQuery) {
   return `总计 ${total} 条`;
 }
 
+export const PAGE_DEFAULT_LIST_QUERY = { page: 1, limit: PAGE_DEFAULT_LIMIT, total: 0 };
+
 /**
  * 缓存当前的工作空间 ID
  */

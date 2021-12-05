@@ -25,6 +25,7 @@ package io.jpom.service.h2db;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.bean.copier.CopyOptions;
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.PageUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.core.util.TypeUtil;
@@ -305,8 +306,8 @@ public abstract class BaseDbCommonService<T> {
 	 * @param consumer 回调
 	 * @return 影响行数
 	 */
-	public int delByKey(String keyValue, Consumer<Entity> consumer) {
-		if (StrUtil.isEmpty(keyValue)) {
+	public int delByKey(Object keyValue, Consumer<Entity> consumer) {
+		if (ObjectUtil.isEmpty(keyValue)) {
 			return 0;
 		}
 		if (!DbConfig.getInstance().isInit()) {

@@ -27,7 +27,7 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
 import io.jpom.common.BaseAgentController;
 import io.jpom.common.BaseOperService;
-import io.jpom.model.data.ProjectInfoModel;
+import io.jpom.model.data.NodeProjectInfoModel;
 import io.jpom.model.data.ProjectRecoverModel;
 import io.jpom.system.AgentConfigBean;
 import org.springframework.stereotype.Service;
@@ -43,7 +43,7 @@ import java.util.List;
  * @author jiangzeyin
  */
 @Service
-public class ProjectInfoService extends BaseOperService<ProjectInfoModel> {
+public class ProjectInfoService extends BaseOperService<NodeProjectInfoModel> {
     @Resource
     private ProjectRecoverService projectRecoverService;
 
@@ -53,13 +53,13 @@ public class ProjectInfoService extends BaseOperService<ProjectInfoModel> {
 
     public HashSet<String> getAllGroup() {
         //获取所有分组
-        List<ProjectInfoModel> projectInfoModels = list();
+        List<NodeProjectInfoModel> nodeProjectInfoModels = list();
         HashSet<String> hashSet = new HashSet<>();
-        if (projectInfoModels == null) {
+        if (nodeProjectInfoModels == null) {
             return hashSet;
         }
-        for (ProjectInfoModel projectInfoModel : projectInfoModels) {
-            hashSet.add(projectInfoModel.getGroup());
+        for (NodeProjectInfoModel nodeProjectInfoModel : nodeProjectInfoModels) {
+            hashSet.add(nodeProjectInfoModel.getGroup());
         }
         return hashSet;
     }
@@ -72,7 +72,7 @@ public class ProjectInfoService extends BaseOperService<ProjectInfoModel> {
      */
     @Override
     public void deleteItem(String id) {
-        ProjectInfoModel projectInfo = getItem(id);
+        NodeProjectInfoModel projectInfo = getItem(id);
         String userId = BaseAgentController.getNowUserName();
         super.deleteItem(id);
         // 添加回收记录
@@ -87,7 +87,7 @@ public class ProjectInfoService extends BaseOperService<ProjectInfoModel> {
      * @param projectInfo 项目信息
      */
     @Override
-    public void updateItem(ProjectInfoModel projectInfo) {
+    public void updateItem(NodeProjectInfoModel projectInfo) {
         projectInfo.setModifyTime(DateUtil.now());
         String userName = BaseAgentController.getNowUserName();
         if (!StrUtil.DASHED.equals(userName)) {
@@ -97,23 +97,23 @@ public class ProjectInfoService extends BaseOperService<ProjectInfoModel> {
     }
 
     @Override
-    public void addItem(ProjectInfoModel projectInfoModel) {
-        projectInfoModel.setCreateTime(DateUtil.now());
-        super.addItem(projectInfoModel);
+    public void addItem(NodeProjectInfoModel nodeProjectInfoModel) {
+        nodeProjectInfoModel.setCreateTime(DateUtil.now());
+        super.addItem(nodeProjectInfoModel);
     }
 
     /**
      * 查看项目控制台日志文件大小
      *
-     * @param projectInfoModel 项目
+     * @param nodeProjectInfoModel 项目
      * @param copyItem  副本
      * @return 文件大小
      */
-    public String getLogSize(ProjectInfoModel projectInfoModel, ProjectInfoModel.JavaCopyItem copyItem) {
-        if (projectInfoModel == null) {
+    public String getLogSize(NodeProjectInfoModel nodeProjectInfoModel, NodeProjectInfoModel.JavaCopyItem copyItem) {
+        if (nodeProjectInfoModel == null) {
             return null;
         }
-        File file = copyItem == null ? new File(projectInfoModel.getLog()) : projectInfoModel.getLog(copyItem);
+        File file = copyItem == null ? new File(nodeProjectInfoModel.getLog()) : nodeProjectInfoModel.getLog(copyItem);
         if (file.exists()) {
             long fileSize = file.length();
             if (fileSize <= 0) {

@@ -116,3 +116,32 @@ CREATE TABLE IF NOT EXISTS PUBLIC.SSH_INFO
 );
 comment on table SSH_INFO is 'ssh信息表';
 
+
+-- 项目信息表
+CREATE TABLE IF NOT EXISTS PUBLIC.PROJECT_INFO
+(
+	ID                 VARCHAR(50) not null comment 'id',
+	CREATETIMEMILLIS   BIGINT COMMENT '数据创建时间',
+	MODIFYTIMEMILLIS   BIGINT COMMENT '数据修改时间',
+	MODIFYUSER         VARCHAR(50) comment '修改人',
+	STRIKE             int DEFAULT 0 comment '逻辑删除{1，删除，0 未删除(默认)}',
+	workspaceId        varchar(50) not null comment '所属工作空间',
+	projectId          varchar(50) not null comment '项目ID',
+	nodeId             varchar(50) not null comment '节点ID',
+	`NAME`             VARCHAR(50) not null comment '名称',
+	mainClass          varchar(100) comment 'mainClas',
+	lib                varchar(100) comment 'lib',
+	whitelistDirectory varchar(100) comment 'whitelistDirectory',
+	logPath            varchar(100) comment 'logPath',
+	jvm                CLOB comment 'jvm',
+	args               CLOB comment 'args',
+	javaCopyItemList   CLOB comment 'javaCopyItemList',
+	token              varchar(255) comment 'token',
+	jdkId              VARCHAR(50) comment '名称',
+	runMode            varchar(20) comment '连接方式',
+	outGivingProject   int DEFAULT 0 comment '分发项目{1，分发，0 独立项目}',
+	javaExtDirsCp      CLOB comment 'javaExtDirsCp',
+	CONSTRAINT PROJECT_INFO_PK PRIMARY KEY (ID)
+);
+comment on table PROJECT_INFO is '项目信息表';
+

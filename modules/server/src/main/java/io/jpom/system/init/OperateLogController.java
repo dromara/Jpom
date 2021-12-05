@@ -139,7 +139,8 @@ public class OperateLogController implements AopLogInterface {
 		UserOperateLogV1.OptType optType = cacheInfo.optType;
 		NodeModel nodeModel = cacheInfo.nodeModel;
 		String dataId = cacheInfo.dataId;
-		UserOperateLogV1 userOperateLogV1 = new UserOperateLogV1(reqId);
+		UserOperateLogV1 userOperateLogV1 = new UserOperateLogV1();
+		userOperateLogV1.setId(reqId);
 		//
 		userOperateLogV1.setUserId(UserModel.getOptUserName(userModel));
 		userOperateLogV1.setIp(ip);
@@ -159,7 +160,7 @@ public class OperateLogController implements AopLogInterface {
 			} catch (Exception ignored) {
 			}
 		}
-		userOperateLogV1.setOptTime(DateUtil.current());
+		userOperateLogV1.setCreateTimeMillis(DateUtil.current());
 		userOperateLogV1.setOptType(optType.getCode());
 		//
 		if (nodeModel != null) {

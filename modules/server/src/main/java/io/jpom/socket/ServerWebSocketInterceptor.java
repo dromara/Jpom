@@ -69,7 +69,7 @@ public class ServerWebSocketInterceptor implements HandshakeInterceptor {
 			String nodeId = httpServletRequest.getParameter("nodeId");
 			if (!JpomApplication.SYSTEM_ID.equals(nodeId)) {
 				NodeService nodeService = SpringUtil.getBean(NodeService.class);
-				NodeModel nodeModel = nodeService.getByKey(nodeId, userId);
+				NodeModel nodeModel = nodeService.getByKey(nodeId, userModel.getId());
 				if (nodeModel == null || roleService.errorDynamicPermission(userModel, ClassFeature.NODE, nodeId)) {
 					return false;
 				}
@@ -116,7 +116,7 @@ public class ServerWebSocketInterceptor implements HandshakeInterceptor {
 					String sshId = httpServletRequest.getParameter("sshId");
 
 					SshService bean = SpringUtil.getBean(SshService.class);
-					SshModel sshModel = bean.getByKey(sshId, userId);
+					SshModel sshModel = bean.getByKey(sshId, userModel.getId());
 					if (sshModel == null) {
 						return false;
 					}

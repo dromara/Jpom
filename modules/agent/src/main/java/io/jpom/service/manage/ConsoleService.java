@@ -24,7 +24,7 @@ package io.jpom.service.manage;
 
 import cn.hutool.core.date.DateUtil;
 import io.jpom.common.commander.AbstractProjectCommander;
-import io.jpom.model.data.ProjectInfoModel;
+import io.jpom.model.data.NodeProjectInfoModel;
 import io.jpom.socket.ConsoleCommandOp;
 import org.springframework.stereotype.Service;
 
@@ -45,27 +45,27 @@ public class ConsoleService {
      * 执行shell命令
      *
      * @param consoleCommandOp 执行的操作
-     * @param projectInfoModel 项目信息
+     * @param nodeProjectInfoModel 项目信息
      * @param copyItem         副本信息
      * @return 执行结果
      * @throws Exception 异常
      */
-    public String execCommand(ConsoleCommandOp consoleCommandOp, ProjectInfoModel projectInfoModel, ProjectInfoModel.JavaCopyItem copyItem) throws Exception {
+    public String execCommand(ConsoleCommandOp consoleCommandOp, NodeProjectInfoModel nodeProjectInfoModel, NodeProjectInfoModel.JavaCopyItem copyItem) throws Exception {
         String result;
         AbstractProjectCommander abstractProjectCommander = AbstractProjectCommander.getInstance();
         // 执行命令
         switch (consoleCommandOp) {
             case restart:
-                result = abstractProjectCommander.restart(projectInfoModel, copyItem);
+                result = abstractProjectCommander.restart(nodeProjectInfoModel, copyItem);
                 break;
             case start:
-                result = abstractProjectCommander.start(projectInfoModel, copyItem);
+                result = abstractProjectCommander.start(nodeProjectInfoModel, copyItem);
                 break;
             case stop:
-                result = abstractProjectCommander.stop(projectInfoModel, copyItem);
+                result = abstractProjectCommander.stop(nodeProjectInfoModel, copyItem);
                 break;
             case status: {
-                String tag = copyItem == null ? projectInfoModel.getId() : copyItem.getTagId();
+                String tag = copyItem == null ? nodeProjectInfoModel.getId() : copyItem.getTagId();
                 result = abstractProjectCommander.status(tag);
                 break;
             }
@@ -77,13 +77,13 @@ public class ConsoleService {
         //  通知日志刷新
         if (consoleCommandOp == ConsoleCommandOp.start || consoleCommandOp == ConsoleCommandOp.restart) {
             // 修改 run lib 使用情况
-            ProjectInfoModel modify = projectInfoService.getItem(projectInfoModel.getId());
+            NodeProjectInfoModel modify = projectInfoService.getItem(nodeProjectInfoModel.getId());
             //
             if (copyItem != null) {
-                ProjectInfoModel.JavaCopyItem copyItem1 = modify.findCopyItem(copyItem.getId());
+                NodeProjectInfoModel.JavaCopyItem copyItem1 = modify.findCopyItem(copyItem.getId());
                 copyItem1.setModifyTime(DateUtil.now());
             }
-            modify.setRunLibDesc(projectInfoModel.getUseLibDesc());
+            modify.setRunLibDesc(nodeProjectInfoModel.getUseLibDesc());
             try {
                 projectInfoService.updateItem(modify);
             } catch (Exception ignored) {

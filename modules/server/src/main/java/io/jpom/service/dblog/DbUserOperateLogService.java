@@ -32,7 +32,7 @@ import io.jpom.model.data.MonitorUserOptModel;
 import io.jpom.model.data.UserModel;
 import io.jpom.model.log.UserOperateLogV1;
 import io.jpom.monitor.NotifyUtil;
-import io.jpom.service.h2db.BaseDbCommonService;
+import io.jpom.service.h2db.BaseWorkspaceService;
 import io.jpom.service.monitor.MonitorUserOptService;
 import io.jpom.service.user.UserService;
 import io.jpom.system.db.DbConfig;
@@ -47,7 +47,7 @@ import java.util.List;
  * @date 2019/7/20
  */
 @Service
-public class DbUserOperateLogService extends BaseDbCommonService<UserOperateLogV1> {
+public class DbUserOperateLogService extends BaseWorkspaceService<UserOperateLogV1> {
 
 	private final MonitorUserOptService monitorUserOptService;
 	private final UserService userService;
@@ -56,7 +56,7 @@ public class DbUserOperateLogService extends BaseDbCommonService<UserOperateLogV
 	public DbUserOperateLogService(MonitorUserOptService monitorUserOptService,
 								   UserService userService,
 								   BuildInfoService buildService) {
-		super(UserOperateLogV1.TABLE_NAME, "reqId", UserOperateLogV1.class);
+
 		this.monitorUserOptService = monitorUserOptService;
 		this.userService = userService;
 		this.buildService = buildService;
@@ -66,6 +66,7 @@ public class DbUserOperateLogService extends BaseDbCommonService<UserOperateLogV
 	public void insert(UserOperateLogV1 userOperateLogV1) {
 		super.insert(userOperateLogV1);
 		DbConfig.autoClear(getTableName(), "optTime");
+		DbConfig.autoClear(getTableName(), "createTimeMillis");
 		ThreadUtil.execute(() -> {
 			UserOperateLogV1.OptType optType = BaseEnum.getEnum(UserOperateLogV1.OptType.class, userOperateLogV1.getOptType());
 			if (optType == null) {

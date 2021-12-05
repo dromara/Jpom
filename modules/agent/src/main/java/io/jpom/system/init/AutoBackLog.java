@@ -33,7 +33,7 @@ import cn.jiangzeyin.common.PreLoadClass;
 import cn.jiangzeyin.common.PreLoadMethod;
 import cn.jiangzeyin.common.spring.SpringUtil;
 import io.jpom.common.commander.AbstractProjectCommander;
-import io.jpom.model.data.ProjectInfoModel;
+import io.jpom.model.data.NodeProjectInfoModel;
 import io.jpom.service.manage.ProjectInfoService;
 import io.jpom.system.AgentExtConfigBean;
 import io.jpom.util.CronUtils;
@@ -72,14 +72,14 @@ public class AutoBackLog {
         //
         CronUtil.schedule(ID, cron, () -> {
             try {
-                List<ProjectInfoModel> list = projectInfoService.list();
+                List<NodeProjectInfoModel> list = projectInfoService.list();
                 if (list == null) {
                     return;
                 }
                 list.forEach(projectInfoModel -> {
                     checkProject(projectInfoModel, null);
                     //
-                    List<ProjectInfoModel.JavaCopyItem> javaCopyItemList = projectInfoModel.getJavaCopyItemList();
+                    List<NodeProjectInfoModel.JavaCopyItem> javaCopyItemList = projectInfoModel.getJavaCopyItemList();
                     if (javaCopyItemList == null) {
                         return;
                     }
@@ -92,20 +92,20 @@ public class AutoBackLog {
         CronUtils.start();
     }
 
-    private static void checkProject(ProjectInfoModel projectInfoModel, ProjectInfoModel.JavaCopyItem javaCopyItem) {
-        File file = javaCopyItem == null ? new File(projectInfoModel.getLog()) : projectInfoModel.getLog(javaCopyItem);
+    private static void checkProject(NodeProjectInfoModel nodeProjectInfoModel, NodeProjectInfoModel.JavaCopyItem javaCopyItem) {
+        File file = javaCopyItem == null ? new File(nodeProjectInfoModel.getLog()) : nodeProjectInfoModel.getLog(javaCopyItem);
         if (!file.exists()) {
             return;
         }
         long len = file.length();
         if (len > MAX_SIZE.getSize()) {
             try {
-                AbstractProjectCommander.getInstance().backLog(projectInfoModel, javaCopyItem);
+                AbstractProjectCommander.getInstance().backLog(nodeProjectInfoModel, javaCopyItem);
             } catch (Exception ignored) {
             }
         }
         // 清理过期的文件
-        File logFile = javaCopyItem == null ? projectInfoModel.getLogBack() : projectInfoModel.getLogBack(javaCopyItem);
+        File logFile = javaCopyItem == null ? nodeProjectInfoModel.getLogBack() : nodeProjectInfoModel.getLogBack(javaCopyItem);
         DateTime nowTime = DateTime.now();
         List<File> files = FileUtil.loopFiles(logFile, pathname -> {
             DateTime dateTime = DateUtil.date(pathname.lastModified());

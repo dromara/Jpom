@@ -9,8 +9,7 @@
       :data-source="list"
       :loading="loading"
       :columns="columns"
-      :style="{ 'max-height': tableHeight + 'px' }"
-      :scroll="{ x: 1110, y: tableHeight - 60 }"
+     
       :pagination="false"
       bordered
       :rowKey="(record, index) => index"
@@ -66,10 +65,10 @@
 </template>
 <script>
 import { mapGetters } from "vuex";
-import { getMonitorList, editMonitor, deleteMonitor } from "../../api/monitor";
-import { getAdminUserList } from "../../api/user";
-import { getNodeProjectList } from "../../api/node";
-import { parseTime } from "../../utils/time";
+import { getMonitorList, editMonitor, deleteMonitor } from "@/api/monitor";
+import { getUserListAll } from "@/api/user";
+import { getNodeProjectList } from "@/api/node";
+import { parseTime } from "@/utils/time";
 export default {
   data() {
     return {
@@ -164,7 +163,7 @@ export default {
     // 加载用户列表
     loadUserList() {
       this.userList = [];
-      getAdminUserList().then((res) => {
+      getUserListAll().then((res) => {
         if (res.code === 200) {
           res.data.forEach((element) => {
             this.userList.push({ key: element.value, title: element.title, disabled: element.disabled || false });

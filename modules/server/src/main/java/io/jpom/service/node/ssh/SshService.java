@@ -32,6 +32,15 @@ import java.util.concurrent.atomic.AtomicReference;
 @Service
 public class SshService extends BaseWorkspaceService<SshModel> {
 
+	@Override
+	protected void fillSelectResult(SshModel data) {
+		if (data == null) {
+			return;
+		}
+		data.setPassword(null);
+		data.setPrivateKey(null);
+	}
+
 	public static Session getSession(SshModel sshModel) {
 		Session session;
 		SshModel.ConnectType connectType = sshModel.connectType();

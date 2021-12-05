@@ -8,11 +8,9 @@ import io.jpom.model.log.UserOperateLogV1;
 import io.jpom.plugin.ClassFeature;
 import io.jpom.plugin.Feature;
 import io.jpom.plugin.MethodFeature;
-import io.jpom.service.node.manage.ProjectInfoService;
+import io.jpom.service.node.ProjectInfoCacheService;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
-
-import javax.annotation.Resource;
 
 /**
  * 文件管理
@@ -23,8 +21,12 @@ import javax.annotation.Resource;
 @RequestMapping(value = "/node/manage/file/")
 @Feature(cls = ClassFeature.PROJECT)
 public class ProjectFileControl extends BaseServerController {
-	@Resource
-	private ProjectInfoService projectInfoService;
+
+	private final ProjectInfoCacheService projectInfoService;
+
+	public ProjectFileControl(ProjectInfoCacheService projectInfoService) {
+		this.projectInfoService = projectInfoService;
+	}
 
 	/**
 	 * 列出目录下的文件

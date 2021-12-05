@@ -33,11 +33,10 @@ import io.jpom.model.data.RepositoryModel;
 import io.jpom.model.data.UserModel;
 import io.jpom.model.enums.BuildReleaseMethod;
 import io.jpom.model.enums.BuildStatus;
-import io.jpom.service.h2db.BaseDbService;
+import io.jpom.service.h2db.BaseWorkspaceService;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
-import javax.annotation.Resource;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -50,10 +49,13 @@ import java.util.stream.Stream;
  * @date 2021-08-10
  **/
 @Service
-public class BuildInfoService extends BaseDbService<BuildInfoModel> {
+public class BuildInfoService extends BaseWorkspaceService<BuildInfoModel> {
 
-	@Resource
-	private RepositoryService repositoryService;
+	private final RepositoryService repositoryService;
+
+	public BuildInfoService(RepositoryService repositoryService) {
+		this.repositoryService = repositoryService;
+	}
 
 	/**
 	 * load date group by group name

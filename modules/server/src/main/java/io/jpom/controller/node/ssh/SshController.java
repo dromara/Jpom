@@ -2,6 +2,7 @@ package io.jpom.controller.node.ssh;
 
 import cn.hutool.core.text.StrSplitter;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.db.Entity;
 import cn.hutool.extra.ssh.JschUtil;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.validator.ValidatorItem;
@@ -26,6 +27,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletRequest;
 import java.nio.charset.Charset;
 import java.util.List;
 
@@ -138,6 +140,18 @@ public class SshController extends BaseServerController {
 		} catch (Exception e) {
 			return JsonMessage.getString(405, "请填写正确的编码格式");
 		}
+		// 判断重复
+		HttpServletRequest request = getRequest();
+		String workspaceId = sshService.getCheckUserWorkspace(request);
+		Entity entity = Entity.create();
+		entity.set("host", sshModel.getHost());
+		entity.set("post", sshModel.getPort());
+		entity.set("workspaceId", workspaceId);
+		if (StrUtil.isNotEmpty(id)) {
+			entity.set("id", StrUtil.format(" <> {}", id));
+		}
+		boolean exists = sshService.exists(entity);
+		Assert.state(!exists, "对应的SSH已经存在啦");
 		try {
 			Session session = SshService.getSession(sshModel);
 			JschUtil.close(session);

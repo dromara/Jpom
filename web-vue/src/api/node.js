@@ -1,19 +1,19 @@
 import axios from "./config";
 
-// 分组
-export function getNodeGroupList() {
-  return axios({
-    url: "/node/list_group.json",
-    method: "get",
-  });
-}
-
 // node 列表
 export function getNodeList(params) {
   return axios({
     url: "/node/list_data.json",
     method: "post",
     params: params,
+  });
+}
+
+// node 列表 all
+export function getNodeListAll() {
+  return axios({
+    url: "/node/list_data_all.json",
+    method: "get",
   });
 }
 
@@ -39,6 +39,16 @@ export function getNodeStatus(nodeId) {
 export function getNodeProjectList(params) {
   return axios({
     url: "/node/node_project_list",
+    method: "post",
+    params: params,
+    timeout: 0,
+  });
+}
+
+// 节点 + 项目列表
+export function getProjectList(params) {
+  return axios({
+    url: "/node/project_list",
     method: "post",
     params: params,
     timeout: 0,

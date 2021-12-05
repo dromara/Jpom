@@ -141,6 +141,9 @@ export default {
       myWorkspace().then((res) => {
         this.myWorkspaceList = res.data;
         this.selectWorkspace = this.getWorkspaceId;
+        if (!this.selectWorkspace) {
+          this.handleChange(res.data[0].id);
+        }
       });
     },
     // 退出登录

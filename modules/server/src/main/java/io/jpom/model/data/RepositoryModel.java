@@ -25,7 +25,7 @@ package io.jpom.model.data;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.http.HttpUtil;
 import io.jpom.model.BaseEnum;
-import io.jpom.model.BaseStrikeDbModel;
+import io.jpom.model.BaseWorkspaceModel;
 import io.jpom.model.enums.GitProtocolEnum;
 import io.jpom.service.h2db.TableName;
 
@@ -34,7 +34,7 @@ import io.jpom.service.h2db.TableName;
  * 仓库地址实体类
  */
 @TableName("REPOSITORY")
-public class RepositoryModel extends BaseStrikeDbModel {
+public class RepositoryModel extends BaseWorkspaceModel {
 	/**
 	 * 名称
 	 */

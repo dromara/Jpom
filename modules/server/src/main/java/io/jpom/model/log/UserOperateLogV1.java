@@ -22,12 +22,10 @@
  */
 package io.jpom.model.log;
 
-import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
-import io.jpom.JpomApplication;
 import io.jpom.model.BaseEnum;
-import io.jpom.model.BaseJsonModel;
-import io.jpom.model.data.UserModel;
+import io.jpom.model.BaseWorkspaceModel;
+import io.jpom.service.h2db.TableName;
 
 /**
  * 用户操作日志
@@ -35,7 +33,8 @@ import io.jpom.model.data.UserModel;
  * @author jiangzeyin
  * @date 2019/4/19
  */
-public class UserOperateLogV1 extends BaseJsonModel {
+@TableName("USEROPERATELOGV1")
+public class UserOperateLogV1 extends BaseWorkspaceModel {
 	/**
 	 * 表名
 	 */
@@ -52,10 +51,10 @@ public class UserOperateLogV1 extends BaseJsonModel {
 	 * 节点id
 	 */
 	private String nodeId;
-	/**
-	 * 操作时间
-	 */
-	private long optTime;
+//	/**
+//	 * 操作时间
+//	 */
+//	private long optTime;
 	/**
 	 * 操作类型
 	 */
@@ -68,11 +67,11 @@ public class UserOperateLogV1 extends BaseJsonModel {
 	 * 完整消息
 	 */
 	private String resultMsg;
-	/**
-	 * 操作id
-	 * 用于socket 回话回调更新
-	 */
-	private String reqId;
+//	/**
+//	 * 操作id
+//	 * 用于socket 回话回调更新
+//	 */
+//	private String reqId;
 	/**
 	 * 请求参数
 	 */
@@ -110,27 +109,27 @@ public class UserOperateLogV1 extends BaseJsonModel {
 		this.dataId = dataId;
 	}
 
-	public UserOperateLogV1(String reqId) {
-		if (reqId == null) {
-			this.reqId = IdUtil.fastUUID();
-		} else {
-			this.reqId = reqId;
-		}
-	}
+//	public UserOperateLogV1(String reqId) {
+//		if (reqId == null) {
+//			this.reqId = IdUtil.fastUUID();
+//		} else {
+//			this.reqId = reqId;
+//		}
+//	}
 
-	/**
-	 * 操作id
-	 */
-	public UserOperateLogV1() {
-	}
+//	/**
+//	 * 操作id
+//	 */
+//	public UserOperateLogV1() {
+//	}
 
-	public String getReqId() {
-		return reqId;
-	}
-
-	public void setReqId(String reqId) {
-		this.reqId = reqId;
-	}
+//	public String getReqId() {
+//		return reqId;
+//	}
+//
+//	public void setReqId(String reqId) {
+//		this.reqId = reqId;
+//	}
 
 	public String getNodeId() {
 		return StrUtil.emptyToDefault(nodeId, StrUtil.DASHED);
@@ -153,20 +152,16 @@ public class UserOperateLogV1 extends BaseJsonModel {
 	}
 
 	public void setUserId(String userId) {
-		if (UserModel.SYSTEM_OCCUPY_NAME.equals(userId)) {
-			this.userId = JpomApplication.SYSTEM_ID;
-		} else {
-			this.userId = userId;
-		}
+		this.userId = userId;
 	}
-
-	public long getOptTime() {
-		return optTime;
-	}
-
-	public void setOptTime(long optTime) {
-		this.optTime = optTime;
-	}
+//
+//	public long getOptTime() {
+//		return optTime;
+//	}
+//
+//	public void setOptTime(long optTime) {
+//		this.optTime = optTime;
+//	}
 
 	public int getOptType() {
 		return optType;

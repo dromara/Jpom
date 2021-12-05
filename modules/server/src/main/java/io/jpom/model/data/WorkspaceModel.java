@@ -17,10 +17,7 @@ public class WorkspaceModel extends BaseStrikeDbModel {
 	 */
 	public static final String DEFAULT_ID = "DEFAULT";
 
-	/**
-	 * 请求 header
-	 */
-	public static final String REQ_HEADER = "workspaceId";
+
 
 	/**
 	 * 名称

@@ -1,7 +1,5 @@
 package io.jpom.model;
 
-import io.jpom.model.data.WorkspaceModel;
-
 /**
  * 工作空间 数据
  *
@@ -14,7 +12,7 @@ public abstract class BaseWorkspaceModel extends BaseStrikeDbModel {
 	 * 工作空间ID
 	 *
 	 * @see io.jpom.model.data.WorkspaceModel
-	 * @see WorkspaceModel#REQ_HEADER
+	 * @see io.jpom.common.Const#WORKSPACEID_REQ_HEADER
 	 */
 	private String workspaceId;
 

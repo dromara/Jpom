@@ -28,7 +28,6 @@ import cn.hutool.crypto.SecureUtil;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.validator.ValidatorItem;
 import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
 import io.jpom.common.BaseServerController;
 import io.jpom.model.PageResultDto;
 import io.jpom.model.data.UserBindWorkspaceModel;
@@ -64,14 +63,12 @@ public class UserListController extends BaseServerController {
 		this.userBindWorkspaceService = userBindWorkspaceService;
 	}
 
-
 	/**
 	 * 查询所有用户
 	 *
 	 * @return json
 	 */
-	@RequestMapping(value = "getUserList", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody
+	@RequestMapping(value = "get_user_list", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	@Feature(method = MethodFeature.LIST)
 	public String getUserList() {
 		PageResultDto<UserModel> userModelPageResultDto = userService.listPage(getRequest());
@@ -80,27 +77,26 @@ public class UserListController extends BaseServerController {
 
 	/**
 	 * 获取所有管理员信息
+	 * get all admin user list
 	 *
 	 * @return json
 	 * @author Hotstrip
-	 * get all admin user list
 	 */
-	@RequestMapping(value = "get-admin-user-list", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody
+	@RequestMapping(value = "get_user_list_all", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	@Feature(method = MethodFeature.LIST)
-	public String getAdminUserList() {
-		List<UserModel> list = userService.list(false);
-		JSONArray jsonArray = new JSONArray();
-		list.forEach(userModel -> {
-			JSONObject jsonObject = new JSONObject();
-			jsonObject.put("title", userModel.getName());
-			jsonObject.put("value", userModel.getId());
-			if (StrUtil.isAllEmpty(userModel.getEmail(), userModel.getDingDing(), userModel.getWorkWx())) {
-				jsonObject.put("disabled", true);
-			}
-			jsonArray.add(jsonObject);
-		});
-		return JsonMessage.getString(200, "success", jsonArray);
+	public String getUserListAll() {
+		List<UserModel> list = userService.list();
+//		JSONArray jsonArray = new JSONArray();
+//		list.forEach(userModel -> {
+//			JSONObject jsonObject = new JSONObject();
+//			jsonObject.put("title", userModel.getName());
+//			jsonObject.put("value", userModel.getId());
+//			if (StrUtil.isAllEmpty(userModel.getEmail(), userModel.getDingDing(), userModel.getWorkWx())) {
+//				jsonObject.put("disabled", true);
+//			}
+//			jsonArray.add(jsonObject);
+//		});
+		return JsonMessage.getString(200, "success", list);
 	}
 
 	/**

@@ -30,7 +30,7 @@ import io.jpom.common.BaseAgentController;
 import io.jpom.common.JpomManifest;
 import io.jpom.common.RemoteVersion;
 import io.jpom.common.interceptor.NotAuthorize;
-import io.jpom.model.data.ProjectInfoModel;
+import io.jpom.model.data.NodeProjectInfoModel;
 import io.jpom.service.WhitelistDirectoryService;
 import io.jpom.service.manage.ProjectInfoService;
 import io.jpom.util.JvmUtil;
@@ -85,7 +85,7 @@ public class IndexController extends BaseAgentController {
 	 */
 	@RequestMapping(value = "status", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	public String status() {
-		List<ProjectInfoModel> projectInfoModels = projectInfoService.list();
+		List<NodeProjectInfoModel> nodeProjectInfoModels = projectInfoService.list();
 		JSONObject jsonObject = new JSONObject();
 		jsonObject.put("javaVirtualCount", JvmUtil.getJavaVirtualCount());
 		jsonObject.put("osName", JpomManifest.getInstance().getOsName());
@@ -98,8 +98,8 @@ public class IndexController extends BaseAgentController {
 		long freeMemory = SystemUtil.getFreeMemory();
 		jsonObject.put("freeMemory", FileUtil.readableFileSize(freeMemory));
 		int count = 0;
-		if (projectInfoModels != null) {
-			count = projectInfoModels.size();
+		if (nodeProjectInfoModels != null) {
+			count = nodeProjectInfoModels.size();
 		}
 		jsonObject.put("count", count);
 		// 运行时间

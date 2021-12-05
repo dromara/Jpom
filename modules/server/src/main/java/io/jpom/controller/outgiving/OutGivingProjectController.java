@@ -51,7 +51,7 @@ import io.jpom.plugin.ClassFeature;
 import io.jpom.plugin.Feature;
 import io.jpom.plugin.MethodFeature;
 import io.jpom.service.node.OutGivingServer;
-import io.jpom.service.node.manage.ProjectInfoService;
+import io.jpom.service.node.ProjectInfoCacheService;
 import io.jpom.service.system.SystemParametersServer;
 import io.jpom.system.ConfigBean;
 import io.jpom.system.ServerConfigBean;
@@ -84,11 +84,12 @@ public class OutGivingProjectController extends BaseServerController {
 
 	@Resource
 	private OutGivingServer outGivingServer;
-	@Resource
-	private ProjectInfoService projectInfoService;
+	private final ProjectInfoCacheService projectInfoCacheService;
 	private final SystemParametersServer systemParametersServer;
 
-	public OutGivingProjectController(SystemParametersServer systemParametersServer) {
+	public OutGivingProjectController(ProjectInfoCacheService projectInfoCacheService,
+									  SystemParametersServer systemParametersServer) {
+		this.projectInfoCacheService = projectInfoCacheService;
 		this.systemParametersServer = systemParametersServer;
 	}
 
@@ -111,7 +112,7 @@ public class OutGivingProjectController extends BaseServerController {
 			JSONObject jsonObject = new JSONObject();
 			JSONObject projectInfo = null;
 			try {
-				projectInfo = projectInfoService.getItem(nodeModel, outGivingNodeProject.getProjectId());
+				projectInfo = projectInfoCacheService.getItem(nodeModel, outGivingNodeProject.getProjectId());
 			} catch (Exception e) {
 				jsonObject.put("errorMsg", "error " + e.getMessage());
 			}

@@ -26,10 +26,7 @@ public class SystemParametersServer extends BaseDbService<SystemParametersModel>
 		systemParametersModel.setId(name);
 		systemParametersModel.setValue(jsonModel.toString());
 		systemParametersModel.setDescription(desc);
-		int update = super.update(systemParametersModel);
-		if (update <= 0) {
-			super.insert(systemParametersModel);
-		}
+		super.upsert(systemParametersModel);
 	}
 
 	/**

@@ -10,14 +10,12 @@ import io.jpom.model.log.UserOperateLogV1;
 import io.jpom.plugin.ClassFeature;
 import io.jpom.plugin.Feature;
 import io.jpom.plugin.MethodFeature;
-import io.jpom.service.node.manage.ProjectInfoService;
+import io.jpom.service.node.ProjectInfoCacheService;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
-
-import javax.annotation.Resource;
 
 /**
  * 控制台日志备份管理
@@ -29,10 +27,14 @@ import javax.annotation.Resource;
 @RequestMapping(value = "node/manage/log")
 @Feature(cls = ClassFeature.PROJECT)
 public class LogBackController extends BaseServerController {
-    @Resource
-    private ProjectInfoService projectInfoService;
 
-    @RequestMapping(value = "export.html", method = RequestMethod.GET)
+    private final ProjectInfoCacheService projectInfoCacheService;
+
+	public LogBackController(ProjectInfoCacheService projectInfoCacheService) {
+		this.projectInfoCacheService = projectInfoCacheService;
+	}
+
+	@RequestMapping(value = "export.html", method = RequestMethod.GET)
     @ResponseBody
     @OptLog(UserOperateLogV1.OptType.ExportProjectLog)
     @Feature(method = MethodFeature.DOWNLOAD)
@@ -83,7 +85,7 @@ public class LogBackController extends BaseServerController {
     @RequestMapping(value = "logSize", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public String logSize(String id, String copyId) {
-        JSONObject info = projectInfoService.getLogSize(getNode(), id, copyId);
+        JSONObject info = projectInfoCacheService.getLogSize(getNode(), id, copyId);
         return JsonMessage.getString(200, "", info);
     }
 

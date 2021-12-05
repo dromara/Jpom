@@ -10,7 +10,7 @@
     <a-table :data-source="list" :loading="loading" :columns="columns" :pagination="this.pagination" bordered @change="changePage" :rowKey="(record, index) => index">
       <template slot="operation" slot-scope="text, record">
         <a-button type="primary" @click="handleEdit(record)">编辑</a-button>
-        <!-- <a-button type="danger" @click="handleDelete(record)">删除</a-button> -->
+        <a-button type="danger" @click="handleDelete(record)">删除</a-button>
       </template>
     </a-table>
     <!-- 编辑区 -->
@@ -28,7 +28,7 @@
   </div>
 </template>
 <script>
-import { getWorkSpaceList, editWorkSpace } from "@/api/workspace";
+import { getWorkSpaceList, editWorkSpace, deleteWorkspace } from "@/api/workspace";
 import { parseTime } from "@/utils/time";
 import { PAGE_DEFAULT_LIMIT, PAGE_DEFAULT_SIZW_OPTIONS, PAGE_DEFAULT_SHOW_TOTAL } from "@/utils/const";
 
@@ -137,6 +137,27 @@ export default {
         this.listQuery.order_field = sorter.field;
       }
       this.loadData();
+    },
+    // 删除
+    handleDelete(record) {
+      this.$confirm({
+        title: "系统提示",
+        content: "真的当前工作空间么,删除前需要将关联数据都删除后才能删除当前工作空间？",
+        okText: "确认",
+        cancelText: "取消",
+        onOk: () => {
+          // 删除
+          deleteWorkspace(record.id).then((res) => {
+            if (res.code === 200) {
+              this.$notification.success({
+                message: res.msg,
+                duration: 2,
+              });
+              this.loadData();
+            }
+          });
+        },
+      });
     },
   },
 };

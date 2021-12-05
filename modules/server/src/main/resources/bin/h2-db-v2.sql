@@ -129,3 +129,9 @@ comment on table BACKUP_INFO is '备份数据库信息';
 -- @author Hotstrip 增加字段 status
 ALTER TABLE BACKUP_INFO
     ADD IF NOT EXISTS `STATUS` int default '0' comment '状态{0: 默认; 1: 成功; 2: 失败}';
+
+-- @author bwcx_jzy
+ALTER TABLE BUILD_INFO
+	ADD IF NOT EXISTS workspaceId VARCHAR(50) comment '所属工作空间';
+ALTER TABLE REPOSITORY
+	ADD IF NOT EXISTS workspaceId VARCHAR(50) comment '所属工作空间';

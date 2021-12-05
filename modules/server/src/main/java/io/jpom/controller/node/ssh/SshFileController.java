@@ -98,7 +98,7 @@ public class SshFileController extends BaseServerController {
 	@ResponseBody
 	@Feature(method = MethodFeature.FILE)
 	public String rootFileList(String id) {
-		SshModel sshModel = sshService.getByKey(id);
+		SshModel sshModel = sshService.getByKey(id, false);
 		Assert.notNull(sshModel, "不存在对应ssh");
 		List<String> fileDirs = sshModel.fileDirs();
 		Assert.notEmpty(fileDirs, "未设置授权目录");
@@ -107,7 +107,7 @@ public class SshFileController extends BaseServerController {
 	}
 
 	private SshModel check(String id, String path, String children) {
-		SshModel sshModel = sshService.getByKey(id);
+		SshModel sshModel = sshService.getByKey(id, false);
 		Assert.notNull(sshModel, "不存在对应ssh");
 		Assert.hasText(path, "请选择文件夹");
 		List<String> fileDirs = sshModel.fileDirs();

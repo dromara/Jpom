@@ -1,15 +1,14 @@
 <template>
   <div class="full-content">
     <div ref="filter" class="filter">
-      <a-select v-model="listQuery.selectUser" allowClear placeholder="请选择操作者" class="filter-item" @change="handleFilter">
-        <a-select-option value="system">系统管理员</a-select-option>
+      <a-select v-model="listQuery.userId" allowClear placeholder="请选择操作者" class="filter-item">
+        <a-select-option v-for="item in userList" :key="item.id">{{ item.name }}</a-select-option>
       </a-select>
-      <a-select v-model="listQuery.selectNode" allowClear placeholder="请选择节点" class="filter-item" @change="handleFilter">
+      <a-select v-model="listQuery.nodeId" allowClear placeholder="请选择节点" class="filter-item">
         <a-select-option v-for="node in nodeList" :key="node.id">{{ node.name }}</a-select-option>
       </a-select>
       <a-range-picker class="filter-item" :show-time="{ format: 'HH:mm:ss' }" format="YYYY-MM-DD HH:mm:ss" @change="onchangeTime" />
       <a-button type="primary" @click="handleFilter">搜索</a-button>
-      <a-button type="primary" @click="handleFilter">刷新</a-button>
     </div>
     <!-- 数据表格 -->
     <a-table :data-source="list" :loading="loading" :columns="columns" :pagination="pagination" bordered :rowKey="(record, index) => index" @change="change">
@@ -39,9 +38,9 @@
   </div>
 </template>
 <script>
-import { getOperationLogList } from "../../api/operation-log";
-import { getNodeList } from "../../api/node";
-import { getUserList } from "../../api/user";
+import { getOperationLogList } from "@/api/operation-log";
+import { getNodeListAll } from "@/api/node";
+import { getUserListAll } from "@/api/user";
 import { parseTime } from "@/utils/time";
 import { PAGE_DEFAULT_LIMIT, PAGE_DEFAULT_SIZW_OPTIONS, PAGE_DEFAULT_SHOW_TOTAL } from "@/utils/const";
 export default {
@@ -101,7 +100,7 @@ export default {
   methods: {
     // 加载 node
     loadNodeList() {
-      getNodeList().then((res) => {
+      getNodeListAll().then((res) => {
         if (res.code === 200) {
           this.nodeList = res.data;
         }
@@ -110,7 +109,7 @@ export default {
     // 加载数据
     loadData() {
       this.loading = true;
-      this.listQuery.time = this.timeRange;
+
       getOperationLogList(this.listQuery).then((res) => {
         if (res.code === 200) {
           this.list = res.data.result;
@@ -120,14 +119,18 @@ export default {
       });
     },
     // 分页、排序、筛选变化时触发
-    change(pagination) {
+    change(pagination, f, sorter) {
       this.listQuery.page = pagination.current;
       this.listQuery.limit = pagination.pageSize;
+      if (sorter) {
+        this.listQuery.order = sorter.order;
+        this.listQuery.order_field = sorter.field;
+      }
       this.loadData();
     },
     // 加载用户列表
     loadUserList() {
-      getUserList().then((res) => {
+      getUserListAll().then((res) => {
         if (res.code === 200) {
           this.userList = res.data;
         }
@@ -135,7 +138,7 @@ export default {
     },
     // 选择时间
     onchangeTime(value, dateString) {
-      this.timeRange = `${dateString[0]} ~ ${dateString[1]}`;
+      this.createTimeMillis = `${dateString[0]} ~ ${dateString[1]}`;
     },
     // 搜索
     handleFilter() {

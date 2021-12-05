@@ -43,7 +43,7 @@ import io.jpom.common.commander.impl.MacOSProjectCommander;
 import io.jpom.common.commander.impl.WindowsProjectCommander;
 import io.jpom.model.RunMode;
 import io.jpom.model.data.JdkInfoModel;
-import io.jpom.model.data.ProjectInfoModel;
+import io.jpom.model.data.NodeProjectInfoModel;
 import io.jpom.model.system.NetstatModel;
 import io.jpom.service.manage.JdkInfoService;
 import io.jpom.service.manage.ProjectInfoService;
@@ -112,18 +112,18 @@ public abstract class AbstractProjectCommander {
 	/**
 	 * 生成可以执行的命令
 	 *
-	 * @param projectInfoModel 项目
+	 * @param nodeProjectInfoModel 项目
 	 * @param javaCopyItem     副本信息
 	 * @return null 是条件不足
 	 */
-	public abstract String buildCommand(ProjectInfoModel projectInfoModel, ProjectInfoModel.JavaCopyItem javaCopyItem);
+	public abstract String buildCommand(NodeProjectInfoModel nodeProjectInfoModel, NodeProjectInfoModel.JavaCopyItem javaCopyItem);
 
-	protected String getRunJavaPath(ProjectInfoModel projectInfoModel, boolean w) {
-		if (StrUtil.isEmpty(projectInfoModel.getJdkId())) {
+	protected String getRunJavaPath(NodeProjectInfoModel nodeProjectInfoModel, boolean w) {
+		if (StrUtil.isEmpty(nodeProjectInfoModel.getJdkId())) {
 			return w ? "javaw" : "java";
 		}
 		JdkInfoService bean = SpringUtil.getBean(JdkInfoService.class);
-		JdkInfoModel item = bean.getItem(projectInfoModel.getJdkId());
+		JdkInfoModel item = bean.getItem(nodeProjectInfoModel.getJdkId());
 		if (item == null) {
 			return w ? "javaw" : "java";
 		}
@@ -137,23 +137,23 @@ public abstract class AbstractProjectCommander {
 	/**
 	 * 启动
 	 *
-	 * @param projectInfoModel 项目
+	 * @param nodeProjectInfoModel 项目
 	 * @return 结果
 	 * @throws Exception 异常
 	 */
-	public String start(ProjectInfoModel projectInfoModel, ProjectInfoModel.JavaCopyItem javaCopyItem) throws Exception {
-		String msg = checkStart(projectInfoModel, javaCopyItem);
+	public String start(NodeProjectInfoModel nodeProjectInfoModel, NodeProjectInfoModel.JavaCopyItem javaCopyItem) throws Exception {
+		String msg = checkStart(nodeProjectInfoModel, javaCopyItem);
 		if (msg != null) {
 			return msg;
 		}
-		String command = buildCommand(projectInfoModel, javaCopyItem);
+		String command = buildCommand(nodeProjectInfoModel, javaCopyItem);
 		if (command == null) {
 			throw new JpomRuntimeException("没有需要执行的命令");
 		}
 		// 执行命令
 		ThreadUtil.execute(() -> {
 			try {
-				File file = FileUtil.file(projectInfoModel.allLib());
+				File file = FileUtil.file(nodeProjectInfoModel.allLib());
 				if (SystemUtil.getOsInfo().isWindows()) {
 					CommandUtil.execSystemCommand(command, file);
 				} else {
@@ -164,8 +164,8 @@ public abstract class AbstractProjectCommander {
 			}
 		});
 		//
-		loopCheckRun(projectInfoModel.getId(), true);
-		return status(projectInfoModel.getId());
+		loopCheckRun(nodeProjectInfoModel.getId(), true);
+		return status(nodeProjectInfoModel.getId());
 	}
 
 	/**
@@ -180,22 +180,22 @@ public abstract class AbstractProjectCommander {
 	/**
 	 * 停止
 	 *
-	 * @param projectInfoModel 项目
+	 * @param nodeProjectInfoModel 项目
 	 * @return 结果
 	 * @throws Exception 异常
 	 */
-	public String stop(ProjectInfoModel projectInfoModel, ProjectInfoModel.JavaCopyItem javaCopyItem) throws Exception {
-		String tag = javaCopyItem == null ? projectInfoModel.getId() : javaCopyItem.getTagId();
-		String token = projectInfoModel.getToken();
+	public String stop(NodeProjectInfoModel nodeProjectInfoModel, NodeProjectInfoModel.JavaCopyItem javaCopyItem) throws Exception {
+		String tag = javaCopyItem == null ? nodeProjectInfoModel.getId() : javaCopyItem.getTagId();
+		String token = nodeProjectInfoModel.getToken();
 		if (StrUtil.isNotEmpty(token)) {
 			try {
 				HttpRequest httpRequest = HttpUtil.createGet(token)
-						.form("projectId", projectInfoModel.getId());
+						.form("projectId", nodeProjectInfoModel.getId());
 				if (javaCopyItem != null) {
 					httpRequest.form("copyId", javaCopyItem.getId());
 				}
 				String body = httpRequest.execute().body();
-				DefaultSystemLog.getLog().info(projectInfoModel.getName() + ":" + body);
+				DefaultSystemLog.getLog().info(nodeProjectInfoModel.getName() + ":" + body);
 			} catch (Exception e) {
 				DefaultSystemLog.getLog().error("WebHooks 调用错误", e);
 				return "WebHooks error:" + e.getMessage();
@@ -217,54 +217,54 @@ public abstract class AbstractProjectCommander {
 	/**
 	 * 重启
 	 *
-	 * @param projectInfoModel 项目
+	 * @param nodeProjectInfoModel 项目
 	 * @return 结果
 	 * @throws Exception 异常
 	 */
-	public String restart(ProjectInfoModel projectInfoModel, ProjectInfoModel.JavaCopyItem javaCopyItem) throws Exception {
+	public String restart(NodeProjectInfoModel nodeProjectInfoModel, NodeProjectInfoModel.JavaCopyItem javaCopyItem) throws Exception {
 		if (javaCopyItem == null) {
-			if (isRun(projectInfoModel.getId())) {
-				stop(projectInfoModel, javaCopyItem);
+			if (isRun(nodeProjectInfoModel.getId())) {
+				stop(nodeProjectInfoModel, javaCopyItem);
 			}
 		} else {
 			if (isRun(javaCopyItem.getTagId())) {
-				stop(projectInfoModel, javaCopyItem);
+				stop(nodeProjectInfoModel, javaCopyItem);
 			}
 		}
-		return start(projectInfoModel, javaCopyItem);
+		return start(nodeProjectInfoModel, javaCopyItem);
 	}
 
 	/**
 	 * 启动项目前基本检查
 	 *
-	 * @param projectInfoModel 项目
+	 * @param nodeProjectInfoModel 项目
 	 * @return null 检查一切正常
 	 * @throws Exception 异常
 	 */
-	private String checkStart(ProjectInfoModel projectInfoModel, ProjectInfoModel.JavaCopyItem javaCopyItem) throws Exception {
-		int pid = javaCopyItem == null ? getPid(projectInfoModel.getId()) : this.getPid(javaCopyItem.getTagId());
+	private String checkStart(NodeProjectInfoModel nodeProjectInfoModel, NodeProjectInfoModel.JavaCopyItem javaCopyItem) throws Exception {
+		int pid = javaCopyItem == null ? getPid(nodeProjectInfoModel.getId()) : this.getPid(javaCopyItem.getTagId());
 		if (pid > 0) {
 			return "当前程序正常运行中，不能重复启动,PID:" + pid;
 		}
-		String lib = projectInfoModel.allLib();
+		String lib = nodeProjectInfoModel.allLib();
 		File fileLib = new File(lib);
 		File[] files = fileLib.listFiles();
 		if (files == null || files.length <= 0) {
 			return "没有jar包,请先到文件管理中上传程序的jar";
 		}
 		//
-		if (projectInfoModel.getRunMode() == RunMode.ClassPath || projectInfoModel.getRunMode() == RunMode.JavaExtDirsCp) {
+		if (nodeProjectInfoModel.getRunMode() == RunMode.ClassPath || nodeProjectInfoModel.getRunMode() == RunMode.JavaExtDirsCp) {
 			JarClassLoader jarClassLoader = JarClassLoader.load(fileLib);
 			// 判断主类
 			try {
-				jarClassLoader.loadClass(projectInfoModel.getMainClass());
+				jarClassLoader.loadClass(nodeProjectInfoModel.getMainClass());
 			} catch (ClassNotFoundException notFound) {
-				return "没有找到对应的MainClass:" + projectInfoModel.getMainClass();
+				return "没有找到对应的MainClass:" + nodeProjectInfoModel.getMainClass();
 			}
 		} else {
-			List<File> fileList = ProjectInfoModel.listJars(projectInfoModel);
+			List<File> fileList = NodeProjectInfoModel.listJars(nodeProjectInfoModel);
 			if (fileList.size() <= 0) {
-				return String.format("没有%s包,请先到文件管理中上传程序的%s", projectInfoModel.getRunMode().name(), projectInfoModel.getRunMode().name());
+				return String.format("没有%s包,请先到文件管理中上传程序的%s", nodeProjectInfoModel.getRunMode().name(), nodeProjectInfoModel.getRunMode().name());
 			}
 			File jarFile = fileList.get(0);
 			String checkJar = checkJar(jarFile);
@@ -273,7 +273,7 @@ public abstract class AbstractProjectCommander {
 			}
 		}
 		// 备份日志
-		backLog(projectInfoModel, javaCopyItem);
+		backLog(nodeProjectInfoModel, javaCopyItem);
 		return null;
 	}
 
@@ -301,11 +301,11 @@ public abstract class AbstractProjectCommander {
 	/**
 	 * 清空日志信息
 	 *
-	 * @param projectInfoModel 项目
+	 * @param nodeProjectInfoModel 项目
 	 * @return 结果
 	 */
-	public String backLog(ProjectInfoModel projectInfoModel, ProjectInfoModel.JavaCopyItem javaCopyItem) {
-		File file = javaCopyItem == null ? new File(projectInfoModel.getLog()) : projectInfoModel.getLog(javaCopyItem);
+	public String backLog(NodeProjectInfoModel nodeProjectInfoModel, NodeProjectInfoModel.JavaCopyItem javaCopyItem) {
+		File file = javaCopyItem == null ? new File(nodeProjectInfoModel.getLog()) : nodeProjectInfoModel.getLog(javaCopyItem);
 		if (!file.exists() || file.isDirectory()) {
 			return "not exists";
 		}
@@ -315,7 +315,7 @@ public abstract class AbstractProjectCommander {
 		}
 		if (AgentExtConfigBean.getInstance().openLogBack()) {
 			// 开启日志备份才移动文件
-			File backPath = javaCopyItem == null ? projectInfoModel.getLogBack() : projectInfoModel.getLogBack(javaCopyItem);
+			File backPath = javaCopyItem == null ? nodeProjectInfoModel.getLogBack() : nodeProjectInfoModel.getLogBack(javaCopyItem);
 			backPath = new File(backPath, DateTime.now().toString(DatePattern.PURE_DATETIME_FORMAT) + ".log");
 			FileUtil.copy(file, backPath, true);
 		}
@@ -469,8 +469,8 @@ public abstract class AbstractProjectCommander {
 		}
 		DefaultSystemLog.getLog().debug("getJpomNameByPid pid: {}", pid);
 		ProjectInfoService projectInfoService = SpringUtil.getBean(ProjectInfoService.class);
-		List<ProjectInfoModel> projectInfoModels = projectInfoService.list();
-		if (projectInfoModels == null || projectInfoModels.isEmpty()) {
+		List<NodeProjectInfoModel> nodeProjectInfoModels = projectInfoService.list();
+		if (nodeProjectInfoModels == null || nodeProjectInfoModels.isEmpty()) {
 			return StrUtil.DASHED;
 		}
 		String virtualMachine = JvmUtil.getVirtualMachineInfo(pid);
@@ -478,9 +478,9 @@ public abstract class AbstractProjectCommander {
 			return StrUtil.DASHED;
 		}
 
-		for (ProjectInfoModel projectInfoModel : projectInfoModels) {
-			if (JvmUtil.checkCommandLineIsJpom(virtualMachine, projectInfoModel.getId())) {
-				name = projectInfoModel.getName();
+		for (NodeProjectInfoModel nodeProjectInfoModel : nodeProjectInfoModels) {
+			if (JvmUtil.checkCommandLineIsJpom(virtualMachine, nodeProjectInfoModel.getId())) {
+				name = nodeProjectInfoModel.getName();
 				break;
 			}
 		}

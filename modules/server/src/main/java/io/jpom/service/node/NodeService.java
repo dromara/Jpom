@@ -51,7 +51,7 @@ public class NodeService extends BaseWorkspaceService<NodeModel> {
 		}
 		Assert.hasText(nodeModel.getName(), "节点名称 不能为空");
 		// 节点地址 重复
-		String workspaceId = getCheckUserWorkspace(request);
+		String workspaceId = this.getCheckUserWorkspace(request);
 		Entity entity = Entity.create();
 		entity.set("url", nodeModel.getUrl());
 		entity.set("workspaceId", workspaceId);

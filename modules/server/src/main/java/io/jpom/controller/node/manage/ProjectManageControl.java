@@ -4,28 +4,25 @@ import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.validator.ValidatorItem;
 import cn.jiangzeyin.common.validator.ValidatorRule;
-import com.alibaba.fastjson.JSONArray;
 import io.jpom.common.BaseServerController;
 import io.jpom.common.forward.NodeForward;
 import io.jpom.common.forward.NodeUrl;
-import io.jpom.common.interceptor.OptLog;
+import io.jpom.model.PageResultDto;
 import io.jpom.model.data.NodeModel;
 import io.jpom.model.data.OutGivingModel;
+import io.jpom.model.data.ProjectInfoModel;
 import io.jpom.model.enums.BuildReleaseMethod;
-import io.jpom.model.log.UserOperateLogV1;
 import io.jpom.plugin.ClassFeature;
 import io.jpom.plugin.Feature;
 import io.jpom.plugin.MethodFeature;
 import io.jpom.service.dblog.BuildInfoService;
 import io.jpom.service.monitor.MonitorService;
 import io.jpom.service.node.OutGivingServer;
-import io.jpom.service.node.manage.ProjectInfoService;
+import io.jpom.service.node.ProjectInfoCacheService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.stereotype.Controller;
 import org.springframework.util.Assert;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import java.util.List;
@@ -35,19 +32,23 @@ import java.util.List;
  *
  * @author Administrator
  */
-@Controller
+@RestController
 @RequestMapping(value = "/node/manage/")
 @Feature(cls = ClassFeature.PROJECT)
 public class ProjectManageControl extends BaseServerController {
 
-	@Resource
-	private ProjectInfoService projectInfoService;
 	@Resource
 	private OutGivingServer outGivingServer;
 	@Resource
 	private MonitorService monitorService;
 	@Resource
 	private BuildInfoService buildService;
+
+	private final ProjectInfoCacheService projectInfoCacheService;
+
+	public ProjectManageControl(ProjectInfoCacheService projectInfoCacheService) {
+		this.projectInfoCacheService = projectInfoCacheService;
+	}
 
 
 	/**
@@ -82,31 +83,18 @@ public class ProjectManageControl extends BaseServerController {
 		return NodeForward.request(getNode(), getRequest(), NodeUrl.Manage_GetProjectCopyPort).toString();
 	}
 
-	/**
-	 * @return
-	 * @author Hotstrip
-	 * get project group
-	 * 获取项目的分组信息
-	 */
-	@RequestMapping(value = "project-group-list", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody
-	public String projectGroupList() {
-		List<String> allGroup = projectInfoService.getAllGroup(getNode());
-		return JsonMessage.getString(200, "success", allGroup);
-	}
 
 	/**
 	 * 查询所有项目
 	 *
 	 * @return json
 	 */
-	@RequestMapping(value = "getProjectInfo", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody
+	@PostMapping(value = "get_project_info", produces = MediaType.APPLICATION_JSON_VALUE)
 	@Feature(method = MethodFeature.LIST)
 	public String getProjectInfo() {
-		NodeModel nodeModel = getNode();
-		JSONArray jsonArray = projectInfoService.listAll(nodeModel, getRequest());
-		return JsonMessage.getString(200, "ok", jsonArray);
+		PageResultDto<ProjectInfoModel> modelPageResultDto = projectInfoCacheService.listPage(getRequest());
+//		JSONArray jsonArray = projectInfoService.listAll(nodeModel, getRequest());
+		return JsonMessage.getString(200, "", modelPageResultDto);
 	}
 
 	/**
@@ -115,9 +103,7 @@ public class ProjectManageControl extends BaseServerController {
 	 * @param id id
 	 * @return json
 	 */
-	@RequestMapping(value = "deleteProject", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody
-	@OptLog(value = UserOperateLogV1.OptType.DelProject)
+	@PostMapping(value = "deleteProject", produces = MediaType.APPLICATION_JSON_VALUE)
 	@Feature(method = MethodFeature.DEL)
 	public String deleteProject(@ValidatorItem(value = ValidatorRule.NOT_BLANK) String id, String copyId) {
 		NodeModel nodeModel = getNode();
@@ -138,7 +124,12 @@ public class ProjectManageControl extends BaseServerController {
 			boolean releaseMethod = buildService.checkReleaseMethod(nodeModel.getId() + StrUtil.COLON + id, BuildReleaseMethod.Project);
 			Assert.state(!releaseMethod, "当前项目存在构建项，不能直接删除");
 		}
-		return NodeForward.request(nodeModel, getRequest(), NodeUrl.Manage_DeleteProject).toString();
+		JsonMessage<Object> request = NodeForward.request(nodeModel, getRequest(), NodeUrl.Manage_DeleteProject);
+		if (request.getCode() == HttpStatus.OK.value()) {
+			//
+			projectInfoCacheService.syncNode(nodeModel);
+		}
+		return request.toString();
 	}
 
 	/**

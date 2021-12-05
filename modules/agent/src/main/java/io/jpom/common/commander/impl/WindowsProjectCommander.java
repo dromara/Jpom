@@ -27,7 +27,7 @@ import cn.hutool.core.text.StrSplitter;
 import cn.hutool.core.util.StrUtil;
 import io.jpom.common.commander.AbstractProjectCommander;
 import io.jpom.common.commander.AbstractSystemCommander;
-import io.jpom.model.data.ProjectInfoModel;
+import io.jpom.model.data.NodeProjectInfoModel;
 import io.jpom.model.system.NetstatModel;
 import io.jpom.util.CommandUtil;
 import io.jpom.util.JvmUtil;
@@ -43,32 +43,32 @@ import java.util.List;
 public class WindowsProjectCommander extends AbstractProjectCommander {
 
     @Override
-    public String buildCommand(ProjectInfoModel projectInfoModel, ProjectInfoModel.JavaCopyItem javaCopyItem) {
-        String classPath = ProjectInfoModel.getClassPathLib(projectInfoModel);
+    public String buildCommand(NodeProjectInfoModel nodeProjectInfoModel, NodeProjectInfoModel.JavaCopyItem javaCopyItem) {
+        String classPath = NodeProjectInfoModel.getClassPathLib(nodeProjectInfoModel);
         if (StrUtil.isBlank(classPath)) {
             return null;
         }
         // 拼接命令
-        String jvm = javaCopyItem == null ? projectInfoModel.getJvm() : javaCopyItem.getJvm();
-        String tag = javaCopyItem == null ? projectInfoModel.getId() : javaCopyItem.getTagId();
-        String mainClass = projectInfoModel.getMainClass();
-        String args = javaCopyItem == null ? projectInfoModel.getArgs() : javaCopyItem.getArgs();
+        String jvm = javaCopyItem == null ? nodeProjectInfoModel.getJvm() : javaCopyItem.getJvm();
+        String tag = javaCopyItem == null ? nodeProjectInfoModel.getId() : javaCopyItem.getTagId();
+        String mainClass = nodeProjectInfoModel.getMainClass();
+        String args = javaCopyItem == null ? nodeProjectInfoModel.getArgs() : javaCopyItem.getArgs();
         return String.format("%s %s %s " +
                         "%s  %s  %s >> %s &",
-                getRunJavaPath(projectInfoModel, true),
-                jvm, JvmUtil.getJpomPidTag(tag, projectInfoModel.allLib()),
-                classPath, mainClass, args, projectInfoModel.getAbsoluteLog(javaCopyItem));
+                getRunJavaPath(nodeProjectInfoModel, true),
+                jvm, JvmUtil.getJpomPidTag(tag, nodeProjectInfoModel.allLib()),
+                classPath, mainClass, args, nodeProjectInfoModel.getAbsoluteLog(javaCopyItem));
     }
 
     @Override
-    public String stop(ProjectInfoModel projectInfoModel, ProjectInfoModel.JavaCopyItem javaCopyItem) throws Exception {
-        String result = super.stop(projectInfoModel, javaCopyItem);
-        String tag = javaCopyItem == null ? projectInfoModel.getId() : javaCopyItem.getTagId();
+    public String stop(NodeProjectInfoModel nodeProjectInfoModel, NodeProjectInfoModel.JavaCopyItem javaCopyItem) throws Exception {
+        String result = super.stop(nodeProjectInfoModel, javaCopyItem);
+        String tag = javaCopyItem == null ? nodeProjectInfoModel.getId() : javaCopyItem.getTagId();
         // 查询状态，如果正在运行，则执行杀进程命令
         int pid = parsePid(result);
         if (pid > 0) {
-            String kill = AbstractSystemCommander.getInstance().kill(FileUtil.file(projectInfoModel.allLib()), pid);
-            loopCheckRun(projectInfoModel.getId(), false);
+            String kill = AbstractSystemCommander.getInstance().kill(FileUtil.file(nodeProjectInfoModel.allLib()), pid);
+            loopCheckRun(nodeProjectInfoModel.getId(), false);
             result = status(tag) + StrUtil.SPACE + kill;
         }
         return result;
