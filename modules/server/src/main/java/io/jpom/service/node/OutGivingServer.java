@@ -1,14 +1,11 @@
 package io.jpom.service.node;
 
-import com.alibaba.fastjson.JSONArray;
-import io.jpom.common.BaseOperService;
 import io.jpom.model.data.OutGivingModel;
 import io.jpom.model.data.OutGivingNodeProject;
-import io.jpom.permission.BaseDynamicService;
-import io.jpom.plugin.ClassFeature;
-import io.jpom.system.ServerConfigBean;
+import io.jpom.service.h2db.BaseWorkspaceService;
 import org.springframework.stereotype.Service;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 /**
@@ -18,37 +15,27 @@ import java.util.List;
  * @date 2019/4/21
  */
 @Service
-public class OutGivingServer extends BaseOperService<OutGivingModel> implements BaseDynamicService {
+public class OutGivingServer extends BaseWorkspaceService<OutGivingModel> {
 
-    public OutGivingServer() {
-        super(ServerConfigBean.OUTGIVING);
-    }
+//    public OutGivingServer() {
+//        super(ServerConfigBean.OUTGIVING);
+//    }
 
-    public boolean checkNode(String nodeId) {
-        List<OutGivingModel> list = list();
-        if (list == null || list.isEmpty()) {
-            return false;
-        }
-        for (OutGivingModel outGivingModel : list) {
-            List<OutGivingNodeProject> outGivingNodeProjectList = outGivingModel.getOutGivingNodeProjectList();
-            if (outGivingNodeProjectList != null) {
-                for (OutGivingNodeProject outGivingNodeProject : outGivingNodeProjectList) {
-                    if (outGivingNodeProject.getNodeId().equals(nodeId)) {
-                        return true;
-                    }
-                }
-            }
-        }
-        return false;
-    }
-
-    @Override
-    public JSONArray listToArray(String dataId) {
-        return (JSONArray) JSONArray.toJSON(this.list());
-    }
-
-    @Override
-    public List<OutGivingModel> list() {
-        return (List<OutGivingModel>) filter(super.list(), ClassFeature.OUTGIVING);
-    }
+	public boolean checkNode(String nodeId, HttpServletRequest request) {
+		List<OutGivingModel> list = super.listByWorkspace(request);
+		if (list == null || list.isEmpty()) {
+			return false;
+		}
+		for (OutGivingModel outGivingModel : list) {
+			List<OutGivingNodeProject> outGivingNodeProjectList = outGivingModel.outGivingNodeProjectList();
+			if (outGivingNodeProjectList != null) {
+				for (OutGivingNodeProject outGivingNodeProject : outGivingNodeProjectList) {
+					if (outGivingNodeProject.getNodeId().equals(nodeId)) {
+						return true;
+					}
+				}
+			}
+		}
+		return false;
+	}
 }

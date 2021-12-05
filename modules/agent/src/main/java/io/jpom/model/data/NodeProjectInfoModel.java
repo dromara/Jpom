@@ -50,10 +50,10 @@ import java.util.stream.Collectors;
  * @author jiangzeyin
  */
 public class NodeProjectInfoModel extends BaseModel {
-	/**
-	 * 分组
-	 */
-	private String group;
+//	/**
+//	 * 分组
+//	 */
+//	private String group;
 	private String mainClass;
 	private String lib;
 	/**
@@ -240,17 +240,17 @@ public class NodeProjectInfoModel extends BaseModel {
 			this.jvm = jvm;
 		}
 	}
-
-	public String getGroup() {
-		if (StrUtil.isEmpty(group)) {
-			return "默认";
-		}
-		return group;
-	}
-
-	public void setGroup(String group) {
-		this.group = group;
-	}
+//
+//	public String getGroup() {
+//		if (StrUtil.isEmpty(group)) {
+//			return "默认";
+//		}
+//		return group;
+//	}
+//
+//	public void setGroup(String group) {
+//		this.group = group;
+//	}
 
 	public String getMainClass() {
 		return StrUtil.emptyToDefault(mainClass, StrUtil.EMPTY);

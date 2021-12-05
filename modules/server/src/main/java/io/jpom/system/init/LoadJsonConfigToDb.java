@@ -11,6 +11,7 @@ import io.jpom.common.BaseServerController;
 import io.jpom.model.data.*;
 import io.jpom.service.monitor.MonitorService;
 import io.jpom.service.node.NodeService;
+import io.jpom.service.node.OutGivingServer;
 import io.jpom.service.node.ssh.SshService;
 import io.jpom.service.system.SystemParametersServer;
 import io.jpom.service.user.UserService;
@@ -223,6 +224,34 @@ public class LoadJsonConfigToDb {
 			DefaultSystemLog.getLog().info("{} mv to {}", FileUtil.getAbsolutePath(file), FileUtil.getAbsolutePath(backupOldData));
 		} catch (Exception e) {
 			DefaultSystemLog.getLog().error("load monitor error ", e);
+		} finally {
+			BaseServerController.remove();
+		}
+	}
+
+
+	public void loadOutgivinInfo() {
+		File backupOldData = FileUtil.file(ConfigBean.getInstance().getDataPath(), "backup_old_data");
+		// 读取 outgiving 文件内容
+		File file = FileUtil.file(ConfigBean.getInstance().getDataPath(), ServerConfigBean.OUTGIVING);
+		if (!FileUtil.exist(file)) {
+			return;
+		}
+		try {
+			JSON json = JsonFileUtil.readJson(file.getAbsolutePath());
+			JSONArray jsonArray = JsonFileUtil.formatToArray((JSONObject) json);
+			List<OutGivingModel> outGivingModels = jsonArray.toJavaList(OutGivingModel.class);
+			if (outGivingModels == null) {
+				return;
+			}
+			BaseServerController.resetInfo(UserModel.EMPTY);
+			OutGivingServer outGivingServer = SpringUtil.getBean(OutGivingServer.class);
+			outGivingServer.insert(outGivingModels);
+			// 将 json 文件转移到备份目录
+			FileUtil.move(file, FileUtil.mkdir(backupOldData), true);
+			DefaultSystemLog.getLog().info("{} mv to {}", FileUtil.getAbsolutePath(file), FileUtil.getAbsolutePath(backupOldData));
+		} catch (Exception e) {
+			DefaultSystemLog.getLog().error("load OUTGIVING error ", e);
 		} finally {
 			BaseServerController.remove();
 		}

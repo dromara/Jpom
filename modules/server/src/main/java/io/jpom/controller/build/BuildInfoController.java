@@ -92,17 +92,17 @@ public class BuildInfoController extends BaseServerController {
 	}
 
 
-	/**
-	 * @return
-	 * @author Hotstrip
-	 * get build group list
-	 * 获取构建分组列表
-	 */
-	@RequestMapping(value = "/build/group/list", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-	public String groupList() {
-		List<String> groupList = buildInfoService.listGroup();
-		return JsonMessage.getString(200, "success", groupList);
-	}
+//	/**
+//	 * @return
+//	 * @author Hotstrip
+//	 * get build group list
+//	 * 获取构建分组列表
+//	 */
+//	@RequestMapping(value = "/build/group/list", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+//	public String groupList() {
+//		List<String> groupList = buildInfoService.listGroup();
+//		return JsonMessage.getString(200, "success", groupList);
+//	}
 
 	/**
 	 * load build list with params

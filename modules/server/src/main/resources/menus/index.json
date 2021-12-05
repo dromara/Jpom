@@ -27,7 +27,6 @@
   {
     "title": "节点分发",
     "icon_v3": "apartment",
-    "dynamic": "showOutGiving",
     "childs": [
       {
         "id": "outgiving",
@@ -35,13 +34,11 @@
       },
       {
         "id": "outgivingLog",
-        "title": "分发日志",
-        "dynamic": "showOutGiving"
+        "title": "分发日志"
       },
       {
         "id": "outgivingWhitelistDirectory",
-        "title": "分发白名单配置",
-        "dynamic": "showOutGiving"
+        "title": "分发白名单配置"
       }
     ]
   },

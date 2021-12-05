@@ -161,6 +161,7 @@ public class InitDb implements DisposableBean, InitializingBean {
 		instance.loadNodeInfo();
 		instance.loadSshInfo();
 		instance.loadMonitorInfo();
+		instance.loadOutgivinInfo();
 		//
 		workspaceService.convertNullWorkspaceId();
 		//  同步项目

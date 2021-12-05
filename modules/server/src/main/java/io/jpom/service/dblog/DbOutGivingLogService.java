@@ -25,7 +25,7 @@ package io.jpom.service.dblog;
 import cn.hutool.db.Entity;
 import io.jpom.model.data.OutGivingNodeProject;
 import io.jpom.model.log.OutGivingLog;
-import io.jpom.service.h2db.BaseDbCommonService;
+import io.jpom.service.h2db.BaseWorkspaceService;
 import org.springframework.stereotype.Service;
 
 /**
@@ -35,11 +35,8 @@ import org.springframework.stereotype.Service;
  * @date 2019/7/20
  */
 @Service
-public class DbOutGivingLogService extends BaseDbCommonService<OutGivingLog> {
+public class DbOutGivingLogService extends BaseWorkspaceService<OutGivingLog> {
 
-	public DbOutGivingLogService() {
-		super(OutGivingLog.TABLE_NAME, "id", OutGivingLog.class);
-	}
 
 	@Override
 	public void insert(OutGivingLog outGivingLog) {

@@ -54,9 +54,7 @@ export default {
       loading: false,
       list: [],
       nodeList: [],
-
       listQuery: PAGE_DEFAULT_LIST_QUERY,
-
       temp: {},
       detailVisible: false,
       detailData: [],

@@ -25,7 +25,7 @@ package io.jpom.common;
 import cn.hutool.core.util.ClassUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import io.jpom.model.BaseJsonModel;
+import io.jpom.model.BaseModel;
 import io.jpom.util.JsonFileUtil;
 
 import java.util.ArrayList;
@@ -38,7 +38,7 @@ import java.util.Objects;
  * @author jiangzeyin
  * @date 2019/3/14
  */
-public abstract class BaseOperService<T extends BaseJsonModel> extends BaseDataService {
+public abstract class BaseOperService<T extends BaseModel> extends BaseDataService {
 
 	private final String fileName;
 	private final Class<?> typeArgument;

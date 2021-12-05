@@ -89,7 +89,7 @@ public class NodeEditController extends BaseServerController {
 	@Feature(method = MethodFeature.DEL)
 	public String del(String id) {
 		//  判断分发
-		boolean checkNode = outGivingServer.checkNode(id);
+		boolean checkNode = outGivingServer.checkNode(id, getRequest());
 		Assert.state(!checkNode, "该节点存在分发项目，不能删除");
 
 		// 监控

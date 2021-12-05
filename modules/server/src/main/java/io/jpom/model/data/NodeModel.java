@@ -29,6 +29,8 @@ import io.jpom.model.BaseWorkspaceModel;
 import io.jpom.model.Cycle;
 import io.jpom.service.h2db.TableName;
 
+import java.util.Objects;
+
 /**
  * 节点实体
  *
@@ -215,4 +217,21 @@ public class NodeModel extends BaseWorkspaceModel {
 		return StrUtil.format("{}://{}{}", getProtocol(), getUrl(), nodeUrl.getUrl());
 	}
 
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) {
+			return true;
+		}
+		if (o == null || getClass() != o.getClass()) {
+			return false;
+		}
+		NodeModel nodeModel = (NodeModel) o;
+		return Objects.equals(url, nodeModel.url) && Objects.equals(loginName, nodeModel.loginName) && Objects.equals(loginPwd, nodeModel.loginPwd) && Objects.equals(name, nodeModel.name) && Objects.equals(protocol, nodeModel.protocol) && Objects.equals(openStatus, nodeModel.openStatus) && Objects.equals(timeOut, nodeModel.timeOut) && Objects.equals(sshId, nodeModel.sshId) && Objects.equals(cycle, nodeModel.cycle);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(url, loginName, loginPwd, name, protocol, openStatus, timeOut, sshId, cycle);
+	}
 }

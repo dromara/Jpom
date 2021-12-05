@@ -85,7 +85,7 @@ public class OutGivingRun implements Callable<OutGivingNodeProject.Status> {
 								UserModel userModel,
 								boolean unzip) {
 		OutGivingServer outGivingServer = SpringUtil.getBean(OutGivingServer.class);
-		OutGivingModel item = outGivingServer.getItem(id);
+		OutGivingModel item = outGivingServer.getByKey(id);
 		Objects.requireNonNull(item, "不存在分发");
 		AfterOpt afterOpt = BaseEnum.getEnum(AfterOpt.class, item.getAfterOpt());
 		if (afterOpt == null) {
@@ -93,7 +93,7 @@ public class OutGivingRun implements Callable<OutGivingNodeProject.Status> {
 		}
 		AfterOpt finalAfterOpt = afterOpt;
 		//
-		List<OutGivingNodeProject> outGivingNodeProjects = item.getOutGivingNodeProjectList();
+		List<OutGivingNodeProject> outGivingNodeProjects = item.outGivingNodeProjectList();
 		// 开启线程
 		if (afterOpt == AfterOpt.Order_Restart || afterOpt == AfterOpt.Order_Must_Restart) {
 			ThreadUtil.execute(() -> {
@@ -235,9 +235,9 @@ public class OutGivingRun implements Callable<OutGivingNodeProject.Status> {
 									 String msg) {
 		synchronized (OutGivingRun.class) {
 			OutGivingServer outGivingServer = SpringUtil.getBean(OutGivingServer.class);
-			OutGivingModel outGivingModel = outGivingServer.getItem(outGivingId);
+			OutGivingModel outGivingModel = outGivingServer.getByKey(outGivingId);
 			OutGivingNodeProject finOutGivingNodeProject = null;
-			List<OutGivingNodeProject> outGivingNodeProjects = outGivingModel.getOutGivingNodeProjectList();
+			List<OutGivingNodeProject> outGivingNodeProjects = outGivingModel.outGivingNodeProjectList();
 			for (OutGivingNodeProject outGivingNodeProject : outGivingNodeProjects) {
 				if (!outGivingNodeProject.getProjectId().equalsIgnoreCase(outGivingNodeProjectItem.getProjectId()) ||
 						!outGivingNodeProject.getNodeId().equalsIgnoreCase(outGivingNodeProjectItem.getNodeId())) {
@@ -249,7 +249,7 @@ public class OutGivingRun implements Callable<OutGivingNodeProject.Status> {
 				//
 				finOutGivingNodeProject = outGivingNodeProject;
 			}
-			outGivingServer.updateItem(outGivingModel);
+			outGivingServer.update(outGivingModel);
 			//
 			OutGivingLog outGivingLog = new OutGivingLog();
 			if (logId != null) {

@@ -26,7 +26,7 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSONObject;
-import io.jpom.model.BaseJsonModel;
+import io.jpom.model.BaseModel;
 import io.jpom.system.ConfigBean;
 import io.jpom.system.JpomRuntimeException;
 import io.jpom.util.JsonFileUtil;
@@ -57,24 +57,24 @@ public abstract class BaseDataService {
 	 * @param filename 文件名
 	 * @param json     json数据
 	 */
-	protected void saveJson(String filename, BaseJsonModel json) {
-//		String key = json.getId();
-//		// 读取文件，如果存在记录，则抛出异常
-//		JSONObject allData;
-//		JSONObject data = null;
-//		allData = getJSONObject(filename);
-//		if (allData != null) {
-//			data = allData.getJSONObject(key);
-//		} else {
-//			allData = new JSONObject();
-//		}
-//		// 判断是否存在数据
-//		if (null != data && 0 < data.keySet().size()) {
-//			throw new JpomRuntimeException("数据Id已经存在啦：" + filename + " :" + key);
-//		} else {
-//			allData.put(key, json.toJson());
-//			JsonFileUtil.saveJson(getDataFilePath(filename), allData);
-//		}
+	protected void saveJson(String filename, BaseModel json) {
+		String key = json.getId();
+		// 读取文件，如果存在记录，则抛出异常
+		JSONObject allData;
+		JSONObject data = null;
+		allData = getJSONObject(filename);
+		if (allData != null) {
+			data = allData.getJSONObject(key);
+		} else {
+			allData = new JSONObject();
+		}
+		// 判断是否存在数据
+		if (null != data && 0 < data.keySet().size()) {
+			throw new JpomRuntimeException("数据Id已经存在啦：" + filename + " :" + key);
+		} else {
+			allData.put(key, json.toJson());
+			JsonFileUtil.saveJson(getDataFilePath(filename), allData);
+		}
 	}
 
 	/**
@@ -83,19 +83,19 @@ public abstract class BaseDataService {
 	 * @param filename 文件名
 	 * @param json     json数据
 	 */
-	protected void updateJson(String filename, BaseJsonModel json) {
-//        String key = json.getId();
-//        // 读取文件，如果不存在记录，则抛出异常
-//        JSONObject allData = getJSONObject(filename);
-//        JSONObject data = allData.getJSONObject(key);
-//
-//        // 判断是否存在数据
-//        if (null == data || 0 == data.keySet().size()) {
-//            throw new JpomRuntimeException("数据不存在:" + key);
-//        } else {
-//            allData.put(key, json.toJson());
-//            JsonFileUtil.saveJson(getDataFilePath(filename), allData);
-//        }
+	protected void updateJson(String filename, BaseModel json) {
+		String key = json.getId();
+		// 读取文件，如果不存在记录，则抛出异常
+		JSONObject allData = getJSONObject(filename);
+		JSONObject data = allData.getJSONObject(key);
+
+		// 判断是否存在数据
+		if (null == data || 0 == data.keySet().size()) {
+			throw new JpomRuntimeException("数据不存在:" + key);
+		} else {
+			allData.put(key, json.toJson());
+			JsonFileUtil.saveJson(getDataFilePath(filename), allData);
+		}
 	}
 
 	/**

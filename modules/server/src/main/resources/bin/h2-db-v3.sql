@@ -164,3 +164,23 @@ CREATE TABLE IF NOT EXISTS PUBLIC.MONITOR_INFO
 );
 comment on table MONITOR_INFO is '监控信息';
 
+-- 节点分发信息
+CREATE TABLE IF NOT EXISTS PUBLIC.OUT_GIVING
+(
+	ID                       VARCHAR(50) not null comment 'id',
+	CREATETIMEMILLIS         BIGINT COMMENT '数据创建时间',
+	MODIFYTIMEMILLIS         BIGINT COMMENT '数据修改时间',
+	MODIFYUSER               VARCHAR(50) comment '修改人',
+	STRIKE                   int     DEFAULT 0 comment '逻辑删除{1，删除，0 未删除(默认)}',
+	workspaceId              varchar(50) not null comment '所属工作空间',
+	`NAME`                   VARCHAR(50) not null comment '名称',
+	afterOpt                 int     DEFAULT 0 comment '分发后的操作',
+	clearOld                 TINYINT DEFAULT 0 comment '是否清空旧包发布',
+	outGivingProject         TINYINT DEFAULT 0 comment '是否为单独创建的分发项目',
+	outGivingNodeProjectList CLOB comment '分发项目信息',
+	CONSTRAINT OUT_GIVING_PK PRIMARY KEY (ID)
+);
+comment on table OUT_GIVING is '节点分发信息';
+
+
+

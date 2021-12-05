@@ -50,6 +50,14 @@ public class ProjectInfoCacheService extends BaseNodeService<ProjectInfoModel> {
 		return NodeForward.requestData(nodeModel, NodeUrl.Manage_GetProjectItem, JSONObject.class, "id", id);
 	}
 
+	public boolean exists(String workspaceId, String nodeId, String id) {
+		ProjectInfoModel projectInfoModel = new ProjectInfoModel();
+		projectInfoModel.setWorkspaceId(workspaceId);
+		projectInfoModel.setNodeId(nodeId);
+		projectInfoModel.setProjectId(id);
+		return super.exists(projectInfoModel);
+	}
+
 	public JSONObject getLogSize(NodeModel nodeModel, String id, String copyId) {
 		return NodeForward.requestData(nodeModel, NodeUrl.Manage_Log_LogSize, JSONObject.class, "id", id, "copyId", copyId);
 	}

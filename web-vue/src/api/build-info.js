@@ -1,12 +1,5 @@
 import axios from './config';
 
-// 分组列表
-export function getBuildGroupList() {
-    return axios({
-        url: '/build/group/list',
-        method: 'get'
-    })
-}
 
 /**
  * 构建列表

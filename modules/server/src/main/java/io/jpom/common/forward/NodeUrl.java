@@ -76,7 +76,7 @@ public enum NodeUrl {
 
 	Manage_Jude_Lib("/manage/judge_lib.json"),
 
-	Manage_GetProjectGroup("/manage/getProjectGroup"),
+//	Manage_GetProjectGroup("/manage/getProjectGroup"),
 
 	Manage_GetProjectItem("/manage/getProjectItem"),
 

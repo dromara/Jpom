@@ -26,7 +26,6 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.db.Entity;
 import cn.jiangzeyin.common.JsonMessage;
 import io.jpom.build.BuildInfoManage;
-import io.jpom.common.Const;
 import io.jpom.model.BaseEnum;
 import io.jpom.model.data.BuildInfoModel;
 import io.jpom.model.data.RepositoryModel;
@@ -35,12 +34,8 @@ import io.jpom.model.enums.BuildReleaseMethod;
 import io.jpom.model.enums.BuildStatus;
 import io.jpom.service.h2db.BaseWorkspaceService;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 
-import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * 构建 service 新版本，数据从数据库里面加载
@@ -57,21 +52,21 @@ public class BuildInfoService extends BaseWorkspaceService<BuildInfoModel> {
 		this.repositoryService = repositoryService;
 	}
 
-	/**
-	 * load date group by group name
-	 *
-	 * @return list
-	 */
-	public List<String> listGroup() {
-		String sql = "select `GROUP` from " + getTableName() + " where 1=1 group by `GROUP`";
-		List<Entity> list = super.query(sql);
-		// 筛选字段
-		return list.stream()
-				.filter(entity -> StringUtils.hasLength(String.valueOf(entity.get(Const.GROUP_STR))))
-				.flatMap(entity -> Stream.of(String.valueOf(entity.get(Const.GROUP_STR))))
-				.distinct()
-				.collect(Collectors.toList());
-	}
+//	/**
+//	 * load date group by group name
+//	 *
+//	 * @return list
+//	 */
+//	public List<String> listGroup() {
+//		String sql = "select `GROUP` from " + getTableName() + " where 1=1 group by `GROUP`";
+//		List<Entity> list = super.query(sql);
+//		// 筛选字段
+//		return list.stream()
+//				.filter(entity -> StringUtils.hasLength(String.valueOf(entity.get(Const.GROUP_STR))))
+//				.flatMap(entity -> Stream.of(String.valueOf(entity.get(Const.GROUP_STR))))
+//				.distinct()
+//				.collect(Collectors.toList());
+//	}
 
 	/**
 	 * start build

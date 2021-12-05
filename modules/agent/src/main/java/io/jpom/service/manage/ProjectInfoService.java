@@ -34,8 +34,6 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.io.File;
-import java.util.HashSet;
-import java.util.List;
 
 /**
  * 项目管理
@@ -51,18 +49,18 @@ public class ProjectInfoService extends BaseOperService<NodeProjectInfoModel> {
         super(AgentConfigBean.PROJECT);
     }
 
-    public HashSet<String> getAllGroup() {
-        //获取所有分组
-        List<NodeProjectInfoModel> nodeProjectInfoModels = list();
-        HashSet<String> hashSet = new HashSet<>();
-        if (nodeProjectInfoModels == null) {
-            return hashSet;
-        }
-        for (NodeProjectInfoModel nodeProjectInfoModel : nodeProjectInfoModels) {
-            hashSet.add(nodeProjectInfoModel.getGroup());
-        }
-        return hashSet;
-    }
+//    public HashSet<String> getAllGroup() {
+//        //获取所有分组
+//        List<NodeProjectInfoModel> nodeProjectInfoModels = list();
+//        HashSet<String> hashSet = new HashSet<>();
+//        if (nodeProjectInfoModels == null) {
+//            return hashSet;
+//        }
+//        for (NodeProjectInfoModel nodeProjectInfoModel : nodeProjectInfoModels) {
+//            hashSet.add(nodeProjectInfoModel.getGroup());
+//        }
+//        return hashSet;
+//    }
 
 
     /**

@@ -8,13 +8,9 @@
         <a-select-option :value="'0'">GIT</a-select-option>
         <a-select-option :value="'1'">SVN</a-select-option>
       </a-select>
-      <a-select v-if="isSystem" default-value="0" v-model="listQuery.strike" allowClear placeholder="选择删除情况" class="filter-item" @change="handleFilter">
-        <a-select-option :value="0">未删除</a-select-option>
-        <a-select-option :value="1">已删除</a-select-option>
-      </a-select>
-      <a-button type="primary" @click="handleFilter">搜索</a-button>
+
+      <a-button type="primary" @click="loadData">搜索</a-button>
       <a-button type="primary" @click="handleAdd">新增</a-button>
-      <a-button type="primary" @click="loadData">刷新</a-button>
     </div>
     <!-- 表格 -->
     <a-table :loading="loading" :columns="columns" :data-source="list" bordered rowKey="id" :pagination="pagination" @change="changePage">
@@ -38,7 +34,6 @@
       <template slot="operation" slot-scope="text, record">
         <a-button type="primary" @click="handleEdit(record)">编辑</a-button>
         <a-button type="danger" @click="handleDelete(record)">删除</a-button>
-        <a-button v-if="isSystem && record.strike === 1" type="primary" @click="handlerecovery(record)">恢复</a-button>
       </template>
     </a-table>
     <!-- 编辑区 -->
@@ -130,20 +125,16 @@
   </div>
 </template>
 <script>
-import { getRepositoryList, editRepository, deleteRepository, recoveryRepository, restHideField } from "../../api/repository";
+import { getRepositoryList, editRepository, deleteRepository, restHideField } from "@/api/repository";
 import { parseTime } from "@/utils/time";
-import { PAGE_DEFAULT_LIMIT, PAGE_DEFAULT_SIZW_OPTIONS, PAGE_DEFAULT_SHOW_TOTAL } from "@/utils/const";
+import { PAGE_DEFAULT_LIMIT, PAGE_DEFAULT_SIZW_OPTIONS, PAGE_DEFAULT_SHOW_TOTAL, PAGE_DEFAULT_LIST_QUERY } from "@/utils/const";
 
 export default {
   components: {},
   data() {
     return {
       loading: false,
-      listQuery: {
-        page: 1,
-        limit: PAGE_DEFAULT_LIMIT,
-        strike: 0,
-      },
+      listQuery: PAGE_DEFAULT_LIST_QUERY,
       list: [],
       total: 0,
       temp: {},
@@ -218,8 +209,7 @@ export default {
   },
   watch: {},
   created() {
-    this.handleFilter();
-    this.isSystem = this.$store.getters.getUserInfo.systemUser;
+    this.loadData();
   },
   methods: {
     // 加载数据
@@ -302,26 +292,7 @@ export default {
         },
       });
     },
-    handlerecovery(record) {
-      this.$confirm({
-        title: "系统提示",
-        content: "真的要恢复仓库信息么？",
-        okText: "确认",
-        cancelText: "取消",
-        onOk: () => {
-          // 恢复
-          recoveryRepository(record.id).then((res) => {
-            if (res.code === 200) {
-              this.$notification.success({
-                message: res.msg,
-                duration: 2,
-              });
-              this.loadData();
-            }
-          });
-        },
-      });
-    },
+
     // 清除隐藏字段
     restHideField(record) {
       this.$confirm({

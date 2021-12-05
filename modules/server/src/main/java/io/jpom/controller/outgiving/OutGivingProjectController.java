@@ -101,11 +101,10 @@ public class OutGivingProjectController extends BaseServerController {
 
 
 	@RequestMapping(value = "getItemData.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody
-	public String getItemData(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "id error") String id) throws IOException {
-		OutGivingModel outGivingServerItem = outGivingServer.getItem(id);
+	public String getItemData(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "id error") String id) {
+		OutGivingModel outGivingServerItem = outGivingServer.getByKey(id);
 		Objects.requireNonNull(outGivingServerItem, "没有数据");
-		List<OutGivingNodeProject> outGivingNodeProjectList = outGivingServerItem.getOutGivingNodeProjectList();
+		List<OutGivingNodeProject> outGivingNodeProjectList = outGivingServerItem.outGivingNodeProjectList();
 		JSONArray jsonArray = new JSONArray();
 		outGivingNodeProjectList.forEach(outGivingNodeProject -> {
 			NodeModel nodeModel = nodeService.getByKey(outGivingNodeProject.getNodeId());
@@ -199,17 +198,17 @@ public class OutGivingProjectController extends BaseServerController {
 		outGivingModel.setClearOld(Convert.toBool(clearOld, false));
 		outGivingModel.setAfterOpt(afterOpt1.getCode());
 
-		outGivingServer.updateItem(outGivingModel);
+		outGivingServer.update(outGivingModel);
 		// 开启
 		OutGivingRun.startRun(outGivingModel.getId(), dest, getUser(), unzip);
 		return JsonMessage.getString(200, "分发成功");
 	}
 
 	private OutGivingModel check(String id) {
-		OutGivingModel outGivingModel = outGivingServer.getItem(id);
+		OutGivingModel outGivingModel = outGivingServer.getByKey(id);
 		Assert.notNull(outGivingModel, "上传失败,没有找到对应的分发项目");
 		// 检查状态
-		List<OutGivingNodeProject> outGivingNodeProjectList = outGivingModel.getOutGivingNodeProjectList();
+		List<OutGivingNodeProject> outGivingNodeProjectList = outGivingModel.outGivingNodeProjectList();
 		Objects.requireNonNull(outGivingNodeProjectList);
 		for (OutGivingNodeProject outGivingNodeProject : outGivingNodeProjectList) {
 			Assert.state(outGivingNodeProject.getStatus() != OutGivingNodeProject.Status.Ing.getCode(), "当前还在分发中,请等待分发结束");
@@ -242,7 +241,7 @@ public class OutGivingProjectController extends BaseServerController {
 			//outGivingModel = outGivingServer.getItem(id);
 			outGivingModel.setClearOld(Convert.toBool(clearOld, false));
 			outGivingModel.setAfterOpt(afterOpt1.getCode());
-			outGivingServer.updateItem(outGivingModel);
+			outGivingServer.update(outGivingModel);
 			//下载
 			File file = FileUtil.file(ServerConfigBean.getInstance().getUserTempPath(), ServerConfigBean.OUTGIVING_FILE, id);
 			FileUtil.mkdir(file);

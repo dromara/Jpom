@@ -59,6 +59,7 @@ public class ServerConfigBean {
 	/**
 	 * 分发数据文件
 	 */
+	@Deprecated
 	public static final String OUTGIVING = "outgiving.json";
 
 	/**

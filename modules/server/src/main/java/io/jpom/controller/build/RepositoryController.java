@@ -37,7 +37,6 @@ import io.jpom.common.BaseServerController;
 import io.jpom.common.Const;
 import io.jpom.model.PageResultDto;
 import io.jpom.model.data.RepositoryModel;
-import io.jpom.model.data.UserModel;
 import io.jpom.model.enums.GitProtocolEnum;
 import io.jpom.plugin.ClassFeature;
 import io.jpom.plugin.Feature;
@@ -47,11 +46,13 @@ import io.jpom.service.dblog.RepositoryService;
 import io.jpom.system.JpomRuntimeException;
 import io.jpom.util.GitUtil;
 import org.springframework.util.Assert;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
 import java.io.File;
+import java.util.List;
 
 /**
  * @author Hotstrip
@@ -73,10 +74,22 @@ public class RepositoryController extends BaseServerController {
 	 * @return json
 	 */
 	@PostMapping(value = "/build/repository/list")
-	@Feature(method = MethodFeature.LOG)
+	@Feature(method = MethodFeature.LIST)
 	public Object loadRepositoryList() {
 		PageResultDto<RepositoryModel> pageResult = repositoryService.listPage(getRequest());
 		return JsonMessage.getString(200, "获取成功", pageResult);
+	}
+
+	/**
+	 * load repository list
+	 *
+	 * @return json
+	 */
+	@GetMapping(value = "/build/repository/list_all")
+	@Feature(method = MethodFeature.LIST)
+	public Object loadRepositoryListAll() {
+		List<RepositoryModel> repositoryModels = repositoryService.listByWorkspace(getRequest());
+		return JsonMessage.getString(200, "", repositoryModels);
 	}
 
 	/**
@@ -167,7 +180,6 @@ public class RepositoryController extends BaseServerController {
 		if (repositoryModelReq.getId() != null) {
 			Validator.validateGeneral(repositoryModelReq.getId(), "错误的ID");
 			entity.set("id", "<> " + repositoryModelReq.getId());
-			entity.set("strike", 0);
 		}
 		entity.set("gitUrl", repositoryModelReq.getGitUrl());
 		Assert.state(!repositoryService.exists(entity), "已经存在对应的仓库信息啦");
@@ -205,57 +217,19 @@ public class RepositoryController extends BaseServerController {
 	/**
 	 * delete
 	 *
-	 * @param id        仓库ID
-	 * @param isRealDel 是否真删
+	 * @param id 仓库ID
 	 * @return json
 	 */
 	@PostMapping(value = "/build/repository/delete")
 	@Feature(method = MethodFeature.DEL)
-	public Object delRepository(String id, Boolean isRealDel) {
+	public Object delRepository(String id) {
 		// 判断仓库是否被关联
 		Entity entity = Entity.create();
 		entity.set("repositoryId", id);
 		boolean exists = buildInfoService.exists(entity);
 		Assert.state(!exists, "当前仓库被构建关联，不能直接删除");
-		UserModel user = getUser();
-		if (user.isSystemUser() && isRealDel) {
-			repositoryService.delByKey(id);
-		} else {
-			Entity updateEntity = Entity.create();
-			updateEntity.set("strike", 1);
-			Entity whereEntity = Entity.create();
-			whereEntity.set("id", id);
-			repositoryService.update(updateEntity, whereEntity);
-		}
+
+		repositoryService.getByKey(id, getRequest());
 		return JsonMessage.getString(200, "删除成功");
-	}
-
-
-	/**
-	 * 恢复仓库
-	 *
-	 * @param id 仓库ID
-	 * @return json
-	 */
-	@PostMapping(value = "/build/repository/recovery")
-	@Feature(method = MethodFeature.EXECUTE)
-	public Object recoveryRepository(String id) {
-		RepositoryModel repositoryModelReq = repositoryService.getByKey(id);
-		// 判断仓库是否重复
-		Entity entity = Entity.create();
-		if (repositoryModelReq.getId() != null) {
-			Validator.validateGeneral(repositoryModelReq.getId(), "错误的ID");
-			entity.set("id", "<> " + repositoryModelReq.getId());
-			entity.set("strike", 0);
-		}
-		entity.set("gitUrl", repositoryModelReq.getGitUrl());
-		Assert.state(!repositoryService.exists(entity), "已经存在对应的仓库信息啦!");
-		// 判断仓库是否被关联
-		Entity whereEntity = Entity.create();
-		whereEntity.set("id", id);
-		Entity updateEntity = Entity.create();
-		updateEntity.set("strike", 0);
-		repositoryService.update(updateEntity, whereEntity);
-		return JsonMessage.getString(200, "恢复成功");
 	}
 }
