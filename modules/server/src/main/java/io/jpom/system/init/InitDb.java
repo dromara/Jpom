@@ -99,6 +99,7 @@ public class InitDb implements DisposableBean, InitializingBean {
 			 */
 			String[] files = new String[]{
 					"classpath:/bin/h2-db-v1.sql",
+//					"classpath:/bin/h2-db-v1-convert.sql",
 					"classpath:/bin/h2-db-v2.sql",
 					"classpath:/bin/h2-db-v3.sql",
 			};
@@ -159,6 +160,7 @@ public class InitDb implements DisposableBean, InitializingBean {
 		//
 		instance.loadNodeInfo();
 		instance.loadSshInfo();
+		instance.loadMonitorInfo();
 		//
 		workspaceService.convertNullWorkspaceId();
 		//  同步项目

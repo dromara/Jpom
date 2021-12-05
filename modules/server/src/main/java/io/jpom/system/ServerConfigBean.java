@@ -75,6 +75,7 @@ public class ServerConfigBean {
 	/**
 	 * 项目监控文件
 	 */
+	@Deprecated
 	public static final String MONITOR_FILE = "monitor.json";
 
 	/**

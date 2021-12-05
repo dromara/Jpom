@@ -22,9 +22,8 @@
  */
 package io.jpom.service.dblog;
 
-import cn.hutool.db.Entity;
 import io.jpom.model.log.MonitorNotifyLog;
-import io.jpom.service.h2db.BaseDbCommonService;
+import io.jpom.service.h2db.BaseWorkspaceService;
 import io.jpom.system.db.DbConfig;
 import org.springframework.stereotype.Service;
 
@@ -35,17 +34,15 @@ import org.springframework.stereotype.Service;
  * @date 2019/7/20
  */
 @Service
-public class DbMonitorNotifyLogService extends BaseDbCommonService<MonitorNotifyLog> {
+public class DbMonitorNotifyLogService extends BaseWorkspaceService<MonitorNotifyLog> {
 
-	public DbMonitorNotifyLogService() {
-		super(MonitorNotifyLog.TABLE_NAME, "logId", MonitorNotifyLog.class);
-	}
 
 	@Override
 	public void insert(MonitorNotifyLog monitorNotifyLog) {
 		super.insert(monitorNotifyLog);
 		//
 		DbConfig.autoClear(getTableName(), "createTime");
+		DbConfig.autoClear(getTableName(), "createTimeMillis");
 	}
 
 
@@ -57,14 +54,19 @@ public class DbMonitorNotifyLogService extends BaseDbCommonService<MonitorNotify
 	 * @param errorMsg 错误消息
 	 */
 	public void updateStatus(String logId, boolean status, String errorMsg) {
-		Entity entity = new Entity();
-		entity.set("notifyStatus", status);
-		if (errorMsg != null) {
-			entity.set("notifyError", errorMsg);
-		}
-		//
-		Entity where = new Entity();
-		where.set("logId", logId);
-		super.update(entity, where);
+		MonitorNotifyLog monitorNotifyLog = new MonitorNotifyLog();
+		monitorNotifyLog.setId(logId);
+		monitorNotifyLog.setStatus(status);
+		monitorNotifyLog.setNotifyError(errorMsg);
+		super.update(monitorNotifyLog);
+//		Entity entity = new Entity();
+//		entity.set("notifyStatus", status);
+//		if (errorMsg != null) {
+//			entity.set("notifyError", errorMsg);
+//		}
+//		//
+//		Entity where = new Entity();
+//		where.set("logId", logId);
+//		super.update(entity, where);
 	}
 }

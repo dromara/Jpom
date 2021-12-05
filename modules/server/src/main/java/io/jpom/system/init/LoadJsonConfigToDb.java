@@ -7,7 +7,9 @@ import cn.jiangzeyin.common.spring.SpringUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import io.jpom.common.BaseServerController;
 import io.jpom.model.data.*;
+import io.jpom.service.monitor.MonitorService;
 import io.jpom.service.node.NodeService;
 import io.jpom.service.node.ssh.SshService;
 import io.jpom.service.system.SystemParametersServer;
@@ -159,6 +161,7 @@ public class LoadJsonConfigToDb {
 			if (nodeModels == null) {
 				return;
 			}
+			BaseServerController.resetInfo(UserModel.EMPTY);
 			NodeService nodeService = SpringUtil.getBean(NodeService.class);
 			nodeService.insert(nodeModels);
 			// 将 json 文件转移到备份目录
@@ -166,6 +169,8 @@ public class LoadJsonConfigToDb {
 			DefaultSystemLog.getLog().info("{} mv to {}", FileUtil.getAbsolutePath(file), FileUtil.getAbsolutePath(backupOldData));
 		} catch (Exception e) {
 			DefaultSystemLog.getLog().error("load node error ", e);
+		} finally {
+			BaseServerController.remove();
 		}
 	}
 
@@ -183,6 +188,7 @@ public class LoadJsonConfigToDb {
 			if (sshModels == null) {
 				return;
 			}
+			BaseServerController.resetInfo(UserModel.EMPTY);
 			SshService sshService = SpringUtil.getBean(SshService.class);
 			sshService.insert(sshModels);
 			// 将 json 文件转移到备份目录
@@ -190,6 +196,35 @@ public class LoadJsonConfigToDb {
 			DefaultSystemLog.getLog().info("{} mv to {}", FileUtil.getAbsolutePath(file), FileUtil.getAbsolutePath(backupOldData));
 		} catch (Exception e) {
 			DefaultSystemLog.getLog().error("load ssh error ", e);
+		} finally {
+			BaseServerController.remove();
+		}
+	}
+
+	public void loadMonitorInfo() {
+		File backupOldData = FileUtil.file(ConfigBean.getInstance().getDataPath(), "backup_old_data");
+		// 读取 monitor 文件内容
+		File file = FileUtil.file(ConfigBean.getInstance().getDataPath(), ServerConfigBean.MONITOR_FILE);
+		if (!FileUtil.exist(file)) {
+			return;
+		}
+		try {
+			JSON json = JsonFileUtil.readJson(file.getAbsolutePath());
+			JSONArray jsonArray = JsonFileUtil.formatToArray((JSONObject) json);
+			List<MonitorModel> monitorModels = jsonArray.toJavaList(MonitorModel.class);
+			if (monitorModels == null) {
+				return;
+			}
+			BaseServerController.resetInfo(UserModel.EMPTY);
+			MonitorService monitorService = SpringUtil.getBean(MonitorService.class);
+			monitorService.insert(monitorModels);
+			// 将 json 文件转移到备份目录
+			FileUtil.move(file, FileUtil.mkdir(backupOldData), true);
+			DefaultSystemLog.getLog().info("{} mv to {}", FileUtil.getAbsolutePath(file), FileUtil.getAbsolutePath(backupOldData));
+		} catch (Exception e) {
+			DefaultSystemLog.getLog().error("load monitor error ", e);
+		} finally {
+			BaseServerController.remove();
 		}
 	}
 }

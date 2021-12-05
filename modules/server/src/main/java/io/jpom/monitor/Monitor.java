@@ -65,7 +65,6 @@ public class Monitor implements Task {
 
 	private static final String CRON_ID = "Monitor";
 
-
 	private static DbMonitorNotifyLogService dbMonitorNotifyLogService;
 
 
@@ -112,21 +111,18 @@ public class Monitor implements Task {
 			return;
 		}
 		monitorModels.forEach(monitorModel -> {
-			List<MonitorModel.NodeProject> nodeProjects = monitorModel.getProjects();
-			if (nodeProjects == null || nodeProjects.isEmpty()) {
+			List<MonitorModel.NodeProject> nodeProjects = monitorModel.projects();
+			List<String> notifyUser = monitorModel.notifyUser();
+			if (CollUtil.isEmpty(nodeProjects) || CollUtil.isEmpty(notifyUser)) {
 				return;
 			}
 			//
-			List<String> notifyUser = monitorModel.getNotifyUser();
-			if (notifyUser == null || notifyUser.isEmpty()) {
-				return;
-			}
 			this.checkNode(monitorModel);
 		});
 	}
 
 	private void checkNode(MonitorModel monitorModel) {
-		List<MonitorModel.NodeProject> nodeProjects = monitorModel.getProjects();
+		List<MonitorModel.NodeProject> nodeProjects = monitorModel.projects();
 		NodeService nodeService = SpringUtil.getBean(NodeService.class);
 		nodeProjects.forEach(nodeProject -> {
 			String nodeId = nodeProject.getNode();
@@ -189,7 +185,7 @@ public class Monitor implements Task {
 			monitorNotifyLog.setProjectId(id);
 			monitorNotifyLog.setMonitorId(monitorModel.getId());
 			//
-			List<String> notify = monitorModel.getNotifyUser();
+			List<String> notify = monitorModel.notifyUser();
 			this.notifyMsg(notify, monitorNotifyLog);
 		});
 	}
@@ -223,7 +219,7 @@ public class Monitor implements Task {
 			}
 		} else {
 			//
-			if (monitorModel.isAutoRestart()) {
+			if (monitorModel.getAutoRestart()) {
 				// 执行重启
 				try {
 					JsonMessage<String> reJson = NodeForward.requestBySys(nodeModel, NodeUrl.Manage_Restart, "id", id, "copyId", copyId);
@@ -258,7 +254,7 @@ public class Monitor implements Task {
 		monitorNotifyLog.setProjectId(projectCopyId);
 		monitorNotifyLog.setMonitorId(monitorModel.getId());
 		//
-		List<String> notify = monitorModel.getNotifyUser();
+		List<String> notify = monitorModel.notifyUser();
 		this.notifyMsg(notify, monitorNotifyLog);
 	}
 

@@ -47,7 +47,7 @@ import { restartProject, startProject, stopProject, getRuningProjectInfo } from 
 import { mapGetters } from "vuex";
 import File from "../node/node-layout/project/project-file";
 import Console from "../node/node-layout/project/project-console";
-import { parseTime } from "@/utils/time";
+import { parseTime, itemGroupBy } from "@/utils/time";
 import { PAGE_DEFAULT_LIMIT, PAGE_DEFAULT_SIZW_OPTIONS, PAGE_DEFAULT_SHOW_TOTAL } from "@/utils/const";
 export default {
   components: {
@@ -121,31 +121,18 @@ export default {
     this.getNodeProjectData();
   },
   methods: {
-    //获取全部项目
-    itemGroupBy(arr, key) {
-      let newArr = [],
-        types = {},
-        // newItem,
-        i,
-        j,
-        cur;
-      for (i = 0, j = arr.length; i < j; i++) {
-        cur = arr[i];
-        if (!(cur[key] in types)) {
-          types[cur[key]] = { type: cur[key], data: [] };
-          newArr.push(types[cur[key]]);
-        }
-        types[cur[key]].data.push(cur);
-      }
-      return newArr;
-    },
     getNodeProjectData() {
       getProjectList(this.listQuery).then((res) => {
         if (res.code === 200) {
-          this.projList = res.data.result;
+          let resultList = res.data.result;
+
+          let tempList = resultList.filter((item) => item.runMode !== "File");
+          let fileList = resultList.filter((item) => item.runMode === "File");
+          this.projList = tempList.concat(fileList);
+
           this.listQuery.total = res.data.total;
 
-          let nodeProjects = this.itemGroupBy(this.projList, "nodeId");
+          let nodeProjects = itemGroupBy(this.projList, "nodeId");
           this.getRuningProjectInfo(nodeProjects, 0);
         }
       });

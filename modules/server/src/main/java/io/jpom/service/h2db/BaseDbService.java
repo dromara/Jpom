@@ -213,13 +213,16 @@ public abstract class BaseDbService<T extends BaseDbModel> extends BaseDbCommonS
 		for (Map.Entry<String, String> stringStringEntry : paramMap.entrySet()) {
 			String key = stringStringEntry.getKey();
 			String value = stringStringEntry.getValue();
+			if (StrUtil.isEmpty(value)) {
+				continue;
+			}
 			key = StrUtil.removeAll(key, "%");
 			if (StrUtil.startWith(stringStringEntry.getKey(), "%") && StrUtil.endWith(stringStringEntry.getKey(), "%")) {
-				where.setIgnoreNull(StrUtil.format("`{}`", key), StrUtil.format(" like '%{}%'", value));
+				where.set(StrUtil.format("`{}`", key), StrUtil.format(" like '%{}%'", value));
 			} else if (StrUtil.endWith(stringStringEntry.getKey(), "%")) {
-				where.setIgnoreNull(StrUtil.format("`{}`", key), StrUtil.format(" like '{}%'", value));
+				where.set(StrUtil.format("`{}`", key), StrUtil.format(" like '{}%'", value));
 			} else if (StrUtil.startWith(stringStringEntry.getKey(), "%")) {
-				where.setIgnoreNull(StrUtil.format("`{}`", key), StrUtil.format(" like '%{}'", value));
+				where.set(StrUtil.format("`{}`", key), StrUtil.format(" like '%{}'", value));
 			} else if (StrUtil.containsIgnoreCase(key, "time") && StrUtil.contains(value, "~")) {
 				String[] val = StrUtil.splitToArray(value, "~");
 				if (val.length == 2) {
@@ -234,7 +237,7 @@ public abstract class BaseDbService<T extends BaseDbModel> extends BaseDbCommonS
 					where.set(key + " ", "<= " + endDateTime.getTime());
 				}
 			} else {
-				where.setIgnoreNull(StrUtil.format("`{}`", key), value);
+				where.set(StrUtil.format("`{}`", key), value);
 			}
 		}
 		// 排序

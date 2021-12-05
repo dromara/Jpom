@@ -51,10 +51,11 @@ public class UserOperateLogV1 extends BaseWorkspaceModel {
 	 * 节点id
 	 */
 	private String nodeId;
-//	/**
-//	 * 操作时间
-//	 */
-//	private long optTime;
+	/**
+	 * 操作时间
+	 */
+	@Deprecated
+	private Long optTime;
 	/**
 	 * 操作类型
 	 */
@@ -67,11 +68,12 @@ public class UserOperateLogV1 extends BaseWorkspaceModel {
 	 * 完整消息
 	 */
 	private String resultMsg;
-//	/**
-//	 * 操作id
-//	 * 用于socket 回话回调更新
-//	 */
-//	private String reqId;
+	/**
+	 * 操作id
+	 * 用于socket 回话回调更新
+	 */
+	@Deprecated
+	private String reqId;
 	/**
 	 * 请求参数
 	 */
@@ -109,7 +111,13 @@ public class UserOperateLogV1 extends BaseWorkspaceModel {
 		this.dataId = dataId;
 	}
 
-//	public UserOperateLogV1(String reqId) {
+	@Override
+	public void setId(String id) {
+		super.setId(id);
+		this.setReqId(id);
+	}
+
+	//	public UserOperateLogV1(String reqId) {
 //		if (reqId == null) {
 //			this.reqId = IdUtil.fastUUID();
 //		} else {
@@ -123,13 +131,13 @@ public class UserOperateLogV1 extends BaseWorkspaceModel {
 //	public UserOperateLogV1() {
 //	}
 
-//	public String getReqId() {
-//		return reqId;
-//	}
-//
-//	public void setReqId(String reqId) {
-//		this.reqId = reqId;
-//	}
+	public String getReqId() {
+		return reqId;
+	}
+
+	public void setReqId(String reqId) {
+		this.reqId = reqId;
+	}
 
 	public String getNodeId() {
 		return StrUtil.emptyToDefault(nodeId, StrUtil.DASHED);
@@ -154,14 +162,15 @@ public class UserOperateLogV1 extends BaseWorkspaceModel {
 	public void setUserId(String userId) {
 		this.userId = userId;
 	}
-//
-//	public long getOptTime() {
-//		return optTime;
-//	}
-//
-//	public void setOptTime(long optTime) {
-//		this.optTime = optTime;
-//	}
+
+	public Long getOptTime() {
+		return optTime;
+	}
+
+	@Deprecated
+	public void setOptTime(long optTime) {
+		this.optTime = optTime;
+	}
 
 	public int getOptType() {
 		return optType;

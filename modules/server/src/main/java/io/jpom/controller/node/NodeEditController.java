@@ -97,7 +97,7 @@ public class NodeEditController extends BaseServerController {
 		Assert.state(checkNode1, "该节点存在监控项，不能删除");
 		boolean checkNode2 = buildService.checkNode(id);
 		Assert.state(checkNode2, "该节点存在构建项，不能删除");
-		nodeService.delByKey(id);
+		nodeService.delByKey(id, getRequest());
 		// 删除授权
 		//        List<UserModel> list = userService.list();
 		//        if (list != null) {

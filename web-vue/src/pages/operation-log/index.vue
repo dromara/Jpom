@@ -69,9 +69,9 @@ export default {
         { title: "执行结果", dataIndex: "optStatusMsg", width: 100 },
         {
           title: "操作时间",
-          dataIndex: "optTime",
-          customRender: (text) => {
-            return parseTime(text);
+          dataIndex: "createTimeMillis",
+          customRender: (text, item) => {
+            return parseTime(text || item.optTime);
           } /*width: 180*/,
         },
         { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, width: 120, fixed: "right" },

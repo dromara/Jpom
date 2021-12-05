@@ -125,7 +125,7 @@ import { getSshListAll } from "@/api/ssh";
 import NodeLayout from "./node-layout";
 import Terminal from "./terminal";
 import { parseTime } from "@/utils/time";
-import { PAGE_DEFAULT_LIMIT, PAGE_DEFAULT_SIZW_OPTIONS, PAGE_DEFAULT_SHOW_TOTAL } from "@/utils/const";
+import { PAGE_DEFAULT_LIMIT, PAGE_DEFAULT_SIZW_OPTIONS, PAGE_DEFAULT_SHOW_TOTAL, PAGE_DEFAULT_LIST_QUERY } from "@/utils/const";
 
 export default {
   components: {
@@ -136,7 +136,7 @@ export default {
     return {
       loading: false,
       childLoading: false,
-      listQuery: { page: 1, limit: PAGE_DEFAULT_LIMIT, total: 0 },
+      listQuery: PAGE_DEFAULT_LIST_QUERY,
       sshList: [],
       list: [],
       temp: {

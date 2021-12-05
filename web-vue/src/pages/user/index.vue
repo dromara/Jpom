@@ -5,7 +5,7 @@
       <a-button type="primary" @click="loadData">刷新</a-button>
     </div>
     <!-- 数据表格 -->
-    <a-table :data-source="list" :loading="loading" :columns="columns" :pagination="(this, pagination)" bordered :rowKey="(record, index) => index">
+    <a-table :data-source="list" :loading="loading" :columns="columns" :pagination="(this, pagination)" @change="changePage" bordered :rowKey="(record, index) => index">
       <template slot="operation" slot-scope="text, record">
         <a-button type="primary" @click="handleEdit(record)">编辑</a-button>
         <a-button type="danger" @click="handleDelete(record)">删除</a-button>
@@ -121,7 +121,6 @@ export default {
   },
   created() {
     this.loadData();
-    this.loadWorkSpaceListAll();
   },
   methods: {
     // 页面引导
@@ -284,6 +283,16 @@ export default {
         },
       });
     },
+  },
+  // 分页、排序、筛选变化时触发
+  changePage(pagination, filters, sorter) {
+    this.listQuery.page = pagination.current;
+    this.listQuery.limit = pagination.pageSize;
+    if (sorter) {
+      this.listQuery.order = sorter.order;
+      this.listQuery.order_field = sorter.field;
+    }
+    this.loadData();
   },
 };
 </script>

@@ -116,7 +116,6 @@ CREATE TABLE IF NOT EXISTS PUBLIC.SSH_INFO
 );
 comment on table SSH_INFO is 'ssh信息表';
 
-
 -- 项目信息表
 CREATE TABLE IF NOT EXISTS PUBLIC.PROJECT_INFO
 (
@@ -144,4 +143,24 @@ CREATE TABLE IF NOT EXISTS PUBLIC.PROJECT_INFO
 	CONSTRAINT PROJECT_INFO_PK PRIMARY KEY (ID)
 );
 comment on table PROJECT_INFO is '项目信息表';
+
+-- 监控信息
+CREATE TABLE IF NOT EXISTS PUBLIC.MONITOR_INFO
+(
+	ID               VARCHAR(50) not null comment 'id',
+	CREATETIMEMILLIS BIGINT COMMENT '数据创建时间',
+	MODIFYTIMEMILLIS BIGINT COMMENT '数据修改时间',
+	MODIFYUSER       VARCHAR(50) comment '修改人',
+	STRIKE           int     DEFAULT 0 comment '逻辑删除{1，删除，0 未删除(默认)}',
+	workspaceId      varchar(50) not null comment '所属工作空间',
+	`NAME`           VARCHAR(50) not null comment '名称',
+	autoRestart      TINYINT DEFAULT 0 comment '是否自动重启{1，是，0 否}',
+	status           TINYINT DEFAULT 0 comment '启用状态{1，启用，0 未启用}',
+	alarm            TINYINT DEFAULT 0 comment '报警状态{1，报警中，0 未报警}',
+	cycle            int     DEFAULT 0 comment '监控周期',
+	notifyUser       CLOB comment '报警联系人',
+	projects         CLOB comment '监控的项目',
+	CONSTRAINT MONITOR_INFO_PK PRIMARY KEY (ID)
+);
+comment on table MONITOR_INFO is '监控信息';
 

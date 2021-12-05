@@ -62,3 +62,25 @@ export function renderSize(value) {
   size = size.toFixed(2); //保留的小数位数
   return size + unitArr[index];
 }
+
+//
+export function itemGroupBy(arr, groupKey, key, dataKey) {
+  key = key || "type";
+  dataKey = dataKey || "data";
+
+  let newArr = [],
+    types = {},
+    // newItem,
+    i,
+    j,
+    cur;
+  for (i = 0, j = arr.length; i < j; i++) {
+    cur = arr[i];
+    if (!(cur[groupKey] in types)) {
+      types[cur[groupKey]] = { [key]: cur[groupKey], [dataKey]: [] };
+      newArr.push(types[cur[groupKey]]);
+    }
+    types[cur[groupKey]][dataKey].push(cur);
+  }
+  return newArr;
+}

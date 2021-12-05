@@ -41,7 +41,6 @@ export function getNodeProjectList(params) {
     url: "/node/node_project_list",
     method: "post",
     params: params,
-    timeout: 0,
   });
 }
 
@@ -51,7 +50,15 @@ export function getProjectList(params) {
     url: "/node/project_list",
     method: "post",
     params: params,
-    timeout: 0,
+  });
+}
+
+// 节点 + 项目列表
+export function getProjectListAll() {
+  return axios({
+    url: "/node/project_list_all",
+    method: "get",
+    params: {},
   });
 }
 
