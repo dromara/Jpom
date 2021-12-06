@@ -22,6 +22,8 @@
  */
 package io.jpom.service.dblog;
 
+import cn.hutool.core.date.SystemClock;
+import cn.hutool.core.util.ObjectUtil;
 import io.jpom.model.log.MonitorNotifyLog;
 import io.jpom.service.h2db.BaseWorkspaceService;
 import io.jpom.system.db.DbConfig;
@@ -39,6 +41,7 @@ public class DbMonitorNotifyLogService extends BaseWorkspaceService<MonitorNotif
 
 	@Override
 	public void insert(MonitorNotifyLog monitorNotifyLog) {
+		monitorNotifyLog.setCreateTime(ObjectUtil.defaultIfNull(monitorNotifyLog.getCreateTime(), SystemClock.now()));
 		super.insert(monitorNotifyLog);
 		//
 		DbConfig.autoClear(getTableName(), "createTime");

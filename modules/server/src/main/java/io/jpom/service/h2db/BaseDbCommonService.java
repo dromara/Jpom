@@ -93,7 +93,7 @@ public abstract class BaseDbCommonService<T> {
 		return tableName;
 	}
 
-	protected String getTableName() {
+	public String getTableName() {
 		return tableName;
 	}
 

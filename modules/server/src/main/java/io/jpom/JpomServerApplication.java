@@ -87,7 +87,11 @@ public class JpomServerApplication implements ApplicationEventLoad {
 		if (ArrayUtil.containsIgnoreCase(args, "--rest:super_user_pwd")) {
 			UserService userService = SpringUtil.getBean(UserService.class);
 			String superUserPwd = userService.restSuperUserPwd();
-			Console.log("重置超级管理员账号密码成功,新密码为：{}", superUserPwd);
+			if (superUserPwd != null) {
+				Console.log("重置超级管理员账号密码成功,新密码为：{}", superUserPwd);
+			} else {
+				Console.log("系统中还没有超级管理员账号");
+			}
 		}
 	}
 

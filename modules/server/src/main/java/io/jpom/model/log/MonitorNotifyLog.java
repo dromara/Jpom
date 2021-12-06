@@ -37,7 +37,7 @@ public class MonitorNotifyLog extends BaseWorkspaceModel {
 	/**
 	 *
 	 */
-	private String logId;
+//	private String logId;
 	private String nodeId;
 	private String projectId;
 	/**
@@ -113,13 +113,6 @@ public class MonitorNotifyLog extends BaseWorkspaceModel {
 		this.notifyStyle = notifyStyle;
 	}
 
-	public String getLogId() {
-		return logId;
-	}
-
-	public void setLogId(String logId) {
-		this.logId = logId;
-	}
 
 	public String getNodeId() {
 		return nodeId;

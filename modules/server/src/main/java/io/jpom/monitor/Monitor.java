@@ -299,44 +299,44 @@ public class Monitor implements Task {
 					// 邮箱
 					String email = item.getEmail();
 					if (StrUtil.isNotEmpty(email)) {
-						monitorNotifyLog.setLogId(IdUtil.fastSimpleUUID());
+						monitorNotifyLog.setId(IdUtil.fastSimpleUUID());
 						MonitorModel.Notify notify1 = new MonitorModel.Notify(MonitorModel.NotifyType.mail, email);
 						monitorNotifyLog.setNotifyStyle(notify1.getStyle());
 						monitorNotifyLog.setNotifyObject(notify1.getValue());
 						//
 						dbMonitorNotifyLogService.insert(monitorNotifyLog);
-						send(notify1, monitorNotifyLog.getLogId(), monitorNotifyLog.getTitle(), monitorNotifyLog.getContent());
+						send(notify1, monitorNotifyLog.getId(), monitorNotifyLog.getTitle(), monitorNotifyLog.getContent());
 						success = true;
 					}
 					// dingding
 					String dingDing = item.getDingDing();
 					if (StrUtil.isNotEmpty(dingDing)) {
-						monitorNotifyLog.setLogId(IdUtil.fastSimpleUUID());
+						monitorNotifyLog.setId(IdUtil.fastSimpleUUID());
 						MonitorModel.Notify notify1 = new MonitorModel.Notify(MonitorModel.NotifyType.dingding, dingDing);
 						monitorNotifyLog.setNotifyStyle(notify1.getStyle());
 						monitorNotifyLog.setNotifyObject(notify1.getValue());
 						//
 						dbMonitorNotifyLogService.insert(monitorNotifyLog);
-						send(notify1, monitorNotifyLog.getLogId(), monitorNotifyLog.getTitle(), monitorNotifyLog.getContent());
+						send(notify1, monitorNotifyLog.getId(), monitorNotifyLog.getTitle(), monitorNotifyLog.getContent());
 						success = true;
 					}
 					// 企业微信
 					String workWx = item.getWorkWx();
 					if (StrUtil.isNotEmpty(workWx)) {
-						monitorNotifyLog.setLogId(IdUtil.fastSimpleUUID());
+						monitorNotifyLog.setId(IdUtil.fastSimpleUUID());
 						MonitorModel.Notify notify1 = new MonitorModel.Notify(MonitorModel.NotifyType.workWx, workWx);
 						monitorNotifyLog.setNotifyStyle(notify1.getStyle());
 						monitorNotifyLog.setNotifyObject(notify1.getValue());
 						//
 						dbMonitorNotifyLogService.insert(monitorNotifyLog);
-						send(notify1, monitorNotifyLog.getLogId(), monitorNotifyLog.getTitle(), monitorNotifyLog.getContent());
+						send(notify1, monitorNotifyLog.getId(), monitorNotifyLog.getTitle(), monitorNotifyLog.getContent());
 						success = true;
 					}
 				}
 				if (success) {
 					return;
 				}
-				monitorNotifyLog.setLogId(IdUtil.fastSimpleUUID());
+				monitorNotifyLog.setId(IdUtil.fastSimpleUUID());
 				monitorNotifyLog.setNotifyObject("报警联系人异常");
 				monitorNotifyLog.setNotifyStyle(MonitorModel.NotifyType.mail.getCode());
 				monitorNotifyLog.setNotifyStatus(false);
