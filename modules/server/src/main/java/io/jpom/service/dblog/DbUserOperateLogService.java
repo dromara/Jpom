@@ -22,25 +22,36 @@
  */
 package io.jpom.service.dblog;
 
+import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.EnumUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
+import cn.jiangzeyin.common.spring.SpringUtil;
 import io.jpom.model.data.MonitorModel;
 import io.jpom.model.data.MonitorUserOptModel;
 import io.jpom.model.data.UserModel;
+import io.jpom.model.data.WorkspaceModel;
 import io.jpom.model.log.UserOperateLogV1;
 import io.jpom.monitor.NotifyUtil;
 import io.jpom.plugin.ClassFeature;
 import io.jpom.plugin.MethodFeature;
+import io.jpom.service.h2db.BaseDbCommonService;
 import io.jpom.service.h2db.BaseWorkspaceService;
+import io.jpom.service.monitor.MonitorService;
 import io.jpom.service.monitor.MonitorUserOptService;
+import io.jpom.service.node.NodeService;
+import io.jpom.service.node.ProjectInfoCacheService;
+import io.jpom.service.node.ssh.SshService;
+import io.jpom.service.system.WorkspaceService;
 import io.jpom.service.user.UserService;
 import io.jpom.system.db.DbConfig;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 操作日志
@@ -51,36 +62,48 @@ import java.util.List;
 @Service
 public class DbUserOperateLogService extends BaseWorkspaceService<UserOperateLogV1> {
 
+	private static final Map<ClassFeature, Class<? extends BaseDbCommonService<?>>> CLASS_FEATURE_SERVICE = new HashMap<>();
+
+	static {
+		CLASS_FEATURE_SERVICE.put(ClassFeature.NODE, NodeService.class);
+		CLASS_FEATURE_SERVICE.put(ClassFeature.SSH, SshService.class);
+		CLASS_FEATURE_SERVICE.put(ClassFeature.OUTGIVING, SshService.class);
+		CLASS_FEATURE_SERVICE.put(ClassFeature.MONITOR, MonitorService.class);
+		CLASS_FEATURE_SERVICE.put(ClassFeature.OPT_MONITOR, MonitorUserOptService.class);
+		CLASS_FEATURE_SERVICE.put(ClassFeature.PROJECT, ProjectInfoCacheService.class);
+		CLASS_FEATURE_SERVICE.put(ClassFeature.BUILD_REPOSITORY, RepositoryService.class);
+		CLASS_FEATURE_SERVICE.put(ClassFeature.BUILD, BuildInfoService.class);
+	}
+
 	private final MonitorUserOptService monitorUserOptService;
 	private final UserService userService;
-	private final BuildInfoService buildService;
+	private final WorkspaceService workspaceService;
 
 	public DbUserOperateLogService(MonitorUserOptService monitorUserOptService,
 								   UserService userService,
-								   BuildInfoService buildService) {
-
+								   WorkspaceService workspaceService) {
 		this.monitorUserOptService = monitorUserOptService;
 		this.userService = userService;
-		this.buildService = buildService;
+		this.workspaceService = workspaceService;
 	}
 
 	private void checkMonitor(UserOperateLogV1 userOperateLogV1) {
+		ClassFeature classFeature = EnumUtil.fromString(ClassFeature.class, userOperateLogV1.getClassFeature(), null);
+		MethodFeature methodFeature = EnumUtil.fromString(MethodFeature.class, userOperateLogV1.getMethodFeature(), null);
 		UserModel optUserItem = userService.getByKey(userOperateLogV1.getUserId());
-		if (optUserItem == null) {
+		if (classFeature == null || methodFeature == null || optUserItem == null) {
 			return;
 		}
 		String otherMsg = "";
-//			if (optType == UserOperateLogV1.OptType.StartBuild || optType == UserOperateLogV1.OptType.EditBuild) {
-//				BuildInfoModel item = buildService.getByKey(userOperateLogV1.getDataId());
-//				if (item != null) {
-//					otherMsg = StrUtil.format("操作的构建名称：{}\n", item.getName());
-//				}
-//			}
-		ClassFeature classFeature = EnumUtil.fromString(ClassFeature.class, userOperateLogV1.getClassFeature(), null);
-		MethodFeature methodFeature = EnumUtil.fromString(MethodFeature.class, userOperateLogV1.getMethodFeature(), null);
-		if (classFeature == null || methodFeature == null) {
-			return;
+		Class<? extends BaseDbCommonService<?>> aClass = CLASS_FEATURE_SERVICE.get(classFeature);
+		BaseDbCommonService<?> baseDbCommonService = SpringUtil.getBean(aClass);
+		Object data = baseDbCommonService.getByKey(userOperateLogV1.getNodeId());
+		if (data != null) {
+			Object name = BeanUtil.getProperty(data, "name");
+			otherMsg = name == null ? StrUtil.EMPTY : StrUtil.format("操作的数据名称：{}\n", name);
 		}
+		WorkspaceModel workspaceModel = workspaceService.getByKey(userOperateLogV1.getWorkspaceId());
+
 		String optTypeMsg = StrUtil.format(" 【{}】->【{}】", classFeature.getName(), methodFeature.getName());
 		List<MonitorUserOptModel> monitorUserOptModels = monitorUserOptService.listByType(userOperateLogV1.getWorkspaceId(),
 				classFeature,
@@ -99,8 +122,11 @@ public class DbUserOperateLogService extends BaseWorkspaceService<UserOperateLog
 					continue;
 				}
 				//
-				String context = StrUtil.format("操作用户：{}\n操作状态：{}\n操作类型：{}\n操作节点：{}\n 操作数据id: {}\n操作IP: {}\n{}",
-						optUserItem.getName(), userOperateLogV1.getOptStatusMsg(), optTypeMsg,
+				String context = StrUtil.format("操作用户：{}\n操作状态：{}\n操作类型：{}\n所属工作空间：{}\n操作节点：{}\n 操作数据id: {}\n操作IP: {}\n{}",
+						optUserItem.getName(),
+						userOperateLogV1.getOptStatusMsg(),
+						optTypeMsg,
+						workspaceModel.getName(),
 						userOperateLogV1.getNodeId(), userOperateLogV1.getDataId(), userOperateLogV1.getIp(), otherMsg);
 				// 邮箱
 				String email = item.getEmail();
