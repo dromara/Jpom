@@ -142,4 +142,17 @@ public class UserService extends BaseDbService<UserModel> {
 		}
 		return null;
 	}
+
+	/**
+	 * 重置超级管理账号密码
+	 */
+	public String restSuperUserPwd() {
+		UserModel userModel = new UserModel();
+		userModel.setParent(UserModel.SYSTEM_ADMIN);
+		UserModel queryByBean = super.queryByBean(userModel);
+		Assert.notNull(queryByBean, "系统中还没有超级管理员账号");
+		String newPwd = RandomUtil.randomString(UserModel.SALT_LEN);
+		this.updatePwd(queryByBean.getId(), SecureUtil.sha1(newPwd));
+		return newPwd;
+	}
 }

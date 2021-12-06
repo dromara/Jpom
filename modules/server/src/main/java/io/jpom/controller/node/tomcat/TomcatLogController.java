@@ -3,6 +3,7 @@ package io.jpom.controller.node.tomcat;
 import io.jpom.common.BaseServerController;
 import io.jpom.common.forward.NodeForward;
 import io.jpom.common.forward.NodeUrl;
+import io.jpom.permission.SystemPermission;
 import io.jpom.plugin.ClassFeature;
 import io.jpom.plugin.Feature;
 import io.jpom.plugin.MethodFeature;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping(value = TomcatManageController.TOMCAT_URL)
 @Feature(cls = ClassFeature.TOMCAT_LOG)
+@SystemPermission
 public class TomcatLogController extends BaseServerController {
 
 //    /**

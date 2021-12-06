@@ -114,8 +114,8 @@ public class DbConfig {
 	 * @return sha1 log
 	 * @author bwcx_jzy
 	 */
-	public static Set<String> loadExecuteSqlLog() {
-		File localPath = DbConfig.getInstance().dbLocalPath();
+	public Set<String> loadExecuteSqlLog() {
+		File localPath = this.dbLocalPath();
 		File file = FileUtil.file(localPath, "execute.init.sql.log");
 		if (!FileUtil.isFile(file)) {
 			// 不存在或者是文件夹
@@ -127,12 +127,21 @@ public class DbConfig {
 	}
 
 	/**
+	 * 清除执行记录
+	 */
+	public void clearExecuteSqlLog() {
+		File localPath = this.dbLocalPath();
+		File file = FileUtil.file(localPath, "execute.init.sql.log");
+		FileUtil.del(file);
+	}
+
+	/**
 	 * 保存本地已经执行的记录
 	 *
 	 * @author bwcx_jzy
 	 */
-	public static void saveExecuteSqlLog(Set<String> logs) {
-		File localPath = DbConfig.getInstance().dbLocalPath();
+	public void saveExecuteSqlLog(Set<String> logs) {
+		File localPath = this.dbLocalPath();
 		File file = FileUtil.file(localPath, "execute.init.sql.log");
 		FileUtil.writeUtf8Lines(logs, file);
 	}

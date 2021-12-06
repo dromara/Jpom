@@ -65,6 +65,7 @@ import java.util.Objects;
 @RestController
 @RequestMapping(value = "system")
 @Feature(cls = ClassFeature.SYSTEM_UPGRADE)
+@SystemPermission(superUser = true)
 public class SystemUpdateController extends BaseServerController {
 
 	@PostMapping(value = "info", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -106,7 +107,6 @@ public class SystemUpdateController extends BaseServerController {
 
 	@PostMapping(value = "uploadJar.json", produces = MediaType.APPLICATION_JSON_VALUE)
 	@Feature(method = MethodFeature.EXECUTE)
-	@SystemPermission
 	public String uploadJar() throws IOException {
 		NodeModel nodeModel = tryGetNode();
 		if (nodeModel != null) {

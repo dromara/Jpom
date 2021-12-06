@@ -7,6 +7,7 @@ import io.jpom.common.BaseServerController;
 import io.jpom.common.forward.NodeForward;
 import io.jpom.common.forward.NodeUrl;
 import io.jpom.model.data.NodeModel;
+import io.jpom.permission.SystemPermission;
 import io.jpom.plugin.ClassFeature;
 import io.jpom.plugin.Feature;
 import io.jpom.plugin.MethodFeature;
@@ -27,6 +28,7 @@ import javax.annotation.Resource;
 @RestController
 @RequestMapping(value = TomcatManageController.TOMCAT_URL)
 @Feature(cls = ClassFeature.TOMCAT)
+@SystemPermission
 public class TomcatManageController extends BaseServerController {
 
 	public static final String TOMCAT_URL = "/node/tomcat/";

@@ -9,7 +9,6 @@ import org.springframework.util.Assert;
 
 import java.util.HashSet;
 import java.util.List;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -65,6 +64,18 @@ public class UserBindWorkspaceService extends BaseDbService<UserBindWorkspaceMod
 	}
 
 	/**
+	 * 判断对应的工作空间是否被用户绑定
+	 *
+	 * @param workspaceId 工作空间ID
+	 * @return true 有用户绑定
+	 */
+	public boolean existsWorkspace(String workspaceId) {
+		UserBindWorkspaceModel userBindWorkspaceModel = new UserBindWorkspaceModel();
+		userBindWorkspaceModel.setWorkspaceId(workspaceId);
+		return super.exists(userBindWorkspaceModel);
+	}
+
+	/**
 	 * 查询用户绑定的工作空间
 	 *
 	 * @param userId 用户ID
@@ -75,12 +86,7 @@ public class UserBindWorkspaceService extends BaseDbService<UserBindWorkspaceMod
 		userBindWorkspaceModel.setUserId(userId);
 		List<UserBindWorkspaceModel> userBindWorkspaceModels = super.listByBean(userBindWorkspaceModel);
 		Assert.notEmpty(userBindWorkspaceModels, "没有任何工作空间信息");
-		List<String> collect = userBindWorkspaceModels.stream().map(new Function<UserBindWorkspaceModel, String>() {
-			@Override
-			public String apply(UserBindWorkspaceModel userBindWorkspaceModel) {
-				return userBindWorkspaceModel.getWorkspaceId();
-			}
-		}).collect(Collectors.toList());
+		List<String> collect = userBindWorkspaceModels.stream().map(UserBindWorkspaceModel::getWorkspaceId).collect(Collectors.toList());
 		return workspaceService.listById(collect);
 	}
 }

@@ -32,13 +32,13 @@ import io.jpom.monitor.EmailUtil;
 import io.jpom.permission.SystemPermission;
 import io.jpom.plugin.ClassFeature;
 import io.jpom.plugin.Feature;
+import io.jpom.plugin.MethodFeature;
 import io.jpom.service.system.SystemParametersServer;
 import org.springframework.http.MediaType;
-import org.springframework.stereotype.Controller;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
 import javax.mail.Session;
@@ -50,23 +50,24 @@ import javax.mail.Transport;
  * @author bwcx_jzy
  * @date 2019/7/16
  */
-@Controller
+@RestController
 @RequestMapping(value = "system")
 @Feature(cls = ClassFeature.SYSTEM_EMAIL)
+@SystemPermission
 public class SystemMailConfigController extends BaseServerController {
 
 	@Resource
 	private SystemParametersServer systemParametersServer;
 
 	/**
-	 * @return
-	 * @author Hotstrip
 	 * load mail config data
 	 * 加载邮件配置
+	 *
+	 * @return json
+	 * @author Hotstrip
 	 */
 	@RequestMapping(value = "mail-config-data", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	@SystemPermission
-	@ResponseBody
+	@Feature(method = MethodFeature.LIST)
 	public String mailConfigData() {
 		UserModel userModel = getUser();
 		MailAccountModel item = null;
@@ -77,8 +78,7 @@ public class SystemMailConfigController extends BaseServerController {
 	}
 
 	@RequestMapping(value = "mailConfig_save.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody
-	@SystemPermission
+	@Feature(method = MethodFeature.EDIT)
 	public String listData(MailAccountModel mailAccountModel) {
 		Assert.notNull(mailAccountModel, "请填写信息,并检查是否填写合法");
 		Assert.hasText(mailAccountModel.getHost(), "请填写host");

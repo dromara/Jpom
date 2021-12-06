@@ -31,9 +31,11 @@ import io.jpom.common.Type;
 import io.jpom.common.interceptor.IpInterceptor;
 import io.jpom.common.interceptor.LoginInterceptor;
 import io.jpom.common.interceptor.OpenApiInterceptor;
+import io.jpom.common.interceptor.PermissionInterceptor;
 import io.jpom.model.data.SystemIpConfigModel;
-import io.jpom.permission.CacheControllerFeature;
 import io.jpom.service.system.SystemParametersServer;
+import io.jpom.service.user.UserService;
+import io.jpom.system.db.DbConfig;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.web.servlet.ServletComponentScan;
 
@@ -48,22 +50,32 @@ import org.springframework.boot.web.servlet.ServletComponentScan;
 @EnableCommonBoot
 public class JpomServerApplication implements ApplicationEventLoad {
 
+	/**
+	 * 重新执行数据库初始化操作，一般用于手动修改数据库字段错误后，恢复默认的字段
+	 */
+	private static boolean load_init_db = false;
 
 	/**
 	 * 启动执行
-	 * --rest:ip_config
+	 * --rest:ip_config 重置 IP 白名单配置
+	 * --rest:load_init_db 重新加载数据库初始化操作
+	 * --rest:super_user_pwd 重置超级管理员密码
 	 *
 	 * @param args 参数
 	 * @throws Exception 异常
 	 */
 	public static void main(String[] args) throws Exception {
+		if (ArrayUtil.containsIgnoreCase(args, "--rest:load_init_db")) {
+			load_init_db = true;
+		}
+		//
 		JpomApplication jpomApplication = new JpomApplication(Type.Server, JpomServerApplication.class, args);
 		jpomApplication
 				// 拦截器
 				.addInterceptor(IpInterceptor.class)
 				.addInterceptor(LoginInterceptor.class)
 				.addInterceptor(OpenApiInterceptor.class)
-//				.addInterceptor(PermissionInterceptor.class)
+				.addInterceptor(PermissionInterceptor.class)
 				.run(args);
 		//
 		if (ArrayUtil.containsIgnoreCase(args, "--rest:ip_config")) {
@@ -72,11 +84,18 @@ public class JpomServerApplication implements ApplicationEventLoad {
 			parametersServer.delByKey(SystemIpConfigModel.ID);
 			Console.log("清除 IP 白名单配置成功");
 		}
+		if (ArrayUtil.containsIgnoreCase(args, "--rest:super_user_pwd")) {
+			UserService userService = SpringUtil.getBean(UserService.class);
+			String superUserPwd = userService.restSuperUserPwd();
+			Console.log("重置超级管理员账号密码成功,新密码为：{}", superUserPwd);
+		}
 	}
 
 
 	@Override
 	public void applicationLoad() {
-		CacheControllerFeature.init();
+		if (load_init_db) {
+			DbConfig.getInstance().clearExecuteSqlLog();
+		}
 	}
 }

@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSONArray;
 import io.jpom.common.BaseServerController;
 import io.jpom.common.forward.NodeForward;
 import io.jpom.common.forward.NodeUrl;
+import io.jpom.permission.SystemPermission;
 import io.jpom.plugin.ClassFeature;
 import io.jpom.plugin.Feature;
 import io.jpom.plugin.MethodFeature;
@@ -15,8 +16,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import javax.annotation.Resource;
-
 /**
  * 脚本管理
  *
@@ -26,18 +25,14 @@ import javax.annotation.Resource;
 @Controller
 @RequestMapping(value = "/node/script")
 @Feature(cls = ClassFeature.SCRIPT)
+@SystemPermission
 public class ScriptController extends BaseServerController {
 
-	@Resource
-	private ScriptServer scriptServer;
+	private final ScriptServer scriptServer;
 
-//    @RequestMapping(value = "list.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
-//    @Feature(method = MethodFeature.LIST)
-//    public String list() {
-//        JSONArray jsonArray = scriptServer.listToArray(getNode());
-//        setAttribute("array", jsonArray);
-//        return "node/script/list";
-//    }
+	public ScriptController(ScriptServer scriptServer) {
+		this.scriptServer = scriptServer;
+	}
 
 	/**
 	 * @return

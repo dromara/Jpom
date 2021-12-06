@@ -104,7 +104,7 @@ public class InitDb implements DisposableBean, InitializingBean {
 					"classpath:/bin/h2-db-v3.sql",
 			};
 			// 加载 sql 变更记录，避免重复执行
-			Set<String> executeSqlLog = DbConfig.loadExecuteSqlLog();
+			Set<String> executeSqlLog = instance.loadExecuteSqlLog();
 			for (String sqlFile : files) {
 				InputStream inputStream = ResourceUtil.getStream(sqlFile);
 				String sql = IoUtil.read(inputStream, CharsetUtil.CHARSET_UTF_8);
@@ -117,7 +117,7 @@ public class InitDb implements DisposableBean, InitializingBean {
 				DefaultSystemLog.getLog().info("exec init SQL file: {} complete, and affected rows is: {}", sqlFile, rows);
 				executeSqlLog.add(sha1);
 			}
-			DbConfig.saveExecuteSqlLog(executeSqlLog);
+			instance.saveExecuteSqlLog(executeSqlLog);
 			DSFactory.setCurrentDSFactory(dsFactory);
 			//
 		} catch (Exception e) {

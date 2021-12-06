@@ -31,6 +31,7 @@ import io.jpom.common.BaseServerController;
 import io.jpom.common.forward.NodeForward;
 import io.jpom.common.forward.NodeUrl;
 import io.jpom.controller.LoginControl;
+import io.jpom.permission.SystemPermission;
 import io.jpom.plugin.ClassFeature;
 import io.jpom.plugin.Feature;
 import io.jpom.plugin.MethodFeature;
@@ -51,6 +52,7 @@ import java.util.Map;
 @RestController
 @RequestMapping(value = "system")
 @Feature(cls = ClassFeature.SYSTEM_CACHE)
+@SystemPermission
 public class CacheManageController extends BaseServerController {
 
 	/**

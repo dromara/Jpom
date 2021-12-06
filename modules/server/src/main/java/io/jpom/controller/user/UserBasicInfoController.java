@@ -165,6 +165,7 @@ public class UserBasicInfoController extends BaseServerController {
 			return JsonMessage.getString(200, "", list);
 		}
 		List<WorkspaceModel> models = userBindWorkspaceService.listUserWorkspaceInfo(user.getId());
+		Assert.notEmpty(models, "当前账号没有绑定任何工作空间，请联系管理员处理");
 		return JsonMessage.getString(200, "", models);
 	}
 }

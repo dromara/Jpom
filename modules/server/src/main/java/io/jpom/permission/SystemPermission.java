@@ -31,7 +31,7 @@ import java.lang.annotation.*;
  * @date 2019/8/17
  */
 @Documented
-@Target({ElementType.METHOD})
+@Target({ElementType.METHOD, ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface SystemPermission {
 

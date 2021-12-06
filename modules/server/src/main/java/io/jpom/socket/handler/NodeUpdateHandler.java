@@ -38,6 +38,9 @@ import io.jpom.model.WebSocketMessageModel;
 import io.jpom.model.data.NodeModel;
 import io.jpom.model.data.UserBindWorkspaceModel;
 import io.jpom.model.data.UserModel;
+import io.jpom.permission.SystemPermission;
+import io.jpom.plugin.ClassFeature;
+import io.jpom.plugin.Feature;
 import io.jpom.service.node.NodeService;
 import io.jpom.service.system.SystemParametersServer;
 import io.jpom.service.user.UserBindWorkspaceService;
@@ -63,6 +66,8 @@ import java.util.stream.Collectors;
  *
  * @author lf
  */
+@SystemPermission
+@Feature(cls = ClassFeature.UPGRADE_NODE_LIST)
 public class NodeUpdateHandler extends BaseProxyHandler {
 
 	private final ConcurrentMap<String, NodeClient> clientMap = new ConcurrentHashMap<>();

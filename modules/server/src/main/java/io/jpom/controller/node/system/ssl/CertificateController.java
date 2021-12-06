@@ -4,6 +4,7 @@ import cn.jiangzeyin.common.JsonMessage;
 import io.jpom.common.BaseServerController;
 import io.jpom.common.forward.NodeForward;
 import io.jpom.common.forward.NodeUrl;
+import io.jpom.permission.SystemPermission;
 import io.jpom.plugin.ClassFeature;
 import io.jpom.plugin.Feature;
 import io.jpom.plugin.MethodFeature;
@@ -15,7 +16,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import javax.annotation.Resource;
 import java.util.List;
 
 /**
@@ -26,18 +26,14 @@ import java.util.List;
 @Controller
 @RequestMapping(value = "/node/system/certificate")
 @Feature(cls = ClassFeature.SSL)
+@SystemPermission
 public class CertificateController extends BaseServerController {
 
-	@Resource
-	private WhitelistDirectoryService whitelistDirectoryService;
+	private final WhitelistDirectoryService whitelistDirectoryService;
 
-//    @RequestMapping(value = "/list.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
-//    @Feature(method = MethodFeature.LIST)
-//    public String certificate() {
-//        List<String> jsonArray = whitelistDirectoryService.getCertificateDirectory(getNode());
-//        setAttribute("certificate", jsonArray);
-//        return "node/system/certificate";
-//    }
+	public CertificateController(WhitelistDirectoryService whitelistDirectoryService) {
+		this.whitelistDirectoryService = whitelistDirectoryService;
+	}
 
 	/**
 	 * @return

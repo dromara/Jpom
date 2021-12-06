@@ -63,6 +63,7 @@ import java.nio.charset.StandardCharsets;
 @RestController
 @RequestMapping(value = "system")
 @Feature(cls = ClassFeature.SYSTEM_CONFIG)
+@SystemPermission
 public class SystemConfigController extends BaseServerController {
 
 	private final SystemParametersServer systemParametersServer;
@@ -72,15 +73,15 @@ public class SystemConfigController extends BaseServerController {
 	}
 
 	/**
-	 * @param nodeId
-	 * @return
-	 * @throws IOException
-	 * @author Hotstrip
 	 * get server's config or node's config
 	 * 加载服务端或者节点端配置
+	 *
+	 * @param nodeId 节点ID
+	 * @return json
+	 * @throws IOException io
+	 * @author Hotstrip
 	 */
 	@RequestMapping(value = "config-data", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	@SystemPermission
 	@Feature(method = MethodFeature.LIST)
 	public String configData(String nodeId) throws IOException {
 		String content;
@@ -94,7 +95,6 @@ public class SystemConfigController extends BaseServerController {
 	}
 
 	@RequestMapping(value = "save_config.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	@SystemPermission
 	@Feature(method = MethodFeature.EDIT)
 	public String saveConfig(String nodeId, String content, String restart) {
 		if (StrUtil.isNotEmpty(nodeId)) {
@@ -138,7 +138,6 @@ public class SystemConfigController extends BaseServerController {
 	 * @return json
 	 */
 	@RequestMapping(value = "ip-config-data", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	@SystemPermission
 	@Feature(cls = ClassFeature.SYSTEM_CONFIG_IP, method = MethodFeature.LIST)
 	public String ipConfigData() {
 		SystemIpConfigModel config = systemParametersServer.getConfig(SystemIpConfigModel.ID, SystemIpConfigModel.class);
@@ -153,7 +152,6 @@ public class SystemConfigController extends BaseServerController {
 	}
 
 	@RequestMapping(value = "save_ip_config.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	@SystemPermission
 	@Feature(cls = ClassFeature.SYSTEM_CONFIG_IP, method = MethodFeature.EDIT)
 	public String saveIpConfig(String allowed, String prohibited) {
 		SystemIpConfigModel systemIpConfigModel = new SystemIpConfigModel();

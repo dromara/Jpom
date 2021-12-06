@@ -17,6 +17,7 @@ import io.jpom.plugin.Feature;
 import io.jpom.plugin.MethodFeature;
 import io.jpom.service.h2db.TableName;
 import io.jpom.service.system.WorkspaceService;
+import io.jpom.service.user.UserBindWorkspaceService;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -34,12 +35,16 @@ import java.util.Set;
 @RestController
 @Feature(cls = ClassFeature.SYSTEM_WORKSPACE)
 @RequestMapping(value = "/system/workspace/")
+@SystemPermission
 public class WorkspaceController extends BaseServerController {
 
 	private final WorkspaceService workspaceService;
+	private final UserBindWorkspaceService userBindWorkspaceService;
 
-	public WorkspaceController(WorkspaceService workspaceService) {
+	public WorkspaceController(WorkspaceService workspaceService,
+							   UserBindWorkspaceService userBindWorkspaceService) {
 		this.workspaceService = workspaceService;
+		this.userBindWorkspaceService = userBindWorkspaceService;
 	}
 
 	/**
@@ -129,6 +134,9 @@ public class WorkspaceController extends BaseServerController {
 				Assert.state(cnt == null || cnt <= 0, "当前工作空间下还存在关联数据：" + tableName.value());
 			}
 		}
+		// 判断用户绑定关系
+		boolean workspace = userBindWorkspaceService.existsWorkspace(id);
+		Assert.state(!workspace, "当前工作空间下还绑定着用户信息");
 		// 删除信息
 		workspaceService.delByKey(id);
 		return JsonMessage.toJson(200, "删除成功");

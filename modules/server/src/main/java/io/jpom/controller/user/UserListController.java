@@ -32,6 +32,7 @@ import io.jpom.common.BaseServerController;
 import io.jpom.model.PageResultDto;
 import io.jpom.model.data.UserBindWorkspaceModel;
 import io.jpom.model.data.UserModel;
+import io.jpom.permission.SystemPermission;
 import io.jpom.plugin.ClassFeature;
 import io.jpom.plugin.Feature;
 import io.jpom.plugin.MethodFeature;
@@ -52,6 +53,7 @@ import java.util.List;
 @RestController
 @RequestMapping(value = "/user")
 @Feature(cls = ClassFeature.USER)
+@SystemPermission
 public class UserListController extends BaseServerController {
 
 	private final UserService userService;
@@ -86,16 +88,6 @@ public class UserListController extends BaseServerController {
 	@Feature(method = MethodFeature.LIST)
 	public String getUserListAll() {
 		List<UserModel> list = userService.list();
-//		JSONArray jsonArray = new JSONArray();
-//		list.forEach(userModel -> {
-//			JSONObject jsonObject = new JSONObject();
-//			jsonObject.put("title", userModel.getName());
-//			jsonObject.put("value", userModel.getId());
-//			if (StrUtil.isAllEmpty(userModel.getEmail(), userModel.getDingDing(), userModel.getWorkWx())) {
-//				jsonObject.put("disabled", true);
-//			}
-//			jsonArray.add(jsonObject);
-//		});
 		return JsonMessage.getString(200, "success", list);
 	}
 

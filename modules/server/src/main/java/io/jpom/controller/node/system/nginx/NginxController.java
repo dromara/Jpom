@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSONObject;
 import io.jpom.common.BaseServerController;
 import io.jpom.common.forward.NodeForward;
 import io.jpom.common.forward.NodeUrl;
+import io.jpom.permission.SystemPermission;
 import io.jpom.plugin.ClassFeature;
 import io.jpom.plugin.Feature;
 import io.jpom.plugin.MethodFeature;
@@ -26,6 +27,7 @@ import java.util.List;
 @Controller
 @RequestMapping("/node/system/nginx")
 @Feature(cls = ClassFeature.NGINX)
+@SystemPermission
 public class NginxController extends BaseServerController {
 
 	@Resource

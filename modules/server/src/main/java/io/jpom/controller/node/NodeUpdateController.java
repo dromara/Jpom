@@ -13,6 +13,9 @@ import io.jpom.common.RemoteVersion;
 import io.jpom.common.Type;
 import io.jpom.model.AgentFileModel;
 import io.jpom.permission.SystemPermission;
+import io.jpom.plugin.ClassFeature;
+import io.jpom.plugin.Feature;
+import io.jpom.plugin.MethodFeature;
 import io.jpom.service.system.SystemParametersServer;
 import io.jpom.system.ConfigBean;
 import io.jpom.system.ServerConfigBean;
@@ -29,6 +32,8 @@ import java.util.List;
  */
 @RestController
 @RequestMapping(value = "/node")
+@SystemPermission(superUser = true)
+@Feature(cls = ClassFeature.UPGRADE_NODE_LIST)
 public class NodeUpdateController extends BaseServerController {
 
 	private final SystemParametersServer systemParametersServer;
@@ -44,6 +49,7 @@ public class NodeUpdateController extends BaseServerController {
 	 * @see RemoteVersion
 	 */
 	@GetMapping(value = "download_remote.json", produces = MediaType.APPLICATION_JSON_VALUE)
+	@Feature(method = MethodFeature.REMOTE_DOWNLOAD)
 	public String downloadRemote() throws IOException {
 		Tuple download = RemoteVersion.download(ConfigBean.getInstance().getTempPath().getAbsolutePath(), Type.Agent);
 		// 保存文件
@@ -78,8 +84,8 @@ public class NodeUpdateController extends BaseServerController {
 	}
 
 	@RequestMapping(value = "upload_agent", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody
 	@SystemPermission
+	@Feature(method = MethodFeature.UPLOAD)
 	public String uploadAgent() throws IOException {
 		String saveDir = ServerConfigBean.getInstance().getAgentPath().getAbsolutePath();
 		MultipartFileBuilder multipartFileBuilder = createMultipart();

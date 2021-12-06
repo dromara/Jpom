@@ -22,29 +22,41 @@
  */
 package io.jpom.socket;
 
+import io.jpom.socket.handler.*;
+
 /**
  * @author bwcx_jzy
  * @date 2019/8/9
  */
 public enum HandlerType {
-    /**
-     * 脚本模板
-     */
-    script,
-    /**
-     * tomcat
-     */
-    tomcat,
-    /**
-     * 项目控制台和首页监控
-     */
-    console,
-    /**
-     * ssh
-     */
-    ssh,
-    /**
-     * 节点升级
-     */
-    nodeUpdate
+	/**
+	 * 脚本模板
+	 */
+	script(ScriptHandler.class),
+	/**
+	 * tomcat
+	 */
+	tomcat(TomcatHandler.class),
+	/**
+	 * 项目控制台和首页监控
+	 */
+	console(ConsoleHandler.class),
+	/**
+	 * ssh
+	 */
+	ssh(SshHandler.class),
+	/**
+	 * 节点升级
+	 */
+	nodeUpdate(NodeUpdateHandler.class),
+	;
+	final Class<?> handlerClass;
+
+	HandlerType(Class<?> handlerClass) {
+		this.handlerClass = handlerClass;
+	}
+
+	public Class<?> getHandlerClass() {
+		return handlerClass;
+	}
 }

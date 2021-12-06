@@ -62,6 +62,7 @@ import java.util.Objects;
  */
 @RestController
 @Feature(cls = ClassFeature.SYSTEM_BACKUP)
+@SystemPermission
 public class BackupInfoController extends BaseServerController {
 
 	private final BackupInfoService backupInfoService;
@@ -92,7 +93,7 @@ public class BackupInfoController extends BaseServerController {
 	 */
 	@PostMapping(value = "/system/backup/delete")
 	@Feature(method = MethodFeature.DEL)
-	@SystemPermission
+	@SystemPermission(superUser = true)
 	public Object deleteBackup(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "数据 id 不能为空") String id) {
 		// 根据 id 查询备份信息
 		BackupInfoModel backupInfoModel = backupInfoService.getByKey(id);
@@ -115,7 +116,6 @@ public class BackupInfoController extends BaseServerController {
 	 */
 	@PostMapping(value = "/system/backup/restore")
 	@Feature(method = MethodFeature.EXECUTE)
-	@SystemPermission
 	public Object restoreBackup(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "数据 id 不能为空") String id) {
 		// 根据 id 查询备份信息
 		BackupInfoModel backupInfoModel = backupInfoService.getByKey(id);
@@ -161,7 +161,7 @@ public class BackupInfoController extends BaseServerController {
 	 */
 	@PostMapping(value = "/system/backup/upload")
 	@Feature(method = MethodFeature.UPLOAD)
-	@SystemPermission
+	@SystemPermission(superUser = true)
 	public Object uploadBackupFile() throws IOException {
 		MultipartFileBuilder multipartFileBuilder = createMultipart()
 				.addFieldName("file");
@@ -198,7 +198,6 @@ public class BackupInfoController extends BaseServerController {
 	 */
 	@GetMapping(value = "/system/backup/download")
 	@Feature(method = MethodFeature.DOWNLOAD)
-	@SystemPermission
 	public void downloadBackup(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "数据 id 不能为空") String id) {
 		// 根据 id 查询备份信息
 		BackupInfoModel backupInfoModel = backupInfoService.getByKey(id);

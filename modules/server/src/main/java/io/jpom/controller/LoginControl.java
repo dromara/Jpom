@@ -37,8 +37,8 @@ import io.jpom.common.BaseServerController;
 import io.jpom.common.ServerOpenApi;
 import io.jpom.common.interceptor.LoginInterceptor;
 import io.jpom.common.interceptor.NotLogin;
-import io.jpom.model.data.UserBindWorkspaceModel;
 import io.jpom.model.data.UserModel;
+import io.jpom.model.data.WorkspaceModel;
 import io.jpom.model.dto.UserLoginDto;
 import io.jpom.service.user.UserBindWorkspaceService;
 import io.jpom.service.user.UserService;
@@ -188,8 +188,8 @@ public class LoginControl extends BaseServerController {
 				if (userService.simpleLogin(userName, userPwd) != null) {
 					userModel.unLock();
 					// 判断工作空间
-					List<UserBindWorkspaceModel> bindWorkspaceModels = userBindWorkspaceService.listUserWorkspace(userModel.getId());
-					Assert.notNull(bindWorkspaceModels, "当前账号没有绑定任何工作空间，请联系管理员处理");
+					List<WorkspaceModel> bindWorkspaceModels = userBindWorkspaceService.listUserWorkspaceInfo(userModel.getId());
+					Assert.notEmpty(bindWorkspaceModels, "当前账号没有绑定任何工作空间，请联系管理员处理");
 					setSessionAttribute(LoginInterceptor.SESSION_NAME, userModel);
 					removeSessionAttribute(SHOW_CODE);
 					this.ipSuccess();

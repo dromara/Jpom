@@ -33,6 +33,7 @@ import com.alibaba.fastjson.JSONArray;
 import io.jpom.common.BaseServerController;
 import io.jpom.common.forward.NodeForward;
 import io.jpom.common.forward.NodeUrl;
+import io.jpom.permission.SystemPermission;
 import io.jpom.plugin.ClassFeature;
 import io.jpom.plugin.Feature;
 import io.jpom.plugin.MethodFeature;
@@ -56,6 +57,7 @@ import java.util.concurrent.TimeUnit;
 @RestController
 @RequestMapping(value = "system")
 @Feature(cls = ClassFeature.SYSTEM_LOG)
+@SystemPermission
 public class LogManageController extends BaseServerController {
 
 
