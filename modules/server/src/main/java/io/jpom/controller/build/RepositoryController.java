@@ -123,7 +123,7 @@ public class RepositoryController extends BaseServerController {
 		Assert.state(andUpdateSshKey, "rsa 私钥文件不存在或者有误");
 
 		if (repositoryModelReq.getRepoType() == RepositoryModel.RepoType.Git.getCode()) {
-			RepositoryModel repositoryModel = repositoryService.getByKey(repositoryModelReq.getId());
+			RepositoryModel repositoryModel = repositoryService.getByKey(repositoryModelReq.getId(), false);
 			// 验证 git 仓库信息
 			try {
 				Tuple tuple = GitUtil.getBranchAndTagList(repositoryModel);

@@ -22,6 +22,9 @@
  */
 package io.jpom;
 
+import cn.hutool.core.date.BetweenFormatter;
+import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.date.SystemClock;
 import cn.hutool.core.lang.Console;
 import cn.hutool.core.util.ArrayUtil;
 import cn.jiangzeyin.common.EnableCommonBoot;
@@ -65,6 +68,7 @@ public class JpomServerApplication implements ApplicationEventLoad {
 	 * @throws Exception 异常
 	 */
 	public static void main(String[] args) throws Exception {
+		long time = SystemClock.now();
 		if (ArrayUtil.containsIgnoreCase(args, "--rest:load_init_db")) {
 			load_init_db = true;
 		}
@@ -86,13 +90,15 @@ public class JpomServerApplication implements ApplicationEventLoad {
 		}
 		if (ArrayUtil.containsIgnoreCase(args, "--rest:super_user_pwd")) {
 			UserService userService = SpringUtil.getBean(UserService.class);
-			String superUserPwd = userService.restSuperUserPwd();
-			if (superUserPwd != null) {
-				Console.log("重置超级管理员账号密码成功,新密码为：{}", superUserPwd);
+			String restResult = userService.restSuperUserPwd();
+			if (restResult != null) {
+				Console.log(restResult);
 			} else {
 				Console.log("系统中还没有超级管理员账号");
 			}
 		}
+		//
+		Console.log("本次启动耗时：{}", DateUtil.formatBetween(SystemClock.now() - time, BetweenFormatter.Level.MILLISECOND));
 	}
 
 

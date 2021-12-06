@@ -182,16 +182,16 @@ public class BuildInfoController extends BaseServerController {
 				return formatProject;
 			}
 		} else if (releaseMethod1 == BuildReleaseMethod.Ssh) {
-			String formatSsh = formatSsh(jsonObject);
-			if (formatSsh != null) {
-				return formatSsh;
-			}
+			this.formatSsh(jsonObject);
 		} else if (releaseMethod1 == BuildReleaseMethod.Outgiving) {
 			String releaseMethodDataId = jsonObject.getString("releaseMethodDataId_1");
 			if (StrUtil.isEmpty(releaseMethodDataId)) {
 				return JsonMessage.getString(405, "请选择分发项目");
 			}
 			jsonObject.put("releaseMethodDataId", releaseMethodDataId);
+		} else if (releaseMethod1 == BuildReleaseMethod.LocalCommand) {
+			this.formatLocalCommand(jsonObject);
+			jsonObject.put("releaseMethodDataId", "LocalCommand");
 		}
 		// 检查关联数据ID
 		buildInfoModel.setReleaseMethodDataId(jsonObject.getString("releaseMethodDataId"));
@@ -217,18 +217,15 @@ public class BuildInfoController extends BaseServerController {
 	 * 当发布方式为【SSH】的时候
 	 *
 	 * @param jsonObject 配置信息
-	 * @return 非 null 错误信息
 	 */
-	private String formatSsh(JSONObject jsonObject) {
+	private void formatSsh(JSONObject jsonObject) {
 		// 发布方式
 		String releaseMethodDataId = jsonObject.getString("releaseMethodDataId_3");
-		if (StrUtil.isEmpty(releaseMethodDataId)) {
-			return JsonMessage.getString(405, "请选择分发SSH项");
-		}
+		Assert.hasText(releaseMethodDataId, "请选择分发SSH项");
+
 		String releasePath = jsonObject.getString("releasePath");
-		if (StrUtil.isEmpty(releasePath)) {
-			return JsonMessage.getString(405, "请输入发布到ssh中的目录");
-		}
+		Assert.hasText(releasePath, "请输入发布到ssh中的目录");
+
 		releasePath = FileUtil.normalize(releasePath);
 		SshModel sshServiceItem = sshService.getByKey(releaseMethodDataId, getRequest());
 		Assert.notNull(sshServiceItem, "没有对应的ssh项");
@@ -245,9 +242,7 @@ public class BuildInfoController extends BaseServerController {
 					find = true;
 				}
 			}
-			if (!find) {
-				return JsonMessage.getString(405, "此ssh未授权操作此目录");
-			}
+			Assert.state(find, "此ssh未授权操作此目录");
 		}
 		// 发布命令
 		String releaseCommand = jsonObject.getString("releaseCommand");
@@ -258,12 +253,19 @@ public class BuildInfoController extends BaseServerController {
 			String[] commands = StrUtil.splitToArray(releaseCommand, StrUtil.LF);
 
 			for (String commandItem : commands) {
-				if (!SshModel.checkInputItem(sshServiceItem, commandItem)) {
-					return JsonMessage.getString(405, "发布命令中包含禁止执行的命令");
-				}
+				boolean checkInputItem = SshModel.checkInputItem(sshServiceItem, commandItem);
+				Assert.state(checkInputItem, "发布命令中包含禁止执行的命令");
 			}
 		}
-		return null;
+	}
+
+	private void formatLocalCommand(JSONObject jsonObject) {
+		// 发布命令
+		String releaseCommand = jsonObject.getString("releaseCommand");
+		if (StrUtil.isNotEmpty(releaseCommand)) {
+			int length = releaseCommand.length();
+			Assert.state(length <= 4000, "发布命令长度限制在4000字符");
+		}
 	}
 
 	/**

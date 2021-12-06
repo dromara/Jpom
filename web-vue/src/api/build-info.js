@@ -232,4 +232,12 @@ export const releaseMethodMap = {
   1: "节点分发",
   2: "项目",
   3: "SSH",
+  4: "本地命令",
 };
+
+export const releaseMethodArray = Object.keys(releaseMethodMap).map((item) => {
+  return {
+    value: Number(item),
+    name: releaseMethodMap[item],
+  };
+});

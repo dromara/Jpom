@@ -34,6 +34,7 @@ import io.jpom.model.enums.BuildReleaseMethod;
 import io.jpom.model.enums.BuildStatus;
 import io.jpom.service.h2db.BaseWorkspaceService;
 import org.springframework.stereotype.Service;
+import org.springframework.util.Assert;
 
 import java.util.Objects;
 
@@ -78,10 +79,8 @@ public class BuildInfoService extends BaseWorkspaceService<BuildInfoModel> {
 	 */
 	public String start(final BuildInfoModel buildInfoModel, final UserModel userModel, Integer delay) {
 		// load repository
-		RepositoryModel repositoryModel = repositoryService.getByKey(buildInfoModel.getRepositoryId());
-		if (null == repositoryModel) {
-			return JsonMessage.getString(404, "仓库信息不存在");
-		}
+		RepositoryModel repositoryModel = repositoryService.getByKey(buildInfoModel.getRepositoryId(), false);
+		Assert.notNull(repositoryModel, "仓库信息不存在");
 		BuildInfoManage.create(buildInfoModel, repositoryModel, userModel, delay);
 		String msg = (delay == null || delay <= 0) ? "开始构建中" : "延迟" + delay + "秒后开始构建";
 		return JsonMessage.getString(200, msg, buildInfoModel.getBuildId());

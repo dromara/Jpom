@@ -22,9 +22,12 @@
  */
 package io.jpom;
 
+import cn.hutool.core.date.BetweenFormatter;
+import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.date.SystemClock;
+import cn.hutool.core.lang.Console;
 import cn.jiangzeyin.common.EnableCommonBoot;
 import io.jpom.common.Type;
-import io.jpom.common.UrlDecodeHandlerMethodArgumentResolver;
 import io.jpom.common.interceptor.AuthorizeInterceptor;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.web.servlet.ServletComponentScan;
@@ -47,6 +50,7 @@ public class JpomAgentApplication {
 	 * @throws Exception 异常
 	 */
 	public static void main(String[] args) throws Exception {
+		long time = SystemClock.now();
 		JpomApplication jpomApplication = new JpomApplication(Type.Agent, JpomAgentApplication.class, args);
 		jpomApplication
 				// 拦截器
@@ -54,6 +58,7 @@ public class JpomAgentApplication {
 				// 添加 参数 url 解码
 				//				.addHandlerMethodArgumentResolver(UrlDecodeHandlerMethodArgumentResolver.class)
 				.run(args);
+		Console.log("本次启动耗时：{}", DateUtil.formatBetween(SystemClock.now() - time, BetweenFormatter.Level.MILLISECOND));
 	}
 
 }

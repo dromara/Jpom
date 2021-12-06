@@ -140,7 +140,7 @@ public class IndexControl extends BaseServerController {
 		if (userService.canUse()) {
 			return JsonMessage.getString(200, "success", data);
 		}
-		return JsonMessage.getString(500, "need init system", data);
+		return JsonMessage.getString(500, "需要初始化系统", data);
 	}
 
 	@RequestMapping(value = "menus_data.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)

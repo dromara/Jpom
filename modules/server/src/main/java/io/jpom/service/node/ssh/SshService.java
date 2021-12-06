@@ -123,7 +123,7 @@ public class SshService extends BaseWorkspaceService<SshModel> {
 		Sftp sftp = null;
 		try {
 			File buildSsh = FileUtil.file(ConfigBean.getInstance().getTempPath(), "build_ssh", sshModel.getId() + ".sh");
-			sshExecTemplateInputStream = ResourceUtil.getStream("classpath:/bin/sshExecTemplate.sh");
+			sshExecTemplateInputStream = ResourceUtil.getStream("classpath:/bin/execTemplate.sh");
 			String sshExecTemplate = IoUtil.readUtf8(sshExecTemplateInputStream);
 			StringBuilder stringBuilder = new StringBuilder(sshExecTemplate);
 			for (String s : command) {

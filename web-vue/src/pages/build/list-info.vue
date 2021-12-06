@@ -133,10 +133,7 @@
         </a-form-model-item>
         <a-form-model-item label="发布操作" prop="releaseMethod">
           <a-radio-group v-model="temp.releaseMethod" name="releaseMethod">
-            <a-radio :value="0">不发布</a-radio>
-            <a-radio :value="1">节点分发</a-radio>
-            <a-radio :value="2">项目</a-radio>
-            <a-radio :value="3">SSH</a-radio>
+            <a-radio v-for="tempValue in releaseMethodArray" :key="tempValue.value" :value="tempValue.value">{{ tempValue.name }}</a-radio>
           </a-radio-group>
         </a-form-model-item>
         <!-- 节点分发 -->
@@ -170,7 +167,19 @@
             :auto-size="{ minRows: 2, maxRows: 10 }"
             type="textarea"
             :rows="3"
-            placeholder="发布执行的命令(非阻塞命令),一般是启动项目命令 如：ps -aux | grep java"
+            placeholder="发布执行的命令(非阻塞命令),一般是启动项目命令 如：ps -aux | grep java,支持变量替换：#{BUILD_ID}、#{BUILD_NAME}、#{BUILD_RESULT_FILE}、#{BUILD_NUMBER_ID}"
+          />
+        </a-form-model-item>
+        <!-- LocalCommand -->
+
+        <a-form-model-item v-if="temp.releaseMethod === 4" label="发布命令" prop="releaseCommand">
+          <a-input
+            v-model="tempExtraData.releaseCommand"
+            allow-clear
+            :auto-size="{ minRows: 2, maxRows: 10 }"
+            type="textarea"
+            :rows="3"
+            placeholder="发布执行的命令(非阻塞命令),一般是启动项目命令 如：ps -aux | grep java ,支持变量替换：#{BUILD_ID}、#{BUILD_NAME}、#{BUILD_RESULT_FILE}、#{BUILD_NUMBER_ID}"
           />
         </a-form-model-item>
         <a-form-model-item v-if="temp.releaseMethod === 2 || temp.releaseMethod === 3" label="清空发布" prop="clearOld">
@@ -190,6 +199,7 @@
             <a-button type="primary" class="btn-add" @click="resetTrigger">重置</a-button>
           </a-col>
         </a-row>
+        可以添加 delay=x 参数来延迟执行构建
       </a-form-model>
     </a-modal>
     <!-- 构建日志 -->
@@ -203,7 +213,7 @@ import { mapGetters } from "vuex";
 import CustomSelect from "@/components/customSelect";
 import BuildLog from "./log";
 import { getRepositoryListAll } from "../../api/repository";
-import { clearBuid, deleteBuild, editBuild, getBranchList, getBuildList, getTriggerUrl, releaseMethodMap, resetTrigger, startBuild, stopBuild } from "../../api/build-info";
+import { clearBuid, deleteBuild, editBuild, getBranchList, getBuildList, getTriggerUrl, releaseMethodMap, releaseMethodArray, resetTrigger, startBuild, stopBuild } from "@/api/build-info";
 import { getDishPatchListAll } from "../../api/dispatch";
 import { getProjectListAll, getNodeListAll } from "@/api/node";
 import { getSshListAll } from "../../api/ssh";
@@ -218,12 +228,13 @@ export default {
   data() {
     return {
       releaseMethodMap: releaseMethodMap,
+      releaseMethodArray: releaseMethodArray,
       loading: false,
       listQuery: PAGE_DEFAULT_LIST_QUERY,
       // 动态列表参数
       groupList: [],
       list: [],
-      
+
       repositoryList: [],
       // 当前仓库信息
       tempRepository: {},
@@ -483,7 +494,7 @@ export default {
       }
       this.loadRepositoryList(() => {
         // 从仓库列表里匹配对应的仓库信息
-        console.log(this.repositoryList);
+        // console.log(this.repositoryList);
         this.tempRepository = this.repositoryList.filter((element) => this.temp.repositoryId === element.id)[0];
         this.editBuildVisible = true;
         this.loadBranchList();

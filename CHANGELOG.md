@@ -11,6 +11,8 @@
 5. 【server】新增通过命令行重置 IP 白名单配置参数 `--rest:ip_config`
 6. 【server】新增通过命令行重置超级管理员参数 `--rest:super_user_pwd`
 7. 【server】新增通过命令行重新加载数据库初始化操作参数 `--rest:load_init_db`
+8. 【server】构建新增`本地命令`发布方式 用户在服务端执行相关命令进行发布操作
+9. 【server】发布命令（SSH发布命令、本地命令）支持变量替换：`#{BUILD_ID}`、`#{BUILD_NAME}`、`#{BUILD_RESULT_FILE}`、`#{BUILD_NUMBER_ID}`
 
 ### 解决BUG、优化功能
 

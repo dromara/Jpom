@@ -26,9 +26,13 @@ import cn.hutool.core.date.BetweenFormatter;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.date.SystemClock;
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.io.IoUtil;
+import cn.hutool.core.io.resource.ResourceUtil;
+import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.ssh.Sftp;
 import cn.hutool.http.HttpStatus;
+import cn.hutool.system.SystemUtil;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.spring.SpringUtil;
 import com.jcraft.jsch.Session;
@@ -43,9 +47,12 @@ import io.jpom.model.log.BuildHistoryLog;
 import io.jpom.outgiving.OutGivingRun;
 import io.jpom.service.node.NodeService;
 import io.jpom.service.node.ssh.SshService;
+import io.jpom.system.ConfigBean;
 import io.jpom.system.JpomRuntimeException;
+import io.jpom.util.CommandUtil;
 
 import java.io.File;
+import java.io.InputStream;
 import java.util.Objects;
 
 /**
@@ -139,21 +146,24 @@ public class ReleaseManage extends BaseBuild {
 			return;
 		}
 		long time = SystemClock.now();
-		this.log("release method:" + BaseEnum.getDescByCode(BuildReleaseMethod.class, this.baseBuildModule.getReleaseMethod()));
+		int releaseMethod = this.baseBuildModule.getReleaseMethod();
+		this.log("release method:" + BaseEnum.getDescByCode(BuildReleaseMethod.class, releaseMethod));
 		try {
-			if (this.baseBuildModule.getReleaseMethod() == BuildReleaseMethod.Outgiving.getCode()) {
+			if (releaseMethod == BuildReleaseMethod.Outgiving.getCode()) {
 				//
 				this.doOutGiving();
-			} else if (this.baseBuildModule.getReleaseMethod() == BuildReleaseMethod.Project.getCode()) {
+			} else if (releaseMethod == BuildReleaseMethod.Project.getCode()) {
 				AfterOpt afterOpt = BaseEnum.getEnum(AfterOpt.class, this.baseBuildModule.getAfterOpt());
 				if (afterOpt == null) {
 					afterOpt = AfterOpt.No;
 				}
 				this.doProject(afterOpt, this.baseBuildModule.isClearOld());
-			} else if (this.baseBuildModule.getReleaseMethod() == BuildReleaseMethod.Ssh.getCode()) {
+			} else if (releaseMethod == BuildReleaseMethod.Ssh.getCode()) {
 				this.doSsh();
+			} else if (releaseMethod == BuildReleaseMethod.LocalCommand.getCode()) {
+				this.localCommand();
 			} else {
-				this.log(" 没有实现的发布分发");
+				this.log(" 没有实现的发布分发:" + releaseMethod);
 			}
 		} catch (Exception e) {
 			this.pubLog("发布异常", e);
@@ -171,6 +181,62 @@ public class ReleaseManage extends BaseBuild {
 		this.start2();
 	}
 
+	/**
+	 * 格式化命令模版
+	 *
+	 * @param command 命令
+	 * @return 格式化后
+	 */
+	private String formatCommand(String command) {
+		String replace = StrUtil.replace(command, "#{BUILD_ID}", this.buildModelId);
+		replace = StrUtil.replace(replace, "#{BUILD_NAME}", this.baseBuildModule.getName());
+		replace = StrUtil.replace(replace, "#{BUILD_RESULT_FILE}", FileUtil.getAbsolutePath(this.resultFile));
+		replace = StrUtil.replace(replace, "#{BUILD_NUMBER_ID}", this.buildId + StrUtil.EMPTY);
+		return replace;
+	}
+
+	/**
+	 * 本地命令执行
+	 */
+	private void localCommand() {
+		// 执行命令
+		String[] commands = StrUtil.splitToArray(this.baseBuildModule.getReleaseCommand(), StrUtil.LF);
+		if (ArrayUtil.isEmpty(commands)) {
+			this.log("没有需要执行的ssh命令");
+			return;
+		}
+		String command = StrUtil.EMPTY;
+		this.log(DateUtil.now() + " start exec");
+		InputStream templateInputStream = null;
+		try {
+			templateInputStream = ResourceUtil.getStream("classpath:/bin/execTemplate." + CommandUtil.SUFFIX);
+			if (templateInputStream == null) {
+				this.log("系统中没有命令模版");
+				return;
+			}
+			String sshExecTemplate = IoUtil.readUtf8(templateInputStream);
+			StringBuilder stringBuilder = new StringBuilder(sshExecTemplate);
+			for (String s : commands) {
+				stringBuilder.append(this.formatCommand(s)).append(StrUtil.LF);
+			}
+			File tempPath = ConfigBean.getInstance().getTempPath();
+			File commandFile = FileUtil.file(tempPath, "build", this.buildModelId + StrUtil.DOT + CommandUtil.SUFFIX);
+			FileUtil.writeUtf8String(stringBuilder.toString(), commandFile);
+			//
+			command = SystemUtil.getOsInfo().isWindows() ? StrUtil.EMPTY : CommandUtil.SUFFIX;
+			command += " " + FileUtil.getAbsolutePath(commandFile);
+			String result = CommandUtil.execSystemCommand(command);
+			this.log(result);
+		} catch (Exception e) {
+			this.pubLog("执行本地命令异常：" + command, e);
+		} finally {
+			IoUtil.close(templateInputStream);
+		}
+	}
+
+	/**
+	 * ssh 发布
+	 */
 	private void doSsh() {
 		String releaseMethodDataId = this.baseBuildModule.getReleaseMethodDataId();
 		SshService sshService = SpringUtil.getBean(SshService.class);
@@ -194,35 +260,6 @@ public class ReleaseManage extends BaseBuild {
 			}
 			String normalizePath = FileUtil.normalize(prefix + StrUtil.SLASH + this.baseBuildModule.getReleasePath());
 			sftp.syncUpload(this.resultFile, normalizePath);
-//            if (this.resultFile.isFile()) {
-//                // 文件
-//                String normalizePath = FileUtil.normalize(prefix + "/" + this.baseBuildModule.getReleasePath());
-//                try {
-//                    sftp.mkDirs(normalizePath);
-//                } catch (Exception e) {
-//                    this.pubLog(" 切换目录失败：" + normalizePath, e);
-//                }
-//                sftp.cd(normalizePath);
-//                sftp.put(this.resultFile.getAbsolutePath(), this.resultFile.getName());
-//            } else if (this.resultFile.isDirectory()) {
-//                // 文件夹
-//                List<File> files = FileUtil.loopFiles(this.resultFile, pathname -> !pathname.isHidden());
-//                String absolutePath = FileUtil.getAbsolutePath(this.resultFile);
-//                //
-//                for (File file : files) {
-//                    String itemAbsPath = FileUtil.getAbsolutePath(file);
-//                    String remoteItemAbsPath = StrUtil.removePrefix(itemAbsPath, absolutePath);
-//                    remoteItemAbsPath = FileUtil.normalize(prefix + "/" + this.baseBuildModule.getReleasePath() + "/" + remoteItemAbsPath);
-//                    String parent = StrUtil.subBefore(remoteItemAbsPath, StrUtil.SLASH, true);
-//                    try {
-//                        sftp.mkDirs(parent);
-//                    } catch (Exception e) {
-//                        this.pubLog(" 切换目录失败：" + parent, e);
-//                    }
-//                    sftp.cd(parent);
-//                    sftp.put(itemAbsPath, file.getName());
-//                }
-//            }
 		} catch (Exception e) {
 			this.pubLog("执行ssh发布异常", e);
 		}
@@ -232,6 +269,9 @@ public class ReleaseManage extends BaseBuild {
 		if (commands == null || commands.length <= 0) {
 			this.log("没有需要执行的ssh命令");
 			return;
+		}
+		for (int i = 0; i < commands.length; i++) {
+			commands[i] = this.formatCommand(commands[i]);
 		}
 		this.log(DateUtil.now() + " start exec");
 		try {

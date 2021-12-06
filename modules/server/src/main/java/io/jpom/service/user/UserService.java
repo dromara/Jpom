@@ -179,6 +179,6 @@ public class UserService extends BaseDbService<UserModel> {
 		}
 		String newPwd = RandomUtil.randomString(UserModel.SALT_LEN);
 		this.updatePwd(queryByBean.getId(), SecureUtil.sha1(newPwd));
-		return newPwd;
+		return StrUtil.format("重置超级管理员账号密码成功,登录账号为：{} 新密码为：{}", queryByBean.getId(), newPwd);
 	}
 }
