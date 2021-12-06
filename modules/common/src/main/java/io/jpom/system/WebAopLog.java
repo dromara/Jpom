@@ -66,14 +66,18 @@ public class WebAopLog extends PropertyDefinerBase {
 		Object proceed;
 		Object logResult = null;
 		try {
-			aopLogInterface.before(joinPoint);
+			if (aopLogInterface != null) {
+				aopLogInterface.before(joinPoint);
+			}
 			proceed = joinPoint.proceed();
 			logResult = proceed;
 		} catch (Throwable e) {
 			logResult = e;
 			throw e;
 		} finally {
-			aopLogInterface.afterReturning(logResult);
+			if (aopLogInterface != null) {
+				aopLogInterface.afterReturning(logResult);
+			}
 		}
 		if (consoleLogReqResponse) {
 			DefaultSystemLog.getLog().info(BaseCallbackController.getRequestAttributes().getRequest().getRequestURI() + " :" + logResult);
