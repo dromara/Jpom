@@ -139,7 +139,7 @@ public class BuildInfoController extends BaseServerController {
 								String branchName, String branchTagName, String group,
 								String extraData) {
 		// 根据 repositoryId 查询仓库信息
-		RepositoryModel repositoryModel = repositoryService.getByKey(repositoryId);
+		RepositoryModel repositoryModel = repositoryService.getByKey(repositoryId, getRequest());
 		Assert.notNull(repositoryModel, "无效的仓库信息");
 		// 如果是 GIT 需要检测分支是否存在
 		if (RepositoryModel.RepoType.Git.getCode() == repositoryModel.getRepoType()) {
@@ -324,7 +324,7 @@ public class BuildInfoController extends BaseServerController {
 	@Feature(method = MethodFeature.DEL)
 	public String delete(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据id") String id) {
 		// 查询构建信息
-		BuildInfoModel buildInfoModel = buildInfoService.getByKey(id);
+		BuildInfoModel buildInfoModel = buildInfoService.getByKey(id, getRequest());
 		Objects.requireNonNull(buildInfoModel, "没有对应数据");
 		//
 		String e = buildInfoService.checkStatus(buildInfoModel.getStatus());
@@ -356,7 +356,7 @@ public class BuildInfoController extends BaseServerController {
 	@Feature(method = MethodFeature.EXECUTE)
 	public String cleanSource(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据id") String id) {
 		// 查询构建信息
-		BuildInfoModel buildInfoModel = buildInfoService.getByKey(id);
+		BuildInfoModel buildInfoModel = buildInfoService.getByKey(id, getRequest());
 		Objects.requireNonNull(buildInfoModel, "没有对应数据");
 
 		File source = BuildUtil.getSourceById(buildInfoModel.getId());

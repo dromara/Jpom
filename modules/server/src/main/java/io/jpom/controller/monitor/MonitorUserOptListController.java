@@ -95,7 +95,7 @@ public class MonitorUserOptListController extends BaseServerController {
 		jsonObject.put("classFeature", classFeatureList);
 		//
 		List<JSONObject> methodFeatureList = Arrays.stream(MethodFeature.values())
-				.filter(methodFeature -> methodFeature != MethodFeature.NULL)
+				.filter(methodFeature -> methodFeature != MethodFeature.NULL && methodFeature != MethodFeature.LIST)
 				.map(classFeature -> {
 					JSONObject jsonObject1 = new JSONObject();
 					jsonObject1.put("title", classFeature.getName());

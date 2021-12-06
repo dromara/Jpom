@@ -20,18 +20,16 @@ import io.jpom.model.BaseEnum;
 import io.jpom.model.Cycle;
 import io.jpom.model.PageResultDto;
 import io.jpom.model.data.NodeModel;
-import io.jpom.model.data.UserModel;
 import io.jpom.model.log.SystemMonitorLog;
+import io.jpom.permission.SystemPermission;
 import io.jpom.service.dblog.DbSystemMonitorLogService;
 import io.jpom.util.StringUtil;
 import org.springframework.http.MediaType;
-import org.springframework.stereotype.Controller;
-import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 
-import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -46,12 +44,15 @@ import java.util.concurrent.TimeUnit;
  *
  * @author Administrator
  */
-@Controller
+@RestController
 @RequestMapping(value = "/node")
 public class NodeWelcomeController extends BaseServerController {
 
-	@Resource
-	private DbSystemMonitorLogService dbSystemMonitorLogService;
+	private final DbSystemMonitorLogService dbSystemMonitorLogService;
+
+	public NodeWelcomeController(DbSystemMonitorLogService dbSystemMonitorLogService) {
+		this.dbSystemMonitorLogService = dbSystemMonitorLogService;
+	}
 
 	private Cycle getCycle() {
 		NodeModel node = getNode();
@@ -66,23 +67,6 @@ public class NodeWelcomeController extends BaseServerController {
 		}
 		return millis;
 	}
-
-//    @RequestMapping(value = "welcome", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
-//    public String welcome() {
-//        Cycle cycle = getCycle();
-//        long millis = getCycleMillis();
-//        if (cycle != null && cycle != Cycle.none) {
-//            //
-//            setAttribute("monitorCycle", true);
-//        }
-//        setAttribute("cycleTime", millis);
-//        return "node/welcome";
-//    }
-
-//    @RequestMapping(value = "nodeMonitor.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
-//    public String nodeMonitor() {
-//        return "node/nodeMonitor";
-//    }
 
 	@RequestMapping(value = "nodeMonitor_data.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
@@ -193,17 +177,13 @@ public class NodeWelcomeController extends BaseServerController {
 	}
 
 	@RequestMapping(value = "processList", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody
 	public String getProcessList() {
 		return NodeForward.request(getNode(), getRequest(), NodeUrl.ProcessList).toString();
 	}
 
 	@RequestMapping(value = "kill.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody
+	@SystemPermission
 	public String kill() {
-		UserModel user = getUser();
-		Assert.state(user.isSystemUser(), "没有权限");
-
 		return NodeForward.request(getNode(), getRequest(), NodeUrl.Kill).toString();
 	}
 }

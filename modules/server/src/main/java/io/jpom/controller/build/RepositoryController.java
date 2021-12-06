@@ -25,7 +25,6 @@ package io.jpom.controller.build;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.lang.Tuple;
 import cn.hutool.core.lang.Validator;
-import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.core.util.URLUtil;
 import cn.hutool.db.Entity;
@@ -50,7 +49,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.annotation.Resource;
 import java.io.File;
 import java.util.List;
 
@@ -62,11 +60,14 @@ import java.util.List;
 @Feature(cls = ClassFeature.BUILD_REPOSITORY)
 public class RepositoryController extends BaseServerController {
 
-	@Resource
-	private RepositoryService repositoryService;
+	private final RepositoryService repositoryService;
+	private final BuildInfoService buildInfoService;
 
-	@Resource
-	private BuildInfoService buildInfoService;
+	public RepositoryController(RepositoryService repositoryService,
+								BuildInfoService buildInfoService) {
+		this.repositoryService = repositoryService;
+		this.buildInfoService = buildInfoService;
+	}
 
 	/**
 	 * load repository list
@@ -103,9 +104,8 @@ public class RepositoryController extends BaseServerController {
 	public Object editRepository(RepositoryModel repositoryModelReq) {
 		this.checkInfo(repositoryModelReq);
 
-		if (null == repositoryModelReq.getId()) {
+		if (StrUtil.isEmpty(repositoryModelReq.getId())) {
 			// insert data
-			repositoryModelReq.setId(IdUtil.fastSimpleUUID());
 			repositoryService.insert(repositoryModelReq);
 		} else {
 			// update data
@@ -115,12 +115,13 @@ public class RepositoryController extends BaseServerController {
 			if (StrUtil.isEmpty(repositoryModelReq.getPassword())) {
 				repositoryModelReq.setPassword(null);
 			}
+			repositoryModelReq.setWorkspaceId(repositoryService.getCheckUserWorkspace(getRequest()));
 			repositoryService.updateById(repositoryModelReq);
 		}
 		// 检查 rsa 私钥
-		if (!checkAndUpdateSshKey(repositoryModelReq)) {
-			return JsonMessage.toJson(500, "rsa 私钥文件不存在或者有误");
-		}
+		boolean andUpdateSshKey = checkAndUpdateSshKey(repositoryModelReq);
+		Assert.state(andUpdateSshKey, "rsa 私钥文件不存在或者有误");
+
 		if (repositoryModelReq.getRepoType() == RepositoryModel.RepoType.Git.getCode()) {
 			RepositoryModel repositoryModel = repositoryService.getByKey(repositoryModelReq.getId());
 			// 验证 git 仓库信息
@@ -149,6 +150,7 @@ public class RepositoryController extends BaseServerController {
 		repositoryModel.setId(id);
 		repositoryModel.setPassword(StrUtil.EMPTY);
 		repositoryModel.setRsaPrv(StrUtil.EMPTY);
+		repositoryModel.setWorkspaceId(repositoryService.getCheckUserWorkspace(getRequest()));
 		repositoryService.updateById(repositoryModel);
 		return JsonMessage.toJson(200, "操作成功");
 	}

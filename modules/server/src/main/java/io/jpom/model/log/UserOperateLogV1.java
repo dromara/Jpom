@@ -50,7 +50,6 @@ public class UserOperateLogV1 extends BaseWorkspaceModel {
 	/**
 	 * 操作时间
 	 */
-	@Deprecated
 	private Long optTime;
 	/**
 	 * 操作状态
@@ -78,6 +77,25 @@ public class UserOperateLogV1 extends BaseWorkspaceModel {
 	 * 浏览器标识
 	 */
 	private String userAgent;
+
+	private String classFeature;
+	private String methodFeature;
+
+	public String getClassFeature() {
+		return classFeature;
+	}
+
+	public void setClassFeature(String classFeature) {
+		this.classFeature = classFeature;
+	}
+
+	public String getMethodFeature() {
+		return methodFeature;
+	}
+
+	public void setMethodFeature(String methodFeature) {
+		this.methodFeature = methodFeature;
+	}
 
 	public String getReqData() {
 		return reqData;
@@ -159,8 +177,7 @@ public class UserOperateLogV1 extends BaseWorkspaceModel {
 		return optTime;
 	}
 
-	@Deprecated
-	public void setOptTime(long optTime) {
+	public void setOptTime(Long optTime) {
 		this.optTime = optTime;
 	}
 

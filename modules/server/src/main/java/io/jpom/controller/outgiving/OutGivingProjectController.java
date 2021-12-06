@@ -221,7 +221,6 @@ public class OutGivingProjectController extends BaseServerController {
 	 * @return json
 	 */
 	@RequestMapping(value = "remote_download", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody
 	@Feature(method = MethodFeature.REMOTE_DOWNLOAD)
 	public String remoteDownload(String id, String afterOpt, String clearOld, String url, String autoUnzip) {
 		OutGivingModel outGivingModel = this.check(id);

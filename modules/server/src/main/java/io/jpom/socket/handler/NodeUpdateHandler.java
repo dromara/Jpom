@@ -155,6 +155,7 @@ public class NodeUpdateHandler extends BaseProxyHandler {
 				model.setData(getAgentVersion());
 				break;
 			case "updateNode":
+				super.logOpt(attributes, json);
 				updateNode(model, session);
 				break;
 			default: {

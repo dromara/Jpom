@@ -86,7 +86,7 @@ public class BuildInfoManageController extends BaseServerController {
 	@RequestMapping(value = "/build/manage/start", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	@Feature(method = MethodFeature.EXECUTE)
 	public String start(@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据")) String id) {
-		BuildInfoModel item = buildInfoService.getByKey(id);
+		BuildInfoModel item = buildInfoService.getByKey(id, getRequest());
 		Assert.notNull(item, "没有对应数据");
 		String e = buildInfoService.checkStatus(item.getStatus());
 		Assert.isNull(e, () -> e);
@@ -111,7 +111,7 @@ public class BuildInfoManageController extends BaseServerController {
 	@RequestMapping(value = "/build/manage/cancel", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	@Feature(method = MethodFeature.EXECUTE)
 	public String cancel(@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据")) String id) {
-		BuildInfoModel item = buildInfoService.getByKey(id);
+		BuildInfoModel item = buildInfoService.getByKey(id, getRequest());
 		Objects.requireNonNull(item, "没有对应数据");
 		BuildStatus nowStatus = BaseEnum.getEnum(BuildStatus.class, item.getStatus());
 		Objects.requireNonNull(nowStatus);
@@ -135,7 +135,7 @@ public class BuildInfoManageController extends BaseServerController {
 	@RequestMapping(value = "/build/manage/reRelease", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	@Feature(method = MethodFeature.EXECUTE)
 	public String reRelease(@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据")) String logId) {
-		BuildHistoryLog buildHistoryLog = dbBuildHistoryLogService.getByKey(logId);
+		BuildHistoryLog buildHistoryLog = dbBuildHistoryLogService.getByKey(logId, getRequest());
 		Objects.requireNonNull(buildHistoryLog, "没有对应构建记录.");
 		BuildInfoModel item = buildInfoService.getByKey(buildHistoryLog.getBuildDataId());
 		Objects.requireNonNull(item, "没有对应数据");
@@ -164,11 +164,10 @@ public class BuildInfoManageController extends BaseServerController {
 	public String getNowLog(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据") String id,
 							@ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "没有buildId") int buildId,
 							@ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "line") int line) {
-		BuildInfoModel item = buildInfoService.getByKey(id);
+		BuildInfoModel item = buildInfoService.getByKey(id, getRequest());
 		Assert.notNull(item, "没有对应数据");
-		if (buildId > item.getBuildId()) {
-			return JsonMessage.getString(405, "还没有对应的构建记录");
-		}
+		Assert.state(buildId <= item.getBuildId(), "还没有对应的构建记录");
+
 		File file = BuildUtil.getLogFile(item.getId(), buildId);
 		Assert.state(FileUtil.isFile(file), "日志文件错误");
 

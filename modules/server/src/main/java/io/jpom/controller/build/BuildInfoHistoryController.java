@@ -22,10 +22,7 @@
  */
 package io.jpom.controller.build;
 
-import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.io.FileUtil;
-import cn.hutool.db.Entity;
-import cn.hutool.db.Page;
 import cn.hutool.extra.servlet.ServletUtil;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.validator.ValidatorConfig;
@@ -49,11 +46,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * new version for build info history controller
@@ -128,17 +121,6 @@ public class BuildInfoHistoryController extends BaseServerController {
 		return JsonMessage.getString(200, "获取成功", pageResultTemp);
 	}
 
-	private Set<String> getDataIds() {
-		Entity where = Entity.create();
-		Page pageReq = new Page();
-		List<BuildInfoModel> list = buildInfoService.listPageOnlyResult(where, pageReq);
-		if (CollUtil.isEmpty(list)) {
-			return new HashSet<>();
-		} else {
-			return list.stream().map(BuildInfoModel::getId).collect(Collectors.toSet());
-		}
-	}
-
 	/**
 	 * 构建
 	 *
@@ -148,13 +130,9 @@ public class BuildInfoHistoryController extends BaseServerController {
 	@RequestMapping(value = "/build/history/delete_log.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	@Feature(method = MethodFeature.DEL)
 	public String delete(@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据")) String logId) {
-		BuildHistoryLog buildHistoryLog = dbBuildHistoryLogService.getByKey(logId);
+		BuildHistoryLog buildHistoryLog = dbBuildHistoryLogService.getByKey(logId, getRequest());
 		Objects.requireNonNull(buildHistoryLog);
-
-		if (!CollUtil.contains(this.getDataIds(), buildHistoryLog.getBuildDataId())) {
-			return JsonMessage.getString(405, "没有权限");
-		}
-		JsonMessage<String> jsonMessage = dbBuildHistoryLogService.deleteLogAndFile(logId);
+		JsonMessage<String> jsonMessage = dbBuildHistoryLogService.deleteLogAndFile(buildHistoryLog);
 		return jsonMessage.toString();
 	}
 }

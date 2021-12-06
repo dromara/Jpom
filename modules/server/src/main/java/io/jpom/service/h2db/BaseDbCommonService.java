@@ -290,6 +290,24 @@ public abstract class BaseDbCommonService<T> {
 	}
 
 	/**
+	 * entity 转 实体
+	 *
+	 * @param entity Entity
+	 * @return data
+	 */
+	public T entityToBean(Entity entity) {
+		if (entity == null) {
+			return null;
+		}
+		CopyOptions copyOptions = new CopyOptions();
+		copyOptions.setIgnoreError(true);
+		copyOptions.setIgnoreCase(true);
+		T toBean = BeanUtil.toBean(entity, this.tClass, copyOptions);
+		this.fillSelectResult(toBean);
+		return toBean;
+	}
+
+	/**
 	 * 根据主键生成
 	 *
 	 * @param keyValue 主键值
@@ -521,14 +539,14 @@ public abstract class BaseDbCommonService<T> {
 	 */
 	public List<T> queryList(String sql, Object... params) {
 		List<Entity> query = this.query(sql, params);
-		if (query == null) {
-			return null;
+		if (query != null) {
+			return query.stream().map((entity -> {
+				T entityToBean = this.entityToBean(entity, this.tClass);
+				this.fillSelectResult(entityToBean);
+				return entityToBean;
+			})).collect(Collectors.toList());
 		}
-		return query.stream().map((entity -> {
-			T entityToBean = this.entityToBean(entity, this.tClass);
-			this.fillSelectResult(entityToBean);
-			return entityToBean;
-		})).collect(Collectors.toList());
+		return null;
 	}
 
 	/**
@@ -544,6 +562,9 @@ public abstract class BaseDbCommonService<T> {
 	}
 
 	public List<T> entityToBeanList(List<Entity> entitys) {
+		if (entitys == null) {
+			return null;
+		}
 		return entitys.stream().map((entity -> {
 			T entityToBean = this.entityToBean(entity, this.tClass);
 			this.fillSelectResult(entityToBean);

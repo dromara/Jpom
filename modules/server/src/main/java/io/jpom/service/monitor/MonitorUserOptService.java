@@ -22,9 +22,15 @@
  */
 package io.jpom.service.monitor;
 
+import cn.hutool.core.collection.CollUtil;
 import io.jpom.model.data.MonitorUserOptModel;
+import io.jpom.plugin.ClassFeature;
+import io.jpom.plugin.MethodFeature;
 import io.jpom.service.h2db.BaseWorkspaceService;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * 监控用户操作Service
@@ -34,21 +40,20 @@ import org.springframework.stereotype.Service;
 @Service
 public class MonitorUserOptService extends BaseWorkspaceService<MonitorUserOptModel> {
 
-//    public List<MonitorUserOptModel> listByType(UserOperateLogV1.OptType optType) {
-//        List<MonitorUserOptModel> list = super.list();
-//        if (CollUtil.isEmpty(list)) {
-//            return null;
-//        }
-//        return list.stream().filter(monitorUserOptModel -> {
-//            boolean status = monitorUserOptModel.isStatus();
-//            if (!status) {
-//                return false;
-//            }
-//            List<UserOperateLogV1.OptType> monitorOpt = monitorUserOptModel.getMonitorOpt();
-//
-//            return CollUtil.contains(monitorOpt, optType);
-//        }).collect(Collectors.toList());
-//    }
+	public List<MonitorUserOptModel> listByType(String workspaceId, ClassFeature classFeature, MethodFeature methodFeature) {
+		MonitorUserOptModel where = new MonitorUserOptModel();
+		where.setWorkspaceId(workspaceId);
+		where.setStatus(true);
+		List<MonitorUserOptModel> list = super.listByBean(where);
+		if (CollUtil.isEmpty(list)) {
+			return null;
+		}
+		return list.stream().filter(monitorUserOptModel -> {
+			List<ClassFeature> classFeatures = monitorUserOptModel.monitorFeature();
+			List<MethodFeature> methodFeatures = monitorUserOptModel.monitorOpt();
+			return CollUtil.contains(classFeatures, classFeature) && CollUtil.contains(methodFeatures, methodFeature);
+		}).collect(Collectors.toList());
+	}
 
 //    public List<MonitorUserOptModel> listByType(UserOperateLogV1.OptType optType, String userId) {
 //        List<MonitorUserOptModel> userOptModels = this.listByType(optType);

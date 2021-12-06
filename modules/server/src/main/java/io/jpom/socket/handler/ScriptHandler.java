@@ -22,14 +22,14 @@
  */
 package io.jpom.socket.handler;
 
-import cn.jiangzeyin.common.DefaultSystemLog;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.common.forward.NodeUrl;
-import io.jpom.model.data.UserModel;
+import io.jpom.permission.SystemPermission;
+import io.jpom.plugin.ClassFeature;
+import io.jpom.plugin.Feature;
 import io.jpom.socket.BaseProxyHandler;
 import io.jpom.socket.ConsoleCommandOp;
 import io.jpom.socket.ProxySession;
-import io.jpom.system.init.OperateLogController;
 
 import java.util.Map;
 
@@ -39,6 +39,8 @@ import java.util.Map;
  * @author jiangzeyin
  * @date 2019/4/24
  */
+@SystemPermission
+@Feature(cls = ClassFeature.UPGRADE_NODE_LIST)
 public class ScriptHandler extends BaseProxyHandler {
 
 	public ScriptHandler() {
@@ -52,29 +54,7 @@ public class ScriptHandler extends BaseProxyHandler {
 
 	@Override
 	protected void handleTextMessage(Map<String, Object> attributes, ProxySession proxySession, JSONObject json, ConsoleCommandOp consoleCommandOp) {
-//		UserOperateLogV1.OptType type = null;
-		switch (consoleCommandOp) {
-			case stop:
-//				type = UserOperateLogV1.OptType.Script_Stop;
-				break;
-			case start:
-//				type = UserOperateLogV1.OptType.Script_Start;
-				break;
-			default:
-				break;
-		}
-//		if (type != null) {
-		// 记录操作日志
-		UserModel userInfo = (UserModel) attributes.get("userInfo");
-		//
-		String scriptId = (String) attributes.get("scriptId");
-		OperateLogController.CacheInfo cacheInfo = cacheInfo(attributes, json, scriptId);
-		try {
-			operateLogController.log(userInfo, "脚本模板执行...", cacheInfo);
-		} catch (Exception e) {
-			DefaultSystemLog.getLog().error("记录操作日志异常", e);
-		}
-//		}
+		super.logOpt(attributes, json);
 		proxySession.send(json.toString());
 	}
 }

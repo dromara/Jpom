@@ -37,9 +37,12 @@ import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
 import io.jpom.model.data.SshModel;
 import io.jpom.model.data.UserModel;
+import io.jpom.plugin.ClassFeature;
+import io.jpom.plugin.Feature;
 import io.jpom.service.dblog.SshTerminalExecuteLogService;
 import io.jpom.service.node.ssh.SshService;
 import io.jpom.socket.BaseHandler;
+import io.jpom.socket.BaseProxyHandler;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.socket.BinaryMessage;
 import org.springframework.web.socket.TextMessage;
@@ -59,6 +62,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * @author bwcx_jzy
  * @date 2019/8/9
  */
+@Feature(cls = ClassFeature.SSH_TERMINAL)
 public class SshHandler extends BaseHandler {
 
 	private static final ConcurrentHashMap<String, HandlerItem> HANDLER_ITEM_CONCURRENT_HASH_MAP = new ConcurrentHashMap<>();
@@ -66,7 +70,9 @@ public class SshHandler extends BaseHandler {
 
 	@Override
 	public void afterConnectionEstablished(WebSocketSession session) throws Exception {
-		SshModel sshItem = (SshModel) session.getAttributes().get("sshItem");
+		Map<String, Object> attributes = session.getAttributes();
+		SshModel sshItem = (SshModel) attributes.get("sshItem");
+		BaseProxyHandler.logOpt(this.getClass(), attributes, attributes);
 		//Map<String, String[]> parameterMap = (Map<String, String[]>) session.getAttributes().get("parameterMap");
 //		String[] fileDirAlls;
 //		//判断url是何操作请求

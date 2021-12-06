@@ -23,22 +23,24 @@
 package io.jpom.controller.openapi.build;
 
 import cn.hutool.core.convert.Convert;
+import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.db.Entity;
 import io.jpom.common.ServerOpenApi;
 import io.jpom.common.interceptor.NotLogin;
+import io.jpom.controller.build.BuildInfoTriggerController;
 import io.jpom.model.data.BuildInfoModel;
 import io.jpom.model.data.UserModel;
 import io.jpom.service.dblog.BuildInfoService;
 import io.jpom.service.user.UserService;
+import org.h2.util.StringUtils;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.annotation.Resource;
 import java.util.List;
-import java.util.Optional;
 
 /**
  * @author bwcx_jzy
@@ -47,36 +49,44 @@ import java.util.Optional;
 @RestController
 @NotLogin
 public class BuildTriggerApiController {
-//
-//	@Resource
-//	private BuildService buildService;
 
-	@Resource
-	private BuildInfoService buildInfoService;
+	private final BuildInfoService buildInfoService;
 
 	private final UserService userService;
 
-	public BuildTriggerApiController(UserService userService) {
+	public BuildTriggerApiController(BuildInfoService buildInfoService,
+									 UserService userService) {
+		this.buildInfoService = buildInfoService;
 		this.userService = userService;
 	}
-//
-//	@RequestMapping(value = ServerOpenApi.BUILD_TRIGGER_BUILD, produces = MediaType.APPLICATION_JSON_VALUE)
-//	public String trigger(@PathVariable String id, @PathVariable String token) {
-//		BuildModel item = buildService.getItem(id);
-//		if (item == null) {
-//			return JsonMessage.getString(404, "没有对应数据");
-//		}
-//		List<UserModel> list = userService.list(false);
-//		Optional<UserModel> first = list.stream().filter(UserModel::isSystemUser).findFirst();
-//		if (!first.isPresent()) {
-//			return JsonMessage.getString(404, "没有对应数据");
-//		}
-//		UserModel userModel = first.get();
-//		if (!StrUtil.equals(token, item.getTriggerToken())) {
-//			return JsonMessage.getString(404, "触发token错误");
-//		}
-//		return buildService.start(userModel, id);
-//	}
+
+	private UserModel getByUrlToken(String token) {
+		String digestCountStr = StrUtil.sub(token, 0, BuildInfoTriggerController.BUILD_INFO_TRIGGER_TOKEN_FILL_LEN);
+		String result = StrUtil.subSuf(token, BuildInfoTriggerController.BUILD_INFO_TRIGGER_TOKEN_FILL_LEN);
+		int digestCount = Convert.toInt(digestCountStr, 1);
+
+		String sql = "select HASH('SHA256', id,?) as token,id from user_info";
+		List<Entity> query = userService.query(sql, digestCount);
+		if (query == null) {
+			return null;
+		}
+		String userId = query.stream()
+				.filter(entity -> {
+					Object token1 = entity.get("token");
+					String sha256;
+					if (token1 instanceof byte[]) {
+						byte[] bytes = (byte[]) token1;
+						sha256 = StringUtils.convertBytesToHex(bytes);
+					} else {
+						sha256 = ObjectUtil.toString(token1);
+					}
+					return StrUtil.equals(result, sha256);
+				})
+				.map(entity -> StrUtil.toString(entity.get("id")))
+				.findFirst()
+				.orElseGet(() -> "没有对应数据:-2");
+		return userService.getByKey(userId);
+	}
 
 
 	/**
@@ -91,13 +101,12 @@ public class BuildTriggerApiController {
 	public String trigger2(@PathVariable String id, @PathVariable String token, String delay) {
 		BuildInfoModel item = buildInfoService.getByKey(id);
 		Assert.notNull(item, "没有对应数据");
-		List<UserModel> list = userService.list(false);
+		UserModel userModel = this.getByUrlToken(token);
 		//
-		Optional<UserModel> first = list.stream().filter(UserModel::isSystemUser).findFirst();
-		Assert.state(first.isPresent(), "没有对应数据:-1");
+		Assert.notNull(userModel, "没有对应数据:-1");
 
-		Assert.state(StrUtil.equals(token, item.getTriggerToken()), "触发token错误");
+		Assert.state(StrUtil.equals(token, item.getTriggerToken()), "触发token错误,或者已经失效");
 
-		return buildInfoService.start(item, first.get(), Convert.toInt(delay, 0));
+		return buildInfoService.start(item, userModel, Convert.toInt(delay, 0));
 	}
 }

@@ -34,6 +34,13 @@ public class NodeService extends BaseWorkspaceService<NodeModel> {
 		this.sshService = sshService;
 	}
 
+	@Override
+	protected void fillSelectResult(NodeModel data) {
+		if (data != null) {
+			data.setLoginPwd(null);
+		}
+	}
+
 	/**
 	 * 修改 节点
 	 *

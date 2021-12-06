@@ -119,6 +119,16 @@ public class DbBuildHistoryLogService extends BaseWorkspaceService<BuildHistoryL
 	 */
 	public JsonMessage<String> deleteLogAndFile(String logId) {
 		BuildHistoryLog buildHistoryLog = getByKey(logId);
+		return this.deleteLogAndFile(buildHistoryLog);
+	}
+
+	/**
+	 * 清理文件并删除记录
+	 *
+	 * @param buildHistoryLog 构建记录
+	 * @return json
+	 */
+	public JsonMessage<String> deleteLogAndFile(BuildHistoryLog buildHistoryLog) {
 		if (buildHistoryLog == null) {
 			return new JsonMessage<>(405, "没有对应构建记录");
 		}
@@ -135,7 +145,7 @@ public class DbBuildHistoryLogService extends BaseWorkspaceService<BuildHistoryL
 				}
 			}
 		}
-		int count = delByKey(logId);
+		int count = delByKey(buildHistoryLog.getId());
 		return new JsonMessage<>(200, "删除成功", count + "");
 	}
 
