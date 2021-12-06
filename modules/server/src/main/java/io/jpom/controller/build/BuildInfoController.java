@@ -35,7 +35,6 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.build.BuildUtil;
 import io.jpom.common.BaseServerController;
-import io.jpom.common.interceptor.OptLog;
 import io.jpom.model.AfterOpt;
 import io.jpom.model.BaseEnum;
 import io.jpom.model.PageResultDto;
@@ -44,7 +43,6 @@ import io.jpom.model.data.RepositoryModel;
 import io.jpom.model.data.SshModel;
 import io.jpom.model.data.UserModel;
 import io.jpom.model.enums.BuildReleaseMethod;
-import io.jpom.model.log.UserOperateLogV1;
 import io.jpom.plugin.ClassFeature;
 import io.jpom.plugin.Feature;
 import io.jpom.plugin.MethodFeature;
@@ -132,7 +130,6 @@ public class BuildInfoController extends BaseServerController {
 	 * @return json
 	 */
 	@RequestMapping(value = "/build/edit", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	@OptLog(UserOperateLogV1.OptType.EditBuild)
 	@Feature(method = MethodFeature.EDIT)
 	public String updateMonitor(String id,
 								@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "构建名称不能为空")) String name,
@@ -324,7 +321,6 @@ public class BuildInfoController extends BaseServerController {
 	 * @return json
 	 */
 	@PostMapping(value = "/build/delete", produces = MediaType.APPLICATION_JSON_VALUE)
-	@OptLog(UserOperateLogV1.OptType.DelBuild)
 	@Feature(method = MethodFeature.DEL)
 	public String delete(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据id") String id) {
 		// 查询构建信息
@@ -357,7 +353,6 @@ public class BuildInfoController extends BaseServerController {
 	 * @return json
 	 */
 	@PostMapping(value = "/build/clean-source", produces = MediaType.APPLICATION_JSON_VALUE)
-	@OptLog(UserOperateLogV1.OptType.BuildCleanSource)
 	@Feature(method = MethodFeature.EXECUTE)
 	public String cleanSource(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据id") String id) {
 		// 查询构建信息

@@ -11,9 +11,7 @@ import io.jpom.common.BaseServerController;
 import io.jpom.common.JpomManifest;
 import io.jpom.common.RemoteVersion;
 import io.jpom.common.Type;
-import io.jpom.common.interceptor.OptLog;
 import io.jpom.model.AgentFileModel;
-import io.jpom.model.log.UserOperateLogV1;
 import io.jpom.permission.SystemPermission;
 import io.jpom.service.system.SystemParametersServer;
 import io.jpom.system.ConfigBean;
@@ -81,7 +79,6 @@ public class NodeUpdateController extends BaseServerController {
 
 	@RequestMapping(value = "upload_agent", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
-	@OptLog(UserOperateLogV1.OptType.UpdateSys)
 	@SystemPermission
 	public String uploadAgent() throws IOException {
 		String saveDir = ServerConfigBean.getInstance().getAgentPath().getAbsolutePath();

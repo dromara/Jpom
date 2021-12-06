@@ -147,7 +147,7 @@
         </a-form-model-item>
         <!-- 项目 -->
         <a-form-model-item v-if="temp.releaseMethod === 2" label="发布项目" prop="releaseMethodDataIdList">
-          <a-cascader v-model="temp.releaseMethodDataIdList" :options="cascaderList" placeholder="Please select" />
+          <a-cascader v-model="temp.releaseMethodDataIdList" :options="cascaderList" placeholder="请选择节点项目" />
         </a-form-model-item>
         <a-form-model-item v-if="temp.releaseMethod === 2" label="发布后操作" prop="afterOpt">
           <a-select v-model="tempExtraData.afterOpt" placeholder="请选择发布后操作">
@@ -223,7 +223,7 @@ export default {
       // 动态列表参数
       groupList: [],
       list: [],
-      total: 0,
+      
       repositoryList: [],
       // 当前仓库信息
       tempRepository: {},
@@ -317,7 +317,7 @@ export default {
   computed: {
     pagination() {
       return {
-        total: this.total,
+        total: this.listQuery.total,
         current: this.listQuery.page || 1,
         pageSize: this.listQuery.limit || PAGE_DEFAULT_LIMIT,
         pageSizeOptions: PAGE_DEFAULT_SIZW_OPTIONS,
@@ -365,7 +365,7 @@ export default {
       getBuildList(this.listQuery).then((res) => {
         if (res.code === 200) {
           this.list = res.data.result;
-          this.total = res.data.total;
+          this.listQuery.total = res.data.total;
         }
         this.loading = false;
       });

@@ -283,16 +283,16 @@ export default {
         },
       });
     },
-  },
-  // 分页、排序、筛选变化时触发
-  changePage(pagination, filters, sorter) {
-    this.listQuery.page = pagination.current;
-    this.listQuery.limit = pagination.pageSize;
-    if (sorter) {
-      this.listQuery.order = sorter.order;
-      this.listQuery.order_field = sorter.field;
-    }
-    this.loadData();
+    // 分页、排序、筛选变化时触发
+    changePage(pagination, filters, sorter) {
+      this.listQuery.page = pagination.current;
+      this.listQuery.limit = pagination.pageSize;
+      if (sorter) {
+        this.listQuery.order = sorter.order;
+        this.listQuery.order_field = sorter.field;
+      }
+      this.loadData();
+    },
   },
 };
 </script>

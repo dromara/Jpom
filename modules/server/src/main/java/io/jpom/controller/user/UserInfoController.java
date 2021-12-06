@@ -31,9 +31,7 @@ import cn.jiangzeyin.common.validator.ValidatorItem;
 import cn.jiangzeyin.common.validator.ValidatorRule;
 import io.jpom.common.BaseServerController;
 import io.jpom.common.interceptor.LoginInterceptor;
-import io.jpom.common.interceptor.OptLog;
 import io.jpom.model.data.UserModel;
-import io.jpom.model.log.UserOperateLogV1;
 import io.jpom.plugin.ClassFeature;
 import io.jpom.plugin.Feature;
 import io.jpom.plugin.MethodFeature;
@@ -114,7 +112,6 @@ public class UserInfoController extends BaseServerController {
 	 * @return String
 	 */
 	@RequestMapping(value = "deleteUser", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	@OptLog(UserOperateLogV1.OptType.DelUer)
 	@Feature(method = MethodFeature.DEL)
 	public String deleteUser(String id) {
 		UserModel userName = getUser();
@@ -140,7 +137,6 @@ public class UserInfoController extends BaseServerController {
 	 * @return json
 	 */
 	@RequestMapping(value = "unlock", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	@OptLog(UserOperateLogV1.OptType.UnlockUer)
 	@Feature(method = MethodFeature.EDIT)
 	public String unlock(String id) {
 		UserModel userModel = userService.getByKey(id);

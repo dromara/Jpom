@@ -22,33 +22,31 @@
  */
 package io.jpom.controller.monitor;
 
-import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.convert.Convert;
-import cn.hutool.core.util.IdUtil;
+import cn.hutool.core.util.EnumUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.jiangzeyin.common.JsonMessage;
-import cn.jiangzeyin.common.validator.ValidatorConfig;
 import cn.jiangzeyin.common.validator.ValidatorItem;
 import cn.jiangzeyin.common.validator.ValidatorRule;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.common.BaseServerController;
-import io.jpom.common.interceptor.OptLog;
+import io.jpom.model.PageResultDto;
 import io.jpom.model.data.MonitorUserOptModel;
-import io.jpom.model.data.UserModel;
-import io.jpom.model.log.UserOperateLogV1;
 import io.jpom.plugin.ClassFeature;
 import io.jpom.plugin.Feature;
 import io.jpom.plugin.MethodFeature;
 import io.jpom.service.monitor.MonitorUserOptService;
 import org.springframework.http.MediaType;
-import org.springframework.stereotype.Controller;
+import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 
-import javax.annotation.Resource;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * 监控用户操作
@@ -56,70 +54,23 @@ import java.util.List;
  * @author bwcx_jzy
  * @date 2020/08/06
  */
-@Controller
+@RestController
 @RequestMapping(value = "/monitor_user_opt")
-@Feature(cls = ClassFeature.MONITOR)
+@Feature(cls = ClassFeature.OPT_MONITOR)
 public class MonitorUserOptListController extends BaseServerController {
 
-	@Resource
-	private MonitorUserOptService monitorUserOptService;
+	private final MonitorUserOptService monitorUserOptService;
 
-//    /**
-//     * 展示监控页面
-//     *
-//     * @return page
-//     */
-//    @RequestMapping(value = "userOpt.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
-//    @Feature(method = MethodFeature.LIST)
-//    public String list() {
-//        return "monitor/userOpt";
-//    }
+	public MonitorUserOptListController(MonitorUserOptService monitorUserOptService) {
+		this.monitorUserOptService = monitorUserOptService;
+	}
 
-//    /**
-//     * 修改监控
-//     *
-//     * @param id id
-//     * @return json
-//     */
-//    @RequestMapping(value = "edit.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
-//    @Feature(method = MethodFeature.EDIT)
-//    public String edit(String id) {
-//        MonitorUserOptModel monitorModel = null;
-//        if (StrUtil.isNotEmpty(id)) {
-//            monitorModel = monitorUserOptService.getItem(id);
-//        }
-//        setAttribute("model", monitorModel);
-//        //
-//        List<UserModel> list = userService.list(false);
-//        JSONArray jsonArray = new JSONArray();
-//        list.forEach(userModel -> {
-//            JSONObject jsonObject = new JSONObject();
-//            jsonObject.put("title", userModel.getName());
-//            jsonObject.put("value", userModel.getId());
-//            if (StrUtil.isEmpty(userModel.getEmail()) && StrUtil.isEmpty(userModel.getDingDing())) {
-//                jsonObject.put("disabled", true);
-//            }
-//            jsonArray.add(jsonObject);
-//        });
-//        UserOperateLogV1.OptType[] values = UserOperateLogV1.OptType.values();
-//        JSONArray jsonArrayOpt = new JSONArray();
-//        for (UserOperateLogV1.OptType value : values) {
-//            JSONObject jsonObject = new JSONObject();
-//            jsonObject.put("title", value.getDesc());
-//            jsonObject.put("value", value.name());
-//            jsonArrayOpt.add(jsonObject);
-//        }
-//        setAttribute("opts", jsonArrayOpt);
-//        setAttribute("userLists", jsonArray);
-//        return "monitor/edit-user-opt";
-//    }
 
 	@RequestMapping(value = "list_data", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody
 	@Feature(method = MethodFeature.LIST)
 	public String getMonitorList() {
-		List<MonitorUserOptModel> list = monitorUserOptService.list();
-		return JsonMessage.getString(200, "", list);
+		PageResultDto<MonitorUserOptModel> pageResultDto = monitorUserOptService.listPage(getRequest());
+		return JsonMessage.getString(200, "", pageResultDto);
 	}
 
 	/**
@@ -128,18 +79,33 @@ public class MonitorUserOptListController extends BaseServerController {
 	 * @return json
 	 */
 	@RequestMapping(value = "type_data", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody
 	@Feature(method = MethodFeature.LIST)
 	public String getOperateTypeList() {
-		UserOperateLogV1.OptType[] values = UserOperateLogV1.OptType.values();
-		JSONArray jsonArrayOpt = new JSONArray();
-		for (UserOperateLogV1.OptType value : values) {
-			JSONObject jsonObject = new JSONObject();
-			jsonObject.put("title", value.getDesc());
-			jsonObject.put("value", value.name());
-			jsonArrayOpt.add(jsonObject);
-		}
-		return JsonMessage.getString(200, "success", jsonArrayOpt);
+		JSONObject jsonObject = new JSONObject();
+		//
+		List<JSONObject> classFeatureList = Arrays.stream(ClassFeature.values())
+				.filter(classFeature -> classFeature != ClassFeature.NULL)
+				.map(classFeature -> {
+					JSONObject jsonObject1 = new JSONObject();
+					jsonObject1.put("title", classFeature.getName());
+					jsonObject1.put("value", classFeature.name());
+					return jsonObject1;
+				})
+				.collect(Collectors.toList());
+		jsonObject.put("classFeature", classFeatureList);
+		//
+		List<JSONObject> methodFeatureList = Arrays.stream(MethodFeature.values())
+				.filter(methodFeature -> methodFeature != MethodFeature.NULL)
+				.map(classFeature -> {
+					JSONObject jsonObject1 = new JSONObject();
+					jsonObject1.put("title", classFeature.getName());
+					jsonObject1.put("value", classFeature.name());
+					return jsonObject1;
+				})
+				.collect(Collectors.toList());
+		jsonObject.put("methodFeature", methodFeatureList);
+
+		return JsonMessage.getString(200, "success", jsonObject);
 	}
 
 	/**
@@ -149,12 +115,10 @@ public class MonitorUserOptListController extends BaseServerController {
 	 * @return json
 	 */
 	@RequestMapping(value = "delete", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody
-	@OptLog(UserOperateLogV1.OptType.DelMonitor)
 	@Feature(method = MethodFeature.DEL)
-	public String deleteMonitor(@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "删除失败")) String id) {
+	public String deleteMonitor(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "删除失败") String id) {
 		//
-		monitorUserOptService.deleteItem(id);
+		monitorUserOptService.delByKey(id, getRequest());
 		return JsonMessage.getString(200, "删除成功");
 	}
 
@@ -168,57 +132,70 @@ public class MonitorUserOptListController extends BaseServerController {
 	 * @return json
 	 */
 	@RequestMapping(value = "update", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody
-	@OptLog(UserOperateLogV1.OptType.EditMonitor)
 	@Feature(method = MethodFeature.EDIT)
 	public String updateMonitor(String id,
-								@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "监控名称不能为空")) String name,
-								String notifyUser, String monitorUser, String monitorOpt) {
+								@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "监控名称不能为空") String name,
+								String notifyUser,
+								String monitorUser,
+								String monitorOpt,
+								String monitorFeature) {
 
 		String status = getParameter("status");
 
 		JSONArray jsonArray = JSONArray.parseArray(notifyUser);
-		List<String> notifyUsers = jsonArray.toJavaList(String.class);
-		if (CollUtil.isEmpty(notifyUsers)) {
-			return JsonMessage.getString(405, "请选择报警联系人");
-		}
+		List<String> notifyUsers = jsonArray.toJavaList(String.class)
+				.stream()
+				.filter(Objects::nonNull)
+				.collect(Collectors.toList());
+
+		Assert.notEmpty(notifyUsers, "请选择报警联系人");
+
 
 		JSONArray monitorUserArray = JSONArray.parseArray(monitorUser);
-		List<String> monitorUserArrays = monitorUserArray.toJavaList(String.class);
-		if (CollUtil.isEmpty(monitorUserArrays)) {
-			return JsonMessage.getString(405, "请选择监控人员");
-		}
+		List<String> monitorUserArrays = monitorUserArray.toJavaList(String.class)
+				.stream()
+				.filter(Objects::nonNull)
+				.collect(Collectors.toList());
+
+		Assert.notEmpty(monitorUserArrays, "请选择监控人员");
 
 
 		JSONArray monitorOptArray = JSONArray.parseArray(monitorOpt);
-		List<UserOperateLogV1.OptType> monitorOptArrays = monitorOptArray.toJavaList(UserOperateLogV1.OptType.class);
+		List<MethodFeature> monitorOptArrays = monitorOptArray
+				.stream()
+				.map(o -> EnumUtil.fromString(MethodFeature.class, StrUtil.toString(o), null))
+				.filter(Objects::nonNull)
+				.collect(Collectors.toList());
 
-		if (CollUtil.isEmpty(monitorOptArrays)) {
-			return JsonMessage.getString(405, "请选择监控的操作");
-		}
+		Assert.notEmpty(monitorOptArrays, "请选择监控的操作");
+
+		JSONArray monitorFeatureArray = JSONArray.parseArray(monitorFeature);
+		List<ClassFeature> monitorFeatureArrays = monitorFeatureArray
+				.stream()
+				.map(o -> EnumUtil.fromString(ClassFeature.class, StrUtil.toString(o), null))
+				.filter(Objects::nonNull)
+				.collect(Collectors.toList());
+		Assert.notEmpty(monitorFeatureArrays, "请选择监控的功能");
 
 
 		boolean start = "on".equalsIgnoreCase(status);
-		MonitorUserOptModel monitorModel = monitorUserOptService.getItem(id);
+		MonitorUserOptModel monitorModel = monitorUserOptService.getByKey(id);
 		if (monitorModel == null) {
 			monitorModel = new MonitorUserOptModel();
 		}
 		monitorModel.setMonitorUser(monitorUserArrays);
 		monitorModel.setStatus(start);
 		monitorModel.setMonitorOpt(monitorOptArrays);
-		monitorModel.setNotifyUser(notifyUsers);
+		monitorModel.monitorFeature(monitorFeatureArrays);
+		monitorModel.notifyUser(notifyUsers);
 		monitorModel.setName(name);
 
 		if (StrUtil.isEmpty(id)) {
 			//添加监控
-			id = IdUtil.objectId();
-			UserModel user = getUser();
-			monitorModel.setId(id);
-			monitorModel.setParent(UserModel.getOptUserName(user));
-			monitorUserOptService.addItem(monitorModel);
+			monitorUserOptService.insert(monitorModel);
 			return JsonMessage.getString(200, "添加成功");
 		}
-		monitorUserOptService.updateItem(monitorModel);
+		monitorUserOptService.update(monitorModel);
 		return JsonMessage.getString(200, "修改成功");
 	}
 
@@ -230,18 +207,15 @@ public class MonitorUserOptListController extends BaseServerController {
 	 * @return json
 	 */
 	@RequestMapping(value = "changeStatus", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody
-	@OptLog(UserOperateLogV1.OptType.ChangeStatusMonitor)
 	@Feature(method = MethodFeature.EDIT)
-	public String changeStatus(@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "id不能为空")) String id,
+	public String changeStatus(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "id不能为空") String id,
 							   String status) {
-		MonitorUserOptModel monitorModel = monitorUserOptService.getItem(id);
-		if (monitorModel == null) {
-			return JsonMessage.getString(405, "不存在监控项啦");
-		}
+		MonitorUserOptModel monitorModel = monitorUserOptService.getByKey(id);
+		Assert.notNull(monitorModel, "不存在监控项啦");
+
 		boolean bStatus = Convert.toBool(status, false);
 		monitorModel.setStatus(bStatus);
-		monitorUserOptService.updateItem(monitorModel);
+		monitorUserOptService.update(monitorModel);
 		return JsonMessage.getString(200, "修改成功");
 	}
 

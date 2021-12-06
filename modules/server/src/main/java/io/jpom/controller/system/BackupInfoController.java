@@ -34,11 +34,9 @@ import cn.jiangzeyin.controller.multipart.MultipartFileBuilder;
 import com.alibaba.fastjson.JSON;
 import io.jpom.common.BaseServerController;
 import io.jpom.common.Const;
-import io.jpom.common.interceptor.OptLog;
 import io.jpom.model.PageResultDto;
 import io.jpom.model.data.BackupInfoModel;
 import io.jpom.model.enums.BackupStatusEnum;
-import io.jpom.model.log.UserOperateLogV1;
 import io.jpom.permission.SystemPermission;
 import io.jpom.plugin.ClassFeature;
 import io.jpom.plugin.Feature;
@@ -50,7 +48,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.annotation.Resource;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
@@ -64,11 +61,14 @@ import java.util.Objects;
  * @date 2021-11-18
  */
 @RestController
-@Feature(cls = ClassFeature.SYSTEM)
+@Feature(cls = ClassFeature.SYSTEM_BACKUP)
 public class BackupInfoController extends BaseServerController {
 
-	@Resource
-	private BackupInfoService backupInfoService;
+	private final BackupInfoService backupInfoService;
+
+	public BackupInfoController(BackupInfoService backupInfoService) {
+		this.backupInfoService = backupInfoService;
+	}
 
 	/**
 	 * 分页加载备份列表数据
@@ -76,7 +76,7 @@ public class BackupInfoController extends BaseServerController {
 	 * @return json
 	 */
 	@PostMapping(value = "/system/backup/list")
-	@Feature(method = MethodFeature.LOG)
+	@Feature(method = MethodFeature.LIST)
 	public Object loadBackupList() {
 		// 查询数据库
 		PageResultDto<BackupInfoModel> pageResult = backupInfoService.listPage(getRequest());
@@ -88,7 +88,7 @@ public class BackupInfoController extends BaseServerController {
 	 * 删除备份数据
 	 *
 	 * @param id 备份 ID
-	 * @return
+	 * @return json
 	 */
 	@PostMapping(value = "/system/backup/delete")
 	@Feature(method = MethodFeature.DEL)
@@ -111,10 +111,10 @@ public class BackupInfoController extends BaseServerController {
 	 * 还原的时候不能异步了，只能等待备份还原成功或者失败
 	 *
 	 * @param id 备份 ID
-	 * @return
+	 * @return json
 	 */
 	@PostMapping(value = "/system/backup/restore")
-	@Feature(method = MethodFeature.EDIT)
+	@Feature(method = MethodFeature.EXECUTE)
 	@SystemPermission
 	public Object restoreBackup(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "数据 id 不能为空") String id) {
 		// 根据 id 查询备份信息
@@ -144,10 +144,10 @@ public class BackupInfoController extends BaseServerController {
 	 * 创建备份任务
 	 *
 	 * @param map 参数 map.tableNameList 选中备份的表名称
-	 * @return
+	 * @return json
 	 */
 	@PostMapping(value = "/system/backup/create")
-	@Feature(method = MethodFeature.EXECUTE)
+	@Feature(method = MethodFeature.EDIT)
 	public Object backup(@RequestBody Map<String, Object> map) {
 		List<String> tableNameList = JSON.parseArray(JSON.toJSONString(map.get("tableNameList")), String.class);
 		backupInfoService.backupToSql(tableNameList);
@@ -157,10 +157,9 @@ public class BackupInfoController extends BaseServerController {
 	/**
 	 * 导入备份数据
 	 *
-	 * @return
+	 * @return json
 	 */
 	@PostMapping(value = "/system/backup/upload")
-	@OptLog(UserOperateLogV1.OptType.UploadProjectFile)
 	@Feature(method = MethodFeature.UPLOAD)
 	@SystemPermission
 	public Object uploadBackupFile() throws IOException {
@@ -196,7 +195,6 @@ public class BackupInfoController extends BaseServerController {
 	 * 下载备份数据
 	 *
 	 * @param id 备份 ID
-	 * @return
 	 */
 	@GetMapping(value = "/system/backup/download")
 	@Feature(method = MethodFeature.DOWNLOAD)
@@ -220,7 +218,7 @@ public class BackupInfoController extends BaseServerController {
 	/**
 	 * 读取数据库表名称列表
 	 *
-	 * @return
+	 * @return json
 	 */
 	@PostMapping(value = "/system/backup/table-name-list")
 	@Feature(method = MethodFeature.LIST)

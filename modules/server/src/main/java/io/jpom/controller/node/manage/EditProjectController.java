@@ -7,9 +7,7 @@ import com.alibaba.fastjson.JSONObject;
 import io.jpom.common.BaseServerController;
 import io.jpom.common.forward.NodeForward;
 import io.jpom.common.forward.NodeUrl;
-import io.jpom.common.interceptor.OptLog;
 import io.jpom.model.data.NodeModel;
-import io.jpom.model.log.UserOperateLogV1;
 import io.jpom.plugin.ClassFeature;
 import io.jpom.plugin.Feature;
 import io.jpom.plugin.MethodFeature;
@@ -73,7 +71,6 @@ public class EditProjectController extends BaseServerController {
 	 */
 	@RequestMapping(value = "saveProject", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
-	@OptLog(UserOperateLogV1.OptType.SaveProject)
 	@Feature(method = MethodFeature.EDIT)
 	public String saveProject(String id) {
 		// 防止和Jpom冲突

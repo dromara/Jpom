@@ -37,10 +37,10 @@ public enum MethodFeature {
 	 * 文件管理
 	 */
 	FILE("文件管理"),
-	EDIT("修改"),
-	DEL("删除"),
+	EDIT("修改、添加数据"),
+	DEL("删除数据"),
 	INSTALL("安装"),
-	LIST("列表"),
+	LIST("列表、查询"),
 	TERMINAL("终端"),
 	DOWNLOAD("下载"),
 	LOG("日志"),
@@ -48,7 +48,7 @@ public enum MethodFeature {
 	//    WHITELIST("白名单"),
 	EXECUTE("执行"),
 	DEL_FILE("删除文件"),
-	CACHE("缓存"),
+	//	CACHE("缓存"),
 	DEL_LOG("删除日志"),
 	CONFIG("配置"),
 	READ_FILE("读取文件"),

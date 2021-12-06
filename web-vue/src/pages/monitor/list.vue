@@ -1,8 +1,9 @@
 <template>
-  <div>
+  <div class="full-content">
     <div ref="filter" class="filter">
+      <a-input v-model="listQuery['%name%']" placeholder="监控名称" class="search-input-item" />
+      <a-button type="primary" @click="loadData">搜索</a-button>
       <a-button type="primary" @click="handleAdd">新增</a-button>
-      <a-button type="primary" @click="loadData">刷新</a-button>
     </div>
     <!-- 数据表格 -->
     <a-table :data-source="list" :loading="loading" :columns="columns" :pagination="pagination" @change="changePage" bordered :rowKey="(record, index) => index">
@@ -46,7 +47,16 @@
           </a-select>
         </a-form-model-item>
         <a-form-model-item label="报警联系人" prop="notifyUser" class="jpom-notify">
-          <a-transfer :data-source="userList" lazy="false" show-search :filter-option="filterOption" :target-keys="targetKeys" :render="(item) => item.name" @change="handleChange" />
+          <a-transfer
+            :data-source="userList"
+            :lazy="false"
+            :titles="['待选择', '已选择']"
+            show-search
+            :filter-option="filterOption"
+            :target-keys="targetKeys"
+            :render="(item) => item.name"
+            @change="handleChange"
+          />
         </a-form-model-item>
       </a-form-model>
     </a-modal>
@@ -144,24 +154,27 @@ export default {
     // 加载数据
     loadData() {
       this.loading = true;
-      const params = {};
-      getMonitorList(params).then((res) => {
+
+      getMonitorList(this.listQuery).then((res) => {
         if (res.code === 200) {
           this.list = res.data.result;
+          this.listQuery.total = res.data.total;
         }
         this.loading = false;
       });
     },
     // 加载用户列表
     loadUserList(fn) {
-      this.userList = [];
       getUserListAll().then((res) => {
         if (res.code === 200) {
-          this.userList = res.data.map((element) => {
-            let canUse = element.email || element.dingDing || element.workWx;
-            return { key: element.id, name: element.name, disabled: !canUse };
+          this.$nextTick(() => {
+            this.userList = res.data.map((element) => {
+              let canUse = element.email || element.dingDing || element.workWx;
+              return { key: element.id, name: element.name, disabled: !canUse };
+            });
+
+            fn && fn();
           });
-          fn && fn();
         }
       });
     },
@@ -193,6 +206,8 @@ export default {
     // 新增
     handleAdd() {
       this.temp = {};
+      this.targetKeys = [];
+      this.projectKeys = [];
       this.editMonitorVisible = true;
       this.loadUserList();
       this.loadNodeProjectList();
@@ -206,29 +221,30 @@ export default {
     handleEdit(record) {
       this.temp = Object.assign(record);
       this.temp.projectsTemp = JSON.parse(this.temp.projects);
-
+      this.targetKeys = [];
       this.loadUserList(() => {
         this.targetKeys = JSON.parse(this.temp.notifyUser);
-      });
 
-      this.loadNodeProjectList(() => {
-        // 设置监控项目
-        this.projectKeys = this.nodeProjectList
-          .filter((item) => {
-            return (
-              this.temp.projectsTemp.filter((item2) => {
-                let isNode = item.nodeId === item2.node;
-                if (!isNode) {
-                  return false;
-                }
-                return item2.projects.filter((item3) => item.projectId === item3).length > 0;
-              }).length > 0
-            );
-          })
-          .map((item) => {
-            return item.id;
-          });
-        this.editMonitorVisible = true;
+        this.loadNodeProjectList(() => {
+          // 设置监控项目
+          this.projectKeys = this.nodeProjectList
+            .filter((item) => {
+              return (
+                this.temp.projectsTemp.filter((item2) => {
+                  let isNode = item.nodeId === item2.node;
+                  if (!isNode) {
+                    return false;
+                  }
+                  return item2.projects.filter((item3) => item.projectId === item3).length > 0;
+                }).length > 0
+              );
+            })
+            .map((item) => {
+              return item.id;
+            });
+
+          this.editMonitorVisible = true;
+        });
       });
     },
     handleEditMonitorOk() {

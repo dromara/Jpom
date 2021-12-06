@@ -36,14 +36,12 @@ import cn.jiangzeyin.common.validator.ValidatorItem;
 import cn.jiangzeyin.common.validator.ValidatorRule;
 import io.jpom.build.BuildUtil;
 import io.jpom.common.BaseServerController;
-import io.jpom.common.interceptor.OptLog;
 import io.jpom.model.BaseEnum;
 import io.jpom.model.PageResultDto;
 import io.jpom.model.data.BuildInfoModel;
 import io.jpom.model.data.UserModel;
 import io.jpom.model.enums.BuildStatus;
 import io.jpom.model.log.BuildHistoryLog;
-import io.jpom.model.log.UserOperateLogV1;
 import io.jpom.model.vo.BuildHistoryLogVo;
 import io.jpom.plugin.ClassFeature;
 import io.jpom.plugin.Feature;
@@ -211,7 +209,6 @@ public class BuildInfoHistoryController extends BaseServerController {
 	 * @return json
 	 */
 	@RequestMapping(value = "/build/history/delete_log.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	@OptLog(UserOperateLogV1.OptType.DelBuildLog)
 	@ResponseBody
 	@Feature(method = MethodFeature.DEL_LOG)
 	public String delete(@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据")) String logId) {

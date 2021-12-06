@@ -37,10 +37,8 @@ import io.jpom.common.BaseServerController;
 import io.jpom.common.ServerOpenApi;
 import io.jpom.common.interceptor.LoginInterceptor;
 import io.jpom.common.interceptor.NotLogin;
-import io.jpom.common.interceptor.OptLog;
 import io.jpom.model.data.UserModel;
 import io.jpom.model.dto.UserLoginDto;
-import io.jpom.model.log.UserOperateLogV1;
 import io.jpom.service.user.UserService;
 import io.jpom.system.ServerConfigBean;
 import io.jpom.system.ServerExtConfigBean;
@@ -147,7 +145,6 @@ public class LoginControl extends BaseServerController {
 	@RequestMapping(value = "userLogin", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
 	@NotLogin
-	@OptLog(UserOperateLogV1.OptType.Login)
 	public String userLogin(
 			@ValidatorConfig(value = {
 					@ValidatorItem(value = ValidatorRule.NOT_EMPTY, msg = "请输入登录信息")

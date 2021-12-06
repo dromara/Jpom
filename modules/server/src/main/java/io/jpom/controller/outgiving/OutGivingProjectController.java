@@ -38,14 +38,12 @@ import com.alibaba.fastjson.JSONObject;
 import io.jpom.common.BaseServerController;
 import io.jpom.common.forward.NodeForward;
 import io.jpom.common.forward.NodeUrl;
-import io.jpom.common.interceptor.OptLog;
 import io.jpom.model.AfterOpt;
 import io.jpom.model.BaseEnum;
 import io.jpom.model.data.NodeModel;
 import io.jpom.model.data.OutGivingModel;
 import io.jpom.model.data.OutGivingNodeProject;
 import io.jpom.model.data.ServerWhitelist;
-import io.jpom.model.log.UserOperateLogV1;
 import io.jpom.outgiving.OutGivingRun;
 import io.jpom.plugin.ClassFeature;
 import io.jpom.plugin.Feature;
@@ -175,7 +173,6 @@ public class OutGivingProjectController extends BaseServerController {
 	 */
 	@RequestMapping(value = "upload", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
-	@OptLog(UserOperateLogV1.OptType.UploadOutGiving)
 	@Feature(method = MethodFeature.UPLOAD)
 	public String upload(String id, String afterOpt, String clearOld, String autoUnzip) throws IOException {
 		OutGivingModel outGivingModel = this.check(id);
@@ -225,7 +222,6 @@ public class OutGivingProjectController extends BaseServerController {
 	 */
 	@RequestMapping(value = "remote_download", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
-	@OptLog(UserOperateLogV1.OptType.UploadOutGiving)
 	@Feature(method = MethodFeature.REMOTE_DOWNLOAD)
 	public String remoteDownload(String id, String afterOpt, String clearOld, String url, String autoUnzip) {
 		OutGivingModel outGivingModel = this.check(id);

@@ -16,10 +16,6 @@
       {
         "id": "jdkList",
         "title": "JDK管理"
-      },
-      {
-        "id": "projectRecover",
-        "title": "项目回收"
       }
     ]
   },

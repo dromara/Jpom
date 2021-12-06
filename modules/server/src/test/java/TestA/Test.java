@@ -23,8 +23,6 @@
 package TestA;
 
 import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.util.ClassUtil;
-import io.jpom.service.user.RoleService;
 import io.jpom.permission.CacheControllerFeature;
 import io.jpom.plugin.ClassFeature;
 import io.jpom.plugin.MethodFeature;
@@ -47,7 +45,7 @@ public class Test {
         System.out.println(monitor.getName());
         System.out.println(classFeatureSetMap);
 
-        Class<?> typeArgument = ClassUtil.getTypeArgument(RoleService.class);
-        System.out.println(typeArgument);
+//        Class<?> typeArgument = ClassUtil.getTypeArgument(RoleService.class);
+//        System.out.println(typeArgument);
     }
 }

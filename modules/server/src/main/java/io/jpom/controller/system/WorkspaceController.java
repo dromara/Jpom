@@ -32,7 +32,7 @@ import java.util.Set;
  * @since 2021/12/3
  */
 @RestController
-@Feature(cls = ClassFeature.SYSTEM)
+@Feature(cls = ClassFeature.SYSTEM_WORKSPACE)
 @RequestMapping(value = "/system/workspace/")
 public class WorkspaceController extends BaseServerController {
 
@@ -113,6 +113,7 @@ public class WorkspaceController extends BaseServerController {
 	public Object delete(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "数据 id 不能为空") String id) {
 		//
 		Assert.state(!StrUtil.equals(id, WorkspaceModel.DEFAULT_ID), "不能删除默认工作空间");
+		// 判断是否存在关联数据
 		Set<Class<?>> classes = ClassUtil.scanPackage("io.jpom.model", BaseWorkspaceModel.class::isAssignableFrom);
 		for (Class<?> aClass : classes) {
 			TableName tableName = aClass.getAnnotation(TableName.class);

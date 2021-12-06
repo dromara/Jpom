@@ -14,10 +14,8 @@ import cn.jiangzeyin.controller.multipart.MultipartFileBuilder;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.common.BaseServerController;
 import io.jpom.common.Type;
-import io.jpom.common.interceptor.OptLog;
 import io.jpom.model.data.NodeModel;
 import io.jpom.model.data.SshModel;
-import io.jpom.model.log.UserOperateLogV1;
 import io.jpom.model.system.AgentAutoUser;
 import io.jpom.plugin.ClassFeature;
 import io.jpom.plugin.Feature;
@@ -69,7 +67,6 @@ public class SshInstallAgentController extends BaseServerController {
 	@RequestMapping(value = "installAgentSubmit.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
 	@Feature(method = MethodFeature.INSTALL)
-	@OptLog(UserOperateLogV1.OptType.SshInstallAgent)
 	public String installAgentSubmit(@ValidatorItem(value = ValidatorRule.NOT_BLANK) String id,
 									 @ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "节点数据") String nodeData,
 									 @ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "安装路径") String path) throws Exception {

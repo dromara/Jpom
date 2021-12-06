@@ -4,8 +4,6 @@ import com.alibaba.fastjson.JSONArray;
 import io.jpom.common.forward.NodeForward;
 import io.jpom.common.forward.NodeUrl;
 import io.jpom.model.data.NodeModel;
-import io.jpom.permission.BaseDynamicService;
-import io.jpom.plugin.ClassFeature;
 import io.jpom.service.node.NodeService;
 import org.springframework.stereotype.Service;
 
@@ -14,7 +12,7 @@ import org.springframework.stereotype.Service;
  * @date 2019/8/16
  */
 @Service
-public class ScriptServer implements BaseDynamicService {
+public class ScriptServer {
 
 
 	private final NodeService nodeService;
@@ -23,17 +21,8 @@ public class ScriptServer implements BaseDynamicService {
 		this.nodeService = nodeService;
 	}
 
-	@Override
-	public JSONArray listToArray(String dataId) {
-		NodeModel item = nodeService.getByKey(dataId);
-		if (item == null || !item.isOpenStatus()) {
-			return null;
-		}
-		return listToArray(item);
-	}
 
 	public JSONArray listToArray(NodeModel nodeModel) {
-		JSONArray jsonArray = NodeForward.requestData(nodeModel, NodeUrl.Script_List, null, JSONArray.class);
-		return filter(jsonArray, ClassFeature.SCRIPT);
+		return NodeForward.requestData(nodeModel, NodeUrl.Script_List, null, JSONArray.class);
 	}
 }

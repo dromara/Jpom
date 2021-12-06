@@ -3,8 +3,6 @@ package io.jpom.controller.node.manage.file;
 import io.jpom.common.BaseServerController;
 import io.jpom.common.forward.NodeForward;
 import io.jpom.common.forward.NodeUrl;
-import io.jpom.common.interceptor.OptLog;
-import io.jpom.model.log.UserOperateLogV1;
 import io.jpom.plugin.ClassFeature;
 import io.jpom.plugin.Feature;
 import io.jpom.plugin.MethodFeature;
@@ -49,7 +47,6 @@ public class ProjectFileControl extends BaseServerController {
 	 */
 	@RequestMapping(value = "upload", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
-	@OptLog(UserOperateLogV1.OptType.UploadProjectFile)
 	@Feature(method = MethodFeature.UPLOAD)
 	public String upload() {
 		return NodeForward.requestMultipart(getNode(), getMultiRequest(), NodeUrl.Manage_File_Upload).toString();
@@ -60,7 +57,6 @@ public class ProjectFileControl extends BaseServerController {
 	 */
 	@RequestMapping(value = "download", method = RequestMethod.GET)
 	@ResponseBody
-	@OptLog(UserOperateLogV1.OptType.DownloadProjectFile)
 	@Feature(method = MethodFeature.DOWNLOAD)
 	public void download() {
 		NodeForward.requestDownload(getNode(), getRequest(), getResponse(), NodeUrl.Manage_File_Download);
@@ -74,7 +70,6 @@ public class ProjectFileControl extends BaseServerController {
 	@RequestMapping(value = "deleteFile", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
 	@Feature(method = MethodFeature.DEL_FILE)
-	@OptLog(UserOperateLogV1.OptType.DelProjectFile)
 	public String deleteFile() {
 		return NodeForward.request(getNode(), getRequest(), NodeUrl.Manage_File_DeleteFile).toString();
 	}

@@ -158,10 +158,10 @@ public class StringUtil {
 	 * @return data
 	 */
 	public static <T> T jsonConvert(String jsonStr, Class<T> cls) {
+		if (StrUtil.isEmpty(jsonStr)) {
+			return null;
+		}
 		try {
-			if (StrUtil.isEmpty(jsonStr)) {
-				return null;
-			}
 			return JSON.parseObject(jsonStr, cls);
 		} catch (Exception e) {
 			return JSON.parseObject(JSON.parse(jsonStr).toString(), cls);
@@ -183,7 +183,8 @@ public class StringUtil {
 			}
 			return JSON.parseArray(jsonStr, cls);
 		} catch (Exception e) {
-			return JSON.parseArray(JSON.parse(jsonStr).toString(), cls);
+			Object parse = JSON.parse(jsonStr);
+			return JSON.parseArray(parse.toString(), cls);
 		}
 	}
 }

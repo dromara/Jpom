@@ -37,13 +37,11 @@ import io.jpom.build.BuildInfoManage;
 import io.jpom.build.BuildUtil;
 import io.jpom.build.ReleaseManage;
 import io.jpom.common.BaseServerController;
-import io.jpom.common.interceptor.OptLog;
 import io.jpom.model.BaseEnum;
 import io.jpom.model.data.BuildInfoModel;
 import io.jpom.model.data.UserModel;
 import io.jpom.model.enums.BuildStatus;
 import io.jpom.model.log.BuildHistoryLog;
-import io.jpom.model.log.UserOperateLogV1;
 import io.jpom.plugin.ClassFeature;
 import io.jpom.plugin.Feature;
 import io.jpom.plugin.MethodFeature;
@@ -86,13 +84,12 @@ public class BuildInfoManageController extends BaseServerController {
 	 * @return json
 	 */
 	@RequestMapping(value = "/build/manage/start", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	@OptLog(UserOperateLogV1.OptType.StartBuild)
 	@Feature(method = MethodFeature.EXECUTE)
 	public String start(@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据")) String id) {
 		BuildInfoModel item = buildInfoService.getByKey(id);
 		Assert.notNull(item, "没有对应数据");
 		String e = buildInfoService.checkStatus(item.getStatus());
-		Assert.isNull(e, e);
+		Assert.isNull(e, () -> e);
 		// set buildId field
 		int buildId = ObjectUtil.defaultIfNull(item.getBuildId(), 0);
 		item.setBuildId(buildId + 1);
@@ -112,7 +109,6 @@ public class BuildInfoManageController extends BaseServerController {
 	 * @return json
 	 */
 	@RequestMapping(value = "/build/manage/cancel", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	@OptLog(UserOperateLogV1.OptType.CancelBuild)
 	@Feature(method = MethodFeature.EXECUTE)
 	public String cancel(@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据")) String id) {
 		BuildInfoModel item = buildInfoService.getByKey(id);
@@ -137,7 +133,6 @@ public class BuildInfoManageController extends BaseServerController {
 	 * @return json
 	 */
 	@RequestMapping(value = "/build/manage/reRelease", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	@OptLog(UserOperateLogV1.OptType.ReReleaseBuild)
 	@Feature(method = MethodFeature.EXECUTE)
 	public String reRelease(@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据")) String logId) {
 		BuildHistoryLog buildHistoryLog = dbBuildHistoryLogService.getByKey(logId);

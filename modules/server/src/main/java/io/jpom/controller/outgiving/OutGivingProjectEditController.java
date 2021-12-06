@@ -33,12 +33,10 @@ import com.alibaba.fastjson.JSONObject;
 import io.jpom.common.BaseServerController;
 import io.jpom.common.forward.NodeForward;
 import io.jpom.common.forward.NodeUrl;
-import io.jpom.common.interceptor.OptLog;
 import io.jpom.model.AfterOpt;
 import io.jpom.model.BaseEnum;
 import io.jpom.model.RunMode;
 import io.jpom.model.data.*;
-import io.jpom.model.log.UserOperateLogV1;
 import io.jpom.plugin.ClassFeature;
 import io.jpom.plugin.Feature;
 import io.jpom.plugin.MethodFeature;
@@ -107,7 +105,6 @@ public class OutGivingProjectEditController extends BaseServerController {
 	 */
 	@RequestMapping(value = "delete_project", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
-	@OptLog(UserOperateLogV1.OptType.DeleteOutgivingProject)
 	@Feature(method = MethodFeature.DEL)
 	public String delete(String id) {
 		OutGivingModel outGivingModel = outGivingServer.getByKey(id);
@@ -379,7 +376,7 @@ public class OutGivingProjectEditController extends BaseServerController {
 		// 删除已经删除的项目
 		deleteProject(outGivingModel, outGivingNodeProjects, userModel);
 
-		outGivingModel.setOutGivingNodeProjectList(outGivingNodeProjects);
+		outGivingModel.outGivingNodeProjectList(outGivingNodeProjects);
 
 		return tuples;
 	}

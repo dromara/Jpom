@@ -5,9 +5,7 @@ import cn.jiangzeyin.common.JsonMessage;
 import io.jpom.common.BaseServerController;
 import io.jpom.common.forward.NodeForward;
 import io.jpom.common.forward.NodeUrl;
-import io.jpom.common.interceptor.OptLog;
 import io.jpom.model.data.AgentWhitelist;
-import io.jpom.model.log.UserOperateLogV1;
 import io.jpom.permission.SystemPermission;
 import io.jpom.service.system.WhitelistDirectoryService;
 import org.springframework.http.MediaType;
@@ -20,7 +18,6 @@ import javax.annotation.Resource;
 import java.lang.reflect.Field;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -71,7 +68,6 @@ public class WhitelistDirectoryController extends BaseServerController {
 	 */
 	@RequestMapping(value = "whitelistDirectory_submit", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
-	@OptLog(UserOperateLogV1.OptType.EditWhitelist)
 	@SystemPermission
 	public String whitelistDirectorySubmit() {
 		return NodeForward.request(getNode(), getRequest(), NodeUrl.WhitelistDirectory_Submit).toString();

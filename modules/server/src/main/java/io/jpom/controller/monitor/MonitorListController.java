@@ -30,16 +30,18 @@ import cn.jiangzeyin.common.validator.ValidatorConfig;
 import cn.jiangzeyin.common.validator.ValidatorItem;
 import cn.jiangzeyin.common.validator.ValidatorRule;
 import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
 import io.jpom.common.BaseServerController;
 import io.jpom.model.Cycle;
 import io.jpom.model.PageResultDto;
 import io.jpom.model.data.MonitorModel;
+import io.jpom.model.data.UserModel;
 import io.jpom.plugin.ClassFeature;
 import io.jpom.plugin.Feature;
 import io.jpom.plugin.MethodFeature;
 import io.jpom.service.dblog.DbMonitorNotifyLogService;
 import io.jpom.service.monitor.MonitorService;
+import io.jpom.service.node.ProjectInfoCacheService;
+import io.jpom.service.user.UserService;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -47,9 +49,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.annotation.Resource;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -64,12 +64,18 @@ import java.util.List;
 public class MonitorListController extends BaseServerController {
 
 	private final MonitorService monitorService;
+	private final DbMonitorNotifyLogService dbMonitorNotifyLogService;
+	private final UserService userService;
+	private final ProjectInfoCacheService projectInfoCacheService;
 
-	@Resource
-	private DbMonitorNotifyLogService dbMonitorNotifyLogService;
-
-	public MonitorListController(MonitorService monitorService) {
+	public MonitorListController(MonitorService monitorService,
+								 DbMonitorNotifyLogService dbMonitorNotifyLogService,
+								 UserService userService,
+								 ProjectInfoCacheService projectInfoCacheService) {
 		this.monitorService = monitorService;
+		this.dbMonitorNotifyLogService = dbMonitorNotifyLogService;
+		this.userService = userService;
+		this.projectInfoCacheService = projectInfoCacheService;
 	}
 
 	/**
@@ -127,28 +133,33 @@ public class MonitorListController extends BaseServerController {
 
 		JSONArray jsonArray = JSONArray.parseArray(notifyUser);
 //		List<String> notifyUsers = jsonArray.toJavaList(String.class);
-
+		List<String> notifyUserList = jsonArray.toJavaList(String.class);
 		Assert.notEmpty(jsonArray, "请选择报警联系人");
+		for (Object o : jsonArray) {
+			String userId = (String) o;
+			Assert.state(userService.exists(new UserModel(userId)), "没有对应的用户：" + userId);
+		}
 		String projects = getParameter("projects");
 		JSONArray projectsArray = JSONArray.parseArray(projects);
-		Assert.notEmpty(projectsArray, "请至少选择一个项目");
-
+		List<MonitorModel.NodeProject> nodeProjects = projectsArray.toJavaList(MonitorModel.NodeProject.class);
+		Assert.notEmpty(nodeProjects, "请至少选择一个节点");
+		for (MonitorModel.NodeProject nodeProject : nodeProjects) {
+			Assert.notEmpty(nodeProject.getProjects(), "请至少选择一个项目");
+			for (String project : nodeProject.getProjects()) {
+				boolean exists = projectInfoCacheService.exists(nodeProject.getNode(), project);
+				Assert.state(exists, "没有对应的项目：" + project);
+			}
+		}
 		boolean start = "on".equalsIgnoreCase(status);
 		MonitorModel monitorModel = monitorService.getByKey(id);
 		if (monitorModel == null) {
 			monitorModel = new MonitorModel();
 		}
-		//
-		List<MonitorModel.NodeProject> nodeProjects = new ArrayList<>();
-		projectsArray.forEach(o -> {
-			JSONObject jsonObject = (JSONObject) o;
-			nodeProjects.add(jsonObject.toJavaObject(MonitorModel.NodeProject.class));
-		});
 		monitorModel.setAutoRestart("on".equalsIgnoreCase(autoRestart));
 		monitorModel.setCycle(cycle);
-		monitorModel.setProjects(nodeProjects);
+		monitorModel.projects(nodeProjects);
 		monitorModel.setStatus(start);
-		monitorModel.setNotifyUser(jsonArray.toString());
+		monitorModel.notifyUser(notifyUserList);
 		monitorModel.setName(name);
 
 		if (StrUtil.isEmpty(id)) {

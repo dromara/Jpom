@@ -23,34 +23,24 @@
 package io.jpom.system.init;
 
 import cn.hutool.core.date.DateUtil;
-import cn.hutool.core.util.ObjectUtil;
-import cn.hutool.core.util.StrUtil;
 import cn.hutool.db.Entity;
-import cn.hutool.extra.servlet.ServletUtil;
 import cn.jiangzeyin.common.JsonMessage;
 import cn.jiangzeyin.common.PreLoadClass;
 import cn.jiangzeyin.common.PreLoadMethod;
 import cn.jiangzeyin.common.spring.SpringUtil;
 import com.alibaba.fastjson.JSONObject;
 import io.jpom.common.BaseServerController;
-import io.jpom.common.interceptor.OptLog;
 import io.jpom.model.data.NodeModel;
 import io.jpom.model.data.UserModel;
 import io.jpom.model.log.UserOperateLogV1;
 import io.jpom.service.dblog.DbUserOperateLogService;
-import io.jpom.service.user.UserService;
 import io.jpom.system.AopLogInterface;
 import io.jpom.system.WebAopLog;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.Signature;
 import org.aspectj.lang.reflect.MethodSignature;
-import org.springframework.http.HttpHeaders;
-import org.springframework.web.context.request.ServletRequestAttributes;
 
-import javax.servlet.http.HttpServletRequest;
 import java.lang.reflect.Method;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * 操作记录控制器
@@ -74,45 +64,45 @@ public class OperateLogController implements AopLogInterface {
 		if (signature instanceof MethodSignature) {
 			MethodSignature methodSignature = (MethodSignature) signature;
 			Method method = methodSignature.getMethod();
-			UserOperateLogV1.OptType optType = null;
-			OptLog optLog = method.getAnnotation(OptLog.class);
-			if (optLog != null) {
-				optType = optLog.value();
-			}
-			if (optType != null) {
-				CacheInfo cacheInfo = new CacheInfo();
-				cacheInfo.optType = optType;
-
-				ServletRequestAttributes servletRequestAttributes = BaseServerController.getRequestAttributes();
-				HttpServletRequest request = servletRequestAttributes.getRequest();
-				if (optType == UserOperateLogV1.OptType.Login) {
-					// 获取登录人的信息
-					String userName = request.getParameter("userName");
-					UserService userService = SpringUtil.getBean(UserService.class);
-					cacheInfo.userModel = userService.getByKey(userName);
-				}
-				// 获取ip地址
-				cacheInfo.ip = ServletUtil.getClientIP(request);
-				// 获取节点
-				cacheInfo.nodeModel = (NodeModel) request.getAttribute("node");
-				//
-				cacheInfo.dataId = request.getParameter("id");
-				//
-				cacheInfo.userAgent = ServletUtil.getHeaderIgnoreCase(request, HttpHeaders.USER_AGENT);
-				//
-				Map<String, String[]> map = ObjectUtil.clone(request.getParameterMap());
-				// 过滤密码字段
-				Set<Map.Entry<String, String[]>> entries = map.entrySet();
-				for (Map.Entry<String, String[]> entry : entries) {
-					String key = entry.getKey();
-					if (StrUtil.containsAnyIgnoreCase(key, "pwd", "password")) {
-						entry.setValue(new String[]{"***"});
-					}
-				}
-				cacheInfo.setReqData(JSONObject.toJSONString(map));
-				CACHE_INFO_THREAD_LOCAL.set(cacheInfo);
-			}
+//			UserOperateLogV1.OptType optType = null;
+//			OptLog optLog = method.getAnnotation(OptLog.class);
+//			if (optLog != null) {
+//				optType = optLog.value();
+//			}
+//			if (optType != null) {
+//				CacheInfo cacheInfo = new CacheInfo();
+//				cacheInfo.optType = optType;
+//
+//				ServletRequestAttributes servletRequestAttributes = BaseServerController.getRequestAttributes();
+//				HttpServletRequest request = servletRequestAttributes.getRequest();
+//				if (optType == UserOperateLogV1.OptType.Login) {
+//					// 获取登录人的信息
+//					String userName = request.getParameter("userName");
+//					UserService userService = SpringUtil.getBean(UserService.class);
+//					cacheInfo.userModel = userService.getByKey(userName);
+//				}
+//				// 获取ip地址
+//				cacheInfo.ip = ServletUtil.getClientIP(request);
+//				// 获取节点
+//				cacheInfo.nodeModel = (NodeModel) request.getAttribute("node");
+//				//
+//				cacheInfo.dataId = request.getParameter("id");
+//				//
+//				cacheInfo.userAgent = ServletUtil.getHeaderIgnoreCase(request, HttpHeaders.USER_AGENT);
+//				//
+//				Map<String, String[]> map = ObjectUtil.clone(request.getParameterMap());
+//				// 过滤密码字段
+//				Set<Map.Entry<String, String[]>> entries = map.entrySet();
+//				for (Map.Entry<String, String[]> entry : entries) {
+//					String key = entry.getKey();
+//					if (StrUtil.containsAnyIgnoreCase(key, "pwd", "password")) {
+//						entry.setValue(new String[]{"***"});
+//					}
+//				}
+//				cacheInfo.setReqData(JSONObject.toJSONString(map));
+//				CACHE_INFO_THREAD_LOCAL.set(cacheInfo);
 		}
+//		}
 	}
 
 	@Override
@@ -136,7 +126,7 @@ public class OperateLogController implements AopLogInterface {
 	public void log(String reqId, UserModel userModel,
 					Object value, CacheInfo cacheInfo) {
 		String ip = cacheInfo.ip;
-		UserOperateLogV1.OptType optType = cacheInfo.optType;
+
 		NodeModel nodeModel = cacheInfo.nodeModel;
 		String dataId = cacheInfo.dataId;
 		UserOperateLogV1 userOperateLogV1 = new UserOperateLogV1();
@@ -161,7 +151,7 @@ public class OperateLogController implements AopLogInterface {
 			}
 		}
 		userOperateLogV1.setCreateTimeMillis(DateUtil.current());
-		userOperateLogV1.setOptType(optType.getCode());
+//		userOperateLogV1.setOptType(optType.getCode());
 		//
 		if (nodeModel != null) {
 			userOperateLogV1.setNodeId(nodeModel.getId());
@@ -203,7 +193,7 @@ public class OperateLogController implements AopLogInterface {
 	 * 临时缓存
 	 */
 	public static class CacheInfo {
-		private UserOperateLogV1.OptType optType;
+		//		private UserOperateLogV1.OptType optType;
 		private UserModel userModel;
 		private String ip;
 		private NodeModel nodeModel;
@@ -215,9 +205,9 @@ public class OperateLogController implements AopLogInterface {
 			this.reqData = reqData;
 		}
 
-		public void setOptType(UserOperateLogV1.OptType optType) {
-			this.optType = optType;
-		}
+//		public void setOptType(UserOperateLogV1.OptType optType) {
+//			this.optType = optType;
+//		}
 
 		public void setUserModel(UserModel userModel) {
 			this.userModel = userModel;

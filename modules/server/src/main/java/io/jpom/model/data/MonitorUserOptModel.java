@@ -22,89 +22,153 @@
  */
 package io.jpom.model.data;
 
-import io.jpom.model.BaseModel;
-import io.jpom.model.log.UserOperateLogV1;
+import com.alibaba.fastjson.JSON;
+import io.jpom.model.BaseWorkspaceModel;
+import io.jpom.plugin.ClassFeature;
+import io.jpom.plugin.MethodFeature;
+import io.jpom.service.h2db.TableName;
+import io.jpom.util.StringUtil;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * 监控用户操作实体
  *
  * @author Arno
  */
-public class MonitorUserOptModel extends BaseModel {
-    /**
-     * 监控的人员
-     */
-    private List<String> monitorUser;
+@TableName("MONITOR_USER_OPT")
+public class MonitorUserOptModel extends BaseWorkspaceModel {
+	/**
+	 *
+	 */
+	private String name;
+	/**
+	 * 监控的人员
+	 */
+	private String monitorUser;
+	/**
+	 * 监控的功能
+	 *
+	 * @see ClassFeature
+	 */
+	private String monitorFeature;
+	/**
+	 * 监控的操作
+	 *
+	 * @see MethodFeature
+	 */
+	private String monitorOpt;
+	/**
+	 * 报警联系人
+	 */
+	private String notifyUser;
 
-    /**
-     * 监控的操作
-     */
-    private List<UserOperateLogV1.OptType> monitorOpt;
-    /**
-     * 报警联系人
-     */
-    private List<String> notifyUser;
+	/**
+	 * 监控开启状态
+	 */
+	private Boolean status;
 
-    /**
-     * 创建人
-     */
-    private String parent;
-    /**
-     * 最后修改时间
-     */
-    private long modifyTime;
-    /**
-     * 监控开启状态
-     */
-    private boolean status;
+	public String getName() {
+		return name;
+	}
 
-    public List<String> getMonitorUser() {
-        return monitorUser;
-    }
+	public void setName(String name) {
+		this.name = name;
+	}
 
-    public void setMonitorUser(List<String> monitorUser) {
-        this.monitorUser = monitorUser;
-    }
+	public void setMonitorUser(String monitorUser) {
+		this.monitorUser = monitorUser;
+	}
 
-    public List<UserOperateLogV1.OptType> getMonitorOpt() {
-        return monitorOpt;
-    }
+	public String getMonitorFeature() {
+		return JSON.toJSONString(monitorFeature());
+	}
 
-    public void setMonitorOpt(List<UserOperateLogV1.OptType> monitorOpt) {
-        this.monitorOpt = monitorOpt;
-    }
+	public List<ClassFeature> monitorFeature() {
+		return StringUtil.jsonConvertArray(monitorFeature, ClassFeature.class);
+	}
 
-    public List<String> getNotifyUser() {
-        return notifyUser;
-    }
+	public void setMonitorFeature(String monitorFeature) {
+		this.monitorFeature = monitorFeature;
+	}
 
-    public void setNotifyUser(List<String> notifyUser) {
-        this.notifyUser = notifyUser;
-    }
+	public void monitorFeature(List<ClassFeature> monitorFeature) {
+		if (monitorFeature == null) {
+			this.monitorFeature = null;
+		} else {
+			this.monitorFeature = JSON.toJSONString(monitorFeature.stream().map(Enum::name).collect(Collectors.toList()));
+		}
+	}
 
-    public String getParent() {
-        return parent;
-    }
+	public String getMonitorOpt() {
+		return JSON.toJSONString(monitorOpt());
+	}
 
-    public void setParent(String parent) {
-        this.parent = parent;
-    }
 
-    public long getModifyTime() {
-        return modifyTime;
-    }
+	public List<MethodFeature> monitorOpt() {
+		return StringUtil.jsonConvertArray(monitorOpt, MethodFeature.class);
+	}
 
-    public void setModifyTime(long modifyTime) {
-        this.modifyTime = modifyTime;
-    }
+	public void setMonitorOpt(String monitorOpt) {
+		this.monitorOpt = monitorOpt;
+	}
 
-    public boolean isStatus() {
-        return status;
-    }
+	public void setMonitorOpt(List<MethodFeature> monitorOpt) {
+		if (monitorOpt == null) {
+			this.monitorOpt = null;
+		} else {
+			this.monitorOpt = JSON.toJSONString(monitorOpt.stream().map(Enum::name).collect(Collectors.toList()));
+		}
+	}
 
-    public void setStatus(boolean status) {
-        this.status = status;
-    }
+	public void setNotifyUser(String notifyUser) {
+		this.notifyUser = notifyUser;
+	}
+
+	public Boolean getStatus() {
+		return status;
+	}
+
+	public String getMonitorUser() {
+		return JSON.toJSONString(monitorUser());
+	}
+
+	public String getNotifyUser() {
+		return JSON.toJSONString(notifyUser());
+
+	}
+
+	public List<String> monitorUser() {
+		return StringUtil.jsonConvertArray(monitorUser, String.class);
+	}
+
+	public void setMonitorUser(List<String> monitorUser) {
+		if (monitorUser == null) {
+			this.monitorUser = null;
+		} else {
+			this.monitorUser = JSON.toJSONString(monitorUser);
+		}
+	}
+
+	public List<String> notifyUser() {
+		return StringUtil.jsonConvertArray(notifyUser, String.class);
+	}
+
+	public void notifyUser(List<String> notifyUser) {
+		if (notifyUser == null) {
+			this.notifyUser = null;
+		} else {
+			this.notifyUser = JSON.toJSONString(notifyUser);
+		}
+	}
+
+
+	public boolean isStatus() {
+		return status != null && status;
+	}
+
+	public void setStatus(Boolean status) {
+		this.status = status;
+	}
 }

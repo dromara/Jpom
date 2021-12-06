@@ -22,11 +22,13 @@
  */
 package io.jpom.model.data;
 
-import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
-import io.jpom.model.*;
+import io.jpom.model.BaseEnum;
+import io.jpom.model.BaseJsonModel;
+import io.jpom.model.BaseWorkspaceModel;
+import io.jpom.model.Cycle;
 import io.jpom.service.h2db.TableName;
+import io.jpom.util.StringUtil;
 
 import java.util.List;
 
@@ -107,29 +109,19 @@ public class MonitorModel extends BaseWorkspaceModel {
 	}
 
 	public List<NodeProject> projects() {
-		if (StrUtil.isEmpty(projects)) {
-			return null;
-		}
-		return JSONArray.parseArray(projects, NodeProject.class);
+		return StringUtil.jsonConvertArray(projects, NodeProject.class);
 	}
 
-
-	public List<String> notifyUser() {
-		if (StrUtil.isEmpty(notifyUser)) {
-			return null;
-		}
-		return JSONArray.parseArray(notifyUser, String.class);
-	}
 
 	public String getProjects() {
-		return projects;
+		return JSON.toJSONString(projects());
 	}
 
 	public void setProjects(String projects) {
 		this.projects = projects;
 	}
 
-	public void setProjects(List<NodeProject> projects) {
+	public void projects(List<NodeProject> projects) {
 		if (projects == null) {
 			this.projects = null;
 		} else {
@@ -137,16 +129,20 @@ public class MonitorModel extends BaseWorkspaceModel {
 		}
 	}
 
+	public List<String> notifyUser() {
+		return StringUtil.jsonConvertArray(notifyUser, String.class);
+	}
+
 	public String getNotifyUser() {
-		return notifyUser;
+		return JSON.toJSONString(notifyUser());
 	}
 
 	public void setNotifyUser(String notifyUser) {
 		this.notifyUser = notifyUser;
 	}
 
-	public void setNotifyUser(List<String> notifyUser) {
-		if (projects == null) {
+	public void notifyUser(List<String> notifyUser) {
+		if (notifyUser == null) {
 			this.notifyUser = null;
 		} else {
 			this.notifyUser = JSON.toJSONString(notifyUser);

@@ -182,5 +182,25 @@ CREATE TABLE IF NOT EXISTS PUBLIC.OUT_GIVING
 );
 comment on table OUT_GIVING is '节点分发信息';
 
+-- 操作监控
+CREATE TABLE IF NOT EXISTS PUBLIC.MONITOR_USER_OPT
+(
+	ID               VARCHAR(50) not null comment 'id',
+	CREATETIMEMILLIS BIGINT COMMENT '数据创建时间',
+	MODIFYTIMEMILLIS BIGINT COMMENT '数据修改时间',
+	MODIFYUSER       VARCHAR(50) comment '修改人',
+	STRIKE           int     DEFAULT 0 comment '逻辑删除{1，删除，0 未删除(默认)}',
+	workspaceId      varchar(50) not null comment '所属工作空间',
+	`NAME`           VARCHAR(50) not null comment '名称',
+	monitorUser      CLOB comment '监控的人',
+	status           TINYINT DEFAULT 0 comment '启用状态{1，启用，0 未启用}',
+	notifyUser       CLOB comment '报警联系人',
+	monitorFeature   CLOB comment '监控的项目',
+	monitorOpt       CLOB comment '监控的项目',
+	CONSTRAINT MONITOR_USER_OPT_PK PRIMARY KEY (ID)
+);
+comment on table MONITOR_USER_OPT is '监控信息';
+
+
 
 

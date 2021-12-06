@@ -104,7 +104,6 @@ public class OutGivingModel extends BaseWorkspaceModel {
 	}
 
 	public String getOutGivingNodeProjectList() {
-		System.out.println(outGivingNodeProjectList);
 		return outGivingNodeProjectList;
 	}
 
@@ -113,13 +112,10 @@ public class OutGivingModel extends BaseWorkspaceModel {
 	}
 
 	public List<OutGivingNodeProject> outGivingNodeProjectList() {
-		if (StrUtil.isEmpty(outGivingNodeProjectList)) {
-			return null;
-		}
 		return StringUtil.jsonConvertArray(outGivingNodeProjectList, OutGivingNodeProject.class);
 	}
 
-	public void setOutGivingNodeProjectList(List<OutGivingNodeProject> outGivingNodeProjectList) {
+	public void outGivingNodeProjectList(List<OutGivingNodeProject> outGivingNodeProjectList) {
 		if (outGivingNodeProjectList == null) {
 			this.outGivingNodeProjectList = null;
 		} else {

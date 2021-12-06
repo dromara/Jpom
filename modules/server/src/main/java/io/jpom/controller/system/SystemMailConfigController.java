@@ -26,10 +26,8 @@ import cn.hutool.extra.mail.MailAccount;
 import cn.hutool.extra.mail.MailUtil;
 import cn.jiangzeyin.common.JsonMessage;
 import io.jpom.common.BaseServerController;
-import io.jpom.common.interceptor.OptLog;
 import io.jpom.model.data.MailAccountModel;
 import io.jpom.model.data.UserModel;
-import io.jpom.model.log.UserOperateLogV1;
 import io.jpom.monitor.EmailUtil;
 import io.jpom.permission.SystemPermission;
 import io.jpom.service.system.SystemParametersServer;
@@ -77,7 +75,6 @@ public class SystemMailConfigController extends BaseServerController {
 
 	@RequestMapping(value = "mailConfig_save.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
-	@OptLog(UserOperateLogV1.OptType.EditMailConfig)
 	@SystemPermission
 	public String listData(MailAccountModel mailAccountModel) {
 		Assert.notNull(mailAccountModel, "请填写信息,并检查是否填写合法");

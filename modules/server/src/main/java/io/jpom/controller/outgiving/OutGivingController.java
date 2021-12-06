@@ -192,7 +192,7 @@ public class OutGivingController extends BaseServerController {
 
 		Assert.state(CollUtil.size(outGivingNodeProjects) >= 2, "至少选择2个节点项目");
 
-		outGivingModel.setOutGivingNodeProjectList(outGivingNodeProjects);
+		outGivingModel.outGivingNodeProjectList(outGivingNodeProjects);
 		//
 		String afterOpt = getParameter("afterOpt");
 		AfterOpt afterOpt1 = BaseEnum.getEnum(AfterOpt.class, Convert.toInt(afterOpt, 0));

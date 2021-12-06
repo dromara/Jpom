@@ -29,49 +29,77 @@ package io.jpom.plugin;
  * @date 2019/8/13
  */
 public enum ClassFeature {
-    /**
-     * 没有
-     */
-    NULL(""),
-    /**
-     * ssh
-     */
-    SSH("SSH管理"),
-    NODE("节点管理"),
-    OUTGIVING("分发管理"),
-    MONITOR("监控管理"),
-    BUILD("在线构建"),
+	/**
+	 * 没有
+	 */
+	NULL(""),
+	NODE("节点管理"),
+	UPGRADE_NODE_LIST("节点升级"),
+	SEARCH_PROJECT("搜索项目"),
+	SSH("SSH管理"),
+	SSH_FILE("SSH文件管理"),
+	SSH_TERMINAL("SSH终端"),
+	SSH_TERMINAL_LOG("SSH终端日志"),
+	OUTGIVING("分发管理"),
+	OUTGIVING_LOG("分发日志"),
+	OUTGIVING_CONFIG_WHITELIST("分发白名单配置"),
+	MONITOR("项目监控"),
+	MONITOR_LOG("监控日志"),
+	OPT_MONITOR("操作监控"),
+	/**
+	 * ssh
+	 */
+	BUILD("在线构建"),
+	BUILD_LOG("构建日志"),
 	BUILD_REPOSITORY("仓库信息"),
-    USER("用户管理"),
-    SYSTEM("系统管理"),
-    USER_ROLE("用户角色"),
-    NGINX("Nginx"),
-    SSL("ssl证书"),
-    //******************************************     节点管理功能
-    PROJECT("项目管理", ClassFeature.NODE),
-    PROJECT_RECOVER("项目回收", ClassFeature.NODE),
-    SCRIPT("脚本模板", ClassFeature.NODE),
-    TOMCAT("Tomcat", ClassFeature.NODE),
-    ;
+	USER("用户管理"),
+	USER_LOG("操作日志"),
+	SYSTEM_EMAIL("邮箱配置"),
+	SYSTEM_CACHE("系统缓存"),
+	SYSTEM_LOG("系统日志"),
+	SYSTEM_UPGRADE("在线升级"),
+	SYSTEM_CONFIG("系统配置"),
+	SYSTEM_BACKUP("数据库备份"),
+	SYSTEM_WORKSPACE("工作空间"),
 
-    private final String name;
+	//******************************************     节点管理功能
+	PROJECT("项目管理", ClassFeature.NODE),
+	PROJECT_FILE("项目文件管理", ClassFeature.NODE),
+	JDK_LIST("JDK管理", ClassFeature.NODE),
+	SCRIPT("脚本模板", ClassFeature.NODE),
+	TOMCAT("Tomcat", ClassFeature.NODE),
 
-    private ClassFeature parent;
+	NGINX("Nginx", ClassFeature.NODE),
+	SSL("ssl证书", ClassFeature.NODE),
+	NODE_CONFIG_WHITELIST("节点白名单配置", ClassFeature.NODE),
+	NODE_CONFIG("节点白名单配置", ClassFeature.NODE),
+	NODE_CACHE("节点缓存", ClassFeature.NODE),
+	NODE_LOG("节点系统日志", ClassFeature.NODE),
+	NODE_UPGRADE("节点在线升级", ClassFeature.NODE),
 
-    public String getName() {
-        return name;
-    }
 
-    public ClassFeature getParent() {
-        return parent;
-    }
+//	PROJECT_RECOVER("项目回收", ClassFeature.NODE),
 
-    ClassFeature(String name) {
-        this.name = name;
-    }
+	;
 
-    ClassFeature(String name, ClassFeature parent) {
-        this.name = name;
-        this.parent = parent;
-    }
+	private final String name;
+
+	private ClassFeature parent;
+
+	public String getName() {
+		return name;
+	}
+
+	public ClassFeature getParent() {
+		return parent;
+	}
+
+	ClassFeature(String name) {
+		this.name = name;
+	}
+
+	ClassFeature(String name, ClassFeature parent) {
+		this.name = name;
+		this.parent = parent;
+	}
 }

@@ -29,7 +29,6 @@ import io.jpom.common.forward.NodeForward;
 import io.jpom.common.forward.NodeUrl;
 import io.jpom.model.data.NodeModel;
 import io.jpom.model.data.UserModel;
-import io.jpom.model.log.UserOperateLogV1;
 import io.jpom.system.init.OperateLogController;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.socket.TextMessage;
@@ -135,12 +134,12 @@ public abstract class BaseProxyHandler extends BaseHandler {
 									 ConsoleCommandOp consoleCommandOp) {
 	}
 
-	protected OperateLogController.CacheInfo cacheInfo(Map<String, Object> attributes, JSONObject json, UserOperateLogV1.OptType optType, String dataId) {
+	protected OperateLogController.CacheInfo cacheInfo(Map<String, Object> attributes, JSONObject json, String dataId) {
 		String ip = (String) attributes.get("ip");
 		NodeModel nodeModel = (NodeModel) attributes.get("nodeInfo");
 		OperateLogController.CacheInfo cacheInfo = new OperateLogController.CacheInfo();
 		cacheInfo.setIp(ip);
-		cacheInfo.setOptType(optType);
+//		cacheInfo.setOptType(optType);
 		cacheInfo.setNodeModel(nodeModel);
 		cacheInfo.setDataId(dataId);
 		String userAgent = (String) attributes.get(HttpHeaders.USER_AGENT);

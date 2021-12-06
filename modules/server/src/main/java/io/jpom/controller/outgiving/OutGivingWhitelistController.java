@@ -28,10 +28,8 @@ import cn.hutool.core.util.ReUtil;
 import cn.hutool.core.util.ReflectUtil;
 import cn.jiangzeyin.common.JsonMessage;
 import io.jpom.common.BaseServerController;
-import io.jpom.common.interceptor.OptLog;
 import io.jpom.model.data.AgentWhitelist;
 import io.jpom.model.data.ServerWhitelist;
-import io.jpom.model.log.UserOperateLogV1;
 import io.jpom.permission.SystemPermission;
 import io.jpom.plugin.ClassFeature;
 import io.jpom.plugin.Feature;
@@ -99,7 +97,6 @@ public class OutGivingWhitelistController extends BaseServerController {
 	 */
 	@RequestMapping(value = "whitelistDirectory_submit", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
-	@OptLog(UserOperateLogV1.OptType.SaveOutgivingWhitelist)
 	@SystemPermission
 	public String whitelistDirectorySubmit(String outGiving, String allowRemoteDownloadHost) {
 		List<String> list = AgentWhitelist.parseToList(outGiving, true, "项目路径白名单不能为空");

@@ -5,7 +5,7 @@
       <a-button type="primary" @click="loadData">刷新</a-button>
     </div>
     <!-- 数据表格 -->
-    <a-table :data-source="list" :loading="loading" :columns="columns" :pagination="false" bordered :rowKey="(record, index) => index">
+    <a-table :data-source="list" :loading="loading" :columns="columns" :pagination="this.pagination" @change="changePage" bordered :rowKey="(record, index) => index">
       <a-tooltip slot="name" slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>
@@ -30,13 +30,40 @@
           <a-switch v-model="temp.start" checked-children="开" un-checked-children="关" />
         </a-form-model-item>
         <a-form-model-item label="监控用户" prop="monitorUser">
-          <a-transfer :data-source="monitorUserList" show-search :filter-option="filterOption" :target-keys="monitorUserKeys" :render="(item) => item.title" @change="handleMonitorUserChange" />
+          <a-transfer
+            :data-source="monitorUserList"
+            :lazy="false"
+            show-search
+            :filter-option="filterOption"
+            :target-keys="monitorUserKeys"
+            :render="(item) => item.title"
+            @change="handleMonitorUserChange"
+          />
+        </a-form-model-item>
+        <a-form-model-item label="监控功能" prop="monitorOpt">
+          <a-transfer
+            :data-source="classFeature"
+            :lazy="false"
+            show-search
+            :filter-option="filterOption"
+            :target-keys="classFeatureKeys"
+            :render="(item) => item.title"
+            @change="handleClassFeatureChange"
+          />
         </a-form-model-item>
         <a-form-model-item label="监控操作" prop="monitorOpt">
-          <a-transfer :data-source="optTypeList" show-search :filter-option="filterOption" :target-keys="monitorOptKeys" :render="(item) => item.title" @change="handleMonitorOptChange" />
+          <a-transfer
+            :data-source="methodFeature"
+            :lazy="false"
+            show-search
+            :filter-option="filterOption"
+            :target-keys="methodFeatureKeys"
+            :render="(item) => item.title"
+            @change="handleMethodFeatureChange"
+          />
         </a-form-model-item>
         <a-form-model-item label="报警联系人" prop="notifyUser" class="jpom-monitor-notify">
-          <a-transfer :data-source="userList" show-search :filter-option="filterOption" :target-keys="notifyUserKeys" :render="(item) => item.title" @change="handleNotifyUserChange" />
+          <a-transfer :data-source="userList" :lazy="false" show-search :filter-option="filterOption" :target-keys="notifyUserKeys" :render="(item) => item.title" @change="handleNotifyUserChange" />
         </a-form-model-item>
       </a-form-model>
     </a-modal>
@@ -44,21 +71,26 @@
 </template>
 <script>
 import { mapGetters } from "vuex";
-import { getMonitorOperateLogList, getMonitorOperateTypeList, editMonitorOperate, deleteMonitorOperate } from "../../api/monitor";
-import { getUserListAll } from "../../api/user";
-import { parseTime } from "../../utils/time";
+import { getMonitorOperateLogList, getMonitorOperateTypeList, editMonitorOperate, deleteMonitorOperate } from "@/api/monitor";
+import { getUserListAll } from "@/api/user";
+import { PAGE_DEFAULT_LIMIT, PAGE_DEFAULT_SIZW_OPTIONS, PAGE_DEFAULT_SHOW_TOTAL, PAGE_DEFAULT_LIST_QUERY } from "@/utils/const";
+import { parseTime } from "@/utils/time";
 export default {
   data() {
     return {
       loading: false,
-      tableHeight: "70vh",
+      listQuery: PAGE_DEFAULT_LIST_QUERY,
       list: [],
-      optTypeList: [],
+
+      classFeature: [],
+      methodFeature: [],
       userList: [],
+      monitorUserList: [],
       temp: {},
       notifyUserKeys: [],
       monitorUserKeys: [],
-      monitorOptKeys: [],
+      classFeatureKeys: [],
+      methodFeatureKeys: [],
       editOperateMonitorVisible: false,
       columns: [
         { title: "名称", dataIndex: "name", scopedSlots: { customRender: "name" }, width: 150 },
@@ -84,13 +116,18 @@ export default {
   },
   computed: {
     ...mapGetters(["getGuideFlag"]),
-    monitorUserList() {
-      // 深拷贝数组对象，修改属性
-      const list = JSON.parse(JSON.stringify(this.userList));
-      list.forEach((ele) => {
-        ele.disabled = false;
-      });
-      return list;
+
+    pagination() {
+      return {
+        total: this.listQuery.total,
+        current: this.listQuery.page || 1,
+        pageSize: this.listQuery.limit || PAGE_DEFAULT_LIMIT,
+        pageSizeOptions: PAGE_DEFAULT_SIZW_OPTIONS,
+        showSizeChanger: true,
+        showTotal: (total) => {
+          return PAGE_DEFAULT_SHOW_TOTAL(total, this.listQuery);
+        },
+      };
     },
   },
   watch: {
@@ -99,7 +136,6 @@ export default {
     },
   },
   created() {
-    
     this.loadData();
     this.loadOptTypeData();
   },
@@ -123,35 +159,46 @@ export default {
       }
       this.$introJs().exit();
     },
-   
+
     // 加载数据
     loadData() {
       this.loading = true;
-      getMonitorOperateLogList().then((res) => {
+      getMonitorOperateLogList(this.listQuery).then((res) => {
         if (res.code === 200) {
-          this.list = res.data;
+          this.list = res.data.result;
+          this.listQuery.total = res.data.total;
         }
         this.loading = false;
       });
     },
     // 加载操作类型数据
     loadOptTypeData() {
-      this.optTypeList = [];
+      // this.optTypeList = [];
       getMonitorOperateTypeList().then((res) => {
         if (res.code === 200) {
-          res.data.forEach((element) => {
-            this.optTypeList.push({ key: element.value, title: element.title, disabled: false });
+          this.methodFeature = res.data.methodFeature.map((element) => {
+            return { key: element.value, title: element.title, disabled: false };
+          });
+          this.classFeature = res.data.classFeature.map((element) => {
+            return { key: element.value, title: element.title, disabled: false };
           });
         }
       });
     },
     // 加载用户列表
     loadUserList() {
-      this.userList = [];
+      // this.userList = [];
       getUserListAll().then((res) => {
         if (res.code === 200) {
-          res.data.forEach((element) => {
-            this.userList.push({ key: element.value, title: element.title, disabled: element.disabled || false });
+          // res.data.forEach((element) => {
+          //   this.userList.push({ key: element.value, title: element.title, disabled: element.disabled || false });
+          // });
+          this.userList = res.data.map((element) => {
+            let canUse = element.email || element.dingDing || element.workWx;
+            return { key: element.id, title: element.name, disabled: !canUse };
+          });
+          this.monitorUserList = res.data.map((element) => {
+            return { key: element.id, title: element.name };
           });
         }
       });
@@ -162,7 +209,8 @@ export default {
         start: false,
       };
       this.notifyUserKeys = [];
-      this.monitorOptKeys = [];
+      this.classFeatureKeys = [];
+      this.methodFeatureKeys = [];
       this.monitorUserKeys = [];
       this.loadUserList();
       this.editOperateMonitorVisible = true;
@@ -180,9 +228,10 @@ export default {
         ...this.temp,
         start: this.temp.status,
       };
-      this.notifyUserKeys = this.temp.notifyUser;
-      this.monitorOptKeys = this.temp.monitorOpt;
-      this.monitorUserKeys = this.temp.monitorUser;
+      this.notifyUserKeys = JSON.parse(this.temp.notifyUser);
+      this.classFeatureKeys = JSON.parse(this.temp.monitorFeature);
+      this.methodFeatureKeys = JSON.parse(this.temp.monitorOpt);
+      this.monitorUserKeys = JSON.parse(this.temp.monitorUser);
       this.editOperateMonitorVisible = true;
     },
     // 穿梭框筛选
@@ -194,9 +243,13 @@ export default {
       this.notifyUserKeys = targetKeys;
     },
     // 穿梭框 change
-    handleMonitorOptChange(targetKeys) {
-      this.monitorOptKeys = targetKeys;
+    handleMethodFeatureChange(targetKeys) {
+      this.methodFeatureKeys = targetKeys;
     },
+    handleClassFeatureChange(targetKeys) {
+      this.classFeatureKeys = targetKeys;
+    },
+
     // 穿梭框 change
     handleMonitorUserChange(targetKeys) {
       this.monitorUserKeys = targetKeys;
@@ -215,9 +268,16 @@ export default {
           });
           return false;
         }
-        if (this.monitorOptKeys.length === 0) {
+        if (this.methodFeatureKeys.length === 0) {
           this.$notification.error({
             message: "请选择监控操作",
+            duration: 2,
+          });
+          return false;
+        }
+        if (this.classFeatureKeys.length === 0) {
+          this.$notification.error({
+            message: "请选择监控的功能",
             duration: 2,
           });
           return false;
@@ -231,7 +291,8 @@ export default {
         }
         // 设置参数
         this.temp.monitorUser = JSON.stringify(this.monitorUserKeys);
-        this.temp.monitorOpt = JSON.stringify(this.monitorOptKeys);
+        this.temp.monitorOpt = JSON.stringify(this.methodFeatureKeys);
+        this.temp.monitorFeature = JSON.stringify(this.classFeatureKeys);
         this.temp.notifyUser = JSON.stringify(this.notifyUserKeys);
         this.temp.start ? (this.temp.status = "on") : (this.temp.status = "no");
         editMonitorOperate(this.temp).then((res) => {
@@ -268,6 +329,16 @@ export default {
           });
         },
       });
+    },
+    // 分页、排序、筛选变化时触发
+    changePage(pagination, filters, sorter) {
+      this.listQuery.page = pagination.current;
+      this.listQuery.limit = pagination.pageSize;
+      if (sorter) {
+        this.listQuery.order = sorter.order;
+        this.listQuery.order_field = sorter.field;
+      }
+      this.loadData();
     },
   },
 };

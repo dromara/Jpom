@@ -446,7 +446,7 @@ public abstract class BaseDbCommonService<T> {
 		try {
 			pageResult = db.page(where, page);
 		} catch (SQLException e) {
-			throw new JpomRuntimeException("数据库异常", e);
+			throw new JpomRuntimeException("数据库异常:" + e.getMessage(), e);
 		}
 		//
 		List<T> list = pageResult.stream().map(entity -> {
