@@ -100,7 +100,19 @@ public class ReleaseManage extends BaseBuild {
 	public ReleaseManage(BuildHistoryLog buildHistoryLog, UserModel userModel) {
 		super(BuildUtil.getLogFile(buildHistoryLog.getBuildDataId(), buildHistoryLog.getBuildNumberId()),
 				buildHistoryLog.getBuildDataId());
-		this.baseBuildModule = buildHistoryLog;
+		this.baseBuildModule = new BaseBuildModule();
+		{
+			//
+			this.baseBuildModule.setAfterOpt(buildHistoryLog.getAfterOpt());
+			this.baseBuildModule.setReleaseMethod(buildHistoryLog.getReleaseMethod());
+			this.baseBuildModule.setReleaseCommand(buildHistoryLog.getReleaseCommand());
+			this.baseBuildModule.setReleasePath(buildHistoryLog.getReleasePath());
+			this.baseBuildModule.setReleaseMethodDataId(buildHistoryLog.getReleaseMethodDataId());
+			this.baseBuildModule.setClearOld(buildHistoryLog.getClearOld());
+			this.baseBuildModule.setResultDirFile(buildHistoryLog.getResultDirFile());
+			this.baseBuildModule.setName(buildHistoryLog.getBuildName());
+		}
+
 		this.buildId = buildHistoryLog.getBuildNumberId();
 		this.userModel = userModel;
 		this.resultFile = BuildUtil.getHistoryPackageFile(this.buildModelId, this.buildId, buildHistoryLog.getResultDirFile());

@@ -37,14 +37,17 @@ import io.jpom.common.BaseServerController;
 import io.jpom.common.ServerOpenApi;
 import io.jpom.common.interceptor.LoginInterceptor;
 import io.jpom.common.interceptor.NotLogin;
+import io.jpom.model.data.UserBindWorkspaceModel;
 import io.jpom.model.data.UserModel;
 import io.jpom.model.dto.UserLoginDto;
+import io.jpom.service.user.UserBindWorkspaceService;
 import io.jpom.service.user.UserService;
 import io.jpom.system.ServerConfigBean;
 import io.jpom.system.ServerExtConfigBean;
 import io.jpom.util.JwtUtil;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -52,6 +55,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import javax.servlet.http.HttpServletResponse;
 import java.awt.*;
 import java.io.IOException;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -74,9 +78,12 @@ public class LoginControl extends BaseServerController {
 //    private static final int INPUT_CODE_ERROR_COUNT = 3;
 
 	private final UserService userService;
+	private final UserBindWorkspaceService userBindWorkspaceService;
 
-	public LoginControl(UserService userService) {
+	public LoginControl(UserService userService,
+						UserBindWorkspaceService userBindWorkspaceService) {
 		this.userService = userService;
+		this.userBindWorkspaceService = userBindWorkspaceService;
 	}
 
 	/**
@@ -180,6 +187,9 @@ public class LoginControl extends BaseServerController {
 				// 验证
 				if (userService.simpleLogin(userName, userPwd) != null) {
 					userModel.unLock();
+					// 判断工作空间
+					List<UserBindWorkspaceModel> bindWorkspaceModels = userBindWorkspaceService.listUserWorkspace(userModel.getId());
+					Assert.notNull(bindWorkspaceModels, "当前账号没有绑定任何工作空间，请联系管理员处理");
 					setSessionAttribute(LoginInterceptor.SESSION_NAME, userModel);
 					removeSessionAttribute(SHOW_CODE);
 					this.ipSuccess();

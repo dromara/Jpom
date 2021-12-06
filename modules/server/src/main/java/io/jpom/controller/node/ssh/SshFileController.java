@@ -49,7 +49,7 @@ import java.util.Vector;
  */
 @RestController
 @RequestMapping("node/ssh")
-@Feature(cls = ClassFeature.SSH)
+@Feature(cls = ClassFeature.SSH_FILE)
 public class SshFileController extends BaseServerController {
 
 	private final SshService sshService;
@@ -96,7 +96,7 @@ public class SshFileController extends BaseServerController {
 	 */
 	@RequestMapping(value = "root_file_data.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
-	@Feature(method = MethodFeature.FILE)
+	@Feature(method = MethodFeature.LIST)
 	public String rootFileList(String id) {
 		SshModel sshModel = sshService.getByKey(id, false);
 		Assert.notNull(sshModel, "不存在对应ssh");
@@ -123,7 +123,7 @@ public class SshFileController extends BaseServerController {
 
 	@RequestMapping(value = "list_file_data.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
-	@Feature(method = MethodFeature.FILE)
+	@Feature(method = MethodFeature.LIST)
 	public String listData(String id, String path, String children) throws SftpException {
 		SshModel sshModel = this.check(id, path, children);
 		//
@@ -133,7 +133,7 @@ public class SshFileController extends BaseServerController {
 
 	@RequestMapping(value = "read_file_data.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
-	@Feature(method = MethodFeature.READ_FILE)
+	@Feature(method = MethodFeature.LIST)
 	public String readFileData(String id, String path, String children) {
 		SshModel sshModel = this.check(id, path, children);
 		//
@@ -146,7 +146,7 @@ public class SshFileController extends BaseServerController {
 
 	@RequestMapping(value = "update_file_data.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
-	@Feature(method = MethodFeature.UPDATE_CONFIG_FILE)
+	@Feature(method = MethodFeature.EDIT)
 	public String updateFileData(String id, String path, String children, String content) {
 		SshModel sshModel = this.check(id, path, children);
 		//

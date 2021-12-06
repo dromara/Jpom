@@ -115,7 +115,7 @@ public class NginxController extends BaseServerController {
 	 */
 	@RequestMapping(value = "config", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
-	@Feature(method = MethodFeature.CONFIG)
+	@Feature(method = MethodFeature.LIST)
 	public String config() {
 		return NodeForward.request(getNode(), getRequest(), NodeUrl.System_Nginx_config).toString();
 	}
@@ -152,7 +152,7 @@ public class NginxController extends BaseServerController {
 	 */
 	@RequestMapping(value = "updateConf", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
-	@Feature(method = MethodFeature.CONFIG)
+	@Feature(method = MethodFeature.EDIT)
 	public String updateConf() {
 		return NodeForward.request(getNode(), getRequest(), NodeUrl.System_Nginx_updateConf).toString();
 	}

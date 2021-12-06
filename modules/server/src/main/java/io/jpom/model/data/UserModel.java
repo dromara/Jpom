@@ -24,6 +24,7 @@ package io.jpom.model.data;
 
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.core.util.StrUtil;
 import io.jpom.model.BaseStrikeDbModel;
 import io.jpom.service.h2db.TableName;
 import io.jpom.system.ServerExtConfigBean;
@@ -275,6 +276,15 @@ public class UserModel extends BaseStrikeDbModel {
 
 	public boolean isSystemUser() {
 		return systemUser != null && systemUser == 1;
+	}
+
+	/**
+	 * 是否为超级管理员
+	 *
+	 * @return true 是
+	 */
+	public boolean isSuperSystemUser() {
+		return StrUtil.equals(getParent(), SYSTEM_ADMIN);
 	}
 
 	/**

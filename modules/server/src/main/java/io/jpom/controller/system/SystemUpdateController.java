@@ -37,14 +37,18 @@ import io.jpom.JpomServerApplication;
 import io.jpom.common.*;
 import io.jpom.common.forward.NodeForward;
 import io.jpom.common.forward.NodeUrl;
-import io.jpom.common.interceptor.OptLog;
 import io.jpom.model.data.NodeModel;
-import io.jpom.model.log.UserOperateLogV1;
 import io.jpom.permission.SystemPermission;
+import io.jpom.plugin.ClassFeature;
+import io.jpom.plugin.Feature;
+import io.jpom.plugin.MethodFeature;
 import io.jpom.system.ConfigBean;
 import io.jpom.system.ServerConfigBean;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.io.File;
 import java.io.IOException;
@@ -60,9 +64,11 @@ import java.util.Objects;
  */
 @RestController
 @RequestMapping(value = "system")
+@Feature(cls = ClassFeature.SYSTEM_UPGRADE)
 public class SystemUpdateController extends BaseServerController {
 
 	@PostMapping(value = "info", produces = MediaType.APPLICATION_JSON_VALUE)
+	@Feature(method = MethodFeature.LIST)
 	public String info() {
 		NodeModel nodeModel = tryGetNode();
 		if (nodeModel != null) {
@@ -99,7 +105,7 @@ public class SystemUpdateController extends BaseServerController {
 	}
 
 	@PostMapping(value = "uploadJar.json", produces = MediaType.APPLICATION_JSON_VALUE)
-	@OptLog(UserOperateLogV1.OptType.UpdateSys)
+	@Feature(method = MethodFeature.EXECUTE)
 	@SystemPermission
 	public String uploadJar() throws IOException {
 		NodeModel nodeModel = tryGetNode();
@@ -155,6 +161,7 @@ public class SystemUpdateController extends BaseServerController {
 	 * @see RemoteVersion
 	 */
 	@GetMapping(value = "remote_upgrade.json", produces = MediaType.APPLICATION_JSON_VALUE)
+	@Feature(method = MethodFeature.DOWNLOAD)
 	public String upgrade() throws IOException {
 		NodeModel nodeModel = tryGetNode();
 		if (nodeModel != null) {

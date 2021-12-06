@@ -22,11 +22,8 @@
  */
 package io.jpom.controller.build;
 
-import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.convert.Convert;
 import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.util.StrUtil;
 import cn.hutool.db.Entity;
 import cn.hutool.db.Page;
 import cn.hutool.extra.servlet.ServletUtil;
@@ -36,13 +33,9 @@ import cn.jiangzeyin.common.validator.ValidatorItem;
 import cn.jiangzeyin.common.validator.ValidatorRule;
 import io.jpom.build.BuildUtil;
 import io.jpom.common.BaseServerController;
-import io.jpom.model.BaseEnum;
 import io.jpom.model.PageResultDto;
 import io.jpom.model.data.BuildInfoModel;
-import io.jpom.model.data.UserModel;
-import io.jpom.model.enums.BuildStatus;
 import io.jpom.model.log.BuildHistoryLog;
-import io.jpom.model.vo.BuildHistoryLogVo;
 import io.jpom.plugin.ClassFeature;
 import io.jpom.plugin.Feature;
 import io.jpom.plugin.MethodFeature;
@@ -54,7 +47,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.annotation.Resource;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashSet;
@@ -70,13 +62,17 @@ import java.util.stream.Collectors;
  * @since 2021-08-26
  */
 @RestController
-@Feature(cls = ClassFeature.BUILD)
+@Feature(cls = ClassFeature.BUILD_LOG)
 public class BuildInfoHistoryController extends BaseServerController {
 
-	@Resource
-	private BuildInfoService buildInfoService;
-	@Resource
-	private DbBuildHistoryLogService dbBuildHistoryLogService;
+	private final BuildInfoService buildInfoService;
+	private final DbBuildHistoryLogService dbBuildHistoryLogService;
+
+	public BuildInfoHistoryController(BuildInfoService buildInfoService,
+									  DbBuildHistoryLogService dbBuildHistoryLogService) {
+		this.buildInfoService = buildInfoService;
+		this.dbBuildHistoryLogService = dbBuildHistoryLogService;
+	}
 
 	/**
 	 * 下载构建物
@@ -126,69 +122,10 @@ public class BuildInfoHistoryController extends BaseServerController {
 	}
 
 	@RequestMapping(value = "/build/history/history_list.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody
-	@Feature(method = MethodFeature.LOG)
-	public String historyList(String status,
-							  @ValidatorConfig(value = {
-									  @ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "limit error")
-							  }, defaultVal = "10") int limit,
-							  @ValidatorConfig(value = {
-									  @ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "page error")
-							  }, defaultVal = "1") int page,
-							  String buildDataId) {
-		Page pageObj = new Page(page, limit);
-		Entity entity = Entity.create();
-		//
-		this.doPage(pageObj, entity, "startTime");
-		BaseEnum anEnum = null;
-		if (StrUtil.isNotEmpty(status)) {
-			Integer integer = Convert.toInt(status);
-			if (integer != null) {
-				anEnum = BaseEnum.getEnum(BuildStatus.class, integer);
-			}
-		}
-
-		if (anEnum != null) {
-			entity.set("status", anEnum.getCode());
-		}
-		UserModel userModel = getUser();
-		if (userModel.isSystemUser()) {
-			if (StrUtil.isNotBlank(buildDataId)) {
-				entity.set("buildDataId", buildDataId);
-			}
-		} else {
-			Set<String> dataIds = this.getDataIds();
-			if (StrUtil.isNotBlank(buildDataId)) {
-				if (CollUtil.contains(dataIds, buildDataId)) {
-					entity.set("buildDataId", buildDataId);
-				} else {
-					entity.set("buildDataId", StrUtil.DASHED);
-				}
-			} else {
-				entity.set("buildDataId", dataIds);
-			}
-		}
-		PageResultDto<BuildHistoryLog> pageResultTemp = dbBuildHistoryLogService.listPage(entity, pageObj);
-		//
-		PageResultDto<BuildHistoryLogVo> pageResult = new PageResultDto<>(pageResultTemp);
-		List<BuildHistoryLogVo> result = pageResult.getResult();
-		if (result != null) {
-			List<BuildHistoryLogVo> collect = result.stream().map(buildHistoryLog -> {
-				BuildHistoryLogVo buildHistoryLogVo = new BuildHistoryLogVo();
-				BeanUtil.copyProperties(buildHistoryLog, buildHistoryLogVo);
-				//
-				if (StrUtil.isEmpty(buildHistoryLog.getBuildName())) {
-					String dataId = buildHistoryLog.getBuildDataId();
-					BuildInfoModel item = buildInfoService.getByKey(dataId);
-					if (item != null) {
-						buildHistoryLogVo.setBuildName(item.getName());
-					}
-				}
-				return buildHistoryLogVo;
-			}).collect(Collectors.toList());
-			pageResult.setResult(collect);
-		}
-		return JsonMessage.getString(200, "获取成功", pageResult);
+	@Feature(method = MethodFeature.LIST)
+	public String historyList() {
+		PageResultDto<BuildHistoryLog> pageResultTemp = dbBuildHistoryLogService.listPage(getRequest());
+		return JsonMessage.getString(200, "获取成功", pageResultTemp);
 	}
 
 	private Set<String> getDataIds() {
@@ -209,8 +146,7 @@ public class BuildInfoHistoryController extends BaseServerController {
 	 * @return json
 	 */
 	@RequestMapping(value = "/build/history/delete_log.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody
-	@Feature(method = MethodFeature.DEL_LOG)
+	@Feature(method = MethodFeature.DEL)
 	public String delete(@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据")) String logId) {
 		BuildHistoryLog buildHistoryLog = dbBuildHistoryLogService.getByKey(logId);
 		Objects.requireNonNull(buildHistoryLog);

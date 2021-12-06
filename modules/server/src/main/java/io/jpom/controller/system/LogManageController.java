@@ -60,7 +60,7 @@ public class LogManageController extends BaseServerController {
 
 
 	@RequestMapping(value = "log_data.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	@Feature(method = MethodFeature.LOG)
+	@Feature(method = MethodFeature.LIST)
 	public String logData(String nodeId) {
 		if (StrUtil.isNotEmpty(nodeId)) {
 			return NodeForward.request(getNode(), getRequest(), NodeUrl.SystemLog).toString();
@@ -78,7 +78,7 @@ public class LogManageController extends BaseServerController {
 	 * @return json
 	 */
 	@RequestMapping(value = "log_del.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	@Feature(method = MethodFeature.DEL_LOG)
+	@Feature(method = MethodFeature.DEL)
 	public String logData(String nodeId,
 						  @ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "path错误") String path) {
 		if (StrUtil.isNotEmpty(nodeId)) {

@@ -33,7 +33,6 @@ import io.jpom.service.dblog.DbMonitorNotifyLogService;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -44,7 +43,7 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequestMapping(value = "/monitor")
-@Feature(cls = ClassFeature.MONITOR)
+@Feature(cls = ClassFeature.MONITOR_LOG)
 public class MonitorLogController extends BaseServerController {
 
 	private final DbMonitorNotifyLogService dbMonitorNotifyLogService;
@@ -59,8 +58,7 @@ public class MonitorLogController extends BaseServerController {
 	 * @return json
 	 */
 	@RequestMapping(value = "list_data.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody
-	@Feature(method = MethodFeature.LOG)
+	@Feature(method = MethodFeature.LIST)
 	public String listData() {
 		PageResultDto<MonitorNotifyLog> pageResult = dbMonitorNotifyLogService.listPage(getRequest());
 		return JsonMessage.getString(200, "获取成功", pageResult);

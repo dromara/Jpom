@@ -51,22 +51,15 @@ import java.util.zip.ZipFile;
 @Feature(cls = ClassFeature.SSH)
 public class SshInstallAgentController extends BaseServerController {
 
-
 	private final SshService sshService;
 
 	public SshInstallAgentController(SshService sshService) {
 		this.sshService = sshService;
 	}
 
-//    @RequestMapping(value = "installAgent.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
-//    @Feature(method = MethodFeature.INSTALL)
-//    public String installAgent() {
-//        return "node/ssh/installAgent";
-//    }
-
 	@RequestMapping(value = "installAgentSubmit.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
-	@Feature(method = MethodFeature.INSTALL)
+	@Feature(method = MethodFeature.EXECUTE)
 	public String installAgentSubmit(@ValidatorItem(value = ValidatorRule.NOT_BLANK) String id,
 									 @ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "节点数据") String nodeData,
 									 @ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "安装路径") String path) throws Exception {
@@ -106,9 +99,7 @@ public class SshInstallAgentController extends BaseServerController {
 					break;
 				}
 			}
-			if (StrUtil.isEmpty(tag)) {
-				return JsonMessage.getString(405, "管理命令中不存在tag");
-			}
+			Assert.hasText(tag, "管理命令中不存在tag");
 			//  读取授权信息
 			File configFile = FileUtil.file(outFle, ExtConfigBean.FILE_NAME);
 			if (configFile.exists()) {
@@ -123,9 +114,9 @@ public class SshInstallAgentController extends BaseServerController {
 				nodeModel.setLoginPwd(Convert.toStr(pwd, ""));
 			}
 			// 查询远程是否运行
-			if (sshService.checkSshRun(sshModel, tag)) {
-				return JsonMessage.getString(300, "对应服务器中已经存在 Jpom 插件端,不需要再次安装啦");
-			}
+
+			Assert.state(!sshService.checkSshRun(sshModel, tag), "对应服务器中已经存在 Jpom 插件端,不需要再次安装啦");
+
 			// 上传文件到服务器
 			sshService.uploadDir(sshModel, path, outFle);
 			//

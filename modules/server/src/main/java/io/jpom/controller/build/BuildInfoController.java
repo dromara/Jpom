@@ -55,12 +55,8 @@ import io.jpom.util.CommandUtil;
 import io.jpom.util.GitUtil;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
-import javax.annotation.Resource;
 import java.io.File;
 import java.util.List;
 import java.util.Objects;
@@ -76,31 +72,21 @@ import java.util.Objects;
 @Feature(cls = ClassFeature.BUILD)
 public class BuildInfoController extends BaseServerController {
 
-	@Resource
-	private DbBuildHistoryLogService dbBuildHistoryLogService;
+
+	private final DbBuildHistoryLogService dbBuildHistoryLogService;
 	private final SshService sshService;
+	private final BuildInfoService buildInfoService;
+	private final RepositoryService repositoryService;
 
-	@Resource
-	private BuildInfoService buildInfoService;
-	@Resource
-	private RepositoryService repositoryService;
-
-	public BuildInfoController(SshService sshService) {
+	public BuildInfoController(DbBuildHistoryLogService dbBuildHistoryLogService,
+							   SshService sshService,
+							   BuildInfoService buildInfoService,
+							   RepositoryService repositoryService) {
+		this.dbBuildHistoryLogService = dbBuildHistoryLogService;
 		this.sshService = sshService;
+		this.buildInfoService = buildInfoService;
+		this.repositoryService = repositoryService;
 	}
-
-
-//	/**
-//	 * @return
-//	 * @author Hotstrip
-//	 * get build group list
-//	 * 获取构建分组列表
-//	 */
-//	@RequestMapping(value = "/build/group/list", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-//	public String groupList() {
-//		List<String> groupList = buildInfoService.listGroup();
-//		return JsonMessage.getString(200, "success", groupList);
-//	}
 
 	/**
 	 * load build list with params
@@ -112,7 +98,20 @@ public class BuildInfoController extends BaseServerController {
 	public String getBuildList() {
 		// load list with page
 		PageResultDto<BuildInfoModel> list = buildInfoService.listPage(getRequest());
-		return JsonMessage.getString(200, "获取成功", list);
+		return JsonMessage.getString(200, "", list);
+	}
+
+	/**
+	 * load build list with params
+	 *
+	 * @return json
+	 */
+	@GetMapping(value = "/build/list_all", produces = MediaType.APPLICATION_JSON_VALUE)
+	@Feature(method = MethodFeature.LIST)
+	public String getBuildListAll() {
+		// load list with page
+		List<BuildInfoModel> modelList = buildInfoService.listByWorkspace(getRequest());
+		return JsonMessage.getString(200, "", modelList);
 	}
 
 	/**
@@ -300,6 +299,7 @@ public class BuildInfoController extends BaseServerController {
 	 * @throws Exception 异常
 	 */
 	@RequestMapping(value = "/build/branch-list", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+	@Feature(method = MethodFeature.LIST)
 	public String branchList(
 			@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "仓库ID不能为空")) String repositoryId) throws Exception {
 		// 根据 repositoryId 查询仓库信息

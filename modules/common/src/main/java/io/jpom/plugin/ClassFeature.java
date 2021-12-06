@@ -59,15 +59,19 @@ public enum ClassFeature {
 	SYSTEM_LOG("系统日志"),
 	SYSTEM_UPGRADE("在线升级"),
 	SYSTEM_CONFIG("系统配置"),
+	SYSTEM_CONFIG_IP("系统配置IP白名单"),
 	SYSTEM_BACKUP("数据库备份"),
 	SYSTEM_WORKSPACE("工作空间"),
 
 	//******************************************     节点管理功能
 	PROJECT("项目管理", ClassFeature.NODE),
 	PROJECT_FILE("项目文件管理", ClassFeature.NODE),
+	PROJECT_LOG("项目日志", ClassFeature.NODE),
 	JDK_LIST("JDK管理", ClassFeature.NODE),
 	SCRIPT("脚本模板", ClassFeature.NODE),
 	TOMCAT("Tomcat", ClassFeature.NODE),
+	TOMCAT_FILE("Tomcat file", ClassFeature.NODE),
+	TOMCAT_LOG("Tomcat log", ClassFeature.NODE),
 
 	NGINX("Nginx", ClassFeature.NODE),
 	SSL("ssl证书", ClassFeature.NODE),

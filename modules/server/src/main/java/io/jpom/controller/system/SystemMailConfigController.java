@@ -30,6 +30,8 @@ import io.jpom.model.data.MailAccountModel;
 import io.jpom.model.data.UserModel;
 import io.jpom.monitor.EmailUtil;
 import io.jpom.permission.SystemPermission;
+import io.jpom.plugin.ClassFeature;
+import io.jpom.plugin.Feature;
 import io.jpom.service.system.SystemParametersServer;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
@@ -50,6 +52,7 @@ import javax.mail.Transport;
  */
 @Controller
 @RequestMapping(value = "system")
+@Feature(cls = ClassFeature.SYSTEM_EMAIL)
 public class SystemMailConfigController extends BaseServerController {
 
 	@Resource

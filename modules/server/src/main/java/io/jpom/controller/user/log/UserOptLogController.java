@@ -43,9 +43,8 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequestMapping(value = "/user/log")
-@Feature(cls = ClassFeature.USER)
+@Feature(cls = ClassFeature.USER_LOG)
 public class UserOptLogController extends BaseServerController {
-
 
 	private final DbUserOperateLogService dbUserOperateLogService;
 
@@ -59,7 +58,7 @@ public class UserOptLogController extends BaseServerController {
 	 * @return json
 	 */
 	@RequestMapping(value = "list_data.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	@Feature(method = MethodFeature.LOG)
+	@Feature(method = MethodFeature.LIST)
 	public String listData() {
 		PageResultDto<UserOperateLogV1> pageResult = dbUserOperateLogService.listPage(getRequest());
 		return JsonMessage.getString(200, "获取成功", pageResult);

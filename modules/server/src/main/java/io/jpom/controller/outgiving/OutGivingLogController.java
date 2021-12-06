@@ -31,10 +31,9 @@ import io.jpom.plugin.Feature;
 import io.jpom.plugin.MethodFeature;
 import io.jpom.service.dblog.DbOutGivingLogService;
 import org.springframework.http.MediaType;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 
 /**
  * 分发日志
@@ -42,9 +41,9 @@ import org.springframework.web.bind.annotation.ResponseBody;
  * @author bwcx_jzy
  * @date 2019/7/20
  */
-@Controller
+@RestController
 @RequestMapping(value = "/outgiving")
-@Feature(cls = ClassFeature.OUTGIVING)
+@Feature(cls = ClassFeature.OUTGIVING_LOG)
 public class OutGivingLogController extends BaseServerController {
 
 	private final DbOutGivingLogService dbOutGivingLogService;
@@ -55,8 +54,7 @@ public class OutGivingLogController extends BaseServerController {
 
 
 	@RequestMapping(value = "log_list_data.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody
-	@Feature(method = MethodFeature.LOG)
+	@Feature(method = MethodFeature.LIST)
 	public String listData() {
 		PageResultDto<OutGivingLog> pageResult = dbOutGivingLogService.listPage(getRequest());
 		return JsonMessage.getString(200, "获取成功", pageResult);

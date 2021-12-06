@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
  */
 @Controller
 @RequestMapping(value = "node/manage/log")
-@Feature(cls = ClassFeature.PROJECT)
+@Feature(cls = ClassFeature.PROJECT_LOG)
 public class LogBackController extends BaseServerController {
 
 	private final ProjectInfoCacheService projectInfoCacheService;
@@ -39,25 +39,16 @@ public class LogBackController extends BaseServerController {
 		NodeForward.requestDownload(getNode(), getRequest(), getResponse(), NodeUrl.Manage_Log_export);
 	}
 
-//    @RequestMapping(value = "logBack", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
-//    @Feature(method = MethodFeature.LOG)
-//    public String console(String id, String copyId) {
-//        JSONObject jsonObject = NodeForward.requestData(getNode(), NodeUrl.Manage_Log_logBack, getRequest(), JSONObject.class);
-//        setAttribute("data", jsonObject);
-//        //
-//        setAttribute("copyId", copyId);
-//        return "node/manage/logBack";
-//    }
-
 	/**
-	 * @return
-	 * @author Hotstrip
 	 * get log back list
 	 * 日志备份列表接口
+	 *
+	 * @return json
+	 * @author Hotstrip
 	 */
 	@RequestMapping(value = "log-back-list", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
-	@Feature(method = MethodFeature.LOG)
+	@Feature(method = MethodFeature.LIST)
 	public String logBackList() {
 		JSONObject jsonObject = NodeForward.requestData(getNode(), NodeUrl.Manage_Log_logBack, getRequest(), JSONObject.class);
 		return JsonMessage.getString(200, "success", jsonObject);
@@ -72,7 +63,7 @@ public class LogBackController extends BaseServerController {
 
 	@RequestMapping(value = "logBack_delete", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
-	@Feature(method = MethodFeature.DEL_FILE)
+	@Feature(method = MethodFeature.DEL)
 	public String clear() {
 		return NodeForward.request(getNode(), getRequest(), NodeUrl.Manage_Log_logBack_delete).toString();
 	}
@@ -91,7 +82,7 @@ public class LogBackController extends BaseServerController {
 	 */
 	@RequestMapping(value = "resetLog", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
-	@Feature(method = MethodFeature.EDIT)
+	@Feature(method = MethodFeature.DEL)
 	public String resetLog() {
 		return NodeForward.request(getNode(), getRequest(), NodeUrl.Manage_Log_ResetLog).toString();
 	}

@@ -1,5 +1,4 @@
-import axios from './config';
-
+import axios from "./config";
 
 /**
  * 构建列表
@@ -8,11 +7,24 @@ import axios from './config';
  * } params
  */
 export function getBuildList(params) {
-    return axios({
-        url: '/build/list',
-        method: 'post',
-        data: params
-    })
+  return axios({
+    url: "/build/list",
+    method: "post",
+    data: params,
+  });
+}
+
+/**
+ * 构建列表
+ * @param {
+ *  group: 分组名称
+ * } params
+ */
+export function getBuildListAll() {
+  return axios({
+    url: "/build/list_all",
+    method: "get",
+  });
 }
 
 /**
@@ -22,12 +34,12 @@ export function getBuildList(params) {
  * } params
  */
 export function getBranchList(params) {
-    return axios({
-        url: '/build/branch-list',
-        method: 'post',
-        timeout: 0,
-        data: params
-    })
+  return axios({
+    url: "/build/branch-list",
+    method: "post",
+    timeout: 0,
+    data: params,
+  });
 }
 
 /**
@@ -42,29 +54,29 @@ export function getBranchList(params) {
  *  resultDirFile: 构建产物目录
  *  releaseMethod: 发布方法
  *  extraData: 额外信息 JSON 字符串
- *  repostitoryId: 仓库信息 
+ *  repostitoryId: 仓库信息
  * } params
  */
 export function editBuild(params) {
-    const data = {
-        id: params.id,
-        name: params.name,
-        repositoryId: params.repositoryId,
-        resultDirFile: params.resultDirFile,
-        script: params.script,
-        releaseMethod: params.releaseMethod,
-        branchName: params.branchName,
-        branchTagName: params.branchTagName,
-        group: params.group,
-        repoType: params.repoType,
-        // 其他参数
-        extraData: params.extraData,
-    }
-    return axios({
-        url: '/build/edit',
-        method: 'post',
-        data
-    })
+  const data = {
+    id: params.id,
+    name: params.name,
+    repositoryId: params.repositoryId,
+    resultDirFile: params.resultDirFile,
+    script: params.script,
+    releaseMethod: params.releaseMethod,
+    branchName: params.branchName,
+    branchTagName: params.branchTagName,
+    group: params.group,
+    repoType: params.repoType,
+    // 其他参数
+    extraData: params.extraData,
+  };
+  return axios({
+    url: "/build/edit",
+    method: "post",
+    data,
+  });
 }
 
 /**
@@ -72,11 +84,11 @@ export function editBuild(params) {
  * @param {*} id
  */
 export function deleteBuild(id) {
-    return axios({
-        url: '/build/delete',
-        method: 'post',
-        data: {id}
-    })
+  return axios({
+    url: "/build/delete",
+    method: "post",
+    data: { id },
+  });
 }
 
 /**
@@ -84,11 +96,11 @@ export function deleteBuild(id) {
  * @param {*} id
  */
 export function getTriggerUrl(id) {
-    return axios({
-        url: '/build/trigger/url',
-        method: 'post',
-        data: {id}
-    })
+  return axios({
+    url: "/build/trigger/url",
+    method: "post",
+    data: { id },
+  });
 }
 
 /**
@@ -96,11 +108,11 @@ export function getTriggerUrl(id) {
  * @param {*} id
  */
 export function resetTrigger(id) {
-    return axios({
-        url: '/build/trigger/rest',
-        method: 'post',
-        data: {id}
-    })
+  return axios({
+    url: "/build/trigger/rest",
+    method: "post",
+    data: { id },
+  });
 }
 
 /**
@@ -108,11 +120,11 @@ export function resetTrigger(id) {
  * @param {*} id
  */
 export function clearBuid(id) {
-    return axios({
-        url: '/build/clean-source',
-        method: 'post',
-        data: {id}
-    })
+  return axios({
+    url: "/build/clean-source",
+    method: "post",
+    data: { id },
+  });
 }
 
 /**
@@ -124,15 +136,15 @@ export function clearBuid(id) {
  * }
  */
 export function loadBuildLog(params) {
-    return axios({
-        url: '/build/manage/get-now-log',
-        method: 'post',
-        data: params,
-        headers: {
-            tip: 'no',
-            loading: 'no'
-        },
-    })
+  return axios({
+    url: "/build/manage/get-now-log",
+    method: "post",
+    data: params,
+    headers: {
+      tip: "no",
+      loading: "no",
+    },
+  });
 }
 
 /**
@@ -140,11 +152,11 @@ export function loadBuildLog(params) {
  * @param {*} id
  */
 export function startBuild(id) {
-    return axios({
-        url: '/build/manage/start',
-        method: 'post',
-        data: {id}
-    })
+  return axios({
+    url: "/build/manage/start",
+    method: "post",
+    data: { id },
+  });
 }
 
 /**
@@ -152,11 +164,11 @@ export function startBuild(id) {
  * @param {*} id
  */
 export function stopBuild(id) {
-    return axios({
-        url: '/build/manage/cancel',
-        method: 'post',
-        data: {id}
-    })
+  return axios({
+    url: "/build/manage/cancel",
+    method: "post",
+    data: { id },
+  });
 }
 
 /**
@@ -167,11 +179,11 @@ export function stopBuild(id) {
  * } params
  */
 export function geteBuildHistory(params) {
-    return axios({
-        url: '/build/history/history_list.json',
-        method: 'post',
-        data: params
-    })
+  return axios({
+    url: "/build/history/history_list.json",
+    method: "post",
+    data: params,
+  });
 }
 
 /**
@@ -179,7 +191,7 @@ export function geteBuildHistory(params) {
  * @param {*} logId
  */
 export function downloadBuildLog(logId) {
-    return `/build/history/download_log.html?logId=${logId}`
+  return `/build/history/download_log.html?logId=${logId}`;
 }
 
 /**
@@ -187,7 +199,7 @@ export function downloadBuildLog(logId) {
  * @param {*} logId
  */
 export function downloadBuildFile(logId) {
-    return `/build/history/download_file.html?logId=${logId}`
+  return `/build/history/download_file.html?logId=${logId}`;
 }
 
 /**
@@ -196,11 +208,11 @@ export function downloadBuildFile(logId) {
  * @returns
  */
 export function rollback(logId) {
-    return axios({
-        url: '/build/manage/reRelease',
-        method: 'post',
-        data: {logId}
-    })
+  return axios({
+    url: "/build/manage/reRelease",
+    method: "post",
+    data: { logId },
+  });
 }
 
 /**
@@ -208,16 +220,16 @@ export function rollback(logId) {
  * @param {*} logId
  */
 export function deleteBuildHistory(logId) {
-    return axios({
-        url: '/build/history/delete_log.json',
-        method: 'post',
-        data: {logId}
-    })
+  return axios({
+    url: "/build/history/delete_log.json",
+    method: "post",
+    data: { logId },
+  });
 }
 
 export const releaseMethodMap = {
-    0: '不发布',
-    1: '节点分发',
-    2: '项目',
-    3: 'SSH'
-}
+  0: "不发布",
+  1: "节点分发",
+  2: "项目",
+  3: "SSH",
+};

@@ -181,7 +181,7 @@ public class SshController extends BaseServerController {
 	 * @return json
 	 */
 	@PostMapping(value = "log_list_data.json", produces = MediaType.APPLICATION_JSON_VALUE)
-	@Feature(method = MethodFeature.LOG)
+	@Feature(cls = ClassFeature.SSH_TERMINAL_LOG, method = MethodFeature.LIST)
 	public String logListData() {
 		PageResultDto<SshTerminalExecuteLog> pageResult = sshTerminalExecuteLogService.listPage(getRequest());
 		return JsonMessage.getString(200, "获取成功", pageResult);

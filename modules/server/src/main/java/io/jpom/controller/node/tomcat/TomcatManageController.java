@@ -12,10 +12,10 @@ import io.jpom.plugin.Feature;
 import io.jpom.plugin.MethodFeature;
 import io.jpom.service.node.tomcat.TomcatService;
 import org.springframework.http.MediaType;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
 
@@ -24,7 +24,7 @@ import javax.annotation.Resource;
  *
  * @author lf
  */
-@Controller
+@RestController
 @RequestMapping(value = TomcatManageController.TOMCAT_URL)
 @Feature(cls = ClassFeature.TOMCAT)
 public class TomcatManageController extends BaseServerController {
@@ -35,26 +35,13 @@ public class TomcatManageController extends BaseServerController {
 	@Resource
 	private TomcatService tomcatService;
 
-//    /**
-//     * 查询tomcat列表
-//     *
-//     * @return tomcat列表
-//     */
-//    @RequestMapping(value = "tomcatManage", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
-//    @Feature(method = MethodFeature.LIST)
-//    public String tomcatManage() {
-//        // 查询tomcat列表
-//        JSONArray tomcatInfos = tomcatService.getTomcatList(getNode());
-//        setAttribute("array", tomcatInfos);
-//        return "node/tomcat/list";
-//    }
-
 	/**
 	 * @return
 	 * @Hotstrip get tomcat list
 	 */
 	@RequestMapping(value = "list", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
+	@Feature(method = MethodFeature.LIST)
 	public String tomcatList() {
 		JSONArray jsonArray = tomcatService.getTomcatList(getNode());
 		return JsonMessage.getString(200, "success", jsonArray);
@@ -67,7 +54,6 @@ public class TomcatManageController extends BaseServerController {
 	 * @return tomcat的项目信息
 	 */
 	@RequestMapping(value = "getTomcatProject", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody
 	@Feature(method = MethodFeature.LIST)
 	public String getTomcatProject(String id) {
 		// 查询tomcat管理的项目的列表
@@ -81,7 +67,6 @@ public class TomcatManageController extends BaseServerController {
 	 * @return tomcat运行状态
 	 */
 	@RequestMapping(value = "getTomcatStatus", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody
 	@Feature(method = MethodFeature.LIST)
 	public String getStatus() {
 		return tomcatService.getTomcatStatus(getNode(), getRequest());
@@ -95,7 +80,6 @@ public class TomcatManageController extends BaseServerController {
 	 * @return 操作结果
 	 */
 	@RequestMapping(value = "save", method = RequestMethod.POST, produces = MediaType.TEXT_HTML_VALUE)
-	@ResponseBody
 	@Feature(method = MethodFeature.EDIT)
 	public String save(String id) {
 		NodeModel nodeModel = getNode();
@@ -113,7 +97,6 @@ public class TomcatManageController extends BaseServerController {
 	 * @return 操作结果
 	 */
 	@RequestMapping(value = "delete", method = RequestMethod.POST, produces = MediaType.TEXT_HTML_VALUE)
-	@ResponseBody
 	@Feature(method = MethodFeature.DEL)
 	public String delete() {
 		return tomcatService.delete(getNode(), getRequest());
@@ -126,7 +109,6 @@ public class TomcatManageController extends BaseServerController {
 	 * @return 操作结果
 	 */
 	@RequestMapping(value = "tomcatProjectManage", method = RequestMethod.POST, produces = MediaType.TEXT_HTML_VALUE)
-	@ResponseBody
 	@Feature(method = MethodFeature.EXECUTE)
 	public String tomcatProjectManage() {
 		return tomcatService.tomcatProjectManage(getNode(), getRequest());
@@ -138,7 +120,6 @@ public class TomcatManageController extends BaseServerController {
 	 * @return 操作结果
 	 */
 	@RequestMapping(value = "start", method = RequestMethod.POST, produces = MediaType.TEXT_HTML_VALUE)
-	@ResponseBody
 	@Feature(method = MethodFeature.EXECUTE)
 	public String start() {
 		return tomcatService.start(getNode(), getRequest());
@@ -150,7 +131,6 @@ public class TomcatManageController extends BaseServerController {
 	 * @return 操作结果
 	 */
 	@RequestMapping(value = "restart", method = RequestMethod.POST, produces = MediaType.TEXT_HTML_VALUE)
-	@ResponseBody
 	@Feature(method = MethodFeature.EXECUTE)
 	public String restart() {
 		return tomcatService.restart(getNode(), getRequest());
@@ -162,7 +142,6 @@ public class TomcatManageController extends BaseServerController {
 	 * @return 操作结果
 	 */
 	@RequestMapping(value = "stop", method = RequestMethod.POST, produces = MediaType.TEXT_HTML_VALUE)
-	@ResponseBody
 	@Feature(method = MethodFeature.EXECUTE)
 	public String stop() {
 		return tomcatService.stop(getNode(), getRequest());
@@ -175,8 +154,7 @@ public class TomcatManageController extends BaseServerController {
 	 * @return 文件列表
 	 */
 	@RequestMapping(value = "getFileList", method = RequestMethod.POST, produces = MediaType.TEXT_HTML_VALUE)
-	@ResponseBody
-	@Feature(method = MethodFeature.FILE)
+	@Feature(cls = ClassFeature.TOMCAT_FILE, method = MethodFeature.LIST)
 	public String getFileList() {
 		return tomcatService.getFileList(getNode(), getRequest());
 	}
@@ -188,8 +166,7 @@ public class TomcatManageController extends BaseServerController {
 	 * @return 操作结果
 	 */
 	@RequestMapping(value = "upload", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody
-	@Feature(method = MethodFeature.UPLOAD)
+	@Feature(cls = ClassFeature.TOMCAT_FILE, method = MethodFeature.UPLOAD)
 	public String upload() {
 		return NodeForward.requestMultipart(getNode(), getMultiRequest(), NodeUrl.Tomcat_File_Upload).toString();
 	}
@@ -200,8 +177,7 @@ public class TomcatManageController extends BaseServerController {
 	 * @return 操作结果
 	 */
 	@RequestMapping(value = "uploadWar", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody
-	@Feature(method = MethodFeature.UPLOAD)
+	@Feature(cls = ClassFeature.TOMCAT_FILE, method = MethodFeature.UPLOAD)
 	public String uploadWar() {
 		return tomcatService.uploadWar(getNode(), getMultiRequest());
 	}
@@ -210,8 +186,7 @@ public class TomcatManageController extends BaseServerController {
 	 * 下载文件
 	 */
 	@RequestMapping(value = "download", method = RequestMethod.GET)
-	@ResponseBody
-	@Feature(method = MethodFeature.DOWNLOAD)
+	@Feature(cls = ClassFeature.TOMCAT_FILE, method = MethodFeature.DOWNLOAD)
 	public void download() {
 		tomcatService.download(getNode(), getRequest(), getResponse());
 	}
@@ -223,7 +198,7 @@ public class TomcatManageController extends BaseServerController {
 	 */
 	@RequestMapping(value = "deleteFile", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
-	@Feature(method = MethodFeature.DEL_FILE)
+	@Feature(cls = ClassFeature.TOMCAT_FILE, method = MethodFeature.DEL)
 	public String deleteFile() {
 		return tomcatService.deleteFile(getNode(), getRequest());
 	}
