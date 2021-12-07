@@ -8,12 +8,14 @@ import io.jpom.common.forward.NodeForward;
 import io.jpom.common.forward.NodeUrl;
 import io.jpom.model.PageResultDto;
 import io.jpom.model.data.NodeModel;
+import io.jpom.model.data.ProjectInfoModel;
 import io.jpom.plugin.ClassFeature;
 import io.jpom.plugin.Feature;
 import io.jpom.plugin.MethodFeature;
 import io.jpom.service.dblog.BuildInfoService;
 import io.jpom.service.monitor.MonitorService;
 import io.jpom.service.node.OutGivingServer;
+import io.jpom.service.node.ProjectInfoCacheService;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
@@ -34,13 +36,16 @@ public class NodeEditController extends BaseServerController {
 	private final OutGivingServer outGivingServer;
 	private final MonitorService monitorService;
 	private final BuildInfoService buildService;
+	private final ProjectInfoCacheService projectInfoCacheService;
 
 	public NodeEditController(OutGivingServer outGivingServer,
 							  MonitorService monitorService,
-							  BuildInfoService buildService) {
+							  BuildInfoService buildService,
+							  ProjectInfoCacheService projectInfoCacheService) {
 		this.outGivingServer = outGivingServer;
 		this.monitorService = monitorService;
 		this.buildService = buildService;
+		this.projectInfoCacheService = projectInfoCacheService;
 	}
 
 
@@ -96,6 +101,11 @@ public class NodeEditController extends BaseServerController {
 		Assert.state(!checkNode1, "该节点存在监控项，不能删除");
 		boolean checkNode2 = buildService.checkNode(id);
 		Assert.state(!checkNode2, "该节点存在构建项，不能删除");
+		//
+		ProjectInfoModel projectInfoModel = new ProjectInfoModel();
+		projectInfoModel.setNodeId(id);
+		boolean exists = projectInfoCacheService.exists(projectInfoModel);
+		Assert.state(!exists, "该节点下还存在项目，不能删除");
 		nodeService.delByKey(id, getRequest());
 		return JsonMessage.getString(200, "操作成功");
 	}
