@@ -23,6 +23,7 @@
 package io.jpom.service.user;
 
 import io.jpom.model.data.UserBindWorkspaceModel;
+import io.jpom.model.data.UserModel;
 import io.jpom.model.data.WorkspaceModel;
 import io.jpom.service.h2db.BaseDbService;
 import io.jpom.service.system.WorkspaceService;
@@ -100,12 +101,16 @@ public class UserBindWorkspaceService extends BaseDbService<UserBindWorkspaceMod
 	/**
 	 * 查询用户绑定的工作空间
 	 *
-	 * @param userId 用户ID
+	 * @param userModel 用户
 	 * @return list
 	 */
-	public List<WorkspaceModel> listUserWorkspaceInfo(String userId) {
+	public List<WorkspaceModel> listUserWorkspaceInfo(UserModel userModel) {
+		if (userModel.isSuperSystemUser()) {
+			// 超级管理员有所有工作空间权限
+			return workspaceService.list();
+		}
 		UserBindWorkspaceModel userBindWorkspaceModel = new UserBindWorkspaceModel();
-		userBindWorkspaceModel.setUserId(userId);
+		userBindWorkspaceModel.setUserId(userModel.getId());
 		List<UserBindWorkspaceModel> userBindWorkspaceModels = super.listByBean(userBindWorkspaceModel);
 		Assert.notEmpty(userBindWorkspaceModels, "没有任何工作空间信息");
 		List<String> collect = userBindWorkspaceModels.stream().map(UserBindWorkspaceModel::getWorkspaceId).collect(Collectors.toList());

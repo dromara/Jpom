@@ -188,7 +188,7 @@ public class LoginControl extends BaseServerController {
 				if (userService.simpleLogin(userName, userPwd) != null) {
 					userModel.unLock();
 					// 判断工作空间
-					List<WorkspaceModel> bindWorkspaceModels = userBindWorkspaceService.listUserWorkspaceInfo(userModel.getId());
+					List<WorkspaceModel> bindWorkspaceModels = userBindWorkspaceService.listUserWorkspaceInfo(userModel);
 					Assert.notEmpty(bindWorkspaceModels, "当前账号没有绑定任何工作空间，请联系管理员处理");
 					setSessionAttribute(LoginInterceptor.SESSION_NAME, userModel);
 					removeSessionAttribute(SHOW_CODE);

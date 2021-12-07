@@ -34,6 +34,7 @@ import io.jpom.model.PageResultDto;
 import io.jpom.model.data.UserBindWorkspaceModel;
 import io.jpom.model.data.UserModel;
 import io.jpom.service.user.UserBindWorkspaceService;
+import io.jpom.service.user.UserService;
 import org.springframework.util.Assert;
 
 import javax.servlet.http.HttpServletRequest;
@@ -78,12 +79,12 @@ public abstract class BaseWorkspaceService<T extends BaseWorkspaceModel> extends
 	 * 根据主键ID + 用户ID
 	 *
 	 * @param keyValue ID
-	 * @param userId   用户ID
+	 * @param userModel   用户
 	 * @return data
 	 */
-	public T getByKey(String keyValue, String userId) {
+	public T getByKey(String keyValue, UserModel userModel) {
 		T byKey = super.getByKey(keyValue, false);
-		this.checkUserWorkspace(byKey.getWorkspaceId(), userId);
+		this.checkUserWorkspace(byKey.getWorkspaceId(), userModel);
 		return byKey;
 	}
 
@@ -137,17 +138,31 @@ public abstract class BaseWorkspaceService<T extends BaseWorkspaceModel> extends
 	}
 
 	/**
-	 * 判断用户是否有对呀工作空间权限
+	 * 判断用户是否有对应工作空间权限
 	 *
 	 * @param workspaceId 工作空间ID
 	 */
 	private void checkUserWorkspace(String workspaceId) {
-		// 查询绑定的权限
 		UserModel userModel = BaseServerController.getUserByThreadLocal();
+		this.checkUserWorkspace(workspaceId, userModel);
+	}
+
+	/**
+	 * 判断用户是否有对应工作空间权限
+	 *
+	 * @param workspaceId 工作空间ID
+	 */
+	private void checkUserWorkspace(String workspaceId, UserModel userModel) {
+		Assert.notNull(userModel, "没有对应的用户");
 		if (StrUtil.equals(userModel.getId(), UserModel.SYSTEM_ADMIN)) {
 			// 系统执行，发行检查
 			return;
 		}
+		if (userModel.isSuperSystemUser()) {
+			// 超级管理员
+			return;
+		}
+		// 查询绑定的权限
 		UserBindWorkspaceModel workspaceModel = new UserBindWorkspaceModel();
 		workspaceModel.setId(UserBindWorkspaceModel.getId(userModel.getId(), workspaceId));
 		UserBindWorkspaceService userBindWorkspaceService = SpringUtil.getBean(UserBindWorkspaceService.class);
@@ -156,17 +171,14 @@ public abstract class BaseWorkspaceService<T extends BaseWorkspaceModel> extends
 	}
 
 	/**
-	 * 判断用户是否有对呀工作空间权限
+	 * 判断用户是否有对应工作空间权限
 	 *
 	 * @param workspaceId 工作空间ID
 	 * @param userId      用户ID
 	 */
 	private void checkUserWorkspace(String workspaceId, String userId) {
-		// 查询绑定的权限
-		UserBindWorkspaceModel workspaceModel = new UserBindWorkspaceModel();
-		workspaceModel.setId(UserBindWorkspaceModel.getId(userId, workspaceId));
-		UserBindWorkspaceService userBindWorkspaceService = SpringUtil.getBean(UserBindWorkspaceService.class);
-		boolean exists = userBindWorkspaceService.exists(workspaceModel);
-		Assert.state(exists, "没有对应的工作空间权限");
+		UserService userService = SpringUtil.getBean(UserService.class);
+		UserModel userModel = userService.getByKey(userId);
+		this.checkUserWorkspace(workspaceId, userModel);
 	}
 }

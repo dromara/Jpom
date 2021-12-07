@@ -159,12 +159,7 @@ public class UserBasicInfoController extends BaseServerController {
 	@GetMapping(value = "my_workspace", produces = MediaType.APPLICATION_JSON_VALUE)
 	public String myWorkspace() {
 		UserModel user = getUser();
-		if (user.isSuperSystemUser()) {
-			// 超级管理员有所有工作空间权限
-			List<WorkspaceModel> list = workspaceService.list();
-			return JsonMessage.getString(200, "", list);
-		}
-		List<WorkspaceModel> models = userBindWorkspaceService.listUserWorkspaceInfo(user.getId());
+		List<WorkspaceModel> models = userBindWorkspaceService.listUserWorkspaceInfo(user);
 		Assert.notEmpty(models, "当前账号没有绑定任何工作空间，请联系管理员处理");
 		return JsonMessage.getString(200, "", models);
 	}
