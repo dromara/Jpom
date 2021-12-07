@@ -100,8 +100,12 @@ export default {
     getMeta(metaName) {
       const metas = document.getElementsByTagName("meta");
       for (let i = 0; i < metas.length; i++) {
-        if (metas[i].getAttribute("name") === metaName) {
-          return metas[i].getAttribute("content");
+        try {
+          if (metas[i].getAttribute("name") === metaName) {
+            return metas[i].getAttribute("content");
+          }
+        } catch (e) {
+          console.error(e);
         }
       }
       return "";

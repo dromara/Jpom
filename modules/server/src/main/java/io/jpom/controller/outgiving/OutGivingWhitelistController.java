@@ -75,7 +75,7 @@ public class OutGivingWhitelistController extends BaseServerController {
 	@RequestMapping(value = "white-list", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public String whiteList() {
-		ServerWhitelist serverWhitelist = systemParametersServer.getConfig(ServerWhitelist.ID, ServerWhitelist.class);
+		ServerWhitelist serverWhitelist = systemParametersServer.getConfigDefNewInstance(ServerWhitelist.ID, ServerWhitelist.class);
 		Field[] fields = ReflectUtil.getFields(ServerWhitelist.class);
 		Map<String, Object> map = new HashMap<>(8);
 		for (Field field : fields) {

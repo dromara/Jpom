@@ -22,6 +22,7 @@
  */
 package io.jpom.common.interceptor;
 
+import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.servlet.ServletUtil;
 import cn.jiangzeyin.common.JsonMessage;
@@ -31,6 +32,8 @@ import io.jpom.common.BaseServerController;
 import io.jpom.model.data.NodeModel;
 import io.jpom.model.data.UserModel;
 import io.jpom.permission.SystemPermission;
+import io.jpom.plugin.Feature;
+import io.jpom.plugin.MethodFeature;
 import io.jpom.service.node.NodeService;
 import io.jpom.system.AgentException;
 import org.springframework.http.MediaType;
@@ -38,7 +41,6 @@ import org.springframework.web.method.HandlerMethod;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
 
 /**
  * 权限拦截器
@@ -50,6 +52,11 @@ import java.io.IOException;
 public class PermissionInterceptor extends BaseJpomInterceptor {
 
 	private NodeService nodeService;
+	private static final MethodFeature[] DEMO = new MethodFeature[]{
+			MethodFeature.DEL,
+			MethodFeature.UPLOAD,
+			MethodFeature.REMOTE_DOWNLOAD,
+			MethodFeature.EXECUTE};
 
 
 	private void init() {
@@ -75,16 +82,34 @@ public class PermissionInterceptor extends BaseJpomInterceptor {
 			// 没有登录、或者超级管理自己放过
 			return true;
 		}
+		boolean systemPermission = this.checkSystemPermission(userModel, response, handlerMethod);
+		if (!systemPermission) {
+			return false;
+		}
+		Feature feature = handlerMethod.getMethodAnnotation(Feature.class);
+		if (feature == null) {
+			return true;
+		}
+		MethodFeature method = feature.method();
+		if (ArrayUtil.contains(DEMO, method) && userModel.isDemoUser()) {
+			this.errorMsg(response, "演示系统不能使用该功能,如果完整体验请部署后使用");
+			return false;
+		}
+		return true;
+	}
+
+	private boolean checkSystemPermission(UserModel userModel, HttpServletResponse response, HandlerMethod handlerMethod) {
+
 		SystemPermission systemPermission = this.getSystemPermission(handlerMethod);
 		if (systemPermission == null) {
 			return true;
 		}
 		if (!userModel.isSystemUser()) {
-			this.errorMsg(request, response);
+			this.errorMsg(response, "你没有权限:-2");
 			return false;
 		}
 		if (systemPermission.superUser() && !userModel.isSuperSystemUser()) {
-			this.errorMsg(request, response);
+			this.errorMsg(response, "你没有权限:-2");
 			return false;
 		}
 		return true;
@@ -102,9 +127,8 @@ public class PermissionInterceptor extends BaseJpomInterceptor {
 		}
 	}
 
-	private void errorMsg(HttpServletRequest request, HttpServletResponse response) throws IOException {
-
-		JsonMessage<String> jsonMessage = new JsonMessage<>(302, "你没有权限:-2");
+	private void errorMsg(HttpServletResponse response, String msg) {
+		JsonMessage<String> jsonMessage = new JsonMessage<>(302, msg);
 		ServletUtil.write(response, jsonMessage.toString(), MediaType.APPLICATION_JSON_VALUE);
 	}
 }
