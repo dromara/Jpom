@@ -1,10 +1,10 @@
 <template>
   <div class="full-content">
     <div ref="filter" class="filter">
-      <a-select v-model="listQuery.buildDataId" allowClear placeholder="请选择构建名称" class="filter-item">
+      <a-select show-search option-filter-prop="children" v-model="listQuery.buildDataId" allowClear placeholder="请选择构建名称" class="filter-item">
         <a-select-option v-for="build in buildList" :key="build.id">{{ build.name }}</a-select-option>
       </a-select>
-      <a-select v-model="listQuery.status" allowClear placeholder="请选择状态" class="filter-item" @change="handleFilter">
+      <a-select show-search option-filter-prop="children" v-model="listQuery.status" allowClear placeholder="请选择状态" class="filter-item">
         <a-select-option v-for="(val, key) in statusMap" :key="key">{{ val }}</a-select-option>
       </a-select>
       <a-range-picker class="filter-item" :show-time="{ format: 'HH:mm:ss' }" format="YYYY-MM-DD HH:mm:ss" @change="onchangeTime" />
@@ -25,12 +25,12 @@
       <template slot="releaseMethod" slot-scope="text" placement="topleft" :title="text">
         <span>{{ releaseMethodMap[text] }}</span>
       </template>
-      <a-tooltip slot="buildUser" slot-scope="text" placement="topLeft" :title="text">
+      <!-- <a-tooltip slot="buildUser" slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
-      </a-tooltip>
+      </a-tooltip> -->
       <template slot="operation" slot-scope="text, record">
-        <a-button type="primary" :disabled="!record.hasLog" @click="handleDownload(record)">下载日志</a-button>
-        <a-button type="primary" :disabled="!record.hashFile" @click="handleFile(record)">下载产物</a-button>
+        <a-button type="primary" :disabled="!record.hasLog" @click="handleDownload(record)"><a-icon type="download" />日志</a-button>
+        <a-button type="primary" :disabled="!record.hashFile" @click="handleFile(record)"><a-icon type="download" />产物</a-button>
         <a-dropdown>
           <a class="ant-dropdown-link" @click="(e) => e.preventDefault()">
             更多
@@ -55,8 +55,8 @@
 </template>
 <script>
 import BuildLog from "./log";
-import { geteBuildHistory, getBuildListAll, downloadBuildLog, rollback, deleteBuildHistory, releaseMethodMap, downloadBuildFile } from "@/api/build-info";
-import { parseTime } from "../../utils/time";
+import { geteBuildHistory, getBuildListAll, downloadBuildLog, rollback, deleteBuildHistory, releaseMethodMap, statusMap, downloadBuildFile } from "@/api/build-info";
+import { parseTime } from "@/utils/time";
 
 import { PAGE_DEFAULT_LIMIT, PAGE_DEFAULT_SIZW_OPTIONS, PAGE_DEFAULT_SHOW_TOTAL, PAGE_DEFAULT_LIST_QUERY } from "@/utils/const";
 export default {
@@ -71,7 +71,7 @@ export default {
       buildList: [],
       total: 0,
       listQuery: Object.assign({}, PAGE_DEFAULT_LIST_QUERY),
-
+      statusMap: statusMap,
       temp: {},
       buildLogVisible: false,
       columns: [
@@ -97,18 +97,9 @@ export default {
           width: 180,
         },
         { title: "发布方式", dataIndex: "releaseMethod", width: 100, ellipsis: true, scopedSlots: { customRender: "releaseMethod" } },
-        { title: "构建人", dataIndex: "buildUser", /*width: 150,*/ ellipsis: true, scopedSlots: { customRender: "buildUser" } },
-        { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, width: 320, fixed: "right" },
+        { title: "构建人", dataIndex: "modifyUser", /*width: 150,*/ ellipsis: true, scopedSlots: { customRender: "modifyUser" } },
+        { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, width: 280, fixed: "right" },
       ],
-      statusMap: {
-        1: "构建中",
-        2: "构建成功",
-        3: "构建失败",
-        4: "发布中",
-        5: "发布成功",
-        6: "发布失败",
-        7: "取消构建",
-      },
     };
   },
   computed: {

@@ -1,5 +1,6 @@
 package io.jpom.service.node;
 
+import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.db.Entity;
 import cn.hutool.extra.servlet.ServletUtil;
@@ -19,7 +20,9 @@ import org.springframework.util.Assert;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * @author bwcx_jzy
@@ -59,14 +62,22 @@ public class NodeService extends BaseWorkspaceService<NodeModel> {
 		Assert.hasText(nodeModel.getName(), "节点名称 不能为空");
 		// 节点地址 重复
 		String workspaceId = this.getCheckUserWorkspace(request);
-		Entity entity = Entity.create();
-		entity.set("url", nodeModel.getUrl());
-		entity.set("workspaceId", workspaceId);
-		if (StrUtil.isNotEmpty(id)) {
-			entity.set("id", StrUtil.format(" <> {}", id));
+		//		Entity entity = Entity.create();
+		//		entity.set("url", nodeModel.getUrl());
+		//		entity.set("workspaceId", workspaceId);
+		//		if (StrUtil.isNotEmpty(id)) {
+		//			entity.set("id", StrUtil.format(" <> {}", id));
+		//		}
+		//		boolean exists = super.exists(entity);
+		//		Assert.state(!exists, "对应的节点已经存在啦");
+		{
+			NodeModel nodeModel1 = new NodeModel();
+			nodeModel1.setUrl(nodeModel.getUrl());
+			nodeModel1.setWorkspaceId(workspaceId);
+			List<NodeModel> nodeModels = ObjectUtil.defaultIfNull(super.listByBean(nodeModel1), Collections.EMPTY_LIST);
+			Optional<NodeModel> any = nodeModels.stream().filter(nodeModel2 -> !StrUtil.equals(id, nodeModel2.getId())).findAny();
+			Assert.state(!any.isPresent(), "对应的节点已经存在啦");
 		}
-		boolean exists = super.exists(entity);
-		Assert.state(!exists, "对应的节点已经存在啦");
 		// 判断 ssh
 		String sshId = nodeModel.getSshId();
 		if (StrUtil.isNotEmpty(sshId)) {

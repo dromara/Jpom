@@ -53,6 +53,7 @@ export default {
             }
             return parseTime(text);
           },
+          sorter: true,
           width: 180,
         },
         { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, width: "300px" },

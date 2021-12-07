@@ -75,6 +75,7 @@ export default {
         {
           title: "修改时间",
           dataIndex: "modifyTimeMillis",
+          sorter: true,
           ellipsis: true,
           customRender: (text) => {
             return parseTime(text);

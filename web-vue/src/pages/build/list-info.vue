@@ -2,10 +2,14 @@
 <template>
   <div class="full-content">
     <div ref="filter" class="filter">
-      <a-input class="search-input-item" v-model="listQuery['%name%']" placeholder="构建名称" />
-      <!-- <a-select v-model="listQuery.group" allowClear placeholder="请选择分组" class="filter-item" >
-        <a-select-option v-for="group in groupList" :key="group">{{ group }}</a-select-option>
-      </a-select> -->
+      <a-input allowClear class="search-input-item" v-model="listQuery['%name%']" placeholder="构建名称" />
+      <a-select show-search option-filter-prop="children" v-model="listQuery.status" allowClear placeholder="状态" class="filter-item">
+        <a-select-option v-for="(val, key) in statusMap" :key="key">{{ val }}</a-select-option>
+      </a-select>
+      <a-select show-search option-filter-prop="children" v-model="listQuery.releaseMethod" allowClear placeholder="发布方式" class="filter-item">
+        <a-select-option v-for="(val, key) in releaseMethodMap" :key="key">{{ val }}</a-select-option>
+      </a-select>
+      <a-input allowClear class="search-input-item" v-model="listQuery['%resultDirFile%']" placeholder="产物目录" />
       <a-button type="primary" @click="loadData">搜索</a-button>
       <a-button type="primary" @click="handleAdd">新增</a-button>
     </div>
@@ -21,15 +25,7 @@
         <span>{{ releaseMethodMap[text] }}</span>
       </template>
       <template slot="status" slot-scope="text">
-        <span v-if="text === 0">未构建</span>
-        <span v-else-if="text === 1">构建中</span>
-        <span v-else-if="text === 2">构建成功</span>
-        <span v-else-if="text === 3">构建失败</span>
-        <span v-else-if="text === 4">发布中</span>
-        <span v-else-if="text === 5">发布成功</span>
-        <span v-else-if="text === 6">发布失败</span>
-        <span v-else-if="text === 7">取消构建</span>
-        <span v-else>未知状态</span>
+        <span>{{ statusMap[text] || "未知" }}</span>
       </template>
       <a-tooltip slot="buildId" slot-scope="text, record" placement="topLeft" :title="text + ' ( 点击查看日志 ) '">
         <span v-if="record.buildId <= 0"></span>
@@ -69,7 +65,7 @@
         </a-form-model-item>
 
         <a-form-model-item label="仓库地址" prop="repositoryId">
-          <a-select v-model="temp.repositoryId" @select="changeRepositpry" @change="changeRepositpry" placeholder="请选择仓库">
+          <a-select show-search option-filter-prop="children" v-model="temp.repositoryId" @select="changeRepositpry" @change="changeRepositpry" placeholder="请选择仓库">
             <a-select-option v-for="item in repositoryList" :key="item.id" :value="item.id">{{ item.name }}[{{ item.gitUrl }}]</a-select-option>
           </a-select>
         </a-form-model-item>
@@ -213,7 +209,7 @@ import { mapGetters } from "vuex";
 import CustomSelect from "@/components/customSelect";
 import BuildLog from "./log";
 import { getRepositoryListAll } from "../../api/repository";
-import { clearBuid, deleteBuild, editBuild, getBranchList, getBuildList, getTriggerUrl, releaseMethodMap, releaseMethodArray, resetTrigger, startBuild, stopBuild } from "@/api/build-info";
+import { clearBuid, deleteBuild, editBuild, getBranchList, getBuildList, getTriggerUrl, releaseMethodMap, releaseMethodArray, resetTrigger, startBuild, stopBuild, statusMap } from "@/api/build-info";
 import { getDishPatchListAll } from "../../api/dispatch";
 import { getProjectListAll, getNodeListAll } from "@/api/node";
 import { getSshListAll } from "../../api/ssh";
@@ -234,7 +230,7 @@ export default {
       // 动态列表参数
       groupList: [],
       list: [],
-
+      statusMap: statusMap,
       repositoryList: [],
       // 当前仓库信息
       tempRepository: {},
@@ -285,6 +281,7 @@ export default {
         {
           title: "修改时间",
           dataIndex: "modifyTimeMillis",
+          sorter: true,
           customRender: (text) => {
             if (!text) {
               return "";

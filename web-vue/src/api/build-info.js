@@ -227,6 +227,16 @@ export function deleteBuildHistory(logId) {
   });
 }
 
+export const statusMap = {
+  1: "构建中",
+  2: "构建成功",
+  3: "构建失败",
+  4: "发布中",
+  5: "发布成功",
+  6: "发布失败",
+  7: "取消构建",
+};
+
 export const releaseMethodMap = {
   0: "不发布",
   1: "节点分发",

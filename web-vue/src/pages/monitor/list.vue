@@ -92,6 +92,7 @@ export default {
         {
           title: "修改时间",
           dataIndex: "modifyTimeMillis",
+          sorter: true,
           customRender: (text) => {
             if (!text || text === "0") {
               return "";
