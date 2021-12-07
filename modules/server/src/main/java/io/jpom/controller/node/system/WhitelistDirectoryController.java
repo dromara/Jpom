@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.annotation.Resource;
 import java.lang.reflect.Field;
 import java.util.Collection;
 import java.util.HashMap;
@@ -32,8 +31,12 @@ import java.util.Map;
 @Feature(cls = ClassFeature.NODE_CONFIG_WHITELIST)
 @SystemPermission
 public class WhitelistDirectoryController extends BaseServerController {
-	@Resource
-	private WhitelistDirectoryService whitelistDirectoryService;
+
+	private final WhitelistDirectoryService whitelistDirectoryService;
+
+	public WhitelistDirectoryController(WhitelistDirectoryService whitelistDirectoryService) {
+		this.whitelistDirectoryService = whitelistDirectoryService;
+	}
 
 
 	/**

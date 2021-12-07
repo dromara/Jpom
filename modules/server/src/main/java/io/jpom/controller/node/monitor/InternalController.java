@@ -21,19 +21,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @RequestMapping(value = "/node/manage/")
 public class InternalController extends BaseServerController {
 
-//    /**
-//     * 获取内存信息
-//     *
-//     * @return page
-//     */
-//    @RequestMapping(value = "internal", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
-//    public String getInternal(String tag, String copyId) {
-//        setAttribute("tag", tag);
-//        JSONObject data = NodeForward.requestData(getNode(), NodeUrl.Manage_internal_data, getRequest(), JSONObject.class);
-//        setAttribute("data", data);
-//        setAttribute("copyId", copyId);
-//        return "node/manage/internal";
-//    }
 
 	/**
 	 * @return

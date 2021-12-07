@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import javax.annotation.Resource;
 import java.util.List;
 
 /**
@@ -30,8 +29,11 @@ import java.util.List;
 @SystemPermission
 public class NginxController extends BaseServerController {
 
-	@Resource
-	private WhitelistDirectoryService whitelistDirectoryService;
+	private final WhitelistDirectoryService whitelistDirectoryService;
+
+	public NginxController(WhitelistDirectoryService whitelistDirectoryService) {
+		this.whitelistDirectoryService = whitelistDirectoryService;
+	}
 
 
 	/**
