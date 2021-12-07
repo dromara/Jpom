@@ -79,11 +79,11 @@ const children = [
     name: "user-list",
     component: () => import("../pages/user"),
   },
-  {
-    path: "/role/list",
-    name: "role-list",
-    component: () => import("../pages/role"),
-  },
+  // {
+  //   path: "/role/list",
+  //   name: "role-list",
+  //   component: () => import("../pages/role"),
+  // },
   {
     path: "/operation/log",
     name: "operation-log",

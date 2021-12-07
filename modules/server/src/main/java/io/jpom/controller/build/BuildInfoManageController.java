@@ -47,7 +47,6 @@ import io.jpom.plugin.Feature;
 import io.jpom.plugin.MethodFeature;
 import io.jpom.service.dblog.BuildInfoService;
 import io.jpom.service.dblog.DbBuildHistoryLogService;
-import io.jpom.service.dblog.RepositoryService;
 import io.jpom.util.LimitQueue;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
@@ -55,7 +54,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.annotation.Resource;
 import java.io.File;
 import java.util.Objects;
 
@@ -70,12 +68,15 @@ import java.util.Objects;
 @Feature(cls = ClassFeature.BUILD)
 public class BuildInfoManageController extends BaseServerController {
 
-	@Resource
-	private BuildInfoService buildInfoService;
-	@Resource
-	private RepositoryService repositoryService;
-	@Resource
-	private DbBuildHistoryLogService dbBuildHistoryLogService;
+
+	private final BuildInfoService buildInfoService;
+	private final DbBuildHistoryLogService dbBuildHistoryLogService;
+
+	public BuildInfoManageController(BuildInfoService buildInfoService,
+									 DbBuildHistoryLogService dbBuildHistoryLogService) {
+		this.buildInfoService = buildInfoService;
+		this.dbBuildHistoryLogService = dbBuildHistoryLogService;
+	}
 
 	/**
 	 * 开始构建
@@ -160,7 +161,7 @@ public class BuildInfoManageController extends BaseServerController {
 	 * @return json
 	 */
 	@RequestMapping(value = "/build/manage/get-now-log", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	@Feature(method = MethodFeature.EXECUTE)
+	@Feature(method = MethodFeature.LIST)
 	public String getNowLog(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据") String id,
 							@ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "没有buildId") int buildId,
 							@ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "line") int line) {

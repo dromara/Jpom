@@ -305,15 +305,16 @@ export default {
 .node-update {
   width 100%
   height 100%
-  display flex
+  // display flex
   flex-direction column
   justify-content space-between
 
 
   .header {
-    height 60px;
+    // height 60px;
     display flex;
     align-items center;
+    margin-bottom: 15px;
 
     > div {
       //  width 50%;
@@ -339,11 +340,11 @@ export default {
   }
 
   .table-div {
-    height calc(100% - 60px)
-    overflow auto
+    // height calc(100% - 60px)
+    // overflow auto
 
     .table {
-      height 100%
+      // height 100%
 
       .uploading {
         display flex

@@ -98,7 +98,7 @@
           <a-form-model-item label="节点账号" prop="loginName">
             <a-input v-model="temp.loginName" placeholder="节点账号,请查看节点启动输出的信息" />
           </a-form-model-item>
-          <a-form-model-item label="节点密码" prop="loginPwd">
+          <a-form-model-item label="节点密码" :prop="`${temp.id ? 'loginPwd-update' : 'loginPwd'}`">
             <a-input-password v-model="temp.loginPwd" placeholder="节点密码,请查看节点启动输出的信息" />
           </a-form-model-item>
         </div>
@@ -298,6 +298,7 @@ export default {
         setTimeout(() => {
           this.introGuide();
         }, 500);
+        this.$refs["editNodeForm"].resetFields();
       });
     },
     // 进入终端

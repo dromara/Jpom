@@ -1,19 +1,31 @@
 <template>
   <div class="full-content">
     <div ref="filter" class="filter">
-      <a-select v-model="listQuery.userId" allowClear placeholder="请选择操作者" class="filter-item">
+      <a-select show-search option-filter-prop="children" v-model="listQuery.userId" allowClear placeholder="请选择操作者" class="filter-item">
         <a-select-option v-for="item in userList" :key="item.id">{{ item.name }}</a-select-option>
       </a-select>
-      <a-select v-model="listQuery.nodeId" allowClear placeholder="请选择节点" class="filter-item">
+      <a-select show-search option-filter-prop="children" v-model="listQuery.nodeId" allowClear placeholder="请选择节点" class="filter-item">
         <a-select-option v-for="node in nodeList" :key="node.id">{{ node.name }}</a-select-option>
+      </a-select>
+      <a-select show-search option-filter-prop="children" v-model="listQuery.classFeature" allowClear placeholder="请选择功能" class="filter-item">
+        <a-select-option v-for="item in classFeature" :key="item.value">{{ item.title }}</a-select-option>
+      </a-select>
+      <a-select show-search option-filter-prop="children" v-model="listQuery.methodFeature" allowClear placeholder="请选择操作" class="filter-item">
+        <a-select-option v-for="item in methodFeature" :key="item.value">{{ item.title }}</a-select-option>
       </a-select>
       <a-range-picker class="filter-item" :show-time="{ format: 'HH:mm:ss' }" format="YYYY-MM-DD HH:mm:ss" @change="onchangeTime" />
       <a-button type="primary" @click="handleFilter">搜索</a-button>
     </div>
     <!-- 数据表格 -->
     <a-table :data-source="list" :loading="loading" :columns="columns" :pagination="pagination" bordered :rowKey="(record, index) => index" @change="change">
-      <a-tooltip slot="nodeId" slot-scope="text" placement="topLeft" :title="text">
-        <span>{{ text }}</span>
+      <a-tooltip slot="nodeId" slot-scope="text" placement="topLeft" :title="nodeMap[text]">
+        <span>{{ nodeMap[text] }}</span>
+      </a-tooltip>
+      <a-tooltip slot="classFeature" slot-scope="text" placement="topLeft" :title="classFeatureMap[text]">
+        <span>{{ classFeatureMap[text] }}</span>
+      </a-tooltip>
+      <a-tooltip slot="methodFeature" slot-scope="text" placement="topLeft" :title="methodFeatureMap[text]">
+        <span>{{ methodFeatureMap[text] }}</span>
       </a-tooltip>
       <a-tooltip slot="dataId" slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
@@ -39,6 +51,7 @@
 </template>
 <script>
 import { getOperationLogList } from "@/api/operation-log";
+import { getMonitorOperateTypeList } from "@/api/monitor";
 import { getNodeListAll } from "@/api/node";
 import { getUserListAll } from "@/api/user";
 import { parseTime } from "@/utils/time";
@@ -49,23 +62,28 @@ export default {
       loading: false,
       list: [],
       nodeList: [],
+      nodeMap: {},
       userList: [],
-
       listQuery: {
         page: 1,
         limit: PAGE_DEFAULT_LIMIT,
         total: 0,
       },
-      timeRange: "",
+      methodFeature: [],
+      classFeature: [],
+      methodFeatureMap: {},
+      classFeatureMap: {},
       temp: {},
       detailVisible: false,
       detailData: [],
       columns: [
         { title: "操作者", dataIndex: "userId", width: 100 },
         { title: "IP", dataIndex: "ip" /*width: 130*/ },
-        { title: "节点 ID", dataIndex: "nodeId", width: 200, ellipsis: true, scopedSlots: { customRender: "nodeId" } },
+        { title: "节点", dataIndex: "nodeId", width: 120, ellipsis: true, scopedSlots: { customRender: "nodeId" } },
         { title: "数据 ID", dataIndex: "dataId", /*width: 240,*/ ellipsis: true, scopedSlots: { customRender: "dataId" } },
-        { title: "操作类型", dataIndex: "optTypeMsg", width: 100, ellipsis: true, scopedSlots: { customRender: "optTypeMsg" } },
+        { title: "功能", dataIndex: "classFeature", /*width: 240,*/ ellipsis: true, scopedSlots: { customRender: "classFeature" } },
+        { title: "方法", dataIndex: "methodFeature", /*width: 240,*/ ellipsis: true, scopedSlots: { customRender: "methodFeature" } },
+
         { title: "执行结果", dataIndex: "optStatusMsg", width: 100 },
         {
           title: "操作时间",
@@ -96,6 +114,17 @@ export default {
     this.loadData();
     this.loadUserList();
     this.loadNodeList();
+
+    getMonitorOperateTypeList().then((res) => {
+      this.methodFeature = res.data.methodFeature;
+      this.classFeature = res.data.classFeature;
+      res.data.methodFeature.forEach((item) => {
+        this.methodFeatureMap[item.value] = item.title;
+      });
+      res.data.classFeature.forEach((item) => {
+        this.classFeatureMap[item.value] = item.title;
+      });
+    });
   },
   methods: {
     // 加载 node
@@ -103,6 +132,10 @@ export default {
       getNodeListAll().then((res) => {
         if (res.code === 200) {
           this.nodeList = res.data;
+
+          res.data.forEach((item) => {
+            this.nodeMap[item.id] = item.name;
+          });
         }
       });
     },

@@ -2,7 +2,7 @@
   <div class="full-content">
     <div ref="filter" class="filter">
       <a-input v-model="listQuery['%name%']" placeholder="搜索项目" class="search-input-item" />
-      <a-button type="primary" @click="getNodeProjectData">刷新</a-button>
+      <a-button type="primary" @click="getNodeProjectData">搜索</a-button>
       <span>| </span>
       <a-button type="primary" @click="batchStart">批量启动</a-button>
       <a-button type="primary" @click="batchRestart">批量重启</a-button>

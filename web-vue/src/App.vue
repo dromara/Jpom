@@ -26,7 +26,7 @@ export default {
 };
 </script>
 
-<style>
+<style lang="stylus">
 #app {
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
@@ -34,5 +34,9 @@ export default {
   color: #2c3e50;
   margin: 0;
   padding: 0;
+}
+
+.full-content {
+  min-height calc(100vh - 120px);
 }
 </style>

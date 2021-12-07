@@ -49,11 +49,6 @@ public class NodeModel extends BaseWorkspaceModel {
 	 * 节点协议
 	 */
 	private String protocol = "http";
-
-//	/**
-//	 * 项目信息  临时信息
-//	 */
-//	private JSONArray projects;
 	/**
 	 * 开启状态，如果关闭状态就暂停使用节点
 	 */

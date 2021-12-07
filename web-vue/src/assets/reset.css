@@ -20,9 +20,6 @@ body {
   overflow-x: auto !important;
 }
 
-.full-content {
-  min-height: 100vh;
-}
 
 .search-input-item {
   width: 140px;
