@@ -33,6 +33,7 @@ import cn.hutool.db.Db;
 import cn.hutool.db.Entity;
 import cn.hutool.db.Page;
 import cn.hutool.db.PageResult;
+import cn.hutool.db.sql.Order;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import io.jpom.model.PageResultDto;
 import io.jpom.system.JpomRuntimeException;
@@ -441,6 +442,22 @@ public abstract class BaseDbCommonService<T> {
 		} catch (SQLException e) {
 			throw new JpomRuntimeException("数据库异常", e);
 		}
+	}
+
+	/**
+	 * 查询列表
+	 *
+	 * @param data   数据
+	 * @param count  查询数量
+	 * @param orders 排序
+	 * @return List
+	 */
+	public List<T> queryList(T data, int count, Order... orders) {
+		Entity where = this.dataBeanToEntity(data);
+		Page page = new Page(1, count);
+		page.addOrder(orders);
+		PageResultDto<T> tPageResultDto = this.listPage(where, page);
+		return tPageResultDto.getResult();
 	}
 
 	/**

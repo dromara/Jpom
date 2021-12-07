@@ -13,6 +13,7 @@
 7. 【server】新增通过命令行重新加载数据库初始化操作参数 `--rest:load_init_db`
 8. 【server】构建新增`本地命令`发布方式 用户在服务端执行相关命令进行发布操作
 9. 【server】发布命令（SSH发布命令、本地命令）支持变量替换：`#{BUILD_ID}`、`#{BUILD_NAME}`、`#{BUILD_RESULT_FILE}`、`#{BUILD_NUMBER_ID}`
+10. 【server】新增自动备份全量数据配置 `db.autoBackupIntervalDay` 默认一天备份一次,执行备份时间 凌晨0点或者中午12点
 
 ### 解决BUG、优化功能
 

@@ -59,7 +59,6 @@ import java.util.concurrent.TimeUnit;
  */
 public class RemoteVersion {
 
-	public static final String CHECK_VERSION_ID = "check_version";
 	/**
 	 * 主 url 用于拉取远程版本信息
 	 */

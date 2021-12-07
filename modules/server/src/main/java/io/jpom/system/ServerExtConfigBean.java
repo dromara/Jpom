@@ -89,6 +89,12 @@ public class ServerExtConfigBean implements DisposableBean {
 	private DataSize cacheSize;
 
 	/**
+	 * 自动全量备份数据库间隔天数 小于等于 0，不自动备份
+	 */
+	@Value("${db.autoBackupIntervalDay:1}")
+	private Integer autoBackupIntervalDay;
+
+	/**
 	 * author Hotstrip
 	 * 是否开启 web 访问数据库
 	 *
@@ -280,6 +286,10 @@ public class ServerExtConfigBean implements DisposableBean {
 
 	public String getLogoFile() {
 		return logoFile;
+	}
+
+	public Integer getAutoBackupIntervalDay() {
+		return autoBackupIntervalDay;
 	}
 
 	/**

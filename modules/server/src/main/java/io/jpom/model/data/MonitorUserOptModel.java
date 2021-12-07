@@ -82,7 +82,8 @@ public class MonitorUserOptModel extends BaseWorkspaceModel {
 	}
 
 	public String getMonitorFeature() {
-		return JSON.toJSONString(monitorFeature());
+		List<ClassFeature> object = monitorFeature();
+		return object == null ? null : JSON.toJSONString(object);
 	}
 
 	public List<ClassFeature> monitorFeature() {
@@ -102,7 +103,8 @@ public class MonitorUserOptModel extends BaseWorkspaceModel {
 	}
 
 	public String getMonitorOpt() {
-		return JSON.toJSONString(monitorOpt());
+		List<MethodFeature> object = monitorOpt();
+		return object == null ? null : JSON.toJSONString(object);
 	}
 
 
@@ -131,11 +133,13 @@ public class MonitorUserOptModel extends BaseWorkspaceModel {
 	}
 
 	public String getMonitorUser() {
-		return JSON.toJSONString(monitorUser());
+		List<String> object = monitorUser();
+		return object == null ? null : JSON.toJSONString(object);
 	}
 
 	public String getNotifyUser() {
-		return JSON.toJSONString(notifyUser());
+		List<String> object = notifyUser();
+		return object == null ? null : JSON.toJSONString(object);
 
 	}
 

@@ -23,13 +23,17 @@
 package io.jpom.service.dblog;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.DatePattern;
 import cn.hutool.core.date.LocalDateTimeUtil;
+import cn.hutool.core.date.SystemClock;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.crypto.SecureUtil;
 import cn.hutool.db.Entity;
+import cn.hutool.db.sql.Direction;
+import cn.hutool.db.sql.Order;
 import cn.jiangzeyin.common.DefaultSystemLog;
 import io.jpom.common.Const;
 import io.jpom.model.data.BackupInfoModel;
@@ -43,10 +47,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
-import javax.annotation.Resource;
 import java.io.File;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -59,8 +63,34 @@ import java.util.stream.Stream;
 @Service
 public class BackupInfoService extends BaseDbService<BackupInfoModel> {
 
-	@Resource
-	private H2BackupService h2BackupService;
+	private final H2BackupService h2BackupService;
+
+	public BackupInfoService(H2BackupService h2BackupService) {
+		this.h2BackupService = h2BackupService;
+	}
+
+	/**
+	 * 检查数据库备份
+	 */
+	public void checkAutoBackup() {
+		Integer autoBackupIntervalDay = ServerExtConfigBean.getInstance().getAutoBackupIntervalDay();
+		if (autoBackupIntervalDay == null || autoBackupIntervalDay <= 0) {
+			return;
+		}
+		BackupInfoModel backupInfoModel = new BackupInfoModel();
+		backupInfoModel.setBackupType(3);
+		List<BackupInfoModel> infoModels = super.queryList(backupInfoModel, 1, new Order("createTimeMillis", Direction.DESC));
+		BackupInfoModel first = CollUtil.getFirst(infoModels);
+		if (first != null) {
+			Long createTimeMillis = first.getCreateTimeMillis();
+			long interval = SystemClock.now() - createTimeMillis;
+			if (interval < TimeUnit.DAYS.toMillis(autoBackupIntervalDay)) {
+				return;
+			}
+		}
+		// 执行数据库备份
+		this.backupToSql(null, 3);
+	}
 
 	/**
 	 * 备份数据库 SQL 文件
@@ -68,6 +98,20 @@ public class BackupInfoService extends BaseDbService<BackupInfoModel> {
 	 * @param tableNameList 需要备份的表名称列表，如果是全库备份，则不需要
 	 */
 	public void backupToSql(final List<String> tableNameList) {
+		// 判断备份类型
+		int backupType = BackupTypeEnum.ALL.getCode();
+		if (!CollectionUtils.isEmpty(tableNameList)) {
+			backupType = BackupTypeEnum.PART.getCode();
+		}
+		this.backupToSql(tableNameList, backupType);
+	}
+
+	/**
+	 * 备份数据库 SQL 文件
+	 *
+	 * @param tableNameList 需要备份的表名称列表，如果是全库备份，则不需要
+	 */
+	public void backupToSql(final List<String> tableNameList, int backupType) {
 		final String fileName = LocalDateTimeUtil.format(LocalDateTimeUtil.now(), DatePattern.PURE_DATETIME_PATTERN);
 
 		// 设置默认备份 SQL 的文件地址
@@ -85,11 +129,7 @@ public class BackupInfoService extends BaseDbService<BackupInfoModel> {
 		BackupInfoModel backupInfoModel = new BackupInfoModel();
 		backupInfoModel.setId(IdUtil.fastSimpleUUID());
 		backupInfoModel.setName(fileName);
-		// 判断备份类型
-		int backupType = BackupTypeEnum.ALL.getCode();
-		if (!CollectionUtils.isEmpty(tableNameList)) {
-			backupType = BackupTypeEnum.PART.getCode();
-		}
+
 		backupInfoModel.setBackupType(backupType);
 		backupInfoModel.setFilePath(backupSqlPath);
 		insert(backupInfoModel);

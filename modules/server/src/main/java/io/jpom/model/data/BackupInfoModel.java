@@ -42,7 +42,7 @@ public class BackupInfoModel extends BaseDbModel {
 	 */
 	private String filePath;
 	/**
-	 * 备份类型{0: 全量, 1: 部分}
+	 * 备份类型{0: 全量, 1: 部分, 2: 导入, 3 自动}
 	 */
 	private Integer backupType;
 	/**
@@ -56,7 +56,6 @@ public class BackupInfoModel extends BaseDbModel {
 
 	/**
 	 * 状态{0: 默认; 1: 成功; 2: 失败}
-	 * @return
 	 */
 	private Integer status;
 

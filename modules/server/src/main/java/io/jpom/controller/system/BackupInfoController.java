@@ -23,7 +23,6 @@
 package io.jpom.controller.system;
 
 import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.util.IdUtil;
 import cn.hutool.crypto.SecureUtil;
 import cn.hutool.extra.servlet.ServletUtil;
 import cn.jiangzeyin.common.DefaultSystemLog;
@@ -166,29 +165,36 @@ public class BackupInfoController extends BaseServerController {
 		MultipartFileBuilder multipartFileBuilder = createMultipart()
 				.addFieldName("file");
 		// 备份类型
-		int backupType = Integer.parseInt(getParameter("backupType"));
+		//int backupType = Integer.parseInt(getParameter("backupType"));
 		// 存储目录
 		File directory = FileUtil.file(DbConfig.getInstance().dbLocalPath(), Const.BACKUP_DIRECTORY_NAME);
 
 		// 保存文件
 		multipartFileBuilder.setSavePath(FileUtil.getAbsolutePath(directory))
-				.setUseOriginalFilename(true);
+				.setUseOriginalFilename(false);
 		String backupSqlPath = multipartFileBuilder.save();
-
 		// 记录到数据库
 		final File file = new File(backupSqlPath);
+		String sha1Sum = SecureUtil.sha1(file);
 		BackupInfoModel backupInfoModel = new BackupInfoModel();
-		backupInfoModel.setId(IdUtil.fastSimpleUUID());
+		backupInfoModel.setSha1Sum(sha1Sum);
+		boolean exists = backupInfoService.exists(backupInfoModel);
+		if (exists) {
+			FileUtil.del(file);
+			return JsonMessage.getString(400, "导入的数据已经存在啦");
+		}
+
+//		backupInfoModel.setId(IdUtil.fastSimpleUUID());
 		backupInfoModel.setName(file.getName());
-		backupInfoModel.setBackupType(backupType);
+		backupInfoModel.setBackupType(2);
 		backupInfoModel.setStatus(BackupStatusEnum.SUCCESS.getCode());
 		backupInfoModel.setFileSize(FileUtil.size(file));
-		backupInfoModel.setSha1Sum(SecureUtil.sha1(file));
-		backupInfoModel.setFilePath(backupSqlPath);
 
+		backupInfoModel.setSha1Sum(sha1Sum);
+		backupInfoModel.setFilePath(backupSqlPath);
 		backupInfoService.insert(backupInfoModel);
 
-		return JsonMessage.toJson(200, "操作成功，请稍后刷新查看备份状态");
+		return JsonMessage.toJson(200, "导入成功");
 	}
 
 	/**

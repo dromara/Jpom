@@ -2,7 +2,7 @@
   <div class="full-content">
     <div ref="filter" class="filter">
       <a-input v-model="listQuery.name" placeholder="请输入备份名称" class="filter-item" />
-      <a-select v-model="listQuery.backupType" allowClear placeholder="请选择备份类型" class="filter-item" @change="handleFilter">
+      <a-select v-model="listQuery.backupType" allowClear placeholder="请选择备份类型" class="filter-item">
         <a-select-option v-for="backupType in backupTypeList" :key="backupType.key">{{ backupType.value }}</a-select-option>
       </a-select>
       <a-button type="primary" @click="loadData">搜索</a-button>
@@ -40,8 +40,7 @@
       <a-form-model ref="editBackupForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }">
         <a-form-model-item label="备份类型" prop="backupType">
           <a-radio-group v-model="temp.backupType" name="backupType">
-            <a-radio :value="0">全量备份</a-radio>
-            <a-radio :value="1">部分备份</a-radio>
+            <a-radio v-for="item in backupTypeList" :disabled="item.disabled" :key="item.key" :value="item.key">{{ item.value }}</a-radio>
           </a-radio-group>
         </a-form-model-item>
         <!-- 部分备份 -->
@@ -55,12 +54,12 @@
       <a-upload :file-list="uploadFileList" :remove="handleSqlRemove" :before-upload="beforeSqlUpload" accept=".sql">
         <a-button><a-icon type="upload" />选择 SQL 文件</a-button>
       </a-upload>
-      <br />
+      <!-- <br />
       <a-radio-group v-model="backupType" name="backupType">
         <a-radio :value="0">全量备份</a-radio>
         <a-radio :value="1">部分备份</a-radio>
       </a-radio-group>
-      <br />
+      <br /> -->
       <br />
       <el-progress :text-inside="true" :stroke-width="18" :percentage="percentage" status="success"></el-progress>
       <br />
@@ -71,7 +70,7 @@
 </template>
 <script>
 import { mapGetters } from "vuex";
-import { getBackupList, getTableNameList, createBackup, downloadBackupFile, deleteBackup, restoreBackup, uploadBackupFile, backupTypeMap, backupStatusMap } from "../../api/backup-info";
+import { getBackupList, getTableNameList, createBackup, downloadBackupFile, deleteBackup, restoreBackup, uploadBackupFile, backupTypeMap, backupTypeArray, backupStatusMap } from "@/api/backup-info";
 import { parseTime, renderSize } from "@/utils/time";
 import { PAGE_DEFAULT_LIMIT, PAGE_DEFAULT_SIZW_OPTIONS, PAGE_DEFAULT_SHOW_TOTAL, PAGE_DEFAULT_LIST_QUERY } from "@/utils/const";
 
@@ -83,10 +82,7 @@ export default {
       backupStatusMap: backupStatusMap,
       loading: false,
       listQuery: Object.assign({}, PAGE_DEFAULT_LIST_QUERY),
-      backupTypeList: [
-        { key: 0, value: "全量" },
-        { key: 1, value: "部分" },
-      ],
+      backupTypeList: backupTypeArray,
       list: [],
       total: 0,
       tableNameList: [],
@@ -174,6 +170,7 @@ export default {
     },
   },
   created() {
+    console.log(backupTypeMap);
     this.loadData();
   },
   methods: {
@@ -242,7 +239,7 @@ export default {
             });
             this.$refs["editBackupForm"].resetFields();
             this.createBackupVisible = false;
-            this.handleFilter();
+            this.loadData();
           }
         });
       });
