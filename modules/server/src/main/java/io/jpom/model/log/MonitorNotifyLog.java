@@ -89,8 +89,20 @@ public class MonitorNotifyLog extends BaseWorkspaceModel {
 		this.notifyError = notifyError;
 	}
 
-	public Boolean isNotifyStatus() {
+	public Boolean getStatus() {
+		return status;
+	}
+
+	public void setStatus(Boolean status) {
+		this.status = status;
+	}
+
+	public Boolean getNotifyStatus() {
 		return notifyStatus;
+	}
+
+	public void setNotifyStatus(Boolean notifyStatus) {
+		this.notifyStatus = notifyStatus;
 	}
 
 	public void setNotifyStatus(boolean notifyStatus) {

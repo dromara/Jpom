@@ -65,7 +65,6 @@ public class MonitorModel extends BaseWorkspaceModel {
 	 */
 	private Boolean alarm;
 
-
 	public String getName() {
 		return name;
 	}
@@ -84,6 +83,10 @@ public class MonitorModel extends BaseWorkspaceModel {
 	}
 
 	public Boolean getAutoRestart() {
+		return autoRestart;
+	}
+
+	public boolean autoRestart() {
 		return autoRestart != null && autoRestart;
 	}
 
@@ -92,6 +95,11 @@ public class MonitorModel extends BaseWorkspaceModel {
 	}
 
 	public Boolean getStatus() {
+		return status;
+	}
+
+
+	public boolean status() {
 		return status != null && status;
 	}
 
@@ -100,7 +108,7 @@ public class MonitorModel extends BaseWorkspaceModel {
 	}
 
 	public Boolean getAlarm() {
-		return alarm != null && alarm;
+		return alarm;
 	}
 
 	public void setAlarm(Boolean alarm) {
@@ -113,7 +121,8 @@ public class MonitorModel extends BaseWorkspaceModel {
 
 
 	public String getProjects() {
-		return JSON.toJSONString(projects());
+		List<NodeProject> projects = projects();
+		return projects == null ? null : JSON.toJSONString(projects);
 	}
 
 	public void setProjects(String projects) {
@@ -133,7 +142,8 @@ public class MonitorModel extends BaseWorkspaceModel {
 	}
 
 	public String getNotifyUser() {
-		return JSON.toJSONString(notifyUser());
+		List<String> object = notifyUser();
+		return object == null ? null : JSON.toJSONString(object);
 	}
 
 	public void setNotifyUser(String notifyUser) {

@@ -24,6 +24,8 @@ package io.jpom.service.dblog;
 
 import cn.hutool.core.date.SystemClock;
 import cn.hutool.core.util.ObjectUtil;
+import io.jpom.common.BaseServerController;
+import io.jpom.model.data.UserModel;
 import io.jpom.model.log.MonitorNotifyLog;
 import io.jpom.service.h2db.BaseWorkspaceService;
 import io.jpom.system.db.DbConfig;
@@ -41,11 +43,17 @@ public class DbMonitorNotifyLogService extends BaseWorkspaceService<MonitorNotif
 
 	@Override
 	public void insert(MonitorNotifyLog monitorNotifyLog) {
-		monitorNotifyLog.setCreateTime(ObjectUtil.defaultIfNull(monitorNotifyLog.getCreateTime(), SystemClock.now()));
-		super.insert(monitorNotifyLog);
-		//
-		DbConfig.autoClear(getTableName(), "createTime");
-		DbConfig.autoClear(getTableName(), "createTimeMillis");
+		try {
+			BaseServerController.resetInfo(UserModel.EMPTY);
+			//
+			monitorNotifyLog.setCreateTime(ObjectUtil.defaultIfNull(monitorNotifyLog.getCreateTime(), SystemClock.now()));
+			super.insert(monitorNotifyLog);
+			//
+			DbConfig.autoClear(getTableName(), "createTime");
+			DbConfig.autoClear(getTableName(), "createTimeMillis");
+		} finally {
+			BaseServerController.remove();
+		}
 	}
 
 
@@ -59,7 +67,7 @@ public class DbMonitorNotifyLogService extends BaseWorkspaceService<MonitorNotif
 	public void updateStatus(String logId, boolean status, String errorMsg) {
 		MonitorNotifyLog monitorNotifyLog = new MonitorNotifyLog();
 		monitorNotifyLog.setId(logId);
-		monitorNotifyLog.setStatus(status);
+		monitorNotifyLog.setNotifyStatus(status);
 		monitorNotifyLog.setNotifyError(errorMsg);
 		super.update(monitorNotifyLog);
 //		Entity entity = new Entity();

@@ -95,10 +95,10 @@ export default {
       columns: [
         { title: "名称", dataIndex: "name", scopedSlots: { customRender: "name" }, width: 150 },
         { title: "开启状态", dataIndex: "status", scopedSlots: { customRender: "status" }, width: 150 },
-        { title: "创建人", dataIndex: "parent", scopedSlots: { customRender: "parent" }, width: 120 },
+        { title: "修改人", dataIndex: "modifyUser", scopedSlots: { customRender: "modifyUser" }, width: 120 },
         {
           title: "修改时间",
-          dataIndex: "modifyTime",
+          dataIndex: "modifyTimeMillis",
           customRender: (text) => {
             if (!text || text === "0") {
               return "";

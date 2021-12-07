@@ -79,7 +79,7 @@ public class WebAopLog extends PropertyDefinerBase {
 				aopLogInterface.afterReturning(logResult);
 			}
 		}
-		if (consoleLogReqResponse) {
+		if (consoleLogReqResponse && logResult != null) {
 			DefaultSystemLog.getLog().info(BaseCallbackController.getRequestAttributes().getRequest().getRequestURI() + " :" + logResult);
 		}
 		return proceed;

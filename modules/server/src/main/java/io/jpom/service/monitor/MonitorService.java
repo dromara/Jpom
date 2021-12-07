@@ -22,15 +22,15 @@
  */
 package io.jpom.service.monitor;
 
+import cn.hutool.core.util.ObjectUtil;
 import io.jpom.model.Cycle;
 import io.jpom.model.data.MonitorModel;
 import io.jpom.monitor.Monitor;
 import io.jpom.service.h2db.BaseWorkspaceService;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * 监控管理Service
@@ -43,7 +43,7 @@ public class MonitorService extends BaseWorkspaceService<MonitorModel> {
 	@Override
 	public void insert(MonitorModel monitorModel) {
 		super.insert(monitorModel);
-		if (monitorModel.getStatus()) {
+		if (monitorModel.status()) {
 			Monitor.start();
 		}
 	}
@@ -83,13 +83,11 @@ public class MonitorService extends BaseWorkspaceService<MonitorModel> {
 	 * @return list
 	 */
 	public List<MonitorModel> listRunByCycle(Cycle cycle) {
-		List<MonitorModel> list = this.list();
-		if (list == null) {
-			return new ArrayList<>();
-		}
-		return list.stream()
-				.filter(monitorModel -> monitorModel.getCycle() == cycle.getCode() && monitorModel.getStatus())
-				.collect(Collectors.toList());
+		MonitorModel monitorModel = new MonitorModel();
+		monitorModel.setCycle(cycle.getCode());
+		monitorModel.setStatus(true);
+		List<MonitorModel> monitorModels = this.listByBean(monitorModel);
+		return ObjectUtil.defaultIfNull(monitorModels, Collections.EMPTY_LIST);
 	}
 
 	/**

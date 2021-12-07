@@ -219,7 +219,7 @@ public class Monitor implements Task {
 			}
 		} else {
 			//
-			if (monitorModel.getAutoRestart()) {
+			if (monitorModel.autoRestart()) {
 				// 执行重启
 				try {
 					JsonMessage<String> reJson = NodeForward.requestBySys(nodeModel, NodeUrl.Manage_Restart, "id", id, "copyId", copyId);
