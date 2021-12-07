@@ -52,10 +52,11 @@ export function getUserListAll() {
 }
 
 // 用户列表
-export function getUserList() {
+export function getUserList(params) {
   return axios({
     url: "/user/get_user_list",
     method: "post",
+    data: params,
   });
 }
 

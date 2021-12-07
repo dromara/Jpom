@@ -41,7 +41,11 @@
     <a-modal v-model="detailVisible" width="600px" title="详情信息" :footer="null">
       <a-list item-layout="horizontal" :data-source="detailData">
         <a-list-item slot="renderItem" slot-scope="item">
-          <a-list-item-meta :description="item.description">
+          <div v-if="item.json">
+            <h4 slot="title">{{ item.title }}</h4>
+            <json-viewer :value="item.value" :expand-depth="4" copyable sort></json-viewer>
+          </div>
+          <a-list-item-meta v-else :description="item.description">
             <h4 slot="title">{{ item.title }}</h4>
           </a-list-item-meta>
         </a-list-item>
@@ -55,8 +59,10 @@ import { getMonitorOperateTypeList } from "@/api/monitor";
 import { getNodeListAll } from "@/api/node";
 import { getUserListAll } from "@/api/user";
 import { parseTime } from "@/utils/time";
+import JsonViewer from "vue-json-viewer";
 import { PAGE_DEFAULT_LIMIT, PAGE_DEFAULT_SIZW_OPTIONS, PAGE_DEFAULT_SHOW_TOTAL, PAGE_DEFAULT_LIST_QUERY } from "@/utils/const";
 export default {
+  components: { JsonViewer },
   data() {
     return {
       loading: false,
@@ -179,9 +185,19 @@ export default {
       this.detailData = [];
       this.detailVisible = true;
       this.temp = Object.assign(record);
+      try {
+        this.temp.reqData = JSON.parse(this.temp.reqData);
+      } catch (e) {
+        console.log(e);
+      }
+      try {
+        this.temp.resultMsg = JSON.parse(this.temp.resultMsg);
+      } catch (e) {
+        console.log(e);
+      }
       this.detailData.push({ title: "浏览器标识", description: this.temp.userAgent });
-      this.detailData.push({ title: "请求参数", description: this.temp.reqData });
-      this.detailData.push({ title: "响应结果", description: this.temp.resultMsg });
+      this.detailData.push({ title: "请求参数", json: true, value: this.temp.reqData });
+      this.detailData.push({ title: "响应结果", json: true, value: this.temp.resultMsg });
     },
   },
 };

@@ -31,16 +31,18 @@ import cn.jiangzeyin.common.validator.ValidatorItem;
 import cn.jiangzeyin.common.validator.ValidatorRule;
 import io.jpom.common.BaseServerController;
 import io.jpom.common.interceptor.LoginInterceptor;
+import io.jpom.model.data.UserBindWorkspaceModel;
 import io.jpom.model.data.UserModel;
-import io.jpom.plugin.ClassFeature;
-import io.jpom.plugin.Feature;
-import io.jpom.plugin.MethodFeature;
+import io.jpom.service.user.UserBindWorkspaceService;
 import io.jpom.service.user.UserService;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 /**
  * 用户管理
@@ -50,13 +52,15 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequestMapping(value = "/user")
-@Feature(cls = ClassFeature.USER)
 public class UserInfoController extends BaseServerController {
 
 	private final UserService userService;
+	private final UserBindWorkspaceService userBindWorkspaceService;
 
-	public UserInfoController(UserService userService) {
+	public UserInfoController(UserService userService,
+							  UserBindWorkspaceService userBindWorkspaceService) {
 		this.userService = userService;
+		this.userBindWorkspaceService = userBindWorkspaceService;
 	}
 
 	/**
@@ -106,43 +110,13 @@ public class UserInfoController extends BaseServerController {
 	}
 
 	/**
-	 * 删除用户
+	 * 查询用户工作空间
 	 *
-	 * @param id 用户id
-	 * @return String
-	 */
-	@RequestMapping(value = "deleteUser", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	@Feature(method = MethodFeature.DEL)
-	public String deleteUser(String id) {
-		UserModel userName = getUser();
-		Assert.state(!StrUtil.equals(userName.getId(), id), "不能删除自己");
-
-		UserModel userModel = userService.getByKey(id);
-		Assert.notNull(userModel, "非法访问");
-		if (userModel.isSystemUser()) {
-			// 如果是系统管理员，判断个数
-			Assert.state(userService.systemUserCount() > 1, "系统中的系统管理员账号数量必须存在一个以上");
-		} else {
-			// 非系统管理员不支持删除演示账号
-			Assert.state(userModel.isDemoUser(), "演示账号不支持删除");
-		}
-		userService.delByKey(id);
-		return JsonMessage.getString(200, "删除成功");
-	}
-
-	/**
-	 * 解锁用户锁定状态
-	 *
-	 * @param id id
 	 * @return json
 	 */
-	@RequestMapping(value = "unlock", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	@Feature(method = MethodFeature.EDIT)
-	public String unlock(String id) {
-		UserModel userModel = userService.getByKey(id);
-		Assert.notNull(userModel, "修改失败:-1");
-		userModel.unLock();
-		userService.update(userModel);
-		return JsonMessage.getString(200, "解锁成功");
+	@GetMapping(value = "workspace_list", produces = MediaType.APPLICATION_JSON_VALUE)
+	public String workspaceList(@ValidatorItem String userId) {
+		List<UserBindWorkspaceModel> workspaceModels = userBindWorkspaceService.listUserWorkspace(userId);
+		return JsonMessage.getString(200, "", workspaceModels);
 	}
 }

@@ -1,8 +1,10 @@
 <template>
   <div class="full-content">
     <div ref="filter" class="filter">
+      <a-input v-model="listQuery.id" placeholder="用户名ID" class="search-input-item" />
+      <a-input v-model="listQuery['%name%']" placeholder="用户名" class="search-input-item" />
+      <a-button type="primary" @click="loadData">搜索</a-button>
       <a-button type="primary" @click="handleAdd">新增</a-button>
-      <a-button type="primary" @click="loadData">刷新</a-button>
     </div>
     <!-- 数据表格 -->
     <a-table :data-source="list" :loading="loading" :columns="columns" :pagination="(this, pagination)" @change="changePage" bordered :rowKey="(record, index) => index">
@@ -142,9 +144,10 @@ export default {
     // 加载数据
     loadData() {
       this.loading = true;
-      getUserList().then((res) => {
+      getUserList(this.listQuery).then((res) => {
         if (res.code === 200) {
           this.list = res.data.result;
+          this.listQuery.total = res.data.total;
         }
         this.loading = false;
       });
