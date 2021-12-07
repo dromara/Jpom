@@ -73,7 +73,7 @@
 import { mapGetters } from "vuex";
 import { getBackupList, getTableNameList, createBackup, downloadBackupFile, deleteBackup, restoreBackup, uploadBackupFile, backupTypeMap, backupStatusMap } from "../../api/backup-info";
 import { parseTime, renderSize } from "@/utils/time";
-import { PAGE_DEFAULT_LIMIT, PAGE_DEFAULT_SIZW_OPTIONS, PAGE_DEFAULT_SHOW_TOTAL } from "@/utils/const";
+import { PAGE_DEFAULT_LIMIT, PAGE_DEFAULT_SIZW_OPTIONS, PAGE_DEFAULT_SHOW_TOTAL, PAGE_DEFAULT_LIST_QUERY } from "@/utils/const";
 
 export default {
   components: {},
@@ -82,7 +82,7 @@ export default {
       backupTypeMap: backupTypeMap,
       backupStatusMap: backupStatusMap,
       loading: false,
-      listQuery: { page: 1, limit: PAGE_DEFAULT_LIMIT, total: 0 },
+      listQuery: Object.assign({}, PAGE_DEFAULT_LIST_QUERY),
       backupTypeList: [
         { key: 0, value: "全量" },
         { key: 1, value: "部分" },

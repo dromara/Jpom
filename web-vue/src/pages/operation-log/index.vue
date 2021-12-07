@@ -55,7 +55,7 @@ import { getMonitorOperateTypeList } from "@/api/monitor";
 import { getNodeListAll } from "@/api/node";
 import { getUserListAll } from "@/api/user";
 import { parseTime } from "@/utils/time";
-import { PAGE_DEFAULT_LIMIT, PAGE_DEFAULT_SIZW_OPTIONS, PAGE_DEFAULT_SHOW_TOTAL } from "@/utils/const";
+import { PAGE_DEFAULT_LIMIT, PAGE_DEFAULT_SIZW_OPTIONS, PAGE_DEFAULT_SHOW_TOTAL, PAGE_DEFAULT_LIST_QUERY } from "@/utils/const";
 export default {
   data() {
     return {
@@ -64,11 +64,7 @@ export default {
       nodeList: [],
       nodeMap: {},
       userList: [],
-      listQuery: {
-        page: 1,
-        limit: PAGE_DEFAULT_LIMIT,
-        total: 0,
-      },
+      listQuery: Object.assign({}, PAGE_DEFAULT_LIST_QUERY),
       methodFeature: [],
       classFeature: [],
       methodFeatureMap: {},

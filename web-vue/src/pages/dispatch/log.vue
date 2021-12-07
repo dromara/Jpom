@@ -66,7 +66,7 @@ export default {
       nodeList: [],
       dispatchList: [],
       total: 0,
-      listQuery: PAGE_DEFAULT_LIST_QUERY,
+      listQuery: Object.assign({}, PAGE_DEFAULT_LIST_QUERY),
 
       temp: {},
       detailVisible: false,

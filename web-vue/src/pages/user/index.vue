@@ -54,7 +54,7 @@ import { getUserList, editUser, deleteUser, unlockUser, workspaceList } from "@/
 import { getWorkSpaceListAll } from "@/api/workspace";
 import { parseTime } from "@/utils/time";
 import sha1 from "sha1";
-import { PAGE_DEFAULT_LIMIT, PAGE_DEFAULT_SIZW_OPTIONS, PAGE_DEFAULT_SHOW_TOTAL } from "@/utils/const";
+import { PAGE_DEFAULT_LIMIT, PAGE_DEFAULT_SIZW_OPTIONS, PAGE_DEFAULT_SHOW_TOTAL, PAGE_DEFAULT_LIST_QUERY } from "@/utils/const";
 export default {
   data() {
     return {
@@ -65,11 +65,7 @@ export default {
       temp: {},
       createOption: true,
       editUserVisible: false,
-      listQuery: {
-        page: 1,
-        limit: PAGE_DEFAULT_LIMIT,
-        total: 0,
-      },
+      listQuery: Object.assign({}, PAGE_DEFAULT_LIST_QUERY),
       columns: [
         { title: "ID", dataIndex: "id", ellipsis: true, width: 150 },
         { title: "昵称", dataIndex: "name", ellipsis: true },

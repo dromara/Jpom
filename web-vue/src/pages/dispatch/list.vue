@@ -335,7 +335,7 @@ export default {
     return {
       loading: false,
       childLoading: false,
-      listQuery: PAGE_DEFAULT_LIST_QUERY,
+      listQuery: Object.assign({}, PAGE_DEFAULT_LIST_QUERY),
       list: [],
       accessList: [],
       nodeList: [],

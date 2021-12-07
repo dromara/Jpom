@@ -48,7 +48,7 @@ import { mapGetters } from "vuex";
 import File from "../node/node-layout/project/project-file";
 import Console from "../node/node-layout/project/project-console";
 import { parseTime, itemGroupBy } from "@/utils/time";
-import { PAGE_DEFAULT_LIMIT, PAGE_DEFAULT_SIZW_OPTIONS, PAGE_DEFAULT_SHOW_TOTAL } from "@/utils/const";
+import { PAGE_DEFAULT_LIMIT, PAGE_DEFAULT_SIZW_OPTIONS, PAGE_DEFAULT_SHOW_TOTAL, PAGE_DEFAULT_LIST_QUERY } from "@/utils/const";
 export default {
   components: {
     File,
@@ -59,7 +59,7 @@ export default {
       projList: [],
 
       selectedRowKeys: [],
-      listQuery: { page: 1, limit: PAGE_DEFAULT_LIMIT, total: 0 },
+      listQuery: Object.assign({}, PAGE_DEFAULT_LIST_QUERY),
 
       drawerTitle: "",
       temp: {},

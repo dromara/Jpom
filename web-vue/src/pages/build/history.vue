@@ -70,7 +70,7 @@ export default {
       list: [],
       buildList: [],
       total: 0,
-      listQuery: PAGE_DEFAULT_LIST_QUERY,
+      listQuery: Object.assign({}, PAGE_DEFAULT_LIST_QUERY),
 
       temp: {},
       buildLogVisible: false,

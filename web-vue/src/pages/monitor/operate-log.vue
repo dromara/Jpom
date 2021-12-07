@@ -79,7 +79,7 @@ export default {
   data() {
     return {
       loading: false,
-      listQuery: PAGE_DEFAULT_LIST_QUERY,
+      listQuery: Object.assign({}, PAGE_DEFAULT_LIST_QUERY),
       list: [],
 
       classFeature: [],

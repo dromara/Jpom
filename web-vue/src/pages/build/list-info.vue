@@ -230,7 +230,7 @@ export default {
       releaseMethodMap: releaseMethodMap,
       releaseMethodArray: releaseMethodArray,
       loading: false,
-      listQuery: PAGE_DEFAULT_LIST_QUERY,
+      listQuery: Object.assign({}, PAGE_DEFAULT_LIST_QUERY),
       // 动态列表参数
       groupList: [],
       list: [],
