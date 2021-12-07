@@ -83,6 +83,10 @@ public class NodeService extends BaseWorkspaceService<NodeModel> {
 		if (StrUtil.isNotEmpty(sshId)) {
 			SshModel byKey = sshService.getByKey(sshId, request);
 			Assert.notNull(byKey, "对应的 SSH 不存在");
+			List<NodeModel> nodeBySshId = this.getNodeBySshId(sshId);
+			nodeBySshId = ObjectUtil.defaultIfNull(nodeBySshId, Collections.EMPTY_LIST);
+			Optional<NodeModel> any = nodeBySshId.stream().filter(nodeModel2 -> !StrUtil.equals(id, nodeModel2.getId())).findAny();
+			Assert.state(!any.isPresent(), "对应的SSH已经被其他节点绑定啦");
 		}
 		if (nodeModel.isOpenStatus()) {
 			int timeOut = nodeModel.getTimeOut();

@@ -5,6 +5,7 @@
       <a-input class="search-input-item" v-model="listQuery['%host%']" placeholder="节点地址" />
       <a-button type="primary" @click="loadData">搜索</a-button>
       <a-button type="primary" @click="handleAdd">新增</a-button>
+      关联节点数据是异步获取有一定时间延迟
     </div>
     <!-- 数据表格 -->
     <a-table :data-source="list" :loading="loading" :columns="columns" :pagination="this.pagination" @change="changePage" bordered :rowKey="(record, index) => index">
@@ -386,6 +387,7 @@ export default {
           this.list = res.data.result;
           this.listQuery.total = res.data.total;
           //
+          this.sshAgentInfo = {};
           let ids = this.list
             .map((item) => {
               return item.id;

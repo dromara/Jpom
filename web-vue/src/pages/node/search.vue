@@ -25,8 +25,12 @@
       <a-tooltip slot="name" slot-scope="text" placement="topLeft" :title="text">
         <span>{{ text }}</span>
       </a-tooltip>
+      <template slot="status" slot-scope="text, record">
+        <a-tooltip v-if="record.runMode !== 'File'" placement="topLeft" title="状态操作请到控制台中控制">
+          <a-switch :checked="text" disabled checked-children="开" un-checked-children="关" />
+        </a-tooltip>
+      </template>
 
-      <a-switch slot="status" slot-scope="text" :checked="text" disabled checked-children="开" un-checked-children="关" />
       <a-tooltip slot="port" slot-scope="text, record" placement="topLeft" :title="`进程号：${record.pid},  端口号：${record.port}`">
         <span v-if="record.pid">{{ record.port }}/{{ record.pid }}</span>
       </a-tooltip>

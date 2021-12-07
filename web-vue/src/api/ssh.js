@@ -15,6 +15,10 @@ export function getSshCheckAgent(params) {
     url: "/node/ssh/check_agent.json",
     method: "get",
     params: params,
+    timeout: 0,
+    headers: {
+      loading: "no",
+    },
   });
 }
 
