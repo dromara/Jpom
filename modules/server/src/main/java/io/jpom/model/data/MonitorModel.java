@@ -26,7 +26,6 @@ import com.alibaba.fastjson.JSON;
 import io.jpom.model.BaseEnum;
 import io.jpom.model.BaseJsonModel;
 import io.jpom.model.BaseWorkspaceModel;
-import io.jpom.model.Cycle;
 import io.jpom.service.h2db.TableName;
 import io.jpom.util.StringUtil;
 
@@ -55,7 +54,7 @@ public class MonitorModel extends BaseWorkspaceModel {
 	/**
 	 * 监控周期
 	 */
-	private Integer cycle = Cycle.thirty.getCode();
+	private Integer cycle;
 
 	/**
 	 * 监控开启状态

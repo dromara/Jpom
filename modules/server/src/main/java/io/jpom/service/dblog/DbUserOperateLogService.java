@@ -96,11 +96,13 @@ public class DbUserOperateLogService extends BaseWorkspaceService<UserOperateLog
 		}
 		String otherMsg = "";
 		Class<? extends BaseDbCommonService<?>> aClass = CLASS_FEATURE_SERVICE.get(classFeature);
-		BaseDbCommonService<?> baseDbCommonService = SpringUtil.getBean(aClass);
-		Object data = baseDbCommonService.getByKey(userOperateLogV1.getNodeId());
-		if (data != null) {
-			Object name = BeanUtil.getProperty(data, "name");
-			otherMsg = name == null ? StrUtil.EMPTY : StrUtil.format("操作的数据名称：{}\n", name);
+		if (aClass != null) {
+			BaseDbCommonService<?> baseDbCommonService = SpringUtil.getBean(aClass);
+			Object data = baseDbCommonService.getByKey(userOperateLogV1.getNodeId());
+			if (data != null) {
+				Object name = BeanUtil.getProperty(data, "name");
+				otherMsg = name == null ? StrUtil.EMPTY : StrUtil.format("操作的数据名称：{}\n", name);
+			}
 		}
 		WorkspaceModel workspaceModel = workspaceService.getByKey(userOperateLogV1.getWorkspaceId());
 

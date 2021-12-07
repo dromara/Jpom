@@ -77,6 +77,7 @@ public class ProjectInfoCacheService extends BaseNodeService<ProjectInfoModel> {
 		ThreadUtil.execute(() -> {
 			List<NodeModel> list = nodeService.list();
 			if (CollUtil.isEmpty(list)) {
+				DefaultSystemLog.getLog().debug("没有任何节点");
 				return;
 			}
 			for (NodeModel nodeModel : list) {
@@ -91,13 +92,16 @@ public class ProjectInfoCacheService extends BaseNodeService<ProjectInfoModel> {
 	 * @param nodeModel 节点
 	 */
 	public void syncNode(final NodeModel nodeModel) {
+		String nodeModelName = nodeModel.getName();
 		if (!nodeModel.isOpenStatus()) {
+			DefaultSystemLog.getLog().debug("{} 节点未启用", nodeModelName);
 			return;
 		}
 		ThreadUtil.execute(() -> {
 			try {
 				JSONArray jsonArray = NodeForward.requestData(nodeModel, NodeUrl.Manage_GetProjectInfo, JSONArray.class, "notStatus", "true");
 				if (CollUtil.isEmpty(jsonArray)) {
+					DefaultSystemLog.getLog().debug("{} 节点没有拉取到任何项目项目", nodeModelName);
 					return;
 				}
 				// 查询现在存在的项目
@@ -127,15 +131,17 @@ public class ProjectInfoCacheService extends BaseNodeService<ProjectInfoModel> {
 				BaseServerController.resetInfo(UserModel.EMPTY);
 				//
 				models.forEach(ProjectInfoCacheService.super::upsert);
-				// 删除项目
+				// 删除项目好的
 				Set<String> strings = cacheIds.stream()
 						.map(s -> ProjectInfoModel.fullId(nodeModel.getWorkspaceId(), nodeModel.getId(), s))
 						.collect(Collectors.toSet());
 				if (CollUtil.isNotEmpty(strings)) {
 					super.delByKey(strings, null);
 				}
+				DefaultSystemLog.getLog().debug("{} 节点拉取到 {} 个项目,缓存 {} 个项目,删除 {} 个缓存",
+						nodeModelName, CollUtil.size(jsonArray), CollUtil.size(projectInfoModelsCacheAll), CollUtil.size(strings));
 			} catch (Exception e) {
-				DefaultSystemLog.getLog().error("同步节点项目失败:" + nodeModel.getId(), e);
+				DefaultSystemLog.getLog().error("同步节点项目失败:" + nodeModelName, e);
 			} finally {
 				BaseServerController.remove();
 			}
@@ -148,7 +154,9 @@ public class ProjectInfoCacheService extends BaseNodeService<ProjectInfoModel> {
 	 * @param nodeModel 节点
 	 */
 	public void syncNode(final NodeModel nodeModel, String id) {
+		String nodeModelName = nodeModel.getName();
 		if (!nodeModel.isOpenStatus()) {
+			DefaultSystemLog.getLog().debug("{} 节点未启用", nodeModelName);
 			return;
 		}
 		ThreadUtil.execute(() -> {

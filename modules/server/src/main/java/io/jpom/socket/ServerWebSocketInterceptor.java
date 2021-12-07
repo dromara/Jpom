@@ -122,7 +122,7 @@ public class ServerWebSocketInterceptor implements HandshakeInterceptor {
 					attributes.put("sshItem", sshModel);
 					break;
 				case nodeUpdate:
-					if (!userModel.isSystemUser()) {
+					if (!userModel.isSuperSystemUser()) {
 						return false;
 					}
 					break;

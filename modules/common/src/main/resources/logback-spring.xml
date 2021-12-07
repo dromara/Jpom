@@ -127,6 +127,26 @@
 		</logger>
     </springProfile>
 
+	<springProfile name="local">
+		<root level="debug">
+			<appender-ref ref="errorFileAppender"/>
+			<appender-ref ref="infoFileAppender"/>
+			<appender-ref ref="warnFileAppender"/>
+			<appender-ref ref="consoleInfo"/>
+			<appender-ref ref="consoleError"/>
+			<appender-ref ref="consoleWarn"/>
+		</root>
+		<logger name="io.jpom" level="debug" additivity="true">
+			<appender-ref ref="consoleDebug"/>
+		</logger>
+		<logger name="cn.jiangzeyin" level="debug" additivity="true">
+			<appender-ref ref="consoleDebug"/>
+		</logger>
+		<logger name="cn.hutool.db.sql" level="debug" additivity="true">
+			<appender-ref ref="consoleDebug"/>
+		</logger>
+	</springProfile>
+
     <springProfile name="pro">
         <root level="INFO">
             <appender-ref ref="errorFileAppender"/>

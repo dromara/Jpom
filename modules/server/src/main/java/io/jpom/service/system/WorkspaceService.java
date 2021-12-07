@@ -71,7 +71,9 @@ public class WorkspaceService extends BaseDbService<WorkspaceModel> {
 			String sql = "update " + tableName.value() + " set workspaceId=? where workspaceId is null";
 			NodeService nodeService = SpringUtil.getBean(NodeService.class);
 			int execute = nodeService.execute(sql, WorkspaceModel.DEFAULT_ID);
-			DefaultSystemLog.getLog().info("convertNullWorkspaceId {} {}", tableName.value(), execute);
+			if (execute > 0) {
+				DefaultSystemLog.getLog().info("convertNullWorkspaceId {} {}", tableName.value(), execute);
+			}
 		}
 
 	}
