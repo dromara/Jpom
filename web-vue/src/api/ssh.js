@@ -9,12 +9,20 @@ export function getSshList(params) {
   });
 }
 
+// 检查 ssh 是否安装 插件端
+export function getSshCheckAgent(params) {
+  return axios({
+    url: "/node/ssh/check_agent.json",
+    method: "get",
+    params: params,
+  });
+}
+
 // 根据 nodeId 查询列表
 export function getSshListAll() {
   return axios({
     url: "/node/ssh/list_data_all.json",
     method: "get",
-    
   });
 }
 

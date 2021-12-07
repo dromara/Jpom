@@ -27,7 +27,7 @@ setlocal enabledelayedexpansion
 @REM 设置环境变量，避免部分服务器没有 taskkill
 set PATH = %PATH%;C:\Windows\system32;C:\Windows;C:\Windows\system32\Wbem
 
-set Tag=KeepBx-System-JpomApplication
+set Tag=KeepBx-System-JpomServerApplication
 set MainClass=org.springframework.boot.loader.JarLauncher
 set basePath=%~dp0
 set Lib=%basePath%lib\

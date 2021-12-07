@@ -22,6 +22,7 @@
  */
 package io.jpom.service.h2db;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.date.DatePattern;
 import cn.hutool.core.date.DateTime;
@@ -48,6 +49,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
 /**
  * 数据库操作 通用 serve
@@ -263,8 +265,24 @@ public abstract class BaseDbService<T extends BaseDbModel> extends BaseDbCommonS
 	 * @return list
 	 */
 	public List<T> listById(Collection<String> ids) {
+		return this.listById(ids, null);
+	}
+
+	/**
+	 * 多个 id 查询数据
+	 *
+	 * @param ids ids
+	 * @return list
+	 */
+	public List<T> listById(Collection<String> ids, Consumer<Entity> consumer) {
+		if (CollUtil.isEmpty(ids)) {
+			return null;
+		}
 		Entity entity = Entity.create();
 		entity.set(Const.ID_STR, ids);
+		if (consumer != null) {
+			consumer.accept(entity);
+		}
 		List<Entity> entities = super.queryList(entity);
 		return this.entityToBeanList(entities);
 	}

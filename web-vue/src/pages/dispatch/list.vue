@@ -323,7 +323,7 @@ import File from "../node/node-layout/project/project-file";
 import Console from "../node/node-layout/project/project-console";
 import { getDishPatchList, getDispatchProject, editDispatch, editDispatchProject, uploadDispatchFile, getDispatchWhiteList, deleteDisPatch, remoteDownload } from "../../api/dispatch";
 import { getNodeListAll, getProjectListAll } from "@/api/node";
-import { getProjectData } from "@/api/node-project";
+import { getProjectData, runModeList } from "@/api/node-project";
 import { itemGroupBy, parseTime } from "@/utils/time";
 import { PAGE_DEFAULT_LIMIT, PAGE_DEFAULT_SIZW_OPTIONS, PAGE_DEFAULT_SHOW_TOTAL, PAGE_DEFAULT_LIST_QUERY } from "@/utils/const";
 export default {
@@ -345,7 +345,7 @@ export default {
       reqId: "",
       temp: {},
       fileList: [],
-      runModeList: ["ClassPath", "Jar", "JarWar", "JavaExtDirsCp", "File"],
+      runModeList: runModeList,
       list_expanded: {},
       linkDispatchVisible: false,
       editDispatchVisible: false,

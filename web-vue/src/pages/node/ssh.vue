@@ -9,12 +9,21 @@
     <!-- 数据表格 -->
     <a-table :data-source="list" :loading="loading" :columns="columns" :pagination="this.pagination" @change="changePage" bordered :rowKey="(record, index) => index">
       <template slot="nodeId" slot-scope="text, record">
-        <a-button v-if="!record.nodeModel" type="primary" @click="install(record)" :disabled="record.installed">安装节点</a-button>
-        <a-tooltip v-else placement="topLeft" :title="`${record.nodeModel.id} ( ${record.nodeModel.name} )`">
-          <a-button type="primary" @click="toNode(record.nodeModel)"
-            >前往节点:
-            {{ `${record.nodeModel.id} ( ${record.nodeModel.name} )` }}
+        <!-- <a-button v-if="!record.nodeModel" type="primary" @click="install(record)" :disabled="record.installed">安装节点</a-button> -->
+        <a-tooltip v-if="sshAgentInfo[record.id] && sshAgentInfo[record.id].nodeId" placement="topLeft" :title="`${sshAgentInfo[record.id].nodeName}`">
+          <a-button type="primary" @click="toNode(sshAgentInfo[record.id].nodeId)">
+            {{ sshAgentInfo[record.id].nodeName }}
           </a-button>
+        </a-tooltip>
+        <a-tooltip v-if="sshAgentInfo[record.id] && sshAgentInfo[record.id].error" placement="topLeft" :title="`${sshAgentInfo[record.id].error}`">
+          {{ sshAgentInfo[record.id].error }}
+        </a-tooltip>
+        <a-tooltip
+          v-if="sshAgentInfo[record.id] && sshAgentInfo[record.id].ok"
+          placement="topLeft"
+          :title="`${sshAgentInfo[record.id].pid > 0 ? 'ssh 中已经运行了插件端进程ID：' + sshAgentInfo[record.id].pid : '点击快速安装插件端'}`"
+        >
+          <a-button type="primary" @click="install(record)" :disabled="sshAgentInfo[record.id].pid > 0">安装节点</a-button>
         </a-tooltip>
       </template>
       <template slot="operation" slot-scope="text, record">
@@ -206,7 +215,7 @@
   </div>
 </template>
 <script>
-import { deleteSsh, editSsh, getSshList, getSshOperationLogList, installAgentNode } from "@/api/ssh";
+import { deleteSsh, editSsh, getSshList, getSshCheckAgent, getSshOperationLogList, installAgentNode } from "@/api/ssh";
 import SshFile from "./ssh-file";
 import Terminal from "./terminal";
 import { parseTime } from "@/utils/time";
@@ -227,6 +236,7 @@ export default {
       nodeVisible: false,
       tempNode: {},
       fileList: [],
+      sshAgentInfo: {},
       formLoading: false,
       drawerTitle: "",
       drawerVisible: false,
@@ -290,7 +300,7 @@ export default {
           title: "关联节点",
           dataIndex: "nodeId",
           scopedSlots: { customRender: "nodeId" },
-          // width: 120,
+          width: 120,
           ellipsis: true,
         },
         {
@@ -374,28 +384,23 @@ export default {
       getSshList(this.listQuery).then((res) => {
         if (res.code === 200) {
           this.list = res.data.result;
+          this.listQuery.total = res.data.total;
+          //
+          let ids = this.list
+            .map((item) => {
+              return item.id;
+            })
+            .join(",");
+          if (ids.length > 0) {
+            getSshCheckAgent({
+              ids: ids,
+            }).then((res) => {
+              this.sshAgentInfo = res.data;
+            });
+          }
         }
         this.loading = false;
       });
-      // // 如果在节点列表中存在，则标记为已安装节点
-      // .then(
-      //   getNodeList().then((res) => {
-      //     let nodeList = res.data.result;
-      //     let tempList = [];
-      //     this.list.forEach((element) => {
-      //       let flag = false;
-      //       nodeList.forEach((node) => {
-      //         if (element.host === node.url.substring(0, node.url.indexOf(":"))) {
-      //           flag = true;
-      //           return;
-      //         }
-      //       });
-      //       element.installed = flag;
-      //       tempList.push(element);
-      //     });
-      //     this.list = tempList;
-      //   })
-      // );
     },
     // 新增 SSH
     handleAdd() {
@@ -508,11 +513,11 @@ export default {
       });
     },
     // 前往节点
-    toNode(node) {
+    toNode(nodeId) {
       this.$router.push({
         path: "/node/list",
         query: {
-          nodeId: node.id,
+          nodeId: nodeId,
         },
       });
     },

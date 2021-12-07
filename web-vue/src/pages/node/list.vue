@@ -6,7 +6,7 @@
       <a-input class="search-input-item" v-model="listQuery['%url%']" placeholder="节点地址" />
       <a-button type="primary" @click="handleFilter">搜索</a-button>
       <a-button type="primary" @click="handleAdd">新增</a-button>
-      <a-button type="primary" @click="loadData">刷新</a-button>
+      <!-- <a-button type="primary" @click="loadData">刷新</a-button> -->
     </div>
     <!-- 表格 :scroll="{ x: 1070, y: tableHeight -60 }" scroll 跟 expandedRowRender 不兼容，没法同时使用不然会多出一行数据-->
     <a-table :loading="loading" :columns="columns" :data-source="list" bordered rowKey="id" @expand="expand" :pagination="(this, pagination)" @change="changePage">
@@ -331,7 +331,6 @@ export default {
             this.$refs["editNodeForm"].resetFields();
             this.editNodeVisible = false;
             this.loadData();
-            this.loadGroupList();
           }
         });
       });

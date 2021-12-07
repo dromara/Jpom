@@ -170,4 +170,10 @@ public class NodeService extends BaseWorkspaceService<NodeModel> {
 		}
 		return list;
 	}
+
+	public List<NodeModel> getNodeBySshId(String sshId) {
+		NodeModel nodeModel = new NodeModel();
+		nodeModel.setSshId(sshId);
+		return super.listByBean(nodeModel);
+	}
 }

@@ -1,5 +1,7 @@
 package io.jpom.service.node.ssh;
 
+import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.convert.Convert;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.io.LineHandler;
@@ -11,19 +13,20 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.ssh.ChannelType;
 import cn.hutool.extra.ssh.JschUtil;
 import cn.hutool.extra.ssh.Sftp;
+import cn.jiangzeyin.common.spring.SpringUtil;
 import com.jcraft.jsch.*;
 import io.jpom.model.data.SshModel;
 import io.jpom.service.h2db.BaseWorkspaceService;
 import io.jpom.system.ConfigBean;
-import io.jpom.system.JpomRuntimeException;
 import io.jpom.system.ServerExtConfigBean;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * @author bwcx_jzy
@@ -41,7 +44,24 @@ public class SshService extends BaseWorkspaceService<SshModel> {
 		data.setPrivateKey(null);
 	}
 
-	public static Session getSession(SshModel sshModel) {
+	/**
+	 * 获取 ssh 回话
+	 *
+	 * @param sshId id
+	 * @return session
+	 */
+	public static Session getSession(String sshId) {
+		SshModel sshModel = SpringUtil.getBean(SshService.class).getByKey(sshId, false);
+		return getSessionByModel(sshModel);
+	}
+
+	/**
+	 * 获取 ssh 回话
+	 *
+	 * @param sshModel sshModel
+	 * @return session
+	 */
+	public static Session getSessionByModel(SshModel sshModel) {
 		Session session;
 		SshModel.ConnectType connectType = sshModel.connectType();
 		if (connectType == SshModel.ConnectType.PASS) {
@@ -68,7 +88,6 @@ public class SshService extends BaseWorkspaceService<SshModel> {
 		return session;
 	}
 
-
 	/**
 	 * 检查是否存在正在运行的进程
 	 *
@@ -79,11 +98,24 @@ public class SshService extends BaseWorkspaceService<SshModel> {
 	 * @throws JSchException jsch
 	 */
 	public boolean checkSshRun(SshModel sshModel, String tag) throws IOException, JSchException {
+		return this.checkSshRunPid(sshModel, tag) != null;
+	}
+
+	/**
+	 * 检查是否存在正在运行的进程
+	 *
+	 * @param sshModel ssh
+	 * @param tag      标识
+	 * @return true 存在运行中的
+	 * @throws IOException   IO
+	 * @throws JSchException jsch
+	 */
+	public Integer checkSshRunPid(SshModel sshModel, String tag) throws IOException, JSchException {
 		String ps = StrUtil.format("ps -ef | grep -v 'grep' | egrep {}", tag);
 		Session session = null;
 		ChannelExec channel = null;
 		try {
-			session = getSession(sshModel);
+			session = getSessionByModel(sshModel);
 			channel = (ChannelExec) JschUtil.createChannel(session, ChannelType.EXEC);
 			channel.setCommand(ps);
 			InputStream inputStream = channel.getInputStream();
@@ -91,27 +123,17 @@ public class SshService extends BaseWorkspaceService<SshModel> {
 			channel.connect();
 			Charset charset = sshModel.getCharsetT();
 			// 运行中
-			AtomicBoolean run = new AtomicBoolean(false);
-			IoUtil.readLines(inputStream, charset, (LineHandler) s -> {
-				run.set(true);
-			});
-			if (run.get()) {
-				return true;
-			}
-			run.set(false);
-			AtomicReference<String> error = new AtomicReference<>();
-			IoUtil.readLines(errStream, charset, (LineHandler) s -> {
-				run.set(true);
-				error.set(s);
-			});
-			if (run.get()) {
-				throw new JpomRuntimeException("检查异常:" + error.get());
-			}
+			List<String> result = new ArrayList<>();
+			IoUtil.readLines(inputStream, charset, (LineHandler) result::add);
+			IoUtil.readLines(errStream, charset, (LineHandler) result::add);
+			return result.stream().map(s -> {
+				List<String> split = StrUtil.splitTrim(s, StrUtil.SPACE);
+				return Convert.toInt(CollUtil.get(split, 1));
+			}).filter(Objects::nonNull).findAny().orElse(null);
 		} finally {
 			JschUtil.close(channel);
 			JschUtil.close(session);
 		}
-		return false;
 	}
 
 	public String exec(SshModel sshModel, String... command) throws IOException {
@@ -132,7 +154,7 @@ public class SshService extends BaseWorkspaceService<SshModel> {
 			Charset charset = sshModel.getCharsetT();
 			FileUtil.writeString(stringBuilder.toString(), buildSsh, charset);
 			//
-			session = getSession(sshModel);
+			session = getSessionByModel(sshModel);
 			// 上传文件
 			sftp = new Sftp(session);
 			String home = sftp.home();
@@ -175,7 +197,7 @@ public class SshService extends BaseWorkspaceService<SshModel> {
 	public String exec(SshModel sshModel, String command) throws IOException, JSchException {
 		Session session = null;
 		try {
-			session = getSession(sshModel);
+			session = getSessionByModel(sshModel);
 			return exec(session, sshModel.getCharsetT(), command);
 		} finally {
 			JschUtil.close(session);
@@ -212,7 +234,7 @@ public class SshService extends BaseWorkspaceService<SshModel> {
 		Session session = null;
 		ChannelSftp channel = null;
 		try {
-			session = getSession(sshModel);
+			session = getSessionByModel(sshModel);
 			channel = (ChannelSftp) JschUtil.openChannel(session, ChannelType.SFTP);
 			Sftp sftp = new Sftp(channel, sshModel.getCharsetT());
 			sftp.syncUpload(desc, remotePath);
@@ -222,41 +244,6 @@ public class SshService extends BaseWorkspaceService<SshModel> {
 			JschUtil.close(session);
 		}
 	}
-
-//	private void uploadDir(ChannelSftp channel, String remotePath, File file, Charset charset) throws FileNotFoundException, SftpException {
-//		if (file.isDirectory()) {
-//			File[] files = file.listFiles();
-//			if (files == null || files.length <= 0) {
-//				return;
-//			}
-//			for (File f : files) {
-//				if (f.isDirectory()) {
-//					String mkdir = FileUtil.normalize(remotePath + "/" + f.getName());
-//					this.uploadDir(channel, mkdir, f, charset);
-//				} else {
-//					this.uploadDir(channel, remotePath, f, charset);
-//				}
-//			}
-//		} else {
-//			mkdir(channel, remotePath, charset);
-//			String name = file.getName();
-//			channel.put(new FileInputStream(file), name);
-//		}
-//	}
-//
-//	private void mkdir(ChannelSftp channel, String remotePath, Charset charset) {
-//		Sftp sftp = new Sftp(channel, charset);
-//		sftp.mkDirs(remotePath);
-////        try {
-////            channel.mkdir(remotePath);
-////        } catch (SftpException ignored) {
-////        }
-//		try {
-//			channel.cd(remotePath);
-//		} catch (SftpException e) {
-//			throw new RuntimeException("切换目录失败：" + remotePath, e);
-//		}
-//	}
 
 	/**
 	 * 下载文件
@@ -272,7 +259,7 @@ public class SshService extends BaseWorkspaceService<SshModel> {
 		ChannelSftp channel = null;
 		OutputStream output = null;
 		try {
-			session = getSession(sshModel);
+			session = getSessionByModel(sshModel);
 			channel = (ChannelSftp) JschUtil.openChannel(session, ChannelType.SFTP);
 			output = new FileOutputStream(save);
 			channel.get(remoteFile, output);

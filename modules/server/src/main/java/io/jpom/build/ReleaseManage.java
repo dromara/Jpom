@@ -30,6 +30,7 @@ import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.io.resource.ResourceUtil;
 import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.extra.ssh.JschUtil;
 import cn.hutool.extra.ssh.Sftp;
 import cn.hutool.http.HttpStatus;
 import cn.hutool.system.SystemUtil;
@@ -245,23 +246,27 @@ public class ReleaseManage extends BaseBuild {
 			this.log("没有找到对应的ssh项：" + releaseMethodDataId);
 			return;
 		}
-		Session session = SshService.getSession(item);
-		try (Sftp sftp = new Sftp(session, item.getCharsetT())) {
-			if (this.baseBuildModule.isClearOld() && StrUtil.isNotEmpty(this.baseBuildModule.getReleasePath())) {
-				try {
-					sftp.delDir(this.baseBuildModule.getReleasePath());
-				} catch (Exception e) {
-					this.pubLog("清除构建产物失败", e);
+		Session session = SshService.getSessionByModel(item);
+		try {
+			try (Sftp sftp = new Sftp(session, item.getCharsetT())) {
+				if (this.baseBuildModule.isClearOld() && StrUtil.isNotEmpty(this.baseBuildModule.getReleasePath())) {
+					try {
+						sftp.delDir(this.baseBuildModule.getReleasePath());
+					} catch (Exception e) {
+						this.pubLog("清除构建产物失败", e);
+					}
 				}
+				String prefix = "";
+				if (!StrUtil.startWith(this.baseBuildModule.getReleasePath(), StrUtil.SLASH)) {
+					prefix = sftp.pwd();
+				}
+				String normalizePath = FileUtil.normalize(prefix + StrUtil.SLASH + this.baseBuildModule.getReleasePath());
+				sftp.syncUpload(this.resultFile, normalizePath);
+			} catch (Exception e) {
+				this.pubLog("执行ssh发布异常", e);
 			}
-			String prefix = "";
-			if (!StrUtil.startWith(this.baseBuildModule.getReleasePath(), StrUtil.SLASH)) {
-				prefix = sftp.pwd();
-			}
-			String normalizePath = FileUtil.normalize(prefix + StrUtil.SLASH + this.baseBuildModule.getReleasePath());
-			sftp.syncUpload(this.resultFile, normalizePath);
-		} catch (Exception e) {
-			this.pubLog("执行ssh发布异常", e);
+		} finally {
+			JschUtil.close(session);
 		}
 		this.log("");
 		// 执行命令

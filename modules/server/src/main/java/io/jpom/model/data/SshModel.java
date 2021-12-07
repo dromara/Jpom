@@ -29,6 +29,7 @@ import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSONArray;
 import io.jpom.model.BaseWorkspaceModel;
 import io.jpom.service.h2db.TableName;
+import io.jpom.util.StringUtil;
 
 import java.nio.charset.Charset;
 import java.util.List;
@@ -63,11 +64,6 @@ public class SshModel extends BaseWorkspaceModel {
 	private String privateKey;
 
 	private String connectType;
-//
-//	/**
-//	 * 临时缓存model
-//	 */
-//	private BaseModel nodeModel;
 
 	/**
 	 * 不允许执行的命令
@@ -114,27 +110,6 @@ public class SshModel extends BaseWorkspaceModel {
 	public void setPrivateKey(String privateKey) {
 		this.privateKey = privateKey;
 	}
-//
-//	public BaseModel getNodeModel() {
-//		return nodeModel;
-//	}
-//
-//	public void setNodeModel(BaseModel nodeModel) {
-//		if (nodeModel == null) {
-//			return;
-//		}
-//		this.nodeModel = new BaseModel() {
-//			@Override
-//			public String getName() {
-//				return nodeModel.getName();
-//			}
-//
-//			@Override
-//			public String getId() {
-//				return nodeModel.getId();
-//			}
-//		};
-//	}
 
 	public String getFileDirs() {
 		return fileDirs;
@@ -145,13 +120,10 @@ public class SshModel extends BaseWorkspaceModel {
 	}
 
 	public List<String> fileDirs() {
-		if (StrUtil.isEmpty(this.fileDirs)) {
-			return null;
-		}
-		return JSONArray.parseArray(this.fileDirs, String.class);
+		return StringUtil.jsonConvertArray(this.fileDirs, String.class);
 	}
 
-	public void setFileDirs(List<String> fileDirs) {
+	public void fileDirs(List<String> fileDirs) {
 		if (fileDirs != null) {
 			for (int i = fileDirs.size() - 1; i >= 0; i--) {
 				String s = fileDirs.get(i);
@@ -214,13 +186,10 @@ public class SshModel extends BaseWorkspaceModel {
 	}
 
 	public List<String> allowEditSuffix() {
-		if (StrUtil.isEmpty(this.allowEditSuffix)) {
-			return null;
-		}
-		return JSONArray.parseArray(this.allowEditSuffix, String.class);
+		return StringUtil.jsonConvertArray(this.allowEditSuffix, String.class);
 	}
 
-	public void setAllowEditSuffix(List<String> allowEditSuffix) {
+	public void allowEditSuffix(List<String> allowEditSuffix) {
 		if (allowEditSuffix == null) {
 			this.allowEditSuffix = null;
 		} else {

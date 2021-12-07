@@ -34,10 +34,10 @@ import io.jpom.model.PageResultDto;
 import io.jpom.model.data.UserBindWorkspaceModel;
 import io.jpom.model.data.UserModel;
 import io.jpom.service.user.UserBindWorkspaceService;
-import io.jpom.service.user.UserService;
 import org.springframework.util.Assert;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -78,8 +78,8 @@ public abstract class BaseWorkspaceService<T extends BaseWorkspaceModel> extends
 	/**
 	 * 根据主键ID + 用户ID
 	 *
-	 * @param keyValue ID
-	 * @param userModel   用户
+	 * @param keyValue  ID
+	 * @param userModel 用户
 	 * @return data
 	 */
 	public T getByKey(String keyValue, UserModel userModel) {
@@ -170,15 +170,9 @@ public abstract class BaseWorkspaceService<T extends BaseWorkspaceModel> extends
 		Assert.state(exists, "没有对应的工作空间权限");
 	}
 
-	/**
-	 * 判断用户是否有对应工作空间权限
-	 *
-	 * @param workspaceId 工作空间ID
-	 * @param userId      用户ID
-	 */
-	private void checkUserWorkspace(String workspaceId, String userId) {
-		UserService userService = SpringUtil.getBean(UserService.class);
-		UserModel userModel = userService.getByKey(userId);
-		this.checkUserWorkspace(workspaceId, userModel);
+
+	public List<T> listById(Collection<String> ids, HttpServletRequest request) {
+		String checkUserWorkspace = this.getCheckUserWorkspace(request);
+		return super.listById(ids, entity -> entity.set("workspaceId", checkUserWorkspace));
 	}
 }

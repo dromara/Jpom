@@ -73,38 +73,6 @@ public class SshHandler extends BaseHandler {
 		Map<String, Object> attributes = session.getAttributes();
 		SshModel sshItem = (SshModel) attributes.get("sshItem");
 		BaseProxyHandler.logOpt(this.getClass(), attributes, attributes);
-		//Map<String, String[]> parameterMap = (Map<String, String[]>) session.getAttributes().get("parameterMap");
-//		String[] fileDirAlls;
-//		//判断url是何操作请求
-//		if (parameterMap.containsKey("tail")) {
-//			fileDirAlls = parameterMap.get("tail");
-//		} else if (parameterMap.containsKey("gz")) {
-//			fileDirAlls = parameterMap.get("gz");
-//		} else {
-//			fileDirAlls = parameterMap.get("zip");
-//		}
-//		//检查文件路径
-//		String fileDirAll = null;
-//		if (fileDirAlls != null && fileDirAlls.length > 0 && !StrUtil.isEmptyOrUndefined(fileDirAlls[0])) {
-//			fileDirAll = fileDirAlls[0];
-//			List<String> fileDirs = sshItem.getFileDirs();
-//			if (fileDirs == null) {
-//				sendBinary(session, "没有配置路径");
-//				return;
-//			}
-//			File file = FileUtil.file(fileDirAll);
-//			boolean find = false;
-//			for (String fileDir : fileDirs) {
-//				if (FileUtil.isSub(FileUtil.file(fileDir), file)) {
-//					find = true;
-//					break;
-//				}
-//			}
-//			if (!find) {
-//				sendBinary(session, "非法路径");
-//				return;
-//			}
-//		}
 		//
 		HandlerItem handlerItem;
 		try {
@@ -120,37 +88,7 @@ public class SshHandler extends BaseHandler {
 		HANDLER_ITEM_CONCURRENT_HASH_MAP.put(session.getId(), handlerItem);
 		//
 		Thread.sleep(1000);
-//		//截取当前操作文件父路径
-//		String fileLocalPath = null;
-//		if (fileDirAll != null && fileDirAll.lastIndexOf("/") > -1) {
-//			fileLocalPath = fileDirAll.substring(0, fileDirAll.lastIndexOf("/"));
-//		}
-//		if (fileDirAll == null) {
-//			this.call(session, StrUtil.CR);
-//		} else if (parameterMap.containsKey("tail")) {
-//			// 查看文件
-//			fileDirAll = FileUtil.normalize(fileDirAll);
-//			this.call(session, StrUtil.format("tail -f {}", fileDirAll));
-//			this.call(session, StrUtil.CR);
-//		} else if (parameterMap.containsKey("zip")) {
-//			//解压zip
-//			fileDirAll = FileUtil.normalize(fileDirAll);
-//			this.call(session, StrUtil.format("unzip -o {} -d " + "{}", fileDirAll, fileLocalPath));
-//			this.call(session, StrUtil.CR);
-//		} else {
-//			//解压 tar和tar.gz
-//			fileDirAll = FileUtil.normalize(fileDirAll);
-//			this.call(session, StrUtil.format("tar -xzvf {} -C " + "{}", fileDirAll, fileLocalPath));
-//			this.call(session, StrUtil.CR);
-//		}
 	}
-
-//	private void call(WebSocketSession session, String msg) throws Exception {
-//		JSONObject first = new JSONObject();
-//		first.put("data", msg);
-//		// 触发消息
-//		//this.handleTextMessage(session, new TextMessage(first.toJSONString()));
-//	}
 
 	@Override
 	protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
@@ -229,7 +167,7 @@ public class SshHandler extends BaseHandler {
 		HandlerItem(WebSocketSession session, SshModel sshItem) throws IOException {
 			this.session = session;
 			this.sshItem = sshItem;
-			this.openSession = SshService.getSession(sshItem);
+			this.openSession = SshService.getSessionByModel(sshItem);
 			this.channel = JschUtil.createChannel(openSession, ChannelType.SHELL);
 			this.inputStream = channel.getInputStream();
 			this.outputStream = channel.getOutputStream();

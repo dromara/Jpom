@@ -70,7 +70,7 @@ public class SshInstallAgentController extends BaseServerController {
 		}
 		NodeModel nodeModel = (NodeModel) object;
 		//
-		SshModel sshModel = sshService.getByKey(id);
+		SshModel sshModel = sshService.getByKey(id, false);
 		Objects.requireNonNull(sshModel, "没有找到对应ssh");
 		//
 		String tempFilePath = ServerConfigBean.getInstance().getUserTempPath().getAbsolutePath();

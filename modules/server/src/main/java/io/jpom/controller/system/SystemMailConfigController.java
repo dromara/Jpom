@@ -27,7 +27,6 @@ import cn.hutool.extra.mail.MailUtil;
 import cn.jiangzeyin.common.JsonMessage;
 import io.jpom.common.BaseServerController;
 import io.jpom.model.data.MailAccountModel;
-import io.jpom.model.data.UserModel;
 import io.jpom.monitor.EmailUtil;
 import io.jpom.permission.SystemPermission;
 import io.jpom.plugin.ClassFeature;
@@ -69,11 +68,7 @@ public class SystemMailConfigController extends BaseServerController {
 	@RequestMapping(value = "mail-config-data", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	@Feature(method = MethodFeature.LIST)
 	public String mailConfigData() {
-		UserModel userModel = getUser();
-		MailAccountModel item = null;
-		if (userModel.isSystemUser()) {
-			item = systemParametersServer.getConfig(MailAccountModel.ID, MailAccountModel.class);
-		}
+		MailAccountModel item = systemParametersServer.getConfig(MailAccountModel.ID, MailAccountModel.class);
 		return JsonMessage.getString(200, "success", item);
 	}
 

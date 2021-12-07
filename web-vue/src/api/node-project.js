@@ -530,3 +530,5 @@ export function stopProject(params) {
     data: params,
   });
 }
+
+export const runModeList = ["ClassPath", "Jar", "JarWar", "JavaExtDirsCp", "File"];

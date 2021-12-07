@@ -2,6 +2,10 @@
   <div class="full-content">
     <div ref="filter" class="filter">
       <a-input v-model="listQuery['%name%']" placeholder="搜索项目" class="search-input-item" />
+
+      <a-select v-model="listQuery.runMode" allowClear placeholder="项目类型" class="filter-item">
+        <a-select-option v-for="item in runModeList" :key="item">{{ item }}</a-select-option>
+      </a-select>
       <a-button type="primary" @click="getNodeProjectData">搜索</a-button>
       <span>| </span>
       <a-button type="primary" @click="batchStart">批量启动</a-button>
@@ -43,7 +47,7 @@
 </template>
 <script>
 import { getProjectList } from "@/api/node";
-import { restartProject, startProject, stopProject, getRuningProjectInfo } from "@/api/node-project";
+import { restartProject, startProject, stopProject, getRuningProjectInfo, runModeList } from "@/api/node-project";
 import { mapGetters } from "vuex";
 import File from "../node/node-layout/project/project-file";
 import Console from "../node/node-layout/project/project-console";
@@ -57,7 +61,7 @@ export default {
   data() {
     return {
       projList: [],
-
+      runModeList: runModeList,
       selectedRowKeys: [],
       listQuery: Object.assign({}, PAGE_DEFAULT_LIST_QUERY),
 
@@ -85,7 +89,7 @@ export default {
           },
           width: 170,
         },
-        // { title: "修改时间", dataIndex: "modifyTime", width: 160, ellipsis: true, scopedSlots: { customRender: "modifyTime" } },
+        { title: "运行方式", dataIndex: "runMode", ellipsis: true, scopedSlots: { customRender: "runMode" } },
         {
           title: "最后操作人",
           dataIndex: "modifyUser",
@@ -95,7 +99,7 @@ export default {
         },
         { title: "运行状态", dataIndex: "status", width: 100, ellipsis: true, scopedSlots: { customRender: "status" } },
         { title: "端口/PID", dataIndex: "port", width: 100, ellipsis: true, scopedSlots: { customRender: "port" } },
-        { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, width: 240 },
+        { title: "操作", dataIndex: "operation", scopedSlots: { customRender: "operation" }, width: 200 },
       ],
     };
   },
@@ -262,7 +266,7 @@ export default {
         this.listQuery.order = sorter.order;
         this.listQuery.order_field = sorter.field;
       }
-      this.loadData();
+      this.getNodeProjectData();
     },
   },
 };

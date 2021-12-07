@@ -34,19 +34,21 @@ public enum Type {
 	/**
 	 * 插件端
 	 */
-	Agent("io.jpom.JpomAgentApplication", RemoteVersion::getAgentUrl),
+	Agent("io.jpom.JpomAgentApplication", RemoteVersion::getAgentUrl, "KeepBx-Agent-System-JpomAgentApplication"),
 	/**
 	 * 中心服务端
 	 */
-	Server("io.jpom.JpomServerApplication", RemoteVersion::getServerUrl),
+	Server("io.jpom.JpomServerApplication", RemoteVersion::getServerUrl, "KeepBx-System-JpomServerApplication"),
 	;
 
 	private final Function<RemoteVersion, String> remoteUrl;
 	private final String applicationClass;
+	private final String tag;
 
-	Type(String applicationClass, Function<RemoteVersion, String> remoteUrl) {
+	Type(String applicationClass, Function<RemoteVersion, String> remoteUrl, String tag) {
 		this.applicationClass = applicationClass;
 		this.remoteUrl = remoteUrl;
+		this.tag = tag;
 	}
 
 	public String getRemoteUrl(RemoteVersion remoteVersion) {
@@ -55,5 +57,9 @@ public enum Type {
 
 	public String getApplicationClass() {
 		return applicationClass;
+	}
+
+	public String getTag() {
+		return tag;
 	}
 }
