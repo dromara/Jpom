@@ -91,20 +91,12 @@ public class NodeEditController extends BaseServerController {
 		//  判断分发
 		boolean checkNode = outGivingServer.checkNode(id, getRequest());
 		Assert.state(!checkNode, "该节点存在分发项目，不能删除");
-
 		// 监控
 		boolean checkNode1 = monitorService.checkNode(id);
-		Assert.state(checkNode1, "该节点存在监控项，不能删除");
+		Assert.state(!checkNode1, "该节点存在监控项，不能删除");
 		boolean checkNode2 = buildService.checkNode(id);
-		Assert.state(checkNode2, "该节点存在构建项，不能删除");
+		Assert.state(!checkNode2, "该节点存在构建项，不能删除");
 		nodeService.delByKey(id, getRequest());
-		// 删除授权
-		//        List<UserModel> list = userService.list();
-		//        if (list != null) {
-		//            list.forEach(userModel -> {
-		//                userService.updateItem(userModel);
-		//            });
-		//        }
 		return JsonMessage.getString(200, "操作成功");
 	}
 }
