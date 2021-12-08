@@ -160,12 +160,8 @@ public class SshController extends BaseServerController {
 		try {
 			SshModel model = sshService.getByKey(id, false);
 			if (model != null) {
-				if (StrUtil.isEmpty(sshModel.getPassword())) {
-					sshModel.setPassword(model.getPassword());
-				}
-				if (StrUtil.isEmpty(sshModel.getPrivateKey())) {
-					sshModel.setPrivateKey(model.getPrivateKey());
-				}
+				sshModel.setPassword(StrUtil.emptyToDefault(sshModel.getPassword(), model.getPassword()));
+				sshModel.setPrivateKey(StrUtil.emptyToDefault(sshModel.getPrivateKey(), model.getPrivateKey()));
 			}
 			Session session = SshService.getSessionByModel(sshModel);
 			JschUtil.close(session);

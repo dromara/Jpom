@@ -22,6 +22,7 @@
  */
 package io.jpom.controller.system;
 
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.mail.MailAccount;
 import cn.hutool.extra.mail.MailUtil;
 import cn.jiangzeyin.common.JsonMessage;
@@ -69,6 +70,9 @@ public class SystemMailConfigController extends BaseServerController {
 	@Feature(method = MethodFeature.LIST)
 	public String mailConfigData() {
 		MailAccountModel item = systemParametersServer.getConfig(MailAccountModel.ID, MailAccountModel.class);
+		if (item != null) {
+			item.setPass(null);
+		}
 		return JsonMessage.getString(200, "success", item);
 	}
 
@@ -78,9 +82,14 @@ public class SystemMailConfigController extends BaseServerController {
 		Assert.notNull(mailAccountModel, "请填写信息,并检查是否填写合法");
 		Assert.hasText(mailAccountModel.getHost(), "请填写host");
 		Assert.hasText(mailAccountModel.getUser(), "请填写user");
-		Assert.hasText(mailAccountModel.getPass(), "请填写pass");
 		Assert.hasText(mailAccountModel.getFrom(), "请填写from");
 		// 验证是否正确
+		MailAccountModel item = systemParametersServer.getConfig(MailAccountModel.ID, MailAccountModel.class);
+		if (item != null) {
+			mailAccountModel.setPass(StrUtil.emptyToDefault(mailAccountModel.getPass(), item.getPass()));
+		} else {
+			Assert.hasText(mailAccountModel.getPass(), "请填写pass");
+		}
 		try {
 			MailAccount account = EmailUtil.getAccount(mailAccountModel);
 			Session session = MailUtil.getSession(account, false);

@@ -46,6 +46,7 @@ import io.jpom.system.ExtConfigBean;
 import org.springframework.boot.env.YamlPropertySourceLoader;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.MediaType;
+import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
@@ -100,9 +101,7 @@ public class SystemConfigController extends BaseServerController {
 		if (StrUtil.isNotEmpty(nodeId)) {
 			return NodeForward.request(getNode(), getRequest(), NodeUrl.SystemSaveConfig).toString();
 		}
-		if (StrUtil.isEmpty(content)) {
-			return JsonMessage.getString(405, "内容不能为空");
-		}
+		Assert.hasText(content, "内容不能为空");
 		try {
 			YamlPropertySourceLoader yamlPropertySourceLoader = new YamlPropertySourceLoader();
 			// @author hjk 前端编辑器允许使用tab键，并设定为2个空格，再转换为yml时要把tab键换成2个空格
@@ -112,9 +111,8 @@ public class SystemConfigController extends BaseServerController {
 			DefaultSystemLog.getLog().warn("内容格式错误，请检查修正", e);
 			return JsonMessage.getString(500, "内容格式错误，请检查修正:" + e.getMessage());
 		}
-		if (JpomManifest.getInstance().isDebug()) {
-			return JsonMessage.getString(405, "调试模式下不支持在线修改,请到resources目录下的bin目录修改extConfig.yml");
-		}
+		Assert.state(!JpomManifest.getInstance().isDebug(), "调试模式下不支持在线修改,请到resources目录下的bin目录修改extConfig.yml");
+
 		File resourceFile = ExtConfigBean.getResourceFile();
 		FileUtil.writeString(content, resourceFile, CharsetUtil.CHARSET_UTF_8);
 

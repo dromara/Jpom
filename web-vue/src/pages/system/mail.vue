@@ -10,7 +10,7 @@
       <a-form-model-item label="用户名" prop="user">
         <a-input v-model="temp.user" type="text" placeholder="发件人名称" />
       </a-form-model-item>
-      <a-form-model-item label="密码" prop="pass">
+      <a-form-model-item label="密码" :prop="`${this.temp.type === 'add' ? 'pass' : 'pass-update'}`">
         <a-input-password v-model="temp.pass" type="text" placeholder="邮箱密码或者授权码" />
       </a-form-model-item>
       <a-form-model-item label="邮箱账号" prop="from">
@@ -57,7 +57,7 @@ export default {
     loadData() {
       getMailConfigData().then((res) => {
         if (res.code === 200) {
-          this.temp = res.data || {};
+          this.temp = res.data || { type: "add" };
         }
       });
     },
@@ -73,7 +73,6 @@ export default {
           // 成功
           this.$notification.success({
             message: res.msg,
-            
           });
         }
         // button recover
