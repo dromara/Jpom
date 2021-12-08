@@ -268,7 +268,6 @@ export default {
         if (!record.openStatus) {
           this.$notification.error({
             message: "节点未启用",
-            
           });
           return false;
         }
@@ -332,7 +331,6 @@ export default {
             // 成功
             this.$notification.success({
               message: res.msg,
-              
             });
             this.$refs["editNodeForm"].resetFields();
             this.editNodeVisible = false;
@@ -353,7 +351,6 @@ export default {
             if (res.code === 200) {
               this.$notification.success({
                 message: res.msg,
-                
               });
               this.loadData();
             }
@@ -369,7 +366,7 @@ export default {
       let nodeId = this.$route.query.nodeId;
       if (nodeId !== record.id) {
         this.$router.push({
-          query: { nodeId: record.id },
+          query: { ...this.$route.query, nodeId: record.id },
         });
       }
     },
@@ -378,7 +375,6 @@ export default {
         if (res.code == 200) {
           this.$notification.success({
             message: res.msg,
-            
           });
           return false;
         }
@@ -396,7 +392,6 @@ export default {
             if (res.code == 200) {
               this.$notification.success({
                 message: res.msg,
-                
               });
               return false;
             }
@@ -407,8 +402,10 @@ export default {
     // 关闭抽屉层
     onClose() {
       this.drawerVisible = false;
-      this.$router.push({
-        query: { nodeId: null },
+      let query = Object.assign({}, this.$route.query);
+      delete query.nodeId, delete query.id, delete query.pId;
+      this.$router.replace({
+        query: query,
       });
     },
     // 分页、排序、筛选变化时触发

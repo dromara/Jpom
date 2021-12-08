@@ -1,7 +1,7 @@
 <template>
   <a-config-provider :locale="locale">
     <div id="app">
-      <router-view />
+      <router-view v-if="routerActivation" />
     </div>
   </a-config-provider>
 </template>
@@ -14,6 +14,12 @@ export default {
   data() {
     return {
       locale: zhCN,
+      routerActivation: true,
+    };
+  },
+  provide() {
+    return {
+      reload: this.reload,
     };
   },
   components: {},
@@ -22,6 +28,14 @@ export default {
       top: "100px",
       duration: 4,
     });
+  },
+  methods: {
+    reload() {
+      this.routerActivation = false;
+      this.$nextTick(() => {
+        this.routerActivation = true;
+      });
+    },
   },
 };
 </script>

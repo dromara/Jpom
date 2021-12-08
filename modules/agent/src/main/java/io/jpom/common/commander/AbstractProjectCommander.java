@@ -113,7 +113,7 @@ public abstract class AbstractProjectCommander {
 	 * 生成可以执行的命令
 	 *
 	 * @param nodeProjectInfoModel 项目
-	 * @param javaCopyItem     副本信息
+	 * @param javaCopyItem         副本信息
 	 * @return null 是条件不足
 	 */
 	public abstract String buildCommand(NodeProjectInfoModel nodeProjectInfoModel, NodeProjectInfoModel.JavaCopyItem javaCopyItem);
@@ -148,7 +148,7 @@ public abstract class AbstractProjectCommander {
 		}
 		String command = buildCommand(nodeProjectInfoModel, javaCopyItem);
 		if (command == null) {
-			throw new JpomRuntimeException("没有需要执行的命令");
+			return "没有需要执行的命令";
 		}
 		// 执行命令
 		ThreadUtil.execute(() -> {

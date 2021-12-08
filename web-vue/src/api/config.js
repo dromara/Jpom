@@ -45,8 +45,9 @@ request.interceptors.request.use(
     if (config.headers["Content-Type"].indexOf("application/x-www-form-urlencoded") !== -1) {
       config.data = Qs.stringify(config.data);
     }
+    let wid = router.history.current.query.wid;
     config.headers[TOKEN_HEADER_KEY] = store.getters.getToken;
-    config.headers[CACHE_WORKSPACE_ID] = store.getters.getWorkspaceId;
+    config.headers[CACHE_WORKSPACE_ID] = wid ? wid : store.getters.getWorkspaceId;
     return config;
   },
   (error) => {
@@ -142,7 +143,6 @@ function checkJWTToken(res, response) {
     notification.warn({
       message: res.msg,
       description: response.config.url,
-      
     });
     store.dispatch("logOut").then(() => {
       router.push("/login");
@@ -156,7 +156,6 @@ function checkJWTToken(res, response) {
     notification.info({
       message: "登录信息过期，尝试自动续签...",
       description: "如果不需要自动续签，请修改配置文件。该续签将不会影响页面。",
-      
     });
     // 续签且重试请求
     return redoRequest(response.config);

@@ -133,6 +133,7 @@ export default {
       return this.getUserInfo.email !== this.temp.email;
     },
   },
+  inject: ["reload"],
   created() {
     this.init();
   },
@@ -140,9 +141,10 @@ export default {
     init() {
       myWorkspace().then((res) => {
         this.myWorkspaceList = res.data;
-        this.selectWorkspace = this.getWorkspaceId;
+        let wid = this.$route.query.wid;
+        this.selectWorkspace = wid ? wid : this.getWorkspaceId;
         if (!this.selectWorkspace) {
-          this.handleChange(res.data[0].id);
+          this.handleChange(res.data[0]?.id);
         }
       });
     },
@@ -230,7 +232,6 @@ export default {
         if (res.code === 200) {
           this.$notification.success({
             message: res.msg,
-            
           });
         }
       });
@@ -247,7 +248,6 @@ export default {
           if (res.code === 200) {
             this.$notification.success({
               message: res.msg,
-              
             });
             // 清空表单校验
             this.$refs["userForm"].resetFields();
@@ -258,7 +258,10 @@ export default {
     },
     handleChange(vlaue) {
       this.$store.dispatch("changeWorkspace", vlaue);
-      location.reload();
+      this.$router.push({
+        query: { ...this.$route.query, wid: vlaue },
+      });
+      this.reload();
     },
     // toOldIndex() {
     //   window.location.href = '/old.html'
