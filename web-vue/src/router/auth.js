@@ -23,7 +23,7 @@ router.beforeEach((to, from, next) => {
       notification.error({
         message: '未登录，无法访问！',
         description: `from: ${from.path} ==> to: ${to.path}`,
-        duration: 2
+        
       });
     }
     next('/login');

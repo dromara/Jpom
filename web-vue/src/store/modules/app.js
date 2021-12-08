@@ -12,6 +12,7 @@ const app = {
     activeMenuKey: localStorage.getItem(ACTIVE_MENU_KEY),
     guideFlag: localStorage.getItem(GUIDE_FLAG_KEY) === "true" ? true : false,
     workspaceId: localStorage.getItem(CACHE_WORKSPACE_ID),
+    collapsed: localStorage.getItem("collapsed"),
   },
   mutations: {
     setActiveTabKey(state, activeKey) {
@@ -28,6 +29,9 @@ const app = {
     },
     setWorkspace(state, workspaceId) {
       state.workspaceId = workspaceId;
+    },
+    collapsed(state, collapsed) {
+      state.collapsed = collapsed;
     },
   },
   actions: {
@@ -116,6 +120,10 @@ const app = {
       commit("setWorkspace", workspaceId);
       localStorage.setItem(CACHE_WORKSPACE_ID, workspaceId);
     },
+    collapsed({ commit }, collapsed) {
+      commit("collapsed", collapsed);
+      localStorage.setItem("collapsed", collapsed);
+    },
   },
   getters: {
     getTabList(state) {
@@ -132,6 +140,9 @@ const app = {
     },
     getWorkspaceId(state) {
       return state.workspaceId;
+    },
+    getCollapsed(state) {
+      return state.collapsed;
     },
   },
 };

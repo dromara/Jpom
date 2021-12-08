@@ -181,7 +181,7 @@ export default {
         if (this.temp.type === 'add' && this.uploadFileList.length === 0) {
           this.$notification.error({
             message: '请选择证书文件',
-            duration: 2
+            
           });
           return false;
         }
@@ -195,7 +195,7 @@ export default {
             // 成功
             this.$notification.success({
               message: res.msg,
-              duration: 2
+              
             });
             this.$refs['editCertForm'].resetFields();
             this.editCertVisible = false;
@@ -221,7 +221,7 @@ export default {
             if (res.code === 200) {
               this.$notification.success({
                 message: res.msg,
-                duration: 2
+                
               });
               this.loadData();
             }

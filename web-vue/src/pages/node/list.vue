@@ -113,7 +113,7 @@
       </a-form-model>
     </a-modal>
     <!-- 管理节点 -->
-    <a-drawer :title="drawerTitle" placement="right" width="calc(100vw - 200px)" :visible="drawerVisible" @close="onClose">
+    <a-drawer :title="drawerTitle" placement="right" :width="`${this.getCollapsed == '1' ? 'calc(100vw - 80px)' : 'calc(100vw - 200px)'}`" :visible="drawerVisible" @close="onClose">
       <!-- 节点管理组件 -->
       <node-layout v-if="drawerVisible" :node="temp" />
     </a-drawer>
@@ -193,7 +193,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(["getGuideFlag"]),
+    ...mapGetters(["getGuideFlag", "getCollapsed"]),
     pagination() {
       return {
         total: this.listQuery.total || 0,

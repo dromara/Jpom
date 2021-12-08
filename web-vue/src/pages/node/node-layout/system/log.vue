@@ -188,7 +188,7 @@ export default {
             if(res.code === 200) {
               this.$notification.success({
                 message: res.msg,
-                duration: 2
+                
               });
               this.visible = false;
               this.loadData();

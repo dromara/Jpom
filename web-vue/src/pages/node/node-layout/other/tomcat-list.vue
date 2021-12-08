@@ -202,7 +202,7 @@ export default {
             // 成功
             this.$notification.success({
               message: res.msg,
-              duration: 2
+              
             });
             this.$refs['editTomcatForm'].resetFields();
             this.editTomcatVisible = false;
@@ -228,7 +228,7 @@ export default {
             if (res.code === 200) {
               this.$notification.success({
                 message: res.msg,
-                duration: 2
+                
               });
               this.loadData();
             }
@@ -284,7 +284,7 @@ export default {
             if (res.code === 200) {
               this.$notification.success({
                 message: res.msg,
-                duration: 2
+                
               });
               this.loadData();
             }
@@ -309,7 +309,7 @@ export default {
             if (res.code === 200) {
               this.$notification.success({
                 message: res.msg,
-                duration: 2
+                
               });
               this.loadData();
             }
@@ -334,7 +334,7 @@ export default {
             if (res.code === 200) {
               this.$notification.success({
                 message: res.msg,
-                duration: 2
+                
               });
               this.loadData();
             }
@@ -366,7 +366,7 @@ export default {
             if (res.code === 200) {
               this.$notification.success({
                 message: res.msg,
-                duration: 2
+                
               });
               // 刷新 Tomcat 项目数据
               this.loadTomcatProjectList(tomcatRecord);
@@ -413,7 +413,7 @@ export default {
           if (res.code === 200) {
             this.$notification.success({
               message: res.msg,
-              duration: 2
+              
             });
           }
         })

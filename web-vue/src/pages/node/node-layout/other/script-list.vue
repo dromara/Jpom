@@ -140,7 +140,7 @@ export default {
             // 成功
             this.$notification.success({
               message: res.msg,
-              duration: 2
+              
             });
             this.$refs['editScriptForm'].resetFields();
             this.editScriptVisible = false;
@@ -166,7 +166,7 @@ export default {
             if (res.code === 200) {
               this.$notification.success({
                 message: res.msg,
-                duration: 2
+                
               });
               this.loadData();
             }
@@ -210,7 +210,7 @@ export default {
           if (res.code === 200) {
             this.$notification.success({
               message: res.msg,
-              duration: 2
+              
             });
           }
         })

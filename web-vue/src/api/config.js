@@ -87,6 +87,7 @@ request.interceptors.response.use(
     if (res.code === 999) {
       notification.error({
         message: "禁止访问",
+        description: "禁止访问,当前IP限制访问",
       });
       router.push("/system/ipAccess");
       return false;
@@ -97,8 +98,8 @@ request.interceptors.response.use(
       // 如果 headers 里面配置了 tip: no 就不用弹出提示信息
       if (!response.config.headers[NO_NOTIFY_KEY]) {
         notification.error({
-          message: res.msg,
-          description: pro ? "提示信息" : response.config.url,
+          message: "提示信息 " + (pro ? "" : response.config.url),
+          description: res.msg,
         });
         console.error(response.config.url, res);
       }
@@ -130,7 +131,7 @@ request.interceptors.response.use(
         });
       } else {
         notification.error({
-          message: status,
+          message: "状态码错误 " + status,
           description: (statusText || "") + (data || ""),
         });
       }
@@ -144,8 +145,8 @@ function checkJWTToken(res, response) {
   // 如果是登录信息失效
   if (res.code === 800) {
     notification.warn({
-      message: res.msg,
-      description: pro ? "提示信息" : response.config.url,
+      message: "提示信息 " + (pro ? "" : response.config.url),
+      description: res.msg,
     });
     console.error(response.config.url, res);
     store.dispatch("logOut").then(() => {

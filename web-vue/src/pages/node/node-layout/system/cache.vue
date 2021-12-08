@@ -59,7 +59,7 @@ export default {
           // 成功
           this.$notification.success({
             message: res.msg,
-            duration: 2
+            
           });
           this.loadData();
         }

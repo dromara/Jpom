@@ -12,9 +12,9 @@
     <a-layout>
       <a-layout-header class="app-header">
         <a-tooltip title="折叠左侧菜单栏">
-          <a-icon class="icon-btn" :type="collapsed ? 'menu-unfold' : 'menu-fold'" @click="() => (collapsed = !collapsed)" />
+          <a-icon class="icon-btn" :type="collapsed ? 'menu-unfold' : 'menu-fold'" @click="changeCollapsed" />
         </a-tooltip>
-        <a-tooltip title="关闭其他标签，只保留当前的 Tab">
+        <a-tooltip v-if="getTabList.length > 1" title="关闭其他标签，只保留当前的 Tab">
           <a-icon class="icon-btn" style="padding-left: 0px" type="close-circle" @click="closeTabs" />
         </a-tooltip>
         <content-tab />
@@ -49,7 +49,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(["getGuideFlag"]),
+    ...mapGetters(["getGuideFlag", "getTabList", "getCollapsed"]),
   },
   watch: {
     getGuideFlag() {
@@ -59,6 +59,7 @@ export default {
   mounted() {
     this.checkSystem();
     this.introGuide();
+    this.collapsed = this.getCollapsed == 1;
   },
   methods: {
     // 页面引导
@@ -155,9 +156,12 @@ export default {
     closeTabs() {
       this.$notification.success({
         message: "操作成功",
-        top: "100px",
       });
       this.$store.dispatch("clearTabs");
+    },
+    changeCollapsed() {
+      this.collapsed = !this.collapsed;
+      this.$store.dispatch("collapsed", this.collapsed ? 1 : 0);
     },
   },
 };

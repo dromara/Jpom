@@ -41,7 +41,7 @@ export default {
       if (!menu.path) {
         this.$notification.error({
           message: '路由无效，无法跳转',
-          duration: 2
+          
         });
         return false;
       }
@@ -49,7 +49,7 @@ export default {
       if (this.$route.path === menu.path) {
         this.$notification.warn({
           message: '已经在当前页面了',
-          duration: 2
+          
         });
         return false;
       }
