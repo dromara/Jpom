@@ -133,6 +133,24 @@ yum install -y wget && wget -O install.sh https://dromara.gitee.io/jpom/docs/ins
 > 如无法访问，检查下是否开启了防火墙`systemctl status firewalld`，如状态显示为绿色`Active: active (running)`可临时关闭防火墙`systemctl stop firewalld`，然后重启防火墙`firewall-cmd --reload`（建议仅测试环境下使用，生产环境下慎用）
 > 如关闭防火墙后仍无法访问，并且使用的是云服务器，还需要到云服务器管理后台中关闭防火墙
 
+### 容器化安装
+
+#### 插件端
+
+```
+docker pull samho2008/jpom-agent
+docker volume create jpom-agent-vol
+docker run -d -p 2123:2123 --name jpom-agent -v /etc/localtime:/etc/localtime:ro -v jpom-agent-vol:/usr/local/jpom-agent samho2008/jpom-agent
+```
+
+#### 服务端
+
+```
+docker pull samho2008/jpom-server
+docker volume create jpom-server-vol
+docker run -d -p 2122:2122 --name jpom-server -v /etc/localtime:/etc/localtime:ro -v jpom-server-vol:/usr/local/jpom-server samho2008/jpom-server
+```
+
 ### 下载安装
 
 > [帮助文档](https://jpom-site.keepbx.cn/docs/#/安装使用/开始安装)
